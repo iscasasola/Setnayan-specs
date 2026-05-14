@@ -599,6 +599,16 @@ Iterations 0024–0035 were drafted after the dashboard's 9 surfaces were locked
 
 ---
 
+## 9. Event lifecycle — delete vs. add (locked 2026-05-15)
+
+**No self-serve event deletion.** No surface in the user-facing app exposes a "Delete event" action — not the couple dashboard, not the event switcher's monogram menu, not Profile Settings (0025), not the vendor or admin role-routed dashboards. An event aggregates months of planning, vendor contracts, guest data, paid render outputs, and (often) third-party deposits; an irreversible self-delete is too dangerous to expose. The only deletion path is **support → admin console** (0023 Delete action, PR #9). This generalizes the rule already implied by `0025 § Active event within next 30 days` ("Contact support to discuss deletion") — that copy now applies regardless of how soon the event is, not only the 30-day window.
+
+**Adding events is supported.** Couples create additional events via the event switcher's `+ Add event` row (0000 § event switcher). V1 still restricts the event-type picker to **Wedding only**; the other five tiles (baptism · debut · birthday · anniversary · religious_event) stay visible with a "Coming soon" badge until iteration 0041 (Multi-Event Vendor Catalog) ships in V1.5. Multi-event creation is core to the "Filipino-first life-events platform" positioning — the same household plans wedding → baptism → anniversary on a single account.
+
+**Implication for affordances.** Anywhere a "remove" / "delete" / "archive" affordance would naturally cluster with event-scoped actions (e.g., Settings → Privacy & Data, the event switcher menu, vendor or guest disconnect flows), do **not** surface an event-level destructive action. Vendor-relationship removal, guest removal, and per-service cancellation are unrelated and remain in their respective iterations (0006, 0001, 0034) — those are event-scoped operations, not event-deleting ones.
+
+---
+
 ## 7. Companions
 
 - `0021_couple_dashboard_fully_purchased.html` — interactive 5-surface walkthrough with web + mobile parity.
