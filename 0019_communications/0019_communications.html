@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0019 — Communications (Chat + Video Meetings + Coordinator Join) — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0019</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0019_communications.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0019_communications.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0019_communications.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0019--communications-chat--video-meetings--coordinator-join">Iteration 0019 — Communications (Chat + Video Meetings + Coordinator Join)</h1>
+<p><strong>Iteration number:</strong> 0019 <strong>Topic:</strong> In-app communications between couples and vendors. Threaded text chat (Messenger-class), 1:1 and group video meetings (Zoom-class) attached to those threads, and a coordinator role permission to join existing client-vendor threads. <strong>Surface:</strong> All three role surfaces (customer / vendor / admin) inside the same Setnayan app per the one-app-three-doorways architecture (decision 2026-05-11). <strong>URL pattern:</strong> <code>setnayan.com/dashboard/[role]/messages/[thread_id]</code>, <code>setnayan.com/dashboard/[role]/meet/[meeting_id]</code> <strong>Builds on:</strong> 0000 (auth + role-router), 0006 (vendor records), 0013 (Supabase + R2 platform stack), 0015 (forward-references this iteration in marketing copy). <strong>Status:</strong> Drafted 2026-05-11. <strong>Phase:</strong> V1 launch-blocking for the vendor side of 0015 marketing site (the marketing copy promises in-app chat + video meetings + coordinator-join; if 0019 doesn't ship, those promises become aspirational).</p>
+<hr />
+<h2 id="why-this-iteration-exists">Why this iteration exists</h2>
+<p>Couples and vendors currently coordinate over a stack of third-party apps — WhatsApp, Messenger, Viber, SMS. The conversation history sits outside Setnayan, attached to nothing in particular. Coordinators get pulled into group chats they can't archive, can't search, and can't hand off cleanly when their job ends.</p>
+<p><strong>Pulling chat in-app:</strong></p>
+<ul>
+<li>Conversation history attaches to the booking record. Search by vendor, by date, by topic.</li>
+<li>Coordinators can be invited to a thread per-thread, not blanket-CC'd into every group chat.</li>
+<li>Files (contracts, mood boards, sample photos) live next to the messages they were discussed in.</li>
+<li>Notifications use the same delivery layer as the rest of the app — one notification stream, not seven.</li>
+</ul>
+<p><strong>Adding video meetings:</strong></p>
+<ul>
+<li>Same thread context. The discovery call, the post-meeting summary, and the follow-up shoot quote all live in one continuous record.</li>
+<li>No "here's the Zoom link" context-switching at the start of every meeting.</li>
+<li>Recording (with consent) attaches to the thread for later review.</li>
+</ul>
+<p><strong>Coordinator-join permission:</strong></p>
+<ul>
+<li>Couples often hire planners after they've already booked some vendors. The planner needs to read what's already been discussed and join the active threads — but only the threads the couple grants access to.</li>
+<li>Vendors don't get a planner shoved into their thread without notice; the couple authorizes the join, the vendor sees the planner appear in the participant list with a notification.</li>
+</ul>
+<hr />
+<h2 id="reference-designs">Reference designs</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Surface</th>
+<th>Reference</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Text chat</td>
+<td><strong>Facebook Messenger</strong></td>
+<td>Threads, presence, typing, reactions, attachments, voice notes, group chats. Universally understood UX in PH; couples and vendors already know how to use it.</td>
+</tr>
+<tr class="even">
+<td>Video meetings</td>
+<td><strong>Zoom</strong></td>
+<td>1:1 + group, gallery view, screen share, mute/cam controls, recording, in-meeting chat. Zoom's UX is the lingua franca for business video in PH.</td>
+</tr>
+<tr class="odd">
+<td>Coordinator join model</td>
+<td><strong>Slack channel invite</strong></td>
+<td>Per-channel join permission, visible participant list, notification when a new participant joins.</td>
+</tr>
+</tbody>
+</table>
+<p>We are NOT cloning Messenger or Zoom feature-for-feature. We are matching their <strong>interaction grammar</strong> so the learning curve is zero, then adding Setnayan-native context (booking record attachment, vendor service category routing, post-meeting AI summary).</p>
+<hr />
+<h2 id="scope-v1--launch-blocking-for-0015-vendor-promises">Scope (V1 — launch-blocking for 0015 vendor promises)</h2>
+<p><strong>In scope:</strong></p>
+<ul>
+<li>1:1 text chat threads (couple ↔︎ vendor)</li>
+<li>Group text chat threads (couple ↔︎ vendor + coordinator(s))</li>
+<li>Presence (online / away / offline / last seen)</li>
+<li>Typing indicators</li>
+<li>Read receipts (per-message)</li>
+<li>Reactions (emoji, single-tap)</li>
+<li>Attachments: image, PDF, voice note (≤ 60s)</li>
+<li>Threaded replies (Messenger-style "reply to message" anchored to the original)</li>
+<li>1:1 video meetings, Zoom-class controls (mute / cam off / leave)</li>
+<li>Group video meetings (≤ 8 participants in V1; raises to 16 in V1.1)</li>
+<li>Screen share (desktop browser only in V1; mobile screen share in V1.1)</li>
+<li>In-meeting chat (separate from the parent thread, persists into the parent thread on meeting end)</li>
+<li>Recording (with explicit consent banner; recording lands on R2, link posts to the parent thread)</li>
+<li>Coordinator join permission (per-thread; couple authorizes, vendor + coordinator notified)</li>
+<li>Notifications: in-app (always), push (V1.1), email digest (V1.1)</li>
+</ul>
+<p><strong>Out of scope (deferred to V1.1+):</strong></p>
+<ul>
+<li>Voice-only calls (covered by video meeting with cam off in V1)</li>
+<li>Auto-translation (the EN/TL/CEB locale work in 0015 doesn't extend to chat translation in V1)</li>
+<li>AI post-meeting summary (queued for V1.1)</li>
+<li>File annotations / collaborative editing on attachments</li>
+<li>Custom emoji</li>
+<li>Message scheduling</li>
+<li>Whiteboard / collaborative canvas inside meetings</li>
+<li>Breakout rooms</li>
+<li>Live captions</li>
+<li>Vendor-to-vendor chat (vendors talking to other vendors — out of scope by privacy invariant; couples mediate)</li>
+</ul>
+<hr />
+<h2 id="pricing--free-use-locked-2026-05-11">Pricing — free use (locked 2026-05-11)</h2>
+<p>Every capability shipped in this iteration is <strong>free for every Setnayan account</strong> — couples, vendors, and coordinators alike. No per-feature charge, no per-meeting fee, no per-GB attachment surcharge, no premium tier behind chat or video.</p>
+<p><strong>What "free use" covers:</strong></p>
+<ul>
+<li>Unlimited 1:1 and group chat threads between any pair (or trio with coordinator)</li>
+<li>Unlimited messages, reactions, replies, edits</li>
+<li>File attachments up to the per-file and per-thread caps (image 25 MB, pdf 50 MB, doc/sheet 25 MB, voice 60s; thread cap 5 GB rolling)</li>
+<li>In-app doc / spreadsheet / pdf / image readers — no download required</li>
+<li>Unlimited 1:1 video meetings (Zoom-class)</li>
+<li>Group video meetings up to 8 participants (raises to 16 in V1.1)</li>
+<li>Screen share + recording (with consent)</li>
+<li>Coordinator-join permission</li>
+</ul>
+<p><strong>Why free:</strong> Communication is the connective tissue of the entire platform. Gating it behind a paywall would push couples and vendors back to WhatsApp / Messenger and gut the in-app value-prop. The marginal cost is small (~₱6 per 60-min 1:1 video call on Daily.co; chat + R2 storage measured in fractions of a peso per thread per month) and is absorbed into the platform's general operating budget — not passed through.</p>
+<p><strong>What this means for marketing:</strong></p>
+<ul>
+<li>0015 marketing copy calls out "free in-app chat, video meetings, and file sharing" as a baseline benefit on both the customer and vendor sides — it's not a feature you "unlock," it's just how the platform works.</li>
+<li>Vendor-side hero already says "no commission, no monthly bill" — free communications is implicit in that promise; reinforce explicitly in the vendor perks list.</li>
+</ul>
+<p><strong>What free use does NOT cover (and never will, per scope):</strong></p>
+<ul>
+<li>Vendor-to-vendor private messaging (out of scope by privacy invariant — couples mediate)</li>
+<li>Public profile messaging (DMs from random visitors to vendors — not a feature; couples message vendors after viewing the profile, not anonymous strangers)</li>
+<li>Email / SMS routed through Setnayan (V2; for V1, Setnayan messages stay in-app)</li>
+</ul>
+<p><strong>Cost model for finance reconciliation:</strong> even though the user sees free, finance still tracks per-meeting Daily.co cost + per-GB R2 cost per event. These show up in the platform's internal cost-per-event reporting, not on any user-facing receipt. Use this data to size the operating budget, not to introduce a paywall.</p>
+<hr />
+<h2 id="architecture">Architecture</h2>
+<p><strong>Chat infrastructure:</strong> Supabase Realtime + Postgres (already in the platform stack from 0013). Messages stored in <code>messages</code> table with <code>thread_id</code> foreign key. Presence + typing managed via Supabase Realtime channels. Push notifications via Expo for the native iOS/Android Papic app + web push for the browser.</p>
+<p><strong>Video infrastructure:</strong> <strong>Daily.co</strong> (recommended) or LiveKit (alternative). Both expose a simple JS SDK + REST API; both run on a per-minute SFU billing model that scales linearly with usage. Setnayan's per-meeting cost: ~$0.001/participant-minute = ~₱0.05/participant-minute. A 60-min 1:1 call costs ~₱6. Folded into the relevant SKU pricing or absorbed as a free baseline (decision deferred to pricing review).</p>
+<p><strong>Why not roll our own video stack:</strong> WebRTC SFUs are notoriously expensive to build and maintain (TURN servers, recording infrastructure, NAT traversal, mobile reliability). Daily.co's hosted SFU is purpose-built and battle-tested; the make-vs-buy tradeoff is overwhelmingly buy.</p>
+<p><strong>Why not WhatsApp Business API:</strong> Routes the conversation outside Setnayan, defeating the whole point of pulling chat in-app.</p>
+<hr />
+<h2 id="data-model">Data model</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="co">-- A thread is a conversation context. 1:1 by default, group when coordinator joins.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> chat_threads (</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>  thread_id UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>  event_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> <span class="kw">events</span> (event_id),  <span class="co">-- every thread is event-scoped</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>  vendor_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> vendors (vendor_id),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>  created_by UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>  topic TEXT,                                            <span class="co">-- optional thread name (e.g. &quot;Pre-nup shoot&quot;)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a>  archived <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>  created_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now()</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a>);</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> chat_thread_participants (</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a>  thread_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> chat_threads (thread_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a>  user_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a>  <span class="kw">role</span> TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (<span class="kw">role</span> <span class="kw">IN</span> (<span class="st">&#39;couple&#39;</span>,<span class="st">&#39;vendor&#39;</span>,<span class="st">&#39;coordinator&#39;</span>)),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true"></a>  joined_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true"></a>  invited_by UUID <span class="kw">REFERENCES</span> users (user_id),           <span class="co">-- who added this participant</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a>  last_read_message_id UUID,                             <span class="co">-- for read-receipt + unread-count</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true"></a>  notification_pref TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;all&#39;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a>    <span class="kw">CHECK</span> (notification_pref <span class="kw">IN</span> (<span class="st">&#39;all&#39;</span>,<span class="st">&#39;mentions&#39;</span>,<span class="st">&#39;none&#39;</span>)),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true"></a>  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (thread_id, user_id)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true"></a>);</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> chat_messages (</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true"></a>  message_id UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true"></a>  thread_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> chat_threads (thread_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true"></a>  sender_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true"></a>  <span class="kw">body</span> TEXT,                                             <span class="co">-- nullable for attachment-only messages</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true"></a>  reply_to_message_id UUID <span class="kw">REFERENCES</span> chat_messages (message_id),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true"></a>  edited_at TIMESTAMPTZ,</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true"></a>  deleted_at TIMESTAMPTZ,                                <span class="co">-- soft delete; &quot;Message deleted&quot; placeholder shown</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true"></a>  created_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now()</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true"></a>);</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> chat_attachments (</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true"></a>  attachment_id UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true"></a>  message_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> chat_messages (message_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true"></a>  kind TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (kind <span class="kw">IN</span> (<span class="st">&#39;image&#39;</span>,<span class="st">&#39;pdf&#39;</span>,<span class="st">&#39;doc&#39;</span>,<span class="st">&#39;spreadsheet&#39;</span>,<span class="st">&#39;voice&#39;</span>)),</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true"></a>  filename TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true"></a>  mime_type TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true"></a>  r2_object_key TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,                           <span class="co">-- under thread-scoped prefix (see &quot;Dedicated storage&quot; below)</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true"></a>  bytes BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true"></a>  duration_sec <span class="dt">INT</span>,                                      <span class="co">-- voice notes only</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true"></a>  preview_r2_key TEXT,                                   <span class="co">-- generated thumbnail / first-page render for doc / sheet</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true"></a>  created_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now()</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true"></a>);</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> chat_reactions (</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true"></a>  message_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> chat_messages (message_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true"></a>  user_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id),</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true"></a>  emoji TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,                                   <span class="co">-- e.g. &quot;❤️&quot;</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true"></a>  created_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true"></a>  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (message_id, user_id, emoji)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true"></a>);</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true"></a><span class="co">-- Video meetings attach to a thread.</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> video_meetings (</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true"></a>  meeting_id UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true"></a>  thread_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> chat_threads (thread_id),</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true"></a>  scheduled_for TIMESTAMPTZ,                             <span class="co">-- null = ad-hoc &quot;join now&quot;</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true"></a>  daily_room_url TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,                          <span class="co">-- the Daily.co room URL</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true"></a>  daily_room_name TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true"></a>  started_at TIMESTAMPTZ,</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true"></a>  ended_at TIMESTAMPTZ,</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true"></a>  recording_consent <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true"></a>  recording_r2_key TEXT,                                 <span class="co">-- populated when recording finishes</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true"></a>  created_by UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id),</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true"></a>  created_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now()</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true"></a>);</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true"></a></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> video_meeting_participants (</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true"></a>  meeting_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> video_meetings (meeting_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true"></a>  user_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id),</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true"></a>  joined_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true"></a>  left_at TIMESTAMPTZ,</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true"></a>  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (meeting_id, user_id, joined_at)</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true"></a>);</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true"></a></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true"></a><span class="co">-- Coordinator-join authorization records (per-thread audit trail).</span></span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> thread_join_authorizations (</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true"></a>  authorization_id UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true"></a>  thread_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> chat_threads (thread_id),</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true"></a>  authorized_user_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id),  <span class="co">-- who&#39;s being granted join</span></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true"></a>  authorized_role TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;coordinator&#39;</span>,</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true"></a>  authorized_by UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id),       <span class="co">-- who granted (must be a &#39;couple&#39; role on the thread)</span></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true"></a>  revoked_at TIMESTAMPTZ,</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true"></a>  created_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now()</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true"></a>);</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true"></a></span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> chat_messages_thread_idx <span class="kw">ON</span> chat_messages (thread_id, created_at <span class="kw">DESC</span>);</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> chat_thread_participants_user_idx <span class="kw">ON</span> chat_thread_participants (user_id);</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> video_meetings_thread_idx <span class="kw">ON</span> video_meetings (thread_id, scheduled_for);</span></code></pre></div>
+<p><strong>RLS policies:</strong> A user can read messages in a thread only if they're a row in <code>chat_thread_participants</code> for that thread. A user can write a message to a thread only if they're a participant AND the thread isn't archived. Coordinator role can join a thread only if a <code>thread_join_authorizations</code> row exists granting them — written by the couple via the "Add coordinator to this thread" flow.</p>
+<hr />
+<h2 id="dedicated-file-storage--in-app-readers">Dedicated file storage + in-app readers</h2>
+<p><strong>Storage model.</strong> Files attached to chat threads live in a <strong>dedicated R2 bucket</strong> (<code>setnayan-thread-files</code>), separate from the existing photo / video buckets used by 0009 / 0011 / 0012. Object key pattern enforces thread scope:</p>
+<pre><code>threads/{thread_id}/{attachment_id}/{filename}
+threads/{thread_id}/{attachment_id}/preview.png   ← generated preview (doc / sheet first-page render)
+</code></pre>
+<p>The <code>{thread_id}</code> prefix is the access-control boundary: signed URLs are minted only for users whose <code>chat_thread_participants</code> row exists for that thread. R2 bucket policy denies public reads — every download goes through an authenticated Setnayan endpoint that resolves the requesting user's participant row before issuing the signed URL.</p>
+<p><strong>Access model (locked):</strong></p>
+<ul>
+<li><strong>Default:</strong> files in a thread are accessible to the <strong>customer (couple) and the vendor</strong> participants of that thread — and no one else.</li>
+<li><strong>Coordinator secondary access:</strong> when the couple authorizes a coordinator to join the thread (<code>thread_join_authorizations</code> row), that coordinator gains <strong>secondary access to all files in the thread</strong> — past, present, and future. Same access model as messages: if you can read the thread, you can read its files.</li>
+<li><strong>Removal:</strong> when the couple removes a coordinator (revokes <code>thread_join_authorizations</code>), the coordinator's read access to thread files revokes within the next signed-URL window (max 15 minutes for in-flight URLs; new URLs deny immediately).</li>
+<li><strong>Cross-event:</strong> files NEVER cross thread boundaries. A vendor active on multiple weddings sees a separate file shelf per thread; nothing global.</li>
+</ul>
+<p><strong>Supported file kinds + in-app readers (V1):</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Kind</th>
+<th>Extensions</th>
+<th>Reader</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>image</code></td>
+<td>jpg, jpeg, png, webp, gif (no autoplay)</td>
+<td>Native <code>&lt;img&gt;</code> viewer with pinch-zoom on mobile, click-to-zoom on desktop</td>
+<td>Inline thumbnail in the chat bubble, full-screen lightbox on tap</td>
+</tr>
+<tr class="even">
+<td><code>pdf</code></td>
+<td>pdf</td>
+<td><code>pdf.js</code> (Mozilla) — page navigation, zoom, search, no download required</td>
+<td>Inline first-page preview in the chat bubble; tap → full-screen reader</td>
+</tr>
+<tr class="odd">
+<td><code>doc</code></td>
+<td>docx (also: doc auto-converted to docx server-side)</td>
+<td>First-page render → PNG preview via LibreOffice headless on the upload pipeline; full doc renders inline via <code>mammoth.js</code> (already in the artifact stack) — read-only HTML</td>
+<td>Read-only inline viewer; download for editing if the recipient wants the source</td>
+</tr>
+<tr class="even">
+<td><code>spreadsheet</code></td>
+<td>xlsx, csv</td>
+<td>First-sheet render → preview via <code>SheetJS</code>; full file renders inline as a virtualized table (<code>SheetJS</code> + <code>react-virtualized</code>) — read-only, sortable</td>
+<td>Read-only inline viewer; download for editing</td>
+</tr>
+<tr class="odd">
+<td><code>voice</code></td>
+<td>webm/opus (recorded in-app), mp3 (uploaded)</td>
+<td>Native <code>&lt;audio&gt;</code> element with custom waveform UI</td>
+<td>Already covered by the chat composer hold-to-record</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Preview generation pipeline.</strong> On upload to R2:</p>
+<ol>
+<li>The Setnayan upload endpoint detects the kind by mime + extension sniff</li>
+<li>Writes the source file to <code>threads/{thread_id}/{attachment_id}/{filename}</code></li>
+<li>Enqueues a preview job (Cloudflare Queue) for <code>pdf</code> / <code>doc</code> / <code>spreadsheet</code></li>
+<li>Worker runs LibreOffice headless → PNG of first page → writes to <code>threads/{thread_id}/{attachment_id}/preview.png</code></li>
+<li><code>chat_attachments.preview_r2_key</code> populated; the chat bubble re-renders with the preview</li>
+</ol>
+<p><strong>Per-file size limits (V1):</strong></p>
+<ul>
+<li>Image: 25 MB</li>
+<li>PDF: 50 MB</li>
+<li>Doc: 25 MB</li>
+<li>Spreadsheet: 25 MB</li>
+<li>Voice: 60 seconds (≈ 1 MB at typical compression)</li>
+</ul>
+<p><strong>Per-thread storage cap (V1):</strong> 5 GB rolling. When approaching cap, oldest attachments are flagged for archive (couple is notified, can opt to download originals before archive). Archived files move to R2 cold tier (still accessible, slower retrieval).</p>
+<p><strong>Privacy invariants:</strong></p>
+<ul>
+<li>File contents are NEVER scanned by Setnayan staff or AI without explicit per-thread consent (e.g., for the V1.1 AI post-meeting summary feature).</li>
+<li>Coordinator removal revokes file access within 15 minutes (signed-URL TTL).</li>
+<li>Files never appear in admin search / global indexing — they're scoped to the thread, full stop.</li>
+<li>Public links are NEVER generated for thread files; even "share this file" only works between thread participants.</li>
+</ul>
+<p><strong>Why not just use Google Drive / OneDrive integrations?</strong> Three reasons: (1) the moment a file leaves Setnayan into Drive, the access-control boundary becomes the user's Google permissions — we can't enforce coordinator-revocation. (2) Vendors / couples don't want to manage two file systems. (3) Drive previews require auth flows that break the "log in once, everything works" promise. Native in-app readers with R2 storage keep the boundary clean.</p>
+<hr />
+<h2 id="ui-surfaces-messenger-class-chat">UI surfaces (Messenger-class chat)</h2>
+<h3 id="inbox-view">Inbox view</h3>
+<p><code>/dashboard/[role]/messages/</code></p>
+<p>Three-column layout on desktop (sidebar nav · thread list · active thread). Single-column on mobile (thread list, tap to open active thread, back-button to return).</p>
+<p><strong>Thread list item shows:</strong></p>
+<ul>
+<li>Vendor logo (for couple-side) or couple's profile avatar (for vendor-side)</li>
+<li>Vendor business name / couple's wedding name</li>
+<li>Last message preview (one line, truncated)</li>
+<li>Unread count pill</li>
+<li>Last message timestamp</li>
+<li>Online presence dot (green = online now)</li>
+</ul>
+<p><strong>Sort order:</strong> unread first, then by last-message timestamp descending. "Archived" tab as a sibling toggle.</p>
+<h3 id="active-thread-view">Active thread view</h3>
+<p>Standard Messenger pattern:</p>
+<ul>
+<li>Top bar: vendor name + business + verified badge + presence + "Schedule meeting" + "Add coordinator" + thread settings menu</li>
+<li>Message scroll area: messages bottom-up, sender bubbles right-aligned for self, left-aligned for others</li>
+<li>Avatar + sender name above each non-self bubble (for group threads)</li>
+<li>Reply-to anchor: tap a message to "reply to it"; the reply renders with a small quoted snippet of the original</li>
+<li>Reaction picker: long-press / hover-press a message to add a reaction</li>
+<li>Composer bar: text input + emoji picker + attach (image / PDF / voice) + send</li>
+<li>Voice note: hold-to-record button, max 60s, real-time waveform during recording</li>
+<li>Typing indicator: "[Sender] is typing…" appears below the latest message</li>
+</ul>
+<h3 id="coordinator-join-flow">Coordinator-join flow</h3>
+<p>From the couple-side thread settings menu:</p>
+<ol>
+<li>Couple taps "Add coordinator to this thread"</li>
+<li>Modal lists coordinators registered on the couple's event (from 0006 vendor records, role = 'coordinator')</li>
+<li>Couple taps a coordinator → confirmation dialog (the vendor will be notified that [Coordinator] joined)</li>
+<li>Confirm → <code>thread_join_authorizations</code> row written, <code>chat_thread_participants</code> row added, system message posts to the thread: "[Couple] added [Coordinator] to this conversation."</li>
+<li>Coordinator gets a push + email notification + the thread appears in their inbox</li>
+</ol>
+<p>Vendor and coordinator can both LEAVE the thread at any time (their participant row gets soft-deleted, system message posts). Only the couple can REMOVE a coordinator — the vendor can't kick a coordinator the couple invited.</p>
+<h3 id="vendor-identity-in-chat--logo-always-never-personal-photo-locked-2026-05-12">Vendor identity in chat — logo always, never personal photo (locked 2026-05-12)</h3>
+<p>When a vendor-side account sends a message in any thread, the <strong>customer always sees the vendor's company logo + business name as the sender</strong> — never the individual team member's personal profile photo or name — regardless of which team member typed the reply. The audit trail underneath retains the actual sender for accountability; the customer surface masks to a single brand identity.</p>
+<p><strong>Why this rule exists:</strong></p>
+<p>A vendor like "Aurora Studios" might have a booking team, a principal photographer, and a scheduling assistant all replying to the same customer thread across the planning lifecycle. From the customer's perspective, they're talking to <strong>"Aurora Studios"</strong> — not to three different humans whose faces and names they don't recognize. Brand consistency on vendor-side messages is the entire point of the vendor's company presence on Setnayan. Leaking individual team members' identities to customers would (a) confuse the customer about who they're actually talking to, (b) expose individual team members publicly without their consent, and (c) break the vendor's professional brand presentation.</p>
+<p><strong>The rule (binding):</strong></p>
+<ul>
+<li><strong>Customer-facing display name</strong> = <code>vendors.business_name</code> (always)</li>
+<li><strong>Customer-facing avatar</strong> = the vendor's company logo, resolved from <code>vendors.logo_r2_key</code> (always)</li>
+<li><strong>NEVER displayed to customers:</strong> the actual sender's <code>users.first_name</code>, <code>users.last_name</code>, or <code>users.profile_photo_r2_key</code> on a vendor-side message</li>
+<li><strong>Audit retention:</strong> <code>chat_messages.sender_id</code> is preserved on every row for admin audit + vendor-internal analytics. The masking happens at the read-time resolver layer, not by stripping data at write-time.</li>
+</ul>
+<p><strong>Optional vendor-controlled team-tag (per thread):</strong></p>
+<p>Vendor admin can toggle a "Replied by [team-name]" subtle label on a per-thread basis (e.g., "Booking team" / "Lead photographer" / "Scheduling assistant"). When enabled, the customer sees:</p>
+<pre><code>[Aurora Studios logo]  Aurora Studios          14:32
+                       Replied by Lead photographer
+                       &quot;Here are the proofs from...&quot;
+</code></pre>
+<p>When disabled (default), the customer sees just:</p>
+<pre><code>[Aurora Studios logo]  Aurora Studios          14:32
+                       &quot;Here are the proofs from...&quot;
+</code></pre>
+<p>The team-tag is a vendor-side opt-in for transparency — never customer-controlled, never required, never showing the team member's real name. The label is a vendor-defined string (free text, max 32 chars) per <code>vendor_users.team_label</code> column; defaults to NULL (masked).</p>
+<p><strong>Vendor-internal view is unmasked.</strong> When the vendor team looks at the same thread on their dashboard, they see the actual team member's name and photo on each message bubble for internal accountability ("who said what to which customer"). The masking applies ONLY to the customer-facing view.</p>
+<p><strong>Group thread with coordinator:</strong> the coordinator's identity is unmasked (they appear as the actual person — name + photo) because the coordinator is acting in their own professional capacity, not under a vendor brand. Coordinators are typically wedding planners working independently or for a planning agency; their personal brand is what the couple hired.</p>
+<p><strong>Customer-side identity is unmodified.</strong> Customers always show their personal profile photo + name as the sender of THEIR messages. Only vendor-side accounts mask to a logo.</p>
+<p><strong>Resolver pseudocode (read-time):</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="kw">function</span> <span class="fu">resolveMessageSender</span>(message<span class="op">,</span> viewer) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>  const sender <span class="op">=</span> users<span class="op">.</span><span class="fu">find</span>(message<span class="op">.</span><span class="at">sender_id</span>)<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a>  const senderIsVendor <span class="op">=</span> sender<span class="op">.</span><span class="at">account_type</span> <span class="op">===</span> <span class="st">&#39;vendor&#39;</span><span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a>  const viewerIsVendorOrAdmin <span class="op">=</span> viewer<span class="op">.</span><span class="at">account_type</span> <span class="op">===</span> <span class="st">&#39;vendor&#39;</span> <span class="op">||</span> viewer<span class="op">.</span><span class="at">account_type</span> <span class="op">===</span> <span class="st">&#39;admin&#39;</span><span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true"></a>  <span class="fu">if</span> (senderIsVendor <span class="op">&amp;&amp;</span> <span class="op">!</span>viewerIsVendorOrAdmin) {</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true"></a>    <span class="co">// mask to vendor brand identity</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true"></a>    const vendor <span class="op">=</span> vendors<span class="op">.</span><span class="fu">find</span>(sender<span class="op">.</span><span class="at">vendor_id</span>)<span class="op">;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true"></a>    return {</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true"></a>      display_name<span class="op">:</span> vendor<span class="op">.</span><span class="at">business_name</span><span class="op">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true"></a>      avatar_url<span class="op">:</span> <span class="fu">r2_signed_url</span>(vendor<span class="op">.</span><span class="at">logo_r2_key</span>)<span class="op">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true"></a>      team_label<span class="op">:</span> vendor<span class="op">.</span><span class="at">show_team_labels_in_chat</span> <span class="op">?</span> sender<span class="op">.</span><span class="at">team_label</span> <span class="op">:</span> <span class="dt">null</span><span class="op">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true"></a>    }<span class="op">;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true"></a>  }</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true"></a>  <span class="co">// unmasked (customer-side message, OR vendor/admin viewing internal)</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true"></a>  return {</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true"></a>    display_name<span class="op">:</span> <span class="vs">`</span><span class="sc">${</span>sender<span class="op">.</span><span class="at">first_name</span><span class="sc">}</span><span class="vs"> </span><span class="sc">${</span>sender<span class="op">.</span><span class="at">last_name</span><span class="sc">}</span><span class="vs">`</span><span class="op">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true"></a>    avatar_url<span class="op">:</span> <span class="fu">r2_signed_url</span>(sender<span class="op">.</span><span class="at">profile_photo_r2_key</span>)<span class="op">,</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true"></a>    team_label<span class="op">:</span> <span class="dt">null</span><span class="op">,</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true"></a>  }<span class="op">;</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true"></a>}</span></code></pre></div>
+<p><strong>Schema additions for this rule:</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> logo_r2_key TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,                  <span class="co">-- mandatory at registration</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> show_team_labels_in_chat <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>;</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendor_users</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> team_label TEXT;                            <span class="co">-- nullable; &quot;Booking team&quot; / &quot;Lead photographer&quot; / etc.</span></span></code></pre></div>
+<p><strong>Acceptance tests for the masking:</strong></p>
+<ul class="task-list">
+<li><input type="checkbox" disabled="" />
+Customer in a vendor thread sees the vendor's logo + business_name on every vendor-side message, regardless of which team member sent it.</li>
+<li><input type="checkbox" disabled="" />
+Customer never sees a vendor team member's first name, last name, or profile photo in any chat surface.</li>
+<li><input type="checkbox" disabled="" />
+When <code>show_team_labels_in_chat = TRUE</code>, the customer sees the vendor's team label below the business name; when FALSE, no team label appears.</li>
+<li><input type="checkbox" disabled="" />
+Vendor team member viewing the same thread internally sees the real sender name + photo for each message bubble.</li>
+<li><input type="checkbox" disabled="" />
+Coordinator in a 3-way thread (couple + vendor + coordinator) shows as themselves (real name + photo) to both other parties.</li>
+<li><input type="checkbox" disabled="" />
+<code>chat_messages.sender_id</code> retains the actual sender across all surfaces; an admin audit log query can answer "who at Vendor X replied to Customer Y on date Z".</li>
+</ul>
+<hr />
+<h3 id="force-majeure-flag-flow-locked-2026-05-12">Force majeure flag flow (locked 2026-05-12)</h3>
+<p>Either the customer OR the vendor can flag a booking as a <strong>force majeure event</strong> from within the chat thread or the booking detail. The flag triggers a structured mediation workflow.</p>
+<p><strong>The trigger:</strong> in any active customer ↔︎ vendor chat thread, both parties see a <code>Flag force majeure</code> option in the thread settings menu. Tapping it opens a modal:</p>
+<ol>
+<li><strong>Type picker (required):</strong> Typhoon / Natural disaster · Severe illness · Family emergency · Government order (e.g., lockdown) · Venue cancellation · Other (describe)</li>
+<li><strong>Date occurred (required):</strong> Date picker, defaults to today</li>
+<li><strong>Evidence (optional):</strong> Up to 5 photo / PDF uploads</li>
+<li><strong>Submit</strong> → creates a <code>force_majeure_flag</code> row tied to the booking</li>
+<li>The other party gets immediate notification (in-app + email via 0028) — "[Name] has flagged this booking as force majeure. Please respond within 7 days."</li>
+</ol>
+<p><strong>The 4-option resolution path:</strong></p>
+<p>Both parties enter a mediation modal showing 4 outcome cards:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Outcome</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Reschedule</strong></td>
+<td>Both pick a new date together; calendar swap is automatic; original booking moves to new date</td>
+</tr>
+<tr class="even">
+<td><strong>Partial refund</strong></td>
+<td>Both negotiate an amount (vendor proposes, customer accepts/counters); on agreement → admin processes</td>
+</tr>
+<tr class="odd">
+<td><strong>Full refund</strong></td>
+<td>Vendor agrees, customer accepts; booking is cancelled; refund processed within 5 business days</td>
+</tr>
+<tr class="even">
+<td><strong>Switch vendor</strong></td>
+<td>Customer wants a replacement; Setnayan helps find one; original vendor refunds proportionally</td>
+</tr>
+</tbody>
+</table>
+<p>Both parties must agree to ONE outcome within 7 days for auto-resolution. If no agreement within 7 days → escalates to <strong>Disputes Handler</strong> (admin). Disputes Handler reviews evidence + chat history + 4-option discussion + decides; outcome is final.</p>
+<p><strong>Schema:</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> force_majeure_flags (</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a>  flag_id          UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a>  booking_id       UUID <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- references the underlying booking</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a>  flagged_by_user_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true"></a>  flagged_role     TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (flagged_role <span class="kw">IN</span> (<span class="st">&#39;customer&#39;</span>,<span class="st">&#39;vendor&#39;</span>)),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true"></a>  fm_type          TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- typhoon / illness / family_emergency / government_order / venue_cancellation / other</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true"></a>  fm_description   TEXT,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true"></a>  occurred_at      <span class="dt">DATE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true"></a>  evidence_r2_keys TEXT[],</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true"></a>  resolution_type  TEXT <span class="kw">CHECK</span> (resolution_type <span class="kw">IN</span> (<span class="st">&#39;reschedule&#39;</span>,<span class="st">&#39;partial_refund&#39;</span>,<span class="st">&#39;full_refund&#39;</span>,<span class="st">&#39;switch_vendor&#39;</span>,<span class="st">&#39;admin_mediated&#39;</span>,<span class="st">&#39;rejected&#39;</span>)),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true"></a>  resolution_details JSONB,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true"></a>  resolution_amount_php <span class="dt">INT</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true"></a>  agreed_by_customer_at TIMESTAMPTZ,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true"></a>  agreed_by_vendor_at   TIMESTAMPTZ,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true"></a>  resolved_at      TIMESTAMPTZ,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true"></a>  escalated_to_admin_at TIMESTAMPTZ,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true"></a>  admin_decision_user_id UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true"></a>  admin_decision_notes   TEXT,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true"></a>  created_at       TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true"></a>);</span></code></pre></div>
+<hr />
+<h2 id="ui-surfaces-zoom-class-video-meetings">UI surfaces (Zoom-class video meetings)</h2>
+<h3 id="schedule-a-meeting">Schedule a meeting</h3>
+<p>From the active thread top bar → "Schedule meeting" → modal:</p>
+<ul>
+<li>Title (defaults to "Discovery call with [Vendor]")</li>
+<li>Date + time (or "Start now")</li>
+<li>Duration estimate</li>
+<li>Recording on / off toggle (default off; consent banner appears in-meeting)</li>
+<li>Participants (defaults to all current thread participants; couple can add/remove)</li>
+<li>Agenda (optional rich text)</li>
+</ul>
+<p>On schedule: a <code>video_meetings</code> row is written, <code>daily_room_url</code> is provisioned via Daily.co API, a calendar invite (.ics) is generated and attached to the thread as a system message: "Meeting scheduled: [Title] on [Date]. [Join button]."</p>
+<h3 id="in-meeting-view">In-meeting view</h3>
+<p>Standard Zoom-class layout:</p>
+<ul>
+<li>Gallery view (default for ≤ 4 participants) or speaker view (default for 5+) — toggle in top-right</li>
+<li>Self-view picture-in-picture, draggable</li>
+<li>Bottom controls: mute / cam off / share screen / chat / participants / leave</li>
+<li>In-meeting chat panel (separate scroll, persists into parent thread on meeting end via system message: "Meeting ended. Chat archived to thread.")</li>
+<li>Recording indicator (red dot top-left) + consent banner ("This meeting is being recorded") if recording is on</li>
+<li>Participant tile shows: name, role badge (couple / vendor / coordinator), mute indicator</li>
+<li>Reactions overlay (Zoom-style 👏 ❤️ 😂 floating up from sender's tile)</li>
+</ul>
+<h3 id="post-meeting">Post-meeting</h3>
+<ul>
+<li><code>ended_at</code> timestamp written</li>
+<li>If recording: Daily.co webhook fires → server downloads recording → uploads to R2 → <code>recording_r2_key</code> populated → system message posts to thread with playback link</li>
+<li>In-meeting chat appended to parent thread as a system block ("Meeting chat (8 messages) — view")</li>
+</ul>
+<hr />
+<h2 id="performance-targets--messenger-class-chat-zoom-class-video">Performance targets — Messenger-class chat, Zoom-class video</h2>
+<p>Locked answer to "can we match the speed of Messenger and Zoom?": <strong>yes</strong>, with the right infrastructure choices and engineering discipline. Both are achievable benchmarks because the underlying tech is well-understood and the same building blocks Messenger and Zoom use are available to us.</p>
+<p><strong>Locked targets (V1):</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Surface</th>
+<th>Metric</th>
+<th>Target</th>
+<th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Chat</td>
+<td>Message-send round-trip p50</td>
+<td>&lt; 150 ms</td>
+<td>Messenger is typically 80–200 ms</td>
+</tr>
+<tr class="even">
+<td>Chat</td>
+<td>Message-send round-trip p99</td>
+<td>&lt; 500 ms</td>
+<td>Messenger is typically 300–800 ms</td>
+</tr>
+<tr class="odd">
+<td>Chat</td>
+<td>Typing indicator latency</td>
+<td>&lt; 100 ms</td>
+<td>At parity with Messenger</td>
+</tr>
+<tr class="even">
+<td>Chat</td>
+<td>Read-receipt propagation</td>
+<td>&lt; 200 ms</td>
+<td>At parity with Messenger</td>
+</tr>
+<tr class="odd">
+<td>Chat</td>
+<td>Thread initial-paint (50 messages)</td>
+<td>&lt; 600 ms cold, &lt; 200 ms warm</td>
+<td>Messenger is ~400 ms cold</td>
+</tr>
+<tr class="even">
+<td>Video</td>
+<td>Call setup (tap "Meet now" → first video frame)</td>
+<td>&lt; 3 s</td>
+<td>Zoom is 1–2 s; we accept slightly slower for V1</td>
+</tr>
+<tr class="odd">
+<td>Video</td>
+<td>One-way audio/video latency</td>
+<td>&lt; 200 ms</td>
+<td>Zoom is 100–150 ms in good conditions</td>
+</tr>
+<tr class="even">
+<td>Video</td>
+<td>Reconnect-after-network-drop</td>
+<td>&lt; 5 s</td>
+<td>At parity with Zoom</td>
+</tr>
+<tr class="odd">
+<td>Video</td>
+<td>Audio quality at 64 kbps</td>
+<td>Comparable to Zoom</td>
+<td>Both use Opus codec</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why these are achievable:</strong></p>
+<ol>
+<li><p><strong>Chat = Messenger pattern.</strong> Supabase Realtime is built on PostgreSQL logical replication + WebSocket fanout — the same architectural pattern Messenger uses (proprietary, but conceptually identical). Stack matures quickly with the right discipline:</p>
+<ul>
+<li>Keep message payloads small (&lt; 4 KB typical)</li>
+<li>Optimistic UI on send (render the bubble in the sender's view immediately, mark it "sent" when the server confirms — exactly like Messenger)</li>
+<li>Virtualized scroll in the thread view (<code>react-window</code> or equivalent) so a thread with 5,000 messages doesn't kill the DOM</li>
+<li>Indexed <code>thread_id, created_at DESC</code> query for the initial 50-message paint</li>
+<li>Presence + typing on ephemeral Supabase Realtime channels (NOT persisted writes — those are 10× slower)</li>
+</ul></li>
+<li><p><strong>Video = Zoom pattern.</strong> Daily.co (and LiveKit, Twilio) are built on the same underlying architecture as Zoom: an SFU (Selective Forwarding Unit) + adaptive bitrate + Opus audio + VP8/VP9/H.264 video. Daily.co specifically benchmarks within 10–15% of Zoom's perceived quality on equivalent network conditions. We won't match Zoom's years of proprietary network optimization, but we'll hit "feels just as smooth" for the 1:1 + small-group calls that dominate vendor discovery.</p></li>
+</ol>
+<p><strong>What would break the targets (and how we avoid it):</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Wrong-region hosting</td>
+<td>Host Supabase in <strong>Singapore</strong> region (closest to PH; ~50 ms RTT from Manila / Cebu / Davao). Use Daily.co's Singapore SFU. R2 buckets already in PH region per 0013.</td>
+</tr>
+<tr class="even">
+<td>Heavy payloads</td>
+<td>Strip server-side rendering for message bodies; ship plain text + minimal metadata. Attachments stay separate (signed-URL fetch on tap).</td>
+</tr>
+<tr class="odd">
+<td>N+1 queries</td>
+<td>Single query per thread paint with a <code>JOIN</code> to <code>chat_thread_participants</code> for presence; never one-query-per-message.</td>
+</tr>
+<tr class="even">
+<td>Unwarmed Daily.co rooms</td>
+<td>Pre-create the Daily room when the meeting is scheduled (not when the user clicks "Join"). For ad-hoc "Meet now," the room provisions in parallel with the user's media-permission grant — typically the slower of the two paths is the user grant, not the room creation.</td>
+</tr>
+<tr class="odd">
+<td>Mobile network jitter</td>
+<td>TURN servers in APAC region (Daily.co handles this); audio prioritized over video when bandwidth drops.</td>
+</tr>
+<tr class="even">
+<td>React over-rendering</td>
+<td>Memoize message bubbles by <code>message_id</code>; only re-render on edit / delete / reaction change.</td>
+</tr>
+<tr class="odd">
+<td>Cold WebSocket connection</td>
+<td>Keep the WebSocket open while the user is in any Setnayan tab; reconnect on tab focus + offline → online events.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What we explicitly accept as worse than Zoom in V1:</strong></p>
+<ul>
+<li>1–2s slower call setup (we're not doing aggressive room pre-warming for ad-hoc calls)</li>
+<li>No proprietary "magic" reconnect heuristics (Zoom has years of tuning here)</li>
+<li>≤ 8 participants per group call in V1 (Zoom does 1,000 — but the use case here is vendor discovery calls, not all-hands)</li>
+</ul>
+<p><strong>Engineering discipline checklist:</strong></p>
+<ul class="task-list">
+<li><input type="checkbox" disabled="" />
+Supabase + Daily.co both in Singapore region</li>
+<li><input type="checkbox" disabled="" />
+Index <code>chat_messages (thread_id, created_at DESC)</code> exists and is verified by <code>EXPLAIN ANALYZE</code></li>
+<li><input type="checkbox" disabled="" />
+Optimistic-send pattern in the chat composer (render before server-confirm)</li>
+<li><input type="checkbox" disabled="" />
+Virtualized scroll in the thread view</li>
+<li><input type="checkbox" disabled="" />
+Presence + typing on ephemeral channels, never persisted writes</li>
+<li><input type="checkbox" disabled="" />
+Memoized message bubbles</li>
+<li><input type="checkbox" disabled="" />
+Daily room pre-creation on <code>scheduled_for</code> write</li>
+<li><input type="checkbox" disabled="" />
+WebSocket kept open while any Setnayan tab is focused</li>
+<li><input type="checkbox" disabled="" />
+Performance test in CI: 500-message thread paint &lt; 600 ms p95 on a throttled 4G profile</li>
+</ul>
+<p><strong>Honest caveat:</strong> speed at this level is an ongoing engineering investment, not a one-time build. We will hit the V1 targets at launch with the architecture above. Maintaining them as the platform scales (10K → 100K → 1M concurrent threads) requires discipline on every PR — performance regressions are easier to ship than performance improvements. CI perf budgets are a hard requirement.</p>
+<hr />
+<h2 id="notifications">Notifications</h2>
+<p><strong>V1:</strong></p>
+<ul>
+<li>In-app notification bell + unread badge on the Messages tab</li>
+<li>Per-thread unread count</li>
+<li>Browser tab title flash on new message ("(3) Setnayan — Messages")</li>
+</ul>
+<p><strong>V1.1:</strong></p>
+<ul>
+<li>Push notifications via Expo (iOS / Android)</li>
+<li>Web push (browser)</li>
+<li>Email digest (daily summary of unread threads)</li>
+</ul>
+<p><strong>V2:</strong></p>
+<ul>
+<li>SMS fallback (only for time-sensitive vendor confirmations)</li>
+</ul>
+<p>The deferred-fallback-channels memory rule (2026-05-09) applies — V1 ships in-UI surfacing only.</p>
+<hr />
+<h2 id="acceptance-criteria">Acceptance criteria</h2>
+<p>This iteration is shippable when all of the following are true:</p>
+<ul class="task-list">
+<li><input type="checkbox" disabled="" />
+A couple can start a 1:1 chat thread with any verified vendor by tapping "Message" on the vendor profile.</li>
+<li><input type="checkbox" disabled="" />
+A vendor can reply to that thread from their vendor dashboard.</li>
+<li><input type="checkbox" disabled="" />
+Both parties see real-time presence (online / away / offline) and typing indicators.</li>
+<li><input type="checkbox" disabled="" />
+Read receipts update per-message; the sender sees "Read" under the most-recently-read message.</li>
+<li><input type="checkbox" disabled="" />
+Reactions (emoji) work via long-press on mobile and hover-press on desktop.</li>
+<li><input type="checkbox" disabled="" />
+Attachments work for image (≤ 10 MB), PDF (≤ 25 MB), and voice notes (≤ 60s, hold-to-record).</li>
+<li><input type="checkbox" disabled="" />
+Reply-to-message anchoring works (Messenger-style quoted snippet above the reply).</li>
+<li><input type="checkbox" disabled="" />
+A couple can add a coordinator to an existing thread via the thread settings menu; both vendor and coordinator are notified.</li>
+<li><input type="checkbox" disabled="" />
+A coordinator can read all messages in a thread they've been added to and write new messages.</li>
+<li><input type="checkbox" disabled="" />
+Only the couple can remove a coordinator from a thread.</li>
+<li><input type="checkbox" disabled="" />
+Either party can schedule a video meeting from the thread top bar; calendar invite (.ics) generates automatically and attaches to the thread.</li>
+<li><input type="checkbox" disabled="" />
+Either party can start an ad-hoc "Meet now" call.</li>
+<li><input type="checkbox" disabled="" />
+Video meeting supports up to 8 participants with mute / cam-off / screen-share controls.</li>
+<li><input type="checkbox" disabled="" />
+In-meeting chat persists into the parent thread on meeting end.</li>
+<li><input type="checkbox" disabled="" />
+Recording (with explicit consent banner) lands on R2 and posts to the thread with a playback link.</li>
+<li><input type="checkbox" disabled="" />
+All chat + meeting data is event-scoped via <code>chat_threads.event_id</code>; RLS enforces participant-only access.</li>
+<li><input type="checkbox" disabled="" />
+Couple can archive a thread; archived threads move to the "Archived" tab.</li>
+<li><input type="checkbox" disabled="" />
+Inbox sorts unread first, then by last-message timestamp descending.</li>
+<li><input type="checkbox" disabled="" />
+Mobile thumb-friendly: composer is bottom-fixed with adequate tap targets (≥ 44pt).</li>
+<li><input type="checkbox" disabled="" />
+Daily.co integration cost is logged per-meeting for finance reconciliation.</li>
+</ul>
+<hr />
+<h2 id="build-order">Build order</h2>
+<ol>
+<li><strong>Sprint 1</strong> — Schema migration + RLS policies. <code>chat_threads</code> / <code>chat_thread_participants</code> / <code>chat_messages</code> / <code>chat_attachments</code> / <code>chat_reactions</code> tables. Supabase Realtime channel-per-thread setup.</li>
+<li><strong>Sprint 2</strong> — Inbox view (web + mobile). Thread list, unread counts, sort order, "Archived" tab.</li>
+<li><strong>Sprint 3</strong> — Active thread view. Message bubbles, composer, send, real-time receive via Supabase Realtime.</li>
+<li><strong>Sprint 4</strong> — Presence + typing indicators (Supabase Realtime presence channels). Read receipts.</li>
+<li><strong>Sprint 5</strong> — Reactions + reply-to-message anchoring + edit / delete.</li>
+<li><strong>Sprint 6</strong> — Attachments (image / PDF / voice) → R2 upload pipeline. Thumbnail rendering for images, audio waveform for voice notes.</li>
+<li><strong>Sprint 7</strong> — Coordinator-join flow. <code>thread_join_authorizations</code> table, "Add coordinator" modal, system messages, notification routing.</li>
+<li><strong>Sprint 8</strong> — Daily.co integration. <code>video_meetings</code> schema. Schedule-meeting modal + .ics generation. Ad-hoc "Meet now" button.</li>
+<li><strong>Sprint 9</strong> — In-meeting UI (web + mobile). Gallery / speaker view, controls, in-meeting chat, screen share.</li>
+<li><strong>Sprint 10</strong> — Recording pipeline (Daily.co webhook → R2 → thread system message).</li>
+<li><strong>Sprint 11</strong> — Acceptance test pass + load test (50 concurrent threads per Realtime channel; 8-participant meeting stress).</li>
+</ol>
+<p>Roughly 8–10 weeks at 1 dev. 5–6 weeks at 2 devs.</p>
+<hr />
+<h2 id="open-questions">Open questions</h2>
+<ul>
+<li><strong>Daily.co vs LiveKit vs Twilio?</strong> Recommendation: Daily.co. Cleanest API, best per-minute pricing, recording out of the box. LiveKit if we ever need to self-host (we don't, in V1). Twilio is over-priced for this use case.</li>
+<li><strong>Per-meeting cost: absorb or pass through?</strong> <strong>DECIDED 2026-05-11: ABSORB. Free use across the board.</strong> Per-feature paywalls would gut the in-app value-prop and push communications back to WhatsApp. Cost (~₱6 per 60-min 1:1, fractions of a peso for chat) is absorbed into the platform's operating budget. Revisited only if a single event exceeds 500 hrs/month sustained, at which point we'd consider per-event throttles, not paywalls.</li>
+<li><strong>Voice-only calls in V1?</strong> Recommendation: defer. A video meeting with cam off is functionally a voice call; building a separate voice-only surface is engineering tax for marginal UX gain.</li>
+<li><strong>AI post-meeting summary?</strong> Recommendation: V1.1. The Anthropic API call to summarize a 60-min Daily.co transcript is cheap (~₱5) and high-value, but not launch-blocking.</li>
+<li><strong>Vendor-to-vendor chat?</strong> Recommendation: never in V1 product line. Privacy invariant — vendors talk through couples, not directly. If two vendors need to coordinate (e.g., florist + venue), they can be added to a group thread by the couple.</li>
+</ul>
+<hr />
+<h2 id="companion-specs-and-cross-references">Companion specs and cross-references</h2>
+<ul>
+<li><code>0000_app_shell_and_navigation/</code> — Messages tab in the bottom-nav (or sidebar on desktop) for both customer and vendor surfaces.</li>
+<li><code>0006_vendors_management/</code> — vendor records that "Message" buttons attach to.</li>
+<li><code>0013_platform_stack_and_sync/</code> — Supabase Realtime is the chat transport; R2 is the attachment + recording store.</li>
+<li><code>0015_main_website/</code> — forward-references this iteration in the vendor section ("In-app chat &amp; video meetings" / "you can pull a coordinator into a vendor chat"). Marketing copy must be revised in lockstep if 0019 scope changes materially.</li>
+<li><code>CLAUDE.md</code> — decision log entry 2026-05-11 "0019 Communications iteration queued."</li>
+</ul>
+<hr />
+<p><a href="computer:///Users/icecasasola/Documents/Claude/Projects/Setnayan%20App/0019_communications/0019_communications.html">View this iteration's HTML mockup</a></p>
+<p><a href="computer:///Users/icecasasola/Documents/Claude/Projects/Setnayan%20App/0019_communications/0019_communications.docx">View this iteration's Word document</a></p>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

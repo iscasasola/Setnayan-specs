@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0025 — Profile Settings & Privacy Controls — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0025</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0025_profile_settings.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0025_profile_settings.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0025_profile_settings.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0025--profile-settings--privacy-controls">Iteration 0025 — Profile Settings &amp; Privacy Controls</h1>
+<p><strong>Iteration number:</strong> 0025 <strong>Topic:</strong> Profile Settings surface and the RA 10173 privacy-controls layer (account deletion + data export). Lives inside each existing dashboard (customer / vendor / admin) as a shared shell with role-specific tabs enabled. <strong>Surface:</strong> All three role surfaces under their respective dashboards. Same component shell, role-driven section visibility. <strong>URL patterns:</strong></p>
+<ul>
+<li>Customer: <code>setnayan.com/dashboard/[event-id]/settings/</code></li>
+<li>Vendor: <code>setnayan.com/dashboard/vendor/settings/</code></li>
+<li>Admin: <code>setnayan.com/admin/settings/profile</code></li>
+</ul>
+<p><strong>Builds on:</strong> 0000 (auth + <code>users</code>), 0002 (slug), 0013 (Supabase + R2 platform stack), 0019 (notification preferences consumed by chat), 0021 (couple dashboard chrome), 0022 (vendor dashboard chrome), 0023 (admin console chrome). <strong>Provides to downstream iterations:</strong></p>
+<ul>
+<li>0026 (BIR / tax compliance) reads the payment-history view introduced here</li>
+<li>0028 (email notifications) reads <code>notification_preferences</code></li>
+<li>All future surfaces read <code>users.theme_preference</code> and <code>users.locale_preference</code></li>
+</ul>
+<p><strong>Status:</strong> Drafted 2026-05-12. <strong>Phase:</strong> V1 launch-blocking — RA 10173 compliance is non-negotiable for any PH consumer platform per the locked Privacy &amp; Security Policy. The data-export and account-deletion features in tab 6 are the legally required pieces; the rest of the tabs are baseline UX hygiene.</p>
+<hr />
+<h2 id="1-why-this-iteration-exists">1. Why this iteration exists</h2>
+<p>Every iteration before this one has shipped surface-specific settings inline (notification toggles inside chat, slug check inside the invitation editor, face-detection toggle inside the gallery). That scatter-pattern was acceptable while we were drafting iterations independently, but it leaves the user without a single place to:</p>
+<ul>
+<li>Change their email or password</li>
+<li>Pick a theme or locale</li>
+<li>Manage notification preferences across categories</li>
+<li>Exercise their RA 10173 rights (data export, account deletion, marketing consent withdrawal)</li>
+</ul>
+<p>The Privacy &amp; Security Policy (locked 2026-05-12) names two rights that <strong>must</strong> be machine-actionable in the product, not "email DPO and wait":</p>
+<ul>
+<li><strong>Right to data portability (§ 18):</strong> the user can download all their data in a structured, commonly-used, machine-readable format.</li>
+<li><strong>Right to erasure (§ 16(e)):</strong> the user can request deletion of their account and have it processed within a defined window.</li>
+</ul>
+<p>A "contact DPO via email" workflow technically satisfies the letter of RA 10173 but fails the spirit and exposes Setnayan to NPC complaints. Pulling both rights into a self-service Settings tab is the correct posture for a consumer platform of Setnayan's scale.</p>
+<p>The other five tabs are the conventional surface every user expects to find under a Settings cog. Shipping them in one iteration means the cog-icon-leads-to-Settings invariant holds across all three roles from V1 launch.</p>
+<hr />
+<h2 id="2-surface-architecture">2. Surface architecture</h2>
+<h3 id="21-shared-shell-role-driven-sections">2.1 Shared shell, role-driven sections</h3>
+<p>The Settings surface is one React component (<code>&lt;SettingsShell /&gt;</code>) parameterized by the current role. It renders six tabs in a left-rail layout on desktop and a horizontal scroll on mobile. Each tab's visibility is gated by role:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Tab</th>
+<th>Customer</th>
+<th>Vendor</th>
+<th>Admin</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1. Profile</td>
+<td>full</td>
+<td>full (business name read-only)</td>
+<td>full</td>
+</tr>
+<tr class="even">
+<td>2. Appearance</td>
+<td>full</td>
+<td>full</td>
+<td>full</td>
+</tr>
+<tr class="odd">
+<td>3. Notifications</td>
+<td>full</td>
+<td>full</td>
+<td>full + admin-only "internal-account creation" category</td>
+</tr>
+<tr class="even">
+<td>4. URL &amp; Slug</td>
+<td>full (event slug)</td>
+<td>full (vendor slug)</td>
+<td>n/a (hidden)</td>
+</tr>
+<tr class="odd">
+<td>5. Payment Methods</td>
+<td>full</td>
+<td>n/a (vendor payouts live in 0022 § 6)</td>
+<td>n/a (hidden)</td>
+</tr>
+<tr class="even">
+<td>6. Privacy &amp; Data</td>
+<td>full</td>
+<td>full</td>
+<td>partial (cannot self-delete · § 6.2 exception)</td>
+</tr>
+</tbody>
+</table>
+<p>A user with multiple roles (<code>event_members.member_type</code> spans couple + guest, or a customer who later becomes a vendor) sees the Settings cog jump them to the role-appropriate Settings page. Switching role via the top-chrome "Switch view" pill (per one-app-three-doorways) re-renders Settings against the new role context.</p>
+<h3 id="22-mobile-considerations">2.2 Mobile considerations</h3>
+<p>Mobile views collapse the left-rail nav into a top-of-screen segmented control that horizontal-scrolls past the visible viewport. Every primary action (Save, Delete, Export) sits in the thumb zone (lower third). Destructive actions (delete account, withdraw consent) require a typed confirmation; mobile renders the typed-confirmation field with a 16pt minimum tap target.</p>
+<hr />
+<h2 id="3-the-six-tabs">3. The six tabs</h2>
+<h3 id="31-tab-1--profile">3.1 Tab 1 — Profile</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Customer</th>
+<th>Vendor</th>
+<th>Admin</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Display name</td>
+<td>editable</td>
+<td>n/a</td>
+<td>editable</td>
+<td>Customer's social name; appears on chat bubbles + guest-list rows</td>
+</tr>
+<tr class="even">
+<td>Business name</td>
+<td>n/a</td>
+<td><strong>read-only</strong></td>
+<td>n/a</td>
+<td>Change requires admin re-verification per Vendor Agreement § 3.1</td>
+</tr>
+<tr class="odd">
+<td>Email</td>
+<td>editable</td>
+<td>editable</td>
+<td>editable</td>
+<td>Change triggers two-email verification flow: confirmation link to old address + confirmation link to new address; both must click within 24h</td>
+</tr>
+<tr class="even">
+<td>Password</td>
+<td>editable</td>
+<td>editable</td>
+<td>editable</td>
+<td>Current → new → confirm; new must satisfy 12-char min + 1 number + 1 symbol per Privacy Policy § 4.3</td>
+</tr>
+<tr class="odd">
+<td>Profile photo (customer)</td>
+<td>editable</td>
+<td>n/a</td>
+<td>editable</td>
+<td>R2 <code>setnayan-media</code> key <code>users/{user_id}/avatar/{uuid}.{ext}</code> · EXIF strip on upload</td>
+</tr>
+<tr class="even">
+<td>Company logo (vendor)</td>
+<td>n/a</td>
+<td>editable</td>
+<td>n/a</td>
+<td>Per Vendor Agreement § 1.1; propagates to all surfaces within 5 min via CDN purge</td>
+</tr>
+<tr class="odd">
+<td>Phone number</td>
+<td>optional</td>
+<td>optional</td>
+<td>optional</td>
+<td>E.164 format · V1 stores only · SMS delivery wired in V1.5 (0028 dependency)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Email change flow safeguards:</strong> The new email cannot already be associated with another <code>users</code> row. If the user has unread security-alert notifications older than 24h, the change is blocked with a "review pending security alerts first" message — defends against a compromised session changing email to lock out the legitimate owner.</p>
+<h3 id="32-tab-2--appearance">3.2 Tab 2 — Appearance</h3>
+<p>Three controls. All persist on <code>users</code> (schema § 4) and apply immediately without page reload.</p>
+<p><strong>Theme picker.</strong> Four V1 themes per <code>02_Specifications/Theme_System_Implementation_Spec.md</code>:</p>
+<ul>
+<li>Setnayan Default (cream + ink + terracotta)</li>
+<li>Victorian (deeper ink + brass accents + serif heavier)</li>
+<li>Classy (cooler neutrals + minimal accent)</li>
+<li>iOS (system-grey + system-blue accent · Apple-Settings rendering)</li>
+</ul>
+<p>Selecting a theme writes <code>users.theme_preference</code> and reloads the CSS variable bundle. Theme applies to every surface the user owns; vendors who want vendor-side public theming must hold a Vendor Pro Weekly subscription (forward-referenced in 0022 § 7) — without it, the customer-side marketplace listing always renders in Setnayan Default.</p>
+<p><strong>Locale preference.</strong> <code>EN | TL | CEB</code> segmented pill. Writes <code>users.locale_preference</code>. In-app strings load from the matching <code>locale.&lt;code&gt;.ts</code> bundle. V1 ships the in-app string bundle for <code>en</code> only; <code>tl</code> and <code>ceb</code> complete in V1.5 per the 0015 locale rollout. Until then, switching to <code>tl</code> or <code>ceb</code> shows a "Coming soon — your preference is saved" notice and keeps rendering EN.</p>
+<p><strong>Density.</strong> Compact / Comfortable. Applies a CSS spacing-scale multiplier (1.0× vs 1.25×). Default is Comfortable. Compact targets vendors running dashboards on laptops who want denser tables.</p>
+<h4 id="dashboard-language-toggle-locked-2026-05-12--entl-only-in-v1">Dashboard language toggle (locked 2026-05-12 — EN/TL only in V1)</h4>
+<p>While the marketing site (0015) supports EN / TL / CEB, V1 in-app dashboards ship with <strong>English + Tagalog only</strong>. CEB deferred to V1.1.</p>
+<p><strong>Settings → Appearance → Language:</strong></p>
+<ul>
+<li>Toggle: English (<code>en</code>) · Tagalog (<code>tl</code>)</li>
+<li>Stored as <code>users.language_preference</code> (extends from the existing <code>users.theme_preference</code>)</li>
+<li>Applied at SSR via Next.js i18n routing: <code>setnayan.com/en/dashboard/...</code> vs <code>setnayan.com/tl/dashboard/...</code></li>
+<li>All dashboard chrome strings live in <code>apps/web/locales/dashboard.{lang}.json</code> bundles</li>
+<li>Date/number/currency formatting respects the locale (₱ stays as ₱; date format flips between MM/DD/YYYY for EN and DD MMM YYYY for TL)</li>
+</ul>
+<p>V1 translation scope: dashboard chrome + bot-nav + button labels + form labels + empty states + error messages. Articles in the help center (0029) stay English-only in V1 per the 0029 decision.</p>
+<h3 id="33-tab-3--notifications">3.3 Tab 3 — Notifications</h3>
+<p>A master toggle ("All notifications") sits at the top. When off, every row below is disabled (writes are blocked, UI is greyed) — same pattern as iOS Do Not Disturb.</p>
+<p><strong>Category rows.</strong> Each row shows the category label, a one-line explainer, and two checkboxes (in-app · email):</p>
+<table>
+<thead>
+<tr class="header">
+<th>Category</th>
+<th>Customer</th>
+<th>Vendor</th>
+<th>Admin</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Payments</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+<td>both on</td>
+</tr>
+<tr class="even">
+<td>Vendors</td>
+<td>yes</td>
+<td>n/a</td>
+<td>yes</td>
+<td>both on</td>
+</tr>
+<tr class="odd">
+<td>Events</td>
+<td>yes</td>
+<td>yes (as bookings)</td>
+<td>yes</td>
+<td>both on</td>
+</tr>
+<tr class="even">
+<td>Account</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+<td>both on</td>
+</tr>
+<tr class="odd">
+<td>Marketing</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+<td><strong>both OFF</strong> — explicit opt-in per Privacy Policy § 6.2</td>
+</tr>
+<tr class="even">
+<td>Internal accounts</td>
+<td>n/a</td>
+<td>n/a</td>
+<td>yes (admin only)</td>
+<td>both on</td>
+</tr>
+</tbody>
+</table>
+<p>Each category writes a row into <code>notification_preferences</code> (schema § 4). Email column requires a verified email on the account — if email is unverified, the email checkbox is disabled with a "verify your email first" hint.</p>
+<p><strong>Quiet hours.</strong> A single time-range picker (start hour → end hour, local time per IANA tz). When set, push and email notifications are queued during the window and delivered at the end. In-app notifications still surface (they're passive — they don't ping). Quiet hours apply across all categories; per-category quiet hours are V1.5.</p>
+<p><strong>Default reminder offsets</strong> (events category): T-7d, T-1d, T-1h. Not configurable in V1; configurable per-event in V1.5.</p>
+<h3 id="34-tab-4--url--slug">3.4 Tab 4 — URL &amp; Slug</h3>
+<p>Reuses the slug check component from 0002 § 4.</p>
+<p><strong>Customer side:</strong> the event slug (<code>setnayan.com/[event-slug]</code>). Real-time availability check (debounced 300ms). On change, the 90-day SEO redirect explainer renders: "Your old URL stays redirected to your new one for 90 days. After 90 days, the old slug becomes available for someone else." Schema: <code>event_slug_redirects</code> already exists from 0002.</p>
+<p><strong>Vendor side:</strong> the vendor slug (<code>setnayan.com/v/[vendor-slug]</code>). Same component. Vendor-slug changes also propagate to the vendor's marketplace card and chat thread routing.</p>
+<p><strong>Admin side:</strong> tab hidden. Admins do not have public URLs.</p>
+<h3 id="35-tab-5--payment-methods">3.5 Tab 5 — Payment Methods</h3>
+<p><strong>Customer side only.</strong> Vendor side is hidden (vendor payouts are managed in 0022 § 6, not here). Admin side is hidden.</p>
+<p><strong>V1 (apply-then-pay).</strong> Static informational block:</p>
+<blockquote>
+<p>Setnayan accepts payments via BDO bank transfer and GCash. Each order generates a payment instruction email with a unique reference code. Pay using the reference code, then the Setnayan Team verifies the payment within 24 hours and your service activates.</p>
+<p><strong>[View my payment history]</strong> — links to a dedicated <code>/dashboard/[event-id]/payments</code> view (introduced here) showing one row per <code>service_orders</code> record with status, amount, reference code, and date.</p>
+</blockquote>
+<p><strong>V1.5 (planned).</strong> This tab will expand to saved-card / saved-GCash management when Setnayan Pay automation lands. Schema is forward-compatible: <code>customer_payment_methods (method_id, user_id, method_type, brand?, last4?, masked_account?, created_at, deleted_at?)</code> table reserved but not populated in V1.</p>
+<p><strong>Payment history view.</strong> Read-only table:</p>
+<ul>
+<li>Date · Service · Amount (₱) · Reference code · Status (<code>pending_payment</code> / <code>paid</code> / <code>failed</code> / <code>refunded</code>) · Receipt download (PDF — generated on demand via Cloudflare Worker)</li>
+<li>Filterable by date range and status</li>
+<li>CSV export for accountants (consumed by 0026 BIR compliance)</li>
+</ul>
+<h3 id="36-tab-6--privacy--data-the-ra-10173-surface">3.6 Tab 6 — Privacy &amp; Data (the RA 10173 surface)</h3>
+<p>This is the legally critical tab. Five subsections, in order.</p>
+<h4 id="361-data-export--right-to-data-portability-ra-10173--18">3.6.1 Data export — Right to data portability (RA 10173 § 18)</h4>
+<p><strong>Button:</strong> "Download all my data"</p>
+<p>Clicking initiates an asynchronous background job. The button immediately becomes disabled with the new state "Export in progress — we'll email you when it's ready" and a status badge shows next to it. The user can leave the page; the job continues server-side.</p>
+<p><strong>The job (Cloudflare Worker triggered via Supabase Edge Function):</strong></p>
+<ol>
+<li>Insert a row into <code>data_export_requests</code> with <code>status='pending'</code>.</li>
+<li>Flip to <code>status='generating'</code>.</li>
+<li>Compile the user's data into a temporary working directory:
+<ul>
+<li><code>profile.json</code> — full <code>users</code> row (PII included since this is the user's own data) + <code>event_members</code> rows</li>
+<li><code>events.json</code> — for customers: every <code>events</code> row the user is on as couple/guest, plus seating chart, guest list, mood board palettes</li>
+<li><code>services.json</code> — for vendors: every <code>vendor_services</code> row, every <code>service_bookings</code> row (with counterparty name + email redacted to first-letter + domain), every milestone</li>
+<li><code>chat_messages.json</code> — every message sent or received. Messages where the counterparty has not consented to data export get the counterparty's name redacted; the user's own messages always render in full.</li>
+<li><code>photos/</code> — every photo the user contributed via Papic or guest-camera (original quality if hot-tier; compressed if past the 90-day window), plus <code>photos_manifest.json</code> mapping filenames to metadata (captured_at, geo if not stripped, tags)</li>
+<li><code>payment_history.json</code> — for customers: every <code>service_orders</code> row + receipt PDFs in a <code>receipts/</code> subfolder</li>
+<li><code>face_vectors.json</code> — every <code>face_enrollments</code> row owned by the user (vector blob base64-encoded), one entry per event</li>
+<li><code>README.txt</code> — explains the ZIP structure, lists what's included, names the file formats, points at <a href="mailto:dpo@setnayan.com">dpo@setnayan.com</a> for questions</li>
+</ul></li>
+<li>ZIP the directory, upload to R2 bucket <code>setnayan-exports</code> under key <code>exports/{user_id}/{request_id}.zip</code>. Bucket access is signed-URL-only; the URL TTL is 30 days from <code>ready_at</code>.</li>
+<li>Flip to <code>status='ready'</code>, set <code>r2_export_key</code>, <code>ready_at</code>, <code>expires_at = ready_at + 30 days</code>.</li>
+<li>Send the user an email with subject "Your Setnayan data is ready to download" containing the signed URL and the expiry date.</li>
+</ol>
+<p><strong>SLA:</strong> the job must complete within 7 days. In practice, most exports finish within minutes — only large photo galleries push toward the upper bound.</p>
+<p><strong>On download:</strong> writes <code>downloaded_at</code> and flips status to <code>'downloaded'</code>. The signed URL remains valid until <code>expires_at</code> so the user can re-download within the 30-day window.</p>
+<p><strong>On expiry:</strong> a scheduled job at 00:00 PHT daily flips any <code>status='ready'</code> rows whose <code>expires_at &lt; NOW()</code> to <code>'expired'</code> and deletes the R2 object. To download again, the user clicks the button to enqueue a fresh job.</p>
+<p><strong>Rate limit:</strong> one in-flight export per user. Multiple requests within 7 days while a previous export is still valid show: "Your last export is still available — re-download or wait until it expires."</p>
+<h4 id="362-account-deletion--right-to-erasure-ra-10173--16e">3.6.2 Account deletion — Right to erasure (RA 10173 § 16(e))</h4>
+<p>Two-tier delete: soft (reversible 30 days) and hard (irreversible).</p>
+<p><strong>Soft delete (default path, immediate UX, reversible):</strong></p>
+<ol>
+<li>User clicks "Delete my account."</li>
+<li>Modal opens with the full consequences laid out (see "Consequences modal" below).</li>
+<li>User must type their email address into a confirmation field to enable the "Confirm deletion" button.</li>
+<li>On confirm:
+<ul>
+<li><code>users.deleted_at = NOW()</code></li>
+<li><code>users.deletion_initiated_by = users.user_id</code> (self-initiated)</li>
+<li>All active sessions invalidated (next API call returns 401)</li>
+<li>Confirmation email sent: "Your Setnayan account is scheduled for deletion. Sign in within 30 days to restore it."</li>
+<li>User is signed out and redirected to the marketing site</li>
+</ul></li>
+</ol>
+<p><strong>Consequences modal copy (locked):</strong></p>
+<blockquote>
+<p><strong>Deleting your account will:</strong></p>
+<ul>
+<li>Hide your profile from vendors and other customers immediately.</li>
+<li>Cancel your access to all events and bookings you're a part of.</li>
+<li><strong>Keep your data for 30 days</strong> — sign in again within 30 days to restore your account fully. After 30 days, your data is permanently deleted.</li>
+</ul>
+<p><strong>Some things stay</strong> — for legal, accounting, and counterparty obligations:</p>
+<ul>
+<li>Active events and bookings remain visible to the other party (e.g., your vendor still sees the booking they're contracted on).</li>
+<li>Audit logs of actions you've taken stay for 5 years, anonymized.</li>
+<li>Photos you contributed to other people's galleries stay in those galleries (the gallery is theirs, not yours).</li>
+</ul>
+<p><strong>Type your email address to confirm:</strong> <code>[__________________]</code></p>
+</blockquote>
+<p><strong>Hard delete (irreversible, auto-triggered after 30 days OR via "Delete immediately" path):</strong></p>
+<p>A scheduled job at 02:00 PHT daily processes all <code>users</code> rows where <code>deleted_at &lt; NOW() - INTERVAL '30 days'</code> AND <code>hard_deleted_at IS NULL</code>:</p>
+<ol>
+<li>Null out / hash PII fields on <code>users</code>:
+<ul>
+<li><code>display_name = '[deleted user]'</code></li>
+<li><code>email = hash_sha256(user_id || '@deleted.setnayan.com')</code></li>
+<li><code>phone = NULL</code></li>
+<li><code>profile_photo_r2_key = NULL</code> (R2 object deleted by separate Worker)</li>
+<li><code>business_name</code>, <code>logo_r2_key</code>, etc. nulled for vendor rows</li>
+</ul></li>
+<li>Delete face vectors for any events older than the legal retention window (events ≥ 5 years old → vectors purged immediately; events within 5 years → retained until the event's retention boundary).</li>
+<li>Anonymize cross-table references:
+<ul>
+<li><code>chat_messages.sender_id</code> resolves to <code>[deleted user]</code> on the read API; the FK stays intact for audit</li>
+<li><code>photos.uploader_user_id</code> resolves to <code>[deleted user]</code> on the read API; FK intact</li>
+<li>Audit-log <code>actor_user_id</code> resolves to <code>deleted_user_X_YYYY-MM-DD</code> anonymized handle on every read</li>
+</ul></li>
+<li>Set <code>users.hard_deleted_at = NOW()</code>. The row is <strong>not</strong> deleted from the database — it's anonymized. Hard-deleting the row would orphan every FK and break the 5-year audit-retention obligation under Privacy Policy § 5.</li>
+</ol>
+<p><strong>"Delete immediately" path:</strong> advanced expander inside the modal. Same consequences, no 30-day grace, hard delete runs synchronously after the confirmation. Used by users who want their data gone now (e.g., after a privacy incident). Requires re-typing the email a second time as a friction guard.</p>
+<p><strong>Restoration during grace window:</strong> if a soft-deleted user signs in within 30 days, the login flow shows "Your account is scheduled for deletion. Restore it now?" → confirm → <code>users.deleted_at = NULL</code>, <code>users.deletion_initiated_by = NULL</code>, restoration confirmation email sent.</p>
+<p><strong>Exceptions that BLOCK deletion entirely:</strong></p>
+<p>The Delete-account button is disabled (with a tooltip explaining why) when any of the following hold:</p>
+<ul>
+<li><strong>Active event within next 30 days (customer-side).</strong> Show: "You have an active wedding scheduled on [date]. Contact support to discuss deletion."</li>
+<li><strong>Active vendor bookings (vendor-side).</strong> Show: "You have [N] active bookings. Mark them completed or cancelled before deleting your account, or contact support."</li>
+<li><strong>Outstanding financial obligations.</strong> Show: "Outstanding balance of ₱[X]. Resolve unpaid orders before deleting your account."</li>
+<li><strong>Admin role.</strong> Admins cannot self-delete. Show: "Admin accounts must be deleted by another admin. Submit a deletion request via the admin console." This routes to a two-admin approval flow per Vendor Agreement § 9.1.</li>
+<li><strong>Sole <code>is_internal=TRUE</code> owner.</strong> If only one of the two § 10a internal accounts remains, that account cannot self-delete until a second internal account is added — protects the dogfooding invariant.</li>
+</ul>
+<h4 id="363-face-data-management--privacy-policy--61">3.6.3 Face data management — Privacy Policy § 6.1</h4>
+<p><strong>Per-event toggle:</strong> "Enable face detection on my photos for [Event Name]." Default ON (per the per-event-scoped face-detection rule in the master CLAUDE.md decision log). Toggling off:</p>
+<ul>
+<li>Sets <code>face_enrollments.revoked_at = NOW()</code> for the user's enrollments in that event</li>
+<li>Within the next 5-min refresh cycle, face vectors are purged from the in-memory matcher</li>
+<li>Future photos of the user are not auto-tagged; the user retains all QR-scan tagging paths</li>
+</ul>
+<p><strong>Per-event enrollment status badge:</strong></p>
+<ul>
+<li><strong>Enrolled</strong> — green dot with the enrollment source (RSVP / portal upload / kiosk)</li>
+<li><strong>Not enrolled</strong> — grey dot with "Add my face data" CTA linking to the guest portal upload (per 0002 § 5)</li>
+<li><strong>Opted out</strong> — red dot with "Re-enable" CTA</li>
+</ul>
+<p><strong>Global "Delete all my face data" button.</strong> Scope: every event, every enrollment source. Confirmation required. On confirm, every matching <code>face_enrollments</code> row is marked <code>revoked_at = NOW()</code> and the underlying vector blobs are purged at the next 5-min refresh.</p>
+<h4 id="364-marketing-consent--privacy-policy--62">3.6.4 Marketing consent — Privacy Policy § 6.2</h4>
+<p>Two toggles, both default OFF (explicit opt-in per RA 10173):</p>
+<ol>
+<li><strong>"Setnayan may feature my event in marketing samples"</strong> — writes <code>users.marketing_consent_event_features</code>. When ON, Setnayan may use the event's logo (vendor logos with separate consent), public photos (couple-tagged as public), and testimonial quotes (collected via separate consent form) in marketing materials.</li>
+<li><strong>"Setnayan may contact me about new features and product updates"</strong> — writes <code>users.marketing_consent_product_updates</code>. Drives the <code>marketing</code> notification category in tab 3 (when this flips OFF, the marketing toggles in tab 3 auto-disable and grey out).</li>
+</ol>
+<p>Withdrawal is immediate. Any in-flight email campaigns drop the user from the next batch within 24h.</p>
+<h4 id="365-dpo-contact">3.6.5 DPO contact</h4>
+<p>Static block at the bottom of the Privacy tab:</p>
+<blockquote>
+<p><strong>Data Privacy Officer</strong> All requests under the PH Data Privacy Act (RA 10173) — access, correction, blocking, erasure, data portability, complaint, or any other right — are handled by Setnayan's DPO within 15 business days per § 21 of our Privacy Policy.</p>
+<p><strong><a href="mailto:dpo@setnayan.com">dpo@setnayan.com</a></strong></p>
+<p>[Read the full Privacy &amp; Security Policy →]</p>
+</blockquote>
+<p>The "Read the full Privacy &amp; Security Policy" link routes to <code>setnayan.com/privacy</code> which renders the policy from <code>01_Contracts/Setnayan_Privacy_and_Security_Policy.md</code> via the same MDX pipeline as the marketing site.</p>
+<hr />
+<h2 id="4-data-model">4. Data model</h2>
+<h3 id="41-new-tables">4.1 New tables</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="co">-- Asynchronous data-export job tracking (RA 10173 § 18)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> data_export_requests (</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>  request_id      UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>  user_id         UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>  requested_at    TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>  status          TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>                  <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;pending&#39;</span>,<span class="st">&#39;generating&#39;</span>,<span class="st">&#39;ready&#39;</span>,<span class="st">&#39;expired&#39;</span>,<span class="st">&#39;downloaded&#39;</span>,<span class="st">&#39;failed&#39;</span>)),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a>  r2_export_key   TEXT,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>  ready_at        TIMESTAMPTZ,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a>  downloaded_at   TIMESTAMPTZ,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a>  expires_at      TIMESTAMPTZ,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a>  failure_reason  TEXT</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a>);</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_data_export_user_status <span class="kw">ON</span> data_export_requests (user_id, status);</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_data_export_expires <span class="kw">ON</span> data_export_requests (expires_at) <span class="kw">WHERE</span> status <span class="op">=</span> <span class="st">&#39;ready&#39;</span>;</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a><span class="co">-- Per-user per-category notification preferences</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> notification_preferences (</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a>  user_id           UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true"></a>  <span class="kw">category</span>          TEXT <span class="kw">NOT</span> <span class="kw">NULL</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true"></a>                    <span class="kw">CHECK</span> (<span class="kw">category</span> <span class="kw">IN</span> (<span class="st">&#39;payments&#39;</span>,<span class="st">&#39;vendors&#39;</span>,<span class="st">&#39;events&#39;</span>,<span class="st">&#39;account&#39;</span>,<span class="st">&#39;marketing&#39;</span>,<span class="st">&#39;internal_accounts&#39;</span>)),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true"></a>  in_app_enabled    <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">TRUE</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true"></a>  email_enabled     <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">TRUE</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true"></a>  quiet_hours_start <span class="dt">TIME</span>,</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true"></a>  quiet_hours_end   <span class="dt">TIME</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true"></a>  updated_at        TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true"></a>  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (user_id, <span class="kw">category</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true"></a>);</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true"></a><span class="co">-- Forward-reserved (V1.5): saved payment methods for Setnayan Pay automation</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> customer_payment_methods (</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true"></a>  method_id       UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true"></a>  user_id         UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true"></a>  method_type     TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (method_type <span class="kw">IN</span> (<span class="st">&#39;card&#39;</span>,<span class="st">&#39;gcash&#39;</span>,<span class="st">&#39;maya&#39;</span>,<span class="st">&#39;bdo_account&#39;</span>)),</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true"></a>  brand           TEXT,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true"></a>  last4           TEXT,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true"></a>  masked_account  TEXT,</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true"></a>  is_default      <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true"></a>  created_at      TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true"></a>  deleted_at      TIMESTAMPTZ</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true"></a>);</span></code></pre></div>
+<h3 id="42-columns-added-to-users">4.2 Columns added to <code>users</code></h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="co">-- Soft + hard delete tracking (RA 10173 § 16(e))</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> deleted_at             TIMESTAMPTZ;</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> hard_deleted_at        TIMESTAMPTZ;</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> deletion_reason        TEXT;</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> deletion_initiated_by  UUID <span class="kw">REFERENCES</span> users(user_id);</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a><span class="co">-- Appearance preferences</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> theme_preference  TEXT <span class="kw">DEFAULT</span> <span class="st">&#39;setnayan_default&#39;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a>  <span class="kw">CHECK</span> (theme_preference <span class="kw">IN</span> (<span class="st">&#39;setnayan_default&#39;</span>,<span class="st">&#39;victorian&#39;</span>,<span class="st">&#39;classy&#39;</span>,<span class="st">&#39;ios&#39;</span>));</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> locale_preference TEXT <span class="kw">DEFAULT</span> <span class="st">&#39;en&#39;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true"></a>  <span class="kw">CHECK</span> (locale_preference <span class="kw">IN</span> (<span class="st">&#39;en&#39;</span>,<span class="st">&#39;tl&#39;</span>,<span class="st">&#39;ceb&#39;</span>));</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> density_preference TEXT <span class="kw">DEFAULT</span> <span class="st">&#39;comfortable&#39;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true"></a>  <span class="kw">CHECK</span> (density_preference <span class="kw">IN</span> (<span class="st">&#39;compact&#39;</span>,<span class="st">&#39;comfortable&#39;</span>));</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true"></a><span class="co">-- Marketing consent (Privacy Policy § 6.2)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> marketing_consent_event_features  <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>;</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> marketing_consent_product_updates <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>;</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true"></a><span class="co">-- Index supporting the daily hard-delete sweeper</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_users_pending_hard_delete</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true"></a>  <span class="kw">ON</span> users (deleted_at)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true"></a>  <span class="kw">WHERE</span> deleted_at <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AND</span> hard_deleted_at <span class="kw">IS</span> <span class="kw">NULL</span>;</span></code></pre></div>
+<h3 id="43-rls-posture">4.3 RLS posture</h3>
+<p>Every table above has Row-Level Security policies:</p>
+<ul>
+<li><code>data_export_requests</code>: user can read/write their own rows only; admin can read any row for support purposes; nobody can delete rows (immutable for audit)</li>
+<li><code>notification_preferences</code>: user can read/write their own rows only; admin read-only</li>
+<li><code>customer_payment_methods</code>: user only; admin no access (PCI-scope isolation)</li>
+<li><code>users</code> new columns: <code>theme_preference</code>, <code>locale_preference</code>, <code>density_preference</code>, <code>marketing_consent_*</code> are self-writable; <code>deleted_at</code>, <code>hard_deleted_at</code>, <code>deletion_reason</code>, <code>deletion_initiated_by</code> are writable only by the user themselves (for self-soft-delete) or by an admin (for admin-processed deletions) — DB-enforced via policy</li>
+</ul>
+<hr />
+<h2 id="5-background-jobs">5. Background jobs</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Job</th>
+<th>Schedule</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>data_export_generator</code></td>
+<td>event-driven (on insert into <code>data_export_requests</code>)</td>
+<td>Compiles the user's ZIP and uploads to R2</td>
+</tr>
+<tr class="even">
+<td><code>data_export_expiry_sweeper</code></td>
+<td>daily 00:00 PHT</td>
+<td>Flips <code>ready</code> → <code>expired</code> for rows past <code>expires_at</code>; deletes the R2 object</td>
+</tr>
+<tr class="odd">
+<td><code>hard_delete_sweeper</code></td>
+<td>daily 02:00 PHT</td>
+<td>Processes <code>users.deleted_at &lt; NOW() - 30d</code> rows · anonymizes PII · purges face vectors · sets <code>hard_deleted_at</code></td>
+</tr>
+<tr class="even">
+<td><code>face_vector_revocation_refresh</code></td>
+<td>every 5 minutes</td>
+<td>Re-syncs the in-memory matcher with <code>face_enrollments.revoked_at</code> changes (already exists per CLAUDE.md face-detection decision; this iteration consumes it)</td>
+</tr>
+<tr class="odd">
+<td><code>marketing_consent_propagator</code></td>
+<td>event-driven (on update of <code>marketing_consent_*</code>)</td>
+<td>Removes user from in-flight campaigns within 24h</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-privacy-posture-summary">6. Privacy posture summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Right (RA 10173)</th>
+<th>Where exercised</th>
+<th>SLA</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>§ 16(a) Right to be informed</td>
+<td>Privacy Policy + § 6.5 DPO block</td>
+<td>Policy is always current</td>
+</tr>
+<tr class="even">
+<td>§ 16(b) Right to access</td>
+<td>§ 6.1 data export</td>
+<td>7 days</td>
+</tr>
+<tr class="odd">
+<td>§ 16(c) Right to correction</td>
+<td>Tab 1 Profile (most fields) + DPO email for the rest</td>
+<td>Immediate (self-serve) or 15 business days (DPO)</td>
+</tr>
+<tr class="even">
+<td>§ 16(d) Right to object</td>
+<td>§ 6.3 (face data) + § 6.4 (marketing)</td>
+<td>Immediate</td>
+</tr>
+<tr class="odd">
+<td>§ 16(e) Right to erasure</td>
+<td>§ 6.2 account deletion</td>
+<td>Immediate (soft) · 30 days (hard)</td>
+</tr>
+<tr class="even">
+<td>§ 18 Right to data portability</td>
+<td>§ 6.1 data export</td>
+<td>7 days</td>
+</tr>
+<tr class="odd">
+<td>§ 21 DPO obligation</td>
+<td>§ 6.5 contact block</td>
+<td>15 business days per request</td>
+</tr>
+</tbody>
+</table>
+<p>Every right has a machine-actionable path through Settings. The DPO email remains the fallback for cases the UI doesn't cover (correction of fields not editable by the user, complaint escalation, cross-account data requests).</p>
+<hr />
+<h2 id="7-build-order">7. Build order</h2>
+<p>After the schema in § 4 lands (Sprint 0), the six tabs are mutually independent and can be implemented in parallel by different engineers:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Order</th>
+<th>Tab</th>
+<th>Why this order</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Sprint 0</strong></td>
+<td>Schema § 4 + RLS policies</td>
+<td>Everything blocks on these tables existing</td>
+</tr>
+<tr class="even">
+<td><strong>Sprint 1</strong></td>
+<td>Tab 6 § 6.2 (account deletion) + Tab 6 § 6.1 (data export)</td>
+<td>Legal compliance — must ship before V1 launch</td>
+</tr>
+<tr class="odd">
+<td>Sprint 1</td>
+<td>Tab 1 (Profile)</td>
+<td>Baseline self-serve UX; unblocks email verification flows</td>
+</tr>
+<tr class="even">
+<td>Sprint 1</td>
+<td>Tab 3 (Notifications)</td>
+<td>Consumed by 0019 chat for routing decisions</td>
+</tr>
+<tr class="odd">
+<td>Sprint 2</td>
+<td>Tab 2 (Appearance)</td>
+<td>Consumed by every surface; no downstream blockers</td>
+</tr>
+<tr class="even">
+<td>Sprint 2</td>
+<td>Tab 4 (URL &amp; Slug)</td>
+<td>Reuses the 0002 slug component</td>
+</tr>
+<tr class="odd">
+<td>Sprint 2</td>
+<td>Tab 5 (Payment Methods)</td>
+<td>V1 is mostly an informational tab + the payment-history view</td>
+</tr>
+<tr class="even">
+<td>Sprint 2</td>
+<td>Tab 6 § 6.3 / § 6.4 / § 6.5 (Face data + Marketing + DPO block)</td>
+<td>Consumed by face matcher + email campaign tool · DPO block is static copy</td>
+</tr>
+</tbody>
+</table>
+<p>The two RA 10173 features (export + deletion) are in Sprint 1 because launching without them exposes Setnayan to NPC complaints. Everything else is hygiene and can slip a sprint without legal exposure.</p>
+<hr />
+<h2 id="8-companions-and-next-steps">8. Companions and next steps</h2>
+<ul>
+<li><strong>0021 (couple dashboard)</strong> — adds the Settings cog to top chrome; routes to this iteration's surface</li>
+<li><strong>0022 (vendor dashboard)</strong> — adds the Settings cog to top chrome; vendor-side tab variants enabled</li>
+<li><strong>0023 (admin console)</strong> — admin's own profile settings hosted here (admin's role-grant management lives separately in 0023)</li>
+<li><strong>0002 (slug check)</strong> — Tab 4 reuses the slug-availability component</li>
+<li><strong>0026 (BIR / tax compliance)</strong> — consumes the payment-history view from Tab 5 for receipt generation</li>
+<li><strong>0028 (email notifications)</strong> — consumes <code>notification_preferences</code> for routing email category opt-outs</li>
+<li><strong><code>01_Contracts/Setnayan_Privacy_and_Security_Policy.md</code></strong> — the policy this iteration's Privacy tab operationalizes</li>
+<li><strong><code>02_Specifications/Theme_System_Implementation_Spec.md</code></strong> — the four V1 themes Tab 2 picks from</li>
+<li><strong>Vendor Agreement § 10a / § 10b</strong> — internal-account markers consumed by Tab 1 (display badge) and Tab 6 (deletion exception)</li>
+</ul>
+<p>The iteration ships when all six tabs are reachable from the Settings cog on every dashboard, the schema in § 4 is live in Supabase, the two background sweepers in § 5 are scheduled, and the export + deletion flows have passed end-to-end privacy review.</p>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

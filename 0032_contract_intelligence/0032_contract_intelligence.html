@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0032 — Contract Intelligence + Builder — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0032</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0032_contract_intelligence.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0032_contract_intelligence.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0032_contract_intelligence.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0032--contract-intelligence--builder">Iteration 0032 — Contract Intelligence + Builder</h1>
+<p><strong>Iteration number:</strong> 0032 <strong>Topic:</strong> AI-powered contract analysis, Setnayan-template contract builder, and in-app e-signature flow for vendors. Detect what a vendor's existing contract covers, fill the gaps with lawyer-reviewed Setnayan clauses, generate a clean PDF, and bind both parties via legally valid PH e-signatures. <strong>Surface:</strong> Vendor dashboard (0022) primary; Customer dashboard (0021) for sign-side; Admin (0023) for audit; chat threads (0019) as the delivery channel. <strong>URL pattern:</strong> <code>setnayan.com/dashboard/vendor/contracts</code>, <code>setnayan.com/dashboard/vendor/contracts/[contract_id]</code>, <code>setnayan.com/dashboard/customer/contracts/[contract_id]</code>, <code>setnayan.com/dashboard/admin/contracts</code> <strong>Builds on:</strong> 0000 (auth + role-router), 0006 (vendor records), 0013 (Supabase + R2 + Cloudflare Workers + Claude API), 0019 (chat thread as the delivery channel), 0021 (customer dashboard sign surface), 0022 (vendor dashboard host + Pro Subscription), 0023 (admin Disputes Handler), 0025 (vendor profile / settings host), Vendor Agreement § 12.1 (the manual signing flow this iteration upgrades from). <strong>Provides to downstream iterations:</strong> Disputes (future) — Disputes Handler consumes the signed contract + signature audit trail as the canonical record of agreement. Vendor Performance Analytics (future) — contract-cycle-time + signature-completion-rate as vendor reliability signals. <strong>Status:</strong> Drafted 2026-05-12. <strong>Phase:</strong> V1 launch (paid upgrade SKU; free-tier vendors retain the manual signing flow from § 12.1).</p>
+<hr />
+<h2 id="1-why-this-iteration-exists">1. Why this iteration exists</h2>
+<p>V1's vendor-signing flow is manual: vendor emails Setnayan a signed PDF, Setnayan files it in the R2 <code>setnayan-vendor-contracts</code> bucket, and the vendor's own client contracts run entirely outside the platform — over Messenger, email, paper. That's documented in Vendor Agreement § 12.1 as the V1 default, with PandaDoc / DocuSign tagged as the V1.5 digital-signing plan.</p>
+<p>This iteration does <strong>not</strong> replace § 12.1 for the vendor's onboarding agreement with Setnayan. § 12.1 stays the way vendors sign onto Setnayan. <strong>This iteration is about the vendor's own contracts with their customers</strong> — the photographer's wedding-day agreement, the caterer's package contract, the venue's reception booking. Those are currently a mess of Google Docs, paper, and "I'll send you the contract by Friday" promises that disappear into Messenger.</p>
+<p>Setnayan can monetize a substantial vendor pain point — and pull more of the bookflow into the platform — by offering AI-powered contract assistance as a paid feature:</p>
+<ul>
+<li><strong>Detect</strong> what the vendor's existing contract already covers (14 standard elements)</li>
+<li><strong>Fill gaps</strong> with lawyer-reviewed Setnayan clauses the vendor can edit in place</li>
+<li><strong>Audit</strong> against PH legal minimums (5 hard requirements + 5 soft recommendations)</li>
+<li><strong>Generate</strong> a clean branded PDF</li>
+<li><strong>Bind</strong> both parties via in-app e-signature (per RA 8792 — PH E-Commerce Act of 2000)</li>
+<li><strong>Store</strong> the signed PDF with an audit-trail certificate page in R2 permanently</li>
+<li><strong>Surface</strong> the signed contract in chat (0019) and admin Disputes Handler view (0023)</li>
+</ul>
+<p>Operationally, this iteration is Setnayan moving from "marketplace + payment rails" → "marketplace + operational SaaS for vendors." Pro Subscription's value prop shifts from "marketing perks" to "operational tools the vendor would otherwise pay PandaDoc / SignNow / DocuSign for."</p>
+<hr />
+<h2 id="2-user-flow-vendor-side">2. User flow (vendor side)</h2>
+<p>The flow is designed so a vendor who has never used a contract tool before can produce a binding contract in under 10 minutes for their first booking, and under 2 minutes for subsequent bookings (because their template + signature are cached).</p>
+<p><strong>Entry point.</strong> In the vendor dashboard (0022), a new <strong>Contracts</strong> tab appears in the primary nav. Initial state: empty list + a single primary CTA, <code>+ Create contract</code>.</p>
+<p><strong>Step 1 — Pick the booking.</strong> Vendor clicks <code>+ Create contract</code> → modal asks "Which booking is this for?" → vendor picks from their active Clients surface (0022 Clients tab). The booking row carries the customer's identity, the event date, and any line-item totals already negotiated in chat (0019). Vendor can also choose <code>Not a Setnayan booking</code> to create a contract for an off-platform client — but only Standard Verified+ tiers can do this (a guardrail against the platform becoming a contract-mill).</p>
+<p><strong>Step 2 — Pick the entry path.</strong> Three buttons:</p>
+<ul>
+<li><strong>(A) Upload existing contract</strong> — vendor uploads a PDF or .docx of the contract they normally send. Runs the AI analysis path.</li>
+<li><strong>(B) Start from template</strong> — blank canvas. Vendor picks from the Setnayan template clause library (Section 5) to assemble a contract from scratch.</li>
+<li><strong>(C) Edit a prior contract</strong> — duplicates one of the vendor's previously generated contracts as a starting point. The most common path after the first contract is generated.</li>
+</ul>
+<p><strong>Step 3 — AI analysis (path A only).</strong> Vendor uploads PDF/docx. Worker extracts text, sends to Claude API. ~10–20 second progress card animates with rotating status messages ("Reading the contract…", "Checking what's covered…", "Comparing to PH legal minimums…"). On completion, the <strong>Detection Panel</strong> opens.</p>
+<p><strong>Step 4 — Detection panel review.</strong> Lists the 14 contract elements from Section 3 with status icons:</p>
+<ul>
+<li><strong>Green check</strong> — element detected and lawyer-reviewed-equivalent. No action required.</li>
+<li><strong>Amber warning</strong> — element detected but weak (e.g., cancellation policy present but vague, "we'll refund what's fair").</li>
+<li><strong>Red X</strong> — element missing entirely.</li>
+</ul>
+<p>For each row the vendor can:</p>
+<ul>
+<li><strong>Keep</strong> what they wrote — the panel shows the extracted snippet as evidence.</li>
+<li><strong>Replace with Setnayan's recommended version</strong> — opens the clause-picker for that element.</li>
+<li><strong>Remove</strong> — marks the element as intentionally omitted (the compliance gate will warn if it's a hard requirement, see Section 6).</li>
+<li><strong>Edit in place</strong> — opens an inline editor with markdown-style formatting.</li>
+</ul>
+<p>The detection panel is the heart of the iteration. It's where the AI does work the vendor would otherwise do by reading their own contract carefully — except the vendor never does that, which is why their contracts are full of gaps.</p>
+<p><strong>Step 5 — Compliance checklist.</strong> A persistent sidebar runs the compliance check from Section 6 against the current contract state. Green / amber / red summary updates live as the vendor edits. The vendor cannot proceed to Send while any <strong>red</strong> (hard requirement missing) item is unresolved. Amber items show as warnings but are bypassable with an explicit "Send anyway" acknowledgment.</p>
+<p><strong>Step 6 — Clause-fill from Setnayan library.</strong> For each gap the vendor wants to fill from the Setnayan library, the clause-picker shows:</p>
+<ul>
+<li><strong>Plain-English explanation</strong> at the top — "This clause says you're not liable for damages above the contract amount."</li>
+<li><strong>The actual legal text</strong> below — editable inline.</li>
+<li><strong>Service-category match</strong> — clauses tagged "photography" surface first if the vendor is a photographer; the vendor can still pick from any category.</li>
+<li><strong>Lawyer-reviewed badge</strong> with the date the clause was last reviewed by external counsel.</li>
+</ul>
+<p><strong>Step 7 — Preview PDF.</strong> Vendor clicks <strong>Preview</strong>. A modal renders the generated PDF in-browser with both signature blocks visible (vendor side filled with their business name, customer side blank with the customer's legal name placeholder). The vendor can scroll the full PDF — header is the vendor's logo (mandatory per § 2.1b), footer is <code>Generated by Setnayan · setnayan.com/c/[contract_id]</code>.</p>
+<p><strong>Step 8 — Send to customer.</strong> Vendor clicks <strong>Send for signature</strong> → the system creates a chat-card in the existing 0019 thread between vendor and customer, with a thumbnail of page 1 + a <code>Sign this contract</code> CTA. The contract enters <code>status='sent'</code>. A 30-day expiry starts from this moment.</p>
+<p>If the vendor is on Vendor Pro Weekly, this step is free. Otherwise the vendor is charged ₱199 (the <code>contract_builder_single</code> SKU) before the contract sends — payment goes through the same apply-then-pay flow as any other in-app SKU (decision 2026-05-11), with the wrinkle that the contract sits in <code>status='draft'</code> until payment confirms. Pro Subscription vendors skip this entirely.</p>
+<p><strong>Step 9 — Customer signs.</strong> Customer opens the chat-card → preview modal → reviews → signs via signature pad (touch device), typed-name-in-cursive-font, or drawn-with-mouse (Section 7). Signature captures user_id, IP, user-agent, timestamp. Contract enters <code>status='customer_signed'</code>. Vendor receives an in-app notification.</p>
+<p><strong>Step 10 — Vendor signs.</strong> Vendor receives notification → opens contract → signs via the same options → contract enters <code>status='both_signed'</code>. A signed PDF is generated server-side embedding both signature images + a signature certificate page (Section 7). The PDF is stored permanently in R2 at <code>vendors/{vendor_id}/contracts/{contract_id}/signed.pdf</code>. A copy of the contract chat-card in the thread updates to show both signatures applied with the timestamps.</p>
+<p><strong>Step 11 — Audit trail.</strong> Both the vendor and the customer can re-download the signed PDF from their dashboards forever. The admin Disputes Handler can view the full audit trail (every signature event + their metadata) for disputes mediation per Section 9.</p>
+<hr />
+<h2 id="3-the-14-detected-contract-elements">3. The 14 detected contract elements</h2>
+<p>The Claude analysis prompt evaluates every uploaded contract for these 14 elements. They're not arbitrary — they're the categories that the external counsel (Section 11) identified as the standard PH wedding-vendor contract structure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Element</th>
+<th>Why it matters</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Parties identified — vendor legal name + customer legal name</td>
+<td>Required for the contract to be binding under PH Civil Code Art. 1318</td>
+<td>Hard</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Service description</td>
+<td>Defines what the customer is purchasing; ambiguity here is the #1 disputes source</td>
+<td>Hard</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Pricing model + total amount</td>
+<td>Required for binding; ambiguity is the #2 disputes source</td>
+<td>Hard</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Payment schedule (milestones / deposit / balance / due dates)</td>
+<td>Disputes-blocker if absent; PH vendors typically use 3-stage but variations are common (see decision 2026-05-09 on flexible milestones)</td>
+<td>Soft</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Cancellation policy (windows + refund rules)</td>
+<td>Required by PH consumer law minimum; sets expectations both ways</td>
+<td>Hard</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Force majeure clause</td>
+<td>Wedding-specific high-risk (typhoons, Taal eruption, COVID-class events); without it the vendor bears all risk for events outside their control</td>
+<td>Soft</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Liability cap / disclaimer</td>
+<td>Vendor protection; caps damages at the contract amount or specified ceiling</td>
+<td>Soft</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Deliverables timeline (turnaround days, revision rounds, file format)</td>
+<td>Disputes-blocker; "edited photos delivered 8 weeks after wedding" is the standard, but many vendors don't write it down</td>
+<td>Soft</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>Crew size + roles</td>
+<td>Operational clarity; matches the crew-meal headcount in 0006</td>
+<td>Optional</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>Travel terms + fee (outside Metro Manila / Cebu Metro radius)</td>
+<td>Common dispute source; often the vendor agrees verbally then bills travel after</td>
+<td>Optional</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>Ownership / IP (who owns the photos / raw footage / RAW files / out-takes)</td>
+<td>Photography/video specific; PH default per IP Code is photographer-owns, but customers regularly assume they own — write it down</td>
+<td>Soft (if photo/video)</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>Warranty / re-shoot guarantee</td>
+<td>Builds trust; some vendors offer it, many don't</td>
+<td>Optional</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>Governing law + jurisdiction</td>
+<td>Defaults to PH if absent — Setnayan's recommended template specifies Philippine law + venue at the city of the wedding</td>
+<td>Soft</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>Signature blocks (both parties + dates)</td>
+<td>Required for binding</td>
+<td>Hard</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Hard</strong> = compliance gate red if missing. <strong>Soft</strong> = compliance gate amber if missing (Section 6). <strong>Optional</strong> = surfaces in the detection panel but doesn't gate.</p>
+<p>The detection panel groups these by severity (Hard at the top, then Soft, then Optional) so the vendor's eye lands on the blockers first.</p>
+<hr />
+<h2 id="4-ai-analysis-architecture">4. AI analysis architecture</h2>
+<p><strong>Provider.</strong> Anthropic Claude API (<code>claude-sonnet-4-6</code> model). Setnayan already uses Claude for AI Video Highlight + AI Edited Highlight (per SKU catalog in CLAUDE.md), so there is no new vendor relationship to establish and the billing is consolidated.</p>
+<p><strong>Pipeline.</strong></p>
+<ol>
+<li>Vendor uploads PDF/docx to a Cloudflare Worker endpoint <code>POST /api/contracts/analyze</code>. Max 10 MB per file. Larger files reject with "Please upload a smaller file or paste the text directly."</li>
+<li>Worker stores the source file in R2 at <code>vendors/{vendor_id}/contracts/{contract_id}/source.pdf</code> (or <code>.docx</code>).</li>
+<li>Worker invokes a Python sub-worker running <code>pdfplumber</code> (for PDFs) or <code>python-docx</code> (for .docx) to extract text. Output is a JSON of <code>{ page_number, text }</code> pairs.</li>
+<li>Worker calls Claude API with the extracted text wrapped in the structured-output prompt (template below). Tokens budget ~6K input + ~2K output (typical 4–6 page vendor contract).</li>
+<li>Claude returns JSON matching the schema in step 6. Worker validates the schema; on validation error, retries once with a corrective prompt; on second failure, surfaces "We couldn't analyze this contract automatically. Please contact support."</li>
+<li>Worker writes the analysis to <code>contract_drafts.detected_elements</code> JSONB column (Section 8) and returns it to the vendor's browser. Total round-trip target: under 20 seconds at p95.</li>
+</ol>
+<p><strong>Claude prompt template (abridged).</strong> The full prompt is versioned in <code>/contracts/prompts/analyze_v{n}.md</code>. The structural shape:</p>
+<pre><code>SYSTEM
+You are a Philippine contract law specialist analyzing a vendor&#39;s contract for completeness.
+You return JSON only — no prose, no markdown. Schema below.
+
+USER
+Here is the extracted text of a vendor&#39;s contract for a wedding (or event) booking:
+
+&lt;contract&gt;
+{extracted_text}
+&lt;/contract&gt;
+
+Analyze it for these 14 elements: { ... list from Section 3 ... }.
+
+For each element return:
+{
+  &quot;element&quot;: &quot;&lt;element_name&gt;&quot;,
+  &quot;status&quot;: &quot;present&quot; | &quot;weak&quot; | &quot;absent&quot;,
+  &quot;evidence&quot;: &quot;&lt;verbatim snippet from contract that supports the status, max 300 chars; empty if absent&gt;&quot;,
+  &quot;page_number&quot;: &lt;int | null&gt;,
+  &quot;rationale&quot;: &quot;&lt;one-sentence explanation of why this status, max 200 chars&gt;&quot;,
+  &quot;recommendation&quot;: &quot;keep&quot; | &quot;strengthen&quot; | &quot;add&quot;
+}
+
+Return a top-level object:
+{
+  &quot;analyzed_at&quot;: &quot;&lt;ISO timestamp&gt;&quot;,
+  &quot;model_version&quot;: &quot;claude-sonnet-4-6&quot;,
+  &quot;elements&quot;: [&lt;14 element objects in the order listed&gt;],
+  &quot;overall_compliance_score&quot;: &lt;0–100 int computed as: (#hard_present × 15) + (#soft_present × 5) + (#optional_present × 2), capped at 100&gt;,
+  &quot;general_observations&quot;: &quot;&lt;2–3 sentences of overall feedback, max 600 chars&gt;&quot;
+}
+</code></pre>
+<p><strong>Cost.</strong> At Claude Sonnet 4.6 input pricing (<del>$3/M tokens) and output (</del>$15/M tokens), a typical analysis runs ~$0.03–$0.05 ≈ ₱1.50–₱3.00 per call. We round up to ~₱5 per analysis for the cost model to absorb retries and longer contracts.</p>
+<p><strong>Latency.</strong> PDF text extraction ~1–3 seconds (pdfplumber on a Cloudflare Worker is fast for typed PDFs; scanned PDFs trigger an OCR fallback that takes ~10s and bumps the total to ~30s — we surface a longer progress message for OCR'd files).</p>
+<p><strong>Retry / failure handling.</strong> Vendor sees one of three outcomes after upload:</p>
+<ul>
+<li><strong>Success</strong> — detection panel opens with results.</li>
+<li><strong>OCR fallback</strong> — "We're reading a scanned contract — this takes a bit longer." Continues to detection panel.</li>
+<li><strong>Failure</strong> — "We couldn't analyze this automatically. You can still build a contract from scratch using Setnayan's templates [B button], or contact support." The vendor isn't charged for the analysis attempt (the ₱199 SKU charge only fires on Send, not on analysis).</li>
+</ul>
+<hr />
+<h2 id="5-setnayan-template-clause-library">5. Setnayan template clause library</h2>
+<p>A curated library of lawyer-reviewed PH-compliant clauses across the 14 elements (Section 3). V1 ships ~50 master clauses. Each clause has:</p>
+<ul>
+<li><strong><code>title</code></strong> — short label shown in the picker ("Standard cancellation — 60-day refund window")</li>
+<li><strong><code>element_type</code></strong> — which of the 14 elements this clause fills (<code>cancellation</code>, <code>force_majeure</code>, <code>liability</code>, <code>ip_ownership</code>, etc.)</li>
+<li><strong><code>plain_english</code></strong> — 1–2 sentence vendor-friendly explanation. The vendor sees this BEFORE the legal text.</li>
+<li><strong><code>legal_text_en</code></strong> — the actual contract language in English. Designed to be paste-able verbatim, with <code>{vendor_name}</code> / <code>{customer_name}</code> / <code>{event_date}</code> / <code>{total_amount}</code> placeholders that the system fills.</li>
+<li><strong><code>legal_text_tl</code></strong> — Tagalog translation (nullable in V1; flagged for future locale work matching the 0015 EN/TL/CEB pattern). Most clauses ship English-only at V1 launch.</li>
+<li><strong><code>applicable_categories</code></strong> — service categories where this clause is relevant (<code>photography</code>, <code>videography</code>, <code>catering</code>, <code>venue</code>, <code>flowers</code>, <code>coordination</code>, <code>mua</code>, <code>gown</code>, <code>entertainment</code>, <code>*</code> for universal). Drives the surfacing-order in the clause picker.</li>
+<li><strong><code>clause_version</code></strong> — integer, increments when external counsel updates the legal text. Existing contracts keep their version snapshot; new contracts get the latest. We never silently mutate a signed contract.</li>
+<li><strong><code>is_active</code></strong> — boolean. Setnayan can retire a clause without deleting it (existing contracts still reference the historical row).</li>
+<li><strong><code>reviewed_by_legal_at</code></strong> — timestamp of the most recent external counsel review.</li>
+</ul>
+<p><strong>Distribution across the 14 elements (V1 target, ~50 total):</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Element</th>
+<th>Clause count V1</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Parties identification</td>
+<td>2</td>
+<td>Standard (with full legal name) + with-rep (business represented by an officer)</td>
+</tr>
+<tr class="even">
+<td>Service description</td>
+<td>6</td>
+<td>Photography full-day, videography full-day, catering pax-based, venue reception, flowers + setup, MUA per-head</td>
+</tr>
+<tr class="odd">
+<td>Pricing model</td>
+<td>4</td>
+<td>Fixed-fee, pax-based, per-hour, package-with-add-ons</td>
+</tr>
+<tr class="even">
+<td>Payment schedule</td>
+<td>4</td>
+<td>3-stage (50/30/20), 2-stage (50/50), 4-stage (25/25/25/25), single-payment</td>
+</tr>
+<tr class="odd">
+<td>Cancellation policy</td>
+<td>5</td>
+<td>60-day refund, 90-day refund, sliding-scale, non-refundable deposit, force-majeure-clause-pointer</td>
+</tr>
+<tr class="even">
+<td>Force majeure</td>
+<td>3</td>
+<td>Standard (acts of God + government action), wedding-specific (typhoons + venue closure + travel restrictions), broad (everything outside party control)</td>
+</tr>
+<tr class="odd">
+<td>Liability cap</td>
+<td>3</td>
+<td>Contract-amount cap, specified-amount cap, no-cap-with-disclaimer</td>
+</tr>
+<tr class="even">
+<td>Deliverables timeline</td>
+<td>6</td>
+<td>Photography 6-8 weeks, videography 8-12 weeks, SDE 24-48hrs, catering same-day, flowers setup-day-only, gown 3-week-fitting-cycle</td>
+</tr>
+<tr class="odd">
+<td>Crew size + roles</td>
+<td>4</td>
+<td>Photography (lead + 2nd shooter + assistant), videography (cinematographer + audio + drone), catering (chef + servers + bar), coordination (lead + 2 assistants)</td>
+</tr>
+<tr class="even">
+<td>Travel terms</td>
+<td>3</td>
+<td>Inside Metro Manila no-fee, outside-Metro distance-based, separate-day overnight</td>
+</tr>
+<tr class="odd">
+<td>IP ownership</td>
+<td>4</td>
+<td>Photographer-owns-RAW-customer-owns-edits, customer-owns-everything, shared-ownership, social-media-usage-license</td>
+</tr>
+<tr class="even">
+<td>Warranty / re-shoot</td>
+<td>2</td>
+<td>Standard re-shoot (vendor-fault only), goodwill (vendor + customer mutual cause)</td>
+</tr>
+<tr class="odd">
+<td>Governing law</td>
+<td>2</td>
+<td>Philippine law + city-of-wedding venue, Philippine law + NCR venue</td>
+</tr>
+<tr class="even">
+<td>Signature blocks</td>
+<td>2</td>
+<td>2-signer (vendor + customer), 3-signer (vendor + customer + witness)</td>
+</tr>
+</tbody>
+</table>
+<p>This distribution is the V1 target. The actual seeded clauses are reviewed by external counsel (Section 11) before launch and stored in <code>contract_clause_library</code> (Section 8). The legal team workstream is a separate effort — Setnayan provides the structure and the clause-prompts; the lawyer writes the binding English text.</p>
+<p><strong>Editing a clause in place.</strong> Vendors can edit any clause they insert. The system tracks this as a vendor-customized clause linked to the parent template clause (so we can see how many vendors edit a given clause — signal for the legal team to revise it). Vendor edits do NOT change the master library; they're per-contract overrides.</p>
+<p><strong>Plain-English-first surfacing.</strong> The clause-picker leads with the plain-English explanation. A vendor browsing the cancellation-policy clauses sees:</p>
+<blockquote>
+<p><strong>Standard cancellation — 60-day refund window</strong> If the customer cancels more than 60 days before the event, they get a full refund minus the deposit. Between 30–60 days, 50% refund. Within 30 days, no refund. <em>[Click to see full legal text →]</em></p>
+</blockquote>
+<p>This pattern shifts the vendor from "I'm not a lawyer, I don't know what this means" to "OK that's what I want, insert it."</p>
+<hr />
+<h2 id="6-compliance-checklist--the-bare-minimum-gate">6. Compliance checklist — the bare-minimum gate</h2>
+<p>The compliance check defines what "bare minimum PH-compliant contract" means for Setnayan's purposes. It's a deliberate floor, not a ceiling — vendors can add anything they want above this; the check just prevents shipping a contract that's missing core elements.</p>
+<p><strong>Hard requirements (compliance gate red if missing — vendor cannot Send):</strong></p>
+<ol>
+<li>Both parties identified by full legal name (element #1)</li>
+<li>Service description present (element #2)</li>
+<li>Total price specified (element #3)</li>
+<li>Cancellation policy present — any policy, the content doesn't have to match Setnayan's templates (element #5)</li>
+<li>Both signature blocks present (element #14)</li>
+</ol>
+<p><strong>Soft recommendations (compliance gate amber if missing — vendor can Send with an acknowledgment):</strong></p>
+<ol start="6">
+<li>Force majeure clause (element #6)</li>
+<li>Liability cap (element #7)</li>
+<li>Deliverables timeline (element #8)</li>
+<li>Governing law clause (element #13)</li>
+<li>Payment schedule (if total &gt; ₱30,000 — small bookings often pay in full upfront, so this is conditional) (element #4)</li>
+</ol>
+<p><strong>Compliance badges:</strong></p>
+<ul>
+<li><strong>✓ Compliant — Recommended</strong> — all 5 hard + 3+ soft present. Renders a green "Compliant — Recommended" badge on the contract PDF footer.</li>
+<li><strong>✓ Compliant — Minimum</strong> — all 5 hard + fewer than 3 soft. Green check but no "Recommended" label.</li>
+<li><strong>✗ Not Compliant</strong> — any hard requirement missing. Send button is disabled. Vendor must resolve before sending.</li>
+</ul>
+<p>The compliance badge appears on the generated PDF footer (small text, alongside the Setnayan-generated marker). This is intentional — customers reading the contract see at a glance whether the contract hits Setnayan's recommended bar. It nudges vendors toward the Recommended tier.</p>
+<p><strong>Compliance score</strong> (separate from the gate). A 0–100 numeric score stored in <code>contract_drafts.compliance_score</code> for analytics. Formula:</p>
+<pre><code>score = min(100, (#hard_present × 15) + (#soft_present × 5) + (#optional_present × 2))
+</code></pre>
+<p>A perfect contract (5 hard × 15 + 5 soft × 5 + 4 optional × 2) = 75 + 25 + 8 = 108, capped at 100. A bare-minimum compliant contract = 75. The dashboard surfaces this score so vendors can see trend (<code>your average contract score this quarter is 82, up from 71</code>).</p>
+<hr />
+<h2 id="7-e-signature-mechanics">7. E-signature mechanics</h2>
+<p>Per RA 8792 (Philippine E-Commerce Act of 2000), electronic signatures with a reliable audit trail are legally equivalent to wet-ink signatures for non-real-estate contracts. Wedding-vendor contracts fall squarely within this scope.</p>
+<p><strong>Signature capture methods (vendor picks at signing time):</strong></p>
+<ol>
+<li><strong>Signature pad</strong> — touch-device users draw their signature with their finger or stylus on a canvas element. The canvas is 600 × 200 pixels, rendered at 2x for retina. Stroke smoothing applied via Catmull-Rom spline.</li>
+<li><strong>Typed name</strong> — desktop users without a stylus can type their full legal name; the system renders it in a cursive web font (<code>Great Vibes</code> from Google Fonts) and displays "I, [Name], affirm this is my signature" above the rendered image.</li>
+<li><strong>Drawn-with-mouse</strong> — desktop users with a mouse can draw their signature on the same canvas as method (1). Strokes smoothed identically.</li>
+</ol>
+<p>All three methods produce a transparent-background PNG signature image, stored at <code>vendors/{vendor_id}/contracts/{contract_id}/signatures/{signature_id}.png</code> in R2.</p>
+<p><strong>Metadata captured per signature event</strong> (stored in <code>contract_signatures</code>):</p>
+<ul>
+<li><code>signer_user_id</code> — auth-verified Setnayan account</li>
+<li><code>signer_role</code> — <code>vendor</code> or <code>customer</code></li>
+<li><code>signature_method</code> — <code>signature_pad</code> | <code>typed</code> | <code>drawn</code></li>
+<li><code>signature_image_r2_key</code> — pointer to the PNG</li>
+<li><code>ip_address</code> — captured at the moment of signature</li>
+<li><code>user_agent</code> — full UA string (browser + OS + device class)</li>
+<li><code>geo_lat</code> / <code>geo_lon</code> — captured only with explicit consent at the signing modal (a checkbox: "Capture my location to strengthen the audit trail")</li>
+<li><code>signed_at</code> — server-side timestamp (UTC, rendered as PHT in displays)</li>
+</ul>
+<p><strong>Signature certificate page.</strong> When <code>both_signed</code> triggers, the system generates a final PDF that contains:</p>
+<ul>
+<li>The full contract (vendor's content + Setnayan template clauses, fully composed)</li>
+<li>Both signature images applied to the signature blocks</li>
+<li>A <strong>Signature Certificate</strong> page appended as the last page, containing:
+<ul>
+<li>Contract ID (UUID)</li>
+<li>Vendor full legal name + signed-at timestamp + IP + UA</li>
+<li>Customer full legal name + signed-at timestamp + IP + UA</li>
+<li>Signature method for each signer</li>
+<li>Setnayan platform identifier + RA 8792 reference</li>
+<li>QR code linking to <code>setnayan.com/c/[contract_id]/verify</code> (public verification page that confirms the contract was signed on Setnayan and matches the stored signed_pdf hash)</li>
+</ul></li>
+</ul>
+<p><strong>Verification page.</strong> <code>setnayan.com/c/[contract_id]/verify</code> is a public read-only page that shows:</p>
+<ul>
+<li>The contract ID + signed-at timestamps for both parties (no PII beyond what's on the certificate page)</li>
+<li>A <code>Verified by Setnayan</code> badge</li>
+<li>A SHA-256 hash of the signed PDF for tamper-detection</li>
+</ul>
+<p>This page is the equivalent of DocuSign's verification page. Either party (or anyone with the link) can confirm the contract is genuinely Setnayan-signed and hasn't been altered.</p>
+<p><strong>Storage and retention.</strong> Signed PDFs are stored permanently in R2 (no expiry, no compression — these are legal records). Source PDFs (the vendor's uploaded original, if any) are retained for 1 year then archived to R2 cold tier. Signature images are retained as long as the parent contract is retained.</p>
+<p><strong>Access control.</strong> Signed PDFs are accessible by:</p>
+<ul>
+<li>The vendor (any team member with vendor-account access)</li>
+<li>The customer (the specific user_id who signed)</li>
+<li>The admin Disputes Handler role (any contract, for mediation)</li>
+<li>The public verification page (read-only confirmation that the contract exists, no content access)</li>
+</ul>
+<p>R2 access enforced via signed URLs from the Setnayan backend, never via public bucket policy.</p>
+<p><strong>Legal validity disclaimer.</strong> Every generated contract footer reads:</p>
+<blockquote>
+<p>This contract was generated using Setnayan's template clause library and signed electronically via Setnayan in compliance with the Philippine E-Commerce Act of 2000 (Republic Act 8792). Setnayan is not a law firm and this contract may not address all your specific legal needs. For specialized advice consult a Philippine attorney.</p>
+</blockquote>
+<hr />
+<h2 id="8-schema">8. Schema</h2>
+<p>Four new tables. All UUIDs use <code>gen_random_uuid()</code> default. All timestamps are <code>TIMESTAMPTZ</code>. RLS policies follow the same pattern as 0019 chat threads — vendor + customer + admin Disputes Handler only.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="co">-- The main contract record. Created when the vendor starts a draft;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a><span class="co">-- mutated through the status lifecycle (draft → sent → customer_signed → both_signed).</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> contract_drafts (</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>  contract_id          UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a>  vendor_id            UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> vendors(vendor_id),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a>  customer_user_id     UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a>  booking_id           UUID,  <span class="co">-- nullable; contracts can be drafted before a booking is firm</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a>  thread_id            UUID <span class="kw">REFERENCES</span> chat_threads(thread_id),  <span class="co">-- the 0019 thread the contract was sent through</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a>  title                TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- vendor-facing label, e.g. &quot;Cruz-Reyes Wedding Photography Contract&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a>  source_pdf_r2_key    TEXT,  <span class="co">-- nullable; only present if vendor uploaded an existing contract (path A)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a>  entry_path           TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (entry_path <span class="kw">IN</span> (<span class="st">&#39;upload&#39;</span>,<span class="st">&#39;template&#39;</span>,<span class="st">&#39;duplicate&#39;</span>)),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a>  source_contract_id   UUID <span class="kw">REFERENCES</span> contract_drafts(contract_id),  <span class="co">-- if duplicated from another contract (path C)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true"></a>  status               TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;draft&#39;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true"></a>                       <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;draft&#39;</span>,<span class="st">&#39;sent&#39;</span>,<span class="st">&#39;customer_signed&#39;</span>,<span class="st">&#39;both_signed&#39;</span>,<span class="st">&#39;rejected&#39;</span>,<span class="st">&#39;expired&#39;</span>,<span class="st">&#39;cancelled&#39;</span>)),</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true"></a>  detected_elements    JSONB,  <span class="co">-- Claude API output cached; null if entry_path != &#39;upload&#39;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true"></a>  contract_body        JSONB <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;{}&#39;</span>:<span class="ch">:jsonb</span>,  <span class="co">-- the editable composed contract (sections + clauses + variable fills)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true"></a>  compliance_score     <span class="dt">INT</span>,  <span class="co">-- 0-100; computed at send time</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true"></a>  compliance_badge     TEXT <span class="kw">CHECK</span> (compliance_badge <span class="kw">IN</span> (<span class="st">&#39;not_compliant&#39;</span>,<span class="st">&#39;compliant_minimum&#39;</span>,<span class="st">&#39;compliant_recommended&#39;</span>)),</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true"></a>  generated_pdf_r2_key TEXT,  <span class="co">-- the unsigned-but-finalized PDF generated at send</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true"></a>  signed_pdf_r2_key    TEXT,  <span class="co">-- the both-signed final PDF; populated at both_signed</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true"></a>  signed_pdf_sha256    TEXT,  <span class="co">-- SHA-256 of the signed PDF for tamper-detection on the verify page</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true"></a>  rejection_reason     TEXT,  <span class="co">-- customer-supplied reason if status=&#39;rejected&#39;</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true"></a>  created_at           TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true"></a>  updated_at           TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true"></a>  sent_at              TIMESTAMPTZ,</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true"></a>  customer_signed_at   TIMESTAMPTZ,</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true"></a>  vendor_signed_at     TIMESTAMPTZ,</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true"></a>  expires_at           TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> (NOW() <span class="op">+</span> <span class="dt">INTERVAL</span> <span class="st">&#39;30 days&#39;</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true"></a>);</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> contract_drafts_vendor_status_idx <span class="kw">ON</span> contract_drafts (vendor_id, status, created_at <span class="kw">DESC</span>);</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> contract_drafts_customer_idx <span class="kw">ON</span> contract_drafts (customer_user_id, created_at <span class="kw">DESC</span>);</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> contract_drafts_expires_idx <span class="kw">ON</span> contract_drafts (expires_at) <span class="kw">WHERE</span> status <span class="op">=</span> <span class="st">&#39;sent&#39;</span>;</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true"></a><span class="co">-- One row per signature event. Two rows per fully-signed contract (vendor + customer).</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> contract_signatures (</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true"></a>  signature_id           UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true"></a>  contract_id            UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> contract_drafts(contract_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true"></a>  signer_user_id         UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true"></a>  signer_role            TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (signer_role <span class="kw">IN</span> (<span class="st">&#39;vendor&#39;</span>,<span class="st">&#39;customer&#39;</span>)),</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true"></a>  signature_method       TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (signature_method <span class="kw">IN</span> (<span class="st">&#39;signature_pad&#39;</span>,<span class="st">&#39;typed&#39;</span>,<span class="st">&#39;drawn&#39;</span>)),</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true"></a>  signature_image_r2_key TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- PNG of the signature</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true"></a>  signer_full_name       TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- captured at sign time (legal name as displayed on signature block)</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true"></a>  ip_address             INET <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true"></a>  user_agent             TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true"></a>  geo_lat                <span class="dt">NUMERIC</span>,  <span class="co">-- captured only with explicit consent</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true"></a>  geo_lon                <span class="dt">NUMERIC</span>,</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true"></a>  geo_consented          <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true"></a>  signed_at              TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true"></a>  <span class="kw">UNIQUE</span> (contract_id, signer_role)  <span class="co">-- one signature per role per contract</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true"></a>);</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true"></a></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> contract_signatures_contract_idx <span class="kw">ON</span> contract_signatures (contract_id);</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true"></a></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true"></a><span class="co">-- The master library of lawyer-reviewed PH-compliant clauses.</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true"></a><span class="co">-- ~50 rows at V1 launch (Section 5 distribution).</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> contract_clause_library (</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true"></a>  clause_id             UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true"></a>  element_type          TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- &#39;force_majeure&#39;, &#39;liability_cap&#39;, &#39;cancellation&#39;, &#39;ip_ownership&#39;, &#39;governing_law&#39;, etc.</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true"></a>  title                 TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true"></a>  plain_english         TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- vendor-facing explanation, shown first in the picker</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true"></a>  legal_text_en         TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- the binding contract language (with {placeholders})</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true"></a>  legal_text_tl         TEXT,  <span class="co">-- Tagalog future; null at V1 launch for most clauses</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true"></a>  applicable_categories TEXT[] <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dt">ARRAY</span>[<span class="st">&#39;*&#39;</span>],  <span class="co">-- service categories; &#39;*&#39; = universal</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true"></a>  clause_version        <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">1</span>,</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true"></a>  is_active             <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">TRUE</span>,</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true"></a>  created_at            TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true"></a>  reviewed_by_legal_at  TIMESTAMPTZ,  <span class="co">-- timestamp of most recent external-counsel review</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true"></a>  reviewed_by_legal_id  TEXT,  <span class="co">-- identifier of the external counsel firm (e.g., &#39;disini-disini-2026-05&#39;)</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true"></a>  retired_at            TIMESTAMPTZ</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true"></a>);</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true"></a></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> contract_clause_library_element_active_idx</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true"></a>  <span class="kw">ON</span> contract_clause_library (element_type, is_active);</span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true"></a></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true"></a><span class="co">-- Tracks vendor purchases of the contract-builder SKU.</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true"></a><span class="co">-- Either a one-time ₱199 purchase or a no-op row referencing a Pro subscription.</span></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> contract_purchases (</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true"></a>  purchase_id           UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true"></a>  contract_id           UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> contract_drafts(contract_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true"></a>  vendor_id             UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> vendors(vendor_id),</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true"></a>  sku                   TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (sku <span class="kw">IN</span> (<span class="st">&#39;contract_builder_single&#39;</span>,<span class="st">&#39;pro_inclusion&#39;</span>)),</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true"></a>  amount_php            <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- 19900 (₱199 in centavos) or 0 (Pro inclusion)</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true"></a>  service_order_id      UUID <span class="kw">REFERENCES</span> service_orders(order_id),  <span class="co">-- nullable for Pro inclusion</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true"></a>  pro_subscription_id   UUID,  <span class="co">-- nullable for pay-as-you-go; references the vendor&#39;s active Pro subscription</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true"></a>  created_at            TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true"></a>  <span class="kw">UNIQUE</span> (contract_id)  <span class="co">-- one purchase row per contract</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true"></a>);</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true"></a></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> contract_purchases_vendor_idx <span class="kw">ON</span> contract_purchases (vendor_id, created_at <span class="kw">DESC</span>);</span></code></pre></div>
+<p><strong><code>contract_body</code> JSONB structure</strong> (the canonical editable form of the contract):</p>
+<pre class="jsonc"><code>{
+  &quot;schema_version&quot;: 1,
+  &quot;sections&quot;: [
+    {
+      &quot;section_id&quot;: &quot;parties&quot;,
+      &quot;element_type&quot;: &quot;parties&quot;,
+      &quot;title&quot;: &quot;Parties&quot;,
+      &quot;content_markdown&quot;: &quot;This contract is entered into by **{vendor_name}** (&#39;the Vendor&#39;) and **{customer_name}** (&#39;the Customer&#39;) on {contract_date}.&quot;,
+      &quot;source&quot;: &quot;setnayan_clause&quot;,
+      &quot;clause_id&quot;: &quot;uuid-of-clause&quot;,
+      &quot;clause_version_snapshot&quot;: 2
+    },
+    { ... services description section ... },
+    { ... pricing section ... },
+    /* ... up to 14 sections matching the 14 elements ... */
+  ],
+  &quot;variables&quot;: {
+    &quot;vendor_name&quot;: &quot;Sample Studio, Inc.&quot;,
+    &quot;customer_name&quot;: &quot;Maria Cruz&quot;,
+    &quot;event_date&quot;: &quot;2026-11-22&quot;,
+    &quot;total_amount_php&quot;: 8500000
+  }
+}
+</code></pre>
+<p>The PDF generator reads this structure, substitutes variables, and produces the final PDF.</p>
+<hr />
+<h2 id="9-ui-surfaces">9. UI surfaces</h2>
+<p><strong>Vendor dashboard (0022) — new <code>Contracts</code> tab.</strong></p>
+<ul>
+<li>Top: search + filter (status: All / Draft / Sent / Signed / Expired).</li>
+<li>Primary CTA <code>+ Create contract</code>.</li>
+<li>List of contracts as rows: title, customer name, event date, status pill, compliance badge, last-action timestamp.</li>
+<li>Row click → contract detail view (the same screen used during creation, but in read or edit mode based on status).</li>
+<li>Empty state: explainer + the 3 entry-path buttons inline. First-contract experience.</li>
+</ul>
+<p><strong>Vendor — contract detail view.</strong></p>
+<ul>
+<li>Left column: the composed contract (read or edit mode).</li>
+<li>Right column: detection panel (collapsible) + compliance checklist sidebar (persistent).</li>
+<li>Top toolbar: Status pill, <code>Preview</code> button, <code>Send</code> button (disabled if compliance gate red), <code>Cancel</code>, <code>Duplicate</code>.</li>
+<li>After both signed: <code>Send</code> becomes <code>Download signed PDF</code> + <code>View audit trail</code>.</li>
+</ul>
+<p><strong>Customer dashboard (0021) — Vendor profile gains a <code>Contracts</code> sub-tab.</strong></p>
+<ul>
+<li>Lists contracts the vendor has sent to this customer.</li>
+<li>Each row: contract title, vendor, status, expires_at countdown if <code>sent</code>.</li>
+<li>Click → preview modal with <code>Sign</code> CTA at the bottom.</li>
+<li>Sign CTA opens the signature modal (Section 7) with the three method tabs.</li>
+</ul>
+<p><strong>Chat thread (0019) — contract chat-card.</strong></p>
+<ul>
+<li>When a contract is sent, the system posts a chat-card to the existing vendor↔︎customer thread.</li>
+<li>Card shows: thumbnail of page 1 of the generated PDF, contract title, status pill, primary CTA (<code>Sign this contract</code> for the customer / <code>View status</code> for the vendor).</li>
+<li>Card updates in place as the status changes (customer signed → vendor turn → both signed).</li>
+<li>Final signed state: card shows <code>Signed · [date]</code> with a <code>Download</code> CTA.</li>
+</ul>
+<p><strong>Admin (0023) — Contracts audit log.</strong></p>
+<ul>
+<li>Admin &gt; Disputes &gt; Contracts view (Disputes Handler role).</li>
+<li>Lists all contracts across the platform, filterable by vendor, customer, status, compliance score range.</li>
+<li>Click any → admin contract detail with full audit trail visible:
+<ul>
+<li>Source PDF (if any)</li>
+<li>Detection results</li>
+<li>Composed contract body</li>
+<li>Both signature events with full metadata (IP, UA, geo if consented)</li>
+<li>Signed PDF</li>
+</ul></li>
+<li>Used during disputes mediation — the Disputes Handler can confirm "yes, the customer signed this on [date] from this IP" or "no, this contract was never signed by the customer."</li>
+</ul>
+<p><strong>Notifications.</strong></p>
+<ul>
+<li>Contract sent → customer in-app notification (V1) + email (when 0028 ships in parallel)</li>
+<li>Customer signed → vendor in-app notification + email</li>
+<li>Both signed → both parties in-app notification + email with the signed PDF attached</li>
+<li>Contract expiring in 3 days → vendor + customer reminder</li>
+<li>Contract expired → vendor in-app notification (offer to resend)</li>
+</ul>
+<hr />
+<h2 id="10-pro-subscription-positioning">10. Pro Subscription positioning</h2>
+<p>Pro Subscription's value prop is restructured. Pre-this-iteration, Pro was framed as "marketing perks" (analytics, landing styling, boost eligibility). With this iteration, Pro becomes "operational SaaS" with marketing perks as a side benefit.</p>
+<p><strong>New Pro Subscription benefit list (replaces the 0022 version):</strong></p>
+<ul>
+<li>Unlimited contract generation + e-signature <strong>(NEW)</strong></li>
+<li>Vendor analytics dashboard</li>
+<li>Landing styling (custom theme picker from the four themes)</li>
+<li>Boost purchase eligibility (Boost is a separate SKU; Pro just unlocks the right to purchase it)</li>
+<li>Verified-badge gold tint (cosmetic, identifies Pro vendors visually in marketplace listings)</li>
+<li>Priority verification re-review (admin Verification Handler bumps Pro applications to the top of the queue)</li>
+</ul>
+<p><strong>ROI math</strong> (the pitch on the Pro subscription upgrade modal):</p>
+<blockquote>
+<p>Pro is ₱499/wk = ₱25,948/yr. If you generate <strong>3+ contracts per month</strong> at ₱199 each, Pro pays for itself on contracts alone. The analytics, theme picker, and verified-badge gold tint are bonus. <em>3 contracts × ₱199 × 52 weeks = ₱31,044 &gt; ₱25,948.</em></p>
+</blockquote>
+<p>This shifts the upgrade-trigger from "I want to look fancier" to "I run a real business and 3+ bookings/month is normal." Vendors generating fewer than 3 contracts/month stay on pay-as-you-go; vendors generating more upgrade naturally.</p>
+<p><strong>Pro subscription badge differentiation.</strong> In the vendor's Contracts tab list, a contract generated under Pro shows a <code>Pro</code> flag on the row. In the vendor's Pro Subscription detail page, a "Contracts this billing period" counter shows usage — useful for the vendor's own internal accounting.</p>
+<hr />
+<h2 id="11-compliance--legal-posture">11. Compliance + legal posture</h2>
+<p><strong>External counsel review (gate to V1 launch).</strong> Setnayan engages a PH labor / contracts law firm to review the ~50 master clauses before this iteration ships. Candidates: <strong>Disini &amp; Disini Law Office</strong> (well-known for tech / e-commerce), <strong>ALA Law</strong> (broad commercial practice), <strong>Romulo Law</strong> (large firm experience). Estimated one-time fee: <strong>₱30,000–₱50,000</strong> for a single review pass. Each clause receives the firm's stamp in <code>contract_clause_library.reviewed_by_legal_id</code> + <code>reviewed_by_legal_at</code>. A re-review is triggered annually or whenever PH contract law changes (new RA, Supreme Court ruling) — re-review fee likely ₱15,000–₱25,000.</p>
+<p><strong>Setnayan is NOT a law firm.</strong> Disclaimer on every generated contract footer:</p>
+<blockquote>
+<p>This contract is a template provided by Setnayan and may not address all your specific legal needs. Consult a Philippine lawyer if you have specific concerns about your booking or your legal exposure.</p>
+</blockquote>
+<p>This is non-removable. Vendors cannot edit it out. The disclaimer is part of the rendered PDF template at generation time.</p>
+<p><strong>AI analysis is advisory only.</strong> The detection panel and compliance checklist are described as "Setnayan's read" — not "the legal verdict." The vendor accepts final responsibility for the contract content via an "I confirm this contract is accurate and reflects my agreement with the customer" checkbox before Send. Without that checkbox, Send is disabled even with green compliance.</p>
+<p><strong>Liability invariant.</strong> If a vendor signs a Setnayan-generated contract that turns out to have a defect (e.g., a force majeure clause Setnayan's template forgot to cover the typhoon that hit on the wedding day), the dispute is between the vendor and customer — Setnayan is the tool, not the party. The Terms of Service explicitly disclaim Setnayan from contract content liability when the vendor exercised final-confirmation. The external counsel review is what gives this disclaimer real-world weight (we did our diligence).</p>
+<p><strong>Data privacy (RA 10173).</strong> Contracts contain PII (full legal names, signature images, optionally geolocation). All four tables in Section 8 are subject to the same Supabase RLS + R2 signed-URL controls described in the Setnayan Privacy &amp; Security Policy (2026-05-12). Customer can request deletion of their PII via the 0025 Privacy &amp; Data tab — but contracts under PH law are retention-required for the duration of the obligation period (typically 5 years post-event). The deletion-request flow surfaces this and offers anonymization-instead-of-deletion (replace customer name with <code>[Customer — Deletion Requested]</code> in the public verify page, keep the contract intact in the audit trail for legal compliance).</p>
+<p><strong>RA 8792 e-signature posture.</strong> Per RA 8792 §§ 5 + 7 + 8, an electronic signature is valid if it is uniquely linked to the signatory, capable of identifying the signatory, made under the signatory's sole control, and linked to the data in a way that any change is detectable. Our implementation satisfies all four:</p>
+<ul>
+<li>Uniquely linked: tied to <code>signer_user_id</code> (auth-verified Setnayan account)</li>
+<li>Identifies the signatory: full legal name + IP + UA + signed-at</li>
+<li>Sole control: auth gate at signing time (re-auth required for the signature step)</li>
+<li>Change detection: SHA-256 hash of the signed PDF stored at <code>contract_drafts.signed_pdf_sha256</code>; the public verify page exposes this for tamper checks</li>
+</ul>
+<p>The signature certificate page renders this all visibly so any reader of the PDF can see the audit trail without needing access to Setnayan's database.</p>
+<hr />
+<h2 id="12-acceptance-tests">12. Acceptance tests</h2>
+<p>V1 ships when all of these pass:</p>
+<ol>
+<li><strong>Upload PDF → detection panel.</strong> A vendor uploads a sample wedding photography contract (3 pages, typed PDF). Within 20 seconds (p95), the detection panel renders with all 14 elements showing accurate status.</li>
+<li><strong>Upload scanned PDF → OCR fallback.</strong> A vendor uploads a scanned-paper-contract PDF. The progress card shows the OCR message. Within 35 seconds (p95), detection panel renders.</li>
+<li><strong>Upload .docx → detection panel.</strong> Same as test 1 with a .docx upload.</li>
+<li><strong>Start from template path.</strong> A vendor picks "Start from template" → assembles a 6-section contract → compliance gate goes green → can Send.</li>
+<li><strong>Compliance gate red — Send disabled.</strong> A vendor creates a contract missing a cancellation policy (hard requirement). Send button is disabled. Tooltip explains why.</li>
+<li><strong>Compliance gate amber — Send with acknowledgment.</strong> Vendor missing only force majeure. Send button shows a warning modal: "This contract is missing recommended clauses. Send anyway?" Acknowledgment proceeds.</li>
+<li><strong>Pay-as-you-go vendor pays ₱199 before Send.</strong> A non-Pro vendor clicks Send. System charges via apply-then-pay (24-hr SLA). Contract stays <code>draft</code> until payment confirms, then auto-sends.</li>
+<li><strong>Pro vendor sends free.</strong> A Pro-Subscription vendor clicks Send. No payment flow. Contract sends immediately. <code>contract_purchases</code> row written with <code>sku='pro_inclusion'</code> + <code>amount_php=0</code>.</li>
+<li><strong>Customer signs via signature pad.</strong> On an iPad, customer draws signature → submits. <code>contract_signatures</code> row written with <code>signature_method='signature_pad'</code>. Contract enters <code>customer_signed</code>.</li>
+<li><strong>Vendor signs → both_signed → PDF generated.</strong> Vendor signs. System generates signed PDF with both signatures + certificate page. <code>signed_pdf_r2_key</code> populated. <code>signed_pdf_sha256</code> populated.</li>
+<li><strong>Verify page resolves.</strong> <code>setnayan.com/c/[contract_id]/verify</code> loads, shows both timestamps + the SHA-256, matches the stored hash.</li>
+<li><strong>Admin Disputes Handler view.</strong> Admin loads <code>/dashboard/admin/contracts/[contract_id]</code>, sees full audit trail including both signature events' IP + UA.</li>
+<li><strong>Customer rejection.</strong> Customer opens the contract in their chat-card, clicks Reject with a reason. Contract enters <code>rejected</code>. Vendor receives notification with the reason. Contract is not sendable as-is again (vendor must duplicate to retry).</li>
+<li><strong>30-day expiry.</strong> A contract sent and unsigned for 30 days enters <code>expired</code> via the scheduled job. Vendor sees expired notification + offer to resend.</li>
+<li><strong>Compliance score accuracy.</strong> A contract with all 5 hard + all 5 soft + 0 optional elements computes <code>compliance_score = 100</code> (capped: 75 + 25 = 100). A contract with 5 hard + 0 soft + 0 optional computes <code>compliance_score = 75</code>.</li>
+</ol>
+<hr />
+<h2 id="13-decision-log">13. Decision log</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Date</th>
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Pricing locked: ₱199 pay-as-you-go + free for Vendor Pro Weekly.</strong> SKU <code>contract_builder_single</code> registered in <code>service_catalog</code> at ₱199. Vendor Pro Weekly subscription unlocks unlimited generation.</td>
+<td>₱199 is the same charm-priced tier as the Pro Widget (₱99) and Pro Bundle (₱199) — vendor-facing pricing already established at that level for individual feature unlocks. Pro inclusion converts the Pro Subscription pitch from "marketing perks" to "operational SaaS" — substantially stronger upgrade hook (Section 10 ROI math).</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>All verification tiers can purchase.</strong> Standard Verified / Certified / Boosted all access the SKU.</td>
+<td>Even Standard Verified vendors close real bookings and need contracts. Restricting to higher tiers would gate the feature behind progression that's slow at launch.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>AI analysis via Claude Sonnet 4.6.</strong> Same provider as AI Video Highlight + AI Edited Highlight; consolidated billing relationship.</td>
+<td>No new vendor relationship. Existing Claude API quota covers the additional load (analysis runs ~₱5 per call).</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>14-element detection schema locked.</strong> The list is exhaustive enough to cover PH wedding-vendor contracts (cross-checked against the seed template set the legal team will draft). Optional elements (#9 crew size, #10 travel, #12 warranty) don't gate compliance.</td>
+<td>A larger element list would balloon the Claude prompt and slow analysis. A smaller list would miss things vendors care about. 14 is the goldilocks.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>5 hard + 5 soft compliance requirements.</strong> Hard requirements gate Send. Soft requirements are warning-only with acknowledgment.</td>
+<td>Hard requirements track the actual legal-binding floor (parties, service, price, cancellation policy, signature). Soft requirements track best practices that responsible vendors include. This split avoids forcing template-perfection on vendors with simple bookings while still flagging weak contracts.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>PH E-Commerce Act of 2000 (RA 8792) as the e-signature basis.</strong> Three signature methods (signature pad / typed / drawn). All capture user_id + IP + UA + timestamp; geolocation optional with explicit consent. SHA-256 hash on the signed PDF for tamper detection.</td>
+<td>RA 8792 is the binding PH law for e-signatures. Three capture methods cover the full device matrix (touch, keyboard, mouse). Optional geolocation respects the privacy invariants in the Setnayan Privacy &amp; Security Policy without sacrificing audit-trail strength.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>External counsel review gate before V1 launch.</strong> ~50 master clauses + the certificate-page boilerplate + the Terms of Service disclaimer reviewed by a PH contracts firm (Disini &amp; Disini / ALA Law / Romulo Law). Estimated cost ₱30K–₱50K one-time + ₱15K–₱25K annual re-review.</td>
+<td>Without external counsel review, "Setnayan template clauses" is marketing copy. With it, the templates have legal weight + Setnayan's liability disclaimer holds up. The cost is small relative to the SKU's revenue potential.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Setnayan is NOT a law firm — disclaimer on every contract.</strong> Non-removable footer + "I confirm this is accurate" checkbox before Send.</td>
+<td>Liability invariant. Vendor accepts final responsibility for contract content. Setnayan provides the tool, not the legal opinion. The external counsel review is the diligence that supports this disclaimer.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Signed contracts stored permanently in R2.</strong> No expiry, no compression on signed_pdf. Source PDFs retained 1 year then cold-tier. Signature images retained with parent contract.</td>
+<td>Legal records. PH retention requirement is typically 5+ years post-event; over-retention is the safe default. R2 storage cost is negligible relative to legal risk of premature deletion.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>30-day default expiry for sent-unsigned contracts.</strong> Vendor can resend (which creates a duplicate, resetting the 30-day clock).</td>
+<td>A sent-unsigned contract that sits for months is more confusing than helpful. 30 days is enough for most customers to act. Resend is one click.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Customer rejection requires a reason.</strong> Rejection enters <code>status='rejected'</code> + <code>rejection_reason</code> populated; vendor must duplicate to retry rather than re-editing the rejected one.</td>
+<td>Force a clear break between "this contract was discussed and rejected" and "this is the new offer." Audit trail clarity.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Chat-card delivery via 0019 thread, not standalone email.</strong> Email is a secondary notification (when 0028 ships); the canonical delivery is the chat thread.</td>
+<td>Keeps the booking conversation + contract in one place. Customers don't have to context-switch to email + back. Aligns with the 0019 "all communications in one place" pattern.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Public verify page at <code>setnayan.com/c/[contract_id]/verify</code>.</strong> Shows minimal PII (just the IDs + timestamps + SHA-256 hash).</td>
+<td>Equivalent to DocuSign's verification page. Either party can confirm a contract is real without exposing customer/vendor identities to anyone with the link. The SHA-256 hash supports tamper detection.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Compliance score 0–100 stored for analytics.</strong> Formula in Section 6. Surfaced on the vendor dashboard as a trend.</td>
+<td>Vendor self-improvement signal. Doesn't gate anything; just informs. Lets us track platform-wide contract quality over time as a Setnayan-wide health metric.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>PII-deletion conflict resolution: anonymization, not deletion.</strong> If a customer requests RA 10173 deletion of contract PII while the contract is still under PH retention requirement, we anonymize the customer name on the public verify page + the audit trail keeps the original for legal compliance.</td>
+<td>PH contract law retention requirement (5+ years post-event) conflicts with RA 10173 deletion right (§ 16 e). Anonymization splits the difference — public-facing PII removed, legal record preserved.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-companion-docs">14. Companion docs</h2>
+<ul>
+<li><strong>Vendor Agreement § 12.1</strong> — the manual signing flow for the vendor's onboarding agreement with Setnayan. NOT replaced by this iteration. V1.5 plan via PandaDoc / DocuSign for vendor-onboarding sits alongside this iteration's vendor↔︎customer flow.</li>
+<li><strong>0019 Communications</strong> — the chat thread is the delivery channel; contract chat-card pattern lives alongside other 0019 message types.</li>
+<li><strong>0021 Couple Dashboard</strong> — Customer-side signing surface (Contracts sub-tab under each Vendor profile).</li>
+<li><strong>0022 Vendor Dashboard</strong> — Primary host for the Contracts tab + Pro Subscription value-prop refresh (Section 10).</li>
+<li><strong>0023 Admin Console</strong> — Disputes Handler role consumes the full audit trail; Verification Handler is unaffected.</li>
+<li><strong>0025 Profile Settings</strong> — Privacy &amp; Data tab handles the RA 10173 deletion-request flow that interacts with contract retention (Section 11).</li>
+<li><strong>0026 BIR / Tax Compliance</strong> — Generated contracts are evidence supporting Official Receipt issuance; the contract total_amount_php matches the OR amount.</li>
+<li><strong>0028 Email Notifications</strong> — When email notifications ship (in parallel), this iteration's contract-state transitions trigger the appropriate templates (contract_sent / contract_signed / contract_expired). V1 ships in-app notifications only.</li>
+<li><strong>Setnayan Privacy &amp; Security Policy (2026-05-12)</strong> — Data scope, retention windows, RLS + R2 controls all defined there.</li>
+<li><strong>Pricing Workbook</strong> — <code>contract_builder_single</code> (₱199) registered in <code>service_catalog</code> + Pro Subscription value-prop updated to include "unlimited contracts" benefit.</li>
+</ul>
+<hr />
+<p><strong>End of iteration 0032.</strong></p>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

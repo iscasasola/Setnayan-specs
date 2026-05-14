@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0035 — Observability (Error Monitoring · Product Analytics · Health · Status · On-Call) — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0035</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0035_observability.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0035_observability.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0035_observability.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0035--observability-error-monitoring--product-analytics--health--status--on-call">Iteration 0035 — Observability (Error Monitoring · Product Analytics · Health · Status · On-Call)</h1>
+<p><strong>Iteration number:</strong> 0035 <strong>Topic:</strong> Production observability stack for Setnayan V1 — Sentry for errors, PostHog for product analytics, Better Stack for uptime + status page + on-call paging, custom health endpoints, structured logging, and a privacy-first telemetry posture (RA 10173). <strong>Surface:</strong> Cross-cutting · instruments every iteration; surfaces an admin observability tab inside 0023 Admin Console; consumer-facing status page at <code>status.setnayan.com</code>. <strong>URL pattern:</strong> <code>setnayan.com/api/health</code>, <code>setnayan.com/api/health/deep</code>, <code>status.setnayan.com</code>, <code>setnayan.com/dashboard/admin/settings/observability</code> <strong>Builds on:</strong> 0013 (platform stack), 0023 (admin console + funnel_events table § 3.8), 0025 (notifications opt-out toggle), 0028 (email notification provider), 0034 (payment events firing). <strong>Status:</strong> Drafted 2026-05-12. <strong>Phase:</strong> V1 launch-blocking. Without it, the team deploys blind — first bug reports arrive from customers, not from monitors, and incident response is reactive.</p>
+<hr />
+<h2 id="1-why-this-iteration-exists">1. Why this iteration exists</h2>
+<p>Setnayan V1 ships with eight launch-blocking surfaces (payment cart 0034 · vendor dashboard 0022 · admin console 0023 · landing pages 0002 · email 0028 · marketing site 0015 · day-of guest 0031 · communications 0019). Any one of them can fail silently in production — an unhandled exception in the payment screenshot upload handler, a Daily.co token misconfiguration, an R2 signed URL returning 403, a Resend webhook quietly dropping bounce events.</p>
+<p>Without observability:</p>
+<ul>
+<li>A payment fails for one customer; we don't know until they email support 6 hours later.</li>
+<li>An admin role tries to approve a vendor and hits a 500; admin assumes "it'll work next time" and the queue silently stalls.</li>
+<li>A wedding day's guest gallery returns 503s for 20 minutes during the ceremony; we find out from a 1-star review the next morning.</li>
+<li>A spike in Sentry errors during a Save-the-Date render storm goes uncorrelated with the deploy that introduced it.</li>
+</ul>
+<p>With observability:</p>
+<ul>
+<li>Sentry pages on-call within 60 seconds of a server-side 5xx threshold.</li>
+<li>Better Stack pings <code>/api/health</code> every minute and lights up the status page on the first failed check.</li>
+<li>PostHog funnels show "vendor inquiry sent → quote sent → booking confirmed" conversion in real time, so the team sees the marketplace working (or not).</li>
+<li>Vercel log drains stream structured JSON to Better Stack's log explorer for ad-hoc forensics.</li>
+</ul>
+<p><strong>The non-negotiable:</strong> V1 cannot launch without eyes. This iteration locks the stack, the alert rules, the on-call rotation, and the privacy posture so engineering can deploy with confidence.</p>
+<hr />
+<h2 id="2-the-observability-stack-locked">2. The observability stack (locked)</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>Tool</th>
+<th>V1 plan</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Error monitoring</td>
+<td><strong>Sentry</strong></td>
+<td>Hosted Sentry account · all client + server + edge errors captured · 90-day retention · alerting via email + Slack</td>
+</tr>
+<tr class="even">
+<td>Product analytics</td>
+<td><strong>PostHog</strong></td>
+<td>Hosted PostHog Cloud (EU region — closest GDPR-equivalent privacy posture) · funnel events from 0023 § 3.8 piped here · session recordings <strong>disabled</strong> by default (privacy) · 90-day retention</td>
+</tr>
+<tr class="odd">
+<td>Uptime monitoring</td>
+<td><strong>Better Stack</strong> (formerly Better Uptime)</td>
+<td>Cheaper than Pingdom · pings every 1 min · status page at <code>status.setnayan.com</code></td>
+</tr>
+<tr class="even">
+<td>Log aggregation</td>
+<td><strong>Vercel Log Drains → Better Stack</strong></td>
+<td>Default Vercel logs + Edge Function logs pipe to Better Stack's log explorer</td>
+</tr>
+<tr class="odd">
+<td>On-call paging</td>
+<td><strong>Better Stack</strong></td>
+<td>Free tier supports 1 on-call user · upgrade to ₱500/mo for a 3-person rotation in V1.5</td>
+</tr>
+<tr class="even">
+<td>Health endpoints</td>
+<td>Custom <code>/api/health</code> + <code>/api/health/deep</code></td>
+<td>See § 4</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total monthly cost (V1):</strong> ~₱3,500</p>
+<ul>
+<li>Sentry Team plan ~₱1,500/mo (50K errors/mo · 100K performance units)</li>
+<li>PostHog Cloud free tier suffices at V1 traffic (1M events/mo free); paid tier kicks in at ~₱1,000/mo once traffic grows</li>
+<li>Better Stack Solo plan ~₱1,000/mo (status page + 10 monitors + 1 on-call user)</li>
+</ul>
+<p>This is the floor. Higher-revenue months may bump Sentry to ~₱3,000/mo (Business plan with longer retention) and PostHog past the free-event ceiling — budget review monthly.</p>
+<p><strong>Why these tools (rationale):</strong></p>
+<ul>
+<li><strong>Sentry</strong> is the industry-default error monitoring stack for Next.js. First-party SDK, source-map upload, breadcrumbs, performance tracing, and release tracking all built in. PH dev teams who've used Sentry need zero ramp time. Self-hosting was considered and rejected — we are 1 engineer in V1; managed Sentry costs less than the engineering hours to run a self-hosted instance.</li>
+<li><strong>PostHog</strong> beats Mixpanel + Amplitude on price (free 1M events vs Amplitude's ~₱15K/mo entry) and ships feature flags + session recording + cohort builder in one bundle. PostHog Cloud EU was chosen over US for the GDPR-equivalent privacy contract — closest legal equivalent to PH RA 10173.</li>
+<li><strong>Better Stack</strong> combines uptime monitoring + status page + log management + on-call paging in one bill. Pingdom + StatusPage + Datadog + PagerDuty would cost ~₱15K/mo for the same surface. The trade-off is Better Stack's log volume is more limited; we accept this for V1 and revisit if log volume grows.</li>
+<li><strong>Custom health endpoints</strong> instead of relying on Better Stack synthetics — <code>/api/health/deep</code> knows the difference between "app responds" and "Supabase reachable, R2 reachable, Daily.co reachable, Resend reachable." A synthetic browser test can't.</li>
+</ul>
+<hr />
+<h2 id="3-sentry-integration">3. Sentry integration</h2>
+<h3 id="31-sdk-setup">3.1 SDK setup</h3>
+<p>Three init files, one per Next.js runtime:</p>
+<pre><code>sentry.server.config.ts   // Node.js server-side
+sentry.client.config.ts   // Browser client-side
+sentry.edge.config.ts     // Edge runtime (middleware, edge functions)
+</code></pre>
+<p>DSN injected via Vercel environment variable. Source maps upload on every Vercel build via <code>@sentry/webpack-plugin</code>.</p>
+<h3 id="32-sample-rates-v1">3.2 Sample rates (V1)</h3>
+<pre><code>errors:         100%   // every error captured
+performance:     10%   // 1 in 10 transactions traced
+replays:          0%   // session replay disabled per privacy posture
+profiling:        0%   // CPU profiling disabled (cost + privacy)
+</code></pre>
+<p>Performance sampling lifts to 25% in V1.1 once we have a baseline; replays stay off until the privacy review explicitly approves them (likely V2).</p>
+<h3 id="33-user-context-pii-scrubbed">3.3 User context (PII-scrubbed)</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>Sentry<span class="op">.</span><span class="fu">setUser</span>({</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>  id<span class="op">:</span> user<span class="op">.</span><span class="at">id</span><span class="op">,</span>                       <span class="co">// OK — opaque UUID</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>  account_type<span class="op">:</span> user<span class="op">.</span><span class="at">account_type</span><span class="op">,</span>   <span class="co">// OK — &#39;customer&#39; | &#39;vendor&#39; | &#39;admin&#39;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>  <span class="co">// email: NEVER</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a>  <span class="co">// full_name: NEVER</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a>  <span class="co">// phone: NEVER</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a>})<span class="op">;</span></span></code></pre></div>
+<p><code>user.id</code> is the only correlator. Email, phone, name are scrubbed before send by the server-side data scrubber (§ 9.2).</p>
+<h3 id="34-custom-tags">3.4 Custom tags</h3>
+<p>Every captured error includes:</p>
+<ul>
+<li><code>iteration</code> — string ID of the iteration the code belongs to (e.g., <code>'0034'</code>)</li>
+<li><code>flow</code> — sub-flow within the iteration (e.g., <code>'payment_screenshot_upload'</code>)</li>
+<li><code>event_id</code> — when the error happens inside an event context</li>
+<li><code>vendor_id</code> — when the error happens inside a vendor context</li>
+<li><code>role_surface</code> — <code>'customer'</code> | <code>'vendor'</code> | <code>'admin'</code></li>
+</ul>
+<p>This lets the on-call engineer filter to "all 0034 errors in the last hour" or "all admin-surface errors in the last 24h" without grep-ing free-text messages.</p>
+<h3 id="35-breadcrumbs">3.5 Breadcrumbs</h3>
+<p>Sentry captures the last 50 user actions automatically (clicks, navigation, fetch calls). We extend with custom breadcrumbs at flow boundaries:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>Sentry<span class="op">.</span><span class="fu">addBreadcrumb</span>({</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>  category<span class="op">:</span> <span class="st">&#39;cart&#39;</span><span class="op">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a>  message<span class="op">:</span> <span class="st">&#39;cart_item_added&#39;</span><span class="op">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true"></a>  data<span class="op">:</span> { sku_code<span class="op">:</span> <span class="st">&#39;paparazzi_3_seats&#39;</span><span class="op">,</span> cart_id<span class="op">:</span> cart<span class="op">.</span><span class="at">id</span> }<span class="op">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true"></a>  level<span class="op">:</span> <span class="st">&#39;info&#39;</span><span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true"></a>})<span class="op">;</span></span></code></pre></div>
+<h3 id="36-error-grouping">3.6 Error grouping</h3>
+<p>Sentry's default fingerprinting (stack trace + error type) works for most cases. Custom fingerprints for known error patterns:</p>
+<ul>
+<li>Supabase RLS denials grouped by <code>policy_name</code> (not stack)</li>
+<li>R2 4xx errors grouped by <code>bucket_name + status_code</code> (not stack)</li>
+<li>Daily.co token errors grouped by <code>error_code</code> (not stack)</li>
+</ul>
+<h3 id="37-example-payment-screenshot-upload-failure">3.7 Example: payment-screenshot upload failure</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a>try {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>  await <span class="fu">uploadPaymentProofToR2</span>(file<span class="op">,</span> order<span class="op">.</span><span class="at">id</span>)<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a>} <span class="fu">catch</span> (error) {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a>  Sentry<span class="op">.</span><span class="fu">captureException</span>(error<span class="op">,</span> {</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true"></a>    tags<span class="op">:</span> {</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true"></a>      iteration<span class="op">:</span> <span class="st">&#39;0034&#39;</span><span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true"></a>      flow<span class="op">:</span> <span class="st">&#39;payment_screenshot_upload&#39;</span><span class="op">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true"></a>      role_surface<span class="op">:</span> <span class="st">&#39;customer&#39;</span><span class="op">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true"></a>    }<span class="op">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true"></a>    extra<span class="op">:</span> {</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true"></a>      order_id<span class="op">:</span> order<span class="op">.</span><span class="at">id</span><span class="op">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true"></a>      file_size_bytes<span class="op">:</span> file<span class="op">.</span><span class="at">size</span><span class="op">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true"></a>      mime_type<span class="op">:</span> file<span class="op">.</span><span class="at">type</span><span class="op">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true"></a>      <span class="co">// NOT included: file name (may contain PII), customer email</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true"></a>    }<span class="op">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true"></a>  })<span class="op">;</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true"></a>  throw <span class="kw">new</span> <span class="fu">UserFacingUploadError</span>()<span class="op">;</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true"></a>}</span></code></pre></div>
+<h3 id="38-release-tracking">3.8 Release tracking</h3>
+<p>Every Vercel deploy creates a Sentry release tagged with the git SHA. When an error spike correlates with a deploy, Sentry surfaces it under the "regression" tab.</p>
+<hr />
+<h2 id="4-health-endpoints">4. Health endpoints</h2>
+<h3 id="41-get-apihealth-liveness">4.1 GET /api/health (liveness)</h3>
+<p>Lightweight liveness check. Returns 200 + minimal JSON if the Node.js process is up and serving requests. <strong>Does NOT</strong> touch databases, external APIs, or storage — used by Better Stack uptime monitor on a 1-minute cadence with a 10-second timeout.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="co">// Response shape</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>{</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>  <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a>  <span class="st">&quot;timestamp&quot;</span><span class="op">:</span> <span class="st">&quot;2026-05-12T15:42:30Z&quot;</span><span class="op">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a>  <span class="st">&quot;version&quot;</span><span class="op">:</span> <span class="st">&quot;0035.1&quot;</span>   <span class="co">// package.json version, useful for rollout detection</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a>}</span></code></pre></div>
+<p>If this endpoint fails, Vercel is down, the deploy is broken, or DNS is misrouted. Critical-tier alert.</p>
+<h3 id="42-get-apihealthdeep-readiness">4.2 GET /api/health/deep (readiness)</h3>
+<p>Deep readiness check. Pings each external subsystem in parallel with a 3-second per-subsystem timeout, aggregates results, returns 200 if all subsystems healthy, 503 if any subsystem unhealthy.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="co">// Response shape (200 — all healthy)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a>{</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a>  <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a>  <span class="st">&quot;timestamp&quot;</span><span class="op">:</span> <span class="st">&quot;2026-05-12T15:42:30Z&quot;</span><span class="op">,</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true"></a>  <span class="st">&quot;subsystems&quot;</span><span class="op">:</span> {</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true"></a>    <span class="st">&quot;supabase&quot;</span><span class="op">:</span>  { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span> <span class="st">&quot;latency_ms&quot;</span><span class="op">:</span>  <span class="dv">45</span> }<span class="op">,</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true"></a>    <span class="st">&quot;r2&quot;</span><span class="op">:</span>        { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span> <span class="st">&quot;latency_ms&quot;</span><span class="op">:</span> <span class="dv">120</span> }<span class="op">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true"></a>    <span class="st">&quot;dailyco&quot;</span><span class="op">:</span>   { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span> <span class="st">&quot;latency_ms&quot;</span><span class="op">:</span> <span class="dv">200</span> }<span class="op">,</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true"></a>    <span class="st">&quot;resend&quot;</span><span class="op">:</span>    { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span> <span class="st">&quot;latency_ms&quot;</span><span class="op">:</span>  <span class="dv">80</span> }<span class="op">,</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true"></a>    <span class="st">&quot;posthog&quot;</span><span class="op">:</span>   { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span> <span class="st">&quot;latency_ms&quot;</span><span class="op">:</span>  <span class="dv">60</span> }</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true"></a>  }</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true"></a>}</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true"></a><span class="co">// Response shape (503 — Daily.co down)</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true"></a>{</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true"></a>  <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;unhealthy&quot;</span><span class="op">,</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true"></a>  <span class="st">&quot;timestamp&quot;</span><span class="op">:</span> <span class="st">&quot;2026-05-12T15:42:30Z&quot;</span><span class="op">,</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true"></a>  <span class="st">&quot;subsystems&quot;</span><span class="op">:</span> {</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true"></a>    <span class="st">&quot;supabase&quot;</span><span class="op">:</span>  { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span>        <span class="st">&quot;latency_ms&quot;</span><span class="op">:</span>  <span class="dv">45</span> }<span class="op">,</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true"></a>    <span class="st">&quot;r2&quot;</span><span class="op">:</span>        { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span>        <span class="st">&quot;latency_ms&quot;</span><span class="op">:</span> <span class="dv">120</span> }<span class="op">,</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true"></a>    <span class="st">&quot;dailyco&quot;</span><span class="op">:</span>   { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;unhealthy&quot;</span><span class="op">,</span> <span class="st">&quot;error&quot;</span><span class="op">:</span> <span class="st">&quot;timeout after 3000ms&quot;</span> }<span class="op">,</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true"></a>    <span class="st">&quot;resend&quot;</span><span class="op">:</span>    { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span>        <span class="st">&quot;latency_ms&quot;</span><span class="op">:</span>  <span class="dv">80</span> }<span class="op">,</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true"></a>    <span class="st">&quot;posthog&quot;</span><span class="op">:</span>   { <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span>        <span class="st">&quot;latency_ms&quot;</span><span class="op">:</span>  <span class="dv">60</span> }</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true"></a>  }</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true"></a>}</span></code></pre></div>
+<p><strong>Status semantics:</strong></p>
+<ul>
+<li><code>ok</code> — every subsystem responded within budget</li>
+<li><code>degraded</code> — at least one non-critical subsystem is slow (e.g., Resend latency &gt; 1000ms) but everything is reachable; the app keeps running but operators should know</li>
+<li><code>unhealthy</code> — at least one critical subsystem is unreachable (Supabase is always critical; R2 is critical for media surfaces; Daily.co is critical only when active meetings exist; Resend is critical only when payment confirmations are queued)</li>
+</ul>
+<p>Better Stack hits this endpoint every 5 minutes. The admin observability tab (§ 10) polls it every 30 seconds while open. Internal staff dashboards may poll up to once per second; rate-limit to 60 req/min per IP to prevent runaway clients.</p>
+<h3 id="43-per-subsystem-ping-implementations">4.3 Per-subsystem ping implementations</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Subsystem</th>
+<th>Ping</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Supabase</td>
+<td><code>SELECT 1</code> against the read replica · times out at 3s</td>
+</tr>
+<tr class="even">
+<td>R2</td>
+<td>HEAD on a fixed <code>/healthcheck.txt</code> object · times out at 3s</td>
+</tr>
+<tr class="odd">
+<td>Daily.co</td>
+<td><code>GET /v1/</code> (root API) with API key · times out at 3s</td>
+</tr>
+<tr class="even">
+<td>Resend</td>
+<td><code>GET /domains</code> · times out at 3s</td>
+</tr>
+<tr class="odd">
+<td>PostHog</td>
+<td><code>GET /api/feature_flag/local_evaluation</code> · times out at 3s</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-posthog-product-analytics">5. PostHog product analytics</h2>
+<h3 id="51-pipe">5.1 Pipe</h3>
+<p>PostHog ingests two streams:</p>
+<ol>
+<li><strong>funnel_events</strong> — backend-fired events from the <code>funnel_events</code> table per 0023 § 3.8. A Supabase trigger calls a PostHog ingestion edge function on insert; failure of the edge function never blocks the main transaction.</li>
+<li><strong>Client-side captures</strong> — explicit <code>posthog.capture()</code> calls in the Next.js app for events that don't warrant a DB row (page views, button clicks, form submissions).</li>
+</ol>
+<h3 id="52-identify-on-login">5.2 Identify on login</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a>posthog<span class="op">.</span><span class="fu">identify</span>(user<span class="op">.</span><span class="at">id</span><span class="op">,</span> {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>  account_type<span class="op">:</span> user<span class="op">.</span><span class="at">account_type</span><span class="op">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a>  signup_date<span class="op">:</span> user<span class="op">.</span><span class="at">created_at</span><span class="op">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a>  locale<span class="op">:</span> user<span class="op">.</span><span class="at">locale</span><span class="op">,</span>         <span class="co">// &#39;en&#39; | &#39;tl&#39; | &#39;ceb&#39;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true"></a>  <span class="co">// email: NEVER</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true"></a>  <span class="co">// full_name: NEVER</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true"></a>})<span class="op">;</span></span></code></pre></div>
+<h3 id="53-key-events-tracked">5.3 Key events tracked</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Event</th>
+<th>Iteration</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>cart_item_added</code></td>
+<td>0034</td>
+<td>Client</td>
+</tr>
+<tr class="even">
+<td><code>cart_checkout_initiated</code></td>
+<td>0034</td>
+<td>Server (funnel_events)</td>
+</tr>
+<tr class="odd">
+<td><code>payment_proof_submitted</code></td>
+<td>0034</td>
+<td>Server (funnel_events)</td>
+</tr>
+<tr class="even">
+<td><code>payment_approved</code></td>
+<td>0034</td>
+<td>Server (funnel_events)</td>
+</tr>
+<tr class="odd">
+<td><code>vendor_inquiry_sent</code></td>
+<td>0019</td>
+<td>Server</td>
+</tr>
+<tr class="even">
+<td><code>vendor_quote_received</code></td>
+<td>0019</td>
+<td>Server</td>
+</tr>
+<tr class="odd">
+<td><code>vendor_booking_confirmed</code></td>
+<td>0006/0034</td>
+<td>Server</td>
+</tr>
+<tr class="even">
+<td><code>save_the_date_template_selected</code></td>
+<td>0024</td>
+<td>Client</td>
+</tr>
+<tr class="odd">
+<td><code>save_the_date_render_purchased</code></td>
+<td>0024</td>
+<td>Server</td>
+</tr>
+<tr class="even">
+<td><code>papic_seat_claimed</code></td>
+<td>0012</td>
+<td>Server</td>
+</tr>
+<tr class="odd">
+<td><code>papic_photo_uploaded</code></td>
+<td>0012</td>
+<td>Server (sampled at 1%)</td>
+</tr>
+<tr class="even">
+<td><code>panood_broadcast_started</code></td>
+<td>0011</td>
+<td>Server</td>
+</tr>
+<tr class="odd">
+<td><code>tour_started</code> / <code>tour_completed</code> / <code>tour_skipped</code></td>
+<td>0030</td>
+<td>Client</td>
+</tr>
+<tr class="even">
+<td><code>help_article_viewed</code> / <code>support_ticket_submitted</code></td>
+<td>0029</td>
+<td>Client/Server</td>
+</tr>
+<tr class="odd">
+<td><code>vendor_registration_submitted</code></td>
+<td>0015</td>
+<td>Server</td>
+</tr>
+<tr class="even">
+<td><code>vendor_verification_approved</code></td>
+<td>0023</td>
+<td>Server</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-session-recordings--disabled-in-v1">5.4 Session recordings — DISABLED in V1</h3>
+<p>Session recordings would capture too much PII — guest names, vendor messages, payment screenshots. Disabled by SDK config:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a>posthog<span class="op">.</span><span class="fu">init</span>(POSTHOG_KEY<span class="op">,</span> {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>  disable_session_recording<span class="op">:</span> true<span class="op">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a>  capture_pageview<span class="op">:</span> true<span class="op">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a>  capture_pageleave<span class="op">:</span> true<span class="op">,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>})<span class="op">;</span></span></code></pre></div>
+<p>Revisit in V2 with a privacy review, region-restricted recording (admin surfaces only), and explicit opt-in.</p>
+<h3 id="55-feature-flags">5.5 Feature flags</h3>
+<p>PostHog feature flags drive:</p>
+<ul>
+<li>Gradual rollouts of new iterations (e.g., 0024 Save-the-Date rolled to 10% of users for the first week)</li>
+<li>A/B tests on marketing copy (0015 hero variants)</li>
+<li>Per-event-type kill switches (disable Papic for one wedding if a bug is reported)</li>
+</ul>
+<h3 id="56-cohort--funnel-example">5.6 Cohort + funnel example</h3>
+<p>Cohort: "Vendors who registered but haven't responded to first inquiry within 48h."</p>
+<p>Funnel: <code>vendor_registration_submitted</code> → <code>vendor_verification_approved</code> → <code>vendor_inquiry_received</code> → <code>vendor_inquiry_responded</code> (window: 48h).</p>
+<p>Both surfaces light up the operations team's drop-off heatmap and feed the vendor-unresponsive nudge email (0028 template § vendor_unresponsive_48h).</p>
+<hr />
+<h2 id="6-better-stack--uptime--status-page--on-call">6. Better Stack — uptime + status page + on-call</h2>
+<h3 id="61-uptime-monitors">6.1 Uptime monitors</h3>
+<p><strong>Public</strong> (Better Stack runs synthetic checks from multi-region):</p>
+<ul>
+<li><code>setnayan.com/</code> — home</li>
+<li><code>setnayan.com/apply</code> — customer apply</li>
+<li><code>setnayan.com/register-vendor</code> — vendor registration</li>
+<li>5 sampled vendor landing pages (<code>/v/[slug]</code>) rotated weekly</li>
+</ul>
+<p><strong>Internal</strong> (Better Stack calls authenticated endpoints with bearer token):</p>
+<ul>
+<li><code>/api/health</code> — every 1 minute · 10s timeout</li>
+<li><code>/api/health/deep</code> — every 5 minutes · 15s timeout</li>
+<li>Supabase direct ping (Better Stack DB monitor) — every 1 minute</li>
+</ul>
+<h3 id="62-status-page">6.2 Status page</h3>
+<p>Hosted at <code>status.setnayan.com</code> (custom domain CNAME'd to Better Stack). Public-facing.</p>
+<ul>
+<li>Auto-updates when monitors trip (red banner + incident card)</li>
+<li>Admin can post manual updates ("We are investigating a payment processing delay")</li>
+<li>Historical uptime % displayed per subsystem (90-day rolling)</li>
+<li>Subscribe-to-incident-updates via email (RFC 8058 unsubscribe support inherited from Better Stack)</li>
+</ul>
+<h3 id="63-on-call">6.3 On-call</h3>
+<table>
+<thead>
+<tr class="header">
+<th>V1</th>
+<th>V1.5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1 on-call user — Ops Lead (free tier)</td>
+<td>3-person rotation — Ops Lead + Backend Lead + Founder rotates weekly (₱500/mo upgrade)</td>
+</tr>
+<tr class="even">
+<td>Escalation: SMS + email simultaneously; if no ack within 10 min, escalate to secondary</td>
+<td>Escalation: same, plus auto-page next-in-rotation if primary doesn't ack within 15 min</td>
+</tr>
+<tr class="odd">
+<td>Quiet hours: non-P1 alerts batched 22:00–08:00 PHT</td>
+<td>Same — quiet hours preserved</td>
+</tr>
+</tbody>
+</table>
+<p>P1 (critical) alerts page even in quiet hours. P2 (warning) and P3 (info) batch.</p>
+<hr />
+<h2 id="7-logging-strategy">7. Logging strategy</h2>
+<h3 id="71-pipeline">7.1 Pipeline</h3>
+<pre><code>Next.js app (Vercel)
+  ├─ stdout/stderr  ──► Vercel runtime logs  ──► Vercel Log Drain  ──► Better Stack
+  └─ Sentry.captureException()  ──► Sentry
+</code></pre>
+<p>Vercel auto-captures everything written to stdout/stderr from Next.js server + Edge Functions. The Log Drain ships the stream to Better Stack's log explorer in real time. Sentry captures errors separately.</p>
+<h3 id="72-log-levels">7.2 Log levels</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Level</th>
+<th>When</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>error</code></td>
+<td>Anything thrown · always captured by Sentry too</td>
+<td>Sentry + Better Stack</td>
+</tr>
+<tr class="even">
+<td><code>warn</code></td>
+<td>Non-fatal anomaly (slow query, retry attempted, deprecated path hit)</td>
+<td>Better Stack</td>
+</tr>
+<tr class="odd">
+<td><code>info</code></td>
+<td>Flow boundary crossings (request received, response sent, queue job started)</td>
+<td>Better Stack</td>
+</tr>
+<tr class="even">
+<td><code>debug</code></td>
+<td>Verbose · enabled only in dev + staging · suppressed in production</td>
+<td>Better Stack (staging only)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-structured-json">7.3 Structured JSON</h3>
+<p>All server logs are JSON-formatted with consistent fields:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="bu">JSON</span><span class="op">.</span><span class="fu">stringify</span>({</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a>  level<span class="op">:</span> <span class="st">&#39;info&#39;</span><span class="op">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true"></a>  iteration<span class="op">:</span> <span class="st">&#39;0034&#39;</span><span class="op">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true"></a>  flow<span class="op">:</span> <span class="st">&#39;payment_proof_submitted&#39;</span><span class="op">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true"></a>  user_id<span class="op">:</span> user<span class="op">.</span><span class="at">id</span><span class="op">,</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true"></a>  order_id<span class="op">:</span> order<span class="op">.</span><span class="at">id</span><span class="op">,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true"></a>  request_id<span class="op">:</span> ctx<span class="op">.</span><span class="at">request_id</span><span class="op">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true"></a>  message<span class="op">:</span> <span class="st">&#39;Payment proof uploaded to R2&#39;</span><span class="op">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true"></a>  timestamp<span class="op">:</span> <span class="kw">new</span> <span class="fu">Date</span>()<span class="op">.</span><span class="fu">toISOString</span>()<span class="op">,</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true"></a>}))<span class="op">;</span></span></code></pre></div>
+<p>A logger helper wraps this — engineers call <code>log.info({...})</code> rather than hand-rolling JSON.stringify each time.</p>
+<h3 id="74-retention">7.4 Retention</h3>
+<ul>
+<li>Better Stack default: 30 days</li>
+<li>Sentry: 90 days (V1 Team plan)</li>
+<li>Vercel raw logs: 24 hours (Hobby) / 7 days (Pro)</li>
+</ul>
+<p>V1 retention is intentionally short to keep cost down and minimize PII exposure surface. Longer retention requires explicit privacy review.</p>
+<hr />
+<h2 id="8-alert-rules">8. Alert rules</h2>
+<h3 id="81-critical-page-on-call-immediately-247">8.1 Critical (page on-call immediately, 24/7)</h3>
+<ul>
+<li><code>/api/health</code> returns 5xx for 2 consecutive checks (2 minutes)</li>
+<li><code>/api/health/deep</code> returns <code>unhealthy</code> for 2 consecutive checks (10 minutes)</li>
+<li>Sentry error rate &gt; 50 errors/minute sustained 5 minutes</li>
+<li>Supabase 5xx rate &gt; 50% sustained 5 minutes</li>
+<li>Daily.co video meeting setup failures &gt; 50% sustained 5 minutes (during business hours)</li>
+<li>Status page subscriber count drops &gt; 30% in 1 hour (signal of incident-driven unsubscribes)</li>
+</ul>
+<h3 id="82-warning-slack-notification-only-not-paged">8.2 Warning (Slack notification only, not paged)</h3>
+<ul>
+<li>Sentry error rate &gt; 10 errors/minute sustained 15 minutes</li>
+<li><code>/api/health/deep</code> returns <code>degraded</code> for 3 consecutive checks (15 minutes)</li>
+<li>R2 upload latency p99 &gt; 5s sustained 10 minutes</li>
+<li>Daily.co video meeting setup failures &gt; 5% sustained 30 minutes</li>
+<li>Resend email delivery rate &lt; 95% sustained 30 minutes</li>
+<li>Vercel deployment failures (2 consecutive)</li>
+</ul>
+<h3 id="83-info-slack-daily-digest-at-0900-pht">8.3 Info (Slack daily digest at 09:00 PHT)</h3>
+<ul>
+<li>Daily error count &gt; 1,000</li>
+<li>Daily 4xx rate &gt; 5%</li>
+<li>R2 storage usage &gt; 80% of plan limit</li>
+<li>Supabase row count growth &gt; 10% week-over-week (capacity planning signal)</li>
+<li>PostHog event volume approaching free-tier ceiling</li>
+</ul>
+<h3 id="84-alert-deduplication">8.4 Alert deduplication</h3>
+<p>Sentry's issue grouping deduplicates errors by fingerprint. Better Stack alert deduplication: identical monitor failures within 15 minutes consolidate into one incident card. Reduces "alert storm" noise during real outages.</p>
+<hr />
+<h2 id="9-privacy--ra-10173-compliance">9. Privacy + RA 10173 compliance</h2>
+<h3 id="91-no-pii-in-logs">9.1 No PII in logs</h3>
+<p>Email addresses, full names, phone numbers, payment card details, and government IDs MUST NOT appear in log messages, breadcrumbs, error contexts, or analytics events. Correlation uses <code>user_id</code> only (opaque UUID).</p>
+<h3 id="92-sentry-server-side-data-scrubber">9.2 Sentry server-side data scrubber</h3>
+<p>Sentry's data scrubber runs before send:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a>Sentry<span class="op">.</span><span class="fu">init</span>({</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true"></a>  <span class="co">// ...</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true"></a>  <span class="fu">beforeSend</span>(event) {</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true"></a>    <span class="co">// Strip known PII fields</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true"></a>    <span class="fu">if</span> (event<span class="op">.</span><span class="at">user</span>) {</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true"></a>      delete event<span class="op">.</span><span class="at">user</span><span class="op">.</span><span class="at">email</span><span class="op">;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true"></a>      delete event<span class="op">.</span><span class="at">user</span><span class="op">.</span><span class="at">username</span><span class="op">;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true"></a>      delete event<span class="op">.</span><span class="at">user</span><span class="op">.</span><span class="at">ip_address</span><span class="op">;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true"></a>    }</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true"></a>    <span class="co">// Scrub free-text PII patterns</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true"></a>    event <span class="op">=</span> <span class="fu">scrubEmailPattern</span>(event)<span class="op">;</span>          <span class="co">// RFC 5322 regex</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true"></a>    event <span class="op">=</span> <span class="fu">scrubCreditCardPattern</span>(event)<span class="op">;</span>     <span class="co">// Luhn-valid 13–19 digit runs</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true"></a>    event <span class="op">=</span> <span class="fu">scrubPHPhonePattern</span>(event)<span class="op">;</span>        <span class="co">// +63 9XX XXXX XXX</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true"></a>    return event<span class="op">;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true"></a>  }<span class="op">,</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true"></a>})<span class="op">;</span></span></code></pre></div>
+<h3 id="93-posthog-opt-out">9.3 PostHog opt-out</h3>
+<p>Users opt out of product analytics via 0025 Profile Settings → Privacy → "Help improve Setnayan" toggle. Default ON (industry standard); UI clearly labels what is collected and provides one-tap toggle.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a><span class="co">// On toggle off</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a>posthog<span class="op">.</span><span class="fu">opt_out_capturing</span>()<span class="op">;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true"></a><span class="co">// On toggle on</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true"></a>posthog<span class="op">.</span><span class="fu">opt_in_capturing</span>()<span class="op">;</span></span></code></pre></div>
+<h3 id="94-session-recordings-disabled-in-v1">9.4 Session recordings DISABLED in V1</h3>
+<p>Per § 5.4. Not configurable in V1 — disabled by SDK init, no admin override.</p>
+<h3 id="95-data-residency">9.5 Data residency</h3>
+<p>Sentry, PostHog (EU), Better Stack are not PH-region hosted. Cross-border data flow is anonymized telemetry — no PII per § 9.1. This is documented in the Privacy Policy under "Service Providers" with each vendor's data processing agreement linked.</p>
+<h3 id="96-right-to-erasure">9.6 Right to erasure</h3>
+<p>When a user invokes account deletion (per 0025 § 6 — RA 10173 § 16(e)):</p>
+<ul>
+<li>Sentry: scheduled job calls Sentry's user deletion API to scrub historical events</li>
+<li>PostHog: same — PostHog supports <code>posthog.reset()</code> on client + server-side user delete API</li>
+<li>Better Stack: logs purged via the 30-day rolling retention (no explicit delete API; user_id naturally ages out)</li>
+</ul>
+<p>Documented latency: user-data erasure across observability vendors completes within 30 days of the soft-delete grace window.</p>
+<hr />
+<h2 id="10-admin-observability-surface-extends-0023">10. Admin observability surface (extends 0023)</h2>
+<p>A new sub-section inside 0023 Admin Console → Settings → <strong>Observability</strong>:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Card</th>
+<th>Content</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Subsystem health</td>
+<td>Green/amber/red badges for Supabase · R2 · Daily.co · Resend · PostHog · Vercel</td>
+<td><code>/api/health/deep</code> polled every 30s</td>
+</tr>
+<tr class="even">
+<td>Recent errors</td>
+<td>Top 10 Sentry issues in last 24h with counts + last-seen + open Sentry link</td>
+<td>Sentry Issues API</td>
+</tr>
+<tr class="odd">
+<td>Funnel snapshot</td>
+<td>Today vs 7d-avg for the 4 headline funnels (cart conversion · vendor signup · S-T-D purchase · Papic seat claim)</td>
+<td>PostHog API</td>
+</tr>
+<tr class="even">
+<td>Uptime</td>
+<td>Last-7-day uptime % per public surface</td>
+<td>Better Stack API</td>
+</tr>
+<tr class="odd">
+<td>Status page</td>
+<td>"Post incident update" button → opens status page admin</td>
+<td>Better Stack</td>
+</tr>
+<tr class="even">
+<td>On-call</td>
+<td>Current on-call user + escalation contact + "I'm on-call now" override</td>
+<td>Better Stack (V1.5)</td>
+</tr>
+</tbody>
+</table>
+<p>Visible to admin roles <code>Operations Lead</code>, <code>Engineering Lead</code>, <code>Founder</code> per 0023 § 9 role gates. Read-only for <code>Verification Handler</code> and <code>Transactions Handler</code>.</p>
+<hr />
+<h2 id="11-acceptance-tests-v1">11. Acceptance tests (V1)</h2>
+<ol>
+<li>Server-side exception thrown in any iteration → appears in Sentry within 60 seconds with <code>iteration</code> tag.</li>
+<li>Client-side React error boundary triggered → appears in Sentry with breadcrumbs.</li>
+<li>Sentry user context contains <code>id</code> + <code>account_type</code> ONLY — never email/name/phone (regression-tested).</li>
+<li>Email address embedded in error message body → scrubbed before Sentry send.</li>
+<li><code>/api/health</code> returns 200 + <code>{ status: 'ok', timestamp, version }</code> in &lt; 50ms p99.</li>
+<li><code>/api/health/deep</code> returns 200 + per-subsystem latencies when everything healthy.</li>
+<li><code>/api/health/deep</code> returns 503 when Supabase ping times out, with <code>unhealthy</code> status and Supabase error detail.</li>
+<li>Better Stack uptime monitor at 1-minute cadence trips on first 5xx, lights up status page within 2 minutes.</li>
+<li>Better Stack pages on-call (SMS + email) within 5 minutes of monitor trip.</li>
+<li>PostHog <code>cart_item_added</code> event fires with sku_code + cart_id, no PII.</li>
+<li>PostHog opt-out via Profile Settings → no further events captured client-side from that user.</li>
+<li>Session recordings: confirmed disabled in production SDK config (build-time assertion).</li>
+<li>Vercel log drain → Better Stack log explorer surfaces structured JSON within 30 seconds of console.log.</li>
+<li>Sentry source map upload succeeds on Vercel build; production stack traces unminified.</li>
+<li>Alert dedup: 50 identical errors in 1 minute create 1 Sentry issue + 1 Slack notification, not 50.</li>
+<li>Feature flag evaluated server-side: <code>posthog.isFeatureEnabled('save_the_date_gradual_rollout', user.id)</code> returns deterministic boolean.</li>
+<li>Account deletion (0025) triggers Sentry + PostHog user erasure API call within 24 hours.</li>
+<li>Admin Observability tab loads in &lt; 2s with all 6 cards populated.</li>
+</ol>
+<hr />
+<h2 id="12-build-sequence">12. Build sequence</h2>
+<ol>
+<li><strong>Day 1</strong> — Sentry account creation · DSN in Vercel env vars · <code>sentry.{server,client,edge}.config.ts</code> committed · source map upload working in staging.</li>
+<li><strong>Day 1</strong> — Logger helper (<code>@/lib/log.ts</code>) + structured JSON enforced via lint rule.</li>
+<li><strong>Day 2</strong> — <code>/api/health</code> + <code>/api/health/deep</code> endpoints implemented + tested locally.</li>
+<li><strong>Day 2</strong> — PostHog account + project · client + server SDKs initialized · identify-on-login wired.</li>
+<li><strong>Day 3</strong> — Better Stack account · uptime monitors created · status page DNS configured (<code>status.setnayan.com</code>).</li>
+<li><strong>Day 3</strong> — Vercel Log Drain → Better Stack configured.</li>
+<li><strong>Day 4</strong> — Alert rules entered into Better Stack + Sentry (critical · warning · info tiers).</li>
+<li><strong>Day 4</strong> — Admin Observability tab (0023 extension) — health card + recent errors card + funnel card.</li>
+<li><strong>Day 5</strong> — Fire-drill: trigger synthetic 5xx in staging · confirm Sentry alert · confirm Slack notification · confirm on-call SMS · confirm status page update. Document run-of-show in <code>09_Operations/incident_response_runbook.md</code>.</li>
+<li><strong>Day 5</strong> — Privacy review: verify Sentry scrubber working · PostHog opt-out wired · session recordings off · all 15 acceptance tests pass.</li>
+</ol>
+<p><strong>Engineering effort:</strong> 1 engineer · 1 week to V1-ready.</p>
+<hr />
+<h2 id="13-decision-log">13. Decision log</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Date</th>
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Sentry over Rollbar / Bugsnag</td>
+<td>First-class Next.js support; PH dev market familiarity; release tracking + source map upload built in</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>PostHog over Mixpanel / Amplitude</td>
+<td>Bundled feature flags + analytics + cohorts at 10–20% the cost; EU region for GDPR-equivalent privacy contract</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Better Stack over Pingdom + StatusPage + PagerDuty</td>
+<td>Single vendor consolidates uptime + status + log + on-call at ₱1K/mo vs ~₱15K split across 4 vendors</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>Custom <code>/api/health</code> + <code>/deep</code> over synthetic-only</td>
+<td>Synthetic browser checks can't distinguish "app responds" from "Supabase reachable, R2 reachable, etc." — too coarse for incident triage</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Session recordings DISABLED in V1</td>
+<td>RA 10173 minimization principle; payment screenshots + guest names + vendor messages in DOM make recordings a PII hazard; revisit V2 with explicit opt-in</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>Performance sampling 10% in V1</td>
+<td>Cost control during launch traffic; lift to 25% in V1.1 once baseline data exists</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>No replays · no profiling V1</td>
+<td>Same privacy + cost rationale; replays require explicit opt-in path that V1 hasn't designed yet</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>On-call free tier (1 user) for V1</td>
+<td>Avoid the ₱500/mo upgrade until we have at least 3 engineers to rotate; until then Ops Lead carries the pager</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>User context = <code>id</code> + <code>account_type</code> only</td>
+<td>Hard PII boundary in observability; correlation possible via internal admin tooling with proper audit trail</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>Health-endpoint rate-limit 60 req/min per IP</td>
+<td>Prevents runaway internal clients from DDoS'ing the deep health check + cascading subsystem pings</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Log retention 30 days (Better Stack) + 90 days (Sentry)</td>
+<td>Sufficient for incident forensics + post-mortem windows; longer retention requires privacy review</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>Status page at <code>status.setnayan.com</code> subdomain</td>
+<td>Independent infrastructure from setnayan.com — if main app goes down, status page stays up because it lives on Better Stack</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-companion-docs">14. Companion docs</h2>
+<ul>
+<li><code>0013_platform_stack_and_sync/</code> — defines the stack this iteration instruments</li>
+<li><code>0023_admin_console/</code> — funnel_events table § 3.8 + admin role gates § 9 + Observability sub-tab landing here in § 10</li>
+<li><code>0025_profile_settings/</code> — Privacy tab hosts the PostHog opt-out toggle</li>
+<li><code>0028_email_notifications/</code> — Resend integration that this iteration health-checks</li>
+<li><code>0034_payments_and_cart/</code> — emits funnel_events that PostHog consumes</li>
+<li><code>Setnayan_Privacy_and_Security_Policy.md</code> — documents the cross-border telemetry flows + scrubbing posture</li>
+<li><code>09_Operations/incident_response_runbook.md</code> — produced as deliverable of § 12 Day 5 fire-drill; covers paging, comms, post-mortem template</li>
+</ul>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

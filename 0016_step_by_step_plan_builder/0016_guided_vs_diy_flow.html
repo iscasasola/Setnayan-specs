@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan · Guided vs DIY Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --page-bg: #F2EBDF;
+  --canvas: #FAF6F0;
+  --canvas-soft: #F5EFE5;
+  --ink: #1A1A1A;
+  --ink-soft: #6B6B6B;
+  --ink-faint: #A39B8E;
+  --accent: #C97B4B;
+  --accent-soft: #E8C9B0;
+  --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08);
+  --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F3;
+  --gold: #B8965E;
+  --green: #5BA962;
+  --green-soft: #DDEFDD;
+  --green-deep: #2F6F36;
+  --amber: #C8A14F;
+  --amber-soft: #F5EBD0;
+  --amber-deep: #8C6A20;
+  --blue: #4D7BA1;
+  --blue-soft: #DCE7F0;
+  --blue-deep: #2A4F6E;
+  --rose: #B86A6A;
+  --rose-soft: #EBD3D3;
+  --shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.04);
+  --shadow-md: 0 12px 32px rgba(26, 26, 26, 0.08);
+  --shadow-lg: 0 28px 72px rgba(26, 26, 26, 0.12);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--page-bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 56px 32px 96px;
+}
+
+.title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+  margin-top: 12px;
+}
+.intro {
+  margin-top: 32px;
+  max-width: 760px;
+  font-size: 16px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.intro b { color: var(--ink); font-weight: 600; }
+
+.flow-rail {
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+}
+
+.step {
+  position: relative;
+  padding: 48px 0;
+  border-top: 1px dashed var(--rule-strong);
+}
+.step:first-child { border-top: none; padding-top: 0; }
+
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.step-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 56px;
+  font-weight: 500;
+  line-height: 0.9;
+  color: var(--accent);
+  flex-shrink: 0;
+  width: 96px;
+}
+.step-titles { flex: 1; padding-top: 6px; }
+.step-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  margin-bottom: 8px;
+}
+.step-caption {
+  font-size: 14px;
+  color: var(--ink-soft);
+  max-width: 720px;
+  line-height: 1.6;
+}
+.step-trigger {
+  margin-top: 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent-deep);
+  display: inline-block;
+  padding: 6px 12px;
+  background: var(--accent-soft);
+  border-radius: 6px;
+}
+
+.frames {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+.frame {
+  background: var(--canvas);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.frame-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--canvas-soft);
+  border-bottom: 1px solid var(--rule);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+}
+.frame-body {
+  padding: 32px 40px;
+  background: var(--canvas);
+}
+
+.mock-chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 28px;
+}
+.mock-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+.mock-step-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  background: var(--surface-soft);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* ============ STEP 1 — Plan Choice ============ */
+.choice-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: 0.005em;
+}
+.choice-sub {
+  font-size: 15px;
+  color: var(--ink-soft);
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.choice-card {
+  background: var(--surface);
+  border: 2px solid var(--rule);
+  border-radius: 18px;
+  padding: 32px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.choice-card.recommended {
+  border-color: var(--accent);
+  box-shadow: 0 18px 48px rgba(201, 123, 75, 0.18);
+}
+.choice-card.recommended::before {
+  content: 'RECOMMENDED';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: white;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 4px 14px;
+  border-radius: 100px;
+}
+.choice-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+.choice-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  margin-bottom: 4px;
+}
+.choice-tagline {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.choice-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.choice-price-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.choice-features {
+  list-style: none;
+  margin-bottom: 28px;
+}
+.choice-features li {
+  padding: 8px 0;
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.choice-features li::before {
+  content: '✓';
+  color: var(--green-deep);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.choice-features li.absent::before {
+  content: '—';
+  color: var(--ink-faint);
+}
+.choice-features li.absent {
+  color: var(--ink-faint);
+}
+.choice-cta {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  margin-top: auto;
+}
+.choice-cta.primary {
+  background: var(--ink);
+  color: white;
+}
+.choice-cta.secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+}
+
+/* ============ STEP 2 — Tier Picker ============ */
+.tier-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.tier-sub {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+.tier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.tier-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.tier-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 6px 24px rgba(201, 123, 75, 0.12);
+}
+.tier-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--accent);
+}
+.tier-info { flex: 1; }
+.tier-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.tier-desc {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+.tier-budget {
+  text-align: right;
+}
+.tier-budget-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.tier-budget-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+/* Stick or Play */
+.budget-confirm {
+  background: var(--canvas-soft);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 16px;
+}
+.budget-confirm-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.budget-confirm-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 28px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--accent-deep);
+  margin-bottom: 4px;
+}
+.budget-confirm-sub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-align: center;
+  margin-bottom: 20px;
+}
+.budget-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.budget-action {
+  padding: 14px 18px;
+  border-radius: 100px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+}
+.budget-action.primary {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+
+/* ============ STEP 3 — Plan Recap ============ */
+.recap-banner {
+  background: linear-gradient(135deg, var(--green-soft), #C8E5C4);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.recap-banner-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--green-deep);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.recap-banner-content { flex: 1; }
+.recap-banner-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--green-deep);
+  margin-bottom: 2px;
+}
+.recap-banner-sub {
+  font-size: 13px;
+  color: var(--green-deep);
+}
+
+.recap-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.recap-stat {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.recap-stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.recap-stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.compare-prompt {
+  background: var(--canvas-soft);
+  border: 2px dashed var(--accent);
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.compare-prompt-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent-deep);
+  margin-bottom: 8px;
+}
+.compare-prompt-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.compare-prompt-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  max-width: 480px;
+  margin: 0 auto 22px;
+  line-height: 1.5;
+}
+.compare-prompt-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.compare-prompt-btn {
+  padding: 12px 22px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.compare-prompt-btn.primary {
+  background: var(--accent);
+  color: white;
+}
+.compare-prompt-btn.secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+}
+
+/* ============ STEP 4 — Compare side-by-side ============ */
+.compare-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.compare-meta {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+
+.compare-headers {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+.compare-corner { font-size: 11px; color: var(--ink-faint); padding: 0 0 10px; }
+.compare-col-header {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px 12px 0 0;
+  padding: 18px 20px;
+  border-bottom: none;
+}
+.compare-col-header.guided {
+  border-top: 4px solid var(--accent);
+}
+.compare-col-header.diy {
+  border-top: 4px solid var(--blue);
+}
+.compare-col-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.compare-col-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.compare-col-total {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+}
+.compare-col-tag {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 3px 8px;
+  border-radius: 100px;
+  margin-top: 8px;
+}
+.compare-col-tag.guided { background: var(--accent-soft); color: var(--accent-deep); }
+.compare-col-tag.diy { background: var(--blue-soft); color: var(--blue-deep); }
+
+.compare-table {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+.compare-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+.compare-row:last-child { border-bottom: none; }
+.compare-row.section-head {
+  background: var(--canvas-soft);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  padding: 10px 18px;
+}
+.compare-row.summary {
+  background: var(--canvas-soft);
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+}
+.compare-cell-label {
+  color: var(--ink);
+  font-weight: 500;
+}
+.compare-cell-label .meta {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-weight: 400;
+  margin-top: 2px;
+}
+.compare-cell {
+  display: flex;
+  flex-direction: column;
+}
+.compare-cell-vendor {
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.compare-cell-price {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.compare-cell-meta {
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+.compare-cell.bundled .compare-cell-vendor {
+  color: var(--green-deep);
+}
+.compare-cell.empty .compare-cell-vendor {
+  color: var(--ink-faint);
+  font-style: italic;
+  font-weight: 400;
+}
+.compare-cell.warning .compare-cell-vendor {
+  color: var(--amber-deep);
+}
+
+.compare-takeaway {
+  margin-top: 24px;
+  padding: 22px 26px;
+  background: linear-gradient(135deg, var(--accent-soft), #F5DEC3);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: center;
+}
+.compare-takeaway-text {
+  font-size: 14px;
+  color: var(--accent-deep);
+  line-height: 1.6;
+}
+.compare-takeaway-text b { font-family: 'DM Mono', monospace; font-weight: 700; }
+.compare-takeaway-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.compare-commit-btn {
+  padding: 11px 20px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+.compare-commit-btn.primary {
+  background: var(--ink);
+  color: white;
+}
+.compare-commit-btn.secondary {
+  background: white;
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+}
+
+/* Annotation flag */
+.flag {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--canvas);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.flag b { color: var(--ink); font-weight: 600; }
+
+/* Mobile preview overlay */
+.mobile-preview {
+  background: var(--canvas);
+  border: 1px solid var(--rule);
+  border-radius: 24px;
+  padding: 14px;
+  width: 320px;
+  margin-top: 24px;
+  box-shadow: var(--shadow-md);
+}
+.mobile-preview-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.mobile-preview-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+}
+.mobile-choice-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 10px;
+  position: relative;
+}
+.mobile-choice-card.recommended {
+  border-color: var(--accent);
+}
+.mobile-choice-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.mobile-choice-tag {
+  font-size: 10px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.mobile-choice-price {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.mobile-choice-bullet {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.mobile-choice-bullet::before {
+  content: '✓';
+  color: var(--green-deep);
+  font-weight: 700;
+}
+.mobile-choice-cta {
+  display: block;
+  width: 100%;
+  padding: 11px;
+  background: var(--ink);
+  color: white;
+  text-align: center;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+footer {
+  margin-top: 96px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule-strong);
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="title">Guided vs DIY Flow</div>
+  <div class="subtitle">0016 · Setnayan Wedding Planner SKU · Compare-Both Pattern</div>
+
+  <p class="intro">
+    Couple lands in Setnayan, has just created their wedding event. They see the
+    plan-mode choice: <b>Setnayan Wedding Planner (Guided · ₱10,000)</b> or
+    <b>DIY (Free)</b>. Picking guided unlocks the wizard, tier picker, smart
+    matching, and bundling cascade. After their guided plan completes,
+    Setnayan offers a <b>compare-both</b> view — couple builds a parallel DIY
+    plan and Setnayan shows them side-by-side, so they can see exactly what
+    the ₱10,000 service bought them.
+  </p>
+
+  <div class="flow-rail">
+
+    <!-- ============ STEP 1 — Plan Choice ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">01</div>
+        <div class="step-titles">
+          <div class="step-title">Plan Choice · Guided or DIY</div>
+          <p class="step-caption">
+            First decision after creating the event. Couple picks how
+            they want to plan. Guided is recommended (badge), priced at
+            ₱10,000 — about 0.3% of a Distinguished-tier wedding's total
+            spend, but absorbs hours of research and unlocks the
+            bundling/sequencing intelligence. DIY is free for couples
+            who already have a plan in mind.
+          </p>
+          <span class="step-trigger">Lands here right after event creation</span>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">
+          <span>Desktop · /dashboard/[event]/plan/start</span>
+          <span>1280 × auto</span>
+        </div>
+        <div class="frame-body">
+          <div class="mock-chrome">
+            <div class="mock-brand">setnayan</div>
+            <div class="mock-step-pill">Wedding · Sept 12, 2026 · 230 guests</div>
+          </div>
+
+          <h2 class="choice-h">How would you like to plan?</h2>
+          <p class="choice-sub">
+            Setnayan can guide you through every category with smart matching and bundle savings, or you can build it yourself from scratch. Either way, your event is yours — change modes any time.
+          </p>
+
+          <div class="choice-grid">
+            <!-- Guided -->
+            <div class="choice-card recommended">
+              <div class="choice-eyebrow">Setnayan Wedding Planner</div>
+              <div class="choice-name">Guided</div>
+              <div class="choice-tagline">We walk you through every category in the right order, with vendor matches, tier-fit pricing, and bundle discovery.</div>
+
+              <div class="choice-price">₱10,000</div>
+              <div class="choice-price-sub">300,000 tokens · paid once per event</div>
+
+              <ul class="choice-features">
+                <li>5-question wizard → tier picker → working budget</li>
+                <li>Categories sequenced by lead time (book photo before stylist)</li>
+                <li>Vendor list filtered by your tier, location, capacity</li>
+                <li>Bundling cascade — venue picks auto-resolve cake, florals, car, etc.</li>
+                <li>Stylist parent-vendor logic (full-service auto-bundles)</li>
+                <li>"Recommended by venue · no corkage" pairings surfaced</li>
+                <li>8km proximity rule + tier-aware budget allocation</li>
+                <li>Compare-with-DIY view at the end (free)</li>
+              </ul>
+
+              <button class="choice-cta primary">Start guided planning · ₱10,000</button>
+            </div>
+
+            <!-- DIY -->
+            <div class="choice-card">
+              <div class="choice-eyebrow">Plan it yourself</div>
+              <div class="choice-name">DIY</div>
+              <div class="choice-tagline">Empty plan template. You enter every vendor, price, and decision manually. Full control, no guidance.</div>
+
+              <div class="choice-price">Free</div>
+              <div class="choice-price-sub">Use Setnayan's structure on your own</div>
+
+              <ul class="choice-features">
+                <li>Same category list and sequence</li>
+                <li>Manual vendor entry (you research, you decide)</li>
+                <li>Manual budget tracking against your own targets</li>
+                <li>Wallet, guest list, seating chart — all still work</li>
+                <li class="absent">No vendor matching or recommendations</li>
+                <li class="absent">No tier-fit budget guidance</li>
+                <li class="absent">No bundling cascade or paired pricing</li>
+                <li>Upgrade to Guided any time — ₱10,000</li>
+              </ul>
+
+              <button class="choice-cta secondary">Start DIY · Free</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile preview -->
+      <div style="display: flex; justify-content: center; margin-top: 32px;">
+        <div class="mobile-preview">
+          <div class="mock-chrome">
+            <div class="mock-brand">setnayan</div>
+            <div class="mock-step-pill">Plan</div>
+          </div>
+          <div class="mobile-preview-h">How would you like to plan?</div>
+          <div class="mobile-preview-sub">Pick a mode — change any time</div>
+
+          <div class="mobile-choice-card recommended">
+            <div class="mobile-choice-name">Setnayan Wedding Planner</div>
+            <div class="mobile-choice-tag">Guided · Recommended</div>
+            <div class="mobile-choice-price">₱10,000</div>
+            <div class="mobile-choice-bullet">Tier picker + smart matching</div>
+            <div class="mobile-choice-bullet">Bundling cascade saves ₱100K+</div>
+            <div class="mobile-choice-bullet">Compare-with-DIY at the end</div>
+            <button class="mobile-choice-cta">Start guided</button>
+          </div>
+
+          <div class="mobile-choice-card">
+            <div class="mobile-choice-name">DIY</div>
+            <div class="mobile-choice-tag">Plan it yourself · Free</div>
+            <div class="mobile-choice-price">Free</div>
+            <div class="mobile-choice-bullet">Same structure, no guidance</div>
+            <div class="mobile-choice-bullet">Manual vendor entry</div>
+            <button class="mobile-choice-cta" style="background: white; color: var(--ink); border: 1px solid var(--rule-strong);">Start DIY</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flag">
+        <b>The compare-with-DIY feature is the value-justifier.</b> Couples who balk at ₱10K can see exactly what they would have missed by going DIY — bundled extras the venue includes, vendor pairings that drop corkage, sequencing that books the right photographer before they're gone. The compare view turns the ₱10K price tag from a leap-of-faith into a measurable choice.
+      </div>
+    </section>
+
+    <!-- ============ STEP 2 — Tier picker (the value moment) ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">02</div>
+        <div class="step-titles">
+          <div class="step-title">Tier Picker · The first guided moment</div>
+          <p class="step-caption">
+            Couple picked Guided. After the 5 setup questions (date, location, guests, style + ceremony format), they reach the <b>tier picker</b> — five cards keyed to per-head spend, with their working budget computed against their guest count. They pick a tier; the next prompt is <b>Stick or Play</b> for budget flexibility.
+          </p>
+          <span class="step-trigger">Step 5 of 5 in the intake wizard</span>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">
+          <span>Desktop · tier picker</span>
+          <span>1280 × auto</span>
+        </div>
+        <div class="frame-body">
+          <div class="mock-chrome">
+            <div class="mock-brand">setnayan</div>
+            <div class="mock-step-pill">Guided · Step 5 of 5</div>
+          </div>
+
+          <div class="tier-h">Pick the kind of wedding you want</div>
+          <div class="tier-sub">Tier is per-head spend, not total. A 100-guest wedding can be Luxurious. A 250-guest wedding can be Simple.</div>
+
+          <div class="tier-list">
+            <div class="tier-card">
+              <div class="tier-num">01</div>
+              <div class="tier-info">
+                <div class="tier-name">Simple and Intimate</div>
+                <div class="tier-desc">Restaurant or modest hotel · close family · minimal extras</div>
+              </div>
+              <div class="tier-budget">
+                <div class="tier-budget-num">₱345K – ₱690K</div>
+                <div class="tier-budget-sub">For your 230 guests</div>
+              </div>
+            </div>
+
+            <div class="tier-card">
+              <div class="tier-num">02</div>
+              <div class="tier-info">
+                <div class="tier-name">Charming and Personal</div>
+                <div class="tier-desc">Mid-tier hotel or curated garden · thoughtful styling</div>
+              </div>
+              <div class="tier-budget">
+                <div class="tier-budget-num">₱690K – ₱1.15M</div>
+                <div class="tier-budget-sub">For your 230 guests</div>
+              </div>
+            </div>
+
+            <div class="tier-card">
+              <div class="tier-num">03</div>
+              <div class="tier-info">
+                <div class="tier-name">Grand and Beautiful</div>
+                <div class="tier-desc">Premium hotel or full-service garden · full design layer</div>
+              </div>
+              <div class="tier-budget">
+                <div class="tier-budget-num">₱1.15M – ₱1.84M</div>
+                <div class="tier-budget-sub">For your 230 guests</div>
+              </div>
+            </div>
+
+            <div class="tier-card selected">
+              <div class="tier-num">04</div>
+              <div class="tier-info">
+                <div class="tier-name">Distinguished and Refined</div>
+                <div class="tier-desc">Top-tier hotel or destination · stylist-driven · couture-adjacent gown</div>
+              </div>
+              <div class="tier-budget">
+                <div class="tier-budget-num">₱1.84M – ₱3M</div>
+                <div class="tier-budget-sub">For your 230 guests</div>
+              </div>
+            </div>
+
+            <div class="tier-card">
+              <div class="tier-num">05</div>
+              <div class="tier-info">
+                <div class="tier-name">Luxurious and Beyond</div>
+                <div class="tier-desc">Iconic grand ballroom or premium destination · couture · designer everything</div>
+              </div>
+              <div class="tier-budget">
+                <div class="tier-budget-num">₱3M+</div>
+                <div class="tier-budget-sub">For your 230 guests</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="budget-confirm">
+            <div class="budget-confirm-h">Your working budget</div>
+            <div class="budget-confirm-num">₱2,500,000</div>
+            <div class="budget-confirm-sub">Distinguished tier × 230 guests · ~₱10,870 per head</div>
+
+            <div class="budget-actions">
+              <button class="budget-action primary">Stick — keep ₱2.5M</button>
+              <button class="budget-action">Play — give me a range</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flag">
+        <b>Tier per-head, not absolute, was the unlock.</b> A couple typing in "₱2,500,000" cold has no anchor — is that a lot? Not enough? Splitting their guests in? But "Distinguished tier × 230 guests = ₱2.5M working budget" gives them the framing first. They pick the kind of wedding; we do the math.
+      </div>
+    </section>
+
+    <!-- ============ STEP 3 — Plan complete → Compare prompt ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">03</div>
+        <div class="step-titles">
+          <div class="step-title">Guided Plan Complete · Want to compare with DIY?</div>
+          <p class="step-caption">
+            All categories filled. Couple sees the recap with their numbers. The <b>compare-with-DIY</b> prompt appears prominently — Setnayan offers to let them build a parallel DIY plan they can stack against the guided one. The free comparison is part of the ₱10K Guided package; couples don't pay extra to see the math.
+          </p>
+          <span class="step-trigger">All 18 categories filled · plan locked</span>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">
+          <span>Desktop · plan summary view</span>
+          <span>1280 × auto</span>
+        </div>
+        <div class="frame-body">
+          <div class="mock-chrome">
+            <div class="mock-brand">setnayan</div>
+            <div class="mock-step-pill">Plan complete · 18 of 18 handled</div>
+          </div>
+
+          <div class="recap-banner">
+            <div class="recap-banner-icon">✓</div>
+            <div class="recap-banner-content">
+              <div class="recap-banner-h">Your guided plan is ready</div>
+              <div class="recap-banner-sub">Distinguished tier · 230 guests · Sept 12, 2026 · Manila</div>
+            </div>
+          </div>
+
+          <div class="recap-stats">
+            <div class="recap-stat">
+              <div class="recap-stat-label">Total committed</div>
+              <div class="recap-stat-value">₱2.42M</div>
+            </div>
+            <div class="recap-stat">
+              <div class="recap-stat-label">Vendors picked</div>
+              <div class="recap-stat-value">11</div>
+            </div>
+            <div class="recap-stat">
+              <div class="recap-stat-label">Bundled categories</div>
+              <div class="recap-stat-value">7</div>
+            </div>
+            <div class="recap-stat">
+              <div class="recap-stat-label">Buffer remaining</div>
+              <div class="recap-stat-value">₱80K</div>
+            </div>
+          </div>
+
+          <div class="compare-prompt">
+            <div class="compare-prompt-eyebrow">★ Free with your Guided plan</div>
+            <div class="compare-prompt-h">Want to see what this would look like if you'd done it yourself?</div>
+            <div class="compare-prompt-sub">
+              Build a parallel DIY plan in 10 minutes. We'll show you both side by side — the bundled extras you'd have missed, the corkage costs that piled up, the photographer slots that closed. So you can see what the Guided plan saved you.
+            </div>
+            <div class="compare-prompt-actions">
+              <button class="compare-prompt-btn primary">Build a DIY plan to compare</button>
+              <button class="compare-prompt-btn secondary">I'm good · go to Mood Board</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flag">
+        <b>The "I'm good · go to Mood Board" button is the path forward when the plan is locked.</b> The next iteration in the couple's journey is mood board (0010 / 0016 sectioned). Plan completion → design layer → execution.
+      </div>
+    </section>
+
+    <!-- ============ STEP 4 — Side-by-side compare ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">04</div>
+        <div class="step-titles">
+          <div class="step-title">Compare both plans · Side-by-side</div>
+          <p class="step-caption">
+            Couple built the DIY parallel. Setnayan lays them next to each other, category-by-category. Bundled extras, vendor pairings, and category coverage are the columns where Guided typically wins. Some columns might tie or favor DIY — that's honest. The takeaway banner at the bottom shows the <b>realized savings</b>: what the Guided plan effectively saved over a reasonable DIY attempt at the same wedding.
+          </p>
+          <span class="step-trigger">DIY plan submitted · comparison rendered</span>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">
+          <span>Desktop · compare view</span>
+          <span>1280 × auto</span>
+        </div>
+        <div class="frame-body">
+          <div class="mock-chrome">
+            <div class="mock-brand">setnayan</div>
+            <div class="mock-step-pill">Compare · Guided vs DIY</div>
+          </div>
+
+          <div class="compare-h">Guided vs DIY · Side-by-side</div>
+          <div class="compare-meta">Distinguished tier · 230 guests · Sept 12, 2026 · Manila ceremony</div>
+
+          <div class="compare-headers">
+            <div class="compare-corner">Category</div>
+            <div class="compare-col-header guided">
+              <div class="compare-col-name">Guided</div>
+              <div class="compare-col-sub">Setnayan Wedding Planner · ₱10,000 SKU</div>
+              <div class="compare-col-total">₱2,420,000</div>
+              <span class="compare-col-tag guided">★ Optimized</span>
+            </div>
+            <div class="compare-col-header diy">
+              <div class="compare-col-name">DIY</div>
+              <div class="compare-col-sub">Couple-built · Free</div>
+              <div class="compare-col-total">₱2,610,000</div>
+              <span class="compare-col-tag diy">Self-sourced</span>
+            </div>
+          </div>
+
+          <div class="compare-table">
+            <div class="compare-row section-head">
+              <div>Anchor decisions</div>
+              <div></div>
+              <div></div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-cell-label">
+                Reception venue
+                <span class="meta">Includes food + 6 extras</span>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Conrad Manila — Forbes Ballroom</div>
+                <div class="compare-cell-price">₱520,000</div>
+                <div class="compare-cell-meta">Bundled: cake, flowers, car, suites, coordinator, AV</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Hillcreek Gardens, Tagaytay</div>
+                <div class="compare-cell-price">₱180,000 + extras</div>
+                <div class="compare-cell-meta warning">+18km from ceremony · violates 8km rule</div>
+              </div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-cell-label">
+                Catering
+                <span class="meta">230 guests</span>
+              </div>
+              <div class="compare-cell bundled">
+                <div class="compare-cell-vendor">✓ Bundled with Conrad</div>
+                <div class="compare-cell-price">Included · 5-course plated</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Hizon's Catering (outside)</div>
+                <div class="compare-cell-price">₱276,000 + ₱46K corkage</div>
+                <div class="compare-cell-meta warning">Corkage ₱200/head — couple unaware</div>
+              </div>
+            </div>
+
+            <div class="compare-row section-head">
+              <div>Bundled at venue (Guided) vs sourced separately (DIY)</div>
+              <div></div>
+              <div></div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-cell-label">Wedding cake</div>
+              <div class="compare-cell bundled">
+                <div class="compare-cell-vendor">✓ Bundled · 4-tier</div>
+                <div class="compare-cell-price">Included</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Cake by Niel Aguilar</div>
+                <div class="compare-cell-price">₱28,000</div>
+              </div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-cell-label">Reception florals</div>
+              <div class="compare-cell bundled">
+                <div class="compare-cell-vendor">✓ Bundled · centerpieces + arch</div>
+                <div class="compare-cell-price">Included</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Florist (TBD)</div>
+                <div class="compare-cell-price">₱85,000</div>
+              </div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-cell-label">Bridal car</div>
+              <div class="compare-cell bundled">
+                <div class="compare-cell-vendor">✓ Bundled · 5 hrs</div>
+                <div class="compare-cell-price">Included</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Manny Driveways · Mercedes</div>
+                <div class="compare-cell-price">₱22,000</div>
+              </div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-cell-label">Hotel suites</div>
+              <div class="compare-cell bundled">
+                <div class="compare-cell-vendor">✓ Bundled · 2 suites</div>
+                <div class="compare-cell-price">Included</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Tagaytay accommodations</div>
+                <div class="compare-cell-price">₱18,000 (2 nights)</div>
+              </div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-cell-label">Day-of coordinator</div>
+              <div class="compare-cell bundled">
+                <div class="compare-cell-vendor">✓ Bundled · in venue package</div>
+                <div class="compare-cell-price">Included</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Coordinator (TBD)</div>
+                <div class="compare-cell-price">₱45,000</div>
+              </div>
+            </div>
+
+            <div class="compare-row section-head">
+              <div>Sourced both ways — sequencing differences</div>
+              <div></div>
+              <div></div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-cell-label">
+                Photography (pre-nup + wedding + SDE)
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Bukool Films</div>
+                <div class="compare-cell-price">₱180,000 · 4.9★</div>
+                <div class="compare-cell-meta">Booked 11 months out</div>
+              </div>
+              <div class="compare-cell warning">
+                <div class="compare-cell-vendor">Top choice unavailable</div>
+                <div class="compare-cell-price">₱220,000 · backup studio</div>
+                <div class="compare-cell-meta">First pick booked someone else's date</div>
+              </div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-cell-label">Stylist (parent-vendor)</div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Teddy Manuel · full-service</div>
+                <div class="compare-cell-price">₱280,000 · absorbs lights</div>
+                <div class="compare-cell-meta">Single contract, single design vision</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">Florist + Lights team (separate)</div>
+                <div class="compare-cell-price">₱160K + ₱140K = ₱300K</div>
+                <div class="compare-cell-meta warning">Two vendors to coordinate</div>
+              </div>
+            </div>
+
+            <div class="compare-row section-head">
+              <div>Summary</div>
+              <div></div>
+              <div></div>
+            </div>
+
+            <div class="compare-row summary">
+              <div class="compare-cell-label">Total cost</div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">₱2,420,000</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">₱2,610,000</div>
+              </div>
+            </div>
+
+            <div class="compare-row summary">
+              <div class="compare-cell-label">Vendors to manage</div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">11 vendors</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">17 vendors</div>
+              </div>
+            </div>
+
+            <div class="compare-row summary">
+              <div class="compare-cell-label">Bundled categories</div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">7 bundled</div>
+              </div>
+              <div class="compare-cell">
+                <div class="compare-cell-vendor">0 bundled</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="compare-takeaway">
+            <div class="compare-takeaway-text">
+              <b>Guided saves ₱190,000</b> and 6 fewer vendors to coordinate.
+              The Guided plan caught the corkage cost (₱46K), the 8km
+              proximity rule (saving Tagaytay travel headaches), and
+              booked the photographer 11 months out before slots closed.
+              <b>Net savings = 19× the ₱10K Guided fee.</b>
+            </div>
+            <div class="compare-takeaway-actions">
+              <button class="compare-commit-btn primary">Commit to Guided plan</button>
+              <button class="compare-commit-btn secondary">Commit to DIY plan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flag">
+        <b>The compare view doesn't always favor Guided.</b> Some couples will run a DIY plan that's cheaper because they have a family caterer, a friend photographer, an inherited wedding gown. Setnayan shows the math honestly. The Guided plan wins when its intelligence (bundling, sequencing, pairings) actually compounds — which it usually does, but not always.
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    Setnayan · Guided vs DIY Flow Storyboard · 0016 Step-by-Step Plan Builder · 2026-05-10 · After plan completes → Mood Board (iteration 0010)
+  </footer>
+
+</div>
+
+</body>
+</html>

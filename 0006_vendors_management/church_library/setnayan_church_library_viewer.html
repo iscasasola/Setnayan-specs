@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setnayan · Church Library V1 — Viewer</title>
+<style>
+  :root {
+    --bg: #f6f5f1;
+    --card: #ffffff;
+    --ink: #1a1a1a;
+    --ink-soft: #5b5b5b;
+    --accent: #b08433;
+    --accent-soft: #f4ead4;
+    --line: #e6e2d6;
+    --pending: #f0c000;
+    --pending-bg: #fff7d6;
+    --verified: #2e7d32;
+    --verified-bg: #d6f4e0;
+    --heritage: #8B0000;
+    --heritage-bg: #fbe7e7;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  body { padding: 32px 24px 80px; }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 500; letter-spacing: 0.5px;
+    font-size: 32px; margin: 0 0 4px;
+  }
+  .lede { color: var(--ink-soft); font-size: 14px; max-width: 760px; line-height: 1.5; margin: 0 0 24px; }
+  .meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: 12px; color: var(--ink-soft); margin-bottom: 28px; }
+  .meta b { color: var(--ink); font-weight: 600; }
+
+  .canvas {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 28px;
+    max-width: 1480px;
+    margin: 0 auto;
+  }
+
+  .pane {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .pane-h {
+    padding: 14px 20px; font-size: 12px;
+    border-bottom: 1px solid var(--line); color: var(--ink-soft);
+    display: flex; justify-content: space-between; align-items: center;
+    text-transform: uppercase; letter-spacing: 1.4px;
+  }
+  .pane-h .dot { width: 8px; height: 8px; border-radius: 50%; background: #c9a86a; display: inline-block; margin-right: 8px; }
+
+  /* DESKTOP */
+  .desktop-body { padding: 20px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip {
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+    background: white; font-size: 12px; cursor: pointer; transition: all .15s;
+  }
+  .chip:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .chip.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+  .card {
+    background: white; border: 1px solid var(--line); border-radius: 10px;
+    overflow: hidden; transition: transform .15s, box-shadow .15s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.06); }
+  .photos { display: grid; grid-template-columns: 1fr 1fr; height: 130px; background: #ddd; }
+  .photo {
+    background: linear-gradient(135deg, #c9a86a 0%, #8a7445 100%);
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+    text-decoration: none; font-weight: 600; opacity: 0.85;
+    border-right: 1px solid white;
+  }
+  .photo.interior { background: linear-gradient(135deg, #6e5d3d 0%, #3d3424 100%); border-right: none; }
+  .photo:hover { opacity: 1; }
+  .photo .lbl { padding: 4px 10px; background: rgba(0,0,0,0.4); border-radius: 4px; }
+
+  .card-body { padding: 14px; }
+  .name { font-weight: 600; font-size: 14px; margin: 0 0 4px; line-height: 1.3; }
+  .aka { font-size: 11px; color: var(--ink-soft); font-style: italic; margin: 0 0 8px; }
+  .loc { font-size: 12px; color: var(--ink-soft); margin: 0 0 10px; }
+
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .badge {
+    font-size: 10px; padding: 3px 8px; border-radius: 999px;
+    border: 1px solid var(--line); background: white; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .badge.heritage { color: var(--heritage); background: var(--heritage-bg); border-color: #f3c9c9; }
+  .badge.unesco { color: white; background: var(--heritage); border-color: var(--heritage); }
+  .badge.type { color: var(--accent); background: var(--accent-soft); border-color: #e6d4a4; }
+
+  .rate-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding-top: 10px; border-top: 1px dashed var(--line);
+  }
+  .rate { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .rate.inquire { color: var(--ink-soft); font-weight: 500; font-size: 12px; }
+
+  .verification {
+    margin-top: 10px; font-size: 11px; padding: 5px 10px; border-radius: 6px;
+    text-align: center; font-weight: 600;
+  }
+  .verification.pending { background: var(--pending-bg); color: #8b6800; border: 1px solid #f0d878; }
+  .verification.verified { background: var(--verified-bg); color: var(--verified); border: 1px solid #aed5b8; }
+
+  .contacts { font-size: 11px; color: var(--ink-soft); margin-top: 8px; line-height: 1.5; }
+  .contacts a { color: var(--accent); text-decoration: none; }
+  .contacts a:hover { text-decoration: underline; }
+
+  /* MOBILE */
+  .mobile-frame {
+    background: #1a1a1a; border-radius: 28px; padding: 12px;
+    height: 720px; display: flex; flex-direction: column;
+  }
+  .mobile-screen {
+    flex: 1; background: var(--bg); border-radius: 18px;
+    overflow-y: auto; padding: 16px 12px 80px;
+  }
+  .mobile-h {
+    font-family: Georgia, serif; font-size: 22px; font-weight: 500;
+    margin: 8px 4px 4px;
+  }
+  .mobile-sub { font-size: 12px; color: var(--ink-soft); margin: 0 4px 14px; }
+  .mobile-search {
+    background: white; border: 1px solid var(--line); border-radius: 999px;
+    padding: 10px 16px; font-size: 13px; color: var(--ink-soft); margin-bottom: 12px;
+  }
+  .m-card {
+    background: white; border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px; margin-bottom: 10px;
+  }
+  .m-card .name { font-size: 14px; }
+  .m-card .photos { height: 90px; margin: -12px -12px 10px; border-radius: 0; }
+  .m-tab {
+    position: absolute; bottom: 24px; left: 24px; right: 24px;
+    height: 56px; background: white; border: 1px solid var(--line); border-radius: 16px;
+    display: flex; align-items: center; justify-content: space-around;
+    font-size: 10px; color: var(--ink-soft);
+  }
+  .m-tab .item.active { color: var(--accent); font-weight: 600; }
+  .m-tab .icon {
+    display: block; width: 22px; height: 22px; margin: 0 auto 2px;
+    border-radius: 6px; background: currentColor; opacity: 0.85;
+  }
+
+  .footer-note {
+    margin-top: 24px; padding: 14px 18px; background: white;
+    border: 1px dashed var(--line); border-radius: 10px;
+    font-size: 12px; color: var(--ink-soft); line-height: 1.6; max-width: 1480px; margin-left: auto; margin-right: auto;
+  }
+  .footer-note b { color: var(--ink); }
+
+  @media (max-width: 980px) {
+    .canvas { grid-template-columns: 1fr; }
+    .pane.mobile-pane { max-width: 380px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Setnayan Church Library — V1 Viewer</h1>
+<p class="lede">
+  A curated index of Philippine churches that conduct weddings. Every entry begins as
+  <b>Pending Verification</b>; the Setnayan Team admin account flips status to Verified once
+  legitimacy, contact, and rate are confirmed. Photo links go to stable article pages
+  (Wikipedia / parish site) where the church can be viewed.
+</p>
+<div class="meta">
+  <span><b id="m-total">0</b> churches</span>
+  <span><b id="m-verified">0</b> verified</span>
+  <span><b id="m-rate">0</b> with published rate</span>
+  <span><b id="m-heritage">0</b> heritage</span>
+  <span><b>Source of truth:</b> setnayan_church_library_v1.xlsx</span>
+</div>
+
+<div class="canvas">
+
+  <!-- WEB PANE -->
+  <div class="pane">
+    <div class="pane-h"><span><span class="dot"></span>Desktop · /dashboard/[event-id]/vendors/ceremony-venue/picker</span><span id="m-shown">— shown</span></div>
+    <div class="desktop-body">
+      <div class="filters" id="filters"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+
+  <!-- MOBILE PANE -->
+  <div class="pane mobile-pane">
+    <div class="pane-h"><span><span class="dot"></span>Mobile · iOS / Android · 380×720</span></div>
+    <div style="padding:12px;">
+      <div class="mobile-frame">
+        <div class="mobile-screen" id="mobile-list">
+          <div class="mobile-h">Pick a church</div>
+          <div class="mobile-sub">Tagged to your event · Manila Cathedral nearby</div>
+          <div class="mobile-search">🔍 Search by name or city</div>
+        </div>
+        <div class="m-tab">
+          <div class="item"><span class="icon"></span>Guests</div>
+          <div class="item active"><span class="icon"></span>Vendors</div>
+          <div class="item"><span class="icon"></span>Schedule</div>
+          <div class="item"><span class="icon"></span>Services</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-note">
+  <b>Note for the Setnayan Team:</b> This viewer renders a curated subset of the live
+  <code>setnayan_church_library_v1.xlsx</code> (127 entries). Use the spreadsheet as the working
+  dataset — append new rows there, run verification by phone, and flip
+  <code>verification_status</code> to <em>Verified</em> with your admin email under
+  <code>verified_by_account</code>. Once seeded into Supabase as <code>ph_churches</code>,
+  the spreadsheet becomes a one-time import; ongoing edits move to the admin dashboard.
+</div>
+
+<script>
+const DATA = [
+  {id:"PH-NCR-001", name:"Manila Cathedral - Basilica", aka:"Minor Basilica & Metropolitan Cathedral of the Immaculate Conception", type:"Cathedral", heritage:"None", city:"Manila", province:"Metro Manila", region:"NCR", rate:"₱32,000–₱42,000", numeric:true, ac:"Optional", phone:"+63 (2) 8527-3093", website:"https://manilacathedral.com.ph", ext_url:"https://en.wikipedia.org/wiki/Manila_Cathedral", int_url:"https://manilacathedral.com.ph/wedding_requirements", status:"Pending Verification"},
+  {id:"PH-NCR-002", name:"San Agustin Church", aka:"Intramuros · UNESCO", type:"Minor Basilica", heritage:"UNESCO World Heritage", city:"Manila", province:"Metro Manila", region:"NCR", rate:"₱27,000 stipend", numeric:true, ac:"No", phone:"+63 938 131 1285", email:"sanagustinchurch1571@gmail.com", ext_url:"https://en.wikipedia.org/wiki/San_Agustin_Church_(Manila)", int_url:"https://en.wikipedia.org/wiki/San_Agustin_Church_(Manila)", status:"Pending Verification"},
+  {id:"PH-NCR-003", name:"Minor Basilica of San Sebastian", aka:"All-steel basilica · Quiapo", type:"Minor Basilica", heritage:"National Cultural Treasure", city:"Manila", province:"Metro Manila", region:"NCR", rate:"₱20,000–₱24,000", numeric:true, ac:"No", phone:"+63 (2) 8734-8931", email:"sansebastianparish@gmail.com", ext_url:"https://en.wikipedia.org/wiki/Basilica_of_San_Sebasti%C3%A1n", int_url:"https://en.wikipedia.org/wiki/Basilica_of_San_Sebasti%C3%A1n", status:"Pending Verification"},
+  {id:"PH-NCR-009", name:"Shrine of Mary, Queen of Peace", aka:"EDSA Shrine", type:"National Shrine", heritage:"None", city:"Quezon City", province:"Metro Manila", region:"NCR", rate:"₱5,000", numeric:true, ac:"Yes", ext_url:"https://en.wikipedia.org/wiki/EDSA_Shrine", int_url:"https://en.wikipedia.org/wiki/EDSA_Shrine", status:"Pending Verification"},
+  {id:"PH-NCR-010", name:"Antipolo Cathedral", aka:"International Shrine of Our Lady of Peace and Good Voyage", type:"Cathedral", heritage:"None", city:"Antipolo", province:"Rizal", region:"CALABARZON", rate:"₱5,000", numeric:true, ac:"No", phone:"+63 (2) 571 7347", ext_url:"https://en.wikipedia.org/wiki/Antipolo_Cathedral", int_url:"https://en.wikipedia.org/wiki/Antipolo_Cathedral", status:"Pending Verification"},
+  {id:"PH-NCR-008", name:"St. Joseph Parish - Las Piñas", aka:"Bamboo Organ Church", type:"Parish", heritage:"National Cultural Treasure", city:"Las Piñas", province:"Metro Manila", region:"NCR", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Las_Pi%C3%B1as_Church", int_url:"https://en.wikipedia.org/wiki/Las_Pi%C3%B1as_Church", status:"Pending Verification"},
+  {id:"PH-CAV-003", name:"Caleruega Church", aka:"Transfiguration Chapel · Batulao", type:"Chapel", heritage:"None", city:"Nasugbu", province:"Batangas", region:"CALABARZON", rate:"₱10,000–₱15,000", numeric:true, ac:"Optional", ext_url:"https://en.wikipedia.org/wiki/Caleruega", int_url:"https://townsdelight.com/caleruega-church-a-complete-wedding-guide/", status:"Pending Verification"},
+  {id:"PH-BAT-001", name:"Basilica of St. Martin de Tours", aka:"Taal Basilica · Largest in Asia", type:"Minor Basilica", heritage:"National Cultural Treasure", city:"Taal", province:"Batangas", region:"CALABARZON", rate:"~₱22,000", numeric:true, ac:"No", ext_url:"https://en.wikipedia.org/wiki/Taal_Basilica", int_url:"https://en.wikipedia.org/wiki/Taal_Basilica", status:"Pending Verification"},
+  {id:"PH-PAN-001", name:"Minor Basilica of Our Lady of Manaoag", aka:"Manaoag Church · Marian pilgrimage site", type:"Minor Basilica", heritage:"None", city:"Manaoag", province:"Pangasinan", region:"Region I", rate:"Inquire with parish", phone:"(075) 529-0132", website:"https://www.manaoagminorbasilica.org/", ext_url:"https://en.wikipedia.org/wiki/Manaoag_Church", int_url:"https://en.wikipedia.org/wiki/Manaoag_Church", status:"Pending Verification"},
+  {id:"PH-INO-001", name:"San Agustin Church - Paoay", aka:"Paoay Church · UNESCO", type:"Parish", heritage:"UNESCO World Heritage", city:"Paoay", province:"Ilocos Norte", region:"Region I", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Paoay_Church", int_url:"https://en.wikipedia.org/wiki/Paoay_Church", status:"Pending Verification"},
+  {id:"PH-ISU-002", name:"Sta. Maria Church (Ilocos Sur)", aka:"Nuestra Señora de la Asunción · UNESCO", type:"Parish", heritage:"UNESCO World Heritage", city:"Santa Maria", province:"Ilocos Sur", region:"Region I", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Santa_Maria_Church_(Ilocos_Sur)", int_url:"https://en.wikipedia.org/wiki/Santa_Maria_Church_(Ilocos_Sur)", status:"Pending Verification"},
+  {id:"PH-ILO-002", name:"Sto. Tomas de Villanueva Parish - Miag-ao", aka:"Miag-ao Church · UNESCO", type:"Parish", heritage:"UNESCO World Heritage", city:"Miagao", province:"Iloilo", region:"Region VI", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Miag-ao_Church", int_url:"https://en.wikipedia.org/wiki/Miag-ao_Church", status:"Pending Verification"},
+  {id:"PH-BEN-001", name:"Baguio Cathedral", aka:"Our Lady of Atonement · Pink-pastel landmark", type:"Cathedral", heritage:"None", city:"Baguio", province:"Benguet", region:"CAR", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Baguio_Cathedral", int_url:"https://en.wikipedia.org/wiki/Baguio_Cathedral", status:"Pending Verification"},
+  {id:"PH-CEB-002", name:"Basilica Minore del Santo Niño", aka:"Oldest RC church in PH (1565)", type:"Minor Basilica", heritage:"National Cultural Treasure", city:"Cebu City", province:"Cebu", region:"Region VII", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Basilica_Minore_del_Santo_Ni%C3%B1o", int_url:"https://en.wikipedia.org/wiki/Basilica_Minore_del_Santo_Ni%C3%B1o", status:"Pending Verification"},
+  {id:"PH-CEB-001", name:"Cebu Metropolitan Cathedral", aka:"Archdiocese of Cebu", type:"Cathedral", heritage:"None", city:"Cebu City", province:"Cebu", region:"Region VII", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Cebu_Metropolitan_Cathedral", int_url:"https://en.wikipedia.org/wiki/Cebu_Metropolitan_Cathedral", status:"Pending Verification"},
+  {id:"PH-BOH-002", name:"Baclayon Church", aka:"Restored after 2013 quake", type:"Parish", heritage:"National Cultural Treasure", city:"Baclayon", province:"Bohol", region:"Region VII", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Baclayon_Church", int_url:"https://en.wikipedia.org/wiki/Baclayon_Church", status:"Pending Verification"},
+  {id:"PH-ILO-001", name:"Jaro Metropolitan Cathedral", aka:"National Shrine of Our Lady of Candles", type:"Cathedral", heritage:"None", city:"Iloilo City", province:"Iloilo", region:"Region VI", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Jaro_Cathedral", int_url:"https://en.wikipedia.org/wiki/Jaro_Cathedral", status:"Pending Verification"},
+  {id:"PH-DAV-001", name:"San Pedro Cathedral - Davao", aka:"Archdiocese of Davao", type:"Cathedral", heritage:"None", city:"Davao City", province:"Davao del Sur", region:"Region XI", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/San_Pedro_Cathedral_(Davao_City)", int_url:"https://en.wikipedia.org/wiki/San_Pedro_Cathedral_(Davao_City)", status:"Pending Verification"},
+  {id:"PH-MIS-001", name:"St. Augustine Cathedral - Cagayan de Oro", aka:"Archdiocese of CDO", type:"Cathedral", heritage:"None", city:"Cagayan de Oro", province:"Misamis Oriental", region:"Region X", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Cagayan_de_Oro_Cathedral", int_url:"https://en.wikipedia.org/wiki/Cagayan_de_Oro_Cathedral", status:"Pending Verification"},
+  {id:"PH-ZBO-001", name:"Zamboanga Cathedral", aka:"Metropolitan Cathedral of the Immaculate Conception", type:"Cathedral", heritage:"None", city:"Zamboanga City", province:"Zamboanga del Sur", region:"Region IX", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Zamboanga_Cathedral", int_url:"https://en.wikipedia.org/wiki/Zamboanga_Cathedral", status:"Pending Verification"},
+  {id:"PH-NCR-005", name:"Minor Basilica of San Lorenzo Ruiz", aka:"Binondo Church", type:"Minor Basilica", heritage:"None", city:"Manila", province:"Metro Manila", region:"NCR", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Binondo_Church", int_url:"https://en.wikipedia.org/wiki/Binondo_Church", status:"Pending Verification"},
+  {id:"PH-NCR-004", name:"Minor Basilica of the Black Nazarene", aka:"Quiapo Church", type:"Minor Basilica", heritage:"None", city:"Manila", province:"Metro Manila", region:"NCR", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Quiapo_Church", int_url:"https://en.wikipedia.org/wiki/Quiapo_Church", status:"Pending Verification"},
+  {id:"PH-NCR-015", name:"Santuario de San Antonio", aka:"Forbes Park · society weddings", type:"Parish", heritage:"None", city:"Makati", province:"Metro Manila", region:"NCR", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Santuario_de_San_Antonio_Parish", int_url:"https://en.wikipedia.org/wiki/Santuario_de_San_Antonio_Parish", status:"Pending Verification"},
+  {id:"PH-PAM-002", name:"St. James the Apostle Parish - Betis", aka:"Sistine Chapel of the PH", type:"Parish", heritage:"National Cultural Treasure", city:"Guagua (Betis)", province:"Pampanga", region:"Region III", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Betis_Church", int_url:"https://en.wikipedia.org/wiki/Betis_Church", status:"Pending Verification"},
+  {id:"PH-ALB-002", name:"Daraga Church", aka:"Iconic Mt. Mayon view", type:"Parish", heritage:"National Cultural Treasure", city:"Daraga", province:"Albay", region:"Region V", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Daraga_Church", int_url:"https://en.wikipedia.org/wiki/Daraga_Church", status:"Pending Verification"},
+  {id:"PH-BUL-002", name:"Barasoain Church", aka:"First Philippine Republic Congress site", type:"Parish", heritage:"National Historical Landmark", city:"Malolos", province:"Bulacan", region:"Region III", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Barasoain_Church", int_url:"https://en.wikipedia.org/wiki/Barasoain_Church", status:"Pending Verification"},
+  {id:"PH-ISU-001", name:"Vigan Cathedral", aka:"St. Paul Metropolitan Cathedral", type:"Cathedral", heritage:"National Cultural Treasure", city:"Vigan", province:"Ilocos Sur", region:"Region I", rate:"Inquire with parish", ext_url:"https://en.wikipedia.org/wiki/Vigan_Cathedral", int_url:"https://en.wikipedia.org/wiki/Vigan_Cathedral", status:"Pending Verification"}
+];
+
+// Filters
+const REGIONS = ["All", "NCR", "CALABARZON", "Region I", "Region III", "Region V", "Region VI", "Region VII", "Region X", "Region XI", "CAR"];
+const HERITAGE_OPTIONS = ["All heritage", "UNESCO only", "NCT only"];
+let activeRegion = "All";
+let activeHeritage = "All heritage";
+
+const filtersEl = document.getElementById("filters");
+REGIONS.forEach(r => {
+  const c = document.createElement("button");
+  c.className = "chip" + (r === "All" ? " active" : "");
+  c.textContent = r;
+  c.onclick = () => { activeRegion = r; refresh(); };
+  filtersEl.appendChild(c);
+});
+HERITAGE_OPTIONS.forEach(h => {
+  const c = document.createElement("button");
+  c.className = "chip";
+  c.textContent = h;
+  c.onclick = () => { activeHeritage = h; refresh(); };
+  filtersEl.appendChild(c);
+});
+
+function statusClass(s) {
+  return s === "Verified" ? "verified" : "pending";
+}
+function heritageBadge(h) {
+  if (!h || h === "None") return "";
+  if (h.includes("UNESCO")) return '<span class="badge unesco">UNESCO</span>';
+  if (h.includes("Cultural Treasure")) return '<span class="badge heritage">NCT</span>';
+  if (h.includes("Historical Landmark")) return '<span class="badge heritage">HISTORICAL</span>';
+  return `<span class="badge heritage">${h}</span>`;
+}
+
+function cardHTML(d) {
+  const phone = d.phone ? `📞 ${d.phone}` : "";
+  const email = d.email ? `<br>✉ <a href="mailto:${d.email}">${d.email}</a>` : "";
+  const web = d.website ? `<br>🌐 <a target="_blank" href="${d.website}">${d.website.replace(/^https?:\/\//,"").replace(/\/$/,"")}</a>` : "";
+  return `
+    <div class="card">
+      <div class="photos">
+        <a class="photo" target="_blank" href="${d.ext_url}"><span class="lbl">View Exterior →</span></a>
+        <a class="photo interior" target="_blank" href="${d.int_url}"><span class="lbl">View Interior →</span></a>
+      </div>
+      <div class="card-body">
+        <div class="name">${d.name}</div>
+        ${d.aka ? `<div class="aka">${d.aka}</div>` : ""}
+        <div class="loc">📍 ${d.city}, ${d.province} · ${d.region}</div>
+        <div class="badges">
+          <span class="badge type">${d.type}</span>
+          ${heritageBadge(d.heritage)}
+          ${d.ac && d.ac !== "Inquire" ? `<span class="badge">AC: ${d.ac}</span>` : ""}
+        </div>
+        <div class="rate-row">
+          <span class="rate ${d.numeric ? "" : "inquire"}">${d.rate}</span>
+          <span style="font-size:11px;color:var(--ink-soft)">${d.id}</span>
+        </div>
+        ${(phone || email || web) ? `<div class="contacts">${phone}${email}${web}</div>` : `<div class="contacts" style="font-style:italic;">Contact info pending</div>`}
+        <div class="verification ${statusClass(d.status)}">${d.status === "Verified" ? "✓ Verified by Setnayan Team" : "⏳ Pending Verification"}</div>
+      </div>
+    </div>
+  `;
+}
+
+function mobileCardHTML(d) {
+  return `
+    <div class="m-card">
+      <div class="photos">
+        <a class="photo" target="_blank" href="${d.ext_url}"><span class="lbl">Outside</span></a>
+        <a class="photo interior" target="_blank" href="${d.int_url}"><span class="lbl">Inside</span></a>
+      </div>
+      <div class="name">${d.name}</div>
+      <div class="loc" style="font-size:11px">📍 ${d.city}, ${d.province}</div>
+      <div class="badges">
+        <span class="badge type">${d.type}</span>
+        ${heritageBadge(d.heritage)}
+      </div>
+      <div class="rate-row">
+        <span class="rate ${d.numeric ? "" : "inquire"}" style="font-size:13px">${d.rate}</span>
+        <span class="verification ${statusClass(d.status)}" style="margin:0;padding:3px 8px;font-size:9px">${d.status === "Verified" ? "✓" : "⏳"}</span>
+      </div>
+    </div>
+  `;
+}
+
+function refresh() {
+  document.querySelectorAll(".chip").forEach(c => {
+    const t = c.textContent;
+    c.classList.toggle("active", t === activeRegion || t === activeHeritage);
+  });
+
+  const filtered = DATA.filter(d => {
+    if (activeRegion !== "All" && d.region !== activeRegion) return false;
+    if (activeHeritage === "UNESCO only" && !d.heritage.includes("UNESCO")) return false;
+    if (activeHeritage === "NCT only" && !d.heritage.includes("Cultural Treasure")) return false;
+    return true;
+  });
+
+  document.getElementById("grid").innerHTML = filtered.map(cardHTML).join("");
+  document.getElementById("m-shown").textContent = `${filtered.length} of ${DATA.length} shown`;
+
+  // Mobile
+  const mList = document.getElementById("mobile-list");
+  // keep header
+  mList.innerHTML = `
+    <div class="mobile-h">Pick a church</div>
+    <div class="mobile-sub">${filtered.length} matches · ${DATA.length} in library</div>
+    <div class="mobile-search">🔍 Search by name or city</div>
+    ${filtered.slice(0, 8).map(mobileCardHTML).join("")}
+  `;
+
+  // Stats
+  document.getElementById("m-total").textContent = "127";
+  document.getElementById("m-verified").textContent = "0";
+  document.getElementById("m-rate").textContent = "8";
+  document.getElementById("m-heritage").textContent = "13";
+}
+
+refresh();
+</script>
+
+</body>
+</html>

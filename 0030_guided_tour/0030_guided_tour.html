@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0030 — First-time Guided Tour — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0030</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0030_guided_tour.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0030_guided_tour.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0030_guided_tour.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0030--first-time-guided-tour">Iteration 0030 — First-time Guided Tour</h1>
+<p><strong>Iteration number:</strong> 0030 <strong>Topic:</strong> A 30-second guided onboarding overlay shown on first login for each account type — customer (couple/organizer), vendor, guest, and admin — that points out the most important parts of the dashboard they just landed on, plus optional deeper mini-tours per major surface. <strong>Surface:</strong> All four role surfaces (customer dashboard 0021, vendor dashboard 0022, admin console 0023, guest landing 0002 + 0031) inside the same Setnayan app per the one-app-three-doorways architecture (decision 2026-05-11). <strong>URL pattern:</strong> Tours overlay on top of existing surface URLs — no dedicated route. Replay path: <code>setnayan.com/dashboard/[role]/settings/replay-tour/[tour_key]</code>. <strong>Builds on:</strong> 0000 (auth + role-router), 0021 (customer dashboard surfaces), 0022 (vendor dashboard surfaces), 0023 (admin console + analytics), 0002 + 0031 (guest landing page), 0025 (Settings surface — "Replay onboarding tour" lives here), 0029 (help center is the fallback when the tour ends). <strong>Status:</strong> Drafted 2026-05-12. <strong>Phase:</strong> V1. Ships alongside the four dashboards it depends on. Not a hard launch-blocker — the dashboards work without it — but the activation cost of <em>not</em> shipping it is high enough that we treat it as Tier-1 polish.</p>
+<hr />
+<h2 id="1-why-this-iteration-exists">1. Why this iteration exists</h2>
+<p>V1 lands new users on visually busy interfaces with no scaffolding:</p>
+<ul>
+<li><strong>Customer dashboard (0021)</strong> has 9 surfaces (Overview · Guests · Vendors · Schedule · Services · Seat Plan · Landing · QR Hub · Gallery) plus a services-launcher grid, a theme picker, and an avatar menu.</li>
+<li><strong>Vendor dashboard (0022)</strong> has 6 surfaces (Home · Services · Calendar · Clients · Threads · Team &amp; Setnayan) plus a mandatory logo upload, a Pro subscription card, and a marketplace listing preview.</li>
+<li><strong>Admin console (0023)</strong> has 7 surfaces (Home · Verification · Payments · Users · Pricing · Disputes · Settings) plus a Team Pool widget, an audit log, and role-gated tools.</li>
+<li><strong>Guest landing (0002 + 0031)</strong> evolves through 4 lifecycle phases (Save-the-Date · Invitation · Logistics · Gallery) with RSVP, personal QR, and (post-event) tagged photos + personal reel builder.</li>
+</ul>
+<p>A first-time user looking at any of these surfaces sees a wall of unfamiliar tabs and buttons. The conversion data from comparable two-sided platforms is unforgiving: every additional second a user spends "figuring out what this is" before their first meaningful action drops activation by measurable percentage points.</p>
+<p><strong>A 30-second guided tour on first login:</strong></p>
+<ul>
+<li>Names each major surface in one sentence, so the user has a mental map.</li>
+<li>Points at the <em>one</em> action that matters most for that role's first session (RSVP for guests, create-first-service for vendors, services-launcher for customers, verification queue for admin verification handlers).</li>
+<li>Tells the user where Settings + Help live so the next question they have has an obvious answer.</li>
+<li>Costs ~30 seconds, is fully skippable, and never re-fires once dismissed.</li>
+</ul>
+<p>This iteration is the connective glue between the four big dashboards. Without it, users self-train; with it, the dashboards feel guided from the first second.</p>
+<hr />
+<h2 id="2-tour-mechanics">2. Tour mechanics</h2>
+<p><strong>Spotlight overlay.</strong> When the tour is active, the rest of the page dims to 60% opacity behind a translucent black scrim (<code>rgba(0,0,0,0.6)</code>). The targeted UI element gets a transparent cutout — it's rendered at full brightness, with the rest of the page muted around it. The cutout is a rounded rectangle that hugs the target element's bounding box with 8px of padding on every side.</p>
+<p><strong>Tooltip.</strong> Anchored next to the spotlighted element (top / bottom / left / right based on the target's position on screen — auto-flipped if it would overflow the viewport). Tooltip contents:</p>
+<ul>
+<li><strong>Step counter</strong> (e.g. "3 of 8") in the top-right corner of the tooltip</li>
+<li><strong>Title</strong> — short, 3-5 words ("Switch surfaces here")</li>
+<li><strong>Body</strong> — one sentence, never longer than two ("Tap any tab to jump to that section.")</li>
+<li><strong>Buttons</strong> row: <code>Skip tour</code> (left, ghost button) · <code>Back</code> (only shown if step &gt; 1) · <code>Next</code> or <code>Finish</code> (right, primary button)</li>
+</ul>
+<p><strong>Progress bar.</strong> A thin horizontal bar pinned to the top of the viewport showing tour progress (e.g. <code>███████░░░ 5 / 8</code>). Persistent across all steps; updates as the user advances.</p>
+<p><strong>Centered modals.</strong> Steps 1 and N (welcome + farewell) don't spotlight a specific element — they show a centered modal with no cutout, just the dim scrim and the modal card. These bookend the tour with a friendly opening and a confident close.</p>
+<p><strong>Dismissibility.</strong></p>
+<ul>
+<li>Esc dismisses the current tour at any step (logs <code>action='skip'</code> with the step number).</li>
+<li>The <code>Skip tour</code> button does the same.</li>
+<li>Clicking the scrim <em>outside</em> the tooltip does NOT dismiss — accidental misses shouldn't end the tour. The user has to use Esc or the explicit Skip button.</li>
+<li>The penultimate step shows a "Don't show me this again" checkbox (default checked). Unchecking it means the tour will re-fire on the next login (used by users who want to come back later).</li>
+</ul>
+<p><strong>Reduced motion.</strong> If <code>prefers-reduced-motion: reduce</code> is set, the spotlight cutout transition is instant (no fade), the tooltip appears with no slide-in animation, and the progress bar updates without easing.</p>
+<p><strong>Theme parity.</strong> The tooltip card respects the user's theme (Setnayan Default · Victorian · Classy · iOS — see <a href="../CLAUDE.md">theme system</a>). Each theme provides its own card background, border, and text colors via CSS variables. The dim scrim is theme-agnostic.</p>
+<hr />
+<h2 id="3-per-role-tour-scripts">3. Per-role tour scripts</h2>
+<p>Each tour is a fixed ordered list of steps. Step targets reference <code>data-tour-id</code> attributes that the dashboard iterations add to their key elements. If a target element is missing from the DOM (e.g. logo upload prompt when the logo is already uploaded), that step is silently skipped.</p>
+<h3 id="31-customer-couple--organizer--customer_dashboard_v1--8-steps">3.1 Customer (couple / organizer) — <code>customer_dashboard_v1</code> — 8 steps</h3>
+<ol>
+<li><strong>Welcome modal</strong> (centered, no spotlight) — "Welcome to your Setnayan dashboard, [first_name]. Let me show you around in under a minute." · Buttons: <code>Skip tour</code> · <code>Let's go</code></li>
+<li><strong>Overview tab</strong> — Title: "Your home base." Body: "This is your overview — today's most important tasks, all in one place." · Target: <code>[data-tour-id="customer-tab-overview"]</code></li>
+<li><strong>Bottom nav tabs</strong> — Title: "Navigate the four sections." Body: "Switch between Guests / Vendors / Schedule / In-App Services with these tabs." · Target: <code>[data-tour-id="customer-bottom-nav"]</code></li>
+<li><strong>Services-launcher grid</strong> — Title: "Tap to start any service." Body: "Save-the-Date, Papic, Live Stream, Custom Monogram, and more — every in-app service starts here." · Target: <code>[data-tour-id="services-launcher-grid"]</code></li>
+<li><strong>Avatar menu (top-right)</strong> — Title: "Your account lives here." Body: "Tap your avatar for Settings, Privacy controls, Payment Methods, and to sign out." · Target: <code>[data-tour-id="topbar-avatar"]</code></li>
+<li><strong>Theme picker</strong> — Title: "Make it yours." Body: "Pick a dashboard look: Setnayan Default, Victorian, Classy, or iOS." · Target: <code>[data-tour-id="theme-picker"]</code></li>
+<li><strong>Help link</strong> — Title: "Stuck? Help is one tap away." Body: "The help center has answers for the most common questions, plus you can replay this tour anytime from Settings." · Target: <code>[data-tour-id="help-link"]</code> · Has the "Don't show me this again" checkbox.</li>
+<li><strong>Farewell modal</strong> (centered, no spotlight) — "You're all set. Each tab also has its own quick walkthrough the first time you open it." · Buttons: <code>Finish</code></li>
+</ol>
+<h3 id="32-vendor--vendor_dashboard_v1--7-steps">3.2 Vendor — <code>vendor_dashboard_v1</code> — 7 steps</h3>
+<ol>
+<li><strong>Welcome modal</strong> — "Welcome to Setnayan, [business_name]. Two minutes to get you oriented." · Buttons: <code>Skip tour</code> · <code>Let's go</code></li>
+<li><strong>Surface tabs at top</strong> — Title: "Your six workspaces." Body: "Home · Services · Calendar · Clients · Threads · Team &amp; Setnayan — switch between them up here." · Target: <code>[data-tour-id="vendor-tab-bar"]</code></li>
+<li><strong>Company-logo upload prompt</strong> (only if logo missing — step auto-skipped if already uploaded) — Title: "Upload your company logo." Body: "Customers see this in chat and on your marketplace listing. PNG with transparent background works best." · Target: <code>[data-tour-id="vendor-logo-upload-prompt"]</code></li>
+<li><strong>Services tab CTA</strong> — Title: "Create your first service." Body: "Even a single service is enough to publish your profile. Add packages later." · Target: <code>[data-tour-id="vendor-services-create-cta"]</code></li>
+<li><strong>Pro subscription card</strong> — Title: "Optional: go Pro." Body: "Pro Weekly (₱499/wk) unlocks unlimited contracts, boost eligibility, and analytics. Skip for now if you'd rather start free." · Target: <code>[data-tour-id="vendor-pro-card"]</code></li>
+<li><strong>Setnayan in-app services</strong> — Title: "Use Setnayan for your own events too." Body: "Same dashboard, customer view: Papic, Live Stream, Save-the-Date — for your own anniversary, christening, or staff party." · Target: <code>[data-tour-id="vendor-switch-to-customer-view"]</code> · Has the "Don't show me this again" checkbox.</li>
+<li><strong>Farewell modal</strong> — "Welcome aboard. Verification takes 3 business days; the help center has a checklist of what's needed." · Buttons: <code>Finish</code></li>
+</ol>
+<h3 id="33-guest--guest_landing_v1--4-steps">3.3 Guest — <code>guest_landing_v1</code> — 4 steps</h3>
+<ol>
+<li><strong>Welcome modal</strong> — "Hi [first_name], you're invited to [organizer_display_name]'s [event_type]." · Buttons: <code>Skip tour</code> · <code>Let's go</code> · <em>Centered, no spotlight, includes the event hero image as a subtle background tint.</em></li>
+<li><strong>RSVP button</strong> — Title: "Let them know you're coming." Body: "Tap here to confirm your attendance. You can update it later if plans change." · Target: <code>[data-tour-id="guest-rsvp-cta"]</code></li>
+<li><strong>Personal QR</strong> — Title: "Bring this on the day." Body: "Save this QR — it finds your table and lets paparazzi tag you in photos." · Target: <code>[data-tour-id="guest-personal-qr"]</code> · Has the "Don't show me this again" checkbox.</li>
+<li><strong>Farewell modal</strong> — "After the event, your tagged photos appear here. You can build a personal 1–30 second reel from them." · Buttons: <code>Finish</code></li>
+</ol>
+<h3 id="34-admin--admin_console_v1--6-steps">3.4 Admin — <code>admin_console_v1</code> — 6 steps</h3>
+<ol>
+<li><strong>Welcome modal</strong> — "Welcome to the Setnayan admin console, [name]. Your assigned role: [admin_role]." · Buttons: <code>Skip tour</code> · <code>Let's go</code></li>
+<li><strong>Surface tabs</strong> — Title: "Seven surfaces, role-gated." Body: "Home · Verification · Payments · Users · Pricing · Disputes · Settings — only the surfaces your role can access are clickable." · Target: <code>[data-tour-id="admin-tab-bar"]</code></li>
+<li><strong>Team Pool widget</strong> — Title: "Your shared monthly pool." (only shown to non-owner team members) Body: "All non-owner team members share a ₱10K monthly pool for Setnayan services. First-come-first-served; resets on the 1st." · Target: <code>[data-tour-id="admin-team-pool-widget"]</code></li>
+<li><strong>Audit log link</strong> — Title: "Everything is logged." Body: "Every admin action is recorded. Major actions (admin promotions, refunds &gt; ₱25K, payment-account changes) require a second admin's approval." · Target: <code>[data-tour-id="admin-audit-log-link"]</code></li>
+<li><strong>Support tickets queue</strong> — Title: "Tickets routed to your role." Body: "Customer support tickets land here, filtered to what your role can handle." · Target: <code>[data-tour-id="admin-support-queue"]</code> · Has the "Don't show me this again" checkbox.</li>
+<li><strong>Farewell modal</strong> — "Read the admin handbook in the help center. Reach out in the internal #setnayan-admin channel if you're stuck." · Buttons: <code>Finish</code></li>
+</ol>
+<hr />
+<h2 id="4-per-surface-mini-tours-deeper-dives">4. Per-surface mini-tours (deeper dives)</h2>
+<p>Beyond the first-login tour, each major sub-surface can have its own 3-5 step mini-tour that fires the first time the user lands on that sub-surface — but only if they completed (or skipped past step 4 of) the parent dashboard tour. This prevents new users from being bombarded with overlapping tours on their first session.</p>
+<h3 id="customer-mini-tours">Customer mini-tours</h3>
+<table>
+<thead>
+<tr class="header">
+<th><code>tour_key</code></th>
+<th>Trigger</th>
+<th>Steps</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>customer_vendors_v1</code></td>
+<td>First time user opens Vendors tab</td>
+<td>1. Vendor card layout · 2. The 6-stage progress pips (shortlisted → in-talks → quoted → booked → paid → completed) · 3. Add-vendor CTA</td>
+</tr>
+<tr class="even">
+<td><code>customer_seat_plan_v1</code></td>
+<td>First time user opens Seat Plan tab</td>
+<td>1. Drag a table from the catalog onto the canvas · 2. Tap a chair to swap a single guest · 3. Tap a table body to swap whole tables · 4. Auto-fill ring rules · 5. Publish to mint QR codes</td>
+</tr>
+<tr class="odd">
+<td><code>customer_landing_v1</code></td>
+<td>First time user opens Landing tab</td>
+<td>1. Lifecycle phases (Save-the-Date → Invitation → Logistics → Gallery) · 2. Per-phase override · 3. Preview-as-guest button</td>
+</tr>
+<tr class="even">
+<td><code>customer_qr_hub_v1</code></td>
+<td>First time user opens QR Hub</td>
+<td>1. Personal guest QRs · 2. Table QRs · 3. Print pack download</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vendor-mini-tours">Vendor mini-tours</h3>
+<table>
+<thead>
+<tr class="header">
+<th><code>tour_key</code></th>
+<th>Trigger</th>
+<th>Steps</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>vendor_services_v1</code></td>
+<td>First time user opens Services tab</td>
+<td>1. Create a service · 2. Plan builder (packages within a service) · 3. Custom service category vs canonical · 4. Publish toggle</td>
+</tr>
+<tr class="even">
+<td><code>vendor_calendar_v1</code></td>
+<td>First time user opens Calendar</td>
+<td>1. Block dates · 2. Color-coded statuses (booked/tentative/blocked) · 3. Agent attribution if multi-team</td>
+</tr>
+<tr class="odd">
+<td><code>vendor_clients_v1</code></td>
+<td>First time user opens Clients</td>
+<td>1. Client list (couples who booked you) · 2. Per-client thread shortcut · 3. Per-client booking record</td>
+</tr>
+<tr class="even">
+<td><code>vendor_team_v1</code></td>
+<td>First time user opens Team &amp; Setnayan</td>
+<td>1. Add team members · 2. Set per-member chat permissions · 3. Switch to customer view</td>
+</tr>
+</tbody>
+</table>
+<h3 id="admin-mini-tours">Admin mini-tours</h3>
+<table>
+<thead>
+<tr class="header">
+<th><code>tour_key</code></th>
+<th>Trigger</th>
+<th>Steps</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>admin_verification_v1</code></td>
+<td>First time user opens Verification queue</td>
+<td>1. New applications list · 2. Document review pane · 3. Approve / Request changes / Reject flow</td>
+</tr>
+<tr class="even">
+<td><code>admin_payments_v1</code></td>
+<td>First time user opens Payments</td>
+<td>1. Inbox view (BDO + GCash) · 2. Match-to-order flow · 3. Mark-paid action with reference code · 4. 24-hr SLA timer</td>
+</tr>
+<tr class="odd">
+<td><code>admin_disputes_v1</code></td>
+<td>First time user opens Disputes</td>
+<td>1. Active disputes list · 2. Mediation message thread · 3. Resolution actions (refund / partial / decline)</td>
+</tr>
+</tbody>
+</table>
+<p>Each mini-tour key is namespaced by surface so users only see one tour fire at a time. The dashboard-level tour is the gatekeeper; mini-tours are progressive.</p>
+<hr />
+<h2 id="5-data-model">5. Data model</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="co">-- One row per completed (or explicitly skipped) tour per user.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="co">-- Presence of a row means &quot;do not auto-trigger this tour for this user again.&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> tour_completions (</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>  user_id          UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>  tour_key         TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>  <span class="co">-- e.g. &#39;customer_dashboard_v1&#39;, &#39;vendor_dashboard_v1&#39;, &#39;guest_landing_v1&#39;,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>  <span class="co">--      &#39;admin_console_v1&#39;, &#39;customer_vendors_v1&#39;, etc.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a>  completed_at     TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>  skipped_at_step  <span class="dt">INT</span>,         <span class="co">-- nullable; the step number where user skipped (NULL if they finished)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a>  total_steps      <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a>  dont_show_again  <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">TRUE</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a>  <span class="co">-- if FALSE, the tour re-fires on next login (user unchecked the penultimate-step checkbox)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a>  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (user_id, tour_key)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a>);</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true"></a><span class="co">-- Per-step analytics, for funnel reporting in 0023 admin analytics.</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> tour_step_views (</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a>  view_id      UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true"></a>  user_id      UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users (user_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a>  tour_key     TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true"></a>  step_number  <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true"></a>  viewed_at    TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true"></a>  action       TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (action <span class="kw">IN</span> (<span class="st">&#39;next&#39;</span>,<span class="st">&#39;back&#39;</span>,<span class="st">&#39;skip&#39;</span>,<span class="st">&#39;complete&#39;</span>))</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true"></a>);</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> tour_step_views_tour_idx <span class="kw">ON</span> tour_step_views (tour_key, viewed_at <span class="kw">DESC</span>);</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> tour_step_views_user_idx <span class="kw">ON</span> tour_step_views (user_id, viewed_at <span class="kw">DESC</span>);</span></code></pre></div>
+<p><strong>No PII in tour rows.</strong> <code>tour_completions</code> is a pure user-state table — it records <em>that</em> a user saw a tour, not <em>what</em> they saw. The tour content lives in TypeScript source files, versioned in code, not in the database.</p>
+<p><strong>Version suffix in <code>tour_key</code>.</strong> When a tour script materially changes (new steps added, surfaces re-ordered), we bump the version (<code>customer_dashboard_v2</code>). Existing users with a <code>v1</code> completion row don't get auto-re-tour'd; they have to opt in via Settings → "Replay onboarding tour" to see the v2 walkthrough. This avoids surprising returning users with a "new" tour on their next login.</p>
+<hr />
+<h2 id="6-trigger-logic--replay-flow">6. Trigger logic + replay flow</h2>
+<p><strong>On every page load:</strong></p>
+<ol>
+<li>Identify the user's role and the current surface (e.g. customer + <code>/dashboard/[event_id]/overview</code> → tour key <code>customer_dashboard_v1</code>).</li>
+<li>Check <code>tour_completions</code> for a row matching <code>(user_id, tour_key)</code>.</li>
+<li>If no row exists: schedule the tour to start after a 1.5-second delay (lets the page render so spotlight targets exist in the DOM).</li>
+<li>If a row exists with <code>dont_show_again = FALSE</code>: re-fire the tour on this login (user wanted to come back).</li>
+<li>If a row exists with <code>dont_show_again = TRUE</code>: do not fire.</li>
+</ol>
+<p><strong>Edge cases handled:</strong></p>
+<ul>
+<li><strong>Spotlight target missing.</strong> If a <code>data-tour-id</code> element is not in the DOM at step-fire time, the step is silently skipped and the tour moves to the next step. The progress bar adjusts (e.g. tour shows as 7 of 8 instead of 8 of 8 if step 3 was skipped). The skipped step is <em>not</em> logged as a step_view.</li>
+<li><strong>User navigates away mid-tour.</strong> Treated as an implicit skip: log <code>action='skip'</code> with the current step number, set <code>skipped_at_step</code> in <code>tour_completions</code>. The tour does not re-fire on the next page load.</li>
+<li><strong>User uncompletes via Settings replay.</strong> Triggering "Replay onboarding tour" from Settings sets <code>dont_show_again = FALSE</code> and re-fires the tour. After completion, the row updates with new <code>completed_at</code> + <code>dont_show_again = TRUE</code>.</li>
+</ul>
+<p><strong>Replay surface (lives in 0025 Settings).</strong> Settings → Onboarding → "Replay onboarding tour" lists every tour the user is eligible for (based on role), with a status pill per tour: <code>Completed</code> / <code>Skipped at step N</code> / <code>Never started</code>. Tapping any row re-fires that tour immediately.</p>
+<hr />
+<h2 id="7-implementation-approach">7. Implementation approach</h2>
+<p><strong>Library decision: Driver.js.</strong> Both Shepherd.js and Driver.js are mature, MIT-licensed, work with vanilla HTML, and are framework-agnostic. We pick <strong>Driver.js</strong> for V1:</p>
+<ul>
+<li><strong>Smaller footprint:</strong> ~5KB gzipped vs Shepherd's ~30KB. Tours load on every dashboard mount; small payload matters.</li>
+<li><strong>Simpler API:</strong> Driver.js uses a flat array of step definitions; Shepherd uses a class-based step builder. For our use case (fixed scripts, no dynamic step injection) the flat array is the better fit.</li>
+<li><strong>No dependencies.</strong> Shepherd pulls in Tippy.js + Popper.js. Driver.js is self-contained.</li>
+<li><strong>Better TypeScript types.</strong> Driver.js ships first-class TS types out of the box.</li>
+</ul>
+<p><strong>Tour definitions live in TypeScript:</strong></p>
+<pre><code>apps/web/src/tours/
+  index.ts                        # exports the tour registry
+  customer_dashboard.ts           # customer_dashboard_v1
+  customer_vendors.ts             # customer_vendors_v1 mini-tour
+  customer_seat_plan.ts           # customer_seat_plan_v1 mini-tour
+  ...
+  vendor_dashboard.ts
+  vendor_services.ts
+  ...
+  guest_landing.ts
+  admin_console.ts
+  admin_verification.ts
+  ...
+</code></pre>
+<p><strong>Step shape:</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="im">export type</span> TourStep <span class="op">=</span> {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>  <span class="co">// Target selector. Null = centered modal (no spotlight).</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>  target<span class="op">:</span> <span class="dt">string</span> <span class="op">|</span> <span class="dt">null</span><span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>  <span class="co">// i18n key resolved at render time from marketing-copy.{locale}.ts</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a>  titleKey<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a>  bodyKey<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a>  <span class="co">// tooltip position; &#39;auto&#39; lets Driver.js pick</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a>  side<span class="op">?:</span> <span class="st">&#39;top&#39;</span> <span class="op">|</span> <span class="st">&#39;bottom&#39;</span> <span class="op">|</span> <span class="st">&#39;left&#39;</span> <span class="op">|</span> <span class="st">&#39;right&#39;</span> <span class="op">|</span> <span class="st">&#39;auto&#39;</span><span class="op">;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a>  <span class="co">// step-specific conditional skip (e.g. logo step skips if logo present)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a>  skipIf<span class="op">?:</span> (ctx<span class="op">:</span> TourContext) <span class="kw">=&gt;</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a>  <span class="co">// show the &quot;Don&#39;t show me this again&quot; checkbox on this step</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a>  showDontShowAgain<span class="op">?:</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true"></a>}<span class="op">;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true"></a><span class="im">export type</span> Tour <span class="op">=</span> {</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true"></a>  key<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>             <span class="co">// &#39;customer_dashboard_v1&#39;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true"></a>  role<span class="op">:</span> <span class="st">&#39;customer&#39;</span> <span class="op">|</span> <span class="st">&#39;vendor&#39;</span> <span class="op">|</span> <span class="st">&#39;guest&#39;</span> <span class="op">|</span> <span class="st">&#39;admin&#39;</span><span class="op">;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true"></a>  surface<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>         <span class="co">// &#39;dashboard&#39; | &#39;vendors_tab&#39; | &#39;landing&#39; | etc.</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true"></a>  steps<span class="op">:</span> TourStep[]<span class="op">;</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true"></a>}<span class="op">;</span></span></code></pre></div>
+<p><strong>Locale resolution.</strong> Step copy is keyed (e.g. <code>tour.customer.welcome.title</code>), then resolved at render time against the user's locale bundle (<code>marketing-copy.en.ts</code> / <code>marketing-copy.tl.ts</code> / <code>marketing-copy.ceb.ts</code>). All three locales must have all keys before a tour can ship — enforced by the locale-completeness CI check from 0015.</p>
+<p><strong>Driver.js wiring.</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="im">import</span> { driver } from <span class="st">&#39;driver.js&#39;</span><span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a>const d <span class="op">=</span> <span class="fu">driver</span>({</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true"></a>  showProgress<span class="op">:</span> true<span class="op">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true"></a>  progressText<span class="op">:</span> <span class="st">&#39;{{current}} of {{total}}&#39;</span><span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true"></a>  allowClose<span class="op">:</span> false<span class="op">,</span>         <span class="co">// no clicking-scrim-to-close</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true"></a>  overlayOpacity<span class="op">:</span> <span class="fl">0.6</span><span class="op">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true"></a>  popoverOffset<span class="op">:</span> <span class="dv">10</span><span class="op">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true"></a>  steps<span class="op">:</span> <span class="fu">resolveSteps</span>(tour<span class="op">.</span><span class="at">steps</span><span class="op">,</span> locale<span class="op">,</span> ctx)<span class="op">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true"></a>  onPopoverRender<span class="op">:</span> (popover<span class="op">,</span> { state }) <span class="kw">=&gt;</span> {</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true"></a>    <span class="co">// inject &quot;Don&#39;t show me this again&quot; checkbox on the flagged step</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true"></a>  }<span class="op">,</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true"></a>  onDestroyed<span class="op">:</span> (element<span class="op">,</span> step<span class="op">,</span> { state }) <span class="kw">=&gt;</span> {</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true"></a>    <span class="co">// log step_view + update tour_completions</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true"></a>  }<span class="op">,</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true"></a>})<span class="op">;</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true"></a>d<span class="op">.</span><span class="fu">drive</span>()<span class="op">;</span></span></code></pre></div>
+<hr />
+<h2 id="8-accessibility">8. Accessibility</h2>
+<p><strong>Keyboard navigation.</strong></p>
+<ul>
+<li><code>Esc</code> dismisses the tour.</li>
+<li><code>→</code> / <code>Enter</code> advances to the next step.</li>
+<li><code>←</code> retreats to the previous step.</li>
+<li><code>Tab</code> cycles focus through the buttons in the tooltip (Skip · Back · Next).</li>
+<li>Focus traps to the tooltip while it's open. Focus restores to the spotlighted element after dismiss.</li>
+</ul>
+<p><strong>Screen-reader support.</strong></p>
+<ul>
+<li>Tooltip has <code>role="dialog"</code> and <code>aria-labelledby</code> / <code>aria-describedby</code> pointing at the title + body.</li>
+<li>Spotlighted element has <code>aria-current="step"</code> while it's the active step.</li>
+<li><code>aria-live="polite"</code> on the tooltip body so step transitions are announced.</li>
+</ul>
+<p><strong>Visual.</strong></p>
+<ul>
+<li>Tooltip text contrast ≥ 4.5:1 in all 4 themes (Setnayan Default / Victorian / Classy / iOS) — enforced by the theme-token contrast audit from 0021.</li>
+<li>Spotlight cutout has a 2px solid border in the theme's accent color so the focused element is visible to low-vision users even with the scrim dimmed.</li>
+<li>Reduced-motion: instant transitions, no slide-in.</li>
+</ul>
+<p><strong>Touch.</strong></p>
+<ul>
+<li>Tooltip buttons ≥ 44pt tap targets (memory rule: thumb-friendly mobile).</li>
+<li>On mobile, tooltips occupy ≥ 70% of the viewport width with primary actions in the thumb zone (bottom third).</li>
+</ul>
+<hr />
+<h2 id="9-tour-analytics-in-0023">9. Tour analytics in 0023</h2>
+<p>Five event types logged into <code>tour_step_views</code>:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Event</th>
+<th>Logged when</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>tour_started</code></td>
+<td>Tour first renders (step 1 viewed)</td>
+</tr>
+<tr class="even">
+<td><code>step_viewed</code></td>
+<td>Each subsequent step renders</td>
+</tr>
+<tr class="odd">
+<td><code>step_skipped</code></td>
+<td>User skips a non-final step</td>
+</tr>
+<tr class="even">
+<td><code>tour_completed</code></td>
+<td>User clicks Finish on the final step</td>
+</tr>
+<tr class="odd">
+<td><code>tour_replayed</code></td>
+<td>User triggers replay from Settings</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Funnel surface in 0023 admin analytics:</strong></p>
+<p>The admin analytics dashboard (0023 § 7) gains a new card: <strong>Tour funnel</strong>. For each <code>tour_key</code>, show:</p>
+<ul>
+<li>Total users eligible (have the role, have logged in)</li>
+<li>Started (step 1 viewed)</li>
+<li>Step-by-step retention (1 → 2 → 3 → … → final)</li>
+<li>Completed</li>
+<li>Skipped (with breakdown by step where they skipped)</li>
+<li>Replayed (count of users who replayed at least once)</li>
+</ul>
+<p><strong>Why this matters.</strong> If we see 70% of customers skipping at step 4 (services-launcher grid), the copy probably isn't landing. If we see 90% of vendors finishing their tour but only 30% of guests, the guest tour might be too long. The funnel data drives copy iterations on a per-tour basis.</p>
+<hr />
+<h2 id="10-composition-with-0021--0022--0023--0031">10. Composition with 0021 / 0022 / 0023 / 0031</h2>
+<p><strong>0021 customer dashboard.</strong> Adds <code>data-tour-id</code> attributes to: tab bar, services-launcher grid, avatar menu, theme picker, help link. Also adds the four customer mini-tour <code>data-tour-id</code> markers to: vendors tab, seat plan canvas, landing tab lifecycle picker, QR hub.</p>
+<p><strong>0022 vendor dashboard.</strong> Adds <code>data-tour-id</code> attributes to: tab bar, logo-upload prompt, Services CTA, Pro card, customer-view switcher. Plus mini-tour markers on Services / Calendar / Clients / Team &amp; Setnayan.</p>
+<p><strong>0023 admin console.</strong> Adds <code>data-tour-id</code> attributes to: tab bar, Team Pool widget, audit log link, support tickets queue. Plus mini-tour markers on Verification queue, Payments inbox, Disputes list. Also gains the Tour funnel analytics card.</p>
+<p><strong>0031 guest landing (post-0030).</strong> Adds <code>data-tour-id</code> attributes to: RSVP button, personal QR display. Note: 0031 is the iteration that wraps 0002 in a full guest dashboard; this iteration forward-references 0031 since the guest tour lands on that surface.</p>
+<p><strong>0025 Settings.</strong> Adds the Onboarding section with "Replay onboarding tour" subsection listing all role-eligible tours.</p>
+<p><strong>0029 help center.</strong> The farewell step of each tour links to the relevant help-center landing (<code>/help/getting-started/[role]</code>). Help center content for first-time users mirrors the tour scripts so the user has a re-readable version of what the tour told them.</p>
+<hr />
+<h2 id="11-voice--tone">11. Voice + tone</h2>
+<p>The same luxurious-Filipino-modern register from 0015 marketing copy applies (locked 2026-05-11). EN is primary; TL and CEB bundles ship complete.</p>
+<p><strong>Style rules for tour copy:</strong></p>
+<ul>
+<li><strong>Conversational, not instructional.</strong> "Your home base" beats "This is the overview tab where you can see your tasks."</li>
+<li><strong>Direct address.</strong> "Tap here" not "Users can click this button."</li>
+<li><strong>One sentence per body.</strong> Two max if absolutely necessary. Long copy in a tooltip gets skipped.</li>
+<li><strong>No exclamation marks.</strong> Calm voice — luxurious restraint per 0015's editorial register.</li>
+<li><strong>No emoji.</strong> Lucide icons only, per the icon system (locked 2026-05-12).</li>
+<li><strong>First-name personalization</strong> on the welcome modal only. "Welcome, Maria." Subsequent steps don't repeat the name (annoying).</li>
+<li><strong>Tagalog phrase in TL bundle warm spots.</strong> TL version of step 1 welcome: "Kumusta, [name]. Pag-aralan natin nang sandali ang dashboard mo." CEB equivalent: "Maayong pag-abot, [name]. Imantala lang nato ang dashboard mo."</li>
+<li><strong>No engineering-spec voice.</strong> Banned: "Apparatus," "surface," "flywheel," "role-router," "doorway" — even though they're locked terms in the project, public-facing copy uses everyday words.</li>
+</ul>
+<p>All tour copy lives in <code>marketing-copy.{locale}.ts</code> under the <code>tour.*</code> namespace so it ships through the same localization pipeline as the rest of the marketing site.</p>
+<hr />
+<h2 id="12-acceptance-tests">12. Acceptance tests</h2>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Test</th>
+<th>Pass criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>New customer signs up, lands on dashboard</td>
+<td>Tour fires 1.5s after page render; step 1 welcome modal is centered + dimmed scrim visible</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Customer completes all 8 steps</td>
+<td><code>tour_completions</code> row created with <code>total_steps=8</code>, <code>skipped_at_step=NULL</code>, <code>dont_show_again=TRUE</code></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Customer signs out, signs back in</td>
+<td>Tour does NOT re-fire</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Customer goes to Settings → Replay onboarding tour</td>
+<td>Tour re-fires; on completion, <code>completed_at</code> updates</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Vendor with logo already uploaded sees the tour</td>
+<td>Step 3 (logo upload prompt) is silently skipped; tour shows 6 of 6 effective steps (not 7)</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Guest opens the landing page tour, presses Esc on step 2</td>
+<td>Tour dismisses; <code>tour_completions</code> row has <code>skipped_at_step=2</code>, <code>action='skip'</code> logged in <code>tour_step_views</code></td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Admin with the Verification Handler role lands on console</td>
+<td>Admin tour fires; step 1 welcome modal references "Verification Handler" by role</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>User on Tagalog locale starts the tour</td>
+<td>All step copy renders from <code>marketing-copy.tl.ts</code>; the "Set na 'yan." brand phrase appears in the farewell modal</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>User with <code>prefers-reduced-motion: reduce</code> starts the tour</td>
+<td>Spotlight transitions are instant; no slide-in animation</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>User uses Tab to navigate the tooltip</td>
+<td>Focus cycles through Skip → Back → Next; Esc dismisses</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>User unchecks "Don't show me this again" on step 7</td>
+<td><code>tour_completions.dont_show_again = FALSE</code>; tour re-fires on next login</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>Admin opens analytics dashboard</td>
+<td>"Tour funnel" card renders per-tour conversion (started → step-by-step → completed)</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>Customer who completed dashboard tour opens Vendors tab first time</td>
+<td>Vendors mini-tour fires (3 steps); separate <code>customer_vendors_v1</code> row created on completion</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>Customer who SKIPPED dashboard tour opens Vendors tab first time</td>
+<td>Vendors mini-tour does NOT fire (gated on parent dashboard tour completion)</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td>Driver.js script weight</td>
+<td>Production bundle adds ≤ 8KB gzipped to the dashboard route</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="13-decision-log">13. Decision log</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Date</th>
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Library: <strong>Driver.js</strong>, not Shepherd.js</td>
+<td>5KB vs 30KB; no Tippy/Popper deps; flat array API matches our fixed scripts; first-class TS types</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>Centered welcome + farewell modals bookend every tour</td>
+<td>Soft open + confident close. Mid-tour spotlight is high-attention; a centered modal lets the user breathe at start and end</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Scrim-click does NOT dismiss; only Esc + Skip button do</td>
+<td>Accidental scrim clicks shouldn't end a tour; explicit dismiss intent only</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>"Don't show me this again" defaults checked</td>
+<td>Most users don't want to see it again; opt-in to re-fire is the friendlier default</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Tour state is per-user-per-tour-key (not per-account-type)</td>
+<td>Same user across multiple roles (e.g. someone who's both a customer at their own wedding AND a vendor for someone else) sees each role's tour the first time they enter that role surface</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>Version suffix in tour_key (<code>_v1</code>, <code>_v2</code>)</td>
+<td>When we revise a tour, existing users aren't surprised on next login; they have to opt-in via Replay</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Mini-tours gated on parent tour completion</td>
+<td>Prevents new users from being bombarded with overlapping tours in their first session</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>No tour for customers who land via QR-join flow</td>
+<td>Customers arriving via 0000's QR-join flow are already on a specific event surface mid-task; firing a tour at that moment is the wrong UX. They get the tour on their next login to <code>/dashboard</code> instead</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Tour copy localized through <code>marketing-copy.{locale}.ts</code></td>
+<td>Same pipeline as the marketing site (0015); single source for all user-facing strings</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>Per-step <code>data-tour-id</code> attributes, not CSS class selectors</td>
+<td>More stable than class names (which change with theme/styling); explicit contract between tour scripts and the surfaces they target</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>Skipped target step is silently skipped, not shown as an error</td>
+<td>If logo upload step targets an element that's not in the DOM (because logo already uploaded), don't break the tour — just move on</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>Tour analytics surface in 0023, not a separate iteration</td>
+<td>Admin analytics dashboard already exists in 0023; tour funnel is one more card there</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td>No emoji in tour copy</td>
+<td>Matches the icon system rule (locked 2026-05-12); Lucide-only</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td>First-name personalization on welcome modal only</td>
+<td>Repeating the name across steps feels uncanny; once is welcome, twice is creepy</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-companion-docs">14. Companion docs</h2>
+<ul>
+<li><code>0021_couple_dashboard_fully_purchased/</code> — customer dashboard surfaces; adds the <code>data-tour-id</code> markers + Replay setting integration</li>
+<li><code>0022_vendor_dashboard/</code> — vendor dashboard surfaces; adds the <code>data-tour-id</code> markers + Replay setting integration</li>
+<li><code>0023_admin_console/</code> — admin console + Tour funnel analytics card</li>
+<li><code>0031_guest_landing_dashboard/</code> (forward-ref) — guest landing surfaces that the guest tour targets</li>
+<li><code>0025_profile_settings/</code> — Settings surface where "Replay onboarding tour" lives</li>
+<li><code>0029_help_center/</code> — the help articles that the farewell step links to</li>
+<li><code>0015_main_website/</code> — marketing-copy localization pipeline reused for tour copy</li>
+<li><code>CLAUDE.md</code> — project decisions index (this iteration's entries land in the main decision log)</li>
+</ul>
+<hr />
+<p><em>End of 0030.</em></p>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

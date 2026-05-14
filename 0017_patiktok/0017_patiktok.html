@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Patiktok Prototype — Dashboard + Camera + Extended Screen</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F7F4;
+    --ink: #111827;
+    --ink-soft: #374151;
+    --muted: #6B7280;
+    --line: #E5E7EB;
+    --accent-pink: #FF2D55;     /* TikTok pink */
+    --accent-cyan: #25F4EE;     /* TikTok cyan */
+    --accent-amber: #CA8A04;
+    --surface: #FFFFFF;
+    --surface-soft: #F9FAFB;
+    --recording: #DC2626;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.45;
+    min-height: 100vh;
+  }
+  header {
+    background: var(--ink);
+    color: white;
+    padding: 24px 32px;
+    border-bottom: 4px solid var(--accent-pink);
+  }
+  header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  header p { font-size: 13px; opacity: 0.7; max-width: 720px; }
+  main { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  .section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .section-h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
+  .section-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; max-width: 720px; }
+
+  /* Device frames */
+  .device-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .phone {
+    width: 320px;
+    height: 680px;
+    background: var(--ink);
+    border-radius: 36px;
+    border: 6px solid var(--ink);
+    padding: 8px;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  }
+  .phone-notch {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 22px;
+    background: var(--ink);
+    border-radius: 12px;
+    z-index: 10;
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+  }
+  .browser {
+    width: 720px;
+    flex: 1;
+    min-width: 480px;
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  }
+  .browser-chrome {
+    background: #F3F4F6;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .browser-chrome .url {
+    flex: 1;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: 12px;
+  }
+  .browser-body { padding: 0; min-height: 540px; }
+
+  /* TV / Monitor frame */
+  .monitor {
+    width: 100%;
+    max-width: 920px;
+    aspect-ratio: 16/9;
+    background: var(--ink);
+    border-radius: 12px;
+    border: 8px solid var(--ink);
+    padding: 6px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    position: relative;
+    overflow: hidden;
+  }
+  .monitor::after {
+    content: '';
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%;
+    height: 16px;
+    background: var(--ink);
+    border-radius: 0 0 6px 6px;
+  }
+  .monitor-screen {
+    width: 100%;
+    height: 100%;
+    background: black;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .device-label {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  /* ───────────── OPERATOR DASHBOARD STYLES ───────────── */
+  .dash {
+    height: 100%;
+    background: var(--surface);
+    overflow-y: auto;
+  }
+  .dash-status-bar {
+    background: white;
+    padding: 28px 16px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .dash-header {
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+    color: white;
+    padding: 20px 16px;
+    position: relative;
+  }
+  .dash-header .event {
+    font-size: 11px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .dash-header .couple {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .dash-status-badge {
+    position: absolute;
+    top: 20px;
+    right: 16px;
+    background: rgba(255,255,255,0.25);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .dash-body { padding: 16px; }
+  .dash-section-title {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .template-card {
+    background: white;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+  }
+  .template-card.active {
+    border-color: var(--accent-pink);
+    background: linear-gradient(180deg, #FFF6F7, white);
+  }
+  .template-thumb {
+    width: 56px;
+    height: 80px;
+    background: linear-gradient(135deg, #FF6B9D, #FFC371);
+    border-radius: 8px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 6px;
+  }
+  .template-thumb::before {
+    content: '▶';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 18px;
+    text-shadow: 0 0 8px rgba(0,0,0,0.4);
+  }
+  .template-thumb.backup {
+    background: linear-gradient(135deg, #25F4EE, #1D4ED8);
+  }
+  .template-info { flex: 1; min-width: 0; }
+  .template-info .title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+  .template-info .sound {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .template-info .sound::before {
+    content: '♫';
+    color: var(--accent-pink);
+  }
+  .template-info .uses { font-size: 10px; color: var(--muted); margin-top: 4px; }
+  .template-badge {
+    background: var(--accent-pink);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .template-badge.backup { background: var(--muted); }
+  .template-swap {
+    width: 32px;
+    height: 32px;
+    background: var(--surface-soft);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .submission-counter {
+    background: linear-gradient(180deg, #FFF6F7, white);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    margin: 16px 0;
+  }
+  .submission-counter .count {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--accent-pink);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .submission-counter .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .submission-counter .breakdown {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 10px;
+    color: var(--ink-soft);
+  }
+
+  .btn-record {
+    background: var(--accent-pink);
+    color: white;
+    width: 100%;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(255,45,85,0.3);
+  }
+  .btn-record::before {
+    content: '●';
+    color: white;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .btn-cast {
+    background: var(--ink);
+    color: white;
+    width: 100%;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-cast.casting {
+    background: #16A34A;
+  }
+  .btn-cast.casting::before { content: '📺'; }
+  .btn-cast:not(.casting)::before { content: '📡'; }
+
+  .quick-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .quick-btn {
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    text-align: center;
+  }
+
+  /* ───────── CAMERA RECORDING VIEW ───────── */
+  .camera {
+    height: 100%;
+    background: #0A0A0A;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .camera-overlay-top {
+    position: absolute;
+    top: 28px;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 5;
+  }
+  .face-lock-indicator {
+    background: rgba(37,244,238,0.18);
+    color: var(--accent-cyan);
+    border: 1px solid var(--accent-cyan);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .face-lock-indicator::before {
+    content: '◉';
+    animation: pulse 1.2s infinite;
+  }
+  .timer {
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Simulated camera preview (with guest silhouette) */
+  .camera-preview {
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(ellipse at 50% 38%, rgba(255,180,180,0.3) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 60%, rgba(80,80,120,0.4) 0%, transparent 60%),
+      linear-gradient(180deg, #1A1A2E 0%, #16213E 70%, #0F3460 100%);
+    position: relative;
+  }
+  .camera-preview::before {
+    content: '';
+    position: absolute;
+    top: 22%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 130px;
+    background: radial-gradient(ellipse at center top, rgba(255,210,210,0.6), rgba(180,140,140,0.4) 60%, transparent);
+    border-radius: 50% 50% 45% 45%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+  .camera-preview::after {
+    content: '';
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 380px;
+    background: linear-gradient(180deg, rgba(200,180,220,0.5), rgba(140,120,180,0.3));
+    border-radius: 50px 50px 0 0;
+    clip-path: polygon(30% 0, 70% 0, 95% 50%, 80% 100%, 20% 100%, 5% 50%);
+  }
+
+  /* Face-lock target overlay */
+  .face-target {
+    position: absolute;
+    top: 28%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    border: 2px solid var(--accent-cyan);
+    border-radius: 50%;
+    z-index: 4;
+    animation: pulse-target 2s infinite;
+  }
+  .face-target::before, .face-target::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--accent-cyan);
+  }
+  .face-target::before {
+    top: -3px; left: -3px;
+    border-right: none;
+    border-bottom: none;
+  }
+  .face-target::after {
+    bottom: -3px; right: -3px;
+    border-left: none;
+    border-top: none;
+  }
+  @keyframes pulse-target {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(37,244,238,0.6); }
+    50% { box-shadow: 0 0 0 12px rgba(37,244,238,0); }
+  }
+
+  /* AR overlay showing reel preview */
+  .ar-overlay {
+    position: absolute;
+    bottom: 120px;
+    right: 12px;
+    width: 90px;
+    height: 130px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #FF6B9D, #FFC371);
+    border: 2px solid white;
+    overflow: hidden;
+    z-index: 4;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .ar-overlay::before {
+    content: '▶';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+    text-shadow: 0 0 12px rgba(0,0,0,0.5);
+  }
+  .ar-overlay .ar-label {
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 8px;
+    font-weight: 700;
+    z-index: 5;
+  }
+
+  /* Bottom controls */
+  .camera-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.6), transparent);
+    z-index: 5;
+  }
+  .countdown {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .countdown .num {
+    font-size: 56px;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    font-variant-numeric: tabular-nums;
+  }
+  .countdown .label {
+    color: white;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+    opacity: 0.85;
+  }
+  .record-btn {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: white;
+    border: 5px solid white;
+    margin: 0 auto;
+    display: block;
+    position: relative;
+    cursor: pointer;
+  }
+  .record-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px;
+    height: 56px;
+    background: var(--recording);
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+  .record-btn.recording::before {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+  }
+  .ready-prompt {
+    text-align: center;
+    background: rgba(0,0,0,0.7);
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    color: white;
+    font-size: 13px;
+  }
+  .ready-prompt strong { display: block; font-size: 15px; margin-bottom: 4px; }
+
+  /* ───────── EXTENDED MONITOR / SPLIT SCREEN ───────── */
+  .ext-split {
+    width: 100%;
+    height: 100%;
+    display: flex;
+  }
+  .ext-half {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .ext-half.reference {
+    background: linear-gradient(135deg, #FF2D55, #FF6B9D);
+  }
+  .ext-half.reference::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 35%, rgba(255,255,255,0.4), transparent 50%),
+      radial-gradient(ellipse at 50% 65%, rgba(80,40,80,0.6), transparent 70%);
+  }
+  .ext-half.reference::after {
+    content: '▶';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 56px;
+    text-shadow: 0 0 20px rgba(0,0,0,0.4);
+    opacity: 0.9;
+  }
+  .ext-half.live {
+    background:
+      radial-gradient(ellipse at 50% 35%, rgba(255,210,210,0.3), transparent 50%),
+      linear-gradient(180deg, #16213E, #0F3460);
+  }
+  .ext-half.live::before {
+    content: '';
+    position: absolute;
+    top: 20%; left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 130px;
+    background: radial-gradient(ellipse, rgba(255,210,210,0.7), rgba(180,140,140,0.4) 60%, transparent);
+    border-radius: 50%;
+  }
+  .ext-half.live::after {
+    content: '';
+    position: absolute;
+    top: 38%; left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 60%;
+    background: linear-gradient(180deg, rgba(200,180,220,0.5), rgba(140,120,180,0.3));
+    clip-path: polygon(30% 0, 70% 0, 95% 50%, 80% 100%, 20% 100%, 5% 50%);
+  }
+  .ext-label {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 5;
+  }
+  .ext-label.ref { background: rgba(255,45,85,0.8); }
+  .ext-label.live::before { content: '🔴 '; }
+  .ext-label.live { background: rgba(220,38,38,0.8); }
+
+  /* Beat indicator at bottom of monitor */
+  .ext-beat {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.6), transparent);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 4;
+  }
+  .ext-beat-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    position: relative;
+    margin: 0 12px;
+  }
+  .ext-beat-progress {
+    width: 35%;
+    height: 100%;
+    background: var(--accent-cyan);
+    border-radius: 2px;
+  }
+  .ext-beat-time {
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* PIP variant */
+  .ext-pip {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 50% 35%, rgba(255,210,210,0.3), transparent 50%),
+      linear-gradient(180deg, #16213E, #0F3460);
+  }
+  .ext-pip::before {
+    content: '';
+    position: absolute;
+    top: 20%; left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 200px;
+    background: radial-gradient(ellipse, rgba(255,210,210,0.7), rgba(180,140,140,0.4) 60%, transparent);
+    border-radius: 50%;
+  }
+  .ext-pip::after {
+    content: '';
+    position: absolute;
+    top: 38%; left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    height: 55%;
+    background: linear-gradient(180deg, rgba(200,180,220,0.5), rgba(140,120,180,0.3));
+    clip-path: polygon(30% 0, 70% 0, 95% 50%, 80% 100%, 20% 100%, 5% 50%);
+  }
+  .pip-window {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 22%;
+    aspect-ratio: 9/16;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #FF2D55, #FF6B9D);
+    border: 3px solid white;
+    z-index: 6;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pip-window::before {
+    content: '▶';
+    color: white;
+    font-size: 24px;
+  }
+  .pip-window::after {
+    content: 'REFERENCE';
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    text-align: center;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 0;
+    border-radius: 2px;
+  }
+
+  /* ───────── DESKTOP DASHBOARD ───────── */
+  .desktop-dash {
+    padding: 24px;
+    background: var(--surface-soft);
+    min-height: 540px;
+  }
+  .desktop-dash .dash-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+  }
+  .panel {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .panel h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  /* Mode toggle */
+  .mode-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .mode-btn {
+    flex: 1;
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  .mode-btn.active {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+
+  /* Misc */
+  .step-label {
+    display: inline-block;
+    background: var(--accent-pink);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .step-label.cam { background: var(--accent-cyan); color: var(--ink); }
+  .step-label.ext { background: var(--ink); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--line);
+    margin-top: 48px;
+  }
+
+  /* ────────────── INTERACTIVITY ────────────── */
+  .top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 12px 32px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .top-nav .nav-label {
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 12px;
+  }
+  .nav-btn {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.2); }
+  .nav-btn.active {
+    background: var(--accent-pink);
+    border-color: var(--accent-pink);
+  }
+  .demo-mode-btn {
+    margin-left: auto;
+    background: var(--accent-cyan);
+    color: var(--ink);
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .demo-mode-btn.playing { background: var(--recording); color: white; }
+
+  /* Interactive state controls */
+  .state-controls {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 8px;
+    flex-wrap: wrap;
+  }
+  .state-btn {
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .state-btn.active {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+  .state-btn:not(.active):hover { background: white; }
+
+  /* Hide / show states */
+  .state-view { display: none; }
+  .state-view.active { display: block; }
+
+  /* Animation on swap */
+  @keyframes swap-flash {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); box-shadow: 0 8px 20px rgba(255,45,85,0.3); }
+  }
+  .template-card.swapping {
+    animation: swap-flash 0.6s ease;
+  }
+
+  /* Counter pulse */
+  @keyframes counter-pulse {
+    0% { transform: scale(1); color: var(--accent-pink); }
+    50% { transform: scale(1.2); color: #16A34A; }
+    100% { transform: scale(1); color: var(--accent-pink); }
+  }
+  .count.pulsing { animation: counter-pulse 0.6s ease; }
+
+  /* Camera state cycling */
+  .camera-state-container { position: relative; }
+  .camera-substate { display: none; }
+  .camera-substate.active { display: block; }
+
+  /* Monitor mode cycling */
+  .monitor-container { transition: opacity 0.3s; }
+  .monitor-mode { display: none; }
+  .monitor-mode.active { display: block; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.success { background: #16A34A; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Patiktok Prototype — Dashboard + Camera + Extended Screen</h1>
+  <p>Iteration 0017 · Operator scans printed QR → dashboard appears on phone → camera records guest → monitor shows dual view (split-screen or PIP) for guest to mimic the reel in real time.</p>
+</header>
+
+<nav class="top-nav">
+  <span class="nav-label">Jump to:</span>
+  <button class="nav-btn" data-jump="setup">0 · Couple Setup</button>
+  <button class="nav-btn" data-jump="dashboard">1 · Operator Dashboard</button>
+  <button class="nav-btn" data-jump="camera">2 · Camera</button>
+  <button class="nav-btn" data-jump="monitor">3 · Monitor</button>
+  <button class="demo-mode-btn" id="demoBtn">▶ Auto-play demo</button>
+</nav>
+
+<main>
+
+  <!-- ════════════════ SECTION 0 — COUPLE SETUP ════════════════ -->
+  <div class="section" id="setup">
+    <span class="step-label" style="background: var(--accent-amber); color: white;">Step 0 · Couple sets up Patiktok before the event</span>
+    <h2 class="section-h2">Couple's Patiktok Setup Page</h2>
+    <p class="section-desc">Couple opens Patiktok in their Setnayan account. Picks 2 TikTok templates (primary + backup) — shares directly from their own TikTok app via native share. Generates the print-ready session QR. Downloads the print pack PDF to hand to whoever will operate the booth.</p>
+
+    <div class="device-row">
+
+      <!-- Mobile couple setup -->
+      <div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="dash">
+              <div class="dash-status-bar">
+                <span>9:41</span>
+                <span>📶 📡 100%</span>
+              </div>
+              <div class="dash-header" style="background: linear-gradient(135deg, #CA8A04, #FF2D55);">
+                <div class="event">Patiktok Setup · Couple</div>
+                <div class="couple">Maria &amp; Juan · May 17</div>
+                <span class="dash-status-badge">Setup</span>
+              </div>
+
+              <div class="dash-body">
+                <div class="dash-section-title">Step 1 · Pick 2 TikTok templates</div>
+                <p style="font-size: 11px; color: var(--muted); margin-bottom: 12px; line-height: 1.5;">Share a sound link from your TikTok app to add it here. Pick what's trending for you — Setnayan will use it in the compilation.</p>
+
+                <div class="template-card active" style="padding: 12px;">
+                  <div class="template-thumb"></div>
+                  <div class="template-info">
+                    <div class="title" style="font-size: 12px;">"Naka setnayan na po setnayan"</div>
+                    <div class="sound" style="font-size: 10px;">Ben&amp;Ben</div>
+                    <div class="uses" style="font-size: 9px;">@bennben_official · 1.2M uses</div>
+                  </div>
+                  <span class="template-badge" style="font-size: 8px; padding: 2px 6px;">Primary</span>
+                </div>
+
+                <div class="template-card" style="padding: 12px;">
+                  <div class="template-thumb backup"></div>
+                  <div class="template-info">
+                    <div class="title" style="font-size: 12px;">Sabrina Carpenter — Espresso</div>
+                    <div class="sound" style="font-size: 10px;">Trending intl</div>
+                    <div class="uses" style="font-size: 9px;">@sabrina · 8.5M uses</div>
+                  </div>
+                  <span class="template-badge backup" style="font-size: 8px; padding: 2px 6px;">Backup</span>
+                </div>
+
+                <button class="quick-btn" style="width: 100%; margin-top: 8px; padding: 12px; border: 2px dashed var(--line); background: white; color: var(--muted);">+ Add from TikTok (max 2)</button>
+
+                <div style="margin-top: 24px;">
+                  <div class="dash-section-title">Step 2 · Print pack</div>
+                  <div style="background: linear-gradient(180deg, white, var(--surface-soft)); border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+                    <div style="width: 110px; height: 110px; margin: 0 auto 12px; background: white; border: 2px solid var(--ink); border-radius: 8px; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); padding: 8px; gap: 1px;">
+                      <!-- QR pattern simulation -->
+                      <div style="background: var(--ink); grid-column: 1 / 4; grid-row: 1 / 4;"></div>
+                      <div style="background: var(--ink); grid-column: 6 / 9; grid-row: 1 / 4;"></div>
+                      <div style="background: var(--ink); grid-column: 1 / 4; grid-row: 6 / 9;"></div>
+                      <div style="background: var(--ink); grid-column: 5 / 6; grid-row: 5 / 6;"></div>
+                      <div style="background: var(--ink); grid-column: 6 / 7; grid-row: 4 / 5;"></div>
+                      <div style="background: var(--ink); grid-column: 4 / 5; grid-row: 7 / 8;"></div>
+                      <div style="background: var(--ink); grid-column: 7 / 8; grid-row: 6 / 7;"></div>
+                      <div style="background: var(--ink); grid-column: 6 / 7; grid-row: 7 / 9;"></div>
+                    </div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--ink);">Session QR ready</div>
+                    <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">Print + hand to booth operator</div>
+                  </div>
+                  <button class="btn-record" style="background: var(--ink); margin-top: 12px; box-shadow: none;">📥 Email print pack (PDF)</button>
+                  <div style="font-size: 10px; color: var(--muted); text-align: center; margin-top: 6px;">QR + setup instructions + signage card · 3 pages</div>
+                </div>
+
+                <div style="margin-top: 24px;">
+                  <div class="dash-section-title">Step 3 · TikTok handle (for tagging)</div>
+                  <div style="background: white; border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; gap: 10px; align-items: center;">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #FF2D55, #25F4EE); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 700;">M</div>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-size: 12px; font-weight: 700;">@maria.juan.wedding</div>
+                      <div style="font-size: 10px; color: var(--muted);">Linked · will appear in compilation caption</div>
+                    </div>
+                    <span style="color: #16A34A; font-size: 16px;">✓</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="device-label">Mobile · Couple's setup view</p>
+      </div>
+
+      <!-- Desktop couple setup -->
+      <div class="browser">
+        <div class="browser-chrome">
+          <div class="dot" style="background:#FF5F57"></div>
+          <div class="dot" style="background:#FEBC2E"></div>
+          <div class="dot" style="background:#28C840"></div>
+          <div class="url">setnayan.com/dashboard/maria-juan/patiktok</div>
+        </div>
+        <div class="browser-body">
+          <div class="desktop-dash">
+            <div class="panel" style="background: linear-gradient(135deg, #CA8A04, #FF2D55); color: white; border: none; margin-bottom: 16px;">
+              <h3 style="color: rgba(255,255,255,0.85);">Patiktok Setup · Pre-event</h3>
+              <div style="font-size: 22px; font-weight: 700;">Maria &amp; Juan · May 17, 2026</div>
+              <div style="font-size: 12px; opacity: 0.85; margin-top: 4px;">Wedding in 12 days · 2 templates picked · Print pack ready</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px;">
+
+              <div class="panel">
+                <h3>Step 1 · Pick your TikTok templates (2 max)</h3>
+                <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5;">Browse TikTok in your own app, find a sound you want for the wedding. Tap "Share" → "Setnayan" to add it here. Pick a primary + a backup. Different guests can pick either at the booth.</p>
+
+                <div class="template-card active" style="margin-bottom: 10px;">
+                  <div class="template-thumb"></div>
+                  <div class="template-info">
+                    <div class="title" style="font-size: 14px;">"Naka setnayan na po setnayan" — Ben&amp;Ben</div>
+                    <div class="sound" style="font-size: 12px;">@bennben_official · 22-sec reel · 1.2M uses</div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                      <span style="font-size: 10px; background: var(--surface-soft); padding: 2px 8px; border-radius: 6px; color: var(--ink-soft);">🇵🇭 PH trending</span>
+                      <span style="font-size: 10px; background: var(--surface-soft); padding: 2px 8px; border-radius: 6px; color: var(--ink-soft);">Choreo · easy</span>
+                    </div>
+                  </div>
+                  <span class="template-badge">Primary</span>
+                </div>
+
+                <div class="template-card" style="margin-bottom: 10px;">
+                  <div class="template-thumb backup"></div>
+                  <div class="template-info">
+                    <div class="title" style="font-size: 14px;">Espresso — Sabrina Carpenter</div>
+                    <div class="sound" style="font-size: 12px;">@sabrina · 15-sec reel · 8.5M uses</div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                      <span style="font-size: 10px; background: var(--surface-soft); padding: 2px 8px; border-radius: 6px; color: var(--ink-soft);">🌍 Intl trending</span>
+                      <span style="font-size: 10px; background: var(--surface-soft); padding: 2px 8px; border-radius: 6px; color: var(--ink-soft);">Lip-sync · easy</span>
+                    </div>
+                  </div>
+                  <span class="template-badge backup">Backup</span>
+                  <div class="template-swap">↔</div>
+                </div>
+
+                <button style="width: 100%; padding: 12px; border: 2px dashed var(--line); background: white; color: var(--muted); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">+ Add from TikTok</button>
+                <div style="font-size: 11px; color: var(--muted); margin-top: 8px;">2 of 2 templates picked · Lock at the limit to keep the event simple for guests</div>
+              </div>
+
+              <div>
+                <div class="panel" style="text-align: center;">
+                  <h3>Print Pack</h3>
+                  <div style="width: 140px; height: 140px; margin: 8px auto; background: white; border: 2px solid var(--ink); border-radius: 8px; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); padding: 12px; gap: 2px;">
+                    <div style="background: var(--ink); grid-column: 1 / 4; grid-row: 1 / 4;"></div>
+                    <div style="background: var(--ink); grid-column: 6 / 9; grid-row: 1 / 4;"></div>
+                    <div style="background: var(--ink); grid-column: 1 / 4; grid-row: 6 / 9;"></div>
+                    <div style="background: var(--ink); grid-column: 5 / 6; grid-row: 5 / 6;"></div>
+                    <div style="background: var(--ink); grid-column: 6 / 7; grid-row: 4 / 5;"></div>
+                    <div style="background: var(--ink); grid-column: 4 / 5; grid-row: 7 / 8;"></div>
+                    <div style="background: var(--ink); grid-column: 7 / 8; grid-row: 6 / 7;"></div>
+                    <div style="background: var(--ink); grid-column: 6 / 7; grid-row: 7 / 9;"></div>
+                    <div style="background: var(--ink); grid-column: 2 / 3; grid-row: 5 / 6;"></div>
+                  </div>
+                  <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">Session QR · scan with any phone to operate the booth</div>
+
+                  <button class="btn-record" style="background: var(--ink); margin-top: 12px; box-shadow: none;">📥 Email print pack (PDF)</button>
+                  <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">3-page PDF: QR + setup + signage</div>
+
+                  <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--line);">
+
+                  <h3 style="margin-top: 0;">TikTok @-handle</h3>
+                  <div style="background: var(--surface-soft); padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; color: var(--ink);">@maria.juan.wedding</div>
+                  <div style="font-size: 10px; color: #16A34A; margin-top: 6px;">✓ Linked · used in compilation caption</div>
+                </div>
+
+                <div class="panel" style="margin-top: 16px;">
+                  <h3>Status</h3>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px;">
+                    <span>Templates picked</span><strong style="color: #16A34A;">2 / 2 ✓</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px;">
+                    <span>Print pack</span><strong style="color: #16A34A;">Ready ✓</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px;">
+                    <span>TikTok @-handle</span><strong style="color: #16A34A;">Linked ✓</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px;">
+                    <span>Booth operator</span><strong style="color: var(--muted);">Hire via coordinator</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                    <span>Hardware (HDMI + TV)</span><strong style="color: var(--accent-amber);">Source via Marketplace</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ SECTION 1 ════════════════ -->
+  <div class="section" id="dashboard">
+    <span class="step-label">Step 1 · Operator scans the printed QR</span>
+    <h2 class="section-h2">Operator Dashboard</h2>
+    <p class="section-desc">After scanning the printed Patiktok session QR, the operator's phone (any phone with Setnayan app) opens the dashboard. Shows couple's primary + backup TikTok templates, submission counter, and one-tap controls. Operator can swap templates at any time.</p>
+
+    <div class="device-row">
+
+      <!-- Mobile dashboard -->
+      <div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="dash">
+              <div class="dash-status-bar">
+                <span>9:41</span>
+                <span>📶 📡 100%</span>
+              </div>
+              <div class="dash-header">
+                <span class="dash-status-badge">Live</span>
+                <div class="event">Patiktok Booth · Operator</div>
+                <div class="couple">Maria &amp; Juan · May 17</div>
+              </div>
+
+              <div class="dash-body">
+                <div class="dash-section-title">Templates</div>
+
+                <div class="template-card active">
+                  <div class="template-thumb"></div>
+                  <div class="template-info">
+                    <div class="title">"Naka setnayan na po setnayan"</div>
+                    <div class="sound">Ben&amp;Ben (PH trending)</div>
+                    <div class="uses">12 used · ~22s reel</div>
+                  </div>
+                  <span class="template-badge">Primary</span>
+                </div>
+
+                <div class="template-card">
+                  <div class="template-thumb backup"></div>
+                  <div class="template-info">
+                    <div class="title">Sabrina Carpenter — Espresso</div>
+                    <div class="sound">Trending intl</div>
+                    <div class="uses">3 used · ~15s reel</div>
+                  </div>
+                  <span class="template-badge backup">Backup</span>
+                </div>
+
+                <div class="submission-counter">
+                  <div class="count" id="mobileCount">15</div>
+                  <div class="label">Submissions captured</div>
+                  <div class="breakdown">
+                    <span>📹 <span id="mobilePrimary">12</span> primary</span>
+                    <span>✨ <span id="mobileBackup">3</span> backup</span>
+                  </div>
+                </div>
+
+                <button class="btn-record" data-action="startRecording">Start Recording</button>
+                <button class="btn-cast casting" data-action="toggleCast">Casting to "Reception TV"</button>
+
+                <div class="quick-controls">
+                  <button class="quick-btn" data-action="swapTemplate">🔄 Swap template</button>
+                  <button class="quick-btn" data-action="pauseStation">⏸ Pause station</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="device-label">Mobile · Operator phone</p>
+      </div>
+
+      <!-- Desktop dashboard -->
+      <div class="browser">
+        <div class="browser-chrome">
+          <div class="dot" style="background:#FF5F57"></div>
+          <div class="dot" style="background:#FEBC2E"></div>
+          <div class="dot" style="background:#28C840"></div>
+          <div class="url">setnayan.com/patiktok/booth/abc123 — scanned QR session</div>
+        </div>
+        <div class="browser-body">
+          <div class="desktop-dash">
+            <div class="dash-grid">
+              <div>
+                <div class="panel" style="background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan)); color: white; border: none;">
+                  <h3 style="color: rgba(255,255,255,0.8);">Event</h3>
+                  <div style="font-size: 24px; font-weight: 700;">Maria &amp; Juan · May 17, 2026</div>
+                  <div style="font-size: 12px; opacity: 0.85; margin-top: 6px;">Operator: Friend / Booth host · Station active · Casting to "Reception TV"</div>
+                </div>
+
+                <div class="panel" style="margin-top: 16px;">
+                  <h3>Curated Templates (2 max)</h3>
+
+                  <div class="template-card active" style="margin-bottom: 10px;">
+                    <div class="template-thumb"></div>
+                    <div class="template-info">
+                      <div class="title" style="font-size: 14px;">"Naka setnayan na po setnayan"</div>
+                      <div class="sound" style="font-size: 12px;">Ben&amp;Ben — PH trending · 22-sec reel</div>
+                      <div class="uses" style="margin-top: 6px;">12 submissions captured today</div>
+                    </div>
+                    <span class="template-badge">Primary</span>
+                  </div>
+
+                  <div class="template-card">
+                    <div class="template-thumb backup"></div>
+                    <div class="template-info">
+                      <div class="title" style="font-size: 14px;">Sabrina Carpenter — Espresso</div>
+                      <div class="sound" style="font-size: 12px;">International trending · 15-sec reel</div>
+                      <div class="uses" style="margin-top: 6px;">3 submissions captured today</div>
+                    </div>
+                    <span class="template-badge backup">Backup</span>
+                    <div class="template-swap">↔</div>
+                  </div>
+                </div>
+
+                <div class="panel" style="margin-top: 16px;">
+                  <h3>Display Mode (controls the external monitor)</h3>
+                  <div class="mode-toggle">
+                    <div class="mode-btn active">Split Screen (50/50)</div>
+                    <div class="mode-btn">Picture-in-Picture</div>
+                    <div class="mode-btn">Phone-only</div>
+                  </div>
+                  <div style="font-size: 12px; color: var(--muted); margin-top: 8px;">
+                    Currently casting to: <strong>Reception TV (Sony Bravia 55")</strong> via Lightning HDMI. Operator can swap mode in real-time.
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="panel" style="text-align: center;">
+                  <h3>Total Today</h3>
+                  <div style="font-size: 48px; font-weight: 800; color: var(--accent-pink); line-height: 1;">15</div>
+                  <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px;">Submissions</div>
+                  <div style="border-top: 1px solid var(--line); margin: 12px 0; padding-top: 12px; font-size: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Primary</span><strong>12</strong></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>Backup</span><strong>3</strong></div>
+                    <div style="display: flex; justify-content: space-between; color: var(--muted);"><span>Storage used</span><strong>1.2 GB / 17 GB</strong></div>
+                  </div>
+                </div>
+
+                <button class="btn-record" style="margin-top: 16px;">Start Recording</button>
+                <div style="font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px;">
+                  Tap to open camera for next guest
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ SECTION 2 — CAMERA VIEW (INTERACTIVE) ════════════════ -->
+  <div class="section" id="camera">
+    <span class="step-label cam">Step 2 · Guest steps on the X mark</span>
+    <h2 class="section-h2">Camera (Guest Recording View)</h2>
+    <p class="section-desc">Tap the buttons below to cycle through the recording states. Face-lock target tracks the performer. AR overlay in the corner shows the reference reel. "Save &amp; Submit" increments the dashboard counter live.</p>
+
+    <div class="state-controls">
+      <button class="state-btn active" data-camera-state="countdown">3·2·1 Countdown</button>
+      <button class="state-btn" data-camera-state="recording">🔴 Recording</button>
+      <button class="state-btn" data-camera-state="review">Review take</button>
+      <button class="state-btn" data-action="autoCycle" style="background: var(--accent-cyan); color: var(--ink); border: none;">▶ Auto-cycle</button>
+    </div>
+
+    <div class="camera-state-container">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+
+          <!-- COUNTDOWN STATE -->
+          <div class="camera camera-substate active" data-state="countdown">
+            <div class="camera-preview"></div>
+            <div class="camera-overlay-top">
+              <span class="face-lock-indicator">Face-lock</span>
+              <span class="timer">00:22</span>
+            </div>
+            <div class="face-target"></div>
+            <div class="ar-overlay">
+              <span class="ar-label">REF</span>
+            </div>
+            <div class="camera-controls">
+              <div class="countdown">
+                <div class="num" id="countdownNum">3</div>
+                <div class="label">Get ready</div>
+              </div>
+              <div class="record-btn" data-action="advanceToRecording"></div>
+            </div>
+          </div>
+
+          <!-- RECORDING STATE -->
+          <div class="camera camera-substate" data-state="recording">
+            <div class="camera-preview"></div>
+            <div class="camera-overlay-top">
+              <span class="face-lock-indicator">Face-lock · ON</span>
+              <span class="timer" style="background: var(--recording); color: white;">🔴 <span id="recordingTimer">00:08</span></span>
+            </div>
+            <div class="face-target"></div>
+            <div class="ar-overlay">
+              <span class="ar-label">REF</span>
+            </div>
+            <div class="camera-controls">
+              <div class="record-btn recording" data-action="advanceToReview"></div>
+              <div style="text-align: center; color: white; font-size: 11px; opacity: 0.85; margin-top: 8px;">Tap to stop · Mimicking primary template</div>
+            </div>
+          </div>
+
+          <!-- REVIEW STATE -->
+          <div class="camera camera-substate" data-state="review">
+            <div class="camera-preview"></div>
+            <div style="position: absolute; top: 28px; left: 16px; right: 16px; background: rgba(0,0,0,0.6); padding: 8px 12px; border-radius: 8px; font-size: 11px; color: white; z-index: 5;">
+              <strong style="display: block; margin-bottom: 2px;">Review your take</strong>
+              <span style="opacity: 0.85;">Happy with it? Save or retake (2 left)</span>
+            </div>
+            <div class="face-target" style="border-color: rgba(37,244,238,0.4); animation: none;"></div>
+            <div style="position: absolute; bottom: 20px; left: 0; right: 0; padding: 0 20px; z-index: 5;">
+              <button style="width: 100%; background: var(--accent-pink); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; margin-bottom: 8px; cursor: pointer;" data-action="submitTake">Save &amp; Submit</button>
+              <button style="width: 100%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer;" data-action="retakeBackToCountdown">↻ Retake</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <p class="device-label">Tap the state buttons above to cycle · Save &amp; Submit increments the operator dashboard counter</p>
+    </div>
+  </div>
+
+  <!-- ════════════════ SECTION 3 — EXTENDED MONITOR (INTERACTIVE) ════════════════ -->
+  <div class="section" id="monitor">
+    <span class="step-label ext">Step 3 · Cast to external monitor</span>
+    <h2 class="section-h2">Extended Screen (External Monitor)</h2>
+    <p class="section-desc">Toggle between display modes. Operator picks live during the event. Beat indicator at the bottom syncs with the music.</p>
+
+    <div class="state-controls">
+      <button class="state-btn active" data-monitor-mode="split">Split Screen (50/50)</button>
+      <button class="state-btn" data-monitor-mode="pip">Picture-in-Picture</button>
+    </div>
+
+    <div class="monitor-container">
+
+      <!-- Split screen mode -->
+      <div class="monitor-mode active" data-mode="split">
+        <div class="monitor">
+          <div class="monitor-screen">
+            <div class="ext-split">
+              <div class="ext-half reference">
+                <span class="ext-label ref">REFERENCE · Ben&amp;Ben</span>
+              </div>
+              <div class="ext-half live">
+                <span class="ext-label live">LIVE · Maria's friend Lara</span>
+              </div>
+            </div>
+            <div class="ext-beat">
+              <span class="ext-beat-time">00:08</span>
+              <div class="ext-beat-track">
+                <div class="ext-beat-progress" id="splitBeatProgress"></div>
+              </div>
+              <span class="ext-beat-time">00:22</span>
+            </div>
+          </div>
+        </div>
+        <p class="device-label">Split Screen · 50/50 reference vs live · Best for choreography reels</p>
+      </div>
+
+      <!-- PIP mode -->
+      <div class="monitor-mode" data-mode="pip">
+        <div class="monitor">
+          <div class="monitor-screen">
+            <div class="ext-pip">
+              <div class="pip-window"></div>
+              <span class="ext-label live" style="top: auto; bottom: 60px; left: 20px;">LIVE · Maria's friend Lara</span>
+            </div>
+            <div class="ext-beat">
+              <span class="ext-beat-time">00:08</span>
+              <div class="ext-beat-track">
+                <div class="ext-beat-progress" id="pipBeatProgress"></div>
+              </div>
+              <span class="ext-beat-time">00:22</span>
+            </div>
+          </div>
+        </div>
+        <p class="device-label">Picture-in-Picture · Reference floats in corner · Best for solo / lip-sync</p>
+      </div>
+
+    </div>
+
+    <div style="background: white; border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 24px;">
+      <h3 style="font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Music + beat sync</h3>
+      <p style="font-size: 13px; color: var(--ink-soft); line-height: 1.5;">
+        The reference TikTok plays in sync with live recording on the monitor. Music plays through the monitor's speakers (or venue PA if hooked up). Beat indicators flash on screen so the guest knows when each move should land. Total recording matches the original TikTok's full duration (15–60 seconds depending on template).
+      </p>
+    </div>
+
+    <div style="background: linear-gradient(180deg, #FFF6F7, white); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 16px;">
+      <h3 style="font-size: 13px; font-weight: 700; color: var(--accent-pink); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Hardware not included (apparatus rule)</h3>
+      <p style="font-size: 13px; color: var(--ink-soft); line-height: 1.5;">
+        Couple / coordinator sources externally (or via Supplies Marketplace, iteration 0018): HDMI dongle (Lightning HDMI for iPhone or USB-C HDMI for Android), HDMI cable, TV or projector. Hardware-free fallback: Patiktok works phone-only, just less spectacle.
+      </p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Setnayan Patiktok prototype · 0017_patiktok.html · 2026-05-11<br>
+  Built per Setnayan's web+mobile parity rule. All visual elements are stylized; final UI will refine typography + transitions.
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  // ─────────── Toast helper ───────────
+  const toast = document.getElementById('toast');
+  let toastTimer;
+  function showToast(msg, type) {
+    clearTimeout(toastTimer);
+    toast.textContent = msg;
+    toast.className = 'toast show' + (type ? ' ' + type : '');
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2500);
+  }
+
+  // ─────────── Top nav: smooth scroll to sections ───────────
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.jump);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    });
+  });
+
+  // Highlight nav based on scroll position
+  const sections = ['setup', 'dashboard', 'camera', 'monitor'];
+  window.addEventListener('scroll', () => {
+    let current = sections[0];
+    for (const id of sections) {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < 200) current = id;
+    }
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.jump === current);
+    });
+  });
+
+  // ─────────── Live counter on operator dashboard ───────────
+  let count = 15;
+  let primary = 12;
+  let backup = 3;
+  function updateCount(animate) {
+    const el = document.getElementById('mobileCount');
+    if (!el) return;
+    el.textContent = count;
+    document.getElementById('mobilePrimary').textContent = primary;
+    document.getElementById('mobileBackup').textContent = backup;
+    if (animate) {
+      el.classList.remove('pulsing');
+      void el.offsetWidth; // restart animation
+      el.classList.add('pulsing');
+    }
+  }
+  function incrementCount() {
+    count++;
+    primary++; // assume primary template by default
+    updateCount(true);
+  }
+
+  // ─────────── Camera state cycling ───────────
+  function setCameraState(state) {
+    document.querySelectorAll('.camera-substate').forEach(el => {
+      el.classList.toggle('active', el.dataset.state === state);
+    });
+    document.querySelectorAll('[data-camera-state]').forEach(b => {
+      b.classList.toggle('active', b.dataset.cameraState === state);
+    });
+  }
+
+  document.querySelectorAll('[data-camera-state]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setCameraState(btn.dataset.cameraState);
+    });
+  });
+
+  // ─────────── Monitor mode toggle ───────────
+  function setMonitorMode(mode) {
+    document.querySelectorAll('.monitor-mode').forEach(el => {
+      el.classList.toggle('active', el.dataset.mode === mode);
+    });
+    document.querySelectorAll('[data-monitor-mode]').forEach(b => {
+      b.classList.toggle('active', b.dataset.monitorMode === mode);
+    });
+  }
+
+  document.querySelectorAll('[data-monitor-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setMonitorMode(btn.dataset.monitorMode);
+      showToast('Display mode: ' + (btn.dataset.monitorMode === 'split' ? 'Split Screen 50/50' : 'Picture-in-Picture'));
+    });
+  });
+
+  // ─────────── Action handlers ───────────
+  document.querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const action = el.dataset.action;
+
+      if (action === 'startRecording') {
+        document.getElementById('camera').scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => {
+          setCameraState('countdown');
+          startCountdown();
+        }, 600);
+        showToast('Camera opening for next guest...');
+      }
+
+      else if (action === 'advanceToRecording') {
+        setCameraState('recording');
+        showToast('🔴 Recording started');
+      }
+
+      else if (action === 'advanceToReview') {
+        setCameraState('review');
+        showToast('Recording stopped · Review your take');
+      }
+
+      else if (action === 'submitTake') {
+        incrementCount();
+        showToast('✓ Submission saved · ' + count + ' total', 'success');
+        setTimeout(() => {
+          setCameraState('countdown');
+        }, 1500);
+      }
+
+      else if (action === 'retakeBackToCountdown') {
+        setCameraState('countdown');
+        showToast('Retake — get ready');
+      }
+
+      else if (action === 'toggleCast') {
+        const isCasting = el.classList.contains('casting');
+        el.classList.toggle('casting');
+        el.textContent = isCasting ? 'Cast to monitor' : 'Casting to "Reception TV"';
+        showToast(isCasting ? 'Cast stopped' : 'Casting to "Reception TV"');
+      }
+
+      else if (action === 'swapTemplate') {
+        const cards = document.querySelectorAll('.template-card');
+        cards.forEach(c => c.classList.add('swapping'));
+        setTimeout(() => cards.forEach(c => c.classList.remove('swapping')), 600);
+        // Swap badges
+        const badges = document.querySelectorAll('.template-badge');
+        badges.forEach(b => {
+          if (b.textContent.trim() === 'Primary') {
+            b.textContent = 'Backup';
+            b.classList.add('backup');
+          } else {
+            b.textContent = 'Primary';
+            b.classList.remove('backup');
+          }
+        });
+        showToast('🔄 Templates swapped — backup is now primary');
+      }
+
+      else if (action === 'pauseStation') {
+        showToast('⏸ Station paused — guests will see "Hold up, please wait"');
+      }
+
+      else if (action === 'autoCycle') {
+        runAutoCycle();
+      }
+    });
+  });
+
+  // ─────────── Countdown animation ───────────
+  let countdownTimer;
+  function startCountdown() {
+    const num = document.getElementById('countdownNum');
+    if (!num) return;
+    let n = 3;
+    num.textContent = n;
+    clearInterval(countdownTimer);
+    countdownTimer = setInterval(() => {
+      n--;
+      if (n > 0) {
+        num.textContent = n;
+      } else {
+        clearInterval(countdownTimer);
+        num.textContent = '3';
+        setCameraState('recording');
+        showToast('🔴 Recording started — face-lock engaged');
+      }
+    }, 1000);
+  }
+
+  // ─────────── Auto-cycle camera (one full flow) ───────────
+  function runAutoCycle() {
+    setCameraState('countdown');
+    showToast('Starting auto-cycle...');
+    startCountdown();
+    setTimeout(() => {
+      // Recording state simulated 3 sec
+      setTimeout(() => {
+        setCameraState('review');
+        showToast('Recording done — review');
+      }, 2500);
+      // Submit after review
+      setTimeout(() => {
+        incrementCount();
+        showToast('✓ Saved · ' + count + ' total', 'success');
+        setCameraState('countdown');
+      }, 5000);
+    }, 3500);
+  }
+
+  // ─────────── Demo mode: auto-play through all sections ───────────
+  const demoBtn = document.getElementById('demoBtn');
+  let demoPlaying = false;
+  let demoTimers = [];
+
+  function clearDemoTimers() {
+    demoTimers.forEach(t => clearTimeout(t));
+    demoTimers = [];
+  }
+
+  function startDemo() {
+    demoPlaying = true;
+    demoBtn.textContent = '⏹ Stop demo';
+    demoBtn.classList.add('playing');
+    clearDemoTimers();
+
+    // Step 0: scroll to couple setup
+    document.getElementById('setup').scrollIntoView({ behavior: 'smooth' });
+    showToast('Demo · Step 0: Couple sets up Patiktok');
+
+    // Step 1: scroll to dashboard
+    demoTimers.push(setTimeout(() => {
+      document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
+      showToast('Demo · Step 1: Operator dashboard');
+    }, 4500));
+
+    // Step 2: scroll to camera, start cycle
+    demoTimers.push(setTimeout(() => {
+      document.getElementById('camera').scrollIntoView({ behavior: 'smooth' });
+      showToast('Demo · Step 2: Guest records');
+      setCameraState('countdown');
+      startCountdown();
+    }, 9000));
+
+    demoTimers.push(setTimeout(() => {
+      setCameraState('review');
+    }, 13000));
+
+    demoTimers.push(setTimeout(() => {
+      incrementCount();
+      showToast('✓ Demo · Submission captured', 'success');
+      setCameraState('countdown');
+    }, 15500));
+
+    // Step 3: scroll to monitor, toggle mode
+    demoTimers.push(setTimeout(() => {
+      document.getElementById('monitor').scrollIntoView({ behavior: 'smooth' });
+      showToast('Demo · Step 3: External monitor — Split Screen');
+      setMonitorMode('split');
+    }, 18000));
+
+    demoTimers.push(setTimeout(() => {
+      setMonitorMode('pip');
+      showToast('Demo · Toggling to Picture-in-Picture');
+    }, 22000));
+
+    demoTimers.push(setTimeout(() => {
+      stopDemo();
+      showToast('Demo complete · Click any state to explore');
+    }, 26000));
+  }
+
+  function stopDemo() {
+    demoPlaying = false;
+    demoBtn.textContent = '▶ Auto-play demo';
+    demoBtn.classList.remove('playing');
+    clearInterval(countdownTimer);
+    clearDemoTimers();
+  }
+
+  demoBtn.addEventListener('click', () => {
+    if (demoPlaying) stopDemo();
+    else startDemo();
+  });
+
+  // Start countdown by default
+  startCountdown();
+})();
+</script>
+
+</body>
+</html>

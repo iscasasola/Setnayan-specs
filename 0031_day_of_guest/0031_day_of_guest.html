@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0031 — Day-of Guest Experience (Live Mode) — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0031</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0031_day_of_guest.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0031_day_of_guest.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0031_day_of_guest.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0031--day-of-guest-experience-live-mode">Iteration 0031 — Day-of Guest Experience (Live Mode)</h1>
+<p><strong>Iteration number:</strong> 0031 <strong>Topic:</strong> The guest-facing live-event surface that activates automatically on the wedding day. The guest's personal landing page (already established in 0002) gains a time-aware mode router that flips through five lifecycle modes, with <strong>LIVE mode</strong> (T-1hr → T+8hr) being this iteration's primary contribution: a six-card surface that tells the guest what's happening now, where their table is, what the live photo wall looks like, what video-guestbook prompt to answer, where they are on the day's schedule, and what the couple/coordinator just announced. <strong>Surface:</strong> Public guest URL <code>setnayan.com/{event-slug}</code> (same URL across all five lifecycle modes — mode is detected, not routed). Couple-facing companion surface lives inside 0021 Couple Dashboard as a "Live event" tab. Coordinator companion surface inherits via the 0019 thread-join permission model. <strong>URL pattern:</strong> <code>setnayan.com/{event-slug}</code> (guest); <code>setnayan.com/dashboard/[event-id]/live</code> (couple/coordinator). <strong>Builds on:</strong> 0000 (auth + event slug routing), 0002 (personal landing page renderer), 0006 (vendor + schedule data), 0007 (schedule segments), 0008 (seating chart + table assignments + venue floor plan PDF), 0012 (Papic photo stream + tag pipeline), 0019 (coordinator-join permission model + chat infrastructure for broadcasts), 0021 (couple dashboard), 0025 (face data + privacy controls), 0028 (email notification fallback). <strong>Status:</strong> Drafted 2026-05-12. <strong>Phase:</strong> V1 launch-blocking. The wedding day is the single most important moment in every Setnayan event lifecycle; if the day-of guest surface doesn't ship, the platform's promise collapses to a planning tool. Every other iteration is upstream support for this moment.</p>
+<hr />
+<h2 id="1-why-this-iteration-exists">1. Why this iteration exists</h2>
+<p>A Filipino wedding day is choreographed across 8–10 hours, three to five venues, and 100–300 guests who are mostly meeting each other for the first time. Every guest carries the same three questions in their head all day:</p>
+<ol>
+<li><strong>Where am I supposed to be right now?</strong></li>
+<li><strong>Which table am I assigned to, and how do I get there?</strong></li>
+<li><strong>Did I miss anything?</strong></li>
+</ol>
+<p>Today they answer those by asking the nearest cousin, squinting at a paper program, or DMing the bride at 3 PM during her makeup retouch. The Setnayan landing page (0002) already holds the schedule, the seating chart, the venue map, and (via 0012) the photo stream — but in static "this is your invitation" mode. None of it activates when the guest walks through the door.</p>
+<p><strong>This iteration makes the landing page time-aware.</strong> When the guest opens <code>setnayan.com/{event-slug}</code> between T-1hr and T+8hr, the page auto-switches to a six-card LIVE surface that answers all three questions at a glance and surfaces real-time signals (current segment, broadcasts, photos tagged with this guest, video-guestbook prompt) the rest of the platform produces.</p>
+<p><strong>It also makes the page offline-survivable.</strong> PH wedding venues — especially provincial barangay churches, mountainside reception sites, and ferry-accessed island weddings — frequently have weak or no cellular signal. A PWA shell + cached schedule + cached table assignment + cached venue map means the guest's most important questions stay answerable even when LTE drops to one bar.</p>
+<hr />
+<h2 id="2-auto-activation-logic-five-lifecycle-modes">2. Auto-activation logic (five lifecycle modes)</h2>
+<p>The landing page reads <code>events.event_date</code>, <code>events.timezone</code>, and <code>NOW()</code> on every render and selects one of five modes. Mode selection is cached client-side for 60 seconds and recomputed on every navigation. The couple can manually override via <code>events.live_mode_override</code>.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Mode</th>
+<th>Time window</th>
+<th>What the guest sees</th>
+<th>Default state</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>coming_soon</code></td>
+<td>T &gt; -7d (more than 7 days out)</td>
+<td>Save-the-date video, RSVP CTA, schedule preview, dress code, registry link</td>
+<td>RSVP-driven invitation surface (0002 existing)</td>
+</tr>
+<tr class="even">
+<td><code>pre_event</code></td>
+<td>T-7d to T-1hr</td>
+<td>Schedule, venue map, parking, dress code, getting-there tips, last-mile directions</td>
+<td>Logistics-focused; "what to bring" checklist if couple opted in</td>
+</tr>
+<tr class="odd">
+<td><strong><code>live</code></strong></td>
+<td><strong>T-1hr to T+8hr</strong></td>
+<td><strong>Six-card LIVE surface (this iteration's contribution)</strong></td>
+<td><strong>Real-time mode; photo wall + broadcasts + current segment</strong></td>
+</tr>
+<tr class="even">
+<td><code>recap</code></td>
+<td>T+8hr to T+30d</td>
+<td>Photo gallery, video reels, video-guestbook playback, thank-you notes from couple</td>
+<td>Post-event celebration surface</td>
+</tr>
+<tr class="odd">
+<td><code>archive</code></td>
+<td>T+30d+</td>
+<td>Read-only photo album access (originals follow 30-day post-download compression rule)</td>
+<td>Long-tail access to memories</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Boundary precision:</strong></p>
+<ul>
+<li>All boundaries computed in the event's timezone (stored on <code>events.timezone</code>), not the guest's device timezone. A guest checking the page from Singapore en route to a Tagaytay wedding sees the same mode their cousin already at the venue sees.</li>
+<li>The T-1hr boundary refers to <code>events.event_date + events.ceremony_start_time</code> (the ceremony, not the reception). If the wedding has no ceremony (rare — vow renewal, civil-only, etc.), the boundary anchors to the earliest segment in <code>event_schedule_segments</code>.</li>
+<li>The T+8hr boundary is the simplest robust default that covers Filipino reception timing patterns. Couples with longer celebrations (debutante-style 12-hour reception, multi-day Bicolano weddings) can extend via the override.</li>
+<li>A 5-minute grace period on either side of the T-1hr and T+8hr boundaries prevents the surface from flickering between modes during the precise transition minute.</li>
+</ul>
+<p><strong>Manual override (couple-controlled, in 0021):</strong></p>
+<ul>
+<li><code>live_mode_override = 'live'</code> — couple flips to LIVE early (e.g., for a morning-of prep livestream to bridal-party guests)</li>
+<li><code>live_mode_override = 'pre_event'</code> — couple holds the page in pre-event mode past T-1hr (e.g., ceremony delayed by traffic)</li>
+<li><code>live_mode_override = 'recap'</code> — couple flips to recap early (e.g., reception ends at hour 6 of 8)</li>
+<li><code>live_mode_override = NULL</code> — auto-mode (default)</li>
+</ul>
+<p>The override is intentionally a single enum field, not per-section flags — keep the contract simple. Couples who want fine-grained control compose multiple events.</p>
+<hr />
+<h2 id="3-live-mode-surfaces-six-cards">3. LIVE mode surfaces (six cards)</h2>
+<p>The LIVE page is a single vertical scroll on mobile (thumb-zone primary actions per memory rule) and a two-column grid on tablet+. The six cards render in this order; each is responsible for one of the three guest questions or for connecting the guest to the couple's real-time signals.</p>
+<h3 id="31-whats-happening-now-card-top-hero">3.1 "What's happening now" card (top, hero)</h3>
+<p>Anchored to the top of the scroll. Largest card. Answers question 1 ("where am I supposed to be right now?").</p>
+<p><strong>Content:</strong></p>
+<ul>
+<li><strong>Current segment title + time + location.</strong> Pulled from <code>event_schedule_segments</code> where <code>status = 'active'</code>. Example: <em>"Ceremony · 4:00 PM · St. Joseph Cathedral, Tagaytay"</em>.</li>
+<li><strong>Countdown timer to next segment.</strong> Computed live every second. Reads "<em>Reception begins in 1h 47m</em>" or "<em>Cocktails begin in 12 minutes</em>" or "<em>Final toast in 5 minutes</em>".</li>
+<li><strong>Optional couple location pin</strong> (opt-in by couple per event in 0021; <code>events.live_location_shared</code>). When ON, a discreet map preview shows the couple's last-reported lat/lon (refreshed every 5 min while sharing is active). Used most often when the couple is in transit between venues and guests want to know when to head to the reception. <strong>Default OFF</strong> — privacy-first.</li>
+<li><strong>Banner state when no segment is active.</strong> Between segments (e.g., reception break), the card surfaces "<em>Up next: First dance · in 8 minutes</em>" instead of leaving the guest staring at a blank state.</li>
+</ul>
+<p><strong>Interactions:</strong></p>
+<ul>
+<li>Tap title → expands an inline detail sheet with the segment's full description, dress code reminder if differing, and a "Get directions" deep link to the venue address (opens Apple/Google Maps native).</li>
+<li>Tap "Up next" → scrolls to card 5 (live schedule).</li>
+<li>Long-press the countdown → reveals "<em>Couple's local time: 4:13 PM PHT</em>" for guests joining from abroad.</li>
+</ul>
+<h3 id="32-your-table-card">3.2 "Your table" card</h3>
+<p>Answers question 2 ("which table am I assigned to and how do I get there?").</p>
+<p><strong>Content:</strong></p>
+<ul>
+<li><strong>Big table number.</strong> Single number, ~64pt typography. Example: <em>"Table 7"</em>.</li>
+<li><strong>Mini floor-plan thumbnail.</strong> A 320×200 rasterized preview of the published seating chart (from 0008), with the guest's table highlighted in the Setnayan terracotta accent and a small star marking the guest's exact seat. Pre-rendered server-side on publish, cached in the PWA shell.</li>
+<li><strong>Natural-language directions.</strong> Generated from the seating chart's coordinate system + venue floor plan: <em>"Enter through the main door, walk straight past the dance floor, your table is on the right side, 3rd row."</em> The 0008 floor plan already has stage / band / dancefloor / doors as first-class elements — the direction generator walks the shortest visual path from the main entrance to the guest's seat and translates the bends into Filipino-natural directions.</li>
+<li><strong>Tablemates strip</strong> (optional, opt-in by guest in 0025). Avatars of the other guests at the table — surfaces who the guest is sitting with so they can find their friend before sitting down. Respects per-guest <code>photo_consent</code>; guests who opted out show as initials only.</li>
+</ul>
+<p><strong>Interactions:</strong></p>
+<ul>
+<li>Tap thumbnail → opens the full venue floor-plan PDF (0008's print-pack output) in a native PDF viewer. Cached offline; renders without signal.</li>
+<li>Tap a tablemate avatar → opens that guest's public profile card (name + role + RSVP'd status only — no contact info exposed).</li>
+<li>"Find me on the chart" button → on tablet+, fits the floor plan to the screen and animates a pulse on the guest's seat.</li>
+</ul>
+<h3 id="33-live-photo-wall-card">3.3 "Live photo wall" card</h3>
+<p>Surfaces the Papic stream (0012) filtered to photos tagged with this guest.</p>
+<p><strong>Content:</strong></p>
+<ul>
+<li><strong>Stream of recently-tagged photos.</strong> Default view = "Photos of me" (where <code>photo_tags.guest_id = this_guest</code>). Toggle to "All photos" if the couple opted into making the global stream visible to guests (see <code>events.live_photo_wall_visibility</code>).</li>
+<li><strong>Auto-refresh.</strong> Supabase Realtime channel <code>event:{event_id}:photos</code> pushes new photo IDs to the client; client fetches signed URL and prepends to the grid. Fallback: 30-second polling if Realtime drops.</li>
+<li><strong>Each photo card shows:</strong> photo thumbnail, tagged-at time, source badge (📸 from a paparazzo / 🤳 from another guest's camera / ✨ auto-face match), "Save to my reel" + "Share" + "Hide from my view" actions.</li>
+</ul>
+<p><strong>Interactions:</strong></p>
+<ul>
+<li>Tap photo → fullscreen lightbox with pinch-to-zoom (mobile) or arrow-key navigation (desktop).</li>
+<li><strong>"Save to my reel"</strong> → adds the photo to the guest's Personal Reel selection set (consumed by the Personal Reel builder in 0012's recap flow). Cap is 5 guest picks per reel — UI surfaces "<em>4 of 5 picks used</em>" once approaching cap.</li>
+<li><strong>"Hide from my view"</strong> → guest-side soft hide (does NOT affect the couple's gallery; this is per-guest UI state only). Stored in <code>guest_photo_hides</code>.</li>
+<li><strong>"Share"</strong> → opens native share sheet with a watermarked download (geo stripped per the apparatus rule).</li>
+<li><strong>Long-press photo</strong> → "Report this photo" → routes to couple-side moderation queue in 0021.</li>
+</ul>
+<h3 id="34-video-guestbook-card">3.4 "Video guestbook" card</h3>
+<p>Per the existing decision in CLAUDE.md (2026-05-09 — <em>"Voice/video guestbook is part of Wedding Challenges, not a standalone iteration"</em>), this card is the day-of surface for the wedding-challenges guestbook prompt.</p>
+<p><strong>Content:</strong></p>
+<ul>
+<li><strong>Rotating prompt.</strong> Pulled from the couple's pre-configured prompts list (defined upstream in the Wedding Challenges iteration when it lands; for 0031 V1 we ship a default prompt set of 8 prompts the couple can edit). Examples:
+<ul>
+<li>"Share your favorite memory of {couple_first_names}."</li>
+<li>"Give them your wishes for the next 10 years."</li>
+<li>"Tell us a secret about the bride."</li>
+<li>"Tell us a secret about the groom."</li>
+<li>"What's the most {couple_first_name} thing you've ever seen them do?"</li>
+<li>"Drop your best dating advice (we'll need it)."</li>
+<li>"Sing 4 bars of any song."</li>
+<li>"Wedding-day weather forecast for {wedding_date} a year from now."</li>
+</ul></li>
+<li><strong>Record button.</strong> Tap → opens in-app camera with 60-second hard cap timer.</li>
+<li><strong>Visible counters.</strong> "<em>X messages sent so far</em>" — shows the live count of submitted entries across all guests, encourages participation.</li>
+</ul>
+<p><strong>Interactions:</strong></p>
+<ul>
+<li>Tap <strong>Record</strong> → camera + mic permission prompt → 60-second countdown overlay → tap-to-stop or auto-stop at 60s.</li>
+<li>Tap <strong>Submit</strong> → uploads to <code>video_guestbook_entries</code> with <code>status='pending'</code>. Couple's gallery in 0021 surfaces the queue for review before public playback.</li>
+<li>Tap <strong>Re-record</strong> before submit → discards the take, no upload.</li>
+<li><strong>24-hour withdrawal window.</strong> After submit, the guest sees a "<em>Recorded — you can delete this until {timestamp 24hr out}</em>" pill. Tap to revoke (sets <code>user_deleted_at</code>).</li>
+<li>Tap <strong>Skip for now</strong> → card collapses; reappears on next visit with a new prompt.</li>
+</ul>
+<p><strong>Recording technical notes:</strong></p>
+<ul>
+<li>iOS: <code>getUserMedia</code> with <code>facingMode='user'</code>, MediaRecorder API, H.264 1080p portrait, ≤ 60s.</li>
+<li>Android: same WebRTC stack, VP9 fallback if H.264 isn't available.</li>
+<li>Recording stays in IndexedDB until upload completes (background sync handles offline-recorded entries).</li>
+</ul>
+<h3 id="35-live-schedule-card">3.5 "Live schedule" card</h3>
+<p>Vertical timeline of all event segments for the day. Answers question 3 ("did I miss anything?") and orients the guest to the rest of the program.</p>
+<p><strong>Content:</strong></p>
+<ul>
+<li><strong>Vertical list of all segments</strong>, oldest first. Each segment shows: time, title, location, status pill.</li>
+<li><strong>Status visual encoding:</strong>
+<ul>
+<li><code>completed</code> segments dimmed to 50% opacity with a check-mark prefix.</li>
+<li><code>active</code> segment highlighted with the Setnayan terracotta accent and a live "now" badge.</li>
+<li><code>upcoming</code> segments rendered in normal weight.</li>
+<li><code>cancelled</code> segments struck-through with a one-line reason if the couple/coordinator provided one.</li>
+</ul></li>
+<li><strong>Real-time updates.</strong> As the couple's coordinator marks segments active/complete in 0021 (or 0022 vendor dashboard for the day-of coordinator), the timeline updates live via Realtime channel <code>event:{event_id}:schedule</code>.</li>
+<li><strong>Dress code chips</strong> per segment if specified (e.g., ceremony = formal Filipiniana / reception = cocktail).</li>
+</ul>
+<p><strong>Interactions:</strong></p>
+<ul>
+<li>Tap any segment → inline detail sheet (description, location with map deep link, dress code, who's invited if the segment is restricted — e.g., principal sponsors photo call).</li>
+<li>Long-press an active segment → "Set a reminder for this segment's end" → schedules a local notification 5 minutes before the projected end time.</li>
+<li>Pull-to-refresh on mobile → forces a re-sync of segment statuses (useful when guest just regained signal).</li>
+</ul>
+<h3 id="36-coordinator-broadcast-card-conditional">3.6 "Coordinator broadcast" card (conditional)</h3>
+<p>Only renders when there's an active broadcast within its <code>expires_at</code> window. Otherwise the card slot is empty (the layout collapses).</p>
+<p><strong>Content:</strong></p>
+<ul>
+<li><strong>Broadcast text.</strong> Plain-text announcement, max 280 characters. Examples:
+<ul>
+<li><em>"The ceremony is starting in 5 minutes — please take your seats."</em></li>
+<li><em>"Reception buffet is now open. Sponsors and family head tables first, please."</em></li>
+<li><em>"Last call for the bouquet toss in the main hall."</em></li>
+</ul></li>
+<li><strong>Sender + timestamp.</strong> "<em>From: Aira &amp; Boy (couple) · 2 minutes ago</em>" or "<em>From: Coordinator Marichu · just now</em>".</li>
+<li><strong>Audience pill.</strong> Most broadcasts are <code>audience='all'</code>; some are scoped (e.g., principal sponsors only). The guest only sees broadcasts targeted to them.</li>
+</ul>
+<p><strong>Interactions:</strong></p>
+<ul>
+<li>Auto-dismiss when <code>expires_at</code> passes (default 2 hours from send).</li>
+<li>Tap <strong>Got it</strong> → guest-side acknowledgment (writes to <code>broadcast_acknowledgments</code>); helps the couple/coordinator confirm reach.</li>
+<li>Tap <strong>Mute broadcasts from this couple</strong> → suppresses future broadcasts on this device only (privacy-respecting, doesn't leak the mute back to the couple).</li>
+</ul>
+<p><strong>Broadcast delivery:</strong></p>
+<ul>
+<li>Composed in 0021 by the couple OR by any user with a <code>thread_join_authorizations</code> row on the wedding's coordinator-class threads (per 0019's coordinator-join model — the coordinator surfaces this iteration are inherited, not re-specced).</li>
+<li>Pushed via Supabase Realtime channel <code>event:{event_id}:broadcasts</code> to all currently-open guest sessions in &lt;500ms.</li>
+<li>Also delivered via PWA push notification (if guest opted in) and email fallback (per 0028) for guests who haven't opened the page yet.</li>
+</ul>
+<hr />
+<h2 id="4-offline-first-pwa-shell">4. Offline-first PWA shell</h2>
+<p>Filipino wedding venues frequently have weak or no cellular signal. The day-of surface must boot, render, and answer the guest's three core questions even when the network is dead.</p>
+<h3 id="41-service-worker-caching-strategy">4.1 Service worker caching strategy</h3>
+<p><strong>Precached on first visit (static shell):</strong></p>
+<ul>
+<li>HTML application shell (index document, no event-specific data)</li>
+<li>CSS bundle (theme + layout)</li>
+<li>JS bundle (route handlers + offline-mode fallback components)</li>
+<li>Lucide icon sprite</li>
+<li>Setnayan symbol mark + logo SVGs</li>
+<li>Fonts (Cormorant Garamond subset + Manrope subset)</li>
+</ul>
+<p><strong>Cached on first navigation to a specific event (event-specific shell):</strong></p>
+<ul>
+<li>The event's published schedule (<code>event_schedule_segments</code> snapshot at last sync)</li>
+<li>The guest's table assignment + tablemate roster</li>
+<li>The venue floor-plan PDF (signed-URL fetch on first visit, then cached for 24 hours)</li>
+<li>The dress code copy + getting-there tips</li>
+<li>The couple's last-uploaded save-the-date video (lo-res transcoded version, ~5 MB)</li>
+<li>The latest 20 photos from the live photo wall (only the guest's tagged photos)</li>
+</ul>
+<p><strong>Cache invalidation:</strong></p>
+<ul>
+<li>Stale-while-revalidate for the schedule + table assignment (serves cached, fetches in background, swaps in if changed).</li>
+<li>Network-first for broadcasts + new photos + segment status changes (the live signals — but with cached fallback if offline).</li>
+<li>30-day expiration on the venue floor plan; refreshed if seating chart re-publishes (cache key includes <code>seating_charts.publish_version</code>).</li>
+</ul>
+<h3 id="42-offline-degradation-behavior">4.2 Offline degradation behavior</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Surface</th>
+<th>Online</th>
+<th>Offline</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>What's happening now</td>
+<td>Live segment + countdown</td>
+<td>Last-known active segment from cache + "<em>Last updated {timestamp}</em>"</td>
+</tr>
+<tr class="even">
+<td>Your table</td>
+<td>Live data</td>
+<td>Cached table number + cached floor plan + cached directions</td>
+</tr>
+<tr class="odd">
+<td>Live photo wall</td>
+<td>Real-time stream</td>
+<td>Cached last 20 photos + "<em>You're offline — new photos will appear when you reconnect</em>" banner</td>
+</tr>
+<tr class="even">
+<td>Video guestbook</td>
+<td>Record + submit</td>
+<td>Record + queue locally; "<em>Will submit when you reconnect</em>" banner</td>
+</tr>
+<tr class="odd">
+<td>Live schedule</td>
+<td>Real-time segment statuses</td>
+<td>Last-synced segment statuses + "<em>Schedule may be out of date</em>" pill</td>
+</tr>
+<tr class="even">
+<td>Coordinator broadcast</td>
+<td>Live</td>
+<td>Last-cached broadcast (with timestamp); new broadcasts deliver via push when reconnected</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-pwa-install-affordance">4.3 PWA install affordance</h3>
+<ul>
+<li><strong>Web App Manifest</strong> declared on first visit. Sets <code>display: standalone</code>, theme color = Setnayan terracotta (<code>#C97B4B</code>), icons (192×192 + 512×512 derived from the Setnayan symbol mark + the couple's monogram if Custom Monogram Pack owned).</li>
+<li><strong>"Add to Home Screen" prompt</strong> triggered on the second visit (not first — first visit is the RSVP path and we don't want to interrupt). Custom UI prompt that explains "<em>Save the wedding to your home screen — works even when there's no signal at the venue.</em>"</li>
+<li><strong>Installed PWA name</strong> = the couple's display name + "wedding" suffix. Example app icon label on the guest's home screen: <em>"Aira &amp; Boy"</em>.</li>
+</ul>
+<h3 id="44-background-sync">4.4 Background sync</h3>
+<ul>
+<li><strong>Queued video-guestbook submissions</strong> upload when connectivity returns. Uses the Background Sync API where supported (Chrome/Android); falls back to "submit on next foreground" for iOS Safari.</li>
+<li><strong>Queued broadcast acknowledgments</strong> flush on reconnect.</li>
+<li><strong>Queued "Save to my reel" picks</strong> flush on reconnect; conflict resolution = last-write-wins (extremely unlikely the same guest hits the 5-pick cap from two devices simultaneously).</li>
+</ul>
+<h3 id="45-failure-surfaces-the-page-must-never-look-broken">4.5 Failure surfaces (the page must never look broken)</h3>
+<ul>
+<li>If the service worker fails to install (Safari quirk, storage quota exceeded), the page degrades to normal-online behavior — no functionality lost, just no offline guarantee. The guest never sees a stack trace or a white screen.</li>
+<li>If the cache is empty on first offline access (the guest opened the URL for the first time at the venue), the page renders a friendly "<em>We're trying to reach the wedding... move closer to the venue or try the WiFi network 'AiraAndBoy2026'.</em>" Couples can configure the network hint in 0021.</li>
+</ul>
+<hr />
+<h2 id="5-privacy-and-consent">5. Privacy and consent</h2>
+<p>The day-of surface produces guest-attributable data (photos tagged with them, video-guestbook submissions, broadcast-acknowledgment receipts). RA 10173 + the existing Setnayan Privacy &amp; Security Policy bound how each is handled.</p>
+<h3 id="51-tag-consent-handshake">5.1 Tag-consent handshake</h3>
+<p>Per the existing 2026-05-09 decision in CLAUDE.md, peer guest-to-guest tagging is QR-scan only, with a tag-once trust handshake. This iteration inherits that contract — no broader tagging affordances are introduced. A guest's appearance on the live photo wall reflects the tag-consent state already established upstream.</p>
+<h3 id="52-photo-wall-opt-out">5.2 Photo wall opt-out</h3>
+<ul>
+<li>Per-guest <code>photo_consent</code> toggle (existing field on <code>guests</code>). When OFF, photos tagged with that guest are NOT shown on their own photo wall card AND not shown on the couple's "Photos of {guest}" view.</li>
+<li>Face-blur on opt-out: when a guest has <code>photo_consent=false</code>, photos containing their auto-face-matched face are blurred in those specific regions before serving to other guests' photo walls (the couple's master gallery retains the original).</li>
+<li>"Hide from my view" per-photo action is a softer affordance — hides from the guest's own LIVE wall without affecting any other surface.</li>
+</ul>
+<h3 id="53-video-guestbook-consent--withdrawal">5.3 Video guestbook consent + withdrawal</h3>
+<ul>
+<li>Recording action requires explicit camera + mic permission grant per-session.</li>
+<li>24-hour withdrawal window: after submit, the guest can delete their own entry within 24 hours by setting <code>user_deleted_at</code>. The R2 object is purged within 24 hours of the deletion (compliance with RA 10173 § 16(e) right-to-erasure).</li>
+<li>Couples can also reject entries (<code>status='rejected'</code>) — rejected entries are NOT shown in recap mode and the R2 object is purged within 7 days.</li>
+</ul>
+<h3 id="54-couple-live-location-sharing">5.4 Couple live-location sharing</h3>
+<ul>
+<li><strong>Default OFF.</strong> Couple toggles ON in 0021 when they want guests to see their transit (e.g., bridal car en route to reception).</li>
+<li>When ON, the couple's device posts location to <code>events.couple_live_lat / couple_live_lon / couple_live_updated_at</code> every 5 minutes (limited cadence — not real-time tracking).</li>
+<li>Auto-OFF at T+8hr or when the couple manually toggles off.</li>
+<li>Location precision rounded to ~50m to avoid revealing exact GPS coordinates.</li>
+</ul>
+<h3 id="55-broadcast-targeting--privacy">5.5 Broadcast targeting + privacy</h3>
+<ul>
+<li>Broadcasts can be scoped (<code>audience</code> enum: <code>all</code>, <code>table</code>, <code>principal_sponsors</code>, <code>entourage</code>, <code>custom</code>). Guests outside the audience never see the broadcast — it never reaches their channel.</li>
+<li>Broadcast acknowledgments are visible to the couple/coordinator (sum: "<em>120 of 145 acknowledged</em>") but never as a per-guest breakdown — preserves consent that the guest's attention isn't individually tracked.</li>
+</ul>
+<h3 id="56-ra-10173-surfaces-inherited-from-0025">5.6 RA 10173 surfaces inherited from 0025</h3>
+<ul>
+<li>"Delete my face data" → revokes within next 5-min refresh (per existing face-detection decision).</li>
+<li>"Export my event data" → produces a ZIP of all guest-attributable data (RSVP form, photo tags, video-guestbook submissions, broadcast ack history).</li>
+<li>"Delete my account" (soft + hard) per 0025 surfaces the same revocation path.</li>
+</ul>
+<hr />
+<h2 id="6-schema">6. Schema</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="co">-- Couple-configured / coordinator-pushed broadcasts during the event window.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> event_broadcasts (</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>  broadcast_id     UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>  event_id         UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> <span class="kw">events</span>(event_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>  sent_by_user_id  UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>  message_text     TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (char_length(message_text) <span class="op">&lt;=</span> <span class="dv">280</span>),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>  scheduled_for    TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a>  expires_at       TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> (NOW() <span class="op">+</span> <span class="dt">INTERVAL</span> <span class="st">&#39;2 hours&#39;</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>  audience         TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;all&#39;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a>                   <span class="kw">CHECK</span> (audience <span class="kw">IN</span> (<span class="st">&#39;all&#39;</span>,<span class="st">&#39;table&#39;</span>,<span class="st">&#39;principal_sponsors&#39;</span>,<span class="st">&#39;entourage&#39;</span>,<span class="st">&#39;custom&#39;</span>)),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a>  audience_targets JSONB,  <span class="co">-- when audience != &#39;all&#39;, specific table_ids or guest_ids</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a>  delivered_count  <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a>  ack_count        <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a>  created_at       TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a>);</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> event_broadcasts_event_window_idx</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true"></a>  <span class="kw">ON</span> event_broadcasts (event_id, scheduled_for, expires_at);</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true"></a><span class="co">-- Per-guest receipt that a broadcast was acknowledged. Aggregate only — never displayed per-guest.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> broadcast_acknowledgments (</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true"></a>  broadcast_id  UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> event_broadcasts(broadcast_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true"></a>  guest_id      UUID <span class="kw">REFERENCES</span> guests(guest_id),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true"></a>  user_id       UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true"></a>  acknowledged_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true"></a>  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (broadcast_id, <span class="fu">COALESCE</span>(guest_id, user_id))</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true"></a>);</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true"></a><span class="co">-- Video guestbook submissions (the wedding-day guestbook surface).</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> video_guestbook_entries (</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true"></a>  entry_id          UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true"></a>  event_id          UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> <span class="kw">events</span>(event_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true"></a>  guest_id          UUID <span class="kw">REFERENCES</span> guests(guest_id),  <span class="co">-- nullable for non-RSVP&#39;d walk-ins</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true"></a>  user_id           UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true"></a>  prompt_text       TEXT,  <span class="co">-- snapshot of the prompt the guest answered</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true"></a>  video_r2_key      TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true"></a>  duration_sec      <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (duration_sec <span class="kw">BETWEEN</span> <span class="dv">1</span> <span class="kw">AND</span> <span class="dv">60</span>),</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true"></a>  status            TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true"></a>                    <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;pending&#39;</span>,<span class="st">&#39;approved&#39;</span>,<span class="st">&#39;rejected&#39;</span>,<span class="st">&#39;user_deleted&#39;</span>)),</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true"></a>  submitted_at      TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true"></a>  reviewed_by_couple_at TIMESTAMPTZ,</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true"></a>  reviewed_by_user_id   UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true"></a>  user_deleted_at   TIMESTAMPTZ,  <span class="co">-- 24-hr withdrawal window</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true"></a>  r2_purged_at      TIMESTAMPTZ</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true"></a>);</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> video_guestbook_event_status_idx</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true"></a>  <span class="kw">ON</span> video_guestbook_entries (event_id, status, submitted_at <span class="kw">DESC</span>);</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true"></a><span class="co">-- Per-guest &quot;hide from my view&quot; state on the live photo wall.</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> guest_photo_hides (</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true"></a>  guest_id   UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> guests(guest_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true"></a>  photo_id   UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> photos(photo_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true"></a>  hidden_at  TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true"></a>  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (guest_id, photo_id)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true"></a>);</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true"></a><span class="co">-- Mode override + couple live-location + photo wall visibility on events.</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> <span class="kw">events</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> live_mode_override TEXT</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true"></a>    <span class="kw">CHECK</span> (live_mode_override <span class="kw">IN</span> (<span class="st">&#39;coming_soon&#39;</span>,<span class="st">&#39;pre_event&#39;</span>,<span class="st">&#39;live&#39;</span>,<span class="st">&#39;recap&#39;</span>,<span class="st">&#39;archive&#39;</span>)),</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> live_location_shared     <span class="dt">BOOLEAN</span>     <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> couple_live_lat          <span class="dt">NUMERIC</span>(<span class="dv">9</span>,<span class="dv">6</span>),</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> couple_live_lon          <span class="dt">NUMERIC</span>(<span class="dv">9</span>,<span class="dv">6</span>),</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> couple_live_updated_at   TIMESTAMPTZ,</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> live_photo_wall_visibility TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;tagged_only&#39;</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true"></a>    <span class="kw">CHECK</span> (live_photo_wall_visibility <span class="kw">IN</span> (<span class="st">&#39;tagged_only&#39;</span>,<span class="st">&#39;all_with_consent&#39;</span>,<span class="st">&#39;off&#39;</span>)),</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> venue_wifi_hint          TEXT,        <span class="co">-- shown on offline failure</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> rehearsal_mode_until     TIMESTAMPTZ; <span class="co">-- non-null = rehearsal banner active</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true"></a></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true"></a><span class="co">-- Segment lifecycle tracking. Used by both the couple/coordinator (write) and</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true"></a><span class="co">-- the guest live schedule card (read).</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> event_schedule_segments</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> status              TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;upcoming&#39;</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true"></a>    <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;upcoming&#39;</span>,<span class="st">&#39;active&#39;</span>,<span class="st">&#39;completed&#39;</span>,<span class="st">&#39;cancelled&#39;</span>)),</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> actual_started_at   TIMESTAMPTZ,</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> actual_ended_at     TIMESTAMPTZ,</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true"></a>  <span class="kw">ADD</span> <span class="kw">COLUMN</span> cancellation_reason TEXT;</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true"></a></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true"></a><span class="co">-- Default video-guestbook prompts the couple can edit. Eight V1 defaults.</span></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> event_guestbook_prompts (</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true"></a>  prompt_id   UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true"></a>  event_id    UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> <span class="kw">events</span>(event_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true"></a>  prompt_text TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true"></a>  display_order <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true"></a>  active      <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">TRUE</span>,</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true"></a>  created_at  TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true"></a>);</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> event_guestbook_prompts_event_order_idx</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true"></a>  <span class="kw">ON</span> event_guestbook_prompts (event_id, active, display_order);</span></code></pre></div>
+<p><strong>RLS policies:</strong></p>
+<ul>
+<li><code>event_broadcasts</code>: read allowed if requesting user is an <code>event_members</code> row on the broadcast's event AND the user's role intersects the broadcast's <code>audience</code> set. Write allowed only for <code>member_type='couple'</code> OR <code>member_type='coordinator'</code> with an active <code>thread_join_authorizations</code> row on a coordinator-class thread.</li>
+<li><code>video_guestbook_entries</code>: read allowed for the submitting user (their own entries always) + couple members of the event (queue moderation). Write requires guest authentication or anonymous guest QR session.</li>
+<li><code>event_schedule_segments</code> status writes: couple OR coordinator on the event only.</li>
+<li><code>events</code> live-mode override + live-location columns: couple only.</li>
+</ul>
+<hr />
+<h2 id="7-ui-surfaces-guest--couple--coordinator-views">7. UI surfaces (guest + couple + coordinator views)</h2>
+<h3 id="71-guest-live-page">7.1 Guest live page</h3>
+<p><code>setnayan.com/{event-slug}</code> — the same URL used in 0002 invitation rendering, with the mode router deciding which sub-template renders.</p>
+<p><strong>Layout (mobile, primary surface):</strong></p>
+<ul>
+<li>Single vertical scroll. Six cards in the order specified in section 3.</li>
+<li>Persistent top bar (60pt height): couple name, current mode pill ("LIVE"), connection status dot (green online / amber slow / red offline).</li>
+<li>Persistent bottom action bar (thumb-zone): three primary actions — <em>Schedule</em> (scrolls to card 5), <em>My table</em> (scrolls to card 2), <em>Photos</em> (scrolls to card 3).</li>
+</ul>
+<p><strong>Layout (tablet+ / desktop):</strong></p>
+<ul>
+<li>Two-column grid. Left column = cards 1, 2, 6 (the orientation cards). Right column = cards 3, 4, 5 (the activity cards).</li>
+<li>Top bar identical to mobile but expanded.</li>
+</ul>
+<p><strong>Hard navigation rules:</strong></p>
+<ul>
+<li>The page is single-route. No nested routes inside the LIVE surface — cards expand inline, never push a new history entry. Browser back from the LIVE page exits the wedding entirely (back to <code>setnayan.com</code> marketing site).</li>
+<li>All inline detail sheets dismiss on outside-tap or swipe-down (mobile).</li>
+</ul>
+<h3 id="72-couple-live-event-surface-inside-0021">7.2 Couple "Live event" surface (inside 0021)</h3>
+<p><code>setnayan.com/dashboard/[event-id]/live</code> — a new tab in the couple dashboard, visible only when <code>events.live_mode_override = 'live'</code> OR auto-mode resolves to <code>live</code> OR within 7 days post-event (so couples can review post-event).</p>
+<p><strong>Panes:</strong></p>
+<ul>
+<li><strong>Broadcast composer</strong> — text field (280 char), audience picker, send button. Recently-sent broadcasts list with delivered + ack counts.</li>
+<li><strong>Segment control</strong> — vertical timeline matching the guest live-schedule card; couple taps a segment to mark <code>active</code> / <code>completed</code> / <code>cancelled</code>. Each action requires a tap-and-hold confirm to prevent fat-finger mistakes during the event.</li>
+<li><strong>Photo wall monitor</strong> — same stream the guest sees, with moderation actions (hide from public wall, surface to couple's review queue, feature on the venue projector if 0011 Live Stream's projector cast is owned).</li>
+<li><strong>Guestbook queue</strong> — pending entries with approve/reject actions. Default state on approval = visible in recap mode.</li>
+<li><strong>Live-location toggle</strong> — single switch with last-update timestamp.</li>
+<li><strong>Mode override picker</strong> — five radio options (coming_soon, pre_event, live, recap, archive, auto).</li>
+</ul>
+<h3 id="73-coordinator-view">7.3 Coordinator view</h3>
+<p>Per the 0019 coordinator-join model: a coordinator who has been granted <code>thread_join_authorizations</code> on a "Day-of coordination" thread on this event inherits <strong>read + broadcast</strong> permission on the LIVE surface (but NOT segment-write or mode-override authority — those stay couple-only by default).</p>
+<p><strong>Coordinator-specific affordances:</strong></p>
+<ul>
+<li>The broadcast composer is identical to the couple's, but every coordinator-sent broadcast is logged with <code>sent_by_user_id</code> = the coordinator's user ID for the couple's later audit.</li>
+<li>Couples can optionally grant segment-write authority via a per-coordinator toggle in 0021 ("Let this coordinator mark segments active/complete"). Off by default; turned on for paid day-of coordinators who are actively running the show.</li>
+</ul>
+<hr />
+<h2 id="8-notifications-push--email">8. Notifications (push + email)</h2>
+<h3 id="81-push-pwa-web-push">8.1 Push (PWA web push)</h3>
+<ul>
+<li>Permission prompt deferred to the second visit, never on first visit (consistent with 0019 + 0028 push patterns).</li>
+<li>Subscribed topics per guest:
+<ul>
+<li><code>event:{event_id}:broadcasts</code> — every broadcast targeted to this guest</li>
+<li><code>event:{event_id}:segment_milestones</code> — "Ceremony starting in 30 minutes" + "Reception begins now" + similar pre-configured beats</li>
+<li><code>event:{event_id}:my_photos</code> — when a new photo is tagged with this guest (rate-limited to 1 notification per 15 minutes; bundles "X new photos of you")</li>
+</ul></li>
+<li>Per-event opt-out via the settings sheet in the top bar.</li>
+</ul>
+<h3 id="82-email-fallback-per-0028">8.2 Email fallback (per 0028)</h3>
+<p>When a guest hasn't opened the page in the last 30 minutes during the LIVE window, key milestones fall back to email:</p>
+<ul>
+<li><code>pre_event_24h_reminder</code> — sent at T-24hr ("Your wedding is tomorrow. Here's the link, your table, the dress code, and how to get there.")</li>
+<li><code>pre_event_1h_reminder</code> — sent at T-1hr ("The ceremony starts in 1 hour. Live updates: {link}")</li>
+<li><code>post_event_recap_ready</code> — sent at T+8hr ("The wedding is wrapping up. Your tagged photos are ready: {link}")</li>
+<li>Broadcasts marked <code>audience='all'</code> and <code>priority='urgent'</code> (a future couple-toggle, default unused in V1) — for "ceremony delayed by 2 hours" class messages.</li>
+</ul>
+<h3 id="83-schedule-milestone-push-pre-computation">8.3 Schedule-milestone push pre-computation</h3>
+<p>Schedule-milestone pushes are pre-computed when the couple publishes/updates the schedule:</p>
+<ul>
+<li>For each <code>event_schedule_segments</code> row, schedule a push at <code>start_time - 30 min</code> and another at <code>start_time - 5 min</code>.</li>
+<li>Schema-side: a <code>scheduled_notifications</code> table (already present in 0028) holds the queue. When a segment is <code>cancelled</code>, scheduled pushes for that segment are revoked.</li>
+</ul>
+<hr />
+<h2 id="9-wedding-day-rehearsal-mode">9. Wedding-day rehearsal mode</h2>
+<p>Couples need to test the LIVE surface before the actual day — see exactly what guests will see, verify the schedule layout, send test broadcasts, double-check table assignments are wired correctly.</p>
+<p><strong>Activation:</strong></p>
+<ul>
+<li>Couple flips <code>events.rehearsal_mode_until = NOW() + INTERVAL '3 days'</code> from 0021 ("Run a rehearsal").</li>
+<li>All guest pages render the LIVE surface as if it were the wedding day, regardless of actual <code>event_date</code>.</li>
+</ul>
+<p><strong>Differences from real LIVE mode:</strong></p>
+<ul>
+<li>Persistent banner at the top: <em>"⚙ Rehearsal mode — this is what guests will see on the wedding day. Test broadcasts, schedule changes, and table layouts."</em></li>
+<li>All broadcasts sent during rehearsal mode are flagged <code>rehearsal=true</code> and delivered only to the couple's own devices + any explicitly invited test accounts — <strong>never</strong> to real guests.</li>
+<li>Push notifications suppressed for all but the couple's test devices.</li>
+<li>Email fallback suppressed entirely during rehearsal mode.</li>
+<li>Video-guestbook submissions during rehearsal land with <code>status='rehearsal'</code> and are purged at the end of the rehearsal window.</li>
+</ul>
+<p><strong>Auto-exit:</strong></p>
+<ul>
+<li><code>rehearsal_mode_until</code> is a TIMESTAMPTZ that auto-clears when it passes. Couples can manually exit earlier ("End rehearsal").</li>
+<li>The 3-day default prevents a forgotten rehearsal mode from suppressing the real wedding-day broadcasts.</li>
+</ul>
+<hr />
+<h2 id="10-composition-with-0002--0008--0012--0019--0021--0028">10. Composition with 0002 / 0008 / 0012 / 0019 / 0021 / 0028</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Upstream</th>
+<th>What this iteration consumes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>0002 Personal QR Invitation System</strong></td>
+<td>The guest URL <code>setnayan.com/{event-slug}</code> and the underlying personal-page renderer. This iteration adds the LIVE mode template; the URL contract is unchanged.</td>
+</tr>
+<tr class="even">
+<td><strong>0008 Seating Chart Editor</strong></td>
+<td>The guest's table assignment, the rasterized floor-plan thumbnail (pre-rendered on publish), the venue floor-plan PDF, and the coordinate system used by the direction generator.</td>
+</tr>
+<tr class="odd">
+<td><strong>0012 Papic</strong></td>
+<td>The photo stream (<code>photos</code> + <code>photo_tags</code>), Realtime channel <code>event:{event_id}:photos</code>, the "Save to my reel" target (Personal Reel selection set), the moderation surface, and the watermark + geo-strip-on-share logic.</td>
+</tr>
+<tr class="even">
+<td><strong>0019 Communications</strong></td>
+<td>The coordinator-join permission model (<code>thread_join_authorizations</code>). The LIVE surface inherits the coordinator's broadcast permission from a coordinator-class thread on the event.</td>
+</tr>
+<tr class="odd">
+<td><strong>0021 Couple Dashboard</strong></td>
+<td>The companion "Live event" tab and its broadcast composer, segment control, photo wall monitor, guestbook queue.</td>
+</tr>
+<tr class="even">
+<td><strong>0028 Email Notifications</strong></td>
+<td>The fallback channel for milestone emails when the guest hasn't opened the page recently.</td>
+</tr>
+<tr class="odd">
+<td><strong>0025 Profile Settings</strong></td>
+<td>The face-data-revocation, account-deletion, and marketing-consent surfaces are inherited; this iteration adds no new privacy controls beyond the per-event opt-outs surfaced inline.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Downstream (provided)</th>
+<th>What this iteration produces</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Personal Reel builder (0012 recap path)</strong></td>
+<td>The "Save to my reel" pick set, populated during the LIVE window.</td>
+</tr>
+<tr class="even">
+<td><strong>Couple gallery (0021)</strong></td>
+<td>Video-guestbook entries (post-approval).</td>
+</tr>
+<tr class="odd">
+<td><strong>Coordinator audit log</strong></td>
+<td>Broadcast send records with attribution.</td>
+</tr>
+<tr class="even">
+<td><strong>Future Wedding Challenges iteration</strong></td>
+<td>The video-guestbook surface (this iteration is the day-of host; the upstream iteration owns the challenge framework).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="11-performance-budgets">11. Performance budgets</h2>
+<p>The LIVE page is loaded under the worst conditions on the platform: a guest at a barangay church with 1-bar LTE, on a mid-tier Android device they bought in 2022, balancing a glass of wine in their other hand. Performance is non-negotiable.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Budget</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Time to Interactive (TTI), warm cache, 3G</td>
+<td>&lt; 1.0s</td>
+<td>Guest opens the link mid-conversation; if it doesn't render in a second they put their phone back in their pocket and miss the broadcast.</td>
+</tr>
+<tr class="even">
+<td>Time to Interactive (TTI), cold cache, 3G</td>
+<td>&lt; 3.0s</td>
+<td>First visit at venue. The PWA shell pre-loads at RSVP; first-time-at-venue is rare but covered.</td>
+</tr>
+<tr class="odd">
+<td>Largest Contentful Paint (LCP)</td>
+<td>&lt; 1.5s</td>
+<td>The hero "What's happening now" card.</td>
+</tr>
+<tr class="even">
+<td>First Input Delay (FID)</td>
+<td>&lt; 100ms</td>
+<td>Tapping any card must respond immediately.</td>
+</tr>
+<tr class="odd">
+<td>Cumulative Layout Shift (CLS)</td>
+<td>&lt; 0.05</td>
+<td>Photo wall lazy-load must not push the hero card off-screen.</td>
+</tr>
+<tr class="even">
+<td>Photo wall scroll FPS</td>
+<td>≥ 50fps</td>
+<td>Smooth scroll on 60 cached photos.</td>
+</tr>
+<tr class="odd">
+<td>Realtime broadcast delivery (p50)</td>
+<td>&lt; 500ms</td>
+<td>From "send" tap to all-guests received.</td>
+</tr>
+<tr class="even">
+<td>Realtime broadcast delivery (p99)</td>
+<td>&lt; 2.0s</td>
+<td>Tail latency on weak signal.</td>
+</tr>
+<tr class="odd">
+<td>Offline boot from cache</td>
+<td>&lt; 1.5s</td>
+<td>No network.</td>
+</tr>
+<tr class="even">
+<td>Service worker install (first visit)</td>
+<td>&lt; 5.0s</td>
+<td>Acceptable initial cost for the offline guarantee.</td>
+</tr>
+<tr class="odd">
+<td>Memory footprint (mid-tier Android)</td>
+<td>&lt; 80 MB</td>
+<td>Headroom for the camera (video guestbook).</td>
+</tr>
+<tr class="even">
+<td>JavaScript bundle (compressed)</td>
+<td>&lt; 120 KB</td>
+<td>Critical-path JS only; everything else lazy-loaded.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CI perf budget enforcement:</strong> Lighthouse CI runs against a throttled 4G profile on every PR touching the LIVE-mode codepath. Budget regressions block merge per the 0019 pattern.</p>
+<hr />
+<h2 id="12-acceptance-tests">12. Acceptance tests</h2>
+<ol>
+<li><strong>Mode auto-switch on T-1hr.</strong> At T-1hr-30s, the page is in <code>pre_event</code>; at T-1hr+30s, the page is in <code>live</code> — without a manual reload.</li>
+<li><strong>Mode auto-switch on T+8hr.</strong> Symmetric: at T+8hr-30s the page is <code>live</code>; at T+8hr+30s it is <code>recap</code>.</li>
+<li><strong>Manual override beats auto-mode.</strong> With <code>live_mode_override='live'</code> set, the page renders LIVE at T-2 days regardless of <code>event_date</code>.</li>
+<li><strong>Schedule segment status update propagates in &lt;2s.</strong> Couple taps "Mark active" on segment 3 in 0021; all open guest pages update card 1 and card 5 within 2 seconds.</li>
+<li><strong>Broadcast delivers to all subscribed guests.</strong> Couple sends <code>audience='all'</code> broadcast; 100 connected test guests all render the broadcast card within 2 seconds at p99.</li>
+<li><strong>Broadcast scoped to audience never reaches outside audience.</strong> <code>audience='principal_sponsors'</code> broadcast does NOT appear on guest accounts who aren't in the principal-sponsors role.</li>
+<li><strong>Photo wall updates in real time.</strong> A new photo tagged with the test guest appears on their LIVE photo wall card within 30 seconds, without a manual reload.</li>
+<li><strong>Photo wall respects opt-out.</strong> Guest with <code>photo_consent=false</code> sees no photos on their LIVE wall AND their face is blurred on other guests' walls.</li>
+<li><strong>Video-guestbook submission cap.</strong> Recording stops at exactly 60 seconds; submit button disabled past cap.</li>
+<li><strong>Video-guestbook 24-hour withdrawal.</strong> Within 24 hours of submit, guest deletes the entry; the R2 object is purged within 24 hours of deletion (queue-driven, not synchronous).</li>
+<li><strong>Couple location toggle off → no location shown.</strong> With <code>live_location_shared=false</code>, the LIVE hero card never renders the location pin even if the couple's lat/lon fields are populated.</li>
+<li><strong>Offline boot from cache.</strong> With network disabled (DevTools offline mode), the page boots in under 1.5s and renders cards 1, 2, 5 from cache with their last-synced data.</li>
+<li><strong>Offline video-guestbook submission queues.</strong> Recording made offline writes to IndexedDB; when connectivity returns, the upload completes and the entry appears in the couple's queue.</li>
+<li><strong>PWA install prompt appears on second visit.</strong> First visit: no prompt. Second visit (cookie set on first visit): "Add to home screen" prompt renders.</li>
+<li><strong>Rehearsal mode banner suppresses real broadcasts.</strong> With <code>rehearsal_mode_until=NOW()+1d</code>, a broadcast sent by the couple is flagged <code>rehearsal=true</code> and is NOT delivered to real guest accounts.</li>
+<li><strong>Coordinator-join inherits broadcast permission.</strong> A coordinator with a <code>thread_join_authorizations</code> row on the event's day-of-coordination thread can send a broadcast; one without such a row cannot.</li>
+<li><strong>Segment-write authority off by default for coordinators.</strong> Without explicit toggle in 0021, the coordinator cannot mark a segment active/completed.</li>
+<li><strong>Mode boundary precision in event timezone.</strong> Page mode for a Tagaytay wedding viewed from a Singapore IP correctly reflects PHT (event timezone), not the viewer's local time.</li>
+<li><strong>Network-loss banner appears on Realtime drop.</strong> Killing the Realtime websocket surfaces "<em>You're offline</em>" banner within 5 seconds; reconnecting clears it.</li>
+<li><strong>Email fallback fires on milestone when page closed.</strong> Guest who hasn't loaded the page in 30 minutes receives the T-1hr email reminder at T-1hr.</li>
+</ol>
+<hr />
+<h2 id="13-decision-log">13. Decision log</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Date</th>
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Five lifecycle modes, single URL.</strong> The guest landing page detects mode from time, not from a path segment. URLs never change across lifecycle.</td>
+<td>One URL for the guest to remember (and to print on the QR-bearing place cards from 0008). Mode changes are invisible — the page just becomes more relevant on the right day.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>LIVE window is T-1hr to T+8hr, in event timezone.</strong> The 5-minute grace zones on either boundary prevent flicker.</td>
+<td>T-1hr is when guests are arriving / getting seated; T+8hr is a sufficient default for the longest reception patterns in PH practice. Override available for outliers.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Six LIVE cards, fixed order, single-scroll mobile layout.</strong> No tab navigation, no nested routes.</td>
+<td>A scroll on the wedding day must be a thumbs-and-eyes-only experience. Tabs add cognitive cost and break the "I just want to see what's next" reflex.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Couple live-location sharing default OFF.</strong></td>
+<td>Privacy-first by default. Couples opt in explicitly when transit visibility matters; otherwise their location stays private.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Coordinator gets broadcast permission for free, segment-write authority by opt-in.</strong></td>
+<td>Broadcasts are recoverable (couple sees the audit log); segment-write changes are higher-stakes (a wrong "completed" mark disorients the whole guest list). Couples grant segment-write only to coordinators they trust to run the show.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Video-guestbook 60-second hard cap, 24-hour withdrawal.</strong></td>
+<td>Cap matches what couples actually consume during the recap reel. Withdrawal window respects guest second-guessing without being indefinite.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>PWA install prompt deferred to second visit.</strong></td>
+<td>First visit is the RSVP/save-the-date path; interrupting with an install prompt is hostile. Second visit is "I'm thinking about the wedding again" — the right moment to ask.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Schedule milestone pushes pre-computed at publish, not run-time.</strong></td>
+<td>Run-time computation of "what segments need a 30-min push?" is fragile when network drops; pre-computed entries in <code>scheduled_notifications</code> are durable and revocable.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Rehearsal mode auto-clears at 3 days.</strong></td>
+<td>Defensive default. A couple who forgets to exit rehearsal mode does not lose their real wedding-day broadcasts.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>All five-mode logic lives in the renderer, not in storage.</strong> Mode is computed from <code>event_date + timezone + override + NOW()</code> on each request; no <code>current_mode</code> column.</td>
+<td>Single source of truth. Migrations don't need to backfill, and the mode is always correct relative to the request's clock. The override is the only stored state.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Live photo wall defaults to "tagged_only," with optional all-with-consent.</strong></td>
+<td>Default keeps each guest's wall focused on photos that include them. Couples can flip to "all_with_consent" for a shared social experience (the global feed becomes visible to every guest, respecting per-photo consent). "Off" is available for the highest-privacy weddings.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Direction generator output is natural-language, not turn-by-turn.</strong></td>
+<td>Filipino reception spaces are too small (and too non-orthogonal) for "turn left at 3.2 meters" to make sense. A single 12-word sentence ("Walk past the dance floor, your table is on the right side") is faster to parse and easier to follow without looking down.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Broadcast acknowledgments are aggregate-only, never per-guest.</strong></td>
+<td>Couples want to know "did the message land?" not "did Cousin Janelle in particular read it?" Aggregate counts answer the practical question without creating a guest-surveillance affordance.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-companion-documents">14. Companion documents</h2>
+<ul>
+<li><strong>Setnayan Privacy &amp; Security Policy</strong> (<code>Setnayan_Privacy_and_Security_Policy.md</code>) — guest data scope, retention, RA 10173 surfaces.</li>
+<li><strong>0002 QR Invitation System spec</strong> — personal landing page renderer this iteration extends.</li>
+<li><strong>0008 Seating Chart Editor spec</strong> — table assignments, floor plan rasterization, direction-generator coordinate system.</li>
+<li><strong>0012 Papic spec</strong> — photo stream + Realtime channel + Personal Reel selection set.</li>
+<li><strong>0019 Communications spec</strong> — coordinator-join permission model.</li>
+<li><strong>0021 Couple Dashboard spec</strong> — companion "Live event" tab housed in the couple surface.</li>
+<li><strong>0025 Profile Settings spec</strong> — face data, account deletion, marketing-consent surfaces.</li>
+<li><strong>0028 Email Notifications spec</strong> — milestone email fallback templates.</li>
+<li><strong>CLAUDE.md</strong> — pricing rules, free-use stance on day-of guest features, decisions referenced inline.</li>
+</ul>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

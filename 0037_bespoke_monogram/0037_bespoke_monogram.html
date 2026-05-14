@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan — Bespoke Monogram (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --cream-soft: #F4EFE5;
+    --ink: #1A1A1A;
+    --ink-soft: #4A4A4A;
+    --ink-faint: #8A8A8A;
+    --terracotta: #C97B4B;
+    --terracotta-soft: #E3A87E;
+    --terracotta-light: #F5E0CE;
+    --navy: #142B4F;
+    --gold: #C9A35B;
+    --gold-soft: #E6D4A8;
+    --rule: #E5DFD3;
+    --rule-soft: #F0EBE0;
+    --sage: #91A88A;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+    --shadow-lg: 0 24px 48px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Manrope', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; font-weight: 400; letter-spacing: -0.01em; }
+  .display { font-family: 'Cormorant Garamond', serif; }
+  .mono { font-family: 'DM Mono', monospace; }
+
+  /* Prototype chrome */
+  .proto-nav {
+    background: var(--ink);
+    color: white;
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .proto-nav .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-right: 12px;
+  }
+  .proto-nav button {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.8);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .proto-nav button:hover { border-color: var(--gold); color: white; }
+  .proto-nav button.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+  .proto-nav .device-toggle {
+    margin-left: auto;
+    display: flex; gap: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 999px;
+    padding: 2px;
+  }
+  .proto-nav .device-toggle button {
+    border: none;
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+  .proto-nav .device-toggle button.active {
+    background: white;
+    color: var(--ink);
+  }
+
+  /* Frame wrapper for mobile preview */
+  .stage {
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    min-height: calc(100vh - 64px);
+  }
+  .frame {
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 1200px;
+    transition: max-width 0.3s ease;
+  }
+  .frame.mobile { max-width: 390px; }
+
+  /* App chrome inside frame */
+  .app-header {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--cream);
+  }
+  .app-header .breadcrumb {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .app-header .breadcrumb .here { color: var(--terracotta); }
+  .app-header .wordmark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    letter-spacing: 0.12em;
+  }
+  .frame.mobile .app-header { padding: 16px 20px; }
+  .frame.mobile .app-header .wordmark { font-size: 15px; }
+  .frame.mobile .app-header .breadcrumb { font-size: 10px; }
+
+  .app-body { padding: 40px 56px 80px; }
+  .frame.mobile .app-body { padding: 24px 20px 60px; }
+
+  /* Hero block */
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--terracotta);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .hero-h1 {
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1.05;
+    margin-bottom: 12px;
+    letter-spacing: -0.015em;
+  }
+  .hero-h1 em { font-style: italic; color: var(--terracotta); }
+  .hero-sub {
+    font-size: clamp(15px, 1.5vw, 18px);
+    color: var(--ink-soft);
+    max-width: 580px;
+    margin-bottom: 24px;
+  }
+  .frame.mobile .hero-h1 { font-size: 32px; }
+  .frame.mobile .hero-sub { font-size: 14px; }
+
+  /* Price tag pill */
+  .price-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--terracotta-light);
+    color: var(--terracotta);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .price-pill .price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--terracotta);
+    font-weight: 500;
+  }
+
+  /* Form fields */
+  .field {
+    margin-bottom: 28px;
+  }
+  .field label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .field .help {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .field input[type="text"], .field select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    background: white;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field input[type="text"]:focus, .field select:focus {
+    border-color: var(--terracotta);
+    box-shadow: 0 0 0 3px rgba(201, 123, 75, 0.12);
+  }
+
+  /* Two-column grid for partners */
+  .partners-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: end;
+  }
+  .partners-grid .connector-cell {
+    text-align: center;
+    padding-bottom: 14px;
+  }
+  .partners-grid .connector-cell .amp {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 32px;
+    color: var(--ink-faint);
+  }
+  .frame.mobile .partners-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .frame.mobile .partners-grid .connector-cell { padding-bottom: 0; padding-top: 0; }
+
+  /* Toggle (initials vs names) */
+  .toggle-row {
+    display: inline-flex;
+    background: var(--rule-soft);
+    border-radius: 999px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .toggle-row button {
+    border: none;
+    background: transparent;
+    padding: 10px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+  }
+  .toggle-row button.active {
+    background: white;
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+  }
+
+  /* Chip picker for personality words */
+  .chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .chip {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--terracotta-soft); }
+  .chip.selected {
+    background: var(--terracotta);
+    border-color: var(--terracotta);
+    color: white;
+    font-weight: 500;
+  }
+  .chip .check { margin-right: 6px; opacity: 0; transition: opacity 0.2s; }
+  .chip.selected .check { opacity: 1; }
+  .chip-counter {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .chip-counter.complete { color: var(--sage); }
+
+  /* Upload area */
+  .upload-area {
+    border: 2px dashed var(--rule);
+    background: var(--cream-soft);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .upload-area:hover {
+    border-color: var(--terracotta-soft);
+    background: var(--cream);
+  }
+  .upload-area .icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+  .upload-area .upload-text {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .upload-area .upload-sub {
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  /* Palette swatch (read-only) */
+  .palette-swatches {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .swatch {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    border: 1px solid var(--rule);
+    position: relative;
+  }
+  .swatch .swatch-label {
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .palette-note {
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-top: 36px;
+    font-style: italic;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 999px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--terracotta);
+    color: white;
+  }
+  .btn-primary:hover { background: #B86B3D; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-secondary {
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+  .btn-secondary:hover { border-color: var(--ink); }
+  .btn-ink {
+    background: var(--ink);
+    color: white;
+  }
+  .btn-ink:hover { background: #2a2a2a; }
+  .btn-large {
+    padding: 18px 36px;
+    font-size: 15px;
+  }
+
+  /* Locked field indicator */
+  .field.locked input[type="text"], .field.locked select {
+    background: var(--rule-soft);
+    color: var(--ink-soft);
+    cursor: not-allowed;
+  }
+  .field.locked label::after {
+    content: " · LOCKED";
+    color: var(--terracotta);
+    font-weight: 600;
+  }
+  .locked-banner {
+    background: var(--terracotta-light);
+    border-left: 3px solid var(--terracotta);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 32px;
+    font-size: 13px;
+    color: #8B4A1F;
+  }
+  .locked-banner strong { color: var(--terracotta); }
+
+  /* Generating state */
+  .generating-stage {
+    text-align: center;
+    padding: 80px 20px;
+  }
+  .generating-stage .display {
+    font-size: 42px;
+    margin: 32px 0 16px;
+  }
+  .generating-stage .sub {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin-bottom: 48px;
+  }
+
+  /* Loader animation */
+  .loader-ring {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 24px;
+    position: relative;
+  }
+  .loader-ring svg { width: 100%; height: 100%; animation: rotate 8s linear infinite; }
+  .loader-ring .inner-dot {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 36px;
+    color: var(--terracotta);
+  }
+  @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.95); }
+  }
+  .loader-ring .inner-dot { animation: pulse-glow 2s ease-in-out infinite; }
+
+  .progress-strip {
+    max-width: 480px;
+    margin: 32px auto 0;
+    height: 4px;
+    background: var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-strip .bar {
+    height: 100%;
+    width: 60%;
+    background: linear-gradient(90deg, var(--terracotta), var(--gold));
+    border-radius: 2px;
+    animation: progress-flow 3s ease-in-out infinite;
+  }
+  @keyframes progress-flow {
+    0% { width: 0%; }
+    100% { width: 75%; }
+  }
+
+  /* Refine loop layout */
+  .refine-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 48px;
+    align-items: start;
+  }
+  .frame.mobile .refine-layout {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  /* Fallback for actual narrow viewports (in case prototype is viewed on a real phone) */
+  @media (max-width: 900px) {
+    .refine-layout {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .chat-panel {
+      position: static !important;
+      top: auto;
+    }
+  }
+
+  .preview-area {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 32px;
+  }
+  .preview-main {
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, var(--navy), #1f3a6b);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .preview-main .label {
+    position: absolute;
+    top: 16px; left: 16px;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.8);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+  .preview-main svg { width: 60%; height: 60%; }
+
+  .thumbnail-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .thumb {
+    aspect-ratio: 1/1;
+    border-radius: 10px;
+    border: 2px solid var(--rule);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: linear-gradient(135deg, var(--navy), #1f3a6b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .thumb:hover { border-color: var(--gold); }
+  .thumb.selected { border-color: var(--terracotta); border-width: 3px; }
+  .thumb svg { width: 65%; height: 65%; }
+  .thumb .badge {
+    position: absolute;
+    top: 6px; right: 6px;
+    background: var(--terracotta);
+    color: white;
+    width: 18px; height: 18px;
+    border-radius: 999px;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .thumb.selected .badge { display: flex; }
+  .thumb .badge { display: none; }
+
+  /* Chat panel for refinements */
+  .chat-panel {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 24px;
+    position: sticky;
+    top: 80px;
+  }
+  .frame.mobile .chat-panel { position: static; }
+
+  .counter-display {
+    background: var(--cream-soft);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .counter-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    color: var(--terracotta);
+    font-style: italic;
+    line-height: 1;
+  }
+  .counter-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+  .counter-warning {
+    background: #FFF6E5;
+    border-left: 3px solid #D6A045;
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: #8B5A14;
+  }
+
+  .chat-input {
+    width: 100%;
+    min-height: 88px;
+    padding: 14px;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    background: var(--cream-soft);
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    resize: vertical;
+    outline: none;
+    font-weight: 400;
+  }
+  .chat-input:focus { border-color: var(--terracotta); background: white; }
+
+  .suggested-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 14px 0;
+  }
+  .suggested-chips .chip {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .action-row {
+    display: flex; gap: 8px;
+    margin-top: 20px;
+  }
+  .action-row .btn { flex: 1; padding: 12px 16px; font-size: 13px; }
+
+  /* Previous attempts carousel */
+  .previous-attempts {
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+  }
+  .previous-attempts h4 {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .attempts-row {
+    display: flex; gap: 10px; overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .attempts-row .thumb {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    aspect-ratio: 1;
+    border-width: 1px;
+    opacity: 0.7;
+  }
+  .attempts-row .thumb:hover { opacity: 1; }
+  .attempts-row .gen-label {
+    position: absolute;
+    bottom: 4px; left: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    color: rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* Quota exhausted state */
+  .quota-banner {
+    background: linear-gradient(135deg, var(--terracotta-light), #F8E5D2);
+    border: 1px solid var(--terracotta-soft);
+    border-radius: 16px;
+    padding: 32px;
+    margin-top: 24px;
+    text-align: center;
+  }
+  .quota-banner h3 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .quota-banner p {
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+    max-width: 460px;
+    margin-left: auto; margin-right: auto;
+  }
+  .upsell-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 20px 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 100%;
+  }
+  .upsell-card .upsell-info { text-align: left; }
+  .upsell-card .upsell-info .title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-style: italic;
+  }
+  .upsell-card .upsell-info .meta {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  .upsell-card .upsell-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 28px;
+    color: var(--terracotta);
+  }
+  .frame.mobile .upsell-card { flex-direction: column; gap: 12px; }
+
+  /* Final delivered state */
+  .celebration {
+    text-align: center;
+    padding: 60px 20px 40px;
+  }
+  .celebration .display {
+    font-size: 48px;
+    line-height: 1.1;
+    margin: 24px 0 12px;
+  }
+  .celebration .display em { color: var(--terracotta); font-style: italic; }
+  .celebration .sub {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 540px;
+    margin: 0 auto 40px;
+  }
+  .final-monogram-frame {
+    aspect-ratio: 1;
+    width: 320px;
+    margin: 0 auto 40px;
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px;
+  }
+  .download-row {
+    display: flex; gap: 10px; justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Use-cases preview row */
+  .usecases-strip {
+    background: var(--cream-soft);
+    border-radius: 16px;
+    padding: 28px;
+    margin-top: 40px;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+  }
+  .frame.mobile .usecases-strip { padding: 20px; margin-top: 24px; }
+  .usecases-strip .strip-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    margin-bottom: 8px;
+  }
+  .usecases-strip h3 {
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
+  .frame.mobile .usecases-strip h3 { font-size: 18px; }
+  .uc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .frame.mobile .uc-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  @media (max-width: 720px) {
+    .uc-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  }
+  .uc-card {
+    min-height: 110px;
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 12px 8px;
+    gap: 8px;
+  }
+  .uc-card svg { width: 36px; height: 36px; flex-shrink: 0; }
+  .uc-card .uc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 8.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  /* Error / edge case banner */
+  .edge-banner {
+    background: #FEF2F2;
+    border-left: 3px solid #DC2626;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .edge-banner .icon { font-size: 20px; }
+  .edge-banner h4 { font-size: 14px; color: #991B1B; margin-bottom: 4px; }
+  .edge-banner p { font-size: 13px; color: #7F1D1D; }
+
+  /* Helper SVG paths reused */
+  .mono-path { stroke: var(--gold); stroke-width: 2; fill: none; stroke-linecap: round; }
+
+  /* Visibility helper */
+  .screen { display: none; }
+  .screen.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Prototype navigation -->
+<div class="proto-nav">
+  <span class="label">Bespoke Monogram · 2026-05-14</span>
+  <button data-screen="brief" class="active">1 · Brief Form</button>
+  <button data-screen="payment">2 · Payment</button>
+  <button data-screen="generating">3 · Generating</button>
+  <button data-screen="refine">4 · Refine Loop</button>
+  <button data-screen="quota">5 · Quota Exhausted</button>
+  <button data-screen="final">6 · Delivered</button>
+  <div class="device-toggle">
+    <button data-device="desktop" class="active">Desktop</button>
+    <button data-device="mobile">Mobile</button>
+  </div>
+</div>
+
+<div class="stage">
+<div class="frame" id="frame">
+
+  <!-- App header (consistent across screens) -->
+  <div class="app-header">
+    <div class="wordmark">SETNAYAN</div>
+    <div class="breadcrumb">
+      Dashboard · <span class="here">Bespoke Monogram</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 1: BRIEF FORM -->
+  <!-- ============================================================ -->
+  <div class="screen active" id="screen-brief">
+    <div class="app-body">
+      <div style="margin-bottom: 40px;">
+        <div class="hero-eyebrow">Designed by Setnayan AI · One-of-a-kind</div>
+        <h1 class="hero-h1">A <em>monogram</em> that exists nowhere else.</h1>
+        <p class="hero-sub">Tell us about you. Setnayan AI will craft four unique designs based on your brief — letters interlocked into a single luxury mark, refined with your feedback until it's exactly right.</p>
+        <span class="price-pill"><span>Bespoke</span><span class="price">₱2,999</span><span>· 30 refinements included</span></span>
+      </div>
+
+      <!-- Initials vs Names toggle -->
+      <div class="field">
+        <label>How would you like your monogram to read?</label>
+        <div class="toggle-row">
+          <button class="active">Initials &nbsp;·&nbsp; <em style="font-family: 'Cormorant Garamond'; font-style: italic;">M &amp; M</em></button>
+          <button>Full Names &nbsp;·&nbsp; <em style="font-family: 'Cormorant Garamond'; font-style: italic;">MARIA &amp; MARK</em></button>
+        </div>
+      </div>
+
+      <!-- Partners -->
+      <div class="field">
+        <label>Your initials</label>
+        <div class="partners-grid">
+          <div>
+            <input type="text" placeholder="M" maxlength="1" value="M" style="text-align: center;">
+            <div class="help" style="margin-top: 4px; text-align: center;">Partner A</div>
+          </div>
+          <div class="connector-cell">
+            <select style="background: var(--cream-soft); border: 1px solid var(--rule); padding: 12px 14px; border-radius: 8px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; cursor: pointer;">
+              <option>&amp;</option>
+              <option>and</option>
+              <option>at</option>
+              <option>y</option>
+            </select>
+          </div>
+          <div>
+            <input type="text" placeholder="M" maxlength="1" value="M" style="text-align: center;">
+            <div class="help" style="margin-top: 4px; text-align: center;">Partner B</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personality chips -->
+      <div class="field">
+        <label>Three words that describe you</label>
+        <div class="chip-grid">
+          <span class="chip selected"><span class="check">✓</span>Romantic</span>
+          <span class="chip">Playful</span>
+          <span class="chip selected"><span class="check">✓</span>Sophisticated</span>
+          <span class="chip">Minimalist</span>
+          <span class="chip selected"><span class="check">✓</span>Botanical</span>
+          <span class="chip">Regal</span>
+          <span class="chip">Vintage</span>
+          <span class="chip">Modern</span>
+          <span class="chip">Whimsical</span>
+          <span class="chip">Cultural</span>
+          <span class="chip">Bold</span>
+          <span class="chip">Delicate</span>
+        </div>
+        <div class="chip-counter complete">3 of 3 selected · these guide your design's feel</div>
+      </div>
+
+      <!-- Motif preference -->
+      <div class="field">
+        <label>Optional motif</label>
+        <select>
+          <option>None — let Setnayan AI choose</option>
+          <option>Botanical · wreaths, vines</option>
+          <option>Heritage Filipino · sampaguita, capiz, baybayin</option>
+          <option>Geometric · linear, hexagonal</option>
+          <option>Royal · crests, banners</option>
+          <option>Calligraphic · flourishes, scrollwork</option>
+        </select>
+        <p class="help">Inspires the artistic direction without locking it.</p>
+      </div>
+
+      <!-- Reference images upload -->
+      <div class="field">
+        <label>Reference inspiration · optional · up to 3 images</label>
+        <div class="upload-area">
+          <div class="icon">⌗</div>
+          <div class="upload-text">Drop Pinterest screenshots, mood boards, or any monogram that inspires you</div>
+          <div class="upload-sub">JPG or PNG · max 5MB each · up to 3 images</div>
+        </div>
+      </div>
+
+      <!-- Palette (read-only from mood board) -->
+      <div class="field">
+        <label>Your wedding palette · from your mood board</label>
+        <div class="palette-swatches">
+          <div class="swatch" style="background: #FAF7F2;"><div class="swatch-label">Cream</div></div>
+          <div class="swatch" style="background: #C97B4B;"><div class="swatch-label">Terracotta</div></div>
+          <div class="swatch" style="background: #91A88A;"><div class="swatch-label">Sage</div></div>
+          <div class="swatch" style="background: #142B4F;"><div class="swatch-label">Navy</div></div>
+          <div class="swatch" style="background: #C9A35B;"><div class="swatch-label">Gold</div></div>
+        </div>
+        <p class="palette-note">Setnayan AI will design within these colors to match your wedding's identity. Edit your palette in your Mood Board if needed before continuing.</p>
+      </div>
+
+      <!-- Big primary CTA -->
+      <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--rule); display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+        <button class="btn btn-primary btn-large">Continue to payment · ₱2,999 →</button>
+        <div style="font-size: 13px; color: var(--ink-soft);">30 refinements included · Final delivery within 24 hours</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 2: PAYMENT + LOCK -->
+  <!-- ============================================================ -->
+  <div class="screen" id="screen-payment">
+    <div class="app-body">
+      <div style="margin-bottom: 32px;">
+        <div class="hero-eyebrow">Step 2 of 4 · Lock your brief</div>
+        <h1 class="hero-h1">Almost <em>there</em>.</h1>
+        <p class="hero-sub">Pay via BDO or GCash to lock in your brief. Once paid, your initials and connector can no longer be changed — this prevents one purchase from producing two different logos.</p>
+      </div>
+
+      <!-- Order summary -->
+      <div style="background: white; border: 1px solid var(--rule); border-radius: 16px; padding: 28px; margin-bottom: 32px; max-width: 600px;">
+        <h3 style="font-size: 22px; margin-bottom: 16px;">Order summary</h3>
+        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--rule-soft);">
+          <div>
+            <div style="font-weight: 500;">Bespoke Monogram</div>
+            <div style="font-size: 12px; color: var(--ink-soft); margin-top: 2px;">M &amp; M · Romantic · Sophisticated · Botanical</div>
+          </div>
+          <div class="display" style="font-style: italic; font-size: 20px;">₱2,999</div>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 16px 0;">
+          <div style="font-weight: 600;">Total</div>
+          <div class="display" style="font-style: italic; font-size: 26px; color: var(--terracotta);">₱2,999</div>
+        </div>
+        <div style="font-size: 11px; color: var(--ink-faint); text-align: center; margin-top: 8px;">Includes 30 refinement generations · final SVG + PNG @300dpi delivery</div>
+      </div>
+
+      <!-- Anti-abuse messaging banner -->
+      <div class="locked-banner" style="max-width: 600px;">
+        <strong>Heads up:</strong> Once you pay, your initials (<em>M &amp; M</em>) and connector (<em>&amp;</em>) become locked. You can keep refining the design freely up to 30 generations, but the letters themselves can't change. This keeps each bespoke order producing one unique mark, not many.
+      </div>
+
+      <!-- Payment methods -->
+      <div style="display: flex; gap: 16px; max-width: 600px; flex-wrap: wrap;">
+        <button class="btn btn-primary btn-large" style="flex: 1; min-width: 200px;">Pay via BDO</button>
+        <button class="btn btn-ink btn-large" style="flex: 1; min-width: 200px;">Pay via GCash</button>
+      </div>
+      <p style="margin-top: 16px; font-size: 12px; color: var(--ink-faint); max-width: 600px;">After payment, you'll receive a confirmation and your first 4 monogram designs within minutes.</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 3: GENERATING (LOADER) -->
+  <!-- ============================================================ -->
+  <div class="screen" id="screen-generating">
+    <div class="app-body">
+      <div class="generating-stage">
+        <div class="loader-ring">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="54" fill="none" stroke="var(--rule)" stroke-width="2"/>
+            <circle cx="60" cy="60" r="54" fill="none" stroke="var(--terracotta)" stroke-width="2"
+              stroke-dasharray="80 240" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="var(--rule)" stroke-width="1"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="var(--gold)" stroke-width="1.5"
+              stroke-dasharray="40 240" stroke-linecap="round"/>
+          </svg>
+          <div class="inner-dot">M&amp;M</div>
+        </div>
+        <h2 class="display">Setnayan AI is <em style="font-style: italic; color: var(--terracotta);">crafting</em> your monogram</h2>
+        <p class="sub">We're generating four unique designs based on your brief.<br>This usually takes about 30 seconds.</p>
+
+        <div class="progress-strip">
+          <div class="bar"></div>
+        </div>
+
+        <p class="mono" style="font-size: 11px; color: var(--ink-faint); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 24px;">
+          26 refinements remaining after this first generation
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 4: REFINE LOOP -->
+  <!-- ============================================================ -->
+  <div class="screen" id="screen-refine">
+    <div class="app-body">
+      <div style="margin-bottom: 32px;">
+        <div class="hero-eyebrow">Pick your favorite · Refine until it's perfect</div>
+        <h1 class="hero-h1">Your <em>four candidates</em>.</h1>
+        <p class="hero-sub">Click any thumbnail to make it the active design, then tell Setnayan AI how to make it more yours. Or accept your favorite as final whenever you're ready.</p>
+      </div>
+
+      <div class="refine-layout">
+
+        <!-- LEFT: Preview + thumbnails -->
+        <div class="preview-area">
+          <div class="preview-main">
+            <span class="label">Variation 1 · Active</span>
+            <!-- Monogram preview (interlocking gold M&M on navy) -->
+            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+              <g class="mono-path" stroke="var(--gold)">
+                <!-- Interlocking M -->
+                <path d="M 100 280 L 100 130 L 170 230 L 240 130 L 240 200"/>
+                <path d="M 160 280 L 160 220 L 230 320 L 300 220 L 300 130 L 300 280"/>
+                <!-- Top flourishes -->
+                <path d="M 145 100 Q 165 80 195 95 Q 225 80 245 100" fill="none"/>
+                <circle cx="195" cy="85" r="3" fill="var(--gold)"/>
+                <!-- Side curls -->
+                <path d="M 100 130 Q 70 110 60 140 Q 55 165 80 175"/>
+                <path d="M 60 140 Q 50 150 50 165"/>
+                <path d="M 300 130 Q 330 110 340 140 Q 345 165 320 175"/>
+                <path d="M 340 140 Q 350 150 350 165"/>
+                <!-- Botanical sprig (bottom) -->
+                <path d="M 130 320 Q 170 340 200 330 Q 230 340 270 320"/>
+                <ellipse cx="180" cy="335" rx="5" ry="2" transform="rotate(20 180 335)" fill="var(--gold)"/>
+                <ellipse cx="220" cy="335" rx="5" ry="2" transform="rotate(-20 220 335)" fill="var(--gold)"/>
+              </g>
+            </svg>
+          </div>
+
+          <div class="thumbnail-strip">
+            <div class="thumb selected">
+              <div class="badge">✓</div>
+              <svg viewBox="0 0 400 400">
+                <g class="mono-path"><path d="M 100 280 L 100 130 L 170 230 L 240 130 L 240 280 M 160 280 L 160 220 L 230 320 L 300 220 L 300 130 L 300 280"/></g>
+              </svg>
+            </div>
+            <div class="thumb">
+              <svg viewBox="0 0 400 400">
+                <g class="mono-path">
+                  <path d="M 100 280 Q 100 100 200 200 Q 300 100 300 280"/>
+                  <path d="M 130 280 L 130 150 L 200 240 L 270 150 L 270 280"/>
+                </g>
+              </svg>
+            </div>
+            <div class="thumb">
+              <svg viewBox="0 0 400 400">
+                <g class="mono-path">
+                  <ellipse cx="200" cy="200" rx="140" ry="140"/>
+                  <text x="200" y="225" font-size="80" font-style="italic" text-anchor="middle" fill="var(--gold)" stroke="none">M&amp;M</text>
+                </g>
+              </svg>
+            </div>
+            <div class="thumb">
+              <svg viewBox="0 0 400 400">
+                <g class="mono-path">
+                  <path d="M 100 100 L 100 240 Q 100 320 200 350 Q 300 320 300 240 L 300 100 Z"/>
+                  <text x="200" y="220" font-size="80" text-anchor="middle" fill="var(--gold)" stroke="none">M&amp;M</text>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Previous attempts -->
+          <div class="previous-attempts">
+            <h4>Previous attempts · 0 so far — refine to see them here</h4>
+            <div class="attempts-row" style="opacity: 0.4;">
+              <!-- placeholder -->
+              <div style="font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-faint); padding: 12px; font-style: italic;">After your first refinement, previous variations will appear here. You can scroll back and pick any of them at no extra cost.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Refinement chat panel -->
+        <div class="chat-panel">
+          <div class="counter-display">
+            <div class="counter-number">26</div>
+            <div class="counter-label">refinements remaining</div>
+            <div class="counter-warning" style="display: none;">
+              Heads up — under 10 left. Make them count.
+            </div>
+          </div>
+
+          <label style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; display: block;">
+            Tell Setnayan AI what to change
+          </label>
+          <textarea class="chat-input" placeholder="e.g., Make the letters thicker · More gold accents · Replace the wreath with a banner · Less ornate, more modern"></textarea>
+
+          <p style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-top: 16px; margin-bottom: 6px;">
+            Or try a suggestion
+          </p>
+          <div class="suggested-chips">
+            <span class="chip">More delicate</span>
+            <span class="chip">More gold accents</span>
+            <span class="chip">Swap wreath for crest</span>
+            <span class="chip">Less ornate</span>
+            <span class="chip">Thicker letters</span>
+            <span class="chip">Add ribbon banner</span>
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-secondary">Refine · −4</button>
+            <button class="btn btn-primary">Accept as final</button>
+          </div>
+
+          <p style="font-size: 11px; color: var(--ink-faint); margin-top: 14px; line-height: 1.4;">
+            Refining generates 4 new variations and uses 4 of your refinements. You can always scroll back to any previous variation for free.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 5: QUOTA EXHAUSTED -->
+  <!-- ============================================================ -->
+  <div class="screen" id="screen-quota">
+    <div class="app-body">
+      <div style="margin-bottom: 24px;">
+        <div class="hero-eyebrow">All 30 refinements used</div>
+        <h1 class="hero-h1">Time to <em>decide</em>.</h1>
+        <p class="hero-sub">You've explored 30 unique variations across 8 refinement rounds. Pick your favorite from any version above and accept it as final — or add 10 more refinements if you're so close to perfect.</p>
+      </div>
+
+      <!-- Counter display (zeroed) -->
+      <div style="background: var(--cream-soft); border-radius: 16px; padding: 24px; margin-bottom: 32px; text-align: center; max-width: 480px;">
+        <div class="counter-number" style="color: var(--ink-soft);">0</div>
+        <div class="counter-label">refinements remaining</div>
+      </div>
+
+      <!-- Quota banner with upsell -->
+      <div class="quota-banner">
+        <h3>Want to keep refining?</h3>
+        <p>Add another 10 refinements to your order. You'll get four new variations per refinement round, just like before.</p>
+        <div class="upsell-card">
+          <div class="upsell-info">
+            <div class="title">+10 Refinements</div>
+            <div class="meta">2 more refinement rounds · multi-buyable</div>
+          </div>
+          <div class="upsell-price">₱199</div>
+          <button class="btn btn-primary">Add to my order</button>
+        </div>
+      </div>
+
+      <!-- Or accept now -->
+      <div style="text-align: center; margin-top: 32px;">
+        <div style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 12px;">
+          Or — accept your favorite now
+        </div>
+        <button class="btn btn-ink btn-large">Pick from all 30 variations →</button>
+        <p style="margin-top: 12px; font-size: 12px; color: var(--ink-faint);">You can pick any variation from your refinement history at no extra cost.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 6: FINAL DELIVERED -->
+  <!-- ============================================================ -->
+  <div class="screen" id="screen-final">
+    <div class="app-body" style="padding-top: 24px;">
+      <div class="celebration">
+        <div class="hero-eyebrow">Designed by Setnayan AI · Live across your event</div>
+        <h2 class="display">Your monogram <em>is live</em>.</h2>
+        <p class="sub">Your bespoke mark now appears on every Setnayan-rendered surface — your invitation site, save-the-date, QR codes, video intros, and signage. Download the full files anytime.</p>
+
+        <div class="final-monogram-frame">
+          <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+            <g stroke="var(--terracotta)" stroke-width="2" fill="none" stroke-linecap="round">
+              <path d="M 100 280 L 100 130 L 170 230 L 240 130 L 240 200"/>
+              <path d="M 160 280 L 160 220 L 230 320 L 300 220 L 300 130 L 300 280"/>
+              <path d="M 145 100 Q 165 80 195 95 Q 225 80 245 100"/>
+              <circle cx="195" cy="85" r="3" fill="var(--terracotta)"/>
+              <path d="M 100 130 Q 70 110 60 140 Q 55 165 80 175"/>
+              <path d="M 60 140 Q 50 150 50 165"/>
+              <path d="M 300 130 Q 330 110 340 140 Q 345 165 320 175"/>
+              <path d="M 340 140 Q 350 150 350 165"/>
+              <path d="M 130 320 Q 170 340 200 330 Q 230 340 270 320"/>
+              <ellipse cx="180" cy="335" rx="5" ry="2" transform="rotate(20 180 335)" fill="var(--terracotta)"/>
+              <ellipse cx="220" cy="335" rx="5" ry="2" transform="rotate(-20 220 335)" fill="var(--terracotta)"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="download-row">
+          <button class="btn btn-ink">Download SVG · Vector</button>
+          <button class="btn btn-secondary">Download PNG · 300 dpi</button>
+          <button class="btn btn-secondary">Download PNG · 4K</button>
+        </div>
+      </div>
+
+      <!-- Where it appears -->
+      <div class="usecases-strip">
+        <div class="strip-eyebrow">Where it appears</div>
+        <h3>One mark · everywhere across your wedding</h3>
+        <div class="uc-grid">
+          <div class="uc-card">
+            <svg viewBox="0 0 400 400">
+              <g stroke="var(--terracotta)" stroke-width="3" fill="none">
+                <path d="M 100 280 L 100 130 L 170 230 L 240 130 L 240 280"/>
+              </g>
+            </svg>
+            <div class="uc-label">Invitation site<br>hero</div>
+          </div>
+          <div class="uc-card">
+            <svg viewBox="0 0 400 400">
+              <g stroke="var(--terracotta)" stroke-width="3" fill="none">
+                <rect x="60" y="60" width="280" height="280" rx="40"/>
+                <path d="M 150 230 L 150 170 L 200 220 L 250 170 L 250 230"/>
+              </g>
+            </svg>
+            <div class="uc-label">QR code<br>center mark</div>
+          </div>
+          <div class="uc-card">
+            <svg viewBox="0 0 400 400">
+              <g stroke="var(--terracotta)" stroke-width="3" fill="none">
+                <rect x="100" y="80" width="200" height="240" rx="6"/>
+                <path d="M 165 220 L 165 160 L 200 200 L 235 160 L 235 220"/>
+              </g>
+            </svg>
+            <div class="uc-label">Save-the-Date<br>video</div>
+          </div>
+          <div class="uc-card">
+            <svg viewBox="0 0 400 400">
+              <g stroke="var(--terracotta)" stroke-width="3" fill="none">
+                <circle cx="200" cy="200" r="140"/>
+                <path d="M 150 230 L 150 170 L 200 220 L 250 170 L 250 230"/>
+              </g>
+            </svg>
+            <div class="uc-label">Personal Reel<br>intro</div>
+          </div>
+          <div class="uc-card">
+            <svg viewBox="0 0 400 400">
+              <g stroke="var(--terracotta)" stroke-width="3" fill="none">
+                <path d="M 60 200 L 200 100 L 340 200 L 200 300 Z"/>
+                <path d="M 150 230 L 150 170 L 200 220 L 250 170 L 250 230"/>
+              </g>
+            </svg>
+            <div class="uc-label">AI Highlight +<br>SDE intros</div>
+          </div>
+          <div class="uc-card">
+            <svg viewBox="0 0 400 400">
+              <g stroke="var(--terracotta)" stroke-width="3" fill="none">
+                <rect x="40" y="100" width="320" height="200" rx="4"/>
+                <path d="M 150 230 L 150 170 L 200 220 L 250 170 L 250 230"/>
+              </g>
+            </svg>
+            <div class="uc-label">LED Background<br>loop</div>
+          </div>
+          <div class="uc-card">
+            <svg viewBox="0 0 400 400">
+              <g stroke="var(--terracotta)" stroke-width="3" fill="none">
+                <path d="M 100 80 L 300 80 L 320 200 L 300 320 L 100 320 L 80 200 Z"/>
+                <path d="M 165 220 L 165 160 L 200 200 L 235 160 L 235 220"/>
+              </g>
+            </svg>
+            <div class="uc-label">Seating<br>place cards</div>
+          </div>
+          <div class="uc-card">
+            <svg viewBox="0 0 400 400">
+              <g stroke="var(--terracotta)" stroke-width="3" fill="none">
+                <path d="M 80 200 Q 200 80 320 200 Q 200 320 80 200"/>
+                <path d="M 150 230 L 150 170 L 200 220 L 250 170 L 250 230"/>
+              </g>
+            </svg>
+            <div class="uc-label">Photo gallery<br>chrome</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- "I changed my mind" subtle support escape -->
+      <div style="margin-top: 32px; padding: 20px 24px; background: var(--cream-soft); border-radius: 12px; max-width: 600px;">
+        <h4 style="font-size: 16px; margin-bottom: 6px;">Something off with your final?</h4>
+        <p style="font-size: 13px; color: var(--ink-soft);">If the AI gave you garbage letters or unexpected artifacts, our design team can help. <a href="#" style="color: var(--terracotta); text-decoration: underline;">Contact support →</a></p>
+      </div>
+    </div>
+  </div>
+
+</div> <!-- /frame -->
+</div> <!-- /stage -->
+
+<script>
+  // Screen toggle
+  document.querySelectorAll('[data-screen]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-screen]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const target = btn.dataset.screen;
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + target).classList.add('active');
+    });
+  });
+
+  // Device toggle
+  document.querySelectorAll('[data-device]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-device]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const frame = document.getElementById('frame');
+      if (btn.dataset.device === 'mobile') {
+        frame.classList.add('mobile');
+      } else {
+        frame.classList.remove('mobile');
+      }
+    });
+  });
+
+  // Chip selection (personality words — enforce 3-of-12 cap)
+  let selectedChips = 3;
+  document.querySelectorAll('#screen-brief .chip-grid .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (chip.classList.contains('selected')) {
+        chip.classList.remove('selected');
+        selectedChips--;
+      } else if (selectedChips < 3) {
+        chip.classList.add('selected');
+        selectedChips++;
+      }
+      const counter = document.querySelector('#screen-brief .chip-counter');
+      counter.textContent = `${selectedChips} of 3 selected · these guide your design's feel`;
+      counter.classList.toggle('complete', selectedChips === 3);
+    });
+  });
+
+  // Suggested-chip click → fill textarea
+  document.querySelectorAll('#screen-refine .suggested-chips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const ta = document.querySelector('#screen-refine .chat-input');
+      ta.value = chip.textContent.trim();
+      ta.focus();
+    });
+  });
+
+  // Thumbnail swap
+  document.querySelectorAll('#screen-refine .thumb').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      document.querySelectorAll('#screen-refine .thumb').forEach(t => t.classList.remove('selected'));
+      thumb.classList.add('selected');
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan · Plan Builder Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --page-bg: #FAF6F0;
+  --canvas-soft: #F5EFE5;
+  --ink: #1A1A1A;
+  --ink-soft: #6B6B6B;
+  --ink-faint: #A39B8E;
+  --accent: #C97B4B;
+  --accent-soft: #E8C9B0;
+  --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08);
+  --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F3;
+  --gold: #B8965E;
+  --green: #5BA962;
+  --green-soft: #DDEFDD;
+  --green-deep: #2F6F36;
+  --amber: #C8A14F;
+  --amber-soft: #F5EBD0;
+  --amber-deep: #8C6A20;
+  --blue: #4D7BA1;
+  --blue-soft: #DCE7F0;
+  --blue-deep: #2A4F6E;
+  --rose: #B86A6A;
+  --rose-soft: #EBD3D3;
+  --rose-deep: #6E2A2A;
+  --shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.04);
+  --shadow-md: 0 12px 32px rgba(26, 26, 26, 0.08);
+  --shadow-lg: 0 28px 72px rgba(26, 26, 26, 0.12);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--page-bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select { font: inherit; }
+input[type="date"], input[type="number"], input[type="text"], select {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+}
+input[type="date"]:focus, input[type="number"]:focus, input[type="text"]:focus, select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.app.wide { max-width: 1100px; }
+
+/* Top chrome */
+.chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 24px;
+}
+.chrome-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.chrome-step {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  background: var(--surface-soft);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+.chrome-restart {
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-decoration: underline;
+}
+
+/* Progress dots */
+.progress {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--rule-strong);
+}
+.progress-dot.active { background: var(--accent); }
+.progress-dot.done { background: var(--ink); }
+
+.page-body {
+  flex: 1;
+  padding: 12px 0 48px;
+}
+
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent-deep);
+  margin-bottom: 12px;
+}
+.h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+.helper {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+.helper b { color: var(--ink); font-weight: 600; }
+
+/* Field labels */
+.field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* CTA buttons */
+.cta-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 32px;
+}
+.cta-row.split { justify-content: space-between; }
+.cta-row.center { justify-content: center; }
+.btn {
+  padding: 14px 28px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity .15s, transform .15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--ink); color: white; }
+.btn.primary:disabled { background: var(--ink-faint); cursor: not-allowed; }
+.btn.secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+}
+.btn.accent { background: var(--accent); color: white; }
+.btn-back {
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  padding: 14px 8px;
+}
+
+/* ============ PLAN CHOICE ============ */
+.choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 8px;
+}
+@media (max-width: 720px) {
+  .choice-grid { grid-template-columns: 1fr; }
+}
+.choice-card {
+  background: var(--surface);
+  border: 2px solid var(--rule);
+  border-radius: 16px;
+  padding: 28px 26px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.choice-card:hover { border-color: var(--accent-soft); }
+.choice-card.recommended {
+  border-color: var(--accent);
+  box-shadow: 0 14px 36px rgba(201, 123, 75, 0.14);
+}
+.choice-card.recommended::before {
+  content: 'RECOMMENDED';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: white;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 4px 14px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+.choice-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.choice-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.choice-tagline {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+.choice-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.choice-price-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.choice-features { list-style: none; margin-bottom: 24px; }
+.choice-features li {
+  padding: 6px 0;
+  font-size: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.choice-features li::before {
+  content: '✓';
+  color: var(--green-deep);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.choice-features li.absent::before { content: '—'; color: var(--ink-faint); }
+.choice-features li.absent { color: var(--ink-faint); }
+.choice-cta {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  margin-top: auto;
+}
+.choice-cta.primary { background: var(--ink); color: white; }
+.choice-cta.secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+}
+
+/* ============ DATE SCREEN — progressive precision ============ */
+.date-fields {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+@media (max-width: 540px) {
+  .date-fields { grid-template-columns: 1fr; }
+}
+.date-field { display: flex; flex-direction: column; }
+.date-field input:disabled, .date-field select:disabled {
+  background: var(--canvas-soft);
+  color: var(--ink-faint);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.tentative-toggle {
+  background: var(--canvas-soft);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tentative-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.tentative-toggle label {
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  line-height: 1.4;
+}
+.tentative-toggle label b { font-weight: 600; }
+.date-summary {
+  background: var(--green-soft);
+  color: var(--green-deep);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.date-summary b { font-weight: 700; }
+.date-error {
+  background: var(--rose-soft);
+  color: var(--rose-deep);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+.date-advisory {
+  background: var(--amber-soft);
+  color: var(--amber-deep);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+.date-advisory-icon { flex-shrink: 0; font-size: 14px; }
+.date-advisory b { font-weight: 700; }
+
+/* ============ NUMBER STEPPER ============ */
+.guests-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin: 28px 0;
+}
+.stepper-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stepper-btn:hover { border-color: var(--accent); }
+/* Higher specificity (input.foo) needed to beat the global input[type="number"] rule */
+input.guests-input {
+  font-family: 'Cormorant Garamond', serif !important;
+  font-size: 56px !important;
+  font-weight: 600;
+  text-align: center;
+  border: none !important;
+  background: transparent !important;
+  width: 160px !important;
+  padding: 4px !important;
+  color: var(--ink);
+  border-radius: 0 !important;
+}
+input.guests-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+/* Hide native spinners on the guest count number input */
+input.guests-input::-webkit-outer-spin-button,
+input.guests-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input.guests-input { -moz-appearance: textfield; }
+.guests-label {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+/* ============ BUDGET PATH PICKER ============ */
+.budget-paths {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (max-width: 540px) {
+  .budget-paths { grid-template-columns: 1fr; }
+}
+.budget-path-card {
+  background: var(--surface);
+  border: 2px solid var(--rule);
+  border-radius: 14px;
+  padding: 22px 20px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.budget-path-card:hover { border-color: var(--accent-soft); }
+.budget-path-card.selected {
+  border-color: var(--accent);
+  background: rgba(201, 123, 75, 0.06);
+}
+.budget-path-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.budget-path-sub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+/* Tier mini-cards (when "recommend a vibe") */
+.tier-mini-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.tier-mini {
+  background: var(--surface);
+  border: 2px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: 50px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+.tier-mini:hover { border-color: var(--accent-soft); }
+.tier-mini.selected {
+  border-color: var(--accent);
+  background: rgba(201, 123, 75, 0.06);
+}
+.tier-mini-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--accent);
+  text-align: center;
+}
+.tier-mini-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+.tier-mini-desc {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.tier-mini-budget {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: right;
+}
+
+/* Feasibility callout (after budget entered) — colour shifts by severity */
+.tier-callout {
+  background: linear-gradient(135deg, var(--green-soft), #C9E4C5);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.tier-callout-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--green-deep);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.tier-callout-text {
+  font-size: 13px;
+  color: var(--green-deep);
+  line-height: 1.5;
+  padding-top: 4px;
+}
+.tier-callout-text b { font-weight: 700; }
+
+/* Severity variants */
+.tier-callout.severity-info {
+  background: linear-gradient(135deg, var(--blue-soft), #C8DCE8);
+}
+.tier-callout.severity-info .tier-callout-icon {
+  background: var(--blue-deep);
+}
+.tier-callout.severity-info .tier-callout-text {
+  color: var(--blue-deep);
+}
+
+.tier-callout.severity-warn {
+  background: linear-gradient(135deg, var(--amber-soft), #F0D89B);
+}
+.tier-callout.severity-warn .tier-callout-icon {
+  background: var(--amber-deep);
+}
+.tier-callout.severity-warn .tier-callout-text {
+  color: var(--amber-deep);
+}
+
+/* ============ COVERAGE CHECKLIST ============ */
+.coverage-summary {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 18px;
+  position: sticky;
+  top: 12px;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+.coverage-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+.budget-adjust {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.budget-adjust-btn, .cov-toolbar-btn {
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.04em;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.budget-adjust-btn:hover, .cov-toolbar-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.budget-adjust-btn:active, .cov-toolbar-btn:active { transform: translateY(0); }
+
+/* Compact ± buttons — used on Step 5 budget header and per-row */
+.adjust-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--rule-strong);
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: all .15s;
+}
+.adjust-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.adjust-btn:active { transform: translateY(0); }
+.adjust-btn.row {
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  border-width: 1px;
+}
+
+/* Section toggle button on Step 4 */
+.coverage-section-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.coverage-section-h-text {
+  display: flex;
+  flex-direction: column;
+}
+.section-toggle-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-deep);
+  background: transparent;
+  border: 1px solid var(--accent-soft);
+  padding: 4px 10px;
+  border-radius: 100px;
+  white-space: nowrap;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.section-toggle-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.section-toggle-btn.partial {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+/* Step 5 review row — three-column layout: − [input] + */
+.review-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.coverage-summary-budget {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+.coverage-summary-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.coverage-summary-bar {
+  margin-top: 12px;
+  height: 6px;
+  background: var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.coverage-summary-fill {
+  position: absolute;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width .25s;
+}
+.coverage-summary-fill.warn { background: var(--amber); }
+.coverage-summary-fill.over { background: var(--rose); }
+
+.coverage-warning {
+  background: var(--rose-soft);
+  color: var(--rose-deep);
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-top: 10px;
+}
+.coverage-warning.amber {
+  background: var(--amber-soft);
+  color: var(--amber-deep);
+}
+.coverage-warning.green {
+  background: var(--green-soft);
+  color: var(--green-deep);
+}
+
+.coverage-section { margin-bottom: 22px; }
+.coverage-section-h {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  padding: 6px 0;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.coverage-section-h .desc {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: 'Manrope';
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+.cov-row {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  display: grid;
+  grid-template-columns: 22px 28px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.cov-row:hover {
+  border-color: var(--accent-soft);
+}
+.cov-row.checked {
+  border-color: var(--accent);
+  background: rgba(201, 123, 75, 0.04);
+}
+.cov-row.tight, .review-row.tight {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+}
+.cov-row.checked.tight {
+  border-color: var(--amber-deep);
+}
+.cov-warn {
+  display: block;
+  font-size: 11px;
+  color: var(--amber-deep);
+  margin-top: 6px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: 'Manrope', system-ui, sans-serif;
+}
+.cov-warn b { font-weight: 700; }
+
+/* Wedding-only specialty badge — marks vendors that only serve weddings.
+   When V2 ships and Setnayan supports other event types, these categories
+   won't appear in those flows. */
+.wedding-tag {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  padding: 2px 7px;
+  border-radius: 100px;
+  margin-left: 8px;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+.cov-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid var(--rule-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all .15s;
+}
+.cov-row.checked .cov-checkbox {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.cov-icon {
+  font-size: 18px;
+  text-align: center;
+}
+.cov-name {
+  font-size: 13px;
+  font-weight: 500;
+}
+.cov-name .meta {
+  display: block;
+  font-size: 10px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+  font-weight: 400;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cov-alloc {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.cov-alloc.muted {
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+/* ============ STAGE 1.5 REVIEW (overrides) ============ */
+.review-list {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.review-row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rule);
+}
+.review-row .review-input-wrap { width: 180px; }
+.review-row:last-child { border-bottom: none; }
+.review-row.overridden { background: rgba(201, 123, 75, 0.04); }
+.review-icon { font-size: 20px; text-align: center; }
+.review-name {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.review-name .review-meta {
+  display: block;
+  font-size: 10px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+  font-weight: 400;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.review-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-soft);
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 10px;
+  padding: 0 10px 0 12px;
+  transition: border-color .15s, background .15s;
+}
+.review-input-wrap:focus-within {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(201, 123, 75, 0.1);
+}
+.review-row.overridden .review-input-wrap {
+  border-color: var(--accent);
+  background: var(--surface);
+}
+.review-currency {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+.review-input {
+  border: none !important;
+  background: transparent !important;
+  padding: 10px 0 !important;
+  font-family: 'DM Mono', monospace !important;
+  font-size: 14px !important;
+  font-weight: 500;
+  width: 100%;
+  text-align: right;
+  outline: none !important;
+}
+.review-input:focus { outline: none !important; }
+.review-input::placeholder {
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+.review-input.overridden {
+  font-weight: 700;
+  color: var(--accent-deep);
+}
+.review-clear {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--rule);
+  color: var(--ink-soft);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.review-clear:hover { background: var(--rule-strong); color: var(--ink); }
+@media (max-width: 600px) {
+  .review-row { grid-template-columns: 32px 1fr; }
+  .review-input-wrap { grid-column: 1 / -1; margin-top: 8px; max-width: 220px; }
+}
+
+/* ============ STAGE LOCK-IN ============ */
+.lock-banner {
+  background: linear-gradient(135deg, var(--green-soft), #C9E4C5);
+  border-radius: 16px;
+  padding: 30px 32px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.lock-banner-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+.lock-banner-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--green-deep);
+  margin-bottom: 4px;
+}
+.lock-banner-sub {
+  font-size: 13px;
+  color: var(--green-deep);
+}
+
+.lock-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.lock-options.two-col {
+  grid-template-columns: 1fr 1fr;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 720px) {
+  .lock-options, .lock-options.two-col { grid-template-columns: 1fr; }
+}
+.lock-option {
+  background: var(--surface);
+  border: 2px solid var(--rule);
+  border-radius: 14px;
+  padding: 22px 20px;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left;
+}
+.lock-option:hover { border-color: var(--accent-soft); }
+.lock-option.primary {
+  border-color: var(--accent);
+}
+.lock-option.primary:hover {
+  background: rgba(201, 123, 75, 0.04);
+}
+.lock-option.locked-out {
+  background: var(--canvas-soft);
+  border-color: var(--rule);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+.lock-option.locked-out:hover {
+  border-color: var(--rule);
+  background: var(--canvas-soft);
+}
+.lock-option-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.lock-option-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.lock-option-sub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+/* ============ TODAY SCREEN (Stage 2+ menu) ============ */
+.countdown-banner {
+  background: linear-gradient(135deg, #1A1A1A, #2D2520);
+  color: white;
+  border-radius: 18px;
+  padding: 32px 36px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-md);
+}
+.countdown-lead {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.countdown-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 16px;
+}
+.countdown-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.5;
+  max-width: 580px;
+  margin-bottom: 24px;
+}
+.pacing-toggle {
+  border-top: 1px solid rgba(255,255,255,0.12);
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.pacing-prompt {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.pacing-options { display: flex; gap: 8px; }
+.pacing-btn {
+  padding: 10px 18px;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: all .15s;
+}
+.pacing-btn:hover { background: rgba(255,255,255,0.14); }
+.pacing-btn.selected {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.today-h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  margin-bottom: 18px;
+}
+
+/* Stage cards */
+.stage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+@media (max-width: 720px) {
+  .stage-grid { grid-template-columns: 1fr; }
+}
+.stage-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 20px 22px;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+}
+.stage-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.stage-card.priority {
+  border-color: var(--accent-soft);
+  background: linear-gradient(180deg, rgba(201, 123, 75, 0.04), var(--surface));
+}
+.stage-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.stage-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--canvas-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.stage-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  flex: 1;
+}
+.stage-card-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-left: 52px;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.stage-card-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 52px;
+  margin-top: 4px;
+}
+.stage-card-status {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border-radius: 100px;
+}
+.stage-card-status.not-started {
+  background: var(--canvas-soft);
+  color: var(--ink-faint);
+}
+.stage-card-status.draft {
+  background: var(--amber-soft);
+  color: var(--amber-deep);
+}
+.stage-card-status.locked {
+  background: var(--green-soft);
+  color: var(--green-deep);
+}
+.stage-card-time {
+  font-size: 10px;
+  color: var(--ink-faint);
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Plan summary mini */
+.plan-mini {
+  background: var(--canvas-soft);
+  border-radius: 14px;
+  padding: 22px 26px;
+  margin-bottom: 24px;
+}
+.plan-mini-h {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.plan-mini-link {
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-decoration: underline;
+}
+.plan-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+@media (max-width: 600px) {
+  .plan-mini-grid { grid-template-columns: 1fr 1fr; }
+}
+.plan-mini-item-label {
+  font-size: 10px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 2px;
+}
+.plan-mini-item-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Recent decisions */
+.decisions-section {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 22px 26px;
+  margin-bottom: 24px;
+}
+.decisions-h {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.decisions-h-count {
+  background: var(--canvas-soft);
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+}
+.decision-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+.decision-row:last-child { border-bottom: none; }
+.decision-text { color: var(--ink); }
+.decision-text .dot {
+  color: var(--accent);
+  margin-right: 8px;
+}
+.decision-text .dot.locked { color: var(--green-deep); }
+.decision-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+.decisions-empty {
+  color: var(--ink-faint);
+  font-style: italic;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+/* Foundation edit picker */
+.foundation-edit-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.edit-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+.edit-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.edit-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--canvas-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.edit-card-body { flex: 1; min-width: 0; }
+.edit-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+.edit-card-value {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-family: 'DM Mono', monospace;
+}
+.edit-card-arrow {
+  font-size: 12px;
+  color: var(--accent-deep);
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* Stage 2 placeholder steps */
+.placeholder-stage {
+  background: var(--canvas-soft);
+  border-radius: 14px;
+  padding: 24px;
+  margin-top: 18px;
+}
+.placeholder-step {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+.placeholder-step:last-child { border-bottom: none; }
+.placeholder-step-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--accent);
+  text-align: center;
+}
+.placeholder-step-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.placeholder-step-sub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* DIY holder */
+.diy-holder {
+  text-align: center;
+  padding: 60px 20px;
+}
+.diy-holder-icon { font-size: 48px; margin-bottom: 16px; }
+
+/* footer */
+.foot-note {
+  margin-top: auto;
+  padding: 24px 0;
+  border-top: 1px solid var(--rule);
+  font-size: 11px;
+  color: var(--ink-faint);
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <div class="chrome">
+    <div class="chrome-brand">setnayan</div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <div class="chrome-step" id="chrome-step">Plan Builder</div>
+      <button class="chrome-restart" onclick="restart()">Restart</button>
+    </div>
+  </div>
+
+  <div class="page-body" id="page-body"></div>
+
+  <div class="foot-note">Setnayan · Plan Builder Prototype · 0016 · Stages + Lock-in · Coverage allocation · Today screen</div>
+</div>
+
+<script>
+// ============ STATE ============
+const state = {
+  screen: 'plan-choice',
+  mode: null,             // 'guided' | 'diy'
+
+  // Stage 1.1 — When (progressive precision: year required, month + day optional)
+  dateYear: '',           // YYYY string
+  dateMonth: '',          // 0-11 string or ''
+  dateDay: '',            // 1-31 string or ''
+  dateTentative: false,   // only meaningful when full date (Y+M+D) set
+
+  // Stage 1.2 — Pax
+  guestCount: 200,
+
+  // Stage 1.3 — Budget
+  budgetPath: null,       // 'have-number' | 'recommend-vibe'
+  budgetAmount: 0,
+  budgetAnchor: 0,        // reference value for ±10% step (set when budget is typed or defaulted)
+  tier: null,             // derived from budget OR picked
+
+  // Stage 1.4 — Coverage
+  coverageSelected: [],   // category ids
+
+  // Stage 1.5 — Distribution overrides
+  coverageOverrides: {},  // { categoryId: amount } — blank means use auto
+
+  // Stage statuses
+  stageStatus: {
+    foundation: 'not-started',
+    moodboard: 'not-started',
+    ceremony: 'not-started',
+    reception: 'not-started',
+    photo: 'not-started',
+    coordinator: 'not-started',
+    guests: 'not-started',
+    invitation: 'not-started'
+  },
+
+  // Pacing + decisions
+  pacing: null,
+  decisions: [],
+
+  // Edit-foundation mode (returns to picker instead of advancing)
+  editingFoundation: false
+};
+
+// ============ TIER MODEL ============
+const TIERS = [
+  { num: 1, name: 'Simple and Intimate', perHeadMin: 1500, perHeadMax: 3000,
+    desc: 'Restaurant or modest hotel · close family · minimal extras' },
+  { num: 2, name: 'Charming and Personal', perHeadMin: 3000, perHeadMax: 5000,
+    desc: 'Mid-tier hotel or curated garden · thoughtful styling' },
+  { num: 3, name: 'Grand and Beautiful', perHeadMin: 5000, perHeadMax: 8000,
+    desc: 'Premium hotel or full-service garden · full design layer' },
+  { num: 4, name: 'Distinguished and Refined', perHeadMin: 8000, perHeadMax: 13000,
+    desc: 'Top-tier hotel or destination · stylist-driven · couture-adjacent' },
+  { num: 5, name: 'Luxurious and Beyond', perHeadMin: 13000, perHeadMax: 25000,
+    desc: 'Iconic ballroom or destination · couture · designer everything' }
+];
+
+// ============ CATEGORIES — ordered most-important to least-important ============
+// `cls` is internal: 'A' = proportional share of remaining budget, 'C' = flat fixed cost.
+// Couples never see the Class A/C distinction — only the math behind it.
+// `group` controls section grouping in the coverage list.
+// `vendorMin` is the realistic floor for booking the lowest-priced vendor in that
+// category. When an allocation lands below this, we show a "tight for this section"
+// note (informational, not blocking).
+const CATEGORIES = [
+  // === Anchor decisions (the must-haves) ===
+  { id: 'reception', name: 'Reception venue', cls: 'A', typical: 25, icon: '🏛',
+    group: 'anchor', meta: 'Hotel ballroom · garden estate · restaurant function room', vendorMin: 80000 },
+  { id: 'catering', name: 'Catering / Food', cls: 'A', typical: 15, icon: '🍽',
+    group: 'anchor', meta: 'Often bundled with hotels/restaurants · separate at gardens', vendorMin: 40000 },
+  { id: 'photo-video', name: 'Photography + Video', cls: 'A', typical: 13.5, icon: '📷',
+    group: 'anchor', meta: 'Pre-nup + wedding day + SDE coverage', vendorMin: 25000 },
+  { id: 'coordinator', name: 'Wedding Coordinator', cls: 'A', typical: 3.5, icon: '🎭',
+    group: 'anchor', meta: 'Day-of or full-event', vendorMin: 15000 },
+  { id: 'hmua', name: 'HMUA roster', cls: 'A', typical: 3.5, icon: '💄',
+    group: 'anchor', meta: 'Bride + mothers + entourage', vendorMin: 8000 },
+  { id: 'ceremony', name: 'Ceremony venue / donation', cls: 'A', typical: 2.25, icon: '⛪',
+    group: 'anchor', meta: 'Parish, chapel, or civil registrar', vendorMin: 500, weddingOnly: true },
+  { id: 'legal-docs', name: 'Legal documents', cls: 'C', flat: 2500, icon: '⚖', group: 'anchor',
+    meta: 'CENOMAR · Marriage license · Pre-Cana · PSA marriage cert', weddingOnly: true },
+  { id: 'bride-attire', name: "Bride's attire", cls: 'A', typical: 6, icon: '👰',
+    group: 'anchor', meta: 'Gown + robe + veil + shoes + accessories · 3–6 mo lead', vendorMin: 20000, weddingOnly: true },
+  { id: 'groom-attire', name: "Groom's attire", cls: 'A', typical: 1.5, icon: '🤵',
+    group: 'anchor', meta: 'Suit / Barong + shoes', vendorMin: 5000, weddingOnly: true },
+  { id: 'rings', name: 'Wedding rings', cls: 'C', flat: 40000, icon: '💍',
+    group: 'anchor', meta: 'Couple-led · highly variable', weddingOnly: true },
+
+  // === Day-of essentials (defines the feel) ===
+  { id: 'florals-stylist-lights', name: 'Florals + Stylist + Lights', cls: 'A', typical: 11, icon: '💐',
+    group: 'important', meta: 'Bundled if a full-service stylist is hired', vendorMin: 30000 },
+  { id: 'cake', name: 'Wedding cake', cls: 'C', flat: 15000, icon: '🎂', group: 'important', weddingOnly: true },
+  { id: 'bridal-car', name: 'Bridal car', cls: 'C', flat: 18000, icon: '🚗', group: 'important', weddingOnly: true },
+  { id: 'drone', name: 'Drone operator', cls: 'C', flat: 20000, icon: '🚁', group: 'important' },
+  { id: 'invitations', name: 'Invitations + stationery', cls: 'A', typical: 2.5, icon: '💌',
+    group: 'important', meta: 'Save-the-dates, invites, place cards, signage', vendorMin: 5000 },
+  { id: 'pre-nup', name: 'Pre-nup shoot', cls: 'A', typical: 2.5, icon: '💏', group: 'important',
+    meta: '2–6 months before the wedding', vendorMin: 10000, weddingOnly: true },
+
+  // === Music + Entertainment (booked separately by role) ===
+  { id: 'choir', name: 'Choir', cls: 'C', flat: 8000, icon: '🎶', group: 'entertainment',
+    meta: 'Ceremonial performances · church or chapel' },
+  { id: 'emcee', name: 'Host / Emcee', cls: 'C', flat: 18000, icon: '🎙', group: 'entertainment',
+    meta: 'Reception MC · couple intro · sponsor announcements · program flow' },
+  { id: 'live-band', name: 'Live band', cls: 'C', flat: 45000, icon: '🎷', group: 'entertainment',
+    meta: 'Ceremony · cocktail · reception sets' },
+  { id: 'dj', name: 'DJ', cls: 'C', flat: 15000, icon: '🎧', group: 'entertainment',
+    meta: 'Reception + after-party music' },
+  { id: 'other-performers', name: 'Other performers', cls: 'C', flat: 15000, icon: '🎤', group: 'entertainment',
+    meta: 'Backup dancers · special numbers · guest acts' },
+  { id: 'dance-guide', name: 'Dance guide / Choreographer', cls: 'C', flat: 12000, icon: '💃', group: 'entertainment',
+    meta: 'First dance + entourage grand march · 4–8 weeks pre-event', weddingOnly: true },
+
+  // === Tradition + family (Filipino-specific) ===
+  { id: 'entourage-attire', name: 'Entourage attire', cls: 'A', typical: 2.5, icon: '👯',
+    group: 'tradition', meta: 'Bridesmaids · groomsmen · sponsors · kid bearers', vendorMin: 10000, weddingOnly: true },
+  { id: 'sponsor-gifts', name: 'Principal Sponsor gifts', cls: 'C', flat: 25000, icon: '💝',
+    group: 'tradition', meta: 'Thank-you tokens for Ninang / Ninong', weddingOnly: true },
+  { id: 'entourage-gifts', name: 'Entourage + parent gifts', cls: 'C', flat: 20000, icon: '🌹',
+    group: 'tradition', meta: 'Bridesmaids · groomsmen · mothers · fathers', weddingOnly: true },
+  { id: 'welcome-packs', name: 'Welcome packs / OOT guest gifts', cls: 'C', flat: 20000, icon: '📦',
+    group: 'tradition', meta: 'Care packs for out-of-town and destination guests' },
+
+  // === Cocktail hour (sub-event · multi-vendor) ===
+  { id: 'cocktail-food', name: 'Cocktail food / Grazing table', cls: 'C', flat: 25000, icon: '🍢',
+    group: 'cocktail' },
+  { id: 'cocktail-drinks', name: 'Mobile bar / Drinks', cls: 'C', flat: 30000, icon: '🍸',
+    group: 'cocktail' },
+  { id: 'specialty-desserts', name: 'Specialty desserts / Dessert bar', cls: 'C', flat: 20000, icon: '🧁',
+    group: 'cocktail', meta: 'Donut walls · cupcakes · halo-halo bars · cake supplements' },
+  { id: 'coffee-station', name: 'Coffee station / Barista', cls: 'C', flat: 18000, icon: '☕',
+    group: 'cocktail' },
+  { id: 'ice-cream-cart', name: 'Ice cream cart', cls: 'C', flat: 15000, icon: '🍦',
+    group: 'cocktail' },
+  { id: 'live-painting', name: 'Live painting / Sketch artist', cls: 'C', flat: 20000, icon: '🎨',
+    group: 'cocktail' },
+  { id: 'photobooth', name: 'Photobooth', cls: 'C', flat: 18000, icon: '📸',
+    group: 'cocktail' },
+  { id: 'attractions', name: 'Attractions (henna, magician, caricaturist)', cls: 'C', flat: 15000, icon: '✨',
+    group: 'cocktail' },
+  { id: 'cold-sparklers', name: 'Cold sparklers / Send-off effects', cls: 'C', flat: 15000, icon: '🎆',
+    group: 'cocktail', meta: 'Grand entrance · send-off · safe indoor effects' },
+  { id: 'favors', name: 'Wedding favors / souvenirs', cls: 'C', flat: 20000, icon: '🎁',
+    group: 'cocktail' },
+
+  // (Polish + extras section was here — Drone moved to Day-of essentials,
+  //  Live band and Dance guide moved to Music + Entertainment)
+];
+
+// ============ STAGE 2+ MENU ITEMS ============
+const STAGES = [
+  { id: 'moodboard', icon: '🎨', name: 'Create your mood', sub: 'Lock palettes + inspiration · ~15 min', priority: 'normal' },
+  { id: 'ceremony', icon: '⛪', name: 'Pick ceremony venue', sub: 'Anchor decision · ~12 min', priority: 'high' },
+  { id: 'reception', icon: '🏛', name: 'Pick reception venue', sub: 'Anchor · within 8km of ceremony · ~20 min', priority: 'high' },
+  { id: 'photo', icon: '📷', name: 'Find your photographer', sub: 'Books 8–12 mo out · ~15 min', priority: 'high' },
+  { id: 'coordinator', icon: '🎭', name: 'Lock a coordinator', sub: 'Day-of or full-event · ~10 min', priority: 'normal' },
+  { id: 'guests', icon: '👥', name: 'Build your guest list', sub: 'Existing feature · update anytime', priority: 'normal' },
+  { id: 'invitation', icon: '💌', name: 'Design your invitation site', sub: 'Existing feature · live URL', priority: 'normal' }
+];
+
+// ============ INPUT FORMATTING ============
+// Formats an input element's value with thousand-separator commas while
+// preserving cursor position. Returns the parsed integer value.
+function formatNumberInput(el) {
+  const cursorPos = el.selectionStart;
+  const oldValue = el.value;
+
+  // Count digits to the left of the cursor BEFORE reformatting
+  let digitsBeforeCursor = 0;
+  for (let i = 0; i < cursorPos; i++) {
+    if (/\d/.test(oldValue[i])) digitsBeforeCursor++;
+  }
+
+  // Strip non-digits and reformat with commas
+  const raw = oldValue.replace(/[^0-9]/g, '');
+  const formatted = raw === '' ? '' : parseInt(raw, 10).toLocaleString('en-US');
+
+  if (oldValue !== formatted) {
+    el.value = formatted;
+
+    // Restore cursor position by walking the new string and stopping
+    // after we've passed the same number of digits as before
+    let newCursorPos = formatted.length;
+    let digitsCounted = 0;
+    for (let i = 0; i < formatted.length; i++) {
+      if (digitsCounted >= digitsBeforeCursor) {
+        newCursorPos = i;
+        break;
+      }
+      if (/\d/.test(formatted[i])) digitsCounted++;
+    }
+    el.setSelectionRange(newCursorPos, newCursorPos);
+  }
+
+  return raw === '' ? null : parseInt(raw, 10);
+}
+
+// ============ HELPERS ============
+function fmtPHP(n) {
+  if (n >= 1_000_000) return '₱' + (n/1_000_000).toFixed(n >= 10_000_000 ? 0 : 2).replace(/\.?0+$/, '') + 'M';
+  if (n >= 1_000) return '₱' + Math.round(n/1_000) + 'K';
+  return '₱' + Math.round(n).toLocaleString();
+}
+function fmtPHPFull(n) {
+  return '₱' + Math.round(n).toLocaleString();
+}
+function tierBudget(tier, guests) {
+  const t = TIERS[tier - 1];
+  return {
+    min: t.perHeadMin * guests,
+    max: t.perHeadMax * guests,
+    mid: Math.round((t.perHeadMin + t.perHeadMax) / 2 * guests)
+  };
+}
+function tomorrowISO() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split('T')[0];
+}
+function maxDateISO() {
+  // 3 years from today (~1095 days). Beyond this, vendor availability
+  // and pricing become unreliable, so we cap input at 3 years out.
+  const d = new Date();
+  d.setDate(d.getDate() + 1095);
+  return d.toISOString().split('T')[0];
+}
+function getDatePrecision() {
+  // Returns 'full' | 'month' | 'year' | 'none'
+  if (state.dateYear && state.dateMonth !== '' && state.dateDay !== '') return 'full';
+  if (state.dateYear && state.dateMonth !== '') return 'month';
+  if (state.dateYear) return 'year';
+  return 'none';
+}
+function getEffectiveDate() {
+  // Returns ISO date or null. Fills in midpoints for missing precision.
+  const prec = getDatePrecision();
+  if (prec === 'none') return null;
+  const y = parseInt(state.dateYear);
+  // Year-only: use July 1 (mid-year). Month-only: use 15th (mid-month).
+  const m = state.dateMonth !== '' ? parseInt(state.dateMonth) : 6;
+  const d = state.dateDay !== '' ? parseInt(state.dateDay) : 15;
+  const dt = new Date(y, m, d);
+  return dt.toISOString().split('T')[0];
+}
+function getDateLabel() {
+  const prec = getDatePrecision();
+  if (prec === 'none') return 'Date TBD';
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const y = state.dateYear;
+  const m = state.dateMonth !== '' ? monthNames[parseInt(state.dateMonth)] : '';
+
+  if (prec === 'full') {
+    let label = `${m} ${state.dateDay}, ${y}`;
+    if (state.dateTentative) label += ' (tentative)';
+    return label;
+  }
+  if (prec === 'month') return `${m} ${y}`;
+  return `Sometime in ${y}`;
+}
+// Returns true if the date should be framed as "estimated" in countdown copy
+function isDateEstimated() {
+  const prec = getDatePrecision();
+  if (prec === 'year' || prec === 'month') return true;
+  if (prec === 'full' && state.dateTentative) return true;
+  return false;
+}
+
+// Tier from per-head spend
+function tierFromBudget(budget, guests) {
+  if (!budget || !guests) return null;
+  const perHead = budget / guests;
+  if (perHead < 3000) return 1;
+  if (perHead < 5000) return 2;
+  if (perHead < 8000) return 3;
+  if (perHead < 13000) return 4;
+  return 5;
+}
+
+// ============ ALLOCATION ENGINE ============
+function computeAllocations(checkedIds, budget, overrides = {}) {
+  const checked = CATEGORIES.filter(c => checkedIds.includes(c.id));
+
+  // Step 1 — honor overrides (user-typed exact amounts)
+  const overridden = checked.filter(c => overrides[c.id] != null && overrides[c.id] !== '' && !isNaN(overrides[c.id]));
+  const unoverridden = checked.filter(c => !overridden.includes(c));
+
+  const overrideTotal = overridden.reduce((sum, c) => sum + Number(overrides[c.id]), 0);
+  const remainingBudget = Math.max(0, budget - overrideTotal);
+
+  const unClassA = unoverridden.filter(c => c.cls === 'A');
+  const unClassC = unoverridden.filter(c => c.cls === 'C');
+
+  // Class C unoverridden: take flat first
+  const unClassCTotal = unClassC.reduce((sum, c) => sum + c.flat, 0);
+  const remainingForA = Math.max(0, remainingBudget - unClassCTotal);
+  const sumTypical = unClassA.reduce((sum, c) => sum + c.typical, 0);
+
+  // Total Class C across all (overridden + not) for warning math
+  const classCTotal = checked.filter(c => c.cls === 'C')
+    .reduce((sum, c) => sum + (overrides[c.id] != null && overrides[c.id] !== '' ? Number(overrides[c.id]) : c.flat), 0);
+  const remaining = budget - classCTotal;
+  const classA = checked.filter(c => c.cls === 'A');
+  const classC = checked.filter(c => c.cls === 'C');
+
+  const allocations = {};
+
+  // Overridden items use the user-entered amount
+  overridden.forEach(c => {
+    allocations[c.id] = {
+      amount: Number(overrides[c.id]),
+      pct: budget > 0 ? (Number(overrides[c.id]) / budget) * 100 : 0,
+      typical: c.cls === 'C' ? c.flat : c.typical,
+      override: true
+    };
+  });
+
+  // Unoverridden Class C: take flat amounts
+  unClassC.forEach(c => {
+    allocations[c.id] = {
+      amount: c.flat,
+      pct: budget > 0 ? (c.flat / budget) * 100 : 0,
+      typical: c.flat,
+      override: false
+    };
+  });
+
+  // Unoverridden Class A: allocate remainingForA proportionally,
+  // round each to nearest ₱1,000, then absorb any rounding delta in
+  // the LARGEST allocation so the running total still equals the
+  // exact budget. Larger categories take rounding-UP, smaller ones
+  // get rounded-DOWN by sorting and giving the leftover (positive)
+  // to the biggest, or pulling the deficit (negative) from the biggest.
+  if (sumTypical > 0) {
+    if (remainingForA > 0) {
+      // First pass — compute raw amounts and rounded amounts
+      const rawAmounts = unClassA.map(c => {
+        const raw = (c.typical / sumTypical) * remainingForA;
+        return { id: c.id, raw, rounded: Math.round(raw / 1000) * 1000, typical: c.typical };
+      });
+      rawAmounts.forEach(item => {
+        allocations[item.id] = {
+          amount: item.rounded,
+          pct: budget > 0 ? (item.rounded / budget) * 100 : 0,
+          typical: item.typical,
+          override: false
+        };
+      });
+    } else {
+      unClassA.forEach(c => {
+        allocations[c.id] = { amount: 0, pct: 0, typical: c.typical, override: false };
+      });
+    }
+  }
+
+  // Force the running total to equal the budget exactly.
+  // Walk every allocation, sum it, take the delta from `budget`,
+  // and absorb the delta into the LARGEST unoverridden Class A item
+  // (so the smallest cleanly round; the dominant category swallows
+  // the leftover). If no Class A is unoverridden, fall back to the
+  // largest unoverridden Class C, then any allocation, in that order.
+  let runningTotal = 0;
+  Object.values(allocations).forEach(a => runningTotal += a.amount);
+  const delta = budget - runningTotal;
+  if (delta !== 0 && Object.keys(allocations).length > 0) {
+    // Find best absorber: largest unoverridden Class A first
+    const absorbers = unClassA.length > 0 ? unClassA :
+                      (unClassC.length > 0 ? unClassC :
+                      checked);
+    if (absorbers.length > 0) {
+      const sorted = [...absorbers].sort((a, b) =>
+        (allocations[b.id]?.amount || 0) - (allocations[a.id]?.amount || 0)
+      );
+      const target = allocations[sorted[0].id];
+      if (target) {
+        target.amount += delta;
+        target.pct = budget > 0 ? (target.amount / budget) * 100 : 0;
+      }
+    }
+  }
+
+  // Compute warnings
+  let warning = null;
+  if (checked.length === 0) {
+    warning = { type: 'info', text: 'Pick at least one category to see how your budget breaks down.' };
+  } else if (classCTotal > budget) {
+    warning = { type: 'over', text: `Flat-cost items alone (${fmtPHPFull(classCTotal)}) exceed your budget. Uncheck some, or stretch the budget.` };
+  } else if (classA.length === 0 && remaining > 0) {
+    // Only Class C selected and there's leftover
+    warning = { type: 'warn', text: `${fmtPHPFull(remaining)} leftover after flat add-ons. Add more categories, or reduce the budget for this scope.` };
+  } else if (classA.length === 1 && (allocations[classA[0].id].amount / budget > 0.85)) {
+    // One Class A item dominates everything
+    warning = {
+      type: 'info',
+      text: `Most of your budget goes to ${classA[0].name}. That's expected when one big anchor is selected — but worth confirming.`
+    };
+  }
+
+  // Total consumed (should always equal budget when at least one Class A selected, or sum of Class C otherwise)
+  let consumed = 0;
+  Object.values(allocations).forEach(a => consumed += a.amount);
+
+  const overshoot = classCTotal > budget;
+  const underfill = classA.length === 0 && remaining > 0;
+
+  return {
+    allocations,
+    classCTotal,
+    remaining,
+    consumed,
+    warning,
+    overshoot,
+    underfill,
+    valid: checked.length > 0 && !overshoot && (classA.length > 0 || classC.length > 0)
+  };
+}
+
+// ============ DECISION LOG ============
+function logDecision(type, detail = {}) {
+  state.decisions.unshift({ ts: new Date(), type, detail });
+}
+function relativeTime(ts) {
+  const diff = (Date.now() - ts.getTime()) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + ' min ago';
+  if (diff < 86400) return Math.floor(diff/3600) + ' hr ago';
+  return Math.floor(diff/86400) + ' days ago';
+}
+function formatDecision(d) {
+  switch (d.type) {
+    case 'mode_picked':       return `Picked ${d.detail.mode === 'guided' ? 'Guided (₱10K)' : 'DIY'} mode`;
+    case 'date_set':          return `Set wedding date · ${d.detail.label}`;
+    case 'pax_set':           return `Set guest count to ${d.detail.count}`;
+    case 'budget_path':       return `Picked budget path: ${d.detail.path === 'have-number' ? 'I have a number' : 'Recommend a vibe'}`;
+    case 'budget_set':        return `Set working budget to ${fmtPHPFull(d.detail.amount)} · derived ${d.detail.tier}`;
+    case 'budget_adjusted':   return `${d.detail.delta > 0 ? 'Increased' : 'Decreased'} budget by 10% to ${fmtPHPFull(d.detail.amount)}`;
+    case 'row_adjusted':      return `${d.detail.direction > 0 ? 'Increased' : 'Decreased'} ${d.detail.id} to ${fmtPHPFull(d.detail.amount)} · budget ${d.detail.delta > 0 ? '+' : ''}${fmtPHPFull(Math.abs(d.detail.delta))}`;
+    case 'tier_picked':       return `Picked ${d.detail.name} tier · ${fmtPHPFull(d.detail.amount)}`;
+    case 'coverage_set':      return `Selected ${d.detail.count} categories for ${fmtPHPFull(d.detail.budget)}`;
+    case 'distribution_set':  return `Reviewed distribution · ${d.detail.customCount} custom · ${d.detail.autoCount} auto`;
+    case 'stage_locked':      return `Locked ${d.detail.stage}`;
+    case 'stage_drafted':     return `Saved ${d.detail.stage} as draft`;
+    case 'stage_deferred':    return `Deferred ${d.detail.stage} for later`;
+    case 'pacing_set':        return `Set pacing: "${d.detail.pacing === 'slow' ? 'Take it slow' : 'Lock it now'}"`;
+    default:                  return d.type;
+  }
+}
+
+// ============ COUNTDOWN ============
+function getCountdown() {
+  const eff = getEffectiveDate();
+  if (!eff) return null;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const wedding = new Date(eff + 'T00:00');
+  return Math.floor((wedding - today) / (1000 * 60 * 60 * 24));
+}
+function getCountdownCopy(days) {
+  if (days === null) return { lead: 'Date TBD', sub: 'Pick or estimate a date so we can sequence everything around it.' };
+  const prefix = isDateEstimated() ? '~' : '';
+  if (days < 0) return { lead: 'Congratulations — you got married!', sub: "Here's the post-wedding tail." };
+  if (days === 0) return { lead: "Today's the day. 🎉", sub: 'Live coordination view ready.' };
+  if (days < 30) return { lead: `${prefix}${days} days away`, sub: 'Days away. Just final confirmations from here.' };
+  if (days < 90) return { lead: `${prefix}${days} days away`, sub: 'Final stretch. Time to confirm, not explore.' };
+  if (days < 180) return { lead: `${prefix}${days} days away`, sub: "It's go-time. Anchors should already be locked." };
+  if (days < 365) return { lead: `${prefix}${days} days away`, sub: "You're in the prime booking window. Anchors lock now while vendors are still open." };
+  if (days < 730) return { lead: `${prefix}${days} days away`, sub: "Comfortable runway. Anchors don't have to lock today, but they shouldn't drift past 6 months out." };
+  return { lead: `${prefix}${days} days away`, sub: 'Two-plus years. Tons of room to design first.' };
+}
+function getDefaultPacing(days) {
+  if (days === null) return 'slow';
+  if (days < 180) return 'lock';
+  return 'slow';
+}
+
+// Locking rule — couples can only commit to a stage when they're inside
+// the 1-year window. Beyond that, vendor pricing isn't reliable enough,
+// so only "Save as draft" is offered.
+function canLockIn() {
+  const days = getCountdown();
+  return days !== null && days >= 0 && days <= 365;
+}
+
+// ============ ROUTING ============
+function setScreen(name) {
+  state.screen = name;
+  render();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function restart() {
+  Object.assign(state, {
+    screen: 'plan-choice',
+    mode: null,
+    dateYear: '',
+    dateMonth: '',
+    dateDay: '',
+    dateTentative: false,
+    guestCount: 200,
+    budgetAmount: 0,
+    tier: null,
+    budgetAnchor: 0,
+    coverageSelected: [],
+    coverageOverrides: {},
+    stageStatus: {
+      foundation: 'not-started',
+      moodboard: 'not-started',
+      ceremony: 'not-started',
+      reception: 'not-started',
+      photo: 'not-started',
+      coordinator: 'not-started',
+      guests: 'not-started',
+      invitation: 'not-started'
+    },
+    pacing: null,
+    decisions: [],
+    editingFoundation: false
+  });
+  render();
+}
+
+// ============ RENDER ============
+function render() {
+  const body = document.getElementById('page-body');
+  const chromeStep = document.getElementById('chrome-step');
+  const app = document.getElementById('app');
+
+  // Wide layout for choice + today + lock-in + coverage + review + foundation-edit
+  if (['plan-choice', 'today', 's1-lock', 's1-coverage', 's1-review', 'foundation-edit'].includes(state.screen)) {
+    app.classList.add('wide');
+  } else {
+    app.classList.remove('wide');
+  }
+
+  let html = '';
+  let stepLabel = 'Plan Builder';
+
+  // In edit mode, suppress wizard progress dots and label as "Edit · ..."
+  const inEdit = state.editingFoundation;
+
+  switch (state.screen) {
+    case 'plan-choice':      stepLabel = 'Plan · Start';                                              html = renderPlanChoice(); break;
+    case 's1-when':          stepLabel = inEdit ? 'Edit · Wedding date'   : 'Stage 1 · 1 of 5';     html = (inEdit ? '' : renderProgress(0, 5)) + renderS1When(); break;
+    case 's1-pax':           stepLabel = inEdit ? 'Edit · Guest count'    : 'Stage 1 · 2 of 5';     html = (inEdit ? '' : renderProgress(1, 5)) + renderS1Pax(); break;
+    case 's1-budget':        stepLabel = inEdit ? 'Edit · Working budget' : 'Stage 1 · 3 of 5';     html = (inEdit ? '' : renderProgress(2, 5)) + renderS1Budget(); break;
+    case 's1-coverage':      stepLabel = inEdit ? 'Edit · Coverage'       : 'Stage 1 · 4 of 5';     html = (inEdit ? '' : renderProgress(3, 5)) + renderS1Coverage(); break;
+    case 's1-review':        stepLabel = inEdit ? 'Edit · Distribution'   : 'Stage 1 · 5 of 5';     html = (inEdit ? '' : renderProgress(4, 5)) + renderS1Review(); break;
+    case 's1-lock':          stepLabel = 'Stage 1 · Lock-in';                                       html = renderS1Lock(); break;
+    case 'foundation-edit':  stepLabel = 'Edit foundation';                                         html = renderFoundationEdit(); break;
+    case 'today':            stepLabel = 'Wedding Hub · Today';                                     html = renderToday(); break;
+    case 's2-moodboard':     stepLabel = 'Stage 2 · Mood Board';                                    html = renderS2MoodboardPlaceholder(); break;
+    case 'diy-mode':         stepLabel = 'DIY Mode';                                                html = renderDIYHolder(); break;
+  }
+
+  chromeStep.textContent = stepLabel;
+  body.innerHTML = html;
+  attachHandlers();
+}
+
+function renderProgress(activeIdx, total) {
+  let dots = '';
+  for (let i = 0; i < total; i++) {
+    let cls = 'progress-dot';
+    if (i < activeIdx) cls += ' done';
+    else if (i === activeIdx) cls += ' active';
+    dots += `<div class="${cls}"></div>`;
+  }
+  return `<div class="progress">${dots}</div>`;
+}
+
+// ============ SCREENS ============
+
+function renderPlanChoice() {
+  return `
+    <div style="text-align: center; max-width: 540px; margin: 0 auto 32px;">
+      <div class="eyebrow">TAYO Planner</div>
+      <h1 class="h1">How would you like to plan?</h1>
+      <p class="helper" style="margin-bottom: 0;">
+        Setnayan can guide you stage by stage with smart matching and bundle savings, or you can build it yourself from scratch. Either way, your event is yours — change modes any time.
+      </p>
+    </div>
+
+    <div class="choice-grid">
+      <div class="choice-card recommended" onclick="pickGuided()">
+        <div class="choice-eyebrow">TAYO Planner · Guided</div>
+        <div class="choice-name">Guided</div>
+        <div class="choice-tagline">Stage 1 sets your foundation. Stage 2+ is a menu — pick what to work on, in any order, anytime.</div>
+        <div class="choice-price">₱10,000</div>
+        <div class="choice-price-sub">300,000 tokens · paid once per event</div>
+        <ul class="choice-features">
+          <li>Stage-based progression with reversible lock-ins</li>
+          <li>Coverage checklist — your budget covers what you say it covers</li>
+          <li>Proportional allocation across selected categories</li>
+          <li>Smart vendor matching when V1.5 ships</li>
+          <li>Bundling cascade — venue auto-resolves cake, florals, etc.</li>
+          <li>Compare-with-DIY view at the end (free)</li>
+        </ul>
+        <button class="choice-cta primary">Start guided · ₱10,000</button>
+      </div>
+
+      <div class="choice-card" onclick="pickDIY()">
+        <div class="choice-eyebrow">Plan it yourself</div>
+        <div class="choice-name">DIY</div>
+        <div class="choice-tagline">Empty plan template. You enter every vendor, price, and decision manually. Full control, no guidance.</div>
+        <div class="choice-price">Free</div>
+        <div class="choice-price-sub">Use Setnayan's structure on your own</div>
+        <ul class="choice-features">
+          <li>Same category list and sequence</li>
+          <li>Manual vendor entry</li>
+          <li class="absent">No vendor matching or recommendations</li>
+          <li class="absent">No proportional budget allocation</li>
+          <li class="absent">No bundling cascade</li>
+          <li>Upgrade to Guided any time — ₱10,000</li>
+        </ul>
+        <button class="choice-cta secondary">Start DIY · Free</button>
+      </div>
+    </div>
+  `;
+}
+
+// --- Stage 1.1 — When (progressive precision: year required, month + day optional)
+function renderS1When() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const currentYear = new Date().getFullYear();
+  const yearOpts = [currentYear, currentYear+1, currentYear+2, currentYear+3]
+    .map(y => `<option value="${y}" ${state.dateYear == String(y) ? 'selected' : ''}>${y}</option>`).join('');
+  const monthOpts = monthNames
+    .map((m, i) => `<option value="${i}" ${state.dateMonth == String(i) ? 'selected' : ''}>${m}</option>`).join('');
+
+  const monthDisabled = !state.dateYear;
+  const dayDisabled = !state.dateYear || state.dateMonth === '';
+  const prec = getDatePrecision();
+  const showTentative = prec === 'full';
+  const tentativeChecked = state.dateTentative ? 'checked' : '';
+
+  // Validation: effective date must be tomorrow or later
+  const eff = getEffectiveDate();
+  let valid = false;
+  let validationMsg = '';
+  if (eff) {
+    const tom = tomorrowISO();
+    if (eff < tom) {
+      validationMsg = 'That date is in the past or today. Pick something later.';
+    } else {
+      valid = true;
+    }
+  }
+
+  // Description of what got picked
+  const dateLabel = getDateLabel();
+  const summaryText = prec === 'none' ? '' : (prec === 'full' && !state.dateTentative
+    ? `Locked: <b>${dateLabel}</b>`
+    : `Working with: <b>${dateLabel}</b> · we'll use this for sequencing`);
+
+  // Compute days out for the >1 year advisory
+  let daysOut = null;
+  if (eff) {
+    const today0 = new Date();
+    today0.setHours(0,0,0,0);
+    daysOut = Math.floor((new Date(eff + 'T00:00') - today0) / (1000 * 60 * 60 * 24));
+  }
+  const advisoryHTML = (valid && daysOut !== null && daysOut > 365)
+    ? `<div class="date-advisory">
+         <span class="date-advisory-icon">📅</span>
+         <div>
+           <b>More than a year out.</b> Vendor prices typically re-quote each quarter. <b>Once you book a specific vendor package, that price locks for you</b> regardless of how far out the date is. The plan-level <b>Lock it in</b> action opens within 1 year of your wedding; until then, foundation decisions save as drafts.
+         </div>
+       </div>`
+    : '';
+
+  return `
+    <div class="eyebrow">Stage 1 · Foundation · 1 of 4</div>
+    <h1 class="h1">When's your wedding?</h1>
+    <p class="helper">Even just a <b>year</b> is enough to start. Add the <b>month</b> when you know it. Lock in the <b>day</b> when you've decided. You can refine any time.</p>
+
+    <div class="date-fields">
+      <div class="date-field">
+        <label class="field-label">Year</label>
+        <select id="date-year" onchange="setDateField('year', this.value)">
+          <option value="">Pick year…</option>
+          ${yearOpts}
+        </select>
+      </div>
+      <div class="date-field">
+        <label class="field-label">Month <span style="text-transform: none; color: var(--ink-faint); letter-spacing: 0;">(optional)</span></label>
+        <select id="date-month" onchange="setDateField('month', this.value)" ${monthDisabled ? 'disabled' : ''}>
+          <option value="">— Any month —</option>
+          ${monthOpts}
+        </select>
+      </div>
+      <div class="date-field">
+        <label class="field-label">Day <span style="text-transform: none; color: var(--ink-faint); letter-spacing: 0;">(optional)</span></label>
+        <input type="number" id="date-day" value="${state.dateDay}" min="1" max="31" placeholder="—" oninput="setDateField('day', this.value)" ${dayDisabled ? 'disabled' : ''} />
+      </div>
+    </div>
+
+    ${showTentative ? `
+      <div class="tentative-toggle">
+        <input type="checkbox" id="tentative-check" ${tentativeChecked} onchange="setTentative(this.checked)" />
+        <label for="tentative-check">
+          <b>This date isn't finalized yet</b> — could still change
+        </label>
+      </div>
+    ` : ''}
+
+    ${summaryText ? `<div class="date-summary">${summaryText}</div>` : ''}
+    ${advisoryHTML}
+    ${validationMsg ? `<div class="date-error">${validationMsg}</div>` : ''}
+
+    <div class="cta-row split">
+      <button class="btn-back" onclick="${state.editingFoundation ? "exitFoundationEdit()" : "setScreen('plan-choice')"}">← ${state.editingFoundation ? 'Cancel' : 'Back'}</button>
+      <button class="btn primary" id="next-btn" ${valid ? '' : 'disabled'} onclick="advanceFromS1When()">${state.editingFoundation ? 'Save changes' : 'Next →'}</button>
+    </div>
+  `;
+}
+
+// --- Stage 1.2 — Pax
+function renderS1Pax() {
+  return `
+    <div class="eyebrow">Stage 1 · Foundation · 2 of 4</div>
+    <h1 class="h1">How many pax?</h1>
+    <p class="helper">Approximate is fine — adjust later. Drives <b>per-head budget math</b> and which venues fit your capacity.</p>
+
+    <div class="guests-control">
+      <button class="stepper-btn" onclick="adjustGuests(-10)">−</button>
+      <input type="number" class="guests-input" id="guests-input" value="${state.guestCount}" min="1" max="2000" oninput="setGuestsFromInput(this)" />
+      <button class="stepper-btn" onclick="adjustGuests(10)">+</button>
+    </div>
+    <div class="guests-label">guests · ± for ±10, type to override</div>
+
+    <div class="cta-row split">
+      <button class="btn-back" onclick="${state.editingFoundation ? "exitFoundationEdit()" : "setScreen('s1-when')"}">← ${state.editingFoundation ? 'Cancel' : 'Back'}</button>
+      <button class="btn primary" onclick="advanceFromS1Pax()">${state.editingFoundation ? 'Save changes' : 'Next →'}</button>
+    </div>
+  `;
+}
+
+// --- Stage 1.3 — Working budget (single input · tier auto-derived)
+function renderS1Budget() {
+  const valid = state.budgetAmount > 0;
+
+  return `
+    <div class="eyebrow">Stage 1 · Foundation · 3 of 5</div>
+    <h1 class="h1">What's your working budget?</h1>
+    <p class="helper">Enter the amount you're planning to work with. We'll show you what tier that lands at for <b>${state.guestCount} guests</b>. You can adjust later — nothing is final.</p>
+
+    <label class="field-label">Working budget (₱)</label>
+    <input type="text" inputmode="numeric" id="budget-input" value="${state.budgetAmount ? state.budgetAmount.toLocaleString('en-US') : ''}" placeholder="${(state.guestCount * 1000).toLocaleString('en-US')}" oninput="onBudgetInput(this)" autocomplete="off" />
+    <p style="font-size: 11px; color: var(--ink-faint); margin-top: 8px;">Type the full peso amount · the placeholder shows a typical starting point (${state.guestCount} × ₱1,000) — couples usually exceed this.</p>
+
+    <div id="tier-callout-zone">
+      ${renderTierCalloutHTML()}
+    </div>
+
+    <div class="cta-row split">
+      <button class="btn-back" onclick="${state.editingFoundation ? "exitFoundationEdit()" : "setScreen('s1-pax')"}">← ${state.editingFoundation ? 'Cancel' : 'Back'}</button>
+      <button class="btn primary" id="next-btn" ${valid ? '' : 'disabled'} onclick="advanceFromS1Budget()">${state.editingFoundation ? 'Save changes' : 'Next →'}</button>
+    </div>
+  `;
+}
+
+function renderTierCalloutHTML() {
+  const budget = state.budgetAmount;
+  const guests = state.guestCount;
+  if (!budget || !guests) return '';
+  const perHead = budget / guests;
+  const perHeadLabel = `<b>~${fmtPHPFull(Math.round(perHead))}/head</b>`;
+  const mathLine = `${fmtPHPFull(budget)} ÷ ${guests} guests = ${perHeadLabel}`;
+
+  // Honest, non-judgmental feasibility framing.
+  // No evaluative tier labels — we don't decide what's "simple" or "extravagant" for the couple.
+  // We only call out the one band where execution is genuinely hard (food alone breaks down).
+
+  if (perHead >= 2000) {
+    // Comfortable PH-typical range — just show the math, no commentary
+    return `
+      <div class="tier-callout" style="margin-top: 14px;">
+        <div class="tier-callout-icon">✓</div>
+        <div class="tier-callout-text">${mathLine}</div>
+      </div>
+    `;
+  }
+
+  if (perHead >= 500) {
+    // Below typical but workable
+    return `
+      <div class="tier-callout severity-info" style="margin-top: 14px;">
+        <div class="tier-callout-icon">·</div>
+        <div class="tier-callout-text">
+          ${mathLine}<br>
+          Below the typical PH wedding range (most start around <b>₱2,000/head</b>). Achievable with restaurant-style receptions, home venues, or a focused vendor list.
+        </div>
+      </div>
+    `;
+  }
+
+  if (perHead >= 100) {
+    // Tight but achievable — civil + home-cooked / fast-food territory
+    return `
+      <div class="tier-callout severity-info" style="margin-top: 14px;">
+        <div class="tier-callout-icon">·</div>
+        <div class="tier-callout-text">
+          ${mathLine}<br>
+          Tight but real — works as a <b>civil ceremony with a home-cooked or fast-food reception</b> for close family. Most non-essential categories won't fit at this per-head; focus on what matters most to you.
+        </div>
+      </div>
+    `;
+  }
+
+  // Below ₱100/head — even feeding people becomes the constraint
+  return `
+    <div class="tier-callout severity-warn" style="margin-top: 14px;">
+      <div class="tier-callout-icon">⚠</div>
+      <div class="tier-callout-text">
+        ${mathLine}<br>
+        Even bare-bones food is hard to source at this per-head. Backyard receptions with home-cooked meals usually land around <b>₱150–200/head</b> minimum. Consider a smaller guest list or a higher budget.
+      </div>
+    </div>
+  `;
+}
+
+// --- Stage 1.4 — Coverage checklist
+function renderS1Coverage() {
+  const result = computeAllocations(state.coverageSelected, state.budgetAmount);
+  const fillPct = state.budgetAmount > 0 ? Math.min(100, (result.consumed / state.budgetAmount) * 100) : 0;
+  const fillCls = result.overshoot ? 'over' : (fillPct < 100 && state.coverageSelected.length > 0 ? 'warn' : '');
+
+  // Group rendering — ordered most-important to least-important
+  const anchorCats = CATEGORIES.filter(c => c.group === 'anchor');
+  const importantCats = CATEGORIES.filter(c => c.group === 'important');
+  const entertainmentCats = CATEGORIES.filter(c => c.group === 'entertainment');
+  const traditionCats = CATEGORIES.filter(c => c.group === 'tradition');
+  const cocktailCats = CATEGORIES.filter(c => c.group === 'cocktail');
+
+  const renderGroup = (cats, sectionTitle, sectionDesc, groupId) => {
+    const sectionIds = cats.map(c => c.id);
+    const allSel = sectionIds.length > 0 && sectionIds.every(id => state.coverageSelected.includes(id));
+    const someSel = sectionIds.some(id => state.coverageSelected.includes(id));
+    const sectionBtnLabel = allSel ? 'Clear section' : 'Select section';
+    let rowsHTML = '';
+    cats.forEach(c => {
+      const checked = state.coverageSelected.includes(c.id);
+      const alloc = result.allocations[c.id];
+
+      // Show the actual allotted amount on checked rows. Unchecked rows
+      // show ₱0 — they're outside the scope of THIS budget. The full budget
+      // always splits across only the checked categories.
+      let allocText;
+      let allocClass = '';
+      if (alloc) {
+        allocText = fmtPHPFull(alloc.amount);
+      } else {
+        allocText = '₱0';
+        allocClass = 'muted';
+      }
+
+      // Tight-budget feasibility check: if the allocated amount is below
+      // the lowest realistic vendor floor for this category, surface a
+      // respectful note. Doesn't block — couple can still proceed.
+      // Fires for any checked row whose allocation falls below the floor,
+      // including ₱0 (which happens when proportional share rounds down past
+      // the rounding threshold and another row absorbs the remainder).
+      const allocAmount = alloc ? alloc.amount : 0;
+      const tooLow = checked && c.vendorMin && allocAmount < c.vendorMin;
+      const tightNote = tooLow
+        ? `<span class="cov-warn">⚠ Tight for this section — typical floor is around <b>${fmtPHPFull(c.vendorMin)}</b>. You can adjust the budget or refocus later.</span>`
+        : '';
+
+      const weddingTag = c.weddingOnly
+        ? '<span class="wedding-tag" title="This vendor exists only for weddings — won\'t appear in other event types">Wedding-only</span>'
+        : '';
+
+      rowsHTML += `
+        <div class="cov-row ${checked ? 'checked' : ''} ${tooLow ? 'tight' : ''}" onclick="toggleCoverage('${c.id}')">
+          <div class="cov-checkbox">${checked ? '✓' : ''}</div>
+          <div class="cov-icon">${c.icon}</div>
+          <div class="cov-name">
+            ${c.name}${weddingTag}
+            ${c.meta ? `<span class="meta">${c.meta}</span>` : ''}
+            ${tightNote}
+          </div>
+          <div class="cov-alloc ${allocClass}">${allocText}</div>
+        </div>
+      `;
+    });
+    return `
+      <div class="coverage-section">
+        <div class="coverage-section-h">
+          <div class="coverage-section-h-text">
+            <span>${sectionTitle}</span>
+            <span class="desc">${sectionDesc}</span>
+          </div>
+          <button class="section-toggle-btn ${someSel && !allSel ? 'partial' : ''}" onclick="toggleSection('${groupId}')">${sectionBtnLabel}</button>
+        </div>
+        ${rowsHTML}
+      </div>
+    `;
+  };
+
+  let warningHTML = '';
+  if (result.warning) {
+    const cls = result.warning.type === 'over' ? '' :
+                result.warning.type === 'warn' ? 'amber' :
+                result.warning.type === 'info' ? 'green' : '';
+    warningHTML = `<div class="coverage-warning ${cls}">${result.warning.text}</div>`;
+  }
+
+  return `
+    <div class="eyebrow">Stage 1 · Foundation · 4 of 5</div>
+    <h1 class="h1">What does this budget cover?</h1>
+    <p class="helper">Check the categories your <b>${fmtPHPFull(state.budgetAmount)}</b> should cover. The full amount is split across <b>only the boxes you check</b> — unchecked categories sit outside this budget and stay at ₱0. You can come back and adjust later.</p>
+
+    <div class="coverage-summary">
+      <div class="coverage-summary-row">
+        <div>
+          <div class="coverage-summary-budget">${fmtPHPFull(result.consumed)} <span style="font-family: 'DM Mono', monospace; color: var(--ink-faint); font-size: 13px;">of ${fmtPHPFull(state.budgetAmount)}</span></div>
+          <div class="coverage-summary-meta">${state.coverageSelected.length} categories selected</div>
+        </div>
+        <div class="budget-adjust">
+          <button class="cov-toolbar-btn" onclick="selectAllCoverage()">Select all</button>
+          <button class="cov-toolbar-btn" onclick="clearAllCoverage()">Clear all</button>
+        </div>
+      </div>
+      <div class="coverage-summary-bar">
+        <div class="coverage-summary-fill ${fillCls}" style="width: ${fillPct}%;"></div>
+      </div>
+      ${warningHTML}
+    </div>
+
+    ${renderGroup(anchorCats, '01 · Anchor decisions', 'the must-haves — venue, photo, attire, coordinator, rings', 'anchor')}
+    ${renderGroup(importantCats, '02 · Day-of essentials', 'design, decor, transportation, paper, drone', 'important')}
+    ${renderGroup(entertainmentCats, '03 · Music + Entertainment', 'choir, band, DJ, special performers, dance prep', 'entertainment')}
+    ${renderGroup(traditionCats, '04 · Tradition + family', 'Filipino wedding specifics — entourage attire and gifts', 'tradition')}
+    ${renderGroup(cocktailCats, '05 · Cocktail hour', 'sub-event · mix and match the vendors you want', 'cocktail')}
+
+    <div class="cta-row split">
+      <button class="btn-back" onclick="${state.editingFoundation ? "exitFoundationEdit()" : "setScreen('s1-budget')"}">← ${state.editingFoundation ? 'Cancel' : 'Back'}</button>
+      <button class="btn primary" ${state.coverageSelected.length > 0 ? '' : 'disabled'} onclick="advanceFromS1Coverage()">${state.editingFoundation ? 'Save changes' : 'Next →'}</button>
+    </div>
+  `;
+}
+
+// --- Stage 1.5 — Review and adjust the distribution
+function renderS1Review() {
+  const result = computeAllocations(state.coverageSelected, state.budgetAmount, state.coverageOverrides);
+  const fillPct = state.budgetAmount > 0 ? Math.min(100, (result.consumed / state.budgetAmount) * 100) : 0;
+  const fillCls = result.overshoot ? 'over' : (fillPct < 100 && result.consumed < state.budgetAmount * 0.99 ? 'warn' : '');
+
+  const checkedCats = CATEGORIES.filter(c => state.coverageSelected.includes(c.id));
+
+  // Sort by group: big anchors first, mid, then flat
+  const groupOrder = { 'big': 0, 'mid': 1, 'flat': 2 };
+  checkedCats.sort((a, b) => groupOrder[a.group] - groupOrder[b.group]);
+
+  // Count overrides
+  const overrideCount = Object.keys(state.coverageOverrides)
+    .filter(k => state.coverageSelected.includes(k) && state.coverageOverrides[k] !== '' && state.coverageOverrides[k] != null)
+    .length;
+
+  let rowsHTML = '';
+  checkedCats.forEach(c => {
+    const alloc = result.allocations[c.id];
+    const isOverridden = alloc && alloc.override;
+    const autoAmount = alloc ? alloc.amount : 0;
+    const overrideRaw = state.coverageOverrides[c.id] != null ? state.coverageOverrides[c.id] : '';
+    const overrideValue = overrideRaw === '' ? '' : Number(overrideRaw).toLocaleString('en-US');
+    const placeholder = Math.round(autoAmount).toLocaleString('en-US');
+
+    // Tight-budget check (mirrors Step 4 logic) — flag if the resolved
+    // amount on this row is below the realistic vendor floor.
+    // Fires for any selected row, including when the allocation rounds to ₱0.
+    const reviewAmount = alloc ? alloc.amount : 0;
+    const reviewTooLow = c.vendorMin && reviewAmount < c.vendorMin;
+    const reviewTightNote = reviewTooLow
+      ? `<span class="cov-warn">⚠ Tight — typical floor is around <b>${fmtPHPFull(c.vendorMin)}</b>. Bump this row or stretch the budget.</span>`
+      : '';
+
+    const reviewWeddingTag = c.weddingOnly
+      ? '<span class="wedding-tag">Wedding-only</span>'
+      : '';
+
+    rowsHTML += `
+      <div class="review-row ${isOverridden ? 'overridden' : ''} ${reviewTooLow ? 'tight' : ''}">
+        <div class="review-icon">${c.icon}</div>
+        <div class="review-name">
+          ${c.name}${reviewWeddingTag}
+          ${c.meta ? `<span class="review-meta">${c.meta}</span>` : ''}
+          ${reviewTightNote}
+        </div>
+        <div class="review-controls">
+          <button class="adjust-btn row" onclick="adjustRow('${c.id}', -1)" title="Decrease this vendor (÷ 1.1) · grows the total budget by the saved amount">−</button>
+          <div class="review-input-wrap">
+            <span class="review-currency">₱</span>
+            <input
+              type="text"
+              inputmode="numeric"
+              value="${overrideValue}"
+              placeholder="${placeholder}"
+              data-cat="${c.id}"
+              oninput="setOverride('${c.id}', this)"
+              class="review-input ${isOverridden ? 'overridden' : ''}"
+              autocomplete="off"
+            />
+            <button class="review-clear" onclick="clearOverride('${c.id}')" title="Reset to auto" ${overrideValue === '' ? 'style="visibility: hidden;"' : ''}>✕</button>
+          </div>
+          <button class="adjust-btn row" onclick="adjustRow('${c.id}', 1)" title="Increase this vendor (× 1.1) · the total budget grows so other rows are unaffected">+</button>
+        </div>
+      </div>
+    `;
+  });
+
+  const overrideTotal = Object.keys(state.coverageOverrides)
+    .filter(k => state.coverageSelected.includes(k) && state.coverageOverrides[k] !== '' && state.coverageOverrides[k] != null)
+    .reduce((sum, k) => sum + Number(state.coverageOverrides[k]), 0);
+  const autoTotal = result.consumed - overrideTotal;
+  const blanksCount = state.coverageSelected.length - overrideCount;
+
+  let warningHTML = '';
+  if (result.overshoot) {
+    warningHTML = `<div class="coverage-warning">Your overrides total ${fmtPHPFull(overrideTotal)} which exceeds your ${fmtPHPFull(state.budgetAmount)} budget. Reduce some amounts or stretch the budget.</div>`;
+  } else if (overrideTotal >= state.budgetAmount && blanksCount > 0) {
+    warningHTML = `<div class="coverage-warning amber">Your overrides already eat the whole budget. The ${blanksCount} blank ${blanksCount === 1 ? 'item' : 'items'} will get ₱0 unless you reduce some overrides.</div>`;
+  }
+
+  return `
+    <div class="eyebrow">Stage 1 · Foundation · 5 of 5</div>
+    <h1 class="h1">Review the distribution</h1>
+    <p class="helper">Setnayan split your <b>${fmtPHPFull(state.budgetAmount)}</b> across the ${state.coverageSelected.length} categories you picked. <b>Type a different amount</b> on any row to override — leave blank to let Setnayan auto-distribute proportionally for what's left.</p>
+
+    <div class="coverage-summary">
+      <div class="coverage-summary-row">
+        <div>
+          <div class="coverage-summary-budget">${fmtPHPFull(result.consumed)} <span style="font-family: 'DM Mono', monospace; color: var(--ink-faint); font-size: 13px;">of ${fmtPHPFull(state.budgetAmount)}</span></div>
+          <div class="coverage-summary-meta">${overrideCount} custom · ${blanksCount} auto-distributed</div>
+        </div>
+        <div class="budget-adjust">
+          <button class="adjust-btn" onclick="adjustBudget(-0.10)" title="Decrease total budget (×÷ 1.1)">−</button>
+          <button class="adjust-btn" onclick="adjustBudget(0.10)" title="Increase total budget (×1.1)">+</button>
+        </div>
+      </div>
+      <div class="coverage-summary-bar">
+        <div class="coverage-summary-fill ${fillCls}" style="width: ${fillPct}%;"></div>
+      </div>
+      ${warningHTML}
+    </div>
+
+    <div class="review-list">
+      ${rowsHTML}
+    </div>
+
+    <div class="cta-row split">
+      <button class="btn-back" onclick="${state.editingFoundation ? "exitFoundationEdit()" : "setScreen('s1-coverage')"}">← ${state.editingFoundation ? 'Cancel' : 'Back to coverage'}</button>
+      <button class="btn primary" onclick="advanceFromS1Review()">${state.editingFoundation ? 'Save changes' : 'Continue →'}</button>
+    </div>
+  `;
+}
+
+// --- Stage 1 end — Lock-in choice (gated by 1-year window)
+function renderS1Lock() {
+  const lockable = canLockIn();
+  const days = getCountdown();
+
+  const lockCard = lockable
+    ? `<div class="lock-option primary" onclick="finishStage1('locked')">
+         <div class="lock-option-icon">🔒</div>
+         <div class="lock-option-name">Lock it in</div>
+         <div class="lock-option-sub">Commit as your decision and continue to Stage 2. Still reversible later — locking just marks it as a confident choice in your timeline.</div>
+       </div>`
+    : `<div class="lock-option locked-out" onclick="return false;">
+         <div class="lock-option-icon" style="opacity: 0.4;">🔒</div>
+         <div class="lock-option-name" style="opacity: 0.6;">Lock it in <span style="font-size: 11px; font-family: 'DM Mono', monospace; color: var(--ink-faint); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; margin-left: 6px;">unlocks within 1 year</span></div>
+         <div class="lock-option-sub">Final plan lock-in opens when you're within <b>365 days</b> of your wedding (you're at ${days === null ? '—' : days + ' days'}). Vendor prices shift quarterly until then; saving as a draft lets you keep iterating without committing the whole plan to a number that's likely to move.</div>
+       </div>`;
+
+  return `
+    <div class="lock-banner">
+      <div class="lock-banner-icon">✓</div>
+      <div class="lock-banner-h">Stage 1 — Foundation complete</div>
+      <div class="lock-banner-sub">${getDateLabel()} · ${state.guestCount} guests · ${fmtPHPFull(state.budgetAmount)} working budget · ${state.coverageSelected.length} categories</div>
+    </div>
+
+    <p class="helper" style="text-align: center; max-width: 580px; margin: 0 auto 28px;">
+      ${lockable
+        ? "Foundation is saved either way. The difference is whether you commit it as a decision or keep it open for further edits."
+        : "You can save your foundation as a draft now and come back anytime. <b>Final lock-in opens within 1 year of your wedding date</b> — before that, vendor pricing isn't reliable enough to commit a plan to."}
+    </p>
+
+    <div class="lock-options two-col">
+      ${lockCard}
+      <div class="lock-option ${lockable ? '' : 'primary'}" onclick="finishStage1('drafted')">
+        <div class="lock-option-icon">📝</div>
+        <div class="lock-option-name">Save as draft</div>
+        <div class="lock-option-sub">${lockable
+          ? "Keep editable and continue. Use this when you're not 100% sure yet — comes back to \"Edit foundation\" as the obvious next move."
+          : "The recommended choice while you're more than a year out. Foundation saves, you continue to other stages, and the plan stays editable."}</div>
+      </div>
+    </div>
+
+    <div class="cta-row" style="justify-content: center;">
+      <button class="btn-back" onclick="setScreen('s1-review')">← Back to review</button>
+    </div>
+  `;
+}
+
+// --- Today screen / Stage 2+ menu
+function renderToday() {
+  const days = getCountdown();
+  const countdown = getCountdownCopy(days);
+  const dateLabel = getDateLabel();
+
+  // Default pacing if not set
+  if (state.pacing === null) {
+    state.pacing = getDefaultPacing(days);
+  }
+  const slowSel = state.pacing === 'slow' ? 'selected' : '';
+  const lockSel = state.pacing === 'lock' ? 'selected' : '';
+
+  // Sort stages by pacing + status
+  const sortedStages = [...STAGES].sort((a, b) => {
+    if (state.pacing === 'lock') {
+      const aPriority = a.priority === 'high' ? 0 : 1;
+      const bPriority = b.priority === 'high' ? 0 : 1;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+    } else {
+      // slow → mood board first, vendors after
+      if (a.id === 'moodboard') return -1;
+      if (b.id === 'moodboard') return 1;
+    }
+    return 0;
+  });
+
+  let stageCardsHTML = '';
+  sortedStages.forEach(s => {
+    const status = state.stageStatus[s.id] || 'not-started';
+    const statusLabels = {
+      'not-started': 'Not started',
+      'draft': 'Draft',
+      'locked': 'Locked',
+      'skipped': 'Skipped'
+    };
+    const isPriority = state.pacing === 'lock' && s.priority === 'high';
+    const clickable = s.id === 'moodboard';
+    const onclick = clickable ? `onclick="openStage2('${s.id}')"` : '';
+    stageCardsHTML += `
+      <div class="stage-card ${isPriority ? 'priority' : ''}" ${onclick} ${clickable ? '' : 'style="cursor: default;"'}>
+        <div class="stage-card-head">
+          <div class="stage-card-icon">${s.icon}</div>
+          <div class="stage-card-name">${s.name}</div>
+        </div>
+        <div class="stage-card-sub">${s.sub}</div>
+        <div class="stage-card-foot">
+          <span class="stage-card-status ${status}">${statusLabels[status]}</span>
+          <span class="stage-card-time">${clickable ? (status === 'not-started' ? 'Open →' : 'Resume →') : 'V1.5 →'}</span>
+        </div>
+      </div>
+    `;
+  });
+
+  // Recent decisions
+  let decisionsHTML = '';
+  if (state.decisions.length === 0) {
+    decisionsHTML = '<div class="decisions-empty">No decisions logged yet.</div>';
+  } else {
+    state.decisions.slice(0, 7).forEach(d => {
+      const isLock = d.type === 'stage_locked';
+      decisionsHTML += `
+        <div class="decision-row">
+          <div class="decision-text"><span class="dot ${isLock ? 'locked' : ''}">●</span>${formatDecision(d)}</div>
+          <div class="decision-time">${relativeTime(d.ts)}</div>
+        </div>
+      `;
+    });
+  }
+
+  const tier = state.tier ? TIERS[state.tier - 1] : null;
+  const perHead = state.budgetAmount && state.guestCount ? Math.round(state.budgetAmount / state.guestCount) : 0;
+  const foundationStatus = state.stageStatus.foundation;
+  const foundationStatusLabel = foundationStatus === 'locked' ? '✓ Locked'
+    : foundationStatus === 'draft' ? '📝 Draft'
+    : '— Not started';
+
+  return `
+    <div class="countdown-banner">
+      <div class="countdown-lead">${countdown.lead}</div>
+      <div class="countdown-date">${dateLabel}${isDateEstimated() ? ' · estimated' : ''}</div>
+      <div class="countdown-sub">${countdown.sub}</div>
+      <div class="pacing-toggle">
+        <div class="pacing-prompt">How do you want to pace this?</div>
+        <div class="pacing-options">
+          <button class="pacing-btn ${slowSel}" onclick="setPacing('slow')">Take it slow</button>
+          <button class="pacing-btn ${lockSel}" onclick="setPacing('lock')">Lock it now</button>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="today-h1">What do you want to do today?</h1>
+
+    <div class="stage-grid">
+      ${stageCardsHTML}
+    </div>
+
+    <div class="plan-mini">
+      <div class="plan-mini-h">
+        <span>Your foundation · ${foundationStatusLabel}</span>
+        <a class="plan-mini-link" href="#" onclick="startEditingFoundation(); return false;">Edit foundation →</a>
+      </div>
+      <div class="plan-mini-grid">
+        <div>
+          <div class="plan-mini-item-label">Working budget</div>
+          <div class="plan-mini-item-value">${fmtPHPFull(state.budgetAmount)}</div>
+        </div>
+        <div>
+          <div class="plan-mini-item-label">Per head</div>
+          <div class="plan-mini-item-value">~${fmtPHPFull(perHead)}</div>
+        </div>
+        <div>
+          <div class="plan-mini-item-label">Tier</div>
+          <div class="plan-mini-item-value">${tier ? tier.name : '—'}</div>
+        </div>
+        <div>
+          <div class="plan-mini-item-label">Guests</div>
+          <div class="plan-mini-item-value">${state.guestCount}</div>
+        </div>
+        <div>
+          <div class="plan-mini-item-label">Coverage</div>
+          <div class="plan-mini-item-value">${state.coverageSelected.length} categories</div>
+        </div>
+        <div>
+          <div class="plan-mini-item-label">Mode</div>
+          <div class="plan-mini-item-value">Guided · ₱10K</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="decisions-section">
+      <div class="decisions-h">
+        <span>Recent decisions</span>
+        <span class="decisions-h-count">${state.decisions.length} logged</span>
+      </div>
+      ${decisionsHTML}
+    </div>
+
+    <div class="cta-row split">
+      <button class="btn-back" onclick="setScreen('s1-lock')">← Back to lock-in</button>
+      <button class="btn secondary" onclick="restart()">Start over</button>
+    </div>
+  `;
+}
+
+// --- Foundation edit picker — pick which Stage 1 part to update
+function renderFoundationEdit() {
+  const t = state.tier ? TIERS[state.tier - 1] : null;
+  const dateLabel = getDateLabel();
+  const budgetLabel = state.budgetAmount > 0 ? fmtPHPFull(state.budgetAmount) : 'Not set';
+  const coverageLabel = state.coverageSelected.length > 0
+    ? `${state.coverageSelected.length} ${state.coverageSelected.length === 1 ? 'category' : 'categories'} selected`
+    : 'None selected';
+  const overrideCount = Object.keys(state.coverageOverrides)
+    .filter(k => state.coverageSelected.includes(k) && state.coverageOverrides[k] !== '' && state.coverageOverrides[k] != null)
+    .length;
+  const distributionLabel = overrideCount > 0
+    ? `${overrideCount} custom · ${state.coverageSelected.length - overrideCount} auto`
+    : 'All auto-distributed';
+  const status = state.stageStatus.foundation;
+  const statusLabel = status === 'locked' ? '🔒 Locked' : status === 'draft' ? '📝 Draft' : '— Not started';
+
+  return `
+    <div style="margin-bottom: 24px; display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
+      <div>
+        <div class="eyebrow">Editing your foundation</div>
+        <h1 class="h1" style="margin-bottom: 8px;">What do you want to update?</h1>
+        <p class="helper" style="margin-bottom: 0;">Each part can be edited independently. Your other choices stay as they are. Saving a change returns you here so you can keep editing or finish.</p>
+      </div>
+      <div style="font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-faint); white-space: nowrap; padding-top: 6px;">
+        Stage 1 · ${statusLabel}
+      </div>
+    </div>
+
+    <div class="foundation-edit-grid">
+      <div class="edit-card" onclick="editFoundationPart('s1-when')">
+        <div class="edit-card-icon">📅</div>
+        <div class="edit-card-body">
+          <div class="edit-card-name">Wedding date</div>
+          <div class="edit-card-value">${dateLabel}</div>
+        </div>
+        <div class="edit-card-arrow">Edit →</div>
+      </div>
+
+      <div class="edit-card" onclick="editFoundationPart('s1-pax')">
+        <div class="edit-card-icon">👥</div>
+        <div class="edit-card-body">
+          <div class="edit-card-name">Guest count</div>
+          <div class="edit-card-value">${state.guestCount} guests</div>
+        </div>
+        <div class="edit-card-arrow">Edit →</div>
+      </div>
+
+      <div class="edit-card" onclick="editFoundationPart('s1-budget')">
+        <div class="edit-card-icon">💰</div>
+        <div class="edit-card-body">
+          <div class="edit-card-name">Working budget</div>
+          <div class="edit-card-value">${budgetLabel}${t ? ` · ${t.name}` : ''}</div>
+        </div>
+        <div class="edit-card-arrow">Edit →</div>
+      </div>
+
+      <div class="edit-card" onclick="editFoundationPart('s1-coverage')">
+        <div class="edit-card-icon">☑</div>
+        <div class="edit-card-body">
+          <div class="edit-card-name">Coverage selection</div>
+          <div class="edit-card-value">${coverageLabel}</div>
+        </div>
+        <div class="edit-card-arrow">Edit →</div>
+      </div>
+
+      <div class="edit-card" onclick="editFoundationPart('s1-review')">
+        <div class="edit-card-icon">⚙</div>
+        <div class="edit-card-body">
+          <div class="edit-card-name">Distribution review</div>
+          <div class="edit-card-value">${distributionLabel}</div>
+        </div>
+        <div class="edit-card-arrow">Edit →</div>
+      </div>
+    </div>
+
+    <div class="cta-row split" style="margin-top: 28px;">
+      <button class="btn-back" onclick="exitFoundationEdit()">← Back to Today</button>
+      <button class="btn primary" onclick="exitFoundationEdit()">Done editing</button>
+    </div>
+  `;
+}
+
+// --- Stage 2 placeholder · Mood Board (demonstrates pattern continuity)
+function renderS2MoodboardPlaceholder() {
+  const status = state.stageStatus.moodboard || 'not-started';
+  const statusLabel = status === 'locked' ? '✓ Locked' : status === 'draft' ? '📝 Draft' : '— Not started';
+
+  return `
+    <div class="eyebrow">Stage 2 · Mood Board</div>
+    <h1 class="h1">Create your mood</h1>
+    <p class="helper">This is a placeholder for the Stage 2 flow — Mood Board lives in iteration 0010 (V1) and 0016 sectioned (V2). The pattern repeats: <b>steps inside the stage → Lock or Save as Draft → return to Today screen</b>. The wizard skeleton below shows what the actual stage will look like.</p>
+
+    <div class="placeholder-stage">
+      <div class="placeholder-step">
+        <div class="placeholder-step-num">01</div>
+        <div class="placeholder-step-body">
+          <div class="placeholder-step-title">Pick your palette</div>
+          <div class="placeholder-step-sub">Hex / picker / image extraction · 6 colors per role</div>
+        </div>
+      </div>
+      <div class="placeholder-step">
+        <div class="placeholder-step-num">02</div>
+        <div class="placeholder-step-body">
+          <div class="placeholder-step-title">Add inspiration images</div>
+          <div class="placeholder-step-sub">Drag-drop or paste URLs · auto-extracts colors</div>
+        </div>
+      </div>
+      <div class="placeholder-step">
+        <div class="placeholder-step-num">03</div>
+        <div class="placeholder-step-body">
+          <div class="placeholder-step-title">Pick a pre-template theme</div>
+          <div class="placeholder-step-sub">20 themes (Classic, Pastel, Royalty, Garden, etc.)</div>
+        </div>
+      </div>
+      <div class="placeholder-step">
+        <div class="placeholder-step-num">04</div>
+        <div class="placeholder-step-body">
+          <div class="placeholder-step-title">Setnayan Guide rule check</div>
+          <div class="placeholder-step-sub">Cohesion · contrast · cultural conventions · 7 categories</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lock-banner" style="margin-top: 28px;">
+      <div class="lock-banner-icon">${status === 'locked' ? '✓' : '◯'}</div>
+      <div class="lock-banner-h">Stage 2 — Mood Board ${status === 'locked' ? 'complete' : 'in progress'}</div>
+      <div class="lock-banner-sub">Currently: ${statusLabel} · this stage's actual interactions are V1.5</div>
+    </div>
+
+    <div class="lock-options two-col">
+      ${canLockIn()
+        ? `<div class="lock-option primary" onclick="finishStage2('moodboard', 'locked')">
+             <div class="lock-option-icon">🔒</div>
+             <div class="lock-option-name">Lock it in</div>
+             <div class="lock-option-sub">Mark Stage 2 as committed and return to your Today screen.</div>
+           </div>`
+        : `<div class="lock-option locked-out" onclick="return false;">
+             <div class="lock-option-icon" style="opacity: 0.4;">🔒</div>
+             <div class="lock-option-name" style="opacity: 0.6;">Lock it in <span style="font-size: 11px; font-family: 'DM Mono', monospace; color: var(--ink-faint); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; margin-left: 6px;">unlocks within 1 year</span></div>
+             <div class="lock-option-sub">Plan-level lock-ins open within 1 year of your wedding. Save as draft for now and lock it once you're inside the window.</div>
+           </div>`
+      }
+      <div class="lock-option ${canLockIn() ? '' : 'primary'}" onclick="finishStage2('moodboard', 'drafted')">
+        <div class="lock-option-icon">📝</div>
+        <div class="lock-option-name">Save as draft</div>
+        <div class="lock-option-sub">${canLockIn()
+          ? "Mark as in-progress and return to Today. Pick this back up anytime."
+          : "Mark as in-progress and continue. The recommended choice while you're more than a year out."}</div>
+      </div>
+    </div>
+
+    <div class="cta-row" style="justify-content: center; margin-top: 16px;">
+      <button class="btn-back" onclick="setScreen('today')">← Back to Today</button>
+    </div>
+  `;
+}
+
+function renderDIYHolder() {
+  return `
+    <div class="diy-holder">
+      <div class="diy-holder-icon">📝</div>
+      <h1 class="h1">DIY mode</h1>
+      <p class="helper" style="max-width: 480px; margin: 0 auto 28px;">
+        DIY shows the same category sequence and structure but with no matching, no recommendations, and no proportional allocation. You enter every vendor and price manually.
+      </p>
+      <div class="cta-row" style="justify-content: center;">
+        <button class="btn secondary" onclick="setScreen('plan-choice')">← Back to choice</button>
+        <button class="btn primary" onclick="setScreen('plan-choice')">Try Guided instead</button>
+      </div>
+    </div>
+  `;
+}
+
+// ============ HANDLERS ============
+function attachHandlers() {
+  // Date field handlers are inline (onchange/oninput in markup) — no extra wiring needed
+}
+
+function pickGuided() {
+  state.mode = 'guided';
+  logDecision('mode_picked', { mode: 'guided' });
+  setScreen('s1-when');
+}
+function pickDIY() {
+  state.mode = 'diy';
+  logDecision('mode_picked', { mode: 'diy' });
+  setScreen('diy-mode');
+}
+
+function setDateField(field, value) {
+  if (field === 'year') {
+    state.dateYear = value;
+    // Clear month + day if year is cleared
+    if (!value) {
+      state.dateMonth = '';
+      state.dateDay = '';
+      state.dateTentative = false;
+    }
+  } else if (field === 'month') {
+    state.dateMonth = value;
+    // Clear day if month is cleared
+    if (value === '') {
+      state.dateDay = '';
+      state.dateTentative = false;
+    }
+  } else if (field === 'day') {
+    // Validate day in range 1-31
+    const v = parseInt(value, 10);
+    if (value === '' || isNaN(v)) {
+      state.dateDay = '';
+      state.dateTentative = false;
+    } else {
+      state.dateDay = String(Math.max(1, Math.min(31, v)));
+    }
+  }
+  render();
+}
+function setTentative(checked) {
+  state.dateTentative = checked;
+  render();
+}
+
+function advanceFromS1When() {
+  logDecision('date_set', {
+    label: getDateLabel(),
+    precision: getDatePrecision(),
+    tentative: state.dateTentative
+  });
+  if (!state.editingFoundation) state.stageStatus.foundation = 'draft';
+  advanceOrReturnToEdit('s1-pax');
+}
+
+function adjustGuests(delta) {
+  state.guestCount = Math.max(1, Math.min(2000, state.guestCount + delta));
+  const input = document.getElementById('guests-input');
+  if (input) input.value = state.guestCount;
+}
+function setGuestsFromInput(el) {
+  const v = parseInt(el.value, 10);
+  if (!isNaN(v) && v > 0) {
+    state.guestCount = Math.min(2000, v);
+  }
+}
+
+function advanceFromS1Pax() {
+  logDecision('pax_set', { count: state.guestCount });
+  // No auto-populate. Budget input on Step 3 stays blank — the suggested
+  // ₱1,000/pax appears as a placeholder hint only. Couple must type a value.
+  advanceOrReturnToEdit('s1-budget');
+}
+
+function onBudgetInput(el) {
+  // Format with commas + preserve cursor; returns parsed integer
+  const v = formatNumberInput(el);
+  state.budgetAmount = v == null ? 0 : v;
+  // Re-anchor the ±10% step when the user types a deliberate value
+  state.budgetAnchor = state.budgetAmount;
+  state.tier = tierFromBudget(state.budgetAmount, state.guestCount);
+
+  // Update tier callout in place (no full re-render — preserves input focus)
+  const zone = document.getElementById('tier-callout-zone');
+  if (zone) zone.innerHTML = renderTierCalloutHTML();
+
+  // Update Next button state
+  const nextBtn = document.getElementById('next-btn');
+  if (nextBtn) nextBtn.disabled = !(state.budgetAmount > 0);
+}
+
+function advanceFromS1Budget() {
+  logDecision('budget_set', {
+    amount: state.budgetAmount,
+    tier: state.tier ? TIERS[state.tier - 1].name : 'unknown'
+  });
+  advanceOrReturnToEdit('s1-coverage');
+}
+
+function toggleCoverage(id) {
+  const idx = state.coverageSelected.indexOf(id);
+  if (idx >= 0) {
+    state.coverageSelected.splice(idx, 1);
+    // Wipe override for now-deselected category
+    delete state.coverageOverrides[id];
+  } else {
+    state.coverageSelected.push(id);
+  }
+  render();
+}
+
+// Adjust working budget — increase = ×1.1, decrease = ÷1.1.
+// These are mathematical inverses, so + then - returns to the start
+// (within ±₱1K rounding noise). Rounded to nearest ₱1,000 each step.
+function adjustBudget(deltaPct) {
+  if (state.budgetAmount <= 0) return;
+  const newRaw = deltaPct > 0
+    ? state.budgetAmount * 1.1
+    : state.budgetAmount / 1.1;
+  state.budgetAmount = Math.max(1000, Math.round(newRaw / 1000) * 1000);
+  state.tier = tierFromBudget(state.budgetAmount, state.guestCount);
+  logDecision('budget_adjusted', { delta: deltaPct, amount: state.budgetAmount });
+  render();
+}
+
+// Bulk-select handlers for Step 4 coverage
+function selectAllCoverage() {
+  state.coverageSelected = CATEGORIES.map(c => c.id);
+  render();
+}
+function clearAllCoverage() {
+  state.coverageSelected = [];
+  state.coverageOverrides = {};
+  render();
+}
+function toggleSection(group) {
+  const sectionIds = CATEGORIES.filter(c => c.group === group).map(c => c.id);
+  const allSelected = sectionIds.length > 0 && sectionIds.every(id => state.coverageSelected.includes(id));
+  if (allSelected) {
+    state.coverageSelected = state.coverageSelected.filter(id => !sectionIds.includes(id));
+    sectionIds.forEach(id => delete state.coverageOverrides[id]);
+  } else {
+    sectionIds.forEach(id => {
+      if (!state.coverageSelected.includes(id)) state.coverageSelected.push(id);
+    });
+  }
+  render();
+}
+
+// Per-row +/- on Step 5 — adjusts ONE vendor's allocation up or down
+// by the same ×1.1 / ÷1.1 math. The TOTAL budget grows or shrinks
+// by exactly the delta, so the OTHER rows are not affected.
+// The clicked row gets locked as an override at the new amount.
+function adjustRow(catId, direction) {
+  const result = computeAllocations(state.coverageSelected, state.budgetAmount, state.coverageOverrides);
+  const current = result.allocations[catId]?.amount || 0;
+  if (current <= 0) return;
+  const newRaw = direction > 0 ? current * 1.1 : current / 1.1;
+  const rounded = Math.max(1000, Math.round(newRaw / 1000) * 1000);
+  const delta = rounded - current;
+  // Lock the new amount as an override on this row
+  state.coverageOverrides[catId] = rounded;
+  // Grow/shrink the total budget by the delta so other rows stay put
+  state.budgetAmount = Math.max(1000, Math.round((state.budgetAmount + delta) / 1000) * 1000);
+  state.tier = tierFromBudget(state.budgetAmount, state.guestCount);
+  logDecision('row_adjusted', { id: catId, amount: rounded, delta, direction });
+  render();
+}
+
+function advanceFromS1Coverage() {
+  logDecision('coverage_set', {
+    count: state.coverageSelected.length,
+    budget: state.budgetAmount
+  });
+  advanceOrReturnToEdit('s1-review');
+}
+
+function setOverride(catId, el) {
+  // Format with commas + preserve cursor; returns parsed integer or null
+  const v = formatNumberInput(el);
+  if (v == null) {
+    delete state.coverageOverrides[catId];
+  } else {
+    state.coverageOverrides[catId] = v;
+  }
+  // Update only the summary bar + other rows' placeholders without losing focus
+  updateReviewSummary();
+}
+
+function clearOverride(catId) {
+  delete state.coverageOverrides[catId];
+  render();
+}
+
+function updateReviewSummary() {
+  // Recompute and update the summary bar in place to avoid losing input focus
+  const result = computeAllocations(state.coverageSelected, state.budgetAmount, state.coverageOverrides);
+  const fillPct = state.budgetAmount > 0 ? Math.min(100, (result.consumed / state.budgetAmount) * 100) : 0;
+  const fill = document.querySelector('.coverage-summary-fill');
+  if (fill) {
+    fill.style.width = fillPct + '%';
+    fill.classList.remove('over', 'warn');
+    if (result.overshoot) fill.classList.add('over');
+    else if (fillPct < 100 && result.consumed < state.budgetAmount * 0.99) fill.classList.add('warn');
+  }
+  const consumedEl = document.querySelector('.coverage-summary-budget');
+  if (consumedEl) {
+    consumedEl.innerHTML = `${fmtPHPFull(result.consumed)} <span style="font-family: 'DM Mono', monospace; color: var(--ink-faint); font-size: 13px;">of ${fmtPHPFull(state.budgetAmount)}</span>`;
+  }
+  // Update placeholders on auto-distributed rows
+  document.querySelectorAll('.review-input').forEach(input => {
+    const catId = input.getAttribute('data-cat');
+    if (state.coverageOverrides[catId] == null || state.coverageOverrides[catId] === '') {
+      const alloc = result.allocations[catId];
+      if (alloc) input.placeholder = Math.round(alloc.amount).toLocaleString('en-US');
+    }
+  });
+}
+
+function advanceFromS1Review() {
+  const overrideCount = Object.keys(state.coverageOverrides)
+    .filter(k => state.coverageSelected.includes(k) && state.coverageOverrides[k] !== '' && state.coverageOverrides[k] != null)
+    .length;
+  logDecision('distribution_set', {
+    customCount: overrideCount,
+    autoCount: state.coverageSelected.length - overrideCount,
+    budget: state.budgetAmount
+  });
+  advanceOrReturnToEdit('s1-lock');
+}
+
+function finishStage1(disposition) {
+  state.stageStatus.foundation = disposition === 'locked' ? 'locked' : 'draft';
+  if (disposition === 'locked') logDecision('stage_locked', { stage: 'Stage 1 (Foundation)' });
+  else logDecision('stage_drafted', { stage: 'Stage 1 (Foundation)' });
+  setScreen('today');
+}
+
+function setPacing(p) {
+  state.pacing = p;
+  logDecision('pacing_set', { pacing: p });
+  render();
+}
+
+function openStage2(stageId) {
+  if (stageId === 'moodboard') {
+    setScreen('s2-moodboard');
+  }
+  // Other stages: V1.5+ — placeholder for now
+}
+
+function startEditingFoundation() {
+  state.editingFoundation = true;
+  setScreen('foundation-edit');
+}
+function editFoundationPart(screenId) {
+  state.editingFoundation = true;
+  setScreen(screenId);
+}
+function exitFoundationEdit() {
+  state.editingFoundation = false;
+  setScreen('today');
+}
+// Helper: in edit mode, return to picker; otherwise advance to nextScreen
+function advanceOrReturnToEdit(nextScreen) {
+  if (state.editingFoundation) {
+    setScreen('foundation-edit');
+  } else {
+    setScreen(nextScreen);
+  }
+}
+
+function finishStage2(stageId, disposition) {
+  state.stageStatus[stageId] = disposition === 'locked' ? 'locked' : 'draft';
+  if (disposition === 'locked') logDecision('stage_locked', { stage: 'Stage 2 (Mood Board)' });
+  else logDecision('stage_drafted', { stage: 'Stage 2 (Mood Board)' });
+  setScreen('today');
+}
+
+// ============ INIT ============
+render();
+</script>
+
+</body>
+</html>

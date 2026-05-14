@@ -1,0 +1,3116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan · 0006 Vendors Management — Web + Mobile Mockup</title>
+<meta name="description" content="Iteration 0006 — Setnayan couple dashboard vendors panel: list, service coverage, vendor detail with package, payments, crew meals. Web + mobile.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --page-bg: #FAF6F0;
+  --page-bg-soft: #F5EFE5;
+  --ink: #1A1A1A;
+  --ink-soft: #6B6B6B;
+  --ink-faint: #A39B8E;
+  --accent: #C97B4B;
+  --accent-soft: #E8C9B0;
+  --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08);
+  --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F3;
+  --canvas-bg: #2B2825;
+
+  /* status colors */
+  --paid: #6FA776;
+  --paid-soft: #DDEBDF;
+  --due: #D69744;
+  --due-soft: #F4E2C8;
+  --overdue: #C46A55;
+  --overdue-soft: #F2DCD5;
+  --booked: #5C8A6B;
+  --booked-soft: #DBE7DE;
+  --lead: #B48E5B;
+  --lead-soft: #EFE4D1;
+  --gap: #BDB7AB;
+  --gap-soft: #ECE7DD;
+  --completed: #4A6B85;
+  --completed-soft: #D8E1EA;
+
+  --shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.04);
+  --shadow-md: 0 12px 32px rgba(26, 26, 26, 0.08);
+  --shadow-frame: 0 40px 100px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--canvas-bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select { font: inherit; }
+
+/* ============== Canvas chrome ============== */
+.canvas-header {
+  padding: 36px 48px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.canvas-title { display: flex; flex-direction: column; gap: 6px; color: rgba(255, 255, 255, 0.9); }
+.canvas-title h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+.canvas-title .canvas-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.canvas-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 4px;
+}
+.toggle-pill {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 8px 18px;
+  border-radius: 999px;
+}
+.toggle-pill.active { background: var(--accent); color: #fff; }
+
+.frames {
+  padding: 36px 48px 80px;
+  display: flex;
+  gap: 36px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-left: 60px;
+}
+body[data-view="desktop"] .frame-mobile { display: none; }
+body[data-view="mobile"] .frame-desktop { display: none; }
+body[data-view="mobile"] .frames { justify-content: center; padding-left: 48px; }
+body[data-view="desktop"] .frames { justify-content: flex-start; padding-left: 60px; }
+
+.frame-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 14px 6px;
+}
+
+/* ============== Desktop frame ============== */
+.frame-desktop {
+  flex-shrink: 0;
+  width: 1280px;
+  background: var(--page-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-frame);
+}
+.browser-chrome {
+  background: #E9E5DE;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.traffic-lights { display: flex; gap: 7px; }
+.traffic-lights span { width: 12px; height: 12px; border-radius: 50%; background: #BDBAB3; }
+.traffic-lights span:nth-child(1) { background: #FF6058; }
+.traffic-lights span:nth-child(2) { background: #FFBE2F; }
+.traffic-lights span:nth-child(3) { background: #2BC940; }
+.url-bar {
+  flex: 1;
+  background: #fff;
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.url-bar .lock { color: var(--paid); }
+
+/* dashboard nav (matches 0001) */
+.dash-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.dash-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500; font-size: 18px; letter-spacing: 0.02em;
+}
+.dash-brand-mark {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+}
+.dash-brand-text em { font-style: italic; color: var(--ink-soft); font-weight: 400; }
+.dash-nav-links { display: flex; gap: 4px; }
+.dash-nav-link {
+  font-size: 13px; font-weight: 500; color: var(--ink-soft);
+  padding: 8px 14px; border-radius: 999px;
+}
+.dash-nav-link.active { background: var(--ink); color: #fff; }
+.dash-nav-right { display: flex; align-items: center; gap: 14px; }
+.dash-event-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--page-bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 6px 12px 6px 6px;
+  font-size: 12px; font-weight: 500;
+}
+.dash-event-pill .ev-mark {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: #fff; display: grid; place-items: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 11px;
+}
+.dash-event-pill .ev-meta {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--ink-faint); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.avatar-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ink); color: #fff;
+  display: grid; place-items: center;
+  font-weight: 600; font-size: 12px; letter-spacing: 0.04em;
+}
+
+/* page body */
+.dash-page { padding: 32px; display: grid; gap: 22px; }
+.page-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+}
+.page-crumb {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--ink-faint); letter-spacing: 0.16em;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.page-title {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 44px; letter-spacing: -0.01em; line-height: 1;
+}
+.page-sub {
+  font-size: 13px; color: var(--ink-soft); margin-top: 8px;
+  max-width: 560px;
+}
+.page-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500;
+  padding: 10px 16px; border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface); color: var(--ink);
+  transition: all 0.15s;
+}
+.btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+.btn.accent  { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.ghost   { background: transparent; border-color: transparent; color: var(--ink-soft); }
+.btn .icn { font-size: 14px; line-height: 1; }
+.btn.sm { padding: 7px 12px; font-size: 12px; }
+
+/* stats strip */
+.stats-strip {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;
+}
+.stat-card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 14px; padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-label {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint);
+}
+.stat-value {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 28px; letter-spacing: -0.01em; line-height: 1.05;
+}
+.stat-delta { font-size: 11px; color: var(--ink-soft); display: flex; gap: 4px; align-items: center; }
+.stat-card.contracted .stat-value { color: var(--ink); }
+.stat-card.paid .stat-value { color: var(--paid); }
+.stat-card.outstanding .stat-value { color: var(--due); }
+.stat-card.deadline .stat-value { color: var(--overdue); font-size: 22px; }
+.stat-card.coverage .stat-value { color: var(--accent-deep); }
+.stat-card.crewmeal .stat-value { color: var(--ink); font-size: 22px; }
+
+/* coverage strip */
+.coverage-summary {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 14px; padding: 18px 22px;
+  display: flex; align-items: center; gap: 24px;
+  flex-wrap: wrap;
+}
+.coverage-summary .head {
+  display: flex; flex-direction: column; gap: 4px; min-width: 220px;
+}
+.coverage-summary .head .label {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint);
+}
+.coverage-summary .head .title {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px;
+  font-weight: 500;
+}
+.coverage-bar-wrap { flex: 1; min-width: 320px; }
+.coverage-bar {
+  height: 10px; border-radius: 6px; background: var(--page-bg-soft);
+  overflow: hidden; display: flex;
+}
+.coverage-bar .seg-booked { background: var(--booked); }
+.coverage-bar .seg-lead   { background: var(--lead); }
+.coverage-bar .seg-gap    { background: var(--gap); }
+.coverage-bar .seg-not-needed { background: var(--rule-strong); opacity: 0.4; }
+.coverage-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px;
+  font-size: 11px; color: var(--ink-soft);
+}
+.coverage-legend .swatch {
+  display: inline-block; width: 10px; height: 10px;
+  border-radius: 3px; margin-right: 6px; vertical-align: middle;
+}
+
+/* toolbar */
+.toolbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 14px; padding: 12px 14px;
+}
+.search-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--page-bg-soft);
+  border-radius: 999px; padding: 8px 14px;
+  flex: 1 1 280px; max-width: 360px;
+}
+.search-box input {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-size: 13px; color: var(--ink);
+}
+.search-box .ic-search { color: var(--ink-faint); }
+.toolbar-divider { width: 1px; height: 22px; background: var(--rule); }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--page-bg-soft); color: var(--ink-soft);
+  font-size: 12px; font-weight: 500;
+}
+.filter-chip.active { background: var(--ink); color: #fff; }
+.filter-chip .count {
+  background: rgba(255,255,255,0.18); padding: 1px 6px;
+  border-radius: 999px; font-size: 10px;
+}
+.filter-chip.active .count { background: rgba(255,255,255,0.22); }
+
+/* split layout — list + drawer */
+.list-and-drawer {
+  display: grid; grid-template-columns: 1fr 460px; gap: 20px;
+}
+
+/* vendor list table */
+.vendor-table {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 14px; overflow: hidden;
+}
+.vt-head {
+  display: grid;
+  grid-template-columns: 2.4fr 1.6fr 1.4fr 1.6fr 0.6fr;
+  padding: 14px 18px;
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--rule);
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.vt-row {
+  display: grid;
+  grid-template-columns: 2.4fr 1.6fr 1.4fr 1.6fr 0.6fr;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rule);
+  align-items: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.vt-row:last-child { border-bottom: none; }
+.vt-row:hover { background: var(--page-bg-soft); }
+.vt-row.selected { background: var(--accent-soft); }
+.vt-row .vt-name {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.vt-row .vt-name .name {
+  font-weight: 600; color: var(--ink);
+}
+.vt-row .vt-name .contact {
+  font-size: 11px; color: var(--ink-faint);
+}
+.vt-row .services-chips {
+  display: flex; gap: 4px; flex-wrap: wrap;
+}
+.svc-chip {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent-deep);
+  font-size: 10px; font-weight: 500; letter-spacing: 0.02em;
+}
+.svc-chip.custom { background: var(--page-bg-soft); color: var(--ink-soft); }
+.vt-row .package-cell {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.vt-row .package-cell .total {
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  font-weight: 500;
+}
+.vt-row .package-cell .progress {
+  width: 110px; height: 6px; background: var(--page-bg-soft);
+  border-radius: 3px; overflow: hidden;
+}
+.vt-row .package-cell .progress span {
+  display: block; height: 100%; background: var(--paid);
+}
+.vt-row .deadline-cell {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.vt-row .deadline-cell .due {
+  font-weight: 600; font-size: 12px;
+}
+.vt-row .deadline-cell .due.overdue { color: var(--overdue); }
+.vt-row .deadline-cell .due.due-soon { color: var(--due); }
+.vt-row .deadline-cell .due.paid { color: var(--paid); }
+.vt-row .deadline-cell .lbl { font-size: 11px; color: var(--ink-faint); }
+.status-pill {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.status-pill.booked { background: var(--booked-soft); color: var(--booked); }
+.status-pill.lead   { background: var(--lead-soft); color: var(--lead); }
+.status-pill.completed { background: var(--completed-soft); color: var(--completed); }
+.status-pill.cancelled { background: var(--page-bg-soft); color: var(--ink-faint); }
+
+/* vendor detail drawer */
+.drawer {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 14px; padding: 0;
+  display: flex; flex-direction: column;
+  max-height: 1640px;
+  overflow: hidden;
+}
+.drawer-header {
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--rule);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.drawer-header .crumb {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--ink-faint); letter-spacing: 0.14em; text-transform: uppercase;
+}
+.drawer-header h3 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 26px; letter-spacing: -0.01em; line-height: 1.1;
+}
+.drawer-header .meta-row {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  align-items: center; font-size: 12px; color: var(--ink-soft);
+}
+.drawer-header .meta-row a { text-decoration: underline; color: var(--accent-deep); }
+.drawer-section {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--rule);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.drawer-section:last-child { border-bottom: none; }
+.drawer-section h4 {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.drawer-section h4 button { font-size: 11px; color: var(--accent-deep); font-weight: 500; }
+
+/* services chips block */
+.svc-chips-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* package + inclusions */
+.package-line {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-bottom: 8px; border-bottom: 1px solid var(--rule);
+}
+.package-line .pkg-name { font-weight: 600; font-size: 14px; }
+.package-line .pkg-total {
+  font-family: 'DM Mono', monospace; font-size: 14px;
+  font-weight: 600; color: var(--ink);
+}
+.inclusions-list {
+  display: flex; flex-direction: column; gap: 6px;
+  font-size: 12px;
+}
+.inclusion-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 6px 0;
+}
+.inclusion-item::before {
+  content: '✓'; color: var(--paid); font-weight: 600;
+  margin-top: 1px;
+}
+.inclusion-item .qty { color: var(--ink-faint); margin-left: 4px; }
+
+/* milestone ledger */
+.milestones {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.milestone {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  align-items: center;
+}
+.milestone.paid { background: var(--paid-soft); border-color: rgba(111, 167, 118, 0.4); }
+.milestone.overdue { background: var(--overdue-soft); border-color: rgba(196, 106, 85, 0.4); }
+.milestone.due-soon { background: var(--due-soft); border-color: rgba(214, 151, 68, 0.4); }
+.milestone .ms-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--ink-faint);
+  background: var(--surface);
+}
+.milestone.paid .ms-dot {
+  background: var(--paid); border-color: var(--paid);
+  position: relative;
+}
+.milestone.paid .ms-dot::after {
+  content: '✓'; position: absolute; inset: 0;
+  display: grid; place-items: center;
+  color: #fff; font-size: 10px; font-weight: 700;
+  line-height: 1;
+}
+.milestone.overdue .ms-dot { border-color: var(--overdue); }
+.milestone.due-soon .ms-dot { border-color: var(--due); }
+.milestone .ms-body { display: flex; flex-direction: column; gap: 2px; }
+.milestone .ms-label {
+  font-weight: 600; font-size: 12px;
+}
+.milestone .ms-meta {
+  font-size: 10px; color: var(--ink-faint);
+  font-family: 'DM Mono', monospace; letter-spacing: 0.04em;
+}
+.milestone.overdue .ms-meta { color: var(--overdue); }
+.milestone.due-soon .ms-meta { color: var(--due); }
+.milestone .ms-amount {
+  font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 600;
+}
+.milestone .ms-action {
+  font-size: 11px; color: var(--accent-deep); font-weight: 500;
+  padding: 4px 8px; border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+}
+.milestone.paid .ms-action {
+  background: rgba(255,255,255,0.6);
+  color: var(--ink-soft); border-color: transparent;
+}
+
+/* milestone summary */
+.payment-summary {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  background: var(--page-bg-soft);
+  border-radius: 10px;
+  padding: 12px;
+}
+.payment-summary .ps-cell {
+  display: flex; flex-direction: column; gap: 3px;
+}
+.payment-summary .ps-cell .l {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-faint); font-family: 'DM Mono', monospace;
+}
+.payment-summary .ps-cell .v {
+  font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 600;
+}
+.payment-summary .ps-cell.balance .v { color: var(--due); }
+.payment-summary .ps-cell.paid .v { color: var(--paid); }
+
+/* crew block */
+.crew-block {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.crew-cell {
+  background: var(--page-bg-soft);
+  border-radius: 10px; padding: 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.crew-cell .l {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-faint); font-family: 'DM Mono', monospace;
+}
+.crew-cell .v {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500;
+}
+.crew-cell .v.mono { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 600; }
+.crew-cell .sub { font-size: 11px; color: var(--ink-soft); }
+.crew-toggle {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--ink-soft);
+  padding: 8px 12px; border-radius: 8px;
+  background: var(--surface-soft); border: 1px solid var(--rule);
+}
+.crew-toggle .switch {
+  width: 28px; height: 16px; border-radius: 8px;
+  background: var(--rule-strong); position: relative;
+}
+.crew-toggle .switch::after {
+  content: ''; position: absolute;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #fff;
+  top: 2px; left: 2px; transition: left 0.15s;
+}
+.crew-toggle.on .switch { background: var(--paid); }
+.crew-toggle.on .switch::after { left: 14px; }
+
+/* meetings */
+.meetings-list { display: flex; flex-direction: column; gap: 8px; }
+.meeting-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  align-items: center;
+}
+.meeting-row.next { background: var(--accent-soft); border-color: rgba(140, 74, 40, 0.25); }
+.meeting-row.past-unconfirmed { background: var(--due-soft); border-color: rgba(214, 151, 68, 0.4); }
+.meeting-row.completed { opacity: 0.65; }
+.meeting-row .mode-icn {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--surface);
+  display: grid; place-items: center;
+  font-size: 14px;
+  border: 1px solid var(--rule);
+}
+.meeting-row.next .mode-icn {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.meeting-row .m-body { display: flex; flex-direction: column; gap: 3px; }
+.meeting-row .m-title { font-weight: 600; font-size: 12px; }
+.meeting-row .m-meta {
+  font-size: 11px; color: var(--ink-soft);
+  font-family: 'DM Mono', monospace; letter-spacing: 0.02em;
+}
+.meeting-row.next .m-meta { color: var(--accent-deep); }
+.meeting-row.past-unconfirmed .m-meta { color: var(--due); font-weight: 600; }
+.meeting-row .m-action {
+  font-size: 11px; color: var(--accent-deep); font-weight: 500;
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+}
+.meeting-row.completed .m-action { display: none; }
+.meeting-row .m-attendees {
+  font-size: 10px; color: var(--ink-faint);
+  font-family: 'Manrope', sans-serif;
+  margin-top: 2px;
+}
+.next-meeting-banner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  background: var(--accent-soft);
+  border: 1px solid rgba(140, 74, 40, 0.25);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--accent-deep);
+}
+.next-meeting-banner .nm-mode {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: grid; place-items: center;
+  font-size: 13px;
+}
+.next-meeting-banner .nm-text { display: flex; flex-direction: column; gap: 2px; }
+.next-meeting-banner .nm-text .t { font-weight: 600; font-size: 13px; color: var(--ink); }
+.next-meeting-banner .nm-text .m {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--accent-deep);
+}
+
+/* meeting modal (decorative — preview only) */
+.meeting-modal-preview {
+  border: 1px dashed rgba(140, 74, 40, 0.4);
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--surface-soft);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.meeting-modal-preview h6 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; font-weight: 500; color: var(--ink);
+  margin-bottom: 6px;
+}
+.meeting-modal-preview .field-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  margin-top: 8px;
+}
+.meeting-modal-preview .field {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 6px; padding: 6px 10px;
+}
+.meeting-modal-preview .field .l {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-faint); font-family: 'DM Mono', monospace;
+}
+.meeting-modal-preview .field .v { font-size: 12px; color: var(--ink); }
+
+/* contracts */
+.contracts-list { display: flex; flex-direction: column; gap: 6px; }
+.contract-row {
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: 10px; padding: 10px 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--rule); border-radius: 8px;
+  align-items: center;
+}
+.contract-row .ic-doc {
+  width: 28px; height: 32px; border-radius: 4px;
+  background: var(--accent-soft); color: var(--accent-deep);
+  display: grid; place-items: center;
+  font-size: 11px; font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+.contract-row .meta { display: flex; flex-direction: column; gap: 2px; }
+.contract-row .meta .name { font-size: 12px; font-weight: 500; }
+.contract-row .meta .sub  { font-size: 10px; color: var(--ink-faint); font-family: 'DM Mono', monospace; }
+.contract-row .dl { font-size: 11px; color: var(--accent-deep); font-weight: 500; }
+
+/* coverage page (second desktop frame) */
+.coverage-page { padding: 32px; display: grid; gap: 22px; }
+.cov-tabs {
+  display: flex; gap: 4px;
+  background: var(--surface);
+  padding: 4px; border-radius: 999px;
+  border: 1px solid var(--rule);
+  width: fit-content;
+}
+.cov-tab {
+  font-size: 12px; padding: 8px 16px; border-radius: 999px;
+  color: var(--ink-soft); font-weight: 500;
+}
+.cov-tab.active { background: var(--ink); color: #fff; }
+
+.coverage-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.cov-card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  min-height: 130px;
+  position: relative;
+}
+.cov-card .cov-label {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.cov-card .cov-name {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 17px; line-height: 1.15;
+}
+.cov-card .cov-vendor {
+  font-size: 12px; color: var(--ink-soft);
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px dashed var(--rule);
+}
+.cov-card .cov-vendor.empty { color: var(--ink-faint); font-style: italic; }
+.cov-card .cov-status {
+  align-self: flex-start;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.cov-card.booked { border-color: rgba(92, 138, 107, 0.35); }
+.cov-card.booked .cov-status { background: var(--booked-soft); color: var(--booked); }
+.cov-card.lead .cov-status { background: var(--lead-soft); color: var(--lead); }
+.cov-card.gap .cov-status { background: var(--gap-soft); color: var(--ink-soft); }
+.cov-card.not-needed { opacity: 0.55; }
+.cov-card.not-needed .cov-status { background: var(--page-bg-soft); color: var(--ink-faint); }
+.cov-card.add-custom {
+  border: 1px dashed var(--rule-strong);
+  background: var(--surface-soft);
+  display: grid; place-items: center;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.cov-card.add-custom .add-icn {
+  font-size: 22px; color: var(--accent);
+  margin-bottom: 4px;
+}
+
+/* custom services strip */
+.custom-strip {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 14px; padding: 18px 22px;
+  display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+}
+.custom-strip .cs-head {
+  display: flex; flex-direction: column; gap: 4px; min-width: 200px;
+}
+.custom-strip .cs-head .l {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint);
+}
+.custom-strip .cs-head .t {
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500;
+}
+.custom-strip .cs-list { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+.custom-strip .cs-pill {
+  background: var(--page-bg-soft); padding: 6px 12px;
+  border-radius: 999px; font-size: 12px; color: var(--ink);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.custom-strip .cs-pill .vn { color: var(--ink-soft); font-size: 11px; }
+
+/* mobile frame */
+.frame-mobile {
+  flex-shrink: 0;
+  width: 390px;
+  background: #0a0a0a;
+  border-radius: 50px;
+  padding: 12px;
+  box-shadow: var(--shadow-frame);
+  position: relative;
+}
+.phone-screen {
+  background: var(--page-bg);
+  border-radius: 38px;
+  overflow: hidden;
+  height: 800px;
+  position: relative;
+  display: flex; flex-direction: column;
+}
+.phone-notch {
+  position: absolute;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 28px;
+  background: #0a0a0a;
+  border-radius: 14px;
+  z-index: 10;
+}
+.ios-status {
+  display: flex; justify-content: space-between;
+  padding: 16px 28px 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; font-weight: 500; color: var(--ink);
+  position: relative; z-index: 5;
+}
+.ios-status .right { display: flex; gap: 4px; align-items: center; }
+
+/* mobile app header */
+.m-header {
+  padding: 18px 20px 12px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.m-crumb {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--ink-faint); letter-spacing: 0.14em; text-transform: uppercase;
+}
+.m-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500; font-size: 28px;
+  letter-spacing: -0.01em; line-height: 1;
+  display: flex; justify-content: space-between; align-items: flex-end;
+}
+.m-title .add-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--ink); color: #fff;
+  display: grid; place-items: center;
+  font-size: 22px; font-weight: 300; line-height: 1;
+}
+
+/* mobile stat strip — horizontal scroll */
+.m-stats {
+  display: flex; gap: 10px;
+  padding: 0 20px 4px;
+  overflow-x: auto;
+}
+.m-stat {
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 130px;
+}
+.m-stat .l {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint);
+}
+.m-stat .v {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500;
+}
+.m-stat.outstanding .v { color: var(--due); }
+.m-stat.deadline .v { color: var(--overdue); font-size: 16px; line-height: 1.2; }
+.m-stat.coverage .v { color: var(--accent-deep); }
+
+/* mobile filter pills */
+.m-pills {
+  display: flex; gap: 8px;
+  padding: 14px 20px 8px;
+  overflow-x: auto;
+}
+.m-pill {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--rule);
+  font-size: 12px; font-weight: 500; color: var(--ink-soft);
+}
+.m-pill.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* mobile vendor list */
+.m-list {
+  flex: 1; overflow-y: auto;
+  padding: 4px 16px 80px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.m-vendor-card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 14px; padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.m-vendor-card .top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 10px;
+}
+.m-vendor-card .vn {
+  font-weight: 600; font-size: 15px; line-height: 1.2;
+}
+.m-vendor-card .svc-strip {
+  display: flex; gap: 4px; flex-wrap: wrap;
+}
+.m-vendor-card .progress-block { display: flex; flex-direction: column; gap: 6px; }
+.m-vendor-card .progress-block .progress {
+  height: 6px; border-radius: 3px; background: var(--page-bg-soft); overflow: hidden;
+}
+.m-vendor-card .progress-block .progress span {
+  display: block; height: 100%; background: var(--paid);
+}
+.m-vendor-card .progress-block .progress span.overdue { background: var(--overdue); }
+.m-vendor-card .progress-block .meta {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--ink-soft);
+}
+.m-vendor-card .progress-block .meta .balance { font-weight: 600; color: var(--due); }
+.m-vendor-card .progress-block .meta .balance.overdue { color: var(--overdue); }
+.m-vendor-card .due-line {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+.m-vendor-card .due-line .label { color: var(--ink-faint); }
+.m-vendor-card .due-line .when { font-weight: 600; }
+.m-vendor-card .due-line .when.overdue { color: var(--overdue); }
+.m-vendor-card .due-line .when.due-soon { color: var(--due); }
+.m-vendor-card .due-line .when.paid { color: var(--paid); }
+
+/* mobile bottom tabs */
+.m-tabbar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--rule);
+  padding: 10px 6px 22px;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+}
+.m-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--ink-faint); font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.m-tab .ic { font-size: 18px; line-height: 1; }
+.m-tab.active { color: var(--ink); }
+.m-tab.active .ic { color: var(--accent); }
+
+/* mobile detail sheet (second mobile frame) */
+.m-detail-page {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column;
+  padding-bottom: 80px;
+}
+.m-detail-page .hero {
+  background: linear-gradient(180deg, var(--accent-soft) 0%, var(--page-bg) 100%);
+  padding: 22px 20px 18px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.m-detail-page .back {
+  font-size: 12px; color: var(--accent-deep);
+  font-weight: 500; display: inline-flex; align-items: center; gap: 4px;
+  margin-bottom: 8px;
+}
+.m-detail-page .name {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500; font-size: 24px; line-height: 1.1;
+}
+.m-detail-page .sub-meta {
+  display: flex; gap: 12px; font-size: 12px; color: var(--ink-soft);
+}
+.m-section {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--rule);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.m-section h5 {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.m-section h5 button { font-size: 11px; color: var(--accent-deep); font-weight: 500; }
+.m-section .pkg-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.m-section .pkg-row .pn { font-weight: 600; font-size: 15px; }
+.m-section .pkg-row .pt {
+  font-family: 'DM Mono', monospace; font-weight: 600; font-size: 14px;
+}
+.m-section .incl { font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.m-section .incl::before { content: '✓'; color: var(--paid); font-weight: 600; }
+
+/* mobile milestone */
+.m-milestone {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px; align-items: center;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  min-height: 56px;
+}
+.m-milestone.paid { background: var(--paid-soft); border-color: rgba(111, 167, 118, 0.4); }
+.m-milestone.overdue { background: var(--overdue-soft); border-color: rgba(196, 106, 85, 0.4); }
+.m-milestone.due-soon { background: var(--due-soft); border-color: rgba(214, 151, 68, 0.4); }
+.m-milestone .ms-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--ink-faint);
+  background: var(--surface);
+}
+.m-milestone.paid .ms-dot {
+  background: var(--paid); border-color: var(--paid);
+  position: relative;
+}
+.m-milestone.paid .ms-dot::after {
+  content: '✓'; position: absolute; inset: 0;
+  display: grid; place-items: center;
+  color: #fff; font-size: 11px; font-weight: 700;
+  line-height: 1;
+}
+.m-milestone .lbl-block { display: flex; flex-direction: column; gap: 2px; }
+.m-milestone .lbl-block .lbl { font-weight: 600; font-size: 13px; }
+.m-milestone .lbl-block .when {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--ink-faint);
+}
+.m-milestone.overdue .lbl-block .when { color: var(--overdue); }
+.m-milestone.due-soon .lbl-block .when { color: var(--due); }
+.m-milestone .amt {
+  font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 600;
+}
+
+/* mobile crew */
+.m-crew { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.m-crew .cell {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 12px;
+}
+.m-crew .cell .l {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint);
+}
+.m-crew .cell .v {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500;
+  margin-top: 4px;
+}
+.m-crew .cell .v.mono { font-family: 'DM Mono', monospace; font-size: 14px; }
+
+.m-cta-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--rule);
+  padding: 12px 16px 22px;
+  display: flex; gap: 10px;
+}
+.m-cta-bar .btn-primary {
+  flex: 1;
+  padding: 14px;
+  background: var(--ink); color: #fff;
+  border-radius: 999px;
+  font-weight: 600; font-size: 14px;
+  text-align: center;
+}
+.m-cta-bar .btn-secondary {
+  flex: 0 0 auto;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-size: 14px;
+  min-width: 56px;
+  text-align: center;
+}
+
+/* spec section */
+.spec-section {
+  background: #1F1D1B;
+  color: rgba(255,255,255,0.85);
+  padding: 60px 48px 80px;
+}
+.spec-inner { max-width: 1100px; margin: 0 auto; }
+.spec-h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500; font-size: 38px;
+  color: #fff; margin-bottom: 8px;
+}
+.spec-sub {
+  font-size: 14px; color: rgba(255,255,255,0.6);
+  margin-bottom: 36px;
+  max-width: 720px;
+}
+.spec-h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500; font-size: 22px;
+  color: #fff;
+  margin: 32px 0 12px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.spec-h3:first-of-type { border-top: none; padding-top: 0; }
+.spec-section p { margin-bottom: 12px; max-width: 880px; }
+.spec-section ul { margin-left: 20px; margin-bottom: 16px; }
+.spec-section li { margin-bottom: 6px; }
+.spec-section strong { color: #fff; font-weight: 600; }
+.decisions-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.decision-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.decision-card h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px; color: #fff;
+  font-weight: 500; margin-bottom: 6px;
+}
+.decision-card p {
+  font-size: 13px; color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+.accept-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.accept-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+}
+.accept-check {
+  width: 14px; height: 14px; flex-shrink: 0;
+  margin-top: 3px; border-radius: 4px;
+  border: 2px solid var(--accent);
+  position: relative;
+}
+.accept-check::after {
+  content: '✓'; position: absolute; inset: -2px;
+  display: grid; place-items: center;
+  color: var(--accent); font-size: 11px; font-weight: 700;
+}
+@media (max-width: 800px) {
+  .decisions-grid, .accept-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body data-view="both">
+
+<header class="canvas-header">
+  <div class="canvas-title">
+    <div class="canvas-meta">Iteration 0006 · Vendors Management · Couple Dashboard</div>
+    <h1>Manual vendor encoding · payments · crew meals · service coverage</h1>
+  </div>
+  <div class="canvas-toggle">
+    <button class="toggle-pill" data-view-target="desktop">Desktop</button>
+    <button class="toggle-pill" data-view-target="mobile">Mobile</button>
+    <button class="toggle-pill active" data-view-target="both">Both</button>
+  </div>
+</header>
+
+<main class="frames">
+
+  <!-- =========================================== -->
+  <!-- Desktop frame 1: vendor list + drawer       -->
+  <!-- =========================================== -->
+  <div class="frame-desktop">
+    <p class="frame-label" style="display:none;"></p>
+    <div class="browser-chrome">
+      <div class="traffic-lights"><span></span><span></span><span></span></div>
+      <div class="url-bar"><span class="lock">🔒</span> setnayan.com/dashboard/vendors</div>
+    </div>
+
+    <div class="dash-nav">
+      <div class="dash-brand">
+        <div class="dash-brand-mark"></div>
+        <div class="dash-brand-text">Setnayan<em> · Couple</em></div>
+      </div>
+      <div class="dash-nav-links">
+        <a class="dash-nav-link">Overview</a>
+        <a class="dash-nav-link">Guests</a>
+        <a class="dash-nav-link">Invitation</a>
+        <a class="dash-nav-link active">Vendors</a>
+        <a class="dash-nav-link">Budget</a>
+        <a class="dash-nav-link">Mood Board</a>
+        <a class="dash-nav-link">Panood</a>
+        <a class="dash-nav-link">Papic</a>
+      </div>
+      <div class="dash-nav-right">
+        <div class="dash-event-pill">
+          <div class="ev-mark">M</div>
+          <div>
+            <div>Maris &amp; Anton</div>
+            <div class="ev-meta">Dec 14, 2026 · 219 days</div>
+          </div>
+        </div>
+        <div class="avatar-circle">MR</div>
+      </div>
+    </div>
+
+    <div class="dash-page">
+
+      <div class="page-header">
+        <div>
+          <div class="page-crumb">Couple Dashboard / Vendors</div>
+          <div class="page-title">Vendors</div>
+          <p class="page-sub">Every supplier working your wedding — services, packages, payment deadlines, crew meals. Manually encoded; you're in control.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn ghost"><span class="icn">⤓</span> Export CSV</button>
+          <button class="btn"><span class="icn">📋</span> Service coverage</button>
+          <button class="btn primary"><span class="icn">＋</span> Add vendor</button>
+        </div>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-card contracted">
+          <div class="stat-label">Total contracted</div>
+          <div class="stat-value">₱742,800</div>
+          <div class="stat-delta">9 booked vendors</div>
+        </div>
+        <div class="stat-card paid">
+          <div class="stat-label">Paid to date</div>
+          <div class="stat-value">₱318,200</div>
+          <div class="stat-delta">42.8% of contracted</div>
+        </div>
+        <div class="stat-card outstanding">
+          <div class="stat-label">Outstanding</div>
+          <div class="stat-value">₱424,600</div>
+          <div class="stat-delta">across 14 milestones</div>
+        </div>
+        <div class="stat-card deadline">
+          <div class="stat-label">Next deadline</div>
+          <div class="stat-value">Jun 15 · 37d</div>
+          <div class="stat-delta">Catering — 1st partial</div>
+        </div>
+        <div class="stat-card crewmeal">
+          <div class="stat-label">Crew meal estimate</div>
+          <div class="stat-value">₱18,750</div>
+          <div class="stat-delta">75 crew · ₱250/meal</div>
+        </div>
+        <div class="stat-card coverage">
+          <div class="stat-label">Service coverage</div>
+          <div class="stat-value">68%</div>
+          <div class="stat-delta">19 / 28 needed services</div>
+        </div>
+      </div>
+
+      <div class="coverage-summary">
+        <div class="head">
+          <div class="label">Service coverage breakdown</div>
+          <div class="title">19 booked · 2 lead · 7 gap · 5 not needed</div>
+        </div>
+        <div class="coverage-bar-wrap">
+          <div class="coverage-bar">
+            <span class="seg-booked"   style="width: 56%;"></span>
+            <span class="seg-lead"     style="width: 6%;"></span>
+            <span class="seg-gap"      style="width: 22%;"></span>
+            <span class="seg-not-needed" style="width: 16%;"></span>
+          </div>
+          <div class="coverage-legend">
+            <span><span class="swatch" style="background: var(--booked);"></span>Booked (19)</span>
+            <span><span class="swatch" style="background: var(--lead);"></span>Lead (2)</span>
+            <span><span class="swatch" style="background: var(--gap);"></span>Gap (7)</span>
+            <span><span class="swatch" style="background: var(--rule-strong); opacity: 0.4;"></span>Not needed (5)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="ic-search">🔍</span>
+          <input placeholder="Search vendor name, service, contact…" />
+        </div>
+        <div class="toolbar-divider"></div>
+        <button class="filter-chip active">All <span class="count">11</span></button>
+        <button class="filter-chip">Booked <span class="count">9</span></button>
+        <button class="filter-chip">Lead <span class="count">2</span></button>
+        <button class="filter-chip">Overdue <span class="count">1</span></button>
+        <button class="filter-chip">Due ≤ 30d <span class="count">3</span></button>
+        <div class="toolbar-divider"></div>
+        <button class="filter-chip">Sort: Next deadline ↓</button>
+      </div>
+
+      <div class="list-and-drawer">
+
+        <div class="vendor-table">
+          <div class="vt-head">
+            <div>Vendor</div>
+            <div>Services</div>
+            <div>Package · Paid</div>
+            <div>Next deadline</div>
+            <div>Status</div>
+          </div>
+
+          <div class="vt-row" style="background: var(--overdue-soft);">
+            <div class="vt-name">
+              <div class="name">Bloom &amp; Burlap Florals</div>
+              <div class="contact">Issa Reyes · 0917 442 1098</div>
+              <div class="contact" style="color: var(--accent-deep); font-weight: 600;">📅 Next: Floral mockup · May 18 · 9d</div>
+            </div>
+            <div class="services-chips">
+              <span class="svc-chip">Florals</span>
+              <span class="svc-chip">Stationery</span>
+            </div>
+            <div class="package-cell">
+              <div class="total">₱85,000 · ₱25,500 paid</div>
+              <div class="progress"><span style="width: 30%;"></span></div>
+            </div>
+            <div class="deadline-cell">
+              <div class="due overdue">3 days overdue</div>
+              <div class="lbl">2nd partial · ₱20,000</div>
+            </div>
+            <div><span class="status-pill booked">Booked</span></div>
+          </div>
+
+          <div class="vt-row selected">
+            <div class="vt-name">
+              <div class="name">Sariwa Catering Co.</div>
+              <div class="contact">Mike Domingo · 0928 117 4421</div>
+              <div class="contact" style="color: var(--accent-deep); font-weight: 600;">📅 Next: Menu tasting · May 22 · 13d</div>
+            </div>
+            <div class="services-chips">
+              <span class="svc-chip">Catering</span>
+              <span class="svc-chip">Mobile bar</span>
+            </div>
+            <div class="package-cell">
+              <div class="total">₱268,000 · ₱134,000 paid</div>
+              <div class="progress"><span style="width: 50%;"></span></div>
+            </div>
+            <div class="deadline-cell">
+              <div class="due due-soon">Jun 15 · 37d</div>
+              <div class="lbl">1st partial · ₱67,000</div>
+            </div>
+            <div><span class="status-pill booked">Booked</span></div>
+          </div>
+
+          <div class="vt-row">
+            <div class="vt-name">
+              <div class="name">Tinta Studios</div>
+              <div class="contact">Bea Cruz · 0915 226 0094</div>
+              <div class="contact" style="color: var(--due); font-weight: 600;">📅 Past — confirm: Prenup planning · May 6</div>
+            </div>
+            <div class="services-chips">
+              <span class="svc-chip">Photography</span>
+              <span class="svc-chip">Videography</span>
+              <span class="svc-chip">Same-day edit</span>
+            </div>
+            <div class="package-cell">
+              <div class="total">₱128,000 · ₱64,000 paid</div>
+              <div class="progress"><span style="width: 50%;"></span></div>
+            </div>
+            <div class="deadline-cell">
+              <div class="due due-soon">Aug 02 · 85d</div>
+              <div class="lbl">Balance · ₱64,000</div>
+            </div>
+            <div><span class="status-pill booked">Booked</span></div>
+          </div>
+
+          <div class="vt-row">
+            <div class="vt-name">
+              <div class="name">Casa Manila Receptions</div>
+              <div class="contact">Karla Tomas · venue@casamanila.ph</div>
+            </div>
+            <div class="services-chips">
+              <span class="svc-chip">Reception venue</span>
+            </div>
+            <div class="package-cell">
+              <div class="total">₱180,000 · ₱90,000 paid</div>
+              <div class="progress"><span style="width: 50%;"></span></div>
+            </div>
+            <div class="deadline-cell">
+              <div class="due">Nov 14 · 189d</div>
+              <div class="lbl">Final balance · ₱90,000</div>
+            </div>
+            <div><span class="status-pill booked">Booked</span></div>
+          </div>
+
+          <div class="vt-row">
+            <div class="vt-name">
+              <div class="name">Glow by Mara</div>
+              <div class="contact">Mara Lim · @glowbymara</div>
+              <div class="contact" style="color: var(--ink-faint); font-weight: 500;">📅 No upcoming — last met Apr 12 (trial run)</div>
+            </div>
+            <div class="services-chips">
+              <span class="svc-chip">HMUA</span>
+            </div>
+            <div class="package-cell">
+              <div class="total">₱42,000 · ₱4,200 paid</div>
+              <div class="progress"><span style="width: 10%;"></span></div>
+            </div>
+            <div class="deadline-cell">
+              <div class="due">Sep 10 · 124d</div>
+              <div class="lbl">Down payment · ₱16,800</div>
+            </div>
+            <div><span class="status-pill booked">Booked</span></div>
+          </div>
+
+          <div class="vt-row">
+            <div class="vt-name">
+              <div class="name">Watt &amp; Wave Productions</div>
+              <div class="contact">Lloyd Yap · 0922 540 7782</div>
+              <div class="contact" style="color: var(--accent-deep); font-weight: 600;">📅 Next: Site visit · Jun 04 · 26d (in person)</div>
+            </div>
+            <div class="services-chips">
+              <span class="svc-chip">Lights &amp; sound</span>
+              <span class="svc-chip">DJ / Emcee</span>
+            </div>
+            <div class="package-cell">
+              <div class="total">₱58,000 · ₱0 paid</div>
+              <div class="progress"><span style="width: 0%;"></span></div>
+            </div>
+            <div class="deadline-cell">
+              <div class="due paid">Reservation Jun 30 · 52d</div>
+              <div class="lbl">Reservation · ₱10,000</div>
+            </div>
+            <div><span class="status-pill lead">Lead</span></div>
+          </div>
+
+          <div class="vt-row">
+            <div class="vt-name">
+              <div class="name">Reverend Magbanua</div>
+              <div class="contact">Officiant · 0917 990 1140</div>
+            </div>
+            <div class="services-chips">
+              <span class="svc-chip">Officiant</span>
+            </div>
+            <div class="package-cell">
+              <div class="total">₱8,000 · ₱8,000 paid</div>
+              <div class="progress"><span style="width: 100%; background: var(--paid);"></span></div>
+            </div>
+            <div class="deadline-cell">
+              <div class="due paid">Paid in full</div>
+              <div class="lbl">Lump sum · cleared</div>
+            </div>
+            <div><span class="status-pill booked">Booked</span></div>
+          </div>
+
+          <div class="vt-row">
+            <div class="vt-name">
+              <div class="name">Drive Manila Bridal Cars</div>
+              <div class="contact">Romy Sevilla · 0918 220 3315</div>
+            </div>
+            <div class="services-chips">
+              <span class="svc-chip">Bridal car</span>
+              <span class="svc-chip">Guest shuttle</span>
+            </div>
+            <div class="package-cell">
+              <div class="total">₱34,800 · ₱0 paid</div>
+              <div class="progress"><span style="width: 0%;"></span></div>
+            </div>
+            <div class="deadline-cell">
+              <div class="due">Oct 14 · 158d</div>
+              <div class="lbl">Down payment · ₱10,000</div>
+            </div>
+            <div><span class="status-pill lead">Lead</span></div>
+          </div>
+
+          <div class="vt-row">
+            <div class="vt-name">
+              <div class="name">Habagat String Quartet</div>
+              <div class="contact">Joey Lazaro · @habagatquartet</div>
+            </div>
+            <div class="services-chips">
+              <span class="svc-chip">Choir / quartet</span>
+              <span class="svc-chip custom">+ Ceremony processional</span>
+            </div>
+            <div class="package-cell">
+              <div class="total">₱24,000 · ₱4,800 paid</div>
+              <div class="progress"><span style="width: 20%;"></span></div>
+            </div>
+            <div class="deadline-cell">
+              <div class="due">Oct 28 · 172d</div>
+              <div class="lbl">Down payment · ₱9,600</div>
+            </div>
+            <div><span class="status-pill booked">Booked</span></div>
+          </div>
+
+        </div>
+
+        <!-- =========================================== -->
+        <!-- Drawer: vendor detail (Sariwa Catering Co.) -->
+        <!-- =========================================== -->
+        <aside class="drawer">
+          <div class="drawer-header">
+            <div class="crumb">Vendor detail · 4 of 11</div>
+            <h3>Sariwa Catering Co.</h3>
+            <div class="meta-row">
+              <span>👤 Mike Domingo</span>
+              <span>📞 0928 117 4421</span>
+              <span>✉ <a>sales@sariwa.ph</a></span>
+              <span class="status-pill booked">Booked</span>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <div class="next-meeting-banner">
+              <div class="nm-mode" title="In-person">📍</div>
+              <div class="nm-text">
+                <div class="t">Next: Menu tasting at Sariwa kitchen</div>
+                <div class="m">May 22 · 1:00 PM · in 13 days · Maris + Anton</div>
+              </div>
+              <div style="margin-left: auto; display: flex; gap: 6px;">
+                <button class="btn sm">Reschedule</button>
+                <button class="btn sm primary">Open</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Services covered <button>＋ Add service</button></h4>
+            <div class="svc-chips-row">
+              <span class="svc-chip">Catering</span>
+              <span class="svc-chip">Mobile bar</span>
+              <span class="svc-chip custom">+ Late-night ulam station</span>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Package &amp; inclusions <button>Edit</button></h4>
+            <div class="package-line">
+              <div class="pkg-name">Sariwa "Pamilya Plus" — 200 pax</div>
+              <div class="pkg-total">₱268,000.00</div>
+            </div>
+            <div class="inclusions-list">
+              <div class="inclusion-item">3-course plated dinner <span class="qty">· 200 pax</span></div>
+              <div class="inclusion-item">Ulam-bar station with 3 mains <span class="qty">· 1 station</span></div>
+              <div class="inclusion-item">Mobile bar w/ 2 bartenders <span class="qty">· 5 hours</span></div>
+              <div class="inclusion-item">Chocolate fountain &amp; dessert spread <span class="qty">· 1 set</span></div>
+              <div class="inclusion-item">Round table linens, china, glassware <span class="qty">· 200 covers</span></div>
+              <div class="inclusion-item">Free corkage on 24 bottles of wine</div>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Payment milestones <button>＋ Add milestone</button></h4>
+            <div class="milestones">
+              <div class="milestone paid">
+                <span class="ms-dot"></span>
+                <div class="ms-body">
+                  <div class="ms-label">Reservation fee</div>
+                  <div class="ms-meta">Mar 02 · GCash · ref 8821-LJ</div>
+                </div>
+                <div class="ms-amount">₱20,000</div>
+                <button class="ms-action">Receipt</button>
+              </div>
+              <div class="milestone paid">
+                <span class="ms-dot"></span>
+                <div class="ms-body">
+                  <div class="ms-label">Down payment (50%)</div>
+                  <div class="ms-meta">Apr 18 · Bank transfer · BDO 4117</div>
+                </div>
+                <div class="ms-amount">₱114,000</div>
+                <button class="ms-action">Receipt</button>
+              </div>
+              <div class="milestone due-soon">
+                <span class="ms-dot"></span>
+                <div class="ms-body">
+                  <div class="ms-label">1st partial</div>
+                  <div class="ms-meta">Due Jun 15 · 37 days</div>
+                </div>
+                <div class="ms-amount">₱67,000</div>
+                <button class="ms-action">Mark paid</button>
+              </div>
+              <div class="milestone">
+                <span class="ms-dot"></span>
+                <div class="ms-body">
+                  <div class="ms-label">Final balance</div>
+                  <div class="ms-meta">Due Nov 30 · 205 days</div>
+                </div>
+                <div class="ms-amount">₱67,000</div>
+                <button class="ms-action">Mark paid</button>
+              </div>
+            </div>
+
+            <div class="payment-summary">
+              <div class="ps-cell">
+                <div class="l">Contracted</div>
+                <div class="v">₱268,000</div>
+              </div>
+              <div class="ps-cell paid">
+                <div class="l">Paid · 50%</div>
+                <div class="v">₱134,000</div>
+              </div>
+              <div class="ps-cell balance">
+                <div class="l">Balance</div>
+                <div class="v">₱134,000</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Crew &amp; meals <button>Edit</button></h4>
+            <div class="crew-block">
+              <div class="crew-cell">
+                <div class="l">Crew attending</div>
+                <div class="v">14</div>
+                <div class="sub">Caterers, bartenders, runners</div>
+              </div>
+              <div class="crew-cell">
+                <div class="l">Per crew meal</div>
+                <div class="v mono">₱250.00</div>
+                <div class="sub">Event default · editable</div>
+              </div>
+              <div class="crew-cell" style="grid-column: 1/-1; background: var(--accent-soft); border: 1px solid rgba(140,74,40,0.2);">
+                <div class="l" style="color: var(--accent-deep);">Crew meal cost (computed)</div>
+                <div class="v mono" style="color: var(--accent-deep); font-size: 18px;">14 × ₱250 = ₱3,500</div>
+                <div class="sub" style="color: var(--accent-deep);">Rolls up into event-level estimate (₱18,750)</div>
+              </div>
+              <div class="crew-toggle">
+                <span class="switch"></span>
+                <span>Vendor provides own crew meals · <strong>off</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Meetings <button>＋ Add meeting</button></h4>
+            <div class="meetings-list">
+              <div class="meeting-row next">
+                <div class="mode-icn" title="In person">📍</div>
+                <div class="m-body">
+                  <div class="m-title">Menu tasting</div>
+                  <div class="m-meta">May 22 · 1:00 PM · 90 min · Sariwa kitchen, Pasig</div>
+                  <div class="m-attendees">Attendees: Maris, Anton · Agenda: pick 3 mains, sample dessert spread, finalize bar package</div>
+                </div>
+                <button class="m-action">Open</button>
+              </div>
+              <div class="meeting-row past-unconfirmed">
+                <div class="mode-icn" title="Phone">📞</div>
+                <div class="m-body">
+                  <div class="m-title">Crew headcount confirmation</div>
+                  <div class="m-meta">May 06 · 4:00 PM · Past — confirm outcome</div>
+                  <div class="m-attendees">Attendees: Maris · Phone call</div>
+                </div>
+                <button class="m-action">Mark done</button>
+              </div>
+              <div class="meeting-row completed">
+                <div class="mode-icn" title="Video">📹</div>
+                <div class="m-body">
+                  <div class="m-title">Initial consult</div>
+                  <div class="m-meta">Mar 02 · 7:00 PM · 45 min · Google Meet</div>
+                  <div class="m-attendees">Notes: Confirmed 200 pax, no vegan-specific table needed; Mike will draft contract by Mar 03.</div>
+                </div>
+                <button class="m-action">View notes</button>
+              </div>
+              <div class="meeting-row completed">
+                <div class="mode-icn" title="In person">📍</div>
+                <div class="m-body">
+                  <div class="m-title">Contract signing</div>
+                  <div class="m-meta">Mar 18 · 11:00 AM · 30 min · Sariwa office</div>
+                  <div class="m-attendees">Notes: Signed contract; reservation fee paid via GCash. Maris kept the original copy.</div>
+                </div>
+                <button class="m-action">View notes</button>
+              </div>
+            </div>
+
+            <div class="meeting-modal-preview">
+              <h6>Add a meeting</h6>
+              <div>Couple-encoded in V1. When Din (Phase 3) ships, vendors will create + propose meetings into the same table — couples just confirm.</div>
+              <div class="field-grid">
+                <div class="field"><div class="l">Title</div><div class="v">e.g., Floral mockup</div></div>
+                <div class="field"><div class="l">Date &amp; time</div><div class="v">Pick a datetime</div></div>
+                <div class="field"><div class="l">Mode</div><div class="v">In-person · Video · Phone</div></div>
+                <div class="field"><div class="l">Location / link</div><div class="v">Address or URL</div></div>
+                <div class="field" style="grid-column: 1 / -1;"><div class="l">Agenda</div><div class="v">What you want to cover</div></div>
+                <div class="field" style="grid-column: 1 / -1;"><div class="l">Attendees</div><div class="v">Maris, Anton, Mom</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Day-of arrival <button>Edit</button></h4>
+            <div style="font-size: 13px;">
+              <strong>Dec 14, 2026 · 02:00 PM</strong> at Casa Manila Receptions<br>
+              <span style="color: var(--ink-soft); font-size: 12px;">Setup window: 02:00 PM – 04:30 PM · service starts 06:30 PM</span>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Contracts &amp; files <button>＋ Upload</button></h4>
+            <div class="contracts-list">
+              <div class="contract-row">
+                <div class="ic-doc">PDF</div>
+                <div class="meta">
+                  <div class="name">Sariwa_Catering_Contract_2026-03-02.pdf</div>
+                  <div class="sub">2.4 MB · Uploaded Mar 02 · Maris</div>
+                </div>
+                <a class="dl">Download</a>
+              </div>
+              <div class="contract-row">
+                <div class="ic-doc">PDF</div>
+                <div class="meta">
+                  <div class="name">Sariwa_Menu_Tasting_Notes.pdf</div>
+                  <div class="sub">880 KB · Uploaded Apr 22 · Anton</div>
+                </div>
+                <a class="dl">Download</a>
+              </div>
+              <div class="contract-row">
+                <div class="ic-doc" style="background: var(--page-bg-soft); color: var(--ink-soft);">JPG</div>
+                <div class="meta">
+                  <div class="name">DownPayment_Receipt_BDO_4117.jpg</div>
+                  <div class="sub">412 KB · Uploaded Apr 18 · Maris</div>
+                </div>
+                <a class="dl">Download</a>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================== -->
+  <!-- Desktop frame 2: service coverage view      -->
+  <!-- =========================================== -->
+  <div class="frame-desktop">
+    <div class="browser-chrome">
+      <div class="traffic-lights"><span></span><span></span><span></span></div>
+      <div class="url-bar"><span class="lock">🔒</span> setnayan.com/dashboard/vendors/coverage</div>
+    </div>
+
+    <div class="dash-nav">
+      <div class="dash-brand">
+        <div class="dash-brand-mark"></div>
+        <div class="dash-brand-text">Setnayan<em> · Couple</em></div>
+      </div>
+      <div class="dash-nav-links">
+        <a class="dash-nav-link">Overview</a>
+        <a class="dash-nav-link">Guests</a>
+        <a class="dash-nav-link">Invitation</a>
+        <a class="dash-nav-link active">Vendors</a>
+        <a class="dash-nav-link">Budget</a>
+        <a class="dash-nav-link">Mood Board</a>
+        <a class="dash-nav-link">Panood</a>
+        <a class="dash-nav-link">Papic</a>
+      </div>
+      <div class="dash-nav-right">
+        <div class="dash-event-pill">
+          <div class="ev-mark">M</div>
+          <div>
+            <div>Maris &amp; Anton</div>
+            <div class="ev-meta">Dec 14, 2026 · 219 days</div>
+          </div>
+        </div>
+        <div class="avatar-circle">MR</div>
+      </div>
+    </div>
+
+    <div class="coverage-page">
+
+      <div class="page-header">
+        <div>
+          <div class="page-crumb">Vendors / Service coverage</div>
+          <div class="page-title">Service coverage</div>
+          <p class="page-sub">28 typical Filipino-wedding services. Tap a tile to assign a vendor or mark "not needed."</p>
+        </div>
+        <div class="cov-tabs">
+          <button class="cov-tab">Vendor list</button>
+          <button class="cov-tab active">Service coverage</button>
+        </div>
+      </div>
+
+      <div class="coverage-grid">
+        <!-- BOOKED tiles -->
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Reception venue</div>
+          <div class="cov-vendor">Casa Manila Receptions</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Catering</div>
+          <div class="cov-vendor">Sariwa Catering Co.</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Photography</div>
+          <div class="cov-vendor">Tinta Studios</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Videography</div>
+          <div class="cov-vendor">Tinta Studios</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Same-day edit</div>
+          <div class="cov-vendor">Tinta Studios</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Florals</div>
+          <div class="cov-vendor">Bloom &amp; Burlap</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">HMUA</div>
+          <div class="cov-vendor">Glow by Mara</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Officiant</div>
+          <div class="cov-vendor">Reverend Magbanua</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Mobile bar</div>
+          <div class="cov-vendor">Sariwa Catering Co.</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Choir / quartet</div>
+          <div class="cov-vendor">Habagat String Quartet</div>
+        </div>
+        <div class="cov-card booked">
+          <div class="cov-status">Booked</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Stationery / signage</div>
+          <div class="cov-vendor">Bloom &amp; Burlap</div>
+        </div>
+        <!-- LEAD tiles -->
+        <div class="cov-card lead">
+          <div class="cov-status">Lead</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Lights &amp; sound</div>
+          <div class="cov-vendor">Watt &amp; Wave Productions</div>
+        </div>
+        <div class="cov-card lead">
+          <div class="cov-status">Lead</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">DJ / Emcee / Host</div>
+          <div class="cov-vendor">Watt &amp; Wave Productions</div>
+        </div>
+        <!-- GAP tiles -->
+        <div class="cov-card gap">
+          <div class="cov-status">Gap</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Wedding coordination</div>
+          <div class="cov-vendor empty">Not yet booked — tap to assign</div>
+        </div>
+        <div class="cov-card gap">
+          <div class="cov-status">Gap</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Bridal gown</div>
+          <div class="cov-vendor empty">Not yet booked</div>
+        </div>
+        <div class="cov-card gap">
+          <div class="cov-status">Gap</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Groom suit</div>
+          <div class="cov-vendor empty">Not yet booked</div>
+        </div>
+        <div class="cov-card gap">
+          <div class="cov-status">Gap</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Wedding rings</div>
+          <div class="cov-vendor empty">Not yet booked</div>
+        </div>
+        <div class="cov-card gap">
+          <div class="cov-status">Gap</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Cake &amp; desserts</div>
+          <div class="cov-vendor empty">Not yet booked</div>
+        </div>
+        <div class="cov-card gap">
+          <div class="cov-status">Gap</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Photobooth</div>
+          <div class="cov-vendor empty">Not yet booked</div>
+        </div>
+        <div class="cov-card gap">
+          <div class="cov-status">Gap</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Souvenirs / giveaways</div>
+          <div class="cov-vendor empty">Not yet booked</div>
+        </div>
+        <!-- Booked but bridal car/shuttle -->
+        <div class="cov-card lead">
+          <div class="cov-status">Lead</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Bridal car</div>
+          <div class="cov-vendor">Drive Manila Bridal Cars</div>
+        </div>
+        <div class="cov-card lead">
+          <div class="cov-status">Lead</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Guest shuttle</div>
+          <div class="cov-vendor">Drive Manila Bridal Cars</div>
+        </div>
+        <!-- NOT NEEDED tiles -->
+        <div class="cov-card not-needed">
+          <div class="cov-status">Not needed</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Drone</div>
+          <div class="cov-vendor">Couple opted out</div>
+        </div>
+        <div class="cov-card not-needed">
+          <div class="cov-status">Not needed</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Pre-nup shoot</div>
+          <div class="cov-vendor">Couple opted out</div>
+        </div>
+        <div class="cov-card not-needed">
+          <div class="cov-status">Not needed</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Live band</div>
+          <div class="cov-vendor">Couple opted out</div>
+        </div>
+        <div class="cov-card not-needed">
+          <div class="cov-status">Not needed</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Acoustic performer</div>
+          <div class="cov-vendor">Covered by quartet</div>
+        </div>
+        <div class="cov-card not-needed">
+          <div class="cov-status">Not needed</div>
+          <div class="cov-label">Canonical service</div>
+          <div class="cov-name">Honeymoon planner</div>
+          <div class="cov-vendor">Couple opted out</div>
+        </div>
+        <!-- ADD CUSTOM -->
+        <div class="cov-card add-custom">
+          <div>
+            <div class="add-icn">＋</div>
+            <strong>Add custom service</strong>
+            <div style="font-size: 11px; color: var(--ink-faint); margin-top: 4px;">Beyond the 28 canonical services</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- custom services strip -->
+      <div class="custom-strip">
+        <div class="cs-head">
+          <div class="l">Custom services for this event</div>
+          <div class="t">Beyond the canonical list</div>
+        </div>
+        <div class="cs-list">
+          <div class="cs-pill">Late-night ulam station <span class="vn">· Sariwa Catering</span></div>
+          <div class="cs-pill">Ceremony processional choir <span class="vn">· Habagat Quartet</span></div>
+          <div class="cs-pill">Bibingka cart <span class="vn">· Not yet booked</span></div>
+          <button class="filter-chip" style="background: var(--surface); border: 1px dashed var(--rule-strong);">＋ Add custom</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- =========================================== -->
+  <!-- Mobile frame 1: vendor list                 -->
+  <!-- =========================================== -->
+  <div class="frame-mobile">
+    <div class="phone-screen">
+      <div class="phone-notch"></div>
+      <div class="ios-status">
+        <span>9:41</span>
+        <span class="right">5G •••• 78%</span>
+      </div>
+
+      <div class="m-header">
+        <div class="m-crumb">Couple Dashboard / Vendors</div>
+        <div class="m-title">
+          <span>Vendors</span>
+          <button class="add-btn">＋</button>
+        </div>
+      </div>
+
+      <div class="m-stats">
+        <div class="m-stat outstanding">
+          <div class="l">Outstanding</div>
+          <div class="v">₱424,600</div>
+        </div>
+        <div class="m-stat deadline">
+          <div class="l">Next due</div>
+          <div class="v">Jun 15<br>Catering</div>
+        </div>
+        <div class="m-stat coverage">
+          <div class="l">Coverage</div>
+          <div class="v">68%</div>
+        </div>
+        <div class="m-stat">
+          <div class="l">Crew meals</div>
+          <div class="v">₱18,750</div>
+        </div>
+      </div>
+
+      <div class="m-pills">
+        <button class="m-pill active">All · 11</button>
+        <button class="m-pill">Overdue · 1</button>
+        <button class="m-pill">Due ≤ 30d · 3</button>
+        <button class="m-pill">Lead · 2</button>
+      </div>
+
+      <div class="m-list">
+        <div class="m-vendor-card" style="border-color: rgba(196, 106, 85, 0.4);">
+          <div class="top">
+            <div>
+              <div class="vn">Bloom &amp; Burlap Florals</div>
+              <div class="svc-strip" style="margin-top: 4px;">
+                <span class="svc-chip">Florals</span>
+                <span class="svc-chip">Stationery</span>
+              </div>
+            </div>
+            <span class="status-pill booked">Booked</span>
+          </div>
+          <div class="progress-block">
+            <div class="progress"><span style="width: 30%;" class="overdue"></span></div>
+            <div class="meta">
+              <span>₱25,500 / ₱85,000</span>
+              <span class="balance overdue">₱59,500 left</span>
+            </div>
+          </div>
+          <div class="due-line">
+            <span class="label">Next:</span>
+            <span class="when overdue">3 days overdue</span>
+            <span style="margin-left: auto; color: var(--ink-faint); font-family: 'DM Mono', monospace; font-size: 11px;">₱20,000</span>
+          </div>
+          <div class="due-line" style="border-top: none; padding-top: 0; padding-bottom: 0;">
+            <span style="color: var(--accent-deep);">📅 Floral mockup · May 18 · 9d</span>
+          </div>
+        </div>
+
+        <div class="m-vendor-card">
+          <div class="top">
+            <div>
+              <div class="vn">Sariwa Catering Co.</div>
+              <div class="svc-strip" style="margin-top: 4px;">
+                <span class="svc-chip">Catering</span>
+                <span class="svc-chip">Mobile bar</span>
+              </div>
+            </div>
+            <span class="status-pill booked">Booked</span>
+          </div>
+          <div class="progress-block">
+            <div class="progress"><span style="width: 50%;"></span></div>
+            <div class="meta">
+              <span>₱134,000 / ₱268,000</span>
+              <span class="balance">₱134,000 left</span>
+            </div>
+          </div>
+          <div class="due-line">
+            <span class="label">Next:</span>
+            <span class="when due-soon">Jun 15 · 37d</span>
+            <span style="margin-left: auto; color: var(--ink-faint); font-family: 'DM Mono', monospace; font-size: 11px;">₱67,000</span>
+          </div>
+          <div class="due-line" style="border-top: none; padding-top: 0; padding-bottom: 0;">
+            <span style="color: var(--accent-deep);">📅 Menu tasting · May 22 · 13d</span>
+          </div>
+        </div>
+
+        <div class="m-vendor-card">
+          <div class="top">
+            <div>
+              <div class="vn">Tinta Studios</div>
+              <div class="svc-strip" style="margin-top: 4px;">
+                <span class="svc-chip">Photo</span>
+                <span class="svc-chip">Video</span>
+                <span class="svc-chip">SDE</span>
+              </div>
+            </div>
+            <span class="status-pill booked">Booked</span>
+          </div>
+          <div class="progress-block">
+            <div class="progress"><span style="width: 50%;"></span></div>
+            <div class="meta">
+              <span>₱64,000 / ₱128,000</span>
+              <span class="balance">₱64,000 left</span>
+            </div>
+          </div>
+          <div class="due-line">
+            <span class="label">Next:</span>
+            <span class="when due-soon">Aug 02 · 85d</span>
+            <span style="margin-left: auto; color: var(--ink-faint); font-family: 'DM Mono', monospace; font-size: 11px;">₱64,000</span>
+          </div>
+          <div class="due-line" style="border-top: none; padding-top: 0; padding-bottom: 0;">
+            <span style="color: var(--due);">📅 Past — Prenup planning · May 6 (confirm)</span>
+          </div>
+        </div>
+
+        <div class="m-vendor-card">
+          <div class="top">
+            <div>
+              <div class="vn">Reverend Magbanua</div>
+              <div class="svc-strip" style="margin-top: 4px;">
+                <span class="svc-chip">Officiant</span>
+              </div>
+            </div>
+            <span class="status-pill booked">Booked</span>
+          </div>
+          <div class="progress-block">
+            <div class="progress"><span style="width: 100%; background: var(--paid);"></span></div>
+            <div class="meta">
+              <span>₱8,000 / ₱8,000</span>
+              <span class="balance" style="color: var(--paid);">Paid in full</span>
+            </div>
+          </div>
+          <div class="due-line">
+            <span class="label">Status:</span>
+            <span class="when paid">Cleared</span>
+            <span style="margin-left: auto; color: var(--ink-faint); font-family: 'DM Mono', monospace; font-size: 11px;">—</span>
+          </div>
+        </div>
+
+        <div class="m-vendor-card" style="opacity: 0.85;">
+          <div class="top">
+            <div>
+              <div class="vn">Watt &amp; Wave Productions</div>
+              <div class="svc-strip" style="margin-top: 4px;">
+                <span class="svc-chip">Lights</span>
+                <span class="svc-chip">DJ</span>
+              </div>
+            </div>
+            <span class="status-pill lead">Lead</span>
+          </div>
+          <div class="progress-block">
+            <div class="progress"><span style="width: 0%;"></span></div>
+            <div class="meta">
+              <span>Reservation pending</span>
+              <span class="balance">₱58,000 quoted</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="m-tabbar">
+        <button class="m-tab"><span class="ic">🏠</span><span>Home</span></button>
+        <button class="m-tab"><span class="ic">👥</span><span>Guests</span></button>
+        <button class="m-tab active"><span class="ic">📇</span><span>Vendors</span></button>
+        <button class="m-tab"><span class="ic">💰</span><span>Budget</span></button>
+        <button class="m-tab"><span class="ic">⋯</span><span>More</span></button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================== -->
+  <!-- Mobile frame 2: vendor detail sheet         -->
+  <!-- =========================================== -->
+  <div class="frame-mobile">
+    <div class="phone-screen">
+      <div class="phone-notch"></div>
+      <div class="ios-status">
+        <span>9:42</span>
+        <span class="right">5G •••• 78%</span>
+      </div>
+
+      <div class="m-detail-page">
+
+        <div class="hero">
+          <a class="back">‹ Vendors</a>
+          <div class="name">Sariwa Catering Co.</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="status-pill booked">Booked</span>
+            <span class="svc-chip">Catering</span>
+            <span class="svc-chip">Mobile bar</span>
+          </div>
+          <div class="sub-meta" style="margin-top: 6px;">
+            <span>👤 Mike Domingo</span>
+            <span>📞 0928 117 4421</span>
+          </div>
+        </div>
+
+        <div class="m-section">
+          <h5>Package <button>Edit</button></h5>
+          <div class="pkg-row">
+            <span class="pn">Pamilya Plus · 200 pax</span>
+            <span class="pt">₱268,000</span>
+          </div>
+          <div class="incl">3-course plated dinner · 200 pax</div>
+          <div class="incl">Ulam-bar station · 3 mains</div>
+          <div class="incl">Mobile bar w/ 2 bartenders · 5 hrs</div>
+          <div class="incl">Dessert spread + chocolate fountain</div>
+          <div class="incl">Free corkage on 24 bottles</div>
+        </div>
+
+        <div class="m-section">
+          <h5>Payments · ₱134,000 paid <button>＋ Add</button></h5>
+          <div class="m-milestone paid">
+            <span class="ms-dot"></span>
+            <div class="lbl-block">
+              <span class="lbl">Reservation</span>
+              <span class="when">Mar 02 · GCash</span>
+            </div>
+            <span class="amt">₱20,000</span>
+          </div>
+          <div class="m-milestone paid">
+            <span class="ms-dot"></span>
+            <div class="lbl-block">
+              <span class="lbl">Down payment 50%</span>
+              <span class="when">Apr 18 · Bank</span>
+            </div>
+            <span class="amt">₱114,000</span>
+          </div>
+          <div class="m-milestone due-soon">
+            <span class="ms-dot"></span>
+            <div class="lbl-block">
+              <span class="lbl">1st partial</span>
+              <span class="when">Due Jun 15 · 37d</span>
+            </div>
+            <span class="amt">₱67,000</span>
+          </div>
+          <div class="m-milestone">
+            <span class="ms-dot"></span>
+            <div class="lbl-block">
+              <span class="lbl">Final balance</span>
+              <span class="when">Due Nov 30</span>
+            </div>
+            <span class="amt">₱67,000</span>
+          </div>
+        </div>
+
+        <div class="m-section">
+          <h5>Crew &amp; meals <button>Edit</button></h5>
+          <div class="m-crew">
+            <div class="cell">
+              <div class="l">Crew</div>
+              <div class="v">14</div>
+            </div>
+            <div class="cell">
+              <div class="l">Per meal</div>
+              <div class="v mono">₱250</div>
+            </div>
+            <div class="cell" style="grid-column: 1/-1; background: var(--accent-soft); border-color: rgba(140,74,40,0.2);">
+              <div class="l" style="color: var(--accent-deep);">Crew meal cost</div>
+              <div class="v mono" style="color: var(--accent-deep);">₱3,500</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="m-section">
+          <h5>Meetings · 4 logged <button>＋ Add</button></h5>
+          <div class="meeting-row next">
+            <div class="mode-icn">📍</div>
+            <div class="m-body">
+              <div class="m-title">Menu tasting</div>
+              <div class="m-meta">May 22 · 1:00 PM · in 13d</div>
+              <div class="m-attendees">Sariwa kitchen, Pasig · Maris + Anton</div>
+            </div>
+            <button class="m-action">Open</button>
+          </div>
+          <div class="meeting-row past-unconfirmed">
+            <div class="mode-icn">📞</div>
+            <div class="m-body">
+              <div class="m-title">Headcount call</div>
+              <div class="m-meta">May 06 · Past</div>
+              <div class="m-attendees">Phone · Maris</div>
+            </div>
+            <button class="m-action">Done</button>
+          </div>
+          <div class="meeting-row completed">
+            <div class="mode-icn">📹</div>
+            <div class="m-body">
+              <div class="m-title">Initial consult</div>
+              <div class="m-meta">Mar 02 · Done</div>
+              <div class="m-attendees">Confirmed 200 pax · vendor drafts contract</div>
+            </div>
+          </div>
+          <div style="font-size: 11px; color: var(--ink-faint); padding: 6px 4px;">
+            Vendor will manage meetings directly when Din ships.
+          </div>
+        </div>
+
+        <div class="m-section">
+          <h5>Contracts · 3 files <button>＋ Upload</button></h5>
+          <div class="contract-row" style="background: var(--surface);">
+            <div class="ic-doc">PDF</div>
+            <div class="meta">
+              <div class="name">Sariwa_Contract_2026-03-02.pdf</div>
+              <div class="sub">2.4 MB · Mar 02</div>
+            </div>
+            <a class="dl">Open</a>
+          </div>
+          <div class="contract-row" style="background: var(--surface);">
+            <div class="ic-doc">PDF</div>
+            <div class="meta">
+              <div class="name">Menu_Tasting_Notes.pdf</div>
+              <div class="sub">880 KB · Apr 22</div>
+            </div>
+            <a class="dl">Open</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="m-cta-bar">
+        <button class="btn-primary">Mark milestone paid</button>
+        <button class="btn-secondary">⋯</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+
+<!-- =========================================== -->
+<!-- Spec section                                 -->
+<!-- =========================================== -->
+<section class="spec-section">
+  <div class="spec-inner">
+
+    <h2 class="spec-h2">Vendors V1 — manual encoding, payment-deadline tracking</h2>
+    <p class="spec-sub">Couple-managed registry of every external supplier. Hybrid taxonomy (28 canonical services + custom rows), flexible payment milestones, computed crew meal totals, R2-stored contracts. No vendor app, no wallet integration — vendor money is external to Setnayan.</p>
+
+    <h3 class="spec-h3">Key design decisions</h3>
+    <div class="decisions-grid">
+      <div class="decision-card">
+        <h4>Hybrid service taxonomy</h4>
+        <p>28 canonical services as the spine — drives gap-checking and Budget rollup. Couples can add custom rows for the long tail (late-night ulam stations, processional choirs, bibingka carts) without polluting the canonical list.</p>
+      </div>
+      <div class="decision-card">
+        <h4>Flexible custom milestones</h4>
+        <p>Any number of payment milestones per vendor with custom labels and due dates. Presets scaffold "Reservation + Down + Balance" and "4 partials + Balance" patterns without locking the schema.</p>
+      </div>
+      <div class="decision-card">
+        <h4>Crew meals computed</h4>
+        <p>Count × per-meal cost = total, with a "vendor provides meals" toggle that zeroes out without losing headcount. Rolls up to event-level estimate; feeds 0007 Budget as a single row.</p>
+      </div>
+      <div class="decision-card">
+        <h4>No wallet integration</h4>
+        <p>Vendor payments leave Setnayan — cash, GCash, bank transfer, direct to vendor. Wallet (0003) is reserved for Setnayan SKUs. Recording, not processing. Combined views can live in Budget (0007) without coupling the two.</p>
+      </div>
+      <div class="decision-card">
+        <h4>Manual encoding only</h4>
+        <p>No vendor login, no vendor self-input. Din (Phase 3 supplier app) inherits these records later with no migration. Building a half-baked vendor surface in V1 would block launch.</p>
+      </div>
+      <div class="decision-card">
+        <h4>PHP-primary, no tokens</h4>
+        <p>Vendor money never touches Setnayan's books — no reason to render in tokens. Tokens stay in Setnayan's own paid surfaces (Pro widgets, Papic, Templates, Monogram, Panood, LED).</p>
+      </div>
+      <div class="decision-card">
+        <h4>Meetings live in vendor profiles</h4>
+        <p>Multiple meetings per vendor (initial consult, tasting, walkthrough, fitting, etc.) with title, datetime, mode (in-person / video / phone), location/link, agenda, attendees, notes. Soonest one surfaces as "Next meeting" on the vendor card. Couple-encoded in V1; <code>created_by_actor</code> column lets Din (Phase 3) write vendor-originated rows into the same table without migration.</p>
+      </div>
+    </div>
+
+    <h3 class="spec-h3">28 canonical services</h3>
+    <p>Code-shipped enum, ordered roughly by planning priority. Couples select which apply, mark unwanted ones as "not needed," and add custom rows for niche needs.</p>
+    <p style="font-family: 'DM Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.7;">
+      ceremony_venue · reception_venue · catering · photography · videography · same_day_edit · drone · prenup_shoot · wedding_coordination · hmua · bridal_gown · groom_suit · entourage_attire · florals · cake_desserts · lights_sound · dj_emcee_host · mobile_bar · live_band · acoustic_performer · choir_string_quartet · officiant · transportation_bridal_car · transportation_guest_shuttle · invitation_print · stationery_signage · photobooth · souvenirs_giveaways · wedding_rings · honeymoon_planner
+    </p>
+
+    <h3 class="spec-h3">Connection to other iterations</h3>
+    <p><strong>Depends on (&lt; 0006):</strong> 0001 (event scaffolding, dashboard shell, file upload primitive). Independent of 0002–0005.</p>
+    <p><strong>Provides to (&gt; 0006):</strong></p>
+    <ul>
+      <li><strong>0007 Budget &amp; Expenses</strong> — every booked vendor becomes a budget row; payment milestones populate the cash-flow timeline; crew meal aggregate is a single budget line.</li>
+      <li><strong>0010 Mood Board</strong> — styling vendors (florist, lights &amp; sound, future stylist) link to mood board segments.</li>
+      <li><strong>Phase 3 Din</strong> — supplier app inherits these vendor rows; no migration required.</li>
+    </ul>
+
+    <h3 class="spec-h3">Acceptance criteria</h3>
+    <div class="accept-grid">
+      <div class="accept-item"><span class="accept-check"></span><div>Couple can add a vendor with manually entered identity fields</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Hybrid service assignment: multi-select 28 canonical + add custom inline</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Mark canonical service "not needed"; gap count updates</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Package: name + total in PHP centavos + free-form inclusions list</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Any number of payment milestones per vendor with label / due date / amount</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Mark paid records date, amount, method, reference; balance auto-updates</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Overdue milestones surface in red on list and detail views</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Crew block: count × per-meal cost = computed total; rolls up to event level</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>"Vendor provides own meals" toggle zeroes that vendor's contribution</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Contract upload (PDF/JPG/PNG, ≤25 MB) lands in R2 PH bucket</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Service coverage view shows all 28 canonical services with status + vendor</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Stats strip aggregates contracted, paid, outstanding, next deadline, crew meals, coverage %</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>All currency in PHP-primary format (₱ symbol; no tokens anywhere)</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Mobile view: thumb-friendly, ≥44pt taps, single-column cards, FAB for add-vendor</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Vendor status workflow lead → booked → completed → cancelled (any direction)</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>5-year R2 retention on contracts; metadata kept after file expiry</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Multiple meetings per vendor: title, datetime, mode, location/link, agenda, attendees, notes</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>"Next meeting" surfaces the soonest upcoming on each vendor card</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Past-but-still-scheduled meetings render amber and prompt confirmation</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div><code>created_by_actor</code> column ready for Din vendor writes (no migration needed)</div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Toast + modal scaffolding -->
+<div id="toast-host" style="position:fixed;left:50%;bottom:32px;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;"></div>
+
+<div id="modal-host" style="position:fixed;inset:0;z-index:9998;display:none;align-items:center;justify-content:center;background:rgba(20,18,16,0.55);backdrop-filter:blur(6px);font-family:'Manrope',sans-serif;">
+  <div id="modal-card" style="background:var(--surface);border-radius:14px;padding:26px;max-width:480px;width:90%;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-md);">
+    <div id="modal-eyebrow" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">VENDOR</div>
+    <h3 id="modal-title" style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:22px;color:var(--ink);margin-bottom:14px;">Add vendor</h3>
+    <div id="modal-body" style="display:flex;flex-direction:column;gap:12px;font-size:13px;color:var(--ink);"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
+      <button id="modal-cancel" style="background:transparent;color:var(--ink-soft);font-size:13px;font-weight:500;padding:10px 16px;border-radius:999px;">Cancel</button>
+      <button id="modal-confirm" style="background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:10px 22px;border-radius:999px;">Save</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .toast-pop {
+    background: rgba(26,26,26,0.92);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 999px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    pointer-events: auto;
+    animation: toastIn 0.18s ease-out, toastOut 0.18s ease-in 1.6s forwards;
+  }
+  .toast-pop.success { background: var(--paid); }
+  .toast-pop.warn { background: var(--due); }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { to { opacity: 0; transform: translateY(8px); } }
+
+  .modal-field { display: flex; flex-direction: column; gap: 4px; }
+  .modal-field label { font-size: 11px; font-weight: 500; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'DM Mono', monospace; }
+  .modal-field input, .modal-field select, .modal-field textarea {
+    padding: 9px 12px; border: 1px solid var(--rule); border-radius: 8px;
+    background: var(--surface-soft); font-size: 13px; color: var(--ink); width: 100%;
+    font-family: 'Manrope', sans-serif;
+  }
+  .modal-field input:focus, .modal-field select:focus { outline: none; border-color: var(--accent); }
+  .milestone.paid .ms-label { text-decoration: line-through; color: var(--ink-faint); }
+  .meeting-row.past-now { background: var(--due-soft) !important; border-color: rgba(214,151,68,0.4); }
+  .filter-chip.dimmed { opacity: 0.5; }
+</style>
+
+<script>
+  // ---------------- State ----------------
+  const CANONICAL_SERVICES = [
+    'ceremony_venue','reception_venue','catering','photography','videography','same_day_edit',
+    'drone','prenup_shoot','wedding_coordination','hmua','bridal_gown','groom_suit','entourage_attire',
+    'florals','cake_desserts','lights_sound','dj_emcee_host','mobile_bar','live_band','acoustic_performer',
+    'choir_string_quartet','officiant','transportation_bridal_car','transportation_guest_shuttle',
+    'invitation_print','stationery_signage','photobooth','souvenirs_giveaways','wedding_rings','honeymoon_planner'
+  ];
+  const NOW = new Date('2026-05-10T12:00:00');
+
+  const state = {
+    view: 'both',
+    activeFilter: 'All',
+    vendors: [],     // additions added through Add Vendor flow
+    expanded: new Set(),  // vendor row IDs that are expanded
+    selectedVendor: null,
+  };
+
+  // ---------------- Toast ----------------
+  function toast(msg, kind) {
+    const host = document.getElementById('toast-host');
+    if (!host) return;
+    const el = document.createElement('div');
+    el.className = 'toast-pop' + (kind ? ' ' + kind : '');
+    el.textContent = msg;
+    host.appendChild(el);
+    setTimeout(() => el.remove(), 1900);
+  }
+
+  // ---------------- Modal ----------------
+  const modalHost = document.getElementById('modal-host');
+  const modalBody = document.getElementById('modal-body');
+  let modalOnConfirm = null;
+
+  function openModal({ eyebrow, title, fields, onConfirm, confirmLabel }) {
+    document.getElementById('modal-eyebrow').textContent = eyebrow || 'FORM';
+    document.getElementById('modal-title').textContent = title || 'Add';
+    document.getElementById('modal-confirm').textContent = confirmLabel || 'Save';
+    modalBody.innerHTML = '';
+    (fields || []).forEach(f => {
+      const wrap = document.createElement('div');
+      wrap.className = 'modal-field';
+      const lbl = document.createElement('label');
+      lbl.textContent = f.label;
+      wrap.appendChild(lbl);
+      let input;
+      if (f.type === 'select') {
+        input = document.createElement('select');
+        (f.options || []).forEach(o => {
+          const opt = document.createElement('option');
+          opt.value = o.value;
+          opt.textContent = o.label;
+          if (o.value === f.value) opt.selected = true;
+          input.appendChild(opt);
+        });
+      } else if (f.type === 'textarea') {
+        input = document.createElement('textarea');
+        input.rows = 2;
+        input.value = f.value || '';
+      } else {
+        input = document.createElement('input');
+        input.type = f.type || 'text';
+        input.value = f.value || '';
+        if (f.placeholder) input.placeholder = f.placeholder;
+      }
+      input.dataset.field = f.key;
+      wrap.appendChild(input);
+      // Optional follow-up (e.g., custom service text)
+      if (f.followUp) {
+        const followWrap = document.createElement('div');
+        followWrap.className = 'modal-field';
+        followWrap.style.display = 'none';
+        followWrap.dataset.followUpFor = f.key;
+        const followLbl = document.createElement('label');
+        followLbl.textContent = f.followUp.label;
+        const followInput = document.createElement('input');
+        followInput.type = 'text';
+        followInput.placeholder = f.followUp.placeholder || '';
+        followInput.dataset.field = f.followUp.key;
+        followWrap.appendChild(followLbl);
+        followWrap.appendChild(followInput);
+        wrap.appendChild(followWrap);
+        input.addEventListener('change', () => {
+          followWrap.style.display = (input.value === f.followUp.triggerValue) ? 'flex' : 'none';
+        });
+      }
+      modalBody.appendChild(wrap);
+    });
+    modalOnConfirm = onConfirm || null;
+    modalHost.style.display = 'flex';
+  }
+
+  function closeModal() {
+    modalHost.style.display = 'none';
+    modalOnConfirm = null;
+  }
+
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-confirm').addEventListener('click', () => {
+    const data = {};
+    modalBody.querySelectorAll('[data-field]').forEach(input => {
+      data[input.dataset.field] = input.value;
+    });
+    if (modalOnConfirm) modalOnConfirm(data);
+    closeModal();
+  });
+  modalHost.addEventListener('click', (e) => { if (e.target === modalHost) closeModal(); });
+
+  // ---------------- View toggle ----------------
+  document.querySelectorAll('.toggle-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.dataset.viewTarget;
+      document.body.dataset.view = view;
+      document.querySelectorAll('.toggle-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.view = view;
+    });
+  });
+
+  // ---------------- Add vendor ----------------
+  function openAddVendor() {
+    const serviceOptions = [{ value: '', label: 'Choose a service…' }]
+      .concat(CANONICAL_SERVICES.map(s => ({ value: s, label: s.replace(/_/g, ' ') })))
+      .concat([{ value: 'custom', label: '+ Custom service…' }]);
+
+    openModal({
+      eyebrow: 'NEW VENDOR',
+      title: 'Add vendor',
+      fields: [
+        { key: 'name', label: 'Vendor name', type: 'text', placeholder: 'e.g., Bloom & Burlap Florals' },
+        { key: 'category', label: 'Service category', type: 'select', options: serviceOptions, value: '',
+          followUp: { key: 'customCategory', label: 'Custom category name', placeholder: 'e.g., Bibingka cart', triggerValue: 'custom' } },
+        { key: 'contact', label: 'Contact (name · phone)', type: 'text', placeholder: 'Mike Domingo · 0928 117 4421' },
+        { key: 'package', label: 'Package amount (₱)', type: 'text', placeholder: '85,000' },
+        { key: 'paymentMethod', label: 'Payment method', type: 'select', options: [
+          { value: 'gcash', label: 'GCash' }, { value: 'bank', label: 'Bank transfer' },
+          { value: 'cash', label: 'Cash' }, { value: 'card', label: 'Credit / debit card' }
+        ], value: 'gcash' }
+      ],
+      confirmLabel: 'Add vendor',
+      onConfirm: (data) => {
+        if (!data.name) { toast('Vendor name required', 'warn'); return; }
+        const cat = data.category === 'custom' ? (data.customCategory || 'Custom service') : (data.category || 'Custom service').replace(/_/g, ' ');
+        addVendorRow({ name: data.name, category: cat, contact: data.contact || '', total: data.package || '0', method: data.paymentMethod });
+        toast('Vendor added', 'success');
+      }
+    });
+  }
+
+  function addVendorRow(v) {
+    const id = 'v_' + Date.now();
+    state.vendors.push({ id, ...v, milestones: [], meetings: [] });
+    // Append to the .vendor-table
+    const table = document.querySelector('.vendor-table');
+    if (!table) return;
+    const row = document.createElement('div');
+    row.className = 'vt-row added-row';
+    row.dataset.vendorId = id;
+    row.innerHTML = `
+      <div class="vt-name">
+        <div class="name">${escapeHtml(v.name)}</div>
+        <div class="contact">${escapeHtml(v.contact)}</div>
+      </div>
+      <div class="services-chips">
+        <span class="svc-chip">${escapeHtml(v.category)}</span>
+      </div>
+      <div class="package-cell">
+        <div class="total">₱${escapeHtml(v.total)} · ₱0 paid</div>
+        <div class="progress"><span style="width: 0%;"></span></div>
+      </div>
+      <div class="deadline-cell">
+        <div class="due">Reservation pending</div>
+        <div class="lbl">Add a milestone →</div>
+      </div>
+      <div><span class="status-pill lead">Lead</span></div>
+    `;
+    row.addEventListener('click', () => selectVendorRow(row));
+    table.appendChild(row);
+    selectVendorRow(row);
+  }
+
+  function selectVendorRow(row) {
+    document.querySelectorAll('.vt-row').forEach(r => r.classList.remove('selected'));
+    row.classList.add('selected');
+    const name = row.querySelector('.name')?.textContent || 'Vendor';
+    // Update drawer header name (visual feedback)
+    const drawerH3 = document.querySelector('.drawer h3');
+    if (drawerH3) drawerH3.textContent = name;
+    state.selectedVendor = name;
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  // Wire all "+ Add vendor" buttons
+  document.querySelectorAll('button, .add-btn').forEach(btn => {
+    const txt = (btn.textContent || '').trim();
+    if (/Add vendor/i.test(txt) || (btn.classList.contains('add-btn') && txt === '＋')) {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); openAddVendor(); });
+    }
+  });
+
+  // ---------------- Vendor list expand on click ----------------
+  document.querySelectorAll('.vt-row').forEach(row => {
+    row.addEventListener('click', () => selectVendorRow(row));
+  });
+  document.querySelectorAll('.m-vendor-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.m-vendor-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      const name = card.querySelector('.vn')?.textContent || 'Vendor';
+      toast('Opening ' + name + '…');
+    });
+  });
+
+  // ---------------- Add milestone ----------------
+  function openAddMilestone(targetList) {
+    openModal({
+      eyebrow: 'NEW MILESTONE',
+      title: 'Add payment milestone',
+      fields: [
+        { key: 'label', label: 'Label', type: 'text', placeholder: 'e.g., 1st partial' },
+        { key: 'date', label: 'Due date', type: 'date' },
+        { key: 'amount', label: 'Amount (₱)', type: 'text', placeholder: '20,000' }
+      ],
+      confirmLabel: 'Add milestone',
+      onConfirm: (data) => {
+        if (!data.label) { toast('Label required', 'warn'); return; }
+        const ms = document.createElement('div');
+        ms.className = 'milestone';
+        ms.innerHTML = `
+          <span class="ms-dot"></span>
+          <div class="ms-body">
+            <div class="ms-label">${escapeHtml(data.label)}</div>
+            <div class="ms-meta">Due ${escapeHtml(data.date || '—')}</div>
+          </div>
+          <div class="ms-amount">₱${escapeHtml(data.amount || '0')}</div>
+          <button class="ms-action">Mark paid</button>
+        `;
+        targetList.appendChild(ms);
+        wireMilestonePaid(ms.querySelector('.ms-action'));
+        toast('Milestone added', 'success');
+      }
+    });
+  }
+
+  // Wire "+ Add milestone" headers
+  document.querySelectorAll('.drawer-section h4 button, .m-section h5 button').forEach(btn => {
+    const txt = (btn.textContent || '').trim();
+    const section = btn.closest('.drawer-section, .m-section');
+    if (!section) return;
+    const heading = section.querySelector('h4, h5')?.textContent.toLowerCase() || '';
+    if (/add milestone|＋ add/i.test(txt) && heading.includes('milestone') || heading.includes('payment')) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const list = section.querySelector('.milestones, .m-milestone-list, .m-section') || section;
+        // Find the actual milestones container
+        let target = section.querySelector('.milestones');
+        if (!target) {
+          target = document.createElement('div');
+          target.className = 'milestones';
+          section.appendChild(target);
+        }
+        if (txt === 'Edit') return; // skip the edit button
+        openAddMilestone(target);
+      });
+    }
+  });
+
+  // ---------------- Mark paid toggle on milestones ----------------
+  function wireMilestonePaid(btn) {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const ms = btn.closest('.milestone, .m-milestone');
+      if (!ms) return;
+      if (btn.textContent.trim() === 'Mark paid') {
+        ms.classList.add('paid');
+        ms.classList.remove('due-soon', 'overdue');
+        btn.textContent = 'Receipt';
+        toast('Marked paid', 'success');
+      } else if (btn.textContent.trim() === 'Receipt') {
+        ms.classList.remove('paid');
+        btn.textContent = 'Mark paid';
+        toast('Marked unpaid');
+      }
+    });
+  }
+  document.querySelectorAll('.milestone .ms-action, .m-milestone .ms-action').forEach(wireMilestonePaid);
+
+  // ---------------- Add meeting ----------------
+  function openAddMeeting(targetList) {
+    openModal({
+      eyebrow: 'NEW MEETING',
+      title: 'Schedule a meeting',
+      fields: [
+        { key: 'title', label: 'Title', type: 'text', placeholder: 'e.g., Floral mockup' },
+        { key: 'datetime', label: 'Date & time', type: 'datetime-local' },
+        { key: 'mode', label: 'Mode', type: 'select', options: [
+          { value: 'in_person', label: 'In-person' },
+          { value: 'video', label: 'Video' },
+          { value: 'phone', label: 'Phone' }
+        ], value: 'in_person' },
+        { key: 'location', label: 'Location / link', type: 'text', placeholder: 'Address or URL' },
+        { key: 'agenda', label: 'Agenda', type: 'textarea', placeholder: 'What you want to cover' }
+      ],
+      confirmLabel: 'Add meeting',
+      onConfirm: (data) => {
+        if (!data.title) { toast('Title required', 'warn'); return; }
+        const meetingDate = data.datetime ? new Date(data.datetime) : null;
+        const isPast = meetingDate && meetingDate < NOW;
+        const modeIcon = data.mode === 'video' ? '📹' : (data.mode === 'phone' ? '📞' : '📍');
+        const modeLabel = data.mode === 'video' ? 'Video' : (data.mode === 'phone' ? 'Phone' : 'In person');
+        const row = document.createElement('div');
+        row.className = 'meeting-row' + (isPast ? ' past-now past-unconfirmed' : ' next');
+        row.innerHTML = `
+          <div class="mode-icn" title="${modeLabel}">${modeIcon}</div>
+          <div class="m-body">
+            <div class="m-title">${escapeHtml(data.title)}</div>
+            <div class="m-meta">${escapeHtml(data.datetime || 'TBD')}${isPast ? ' · Past — confirm outcome' : ''} · ${escapeHtml(data.location || '')}</div>
+            <div class="m-attendees">Agenda: ${escapeHtml(data.agenda || '—')}</div>
+          </div>
+          <button class="m-action">${isPast ? 'Mark done' : 'Open'}</button>
+        `;
+        targetList.appendChild(row);
+        wireMeetingButton(row.querySelector('.m-action'));
+        toast(isPast ? 'Meeting added (past — confirm)' : 'Meeting added', 'success');
+      }
+    });
+  }
+
+  // Wire "+ Add meeting" headers
+  document.querySelectorAll('.drawer-section h4 button, .m-section h5 button').forEach(btn => {
+    const txt = (btn.textContent || '').trim();
+    const section = btn.closest('.drawer-section, .m-section');
+    if (!section) return;
+    const heading = section.querySelector('h4, h5')?.textContent.toLowerCase() || '';
+    if (/＋ add/i.test(txt) && (heading.includes('meeting'))) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        let target = section.querySelector('.meetings-list');
+        if (!target) {
+          target = document.createElement('div');
+          target.className = 'meetings-list';
+          const insertBefore = section.querySelector('.meeting-modal-preview');
+          if (insertBefore) section.insertBefore(target, insertBefore);
+          else section.appendChild(target);
+        }
+        openAddMeeting(target);
+      });
+    }
+  });
+
+  // Mark past meetings amber based on NOW
+  document.querySelectorAll('.meeting-row').forEach(row => {
+    const meta = row.querySelector('.m-meta')?.textContent || '';
+    if (/past|confirm/i.test(meta) && !row.classList.contains('completed')) {
+      row.classList.add('past-now');
+    }
+  });
+
+  function wireMeetingButton(btn) {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const row = btn.closest('.meeting-row');
+      const txt = btn.textContent.trim();
+      if (txt === 'Mark done') {
+        row.classList.remove('past-unconfirmed', 'past-now', 'next');
+        row.classList.add('completed');
+        btn.textContent = 'View notes';
+        toast('Meeting marked done', 'success');
+      } else if (txt === 'Open') {
+        toast('Opening meeting…');
+      } else if (txt === 'View notes') {
+        toast('Notes — coming soon');
+      }
+    });
+  }
+  document.querySelectorAll('.meeting-row .m-action').forEach(wireMeetingButton);
+
+  // ---------------- Crew meal live calc ----------------
+  const crewBlock = document.querySelector('.crew-block');
+  if (crewBlock) {
+    // Wrap the static numbers with editable inputs (shadow inputs that mirror)
+    const crewCells = crewBlock.querySelectorAll('.crew-cell');
+    if (crewCells.length >= 2) {
+      const crewCountCell = crewCells[0];
+      const perMealCell = crewCells[1];
+      const totalCell = crewCells[2];
+      const toggleEl = crewBlock.querySelector('.crew-toggle');
+
+      const crewCountV = crewCountCell.querySelector('.v');
+      const perMealV = perMealCell.querySelector('.v');
+
+      // Make them clickable / editable with prompt
+      [crewCountV, perMealV].forEach(el => {
+        if (!el) return;
+        el.style.cursor = 'pointer';
+        el.title = 'Click to edit';
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isCount = (el === crewCountV);
+          const current = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10) || 0;
+          const next = window.prompt(isCount ? 'Crew count' : 'Per-meal cost (₱)', String(current));
+          if (next == null) return;
+          const n = parseInt(next, 10);
+          if (isNaN(n) || n < 0) { toast('Enter a positive number', 'warn'); return; }
+          el.textContent = isCount ? String(n) : '₱' + n.toLocaleString();
+          recomputeCrewMeal();
+        });
+      });
+
+      function recomputeCrewMeal() {
+        const count = parseInt((crewCountV?.textContent || '0').replace(/[^0-9]/g, ''), 10) || 0;
+        const per = parseInt((perMealV?.textContent || '0').replace(/[^0-9]/g, ''), 10) || 0;
+        const optedOut = toggleEl && toggleEl.classList.contains('off');
+        const total = optedOut ? 0 : count * per;
+        if (totalCell) {
+          const v = totalCell.querySelector('.v');
+          if (v) v.textContent = optedOut ? '₱0 (vendor provides)' : (count + ' × ₱' + per + ' = ₱' + total.toLocaleString());
+        }
+      }
+
+      // Wire toggle
+      if (toggleEl) {
+        toggleEl.style.cursor = 'pointer';
+        toggleEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleEl.classList.toggle('off');
+          const isOff = toggleEl.classList.contains('off');
+          const strong = toggleEl.querySelector('strong');
+          if (strong) strong.textContent = isOff ? 'on' : 'off';
+          recomputeCrewMeal();
+          toast(isOff ? 'Vendor provides own meals — contribution zeroed' : 'Vendor opt-out cleared');
+        });
+      }
+    }
+  }
+
+  // ---------------- Filter chips ----------------
+  document.querySelectorAll('.filter-chip, .m-pill').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Sort chip is a special chip that opens a menu — toast for now
+      const txt = (chip.textContent || '').trim();
+      if (/^Sort:/i.test(txt)) {
+        toast(txt + ' — coming soon');
+        return;
+      }
+      const group = chip.parentElement;
+      group.querySelectorAll('.filter-chip, .m-pill').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const filterName = txt.split('·')[0].split(/\s+\d/)[0].trim();
+      state.activeFilter = filterName;
+      // Visual: dim non-matching vendor rows
+      applyVendorFilter();
+      toast('Filter · ' + filterName);
+    });
+  });
+
+  function applyVendorFilter() {
+    const f = state.activeFilter || 'All';
+    document.querySelectorAll('.vt-row, .m-vendor-card').forEach(row => {
+      let show = true;
+      const text = row.textContent || '';
+      if (f === 'Booked') show = /\bBooked\b/.test(text);
+      else if (f === 'Lead') show = /\bLead\b/.test(text);
+      else if (f === 'Overdue') show = /overdue/i.test(text);
+      else if (f === 'Due ≤ 30d') show = /\b\d{1,2}d\b|overdue/.test(text);
+      row.style.display = show ? '' : 'none';
+    });
+  }
+
+  // ---------------- Coverage tabs ----------------
+  document.querySelectorAll('.cov-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.stopPropagation();
+      tab.parentElement.querySelectorAll('.cov-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      toast(tab.textContent.trim());
+    });
+  });
+
+  // ---------------- Coverage cards ----------------
+  document.querySelectorAll('.cov-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (card.classList.contains('add-custom')) {
+        openModal({
+          eyebrow: 'CUSTOM SERVICE',
+          title: 'Add custom service',
+          fields: [
+            { key: 'name', label: 'Service name', type: 'text', placeholder: 'e.g., Bibingka cart' },
+            { key: 'vendor', label: 'Vendor (optional)', type: 'text', placeholder: 'Leave blank if not yet booked' }
+          ],
+          confirmLabel: 'Add service',
+          onConfirm: (data) => {
+            if (!data.name) { toast('Service name required', 'warn'); return; }
+            // Append a new gap card before the add-custom tile
+            const grid = document.querySelector('.coverage-grid');
+            const addTile = grid?.querySelector('.cov-card.add-custom');
+            const card2 = document.createElement('div');
+            card2.className = 'cov-card ' + (data.vendor ? 'booked' : 'gap');
+            card2.innerHTML = `
+              <div class="cov-status">${data.vendor ? 'Booked' : 'Gap'}</div>
+              <div class="cov-label">Custom service</div>
+              <div class="cov-name">${escapeHtml(data.name)}</div>
+              <div class="cov-vendor${data.vendor ? '' : ' empty'}">${escapeHtml(data.vendor || 'Not yet booked — tap to assign')}</div>
+            `;
+            grid.insertBefore(card2, addTile);
+            toast('Custom service added', 'success');
+          }
+        });
+        return;
+      }
+      const name = card.querySelector('.cov-name')?.textContent || 'service';
+      const status = card.querySelector('.cov-status')?.textContent || '';
+      if (/Gap/i.test(status)) {
+        openModal({
+          eyebrow: 'ASSIGN VENDOR',
+          title: 'Assign vendor for ' + name,
+          fields: [
+            { key: 'name', label: 'Vendor name', type: 'text', placeholder: 'Who will provide ' + name + '?' },
+            { key: 'status', label: 'Status', type: 'select', options: [
+              { value: 'lead', label: 'Lead' }, { value: 'booked', label: 'Booked' },
+              { value: 'not_needed', label: 'Not needed (mark service as opted out)' }
+            ], value: 'lead' }
+          ],
+          confirmLabel: 'Save',
+          onConfirm: (data) => {
+            if (data.status === 'not_needed') {
+              card.classList.remove('gap', 'lead', 'booked');
+              card.classList.add('not-needed');
+              card.querySelector('.cov-status').textContent = 'Not needed';
+              card.querySelector('.cov-vendor').textContent = 'Couple opted out';
+              card.querySelector('.cov-vendor').classList.remove('empty');
+              toast(name + ' marked not needed');
+              return;
+            }
+            if (!data.name) { toast('Vendor name required', 'warn'); return; }
+            card.classList.remove('gap');
+            card.classList.add(data.status);
+            card.querySelector('.cov-status').textContent = data.status === 'booked' ? 'Booked' : 'Lead';
+            const vendorEl = card.querySelector('.cov-vendor');
+            vendorEl.textContent = data.name;
+            vendorEl.classList.remove('empty');
+            toast(name + ' assigned to ' + data.name, 'success');
+          }
+        });
+      } else {
+        toast(name + ' · ' + status);
+      }
+    });
+  });
+
+  // ---------------- Mobile bottom tabs ----------------
+  document.querySelectorAll('.m-tab, .m-tabbar button').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.stopPropagation();
+      tab.parentElement.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const lbl = tab.querySelector('span:last-child')?.textContent || tab.textContent.trim();
+      toast(lbl + ' tab');
+    });
+  });
+
+  // Top mobile add button (＋)
+  document.querySelectorAll('.m-header .add-btn').forEach(b => {
+    b.addEventListener('click', (e) => { e.stopPropagation(); openAddVendor(); });
+  });
+
+  // ---------------- Search input ----------------
+  const searchInput = document.querySelector('.search-box input');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim().toLowerCase();
+      document.querySelectorAll('.vt-row').forEach(row => {
+        const t = row.textContent.toLowerCase();
+        row.style.display = (!q || t.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+
+  // ---------------- Generic fallback for any unwired button ----------------
+  document.querySelectorAll('button').forEach(btn => {
+    if (btn.dataset.wired) return;
+    btn.dataset.wired = 'true';
+    btn.addEventListener('click', (e) => {
+      const txt = (btn.textContent || '').trim().slice(0, 50);
+      // skip already-handled
+      if (btn.closest('#modal-host')) return;
+      if (btn.classList.contains('toggle-pill')) return;
+      if (btn.classList.contains('filter-chip') || btn.classList.contains('m-pill')) return;
+      if (btn.classList.contains('cov-tab')) return;
+      if (btn.classList.contains('m-tab')) return;
+      if (btn.classList.contains('ms-action') || btn.classList.contains('m-action')) return;
+      // Skip if a more specific listener already toasted (we just no-op)
+      setTimeout(() => {
+        if (txt && !btn._handled) {
+          // Don't blast the user with toasts if something is happening
+        }
+      }, 0);
+      // Specific common labels
+      if (/Edit/i.test(txt) && txt.length < 8) { toast('Edit — coming soon'); return; }
+      if (/Reschedule/i.test(txt)) { toast('Reschedule — coming soon'); return; }
+      if (/Receipt/i.test(txt)) { toast('Receipt opened'); return; }
+      if (/Export CSV/i.test(txt)) { toast('Export CSV — coming soon'); return; }
+      if (/Service coverage/i.test(txt) && txt.length < 30) { toast('Switching to coverage view…'); return; }
+      if (/Upload/i.test(txt)) { toast('Upload — coming soon'); return; }
+      if (/Download|Open/i.test(txt) && txt.length < 12) { toast(txt + ' — coming soon'); return; }
+      if (/Mark done|Done|Open/i.test(txt) && txt.length < 10) { return; }
+      if (/＋|Add/i.test(txt)) { toast(txt.replace(/＋/, 'Add') + ' — coming soon'); return; }
+      if (txt) toast(txt + ' — coming soon');
+    });
+  });
+
+  // Anchor links (.dl, dash-nav-link) → toast
+  document.querySelectorAll('a.dl, a.dash-nav-link, .back, .m-detail-page .back').forEach(a => {
+    a.style.cursor = 'pointer';
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const t = (a.textContent || '').trim();
+      if (a.classList.contains('dash-nav-link')) {
+        // Switch active dashboard tab
+        a.parentElement.querySelectorAll('.dash-nav-link').forEach(l => l.classList.remove('active'));
+        a.classList.add('active');
+        toast(t + ' · navigating');
+      } else if (a.classList.contains('dl')) {
+        toast('Downloading ' + t + '…');
+      } else {
+        toast(t + ' — coming soon');
+      }
+    });
+  });
+
+  // Vendor table row right-side avatar / pill click should not steal row click
+  // already handled by stopPropagation on internal buttons
+</script>
+
+</body>
+</html>

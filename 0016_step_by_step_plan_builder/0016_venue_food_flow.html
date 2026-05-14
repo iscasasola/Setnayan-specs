@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan · Venue + Food Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --page-bg: #F2EBDF;
+  --canvas: #FAF6F0;
+  --canvas-soft: #F5EFE5;
+  --ink: #1A1A1A;
+  --ink-soft: #6B6B6B;
+  --ink-faint: #A39B8E;
+  --accent: #C97B4B;
+  --accent-soft: #E8C9B0;
+  --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08);
+  --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F3;
+  --gold: #B8965E;
+  --green: #5BA962;
+  --green-soft: #DDEFDD;
+  --green-deep: #2F6F36;
+  --amber: #C8A14F;
+  --amber-soft: #F5EBD0;
+  --amber-deep: #8C6A20;
+  --blue: #4D7BA1;
+  --blue-soft: #DCE7F0;
+  --shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.04);
+  --shadow-md: 0 12px 32px rgba(26, 26, 26, 0.08);
+  --shadow-lg: 0 28px 72px rgba(26, 26, 26, 0.12);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--page-bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Page wrapper */
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 56px 32px 96px;
+}
+
+.title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+  margin-top: 12px;
+}
+.intro {
+  margin-top: 32px;
+  max-width: 760px;
+  font-size: 16px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.intro b { color: var(--ink); font-weight: 600; }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--canvas);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.flow-rail {
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Step section */
+.step {
+  position: relative;
+  padding: 48px 0;
+  border-top: 1px dashed var(--rule-strong);
+}
+.step:first-child { border-top: none; padding-top: 0; }
+
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.step-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 56px;
+  font-weight: 500;
+  line-height: 0.9;
+  color: var(--accent);
+  flex-shrink: 0;
+  width: 96px;
+}
+.step-titles {
+  flex: 1;
+  padding-top: 6px;
+}
+.step-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  margin-bottom: 8px;
+}
+.step-caption {
+  font-size: 14px;
+  color: var(--ink-soft);
+  max-width: 720px;
+  line-height: 1.6;
+}
+.step-trigger {
+  margin-top: 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent-deep);
+  display: inline-block;
+  padding: 6px 12px;
+  background: var(--accent-soft);
+  border-radius: 6px;
+}
+
+/* Frame area */
+.frames {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 1080px) {
+  .frames { grid-template-columns: 1fr; }
+}
+
+.frame {
+  background: var(--canvas);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.frame-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--canvas-soft);
+  border-bottom: 1px solid var(--rule);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+}
+.frame-body {
+  padding: 20px;
+  background: var(--canvas);
+}
+
+.frame-mobile { width: 100%; }
+.frame-mobile .frame-body { padding: 14px; }
+
+/* Mockup chrome */
+.mock-chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 16px;
+}
+.mock-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+}
+.mock-step-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  background: var(--surface-soft);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Page section heading inside mock */
+.mock-h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.mock-frame-mobile .mock-h1 { font-size: 20px; }
+.mock-meta {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+.mock-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  padding: 4px 10px;
+  border-radius: 100px;
+  margin-bottom: 16px;
+}
+
+/* Section group inside venue browse */
+.mock-section { margin-top: 18px; }
+.mock-section-head {
+  margin-bottom: 10px;
+}
+.mock-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+}
+.mock-section-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+/* Venue card */
+.v-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  margin-bottom: 10px;
+  position: relative;
+}
+.v-mobile .v-card {
+  grid-template-columns: 1fr;
+}
+.v-photo {
+  background: linear-gradient(135deg, var(--accent-soft), var(--gold));
+  height: 100%;
+  min-height: 110px;
+  position: relative;
+}
+.v-mobile .v-photo {
+  height: 86px;
+  background: linear-gradient(135deg, var(--accent-soft), var(--gold));
+}
+.v-photo.gradient-2 { background: linear-gradient(135deg, #C8D7C0, #8FA68A); }
+.v-photo.gradient-3 { background: linear-gradient(135deg, #E5D5C2, #B89B7C); }
+.v-photo.gradient-4 { background: linear-gradient(135deg, #DCE0C0, #A8B098); }
+.v-photo.gradient-5 { background: linear-gradient(135deg, #EBC8B5, #C49B85); }
+.v-body {
+  padding: 12px 14px;
+}
+.v-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.15;
+  margin-bottom: 2px;
+}
+.v-mobile .v-name { font-size: 15px; }
+.v-loc {
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.v-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  gap: 10px;
+}
+.v-cap {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.v-price {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.v-rating {
+  font-size: 11px;
+  color: var(--ink-soft);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.v-rating .star { color: var(--accent); }
+.v-verified {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.v-food {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 100px;
+  margin-bottom: 6px;
+}
+.v-food.included { background: var(--green-soft); color: var(--green-deep); }
+.v-food.exclusive { background: var(--blue-soft); color: var(--blue); }
+.v-food.preferred { background: var(--amber-soft); color: var(--amber-deep); }
+.v-food.open { background: var(--rule); color: var(--ink-soft); }
+
+.v-includes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.v-inc-chip {
+  font-size: 9px;
+  font-weight: 500;
+  background: var(--canvas-soft);
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.v-inc-chip.empty { color: var(--ink-faint); font-style: italic; }
+.v-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+}
+.v-heart, .v-add {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 1px solid var(--rule);
+}
+.v-add { background: var(--ink); color: white; font-size: 16px; }
+
+/* Step 2 — venue detail */
+.detail-hero {
+  height: 140px;
+  background: linear-gradient(135deg, #E5D5C2, #B89B7C);
+  position: relative;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.detail-hero .badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: rgba(255,255,255,0.92);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--accent-deep);
+}
+.detail-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.detail-line {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+.detail-total {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.detail-total-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+}
+.detail-includes-h {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+}
+.detail-includes-list {
+  list-style: none;
+  padding: 12px 14px;
+  background: var(--canvas-soft);
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.detail-includes-list li {
+  font-size: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  color: var(--ink);
+}
+.detail-includes-list li::before {
+  content: '✓';
+  color: var(--green-deep);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.detail-cta {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  background: var(--ink);
+  color: white;
+  text-align: center;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.detail-cta-secondary {
+  display: block;
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  color: var(--ink);
+  text-align: center;
+  border-radius: 100px;
+  font-weight: 500;
+  font-size: 12px;
+  margin-top: 8px;
+  border: 1px solid var(--rule-strong);
+}
+
+/* Step 3/4 — plan summary */
+.plan-locked-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--green-deep);
+}
+.plan-locked-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.plan-locked-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+.plan-locked-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--green-deep);
+}
+.plan-locked-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.plan-bundled-strip {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.plan-bundled-strip .v-inc-chip {
+  background: var(--green-soft);
+  border-color: var(--green-soft);
+  color: var(--green-deep);
+}
+
+.plan-progress {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-deep);
+  margin: 18px 0 10px;
+}
+
+.plan-list {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.plan-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+.plan-row:last-child { border-bottom: none; }
+.plan-row-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.plan-row.done .plan-row-icon {
+  background: var(--green-soft);
+  color: var(--green-deep);
+  font-weight: 700;
+}
+.plan-row.bundled .plan-row-icon {
+  background: var(--green-soft);
+  color: var(--green-deep);
+  font-weight: 700;
+}
+.plan-row.open .plan-row-icon {
+  background: var(--canvas-soft);
+  color: var(--ink-faint);
+}
+.plan-row.next .plan-row-icon {
+  background: var(--accent);
+  color: white;
+}
+.plan-row-title { flex: 1; font-weight: 500; }
+.plan-row-meta { font-size: 11px; color: var(--ink-faint); }
+.plan-row.bundled .plan-row-title { color: var(--ink-soft); }
+.plan-row.next { background: rgba(201, 123, 75, 0.06); }
+
+/* Step 5 — catering browse */
+.cat-headline {
+  background: var(--green-soft);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.cat-headline-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cat-headline-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--green-deep);
+}
+.cat-headline-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--green-deep);
+}
+.cat-headline-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+.cat-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cat-card-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent-soft), var(--gold));
+  flex-shrink: 0;
+}
+.cat-card-thumb.g2 { background: linear-gradient(135deg, #C8D7C0, #8FA68A); }
+.cat-card-thumb.g3 { background: linear-gradient(135deg, #E5D5C2, #B89B7C); }
+.cat-card-body { flex: 1; min-width: 0; }
+.cat-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.cat-card-meta {
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+.cat-card-price {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cat-toggle {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--canvas-soft);
+  border: 1px dashed var(--rule-strong);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.cat-toggle-text {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.cat-toggle-text b { color: var(--ink); }
+.cat-toggle-text .corkage {
+  display: block;
+  font-size: 10px;
+  color: var(--amber-deep);
+  margin-top: 2px;
+}
+.cat-toggle-arrow {
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+/* Step 6 — comparison */
+.comp-table {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 12px;
+}
+.comp-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  background: var(--canvas-soft);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+}
+.comp-head-cell {
+  padding: 12px 14px;
+  border-right: 1px solid var(--rule);
+}
+.comp-head-cell:last-child { border-right: none; }
+.comp-head-cell.col-2 { color: var(--accent-deep); font-weight: 600; }
+.comp-head-cell.col-3 { color: var(--ink); font-weight: 600; }
+.comp-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-top: 1px solid var(--rule);
+}
+.comp-cell {
+  padding: 10px 14px;
+  border-right: 1px solid var(--rule);
+}
+.comp-cell:last-child { border-right: none; }
+.comp-cell.label { color: var(--ink-soft); }
+.comp-cell .ok { color: var(--green-deep); font-weight: 600; }
+.comp-cell .add { color: var(--ink); font-family: 'DM Mono', monospace; }
+.comp-row.total {
+  background: var(--canvas-soft);
+  font-weight: 700;
+}
+.comp-row.total .comp-cell {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+}
+
+.comp-takeaway {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--green-soft);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--green-deep);
+  font-weight: 500;
+}
+.comp-takeaway b { font-family: 'DM Mono', monospace; }
+
+/* Mobile-specific resizes */
+.mock-frame-mobile .v-card {
+  display: flex;
+  flex-direction: column;
+}
+.mock-frame-mobile .v-card .v-photo {
+  width: 100%;
+  height: 80px;
+}
+.mock-frame-mobile .detail-hero { height: 100px; }
+.mock-frame-mobile .detail-name { font-size: 18px; }
+.mock-frame-mobile .detail-total { font-size: 16px; }
+
+/* Small note pinned beneath each frame */
+.frame-note {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-style: italic;
+  padding: 0 8px;
+}
+
+/* Bottom nav (mock mobile) */
+.mock-bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0 4px;
+  border-top: 1px solid var(--rule);
+  margin-top: 14px;
+}
+.mock-nav-item {
+  font-size: 10px;
+  color: var(--ink-faint);
+  text-align: center;
+}
+.mock-nav-item.active { color: var(--accent); }
+.mock-nav-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--canvas-soft);
+  margin: 0 auto 4px;
+}
+.mock-nav-item.active .mock-nav-icon { background: var(--accent); }
+
+/* Annotation flag */
+.flag {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--canvas);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.flag b { color: var(--ink); font-weight: 600; }
+
+footer {
+  margin-top: 96px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule-strong);
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="title">Venue + Food Flow</div>
+  <div class="subtitle">0016 · Step-by-Step Plan Builder · Storyboard</div>
+
+  <p class="intro">
+    Six screens, end-to-end. Couple has finished the intake wizard
+    (200 guests, Manila, Grand &amp; Beautiful tier, ₱600K target) and
+    landed on the <b>Reception Venue</b> step. The flow proves how the
+    food arrangement on the venue auto-routes everything that comes
+    after — including <b>which categories the couple even has to shop
+    for</b>.
+  </p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background: var(--green-deep);"></span>Food included / Bundled</div>
+    <div class="legend-item"><span class="legend-dot" style="background: var(--blue);"></span>Exclusive caterer (no outside)</div>
+    <div class="legend-item"><span class="legend-dot" style="background: var(--amber);"></span>Preferred + corkage for outside</div>
+    <div class="legend-item"><span class="legend-dot" style="background: var(--ink-faint);"></span>Open / Self-sourced</div>
+  </div>
+
+  <div class="flow-rail">
+
+    <!-- ============ STEP 1 — Reception venue browse ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">01</div>
+        <div class="step-titles">
+          <div class="step-title">Reception Venue · Browse</div>
+          <p class="step-caption">
+            Three sections, ordered by tier fit. Grand &amp; Beautiful
+            sees Hotels first, Garden Estates second, Restaurants third.
+            Every venue card surfaces its <b>food arrangement</b> and an
+            <b>inclusion badge cluster</b> — couples see at a glance how
+            much the venue absorbs vs how much they'll have to source
+            elsewhere. Don't-undersell rule still holds: every tier
+            sees every type, only the order changes.
+          </p>
+          <span class="step-trigger">Couple lands here · single scrollable page</span>
+        </div>
+      </div>
+
+      <div class="frames">
+        <!-- Desktop -->
+        <div class="frame frame-desktop">
+          <div class="frame-label">
+            <span>Desktop · /dashboard/[event]/plan/reception-venue</span>
+            <span>1280 × auto</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">Plan · Step 2 of 8</div>
+            </div>
+            <div class="mock-tier-badge">Grand &amp; Beautiful · 200 guests · Manila</div>
+            <div class="mock-h1">Reception Venue</div>
+            <div class="mock-meta">Pick the place — and we'll route catering, cake, florals, and the rest based on what your venue includes.</div>
+
+            <!-- Section 1: Hotels -->
+            <div class="mock-section">
+              <div class="mock-section-head">
+                <div class="mock-section-title">Hotels</div>
+                <div class="mock-section-sub">Venue + food + extras in one package · 6 results within range</div>
+              </div>
+
+              <div class="v-card">
+                <div class="v-photo gradient-3"></div>
+                <div class="v-body">
+                  <div class="v-name">Conrad Manila — Forbes Ballroom</div>
+                  <div class="v-loc">Pasay · 4.9★ Verified</div>
+                  <div class="v-meta-row">
+                    <div class="v-cap">Up to 280 guests</div>
+                    <div class="v-price">₱520,000 / 200 pax</div>
+                  </div>
+                  <span class="v-food included">● Food included · 5-course plated</span>
+                  <div class="v-includes">
+                    <span class="v-inc-chip">🎂 Cake</span>
+                    <span class="v-inc-chip">💐 Florals</span>
+                    <span class="v-inc-chip">🚗 Bridal car</span>
+                    <span class="v-inc-chip">🏨 2 suites</span>
+                    <span class="v-inc-chip">🎭 Coordinator</span>
+                    <span class="v-inc-chip">🔊 AV + sound</span>
+                  </div>
+                </div>
+                <div class="v-actions">
+                  <div class="v-heart">♡</div>
+                  <div class="v-add">+</div>
+                </div>
+              </div>
+
+              <div class="v-card">
+                <div class="v-photo gradient-1"></div>
+                <div class="v-body">
+                  <div class="v-name">Manila Hotel — Champagne Room</div>
+                  <div class="v-loc">Ermita · 4.7★ Verified</div>
+                  <div class="v-meta-row">
+                    <div class="v-cap">Up to 300 guests</div>
+                    <div class="v-price">₱560,000 / 200 pax</div>
+                  </div>
+                  <span class="v-food exclusive">● Exclusive caterer · pick from 4-vendor list</span>
+                  <div class="v-includes">
+                    <span class="v-inc-chip">🎂 Cake</span>
+                    <span class="v-inc-chip">💐 Florals</span>
+                    <span class="v-inc-chip">🚗 Bridal car</span>
+                    <span class="v-inc-chip">🏨 2 suites</span>
+                    <span class="v-inc-chip">🎭 Coordinator</span>
+                  </div>
+                </div>
+                <div class="v-actions">
+                  <div class="v-heart">♡</div>
+                  <div class="v-add">+</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: Garden Estates -->
+            <div class="mock-section">
+              <div class="mock-section-head">
+                <div class="mock-section-title">Garden Estates</div>
+                <div class="mock-section-sub">Standalone venue · design freedom, more vendors to source · 4 results</div>
+              </div>
+
+              <div class="v-card">
+                <div class="v-photo gradient-2"></div>
+                <div class="v-body">
+                  <div class="v-name">Hillcreek Gardens, Tagaytay</div>
+                  <div class="v-loc">Tagaytay · 4.6★ Verified</div>
+                  <div class="v-meta-row">
+                    <div class="v-cap">Up to 220 guests</div>
+                    <div class="v-price">₱180,000 venue rent</div>
+                  </div>
+                  <span class="v-food preferred">● Preferred caterers · no corkage from list of 4</span>
+                  <div class="v-includes">
+                    <span class="v-inc-chip">🔊 Sound system</span>
+                    <span class="v-inc-chip">🪑 Basic decor</span>
+                    <span class="v-inc-chip empty">+ source: cake, flowers, car, suites, coordination</span>
+                  </div>
+                </div>
+                <div class="v-actions">
+                  <div class="v-heart">♡</div>
+                  <div class="v-add">+</div>
+                </div>
+              </div>
+
+              <div class="v-card">
+                <div class="v-photo gradient-4"></div>
+                <div class="v-body">
+                  <div class="v-name">Casa Ibarra, Tagaytay</div>
+                  <div class="v-loc">Tagaytay · 4.5★</div>
+                  <div class="v-meta-row">
+                    <div class="v-cap">Up to 250 guests</div>
+                    <div class="v-price">₱150,000 venue rent</div>
+                  </div>
+                  <span class="v-food preferred">● Preferred + outside OK · ₱180/head corkage</span>
+                  <div class="v-includes">
+                    <span class="v-inc-chip">🔊 Sound system</span>
+                    <span class="v-inc-chip empty">+ source: cake, flowers, car, suites, coordination</span>
+                  </div>
+                </div>
+                <div class="v-actions">
+                  <div class="v-heart">♡</div>
+                  <div class="v-add">+</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3: Restaurants -->
+            <div class="mock-section">
+              <div class="mock-section-head">
+                <div class="mock-section-title">Restaurants</div>
+                <div class="mock-section-sub">Intimate, all-inclusive small celebrations · 3 results</div>
+              </div>
+
+              <div class="v-card">
+                <div class="v-photo gradient-5"></div>
+                <div class="v-body">
+                  <div class="v-name">Casa Marcos — Banquet Hall</div>
+                  <div class="v-loc">Quezon City · 4.4★</div>
+                  <div class="v-meta-row">
+                    <div class="v-cap">Up to 100 guests</div>
+                    <div class="v-price">₱220,000 / 100 pax</div>
+                  </div>
+                  <span class="v-food included">● Food included · Filipino classics, family-style</span>
+                  <div class="v-includes">
+                    <span class="v-inc-chip">🎂 Cake</span>
+                    <span class="v-inc-chip">💐 Centerpieces</span>
+                  </div>
+                </div>
+                <div class="v-actions">
+                  <div class="v-heart">♡</div>
+                  <div class="v-add">+</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile -->
+        <div class="frame frame-mobile mock-frame-mobile">
+          <div class="frame-label">
+            <span>Mobile · 380px</span>
+            <span>iPhone 15 Pro</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">2 / 8</div>
+            </div>
+            <div class="mock-tier-badge">Grand &amp; Beautiful</div>
+            <div class="mock-h1">Reception Venue</div>
+            <div class="mock-meta">200 guests · Manila</div>
+
+            <div class="mock-section">
+              <div class="mock-section-head">
+                <div class="mock-section-title">Hotels</div>
+                <div class="mock-section-sub">Bundled · 6 results</div>
+              </div>
+
+              <div class="v-card">
+                <div class="v-photo gradient-3"></div>
+                <div class="v-body">
+                  <div class="v-name">Conrad Manila</div>
+                  <div class="v-loc">Forbes Ballroom · 4.9★</div>
+                  <div class="v-meta-row">
+                    <div class="v-cap">Up to 280</div>
+                    <div class="v-price">₱520K</div>
+                  </div>
+                  <span class="v-food included">● Food included</span>
+                  <div class="v-includes">
+                    <span class="v-inc-chip">Cake</span>
+                    <span class="v-inc-chip">Flowers</span>
+                    <span class="v-inc-chip">Car</span>
+                    <span class="v-inc-chip">Suites</span>
+                    <span class="v-inc-chip">+2</span>
+                  </div>
+                </div>
+                <div class="v-actions">
+                  <div class="v-heart">♡</div>
+                  <div class="v-add">+</div>
+                </div>
+              </div>
+
+              <div class="v-card">
+                <div class="v-photo gradient-1"></div>
+                <div class="v-body">
+                  <div class="v-name">Manila Hotel</div>
+                  <div class="v-loc">Champagne Room · 4.7★</div>
+                  <div class="v-meta-row">
+                    <div class="v-cap">Up to 300</div>
+                    <div class="v-price">₱560K</div>
+                  </div>
+                  <span class="v-food exclusive">● Exclusive caterer</span>
+                  <div class="v-includes">
+                    <span class="v-inc-chip">Cake</span>
+                    <span class="v-inc-chip">Flowers</span>
+                    <span class="v-inc-chip">Suites</span>
+                    <span class="v-inc-chip">+2</span>
+                  </div>
+                </div>
+                <div class="v-actions">
+                  <div class="v-heart">♡</div>
+                  <div class="v-add">+</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mock-section">
+              <div class="mock-section-head">
+                <div class="mock-section-title">Garden Estates</div>
+                <div class="mock-section-sub">Standalone · 4 results</div>
+              </div>
+              <div class="v-card">
+                <div class="v-photo gradient-2"></div>
+                <div class="v-body">
+                  <div class="v-name">Hillcreek Gardens</div>
+                  <div class="v-loc">Tagaytay · 4.6★</div>
+                  <div class="v-meta-row">
+                    <div class="v-cap">Up to 220</div>
+                    <div class="v-price">₱180K rent</div>
+                  </div>
+                  <span class="v-food preferred">● No corkage with preferred list</span>
+                  <div class="v-includes">
+                    <span class="v-inc-chip">Sound</span>
+                    <span class="v-inc-chip empty">+5 to source</span>
+                  </div>
+                </div>
+                <div class="v-actions">
+                  <div class="v-heart">♡</div>
+                  <div class="v-add">+</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mock-bottom-nav">
+              <div class="mock-nav-item active"><div class="mock-nav-icon"></div>Plan</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Guests</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Schedule</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Services</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flag">
+        <b>The food arrangement badge is the most-watched element on the page.</b>
+        It tells the couple what they'll be doing for the next 30 minutes:
+        bundled = nothing more to shop for; exclusive = pick from a short list;
+        preferred + corkage = browse a curated set; open = full search needed.
+      </div>
+    </section>
+
+    <!-- ============ STEP 2 — Venue detail ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">02</div>
+        <div class="step-titles">
+          <div class="step-title">Venue Detail Sheet</div>
+          <p class="step-caption">
+            Couple taps Conrad Manila. Sheet opens with the full
+            inclusion list, total cost for their headcount, and a
+            single primary CTA: <b>Add to Plan</b>. Save-for-later
+            is the secondary action — couples should be encouraged to
+            shortlist 2–3 venues before committing, but not forced to.
+          </p>
+          <span class="step-trigger">Tap any venue card</span>
+        </div>
+      </div>
+
+      <div class="frames">
+        <div class="frame frame-desktop">
+          <div class="frame-label">
+            <span>Desktop · venue detail (modal sheet)</span>
+            <span>720px wide</span>
+          </div>
+          <div class="frame-body">
+            <div class="detail-hero">
+              <div class="badge">4.9★ Verified · Pasay</div>
+            </div>
+            <div class="detail-name">Conrad Manila — Forbes Ballroom</div>
+            <div class="detail-line">Pasay · Capacity 200–280 · Food included (5-course plated)</div>
+            <div class="detail-total">₱520,000</div>
+            <div class="detail-total-sub">Total for 200 guests · ₱2,600/pax all-in</div>
+
+            <div class="detail-includes-h">What's included in this package</div>
+            <ul class="detail-includes-list">
+              <li>Reception venue (Forbes Ballroom · 8 hours)</li>
+              <li>5-course plated dinner for 200 guests</li>
+              <li>4-tier wedding cake (couple's choice of flavor)</li>
+              <li>Centerpiece florals · ceremony arch · aisle florals</li>
+              <li>Bridal Suite (1 night) · Family Suite (1 night)</li>
+              <li>Bridal car (5 hours, with chauffeur)</li>
+              <li>Day-of wedding coordinator</li>
+              <li>Sound system + 4 lavalier mics</li>
+              <li>Basic AV (projector + 2 screens + lighting)</li>
+              <li>Ceremony coordination on-site</li>
+            </ul>
+
+            <button class="detail-cta">Add to plan — ₱520,000</button>
+            <button class="detail-cta-secondary">♡  Save to shortlist</button>
+          </div>
+        </div>
+
+        <div class="frame frame-mobile mock-frame-mobile">
+          <div class="frame-label">
+            <span>Mobile · sheet</span>
+            <span>380px</span>
+          </div>
+          <div class="frame-body">
+            <div class="detail-hero">
+              <div class="badge">4.9★ · Pasay</div>
+            </div>
+            <div class="detail-name">Conrad Manila</div>
+            <div class="detail-line">Forbes Ballroom · 200–280 cap</div>
+            <div class="detail-total">₱520,000</div>
+            <div class="detail-total-sub">For 200 guests · ₱2,600/pax</div>
+
+            <div class="detail-includes-h">Included</div>
+            <ul class="detail-includes-list">
+              <li>Reception venue (8 hrs)</li>
+              <li>5-course plated dinner</li>
+              <li>4-tier wedding cake</li>
+              <li>Centerpieces + arch florals</li>
+              <li>2 hotel suites (1 night)</li>
+              <li>Bridal car (5 hrs)</li>
+              <li>Day-of coordinator</li>
+              <li>Sound + AV + mics</li>
+            </ul>
+
+            <button class="detail-cta">Add to plan</button>
+            <button class="detail-cta-secondary">♡  Save</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STEP 3 — Picked a hotel — auto-bundle fires ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">03</div>
+        <div class="step-titles">
+          <div class="step-title">Plan Summary · After picking a Hotel</div>
+          <p class="step-caption">
+            Conrad Manila → Add to Plan. The plan engine reads the
+            inclusion manifest and <b>auto-marks 6 downstream
+            categories as Bundled</b> — cake, florals, bridal car,
+            suites, coordinator, AV. The list visibly shrinks. The
+            couple's "what's left to plan" feeling drops from 14 items
+            to 7.
+          </p>
+          <span class="step-trigger">+ Add to plan tapped · plan re-renders</span>
+        </div>
+      </div>
+
+      <div class="frames">
+        <div class="frame frame-desktop">
+          <div class="frame-label">
+            <span>Desktop · plan summary view</span>
+            <span>1280px</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">Plan · 9 of 15 handled</div>
+            </div>
+
+            <div class="plan-locked-card">
+              <div class="plan-locked-row">
+                <div class="plan-locked-name">Conrad Manila — Forbes Ballroom</div>
+                <div class="plan-locked-tag">✓ Locked in</div>
+              </div>
+              <div class="plan-locked-sub">₱520,000 · 200 guests · Pasay · Food included</div>
+              <div class="plan-bundled-strip">
+                <span class="v-inc-chip">+ Catering</span>
+                <span class="v-inc-chip">+ Cake</span>
+                <span class="v-inc-chip">+ Reception florals</span>
+                <span class="v-inc-chip">+ Bridal car</span>
+                <span class="v-inc-chip">+ 2 suites</span>
+                <span class="v-inc-chip">+ Coordinator</span>
+                <span class="v-inc-chip">+ AV / sound</span>
+              </div>
+            </div>
+
+            <div class="plan-progress">9 categories handled · 6 left to plan</div>
+
+            <div class="plan-list">
+              <div class="plan-row done">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Reception venue</div>
+                <div class="plan-row-meta">Conrad Manila</div>
+              </div>
+              <div class="plan-row bundled">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Catering</div>
+                <div class="plan-row-meta">Bundled with venue</div>
+              </div>
+              <div class="plan-row bundled">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Wedding cake</div>
+                <div class="plan-row-meta">Bundled · 4-tier</div>
+              </div>
+              <div class="plan-row bundled">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Reception florals</div>
+                <div class="plan-row-meta">Bundled · centerpieces + arch</div>
+              </div>
+              <div class="plan-row bundled">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Bridal car</div>
+                <div class="plan-row-meta">Bundled · 5 hrs</div>
+              </div>
+              <div class="plan-row bundled">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Hotel suites</div>
+                <div class="plan-row-meta">Bundled · 2 suites</div>
+              </div>
+              <div class="plan-row bundled">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Wedding coordinator (day-of)</div>
+                <div class="plan-row-meta">Bundled</div>
+              </div>
+              <div class="plan-row bundled">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">AV / Sound</div>
+                <div class="plan-row-meta">Bundled</div>
+              </div>
+              <div class="plan-row next">
+                <div class="plan-row-icon">→</div>
+                <div class="plan-row-title">Photography</div>
+                <div class="plan-row-meta">Next up · ~₱120K typical</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Videography</div>
+                <div class="plan-row-meta">~₱90K typical</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">HMUA (bride + entourage)</div>
+                <div class="plan-row-meta">~₱45K typical</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Music / Entertainment</div>
+                <div class="plan-row-meta">~₱40K typical</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Attire (bride · groom · entourage)</div>
+                <div class="plan-row-meta">~₱80K typical</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Invitations + stationery</div>
+                <div class="plan-row-meta">~₱18K typical</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Wedding rings</div>
+                <div class="plan-row-meta">External · couple-led</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame frame-mobile mock-frame-mobile">
+          <div class="frame-label">
+            <span>Mobile · plan summary</span>
+            <span>380px</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">9 / 15</div>
+            </div>
+
+            <div class="plan-locked-card">
+              <div class="plan-locked-row">
+                <div class="plan-locked-name">Conrad Manila</div>
+                <div class="plan-locked-tag">✓ Locked</div>
+              </div>
+              <div class="plan-locked-sub">₱520K · Food included</div>
+              <div class="plan-bundled-strip">
+                <span class="v-inc-chip">Cake</span>
+                <span class="v-inc-chip">Flowers</span>
+                <span class="v-inc-chip">Car</span>
+                <span class="v-inc-chip">+4 more</span>
+              </div>
+            </div>
+
+            <div class="plan-progress">9 done · 6 left</div>
+
+            <div class="plan-list">
+              <div class="plan-row done">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Reception</div>
+                <div class="plan-row-meta">Conrad</div>
+              </div>
+              <div class="plan-row bundled">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Catering</div>
+                <div class="plan-row-meta">Bundled</div>
+              </div>
+              <div class="plan-row bundled">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Cake · Flowers · Car</div>
+                <div class="plan-row-meta">+ 3 more bundled</div>
+              </div>
+              <div class="plan-row next">
+                <div class="plan-row-icon">→</div>
+                <div class="plan-row-title">Photography</div>
+                <div class="plan-row-meta">Next up</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Videography</div>
+                <div class="plan-row-meta">~₱90K</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">HMUA</div>
+                <div class="plan-row-meta">~₱45K</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Music</div>
+                <div class="plan-row-meta">~₱40K</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Attire · Invites · Rings</div>
+                <div class="plan-row-meta">3 categories left</div>
+              </div>
+            </div>
+
+            <div class="mock-bottom-nav">
+              <div class="mock-nav-item active"><div class="mock-nav-icon"></div>Plan</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Guests</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Schedule</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Services</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flag">
+        <b>This is the moment the hotel's value lands.</b> Couples comparing
+        ₱520K (Conrad) against ₱180K (Hillcreek) on the previous screen
+        often default to the cheaper number. Watching 6 categories
+        auto-disappear is the visceral proof that the hotel package
+        already absorbed work the garden estate would leave open.
+      </div>
+    </section>
+
+    <!-- ============ STEP 4 — Picked a garden — categories stay open ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">04</div>
+        <div class="step-titles">
+          <div class="step-title">Plan Summary · After picking a Garden Estate</div>
+          <p class="step-caption">
+            Same screen, different outcome. The couple picked Hillcreek
+            Gardens instead. Sound is bundled (the venue's only
+            inclusion); everything else stays open. <b>14 categories
+            still to plan</b>, with Catering surfaced as the next step
+            and badged with "Recommended caterers ready · no corkage"
+            so the path forward is friction-free.
+          </p>
+          <span class="step-trigger">Same screen — different venue chosen</span>
+        </div>
+      </div>
+
+      <div class="frames">
+        <div class="frame frame-desktop">
+          <div class="frame-label">
+            <span>Desktop · plan summary (Hillcreek path)</span>
+            <span>1280px</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">Plan · 1 of 15 handled</div>
+            </div>
+
+            <div class="plan-locked-card">
+              <div class="plan-locked-row">
+                <div class="plan-locked-name">Hillcreek Gardens, Tagaytay</div>
+                <div class="plan-locked-tag">✓ Locked in</div>
+              </div>
+              <div class="plan-locked-sub">₱180,000 venue rent · Tagaytay · Preferred caterers, no corkage</div>
+              <div class="plan-bundled-strip">
+                <span class="v-inc-chip">+ Sound system</span>
+                <span class="v-inc-chip">+ Basic decor</span>
+              </div>
+            </div>
+
+            <div class="plan-progress">1 category handled · 14 left to plan</div>
+
+            <div class="plan-list">
+              <div class="plan-row done">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Reception venue</div>
+                <div class="plan-row-meta">Hillcreek Gardens</div>
+              </div>
+              <div class="plan-row next">
+                <div class="plan-row-icon">→</div>
+                <div class="plan-row-title">Catering</div>
+                <div class="plan-row-meta">Next up · 4 recommended caterers ready · no corkage</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Wedding cake</div>
+                <div class="plan-row-meta">~₱25K typical</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Reception florals</div>
+                <div class="plan-row-meta">~₱70K typical</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Bridal car</div>
+                <div class="plan-row-meta">~₱18K typical</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Hotel suites (Tagaytay)</div>
+                <div class="plan-row-meta">~₱16K · 2 nights</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Wedding coordinator</div>
+                <div class="plan-row-meta">~₱20K typical</div>
+              </div>
+              <div class="plan-row done">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">AV / Sound</div>
+                <div class="plan-row-meta">Confirmed via venue</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Photography · Videography · HMUA · Music</div>
+                <div class="plan-row-meta">4 categories · ~₱295K typical combined</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Attire · Invitations · Rings</div>
+                <div class="plan-row-meta">3 categories left</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame frame-mobile mock-frame-mobile">
+          <div class="frame-label">
+            <span>Mobile · Hillcreek path</span>
+            <span>380px</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">1 / 15</div>
+            </div>
+
+            <div class="plan-locked-card">
+              <div class="plan-locked-row">
+                <div class="plan-locked-name">Hillcreek Gardens</div>
+                <div class="plan-locked-tag">✓ Locked</div>
+              </div>
+              <div class="plan-locked-sub">₱180K rent · No corkage</div>
+              <div class="plan-bundled-strip">
+                <span class="v-inc-chip">Sound</span>
+                <span class="v-inc-chip">Basic decor</span>
+              </div>
+            </div>
+
+            <div class="plan-progress">1 done · 14 left</div>
+
+            <div class="plan-list">
+              <div class="plan-row done">
+                <div class="plan-row-icon">✓</div>
+                <div class="plan-row-title">Reception</div>
+                <div class="plan-row-meta">Hillcreek</div>
+              </div>
+              <div class="plan-row next">
+                <div class="plan-row-icon">→</div>
+                <div class="plan-row-title">Catering</div>
+                <div class="plan-row-meta">Next · 4 ready</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Cake</div>
+                <div class="plan-row-meta">~₱25K</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Florals</div>
+                <div class="plan-row-meta">~₱70K</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Bridal car</div>
+                <div class="plan-row-meta">~₱18K</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">Suites · Coordinator</div>
+                <div class="plan-row-meta">2 categories</div>
+              </div>
+              <div class="plan-row open">
+                <div class="plan-row-icon">○</div>
+                <div class="plan-row-title">+ 7 more categories</div>
+                <div class="plan-row-meta">Photo · Video · HMUA · ...</div>
+              </div>
+            </div>
+
+            <div class="mock-bottom-nav">
+              <div class="mock-nav-item active"><div class="mock-nav-icon"></div>Plan</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Guests</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Schedule</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Services</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flag">
+        <b>The category list itself is the visual contract.</b> 6 left vs
+        14 left tells the couple <i>what kind of wedding planning project
+        they just signed up for</i>. Don't-undersell rule still holds —
+        this is information, not a nudge. Couples who want garden ambiance
+        can see the workload and accept it eyes-open.
+      </div>
+    </section>
+
+    <!-- ============ STEP 5 — Catering category fires ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">05</div>
+        <div class="step-titles">
+          <div class="step-title">Catering · Fires only on the Garden path</div>
+          <p class="step-caption">
+            Hillcreek's preferred caterers headline the page, badged
+            <b>"Recommended by Hillcreek Gardens · No corkage."</b>
+            That's the friction-free path. Below, an outside-caterer
+            disclosure is collapsed — couples who insist on a specific
+            outside vendor can expand it, but the corkage cost shows on
+            every card so the trade-off is visible before they get
+            attached. On the Conrad path, this entire screen is skipped.
+          </p>
+          <span class="step-trigger">Hillcreek path · auto-routed from venue pick</span>
+        </div>
+      </div>
+
+      <div class="frames">
+        <div class="frame frame-desktop">
+          <div class="frame-label">
+            <span>Desktop · catering category</span>
+            <span>1280px</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">Plan · 2 of 15</div>
+            </div>
+            <div class="mock-h1">Catering</div>
+            <div class="mock-meta">For 200 guests at Hillcreek Gardens, Tagaytay</div>
+
+            <div class="cat-headline">
+              <div class="cat-headline-row">
+                <div class="cat-headline-title">Recommended by Hillcreek Gardens</div>
+                <div class="cat-headline-tag">No corkage · 4 vendors</div>
+              </div>
+              <div class="cat-headline-sub">These caterers have worked at Hillcreek before. Hillcreek waives corkage when you pick from this list.</div>
+            </div>
+
+            <div class="cat-card">
+              <div class="cat-card-thumb"></div>
+              <div class="cat-card-body">
+                <div class="cat-card-name">Hizon's Catering</div>
+                <div class="cat-card-meta">4.7★ Verified · Filipino-international fusion · Plated or buffet</div>
+              </div>
+              <div class="cat-card-price">₱240K / 200pax</div>
+            </div>
+
+            <div class="cat-card">
+              <div class="cat-card-thumb g2"></div>
+              <div class="cat-card-body">
+                <div class="cat-card-name">K. by Cunanan</div>
+                <div class="cat-card-meta">4.9★ Verified · Premium 5-course · Dietary options</div>
+              </div>
+              <div class="cat-card-price">₱360K / 200pax</div>
+            </div>
+
+            <div class="cat-card">
+              <div class="cat-card-thumb g3"></div>
+              <div class="cat-card-body">
+                <div class="cat-card-name">Bizu Catering Studio</div>
+                <div class="cat-card-meta">4.6★ · Filipino classics · Family-style</div>
+              </div>
+              <div class="cat-card-price">₱200K / 200pax</div>
+            </div>
+
+            <div class="cat-card">
+              <div class="cat-card-thumb"></div>
+              <div class="cat-card-body">
+                <div class="cat-card-name">Juan Carlo</div>
+                <div class="cat-card-meta">4.5★ · Modern Filipino · Plated dinners</div>
+              </div>
+              <div class="cat-card-price">₱220K / 200pax</div>
+            </div>
+
+            <div class="cat-toggle">
+              <div class="cat-toggle-text">
+                <b>Looking for someone specific?</b> See more caterers nearby Tagaytay.
+                <span class="corkage">Outside caterers add ₱200/head corkage · ~₱40K extra</span>
+              </div>
+              <div class="cat-toggle-arrow">▾</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame frame-mobile mock-frame-mobile">
+          <div class="frame-label">
+            <span>Mobile · catering</span>
+            <span>380px</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">2 / 15</div>
+            </div>
+            <div class="mock-h1">Catering</div>
+            <div class="mock-meta">200 guests · Hillcreek Gardens</div>
+
+            <div class="cat-headline">
+              <div class="cat-headline-title">Hillcreek's Picks</div>
+              <div class="cat-headline-sub">No corkage · 4 vendors</div>
+            </div>
+
+            <div class="cat-card">
+              <div class="cat-card-thumb"></div>
+              <div class="cat-card-body">
+                <div class="cat-card-name">Hizon's</div>
+                <div class="cat-card-meta">4.7★ · Filipino fusion</div>
+              </div>
+              <div class="cat-card-price">₱240K</div>
+            </div>
+
+            <div class="cat-card">
+              <div class="cat-card-thumb g2"></div>
+              <div class="cat-card-body">
+                <div class="cat-card-name">K. by Cunanan</div>
+                <div class="cat-card-meta">4.9★ · Premium 5-course</div>
+              </div>
+              <div class="cat-card-price">₱360K</div>
+            </div>
+
+            <div class="cat-card">
+              <div class="cat-card-thumb g3"></div>
+              <div class="cat-card-body">
+                <div class="cat-card-name">Bizu</div>
+                <div class="cat-card-meta">4.6★ · Family-style</div>
+              </div>
+              <div class="cat-card-price">₱200K</div>
+            </div>
+
+            <div class="cat-toggle">
+              <div class="cat-toggle-text">
+                <b>See more nearby</b>
+                <span class="corkage">+₱200/head corkage</span>
+              </div>
+              <div class="cat-toggle-arrow">▾</div>
+            </div>
+
+            <div class="mock-bottom-nav">
+              <div class="mock-nav-item active"><div class="mock-nav-icon"></div>Plan</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Guests</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Schedule</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Services</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STEP 6 — True-cost comparison ============ -->
+    <section class="step">
+      <div class="step-header">
+        <div class="step-num">06</div>
+        <div class="step-titles">
+          <div class="step-title">True-Cost Comparison · Shortlist view</div>
+          <p class="step-caption">
+            Couple has both venues hearted (saved). The shortlist
+            comparison normalizes the apples-to-oranges by adding
+            unbundled items at typical PH rates. The hotel's "expensive"
+            ₱520K turns out to be <b>₱57K cheaper</b> than the garden's
+            "cheap" ₱180K once everything else is sourced. Hotel
+            comparison is informational, not promotional — couples who
+            want the garden experience know the cost of that choice.
+          </p>
+          <span class="step-trigger">Tap "Compare 2 saved" pill on browse page</span>
+        </div>
+      </div>
+
+      <div class="frames">
+        <div class="frame frame-desktop">
+          <div class="frame-label">
+            <span>Desktop · shortlist comparison</span>
+            <span>1280px</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">Saved venues · 2</div>
+            </div>
+            <div class="mock-h1">Compare your shortlist</div>
+            <div class="mock-meta">Side-by-side total cost for 200 guests · typical PH market rates</div>
+
+            <div class="comp-table">
+              <div class="comp-head">
+                <div class="comp-head-cell">Category</div>
+                <div class="comp-head-cell col-2">Hillcreek Gardens<br><span style="font-size: 9px; color: var(--ink-faint);">Garden estate · Tagaytay</span></div>
+                <div class="comp-head-cell col-3">Conrad Manila<br><span style="font-size: 9px; color: var(--ink-faint);">Hotel · Pasay</span></div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label">Headline price</div>
+                <div class="comp-cell"><span class="add">₱180,000</span> rent</div>
+                <div class="comp-cell"><span class="add">₱520,000</span> all-in</div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label">Catering (200 pax)</div>
+                <div class="comp-cell"><span class="add">+ ₱240,000</span> Hizon's</div>
+                <div class="comp-cell"><span class="ok">✓ Included</span></div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label">Wedding cake</div>
+                <div class="comp-cell"><span class="add">+ ₱25,000</span></div>
+                <div class="comp-cell"><span class="ok">✓ 4-tier included</span></div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label">Reception florals</div>
+                <div class="comp-cell"><span class="add">+ ₱70,000</span></div>
+                <div class="comp-cell"><span class="ok">✓ Centerpieces + arch</span></div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label">Bridal car</div>
+                <div class="comp-cell"><span class="add">+ ₱18,000</span></div>
+                <div class="comp-cell"><span class="ok">✓ 5 hrs included</span></div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label">Hotel suites (2 nights)</div>
+                <div class="comp-cell"><span class="add">+ ₱16,000</span></div>
+                <div class="comp-cell"><span class="ok">✓ 2 suites included</span></div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label">Wedding coordinator</div>
+                <div class="comp-cell"><span class="add">+ ₱20,000</span></div>
+                <div class="comp-cell"><span class="ok">✓ Day-of included</span></div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label">AV / Sound</div>
+                <div class="comp-cell"><span class="ok">✓ Sound included</span></div>
+                <div class="comp-cell"><span class="ok">✓ Full AV included</span></div>
+              </div>
+              <div class="comp-row total">
+                <div class="comp-cell label">Total comparable cost</div>
+                <div class="comp-cell">₱569,000</div>
+                <div class="comp-cell">₱520,000</div>
+              </div>
+            </div>
+
+            <div class="comp-takeaway">
+              <b>Conrad ₱49,000 less</b> · 6 fewer vendors to coordinate · 1 contract instead of 7. Hillcreek wins on ambiance and design freedom; Conrad wins on cost and simplicity.
+            </div>
+          </div>
+        </div>
+
+        <div class="frame frame-mobile mock-frame-mobile">
+          <div class="frame-label">
+            <span>Mobile · comparison</span>
+            <span>380px</span>
+          </div>
+          <div class="frame-body">
+            <div class="mock-chrome">
+              <div class="mock-brand">setnayan</div>
+              <div class="mock-step-pill">Compare 2</div>
+            </div>
+            <div class="mock-h1">Compare</div>
+            <div class="mock-meta">200 guests · typical rates</div>
+
+            <div class="comp-table">
+              <div class="comp-head">
+                <div class="comp-head-cell" style="grid-column: span 1; font-size: 9px;">Item</div>
+                <div class="comp-head-cell col-2" style="font-size: 9px;">Hillcreek</div>
+                <div class="comp-head-cell col-3" style="font-size: 9px;">Conrad</div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label" style="font-size: 11px;">Venue</div>
+                <div class="comp-cell" style="font-size: 11px;">₱180K</div>
+                <div class="comp-cell" style="font-size: 11px;">₱520K</div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label" style="font-size: 11px;">Food</div>
+                <div class="comp-cell" style="font-size: 11px;">+₱240K</div>
+                <div class="comp-cell" style="font-size: 11px; color: var(--green-deep);">✓</div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label" style="font-size: 11px;">Cake + Flowers</div>
+                <div class="comp-cell" style="font-size: 11px;">+₱95K</div>
+                <div class="comp-cell" style="font-size: 11px; color: var(--green-deep);">✓</div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label" style="font-size: 11px;">Car + Suites</div>
+                <div class="comp-cell" style="font-size: 11px;">+₱34K</div>
+                <div class="comp-cell" style="font-size: 11px; color: var(--green-deep);">✓</div>
+              </div>
+              <div class="comp-row">
+                <div class="comp-cell label" style="font-size: 11px;">Coordinator</div>
+                <div class="comp-cell" style="font-size: 11px;">+₱20K</div>
+                <div class="comp-cell" style="font-size: 11px; color: var(--green-deep);">✓</div>
+              </div>
+              <div class="comp-row total">
+                <div class="comp-cell label" style="font-size: 12px;">Total</div>
+                <div class="comp-cell" style="font-size: 12px;">₱569K</div>
+                <div class="comp-cell" style="font-size: 12px;">₱520K</div>
+              </div>
+            </div>
+
+            <div class="comp-takeaway">
+              <b>Conrad ₱49K less</b> · 6 fewer vendors to coordinate.
+            </div>
+
+            <div class="mock-bottom-nav">
+              <div class="mock-nav-item active"><div class="mock-nav-icon"></div>Plan</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Guests</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Schedule</div>
+              <div class="mock-nav-item"><div class="mock-nav-icon"></div>Services</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flag">
+        <b>This is the screen that earns trust.</b> Couples come in with a
+        gut sense that hotels are "expensive." The math reveals the bundle
+        is the value. Setnayan doesn't push them either way — both totals are
+        shown honestly, both choices are valid. The couple leaves the
+        comparison view with a fully-informed decision instead of a
+        sticker-shock decision.
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    Setnayan · Venue + Food Flow Storyboard · 0016 Step-by-Step Plan Builder · 2026-05-10
+  </footer>
+
+</div>
+
+</body>
+</html>

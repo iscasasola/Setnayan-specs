@@ -1,0 +1,732 @@
+# 0006 — Vendors Management
+
+**Type:** Implementation work order (Claude Code ticket)
+**Surface:** Setnayan Web → Couple Dashboard ("Vendors" panel) + responsive mobile · **Bottom-nav tab: Vendors** · URL: `setnayan.com/dashboard/[event-id]/vendors`
+**Phase:** Phase 1 — pre-event planning surface
+**Status:** Drafted 2026-05-09
+**Owner:** Ice (indaleciocasasolaii@gmail.com)
+**Builds on:** 0000 (app shell, sign-in, event-scoped URL, bottom-nav routing), 0001 (events, dashboard shell baseline)
+
+---
+
+## What this iteration builds
+
+The Vendors panel — the couple's central registry of every external supplier working their wedding. In V1 there is **no vendor app and no vendor self-input.** Every vendor row is **manually encoded by the couple** (or the Setnayan concierge on their behalf). This is a planning, tracking, and payment-deadline-management surface.
+
+For each vendor the couple captures:
+
+1. **Vendor identity** — business name, primary contact, phone, email, website / social, notes.
+2. **Services covered** — which wedding services this vendor delivers, drawn from a hybrid taxonomy (canonical fixed list + custom rows the couple can add).
+3. **Package + inclusions** — package name, contracted amount in PHP, and a free-form inclusions list (what's actually being delivered).
+4. **Payment milestones** — flexible custom milestones (any number per vendor) with label, due date, amount, paid status, payment method/reference. System computes balance and surfaces upcoming / overdue deadlines.
+5. **Crew + crew meals** — number of crew the vendor is sending, per-crew-meal cost, optional "vendor provides own meals" toggle. System computes the crew meal total and rolls up across all vendors.
+6. **Meetings** — list of scheduled meetings between couple and vendor (planning meetings, tastings, walkthroughs, fittings, etc.). Each meeting has a title, date/time, mode (in-person / video / phone), location or link, agenda, attendees, and post-meeting notes. The soonest upcoming meeting per vendor is surfaced as "Next meeting" on the vendor card. Manually encoded by the couple in V1; **migrates to vendor-managed in Din (Phase 3)** where the supplier-facing app lets vendors propose / reschedule / confirm meetings directly. The schema is shaped today so the migration is data-only — same table, just a different writer.
+7. **Contract files** — couple uploads PDFs/image scans of signed contracts to R2.
+8. **Day-of arrival window** — when this vendor is scheduled to arrive at the venue.
+
+The panel also exposes a **Service Coverage** view that maps every canonical service to its assigned vendor (or flags it as gap / not needed). This is how the couple sees at a glance "do I have a Photographer yet?"
+
+---
+
+## Visual reference (canonical)
+
+`0006_vendors_management.html` (in this same folder) is the canonical visual reference. The implementation must visually match it at desktop and mobile widths. Reuse the design tokens (`#FAF6F0` cream, `#1A1A1A` charcoal, `#C97B4B` terracotta; Cormorant Garamond + Manrope + DM Mono).
+
+The mockup shows three primary surfaces:
+
+- **Vendor list (desktop):** sortable table + service-coverage strip + aggregate payment summary.
+- **Vendor detail drawer (desktop):** services chips, package + inclusions, payment milestone ledger, crew meal block, contracts list.
+- **Mobile cards:** single-column vendor cards with a payment progress bar; tap → vendor detail sheet (full-height, scrollable). FAB to add a vendor.
+
+---
+
+## Stack & conventions
+
+Per `CLAUDE.md`:
+
+- **Frontend:** Next.js 15 App Router. Server Components for the list view; Client Components for the add-vendor flow, milestone editor, crew calculator, contract uploader.
+- **UI:** Tailwind + shadcn/ui primitives (Dialog, Sheet, Select, Input, Button, Tabs, Popover, DatePicker). Reuse the dashboard shell from 0001.
+- **Data:** Postgres via existing Setnayan backend; Drizzle/Prisma matching repo convention.
+- **Storage:** Cloudflare R2 PH-region bucket for contract files (`/vendor-contracts/{event_id}/{relationship_id}/{contract_id}.{ext}`). Signed URLs for downloads.
+- **Auth:** couple-auth required. All endpoints scoped to the requesting couple's event.
+- **Validation:** Zod, server- and client-side. PHP amounts stored as integer centavos to match `service_catalog` convention.
+
+---
+
+## Route
+
+```
+setnayan.com/dashboard/vendors                — list view
+setnayan.com/dashboard/vendors/[vendor_id]    — vendor detail (drawer overlay; deep-linkable)
+setnayan.com/dashboard/vendors/new            — add-vendor flow
+setnayan.com/dashboard/vendors/coverage       — service coverage view (tab)
+```
+
+---
+
+## Data model
+
+### `canonical_services` — hardcoded enum
+
+Master list of typical Filipino-wedding services. This is **code-shipped**, not user-editable. Couples can choose which canonical services apply to their wedding (mark "not needed") and can add custom rows beyond this set.
+
+```
+ceremony_venue
+reception_venue
+catering
+photography
+videography
+same_day_edit
+drone
+prenup_shoot
+wedding_coordination
+hmua
+bridal_gown
+groom_suit
+entourage_attire
+florals
+cake_desserts
+lights_sound
+dj_emcee_host
+mobile_bar
+live_band
+acoustic_performer
+choir_string_quartet
+officiant
+transportation_bridal_car
+transportation_guest_shuttle
+invitation_print
+stationery_signage
+photobooth
+souvenirs_giveaways
+wedding_rings
+honeymoon_planner
+```
+
+(28 canonical services. Order roughly matches wedding-planning priority. Final list reviewed in HTML mockup; add/remove via PR.)
+
+**Note on `wedding_coordination` (locked 2026-05-12):** Wedding coordinators register as a regular vendor under this canonical key and use the same 0022 vendor dashboard as photographers, caterers, and every other category — there is **no separate "coordinator" platform role**. Coordinators receive two special permissions on top of standard vendor capability: (a) per-thread join into customer ↔ vendor chats per 0019 § Coordinator-join flow (the couple invites them into vendor threads as needed) and (b) broadcast access on day-of guest experience surfaces per 0031. Both permissions are scoped to the events that booked them and revoke automatically at event-end + 30 days.
+
+### `event_vendor_relationships` table
+
+> **Note (locked 2026-05-12):** This table tracks the COUPLE's per-event list of vendors they're working with. It is distinct from the marketplace `vendors` table (declared in 0022) which holds the canonical platform vendor entities. When a couple selects a marketplace vendor, this table's `marketplace_vendor_id` FK links them; for couple-entered custom vendors (off-platform), `marketplace_vendor_id` stays NULL. The previous name `vendors` was renamed to `event_vendor_relationships` to remove the collision with the marketplace table; the primary key column is `relationship_id` (not `vendor_id`) to make joins explicit.
+
+```sql
+CREATE TABLE event_vendor_relationships (
+  relationship_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id            UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
+  marketplace_vendor_id UUID REFERENCES vendors(vendor_id),  -- nullable; links to canonical marketplace vendor (declared in 0022)
+  business_name       TEXT NOT NULL,
+  contact_name        TEXT,
+  phone               TEXT,
+  email               TEXT,
+  website             TEXT,                       -- URL or social handle
+  notes               TEXT,                       -- couple's free-form notes
+  day_of_arrival_at   TIMESTAMPTZ,                -- when vendor arrives at venue
+  status              TEXT NOT NULL DEFAULT 'lead'
+                        CHECK (status IN ('lead', 'booked', 'completed', 'cancelled')),
+  package_name        TEXT,
+  package_total_centavos BIGINT NOT NULL DEFAULT 0,  -- PHP centavos
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX event_vendor_relationships_event_idx ON event_vendor_relationships (event_id);
+CREATE INDEX event_vendor_relationships_marketplace_idx ON event_vendor_relationships (marketplace_vendor_id);
+```
+
+### `vendor_services` — links a vendor to one or many services (canonical or custom)
+
+```sql
+CREATE TABLE vendor_services (
+  relationship_id     UUID NOT NULL REFERENCES event_vendor_relationships(relationship_id) ON DELETE CASCADE,
+  service_kind        TEXT NOT NULL CHECK (service_kind IN ('canonical', 'custom')),
+  canonical_key       TEXT,                       -- present when service_kind='canonical'
+  custom_service_id   UUID,                       -- present when service_kind='custom'
+  PRIMARY KEY (relationship_id, service_kind, COALESCE(canonical_key, custom_service_id::text))
+);
+```
+
+**Crew size extension (locked 2026-05-12):**
+
+```sql
+ALTER TABLE vendor_services
+  ADD COLUMN crew_size INT NOT NULL DEFAULT 1 CHECK (crew_size >= 1),
+  ADD COLUMN crew_meal_required BOOLEAN NOT NULL DEFAULT TRUE;
+```
+
+Each service specifies how many crew members will be physically present at the event for that service (a photographer + 2 assistants = `crew_size = 3`; a solo videographer = `crew_size = 1`; a 5-piece string quartet + 1 sound tech = `crew_size = 6`). This feeds into:
+
+- **0007 Budget computed crew meal totals** — the catering vendor's "meal count" auto-aggregates from all booked services' `crew_size` where `crew_meal_required = TRUE`, so couples don't undershoot their catering quote.
+- **Dashboard headcount totals** — Setnayan surfaces pax + crew combined headcount on the customer's dashboard ("180 guests + 22 crew = 202 covers") so the catering vendor receives the right quote.
+
+`crew_meal_required` defaults TRUE; vendors can opt out of crew meal billing if they bring their own crew meals or the service has no on-site crew (e.g., invitation printing).
+
+### `event_custom_services` — couple-defined service rows beyond the canonical list
+
+```sql
+CREATE TABLE event_custom_services (
+  custom_service_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id            UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
+  name                TEXT NOT NULL,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+### `event_service_coverage_status` — per-event flag for "not needed"
+
+Lets the couple mark a canonical service as not-needed so it stops showing up in the gap list. No row = "needed but not yet booked." Vendor assigned via `vendor_services` overrides "not needed."
+
+```sql
+CREATE TABLE event_service_coverage_status (
+  event_id            UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
+  canonical_key       TEXT NOT NULL,
+  status              TEXT NOT NULL CHECK (status IN ('not_needed')),
+  PRIMARY KEY (event_id, canonical_key)
+);
+```
+
+### `vendor_inclusions` — free-form line items inside the package
+
+```sql
+CREATE TABLE vendor_inclusions (
+  inclusion_id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  relationship_id     UUID NOT NULL REFERENCES event_vendor_relationships(relationship_id) ON DELETE CASCADE,
+  label               TEXT NOT NULL,              -- "8-hr photo coverage", "2 photographers", "200 print prints", etc.
+  quantity            TEXT,                       -- free-form ("8 hours", "200 pcs", "unlimited")
+  sort_order          INT NOT NULL DEFAULT 0
+);
+```
+
+### `vendor_payment_milestones` — flexible custom milestones
+
+```sql
+CREATE TABLE vendor_payment_milestones (
+  milestone_id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  relationship_id     UUID NOT NULL REFERENCES event_vendor_relationships(relationship_id) ON DELETE CASCADE,
+  label               TEXT NOT NULL,              -- "Reservation", "Down payment", "1st partial", "Balance", etc.
+  due_date            DATE,                       -- nullable for milestones with no fixed deadline
+  amount_centavos     BIGINT NOT NULL,            -- PHP centavos contracted for this milestone
+  paid_at             TIMESTAMPTZ,                -- NULL = unpaid
+  paid_amount_centavos BIGINT,                    -- actual amount paid (may differ from amount_centavos)
+  payment_method      TEXT CHECK (payment_method IN
+                        ('cash', 'gcash', 'bank_transfer', 'check', 'card', 'other')),
+  payment_reference   TEXT,                       -- ref no, transaction id, OR check no — couple-entered
+  notes               TEXT,
+  sort_order          INT NOT NULL DEFAULT 0
+);
+CREATE INDEX vendor_payment_milestones_due_idx ON vendor_payment_milestones (due_date)
+  WHERE paid_at IS NULL;
+```
+
+### `vendor_crew` — crew count + meal cost computation
+
+```sql
+CREATE TABLE vendor_crew (
+  relationship_id     UUID PRIMARY KEY REFERENCES event_vendor_relationships(relationship_id) ON DELETE CASCADE,
+  crew_count          INT NOT NULL DEFAULT 0,
+  vendor_provides_meals BOOLEAN NOT NULL DEFAULT FALSE,
+  meal_cost_each_centavos BIGINT NOT NULL DEFAULT 0
+    -- couple's expected cost per crew meal (defaults to event-level catering crew-meal rate
+    -- when the catering vendor's package is configured; otherwise 0).
+);
+```
+
+Crew meal total per vendor (computed view):
+
+```sql
+CREATE VIEW vendor_crew_meal_totals AS
+SELECT
+  c.relationship_id,
+  v.event_id,
+  CASE WHEN c.vendor_provides_meals THEN 0
+       ELSE c.crew_count * c.meal_cost_each_centavos
+  END AS crew_meal_total_centavos
+FROM vendor_crew c
+JOIN event_vendor_relationships v USING (relationship_id);
+```
+
+### `vendor_meetings` — scheduled meetings between couple and vendor
+
+```sql
+CREATE TABLE vendor_meetings (
+  meeting_id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  relationship_id     UUID NOT NULL REFERENCES event_vendor_relationships(relationship_id) ON DELETE CASCADE,
+  title               TEXT NOT NULL,              -- "Menu tasting", "Floral mockup", "Final walkthrough"
+  starts_at           TIMESTAMPTZ NOT NULL,       -- meeting datetime (Asia/Manila)
+  duration_minutes    INT,                        -- nullable; informational
+  mode                TEXT NOT NULL CHECK (mode IN ('in_person', 'video', 'phone')),
+  location            TEXT,
+    -- For in_person: venue / address. For video: meeting URL. For phone: dial-in or "vendor will call".
+  agenda              TEXT,                       -- free-form
+  attendees           TEXT[],                     -- couple-side attendee names ("Maris", "Anton", "Mom")
+                                                  -- in V1; future: array of guest_id refs
+  status              TEXT NOT NULL DEFAULT 'scheduled'
+                        CHECK (status IN ('scheduled', 'completed', 'cancelled', 'rescheduled')),
+  post_notes          TEXT,                       -- post-meeting notes; populated after status='completed'
+  created_by_actor    TEXT NOT NULL DEFAULT 'couple'
+                        CHECK (created_by_actor IN ('couple', 'vendor', 'setnayan_staff')),
+    -- V1: always 'couple'. Phase 3 (Din): vendors write 'vendor'. Setnayan Staff support actions write 'setnayan_staff'.
+  created_by_user_id  UUID NOT NULL,              -- whoever entered it (couple-side user in V1)
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX vendor_meetings_vendor_starts_idx
+  ON vendor_meetings (relationship_id, starts_at)
+  WHERE status = 'scheduled';
+```
+
+`created_by_actor` is forward-compatible: today everything is `'couple'`, but the column lets Din writes coexist with legacy couple-encoded rows once the vendor app ships. No data migration is required when Din launches.
+
+### `vendor_contracts` — uploaded contract files
+
+```sql
+CREATE TABLE vendor_contracts (
+  contract_id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  relationship_id     UUID NOT NULL REFERENCES event_vendor_relationships(relationship_id) ON DELETE CASCADE,
+  filename            TEXT NOT NULL,
+  r2_object_key       TEXT NOT NULL,              -- /vendor-contracts/{event_id}/{relationship_id}/{contract_id}.{ext}
+  byte_size           BIGINT NOT NULL,
+  mime_type           TEXT NOT NULL,
+  uploaded_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  uploaded_by_user_id UUID NOT NULL              -- couple member who uploaded
+);
+```
+
+R2 retention: 5 years post-event, mirroring photographer industry norm and Personal Reels storage policy.
+
+---
+
+## Computed / derived values
+
+### Per-vendor
+
+- `package_balance_centavos` = `package_total_centavos − SUM(paid_amount_centavos)` over the vendor's milestones.
+- `next_unpaid_milestone` = the milestone with the soonest non-null `due_date` where `paid_at IS NULL`.
+- `payment_progress_pct` = `SUM(paid_amount_centavos) / package_total_centavos`, capped at 100%.
+- `crew_meal_total_centavos` per `vendor_crew_meal_totals` view above.
+- `next_meeting` = the meeting row with the soonest `starts_at >= now()` and `status = 'scheduled'`. Surfaced as "Next meeting" on the vendor card and in the drawer header.
+
+### Per-event aggregate (Vendor Panel header)
+
+- **Total contracted** across all vendors with `status IN ('booked', 'completed')`.
+- **Total paid** across all milestones with `paid_at IS NOT NULL`.
+- **Total outstanding** = contracted − paid.
+- **Next deadline** = earliest `due_date` of any unpaid milestone across all booked vendors.
+- **Crew meal estimate** = `SUM(crew_meal_total_centavos)` across all vendors.
+- **Service coverage %** = `assigned_canonical_services / (canonical_services − not_needed_services)`.
+
+These power the stats strip at the top of the Vendors page and feed iteration **0007 (Budget & Expenses)** when it pulls vendor rows.
+
+---
+
+## Hybrid service taxonomy — UX rules
+
+1. **Default state when adding a vendor:** the canonical 28-item list is shown as a multi-select with type-ahead filter. Couple ticks one or more.
+2. **"Add custom service" affordance** lives at the bottom of the multi-select. Opens a small inline input → creates a row in `event_custom_services` → immediately selectable.
+3. **Custom services are scoped per event.** No global custom-service registry; couples typing "Habagat reception band" don't pollute other couples' lists.
+4. **Coverage gap view** only counts canonical services. Custom services are surfaced in a separate "Custom services" panel below the canonical grid.
+5. **"Not needed" toggle** — if a couple isn't doing a Pre-nup Shoot, they tap the canonical card → "mark not needed." It's removed from the gap count and visually muted in coverage view. Reversible.
+
+---
+
+## Payment milestones — UX rules
+
+1. **No fixed schedule.** Each vendor starts with zero milestones; the couple adds milestones as they appear in the contract.
+2. **Common shortcuts:** the milestone editor offers one-tap presets to scaffold typical schedules: "Reservation + Down + Balance," "Reservation + 4 partials + Balance," "Lump sum on the day." The couple edits each milestone's due date and amount after picking the preset.
+3. **Paid status is not financial verification.** When the couple marks a milestone paid, they're recording what *they* did. Setnayan never validates the transaction. `paid_amount_centavos` allows recording partial payments different from the contracted amount.
+4. **Overdue surfacing.** Any milestone with `due_date < today AND paid_at IS NULL` renders red. The vendor card in the list surfaces "X day(s) overdue" so the couple sees it without opening the detail.
+5. **Upcoming-deadline notification cadence:** out of scope for V1. We surface in-UI; we don't email/push. (Notifications iteration is queued for V1.1.)
+
+---
+
+## Crew meals — UX rules
+
+1. **Default `meal_cost_each_centavos`:** when a vendor is added, this defaults to the event-level "crew meal rate." Couples set the rate once on the catering vendor's record (or via a thin event-settings field). Editable per-vendor in case some crew get plated meals and others get takeaway.
+2. **`vendor_provides_meals = true`** zeroes that vendor's contribution to the crew meal aggregate without losing the crew count (still useful for headcount at venue, parking, etc.).
+3. **Couple sees both numbers** at the event level: total crew headcount across all vendors AND the crew meal cost subtotal.
+4. **Forward link to 0007 (Budget):** the crew meal aggregate is a budget row in iteration 0007. We don't double-count — vendor packages are separate budget rows.
+
+---
+
+## Meetings — UX rules
+
+1. **Multiple meetings per vendor.** A photographer typically has 4–6 meetings before the wedding (initial consult, contract signing, prenup planning, prenup shoot day, final walkthrough, etc.). The drawer shows them as a chronological list with the next one pinned at the top.
+2. **"Next meeting" surface.** The vendor card in the list shows a one-line preview of the soonest upcoming meeting ("Next: Menu tasting · Apr 22 · in-person"). When a meeting is missed (`starts_at < now()` and still `status='scheduled'`), it renders amber as "Past — confirm outcome" and prompts the couple to mark it `completed`, `cancelled`, or `rescheduled`.
+3. **Mode-specific UX:**
+   - `in_person` — `location` accepts a free-form address or venue name. No map embed in V1.
+   - `video` — `location` accepts a meeting URL. The detail surface shows a "Open meeting link" button when the start is within ±15 min; outside that window it's just a copyable URL.
+   - `phone` — `location` accepts a phone number or "vendor will call." No dialer integration in V1.
+4. **Manual encoding only.** V1 is couple-only writes (`created_by_actor='couple'`). The vendor cannot edit, propose, or confirm — they communicate offline (email, message, call) and the couple records the meeting. The schema is shaped to accept Din writes later without a migration.
+5. **Post-meeting notes.** When the couple marks a meeting `completed`, the UI prompts for free-form notes ("Picked the seafood option, no allergies, vendor will send invoice by Mon"). Notes stay attached to the meeting row for future reference.
+6. **No reminders / push in V1.** In-UI surfacing only. The notifications iteration (V1.1) will own email + push for upcoming meetings the same way it owns payment-deadline reminders.
+7. **No `.ics` export in V1.** Calendar export ships as part of iteration **0007 Budget & Expenses** (which already owns the `.ics` pattern for payment deadlines). Once 0007 lands, meetings will join payments in the same combined calendar feed.
+8. **Din migration path.** When the supplier app ships in Phase 3, vendors will create / propose / reschedule meetings via Din writing to the same `vendor_meetings` table with `created_by_actor='vendor'`. Couples will see vendor-proposed meetings as `status='scheduled'` rows that originated outside their hands; UI affordances to confirm or counter-propose come with the Phase 3 surfaces. Tonight's V1 schema needs no changes for that future.
+
+---
+
+## DIY-mode vendor browse — filter popup
+
+### DIY-mode filter popup (locked 2026-05-12)
+
+The DIY-mode vendor browse view (at `/dashboard/{event-id}/vendors/browse`) shows the vendor marketplace as a list/grid of vendor cards. Customers refine the list via a **filter popup** — a modal triggered by a "Filter & sort" button in the top toolbar.
+
+**Filter popup contents:**
+
+- **City** (multi-select chip list, populated from cities of all active vendors)
+- **Service category** (multi-select, the 28 canonical + custom categories)
+- **Price band** (range slider in ₱ with histogram backdrop showing distribution of vendor packages)
+- **Available on date** (date picker; defaults to event date)
+- **Tier filter** (any / Standard Verified / Certified / Boosted)
+- **Distance radius from venue** (10 / 20 / 30 / 50 km; default 30 km — uses event venue lat/lon as origin)
+- **Years operating** (any / 1+ / 3+ / 5+ years)
+- **Has Setnayan-exclusive offer** (toggle)
+- **Has reviews** (toggle)
+- **Rating** (min stars · 3+ / 4+ / 4.5+)
+- **Verified only** (toggle, OFF by default — locked 2026-05-15) — when OFF (default), browse shows BOTH `public_visibility='verified'` AND `public_visibility='coming_soon'` vendors. Coming-soon cards render with a muted "Coming soon" badge, no booking CTA, profile is read-only preview. When ON, only verified vendors appear. Default OFF so couples see the platform's growing vendor pool even before verification completes — per 2026-05-15 decision. See iteration 0022 § 2.1c for the `public_visibility` state machine.
+
+**Sort options (radio):**
+- Recommended (Setnayan default: tier-strict + relevance score)
+- Most reviews
+- Highest rated
+- Closest to venue
+- Newest on Setnayan
+- Price: low to high
+- Price: high to low
+
+**Apply / Reset buttons.** Active filters appear as chips at the top of the browse view; tapping × on any chip removes that filter. URL is updated with query params so filtered state is shareable.
+
+**Guided-mode contrast:** Guided customers don't see this popup. Guided uses the recommender (per the 7 locked Guided UX patterns in memory) that picks vendors based on event constraints. DIY is opt-in for customers who want to browse the marketplace themselves.
+
+Schema additions if needed: none — all filters operate on existing `event_vendor_relationships` + `vendor_services` columns (joined to marketplace `vendors` via `marketplace_vendor_id` for marketplace browsing).
+
+---
+
+## Reviews schema (locked 2026-05-12)
+
+```sql
+CREATE TABLE vendor_reviews (
+  review_id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  vendor_id        UUID NOT NULL REFERENCES vendors(vendor_id),
+  reviewer_user_id UUID NOT NULL REFERENCES users(user_id),
+  event_id         UUID NOT NULL REFERENCES events(event_id),
+  booking_id       UUID NOT NULL,  -- the booking this review is for
+  rating_overall   INT NOT NULL CHECK (rating_overall BETWEEN 1 AND 5),
+  rating_communication INT CHECK (rating_communication BETWEEN 1 AND 5),
+  rating_quality       INT CHECK (rating_quality BETWEEN 1 AND 5),
+  rating_value         INT CHECK (rating_value BETWEEN 1 AND 5),
+  rating_punctuality   INT CHECK (rating_punctuality BETWEEN 1 AND 5),
+  body_text        TEXT,
+  photo_keys       TEXT[],  -- R2 keys for review photos
+  vendor_response  TEXT,  -- vendor's public reply
+  is_published     BOOLEAN NOT NULL DEFAULT FALSE,
+  is_flagged       BOOLEAN NOT NULL DEFAULT FALSE,
+  flagged_reason   TEXT,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  published_at    TIMESTAMPTZ,
+  edited_at        TIMESTAMPTZ
+);
+
+CREATE UNIQUE INDEX vendor_reviews_one_per_booking ON vendor_reviews(booking_id);
+CREATE INDEX idx_vendor_reviews_vendor ON vendor_reviews(vendor_id, published_at DESC) WHERE is_published = TRUE;
+
+-- Aggregate view for marketplace display
+CREATE MATERIALIZED VIEW vendor_review_stats AS
+SELECT
+  vendor_id,
+  COUNT(*) AS review_count,
+  AVG(rating_overall)::numeric(3,2) AS avg_rating,
+  AVG(rating_communication)::numeric(3,2) AS avg_communication,
+  AVG(rating_quality)::numeric(3,2) AS avg_quality,
+  AVG(rating_value)::numeric(3,2) AS avg_value,
+  AVG(rating_punctuality)::numeric(3,2) AS avg_punctuality
+FROM vendor_reviews
+WHERE is_published = TRUE
+GROUP BY vendor_id;
+
+-- Refresh on review publish/edit (trigger or hourly cron, whichever is cheaper)
+
+-- Self-review hard gate — schema CHECK + BEFORE INSERT trigger.
+-- See CLAUDE.md decision log 2026-05-15.
+
+ALTER TABLE vendor_reviews ADD CONSTRAINT no_self_review
+  CHECK (reviewer_user_id <> (
+    SELECT owner_user_id FROM vendors v WHERE v.vendor_id = vendor_reviews.vendor_id
+  ));
+
+CREATE OR REPLACE FUNCTION block_related_account_review()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+DECLARE
+  matched_signal TEXT;
+  v_owner_id     UUID;
+BEGIN
+  SELECT owner_user_id INTO v_owner_id FROM vendors WHERE vendor_id = NEW.vendor_id;
+
+  -- 1. Team member of the vendor (owner_self is already caught by the CHECK above).
+  IF EXISTS (
+    SELECT 1 FROM vendor_service_agents
+    WHERE vendor_id = NEW.vendor_id AND member_id = NEW.reviewer_user_id
+  ) THEN
+    matched_signal := 'team_member';
+  -- 2. Payment-method match — reviewer and vendor owner share any payer account
+  --    reference across service_order_payments history.
+  ELSIF EXISTS (
+    SELECT 1
+    FROM service_order_payments p1
+    JOIN service_orders o1            ON o1.order_id = p1.order_id
+    JOIN service_order_payments p2    ON p2.payer_account_number = p1.payer_account_number
+                                      AND p2.payer_account_number IS NOT NULL
+    JOIN service_orders o2            ON o2.order_id = p2.order_id
+    WHERE o1.user_id = NEW.reviewer_user_id
+      AND o2.user_id = v_owner_id
+  ) THEN
+    matched_signal := 'payment_match';
+  -- 3. Device fingerprint match (requires user_devices table — iteration 0034 § 3.1a).
+  ELSIF EXISTS (
+    SELECT 1
+    FROM user_devices d1
+    JOIN user_devices d2 ON d2.device_hash = d1.device_hash
+    WHERE d1.user_id = NEW.reviewer_user_id
+      AND d2.user_id = v_owner_id
+  ) THEN
+    matched_signal := 'device_match';
+  -- 4. Household address match (requires users.address_normalized; null-safe).
+  ELSIF EXISTS (
+    SELECT 1
+    FROM users u1
+    JOIN users u2 ON u2.address_normalized = u1.address_normalized
+                  AND u1.address_normalized IS NOT NULL
+                  AND length(u1.address_normalized) > 0
+    WHERE u1.user_id = NEW.reviewer_user_id
+      AND u2.user_id = v_owner_id
+  ) THEN
+    matched_signal := 'household_match';
+  END IF;
+
+  IF matched_signal IS NOT NULL THEN
+    RAISE EXCEPTION 'SELF_REVIEW_BLOCKED: % (appeal via 0023 Help inbox)', matched_signal
+      USING ERRCODE = 'check_violation';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER vendor_reviews_block_related_account
+  BEFORE INSERT ON vendor_reviews
+  FOR EACH ROW EXECUTE FUNCTION block_related_account_review();
+```
+
+**Review flow:**
+1. Review prompts trigger via 0028 email 24 hours after event ends ("How was [Vendor Name] at your wedding?")
+2. Customer rates 1-5 stars overall + 4 sub-categories + optional text + up to 5 photos
+3. Vendor has 7 days to publicly respond before review auto-publishes
+4. Reviews are PERMANENT per Vendor Agreement § "review permanence + mediation" — never deleted, only flagged for admin mediation if content violates community standards
+5. Reviews show on vendor cards (avg star + count), vendor landing page (full reviews list), vendor's own dashboard (in 0022 Clients tab — read-only summary)
+
+---
+
+## Dual-role customer ↔ vendor — review gate (locked 2026-05-15)
+
+A single `users` row may carry `account_type='vendor'` AND own/host events as a customer. Setnayan's "one app, three role-routed entries" rule (CLAUDE.md 2026-05-11) extends explicitly to the customer ↔ vendor surface: applying to become a vendor is **additive** — it never closes the customer surface, and the Switch-view pill toggles between roles in chrome. The model mirrors the admin = customer-with-`is_internal=TRUE` pattern locked in § 10a (CLAUDE.md 2026-05-12): one identity, multiple roles, real customer codepath.
+
+**Self-purchase is allowed.** A vendor who books a service from their own catalog hits the standard cart and checkout flow. At checkout, iteration 0034 § 3.1a surfaces a confirm modal with two CTAs — **"Pay full price"** (standard payment) or **"Comp for myself"** (audit-logged self-comp, rate-limited per quarter; see 0034 § 10c). Legitimate use cases include grand-opening dogfooding, internal booking-flow QA, and gifting a service to a friend's event.
+
+**Self-review is blocked at three layers:**
+
+1. **Schema** — the `no_self_review` CHECK constraint and the `block_related_account_review()` BEFORE INSERT trigger (declared above in the Reviews schema block) refuse any row where reviewer + vendor owner share `owner_user_id` (CHECK), team membership (`vendor_service_agents.member_id`), payment method (matching `service_order_payments.payer_account_number`), device fingerprint (`user_devices.device_hash`), or household address (`users.address_normalized`).
+2. **API** — `POST /api/v1/reviews` catches the trigger exception and returns `403 SELF_REVIEW_BLOCKED` with the matched-signal name (`owner_self` / `team_member` / `payment_match` / `device_match` / `household_match`) and `next_action: "contest_via_help"`.
+3. **UI** — the "Leave a review" CTA renders disabled on the booked-vendor card with the hint *"You can't review your own services"* when the event flips to Wrap stage (0021 § 2.2d). Tap-on-disabled opens the appeal flow.
+
+**Appeal path.** Filipino households legitimately share GCash numbers, devices, and addresses, so the hard gate WILL produce false positives. The appeal routes to the 0023 Help inbox; admin investigates, and if the related-account match is coincidental (couple sharing a GCash with an unrelated vendor's owner is the canonical false-positive), the admin can **override-publish** the review with reason logged in `admin_audit_log`. Single-admin authority (falls below the two-admin threshold per § 9.1).
+
+**Admin parity.** Admins are already customers carrying `is_internal=TRUE` (§ 10a). The self-review gate applies symmetrically — an admin who books a vendor on the customer side cannot review that vendor if the admin sits on the vendor's team.
+
+---
+
+## Public marketplace stats — completed-events count (locked 2026-05-15)
+
+The marketplace vendor card and the public `/v/[slug]` landing page display a "completed events" credibility number. Per the dual-role public-stats rule (CLAUDE.md decision log 2026-05-15, second row), this number EXCLUDES bookings made by the vendor's own people. Encoded as a materialized view, the public sibling of `vendor_review_stats`:
+
+```sql
+-- ============================================================
+-- vendor_public_completed_events_stats — the count shown on
+-- the marketplace card and the public /v/[slug] landing.
+-- ============================================================
+CREATE MATERIALIZED VIEW vendor_public_completed_events_stats AS
+SELECT
+  evr.vendor_id,
+  COUNT(*) AS public_completed_count
+FROM event_vendor_relationships evr
+JOIN events e ON e.event_id = evr.event_id
+LEFT JOIN service_orders so ON so.event_id = evr.event_id
+                            AND so.vendor_id = evr.vendor_id
+LEFT JOIN comp_grants cg   ON cg.grant_id = so.comp_grant_id
+WHERE evr.stage = 'completed'
+  AND e.archived = FALSE
+  -- Exclude any booking where the buying couple includes the vendor's owner...
+  AND NOT EXISTS (
+    SELECT 1
+    FROM vendors v
+    JOIN event_members em ON em.user_id = v.owner_user_id
+    WHERE v.vendor_id = evr.vendor_id
+      AND em.event_id = evr.event_id
+      AND em.member_type = 'couple'
+  )
+  -- ...or a vendor team member...
+  AND NOT EXISTS (
+    SELECT 1
+    FROM vendor_service_agents vsa
+    JOIN event_members em ON em.user_id = vsa.member_id
+    WHERE vsa.vendor_id = evr.vendor_id
+      AND em.event_id = evr.event_id
+      AND em.member_type = 'couple'
+  )
+  -- ...or an internal account that owns or sits on this vendor's team.
+  AND NOT EXISTS (
+    SELECT 1
+    FROM users u
+    JOIN event_members em ON em.user_id = u.user_id
+    WHERE u.is_internal = TRUE
+      AND em.event_id = evr.event_id
+      AND em.member_type = 'couple'
+      AND (
+        EXISTS (SELECT 1 FROM vendors v WHERE v.vendor_id = evr.vendor_id AND v.owner_user_id = u.user_id)
+        OR EXISTS (SELECT 1 FROM vendor_service_agents vsa WHERE vsa.vendor_id = evr.vendor_id AND vsa.member_id = u.user_id)
+      )
+  )
+  -- Vendor self-comp orders never count regardless of buyer identity.
+  AND (cg.source IS NULL OR cg.source <> 'vendor_self_comp')
+GROUP BY evr.vendor_id;
+
+CREATE UNIQUE INDEX vendor_public_completed_events_pk
+  ON vendor_public_completed_events_stats(vendor_id);
+
+-- Refresh on relationship stage change or comp-grant insert
+-- (trigger or hourly cron, whichever is cheaper).
+
+-- ============================================================
+-- vendor_full_completed_events_stats — the unfiltered count
+-- the vendor's own backend card reads when their toggle is ON.
+-- ============================================================
+CREATE OR REPLACE VIEW vendor_full_completed_events_stats AS
+SELECT
+  evr.vendor_id,
+  COUNT(*) AS full_completed_count
+FROM event_vendor_relationships evr
+JOIN events e ON e.event_id = evr.event_id
+WHERE evr.stage = 'completed' AND e.archived = FALSE
+GROUP BY evr.vendor_id;
+
+-- ============================================================
+-- vendors.show_team_bookings_in_backend_count
+-- ============================================================
+-- Per-vendor toggle. Default FALSE = vendor's backend card reads from
+-- vendor_public_completed_events_stats (same number the public sees).
+-- TRUE = backend card reads from vendor_full_completed_events_stats and
+-- renders the delta inline. Public count is unaffected either way.
+ALTER TABLE vendors ADD COLUMN IF NOT EXISTS
+  show_team_bookings_in_backend_count BOOLEAN NOT NULL DEFAULT FALSE;
+```
+
+**Surface consumers:**
+
+| Surface | View read | Notes |
+|---|---|---|
+| Marketplace browse vendor card | `vendor_public_completed_events_stats` | The credibility number next to the avg-rating star |
+| Public `/v/[slug]` landing | `vendor_public_completed_events_stats` | Inside the credibility band |
+| Vendor's own dashboard "Completed events" card | `vendor_public_completed_events_stats` (default) OR `vendor_full_completed_events_stats` (when toggle ON) | See iteration 0022 § 2.4a for the toggle UX |
+| Admin console vendor detail (0023 § 3.4) | Both side-by-side | Admin sees public and full counts together for moderation visibility |
+
+**Personal/customer side unaffected.** A team member viewing their own customer-side dashboard sees the full history of THEIR events as a customer. The exclusion above is strictly about the vendor's marketplace credibility number, not the user's personal record.
+
+---
+
+## Connection to other iterations (forward-sequenced)
+
+This iteration depends only on iterations **< 0006**:
+
+- **0001 Guest List** — provides `event_id`, basic event scaffolding, dashboard shell, file upload primitives.
+- **0002 QR Invitation** — independent; no shared state.
+- **0003 Token Wallet** — explicitly **NOT used here.** Vendor payments are external; the wallet is reserved for Setnayan-charged services. This is a deliberate separation; see decision log.
+- **0004 Invitation Widgets / 0005 LED Background Maker** — independent.
+
+This iteration **provides** to downstream iterations (0007+):
+
+- **0007 Budget & Expenses** consumes `event_vendor_relationships`, `vendor_payment_milestones`, and `vendor_crew_meal_totals` to populate budget rows automatically. Any vendor relationship in 'booked' status appears as an expense category; payments roll up into the cash-flow view. The `.ics` calendar export in 0007 also pulls `vendor_meetings` rows, so couples get one combined feed of payment deadlines + meetings.
+- **0010 Mood Board** can link styling-related vendors (florist, lights & sound, stylist if added) to mood board segments (florals, stage, etc.).
+- **Future Din (Phase 3 supplier app)** inherits the vendor records *and* the `vendor_meetings` table — vendors take over meeting creation/proposals via the same schema with `created_by_actor='vendor'`. No migration required.
+
+---
+
+## Privacy & compliance
+
+- Contract files are couple-scoped. Only logged-in members of the couple's event can fetch signed download URLs. Setnayan Staff have read access for support; access is logged.
+- Vendor PII (phone, email, website) is treated as sensitive and never surfaced to other guests, never indexed, never embedded in QR payloads, never sent to analytics.
+- 5-year retention on contracts (R2 lifecycle rule). After 5 years, files are auto-purged; metadata rows are kept with `r2_object_key = NULL`.
+- PH Data Privacy Act (RA 10173): couple consents to storing vendor contact data on their behalf. Vendors are external businesses; their contact info is publicly shared by them and not protected as personal data, but we treat it carefully anyway.
+
+---
+
+## What's NOT in V1 (don't backdoor in)
+
+- Vendor self-input app or login (Phase 3 — Din).
+- Automated reminder emails / push to the couple about upcoming deadlines (V1.1).
+- Vendor-side proof of payment (V1.1+).
+- Vendor reviews / star ratings (Phase 4).
+- Importing vendors from a Setnayan-curated marketplace (Phase 4).
+- E-signatures on contracts in Setnayan (V2+).
+- Currency other than PHP (V2+).
+- Multi-event vendor copy ("use my photographer from cousin's wedding") — copy-vendor flow lives in V1.1.
+
+---
+
+## Acceptance criteria
+
+- Couple can add a vendor with manually entered business name, contact, phone, email, website, notes, day-of arrival.
+- Hybrid service assignment works: multi-select from 28 canonical services + add custom service inline.
+- Couple can mark a canonical service as "not needed"; it disappears from gap count.
+- Vendor package: package name + total amount in PHP; inclusions list with add/remove/reorder.
+- Payment milestones: any number per vendor, with label / due date / amount / paid status / payment method / reference. Presets scaffold common schedules.
+- Balance, payment progress %, next-unpaid-milestone, and overdue flag are all computed and displayed correctly.
+- Crew block: count + per-meal cost + "vendor provides meals" toggle. Crew meal total is computed and rolled up.
+- Contract upload: PDF / JPG / PNG up to 25 MB per file, stored in R2; download via signed URL works.
+- Service coverage view shows status of every canonical service (Booked / Gap / Not needed) with vendor name when booked.
+- Aggregate stats strip (total contracted, total paid, outstanding, next deadline, crew meal estimate, coverage %) reflects current data.
+- All currency rendered PHP-primary (`₱1,500.00` format). No token rendering anywhere in this iteration.
+- Mobile view: thumb-friendly, single-column, ≥44pt tap targets, FAB for add-vendor.
+- Empty states: list view with no vendors shows "Add your first vendor" with quick-start cards for top 5 canonical services.
+- Vendor `status` workflow: lead → booked → completed → cancelled (any direction; couple-controlled).
+- Meetings: couple can add any number of meetings per vendor with title, datetime, mode (in-person/video/phone), location/link, agenda, attendees, notes.
+- "Next meeting" surfaces the soonest upcoming meeting on each vendor card; past-but-still-scheduled meetings render amber and prompt confirmation.
+- Meeting `status` workflow: scheduled → completed (with notes) | cancelled | rescheduled.
+- Meeting writes in V1 are always `created_by_actor='couple'`; schema accepts `'vendor'` and `'setnayan_staff'` for forward compatibility with Din.
+
+---
+
+## Decision log (this iteration)
+
+| Date | Decision | Why |
+|---|---|---|
+| 2026-05-09 | **Hybrid service taxonomy** — 28 canonical services + per-event custom rows | Canonical list gives clean coverage reporting and consistent rollup into Budget (0007); custom rows handle the long tail of niche services without forcing couples through a "request canonical addition" dance. |
+| 2026-05-09 | **Flexible custom payment milestones** (any number per vendor) over fixed 3-stage | PH wedding vendors structure schedules differently — some take reservation + down + balance, others want monthly partials. Fixed 3-stage forces couples to lie about reality. Presets in the UI scaffold the common cases without locking the schema. |
+| 2026-05-09 | **Crew meals: count × per-meal cost → computed total**, with `vendor_provides_meals` opt-out | Most vendors expect couple to feed crew. Couple needs the rolled-up number for catering headcount and the budget. The opt-out matters because some larger vendors (full-service caterers, big production crews) bring their own. |
+| 2026-05-09 | **No token wallet integration — vendor payments are external, tracking-only** | Vendors are external businesses paid by cash / GCash / bank transfer outside Setnayan. The wallet (0003) is reserved for Setnayan-charged services. Mixing the two would blur the source-of-truth boundary; couples already understand the mental model of "what I paid the vendor" vs "what I paid Setnayan." Combined views can be assembled at the Budget (0007) layer if useful, without coupling the wallet to vendor records. |
+| 2026-05-09 | **Manual encoding only in V1** — no vendor self-input | Din (vendor-facing app) is Phase 3. Building a half-baked vendor login surface in V1 would block the V1 launch and create a migration we'd then have to throw away. Manual encoding is sufficient for the planning workflow. |
+| 2026-05-09 | **Contracts in R2 with 5-year retention** | Mirrors photographer industry norm and Setnayan's existing photo retention policy. Aligns the storage lifecycle across the platform. |
+| 2026-05-09 | **PHP-primary, no token display anywhere** in this iteration | Vendor money never touches Setnayan's books, so no reason to render in tokens. Tokens are for Setnayan SKUs only. |
+| 2026-05-09 | **Meetings live in vendor profiles in V1; vendor-managed in Din.** Couple records meetings (title, datetime, mode, location/link, agenda, attendees, notes) on each vendor's detail page. The soonest upcoming meeting per vendor is surfaced as "Next meeting" on the card. The `vendor_meetings` table includes a `created_by_actor` column (`'couple'` in V1) so Din can later write `'vendor'` rows into the same table without migration. | Couples already track meetings in scattered notes, message threads, or memory. Centralizing them on the vendor profile mirrors how planners actually work, and the schema's forward-compatibility column means Phase 3 (Din) can take over without reshaping data. No `.ics` export here — that lives in 0007 Budget, which already owns the calendar pattern; once 0007 ships, meetings join payment deadlines in one feed. |
+| 2026-05-12 | **Renamed the per-event `vendors` table to `event_vendor_relationships`** (PK column renamed from `vendor_id` to `relationship_id`); added `marketplace_vendor_id UUID REFERENCES vendors(vendor_id)` FK to link the couple's per-event vendor record to the canonical marketplace `vendors` entity declared in 0022. All seven dependent tables in 0006 (`vendor_services`, `vendor_inclusions`, `vendor_payment_milestones`, `vendor_crew`, `vendor_crew_meal_totals` view, `vendor_meetings`, `vendor_contracts`) updated to FK `relationship_id`. | The previous setup had two tables named `vendors` (one in 0006 for the couple's per-event vendor list, one in 0022 for the canonical marketplace vendor entities) which would have caused namespace collision at the Postgres level. Rename clarifies the data model: `event_vendor_relationships` is the join row that says "this couple's event is working with this vendor" and carries the negotiated package details; `vendors` (in 0022) is the canonical marketplace vendor profile shared across all couples who book them. Nullable FK supports the off-platform vendor case (couple enters a custom vendor that isn't on Setnayan's marketplace). |
+
+---
+
+## Companion documents
+
+- `0001_creating_guest_list/` — dashboard shell, event scaffolding, file upload primitive
+- `0003_token_wallet_and_packs/` — explains why this iteration deliberately does not use the wallet
+- `0007_budget_expenses/` (downstream) — consumes this iteration's vendor + milestone data
+- `13_Engineering_Brief.docx` — overall Setnayan engineering brief
+
+---
+
+## Offline behavior
+
+Pre-event use only — vendor management is desktop/mobile-web planning UI, not event-day. Standard offline rules apply: form drafts persist in IndexedDB; reads cache for view-time offline access; writes queue and replay when connection returns. Contract uploads require online.

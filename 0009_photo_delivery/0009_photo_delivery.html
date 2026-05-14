@@ -1,0 +1,2295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan · 0008 · Photo Delivery to Couple's Cloud — Web + Mobile Mockup</title>
+<meta name="description" content="Setnayan iteration 0009 — couple's dashboard Photo Delivery panel. OAuth Google Drive integration, release pipeline, upload progress, completion state.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --page-bg: #FAF6F0;
+  --page-bg-soft: #F5EFE5;
+  --ink: #1A1A1A;
+  --ink-soft: #6B6B6B;
+  --ink-faint: #A39B8E;
+  --accent: #C97B4B;
+  --accent-soft: #E8C9B0;
+  --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08);
+  --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F3;
+  --canvas-bg: #2B2825;
+
+  --rsvp-attending: #6FA776;
+  --rsvp-attending-soft: #DDEBDF;
+  --rsvp-pending: #D69744;
+  --rsvp-pending-soft: #F4E2C8;
+  --rsvp-declined: #C46A55;
+  --rsvp-declined-soft: #F2DCD5;
+
+  --drive-blue: #1A73E8;
+  --drive-yellow: #FBBC04;
+  --drive-green: #34A853;
+  --drive-red: #EA4335;
+
+  --shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.04);
+  --shadow-md: 0 12px 32px rgba(26, 26, 26, 0.08);
+  --shadow-lg: 0 28px 72px rgba(26, 26, 26, 0.12);
+  --shadow-frame: 0 40px 100px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--canvas-bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+/* Canvas chrome */
+.canvas-header {
+  padding: 36px 48px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.canvas-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.9);
+}
+.canvas-title h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+.canvas-title .canvas-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.canvas-toggles {
+  display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+}
+.canvas-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 4px;
+}
+.toggle-pill {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 8px 16px;
+  border-radius: 999px;
+  transition: all 0.18s;
+}
+.toggle-pill:hover { color: #fff; }
+.toggle-pill.active {
+  background: var(--accent);
+  color: #fff;
+}
+.toggle-divider {
+  width: 1px; height: 22px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Frames */
+.frames {
+  padding: 36px 48px 80px;
+  display: flex;
+  gap: 36px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+body[data-view="desktop"] .frame-mobile { display: none; }
+body[data-view="mobile"] .frame-desktop { display: none; }
+
+.frame-wrap { position: relative; }
+.frame-label {
+  position: absolute;
+  top: -36px;
+  left: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.frame-desktop {
+  flex-shrink: 0;
+  width: 1200px;
+  background: var(--page-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-frame);
+}
+.browser-chrome {
+  background: #E9E5DE;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.traffic-lights { display: flex; gap: 7px; }
+.traffic-lights span {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #BDBAB3;
+}
+.traffic-lights span:nth-child(1) { background: #FF6058; }
+.traffic-lights span:nth-child(2) { background: #FFBE2F; }
+.traffic-lights span:nth-child(3) { background: #2BC940; }
+.url-bar {
+  flex: 1;
+  background: #fff;
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.url-bar .lock { color: var(--rsvp-attending); margin-right: 4px; }
+
+/* Dashboard nav */
+.dash-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.dash-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+.dash-brand-mark {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+}
+.dash-brand-text em { font-style: italic; color: var(--ink-soft); font-weight: 400; }
+.dash-nav-links {
+  display: flex; gap: 4px;
+}
+.dash-nav-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: all 0.15s;
+}
+.dash-nav-link:hover { background: rgba(26, 26, 26, 0.04); color: var(--ink); }
+.dash-nav-link.active {
+  background: var(--ink);
+  color: #fff;
+}
+.dash-event-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--page-bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 6px 12px 6px 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.dash-event-pill .ev-mark {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 11px;
+}
+.dash-event-pill .ev-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.avatar-circle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.dash-nav-right {
+  display: flex; align-items: center; gap: 14px;
+}
+
+/* Page body */
+.dash-page {
+  padding: 32px;
+}
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.page-crumb {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.page-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 44px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.state-pill.idle { background: var(--page-bg-soft); color: var(--ink-soft); border: 1px solid var(--rule); }
+.state-pill.ready { background: var(--rsvp-attending-soft); color: #355C3A; border: 1px solid rgba(111,167,118,0.35); }
+.state-pill.uploading { background: var(--rsvp-pending-soft); color: #7A4F0F; border: 1px solid rgba(214,151,68,0.35); }
+.state-pill.complete { background: var(--accent-soft); color: var(--accent-deep); border: 1px solid var(--accent); }
+.state-pill .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: none;
+}
+.state-pill.uploading .dot { animation: pulse 1.5s infinite; }
+@keyframes pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* State views */
+.state-view { display: none; }
+.state-view.active { display: block; }
+
+/* Connection status card */
+.connection-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.connection-card.disconnected {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--page-bg-soft) 100%);
+  border-style: dashed;
+}
+.drive-logo {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.drive-logo::before, .drive-logo::after, .drive-logo span {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+/* Stylized Google Drive triangle */
+.drive-logo::before {
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-bottom: 24px solid var(--drive-yellow);
+  top: 12px; left: 14px;
+}
+.drive-logo::after {
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 24px solid var(--drive-blue);
+  bottom: 12px; right: 14px;
+}
+.drive-logo span {
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 24px solid var(--drive-green);
+  bottom: 12px; left: 14px;
+}
+.connection-info { flex: 1; min-width: 0; }
+.connection-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+.connection-card.connected .connection-eyebrow { color: var(--rsvp-attending); }
+.connection-eyebrow .dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.connection-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.connection-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.connection-sub strong { color: var(--ink); font-weight: 600; }
+.connection-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink);
+  transition: all 0.15s;
+}
+.btn:hover { border-color: var(--ink); }
+.btn.primary {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+.btn.accent {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn.accent:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+.btn.green {
+  background: var(--rsvp-attending);
+  color: #fff;
+  border-color: var(--rsvp-attending);
+}
+.btn.green:hover { background: #5C8B62; border-color: #5C8B62; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--ink-soft); }
+.btn.ghost:hover { color: var(--ink); background: var(--page-bg-soft); }
+.btn-large {
+  font-size: 15px;
+  padding: 14px 24px;
+}
+
+/* Two-column body */
+.dash-body {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.section-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  padding: 24px;
+}
+.section-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+  line-height: 1.15;
+}
+.section-body {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+/* ============== State 1: Connect (initial) ============== */
+.connect-hero {
+  padding: 40px 32px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+}
+.connect-hero .drive-logo {
+  margin: 0 auto 24px;
+  width: 80px; height: 80px;
+}
+.connect-hero h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 36px;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.connect-hero p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto 28px;
+}
+.connect-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  max-width: 720px;
+  margin: 0 auto 32px;
+}
+.connect-step {
+  background: var(--surface-soft);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 18px 16px;
+  text-align: center;
+}
+.connect-step-num {
+  width: 28px; height: 28px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+.connect-step h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.connect-step p {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+  max-width: none;
+  margin: 0;
+}
+.btn-drive {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  padding: 12px 24px 12px 18px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+.btn-drive:hover { border-color: var(--ink); }
+.btn-drive .drive-logo {
+  width: 22px; height: 22px;
+  border: none;
+  background: transparent;
+}
+.btn-drive .drive-logo::before {
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 9px solid var(--drive-yellow);
+  top: 4px; left: 6px;
+}
+.btn-drive .drive-logo::after {
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 9px solid var(--drive-blue);
+  bottom: 4px; right: 6px;
+}
+.btn-drive .drive-logo span {
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 9px solid var(--drive-green);
+  bottom: 4px; left: 6px;
+}
+.connect-permissions {
+  margin-top: 28px;
+  padding: 16px 18px;
+  background: var(--page-bg-soft);
+  border: 1px dashed var(--rule-strong);
+  border-radius: 12px;
+  text-align: left;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.connect-permissions strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.connect-permissions span {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* ============== State 2: Ready to release ============== */
+.release-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.summary-stat {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.summary-stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+.summary-stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 30px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.summary-stat-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+.folder-tree {
+  background: var(--surface-soft);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 18px 22px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--ink);
+}
+.folder-tree .root {
+  font-weight: 600;
+  color: var(--accent-deep);
+  margin-bottom: 6px;
+}
+.folder-tree .item {
+  padding-left: 18px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed var(--rule);
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.folder-tree .item:last-child { border-bottom: none; }
+.folder-tree .item .nm {
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.folder-tree .item .nm::before {
+  content: "📁";
+  font-size: 13px;
+}
+.folder-tree .item.file .nm::before {
+  content: "📄";
+}
+.folder-tree .item .ct {
+  color: var(--ink-faint);
+  font-size: 11px;
+}
+
+.release-cta-card {
+  margin-top: 20px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--rsvp-attending-soft) 200%);
+  border: 1.5px solid rgba(111, 167, 118, 0.35);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.release-cta-info { flex: 1; min-width: 240px; }
+.release-cta-info h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.release-cta-info p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.review-status {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+.review-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+.review-stat .glyph {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.review-stat.ok .glyph { background: var(--rsvp-attending); }
+.review-stat.review .glyph { background: var(--rsvp-pending); }
+.review-stat .label {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.review-stat strong {
+  display: block;
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ============== State 3: Uploading ============== */
+.upload-progress-card {
+  background: var(--surface);
+  border: 1.5px solid rgba(214, 151, 68, 0.35);
+  border-radius: 16px;
+  padding: 28px;
+}
+.upload-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.upload-progress-head h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+}
+.upload-progress-eta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+}
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--page-bg-soft);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--rsvp-pending));
+  border-radius: 999px;
+  transition: width 0.3s;
+}
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  margin-bottom: 18px;
+}
+.progress-meta strong { color: var(--ink); font-weight: 600; }
+.upload-current {
+  background: var(--surface-soft);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.upload-current-thumb {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+  flex-shrink: 0;
+}
+.upload-current-info { flex: 1; }
+.upload-current-info strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.upload-current-info span {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.upload-current-spinner {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--accent-deep);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.upload-recent {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+.upload-recent li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: var(--surface-soft);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.upload-recent li .name {
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.02em;
+}
+.upload-recent li .status {
+  color: var(--rsvp-attending);
+  font-weight: 600;
+}
+
+/* ============== State 4: Complete ============== */
+.complete-card {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--accent-soft) 240%);
+  border: 1.5px solid var(--accent-soft);
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+}
+.complete-icon {
+  width: 64px; height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--rsvp-attending);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 700;
+  box-shadow: 0 12px 28px rgba(111, 167, 118, 0.35);
+}
+.complete-card h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 36px;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.complete-card p {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-bottom: 22px;
+  line-height: 1.55;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.complete-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  max-width: 480px;
+  margin: 0 auto 24px;
+}
+.complete-stat {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px 12px;
+}
+.complete-stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.complete-stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 4px;
+}
+.complete-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Side panel content */
+.help-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 12px;
+}
+.help-card h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.help-card p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+.faq-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+.faq-list li {
+  font-size: 12px;
+  color: var(--ink-soft);
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+.faq-list li:last-child { border-bottom: none; }
+.faq-list li strong { color: var(--ink); display: block; margin-bottom: 2px; font-size: 13px; }
+
+.timeline {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.timeline li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--rule);
+}
+.timeline li:last-child { border-bottom: none; }
+.timeline .glyph {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.timeline .glyph.done { background: var(--rsvp-attending); }
+.timeline .glyph.now { background: var(--rsvp-pending); }
+.timeline .glyph.queued { background: var(--ink-faint); }
+.timeline strong { color: var(--ink); display: block; }
+
+/* ============== MOBILE ============== */
+.frame-mobile {
+  flex-shrink: 0;
+  width: 392px;
+  height: 844px;
+  background: #1A1A1A;
+  border-radius: 50px;
+  padding: 12px;
+  position: relative;
+  box-shadow: var(--shadow-frame);
+}
+.mobile-screen {
+  width: 100%; height: 100%;
+  background: var(--page-bg);
+  border-radius: 38px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.mobile-notch {
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 32px;
+  background: #000;
+  border-radius: 18px;
+  z-index: 10;
+}
+.mobile-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 32px 6px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  z-index: 5;
+  position: relative;
+}
+.mobile-status .status-icons { display: flex; gap: 6px; align-items: center; }
+.mobile-status .battery {
+  width: 24px; height: 11px;
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  position: relative;
+  padding: 1px;
+}
+.mobile-status .battery::after {
+  content: ""; position: absolute;
+  right: -3px; top: 50%;
+  transform: translateY(-50%);
+  width: 2px; height: 5px;
+  background: var(--ink);
+  border-radius: 0 1px 1px 0;
+}
+.mobile-status .battery span {
+  display: block;
+  background: var(--ink);
+  width: 80%; height: 100%;
+  border-radius: 1px;
+}
+
+.m-header {
+  padding: 14px 18px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(250, 246, 240, 0.96);
+  border-bottom: 1px solid var(--rule);
+}
+.m-back {
+  width: 44px; height: 44px;
+  margin-left: -10px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 300;
+}
+.m-header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.m-header-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+.m-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.m-state-pill {
+  align-self: flex-start;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+.m-state-pill.idle { background: var(--page-bg-soft); color: var(--ink-soft); }
+.m-state-pill.ready { background: var(--rsvp-attending-soft); color: #355C3A; }
+.m-state-pill.uploading { background: var(--rsvp-pending-soft); color: #7A4F0F; }
+.m-state-pill.complete { background: var(--accent-soft); color: var(--accent-deep); }
+
+.m-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.m-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.m-card-body {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.m-connect-card {
+  text-align: center;
+  padding: 24px 18px;
+}
+.m-connect-card .drive-logo {
+  width: 56px; height: 56px;
+  margin: 0 auto 14px;
+}
+.m-connect-card h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.m-connect-card p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+.m-connect-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  padding: 11px 20px 11px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.m-connect-btn .drive-logo {
+  width: 18px; height: 18px;
+  border: none;
+  background: transparent;
+  margin: 0;
+}
+.m-connect-btn .drive-logo::before {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 7px solid var(--drive-yellow);
+  top: 3px; left: 5px;
+}
+.m-connect-btn .drive-logo::after {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 7px solid var(--drive-blue);
+  bottom: 3px; right: 5px;
+}
+.m-connect-btn .drive-logo span {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 7px solid var(--drive-green);
+  bottom: 3px; left: 5px;
+}
+
+.m-connection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+}
+.m-connection .drive-logo {
+  width: 38px; height: 38px;
+}
+.m-connection .info { flex: 1; min-width: 0; }
+.m-connection .info strong {
+  font-size: 13px; font-weight: 600;
+  display: block;
+}
+.m-connection .info span {
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.m-connection .check {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--rsvp-attending);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.m-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.m-summary-stat {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 12px;
+}
+.m-summary-stat .label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+.m-summary-stat .value {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.m-summary-stat .sub {
+  font-size: 10px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.m-folder-tree {
+  background: var(--surface-soft);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.m-folder-tree .root {
+  font-weight: 600;
+  color: var(--accent-deep);
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+.m-folder-tree .item {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0 3px 14px;
+  border-bottom: 1px dashed var(--rule);
+}
+.m-folder-tree .item:last-child { border-bottom: none; }
+.m-folder-tree .item .ct {
+  color: var(--ink-faint);
+  font-size: 10px;
+}
+
+.m-cta-bar {
+  position: sticky;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.98);
+  margin: 0 -14px -24px;
+  padding: 14px 18px 22px;
+  border-top: 1px solid var(--rule);
+}
+.m-cta-bar .btn-cta {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--rsvp-attending);
+  color: #fff;
+}
+
+.m-progress-card {
+  background: var(--surface);
+  border: 1.5px solid rgba(214, 151, 68, 0.35);
+  border-radius: 14px;
+  padding: 18px;
+}
+.m-progress-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+.m-progress-card .eta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+.m-progress-card .progress-bar {
+  margin-bottom: 8px;
+}
+.m-progress-card .progress-meta {
+  font-size: 10px;
+  margin-bottom: 14px;
+}
+
+.m-complete-card {
+  text-align: center;
+  padding: 24px 18px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--accent-soft) 240%);
+  border: 1.5px solid var(--accent-soft);
+  border-radius: 16px;
+}
+.m-complete-icon {
+  width: 52px; height: 52px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: var(--rsvp-attending);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 700;
+}
+.m-complete-card h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.m-complete-card p {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.m-complete-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.m-complete-stat {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 10px 6px;
+}
+.m-complete-stat .num {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 20px;
+}
+.m-complete-stat .label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.m-complete-card .btn-cta {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  margin-bottom: 6px;
+}
+.m-complete-card .btn-secondary {
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-soft);
+  padding: 6px;
+}
+
+@media (max-width: 1300px) {
+  .canvas-header { padding: 24px 20px 16px; flex-direction: column; align-items: flex-start; }
+  .frames { padding: 24px 16px 60px; flex-direction: column; align-items: center; }
+  .frame-desktop { width: 100%; max-width: 1200px; }
+  .dash-body { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body data-view="both" data-state="ready">
+
+<header class="canvas-header">
+  <div class="canvas-title">
+    <span class="canvas-meta">Setnayan · Iteration 0008 · Design Review</span>
+    <h1>Photo Delivery to Couple's Cloud — Web &amp; Mobile</h1>
+  </div>
+  <div class="canvas-toggles">
+    <nav class="canvas-toggle">
+      <button class="toggle-pill" data-state-toggle="connect">Connect</button>
+      <button class="toggle-pill active" data-state-toggle="ready">Ready</button>
+      <button class="toggle-pill" data-state-toggle="uploading">Uploading</button>
+      <button class="toggle-pill" data-state-toggle="complete">Complete</button>
+    </nav>
+    <div class="toggle-divider"></div>
+    <nav class="canvas-toggle">
+      <button class="toggle-pill" data-toggle="desktop">Web</button>
+      <button class="toggle-pill" data-toggle="mobile">Mobile</button>
+      <button class="toggle-pill active" data-toggle="both">Both</button>
+    </nav>
+  </div>
+</header>
+
+<main class="frames">
+
+<!-- ============================================================== -->
+<!-- DESKTOP FRAME -->
+<!-- ============================================================== -->
+<div class="frame-wrap">
+  <div class="frame-label">Web · Couple dashboard · 1200px</div>
+  <section class="frame frame-desktop">
+    <div class="browser-chrome">
+      <div class="traffic-lights"><span></span><span></span><span></span></div>
+      <div class="url-bar">
+        <span class="lock">🔒</span>
+        <span>setnayan.com/dashboard/photo-delivery</span>
+      </div>
+    </div>
+
+    <nav class="dash-nav">
+      <div class="dash-brand">
+        <div class="dash-brand-mark"></div>
+        <div class="dash-brand-text">Setnayan<em> · couple</em></div>
+      </div>
+      <div class="dash-nav-links">
+        <a class="dash-nav-link">Overview</a>
+        <a class="dash-nav-link">Landing</a>
+        <a class="dash-nav-link">Guests</a>
+        <a class="dash-nav-link">Schedule</a>
+        <a class="dash-nav-link">Suppliers</a>
+        <a class="dash-nav-link">Gallery</a>
+        <a class="dash-nav-link active">Photo Delivery</a>
+      </div>
+      <div class="dash-nav-right">
+        <div class="dash-event-pill">
+          <div class="ev-mark">M&amp;J</div>
+          <div>
+            <div style="font-weight:500;font-size:12px;">Maria &amp; Juan</div>
+            <div class="ev-meta">Oct 24, 2026 · 7d post-event</div>
+          </div>
+        </div>
+        <div class="avatar-circle">MR</div>
+      </div>
+    </nav>
+
+    <div class="dash-page">
+      <div class="page-header">
+        <div>
+          <div class="page-crumb">Dashboard / Photo Delivery</div>
+          <div class="page-title">Photo Delivery</div>
+        </div>
+        <div>
+          <span class="state-pill idle d-state-connect"><span class="dot"></span>Not connected</span>
+          <span class="state-pill ready d-state-ready"><span class="dot"></span>Ready to release</span>
+          <span class="state-pill uploading d-state-uploading"><span class="dot"></span>Uploading</span>
+          <span class="state-pill complete d-state-complete"><span class="dot"></span>Delivered</span>
+        </div>
+      </div>
+
+      <!-- ===== STATE 1: CONNECT ===== -->
+      <div class="state-view" data-state-view="connect">
+        <div class="connect-hero">
+          <div class="drive-logo"><span></span></div>
+          <h2>Send your finalized photos<br>straight to your Google Drive</h2>
+          <p>
+            Once you've reviewed and approved your wedding photos, Setnayan can upload everything to a folder in your Drive — full-resolution photos, 5-second clips, and a manifest of who's tagged in what.
+          </p>
+          <div class="connect-flow">
+            <div class="connect-step">
+              <div class="connect-step-num">1</div>
+              <h4>Connect Drive</h4>
+              <p>One-tap OAuth. Setnayan creates its own folder — never touches the rest of your Drive.</p>
+            </div>
+            <div class="connect-step">
+              <div class="connect-step-num">2</div>
+              <h4>Review &amp; approve</h4>
+              <p>You have 7 days to approve photos before they unlock for guests &amp; release.</p>
+            </div>
+            <div class="connect-step">
+              <div class="connect-step-num">3</div>
+              <h4>Release to Drive</h4>
+              <p>One button, one upload. We email you when it's done.</p>
+            </div>
+          </div>
+          <button class="btn-drive">
+            <span class="drive-logo"><span></span></span>
+            Connect Google Drive
+          </button>
+          <div class="connect-permissions">
+            <strong>What we ask for: <em>drive.file</em> scope only</strong>
+            <span>Setnayan can write to and read files it creates inside the Setnayan folder. We can't see, list, or touch any other file in your Drive. Disconnect any time — your photos in the Setnayan folder stay yours.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STATE 2: READY ===== -->
+      <div class="state-view active" data-state-view="ready">
+        <div class="connection-card connected">
+          <div class="drive-logo"><span></span></div>
+          <div class="connection-info">
+            <div class="connection-eyebrow"><span class="dot"></span>Connected to Google Drive</div>
+            <div class="connection-title">Setnayan · Maria &amp; Juan Wedding · 2026-10-24</div>
+            <div class="connection-sub">m••• @ gmail.com · folder created Oct 31, 2026 · <strong>1.3 GB available</strong></div>
+          </div>
+          <div class="connection-actions">
+            <button class="btn ghost">Change folder</button>
+            <button class="btn">Disconnect</button>
+          </div>
+        </div>
+
+        <div class="dash-body">
+          <div>
+            <div class="release-summary">
+              <div class="summary-stat">
+                <div class="summary-stat-label">Photos finalized</div>
+                <div class="summary-stat-value">1,247</div>
+                <div class="summary-stat-sub">across 4 segments</div>
+              </div>
+              <div class="summary-stat">
+                <div class="summary-stat-label">Clips finalized</div>
+                <div class="summary-stat-value">312</div>
+                <div class="summary-stat-sub">5-sec each</div>
+              </div>
+              <div class="summary-stat">
+                <div class="summary-stat-label">Total size</div>
+                <div class="summary-stat-value">4.2<span style="font-size:18px;color:var(--ink-soft);"> GB</span></div>
+                <div class="summary-stat-sub">JPG + MP4</div>
+              </div>
+              <div class="summary-stat">
+                <div class="summary-stat-label">Photographers</div>
+                <div class="summary-stat-value">5</div>
+                <div class="summary-stat-sub">Papic seats</div>
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-eyebrow">Folder structure</div>
+              <h3 class="section-title">What we'll upload to Drive</h3>
+              <div class="folder-tree">
+                <div class="root">📁 Setnayan · Maria &amp; Juan Wedding · 2026-10-24/</div>
+                <div class="item"><span class="nm">01_Pre-event &amp; Arrival</span><span class="ct">112 photos · 14 clips · 312 MB</span></div>
+                <div class="item"><span class="nm">02_Ceremony</span><span class="ct">348 photos · 87 clips · 1.1 GB</span></div>
+                <div class="item"><span class="nm">03_Cocktails</span><span class="ct">216 photos · 54 clips · 720 MB</span></div>
+                <div class="item"><span class="nm">04_Reception</span><span class="ct">459 photos · 112 clips · 1.5 GB</span></div>
+                <div class="item"><span class="nm">05_Dancing &amp; Send-off</span><span class="ct">112 photos · 45 clips · 580 MB</span></div>
+                <div class="item file"><span class="nm">manifest.csv</span><span class="ct">filename · photographer · tagged guests · timestamp</span></div>
+                <div class="item file"><span class="nm">README.txt</span><span class="ct">delivery info &amp; copyright</span></div>
+              </div>
+            </div>
+
+            <div class="release-cta-card">
+              <div class="release-cta-info">
+                <h3>Everything's reviewed and ready</h3>
+                <p>Click below to start the upload. Estimated time: ~15 minutes for 4.2 GB. We'll email you when it's done — you don't need to keep this tab open.</p>
+              </div>
+              <button class="btn green btn-large">Release to Drive →</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="help-card">
+              <div class="section-eyebrow">Where you are</div>
+              <h4>Delivery timeline</h4>
+              <ul class="timeline">
+                <li>
+                  <span class="glyph done">✓</span>
+                  <div><strong>Event ended</strong>Oct 24, 2026 · 11:47 PM</div>
+                </li>
+                <li>
+                  <span class="glyph done">✓</span>
+                  <div><strong>Review complete</strong>1,247 photos approved · 18 hidden</div>
+                </li>
+                <li>
+                  <span class="glyph done">✓</span>
+                  <div><strong>Drive connected</strong>Oct 31, 2026</div>
+                </li>
+                <li>
+                  <span class="glyph now">▸</span>
+                  <div><strong>Release</strong>Tap the green button when ready</div>
+                </li>
+                <li>
+                  <span class="glyph queued">○</span>
+                  <div><strong>Upload &amp; notify</strong>~15 min after release</div>
+                </li>
+              </ul>
+            </div>
+            <div class="help-card">
+              <h4>Review status</h4>
+              <p style="margin-bottom:10px;">All segments approved through Setnayan's 7-day review window. Hidden photos won't be uploaded.</p>
+              <div class="review-status">
+                <div class="review-stat ok">
+                  <span class="glyph">✓</span>
+                  <div class="label"><strong>1,247</strong>Approved &amp; uploading</div>
+                </div>
+                <div class="review-stat review">
+                  <span class="glyph">‒</span>
+                  <div class="label"><strong>18</strong>Hidden by you</div>
+                </div>
+              </div>
+            </div>
+            <div class="help-card">
+              <h4>FAQ</h4>
+              <ul class="faq-list">
+                <li><strong>Can I re-deliver later?</strong>Yes — only new or changed photos will be re-uploaded.</li>
+                <li><strong>What if Drive runs out of space?</strong>We pause and notify you. You can free up Drive space and click Resume.</li>
+                <li><strong>Can guests download from this folder?</strong>Only if you share the folder. By default it's private to your account.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STATE 3: UPLOADING ===== -->
+      <div class="state-view" data-state-view="uploading">
+        <div class="connection-card connected">
+          <div class="drive-logo"><span></span></div>
+          <div class="connection-info">
+            <div class="connection-eyebrow" style="color:var(--rsvp-pending);"><span class="dot"></span>Uploading to Google Drive</div>
+            <div class="connection-title">Setnayan · Maria &amp; Juan Wedding · 2026-10-24</div>
+            <div class="connection-sub">Started 11:42 AM · <strong>uploading in background — you can close this tab</strong></div>
+          </div>
+          <div class="connection-actions">
+            <button class="btn ghost">Pause</button>
+            <button class="btn">Cancel</button>
+          </div>
+        </div>
+
+        <div class="dash-body">
+          <div>
+            <div class="upload-progress-card">
+              <div class="upload-progress-head">
+                <h3>Uploading 1,247 photos &amp; 312 clips</h3>
+                <div class="upload-progress-eta">~5 min remaining</div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: 67%;"></div>
+              </div>
+              <div class="progress-meta">
+                <span><strong>67%</strong> complete</span>
+                <span><strong>847</strong>/1,247 photos · <strong>200</strong>/312 clips · <strong>2.8 GB</strong>/4.2 GB</span>
+              </div>
+
+              <div class="upload-current">
+                <div class="upload-current-thumb"></div>
+                <div class="upload-current-info">
+                  <strong>IMG_0847.jpg</strong>
+                  <span>Reception · Photographer 3 · 4.2 MB</span>
+                </div>
+                <div class="upload-current-spinner">↻ Uploading</div>
+              </div>
+
+              <div class="section-eyebrow" style="margin-top:18px;">Recently uploaded</div>
+              <ul class="upload-recent">
+                <li><span class="name">IMG_0846.jpg</span><span class="status">✓ Reception</span></li>
+                <li><span class="name">CLIP_0199.mp4</span><span class="status">✓ Reception</span></li>
+                <li><span class="name">IMG_0845.jpg</span><span class="status">✓ Reception</span></li>
+                <li><span class="name">IMG_0844.jpg</span><span class="status">✓ Cocktails</span></li>
+                <li><span class="name">CLIP_0198.mp4</span><span class="status">✓ Cocktails</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div>
+            <div class="help-card">
+              <h4>While we upload</h4>
+              <p>You can close this tab. The upload runs on our servers — it doesn't depend on your connection. We'll email maria@example.com when it's done.</p>
+            </div>
+            <div class="help-card">
+              <h4>Per-segment progress</h4>
+              <div class="folder-tree" style="font-size:12px;line-height:1.7;">
+                <div class="item"><span class="nm">01_Pre-event</span><span class="ct">112/112 ✓</span></div>
+                <div class="item"><span class="nm">02_Ceremony</span><span class="ct">348/348 ✓</span></div>
+                <div class="item"><span class="nm">03_Cocktails</span><span class="ct">216/216 ✓</span></div>
+                <div class="item"><span class="nm">04_Reception</span><span class="ct" style="color:var(--rsvp-pending);font-weight:600;">171/459 ↻</span></div>
+                <div class="item"><span class="nm">05_Dancing</span><span class="ct">queued</span></div>
+              </div>
+            </div>
+            <div class="help-card">
+              <h4>Auto-retry on</h4>
+              <p>If a file fails, we retry up to 5 times with exponential backoff. Permanently failed files are listed in the manifest with a flag — they don't block the rest.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STATE 4: COMPLETE ===== -->
+      <div class="state-view" data-state-view="complete">
+        <div class="connection-card connected">
+          <div class="drive-logo"><span></span></div>
+          <div class="connection-info">
+            <div class="connection-eyebrow"><span class="dot"></span>Delivered · 1,247 photos in your Drive</div>
+            <div class="connection-title">Setnayan · Maria &amp; Juan Wedding · 2026-10-24</div>
+            <div class="connection-sub">Completed Oct 31, 2026 · 12:14 PM · <strong>4.2 GB uploaded · 0 failures</strong></div>
+          </div>
+          <div class="connection-actions">
+            <a class="btn primary" href="#">Open in Drive →</a>
+          </div>
+        </div>
+
+        <div class="complete-card">
+          <div class="complete-icon">✓</div>
+          <h2>All your photos are in Drive</h2>
+          <p>
+            We uploaded 1,247 photos and 312 clips to your Setnayan folder, organized by segment. The manifest CSV lists every file with its photographer and tagged guests. Confirmation email sent to <strong>maria@example.com</strong>.
+          </p>
+          <div class="complete-stats">
+            <div class="complete-stat">
+              <div class="complete-stat-num">1,247</div>
+              <div class="complete-stat-label">Photos</div>
+            </div>
+            <div class="complete-stat">
+              <div class="complete-stat-num">312</div>
+              <div class="complete-stat-label">Clips</div>
+            </div>
+            <div class="complete-stat">
+              <div class="complete-stat-num">4.2<span style="font-size:14px;"> GB</span></div>
+              <div class="complete-stat-label">Total</div>
+            </div>
+          </div>
+          <div class="complete-actions">
+            <a class="btn accent btn-large">📂 Open in Drive</a>
+            <a class="btn">⤓ Download manifest CSV</a>
+            <a class="btn ghost">Re-deliver</a>
+          </div>
+        </div>
+
+        <div class="help-card" style="margin-top:20px;">
+          <h4>Setnayan's copy stays for 5 years</h4>
+          <p>The photos in your Drive are now your authoritative archive. Setnayan also keeps a backup copy on Cloudflare R2 for 5 years per our retention policy — so even if you delete from Drive, you can re-deliver from the dashboard within that window. Guests retain their tagged-photo access per their tier (3 days for public, permanent for registered).</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================== -->
+<!-- MOBILE FRAME -->
+<!-- ============================================================== -->
+<div class="frame-wrap">
+  <div class="frame-label">Mobile · 390 × 844</div>
+  <section class="frame frame-mobile">
+    <div class="mobile-screen">
+      <div class="mobile-notch"></div>
+      <div class="mobile-status">
+        <span>9:41</span>
+        <div class="status-icons">
+          <span style="font-size:11px;">●●●●●</span>
+          <span style="font-size:11px;">📶</span>
+          <div class="battery"><span></span></div>
+        </div>
+      </div>
+
+      <div class="m-header">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="m-back">‹</button>
+          <div>
+            <div class="m-header-title">Photo Delivery</div>
+            <div class="m-header-sub">Maria &amp; Juan · 7d post-event</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="m-body">
+
+        <!-- ===== MOBILE STATE 1: CONNECT ===== -->
+        <div class="state-view" data-state-view="connect">
+          <span class="m-state-pill idle">Not connected</span>
+          <div class="m-card m-connect-card">
+            <div class="drive-logo"><span></span></div>
+            <h2>Send finalized photos to Drive</h2>
+            <p>One-tap OAuth, your own folder, your own copy.</p>
+            <a class="m-connect-btn">
+              <span class="drive-logo"><span></span></span>
+              Connect Google Drive
+            </a>
+            <div style="font-size:10px;color:var(--ink-faint);font-family:'DM Mono',monospace;letter-spacing:0.06em;margin-top:6px;">drive.file scope only — folder Setnayan creates</div>
+          </div>
+          <div class="m-card">
+            <div class="m-card-title">How it works</div>
+            <ul class="timeline">
+              <li><span class="glyph queued">1</span><div><strong>Connect Drive</strong>OAuth flow, ~10 seconds</div></li>
+              <li><span class="glyph queued">2</span><div><strong>Review &amp; approve</strong>7 days from event end</div></li>
+              <li><span class="glyph queued">3</span><div><strong>Release to Drive</strong>Background upload, email when done</div></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ===== MOBILE STATE 2: READY ===== -->
+        <div class="state-view active" data-state-view="ready">
+          <span class="m-state-pill ready">Ready to release</span>
+          <div class="m-connection">
+            <div class="drive-logo"><span></span></div>
+            <div class="info">
+              <strong>Drive connected</strong>
+              <span>m•••@gmail.com</span>
+            </div>
+            <div class="check">✓</div>
+          </div>
+
+          <div class="m-summary">
+            <div class="m-summary-stat">
+              <div class="label">Photos</div>
+              <div class="value">1,247</div>
+              <div class="sub">finalized</div>
+            </div>
+            <div class="m-summary-stat">
+              <div class="label">Clips</div>
+              <div class="value">312</div>
+              <div class="sub">5-sec each</div>
+            </div>
+            <div class="m-summary-stat">
+              <div class="label">Total size</div>
+              <div class="value">4.2 <span style="font-size:14px;">GB</span></div>
+              <div class="sub">JPG + MP4</div>
+            </div>
+            <div class="m-summary-stat">
+              <div class="label">ETA</div>
+              <div class="value">~15<span style="font-size:14px;"> min</span></div>
+              <div class="sub">to upload</div>
+            </div>
+          </div>
+
+          <div class="m-card">
+            <div class="m-card-title">Folder layout</div>
+            <div class="m-folder-tree">
+              <div class="root">Setnayan · M&amp;J Wedding · 2026-10-24/</div>
+              <div class="item"><span>01_Pre-event</span><span class="ct">112 ph · 14 clips</span></div>
+              <div class="item"><span>02_Ceremony</span><span class="ct">348 ph · 87 clips</span></div>
+              <div class="item"><span>03_Cocktails</span><span class="ct">216 ph · 54 clips</span></div>
+              <div class="item"><span>04_Reception</span><span class="ct">459 ph · 112 clips</span></div>
+              <div class="item"><span>05_Dancing</span><span class="ct">112 ph · 45 clips</span></div>
+              <div class="item"><span>manifest.csv</span><span class="ct">·</span></div>
+            </div>
+          </div>
+
+          <div class="m-card">
+            <div class="m-card-title">Where you are</div>
+            <ul class="timeline">
+              <li><span class="glyph done">✓</span><div><strong>Event ended</strong>Oct 24, 2026</div></li>
+              <li><span class="glyph done">✓</span><div><strong>Review complete</strong>1,247 approved · 18 hidden</div></li>
+              <li><span class="glyph done">✓</span><div><strong>Drive connected</strong>Oct 31, 2026</div></li>
+              <li><span class="glyph now">▸</span><div><strong>Release</strong>Tap below when ready</div></li>
+            </ul>
+          </div>
+
+          <div class="m-cta-bar">
+            <button class="btn-cta">Release to Drive →</button>
+          </div>
+        </div>
+
+        <!-- ===== MOBILE STATE 3: UPLOADING ===== -->
+        <div class="state-view" data-state-view="uploading">
+          <span class="m-state-pill uploading">Uploading</span>
+          <div class="m-progress-card">
+            <h3>Uploading to Drive</h3>
+            <div class="eta">~5 min remaining · 67% complete</div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width:67%;"></div>
+            </div>
+            <div class="progress-meta">
+              <span><strong>847</strong>/1,247 photos</span>
+              <span><strong>200</strong>/312 clips</span>
+            </div>
+            <div class="upload-current" style="margin-top:0;">
+              <div class="upload-current-thumb"></div>
+              <div class="upload-current-info">
+                <strong>IMG_0847.jpg</strong>
+                <span>Reception · Photog 3</span>
+              </div>
+              <div class="upload-current-spinner">↻</div>
+            </div>
+          </div>
+
+          <div class="m-card">
+            <div class="m-card-title">Per-segment</div>
+            <div class="m-folder-tree">
+              <div class="item"><span>Pre-event</span><span class="ct">112/112 ✓</span></div>
+              <div class="item"><span>Ceremony</span><span class="ct">348/348 ✓</span></div>
+              <div class="item"><span>Cocktails</span><span class="ct">216/216 ✓</span></div>
+              <div class="item"><span>Reception</span><span class="ct" style="color:var(--rsvp-pending);font-weight:600;">171/459 ↻</span></div>
+              <div class="item"><span>Dancing</span><span class="ct">queued</span></div>
+            </div>
+          </div>
+
+          <div class="m-card">
+            <div class="m-card-body" style="text-align:center;">
+              <strong style="display:block;color:var(--ink);font-size:14px;margin-bottom:4px;">You can close this app</strong>
+              Upload runs on our servers. We'll email when complete.
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== MOBILE STATE 4: COMPLETE ===== -->
+        <div class="state-view" data-state-view="complete">
+          <span class="m-state-pill complete">Delivered</span>
+          <div class="m-complete-card">
+            <div class="m-complete-icon">✓</div>
+            <h2>All in Drive</h2>
+            <p>1,247 photos &amp; 312 clips uploaded to your Setnayan folder. Manifest CSV included.</p>
+            <div class="m-complete-stats">
+              <div class="m-complete-stat">
+                <div class="num">1,247</div>
+                <div class="label">Photos</div>
+              </div>
+              <div class="m-complete-stat">
+                <div class="num">312</div>
+                <div class="label">Clips</div>
+              </div>
+              <div class="m-complete-stat">
+                <div class="num">4.2 GB</div>
+                <div class="label">Total</div>
+              </div>
+            </div>
+            <a class="btn-cta">📂 Open in Drive</a>
+            <a class="btn-secondary">⤓ Manifest CSV  ·  Re-deliver</a>
+          </div>
+
+          <div class="m-card">
+            <div class="m-card-body">
+              <strong style="color:var(--ink);display:block;margin-bottom:4px;">Setnayan keeps a copy for 5 years</strong>
+              Even if you delete from Drive, re-delivery works for 5 years from event date.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+</main>
+
+<style>
+  .proto-toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff;
+    font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 500;
+    padding: 12px 20px; border-radius: 999px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    z-index: 9999; opacity: 0; pointer-events: none;
+    transition: opacity 0.18s, transform 0.18s;
+  }
+  .proto-toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+  .proto-modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    display: none; align-items: center; justify-content: center;
+    z-index: 9000; padding: 20px;
+  }
+  .proto-modal-bg.show { display: flex; }
+  .proto-modal {
+    background: var(--surface); border-radius: 14px; padding: 24px 26px;
+    max-width: 480px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .proto-modal h3 {
+    font-family: 'Cormorant Garamond', serif; font-weight: 500;
+    font-size: 24px; margin-bottom: 6px;
+  }
+  .proto-modal .sub {
+    font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.5;
+  }
+  .proto-modal-actions {
+    display: flex; gap: 8px; justify-content: flex-end;
+    margin-top: 20px; flex-wrap: wrap;
+  }
+  .oauth-account {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--rule); border-radius: 10px;
+    margin-bottom: 8px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .oauth-account:hover { border-color: var(--ink); background: var(--page-bg-soft); }
+  .oauth-account .av {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--drive-blue), var(--drive-green));
+    color: #fff; display: grid; place-items: center;
+    font-weight: 700; font-size: 14px;
+  }
+  .oauth-account .info { flex: 1; }
+  .oauth-account .info strong { font-size: 14px; display: block; }
+  .oauth-account .info span { font-size: 11px; color: var(--ink-soft); font-family: 'DM Mono', monospace; }
+</style>
+<div class="proto-toast" id="protoToast"></div>
+<div class="proto-modal-bg" id="protoModal"><div class="proto-modal" id="protoModalInner"></div></div>
+
+<script>
+(function () {
+  // ============== View toggle (Web / Mobile / Both) ==============
+  document.querySelectorAll('[data-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-toggle]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.body.dataset.view = btn.dataset.toggle;
+    });
+  });
+
+  // ============== State toggle ==============
+  function applyState(state) {
+    document.body.dataset.state = state;
+    document.querySelectorAll('[data-state-view]').forEach(v => {
+      v.classList.toggle('active', v.dataset.stateView === state);
+    });
+    document.querySelectorAll('[class*="d-state-"]').forEach(p => {
+      p.style.display = 'none';
+    });
+    const active = document.querySelector('.d-state-' + state);
+    if (active) active.style.display = 'inline-flex';
+    // Reflect on the canvas state-toggle pills
+    document.querySelectorAll('[data-state-toggle]').forEach(b => {
+      b.classList.toggle('active', b.dataset.stateToggle === state);
+    });
+  }
+  document.querySelectorAll('[data-state-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyState(btn.dataset.stateToggle);
+    });
+  });
+  applyState('ready');
+
+  // ============== Toast / modal helpers ==============
+  const toast = document.getElementById('protoToast');
+  const modalBg = document.getElementById('protoModal');
+  const modalInner = document.getElementById('protoModalInner');
+  let toastT;
+  function showToast(msg) {
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+  function openModal(html) {
+    modalInner.innerHTML = html;
+    modalBg.classList.add('show');
+  }
+  function closeModal() { modalBg.classList.remove('show'); }
+  modalBg.addEventListener('click', (e) => { if (e.target === modalBg) closeModal(); });
+  window.__protoCloseModal = closeModal;
+
+  // ============== Connect Google Drive — fake OAuth flow ==============
+  function openOAuth() {
+    openModal(`
+      <h3>Choose a Google account</h3>
+      <div class="sub">Setnayan will request <em>drive.file</em> scope only — it can only see files it creates.</div>
+      <div class="oauth-account" data-acct="maria@gmail.com">
+        <div class="av">M</div>
+        <div class="info"><strong>maria@gmail.com</strong><span>Maria Rivera-Calle</span></div>
+      </div>
+      <div class="oauth-account" data-acct="juan@gmail.com">
+        <div class="av" style="background:linear-gradient(135deg, var(--drive-yellow), var(--drive-red));">J</div>
+        <div class="info"><strong>juan@gmail.com</strong><span>Juan Calle</span></div>
+      </div>
+      <div class="oauth-account" data-acct="couple.shared@gmail.com">
+        <div class="av" style="background:linear-gradient(135deg, var(--accent), var(--accent-deep));">M&amp;J</div>
+        <div class="info"><strong>couple.shared@gmail.com</strong><span>Maria &amp; Juan (shared)</span></div>
+      </div>
+      <div class="proto-modal-actions">
+        <button class="btn ghost" onclick="window.__protoCloseModal()">Cancel</button>
+      </div>
+    `);
+    modalInner.querySelectorAll('.oauth-account').forEach(row => {
+      row.addEventListener('click', () => {
+        closeModal();
+        showToast('Connected · ' + row.dataset.acct);
+        applyState('ready');
+      });
+    });
+  }
+
+  // Wire the desktop hero connect button + mobile connect button + connect-only nav
+  document.querySelectorAll('.btn-drive, .m-connect-btn').forEach(btn => {
+    btn.style.cursor = 'pointer';
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openOAuth();
+    });
+  });
+
+  // ============== Disconnect — confirm modal then return to connect state ==============
+  document.querySelectorAll('.btn').forEach(btn => {
+    if (btn.textContent.trim() === 'Disconnect') {
+      btn.addEventListener('click', () => {
+        openModal(`
+          <h3>Disconnect Google Drive?</h3>
+          <div class="sub">Setnayan will stop being able to write to your Drive folder. Photos already uploaded stay in your Drive — only the connection is removed.</div>
+          <div class="proto-modal-actions">
+            <button class="btn ghost" onclick="window.__protoCloseModal()">Keep connected</button>
+            <button class="btn primary" onclick="window.__protoConfirmDisconnect()">Disconnect</button>
+          </div>
+        `);
+      });
+    }
+  });
+  window.__protoConfirmDisconnect = function () {
+    closeModal();
+    applyState('connect');
+    showToast('Drive disconnected');
+  };
+
+  // ============== Release to Drive → simulate to uploading then complete ==============
+  function startUpload() {
+    applyState('uploading');
+    showToast('Upload started — running in background');
+    // Animate the progress bars
+    const fills = document.querySelectorAll('[data-state-view="uploading"] .progress-bar-fill');
+    let pct = 67; // start where mockup begins
+    const tick = () => {
+      pct = Math.min(100, pct + 4);
+      fills.forEach(f => f.style.width = pct + '%');
+      if (pct < 100) {
+        setTimeout(tick, 400);
+      } else {
+        setTimeout(() => {
+          applyState('complete');
+          showToast('Delivered · 1,247 photos in Drive');
+        }, 600);
+      }
+    };
+    setTimeout(tick, 600);
+  }
+  document.querySelectorAll('.btn-large, .btn-cta').forEach(btn => {
+    if (btn.textContent.includes('Release to Drive')) {
+      btn.addEventListener('click', startUpload);
+    }
+  });
+
+  // ============== Pause / Cancel during upload ==============
+  document.querySelectorAll('.btn').forEach(btn => {
+    const lbl = btn.textContent.trim();
+    if (lbl === 'Pause') {
+      btn.addEventListener('click', () => showToast('Upload paused'));
+    }
+    if (lbl === 'Cancel') {
+      btn.addEventListener('click', () => {
+        openModal(`
+          <h3>Cancel this upload?</h3>
+          <div class="sub">Files already uploaded stay in your Drive. You can resume later from the Ready state.</div>
+          <div class="proto-modal-actions">
+            <button class="btn ghost" onclick="window.__protoCloseModal()">Keep uploading</button>
+            <button class="btn primary" onclick="window.__protoCancelUpload()">Cancel upload</button>
+          </div>
+        `);
+      });
+    }
+  });
+  window.__protoCancelUpload = function () {
+    closeModal();
+    applyState('ready');
+    showToast('Upload cancelled');
+  };
+
+  // ============== Open in Drive / Download manifest / Re-deliver ==============
+  document.querySelectorAll('.btn, .btn-cta, .btn-secondary').forEach(btn => {
+    if (btn._wired9) return;
+    const txt = btn.textContent.trim();
+    if (txt.startsWith('Open in Drive') || txt.includes('📂') ) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        showToast('Opening Drive in a new tab — placeholder');
+      });
+      btn._wired9 = true;
+      return;
+    }
+    if (txt.includes('manifest CSV') || txt.includes('Manifest CSV')) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        showToast('manifest.csv downloading');
+      });
+      btn._wired9 = true;
+      return;
+    }
+    if (txt === 'Re-deliver') {
+      btn.addEventListener('click', () => {
+        openModal(`
+          <h3>Re-deliver to Drive?</h3>
+          <div class="sub">Only new or changed photos will be re-uploaded. Files unchanged in Drive will be skipped.</div>
+          <div class="proto-modal-actions">
+            <button class="btn ghost" onclick="window.__protoCloseModal()">Cancel</button>
+            <button class="btn primary" onclick="window.__protoRedeliver()">Re-deliver</button>
+          </div>
+        `);
+      });
+      btn._wired9 = true;
+      return;
+    }
+    if (txt === 'Change folder') {
+      btn.addEventListener('click', () => showToast('Change folder — coming soon'));
+      btn._wired9 = true;
+      return;
+    }
+  });
+  window.__protoRedeliver = function () {
+    closeModal();
+    startUpload();
+  };
+
+  // ============== Mobile back button ==============
+  document.querySelectorAll('.m-back').forEach(b => {
+    b.style.cursor = 'pointer';
+    b.addEventListener('click', () => showToast('Back to dashboard'));
+  });
+
+  // ============== Top nav links — visible click feedback ==============
+  document.querySelectorAll('.dash-nav-link').forEach(l => {
+    l.style.cursor = 'pointer';
+    l.addEventListener('click', () => {
+      if (l.classList.contains('active')) return;
+      document.querySelectorAll('.dash-nav-link').forEach(x => x.classList.remove('active'));
+      l.classList.add('active');
+      showToast(l.textContent.trim() + ' — coming soon');
+      // For demo, snap back to Photo Delivery active
+      setTimeout(() => {
+        document.querySelectorAll('.dash-nav-link').forEach(x => x.classList.remove('active'));
+        const pd = Array.from(document.querySelectorAll('.dash-nav-link')).find(x => x.textContent.trim() === 'Photo Delivery');
+        if (pd) pd.classList.add('active');
+      }, 1200);
+    });
+  });
+
+  // ============== Catch-all for any remaining buttons ==============
+  // Mark already-wired buttons so we don't double-fire toasts
+  const explicitlyHandled = new Set();
+  function markHandled(sel) {
+    document.querySelectorAll(sel).forEach(el => explicitlyHandled.add(el));
+  }
+  markHandled('.btn-drive, .m-connect-btn, .m-back, .dash-nav-link, [data-toggle], [data-state-toggle], .toggle-pill');
+  document.querySelectorAll('.btn, .btn-cta, .btn-secondary').forEach(b => {
+    const t = b.textContent.trim();
+    if (['Disconnect','Pause','Cancel','Release to Drive →','Re-deliver','Change folder'].includes(t)) explicitlyHandled.add(b);
+    if (t.startsWith('Open in Drive') || t.startsWith('📂') || t.includes('manifest CSV') || t.includes('Manifest CSV')) explicitlyHandled.add(b);
+    if (t === 'Connect Google Drive') explicitlyHandled.add(b);
+  });
+  document.querySelectorAll('button, a.btn, a.btn-cta, a.btn-secondary').forEach(b => {
+    if (explicitlyHandled.has(b)) return;
+    if (b.dataset.toggle || b.dataset.stateToggle) return;
+    if (b.classList.contains('toggle-pill')) return;
+    if (b.closest('.proto-modal')) return;
+    const lbl = (b.textContent || '').trim().split('\n')[0].trim();
+    if (!lbl) return;
+    b.addEventListener('click', () => {
+      showToast(lbl.slice(0, 40) + ' — coming soon');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

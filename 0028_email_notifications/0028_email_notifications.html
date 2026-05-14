@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0028 — Email Notification Fallback — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0028</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0028_email_notifications.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0028_email_notifications.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0028_email_notifications.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0028--email-notification-fallback">Iteration 0028 — Email Notification Fallback</h1>
+<p><strong>Iteration number:</strong> 0028 <strong>Topic:</strong> Email-only notification layer that augments the in-UI notifications already shipped across V1 iterations. Covers transactional, coordination, and (opt-in) marketing emails. SMS is explicitly out of V1 scope. <strong>Surface:</strong> Cross-cutting infrastructure — no user-facing screen of its own. Surfaces as outbound emails to customers / vendors / admins, plus an Email Operations sub-section inside the 0023 admin console. <strong>URL pattern:</strong> N/A (outbound only). One-click unsubscribe links resolve at <code>setnayan.com/u/[token]</code>. Provider webhooks land at <code>setnayan.com/api/email/webhook/[provider]</code>. <strong>Builds on:</strong> 0000 (users + auth), 0013 (Supabase Edge Functions + Cloudflare Queue), 0019 (chat-message triggers), 0023 (admin observability surface), 0025 (per-user notification preferences), 0026 (BIR Official Receipt + Form 2307 attachments). <strong>Provides to downstream iterations:</strong> Every iteration with a critical event now has a reliable email rail. Push notifications and SMS fallback ship in later iterations and consume the same <code>email_dispatches</code>-style queue pattern. <strong>Status:</strong> Drafted 2026-05-12. <strong>Phase:</strong> V1 launch-blocking for payments (customers must receive payment instructions + confirmations) and for wedding-day reliability (T-1d / T-1h reminders).</p>
+<hr />
+<h2 id="1-why-this-iteration-exists">1. Why this iteration exists</h2>
+<p>The existing V1 notification posture is "in-UI only." That's fine for "your wedding has 3 unread messages" — couples and vendors check the app daily and see the badge. It is <strong>not</strong> fine for:</p>
+<ul>
+<li><strong>Payments.</strong> Customers apply for a service and then leave the app. The next touch is a payment-instructions email pointing them at Setnayan's static BDO + GCash accounts. Without email, the apply-then-pay model breaks at the second step.</li>
+<li><strong>Wedding-day reliability.</strong> A vendor who hasn't opened the app in three weeks needs a T-1d reminder of call time and venue address. The in-UI badge they can't see is useless.</li>
+<li><strong>Account security.</strong> New-device logins and password changes need to leave a trail in the user's inbox so a hijacked account is visible even when the attacker controls the in-app surface.</li>
+<li><strong>Cross-platform reach.</strong> Couples handle 80% of planning on mobile; vendors handle 60% on desktop. Email is the lowest-common-denominator inbox both sides already check.</li>
+</ul>
+<p>V1 ships <strong>email only</strong>. SMS, push, and in-app digest emails are V1.1+ work. The architecture is multi-channel-ready (the dispatch table carries a <code>provider</code> field that today only knows <code>resend</code> / <code>sendgrid</code> but tomorrow extends to <code>twilio_sms</code> / <code>apns</code> / <code>fcm</code>), so adding channels later is a schema-additive change.</p>
+<hr />
+<h2 id="2-reference-designs">2. Reference designs</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Concern</th>
+<th>Reference</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Transactional email DX</td>
+<td><strong>Stripe</strong></td>
+<td>Subject-line clarity, pre-header copy, single primary CTA, plaintext alternative. Stripe's emails are the de facto standard PH startups copy from.</td>
+</tr>
+<tr class="even">
+<td>Provider primary</td>
+<td><strong>Resend</strong></td>
+<td>Same team as Vercel; React Email native; ₱0.0006/email at PH conversion; modern webhook + suppression API.</td>
+</tr>
+<tr class="odd">
+<td>Provider fallback</td>
+<td><strong>SendGrid</strong></td>
+<td>Mature deliverability infra; admin-toggleable in 0023 if Resend has an outage.</td>
+</tr>
+<tr class="even">
+<td>Bulk-sender compliance</td>
+<td><strong>Gmail / Yahoo 2024 sender requirements</strong></td>
+<td>SPF + DKIM + DMARC aligned, one-click unsubscribe per RFC 8058, bounce rate &lt; 0.3%, spam rate &lt; 0.1%.</td>
+</tr>
+<tr class="odd">
+<td>Wedding-day reminder cadence</td>
+<td><strong>Calendly + Airbnb checkin emails</strong></td>
+<td>T-7d / T-1d / T-1h ladder with calendar attachment + venue address front and center.</td>
+</tr>
+</tbody>
+</table>
+<p>We are <strong>not</strong> cloning Stripe's templates. We are matching their <strong>deliverability discipline</strong> (sender domain, alignment, suppression hygiene) so we never end up in the spam folder when a couple needs the payment-instructions email at 11pm three weeks before the wedding.</p>
+<hr />
+<h2 id="3-scope-v1">3. Scope (V1)</h2>
+<p><strong>In scope:</strong></p>
+<ul>
+<li>One sender domain (<code>notifications@setnayan.com</code>) with SPF, DKIM, DMARC, and BIMI-ready record setup.</li>
+<li>Resend as primary provider; SendGrid as admin-toggleable fallback.</li>
+<li>Ten transactional / coordination templates spanning five categories (payments, vendors, events, account, marketing).</li>
+<li>React Email components rendered server-side, stored as compiled HTML in the dispatch payload for replay.</li>
+<li>Async dispatch via Cloudflare Queue (retries, dead-letter).</li>
+<li>Provider webhook ingest for delivered / opened / clicked / bounced / complained / unsubscribed.</li>
+<li>Suppression list (hard bounces + spam complaints + unsubscribes + admin blocks).</li>
+<li>One-click unsubscribe per category.</li>
+<li>Per-user notification preferences (<code>notification_preferences</code> from 0025), quiet-hours support, category opt-outs.</li>
+<li>Admin observability inside 0023 Settings → Email Operations.</li>
+<li>Plaintext alternative for every HTML email.</li>
+<li>Mobile-responsive templates (Gmail, Apple Mail, Outlook).</li>
+</ul>
+<p><strong>Out of scope (deferred to V1.1+):</strong></p>
+<ul>
+<li>SMS fallback (separate iteration; Twilio or Globe Labs).</li>
+<li>Push notifications (Expo + web push; separate iteration).</li>
+<li>In-app digest emails (daily / weekly bundles for low-priority events).</li>
+<li>Marketing automation flows beyond simple one-off broadcasts (drip campaigns, behavioral triggers).</li>
+<li>Multi-language template rendering (EN / TL / CEB) — V1 ships EN primary with selective Tagalog warmth in subject lines per marketing voice memory; full TL / CEB localization is V1.1.</li>
+<li>Custom per-vendor branded templates (vendor logos in customer notifications about that vendor).</li>
+<li>A/B testing infrastructure.</li>
+</ul>
+<hr />
+<h2 id="4-architecture">4. Architecture</h2>
+<p><strong>Provider:</strong> <strong>Resend</strong> (<code>resend.com</code>) primary.</p>
+<p>Resend is chosen because:</p>
+<ol>
+<li>Excellent transactional DX — clean SDK, React Email native rendering, helpful error messages.</li>
+<li>Same team as Vercel (which Setnayan already uses for web hosting), aligned upgrade cadence.</li>
+<li>Low cost — $0.00001/email base + sender domain free; ₱0.0006 effective at PH conversion.</li>
+<li>Strong deliverability defaults; pre-warmed shared IPs for low-volume launches, dedicated IPs available at scale.</li>
+<li>React Email templates match Setnayan's Next.js + React stack — same components can be reused across in-app, push, and email surfaces over time.</li>
+</ol>
+<p><strong>Fallback provider:</strong> <strong>SendGrid</strong>. Admin-toggleable from 0023 → Email Operations → Provider. Same template payload structure (compiled HTML + plaintext); the dispatcher chooses the provider at send time based on the global flag. If Resend is unreachable for &gt; 5 minutes, the queue auto-routes to SendGrid (circuit-breaker pattern).</p>
+<p><strong>Sender domain:</strong> <code>notifications@setnayan.com</code>. SPF includes both Resend (<code>include:_spf.resend.com</code>) and SendGrid (<code>include:sendgrid.net</code>); DKIM signs with both providers' keys; DMARC starts at <code>p=quarantine; pct=100; rua=mailto:dmarc-reports@setnayan.com</code> and hardens to <code>p=reject</code> after 30 days of clean reports. BIMI record published once the verified mark certificate (VMC) lands — Setnayan symbol mark displayed inline in Gmail.</p>
+<p><strong>Templates:</strong> <strong>React Email</strong> components rendered server-side via <code>@react-email/render</code>. Each template is a TSX file under <code>apps/web/emails/</code>; compiled HTML + plaintext are inlined into the dispatch payload so a replay always produces the same bytes the user originally received.</p>
+<p><strong>Queue:</strong> Supabase Edge Function <code>dispatch-email</code> enqueues onto a <strong>Cloudflare Queue</strong> (<code>email-dispatch</code>). A Cloudflare Worker consumer picks up jobs, calls the active provider's API, updates the dispatch row, and ACKs the message. Failures route to a dead-letter queue inspected daily by the admin Email Operations panel.</p>
+<p><strong>Webhooks:</strong> Resend posts to <code>setnayan.com/api/email/webhook/resend</code>; SendGrid posts to <code>setnayan.com/api/email/webhook/sendgrid</code>. Both endpoints verify HMAC signatures, map provider-specific event names onto Setnayan's canonical set (<code>delivered</code>, <code>opened</code>, <code>clicked</code>, <code>bounced</code>, <code>complained</code>, <code>unsubscribed</code>), and update <code>email_dispatches</code> in place. Webhooks are idempotent on <code>provider_message_id</code> + event type.</p>
+<hr />
+<h2 id="5-notification-categories-5--v1-templates-10">5. Notification categories (5) + V1 templates (10)</h2>
+<p>Categories mirror the 0025 Profile Settings notification preference toggles so a single opt-out flips email + future push + future SMS together.</p>
+<h3 id="quick-reference">Quick reference</h3>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Template key</th>
+<th>Category</th>
+<th>Subject (EN-primary, Tagalog warmth where it lands)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><code>payment_instructions</code></td>
+<td>payments</td>
+<td>Bayad mo, eto ang paraan — payment instructions for [SKU]</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><code>payment_confirmed</code></td>
+<td>payments</td>
+<td>Bayad mo nai-receive na 💌 — [SKU] activated</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><code>refund_processed</code></td>
+<td>payments</td>
+<td>Refund processed — ₱[amount] is on its way back</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><code>new_vendor_message</code></td>
+<td>vendors</td>
+<td>[Vendor business name] sent you a message</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td><code>vendor_status_change</code></td>
+<td>vendors</td>
+<td>Your vendor [Name] is now [Tier] on Setnayan</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td><code>vendor_unresponsive_48h</code></td>
+<td>vendors</td>
+<td>We nudged [Vendor] for you — here's what's next</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td><code>rsvp_received</code></td>
+<td>events</td>
+<td>[Guest name] is in! RSVP confirmed for your wedding</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td><code>wedding_day_reminder</code></td>
+<td>events</td>
+<td>[T-7d / T-1d / T-1h] reminder — [Event title]</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td><code>save_the_date_sent</code></td>
+<td>events</td>
+<td>[Couple names] invite you to their wedding</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td><code>security_alert</code></td>
+<td>account</td>
+<td>New sign-in to your Setnayan account</td>
+</tr>
+</tbody>
+</table>
+<p>Category 5 (marketing) ships with the infrastructure but no V1 templates — marketing emails (promotional, new vendor recommendations, feature announcements) are explicit opt-in via 0025 and the first marketing template lands in V1.1 once we have a curated send list.</p>
+<hr />
+<h2 id="6-per-template-specifications">6. Per-template specifications</h2>
+<p>Every template specification below states:</p>
+<ul>
+<li><strong>Template key</strong> — canonical key the dispatch payload uses.</li>
+<li><strong>Category</strong> — drives suppression resolution against <code>notification_preferences</code>.</li>
+<li><strong>Subject</strong> + <strong>Pre-header</strong> — what the recipient sees in the inbox list.</li>
+<li><strong>Body structure</strong> — greeting / main / CTA / footer at the shape level (the React Email TSX file is the source of truth for pixels).</li>
+<li><strong>Trigger</strong> — where in the platform code the dispatch is enqueued.</li>
+<li><strong>Suppression rules</strong> — when this dispatch is skipped.</li>
+<li><strong>Variables</strong> — keys the <code>template_data</code> JSON must contain.</li>
+</ul>
+<h3 id="61-payment_instructions">6.1 <code>payment_instructions</code></h3>
+<ul>
+<li><strong>Category:</strong> payments</li>
+<li><strong>Subject:</strong> <code>Bayad mo, eto ang paraan — payment instructions for {sku_name}</code></li>
+<li><strong>Pre-header:</strong> <code>Reference {reference_code}. Pay via BDO or GCash. Setnayan Team confirms within 24 hours.</code></li>
+<li><strong>Body:</strong> Greeting → "You applied for <code>{sku_name}</code> (₱<code>{amount_php}</code>). Send your payment to either of the accounts below and reply with your screenshot." → static BDO + GCash account block (account name, number, reference code in monospace) → "What happens next" 3-step explainer → CTA <code>View your order</code> → footer.</li>
+<li><strong>Trigger:</strong> <code>service_orders</code> row created with <code>status = 'pending_payment'</code>.</li>
+<li><strong>Suppression:</strong> Always sends (transactional). Bypasses quiet hours. Skips only if the email is on the global suppression list with reason <code>hard_bounce</code> or <code>admin_block</code>.</li>
+<li><strong>Variables:</strong> <code>{customer_first_name, sku_name, sku_description, amount_php, reference_code, order_id, order_url, expiry_hint}</code>.</li>
+</ul>
+<h3 id="62-payment_confirmed">6.2 <code>payment_confirmed</code></h3>
+<ul>
+<li><strong>Category:</strong> payments</li>
+<li><strong>Subject:</strong> <code>Bayad mo nai-receive na 💌 — {sku_name} activated</code></li>
+<li><strong>Pre-header:</strong> <code>₱{amount_php} confirmed. {sku_name} is live on your event right now.</code></li>
+<li><strong>Body:</strong> Greeting → confirmation block (amount + date + reference) → "You can now do X, Y, Z" benefits list scoped to the SKU → CTA <code>Open my event</code> → BIR-attached Official Receipt PDF if 0026 is live and the customer is registered for OR issuance → footer.</li>
+<li><strong>Trigger:</strong> Admin reconciles a <code>service_orders</code> row to <code>status = 'paid'</code> from the 0023 Payments Handler panel.</li>
+<li><strong>Suppression:</strong> Always sends (transactional). Bypasses quiet hours.</li>
+<li><strong>Variables:</strong> <code>{customer_first_name, sku_name, amount_php, reference_code, order_id, paid_at, event_name, event_url, benefits[]}</code>. PDF attachment via <code>or_pdf_r2_key</code> when present.</li>
+</ul>
+<h3 id="63-refund_processed">6.3 <code>refund_processed</code></h3>
+<ul>
+<li><strong>Category:</strong> payments</li>
+<li><strong>Subject:</strong> <code>Refund processed — ₱{amount_php} is on its way back</code></li>
+<li><strong>Pre-header:</strong> <code>Refund for {sku_name} sent to your {payment_method}. Reference {refund_reference}.</code></li>
+<li><strong>Body:</strong> Greeting → refund block (amount + method + estimated arrival date — BDO 1–3 banking days, GCash same-day) → "Why this refund happened" reason text → CTA <code>View refund details</code> → "Need help?" → footer.</li>
+<li><strong>Trigger:</strong> Admin marks <code>service_orders.status = 'refunded'</code> and writes a <code>refunds</code> row.</li>
+<li><strong>Suppression:</strong> Always sends.</li>
+<li><strong>Variables:</strong> <code>{customer_first_name, sku_name, amount_php, refund_method, refund_reference, refund_reason_text, estimated_arrival_date}</code>.</li>
+</ul>
+<h3 id="64-new_vendor_message">6.4 <code>new_vendor_message</code></h3>
+<ul>
+<li><strong>Category:</strong> vendors</li>
+<li><strong>Subject:</strong> <code>{vendor_business_name} sent you a message</code></li>
+<li><strong>Pre-header:</strong> <code>{message_preview_60_chars}…</code></li>
+<li><strong>Body:</strong> Greeting → vendor avatar (vendor logo per identity-masking rule) + business name + first 280 chars of message → CTA <code>Reply in Setnayan</code> → "Why we're sending this" footer noting the user can change cadence (instant / 2hr batch / daily digest) in 0025 → unsubscribe link (category-specific) → footer.</li>
+<li><strong>Trigger:</strong> New <code>chat_messages</code> row where <code>chat_thread_participants.notification_pref = 'all'</code> for the recipient AND the recipient hasn't opened the thread within 5 minutes (debounce to avoid emailing on every chime).</li>
+<li><strong>Cadence resolution:</strong> <code>notification_preferences.vendors_email_cadence ∈ ('instant','batched_2h','daily_digest')</code>. <code>batched_2h</code> flushes the queued previews into one email per thread every 2 hours; <code>daily_digest</code> flushes once at 09:00 PHT.</li>
+<li><strong>Suppression:</strong> Skips if the user has muted the thread, if <code>notification_preferences.vendors_email_enabled = false</code>, or if currently inside the user's quiet hours (defer to next active window unless quiet-hours window &gt; 24h, in which case fold into the next digest).</li>
+<li><strong>Variables:</strong> <code>{customer_first_name, vendor_business_name, vendor_logo_url, message_preview, thread_url, unread_count_in_thread}</code>.</li>
+</ul>
+<h3 id="65-vendor_status_change">6.5 <code>vendor_status_change</code></h3>
+<ul>
+<li><strong>Category:</strong> vendors</li>
+<li><strong>Subject:</strong> <code>Your vendor {vendor_business_name} is now {new_tier_label} on Setnayan</code></li>
+<li><strong>Pre-header:</strong> <code>Status changed from {old_tier_label} to {new_tier_label} on {effective_date}.</code></li>
+<li><strong>Body:</strong> Greeting → status change explainer ("Standard Verified → Certified means {Certified tier benefits}") → CTA <code>View {vendor_business_name}</code> → "What this means for your booking" note (in-flight bookings are unaffected) → footer.</li>
+<li><strong>Trigger:</strong> Admin promotes/demotes a vendor in the 0023 Vendor Tier panel; row in <code>vendor_tier_changes</code> audit log is INSERTed.</li>
+<li><strong>Suppression:</strong> Skips if user has no active booking with this vendor (avoid spamming customers who only browsed). Skips if <code>notification_preferences.vendors_email_enabled = false</code>.</li>
+<li><strong>Variables:</strong> <code>{customer_first_name, vendor_business_name, vendor_logo_url, vendor_url, old_tier_label, new_tier_label, effective_date, tier_benefits_text}</code>.</li>
+</ul>
+<h3 id="66-vendor_unresponsive_48h">6.6 <code>vendor_unresponsive_48h</code></h3>
+<ul>
+<li><strong>Category:</strong> vendors</li>
+<li><strong>Subject:</strong> <code>We nudged {vendor_business_name} for you — here's what's next</code></li>
+<li><strong>Pre-header:</strong> <code>It's been 48 hours since your last message. Here's how to escalate if you need to.</code></li>
+<li><strong>Body:</strong> Greeting → "Your message to <code>{vendor_business_name}</code> on <code>{last_message_date}</code> is still unread." → "We've sent them a reminder." → CTA <code>Open thread</code> → secondary actions (<code>Find a backup vendor</code> / <code>Escalate to Setnayan Team</code>) → footer.</li>
+<li><strong>Trigger:</strong> Daily scheduled job at 14:00 PHT queries <code>chat_threads</code> for any thread where the last customer message is &gt; 48h old, the last vendor activity is older than that, and the customer hasn't already received this template for this thread in the last 7 days.</li>
+<li><strong>Suppression:</strong> Skips after one send per thread per 7 days. Skips if vendor responded within the same hour as the scan.</li>
+<li><strong>Variables:</strong> <code>{customer_first_name, vendor_business_name, vendor_logo_url, thread_url, last_message_preview, last_message_date, escalate_url, find_backup_url}</code>.</li>
+</ul>
+<h3 id="67-rsvp_received">6.7 <code>rsvp_received</code></h3>
+<ul>
+<li><strong>Category:</strong> events</li>
+<li><strong>Subject:</strong> <code>{guest_first_name} is in! RSVP confirmed for your wedding</code></li>
+<li><strong>Pre-header:</strong> <code>{plus_one_text}. Running total: {confirmed_count} of {invited_count} guests.</code></li>
+<li><strong>Body:</strong> Greeting → guest name + plus-one details → running RSVP counter → CTA <code>View guest list</code> → optional "thoughtful note from <code>{guest_first_name}</code>" if the guest left one on the RSVP form → footer.</li>
+<li><strong>Trigger:</strong> <code>guests.rsvp_status</code> transitions from <code>pending</code> to <code>confirmed</code>.</li>
+<li><strong>Suppression:</strong> Skips if <code>notification_preferences.events_email_enabled = false</code>. Honors per-event mute (organizer can mute their own RSVP emails from the 0001 guest list panel).</li>
+<li><strong>Variables:</strong> <code>{organizer_first_name, guest_first_name, guest_last_name, plus_one_text, confirmed_count, invited_count, guest_note, guest_list_url}</code>.</li>
+</ul>
+<h3 id="68-wedding_day_reminder">6.8 <code>wedding_day_reminder</code></h3>
+<ul>
+<li><strong>Category:</strong> events</li>
+<li><strong>Subject:</strong> <code>{stage_label} reminder — {event_title}</code> (stage_label = "1 week away" / "Tomorrow" / "1 hour to go")</li>
+<li><strong>Pre-header:</strong> <code>{call_time} at {venue_name}. {weather_hint}.</code></li>
+<li><strong>Body:</strong> Greeting → date / call time / venue address (clickable, opens Maps) → "Bring with you" checklist scoped to the recipient's role (organizer / vendor / coordinator) → CTA <code>Open event</code> → calendar attachment (<code>.ics</code> reattached at every stage so the recipient can re-add if they deleted) → footer.</li>
+<li><strong>Trigger:</strong> Scheduled job at 09:00 PHT scans <code>events</code> for <code>event_date - now() ≈ 7d / 1d</code> and at top of each hour for <code>event_date - now() ≈ 1h</code>. T-1h reminder also dispatches at the actual venue's local timezone (V1 assumes Asia/Manila across the board).</li>
+<li><strong>Suppression:</strong> Recipient-specific. T-7d skips if <code>notification_preferences.events_email_enabled = false</code>. T-1d and T-1h <strong>always send</strong> for organizers and confirmed vendors — wedding-day reliability overrides quiet hours and overrides standard category opt-out. T-1h skips for guests entirely (too noisy).</li>
+<li><strong>Variables:</strong> <code>{recipient_first_name, recipient_role, stage_label, event_title, event_date, call_time_local, venue_name, venue_address, venue_maps_url, weather_hint, bring_checklist[], event_url, ics_attachment}</code>.</li>
+</ul>
+<h3 id="69-save_the_date_sent">6.9 <code>save_the_date_sent</code></h3>
+<ul>
+<li><strong>Category:</strong> events</li>
+<li><strong>Subject:</strong> <code>{organizer_names} invite you to their wedding</code></li>
+<li><strong>Pre-header:</strong> <code>{event_date_pretty} · {venue_city}. RSVP inside.</code></li>
+<li><strong>Body:</strong> Editorial-warm greeting → couple names in display font → date + city → embedded preview image (Save-the-Date render thumbnail or hero photo) → CTA <code>View invitation</code> → <code>Add to calendar</code> secondary → footer.</li>
+<li><strong>Trigger:</strong> Organizer dispatches their save-the-date batch from the 0024 Save-the-Date surface; one dispatch row per guest with a valid email.</li>
+<li><strong>Suppression:</strong> Guests without valid emails fall back to the in-app invite (still works because guests have accounts per the 2026-05-12 memory rule). Skips if guest is on global suppression list. Marketing opt-out does NOT suppress this (it's a personal invitation, not marketing).</li>
+<li><strong>Variables:</strong> <code>{guest_first_name, organizer_names, event_date_pretty, venue_city, hero_image_url, invitation_url, ics_attachment}</code>.</li>
+</ul>
+<h3 id="610-security_alert">6.10 <code>security_alert</code></h3>
+<ul>
+<li><strong>Category:</strong> account</li>
+<li><strong>Subject:</strong> <code>New sign-in to your Setnayan account</code></li>
+<li><strong>Pre-header:</strong> <code>{device_summary} from {city_or_region} at {login_time_local}. Was this you?</code></li>
+<li><strong>Body:</strong> Greeting → "We noticed a sign-in" block (device + IP-derived city + timestamp) → <code>Yes, this was me</code> (no-op confirmation) + <code>No, secure my account</code> (forces logout-all + password reset) → "We send this whenever you sign in from a device or city we haven't seen before" → footer.</li>
+<li><strong>Trigger:</strong> Auth event where the device fingerprint OR the IP-derived city is not in the user's <code>known_devices</code> / <code>known_cities</code> set. Also fires on password change, email change, internal-account creation (admin recipient).</li>
+<li><strong>Suppression:</strong> Always sends — security alerts override all category opt-outs and all quiet hours. Cannot be suppressed except via global block.</li>
+<li><strong>Variables:</strong> <code>{recipient_first_name, event_type, device_summary, city_or_region, login_time_local, secure_account_url, ip_address_truncated}</code>.</li>
+</ul>
+<hr />
+<h2 id="7-schema">7. Schema</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="co">-- Email dispatch queue (one row per outbound email; never deleted)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> email_dispatches (</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>  dispatch_id          UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>  user_id              UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>  <span class="kw">category</span>             TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (<span class="kw">category</span> <span class="kw">IN</span> (<span class="st">&#39;payments&#39;</span>,<span class="st">&#39;vendors&#39;</span>,<span class="st">&#39;events&#39;</span>,<span class="st">&#39;account&#39;</span>,<span class="st">&#39;marketing&#39;</span>)),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>  template_key         TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,         <span class="co">-- e.g. &#39;payment_confirmed&#39;, &#39;rsvp_received&#39;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>  template_data        JSONB <span class="kw">NOT</span> <span class="kw">NULL</span>,        <span class="co">-- variables fed into the React Email template</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a>  subject              TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,         <span class="co">-- rendered subject (snapshot)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>  to_email             TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,         <span class="co">-- snapshot of users.email at dispatch time</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a>  scheduled_for        TIMESTAMPTZ,           <span class="co">-- NULL = send immediately; otherwise defer</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a>  sent_at              TIMESTAMPTZ,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a>  delivered_at         TIMESTAMPTZ,           <span class="co">-- from provider webhook</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a>  opened_at            TIMESTAMPTZ,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a>  clicked_at           TIMESTAMPTZ,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a>  bounced_at           TIMESTAMPTZ,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true"></a>  bounce_reason        TEXT,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true"></a>  unsubscribe_at       TIMESTAMPTZ,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a>  provider             TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;resend&#39;</span> <span class="kw">CHECK</span> (provider <span class="kw">IN</span> (<span class="st">&#39;resend&#39;</span>,<span class="st">&#39;sendgrid&#39;</span>)),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true"></a>  provider_message_id  TEXT,                  <span class="co">-- correlation key for webhooks</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a>  status               TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;queued&#39;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true"></a>                         <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;queued&#39;</span>,<span class="st">&#39;sent&#39;</span>,<span class="st">&#39;delivered&#39;</span>,<span class="st">&#39;bounced&#39;</span>,<span class="st">&#39;complained&#39;</span>,<span class="st">&#39;failed&#39;</span>,<span class="st">&#39;suppressed&#39;</span>)),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true"></a>  suppression_reason   TEXT,                  <span class="co">-- e.g. &#39;user_preference&#39;,&#39;quiet_hours_overflow&#39;,&#39;global_suppression&#39;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true"></a>  retry_count          <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true"></a>  next_retry_at        TIMESTAMPTZ,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true"></a>  created_at           TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now()</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true"></a>);</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_dispatches_user        <span class="kw">ON</span> email_dispatches(user_id, scheduled_for <span class="kw">DESC</span>);</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_dispatches_status      <span class="kw">ON</span> email_dispatches(status) <span class="kw">WHERE</span> status <span class="kw">IN</span> (<span class="st">&#39;queued&#39;</span>,<span class="st">&#39;failed&#39;</span>);</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_dispatches_scheduled   <span class="kw">ON</span> email_dispatches(scheduled_for) <span class="kw">WHERE</span> status <span class="op">=</span> <span class="st">&#39;queued&#39;</span> <span class="kw">AND</span> scheduled_for <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>;</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_dispatches_provider_id <span class="kw">ON</span> email_dispatches(provider_message_id);</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true"></a><span class="co">-- Suppression list (auto-populated on hard bounce + spam complaint + unsubscribe)</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> email_suppressions (</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true"></a>  email_address  TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true"></a>  reason         TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (reason <span class="kw">IN</span> (<span class="st">&#39;hard_bounce&#39;</span>,<span class="st">&#39;spam_complaint&#39;</span>,<span class="st">&#39;unsubscribe&#39;</span>,<span class="st">&#39;admin_block&#39;</span>)),</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true"></a>  <span class="kw">category</span>       TEXT <span class="kw">CHECK</span> (<span class="kw">category</span> <span class="kw">IN</span> (<span class="st">&#39;payments&#39;</span>,<span class="st">&#39;vendors&#39;</span>,<span class="st">&#39;events&#39;</span>,<span class="st">&#39;account&#39;</span>,<span class="st">&#39;marketing&#39;</span>)),</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true"></a>                                              <span class="co">-- NULL = global suppression; otherwise category-specific</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true"></a>  suppressed_at  TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true"></a>  override_at    TIMESTAMPTZ,                 <span class="co">-- admin manual override</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true"></a>  override_by    UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true"></a>  notes          TEXT</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true"></a>);</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true"></a><span class="co">-- Unsubscribe tokens (one-click per RFC 8058)</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> email_unsubscribe_tokens (</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true"></a>  token        TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,              <span class="co">-- 32 hex chars, URL-safe</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true"></a>  user_id      UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true"></a>  <span class="kw">category</span>     TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (<span class="kw">category</span> <span class="kw">IN</span> (<span class="st">&#39;payments&#39;</span>,<span class="st">&#39;vendors&#39;</span>,<span class="st">&#39;events&#39;</span>,<span class="st">&#39;account&#39;</span>,<span class="st">&#39;marketing&#39;</span>)),</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true"></a>  dispatch_id  UUID <span class="kw">REFERENCES</span> email_dispatches(dispatch_id),</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true"></a>  created_at   TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true"></a>  consumed_at  TIMESTAMPTZ</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true"></a>);</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_unsub_user_category <span class="kw">ON</span> email_unsubscribe_tokens(user_id, <span class="kw">category</span>);</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true"></a></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true"></a><span class="co">-- Daily aggregated metrics (refreshed by scheduled job)</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">MATERIALIZED</span> <span class="kw">VIEW</span> email_metrics_daily <span class="kw">AS</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true"></a><span class="kw">SELECT</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true"></a>  <span class="dt">DATE</span>(sent_at)  <span class="kw">AS</span> <span class="dt">day</span>,</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true"></a>  <span class="kw">category</span>,</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true"></a>  template_key,</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>)                                                 <span class="kw">AS</span> sent,</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> delivered_at <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>)         <span class="kw">AS</span> delivered,</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> opened_at <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>)            <span class="kw">AS</span> opened,</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> clicked_at <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>)           <span class="kw">AS</span> clicked,</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> bounced_at <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>)           <span class="kw">AS</span> bounced,</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> status <span class="op">=</span> <span class="st">&#39;complained&#39;</span>)            <span class="kw">AS</span> complained,</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true"></a>  <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> status <span class="op">=</span> <span class="st">&#39;suppressed&#39;</span>)            <span class="kw">AS</span> suppressed</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true"></a><span class="kw">FROM</span> email_dispatches</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true"></a><span class="kw">WHERE</span> sent_at <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true"></a><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>;</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true"></a></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">UNIQUE</span> <span class="kw">INDEX</span> idx_metrics_day_template <span class="kw">ON</span> email_metrics_daily(<span class="dt">day</span>, <span class="kw">category</span>, template_key);</span></code></pre></div>
+<p><code>notification_preferences</code> (already defined in 0025) is the upstream source for per-user opt-outs. The relevant columns:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="co">-- Snippet from 0025; reproduced for clarity, NOT re-created here</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="co">-- notification_preferences (</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="co">--   user_id UUID PRIMARY KEY REFERENCES users(user_id),</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a><span class="co">--   payments_email_enabled  BOOLEAN NOT NULL DEFAULT TRUE,   -- transactional default-on</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a><span class="co">--   vendors_email_enabled   BOOLEAN NOT NULL DEFAULT TRUE,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a><span class="co">--   vendors_email_cadence   TEXT NOT NULL DEFAULT &#39;instant&#39;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a><span class="co">--                             CHECK (vendors_email_cadence IN (&#39;instant&#39;,&#39;batched_2h&#39;,&#39;daily_digest&#39;)),</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a><span class="co">--   events_email_enabled    BOOLEAN NOT NULL DEFAULT TRUE,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a><span class="co">--   account_email_enabled   BOOLEAN NOT NULL DEFAULT TRUE,   -- security overrides this anyway</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true"></a><span class="co">--   marketing_email_enabled BOOLEAN NOT NULL DEFAULT FALSE,  -- marketing default-off; explicit opt-in</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true"></a><span class="co">--   quiet_hours_start       TIME,                            -- e.g. &#39;22:00&#39;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true"></a><span class="co">--   quiet_hours_end         TIME,                            -- e.g. &#39;07:00&#39;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true"></a><span class="co">--   timezone                TEXT NOT NULL DEFAULT &#39;Asia/Manila&#39;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true"></a><span class="co">-- )</span></span></code></pre></div>
+<hr />
+<h2 id="8-per-user-preference-resolution">8. Per-user preference resolution</h2>
+<p>Before enqueuing, the dispatcher resolves the user's preferences:</p>
+<ol>
+<li><strong>Global suppression check.</strong> If <code>to_email</code> is in <code>email_suppressions</code> with <code>reason ∈ ('hard_bounce','admin_block')</code> AND no <code>override_at</code>, mark dispatch <code>suppressed</code> and return.</li>
+<li><strong>Category opt-out check.</strong> Look up <code>notification_preferences.{category}_email_enabled</code>. If FALSE, mark <code>suppressed</code> with <code>suppression_reason = 'user_preference'</code>. <strong>Exception:</strong> payments + account categories always send regardless (transactional baseline per CAN-SPAM / RA 10173).</li>
+<li><strong>Security override.</strong> If template is <code>security_alert</code>, send immediately regardless of quiet hours, opt-outs, or cadence settings.</li>
+<li><strong>Quiet hours.</strong> If now() (in user's timezone) is within <code>[quiet_hours_start, quiet_hours_end]</code>, defer <code>scheduled_for</code> to the start of the next active window. <strong>Exception:</strong> payments + account + T-1d / T-1h wedding-day reminders bypass quiet hours.</li>
+<li><strong>Cadence (vendor messages only).</strong> If template is <code>new_vendor_message</code> and <code>vendors_email_cadence ∈ ('batched_2h','daily_digest')</code>, enqueue with the next flush window's <code>scheduled_for</code>.</li>
+<li><strong>Idempotency.</strong> A dispatch is keyed on <code>(user_id, template_key, dedupe_key)</code> where <code>dedupe_key</code> is template-specific (order_id for payment templates, message_id for vendor messages, event_id+stage for wedding-day reminders). Re-enqueue within the dedupe window is a no-op.</li>
+</ol>
+<hr />
+<h2 id="9-delivery--reliability">9. Delivery + reliability</h2>
+<p><strong>Async dispatch flow:</strong></p>
+<ol>
+<li>Trigger code calls <code>enqueueEmail({user_id, template_key, template_data, category})</code>.</li>
+<li>Edge Function <code>dispatch-email</code> resolves preferences (§ 8), inserts an <code>email_dispatches</code> row with <code>status = 'queued'</code>, and pushes a job onto the Cloudflare Queue <code>email-dispatch</code>.</li>
+<li>Worker consumer pulls the job, renders the React Email component to HTML + plaintext, calls the active provider's send API, stores the returned <code>provider_message_id</code>, and sets <code>status = 'sent'</code> + <code>sent_at = now()</code>.</li>
+<li>Provider webhook fires asynchronously over the next minutes / hours; the webhook handler updates <code>delivered_at</code>, <code>opened_at</code>, <code>clicked_at</code>, <code>bounced_at</code> in place.</li>
+</ol>
+<p><strong>Retry policy:</strong> exponential backoff <code>5s → 30s → 5min → 30min → 2hr → fail</code>. After 5 failed attempts the dispatch lands in <code>status = 'failed'</code> and the worker pushes a dead-letter queue message that surfaces in the admin Email Operations panel.</p>
+<p><strong>Provider failover:</strong> If Resend returns 5xx for &gt; 5 minutes (rolling), the dispatcher switches the per-dispatch <code>provider</code> field to <code>sendgrid</code> for new jobs. Admin can also force the failover from 0023 Settings → Email Operations → Provider. In-flight Resend jobs retry through Resend; the failover only affects newly enqueued work.</p>
+<p><strong>Bounce + complaint handling:</strong></p>
+<ul>
+<li><strong>Hard bounce</strong> → email added to <code>email_suppressions</code> with <code>reason = 'hard_bounce'</code>. Future sends to this address skip with <code>status = 'suppressed'</code>. Admin can manually un-suppress via 0023.</li>
+<li><strong>Soft bounce</strong> → retry per backoff. After 5 soft bounces in 30 days the address is treated as hard.</li>
+<li><strong>Spam complaint (FBL)</strong> → <code>reason = 'spam_complaint'</code>, auto-suppress globally, log to admin audit, flag the user for review (a customer marking us as spam is a UX signal as much as a deliverability signal).</li>
+<li><strong>Unsubscribe</strong> → <code>reason = 'unsubscribe'</code>, suppress only for the matching <code>category</code> (per RFC 8058 one-click unsubscribe). Other categories continue to send.</li>
+</ul>
+<p><strong>RFC 8058 one-click unsubscribe.</strong> Every marketing-eligible email carries:</p>
+<pre><code>List-Unsubscribe: &lt;https://setnayan.com/u/{token}&gt;, &lt;mailto:unsubscribe+{token}@notifications.setnayan.com&gt;
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+</code></pre>
+<p>The token resolves to a <code>email_unsubscribe_tokens</code> row, flips the matching <code>notification_preferences.{category}_email_enabled</code> to FALSE, inserts a category-specific row in <code>email_suppressions</code>, and renders a confirmation page with a one-click "resubscribe" affordance.</p>
+<hr />
+<h2 id="10-branding">10. Branding</h2>
+<ul>
+<li><strong>Header:</strong> Setnayan symbol mark (terracotta pin/star until the new mark from <code>0015_main_website/setnayan_logo.svg</code> lands, then that mark) at 40×40 px, left-aligned. SETNAYAN wordmark in DM Mono uppercase tracking, right of the mark. Cream <code>#FAF6F0</code> background.</li>
+<li><strong>Body:</strong> Ink <code>#1A1A1A</code> text on cream. Manrope (or web-safe fallback <code>system-ui, -apple-system, Segoe UI, Helvetica Neue, sans-serif</code>) for body; Cormorant Garamond italic (or web-safe fallback <code>Georgia, "Times New Roman", serif</code>) for display lines.</li>
+<li><strong>CTA button:</strong> Terracotta <code>#C97B4B</code> background, cream text, 12 px corner radius, 16 px / 24 px padding. One primary CTA per email.</li>
+<li><strong>Footer:</strong> Light terracotta divider line → "Setnayan, Inc. · [registered business address]" → DPO contact <code>dpo@setnayan.com</code> → Privacy Policy + Terms links → category-specific unsubscribe link → "Why you're getting this email" sentence.</li>
+<li><strong>Plaintext alternative:</strong> Every HTML email ships with a plaintext version generated alongside (React Email exposes both). Critical for deliverability (Gmail downranks HTML-only) and accessibility (screen readers + plaintext-only mail clients).</li>
+<li><strong>Mobile responsiveness:</strong> Single column, max-width 600 px, fluid below 480 px. Tested in Gmail (iOS, Android, web), Apple Mail (iOS, macOS), Outlook (Windows, web). Litmus or similar previews enforced in CI on the React Email components.</li>
+<li><strong>Dark mode:</strong> Honor <code>prefers-color-scheme: dark</code> in supporting clients via CSS media query — flip cream → ink and ink → cream. Apple Mail and Gmail web honor this; Outlook does not (we don't fight it).</li>
+</ul>
+<hr />
+<h2 id="11-compliance">11. Compliance</h2>
+<ul>
+<li><strong>PH Data Privacy Act (RA 10173).</strong> Marketing emails require explicit opt-in (<code>marketing_email_enabled = TRUE</code>, defaulted FALSE in 0025). Transactional categories (payments, account security, event coordination) are lawful under the legitimate-interest basis without explicit opt-in, but they still respect category-specific unsubscribe-from-marketing. DPO contact <code>dpo@setnayan.com</code> is in every footer. Suppression list is one of the data points covered by 0025's "delete my account" flow.</li>
+<li><strong>CAN-SPAM (US visitors / vendors).</strong> Clear sender ID (<code>Setnayan &lt;notifications@setnayan.com&gt;</code>), valid physical mailing address in every footer, working unsubscribe mechanism processed within 10 business days (we process in seconds), no deceptive subject lines or false header info.</li>
+<li><strong>GDPR (EU visitors).</strong> Same opt-in / opt-out / right-to-be-forgotten patterns as RA 10173. Suppression list survives account deletion (the email address stays in <code>email_suppressions</code> even if the user row is deleted, so we can't accidentally re-mail a deleted user who later re-registers with the same address — separate question of whether to allow re-registration is owned by 0025).</li>
+<li><strong>Gmail / Yahoo 2024 bulk sender requirements.</strong> SPF + DKIM + DMARC aligned at <code>p=quarantine</code> minimum (target <code>p=reject</code> 30 days post-launch). One-click unsubscribe per RFC 8058 on every marketing email. Bounce rate &lt; 0.3% and spam rate &lt; 0.1% are operational SLAs monitored in the admin Email Operations panel.</li>
+</ul>
+<hr />
+<h2 id="12-admin-observability-in-0023">12. Admin observability (in 0023)</h2>
+<p>A new sub-section ships inside 0023 Settings → <strong>Email Operations</strong> (admin role gate: Operations Handler tier or higher):</p>
+<ul>
+<li><strong>Queue health card</strong> — queued / sending / failed / dead-letter counts, last 24h.</li>
+<li><strong>Daily volume + funnel</strong> — sent / delivered / opened / clicked / bounced / complained, sliceable by category and by template_key, last 30 days.</li>
+<li><strong>Suppression list</strong> — paginated table of <code>email_suppressions</code> rows; search by email; per-row "Override" action (logged to admin audit with two-admin approval if <code>reason = 'spam_complaint'</code>).</li>
+<li><strong>Template preview</strong> — pick a template + paste sample JSON → renders the email server-side and shows the HTML + plaintext side-by-side.</li>
+<li><strong>Send test email</strong> — admin sends any template to their own email (or a test inbox under <code>*@notifications.setnayan.com</code>). One-click; logs to audit.</li>
+<li><strong>Provider toggle</strong> — Resend ⇄ SendGrid radio. Toggle is two-admin-approved (per the 2026-05-12 § 9.1 memory rule, this counts as "modify Setnayan payment-account-equivalent settings" because it controls deliverability).</li>
+<li><strong>Deliverability health</strong> — DMARC reports parsed, SPF/DKIM alignment status, bounce + complaint rate trend, BIMI status.</li>
+<li><strong>Dead-letter inspector</strong> — shows failed dispatches with last error from the provider, raw payload, and <code>Retry</code> button.</li>
+</ul>
+<hr />
+<h2 id="13-cost-projection">13. Cost projection</h2>
+<p>At ₱0.0006 per Resend email and an estimated 30 emails per event lifecycle × 1,000 events/month = 30,000 emails/month = <strong>₱18/month</strong>. Cost is negligible at V1 scale.</p>
+<p>Sensitivity:</p>
+<ul>
+<li>10,000 events/month → 300,000 emails → ₱180/month.</li>
+<li>100,000 events/month → 3,000,000 emails → ₱1,800/month + likely move to a dedicated IP at ~$30/month (₱1,700) → ~₱3,500/month all-in. Still well under one Custom Monogram Pack sale per month.</li>
+</ul>
+<p>Revisit only if monthly volume exceeds 100K, at which point dedicated IPs + multi-domain warmup become relevant.</p>
+<p>SendGrid as fallback adds zero cost while idle (their free tier covers 100 emails/day; we pay only if we actually fail over and stay there for hours).</p>
+<hr />
+<h2 id="14-forward-compatibility-hooks">14. Forward-compatibility hooks</h2>
+<ul>
+<li><strong>Schema multi-channel.</strong> <code>email_dispatches.provider</code> is intentionally a free-string CHECK column. The next iteration adds <code>'twilio_sms'</code>, <code>'apns'</code>, <code>'fcm'</code> without altering the table shape.</li>
+<li><strong>Notification preferences shape.</strong> 0025's <code>notification_preferences</code> table will grow <code>*_sms_enabled</code>, <code>*_push_enabled</code> columns alongside <code>*_email_enabled</code> when those channels ship; existing email-side code reads its own column and is unaffected.</li>
+<li><strong>Localization.</strong> Template files are keyed <code>payment_confirmed.en.tsx</code>. When TL + CEB localized templates ship in V1.1, the dispatcher reads <code>users.preferred_locale</code> and picks the right file. EN remains the default fallback.</li>
+<li><strong>Vendor-branded templates.</strong> Vendor-specific templates (<code>new_vendor_message</code>, <code>vendor_unresponsive_48h</code>) carry the vendor logo via <code>vendor_logo_url</code> already. The full vendor-branded layout (vendor's color scheme as header chrome) is a V1.1 toggle gated on Vendor Pro Weekly.</li>
+</ul>
+<hr />
+<h2 id="15-acceptance-tests">15. Acceptance tests</h2>
+<ol>
+<li>Customer applies for the ₱1,999 Custom Monogram Pack → within 60 seconds receives <code>payment_instructions</code> email with correct BDO + GCash blocks + matching <code>reference_code</code>.</li>
+<li>Admin reconciles the same order to <code>paid</code> → customer receives <code>payment_confirmed</code> within 60 seconds; email opens are tracked via webhook within 5 minutes.</li>
+<li>Customer mutes the <code>vendors</code> category in 0025 → next vendor message generates an <code>email_dispatches</code> row with <code>status = 'suppressed'</code> and <code>suppression_reason = 'user_preference'</code> and the email is NOT sent.</li>
+<li>Customer's email lands on <code>email_suppressions</code> after a hard bounce → next <code>wedding_day_reminder</code> skips with <code>suppression_reason = 'global_suppression'</code>; admin manual un-suppress restores delivery on the subsequent send.</li>
+<li>Customer clicks the one-click unsubscribe link in a vendor-category email → <code>notification_preferences.vendors_email_enabled</code> flips to FALSE within 5 seconds; <code>email_unsubscribe_tokens.consumed_at</code> is set; the customer's payment-category emails continue to send.</li>
+<li>Resend returns 5xx for &gt; 5 minutes (simulated) → dispatcher auto-flips to SendGrid for new jobs; admin sees the provider state change in 0023; in-flight Resend jobs retry through Resend per backoff.</li>
+<li>T-7d / T-1d / T-1h <code>wedding_day_reminder</code> sends fire at the correct local-time thresholds; T-1h sends to organizers + confirmed vendors but NOT to guests; T-1d send overrides organizer's quiet hours.</li>
+<li>Security alert for a new-city sign-in sends within 60 seconds even when the user has all categories muted and is inside quiet hours.</li>
+<li>Spam complaint webhook posts → <code>email_suppressions</code> row INSERTed with <code>reason = 'spam_complaint'</code>; admin audit log entry written; admin un-suppress requires two-admin approval per § 9.1.</li>
+<li>Template preview tool in 0023 renders <code>rsvp_received</code> with sample JSON correctly in HTML + plaintext; both versions match what the customer would actually receive.</li>
+<li>Send-test-email button in 0023 dispatches <code>payment_confirmed</code> to the admin's own email; dispatch row created with <code>is_test = TRUE</code> semantic flag (admin-audit only, not user-facing).</li>
+<li>DMARC report parser ingests a sample AGGREGATE XML and surfaces SPF/DKIM alignment counts in 0023.</li>
+<li>Bounce rate exceeds 0.3% rolling 7d → 0023 surfaces a red banner; daily volume auto-throttles per provider best practice until rate falls below threshold.</li>
+<li>Plaintext alternative is present on every dispatched email (validated in CI by parsing the multipart MIME structure on a sample of templates).</li>
+<li>Mobile-responsive rendering passes Litmus (or similar) snapshot checks for Gmail iOS, Apple Mail iOS, Outlook web on every PR that touches <code>apps/web/emails/</code>.</li>
+</ol>
+<hr />
+<h2 id="16-companion-documents">16. Companion documents</h2>
+<ul>
+<li><strong>0025 Profile Settings</strong> — <code>notification_preferences</code> schema is the source of truth for per-user opt-outs and quiet hours; this iteration reads, never writes, that table (except via the unsubscribe-token flow).</li>
+<li><strong>0023 Admin console</strong> — Email Operations sub-section; provider toggle gated on two-admin approval per § 9.1.</li>
+<li><strong>0019 Communications</strong> — <code>new_vendor_message</code> trigger; dedupe + cadence resolution.</li>
+<li><strong>0026 BIR tax compliance</strong> — Official Receipt + Form 2307 PDF attachments on <code>payment_confirmed</code> for OR-eligible customers.</li>
+<li><strong>0013 Platform stack</strong> — Supabase Edge Functions for dispatcher; Cloudflare Queue for retry; sender domain <code>notifications@setnayan.com</code> lives in Cloudflare DNS.</li>
+<li><strong>Setnayan Privacy &amp; Security Policy</strong> — § on lawful basis for transactional vs marketing email; suppression list survives account deletion; DPO contact in every email footer.</li>
+</ul>
+<hr />
+<h2 id="17-decision-log-this-iteration">17. Decision log (this iteration)</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Resend primary / SendGrid fallback (not the reverse)</td>
+<td>Resend's React Email integration cuts template authoring time roughly in half vs SendGrid's templating, and the Vercel-aligned roadmap means the DX gap will widen, not narrow. SendGrid is the deliverability-veteran insurance policy.</td>
+</tr>
+<tr class="even">
+<td>Marketing opt-in default-FALSE; transactional categories not opt-out-able</td>
+<td>RA 10173 + CAN-SPAM both treat marketing as a higher-consent bar than transactional. Defaulting marketing OFF avoids any "we surprise-spammed our own users" launch incident.</td>
+</tr>
+<tr class="odd">
+<td>One-click unsubscribe is category-specific, not global</td>
+<td>A customer annoyed at vendor-message density should not also lose their payment-confirmation emails. Category-level granularity matches the 0025 preference shape.</td>
+</tr>
+<tr class="even">
+<td>Wedding-day T-1d and T-1h reminders bypass quiet hours</td>
+<td>Wedding-day reliability is the hill these emails are designed to die on. A 6am call time means a 5am T-1h reminder, and the couple wants that reminder even if they normally mute.</td>
+</tr>
+<tr class="odd">
+<td>Security alerts override everything</td>
+<td>Standard practice; never a compliance question.</td>
+</tr>
+<tr class="even">
+<td>BIMI + verified mark certificate deferred to post-launch</td>
+<td>VMC costs ~$1,500/year and requires registered trademark on the symbol mark. Setnayan trademark is in flight; once the registration lands, VMC is a 2-week procurement and a DNS record. Until then, Gmail shows our domain initial as the inbox avatar — acceptable.</td>
+</tr>
+<tr class="odd">
+<td>Plaintext alternative is mandatory, never optional</td>
+<td>Gmail's reputation algorithm penalizes HTML-only email; we lose nothing by always shipping both.</td>
+</tr>
+<tr class="even">
+<td>Sender domain is <code>notifications@setnayan.com</code>, not <code>setnayan.com</code> directly</td>
+<td>Isolates transactional/marketing reputation from the corporate domain. If a campaign goes sideways, the corporate domain's deliverability is unaffected.</td>
+</tr>
+</tbody>
+</table>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

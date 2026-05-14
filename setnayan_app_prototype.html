@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setnayan · End-to-end app prototype</title>
+<style>
+/* ============================================================
+   SETNAYAN APP PROTOTYPE — single-file clickable end-to-end
+   ============================================================
+   Demonstrates the whole app surface: login → role-router →
+   three dashboards → iteration entry points. Click any nav
+   item to jump into that screen. Tour mode auto-advances.
+   ============================================================ */
+
+:root {
+  --ink: #1a2346;
+  --ink-soft: #3f506e;
+  --cream: #faf5ee;
+  --cream-2: #f3ebd9;
+  --terra: #c97b4b;
+  --terra-soft: #e3a87c;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+  --green: #4f7a4a;
+  --purple: #7a4d8c;
+  --red: #b94a4a;
+  --shadow: 0 4px 24px rgba(26, 35, 70, 0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+button { font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+a { color: var(--terra); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.serif { font-family: "Cormorant Garamond", Georgia, serif; font-style: italic; font-weight: 500; }
+.mono { font-family: "DM Mono", "SF Mono", Menlo, monospace; }
+
+/* ============================================================
+   APP CHROME — fixed top bar + role badge + nav drawer
+   ============================================================ */
+.appbar {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--ink); color: var(--cream);
+  padding: 12px 24px;
+  display: flex; align-items: center; gap: 16px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+}
+.appbar .brand {
+  font-weight: 700; letter-spacing: 0.08em; font-size: 14px;
+}
+.appbar .role-chip {
+  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 12px;
+  background: var(--terra); color: var(--cream);
+}
+.appbar .role-chip.admin { background: var(--purple); }
+.appbar .role-chip.vendor { background: var(--ink-soft); }
+.appbar .breadcrumb {
+  font-size: 13px; color: rgba(250, 245, 238, 0.7);
+}
+.appbar .spacer { flex: 1; }
+.appbar .tour-toggle {
+  font-size: 12px; padding: 6px 12px; border-radius: 4px;
+  border: 1px solid rgba(250,245,238,0.3);
+  color: var(--cream);
+}
+.appbar .tour-toggle.on { background: var(--terra); border-color: var(--terra); }
+.appbar .back-btn {
+  font-size: 12px; padding: 6px 12px; border-radius: 4px;
+  background: rgba(250,245,238,0.1); color: var(--cream);
+}
+.appbar .profile-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 12px 4px 4px; border-radius: 20px;
+  background: rgba(250,245,238,0.1);
+  cursor: pointer; position: relative;
+}
+.appbar .profile-pill:hover { background: rgba(250,245,238,0.2); }
+.appbar .profile-pill .avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--terra); color: var(--cream);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600;
+}
+.appbar .profile-pill .name { font-size: 13px; font-weight: 500; }
+
+.profile-dropdown {
+  position: absolute; top: 100%; right: 0; margin-top: 8px;
+  background: white; color: var(--ink); border-radius: 8px;
+  min-width: 220px; box-shadow: var(--shadow);
+  display: none; z-index: 100;
+}
+.profile-dropdown.open { display: block; }
+.profile-dropdown a, .profile-dropdown button {
+  display: block; width: 100%; text-align: left;
+  padding: 12px 16px; font-size: 14px; color: var(--ink);
+  border-bottom: 1px solid var(--hairline);
+}
+.profile-dropdown a:last-child, .profile-dropdown button:last-child {
+  border-bottom: none;
+}
+.profile-dropdown a:hover, .profile-dropdown button:hover {
+  background: var(--cream-2); text-decoration: none;
+}
+.profile-dropdown .meta {
+  padding: 12px 16px; font-size: 12px; color: var(--muted);
+  background: var(--cream-2); border-radius: 8px 8px 0 0;
+}
+
+/* ============================================================
+   SCREEN MANAGEMENT — only .screen.active is visible
+   ============================================================ */
+.screen { display: none; min-height: calc(100vh - 56px); padding: 32px 24px 96px; }
+.screen.active { display: block; }
+
+.shell {
+  max-width: 1180px; margin: 0 auto;
+}
+
+/* ============================================================
+   LOGIN / ROLE-ROUTER (first screen)
+   ============================================================ */
+#screen-login { background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%); padding-top: 80px; }
+#screen-login .login-shell {
+  max-width: 720px; margin: 0 auto; text-align: center;
+}
+#screen-login .symbol {
+  width: 80px; height: 80px; margin: 0 auto 24px;
+  background: var(--terra); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--cream); font-size: 32px; font-weight: 700;
+  font-family: "Cormorant Garamond", serif;
+}
+#screen-login h1 {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-weight: 500; font-size: 56px; line-height: 1.1;
+  margin-bottom: 8px;
+}
+#screen-login .tagline {
+  color: var(--muted); font-size: 15px; margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+#screen-login .strap {
+  color: var(--ink-soft); font-size: 14px; margin-bottom: 48px;
+  font-style: italic;
+}
+#screen-login .doorways {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-bottom: 32px;
+}
+#screen-login .doorway {
+  background: white; border-radius: 12px; padding: 28px 20px;
+  border: 1px solid var(--hairline);
+  cursor: pointer; transition: all 0.2s;
+}
+#screen-login .doorway:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--terra);
+}
+#screen-login .doorway .icon {
+  font-size: 36px; margin-bottom: 12px;
+}
+#screen-login .doorway .title {
+  font-weight: 600; font-size: 16px; margin-bottom: 4px;
+}
+#screen-login .doorway .sub {
+  font-size: 13px; color: var(--muted);
+}
+#screen-login .signin-hint {
+  font-size: 13px; color: var(--muted);
+}
+#screen-login .signin-hint .demo-note {
+  display: inline-block; padding: 4px 10px; border-radius: 12px;
+  background: var(--cream-2); margin-top: 12px; font-size: 12px;
+}
+
+/* ============================================================
+   DASHBOARD COMMON
+   ============================================================ */
+.dash-eyebrow {
+  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.dash-title {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-weight: 500; font-size: 36px; line-height: 1.1;
+  margin-bottom: 8px;
+}
+.dash-subtitle {
+  color: var(--ink-soft); font-size: 15px; margin-bottom: 32px;
+}
+
+/* Bottom tab nav for dashboards (mobile-style, also visible on desktop) */
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+  background: white; border-top: 1px solid var(--hairline);
+  display: flex; justify-content: center; gap: 4px;
+  padding: 8px 12px; max-width: 100vw; overflow-x: auto;
+}
+.tabbar button {
+  flex: 0 0 auto;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 14px; border-radius: 6px;
+  font-size: 11px; letter-spacing: 0.04em; color: var(--muted);
+  white-space: nowrap;
+}
+.tabbar button.active {
+  background: var(--cream-2); color: var(--ink); font-weight: 600;
+}
+.tabbar button .icon { font-size: 20px; }
+
+/* Card grid for surfaces */
+.surface-grid {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin-bottom: 24px;
+}
+.surface-card {
+  background: white; border: 1px solid var(--hairline); border-radius: 12px;
+  padding: 20px; cursor: pointer; transition: all 0.2s;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.surface-card:hover {
+  border-color: var(--terra); box-shadow: var(--shadow); transform: translateY(-1px);
+}
+.surface-card .label {
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted);
+}
+.surface-card .name {
+  font-weight: 600; font-size: 17px; margin-top: 4px;
+}
+.surface-card .desc {
+  font-size: 13px; color: var(--ink-soft); line-height: 1.5;
+}
+.surface-card .badge {
+  display: inline-block; font-size: 10px; padding: 2px 8px;
+  border-radius: 8px; background: var(--cream-2); color: var(--ink);
+  letter-spacing: 0.04em; text-transform: uppercase;
+  align-self: flex-start;
+}
+.surface-card .badge.live { background: var(--green); color: white; }
+.surface-card .badge.warn { background: var(--terra); color: white; }
+.surface-card .badge.locked { background: var(--ink); color: var(--cream); }
+
+/* Inner screen header within a dashboard surface */
+.inner-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+}
+.inner-header .back-link {
+  background: white; border: 1px solid var(--hairline);
+  padding: 6px 12px; border-radius: 6px; font-size: 13px;
+  color: var(--ink);
+}
+.inner-header .h2 {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-weight: 500; font-size: 28px;
+}
+
+.placeholder-panel {
+  background: white; border: 1px dashed var(--terra); border-radius: 12px;
+  padding: 32px 24px; margin: 16px 0;
+}
+.placeholder-panel h3 {
+  font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--terra); margin-bottom: 12px;
+}
+.placeholder-panel p { color: var(--ink-soft); font-size: 14px; margin-bottom: 8px; }
+.placeholder-panel ul { margin: 8px 0 0 20px; font-size: 14px; color: var(--ink-soft); }
+.placeholder-panel ul li { margin-bottom: 4px; }
+.placeholder-panel .deep-link {
+  display: inline-block; margin-top: 16px; padding: 8px 14px;
+  background: var(--ink); color: var(--cream); border-radius: 6px;
+  font-size: 13px; font-weight: 500;
+}
+.placeholder-panel .deep-link:hover { background: var(--terra); text-decoration: none; }
+
+/* Status banner */
+.status-banner {
+  background: white; border-radius: 12px; padding: 16px 20px;
+  display: flex; gap: 16px; align-items: center;
+  margin-bottom: 24px; border-left: 4px solid var(--terra);
+}
+.status-banner .icon { font-size: 24px; }
+.status-banner .text { flex: 1; font-size: 14px; color: var(--ink-soft); }
+.status-banner .text strong { color: var(--ink); font-weight: 600; }
+
+/* Inline mini-cards for the event-overview surface */
+.metric-row {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin-bottom: 24px;
+}
+.metric {
+  background: white; border-radius: 10px; padding: 14px 16px;
+  border: 1px solid var(--hairline);
+}
+.metric .label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.metric .value { font-size: 22px; font-weight: 600; margin-top: 4px; }
+.metric .value .unit { font-size: 13px; color: var(--muted); font-weight: 400; }
+
+/* Tour overlay */
+.tour-overlay {
+  position: fixed; inset: 0; background: rgba(26, 35, 70, 0.6);
+  display: none; align-items: center; justify-content: center;
+  z-index: 200;
+}
+.tour-overlay.show { display: flex; }
+.tour-card {
+  background: white; border-radius: 16px; padding: 28px;
+  max-width: 480px; box-shadow: var(--shadow);
+}
+.tour-card .step { color: var(--terra); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.tour-card h3 { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 26px; margin: 8px 0 12px; }
+.tour-card p { color: var(--ink-soft); font-size: 14px; margin-bottom: 8px; }
+.tour-actions {
+  display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;
+}
+.tour-actions button {
+  padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;
+}
+.tour-actions .skip { color: var(--muted); }
+.tour-actions .next { background: var(--ink); color: var(--cream); }
+.tour-actions .next:hover { background: var(--terra); }
+
+/* Footer hint */
+.foot-hint {
+  text-align: center; padding: 24px; font-size: 12px; color: var(--muted);
+}
+
+/* ============================================================
+   RESPONSIVE SHOWCASE — locked into every prototype per
+   2026-05-12 decision log. Renders the current screen across 4
+   device frames simultaneously.
+   ============================================================ */
+.appbar .showcase-toggle {
+  font-size: 12px; padding: 6px 12px; border-radius: 4px;
+  border: 1px solid rgba(250,245,238,0.3);
+  color: var(--cream);
+}
+.appbar .showcase-toggle.on { background: var(--terra); border-color: var(--terra); }
+
+.showcase-overlay {
+  display: none;
+  position: fixed;
+  top: 56px; left: 0; right: 0; bottom: 0;
+  z-index: 80;
+  background: linear-gradient(180deg, var(--cream-2) 0%, var(--cream) 100%);
+  overflow: auto;
+}
+.showcase-overlay.open { display: block; }
+
+.showcase-header {
+  padding: 24px 32px 8px;
+  max-width: 1400px; margin: 0 auto;
+}
+.showcase-header h2 {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-weight: 500; font-size: 28px;
+}
+.showcase-header p {
+  font-size: 13px; color: var(--muted); margin-top: 4px;
+}
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 24px;
+  padding: 16px 32px 96px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.showcase-grid .row {
+  display: contents;
+}
+.showcase-grid > .full {
+  grid-column: 1 / -1;
+}
+@media (max-width: 900px) {
+  .showcase-grid { grid-template-columns: 1fr; }
+}
+
+.device-frame {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 32px rgba(26, 35, 70, 0.10);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--hairline);
+}
+.device-frame-label {
+  padding: 10px 16px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: white;
+  border-bottom: 1px solid var(--hairline);
+  display: flex; align-items: center; gap: 8px;
+}
+.device-frame-label .chip {
+  font-size: 10px; padding: 2px 6px; border-radius: 8px;
+  background: var(--cream-2); color: var(--ink);
+}
+.device-frame .viewport {
+  position: relative;
+  background: var(--cream);
+  overflow: hidden;
+}
+.device-frame .scaled-content {
+  transform-origin: top left;
+  position: absolute; top: 0; left: 0;
+  pointer-events: none;
+  background: var(--cream);
+}
+
+/* Mobile frame row — show iOS + Android side-by-side */
+.mobile-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Mobile tweaks */
+@media (max-width: 640px) {
+  .appbar { padding: 10px 16px; gap: 8px; flex-wrap: wrap; }
+  .appbar .breadcrumb { width: 100%; order: 10; padding-top: 4px; }
+  .screen { padding: 24px 16px 120px; }
+  #screen-login h1 { font-size: 42px; }
+  .dash-title { font-size: 28px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =============== APP BAR =============== -->
+<header class="appbar" id="appbar" style="display:none">
+  <div class="brand">SETNAYAN</div>
+  <span class="role-chip" id="role-chip">CUSTOMER</span>
+  <span class="breadcrumb" id="breadcrumb">Dashboard</span>
+  <div class="spacer"></div>
+  <button class="showcase-toggle" id="showcase-toggle" onclick="toggleShowcase()">Showcase</button>
+  <button class="tour-toggle" id="tour-toggle" onclick="toggleTour()">Tour mode</button>
+  <button class="back-btn" id="back-btn" onclick="goLauncher()">Back to launcher</button>
+  <div class="profile-pill" onclick="toggleProfile(event)">
+    <div class="avatar" id="profile-avatar">M</div>
+    <span class="name" id="profile-name">Maria de la Cruz</span>
+    <div class="profile-dropdown" id="profile-dropdown">
+      <div class="meta">
+        <strong id="profile-full">Maria de la Cruz</strong><br>
+        <span class="mono" style="font-size:11px" id="profile-id">S89U-MAR1AKR1ST</span>
+      </div>
+      <a href="#" onclick="event.stopPropagation(); go('screen-settings'); closeProfile(); return false;">Settings</a>
+      <a href="#" onclick="event.stopPropagation(); go('screen-notifications'); closeProfile(); return false;">Notifications</a>
+      <a href="#" onclick="event.stopPropagation(); go('screen-help'); closeProfile(); return false;">Help &amp; FAQ</a>
+      <a href="#" onclick="event.stopPropagation(); replayTour(); closeProfile(); return false;">Replay guided tour</a>
+      <a href="#" onclick="event.stopPropagation(); goLauncher(); closeProfile(); return false;">Sign out</a>
+    </div>
+  </div>
+</header>
+
+<!-- =============== LOGIN / ROLE-ROUTER =============== -->
+<section class="screen active" id="screen-login">
+  <div class="login-shell">
+    <div class="symbol">S</div>
+    <h1>Set na 'yan.</h1>
+    <div class="tagline">SET NA 'YAN · BOOK EVERY LIFE EVENT</div>
+    <div class="strap">A Philippines-first life-events platform. One app, three doorways.</div>
+    <div class="doorways">
+      <div class="doorway" onclick="loginAs('customer')">
+        <div class="icon">💍</div>
+        <div class="title">I'm a couple</div>
+        <div class="sub">Plan your wedding end-to-end</div>
+      </div>
+      <div class="doorway" onclick="loginAs('vendor')">
+        <div class="icon">🎨</div>
+        <div class="title">I'm a vendor</div>
+        <div class="sub">Free vendor profile during launch</div>
+      </div>
+      <div class="doorway" onclick="loginAs('admin')">
+        <div class="icon">⚙️</div>
+        <div class="title">I'm a Setnayan admin</div>
+        <div class="sub">Internal team operations</div>
+      </div>
+    </div>
+    <div class="signin-hint">
+      In production this is a standard email+password screen with the role-router behind it.<br>
+      <span class="demo-note">Prototype demo — pick a role above to enter that dashboard</span>
+    </div>
+  </div>
+</section>
+
+<!-- =============== CUSTOMER DASHBOARD (0021) =============== -->
+<section class="screen" id="screen-customer-home">
+  <div class="shell">
+    <div class="dash-eyebrow">Couple Dashboard · Iteration 0021</div>
+    <div class="dash-title">Maria &amp; Juan · Wedding 2027-03-15</div>
+    <div class="dash-subtitle">Tagaytay Highlands · 28 days away · 47/120 RSVPs confirmed</div>
+
+    <div class="metric-row">
+      <div class="metric"><div class="label">RSVPs</div><div class="value">47<span class="unit">/120</span></div></div>
+      <div class="metric"><div class="label">Vendors booked</div><div class="value">7<span class="unit">/12</span></div></div>
+      <div class="metric"><div class="label">Budget paid</div><div class="value">₱428K<span class="unit">/738K</span></div></div>
+      <div class="metric"><div class="label">Tables seated</div><div class="value">11<span class="unit">/12</span></div></div>
+    </div>
+
+    <div class="status-banner">
+      <div class="icon">🎬</div>
+      <div class="text"><strong>Day-of mode</strong> activates at 14:00 PHT on 2027-03-15 — your personal landing page auto-switches to the live-event experience for guests. <a href="#" onclick="go('screen-day-of'); return false;">Preview live mode →</a></div>
+    </div>
+
+    <div class="surface-grid">
+      <div class="surface-card" onclick="go('screen-guests')">
+        <div class="label">Iteration 0001</div>
+        <div class="name">Guest list</div>
+        <div class="desc">120 guests · 47 RSVPs · 73 pending. Role-tier ring + plus-ones tracked.</div>
+      </div>
+      <div class="surface-card" onclick="go('screen-vendors')">
+        <div class="label">Iteration 0006 + 0007</div>
+        <div class="name">Vendors &amp; Budget</div>
+        <div class="desc">7 vendors booked · 16 payment milestones · ₱310K outstanding.</div>
+        <span class="badge warn">3 due in 7 days</span>
+      </div>
+      <div class="surface-card" onclick="go('screen-seating')">
+        <div class="label">Iteration 0008</div>
+        <div class="name">Seating chart</div>
+        <div class="desc">12 tables · published · QR print pack ready.</div>
+        <span class="badge live">Published</span>
+      </div>
+      <div class="surface-card" onclick="go('screen-mood-board')">
+        <div class="label">Iteration 0010</div>
+        <div class="name">Mood board</div>
+        <div class="desc">Palettes locked for all roles + venue. Setnayan Guide all green.</div>
+      </div>
+      <div class="surface-card" onclick="go('screen-services')">
+        <div class="label">Services launcher</div>
+        <div class="name">In-app services</div>
+        <div class="desc">Papic · Panood · Save-the-Date · LED Background · Pro Widgets · AI Highlights</div>
+      </div>
+      <div class="surface-card" onclick="go('screen-qr-hub')">
+        <div class="label">Iteration 0000 + 0002</div>
+        <div class="name">QR hub</div>
+        <div class="desc">Event join QR · 120 guest QRs · 12 table QRs · paparazzi seat QRs.</div>
+      </div>
+      <div class="surface-card" onclick="go('screen-landing')">
+        <div class="label">Iteration 0015</div>
+        <div class="name">Landing page</div>
+        <div class="desc">setnayan.com/maria-juan-2027 · pro widgets active.</div>
+      </div>
+      <div class="surface-card" onclick="go('screen-gallery')">
+        <div class="label">Iteration 0009 + 0012</div>
+        <div class="name">Gallery</div>
+        <div class="desc">Pre-event empty · activates after wedding day.</div>
+      </div>
+      <div class="surface-card" onclick="go('screen-schedule')">
+        <div class="label">Iteration 0000</div>
+        <div class="name">Schedule</div>
+        <div class="desc">47 day-of items · 14 vendor meetings in next 14 days.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Per-iteration screens for customer flow -->
+<section class="screen" id="screen-guests">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">Guest list · Iteration 0001</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>What lives here</h3>
+      <p>Full guest list with role tiers (principal sponsors, entourage, family, friends), plus-ones, RSVPs, dietary restrictions, bulk-edit spreadsheet mode. Tag-once trust handshake from peer-to-peer QR scans.</p>
+      <ul>
+        <li>120 guests in <code>fixtures.json</code> baseline</li>
+        <li>Bulk import via CSV · Bulk edit via spreadsheet</li>
+        <li>Per-guest QR tokens used in 0002 invitation system</li>
+        <li>Roles drive 0008 seating chart auto-fill rings</li>
+      </ul>
+      <a class="deep-link" href="0001_creating_guest_list/0001_creating_guest_list.html" target="_blank">Open full guest list prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-vendors">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">Vendors &amp; Budget · Iterations 0006 + 0007</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>What lives here</h3>
+      <p>Vendor registry (28 canonical categories + custom), 6-stage readiness tracker per vendor, flexible payment milestones, crew meal computation, contracts. Budget rolls up the three line items per vendor (Package + Crew Meal + Transportation) plus Setnayan platform costs.</p>
+      <ul>
+        <li>Aklatan Photography (booked · stage 4/6) · ₱85K package · ₱10K reserved · ₱75K balance due 2027-03-01</li>
+        <li>14 vendor meetings on the calendar in the next 14 days</li>
+        <li>Contract module (0032) — AI 14-element analysis on uploaded PDFs</li>
+        <li>Tax receipts (0026) downloadable from each paid order</li>
+      </ul>
+      <a class="deep-link" href="0006_vendors_management/0006_vendors_management.html" target="_blank">Open vendors prototype →</a>
+      <a class="deep-link" style="margin-left:8px" href="0007_budget_expenses/0007_budget_expenses.html" target="_blank">Open budget prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-seating">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">Seating chart · Iteration 0008</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>What lives here</h3>
+      <p>Drag-and-drop seating editor with 13-table catalog (round / long / family head / sweetheart / serpentine). Role-tier auto-fill rings. Chair-level interaction. Published seating mints QR tokens for print pack.</p>
+      <a class="deep-link" href="0008_seating_chart_editor/0008_seating_chart_editor.html" target="_blank">Open seating chart prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-mood-board">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">Mood board · Iteration 0010</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>What lives here</h3>
+      <p>Palette builder for every role + venue. Setnayan Guide rule engine evaluates 7 categories on every change. 20 pre-template themes.</p>
+      <a class="deep-link" href="0010_mood_board/0010_mood_board.html" target="_blank">Open mood board prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-services">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">In-app services</div>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-card" onclick="window.open('0012_papic/0012_papic.html', '_blank')">
+        <div class="label">Iteration 0012</div>
+        <div class="name">Papic — candid capture</div>
+        <div class="desc">Native iOS/Android. 3 or 5 paparazzi seats. QR tagging. Face auto-tag.</div>
+        <span class="badge">From ₱1,499</span>
+      </div>
+      <div class="surface-card" onclick="window.open('0011_panood/0011_panood.html', '_blank')">
+        <div class="label">Iteration 0011</div>
+        <div class="name">Panood — live stream</div>
+        <div class="desc">YouTube-delivered live broadcast. Base + camera/hour add-ons.</div>
+        <span class="badge">From ₱2,499</span>
+      </div>
+      <div class="surface-card" onclick="window.open('0024_save_the_date/0024_save_the_date.html', '_blank')">
+        <div class="label">Iteration 0024</div>
+        <div class="name">Save-the-Date</div>
+        <div class="desc">30 templates · 3 formats per render · multi-purchase.</div>
+        <span class="badge">₱49 per render</span>
+      </div>
+      <div class="surface-card" onclick="window.open('0017_patiktok/0017_patiktok.html', '_blank')">
+        <div class="label">Iteration 0017</div>
+        <div class="name">Patiktok — guest reels</div>
+        <div class="desc">Short-form vertical templates from gallery photos.</div>
+      </div>
+      <div class="surface-card" onclick="window.open('0005_led_background_maker/0005_led_background_maker.html', '_blank')">
+        <div class="label">Iteration 0005</div>
+        <div class="name">LED Background</div>
+        <div class="desc">8K reception screen template. USB delivery, offline.</div>
+        <span class="badge">From ₱599</span>
+      </div>
+      <div class="surface-card" onclick="window.open('0004_invitation_widgets/0004_invitation_widgets.html', '_blank')">
+        <div class="label">Iteration 0004</div>
+        <div class="name">Invitation Pro widgets</div>
+        <div class="desc">Hero · Our Story · Schedule — Basic free, Pro per-widget.</div>
+        <span class="badge">From ₱99</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-qr-hub">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">QR Hub · Iterations 0000 + 0002</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>What lives here</h3>
+      <p>Event-level QR codes: join QR (for couple's account + family), 120 personal guest QRs (used by Papic for tagging), 12 table QRs (used for table-tagging), paparazzi seat QRs (claim flow). Print pack downloads ready.</p>
+      <a class="deep-link" href="0002_qr_invitation_system/0002_qr_invitation_system.html" target="_blank">Open QR system prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-landing">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">Public landing page · Iteration 0015</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>What lives here</h3>
+      <p>The couple's public wedding page — RSVPs, story, schedule, gallery, livestream embed when active. Day-of mode auto-switches T-1hr per iteration 0031.</p>
+      <a class="deep-link" href="0015_main_website/0015_main_website.html" target="_blank">Open landing page prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-gallery">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">Gallery · Iterations 0009 + 0012</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>What lives here</h3>
+      <p>Pre-event: empty placeholder. Post-event: every Papic photo + guest contribution. Tagged photos filtered "Photos of [guest]." Personal Reel builder. 7-day review window before public unlock.</p>
+      <a class="deep-link" href="0012_papic/0012_papic.html" target="_blank">Open Papic gallery prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-schedule">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">Schedule · Iteration 0000</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>What lives here</h3>
+      <p>Day-of timeline (47 items) + vendor meetings (14 upcoming). .ics export. Payment due dates pulled from 0007 Budget. Two-layer dedup so re-exports don't duplicate calendar events.</p>
+      <a class="deep-link" href="0000_app_shell_and_navigation/0000_app_shell_and_navigation.html" target="_blank">Open app shell prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-day-of">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="go('screen-customer-home')">← Dashboard</button>
+      <div class="h2">Day-of mode · Iteration 0031</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>What lives here</h3>
+      <p>Live-event mode auto-activates T-1hr → T+8hr. Six cards: what's-happening · your-table · live-photo-wall · video-guestbook · live-schedule · coordinator-broadcast. Offline-first PWA shell.</p>
+      <a class="deep-link" href="0031_day_of_guest/0031_day_of_guest.html" target="_blank">Open day-of prototype →</a>
+    </div>
+  </div>
+</section>
+
+<!-- =============== VENDOR DASHBOARD (0022) =============== -->
+<section class="screen" id="screen-vendor-home">
+  <div class="shell">
+    <div class="dash-eyebrow">Vendor Dashboard · Iteration 0022</div>
+    <div class="dash-title">Aklatan Photography</div>
+    <div class="dash-subtitle">Verified · Pro subscriber · 3 active client threads</div>
+
+    <div class="metric-row">
+      <div class="metric"><div class="label">Active clients</div><div class="value">7</div></div>
+      <div class="metric"><div class="label">Bookings this month</div><div class="value">3</div></div>
+      <div class="metric"><div class="label">Revenue MTD</div><div class="value">₱245K</div></div>
+      <div class="metric"><div class="label">Pro renews</div><div class="value">12d</div></div>
+    </div>
+
+    <div class="surface-grid">
+      <div class="surface-card" onclick="window.open('0022_vendor_dashboard/0022_vendor_dashboard.html', '_blank')">
+        <div class="label">Home</div>
+        <div class="name">Overview</div>
+        <div class="desc">Today's appointments, unread threads, payments awaiting confirmation.</div>
+      </div>
+      <div class="surface-card" onclick="window.open('0016_step_by_step_plan_builder/0016_step_by_step_plan_builder.html', '_blank')">
+        <div class="label">Iteration 0016 + 0022</div>
+        <div class="name">Services</div>
+        <div class="desc">Plan builder · 3 active service tiers · crew sizes locked.</div>
+      </div>
+      <div class="surface-card" onclick="alert('Calendar — opens vendor calendar prototype in 0022 spec')">
+        <div class="label">Calendar</div>
+        <div class="name">Schedule</div>
+        <div class="desc">Block dates · accept/decline booking requests · day-of arrival times.</div>
+      </div>
+      <div class="surface-card" onclick="window.open('0019_communications/0019_communications.html', '_blank')">
+        <div class="label">Iteration 0019</div>
+        <div class="name">Threads &amp; Clients</div>
+        <div class="desc">7 active client conversations · 2 video meetings scheduled this week.</div>
+        <span class="badge warn">3 unread</span>
+      </div>
+      <div class="surface-card" onclick="window.open('0032_contract_intelligence/0032_contract_intelligence.html', '_blank')">
+        <div class="label">Iteration 0032</div>
+        <div class="name">Contracts</div>
+        <div class="desc">AI 14-element analysis · ~50-clause library · both-party e-sign (V1.5).</div>
+      </div>
+      <div class="surface-card" onclick="alert('Team & Setnayan — vendor team management')">
+        <div class="label">Settings</div>
+        <div class="name">Team &amp; Setnayan</div>
+        <div class="desc">Logo · brand assets · Pro subscription · team members · billing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============== ADMIN CONSOLE (0023) =============== -->
+<section class="screen" id="screen-admin-home">
+  <div class="shell">
+    <div class="dash-eyebrow">Admin Console · Iteration 0023</div>
+    <div class="dash-title">Operations · Ice Casasola</div>
+    <div class="dash-subtitle">Internal owner · 🟣 unlimited grants</div>
+
+    <div class="status-banner">
+      <div class="icon">⚠️</div>
+      <div class="text"><strong>1 two-admin approval pending:</strong> spouse account upgrade (founding owner bootstrap). <a href="#" onclick="alert('Opens approval queue'); return false;">Review →</a></div>
+    </div>
+
+    <div class="metric-row">
+      <div class="metric"><div class="label">Verification queue</div><div class="value">3</div></div>
+      <div class="metric"><div class="label">Payments to reconcile</div><div class="value">4</div></div>
+      <div class="metric"><div class="label">Open disputes</div><div class="value">1</div></div>
+      <div class="metric"><div class="label">Team pool remaining</div><div class="value">₱7,600</div></div>
+    </div>
+
+    <div class="surface-grid">
+      <div class="surface-card" onclick="window.open('0023_admin_console/0023_admin_console.html', '_blank')">
+        <div class="label">Surface 1</div>
+        <div class="name">Home — queue overview</div>
+        <div class="desc">Aggregated counts + most-urgent items.</div>
+      </div>
+      <div class="surface-card" onclick="alert('Verification Queues opens here')">
+        <div class="label">Surface 2</div>
+        <div class="name">Verification Queues</div>
+        <div class="desc">3 vendor applications · 2 service approvals · 1 custom category proposal.</div>
+        <span class="badge warn">SLA: 3 business days</span>
+      </div>
+      <div class="surface-card" onclick="window.open('0034_payments_and_cart/0034_payments_and_cart.html', '_blank')">
+        <div class="label">Iteration 0034 · Surface 3</div>
+        <div class="name">Payments &amp; Activations</div>
+        <div class="desc">4 customer-paid orders awaiting verification. 4-tier matcher suggestions ready.</div>
+      </div>
+      <div class="surface-card" onclick="alert('Users surface opens here')">
+        <div class="label">Surface 4</div>
+        <div class="name">Users</div>
+        <div class="desc">Couples / vendors / admins / guests. RA 10173 deletion + export workflows.</div>
+      </div>
+      <div class="surface-card" onclick="alert('Pricing & Catalog opens here')">
+        <div class="label">Surface 5</div>
+        <div class="name">Pricing &amp; Catalog</div>
+        <div class="desc">SKU master · price history · Help articles · payment methods upload.</div>
+      </div>
+      <div class="surface-card" onclick="alert('Disputes & Refunds opens here')">
+        <div class="label">Surface 6</div>
+        <div class="name">Disputes &amp; Refunds</div>
+        <div class="desc">1 active mediation case. Refund ≤ ₱25K single-admin; above requires two-admin.</div>
+      </div>
+      <div class="surface-card" onclick="alert('Operations surface — links to status.setnayan.com')">
+        <div class="label">Surface 7 · Iteration 0035</div>
+        <div class="name">Operations</div>
+        <div class="desc">Sentry · PostHog · Better Stack status. Links to status.setnayan.com.</div>
+        <span class="badge live">All systems green</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============== SHARED SETTINGS / HELP / NOTIFICATIONS =============== -->
+<section class="screen" id="screen-settings">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="goBack()">← Back</button>
+      <div class="h2">Settings · Iteration 0025</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>Six tabs (per spec)</h3>
+      <ul>
+        <li><strong>Profile</strong> — display name, photo, locale (EN / TL / CEB)</li>
+        <li><strong>Appearance</strong> — theme picker (Setnayan Default / Victorian / Classy / iOS)</li>
+        <li><strong>Notifications</strong> — email preferences per category (payment, RSVP, vendor message, security)</li>
+        <li><strong>URL &amp; Slug</strong> — customize your wedding's public URL (couples only)</li>
+        <li><strong>Payment Methods</strong> — Setnayan Pay convenience-fee account; receipts download</li>
+        <li><strong>Privacy &amp; Data</strong> — RA 10173 export · soft delete · hard delete · face data revocation</li>
+      </ul>
+      <a class="deep-link" href="0025_profile_settings/0025_profile_settings.html" target="_blank">Open settings prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-notifications">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="goBack()">← Back</button>
+      <div class="h2">Notification preferences · Iteration 0028</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>Email-only fallback channel</h3>
+      <p>SMS deferred to V1.5. 10 V1 templates: payment_instructions, payment_confirmed, refund_processed, new_vendor_message, vendor_status_change, vendor_unresponsive_48h, rsvp_received, wedding_day_reminder, save_the_date_sent, security_alert.</p>
+      <a class="deep-link" href="0028_email_notifications/0028_email_notifications.html" target="_blank">Open notifications prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-help">
+  <div class="shell">
+    <div class="inner-header">
+      <button class="back-link" onclick="goBack()">← Back</button>
+      <div class="h2">Help &amp; FAQ · Iteration 0029</div>
+    </div>
+    <div class="placeholder-panel">
+      <h3>Help center</h3>
+      <p>Per-role tiles (customer / vendor / guest / admin) · ~90 articles in V1 · full-text search · structured contact-form routing to admin roles · 24-hr SLA on tickets.</p>
+      <a class="deep-link" href="0029_help_center/0029_help_center.html" target="_blank">Open help center prototype →</a>
+    </div>
+  </div>
+</section>
+
+<!-- =============== TABBAR =============== -->
+<nav class="tabbar" id="tabbar" style="display:none">
+  <!-- populated by JS based on active role -->
+</nav>
+
+<!-- =============== RESPONSIVE SHOWCASE OVERLAY =============== -->
+<div class="showcase-overlay" id="showcase-overlay">
+  <div class="showcase-header">
+    <h2>Responsive showcase</h2>
+    <p>The same screen rendered across 4 device frames. Toggle off to return to single-device view.</p>
+  </div>
+  <div class="showcase-grid" id="showcase-grid">
+    <!-- Populated by JS when showcase opens -->
+  </div>
+</div>
+
+<!-- =============== TOUR OVERLAY =============== -->
+<div class="tour-overlay" id="tour-overlay">
+  <div class="tour-card">
+    <div class="step" id="tour-step">Step 1 of 7</div>
+    <h3 id="tour-title">Welcome to Setnayan</h3>
+    <p id="tour-body">This prototype walks you through every major surface of the app. Each step shows where a user lands and what they can do there. Skip anytime.</p>
+    <div class="tour-actions">
+      <button class="skip" onclick="endTour()">Skip tour</button>
+      <button class="next" id="tour-next" onclick="nextTourStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<div class="foot-hint">
+  Setnayan · Single end-to-end app prototype · click any surface to drill in, or open an iteration's dedicated <code>.html</code> prototype for the deep version.
+</div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentRole = null;
+let currentScreen = 'screen-login';
+let backStack = [];
+let tourActive = false;
+let tourIdx = 0;
+
+const ROLES = {
+  customer: {
+    chip: 'CUSTOMER',
+    name: 'Maria de la Cruz',
+    avatar: 'M',
+    id: 'S89U-MAR1AKR1ST',
+    home: 'screen-customer-home',
+    tabs: [
+      {id: 'screen-customer-home', icon: '🏠', label: 'Home'},
+      {id: 'screen-guests', icon: '👥', label: 'Guests'},
+      {id: 'screen-vendors', icon: '🛍', label: 'Vendors'},
+      {id: 'screen-schedule', icon: '📅', label: 'Schedule'},
+      {id: 'screen-services', icon: '✨', label: 'Services'},
+    ]
+  },
+  vendor: {
+    chip: 'VENDOR',
+    name: 'Liza Aquino',
+    avatar: 'L',
+    id: 'S89U-V3ND0RBOSS',
+    home: 'screen-vendor-home',
+    tabs: [
+      {id: 'screen-vendor-home', icon: '🏠', label: 'Home'},
+      {id: 'screen-vendor-home', icon: '📋', label: 'Services'},
+      {id: 'screen-vendor-home', icon: '📅', label: 'Calendar'},
+      {id: 'screen-vendor-home', icon: '💬', label: 'Clients'},
+      {id: 'screen-vendor-home', icon: '⚙', label: 'Settings'},
+    ]
+  },
+  admin: {
+    chip: 'ADMIN',
+    name: 'Ice Casasola',
+    avatar: 'I',
+    id: 'S89U-ADM1N00ICE',
+    home: 'screen-admin-home',
+    tabs: [
+      {id: 'screen-admin-home', icon: '🏠', label: 'Home'},
+      {id: 'screen-admin-home', icon: '✓', label: 'Verify'},
+      {id: 'screen-admin-home', icon: '💳', label: 'Pay'},
+      {id: 'screen-admin-home', icon: '⚖', label: 'Disputes'},
+      {id: 'screen-admin-home', icon: '📊', label: 'Ops'},
+    ]
+  }
+};
+
+const TOUR_STEPS = [
+  {title: 'Welcome to Setnayan', body: 'This prototype shows the three-doorway role-router and every dashboard surface. We\'ll walk you through as a couple first.'},
+  {title: 'You are now Maria', body: 'You\'ve "logged in" as the bride. The dashboard shows your 28-day wedding countdown, RSVPs, vendors, and budget.', go: 'screen-customer-home'},
+  {title: 'Guest list', body: 'Iteration 0001. 120 guests with role tiers (principal sponsors, entourage, family). Bulk-edit spreadsheet mode.', go: 'screen-guests'},
+  {title: 'Vendors & Budget', body: 'Iterations 0006 + 0007. 7 booked vendors. 6-stage readiness tracker. Payment milestones across 16 lines.', go: 'screen-vendors'},
+  {title: 'Day-of mode', body: 'Iteration 0031. T-1hr the landing page auto-switches to live mode for guests. PWA shell works offline.', go: 'screen-day-of'},
+  {title: 'Switching to vendor view', body: 'Now we sign out and re-enter as the vendor (Aklatan Photography). Same app, different doorway.', go: 'screen-vendor-home', role: 'vendor'},
+  {title: 'And the admin console', body: 'Iteration 0023. 7 surfaces for operations: verification queue, payment reconciliation, disputes, pricing, observability.', go: 'screen-admin-home', role: 'admin'},
+  {title: 'That\'s the app', body: 'Each surface in each dashboard is its own iteration spec with its own deep prototype. Click any card from the dashboards to open them.', go: 'screen-admin-home'},
+];
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function go(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(screenId);
+  if (target) {
+    target.classList.add('active');
+    if (currentScreen !== 'screen-login' && currentScreen !== screenId) {
+      backStack.push(currentScreen);
+    }
+    currentScreen = screenId;
+    updateBreadcrumb();
+    updateTabbar();
+    window.scrollTo(0, 0);
+  }
+}
+
+function goBack() {
+  if (backStack.length > 0) {
+    const prev = backStack.pop();
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(prev).classList.add('active');
+    currentScreen = prev;
+    updateBreadcrumb();
+    window.scrollTo(0, 0);
+  } else if (currentRole) {
+    go(ROLES[currentRole].home);
+  }
+}
+
+function goLauncher() {
+  document.getElementById('appbar').style.display = 'none';
+  document.getElementById('tabbar').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-login').classList.add('active');
+  currentRole = null;
+  currentScreen = 'screen-login';
+  backStack = [];
+  closeProfile();
+}
+
+function loginAs(role) {
+  currentRole = role;
+  const r = ROLES[role];
+  document.getElementById('appbar').style.display = 'flex';
+  document.getElementById('tabbar').style.display = 'flex';
+  document.getElementById('role-chip').textContent = r.chip;
+  document.getElementById('role-chip').className = 'role-chip ' + (role === 'admin' ? 'admin' : role === 'vendor' ? 'vendor' : '');
+  document.getElementById('profile-name').textContent = r.name;
+  document.getElementById('profile-full').textContent = r.name;
+  document.getElementById('profile-avatar').textContent = r.avatar;
+  document.getElementById('profile-id').textContent = r.id;
+  backStack = [];
+  go(r.home);
+}
+
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
+function updateBreadcrumb() {
+  const map = {
+    'screen-customer-home': 'Dashboard',
+    'screen-vendor-home': 'Dashboard',
+    'screen-admin-home': 'Dashboard',
+    'screen-guests': 'Dashboard › Guest list',
+    'screen-vendors': 'Dashboard › Vendors',
+    'screen-seating': 'Dashboard › Seating',
+    'screen-mood-board': 'Dashboard › Mood board',
+    'screen-services': 'Dashboard › Services',
+    'screen-qr-hub': 'Dashboard › QR Hub',
+    'screen-landing': 'Dashboard › Landing page',
+    'screen-gallery': 'Dashboard › Gallery',
+    'screen-schedule': 'Dashboard › Schedule',
+    'screen-day-of': 'Dashboard › Day-of mode',
+    'screen-settings': 'Settings',
+    'screen-notifications': 'Settings › Notifications',
+    'screen-help': 'Help &amp; FAQ',
+  };
+  document.getElementById('breadcrumb').innerHTML = map[currentScreen] || '';
+}
+
+function updateTabbar() {
+  if (!currentRole) return;
+  const tabs = ROLES[currentRole].tabs;
+  const bar = document.getElementById('tabbar');
+  bar.innerHTML = tabs.map(t => `
+    <button class="${currentScreen === t.id ? 'active' : ''}" onclick="go('${t.id}')">
+      <span class="icon">${t.icon}</span>
+      <span>${t.label}</span>
+    </button>
+  `).join('');
+}
+
+function toggleProfile(e) {
+  e.stopPropagation();
+  document.getElementById('profile-dropdown').classList.toggle('open');
+}
+function closeProfile() {
+  document.getElementById('profile-dropdown').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.profile-pill')) closeProfile();
+});
+
+/* ============================================================
+   TOUR MODE
+   ============================================================ */
+function toggleTour() {
+  if (tourActive) endTour();
+  else startTour();
+}
+function startTour() {
+  tourActive = true;
+  tourIdx = 0;
+  document.getElementById('tour-toggle').classList.add('on');
+  document.getElementById('tour-overlay').classList.add('show');
+  renderTourStep();
+}
+function endTour() {
+  tourActive = false;
+  document.getElementById('tour-toggle').classList.remove('on');
+  document.getElementById('tour-overlay').classList.remove('show');
+}
+function replayTour() {
+  if (!currentRole) loginAs('customer');
+  startTour();
+}
+function renderTourStep() {
+  const step = TOUR_STEPS[tourIdx];
+  document.getElementById('tour-step').textContent = `Step ${tourIdx + 1} of ${TOUR_STEPS.length}`;
+  document.getElementById('tour-title').textContent = step.title;
+  document.getElementById('tour-body').textContent = step.body;
+  document.getElementById('tour-next').textContent = (tourIdx === TOUR_STEPS.length - 1) ? 'Finish' : 'Next →';
+  if (step.go) {
+    if (step.role && step.role !== currentRole) loginAs(step.role);
+    else go(step.go);
+  }
+}
+function nextTourStep() {
+  if (tourIdx >= TOUR_STEPS.length - 1) {
+    endTour();
+    return;
+  }
+  tourIdx++;
+  renderTourStep();
+}
+
+/* ============================================================
+   RESPONSIVE SHOWCASE — locked per 2026-05-12 CLAUDE.md entry
+   ============================================================ */
+let showcaseOpen = false;
+
+const SHOWCASE_FRAMES = [
+  {id: 'desktop', label: 'Desktop / Web', chip: '1440 × 900',
+   width: 1440, height: 900, layout: 'full'},
+  {id: 'tablet', label: 'Tablet · iPad Pro', chip: '1024 × 1366',
+   width: 1024, height: 1366, layout: 'half'},
+  {id: 'mobile-ios', label: 'Mobile · iPhone 15 Pro', chip: '393 × 852',
+   width: 393, height: 852, layout: 'pair'},
+  {id: 'mobile-android', label: 'Mobile · Pixel 8', chip: '412 × 915',
+   width: 412, height: 915, layout: 'pair'},
+];
+
+function toggleShowcase() {
+  showcaseOpen = !showcaseOpen;
+  const overlay = document.getElementById('showcase-overlay');
+  const btn = document.getElementById('showcase-toggle');
+  if (showcaseOpen) {
+    populateShowcase();
+    overlay.classList.add('open');
+    btn.classList.add('on');
+    btn.textContent = 'Close showcase';
+  } else {
+    overlay.classList.remove('open');
+    btn.classList.remove('on');
+    btn.textContent = 'Showcase';
+  }
+}
+
+function populateShowcase() {
+  const activeScreen = document.querySelector('.screen.active');
+  if (!activeScreen) return;
+  const contentHTML = activeScreen.innerHTML;
+
+  const grid = document.getElementById('showcase-grid');
+
+  // Layout: Desktop full width on top row, Tablet half on second row,
+  // iOS + Android paired on third row.
+  grid.innerHTML = `
+    <div class="full">${frameHTML(SHOWCASE_FRAMES[0], contentHTML)}</div>
+    <div class="full"><div class="mobile-pair">
+      ${frameHTML(SHOWCASE_FRAMES[1], contentHTML, 'tablet-half')}
+      <div class="mobile-pair">
+        ${frameHTML(SHOWCASE_FRAMES[2], contentHTML)}
+        ${frameHTML(SHOWCASE_FRAMES[3], contentHTML)}
+      </div>
+    </div></div>
+  `;
+
+  requestAnimationFrame(applyShowcaseScale);
+  window.addEventListener('resize', applyShowcaseScale);
+}
+
+function frameHTML(spec, content, extraClass = '') {
+  return `
+    <div class="device-frame device-${spec.id} ${extraClass}"
+         data-width="${spec.width}" data-height="${spec.height}">
+      <div class="device-frame-label">
+        <strong>${spec.label}</strong>
+        <span class="chip">${spec.chip}</span>
+      </div>
+      <div class="viewport">
+        <div class="scaled-content"
+             style="width:${spec.width}px;height:${spec.height}px">
+          ${content}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function applyShowcaseScale() {
+  document.querySelectorAll('.showcase-overlay .device-frame').forEach(frame => {
+    const targetW = parseInt(frame.dataset.width);
+    const targetH = parseInt(frame.dataset.height);
+    const viewport = frame.querySelector('.viewport');
+    const scaled = frame.querySelector('.scaled-content');
+    if (!viewport || !scaled) return;
+
+    const availW = viewport.clientWidth || frame.clientWidth;
+    const scale = availW / targetW;
+    scaled.style.transform = `scale(${scale})`;
+    viewport.style.height = (targetH * scale) + 'px';
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+window.addEventListener('DOMContentLoaded', () => {
+  go('screen-login');
+});
+</script>
+
+</body>
+</html>

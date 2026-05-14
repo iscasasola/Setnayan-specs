@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0034 — Payments & Cart Flow — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0034</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0034_payments_and_cart.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0034_payments_and_cart.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0034_payments_and_cart.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0034--payments--cart-flow">Iteration 0034 — Payments &amp; Cart Flow</h1>
+<ul>
+<li><strong>Surface:</strong> Customer cart (lives inside 0021 services launcher) + Admin reconciliation (lives inside 0023 § 3.3 Payments &amp; Activations)</li>
+<li><strong>Status:</strong> drafted 2026-05-12</li>
+<li><strong>Builds on:</strong> 0000 (users + auth) · 0006 (vendor records via <code>event_vendor_relationships</code>) · 0013 (platform stack — Supabase + R2)</li>
+<li><strong>Provides to downstream iterations:</strong>
+<ul>
+<li>0021 (cart drawer UI + customer order-status page)</li>
+<li>0022 (vendor-side pricing display + Setnayan Pay convenience fee surfacing)</li>
+<li>0023 (admin reconciliation queue + decision buttons)</li>
+<li>0026 (Official Receipts triggered on <code>status = 'paid'</code>)</li>
+<li>0028 (<code>payment_instructions</code>, <code>payment_confirmed</code>, <code>payment_proof_rejected</code>, <code>refund_processed</code> email templates)</li>
+<li>0032 (<code>contract_purchases</code> rows link via <code>order_id</code> FK)</li>
+<li>§ 9.1 admin role authority — references <code>service_orders.status</code> transitions</li>
+<li>§ 10a internal-account comp routing</li>
+<li>§ 10b team-pool consumption</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="1-why-this-iteration-exists">1. Why this iteration exists</h2>
+<p>V1 ships with <strong>no automated payment processing</strong>. The token wallet (the previous iteration 0003) is retired as of 2026-05-11. PayMongo evaluation and GCash Merchant API automation are V1.5 candidates, not V1. Every paid SKU in V1 — Save-the-Date renders, Paparazzi seat packs, Pro Camera Bridge, Custom Monogram Pack, Live Stream base + add-ons, AI Highlight rendering, Pro widgets, contract intelligence upgrades, Vendor Pro Weekly subscriptions, and Setnayan Pay-routed vendor bookings — flows through one canonical loop:</p>
+<ol>
+<li><strong>Customer adds items to cart</strong> (cart bubble in the chrome of every dashboard surface)</li>
+<li><strong>Customer reviews cart and taps Checkout</strong></li>
+<li><strong>Setnayan displays a payment screen</strong> with two QR code tabs (BDO Bank Transfer · GCash) + a unique reference code + the order total</li>
+<li><strong>Customer scans the QR with their bank or GCash app</strong>, completes the transfer outside Setnayan, includes the reference code in the transfer note</li>
+<li><strong>Customer returns to Setnayan and uploads a screenshot</strong> of the payment-confirmation screen</li>
+<li><strong>Admin (Transactions Handler or Payments Handler role per § 9.1 single-admin authority)</strong> receives the submission in the reconciliation queue</li>
+<li><strong>Admin opens their own Setnayan BDO/GCash inbox side-by-side with the customer's screenshot</strong>, matches the amount + reference code + timestamp</li>
+<li><strong>Admin presses one of three buttons:</strong>
+<ul>
+<li><strong>Approve</strong> → order activates, service-activation hooks fire (insert paparazzi_seats × N, set event-wide monogram flag, etc.), Official Receipt PDF generated per 0026, <code>payment_confirmed</code> email sent per 0028</li>
+<li><strong>Reject — needs more proof</strong> → customer's order stays open, they can resubmit a clearer screenshot</li>
+<li><strong>Reject permanently</strong> → order closes, customer must start a new order if they still want the service</li>
+</ul></li>
+</ol>
+<p>24-hour SLA target for admin reconciliation. V1.5 may collapse this to minutes via automated bank-API integration.</p>
+<p>The token wallet is gone. Charm pricing is the new convention (decision 2026-05-12). Every SKU is PHP-denominated, stored as centavos to dodge float arithmetic, and displayed as <code>₱X,XXX</code> everywhere. Token math is not part of V1.</p>
+<hr />
+<h2 id="2-the-8-table-canonical-schema">2. The 8-table canonical schema</h2>
+<p>The full payment + cart spine is 8 tables. They are declared here as the single source of truth; references from other iterations (0021 cart UI, 0023 reconciliation queue, 0026 OR generation) link back to this iteration.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="co">-- 0034.1: service_catalog — master price list for every in-app SKU</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> service_catalog (</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>  sku_code            TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,           <span class="co">-- &#39;paparazzi_3_seats&#39;, &#39;save_the_date_render&#39;, etc.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>  name                TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>  description         TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a>  <span class="kw">category</span>            TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,              <span class="co">-- &#39;paparazzi&#39;, &#39;panood&#39;, &#39;save_the_date&#39;, &#39;contract&#39;, &#39;pro_widget&#39;, etc.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>  price_php_centavos  <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,               <span class="co">-- price stored in centavos to avoid float</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a>  is_multi_purchase   <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,  <span class="co">-- e.g., per-template add-ons can be bought multiple times</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a>  is_active           <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">TRUE</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a>  effective_from      TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a>  effective_until     TIMESTAMPTZ,                <span class="co">-- nullable; null = currently active</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a>  created_at          TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a>  <span class="kw">CONSTRAINT</span> price_positive <span class="kw">CHECK</span> (price_php_centavos <span class="op">&gt;=</span> <span class="dv">0</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true"></a>);</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_service_catalog_active <span class="kw">ON</span> service_catalog(is_active, <span class="kw">category</span>) <span class="kw">WHERE</span> is_active <span class="op">=</span> <span class="kw">TRUE</span>;</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a><span class="co">-- Seed values (charm-priced 2026-05-12; centavos = pesos × 100):</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> service_catalog (sku_code, name, description, <span class="kw">category</span>, price_php_centavos, is_multi_purchase) <span class="kw">VALUES</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true"></a>  (<span class="st">&#39;paparazzi_3_seats&#39;</span>,           <span class="st">&#39;3 Paparazzi Pack&#39;</span>,           <span class="st">&#39;3 app seats per event&#39;</span>,                              <span class="st">&#39;paparazzi&#39;</span>,         <span class="dv">149900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true"></a>  (<span class="st">&#39;paparazzi_5_seats&#39;</span>,           <span class="st">&#39;5 Paparazzi Pack&#39;</span>,           <span class="st">&#39;5 app seats per event&#39;</span>,                              <span class="st">&#39;paparazzi&#39;</span>,         <span class="dv">249900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true"></a>  (<span class="st">&#39;template_unlock&#39;</span>,             <span class="st">&#39;Template Unlock (per template)&#39;</span>, <span class="st">&#39;Unlocks one Personal Reel template&#39;</span>,             <span class="st">&#39;template&#39;</span>,           <span class="dv">19900</span>, <span class="kw">TRUE</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true"></a>  (<span class="st">&#39;save_the_date_render&#39;</span>,        <span class="st">&#39;Save-the-Date Render&#39;</span>,       <span class="st">&#39;One render in all 3 formats (16:9 / 1:1 / 9:16)&#39;</span>,     <span class="st">&#39;save_the_date&#39;</span>,       <span class="dv">4900</span>, <span class="kw">TRUE</span>),</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true"></a>  (<span class="st">&#39;pro_camera_bridge_seat&#39;</span>,      <span class="st">&#39;Pro Camera Bridge (per DSLR seat)&#39;</span>, <span class="st">&#39;WiFi-SDK pairing for Canon/Nikon/Sony/Fujifilm&#39;</span>, <span class="st">&#39;paparazzi&#39;</span>,     <span class="dv">149900</span>, <span class="kw">TRUE</span>),</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true"></a>  (<span class="st">&#39;pro_widget_hero&#39;</span>,             <span class="st">&#39;Pro Widget — Hero&#39;</span>,          <span class="st">&#39;Pro tier for Hero invitation widget&#39;</span>,                <span class="st">&#39;pro_widget&#39;</span>,          <span class="dv">9900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true"></a>  (<span class="st">&#39;pro_widget_story&#39;</span>,            <span class="st">&#39;Pro Widget — Our Story&#39;</span>,     <span class="st">&#39;Pro tier for Our Story invitation widget&#39;</span>,           <span class="st">&#39;pro_widget&#39;</span>,          <span class="dv">9900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true"></a>  (<span class="st">&#39;pro_widget_schedule&#39;</span>,         <span class="st">&#39;Pro Widget — Schedule&#39;</span>,      <span class="st">&#39;Pro tier for Schedule invitation widget&#39;</span>,            <span class="st">&#39;pro_widget&#39;</span>,          <span class="dv">9900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true"></a>  (<span class="st">&#39;pro_widget_bundle&#39;</span>,           <span class="st">&#39;Pro Bundle (all 3 widgets)&#39;</span>, <span class="st">&#39;All three Pro widgets in one purchase&#39;</span>,              <span class="st">&#39;pro_widget&#39;</span>,         <span class="dv">19900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true"></a>  (<span class="st">&#39;live_stream_base&#39;</span>,            <span class="st">&#39;Live Stream — Base&#39;</span>,         <span class="st">&#39;1 broadcaster + 3 cameras + 3 hours&#39;</span>,                 <span class="st">&#39;panood&#39;</span>,           <span class="dv">249900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true"></a>  (<span class="st">&#39;live_stream_camera_addon&#39;</span>,    <span class="st">&#39;Live Stream — +1 Camera&#39;</span>,    <span class="st">&#39;One additional camera slot (max +2)&#39;</span>,                 <span class="st">&#39;panood&#39;</span>,            <span class="dv">99900</span>, <span class="kw">TRUE</span>),</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true"></a>  (<span class="st">&#39;live_stream_hour_addon&#39;</span>,      <span class="st">&#39;Live Stream — +1 Hour&#39;</span>,      <span class="st">&#39;One additional hour of stream capacity&#39;</span>,              <span class="st">&#39;panood&#39;</span>,            <span class="dv">99900</span>, <span class="kw">TRUE</span>),</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true"></a>  (<span class="st">&#39;custom_monogram_pack&#39;</span>,        <span class="st">&#39;Custom Monogram Pack&#39;</span>,       <span class="st">&#39;Remove Setnayan watermark — event-wide&#39;</span>,              <span class="st">&#39;monogram&#39;</span>,         <span class="dv">199900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true"></a>  (<span class="st">&#39;broadcast_style_pack&#39;</span>,        <span class="st">&#39;Broadcast Style Pack&#39;</span>,       <span class="st">&#39;4 modes: News / Cinematic / Sports / Royalty&#39;</span>,        <span class="st">&#39;panood&#39;</span>,           <span class="dv">299900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true"></a>  (<span class="st">&#39;ai_video_highlight_60s&#39;</span>,      <span class="st">&#39;AI Video Highlight (60s)&#39;</span>,   <span class="st">&#39;AI-generated 60-second highlight reel&#39;</span>,                <span class="st">&#39;ai_highlight&#39;</span>,     <span class="dv">199900</span>, <span class="kw">TRUE</span>),</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true"></a>  (<span class="st">&#39;ai_edited_highlight_3min&#39;</span>,    <span class="st">&#39;AI Edited Highlight (3-min)&#39;</span>,<span class="st">&#39;Themed multi-segment 3-minute polished reel&#39;</span>,          <span class="st">&#39;ai_highlight&#39;</span>,     <span class="dv">499900</span>, <span class="kw">TRUE</span>),</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true"></a>  (<span class="st">&#39;contract_intelligence_upgrade&#39;</span>,<span class="st">&#39;Contract Intelligence (per contract)&#39;</span>, <span class="st">&#39;Per-contract AI analysis + e-sig flow&#39;</span>,     <span class="st">&#39;contract&#39;</span>,          <span class="dv">19900</span>, <span class="kw">TRUE</span>),</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true"></a>  (<span class="st">&#39;vendor_pro_weekly&#39;</span>,           <span class="st">&#39;Vendor Pro Weekly&#39;</span>,          <span class="st">&#39;Vendor analytics + custom plan builder + branding&#39;</span>,    <span class="st">&#39;vendor_subscription&#39;</span>, <span class="dv">49900</span>, <span class="kw">FALSE</span>),</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true"></a>  (<span class="st">&#39;sponsored_boost_weekly&#39;</span>,      <span class="st">&#39;Sponsored Boost (per week)&#39;</span>, <span class="st">&#39;Marketplace ranking boost (Certified vendors only)&#39;</span>,   <span class="st">&#39;vendor_subscription&#39;</span>,<span class="dv">149900</span>, <span class="kw">TRUE</span>);</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true"></a><span class="co">-- 0034.2: service_catalog_price_history — audit trail for price changes</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true"></a><span class="co">-- Mid-quarter SKU price changes require two-admin approval per § 9.1.</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true"></a><span class="co">-- This table is the audit record for those changes, plus it backs Official Receipt</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true"></a><span class="co">-- voiding/replacement per 0026 (an OR generated when the SKU was ₱4,900 must be</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true"></a><span class="co">-- voided + reissued if the price changes before the customer pays).</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> service_catalog_price_history (</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true"></a>  history_id            UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true"></a>  sku_code              TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> service_catalog(sku_code),</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true"></a>  prior_price_centavos  <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true"></a>  new_price_centavos    <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true"></a>  changed_by_admin      UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true"></a>  changed_at            TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true"></a>  effective_from        TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true"></a>  two_admin_approval_id UUID,  <span class="co">-- references admin_approval_requests(approval_id) when applicable</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true"></a>  rationale             TEXT <span class="kw">NOT</span> <span class="kw">NULL</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true"></a>);</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_price_history_sku <span class="kw">ON</span> service_catalog_price_history(sku_code, effective_from <span class="kw">DESC</span>);</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true"></a></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true"></a><span class="co">-- 0034.3: carts — pre-checkout state, one active cart per user</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> carts (</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true"></a>  cart_id                 UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true"></a>  user_id                 UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true"></a>  event_id                UUID <span class="kw">REFERENCES</span> <span class="kw">events</span>(event_id),  <span class="co">-- nullable; carts can be event-scoped or account-scoped</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true"></a>  status                  TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;active&#39;</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true"></a>                          <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;active&#39;</span>,<span class="st">&#39;checking_out&#39;</span>,<span class="st">&#39;converted_to_order&#39;</span>,<span class="st">&#39;abandoned&#39;</span>)),</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true"></a>  created_at              TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true"></a>  updated_at              TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true"></a>  converted_to_order_id   UUID  <span class="co">-- FK to service_orders.order_id, set when cart converts</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true"></a>);</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true"></a></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true"></a><span class="co">-- One active cart per user. The partial unique index enforces this.</span></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">UNIQUE</span> <span class="kw">INDEX</span> idx_carts_one_active_per_user</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true"></a>  <span class="kw">ON</span> carts(user_id)</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true"></a>  <span class="kw">WHERE</span> status <span class="op">=</span> <span class="st">&#39;active&#39;</span>;</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true"></a></span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_carts_user_updated <span class="kw">ON</span> carts(user_id, updated_at <span class="kw">DESC</span>);</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true"></a></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true"></a><span class="co">-- 0034.4: cart_items — line items in an active cart</span></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> cart_items (</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true"></a>  cart_item_id            UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true"></a>  cart_id                 UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> carts(cart_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true"></a>  sku_code                TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> service_catalog(sku_code),</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true"></a>  quantity                <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">1</span> <span class="kw">CHECK</span> (quantity <span class="op">&gt;</span> <span class="dv">0</span>),</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true"></a>  unit_price_centavos     <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- snapshot at add-to-cart time (protects against mid-shopping price changes)</span></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true"></a>  metadata                JSONB,         <span class="co">-- e.g., per-Save-the-Date template_id, per-Papic seat assignments</span></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true"></a>  added_at                TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true"></a>);</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true"></a></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_cart_items_cart <span class="kw">ON</span> cart_items(cart_id);</span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true"></a></span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true"></a><span class="co">-- 0034.5: service_orders — locked-in order at checkout</span></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> service_orders (</span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true"></a>  order_id                UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true"></a>  reference_code          TEXT <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- 10-char Crockford base 32, e.g., &#39;S89O-A4F2K9R7BX&#39;</span></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true"></a>  user_id                 UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true"></a>  event_id                UUID <span class="kw">REFERENCES</span> <span class="kw">events</span>(event_id),</span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true"></a>  cart_id                 UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> carts(cart_id),</span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true"></a>  subtotal_centavos       <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,           <span class="co">-- sum of cart_items.unit_price_centavos * quantity</span></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true"></a>  fees_centavos           <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>, <span class="co">-- Setnayan Pay 3% fee on vendor-booking orders only</span></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true"></a>  total_centavos          <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,           <span class="co">-- subtotal + fees</span></span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true"></a>  payment_method          TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (payment_method <span class="kw">IN</span> (<span class="st">&#39;bdo_bank&#39;</span>,<span class="st">&#39;gcash&#39;</span>,<span class="st">&#39;setnayan_pay&#39;</span>,<span class="st">&#39;comp_grant&#39;</span>)),</span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true"></a>  status                  TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;pending_payment&#39;</span></span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true"></a>                          <span class="kw">CHECK</span> (status <span class="kw">IN</span> (</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true"></a>                            <span class="st">&#39;pending_payment&#39;</span>,         <span class="co">-- customer has checked out, hasn&#39;t uploaded proof yet</span></span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true"></a>                            <span class="st">&#39;proof_submitted&#39;</span>,         <span class="co">-- screenshot uploaded, awaiting admin review</span></span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true"></a>                            <span class="st">&#39;verification_in_progress&#39;</span>,<span class="co">-- admin is actively reviewing</span></span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true"></a>                            <span class="st">&#39;paid&#39;</span>,                    <span class="co">-- admin approved, services unlocked</span></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true"></a>                            <span class="st">&#39;rejected&#39;</span>,                <span class="co">-- admin rejected; customer can resubmit if not permanent</span></span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true"></a>                            <span class="st">&#39;cancelled&#39;</span>,               <span class="co">-- customer cancelled before payment</span></span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true"></a>                            <span class="st">&#39;refunded&#39;</span>,                <span class="co">-- post-paid refund processed</span></span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true"></a>                            <span class="st">&#39;expired&#39;</span>                  <span class="co">-- 7-day expiry on pending_payment with no submission</span></span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true"></a>                          )),</span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true"></a>  comp_grant_id           UUID <span class="kw">REFERENCES</span> comp_grants(grant_id),  <span class="co">-- populated for § 10a internal or § 10b team-pool comps</span></span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true"></a>  created_at              TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true"></a>  checked_out_at          TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true"></a>  paid_at                 TIMESTAMPTZ,</span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true"></a>  rejected_at             TIMESTAMPTZ,</span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true"></a>  expires_at              TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> (NOW() <span class="op">+</span> <span class="dt">INTERVAL</span> <span class="st">&#39;7 days&#39;</span>),</span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true"></a>  <span class="kw">CONSTRAINT</span> order_total_consistent <span class="kw">CHECK</span> (total_centavos <span class="op">=</span> subtotal_centavos <span class="op">+</span> fees_centavos)</span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true"></a>);</span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true"></a></span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_orders_user_status <span class="kw">ON</span> service_orders(user_id, status, created_at <span class="kw">DESC</span>);</span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_orders_status_pending <span class="kw">ON</span> service_orders(status) <span class="kw">WHERE</span> status <span class="kw">IN</span> (<span class="st">&#39;proof_submitted&#39;</span>,<span class="st">&#39;verification_in_progress&#39;</span>);</span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_orders_reference <span class="kw">ON</span> service_orders(reference_code);</span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_orders_expiry <span class="kw">ON</span> service_orders(expires_at) <span class="kw">WHERE</span> status <span class="op">=</span> <span class="st">&#39;pending_payment&#39;</span>;</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true"></a></span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true"></a><span class="co">-- 0034.6: service_order_items — immutable line items locked at checkout</span></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true"></a><span class="co">-- Snapshots cart_items at checkout time. After order conversion, cart_items</span></span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true"></a><span class="co">-- are read-only; service_order_items become the authoritative billing record</span></span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true"></a><span class="co">-- and feed Official Receipt generation per 0026.</span></span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> service_order_items (</span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true"></a>  order_item_id           UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true"></a>  order_id                UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> service_orders(order_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true"></a>  sku_code                TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> service_catalog(sku_code),</span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true"></a>  quantity                <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true"></a>  unit_price_centavos     <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true"></a>  metadata                JSONB</span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true"></a>);</span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true"></a></span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_order_items_order <span class="kw">ON</span> service_order_items(order_id);</span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true"></a></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true"></a><span class="co">-- 0034.7: service_order_payments — payment-proof submissions</span></span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true"></a><span class="co">-- One order can have multiple payment rows if rejected + resubmitted.</span></span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true"></a><span class="co">-- resubmission_count = 0 for first attempt; increments on each resubmission.</span></span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> service_order_payments (</span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true"></a>  payment_id              UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true"></a>  order_id                UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> service_orders(order_id),</span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true"></a>  <span class="kw">method</span>                  TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (<span class="kw">method</span> <span class="kw">IN</span> (<span class="st">&#39;bdo_bank&#39;</span>,<span class="st">&#39;gcash&#39;</span>)),</span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true"></a>  amount_centavos         <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true"></a>  reference_code          TEXT,  <span class="co">-- bank/GCash transaction reference shown on the screenshot</span></span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true"></a>  proof_screenshot_r2_key TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,  <span class="co">-- R2 path: &#39;payment_proofs/{order_id}/{payment_id}.jpg&#39;</span></span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true"></a>  submitter_notes         TEXT,</span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true"></a>  submitted_at            TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true"></a>  reviewed_by_admin       UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true"></a>  reviewed_at             TIMESTAMPTZ,</span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true"></a>  decision                TEXT <span class="kw">CHECK</span> (decision <span class="kw">IN</span> (<span class="st">&#39;approved&#39;</span>,<span class="st">&#39;rejected&#39;</span>,<span class="st">&#39;needs_more_proof&#39;</span>)),</span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true"></a>  decision_reason         TEXT,</span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true"></a>  resubmission_count      <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span></span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true"></a>);</span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true"></a></span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_payments_order <span class="kw">ON</span> service_order_payments(order_id, submitted_at <span class="kw">DESC</span>);</span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_payments_pending_review <span class="kw">ON</span> service_order_payments(reviewed_at) <span class="kw">WHERE</span> reviewed_at <span class="kw">IS</span> <span class="kw">NULL</span>;</span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_payments_by_admin <span class="kw">ON</span> service_order_payments(reviewed_by_admin, reviewed_at <span class="kw">DESC</span>);</span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true"></a></span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true"></a><span class="co">-- 0034.8: comp_grants — permanent + per-grant comp records</span></span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true"></a><span class="co">-- Already partly declared in 0023 § 3.5b; restated here for completeness.</span></span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true"></a><span class="co">-- Used by § 10a (Owner Internal Accounts — permanent, all_services, unlimited)</span></span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true"></a><span class="co">-- and § 10b (Setnayan Team Shared Pool — monthly consumption ledger drives</span></span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true"></a><span class="co">-- single_order grants).</span></span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> comp_grants (</span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true"></a>  grant_id                UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true"></a>  user_id                 UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true"></a>  <span class="kw">scope</span>                   TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;all_services&#39;</span></span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true"></a>                          <span class="kw">CHECK</span> (<span class="kw">scope</span> <span class="kw">IN</span> (<span class="st">&#39;all_services&#39;</span>,<span class="st">&#39;specific_skus&#39;</span>,<span class="st">&#39;single_order&#39;</span>)),</span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true"></a>  scoped_skus             TEXT[],</span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true"></a>  expiry                  TIMESTAMPTZ,                 <span class="co">-- NULL = lifetime</span></span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true"></a>  retail_value_centavos   <span class="dt">INT</span>,                         <span class="co">-- estimated retail value at grant time</span></span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true"></a>  rationale               TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true"></a>  granted_by              UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true"></a>  approved_by             UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true"></a>  two_admin_approval_id   UUID,                        <span class="co">-- required for grants &gt; ₱10,000 retail per § 9.1</span></span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true"></a>  <span class="kw">source</span>                  TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (<span class="kw">source</span> <span class="kw">IN</span> (<span class="st">&#39;owner_internal&#39;</span>,<span class="st">&#39;team_pool&#39;</span>,<span class="st">&#39;external_promo&#39;</span>,<span class="st">&#39;dispute_remedy&#39;</span>)),</span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true"></a>  created_at              TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true"></a>  revoked_at              TIMESTAMPTZ</span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true"></a>);</span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true"></a></span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_comp_grants_user <span class="kw">ON</span> comp_grants(user_id) <span class="kw">WHERE</span> revoked_at <span class="kw">IS</span> <span class="kw">NULL</span>;</span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_comp_grants_source <span class="kw">ON</span> comp_grants(<span class="kw">source</span>, created_at <span class="kw">DESC</span>);</span></code></pre></div>
+<hr />
+<h2 id="3-the-customer-flow-lives-in-0021-services-launcher--0022-vendor-dashboard">3. The customer flow (lives in 0021 services launcher + 0022 vendor dashboard)</h2>
+<p>End-to-end customer journey, screen-by-screen:</p>
+<h3 id="31-add-to-cart">3.1 Add to cart</h3>
+<p>Every SKU tile on the services grid (0021 Services launcher) has an <strong>Add to cart</strong> CTA. Tap inserts a <code>cart_items</code> row, bumps <code>carts.updated_at</code>. If no active cart exists for the user (no row where <code>status = 'active'</code>), one is created on the fly.</p>
+<p>A small <strong>cart badge</strong> in the top chrome shows the active cart's item count and updates in real time via Supabase Realtime subscription on the <code>cart_items</code> table filtered to the user's active cart.</p>
+<h3 id="32-cart-drawer">3.2 Cart drawer</h3>
+<p>Tapping the cart badge slides up a bottom-sheet drawer (mobile) or a right-side panel (desktop) showing:</p>
+<ul>
+<li>One row per <code>cart_items</code> line: SKU name, quantity stepper, line subtotal, remove button</li>
+<li>Computed subtotal of all line items</li>
+<li>Applicable fees (Setnayan Pay 3% appears only when at least one cart_item is a vendor booking — none in pure in-app SKU carts)</li>
+<li>Total in large PHP type</li>
+<li><strong>Checkout</strong> CTA</li>
+</ul>
+<p>The drawer is the only place a customer modifies cart contents before checkout. After checkout, cart_items are read-only.</p>
+<h3 id="33-checkout">3.3 Checkout</h3>
+<p>Pressing Checkout:</p>
+<ol>
+<li>Locks the cart: <code>UPDATE carts SET status = 'checking_out' WHERE cart_id = $1</code></li>
+<li>Generates a fresh 10-char Crockford base 32 reference code (alphabet <code>0123456789ABCDEFGHJKMNPQRSTVWXYZ</code> — Crockford base32, ambiguous chars removed). Format displayed to user: <code>S89O-XXXXXXXXXX</code>. Collision-check on insert; retry on duplicate.</li>
+<li>Inserts a <code>service_orders</code> row with:
+<ul>
+<li><code>status = 'pending_payment'</code></li>
+<li><code>subtotal_centavos</code> = SUM(cart_items.unit_price_centavos × cart_items.quantity)</li>
+<li><code>fees_centavos</code> = applicable convenience fee (3% if Setnayan Pay; 0 otherwise)</li>
+<li><code>total_centavos</code> = subtotal + fees</li>
+<li><code>payment_method</code> = customer's choice (BDO or GCash; for Setnayan Pay vendor bookings, fixed)</li>
+<li><code>expires_at</code> = NOW() + 7 days</li>
+</ul></li>
+<li>Inserts <code>service_order_items</code> rows mirroring each <code>cart_items</code> row at the snapshot price</li>
+<li>Updates <code>carts.status = 'converted_to_order'</code>, <code>carts.converted_to_order_id = new_order_id</code></li>
+<li>Sends the <code>payment_instructions</code> email per 0028, including the reference code, total, and QR-code instructions</li>
+</ol>
+<h3 id="34-payment-screen">3.4 Payment screen</h3>
+<p>Full-screen on mobile; centered modal on desktop. Layout:</p>
+<pre><code>─────────────────────────────────────
+  Total to pay
+  ₱4,997
+─────────────────────────────────────
+  Reference code (include in transfer note)
+  ┌────────────────────────────────┐
+  │  S89O-A4F2K9R7BX                │  [copy]
+  └────────────────────────────────┘
+─────────────────────────────────────
+  [ BDO Bank Transfer ] [ GCash ]
+  ┌────────────────────────────────┐
+  │                                │
+  │      ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓         │
+  │      ▓ ▓  QR CODE  ▓ ▓         │
+  │      ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓         │
+  │                                │
+  └────────────────────────────────┘
+  Setnayan Pay Inc.
+  Account #: 0123-4567-8901
+─────────────────────────────────────
+  [ I&#39;ve paid — upload screenshot ]
+─────────────────────────────────────
+</code></pre>
+<p>The two QR code tabs load Setnayan-owned receiving-account QRs from <code>payment_receiving_accounts.qr_code_r2_key</code> (the receiving accounts catalog is admin-managed per § 3.5c). The QR encodes the bank/GCash account info — customer's bank app reads it and pre-fills the transfer recipient. Customer manually enters the <strong>amount</strong> and <strong>reference code</strong> into the transfer note.</p>
+<p>Below the QRs: fallback plaintext account name + account/mobile number for customers whose bank app doesn't support QR.</p>
+<h3 id="35-screenshot-upload">3.5 Screenshot upload</h3>
+<p>Tapping "I've paid — upload screenshot" opens a file picker (camera or gallery on mobile; file picker on desktop). Customer selects the screenshot of their bank/GCash payment confirmation.</p>
+<p>On upload:</p>
+<ol>
+<li>Image is sent to R2 at key <code>payment_proofs/{order_id}/{payment_id}.jpg</code></li>
+<li>A <code>service_order_payments</code> row is inserted with:
+<ul>
+<li><code>method</code> = matches the QR tab they paid through</li>
+<li><code>amount_centavos</code> = customer-typed (defaults to order.total_centavos; they can adjust if they paid a different amount)</li>
+<li><code>reference_code</code> = customer-typed (the bank's own transaction ref from the screenshot)</li>
+<li><code>proof_screenshot_r2_key</code> populated</li>
+<li><code>submitter_notes</code> = optional free-text</li>
+<li><code>resubmission_count</code> = 0 for first attempt</li>
+</ul></li>
+<li><code>service_orders.status</code> flips from <code>pending_payment</code> → <code>proof_submitted</code></li>
+<li>Admin reconciliation queue (0023 § 3.3) picks it up</li>
+</ol>
+<h3 id="36-confirmation-screen">3.6 Confirmation screen</h3>
+<p>After upload, customer sees:</p>
+<pre><code>✓ Submitted!
+Setnayan Team will verify your payment within 24 hours.
+We&#39;ll email you when approved.
+
+Order: S89O-A4F2K9R7BX
+Total: ₱4,997
+Status: Awaiting verification
+
+[ View order ]
+</code></pre>
+<p>The <code>payment_instructions</code> email is followed by either <code>payment_confirmed</code> (on approve) or <code>payment_proof_rejected</code> (on reject) per 0028.</p>
+<h3 id="37-order-status-page">3.7 Order status page</h3>
+<p>Customers can revisit the order at <code>/dashboard/[event-id]/orders/[order-id]</code> (or <code>/dashboard/orders/[order-id]</code> for account-scoped orders) at any time. The page shows:</p>
+<ul>
+<li>Current <code>status</code> with a friendly label</li>
+<li>Full line-item breakdown from <code>service_order_items</code></li>
+<li>All submitted payment proofs (each with its decision + reason, if reviewed)</li>
+<li>If <code>status = 'rejected'</code> and <code>decision = 'needs_more_proof'</code> on the latest payment: a <strong>Submit new proof</strong> CTA that opens the upload screen again (creates a new <code>service_order_payments</code> row with <code>resubmission_count += 1</code> against the same <code>order_id</code>)</li>
+<li>If <code>status = 'rejected'</code> (permanently): a "Start a new order" CTA that creates a fresh cart with the same line items</li>
+</ul>
+<hr />
+<h2 id="4-the-admin-flow-lives-in-0023--33-payments--activations">4. The admin flow (lives in 0023 § 3.3 Payments &amp; Activations)</h2>
+<p>Already documented in 0023 § 3.3. This section extends and clarifies the workflow.</p>
+<h3 id="41-queue-view">4.1 Queue view</h3>
+<p>Admin sees a list of all <code>service_orders</code> where the latest <code>service_order_payments.reviewed_at IS NULL</code>, sorted by <code>submitted_at ASC</code> (oldest first — FIFO). Each row shows:</p>
+<ul>
+<li>Reference code</li>
+<li>Customer name + email</li>
+<li>Total amount</li>
+<li>Submitted at (with elapsed time — green &lt; 12hr, amber 12–20hr, red &gt; 20hr against the 24-hr SLA)</li>
+<li>Method (BDO / GCash badge)</li>
+<li><strong>Open</strong> button</li>
+</ul>
+<h3 id="42-detail-view">4.2 Detail view</h3>
+<p>Splits into two columns:</p>
+<p><strong>Left column — customer's submission:</strong></p>
+<ul>
+<li>Screenshot displayed at full size (R2 signed URL, 1-hour TTL)</li>
+<li>Customer-typed amount + reference code + notes</li>
+<li>Order line items</li>
+<li>Customer's prior order history (count of paid / rejected / pending orders)</li>
+</ul>
+<p><strong>Right column — Setnayan's reconciliation tools:</strong></p>
+<ul>
+<li>Quick-link to BDO online banking dashboard</li>
+<li>Quick-link to GCash merchant dashboard</li>
+<li>Search field pre-filled with the customer's reference code (admin pastes it into the bank's transaction search)</li>
+<li>The order's <code>total_centavos</code> displayed for easy comparison</li>
+</ul>
+<h3 id="43-three-decision-buttons">4.3 Three decision buttons</h3>
+<p><strong>Approve</strong> (single-admin authority per § 9.1)</p>
+<ul>
+<li><code>service_order_payments.decision = 'approved'</code></li>
+<li><code>service_order_payments.reviewed_by_admin = current_admin_user_id</code></li>
+<li><code>service_order_payments.reviewed_at = NOW()</code></li>
+<li><code>service_orders.status = 'paid'</code></li>
+<li><code>service_orders.paid_at = NOW()</code></li>
+<li>Service-activation hooks fire per SKU (see § 5)</li>
+<li>Official Receipt PDF generated per 0026</li>
+<li><code>payment_confirmed</code> email sent per 0028 with OR attached</li>
+</ul>
+<p><strong>Reject — needs more proof</strong></p>
+<ul>
+<li><code>service_order_payments.decision = 'needs_more_proof'</code></li>
+<li><code>service_order_payments.decision_reason</code> = admin-typed (e.g., "Screenshot is blurry, please retake")</li>
+<li><code>service_orders.status</code> stays <code>pending_payment</code> (customer can resubmit on the same order)</li>
+<li><code>payment_proof_rejected</code> email sent per 0028 with the reason</li>
+</ul>
+<p><strong>Reject permanently</strong></p>
+<ul>
+<li><code>service_order_payments.decision = 'rejected'</code></li>
+<li><code>service_order_payments.decision_reason</code> populated</li>
+<li><code>service_orders.status = 'rejected'</code></li>
+<li><code>service_orders.rejected_at = NOW()</code></li>
+<li><code>payment_proof_rejected</code> email sent per 0028 with the reason and a note that the customer must start a new order</li>
+</ul>
+<h3 id="44-service-activation-hooks-per-sku">4.4 Service-activation hooks per SKU</h3>
+<p>When <code>service_orders.status</code> transitions to <code>paid</code>, a per-SKU activation hook fires for each <code>service_order_items</code> row. Implemented as a Postgres trigger that dispatches to per-SKU stored procedures (or Edge Functions for complex logic):</p>
+<table>
+<thead>
+<tr class="header">
+<th>SKU prefix</th>
+<th>Activation action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>paparazzi_*_seats</code></td>
+<td>Insert <code>paparazzi_seats</code> rows for the event (N rows, status = 'unclaimed')</td>
+</tr>
+<tr class="even">
+<td><code>template_unlock</code></td>
+<td>Insert <code>event_template_unlocks</code> row binding template_id to event_id</td>
+</tr>
+<tr class="odd">
+<td><code>save_the_date_render</code></td>
+<td>Insert <code>save_the_date_render_credits</code> row (one credit, consumed on render)</td>
+</tr>
+<tr class="even">
+<td><code>pro_camera_bridge_seat</code></td>
+<td>Insert <code>pro_camera_bridge_seats</code> row (1 phone:1 DSLR, multi-purchase)</td>
+</tr>
+<tr class="odd">
+<td><code>pro_widget_*</code></td>
+<td>Set <code>event_widget_pro_tier</code> flag for the specific widget</td>
+</tr>
+<tr class="even">
+<td><code>live_stream_base</code></td>
+<td>Insert <code>live_stream_event_config</code> row with 3-cam, 3-hr defaults</td>
+</tr>
+<tr class="odd">
+<td><code>live_stream_camera_addon</code></td>
+<td>Increment <code>live_stream_event_config.max_cameras</code> (cap at 5)</td>
+</tr>
+<tr class="even">
+<td><code>live_stream_hour_addon</code></td>
+<td>Increment <code>live_stream_event_config.max_hours</code> (no cap)</td>
+</tr>
+<tr class="odd">
+<td><code>custom_monogram_pack</code></td>
+<td>Set <code>events.custom_monogram_unlocked = TRUE</code></td>
+</tr>
+<tr class="even">
+<td><code>broadcast_style_pack</code></td>
+<td>Set <code>events.broadcast_style_pack_unlocked = TRUE</code></td>
+</tr>
+<tr class="odd">
+<td><code>ai_video_highlight_60s</code></td>
+<td>Insert <code>ai_highlight_credits</code> row (one 60s credit)</td>
+</tr>
+<tr class="even">
+<td><code>ai_edited_highlight_3min</code></td>
+<td>Insert <code>ai_highlight_credits</code> row (one 3min credit)</td>
+</tr>
+<tr class="odd">
+<td><code>contract_intelligence_upgrade</code></td>
+<td>Insert <code>contract_purchases</code> row tied to a specific <code>contracts.contract_id</code></td>
+</tr>
+<tr class="even">
+<td><code>vendor_pro_weekly</code></td>
+<td>Insert <code>vendor_subscriptions</code> row with 7-day duration</td>
+</tr>
+<tr class="odd">
+<td><code>sponsored_boost_weekly</code></td>
+<td>Insert <code>vendor_sponsored_boost</code> row with 7-day duration</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-internal-accounts--team-pool-integration">5. Internal accounts + team pool integration</h2>
+<h3 id="51-owner-internal-accounts--10a">5.1 Owner Internal Accounts (§ 10a)</h3>
+<p>Users with <code>users.is_internal = TRUE</code> (owner + spouse only, two-admin approved at account creation) skip the payment-pending state entirely. The cart flow short-circuits at checkout:</p>
+<pre><code>IF user.is_internal = TRUE THEN
+  service_orders.payment_method = &#39;comp_grant&#39;
+  service_orders.status = &#39;paid&#39;
+  service_orders.paid_at = NOW()
+  service_orders.total_centavos = total_centavos  -- retail value preserved for reporting
+  service_orders.comp_grant_id = user&#39;s permanent grant_id (scope=&#39;all_services&#39;, expiry=NULL)
+  -- No payment screen shown; customer sees &quot;Comped via internal grant ✓&quot;
+  -- Service-activation hooks fire immediately
+END
+</code></pre>
+<p>A <code>service_order_payments</code> row is NOT created — there's no proof to review. The audit trail is in <code>comp_grants</code> + <code>service_orders.comp_grant_id</code>.</p>
+<h3 id="52-setnayan-team-shared-monthly-pool--10b">5.2 Setnayan Team Shared Monthly Pool (§ 10b)</h3>
+<p>Users with <code>users.is_team_member = TRUE</code> (all non-owner team) check the singleton <code>team_shared_monthly_allowance</code> table at checkout:</p>
+<pre><code>SELECT remaining_php FROM team_shared_monthly_allowance
+WHERE period_month = TO_CHAR(NOW(), &#39;YYYY-MM&#39;)
+FOR UPDATE;
+</code></pre>
+<p>Three branches:</p>
+<p><strong>(a) Full comp</strong> — <code>remaining_php &gt;= total_php</code>: behaves like internal accounts. Order goes directly to <code>paid</code>. A <code>comp_grants</code> row is created with <code>source = 'team_pool'</code>, <code>scope = 'single_order'</code>. A <code>team_allowance_consumptions</code> row records the spend. <code>team_shared_monthly_allowance.consumed_php += total_php</code>, <code>remaining_php -= total_php</code>.</p>
+<p><strong>(b) Partial comp</strong> — <code>0 &lt; remaining_php &lt; total_php</code>: the customer pays the difference via standard flow. The order's <code>total_centavos</code> shows the full retail; a separate <code>comp_grants</code> row with <code>scope = 'single_order'</code> and <code>retail_value_centavos = remaining_php × 100</code> accompanies. The displayed price on the payment screen is <code>total_centavos - (remaining_php × 100)</code>.</p>
+<p><strong>(c) Exhausted</strong> — <code>remaining_php = 0</code>: standard flow at full price. No comp.</p>
+<p>Both (a) and (b) update the pool ledger atomically (FOR UPDATE lock prevents race conditions when two team members check out simultaneously).</p>
+<h3 id="53-pool-reset-on-month-boundary">5.3 Pool reset on month boundary</h3>
+<p>Scheduled Edge Function runs at 00:00 PHT on the 1st of each month:</p>
+<ol>
+<li>Closes the prior month's row (<code>closed_at = NOW()</code>)</li>
+<li>Computes new pool: <code>LEAST(0.005 * prior_month_total_sales_php, 10000)</code></li>
+<li>Inserts a new <code>team_shared_monthly_allowance</code> row for the current month</li>
+</ol>
+<p>Unused balance is NOT carried forward (use-it-or-lose-it per § 10b).</p>
+<hr />
+<h2 id="6-setnayan-pay-convenience-fee-3">6. Setnayan Pay convenience fee (3%)</h2>
+<p>When the order is a vendor booking routed through Setnayan Pay (not an in-app SKU), the 3% convenience fee surfaces as a transparent line item on the customer's cart and order.</p>
+<p><strong>Example:</strong> vendor's quoted booking price is ₱50,000.</p>
+<pre><code>Subtotal (vendor quote)              ₱50,000.00
+Setnayan Pay convenience fee (3%)     ₱1,500.00
+─────────────────────────────────────────────────
+Total                                ₱51,500.00
+</code></pre>
+<p>In centavos:</p>
+<ul>
+<li><code>subtotal_centavos = 5000000</code></li>
+<li><code>fees_centavos = 150000</code> (3% of 5,000,000 centavos = 150,000 centavos = ₱1,500)</li>
+<li><code>total_centavos = 5150000</code></li>
+</ul>
+<p>The vendor receives the full ₱50,000 quoted amount. Setnayan retains the ₱1,500 fee as platform revenue. This is the only fee category in V1; in-app SKUs (Save-the-Date, Paparazzi, Live Stream, etc.) have <code>fees_centavos = 0</code>.</p>
+<p><code>payment_method = 'setnayan_pay'</code> flags this as a vendor booking; service-activation hook on Approve releases vendor-side notification (vendor sees "Booking confirmed by Setnayan" in their 0022 dashboard) instead of activating Setnayan-side services.</p>
+<hr />
+<h2 id="7-receipts-per-0026">7. Receipts (per 0026)</h2>
+<p>After <code>service_orders.status</code> transitions to <code>paid</code>, an Official Receipt is auto-generated per 0026 BIR compliance. The OR PDF is:</p>
+<ul>
+<li>Stored at R2 key <code>receipts/{order_id}/OR_{or_number}.pdf</code></li>
+<li>Attached to the <code>payment_confirmed</code> email per 0028</li>
+<li>Available in the customer's order status page for re-download</li>
+<li>Listed in 0026's tax-document download surface</li>
+</ul>
+<p>Internal-account comp orders (<code>comp_grant_id IS NOT NULL</code>, <code>total_centavos &gt; 0</code>) DO generate an OR (for the retail value), but the OR is marked "Comped — no actual payment received" and is NOT included in BIR sales totals (0026 § VAT calculation excludes comp-grant orders).</p>
+<hr />
+<h2 id="8-refunds">8. Refunds</h2>
+<p>When an admin processes a refund (per 0023 Disputes &amp; Refunds flow, post-2026-05-12 pivot):</p>
+<ul>
+<li>Per § 9.1: refunds ≤ ₱25K = single-admin authority (Transactions Handler or Disputes Handler). Refunds &gt; ₱25K = two-admin approval required.</li>
+<li><code>service_orders.status = 'refunded'</code></li>
+<li>A new <code>refunds</code> table row (declared in 0023) records:
+<ul>
+<li><code>order_id</code></li>
+<li><code>refund_amount_centavos</code></li>
+<li><code>reason</code> (admin-typed)</li>
+<li><code>processed_by_admin</code></li>
+<li><code>refund_payout_method</code> ('bdo_bank' / 'gcash')</li>
+<li><code>refund_payout_reference</code> (the Setnayan-side bank/GCash transaction reference for the outbound transfer)</li>
+<li><code>processed_at</code></li>
+</ul></li>
+<li>OR-replacement protocol per 0026 fires: original OR is voided, a credit note PDF is generated</li>
+<li>Setnayan Team initiates the outbound transfer <strong>externally</strong> (out-of-app) using the customer's payout details captured at refund-request time</li>
+<li><code>refund_processed</code> email sent per 0028 (NOT the <code>payment_confirmed</code> template)</li>
+<li>Service-deactivation hooks reverse the original activation (revoke paparazzi seats, clear monogram flag, etc.)</li>
+</ul>
+<p>Partial refunds are V1.5; V1 supports full-order refunds only.</p>
+<hr />
+<h2 id="9-reference-code-uniqueness--retry">9. Reference code uniqueness + retry</h2>
+<p>Reference codes are generated as 8-char Crockford base32 (alphabet <code>0123456789ABCDEFGHJKMNPQRSTVWXYZ</code> — ambiguous chars 0/O/1/I/L removed for human readability). Total namespace: <code>32^8 = 1.099 × 10^12</code> (~1 trillion).</p>
+<p>Generation flow:</p>
+<ol>
+<li>Generate random 8 chars from the alphabet (40 bits of entropy)</li>
+<li>Attempt insert into <code>service_orders</code> with that code</li>
+<li>On unique-constraint violation, retry up to 5 times</li>
+<li>After 5 retries, surface a server error (statistically impossible at any realistic transaction volume)</li>
+</ol>
+<p>Codes are case-insensitive in admin search but stored uppercase. The full reference shown to customers includes the <code>SET-</code> prefix for visual branding; the prefix is NOT stored in the DB (just the 8-char tail).</p>
+<hr />
+<h2 id="10-acceptance-criteria">10. Acceptance criteria</h2>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Customer can add multiple SKUs to their cart and the badge in the chrome reflects the count in real time.</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Customer can remove or change quantity of any cart_item before checkout; price snapshot is taken at add-to-cart time, not checkout time.</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Pressing Checkout creates a <code>service_orders</code> row with a unique 10-char Crockford base 32 reference code and 7-day expiry.</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Payment screen displays both BDO and GCash QR codes loaded from <code>payment_receiving_accounts.qr_code_r2_key</code>.</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Customer can upload a payment proof screenshot; <code>service_order_payments.proof_screenshot_r2_key</code> resolves to a valid R2 object.</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>After upload, <code>service_orders.status</code> flips from <code>pending_payment</code> to <code>proof_submitted</code> and the order appears in the admin queue within 5 seconds.</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Admin can view the customer's screenshot and the order details side-by-side.</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Admin pressing <strong>Approve</strong> transitions order to <code>paid</code>, fires the per-SKU service-activation hooks, generates an OR per 0026, and triggers the <code>payment_confirmed</code> email per 0028.</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>Admin pressing <strong>Reject — needs more proof</strong> leaves <code>service_orders.status</code> at <code>pending_payment</code>, allows the customer to submit a new <code>service_order_payments</code> row with <code>resubmission_count = previous + 1</code> against the same <code>order_id</code>.</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>Admin pressing <strong>Reject permanently</strong> transitions order to <code>rejected</code>; customer can only start a new order.</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>Internal account checkout (<code>users.is_internal = TRUE</code>) skips payment screen, order goes directly to <code>paid</code> with <code>comp_grant_id</code> populated and no <code>service_order_payments</code> row.</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>Team-pool member with sufficient balance (<code>team_shared_monthly_allowance.remaining_php &gt;= total</code>) is fully comped; pool ledger decrements atomically.</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>Team-pool member with partial balance pays only the difference via standard flow; comp covers the comped portion.</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>Setnayan Pay vendor-booking orders show the 3% fee as a transparent cart line item; vendor receives full booking amount on Approve.</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td>Refund (≤ ₱25K, single admin) transitions order to <code>refunded</code>, voids the OR per 0026, fires deactivation hooks, sends <code>refund_processed</code> email per 0028.</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td>Reference codes are unique across the entire <code>service_orders</code> table; collision retry succeeds within 5 attempts at all realistic transaction volumes.</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td>Orders in <code>pending_payment</code> for &gt; 7 days transition to <code>expired</code> via scheduled job; expired orders cannot be paid (customer must re-checkout).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="11-payment-reconciliation-module-the-cron-that-helps-admin-verify-payments">11. Payment reconciliation module (the cron that helps admin verify payments)</h2>
+<h3 id="111-purpose">11.1 Purpose</h3>
+<p>Setnayan owns <strong>1 BDO business bank account + 1 GCash business account</strong> (per § 3.5c — the <code>payment_receiving_accounts</code> catalog). Every customer payment lands in one of these inboxes as either an SMS notification (BDO Alert), an email notification (BDO-Mail), or a bank/GCash app transaction record. The Transactions Handler / Payments Handler admin's job (§ 9.1 single-admin authority) is to match each inbox arrival to a <code>service_orders.reference_code</code> and approve the order.</p>
+<p>This module <strong>automates the matching</strong> to save the admin time and to surface high-confidence suggestions alongside every pending order. The FINAL approve / reject decision stays with admin per § 9.1 — the matcher never auto-approves on its own. The matcher only proposes; admin disposes.</p>
+<h3 id="112-architecture">11.2 Architecture</h3>
+<p>Three components:</p>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Component</th>
+<th>Where it runs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><strong>Inbox ingestion job</strong></td>
+<td>Scheduled Supabase Edge Function · every 5 minutes</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><strong>Reference-code matcher</strong></td>
+<td>Postgres SQL function · invoked per parsed message</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><strong>Admin matching UI</strong></td>
+<td>Extends 0023 § 3.3 Payments &amp; Activations · React panel beside the customer screenshot</td>
+</tr>
+</tbody>
+</table>
+<p>The flow:</p>
+<pre><code>BDO/GCash inbox  →  ingestion job  →  payment_inbox_messages row  →  match_inbox_to_order()  →  matched_order_id populated
+                                                                          ↓
+                                          admin sees suggestion in 0023 § 3.3 alongside customer screenshot
+                                                                          ↓
+                                              admin clicks Approve / Override / Reject (§ 9.1 single-admin)
+</code></pre>
+<h3 id="113-inbox-ingestion-sources-v1">11.3 Inbox ingestion sources (V1)</h3>
+<p>Three sources are wired in V1; a fourth (GCash for Business API) is queued for V1.5 once Setnayan is granted access.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Source</th>
+<th>Method</th>
+<th>Cadence</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>BDO Business Banking SMS</strong></td>
+<td>Forward SMS to a dedicated inbox parser email address (e.g., <code>bdo-inbox@setnayan.com</code>) via a phone-based SMS-to-email gateway (Twilio · Globe Labs) <strong>OR</strong> subscribe to BDO's email-notification feature (BDO-Mail) that sends one email per credit transaction</td>
+<td>Real-time (push)</td>
+<td>~₱500/month for SMS gateway capacity at V1 volume</td>
+</tr>
+<tr class="even">
+<td><strong>GCash transaction history</strong></td>
+<td>GCash for Business has an API in limited beta. V1 fallback: admin manually exports the daily transaction history CSV from the GCash for Business dashboard and uploads it through a Setnayan admin upload form in 0023 § 3.3</td>
+<td>Daily manual CSV upload in V1 · automated polling in V1.5 once API access is granted</td>
+<td>The CSV upload form parses each row into a <code>payment_inbox_messages</code> insert</td>
+</tr>
+<tr class="odd">
+<td><strong>Manual override</strong></td>
+<td>Admin can hand-create a <code>payment_inbox_messages</code> row from anything they see in their own bank / GCash app (e.g., a payment that arrived during an SMS-gateway outage, or a corporate-name transfer that the SMS parser couldn't parse)</td>
+<td>On-demand</td>
+<td><code>source = 'manual'</code> · <code>reviewed_by_admin</code> populated immediately</td>
+</tr>
+</tbody>
+</table>
+<p>The fourth source (GCash for Business API push) is intentionally NOT in V1. V1.5 adds it as a <code>source = 'gcash_api'</code> row type with the same matching pipeline.</p>
+<h3 id="114-schema-additions-to-0034">11.4 Schema additions to 0034</h3>
+<p>The reconciliation module adds one new table and two indexes. It does NOT alter the 8 canonical tables in § 2; it links to them via FK only.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a><span class="co">-- 0034.9: payment_inbox_messages — raw inbox arrivals from BDO/GCash</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a><span class="co">-- ============================================================</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> payment_inbox_messages (</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true"></a>  message_id              UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true"></a>  <span class="kw">source</span>                  TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (<span class="kw">source</span> <span class="kw">IN</span> (<span class="st">&#39;bdo_sms&#39;</span>,<span class="st">&#39;bdo_email&#39;</span>,<span class="st">&#39;gcash_api&#39;</span>,<span class="st">&#39;gcash_csv&#39;</span>,<span class="st">&#39;manual&#39;</span>)),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true"></a>  source_message_id       TEXT,                                    <span class="co">-- the BDO/GCash native message ID for dedup</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true"></a>  received_at             TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span>,                    <span class="co">-- when the inbox message originally landed</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true"></a>  raw_body                TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,                           <span class="co">-- the original SMS/email/CSV-row text, unmodified</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true"></a>  parsed_amount_centavos  <span class="dt">INT</span>,                                     <span class="co">-- extracted amount, null if parse failed</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true"></a>  parsed_reference_code   TEXT,                                    <span class="co">-- extracted reference code if any</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true"></a>  parsed_sender_name      TEXT,                                    <span class="co">-- the payer&#39;s name as the bank/GCash reported it</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true"></a>  parsed_at               TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true"></a>  matched_order_id        UUID <span class="kw">REFERENCES</span> service_orders(order_id),</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true"></a>  matched_payment_id      UUID <span class="kw">REFERENCES</span> service_order_payments(payment_id),</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true"></a>  match_confidence        TEXT <span class="kw">CHECK</span> (match_confidence <span class="kw">IN</span> (<span class="st">&#39;exact&#39;</span>,<span class="st">&#39;high&#39;</span>,<span class="st">&#39;medium&#39;</span>,<span class="st">&#39;low&#39;</span>,<span class="st">&#39;none&#39;</span>)),</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true"></a>  match_method            TEXT <span class="kw">CHECK</span> (match_method <span class="kw">IN</span> (<span class="st">&#39;reference_code&#39;</span>,<span class="st">&#39;amount_plus_sender&#39;</span>,<span class="st">&#39;admin_manual&#39;</span>,<span class="st">&#39;unmatched&#39;</span>)),</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true"></a>  reviewed_by_admin       UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true"></a>  reviewed_at             TIMESTAMPTZ</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true"></a>);</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_inbox_unmatched <span class="kw">ON</span> payment_inbox_messages(matched_order_id) <span class="kw">WHERE</span> matched_order_id <span class="kw">IS</span> <span class="kw">NULL</span>;</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_inbox_received  <span class="kw">ON</span> payment_inbox_messages(received_at <span class="kw">DESC</span>);</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">UNIQUE</span> <span class="kw">INDEX</span> uq_inbox_source_message_id <span class="kw">ON</span> payment_inbox_messages(<span class="kw">source</span>, source_message_id) <span class="kw">WHERE</span> source_message_id <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span>;</span></code></pre></div>
+<p>The unique index on <code>(source, source_message_id)</code> is the dedup gate — replays of the same BDO SMS or GCash CSV row are rejected at INSERT time, so the ingestion job is naturally idempotent.</p>
+<h3 id="115-the-matching-algorithm--fuzzy-sql-function">11.5 The matching algorithm — fuzzy SQL function</h3>
+<p>When a new <code>payment_inbox_messages</code> row lands (either via the ingestion job or a manual admin insert), the Edge Function calls <code>match_inbox_to_order(message_id)</code> which runs four tiers of matching from strongest to weakest:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> match_inbox_to_order(p_message_id UUID)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>RETURNS <span class="kw">TABLE</span> (order_id UUID, confidence TEXT, <span class="kw">method</span> TEXT)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a><span class="kw">AS</span> $$</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a><span class="kw">DECLARE</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>  msg          payment_inbox_messages<span class="dt">%ROWTYPE</span>;</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a>  exact_match  UUID;</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>  amount_match UUID;</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true"></a><span class="cf">BEGIN</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true"></a>  <span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">INTO</span> msg <span class="kw">FROM</span> payment_inbox_messages <span class="kw">WHERE</span> message_id <span class="op">=</span> p_message_id;</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true"></a>  <span class="co">-- Tier 1: Exact reference-code match (auto-resolvable)</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true"></a>  <span class="co">-- The customer included our reference code in their transfer note and the amount lines up within ₱1.</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true"></a>  <span class="cf">IF</span> msg.parsed_reference_code <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="cf">THEN</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true"></a>    <span class="kw">SELECT</span> o.order_id <span class="kw">INTO</span> exact_match</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true"></a>    <span class="kw">FROM</span> service_orders o</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true"></a>    <span class="kw">WHERE</span> <span class="fu">LOWER</span>(o.reference_code) <span class="op">=</span> <span class="fu">LOWER</span>(msg.parsed_reference_code)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true"></a>      <span class="kw">AND</span> o.status <span class="kw">IN</span> (<span class="st">&#39;pending_payment&#39;</span>,<span class="st">&#39;proof_submitted&#39;</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true"></a>      <span class="kw">AND</span> <span class="fu">ABS</span>(o.total_centavos <span class="op">-</span> msg.parsed_amount_centavos) <span class="op">&lt;</span> <span class="dv">100</span>   <span class="co">-- within ₱1 rounding tolerance</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true"></a>    <span class="kw">LIMIT</span> <span class="dv">1</span>;</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true"></a>    <span class="cf">IF</span> exact_match <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="cf">THEN</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true"></a>      <span class="kw">RETURN</span> <span class="kw">QUERY</span> <span class="kw">SELECT</span> exact_match, <span class="st">&#39;exact&#39;</span>:<span class="ch">:TEXT</span>, <span class="st">&#39;reference_code&#39;</span>:<span class="ch">:TEXT</span>;</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true"></a>      <span class="kw">RETURN</span>;</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true"></a>    <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true"></a>  <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true"></a></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true"></a>  <span class="co">-- Tier 2: Amount + recent + sender-name fuzzy (high confidence, admin still reviews)</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true"></a>  <span class="co">-- Customer forgot to add the reference code, but the amount matches an order created within</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true"></a>  <span class="co">-- the last 48 hours AND the bank-reported sender name fuzzy-matches the order&#39;s customer name</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true"></a>  <span class="co">-- with pg_trgm similarity &gt; 0.6.</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true"></a>  <span class="kw">SELECT</span> o.order_id <span class="kw">INTO</span> amount_match</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true"></a>  <span class="kw">FROM</span> service_orders o</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true"></a>  <span class="kw">JOIN</span> users u <span class="kw">ON</span> u.user_id <span class="op">=</span> o.user_id</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true"></a>  <span class="kw">WHERE</span> o.total_centavos <span class="op">=</span> msg.parsed_amount_centavos</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true"></a>    <span class="kw">AND</span> o.status <span class="kw">IN</span> (<span class="st">&#39;pending_payment&#39;</span>,<span class="st">&#39;proof_submitted&#39;</span>)</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true"></a>    <span class="kw">AND</span> o.created_at <span class="op">&gt;</span> NOW() <span class="op">-</span> <span class="dt">INTERVAL</span> <span class="st">&#39;48 hours&#39;</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true"></a>    <span class="kw">AND</span> msg.parsed_sender_name <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true"></a>    <span class="kw">AND</span> similarity(u.full_name, msg.parsed_sender_name) <span class="op">&gt;</span> <span class="fl">0.6</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true"></a>  <span class="kw">ORDER</span> <span class="kw">BY</span> o.created_at <span class="kw">DESC</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true"></a>  <span class="kw">LIMIT</span> <span class="dv">1</span>;</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true"></a></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true"></a>  <span class="cf">IF</span> amount_match <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="cf">THEN</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true"></a>    <span class="kw">RETURN</span> <span class="kw">QUERY</span> <span class="kw">SELECT</span> amount_match, <span class="st">&#39;high&#39;</span>:<span class="ch">:TEXT</span>, <span class="st">&#39;amount_plus_sender&#39;</span>:<span class="ch">:TEXT</span>;</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true"></a>    <span class="kw">RETURN</span>;</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true"></a>  <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true"></a></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true"></a>  <span class="co">-- Tier 3: Amount-only fallback (medium confidence — manual review needed)</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true"></a>  <span class="co">-- Same amount could legitimately come from any customer. Surface as a candidate only.</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true"></a>  <span class="kw">SELECT</span> o.order_id <span class="kw">INTO</span> amount_match</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true"></a>  <span class="kw">FROM</span> service_orders o</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true"></a>  <span class="kw">WHERE</span> o.total_centavos <span class="op">=</span> msg.parsed_amount_centavos</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true"></a>    <span class="kw">AND</span> o.status <span class="kw">IN</span> (<span class="st">&#39;pending_payment&#39;</span>,<span class="st">&#39;proof_submitted&#39;</span>)</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true"></a>    <span class="kw">AND</span> o.created_at <span class="op">&gt;</span> NOW() <span class="op">-</span> <span class="dt">INTERVAL</span> <span class="st">&#39;7 days&#39;</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true"></a>  <span class="kw">ORDER</span> <span class="kw">BY</span> o.created_at <span class="kw">DESC</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true"></a>  <span class="kw">LIMIT</span> <span class="dv">1</span>;</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true"></a></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true"></a>  <span class="cf">IF</span> amount_match <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="cf">THEN</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true"></a>    <span class="kw">RETURN</span> <span class="kw">QUERY</span> <span class="kw">SELECT</span> amount_match, <span class="st">&#39;medium&#39;</span>:<span class="ch">:TEXT</span>, <span class="st">&#39;amount_plus_sender&#39;</span>:<span class="ch">:TEXT</span>;</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true"></a>    <span class="kw">RETURN</span>;</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true"></a>  <span class="cf">END</span> <span class="cf">IF</span>;</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true"></a></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true"></a>  <span class="co">-- Tier 4: No match — surfaces to the &quot;Unmatched inbox&quot; queue for admin attention</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true"></a>  <span class="kw">RETURN</span> <span class="kw">QUERY</span> <span class="kw">SELECT</span> <span class="kw">NULL</span>:<span class="ch">:UUID</span>, <span class="st">&#39;none&#39;</span>:<span class="ch">:TEXT</span>, <span class="st">&#39;unmatched&#39;</span>:<span class="ch">:TEXT</span>;</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true"></a><span class="cf">END</span>;</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true"></a>$$ LANGUAGE plpgsql STABLE;</span></code></pre></div>
+<p><code>pg_trgm</code> is enabled cluster-wide for fuzzy name matching. The 0.6 threshold catches "JUAN DELA CRUZ" ↔︎ "Juan dela Cruz" ↔︎ "JUAN DELACRUZ" but rejects "JUAN" vs "MARIA".</p>
+<p>The Edge Function writes the returned <code>(order_id, confidence, method)</code> back into the <code>payment_inbox_messages</code> row's <code>matched_order_id</code>, <code>match_confidence</code>, and <code>match_method</code> columns. From there the admin UI takes over.</p>
+<h3 id="116-parsing-regexes-v1-starter-set">11.6 Parsing regexes (V1 starter set)</h3>
+<p>The parser lives in the Edge Function (TypeScript), not in SQL. The function takes the raw SMS / email body / CSV row, extracts the three fields (<code>parsed_amount_centavos</code>, <code>parsed_sender_name</code>, <code>parsed_reference_code</code>), and INSERTs into <code>payment_inbox_messages</code>.</p>
+<p><strong>BDO SMS — typical format:</strong></p>
+<pre><code>BDO ALERT: PHP 2,499.00 deposited to ACCT ****1234. Sender: JUAN DELA CRUZ.
+Ref: S89O-A4F2K9R7BX. Bal: PHP X,XXX.XX. Time: 14:32 12/05/26.
+</code></pre>
+<p>Extraction:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a>const amount    <span class="op">=</span> <span class="ss">/PHP </span><span class="sc">([\d,]+\.\d{2})</span><span class="ss">/</span><span class="op">.</span><span class="fu">exec</span>(body)<span class="op">?.</span>[<span class="dv">1</span>]<span class="op">;</span>              <span class="co">// &quot;2,499.00&quot;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a>const sender    <span class="op">=</span> <span class="ss">/Sender:</span><span class="sc">\s+(</span><span class="ss">.</span><span class="sc">+?)\.</span><span class="ss">/</span><span class="op">.</span><span class="fu">exec</span>(body)<span class="op">?.</span>[<span class="dv">1</span>]<span class="op">;</span>                 <span class="co">// &quot;JUAN DELA CRUZ&quot;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true"></a>const refCode   <span class="op">=</span> <span class="ss">/Ref:</span><span class="sc">\s+(</span><span class="ss">SET-</span><span class="sc">[A-Z0-9]{6,12}|[A-Z0-9]{6,12})</span><span class="ss">/</span><span class="op">.</span><span class="fu">exec</span>(body)<span class="op">?.</span>[<span class="dv">1</span>]<span class="op">;</span></span></code></pre></div>
+<p><strong>GCash transaction line — typical format:</strong></p>
+<pre><code>You received PHP 2,499.00 from Juan Dela Cruz on May 12, 2026 at 2:32 PM.
+Ref No.: 1234567890. Note: S89O-A4F2K9R7BX
+</code></pre>
+<p>Extraction:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a>const amount    <span class="op">=</span> <span class="ss">/PHP </span><span class="sc">([\d,]+\.\d{2})</span><span class="ss">/</span><span class="op">.</span><span class="fu">exec</span>(body)<span class="op">?.</span>[<span class="dv">1</span>]<span class="op">;</span>               <span class="co">// &quot;2,499.00&quot;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a>const sender    <span class="op">=</span> <span class="ss">/from </span><span class="sc">(</span><span class="ss">.</span><span class="sc">+?)</span><span class="ss"> on /</span><span class="op">.</span><span class="fu">exec</span>(body)<span class="op">?.</span>[<span class="dv">1</span>]<span class="op">;</span>                    <span class="co">// &quot;Juan Dela Cruz&quot;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a>const refCode   <span class="op">=</span> <span class="ss">/Note:</span><span class="sc">\s+(</span><span class="ss">.</span><span class="sc">+)$</span><span class="ss">/</span><span class="op">.</span><span class="fu">exec</span>(body)<span class="op">?.</span>[<span class="dv">1</span>]</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true"></a>                <span class="op">??</span> <span class="ss">/Ref No</span><span class="sc">\.?</span><span class="ss">:</span><span class="sc">\s+([A-Z0-9]{6,12})</span><span class="ss">/</span><span class="op">.</span><span class="fu">exec</span>(body)<span class="op">?.</span>[<span class="dv">1</span>]<span class="op">;</span></span></code></pre></div>
+<p>Parsing failures (e.g., a corporate-pay format we haven't seen) still produce a <code>payment_inbox_messages</code> row with <code>parsed_amount_centavos = NULL</code> — the row surfaces in the "Unparseable" admin view so the admin can hand-correct and so we can extend the regexes for the next deploy.</p>
+<h3 id="117-admin-reconciliation-ui-extends-0023--33">11.7 Admin reconciliation UI (extends 0023 § 3.3)</h3>
+<p>The Payments &amp; Activations surface gains a left-rail filter and a right-side suggestion panel.</p>
+<p><strong>Left-rail filter — three sub-views:</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Tab</th>
+<th>Filter</th>
+<th>Count badge</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Pending orders</strong> (existing)</td>
+<td><code>service_orders.status = 'proof_submitted'</code></td>
+<td>open orders awaiting admin review</td>
+</tr>
+<tr class="even">
+<td><strong>Inbox matches</strong> (NEW)</td>
+<td><code>payment_inbox_messages</code> rows with <code>matched_order_id IS NOT NULL AND reviewed_by_admin IS NULL</code></td>
+<td>matcher proposed; admin hasn't decided</td>
+</tr>
+<tr class="odd">
+<td><strong>Unmatched inbox</strong> (NEW)</td>
+<td><code>payment_inbox_messages</code> rows with <code>matched_order_id IS NULL AND reviewed_at IS NULL</code> older than 1 hour</td>
+<td>inbox arrivals that couldn't be matched — admin must investigate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Per-order detail view — adds a "Matched inbox messages" panel beside the customer screenshot:</strong></p>
+<p>The panel shows zero, one, or many matched messages with a colored badge per confidence tier:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Confidence</th>
+<th>Badge</th>
+<th>Copy template</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>exact</code></td>
+<td>green check</td>
+<td>"Exact reference-code match — JUAN DELA CRUZ paid ₱2,499 at 14:32 via BDO"</td>
+</tr>
+<tr class="even">
+<td><code>high</code></td>
+<td>amber warn</td>
+<td>"Likely match — amount + sender name fuzzy. Review carefully."</td>
+</tr>
+<tr class="odd">
+<td><code>medium</code></td>
+<td>red warn</td>
+<td>"Amount-only match — manual review needed; same amount could be a different customer."</td>
+</tr>
+<tr class="even">
+<td><code>none</code> (no inbox row)</td>
+<td>gray</td>
+<td>"No matching inbox message yet — customer may not have paid, or admin needs to forward the bank notification."</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Admin actions per matched suggestion:</strong></p>
+<ul>
+<li><strong>Approve with this match</strong> — atomically:
+<ul>
+<li><code>service_orders.status</code> → <code>paid</code></li>
+<li><code>service_order_payments.reviewed_by_admin</code> populated</li>
+<li><code>payment_inbox_messages.matched_payment_id</code> populated (links the inbox message to the specific payment row)</li>
+<li><code>payment_inbox_messages.reviewed_by_admin</code> + <code>reviewed_at</code> populated</li>
+<li>Service-activation hooks per § 4.4 fire</li>
+<li>OR generated per 0026</li>
+<li><code>payment_confirmed</code> email sent per 0028</li>
+</ul></li>
+<li><strong>Override match</strong> — opens a picker of other <code>payment_inbox_messages</code> rows (e.g., the matcher got it wrong; admin can hand-pick a different inbox message)</li>
+<li><strong>Reject screenshot — needs more proof</strong> — existing § 4.3 flow; inbox message stays unlinked</li>
+<li><strong>Reject permanently</strong> — existing § 4.3 flow; inbox message stays unlinked</li>
+<li><strong>Mark inbox unrelated</strong> — the matcher's suggestion is dismissed; <code>payment_inbox_messages.matched_order_id</code> is nulled and <code>reviewed_by_admin</code> is populated with a "dismissed" note. The inbox row then re-enters the Unmatched queue for further investigation.</li>
+</ul>
+<h3 id="118-escalation-rules">11.8 Escalation rules</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Rule</th>
+<th>Trigger</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>No-match-for-48-hours</strong></td>
+<td>A <code>payment_inbox_messages</code> row has <code>matched_order_id IS NULL</code> for &gt; 48 hours</td>
+<td>Alert Ops Lead in the admin Home queue (0023 § 3.1). Either a customer paid but never uploaded a screenshot, or admin needs to investigate a fraudulent screenshot, or a corporate transfer with an unrecognizable format needs hand-parsing.</td>
+</tr>
+<tr class="even">
+<td><strong>Multiple-matches</strong></td>
+<td><code>match_inbox_to_order()</code> finds 2+ candidates at the same confidence tier</td>
+<td>The admin UI shows all candidates as a list with their order summaries; admin picks one. The matcher only auto-fills the most recent at each tier.</td>
+</tr>
+<tr class="odd">
+<td><strong>Stale order</strong></td>
+<td><code>service_orders.status = 'proof_submitted'</code> for &gt; 48 hours without admin decision</td>
+<td>Daily admin reminder banner in 0023 § 3.3 listing the stale orders with elapsed time.</td>
+</tr>
+<tr class="even">
+<td><strong>Suspicious-pattern fraud flag</strong></td>
+<td>The same <code>reference_code</code> appears in 2+ inbox messages (e.g., a customer screenshotted someone else's confirmation) OR an <code>exact</code> match resolves to an order whose <code>users.user_id</code> is on the fraud-watch list</td>
+<td>Order auto-flagged <code>fraud_review_pending</code>; payment activation blocked until two-admin approval per § 9.1. Admin Home queue surfaces a red banner.</td>
+</tr>
+<tr class="odd">
+<td><strong>Parser failure rate</strong></td>
+<td>&gt; 10% of inbox rows in a rolling 24-hour window land with <code>parsed_amount_centavos IS NULL</code></td>
+<td>Engineering alert. A new bank-message format has likely shown up; regex set needs an update.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="119-cost">11.9 Cost</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Line item</th>
+<th>Cost</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Edge Function execution</td>
+<td>~₱0</td>
+<td>Supabase free tier covers 500K invocations/month. Cron runs ~12×/hour × 24 × 30 = ~9,000/month.</td>
+</tr>
+<tr class="even">
+<td>SMS-to-email gateway (Twilio or Globe Labs)</td>
+<td>~₱500/month at V1 volume</td>
+<td>One-way SMS forwarding from a dedicated SIM. Twilio inbound SMS in PH is ~₱0.50/msg; 1,000 BDO alerts/month = ₱500.</td>
+</tr>
+<tr class="odd">
+<td>Storage (<code>payment_inbox_messages</code>)</td>
+<td>negligible</td>
+<td>~1 KB per row · ~3,000 rows/month · ~3 MB/month. Postgres handles trivially.</td>
+</tr>
+<tr class="even">
+<td>pg_trgm extension</td>
+<td>₱0</td>
+<td>Comes free with Supabase Postgres.</td>
+</tr>
+<tr class="odd">
+<td><strong>Total marginal cost</strong></td>
+<td><strong>~₱500/month for V1</strong></td>
+<td>Scales to ~₱2K/month at 10× volume before the Edge Function tier matters.</td>
+</tr>
+</tbody>
+</table>
+<p>Compared with the labor cost of manual matching (~5 minutes × ~50 orders/day × ~₱200/hr admin loaded cost = ~₱830/day, ~₱25K/month), the module pays for itself many times over.</p>
+<h3 id="1110-build-sequence">11.10 Build sequence</h3>
+<ol>
+<li>Provision the SMS-to-email gateway (Twilio number or Globe Labs SIM forwarding to <code>bdo-inbox@setnayan.com</code>) <strong>OR</strong> activate BDO-Mail email-per-credit notifications on the Setnayan BDO business account.</li>
+<li>Implement the Edge Function parser (<code>functions/inbox_ingestion.ts</code>) — handles SMS / email / CSV row body extraction with the V1 regexes from § 11.6.</li>
+<li>Implement <code>match_inbox_to_order()</code> SQL function in a migration; enable <code>pg_trgm</code> extension.</li>
+<li>Build the admin reconciliation UI panel in 0023 § 3.3 — three left-rail tabs, the matched-messages panel beside the screenshot, the Approve-with-match / Override / Mark-unrelated actions.</li>
+<li>Seed-test with synthetic inbox messages — generate mock BDO SMS and GCash CSV rows for every confidence tier and confirm the matcher tags them correctly.</li>
+<li>Run a live test — one Setnayan admin makes a real ₱49 Save-the-Date purchase end-to-end and confirms the full loop fires.</li>
+<li>Roll out to production behind the <code>admin_reconciliation_v1</code> feature flag in 0023; flip on once green for 7 consecutive days.</li>
+</ol>
+<h3 id="1111-acceptance-tests">11.11 Acceptance tests</h3>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Exact reference-code match (Tier 1) populates <code>matched_order_id</code> with <code>match_confidence = 'exact'</code> and <code>match_method = 'reference_code'</code>.</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Amount + sender fuzzy match (Tier 2) populates with <code>match_confidence = 'high'</code>; admin must still click Approve — never auto-approved.</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Amount-only match (Tier 3) populates with <code>match_confidence = 'medium'</code>; surfaces with red warning in the admin UI.</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Tier-4 unmatched produces <code>matched_order_id = NULL</code> and <code>match_confidence = 'none'</code>; row appears in the Unmatched Inbox tab.</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>An inbox message older than 48 hours with <code>matched_order_id IS NULL</code> triggers an Ops Lead alert in the admin Home queue.</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>When <code>match_inbox_to_order()</code> finds 2+ candidates at the same confidence tier, the admin UI shows all candidates as a list; the matcher auto-fills only the most recent.</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Duplicate <code>(source, source_message_id)</code> insert is rejected by the unique index; the ingestion job logs the duplicate and continues.</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Fraudulent reuse of the same reference code across 2+ inbox messages flags the order <code>fraud_review_pending</code>; activation blocked until two-admin approval per § 9.1.</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>Admin can override the matcher's suggestion and hand-pick a different inbox message via the Override flow.</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>Approve-with-match atomically populates <code>service_orders.status = 'paid'</code>, <code>service_order_payments.reviewed_by_admin</code>, <code>payment_inbox_messages.matched_payment_id</code>, fires service-activation hooks, generates OR, sends <code>payment_confirmed</code> email — all inside a single transaction with rollback-on-failure.</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>Mark-inbox-unrelated nulls <code>matched_order_id</code> and populates <code>reviewed_by_admin</code>; the row re-enters the Unmatched Inbox tab.</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>Parser failure (<code>parsed_amount_centavos IS NULL</code>) still produces a <code>payment_inbox_messages</code> row; surfaces in an Unparseable filter for admin hand-correction.</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>pg_trgm <code>similarity(u.full_name, msg.parsed_sender_name) &gt; 0.6</code> correctly accepts "JUAN DELA CRUZ" ↔︎ "Juan Dela Cruz" ↔︎ "JUAN DELACRUZ" and rejects unrelated names.</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>Audit log captures admin decision + matcher confidence + match method for every Approve / Override / Reject — full forensic trail per § 9.1.</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td>Parser-failure-rate &gt; 10% in 24h triggers an engineering alert.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-decision-log-iteration-local">12. Decision log (iteration-local)</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Date</th>
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Cart is required pre-checkout state</strong> (not optional).</td>
+<td>Every SKU goes through <code>cart → cart_items → service_orders</code> even if it's a single-item purchase. Uniform flow simplifies frontend logic and gives users a consistent "review before pay" moment. The cart abstraction also future-proofs bundle discounts and multi-SKU promotions in V1.5.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Price snapshot at add-to-cart time, not checkout.</strong></td>
+<td>Customer adds item at ₱4,999. Admin changes price mid-shopping to ₱5,499 (two-admin approved per § 9.1). Customer pays the snapshotted ₱4,999 because that's what their cart showed. Prevents "bait and switch" customer experience. Trade-off: prices can be stale for hours. Acceptable because cart abandonment timeout is 30 days for active carts; mid-quarter price changes are rare events anyway.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Resubmission stays on the same order_id.</strong></td>
+<td>When admin rejects "needs more proof," the customer doesn't have to re-add items to their cart. Better UX, same order tracking. <code>resubmission_count</code> increments for analytics.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>10-char Crockford base 32 reference codes (no <code>SET-</code> prefix in DB).</strong></td>
+<td>1 trillion namespace is comfortable for V1; collision math gives a 50% chance of collision at ~1M codes — well beyond realistic V1 volume. Crockford alphabet (no 0/O/1/I/L) eliminates customer-typed errors in transfer notes. Prefix shown to customer only, not stored.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>7-day order expiry on <code>pending_payment</code>.</strong></td>
+<td>Filipino bank transfers settle within 1–2 business days; 7 days covers weekends + holidays + customer hesitation. After expiry, the customer must re-checkout (which generates a fresh reference code, useful because the prior code may now be polluted with confused customer transfers).</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Setnayan Pay 3% fee is a transparent line item.</strong></td>
+<td>Hidden fees damage trust. The breakdown surfaces the fee as a separate cart row so customers see exactly what they're paying for. Mirrors how Stripe/PayMongo surface processing fees in their B2C-direct UIs.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Service-activation hooks are Postgres triggers + Edge Function dispatchers.</strong></td>
+<td>Triggers handle the simple cases (insert N seats, flip a boolean flag). Edge Functions handle the complex cases (OR generation per 0026, email send per 0028). All hooks are idempotent so re-running on retry is safe.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>No automated bank-API integration in V1.</strong></td>
+<td>Manual reconciliation is the V1 design constraint. PayMongo evaluation and GCash Merchant API integration are V1.5 candidates only. The schema is ready to support automation drop-in: <code>service_order_payments.reviewed_by_admin</code> becomes nullable for auto-approved payments, and a new <code>auto_approved_at</code> column can be added without breaking the manual flow.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Reconciliation matcher proposes; admin disposes.</strong></td>
+<td>The matcher never auto-approves a payment — even at Tier 1 exact-match, admin must click Approve. § 9.1 single-admin authority is preserved end-to-end. Two reasons: (1) PH bank message formats can be spoofed in a forwarded SMS, so an exact-reference-code match alone isn't proof of payment receipt; (2) the V1 manual flow already meets the 24-hr SLA — automation that bypasses admin would skip the human fraud-check layer for a marginal speed gain. The Tier 1 case ends up being a one-click confirmation for admin, which captures ~90% of the labor savings without the trust cost.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Four-tier match cascade (exact → high → medium → none).</strong></td>
+<td>Maps directly to the three legitimate failure modes of customer payment behavior: (Tier 1) customer follows instructions correctly · (Tier 2) customer transferred the right amount but forgot the reference code · (Tier 3) two different customers happened to pay identical amounts within the same week · (Tier 4) no inbox message arrived yet. Each tier has a clear admin-facing affordance — green / amber / red / gray — so the admin reviews the easy cases in seconds and spends real attention only on the medium-confidence ones.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>pg_trgm similarity threshold 0.6 for sender-name fuzzy match.</strong></td>
+<td>Calibrated against real PH name variation patterns: "JUAN DELA CRUZ" ↔︎ "Juan dela Cruz" ↔︎ "JUAN DELACRUZ" ↔︎ "J. DELA CRUZ" all score ~0.65–0.85 against the canonical full name. Threshold 0.6 catches all of these without admitting "MARIA SANTOS" vs "JUAN DELA CRUZ" (which scores ~0.15). Tunable later — store as a config row if real-data calibration shifts.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Unique index on <code>(source, source_message_id)</code> is the idempotence gate.</strong></td>
+<td>Replays of the same BDO SMS or GCash CSV row are rejected at INSERT time. This means the ingestion job can be safely re-run on failure, the Edge Function cron can overlap a previous invocation, and a CSV upload can be retried by the admin without producing duplicate inbox rows. Cheaper than building dedup logic in application code.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Suspicious-pattern rule — same reference code in 2+ inbox messages flags fraud_review_pending.</strong></td>
+<td>The single highest-value abuse vector for V1 manual reconciliation is screenshotting someone else's confirmation. If the matcher sees the same reference code on two different inbox arrivals (different senders, different amounts, different sources), one of them is fraudulent. Auto-flagging the order escalates to two-admin approval per § 9.1; the legitimate customer pays again, the impostor is investigated.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Parser lives in TypeScript (Edge Function), matcher lives in Postgres (SQL function).</strong></td>
+<td>Two reasons. (1) The regex set will need iteration as new BDO / GCash message formats appear; TypeScript is the right tool for that kind of code churn (better tooling, easier testing, faster deploy). (2) The matching logic touches multiple service-orders rows with similarity / interval queries; Postgres-native SQL is far faster than round-tripping each candidate to the Edge Function. Each tool used where it's strongest.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>No GCash Merchant API in V1.</strong></td>
+<td>Limited beta access only; we don't yet have credentials. The schema includes <code>source = 'gcash_api'</code> as a placeholder enum value so V1.5 can drop it in without a migration. Daily CSV upload covers V1; it's a 1-minute manual task for the admin in exchange for the same matching pipeline.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="13-companion-docs">13. Companion docs</h2>
+<ul>
+<li><code>0021_couple_dashboard_fully_purchased/0021_couple_dashboard_fully_purchased.md</code> — cart drawer UI lives here on the customer-side Services launcher</li>
+<li><code>0022_vendor_dashboard/0022_vendor_dashboard.md</code> — vendor-side pricing display + Setnayan Pay convenience fee surfacing</li>
+<li><code>0023_admin_console/0023_admin_console.md</code> — § 3.3 Payments &amp; Activations reconciliation queue (consumes this schema)</li>
+<li><code>0023_admin_console/0023_admin_console.md</code> — § 3.5b comp_grants surface (shared with this iteration)</li>
+<li><code>0023_admin_console/0023_admin_console.md</code> — § 3.5c payment_receiving_accounts catalog (QR sources)</li>
+<li><code>0026_bir_tax_compliance/0026_bir_tax_compliance.md</code> — OR generation, voiding, replacement; VAT decision</li>
+<li><code>0028_email_notifications/0028_email_notifications.md</code> — <code>payment_instructions</code> / <code>payment_confirmed</code> / <code>payment_proof_rejected</code> / <code>refund_processed</code> templates</li>
+<li><code>0032_contract_intelligence/0032_contract_intelligence.md</code> — <code>contract_purchases.order_id</code> FK links contract upgrades to this schema</li>
+<li><code>CLAUDE.md</code> § 9.1 — admin role authority matrix (single-admin vs two-admin approval scope)</li>
+<li><code>CLAUDE.md</code> § 10a — Owner Internal Accounts (permanent comps; payment short-circuit)</li>
+<li><code>CLAUDE.md</code> § 10b — Setnayan Team Shared Monthly Pool (capped consumption pool; first-come-first-served)</li>
+<li><code>Setnayan_Vendor_Agreement.md</code> Refund Rules section — refund policy summary</li>
+<li><code>Setnayan_Privacy_and_Security_Policy.md</code> — payment proof screenshots are PII; retention follows the events 5-year window</li>
+</ul>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,2930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan · 0004 · Invitation Widgets Editor — Web + Mobile Mockup</title>
+<meta name="description" content="Setnayan iteration 0004 — couple's customization editor for the invitation widgets. Three-panel layout, Basic/Pro tier toggle, live preview.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --page-bg: #FAF6F0;
+  --page-bg-soft: #F5EFE5;
+  --ink: #1A1A1A;
+  --ink-soft: #6B6B6B;
+  --ink-faint: #A39B8E;
+  --accent: #C97B4B;
+  --accent-soft: #E8C9B0;
+  --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08);
+  --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F3;
+  --canvas-bg: #2B2825;
+
+  --rsvp-attending: #6FA776;
+  --rsvp-attending-soft: #DDEBDF;
+  --rsvp-pending: #D69744;
+  --rsvp-pending-soft: #F4E2C8;
+
+  --pro-gold: #B8893E;
+  --pro-gold-soft: #F4E5C2;
+
+  --shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.04);
+  --shadow-md: 0 12px 32px rgba(26, 26, 26, 0.08);
+  --shadow-lg: 0 28px 72px rgba(26, 26, 26, 0.12);
+  --shadow-frame: 0 40px 100px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--canvas-bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+/* Canvas */
+.canvas-header {
+  padding: 36px 48px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.canvas-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.9);
+}
+.canvas-title h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 28px;
+  color: #fff;
+}
+.canvas-title .canvas-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.canvas-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 4px;
+}
+.toggle-pill {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 8px 18px;
+  border-radius: 999px;
+  transition: all 0.18s;
+}
+.toggle-pill:hover { color: #fff; }
+.toggle-pill.active { background: var(--accent); color: #fff; }
+
+.frames {
+  padding: 36px 48px 80px;
+  display: flex;
+  gap: 36px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+body[data-view="desktop"] .frame-mobile { display: none; }
+body[data-view="mobile"] .frame-desktop { display: none; }
+
+.frame-wrap { position: relative; }
+.frame-label {
+  position: absolute;
+  top: -36px; left: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Desktop frame */
+.frame-desktop {
+  flex-shrink: 0;
+  width: 1380px;
+  background: var(--page-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-frame);
+}
+.browser-chrome {
+  background: #E9E5DE;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.traffic-lights { display: flex; gap: 7px; }
+.traffic-lights span {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #BDBAB3;
+}
+.traffic-lights span:nth-child(1) { background: #FF6058; }
+.traffic-lights span:nth-child(2) { background: #FFBE2F; }
+.traffic-lights span:nth-child(3) { background: #2BC940; }
+.url-bar {
+  flex: 1;
+  background: #fff;
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.url-bar .lock { color: var(--rsvp-attending); margin-right: 4px; }
+
+/* Editor top bar */
+.editor-top {
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.editor-top-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.editor-top-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 16px;
+}
+.editor-top-brand-mark {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+}
+.editor-top-brand em { font-style: italic; color: var(--ink-soft); font-weight: 400; }
+.editor-divider {
+  width: 1px; height: 22px;
+  background: var(--rule);
+}
+.editor-event-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.editor-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink);
+  transition: all 0.15s;
+}
+.btn:hover { border-color: var(--ink); }
+.btn.primary {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.btn.accent {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn.gold {
+  background: var(--pro-gold);
+  color: #fff;
+  border-color: var(--pro-gold);
+}
+.btn.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink-soft);
+}
+.btn.ghost:hover { color: var(--ink); background: var(--page-bg-soft); }
+.btn.icn-only { padding: 9px; width: 36px; height: 36px; justify-content: center; }
+.save-state {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rsvp-attending);
+  font-weight: 600;
+}
+
+/* Three-panel layout */
+.editor-body {
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  height: 820px;
+}
+
+/* Left: widget library */
+.widget-library {
+  background: var(--surface-soft);
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
+  padding: 18px;
+}
+.lib-section {
+  margin-bottom: 24px;
+}
+.lib-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.lib-eyebrow .count {
+  background: var(--ink);
+  color: #fff;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0;
+}
+.widget-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.widget-item:hover { border-color: var(--ink); transform: translateX(2px); }
+.widget-item.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.widget-item .drag {
+  color: var(--ink-faint);
+  font-size: 12px;
+  cursor: grab;
+}
+.widget-item .icn {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: var(--page-bg-soft);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.widget-item.selected .icn {
+  background: var(--surface);
+  color: var(--accent-deep);
+}
+.widget-item .info { flex: 1; min-width: 0; }
+.widget-item .name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.widget-item .tier {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+.widget-item .tier.pro { color: var(--pro-gold); font-weight: 700; }
+.widget-item .visibility {
+  font-size: 14px;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.widget-item.hidden .visibility { color: var(--ink-faint); opacity: 0.5; }
+.widget-item.hidden .info { opacity: 0.5; }
+
+.add-widget-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  border: 1.5px dashed var(--rule-strong);
+  background: transparent;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  width: 100%;
+  margin-top: 4px;
+}
+.add-widget-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+/* Center: preview */
+.preview-pane {
+  background: var(--canvas-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.preview-toolbar {
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.preview-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255,255,255,0.7);
+}
+.preview-toolbar-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.preview-toolbar-toggle {
+  display: inline-flex;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 3px;
+}
+.preview-toolbar-toggle button {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.6);
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.preview-toolbar-toggle button.active {
+  background: var(--accent);
+  color: #fff;
+}
+.preview-toolbar-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.preview-toolbar-actions button {
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+.preview-toolbar-actions button:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.preview-stage {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  padding: 32px 24px;
+}
+.preview-frame {
+  width: 100%;
+  max-width: 540px;
+  background: var(--page-bg);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+/* Preview content (mini invitation site) */
+.pv-section {
+  padding: 28px 24px;
+  text-align: center;
+  position: relative;
+  border-bottom: 1px solid var(--rule);
+}
+.pv-section:last-child { border-bottom: none; }
+.pv-section.selected-widget {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--accent-soft) 240%);
+}
+.pv-section .selected-tag {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  display: none;
+}
+.pv-section.selected-widget .selected-tag { display: inline-flex; align-items: center; gap: 4px; }
+.pv-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.pv-monogram {
+  width: 64px; height: 64px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  display: grid;
+  place-items: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--accent-deep);
+  background: var(--surface);
+}
+.pv-names {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 38px;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin-bottom: 8px;
+}
+.pv-names em { font-style: italic; font-weight: 400; }
+.pv-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+.pv-greeting {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.pv-greeting strong { color: var(--accent-deep); font-style: normal; font-weight: 500; }
+.pv-greeting-msg {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+.pv-countdown {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.pv-countdown-box {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 10px 6px;
+}
+.pv-countdown-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+}
+.pv-countdown-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 4px;
+}
+.pv-qr {
+  width: 110px; height: 110px;
+  margin: 0 auto 10px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.pv-qr-monogram {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  /* Outer clearance — white rounded-square that masks the QR pattern center */
+  width: 44px; height: 44px;
+  background: #fff;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+.pv-qr-monogram::before {
+  /* Inner monogram badge — circular terracotta-bordered ring */
+  content: "";
+  position: absolute;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  background: var(--surface);
+}
+.pv-qr-monogram > .mark {
+  position: relative;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--accent-deep);
+  letter-spacing: -0.02em;
+  z-index: 1;
+}
+.pv-qr-pattern {
+  width: 100%; height: 100%;
+  background:
+    linear-gradient(45deg, var(--ink) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--ink) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--ink) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--ink) 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+  border-radius: 2px;
+}
+.pv-rsvp-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  max-width: 280px;
+  margin: 0 auto 8px;
+}
+.pv-rsvp-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 10px;
+  padding: 10px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.pv-venue-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.pv-venue-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.pv-venue-photo {
+  height: 56px;
+  background: linear-gradient(135deg, #C8807F, #C97B4B);
+}
+.pv-venue-photo.r { background: linear-gradient(135deg, #6E89AD, #C9A66B); }
+.pv-venue-body { padding: 8px 10px; text-align: left; }
+.pv-venue-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+.pv-venue-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+.pv-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.pv-dress-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.pv-dress-col {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 10px;
+  text-align: left;
+}
+.pv-dress-col.do { background: var(--rsvp-attending-soft); }
+.pv-dress-col.dont { background: #F2DCD5; }
+.pv-dress-col h5 {
+  font-size: 12px;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+.pv-moments {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.pv-moment-card {
+  background: var(--surface-soft);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 10px 6px;
+}
+.pv-moment-glyph {
+  width: 30px; height: 30px;
+  margin: 0 auto 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+.pv-moment-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.15;
+}
+.pv-schedule {
+  text-align: left;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.pv-schedule-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--rule);
+  font-size: 11px;
+}
+.pv-schedule-item:last-child { border: none; }
+.pv-schedule-item .time {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+.pv-schedule-item .ttl { font-weight: 500; }
+.pv-event-details {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: left;
+  max-width: 360px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 4px 12px;
+}
+.pv-event-details .k {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.pv-event-details .v { color: var(--ink); }
+
+/* Right: inspector */
+.inspector {
+  background: var(--surface);
+  border-left: 1px solid var(--rule);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.inspector-head {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.inspector-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.inspector-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.inspector-tier-toggle {
+  display: inline-flex;
+  background: var(--page-bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 3px;
+  width: 100%;
+  margin-top: 10px;
+}
+.inspector-tier-toggle button {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.inspector-tier-toggle button.active.basic {
+  background: var(--ink);
+  color: #fff;
+}
+.inspector-tier-toggle button.active.pro {
+  background: var(--pro-gold);
+  color: #fff;
+}
+.inspector-tier-toggle .pro-price {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+.inspector-body {
+  flex: 1;
+  padding: 18px 22px;
+  overflow-y: auto;
+}
+.field-group { margin-bottom: 18px; }
+.field-group h5 {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.field input, .field select, .field textarea {
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  background: var(--surface);
+  outline: none;
+  height: 38px;
+  font-family: inherit;
+}
+.field textarea { height: 70px; resize: vertical; padding: 8px 12px; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+.field .helper {
+  font-size: 10px;
+  color: var(--ink-faint);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+}
+
+.style-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.style-card {
+  background: var(--surface);
+  border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  padding: 12px 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.style-card:hover { border-color: var(--ink); }
+.style-card.active { border-color: var(--accent); background: var(--accent-soft); }
+.style-card .preview {
+  width: 36px; height: 36px;
+  margin: 0 auto 6px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  color: var(--accent-deep);
+  background: var(--surface);
+}
+.style-card .preview.geom { border-style: solid; border-radius: 4px; }
+.style-card .preview.calligraphic { font-style: italic; font-weight: 600; }
+.style-card .preview.modern { font-family: 'Manrope', sans-serif; font-weight: 700; border-radius: 6px; font-size: 12px; }
+.style-card .name {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.motif-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.motif-tile {
+  aspect-ratio: 1;
+  background: var(--page-bg-soft);
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.motif-tile:hover { border-color: var(--ink); }
+.motif-tile.active { border-color: var(--accent); background: var(--accent-soft); }
+
+/* ============== Frame picker (25 monogram frames in 5 categories) ============== */
+.frame-cat {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 14px 0 6px;
+  font-weight: 600;
+}
+.frame-cat:first-child { margin-top: 0; }
+.frame-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.frame-tile {
+  aspect-ratio: 1;
+  background: var(--page-bg-soft);
+  border: 1.5px solid var(--rule);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+}
+.frame-tile:hover { border-color: var(--ink); }
+.frame-tile.active { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+.frame-tile-name {
+  position: absolute;
+  bottom: -16px;
+  left: 0; right: 0;
+  font-size: 9px;
+  text-align: center;
+  color: var(--ink-faint);
+  letter-spacing: 0;
+  font-family: 'Manrope', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Frame visuals (CSS-art mockup; production uses SVG) */
+.fm {
+  width: 28px;
+  height: 28px;
+  position: relative;
+}
+.fm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  -webkit-mask: var(--frame-mask);
+          mask: var(--frame-mask);
+}
+.fm-circle { --frame-mask: radial-gradient(circle at 50% 50%, transparent 38%, #000 38%, #000 50%, transparent 50%); }
+.fm-rsq { --frame-mask: linear-gradient(#000, #000); border: 2px solid var(--accent); border-radius: 6px; background: transparent; }
+.fm-rsq::before { display:none; }
+.fm-sq { border: 2px solid var(--accent); }
+.fm-sq::before { display:none; }
+.fm-hex { clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+.fm-diamond { transform: rotate(45deg); border: 2px solid var(--accent); }
+.fm-diamond::before { display:none; }
+.fm-shield { clip-path: polygon(50% 0%, 100% 18%, 100% 60%, 50% 100%, 0 60%, 0 18%); }
+.fm-oval { border-radius: 50%; aspect-ratio: 1.4 / 1; border: 2px solid var(--accent); width: 32px; height: 22px; }
+.fm-oval::before { display:none; }
+.fm-doublecircle { border: 2px solid var(--accent); border-radius: 50%; }
+.fm-doublecircle::before { content: ""; position: absolute; inset: 4px; border: 1px solid var(--accent); border-radius: 50%; background: transparent; -webkit-mask: none; mask: none; }
+.fm-octagon { clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
+.fm-sqinner { border: 2px solid var(--accent); position: relative; }
+.fm-sqinner::before { content: ""; position: absolute; inset: 4px; border: 1px solid var(--accent); background: transparent; -webkit-mask: none; mask: none; }
+.fm-sunburst { border-radius: 50%; background: conic-gradient(var(--accent) 0 5%, transparent 5% 10%, var(--accent) 10% 15%, transparent 15% 20%, var(--accent) 20% 25%, transparent 25% 30%, var(--accent) 30% 35%, transparent 35% 40%, var(--accent) 40% 45%, transparent 45% 50%, var(--accent) 50% 55%, transparent 55% 60%, var(--accent) 60% 65%, transparent 65% 70%, var(--accent) 70% 75%, transparent 75% 80%, var(--accent) 80% 85%, transparent 85% 90%, var(--accent) 90% 95%, transparent 95% 100%); -webkit-mask: radial-gradient(circle at 50% 50%, transparent 32%, #000 32%); mask: radial-gradient(circle at 50% 50%, transparent 32%, #000 32%); }
+.fm-sunburst::before { display: none; }
+.fm-laurel::before { content: "❦"; font-size: 20px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+.fm-sampaguita::before { content: "❀"; font-size: 22px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+.fm-palm::before { content: "❅"; font-size: 22px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+.fm-garden::before { content: "✿"; font-size: 22px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+.fm-calla::before { content: "⚜"; font-size: 22px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+.fm-filigree::before { content: "❧"; font-size: 22px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+.fm-artdeco { border: 2px solid var(--accent); border-radius: 50% 50% 0 0; }
+.fm-artdeco::before { display:none; }
+.fm-beaded { border: 2px dotted var(--accent); border-radius: 50%; }
+.fm-beaded::before { display:none; }
+.fm-vintage { border: 2px double var(--accent); border-radius: 4px; }
+.fm-vintage::before { display:none; }
+.fm-rope { border: 3px solid var(--accent); border-radius: 50%; border-style: dashed; }
+.fm-rope::before { display:none; }
+.fm-capiz::before { content: "◈"; font-size: 22px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+.fm-baybayin::before { content: "ᜃ"; font-size: 22px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+.fm-modernpinoy { border: 2px solid var(--accent); clip-path: polygon(0 30%, 30% 30%, 30% 0, 70% 0, 70% 30%, 100% 30%, 100% 70%, 70% 70%, 70% 100%, 30% 100%, 30% 70%, 0 70%); }
+.fm-modernpinoy::before { display:none; }
+.fm-catholic::before { content: "✚"; font-size: 22px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+.fm-combined { border: 2px solid var(--accent); border-radius: 50%; }
+.fm-combined::before { content: "❀"; font-size: 14px; color: var(--accent); background: none; mask: none; -webkit-mask: none; display: grid; place-items: center; }
+
+/* Pro upsell card */
+.pro-upsell {
+  background: linear-gradient(135deg, #FBF8F3 0%, var(--pro-gold-soft) 240%);
+  border: 1.5px solid var(--pro-gold);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.pro-upsell::before {
+  content: "PRO";
+  position: absolute;
+  top: 12px; right: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  background: var(--pro-gold);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.pro-upsell-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 18px;
+  margin-bottom: 4px;
+  padding-right: 50px;
+  line-height: 1.2;
+}
+.pro-upsell-desc {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.pro-preview-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+}
+.pro-preview-stage {
+  height: 80px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+/* Trace-then-morph animation — 6s loop */
+.trace-name {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 32px;
+  color: var(--accent-deep);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+}
+.trace-name.maria {
+  animation: trace-maria 6s ease-in-out infinite;
+}
+.trace-name.juan {
+  animation: trace-juan 6s ease-in-out infinite;
+}
+@keyframes trace-maria {
+  0%   { clip-path: inset(0 100% 0 0); opacity: 0; transform: translate(-50%, -50%); }
+  3%   { opacity: 1; }
+  20%  { clip-path: inset(0 0 0 0); opacity: 1; transform: translate(-50%, -50%); }
+  43%  { clip-path: inset(0 0 0 0); opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  53%  { clip-path: inset(0 0 0 0); opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  100% { clip-path: inset(0 0 0 0); opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+}
+@keyframes trace-juan {
+  0%, 23%   { clip-path: inset(0 100% 0 0); opacity: 0; transform: translate(-50%, -50%); }
+  26%  { opacity: 1; }
+  43%  { clip-path: inset(0 0 0 0); opacity: 1; transform: translate(-50%, -50%); }
+  53%  { clip-path: inset(0 0 0 0); opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  100% { clip-path: inset(0 0 0 0); opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+}
+/* Animated monogram that draws after the names morph in */
+.trace-monogram {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.4);
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 20px;
+  color: var(--accent-deep);
+  opacity: 0;
+  letter-spacing: -0.02em;
+  animation: morph-in 6s ease-in-out infinite;
+}
+@keyframes morph-in {
+  0%, 50%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  68%  { transform: translate(-50%, -50%) scale(1); }
+  90%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+}
+/* Frame draws around the monogram via stroke-dashoffset on SVG circle */
+.trace-frame {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70px; height: 70px;
+}
+.trace-frame circle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  transform-origin: center;
+  transform: rotate(-90deg);
+  animation: frame-draw 6s ease-in-out infinite;
+}
+@keyframes frame-draw {
+  0%, 60%   { stroke-dashoffset: 220; opacity: 0; }
+  68%  { opacity: 1; }
+  82%  { stroke-dashoffset: 0; opacity: 1; }
+  90%  { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+.pro-preview-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-faint);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.pro-anim-timeline {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  margin-top: 8px;
+  padding: 0 4px;
+}
+.pro-anim-timeline span { opacity: 0.6; }
+.pro-upsell-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pro-price-tag {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 22px;
+  color: var(--accent-deep);
+}
+.pro-price-tag em {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-style: normal;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: block;
+}
+.btn-upgrade {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--pro-gold);
+  color: #fff;
+}
+.btn-upgrade:hover { background: #9C7434; }
+
+.inspector-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--rule);
+  background: var(--surface-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.inspector-footer .auto-save {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--rsvp-attending);
+  letter-spacing: 0.1em;
+}
+
+/* MOBILE FRAME */
+.frame-mobile {
+  flex-shrink: 0;
+  width: 392px; height: 844px;
+  background: #1A1A1A;
+  border-radius: 50px;
+  padding: 12px;
+  position: relative;
+  box-shadow: var(--shadow-frame);
+}
+.mobile-screen {
+  width: 100%; height: 100%;
+  background: var(--page-bg);
+  border-radius: 38px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.mobile-notch {
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 32px;
+  background: #000;
+  border-radius: 18px;
+  z-index: 10;
+}
+.mobile-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 32px 6px;
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 5;
+  position: relative;
+}
+.mobile-status .status-icons { display: flex; gap: 6px; align-items: center; }
+.mobile-status .battery {
+  width: 24px; height: 11px;
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  position: relative;
+  padding: 1px;
+}
+.mobile-status .battery::after {
+  content: ""; position: absolute;
+  right: -3px; top: 50%;
+  transform: translateY(-50%);
+  width: 2px; height: 5px;
+  background: var(--ink);
+  border-radius: 0 1px 1px 0;
+}
+.mobile-status .battery span {
+  display: block;
+  background: var(--ink);
+  width: 80%; height: 100%;
+  border-radius: 1px;
+}
+
+.m-editor-top {
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+}
+.m-editor-back {
+  font-size: 22px;
+  width: 36px; height: 36px;
+  display: grid;
+  place-items: center;
+  margin-left: -8px;
+}
+.m-editor-titlewrap {
+  text-align: center;
+  flex: 1;
+}
+.m-editor-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1;
+}
+.m-editor-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+.m-editor-publish {
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+
+.m-preview-stage {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--canvas-bg);
+  padding: 20px 16px 80px;
+}
+.m-preview-frame {
+  background: var(--page-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+}
+
+.m-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  background: rgba(255,255,255,0.98);
+  border-top: 1px solid var(--rule);
+  padding: 10px 16px 22px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+}
+.m-bottom-tab {
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-faint);
+}
+.m-bottom-tab.active { color: var(--ink); }
+.m-bottom-tab .ic {
+  font-size: 16px;
+}
+.m-bottom-tab.active .ic { color: var(--accent); }
+
+/* Mobile sheet (settings popup) */
+.m-sheet {
+  position: absolute;
+  bottom: 60px;
+  left: 0; right: 0;
+  background: var(--surface);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.15);
+  max-height: 60%;
+  overflow-y: auto;
+  padding: 18px 20px 22px;
+  z-index: 5;
+}
+.m-sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--rule-strong);
+  border-radius: 2px;
+  margin: 0 auto 14px;
+}
+.m-sheet-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+.m-sheet-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.m-tier-toggle {
+  display: inline-flex;
+  background: var(--page-bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 3px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+.m-tier-toggle button {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+}
+.m-tier-toggle button.active.basic { background: var(--ink); color: #fff; }
+.m-tier-toggle button.active.pro { background: var(--pro-gold); color: #fff; }
+
+.m-pro-upsell {
+  background: linear-gradient(135deg, #FBF8F3 0%, var(--pro-gold-soft) 240%);
+  border: 1.5px solid var(--pro-gold);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.m-pro-upsell::before {
+  content: "PRO";
+  position: absolute;
+  top: 10px; right: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  background: var(--pro-gold);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+.m-pro-upsell h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 4px;
+  padding-right: 40px;
+}
+.m-pro-upsell p {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.m-pro-upgrade-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: var(--pro-gold);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 999px;
+}
+.m-pro-upgrade-btn .price {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+}
+
+@media (max-width: 1500px) {
+  .canvas-header { padding: 24px 20px 16px; flex-direction: column; align-items: flex-start; }
+  .frames { padding: 24px 16px 60px; flex-direction: column; align-items: center; }
+  .frame-desktop { width: 100%; max-width: 1380px; }
+  .editor-body { grid-template-columns: 240px 1fr 320px; }
+}
+
+</style>
+</head>
+<body data-view="both">
+
+<header class="canvas-header">
+  <div class="canvas-title">
+    <span class="canvas-meta">Setnayan · Iteration 0004 · Design Review</span>
+    <h1>Invitation Widgets Editor — Web &amp; Mobile</h1>
+  </div>
+  <nav class="canvas-toggle">
+    <button class="toggle-pill" data-toggle="desktop">Web</button>
+    <button class="toggle-pill" data-toggle="mobile">Mobile</button>
+    <button class="toggle-pill active" data-toggle="both">Both</button>
+  </nav>
+</header>
+
+<main class="frames">
+
+<!-- ============================================================== -->
+<!-- DESKTOP FRAME -->
+<!-- ============================================================== -->
+<div class="frame-wrap">
+  <div class="frame-label">Web · Couple's editor · 1380px</div>
+  <section class="frame frame-desktop">
+
+    <div class="browser-chrome">
+      <div class="traffic-lights"><span></span><span></span><span></span></div>
+      <div class="url-bar">
+        <span class="lock">🔒</span>
+        <span>setnayan.com/dashboard/customize</span>
+      </div>
+    </div>
+
+    <!-- Editor top bar -->
+    <div class="editor-top">
+      <div class="editor-top-left">
+        <div class="editor-top-brand">
+          <div class="editor-top-brand-mark"></div>
+          <div>Setnayan<em> · customize</em></div>
+        </div>
+        <div class="editor-divider"></div>
+        <div class="editor-event-meta">Maria &amp; Juan · Oct 24, 2026</div>
+        <div class="editor-divider"></div>
+        <div class="save-state">⬤ All changes saved · 2s ago</div>
+      </div>
+      <div class="editor-top-actions">
+        <button class="btn ghost icn-only" title="Undo">↶</button>
+        <button class="btn ghost icn-only" title="Redo">↷</button>
+        <div class="editor-divider"></div>
+        <button class="btn ghost">👁 Preview as guest</button>
+        <button class="btn">Save draft</button>
+        <button class="btn primary">Publish →</button>
+      </div>
+    </div>
+
+    <!-- Three-panel body -->
+    <div class="editor-body">
+
+      <!-- LEFT: Widget library -->
+      <aside class="widget-library">
+        <div class="lib-section">
+          <div class="lib-eyebrow">Active widgets <span class="count">11</span></div>
+          <div class="widget-item selected" data-widget="hero_monogram">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">⊙</div>
+            <div class="info">
+              <div class="name">Hero Monogram</div>
+              <div class="tier pro">Basic · Pro avail.</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">✎</div>
+            <div class="info">
+              <div class="name">Greeting</div>
+              <div class="tier">Basic · video</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item" data-widget="our_story">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">❦</div>
+            <div class="info">
+              <div class="name">Our Story</div>
+              <div class="tier pro">Basic · Pro avail.</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">⏱</div>
+            <div class="info">
+              <div class="name">Countdown</div>
+              <div class="tier">Basic</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item" data-widget="qr_code">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">▤</div>
+            <div class="info">
+              <div class="name">QR Code</div>
+              <div class="tier">Basic</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">✓</div>
+            <div class="info">
+              <div class="name">RSVP</div>
+              <div class="tier">Basic · multi-event</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">📅</div>
+            <div class="info">
+              <div class="name">Event Details</div>
+              <div class="tier">Basic · cal.links</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">📍</div>
+            <div class="info">
+              <div class="name">Venue</div>
+              <div class="tier">Basic · Waze</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">⌚</div>
+            <div class="info">
+              <div class="name">Schedule</div>
+              <div class="tier pro">Basic · Pro avail.</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">👗</div>
+            <div class="info">
+              <div class="name">Dress Code · Do/Don't</div>
+              <div class="tier">Basic</div>
+            </div>
+            <span class="visibility">👁</span>
+          </div>
+          <div class="widget-item hidden">
+            <span class="drag">⋮⋮</span>
+            <div class="icn">✦</div>
+            <div class="info">
+              <div class="name">Photo Moments · Savour</div>
+              <div class="tier">Basic</div>
+            </div>
+            <span class="visibility">⊘</span>
+          </div>
+        </div>
+
+        <div class="lib-section">
+          <div class="lib-eyebrow">Add widget</div>
+          <button class="add-widget-btn">＋ Browse widget library</button>
+        </div>
+
+        <div class="lib-section">
+          <div class="lib-eyebrow">Pro upgrades</div>
+          <div style="background:linear-gradient(135deg,var(--surface) 0%,var(--pro-gold-soft) 240%);border:1px solid var(--pro-gold);border-radius:10px;padding:12px;font-size:11px;line-height:1.5;color:var(--ink-soft);">
+            <strong style="color:var(--pro-gold);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;display:block;margin-bottom:4px;">PRO BUNDLE · ₱199</strong>
+            <strong style="color:var(--ink);display:block;font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:500;margin-bottom:4px;">All 3 Pro upgrades</strong>
+            Hero animation + Our Story scroll + Schedule live highlight. Save ₱98 vs ₱99 each.
+            <button style="display:block;width:100%;margin-top:10px;background:var(--pro-gold);color:#fff;font-size:12px;font-weight:600;padding:8px;border-radius:999px;">Upgrade bundle →</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER: Live preview -->
+      <div class="preview-pane">
+        <div class="preview-toolbar">
+          <div class="preview-toolbar-left">
+            <span class="preview-toolbar-eyebrow">Live preview</span>
+            <div class="preview-toolbar-toggle">
+              <button class="active">Mobile</button>
+              <button>Tablet</button>
+              <button>Desktop</button>
+            </div>
+          </div>
+          <div class="preview-toolbar-actions">
+            <button>↻ Refresh</button>
+            <button>⤢ Open full</button>
+          </div>
+        </div>
+        <div class="preview-stage">
+          <div class="preview-frame">
+            <!-- Hero Monogram (selected) -->
+            <div class="pv-section selected-widget">
+              <span class="selected-tag">⬤ Editing</span>
+              <div class="pv-eyebrow">You are invited</div>
+              <div class="pv-monogram">M&amp;J</div>
+              <div class="pv-names">Maria <em>&amp;</em> Juan</div>
+              <div class="pv-date">Oct 24, 2026 · QC</div>
+            </div>
+
+            <!-- Greeting -->
+            <div class="pv-section">
+              <div class="pv-greeting">Hi, <strong>Carla.</strong></div>
+              <div class="pv-greeting-msg">Maria &amp; Juan would love to celebrate with you on October 24th.</div>
+              <!-- Optional couple-uploaded video greeting (Basic — included free) -->
+              <div style="margin-top:14px;background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden;max-width:280px;margin-left:auto;margin-right:auto;">
+                <div style="aspect-ratio:16/9;background:linear-gradient(135deg,#6E89AD 0%,#C97B4B 100%);display:grid;place-items:center;position:relative;">
+                  <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.95);display:grid;place-items:center;color:var(--accent-deep);font-size:12px;">▶</div>
+                  <div style="position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;letter-spacing:0.04em;">0:18</div>
+                </div>
+                <div style="padding:6px 10px;font-size:10px;color:var(--ink-faint);font-family:'DM Mono',monospace;letter-spacing:0.06em;text-align:left;">A NOTE FROM US ✦ video</div>
+              </div>
+            </div>
+
+            <!-- Our Story (new in 0003) -->
+            <div class="pv-section">
+              <div class="pv-eyebrow">Our story</div>
+              <div class="pv-section-title">How we got here</div>
+              <div style="font-size:11px;color:var(--ink-soft);line-height:1.55;margin:0 auto 14px;max-width:340px;">
+                The short version of seven years and one very loud "yes."
+              </div>
+              <!-- Timeline of moments -->
+              <div style="display:flex;flex-direction:column;gap:10px;max-width:380px;margin:0 auto;text-align:left;">
+                <div style="display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;">
+                  <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,#E8C9B0 0%,#C97B4B 100%);flex-shrink:0;"></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--accent-deep);text-transform:uppercase;">Spring 2019</div>
+                    <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:14px;line-height:1.2;margin:2px 0 2px;">A friend's birthday</div>
+                    <div style="font-size:11px;color:var(--ink-soft);line-height:1.4;">We met over a shared bowl of sisig and an unfortunate karaoke duet.</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;">
+                  <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,#9DBFA7 0%,#5B7C6A 100%);flex-shrink:0;"></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--accent-deep);text-transform:uppercase;">Summer 2022</div>
+                    <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:14px;line-height:1.2;margin:2px 0 2px;">First trip together</div>
+                    <div style="font-size:11px;color:var(--ink-soft);line-height:1.4;">Siargao. Three flat tires, two storms, and one very obvious "this is it."</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;">
+                  <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,#C8807F 0%,#8C4A28 100%);flex-shrink:0;"></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--accent-deep);text-transform:uppercase;">Dec 24, 2025</div>
+                    <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:14px;line-height:1.2;margin:2px 0 2px;">The proposal</div>
+                    <div style="font-size:11px;color:var(--ink-soft);line-height:1.4;">Noche Buena, the family kitchen, and a ring that took a year to design.</div>
+                  </div>
+                </div>
+              </div>
+              <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--ink-soft);margin-top:14px;max-width:340px;margin-left:auto;margin-right:auto;line-height:1.45;">
+                And here we are — asking you to celebrate with us.
+              </div>
+            </div>
+
+            <!-- Countdown -->
+            <div class="pv-section">
+              <div class="pv-eyebrow">Until we say "I do"</div>
+              <div class="pv-countdown">
+                <div class="pv-countdown-box"><div class="pv-countdown-num">169</div><div class="pv-countdown-label">Days</div></div>
+                <div class="pv-countdown-box"><div class="pv-countdown-num">14</div><div class="pv-countdown-label">Hrs</div></div>
+                <div class="pv-countdown-box"><div class="pv-countdown-num">32</div><div class="pv-countdown-label">Min</div></div>
+                <div class="pv-countdown-box"><div class="pv-countdown-num">18</div><div class="pv-countdown-label">Sec</div></div>
+              </div>
+            </div>
+
+            <!-- QR Code -->
+            <div class="pv-section">
+              <div class="pv-eyebrow">Your wedding QR</div>
+              <div class="pv-qr"><div class="pv-qr-pattern"></div><div class="pv-qr-monogram"><span class="mark">M&amp;J</span></div></div>
+            </div>
+
+            <!-- RSVP -->
+            <div class="pv-section">
+              <div class="pv-eyebrow">RSVP · pending</div>
+              <div class="pv-section-title">Will you be there?</div>
+              <div class="pv-rsvp-buttons">
+                <button class="pv-rsvp-btn">✓ Going</button>
+                <button class="pv-rsvp-btn">? Maybe</button>
+                <button class="pv-rsvp-btn">✕ Can't</button>
+              </div>
+            </div>
+
+            <!-- Event Details -->
+            <div class="pv-section">
+              <div class="pv-eyebrow">When &amp; where</div>
+              <div class="pv-event-details">
+                <div class="k">Date</div><div class="v">Sat, Oct 24, 2026</div>
+                <div class="k">Ceremony</div><div class="v">3 PM · Sto. Domingo</div>
+                <div class="k">Reception</div><div class="v">6 PM · Diamond Hotel</div>
+                <div class="k">Your role</div><div class="v">Maid of Honor</div>
+              </div>
+            </div>
+
+            <!-- Venue -->
+            <div class="pv-section">
+              <div class="pv-eyebrow">Venues</div>
+              <div class="pv-venue-grid">
+                <div class="pv-venue-card">
+                  <div class="pv-venue-photo"></div>
+                  <div class="pv-venue-body">
+                    <div class="pv-venue-time">3 PM · Ceremony</div>
+                    <div class="pv-venue-name">Sto. Domingo</div>
+                  </div>
+                </div>
+                <div class="pv-venue-card">
+                  <div class="pv-venue-photo r"></div>
+                  <div class="pv-venue-body">
+                    <div class="pv-venue-time">6 PM · Reception</div>
+                    <div class="pv-venue-name">Diamond Hotel</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="pv-section">
+              <div class="pv-eyebrow">Run of show</div>
+              <div class="pv-schedule">
+                <div class="pv-schedule-item"><span class="time">3:00 PM</span><span class="ttl">Nuptial Mass</span></div>
+                <div class="pv-schedule-item"><span class="time">5:30 PM</span><span class="ttl">Cocktails</span></div>
+                <div class="pv-schedule-item"><span class="time">6:00 PM</span><span class="ttl">Dinner reception</span></div>
+                <div class="pv-schedule-item"><span class="time">9:00 PM</span><span class="ttl">Dancing &amp; toasts</span></div>
+              </div>
+            </div>
+
+            <!-- Dress Code -->
+            <div class="pv-section">
+              <div class="pv-eyebrow">Dress code</div>
+              <div class="pv-section-title">Look magical</div>
+              <div class="pv-dress-grid">
+                <div class="pv-dress-col do">
+                  <h5>Do</h5>
+                  Long gown · Tuxedo<br>Sparkle welcome
+                </div>
+                <div class="pv-dress-col dont">
+                  <h5>Don't</h5>
+                  No barong<br>No white · No casual
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Inspector -->
+      <aside class="inspector">
+
+        <!-- ===== Inspector content: HERO MONOGRAM (default) ===== -->
+        <div data-inspector="hero_monogram">
+          <div class="inspector-head">
+            <div class="inspector-eyebrow">Editing widget</div>
+            <h3 class="inspector-title">Hero Monogram</h3>
+            <div class="inspector-tier-toggle">
+              <button class="active basic">⊙ Basic <span class="pro-price">included</span></button>
+              <button>✦ Pro <span class="pro-price">+₱99</span></button>
+            </div>
+          </div>
+
+          <div class="inspector-body">
+
+            <!-- Source toggle: Auto-generated vs Upload -->
+            <div class="field-group">
+              <h5>Monogram source</h5>
+              <div style="display:inline-flex;background:var(--page-bg-soft);border:1px solid var(--rule);border-radius:999px;padding:3px;width:100%;">
+                <button data-mono-source="auto" class="active" style="flex:1;font-size:12px;font-weight:600;padding:8px 12px;border-radius:999px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;">
+                  <span style="font-size:10px;">⚙</span>
+                  Auto-generated
+                </button>
+                <button data-mono-source="upload" style="flex:1;font-size:12px;font-weight:600;padding:8px 12px;border-radius:999px;background:transparent;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;gap:6px;">
+                  <span style="font-size:10px;">⤒</span>
+                  Upload your own
+                </button>
+              </div>
+              <div style="font-size:11px;color:var(--ink-soft);margin-top:8px;line-height:1.5;">
+                Choose <strong>Upload your own</strong> if you've worked with a designer on a custom monogram. We'll use it on the hero, the QR center, the print sheet — everywhere your wedding's identity shows.
+              </div>
+            </div>
+
+            <!-- Auto-generated mode content (default visible) -->
+            <div data-mono-mode="auto">
+            <div class="field-group">
+              <h5>Couple names</h5>
+              <div class="field">
+                <label>Partner A first name</label>
+                <input type="text" value="Maria" />
+              </div>
+              <div class="field">
+                <label>Partner B first name</label>
+                <input type="text" value="Juan" />
+              </div>
+              <div class="field">
+                <label>Connector</label>
+                <select>
+                  <option selected>&amp; (ampersand)</option>
+                  <option>and</option>
+                  <option>at</option>
+                  <option>y</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <h5>Monogram style</h5>
+              <div class="style-grid">
+                <div class="style-card active"><div class="preview">M&amp;J</div><div class="name">Ornamental</div></div>
+                <div class="style-card"><div class="preview geom">M&amp;J</div><div class="name">Geometric</div></div>
+                <div class="style-card"><div class="preview calligraphic">M&amp;J</div><div class="name">Calligraphic</div></div>
+                <div class="style-card"><div class="preview modern">MJ</div><div class="name">Modern</div></div>
+              </div>
+            </div>
+            <div class="field-group">
+              <h5>Motif (24 to choose from)</h5>
+              <div class="motif-grid">
+                <div class="motif-tile active" title="Sampaguita">✿</div>
+                <div class="motif-tile" title="Capiz">◈</div>
+                <div class="motif-tile" title="Ring">○</div>
+                <div class="motif-tile" title="Dove">⌒</div>
+                <div class="motif-tile" title="Calla">❀</div>
+                <div class="motif-tile" title="Palm">𓆭</div>
+                <div class="motif-tile" title="Star">✦</div>
+                <div class="motif-tile">…</div>
+              </div>
+            </div>
+
+            <!-- 25 frames in 5 categories -->
+            <div class="field-group">
+              <h5>Monogram frame (25 to choose from)</h5>
+              <div style="font-size:11px;color:var(--ink-soft);line-height:1.5;margin-bottom:10px;">
+                The shape and decoration that wraps around your monogram. Renders on the hero, the QR center, the print sheet — wherever your monogram appears. Production uses SVG; previews are simplified.
+              </div>
+
+              <div class="frame-cat">Simple</div>
+              <div class="frame-grid">
+                <div class="frame-tile active" title="Circle"><div class="fm fm-circle"></div><div class="frame-tile-name">Circle</div></div>
+                <div class="frame-tile" title="Rounded square"><div class="fm fm-rsq"></div><div class="frame-tile-name">Rounded sq</div></div>
+                <div class="frame-tile" title="Square"><div class="fm fm-sq"></div><div class="frame-tile-name">Square</div></div>
+                <div class="frame-tile" title="Hexagon"><div class="fm fm-hex"></div><div class="frame-tile-name">Hexagon</div></div>
+                <div class="frame-tile" title="Diamond"><div class="fm fm-diamond"></div><div class="frame-tile-name">Diamond</div></div>
+              </div>
+
+              <div class="frame-cat">Geometric</div>
+              <div class="frame-grid">
+                <div class="frame-tile" title="Shield"><div class="fm fm-shield"></div><div class="frame-tile-name">Shield</div></div>
+                <div class="frame-tile" title="Oval"><div class="fm fm-oval"></div><div class="frame-tile-name">Oval</div></div>
+                <div class="frame-tile" title="Double circle"><div class="fm fm-doublecircle"></div><div class="frame-tile-name">Double ring</div></div>
+                <div class="frame-tile" title="Octagon"><div class="fm fm-octagon"></div><div class="frame-tile-name">Octagon</div></div>
+                <div class="frame-tile" title="Square inner"><div class="fm fm-sqinner"></div><div class="frame-tile-name">Inner sq</div></div>
+              </div>
+
+              <div class="frame-cat">Botanical</div>
+              <div class="frame-grid">
+                <div class="frame-tile" title="Sunburst"><div class="fm fm-sunburst"></div><div class="frame-tile-name">Sunburst</div></div>
+                <div class="frame-tile" title="Laurel wreath"><div class="fm fm-laurel"></div><div class="frame-tile-name">Laurel</div></div>
+                <div class="frame-tile" title="Sampaguita wreath"><div class="fm fm-sampaguita"></div><div class="frame-tile-name">Sampaguita</div></div>
+                <div class="frame-tile" title="Palm fronds"><div class="fm fm-palm"></div><div class="frame-tile-name">Palm</div></div>
+                <div class="frame-tile" title="Garden"><div class="fm fm-garden"></div><div class="frame-tile-name">Garden</div></div>
+              </div>
+
+              <div class="frame-cat">Decorative</div>
+              <div class="frame-grid">
+                <div class="frame-tile" title="Calla side branches"><div class="fm fm-calla"></div><div class="frame-tile-name">Calla</div></div>
+                <div class="frame-tile" title="Filigree"><div class="fm fm-filigree"></div><div class="frame-tile-name">Filigree</div></div>
+                <div class="frame-tile" title="Art Deco fan"><div class="fm fm-artdeco"></div><div class="frame-tile-name">Art Deco</div></div>
+                <div class="frame-tile" title="Beaded pearls"><div class="fm fm-beaded"></div><div class="frame-tile-name">Beaded</div></div>
+                <div class="frame-tile" title="Vintage stamp"><div class="fm fm-vintage"></div><div class="frame-tile-name">Vintage</div></div>
+              </div>
+
+              <div class="frame-cat">Filipino Heritage</div>
+              <div class="frame-grid">
+                <div class="frame-tile" title="Rope / nautical"><div class="fm fm-rope"></div><div class="frame-tile-name">Rope</div></div>
+                <div class="frame-tile" title="Capiz shell border"><div class="fm fm-capiz"></div><div class="frame-tile-name">Capiz</div></div>
+                <div class="frame-tile" title="Baybayin script"><div class="fm fm-baybayin"></div><div class="frame-tile-name">Baybayin</div></div>
+                <div class="frame-tile" title="Modern Pinoy"><div class="fm fm-modernpinoy"></div><div class="frame-tile-name">Modern Pinoy</div></div>
+                <div class="frame-tile" title="Catholic cross"><div class="fm fm-catholic"></div><div class="frame-tile-name">Catholic</div></div>
+              </div>
+            </div>
+            </div><!-- /data-mono-mode="auto" -->
+
+            <!-- Upload mode content (hidden by default) -->
+            <div data-mono-mode="upload" style="display:none;">
+              <div class="field-group">
+                <h5>Upload your monogram</h5>
+                <div style="background:var(--surface-soft);border:2px dashed var(--rule-strong);border-radius:14px;padding:28px 18px;text-align:center;cursor:pointer;transition:all 0.15s;">
+                  <div style="width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:var(--page-bg-soft);display:grid;place-items:center;font-size:24px;color:var(--ink-faint);">⤒</div>
+                  <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;">Drop your file here</div>
+                  <div style="font-size:11px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;margin-bottom:14px;">or click to browse</div>
+                  <button class="btn ghost" style="font-size:12px;border:1px solid var(--rule-strong);">Choose file</button>
+                </div>
+                <div style="margin-top:12px;padding:12px 14px;background:var(--page-bg-soft);border:1px dashed var(--rule);border-radius:10px;font-size:11px;color:var(--ink-soft);line-height:1.6;">
+                  <strong style="color:var(--ink);display:block;font-size:12px;margin-bottom:4px;">File requirements</strong>
+                  <strong style="color:var(--ink);">SVG</strong> preferred — scales infinitely.<br>
+                  <strong style="color:var(--ink);">PNG</strong> accepted if ≥800×800, transparent or white background.<br>
+                  Square or near-square (10% tolerance). Max 1MB.<br>
+                  JPG / GIF / WebP rejected (lossy at QR-center sizing).
+                </div>
+              </div>
+
+              <!-- Mock "uploaded" state preview (for design demo) -->
+              <div class="field-group">
+                <h5>Currently uploaded</h5>
+                <div style="background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:14px;display:flex;align-items:center;gap:14px;">
+                  <div style="width:64px;height:64px;border-radius:50%;background:var(--surface-soft);border:2px solid var(--accent);display:grid;place-items:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:var(--accent-deep);font-weight:600;">M&amp;J</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px;">maria-juan-monogram.svg</div>
+                    <div style="font-size:10px;color:var(--ink-faint);font-family:'DM Mono',monospace;letter-spacing:0.04em;">SVG · 14 KB · 1024×1024 · uploaded just now</div>
+                    <div style="display:flex;gap:6px;margin-top:8px;">
+                      <button class="btn ghost" style="font-size:11px;padding:5px 10px;">Replace</button>
+                      <button class="btn ghost" style="font-size:11px;padding:5px 10px;color:var(--rsvp-declined);">Remove</button>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top:8px;padding:8px 12px;background:var(--rsvp-attending-soft);border:1px solid rgba(111,167,118,0.35);border-radius:8px;font-size:11px;color:#355C3A;display:flex;align-items:center;gap:8px;">
+                  <span style="font-weight:700;">✓</span>
+                  Looks good — square aspect ratio, clean transparency, fits the QR center cleanly.
+                </div>
+              </div>
+            </div><!-- /data-mono-mode="upload" -->
+
+            <div class="field-group">
+              <h5>Date format</h5>
+              <div class="field">
+                <select>
+                  <option>Long · October 24, 2026</option>
+                  <option>Short · Oct 24, 2026</option>
+                  <option>ISO · 2026-10-24</option>
+                  <option>Filipino · 24 Oktubre 2026</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Size + Position (Basic tier) -->
+            <div class="field-group">
+              <h5>Size on hero</h5>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+                <button style="background:var(--surface);border:1.5px solid var(--rule);border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer;">
+                  <div style="width:14px;height:14px;border:1.5px solid var(--accent-deep);border-radius:50%;margin:0 auto 4px;"></div>
+                  <div style="font-size:10px;font-weight:600;">Small</div>
+                </button>
+                <button style="background:var(--surface);border:1.5px solid var(--rule);border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer;">
+                  <div style="width:20px;height:20px;border:1.5px solid var(--accent-deep);border-radius:50%;margin:0 auto 4px;"></div>
+                  <div style="font-size:10px;font-weight:600;">Medium</div>
+                </button>
+                <button style="background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer;box-shadow:0 0 0 1px var(--accent);">
+                  <div style="width:28px;height:28px;border:1.5px solid var(--accent-deep);border-radius:50%;margin:0 auto 4px;"></div>
+                  <div style="font-size:10px;font-weight:700;color:var(--accent-deep);">Large ✓</div>
+                </button>
+                <button style="background:var(--surface);border:1.5px solid var(--rule);border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer;">
+                  <div style="width:36px;height:36px;border:1.5px solid var(--accent-deep);border-radius:50%;margin:0 auto 4px;"></div>
+                  <div style="font-size:10px;font-weight:600;">Huge</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <h5>Position on hero</h5>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100px;margin:0 auto;">
+                <button style="aspect-ratio:1;background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:14px;color:var(--ink-faint);">↖</button>
+                <button style="aspect-ratio:1;background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:14px;color:var(--ink-faint);">↑</button>
+                <button style="aspect-ratio:1;background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:14px;color:var(--ink-faint);">↗</button>
+                <button style="aspect-ratio:1;background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:14px;color:var(--ink-faint);">←</button>
+                <button style="aspect-ratio:1;background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:14px;color:var(--accent-deep);font-weight:700;">●</button>
+                <button style="aspect-ratio:1;background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:14px;color:var(--ink-faint);">→</button>
+                <button style="aspect-ratio:1;background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:14px;color:var(--ink-faint);">↙</button>
+                <button style="aspect-ratio:1;background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:14px;color:var(--ink-faint);">↓</button>
+                <button style="aspect-ratio:1;background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;cursor:pointer;display:grid;place-items:center;font-size:14px;color:var(--ink-faint);">↘</button>
+              </div>
+              <div style="font-size:10px;color:var(--ink-faint);text-align:center;margin-top:6px;font-family:'DM Mono',monospace;letter-spacing:0.06em;">Center selected</div>
+            </div>
+
+            <!-- Pro Upgrades (multiple toggleable Pro tiers) -->
+            <div class="field-group">
+              <h5>Pro upgrades · pick &amp; mix</h5>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <!-- Trace-then-morph animation -->
+                <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,var(--surface) 0%,var(--pro-gold-soft) 240%);border:1px solid var(--pro-gold);border-radius:10px;cursor:pointer;">
+                  <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--pro-gold);" />
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink);">Trace-then-morph animation</div>
+                    <div style="font-size:10px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;">Names write in, then morph into the monogram</div>
+                  </div>
+                  <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:14px;color:var(--accent-deep);">₱99</div>
+                </label>
+
+                <!-- Glow effect -->
+                <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;cursor:pointer;">
+                  <input type="checkbox" style="width:16px;height:16px;" />
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink);">Glow effect</div>
+                    <div style="font-size:10px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;">Subtle pulsing halo around the monogram</div>
+                  </div>
+                  <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:14px;color:var(--accent-deep);">₱99</div>
+                </label>
+
+                <!-- Gold-leaf shimmer -->
+                <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;cursor:pointer;">
+                  <input type="checkbox" style="width:16px;height:16px;" />
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink);">Gold-leaf shimmer</div>
+                    <div style="font-size:10px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;">Metallic gold finish that catches light</div>
+                  </div>
+                  <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:14px;color:var(--accent-deep);">₱149</div>
+                </label>
+
+                <!-- Foil press effect -->
+                <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;cursor:pointer;">
+                  <input type="checkbox" style="width:16px;height:16px;" />
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink);">Foil press metallic frame</div>
+                    <div style="font-size:10px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;">Stamped-foil look on the chosen frame</div>
+                  </div>
+                  <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:14px;color:var(--accent-deep);">₱149</div>
+                </label>
+
+                <!-- Frame draw-on animation -->
+                <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;cursor:pointer;">
+                  <input type="checkbox" style="width:16px;height:16px;" />
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink);">Frame draw-on animation</div>
+                    <div style="font-size:10px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;">Frame draws itself in stroke-by-stroke</div>
+                  </div>
+                  <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:14px;color:var(--accent-deep);">₱99</div>
+                </label>
+
+                <!-- Pro All-In Bundle (Hero Monogram) -->
+                <div style="margin-top:6px;padding:12px;background:linear-gradient(135deg,#FBF8F3 0%,var(--pro-gold-soft) 240%);border:1.5px solid var(--pro-gold);border-radius:10px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                    <div style="flex:1;">
+                      <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.16em;color:var(--pro-gold);text-transform:uppercase;">HERO MONOGRAM PRO BUNDLE</div>
+                      <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:var(--ink);margin-top:2px;">All 5 Pro upgrades · ₱449</div>
+                      <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">Saves ₱146 vs buying individually (₱595 total: 3× ₱99 + 2× ₱149).</div>
+                    </div>
+                    <button style="background:var(--pro-gold);color:#fff;font-size:13px;font-weight:600;padding:10px 16px;border-radius:999px;flex-shrink:0;">Upgrade →</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- The original single-Pro upsell card stays as the active demo for the trace-then-morph animation -->
+            <div class="pro-upsell">
+              <div class="pro-upsell-title">Trace your names<br>into the monogram</div>
+              <div class="pro-upsell-desc">"Maria" writes itself across the page in italic script. "Juan" follows. Both then morph and condense into the M&amp;J monogram, and the frame draws itself around. A 5-second cinematic title sequence at the top of every guest's invitation.</div>
+              <div class="pro-preview-card">
+                <div class="pro-preview-stage">
+                  <div class="trace-name maria">Maria</div>
+                  <div class="trace-name juan">Juan</div>
+                  <div class="trace-monogram">M&amp;J</div>
+                  <svg class="trace-frame" viewBox="0 0 70 70">
+                    <circle cx="35" cy="35" r="33" />
+                  </svg>
+                </div>
+                <div class="pro-anim-timeline">
+                  <span>Trace · 0–2s</span>
+                  <span>Morph · 3–4s</span>
+                  <span>Frame · 4–5s</span>
+                </div>
+                <div class="pro-preview-label">↻ Auto-looping · 6s</div>
+              </div>
+              <div class="pro-upsell-cta">
+                <div class="pro-price-tag">₱99<em>one-time · this widget</em></div>
+                <button class="btn-upgrade">Upgrade →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Inspector content: QR CODE ===== -->
+        <div data-inspector="qr_code" style="display:none;">
+          <div class="inspector-head">
+            <div class="inspector-eyebrow">Editing widget</div>
+            <h3 class="inspector-title">QR Code</h3>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.5;">
+              Basic tier · structural QR rules (level H · ≥4 module quiet zone · ≤25% logo coverage) are renderer-locked for scan reliability.
+            </div>
+          </div>
+          <div class="inspector-body">
+
+            <!-- Color mode -->
+            <div class="field-group">
+              <h5>Color mode</h5>
+              <div class="style-grid" style="grid-template-columns: 1fr;">
+                <div class="style-card active" style="text-align:left;padding:14px 14px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--page-bg-soft);display:grid;place-items:center;font-size:14px;color:var(--accent-deep);">✦</div>
+                    <div>
+                      <div class="name" style="margin-bottom:2px;">Auto from palette</div>
+                      <div style="font-size:10px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;">picks darkest + lightest swatches</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="style-card" style="text-align:left;padding:14px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--page-bg-soft);display:grid;place-items:center;font-size:14px;">◈</div>
+                    <div>
+                      <div class="name" style="margin-bottom:2px;">Style preset</div>
+                      <div style="font-size:10px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;">6 pre-validated combos</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="style-card" style="text-align:left;padding:14px;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--page-bg-soft);display:grid;place-items:center;font-size:14px;">⊙</div>
+                    <div>
+                      <div class="name" style="margin-bottom:2px;">Custom colors</div>
+                      <div style="font-size:10px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;">pick your own · contrast-validated</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Auto-derived preview (since palette is locked in this mock) -->
+            <div class="field-group">
+              <h5>Auto-derived (palette locked ✓)</h5>
+              <div style="background:var(--page-bg-soft);border:1px solid var(--rule);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px;">
+                <div style="width:60px;height:60px;border-radius:8px;background:#FAF6F0;border:1px solid var(--rule);display:grid;place-items:center;position:relative;">
+                  <div style="width:46px;height:46px;background:linear-gradient(45deg,#1F2A3F 25%,transparent 25%),linear-gradient(-45deg,#1F2A3F 25%,transparent 25%);background-size:8px 8px;background-color:#FAF6F0;border-radius:2px;"></div>
+                </div>
+                <div style="flex:1;font-size:11px;line-height:1.5;color:var(--ink-soft);">
+                  <strong style="color:var(--ink);display:block;font-size:12px;margin-bottom:2px;">Midnight on Cream</strong>
+                  Pattern <code style="font-family:'DM Mono',monospace;font-size:10px;">#1F2A3F</code> · Background <code style="font-family:'DM Mono',monospace;font-size:10px;">#FAF6F0</code><br>
+                  Contrast <strong style="color:var(--rsvp-attending);">12.4 : 1 ✓</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live contrast meter (would show on Custom mode) -->
+            <div class="field-group">
+              <h5>Custom override · contrast guard</h5>
+              <div class="field">
+                <label>Pattern color</label>
+                <input type="text" value="#1F2A3F" />
+              </div>
+              <div class="field">
+                <label>Background color</label>
+                <input type="text" value="#FAF6F0" />
+              </div>
+              <div style="margin-top:6px;padding:10px 12px;background:var(--rsvp-attending-soft);border:1px solid rgba(111,167,118,0.35);border-radius:8px;display:flex;align-items:center;gap:10px;">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--rsvp-attending);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;">✓</div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:600;color:#355C3A;">Contrast 12.4 : 1 — scan-safe</div>
+                  <div style="font-size:10px;color:#355C3A;opacity:0.8;font-family:'DM Mono',monospace;">requires ≥4:1 to save · ≥7:1 recommended</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card frame -->
+            <div class="field-group">
+              <h5>Card frame</h5>
+              <div class="field">
+                <label>Corner radius</label>
+                <input type="text" value="16px" />
+              </div>
+              <div class="field">
+                <label>Shadow</label>
+                <select>
+                  <option>None</option>
+                  <option selected>Subtle</option>
+                  <option>Soft</option>
+                  <option>Lifted</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Border</label>
+                <select>
+                  <option selected>None</option>
+                  <option>Thin · 1px hairline</option>
+                  <option>Decorative · braided edge</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="field-group">
+              <h5>Action buttons under QR</h5>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;cursor:pointer;">
+                  <input type="checkbox" checked /> ⤓ Save to phone
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;cursor:pointer;">
+                  <input type="checkbox" checked /> 📋 Copy link
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;cursor:pointer;">
+                  <input type="checkbox" checked /> 📱 Add to wallet
+                </label>
+              </div>
+            </div>
+
+            <!-- Hint text -->
+            <div class="field-group">
+              <h5>Hint text under QR</h5>
+              <div class="field">
+                <textarea>Show this at the wedding so shutterbugs can tag your photos and our suppliers can mark your souvenir as claimed.</textarea>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="inspector-footer">
+          <span class="auto-save">⬤ Auto-saved</span>
+          <button class="btn ghost" style="font-size:12px;">Reset to default</button>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================== -->
+<!-- MOBILE FRAME -->
+<!-- ============================================================== -->
+<div class="frame-wrap">
+  <div class="frame-label">Mobile · Couple's editor · 390 × 844</div>
+  <section class="frame frame-mobile">
+    <div class="mobile-screen">
+      <div class="mobile-notch"></div>
+      <div class="mobile-status">
+        <span>9:41</span>
+        <div class="status-icons">
+          <span style="font-size:11px;">●●●●●</span>
+          <span style="font-size:11px;">📶</span>
+          <div class="battery"><span></span></div>
+        </div>
+      </div>
+
+      <div class="m-editor-top">
+        <button class="m-editor-back">‹</button>
+        <div class="m-editor-titlewrap">
+          <div class="m-editor-title">Customize</div>
+          <div class="m-editor-sub">Maria &amp; Juan · auto-saved</div>
+        </div>
+        <button class="m-editor-publish">Publish</button>
+      </div>
+
+      <div class="m-preview-stage" style="overflow:visible;">
+        <div class="m-preview-frame">
+          <div class="pv-section selected-widget">
+            <span class="selected-tag">⬤ Editing</span>
+            <div class="pv-eyebrow">You are invited</div>
+            <div class="pv-monogram">M&amp;J</div>
+            <div class="pv-names">Maria <em>&amp;</em> Juan</div>
+            <div class="pv-date">Oct 24, 2026</div>
+          </div>
+          <div class="pv-section">
+            <div class="pv-greeting">Hi, <strong>Carla.</strong></div>
+          </div>
+          <div class="pv-section">
+            <div class="pv-eyebrow">Our story</div>
+            <div class="pv-section-title" style="font-size:18px;">How we got here</div>
+            <div style="display:flex;flex-direction:column;gap:6px;text-align:left;margin-top:6px;">
+              <div style="display:flex;gap:8px;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:7px 8px;">
+                <div style="width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,#E8C9B0,#C97B4B);flex-shrink:0;"></div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.1em;color:var(--accent-deep);text-transform:uppercase;">Spring 2019</div>
+                  <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:11px;line-height:1.15;">A friend's birthday</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:7px 8px;">
+                <div style="width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,#C8807F,#8C4A28);flex-shrink:0;"></div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.1em;color:var(--accent-deep);text-transform:uppercase;">Dec 24, 2025</div>
+                  <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:11px;line-height:1.15;">The proposal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pv-section">
+            <div class="pv-eyebrow">Until we say "I do"</div>
+            <div class="pv-countdown">
+              <div class="pv-countdown-box"><div class="pv-countdown-num">169</div><div class="pv-countdown-label">D</div></div>
+              <div class="pv-countdown-box"><div class="pv-countdown-num">14</div><div class="pv-countdown-label">H</div></div>
+              <div class="pv-countdown-box"><div class="pv-countdown-num">32</div><div class="pv-countdown-label">M</div></div>
+              <div class="pv-countdown-box"><div class="pv-countdown-num">18</div><div class="pv-countdown-label">S</div></div>
+            </div>
+          </div>
+          <div class="pv-section">
+            <div class="pv-eyebrow">Your QR</div>
+            <div class="pv-qr"><div class="pv-qr-pattern"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings sheet (slide-up for the selected widget) -->
+      <div class="m-sheet">
+        <div class="m-sheet-handle"></div>
+        <div class="m-sheet-eyebrow">Editing</div>
+        <div class="m-sheet-title">Hero Monogram</div>
+        <div class="m-tier-toggle">
+          <button class="active basic">⊙ Basic</button>
+          <button>✦ Pro · +₱99</button>
+        </div>
+
+        <div class="field">
+          <label>Couple names</label>
+          <input type="text" value="Maria &amp; Juan" />
+        </div>
+
+        <div class="field-group">
+          <h5>Monogram style</h5>
+          <div class="style-grid">
+            <div class="style-card active">
+              <div class="preview">M&amp;J</div>
+              <div class="name" style="font-size:10px;">Ornamental</div>
+            </div>
+            <div class="style-card">
+              <div class="preview geom">M&amp;J</div>
+              <div class="name" style="font-size:10px;">Geometric</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="m-pro-upsell">
+          <h4>Animate names → monogram</h4>
+          <p>Names slide in and merge on page load. Premium polish that costs nothing on top.</p>
+          <button class="m-pro-upgrade-btn">
+            Upgrade to Pro
+            <span class="price">₱99</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom nav -->
+      <nav class="m-bottom-bar">
+        <button class="m-bottom-tab active">
+          <span class="ic">◉</span>
+          Widgets
+        </button>
+        <button class="m-bottom-tab">
+          <span class="ic">👁</span>
+          Preview
+        </button>
+        <button class="m-bottom-tab">
+          <span class="ic">⚙</span>
+          Settings
+        </button>
+      </nav>
+
+    </div>
+  </section>
+</div>
+
+</main>
+
+<!-- Toast + modal scaffolding -->
+<div id="toast-host" style="position:fixed;left:50%;bottom:32px;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;"></div>
+
+<div id="modal-host" style="position:fixed;inset:0;z-index:9998;display:none;align-items:center;justify-content:center;background:rgba(20,18,16,0.55);backdrop-filter:blur(6px);">
+  <div id="modal-card" style="background:var(--surface);border-radius:14px;padding:28px;max-width:440px;width:90%;box-shadow:var(--shadow-lg);font-family:'Manrope',sans-serif;">
+    <div id="modal-eyebrow" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--pro-gold);margin-bottom:8px;">PRO PURCHASE</div>
+    <h3 id="modal-title" style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:24px;color:var(--ink);margin-bottom:8px;">Buy Pro</h3>
+    <p id="modal-desc" style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:18px;">Spend tokens from your wallet to unlock this Pro upgrade.</p>
+    <div id="modal-priceline" style="background:var(--page-bg-soft);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--ink-soft);">Cost</span>
+        <span id="modal-price" style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:20px;color:var(--ink);">₱100</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+        <span style="font-size:11px;color:var(--ink-faint);font-family:'DM Mono',monospace;letter-spacing:0.06em;">Wallet balance</span>
+        <span id="modal-wallet" style="font-size:11px;color:var(--ink-soft);font-family:'DM Mono',monospace;">42,000 tokens · ≈₱1,400</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button id="modal-cancel" style="background:transparent;color:var(--ink-soft);font-size:13px;font-weight:500;padding:10px 16px;border-radius:999px;">Cancel</button>
+      <button id="modal-confirm" style="background:var(--pro-gold);color:#fff;font-size:13px;font-weight:600;padding:10px 22px;border-radius:999px;">Confirm purchase</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .toast-pop {
+    background: rgba(26,26,26,0.92);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 999px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    pointer-events: auto;
+    animation: toastIn 0.18s ease-out, toastOut 0.18s ease-in 1.6s forwards;
+  }
+  .toast-pop.success { background: var(--rsvp-attending); }
+  .toast-pop.pro { background: var(--pro-gold); }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { to { opacity: 0; transform: translateY(8px); } }
+  .pro-badge-dynamic {
+    display:inline-flex; align-items:center; gap:4px;
+    background:var(--pro-gold); color:#fff;
+    font-family:'DM Mono',monospace; font-size:9px; font-weight:700;
+    letter-spacing:0.16em; padding:3px 8px; border-radius:999px;
+    margin-left:6px;
+  }
+  .pro-watermark {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(184,137,62,0.92); color: #fff;
+    font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700;
+    letter-spacing: 0.14em; padding: 3px 8px; border-radius: 4px;
+    pointer-events: none;
+  }
+  .pro-anim-shimmer {
+    animation: proShimmer 2.4s ease-in-out infinite;
+  }
+  @keyframes proShimmer {
+    0%, 100% { filter: drop-shadow(0 0 0 rgba(184,137,62,0)); }
+    50%      { filter: drop-shadow(0 0 14px rgba(184,137,62,0.55)); }
+  }
+  .btn.dimmed { opacity: 0.65; }
+</style>
+
+<script>
+  // ---------------- State ----------------
+  const state = {
+    view: 'both',
+    selectedWidget: 'hero_monogram',
+    pro: { hero: false, story: false, schedule: false }, // bundle = all three true
+    animations: { hero: false, story: false, schedule: false },
+    deepLinks: { hero: false, story: false, schedule: false },
+    layout: { hero: 'centered', story: 'timeline', schedule: 'list' },
+    theme: { hero: 'ornamental', story: 'classic', schedule: 'minimal' },
+    coupleNames: { a: 'Maria', b: 'Juan' },
+    eventDate: 'Oct 24, 2026',
+    walletTokens: 42000,
+  };
+
+  // ---------------- Toast helper ----------------
+  function toast(msg, kind) {
+    const host = document.getElementById('toast-host');
+    if (!host) return;
+    const el = document.createElement('div');
+    el.className = 'toast-pop' + (kind ? ' ' + kind : '');
+    el.textContent = msg;
+    host.appendChild(el);
+    setTimeout(() => el.remove(), 1900);
+  }
+
+  // ---------------- Modal helper ----------------
+  const modalHost = document.getElementById('modal-host');
+  let modalOnConfirm = null;
+  function openModal({ eyebrow, title, desc, price, onConfirm }) {
+    document.getElementById('modal-eyebrow').textContent = eyebrow || 'PRO PURCHASE';
+    document.getElementById('modal-title').textContent = title || 'Buy Pro';
+    document.getElementById('modal-desc').textContent = desc || '';
+    document.getElementById('modal-price').textContent = price || '₱100';
+    modalOnConfirm = onConfirm || null;
+    modalHost.style.display = 'flex';
+  }
+  function closeModal() {
+    modalHost.style.display = 'none';
+    modalOnConfirm = null;
+  }
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-confirm').addEventListener('click', () => {
+    if (modalOnConfirm) modalOnConfirm();
+    closeModal();
+  });
+  modalHost.addEventListener('click', (e) => { if (e.target === modalHost) closeModal(); });
+
+  // ---------------- Apply Pro state visually ----------------
+  function applyProState() {
+    // Update tier toggle buttons
+    document.querySelectorAll('.inspector-tier-toggle, .m-tier-toggle').forEach(group => {
+      const ctx = group.closest('[data-inspector]');
+      const widgetId = ctx ? ctx.dataset.inspector : 'hero_monogram';
+      const proKey = widgetId.includes('story') ? 'story' : (widgetId.includes('schedule') ? 'schedule' : 'hero');
+      // mark Pro pill if owned
+      const buttons = group.querySelectorAll('button');
+      if (state.pro[proKey]) {
+        buttons.forEach(b => {
+          if (b.textContent.includes('Pro')) {
+            if (!b.querySelector('.pro-badge-dynamic')) {
+              const badge = document.createElement('span');
+              badge.className = 'pro-badge-dynamic';
+              badge.textContent = 'OWNED';
+              b.appendChild(badge);
+            }
+          }
+        });
+      }
+    });
+
+    // Add Pro badge in widget library item names
+    document.querySelectorAll('.widget-item').forEach(item => {
+      const w = item.dataset.widget;
+      const proKey = w === 'our_story' ? 'story' : (w === 'schedule' ? 'schedule' : (w === 'hero_monogram' ? 'hero' : null));
+      if (!proKey) return;
+      const tier = item.querySelector('.tier');
+      if (state.pro[proKey] && tier && !tier.querySelector('.pro-badge-dynamic')) {
+        const badge = document.createElement('span');
+        badge.className = 'pro-badge-dynamic';
+        badge.textContent = 'PRO';
+        tier.appendChild(badge);
+      }
+    });
+
+    // Watermark on previews when not Pro for that widget; remove when Pro
+    document.querySelectorAll('.preview-frame, .m-preview-frame').forEach(frame => {
+      // Add watermark per-section based on state
+      frame.querySelectorAll('.pv-section').forEach((section, idx) => {
+        section.style.position = 'relative';
+        // Identify which widget by content
+        const text = section.textContent.toLowerCase();
+        let key = null;
+        if (section.querySelector('.pv-monogram') || text.includes('you are invited')) key = 'hero';
+        else if (text.includes('our story')) key = 'story';
+        else if (text.includes('run of show')) key = 'schedule';
+        const existing = section.querySelector('.pro-watermark');
+        if (key && state.pro[key]) {
+          if (existing) existing.remove();
+          if (state.animations[key]) section.classList.add('pro-anim-shimmer');
+          else section.classList.remove('pro-anim-shimmer');
+        }
+      });
+    });
+  }
+
+  // ---------------- View toggle (existing) ----------------
+  document.querySelectorAll('[data-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-toggle]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.body.dataset.view = btn.dataset.toggle;
+      state.view = btn.dataset.toggle;
+    });
+  });
+
+  // ---------------- Tier toggle (Basic / Pro) ----------------
+  document.querySelectorAll('.inspector-tier-toggle button, .m-tier-toggle button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const group = btn.parentElement;
+      const ctx = group.closest('[data-inspector]');
+      const widgetId = ctx ? ctx.dataset.inspector : 'hero_monogram';
+      const proKey = widgetId.includes('story') ? 'story' : (widgetId.includes('schedule') ? 'schedule' : 'hero');
+      const isPro = btn.textContent.includes('Pro');
+
+      group.querySelectorAll('button').forEach(b => b.classList.remove('active', 'basic', 'pro'));
+      btn.classList.add('active');
+      btn.classList.add(isPro ? 'pro' : 'basic');
+
+      if (isPro && !state.pro[proKey]) {
+        // Show buy CTA inline + open buy modal
+        const widgetTitle = widgetId.includes('story') ? 'Our Story Pro' : (widgetId.includes('schedule') ? 'Schedule Pro' : 'Hero Monogram Pro');
+        openModal({
+          eyebrow: 'PRO UPGRADE · ' + (proKey).toUpperCase(),
+          title: 'Buy ' + widgetTitle,
+          desc: 'Unlock animations, deep-link sharing, and remove the watermark on the preview.',
+          price: '₱100 (3,000 tokens)',
+          onConfirm: () => {
+            state.pro[proKey] = true;
+            state.walletTokens -= 3000;
+            applyProState();
+            toast(widgetTitle + ' unlocked', 'pro');
+          }
+        });
+      }
+    });
+  });
+
+
+  // Monogram source toggle (Auto-generated vs Upload your own)
+  document.querySelectorAll('[data-mono-source]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const source = btn.dataset.monoSource;
+      // Toggle button state
+      document.querySelectorAll('[data-mono-source]').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = 'transparent';
+        b.style.color = 'var(--ink-soft)';
+      });
+      btn.classList.add('active');
+      btn.style.background = 'var(--ink)';
+      btn.style.color = '#fff';
+      // Toggle mode panels
+      document.querySelectorAll('[data-mono-mode]').forEach(p => {
+        p.style.display = (p.dataset.monoMode === source) ? 'block' : 'none';
+      });
+    });
+  });
+
+  // Widget item select — swaps inspector content based on data-widget attribute
+  document.querySelectorAll('.widget-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.widget-item').forEach(i => i.classList.remove('selected'));
+      item.classList.add('selected');
+      const widgetType = item.dataset.widget;
+      // Show matching inspector content, hide others
+      document.querySelectorAll('[data-inspector]').forEach(panel => {
+        panel.style.display = (panel.dataset.inspector === widgetType) ? 'block' : 'none';
+      });
+      // If no matching inspector exists for this widget, fall back to hero_monogram
+      const matched = document.querySelector(`[data-inspector="${widgetType}"]`);
+      if (!matched) {
+        document.querySelector('[data-inspector="hero_monogram"]').style.display = 'block';
+      }
+    });
+  });
+
+  // Style card pick
+  document.querySelectorAll('.style-grid').forEach(grid => {
+    grid.querySelectorAll('.style-card').forEach(c => {
+      c.addEventListener('click', () => {
+        grid.querySelectorAll('.style-card').forEach(o => o.classList.remove('active'));
+        c.classList.add('active');
+      });
+    });
+  });
+
+  // Frame tile pick — single selection across all 25 tiles
+  document.querySelectorAll('.frame-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      document.querySelectorAll('.frame-tile').forEach(t => t.classList.remove('active'));
+      tile.classList.add('active');
+    });
+  });
+
+  // Motif pick
+  document.querySelectorAll('.motif-grid').forEach(grid => {
+    grid.querySelectorAll('.motif-tile').forEach(t => {
+      t.addEventListener('click', () => {
+        grid.querySelectorAll('.motif-tile').forEach(o => o.classList.remove('active'));
+        t.classList.add('active');
+      });
+    });
+  });
+
+  // ---------------- Pro Bundle button ----------------
+  document.querySelectorAll('button').forEach(btn => {
+    const txt = (btn.textContent || '').trim();
+    if (/Upgrade bundle/i.test(txt) || /All 3 Pro upgrades/i.test(txt)) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openModal({
+          eyebrow: 'PRO BUNDLE',
+          title: 'All 3 Pro upgrades',
+          desc: 'Hero Monogram, Our Story, and Schedule — all Pro at once. Save ₱100 vs buying individually.',
+          price: '₱200 (6,000 tokens)',
+          onConfirm: () => {
+            state.pro.hero = true;
+            state.pro.story = true;
+            state.pro.schedule = true;
+            state.walletTokens -= 6000;
+            applyProState();
+            toast('Pro Bundle unlocked — all 3 widgets', 'pro');
+          }
+        });
+      });
+    }
+  });
+
+  // ---------------- Generic Upgrade buttons ----------------
+  document.querySelectorAll('.btn-upgrade, .m-pro-upgrade-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const widget = state.selectedWidget || 'hero_monogram';
+      const proKey = widget.includes('story') ? 'story' : (widget.includes('schedule') ? 'schedule' : 'hero');
+      openModal({
+        eyebrow: 'PRO UPGRADE',
+        title: 'Buy Pro for this widget',
+        desc: 'Unlock animations, deep-link sharing, and remove the preview watermark.',
+        price: '₱100 (3,000 tokens)',
+        onConfirm: () => {
+          state.pro[proKey] = true;
+          state.walletTokens -= 3000;
+          applyProState();
+          toast('Pro unlocked', 'pro');
+        }
+      });
+    });
+  });
+
+  // ---------------- Live preview content edits ----------------
+  // Couple names — update preview as user types
+  document.querySelectorAll('input[type="text"]').forEach(input => {
+    input.addEventListener('input', () => {
+      const lbl = input.previousElementSibling ? input.previousElementSibling.textContent.toLowerCase() : '';
+      if (lbl.includes('partner a')) {
+        state.coupleNames.a = input.value || 'Maria';
+        updatePreview();
+      } else if (lbl.includes('partner b')) {
+        state.coupleNames.b = input.value || 'Juan';
+        updatePreview();
+      } else if (lbl.includes('couple names')) {
+        // mobile combined input
+        const parts = input.value.split(/\s*&\s*|\s+and\s+/i);
+        state.coupleNames.a = parts[0] || 'Maria';
+        state.coupleNames.b = parts[1] || 'Juan';
+        updatePreview();
+      }
+    });
+  });
+  function updatePreview() {
+    const monogram = state.coupleNames.a.charAt(0).toUpperCase() + '&' + state.coupleNames.b.charAt(0).toUpperCase();
+    const namesHtml = state.coupleNames.a + ' <em>&amp;</em> ' + state.coupleNames.b;
+    document.querySelectorAll('.pv-monogram').forEach(el => el.textContent = monogram);
+    document.querySelectorAll('.pv-names').forEach(el => el.innerHTML = namesHtml);
+    document.querySelectorAll('.pv-qr-monogram .mark').forEach(el => el.textContent = monogram);
+  }
+
+  // Textareas (greeting, hint text) → echo into preview
+  document.querySelectorAll('textarea').forEach(ta => {
+    ta.addEventListener('input', () => {
+      // Try to find a matching preview line
+      // Lightweight; just trigger a save banner
+      showSaveBanner();
+    });
+  });
+
+  // ---------------- Save banner ----------------
+  function showSaveBanner() {
+    document.querySelectorAll('.save-state').forEach(el => {
+      el.textContent = '⬤ Saving…';
+      el.style.color = 'var(--accent-deep)';
+      setTimeout(() => {
+        el.textContent = '⬤ All changes saved · just now';
+        el.style.color = '';
+      }, 600);
+    });
+  }
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('change', showSaveBanner);
+  });
+
+  // ---------------- Pro feature checkbox toggles ----------------
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const label = cb.closest('label');
+      if (!label) return;
+      const text = label.textContent.toLowerCase();
+      if (text.includes('animation') || text.includes('morph') || text.includes('shimmer') || text.includes('glow')) {
+        // Treat as animation toggle on Hero
+        state.animations.hero = cb.checked;
+        applyProState();
+        toast(cb.checked ? 'Animation enabled' : 'Animation disabled', 'success');
+      } else if (text.includes('save to phone') || text.includes('copy link') || text.includes('add to wallet')) {
+        toast(cb.checked ? 'Action button shown' : 'Action button hidden', 'success');
+      }
+    });
+  });
+
+  // ---------------- Top-bar buttons (Undo, Redo, Preview, Save, Publish) ----------------
+  document.querySelectorAll('.editor-top-actions .btn, .m-editor-publish, .m-editor-back, .m-bottom-tab').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const txt = (btn.textContent || '').trim();
+      if (/Publish/i.test(txt)) {
+        toast('Invitation published — link copied', 'success');
+        return;
+      }
+      if (/Save draft/i.test(txt)) {
+        showSaveBanner();
+        toast('Draft saved');
+        return;
+      }
+      if (/Preview/i.test(txt)) {
+        toast('Opening guest preview…');
+        return;
+      }
+      if (/Undo|↶/.test(txt)) { toast('Undo'); return; }
+      if (/Redo|↷/.test(txt)) { toast('Redo'); return; }
+      if (/Widgets|Preview|Settings/i.test(txt) && btn.classList.contains('m-bottom-tab')) {
+        document.querySelectorAll('.m-bottom-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        toast(txt + ' tab');
+        return;
+      }
+      if (/‹/.test(txt) || /back/i.test(txt)) { toast('Back to dashboard'); return; }
+    });
+  });
+
+  // ---------------- Add widget / Reset / All other unwired buttons ----------------
+  document.querySelectorAll('.add-widget-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toast('Browse widget library — coming soon');
+    });
+  });
+
+  // Reset to default
+  document.querySelectorAll('.inspector-footer .btn.ghost, .inspector-footer button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const txt = (btn.textContent || '').trim().toLowerCase();
+      if (txt.includes('reset')) {
+        state.coupleNames = { a: 'Maria', b: 'Juan' };
+        // Reset inputs
+        document.querySelectorAll('input[type="text"]').forEach(inp => {
+          const lbl = inp.previousElementSibling ? inp.previousElementSibling.textContent.toLowerCase() : '';
+          if (lbl.includes('partner a')) inp.value = 'Maria';
+          if (lbl.includes('partner b')) inp.value = 'Juan';
+        });
+        updatePreview();
+        toast('Reset to default', 'success');
+      }
+    });
+  });
+
+  // Preview toolbar (Mobile/Tablet/Desktop pill)
+  document.querySelectorAll('.preview-toolbar-toggle button, .preview-toolbar-actions button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const group = btn.parentElement;
+      if (group.classList.contains('preview-toolbar-toggle')) {
+        group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        toast('Preview · ' + btn.textContent.trim());
+      } else {
+        toast(btn.textContent.trim() + ' — coming soon');
+      }
+    });
+  });
+
+  // RSVP buttons in preview
+  document.querySelectorAll('.pv-rsvp-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.pv-rsvp-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      btn.style.background = 'var(--accent)';
+      btn.style.color = '#fff';
+      toast('RSVP preview · ' + btn.textContent.trim());
+    });
+  });
+
+  // Visibility eye toggles
+  document.querySelectorAll('.widget-item .visibility').forEach(eye => {
+    eye.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const item = eye.closest('.widget-item');
+      const isHidden = item.classList.toggle('hidden');
+      eye.textContent = isHidden ? '⊘' : '👁';
+      toast(isHidden ? 'Widget hidden' : 'Widget visible');
+    });
+  });
+
+  // Generic fallback — any button without a handler shows a coming-soon toast
+  document.querySelectorAll('button').forEach(btn => {
+    if (btn.dataset.wired) return;
+    btn.dataset.wired = 'true';
+    btn.addEventListener('click', (e) => {
+      // skip if another listener already toasted
+      if (e.defaultPrevented) return;
+      // If button is inside a known wired surface, skip
+      if (btn.closest('.style-grid, .frame-grid, .motif-grid, .inspector-tier-toggle, .m-tier-toggle')) return;
+      if (btn.classList.contains('toggle-pill')) return;
+      const txt = (btn.textContent || '').trim().slice(0, 40);
+      // Only toast for truly unhandled — catch by checking if no other handler set a state
+      // Defer with timeout so other listeners run first
+      setTimeout(() => {
+        if (!btn._handled) {
+          if (txt) toast(txt + ' — coming soon');
+        }
+      }, 0);
+    }, true);
+  });
+
+  // Init: first run of state application
+  applyProState();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0033 — Public API Foundation — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0033</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0033_public_api_foundation.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0033_public_api_foundation.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0033_public_api_foundation.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0033--public-api-foundation">Iteration 0033 — Public API Foundation</h1>
+<p><strong>Iteration number:</strong> 0033 <strong>Topic:</strong> Plumbing for a future public API. OAuth2 PKCE authorization server, scoped tokens, rate limiting, schema versioning, webhook delivery infrastructure, and a developer portal. NO public endpoints turn on in V1 — this iteration ships the foundation so V1.5 can flip endpoints on incrementally without retro-fitting auth or rate limiting under fire. <strong>Surface:</strong> Customer / vendor / admin (foundation only) + new developer portal subdomain <code>developers.setnayan.com</code>. <strong>URL pattern:</strong> <code>api.setnayan.com/v{n}/{resource}</code>, <code>developers.setnayan.com/apps/{app_id}</code>, admin extension under <code>setnayan.com/dashboard/admin/api</code>. <strong>Builds on:</strong> 0000 (auth + role-router), 0013 (Supabase + Cloudflare + R2 platform stack), 0019 (webhook delivery patterns), 0023 (admin console — extends with API surface). <strong>Status:</strong> Drafted 2026-05-12. <strong>Phase:</strong> V1 ships <strong>foundation only</strong>. Zero customer-facing endpoints active. Internal-only callback endpoints (Resend, Daily.co, GCash) routed through the same gateway so V1 stress-tests the plumbing.</p>
+<hr />
+<h2 id="1-why-this-iteration-exists">1. Why this iteration exists</h2>
+<p>Owner direction (2026-05-12): "set this up now for future-proofing." Locking in the API foundation while the codebase is small means V1.5's first endpoint flip is a configuration change, not a refactor.</p>
+<p><strong>The trap we are avoiding.</strong> Most platforms add a public API after they ship — and then discover that their internal architecture assumed trusted callers, made auth a per-route afterthought, hardcoded rate limits in three different places, and never planned for schema versioning. By the time those problems surface, every internal team is paying the refactor tax.</p>
+<p><strong>What "foundation" means here:</strong></p>
+<ul>
+<li>An API gateway sits between the public internet and every Setnayan backend service, from day one. Internal callbacks (Resend webhooks, Daily.co meeting events, GCash payment notifications) flow through it. The gateway is real, exercised, observed, hardened — just not exposed to third-party developers yet.</li>
+<li>OAuth2 with PKCE is implemented end-to-end. First-party Setnayan apps (web, mobile) use the same authorization server an external app would use later. No "internal auth" vs "public auth" split.</li>
+<li>Every Edge Function defines its OpenAPI schema fragment. Schema is generated at build-time, published at <code>api.setnayan.com/v1/openapi.json</code>. Internal endpoints carry <code>x-internal: true</code> and are stripped from the public bundle.</li>
+<li>Rate-limiting middleware runs on every request, even internal ones. The tier table is in code; flipping a token to "free tier" applies the same limits the eventual public free tier will see.</li>
+<li>Webhook delivery infrastructure (queue + retry + HMAC signing) is built and used internally for events like <code>payment.reconciled</code> posting to admin Slack-equivalents. Same code path that third-party webhook subscriptions will use in V1.5.</li>
+</ul>
+<p>When V1.5 says "ship the first three public endpoints," the work is: write the Edge Function business logic, declare the scopes, publish to the OpenAPI bundle. The plumbing is already battle-tested.</p>
+<hr />
+<h2 id="2-architecture">2. Architecture</h2>
+<h3 id="21-gateway">2.1 Gateway</h3>
+<p><strong>Cloudflare Workers</strong> sit in front of every Setnayan backend service. The Worker layer owns:</p>
+<ul>
+<li>TLS termination</li>
+<li>Request authentication (Bearer token validation, OAuth flow handlers)</li>
+<li>Rate limit enforcement (per-token, per-IP, per-account)</li>
+<li>Request logging (writes to <code>api_request_log</code>)</li>
+<li>API version routing (<code>/v1/...</code> → v1 Edge Functions; <code>/v2/...</code> → v2 Edge Functions)</li>
+<li>Response header stamping (<code>X-Setnayan-Api-Version</code>, <code>X-Request-Id</code>, <code>X-RateLimit-*</code>)</li>
+<li>CORS enforcement for browser-origin callers</li>
+</ul>
+<p><strong>Supabase Edge Functions</strong> sit behind the gateway and own business logic only. No Edge Function ever sees an unauthenticated request — the gateway either resolves the caller's <code>user_id</code> + <code>scopes</code> and forwards them as signed headers (<code>X-Setnayan-User-Id</code>, <code>X-Setnayan-Scopes</code>), or returns 401/403 directly.</p>
+<p>This split means:</p>
+<ul>
+<li>Edge Functions stay small and testable. They trust the gateway-provided context.</li>
+<li>Rate limit logic and auth logic live in one place. No drift across functions.</li>
+<li>The gateway can be swapped (e.g., to AWS API Gateway, Kong) without touching business logic.</li>
+</ul>
+<h3 id="22-authorization-server-oauth2-with-pkce">2.2 Authorization server (OAuth2 with PKCE)</h3>
+<p><strong>Standard:</strong> RFC 6749 (OAuth 2.0) + RFC 7636 (PKCE) + RFC 6750 (Bearer tokens) + RFC 7009 (token revocation).</p>
+<p><strong>Flows supported in V1:</strong></p>
+<ul>
+<li>Authorization Code with PKCE (for third-party apps, single-page apps, mobile apps)</li>
+<li>Refresh Token grant (with rotation)</li>
+</ul>
+<p><strong>Flows NOT supported (locked decision):</strong></p>
+<ul>
+<li>Implicit flow (deprecated by IETF; PKCE supersedes it)</li>
+<li>Resource Owner Password Credentials (RFC explicitly warns against; we never want third-party apps holding user passwords)</li>
+<li>Client Credentials grant (no server-to-server use case in V1; revisit if Setnayan adds B2B integrations like Zapier connectors)</li>
+</ul>
+<p><strong>Token shape:</strong></p>
+<ul>
+<li>Access token: opaque random string (256-bit entropy), prefix <code>stn_at_</code>, 1-hour lifetime</li>
+<li>Refresh token: opaque random string (256-bit entropy), prefix <code>stn_rt_</code>, 30-day lifetime, single-use (rotated on each use)</li>
+<li>Tokens are validated by lookup in <code>api_tokens</code> keyed on SHA-256 hash, never decoded JWTs</li>
+</ul>
+<p><strong>Why opaque tokens, not JWTs:</strong> JWTs sound great until you need to revoke one before its expiry. Opaque-token-with-lookup gives instant revocation, lets us update scopes mid-session, and survives a private-key rotation without forcing every active session to log out. Cost: one Redis-cached DB lookup per request — negligible.</p>
+<h3 id="23-token-storage">2.3 Token storage</h3>
+<ul>
+<li><code>api_tokens.token_hash</code> stores SHA-256 of the token (cleartext token never persisted)</li>
+<li><code>api_tokens.token_last4</code> stores the last 4 characters cleartext so UI can show <code>stn_at_••••••abcd</code> for selection</li>
+<li>Tokens are issued exactly once. If the user loses theirs, they revoke and re-issue — there is no recovery path</li>
+<li>Token-hash lookup is cached in Cloudflare Workers KV with 60-second TTL (revocations propagate within 60 seconds)</li>
+</ul>
+<h3 id="24-versioning">2.4 Versioning</h3>
+<p><strong>Path-based major versions:</strong> <code>/v1/events/{id}</code> vs <code>/v2/events/{id}</code>. Major bumps reserved for <strong>breaking schema changes only</strong> (removed fields, changed field types, changed response shape).</p>
+<p><strong>Header-based minor versions:</strong> Additive changes (new optional fields, new optional query params) ship without a path bump. Each response carries <code>X-Setnayan-Api-Version: 1.4</code> so clients can opt into newer behavior with <code>X-Setnayan-Api-Version-Pinned: 1.2</code> if they need stability.</p>
+<p><strong>Deprecation policy (locked):</strong></p>
+<ul>
+<li>Minor version: backward-compatible always; no deprecation needed</li>
+<li>Major version: previous major supported for 12 months minimum after the next major ships; deprecation warnings injected as <code>Deprecation: true</code> and <code>Sunset: &lt;RFC9745-date&gt;</code> response headers starting 6 months before sunset</li>
+</ul>
+<h3 id="25-rate-limiting">2.5 Rate limiting</h3>
+<p>Per-token quotas + per-IP DOS protection + per-account app cap. See Section 8 for the full table.</p>
+<p>Limits are enforced by a sliding-window counter in Cloudflare Workers KV. Each request decrements the relevant counters; if any counter reaches zero, the gateway returns <code>429 Too Many Requests</code> with a <code>Retry-After: &lt;seconds&gt;</code> header and <code>X-RateLimit-Remaining: 0</code>.</p>
+<h3 id="26-webhook-delivery">2.6 Webhook delivery</h3>
+<p>Outbound events get POSTed to subscriber URLs. Delivery semantics:</p>
+<ul>
+<li><strong>At-least-once.</strong> Subscribers must implement idempotency keys (we provide <code>X-Setnayan-Delivery-Id</code> per attempt)</li>
+<li><strong>Retry schedule:</strong> 5min → 30min → 2hr → 8hr → 24hr → fail. Five retries; total span 1d 10h 35m</li>
+<li><strong>HMAC signing:</strong> every delivery carries <code>X-Setnayan-Signature: sha256=&lt;hex&gt;</code> computed as <code>HMAC-SHA256(body, hmac_secret)</code> so subscribers can verify authenticity</li>
+<li><strong>Hard timeout:</strong> subscriber must respond within 10 seconds. Any 2xx response = success; anything else (including timeout) = retry</li>
+<li><strong>Expiry:</strong> after 5 failed attempts, delivery moves to <code>status='expired'</code> and the subscription gets a strike. 3 strikes auto-disables the subscription and emails the app owner</li>
+</ul>
+<h3 id="27-openapi-31-schema">2.7 OpenAPI 3.1 schema</h3>
+<p>Auto-generated from Edge Function type definitions (TypeScript types → JSON Schema → OpenAPI). Build pipeline runs on every commit; published at:</p>
+<ul>
+<li><code>api.setnayan.com/v1/openapi.json</code> (public bundle — <code>x-internal: true</code> endpoints stripped)</li>
+<li><code>api.setnayan.com/v1/openapi.internal.json</code> (full bundle — gated to Setnayan admins)</li>
+</ul>
+<p>Compatible with Postman, Insomnia, OpenAPI Generator, and Stoplight tooling. The dev portal embeds Swagger UI rendered against the public bundle.</p>
+<hr />
+<h2 id="3-scoped-permissions-catalog">3. Scoped permissions catalog</h2>
+<p>Token scopes follow the pattern <code>{action}:{resource}</code> where action ∈ <code>read | write | delete</code>. Tokens combine scopes; an app requests a list at OAuth flow start, the user grants exactly what they choose, the token is issued with exactly those scopes. <strong>No runtime scope escalation is possible</strong> — to gain a new scope, the app must re-initiate the OAuth flow and the user must re-consent.</p>
+<h3 id="31-standard-scopes">3.1 Standard scopes</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Scope</th>
+<th>What it grants</th>
+<th>V1.5 endpoint examples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>read:events</code></td>
+<td>List + read events the user is on</td>
+<td><code>GET /v1/events/me</code>, <code>GET /v1/events/{id}</code></td>
+</tr>
+<tr class="even">
+<td><code>write:events</code></td>
+<td>Edit event metadata, dates, settings</td>
+<td><code>PATCH /v1/events/{id}</code></td>
+</tr>
+<tr class="odd">
+<td><code>delete:events</code></td>
+<td>Soft-delete an event (organizer only)</td>
+<td><code>DELETE /v1/events/{id}</code></td>
+</tr>
+<tr class="even">
+<td><code>read:guests</code></td>
+<td>List + read the guest list of events the user organizes</td>
+<td><code>GET /v1/events/{id}/guests</code></td>
+</tr>
+<tr class="odd">
+<td><code>write:guests</code></td>
+<td>Add / edit / remove guests</td>
+<td><code>POST /v1/events/{id}/guests</code>, <code>PATCH /v1/guests/{id}</code></td>
+</tr>
+<tr class="even">
+<td><code>read:vendors</code></td>
+<td>Read vendor profiles (public + booked)</td>
+<td><code>GET /v1/vendors/{id}</code>, <code>GET /v1/vendors/search</code></td>
+</tr>
+<tr class="odd">
+<td><code>write:vendors</code></td>
+<td>Vendor-side: edit own vendor profile, services, calendar</td>
+<td><code>PATCH /v1/vendors/{id}</code></td>
+</tr>
+<tr class="even">
+<td><code>read:bookings</code></td>
+<td>List + read bookings (customer-side: my bookings; vendor-side: my clients)</td>
+<td><code>GET /v1/bookings</code>, <code>GET /v1/bookings/{id}</code></td>
+</tr>
+<tr class="odd">
+<td><code>write:bookings</code></td>
+<td>Create / update / cancel bookings</td>
+<td><code>POST /v1/bookings</code>, <code>PATCH /v1/bookings/{id}</code></td>
+</tr>
+<tr class="even">
+<td><code>read:contracts</code></td>
+<td>Download contracts the user is party to</td>
+<td><code>GET /v1/contracts/{id}/download</code></td>
+</tr>
+<tr class="odd">
+<td><code>write:contracts</code></td>
+<td>Upload / sign contracts</td>
+<td><code>POST /v1/contracts</code></td>
+</tr>
+<tr class="even">
+<td><code>read:photos</code></td>
+<td>Read Papic gallery for events the user has access to</td>
+<td><code>GET /v1/events/{id}/photos</code></td>
+</tr>
+<tr class="odd">
+<td><code>write:photos</code></td>
+<td>Upload photos via Papic API (third-party DSLR integrations)</td>
+<td><code>POST /v1/events/{id}/photos</code></td>
+</tr>
+<tr class="even">
+<td><code>read:schedule</code></td>
+<td>Read event schedule + calendar feeds</td>
+<td><code>GET /v1/events/{id}/schedule.ics</code></td>
+</tr>
+<tr class="odd">
+<td><code>read:messages</code></td>
+<td>Read chat threads (heavily restricted — explicit user consent required, audit-logged)</td>
+<td><code>GET /v1/threads/{id}/messages</code></td>
+</tr>
+<tr class="even">
+<td><code>read:analytics</code></td>
+<td>Vendor-side stats, customer-side spend history</td>
+<td><code>GET /v1/analytics/vendor/me</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-special-scopes">3.2 Special scopes</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Scope</th>
+<th>What it grants</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>webhook:subscribe</code></td>
+<td>App may register webhook subscriptions for events on resources it has read access to. Subscriptions are auto-revoked if the underlying read scope is revoked.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-scope-invariants-locked">3.3 Scope invariants (locked)</h3>
+<ul>
+<li><code>delete:*</code> always requires the corresponding <code>write:*</code> and <code>read:*</code></li>
+<li><code>write:*</code> always requires the corresponding <code>read:*</code></li>
+<li><code>read:messages</code> is <strong>never bundled</strong> with other scopes silently — the consent screen must call it out explicitly with a "this app will read your private conversations" warning</li>
+<li>Scopes are <strong>per-user</strong>, not per-event. An app with <code>read:events</code> reads every event the user can see; the gateway scopes the response by membership</li>
+</ul>
+<hr />
+<h2 id="4-developer-portal-at-developerssetnayancom">4. Developer portal at <code>developers.setnayan.com</code></h2>
+<p>The dev portal is the third-party developer's entire interface to Setnayan APIs.</p>
+<h3 id="41-account-model">4.1 Account model</h3>
+<p>Any Setnayan user (customer, vendor, or admin) can register as a developer. No separate developer account type — the existing <code>users</code> row gets <code>is_developer = TRUE</code> set on first portal login. This means:</p>
+<ul>
+<li>Couples who want to script their own wedding workflows can build personal apps</li>
+<li>Vendors who want to integrate Setnayan with their existing studio software can build vendor-side apps</li>
+<li>Wedding-tech startups can build apps against Setnayan's public API</li>
+</ul>
+<p>Free tier: up to 5 apps per user. Pro tier (planned V1.5): unlimited apps.</p>
+<h3 id="42-portal-surfaces">4.2 Portal surfaces</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Surface</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Dashboard</strong></td>
+<td>List my apps, recent request volumes, alerts (failed webhooks, expiring tokens)</td>
+</tr>
+<tr class="even">
+<td><strong>Create app</strong></td>
+<td>Name + logo + redirect URIs + description + scopes-requested. On submit: <code>client_id</code> issued immediately, <code>client_secret</code> shown ONCE (downloadable as <code>.env</code>-format file), app enters <code>status='pending_review'</code></td>
+</tr>
+<tr class="odd">
+<td><strong>App detail</strong></td>
+<td>Edit metadata, regenerate <code>client_secret</code> (invalidates old; all active tokens revoked), view scope grants</td>
+</tr>
+<tr class="even">
+<td><strong>Metrics</strong></td>
+<td>Requests/day, p50/p99 latency, error breakdown by status code, rate-limit hits, top endpoints</td>
+</tr>
+<tr class="odd">
+<td><strong>Webhooks</strong></td>
+<td>Manage subscriptions (which events fire to which URLs), view delivery log per subscription, replay failed deliveries</td>
+</tr>
+<tr class="even">
+<td><strong>API docs</strong></td>
+<td>Embedded Swagger UI rendered from <code>api.setnayan.com/v1/openapi.json</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Sandbox</strong></td>
+<td>Generate a sandbox token bound to a synthetic test event with fake guests, fake vendors, fake bookings. Sandbox tokens never hit production data.</td>
+</tr>
+<tr class="even">
+<td><strong>Logs</strong></td>
+<td>Last 7 days of requests for this app (paginated), with full request/response details. After 7 days, summary metrics remain but per-request detail is purged.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-app-approval-workflow">4.3 App approval workflow</h3>
+<p>Apps in <code>status='pending_review'</code> can call only sandbox-scoped endpoints. Production access requires Setnayan admin review:</p>
+<ul>
+<li>Apps requesting only standard scopes (<code>read:*</code> / <code>write:*</code> on the app owner's own resources) are auto-approved after 24 hours if no admin flags</li>
+<li>Apps requesting <code>read:messages</code>, <code>write:bookings</code>, or <code>delete:*</code> require explicit admin approval</li>
+<li>Apps with &gt; 3 reported abuse incidents auto-suspend pending review</li>
+</ul>
+<hr />
+<h2 id="5-v1-endpoints-locked-down-internal-only">5. V1 endpoints (locked-down internal-only)</h2>
+<p>No public endpoints in V1. All routes in V1 are flagged <code>x-internal: true</code> in OpenAPI and require either:</p>
+<ul>
+<li>A Setnayan-internal Bearer token (admin console, mobile app session, web app session), OR</li>
+<li>A vetted third-party callback signature (Resend, Daily.co, GCash)</li>
+</ul>
+<h3 id="51-internal-callback-endpoints">5.1 Internal callback endpoints</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Path</th>
+<th>Purpose</th>
+<th>Authenticator</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>POST /v1/internal/webhooks/resend</code></td>
+<td>Email delivery events from 0028</td>
+<td>Resend HMAC signature</td>
+</tr>
+<tr class="even">
+<td><code>POST /v1/internal/webhooks/daily</code></td>
+<td>Meeting events from 0019</td>
+<td>Daily.co HMAC signature</td>
+</tr>
+<tr class="odd">
+<td><code>POST /v1/internal/webhooks/gcash</code></td>
+<td>Payment notifications</td>
+<td>GCash webhook signature (V1.5; manual in V1)</td>
+</tr>
+<tr class="even">
+<td><code>POST /v1/internal/webhooks/cloudflare</code></td>
+<td>R2 upload completion events</td>
+<td>Cloudflare HMAC signature</td>
+</tr>
+</tbody>
+</table>
+<p>These are real production endpoints. Routing them through the gateway gives V1 a full operational exercise of the auth + rate limit + logging + retry infrastructure.</p>
+<h3 id="52-sandbox-only-public-endpoints-v1">5.2 Sandbox-only public endpoints (V1)</h3>
+<p>The dev portal sandbox exposes a synthetic surface so external developers can build against the API before V1.5 flips production endpoints on:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Path</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>GET /v1/sandbox/events/me</code></td>
+<td>Synthetic wedding-event payload</td>
+</tr>
+<tr class="even">
+<td><code>GET /v1/sandbox/vendors/search?q=photographer</code></td>
+<td>Synthetic vendor list</td>
+</tr>
+<tr class="odd">
+<td><code>GET /v1/sandbox/openapi.json</code></td>
+<td>Full OpenAPI bundle including planned V1.5 endpoints</td>
+</tr>
+</tbody>
+</table>
+<p>Sandbox endpoints respond with <code>X-Setnayan-Sandbox: true</code> and never touch production data.</p>
+<hr />
+<h2 id="6-v15-endpoint-roadmap-not-building-documenting-the-order">6. V1.5+ endpoint roadmap (NOT building, documenting the order)</h2>
+<p>The roadmap below is the planned flip sequence. Each phase requires the prior phase's endpoints to be stable + observed in production for at least 4 weeks before the next phase's endpoints flip on.</p>
+<h3 id="61-phase-a--read-only-event-surface-v15-launch">6.1 Phase A — Read-only event surface (V1.5 launch)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Endpoint</th>
+<th>Scopes</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>GET /v1/events/me</code></td>
+<td><code>read:events</code></td>
+<td>List events the authenticated user is on</td>
+</tr>
+<tr class="even">
+<td><code>GET /v1/events/{id}</code></td>
+<td><code>read:events</code></td>
+<td>Event detail, scope-gated by membership</td>
+</tr>
+<tr class="odd">
+<td><code>GET /v1/events/{id}/schedule</code></td>
+<td><code>read:schedule</code></td>
+<td>Used by calendar-sync apps (Google Calendar, Apple Calendar, Outlook integrations)</td>
+</tr>
+<tr class="even">
+<td><code>GET /v1/events/{id}/schedule.ics</code></td>
+<td><code>read:schedule</code></td>
+<td>iCalendar feed for subscribe-based calendar sync</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-phase-b--webhook-delivery-after-phase-a-learnings">6.2 Phase B — Webhook delivery (after Phase A learnings)</h3>
+<p>Webhook event types fired:</p>
+<ul>
+<li><code>event.created</code> — when a new event is created on the user's account</li>
+<li><code>event.updated</code> — when an event the user is on is edited</li>
+<li><code>event.deleted</code> — when an event is soft-deleted</li>
+<li><code>booking.confirmed</code> — when a vendor booking moves to <code>confirmed</code> status</li>
+<li><code>booking.cancelled</code> — when a vendor booking is cancelled</li>
+<li><code>photo.uploaded</code> — when a new photo lands in Papic gallery (heavily rate-limited; subscribers can opt for digest mode)</li>
+</ul>
+<p>Webhook subscription flow lives in the developer portal (Section 4).</p>
+<h3 id="63-phase-c--public-vendor-browse">6.3 Phase C — Public vendor browse</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Endpoint</th>
+<th>Scopes</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>GET /v1/vendors/{id}</code></td>
+<td>none (public)</td>
+<td>Public vendor profile. No auth required; rate-limited per IP.</td>
+</tr>
+<tr class="even">
+<td><code>GET /v1/vendors/search</code></td>
+<td>none (public)</td>
+<td>Vendor browse with filters. Rate-limited per IP (300 req/min ceiling).</td>
+</tr>
+</tbody>
+</table>
+<p>Phase C is the first <strong>no-auth-required</strong> public surface. Triggers a separate review pass for caching strategy (Cloudflare edge cache: 5-min TTL on <code>GET /v1/vendors/{id}</code>, 60-sec TTL on <code>GET /v1/vendors/search</code>).</p>
+<h3 id="64-phase-d--third-party-booking-flow-probably-never">6.4 Phase D — Third-party booking flow (probably never)</h3>
+<p><code>POST /v1/bookings</code> to let third-party apps initiate bookings on behalf of the user. Probably never ships because:</p>
+<ul>
+<li>Booking flow includes payment, which requires PCI scope we don't want to expose</li>
+<li>Coordination with the vendor's calendar is real-time and breaks the request/response model</li>
+<li>The booking flow is the highest-value user interaction on the platform; off-loading it to third parties is strategically questionable</li>
+</ul>
+<p>Documented here as the line we currently don't cross.</p>
+<hr />
+<h2 id="7-schema">7. Schema</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="co">-- OAuth applications registered by third parties (and first-party Setnayan apps)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> oauth_applications (</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>  app_id              UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>  owner_user_id       UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>  name                TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>  description         TEXT,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>  logo_r2_key         TEXT,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a>  redirect_uris       TEXT[] <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>  client_id           TEXT <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,           <span class="co">-- public, displayable</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a>  client_secret_hash  TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,                  <span class="co">-- SHA-256(secret)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a>  client_secret_last4 TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,                  <span class="co">-- cleartext last 4 chars for UI</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a>  scopes_requested    TEXT[] <span class="kw">NOT</span> <span class="kw">NULL</span>,                <span class="co">-- declared at registration</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a>  status              TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;pending_review&#39;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a>                      <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;pending_review&#39;</span>,<span class="st">&#39;approved&#39;</span>,<span class="st">&#39;rejected&#39;</span>,<span class="st">&#39;suspended&#39;</span>)),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a>  tier                TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;free&#39;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true"></a>                      <span class="kw">CHECK</span> (tier <span class="kw">IN</span> (<span class="st">&#39;free&#39;</span>,<span class="st">&#39;pro&#39;</span>,<span class="st">&#39;enterprise&#39;</span>)),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true"></a>  is_first_party      <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>, <span class="co">-- Setnayan-owned apps skip review</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true"></a>  created_at          TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true"></a>  approved_at         TIMESTAMPTZ,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true"></a>  approved_by         UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true"></a>  suspended_at        TIMESTAMPTZ,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true"></a>  suspended_reason    TEXT</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true"></a>);</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_oauth_apps_owner <span class="kw">ON</span> oauth_applications(owner_user_id);</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_oauth_apps_status <span class="kw">ON</span> oauth_applications(status) <span class="kw">WHERE</span> status <span class="op">!=</span> <span class="st">&#39;approved&#39;</span>;</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true"></a><span class="co">-- User authorizations (one row per user-app pair, per scope-grant)</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> oauth_authorizations (</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true"></a>  authorization_id UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true"></a>  app_id           UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> oauth_applications(app_id),</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true"></a>  user_id          UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true"></a>  scopes_granted   TEXT[] <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true"></a>  authorized_at    TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true"></a>  revoked_at       TIMESTAMPTZ,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true"></a>  <span class="kw">UNIQUE</span>(app_id, user_id, authorized_at)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true"></a>);</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_oauth_authz_user <span class="kw">ON</span> oauth_authorizations(user_id) <span class="kw">WHERE</span> revoked_at <span class="kw">IS</span> <span class="kw">NULL</span>;</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_oauth_authz_app <span class="kw">ON</span> oauth_authorizations(app_id) <span class="kw">WHERE</span> revoked_at <span class="kw">IS</span> <span class="kw">NULL</span>;</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true"></a><span class="co">-- Issued tokens (access + refresh)</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> api_tokens (</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true"></a>  token_id         UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true"></a>  authorization_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> oauth_authorizations(authorization_id),</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true"></a>  token_hash       TEXT <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,            <span class="co">-- SHA-256 of cleartext token</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true"></a>  token_last4      TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true"></a>  <span class="kw">type</span>             TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (<span class="kw">type</span> <span class="kw">IN</span> (<span class="st">&#39;access&#39;</span>,<span class="st">&#39;refresh&#39;</span>)),</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true"></a>  scopes           TEXT[] <span class="kw">NOT</span> <span class="kw">NULL</span>,                 <span class="co">-- copy of grant at issue-time</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true"></a>  expires_at       TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true"></a>  revoked_at       TIMESTAMPTZ,</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true"></a>  last_used_at     TIMESTAMPTZ,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true"></a>  created_at       TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true"></a>);</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_api_tokens_hash <span class="kw">ON</span> api_tokens(token_hash) <span class="kw">WHERE</span> revoked_at <span class="kw">IS</span> <span class="kw">NULL</span>;</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_api_tokens_auth <span class="kw">ON</span> api_tokens(authorization_id);</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true"></a><span class="co">-- Request log (every API call lands here for observability + abuse detection)</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> api_request_log (</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true"></a>  request_id     UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true"></a>  app_id         UUID <span class="kw">REFERENCES</span> oauth_applications(app_id),</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true"></a>  user_id        UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true"></a>  token_id       UUID <span class="kw">REFERENCES</span> api_tokens(token_id),</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true"></a>  <span class="kw">method</span>         TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true"></a>  path           TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true"></a>  status_code    <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true"></a>  duration_ms    <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true"></a>  ip_address     INET,</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true"></a>  user_agent     TEXT,</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true"></a>  rate_limit_hit <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true"></a>  created_at     TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true"></a>);</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true"></a></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_request_log_app_time <span class="kw">ON</span> api_request_log(app_id, created_at <span class="kw">DESC</span>);</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_request_log_user_time <span class="kw">ON</span> api_request_log(user_id, created_at <span class="kw">DESC</span>);</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_request_log_status <span class="kw">ON</span> api_request_log(status_code, created_at <span class="kw">DESC</span>)</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true"></a>  <span class="kw">WHERE</span> status_code <span class="op">&gt;=</span> <span class="dv">400</span>;</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true"></a></span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true"></a><span class="co">-- Webhook subscriptions</span></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> webhook_subscriptions (</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true"></a>  subscription_id  UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true"></a>  app_id           UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> oauth_applications(app_id),</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true"></a>  event_type       TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,                    <span class="co">-- e.g. &#39;event.created&#39;</span></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true"></a>  delivery_url     TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true"></a>  hmac_secret_hash TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,                    <span class="co">-- SHA-256 of HMAC secret</span></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true"></a>  is_active        <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">TRUE</span>,</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true"></a>  strike_count     <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true"></a>  created_at       TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true"></a>);</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true"></a></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_webhook_subs_event <span class="kw">ON</span> webhook_subscriptions(event_type) <span class="kw">WHERE</span> is_active <span class="op">=</span> <span class="kw">TRUE</span>;</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true"></a></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true"></a><span class="co">-- Webhook delivery attempts (one row per subscription per event firing)</span></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> webhook_deliveries (</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true"></a>  delivery_id        UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true"></a>  subscription_id    UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> webhook_subscriptions(subscription_id),</span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true"></a>  event_payload      JSONB <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true"></a>  attempt_count      <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true"></a>  next_attempt_at    TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true"></a>  delivered_at       TIMESTAMPTZ,</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true"></a>  last_response_code <span class="dt">INT</span>,</span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true"></a>  last_response_body TEXT,</span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true"></a>  status             TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;queued&#39;</span></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true"></a>                     <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;queued&#39;</span>,<span class="st">&#39;delivered&#39;</span>,<span class="st">&#39;failed&#39;</span>,<span class="st">&#39;expired&#39;</span>)),</span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true"></a>  created_at         TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true"></a>);</span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true"></a></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_webhook_deliveries_queued <span class="kw">ON</span> webhook_deliveries(next_attempt_at)</span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true"></a>  <span class="kw">WHERE</span> status <span class="op">=</span> <span class="st">&#39;queued&#39;</span>;</span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_webhook_deliveries_sub <span class="kw">ON</span> webhook_deliveries(subscription_id, created_at <span class="kw">DESC</span>);</span></code></pre></div>
+<p><strong>Total new tables:</strong> 6 (<code>oauth_applications</code>, <code>oauth_authorizations</code>, <code>api_tokens</code>, <code>api_request_log</code>, <code>webhook_subscriptions</code>, <code>webhook_deliveries</code>).</p>
+<hr />
+<h2 id="8-rate-limit--abuse-prevention">8. Rate limit + abuse prevention</h2>
+<h3 id="81-tier-table">8.1 Tier table</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Tier</th>
+<th>Per-token quota</th>
+<th>Burst (5-sec window)</th>
+<th>Apps per account</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Free</td>
+<td>100 req/min</td>
+<td>50 req</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td>Pro</td>
+<td>1,000 req/min</td>
+<td>500 req</td>
+<td>unlimited</td>
+</tr>
+<tr class="odd">
+<td>Enterprise</td>
+<td>10,000 req/min</td>
+<td>5,000 req</td>
+<td>unlimited</td>
+</tr>
+</tbody>
+</table>
+<p>Pro and Enterprise tiers are V1.5+ pricing decisions; V1 ships only the Free tier definition. The schema (<code>oauth_applications.tier</code>) already supports them so the upgrade path is data-only.</p>
+<h3 id="82-per-ip-dos-ceiling">8.2 Per-IP DOS ceiling</h3>
+<p>600 req/min hard ceiling per source IP, regardless of token tier. Applies to:</p>
+<ul>
+<li>Unauthenticated traffic (sandbox endpoints, eventual public vendor browse)</li>
+<li>Token-authenticated traffic (a single misbehaving app on Enterprise tier still can't exceed 600 req/min from one IP)</li>
+</ul>
+<p>Source IPs that exceed the ceiling more than 3 times in an hour get a 1-hour cooldown. Repeat offenders escalate to a 24-hour block; admin can permanently block.</p>
+<h3 id="83-429-response-shape">8.3 429 response shape</h3>
+<pre class="http"><code>HTTP/1.1 429 Too Many Requests
+Content-Type: application/json
+Retry-After: 12
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1715520000
+
+{
+  &quot;error&quot;: &quot;rate_limited&quot;,
+  &quot;message&quot;: &quot;Quota exceeded. Retry after 12 seconds.&quot;,
+  &quot;scope&quot;: &quot;per_token&quot;
+}
+</code></pre>
+<h3 id="84-burst-capacity">8.4 Burst capacity</h3>
+<p>Sliding-window counter. Within any 5-second window, an app may use up to 50% of its per-minute quota. Prevents an app from blowing its entire 100/min budget in the first second.</p>
+<h3 id="85-abuse-detection">8.5 Abuse detection</h3>
+<p>Auto-suspension triggers:</p>
+<ul>
+<li>5xx response rate &gt; 50% over 1 hour (the app is hammering broken endpoints; suspend pending investigation)</li>
+<li>429 rate &gt; 80% over 1 hour (the app isn't honoring rate limits; suspend pending investigation)</li>
+<li>3 reported abuse incidents from end users (consent-screen complaints, behavior reports)</li>
+<li>Webhook subscription strikes ≥ 3 (consecutive delivery failure cycles)</li>
+</ul>
+<p>Suspended apps return 503 to all requests with <code>X-Setnayan-Suspended-Reason</code> and email the app owner with the rationale + appeal path.</p>
+<hr />
+<h2 id="9-admin-operations-extends-0023">9. Admin operations (extends 0023)</h2>
+<p>New surface in the admin console: <strong>API &amp; Developer Portal</strong> at <code>setnayan.com/dashboard/admin/api</code>.</p>
+<h3 id="91-admin-surfaces">9.1 Admin surfaces</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Surface</th>
+<th>What it does</th>
+<th>Role gate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>App queue</strong></td>
+<td>List <code>status='pending_review'</code> apps + approve / reject / request-changes</td>
+<td>API &amp; Developer Reviewer role</td>
+</tr>
+<tr class="even">
+<td><strong>All apps</strong></td>
+<td>All registered apps, filterable by status / tier / scope-requested / owner</td>
+<td>API &amp; Developer Reviewer role</td>
+</tr>
+<tr class="odd">
+<td><strong>Volume dashboard</strong></td>
+<td>Aggregate request volumes, error rates, top apps by traffic, p99 latencies</td>
+<td>API &amp; Developer Reviewer + Analytics roles</td>
+</tr>
+<tr class="even">
+<td><strong>Token revocation</strong></td>
+<td>Search by <code>client_id</code>, <code>user_id</code>, or <code>token_last4</code>; bulk-revoke</td>
+<td>API &amp; Developer Reviewer + Security role</td>
+</tr>
+<tr class="odd">
+<td><strong>Webhook health</strong></td>
+<td>Subscriptions with strike_count &gt; 0, recent delivery failures, expired subscriptions</td>
+<td>API &amp; Developer Reviewer role</td>
+</tr>
+<tr class="even">
+<td><strong>Suspension queue</strong></td>
+<td>Apps auto-suspended by abuse detection; review + reinstate or confirm</td>
+<td>API &amp; Developer Reviewer + two-admin approval (§ 9.1 from 0023 — vendor force-delist parity)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-two-admin-approval-scope-extends-0023--91">9.2 Two-admin approval scope (extends 0023 § 9.1)</h3>
+<p>Adds to the two-admin approval list:</p>
+<ul>
+<li><strong>Approve an app requesting <code>read:messages</code> scope</strong> — chat data is heavily protected; second admin required</li>
+<li><strong>Approve an app requesting <code>delete:*</code> scope</strong> — destructive scope; second admin required</li>
+<li><strong>Confirm a suspended-app reinstatement</strong> — preventing single-admin reinstatement of an abusive app</li>
+</ul>
+<p>Routine work stays single-admin (the rest of the app queue, volume dashboard reads, webhook health inspection).</p>
+<hr />
+<h2 id="10-composition-with-cloudflare-workers--supabase-edge-functions">10. Composition with Cloudflare Workers + Supabase Edge Functions</h2>
+<h3 id="101-request-flow">10.1 Request flow</h3>
+<pre><code>Client request
+    ↓
+Cloudflare Worker (gateway)
+    1. TLS termination
+    2. Parse Authorization header (Bearer token)
+    3. SHA-256(token) → lookup in Workers KV (60s cache) → api_tokens
+    4. Check token: not revoked, not expired
+    5. Resolve scopes from api_tokens.scopes
+    6. Check rate limit counters (KV sliding window)
+    7. Route by path version: /v1/* → v1 functions
+    8. Stamp request context: X-Setnayan-User-Id, X-Setnayan-Scopes,
+       X-Setnayan-App-Id, X-Setnayan-Request-Id
+    9. Forward to Edge Function
+    ↓
+Supabase Edge Function (business logic)
+    10. Trust gateway-provided context
+    11. Check declared scopes against scopes provided
+    12. Execute business logic against Postgres
+    13. Return response
+    ↓
+Cloudflare Worker (gateway)
+    14. Stamp response headers: X-Setnayan-Api-Version,
+        X-RateLimit-*, X-Request-Id
+    15. Write api_request_log row (async, fire-and-forget)
+    16. Return to client
+</code></pre>
+<h3 id="102-webhook-delivery-flow">10.2 Webhook delivery flow</h3>
+<pre><code>Business event fires (e.g., booking.confirmed)
+    ↓
+Edge Function publishes to &quot;outbound_webhooks&quot; queue (Cloudflare Queue)
+    ↓
+Queue worker (Cloudflare Worker on Cron Trigger every 30 sec)
+    1. Pull due deliveries (webhook_deliveries.next_attempt_at &lt;= NOW())
+    2. For each: lookup subscription, HMAC-sign payload, POST to delivery_url
+    3. On 2xx: mark delivered_at, status=&#39;delivered&#39;
+    4. On non-2xx or timeout (10s): increment attempt_count, set next_attempt_at
+       per retry schedule (5m, 30m, 2h, 8h, 24h), status=&#39;queued&#39;
+    5. After 5 failed attempts: status=&#39;expired&#39;, increment subscription.strike_count
+    6. If strike_count &gt;= 3: deactivate subscription, email owner
+</code></pre>
+<h3 id="103-why-this-split">10.3 Why this split</h3>
+<ul>
+<li>Cloudflare Workers run on edge POPs in PH (Manila + Cebu PoPs) — auth + rate limit decisions happen within ~5ms of the user</li>
+<li>Supabase Edge Functions run in Singapore (closest Supabase region) — business logic + database access in ~30ms</li>
+<li>Total round-trip stays under 100ms p95 for Manila/Cebu/Davao clients</li>
+<li>The gateway can be moved off Cloudflare without touching Edge Functions; the Edge Functions can be moved off Supabase without touching the gateway</li>
+</ul>
+<hr />
+<h2 id="11-security-posture">11. Security posture</h2>
+<h3 id="111-token-hashing">11.1 Token hashing</h3>
+<ul>
+<li>Tokens generated as 256-bit cryptographically random strings via <code>crypto.randomBytes(32)</code></li>
+<li>Stored as SHA-256 hash; cleartext never written to disk or logs</li>
+<li>Token last 4 chars stored cleartext only for UI display ("which token did I revoke?")</li>
+</ul>
+<h3 id="112-oauth-pkce">11.2 OAuth PKCE</h3>
+<ul>
+<li>Authorization Code flow requires <code>code_challenge</code> (S256) on <code>/oauth/authorize</code> and <code>code_verifier</code> on <code>/oauth/token</code></li>
+<li>Authorization codes are single-use, 60-second lifetime, bound to the exact <code>code_challenge</code></li>
+<li>Refresh tokens rotate on every use; the old refresh token is invalidated immediately</li>
+</ul>
+<h3 id="113-hmac-webhook-signing">11.3 HMAC webhook signing</h3>
+<ul>
+<li>Each subscription has a unique HMAC secret (256-bit), shared with the subscriber at subscription creation (once)</li>
+<li>Every delivery POST carries <code>X-Setnayan-Signature: sha256=&lt;hex&gt;</code> over the raw body</li>
+<li>Subscribers verify by computing <code>HMAC-SHA256(received_body, their_copy_of_secret)</code> and comparing</li>
+<li>Subscribers MUST reject mismatched signatures with non-2xx — the gateway treats those as failed deliveries</li>
+</ul>
+<h3 id="114-secrets-rotation">11.4 Secrets rotation</h3>
+<ul>
+<li><code>client_secret</code> rotation: app owner triggers from dev portal; old secret invalidates immediately; all active tokens revoked; app must re-OAuth all users</li>
+<li>HMAC secret rotation: app owner triggers from dev portal; supports 24-hour overlap window where both old and new HMAC are accepted, then old is purged</li>
+<li>Internal Cloudflare Worker signing keys: rotated quarterly; supports 24-hour overlap</li>
+</ul>
+<h3 id="115-scope-validation">11.5 Scope validation</h3>
+<ul>
+<li>The Edge Function declares required scopes in its handler metadata</li>
+<li>The gateway forwards <code>X-Setnayan-Scopes</code> header with the token's granted scopes</li>
+<li>The Edge Function's wrapper validates <code>required_scopes ⊆ granted_scopes</code> BEFORE running business logic</li>
+<li>If insufficient, returns 403 with <code>WWW-Authenticate: Bearer error="insufficient_scope", scope="read:events"</code></li>
+</ul>
+<h3 id="116-audit-logging">11.6 Audit logging</h3>
+<ul>
+<li>Every <code>read:messages</code> access logged separately to <code>api_audit_messages_access</code> (admin-visible, never user-deletable)</li>
+<li>Every admin action in the admin console (app approval, suspension, token revocation) logged to existing admin audit log from 0023</li>
+<li><code>api_request_log</code> rows kept for 90 days, then aggregated to daily summary rows and purged</li>
+</ul>
+<h3 id="117-ra-10173-alignment">11.7 RA 10173 alignment</h3>
+<ul>
+<li>Users can list and revoke all OAuth grants from their account settings (Profile Settings → Authorized Apps, extends 0025)</li>
+<li>Token revocation cascades: revoking a grant revokes all tokens issued under it</li>
+<li>Account deletion (soft + hard, from 0025) cascades to revoke all OAuth authorizations + tokens</li>
+</ul>
+<hr />
+<h2 id="12-acceptance-tests">12. Acceptance tests</h2>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Test</th>
+<th>Pass criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Register a new OAuth app</td>
+<td>App created, <code>client_id</code> displayed, <code>client_secret</code> shown once, app enters <code>pending_review</code></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>OAuth authorization code flow with PKCE</td>
+<td>User authorizes → code issued → exchanged for token with PKCE verifier → access token + refresh token returned</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>OAuth flow without PKCE</td>
+<td>Request rejected with <code>error=invalid_request, error_description="code_challenge required"</code></td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Access protected endpoint without token</td>
+<td>401 with <code>WWW-Authenticate: Bearer error="invalid_token"</code></td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Access endpoint with insufficient scope</td>
+<td>403 with <code>WWW-Authenticate: Bearer error="insufficient_scope", scope="read:events"</code></td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Exceed per-token rate limit</td>
+<td>429 with <code>Retry-After</code> header, <code>X-RateLimit-Remaining: 0</code></td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Exceed per-IP DOS ceiling</td>
+<td>429 even with valid token; IP enters cooldown after 3 violations</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Refresh token rotation</td>
+<td>Old refresh token invalidates immediately, new refresh + access tokens returned</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>Reuse rotated refresh token</td>
+<td>401, all tokens under the authorization revoked (replay-attack defense)</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>Token revocation propagates within 60s</td>
+<td>Workers KV cache expires, subsequent calls fail with 401</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>Webhook delivery succeeds</td>
+<td>Subscriber receives POST with valid HMAC signature; delivery marked <code>delivered</code></td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>Webhook delivery retries on 5xx</td>
+<td>Subscriber returns 503; delivery retried at 5m, 30m, 2h, 8h, 24h; marked <code>expired</code> after 5 failures</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>Webhook subscription auto-disables after 3 strikes</td>
+<td>Subscription <code>is_active = FALSE</code>, owner email sent</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>OpenAPI bundle excludes internal endpoints</td>
+<td><code>GET api.setnayan.com/v1/openapi.json</code> returns spec with no <code>x-internal: true</code> paths</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td>Sandbox token cannot access production data</td>
+<td>Token bound to <code>sandbox=true</code> returns 403 on any non-sandbox path</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td>App auto-suspends on 5xx &gt; 50% over 1h</td>
+<td>Suspension triggers, app returns 503, owner emailed</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td>User revokes app from profile settings</td>
+<td>All authorizations + tokens for that app revoked within 60s</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td>Account deletion cascades to OAuth</td>
+<td>All grants + tokens for the deleted user revoked</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="13-decision-log">13. Decision log</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Date</th>
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Build the foundation in V1; flip endpoints in V1.5.</strong></td>
+<td>Owner direction. Retro-fitting auth + rate limits + versioning into a shipped backend is the most expensive refactor pattern in API design. Setting it up now costs ~2 sprints; retrofitting later costs ~10+.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Cloudflare Workers gateway + Supabase Edge Functions backend.</strong></td>
+<td>Workers run at the PH edge (~5ms auth decisions for Manila/Cebu/Davao); Edge Functions in Singapore handle business logic (~30ms DB roundtrip). Total p95 &lt; 100ms. Matches the platform stack from 0013 — no new vendors.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Opaque tokens, not JWTs.</strong></td>
+<td>Instant revocation is non-negotiable for a public API where credentials may leak. JWTs sound clean until you need to invalidate one before its expiry; opaque-token-with-lookup gives that for free. Lookup cost is one Workers-KV-cached DB read per request — negligible.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>OAuth2 Authorization Code with PKCE only.</strong></td>
+<td>Implicit deprecated by IETF; ROPC is a security smell; Client Credentials has no V1 use case. PKCE supports SPAs, mobile apps, and traditional server apps from one flow.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Path-based major versions, header-based minor versions.</strong></td>
+<td>Major bumps are rare and require a hard cut (12-month deprecation overlap). Additive changes ship continuously without forcing clients to re-bind paths. Matches GitHub, Stripe, Google's API versioning conventions.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Free tier 100 req/min; Pro / Enterprise schema-ready but unpriced in V1.</strong></td>
+<td>V1 ships zero public endpoints, so tier pricing is a V1.5 decision. The schema slot is there so V1.5 is a price-table change, not a migration.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>At-least-once webhook delivery with HMAC signing.</strong></td>
+<td>Industry standard (Stripe, GitHub, Shopify all do this). Subscribers MUST implement idempotency keys; we provide <code>X-Setnayan-Delivery-Id</code> so they can. Exactly-once delivery is impossible to guarantee over arbitrary subscriber endpoints.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>5-attempt retry schedule (5m / 30m / 2h / 8h / 24h).</strong></td>
+<td>Covers transient subscriber outages up to ~1.5 days; balances retry burden against subscriber survivability. Stripe's pattern (3 days) is more forgiving; Setnayan's is tighter to keep webhook_deliveries table size bounded.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>Internal callbacks (Resend, Daily.co, GCash) routed through the same gateway in V1.</strong></td>
+<td>Stress-tests the gateway in production from day one. If the auth + rate limit + logging path can't handle internal callbacks, it can't handle public traffic. Bonus: webhook-from-third-party arrives at the same machinery as webhook-to-third-party will.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Sandbox environment from V1 launch, even though no public endpoints exist.</strong></td>
+<td>Lets early developer-portal users build and test against synthetic data while V1 is live. When V1.5 flips Phase A endpoints on, those developers are ready to ship integrations on day one.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong><code>read:messages</code> scope requires two-admin approval at app review time.</strong></td>
+<td>Chat data is among the most sensitive in the platform (privacy of customer↔︎vendor↔︎coordinator conversations). Two-admin approval is the same gate from 0023 § 9.1 we apply to other high-stakes decisions.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>No B2B <code>client_credentials</code> flow in V1.</strong></td>
+<td>No identified use case. The temptation is to ship it for "server-to-server integrations" but Setnayan doesn't have a clear B2B integration story yet. Adding it later is trivial; removing it later is operationally messy if anyone depends on it.</td>
+</tr>
+<tr class="odd">
+<td>2026-05-12</td>
+<td><strong>OpenAPI 3.1 schema auto-generated from TypeScript types.</strong></td>
+<td>Manual OpenAPI maintenance drifts within weeks. Generating from source-of-truth types (the Edge Function definitions) ensures docs and reality stay aligned. Tooling support (Postman, Insomnia, OpenAPI Generator) gives third-party developers production-ready clients for free.</td>
+</tr>
+<tr class="even">
+<td>2026-05-12</td>
+<td><strong>Phase D (third-party booking flow) probably never ships.</strong></td>
+<td>Booking flow involves payment, real-time vendor calendar coordination, and is the highest-leverage interaction on the platform. Off-loading it to third parties is strategically dangerous. Documented here as the line we currently don't cross — revisit only with explicit owner sign-off.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-companion-docs">14. Companion docs</h2>
+<ul>
+<li><code>0000_app_shell_and_navigation/</code> — <code>users.account_type</code>, role-router; this iteration extends with <code>users.is_developer</code></li>
+<li><code>0013_platform_stack_and_sync/</code> — Cloudflare + Supabase + R2 stack; the gateway and Edge Functions sit on this stack</li>
+<li><code>0019_communications/</code> — webhook delivery pattern reference; chat scope (<code>read:messages</code>) protects this surface</li>
+<li><code>0023_admin_console/</code> — admin console foundation; extended with the API &amp; Developer Portal surface (§ 9)</li>
+<li><code>0025_profile_settings/</code> — "Authorized Apps" tab added under Privacy &amp; Data for user-side OAuth grant management</li>
+<li><code>0028_email_notifications/</code> — webhook-callback infrastructure (Resend) routed through this iteration's gateway in V1</li>
+<li><code>Setnayan_Privacy_and_Security_Policy.md</code> — RA 10173 alignment for OAuth grants + audit logs + account deletion cascades</li>
+</ul>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

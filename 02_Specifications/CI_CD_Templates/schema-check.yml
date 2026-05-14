@@ -1,0 +1,54 @@
+name: Schema validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - '.github/workflows/schema-check.yml'
+
+jobs:
+  validate-sql:
+    name: Validate migration SQL syntax
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: schema_check
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply migrations to ephemeral Postgres
+        env:
+          PGPASSWORD: postgres
+        run: |
+          for f in supabase/migrations/*.sql; do
+            echo "Applying $f"
+            psql -h localhost -U postgres -d schema_check -f "$f" -v ON_ERROR_STOP=1
+          done
+      - name: Verify RLS is enabled on every table
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d schema_check -v ON_ERROR_STOP=1 -c "
+            SELECT tablename
+            FROM pg_tables
+            WHERE schemaname = 'public'
+              AND tablename NOT IN (
+                SELECT tablename
+                FROM pg_tables t
+                JOIN pg_class c ON c.relname = t.tablename
+                WHERE c.relrowsecurity = true
+              );
+          " | tee /tmp/no-rls.out
+          if grep -q '^ [a-z_]' /tmp/no-rls.out; then
+            echo "::error::Tables above are missing RLS. Every public table must enable RLS (see 02_Specifications/RLS_Policy_Pattern.md)."
+            exit 1
+          fi

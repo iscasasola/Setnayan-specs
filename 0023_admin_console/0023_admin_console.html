@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>0023 · Admin Console — Setnayan Operations · 7-surface walkthrough</title>
+<meta name="description" content="Setnayan admin console — Cara Aquino (Operations Lead). Verification queues, payments, users, pricing, disputes, settings.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --page-bg: #FAF6F0; --page-bg-soft: #F5EFE5;
+  --ink: #1A1A1A; --ink-soft: #6B6B6B; --ink-faint: #A39B8E;
+  --accent: #C97B4B; --accent-soft: #E8C9B0; --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08); --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF; --surface-soft: #FBF8F3;
+  --canvas-bg: #1F1D1B;
+  --bride: #C8807F; --bride-soft: #F5DEDD;
+  --groom: #6E89AD; --groom-soft: #DDE5F0;
+  --both: #C9A66B; --both-soft: #F0E5CD;
+  --status-ok: #6FA776; --status-ok-soft: #DDEBDF;
+  --status-warn: #D69744; --status-warn-soft: #F4E2C8;
+  --status-bad: #C46A55; --status-bad-soft: #F2DCD5;
+  --admin-purple: #6E5BAD; --admin-purple-soft: #DDD8F0;
+  --shadow-frame: 0 40px 100px rgba(0, 0, 0, 0.45), 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+body { background: var(--canvas-bg); color: var(--ink); font-family: 'Manrope', system-ui, sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+.canvas-header { padding: 28px 40px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); position: sticky; top: 0; z-index: 50; background: var(--canvas-bg); }
+.canvas-title { color: #fff; }
+.canvas-title h1 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-style: italic; font-size: 26px; letter-spacing: 0.01em; }
+.canvas-title .canvas-meta { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.canvas-toggle { display: inline-flex; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 4px; }
+.toggle-pill { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.55); padding: 6px 14px; border-radius: 999px; transition: all 0.18s; }
+.toggle-pill.active { background: var(--admin-purple); color: #fff; }
+
+.surface-bar { display: flex; gap: 6px; padding: 14px 40px; background: var(--canvas-bg); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 86px; z-index: 49; overflow-x: auto; }
+.surface-tab { flex: 0 0 auto; padding: 9px 18px; border-radius: 8px; color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: all 0.15s; border: 1px solid transparent; }
+.surface-tab:hover { background: rgba(255,255,255,0.04); color: #fff; }
+.surface-tab.active { background: rgba(110,91,173,0.18); color: #fff; border-color: rgba(110,91,173,0.4); }
+.surface-tab .num { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.16em; color: var(--admin-purple); }
+
+.surface-container { padding: 32px 40px 60px; }
+.surface { display: none; }
+.surface.active { display: block; }
+.frames { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+.frame-col { display: flex; flex-direction: column; gap: 10px; }
+.frame-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+.frame-desktop { width: 920px; background: var(--page-bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-frame); }
+.browser-chrome { background: #E9E5DE; padding: 9px 14px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--rule); }
+.tl { display: flex; gap: 6px; }
+.tl span { width: 10px; height: 10px; border-radius: 50%; background: #BDBAB3; }
+.tl span:nth-child(1) { background: #FF6058; } .tl span:nth-child(2) { background: #FFBE2F; } .tl span:nth-child(3) { background: #2BC940; }
+.url-bar { flex: 1; background: #fff; border-radius: 6px; padding: 6px 12px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+.url-bar .lock { color: var(--status-ok); }
+
+.frame-mobile { width: 320px; background: var(--page-bg); border-radius: 36px; border: 8px solid #15130F; overflow: hidden; box-shadow: var(--shadow-frame); position: relative; }
+.phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 24px; background: #15130F; border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; z-index: 5; }
+.phone-body { padding: 38px 0 0; height: 720px; display: flex; flex-direction: column; overflow: hidden; }
+.phone-status { padding: 4px 14px 6px; display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink); }
+.phone-scrn { scrollbar-width: none; -ms-overflow-style: none; min-height: 0; }
+.phone-scrn::-webkit-scrollbar { width: 0; height: 0; display: none; }
+body[data-view="desktop"] .frame-mobile { display: none; }
+body[data-view="mobile"] .frame-desktop { display: none; }
+
+.app-bar { background: var(--surface); padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--rule); }
+.brand-block { display: flex; align-items: center; gap: 10px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 17px; }
+.brand-pin {
+  width: 14px; height: 22px;
+  background: var(--admin-purple);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22512%22%20height%3D%22784%22%20viewBox%3D%220%200%20512%20784%22%3E%20%3Cg%3E%20%3Cpath%20d%3D%22M%20244.97%20691.40%20C221.64%2C659.25%20191.89%2C613.21%20170.90%2C576.78%20C120.18%2C488.75%2090.15%2C413.38%2079.76%2C348.00%20C76.54%2C327.71%2076.56%2C292.12%2079.81%2C276.07%20C87.32%2C239.00%20106.16%2C204.79%20132.74%2C179.97%20C141.15%2C172.12%20151.32%2C164.00%20152.75%2C164.00%20C153.69%2C164.00%20154.91%2C165.63%20166.29%2C182.09%20L%20172.93%20191.69%20L%20164.03%20198.82%20C127.81%2C227.81%20107.77%2C275.16%20111.99%2C321.77%20C116.51%2C371.82%20146.03%2C415.39%20190.59%2C437.79%20C210.73%2C447.92%20230.38%2C452.41%20254.50%2C452.40%20C272.29%2C452.39%20282.00%2C450.91%20297.96%2C445.80%20C324.41%2C437.33%20349.35%2C420.22%20365.96%2C399.13%20C369.54%2C394.59%20372.79%2C391.35%20373.40%2C391.71%20C380.27%2C395.69%20411.00%2C417.69%20411.00%2C418.61%20C411.00%2C420.37%20405.72%2C435.20%20399.30%2C451.46%20C375.26%2C512.36%20337.65%2C581.95%20290.64%2C652.50%20C278.61%2C670.56%20257.46%2C700.74%20255.02%2C703.33%20C254.58%2C703.79%20250.06%2C698.42%20244.97%2C691.40%20ZM%20238.50%20415.53%20C222.88%2C413.05%20209.61%2C407.99%20196.39%2C399.46%20C179.83%2C388.78%20167.46%2C374.75%20158.50%2C356.50%20C130.41%2C299.34%20158.39%2C230.85%20218.75%2C209.00%20C222.19%2C207.75%20225.00%2C206.32%20225.00%2C205.81%20C225.00%2C205.30%20220.49%2C188.63%20214.97%2C168.75%20L%20204.94%20132.61%20L%20211.67%20125.83%20C215.36%2C122.11%20218.56%2C119.22%20218.76%2C119.43%20C219.14%2C119.81%20219.82%2C123.37%20228.95%2C173.00%20C231.73%2C188.12%20234.22%2C201.42%20234.47%2C202.55%20C234.86%2C204.25%20235.55%2C204.53%20238.47%2C204.19%20C242.79%2C203.69%20242.75%2C204.26%20240.04%2C180.61%20C238.96%2C171.20%20236.70%2C150.98%20235.00%2C135.69%20L%20231.92%20107.87%20L%20243.18%2094.46%20C249.38%2C87.08%20254.71%2C81.37%20255.04%2C81.77%20C255.37%2C82.17%20260.43%2C88.19%20266.28%2C95.14%20L%20276.92%20107.77%20L%20271.60%20155.14%20C268.67%2C181.19%20266.55%2C202.80%20266.89%2C203.16%20C267.22%2C203.53%20268.85%2C203.98%20270.50%2C204.16%20L%20273.50%20204.50%20L%20278.22%20179.00%20C288.39%2C124.08%20289.38%2C119.00%20289.96%2C119.00%20C290.29%2C119.00%20293.36%2C121.82%20296.78%2C125.27%20L%20302.99%20131.55%20L%20299.43%20144.52%20C291.24%2C174.33%20283.00%2C205.15%20283.00%2C206.01%20C283.00%2C206.51%20284.83%2C207.42%20287.07%2C208.02%20C289.31%2C208.62%20294.54%2C210.66%20298.70%2C212.56%20C302.85%2C214.45%20306.56%2C216.00%20306.93%2C216.00%20C307.31%2C216.00%20315.92%2C201.19%20326.06%2C183.08%20L%20344.50%20150.16%20L%20354.25%20149.83%20C359.62%2C149.65%20364.00%2C149.80%20364.00%2C150.16%20C364.00%2C150.52%20353.02%2C166.72%20339.59%2C186.16%20L%20315.18%20221.50%20L%20317.84%20223.75%20C319.30%2C224.98%20320.73%2C225.98%20321.00%2C225.96%20C321.27%2C225.95%20334.98%2C209.08%20351.46%2C188.47%20C376.42%2C157.25%20381.84%2C150.99%20383.96%2C150.94%20C385.36%2C150.90%20393.02%2C150.29%20401.00%2C149.57%20C408.98%2C148.85%20415.62%2C148.37%20415.78%2C148.49%20C415.93%2C148.62%20415.37%2C156.21%20414.53%2C165.38%20C413.69%2C174.54%20413.00%2C182.25%20413.00%2C182.51%20C413.00%2C182.77%20397.59%2C195.33%20378.75%2C210.42%20C359.91%2C225.51%20343.05%2C239.13%20341.27%2C240.68%20L%20338.05%20243.50%20L%20340.27%20246.15%20L%20342.50%20248.80%20L%20378.00%20223.93%20C397.52%2C210.26%20413.98%2C199.06%20414.56%2C199.04%20C415.23%2C199.01%20415.71%2C202.52%20415.85%2C208.36%20L%20416.07%20217.71%20L%20382.29%20236.95%20C363.70%2C247.53%20348.32%2C256.36%20348.10%2C256.58%20C347.88%2C256.79%20349.30%2C260.46%20351.25%2C264.73%20C353.19%2C269.00%20355.36%2C274.42%20356.06%2C276.77%20C356.99%2C279.89%20357.75%2C280.90%20358.91%2C280.55%20C360.33%2C280.13%20402.83%2C268.28%20423.58%2C262.52%20L%20431.65%20260.29%20L%20438.50%20267.14%20C442.26%2C270.91%20445.15%2C274.15%20444.92%2C274.35%20C444.69%2C274.55%20432.80%2C276.83%20418.50%2C279.41%20C404.20%2C281.99%20385.16%2C285.49%20376.20%2C287.18%20L%20359.89%20290.26%20L%20360.20%20293.88%20L%20360.50%20297.50%20L%20365.50%20297.18%20C368.25%2C297.01%20389.80%2C294.73%20413.38%2C292.13%20L%20456.26%20287.39%20L%20468.88%20297.97%20C475.82%2C303.80%20481.50%2C309.13%20481.50%2C309.83%20C481.50%2C311.47%20456.98%2C331.96%20455.00%2C331.97%20C454.17%2C331.98%20435.50%2C330.00%20413.50%2C327.57%20C391.50%2C325.14%20370.46%2C322.84%20366.75%2C322.46%20L%20360.00%20321.77%20L%20360.00%20325.36%20C360.00%2C328.28%20360.43%2C329.06%20362.25%2C329.46%20C363.49%2C329.73%20382.05%2C333.14%20403.50%2C337.04%20C424.95%2C340.94%20443.34%2C344.37%20444.37%2C344.67%20C445.93%2C345.12%20445.21%2C346.24%20439.90%2C351.60%20C436.41%2C355.12%20433.03%2C358.00%20432.38%2C358.00%20C431.73%2C358.00%20414.77%2C353.50%20394.70%2C348.00%20C374.62%2C342.50%20357.97%2C338.00%20357.68%2C338.00%20C357.39%2C338.00%20356.84%2C339.45%20356.45%2C341.23%20C355.09%2C347.44%20349.25%2C359.82%20343.53%2C368.62%20C336.98%2C378.70%20324.55%2C391.52%20315.12%2C397.92%20C292.65%2C413.17%20264.47%2C419.65%20238.50%2C415.53%20ZM%20265.27%20359.53%20C288.55%2C354.60%20305.35%2C333.82%20305.32%2C310.00%20C305.30%2C289.34%20294.72%2C272.44%20276.25%2C263.53%20C268.80%2C259.94%20263.42%2C258.81%20253.85%2C258.86%20C225.51%2C258.99%20203.56%2C281.11%20203.56%2C309.50%20C203.56%2C323.88%20208.36%2C335.54%20218.41%2C345.60%20C231.11%2C358.30%20247.75%2C363.24%20265.27%2C359.53%20Z%22%20fill%3D%22rgba%280%2C0%2C0%2C1%29%22/%3E%20%3C/g%3E%20%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22512%22%20height%3D%22784%22%20viewBox%3D%220%200%20512%20784%22%3E%20%3Cg%3E%20%3Cpath%20d%3D%22M%20244.97%20691.40%20C221.64%2C659.25%20191.89%2C613.21%20170.90%2C576.78%20C120.18%2C488.75%2090.15%2C413.38%2079.76%2C348.00%20C76.54%2C327.71%2076.56%2C292.12%2079.81%2C276.07%20C87.32%2C239.00%20106.16%2C204.79%20132.74%2C179.97%20C141.15%2C172.12%20151.32%2C164.00%20152.75%2C164.00%20C153.69%2C164.00%20154.91%2C165.63%20166.29%2C182.09%20L%20172.93%20191.69%20L%20164.03%20198.82%20C127.81%2C227.81%20107.77%2C275.16%20111.99%2C321.77%20C116.51%2C371.82%20146.03%2C415.39%20190.59%2C437.79%20C210.73%2C447.92%20230.38%2C452.41%20254.50%2C452.40%20C272.29%2C452.39%20282.00%2C450.91%20297.96%2C445.80%20C324.41%2C437.33%20349.35%2C420.22%20365.96%2C399.13%20C369.54%2C394.59%20372.79%2C391.35%20373.40%2C391.71%20C380.27%2C395.69%20411.00%2C417.69%20411.00%2C418.61%20C411.00%2C420.37%20405.72%2C435.20%20399.30%2C451.46%20C375.26%2C512.36%20337.65%2C581.95%20290.64%2C652.50%20C278.61%2C670.56%20257.46%2C700.74%20255.02%2C703.33%20C254.58%2C703.79%20250.06%2C698.42%20244.97%2C691.40%20ZM%20238.50%20415.53%20C222.88%2C413.05%20209.61%2C407.99%20196.39%2C399.46%20C179.83%2C388.78%20167.46%2C374.75%20158.50%2C356.50%20C130.41%2C299.34%20158.39%2C230.85%20218.75%2C209.00%20C222.19%2C207.75%20225.00%2C206.32%20225.00%2C205.81%20C225.00%2C205.30%20220.49%2C188.63%20214.97%2C168.75%20L%20204.94%20132.61%20L%20211.67%20125.83%20C215.36%2C122.11%20218.56%2C119.22%20218.76%2C119.43%20C219.14%2C119.81%20219.82%2C123.37%20228.95%2C173.00%20C231.73%2C188.12%20234.22%2C201.42%20234.47%2C202.55%20C234.86%2C204.25%20235.55%2C204.53%20238.47%2C204.19%20C242.79%2C203.69%20242.75%2C204.26%20240.04%2C180.61%20C238.96%2C171.20%20236.70%2C150.98%20235.00%2C135.69%20L%20231.92%20107.87%20L%20243.18%2094.46%20C249.38%2C87.08%20254.71%2C81.37%20255.04%2C81.77%20C255.37%2C82.17%20260.43%2C88.19%20266.28%2C95.14%20L%20276.92%20107.77%20L%20271.60%20155.14%20C268.67%2C181.19%20266.55%2C202.80%20266.89%2C203.16%20C267.22%2C203.53%20268.85%2C203.98%20270.50%2C204.16%20L%20273.50%20204.50%20L%20278.22%20179.00%20C288.39%2C124.08%20289.38%2C119.00%20289.96%2C119.00%20C290.29%2C119.00%20293.36%2C121.82%20296.78%2C125.27%20L%20302.99%20131.55%20L%20299.43%20144.52%20C291.24%2C174.33%20283.00%2C205.15%20283.00%2C206.01%20C283.00%2C206.51%20284.83%2C207.42%20287.07%2C208.02%20C289.31%2C208.62%20294.54%2C210.66%20298.70%2C212.56%20C302.85%2C214.45%20306.56%2C216.00%20306.93%2C216.00%20C307.31%2C216.00%20315.92%2C201.19%20326.06%2C183.08%20L%20344.50%20150.16%20L%20354.25%20149.83%20C359.62%2C149.65%20364.00%2C149.80%20364.00%2C150.16%20C364.00%2C150.52%20353.02%2C166.72%20339.59%2C186.16%20L%20315.18%20221.50%20L%20317.84%20223.75%20C319.30%2C224.98%20320.73%2C225.98%20321.00%2C225.96%20C321.27%2C225.95%20334.98%2C209.08%20351.46%2C188.47%20C376.42%2C157.25%20381.84%2C150.99%20383.96%2C150.94%20C385.36%2C150.90%20393.02%2C150.29%20401.00%2C149.57%20C408.98%2C148.85%20415.62%2C148.37%20415.78%2C148.49%20C415.93%2C148.62%20415.37%2C156.21%20414.53%2C165.38%20C413.69%2C174.54%20413.00%2C182.25%20413.00%2C182.51%20C413.00%2C182.77%20397.59%2C195.33%20378.75%2C210.42%20C359.91%2C225.51%20343.05%2C239.13%20341.27%2C240.68%20L%20338.05%20243.50%20L%20340.27%20246.15%20L%20342.50%20248.80%20L%20378.00%20223.93%20C397.52%2C210.26%20413.98%2C199.06%20414.56%2C199.04%20C415.23%2C199.01%20415.71%2C202.52%20415.85%2C208.36%20L%20416.07%20217.71%20L%20382.29%20236.95%20C363.70%2C247.53%20348.32%2C256.36%20348.10%2C256.58%20C347.88%2C256.79%20349.30%2C260.46%20351.25%2C264.73%20C353.19%2C269.00%20355.36%2C274.42%20356.06%2C276.77%20C356.99%2C279.89%20357.75%2C280.90%20358.91%2C280.55%20C360.33%2C280.13%20402.83%2C268.28%20423.58%2C262.52%20L%20431.65%20260.29%20L%20438.50%20267.14%20C442.26%2C270.91%20445.15%2C274.15%20444.92%2C274.35%20C444.69%2C274.55%20432.80%2C276.83%20418.50%2C279.41%20C404.20%2C281.99%20385.16%2C285.49%20376.20%2C287.18%20L%20359.89%20290.26%20L%20360.20%20293.88%20L%20360.50%20297.50%20L%20365.50%20297.18%20C368.25%2C297.01%20389.80%2C294.73%20413.38%2C292.13%20L%20456.26%20287.39%20L%20468.88%20297.97%20C475.82%2C303.80%20481.50%2C309.13%20481.50%2C309.83%20C481.50%2C311.47%20456.98%2C331.96%20455.00%2C331.97%20C454.17%2C331.98%20435.50%2C330.00%20413.50%2C327.57%20C391.50%2C325.14%20370.46%2C322.84%20366.75%2C322.46%20L%20360.00%20321.77%20L%20360.00%20325.36%20C360.00%2C328.28%20360.43%2C329.06%20362.25%2C329.46%20C363.49%2C329.73%20382.05%2C333.14%20403.50%2C337.04%20C424.95%2C340.94%20443.34%2C344.37%20444.37%2C344.67%20C445.93%2C345.12%20445.21%2C346.24%20439.90%2C351.60%20C436.41%2C355.12%20433.03%2C358.00%20432.38%2C358.00%20C431.73%2C358.00%20414.77%2C353.50%20394.70%2C348.00%20C374.62%2C342.50%20357.97%2C338.00%20357.68%2C338.00%20C357.39%2C338.00%20356.84%2C339.45%20356.45%2C341.23%20C355.09%2C347.44%20349.25%2C359.82%20343.53%2C368.62%20C336.98%2C378.70%20324.55%2C391.52%20315.12%2C397.92%20C292.65%2C413.17%20264.47%2C419.65%20238.50%2C415.53%20ZM%20265.27%20359.53%20C288.55%2C354.60%20305.35%2C333.82%20305.32%2C310.00%20C305.30%2C289.34%20294.72%2C272.44%20276.25%2C263.53%20C268.80%2C259.94%20263.42%2C258.81%20253.85%2C258.86%20C225.51%2C258.99%20203.56%2C281.11%20203.56%2C309.50%20C203.56%2C323.88%20208.36%2C335.54%20218.41%2C345.60%20C231.11%2C358.30%20247.75%2C363.24%20265.27%2C359.53%20Z%22%20fill%3D%22rgba%280%2C0%2C0%2C1%29%22/%3E%20%3C/g%3E%20%3C/svg%3E");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  position: relative;
+}
+.brand-pin::after { content: none; }
+.dash-nav { display: flex; gap: 4px; }
+.dash-nav-link { font-size: 12px; font-weight: 500; color: var(--ink-soft); padding: 7px 14px; border-radius: 999px; cursor: pointer; }
+.dash-nav-link:hover { background: rgba(26,26,26,0.04); color: var(--ink); }
+.dash-nav-link.active { background: var(--admin-purple); color: #fff; }
+.dash-right { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--admin-purple-soft), var(--admin-purple)); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
+.avatar.sm { width: 22px; height: 22px; font-size: 9px; }
+
+.bot-nav { display: flex; justify-content: space-around; padding: 10px 6px 14px; background: var(--surface); border-top: 1px solid var(--rule); margin-top: auto; }
+.bot-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 9.5px; color: var(--ink-faint); font-weight: 500; }
+.bot-nav-item.active { color: var(--admin-purple); }
+.bot-nav-item .ico { width: 24px; height: 24px; border-radius: 6px; background: var(--page-bg-soft); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.bot-nav-item.active .ico { background: var(--admin-purple-soft); }
+
+.scrn { padding: 22px; }
+.phone-scrn { padding: 18px; flex: 1; overflow-y: auto; }
+.scrn h2 { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 28px; color: var(--ink); margin-bottom: 4px; }
+.scrn h3, .phone-scrn h3 { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 22px; color: var(--ink); margin-bottom: 6px; }
+.scrn h4, .phone-scrn h4 { font-size: 12px; font-weight: 600; color: var(--ink); margin-top: 18px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+.scrn .eyebrow, .phone-scrn .eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--admin-purple); margin-bottom: 8px; }
+.scrn p, .phone-scrn p { color: var(--ink-soft); font-size: 12.5px; margin-bottom: 10px; }
+.divider { height: 1px; background: var(--rule); margin: 14px 0; }
+
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; }
+.card.soft { background: var(--surface-soft); }
+.card-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+.card-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.card-body { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+
+.chip { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 500; padding: 4px 9px; border-radius: 999px; background: var(--surface-soft); border: 1px solid var(--rule); color: var(--ink-soft); }
+.chip.ok { background: var(--status-ok-soft); border-color: rgba(111,167,118,0.4); color: #3F6E47; }
+.chip.warn { background: var(--status-warn-soft); border-color: rgba(214,151,68,0.4); color: #8C5C1F; }
+.chip.bad { background: var(--status-bad-soft); border-color: rgba(196,106,85,0.4); color: #843828; }
+.chip.admin { background: var(--admin-purple-soft); border-color: rgba(110,91,173,0.4); color: var(--admin-purple); }
+.chip.dark { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 9px 16px; border-radius: 999px; background: var(--ink); color: #fff; }
+.btn.purple { background: var(--admin-purple); }
+.btn.accent { background: var(--accent); }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--rule-strong); }
+.btn.sm { font-size: 11px; padding: 6px 12px; }
+.btn.full { width: 100%; justify-content: center; }
+.btn.danger { background: var(--status-bad); }
+
+.kv { display: flex; justify-content: space-between; font-size: 11.5px; padding: 5px 0; border-bottom: 1px solid var(--rule); }
+.kv:last-child { border-bottom: none; }
+.kv .k { color: var(--ink-soft); }
+.kv .v { color: var(--ink); font-weight: 500; }
+
+.list-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 12px; gap: 12px; }
+.list-row:last-child { border-bottom: none; }
+.list-row .name { color: var(--ink); font-weight: 500; }
+.list-row .meta { color: var(--ink-soft); font-size: 10.5px; }
+.list-row .lhs { display: flex; align-items: center; gap: 10px; flex: 1; }
+
+.banner { padding: 12px 14px; border-radius: 8px; font-size: 11.5px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+.banner.ok { background: var(--status-ok-soft); color: #3F6E47; border: 1px solid rgba(111,167,118,0.4); }
+.banner.warn { background: var(--status-warn-soft); color: #8C5C1F; border: 1px solid rgba(214,151,68,0.4); }
+.banner.bad { background: var(--status-bad-soft); color: #843828; border: 1px solid rgba(196,106,85,0.4); }
+.banner.admin { background: var(--admin-purple-soft); color: var(--admin-purple); border: 1px solid rgba(110,91,173,0.4); }
+
+.queue-card { background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--admin-purple); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.queue-card.urgent { border-left-color: var(--status-bad); }
+.queue-card.ok { border-left-color: var(--status-ok); }
+
+.sheet-table { width: 100%; border-collapse: collapse; font-size: 12px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.sheet-table thead th { background: var(--page-bg-soft); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; padding: 9px 10px; text-align: left; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.sheet-table thead th:last-child { border-right: none; }
+.sheet-table tbody td { padding: 8px 10px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); color: var(--ink); }
+.sheet-table tbody td:last-child { border-right: none; }
+.sheet-table tbody tr:last-child td { border-bottom: none; }
+.sheet-table tbody tr:hover td { background: var(--surface-soft); }
+
+@media (max-width: 1300px) {
+  .frame-desktop { width: 100%; max-width: 920px; }
+  .frames { flex-direction: column; align-items: center; }
+}
+
+.brand-name { font-family: 'Manrope', system-ui, sans-serif; font-weight: 700; font-style: normal; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); font-size: 14px; }
+.brand-block { letter-spacing: 0; }
+
+.avatar { font-size: 0 !important; color: transparent !important; background: radial-gradient(circle at 50% 35%, #F5DEDD 0%, #E8C9B0 45%, #C97B4B 100%) !important; position: relative; overflow: hidden; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.08); }
+.avatar::before { content: ''; position: absolute; left: 50%; top: 38%; width: 38%; height: 38%; transform: translateX(-50%); background: radial-gradient(circle, rgba(255,255,255,0.32) 0%, transparent 70%); border-radius: 50%; }
+.avatar::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 70%; height: 45%; transform: translateX(-50%); background: linear-gradient(to top, rgba(140,74,40,0.35), transparent); border-radius: 50% 50% 0 0 / 80% 80% 0 0; }
+
+
+/* Hide preview chrome / dev placeholders by default — the user sees the actual app */
+.frame-label { display: none !important; }
+/* Show only on hover for inspection (Ctrl-hover or developer mode) */
+body.dev-mode .frame-label { display: block !important; }
+
+</style>
+<script>
+const LUCIDE_PATHS = {
+  'home': '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  'users': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  'heart': '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  'building': '<rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>',
+  'briefcase': '<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  'calendar': '<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>',
+  'sparkles': '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
+  'layout-grid': '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  'mail': '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  'qr-code': '<rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/>',
+  'image': '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
+  'shopping-cart': '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+  'settings': '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  'credit-card': '<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>',
+  'bar-chart-3': '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  'film': '<rect width="20" height="20" x="2" y="2" rx="2.18" ry="2.18"/><line x1="7" x2="7" y1="2" y2="22"/><line x1="17" x2="17" y1="2" y2="22"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="2" x2="7" y1="7" y2="7"/><line x1="2" x2="7" y1="17" y2="17"/><line x1="17" x2="22" y1="17" y2="17"/><line x1="17" x2="22" y1="7" y2="7"/>',
+  'camera': '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+  'message-circle': '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  'star': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  'check': '<polyline points="20 6 9 17 4 12"/>',
+  'check-circle-2': '<circle cx="12" cy="12" r="10"/><polyline points="9 12 12 15 16 10"/>',
+  'map-pin': '<path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  'bell': '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  'utensils-crossed': '<path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/>',
+  'cake': '<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3"/><path d="M12 8v3"/><path d="M17 8v3"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/>',
+  'clock': '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  'minus': '<path d="M5 12h14"/>',
+  'x': '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  'folder': '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+  'smartphone': '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/>',
+  'party-popper': '<path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-1.7.3a2.6 2.6 0 0 0-2.1 1.55l-.21.55a1.84 1.84 0 0 1-3.46-.18l-.27-.81a1.85 1.85 0 0 0-2.7-1.06L9 14.6"/><path d="m11 2-1.46.51a2.94 2.94 0 0 0-2 2.06L7 7"/>'
+};
+
+const LUCIDE_SVG_TEMPLATE = (paths, size, strokeWidth) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+
+function renderLucideIcons(root) {
+  root = root || document;
+  const nodes = root.querySelectorAll('[data-icon]:not([data-icon-rendered])');
+  nodes.forEach(function(node) {
+    const name = node.getAttribute('data-icon');
+    const size = parseInt(node.getAttribute('data-size') || '20', 10);
+    const stroke = parseFloat(node.getAttribute('data-stroke') || '1.75');
+    const paths = LUCIDE_PATHS[name];
+    if (!paths) { console.warn('[lucide] unknown icon:', name); return; }
+    node.innerHTML = LUCIDE_SVG_TEMPLATE(paths, size, stroke);
+    node.setAttribute('data-icon-rendered', '1');
+    node.style.display = 'inline-flex';
+    node.style.alignItems = 'center';
+    node.style.justifyContent = 'center';
+    node.style.verticalAlign = 'middle';
+    node.style.lineHeight = '1';
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() { renderLucideIcons(); });
+</script>
+
+</head>
+<body data-surface="home" data-view="both">
+
+<header class="canvas-header">
+  <div class="canvas-title">
+    <h1>Admin Console · Setnayan Operations</h1>
+    <div class="canvas-meta">0023 · 7 surfaces · Cara Aquino · Ops Lead · queues + payments + disputes</div>
+  </div>
+  <div class="canvas-toggle" id="viewToggle">
+    <button class="toggle-pill" data-view="desktop">Web</button>
+    <button class="toggle-pill" data-view="mobile">Mobile</button>
+    <button class="toggle-pill active" data-view="both">Both</button>
+  </div>
+</header>
+
+<nav class="surface-bar" id="surfaceBar">
+  <button class="surface-tab active" data-surface="home"><span class="num">01</span> Home</button>
+  <button class="surface-tab" data-surface="verify"><span class="num">02</span> Verification · 6 pending</button>
+  <button class="surface-tab" data-surface="payments"><span class="num">03</span> Payments · 4 pending</button>
+  <button class="surface-tab" data-surface="users"><span class="num">04</span> Users · 1,247</button>
+  <button class="surface-tab" data-surface="pricing"><span class="num">05</span> Pricing &amp; Catalog</button>
+  <button class="surface-tab" data-surface="disputes"><span class="num">06</span> Disputes · 1 active</button>
+  <button class="surface-tab" data-surface="settings"><span class="num">07</span> Settings</button>
+</nav>
+
+<main class="surface-container" id="surfaceContainer">
+  <!-- ============ SURFACE 1 · HOME ============ -->
+  <section class="surface active" data-surface="home">
+    <div class="frames">
+      <div class="frame-col">
+        <div class="frame-label">Admin · Desktop · Home</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><div class="tl"><span></span><span></span><span></span></div><div class="url-bar"><span class="lock">🔒</span>setnayan.com/admin</div></div>
+          <div class="app-bar">
+            <div class="brand-block"><span class="brand-pin"></span><span class="brand-name">SETNAYAN</span> · <em style="font-style:italic; color: var(--ink-soft);">Admin</em></div>
+            <div class="dash-nav">
+              <span class="dash-nav-link active" data-surface="home">Home</span>
+              <span class="dash-nav-link" data-surface="verify">Verify</span>
+              <span class="dash-nav-link" data-surface="payments">Payments</span>
+              <span class="dash-nav-link" data-surface="users">Users</span>
+              <span class="dash-nav-link" data-surface="pricing">Pricing</span>
+              <span class="dash-nav-link" data-surface="disputes">Refunds</span>
+              <span class="dash-nav-link" data-surface="settings">Settings</span>
+            </div>
+            <div class="dash-right"><span class="chip admin">OPS LEAD</span><div class="avatar">CA</div></div>
+          </div>
+          <div class="scrn">
+            <div class="eyebrow">SETNAYAN OPERATIONS · MON NOV 11</div>
+            <h2>Good morning, Cara.</h2>
+            <p>11 items in your queues today · 1 two-admin approval pending · 0 platform alerts.</p>
+
+            <!-- Queue overview grid -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0 22px;">
+              <div class="queue-card urgent" style="cursor: pointer;" data-surface="verify">
+                <div class="card-eyebrow" style="color: var(--status-bad);">VERIFICATION QUEUE</div>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                  <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 32px; color: var(--ink); font-weight: 500;">6</div>
+                  <div style="font-size: 11.5px; color: var(--ink-soft);">vendors + services + categories</div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--ink-soft); margin-top: 4px;">3 vendor identity · 2 services · 1 custom category</div>
+                <div style="font-size: 10px; color: var(--status-bad); margin-top: 6px; font-weight: 600;">⚐ 1 approaching 3-day SLA</div>
+              </div>
+              <div class="queue-card" style="cursor: pointer;" data-surface="payments">
+                <div class="card-eyebrow">PAYMENTS AWAITING</div>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                  <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 32px; color: var(--ink); font-weight: 500;">4</div>
+                  <div style="font-size: 11.5px; color: var(--ink-soft);">customer payments to verify</div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--ink-soft); margin-top: 4px;">₱11,500 total · GCash + BDO inboxes</div>
+                <div style="font-size: 10px; color: var(--status-ok); margin-top: 6px; font-weight: 600;">✓ all within 24-hr SLA</div>
+              </div>
+              <div class="queue-card" style="cursor: pointer;" data-surface="disputes">
+                <div class="card-eyebrow">REFUNDS · GOODWILL</div>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                  <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 32px; color: var(--ink); font-weight: 500;">1</div>
+                  <div style="font-size: 11.5px; color: var(--ink-soft);">active customer-service case</div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--ink-soft); margin-top: 4px;">Mendoza couple · vendor partial-delivery</div>
+                <div style="font-size: 10px; color: var(--admin-purple); margin-top: 6px; font-weight: 600;">In mediation · day 2</div>
+              </div>
+              <div class="queue-card ok" style="cursor: pointer;">
+                <div class="card-eyebrow" style="color: #3F6E47;">2-ADMIN APPROVALS</div>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                  <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 32px; color: var(--ink); font-weight: 500;">1</div>
+                  <div style="font-size: 11.5px; color: var(--ink-soft);">awaiting your approval</div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--ink-soft); margin-top: 4px;">Joel (admin) requesting ₱22K comp</div>
+                <div style="font-size: 10px; color: var(--ink-soft); margin-top: 6px;">⏱ expires 36h</div>
+              </div>
+              <div class="queue-card ok">
+                <div class="card-eyebrow" style="color: #3F6E47;">SIGNUPS TODAY</div>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                  <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 32px; color: var(--ink); font-weight: 500;">20</div>
+                  <div style="font-size: 11.5px; color: var(--ink-soft);">new accounts</div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--ink-soft); margin-top: 4px;">14 couples · 6 vendors · informational</div>
+              </div>
+              <div class="queue-card ok">
+                <div class="card-eyebrow" style="color: #3F6E47;">PLATFORM HEALTH</div>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                  <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 32px; color: var(--status-ok); font-weight: 500;">100%</div>
+                  <div style="font-size: 11.5px; color: var(--ink-soft);">all systems green</div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--ink-soft); margin-top: 4px;">Supabase · R2 · YouTube · Daily.co</div>
+              </div>
+            </div>
+
+            <!-- Team Shared Pool widget (§ 10b) -->
+            <div class="card" style="margin-top: 0; padding: 16px 18px; background: linear-gradient(135deg, var(--admin-purple-soft) 0%, var(--surface) 100%); border: 1px solid var(--admin-purple-soft);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <div>
+                  <div class="card-eyebrow" style="color: var(--admin-purple);">🟢 TEAM SHARED POOL · MAY 2026</div>
+                  <div style="font-size: 12px; color: var(--ink-soft); margin-top: 2px;">In-app credit shared across non-owner team · use-it-or-lose-it · resets June 1</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 26px; color: var(--ink); font-weight: 500;">₱6,502</div>
+                  <div style="font-size: 10px; color: var(--ink-soft);">remaining of ₱10,000</div>
+                </div>
+              </div>
+              <div style="background: var(--rule); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+                <div style="width: 35%; height: 100%; background: var(--admin-purple); border-radius: 4px;"></div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 11px;">
+                <div><span style="color: var(--ink-soft);">Allocated</span><div style="font-weight: 600;">₱10,000</div></div>
+                <div><span style="color: var(--ink-soft);">Consumed (35%)</span><div style="font-weight: 600;">₱3,498</div></div>
+                <div><span style="color: var(--ink-soft);">Remaining</span><div style="font-weight: 600; color: var(--admin-purple);">₱6,502</div></div>
+              </div>
+              <div style="border-top: 1px solid var(--rule); margin-top: 10px; padding-top: 8px; font-size: 10.5px; color: var(--ink-soft);">
+                <strong style="color: var(--ink);">Recent consumption:</strong>
+                Ana Cruz · Paparazzi 3-seat · ₱1,499 · May 10 &nbsp;·&nbsp; Ben Reyes · AI Edited Highlight · ₱1,999 · May 8
+              </div>
+            </div>
+
+            <div style="height: 18px;"></div>
+
+            <!-- Recent admin activity feed -->
+            <h4 style="margin-top: 0;">Recent admin activity</h4>
+            <div class="card soft" style="padding: 6px 16px;">
+              <div class="list-row"><span class="name"><span class="chip admin" style="margin-right: 6px; font-size: 8.5px;">JOEL</span>Approved vendor: <strong>Casa Florals</strong> — verified after portfolio review</span><span class="meta">14 min ago</span></div>
+              <div class="list-row"><span class="name"><span class="chip admin" style="margin-right: 6px; font-size: 8.5px;">CARA</span>Confirmed payment: Garcia-Cruz · ₱2,499 · activated Papic 5-seat</span><span class="meta">38 min ago</span></div>
+              <div class="list-row"><span class="name"><span class="chip admin" style="margin-right: 6px; font-size: 8.5px;">JOEL</span>Issued ₱500 goodwill credit to Bayot-Tan (delayed activation)</span><span class="meta">2 hr ago</span></div>
+              <div class="list-row"><span class="name"><span class="chip admin" style="margin-right: 6px; font-size: 8.5px;">CARA</span>Promoted custom category: &quot;Documentary &amp; Heirloom Restoration&quot; to global</span><span class="meta">yesterday</span></div>
+              <div class="list-row"><span class="name"><span class="chip admin" style="margin-right: 6px; font-size: 8.5px;">SYS</span>SKU price scheduled: <strong>panood_hour_addon</strong> · ₱1,000 → ₱1,100 · effective Dec 1</span><span class="meta">yesterday</span></div>
+            </div>
+
+            <!-- Platform metrics -->
+            <h4>Platform metrics · last 7 days</h4>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+              <div class="card" style="text-align: center; padding: 14px;">
+                <div class="card-eyebrow">DAILY ACTIVE</div>
+                <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 28px; color: var(--ink); font-weight: 500;">847</div>
+                <div style="font-size: 10px; color: var(--status-ok);">+12% w/w</div>
+              </div>
+              <div class="card" style="text-align: center; padding: 14px;">
+                <div class="card-eyebrow">NEW EVENTS</div>
+                <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 28px; color: var(--ink); font-weight: 500;">38</div>
+                <div style="font-size: 10px; color: var(--status-ok);">+5 w/w</div>
+              </div>
+              <div class="card" style="text-align: center; padding: 14px;">
+                <div class="card-eyebrow">SKU REVENUE · 7D</div>
+                <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; color: var(--accent-deep); font-weight: 500;">₱312K</div>
+                <div style="font-size: 10px; color: var(--status-ok);">+18% w/w</div>
+              </div>
+              <div class="card" style="text-align: center; padding: 14px;">
+                <div class="card-eyebrow">VERIFIED VENDORS</div>
+                <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 28px; color: var(--ink); font-weight: 500;">156</div>
+                <div style="font-size: 10px; color: var(--status-ok);">+8 this week</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-col">
+        <div class="frame-label">Admin · Mobile · Home</div>
+        <div class="frame-mobile"><div class="phone-notch"></div><div class="phone-body">
+          <div class="phone-status"><span>9:41</span><span>5G · 87%</span></div>
+          <div class="app-bar" style="padding: 10px 16px;">
+            <div class="brand-block" style="font-size:15px;"><span class="brand-pin"></span>Admin</div>
+            <div class="avatar sm">CA</div>
+          </div>
+          <div class="phone-scrn">
+            <div class="eyebrow">MON NOV 11</div>
+            <h3>Good morning, Cara.</h3>
+            <p style="font-size: 11.5px;">11 items · 1 two-admin approval</p>
+
+            <h4 style="margin-top: 10px;">Queues</h4>
+            <div class="queue-card urgent" style="margin-bottom: 8px;" data-surface="verify">
+              <div class="card-eyebrow" style="color: var(--status-bad); font-size: 8.5px;">VERIFICATION · URGENT</div>
+              <div style="font-size: 22px; font-weight: 600;">6 pending</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">3 vendors · 2 services · 1 category</div>
+            </div>
+            <div class="queue-card" style="margin-bottom: 8px;" data-surface="payments">
+              <div class="card-eyebrow" style="font-size: 8.5px;">PAYMENTS</div>
+              <div style="font-size: 22px; font-weight: 600;">4 pending</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">₱11,500 total</div>
+            </div>
+            <div class="queue-card" style="margin-bottom: 8px;" data-surface="disputes">
+              <div class="card-eyebrow" style="font-size: 8.5px;">REFUNDS</div>
+              <div style="font-size: 22px; font-weight: 600;">1 active</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">Mendoza · day 2</div>
+            </div>
+            <div class="queue-card ok" style="margin-bottom: 12px;">
+              <div class="card-eyebrow" style="font-size: 8.5px;">2-ADMIN APPROVAL</div>
+              <div style="font-size: 22px; font-weight: 600;">1 waiting</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">Joel · ₱22K comp · 36h left</div>
+            </div>
+
+            <h4>Recent activity</h4>
+            <div class="card soft" style="padding: 6px 12px; font-size: 10.5px;">
+              <div style="padding: 6px 0; border-bottom: 1px dashed var(--rule);">Joel verified Casa Florals · 14m</div>
+              <div style="padding: 6px 0; border-bottom: 1px dashed var(--rule);">Cara activated Papic for Garcia · 38m</div>
+              <div style="padding: 6px 0;">Joel issued ₱500 goodwill · 2h</div>
+            </div>
+          </div>
+          <div class="bot-nav">
+            <div class="bot-nav-item active" data-surface="home"><div class="ico"><span data-icon="home" data-size="18"></span></div>Home</div>
+            <div class="bot-nav-item" data-surface="verify"><div class="ico">✓</div>Verify</div>
+            <div class="bot-nav-item" data-surface="payments"><div class="ico"><span data-icon="credit-card" data-size="18"></span></div>Pay</div>
+            <div class="bot-nav-item" data-surface="users"><div class="ico"><span data-icon="users" data-size="18"></span></div>Users</div>
+            <div class="bot-nav-item" data-surface="settings"><div class="ico">⋯</div>More</div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SURFACE 2 · VERIFICATION ============ -->
+  <section class="surface" data-surface="verify">
+    <div class="frames">
+      <div class="frame-col">
+        <div class="frame-label">Admin · Desktop · Verification Queues</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><div class="tl"><span></span><span></span><span></span></div><div class="url-bar"><span class="lock">🔒</span>setnayan.com/admin/verify</div></div>
+          <div class="app-bar">
+            <div class="brand-block"><span class="brand-pin"></span><span class="brand-name">SETNAYAN</span> · <em style="font-style:italic; color: var(--ink-soft);">Admin</em></div>
+            <div class="dash-nav">
+              <span class="dash-nav-link" data-surface="home">Home</span>
+              <span class="dash-nav-link active" data-surface="verify">Verify</span>
+              <span class="dash-nav-link" data-surface="payments">Payments</span>
+              <span class="dash-nav-link" data-surface="users">Users</span>
+              <span class="dash-nav-link" data-surface="pricing">Pricing</span>
+              <span class="dash-nav-link" data-surface="disputes">Refunds</span>
+              <span class="dash-nav-link" data-surface="settings">Settings</span>
+            </div>
+            <div class="dash-right"><span class="chip admin">OPS LEAD</span><div class="avatar">CA</div></div>
+          </div>
+          <div class="scrn">
+            <div class="eyebrow">3 QUEUES · 6 ITEMS · 3-BUSINESS-DAY SLA</div>
+            <h2>Verification queues</h2>
+            <p>Three queues stacked on one screen. Approve, reject, or request more info.</p>
+
+            <div class="banner warn"><span>⚐</span><div><strong>Wildflower Catering</strong> has been pending 2 business days. Auto-email going out at 48h if no decision.</div></div>
+
+            <!-- Queue A · Vendor identity verification -->
+            <h4 style="margin-top: 16px;">A · Vendor identity verification · 3 pending</h4>
+            <p style="font-size: 11px;">New vendors awaiting first approval. Check portfolio, sample work, business registration. 3-business-day SLA.</p>
+            <div class="queue-card urgent" style="margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                <div style="flex: 1;">
+                  <div class="card-eyebrow" style="color: var(--status-bad);">SUBMITTED 2 BUSINESS DAYS AGO · ⚐ SLA RISK</div>
+                  <div class="card-title">Wildflower Catering</div>
+                  <div class="card-body">Catering · Manila · 4 yrs · DTI registered · <a style="color: var(--accent-deep);">portfolio.wildflower-ph.com ↗</a></div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <span class="chip" style="font-size: 9px;">DTI ✓</span>
+                    <span class="chip" style="font-size: 9px;">Gov ID ✓</span>
+                    <span class="chip" style="font-size: 9px;">Portfolio 14 photos</span>
+                    <span class="chip warn" style="font-size: 9px;">BIR ✗ missing</span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button class="btn purple sm">Approve ✓</button>
+                  <button class="btn ghost sm">Request BIR cert</button>
+                  <button class="btn ghost sm" style="color: var(--status-bad);">Reject</button>
+                </div>
+              </div>
+            </div>
+            <div class="queue-card" style="margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                <div style="flex: 1;">
+                  <div class="card-eyebrow">SUBMITTED 1 BUSINESS DAY AGO</div>
+                  <div class="card-title">Bloom Atelier · Bridal Gowns</div>
+                  <div class="card-body">Atelier · Tagaytay · 8 yrs · DTI + BIR registered</div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <span class="chip ok" style="font-size: 9px;">All docs ✓</span>
+                    <span class="chip" style="font-size: 9px;">Portfolio 22 photos</span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button class="btn purple sm">Approve ✓</button>
+                  <button class="btn ghost sm">Reject</button>
+                </div>
+              </div>
+            </div>
+            <div class="queue-card" style="margin-bottom: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                <div style="flex: 1;">
+                  <div class="card-eyebrow">SUBMITTED TODAY</div>
+                  <div class="card-title">Lumière Sound &amp; Lights</div>
+                  <div class="card-body">Lights &amp; Sound · Cebu · 6 yrs</div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <span class="chip ok" style="font-size: 9px;">All docs ✓</span>
+                    <span class="chip" style="font-size: 9px;">Portfolio 18 photos</span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button class="btn purple sm">Approve ✓</button>
+                  <button class="btn ghost sm">Reject</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Queue B · Service approval -->
+            <h4>B · Vendor service approval · 2 pending</h4>
+            <p style="font-size: 11px;">Already-verified vendors publishing new services. First service requires approval; later edits auto-approve unless heuristic triggers.</p>
+            <div class="queue-card" style="margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                <div style="flex: 1;">
+                  <div class="card-eyebrow">MARIPOSA BLOOM · NEW SERVICE</div>
+                  <div class="card-title">&quot;Cinematic Highlight Edit · Same Day&quot;</div>
+                  <div class="card-body">Video · ₱45,000 · 6 hours · same-day delivery · 12 photos + 2 videos in gallery</div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <span class="chip ok" style="font-size: 9px;">Pricing within category range</span>
+                    <span class="chip ok" style="font-size: 9px;">Photos look real</span>
+                    <span class="chip" style="font-size: 9px;">Inclusions complete</span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button class="btn purple sm">Approve ✓</button>
+                  <button class="btn ghost sm">Request edit</button>
+                </div>
+              </div>
+            </div>
+            <div class="queue-card" style="margin-bottom: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                <div style="flex: 1;">
+                  <div class="card-eyebrow">CASA FLORALS · NEW SERVICE</div>
+                  <div class="card-title">&quot;Garden Wedding Florals Premium&quot;</div>
+                  <div class="card-body">Florals · ₱120,000 · ceremony arch + 12 centerpieces + bouquet + entourage</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button class="btn purple sm">Approve ✓</button>
+                  <button class="btn ghost sm">Request edit</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Queue C · Custom category review -->
+            <h4>C · Custom category review · 1 proposed</h4>
+            <p style="font-size: 11px;">Vendor proposed a new global category. Promote to canonical taxonomy, keep as private label, or reject.</p>
+            <div class="queue-card" style="margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                <div style="flex: 1;">
+                  <div class="card-eyebrow">PROPOSED BY MARIPOSA BLOOM</div>
+                  <div class="card-title">&quot;Photography · Documentary &amp; Heirloom Restoration&quot;</div>
+                  <div class="card-body">Documentary photography that also restores damaged family heirloom photos as part of the package — e.g., scan grandma&apos;s wedding album and bring it back to life for display at the reception.</div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <span class="chip" style="font-size: 9px;">Parent: Photography</span>
+                    <span class="chip" style="font-size: 9px;">Unique vs 28 canonical · yes</span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button class="btn purple sm">Promote to global</button>
+                  <button class="btn ghost sm">Keep private label</button>
+                  <button class="btn ghost sm" style="color: var(--status-bad);">Reject</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-col">
+        <div class="frame-label">Admin · Mobile · Verification</div>
+        <div class="frame-mobile"><div class="phone-notch"></div><div class="phone-body">
+          <div class="phone-status"><span>9:41</span><span>5G · 87%</span></div>
+          <div class="app-bar" style="padding: 10px 16px;">
+            <div class="brand-block" style="font-size:15px;"><span class="brand-pin"></span>Verify</div>
+          </div>
+          <div class="phone-scrn">
+            <div class="eyebrow">6 ITEMS · 3 QUEUES</div>
+            <h3>Queues</h3>
+
+            <div style="display: flex; gap: 4px; margin-bottom: 10px;">
+              <span class="chip admin" style="font-size: 9.5px;">Vendors · 3</span>
+              <span class="chip" style="font-size: 9.5px;">Services · 2</span>
+              <span class="chip" style="font-size: 9.5px;">Category · 1</span>
+            </div>
+
+            <h4>Vendors · 3</h4>
+            <div class="queue-card urgent" style="padding: 12px; margin-bottom: 8px;">
+              <div class="card-eyebrow" style="color: var(--status-bad); font-size: 8.5px;">⚐ SLA RISK · DAY 2</div>
+              <div style="font-size: 12px; font-weight: 600;">Wildflower Catering</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">Catering · Manila · BIR missing</div>
+              <div style="display: flex; gap: 6px; margin-top: 8px;">
+                <button class="btn purple sm">✓ Approve</button>
+                <button class="btn ghost sm">More info</button>
+              </div>
+            </div>
+            <div class="queue-card" style="padding: 12px; margin-bottom: 8px;">
+              <div class="card-eyebrow" style="font-size: 8.5px;">SUBMITTED 1 DAY AGO</div>
+              <div style="font-size: 12px; font-weight: 600;">Bloom Atelier</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">Atelier · all docs ✓</div>
+              <button class="btn purple sm" style="margin-top: 8px;">✓ Approve</button>
+            </div>
+            <div class="queue-card" style="padding: 12px; margin-bottom: 8px;">
+              <div class="card-eyebrow" style="font-size: 8.5px;">TODAY</div>
+              <div style="font-size: 12px; font-weight: 600;">Lumière Sound &amp; Lights</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">Lights · all docs ✓</div>
+              <button class="btn purple sm" style="margin-top: 8px;">✓ Approve</button>
+            </div>
+
+            <h4>Services · 2</h4>
+            <div class="queue-card" style="padding: 12px; margin-bottom: 8px;">
+              <div class="card-eyebrow" style="font-size: 8.5px;">MARIPOSA BLOOM</div>
+              <div style="font-size: 12px; font-weight: 600;">Cinematic Highlight Edit</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">₱45K · same-day</div>
+              <button class="btn purple sm" style="margin-top: 8px;">✓ Approve</button>
+            </div>
+          </div>
+          <div class="bot-nav">
+            <div class="bot-nav-item" data-surface="home"><div class="ico"><span data-icon="home" data-size="18"></span></div>Home</div>
+            <div class="bot-nav-item active" data-surface="verify"><div class="ico">✓</div>Verify</div>
+            <div class="bot-nav-item" data-surface="payments"><div class="ico"><span data-icon="credit-card" data-size="18"></span></div>Pay</div>
+            <div class="bot-nav-item" data-surface="users"><div class="ico"><span data-icon="users" data-size="18"></span></div>Users</div>
+            <div class="bot-nav-item" data-surface="settings"><div class="ico">⋯</div>More</div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SURFACE 3 · PAYMENTS &amp; ACTIVATIONS ============ -->
+  <section class="surface" data-surface="payments">
+    <div class="frames">
+      <div class="frame-col">
+        <div class="frame-label">Admin · Desktop · Payments &amp; Activations</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><div class="tl"><span></span><span></span><span></span></div><div class="url-bar"><span class="lock">🔒</span>setnayan.com/admin/payments</div></div>
+          <div class="app-bar">
+            <div class="brand-block"><span class="brand-pin"></span><span class="brand-name">SETNAYAN</span> · <em style="font-style:italic; color: var(--ink-soft);">Admin</em></div>
+            <div class="dash-nav">
+              <span class="dash-nav-link" data-surface="home">Home</span>
+              <span class="dash-nav-link" data-surface="verify">Verify</span>
+              <span class="dash-nav-link active" data-surface="payments">Payments</span>
+              <span class="dash-nav-link" data-surface="users">Users</span>
+              <span class="dash-nav-link" data-surface="pricing">Pricing</span>
+              <span class="dash-nav-link" data-surface="disputes">Refunds</span>
+              <span class="dash-nav-link" data-surface="settings">Settings</span>
+            </div>
+            <div class="dash-right"><span class="chip admin">OPS LEAD</span><div class="avatar">CA</div></div>
+          </div>
+          <div class="scrn">
+            <div class="eyebrow">4 AWAITING · ₱11,500 TOTAL · 24-HR SLA</div>
+            <h2>Payment verification &amp; activation</h2>
+            <p>Customer paid externally → check the BDO statement / GCash inbox → click Verified → activation hook fires.</p>
+
+            <div class="banner admin"><span>🔔</span><div><strong>2 customers uploaded payment screenshots in the last hour.</strong> Open the BDO and GCash dashboards in adjacent tabs · click "Cross-check" to match reference codes.</div></div>
+
+            <div style="display: flex; gap: 8px; margin: 14px 0;">
+              <button class="btn ghost sm">Open BDO Business Banking ↗</button>
+              <button class="btn ghost sm">Open GCash for Business ↗</button>
+              <button class="btn ghost sm" style="margin-left: auto;">⤓ Today&apos;s reconciliation CSV</button>
+            </div>
+
+            <h4 style="margin-top: 0;">Pending verifications</h4>
+            <div class="queue-card" style="margin-bottom: 10px;">
+              <div style="display: flex; gap: 14px;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #007BFF, #003D80); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-align: center; font-family: 'DM Mono', monospace; flex-shrink: 0;">RECEIPT<br/>GCash<br/>16:14</div>
+                <div style="flex: 1;">
+                  <div class="card-eyebrow">SUBMITTED 16:14 · GCASH · 30 MIN AGO</div>
+                  <div class="card-title">app_papic5_x9h2 · Aira &amp; Boy</div>
+                  <div class="card-body">Papic · 5 seats · ₱2,500.00 · couple confirmation: &quot;Confirming this payment is for app_papic5_x9h2 · Papic 5-seat&quot;</div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px; align-items: center;">
+                    <span class="chip ok" style="font-size: 9.5px;">GCash reference matches</span>
+                    <span class="chip ok" style="font-size: 9.5px;">Amount ₱2,499 ✓</span>
+                    <span class="chip" style="font-size: 9.5px;">Sender: 0917-***-1234</span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                  <button class="btn purple sm">✓ Verified · activate</button>
+                  <button class="btn ghost sm">⚐ Mismatch</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="queue-card" style="margin-bottom: 10px;">
+              <div style="display: flex; gap: 14px;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #C8102E, #8B0000); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-align: center; font-family: 'DM Mono', monospace; flex-shrink: 0;">RECEIPT<br/>BDO<br/>11:22</div>
+                <div style="flex: 1;">
+                  <div class="card-eyebrow">SUBMITTED 11:22 · BDO TRANSFER</div>
+                  <div class="card-title">app_lstrm_base_v3 · Garcia-Cruz</div>
+                  <div class="card-body">Live Stream Base · ₱2,499 · BDO Account 001234567890 · note in transfer: &quot;app_lstrm_base_v3&quot;</div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <span class="chip ok" style="font-size: 9.5px;">BDO ref matches</span>
+                    <span class="chip ok" style="font-size: 9.5px;">Amount ✓</span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                  <button class="btn purple sm">✓ Verified · activate</button>
+                  <button class="btn ghost sm">⚐ Mismatch</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="queue-card urgent" style="margin-bottom: 10px;">
+              <div style="display: flex; gap: 14px;">
+                <div style="width: 80px; height: 80px; background: var(--page-bg-soft); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--ink-faint); font-size: 9px; text-align: center; flex-shrink: 0;">NO RECEIPT<br/>YET</div>
+                <div style="flex: 1;">
+                  <div class="card-eyebrow" style="color: var(--status-bad);">SUBMITTED 08:14 · AMOUNT MISMATCH</div>
+                  <div class="card-title">app_monogram_z8 · Tan-Reyes</div>
+                  <div class="card-body">Customer claims paid ₱1,999 via GCash, but BDO/GCash inboxes show ₱1,499 only. Couple may have typed wrong amount.</div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <span class="chip bad" style="font-size: 9.5px;">Amount mismatch · ₱500 short</span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                  <button class="btn ghost sm" style="color: var(--status-bad);">Contact customer</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="queue-card" style="margin-bottom: 10px;">
+              <div style="display: flex; gap: 14px;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #007BFF, #003D80); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; text-align: center; font-family: 'DM Mono', monospace; flex-shrink: 0;">RECEIPT<br/>GCash<br/>14:30</div>
+                <div style="flex: 1;">
+                  <div class="card-eyebrow">SUBMITTED 14:30</div>
+                  <div class="card-title">app_widgets_pro_a4 · Cruz-Lim</div>
+                  <div class="card-body">Pro Bundle (Invitation Widgets) · ₱199 · GCash transfer</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                  <button class="btn purple sm">✓ Verified · activate</button>
+                </div>
+              </div>
+            </div>
+
+            <h4>Activation hook idempotency</h4>
+            <div class="card soft" style="padding: 12px 14px; font-size: 11.5px; color: var(--ink-soft);">
+              <strong style="color: var(--ink);">Per MC-07 from iteration 0020:</strong> the &quot;Verified · activate&quot; button is debounced + the activation hook has a DB unique constraint on (application_id, slot_index). Double-clicking won&apos;t double-insert seats. Audit log records each click with timestamp + admin ID.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-col">
+        <div class="frame-label">Admin · Mobile · Payments</div>
+        <div class="frame-mobile"><div class="phone-notch"></div><div class="phone-body">
+          <div class="phone-status"><span>9:41</span><span>5G · 87%</span></div>
+          <div class="app-bar" style="padding: 10px 16px;"><div class="brand-block" style="font-size:15px;"><span class="brand-pin"></span>Payments</div></div>
+          <div class="phone-scrn">
+            <div class="eyebrow">4 AWAITING · ₱11,500</div>
+            <h3>Verify &amp; activate</h3>
+            <div class="queue-card" style="padding: 12px; margin-bottom: 8px;">
+              <div class="card-eyebrow" style="font-size: 8.5px;">GCASH · 30M AGO</div>
+              <div style="font-size: 12px; font-weight: 600;">Aira &amp; Boy · Papic 5</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">₱2,499 · ref matches</div>
+              <button class="btn purple sm" style="margin-top: 8px;">✓ Activate</button>
+            </div>
+            <div class="queue-card" style="padding: 12px; margin-bottom: 8px;">
+              <div class="card-eyebrow" style="font-size: 8.5px;">BDO</div>
+              <div style="font-size: 12px; font-weight: 600;">Garcia-Cruz · Live Stream</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">₱2,499 · ref matches</div>
+              <button class="btn purple sm" style="margin-top: 8px;">✓ Activate</button>
+            </div>
+            <div class="queue-card urgent" style="padding: 12px; margin-bottom: 8px;">
+              <div class="card-eyebrow" style="color: var(--status-bad); font-size: 8.5px;">MISMATCH</div>
+              <div style="font-size: 12px; font-weight: 600;">Tan-Reyes · Monogram</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">Amount ₱500 short</div>
+              <button class="btn ghost sm" style="margin-top: 8px; color: var(--status-bad);">Contact</button>
+            </div>
+          </div>
+          <div class="bot-nav">
+            <div class="bot-nav-item" data-surface="home"><div class="ico"><span data-icon="home" data-size="18"></span></div>Home</div>
+            <div class="bot-nav-item" data-surface="verify"><div class="ico">✓</div>Verify</div>
+            <div class="bot-nav-item active" data-surface="payments"><div class="ico"><span data-icon="credit-card" data-size="18"></span></div>Pay</div>
+            <div class="bot-nav-item" data-surface="users"><div class="ico"><span data-icon="users" data-size="18"></span></div>Users</div>
+            <div class="bot-nav-item" data-surface="settings"><div class="ico">⋯</div>More</div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SURFACE 4 · USERS ============ -->
+  <section class="surface" data-surface="users">
+    <div class="frames">
+      <div class="frame-col">
+        <div class="frame-label">Admin · Desktop · Users</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><div class="tl"><span></span><span></span><span></span></div><div class="url-bar"><span class="lock">🔒</span>setnayan.com/admin/users</div></div>
+          <div class="app-bar">
+            <div class="brand-block"><span class="brand-pin"></span><span class="brand-name">SETNAYAN</span> · <em style="font-style:italic; color: var(--ink-soft);">Admin</em></div>
+            <div class="dash-nav">
+              <span class="dash-nav-link" data-surface="home">Home</span>
+              <span class="dash-nav-link" data-surface="verify">Verify</span>
+              <span class="dash-nav-link" data-surface="payments">Payments</span>
+              <span class="dash-nav-link active" data-surface="users">Users</span>
+              <span class="dash-nav-link" data-surface="pricing">Pricing</span>
+              <span class="dash-nav-link" data-surface="disputes">Refunds</span>
+              <span class="dash-nav-link" data-surface="settings">Settings</span>
+            </div>
+            <div class="dash-right"><span class="chip admin">OPS LEAD</span><div class="avatar">CA</div></div>
+          </div>
+          <div class="scrn">
+            <div class="eyebrow">1,247 TOTAL · 1,091 COUPLES · 156 VENDORS · 4 ADMINS</div>
+            <h2>Users</h2>
+
+            <div style="display: flex; gap: 8px; margin: 14px 0; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 240px; background: var(--surface); border: 1px solid var(--rule-strong); padding: 9px 14px; border-radius: 999px; font-size: 11.5px; color: var(--ink-soft);">🔍 Search by name, email, business name…</div>
+              <span class="chip admin">All · 1,247</span>
+              <span class="chip">Couples · 1,091</span>
+              <span class="chip">Vendors · 156</span>
+              <span class="chip">Admins · 4</span>
+              <span class="chip">Suspended · 2</span>
+            </div>
+
+            <table class="sheet-table">
+              <thead>
+                <tr><th>Name</th><th>Type</th><th>Joined</th><th>Last active</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>Aira Reyes &amp; Boy Delos Santos</strong></td><td><span class="chip" style="font-size: 9px;">Couple</span></td><td>2026-04-12</td><td>2 min ago</td><td><span class="chip ok" style="font-size: 9px;">Active · 6 SKUs</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+                <tr><td><strong>Mariposa Bloom Photography</strong></td><td><span class="chip" style="font-size: 9px;">Vendor</span></td><td>2026-04-08</td><td>14 min ago</td><td><span class="chip ok" style="font-size: 9px;">Verified · Pro</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+                <tr><td><strong>Wildflower Catering</strong></td><td><span class="chip" style="font-size: 9px;">Vendor</span></td><td>2026-05-08</td><td>3 hr ago</td><td><span class="chip warn" style="font-size: 9px;">Pending verify</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+                <tr><td><strong>Garcia-Cruz</strong></td><td><span class="chip" style="font-size: 9px;">Couple</span></td><td>2026-05-09</td><td>38 min ago</td><td><span class="chip ok" style="font-size: 9px;">Active</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+                <tr><td><strong>Joel Magat (Ops)</strong></td><td><span class="chip admin" style="font-size: 9px;">Admin</span></td><td>2026-03-22</td><td>just now</td><td><span class="chip ok" style="font-size: 9px;">Active · 2-yr admin</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+                <tr><td>Reyes-Delos Santos (Aira&apos;s sister)</td><td><span class="chip" style="font-size: 9px;">Couple</span></td><td>2026-04-30</td><td>yesterday</td><td><span class="chip ok" style="font-size: 9px;">Active</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+                <tr><td>North Star Cinema</td><td><span class="chip" style="font-size: 9px;">Vendor</span></td><td>2026-03-15</td><td>2 hr ago</td><td><span class="chip ok" style="font-size: 9px;">Verified · Pro</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+                <tr><td>Spam Vendor X</td><td><span class="chip" style="font-size: 9px;">Vendor</span></td><td>2026-04-19</td><td>2 weeks ago</td><td><span class="chip bad" style="font-size: 9px;">Suspended · TOS</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+                <tr><td><strong>Indalecio Casasola</strong></td><td><span class="chip" style="font-size: 9px;">Customer</span></td><td>2026-01-04</td><td>now</td><td><span class="chip" style="background: #F3E8FF; color: #6E5BAD; border-color: #C9B8FF; font-size: 9px;">🟣 Internal · § 10a</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+                <tr><td><strong>Ana Cruz</strong></td><td><span class="chip admin" style="font-size: 9px;">Team</span></td><td>2026-03-18</td><td>1 hr ago</td><td><span class="chip" style="background: #E6F4EC; color: #2E7D4A; border-color: #B8E4C9; font-size: 9px;">🟢 Team · Pool · § 10b</span></td><td><button class="btn ghost sm">Open →</button></td></tr>
+              </tbody>
+            </table>
+
+            <!-- Sample rows showing § 10a / § 10b badge presentation (desktop list form) -->
+            <h4>Internal &amp; team accounts · badges (§ 10a / § 10b)</h4>
+            <div class="card soft" style="padding: 6px 14px;">
+              <div class="list-row" style="padding: 10px 12px;">
+                <div class="lhs">
+                  <div class="avatar sm" style="background: #F3E8FF; color: #6E5BAD;">IC</div>
+                  <div>
+                    <div class="name">Indalecio Casasola</div>
+                    <div class="meta">Customer · owner · joined 2026-01-04 · last active now</div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <span class="chip" style="background: #F3E8FF; color: #6E5BAD; border-color: #C9B8FF; font-size: 9px;">🟣 Internal</span>
+                  <span class="chip ok" style="font-size: 9px;">Active</span>
+                </div>
+              </div>
+              <div class="list-row" style="padding: 10px 12px;">
+                <div class="lhs">
+                  <div class="avatar sm" style="background: #E6F4EC; color: #2E7D4A;">AC</div>
+                  <div>
+                    <div class="name">Ana Cruz</div>
+                    <div class="meta">Customer · Setnayan Team · Verification Handler · joined 2026-03-18</div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <span class="chip" style="background: #E6F4EC; color: #2E7D4A; border-color: #B8E4C9; font-size: 9px;">🟢 Team · Pool</span>
+                  <span class="chip ok" style="font-size: 9px;">Active</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Selected user detail -->
+            <h4 style="margin-top: 0;">Selected · Aira Reyes &amp; Boy Delos Santos</h4>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+              <div>
+                <div class="card" style="margin-bottom: 12px;">
+                  <div class="card-eyebrow">PROFILE</div>
+                  <div class="card-title">Aira Reyes &amp; Boy Delos Santos</div>
+                  <div class="card-body">aira@example.ph · +63 917 555 0123 · joined 2026-04-12 · last active 2 min ago</div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <span class="chip">Wedding · Nov 15, 2026 · Tagaytay</span>
+                    <span class="chip ok">156 guests RSVPed</span>
+                    <span class="chip accent">₱26,599 in apparatus</span>
+                  </div>
+                </div>
+                <h4>Audit log · last 8 actions</h4>
+                <div class="card soft" style="padding: 6px 14px;">
+                  <div class="list-row" style="padding: 6px 0; font-size: 10.5px;"><span class="name">Confirmed Papic 5-seat payment · ₱2,499</span><span class="meta">2 min ago · auto</span></div>
+                  <div class="list-row" style="padding: 6px 0; font-size: 10.5px;"><span class="name">Issued claim QRs · 5 paparazzi seats</span><span class="meta">2 min ago · system</span></div>
+                  <div class="list-row" style="padding: 6px 0; font-size: 10.5px;"><span class="name">Booked Mariposa Bloom · contract sent</span><span class="meta">yesterday</span></div>
+                  <div class="list-row" style="padding: 6px 0; font-size: 10.5px;"><span class="name">Published seating chart · 12 tables</span><span class="meta">3 days ago</span></div>
+                </div>
+              </div>
+              <div>
+                <h4 style="margin-top: 0;">Admin actions</h4>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button class="btn ghost sm">View as user (impersonate)</button>
+                  <button class="btn ghost sm">Send broadcast email</button>
+                  <button class="btn ghost sm">Issue comp / goodwill credit</button>
+                  <button class="btn ghost sm">Reset password</button>
+                  <button class="btn ghost sm" style="color: var(--status-bad);">Suspend account (2-admin)</button>
+                </div>
+                <h4>Spend history</h4>
+                <div class="card soft">
+                  <div class="kv"><span class="k">Total spend</span><span class="v accent">₱26,599</span></div>
+                  <div class="kv"><span class="k">Applications</span><span class="v">11 active</span></div>
+                  <div class="kv"><span class="k">Refunds</span><span class="v">₱0</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-col">
+        <div class="frame-label">Admin · Mobile · Users</div>
+        <div class="frame-mobile"><div class="phone-notch"></div><div class="phone-body">
+          <div class="phone-status"><span>9:41</span><span>5G · 87%</span></div>
+          <div class="app-bar" style="padding: 10px 16px;"><div class="brand-block" style="font-size:15px;"><span class="brand-pin"></span>Users</div></div>
+          <div class="phone-scrn">
+            <div class="eyebrow">1,247 TOTAL</div>
+            <h3>Users</h3>
+            <div style="background: var(--surface); border: 1px solid var(--rule-strong); padding: 9px 12px; border-radius: 999px; font-size: 11px; margin-bottom: 10px;">🔍 Search…</div>
+            <div style="display: flex; gap: 4px; margin-bottom: 10px;">
+              <span class="chip admin" style="font-size: 9px;">All</span>
+              <span class="chip" style="font-size: 9px;">Couples</span>
+              <span class="chip" style="font-size: 9px;">Vendors</span>
+            </div>
+            <div class="list-row" style="padding: 10px 0;"><div class="lhs"><div class="avatar sm">AB</div><div><div class="name" style="font-size: 11.5px;">Aira &amp; Boy</div><div class="meta">Couple · 2 min ago</div></div></div><span class="chip ok" style="font-size: 9px;">Active</span></div>
+            <div class="list-row" style="padding: 10px 0;"><div class="lhs"><div class="avatar sm" style="background: var(--bride-soft); color: var(--accent-deep);">MB</div><div><div class="name" style="font-size: 11.5px;">Mariposa Bloom</div><div class="meta">Vendor · 14 min ago</div></div></div><span class="chip ok" style="font-size: 9px;">Pro</span></div>
+            <div class="list-row" style="padding: 10px 0;"><div class="lhs"><div class="avatar sm">WC</div><div><div class="name" style="font-size: 11.5px;">Wildflower Catering</div><div class="meta">Vendor · 3h ago</div></div></div><span class="chip warn" style="font-size: 9px;">Pending</span></div>
+            <div class="list-row" style="padding: 10px 0;"><div class="lhs"><div class="avatar sm">GC</div><div><div class="name" style="font-size: 11.5px;">Garcia-Cruz</div><div class="meta">Couple · 38m ago</div></div></div><span class="chip ok" style="font-size: 9px;">Active</span></div>
+            <div class="list-row" style="padding: 10px 0;"><div class="lhs"><div class="avatar sm" style="background: var(--admin-purple-soft); color: var(--admin-purple);">JM</div><div><div class="name" style="font-size: 11.5px;">Joel Magat (Ops)</div><div class="meta">Admin · now</div></div></div><span class="chip admin" style="font-size: 9px;">Admin</span></div>
+            <div class="list-row" style="padding: 10px 0;"><div class="lhs"><div class="avatar sm" style="background: #F3E8FF; color: #6E5BAD;">IC</div><div><div class="name" style="font-size: 11.5px;">Indalecio Casasola</div><div class="meta">Owner · now</div></div></div><span class="chip" style="background: #F3E8FF; color: #6E5BAD; border-color: #C9B8FF; font-size: 9px;">🟣 Internal</span></div>
+            <div class="list-row" style="padding: 10px 0;"><div class="lhs"><div class="avatar sm" style="background: #E6F4EC; color: #2E7D4A;">AC</div><div><div class="name" style="font-size: 11.5px;">Ana Cruz</div><div class="meta">Team · 1h ago</div></div></div><span class="chip" style="background: #E6F4EC; color: #2E7D4A; border-color: #B8E4C9; font-size: 9px;">🟢 Team</span></div>
+          </div>
+          <div class="bot-nav">
+            <div class="bot-nav-item" data-surface="home"><div class="ico"><span data-icon="home" data-size="18"></span></div>Home</div>
+            <div class="bot-nav-item" data-surface="verify"><div class="ico">✓</div>Verify</div>
+            <div class="bot-nav-item" data-surface="payments"><div class="ico"><span data-icon="credit-card" data-size="18"></span></div>Pay</div>
+            <div class="bot-nav-item active" data-surface="users"><div class="ico"><span data-icon="users" data-size="18"></span></div>Users</div>
+            <div class="bot-nav-item" data-surface="settings"><div class="ico">⋯</div>More</div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SURFACE 5 · PRICING & CATALOG ============ -->
+  <section class="surface" data-surface="pricing">
+    <div class="frames">
+      <div class="frame-col">
+        <div class="frame-label">Admin · Desktop · Pricing &amp; Catalog</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><div class="tl"><span></span><span></span><span></span></div><div class="url-bar"><span class="lock">🔒</span>setnayan.com/admin/pricing</div></div>
+          <div class="app-bar">
+            <div class="brand-block"><span class="brand-pin"></span><span class="brand-name">SETNAYAN</span> · <em style="font-style:italic; color: var(--ink-soft);">Admin</em></div>
+            <div class="dash-nav">
+              <span class="dash-nav-link" data-surface="home">Home</span>
+              <span class="dash-nav-link" data-surface="verify">Verify</span>
+              <span class="dash-nav-link" data-surface="payments">Payments</span>
+              <span class="dash-nav-link" data-surface="users">Users</span>
+              <span class="dash-nav-link active" data-surface="pricing">Pricing</span>
+              <span class="dash-nav-link" data-surface="disputes">Refunds</span>
+              <span class="dash-nav-link" data-surface="settings">Settings</span>
+            </div>
+            <div class="dash-right"><span class="chip admin">OPS LEAD</span><div class="avatar">CA</div></div>
+          </div>
+          <div class="scrn">
+            <div class="eyebrow">14 ACTIVE SKUs · 3 PRICE CHANGES SCHEDULED · 8 COMPS LAST 30 DAYS</div>
+            <h2>Pricing &amp; catalog</h2>
+
+            <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+              <button class="btn purple sm">+ Add SKU</button>
+              <button class="btn ghost sm">+ Issue comp / freebie</button>
+              <button class="btn ghost sm">+ Create promo code</button>
+              <button class="btn ghost sm" style="margin-left: auto;">⤓ Price history CSV</button>
+            </div>
+
+            <h4 style="margin-top: 0;">SKU price editor · service_catalog</h4>
+            <table class="sheet-table">
+              <thead>
+                <tr><th>SKU code</th><th>Name</th><th>Current PHP</th><th>Last change</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">papic_5_seat</code></td><td>Papic · 5 seats</td><td>₱2,499</td><td>locked since launch</td><td><span class="chip ok" style="font-size: 9px;">Active</span></td><td><button class="btn ghost sm">Edit</button></td></tr>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">panood_hour_addon</code></td><td>Panood · +1 hour</td><td><span style="color: var(--status-warn);">₱1,000 → ₱1,100</span></td><td>scheduled Dec 1</td><td><span class="chip warn" style="font-size: 9px;">Pending</span></td><td><button class="btn ghost sm">Edit</button></td></tr>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">custom_monogram_pack</code></td><td>Custom Monogram Pack</td><td>₱1,999</td><td>2026-04-15</td><td><span class="chip ok" style="font-size: 9px;">Active</span></td><td><button class="btn ghost sm">Edit</button></td></tr>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">ai_edited_highlight</code></td><td>AI Edited Highlight · 3 min</td><td>₱4,999</td><td>2026-05-09</td><td><span class="chip ok" style="font-size: 9px;">Active</span></td><td><button class="btn ghost sm">Edit</button></td></tr>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">vendor_pro_weekly</code></td><td>Vendor Pro · weekly</td><td>₱499/wk</td><td>2026-04-08</td><td><span class="chip ok" style="font-size: 9px;">Active</span></td><td><button class="btn ghost sm">Edit</button></td></tr>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">sponsored_boost</code></td><td>Sponsored Boost · weekly</td><td>₱1,499/wk</td><td>2026-05-11</td><td><span class="chip ok" style="font-size: 9px;">Active</span></td><td><button class="btn ghost sm">Edit</button></td></tr>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">setnayan_pay_fee</code></td><td>Setnayan Pay convenience</td><td>3% surcharge</td><td>2026-05-11</td><td><span class="chip ok" style="font-size: 9px;">Active</span></td><td><button class="btn ghost sm">Edit</button></td></tr>
+              </tbody>
+            </table>
+            <p style="font-size: 10.5px; color: var(--ink-faint); margin-top: 6px;">Price edits apply with 24-hour delay (rollback window). All changes log to service_catalog_price_history. Bulk updates affecting &gt; 100 active accounts require two-admin approval.</p>
+
+            <div class="divider"></div>
+
+            <!-- Comps / freebies -->
+            <h4 style="margin-top: 0;">Comp / freebie tool</h4>
+            <p style="font-size: 11.5px;">Grant any SKU free to a user. Logged + tied to a reason. Comps &gt; ₱4,999 require two-admin approval.</p>
+            <div class="card" style="padding: 14px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div><label style="font-size: 11px; color: var(--ink-soft); display: block; margin-bottom: 4px;">Recipient</label><div style="background: var(--surface); border: 1px solid var(--rule-strong); padding: 9px 12px; border-radius: 6px; font-size: 12px;">Bayot-Tan (couple) ▾</div></div>
+                <div><label style="font-size: 11px; color: var(--ink-soft); display: block; margin-bottom: 4px;">SKU</label><div style="background: var(--surface); border: 1px solid var(--rule-strong); padding: 9px 12px; border-radius: 6px; font-size: 12px;">Pro Bundle Widgets · ₱199 ▾</div></div>
+              </div>
+              <div style="margin-bottom: 10px;"><label style="font-size: 11px; color: var(--ink-soft); display: block; margin-bottom: 4px;">Reason</label><div style="background: var(--surface); border: 1px solid var(--rule-strong); padding: 9px 12px; border-radius: 6px; font-size: 12px;">Customer support · &quot;delayed activation by 3 days, offering goodwill credit&quot;</div></div>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn purple sm">Grant ₱199 comp</button>
+                <span style="font-size: 10.5px; color: var(--status-ok); align-self: center;">✓ Below ₱5K · no 2-admin needed</span>
+              </div>
+            </div>
+
+            <h4>Recent comps · last 30 days · ₱8 / 12 budget</h4>
+            <div class="card soft" style="padding: 6px 14px;">
+              <div class="list-row" style="padding: 6px 0; font-size: 11px;"><span class="name"><strong>Bayot-Tan</strong> · Pro Bundle Widgets · ₱199 · &quot;delayed activation&quot;</span><span class="meta">Joel · today</span></div>
+              <div class="list-row" style="padding: 6px 0; font-size: 11px;"><span class="name"><strong>Mendoza-Cruz</strong> · ₱500 goodwill credit · &quot;vendor flaked, found replacement&quot;</span><span class="meta">Cara · 2 days ago</span></div>
+              <div class="list-row" style="padding: 6px 0; font-size: 11px;"><span class="name"><strong>Beta cohort</strong> · Papic 5-seat free for 12 testers · ₱30,000 total</span><span class="meta">Cara · last week · 2-admin ✓</span></div>
+            </div>
+
+            <h4>Promo codes · active</h4>
+            <table class="sheet-table">
+              <thead><tr><th>Code</th><th>Discount</th><th>Applies to</th><th>Uses</th><th>Expires</th></tr></thead>
+              <tbody>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">LAUNCH50</code></td><td>50% off</td><td>Papic 5-seat</td><td>23 / 100</td><td>2026-12-31</td></tr>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">BFAIRE2026</code></td><td>₱500 off</td><td>any SKU</td><td>8 / 200</td><td>2026-09-30</td></tr>
+                <tr><td><code style="font-family:'DM Mono',monospace; font-size: 10px;">EARLYBIRD</code></td><td>20% off</td><td>Vendor Pro</td><td>14 / 50</td><td>2026-07-31</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="frame-col">
+        <div class="frame-label">Admin · Mobile · Pricing</div>
+        <div class="frame-mobile"><div class="phone-notch"></div><div class="phone-body">
+          <div class="phone-status"><span>9:41</span><span>5G · 87%</span></div>
+          <div class="app-bar" style="padding: 10px 16px;"><div class="brand-block" style="font-size:15px;"><span class="brand-pin"></span>Pricing</div></div>
+          <div class="phone-scrn">
+            <div class="eyebrow">14 SKUs ACTIVE</div>
+            <h3>Pricing</h3>
+            <p style="font-size: 11px;">Bulk edits best on desktop.</p>
+            <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+              <button class="btn purple sm">+ Comp</button>
+              <button class="btn ghost sm">+ Promo</button>
+            </div>
+            <h4 style="margin-top: 10px;">Top SKUs</h4>
+            <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div><div class="name" style="font-size: 11.5px;">Papic · 5 seats</div><div class="meta">papic_5_seat</div></div></div><span class="chip" style="font-size: 9px;">₱2,499</span></div>
+            <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div><div class="name" style="font-size: 11.5px;">Panood · +1 hour</div><div class="meta">panood_hour_addon</div></div></div><span class="chip warn" style="font-size: 9px;">₱1,000 → 1,100</span></div>
+            <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div><div class="name" style="font-size: 11.5px;">Custom Monogram</div><div class="meta">custom_monogram_pack</div></div></div><span class="chip" style="font-size: 9px;">₱1,999</span></div>
+            <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div><div class="name" style="font-size: 11.5px;">Vendor Pro · wk</div><div class="meta">vendor_pro_weekly</div></div></div><span class="chip" style="font-size: 9px;">₱500</span></div>
+            <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div><div class="name" style="font-size: 11.5px;">Sponsored Boost · wk</div><div class="meta">sponsored_boost</div></div></div><span class="chip" style="font-size: 9px;">₱1,499</span></div>
+          </div>
+          <div class="bot-nav">
+            <div class="bot-nav-item" data-surface="home"><div class="ico"><span data-icon="home" data-size="18"></span></div>Home</div>
+            <div class="bot-nav-item" data-surface="verify"><div class="ico">✓</div>Verify</div>
+            <div class="bot-nav-item" data-surface="payments"><div class="ico"><span data-icon="credit-card" data-size="18"></span></div>Pay</div>
+            <div class="bot-nav-item" data-surface="users"><div class="ico"><span data-icon="users" data-size="18"></span></div>Users</div>
+            <div class="bot-nav-item active" data-surface="settings"><div class="ico">⋯</div>More</div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SURFACE 6 · REFUNDS & GOODWILL ============ -->
+  <section class="surface" data-surface="disputes">
+    <div class="frames">
+      <div class="frame-col">
+        <div class="frame-label">Admin · Desktop · Refunds &amp; Goodwill (V1 informal mediation)</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><div class="tl"><span></span><span></span><span></span></div><div class="url-bar"><span class="lock">🔒</span>setnayan.com/admin/refunds</div></div>
+          <div class="app-bar">
+            <div class="brand-block"><span class="brand-pin"></span><span class="brand-name">SETNAYAN</span> · <em style="font-style:italic; color: var(--ink-soft);">Admin</em></div>
+            <div class="dash-nav">
+              <span class="dash-nav-link" data-surface="home">Home</span>
+              <span class="dash-nav-link" data-surface="verify">Verify</span>
+              <span class="dash-nav-link" data-surface="payments">Payments</span>
+              <span class="dash-nav-link" data-surface="users">Users</span>
+              <span class="dash-nav-link" data-surface="pricing">Pricing</span>
+              <span class="dash-nav-link active" data-surface="disputes">Refunds</span>
+              <span class="dash-nav-link" data-surface="settings">Settings</span>
+            </div>
+            <div class="dash-right"><span class="chip admin">OPS LEAD</span><div class="avatar">CA</div></div>
+          </div>
+          <div class="scrn">
+            <div class="eyebrow">1 ACTIVE CASE · 23 RESOLVED THIS MONTH · V1 INFORMAL MEDIATION</div>
+            <h2>Refunds &amp; goodwill</h2>
+            <p>V1 doesn&apos;t ship the Setnayan Guarantee. Customer disputes go through informal mediation — admin discretion + goodwill credits + case-by-case partial refunds. <strong>All cases are logged · the data feeds the V1.5 Guarantee economics.</strong></p>
+
+            <div class="banner admin"><span>📋</span><div><strong>V1 mediation rules (informal):</strong> &lt; ₱5K refund — admin discretion. ₱5K–₱20K — admin + reason in audit log. &gt; ₱20K — two-admin approval. No contractual guarantee; this is goodwill customer service.</div></div>
+
+            <h4 style="margin-top: 14px;">Active case</h4>
+            <div class="queue-card urgent" style="padding: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                <div style="flex: 1;">
+                  <div class="card-eyebrow" style="color: var(--status-bad);">DAY 2 · MENDOZA WEDDING · NOV 8</div>
+                  <div class="card-title">Florist partial-delivery dispute</div>
+                  <div class="card-body" style="margin-bottom: 10px;">Couple paid Casa Florals ₱56,000 direct (NOT Setnayan Pay routing). Wedding day Nov 8: bouquet + arch delivered as agreed, but only 8 of 12 centerpieces showed up. Florist claims a delivery-truck mishap. Couple wants 33% partial refund (₱18,667). Florist disputes percentage, offered ₱5,000.</div>
+                  <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+                    <span class="chip warn" style="font-size: 9.5px;">Direct payment · Setnayan didn't hold money</span>
+                    <span class="chip" style="font-size: 9.5px;">Stage 5 reached · partial delivery</span>
+                    <span class="chip" style="font-size: 9.5px;">Goodwill credit option</span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end; min-width: 160px;">
+                  <button class="btn purple sm">Mediate negotiation</button>
+                  <button class="btn ghost sm">Issue ₱5K goodwill</button>
+                  <button class="btn ghost sm">Close · vendor settled</button>
+                </div>
+              </div>
+              <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div><h4 style="margin: 0 0 6px;">Evidence on file</h4><div style="font-size: 11px;">📄 Original contract · 📷 Setup photos showing 8 centerpieces · 💬 Vendor reply: "supply truck delayed"</div></div>
+                <div><h4 style="margin: 0 0 6px;">Recommended action</h4><div style="font-size: 11px;">Mediate · vendor pays direct ₱11,200 to couple (20% partial) · Setnayan absorbs ₱2K platform-credit goodwill · close as mutual.</div></div>
+              </div>
+            </div>
+
+            <h4>Resolved cases · last 30 days</h4>
+            <table class="sheet-table">
+              <thead><tr><th>Couple</th><th>Vendor</th><th>Issue</th><th>Resolution</th><th>Setnayan paid</th></tr></thead>
+              <tbody>
+                <tr><td>Reyes-Garcia</td><td>Belle &amp; Soir HMUA</td><td>HMUA arrived 1 hr late</td><td>₱500 goodwill credit · couple satisfied</td><td>₱500</td></tr>
+                <tr><td>Tan-Salonga</td><td>Wildflower Catering</td><td>Crew meal short by 8</td><td>Vendor refunded direct · no Setnayan action</td><td>₱0</td></tr>
+                <tr><td>Velasco-Lim</td><td>Mariposa Bloom</td><td>Gallery delivery 3 days late</td><td>Refunded the late-fee per contract · ₱2K Setnayan credit</td><td>₱1,999</td></tr>
+                <tr><td>Aquino-Cruz</td><td>Lumière Lighting</td><td>LED wall pixel column failed mid-event</td><td>Vendor offered ₱8K direct · couple accepted</td><td>₱0</td></tr>
+              </tbody>
+            </table>
+
+            <div class="divider"></div>
+
+            <h4 style="margin-top: 0;">V1.5 roadmap · Setnayan Guarantee</h4>
+            <div class="card soft" style="padding: 14px 16px;">
+              <div class="card-body">After 12 months of V1 informal mediation, the claim-rate + average-claim-size data will inform the V1.5 launch of <strong>Setnayan Guarantee</strong> (5% surcharge · escrow · contractual refund + replacement-vendor flow). For now the surface is named &quot;Refunds &amp; Goodwill&quot; rather than &quot;Disputes&quot; to match the informal nature of V1.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-col">
+        <div class="frame-label">Admin · Mobile · Refunds</div>
+        <div class="frame-mobile"><div class="phone-notch"></div><div class="phone-body">
+          <div class="phone-status"><span>9:41</span><span>5G · 87%</span></div>
+          <div class="app-bar" style="padding: 10px 16px;"><div class="brand-block" style="font-size:15px;"><span class="brand-pin"></span>Refunds</div></div>
+          <div class="phone-scrn">
+            <div class="eyebrow">1 ACTIVE · 23 RESOLVED</div>
+            <h3>Refunds &amp; goodwill</h3>
+            <p style="font-size: 11px;">V1 informal mediation.</p>
+            <h4>Active</h4>
+            <div class="queue-card urgent" style="padding: 12px;">
+              <div class="card-eyebrow" style="color: var(--status-bad); font-size: 8.5px;">DAY 2</div>
+              <div style="font-size: 12px; font-weight: 600;">Mendoza · florist dispute</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">8/12 centerpieces delivered · 33% refund asked</div>
+              <button class="btn purple sm" style="margin-top: 8px;">Open case →</button>
+            </div>
+            <h4>Recently resolved</h4>
+            <div class="list-row" style="padding: 8px 0;"><span class="name" style="font-size: 11px;">Reyes-Garcia · HMUA late</span><span class="meta">₱500 credit</span></div>
+            <div class="list-row" style="padding: 8px 0;"><span class="name" style="font-size: 11px;">Velasco-Lim · gallery late</span><span class="meta">₱2K credit</span></div>
+            <div class="list-row" style="padding: 8px 0;"><span class="name" style="font-size: 11px;">Aquino-Cruz · LED issue</span><span class="meta">vendor direct</span></div>
+          </div>
+          <div class="bot-nav">
+            <div class="bot-nav-item" data-surface="home"><div class="ico"><span data-icon="home" data-size="18"></span></div>Home</div>
+            <div class="bot-nav-item" data-surface="verify"><div class="ico">✓</div>Verify</div>
+            <div class="bot-nav-item" data-surface="payments"><div class="ico"><span data-icon="credit-card" data-size="18"></span></div>Pay</div>
+            <div class="bot-nav-item" data-surface="users"><div class="ico"><span data-icon="users" data-size="18"></span></div>Users</div>
+            <div class="bot-nav-item active" data-surface="settings"><div class="ico">⋯</div>More</div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SURFACE 7 · SETTINGS ============ -->
+  <section class="surface" data-surface="settings">
+    <div class="frames">
+      <div class="frame-col">
+        <div class="frame-label">Admin · Desktop · Settings</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><div class="tl"><span></span><span></span><span></span></div><div class="url-bar"><span class="lock">🔒</span>setnayan.com/admin/settings</div></div>
+          <div class="app-bar">
+            <div class="brand-block"><span class="brand-pin"></span><span class="brand-name">SETNAYAN</span> · <em style="font-style:italic; color: var(--ink-soft);">Admin</em></div>
+            <div class="dash-nav">
+              <span class="dash-nav-link" data-surface="home">Home</span>
+              <span class="dash-nav-link" data-surface="verify">Verify</span>
+              <span class="dash-nav-link" data-surface="payments">Payments</span>
+              <span class="dash-nav-link" data-surface="users">Users</span>
+              <span class="dash-nav-link" data-surface="pricing">Pricing</span>
+              <span class="dash-nav-link" data-surface="disputes">Refunds</span>
+              <span class="dash-nav-link active" data-surface="settings">Settings</span>
+            </div>
+            <div class="dash-right"><span class="chip admin">OPS LEAD</span><div class="avatar">CA</div></div>
+          </div>
+          <div class="scrn">
+            <div class="eyebrow">PLATFORM-WIDE CONFIG · 4 ADMINS · BRAND V3</div>
+            <h2>Settings</h2>
+
+            <h4 style="margin-top: 14px;">Brand &amp; marketing</h4>
+            <div class="card soft">
+              <div class="kv"><span class="k">Wordmark · current</span><span class="v">SETNAYAN · v4 · launched 2026-05-12</span></div>
+              <div class="kv"><span class="k">Brand mark</span><span class="v">Symbol mark (uploaded SVG) · #000 / #C97B4B accent</span></div>
+              <div class="kv"><span class="k">Tagline</span><span class="v">&quot;Set na &apos;yan.&quot;</span></div>
+              <div class="kv"><span class="k">Brand config versions</span><span class="v">v1 (Mar) · v2 (Apr · earlier-rejected-candidate) · v3 (May · STNYN · retired) · <strong>v4 (May · SETNAYAN)</strong></span></div>
+              <button class="btn ghost sm" style="margin-top: 8px;">Manage brand versions →</button>
+              <p style="font-size: 10.5px; color: var(--ink-faint); margin-top: 6px;">Brand-mark version flips require two-admin approval per the V1 lock.</p>
+            </div>
+
+            <h4>Payment Methods · receiving accounts (§ 3.5c · two-admin approval to change)</h4>
+            <div class="card">
+              <div class="list-row" style="padding: 12px 0;">
+                <div class="lhs" style="align-items: flex-start;">
+                  <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #C8102E, #8B0000); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; text-align: center; font-family: 'DM Mono', monospace; flex-shrink: 0;">BDO<br/>QR</div>
+                  <div>
+                    <div class="name">BDO Bank Transfer</div>
+                    <div class="meta">Account name: Setnayan Ventures Inc. · Account number: 1234-5678-9012</div>
+                    <div style="margin-top: 6px;"><span class="chip ok" style="font-size: 9px;">Active</span></div>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                  <button class="btn ghost sm">View</button>
+                  <button class="btn ghost sm">Replace</button>
+                  <button class="btn ghost sm">Download</button>
+                </div>
+              </div>
+              <div class="list-row" style="padding: 12px 0;">
+                <div class="lhs" style="align-items: flex-start;">
+                  <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #007BFF, #003D80); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; text-align: center; font-family: 'DM Mono', monospace; flex-shrink: 0;">GCash<br/>QR</div>
+                  <div>
+                    <div class="name">GCash</div>
+                    <div class="meta">Mobile number: 0917-123-4567 · Setnayan Ventures Inc.</div>
+                    <div style="margin-top: 6px;"><span class="chip ok" style="font-size: 9px;">Active</span></div>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                  <button class="btn ghost sm">View</button>
+                  <button class="btn ghost sm">Replace</button>
+                  <button class="btn ghost sm">Download</button>
+                </div>
+              </div>
+              <div style="border-top: 1px solid var(--rule); margin-top: 8px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="font-size: 10.5px; color: var(--ink-faint);">Last updated 2026-04-12 · by Cara Aquino · approved by Ben Reyes (two-admin)</div>
+                <button class="btn ghost sm">+ Add additional payment method (V1.5: Maya, UnionBank)</button>
+              </div>
+            </div>
+
+            <h4>Feature flags · kill-switches</h4>
+            <div class="card soft">
+              <div class="kv"><span class="k">Papic capture</span><span class="v"><span class="chip ok" style="font-size: 9px;">ON</span></span></div>
+              <div class="kv"><span class="k">Panood broadcast</span><span class="v"><span class="chip ok" style="font-size: 9px;">ON</span></span></div>
+              <div class="kv"><span class="k">Patiktok reel rendering</span><span class="v"><span class="chip ok" style="font-size: 9px;">ON</span></span></div>
+              <div class="kv"><span class="k">Setnayan Pay (3%)</span><span class="v"><span class="chip ok" style="font-size: 9px;">ON</span></span></div>
+              <div class="kv"><span class="k">Sponsored Boost</span><span class="v"><span class="chip ok" style="font-size: 9px;">ON</span></span></div>
+              <div class="kv"><span class="k">Vendor Pro signups</span><span class="v"><span class="chip ok" style="font-size: 9px;">ON</span></span></div>
+              <p style="font-size: 10.5px; color: var(--ink-faint); margin-top: 6px;">Kill-switching any service requires two-admin approval. Use for ops emergencies (Cloudflare R2 outage, YouTube API failure, etc.).</p>
+            </div>
+
+            <h4>Geographic radii</h4>
+            <div class="card soft">
+              <div class="kv"><span class="k">Free-transport zone (per pin)</span><span class="v">5 km</span></div>
+              <div class="kv"><span class="k">Standard visibility</span><span class="v">10 km from pin</span></div>
+              <div class="kv"><span class="k">Density gate for Boost</span><span class="v">20 km from pin (20+ vendors needed)</span></div>
+              <div class="kv"><span class="k">Sponsored Boost extended visibility</span><span class="v">30 km from pin</span></div>
+              <button class="btn ghost sm" style="margin-top: 8px;">Edit radii</button>
+            </div>
+
+            <h4>Admin role provisioning · 4 admins</h4>
+            <div class="card soft" style="padding: 6px 14px;">
+              <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div class="avatar sm">CA</div><div><div class="name">Cara Aquino</div><div class="meta">Ops Lead · founder · all privileges</div></div></div><span class="chip admin" style="font-size: 9px;">Owner</span></div>
+              <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div class="avatar sm" style="background: var(--admin-purple-soft); color: var(--admin-purple);">JM</div><div><div class="name">Joel Magat</div><div class="meta">Ops Admin · joined 2026-03</div></div></div><span class="chip admin" style="font-size: 9px;">Admin</span></div>
+              <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div class="avatar sm" style="background: var(--admin-purple-soft); color: var(--admin-purple);">RD</div><div><div class="name">Rina Dela Cruz</div><div class="meta">Vendor verification · joined 2026-04</div></div></div><span class="chip admin" style="font-size: 9px;">Admin</span></div>
+              <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div class="avatar sm" style="background: var(--admin-purple-soft); color: var(--admin-purple);">PT</div><div><div class="name">Paolo Torres</div><div class="meta">Support / mediation · joined 2026-04</div></div></div><span class="chip admin" style="font-size: 9px;">Admin</span></div>
+              <button class="btn ghost sm" style="margin-top: 8px;">+ Add admin (2-admin approval)</button>
+            </div>
+
+            <h4>Two-admin approval queue · 4 pending</h4>
+            <div class="card" style="border-left: 3px solid var(--admin-purple); padding: 14px; margin-bottom: 10px;">
+              <div class="card-eyebrow">REQUESTED BY JOEL · 12 HR AGO · 36 HR LEFT</div>
+              <div class="card-title">Comp grant · ₱22,000 to Bayot-Tan</div>
+              <div class="card-body">Reason: &quot;couple had vendor flake event-day · we found replacement at higher cost · Setnayan absorbing the gap as goodwill&quot;</div>
+              <div style="display: flex; gap: 6px; margin-top: 10px;">
+                <button class="btn purple sm">✓ Approve</button>
+                <button class="btn ghost sm">Reject with reason</button>
+                <button class="btn ghost sm">Request more info</button>
+              </div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid var(--admin-purple); padding: 14px; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px;">
+                <span class="chip admin" style="font-size: 9.5px;">Add internal account · § 10a</span>
+                <span style="font-size: 10px; color: var(--ink-faint);">expires in 5d 12h</span>
+              </div>
+              <div class="card-eyebrow">REQUESTED BY CARA · PENDING JOEL</div>
+              <div class="card-title">Jane Casasola · spouse account</div>
+              <div class="card-body">Founder family · spouse of Indalecio Casasola. Set `users.is_internal = TRUE` · auto-issue permanent unlimited_use_grant covering all in-app SKUs.</div>
+              <div style="display: flex; gap: 6px; margin-top: 10px;">
+                <button class="btn purple sm">✓ Approve</button>
+                <button class="btn ghost sm" style="color: var(--status-bad);">Reject</button>
+              </div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid var(--admin-purple); padding: 14px; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px;">
+                <span class="chip admin" style="font-size: 9.5px;">Add team-member to shared pool · § 10b</span>
+                <span style="font-size: 10px; color: var(--ink-faint);">expires in 5d 12h</span>
+              </div>
+              <div class="card-eyebrow">REQUESTED BY JOEL · PENDING CARA</div>
+              <div class="card-title">Ana Cruz · Verification Handler · 30 days in role</div>
+              <div class="card-body">Set `users.is_team_member = TRUE` · grants access to draw from the shared ₱10,000/mo Team Pool starting June 1. Use-it-or-lose-it · first-come-first-served.</div>
+              <div style="display: flex; gap: 6px; margin-top: 10px;">
+                <button class="btn purple sm">✓ Approve</button>
+                <button class="btn ghost sm" style="color: var(--status-bad);">Reject</button>
+              </div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid var(--admin-purple); padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px;">
+                <span class="chip admin" style="font-size: 9.5px;">Modify BDO receiving account · § 3.5c</span>
+                <span style="font-size: 10px; color: var(--ink-faint);">expires in 6d 18h</span>
+              </div>
+              <div class="card-eyebrow">REQUESTED BY CARA · PENDING JOEL</div>
+              <div class="card-title">Updated BDO QR code · new branch reference</div>
+              <div class="card-body">Replace current BDO QR asset (issued 2026-04-12) with new branch-reference variant. Account number unchanged. New QR previewed in Payment Methods card above.</div>
+              <div style="display: flex; gap: 6px; margin-top: 10px;">
+                <button class="btn purple sm">✓ Approve</button>
+                <button class="btn ghost sm" style="color: var(--status-bad);">Reject</button>
+              </div>
+            </div>
+
+            <h4>Audit log · searchable</h4>
+            <div class="card soft" style="padding: 6px 14px;">
+              <div class="list-row" style="padding: 6px 0; font-size: 10.5px;"><span class="name"><span class="chip admin" style="margin-right: 6px; font-size: 8.5px;">CARA</span>Updated SKU price: panood_hour_addon → ₱1,100 · scheduled Dec 1</span><span class="meta">yesterday</span></div>
+              <div class="list-row" style="padding: 6px 0; font-size: 10.5px;"><span class="name"><span class="chip admin" style="margin-right: 6px; font-size: 8.5px;">JOEL</span>Approved vendor: Casa Florals</span><span class="meta">14m ago</span></div>
+              <div class="list-row" style="padding: 6px 0; font-size: 10.5px;"><span class="name"><span class="chip admin" style="margin-right: 6px; font-size: 8.5px;">CARA</span>Confirmed payment: Aira &amp; Boy · Papic 5-seat</span><span class="meta">2m ago</span></div>
+              <button class="btn ghost sm" style="margin-top: 8px;">View full log →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-col">
+        <div class="frame-label">Admin · Mobile · Settings</div>
+        <div class="frame-mobile"><div class="phone-notch"></div><div class="phone-body">
+          <div class="phone-status"><span>9:41</span><span>5G · 87%</span></div>
+          <div class="app-bar" style="padding: 10px 16px;"><div class="brand-block" style="font-size:15px;"><span class="brand-pin"></span>Settings</div></div>
+          <div class="phone-scrn">
+            <div class="eyebrow">4 ADMINS · BRAND v3</div>
+            <h3>Settings</h3>
+            <p style="font-size: 11px;">Most settings best edited on desktop.</p>
+            <h4 style="margin-top: 10px;">2-admin approvals · 1 pending</h4>
+            <div class="card" style="padding: 12px; border-left: 3px solid var(--admin-purple); margin-bottom: 10px;">
+              <div class="card-eyebrow" style="font-size: 8.5px;">JOEL · 12H AGO · 36H LEFT</div>
+              <div style="font-size: 12px; font-weight: 600;">₱22,000 comp · Bayot-Tan</div>
+              <div style="font-size: 10px; color: var(--ink-soft);">Goodwill · replacement vendor cost</div>
+              <button class="btn purple sm" style="margin-top: 8px;">✓ Approve</button>
+            </div>
+            <h4>Brand</h4>
+            <div class="list-row" style="padding: 8px 0;"><span class="name" style="font-size: 11px;">Wordmark · SETNAYAN v4</span></div>
+            <div class="list-row" style="padding: 8px 0;"><span class="name" style="font-size: 11px;">Tagline · Set na &apos;yan.</span></div>
+            <h4>Kill-switches</h4>
+            <div class="list-row" style="padding: 8px 0;"><span class="name" style="font-size: 11px;">Papic</span><span class="chip ok" style="font-size: 9px;">ON</span></div>
+            <div class="list-row" style="padding: 8px 0;"><span class="name" style="font-size: 11px;">Panood</span><span class="chip ok" style="font-size: 9px;">ON</span></div>
+            <div class="list-row" style="padding: 8px 0;"><span class="name" style="font-size: 11px;">Setnayan Pay</span><span class="chip ok" style="font-size: 9px;">ON</span></div>
+            <h4>Admins · 4</h4>
+            <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div class="avatar sm">CA</div><span class="name" style="font-size: 11px;">Cara · Owner</span></div></div>
+            <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div class="avatar sm" style="background: var(--admin-purple-soft); color: var(--admin-purple);">JM</div><span class="name" style="font-size: 11px;">Joel · Admin</span></div></div>
+            <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div class="avatar sm" style="background: var(--admin-purple-soft); color: var(--admin-purple);">RD</div><span class="name" style="font-size: 11px;">Rina · Admin</span></div></div>
+            <div class="list-row" style="padding: 8px 0;"><div class="lhs"><div class="avatar sm" style="background: var(--admin-purple-soft); color: var(--admin-purple);">PT</div><span class="name" style="font-size: 11px;">Paolo · Admin</span></div></div>
+          </div>
+          <div class="bot-nav">
+            <div class="bot-nav-item" data-surface="home"><div class="ico"><span data-icon="home" data-size="18"></span></div>Home</div>
+            <div class="bot-nav-item" data-surface="verify"><div class="ico">✓</div>Verify</div>
+            <div class="bot-nav-item" data-surface="payments"><div class="ico"><span data-icon="credit-card" data-size="18"></span></div>Pay</div>
+            <div class="bot-nav-item" data-surface="users"><div class="ico"><span data-icon="users" data-size="18"></span></div>Users</div>
+            <div class="bot-nav-item active" data-surface="settings"><div class="ico">⋯</div>More</div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- end of surfaces -->
+</main>
+
+<script>
+const surfaceBar = document.getElementById('surfaceBar');
+const viewToggle = document.getElementById('viewToggle');
+function goToSurface(name) {
+  document.body.dataset.surface = name;
+  document.querySelectorAll('.surface-tab').forEach(t => t.classList.toggle('active', t.dataset.surface === name));
+  document.querySelectorAll('.surface').forEach(s => s.classList.toggle('active', s.dataset.surface === name));
+  document.querySelectorAll('.dash-nav-link, .bot-nav-item').forEach(l => l.classList.toggle('active', l.dataset.surface === name));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+surfaceBar.addEventListener('click', e => { const t = e.target.closest('.surface-tab'); if (t) goToSurface(t.dataset.surface); });
+viewToggle.addEventListener('click', e => { const btn = e.target.closest('.toggle-pill'); if (!btn) return; document.body.dataset.view = btn.dataset.view; document.querySelectorAll('.toggle-pill').forEach(p => p.classList.toggle('active', p === btn)); });
+document.addEventListener('click', e => { const link = e.target.closest('[data-surface]'); if (!link || link.classList.contains('surface-tab')) return; goToSurface(link.dataset.surface); });
+</script>
+
+</body>
+</html>

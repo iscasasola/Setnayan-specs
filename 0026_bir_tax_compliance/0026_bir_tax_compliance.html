@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iteration 0026 — BIR / Tax Compliance — Setnayan</title>
+<style>
+:root {
+  --ink: #1a2346;
+  --cream: #faf5ee;
+  --terra: #c97b4b;
+  --muted: #6b7280;
+  --hairline: #e5e0d6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Manrope", "Segoe UI", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.banner {
+  background: var(--terra);
+  color: var(--cream);
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.banner strong { letter-spacing: 0.08em; }
+.chrome {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+h2 {
+  margin-top: 48px;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 8px;
+}
+h3 {
+  margin-top: 32px;
+  font-size: 18px;
+  font-weight: 600;
+}
+p, ul, ol { font-size: 16px; }
+code {
+  font-family: "DM Mono", "SF Mono", Menlo, monospace;
+  background: rgba(201,123,75,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: transparent; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: rgba(0,0,0,0.03); }
+blockquote {
+  border-left: 3px solid var(--terra);
+  padding: 4px 0 4px 16px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.placeholder-meta {
+  background: white;
+  border: 1px dashed var(--terra);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0 32px;
+  font-size: 14px;
+}
+.placeholder-meta h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+.placeholder-meta ul { margin: 8px 0 0 0; padding-left: 20px; }
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="banner"><strong>Placeholder prototype</strong> · spec rendered as HTML · full interactive build deferred to Claude Code during implementation</div>
+<div class="chrome">
+<div class="eyebrow">Setnayan · Iteration 0026</div>
+<div class="placeholder-meta">
+<h3>What's in this file</h3>
+This file renders the iteration's <code>.md</code> spec as readable HTML. It is NOT a working interactive prototype. The real prototype gets built when the engineering team implements this iteration in Claude Code — at that point this file is replaced with a clickable mockup that exercises the actual UI flows.
+<ul>
+<li><strong>Engineering spec:</strong> <code>0026_bir_tax_compliance.md</code></li>
+<li><strong>Stakeholder doc:</strong> <code>0026_bir_tax_compliance.docx</code></li>
+<li><strong>Test plan:</strong> <code>tests.md</code></li>
+<li><strong>This file:</strong> <code>0026_bir_tax_compliance.html</code> (placeholder)</li>
+</ul>
+</div>
+<h1 id="iteration-0026--bir--tax-compliance">Iteration 0026 — BIR / Tax Compliance</h1>
+<p><strong>Iteration number:</strong> 0026 <strong>Topic:</strong> Bureau of Internal Revenue (BIR) tax compliance for the Setnayan marketplace. BIR-compliant Official Receipts issued to every paying customer, VAT vs Percentage Tax decision for the 3% Setnayan Pay convenience fee, Expanded Withholding Tax on vendor payouts, quarterly Form 2307 issuance to vendors, and admin-side tax-report exports that feed Setnayan's accountant for eFPS filing. <strong>Surface:</strong> Mostly invisible (PDF generation pipelines + admin reports). Customer-facing surface is a "Tax Documents" sub-section of Profile Settings → Privacy &amp; Data (consumed by 0025). Vendor-facing surface is a "Tax Documents" entry in the vendor dashboard's Settings (consumed by 0022). Admin-facing surface is <code>/admin/finance/tax-reports</code> (consumed by 0023). <strong>URL patterns:</strong></p>
+<ul>
+<li>Customer: <code>setnayan.com/dashboard/customer/settings/tax-documents</code></li>
+<li>Vendor: <code>setnayan.com/dashboard/vendor/settings/tax-documents</code></li>
+<li>Admin: <code>setnayan.com/admin/finance/tax-reports</code> <strong>Builds on:</strong> 0013 (Supabase Edge Functions + R2 platform stack), 0022 (vendor records + <code>vendors.tin</code> field — added here if not present), 0023 (admin payment reconciliation surface that flips <code>service_orders</code> to <code>paid</code>), and the post-token-wallet PHP-direct apply-then-pay model (decision log 2026-05-11). <strong>Provides to downstream iterations:</strong></li>
+<li><strong>0025 Profile Settings</strong> consumes the customer-facing "Tax Documents" list + the "Update my TIN / business address" form</li>
+<li><strong>0022 Vendor Dashboard</strong> consumes the vendor-facing "Tax Documents" list (Form 2307 PDFs per quarter)</li>
+<li><strong>0023 Admin Console</strong> consumes the <code>tax-reports</code> exports (monthly Percentage Tax / VAT, quarterly Form 1601-EQ, annual income tax inputs)</li>
+<li><strong>0028 Email Notifications</strong> consumes the OR-issued and Form-2307-issued events to send transactional emails <strong>Status:</strong> Drafted 2026-05-12. <strong>Phase:</strong> <strong>V1 launch-blocking.</strong> Setnayan legally cannot accept payment from a Philippine customer without issuing a BIR-compliant Official Receipt. This iteration must ship before the first paid order — even a single ₱49 Save-the-Date charge requires an OR.</li>
+</ul>
+<hr />
+<h2 id="why-this-iteration-exists">Why this iteration exists</h2>
+<p>Setnayan is a domestic Philippine marketplace incorporated as a stock corporation (<code>Setnayan Ventures Inc.</code> is the working assumption pending DTI / SEC registration). The platform receives money from customers (in-app SKUs + 3% convenience fee on vendor bookings routed through Setnayan Pay) and disburses money to vendors (the vendor's gross booking amount). Both directions trigger BIR obligations:</p>
+<ul>
+<li><strong>Money in.</strong> Every payment received by Setnayan from a Philippine resident or business is a taxable receipt. The platform must issue a BIR-registered Official Receipt (OR) for each one. Operating without OR issuance is a violation of NIRC § 237 and exposes Setnayan to closure under the BIR's Oplan Kandado program.</li>
+<li><strong>Money out.</strong> Every payout to a Philippine resident vendor (individual or corporation) is subject to Expanded Withholding Tax (EWT). Setnayan acts as the withholding agent, retains a percentage of the gross payment, remits it to BIR monthly (Form 1601-EQ), and issues each vendor a Certificate of Creditable Tax Withheld at Source (Form 2307) quarterly so the vendor can credit the withheld amount against their own income tax.</li>
+</ul>
+<p>The platform also has to file its own returns — monthly Percentage Tax (or VAT) returns on Setnayan's gross receipts, plus annual corporate income tax. These are operationally filed by Setnayan's tax accountant via BIR's eFPS, but the engineering system needs to produce the inputs.</p>
+<p>This iteration covers all six pieces. None of it is glamorous. All of it is required.</p>
+<blockquote>
+<p><strong>Important caveat.</strong> Tax rules and rates change. The specific rates and thresholds named in this iteration are the current best estimates as of drafting (May 2026); every one of them is marked <strong>"subject to confirmation with Setnayan's tax accountant"</strong> wherever an engineering decision depends on a specific number. The schema and the report-generation pipelines are designed to be rate-agnostic — a configuration table holds the actual rates so they can be updated without code changes.</p>
+</blockquote>
+<hr />
+<h2 id="1-setnayan-business-registration-operational-prerequisites--non-engineering">1. Setnayan business registration (operational prerequisites — non-engineering)</h2>
+<p>This section documents the legal-operational steps Setnayan must complete before any of the engineering in this iteration becomes meaningful. Engineering does not build any of this; it is captured here so the iteration's reader understands what has to be in place before the OR pipeline can issue a single receipt.</p>
+<h3 id="11-required-registrations">1.1 Required registrations</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Authority</th>
+<th>What it produces</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Incorporation</td>
+<td>SEC (Securities and Exchange Commission)</td>
+<td>Certificate of Incorporation; SEC Registration Number</td>
+<td>Setnayan founders + corporate lawyer</td>
+</tr>
+<tr class="even">
+<td>Business name registration</td>
+<td>DTI (if sole prop) <strong>OR</strong> SEC (if corporation)</td>
+<td>DTI / SEC business name certificate</td>
+<td>Same</td>
+</tr>
+<tr class="odd">
+<td>Mayor's permit / Business permit</td>
+<td>LGU (City Hall of the registered business address)</td>
+<td>Annual local business permit</td>
+<td>Operations</td>
+</tr>
+<tr class="even">
+<td>BIR Certificate of Registration (Form 2303)</td>
+<td>BIR Revenue District Office (RDO)</td>
+<td>TIN; line-of-business code; tax type registration (VAT or Percentage Tax)</td>
+<td>Tax accountant</td>
+</tr>
+<tr class="odd">
+<td>BIR "Ask for Receipt" notice</td>
+<td>BIR</td>
+<td>Required posted notice at place of business</td>
+<td>Operations</td>
+</tr>
+<tr class="even">
+<td>BIR Permit to Issue Receipts / Invoices (Form 1906)</td>
+<td>BIR</td>
+<td>Authority to print or to use a Computerized Accounting System (CAS)</td>
+<td>Tax accountant</td>
+</tr>
+<tr class="odd">
+<td>Books of Accounts registration</td>
+<td>BIR</td>
+<td>Stamped books (or CAS approval)</td>
+<td>Tax accountant</td>
+</tr>
+<tr class="even">
+<td>Tax type election</td>
+<td>BIR (filed with Form 2303 or via amendment)</td>
+<td>Setnayan registered as either VAT-registered or Percentage Tax (non-VAT) — see § 3</td>
+<td>Founders + tax accountant</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-bir-stamped-or-books-vs-computerized-accounting-system-cas">1.2 BIR-stamped OR books vs Computerized Accounting System (CAS)</h3>
+<p>A Philippine business may issue ORs via either route:</p>
+<ul>
+<li><strong>Manual OR booklets.</strong> BIR-printed booklets, each receipt hand-written or typed, signed and stamped. Cheap to start, but unworkable for a digital marketplace doing thousands of transactions per month.</li>
+<li><strong>Computerized Accounting System (CAS).</strong> Software-generated ORs that comply with the BIR's CAS guidelines (Revenue Memorandum Order 29-2002, as amended). Requires a CAS application (BIR Form 1900) and approval from the RDO. Once approved, the system generates BIR-sequence-compliant ORs digitally, including in PDF form for email delivery.</li>
+</ul>
+<p><strong>Setnayan's path:</strong> apply for CAS from day one. The OR generation pipeline in § 4 below is designed to satisfy CAS requirements (sequential numbering with no gaps, no overwrites, audit trail, RDO permit number printed on every OR). The CAS application typically takes 4–6 weeks to be approved, <strong>subject to confirmation with the assigned RDO</strong> — Setnayan must start this in parallel with engineering build of the OR pipeline so they land at roughly the same time.</p>
+<p>While CAS is pending, Setnayan can either (a) delay paid-product launch (acceptable for V1 since the platform itself is still pre-launch) or (b) issue manual ORs from a stamped booklet as a temporary stopgap (acceptable for the first few customers but does not scale).</p>
+<h3 id="13-quarterly-compliance-check-ins">1.3 Quarterly compliance check-ins</h3>
+<p>The assigned RDO conducts routine compliance check-ins. Setnayan operations is responsible for attending; the engineering surface only needs to produce the supporting reports (§ 7) the accountant carries to the RDO.</p>
+<hr />
+<h2 id="2-tax-relevant-concepts-cheat-sheet">2. Tax-relevant concepts cheat sheet</h2>
+<p>Captured here so every later section can refer to a single shared vocabulary.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Meaning in Setnayan context</th>
+<th>Source authority</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>TIN</strong></td>
+<td>Taxpayer Identification Number — 12-digit Philippine taxpayer ID. Setnayan has one (the corporation's); every vendor has one; customers optionally provide theirs if they want an OR they can claim as a business expense.</td>
+<td>BIR (NIRC § 236)</td>
+</tr>
+<tr class="even">
+<td><strong>VAT</strong></td>
+<td>Value Added Tax — 12% on most goods and services in the Philippines. Applies if a taxpayer's annual gross receipts exceed ₱3 million, or if the taxpayer voluntarily elects VAT registration.</td>
+<td>NIRC § 105–115, as amended by TRAIN Law</td>
+</tr>
+<tr class="odd">
+<td><strong>Percentage Tax</strong></td>
+<td>3% of gross receipts; the alternative to VAT for non-VAT-registered taxpayers. Setnayan defaults here in V1 (§ 3). <strong>Subject to confirmation — the 3% rate has historically been 1% under temporary relief measures; current applicable rate must be confirmed with the tax accountant before launch.</strong></td>
+<td>NIRC § 116, CREATE Law amendments</td>
+</tr>
+<tr class="even">
+<td><strong>EWT</strong></td>
+<td>Expanded Withholding Tax — Setnayan withholds a percentage of each vendor payout, remits to BIR, gives vendor a credit document (Form 2307).</td>
+<td>NIRC § 57(B), RR 2-98 as amended</td>
+</tr>
+<tr class="odd">
+<td><strong>Top Withholding Agent (TWA)</strong></td>
+<td>A taxpayer designated by BIR with elevated withholding rates (typically 15% / 30%). Setnayan is <strong>NOT</strong> a TWA at V1 launch (subject to confirmation; TWA designation typically follows large gross-receipts thresholds and is BIR-issued, not self-elected).</td>
+<td>RR 11-2018</td>
+</tr>
+<tr class="even">
+<td><strong>Official Receipt (OR)</strong></td>
+<td>The legal proof of sale issued to the buyer. Required for every receipt of money. Contains BIR Permit Number, sequence number, parties, amounts, VAT breakdown (if applicable).</td>
+<td>NIRC § 237</td>
+</tr>
+<tr class="odd">
+<td><strong>Form 2307</strong></td>
+<td>Certificate of Creditable Tax Withheld at Source — issued by the withholding agent (Setnayan) to the income earner (vendor) quarterly.</td>
+<td>BIR Form 2307</td>
+</tr>
+<tr class="even">
+<td><strong>Form 1601-EQ</strong></td>
+<td>Quarterly remittance return of creditable income taxes withheld (expanded). Setnayan files monthly variants and a quarterly consolidator.</td>
+<td>BIR Form 1601-EQ</td>
+</tr>
+<tr class="odd">
+<td><strong>eFPS</strong></td>
+<td>Electronic Filing and Payment System. Setnayan's accountant uses this to file all of the above online.</td>
+<td>BIR (Section 27.5 of NIRC implementing regs)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-vat-vs-percentage-tax-decision-matrix">3. VAT vs Percentage Tax decision matrix</h2>
+<p>A foundational tax-type election — irreversible for three years once VAT is elected, per NIRC § 109(BB).</p>
+<h3 id="31-the-two-options">3.1 The two options</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Criterion</th>
+<th>Percentage Tax (non-VAT)</th>
+<th>VAT-registered</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Rate</td>
+<td>3% of gross receipts (subject to confirmation — see § 2)</td>
+<td>12% of value added</td>
+</tr>
+<tr class="even">
+<td>Trigger</td>
+<td>Annual gross receipts ≤ ₱3,000,000</td>
+<td>Annual gross receipts &gt; ₱3,000,000 <strong>OR</strong> voluntary election</td>
+</tr>
+<tr class="odd">
+<td>Can claim input VAT?</td>
+<td>No</td>
+<td>Yes (on Setnayan's own expenses: R2 invoices, Vercel, Supabase, Daily.co — provided those vendors issue VAT-able invoices)</td>
+</tr>
+<tr class="even">
+<td>OR template</td>
+<td>Includes "THIS DOCUMENT IS NOT VALID FOR CLAIM OF INPUT TAX" footer</td>
+<td>Includes 12% VAT line and breakdown; no disclaimer</td>
+</tr>
+<tr class="odd">
+<td>Setnayan Pay 3% convenience fee</td>
+<td>3% billed to the customer; no VAT layered on</td>
+<td>3% billed to the customer + 12% VAT on the 3% fee = effective 3.36%</td>
+</tr>
+<tr class="even">
+<td>Filing frequency</td>
+<td>Monthly (Form 2551Q quarterly)</td>
+<td>Monthly (Form 2550M) + Quarterly (Form 2550Q)</td>
+</tr>
+<tr class="odd">
+<td>Switching cost</td>
+<td>Easy upgrade to VAT later (just amend Form 2303)</td>
+<td><strong>Irrevocable for 3 years</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-v1-recommendation-subject-to-confirmation">3.2 V1 recommendation (subject to confirmation)</h3>
+<p><strong>Setnayan launches as Percentage Tax (non-VAT).</strong> Rationale:</p>
+<ul>
+<li>V1 launch revenue is likely to land well under ₱3M annual in the first 12 months (typical bootstrapped two-sided marketplace ramp).</li>
+<li>The 3-year irrevocability on VAT election is a meaningful constraint to take on before product-market fit is proven.</li>
+<li>The OR template is simpler under Percentage Tax (no VAT breakdown to compute).</li>
+<li>The 3% convenience fee stays at a clean 3% to the customer (no 3.36% rounding awkwardness).</li>
+</ul>
+<p><strong>Migration trigger.</strong> When Setnayan's trailing-12-month gross receipts approach ₱2.5M (i.e., 83% of the ₱3M threshold), the tax accountant initiates the VAT election with BIR. The OR template flips to the VAT variant on the effective date issued in the BIR approval letter. Schema-side this is a single configuration flip (§ 4.4).</p>
+<p><strong>Both branches built in V1.</strong> The OR generation pipeline supports both templates from day one, controlled by a single configuration row. This avoids a future rewrite when the migration happens. <strong>Final decision subject to confirmation with Setnayan's tax accountant before BIR Form 2303 is filed.</strong></p>
+<h3 id="33-effect-on-the-3-convenience-fee">3.3 Effect on the 3% convenience fee</h3>
+<p>When a customer books a vendor through Setnayan Pay, the customer is invoiced:</p>
+<pre><code>Vendor package amount    ₱25,000.00
+Setnayan Pay convenience  ₱   750.00  (3% of vendor amount)
+─────────────────────────────────────
+Customer pays             ₱25,750.00
+</code></pre>
+<p>The convenience fee is Setnayan's revenue. Under Percentage Tax, the ₱750 is taxable at 3% (₱22.50 owed to BIR). Under VAT-registered, the ₱750 becomes ₱840 (the additional ₱90 is the 12% VAT on the convenience fee), and ₱90 is owed to BIR as output VAT.</p>
+<p>The vendor receives ₱25,000 in full (less their own EWT — see § 5). The convenience fee never touches the vendor's books.</p>
+<hr />
+<h2 id="4-customer-facing-official-receipt-generation">4. Customer-facing Official Receipt generation</h2>
+<p>The engineering heart of this iteration. Every paid <code>service_orders</code> row produces exactly one Official Receipt on activation. ORs are stored as PDFs in R2 and exposed to the customer through the surface defined in § 8.</p>
+<h3 id="41-schema">4.1 Schema</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> official_receipts (</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a>  receipt_id              UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a>  receipt_number          TEXT <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a>    <span class="co">-- BIR-sequence-compliant: e.g. &#39;2026-00001&#39;. Format = {year}-{6-digit zero-padded sequence}.</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a>    <span class="co">-- Sequence resets at the start of each calendar year and is monotonically increasing within the year.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a>    <span class="co">-- Gaps are NOT permitted — voided receipts retain their number with is_void=TRUE rather than freeing it.</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a>  service_order_id        UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> service_orders(order_id),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a>  customer_user_id        UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a>  customer_tin            TEXT,                      <span class="co">-- optional, customer-supplied at order time or in settings</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true"></a>  customer_business_name  TEXT,                      <span class="co">-- optional, for corporate ORs</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true"></a>  customer_address        TEXT,                      <span class="co">-- optional, for corporate ORs</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true"></a>  issued_at               TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true"></a>  line_items_json         JSONB <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true"></a>    <span class="co">-- Array of {description, qty, unit_php, line_total_php}.</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true"></a>    <span class="co">-- Example: [{&quot;description&quot;:&quot;Paparazzi 5-seat pack&quot;,&quot;qty&quot;:1,&quot;unit_php&quot;:2499.00,&quot;line_total_php&quot;:2499.00}]</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true"></a>  gross_php               <span class="dt">NUMERIC</span>(<span class="dv">12</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,    <span class="co">-- sum of line_total_php across all line_items</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true"></a>  vat_php                 <span class="dt">NUMERIC</span>(<span class="dv">12</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,   <span class="co">-- 0 when Setnayan is non-VAT</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true"></a>  net_php                 <span class="dt">NUMERIC</span>(<span class="dv">12</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,    <span class="co">-- gross + vat (the amount actually charged)</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true"></a>  payment_method          TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,             <span class="co">-- &#39;bdo_bank&#39; | &#39;gcash&#39; | &#39;paymongo_card&#39; | etc.</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true"></a>  payment_reference       TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,             <span class="co">-- reference code matched at reconciliation</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true"></a>  pdf_r2_key              TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,             <span class="co">-- R2 key under &#39;setnayan-tax-docs/customers/{user_id}/or/{receipt_id}.pdf&#39;</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true"></a>  is_void                 <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true"></a>  voided_at               TIMESTAMPTZ,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true"></a>  voided_by_admin         UUID <span class="kw">REFERENCES</span> users(user_id),</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true"></a>  void_reason             TEXT,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true"></a>  bir_permit_number       TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,             <span class="co">-- snapshot at issuance time from setnayan_tax_config</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true"></a>  bir_tax_type_at_issue   TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,             <span class="co">-- &#39;percentage_tax&#39; | &#39;vat&#39; — snapshot at issuance</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true"></a>  created_at              TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true"></a>);</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_or_customer <span class="kw">ON</span> official_receipts (customer_user_id, issued_at <span class="kw">DESC</span>);</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_or_order <span class="kw">ON</span> official_receipts (service_order_id);</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">UNIQUE</span> <span class="kw">INDEX</span> idx_or_number <span class="kw">ON</span> official_receipts (receipt_number);</span></code></pre></div>
+<h3 id="42-or-sequence-assignment--gap-free-guarantee">4.2 OR sequence assignment — gap-free guarantee</h3>
+<p>Per BIR CAS rules, OR sequence numbers cannot have gaps. The pipeline enforces this with a Postgres-level sequence reserved per calendar year:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> or_sequence_state (</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>  <span class="dt">year</span>                <span class="dt">INT</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>  next_sequence       <span class="dt">INT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">1</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>  updated_at          TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a>);</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a><span class="co">-- Atomic next-sequence allocation:</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a><span class="co">-- Wrapped in a SECURITY DEFINER function so callers can&#39;t bypass the ordering.</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> allocate_or_sequence(p_year <span class="dt">INT</span>) RETURNS <span class="dt">INT</span> <span class="kw">AS</span> $$</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a><span class="kw">DECLARE</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a>  next_seq <span class="dt">INT</span>;</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a><span class="cf">BEGIN</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true"></a>  <span class="kw">INSERT</span> <span class="kw">INTO</span> or_sequence_state (<span class="dt">year</span>, next_sequence) <span class="kw">VALUES</span> (p_year, <span class="dv">2</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true"></a>    <span class="kw">ON</span> CONFLICT (<span class="dt">year</span>) DO <span class="kw">UPDATE</span> <span class="kw">SET</span> next_sequence <span class="op">=</span> or_sequence_state.next_sequence <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true"></a>    <span class="kw">RETURNING</span> or_sequence_state.next_sequence <span class="op">-</span> <span class="dv">1</span> <span class="kw">INTO</span> next_seq;</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true"></a>  <span class="kw">RETURN</span> next_seq;</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true"></a><span class="cf">END</span>;</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true"></a>$$ LANGUAGE plpgsql SECURITY <span class="kw">DEFINER</span>;</span></code></pre></div>
+<p>Voids do not free the number — the OR row keeps <code>receipt_number = '2026-00042'</code> with <code>is_void = TRUE</code> so the BIR audit trail shows 42 was issued, then voided, never skipped.</p>
+<h3 id="43-or-generation-flow">4.3 OR generation flow</h3>
+<ol>
+<li><strong>Customer pays for an in-app SKU.</strong> Examples: ₱49 Save-the-Date Render, ₱2,499 Paparazzi 5-seat pack, ₱1,999 Custom Monogram Pack, ₱750 Setnayan Pay convenience fee on a vendor booking.</li>
+<li><strong>Admin reconciles via the 0023 Payments surface.</strong> Once the inbound payment is matched against the customer's order, <code>service_orders.status</code> flips to <code>'paid'</code>.</li>
+<li><strong>Trigger:</strong> an <code>AFTER UPDATE ON service_orders WHEN NEW.status = 'paid' AND OLD.status != 'paid'</code> row trigger fires <code>generate_official_receipt(order_id)</code> via Supabase Edge Function invocation. The trigger is idempotent — re-running on the same order is a no-op once an <code>official_receipts</code> row exists for that <code>service_order_id</code>.</li>
+<li><strong>Edge Function runs:</strong>
+<ul>
+<li>Pulls the customer + order rows</li>
+<li>Pulls Setnayan's current tax config (TIN, BIR Permit Number, registered tax type) from <code>setnayan_tax_config</code> (§ 4.4)</li>
+<li>Computes <code>vat_php</code> if VAT-registered (else 0)</li>
+<li>Allocates the next OR sequence via <code>allocate_or_sequence(extract(year from now()))</code></li>
+<li>Renders the PDF via headless Chromium (using the BIR-compliant HTML template — § 4.5)</li>
+<li>Uploads to R2 bucket <code>setnayan-tax-docs</code> under <code>customers/{user_id}/or/{receipt_id}.pdf</code></li>
+<li>Inserts the <code>official_receipts</code> row, snapshotting <code>bir_permit_number</code> and <code>bir_tax_type_at_issue</code> so retroactive config changes don't rewrite history</li>
+</ul></li>
+<li><strong>Notification fired</strong> via 0028 — email to the customer with the OR attached + a deep link to the in-app Tax Documents surface.</li>
+<li><strong>Customer sees the OR</strong> in Profile Settings → Privacy &amp; Data → Tax Documents from this moment onward, indefinitely.</li>
+</ol>
+<h3 id="44-setnayan-tax-configuration-table">4.4 Setnayan tax configuration table</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> setnayan_tax_config (</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>  config_id           UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a>  effective_from      <span class="dt">DATE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true"></a>  effective_to        <span class="dt">DATE</span>,                  <span class="co">-- nullable = currently active</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true"></a>  business_name       TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,         <span class="co">-- e.g. &#39;Setnayan Ventures Inc.&#39;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true"></a>  business_address    TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true"></a>  tin                 TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true"></a>  bir_permit_number   TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true"></a>  rdo_code            TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true"></a>  tax_type            TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (tax_type <span class="kw">IN</span> (<span class="st">&#39;percentage_tax&#39;</span>,<span class="st">&#39;vat&#39;</span>)),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true"></a>  percentage_tax_rate <span class="dt">NUMERIC</span>(<span class="dv">5</span>,<span class="dv">2</span>),          <span class="co">-- e.g. 3.00 (subject to confirmation per § 2)</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true"></a>  vat_rate            <span class="dt">NUMERIC</span>(<span class="dv">5</span>,<span class="dv">2</span>) <span class="kw">DEFAULT</span> <span class="fl">12.00</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true"></a>  is_top_withholding_agent <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true"></a>  ewt_default_rate_individual_pct <span class="dt">NUMERIC</span>(<span class="dv">5</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="fl">5.00</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true"></a>    <span class="co">-- 5% if individual vendor&#39;s gross income ≤ ₱720K; 10% if &gt; ₱720K — see § 5</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true"></a>    <span class="co">-- Default here is the lower-rate fallback; per-vendor override in vendors.ewt_rate_pct</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true"></a>  ewt_default_rate_corporate_pct <span class="dt">NUMERIC</span>(<span class="dv">5</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="fl">2.00</span>,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true"></a>    <span class="co">-- Subject to confirmation — typical creditable WT on corporate professional services</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true"></a>  created_at          TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true"></a>);</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_tax_config_effective <span class="kw">ON</span> setnayan_tax_config (effective_from <span class="kw">DESC</span>);</span></code></pre></div>
+<p>Tax-rate changes (e.g., BIR adjusts the Percentage Tax rate) are handled by closing the current row (<code>effective_to = today</code>) and inserting a new row (<code>effective_from = tomorrow</code>). Historical ORs continue to display the rate that was active at issuance time because <code>bir_tax_type_at_issue</code> and the line items are snapshotted on the OR row itself.</p>
+<h3 id="45-or-pdf-template">4.5 OR PDF template</h3>
+<p>The OR PDF is rendered from an HTML template. Per BIR CAS guidelines, the template must include every field in the template below; deviations require RDO re-approval.</p>
+<p><strong>Non-VAT (Percentage Tax) variant:</strong></p>
+<pre><code>                           SETNAYAN VENTURES INC.
+                  [Business Address — single line, registered with BIR]
+                TIN: XXX-XXX-XXX-XXX · BIR PERMIT NO.: XXXXX-XXXX-XX
+                       NON-VAT REGISTERED TAXPAYER
+
+                          OFFICIAL RECEIPT
+                          No. 2026-00001
+                       Issued: 15 November 2026 · 14:32 PHT
+
+Received from:
+  Aira Reyes &amp; Boy Delos Santos
+  aira@example.ph · +63 917 555 0123
+  TIN: (optional)             Address: (optional, for business OR)
+
+For:
+  Description                              Qty    Unit Price       Total
+  Paparazzi 5-seat pack                     1     ₱2,499.00     ₱ 2,499.00
+  Setnayan Pay convenience fee (3%)         1     ₱   74.97     ₱    74.97
+                                                  ─────────────────────────
+                                                  Subtotal      ₱ 2,573.97
+                                                  VAT (12%)     ₱     0.00*
+                                                  ─────────────────────────
+                                                  TOTAL         ₱ 2,573.97
+
+  * This receipt is issued by a non-VAT registered entity.
+
+Payment received via: BDO Bank Transfer · Ref: STN-2026-AB1234
+
+THIS DOCUMENT IS NOT VALID FOR CLAIM OF INPUT TAX.
+
+   [BIR Permit Stamp]              [Setnayan Authorized Signature]
+</code></pre>
+<p><strong>VAT variant (post-migration):</strong></p>
+<p>The footer disclaimer is removed; the VAT line shows the actual 12% computed value; line items break out VAT-exclusive amounts; a "VAT-INCLUSIVE" header is added near the total. Sequence numbering is unaffected.</p>
+<h3 id="46-voiding-an-or">4.6 Voiding an OR</h3>
+<p>Voiding is admin-only and lives in 0023 Admin Console → Payments → OR detail. A void requires:</p>
+<ul>
+<li>A reason (free text, ≥ 20 characters)</li>
+<li>Two-admin approval (per CLAUDE.md decision log 2026-05-12 § 9.1 — OR voids over ₱25K refunds count as "refund &gt; ₱25K"; OR voids under that threshold can be single-admin but <strong>a refund-and-reissue pattern is preferred over a void wherever feasible</strong> because BIR auditors scrutinize void rates)</li>
+<li>An audit log entry</li>
+</ul>
+<p>A void does not free the receipt number. The voided OR is marked <code>is_void = TRUE</code>, a replacement OR is generated with a fresh sequence number, and the relationship is recorded in a separate <code>or_replacements</code> table:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> or_replacements (</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>  replacement_id       UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>  voided_receipt_id    UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> official_receipts(receipt_id),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a>  replacement_receipt_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> official_receipts(receipt_id),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a>  reason               TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a>  created_at           TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true"></a>);</span></code></pre></div>
+<h3 id="47-refunds">4.7 Refunds</h3>
+<p>A refund triggers an OR void + the issuance of a Credit Memo (CM). Credit Memos follow the same BIR-permit-required rules as ORs and are a separate document class. <strong>V1 scope note:</strong> Credit Memo generation is a follow-on engineering surface tracked in 0026's V1.1 backlog. Until that ships, refunds are documented as a manual operations process — Setnayan's accountant writes the CM by hand from a stamped CM booklet — and engineering only voids the OR row.</p>
+<hr />
+<h2 id="5-vendor-payout-withholding--form-2307">5. Vendor payout withholding + Form 2307</h2>
+<p>When Setnayan disburses money to a Philippine resident vendor, the platform retains a percentage as EWT, sends the rest to the vendor, remits the withheld portion to BIR, and (quarterly) gives the vendor a Form 2307 certificate.</p>
+<h3 id="51-applicable-rates-subject-to-confirmation-with-accountant">5.1 Applicable rates (subject to confirmation with accountant)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Vendor type</th>
+<th>Withholding rate</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Individual (sole prop / freelancer / professional) — gross income ≤ ₱720K</td>
+<td><strong>5%</strong></td>
+<td>RR 11-2018, § 2.57.2(I) — best estimate; subject to confirmation</td>
+</tr>
+<tr class="even">
+<td>Individual — gross income &gt; ₱720K</td>
+<td><strong>10%</strong></td>
+<td>RR 11-2018, § 2.57.2(I) — best estimate; subject to confirmation</td>
+</tr>
+<tr class="odd">
+<td>Corporation (vendor incorporated as Inc. / Corp.)</td>
+<td><strong>2%</strong></td>
+<td>RR 2-98 as amended — best estimate; subject to confirmation</td>
+</tr>
+<tr class="even">
+<td>Top Withholding Agent applies</td>
+<td><strong>10% / 15%</strong></td>
+<td>Subject to TWA designation status — confirm with accountant</td>
+</tr>
+</tbody>
+</table>
+<p>Vendors self-declare their type during onboarding (already captured in 0022 — <code>vendors.tax_type</code> may need to be added). The default rate is the conservative-low default; per-vendor overrides allowed when supporting documentation (latest year's tax returns showing income tier) is provided.</p>
+<h3 id="52-schema">5.2 Schema</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="co">-- Augment vendors with tax-relevant fields</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> tin TEXT;</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> vendor_tax_type TEXT</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a>  <span class="kw">CHECK</span> (vendor_tax_type <span class="kw">IN</span> (<span class="st">&#39;individual_low&#39;</span>, <span class="st">&#39;individual_high&#39;</span>, <span class="st">&#39;corporate&#39;</span>, <span class="st">&#39;twa_individual&#39;</span>, <span class="st">&#39;twa_corporate&#39;</span>));</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> ewt_rate_pct <span class="dt">NUMERIC</span>(<span class="dv">5</span>,<span class="dv">2</span>);</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true"></a>  <span class="co">-- Override; if null, derive from vendor_tax_type via setnayan_tax_config defaults</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> registered_business_name TEXT;</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> registered_business_address TEXT;</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> vendor_payouts (</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true"></a>  payout_id              UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true"></a>  vendor_id              UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> vendors(vendor_id),</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true"></a>  service_order_id       UUID <span class="kw">REFERENCES</span> service_orders(order_id),</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true"></a>    <span class="co">-- Nullable for bulk payouts that aggregate multiple orders into a single transfer</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true"></a>  vendor_invoice_amount  <span class="dt">NUMERIC</span>(<span class="dv">12</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true"></a>    <span class="co">-- What the customer paid the vendor for (vendor&#39;s package amount, NOT including Setnayan&#39;s 3% fee)</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true"></a>  ewt_rate_pct           <span class="dt">NUMERIC</span>(<span class="dv">5</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true"></a>  ewt_php                <span class="dt">NUMERIC</span>(<span class="dv">12</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true"></a>    <span class="co">-- vendor_invoice_amount × ewt_rate_pct / 100</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true"></a>  setnayan_fee_php       <span class="dt">NUMERIC</span>(<span class="dv">12</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true"></a>    <span class="co">-- 3% convenience fee charged to the customer (recorded here for ledger completeness, not deducted from vendor)</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true"></a>  payout_net_php         <span class="dt">NUMERIC</span>(<span class="dv">12</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true"></a>    <span class="co">-- vendor_invoice_amount - ewt_php</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true"></a>  payout_status          TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true"></a>                         <span class="kw">CHECK</span> (payout_status <span class="kw">IN</span> (<span class="st">&#39;pending&#39;</span>,<span class="st">&#39;scheduled&#39;</span>,<span class="st">&#39;sent&#39;</span>,<span class="st">&#39;failed&#39;</span>,<span class="st">&#39;clawed_back&#39;</span>)),</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true"></a>  payout_method          TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,           <span class="co">-- &#39;bdo&#39; | &#39;gcash&#39; | &#39;maya&#39; | etc.</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true"></a>  payout_reference       TEXT,                    <span class="co">-- bank or GCash transaction reference once sent</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true"></a>  scheduled_for          <span class="dt">DATE</span>,</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true"></a>  sent_at                TIMESTAMPTZ,</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true"></a>  failed_reason          TEXT,</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true"></a>  form_2307_quarter      TEXT,                    <span class="co">-- &#39;2026-Q4&#39; assigned at end-of-quarter aggregation</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true"></a>  form_2307_pdf_r2_key   TEXT,                    <span class="co">-- populated when the quarterly Form 2307 PDF is generated</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true"></a>  created_at             TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true"></a>);</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true"></a></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_payouts_vendor_quarter <span class="kw">ON</span> vendor_payouts (vendor_id, form_2307_quarter);</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_payouts_status <span class="kw">ON</span> vendor_payouts (payout_status);</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_payouts_scheduled <span class="kw">ON</span> vendor_payouts (scheduled_for) <span class="kw">WHERE</span> payout_status <span class="op">=</span> <span class="st">&#39;scheduled&#39;</span>;</span></code></pre></div>
+<h3 id="53-payout-flow-v1--manual-bank-transfer--gcash">5.3 Payout flow (V1 — manual bank transfer / GCash)</h3>
+<p>V1 mirrors the inbound-payment model: payouts are manually executed by Setnayan operations via BDO online banking or GCash for Business. Engineering produces the work queue and records the result.</p>
+<ol>
+<li><strong>Trigger.</strong> When a <code>service_order</code> reaches a vendor-payable state (e.g., the event date has passed, or per the vendor agreement § 8 the milestone is due), a <code>vendor_payouts</code> row is created in <code>payout_status = 'pending'</code> with EWT calculated.</li>
+<li><strong>Admin review.</strong> Payouts surface in 0023 Admin Console → Finance → Vendor Payouts queue. Admin verifies vendor's bank details on file, confirms EWT calculation, marks <code>payout_status = 'scheduled'</code> with a <code>scheduled_for</code> date.</li>
+<li><strong>Manual disbursement.</strong> On the scheduled date, operations executes the transfer via BDO online banking or GCash for Business, copies the transaction reference back into 0023 admin, marks <code>payout_status = 'sent'</code> with <code>payout_reference</code> and <code>sent_at</code>.</li>
+<li><strong>Vendor notification.</strong> 0028 emails the vendor "₱X has been sent to your registered account · reference Y" with a remittance advice attached (PDF — separate template from Form 2307; the remittance advice is informal, Form 2307 is the legally binding tax document issued quarterly).</li>
+</ol>
+<p>V1.5 automated payouts via PayMongo / GCash Merchant API are a follow-on iteration tracked in 0023's roadmap, not built here.</p>
+<h3 id="54-form-2307-quarterly-generation">5.4 Form 2307 quarterly generation</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> form_2307_issuances (</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>  issuance_id          UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a>  vendor_id            UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> vendors(vendor_id),</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a>  quarter              TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,             <span class="co">-- &#39;2026-Q1&#39; | &#39;2026-Q2&#39; | ...</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true"></a>  total_gross_php      <span class="dt">NUMERIC</span>(<span class="dv">12</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,    <span class="co">-- sum of vendor_invoice_amount for the quarter</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true"></a>  total_ewt_php        <span class="dt">NUMERIC</span>(<span class="dv">12</span>,<span class="dv">2</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,    <span class="co">-- sum of ewt_php for the quarter</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true"></a>  payout_ids           UUID[] <span class="kw">NOT</span> <span class="kw">NULL</span>,           <span class="co">-- the vendor_payouts.payout_id list aggregated</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true"></a>  pdf_r2_key           TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true"></a>  issued_at            TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true"></a>  emailed_to_vendor    <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true"></a>  emailed_at           TIMESTAMPTZ,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true"></a>  <span class="kw">UNIQUE</span> (vendor_id, quarter)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true"></a>);</span></code></pre></div>
+<p><strong>Generation cron.</strong> A scheduled job runs on the last day of every quarter at 23:59 PHT (Mar 31, Jun 30, Sep 30, Dec 31) — actually executed on the <strong>5th of the following month</strong> to ensure all in-quarter payouts have been reconciled and any late-arriving EWT corrections are absorbed. The job:</p>
+<ol>
+<li>Groups all <code>vendor_payouts</code> rows for the quarter by <code>vendor_id</code> where <code>payout_status IN ('sent')</code> (sent, not pending or scheduled — only completed payouts get Form 2307'd; pending payouts roll to the next quarter).</li>
+<li>For each vendor, sums <code>vendor_invoice_amount</code> and <code>ewt_php</code>, renders the Form 2307 PDF, uploads to R2 at <code>setnayan-tax-docs/vendors/{vendor_id}/form_2307/{year}_Q{n}.pdf</code>.</li>
+<li>Inserts a <code>form_2307_issuances</code> row.</li>
+<li>Updates each contributing <code>vendor_payouts.form_2307_quarter</code> and <code>form_2307_pdf_r2_key</code>.</li>
+<li>Triggers 0028 to email the vendor.</li>
+</ol>
+<p><strong>Form 2307 template</strong> mirrors the official BIR layout. Single page. Header section identifies the withholding agent (Setnayan) and the income payee (the vendor). Body has a single-row table for the quarter's aggregated EWT. Signed by Setnayan's authorized signatory (e.g., the President or CFO of Setnayan Ventures Inc.). The exact BIR Form 2307 template is <strong>subject to the latest version published by BIR at the time of issuance</strong> — engineering uses the BIR-published template image as the canonical layout, refreshed annually.</p>
+<h3 id="55-ewt-remittance-to-bir-form-1601-eq">5.5 EWT remittance to BIR (Form 1601-EQ)</h3>
+<p>Separate from the vendor-facing Form 2307. Setnayan owes BIR the withheld amount <strong>monthly</strong> (10th of the following month), filed as Form 1601-EQ. This is a return-and-payment, not a per-vendor document.</p>
+<p>Engineering produces the input as a CSV export (§ 7.2). The accountant files via eFPS and pays BIR via the eFPS-linked authorized agent bank (AAB). The remittance is operational; engineering only generates the supporting figures.</p>
+<hr />
+<h2 id="6-efps-reporting-outputs">6. eFPS reporting outputs</h2>
+<p>Engineering does <strong>not</strong> file eFPS returns directly. eFPS is a BIR-operated portal accessed by Setnayan's tax accountant. The 0023 Admin Console produces the reports the accountant needs to file.</p>
+<p>All reports live at <code>/admin/finance/tax-reports</code> with admin role gates per CLAUDE.md decision log 2026-05-12 § 9.1 (Finance role required).</p>
+<h3 id="61-reports-produced">6.1 Reports produced</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Report</th>
+<th>Frequency</th>
+<th>Format</th>
+<th>Used to file</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Monthly Gross Receipts Summary</td>
+<td>Monthly</td>
+<td>CSV + PDF</td>
+<td>Form 2551Q (Percentage Tax) — quarterly Percentage Tax return, or Form 2550M (VAT monthly) if VAT-registered</td>
+</tr>
+<tr class="even">
+<td>Quarterly Withholding Tax Summary</td>
+<td>Quarterly</td>
+<td>CSV + PDF</td>
+<td>Form 1601-EQ + supporting alphalist (per-vendor breakdown)</td>
+</tr>
+<tr class="odd">
+<td>Annual Income Summary</td>
+<td>Annual</td>
+<td>CSV + PDF</td>
+<td>BIR Form 1702 (Corporate Income Tax Return) — accountant computes net income from this plus expense records (out-of-scope)</td>
+</tr>
+<tr class="even">
+<td>Alphalist of Payees Subjected to Withholding</td>
+<td>Quarterly</td>
+<td>CSV (BIR-specified format)</td>
+<td>Required attachment to Form 1601-EQ</td>
+</tr>
+<tr class="odd">
+<td>Voided OR audit log</td>
+<td>On demand</td>
+<td>CSV</td>
+<td>RDO compliance check-ins</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-report-formats">6.2 Report formats</h3>
+<p><strong>Monthly Gross Receipts Summary CSV</strong> (per month, one row per OR):</p>
+<pre><code>receipt_number, issued_at, customer_user_id, customer_name, customer_tin,
+gross_php, vat_php, net_php, payment_method, payment_reference, is_void
+</code></pre>
+<p><strong>Quarterly Withholding Tax Summary CSV</strong> (per quarter, one row per <code>form_2307_issuances</code>):</p>
+<pre><code>vendor_tin, vendor_name, vendor_address, quarter, gross_paid_php, ewt_rate_pct,
+ewt_withheld_php, payout_count
+</code></pre>
+<p><strong>Alphalist CSV</strong> follows the BIR-published Alphalist Data Entry format (BIR Form 1604-E / 1604-EQ schemas). The exact column order and headers are <strong>subject to BIR's current published schema</strong> — engineering reads the BIR data dictionary at the start of each tax-year cycle to confirm format compatibility before the cron generates the file.</p>
+<h3 id="63-admin-tax-report-surface-consumed-by-0023">6.3 Admin tax-report surface (consumed by 0023)</h3>
+<p>The Admin Console renders a simple report-builder at <code>/admin/finance/tax-reports</code>:</p>
+<ul>
+<li>Period selector (month / quarter / year picker)</li>
+<li>Report type selector (radio: Gross Receipts · Withholding · Alphalist · Income · Void Audit)</li>
+<li>"Generate report" button → produces CSV + PDF, uploads to R2 under <code>setnayan-tax-docs/admin/reports/{report_type}/{period}.{ext}</code>, presents a download link.</li>
+<li>"Email report to accountant" button → sends to a pre-configured accountant email on file in admin settings.</li>
+</ul>
+<p>All report generations are logged in the admin audit log (per CLAUDE.md § 9.1 — single-admin authority for report export).</p>
+<hr />
+<h2 id="7-customer-facing-tax-document-download-surface-consumed-by-0025">7. Customer-facing tax-document download surface (consumed by 0025)</h2>
+<p>A new section in Profile Settings → Privacy &amp; Data → <strong>Tax Documents</strong>.</p>
+<h3 id="71-ui-structure">7.1 UI structure</h3>
+<pre><code>Profile Settings
+  └── Privacy &amp; Data
+        └── Tax Documents
+              ├── My TIN (optional)               [editable]
+              ├── My business name (optional)     [editable]
+              ├── My billing address (optional)   [editable]
+              │
+              ├── Official Receipts
+              │     ├── OR No. 2026-00042 — ₱2,573.97 — 15 Nov 2026  [Download] [Re-email]
+              │     ├── OR No. 2026-00031 — ₱49.00    — 02 Nov 2026  [Download] [Re-email]
+              │     └── ...
+              │
+              └── Need help? Contact support@setnayan.com
+</code></pre>
+<h3 id="72-field-additions">7.2 Field additions</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> tin_optional TEXT;</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> billing_business_name TEXT;</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> billing_address TEXT;</span></code></pre></div>
+<p>These are optional. If populated, future ORs issued to this user automatically include them on the OR PDF. Retroactive ORs are <strong>not</strong> automatically reissued (BIR audit trail concern — an OR's content is the content at issuance time). The customer can request a reissuance via support; admin handles via the void-and-reissue flow in § 4.6.</p>
+<h3 id="73-vendor-facing-tax-document-surface-consumed-by-0022">7.3 Vendor-facing tax-document surface (consumed by 0022)</h3>
+<p>Vendor dashboard → Settings → <strong>Tax Documents</strong> has the parallel surface for Form 2307 PDFs:</p>
+<pre><code>Settings
+  └── Tax Documents
+        ├── My TIN                              [editable, but flagged as needing re-verification if changed]
+        ├── My registered business name         [editable, re-verification flag]
+        ├── My registered business address      [editable, re-verification flag]
+        ├── My EWT classification               [shows current vendor_tax_type, support-only to change]
+        │
+        └── Form 2307 — Quarterly Withholding Tax Certificates
+              ├── 2026 Q4 — Gross ₱45,000.00 — EWT ₱2,250.00  [Download] [Re-email]
+              ├── 2026 Q3 — Gross ₱72,500.00 — EWT ₱3,625.00  [Download] [Re-email]
+              └── ...
+</code></pre>
+<p>Vendor TIN changes flip the vendor record's <code>verification_status</code> back to pending (per Vendor Agreement § 1.1) because the TIN is part of legal identity. Operations re-verifies via the same 3-business-day SLA before the next payout cycle.</p>
+<hr />
+<h2 id="8-cross-iteration-touch-points">8. Cross-iteration touch points</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Iteration</th>
+<th>What 0026 provides</th>
+<th>What 0026 consumes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>0013 Platform Stack</strong></td>
+<td>—</td>
+<td>Supabase Edge Function runtime for OR/2307 PDF generation; R2 bucket <code>setnayan-tax-docs</code> (new)</td>
+</tr>
+<tr class="even">
+<td><strong>0022 Vendor Dashboard</strong></td>
+<td>Form 2307 PDFs + tax-document surface</td>
+<td><code>vendors.tin</code>, <code>vendors.vendor_tax_type</code>, <code>vendors.ewt_rate_pct</code>, <code>vendors.registered_business_name</code>, <code>vendors.registered_business_address</code> (added here)</td>
+</tr>
+<tr class="odd">
+<td><strong>0023 Admin Console</strong></td>
+<td>Tax report exports + payout reconciliation queue</td>
+<td>The 0023 payment-reconciliation hook that flips <code>service_orders.status = 'paid'</code></td>
+</tr>
+<tr class="even">
+<td><strong>0025 Profile Settings</strong></td>
+<td>Customer-side tax document surface</td>
+<td><code>users.tin_optional</code>, <code>users.billing_business_name</code>, <code>users.billing_address</code></td>
+</tr>
+<tr class="odd">
+<td><strong>0028 Email Notifications</strong></td>
+<td>OR-issued and Form-2307-issued event hooks</td>
+<td>Daily.co / SMTP infrastructure</td>
+</tr>
+<tr class="even">
+<td><strong>Vendor Agreement § 8</strong></td>
+<td>EWT mechanics referenced in the vendor pricing schedule</td>
+<td>Pricing constraints (the 3% Setnayan Pay convenience fee)</td>
+</tr>
+<tr class="odd">
+<td><strong>Vendor Agreement § 12</strong></td>
+<td>TIN + tax-classification fields collected at signing</td>
+<td>Vendor signature-block schema</td>
+</tr>
+<tr class="even">
+<td><strong>Privacy &amp; Security Policy</strong></td>
+<td>TIN treated as Sensitive Personal Information under RA 10173; encryption at rest in Supabase + access restricted via RLS to the owning vendor user + Finance admin role</td>
+<td>RA 10173 compliance framework</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9-schema-additions-summary">9. Schema additions summary</h2>
+<p>New tables:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a><span class="co">-- § 4.1</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true"></a>official_receipts</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true"></a><span class="co">-- § 4.2</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true"></a>or_sequence_state</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true"></a><span class="co">-- § 4.4</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true"></a>setnayan_tax_config</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true"></a><span class="co">-- § 4.6</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true"></a>or_replacements</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true"></a><span class="co">-- § 5.2</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true"></a>vendor_payouts</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true"></a><span class="co">-- § 5.4</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true"></a>form_2307_issuances</span></code></pre></div>
+<p><code>ALTER TABLE</code> additions:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true"></a><span class="co">-- § 5.2 — vendors</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> tin TEXT;</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> vendor_tax_type TEXT;</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> ewt_rate_pct <span class="dt">NUMERIC</span>(<span class="dv">5</span>,<span class="dv">2</span>);</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> registered_business_name TEXT;</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> vendors <span class="kw">ADD</span> <span class="kw">COLUMN</span> registered_business_address TEXT;</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true"></a><span class="co">-- § 7.2 — users</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> tin_optional TEXT;</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> billing_business_name TEXT;</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> users <span class="kw">ADD</span> <span class="kw">COLUMN</span> billing_address TEXT;</span></code></pre></div>
+<p>New Postgres function:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a>allocate_or_sequence(<span class="dt">year</span> <span class="dt">INT</span>) → <span class="dt">INT</span>     <span class="co">-- § 4.2, gap-free sequence</span></span></code></pre></div>
+<p>New R2 bucket:</p>
+<pre><code>setnayan-tax-docs/
+  customers/{user_id}/or/{receipt_id}.pdf
+  vendors/{vendor_id}/form_2307/{year}_Q{n}.pdf
+  admin/reports/{report_type}/{period}.{csv|pdf}
+</code></pre>
+<p>New scheduled jobs:</p>
+<ul>
+<li><code>generate_quarterly_form_2307</code> — runs 5th of every Apr / Jul / Oct / Jan at 06:00 PHT</li>
+<li><code>aggregate_monthly_gross_receipts</code> — runs 5th of every month at 06:00 PHT</li>
+<li><code>flag_pending_vendor_tin_verifications</code> — runs daily at 09:00 PHT (surfaces vendor TIN changes awaiting re-verification)</li>
+</ul>
+<hr />
+<h2 id="10-tax-law-assertions-marked-subject-to-confirmation">10. Tax-law assertions marked "subject to confirmation"</h2>
+<p>Every numeric tax rate or rule in this iteration is captured as a configurable value rather than a hard-coded constant, because tax rates change and because engineering should not be asserting tax law. The specific items that <strong>must be reviewed with Setnayan's tax accountant</strong> before launch:</p>
+<ol>
+<li><strong>The 3% Percentage Tax rate</strong> (§ 2, § 3) — historically temporarily reduced to 1% under CREATE Law transitional provisions; current rate must be confirmed.</li>
+<li><strong>The ₱720K individual-EWT-rate threshold</strong> (§ 5.1) — RR 11-2018 has been amended multiple times; the threshold and the 5% vs 10% boundaries must be confirmed.</li>
+<li><strong>The 2% corporate EWT rate</strong> (§ 5.1) — RR 2-98's professional-services rate has been amended; confirm whether 2% or another rate applies to marketplace-disbursed vendor payments specifically.</li>
+<li><strong>TWA designation status</strong> (§ 5.1) — Setnayan is assumed NOT to be a Top Withholding Agent at V1 launch; confirm with BIR upon registration.</li>
+<li><strong>CAS approval timeline</strong> (§ 1.2) — assumed 4–6 weeks; varies by RDO.</li>
+<li><strong>Form 1601-EQ filing dates</strong> (§ 5.5) — the 10th-of-following-month rule is the historical default but specific cutoffs vary by category; confirm.</li>
+<li><strong>VAT election irrevocability</strong> (§ 3.1) — assumed 3 years per current NIRC; confirm under latest amendments.</li>
+<li><strong>The exact BIR-published Form 2307 template</strong> (§ 5.4) — refresh annually; engineering's PDF render must match the current BIR layout.</li>
+<li><strong>Alphalist data dictionary</strong> (§ 6.2) — BIR publishes the schema; confirm at start of each tax-year cycle.</li>
+<li><strong>OR template requirements for the specific RDO</strong> (§ 4.5) — RDO-level interpretation varies; confirm with the assigned RDO during CAS application.</li>
+</ol>
+<p>This list is a launch-readiness checklist for the tax accountant. None of the items block engineering work — the schema accommodates any answer.</p>
+<hr />
+<h2 id="11-build-order">11. Build order</h2>
+<p><strong>Phase A — Legal / operational (Setnayan founders + tax accountant, no engineering).</strong> Run in parallel with Phase B; both must complete before Phase E goes live.</p>
+<ul>
+<li>A1. SEC incorporation of Setnayan Ventures Inc.</li>
+<li>A2. BIR Form 2303 Certificate of Registration + tax type election (Percentage Tax — § 3.2 recommendation)</li>
+<li>A3. BIR Form 1900 — Application for CAS approval (submit the OR template from § 4.5 and the system documentation from this iteration)</li>
+<li>A4. BIR Permit to Issue Receipts (Form 1906) — issued upon CAS approval; the Permit Number populates <code>setnayan_tax_config.bir_permit_number</code></li>
+<li>A5. Mayor's Permit + Books of Accounts registration</li>
+<li>A6. Authorized signatory designation (for Form 2307 signing) — typically the corporate President or CFO</li>
+</ul>
+<p><strong>Phase B — Engineering: OR generation pipeline.</strong></p>
+<ul>
+<li>B1. Create <code>setnayan-tax-docs</code> R2 bucket; configure access policy (admin + owning-user signed URLs only)</li>
+<li>B2. Implement <code>setnayan_tax_config</code> table + admin surface to edit (read-only after launch; updates create new effective-dated rows)</li>
+<li>B3. Implement <code>or_sequence_state</code> + <code>allocate_or_sequence(year)</code> Postgres function with transactional gap-free guarantee</li>
+<li>B4. Implement <code>official_receipts</code> schema + the <code>AFTER UPDATE ON service_orders</code> trigger</li>
+<li>B5. Build the OR-generation Edge Function (HTML template → headless Chromium → PDF → R2 upload → row insert)</li>
+<li>B6. Implement <code>or_replacements</code> table + admin void surface in 0023</li>
+<li>B7. Run integration tests: ₱49, ₱2,499, ₱25,750 (vendor-booking-via-Setnayan-Pay), refund void, replacement issuance</li>
+</ul>
+<p><strong>Phase C — Engineering: Vendor payout + EWT + Form 2307.</strong></p>
+<ul>
+<li>C1. <code>ALTER TABLE vendors</code> additions (TIN, vendor_tax_type, ewt_rate_pct, registered_business_name, registered_business_address)</li>
+<li>C2. Implement <code>vendor_payouts</code> schema + admin payout queue surface in 0023</li>
+<li>C3. Build the EWT calculator: <code>(vendor_invoice_amount, vendor_tax_type, override_rate) → ewt_php</code></li>
+<li>C4. Implement <code>form_2307_issuances</code> schema + the quarterly cron + the Form 2307 PDF renderer</li>
+<li>C5. Vendor TIN change flow → flags vendor for re-verification (per § 7.3)</li>
+<li>C6. Vendor-side tax-document surface in 0022's settings panel</li>
+</ul>
+<p><strong>Phase D — Engineering: Admin tax-report exports.</strong></p>
+<ul>
+<li>D1. Build the <code>/admin/finance/tax-reports</code> UI per § 6.3</li>
+<li>D2. Implement CSV generators for each report type</li>
+<li>D3. Implement PDF generators (where applicable — summary cover sheets)</li>
+<li>D4. Hook up the "Email report to accountant" action via 0028</li>
+</ul>
+<p><strong>Phase E — Customer/vendor-facing download surfaces.</strong></p>
+<ul>
+<li>E1. Customer tax-documents UI in Profile Settings (consumed by 0025)</li>
+<li>E2. Vendor tax-documents UI in Settings (consumed by 0022)</li>
+<li>E3. 0028 email templates for "OR issued" and "Form 2307 issued"</li>
+</ul>
+<p><strong>Phase F — Pre-launch dry run.</strong></p>
+<ul>
+<li>F1. Generate test ORs against a sandbox <code>setnayan_tax_config</code> (test TIN, test permit number)</li>
+<li>F2. Walk the accountant through one full quarter of test data — confirm Form 2307 output matches BIR's expected format</li>
+<li>F3. Submit one paper OR (manual booklet) to RDO as a parallel control; verify CAS-generated OR matches all required fields</li>
+<li>F4. Flip production <code>setnayan_tax_config.effective_from</code> to the launch date; first real OR issued in production is sequence <code>{launch_year}-000001</code></li>
+</ul>
+<hr />
+<h2 id="12-companions-and-next-steps">12. Companions and next steps</h2>
+<ul>
+<li><strong>0023 Admin Console</strong> — payment reconciliation flips <code>service_orders.status = 'paid'</code>, which is the trigger for OR issuance; also hosts the payout queue, void surface, and tax-report exports.</li>
+<li><strong>0025 Profile Settings</strong> — surfaces the customer-facing OR list + the optional TIN / business address fields.</li>
+<li><strong>0022 Vendor Dashboard</strong> — surfaces vendor-facing Form 2307 list + the TIN / classification fields (added in § 5.2).</li>
+<li><strong>0028 Email Notifications</strong> — transactional emails for OR issued + Form 2307 issued + remittance advice on payout sent.</li>
+<li><strong>Vendor Agreement § 8 (pricing constraints)</strong> — references the 3% convenience fee and the EWT mechanic; reciprocally, this iteration is the engineering implementation of that section.</li>
+<li><strong>Vendor Agreement § 12 (signing)</strong> — collects vendor TIN + classification at signing time; reciprocally, vendor onboarding writes those fields into the schema this iteration consumes.</li>
+<li><strong>Privacy &amp; Security Policy</strong> — TINs and registered business addresses are Sensitive Personal Information under RA 10173; access is gated by RLS to the owning user + Finance admin role + DPO. Retention follows the standard 5-year window post-account-closure.</li>
+<li><strong>0013 Platform Stack</strong> — Supabase Edge Functions are the OR-generation runtime; R2 stores all tax PDFs; the quarterly Form 2307 cron runs on Supabase scheduled functions or a Cloudflare Worker — final choice to be decided during Phase B implementation.</li>
+</ul>
+<hr />
+<p><em>End of Iteration 0026 spec.</em></p>
+
+<footer>
+Setnayan · This placeholder will be replaced with a clickable prototype during implementation. The spec above is the source of truth until then.
+</footer>
+</div>
+</body>
+</html>

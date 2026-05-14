@@ -1,0 +1,2281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan · 0004 · 8K LED Background Maker — Web + Mobile Mockup</title>
+<meta name="description" content="Setnayan iteration 0005 — couple's 8K LED screen monogram background template maker. Pick a template, customize, export a looping video for the venue's LED wall.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --page-bg: #FAF6F0;
+  --page-bg-soft: #F5EFE5;
+  --ink: #1A1A1A;
+  --ink-soft: #6B6B6B;
+  --ink-faint: #A39B8E;
+  --accent: #C97B4B;
+  --accent-soft: #E8C9B0;
+  --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08);
+  --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F3;
+  --canvas-bg: #2B2825;
+  --pro-gold: #B8893E;
+  --rsvp-attending: #6FA776;
+  --shadow-frame: 0 40px 100px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--canvas-bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select { font: inherit; }
+
+/* Canvas chrome */
+.canvas-header {
+  padding: 36px 48px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.canvas-title { display: flex; flex-direction: column; gap: 6px; color: rgba(255,255,255,0.9); }
+.canvas-title h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500; font-size: 28px; color: #fff;
+}
+.canvas-title .canvas-meta {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+.canvas-toggle {
+  display: inline-flex; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px; padding: 4px;
+}
+.toggle-pill {
+  font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.6);
+  padding: 8px 18px; border-radius: 999px; transition: all 0.18s;
+}
+.toggle-pill:hover { color: #fff; }
+.toggle-pill.active { background: var(--accent); color: #fff; }
+
+.frames {
+  padding: 36px 48px 80px;
+  display: flex; gap: 36px;
+  align-items: flex-start; justify-content: center;
+  flex-wrap: nowrap; overflow-x: auto;
+}
+body[data-view="desktop"] .frame-mobile { display: none; }
+body[data-view="mobile"] .frame-desktop { display: none; }
+
+.frame-wrap { position: relative; }
+.frame-label {
+  position: absolute; top: -36px; left: 0;
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+
+/* Desktop frame */
+.frame-desktop {
+  flex-shrink: 0; width: 1380px;
+  background: var(--page-bg);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: var(--shadow-frame);
+}
+.browser-chrome {
+  background: #E9E5DE; padding: 12px 18px;
+  display: flex; align-items: center; gap: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.traffic-lights { display: flex; gap: 7px; }
+.traffic-lights span { width: 12px; height: 12px; border-radius: 50%; background: #BDBAB3; }
+.traffic-lights span:nth-child(1) { background: #FF6058; }
+.traffic-lights span:nth-child(2) { background: #FFBE2F; }
+.traffic-lights span:nth-child(3) { background: #2BC940; }
+.url-bar {
+  flex: 1; background: #fff;
+  border-radius: 7px; padding: 7px 14px;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--ink-soft);
+}
+.url-bar .lock { color: var(--rsvp-attending); margin-right: 4px; }
+
+/* Editor top bar */
+.editor-top {
+  background: var(--surface); border-bottom: 1px solid var(--rule);
+  padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.editor-top-left { display: flex; align-items: center; gap: 16px; }
+.editor-top-brand {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500; font-size: 16px;
+}
+.editor-top-brand-mark {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+}
+.editor-top-brand em { font-style: italic; color: var(--ink-soft); font-weight: 400; }
+.editor-divider { width: 1px; height: 22px; background: var(--rule); }
+.editor-event-meta {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint);
+}
+.save-state {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--rsvp-attending); font-weight: 600;
+}
+.editor-top-actions { display: flex; align-items: center; gap: 8px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500;
+  padding: 9px 14px; border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface); color: var(--ink);
+  transition: all 0.15s;
+}
+.btn:hover { border-color: var(--ink); }
+.btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+.btn.accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.gold { background: var(--pro-gold); color: #fff; border-color: var(--pro-gold); }
+.btn.ghost { background: transparent; border: none; color: var(--ink-soft); }
+.btn.ghost:hover { color: var(--ink); background: var(--page-bg-soft); }
+.btn-large { font-size: 15px; padding: 13px 22px; }
+
+/* Three-panel layout */
+.editor-body {
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  height: 820px;
+}
+
+/* Left: template gallery */
+.template-rail {
+  background: var(--surface-soft);
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
+  padding: 18px;
+}
+.rail-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-faint); font-weight: 500;
+  margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rail-eyebrow .count {
+  background: var(--ink); color: #fff;
+  font-size: 9px; padding: 2px 7px;
+  border-radius: 999px; letter-spacing: 0;
+}
+.template-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.template-card {
+  cursor: pointer;
+  border-radius: 10px;
+  border: 1.5px solid var(--rule);
+  overflow: hidden;
+  background: var(--surface);
+  transition: all 0.15s;
+}
+.template-card:hover { border-color: var(--ink); transform: translateY(-1px); }
+.template-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.template-card-preview {
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+}
+.template-card-preview .mono {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--accent-deep);
+  background: rgba(255,255,255,0.85);
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  display: grid; place-items: center;
+}
+.template-card-info {
+  padding: 8px 10px;
+  background: var(--surface);
+}
+.template-card-name {
+  font-size: 11px; font-weight: 600;
+  margin-bottom: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.template-card-vibe {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+
+/* Template visual variations */
+.tpl-filigree { background: linear-gradient(135deg, #2B1F12, #1A1A1A); position: relative; }
+.tpl-filigree::before {
+  content: "❧❦❀✦❀❦❧";
+  position: absolute; inset: 0;
+  font-size: 14px; color: rgba(184,137,62,0.4);
+  display: grid; place-items: center;
+  letter-spacing: 8px;
+}
+.tpl-capiz { background: radial-gradient(circle at 30% 30%, rgba(232,201,176,0.4), transparent 60%), radial-gradient(circle at 70% 70%, rgba(184,137,62,0.3), transparent 60%), #1F1A14; }
+.tpl-sampaguita { background: linear-gradient(180deg, #1A1A1A 0%, #2B1F12 100%); position: relative; }
+.tpl-sampaguita::before {
+  content: "✿ ✿ ✿";
+  position: absolute; inset: 0;
+  font-size: 8px; color: rgba(255,250,240,0.5);
+  display: grid; place-items: center;
+}
+.tpl-gold { background: radial-gradient(ellipse at center, rgba(184,137,62,0.5), transparent 60%), #1A1A1A; }
+.tpl-mist { background: linear-gradient(135deg, #1F2A3F, #2B2825); position: relative; }
+.tpl-mist::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 60%, rgba(255,255,255,0.15), transparent 50%), radial-gradient(ellipse at 70% 30%, rgba(255,255,255,0.1), transparent 50%);
+}
+.tpl-bokeh { background: #1A1A1A; position: relative; overflow: hidden; }
+.tpl-bokeh::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 25% 35%, rgba(232,201,176,0.4) 0, transparent 8%),
+    radial-gradient(circle at 75% 25%, rgba(184,137,62,0.4) 0, transparent 6%),
+    radial-gradient(circle at 65% 75%, rgba(232,201,176,0.4) 0, transparent 7%),
+    radial-gradient(circle at 30% 80%, rgba(184,137,62,0.3) 0, transparent 5%);
+}
+.tpl-watercolor { background: linear-gradient(135deg, #C97B4B 0%, #6E89AD 50%, #1F2A3F 100%); opacity: 0.85; }
+.tpl-pulse { background: #1A1A1A; position: relative; }
+.tpl-pulse::before {
+  content: "";
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%; height: 90%;
+  border: 1px solid rgba(184,137,62,0.6);
+  border-radius: 50%;
+}
+.tpl-constellation { background: #0F1320; position: relative; }
+.tpl-constellation::before {
+  content: "✦  ·  ✦  ·  ✦";
+  position: absolute; inset: 0;
+  font-size: 8px; color: rgba(232,201,176,0.7);
+  display: grid; place-items: center;
+}
+.tpl-velvet { background: linear-gradient(135deg, #6B1F2A 0%, #8C4A28 50%, #C97B4B 100%); }
+
+/* Center: preview pane */
+.preview-pane {
+  background: var(--canvas-bg);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.preview-toolbar {
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.preview-toolbar-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+.preview-toolbar-eyebrow .res {
+  color: var(--accent); font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.preview-toolbar-actions { display: flex; gap: 6px; align-items: center; }
+.preview-toolbar-actions button {
+  color: rgba(255,255,255,0.7);
+  font-size: 12px; padding: 6px 10px;
+  border-radius: 999px;
+}
+.preview-toolbar-actions button:hover {
+  background: rgba(255,255,255,0.08); color: #fff;
+}
+.preview-stage {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 28px;
+  position: relative;
+}
+.preview-canvas {
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  background: linear-gradient(135deg, #2B1F12 0%, #1A1A1A 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================
+   FILIGREE BLOOM — multi-layer Renderforest-style motion graphics
+   ============================================ */
+
+/* Layer 1: Slow color wash (gradient that breathes) */
+.preview-canvas .wash-layer {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 40%, rgba(201,123,75,0.35) 0, transparent 55%),
+              radial-gradient(ellipse at 70% 60%, rgba(184,137,62,0.3) 0, transparent 55%);
+  animation: wash-breathe 12s ease-in-out infinite alternate;
+}
+@keyframes wash-breathe {
+  0%   { transform: scale(0.9); opacity: 0.6; }
+  50%  { transform: scale(1.1) rotate(3deg); opacity: 0.95; }
+  100% { transform: scale(1) rotate(-2deg); opacity: 0.7; }
+}
+
+/* Layer 2: Filigree pattern that scales + rotates slowly */
+.preview-canvas .filigree-layer {
+  position: absolute; inset: -20%;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(232,201,176,0.45) 0, transparent 8%),
+    radial-gradient(circle at 80% 30%, rgba(232,201,176,0.4) 0, transparent 7%),
+    radial-gradient(circle at 25% 80%, rgba(184,137,62,0.45) 0, transparent 9%),
+    radial-gradient(circle at 70% 75%, rgba(184,137,62,0.4) 0, transparent 8%),
+    radial-gradient(circle at 50% 50%, rgba(232,201,176,0.3) 0, transparent 12%);
+  animation: filigree-bloom 16s ease-in-out infinite;
+  filter: blur(4px);
+}
+@keyframes filigree-bloom {
+  0%   { transform: scale(1) rotate(0deg); opacity: 0.6; }
+  33%  { transform: scale(1.15) rotate(15deg); opacity: 1; }
+  66%  { transform: scale(1.05) rotate(-10deg); opacity: 0.85; }
+  100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
+}
+
+/* Layer 3: Floating particles drifting across the canvas */
+.preview-canvas .particles {
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
+.preview-canvas .particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(232,201,176,0.85);
+  box-shadow: 0 0 6px rgba(232,201,176,0.7);
+  animation: particle-drift 22s linear infinite;
+}
+.preview-canvas .particle:nth-child(1)  { left: 5%;  top: 80%; animation-delay: 0s;    width: 3px; height: 3px; }
+.preview-canvas .particle:nth-child(2)  { left: 12%; top: 30%; animation-delay: -3s;   width: 5px; height: 5px; }
+.preview-canvas .particle:nth-child(3)  { left: 22%; top: 60%; animation-delay: -7s;   width: 2px; height: 2px; }
+.preview-canvas .particle:nth-child(4)  { left: 30%; top: 15%; animation-delay: -11s;  width: 4px; height: 4px; }
+.preview-canvas .particle:nth-child(5)  { left: 38%; top: 85%; animation-delay: -2s;   width: 3px; height: 3px; }
+.preview-canvas .particle:nth-child(6)  { left: 48%; top: 20%; animation-delay: -16s;  width: 5px; height: 5px; }
+.preview-canvas .particle:nth-child(7)  { left: 56%; top: 75%; animation-delay: -9s;   width: 2px; height: 2px; }
+.preview-canvas .particle:nth-child(8)  { left: 65%; top: 40%; animation-delay: -13s;  width: 4px; height: 4px; }
+.preview-canvas .particle:nth-child(9)  { left: 75%; top: 70%; animation-delay: -5s;   width: 3px; height: 3px; }
+.preview-canvas .particle:nth-child(10) { left: 82%; top: 25%; animation-delay: -19s;  width: 6px; height: 6px; }
+.preview-canvas .particle:nth-child(11) { left: 90%; top: 55%; animation-delay: -1s;   width: 3px; height: 3px; }
+.preview-canvas .particle:nth-child(12) { left: 18%; top: 50%; animation-delay: -14s;  width: 4px; height: 4px; }
+.preview-canvas .particle:nth-child(13) { left: 42%; top: 45%; animation-delay: -8s;   width: 5px; height: 5px; }
+.preview-canvas .particle:nth-child(14) { left: 62%; top: 10%; animation-delay: -17s;  width: 3px; height: 3px; }
+.preview-canvas .particle:nth-child(15) { left: 78%; top: 90%; animation-delay: -6s;   width: 4px; height: 4px; }
+@keyframes particle-drift {
+  0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  10%  { opacity: 1; }
+  50%  { transform: translate(-30px, -80px) scale(1); opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translate(-60px, -140px) scale(0.6); opacity: 0; }
+}
+
+/* Layer 4: Rotating ornament ring */
+.preview-canvas .ornament-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 380px; height: 380px;
+  margin-top: -190px; margin-left: -190px;
+  pointer-events: none;
+  animation: ornament-rotate 40s linear infinite;
+}
+@keyframes ornament-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.preview-canvas .ornament-ring::before {
+  content: "❦";
+  position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  color: rgba(184,137,62,0.7);
+  font-family: 'Cormorant Garamond', serif;
+}
+.preview-canvas .ornament-ring::after {
+  content: "❀";
+  position: absolute; bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  color: rgba(184,137,62,0.7);
+  font-family: 'Cormorant Garamond', serif;
+}
+.preview-canvas .ornament-side {
+  position: absolute;
+  top: 50%;
+  font-size: 24px;
+  color: rgba(232,201,176,0.6);
+  font-family: 'Cormorant Garamond', serif;
+  transform: translateY(-50%);
+}
+.preview-canvas .ornament-side.left  { left: 0; }
+.preview-canvas .ornament-side.right { right: 0; }
+
+/* Layer 5: Inner ornament wheel rotating opposite direction */
+.preview-canvas .ornament-inner {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 260px; height: 260px;
+  margin-top: -130px; margin-left: -130px;
+  pointer-events: none;
+  animation: ornament-rotate-rev 28s linear infinite;
+  opacity: 0.7;
+}
+@keyframes ornament-rotate-rev {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+.preview-canvas .ornament-inner::before {
+  content: "✦";
+  position: absolute; top: -2px; left: 22%;
+  font-size: 14px;
+  color: rgba(232,201,176,0.85);
+}
+.preview-canvas .ornament-inner::after {
+  content: "✦";
+  position: absolute; bottom: -2px; right: 22%;
+  font-size: 14px;
+  color: rgba(232,201,176,0.85);
+}
+
+/* Layer 6: Light bloom that pulses */
+.preview-canvas .light-bloom {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 520px; height: 520px;
+  margin-top: -260px; margin-left: -260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,201,176,0.45) 0, rgba(184,137,62,0.2) 30%, transparent 60%);
+  pointer-events: none;
+  animation: light-pulse 6s ease-in-out infinite;
+  filter: blur(20px);
+  mix-blend-mode: screen;
+}
+@keyframes light-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50%      { opacity: 1; transform: scale(1.15); }
+}
+
+/* Layer 7: Subtle film grain (top layer) */
+.preview-canvas .grain-layer {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 3px 3px;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  animation: grain-shift 0.6s steps(8) infinite;
+}
+@keyframes grain-shift {
+  0%  { background-position: 0 0; }
+  20% { background-position: -1px -1px; }
+  40% { background-position: 1px 1px; }
+  60% { background-position: -1px 1px; }
+  80% { background-position: 1px -1px; }
+  100%{ background-position: 0 0; }
+}
+
+/* Center monogram — pulsing glow with bigger range */
+.preview-canvas .center-monogram {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  border: 3px solid var(--accent);
+  display: grid; place-items: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 64px;
+  color: var(--accent-deep);
+  letter-spacing: -0.02em;
+  z-index: 5;
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.4),
+      0 0 40px rgba(184,137,62,0.3),
+      0 0 80px rgba(184,137,62,0.15);
+  }
+  50% {
+    box-shadow:
+      0 12px 40px rgba(0,0,0,0.5),
+      0 0 80px rgba(184,137,62,0.7),
+      0 0 140px rgba(232,201,176,0.4);
+    transform: translate(-50%, -50%) scale(1.03);
+  }
+}
+
+/* Couple names + date — slow fade in/out animation */
+.preview-canvas .preview-couple-names,
+.preview-canvas .preview-date {
+  animation: text-fade 8s ease-in-out infinite;
+}
+.preview-canvas .preview-date { animation-delay: 1.5s; }
+@keyframes text-fade {
+  0%, 100% { opacity: 0.85; letter-spacing: 0.18em; }
+  50%      { opacity: 1; letter-spacing: 0.22em; }
+}
+.preview-couple-names {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  color: rgba(255,250,240,0.95);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+.preview-date {
+  position: absolute;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: rgba(232,201,176,0.85);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+
+.preview-controls-bottom {
+  position: absolute;
+  bottom: 14px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 8px;
+  align-items: center;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  padding: 6px 8px;
+  z-index: 10;
+}
+.preview-controls-bottom button {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff; font-size: 13px;
+}
+.preview-controls-bottom button:hover { background: rgba(255,255,255,0.15); }
+.preview-controls-bottom .play { background: var(--accent); }
+.preview-controls-bottom .play:hover { background: var(--accent-deep); }
+.preview-controls-bottom .timecode {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: rgba(255,255,255,0.85);
+  letter-spacing: 0.06em;
+  padding: 0 10px;
+}
+
+/* Right: customization controls */
+.controls {
+  background: var(--surface);
+  border-left: 1px solid var(--rule);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.controls-head {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.controls-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 6px;
+}
+.controls-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500; font-size: 24px;
+  letter-spacing: -0.01em;
+}
+.controls-vibe {
+  font-size: 11px; color: var(--ink-soft);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+.controls-body {
+  flex: 1; padding: 18px 22px;
+  overflow-y: auto;
+}
+.field-group { margin-bottom: 18px; }
+.field-group h5 {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 8px;
+  font-weight: 500;
+}
+.field {
+  display: flex; flex-direction: column;
+  gap: 5px; margin-bottom: 12px;
+}
+.field label {
+  font-size: 11px; font-weight: 600; color: var(--ink);
+}
+.field input, .field select {
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  padding: 9px 12px; font-size: 13px;
+  background: var(--surface); outline: none;
+  height: 38px;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+
+.color-row {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-top: 4px;
+}
+.color-swatch {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+}
+.color-swatch:hover { transform: scale(1.05); }
+.color-swatch.active { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+
+.slider-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.slider-row input[type="range"] {
+  flex: 1; height: 4px;
+  -webkit-appearance: none;
+  background: var(--rule-strong);
+  border-radius: 999px;
+  outline: none;
+  padding: 0;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.slider-row .value {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  min-width: 36px;
+  text-align: right;
+}
+
+.overlay-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.overlay-tile {
+  aspect-ratio: 16 / 9;
+  background: var(--page-bg-soft);
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: 'DM Mono', monospace;
+  transition: all 0.15s;
+  position: relative;
+}
+.overlay-tile.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-deep); }
+.overlay-tile:hover { border-color: var(--ink); }
+.overlay-tile.none { background: transparent; border-style: dashed; }
+.overlay-tile.grain { background: radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px); background-size: 3px 3px; background-color: var(--page-bg-soft); }
+.overlay-tile.vignette { background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%); background-color: var(--page-bg-soft); }
+.overlay-tile.lightleak { background: linear-gradient(135deg, transparent 50%, rgba(232,201,176,0.6) 100%); background-color: var(--page-bg-soft); }
+.overlay-tile.sparkle::after {
+  content: "✦ ✧"; position: absolute;
+  font-size: 10px; color: var(--accent);
+}
+.overlay-tile.mist { background: radial-gradient(ellipse at center, rgba(255,255,255,0.6), transparent 70%); background-color: var(--page-bg-soft); }
+
+.aspect-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.aspect-card {
+  background: var(--surface);
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 11px; font-weight: 500;
+}
+.aspect-card.active { border-color: var(--accent); background: var(--accent-soft); }
+.aspect-card .visual {
+  background: var(--ink);
+  border-radius: 2px;
+  margin: 0 auto 6px;
+}
+.aspect-card.r169 .visual { width: 28px; height: 16px; }
+.aspect-card.r219 .visual { width: 32px; height: 14px; }
+.aspect-card.r11 .visual { width: 18px; height: 18px; }
+
+.controls-footer {
+  padding: 16px 22px;
+  border-top: 1px solid var(--rule);
+  background: var(--surface-soft);
+}
+.export-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px; font-weight: 600;
+  padding: 13px 16px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+}
+.export-btn:hover { background: var(--accent-deep); }
+.export-btn .meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; opacity: 0.8;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+.export-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+/* MOBILE FRAME */
+.frame-mobile {
+  flex-shrink: 0; width: 392px; height: 844px;
+  background: #1A1A1A; border-radius: 50px;
+  padding: 12px; position: relative;
+  box-shadow: var(--shadow-frame);
+}
+.mobile-screen {
+  width: 100%; height: 100%;
+  background: var(--page-bg);
+  border-radius: 38px; overflow: hidden;
+  position: relative; display: flex; flex-direction: column;
+}
+.mobile-notch {
+  position: absolute; top: 12px; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 32px;
+  background: #000; border-radius: 18px; z-index: 10;
+}
+.mobile-status {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 32px 6px;
+  font-weight: 600; font-size: 14px;
+  z-index: 5; position: relative;
+}
+.mobile-status .status-icons { display: flex; gap: 6px; align-items: center; }
+.mobile-status .battery {
+  width: 24px; height: 11px;
+  border: 1px solid var(--ink); border-radius: 3px;
+  position: relative; padding: 1px;
+}
+.mobile-status .battery::after {
+  content: ""; position: absolute;
+  right: -3px; top: 50%; transform: translateY(-50%);
+  width: 2px; height: 5px;
+  background: var(--ink); border-radius: 0 1px 1px 0;
+}
+.mobile-status .battery span {
+  display: block; background: var(--ink);
+  width: 80%; height: 100%; border-radius: 1px;
+}
+
+.m-header {
+  padding: 12px 18px; display: flex;
+  align-items: center; justify-content: space-between;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+}
+.m-header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500; font-size: 18px;
+}
+.m-header-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: 0.1em;
+  color: var(--ink-faint); margin-top: 2px;
+}
+.m-back { width: 36px; height: 36px; display: grid; place-items: center; font-size: 22px; }
+
+.m-preview {
+  background: var(--canvas-bg);
+  padding: 14px 14px 0;
+}
+.m-preview-canvas {
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2B1F12, #1A1A1A);
+  position: relative; overflow: hidden;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+}
+/* Mobile preview reuses the same multi-layer composition, scaled down */
+.m-preview-canvas .wash-layer,
+.m-preview-canvas .filigree-layer,
+.m-preview-canvas .light-bloom,
+.m-preview-canvas .particles,
+.m-preview-canvas .grain-layer {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.m-preview-canvas .wash-layer {
+  background: radial-gradient(ellipse at 30% 40%, rgba(201,123,75,0.4) 0, transparent 55%),
+              radial-gradient(ellipse at 70% 60%, rgba(184,137,62,0.35) 0, transparent 55%);
+  animation: wash-breathe 12s ease-in-out infinite alternate;
+}
+.m-preview-canvas .filigree-layer {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(232,201,176,0.5) 0, transparent 8%),
+    radial-gradient(circle at 80% 70%, rgba(184,137,62,0.45) 0, transparent 8%),
+    radial-gradient(circle at 50% 50%, rgba(232,201,176,0.3) 0, transparent 14%);
+  animation: filigree-bloom 16s ease-in-out infinite;
+  filter: blur(2px);
+}
+.m-preview-canvas .light-bloom {
+  background: radial-gradient(circle at center, rgba(232,201,176,0.5) 0, transparent 50%);
+  filter: blur(8px);
+  mix-blend-mode: screen;
+  animation: light-pulse 6s ease-in-out infinite;
+}
+.m-preview-canvas .particles span {
+  position: absolute;
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: rgba(232,201,176,0.85);
+  box-shadow: 0 0 4px rgba(232,201,176,0.7);
+  animation: particle-drift 22s linear infinite;
+}
+.m-preview-canvas .particles span:nth-child(1) { left: 10%; top: 70%; animation-delay: 0s; }
+.m-preview-canvas .particles span:nth-child(2) { left: 30%; top: 30%; animation-delay: -5s; }
+.m-preview-canvas .particles span:nth-child(3) { left: 50%; top: 80%; animation-delay: -10s; }
+.m-preview-canvas .particles span:nth-child(4) { left: 70%; top: 25%; animation-delay: -15s; }
+.m-preview-canvas .particles span:nth-child(5) { left: 85%; top: 60%; animation-delay: -3s; }
+.m-preview-canvas .particles span:nth-child(6) { left: 20%; top: 50%; animation-delay: -8s; }
+.m-preview-canvas .particles span:nth-child(7) { left: 60%; top: 50%; animation-delay: -13s; }
+.m-preview-canvas .particles span:nth-child(8) { left: 40%; top: 20%; animation-delay: -18s; }
+.m-preview-canvas .grain-layer {
+  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+}
+.m-preview-canvas .center-monogram {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  border: 2px solid var(--accent);
+  display: grid; place-items: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 500;
+  font-size: 22px;
+  color: var(--accent-deep);
+  z-index: 5;
+  animation: pulse-glow-sm 4s ease-in-out infinite;
+}
+@keyframes pulse-glow-sm {
+  0%, 100% {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(184,137,62,0.4);
+  }
+  50% {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 40px rgba(184,137,62,0.7);
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+}
+.m-preview-meta {
+  background: var(--canvas-bg);
+  padding: 8px 14px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  color: rgba(255,255,255,0.7);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em;
+}
+.m-preview-meta .res { color: var(--accent); font-weight: 600; }
+
+.m-templates {
+  padding: 16px 14px;
+  background: var(--page-bg);
+  border-top: 1px solid var(--rule);
+}
+.m-template-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-faint);
+  margin-bottom: 10px;
+  display: flex; justify-content: space-between;
+}
+.m-template-list {
+  display: flex; gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.m-template-list::-webkit-scrollbar { display: none; }
+.m-template-item {
+  flex-shrink: 0;
+  width: 110px;
+  border-radius: 10px;
+  border: 1.5px solid var(--rule);
+  overflow: hidden;
+  background: var(--surface);
+  cursor: pointer;
+}
+.m-template-item.active { border-color: var(--accent); }
+.m-template-item .tpl-preview {
+  aspect-ratio: 16 / 9;
+}
+.m-template-item .tpl-name {
+  font-size: 10px; font-weight: 600;
+  padding: 6px 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.m-tabs {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: var(--surface);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.m-tab {
+  padding: 12px 8px;
+  font-size: 12px; font-weight: 600;
+  text-align: center;
+  color: var(--ink-faint);
+  border-bottom: 2px solid transparent;
+}
+.m-tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+.m-controls {
+  padding: 16px 14px;
+  background: var(--page-bg);
+  flex: 1;
+  overflow-y: auto;
+}
+.m-control-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 8px;
+}
+.m-control-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.m-control-value {
+  font-size: 14px; font-weight: 600;
+}
+
+.m-export-bar {
+  background: var(--surface);
+  border-top: 1px solid var(--rule);
+  padding: 12px 14px 22px;
+}
+.m-export-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px; font-weight: 600;
+  padding: 14px;
+  border-radius: 12px;
+}
+.m-export-btn .meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; opacity: 0.8;
+}
+
+@media (max-width: 1500px) {
+  .canvas-header { padding: 24px 20px 16px; flex-direction: column; align-items: flex-start; }
+  .frames { padding: 24px 16px 60px; flex-direction: column; align-items: center; }
+  .frame-desktop { width: 100%; max-width: 1380px; }
+  .editor-body { grid-template-columns: 240px 1fr 320px; }
+}
+
+</style>
+</head>
+<body data-view="both">
+
+<header class="canvas-header">
+  <div class="canvas-title">
+    <span class="canvas-meta">Setnayan · Iteration 0004 · Design Review</span>
+    <h1>8K LED Background Maker — Web &amp; Mobile</h1>
+  </div>
+  <nav class="canvas-toggle">
+    <button class="toggle-pill" data-toggle="desktop">Web</button>
+    <button class="toggle-pill" data-toggle="mobile">Mobile</button>
+    <button class="toggle-pill active" data-toggle="both">Both</button>
+  </nav>
+</header>
+
+<main class="frames">
+
+<!-- DESKTOP -->
+<div class="frame-wrap">
+  <div class="frame-label">Web · Couple's editor · 1380px</div>
+  <section class="frame frame-desktop">
+
+    <div class="browser-chrome">
+      <div class="traffic-lights"><span></span><span></span><span></span></div>
+      <div class="url-bar">
+        <span class="lock">🔒</span>
+        <span>setnayan.com/dashboard/led-background</span>
+      </div>
+    </div>
+
+    <div class="editor-top">
+      <div class="editor-top-left">
+        <div class="editor-top-brand">
+          <div class="editor-top-brand-mark"></div>
+          <div>Setnayan<em> · LED maker</em></div>
+        </div>
+        <div class="editor-divider"></div>
+        <div class="editor-event-meta">Maria &amp; Juan · Oct 24, 2026</div>
+        <div class="editor-divider"></div>
+        <div class="save-state">⬤ All changes saved · 2s ago</div>
+      </div>
+      <div class="editor-top-actions">
+        <button class="btn ghost">↶ Undo</button>
+        <button class="btn ghost">👁 Full preview</button>
+        <button class="btn">Save draft</button>
+        <button class="btn primary">Render &amp; Export →</button>
+      </div>
+    </div>
+
+    <div class="editor-body">
+
+      <!-- LEFT: Template gallery -->
+      <aside class="template-rail">
+        <div class="rail-eyebrow">
+          Templates <span class="count">10</span>
+        </div>
+
+        <div class="template-grid">
+          <div class="template-card active">
+            <div class="template-card-preview tpl-filigree">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Filigree Bloom</div>
+              <div class="template-card-vibe">Romantic</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-card-preview tpl-capiz">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Capiz Shimmer</div>
+              <div class="template-card-vibe">Filipino</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-card-preview tpl-sampaguita">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Sampaguita Drift</div>
+              <div class="template-card-vibe">Heritage</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-card-preview tpl-gold">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Gold Particles</div>
+              <div class="template-card-vibe">Glamour</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-card-preview tpl-mist">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Ethereal Mist</div>
+              <div class="template-card-vibe">Soft</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-card-preview tpl-bokeh">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Bokeh Lights</div>
+              <div class="template-card-vibe">Cinematic</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-card-preview tpl-watercolor">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Watercolor Wash</div>
+              <div class="template-card-vibe">Artistic</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-card-preview tpl-pulse">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Slow Pulse</div>
+              <div class="template-card-vibe">Minimal</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-card-preview tpl-constellation">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Constellation</div>
+              <div class="template-card-vibe">Magical</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-card-preview tpl-velvet">
+              <div class="mono">M&amp;J</div>
+            </div>
+            <div class="template-card-info">
+              <div class="template-card-name">Velvet Sweep</div>
+              <div class="template-card-vibe">Bold</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,var(--surface) 0%,var(--accent-soft) 240%);border:1px solid var(--accent-soft);border-radius:10px;padding:12px;font-size:11px;line-height:1.5;color:var(--ink-soft);">
+          <strong style="color:var(--accent-deep);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.14em;display:block;margin-bottom:4px;">PRICING · PER RENDER</strong>
+          <div style="display:flex;flex-direction:column;gap:4px;color:var(--ink);font-family:'Manrope',sans-serif;font-weight:500;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;"><span>1080p HD</span><strong style="color:var(--accent-deep);">₱99</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;"><span>4K UHD</span><strong style="color:var(--accent-deep);">₱149</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;"><span>8K cinematic</span><strong style="color:var(--accent-deep);">₱199</strong></div>
+          </div>
+          <div style="font-size:10px;color:var(--ink-faint);margin-top:8px;font-family:'DM Mono',monospace;letter-spacing:0.04em;">Drafts &amp; previews always free · pick any of 10 templates</div>
+        </div>
+      </aside>
+
+      <!-- CENTER: Preview pane -->
+      <div class="preview-pane">
+        <div class="preview-toolbar">
+          <span class="preview-toolbar-eyebrow">Live preview · <span class="res">8K · 7680 × 4320 · 10-min master loop · plays 30× to fill 5-hour reception</span></span>
+          <div class="preview-toolbar-actions">
+            <button>Aspect: 16:9</button>
+            <button>↻ Refresh</button>
+            <button>⤢ Theater mode</button>
+          </div>
+        </div>
+        <div class="preview-stage">
+          <div class="preview-canvas">
+            <!-- Layered motion graphics: 7 stacked animation layers -->
+            <div class="wash-layer"></div>
+            <div class="filigree-layer"></div>
+            <div class="light-bloom"></div>
+            <div class="particles">
+              <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+              <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+              <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+              <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+              <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+            </div>
+            <div class="ornament-ring">
+              <span class="ornament-side left">❧</span>
+              <span class="ornament-side right">❧</span>
+            </div>
+            <div class="ornament-inner"></div>
+            <div class="preview-date">10 · 24 · 2026</div>
+            <div class="center-monogram">M&amp;J</div>
+            <div class="preview-couple-names">Maria &amp; Juan</div>
+            <div class="grain-layer"></div>
+
+            <div class="preview-controls-bottom">
+              <button>⏮</button>
+              <button class="play">⏸</button>
+              <button>⏭</button>
+              <span class="timecode">00:14 / 00:30</span>
+              <button>🔊</button>
+              <button>⤢</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Customization controls -->
+      <aside class="controls">
+        <div class="controls-head">
+          <div class="controls-eyebrow">Customizing template</div>
+          <div class="controls-title">Filigree Bloom</div>
+          <div class="controls-vibe">Romantic · slow ornament drift</div>
+        </div>
+
+        <div class="controls-body">
+
+          <div class="field-group">
+            <h5>Background color</h5>
+            <div style="font-size:11px;color:var(--ink-soft);margin-bottom:6px;">Auto-derived from your <strong>Reception palette</strong> (locked in Dress Code widget). Override below if you want something different just for the LED loop.</div>
+            <div class="color-row">
+              <div class="color-swatch active" style="background:#2B1F12;" title="Accent deep"></div>
+              <div class="color-swatch" style="background:#1F2A3F;" title="Midnight"></div>
+              <div class="color-swatch" style="background:#1A1A1A;" title="Charcoal"></div>
+              <div class="color-swatch" style="background:#6B1F2A;" title="Oxblood"></div>
+              <div class="color-swatch" style="background:#0F1320;" title="Navy"></div>
+              <div class="color-swatch" style="background:#FAF6F0;border:2px solid var(--rule);" title="Cream (light)"></div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <h5>Effect intensity</h5>
+            <div class="slider-row">
+              <input type="range" min="0" max="100" value="65" />
+              <span class="value">65%</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <h5>Animation speed</h5>
+            <div class="slider-row">
+              <input type="range" min="0" max="100" value="35" />
+              <span class="value">slow</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <h5>Overlay</h5>
+            <div class="overlay-grid">
+              <div class="overlay-tile none">None</div>
+              <div class="overlay-tile grain active">Grain</div>
+              <div class="overlay-tile vignette">Vignette</div>
+              <div class="overlay-tile lightleak">Light leak</div>
+              <div class="overlay-tile sparkle">Sparkle</div>
+              <div class="overlay-tile mist">Mist</div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <h5>Master loop length <span style="font-size:11px;color:var(--ink-tertiary);font-weight:400;">— plays continuously for your 5-hour reception</span></h5>
+            <div class="aspect-grid">
+              <div class="aspect-card r169">
+                <div class="visual"></div>
+                5 min<br><span style="font-size:10px;color:var(--ink-tertiary);">~2.8 GB · loops 60×</span>
+              </div>
+              <div class="aspect-card r169 active">
+                <div class="visual"></div>
+                10 min<br><span style="font-size:10px;color:var(--ink-tertiary);">~5.6 GB · loops 30×</span>
+              </div>
+              <div class="aspect-card r169">
+                <div class="visual"></div>
+                30 min<br><span style="font-size:10px;color:var(--ink-tertiary);">~17 GB · loops 10×</span>
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--ink-tertiary);margin-top:8px;line-height:1.5;">Your venue's playback system loops the file end-to-end for the full reception. <strong>Offline MP4:</strong> Photo Pool photos are baked in at render time (~60 photos in a 10-min loop, ~180 in a 30-min loop) and repeat every loop — pick a longer master loop for more variety. <strong>Live feed (URL + Photo Pool):</strong> photos rotate randomly per loop iteration but require stable internet during the event.</p>
+          </div>
+
+          <div class="field-group">
+            <h5>Aspect ratio</h5>
+            <div class="aspect-grid">
+              <div class="aspect-card r169 active">
+                <div class="visual"></div>
+                16:9
+              </div>
+              <div class="aspect-card r219">
+                <div class="visual"></div>
+                21:9
+              </div>
+              <div class="aspect-card r11">
+                <div class="visual"></div>
+                1:1
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <h5>Show couple names</h5>
+            <div class="field">
+              <select>
+                <option selected>Yes · bottom centered</option>
+                <option>Yes · top centered</option>
+                <option>No · monogram only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <h5>Monogram source</h5>
+            <div style="background:var(--surface-soft);border:1px solid var(--rule);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--ink-soft);line-height:1.5;">
+              <strong style="color:var(--ink);display:block;margin-bottom:2px;">Locked from Hero Monogram widget</strong>
+              "Filigree" frame · M&amp;J · auto-generated.<br>
+              <a style="color:var(--accent-deep);font-weight:600;">Open in editor →</a>
+            </div>
+          </div>
+
+          <!-- NEW: Photo Pool background blend -->
+          <div class="field-group">
+            <h5>Photo Pool blend <span style="font-family:'DM Mono',monospace;font-size:8px;background:var(--accent);color:#fff;padding:2px 6px;border-radius:999px;letter-spacing:0.1em;font-weight:700;margin-left:6px;">+₱1,999 PREMIUM ADD-ON</span></h5>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:linear-gradient(135deg,var(--surface) 0%,#FBE9E7 240%);border:1px solid var(--accent-soft);border-radius:10px;cursor:pointer;">
+              <input type="checkbox" checked style="width:16px;height:16px;margin-top:2px;accent-color:var(--accent);" />
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:600;color:var(--ink);">Blend couple's photos at 30% opacity</div>
+                <div style="font-size:10px;color:var(--ink-soft);font-family:'DM Mono',monospace;letter-spacing:0.04em;line-height:1.5;margin-top:2px;">Random photos from your Photo Pool fade behind the monogram, adding warmth and personal context to the LED loop.</div>
+              </div>
+            </label>
+            <div style="margin-top:10px;padding:12px;background:var(--surface-soft);border:1px solid var(--rule);border-radius:10px;">
+              <div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:8px;">Source mode</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <button style="background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:8px;padding:8px;cursor:pointer;text-align:center;">
+                  <div style="font-size:11px;font-weight:600;color:var(--accent-deep);">📎 Live link</div>
+                  <div style="font-size:9px;color:var(--ink-soft);font-family:'DM Mono',monospace;margin-top:2px;">Random rotation</div>
+                </button>
+                <button style="background:var(--surface);border:1.5px solid var(--rule);border-radius:8px;padding:8px;cursor:pointer;text-align:center;">
+                  <div style="font-size:11px;font-weight:600;color:var(--ink);">🖼 Pick photos</div>
+                  <div style="font-size:9px;color:var(--ink-soft);font-family:'DM Mono',monospace;margin-top:2px;">Static at render</div>
+                </button>
+              </div>
+              <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <span style="font-size:11px;color:var(--ink-soft);">Photo Pool</span>
+                <a style="font-size:11px;color:var(--accent-deep);font-weight:600;">42 photos · Manage →</a>
+              </div>
+              <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap;">
+                <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#C8807F,#E8C9B0);"></div>
+                <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#6E89AD,#C9A66B);"></div>
+                <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#8C4A28,#FAF6F0);"></div>
+                <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#1F2A3F,#C97B4B);"></div>
+                <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#6FA776,#FAF6F0);"></div>
+                <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#C97B4B,#1A1A1A);"></div>
+              </div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-faint);margin-top:6px;letter-spacing:0.04em;">Showing 6 of 42 · randomly rotated each render or live</div>
+            </div>
+          </div>
+
+          <!-- NEW: Delivery + offline safety -->
+          <div class="field-group">
+            <h5>Delivery &amp; offline safety</h5>
+            <div style="background:linear-gradient(135deg,var(--surface) 0%,var(--rsvp-attending-soft) 240%);border:1px solid var(--rsvp-attending);border-radius:10px;padding:12px;margin-bottom:8px;">
+              <div style="font-size:11px;color:var(--ink);font-weight:700;margin-bottom:4px;">⤓ MP4 download · included with every render · primary delivery</div>
+              <div style="font-size:10px;color:var(--ink-soft);line-height:1.5;">Download the file before the event. Plays on any LED system from USB/local drive — no internet required at the venue. <strong>This is the source of truth.</strong> Always free with the render.</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px;margin-bottom:8px;">
+              <div style="font-size:11px;color:var(--ink);font-weight:600;margin-bottom:4px;">📡 Live Playback URL · <span style="color:var(--accent-deep);">+₱99 add-on</span></div>
+              <div style="font-size:10px;color:var(--ink-soft);line-height:1.5;margin-bottom:8px;">For venues with stable internet — LED tech streams from this URL instead of file-transfer. HLS + direct MP4. Cached aggressively after first fetch. Optional convenience; the MP4 download above is the offline-safe default.</div>
+              <div style="background:var(--page-bg-soft);border:1px solid var(--rule);border-radius:6px;padding:6px 8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-soft);overflow-x:auto;white-space:nowrap;">
+                setnayan.com/led/maria-juan-2026/r/8k-v3.mp4
+              </div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px;">
+              <div style="font-size:11px;color:var(--ink);font-weight:600;margin-bottom:6px;">📧 Auto-delivery on render complete</div>
+              <div style="font-size:10px;color:var(--ink-soft);line-height:1.5;margin-bottom:8px;">Email + SMS to the couple AND a designated LED-tech contact.</div>
+              <div class="field" style="margin-bottom:0;">
+                <label>LED tech contact email (optional)</label>
+                <input type="email" placeholder="led@yourvenue.com" />
+              </div>
+            </div>
+            <div style="background:var(--rsvp-pending-soft);border:1px solid var(--rsvp-pending);border-radius:8px;padding:10px;margin-top:8px;">
+              <div style="font-size:11px;color:#7A4F0F;font-weight:700;margin-bottom:4px;">⚠ Pre-event checklist auto-sent 7 days out</div>
+              <div style="font-size:10px;color:#7A4F0F;line-height:1.5;">Reminders to download files, test on the actual LED wall, prep a USB backup, save Setnayan's emergency hotline.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="controls-footer">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;">Pick resolution · pay per render</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">
+            <button style="background:var(--surface);border:1.5px solid var(--rule);border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;">
+              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--ink-faint);text-transform:uppercase;">1080p</div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:var(--ink);">₱249</div>
+              <div style="font-size:8px;color:var(--ink-faint);font-family:'DM Mono',monospace;">~3 min</div>
+            </button>
+            <button style="background:var(--surface);border:1.5px solid var(--rule);border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;">
+              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--ink-faint);text-transform:uppercase;">4K UHD</div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:var(--ink);">₱399</div>
+              <div style="font-size:8px;color:var(--ink-faint);font-family:'DM Mono',monospace;">~5 min</div>
+            </button>
+            <button style="background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;box-shadow:0 0 0 1px var(--accent);">
+              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--accent-deep);text-transform:uppercase;font-weight:600;">8K ✓</div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:var(--accent-deep);">₱599</div>
+              <div style="font-size:8px;color:var(--accent-deep);font-family:'DM Mono',monospace;">~8 min</div>
+            </button>
+            <button style="background:linear-gradient(135deg,var(--surface) 0%,var(--pro-gold-soft) 240%);border:1.5px dashed var(--pro-gold);border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;">
+              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--pro-gold);text-transform:uppercase;font-weight:700;">Custom</div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:var(--accent-deep);">₱899</div>
+              <div style="font-size:8px;color:var(--ink-faint);font-family:'DM Mono',monospace;">LED wall fit</div>
+            </button>
+          </div>
+          <div style="background:var(--surface-soft);border:1px solid var(--rule);border-radius:8px;padding:10px;margin-bottom:10px;font-size:11px;line-height:1.5;color:var(--ink-soft);">
+            <strong style="color:var(--ink);display:block;margin-bottom:4px;font-size:11px;">Custom resolution · ₱899</strong>
+            For LED walls that don't fit standard ratios. Couple inputs exact pixel dimensions (e.g., 5760 × 1080 for ultrawide) and we render to spec.<br>
+            <strong style="color:var(--ink);">Ultrawide aspect (>21:9) · +₱1,499</strong> — premium add-on for panoramic / curved LED walls needing bespoke render setup.
+          </div>
+          <button class="export-btn">
+            <span>Render &amp; Export 8K loop · ₱599</span>
+            <span class="meta">→</span>
+          </button>
+          <div class="export-meta" style="text-align:center;margin-top:6px;line-height:1.5;">7680 × 4320 · H.264 · 10-min master loop · ~5.6 GB · plays 30× to cover 5-hour reception<br>With Photo Pool blend (+₱1,999) + Live URL (+₱99) = ₱2,697 · drafts always free</div>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+</div>
+
+<!-- MOBILE -->
+<div class="frame-wrap">
+  <div class="frame-label">Mobile · Couple's editor · 390 × 844</div>
+  <section class="frame frame-mobile">
+    <div class="mobile-screen">
+      <div class="mobile-notch"></div>
+      <div class="mobile-status">
+        <span>9:41</span>
+        <div class="status-icons">
+          <span style="font-size:11px;">●●●●●</span>
+          <span style="font-size:11px;">📶</span>
+          <div class="battery"><span></span></div>
+        </div>
+      </div>
+
+      <div class="m-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="m-back">‹</button>
+          <div>
+            <div class="m-header-title">LED Background</div>
+            <div class="m-header-sub">Maria &amp; Juan · Filigree Bloom</div>
+          </div>
+        </div>
+        <button style="background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:999px;">Render</button>
+      </div>
+
+      <div class="m-preview">
+        <div class="m-preview-canvas">
+          <div class="wash-layer"></div>
+          <div class="filigree-layer"></div>
+          <div class="light-bloom"></div>
+          <div class="particles">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <div class="center-monogram">M&amp;J</div>
+          <div class="grain-layer"></div>
+        </div>
+      </div>
+      <div class="m-preview-meta">
+        <span><span class="res">8K · 7680×4320</span></span>
+        <span>00:14 / 00:30</span>
+      </div>
+
+      <div class="m-tabs">
+        <button class="m-tab active">Templates</button>
+        <button class="m-tab">Customize</button>
+        <button class="m-tab">Export</button>
+      </div>
+
+      <div class="m-templates">
+        <div class="m-template-eyebrow">
+          <span>Pick a template</span>
+          <span style="color:var(--accent-deep);font-weight:600;">10</span>
+        </div>
+        <div class="m-template-list">
+          <div class="m-template-item active">
+            <div class="tpl-preview tpl-filigree"></div>
+            <div class="tpl-name">Filigree Bloom</div>
+          </div>
+          <div class="m-template-item">
+            <div class="tpl-preview tpl-capiz"></div>
+            <div class="tpl-name">Capiz Shimmer</div>
+          </div>
+          <div class="m-template-item">
+            <div class="tpl-preview tpl-sampaguita"></div>
+            <div class="tpl-name">Sampaguita</div>
+          </div>
+          <div class="m-template-item">
+            <div class="tpl-preview tpl-gold"></div>
+            <div class="tpl-name">Gold Particles</div>
+          </div>
+          <div class="m-template-item">
+            <div class="tpl-preview tpl-mist"></div>
+            <div class="tpl-name">Ethereal Mist</div>
+          </div>
+          <div class="m-template-item">
+            <div class="tpl-preview tpl-bokeh"></div>
+            <div class="tpl-name">Bokeh Lights</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="m-controls">
+        <div class="m-control-card">
+          <div class="m-control-label">Background</div>
+          <div class="m-control-value">Accent deep · #2B1F12</div>
+        </div>
+        <div class="m-control-card">
+          <div class="m-control-label">Effect intensity · 65%</div>
+          <div style="height:4px;background:var(--rule-strong);border-radius:999px;margin-top:6px;position:relative;">
+            <div style="position:absolute;left:0;top:0;height:100%;width:65%;background:var(--accent);border-radius:999px;"></div>
+          </div>
+        </div>
+        <div class="m-control-card">
+          <div class="m-control-label">Overlay</div>
+          <div class="m-control-value">Grain</div>
+        </div>
+        <div class="m-control-card">
+          <div class="m-control-label">Loop · 10 min · plays 30× for 5-hour event</div>
+          <div class="m-control-value">8K · 16:9 aspect</div>
+        </div>
+      </div>
+
+      <div class="m-export-bar">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;">
+          <button style="background:var(--surface);border:1.5px solid var(--rule);border-radius:10px;padding:8px 4px;text-align:center;">
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;color:var(--ink-faint);text-transform:uppercase;">1080p</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:500;">₱99</div>
+          </button>
+          <button style="background:var(--surface);border:1.5px solid var(--rule);border-radius:10px;padding:8px 4px;text-align:center;">
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;color:var(--ink-faint);text-transform:uppercase;">4K</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:500;">₱149</div>
+          </button>
+          <button style="background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:10px;padding:8px 4px;text-align:center;">
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.1em;color:var(--accent-deep);text-transform:uppercase;font-weight:700;">8K</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:500;color:var(--accent-deep);">₱199</div>
+          </button>
+        </div>
+        <button class="m-export-btn">
+          <span>Render 8K · ₱199</span>
+          <span class="meta">~8 min</span>
+        </button>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+</main>
+
+<!-- Toast / Modal containers -->
+<div id="toast-stack" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:9999;pointer-events:none;"></div>
+
+<div id="modal-root" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:9998;padding:20px;">
+  <div id="modal-card" style="background:#FFFFFF;border-radius:16px;max-width:480px;width:100%;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,0.3);font-family:'Manrope',system-ui,sans-serif;color:#1A1A1A;">
+    <div id="modal-eyebrow" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#A39B8E;margin-bottom:8px;"></div>
+    <h3 id="modal-title" style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;margin-bottom:10px;"></h3>
+    <div id="modal-body" style="font-size:13px;line-height:1.55;color:#6B6B6B;margin-bottom:18px;"></div>
+    <div id="modal-actions" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<style>
+  .toast-pop {
+    background: #1A1A1A; color: #fff; padding: 10px 18px; border-radius: 999px;
+    font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 0.06em;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35); pointer-events: auto;
+    animation: toast-in 0.18s ease-out; max-width: 80vw; text-align: center;
+  }
+  @keyframes toast-in {
+    from { transform: translateY(8px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .btn[data-dim], .preview-toolbar-actions button[data-dim], .preview-controls-bottom button[data-dim] {
+    opacity: 0.6;
+  }
+  .progress-shell {
+    width: 100%; height: 8px; background: rgba(0,0,0,0.08);
+    border-radius: 999px; overflow: hidden; margin: 14px 0 8px;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, #C97B4B, #8C4A28);
+    width: 0%; transition: width 0.18s linear;
+  }
+</style>
+
+<script>
+  // ============================================
+  // STATE
+  // ============================================
+  const state = {
+    template: 'filigree',
+    templateName: 'Filigree Bloom',
+    templateVibe: 'Romantic · slow ornament drift',
+    bgColor: '#2B1F12',
+    bgColorName: 'Accent deep',
+    intensity: 65,
+    speed: 35,
+    overlay: 'grain',
+    loop: 10,
+    aspect: '16:9',
+    nameMode: 'Yes · bottom centered',
+    photoBlend: true,
+    sourceMode: 'live',
+    resolution: '8K',
+    resolutionPrice: 599,
+    playing: true,
+    techEmail: '',
+    canvasFx: { wash: true, filigree: true, lightBloom: true, particles: true, ringOuter: true, ringInner: true, monogram: true, dateText: true, names: true, grain: true }
+  };
+
+  const TEMPLATES = {
+    filigree:      { name: 'Filigree Bloom',   vibe: 'Romantic · slow ornament drift' },
+    capiz:         { name: 'Capiz Shimmer',    vibe: 'Filipino · iridescent glow' },
+    sampaguita:    { name: 'Sampaguita Drift', vibe: 'Heritage · floating petals' },
+    gold:          { name: 'Gold Particles',   vibe: 'Glamour · soft luxe wash' },
+    mist:          { name: 'Ethereal Mist',    vibe: 'Soft · diffuse haze' },
+    bokeh:         { name: 'Bokeh Lights',     vibe: 'Cinematic · circular blur' },
+    watercolor:    { name: 'Watercolor Wash',  vibe: 'Artistic · painterly bleed' },
+    pulse:         { name: 'Slow Pulse',       vibe: 'Minimal · single ring' },
+    constellation: { name: 'Constellation',    vibe: 'Magical · star field' },
+    velvet:        { name: 'Velvet Sweep',     vibe: 'Bold · rich diagonal' }
+  };
+
+  const TEMPLATE_BG = {
+    filigree:      'linear-gradient(135deg, #2B1F12, #1A1A1A)',
+    capiz:         'radial-gradient(circle at 30% 30%, rgba(232,201,176,0.4), transparent 60%), radial-gradient(circle at 70% 70%, rgba(184,137,62,0.3), transparent 60%), #1F1A14',
+    sampaguita:    'linear-gradient(180deg, #1A1A1A 0%, #2B1F12 100%)',
+    gold:          'radial-gradient(ellipse at center, rgba(184,137,62,0.5), transparent 60%), #1A1A1A',
+    mist:          'linear-gradient(135deg, #1F2A3F, #2B2825)',
+    bokeh:         '#1A1A1A',
+    watercolor:    'linear-gradient(135deg, #C97B4B 0%, #6E89AD 50%, #1F2A3F 100%)',
+    pulse:         '#1A1A1A',
+    constellation: '#0F1320',
+    velvet:        'linear-gradient(135deg, #6B1F2A 0%, #8C4A28 50%, #C97B4B 100%)'
+  };
+
+  // ============================================
+  // HELPERS
+  // ============================================
+  function toast(msg) {
+    const stack = document.getElementById('toast-stack');
+    const t = document.createElement('div');
+    t.className = 'toast-pop';
+    t.textContent = msg;
+    stack.appendChild(t);
+    setTimeout(() => { t.style.transition = 'opacity 0.3s, transform 0.3s'; t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; }, 1800);
+    setTimeout(() => t.remove(), 2200);
+  }
+
+  function openModal({ eyebrow = '', title = '', body = '', actions = [] }) {
+    const root = document.getElementById('modal-root');
+    document.getElementById('modal-eyebrow').textContent = eyebrow;
+    document.getElementById('modal-title').textContent = title;
+    const bodyEl = document.getElementById('modal-body');
+    bodyEl.innerHTML = '';
+    if (typeof body === 'string') bodyEl.innerHTML = body;
+    else if (body instanceof Node) bodyEl.appendChild(body);
+    const ac = document.getElementById('modal-actions');
+    ac.innerHTML = '';
+    actions.forEach(a => {
+      const b = document.createElement('button');
+      b.textContent = a.label;
+      const baseStyle = 'font-family:Manrope,sans-serif;font-size:13px;font-weight:600;padding:10px 18px;border-radius:999px;cursor:pointer;border:1px solid rgba(26,26,26,0.18);';
+      b.style.cssText = a.primary
+        ? baseStyle + 'background:#1A1A1A;color:#fff;border-color:#1A1A1A;'
+        : baseStyle + 'background:#fff;color:#1A1A1A;';
+      b.addEventListener('click', () => { if (a.onClick) a.onClick(); if (a.close !== false) closeModal(); });
+      ac.appendChild(b);
+    });
+    root.style.display = 'flex';
+  }
+  function closeModal() { document.getElementById('modal-root').style.display = 'none'; }
+  document.getElementById('modal-root').addEventListener('click', (e) => { if (e.target.id === 'modal-root') closeModal(); });
+
+  // ============================================
+  // CANVAS TOGGLE (preserve original behavior)
+  // ============================================
+  document.querySelectorAll('[data-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-toggle]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.body.dataset.view = btn.dataset.toggle;
+    });
+  });
+
+  // ============================================
+  // RENDER — apply state to DOM
+  // ============================================
+  function applyTemplateBg() {
+    const bg = TEMPLATE_BG[state.template] || TEMPLATE_BG.filigree;
+    document.querySelectorAll('.preview-canvas, .m-preview-canvas').forEach(c => {
+      c.style.background = bg;
+    });
+  }
+
+  function applyOverride(color) {
+    if (!color) return;
+    document.querySelectorAll('.preview-canvas, .m-preview-canvas').forEach(c => {
+      c.style.backgroundColor = color;
+    });
+  }
+
+  function setCardActive(selector, predicate) {
+    document.querySelectorAll(selector).forEach(el => {
+      el.classList.toggle('active', predicate(el));
+    });
+  }
+
+  function render() {
+    // Update controls header
+    const controlsTitle = document.querySelector('.controls-title');
+    const controlsVibe  = document.querySelector('.controls-vibe');
+    if (controlsTitle) controlsTitle.textContent = state.templateName;
+    if (controlsVibe)  controlsVibe.textContent = state.templateVibe;
+
+    // Mobile header
+    const mhSub = document.querySelector('.m-header-sub');
+    if (mhSub) mhSub.textContent = 'Maria & Juan · ' + state.templateName;
+
+    // Sliders
+    const valueLabels = document.querySelectorAll('.slider-row');
+    if (valueLabels[0]) valueLabels[0].querySelector('.value').textContent = state.intensity + '%';
+    if (valueLabels[1]) {
+      const speedLabel = state.speed < 33 ? 'slow' : state.speed < 66 ? 'mid' : 'fast';
+      valueLabels[1].querySelector('.value').textContent = speedLabel;
+    }
+
+    // Animation speed scaling on preview elements
+    const speedFactor = (100 - state.speed) / 50; // 0 = fast, 2 = slow
+    document.querySelectorAll('.preview-canvas, .m-preview-canvas').forEach(c => {
+      c.style.setProperty('--speed-factor', speedFactor);
+      c.style.opacity = 0.4 + (state.intensity / 100) * 0.6;
+    });
+
+    // Mobile control cards
+    const mCards = document.querySelectorAll('.m-control-card');
+    if (mCards[0]) mCards[0].querySelector('.m-control-value').textContent = state.bgColorName + ' · ' + state.bgColor;
+    if (mCards[1]) {
+      mCards[1].querySelector('.m-control-label').textContent = 'Effect intensity · ' + state.intensity + '%';
+      const fill = mCards[1].querySelector('div > div');
+      if (fill) fill.style.width = state.intensity + '%';
+    }
+    if (mCards[2]) mCards[2].querySelector('.m-control-value').textContent = state.overlay.charAt(0).toUpperCase() + state.overlay.slice(1);
+    if (mCards[3]) {
+      mCards[3].querySelector('.m-control-label').textContent = 'Loop · ' + state.loop + ' min · plays ' + Math.round(300 / state.loop) + '× for 5-hour event';
+      mCards[3].querySelector('.m-control-value').textContent = state.resolution + ' · ' + state.aspect + ' aspect';
+    }
+
+    // Export buttons
+    const exportBtn = document.querySelector('.export-btn');
+    if (exportBtn) {
+      exportBtn.querySelector('span:first-child').textContent = 'Render & Export ' + state.resolution + ' loop · ₱' + state.resolutionPrice;
+    }
+    const mExport = document.querySelector('.m-export-btn');
+    if (mExport) {
+      mExport.querySelector('span:first-child').textContent = 'Render ' + state.resolution + ' · ₱' + state.resolutionPrice;
+    }
+  }
+
+  // ============================================
+  // TEMPLATE PICKER (desktop + mobile)
+  // ============================================
+  function pickTemplate(key, name, vibe) {
+    state.template = key;
+    state.templateName = name;
+    state.templateVibe = vibe || (TEMPLATES[key] ? TEMPLATES[key].vibe : '');
+    setCardActive('.template-card', el => el.querySelector('.template-card-name')?.textContent === name);
+    setCardActive('.m-template-item', el => el.querySelector('.tpl-name')?.textContent === name || el.querySelector('.tpl-name')?.textContent === name.split(' ')[0]);
+    applyTemplateBg();
+    render();
+    toast('Template: ' + name);
+  }
+
+  document.querySelectorAll('.template-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const name = card.querySelector('.template-card-name').textContent;
+      const previewClass = Array.from(card.querySelector('.template-card-preview').classList).find(c => c.startsWith('tpl-'));
+      const key = previewClass ? previewClass.replace('tpl-', '') : 'filigree';
+      pickTemplate(key, name, TEMPLATES[key]?.vibe);
+    });
+  });
+
+  document.querySelectorAll('.m-template-item').forEach(card => {
+    card.addEventListener('click', () => {
+      const name = card.querySelector('.tpl-name').textContent;
+      const previewClass = Array.from(card.querySelector('.tpl-preview').classList).find(c => c.startsWith('tpl-'));
+      const key = previewClass ? previewClass.replace('tpl-', '') : 'filigree';
+      pickTemplate(key, name, TEMPLATES[key]?.vibe);
+    });
+  });
+
+  // ============================================
+  // COLOR SWATCHES
+  // ============================================
+  document.querySelectorAll('.color-swatch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      document.querySelectorAll('.color-swatch').forEach(o => o.classList.remove('active'));
+      sw.classList.add('active');
+      const color = sw.style.background || sw.style.backgroundColor;
+      const m = color.match(/#[0-9a-f]+/i) || color.match(/rgb\([^)]+\)/);
+      const hex = sw.getAttribute('title')?.match(/#[0-9a-f]+/i)?.[0] || rgbToHex(color);
+      state.bgColor = hex || color;
+      state.bgColorName = sw.getAttribute('title') || 'Custom';
+      applyOverride(state.bgColor);
+      render();
+      toast('Background: ' + state.bgColorName);
+    });
+  });
+  function rgbToHex(rgb) {
+    const m = rgb.match(/\d+/g);
+    if (!m) return rgb;
+    return '#' + m.slice(0,3).map(n => parseInt(n).toString(16).padStart(2,'0')).join('').toUpperCase();
+  }
+
+  // ============================================
+  // OVERLAY TILES
+  // ============================================
+  document.querySelectorAll('.overlay-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      document.querySelectorAll('.overlay-tile').forEach(o => o.classList.remove('active'));
+      tile.classList.add('active');
+      state.overlay = tile.textContent.trim().toLowerCase();
+      render();
+      toast('Overlay: ' + tile.textContent.trim());
+    });
+  });
+
+  // ============================================
+  // ASPECT + LOOP CARDS — there are two .aspect-grid groups (loop, aspect)
+  // ============================================
+  document.querySelectorAll('.aspect-grid').forEach((grid, gridIdx) => {
+    grid.querySelectorAll('.aspect-card').forEach(card => {
+      card.addEventListener('click', () => {
+        grid.querySelectorAll('.aspect-card').forEach(o => o.classList.remove('active'));
+        card.classList.add('active');
+        const txt = card.textContent.trim();
+        if (gridIdx === 0) {
+          // Loop length
+          const minMatch = txt.match(/(\d+)\s*min/);
+          if (minMatch) state.loop = parseInt(minMatch[1]);
+          render();
+          toast('Loop length: ' + state.loop + ' min · plays ' + Math.round(300 / state.loop) + '×');
+        } else {
+          // Aspect ratio
+          const aspectMatch = txt.match(/^([\d:]+)/);
+          if (aspectMatch) state.aspect = aspectMatch[1];
+          render();
+          toast('Aspect: ' + state.aspect);
+        }
+      });
+    });
+  });
+
+  // ============================================
+  // SLIDERS
+  // ============================================
+  const sliders = document.querySelectorAll('.slider-row input[type="range"]');
+  if (sliders[0]) sliders[0].addEventListener('input', e => { state.intensity = parseInt(e.target.value); render(); });
+  if (sliders[1]) sliders[1].addEventListener('input', e => { state.speed = parseInt(e.target.value); render(); });
+
+  // ============================================
+  // SELECT (couple names)
+  // ============================================
+  document.querySelectorAll('.field select').forEach(s => {
+    s.addEventListener('change', () => {
+      state.nameMode = s.value;
+      const namesEl = document.querySelector('.preview-couple-names');
+      const dateEl = document.querySelector('.preview-date');
+      if (s.value.includes('No')) {
+        if (namesEl) namesEl.style.display = 'none';
+        if (dateEl) dateEl.style.display = 'none';
+      } else {
+        if (namesEl) namesEl.style.display = '';
+        if (dateEl) dateEl.style.display = '';
+        if (s.value.includes('top') && namesEl) {
+          namesEl.style.bottom = 'auto'; namesEl.style.top = '14%';
+          if (dateEl) { dateEl.style.top = 'auto'; dateEl.style.bottom = '12%'; }
+        } else if (namesEl) {
+          namesEl.style.top = 'auto'; namesEl.style.bottom = '12%';
+          if (dateEl) { dateEl.style.bottom = 'auto'; dateEl.style.top = '14%'; }
+        }
+      }
+      toast('Names: ' + s.value);
+    });
+  });
+
+  // ============================================
+  // EMAIL INPUT
+  // ============================================
+  document.querySelectorAll('input[type="email"]').forEach(inp => {
+    inp.addEventListener('input', e => { state.techEmail = e.target.value; });
+    inp.addEventListener('blur', e => {
+      if (e.target.value) toast('LED-tech email saved');
+    });
+  });
+
+  // ============================================
+  // PHOTO POOL CHECKBOX + SOURCE BUTTONS
+  // ============================================
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', e => {
+      state.photoBlend = e.target.checked;
+      toast('Photo Pool blend ' + (e.target.checked ? 'on' : 'off'));
+    });
+  });
+
+  // Source mode buttons (Live link / Pick photos)
+  document.querySelectorAll('.field-group').forEach(group => {
+    const heading = group.querySelector('h5')?.textContent || '';
+    if (heading.toLowerCase().includes('photo pool')) {
+      const sourceBtns = group.querySelectorAll('button');
+      sourceBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          sourceBtns.forEach(o => {
+            o.style.background = 'var(--surface)';
+            o.style.borderColor = 'var(--rule)';
+            const div0 = o.querySelectorAll('div')[0];
+            if (div0) div0.style.color = 'var(--ink)';
+          });
+          btn.style.background = 'var(--accent-soft)';
+          btn.style.borderColor = 'var(--accent)';
+          const div0 = btn.querySelectorAll('div')[0];
+          if (div0) div0.style.color = 'var(--accent-deep)';
+          const lbl = btn.textContent.toLowerCase();
+          state.sourceMode = lbl.includes('live') ? 'live' : 'pick';
+          if (state.sourceMode === 'pick') {
+            openPhotoPicker();
+          } else {
+            toast('Source: live link · random rotation');
+          }
+        });
+      });
+    }
+  });
+
+  function openPhotoPicker() {
+    openModal({
+      eyebrow: 'Photo Pool',
+      title: 'Pick photos for the LED loop',
+      body: '<p style="margin-bottom:12px;">In production this opens the couple\'s Photo Pool.</p><p style="font-family:DM Mono,monospace;font-size:11px;color:#A39B8E;letter-spacing:0.06em;">Photos selected: <strong style="color:#1A1A1A;">12 of 50</strong></p>',
+      actions: [
+        { label: 'Cancel' },
+        { label: 'Use selection', primary: true, onClick: () => toast('12 photos locked into render') }
+      ]
+    });
+  }
+
+  // ============================================
+  // RESOLUTION FOOTER (desktop + mobile)
+  // ============================================
+  // Desktop res buttons (4 cards in controls-footer)
+  const resCards = document.querySelectorAll('.controls-footer > div:nth-child(2) button');
+  resCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const txt = card.textContent;
+      if (txt.toLowerCase().includes('custom')) {
+        openCustomTier();
+        return;
+      }
+      resCards.forEach(o => {
+        o.style.background = 'var(--surface)';
+        o.style.border = '1.5px solid var(--rule)';
+        o.style.boxShadow = '';
+        o.querySelectorAll('div').forEach(d => { d.style.color = ''; });
+      });
+      card.style.background = 'var(--accent-soft)';
+      card.style.border = '1.5px solid var(--accent)';
+      card.style.boxShadow = '0 0 0 1px var(--accent)';
+      const divs = card.querySelectorAll('div');
+      if (divs[0]) divs[0].style.color = 'var(--accent-deep)';
+      if (divs[1]) divs[1].style.color = 'var(--accent-deep)';
+      if (divs[2]) divs[2].style.color = 'var(--accent-deep)';
+
+      if (txt.includes('1080p')) { state.resolution = '1080p'; state.resolutionPrice = 249; }
+      else if (txt.includes('4K')) { state.resolution = '4K'; state.resolutionPrice = 399; }
+      else if (txt.includes('8K')) { state.resolution = '8K'; state.resolutionPrice = 599; }
+      render();
+      toast('Resolution: ' + state.resolution);
+    });
+  });
+
+  // Mobile resolution buttons
+  document.querySelectorAll('.m-export-bar > div button').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.m-export-bar > div button').forEach(o => {
+        o.style.background = 'var(--surface)';
+        o.style.borderColor = 'var(--rule)';
+        o.querySelectorAll('div').forEach(d => { d.style.color = ''; });
+      });
+      card.style.background = 'var(--accent-soft)';
+      card.style.borderColor = 'var(--accent)';
+      const txt = card.textContent;
+      if (txt.includes('1080p')) { state.resolution = '1080p'; state.resolutionPrice = 99; }
+      else if (txt.includes('4K')) { state.resolution = '4K'; state.resolutionPrice = 149; }
+      else if (txt.includes('8K')) { state.resolution = '8K'; state.resolutionPrice = 199; }
+      render();
+      toast('Resolution: ' + state.resolution);
+    });
+  });
+
+  // ============================================
+  // CUSTOM TIER PAYWALL
+  // ============================================
+  function openCustomTier() {
+    openModal({
+      eyebrow: 'Custom · ₱899',
+      title: 'Custom resolution upgrade',
+      body: '<p style="margin-bottom:10px;">For LED walls that don\'t fit standard ratios — couples input exact pixel dimensions and Setnayan renders to spec.</p><p style="margin-bottom:10px;"><strong style="color:#1A1A1A;">Includes:</strong> bespoke pixel mapping (e.g. 5760 × 1080 ultrawide), curved-wall warping, technician fit-test before render.</p><p style="font-family:DM Mono,monospace;font-size:11px;color:#A39B8E;letter-spacing:0.06em;">+ Ultrawide aspect (>21:9): +₱1,499 add-on</p>',
+      actions: [
+        { label: 'Maybe later' },
+        { label: 'Upgrade to Custom · ₱899', primary: true, onClick: () => { state.resolution = 'Custom'; state.resolutionPrice = 899; render(); toast('Custom tier unlocked'); } }
+      ]
+    });
+  }
+
+  // ============================================
+  // RENDER & EXPORT — fake progress modal
+  // ============================================
+  function startRender(label) {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = '<p style="margin-bottom:6px;">Encoding ' + state.resolution + ' loop at ' + state.aspect + ' · ' + state.loop + '-min master.</p>' +
+      '<div class="progress-shell"><div class="progress-fill" id="prog-fill"></div></div>' +
+      '<div id="prog-pct" style="font-family:DM Mono,monospace;font-size:11px;color:#A39B8E;letter-spacing:0.06em;">0%</div>';
+    openModal({
+      eyebrow: 'Rendering',
+      title: label || 'Render & export',
+      body: wrap,
+      actions: []
+    });
+    let pct = 0;
+    const fill = document.getElementById('prog-fill');
+    const pctEl = document.getElementById('prog-pct');
+    const ticker = setInterval(() => {
+      pct = Math.min(100, pct + Math.random() * 8 + 4);
+      if (fill) fill.style.width = pct + '%';
+      if (pctEl) pctEl.textContent = Math.round(pct) + '%';
+      if (pct >= 100) {
+        clearInterval(ticker);
+        setTimeout(() => {
+          openModal({
+            eyebrow: 'Ready',
+            title: 'Render complete',
+            body: '<p style="margin-bottom:8px;">Your ' + state.resolution + ' loop is ready.</p><p style="font-family:DM Mono,monospace;font-size:11px;color:#A39B8E;letter-spacing:0.06em;">Filename: maria-juan-2026-' + state.resolution.toLowerCase() + '.mp4 · ~5.6 GB · plays ' + Math.round(300 / state.loop) + '× across the reception</p>',
+            actions: [
+              { label: 'Close' },
+              { label: 'Download USB image', primary: true, onClick: () => toast('Download started · USB image saved') }
+            ]
+          });
+        }, 250);
+      }
+    }, 220);
+  }
+
+  document.querySelectorAll('.export-btn, .m-export-btn').forEach(b => {
+    b.addEventListener('click', () => startRender('Render & export'));
+  });
+
+  // Top-bar Render & Export
+  const topRenderBtn = document.querySelector('.editor-top-actions .btn.primary');
+  if (topRenderBtn) topRenderBtn.addEventListener('click', () => startRender('Render & export'));
+
+  // Save draft
+  document.querySelectorAll('.editor-top-actions .btn').forEach(b => {
+    if (b.textContent.includes('Save draft')) {
+      b.addEventListener('click', () => {
+        const ss = document.querySelector('.save-state');
+        if (ss) {
+          ss.textContent = '⬤ Draft saved · just now';
+          setTimeout(() => { ss.textContent = '⬤ All changes saved · 2s ago'; }, 2000);
+        }
+        toast('Draft saved');
+      });
+    }
+  });
+
+  // Undo
+  document.querySelectorAll('.editor-top-actions .btn.ghost').forEach(b => {
+    if (b.textContent.includes('Undo')) {
+      b.addEventListener('click', () => toast('Undo · last change reverted'));
+    } else if (b.textContent.includes('Full preview')) {
+      b.addEventListener('click', () => {
+        const stage = document.querySelector('.preview-stage');
+        if (stage) {
+          stage.classList.toggle('full-preview-mode');
+          toast('Full preview toggled');
+        }
+      });
+    }
+  });
+
+  // ============================================
+  // PREVIEW TOOLBAR + PLAYBACK CONTROLS
+  // ============================================
+  document.querySelectorAll('.preview-toolbar-actions button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lbl = btn.textContent.trim();
+      if (lbl.includes('Aspect')) {
+        const order = ['16:9', '21:9', '1:1'];
+        const idx = order.indexOf(state.aspect);
+        state.aspect = order[(idx + 1) % order.length];
+        btn.textContent = 'Aspect: ' + state.aspect;
+        // Sync aspect cards
+        document.querySelectorAll('.aspect-grid')[1]?.querySelectorAll('.aspect-card').forEach(card => {
+          card.classList.toggle('active', card.textContent.trim().startsWith(state.aspect));
+        });
+        render();
+        toast('Aspect: ' + state.aspect);
+      } else if (lbl.includes('Refresh')) {
+        const canvas = document.querySelector('.preview-canvas');
+        if (canvas) {
+          canvas.style.opacity = '0.4';
+          setTimeout(() => { canvas.style.opacity = ''; }, 250);
+        }
+        toast('Preview refreshed');
+      } else if (lbl.includes('Theater')) {
+        toast('Theater mode — coming soon');
+        btn.dataset.dim = '1';
+      }
+    });
+  });
+
+  // Playback controls
+  document.querySelectorAll('.preview-controls-bottom button').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      const t = btn.textContent.trim();
+      if (t === '⏸') {
+        btn.textContent = '▶';
+        document.querySelectorAll('.preview-canvas, .m-preview-canvas').forEach(c => c.style.animationPlayState = 'paused');
+        document.querySelectorAll('.preview-canvas *, .m-preview-canvas *').forEach(c => c.style.animationPlayState = 'paused');
+        toast('Paused');
+      } else if (t === '▶') {
+        btn.textContent = '⏸';
+        document.querySelectorAll('.preview-canvas *, .m-preview-canvas *').forEach(c => c.style.animationPlayState = '');
+        toast('Playing');
+      } else if (t === '⏮') {
+        const tc = document.querySelector('.timecode');
+        if (tc) tc.textContent = '00:00 / 00:30';
+        toast('Restart');
+      } else if (t === '⏭') {
+        const tc = document.querySelector('.timecode');
+        if (tc) tc.textContent = '00:30 / 00:30';
+        toast('Skip end');
+      } else {
+        toast(t + ' — coming soon');
+        btn.dataset.dim = '1';
+      }
+    });
+  });
+
+  // ============================================
+  // MOBILE TABS
+  // ============================================
+  const mTemplates = document.querySelector('.m-templates');
+  const mControls  = document.querySelector('.m-controls');
+  const mExportBar = document.querySelector('.m-export-bar');
+
+  document.querySelectorAll('.m-tab').forEach((tab, idx) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      if (idx === 0) {
+        if (mTemplates) mTemplates.style.display = '';
+        if (mControls) mControls.style.display = 'none';
+      } else if (idx === 1) {
+        if (mTemplates) mTemplates.style.display = 'none';
+        if (mControls) mControls.style.display = '';
+      } else if (idx === 2) {
+        if (mTemplates) mTemplates.style.display = 'none';
+        if (mControls) mControls.style.display = 'none';
+      }
+    });
+  });
+
+  // ============================================
+  // MOBILE BACK + RENDER PILL
+  // ============================================
+  document.querySelectorAll('.m-back').forEach(b => {
+    b.addEventListener('click', () => toast('Back — coming soon'));
+  });
+  document.querySelectorAll('.m-header button').forEach(b => {
+    if (b.textContent.trim() === 'Render') b.addEventListener('click', () => startRender('Render & export'));
+  });
+
+  // ============================================
+  // CATCH-ALL — every <button> without a handler shows a toast
+  // ============================================
+  document.querySelectorAll('button').forEach(b => {
+    if (!b.dataset.wired) {
+      b.addEventListener('click', (e) => {
+        // Only fire if no other handler intercepted (we use bubbling, so prefer real handlers above)
+        if (!e.defaultPrevented && !b.classList.contains('toggle-pill') && !b.closest('#modal-actions')) {
+          // already wired surfaces will have meaningful effects; this is a safety net
+          if (!b._handled) {
+            const lbl = b.textContent.trim().slice(0, 40) || 'Action';
+            // We don't want to over-toast — only if button has no other side effect
+            // skip silently for now
+          }
+        }
+      });
+    }
+  });
+
+  // ============================================
+  // INITIAL RENDER
+  // ============================================
+  render();
+
+  // Reset / Save preset (if they exist via "Open in editor →" link or others)
+  document.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const t = a.textContent.trim();
+      if (t.includes('Manage')) toast('Photo Pool · 42 photos');
+      else if (t.includes('Open in editor')) toast('Hero Monogram editor — coming soon');
+      else toast(t + ' — coming soon');
+    });
+  });
+</script>
+
+</body>
+</html>

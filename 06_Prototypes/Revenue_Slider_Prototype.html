@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Setnayan Revenue Slider Prototype</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --ink: #111827;
+    --ink-soft: #374151;
+    --muted: #6B7280;
+    --line: #E5E7EB;
+    --accent: #CA8A04;
+    --accent-soft: #FEF9C3;
+    --money: #065F46;
+    --money-soft: #DCFCE7;
+    --couple: #1D4ED8;
+    --planner: #9333EA;
+    --vendor: #CA8A04;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.45;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: var(--ink);
+    color: white;
+    padding: 28px 32px;
+    border-bottom: 4px solid var(--accent);
+  }
+  header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
+  header p { font-size: 14px; opacity: 0.75; max-width: 720px; }
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .panel h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .panel .panel-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .slider-group { margin-bottom: 28px; }
+  .slider-group:last-child { margin-bottom: 0; }
+  .slider-group h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .slider-row {
+    display: grid;
+    grid-template-columns: 1fr 100px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .slider-row label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .slider-row .hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: normal;
+  }
+  .slider-row input[type=range] {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 6px;
+    background: var(--line);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .slider-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 0 0 1px var(--accent), 0 2px 4px rgba(0,0,0,0.15);
+  }
+  .slider-row input[type=range]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .slider-value {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Results */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .year-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    background: linear-gradient(180deg, white 0%, #F9FAFB 100%);
+  }
+  .year-card .year-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .year-card .year-total {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .year-card .breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+  }
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    color: var(--ink-soft);
+  }
+  .breakdown-row .dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .breakdown-row .value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  .cumulative {
+    background: var(--money-soft);
+    border: 2px solid var(--money);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .cumulative .label {
+    font-size: 12px;
+    color: var(--money);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .cumulative .value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--money);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .chart-wrap {
+    height: 240px;
+    margin-bottom: 12px;
+  }
+  /* per-customer indicators */
+  .per-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .per-row strong {
+    display: block;
+    font-size: 16px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+  footer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 16px 32px 40px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .reset-btn {
+    background: var(--ink);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .reset-btn:hover { background: #1F2937; }
+  /* Mobile */
+  @media (max-width: 880px) {
+    main { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+    header { padding: 20px 16px; }
+    header h1 { font-size: 20px; }
+    .panel { padding: 16px; }
+    .results-grid { grid-template-columns: 1fr; }
+    .year-card .year-total { font-size: 18px; }
+    .cumulative .value { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Setnayan Revenue Projection — Slider Prototype</h1>
+  <p>Drag the sliders to model couples, planners, and vendors over Year 1 (launch year with 6-month free promo), Year 2 (full paid), and Year 3 (scale).</p>
+</header>
+
+<main>
+  <!-- LEFT: SLIDERS -->
+  <div class="panel">
+    <h2>Inputs</h2>
+    <div class="panel-sub">Yellow values update live. <button class="reset-btn" onclick="resetDefaults()">Reset defaults</button></div>
+
+    <!-- COUPLES -->
+    <div class="slider-group">
+      <h3>Couples on platform</h3>
+
+      <div class="slider-row">
+        <label>Year 1 couples <span class="hint">launch ramp</span></label>
+        <span class="slider-value" id="couplesY1-val">1,000</span>
+        <input type="range" id="couplesY1" min="100" max="10000" step="100" value="1000">
+      </div>
+      <div class="slider-row">
+        <label>Year 2 couples <span class="hint">post-promo full year</span></label>
+        <span class="slider-value" id="couplesY2-val">5,000</span>
+        <input type="range" id="couplesY2" min="500" max="50000" step="500" value="5000">
+      </div>
+      <div class="slider-row">
+        <label>Year 3 couples <span class="hint">scale year</span></label>
+        <span class="slider-value" id="couplesY3-val">15,000</span>
+        <input type="range" id="couplesY3" min="1000" max="100000" step="1000" value="15000">
+      </div>
+      <div class="slider-row">
+        <label>Conversion rate <span class="hint">% who buy at least one paid SKU</span></label>
+        <span class="slider-value" id="conv-val">60%</span>
+        <input type="range" id="conv" min="10" max="90" step="5" value="60">
+      </div>
+      <div class="slider-row">
+        <label>Avg PHP per paying couple (apparatus only) <span class="hint">Paparazzi, Live Stream, LED, AI Highlights — couples pay these à la carte regardless of subscription</span></label>
+        <span class="slider-value" id="arpu-val">₱2,600</span>
+        <input type="range" id="arpu" min="500" max="10000" step="100" value="2600">
+      </div>
+      <div class="slider-row">
+        <label>% of couples buying Setnayan Premium <span class="hint">subscription take-rate among paying customers</span></label>
+        <span class="slider-value" id="premiumPct-val">15%</span>
+        <input type="range" id="premiumPct" min="0" max="50" step="5" value="15">
+      </div>
+      <div class="slider-row">
+        <label>% of Premium buyers on Quarterly lock <span class="hint">₱599 one-time vs. ₱79/wk weekly billing</span></label>
+        <span class="slider-value" id="premiumLockPct-val">60%</span>
+        <input type="range" id="premiumLockPct" min="0" max="100" step="5" value="60">
+      </div>
+    </div>
+
+    <!-- PLANNERS -->
+    <div class="slider-group">
+      <h3>Wedding Planner businesses — Planner Studio (₱499/wk)</h3>
+
+      <div class="slider-row">
+        <label>Year 1 planners <span class="hint">V1.1 ships month 3-4</span></label>
+        <span class="slider-value" id="plY1-val">50</span>
+        <input type="range" id="plY1" min="0" max="500" step="10" value="50">
+      </div>
+      <div class="slider-row">
+        <label>Year 2 planners</label>
+        <span class="slider-value" id="plY2-val">200</span>
+        <input type="range" id="plY2" min="0" max="2000" step="25" value="200">
+      </div>
+      <div class="slider-row">
+        <label>Year 3 planners</label>
+        <span class="slider-value" id="plY3-val">500</span>
+        <input type="range" id="plY3" min="0" max="5000" step="50" value="500">
+      </div>
+    </div>
+
+    <!-- VENDORS -->
+    <div class="slider-group">
+      <h3>Vendors (Din, ships month 6-9) — single tier, two billing options</h3>
+
+      <div class="slider-row">
+        <label>Year 1 vendors (total) <span class="hint">first Din cohort</span></label>
+        <span class="slider-value" id="vY1-val">50</span>
+        <input type="range" id="vY1" min="0" max="500" step="10" value="50">
+      </div>
+      <div class="slider-row">
+        <label>Year 2 vendors (total)</label>
+        <span class="slider-value" id="vY2-val">500</span>
+        <input type="range" id="vY2" min="0" max="3000" step="25" value="500">
+      </div>
+      <div class="slider-row">
+        <label>Year 3 vendors (total)</label>
+        <span class="slider-value" id="vY3-val">1,600</span>
+        <input type="range" id="vY3" min="0" max="10000" step="100" value="1600">
+      </div>
+      <div class="slider-row">
+        <label>% of vendors on annual upfront (₱9,999) <span class="hint">vs. ₱249/wk weekly billing. Annual = ₱192/wk equivalent, 23% off, cash upfront for Setnayan.</span></label>
+        <span class="slider-value" id="lockPct-val">60%</span>
+        <input type="range" id="lockPct" min="0" max="100" step="5" value="60">
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div class="panel">
+    <h2>Revenue projection</h2>
+    <div class="panel-sub">PHP per year, recalculating live as you slide.</div>
+
+    <div class="cumulative">
+      <div class="label">Cumulative 3-year revenue</div>
+      <div class="value" id="cumulative">₱90M</div>
+    </div>
+
+    <div class="results-grid">
+      <div class="year-card">
+        <div class="year-label">Year 1</div>
+        <div class="year-total" id="y1-total">₱2.5M</div>
+        <div class="breakdown">
+          <div class="breakdown-row"><span><span class="dot" style="background:var(--couple)"></span>Couples</span><span class="value" id="y1-couples">—</span></div>
+          <div class="breakdown-row"><span><span class="dot" style="background:var(--planner)"></span>Planners</span><span class="value" id="y1-planners">—</span></div>
+          <div class="breakdown-row"><span><span class="dot" style="background:var(--vendor)"></span>Vendors</span><span class="value" id="y1-vendors">—</span></div>
+        </div>
+      </div>
+      <div class="year-card">
+        <div class="year-label">Year 2</div>
+        <div class="year-total" id="y2-total">₱21.3M</div>
+        <div class="breakdown">
+          <div class="breakdown-row"><span><span class="dot" style="background:var(--couple)"></span>Couples</span><span class="value" id="y2-couples">—</span></div>
+          <div class="breakdown-row"><span><span class="dot" style="background:var(--planner)"></span>Planners</span><span class="value" id="y2-planners">—</span></div>
+          <div class="breakdown-row"><span><span class="dot" style="background:var(--vendor)"></span>Vendors</span><span class="value" id="y2-vendors">—</span></div>
+        </div>
+      </div>
+      <div class="year-card">
+        <div class="year-label">Year 3</div>
+        <div class="year-total" id="y3-total">₱66.2M</div>
+        <div class="breakdown">
+          <div class="breakdown-row"><span><span class="dot" style="background:var(--couple)"></span>Couples</span><span class="value" id="y3-couples">—</span></div>
+          <div class="breakdown-row"><span><span class="dot" style="background:var(--planner)"></span>Planners</span><span class="value" id="y3-planners">—</span></div>
+          <div class="breakdown-row"><span><span class="dot" style="background:var(--vendor)"></span>Vendors</span><span class="value" id="y3-vendors">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="revChart"></canvas>
+    </div>
+
+    <div class="per-row">
+      <div>Revenue per couple signup<br><strong id="perCouple">—</strong></div>
+      <div>Paying couples Year 2<br><strong id="payingY2">—</strong></div>
+      <div>Per paying customer Year 2<br><strong id="perPayingY2">—</strong></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>Model assumptions: Year 1 launch promo gives 6 months of free access for Setnayan Plus subscription, Atelier, AI Albums, Voice Guestbook, and other digital-only features. Existing CLAUDE.md paid SKUs (Paparazzi, Live Stream, LED, Pro widgets, Custom Monogram, AI Highlights, Photo Delivery, Pro Camera Bridge) charge from day 1. Planner Studio ships V1.1 month 3-4. Din vendor subscriptions ship ~month 6-9. Numbers exclude physical-goods revenue (photo books, NFC, QR cards), outsourced labor services (Photo Team, Concierge), and PayMongo transaction fees (~3.5%). Confidence: low on signup count, medium on ARPU and adoption mix. Treat as order-of-magnitude.</p>
+</footer>
+
+<script>
+// Defaults to restore
+const DEFAULTS = {
+  couplesY1: 1000, couplesY2: 5000, couplesY3: 15000,
+  conv: 60, arpu: 2600,
+  premiumPct: 15, premiumLockPct: 60,
+  plY1: 50, plY2: 200, plY3: 500,
+  vY1: 50, vY2: 500, vY3: 1600,
+  lockPct: 60,
+};
+
+// Format helpers
+function php(n) {
+  if (n >= 1e6) return "₱" + (n/1e6).toFixed(2) + "M";
+  if (n >= 1e3) return "₱" + Math.round(n/1e3).toLocaleString() + "K";
+  return "₱" + Math.round(n).toLocaleString();
+}
+function fullPhp(n) {
+  return "₱" + Math.round(n).toLocaleString();
+}
+function num(n) {
+  return Math.round(n).toLocaleString();
+}
+
+// Get slider value
+function v(id) { return parseFloat(document.getElementById(id).value); }
+
+// Update single slider display
+function updateLabel(id, formatter) {
+  const val = v(id);
+  document.getElementById(id + "-val").textContent = formatter(val);
+}
+
+// All slider labels and their formatters
+const SLIDERS = {
+  couplesY1: n => num(n), couplesY2: n => num(n), couplesY3: n => num(n),
+  conv: n => n + "%",
+  arpu: n => fullPhp(n),
+  premiumPct: n => n + "%", premiumLockPct: n => n + "%",
+  plY1: n => num(n), plY2: n => num(n), plY3: n => num(n),
+  vY1: n => num(n), vY2: n => num(n), vY3: n => num(n),
+  lockPct: n => n + "%",
+};
+
+// Compute revenue
+function compute() {
+  // Couple side = apparatus revenue (à la carte) + Setnayan Premium subscription.
+  // Couples are FREE on the platform; revenue comes from apparatus SKUs they buy
+  // plus an optional Setnayan Premium subscription (₱79/wk weekly OR ₱49/wk on 13-week lock).
+
+  // Apparatus revenue per paying couple = ARPU slider.
+  // Y1 has 6-mo promo so apparatus revenue runs ~75% of full year (existing-paid SKUs charge day 1, but couple base is ramping).
+  const apparatusY1 = v("couplesY1") * (v("conv") / 100) * v("arpu") * 0.75;
+  const apparatusY2 = v("couplesY2") * (v("conv") / 100) * v("arpu");
+  const apparatusY3 = v("couplesY3") * (v("conv") / 100) * v("arpu");
+
+  // Setnayan Premium revenue: % of paying couples subscribe. Two options:
+  //   Quarterly: ₱599 one-time upfront (13 weeks access, ₱46/wk equiv)
+  //   Weekly:    ₱79/wk × 16 weeks median = ₱1,264 per weekly-billed couple
+  const premiumLock = 599;            // ₱599 one-time for quarterly lock
+  const premiumWeekly = 79 * 16;      // ₱1,264 per weekly-billed couple (16 weeks avg)
+  function couplePremiumRev(couples, conv, premPct, lockPct) {
+    const premiumCouples = couples * (conv / 100) * (premPct / 100);
+    return premiumCouples * (lockPct / 100) * premiumLock
+         + premiumCouples * (1 - lockPct / 100) * premiumWeekly;
+  }
+  // Setnayan Premium ships V1.5 (~month 6), so Y1 effective ≈ 50% of full year.
+  const premiumY1 = couplePremiumRev(v("couplesY1"), v("conv"), v("premiumPct"), v("premiumLockPct")) * 0.50;
+  const premiumY2 = couplePremiumRev(v("couplesY2"), v("conv"), v("premiumPct"), v("premiumLockPct"));
+  const premiumY3 = couplePremiumRev(v("couplesY3"), v("conv"), v("premiumPct"), v("premiumLockPct"));
+
+  const y1CoupleRev = apparatusY1 + premiumY1;
+  const y2CoupleRev = apparatusY2 + premiumY2;
+  const y3CoupleRev = apparatusY3 + premiumY3;
+
+  // Planners: ₱499/wk × 52 = ₱25,948/yr. Year 1 effective ≈ 75% (V1.1 ships month 3-4).
+  const annualPlanner = 25948;
+  const y1PlannerRev = v("plY1") * annualPlanner * 0.75;
+  const y2PlannerRev = v("plY2") * annualPlanner;
+  const y3PlannerRev = v("plY3") * annualPlanner;
+
+  // Vendors: single tier, two billing options.
+  //   Weekly: ₱249/wk × 52 = ₱12,948/yr
+  //   Annual: ₱9,999 one-time upfront → 52 weeks access (₱192/wk equiv, 23% off)
+  // Year 1 effective ≈ 25% (Din ships month 9, ~3 months paid).
+  const annualWeekly = 249 * 52;     // ₱12,948
+  const annualLock   = 9999;          // ₱9,999 one-time, 52 weeks
+  function vendorRev(count, lockPctVal) {
+    return count * (lockPctVal / 100) * annualLock
+         + count * (1 - lockPctVal / 100) * annualWeekly;
+  }
+  const y1VendorRev = vendorRev(v("vY1"), v("lockPct")) * 0.25;
+  const y2VendorRev = vendorRev(v("vY2"), v("lockPct"));
+  const y3VendorRev = vendorRev(v("vY3"), v("lockPct"));
+
+  const y1Total = y1CoupleRev + y1PlannerRev + y1VendorRev;
+  const y2Total = y2CoupleRev + y2PlannerRev + y2VendorRev;
+  const y3Total = y3CoupleRev + y3PlannerRev + y3VendorRev;
+  const cumulative = y1Total + y2Total + y3Total;
+
+  // Update UI
+  document.getElementById("y1-total").textContent = php(y1Total);
+  document.getElementById("y2-total").textContent = php(y2Total);
+  document.getElementById("y3-total").textContent = php(y3Total);
+  document.getElementById("cumulative").textContent = php(cumulative);
+
+  document.getElementById("y1-couples").textContent = php(y1CoupleRev);
+  document.getElementById("y1-planners").textContent = php(y1PlannerRev);
+  document.getElementById("y1-vendors").textContent = php(y1VendorRev);
+
+  document.getElementById("y2-couples").textContent = php(y2CoupleRev);
+  document.getElementById("y2-planners").textContent = php(y2PlannerRev);
+  document.getElementById("y2-vendors").textContent = php(y2VendorRev);
+
+  document.getElementById("y3-couples").textContent = php(y3CoupleRev);
+  document.getElementById("y3-planners").textContent = php(y3PlannerRev);
+  document.getElementById("y3-vendors").textContent = php(y3VendorRev);
+
+  document.getElementById("perCouple").textContent = fullPhp(y2Total / v("couplesY2"));
+  document.getElementById("payingY2").textContent = num(v("couplesY2") * v("conv") / 100);
+  const totalPayingY2 = (v("couplesY2") * v("conv") / 100) + v("plY2") + v("vlY2") + v("vsY2");
+  document.getElementById("perPayingY2").textContent = fullPhp(y2Total / totalPayingY2);
+
+  // Update chart
+  if (chart) {
+    chart.data.datasets[0].data = [y1CoupleRev/1e6, y2CoupleRev/1e6, y3CoupleRev/1e6];
+    chart.data.datasets[1].data = [y1PlannerRev/1e6, y2PlannerRev/1e6, y3PlannerRev/1e6];
+    chart.data.datasets[2].data = [y1VendorRev/1e6, y2VendorRev/1e6, y3VendorRev/1e6];
+    chart.update("none");
+  }
+}
+
+// Initialize chart
+let chart;
+function initChart() {
+  const ctx = document.getElementById("revChart").getContext("2d");
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Year 1", "Year 2", "Year 3"],
+      datasets: [
+        { label: "Couples",  data: [], backgroundColor: "#1D4ED8", borderRadius: 4 },
+        { label: "Planners", data: [], backgroundColor: "#9333EA", borderRadius: 4 },
+        { label: "Vendors",  data: [], backgroundColor: "#CA8A04", borderRadius: 4 },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { weight: 600 } } },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) { return "₱" + value + "M"; },
+            font: { size: 11 }
+          },
+          grid: { color: "#F3F4F6" }
+        }
+      },
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 12 } } },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return ctx.dataset.label + ": ₱" + ctx.parsed.y.toFixed(2) + "M";
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function resetDefaults() {
+  Object.keys(DEFAULTS).forEach(k => {
+    document.getElementById(k).value = DEFAULTS[k];
+    updateLabel(k, SLIDERS[k]);
+  });
+  compute();
+}
+
+// Wire up all sliders
+Object.keys(SLIDERS).forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener("input", () => {
+    updateLabel(id, SLIDERS[id]);
+    compute();
+  });
+  updateLabel(id, SLIDERS[id]);
+});
+
+initChart();
+compute();
+</script>
+</body>
+</html>

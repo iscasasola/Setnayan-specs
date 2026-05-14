@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan · 0013 Platform Stack & Sync — Setup Dashboard</title>
+<meta name="description" content="Iteration 0013 — Setnayan platform stack setup mockup. Account checklist, sync health dashboard, integration test runner.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --page-bg: #FAF6F0;
+  --page-bg-soft: #F5EFE5;
+  --ink: #1A1A1A;
+  --ink-soft: #6B6B6B;
+  --ink-faint: #A39B8E;
+  --accent: #C97B4B;
+  --accent-soft: #E8C9B0;
+  --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08);
+  --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F3;
+  --canvas-bg: #2B2825;
+  --green: #5BA962;
+  --green-soft: #D7EDD9;
+  --amber: #D9A04A;
+  --amber-soft: #F7E6CC;
+  --red: #D63B3B;
+  --red-soft: #F4D5D5;
+  --gray: #888780;
+  --gray-soft: #E8E5DD;
+  --shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.04);
+  --shadow-md: 0 12px 32px rgba(26, 26, 26, 0.08);
+  --shadow-lg: 0 28px 72px rgba(26, 26, 26, 0.12);
+  --shadow-frame: 0 40px 100px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--canvas-bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+.canvas-header {
+  padding: 36px 48px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.canvas-title { display: flex; flex-direction: column; gap: 6px; color: rgba(255, 255, 255, 0.9); }
+.canvas-title h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+.canvas-title .canvas-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.frames {
+  padding: 40px 48px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+.frame-section { display: flex; flex-direction: column; gap: 24px; }
+.frame-section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.frame-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: #fff;
+  font-weight: 500;
+}
+.frame-section-desc {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+  max-width: 720px;
+  line-height: 1.6;
+}
+.frame {
+  background: var(--page-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-frame);
+}
+.frame-pair {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 1100px) { .frame-pair { grid-template-columns: 1fr; } }
+.frame-label {
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.web-frame { min-height: 720px; }
+.mobile-frame {
+  width: 380px;
+  margin: 0 auto;
+  border-radius: 36px;
+  overflow: hidden;
+  background: var(--page-bg);
+  box-shadow: var(--shadow-frame);
+}
+.mobile-frame .frame-label { border-radius: 36px 36px 0 0; }
+
+/* ============== DASHBOARD ============== */
+.dashboard-page {
+  min-height: 720px;
+  background: var(--page-bg);
+  padding: 32px;
+}
+.dashboard-h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.dashboard-sub {
+  color: var(--ink-soft);
+  font-size: 13px;
+  margin-bottom: 32px;
+}
+
+/* Status pill */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.status-pill.connected { background: var(--green-soft); color: #2D5C32; }
+.status-pill.partial { background: var(--amber-soft); color: #6B4D14; }
+.status-pill.pending { background: var(--gray-soft); color: var(--ink-soft); }
+.status-pill.failed { background: var(--red-soft); color: #6B1F1F; }
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.connected .status-dot { background: var(--green); }
+.partial .status-dot { background: var(--amber); }
+.pending .status-dot { background: var(--gray); }
+.failed .status-dot { background: var(--red); }
+
+/* Service grid */
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.svc-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.svc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.svc-name {
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.svc-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-deep);
+}
+.svc-role {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+.svc-detail {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+
+/* Section divider */
+.section-divider {
+  margin: 36px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-divider .label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.section-divider .line {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* Test runner */
+.tests-block {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 0;
+  margin-top: 16px;
+  overflow: hidden;
+}
+.test-row {
+  padding: 14px 18px;
+  border-top: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 70px 1fr 100px;
+  align-items: center;
+  gap: 12px;
+}
+.test-row:first-child { border-top: none; }
+.test-id {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-faint);
+}
+.test-desc {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.test-status { text-align: right; }
+
+/* Setup steps */
+.steps-block {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  margin-top: 16px;
+  overflow: hidden;
+}
+.step-row {
+  padding: 14px 18px;
+  border-top: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 60px 1fr 110px;
+  align-items: center;
+  gap: 12px;
+}
+.step-row:first-child { border-top: none; }
+.step-id {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent-deep);
+}
+.step-name {
+  font-weight: 500;
+  font-size: 13px;
+}
+.step-meta {
+  color: var(--ink-faint);
+  font-size: 11px;
+}
+
+/* Mobile */
+.mobile-page {
+  min-height: 700px;
+  background: var(--page-bg);
+  padding: 20px 18px;
+}
+.mobile-h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.mobile-sub { font-size: 12px; color: var(--ink-soft); margin-bottom: 20px; }
+.mobile-svc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.mobile-svc-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mobile-svc-name { font-weight: 600; font-size: 12px; }
+
+/* Spec section */
+.spec { background: var(--page-bg); color: var(--ink); }
+.spec-inner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 80px 48px;
+}
+.spec-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.spec-h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.spec p { color: var(--ink-soft); margin-bottom: 16px; line-height: 1.7; }
+.spec-h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  margin-top: 36px;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+.flow-diagram {
+  background: var(--surface-soft);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink);
+  white-space: pre;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+.callout {
+  background: linear-gradient(135deg, #FBF1DD 0%, #F5E5C8 100%);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  color: var(--accent-deep);
+  font-size: 13px;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<div class="canvas-header">
+  <div class="canvas-title">
+    <div class="canvas-meta">Iteration 0013 · Platform Stack &amp; Sync Setup</div>
+    <h1>The foundation. Build this first.</h1>
+  </div>
+  <div class="canvas-toggle" style="display:inline-flex;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:4px;">
+    <button class="toggle-pill active" data-section-target="A" style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);padding:8px 18px;border-radius:999px;">Section A · Setup</button>
+    <button class="toggle-pill" data-section-target="B" style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);padding:8px 18px;border-radius:999px;">Section B · Implementation</button>
+    <button class="toggle-pill" data-section-target="C" style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);padding:8px 18px;border-radius:999px;">Section C · Tests</button>
+  </div>
+</div>
+
+<style>
+  .toggle-pill.active { background: var(--accent) !important; color: #fff !important; }
+  body[data-section="A"] [data-section-pane="B"], body[data-section="A"] [data-section-pane="C"] { display:none; }
+  body[data-section="B"] [data-section-pane="A"], body[data-section="B"] [data-section-pane="C"] { display:none; }
+  body[data-section="C"] [data-section-pane="A"], body[data-section="C"] [data-section-pane="B"] { display:none; }
+  .progress-bar { height: 6px; background: var(--gray-soft); border-radius: 3px; overflow: hidden; margin: 8px 0 24px; }
+  .progress-bar > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-deep)); transition: width 0.3s ease; }
+  .progress-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+  .check-box { width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--rule-strong); display: grid; place-items: center; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+  .check-box.checked { background: var(--green); border-color: var(--green); color: #fff; }
+  .step-row .check-box, .test-row .check-box { margin-right: 4px; }
+  .run-btn, .done-btn, .runall-btn, .copy-btn { background: var(--ink); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; font-family: 'Manrope', sans-serif; }
+  .run-btn { background: var(--accent); }
+  .runall-btn { background: var(--accent-deep); }
+  .copy-btn { background: var(--surface); color: var(--ink); border: 1px solid var(--rule-strong); }
+  .run-btn:disabled, .done-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .code-block { background: #1A1A1A; color: #D4D0C8; border-radius: 8px; padding: 14px 16px; font-family: 'DM Mono', monospace; font-size: 11px; line-height: 1.6; margin: 12px 0; white-space: pre; overflow-x: auto; position: relative; }
+  .code-block .copy-btn { position: absolute; top: 8px; right: 8px; }
+  .ext-link { background: var(--surface); color: var(--accent-deep); border: 1px solid var(--rule-strong); padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 500; text-decoration: none; display: inline-block; }
+  .ext-link:hover { border-color: var(--accent); }
+  .step-row.collapsed .step-name { color: var(--ink-faint); text-decoration: line-through; }
+  .running { animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  #toast-root { position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 9999; pointer-events: none; }
+  #toast-root .toast { background: rgba(26,26,26,0.92); color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-family: Manrope, sans-serif; box-shadow: 0 8px 24px rgba(0,0,0,0.3); pointer-events: auto; opacity: 0; transform: translateY(10px); transition: opacity 0.2s, transform 0.2s; }
+  #toast-root .toast.in { opacity: 1; transform: translateY(0); }
+</style>
+
+<div id="toast-root"></div>
+
+<div class="frames">
+
+  <!-- ========== DASHBOARD ========== -->
+  <div class="frame-section">
+    <div class="frame-section-label">Setup dashboard · what the couple-side product team uses to track platform readiness</div>
+    <div class="frame-section-title">Platform connection health</div>
+    <div class="frame-section-desc">Internal tool — used during the Sprint 0 setup phase to track which accounts are wired up and which integration tests have passed. Once everything is green, V1 features (0000–0012) can ship on top.</div>
+
+    <div class="frame-pair">
+      <div class="frame web-frame">
+        <div class="frame-label">Web · 1280px · Internal setup dashboard</div>
+        <div class="dashboard-page">
+          <div class="dashboard-h1">Platform setup status</div>
+          <div class="dashboard-sub">Sprint 0 readiness · 9 of 13 accounts connected · 11 of 15 tests passing</div>
+
+          <!-- ========== SECTION A: Accounts ========== -->
+          <div data-section-pane="A">
+          <div class="progress-label">Section A progress · <span id="a-progress-label">0 / 15</span></div>
+          <div class="progress-bar"><div id="a-progress-bar" style="width:0%"></div></div>
+
+          <div class="section-divider">
+            <div class="label">Accounts &amp; credentials</div>
+            <div class="line"></div>
+          </div>
+
+          <div class="service-grid">
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">▲</span> Vercel</div>
+                <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+              </div>
+              <div class="svc-role">Hosts Next.js web app. Auto-deploys from GitHub main branch.</div>
+              <div class="svc-detail">team / setnayan-team · project / setnayan-prod</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">⬢</span> Supabase</div>
+                <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+              </div>
+              <div class="svc-role">Postgres + Auth + Realtime + Storage + Edge Fns. The single source of truth.</div>
+              <div class="svc-detail">project / setnayan-prod · region / ap-southeast-1</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">☁</span> Cloudflare R2</div>
+                <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+              </div>
+              <div class="svc-role">Large media storage. Free egress. Photos, broadcasts, LED renders.</div>
+              <div class="svc-detail">3 buckets · custom domain media.setnayan.com</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">⌥</span> GitHub</div>
+                <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+              </div>
+              <div class="svc-role">Source-of-truth code. CI/CD triggers for Vercel + Supabase migrations.</div>
+              <div class="svc-detail">repo / setnayan (private)</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">▶</span> YouTube</div>
+                <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+              </div>
+              <div class="svc-role">Setnayan master channel for Panood delivery (YouTube-only per memory).</div>
+              <div class="svc-detail">channel / @SetnayanWeddings · YPP / disabled</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">$</span> PayMongo</div>
+                <span class="status-pill partial"><span class="status-dot"></span>Test mode</span>
+              </div>
+              <div class="svc-role">PHP payment processing. Live mode pending business verification.</div>
+              <div class="svc-detail">webhooks / configured · awaiting / live keys</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">S</span> Stripe</div>
+                <span class="status-pill partial"><span class="status-dot"></span>Test mode</span>
+              </div>
+              <div class="svc-role">International payment processing. Test keys live, prod awaiting verification.</div>
+              <div class="svc-detail">webhooks / configured · awaiting / live keys</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">A</span> Anthropic</div>
+                <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+              </div>
+              <div class="svc-role">Claude API. Powers AI Video + AI Edited Highlights.</div>
+              <div class="svc-detail">api key / sk-ant-...nz4q</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">📨</span> Resend</div>
+                <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+              </div>
+              <div class="svc-role">Transactional email — magic-link auth, deadline reminders.</div>
+              <div class="svc-detail">domain / mail.setnayan.com · verified</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon"></span> Apple Developer</div>
+                <span class="status-pill pending"><span class="status-dot"></span>Pending approval</span>
+              </div>
+              <div class="svc-role">For iOS Papic app + macOS desktop app.</div>
+              <div class="svc-detail">paid / yes · awaiting / 1–3 day approval</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">▶</span> Google Play</div>
+                <span class="status-pill pending"><span class="status-dot"></span>Pending approval</span>
+              </div>
+              <div class="svc-role">For Android Papic app.</div>
+              <div class="svc-detail">paid / yes · awaiting / 1–2 day approval</div>
+            </div>
+
+            <div class="svc-card">
+              <div class="svc-head">
+                <div class="svc-name"><span class="svc-icon">⚇</span> Sentry</div>
+                <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+              </div>
+              <div class="svc-role">Error tracking — web, iOS, Android.</div>
+              <div class="svc-detail">3 projects / configured</div>
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <div class="label">User setup checklist (Section A)</div>
+            <div class="line"></div>
+          </div>
+
+          <div class="steps-block">
+            <div class="step-row"><div class="step-id">A1</div><div class="step-name">Domain registered + DNS at Cloudflare</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A2</div><div class="step-name">GitHub repo + Personal Access Token</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A3</div><div class="step-name">Vercel project linked to GitHub</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A4</div><div class="step-name">Supabase project + API keys</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A5</div><div class="step-name">Cloudflare R2 buckets + custom domain</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A6</div><div class="step-name">YouTube master channel + Data API OAuth</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A7</div><div class="step-name">PayMongo account + verification</div><span class="status-pill partial"><span class="status-dot"></span>In review</span></div>
+            <div class="step-row"><div class="step-id">A8</div><div class="step-name">Stripe account + verification</div><span class="status-pill partial"><span class="status-dot"></span>In review</span></div>
+            <div class="step-row"><div class="step-id">A9</div><div class="step-name">Anthropic API key</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A10</div><div class="step-name">Apple Developer Program ($99)</div><span class="status-pill pending"><span class="status-dot"></span>Pending</span></div>
+            <div class="step-row"><div class="step-id">A11</div><div class="step-name">Google Play Console ($25)</div><span class="status-pill pending"><span class="status-dot"></span>Pending</span></div>
+            <div class="step-row"><div class="step-id">A12</div><div class="step-name">Domain DNS pointed at Vercel + R2</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A13</div><div class="step-name">Resend transactional email</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A14</div><div class="step-name">Sentry projects (web, iOS, Android)</div><span class="status-pill connected"><span class="status-dot"></span>Done</span></div>
+            <div class="step-row"><div class="step-id">A15</div><div class="step-name">Suno music catalogue (per playbook 14)</div><span class="status-pill partial"><span class="status-dot"></span>~80 of 400 tracks</span></div>
+          </div>
+
+          </div><!-- /data-section-pane=A -->
+
+          <!-- ========== SECTION B: Implementation ========== -->
+          <div data-section-pane="B">
+            <div class="progress-label">Section B progress · <span id="b-progress-label">0 / 11</span></div>
+            <div class="progress-bar"><div id="b-progress-bar" style="width:0%"></div></div>
+
+            <div class="section-divider">
+              <div class="label">Claude Code implementation steps</div>
+              <div class="line"></div>
+            </div>
+
+            <div class="steps-block" id="b-steps-block">
+              <div class="step-row" data-step="B1"><div class="step-id">B1</div><div class="step-name">Scaffold Next.js project + .env wiring</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B2"><div class="step-id">B2</div><div class="step-name">Apply Supabase migrations (users, events, wallet)</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B3"><div class="step-id">B3</div><div class="step-name">RLS policies — couples can only see their event</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B4"><div class="step-id">B4</div><div class="step-name">Auth flow — magic link + OAuth providers</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B5"><div class="step-id">B5</div><div class="step-name">iOS Papic skeleton — Swift + Supabase SDK</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B6"><div class="step-id">B6</div><div class="step-name">Android Papic skeleton — Kotlin + Supabase</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B7"><div class="step-id">B7</div><div class="step-name">macOS Tauri shell — embeds web app</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B8"><div class="step-id">B8</div><div class="step-name">CI/CD GitHub Actions — Vercel + Supabase deploy</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B9"><div class="step-id">B9</div><div class="step-name">service_catalog seed — all V1 SKU rows</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B10"><div class="step-id">B10</div><div class="step-name">R2 helpers — signed URLs, custom domain CORS</div><button class="done-btn">Done</button></div>
+              <div class="step-row" data-step="B11"><div class="step-id">B11</div><div class="step-name">YouTube Edge Function — broadcast creation</div><button class="done-btn">Done</button></div>
+            </div>
+
+            <div class="section-divider">
+              <div class="label">Code snippets</div>
+              <div class="line"></div>
+            </div>
+
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px;">.env.example</div>
+            <div class="code-block"><button class="copy-btn" data-copy-target="snippet-env">Copy</button><span id="snippet-env">NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET=setnayan-prod-media
+ANTHROPIC_API_KEY=sk-ant-...
+RESEND_API_KEY=re_...
+YOUTUBE_OAUTH_CLIENT_ID=...
+YOUTUBE_OAUTH_CLIENT_SECRET=...</span></div>
+
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px;">supabase/migrations/0001_users.sql</div>
+            <div class="code-block"><button class="copy-btn" data-copy-target="snippet-users">Copy</button><span id="snippet-users">create table users (
+  id uuid primary key default gen_random_uuid(),
+  email text unique not null,
+  display_name text,
+  created_at timestamptz default now()
+);
+
+alter table users enable row level security;
+
+create policy "users read self"
+  on users for select
+  using (auth.uid() = id);</span></div>
+
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px;">RLS — event members</div>
+            <div class="code-block"><button class="copy-btn" data-copy-target="snippet-rls">Copy</button><span id="snippet-rls">create policy "event read by member"
+  on events for select
+  using (
+    exists (
+      select 1 from event_members em
+      where em.event_id = events.id
+        and em.user_id = auth.uid()
+    )
+  );</span></div>
+          </div><!-- /data-section-pane=B -->
+
+          <!-- ========== SECTION C: Tests ========== -->
+          <div data-section-pane="C">
+          <div class="progress-label">Section C progress · <span id="c-progress-label">0 / 15</span></div>
+          <div class="progress-bar"><div id="c-progress-bar" style="width:0%"></div></div>
+
+          <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+            <button class="runall-btn" id="run-all-btn">Run all tests</button>
+          </div>
+
+          <div class="section-divider">
+            <div class="label">Integration tests (Section C)</div>
+            <div class="line"></div>
+          </div>
+
+          <div class="tests-block" id="c-tests-block">
+            <div class="test-row"><div class="test-id">C1</div><div class="test-desc">Local dev server boots, Supabase connected</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C2</div><div class="test-desc">Magic-link sign-in works (Resend → inbox)</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C3</div><div class="test-desc">Create test event, row appears in Supabase</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C4</div><div class="test-desc">Realtime sync between two browser tabs (&lt; 2s)</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C5</div><div class="test-desc">RLS enforcement (User B can&apos;t see User A&apos;s data)</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C6</div><div class="test-desc">service_catalog seeded with all V1 SKU rows</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C7</div><div class="test-desc">R2 signed URL upload + public retrieval</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C8</div><div class="test-desc">YouTube broadcast creation via Data API</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C9</div><div class="test-desc">Cross-platform sync iOS ↔ Web</div><div class="test-status"><span class="status-pill pending"><span class="status-dot"></span>Blocked on A10</span></div></div>
+            <div class="test-row"><div class="test-id">C10</div><div class="test-desc">Cross-platform sync Android ↔ Web</div><div class="test-status"><span class="status-pill pending"><span class="status-dot"></span>Blocked on A11</span></div></div>
+            <div class="test-row"><div class="test-id">C11</div><div class="test-desc">macOS Tauri shell builds + signs in</div><div class="test-status"><span class="status-pill partial"><span class="status-dot"></span>Local OK</span></div></div>
+            <div class="test-row"><div class="test-id">C12</div><div class="test-desc">Production deploy via GitHub push</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C13</div><div class="test-desc">Migration auto-apply on push</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C14</div><div class="test-desc">Sentry captures test errors</div><div class="test-status"><span class="status-pill connected"><span class="status-dot"></span>Pass</span></div></div>
+            <div class="test-row"><div class="test-id">C15</div><div class="test-desc">Multi-device auth (4 platforms, same user)</div><div class="test-status"><span class="status-pill pending"><span class="status-dot"></span>Blocked</span></div></div>
+          </div>
+
+          <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:8px;">
+            <a class="ext-link" href="https://vercel.com/dashboard" target="_blank" rel="noopener">Open Vercel Dashboard</a>
+            <a class="ext-link" href="https://supabase.com/dashboard" target="_blank" rel="noopener">Open Supabase Dashboard</a>
+            <a class="ext-link" href="https://dash.cloudflare.com" target="_blank" rel="noopener">Open Cloudflare</a>
+            <a class="ext-link" href="https://github.com" target="_blank" rel="noopener">Open GitHub</a>
+            <a class="ext-link" href="https://studio.youtube.com" target="_blank" rel="noopener">Open YouTube Studio</a>
+          </div>
+          </div><!-- /data-section-pane=C -->
+        </div>
+      </div>
+
+      <div class="frame mobile-frame">
+        <div class="frame-label">Mobile · 380px · Setup status</div>
+        <div class="mobile-page">
+          <div class="mobile-h1">Setup status</div>
+          <div class="mobile-sub">9 of 13 accounts · 11 of 15 tests</div>
+
+          <div class="mobile-svc-grid">
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">Vercel</div>
+              <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+            </div>
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">Supabase</div>
+              <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+            </div>
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">Cloudflare R2</div>
+              <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+            </div>
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">GitHub</div>
+              <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+            </div>
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">YouTube</div>
+              <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+            </div>
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">Anthropic</div>
+              <span class="status-pill connected"><span class="status-dot"></span>Connected</span>
+            </div>
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">PayMongo</div>
+              <span class="status-pill partial"><span class="status-dot"></span>Test only</span>
+            </div>
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">Stripe</div>
+              <span class="status-pill partial"><span class="status-dot"></span>Test only</span>
+            </div>
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">Apple Dev</div>
+              <span class="status-pill pending"><span class="status-dot"></span>Pending</span>
+            </div>
+            <div class="mobile-svc-card">
+              <div class="mobile-svc-name">Google Play</div>
+              <span class="status-pill pending"><span class="status-dot"></span>Pending</span>
+            </div>
+          </div>
+
+          <div class="section-divider" style="margin: 16px 0 12px;">
+            <div class="label">Tests · 11/15 passing</div>
+            <div class="line"></div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: grid; grid-template-columns: 40px 1fr 90px; gap: 8px; align-items: center; padding: 10px; background: var(--surface); border-radius: 10px; border: 1px solid var(--rule);">
+              <div style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-faint);">C1–C8</div>
+              <div style="font-size: 12px;">Core platform</div>
+              <span class="status-pill connected" style="justify-self: end;"><span class="status-dot"></span>All pass</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 40px 1fr 90px; gap: 8px; align-items: center; padding: 10px; background: var(--surface); border-radius: 10px; border: 1px solid var(--rule);">
+              <div style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-faint);">C9</div>
+              <div style="font-size: 12px;">iOS ↔ Web sync</div>
+              <span class="status-pill pending" style="justify-self: end;"><span class="status-dot"></span>Blocked</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 40px 1fr 90px; gap: 8px; align-items: center; padding: 10px; background: var(--surface); border-radius: 10px; border: 1px solid var(--rule);">
+              <div style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-faint);">C10</div>
+              <div style="font-size: 12px;">Android ↔ Web sync</div>
+              <span class="status-pill pending" style="justify-self: end;"><span class="status-dot"></span>Blocked</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 40px 1fr 90px; gap: 8px; align-items: center; padding: 10px; background: var(--surface); border-radius: 10px; border: 1px solid var(--rule);">
+              <div style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-faint);">C11</div>
+              <div style="font-size: 12px;">macOS Tauri</div>
+              <span class="status-pill partial" style="justify-self: end;"><span class="status-dot"></span>Local OK</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 40px 1fr 90px; gap: 8px; align-items: center; padding: 10px; background: var(--surface); border-radius: 10px; border: 1px solid var(--rule);">
+              <div style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-faint);">C12–14</div>
+              <div style="font-size: 12px;">Deploy + Sentry</div>
+              <span class="status-pill connected" style="justify-self: end;"><span class="status-dot"></span>All pass</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 40px 1fr 90px; gap: 8px; align-items: center; padding: 10px; background: var(--surface); border-radius: 10px; border: 1px solid var(--rule);">
+              <div style="font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-faint);">C15</div>
+              <div style="font-size: 12px;">Multi-device auth</div>
+              <span class="status-pill pending" style="justify-self: end;"><span class="status-dot"></span>Blocked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<section class="spec">
+  <div class="spec-inner">
+    <div class="spec-eyebrow">Iteration 0013 · The foundation</div>
+    <h2 class="spec-h2">Build this first. Everything else depends on it.</h2>
+    <p>Iteration 0013 is the platform infrastructure that all 12 V1 feature iterations sit on top of. Despite being numbered 0013, it must ship as Sprint 0 — before iteration 0000 begins. The numbering is for ledger organization; the build order is "this comes first."</p>
+
+    <h3 class="spec-h3">The stack</h3>
+    <div class="flow-diagram">GitHub (source of truth for code)
+   │
+   ├──► Vercel (auto-deploys main branch → web frontend)
+   │       Next.js + React, Supabase JS SDK in browser
+   │
+   ├──► Supabase (auto-applies migrations from /supabase/migrations/)
+   │       Postgres + Auth + Realtime + Storage + Edge Functions
+   │
+   ├──► Cloudflare R2 (large media — photos, broadcasts, LED renders)
+   │       Free egress + custom domain media.setnayan.com
+   │
+   └──► YouTube (Setnayan master channel for live broadcast delivery)
+           Sole viewer-delivery surface in V1</div>
+
+    <h3 class="spec-h3">Three sections in the spec</h3>
+    <p><strong>Section A — User Setup Checklist.</strong> Every account, credential, and configuration that you must obtain. Claude Code can&apos;t sign up for accounts on your behalf. Includes Vercel, Supabase, Cloudflare, GitHub, Apple Developer, Google Play, YouTube, PayMongo, Stripe, Anthropic, Resend, Sentry, Suno.</p>
+    <p><strong>Section B — Claude Code Implementation Guide.</strong> Once Section A is complete, Claude Code scaffolds the Next.js project, applies Supabase migrations, sets up RLS policies, builds iOS/Android skeletons, configures the macOS Tauri shell, and wires CI/CD pipelines.</p>
+    <p><strong>Section C — Integration Tests.</strong> 15 verification steps that confirm everything works end-to-end before V1 features start building. Auth, realtime sync, RLS, R2 uploads, YouTube broadcast creation, cross-platform sync, deployment, error tracking.</p>
+
+    <div class="callout">
+      <strong>Production-readiness gate:</strong> The platform is ready for iteration 0000 to ship on top of it once all 15 tests in Section C pass. Any failure blocks the V1 launch.
+    </div>
+
+    <h3 class="spec-h3">Sprint timeline</h3>
+    <p><strong>Sprint 0a (you, ~1 week elapsed):</strong> Section A. Most steps are 15–30 min of clicking; long pole is Apple Developer (1–3 days approval) and PayMongo verification (1–3 business days).</p>
+    <p><strong>Sprint 0b (Claude Code, ~3–4 days):</strong> Section B steps 1–4. Web app skeleton + auth + realtime + RLS.</p>
+    <p><strong>Sprint 0c (Claude Code, ~1 week):</strong> Section B steps 5–7. Native iOS, Android, macOS skeletons. Each authenticates and reads events.</p>
+    <p><strong>Sprint 0d (Claude Code, ~3 days):</strong> Section B steps 8–11. CI/CD + service catalog + R2 helpers + YouTube Edge Function.</p>
+    <p><strong>Sprint 0e (you + Claude Code, ~2 days):</strong> Section C — run all 15 tests, fix anything that fails.</p>
+
+    <h3 class="spec-h3">After 0013 ships</h3>
+    <p>Iteration 0000 (App Shell) starts. Then 0001–0012 layer on as feature iterations, each building on the platform 0013 established. Every iteration&apos;s data model lives in Supabase, every iteration&apos;s UI lives in the Next.js codebase, every iteration&apos;s media lives in R2.</p>
+  </div>
+</section>
+
+<script>
+/* ================ Section toggle ================ */
+document.body.dataset.section = 'A';
+document.querySelectorAll('.toggle-pill[data-section-target]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.sectionTarget;
+    document.body.dataset.section = target;
+    document.querySelectorAll('.toggle-pill[data-section-target]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+/* ================ Toast ================ */
+function toast(msg) {
+  const root = document.getElementById('toast-root');
+  if (!root) return;
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  root.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('in'));
+  setTimeout(() => { t.classList.remove('in'); setTimeout(() => t.remove(), 220); }, 1800);
+}
+
+/* ================ Section A: Step Done buttons + progress ================ */
+const stepRows = document.querySelectorAll('.steps-block .step-row');
+// Section A is the first steps-block (15 steps). Section B will be the second.
+const aBlocks = document.querySelectorAll('[data-section-pane="A"] .steps-block');
+const aRows = aBlocks.length ? aBlocks[0].querySelectorAll('.step-row') : [];
+
+aRows.forEach((row, idx) => {
+  const id = row.querySelector('.step-id')?.textContent || ('A' + (idx+1));
+  const existingPill = row.querySelector('.status-pill');
+  const isDone = existingPill && existingPill.classList.contains('connected');
+  // Replace pill with a Done button + checkbox combo
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;align-items:center;gap:8px;justify-content:flex-end;';
+  const checkBox = document.createElement('div');
+  checkBox.className = 'check-box' + (isDone ? ' checked' : '');
+  if (isDone) checkBox.textContent = '✓';
+  const doneBtn = document.createElement('button');
+  doneBtn.className = 'done-btn';
+  doneBtn.textContent = isDone ? 'Reopen' : 'Done';
+  if (isDone) row.classList.add('collapsed');
+  wrap.appendChild(checkBox);
+  wrap.appendChild(doneBtn);
+  if (existingPill) existingPill.replaceWith(wrap); else row.appendChild(wrap);
+
+  const toggle = () => {
+    const wasChecked = checkBox.classList.contains('checked');
+    checkBox.classList.toggle('checked');
+    const nowChecked = checkBox.classList.contains('checked');
+    checkBox.textContent = nowChecked ? '✓' : '';
+    doneBtn.textContent = nowChecked ? 'Reopen' : 'Done';
+    if (nowChecked) row.classList.add('collapsed'); else row.classList.remove('collapsed');
+    updateProgress('a');
+    toast(`${id} · ${nowChecked ? 'Done' : 'Reopened'}`);
+  };
+  checkBox.addEventListener('click', toggle);
+  doneBtn.addEventListener('click', toggle);
+});
+
+/* ================ Section B: Step Done buttons + progress ================ */
+const bRows = document.querySelectorAll('#b-steps-block .step-row');
+bRows.forEach((row) => {
+  const id = row.querySelector('.step-id').textContent;
+  const doneBtn = row.querySelector('.done-btn');
+  const checkBox = document.createElement('div');
+  checkBox.className = 'check-box';
+  row.insertBefore(checkBox, row.firstChild.nextSibling);
+  // restructure grid for the checkbox
+  row.style.gridTemplateColumns = '60px 30px 1fr 90px';
+
+  const toggle = () => {
+    const nowChecked = !checkBox.classList.contains('checked');
+    checkBox.classList.toggle('checked', nowChecked);
+    checkBox.textContent = nowChecked ? '✓' : '';
+    doneBtn.textContent = nowChecked ? 'Reopen' : 'Done';
+    if (nowChecked) row.classList.add('collapsed'); else row.classList.remove('collapsed');
+    updateProgress('b');
+    toast(`${id} · ${nowChecked ? 'Done' : 'Reopened'}`);
+  };
+  checkBox.addEventListener('click', toggle);
+  doneBtn.addEventListener('click', toggle);
+});
+
+/* ================ Section C: Test Run buttons ================ */
+const cRows = document.querySelectorAll('#c-tests-block .test-row');
+cRows.forEach((row) => {
+  const id = row.querySelector('.test-id').textContent;
+  const statusCell = row.querySelector('.test-status');
+  const existingPill = statusCell.querySelector('.status-pill');
+  const initialPass = existingPill && existingPill.classList.contains('connected');
+
+  // restructure grid to add Run button column
+  row.style.gridTemplateColumns = '60px 1fr 100px 70px';
+
+  const checkBox = document.createElement('div');
+  checkBox.className = 'check-box' + (initialPass ? ' checked' : '');
+  if (initialPass) {
+    checkBox.textContent = '✓';
+    row.dataset.passed = 'true';
+  }
+  // place checkbox before id? insert at start
+  row.style.gridTemplateColumns = '30px 60px 1fr 100px 70px';
+  row.insertBefore(checkBox, row.firstChild);
+
+  const runBtn = document.createElement('button');
+  runBtn.className = 'run-btn';
+  runBtn.textContent = 'Run';
+  row.appendChild(runBtn);
+
+  const runTest = () => {
+    runBtn.disabled = true;
+    runBtn.textContent = 'Running…';
+    runBtn.classList.add('running');
+    if (existingPill) {
+      existingPill.className = 'status-pill pending';
+      existingPill.innerHTML = '<span class="status-dot"></span>Running';
+    }
+    const delay = 1000 + Math.random() * 1000;
+    setTimeout(() => {
+      runBtn.disabled = false;
+      runBtn.classList.remove('running');
+      runBtn.textContent = 'Run';
+      // Pass 80% of the time
+      const pass = Math.random() > 0.2;
+      if (existingPill) {
+        existingPill.className = 'status-pill ' + (pass ? 'connected' : 'failed');
+        existingPill.innerHTML = `<span class="status-dot"></span>${pass ? 'Pass' : 'Fail'}`;
+      }
+      checkBox.classList.toggle('checked', pass);
+      checkBox.textContent = pass ? '✓' : '';
+      if (pass) row.dataset.passed = 'true'; else delete row.dataset.passed;
+      updateProgress('c');
+      toast(`${id} · ${pass ? 'Pass' : 'Fail'}`);
+    }, delay);
+  };
+  runBtn.addEventListener('click', runTest);
+});
+
+/* ================ Run all tests ================ */
+const runAllBtn = document.getElementById('run-all-btn');
+if (runAllBtn) {
+  runAllBtn.addEventListener('click', async () => {
+    runAllBtn.disabled = true;
+    runAllBtn.textContent = 'Running…';
+    const tests = document.querySelectorAll('#c-tests-block .test-row .run-btn');
+    for (const btn of tests) {
+      btn.click();
+      await new Promise(r => setTimeout(r, 250));
+    }
+    setTimeout(() => {
+      runAllBtn.disabled = false;
+      runAllBtn.textContent = 'Run all tests';
+      toast('All tests run · check results');
+    }, 2500);
+  });
+}
+
+/* ================ Progress bars ================ */
+function updateProgress(section) {
+  if (section === 'a') {
+    const total = aRows.length;
+    let done = 0;
+    aRows.forEach(r => { if (r.querySelector('.check-box.checked')) done++; });
+    const pct = total ? Math.round((done/total)*100) : 0;
+    document.getElementById('a-progress-bar').style.width = pct + '%';
+    document.getElementById('a-progress-label').textContent = `${done} / ${total}`;
+  } else if (section === 'b') {
+    const total = bRows.length;
+    let done = 0;
+    bRows.forEach(r => { if (r.querySelector('.check-box.checked')) done++; });
+    const pct = total ? Math.round((done/total)*100) : 0;
+    document.getElementById('b-progress-bar').style.width = pct + '%';
+    document.getElementById('b-progress-label').textContent = `${done} / ${total}`;
+  } else if (section === 'c') {
+    const total = cRows.length;
+    let done = 0;
+    cRows.forEach(r => { if (r.dataset.passed === 'true') done++; });
+    const pct = total ? Math.round((done/total)*100) : 0;
+    document.getElementById('c-progress-bar').style.width = pct + '%';
+    document.getElementById('c-progress-label').textContent = `${done} / ${total}`;
+  }
+}
+updateProgress('a'); updateProgress('b'); updateProgress('c');
+
+/* ================ Copy buttons ================ */
+document.querySelectorAll('.copy-btn[data-copy-target]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const tgt = document.getElementById(btn.dataset.copyTarget);
+    if (!tgt) return;
+    const text = tgt.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = orig, 2000);
+      toast('Copied to clipboard');
+    } catch (e) {
+      toast('Copy failed — select manually');
+    }
+  });
+});
+
+/* ================ Service grid cards ================ */
+document.querySelectorAll('.svc-card').forEach(card => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', () => {
+    const name = card.querySelector('.svc-name')?.textContent.trim() || 'Service';
+    toast(`${name} — opening detail (coming soon)`);
+  });
+});
+
+/* ================ Mobile service cards ================ */
+document.querySelectorAll('.mobile-svc-card').forEach(card => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', () => {
+    const name = card.querySelector('.mobile-svc-name')?.textContent.trim() || 'Service';
+    toast(`${name} — opening detail (coming soon)`);
+  });
+});
+</script>
+
+</body>
+</html>

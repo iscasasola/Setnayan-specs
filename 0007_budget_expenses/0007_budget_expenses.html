@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setnayan · 0007 Budget &amp; Expenses — Web + Mobile Mockup</title>
+<meta name="description" content="Iteration 0007 — Setnayan Budget & Expenses tracker, web and mobile views side-by-side.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --page-bg: #FAF6F0;
+  --page-bg-soft: #F5EFE5;
+  --ink: #1A1A1A;
+  --ink-soft: #6B6B6B;
+  --ink-faint: #A39B8E;
+  --accent: #C97B4B;
+  --accent-soft: #E8C9B0;
+  --accent-deep: #8C4A28;
+  --rule: rgba(26, 26, 26, 0.08);
+  --rule-strong: rgba(26, 26, 26, 0.18);
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F3;
+  --canvas-bg: #2B2825;
+  --paid: #6FA776;
+  --paid-soft: #DDEBDF;
+  --pending: #D69744;
+  --pending-soft: #F4E2C8;
+  --due: #C46A55;
+  --due-soft: #F2DCD5;
+  --shadow-frame: 0 40px 100px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--canvas-bg);
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+.canvas-header {
+  padding: 36px 48px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.canvas-title { display: flex; flex-direction: column; gap: 6px; color: rgba(255, 255, 255, 0.9); }
+.canvas-title h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+.canvas-title .canvas-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.canvas-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 4px;
+}
+.toggle-pill {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 8px 18px;
+  border-radius: 999px;
+}
+.toggle-pill.active { background: var(--accent); color: #fff; }
+
+.frames {
+  padding: 36px 48px 80px;
+  display: flex;
+  gap: 36px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-left: 60px;
+}
+body[data-view="desktop"] .frame-mobile { display: none; }
+body[data-view="mobile"] .frame-desktop { display: none; }
+body[data-view="mobile"] .frames { justify-content: center; padding-left: 48px; }
+body[data-view="desktop"] .frames { justify-content: center; padding-left: 48px; }
+
+/* Browser frame */
+.frame-desktop {
+  flex-shrink: 0;
+  width: 1280px;
+  background: var(--page-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-frame);
+}
+.browser-chrome {
+  background: #E9E5DE;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.traffic-lights { display: flex; gap: 7px; }
+.traffic-lights span { width: 12px; height: 12px; border-radius: 50%; background: #BDBAB3; }
+.traffic-lights span:nth-child(1) { background: #FF6058; }
+.traffic-lights span:nth-child(2) { background: #FFBE2F; }
+.traffic-lights span:nth-child(3) { background: #2BC940; }
+.url-bar {
+  flex: 1;
+  background: #fff;
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.url-bar .lock { color: var(--paid); }
+
+/* ===== Couple dashboard page ===== */
+.dash-page { padding: 28px 32px 48px; min-height: 760px; }
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+.dash-crumb {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dash-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 40px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.dash-actions { display: flex; gap: 8px; }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Rollup cards */
+.rollup-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.rollup-card {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  padding: 22px 24px;
+}
+.rollup-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+}
+.rollup-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.rollup-sub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rollup-card.next-due {
+  background: linear-gradient(135deg, var(--accent-soft), #f5dec9);
+  border-color: rgba(140, 74, 40, 0.18);
+}
+.rollup-card.next-due .rollup-label { color: var(--accent-deep); opacity: 0.8; }
+.rollup-card.next-due .rollup-value { color: var(--accent-deep); }
+.rollup-card.next-due .rollup-sub { color: var(--accent-deep); opacity: 0.85; }
+.rollup-card .small-action {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Section header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 32px 0 12px;
+  gap: 16px;
+}
+.section-header h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.005em;
+}
+.section-header .meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+
+/* Vendor table */
+.vendor-list {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  overflow: hidden;
+}
+.vendor-row {
+  border-bottom: 1px solid var(--rule);
+}
+.vendor-row:last-child { border-bottom: none; }
+.vendor-row.expanded { background: var(--surface-soft); }
+.vendor-summary {
+  display: grid;
+  grid-template-columns: 240px 140px 130px 130px 130px 1fr;
+  align-items: center;
+  padding: 18px 24px;
+  gap: 16px;
+  cursor: pointer;
+}
+.vendor-summary .vendor-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink);
+}
+.vendor-summary .vendor-name .sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ink-soft);
+  display: block;
+  margin-top: 2px;
+}
+.vendor-summary .vendor-cat {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+.vendor-summary .num-cell {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 500;
+}
+.vendor-summary .num-cell .label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 400;
+}
+.vendor-summary .num-cell.due {
+  color: var(--due);
+}
+.vendor-summary .due-pill {
+  display: inline-flex;
+  background: var(--due-soft);
+  color: var(--due);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  align-items: center;
+  gap: 6px;
+}
+.vendor-summary .due-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--due);
+}
+.vendor-summary .chevron {
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid var(--ink-faint);
+  border-bottom: 2px solid var(--ink-faint);
+  transform: rotate(45deg);
+  transition: transform 0.18s;
+  margin-left: auto;
+}
+.vendor-row.expanded .vendor-summary .chevron { transform: rotate(-135deg); }
+
+/* Line items inside expanded vendor */
+.line-items { padding: 0 24px 20px; }
+.line-item {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: start;
+}
+.line-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.line-item-type {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+}
+.line-item-amount {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.line-item-amount .balance {
+  font-size: 13px;
+  font-family: 'Manrope', sans-serif;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+.line-item-deadline {
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.line-item-deadline .deadline-pill {
+  background: var(--pending-soft);
+  color: var(--pending);
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.line-item-deadline .deadline-pill.due { background: var(--due-soft); color: var(--due); }
+.line-item-deadline .deadline-pill.paid { background: var(--paid-soft); color: var(--paid); }
+.line-item-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.line-action {
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.line-action.qr {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.line-action.payment {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.line-action.cal {
+  background: var(--surface-soft);
+}
+
+/* Calendar tracking pill */
+.cal-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.cal-status.not-added {
+  background: rgba(26, 26, 26, 0.04);
+  color: var(--ink-soft);
+  border-color: var(--rule);
+}
+.cal-status.on-cal {
+  background: var(--paid-soft);
+  color: var(--paid);
+}
+.cal-status .check {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--paid);
+  display: inline-grid;
+  place-items: center;
+  color: #fff;
+  font-size: 9px;
+  line-height: 1;
+}
+.cal-status.not-added .check {
+  background: transparent;
+  border: 1.5px solid var(--ink-faint);
+}
+
+/* Payment history */
+.payment-history {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+.payment-record {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--paid-soft);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.payment-record .amount {
+  font-weight: 500;
+  color: var(--paid);
+}
+.payment-record .meta {
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.payment-record .proof {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #d4cdb8, #b8a98a);
+}
+
+/* Setnayan platform costs */
+.platform-costs {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  padding: 20px 24px;
+}
+.platform-row {
+  display: grid;
+  grid-template-columns: 1fr 130px 180px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+.platform-row:last-child { border-bottom: none; }
+.platform-row .name { color: var(--ink); }
+.platform-row .amount {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: right;
+}
+.platform-row .meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+.platform-total {
+  background: var(--surface-soft);
+  margin: 12px -24px -20px;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.platform-total .label {
+  font-weight: 500;
+  font-size: 13px;
+}
+.platform-total .amount {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+/* Misc expenses */
+.misc-section {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  padding: 20px 24px;
+}
+.misc-row {
+  display: grid;
+  grid-template-columns: 1fr 130px 130px 1fr;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+  gap: 16px;
+}
+.misc-row:last-child { border-bottom: none; }
+.misc-row .name { color: var(--ink); font-weight: 500; }
+.misc-row .amount {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 500;
+}
+.misc-row .deadline {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.misc-row .actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+/* ===== Mobile frame ===== */
+.frame-mobile {
+  flex-shrink: 0;
+  width: 390px;
+  background: #0a0a0a;
+  border-radius: 50px;
+  padding: 12px;
+  box-shadow: var(--shadow-frame);
+  position: relative;
+}
+.phone-screen {
+  background: var(--page-bg);
+  border-radius: 38px;
+  overflow: hidden;
+  height: 800px;
+  position: relative;
+}
+.phone-notch {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 28px;
+  background: #0a0a0a;
+  border-radius: 14px;
+  z-index: 10;
+}
+.ios-status {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 28px 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  position: relative;
+  z-index: 5;
+}
+.ios-status .right { display: flex; gap: 4px; align-items: center; }
+.ios-status .battery {
+  width: 22px;
+  height: 12px;
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  position: relative;
+}
+.ios-status .battery::before {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 80%;
+  background: var(--ink);
+  border-radius: 1px;
+  margin: 0 1px;
+}
+
+.mobile-page {
+  padding: 16px 16px 24px;
+  height: calc(100% - 60px);
+  overflow-y: auto;
+}
+.mobile-crumb {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  margin: 8px 0 4px;
+}
+.mobile-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.005em;
+  margin-bottom: 16px;
+}
+
+.mobile-rollups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.mobile-rollup {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.mobile-rollup.full { grid-column: span 2; }
+.mobile-rollup.next-due {
+  background: linear-gradient(135deg, var(--accent-soft), #f5dec9);
+  border-color: rgba(140, 74, 40, 0.18);
+}
+.mobile-rollup .label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.mobile-rollup.next-due .label { color: var(--accent-deep); opacity: 0.8; }
+.mobile-rollup .value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+}
+.mobile-rollup.next-due .value { color: var(--accent-deep); }
+.mobile-rollup .sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.mobile-rollup.next-due .sub { color: var(--accent-deep); opacity: 0.85; }
+
+.mobile-add-cal {
+  background: var(--ink);
+  color: #fff;
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mobile-section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 16px 4px 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.mobile-vendor-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.mobile-vendor-card.expanded { background: var(--surface-soft); }
+.mobile-vendor-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.mobile-vendor-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.mobile-vendor-cat {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+.mobile-vendor-stats {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 11px;
+}
+.mobile-vendor-stats .stat .label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  display: block;
+}
+.mobile-vendor-stats .stat .value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.mobile-vendor-stats .stat .value.due { color: var(--due); }
+
+.mobile-line-items {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mobile-line {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.mobile-line-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.mobile-line-type {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+}
+.mobile-line-amount {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+.mobile-line-deadline {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+.mobile-line-deadline .pill {
+  background: var(--pending-soft);
+  color: var(--pending);
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+}
+.mobile-line-deadline .pill.due { background: var(--due-soft); color: var(--due); }
+.mobile-line-actions {
+  display: flex;
+  gap: 6px;
+}
+.mobile-line-actions button {
+  flex: 1;
+  padding: 9px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink);
+}
+.mobile-line-actions .qr-btn { background: var(--ink); color: #fff; border-color: var(--ink); }
+.mobile-line-actions .pay-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Spec sections */
+.spec {
+  background: var(--page-bg);
+  color: var(--ink);
+  padding: 80px 0 100px;
+}
+.spec-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+.spec-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.spec-h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 40px;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+.spec-h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 22px;
+  margin: 36px 0 12px;
+}
+.spec p { color: var(--ink-soft); margin-bottom: 16px; max-width: 760px; }
+.spec strong { color: var(--ink); font-weight: 500; }
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 22px;
+}
+.feature-card .num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  margin-bottom: 8px;
+}
+.feature-card h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.feature-card p {
+  font-size: 13px;
+  margin: 0;
+}
+
+.accept-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+}
+.accept-item {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.accept-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rule-strong);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+</style>
+</head>
+<body data-view="both">
+
+<header class="canvas-header">
+  <div class="canvas-title">
+    <div class="canvas-meta">Iteration 0007 · Budget &amp; Expenses · 2026-05-09</div>
+    <h1>Budget &amp; Expenses — Web + Mobile mockup</h1>
+  </div>
+  <div class="canvas-toggle">
+    <button class="toggle-pill" data-view-target="desktop">Web</button>
+    <button class="toggle-pill" data-view-target="mobile">Mobile</button>
+    <button class="toggle-pill active" data-view-target="both">Both</button>
+  </div>
+</header>
+
+<div class="frames">
+
+  <!-- ============== DESKTOP: Couple Budget Dashboard ============== -->
+  <div class="frame-desktop">
+    <div class="browser-chrome">
+      <div class="traffic-lights"><span></span><span></span><span></span></div>
+      <div class="url-bar">
+        <span class="lock">●</span> setnayan.ph/maria-and-juan/dashboard/budget
+      </div>
+    </div>
+
+    <div class="dash-page">
+      <div class="dash-header">
+        <div>
+          <div class="dash-crumb">Couple dashboard / Budget &amp; Expenses</div>
+          <div class="dash-title">Budget &amp; Expenses</div>
+        </div>
+        <div class="dash-actions">
+          <button class="btn-secondary">Add miscellaneous</button>
+          <button class="btn-primary">Add 14 new dates to calendar</button>
+        </div>
+      </div>
+
+      <div class="rollup-grid">
+        <div class="rollup-card">
+          <div class="rollup-label">Total amount</div>
+          <div class="rollup-value">₱486,800</div>
+          <div class="rollup-sub">8 vendors · 24 line items</div>
+        </div>
+        <div class="rollup-card">
+          <div class="rollup-label">Total paid</div>
+          <div class="rollup-value">₱158,300</div>
+          <div class="rollup-sub">32% of total settled</div>
+        </div>
+        <div class="rollup-card">
+          <div class="rollup-label">Remaining balance</div>
+          <div class="rollup-value">₱328,500</div>
+          <div class="rollup-sub">across 19 unpaid line items</div>
+        </div>
+        <div class="rollup-card next-due">
+          <div class="rollup-label">Next payment due</div>
+          <div class="rollup-value">₱45,000</div>
+          <div class="rollup-sub">Studio Calle · Photography Package · 2026-04-01 (12 days)</div>
+          <a href="#" class="small-action">Pay now via vendor's GCash QR →</a>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2>Vendors</h2>
+        <span class="meta">6 booked · 2 confirmed</span>
+      </div>
+
+      <div class="vendor-list">
+
+        <!-- VENDOR 1: Photographer (expanded) -->
+        <div class="vendor-row expanded">
+          <div class="vendor-summary">
+            <div class="vendor-name">Studio Calle<span class="sub">Maria Calle · 0917-555-0123</span></div>
+            <div class="vendor-cat">Photography</div>
+            <div class="num-cell"><span class="label">Total</span>₱50,000</div>
+            <div class="num-cell"><span class="label">Paid</span>₱15,000</div>
+            <div class="num-cell due"><span class="label">Balance</span>₱35,000</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span class="due-pill"><span class="dot"></span>Due in 12 days</span>
+              <span class="chevron"></span>
+            </div>
+          </div>
+
+          <div class="line-items">
+            <div class="line-item">
+              <div class="line-item-meta">
+                <span class="line-item-type">Package</span>
+                <div class="line-item-amount">₱45,000<span class="balance">balance ₱30,000</span></div>
+                <div class="line-item-deadline">
+                  Deadline: <span class="deadline-pill due">2026-04-01 · in 12 days</span>
+                  <span class="cal-status not-added"><span class="check"></span>Not on calendar</span>
+                </div>
+              </div>
+              <div class="line-item-actions">
+                <button class="line-action qr">QR</button>
+                <button class="line-action payment">+ Payment</button>
+                <button class="line-action cal">+ Calendar</button>
+              </div>
+              <div class="payment-history">
+                <div class="payment-record">
+                  <div class="proof"></div>
+                  <div>
+                    <div class="amount">₱15,000 paid</div>
+                    <div class="meta">2026-02-01 · GCash · Ref 2401XXX234</div>
+                  </div>
+                  <button class="line-action" style="font-size: 11px;">View proof</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="line-item">
+              <div class="line-item-meta">
+                <span class="line-item-type">Crew Meal</span>
+                <div class="line-item-amount">₱3,000<span class="balance">balance ₱3,000</span></div>
+                <div class="line-item-deadline">
+                  Deadline: <span class="deadline-pill">2026-05-08 · event day</span>
+                  <span class="cal-status on-cal"><span class="check">✓</span>On calendar</span>
+                </div>
+              </div>
+              <div class="line-item-actions">
+                <button class="line-action qr">QR</button>
+                <button class="line-action payment">+ Payment</button>
+                <button class="line-action cal">+ Calendar</button>
+              </div>
+            </div>
+
+            <div class="line-item">
+              <div class="line-item-meta">
+                <span class="line-item-type">Transportation</span>
+                <div class="line-item-amount">₱2,000<span class="balance">balance ₱2,000</span></div>
+                <div class="line-item-deadline">
+                  Deadline: <span class="deadline-pill">2026-05-08 · event day</span>
+                  <span class="cal-status not-added"><span class="check"></span>Not on calendar</span>
+                </div>
+              </div>
+              <div class="line-item-actions">
+                <button class="line-action qr">QR</button>
+                <button class="line-action payment">+ Payment</button>
+                <button class="line-action cal">+ Calendar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VENDOR 2: Caterer (collapsed) -->
+        <div class="vendor-row">
+          <div class="vendor-summary">
+            <div class="vendor-name">Bistro Manila<span class="sub">Juan Cruz · 0918-555-0234</span></div>
+            <div class="vendor-cat">Catering</div>
+            <div class="num-cell"><span class="label">Total</span>₱180,000</div>
+            <div class="num-cell"><span class="label">Paid</span>₱90,000</div>
+            <div class="num-cell"><span class="label">Balance</span>₱90,000</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 12px; color: var(--ink-soft);">Due 2026-05-01</span>
+              <span class="chevron"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- VENDOR 3: DJ (collapsed) -->
+        <div class="vendor-row">
+          <div class="vendor-summary">
+            <div class="vendor-name">DJ Pao Velasco<span class="sub">0917-555-0456</span></div>
+            <div class="vendor-cat">Music</div>
+            <div class="num-cell"><span class="label">Total</span>₱28,000</div>
+            <div class="num-cell"><span class="label">Paid</span>₱14,000</div>
+            <div class="num-cell"><span class="label">Balance</span>₱14,000</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 12px; color: var(--ink-soft);">Due 2026-05-08</span>
+              <span class="chevron"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- VENDOR 4: Florist (collapsed) -->
+        <div class="vendor-row">
+          <div class="vendor-summary">
+            <div class="vendor-name">Bloom &amp; Co.<span class="sub">Ana Reyes · 0916-555-0567</span></div>
+            <div class="vendor-cat">Flowers &amp; Decor</div>
+            <div class="num-cell"><span class="label">Total</span>₱75,000</div>
+            <div class="num-cell"><span class="label">Paid</span>₱25,000</div>
+            <div class="num-cell"><span class="label">Balance</span>₱50,000</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 12px; color: var(--ink-soft);">Due 2026-04-25</span>
+              <span class="chevron"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- VENDOR 5: HMUA (collapsed) -->
+        <div class="vendor-row">
+          <div class="vendor-summary">
+            <div class="vendor-name">Glow Studio<span class="sub">Sara Lim · 0917-555-0678</span></div>
+            <div class="vendor-cat">Hair &amp; Make-up</div>
+            <div class="num-cell"><span class="label">Total</span>₱22,000</div>
+            <div class="num-cell"><span class="label">Paid</span>₱11,000</div>
+            <div class="num-cell"><span class="label">Balance</span>₱11,000</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 12px; color: var(--ink-soft);">Due 2026-05-08</span>
+              <span class="chevron"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- VENDOR 6: Officiant (collapsed) -->
+        <div class="vendor-row">
+          <div class="vendor-summary">
+            <div class="vendor-name">Fr. Gomez<span class="sub">0917-555-0789</span></div>
+            <div class="vendor-cat">Officiant</div>
+            <div class="num-cell"><span class="label">Total</span>₱8,000</div>
+            <div class="num-cell"><span class="label">Paid</span>₱3,300</div>
+            <div class="num-cell"><span class="label">Balance</span>₱4,700</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 12px; color: var(--ink-soft);">Due 2026-05-08</span>
+              <span class="chevron"></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="section-header">
+        <h2>Setnayan Platform</h2>
+        <span class="meta">Already paid via tokens · auto-populated from wallet</span>
+      </div>
+      <div class="platform-costs">
+        <div class="platform-row">
+          <div class="name">Custom Monogram Pack</div>
+          <div class="amount">₱1,999</div>
+          <div class="meta">paid 2026-04-12</div>
+        </div>
+        <div class="platform-row">
+          <div class="name">5 Papic seats</div>
+          <div class="amount">₱2,500</div>
+          <div class="meta">paid 2026-04-12</div>
+        </div>
+        <div class="platform-row">
+          <div class="name">Personal Reel templates × 3</div>
+          <div class="amount">₱600</div>
+          <div class="meta">paid 2026-04-15</div>
+        </div>
+        <div class="platform-row">
+          <div class="name">Panood Tier 1 (WebApp 3-cam)</div>
+          <div class="amount">₱4,500</div>
+          <div class="meta">paid 2026-04-20</div>
+        </div>
+        <div class="platform-row">
+          <div class="name">Pro Bundle (3 widgets)</div>
+          <div class="amount">₱200</div>
+          <div class="meta">paid 2026-04-22</div>
+        </div>
+        <div class="platform-total">
+          <span class="label">Total Setnayan platform</span>
+          <span class="amount">₱9,798</span>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2>Miscellaneous</h2>
+        <span class="meta">Direct purchases — no vendor</span>
+      </div>
+      <div class="misc-section">
+        <div class="misc-row">
+          <div class="name">Wedding rings</div>
+          <div class="amount">₱65,000</div>
+          <div class="deadline">Paid 2026-03-12</div>
+          <div class="actions">
+            <button class="line-action">View proof</button>
+            <button class="line-action">Edit</button>
+          </div>
+        </div>
+        <div class="misc-row">
+          <div class="name">Marriage license fees</div>
+          <div class="amount">₱2,200</div>
+          <div class="deadline">Paid 2026-03-08</div>
+          <div class="actions">
+            <button class="line-action">View proof</button>
+            <button class="line-action">Edit</button>
+          </div>
+        </div>
+        <div class="misc-row">
+          <div class="name">Save-the-date printing</div>
+          <div class="amount">₱8,500</div>
+          <div class="deadline">Due 2026-04-15</div>
+          <div class="actions">
+            <button class="line-action payment">+ Payment</button>
+            <button class="line-action cal">+ Calendar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== MOBILE: Budget on phone ============== -->
+  <div class="frame-mobile">
+    <div class="phone-screen">
+      <div class="phone-notch"></div>
+      <div class="ios-status">
+        <span>9:41</span>
+        <span class="right">
+          <span style="font-family: 'DM Mono', monospace; font-size: 11px;">●●●</span>
+          <span class="battery"></span>
+        </span>
+      </div>
+
+      <div class="mobile-page">
+        <div class="mobile-crumb">Budget &amp; Expenses</div>
+        <div class="mobile-title">Maria &amp; Juan</div>
+
+        <div class="mobile-rollups">
+          <div class="mobile-rollup">
+            <div class="label">Total</div>
+            <div class="value">₱486K</div>
+            <div class="sub">8 vendors · 24 lines</div>
+          </div>
+          <div class="mobile-rollup">
+            <div class="label">Paid</div>
+            <div class="value">₱158K</div>
+            <div class="sub">32% settled</div>
+          </div>
+          <div class="mobile-rollup full next-due">
+            <div class="label">Next due · in 12 days</div>
+            <div class="value">₱45,000 · Studio Calle</div>
+            <div class="sub">Photography Package · 2026-04-01</div>
+          </div>
+        </div>
+
+        <button class="mobile-add-cal">Add 14 new dates to calendar</button>
+
+        <div class="mobile-section-label">
+          <span>Vendors (6)</span>
+          <span style="color: var(--accent);">+ Add</span>
+        </div>
+
+        <div class="mobile-vendor-card expanded">
+          <div class="mobile-vendor-summary">
+            <div>
+              <div class="mobile-vendor-name">Studio Calle</div>
+              <div class="mobile-vendor-cat">Photography</div>
+            </div>
+            <span style="background: var(--due-soft); color: var(--due); padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 500;">Due 12d</span>
+          </div>
+          <div class="mobile-vendor-stats">
+            <div class="stat">
+              <span class="label">Total</span>
+              <span class="value">₱50,000</span>
+            </div>
+            <div class="stat">
+              <span class="label">Paid</span>
+              <span class="value">₱15,000</span>
+            </div>
+            <div class="stat">
+              <span class="label">Balance</span>
+              <span class="value due">₱35,000</span>
+            </div>
+          </div>
+
+          <div class="mobile-line-items">
+            <div class="mobile-line">
+              <div class="mobile-line-head">
+                <span class="mobile-line-type">Package</span>
+                <span class="mobile-line-amount">₱45,000</span>
+              </div>
+              <div class="mobile-line-deadline">
+                <span class="pill due">Due 2026-04-01</span> · balance ₱30,000
+                <div style="margin-top: 6px;"><span class="cal-status not-added"><span class="check"></span>Not on calendar</span></div>
+              </div>
+              <div class="mobile-line-actions">
+                <button class="qr-btn">QR</button>
+                <button class="pay-btn">+ Pay</button>
+                <button>+ Cal</button>
+              </div>
+            </div>
+
+            <div class="mobile-line">
+              <div class="mobile-line-head">
+                <span class="mobile-line-type">Crew Meal</span>
+                <span class="mobile-line-amount">₱3,000</span>
+              </div>
+              <div class="mobile-line-deadline">
+                <span class="pill">Event day</span>
+                <div style="margin-top: 6px;"><span class="cal-status on-cal"><span class="check">✓</span>On calendar</span></div>
+              </div>
+              <div class="mobile-line-actions">
+                <button class="qr-btn">QR</button>
+                <button class="pay-btn">+ Pay</button>
+                <button>+ Cal</button>
+              </div>
+            </div>
+
+            <div class="mobile-line">
+              <div class="mobile-line-head">
+                <span class="mobile-line-type">Transportation</span>
+                <span class="mobile-line-amount">₱2,000</span>
+              </div>
+              <div class="mobile-line-deadline">
+                <span class="pill">Event day</span>
+                <div style="margin-top: 6px;"><span class="cal-status not-added"><span class="check"></span>Not on calendar</span></div>
+              </div>
+              <div class="mobile-line-actions">
+                <button class="qr-btn">QR</button>
+                <button class="pay-btn">+ Pay</button>
+                <button>+ Cal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mobile-vendor-card">
+          <div class="mobile-vendor-summary">
+            <div>
+              <div class="mobile-vendor-name">Bistro Manila</div>
+              <div class="mobile-vendor-cat">Catering</div>
+            </div>
+            <span style="font-size: 11px; color: var(--ink-soft);">Tap to expand</span>
+          </div>
+          <div class="mobile-vendor-stats">
+            <div class="stat"><span class="label">Total</span><span class="value">₱180K</span></div>
+            <div class="stat"><span class="label">Paid</span><span class="value">₱90K</span></div>
+            <div class="stat"><span class="label">Balance</span><span class="value">₱90K</span></div>
+          </div>
+        </div>
+
+        <div class="mobile-vendor-card">
+          <div class="mobile-vendor-summary">
+            <div>
+              <div class="mobile-vendor-name">DJ Pao Velasco</div>
+              <div class="mobile-vendor-cat">Music</div>
+            </div>
+            <span style="font-size: 11px; color: var(--ink-soft);">Tap to expand</span>
+          </div>
+          <div class="mobile-vendor-stats">
+            <div class="stat"><span class="label">Total</span><span class="value">₱28K</span></div>
+            <div class="stat"><span class="label">Paid</span><span class="value">₱14K</span></div>
+            <div class="stat"><span class="label">Balance</span><span class="value">₱14K</span></div>
+          </div>
+        </div>
+
+        <div class="mobile-section-label">
+          <span>Setnayan platform · paid</span>
+        </div>
+        <div class="mobile-vendor-card" style="background: var(--surface-soft);">
+          <div style="font-size: 12px; color: var(--ink-soft);">Custom Monogram, 5 Papic, 3 templates, Panood T1, Pro Bundle</div>
+          <div style="font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; margin-top: 6px;">₱9,798 <span style="font-size: 11px; font-family: 'DM Mono', monospace; color: var(--ink-faint); font-weight: 400; letter-spacing: 0.06em;">via tokens</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============== Spec sections ============== -->
+<section class="spec">
+  <div class="spec-inner">
+    <div class="spec-eyebrow">Iteration 0007 · What ships</div>
+    <h2 class="spec-h2">Budget &amp; Expenses</h2>
+    <p>The couple's payment ledger for every vendor at their wedding. Each vendor has three line items — Package, Crew Meal, Transportation — each with its own deadline and payment log. Vendors share their GCash, Maya, or bank QR; the couple scans to pay. Payment proofs upload to R2; calendar reminders export to Apple Calendar, Google Calendar, or Outlook with one tap.</p>
+
+    <h3 class="spec-h3">The five core mechanics</h3>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="num">01 · per vendor</div>
+        <h4>Three line items</h4>
+        <p>Package, Crew Meal, Transportation. Each has its own contract amount and deadline (couple-input in V1).</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">02 · per line item</div>
+        <h4>Multiple payment records</h4>
+        <p>Couples often pay in down + mid + final. Each payment captures amount, date, method, reference, and a proof screenshot.</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">03 · per line item</div>
+        <h4>Vendor's payment QR</h4>
+        <p>Vendors upload their GCash / Maya / bank QR in 0006. Tap [QR] to scan with your banking app and pay directly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">04 · top of panel</div>
+        <h4>Live rollup cards</h4>
+        <p>Total amount, total paid, remaining balance, next payment due — refreshes the moment a payment is recorded.</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">05 · one-tap export</div>
+        <h4>Native calendar (.ics)</h4>
+        <p>Per-line "Add to calendar" + bulk export with duplicate avoidance. Default reminders fire 24h and 1h before each due date. Per-line "On calendar" toggle skips already-tracked entries from bulk export.</p>
+      </div>
+      <div class="feature-card">
+        <div class="num">06 · auto from wallet</div>
+        <h4>Setnayan platform costs</h4>
+        <p>Papic seats, templates, Custom Monogram Pack, Pro widgets, Panood — auto-populated from 0003 wallet, read-only.</p>
+      </div>
+    </div>
+
+    <h3 class="spec-h3">Acceptance criteria</h3>
+    <div class="accept-grid">
+      <div class="accept-item"><span class="accept-check"></span><div>Every booked vendor in 0006 auto-creates a budget row with three line items</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Couple inputs amount and deadline per line item independently</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Multiple payment records can be recorded against any single line item</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Payment validation: amount can't exceed remaining balance</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Proof screenshots upload to R2 and display inline on the payment row</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Vendor's QR (when uploaded in 0006) renders next to each line item</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Rollup cards update in real-time on every payment record</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>.ics file imports successfully into Apple Calendar, Google Calendar, Outlook</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Stable VEVENT UIDs — re-importing the same .ics updates the existing event, doesn't duplicate</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Per-line tracked_in_calendar toggle; bulk export skips lines already flagged as tracked</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Default reminders fire at 24h and 1h before deadline</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Setnayan platform costs auto-populate from 0003 wallet spend records</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Miscellaneous expenses can be added free-form</div></div>
+      <div class="accept-item"><span class="accept-check"></span><div>Audit log captures all payment record edits</div></div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* Prototype layer — toasts, modals, save banner */
+  .proto-toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff;
+    font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 500;
+    padding: 12px 20px; border-radius: 999px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    z-index: 9999; opacity: 0; pointer-events: none;
+    transition: opacity 0.18s, transform 0.18s;
+  }
+  .proto-toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+  .proto-modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 9000; padding: 20px;
+  }
+  .proto-modal-bg.show { display: flex; }
+  .proto-modal {
+    background: var(--surface); border-radius: 14px; padding: 24px 26px;
+    max-width: 460px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .proto-modal h3 {
+    font-family: 'Cormorant Garamond', serif; font-weight: 500;
+    font-size: 24px; margin-bottom: 6px;
+  }
+  .proto-modal .sub {
+    font-size: 13px; color: var(--ink-soft); margin-bottom: 16px;
+  }
+  .proto-modal label {
+    display: block; font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 12px 0 4px;
+  }
+  .proto-modal input, .proto-modal select {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--rule-strong); border-radius: 8px;
+    font-size: 14px; background: var(--surface);
+  }
+  .proto-modal-actions {
+    display: flex; gap: 8px; justify-content: flex-end;
+    margin-top: 20px;
+  }
+  .proto-qr-box {
+    width: 180px; height: 180px; margin: 0 auto 12px;
+    background: repeating-conic-gradient(var(--ink) 0% 25%, #fff 25% 50%);
+    background-size: 14px 14px;
+    border: 8px solid var(--ink); border-radius: 8px;
+  }
+  .proto-pay-method {
+    display: flex; gap: 8px; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .proto-pay-method span {
+    background: var(--page-bg-soft); border: 1px solid var(--rule);
+    padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 500;
+  }
+  .proto-banner {
+    position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+    background: var(--paid); color: #fff;
+    font-size: 13px; font-weight: 500; padding: 10px 20px;
+    border-radius: 999px; box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    z-index: 9999; opacity: 0; pointer-events: none;
+    transition: opacity 0.18s, transform 0.18s;
+  }
+  .proto-banner.show { opacity: 1; transform: translateX(-50%) translateY(4px); }
+</style>
+<div class="proto-toast" id="protoToast"></div>
+<div class="proto-banner" id="protoBanner"></div>
+<div class="proto-modal-bg" id="protoModal"><div class="proto-modal" id="protoModalInner"></div></div>
+
+<script>
+(function () {
+  // ============== View toggle ==============
+  document.querySelectorAll('.toggle-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.dataset.viewTarget;
+      document.body.dataset.view = view;
+      document.querySelectorAll('.toggle-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // ============== Toast / banner / modal helpers ==============
+  const toast = document.getElementById('protoToast');
+  const banner = document.getElementById('protoBanner');
+  const modalBg = document.getElementById('protoModal');
+  const modalInner = document.getElementById('protoModalInner');
+  let toastT, bannerT;
+  function showToast(msg) {
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+  function showBanner(msg) {
+    if (!banner) return;
+    banner.textContent = msg;
+    banner.classList.add('show');
+    clearTimeout(bannerT);
+    bannerT = setTimeout(() => banner.classList.remove('show'), 2400);
+  }
+  function openModal(html) {
+    modalInner.innerHTML = html;
+    modalBg.classList.add('show');
+  }
+  function closeModal() { modalBg.classList.remove('show'); }
+  modalBg.addEventListener('click', (e) => {
+    if (e.target === modalBg) closeModal();
+  });
+  // Expose for inline handlers
+  window.__protoCloseModal = closeModal;
+
+  // ============== State (in-memory) ==============
+  const state = {
+    rollup: { total: 486800, paid: 158300, balance: 328500, untrackedDates: 14 },
+    payments: [], // appended on save
+    miscCount: 3,
+  };
+
+  function fmt(n) { return '₱' + n.toLocaleString('en-US'); }
+
+  // ============== Vendor row expand/collapse ==============
+  document.querySelectorAll('.vendor-summary').forEach(sum => {
+    sum.addEventListener('click', () => {
+      const row = sum.closest('.vendor-row');
+      if (row) row.classList.toggle('expanded');
+    });
+  });
+  document.querySelectorAll('.mobile-vendor-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Don't toggle if a button inside was clicked
+      if (e.target.closest('button')) return;
+      card.classList.toggle('expanded');
+    });
+  });
+
+  // ============== + Payment modal ==============
+  function openPaymentModal(lineCtx) {
+    openModal(`
+      <h3>Record a payment</h3>
+      <div class="sub">${lineCtx} — current balance applies</div>
+      <label>Amount (PHP)</label>
+      <input id="payAmt" type="text" value="15000" />
+      <label>Date paid</label>
+      <input id="payDate" type="text" value="2026-04-01" />
+      <label>Payment method</label>
+      <select id="payMethod">
+        <option>GCash</option>
+        <option>Maya</option>
+        <option>Bank transfer</option>
+        <option>Cash</option>
+      </select>
+      <label>Reference number</label>
+      <input id="payRef" type="text" value="2401XXX234" />
+      <label>Proof screenshot</label>
+      <div style="padding:12px; border:1px dashed var(--rule-strong); border-radius:8px; text-align:center; font-size:12px; color:var(--ink-soft);">Drop a screenshot here · placeholder</div>
+      <div class="proto-modal-actions">
+        <button class="btn-secondary" onclick="window.__protoCloseModal()">Cancel</button>
+        <button class="btn-primary" onclick="window.__protoSavePayment()">Save payment</button>
+      </div>
+    `);
+  }
+  window.__protoSavePayment = function () {
+    const amtEl = document.getElementById('payAmt');
+    const amt = parseInt((amtEl && amtEl.value || '0').replace(/[^0-9]/g, ''), 10) || 0;
+    state.rollup.paid += amt;
+    state.rollup.balance = Math.max(0, state.rollup.balance - amt);
+    // Update rollup cards (desktop)
+    const cards = document.querySelectorAll('.rollup-card .rollup-value');
+    if (cards[1]) cards[1].textContent = fmt(state.rollup.paid);
+    if (cards[2]) cards[2].textContent = fmt(state.rollup.balance);
+    // Mobile rollups
+    const mobVals = document.querySelectorAll('.mobile-rollup .value');
+    if (mobVals[1]) mobVals[1].textContent = '₱' + Math.round(state.rollup.paid / 1000) + 'K';
+    closeModal();
+    showBanner('Payment of ' + fmt(amt) + ' recorded');
+  };
+
+  document.querySelectorAll('.line-action.payment, .mobile-line-actions .pay-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const line = btn.closest('.line-item, .mobile-line, .misc-row');
+      let label = 'this line';
+      if (line) {
+        const t = line.querySelector('.line-item-type, .mobile-line-type, .name');
+        if (t) label = t.textContent.trim();
+      }
+      openPaymentModal(label);
+    });
+  });
+
+  // ============== + Calendar / cal-status toggle ==============
+  function openCalendarModal(line) {
+    const calStatus = line && line.querySelector('.cal-status');
+    const isOn = calStatus && calStatus.classList.contains('on-cal');
+    openModal(`
+      <h3>Add to calendar</h3>
+      <div class="sub">setnayan-budget-${Date.now()}.ics will be saved · imports into Apple / Google / Outlook</div>
+      <div style="background:var(--surface-soft); border:1px solid var(--rule); border-radius:8px; padding:12px 14px; margin: 8px 0; font-family:'DM Mono', monospace; font-size:11px;">
+        <div>UID: line-${Math.random().toString(36).slice(2, 9)}@setnayan.ph</div>
+        <div>SUMMARY: Payment due</div>
+        <div>VALARM: -P1D, -PT1H</div>
+      </div>
+      <label style="display:flex; align-items:center; gap:8px; margin-top:14px; font-family:Manrope; font-size:13px; text-transform:none; letter-spacing:0; color:var(--ink);">
+        <input type="checkbox" id="calTracked" ${isOn ? 'checked' : ''} />
+        Tracked in calendar (skip on bulk export)
+      </label>
+      <div class="proto-modal-actions">
+        <button class="btn-secondary" onclick="window.__protoCloseModal()">Cancel</button>
+        <button class="btn-primary" onclick="window.__protoConfirmCal()">Download .ics</button>
+      </div>
+    `);
+    window.__protoCalLine = line;
+  }
+  window.__protoConfirmCal = function () {
+    const line = window.__protoCalLine;
+    const tracked = document.getElementById('calTracked');
+    if (line) {
+      const calStatus = line.querySelector('.cal-status');
+      if (calStatus && tracked && tracked.checked) {
+        calStatus.classList.remove('not-added');
+        calStatus.classList.add('on-cal');
+        calStatus.innerHTML = '<span class="check">&#10003;</span>On calendar';
+      }
+    }
+    closeModal();
+    showBanner('.ics downloaded');
+  };
+  document.querySelectorAll('.line-action.cal').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const line = btn.closest('.line-item, .misc-row');
+      openCalendarModal(line);
+    });
+  });
+  // Mobile + Cal buttons
+  document.querySelectorAll('.mobile-line-actions button').forEach(btn => {
+    if (btn.textContent.trim() === '+ Cal') {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCalendarModal(btn.closest('.mobile-line'));
+      });
+    }
+  });
+
+  // Per-line cal-status pill click toggles directly
+  document.querySelectorAll('.cal-status').forEach(p => {
+    p.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (p.classList.contains('on-cal')) {
+        p.classList.remove('on-cal');
+        p.classList.add('not-added');
+        p.innerHTML = '<span class="check"></span>Not on calendar';
+        showToast('Removed from calendar');
+      } else {
+        p.classList.remove('not-added');
+        p.classList.add('on-cal');
+        p.innerHTML = '<span class="check">&#10003;</span>On calendar';
+        showToast('Added to calendar');
+      }
+    });
+  });
+
+  // ============== QR modal ==============
+  function openQR(vendorName) {
+    openModal(`
+      <h3>${vendorName || 'Vendor'} payment QR</h3>
+      <div class="sub">Scan with your banking app to pay directly</div>
+      <div class="proto-qr-box"></div>
+      <div class="proto-pay-method">
+        <span>GCash</span>
+        <span>Maya</span>
+        <span>BPI / BDO</span>
+      </div>
+      <div style="text-align:center; font-family:'DM Mono', monospace; font-size:11px; color:var(--ink-soft); letter-spacing:0.06em;">
+        Account: 0917-555-XXXX · ${vendorName || 'Vendor'}
+      </div>
+      <div class="proto-modal-actions">
+        <button class="btn-primary" onclick="window.__protoCloseModal()">Done</button>
+      </div>
+    `);
+  }
+  document.querySelectorAll('.line-action.qr, .mobile-line-actions .qr-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const row = btn.closest('.vendor-row, .mobile-vendor-card, .misc-row');
+      const nameEl = row && row.querySelector('.vendor-name, .mobile-vendor-name, .name');
+      const vendorName = nameEl ? nameEl.firstChild.textContent.trim() : 'Vendor';
+      openQR(vendorName);
+    });
+  });
+
+  // ============== "Pay now via vendor's GCash QR" link in next-due card ==============
+  document.querySelectorAll('.small-action').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      openQR('Studio Calle');
+    });
+  });
+
+  // ============== Bulk add to calendar ==============
+  document.querySelectorAll('.btn-primary, .mobile-add-cal').forEach(btn => {
+    if (btn.textContent.includes('Add') && btn.textContent.includes('calendar')) {
+      btn.addEventListener('click', () => {
+        const count = state.rollup.untrackedDates;
+        openModal(`
+          <h3>Add ${count} new dates to calendar</h3>
+          <div class="sub">Lines already tracked will be skipped. Default reminders fire 24h and 1h before each due date.</div>
+          <div style="background:var(--surface-soft); border:1px solid var(--rule); border-radius:8px; padding:14px; margin: 8px 0; font-size:13px;">
+            setnayan-budget-bundle.ics &middot; ${count} VEVENTs &middot; stable UIDs<br>
+            <span style="color:var(--ink-soft); font-size:12px;">Re-importing later updates existing entries instead of duplicating.</span>
+          </div>
+          <div class="proto-modal-actions">
+            <button class="btn-secondary" onclick="window.__protoCloseModal()">Cancel</button>
+            <button class="btn-primary" onclick="window.__protoConfirmBulkCal()">Download bundle</button>
+          </div>
+        `);
+      });
+    }
+  });
+  window.__protoConfirmBulkCal = function () {
+    state.rollup.untrackedDates = 0;
+    document.querySelectorAll('.btn-primary, .mobile-add-cal').forEach(btn => {
+      if (btn.textContent.includes('Add') && btn.textContent.includes('calendar')) {
+        btn.textContent = 'All dates on calendar — re-export?';
+      }
+    });
+    // Flip every not-added pill
+    document.querySelectorAll('.cal-status.not-added').forEach(p => {
+      p.classList.remove('not-added');
+      p.classList.add('on-cal');
+      p.innerHTML = '<span class="check">&#10003;</span>On calendar';
+    });
+    closeModal();
+    showBanner('Bundle .ics downloaded · 14 dates added');
+  };
+
+  // ============== Add miscellaneous expense ==============
+  function openMiscModal() {
+    openModal(`
+      <h3>Add miscellaneous expense</h3>
+      <div class="sub">Direct purchases — no vendor</div>
+      <label>Name</label>
+      <input id="miscName" type="text" placeholder="e.g. Bridal car flowers" />
+      <label>Amount (PHP)</label>
+      <input id="miscAmt" type="text" placeholder="0" />
+      <label>Deadline / paid date</label>
+      <input id="miscDate" type="text" placeholder="2026-04-15" />
+      <div class="proto-modal-actions">
+        <button class="btn-secondary" onclick="window.__protoCloseModal()">Cancel</button>
+        <button class="btn-primary" onclick="window.__protoSaveMisc()">Add expense</button>
+      </div>
+    `);
+  }
+  window.__protoSaveMisc = function () {
+    const name = (document.getElementById('miscName').value || 'New expense').trim();
+    const amt = parseInt((document.getElementById('miscAmt').value || '0').replace(/[^0-9]/g, ''), 10) || 0;
+    const date = (document.getElementById('miscDate').value || '2026-05-01').trim();
+    const sec = document.querySelector('.misc-section');
+    if (sec) {
+      const row = document.createElement('div');
+      row.className = 'misc-row';
+      row.innerHTML = `
+        <div class="name">${name}</div>
+        <div class="amount">${fmt(amt)}</div>
+        <div class="deadline">Due ${date}</div>
+        <div class="actions">
+          <button class="line-action payment">+ Payment</button>
+          <button class="line-action cal">+ Calendar</button>
+        </div>`;
+      sec.appendChild(row);
+      // Wire the new buttons
+      row.querySelector('.payment').addEventListener('click', () => openPaymentModal(name));
+      row.querySelector('.cal').addEventListener('click', () => openCalendarModal(row));
+    }
+    closeModal();
+    showBanner('Misc expense added');
+  };
+  document.querySelectorAll('.btn-secondary').forEach(btn => {
+    if (btn.textContent.trim() === 'Add miscellaneous') {
+      btn.addEventListener('click', openMiscModal);
+    }
+  });
+  // Mobile "+ Add" hint
+  document.querySelectorAll('.mobile-section-label span').forEach(span => {
+    if (span.textContent.includes('+ Add')) {
+      span.style.cursor = 'pointer';
+      span.addEventListener('click', openMiscModal);
+    }
+  });
+
+  // ============== Wire all View proof / Edit / generic line-action buttons ==============
+  document.querySelectorAll('.line-action').forEach(btn => {
+    if (btn._wired) return;
+    if (btn.classList.contains('payment') || btn.classList.contains('cal') || btn.classList.contains('qr')) return;
+    const lbl = btn.textContent.trim();
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (lbl === 'View proof') {
+        openModal(`
+          <h3>Payment proof</h3>
+          <div class="sub">Uploaded screenshot — stored on R2</div>
+          <div style="height:220px; border-radius:10px; background:linear-gradient(135deg, #d4cdb8, #b8a98a); display:grid; place-items:center; color:#fff; font-family:'DM Mono', monospace; font-size:12px;">PROOF.JPG</div>
+          <div class="proto-modal-actions">
+            <button class="btn-primary" onclick="window.__protoCloseModal()">Close</button>
+          </div>
+        `);
+      } else if (lbl === 'Edit') {
+        showToast('Edit — coming soon');
+      } else {
+        showToast(lbl + ' — coming soon');
+      }
+    });
+    btn._wired = true;
+  });
+})();
+</script>
+
+</body>
+</html>
