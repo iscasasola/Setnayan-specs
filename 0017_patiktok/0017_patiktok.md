@@ -1,10 +1,12 @@
 # 0017 — Patiktok
 
-**Status:** drafted 2026-05-11
+**Status:** drafted 2026-05-11 · **V1 SKU lock 2026-05-16 (dual-tier per-day model · Setnayan TikTok ₱999/day vs Personal TikTok ₱1,999/day · 40-video soft cap per booth per day · ₱49/+10 overage · see CLAUDE.md 6th 2026-05-16 row)**
 **Iteration:** 0017
 **Surface:** Guest engagement / event-day station
-**Dependencies:** 0000 App Shell, 0002 QR Invitations (personalized QR), 0012 Papic (storage), Setnayan owned-AI music catalogue (cross-workstream)
+**Dependencies:** 0000 App Shell, 0002 QR Invitations (personalized QR), 0012 Papic (storage), Setnayan owned-AI music catalogue (cross-workstream), TikTok OAuth (for Personal-tier BYO TikTok flow, added 2026-05-16)
 **Author:** Ice
+
+> **2026-05-16 PIVOT NOTICE.** The Pricing section (and the TikTok integration section's posting-flow subsection) describe the **new** dual-tier V1 SKU lock. The original single-SKU ₱2,499/booth/5hr model + the ₱999 additional-station + the ₱499/hour add-on are **retired** — V1 ships per-day pricing with two ownership tiers (Setnayan TikTok or Personal TikTok). The 500-submission-per-station-per-event anti-abuse cap is replaced by the 40-videos/day soft cap + ₱49/+10 overage SKU. Sound selection · multi-performer · external display · downloadable backup mechanics are preserved.
 
 ---
 
@@ -33,9 +35,14 @@ Patiktok is a **TikTok-style mimic station** placed at the wedding venue. Guests
 | Continuous looping music | One Setnayan-owned AI-generated track loops through the entire compilation. Music doesn't restart between clips. |
 | Compilation export | Final reel exported in 9:16 vertical, 1080p (or 4K if 4K Upgrade is purchased). |
 
-## TikTok integration — viral loop posting via @SetnayanWeddings
+## TikTok integration — dual-tier posting (Setnayan TikTok or Personal TikTok)
 
-Patiktok publishes through **Setnayan's own TikTok account (`@SetnayanWeddings`)**. This is intentional — Setnayan captures monetization upside on viral compilations while keeping the licensing model simple. No per-couple OAuth headaches; one account, one set of credentials, one monetization pool.
+Patiktok publishes through one of **two posting destinations**, determined by the couple's SKU choice at purchase:
+
+- **Setnayan TikTok tier (₱999/day):** videos auto-post to **Setnayan's master TikTok account (`@SetnayanWeddings`)**. Setnayan captures monetization upside on viral compilations; licensing model is simple (one account, one set of credentials, one monetization pool). Couple gets the post link + downloadable MP4 with Setnayan-owned music.
+- **Personal TikTok tier (₱1,999/day · added 2026-05-16):** couple **BYO TikTok via OAuth**. At purchase time the couple completes a one-time TikTok OAuth handshake (scopes: `user.info.basic` + `video.upload` + `video.publish`) granting Setnayan write permission to their TikTok account. Videos auto-post to the couple's own handle; couple owns all videos + analytics + ad-revenue upside. Setnayan loses the platform-marketing upside of `@SetnayanWeddings` amplification, which is the reason the price is ~2× the Setnayan tier.
+
+The posting-flow downstream of the compilation render is the same for both tiers — the only branch is the OAuth credential used at upload time and the destination account. Sound selection / multi-performer face-lock / external-display dual-view / downloadable backup mechanics are identical across tiers.
 
 ### Sound selection — couple curates 2 templates, hands off via printable QR
 
@@ -126,36 +133,68 @@ Patiktok auto-detects when multiple faces are in frame:
 - Primary performer can add multiple TikTok handles (or pull from RSVP'd guests who already linked their TikTok)
 - Compilation caption @-mentions all tagged performers per clip
 
-### Posting flow (post-event)
+### Posting flow (post-event · dual-tier branching)
 
 1. Setnayan renders the final compilation (face-lock + masked transitions + couple's chosen TikTok sound).
-2. Setnayan posts to **@SetnayanWeddings** with caption: `"[Couple Name]'s Patiktok — [event date] · @[guest1] @[guest2] ... · #[customhashtag]"`.
+2. **Routing branch based on purchased tier:**
+   - **Setnayan TikTok tier:** Setnayan posts to **@SetnayanWeddings** using master credentials, caption: `"[Couple Name]'s Patiktok — [event date] · @[guest1] @[guest2] ... · #[customhashtag]"`. **Setnayan collects any ad revenue.**
+   - **Personal TikTok tier:** Setnayan posts to **the couple's TikTok handle** using the OAuth grant captured at purchase, caption: `"Our Patiktok — [event date] · @[guest1] @[guest2] ... · #[customhashtag]"`. **Couple collects any ad revenue + retains all analytics.**
 3. Every @-mentioned guest gets a TikTok notification, sees themselves in the compilation, can repost to their own profile via TikTok's native share-to-profile.
-4. Couple gets the compilation post link to share to their own followers (couple can also natively repost to their own TikTok if they want).
-5. **If the video monetizes, Setnayan collects the ad revenue.** A single viral wedding compilation could earn ₱500–₱50,000 in TikTok Creator Fund / brand sponsorship — pure margin upside.
+4. Couple gets the compilation post link to share to their own followers (and, on the Setnayan tier, can natively repost from @SetnayanWeddings to their own TikTok if they want).
+5. **Monetization upside:** a single viral wedding compilation could earn ₱500–₱50,000 in TikTok Creator Fund / brand sponsorship. On the Setnayan tier this flows to Setnayan; on the Personal tier this flows to the couple — pure margin upside for whichever side owns the destination handle.
 
 ### Downloadable backup copy
 
 Couple also gets a downloadable MP4 of the compilation. This version uses Setnayan's owned-AI music (fallback) to be safe for off-TikTok sharing. The TikTok-sound version lives only on @SetnayanWeddings (where it's properly licensed).
 
-## Pricing
+## Pricing — V1 SKU lock 2026-05-16 (dual-tier per-day model)
 
-| SKU | Price | Duration / scope | Notes |
-|---|---|---|---|
-| **Patiktok** | **₱2,499** | **per booth · 5 hours** | Single tier. App-only. Covers the standard PH wedding reception window. Includes X-mark decal + app station + TikTok integration + auto-post + guest tagging + multi-performer + compilation + **standard background soft copy**. |
-| **Patiktok additional station** | **₱999** | per extra station · 5 hours | Multi-purchase. Each station gets own X-mark + compilation. Matches the base booth's 5-hour window. |
-| **Patiktok +1 hour add-on** | **₱499** | per booth · per hour | Multi-purchase, unlimited. For events running longer than 5 hours. Pricing parity with Live Stream's hour-extension model. |
-| **Patiktok custom background design** | **₱1,499** | per event | Optional upgrade. Setnayan designs a fully-custom Patiktok backdrop digital file based on couple's request — custom artwork, multiple revisions, full art direction. Soft-copy delivered; couple uses marketplace (future 0018) to source printing. |
+V1 ships **three SKUs** under a dual-tier per-day model based on **who owns the videos**. The two tiers differ in posting destination (Setnayan's master TikTok handle vs the couple's own TikTok via OAuth) and consequently price (₱999 vs ₱1,999 per day). A booth soft-caps at 40 captured videos per day per booth; overage stacks in ₱49 / +10 video blocks.
 
-**Background soft copy (bundled in ₱2,499):** Setnayan auto-generates a digital background design pulling from couple's mood board palette + monogram. Couple receives the soft copy (PDF, PNG, AI source). Use it for print or LED display.
+### V1 SKU table (locked 2026-05-16)
+
+| SKU | `service_catalog.sku_code` | Price | Scope | Multi-purchase |
+|---|---|---|---|---|
+| **Patiktok — Setnayan TikTok** | `patiktok_setnayan_daily` | **₱999 / day** | One day of Patiktok booth · videos auto-post to **Setnayan's master TikTok handle `@SetnayanWeddings`** (or similar) · Setnayan retains ad-revenue upside if the compilation goes viral · couple gets the post link + downloadable MP4 with Setnayan-owned music | Yes — couple buys one per event-day |
+| **Patiktok — Personal TikTok** | `patiktok_personal_daily` | **₱1,999 / day** | One day of Patiktok booth · **couple BYO TikTok via OAuth** (one-time OAuth handshake at purchase) · videos auto-post to the couple's own TikTok handle · couple owns all videos + analytics + ad-revenue upside | Yes — couple buys one per event-day |
+| **Patiktok — Video Overage (+10 videos)** | `patiktok_video_overage` | **₱49 / +10 videos** | Extends a booth's daily video allotment by +10 captures (multi-stack: each ₱49 adds 10) · in-event upsell at the booth dashboard when the 40-video soft cap is reached | Yes — operator stacks as many +10 blocks as the event needs |
+
+**Soft cap: 40 captured videos per booth per day.** Booth dashboard shows a live counter. At 40 the operator sees a soft-warning ("You've captured your day's allotted 40 videos · keep recording with the overage add-on") with a one-tap purchase button for the ₱49 / +10 overage SKU. Operator can stack as many overage blocks as the event needs without leaving the booth flow. The soft cap protects Setnayan margin (compilation render + storage + per-clip face-lock processing scales with video count); the in-event upsell at ₱49 keeps margin healthy on outlier high-engagement events.
+
+### Worked pricing examples
+
+| What the couple wants | Calculation | Total PHP |
+|---|---|---|
+| Single-day reception booth · @SetnayanWeddings posting · 40 videos | Patiktok Setnayan ₱999 | **₱999** |
+| Single-day reception booth · personal TikTok · 40 videos | Patiktok Personal ₱1,999 | **₱1,999** |
+| Single-day reception booth · personal TikTok · 60 videos (40 + 2 overage blocks) | Patiktok Personal ₱1,999 + 2 × Overage ₱49 | **₱2,097** |
+| Multi-day event (prep + ceremony + reception, 3 days) · Setnayan-tier | Patiktok Setnayan ₱999 × 3 | **₱2,997** |
+| Multi-day event (3 days) · personal-tier | Patiktok Personal ₱1,999 × 3 | **₱5,997** |
+
+### Retired SKUs (single-tier era)
+
+| Retired SKU | Old price | Retirement reason |
+|---|---|---|
+| Patiktok (single tier · per booth · 5 hours) | ₱2,499 | Replaced by dual-tier per-day model — single-day flat rate did not match multi-day Filipino-wedding scheduling |
+| Patiktok additional station (5 hours) | ₱999 | Each additional day's booth is now bought as another `patiktok_*_daily` row |
+| Patiktok +1 hour add-on | ₱499 | Hour-based pricing replaced by per-day (couples buy days, not hours) |
+| Patiktok custom background design | ₱1,499 | Background soft copy stays bundled with the per-day SKUs (auto-generated from mood board + monogram); fully-custom design moves to a future 0018 Supplies Marketplace listing |
+
+**Background soft copy (bundled in both per-day SKUs):** Setnayan auto-generates a digital background design pulling from couple's mood board palette + monogram. Couple receives the soft copy (PDF, PNG, AI source). Use it for print or LED display.
 
 **Not included by Setnayan** (couple / coordinator sources via Setnayan Marketplace — future 0018): backdrops, lighting kits, ring lights, HDMI dongles, monitors, tripods, print fulfillment.
+
+### Why this pricing structure
+
+Three drivers. **First**, the prior single-SKU ₱2,499/booth/5hr model under-served couples with multi-day weddings (a 3-day event meant either buying multiple full stations or skipping the booth on most days) and over-served couples with shorter receptions (5 hours is more than most receptions need). Per-day pricing matches event reality and aligns with the per-day Panood Daily Broadcast model decided in the same 2026-05-16 session. **Second**, the dual-tier split by video-ownership resolves a long-standing tension: some couples want the viral marketing upside of @SetnayanWeddings (Setnayan amplifies the wedding to the platform's audience for free), others want their own TikTok to be where the wedding content lives forever (with ad-revenue + analytics). Charging differently for these two ownership models reflects the real value difference — BYO TikTok means Setnayan loses platform-marketing upside, so the price is ~2× to compensate. **Third**, the 40-video soft cap is calibrated to typical Filipino-wedding guest counts (200 guests × ~20% participation rate ≈ 40 unique submitters per booth per day); the soft cap with ₱49/+10 overage protects margin on outlier high-engagement events without forcing couples to buy a whole second booth purchase.
+
+**Tax-tier note (V1):** Setnayan-tier ₱999/day nets ~70% margin under V1 tax tier (PT 3% + LBT 1% + Income 25%); Personal-tier ₱1,999/day nets ~72% (higher % because the OAuth + per-couple TikTok adds ~₱0 marginal cost vs the Setnayan-handle posting); overage SKU at ₱49 nets ~80%.
 
 ## Coordinator workflow
 
 Most weddings hire a coordinator (paid wedding planner) to handle execution. Patiktok fits this flow:
 
-1. **Couple buys Patiktok** (₱2,499) via apply-then-pay flow.
+1. **Couple buys Patiktok** — picks one of the two V1 tiers (`patiktok_setnayan_daily` ₱999/day or `patiktok_personal_daily` ₱1,999/day) for each event-day they want booth coverage, via apply-then-pay flow.
 2. **Coordinator accepts** the Patiktok purchase as part of the couple's wedding planning workflow they're managing.
 3. **Coordinator hires a booth operator** — friend, family, or paid event staff. Operator doesn't need a Setnayan account.
 4. **Coordinator scans the Patiktok QR** to test the dashboard, picks the primary + backup TikTok templates with the couple, generates the print-ready QR + signage card PDF.
@@ -187,7 +226,7 @@ Additional stations cost ~₱120 each (more decal + separate compilation render)
 
 ### Couple flow
 
-1. Couple buys **Patiktok Station Pack** (₱1,499) via apply-then-pay flow.
+1. Couple buys a **Patiktok per-day SKU** (Setnayan tier ₱999/day or Personal tier ₱1,999/day) via apply-then-pay flow — one per event-day they want booth coverage.
 2. Setnayan confirms payment, ships X-mark decal within 3-5 days.
 3. Couple picks reel template from library (or assigns Setnayan Team to curate one based on couple's mood board palette).
 4. On wedding day, couple places X-mark in venue (entrance, photobooth area, or dance floor).
@@ -237,8 +276,8 @@ Additional stations cost ~₱120 each (more decal + separate compilation render)
 
 | Rule | Why |
 |---|---|
-| Station active window = event days (per event-day pack purchased) | Same as Papic — protects against year-out events using free station |
-| Max 500 submissions per station per event | Caps storage + render cost. Multi-station packs lift this limit. |
+| Station active window = each purchased day (per-day SKU activation window) | Same as Papic — protects against year-out events using free station |
+| Soft cap: 40 captured videos per booth per day · ₱49 / +10 overage SKU at cap (locked 2026-05-16) | Caps storage + compilation render cost. Soft cap (warning + in-event upsell) replaces the prior hard 500-per-event cap. |
 | Each guest QR can submit max 3 times | Prevents one guest spamming. Encourages retakes within session. |
 | Submission must be ≥2.5 sec captured (no instant tap-and-submit) | Real-time guard against empty/spam submissions |
 

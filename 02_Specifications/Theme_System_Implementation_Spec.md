@@ -73,7 +73,7 @@ locked spec.
 
 Web fallback for iOS (when not on Apple): `Inter` substitutes for SF Pro automatically via the font stack.
 
-### 2.5 Forest Theme (`[data-theme="forest_theme"]`)
+### 2.5 Forest & Champagne Gold (`[data-theme="forest_champagne"]`)
 
 > Added 2026-05-15 as the fifth UI Theme. Vendor-grounded / professional register; champagne gold is constrained to existing tint roles (Boosted gradient · Certified badge · celebration moments) per 0015 § Section 8 so the page-level "no competing accents" discipline holds.
 
@@ -91,7 +91,7 @@ Web fallback for iOS (when not on Apple): `Inter` substitutes for SF Pro automat
 ### 3.1 Picker UI
 
 A `.theme-picker` element contains five `.theme-swatch` buttons, each carrying
-`data-theme-id` matching one of: `setnayan_default · victorian · classy · ios · forest_theme`.
+`data-theme-id` matching one of: `setnayan_default · victorian · classy · ios · forest_champagne`.
 Swatch backgrounds use a 135° split gradient: bg-color 50% → accent 50% — a
 miniature preview of the theme's palette.
 

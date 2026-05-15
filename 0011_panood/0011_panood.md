@@ -4,7 +4,9 @@
 **Topic:** Panood feature, V1.5 (WebApp track) — YouTube-delivered
 **Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: In-App Services** · URL: `setnayan.com/dashboard/[event-id]/services/panood`
 **Builds on:** 0000 (app shell, sign-in, event-scoped URL, In-App Services launcher), 0003 (apply-then-pay flow, `spend()` primitive)
-**Status:** Drafted 2026-05-09 · revised 2026-05-09 (apparatus pricing + YouTube-only delivery) · revised 2026-05-10 (Pro Camera Bridge — DSLR feeds, shared SKU with 0012) · revised 2026-05-10 (broadcaster control surfaces — preview/program, audio rail, hold-to-end, mobile slide-to-end, keyboard shortcuts)
+**Status:** Drafted 2026-05-09 · revised 2026-05-09 (apparatus pricing + YouTube-only delivery) · revised 2026-05-10 (Pro Camera Bridge — DSLR feeds, shared SKU with 0012) · revised 2026-05-10 (broadcaster control surfaces — preview/program, audio rail, hold-to-end, mobile slide-to-end, keyboard shortcuts) · **revised 2026-05-16 (Architecture pivot: drop Cloudflare Stream Live composite + Setnayan master YouTube channel · couple BYO YouTube via OAuth · per-day pricing replaces base+add-ons · Broadcast Style Pack retired · see CLAUDE.md 4th 2026-05-16 row)**
+
+> **2026-05-16 PIVOT NOTICE.** The Pricing section below is the **new** V1 SKU lock. The "Delivery architecture", "Pipeline", "Setnayan's master YouTube channel", "Broadcaster control surfaces", and "Broadcast Style Pack" sections further down describe the **prior** Cloudflare-Stream-Live composite architecture and are **retired in V1**. They are kept on disk for historical reference; the V1.5+ build will read only the Pricing section + the new BYO-YouTube delivery model summarized below. Composite-dependent features (lower-thirds, scene cards, 4-mode broadcast styles, ffmpeg overlay) are NOT in V1 because the composite step is gone — couples wanting those use YouTube's own production tools or OBS-style apps writing to their YouTube.
 **Companion specs:** `09_Panood_Feature_Specification.md`, `0003_token_wallet_and_packs/`, `0012_papic/`
 **Successor iteration:** `0012_papic/` consumes the same shared monogram pack flag this iteration registers, and shares the `pro_camera_bridge_addon` SKU registered here.
 
@@ -47,65 +49,49 @@ This iteration does NOT ship:
 
 ---
 
-## Pricing — base + add-ons (V1, locked 2026-05-09)
+## Pricing — V1 SKU lock 2026-05-16 (BYO YouTube · per-day + Annual)
 
-V1 ships a single Panood base SKU plus two capacity add-ons. PHP is the source of truth; tokens are render-time display via 0003's formatter (PHP-direct pricing, multiples of 100 tokens for clean display).
+V1 Panood ships **four SKUs** under the BYO-YouTube architecture. Couple OAuths their own YouTube channel; Setnayan provides broadcaster orchestration (multi-cam UI + RTMP push of the active feed) + auto landing-page IFrame embed. **The composite step is gone**; YouTube does any compositing via its own multi-camera Live tools, or Setnayan's broadcaster UI just hands one active feed at a time to the couple's YouTube via standard RTMP from the operator-selected camera.
 
-### Base SKU
+### V1 SKU table (locked 2026-05-16)
 
-| Item | What's included | PHP | Tokens |
-|---|---|---|---|
-| **Panood — Base** | 1 broadcaster + **3 cameras** + **3 hours of stream capacity** | **₱2,499** | 75,000 |
-
-Included with every base SKU:
-- WebApp camera operator client (browser-based, no install) — runs on any modern phone browser
-- WebApp broadcaster client (multi-stream subscribe + grid UI with tap-to-switch) — desktop/tablet/mobile responsive
-- Cloudflare Stream Live SFU ingest of all camera feeds
-- Server-side ffmpeg compositor with default Setnayan monogram overlay (replaceable with couple's monogram via the Custom Monogram Pack)
-- Lower-thirds, scene cards, and Custom Standby screens (when Custom Monogram Pack purchased)
-- RTMP relay to YouTube Live on Setnayan's master channel
-- YouTube IFrame Player embedded on the couple's landing page
-- YouTube auto-archive of the recording on Setnayan's master channel; couple downloads from their dashboard
-- Full event-day support during the broadcast
-
-### Capacity add-ons
-
-| Add-on | What it adds | PHP each | Tokens each | Limits |
+| SKU | `service_catalog.sku_code` | Price | Scope | Multi-purchase |
 |---|---|---|---|---|
-| **+1 Camera** | Adds one more camera slot to the broadcast | ₱999 | 30,000 | Multi-purchase up to **+2** (max 5 cameras total — 3 base + 2 extra) |
-| **+1 Hour** | Adds one more hour of stream capacity | ₱999 | 30,000 | Multi-purchase, **unlimited** — couples buy as many hours as they need |
+| **Daily Broadcast** | `panood_daily_broadcast` | **₱499 / day** | One day of broadcasting to the couple's YouTube channel. Single-cam by default; pair with Camera Sync for multi-cam. | Yes — couple buys one per event-day (prep · ceremony · reception are often 3 separate days) |
+| **Camera Sync (multi-cam add-on)** | `panood_camera_sync_daily` | **₱99 / day** | Unlocks the Setnayan broadcaster UI's multi-cam switching for that day. Without it, Daily Broadcast is single-cam. | Yes — one per day on which multi-cam is wanted |
+| **Annual Streaming** | `panood_annual_streaming` | **₱2,999 / year** | Single-cam unlimited days for one year. Vendor-friendly for vendors who livestream regularly to their own YouTube. | Yes — additional years stack |
+| **Annual Streaming Plus** | `panood_annual_streaming_plus` | **₱3,999 / year** | Multi-cam unlimited days for one year (includes Camera Sync built-in). | Yes — additional years stack |
 
-The add-ons are independent. A couple can buy +2 cameras alone, or +5 hours alone, or any combination.
+Custom Monogram Pack (₱1,999) still applies for the landing-page chrome (event-page brand) but **no longer touches the broadcast video itself** — the couple sets their own YouTube channel branding inside YouTube Studio (channel watermark, lower-thirds via YouTube Live Producer, end-cards). Setnayan's landing page wraps the couple's `liveBroadcasts.id` in an IFrame embed and applies the couple's monogram + page chrome around it.
 
 ### Worked pricing examples
 
 | What the couple wants | Calculation | Total PHP |
 |---|---|---|
-| Standard 3-cam, 3-hr stream | base | ₱2,499 |
-| 5 cams, 3 hrs (full reception coverage with 5 angles) | base + 2 cams | ₱4,500 |
-| 3 cams, 5 hrs (whole ceremony + reception) | base + 2 hrs | ₱4,500 |
-| 5 cams, 5 hrs (typical Filipino wedding broadcast) | base + 2 cams + 2 hrs | ₱6,500 |
-| 5 cams, 8 hrs (prep through send-off, full day) | base + 2 cams + 5 hrs | ₱9,500 |
-| 5 cams, 12 hrs (very long wedding, marathon broadcast) | base + 2 cams + 9 hrs | ₱13,500 |
+| Single-cam reception broadcast, 1 day | Daily Broadcast | **₱499** |
+| Multi-cam reception broadcast, 1 day | Daily Broadcast + Camera Sync | **₱598** |
+| Multi-cam coverage across 3 event-days (prep + ceremony + reception) | (Daily Broadcast + Camera Sync) × 3 | **₱1,794** |
+| Vendor streaming portfolio events for a year (single-cam) | Annual Streaming | **₱2,999** |
+| Vendor streaming portfolio events for a year (multi-cam) | Annual Streaming Plus | **₱3,999** |
 
-### Service add-ons (event-wide, not capacity-based)
+### Retired SKUs (Cloudflare-composite era)
 
-| Add-on | PHP | Tokens | What it unlocks |
-|---|---|---|---|
-| **Custom Monogram Pack (Remove Watermark)** | ₱1,999 | 60,000 | Replaces Setnayan branding with the couple's monogram across Panood broadcast, Papic photo exports + reels, Personal Reels, and gallery chrome on the landing page. Single event-wide flag. See "Custom Monogram Pack — V1 spec" below. |
-| **Broadcast Style Pack** | ₱2,999 | 90,000 | Unlocks all four broadcast style modes (News, Cinematic, Sports, Royalty), all transition types (crossfade, slide, push, iris reveal), and four color presets per mode (warm film / cool blue / black-&-white / vintage sepia). Broadcaster can switch styles mid-event. See "Broadcast Style Pack — V1 spec" below. |
-| **Pro Camera Bridge (per DSLR seat)** | ₱1,500 | 45,000 | Turns one phone camera slot into a phone+DSLR pair via vendor WiFi SDK (Canon, Nikon, Sony, Fujifilm). Phone+DSLR still counts as **1 camera slot** against the Panood camera limit — no extra LS cost for the slot itself. Multi-purchase, bound at spend-time to a specific Panood camera or papic seat. Shared SKU with 0012 Papic. See *Pro Camera Bridge — DSLR camera feeds* below. |
-| **AI Video Highlight (per 60s)** | ₱999 | 6,000 | Quick AI-compiled 60-second highlight reel. Built for social media (Instagram, TikTok). Multi-purchase. |
-| **AI Edited Highlight (per 3-min)** | ₱2,999 | 150,000 | Themed multi-segment polished reel from broadcast clips + papic photos. Couple picks theme; auto-inherits Broadcast Style if Pack is owned. Multi-purchase. |
-| **Same-Day Edit (SDE · 3–5 min)** | **₱24,999** | — | **Flagship same-day render.** Locked 2026-05-12 (un-retired). Claude vision picks 30–40 best moments from the full event feed (paparazzi + Panood broadcast clips), writes a Remotion render spec, FFmpeg + Lottie + `.cube` LUT compose the final 3–5 minute reel. Delivered T-30min before reception. Plays on the LED background screen at the reception's climactic moment. Multi-purchase per event but typically bought once. See "Same-Day Edit — V1 spec" below. |
+| Retired SKU | Old price | Retirement reason |
+|---|---|---|
+| `live_stream_base` | ₱2,499 | Cloudflare Stream Live composite no longer the V1 architecture |
+| `live_stream_camera_addon` | ₱999 | Per-camera slot pricing replaced by per-day Camera Sync (₱99) |
+| `live_stream_hour_addon` | ₱999 | Hour-based pricing replaced by per-day model (couples buy days, not hours) |
+| `broadcast_style_pack` | ₱2,999 | News / Cinematic / Sports / Royalty + ffmpeg-overlay composites required the retired composite step; couples wanting style switching use YouTube's own production tools |
 
-Optional hardware kits (tripod kit, audio boost kit, combined kit) are sold separately as physical products in the Setnayan web store, NOT through the wallet, NOT part of any tier. They're "couple buys this on top if they want."
+Pro Camera Bridge (DSLR pairing via 0012 Papic-shared SKU) is preserved as a 0012-side capability and can still pair a DSLR to one of the operator's phones for the Panood broadcast — the DSLR feed enters the Setnayan broadcaster UI as one of the multi-cam slots when Camera Sync is purchased.
+
+AI Video Highlight (₱999/60s), AI Edited Highlight (₱2,999/3min), and Same-Day Edit (₱24,999) are **preserved** but their data source shifts: they consume the **couple's YouTube archive via OAuth** rather than Cloudflare-Stream-recorded feeds. Engineering re-scope at V1.5+ build time will route their archive-fetch logic through the YouTube Data API instead of Cloudflare Stream's recording endpoints.
 
 ### Why this pricing structure
 
-The base + add-ons model aligns Setnayan's revenue with Setnayan's actual cost (Cloudflare ingest scales per camera-hour) without selling "hours of crew coverage" — couples buy the **stream capacity** they need from a software platform. The apparatus rule is preserved: every unit on the SKU (camera slot, hour of stream capacity, capability flag) is a software resource Setnayan's infrastructure provides.
+Three drivers. **First**, the BYO-YouTube model cuts the largest variable-cost line (~$1 per 1,000 streamed minutes × cameras × hours) to near zero by handing the composite + delivery + storage to YouTube at unbounded scale. **Second**, per-day pricing matches how Filipino weddings are actually scheduled (prep day at one venue · ceremony at another · reception at a third — each is a distinct broadcast day, not a continuous "stream capacity hour" pool). **Third**, the Annual SKUs open a vendor-side ARR line for vendors who livestream portfolio events year-round — break-even after ~6 days of use, attractive for wedding-coverage vendors who do 30+ events a year.
 
-The structure is more granular than the previous 4-tier model. Couples streaming a short reception (3 cams × 3 hrs at ₱2,499) get a stronger entry-price experience than the previous ₱4,500 Tier 1, while couples broadcasting their full day (5 cams × 12 hrs at ₱13,500) pay proportionally more — capturing real value from heavy-use customers without forcing it on light-use ones.
+The architecture pivot also trims the V1 engineering surface by ~60% — no Cloudflare Stream Live ingest, no SFU subscription wiring, no server-side ffmpeg compositor, no RTMP relay to a Setnayan master channel. The broadcaster web UI + landing-page IFrame embed are the entire V1 build.
 
 ---
 

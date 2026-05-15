@@ -88,7 +88,7 @@ Three controls. All persist on `users` (schema § 4) and apply immediately witho
 - Victorian (aged paper + deep burgundy + gold leaf + ornate Playfair italic — Bridgerton / heritage-formal)
 - Classy (ivory + champagne gold + Cinzel display — understated luxury)
 - iOS (system-grey + system-blue accent · Apple-Settings rendering)
-- Forest Theme (warm off-cream + deep forest accent + champagne secondary tint — vendor-grounded / professional)
+- Forest & Champagne Gold (warm off-cream + deep forest accent + champagne secondary tint — vendor-grounded / professional)
 
 Selecting a theme writes `users.theme_preference` and reloads the CSS variable bundle. Theme applies to every surface the user owns; vendors who want vendor-side public theming must hold a Vendor Pro Weekly subscription (forward-referenced in 0022 § 7) — without it, the customer-side marketplace listing always renders in Setnayan Default.
 
@@ -474,7 +474,7 @@ ALTER TABLE users ADD COLUMN deletion_initiated_by  UUID REFERENCES users(user_i
 
 -- Appearance preferences
 ALTER TABLE users ADD COLUMN theme_preference  TEXT DEFAULT 'setnayan_default'
-  CHECK (theme_preference IN ('setnayan_default','victorian','classy','ios','forest_theme'));
+  CHECK (theme_preference IN ('setnayan_default','victorian','classy','ios','forest_champagne'));
 -- Schema key 'setnayan_default' unchanged across the 2026-05-15 accent-token swap (terracotta → burgundy).
 -- Name unchanged. No data migration needed for existing rows.
 ALTER TABLE users ADD COLUMN locale_preference TEXT DEFAULT 'en'

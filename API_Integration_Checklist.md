@@ -134,9 +134,9 @@ V1 is built on Vercel + Supabase + Cloudflare R2 + GitHub plus seven third-party
 ### 3.3 Music catalogue + Template library hosting
 
 - [ ] Generate the ~400 owned AI music tracks via Suno Premier (see `02_Specifications/14_Music_Catalogue_Cowork_Playbook.md`)
-- [ ] Generate the 30 Save-the-Date templates (see `0024_save_the_date/`)
-- [ ] Upload all assets to `setnayan-media` R2 bucket under `/music_catalogue/` and `/std_library/`
-- [ ] Publish `catalogue_manifest.json` and `library_index.json` to the same bucket
+- [ ] ~~Generate the 30 Save-the-Date templates~~ **RETIRED 2026-05-16** — 0024 folded into 0002 Phase 1; no MP4 templates needed. Phase 1 hero design templates live with the 0004 widget catalog instead (web-tech rendering)
+- [ ] Upload all assets to `setnayan-media` R2 bucket under `/music_catalogue/`
+- [ ] Publish `catalogue_manifest.json` to the same bucket
 
 **Status:** Asset creation is parallel workstream; engineering can build the consumer surfaces with placeholder assets and swap in production assets when ready.
 
@@ -157,47 +157,68 @@ V1 is built on Vercel + Supabase + Cloudflare R2 + GitHub plus seven third-party
 - [ ] BetterStack or UptimeRobot for `setnayan.com` + key API endpoints
 - [ ] Configure SMS alerts to Ops Lead phone
 
-## Tier 5 — Media + AI Pipeline (mandatory for Papic/Panood/Save-the-Date/AI Highlights)
+## Tier 5 — Media + AI Pipeline (mandatory for Papic/Panood/AI Highlights · 2026-05-16: Save-the-Date dropped from this tier)
 
-### 5.1 Cloudflare Stream Live
+### 5.1 Cloudflare Stream Live — **RETIRED 2026-05-16**
 
-- [ ] Enable Cloudflare Stream Live on the existing Cloudflare account (§ 1.4)
-- [ ] Provision SFU ingest endpoints for iteration 0011 Panood live stream
-- [ ] Configure ultra-low-latency mode (~10s end-to-end target)
-- [ ] Set up RTMP relay output to YouTube on Setnayan's master channel `@SetnayanWeddings` (§ 5.3)
-- [ ] Verify the channel is NOT enrolled in YouTube Partner Program (YPP) — monetization must stay off
-- [ ] Set up signed-URL playback for landing-page embed fallback (if YouTube IFrame fails)
+> **Retired with the Panood architecture pivot to BYO YouTube via OAuth.** The composite step (server-side ffmpeg) + SFU ingest + RTMP relay through Setnayan's master channel are no longer the V1 architecture. Couple OAuths their own YouTube channel; Setnayan provides broadcaster orchestration (multi-cam UI + RTMP push of the active feed to the couple's YouTube) + landing-page IFrame embed. **DO NOT enable Cloudflare Stream Live** for the V1 Panood build. See § 5.3 below for the reframed YouTube Live OAuth model and CLAUDE.md 4th 2026-05-16 row.
 
-**Cost:** Stream Live ingest ~$1 per 1,000 minutes delivered to YouTube; ~₱120 per 3-hour event base SKU.
+~~- [ ] Enable Cloudflare Stream Live on the existing Cloudflare account (§ 1.4)~~
+~~- [ ] Provision SFU ingest endpoints for iteration 0011 Panood live stream~~
+~~- [ ] Configure ultra-low-latency mode (~10s end-to-end target)~~
+~~- [ ] Set up RTMP relay output to YouTube on Setnayan's master channel `@SetnayanWeddings` (§ 5.3)~~
+~~- [ ] Verify the channel is NOT enrolled in YouTube Partner Program (YPP) — monetization must stay off~~
+~~- [ ] Set up signed-URL playback for landing-page embed fallback (if YouTube IFrame fails)~~
 
-**Spec refs:** `0011_live_stream/0011_live_stream.md`, decision log "Live Stream delivers exclusively via YouTube" 2026-05-09.
+**Cost (retired):** Stream Live ingest would have been ~$1 per 1,000 minutes; ~₱120 per 3-hour event base SKU. V1 cost is now ~₱0 per event because YouTube composites and delivers at unbounded scale on the couple's own channel.
+
+**Spec refs:** ~~`0011_live_stream/0011_live_stream.md`~~ → `0011_panood/0011_panood.md` § Pricing — V1 SKU lock 2026-05-16, CLAUDE.md 2026-05-16 4th row.
+
+### 5.1a Potrace WASM (Monogram Hero PNG-to-SVG conversion · added 2026-05-16)
+
+- [ ] Pick a Potrace WASM build (`potrace-wasm` on npm exists; verify license + size <500KB compressed)
+- [ ] Deploy as Cloudflare Worker at `/api/monogram/convert` — reads PNG from R2 `setnayan-media`, runs Potrace, writes SVG to R2 under `hero_monogram/{event_id}/converted.svg`
+- [ ] Default Potrace settings: threshold 128, turdsize 2, optcurve true, opttolerance 0.2 — captured to `hero_monogram.converted_svg_potrace_settings` for reproducibility
+- [ ] Wire the preview-gate UI in the Monogram Hero checkout flow (per 0004 § "Monogram Hero PNG → SVG preview gate · 6-step flow")
+- [ ] Acceptance test: PNG upload → Convert tap → ≤3s p95 → preview rendered → couple taps "Use this SVG" → `converted_svg_url` + `converted_svg_approved_at` + `converted_svg_potrace_settings` all written to `invitation_widgets.config_json`
+
+**Cost:** ~₱0 per conversion (Worker compute + R2 storage). Preserves 95%+ margin on the ₱1,999 Monogram Hero SKU.
+
+**Spec refs:** `0004_invitation_widgets/0004_invitation_widgets.md` § "Monogram Hero PNG → SVG preview gate"; CLAUDE.md 2026-05-16 amendment entry.
 
 ### 5.2 FFmpeg render pipeline
 
 - [ ] Choose Cloudflare Workers Paid plan tier ($5/month minimum + $0.50 per million requests)
-- [ ] Provision a Cloudflare Queue for render jobs (`reel-render-queue`, `std-render-queue`, `ai-highlight-queue`)
-- [ ] Deploy a Worker that loads template manifest + photos/clips + music, generates FFmpeg cmd, encodes 1080×1920 H.264 MP4 (Personal Reels), 1080p multi-aspect (Save-the-Date), 1080p themed (AI Edited Highlight)
+- [ ] Provision a Cloudflare Queue for render jobs (`reel-render-queue`, `ai-highlight-queue`)
+- [ ] **NEW 2026-05-16:** Provision a Cloudflare Queue `std-video-render-queue` for the **Save-the-Date Video MP4 SKU** (`save_the_date_video_render` ₱99) — separate from the retired page-render `std-render-queue`. Worker reads from R2 `setnayan-media/std-video-uploads/{render_id}/` (5-10 engagement photos), runs FFmpeg + Lottie composition with one of the 8-12 V1 templates + a Setnayan-owned music track from the chosen category, writes the output to R2 `setnayan-media/std-video-renders/{render_id}.mp4`. 5-minute SLA from upload-complete to download-ready.
+- [ ] Deploy a Worker that loads template manifest + photos/clips + music, generates FFmpeg cmd, encodes 1080×1920 H.264 MP4 (Personal Reels), 1080p themed (AI Edited Highlight)
+- [ ] **NOTE 2026-05-16:** Panood AI Video Highlight / AI Edited Highlight render pipelines need re-scope to consume the **couple's YouTube archive via OAuth** (per § 5.3 reframe) instead of Cloudflare-Stream recordings. Engineering re-scope at V1.5+ build time; current spec describes the retired source. Save-the-Date Phase 1 landing page (0002) remains web-tech only — separate from the new STD Video MP4 SKU here.
 - [ ] Output to R2 `setnayan-media` bucket under `/renders/{event_id}/{render_id}.mp4`
 - [ ] Configure Hetzner Cloud VM pool as fallback (§ 7.3) when Workers CPU-time limit (30s) is exceeded for longer renders
 - [ ] Set up render-job webhook → Supabase Edge Function → guest/couple notification
 
-**Cost:** ~₱2–₱5 per render (Workers compute + R2 storage). Workers Paid plan ~₱290/month base.
+**Cost:** ~₱2–₱5 per render (Workers compute + R2 storage). Workers Paid plan ~₱290/month base. STD Video MP4 SKU runs ~₱5-10 per render (slightly higher due to Lottie overlay compute) — still nets ~70% under V1 tax tier at the ₱99 price point.
 
-**Spec refs:** `0012_paparazzi/0012_paparazzi.md` Part 4 (Personal Reel render), `0024_save_the_date/0024_save_the_date.md`, `0011_live_stream/0011_live_stream.md` § AI Edited Highlight.
+**Spec refs:** `0012_papic/0012_papic.md` Part 4 (Personal Reel render), `0011_panood/0011_panood.md` § AI Edited Highlight (re-scope flagged), `0024_save_the_date/0024_save_the_date.md` § "Save-the-Date Video SKU ₱99 — reintroduced 2026-05-16" (new pipeline consumer).
 
-### 5.3 YouTube Live API + master channel
+### 5.3 YouTube Live API — per-couple OAuth (reframed 2026-05-16)
 
-- [ ] Create the master YouTube channel `@SetnayanWeddings` under a Setnayan-owned Google account
-- [ ] Apply for YouTube Live enablement (24-hour wait for first-time channels)
-- [ ] Set up Google Cloud project + YouTube Data API v3 client
-- [ ] Generate OAuth credentials with scopes `https://www.googleapis.com/auth/youtube` + `https://www.googleapis.com/auth/youtube.upload`
-- [ ] Implement `liveBroadcasts.insert` with `monetizationDetails.monetization: false` and `contentDetails.latencyPreference: ultraLow`
-- [ ] Implement `liveStreams.insert` to get the RTMP ingest URL + stream key for Cloudflare Stream relay (§ 5.1)
-- [ ] Verify the master channel is NOT enrolled in YPP — ad insertion would break the unmonetized broadcast contract
+> **Reframed 2026-05-16.** Per the Panood architecture pivot, Setnayan no longer hosts a master YouTube channel for couple broadcasts. **Each couple OAuths their own YouTube channel** at Panood booking time, granting Setnayan write permission to their channel; the broadcaster UI pushes the active camera feed via RTMP to the couple's `liveBroadcasts` resource; the landing page embeds the couple's `liveBroadcasts.id` in an IFrame. Setnayan never touches a master Setnayan-owned YouTube channel for Panood. (Patiktok's `@SetnayanWeddings` master TikTok handle is a separate flow under § 7.2 — that one IS Setnayan-owned for the Setnayan-tier Patiktok SKU.)
 
-**Cost:** Free (YouTube Data API quota is generous; Setnayan's broadcast count is well below limits).
+- [ ] Set up Google Cloud project + YouTube Data API v3 client (Setnayan-owned)
+- [ ] Configure OAuth 2.0 consent screen with verified-app status (required by YouTube for write-scope OAuth from third parties)
+- [ ] Request OAuth scope verification from Google: `https://www.googleapis.com/auth/youtube` + `https://www.googleapis.com/auth/youtube.upload` (Google reviews the request; typical 1-4 weeks for verified-app status)
+- [ ] Extend `oauth_grants` schema to persist per-couple YouTube refresh tokens + token expiry + granted scopes (one row per event, tied to `events.event_id`)
+- [ ] Implement OAuth handshake at Panood SKU purchase time — couple completes consent in a popup, refresh token written to `oauth_grants`
+- [ ] Implement `liveBroadcasts.insert` for the couple's channel with `monetizationDetails.monetization: false` and `contentDetails.latencyPreference: ultraLow` (couple decides monetization on their own channel post-event)
+- [ ] Implement `liveStreams.insert` to get the RTMP ingest URL + stream key for the **broadcaster web UI's active-feed push** (not Cloudflare Stream relay — § 5.1 is retired)
+- [ ] Landing-page IFrame embed: fetch the couple's `liveBroadcasts.id` from `oauth_grants` and render `https://www.youtube.com/embed/{video_id}` in the landing page's hero
+- [ ] Token-refresh worker: nightly refresh of YouTube OAuth tokens within their 6-month inactivity window
+- [ ] Revocation handling: if couple revokes YouTube access from their Google account, Setnayan dashboard shows "Re-authorize YouTube to continue broadcasting" with a one-tap re-OAuth button
 
-**Spec refs:** `0011_live_stream/0011_live_stream.md`, decision log "Live Stream delivers exclusively via YouTube" 2026-05-09.
+**Cost:** Free (YouTube Data API quota is generous per-OAuth-client; per-couple OAuth means quota scales naturally with users without consuming Setnayan's daily quota budget).
+
+**Spec refs:** `0011_panood/0011_panood.md` § Pricing — V1 SKU lock 2026-05-16, CLAUDE.md 2026-05-16 4th row, `0033_public_api_foundation/0033_public_api_foundation.md` § oauth_grants schema (extended for per-event YouTube refresh-token storage).
 
 ### 5.4 Anthropic Claude API
 
@@ -427,6 +448,28 @@ V1 is built on Vercel + Supabase + Cloudflare R2 + GitHub plus seven third-party
 
 **Spec refs:** `0034_payments_and_cart/0034_payments_and_cart.md` § 11, CLAUDE.md "Payment system" V1.5 roadmap.
 
+### 7.8 TikTok OAuth — Personal-tier Patiktok BYO flow (V1 · added 2026-05-16)
+
+> **V1 integration.** Added with the 2026-05-16 Patiktok dual-tier SKU lock — the **Personal TikTok** tier (`patiktok_personal_daily` ₱1,999/day) requires the couple to grant Setnayan write permission to their own TikTok account so compilations auto-post to their handle. The **Setnayan TikTok** tier (`patiktok_setnayan_daily` ₱999/day) does NOT use this OAuth path — it posts via Setnayan-owned `@SetnayanWeddings` credentials.
+
+- [ ] Register a TikTok developer app at `developers.tiktok.com` (Setnayan-owned, business-tier)
+- [ ] Submit business verification (DTI cert + business email + privacy policy URL pointing to `setnayan.com/privacy`)
+- [ ] Wait for TikTok Login Kit + Content Posting API approval (typical 5-10 business days)
+- [ ] Request the following scopes for the Personal-tier Patiktok flow:
+   - `user.info.basic` — read couple's TikTok display name / avatar for confirmation UI
+   - `video.upload` — write videos to the couple's account (PRIVATE by default)
+   - `video.publish` — publish those videos publicly with caption + @-mentions
+- [ ] Wait for scope-by-scope review (TikTok reviews each scope independently; `video.publish` is the slowest, typically 2-4 weeks)
+- [ ] Implement OAuth handshake at Patiktok Personal-tier SKU purchase time — couple completes TikTok login in a popup, refresh token written to `oauth_grants` (same table as YouTube per § 5.3 extension)
+- [ ] Token refresh: TikTok refresh tokens are 365 days; nightly cron refreshes any expiring tokens
+- [ ] Compilation posting flow: after compilation render completes, server reads couple's refresh token → exchanges for access token → calls `POST /v2/post/publish/video/init/` → uploads the rendered MP4 → finalizes with `POST /v2/post/publish/status/fetch/` polling
+- [ ] Revocation handling: if couple revokes TikTok access from their TikTok app, Setnayan dashboard shows "Re-authorize TikTok to continue posting from Patiktok" with a one-tap re-OAuth button
+- [ ] Caption template: `"Our Patiktok — [event date] · @[guest1] @[guest2] ... · #[customhashtag]"` (vs Setnayan-tier template that uses `"[Couple Name]'s Patiktok ..."`)
+
+**Cost:** Free (TikTok Content Posting API quota is generous for verified business apps; Setnayan's posting count is well below limits even at V1 scale).
+
+**Spec refs:** `0017_patiktok/0017_patiktok.md` § Pricing — V1 SKU lock 2026-05-16 + § TikTok integration — dual-tier posting, CLAUDE.md 2026-05-16 6th row, `oauth_grants` schema (extended for per-event TikTok refresh-token storage).
+
 ## Tier 8 — Missing items (surfaced in 2026-05-14 10-pass audit)
 
 These are integrations + libraries + assets that were referenced across iteration specs / CLAUDE.md decisions / app build but were missing from Tiers 1–7. Added 2026-05-14 to close the gap. For the prioritized install sequence, see [Install_Sequence_V1.md](02_Specifications/Install_Sequence_V1.md).
@@ -489,7 +532,7 @@ These are integrations + libraries + assets that were referenced across iteratio
 
 #### 8.3f — Render pipeline (Phase 7 of `Install_Sequence_V1.md`)
 
-- [ ] **Remotion** — programmatic video rendering (0011 + 0024 + SDE + 0017)
+- [ ] **Remotion** — programmatic video rendering (0011 + SDE + 0017). ~~0024~~ dropped from this list 2026-05-16 (Save-the-Date retired)
 - [ ] **`lottie-web`** (or `@lottiefiles/lottie-player`) — animated overlay rendering
 - [ ] **FFmpeg binary** on Cloudflare Workers + Hetzner VMs
 - [ ] **LUT files** (`.cube` color-grading) — ~30 files for V1 catalog feel categories

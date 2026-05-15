@@ -1,4 +1,6 @@
-# 0002 — Guest QR Code System & Personal Invitation Site
+# 0002 — Guest QR Code System & Event Landing Page
+
+> **Spec note (2026-05-16):** This iteration now also owns the **Event Landing Page** — one free landing page per event at `setnayan.com/{couple-slug}` that morphs through four lifecycle phases (Save-the-Date → Invitation → Logistics → Post-event). Retired iteration 0024 (Save-the-Date) folded into this spec as the Phase 1 hero layout; § 5a of the original 0024 absorbed into the new **Event Landing Page lifecycle** section below. See `CLAUDE.md` decision log 2026-05-16 for the full reframe rationale.
 
 **Type:** Implementation work order (Claude Code ticket)
 **Surface:** Setnayan Web (couple dashboard + guest-facing invitation site) + cross-cutting QR architecture · **Bottom-nav tab: Guest List** · Couple-side URLs: `setnayan.com/dashboard/[event-id]/invitation` (admin) and `setnayan.com/dashboard/[event-id]/invitation/print` (print pack); guest-facing: `setnayan.com/[event-slug]?invite=[token]` (unchanged)
@@ -25,6 +27,82 @@ Every guest carries one QR token. The same token, scanned from different surface
 Same QR. Same token format. Three contexts. The native apps register themselves as preferred handlers for the URI scheme so the OS routes the scan correctly when those apps are installed; otherwise the browser handles it.
 
 This iteration delivers the **web-side foundation**: the token generation, the personal invitation site, the couple's QR admin / print sheet view, and the database schema for scan events. The native-app scanning UIs are designed in stub form here but implemented in Phase 2 (Setnayan) and Phase 3 (Din).
+
+---
+
+## Event Landing Page lifecycle (locked 2026-05-16)
+
+The personal invitation site at `setnayan.com/{couple-slug}` is **one free page per event** that auto-transitions through four lifecycle phases on calendar thresholds. Each phase ships a first-class hero layout — not an MP4 embed, not a separate page. The page is the destination for every shared link, every QR scan, and every couple-to-guest broadcast.
+
+**Why this is in 0002 (and not 0024):** The original 0024 § 5a already imagined the landing page as one lifecycle-phased surface. The reframe (decision log 2026-05-16) drops the MP4-rendering primitive entirely and makes Phase 1 a first-class layout that runs on web tech only (animated SVG monogram + countdown + calendar-add + Open Graph card + music). No FFmpeg pipeline, no render storage, no aspect-ratio multiplexing. The lifecycle machinery belongs to the landing-page chassis, which lives in this iteration.
+
+### The four phases
+
+**Phase 1 — Save-the-Date (T-event to T-90d):**
+- Hero: animated SVG-trace monogram reveal (Monogram Hero upgrade in 0004 unlocks the trace + custom video/photo background) + couple names + date overlay + countdown
+- Soft RSVP intent prompt ("I plan to attend") — non-binding head-count signal
+- Calendar-add row: one-tap Apple / Google / Outlook
+- Below hero: brief "Save the date" message, music autoplay-muted, social share row
+- Other widgets minimal — guests are here to bookmark and share
+- Open Graph metadata renders a beautiful link-preview card for FB / WhatsApp / Messenger / email
+
+**Phase 2 — Invitation (T-90d to T-30d):**
+- Hero: shifts to the formal invitation card — still date/venue, but emphasizes RSVP
+- The Phase 1 monogram-hero animation/video moves to a smaller "Our story so far" section below the fold
+- RSVP form: prominent above-the-fold call-to-action
+- Schedule, dress code, gift registry, accommodations surface as scroll sections
+- All 0004 widgets become visible per their `is_visible` flags
+
+**Phase 3 — Final logistics (T-30d to T-1d):**
+- Hero: countdown card + driving directions / parking / venue map
+- RSVP form: gated to RSVPed guests only — non-RSVPed see a soft prompt
+- Day-of timeline, what-to-wear reminders, contact info for the coordinator
+- Live Schedule widget (0004 upgrade) glows on its current block if owned
+
+**Phase 4 — Post-event (T+1d onwards):**
+- Hero: gallery feed from Papic / Panood / Patiktok (consumes 0012 / 0011 / 0017 when shipped)
+- Phase 1 monogram-hero moves to a small "Where it started" archive section
+- RSVP form removed
+- 30-day photo download window already documented elsewhere in this spec
+
+### Auto-transition mechanics
+
+Phase boundaries are computed from `events.event_date` and the current timestamp:
+
+```sql
+-- Phase computation (pseudo)
+CASE
+  WHEN now() < event_date - INTERVAL '90 days' THEN 'save_the_date'
+  WHEN now() < event_date - INTERVAL '30 days' THEN 'invitation'
+  WHEN now() < event_date + INTERVAL '1 day'   THEN 'logistics'
+  ELSE 'post_event'
+END AS lifecycle_phase
+```
+
+Auto-transitions happen on first request after the boundary. Couples can manually override any phase from the landing-page editor (in 0004's couple-side customize surface). The override flag is per-phase; a couple can stay on the Save-the-Date hero forever if they want.
+
+### Schema addition
+
+```sql
+ALTER TABLE events ADD COLUMN lifecycle_phase_override TEXT
+  CHECK (lifecycle_phase_override IS NULL OR lifecycle_phase_override IN
+    ('save_the_date','invitation','logistics','post_event'));
+-- NULL = auto-compute from event_date thresholds
+-- non-NULL = couple has pinned this phase, ignore date math
+```
+
+### Why default-on (no opt-in)
+
+The first 6–8 months of a landing page's life is announcement traffic. Defaulting Phase 1 as the hero matches what those visitors came expecting — the polished Save-the-Date moment from the couple's social share. Forcing opt-in means most couples never set up Phase 1 and the landing page launches with an empty or generic hero. Couples who want a different starting state use the per-phase override.
+
+### Pricing
+
+The landing page itself is **free** for every event. Couples customize it via 0004's widget editor. Two paid Phase 1 upgrades (V1):
+
+- **Monogram Hero ₱1,999** (no-refund · all sales final) — animated SVG-trace monogram reveal + custom video (max 30MB) or photo background; SVG-only monogram upload required
+- **Live Schedule ₱999** — "Happening now" highlight + auto-scroll, primarily a Phase 3 feature but available from purchase
+
+Full V1 pricing + retired SKUs + V1.5+ widget plans in iteration 0004.
 
 ---
 

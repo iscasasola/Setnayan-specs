@@ -100,22 +100,22 @@ These came up during the same conversation and also landed:
 ```
 0000_app_shell_and_navigation/    → login, role-router, event picker, 4-tab nav
 0001_creating_guest_list/         → guest list, RSVP
-0002_qr_invitation_system/        → personal QR + slug system
+0002_qr_invitation_system/        → personal QR + slug system + **Event Landing Page** (4 lifecycle phases: Save-the-Date / Invitation / Logistics / Post-event · absorbs retired 0024 as Phase 1)
 0003_token_wallet_and_packs/      → [RETIRED 2026-05-11]
-0004_invitation_widgets/          → Pro widgets
+0004_invitation_widgets/          → 11 widgets · 2 V1 paid upgrades (Monogram Hero ₱1,999 no-refund + Live Schedule ₱999) · 3 V1.5+ reserved (Panood/Papic/Patiktok)
 0005_led_background_maker/        → 8K LED templates
 0006_vendors_management/          → vendor registry, filter popup, reviews schema, crew_size
 0007_budget_expenses/             → couple's payment ledger
 0008_seating_chart_editor/        → table layout + QR print pack
 0009_photo_delivery/              → Google Drive integration
 0010_mood_board/                  → palettes + Setnayan Guide rule engine
-0011_panood/                      → Live Stream (Panood) V1
-0012_paparazzi/ or 0012_papic/    → Paparazzi (Papic) native iOS/Android
+0011_panood/                      → Panood — V1 SKU lock 2026-05-16: BYO YouTube via OAuth · per-day pricing (Daily Broadcast ₱499 · Camera Sync ₱99 · Annual ₱2,999 · Annual Plus ₱3,999) · Cloudflare-composite SKUs retired
+0012_paparazzi/ or 0012_papic/    → Papic — V1.5+ deferral with **architecture lock 2026-05-16**: 207-cam mesh + Drive transfer T+30d + cold-tier 90-day window + pooled credits + Auto-Recap; SKUs frozen at V1.5+ build-time (paparazzi_3_seats ₱1,499 · paparazzi_5_seats ₱2,499 · paparazzi_camera_addon ₱999 · paparazzi_credits_addon ₱299 · premium_guest_camera_pack ₱1,499 · personal_album_per_guest ₱49 · memory_book_per_guest ₱249)
 0013_platform_stack_and_sync/     → Vercel + Supabase + R2 + GitHub setup
 0014_v1_1_polish/                 → queued; no folder yet
 0015_main_website/                → setnayan.com marketing site
 0016_step_by_step_plan_builder/   → vendor plan builder
-0017_patiktok/                    → Patiktok templates (vertical reels)
+0017_patiktok/                    → Patiktok — V1 SKU lock 2026-05-16: dual-tier per-day model (Setnayan TikTok ₱999/day · Personal TikTok ₱1,999/day via OAuth) · 40-video/day soft cap + ₱49/+10 overage · old ₱2,499/booth/5hr SKU retired
 0018_supplies_marketplace/   → supplies marketplace placeholder
 0019_communications/              → chat + video + file sharing + vendor identity masking + force majeure
 0020_admin_console/               → [SUPERSEDED by 0023]
@@ -123,7 +123,7 @@ These came up during the same conversation and also landed:
 0021_couple_dashboard_fully_purchased/  → 9 customer surfaces (post-purchase)
 0022_vendor_dashboard/            → 6 vendor surfaces
 0023_admin_console/               → 7 admin surfaces + § 9.1 two-admin scope + Team Pool + Payment Methods + funnel analytics + force majeure escalation
-0024_save_the_date/               → 30 Save-the-Date templates
+0024_save_the_date/               → Save-the-Date — page-render SKU retired 2026-05-16 (folded into 0002 Phase 1); **NEW Save-the-Date Video MP4 SKU ₱99 reintroduced 2026-05-16 as a separate product** — 5-10 engagement photos in → 30-60s vertical MP4 out with Setnayan-owned music + landing-page end-card (different inputs, different outputs, different SKU code `save_the_date_video_render`)
 0025_profile_settings/            → 6-tab settings inside customer/vendor/admin dashboards
 0026_bir_tax_compliance/          → OR + VAT + EWT + Form 2307
 0027_e_signature/                 → [DEFERRED V1.5 — manual signing in V1 per Vendor Agreement § 12.1]

@@ -4,8 +4,96 @@
 **Topic:** Papic feature, V1
 **Surface:** Couple-side → Setnayan Web Dashboard · **Bottom-nav tab: In-App Services** · Couple URL: `setnayan.com/dashboard/[event-id]/services/papic` (gallery + seat purchase) · Paparazzo-side: native iOS / Android apps (separate)
 **Builds on:** 0000 (app shell, sign-in, event-scoped URL, In-App Services launcher), 0001 (guest data, role taxonomy, `photo_consent`), 0002 (personal QR delivery), 0008 (table QR for fan-out tagging), 0011 (Custom Monogram Pack flag), 0034 (Payments & Cart — Papic seat purchases route through `service_orders` apply-then-pay)
-**Status:** Drafted 2026-05-09 · revised 2026-05-10 (DSLR Pro Camera Bridge + face-detection auto-tag + EXIF/geo metadata + adaptive compression) · token-wallet language purged 2026-05-12 (now PHP-native via 0034)
+**Status:** Drafted 2026-05-09 · revised 2026-05-10 (DSLR Pro Camera Bridge + face-detection auto-tag + EXIF/geo metadata + adaptive compression) · token-wallet language purged 2026-05-12 (now PHP-native via 0034) · **V1.5+ deferral + architecture lock 2026-05-16 (see § V1.5+ Architecture Lock below — entire build deferred to V1.5+; architecture frozen now to prevent re-litigation)**
 **Companion specs:** `10_Papic_Feature_Specification.md`, `0011_panood/`, `0034_payments_and_cart/`, `0001_creating_guest_list/`, `0002_qr_invitation_system/`
+
+---
+
+## V1.5+ Architecture Lock — locked 2026-05-16
+
+> **All Papic SKUs are deferred to V1.5+.** V1 ships without native iOS / Android engineering bandwidth. The architecture is **frozen now** so the V1.5+ build cannot re-litigate decisions already argued through. The "What this iteration ships" section below describes the prior V1 scope and remains canonical for V1.5+ build-time reference; SKU pricing is updated in the V1.5+ SKU table at the end of this section.
+
+### 1. 207-camera mesh per event
+
+5 paid paparazzi + 200 guest cameras (cap) + 1 couple seat = **207 cameras** per event. Each guest receives **150 captured-photo credits**, bundled free in the Premium Guest Camera Pack (event-wide ₱1,499 SKU). The 5 paid paparazzi seats share a **pooled credit pool** (see § 8 below) rather than per-paparazzo quotas.
+
+### 2. Drive transfer at T+30d
+
+Setnayan retains the canonical archive in R2 until T+30d post-event. At T+30d, the couple OAuths their Google account and Setnayan pushes the full archive (photos, videos, Auto-Recap, XMP/EXIF metadata) to the couple's `Setnayan/[Event Name]/` Drive folder root. **Couple owns the archive from T+30d onward.** Drive transfer is one-way; subsequent edits in Setnayan (e.g. couple un-hides a photo during the 7-day review window) do NOT re-sync to Drive — review window closes at T+7d, Drive transfer happens at T+30d, so this is not a real-world conflict.
+
+### 3. Cold-tier 90-day safety window
+
+From T+30d to T+120d, Setnayan retains a **cold-tier R2 mirror** of the archive (R2 Infrequent Access class — ~₱0.004/GB/month vs hot-tier ~₱0.020/GB/month, ~80% cost reduction). After T+120d the cold-tier rows lapse and the couple's own Google Drive becomes the only canonical copy. If a couple accidentally trashes the Drive folder within the 90-day window they can request re-transfer from Setnayan support.
+
+### 4. XMP/EXIF tag embedding on Drive transfer
+
+Before the T+30d Drive push, Setnayan embeds the following into each file:
+- **XMP sidecars (per-photo, alongside `.jpg`/`.cr2`/`.nef`):** face-detection tags (Lightroom-compatible `Iptc4xmpCore:PersonInImage`), table tag, capture timestamp, geo coordinates, photographer ID
+- **EXIF UserComment / ImageDescription** (where the file format supports it): same tags as a fallback for tools that don't read XMP
+
+Couple's archive is queryable in Lightroom / Photo Mechanic / Capture One / Photos.app without Setnayan being in the loop — face tags surface as named keywords, table tags as a custom keyword, geo as standard EXIF lat/lon.
+
+### 5. Auto-Recap (FFmpeg, no AI · free with Premium Guest Camera Pack)
+
+Rendered T+24h post-event, **60-90 second highlight reel**, deterministic ordering:
+- Capture timestamps clustered into ~12-15 narrative beats spread evenly across event duration
+- Within each beat, photo-quality heuristic picks the best frame: sharpness score (Laplacian variance) + face-count (more faces = higher score) + exposure-curve median (closer to mid-gray = higher score)
+- No Anthropic API · no scene-prompt costs · no LLM in the loop
+- Music: Setnayan-owned AI track from the catalogue (couple picks category at purchase)
+- Output: 1080×1920 vertical MP4 (H.264) + 1920×1080 horizontal MP4 (H.264), both bundled into Drive transfer + downloadable from couple dashboard
+
+Auto-Recap is **free** when the event has the Premium Guest Camera Pack (₱1,499 event-wide) — no separate per-event recap charge.
+
+### 6. Folder structure on Drive
+
+```
+Setnayan/[Event Name]/
+├── 00_Cover/                    # best-of-show curated by couple during 7-day review
+├── 01_Pre-event/                # captures before ceremony start time
+├── 02_Ceremony/                 # captures during ceremony window
+├── 03_Reception/                # captures during reception window
+└── 04_Auto-Recap/               # the 60-90s highlight reel (vertical + horizontal)
+```
+
+Phase-bucketed for Lightroom-style ingest. Couple can re-organize at will after T+30d (they own the folder).
+
+### 7. File naming
+
+```
+{couple-slug}_{ISO-8601 capture timestamp}_{photographer-id}_{capture-id}.{ext}
+```
+
+Example: `maria-juan_2026-08-15T14-32-08+0800_p3_c00421.jpg` — sorts chronologically by photographer per session; photographer-id (`p1`-`p5`) lets Lightroom collections filter by-photographer trivially.
+
+### 8. Pooled credit pool
+
+Couple's paid paparazzi **share a pool** (not per-paparazzo quotas):
+- **3-Paparazzi pack** (₱1,499): **5,000 captured-photo credits** shared across the 3 seats
+- **5-Paparazzi pack** (₱2,499): **10,000 captured-photo credits** shared across the 5 seats
+
+Pool sizes are calibrated for typical Filipino-wedding capture counts (200-guest event = 3K-5K paparazzi shots; pool gives 1.5-2× headroom). Per-paparazzo quotas would force premature shutter-discipline in high-value windows (ceremony, first dance, send-off) where one paparazzo legitimately shoots heavy while another shoots lighter at the same moment.
+
+### 9. Soft warning at 80% pool utilization + extension SKU
+
+At **80% of the pool consumed**, the operator UI shows a soft-warning banner: *"You've used 80% of the event credit pool. Add 1,000 more credits for ₱299 to keep shooting freely."* Operator can tap to purchase the **Credits Add-on** (`paparazzi_credits_addon`, ₱299 / +1,000 credits, multi-purchase) inline without leaving the booth flow. Pool depletion is non-blocking — shutter still works after 100%, but each capture posts a warning toast and the couple's dashboard surfaces the overage at event-end with a one-tap top-up button.
+
+### V1.5+ SKU table (deferred build · pricing locked 2026-05-16)
+
+| SKU | `service_catalog.sku_code` | Price | Scope |
+|---|---|---|---|
+| **3-Paparazzi Pack** | `paparazzi_3_seats` | **₱1,499** | 3 paparazzi seats · 5,000-credit pool · 200 guest cams · 150 credits/guest |
+| **5-Paparazzi Pack** | `paparazzi_5_seats` | **₱2,499** | 5 paparazzi seats · 10,000-credit pool · 200 guest cams · 150 credits/guest |
+| **Camera Add-on** | `paparazzi_camera_addon` | **₱999** | One additional paid paparazzi seat · multi-purchase · **repriced from prior ₱1,499 Pro Camera Bridge SKU** |
+| **Credits Add-on** | `paparazzi_credits_addon` | **₱299** | +1,000 pool credits · multi-purchase · in-event upsell at 80% pool warning |
+| **Premium Guest Camera Pack** | `premium_guest_camera_pack` | **₱1,499** | Event-wide flag: every guest gets Lifetime Archive + Drive sync + Auto-Recap + watermark-free downloads + HD video upload. Replaces per-guest gating with one event-wide flag. |
+| **Personal Album (per guest)** | `personal_album_per_guest` | **₱49** | Per-guest digital album · opt-in per guest · low-friction upsell · multi-purchase per event |
+| **Memory Book (per guest)** | `memory_book_per_guest` | **₱249** | Per-guest printable hardcover memory book PDF · opt-in per guest · higher-touch upsell · multi-purchase per event |
+
+Pro Camera Bridge for DSLR pairing (Canon · Nikon · Sony · Fujifilm WiFi SDK) is folded into the paid-paparazzi seat's capability set — no longer a separate ₱1,499 SKU. A 5-Paparazzi pack includes DSLR-pairing capability across all 5 seats out of the box.
+
+### Tax-tier note
+
+All V1.5+ Papic SKUs net **~65-72% margin** under V1 tax tier (Percentage Tax 3% + Local Business Tax 1% + Income Tax 25% — non-VAT lock). Cold-tier R2 + 90-day safety window cuts long-tail storage cost ~80% vs the prior hot-tier indefinite retention model.
 
 ---
 

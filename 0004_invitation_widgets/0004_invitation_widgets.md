@@ -14,9 +14,11 @@
 
 The couple's customization editor for their invitation site. The personal invitation site from iteration 0002 is a fixed sequence of sections; this iteration turns those sections into **editable widgets** the couple can configure, reorder, hide, and selectively upgrade to Pro tiers. The editor lives at `setnayan.com/dashboard/customize` as a three-panel layout: widget library on the left, live preview in the center, inspector with Basic/Pro tier toggle on the right.
 
-Each widget has a **Basic tier** included free with every wedding. A small subset of widgets also offers a **Pro tier** — a one-time per-widget upgrade that unlocks pre-programmed enhancements (animations, deep-links, premium layouts) at near-zero marginal cost. Pro tiers are pure-margin upsells; the vast majority of features ship in Basic and are free.
+Each widget has a **Basic tier** included free with every wedding. A small subset of widgets also offers a **paid upgrade** — a one-time per-widget unlock that delivers a fundamentally different visual or operational experience. Paid upgrades are pure-margin upsells; the vast majority of features ship in Basic and are free.
 
-V1 ships with **11 widgets**, of which **3 have Pro tiers** (Hero Monogram animation, Our Story scroll animations, Schedule live "happening now" highlight). All other previously-Pro features (Waze deep-links, calendar deep-links, video greeting, flip-digit countdown, multi-event RSVP) are folded into Basic — they cost zero per render and shouldn't gate behind a paywall.
+V1 ships with **11 widgets**, of which **2 have paid upgrades (locked 2026-05-16)**: **Monogram Hero** (₱1,999, no refund — animated SVG-trace monogram reveal + custom video/photo background) and **Live Schedule** (₱999 — "Happening now" highlight + auto-scroll). The Our Story scroll-animation Pro tier originally drafted in this iteration is **retired and folded to free** (zero marginal cost); the Pro Bundle is **retired** (bundle math doesn't work with 2 SKUs at vastly different price points). All other previously-Pro features (Waze deep-links, calendar deep-links, video greeting, flip-digit countdown, multi-event RSVP) remain folded into Basic — they cost zero per render and shouldn't gate behind a paywall.
+
+**Reserved for V1.5+:** three additional widget types — **Panood widget**, **Papic widget**, **Patiktok widget** — pre-reserved in the registry but not pre-seeded; activated when their parent iterations (0011 / 0012 / 0017) ship. Each inherits its upgrade pricing from the parent iteration's SKU. Pricing for the remaining 9 widgets' paid upgrades is **TBA post-launch** once V1 usage data identifies which widgets convert.
 
 ---
 
@@ -29,8 +31,8 @@ This iteration is part of a strictly forward-sequenced build. Each numbered iter
 | From | What 0004 needs |
 |---|---|
 | **0001** | `events` table, couple authentication, dashboard shell, R2 storage (PH-region), base palette field on `events` (single-list of swatches — superseded by 0004's multi-palette structure) |
-| **0002** | Personal invitation site renderer (server-rendered React tree, reads from a per-event content blob), QR Code widget with `color_mode` field already shipped (defaulted to safe black-on-white) |
-| **0034** | Payments & Cart spine: `service_catalog` SKUs (`pro_widget_hero`, `pro_widget_story`, `pro_widget_schedule`, `pro_widget_bundle`), `carts` + `service_orders` flow, admin-reconciliation activation hook (per 0023 § 3.3). **All Pro widget purchases in this iteration route through the standard apply-then-pay flow** — customer adds Pro upgrade to cart, checks out, pays via QR + screenshot, admin approves, the activation hook flips `invitation_widgets.tier` to `'pro'`. No direct PayMongo/Stripe charges initiated from this iteration. |
+| **0002** | Event Landing Page renderer (server-rendered React tree, reads from a per-event content blob + lifecycle phase), QR Code widget with `color_mode` field already shipped (defaulted to safe black-on-white) |
+| **0034** | Payments & Cart spine: `service_catalog` SKUs (`monogram_hero_upgrade`, `pro_widget_schedule`), `carts` + `service_orders` flow, admin-reconciliation activation hook (per 0023 § 3.3). **All paid widget upgrades in this iteration route through the standard apply-then-pay flow** — customer adds upgrade to cart, checks out, pays via QR + screenshot, admin approves, the activation hook flips `invitation_widgets.tier` to `'pro'`. No direct PayMongo/Stripe charges initiated from this iteration. **Monogram Hero is no-refund · all sales final** (apparatus-rule clean — one purchase = one tool unlock); checkout copy must surface this disclosure. The previously-spec'd `pro_widget_hero`, `pro_widget_story`, and `pro_widget_bundle` SKUs are retired per the 2026-05-16 pricing reset. |
 
 ### Provides (downstream iterations consume these — do not modify in later iterations without changelog)
 
@@ -54,7 +56,7 @@ This iteration is part of a strictly forward-sequenced build. Each numbered iter
 
 `0004_invitation_widgets.html` (this folder) is the canonical visual reference. The mockup shows:
 
-- **Desktop frame (1380px)**: Editor top bar with brand, save state, undo/redo, Preview-as-guest, Save draft, Publish. Three-panel body: left widget library (active widgets list with drag-handles + Add widget + Pro Bundle promo), center preview pane (live-rendered scaled invitation, with the selected widget outlined and tagged "Editing"), right inspector (selected widget = Hero Monogram with Basic/Pro toggle, settings fields, and a Pro upsell card showing "Animate names → monogram · ₱99").
+- **Desktop frame (1380px)**: Editor top bar with brand, save state, undo/redo, Preview-as-guest, Save draft, Publish. Three-panel body: left widget library (active widgets list with drag-handles + Add widget + paid-upgrade promo card surfacing the two V1 upgrades), center preview pane (live-rendered scaled invitation, with the selected widget outlined and tagged "Editing"), right inspector (selected widget = Hero Monogram with Basic / Monogram Hero toggle, settings fields, and the Monogram Hero upsell card showing trace animation preview + background upload + "₱1,999 · All sales final · no refund" pricing block). *Note: the canonical `.html` mockup file may still render the older ₱99 Pro pricing; the .md spec is source-of-truth as of 2026-05-16 and the prototype regeneration is a pending engineering task.*
 - **Mobile frame (390×844)**: Vertical preview with the selected widget highlighted, slide-up settings sheet at the bottom for editing the active widget, three-tab bottom bar (Widgets / Preview / Settings).
 
 Open the mockup, click a widget in the left rail to swap the inspector content, click the tier toggle to flip between Basic and Pro states.
@@ -63,23 +65,25 @@ Open the mockup, click a widget in the left rail to swap the inspector content, 
 
 ## The 11 widgets
 
-| # | Widget | Basic (free) | Pro (paid) |
+| # | Widget | Basic (free) | Paid upgrade (V1) |
 |---|---|---|---|
-| 1 | **Hero Monogram** | Static monogram (auto-generated or uploaded) with style + motif picker + 25-frame catalog | Names animate into the monogram on page load · ₱99 |
-| 2 | **Greeting** | Personalized "Hi, [first name]" + custom message + optional couple-uploaded video (15–30 sec MP4) that plays inline per guest | — |
-| 3 | **Our Story** *(new in 0003)* | Couple's love-story timeline of 3–7 moments (date label + title + body + optional photo) with optional intro/closing copy. Format toggle: timeline / prose / mixed | Scroll-triggered photo parallax + Ken Burns effect on each moment · ₱99 |
-| 4 | **Countdown** | Days / Hours / Minutes / Seconds, ticking. Couple chooses style: standard ticker **or** flip-digit + milestone bursts (animated celebration at 30/7/1 days) | — |
-| 5 | **QR Code** | QR with download + copy + add-to-wallet actions, 6 frame styles, palette auto-derive or custom colors | — |
-| 6 | **RSVP** | Couple chooses mode: single-event (3 buttons + plus-one + meal + dietary + note) **or** multi-event (separate yes/no per ceremony / reception / after-party with independent meal pickers) | — |
-| 7 | **Event Details** | Date, ceremony summary, reception summary, guest's role, plus one-tap calendar deep-links (Google / Apple / Outlook) | — |
-| 8 | **Venue** | Two photo cards (ceremony + reception) with "Get directions" + native Waze + Google Maps deep-links | — |
-| 9 | **Schedule** | Time-aligned run-of-show list | "Happening now" live highlight (purely time-based; current block glows + auto-scrolls; role-specific cue line) · ₱99 |
-| 10 | **Dress Code · Do/Don't** | Title + 9 palettes (8 ceremony roles + reception) + global Do list + global Don't list + tagline + per-role attire references (up to 3 photos × 12 role-gender slots, stylist-uploaded) + global inspiration board | — |
-| 11 | **Photo Moments · Savour** | 3 highlighted moments (Bridal Walk / Kiss / First Entrance) | — |
+| 1 | **Hero Monogram** | Static monogram (auto-generated or uploaded SVG/PNG) with style + motif picker + 25-frame catalog | **Monogram Hero · ₱1,999 · no refund** — animated SVG-trace monogram reveal + custom video (15–30s MP4 ≤30MB) OR photo (JPG/PNG ≤5MB) background. **PNG monograms accepted via Potrace conversion + preview gate** (see Pro purchase flow below). All sales final |
+| 2 | **Greeting** | Personalized "Hi, [first name]" + custom message + optional couple-uploaded video (15–30 sec MP4) that plays inline per guest | — (V1.1+ TBA) |
+| 3 | **Our Story** | Couple's love-story timeline of 3–7 moments (date label + title + body + optional photo) with optional intro/closing copy. Format toggle: timeline / prose / mixed. **Scroll parallax + Ken Burns now in Basic** (folded from retired Pro tier 2026-05-16) | — (V1.1+ TBA) |
+| 4 | **Countdown** | Days / Hours / Minutes / Seconds, ticking. Couple chooses style: standard ticker **or** flip-digit + milestone bursts (animated celebration at 30/7/1 days) | — (V1.1+ TBA) |
+| 5 | **QR Code** | QR with download + copy + add-to-wallet actions, 6 frame styles, palette auto-derive or custom colors | — (V1.1+ TBA) |
+| 6 | **RSVP** | Couple chooses mode: single-event (3 buttons + plus-one + meal + dietary + note) **or** multi-event (separate yes/no per ceremony / reception / after-party with independent meal pickers) | — (V1.1+ TBA) |
+| 7 | **Event Details** | Date, ceremony summary, reception summary, guest's role, plus one-tap calendar deep-links (Google / Apple / Outlook) | — (V1.1+ TBA) |
+| 8 | **Venue** | Two photo cards (ceremony + reception) with "Get directions" + native Waze + Google Maps deep-links | — (V1.1+ TBA) |
+| 9 | **Schedule** | Time-aligned run-of-show list | **Live Schedule · ₱999** — "Happening now" highlight (purely time-based; current block glows + auto-scrolls; role-specific cue line) |
+| 10 | **Dress Code · Do/Don't** | Title + 9 palettes (8 ceremony roles + reception) + global Do list + global Don't list + tagline + per-role attire references (up to 3 photos × 12 role-gender slots, stylist-uploaded) + global inspiration board | — (V1.1+ TBA) |
+| 11 | **Photo Moments · Savour** | 3 highlighted moments (Bridal Walk / Kiss / First Entrance) | — (V1.1+ TBA) |
 
-**Pro upgrades launched in V1:** Hero Monogram animation (₱99), Our Story scroll animations (₱99), Schedule live highlight (₱99). **Pro Bundle:** combines all current Pro upgrades for ₱199 (vs ₱300 separately, saves ₱99 / ~33%). Future widgets may add their own Pro tiers; the bundle scales accordingly.
+**V1 paid upgrades locked (2026-05-16):** Monogram Hero ₱1,999 (no-refund), Live Schedule ₱999. **Retired V1 SKUs:** `pro_widget_story` (Our Story scroll parallax — folded to free); `pro_widget_bundle` ₱199 (bundle math doesn't work with 2 SKUs at vastly different price points). The original Pro Monogram (₱99) and Pro Schedule (₱99) SKUs from earlier drafts are superseded by the repriced V1 SKUs above. Future widgets may add their own paid upgrades in V1.1+; no bundle re-introduced unless ≥3 SKUs land at comparable price points.
 
-**Pricing display rule:** all prices are PHP-native, charm-priced (per 2026-05-12 charm-pricing decision). Pro tier per widget = **₱99**; Pro Bundle (all 3 widgets) = **₱199**. Prices render via the standard PHP price formatter as `"₱99"` everywhere — cart, checkout, receipts, inspector toggle. See iteration 0034 (Payments & Cart) for the `service_orders` flow.
+**Reserved for V1.5+ (price inherits from parent iteration):** **Panood widget** (when 0011 ships), **Papic widget** (when 0012 ships), **Patiktok widget** (when 0017 ships). Widget types not pre-seeded in `invitation_widgets`; added to the registry only when the parent iteration activates.
+
+**Pricing display rule:** all prices are PHP-native, charm-priced (per 2026-05-12 charm-pricing decision). Monogram Hero = **₱1,999**; Live Schedule = **₱999**. Prices render via the standard PHP price formatter as `"₱1,999"` / `"₱999"` everywhere — cart, checkout, receipts, inspector toggle. See iteration 0034 (Payments & Cart) for the `service_orders` flow. Monogram Hero checkout copy must surface the **"All sales final · no refund"** disclosure before confirm.
 
 ---
 
@@ -151,9 +155,46 @@ hero_monogram: {
   // Apply to both modes
   date_format: 'long' | 'short' | 'iso' | 'filipino',
 
-  // Pro tier (works for both auto-generated and uploaded)
-  animation_enabled?: boolean,
-  animation_speed_ms?: number,
+  // === Monogram Hero upgrade fields (₱1,999, no-refund — locked 2026-05-16) ===
+  // Set only when the couple has purchased the Monogram Hero SKU.
+  //
+  // PNG-to-SVG conversion via Potrace (amended 2026-05-16):
+  // PNG monogram uploads are accepted, but server-side Potrace conversion runs
+  // and the couple must approve the converted SVG via a preview gate before
+  // checkout completes. SVG-only at the RENDERING layer (the trace animation
+  // requires path-driven SVG); PNG-only at the UPLOAD layer is rescued by the
+  // Potrace pipeline. SVG uploads bypass conversion entirely.
+  //
+  // (1) Animated SVG-trace reveal of the monogram on page load.
+  //     Each <path> in the monogram SVG animates stroke-dasharray + stroke-dashoffset
+  //     from path-length to 0 with cubic-bezier easing; paths stagger so frame draws first
+  //     (~1s), then monogram body (~1.5s), then names fade in below (~0.5s) = ~3s total.
+  trace_animation_enabled?: boolean,
+  trace_animation_duration_ms?: number,  // default 3000, range 1500-6000
+
+  // (2) Custom background for the monogram hero section.
+  //     Couple uploads ONE of video OR photo (mutually exclusive).
+  //     Rendered behind the monogram + couple names via `object-fit: cover`,
+  //     `object-position: center`. Same asset serves all device widths.
+  pro_background_type?: 'template_default' | 'photo' | 'video',
+  pro_background_photo_r2_key?: string,       // JPG/PNG, max 5MB, ≥1920×1080 recommended
+  pro_background_video_r2_key?: string,       // MP4 H.264, 15-30s, max 30MB, autoplay-muted, looping
+  pro_background_video_poster_r2_key?: string, // auto-extracted first non-black frame for OG card + slow-connection placeholder
+  pro_background_uploaded_at?: string,        // ISO timestamp
+  pro_background_uploaded_size_bytes?: number,
+
+  // (3) PNG-to-SVG conversion record (set when uploaded_format = 'png' AND couple
+  //     approved the converted SVG via the preview gate).
+  //     PNG original kept at `uploaded_url` as backup / audit / future re-conversion.
+  //     Converted SVG at `converted_svg_url` is canonical for rendering.
+  converted_svg_url?: string,                 // R2 path to Potrace-output SVG
+  converted_svg_approved_at?: string,         // ISO timestamp — couple's explicit approval at preview gate
+  converted_svg_potrace_settings?: {
+    threshold: number,                        // brightness threshold (Potrace --threshold), default 128
+    turdsize: number,                         // suppress speckles smaller than this (Potrace --turdsize), default 2
+    optcurve: boolean,                        // optimize curves (Potrace --no-optcurve negated), default true
+    opttolerance: number,                     // curve-optimization tolerance (Potrace --opttolerance), default 0.2
+  },
 }
 
 greeting: {
@@ -179,7 +220,9 @@ our_story: {
     icon?: string,                  // optional motif glyph
   }>,                               // 3-7 entries
   closing?: string,                 // "And here we are..." kind of line
-  // Pro tier
+  // === Basic-tier (folded from retired Pro tier on 2026-05-16) ===
+  // Scroll parallax + Ken Burns are now free for every couple.
+  // Zero marginal cost to deliver; was extractive to paywall.
   scroll_animation_enabled?: boolean,
   parallax_enabled?: boolean,
   ken_burns_enabled?: boolean,
@@ -264,7 +307,9 @@ venue: {
 
 schedule: {
   blocks: Array<{ time, title, location?, description?, role_cue?: { role_key: string, cue_text: string }[] }>,
-  // Pro tier — purely client-side time comparison vs. current time
+  // === Live Schedule upgrade fields (₱999 — re-priced from ₱99 on 2026-05-16) ===
+  // Purely client-side time comparison vs. current time.
+  // SKU `pro_widget_schedule` retained (same code, new price).
   live_highlight_enabled?: boolean,
   auto_scroll_to_current_block?: boolean,
 }
@@ -366,7 +411,7 @@ CREATE TABLE pro_widget_purchases (
   event_id           UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
   widget_id          UUID NOT NULL REFERENCES invitation_widgets(widget_id),
   purchase_type      TEXT NOT NULL CHECK (purchase_type IN ('individual','bundle')),
-  php_price_centavos INT NOT NULL,                       -- canonical PHP price (₱99 individual, ₱199 bundle in centavos)
+  php_price_centavos INT NOT NULL,                       -- canonical PHP price in centavos (V1: 199900 = ₱1,999 Monogram Hero, 99900 = ₱999 Live Schedule)
   order_id           UUID NOT NULL REFERENCES service_orders(order_id),
                                                          -- the 0034 service_orders row that funded this upgrade
   refunded_at        TIMESTAMPTZ,
@@ -380,18 +425,43 @@ Bundle purchases create one `pro_widget_purchases` row per widget the bundle cov
 
 ---
 
-## Pro purchase flow (apply-then-pay via 0034)
+## Paid upgrade purchase flow (apply-then-pay via 0034 · locked 2026-05-16)
 
-1. Couple is on the inspector for a Pro-eligible widget (Hero Monogram, Our Story, or Schedule). They click the "✦ Pro ·" tier toggle.
+V1 has **two** paid upgrades: **Monogram Hero** (₱1,999, no-refund) and **Live Schedule** (₱999, refundable per 0034 § 8 within 14 days).
+
+1. Couple is on the inspector for an upgrade-eligible widget (Hero Monogram or Schedule). They click the "✦ Upgrade ·" toggle.
 2. If `pro_purchased_at IS NOT NULL` for this widget, tier flips immediately and saves. (Already upgraded.)
-3. If not, the SKU (`pro_widget_hero` / `pro_widget_story` / `pro_widget_schedule`) is added to the couple's cart per 0034. Cart drawer slides up showing "Upgrade [Widget] to Pro · ₱99 · one-time."
+3. If not, the SKU (`monogram_hero_upgrade` / `pro_widget_schedule`) is added to the couple's cart per 0034. Cart drawer slides up showing the upgrade name + price + one-time language.
+   - **For Monogram Hero:** the cart drawer surfaces the **"All sales final · no refund"** disclosure prominently. The couple must check an acknowledgment box before Checkout activates.
+   - **PNG → SVG preview gate** (locked 2026-05-16 amendment): if the couple's current monogram is uploaded PNG, the cart drawer offers an inline **"Convert your PNG to SVG so it can animate?"** path before checkout activates. See the 6-step preview-gate flow immediately below. PNG monograms are no longer hard-blocked; they're rescued by Potrace conversion + explicit couple approval.
+
+### Monogram Hero PNG → SVG preview gate (6-step flow · locked 2026-05-16)
+
+1. Couple in Monogram Hero checkout has a PNG monogram (per `hero_monogram.uploaded_format = 'png'`).
+2. Editor surfaces the offer: *"Convert your PNG to SVG so it can animate? We'll show you the result first."* with two CTAs: **Convert + preview** and **Upload SVG instead**.
+3. On **Convert + preview**: a `POST /api/monogram/convert?event_id={event_id}` request runs the Potrace WASM Worker; server reads the PNG from R2, runs Potrace with default settings (threshold 128, turdsize 2, optcurve true, opttolerance 0.2), writes the output SVG to R2 under `hero_monogram/{event_id}/converted.svg`. Typical wait ~2 seconds; loading state shown in the editor.
+4. **Preview screen** opens: side-by-side panels showing (a) the original PNG and (b) the animated SVG-trace preview looping ~3s. Heading copy: *"This is how your monogram will animate on your landing page. Take your time."*
+5. Three CTAs on the preview: **Use this SVG** (proceed to checkout) · **Try a different file** (return to monogram upload) · **Use auto-generated instead** (revert to Setnayan's generator).
+6. On **Use this SVG**: write `converted_svg_url`, `converted_svg_approved_at`, and `converted_svg_potrace_settings` to `hero_monogram.config_json`. The PNG at `uploaded_url` is **kept as backup** (audit, archive, future re-conversion if Potrace settings improve). The SVG at `converted_svg_url` is the canonical monogram for rendering. Cart drawer's Checkout button now activates; couple proceeds through the standard apply-then-pay flow.
+
+**Engine:** Potrace (open-source, server-side, Cloudflare Worker WASM). ~₱0 marginal cost per conversion. Mature, used by Inkscape's Trace Bitmap. Quality 80–90% on high-contrast monogram-style content.
+
+**Preview-gate IS the consent mechanism for the no-refund clause.** Couples see exactly what they're paying for before commit. "Use this SVG" is the moment of acceptance; all-sales-final is morally defensible after the gate.
 4. Couple taps Checkout. Standard apply-then-pay flow per 0034 § 3 runs: payment screen with BDO + GCash QR codes → external payment → screenshot upload → admin review → approve.
-5. **On admin Approve:** the service-activation hook (0034 § 4.4) inserts a `pro_widget_purchases` row referencing the `service_orders.order_id`, sets `invitation_widgets.pro_purchased_at = NOW()`, and flips `invitation_widgets.tier = 'pro'`. The Pro fields unlock in the inspector.
-6. Refund window: 14 days from `paid_at`, only if Pro tier hasn't been customized in a way that requires the Pro fields. Refund processed per 0034 § 8: admin marks the `service_orders.status = 'refunded'`, the deactivation hook on `pro_widget_purchases` sets `refunded_at`, populates `refund_order_id`, flips `invitation_widgets.tier = 'basic'`, zeroes `pro_purchased_at`.
+5. **On admin Approve:** the service-activation hook (0034 § 4.4) inserts a `pro_widget_purchases` row referencing the `service_orders.order_id`, sets `invitation_widgets.pro_purchased_at = NOW()`, and flips `invitation_widgets.tier = 'pro'`. The upgrade fields unlock in the inspector. For Monogram Hero, the Trace Animation toggle and background upload widgets unlock.
+6. **Refund window:**
+   - **Monogram Hero (₱1,999):** NO REFUND. All sales final. The 14-day window does not apply. Apparatus-rule clean — one purchase = one tool unlock; not returnable. Admin console refunds-tooling will refuse Monogram Hero refunds unless an explicit two-admin escalation override is filed.
+   - **Live Schedule (₱999):** 14 days from `paid_at`, only if the Pro tier hasn't been actively customized in a way that requires the Pro fields. Refund processed per 0034 § 8: admin marks the `service_orders.status = 'refunded'`, the deactivation hook on `pro_widget_purchases` sets `refunded_at`, populates `refund_order_id`, flips `invitation_widgets.tier = 'basic'`, zeroes `pro_purchased_at`.
 
-**Pro Bundle (₱199):** clicking "Upgrade bundle →" in the left rail adds the `pro_widget_bundle` SKU to the cart. Single ₱199 checkout funds all three widget Pro tiers. On Approve, the activation hook creates one `pro_widget_purchases` row per widget the bundle covers (currently 3: Hero Monogram, Our Story, Schedule); all three widgets flip to `tier = 'pro'` atomically against the same `service_orders.order_id`.
+**Retired SKUs (2026-05-16):**
+- `pro_widget_hero` (₱99 Pro Monogram animation) — superseded by `monogram_hero_upgrade` (₱1,999) which bundles trace animation + custom video/photo background
+- `pro_widget_story` (₱99 Our Story scroll parallax) — folded to free, no SKU
+- `pro_widget_bundle` (₱199 three-widget bundle) — math doesn't work with 2 SKUs at vastly different price points; couples pick what matters
 
-**Pricing rationale:** Pro upgrades cost zero marginal to deliver (animations, parallax, time-based UI — all client-side rendering). Per-widget ₱99 is a clean impulse-purchase price. The Bundle at ₱199 is ₱99 cheaper than buying all three Pros separately (~33% off), which converts couples who were going to buy at least one anyway. Bundle pricing is dynamic and scales as future widgets add their own Pro tiers — keep the bundle math in code, not hardcoded.
+**Pricing rationale (2026-05-16):**
+- **Monogram Hero ₱1,999** — designer-grade upgrade (PH monogram designers charge ₱2K–10K for static work; ₱1,999 for animation + custom video background is market-appropriate). All sales final because (a) the upgrade unlocks immediate creative output the couple can't un-see, (b) animation customization can't be cleanly reverted, (c) apparatus-rule clarity.
+- **Live Schedule ₱999** — 10× re-price from original ₱99 captures the wedding-day moment-of-glory value. The widget glows at the venue when "Cake Cutting" is happening NOW; that emotional payoff justifies the premium price.
+- **Bundle retired** — two SKUs at ₱1,999 + ₱999 = ₱2,998 don't bundle naturally. No discount stack offered; couples pick the one(s) that matter to them.
 
 ---
 
@@ -403,7 +473,7 @@ Bundle purchases create one `pro_widget_purchases` row per widget the bundle cov
 
 - "Active widgets" section — drag-reorderable list of all 11 widgets currently in the invitation. Each item: drag handle, icon, name, tier label (Basic / Pro), visibility toggle (eye icon). Click a widget to select it (loads it in the inspector). The eye icon toggles `is_visible` without removing the widget — hidden widgets render with reduced opacity in this list and don't render on the public invitation.
 - "Add widget" button — opens a sheet listing widgets the couple has hidden, plus future widgets that may be added (when more widget types are released, they'll appear here for couples to opt in).
-- "Pro upgrades" promo card at the bottom — shows the Pro Bundle CTA (₱199 for all current Pro upgrades: Hero animation + Our Story scroll + Schedule live highlight).
+- "Paid upgrades" promo card at the bottom — surfaces the two V1 upgrades available: **Monogram Hero ₱1,999** (animated SVG trace + custom video/photo background; no-refund disclosure surfaced inline) and **Live Schedule ₱999** ("Happening now" highlight). No bundle in V1 (retired 2026-05-16; bundle math doesn't work at these price points).
 
 **Center (flexible):** Live preview pane.
 
@@ -445,7 +515,7 @@ The mobile editor is best for tweaks ("change the greeting copy"), not for first
 - **Toggle visibility.** Eye icon flips `is_visible`. Public invitation page hides invisible widgets without re-rendering layout.
 - **Reorder widgets.** Drag handles on the left rail update the `position` column. Position changes reflect in the public invitation immediately on save.
 - **Tier toggle / Pro purchase.** Clicking Pro on a Pro-eligible widget that hasn't been bought opens the payment modal. Successful payment flips tier and unlocks Pro fields. Refund within 14 days. Widgets without a Pro tier hide the toggle.
-- **Pro Bundle purchase.** Single ₱199 charge atomically upgrades all currently-applicable Pro widgets (Hero Monogram, Our Story, Schedule).
+- **Monogram Hero purchase.** Single ₱1,999 charge unlocks the animated SVG-trace monogram reveal + custom video/photo background. SVG-only validation enforced at checkout (PNG monograms blocked with inline upgrade message). No-refund disclosure surfaced inline with required acknowledgment checkbox before checkout button activates.
 - **Live preview.** Center pane re-renders within 250ms of any field change (debounced).
 - **Device-width preview toggle.** Mobile / Tablet / Desktop in the preview toolbar swaps the preview frame width.
 - **Save draft / Publish.** Drafts are written to `config_json` continuously; Publish flips the event's visibility per spec 15's lifecycle (`page_status = 'published'`).
@@ -503,10 +573,14 @@ The mobile editor is best for tweaks ("change the greeting copy"), not for first
 - [ ] Editing a field (e.g., changing the connector from "&" to "and") updates the live preview within 250ms and autosaves within 500ms.
 - [ ] Reordering widgets via drag-and-drop on the left rail persists `position` to the database; the public invitation reflects the new order on next render.
 - [ ] Hiding a widget with the eye icon excludes it from the public invitation; in-editor it stays visible at 50% opacity.
-- [ ] Clicking the Pro tier toggle on Hero Monogram, Our Story, or Schedule adds the corresponding SKU (`pro_widget_hero` / `pro_widget_story` / `pro_widget_schedule`) to the couple's cart per 0034. The cart drawer slides up showing the ₱99 upgrade.
-- [ ] After standard apply-then-pay checkout (per 0034 § 3) and admin approval (per 0034 § 4), the service-activation hook inserts a `pro_widget_purchases` row referencing `service_orders.order_id`, flips `invitation_widgets.tier` to 'pro', sets `pro_purchased_at`, and unlocks the Pro fields in the inspector.
-- [ ] Pro Bundle purchase atomically upgrades all 3 current Pro widgets (Hero Monogram, Our Story, Schedule) for a single ₱199 checkout; 3 `pro_widget_purchases` rows inserted on activation, all referencing the same `service_orders.order_id`.
-- [ ] Refund within 14 days (admin-processed per 0034 § 8) reverts `tier` to 'basic', writes `refunded_at`, populates `refund_order_id`. Live preview returns to basic styling.
+- [ ] Clicking the upgrade toggle on Hero Monogram adds `monogram_hero_upgrade` (₱1,999) to the couple's cart per 0034. Cart drawer surfaces the **"All sales final · no refund"** disclosure with a required acknowledgment checkbox. If the current monogram is uploaded PNG, the cart drawer surfaces the **"Convert your PNG to SVG so it can animate?"** preview-gate path (per the 6-step flow); checkout button stays disabled until the couple either (a) approves the converted SVG, (b) uploads an SVG directly, or (c) reverts to auto-generated.
+- [ ] **Monogram Hero PNG-to-SVG conversion + preview gate:** with a PNG monogram in place, tapping "Convert + preview" calls `POST /api/monogram/convert` → Potrace WASM Worker runs → output SVG written to R2 within ~3s p95. Preview screen renders side-by-side (original PNG + animated SVG trace, ~3s loop). Three CTAs are present: **Use this SVG · Try a different file · Use auto-generated instead**. Tapping "Use this SVG" writes `converted_svg_url`, `converted_svg_approved_at`, and `converted_svg_potrace_settings` to `hero_monogram.config_json` and activates the cart Checkout button. PNG original at `uploaded_url` is preserved.
+- [ ] Clicking the upgrade toggle on Schedule adds `pro_widget_schedule` (₱999) to the couple's cart per 0034. Cart drawer slides up showing the upgrade.
+- [ ] After standard apply-then-pay checkout (per 0034 § 3) and admin approval (per 0034 § 4), the service-activation hook inserts a `pro_widget_purchases` row referencing `service_orders.order_id`, flips `invitation_widgets.tier` to 'pro', sets `pro_purchased_at`, and unlocks the upgrade fields in the inspector. For Monogram Hero: trace animation toggle + background upload widgets unlock.
+- [ ] Monogram Hero **refund attempts are refused** by the admin console refunds tool unless explicit two-admin escalation is filed. Live Schedule refund within 14 days (admin-processed per 0034 § 8) reverts `tier` to 'basic', writes `refunded_at`, populates `refund_order_id`, returns live preview to basic styling.
+- [ ] **Monogram Hero background upload:** couple uploads a video (15–30s MP4 H.264, ≤30MB) OR a photo (JPG/PNG, ≤5MB). Validation blocks files outside spec. Video: poster frame auto-extracted from first non-black frame. Photo: stored as-is. Background renders behind the monogram on the public landing page via `object-fit: cover`.
+- [ ] **Monogram Hero trace animation:** SVG monogram paths animate via `stroke-dasharray` + `stroke-dashoffset` on page load, staggered ~3s total reveal. Animation reduces to a static monogram in users with `prefers-reduced-motion: reduce` set.
+- [ ] **Pro Bundle SKU is retired** — `pro_widget_bundle` should not appear in the cart or checkout; admin console SKU list shows it as retired.
 - [ ] **Offline RSVP:** disabling network in DevTools, submitting an RSVP, re-enabling network within 5 minutes results in the response being syncing successfully without duplicate writes. UI shows "✓ Saved · syncing" then "✓ Saved · just now."
 - [ ] **Service worker cache:** loading the invitation site once with a connection, then disabling network, refreshing the page, results in all widgets except video/photo media rendering correctly.
 - [ ] Live preview frame switches between Mobile (390px), Tablet (768px), Desktop (1100px) widths via the toolbar toggle.
@@ -553,6 +627,10 @@ The mobile editor is best for tweaks ("change the greeting copy"), not for first
 | 2026-05-08 | Pro Bundle priced at ₱199 (covers all 3 Pros, vs ₱300 separately, ~33% off) | Bundle math kept dynamic in code so it auto-scales as new Pros are added |
 | 2026-05-08 | **Pro tier per widget priced at ₱99; Pro Bundle (all 3) at ₱199** (charm-priced 2026-05-12) | Clean impulse-purchase price points; bundle saves ~33% off the all-three sum and converts couples who would have bought at least one anyway |
 | 2026-05-12 | **Pro purchases routed through the 0034 payments & cart spine — replaces the retired token wallet flow** | The 2026-05-11 retirement of the token wallet (iteration 0003) collapsed all in-app SKU purchases onto a single apply-then-pay flow defined in 0034. Pro widget upgrades now go: add-to-cart → checkout → QR code → screenshot → admin approve → activation hook flips tier. No direct PayMongo / Stripe charges; no wallet ledger; one `service_orders` row per upgrade event |
+| 2026-05-16 | **V1 paid-upgrade pricing reset — Monogram Hero ₱1,999 no-refund + Live Schedule ₱999; retire 3 SKUs.** Hero Monogram ₱99 animation Pro is replaced with **Monogram Hero ₱1,999 (no refund · all sales final)** that bundles the animated SVG-stroke trace reveal + custom video (15-30s MP4 ≤30MB) OR photo (JPG/PNG ≤5MB) background. SKU code rename `pro_widget_hero` → `monogram_hero_upgrade`. Live Schedule re-priced ₱99 → ₱999. Retired SKUs: `pro_widget_story` (Our Story scroll parallax — folded to free); `pro_widget_bundle` (₱199 bundle math no longer works with 2 SKUs at vastly different price points). | Designer-grade upgrade pricing aligns with PH monogram designer market (₱2K-10K for static work); the trace + custom hero background is a fundamentally different visual product than free baseline. Schedule 10× re-price captures wedding-day moment-of-glory value. No-refund clause is apparatus-rule clean (one purchase = one tool unlock; immediate creative output not reversible). |
+| 2026-05-16 | **Monogram Hero accepts PNG via Potrace preview gate (amends earlier SVG-only-hard-block).** Earlier same-day decision hard-blocked PNG monogram uploads from the Monogram Hero upgrade. Amended: PNG uploads are accepted, server-side Potrace conversion runs, the couple sees a side-by-side preview + animated trace loop, and the couple explicitly approves the converted SVG before checkout activates. PNG original kept as backup at `uploaded_url`; converted SVG at `converted_svg_url` is canonical for rendering. SVG uploads bypass conversion. The preview gate IS the consent mechanism for the no-refund clause — couples see exactly what they're paying for before commit. | The earlier hard-block was right-by-default but unnecessarily restrictive on what's technically possible. Many couples receive their monogram as PNG from their designer (designer keeps the SVG source); blocking PNG forced them to either go back to the designer, use auto-generated, or skip the upgrade. The preview gate protects the quality bar without locking out couples — those whose conversions look bad self-select away at the preview step. Potrace is free + open-source + battle-tested; quality 80–90% on monogram content; ~₱0 marginal cost preserves the 95%+ margin on the ₱1,999 SKU. |
+| 2026-05-16 | **0024 Save-the-Date video SKU retired; landing page is now free with lifecycle phases (Phase 1 = Save-the-Date hero).** This iteration's widget editor surface continues to be the customize interface for that page. Save-the-Date as a separate ₱99 MP4 render no longer exists; couples get a free Phase 1 hero out of the box and optionally upgrade to Monogram Hero (₱1,999) for the animated/personalized version. | Closes item #6 of the 2026-05-15 owner walkthrough. The video-file primitive was wrong for the JTBD; the page-with-calendar-add solves the actual job better. See CLAUDE.md 2026-05-16 entry for full rationale. |
+| 2026-05-16 | **3 V1.5+ widget types reserved: Panood, Papic, Patiktok.** Not pre-seeded in `invitation_widgets`; added to the registry only when parent iteration (0011 / 0012 / 0017) activates. Each inherits its upgrade pricing from the parent iteration's SKU. | Forward-compatible registry pattern. Couples don't see unused widget types cluttering the editor; widgets appear when the underlying feature ships. |
 | 2026-05-08 | Dress Code adds **per-role attire references** (3 photos × 12 role-gender slots, stylist-uploaded) | Replaces abstract "moodboard" with concrete role-specific guidance. Up to 36 photos per wedding; all optional |
 | 2026-05-08 | Global Do/Don't lists explicitly labeled "Applies to everyone" in the editor (no schema change) | Removes ambiguity — the per-role palettes are scoped, but the Do/Don't is universal. UI surfaces this distinction clearly |
 | 2026-05-08 | Illustrated attire figure library (with runtime skin-tone + fabric recoloring) deferred to V2 | Build cost (~₱25–35K) hard to justify until demand validated. V1 ships with stylist-uploaded reference photos at zero build cost |
@@ -568,8 +646,10 @@ The mobile editor is best for tweaks ("change the greeting copy"), not for first
 ## Notes for Claude Code
 
 - **Don't reinvent the preview engine.** The preview pane should server-render the same React tree that powers the public invitation site (the renderer shipped in 0002). Use a lightweight wrapper that sets the device width and adds the "selected widget" outline overlay. Sharing one renderer between editor preview and the live site means edits look identical to what guests see.
-- **Pro Bundle pricing is dynamic.** When new Pro upgrades are added in future iterations, the Bundle price increases by some discount-vs-individual ratio (currently ₱199 = ₱99 × 3 - ₱99). Keep the bundle calculation in code, not hardcoded.
-- **All Pro purchases route through the apply-then-pay payments & cart spine** (iteration 0034). No direct PayMongo / Stripe calls from this iteration. The cart drawer, payment screen, and admin reconciliation surfaces live in 0021 / 0023 and are reused; this iteration only triggers the add-to-cart for the right `sku_code` (`pro_widget_hero` / `pro_widget_story` / `pro_widget_schedule` / `pro_widget_bundle`).
+- **No bundle in V1.** The Pro Bundle (₱199, 3 widgets) was retired 2026-05-16; bundle math doesn't work with 2 paid SKUs at vastly different price points. Couples pick the one(s) that matter to them. If V1.1+ adds ≥3 paid widget upgrades at comparable price points, a bundle may be re-introduced — keep the bundle math in code, not hardcoded, ready to wire when conditions justify.
+- **All paid widget upgrades route through the apply-then-pay payments & cart spine** (iteration 0034). No direct PayMongo / Stripe calls from this iteration. The cart drawer, payment screen, and admin reconciliation surfaces live in 0021 / 0023 and are reused; this iteration only triggers the add-to-cart for the V1 SKU codes (`monogram_hero_upgrade` for Hero Monogram, `pro_widget_schedule` for Live Schedule). Retired SKU codes (`pro_widget_hero`, `pro_widget_story`, `pro_widget_bundle`) must NOT be added to cart and the admin console SKU list must reflect retired status.
+- **Monogram Hero accepts PNG via Potrace conversion + preview gate** (amended 2026-05-16). Before adding `monogram_hero_upgrade` to the cart, check `hero_monogram.config_json.monogram_source` / `uploaded_format`. If SVG or auto-generated: proceed to cart directly. If PNG: surface the PNG → SVG preview-gate flow (6-step) — Potrace WASM Worker runs server-side, couple sees side-by-side preview + animated trace loop, couple explicitly approves the conversion before checkout activates. The approved SVG is stored at `converted_svg_url` and becomes canonical for rendering; the original PNG at `uploaded_url` is kept as backup. PNG monograms continue to work on Basic tier (static rendering) without conversion.
+- **Monogram Hero is no-refund.** Checkout copy surfaces "All sales final · no refund" with a required acknowledgment checkbox. Admin console refunds tool refuses Monogram Hero refunds unless explicit two-admin escalation is filed. Apparatus-rule clean — one purchase = one tool unlock; immediate creative output not reversible.
 - **Greeting video upload constraints:** validate client-side (duration 15–30s, size ≤60MB, codec H.264 preferred, container MP4). Reject otherwise with clear error. Generate poster frame from first non-black frame using `ffmpeg.wasm` in the browser before upload.
 - **Attire references upload constraints:** JPG/PNG accepted, max 5MB per image, recommended 1080×1080 or larger square crop. Auto-rotate from EXIF.
 - **When you finish, save a result summary at `0004_invitation_widgets_result.md`** describing what was built, what was deferred, what schema migrations ran, and any decisions made worth surfacing.

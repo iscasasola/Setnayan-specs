@@ -89,6 +89,58 @@ INSERT INTO service_catalog (sku_code, name, description, category, price_php_ce
   ('guided_planner_12month',      'Guided Planner — 12-Month Plan','52-week access · saves 61% vs week-by-week · BEST VALUE','guided_planner',199900, TRUE);
 
 -- ============================================================
+-- 2026-05-16 V1 SKU lock batch — Papic V1.5+ architecture lock · Panood BYO YouTube ·
+-- Save-the-Date Video reintroduction · Patiktok dual-tier (per CLAUDE.md decision log
+-- 2026-05-16 rows 3-6). Marketplace commission SKUs INTENTIONALLY EXCLUDED from this
+-- batch — separate commit pending. Run as ALTER + INSERT in a single transaction:
+-- ============================================================
+
+-- (a) Panood — Cloudflare-composite SKUs retired (architecture pivoted to BYO YouTube)
+UPDATE service_catalog SET is_active = FALSE WHERE sku_code IN (
+  'live_stream_base',          -- ₱2,499 (retired 2026-05-16 · Cloudflare composite gone)
+  'live_stream_camera_addon',  -- ₱999 (retired 2026-05-16 · replaced by panood_camera_sync_daily ₱99/day)
+  'live_stream_hour_addon',    -- ₱999 (retired 2026-05-16 · hour-based pricing replaced by per-day)
+  'broadcast_style_pack'       -- ₱2,999 (retired 2026-05-16 · ffmpeg-overlay composites gone with composite step)
+);
+
+-- (b) Pro Camera Bridge folded into 5-Paparazzi pack capability (no longer standalone SKU)
+UPDATE service_catalog SET is_active = FALSE WHERE sku_code = 'pro_camera_bridge_seat';
+
+-- (c) New SKU rows from the 2026-05-16 batch:
+INSERT INTO service_catalog (sku_code, name, description, category, price_php_centavos, is_multi_purchase, is_active) VALUES
+  -- Panood — V1 (locked 2026-05-16 · BYO YouTube via OAuth)
+  ('panood_daily_broadcast',         'Panood — Daily Broadcast',         'One day of broadcasting to couple''s own YouTube · single-cam by default',    'panood',         49900, TRUE,  TRUE),
+  ('panood_camera_sync_daily',       'Panood — Camera Sync (per day)',   'Multi-cam switching add-on for one day · pairs with Daily Broadcast',         'panood',          9900, TRUE,  TRUE),
+  ('panood_annual_streaming',        'Panood — Annual Streaming',        'Single-cam unlimited days for one year · vendor-friendly',                    'panood',        299900, TRUE,  TRUE),
+  ('panood_annual_streaming_plus',   'Panood — Annual Streaming Plus',   'Multi-cam unlimited days for one year · includes Camera Sync built-in',        'panood',        399900, TRUE,  TRUE),
+
+  -- Save-the-Date Video — V1 (reintroduced 2026-05-16 · DIFFERENT product from retired save_the_date_render)
+  ('save_the_date_video_render',     'Save-the-Date Video',              'AI-auto-edit 30-60s vertical MP4 from 5-10 engagement photos · Setnayan-owned music · landing-page end-card', 'save_the_date_video', 9900, TRUE, TRUE),
+
+  -- Patiktok — V1 (locked 2026-05-16 · dual-tier per-day model)
+  ('patiktok_setnayan_daily',        'Patiktok — Setnayan TikTok (per day)','Per-day Patiktok booth · auto-post to @SetnayanWeddings · Setnayan keeps ad-revenue upside', 'patiktok', 99900, TRUE, TRUE),
+  ('patiktok_personal_daily',        'Patiktok — Personal TikTok (per day)','Per-day Patiktok booth · BYO TikTok via OAuth · couple owns videos + ad revenue',    'patiktok',       199900, TRUE,  TRUE),
+  ('patiktok_video_overage',         'Patiktok — Video Overage (+10)',   'In-event +10 video allotment on top of 40/day soft cap · multi-stack',         'patiktok',        4900, TRUE,  TRUE),
+
+  -- Papic — V1.5+ (architecture locked 2026-05-16; SKUs deferred to V1.5+ via is_active=FALSE)
+  ('paparazzi_camera_addon',         'Papic — Camera Add-on (per seat)', 'One additional paid paparazzi seat · multi-purchase · DSLR-capable',           'paparazzi',      99900, TRUE,  FALSE),
+  ('paparazzi_credits_addon',        'Papic — Credits Add-on (+1,000)',  '+1,000 pool credits · multi-purchase · in-event upsell at 80% pool warning',    'paparazzi',      29900, TRUE,  FALSE),
+  ('premium_guest_camera_pack',      'Papic — Premium Guest Camera Pack','Event-wide · every guest gets Lifetime Archive + Drive sync + Auto-Recap + watermark-free downloads + HD video upload', 'paparazzi', 149900, FALSE, FALSE),
+  ('personal_album_per_guest',       'Papic — Personal Album (per guest)','Per-guest digital album · opt-in per guest · multi-purchase per event',         'paparazzi',       4900, TRUE,  FALSE),
+  ('memory_book_per_guest',          'Papic — Memory Book (per guest)',  'Per-guest printable hardcover memory book PDF · opt-in per guest · multi-purchase', 'paparazzi',     24900, TRUE,  FALSE);
+
+-- (d) Papic existing seats also deferred to V1.5+ (architecture locked, build deferred)
+UPDATE service_catalog SET is_active = FALSE WHERE sku_code IN (
+  'paparazzi_3_seats',         -- ₱1,499 · 5K pool · architecture locked 2026-05-16, build V1.5+
+  'paparazzi_5_seats',         -- ₱2,499 · 10K pool · architecture locked 2026-05-16, build V1.5+
+  'template_unlock'            -- ₱49 · gated to Papic native build; deferred with Papic V1.5+
+);
+
+-- (e) Save-the-Date Render (retired 2026-05-16 · DIFFERENT product from new save_the_date_video_render)
+UPDATE service_catalog SET is_active = FALSE WHERE sku_code = 'save_the_date_render';
+-- ============================================================
+
+-- ============================================================
 -- 0034.2: service_catalog_price_history — audit trail for price changes
 -- ============================================================
 -- Mid-quarter SKU price changes require two-admin approval per § 9.1.
