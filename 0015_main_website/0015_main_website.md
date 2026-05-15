@@ -417,6 +417,34 @@ Tabbed module that flips between "What you get as a vendor" and "How verificatio
 
 Anchor: this section's "Apply now" CTA goes to `/register-vendor`.
 
+### Section 8.5 — Transparent pricing
+
+Canonical pricing-transparency block. Replaces the prior `setnayan.com` live copy `"No subscription, no per-guest fee, no commission on vendor bookings."` — that line is **deprecated** as of 2026-05-16 because it hid the **5.5% Setnayan Pay convenience fee** locked the same day. The fee is paid by the couple on top of the vendor's listed price at checkout; the vendor sees their full listed price (minus only the terminal fee + BIR 1% marketplace withholding, both of which they'd pay on any platform). The vendor-side "no commission, no monthly bill" framing in Sections 5/8 stays intact — that promise is still true because the 5.5% is couple-paid, not deducted from the vendor's price.
+
+**Section headline:** Transparent pricing.
+
+**Sub-claim:** Free to plan — the planning tools are free forever. Vendor bookings add a **5.5% Setnayan Pay convenience fee** at checkout, shown on the order summary before you confirm. No subscription, no per-guest fee, no hidden charges.
+
+**Three-column transparency strip (icons + one-line claim each):**
+
+| Column | Headline | Body |
+|---|---|---|
+| Planning tools | **Free forever** | Guest list, RSVP, seating, budget, mood board, schedule — every planning surface is free. No paywall, no per-guest fee. |
+| Add-on apparatus | **À la carte** | Papic, Panood, Custom Monogram, Live Stream, Save-the-Date Video — you only pay when you opt into a specific service. Couple-side prices are listed on `/pricing` and re-shown at checkout. |
+| Vendor bookings | **+5.5% at checkout** | Vendor lists their price. At checkout we add a 5.5% Setnayan Pay convenience fee that powers BIR-compliant receipts, in-app messaging, milestone-protected payments, and platform safety. Your vendor sees their listed price 100%. |
+
+**Worked example block** (right column on desktop / collapsed accordion on mobile):
+
+> **Worked example — ₱100,000 vendor booking**
+> Vendor's listed price: ₱100,000
+> Setnayan Pay convenience fee (5.5%): ₱5,500
+> **You pay at checkout: ₱105,500**
+> Your vendor receives the ₱100,000 listed price (minus their own terminal fee + BIR withholding — same as any payment platform). Setnayan keeps the 5,500 to run the app.
+
+**Mobile copy collapse:** The three-column transparency strip stacks to a single column with each row remaining a full card. The worked-example block becomes a tap-to-expand accordion ("See how it works") to keep above-the-fold density mobile-readable.
+
+**Engineering note:** the live-site copy on `setnayan.com` (current production: "No subscription, no per-guest fee, no commission on vendor bookings.") needs to be replaced with this section's headline + sub-claim + three-column strip. Tracked as Section 8.5 in `apps/web/app/(marketing)/pricing/page.tsx` (or equivalent — confirm at implementation time). The deprecated "no commission on vendor bookings" claim must be removed from couple-side marketing surfaces; vendor-side "no commission, no monthly bill" copy stays intact per the 2026-05-11 grandfather promise.
+
 ### Section 9 — Event-type readiness board
 
 A grid of event-type tiles. Each tile has a cover photo, the event-type name, a status pill, and a goal-progress bar showing vendor readiness for that type.
