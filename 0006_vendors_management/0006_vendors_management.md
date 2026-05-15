@@ -666,6 +666,135 @@ This iteration **provides** to downstream iterations (0007+):
 
 ---
 
+## Vendor Verification flow (locked 2026-05-16)
+
+The verification flow gates which vendors can offer Setnayan Pay to couples, which can subscribe to Pro Weekly, and which can run paid marketing (Boosted Ads / Sponsored Boost). It is the trust spine of the marketplace.
+
+### Pricing
+
+| Stage | Price | Paid by | Notes |
+|---|---|---|---|
+| Initial Verification | **FREE** | Setnayan absorbs ~₱535/vendor | Treated as customer acquisition cost — keeps onboarding funnel frictionless |
+| Annual Re-verification | **₱1,500/year** | Vendor | Light-touch yearly refresh — re-checks docs are current |
+| Re-verification after demotion | **₱2,500** | Vendor | Higher gate to discourage demotion churn (vendor is paying to climb back up from coming_soon state) |
+
+### Required documents (all 12 — no exceptions)
+
+1. **DTI Business Name Certificate** — auto-validated via DTI Database lookup
+2. **BIR Form 2303** (Certificate of Registration)
+3. **Mayor's Permit** (current year)
+4. **Valid government ID (owner)** — verified via Persona / Veriff / Onfido (~₱200 per check)
+5. **Bank account proof** — Maya / GCash micro-deposit verification
+6. **5-10 portfolio samples** — reverse image search check
+7. **3-5 past client references** — Setnayan calls 1-2 randomly
+8. **Live selfie + ID liveness check**
+9. **15-min Google Meet with admin** (scheduled in verification queue)
+10. **Phone SMS OTP + email confirmation**
+11. **Social media presence** — Instagram or Facebook business page link
+12. **Sanctions / PEP screening** — AMLC watchlist API
+
+### Category-specific extras
+
+- **Wedding venues:** insurance documents ≥ ₱1M liability
+- **Catering > 100 guests:** Health Department certification
+- **Wedding coordinators:** industry certification OR 5+ years experience proof
+- **High-value vendors (₱500K+ avg booking):** background check on owner
+
+### Process
+
+- **Vendor effort:** 30-45 minutes (document upload + Google Meet)
+- **Setnayan SLA:** 3-5 business days
+- **All-or-nothing:** no partial verified state — a vendor is either `verified` or `coming_soon`
+- **Document storage:** R2 bucket `setnayan-vendor-verification` (90-day rolling for raw uploads · 7-year retention for verification audit trail per BIR § 235)
+- **Admin queue:** Setnayan admin reviews each application in 0023 Admin Console → Verification Queue surface
+
+### Tier perks/limitations (locked)
+
+**Verified vendor perks:**
+
+- Verified badge in marketplace
+- **Setnayan Pay unlocks for couples** (couples can ONLY use Setnayan Pay with verified vendors)
+- Custom partial payment plan configuration
+- Pro Weekly subscription access (₱499/wk)
+- Sponsored Boost eligibility (Quarterly ₱250K / Annual ₱800K)
+- Boosted Ads eligibility (5km ₱5K / 10km ₱8K / 20km ₱15K per week)
+- All Tools Unlock bundle access (₱9,999/year)
+- Immediate full payout (no 3-stage hold)
+- Higher marketplace search ranking
+- Featured Vendor program eligibility
+- Coordinator-join permission in couple threads
+
+**Coming_soon vendor limitations:**
+
+- Setnayan Pay LOCKED (couples pay direct off-platform — vendor's own BDO / GCash)
+- Fixed Setnayan-managed 3-stage payout (see § Payout below)
+- "Coming Soon" badge in marketplace
+- No Pro Weekly subscription
+- No Boosted Ads or Sponsored Boost
+- Lower marketplace search ranking
+- No tool access (All Tools Unlock locked at coming_soon — wait, exception: All Tools Unlock is open to ALL paying vendors including coming_soon per 2026-05-16 lock; the other marketing/payment perks remain locked)
+
+### Schema
+
+```sql
+ALTER TABLE vendors ADD COLUMN verification_state TEXT
+  CHECK (verification_state IN ('coming_soon','verified','demoted','revoked'))
+  DEFAULT 'coming_soon';
+
+ALTER TABLE vendors ADD COLUMN last_verified_at TIMESTAMPTZ;
+ALTER TABLE vendors ADD COLUMN next_renewal_due_at TIMESTAMPTZ;
+ALTER TABLE vendors ADD COLUMN demotion_count INT DEFAULT 0;
+ALTER TABLE vendors ADD COLUMN last_demoted_at TIMESTAMPTZ;
+
+CREATE TABLE vendor_verification_applications (
+  application_id UUID PRIMARY KEY,
+  vendor_id UUID REFERENCES vendors(vendor_id),
+  application_type TEXT CHECK (application_type IN ('initial','annual_renewal','post_demotion')),
+  fee_php_centavos INT NOT NULL,    -- 0 / 150000 / 250000
+  submitted_at TIMESTAMPTZ NOT NULL,
+  doc_uploads JSONB,                 -- 12-doc checklist + R2 keys
+  persona_check_result JSONB,
+  amlc_screening_result JSONB,
+  google_meet_scheduled_at TIMESTAMPTZ,
+  reviewer_admin_id UUID,
+  approved_at TIMESTAMPTZ,
+  rejected_at TIMESTAMPTZ,
+  rejection_reason TEXT,
+  notes TEXT
+);
+```
+
+---
+
+## Vendor Payout model (locked 2026-05-16)
+
+### Verified vendors — immediate full payout
+
+- Released **T+1** to vendor's chosen disbursement method (Maya / GCash / bank transfer)
+- Net amount = vendor list price − gateway/terminal fee − BIR Marketplace Withholding 0.5%
+- Setnayan absorbs the ₱15-25 outbound disbursement fee (vendor sees nominal net, no additional deduction)
+- BIR Form 2307 issued quarterly to vendor (creditable against vendor's own income tax)
+
+### Coming_soon vendors — 3-stage milestone release
+
+| Stage | Release % | Trigger | Dispute window |
+|---|---|---|---|
+| 1 — Reservation deposit | 20% | Booking confirmation | none |
+| 2 — Pre-event check | 60% | T-14 days · couple confirms vendor's prep on track | 7-day couple response · auto-release on silence |
+| 3 — Post-event balance | 20% | T+7 days · couple confirms delivery, no dispute | 7-day couple response · auto-release on silence |
+
+### Demote-to-coming_soon trigger
+
+A verified vendor is auto-demoted if they accumulate **3+ disputes within 30 days**. Demotion:
+
+1. Sets `verification_state = 'demoted'` + `last_demoted_at = NOW()` + `demotion_count = demotion_count + 1`
+2. Locks Setnayan Pay (couples pay direct off-platform)
+3. Switches payout model to the 3-stage milestone release for in-flight bookings
+4. Removes Boosted Ads / Sponsored Boost eligibility
+5. Email + in-app notification to vendor with re-verification fee (₱2,500) and link to apply
+
+---
+
 ## What's NOT in V1 (don't backdoor in)
 
 - Vendor self-input app or login (Phase 3 — Din).
@@ -714,6 +843,8 @@ This iteration **provides** to downstream iterations (0007+):
 | 2026-05-09 | **Contracts in R2 with 5-year retention** | Mirrors photographer industry norm and Setnayan's existing photo retention policy. Aligns the storage lifecycle across the platform. |
 | 2026-05-09 | **PHP-primary, no token display anywhere** in this iteration | Vendor money never touches Setnayan's books, so no reason to render in tokens. Tokens are for Setnayan SKUs only. |
 | 2026-05-09 | **Meetings live in vendor profiles in V1; vendor-managed in Din.** Couple records meetings (title, datetime, mode, location/link, agenda, attendees, notes) on each vendor's detail page. The soonest upcoming meeting per vendor is surfaced as "Next meeting" on the card. The `vendor_meetings` table includes a `created_by_actor` column (`'couple'` in V1) so Din can later write `'vendor'` rows into the same table without migration. | Couples already track meetings in scattered notes, message threads, or memory. Centralizing them on the vendor profile mirrors how planners actually work, and the schema's forward-compatibility column means Phase 3 (Din) can take over without reshaping data. No `.ics` export here — that lives in 0007 Budget, which already owns the calendar pattern; once 0007 ships, meetings join payment deadlines in one feed. |
+| 2026-05-16 | **Vendor Verification flow locked — FREE initial / ₱1,500 annual renewal / ₱2,500 re-verification after demotion · 12-document checklist · all-or-nothing (no partial verified state) · 3-5 business day SLA · documents in `setnayan-vendor-verification` R2 bucket.** Verified tier unlocks Setnayan Pay for couples, Pro Weekly access, Boosted Ads, Sponsored Boost, All Tools Unlock, immediate payout, and Featured Vendor eligibility. Coming_soon tier is restricted to marketplace profile + listing only with Setnayan-managed 3-stage payout (20%/60%/20%). | The FREE initial onboarding lowers vendor activation friction while the 12-doc bar filters out non-serious applicants at zero cost to Setnayan's revenue model. The renewal fee (₱1,500/yr) covers Setnayan's ongoing trust-maintenance cost; the post-demotion fee (₱2,500) discourages demotion churn. The Setnayan Pay gate is the spine of the marketplace's trust signal — only verified vendors get the in-app convenience-fee rail (5.5% on top of vendor price per 0034). Coming_soon vendors get a path to inclusion (marketplace listing + 3-stage payout) without compromising couple safety. |
+| 2026-05-16 | **Vendor Payout model locked — verified = immediate full payout T+1; coming_soon = 3-stage milestone release 20/60/20 with T-14 + T+7 dispute windows.** Demote-to-coming_soon trigger: 3+ disputes within 30 days. Setnayan absorbs the ₱15-25 outbound disbursement fee per payout. BIR Form 2307 issued quarterly to all vendors. | Coming_soon 3-stage release puts a real-money escrow safety net behind unverified vendors — couples don't lose deposits to no-show low-trust providers. Verified vendors are trusted to deliver, so payout is immediate (T+1) less only gateway fee + BIR withholding — no Setnayan deduction. The auto-release-on-silence pattern (T+14 + T+7 7-day windows) keeps the workflow lightweight: couples confirm or stay silent; silence = approval. |
 | 2026-05-12 | **Renamed the per-event `vendors` table to `event_vendor_relationships`** (PK column renamed from `vendor_id` to `relationship_id`); added `marketplace_vendor_id UUID REFERENCES vendors(vendor_id)` FK to link the couple's per-event vendor record to the canonical marketplace `vendors` entity declared in 0022. All seven dependent tables in 0006 (`vendor_services`, `vendor_inclusions`, `vendor_payment_milestones`, `vendor_crew`, `vendor_crew_meal_totals` view, `vendor_meetings`, `vendor_contracts`) updated to FK `relationship_id`. | The previous setup had two tables named `vendors` (one in 0006 for the couple's per-event vendor list, one in 0022 for the canonical marketplace vendor entities) which would have caused namespace collision at the Postgres level. Rename clarifies the data model: `event_vendor_relationships` is the join row that says "this couple's event is working with this vendor" and carries the negotiated package details; `vendors` (in 0022) is the canonical marketplace vendor profile shared across all couples who book them. Nullable FK supports the off-platform vendor case (couple enters a custom vendor that isn't on Setnayan's marketplace). |
 
 ---

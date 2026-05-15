@@ -76,13 +76,19 @@ Cloudflare R2 in PH region. Originals stored with signed URL access only (no pub
 - Vendor — read only photos relevant to their booking
 - Setnayan Team — read on mediation cases only; never bulk-export
 
-### 3.3 Communications (0019 chat + video)
+### 3.3 Communications (0019 chat + ~~video~~)
 
-Supabase Realtime channels for live chat (ephemeral); messages persisted to Postgres for history. Daily.co hosted SFU for video meetings (recordings only when consented; stored in R2 thread-files bucket).
+Supabase Realtime channels for live chat (ephemeral); messages persisted to Postgres for history. ~~Daily.co hosted SFU for video meetings (recordings only when consented; stored in R2 thread-files bucket).~~ **Video meetings RETIRED 2026-05-16** — couples + vendors use external tools (Google Meet, Zoom, Messenger, WhatsApp); Setnayan no longer hosts video data of any kind. Pasted external meeting links are stored as plain text in chat messages and are subject to the same retention as the parent message.
 
-### 3.4 Vendor-uploaded documents (DTI, BIR, ID)
+### 3.4 Vendor-uploaded documents (DTI, BIR, ID, portfolio, references) — amended 2026-05-16
 
-Dedicated R2 bucket `setnayan-vendor-verification` with extra-restricted access — only Setnayan Team Verification Handler role can read; documents auto-deleted 90 days after vendor approval (retain only DTI/SEC + BIR for tax/legal record; ID + business address proof purged).
+Dedicated R2 bucket `setnayan-vendor-verification` with extra-restricted access — only Setnayan Team Verification Handler role can read. **As of 2026-05-16 the 12-document verification checklist applies** (DTI Business Name Certificate · BIR Form 2303 · Mayor's Permit · gov ID via Persona/Veriff/Onfido · bank account proof · portfolio samples · client references · live selfie + ID liveness · 15-min Google Meet · SMS OTP + email · social presence · AMLC sanctions screening). Document retention:
+
+- **Raw uploads (ID copies, bank micro-deposit proofs, portfolio samples, selfie + liveness videos):** 90 days hot R2; purged after admin approval/rejection unless required for audit
+- **Verification audit trail (verification application metadata, Persona/Veriff/Onfido check results, AMLC screening result, admin decision rationale):** 7 years cold R2 — per BIR § 235 minimum retention for marketplace-platform onboarding records and per AMLC AML/CTF audit obligations
+- **DTI Business Name + BIR Form 2303 + Mayor's Permit:** 7 years cold R2 (tax/legal record retention)
+
+The 12-doc checklist is presented to the vendor at registration with explicit consent for: (i) DTI Database lookup (RA 10173 § 12(b) lawful basis: legitimate interest); (ii) Persona/Veriff/Onfido ID + liveness check (RA 10173 § 12(b)); (iii) Reverse image search on portfolio (legitimate interest); (iv) Setnayan calling 1-2 client references (legitimate interest); (v) AMLC sanctions screening (RA 10173 § 13(d): compliance with PH AMLA). Sub-processors (Persona/Veriff/Onfido, AMLC API or ComplyAdvantage, DTI Database) are listed in § 10 below.
 
 ## 4. Retention windows
 
@@ -93,10 +99,12 @@ Dedicated R2 bucket `setnayan-vendor-verification` with extra-restricted access 
 | Photo/video originals | 90 days hot R2 | 5 years IA R2 | Per the 30-day-post-download compression rule + 5-year hard limit |
 | Face vectors | Per-event lifetime + 5 years | — | Auto-purge with event data |
 | Vendor account profile | Active | — | Vendor deletes; 30-day grace then purge |
-| Vendor verification docs (DTI/BIR) | 90 days hot | 7 years cold | Tax/legal retention; ID + address proof purged at 90 days |
+| Vendor verification raw uploads (ID, selfie+liveness, bank micro-deposit, portfolio) | 90 days hot | — | Auto-purge after admin approve/reject unless audit hold |
+| Vendor verification audit trail (Persona/AMLC results + admin decision) | 90 days hot | 7 years cold | BIR § 235 + AMLC AML/CTF audit retention |
+| Vendor business permits (DTI / BIR 2303 / Mayor's Permit) | 90 days hot | 7 years cold | Tax/legal retention |
 | Vendor transaction history | 5 years | — | Tax compliance |
 | Chat messages | 5 years | — | Aligned with event retention |
-| Video meeting recordings | 90 days | — | Auto-purge unless customer/vendor extends |
+| ~~Video meeting recordings~~ | ~~90 days~~ | — | **Feature retired 2026-05-16 — no video data stored** |
 | Audit log (admin actions) | 5 years | — | Tax/legal compliance |
 | Anonymized aggregate data | Indefinite | — | No PII — never auto-purged |
 
@@ -194,7 +202,7 @@ Setnayan's DPO is registered with the Philippine National Privacy Commission. Th
 
 **DPO contact:** dpo@setnayan.com · response within 7 business days for non-urgent requests; immediate for breach notifications.
 
-## 10. Cross-border data transfers
+## 10. Cross-border data transfers (amended 2026-05-16)
 
 Setnayan's primary infrastructure is Singapore (Supabase) + PH region (Cloudflare R2). When data crosses the SG / PH border (which it does for routine application operations), the transfer is:
 
@@ -202,7 +210,19 @@ Setnayan's primary infrastructure is Singapore (Supabase) + PH region (Cloudflar
 - Governed by Cloudflare's and Supabase's PH-compliant data processing agreements
 - Subject to NPC oversight per RA 10173
 
-No personal data is transferred to jurisdictions outside ASEAN unless required for specific contracted services (e.g., Daily.co for video — US-based provider with EU-equivalent privacy commitments).
+**Sub-processors and cross-border transfers outside ASEAN** (locked 2026-05-16):
+
+| Sub-processor | Jurisdiction | Data shared | Purpose | Lawful basis |
+|---|---|---|---|---|
+| ~~Daily.co~~ | ~~US~~ | ~~Video meeting metadata + recordings~~ | ~~Video SFU for 0019~~ | **RETIRED 2026-05-16** |
+| **Anthropic Console (Claude API)** | US | Vendor contract text content (extracted from uploaded PDF/docx) | Contract Intelligence text analysis (0032) — Claude Haiku 4.5 primary, Sonnet 4.6 reserved | RA 10173 § 12(b) legitimate interest (vendor service · contract analysis); Anthropic's enterprise DPA + zero-retention API mode |
+| **Persona / Veriff / Onfido** | US | Vendor gov-ID image + selfie + liveness video | Vendor identity verification (item 4 + 8 of the 12-doc checklist · 0006 Verification flow) | RA 10173 § 12(b) — vendor consent at registration |
+| **AMLC API / ComplyAdvantage** | PH (AMLC) / UK (ComplyAdvantage) | Vendor business name + owner name | Sanctions / PEP screening | RA 10173 § 13(d) — compliance with PH AMLA |
+| **DTI Database** | PH | Vendor DTI Business Name Certificate number | Auto-validation of business registration | RA 10173 § 12(c) — necessity for performance of contract |
+| **Maya Business** (V1.5+) | PH | Couple + vendor payment data, vendor disbursement details | Payment gateway processing | RA 10173 § 12(b) — performance of contract |
+| OpenAI GPT-4 (V1.5+ fallback only) | US | Vendor contract text (fallback case only) | Contract Intelligence backup | Same as Anthropic above |
+
+All US sub-processors are bound by Standard Contractual Clauses (SCCs) or equivalent enforceable data-processing agreements. The Anthropic Console workspace "Setnayan" is configured with zero-retention API mode (the model does not retain prompts or completions after the inference call). Persona/Veriff/Onfido + AMLC API screenings are batch-call-only with no ongoing storage at the sub-processor.
 
 ## 11. Acknowledgments and changes to this policy
 

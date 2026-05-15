@@ -79,7 +79,7 @@ INSERT INTO service_catalog (sku_code, name, description, category, price_php_ce
   ('custom_monogram_pack',        'Custom Monogram Pack',       'Remove Setnayan watermark — event-wide',              'monogram',         199900, FALSE),
   ('broadcast_style_pack',        'Broadcast Style Pack',       '4 modes: News / Cinematic / Sports / Royalty',        'panood',           299900, FALSE),
   ('ai_video_highlight_60s',      'AI Video Highlight (60s)',   'AI-generated 60-second highlight reel',                'ai_highlight',     199900, TRUE),
-  ('ai_edited_highlight_3min',    'AI Edited Highlight (3-min)','Themed multi-segment 3-minute polished reel',          'ai_highlight',     499900, TRUE),
+  ('ai_edited_highlight_3min',    'AI Edited Highlight (3-min)','Themed multi-segment 3-minute polished reel',          'ai_highlight',     349900, TRUE),  -- ₱3,499 locked 2026-05-16 (was ₱4,999)
   ('contract_intelligence_upgrade','Contract Intelligence (per contract)', 'Per-contract AI analysis + e-sig flow',     'contract',          19900, TRUE),
   ('vendor_pro_weekly',           'Vendor Pro Weekly',          'Vendor analytics + custom plan builder + branding',    'vendor_subscription', 49900, FALSE),
   ('sponsored_boost_weekly',      'Sponsored Boost (per week)', 'Marketplace ranking boost (Certified vendors only)',   'vendor_subscription',149900, TRUE),
@@ -207,7 +207,7 @@ CREATE TABLE service_orders (
   event_id                UUID REFERENCES events(event_id),
   cart_id                 UUID NOT NULL REFERENCES carts(cart_id),
   subtotal_centavos       INT NOT NULL,           -- sum of cart_items.unit_price_centavos * quantity
-  fees_centavos           INT NOT NULL DEFAULT 0, -- Setnayan Pay 3% fee on vendor-booking orders only
+  fees_centavos           INT NOT NULL DEFAULT 0, -- Setnayan Pay convenience fee (5.5%/6.5% per method, admin-configurable 2026-05-16); on vendor-booking orders only
   total_centavos          INT NOT NULL,           -- subtotal + fees
   payment_method          TEXT NOT NULL CHECK (payment_method IN ('bdo_bank','gcash','setnayan_pay','comp_grant')),
   status                  TEXT NOT NULL DEFAULT 'pending_payment'
@@ -450,7 +450,7 @@ Tapping the cart badge slides up a bottom-sheet drawer (mobile) or a right-side 
 
 - One row per `cart_items` line: SKU name, quantity stepper, line subtotal, remove button
 - Computed subtotal of all line items
-- Applicable fees (Setnayan Pay 3% appears only when at least one cart_item is a vendor booking — none in pure in-app SKU carts)
+- Applicable fees (Setnayan Pay convenience fee — 5.5% / 6.5% per method, admin-configurable per 2026-05-16 lock — appears only when at least one cart_item is a vendor booking; none in pure in-app SKU carts)
 - Total in large PHP type
 - **Checkout** CTA
 
@@ -732,27 +732,110 @@ The 0023 admin console surfaces these in the audit-log viewer (§ 365 of 0023) w
 
 ---
 
-## 6. Setnayan Pay convenience fee (3%)
+## 6. Setnayan Pay convenience fee — 5.5% on top of vendor price (locked 2026-05-16)
 
-When the order is a vendor booking routed through Setnayan Pay (not an in-app SKU), the 3% convenience fee surfaces as a transparent line item on the customer's cart and order.
+When the order is a vendor booking routed through Setnayan Pay (not an in-app SKU), a **5.5% convenience fee** is added **on top of** the vendor's listed price. The vendor receives their list price (less terminal/gateway fee + BIR Withholding); Setnayan keeps the 5.5% convenience fee as gross revenue.
 
-**Example:** vendor's quoted booking price is ₱50,000.
+**The previous 3% figure is RETIRED 2026-05-16.** All references to `fees_centavos = subtotal × 3%` in this document should be read as `fees_centavos = subtotal × convenience_fee_bps_for_method / 10000` (admin-configurable per payment method via 0023 § 3.5d).
+
+### 6.1 Couple-facing cart math
+
+**Example A — Maya QR Ph (preferred default rail · 5.5% Setnayan fee):**
+
+Vendor's listed price is ₱100,000.
 
 ```
-Subtotal (vendor quote)              ₱50,000.00
-Setnayan Pay convenience fee (3%)     ₱1,500.00
-─────────────────────────────────────────────────
-Total                                ₱51,500.00
+Subtotal (vendor list price)              ₱100,000.00
+Setnayan Pay convenience fee (5.5%)         ₱5,500.00
+──────────────────────────────────────────────────────
+Total                                     ₱105,500.00
 ```
 
 In centavos:
-- `subtotal_centavos = 5000000`
-- `fees_centavos = 150000`  (3% of 5,000,000 centavos = 150,000 centavos = ₱1,500)
-- `total_centavos = 5150000`
+- `subtotal_centavos = 10000000`
+- `fees_centavos = 550000` (5.5% of 10,000,000 centavos)
+- `total_centavos = 10550000`
 
-The vendor receives the full ₱50,000 quoted amount. Setnayan retains the ₱1,500 fee as platform revenue. This is the only fee category in V1; in-app SKUs (Save-the-Date, Paparazzi, Live Stream, etc.) have `fees_centavos = 0`.
+**Example B — Credit card (premium rail · 6.5% Setnayan fee):**
 
-`payment_method = 'setnayan_pay'` flags this as a vendor booking; service-activation hook on Approve releases vendor-side notification (vendor sees "Booking confirmed by Setnayan" in their 0022 dashboard) instead of activating Setnayan-side services.
+```
+Subtotal (vendor list price)              ₱100,000.00
+Setnayan Pay convenience fee (6.5%)         ₱6,500.00
+──────────────────────────────────────────────────────
+Total                                     ₱106,500.00
+```
+
+### 6.2 Vendor side of the ledger
+
+The vendor's net payout is the vendor list price minus (a) gateway/terminal fee + (b) BIR Marketplace Withholding 0.5%. **Setnayan does NOT deduct any commission from the vendor side** — the 5.5%/6.5% convenience fee is paid by the couple on top.
+
+| Rail | Gateway fee | BIR Withholding | Vendor net on ₱100K | Effective burden |
+|---|---|---|---|---|
+| Maya QR Ph (preferred) | 1.5% | 0.5% | ₱98,000 | 2.0% |
+| GCash direct | 1.5% | 0.5% | ₱98,000 | 2.0% |
+| Bank transfer (BDO/etc) | 0% (manual) | 0.5% | ₱99,500 | 0.5% |
+| Maya eWallet | 2.0% | 0.5% | ₱97,500 | 2.5% |
+| Credit card | 3.0% | 0.5% | ₱96,500 | 3.5% |
+| OTC | 1.5% | 0.5% | ₱98,000 | 2.0% |
+
+Setnayan absorbs the **₱15-25 outbound disbursement fee** per payout — the vendor sees the nominal "net of gateway + BIR" figure on their dashboard without an additional disbursement deduction.
+
+### 6.3 Setnayan's gross / net at V1 tax tier
+
+For a ₱100K booking via Maya QR Ph:
+
+- **Setnayan gross:** ₱5,500 (the 5.5% convenience fee)
+- **Setnayan pays its own taxes** from this gross: Percentage Tax 3% (NIRC § 116, non-VAT under ₱3M annual gross threshold) + LBT 1% + Income Tax 25%
+- **Setnayan V1 tax tier net:** ~₱3,960 (3.96% effective)
+- **Setnayan worst-case V2 tax tier net** (12% VAT + 35% IT): ~₱3,143 (3.14% effective)
+
+### 6.4 BIR Marketplace Withholding (per RMC No. 8-2024)
+
+Setnayan acts as the **withholding agent** for the 0.5% BIR Marketplace Withholding (1% × 50% under RMC 8-2024). For each vendor payout:
+
+1. Setnayan computes BIR withholding = `vendor_subtotal_centavos × 50 / 10000` (0.5%)
+2. Setnayan remits the withheld amount to BIR each month (BIR Form 1601-EQ)
+3. Setnayan issues the vendor a **BIR Form 2307** quarterly — creditable against the vendor's own income-tax liability
+4. The withholding line appears on the vendor's payout breakdown in 0022 Vendor Dashboard
+
+### 6.5 Verified-only Setnayan Pay gate (locked 2026-05-16)
+
+**Couples can ONLY use Setnayan Pay with verified vendors.** Coming_soon vendors are paid direct off-platform (couple pays the vendor's own BDO / GCash account, Setnayan tracks the milestone via 3-stage release per 0006 Payout model). The Setnayan Pay rail is the verification flow's primary unlock.
+
+### 6.6 Payment gateway sequencing
+
+- **V1 launch:** manual reconciliation — current 0034 flow (BDO / GCash QR + screenshot upload + admin approve). No automated gateway.
+- **V1.5+:** **Maya Business** as the primary gateway. Maya QR Ph (1.5% gateway fee) is the **preferred default rail** at checkout. Per-method admin config (0023 § 3.5d) controls: Maya QR / Bank transfer / GCash direct / Maya eWallet / Credit card / OTC.
+- **Daily.co video meetings retired** as part of the same 2026-05-16 lock — no longer a billing line item.
+
+### 6.7 Schema updates
+
+```sql
+ALTER TABLE service_orders ADD COLUMN setnayan_fee_bps INT DEFAULT 550;
+ALTER TABLE service_orders ADD COLUMN gateway_fee_centavos INT DEFAULT 0;
+ALTER TABLE service_orders ADD COLUMN bir_withholding_centavos INT DEFAULT 0;
+ALTER TABLE service_orders ADD COLUMN vendor_net_centavos INT DEFAULT 0;
+ALTER TABLE service_orders ADD COLUMN disbursement_fee_centavos INT DEFAULT 0;   -- absorbed by Setnayan, tracked for finance
+ALTER TABLE service_orders ADD COLUMN payment_method_key TEXT;   -- FK to payment_method_config.method_key
+
+CREATE TABLE vendor_payouts (
+    payout_id              UUID PRIMARY KEY,
+    vendor_id              UUID NOT NULL REFERENCES vendors(vendor_id),
+    order_id               UUID NOT NULL REFERENCES service_orders(order_id),
+    payout_stage           TEXT CHECK (payout_stage IN ('immediate','reservation_20','pre_event_60','post_event_20')),
+    gross_centavos         INT NOT NULL,
+    gateway_fee_centavos   INT NOT NULL,
+    bir_withholding_centavos INT NOT NULL,
+    net_centavos           INT NOT NULL,
+    disbursement_method    TEXT CHECK (disbursement_method IN ('maya','gcash','bdo_transfer')),
+    disbursement_fee_centavos INT NOT NULL DEFAULT 0,    -- absorbed by Setnayan
+    initiated_at           TIMESTAMPTZ,
+    completed_at           TIMESTAMPTZ,
+    bir_form_2307_r2_key   TEXT
+);
+```
+
+`payment_method = 'setnayan_pay'` flags this as a vendor booking; service-activation hook on Approve releases vendor-side notification (vendor sees "Booking confirmed by Setnayan" in their 0022 dashboard) instead of activating Setnayan-side services. The payout stage is determined by the vendor's `verification_state`: `verified` → `immediate`; `coming_soon` → `reservation_20` → `pre_event_60` → `post_event_20`.
 
 ---
 
@@ -822,7 +905,7 @@ Codes are case-insensitive in admin search but stored uppercase. The full refere
 | 11 | Internal account checkout (`users.is_internal = TRUE`) skips payment screen, order goes directly to `paid` with `comp_grant_id` populated and no `service_order_payments` row. |
 | 12 | Team-pool member with sufficient balance (`team_shared_monthly_allowance.remaining_php >= total`) is fully comped; pool ledger decrements atomically. |
 | 13 | Team-pool member with partial balance pays only the difference via standard flow; comp covers the comped portion. |
-| 14 | Setnayan Pay vendor-booking orders show the 3% fee as a transparent cart line item; vendor receives full booking amount on Approve. |
+| 14 | Setnayan Pay vendor-booking orders show the convenience fee (5.5% / 6.5% per method per 2026-05-16 lock) as a transparent cart line item; vendor receives list price minus gateway fee minus BIR Withholding 0.5%; verified vendors get immediate full payout, coming_soon vendors get the 3-stage milestone release (20/60/20). |
 | 15 | Refund (≤ ₱25K, single admin) transitions order to `refunded`, voids the OR per 0026, fires deactivation hooks, sends `refund_processed` email per 0028. |
 | 16 | Reference codes are unique across the entire `service_orders` table; collision retry succeeds within 5 attempts at all realistic transaction volumes. |
 | 17 | Orders in `pending_payment` for > 7 days transition to `expired` via scheduled job; expired orders cannot be paid (customer must re-checkout). |
@@ -1116,7 +1199,8 @@ Compared with the labor cost of manual matching (~5 minutes × ~50 orders/day ×
 | 2026-05-12 | **Resubmission stays on the same order_id.** | When admin rejects "needs more proof," the customer doesn't have to re-add items to their cart. Better UX, same order tracking. `resubmission_count` increments for analytics. |
 | 2026-05-12 | **10-char Crockford base 32 reference codes (no `SET-` prefix in DB).** | 1 trillion namespace is comfortable for V1; collision math gives a 50% chance of collision at ~1M codes — well beyond realistic V1 volume. Crockford alphabet (no 0/O/1/I/L) eliminates customer-typed errors in transfer notes. Prefix shown to customer only, not stored. |
 | 2026-05-12 | **7-day order expiry on `pending_payment`.** | Filipino bank transfers settle within 1–2 business days; 7 days covers weekends + holidays + customer hesitation. After expiry, the customer must re-checkout (which generates a fresh reference code, useful because the prior code may now be polluted with confused customer transfers). |
-| 2026-05-12 | **Setnayan Pay 3% fee is a transparent line item.** | Hidden fees damage trust. The breakdown surfaces the fee as a separate cart row so customers see exactly what they're paying for. Mirrors how Stripe/PayMongo surface processing fees in their B2C-direct UIs. |
+| 2026-05-12 | **Setnayan Pay 3% fee is a transparent line item.** ~~3% rate~~ **superseded 2026-05-16 — see next row.** | Hidden fees damage trust. The breakdown surfaces the fee as a separate cart row so customers see exactly what they're paying for. Mirrors how Stripe/PayMongo surface processing fees in their B2C-direct UIs. |
+| 2026-05-16 | **Setnayan Pay convenience fee repriced 3% → 5.5% on top of vendor price (admin-configurable per payment method · cheap rails 5.5% / premium rails 6.5%) · BIR Marketplace Withholding 0.5% pass-through per RMC 8-2024 · Maya Business as V1.5+ primary gateway with Maya QR Ph (1.5%) preferred rail · Setnayan absorbs ₱15-25 outbound disbursement fee per payout · Setnayan Pay gated to verified vendors only (coming_soon vendors pay direct off-platform with Setnayan-managed 3-stage milestone release per 0006).** | The 3% figure was a placeholder during the manual-reconciliation V1 launch and didn't account for the actual tax wedge (Percentage Tax 3% + LBT 1% + Income Tax 25% = ~28% wedge → 3% gross fee × 72% = 2.16% net which is below operating breakeven once admin time per booking is counted). 5.5% lands at ~3.96% net at V1 tax tier — actually profitable per booking. The on-top model preserves vendor pricing autonomy (vendor sets list price without absorbing platform commission); the BIR withholding pass-through delegates BIR's marketplace withholding agent role to Setnayan cleanly; Maya Business unlocks the gateway automation. |
 | 2026-05-12 | **Service-activation hooks are Postgres triggers + Edge Function dispatchers.** | Triggers handle the simple cases (insert N seats, flip a boolean flag). Edge Functions handle the complex cases (OR generation per 0026, email send per 0028). All hooks are idempotent so re-running on retry is safe. |
 | 2026-05-12 | **No automated bank-API integration in V1.** | Manual reconciliation is the V1 design constraint. PayMongo evaluation and GCash Merchant API integration are V1.5 candidates only. The schema is ready to support automation drop-in: `service_order_payments.reviewed_by_admin` becomes nullable for auto-approved payments, and a new `auto_approved_at` column can be added without breaking the manual flow. |
 | 2026-05-12 | **Reconciliation matcher proposes; admin disposes.** | The matcher never auto-approves a payment — even at Tier 1 exact-match, admin must click Approve. § 9.1 single-admin authority is preserved end-to-end. Two reasons: (1) PH bank message formats can be spoofed in a forwarded SMS, so an exact-reference-code match alone isn't proof of payment receipt; (2) the V1 manual flow already meets the 24-hr SLA — automation that bypasses admin would skip the human fraud-check layer for a marginal speed gain. The Tier 1 case ends up being a one-click confirmation for admin, which captures ~90% of the labor savings without the trust cost. |

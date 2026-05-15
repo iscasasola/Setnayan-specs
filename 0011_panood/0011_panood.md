@@ -85,7 +85,7 @@ Custom Monogram Pack (₱1,999) still applies for the landing-page chrome (event
 
 Pro Camera Bridge (DSLR pairing via 0012 Papic-shared SKU) is preserved as a 0012-side capability and can still pair a DSLR to one of the operator's phones for the Panood broadcast — the DSLR feed enters the Setnayan broadcaster UI as one of the multi-cam slots when Camera Sync is purchased.
 
-AI Video Highlight (₱999/60s), AI Edited Highlight (₱2,999/3min), and Same-Day Edit (₱24,999) are **preserved** but their data source shifts: they consume the **couple's YouTube archive via OAuth** rather than Cloudflare-Stream-recorded feeds. Engineering re-scope at V1.5+ build time will route their archive-fetch logic through the YouTube Data API instead of Cloudflare Stream's recording endpoints.
+AI Video Highlight (₱1,999/60s), **AI Edited Highlight (₱3,499/3min — repriced 2026-05-16 from prior conflicting values: Strategy B ₱2,999, charm pricing ₱4,999)**, and Same-Day Edit (₱24,999) are **preserved** but their data source shifts: they consume the **couple's YouTube archive via OAuth** rather than Cloudflare-Stream-recorded feeds. Engineering re-scope at V1.5+ build time will route their archive-fetch logic through the YouTube Data API instead of Cloudflare Stream's recording endpoints.
 
 ### Why this pricing structure
 

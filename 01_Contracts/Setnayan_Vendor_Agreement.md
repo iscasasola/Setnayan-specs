@@ -379,8 +379,8 @@ ALL Setnayan team members **except the 2 owners** (owner + spouse, who hold the 
 - 0.5% × ₱5,000,000 = ₱25,000 → capped at ₱10,000
 - The team's shared pool opens May 1 with ₱10,000 remaining
 - If Team Member A spends ₱2,499 on Paparazzi on May 3 → pool drops to ₱7,501
-- If Team Member B spends ₱4,999 on AI Edited Highlight on May 10 → pool drops to ₱2,502
-- If Team Member C tries to spend ₱2,999 on Broadcast Style Pack on May 18 → ₱2,502 comped, member pays ₱497; pool zeroes out
+- If Team Member B spends ₱3,499 on AI Edited Highlight (repriced 2026-05-16 from ₱4,999) on May 10 → pool drops to ₱4,002
+- If Team Member C tries to spend ₱5,499 on Broadcast Style Pack + tool bundle on May 18 → ₱4,002 comped, member pays ₱1,497; pool zeroes out
 - Any further team purchases in May pay full price; June 1 resets the pool
 
 **Example (April platform sales = ₱500,000):**

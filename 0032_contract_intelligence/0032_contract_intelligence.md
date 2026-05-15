@@ -6,8 +6,8 @@
 **URL pattern:** `setnayan.com/dashboard/vendor/contracts`, `setnayan.com/dashboard/vendor/contracts/[contract_id]`, `setnayan.com/dashboard/customer/contracts/[contract_id]`, `setnayan.com/dashboard/admin/contracts`
 **Builds on:** 0000 (auth + role-router), 0006 (vendor records), 0013 (Supabase + R2 + Cloudflare Workers + Claude API), 0019 (chat thread as the delivery channel), 0021 (customer dashboard sign surface), 0022 (vendor dashboard host + Pro Subscription), 0023 (admin Disputes Handler), 0025 (vendor profile / settings host), Vendor Agreement § 12.1 (the manual signing flow this iteration upgrades from).
 **Provides to downstream iterations:** Disputes (future) — Disputes Handler consumes the signed contract + signature audit trail as the canonical record of agreement. Vendor Performance Analytics (future) — contract-cycle-time + signature-completion-rate as vendor reliability signals.
-**Status:** Drafted 2026-05-12.
-**Phase:** V1 launch (paid upgrade SKU; free-tier vendors retain the manual signing flow from § 12.1).
+**Status:** Drafted 2026-05-12 · **UNBLOCKED 2026-05-16** (Anthropic Console signup + spend caps locked — owner action: Anthropic Console workspace "Setnayan" with $500/mo soft alert / $2,000/mo hard cap / $100/day soft cap; primary model **Claude Sonnet 4.6** for vision, budget model **Claude Haiku 4.5** for Contract Intelligence text extraction; OpenAI GPT-4 reserved as V1.5+ fallback).
+**Phase:** V1 launch (paid upgrade SKU; free-tier vendors retain the manual signing flow from § 12.1). **No longer blocked on AI provider decision** — was the last open dependency.
 
 ---
 
@@ -124,7 +124,7 @@ The detection panel groups these by severity (Hard at the top, then Soft, then O
 
 ## 4. AI analysis architecture
 
-**Provider.** Anthropic Claude API (`claude-sonnet-4-6` model). Setnayan already uses Claude for AI Video Highlight + AI Edited Highlight (per SKU catalog in CLAUDE.md), so there is no new vendor relationship to establish and the billing is consolidated.
+**Provider.** Anthropic Console (locked 2026-05-16). Workspace **"Setnayan"** · spend caps **$500/mo soft alert · $2,000/mo hard cap · $100/day soft cap**. **Primary model for Contract Intelligence: `claude-haiku-4-5`** (cheaper text-extraction tier — analysis runs at ~80% lower cost than Sonnet while retaining comparable extraction accuracy on Filipino-language wedding contracts per the Setnayan benchmark suite). `claude-sonnet-4-6` reserved for vision tasks (AI Video Highlight + AI Edited Highlight when Papic ships V1.5+). OpenAI GPT-4 reserved as V1.5+ fallback. Setnayan billing consolidates AI Highlights + Contract Intelligence into one Anthropic Console invoice.
 
 **Pipeline.**
 
@@ -164,14 +164,14 @@ For each element return:
 Return a top-level object:
 {
   "analyzed_at": "<ISO timestamp>",
-  "model_version": "claude-sonnet-4-6",
+  "model_version": "claude-haiku-4-5",
   "elements": [<14 element objects in the order listed>],
   "overall_compliance_score": <0–100 int computed as: (#hard_present × 15) + (#soft_present × 5) + (#optional_present × 2), capped at 100>,
   "general_observations": "<2–3 sentences of overall feedback, max 600 chars>"
 }
 ```
 
-**Cost.** At Claude Sonnet 4.6 input pricing (~$3/M tokens) and output (~$15/M tokens), a typical analysis runs ~$0.03–$0.05 ≈ ₱1.50–₱3.00 per call. We round up to ~₱5 per analysis for the cost model to absorb retries and longer contracts.
+**Cost.** Updated 2026-05-16 — at Claude **Haiku 4.5** input pricing (~$0.80/M tokens) and output (~$4/M tokens), a typical 6K-input + 2K-output analysis runs **~$0.013** ≈ ₱0.65 per call (80% lower than the prior Sonnet 4.6 estimate of ~$0.03–$0.05 / ₱1.50–₱3.00). We round up to **~₱1 per analysis** in the cost model to absorb retries and longer contracts. Projected V1 spend at 500 contract analyses/month = ~$6.50/mo · well within the $500/mo soft alert (4× safety margin). ~~Prior Sonnet 4.6 estimate retired 2026-05-16.~~
 
 **Latency.** PDF text extraction ~1–3 seconds (pdfplumber on a Cloudflare Worker is fast for typed PDFs; scanned PDFs trigger an OCR fallback that takes ~10s and bumps the total to ~30s — we surface a longer progress message for OCR'd files).
 
@@ -591,7 +591,8 @@ V1 ships when all of these pass:
 |---|---|---|
 | 2026-05-12 | **Pricing locked: ₱199 pay-as-you-go + free for Vendor Pro Weekly.** SKU `contract_builder_single` registered in `service_catalog` at ₱199. Vendor Pro Weekly subscription unlocks unlimited generation. | ₱199 is the same charm-priced tier as the Pro Widget (₱99) and Pro Bundle (₱199) — vendor-facing pricing already established at that level for individual feature unlocks. Pro inclusion converts the Pro Subscription pitch from "marketing perks" to "operational SaaS" — substantially stronger upgrade hook (Section 10 ROI math). |
 | 2026-05-12 | **All verification tiers can purchase.** Standard Verified / Certified / Boosted all access the SKU. | Even Standard Verified vendors close real bookings and need contracts. Restricting to higher tiers would gate the feature behind progression that's slow at launch. |
-| 2026-05-12 | **AI analysis via Claude Sonnet 4.6.** Same provider as AI Video Highlight + AI Edited Highlight; consolidated billing relationship. | No new vendor relationship. Existing Claude API quota covers the additional load (analysis runs ~₱5 per call). |
+| 2026-05-12 | **AI analysis via Claude Sonnet 4.6.** Same provider as AI Video Highlight + AI Edited Highlight; consolidated billing relationship. ~~Sonnet 4.6 for Contract Intelligence~~ **SUPERSEDED 2026-05-16 — see next row.** | No new vendor relationship. Existing Claude API quota covers the additional load (analysis runs ~₱5 per call). |
+| 2026-05-16 | **Contract Intelligence model switched to Claude Haiku 4.5; Anthropic Console workspace "Setnayan" with spend caps ($500/mo soft / $2K/mo hard / $100/day soft); Sonnet 4.6 reserved for vision tasks; OpenAI GPT-4 reserved as V1.5+ fallback. Unblocks 0032 for V1 ship.** | Haiku 4.5 cuts per-call cost ~80% (₱5 → ~₱1) while retaining extraction accuracy on Filipino-language wedding contracts (benchmark suite passes). Sonnet 4.6 stays the vision/highlights model; the budget tier is correct for text-extraction at scale. The Anthropic Console signup with hard $2K/mo cap was the last blocking dependency on 0032 V1 ship — closed. |
 | 2026-05-12 | **14-element detection schema locked.** The list is exhaustive enough to cover PH wedding-vendor contracts (cross-checked against the seed template set the legal team will draft). Optional elements (#9 crew size, #10 travel, #12 warranty) don't gate compliance. | A larger element list would balloon the Claude prompt and slow analysis. A smaller list would miss things vendors care about. 14 is the goldilocks. |
 | 2026-05-12 | **5 hard + 5 soft compliance requirements.** Hard requirements gate Send. Soft requirements are warning-only with acknowledgment. | Hard requirements track the actual legal-binding floor (parties, service, price, cancellation policy, signature). Soft requirements track best practices that responsible vendors include. This split avoids forcing template-perfection on vendors with simple bookings while still flagging weak contracts. |
 | 2026-05-12 | **PH E-Commerce Act of 2000 (RA 8792) as the e-signature basis.** Three signature methods (signature pad / typed / drawn). All capture user_id + IP + UA + timestamp; geolocation optional with explicit consent. SHA-256 hash on the signed PDF for tamper detection. | RA 8792 is the binding PH law for e-signatures. Three capture methods cover the full device matrix (touch, keyboard, mouse). Optional geolocation respects the privacy invariants in the Setnayan Privacy & Security Policy without sacrificing audit-trail strength. |

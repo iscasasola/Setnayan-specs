@@ -1,12 +1,14 @@
-# Iteration 0019 — Communications (Chat + Video Meetings + Coordinator Join)
+# Iteration 0019 — Communications (Chat + ~~Video Meetings~~ + File Sharing + Coordinator Join)
+
+> **⚠️ AMENDMENT 2026-05-16 — Video meetings RETIRED.** The Daily.co-backed video meetings feature originally speced in this iteration has been **removed entirely from V1+**. Couples and vendors use external tools (Google Meet, Zoom, Messenger, WhatsApp) for video. The chat + file sharing + in-app file viewers + coordinator-join + force-majeure flow all remain in force. Sections below that mention 1:1 / group video meetings, Daily.co SFU, screen share, recording, and in-meeting chat are **historical context only** — they describe a feature that was speced but never shipped. The vendor Pro Weekly "Video meetings via Daily.co" benefit is also removed. See `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row for full rationale.
 
 **Iteration number:** 0019
-**Topic:** In-app communications between couples and vendors. Threaded text chat (Messenger-class), 1:1 and group video meetings (Zoom-class) attached to those threads, and a coordinator role permission to join existing client-vendor threads.
+**Topic:** In-app communications between couples and vendors. Threaded text chat (Messenger-class), file sharing with dedicated in-app readers, and a coordinator role permission to join existing client-vendor threads. ~~1:1 and group video meetings (Zoom-class) attached to those threads~~ retired 2026-05-16.
 **Surface:** All three role surfaces (customer / vendor / admin) inside the same Setnayan app per the one-app-three-doorways architecture (decision 2026-05-11).
-**URL pattern:** `setnayan.com/dashboard/[role]/messages/[thread_id]`, `setnayan.com/dashboard/[role]/meet/[meeting_id]`
+**URL pattern:** `setnayan.com/dashboard/[role]/messages/[thread_id]` ~~, `setnayan.com/dashboard/[role]/meet/[meeting_id]`~~ (meeting routes retired 2026-05-16)
 **Builds on:** 0000 (auth + role-router), 0006 (vendor records), 0013 (Supabase + R2 platform stack), 0015 (forward-references this iteration in marketing copy).
-**Status:** Drafted 2026-05-11.
-**Phase:** V1 launch-blocking for the vendor side of 0015 marketing site (the marketing copy promises in-app chat + video meetings + coordinator-join; if 0019 doesn't ship, those promises become aspirational).
+**Status:** Drafted 2026-05-11 · vendor identity masking added 2026-05-12 · **video meetings RETIRED 2026-05-16**.
+**Phase:** V1 launch-blocking for the vendor side of 0015 marketing site (the marketing copy promises in-app chat + file sharing + coordinator-join; if 0019 doesn't ship, those promises become aspirational). Video meeting promises in marketing copy are also retired 2026-05-16.
 
 ---
 
@@ -57,13 +59,14 @@ We are NOT cloning Messenger or Zoom feature-for-feature. We are matching their 
 - Reactions (emoji, single-tap)
 - Attachments: image, PDF, voice note (≤ 60s)
 - Threaded replies (Messenger-style "reply to message" anchored to the original)
-- 1:1 video meetings, Zoom-class controls (mute / cam off / leave)
-- Group video meetings (≤ 8 participants in V1; raises to 16 in V1.1)
-- Screen share (desktop browser only in V1; mobile screen share in V1.1)
-- In-meeting chat (separate from the parent thread, persists into the parent thread on meeting end)
-- Recording (with explicit consent banner; recording lands on R2, link posts to the parent thread)
+- ~~1:1 video meetings, Zoom-class controls (mute / cam off / leave)~~ **RETIRED 2026-05-16**
+- ~~Group video meetings (≤ 8 participants in V1; raises to 16 in V1.1)~~ **RETIRED 2026-05-16**
+- ~~Screen share (desktop browser only in V1; mobile screen share in V1.1)~~ **RETIRED 2026-05-16**
+- ~~In-meeting chat (separate from the parent thread, persists into the parent thread on meeting end)~~ **RETIRED 2026-05-16**
+- ~~Recording (with explicit consent banner; recording lands on R2, link posts to the parent thread)~~ **RETIRED 2026-05-16**
 - Coordinator join permission (per-thread; couple authorizes, vendor + coordinator notified)
 - Notifications: in-app (always), push (V1.1), email digest (V1.1)
+- **External video tool handoff:** when a video call is needed, the in-app chat composer surfaces a "Share meeting link" affordance — the couple or vendor pastes a Google Meet / Zoom / Messenger / WhatsApp URL into the thread (auto-detected, rendered as a tappable card with title + time-range hint). Setnayan does NOT host the video — the parties use whichever external rail they already use.
 
 **Out of scope (deferred to V1.1+):**
 
@@ -90,16 +93,16 @@ Every capability shipped in this iteration is **free for every Setnayan account*
 - Unlimited messages, reactions, replies, edits
 - File attachments up to the per-file and per-thread caps (image 25 MB, pdf 50 MB, doc/sheet 25 MB, voice 60s; thread cap 5 GB rolling)
 - In-app doc / spreadsheet / pdf / image readers — no download required
-- Unlimited 1:1 video meetings (Zoom-class)
-- Group video meetings up to 8 participants (raises to 16 in V1.1)
-- Screen share + recording (with consent)
+- ~~Unlimited 1:1 video meetings (Zoom-class)~~ **RETIRED 2026-05-16 — use external tools (Google Meet / Zoom / Messenger / WhatsApp)**
+- ~~Group video meetings up to 8 participants (raises to 16 in V1.1)~~ **RETIRED 2026-05-16**
+- ~~Screen share + recording (with consent)~~ **RETIRED 2026-05-16**
 - Coordinator-join permission
 
-**Why free:** Communication is the connective tissue of the entire platform. Gating it behind a paywall would push couples and vendors back to WhatsApp / Messenger and gut the in-app value-prop. The marginal cost is small (~₱6 per 60-min 1:1 video call on Daily.co; chat + R2 storage measured in fractions of a peso per thread per month) and is absorbed into the platform's general operating budget — not passed through.
+**Why free:** Communication is the connective tissue of the entire platform. Gating it behind a paywall would push couples and vendors back to WhatsApp / Messenger and gut the in-app value-prop. The marginal cost is small (chat + R2 storage measured in fractions of a peso per thread per month) and is absorbed into the platform's general operating budget — not passed through. ~~Video meetings via Daily.co (~₱6 per 60-min 1:1) were also part of the free-use bundle until retired 2026-05-16.~~
 
 **What this means for marketing:**
 
-- 0015 marketing copy calls out "free in-app chat, video meetings, and file sharing" as a baseline benefit on both the customer and vendor sides — it's not a feature you "unlock," it's just how the platform works.
+- 0015 marketing copy ~~calls out "free in-app chat, video meetings, and file sharing"~~ now reads "free in-app chat & file sharing" (video meetings reference removed 2026-05-16) as a baseline benefit on both the customer and vendor sides — it's not a feature you "unlock," it's just how the platform works.
 - Vendor-side hero already says "no commission, no monthly bill" — free communications is implicit in that promise; reinforce explicitly in the vendor perks list.
 
 **What free use does NOT cover (and never will, per scope):**
@@ -109,7 +112,7 @@ Every capability shipped in this iteration is **free for every Setnayan account*
 - Vendor-initiated cold threads (vendors cannot DM customers who haven't started a thread; vendors can only reply within existing threads — preserves the customer-mediated invariant)
 - Email / SMS routed through Setnayan (V2; for V1, Setnayan messages stay in-app)
 
-**Cost model for finance reconciliation:** even though the user sees free, finance still tracks per-meeting Daily.co cost + per-GB R2 cost per event. These show up in the platform's internal cost-per-event reporting, not on any user-facing receipt. Use this data to size the operating budget, not to introduce a paywall.
+**Cost model for finance reconciliation:** even though the user sees free, finance still tracks per-GB R2 cost per event. These show up in the platform's internal cost-per-event reporting, not on any user-facing receipt. Use this data to size the operating budget, not to introduce a paywall. ~~Per-meeting Daily.co cost was previously tracked here — retired 2026-05-16 with the video-meetings feature.~~
 
 ---
 

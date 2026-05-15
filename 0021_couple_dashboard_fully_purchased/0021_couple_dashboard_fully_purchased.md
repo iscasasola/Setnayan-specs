@@ -25,7 +25,7 @@ Aira Reyes & Boy Delos Santos. Wedding date **November 15, 2026 at Tagaytay High
 | LED Background | 1 | ₱599 | Rendering — USB ships T-7 |
 | Invitation Widgets Pro Bundle | 1 | ₱200 | Active — all 3 widgets upgraded |
 | AI Video Highlight (60s) | 1 | ₱2,000 | Queued — renders post-event |
-| AI Edited Highlight (3-min) | 1 | ₱5,000 | Queued — renders post-event |
+| AI Edited Highlight (3-min) | 1 | ₱3,499 | Queued — renders post-event (repriced 2026-05-16 from ₱4,999) |
 | Template Add-ons | 4 | ₱800 | 4 of 14 unlocked premade templates |
 | **Total platform spend** | | **₱26,599** | |
 

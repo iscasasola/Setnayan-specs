@@ -1,8 +1,10 @@
 # Sample Render Refresh Program — Setnayan canonical spec
 
-**Status:** Locked 2026-05-12
+**Status:** Locked 2026-05-12 · **AI Edited Highlight pricing amendment 2026-05-16**
 **Owner:** Operations + Product (admin curation lives in iteration 0023)
 **Touches:** iterations 0005 · 0011 · 0012 · 0023 · 0024 · 0025 · privacy policy
+
+> **⚠️ AMENDMENT 2026-05-16 — AI Edited Highlight 3-min repriced ₱2,999 → ₱3,499.** Every inline reference below that quotes the AI Edited Highlight price at ₱2,999 should be read as the **new locked value ₱3,499** (per `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row § 14). The reprice resolves a prior internal conflict (Strategy B said ₱2,999; charm pricing table said ₱4,999; new lock ₱3,499 lands cleanly between). Margin tables and per-tier reward economics below remain directionally accurate at the new price — the SDE → AIEH gift-ladder remains intact, just at the new ₱3,499 anchor.
 
 ---
 

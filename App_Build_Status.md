@@ -25,7 +25,7 @@
 | ✅ Shipped | **22** | 0000, 0001, 0002, 0004, 0007, 0008, 0010, 0013, 0015, 0016, 0021, 0023, 0025, 0026, 0028, 0029, 0030, **0031**, 0033 (partial), 0034, **0035**, **0036** (NEW) |
 | ⚠️ Partial / Phase 2 in flight | 5 | 0006, 0019, 0022, 0030, 0033 |
 | 🟡 Deliberate V1.5+ | 6 | 0005, 0009, 0011, 0012, 0017, 0018 |
-| ⛔ Blocked | 1 | 0032 (Anthropic) |
+| ⛔ Blocked | 0 | ~~0032 (Anthropic)~~ — **unblocked 2026-05-16** (Anthropic Console signup + Haiku 4.5 locked) |
 | 🚫 Retired | **4** | 0003, 0014, 0027, **0024 (folded into 0002 Phase 1 on 2026-05-16)** |
 
 **Bold** = changed today.
@@ -55,7 +55,7 @@
 | 0016 | Step-by-Step Plan Builder | ✅ Shipped | — |
 | 0017 | Patiktok | 🟡 V1.5+ build (SKU lock 2026-05-16) | **SKU lock 2026-05-16:** old single-tier ₱2,499/booth/5hr + ₱999 additional-station + ₱499/hour retired. New dual-tier per-day model: Patiktok Setnayan TikTok ₱999/day (auto-posts to @SetnayanWeddings · Setnayan keeps ad-revenue) vs Patiktok Personal TikTok ₱1,999/day (couple BYO TikTok via OAuth · couple owns videos). 40-video soft cap per booth per day · ₱49/+10 overage SKU as in-event upsell · per-day multi-purchase for multi-day events. Sound selection / multi-performer / external-display mechanics preserved. Anti-abuse rule changed: 500-per-event hard cap → 40-per-day soft cap. Still showing as "Coming soon" in add-ons grid pending V1.5+ build. |
 | 0018 | Supplies Marketplace | 🟡 V1.5+ | Now visible as "Coming soon" in add-ons grid (PR #22) |
-| 0019 | Communications | ⚠️ Partial | Force-majeure flow + admin escalation in Phase 2 agent (in flight); video meetings still deferred |
+| 0019 | Communications | ⚠️ Partial — chat + files shipped · video meetings RETIRED 2026-05-16 | Force-majeure flow + admin escalation in Phase 2 agent (in flight); **video meetings (Daily.co) RETIRED entirely from V1+ on 2026-05-16** — couples + vendors use external tools (Google Meet, Zoom, Messenger, WhatsApp). Chat + file attachments + in-app viewers + coordinator-join + force-majeure flow all retained. |
 | 0020 | Interaction Prototype | n/a | Design artifact only |
 | 0021 | Couple Dashboard | ✅ Shipped | Day-of mode (PR #11) + event-day pre-load CTA (PR #12) + dispute entry placeholder (PR #22) |
 | 0022 | Vendor Dashboard | ⚠️ Partial | 5 new placeholder routes shipped (PR #22); services + bookings + team + earnings in Phase 2 agent (in flight) |
@@ -68,9 +68,9 @@
 | 0029 | Help Center | ✅ Shipped | — |
 | 0030 | Guided Tour | ⚠️ Partial | Per-surface mini-tours still queued (not in current Phase 2 batch) |
 | 0031 | Day-of Guest | ✅ Shipped (NEW) | Banner + 6-card grid auto-activates T-1h to T+8h (PR #11); 3 of 6 cards are stubs depending on 0009/0011/0012 |
-| 0032 | Contract Intelligence | ⛔ Blocked on Anthropic | — |
+| 0032 | Contract Intelligence | ✅ Unblocked 2026-05-16 (Claude API setup pending) | Anthropic Console workspace "Setnayan" + spend caps locked ($500/$2K/$100); primary text model **Claude Haiku 4.5** (Contract Intelligence); Sonnet 4.6 reserved for vision (AI Highlights V1.5+); OpenAI GPT-4 reserved as V1.5+ fallback. Per-call cost ~₱1 (80% lower than prior Sonnet estimate). Owner action: sign up at console.anthropic.com, create workspace, set spend caps. |
 | 0033 | Public API | ⚠️ Partial | `/health` + `/me` shipped earlier; Phase 2 agent in flight adds events/guests/vendors read-only |
-| 0034 | Payments & Cart | ✅ Shipped | TIN format fix flows through receipts (PR #5) |
+| 0034 | Payments & Cart | ✅ Shipped (V1 manual reconciliation) · 🟡 Setnayan Pay reprice + Maya Business pending V1.5+ | TIN format fix flows through receipts (PR #5). **2026-05-16:** Setnayan Pay convenience fee repriced 3% → 5.5% on top of vendor price (admin-configurable per method · cheap rails 5.5% / premium rails 6.5%); BIR Marketplace Withholding 0.5% pass-through per RMC 8-2024; Maya Business as V1.5+ primary gateway with Maya QR Ph preferred (1.5% gateway fee). Engineering pending: per-method config table, BIR 2307 generation, vendor_payouts table, gateway integration. |
 | 0035 | Observability | ✅ Shipped (NEW) | Sentry (PR #17) + PostHog 3-event funnel (PR #19); 4 more funnels go through PostHog Insights |
 | **0036** | **Event-Day Pre-load (NEW iteration)** | ✅ Shipped | Couple + vendor T-3d → T+1d "Prepare for event day" CTA + auto-prefetch T-24h → T+12h (PR #12). Spec needs to be added to Cowork corpus |
 
@@ -86,6 +86,10 @@
 | **Persistent login (client-aware sessions)** | ✅ Shipped | 10-year cookie maxAge for Tauri + installed PWA; 1-year for web (PR #6) |
 | **Services → Add-ons rename** | ✅ Shipped | 308 redirects from `/services/*` → `/add-ons/*` (PR #13) |
 | **CI build job** | ✅ Shipped | `pnpm --filter @setnayan/web build` runs on every PR (PR #15) |
+| **Vendor Verification flow (NEW 2026-05-16)** | 🟡 Spec locked · engineering pending | FREE initial / ₱1,500 annual renewal / ₱2,500 re-verification after demotion · 12-document checklist (DTI / BIR 2303 / Mayor's Permit / gov ID via Persona/Veriff/Onfido / bank micro-deposit / portfolio + reverse image search / 3-5 references / live selfie + liveness / 15-min Google Meet / SMS OTP + email / social presence / AMLC sanctions) · all-or-nothing · 3-5 BD SLA · `setnayan-vendor-verification` R2 bucket (90d raw + 7yr audit). Schema migrations pending (vendors.verification_state + vendor_verification_applications + vendor_tier_history). |
+| **All Tools Unlock bundle (NEW 2026-05-16)** | 🟡 Spec locked · SKU seed pending | ₱9,999/year · includes Mood Board + Palette + Seating + QR Reader + Advanced Pricing Tier · open to ALL paying vendors (NOT verified-only). vendor_tool_bundles table pending. |
+| **Boosted Ads + Sponsored Boost ladder (NEW 2026-05-16)** | 🟡 Spec locked · SKU seed pending | Boosted Ads 5km ₱5K/wk · 10km ₱8K/wk · 20km ₱15K/wk · Sponsored Boost Quarterly ₱250K / Annual ₱800K at 30km (verified-only). Replaces prior single ₱1,499/wk Sponsored Boost SKU. |
+| **Vendor Payout model (NEW 2026-05-16)** | 🟡 Spec locked · engineering pending | Verified = immediate full payout T+1 (less gateway + BIR 0.5%); coming_soon = 3-stage milestone release 20/60/20 with T-14 + T+7 dispute windows. Demote-to-coming_soon trigger: 3+ disputes/30d. Setnayan absorbs ₱15-25 disbursement fee. vendor_payouts table + dispute counter cron pending. |
 
 ---
 
@@ -151,7 +155,7 @@ Owner must run `supabase db push` once all Phase 2 PRs are merged — multiple n
 | Panood live stream | Provision Cloudflare Stream Live + YouTube Data API + master channel |
 | Marketplace commission model | Free / commission per booking / paid tier |
 | Daily.co video meetings | Sign up, paste API key |
-| Anthropic Claude API (0032) | Sign up + spend cap |
+| Anthropic Claude API (0032) | Sign up + spend cap | **LOCKED 2026-05-16:** workspace "Setnayan" · $500/mo soft alert · $2,000/mo hard cap · $100/day soft cap · primary text model Claude Haiku 4.5 · vision Sonnet 4.6 · OpenAI GPT-4 V1.5+ fallback |
 | Apple Developer Program | $99/yr enrollment (V1.0+ deferred per owner) |
 | ~~Render pipeline infra~~ | **CLOSED 2026-05-16** — alongside item #6 closure; landing page is web tech only |
 

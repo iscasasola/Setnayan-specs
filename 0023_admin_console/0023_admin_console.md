@@ -72,12 +72,16 @@ Below: recent admin activity feed (other admins' actions), platform metrics (DAU
 
 Three sub-queues stacked on one screen:
 
-**3.2a Vendor identity verification** (V1 launch-critical)
+**3.2a Vendor identity verification** (V1 launch-critical — full flow locked 2026-05-16, see 0006 Verification spec)
 - New vendor registers → `vendor_registrations.status = pending_verification`
-- Admin reviews: business name, portfolio link, sample work, government ID (if uploaded), DTI/SEC reg
-- Approve → vendor.is_verified = true · `users.account_type = 'vendor'` provisioned · welcome email sent
-- Reject → email vendor with reason
-- 3-business-day SLA · auto-page Setnayan Team at 48h
+- Vendor uploads **12-document checklist** (DTI, BIR 2303, Mayor's Permit, gov ID via Persona/Veriff/Onfido, bank micro-deposit proof, 5-10 portfolio samples, 3-5 client references, live selfie + ID liveness, social media presence, AMLC sanctions screening). Category-specific extras for venues / catering / coordinators / high-value vendors.
+- Admin reviews: 12-doc checklist completion, Persona/Veriff/Onfido result, AMLC screening, reverse image search on portfolio, schedules the 15-min Google Meet
+- Approve → `verification_state = 'verified'`, `last_verified_at = NOW()`, `next_renewal_due_at = NOW() + INTERVAL '1 year'`, Setnayan Pay unlocks for couples, Pro Weekly access granted, Boosted Ads / Sponsored Boost / All Tools Unlock eligibility activates, welcome email sent
+- Reject → email vendor with specific document/check that failed
+- **Three application types** in queue (color-tagged): initial (FREE), annual renewal (₱1,500), post-demotion (₱2,500)
+- 3-5 business-day SLA · auto-page Setnayan Team at 96h
+- **Auto-demotion handler:** cron flags any vendor with 3+ disputes within rolling 30 days → `verification_state = 'demoted'` · email vendor with re-verification fee + apply link
+- Documents stored in R2 bucket `setnayan-vendor-verification` (90-day rolling raw uploads · 7-year audit-trail retention per BIR § 235)
 
 **3.2b Vendor service approval**
 - Vendor publishes a new service → admin reviews per existing 2026-05-09 admin curation decision
@@ -326,6 +330,81 @@ CREATE TABLE payment_receiving_accounts (
 ```
 
 **Why this is two-admin gated:** changing the receiving account numbers is the single highest-leverage fraud vector in the V1 payment system. If a compromised admin account silently swaps the BDO account number for an attacker-controlled one, every customer payment for 24 hours could route to the attacker. Two-admin approval makes this attack require simultaneous compromise of two admins, which is dramatically harder. The 24-hour reconciliation SLA means the attack window is bounded even if both admins are compromised — finance sees the diversion the next day.
+
+### 3.5d Payment Method Configuration · admin-configurable per-method fee table (locked 2026-05-16)
+
+V1.5+ when Maya Business goes live as the primary gateway (per 0034 § Setnayan Pay), the admin console exposes a per-payment-method configuration table that controls (a) which rails are visible to couples at checkout, (b) the Setnayan convenience fee charged on top of vendor price, (c) the gateway fee passed through to the vendor, and (d) the preferred-rail flag (Maya QR Ph defaulted).
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ Payment Method Configuration · Setnayan Pay rails                                       │
+│                                                                                         │
+│ Method                  Setnayan fee  Gateway fee  Vendor net*  Preferred  Active       │
+│ ───────────────────────────────────────────────────────────────────────────────────     │
+│ Maya QR Ph              5.5%          1.5%         97.5%         ★ default  ✅          │
+│ GCash direct            5.5%          1.5%         97.5%                    ✅          │
+│ Bank transfer (BDO/etc) 5.5%          0% (manual)  99.5%                    ✅          │
+│ Maya eWallet            5.5%          2.0%         97.0%                    ✅          │
+│ Credit card (Mastercard/│                                                                │
+│  Visa)                  6.5%          3.0%         96.5%                    ✅          │
+│ OTC (7-Eleven, M Lhuill │                                                                │
+│  ier, etc.)             5.5%          1.5%         97.5%                    ✅          │
+│                                                                                         │
+│ * Vendor net = 100% − gateway fee − BIR Withholding 0.5%                                │
+│   Setnayan keeps the 5.5%/6.5% convenience fee gross; pays own taxes from that          │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Editable per row:** Setnayan convenience fee % · gateway fee % · preferred-rail flag · active toggle. Changes are single-admin authority (light-touch) but logged in `payment_method_config_history` for audit.
+
+**Schema:**
+
+```sql
+CREATE TABLE payment_method_config (
+    method_key            TEXT PRIMARY KEY,    -- 'maya_qr','gcash_direct','bdo_transfer','maya_ewallet','credit_card','otc'
+    display_label         TEXT NOT NULL,
+    setnayan_fee_bps      INT NOT NULL,        -- 550 = 5.5%; 650 = 6.5% (basis points)
+    gateway_fee_bps       INT NOT NULL,        -- 150 = 1.5%; 300 = 3.0%
+    is_preferred_default  BOOLEAN NOT NULL DEFAULT FALSE,
+    is_active             BOOLEAN NOT NULL DEFAULT TRUE,
+    updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by_admin      UUID REFERENCES users(user_id)
+);
+
+CREATE TABLE payment_method_config_history (
+    history_id UUID PRIMARY KEY,
+    method_key TEXT NOT NULL,
+    snapshot   JSONB NOT NULL,
+    changed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    changed_by_admin UUID NOT NULL REFERENCES users(user_id),
+    change_reason TEXT
+);
+```
+
+**Why single-admin (not two-admin):** unlike the receiving account number (which is a fraud vector), the per-method fee % is a business-policy lever. Setnayan ops adjust these for promotional periods (e.g., "0% Setnayan fee on Maya QR for Q3 launch push") or to align with renegotiated gateway contracts. Changes ripple to the customer-facing checkout fee calculator (0034 § Setnayan Pay) within 1 minute via cache TTL.
+
+### 3.5e Vendor Tier Perks Management (locked 2026-05-16)
+
+Admin surface to inspect and override per-vendor tier perks (verified vs coming_soon). Per-vendor row in Users surface filters by `verification_state` and exposes:
+
+- **Force tier change** (verified ↔ coming_soon) — single-admin authority for verified → coming_soon (demotion) · two-admin gate for coming_soon → verified outside the normal verification queue (bypass-approval safeguard)
+- **Toggle individual perks** — e.g., revoke Setnayan Pay access for a verified vendor without full demotion (used when dispute pattern is borderline)
+- **Override 3-stage payout milestones** — admin can manually advance/hold a coming_soon vendor's stage if a couple confirms early or files a dispute
+- **View tier history** — `vendor_tier_history` table logs every state change with reason
+
+```sql
+CREATE TABLE vendor_tier_history (
+    history_id UUID PRIMARY KEY,
+    vendor_id  UUID NOT NULL REFERENCES vendors(vendor_id),
+    from_state TEXT,
+    to_state   TEXT NOT NULL,
+    changed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    changed_by_admin UUID,           -- nullable for system auto-demotions
+    change_reason TEXT,
+    related_application_id UUID REFERENCES vendor_verification_applications(application_id),
+    related_dispute_count INT         -- for auto-demotions: count of disputes in window
+);
+```
 
 ### 3.6 Disputes &amp; Refunds
 

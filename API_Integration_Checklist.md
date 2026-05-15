@@ -25,7 +25,7 @@ V1 is built on Vercel + Supabase + Cloudflare R2 + GitHub plus seven third-party
 - [ ] Sign up for Vercel Pro ($20/month) for build minutes + larger functions
 - [ ] Connect Vercel to the GitHub repo
 - [ ] Set up environments: `production` (setnayan.com), `staging` (staging.setnayan.com), `preview` (auto-generated per PR)
-- [ ] Configure environment variables (Supabase keys, R2 keys, Daily.co keys — TBD per § 1.3, § 1.4, § 1.5)
+- [ ] Configure environment variables (Supabase keys, R2 keys ~~, Daily.co keys~~ — TBD per § 1.3, § 1.4 · Daily.co RETIRED 2026-05-16)
 - [ ] Enable Vercel Analytics (Web Vitals tracking)
 
 **Cost:** ~$20/month Pro tier.
@@ -57,14 +57,18 @@ V1 is built on Vercel + Supabase + Cloudflare R2 + GitHub plus seven third-party
 
 **Cost:** Free up to 10GB storage + free egress; $0.015/GB/month over.
 
-### 1.5 Daily.co (for 0019 video meetings)
+### 1.5 ~~Daily.co (for 0019 video meetings)~~ **RETIRED 2026-05-16**
 
-- [ ] Sign up for Daily.co; enable Singapore region for SFU
-- [ ] Generate API keys — domain creation + room creation + meeting tokens
-- [ ] Configure webhook for recording-completed events → uploads to R2 thread-files bucket
-- [ ] Set up cost limits: $0 hard ceiling for free trial; $200/month soft cap to start
+The Daily.co video-meetings feature was retired entirely from V1+ on 2026-05-16. No signup needed. Couples + vendors use external tools (Google Meet, Zoom, Messenger, WhatsApp) for video; the 0019 chat composer surfaces a "Share meeting link" affordance that auto-detects pasted URLs and renders them as tappable cards. Daily.co domain + API keys + recording webhooks all NOT required.
 
-**Cost:** Pay-as-you-go ~₱0.05 per participant-minute. ~₱6 per 60-minute 1:1.
+- ~~Sign up for Daily.co; enable Singapore region for SFU~~ — N/A
+- ~~Generate API keys — domain creation + room creation + meeting tokens~~ — N/A
+- ~~Configure webhook for recording-completed events → uploads to R2 thread-files bucket~~ — N/A
+- ~~Set up cost limits: $0 hard ceiling for free trial; $200/month soft cap to start~~ — N/A
+
+**Cost:** ₱0 (feature retired).
+
+**Spec ref:** `0019_communications/0019_communications.md` 2026-05-16 amendment banner; `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row § 6.
 
 ### 1.6 Domain registration
 
@@ -107,14 +111,18 @@ V1 is built on Vercel + Supabase + Cloudflare R2 + GitHub plus seven third-party
 
 **Cost:** DPO compensation (if internal: part of payroll; if contracted: ~₱20K/month). NPC registration ~₱500 one-time.
 
-### 2.4 Setnayan Pay processing (V1.5 prep)
+### 2.4 Setnayan Pay processing (V1.5 prep) — **AMENDED 2026-05-16**
 
-- [ ] Submit application to GCash Merchant API (typically 4–6 week approval)
-- [ ] Submit application to PayMongo (typically 1–2 week approval) — backup integration
-- [ ] Set up sandbox test accounts in each
-- [ ] Coordinate with BIR for proper invoicing format
+**2026-05-16 lock:** primary V1.5+ gateway is **Maya Business** with Maya QR Ph (1.5% gateway) as the preferred default rail — see § 5.7 above for full Maya Business signup checklist. GCash Merchant API and PayMongo are now V1.5+ optional alternates rather than primary.
 
-**Status:** V1 doesn't use these. Apply now so V1.5 launches with automated reconciliation. Approval timeline is the bottleneck.
+- [ ] **[NEW PRIMARY 2026-05-16]** Submit Maya Business merchant application — see § 5.7
+- [ ] ~~Submit application to GCash Merchant API (typically 4–6 week approval)~~ — V1.5+ alternate rail (under Maya Business primary)
+- [ ] ~~Submit application to PayMongo (typically 1–2 week approval) — backup integration~~ — superseded by Maya Business primary
+- [ ] Set up sandbox test accounts in Maya Business
+- [ ] Coordinate with BIR for proper invoicing format (BIR Form 2303 + Form 2307 for marketplace withholding 0.5%)
+- [ ] Setnayan Pay convenience fee repriced **3% → 5.5% on top of vendor price** (admin-configurable per method — see 0034 § 6 + 0023 § 3.5d)
+
+**Status:** V1 doesn't use automated gateway; ships with manual reconciliation per current 0034 flow. Maya Business turns on at V1.5+. Approval timeline (2-4 weeks) is the bottleneck.
 
 ## Tier 3 — Marketing + Content (nice to have for launch)
 
@@ -220,18 +228,72 @@ V1 is built on Vercel + Supabase + Cloudflare R2 + GitHub plus seven third-party
 
 **Spec refs:** `0011_panood/0011_panood.md` § Pricing — V1 SKU lock 2026-05-16, CLAUDE.md 2026-05-16 4th row, `0033_public_api_foundation/0033_public_api_foundation.md` § oauth_grants schema (extended for per-event YouTube refresh-token storage).
 
-### 5.4 Anthropic Claude API
+### 5.4 Anthropic Claude API — **LOCKED 2026-05-16**
 
 - [ ] Sign up for Anthropic Console account under Setnayan-owned email
+- [ ] Create workspace **"Setnayan"** within the console
+- [ ] Set spend caps: **$500/month soft alert · $2,000/month hard cap · $100/day soft cap** (locked 2026-05-16)
 - [ ] Generate API key, store in `.env` as `ANTHROPIC_API_KEY`
-- [ ] Set monthly spend cap (start at $500/month soft cap, adjust based on usage)
-- [ ] Enable prompt caching on the contract-analysis prompt template (0032) and the AI-highlight scene-selection prompt (0011/0012)
-- [ ] Configure model choice: Claude Sonnet 4 (cost-optimized) for contract analysis; Claude Opus 4.7 for AI Edited Highlight scene selection
-- [ ] Add usage monitoring dashboard alert at 80% of monthly cap
+- [ ] Enable prompt caching on the contract-analysis prompt template (0032) and the AI-highlight scene-selection prompt (V1.5+ Papic)
+- [ ] **Model config (2026-05-16 lock):**
+  - Primary text model: **Claude Haiku 4.5** for Contract Intelligence (0032 text extraction) — ~80% cheaper than Sonnet, comparable accuracy on Filipino-language wedding contracts
+  - Vision model: **Claude Sonnet 4.6** for AI Video Highlight + AI Edited Highlight (V1.5+ Papic) — reserved for when Papic ships
+  - V1.5+ fallback: OpenAI GPT-4 (separate API key in `OPENAI_API_KEY` when needed)
+- [ ] Add usage monitoring dashboard alert at 80% of monthly cap ($400/mo trigger)
+- [ ] Unblocks 0032 Contract Intelligence for V1 ship — this was the last open dependency
 
-**Cost:** ~₱10 per AI Video Highlight render, ~₱30 per AI Edited Highlight render, ~₱5 per contract analysis. Estimated ~₱5,000–15,000/month at V1 scale.
+**Cost (updated 2026-05-16):** ~**₱1 per contract analysis** (Haiku 4.5 input ~$0.80/M + output ~$4/M tokens). V1 spend at 500 analyses/month = ~$6.50/mo — well inside the $500/mo soft alert (4× safety margin). AI Highlights (Sonnet 4.6) cost line N/A until Papic V1.5+ ships.
 
-**Spec refs:** `0032_contract_intelligence/0032_contract_intelligence.md`, `0011_live_stream/0011_live_stream.md` § AI Edited Highlight, `0012_paparazzi/0012_paparazzi.md` § AI Video Highlight.
+**Spec refs:** `0032_contract_intelligence/0032_contract_intelligence.md`, `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row § 13 (Anthropic API setup).
+
+### 5.6 Persona / Veriff / Onfido — Identity verification (NEW 2026-05-16 · Tier 2)
+
+For vendor verification (0006 Vendor Verification flow). Required for the gov-ID check + liveness step (item 4 + 8 of the 12-document checklist).
+
+- [ ] Evaluate Persona vs Veriff vs Onfido for PH market support + PH gov ID coverage (UMID, SSS, PhilHealth, PRC, Passport, Driver's License, Voter's ID)
+- [ ] Choose one provider (recommendation pending — Persona has best PH coverage at last spot-check; Veriff is cheapest at ~$0.80/check; Onfido has best fraud-detection accuracy)
+- [ ] Sign up + KYC the Setnayan business (1-2 BD)
+- [ ] Generate API keys, store in `.env` as `PERSONA_API_KEY` (or equivalent)
+- [ ] Configure webhook → `/api/vendor-verification/identity-check-result` → updates `vendor_verification_applications.persona_check_result` JSONB
+- [ ] Set up sandbox test accounts
+
+**Cost:** ~₱200 per ID + liveness check (1 USD ≈ ₱56). Setnayan absorbs as part of the ~₱535/vendor initial-verification CAC.
+
+**Spec refs:** `0006_vendors_management/0006_vendors_management.md` Vendor Verification flow; `0023_admin_console/0023_admin_console.md` § 3.2a Vendor identity verification queue; `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row § 7 (item d).
+
+### 5.7 Maya Business — Primary payment gateway (NEW 2026-05-16 · Tier 2 · V1.5+ activation)
+
+V1.5+ primary gateway per 2026-05-16 lock. V1 ships with manual reconciliation (current 0034 flow); Maya Business turns on at V1.5+ for automated processing.
+
+- [ ] Apply for Maya Business merchant account (PH business registration from § 2.2 required)
+- [ ] Submit BIR Form 2303 + Mayor's Permit + bank account details
+- [ ] Wait for Maya Business approval (typical 2-4 weeks)
+- [ ] Enable Maya QR Ph (1.5% gateway fee — preferred default rail at checkout per 0034)
+- [ ] Enable additional rails: bank transfer, GCash direct, Maya eWallet (2.0%), credit card (3.0%), OTC (1.5%)
+- [ ] Generate API keys, store in `.env` as `MAYA_BUSINESS_API_KEY` + `MAYA_BUSINESS_SECRET`
+- [ ] Configure webhook → `/api/payments/maya-webhook` → updates `service_orders.status` on payment confirmation
+- [ ] Configure outbound disbursement (Setnayan → vendor) — Setnayan absorbs ₱15-25 fee per payout
+- [ ] Set up sandbox + production keys
+- [ ] Build per-method admin config UI surface (0023 § 3.5d Payment Method Configuration)
+
+**Cost:** Application fee TBD (typically ₱5,000-10,000 one-time). Gateway fees passed through to vendor transparently.
+
+**Spec refs:** `0034_payments_and_cart/0034_payments_and_cart.md` § 6 Setnayan Pay convenience fee; `0023_admin_console/0023_admin_console.md` § 3.5d Payment Method Configuration; `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row § 4 (Payment gateway sequencing).
+
+### 5.8 AMLC sanctions API — PEP screening (NEW 2026-05-16 · Tier 2)
+
+For vendor verification item 12 (sanctions / PEP screening).
+
+- [ ] Apply for access to AMLC (Anti-Money Laundering Council) watchlist API — typically via a registered Compliance Officer
+- [ ] Alternative: use ComplyAdvantage or Refinitiv World-Check (international PEP databases) for broader coverage
+- [ ] Sign up + register Setnayan's Compliance Officer with the AMLC
+- [ ] Generate API key, store in `.env` as `AMLC_API_KEY` (or `COMPLY_ADVANTAGE_API_KEY`)
+- [ ] Configure batch check on each verification application submission → updates `vendor_verification_applications.amlc_screening_result` JSONB
+- [ ] Set up alerts for positive matches → escalate to Setnayan admin for manual review
+
+**Cost:** AMLC direct access typically free for registered Compliance Officers; ComplyAdvantage ~$1-3 per check at low volume.
+
+**Spec refs:** `0006_vendors_management/0006_vendors_management.md` Vendor Verification flow item 12; `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row § 7 (item l).
 
 ### 5.5 Suno Premier (one-time music catalog generation)
 

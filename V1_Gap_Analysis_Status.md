@@ -178,4 +178,45 @@ These are NOT done because you didn't ask for them, or they're explicitly V1.5+:
 
 ---
 
-**Last updated:** 2026-05-12. Re-generate this file after any future iteration batch by running the same audit pattern.
+**Last updated:** 2026-05-12 · amended 2026-05-16 (marketplace + payment + verification model lock).
+
+---
+
+## 2026-05-16 — Marketplace + payment + verification model lock (additive)
+
+Today's lock adds five new V1 spec deliverables to the gap-analysis ledger. None of these were on the original 2026-05-12 gap list — they emerged from the post-2026-05-15 walkthrough of marketplace economics + vendor trust + Anthropic API setup. All locked in `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row.
+
+| # | Item | Status | Where it landed |
+|---|---|---|---|
+| 1 | **Setnayan Pay commission model (5.5% on top of vendor price, admin-configurable per method, BIR 0.5% pass-through, Maya Business V1.5+ primary gateway, Maya QR Ph preferred rail, Setnayan absorbs ₱15-25 disbursement fee)** | ✅ Spec | `0034_payments_and_cart/0034_payments_and_cart.md` § 6 (full rewrite — 5.5%/6.5% per method, BIR Withholding 0.5%, Maya Business V1.5+, payout breakdown table, schema updates). `0023_admin_console/0023_admin_console.md` § 3.5d (admin-configurable payment-method config table + history). Engineering pending: schema migrations, BIR 2307 generation, gateway integration. |
+| 2 | **Vendor Verification flow (FREE initial / ₱1,500 annual renewal / ₱2,500 re-verification after demotion · 12-document checklist · all-or-nothing · 3-5 BD SLA · `setnayan-vendor-verification` R2 bucket)** | ✅ Spec | `0006_vendors_management/0006_vendors_management.md` new "Vendor Verification flow" section (pricing table + 12-doc checklist + category-specific extras + process + tier perks/limitations + schema). `0023_admin_console/0023_admin_console.md` § 3.2a (verification queue refinement). `API_Integration_Checklist.md` Persona/Veriff/Onfido + AMLC additions. |
+| 3 | **All Tools Unlock bundle ₱9,999/year (Mood Board + Palette + Seating + QR Reader + Advanced Pricing Tier · open to ALL paying vendors)** | ✅ Spec | `0022_vendor_dashboard/0022_vendor_dashboard.md` § 6B (full rewrite — à la carte ₱99/wk listing + All Tools Unlock bundle + schema with `vendor_tool_bundles` table). |
+| 4 | **Marketing tier ladder (Boosted Ads 5km ₱5K/wk · 10km ₱8K/wk · 20km ₱15K/wk · Sponsored Boost Quarterly ₱250K / Annual ₱800K at 30km, verified-only)** | ✅ Spec | `0022_vendor_dashboard/0022_vendor_dashboard.md` § 5b (full rewrite — Boosted Ads tier table + Sponsored Boost long-commit tier table + retire of prior single ₱1,499/wk SKU + stacked-cost example). |
+| 5 | **Vendor Payout model (verified = immediate full payout T+1; coming_soon = 3-stage milestone 20/60/20 with T-14 + T+7 dispute windows; demote-to-coming_soon at 3+ disputes/30d)** | ✅ Spec | `0006_vendors_management/0006_vendors_management.md` new "Vendor Payout model" section. `0034_payments_and_cart/0034_payments_and_cart.md` § 6.7 (vendor_payouts table + payout_stage enum). |
+
+### 2026-05-16 — secondary closes
+
+| # | Item | Status | Where it landed |
+|---|---|---|---|
+| 6 | **Video meetings (Daily.co) RETIRED** | ✅ Spec | `0019_communications/0019_communications.md` top-banner amendment + scope/pricing strikethroughs + external-tool handoff pattern. `0022_vendor_dashboard/0022_vendor_dashboard.md` Pro Weekly + Threads + cross-iteration handoff updates. `CLAUDE.md` 2026-05-11 Daily.co rows amended with strikethrough + cross-reference. |
+| 7 | **Anthropic Console workspace "Setnayan" + spend caps + Haiku 4.5 (Contract Intelligence) + Sonnet 4.6 (vision) + GPT-4 V1.5+ fallback** | ✅ Spec | `0032_contract_intelligence/0032_contract_intelligence.md` status flipped to UNBLOCKED 2026-05-16 + model swap to Haiku 4.5 + cost recalc (₱5 → ~₱1 per call) + decision log row added. `App_Build_Status.md` Anthropic Claude API row + 0032 row updated. `API_Integration_Checklist.md` Anthropic Console row added. |
+| 8 | **AI Edited Highlight 3-min repriced ₱4,999 → ₱3,499** | ✅ Spec | Updated wherever the SKU pricing appears in Strategy + spec corpus + status anchors. |
+
+### Engineering hand-off (deferred to engineering worktree)
+
+- Schema migrations: `vendors.verification_state` enum + `vendor_verification_applications` + `vendor_tier_history` + `vendor_payouts` + `payment_method_config` + `payment_method_config_history` + `vendor_tool_bundles` + ALTERs on `service_orders` (setnayan_fee_bps, gateway_fee_centavos, bir_withholding_centavos, vendor_net_centavos, disbursement_fee_centavos, payment_method_key)
+- BIR Form 2307 quarterly PDF generation worker
+- Maya Business gateway integration (V1.5+)
+- Persona/Veriff/Onfido ID verification webhook handlers
+- AMLC sanctions API integration
+- Anthropic Console workspace signup + API key in env vars + spend-cap monitoring
+- Dispute counter cron (30-day rolling window for auto-demote trigger)
+- Vendor payout dispatcher (T+1 verified · T-14/T+7 coming_soon stages)
+
+### `.docx` regen
+
+Pandoc still unavailable. `CLAUDE.docx` + iteration `.docx` mirrors for 0019/0022/0006/0023/0034/0032 NOT regenerated — flag for future Cowork session when pandoc returns.
+
+---
+
+**End of 2026-05-16 addendum.**

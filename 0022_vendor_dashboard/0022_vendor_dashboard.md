@@ -18,7 +18,7 @@ The vendor logs in at `setnayan.com` → role-router sends them to `/dashboard/v
 | 2 | **My Services** | `/services` | Service catalog (vendor's own offerings) with rich service-object cards. Click to author/edit. |
 | 3 | **Calendar** | `/calendar` | Master calendar of all bookings · toggle to filter to one service · blocked dates · upcoming sidebar |
 | 4 | **Clients** | `/clients` | Pipeline view (Inquiry → Proposal Sent → Accepted → Active → Completed) · click client → detail with plan builder, payments, chat shortcut, file shelf |
-| 5 | **Threads** | `/threads` | All chat threads · video meetings · file sharing (Daily.co + R2-backed per 0019) |
+| 5 | **Threads** | `/threads` | All chat threads · file sharing (R2-backed per 0019) · ~~video meetings (Daily.co)~~ retired 2026-05-16 |
 | 6 | **Team &amp; Setnayan** | `/team` | Team agents + permissions, Pro subscription mgmt, vendor's in-app Setnayan consumption (QR-as-a-service, crew-for-hire listing, etc.) |
 
 Mobile uses a 5-tab bottom nav: **Home · Calendar · Clients · Threads · More**. The "More" tab houses Services, Team, Pro Sub, Settings.
@@ -283,15 +283,33 @@ The team label feeds into the 0019 chat identity masking rule — when `show_tea
 
 **Free tier (always):** vendor profile, marketplace listing, basic chat with clients, accepting bookings, manual payment tracking.
 
-**Pro tier (₱499/week — proposed):**
+**Pro tier (₱499/week — verified vendors only, locked 2026-05-16):**
 - Multi-service authoring (more than one service)
 - One calendar per service + unified master calendar
-- In-app payments + QR-per-guest service retrieval
+- In-app payments + QR-per-guest service retrieval (Setnayan Pay)
 - Plan/proposal builder
 - Team / agent invites (more than just the owner)
-- Video meetings via Daily.co (0019)
+- ~~Video meetings via Daily.co (0019)~~ **RETIRED 2026-05-16** — couples + vendors use external tools (Google Meet, Zoom, Messenger, WhatsApp)
 - Per-service rich content (videos, expanded gallery)
 - Showcase-event opt-in (0023)
+- Boosted Ads eligibility (5km / 10km / 20km weekly — see § 5b)
+- Sponsored Boost eligibility (Quarterly ₱250K / Annual ₱800K at 30km — see § 5b)
+- All Tools Unlock bundle eligibility (₱9,999/year — see § 6B)
+- Coordinator-join permission in couple threads
+- Custom partial payment plans for couples
+- Immediate full payout (no 3-stage hold)
+- Higher marketplace search ranking
+- Featured Vendor program eligibility
+
+**Coming_soon tier (unverified · locked 2026-05-16):**
+- Marketplace profile + listing only
+- Setnayan Pay LOCKED (couples pay direct off-platform)
+- Fixed Setnayan-managed 3-stage payout (20% / 60% / 20% — see § 5c)
+- "Coming Soon" badge in marketplace
+- No Pro Weekly subscription access
+- No Boosted Ads or Sponsored Boost
+- No tool access (All Tools Unlock bundle locked)
+- Lower marketplace search ranking
 
 Subscription is **weekly, not per-event**. A photographer with 10 weddings in one week pays ₱500 once. Auto-renews; vendor can pause anytime.
 
@@ -433,18 +451,42 @@ Auto-populates on proposals; vendor can override per-client.
 
 ---
 
-## 5b. Sponsored Boost · ₱1,499/week · extends visibility from 10km to 30km
+## 5b. Vendor Marketing tier ladder · Boosted Ads (weekly) + Sponsored Boost (long-commit) — locked 2026-05-16
 
-A paid weekly add-on that extends a vendor's marketplace reach. Standard listings are visible to couples within 10km of the vendor's pin. **Sponsored Boost extends that visibility by +20km — total 30km radius.** A vendor in Tagaytay normally surfaces to couples shopping for Tagaytay-area weddings (10km). With Boost, the same listing also appears for couples shopping in Alfonso, Silang, Indang, parts of Cavite City, and the southern reaches of Las Piñas (the +20km extension) — roughly a 3× catchment area.
+The vendor marketing surface now offers a **two-tier ladder**, replacing the original single ₱1,499/week Sponsored Boost SKU:
 
-**Four rules at once:**
+### Boosted Ads (weekly, by radius — verified vendors only)
 
-1. **Visibility radius rule.** Standard accounts: visible only within 10km of pin. Boosted accounts: visible up to 30km (10km core + 20km extension). This is what couples see in marketplace search.
-2. **Top-of-search ranking.** Boosted listings appear at the top of marketplace results for couples within the boosted 30km radius. Organic (non-boosted) listings follow below in the same query. A tiny "Sponsored" pill is the only visual differentiator otherwise.
-3. **Certified-vendor gate.** Only verified vendors (Setnayan Team admin approved) can purchase Sponsored Boost. Free vendors with pending verification cannot boost. This protects couples from boost-as-a-scam where a low-trust vendor pays to dominate marketplace results.
-4. **Density gate.** The Boost feature is itself **locked until 20+ vendors in the same service category exist within 20km of the boost target pin.** Below that, paying for boost would be silly (nothing to outrank in a sparse market), so the feature is hidden.
+A paid weekly add-on that extends a vendor's marketplace reach. Pick a radius:
 
-**Pricing:** **₱1,499 / week per boosted pin.** Stacks weekly with Pro base + tool integrations. A photographer running Pro + Mood Board + 1 sponsored boost = ₱500 + ₱99 + ₱1,499 = **₱2,099/week**.
+| Tier | Price | Radius extension | Use case |
+|---|---|---|---|
+| **Boosted Ads 5km** | ₱5,000/week | 5km from pin | Try-this-week local push |
+| **Boosted Ads 10km** | ₱8,000/week | 10km from pin | Citywide reach |
+| **Boosted Ads 20km** | ₱15,000/week | 20km from pin | Regional reach |
+
+- Verified vendors only · stacks with Pro Weekly · cancel anytime
+- Top-of-search ranking within radius · tiny "Sponsored" pill differentiator
+- Same density gate (≥20 vendors in same service category within 20km) — feature hidden below threshold
+- Auto-renews weekly unless paused
+
+### Sponsored Boost (premium long-commit · 30km · verified only)
+
+Premium tier for marquee vendor presence at a fixed 30km radius — long commitment required:
+
+| Tier | Price | Commitment | Effective monthly rate |
+|---|---|---|---|
+| **Sponsored Boost Quarterly** | ₱250,000 | 3 months | ~₱83,333/mo |
+| **Sponsored Boost Annual** | ₱800,000 | 12 months | ~₱66,666/mo (20% discount vs quarterly × 4) |
+
+- Verified vendors only · stacks with EVERYTHING (Pro Weekly + Boosted Ads + tool integrations)
+- 30km radius (3× catchment vs default 10km · still density-gated)
+- "Featured Sponsor" pill (more prominent than "Sponsored" — visually distinct from weekly Boosted Ads)
+- Top-of-search ranking + homepage hero rotation eligibility + category-page top placement
+
+**The prior single ₱1,499/week Sponsored Boost tier is RETIRED.** Weekly demand is now served by Boosted Ads 5km/10km/20km; premium demand is served by the Quarterly/Annual long-commit tier.
+
+**Combined-stack example:** photographer running Pro Weekly + Mood Board integration + Boosted Ads 10km + Sponsored Boost Annual = ₱500 + ₱99 + ₱8,000 (weekly) + ₱800,000/year (~₱15,400/wk amortized) ≈ **~₱24,000/week effective.**
 
 **Per-zone availability:** a multi-pin vendor sees the boost available per-zone. If Mariposa has 3 pins (Tagaytay, Manila, Cebu) and 12 / 32 / 28 photography vendors in each 20km respectively, boost is locked in Tagaytay but available in Manila and Cebu independently.
 
@@ -637,23 +679,39 @@ apparatus_provider_listings(
 )
 ```
 
-### 6B. Specialized tool integrations · ₱99/week per service
+### 6B. Specialized tool integrations · ₱99/week each OR All Tools Unlock bundle ₱9,999/year (locked 2026-05-16)
 
 Stylists, planners, ateliers — embed Setnayan's couple-facing tools inside their own service offering. Couples edit through the vendor's branded surface; the vendor co-edits alongside.
 
-Available integrations:
+**À la carte (₱99/week each):**
 - **Mood Board integration** · ₱99/week · embeds the palette editor + Setnayan Guide rule engine + 20 pre-templates
 - **Seat Arrangement integration** · ₱99/week · embeds the seating chart editor + 13-table catalog + print pack
-- *(future V1.5)* Schedule Builder · Vendor Coordinator · Color Palette Studio · etc.
+- **Palette integration** · ₱99/week · color-palette studio
+- **QR Reader integration** · ₱99/week · scan-and-retrieve workflows
+- **Advanced Pricing Tier** · ₱99/week · multi-rate / time-of-day / package-bundle pricing engine
+- *(future V1.5)* Schedule Builder · Vendor Coordinator · etc.
 
-Subscription stacks **on top of Pro Weekly base** (₱499/week). A stylist using both integrations: ₱500 + ₱99 + ₱99 = ₱698/week.
+**All Tools Unlock bundle (NEW SKU 2026-05-16):**
+- **Price: ₱9,999/year**
+- Includes: Mood Board · Palette · Seating Arrangement · QR Reader · Advanced Pricing Tier
+- **Open to ALL paying vendors** (NOT verified-only — capability tools support new vendor growth, including coming_soon vendors who can pay for the bundle even without full verification)
+- Saves ~61% vs buying each tool at ₱99/wk individually (₱99 × 5 tools × 52 weeks = ₱25,740/yr à la carte)
+- Annual billing only · auto-renews · paused on subscription pause
+
+À la carte ₱99/wk and All Tools Unlock ₱9,999/yr both stack on top of Pro Weekly base. A stylist on Pro Weekly + All Tools Unlock pays ₱500/wk + ₱9,999/yr (~₱192/wk amortized) = ~₱692/wk effective.
 
 Schema:
 
 ```
 vendor_tool_integrations(
-  integration_id, vendor_id, tool_key enum('mood_board','seat_arrangement','...'),
+  integration_id, vendor_id, tool_key enum('mood_board','seat_arrangement','palette','qr_reader','advanced_pricing','...'),
   weekly_price_php, started_at, current_period_end, paused_at?
+)
+
+vendor_tool_bundles(
+  bundle_id, vendor_id, bundle_key enum('all_tools_unlock_annual'),
+  annual_price_php default 999900,    -- ₱9,999 in centavos
+  started_at, current_period_end, auto_renew, paused_at?
 )
 ```
 
@@ -666,7 +724,7 @@ Everything else in the Pro Weekly base (₱499/week):
 - Multi-service calendars
 - Plan / proposal builder
 - Team invites
-- Video meetings (Daily.co)
+- ~~Video meetings (Daily.co)~~ **RETIRED 2026-05-16** — couples + vendors use external tools
 - Plus future inclusions as Pro evolves
 
 ### Cross-category summary
@@ -697,7 +755,7 @@ Bulk work (service authoring, plan-and-proposal building) defaults to desktop wi
 ## 8. Cross-iteration handoffs
 
 - **0006 Vendors** — extends the couple-side vendor profile with the vendor's own authoring surface here.
-- **0019 Communications** — chat threads and video meetings live there; this surface just renders them.
+- **0019 Communications** — chat threads + file sharing + coordinator-join live there; this surface just renders them. ~~Video meetings~~ retired 2026-05-16 — external tools (Google Meet / Zoom / Messenger / WhatsApp) used instead.
 - **0007 Budget** — when a client pays the vendor, the milestone flows back into the couple's budget; vendor sees their own payment register here.
 - **0020 Interaction Prototype** — Phase 1 covers vendor onboarding (0022 expands the post-verification view).
 - **0021 Couple Dashboard** — symmetric to this iteration on the demand side.

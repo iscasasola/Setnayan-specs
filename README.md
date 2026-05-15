@@ -105,7 +105,7 @@ A two-sided marketplace + planning platform for Filipino weddings (V1) that expa
 See CLAUDE.md decision log for the full chronology. Major locks:
 
 - **Brand:** SETNAYAN wordmark (full spelling) + custom symbol mark at `setnayan_logo.svg`. Brand-origin "Set na 'yan." Domain `setnayan.com` + `setnayan.ph`.
-- **Pricing:** -1 charm pricing across all SKUs (Save-the-Date ₱49, Paparazzi packs ₱1,499/₱2,499, Live Stream Base ₱2,499, Custom Monogram ₱1,999, Broadcast Style ₱2,999, AI Edited Highlight ₱4,999, etc.)
+- **Pricing:** -1 charm pricing across all SKUs (Save-the-Date ₱49, Paparazzi packs ₱1,499/₱2,499, Live Stream Base ₱2,499, Custom Monogram ₱1,999, Broadcast Style ₱2,999, AI Edited Highlight ₱3,499 [repriced 2026-05-16 from ₱4,999], etc.)
 - **Payment:** Apply-then-pay V1 (static BDO + GCash, manual reconciliation, 24-hr activation SLA). PayMongo / GCash Merchant API for V1.5.
 - **Brand-character payments:** 3% Setnayan Pay convenience fee on customer side when paying vendor through Setnayan.
 - **Vendor tiers:** Boosted · Certified · Standard Verified. Certified requires on-site visit. Boost requires Certified.
