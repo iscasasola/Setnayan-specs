@@ -119,18 +119,47 @@ Both badges are visual only — they do not change the activation hook or the re
 
 ### 3.4 Users
 
-Master list of every account on the platform. Filterable by account_type (customer / vendor / admin) + verification status + city + spend tier + last-active.
+Master list of every account on the platform. Filterable by account_type (customer / vendor / admin) + verification status + city + spend tier + last-active. **Account-lifecycle filter** (locked 2026-05-13 via PR #9): toggle between **Active users** (default table) and **🚫 Blacklisted** (separate table reading from the new `blacklisted_emails` table).
 
 Per-user detail:
 - Identity + contact info
 - Wallet / spend history
 - Active events / bookings
 - Audit log (every action this user has taken)
-- Actions: **Suspend account** (two-admin approval required), **Reset password**, **Issue comp** (see §3.5), **View as user** (impersonation for support), **Send broadcast email**
+- Actions:
+  - **Reset password**
+  - **Issue comp** (see §3.5)
+  - **View as user** (impersonation for support)
+  - **Send broadcast email**
+  - **Suspend account** (two-admin approval required — short-term soft hold; does NOT touch `auth.users` or `blacklisted_emails`)
+  - **🗑 Delete** (locked 2026-05-13 · PR #9 · single-admin authority gated by confirmation modal) — **hard-deletes** the `auth.users` row (cascades to `public.users` via FK). Result: the email is **free** for re-signup, even as a different `account_type` (e.g. a former vendor can come back as a customer). The user's audit log + historical orders + comp grants stay in place because those tables reference `user_id` as a FK with `ON DELETE SET NULL` (or are pinned via the iteration 0035 audit-retention pattern). **Self-protection:** the action errors with `"You cannot delete your own account"` if the admin attempts it on themselves; errors with `"Cannot delete an internal account"` for any user flagged `is_internal=TRUE`.
+  - **🚫 Blacklist** (locked 2026-05-13 · PR #9 · single-admin authority gated by confirmation modal) — **hard-deletes** the `auth.users` row (same cascade as Delete) **AND** inserts the email into the new `blacklisted_emails` table. Result: the email is **locked** — the signup gate (`apps/web/lib/blacklist.ts` → `isEmailBlacklisted(email)`) intercepts any `auth.signUp` call and redirects to `/signup?error=blacklisted`. Same self-protection + internal-account guard as Delete.
+  - **↩ Unblacklist** (visible only on the 🚫 Blacklisted filter table) — removes the row from `blacklisted_emails`. The email becomes free for re-signup (no auth.users row is restored — the original account was hard-deleted at Blacklist time and the user signs up fresh).
+
+**Why two verbs instead of one (PR #9 rationale):** the prior model (PR #7) coupled "occupy the email" with "block sign-in" via a permanent 100-year `auth.users.banned_until` + a soft-delete `users.deleted_at` flag. That fit a banlist use case but blocked the much more common "the user wants to re-register fresh" path the owner spotted — e.g., a vendor wanting to come back as a customer. Splitting into Delete (email free for re-signup) + Blacklist (email locked) matches the user's mental model and gives the admin two clean choices instead of one overloaded verb.
 
 **Vendor-account-only fields (locked 2026-05-15).** When `account_type='vendor'`, the per-user detail page exposes one additional stepper:
 
 - **Self-comp quarterly cap** — read/write integer, default 12, lower-bounded at 0. Backed by the `vendor_self_comp_caps` table from iteration 0034 § 3.1a. Stepper has `Raise` / `Lower` / `Reset to default` actions; every change writes an `admin_audit_log` row with action `vendor_self_comp_cap_changed`, the old and new cap, and a required free-text reason ("vendor in grand-opening period — raised to 40 for Q2"). Single-admin authority. Lowering below current-quarter usage does NOT retroactively revoke grants; it just blocks new ones until the next quarter starts.
+
+**Account-lifecycle schema (locked 2026-05-13 · PR #9):**
+
+```sql
+CREATE TABLE public.blacklisted_emails (
+  email                    TEXT PRIMARY KEY,
+  reason                   TEXT NOT NULL,
+  blacklisted_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  blacklisted_by_user_id   UUID NOT NULL REFERENCES public.users(user_id)
+);
+
+CREATE INDEX idx_blacklisted_emails_lower
+  ON public.blacklisted_emails (LOWER(email));
+-- Used by the signup gate's case-insensitive lookup.
+```
+
+**RLS:** admin-only via `is_admin()`. No public read; no user-side write.
+
+**Deprecated columns:** `users.deleted_at` (PR #7's soft-delete flag) and `auth.users.banned_until` (PR #7's 100-year ban) are **no longer written to** under the new model. PR #9's migration includes a one-time cleanup that clears any existing `deleted_at` values + lifts any `banned_until` values set by PR #7. The `deleted_at` column stays on the schema for now (deprecated; drop in a future migration once the audit window has passed).
 
 ### 3.5 Pricing &amp; Catalog
 

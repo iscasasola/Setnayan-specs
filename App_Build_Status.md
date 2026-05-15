@@ -22,7 +22,7 @@
 
 | Bucket | Count | Iterations |
 |---|---|---|
-| ✅ Shipped | **22** | 0000, 0001, 0002, 0004, 0007, 0008, 0010, 0013, 0015, 0016, 0021, 0023, 0025, 0026, 0028, 0029, 0030, **0031**, 0033 (partial), 0034, **0035**, **0036** (NEW) |
+| ✅ Shipped | **22** | 0000, 0001, 0002, 0004, 0007, 0008, 0010, 0013, 0015, 0016, 0021, 0023, 0025, 0026, 0028, 0029, 0030, **0031**, 0033 (partial), 0034, **0035**, **0037** (renumbered from 0036 on 2026-05-16 — 0036 was already used by `0036_pakanta`) |
 | ⚠️ Partial / Phase 2 in flight | 5 | 0006, 0019, 0022, 0030, 0033 |
 | 🟡 Deliberate V1.5+ | 6 | 0005, 0009, 0011, 0012, 0017, 0018 |
 | ⛔ Blocked | 0 | ~~0032 (Anthropic)~~ — **unblocked 2026-05-16** (Anthropic Console signup + Haiku 4.5 locked) |
@@ -72,7 +72,7 @@
 | 0033 | Public API | ⚠️ Partial | `/health` + `/me` shipped earlier; Phase 2 agent in flight adds events/guests/vendors read-only |
 | 0034 | Payments & Cart | ✅ Shipped (V1 manual reconciliation) · 🟡 Setnayan Pay reprice + Maya Business pending V1.5+ | TIN format fix flows through receipts (PR #5). **2026-05-16:** Setnayan Pay convenience fee repriced 3% → 5.5% on top of vendor price (admin-configurable per method · cheap rails 5.5% / premium rails 6.5%); BIR Marketplace Withholding 0.5% pass-through per RMC 8-2024; Maya Business as V1.5+ primary gateway with Maya QR Ph preferred (1.5% gateway fee). Engineering pending: per-method config table, BIR 2307 generation, vendor_payouts table, gateway integration. |
 | 0035 | Observability | ✅ Shipped (NEW) | Sentry (PR #17) + PostHog 3-event funnel (PR #19); 4 more funnels go through PostHog Insights |
-| **0036** | **Event-Day Pre-load (NEW iteration)** | ✅ Shipped | Couple + vendor T-3d → T+1d "Prepare for event day" CTA + auto-prefetch T-24h → T+12h (PR #12). Spec needs to be added to Cowork corpus |
+| **0037** | **Event-Day Pre-load (NEW iteration)** | ✅ Shipped | Couple + vendor T-3d → T+1d "Prepare for event day" CTA + auto-prefetch T-24h → T+12h (PR #12). Spec drafted retroactively 2026-05-16 in `0037_event_day_preload/0037_event_day_preload.md` (renumbered from the originally proposed 0036 to avoid collision with `0036_pakanta`). |
 
 ---
 
@@ -174,10 +174,7 @@ Owner must run `supabase db push` once all Phase 2 PRs are merged — multiple n
 
 The 2026-05-14 PR run added or changed several iterations. The spec corpus needs catch-up edits via Cowork:
 
-1. **0036 Event-Day Pre-load** — NEW iteration not in any spec folder yet. Owner picks one:
-   - Add a new section to `02_Specifications/Caching_and_Offline_Strategy.md`, OR
-   - Create a new iteration folder `0036_event_day_preload/0036_event_day_preload.md`
-   - Content already drafted in `COWORK_INBOX.md` `[PENDING]` entry
+1. **0037 Event-Day Pre-load** — ✅ DONE 2026-05-16. Iteration folder `0037_event_day_preload/0037_event_day_preload.md` created (renumbered from the originally proposed 0036 to avoid collision with the existing `0036_pakanta` iteration). Spec retroactively documents PR #12 — couple-side banner CTA (T-3d / T+1d) + silent auto-preload (T-24h / T+12h) + vendor-side per-thread CTA + RLS-gated bundle + service-worker asset warming.
 2. **0023 Admin Console + 0025 Profile Settings** — update to reflect the Delete vs Blacklist redesign (PR #9). The old soft-delete + ban model from PR #7 is gone; spec text in `0023_admin_console.md` § 9.1 should be updated.
 3. **0006 Vendors** — once the Phase 2 marketplace + reviews PR merges, update `0006_vendors_management.md` to reflect that the marketplace + review-stats materialized view are live.
 4. **0019 Communications** — once the Phase 2 force-majeure PR merges, update `0019_communications.md` to reflect the actual schema + admin flow.

@@ -195,9 +195,13 @@ Clicking initiates an asynchronous background job. The button immediately become
 
 #### 3.6.2 Account deletion — Right to erasure (RA 10173 § 16(e))
 
-Two-tier delete: soft (reversible 30 days) and hard (irreversible).
+> **Status note (locked 2026-05-13 · PR #9 · amended into spec 2026-05-16):** the **two-tier soft-delete + 30-day grace window** model described below is **DEPRECATED**. PR #9 retired the `users.deleted_at` write path and the 100-year `auth.users.banned_until` ban; an admin now uses **🗑 Delete (hard-delete, email free for re-signup)** or **🚫 Blacklist (hard-delete + lock the email)** from `/admin/users` — see iteration 0023 § 3.4 Users for the canonical actions + the new `blacklisted_emails` schema. **For user-side self-erasure under V1:** the "Delete my account" button is disabled whenever the user has any active event / active booking / outstanding financial obligation (per the 2026-05-15 event-lifecycle lock — see § 9 of iteration 0021 + the "Exceptions that BLOCK deletion entirely" list at the bottom of this subsection), and routes to **"Contact support to discuss deletion"** instead. Support escalates to admin, who chooses Delete or Blacklist. **For users with no active events / bookings / balances:** self-erasure under V1 routes through the same admin flow — the V1 user-side surface enqueues an erasure request that an admin actions within 24 hours; there is no self-serve immediate-delete path. **The soft-delete + 30-day grace window described below is retained in this spec only as historical reference for the deprecated PR #7 model.** Future Cowork pass: rewrite this section to spec the user-side erasure-request flow (a 1-button "Request account deletion" → admin queue → Delete or Blacklist per admin's call), and drop the soft-delete + grace-window narrative entirely.
 
-**Soft delete (default path, immediate UX, reversible):**
+---
+
+**Two-tier delete: soft (reversible 30 days) and hard (irreversible).** _[DEPRECATED — see status note above.]_
+
+**Soft delete (default path, immediate UX, reversible):** _[DEPRECATED]_
 
 1. User clicks "Delete my account."
 2. Modal opens with the full consequences laid out (see "Consequences modal" below).
@@ -223,7 +227,7 @@ Two-tier delete: soft (reversible 30 days) and hard (irreversible).
 >
 > **Type your email address to confirm:** `[__________________]`
 
-**Hard delete (irreversible, auto-triggered after 30 days OR via "Delete immediately" path):**
+**Hard delete (irreversible, auto-triggered after 30 days OR via "Delete immediately" path):** _[DEPRECATED — PR #9 retired the 30-day-grace path; current model is admin-actioned 🗑 Delete via 0023 § 3.4]_
 
 A scheduled job at 02:00 PHT daily processes all `users` rows where `deleted_at < NOW() - INTERVAL '30 days'` AND `hard_deleted_at IS NULL`:
 
@@ -242,7 +246,7 @@ A scheduled job at 02:00 PHT daily processes all `users` rows where `deleted_at 
 
 **"Delete immediately" path:** advanced expander inside the modal. Same consequences, no 30-day grace, hard delete runs synchronously after the confirmation. Used by users who want their data gone now (e.g., after a privacy incident). Requires re-typing the email a second time as a friction guard.
 
-**Restoration during grace window:** if a soft-deleted user signs in within 30 days, the login flow shows "Your account is scheduled for deletion. Restore it now?" → confirm → `users.deleted_at = NULL`, `users.deletion_initiated_by = NULL`, restoration confirmation email sent.
+**Restoration during grace window:** _[DEPRECATED — there is no grace window under PR #9; if a user wants to come back after Delete they sign up fresh on the same email; if Blacklisted they cannot until an admin Unblacklists.]_ Historical: if a soft-deleted user signs in within 30 days, the login flow shows "Your account is scheduled for deletion. Restore it now?" → confirm → `users.deleted_at = NULL`, `users.deletion_initiated_by = NULL`, restoration confirmation email sent.
 
 **Exceptions that BLOCK deletion entirely:**
 
