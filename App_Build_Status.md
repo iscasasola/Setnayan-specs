@@ -36,7 +36,7 @@
 
 | # | Iteration | Status | What changed today (if any) |
 |---|---|---|---|
-| 0000 | App Shell & Navigation | ✅ Shipped | Bottom nav now reads "Add-ons" (PR #13); locale toggle (Phase 2 agent in flight) |
+| 0000 | App Shell & Navigation | ✅ Shipped (chrome drift) | Bottom nav now reads "Add-ons" (PR #13); locale toggle (Phase 2 agent in flight). **Chrome drift 2026-05-15** (visually confirmed in production): (A) top-left anchor is the global Setnayan brand logo, not the per-couple monogram → no event-switcher entry point reachable from the chrome; back-arrow on the `← Maria & Juan (Demo)` pill does not lead to an events index either, so the `+ Add event` row spec'd in 0000 § event switcher is unreachable in production (violates 0000 § event switcher · blocks the 2026-05-15 "Event lifecycle locked" decision-log row's add-event half). (B) Top-nav rendered as two stacked rows instead of the single persistent strip locked in the 2026-05-14 "Top-nav redesign locked + token-wallet pill removed from chrome" decision-log row. Both gaps need engineering follow-up: wire the monogram + caret event switcher, AND collapse the two rows into one strip — OR amend the specs if the shipped chrome is the new intent. |
 | 0001 | Creating Guest List | ✅ Shipped | RSVP-received email + in-app notification (PR #20) |
 | 0002 | QR Invitation System | ✅ Shipped | — |
 | 0003 | Token Wallet (retired) | 🚫 — | — |
