@@ -53,7 +53,7 @@ The dashboard is event-scoped at `setnayan.com/dashboard/[event_id]/...`. Eight 
 | 2 | **Guest List** | `/guests` | 200 invitees as one continuous list with expandable group headers (Table / Role / Side / Custom). Mobile uses a bottom-sheet filter & sort popup. |
 | 3 | **Vendors** | `/vendors` | 8 booked vendors. **Mobile uses a tap-to-expand card pattern** — see 2.2b below. Desktop shows the full card inline. |
 | 4 | **Schedule** | `/schedule` | Day-of timeline + vendor meetings, .ics export |
-| 5 | **In-App Services** | `/services` | Every purchased apparatus with active status, deep-link to management |
+| 5 | **Add-ons** | `/add-ons` | Every purchased apparatus with active status, deep-link to management |
 | 6 | **Seat Plan** | `/seating` | Published seating chart canvas + 12 table QRs + Print Pack download (12 MB PDF). **Desktop: tables show every chair with profile photo or side-coded initials (per 0008 chair-circle interaction rule).** Mobile: tables only — chairs are too dense to render usefully on a phone screen. Tap a table on mobile → bottom sheet shows that table's guests as a list. |
 | 7 | **Landing Page** | `/invitation` | Couple's public landing page editor with widget toggles, theme settings, live preview, page-view analytics |
 | 8 | **QR Hub** | `/qr-codes` | All 5 QR sets consolidated · TTL rules visible per set · re-mint / re-issue actions · Print Pack regen |
@@ -557,7 +557,7 @@ Day-of timeline (Nov 15) at the top: 47 items from prenup-day breakfast through 
 
 Below: upcoming meetings (T-14 to T-1) — a vertical list of 14 vendor meetings with date, vendor, mode (in-person/video), and quick-join link.
 
-### 4.4 In-App Services
+### 4.4 Add-ons
 
 Active apparatus grid (12 tiles, all green-dot active). Below: spend summary breakdown by category (Capture & Broadcast / Branding & Styling / AI & Physical / Widgets). "Buy more" CTA for any apparatus that's multi-purchasable (Pro Camera Bridge grants, Template Add-ons, AI Highlights, +1 Camera, +1 Hour).
 

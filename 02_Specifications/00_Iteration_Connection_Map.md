@@ -18,7 +18,7 @@
 | # | Folder | Status | Built | One-liner |
 |---|---|---|---|---|
 | **0013** | `0013_platform_stack_and_sync/` | **drafted 2026-05-09 · BUILD FIRST (Sprint 0)** | ⚠ partial | **Platform Stack & Sync Setup — Vercel (Next.js host) + Supabase (Postgres/Auth/Realtime/Storage/Edge Fns) + Cloudflare R2 (large media) + GitHub (CI/CD). User Setup Checklist + Claude Code Implementation Guide + 15 Integration Tests. Foundation infrastructure that 0000–0012 all run on.** |
-| **0000** | `0000_app_shell_and_navigation/` | **drafted 2026-05-09** | ⚠ Phase 1 | **App shell foundation — universal Setnayan account, login, event picker, primary event auto-jump, event QR + scan-to-join flow with role picker, four bottom-nav tabs (Guest List / Vendors / Schedule / In-App Services), event-scoped URL pattern, services launcher, unified Schedule view** |
+| **0000** | `0000_app_shell_and_navigation/` | **drafted 2026-05-09** | ⚠ Phase 1 | **App shell foundation — universal Setnayan account, login, event picker, primary event auto-jump, event QR + scan-to-join flow with role picker, four bottom-nav tabs (Guest List / Vendors / Schedule / Add-ons), event-scoped URL pattern, services launcher, unified Schedule view** |
 | 0001 | `0001_creating_guest_list/` | drafted | ✅ | Guest list, household model, role taxonomy, `guests.qr_token`, base `events` table |
 | 0002 | `0002_qr_invitation_system/` | drafted | ✅ v2 | Personal invitation site at `setnayan.com/[event-slug]?invite=…`, `setnayan://[entity]/[id]?token=…` URI scheme, `scan_events`, `events.palette_finalized_at` |
 | 0003 | `0003_token_wallet_and_packs/` | drafted | ⚠ schema | Token wallet, pack purchase, `service_catalog`, `create_service_order(service_key, customer_id, amount_php)` primitive, formatter, refund |
@@ -83,7 +83,7 @@ Every iteration's user-facing surface lives under the event-scoped URL pattern a
 | **Guest List** | Guests → `/dashboard/[event-id]/guests` → 0001 · Invitation Site → `/dashboard/[event-id]/invitation` → 0002 + 0004 · Seating → `/dashboard/[event-id]/seating` → 0008 |
 | **Vendors** | Vendor List → `/dashboard/[event-id]/vendors` → 0006 · Budget → `/dashboard/[event-id]/budget` → 0007 |
 | **Schedule** | Unified calendar → `/dashboard/[event-id]/schedule` → 0000 (pulls from 0004, 0006, 0007) |
-| **In-App Services** | Launcher grid → `/dashboard/[event-id]/services` → 0000 · Wallet → `.../services/wallet` → 0003 · Mood Board → `.../services/mood-board` → 0010 · LED → `.../services/led` → 0005 · Photo Delivery → `.../services/photo-delivery` → 0009 · Panood → `.../services/panood` → 0011 · Papic → `.../services/papic` → 0012 |
+| **Add-ons** | Launcher grid → `/dashboard/[event-id]/services` → 0000 · Wallet → `.../services/wallet` → 0003 · Mood Board → `.../services/mood-board` → 0010 · LED → `.../services/led` → 0005 · Photo Delivery → `.../services/photo-delivery` → 0009 · Panood → `.../services/panood` → 0011 · Papic → `.../services/papic` → 0012 |
 
 **Auto-jump rule (after sign-in):** 0 events → welcome screen; 1 active event → jump into that event's Guest List tab; 2+ active events → show the event picker. `events.is_primary` is a UI sort hint only — it doesn't change jump logic.
 
@@ -237,7 +237,7 @@ Each section is a contract sheet: what the iteration **provides** to downstream 
 - Inside-event chrome (couples only) — top bar (event pill + wallet pill from 0003 + avatar) + four-tab bottom nav (mobile) / sidebar (desktop).
 - Event-scoped URL pattern: `setnayan.com/dashboard/[event-id]/[section]`.
 - Unified Schedule view at `setnayan.com/dashboard/[event-id]/schedule` — pulls from `vendor_meetings` (0006), `VendorLineItem.deadline_date` (0007), and `invitation_widgets` schedule widget (0004) plus `events.wedding_date` countdown.
-- In-App Services launcher grid at `setnayan.com/dashboard/[event-id]/services` — shows one card per registered service with state and primary action.
+- Add-ons launcher grid at `setnayan.com/dashboard/[event-id]/services` — shows one card per registered service with state and primary action.
 - Schema additions to `events`: `is_primary BOOLEAN NOT NULL DEFAULT FALSE` (with partial unique index, one primary per couple) and `archived BOOLEAN NOT NULL DEFAULT FALSE`.
 - Service registration manifest (config file, not DB) — every In-App Service iteration registers its launcher card here.
 
@@ -483,12 +483,12 @@ All 15 integration tests in `0013_platform_stack_and_sync.md` Section C must pas
 - [ ] Couples with exactly 1 active event are auto-redirected to `/dashboard/[event-id]/guests` and never see the picker.
 - [ ] Couples with 2+ active events always land on `/dashboard` (the picker) on sign-in.
 - [ ] Event picker sorts the primary event first; "+ Create another event" button is visible.
-- [ ] Inside an event, the four bottom-nav tabs (Guest List / Vendors / Schedule / In-App Services) are visible on mobile and as a sidebar on desktop.
+- [ ] Inside an event, the four bottom-nav tabs (Guest List / Vendors / Schedule / Add-ons) are visible on mobile and as a sidebar on desktop.
 - [ ] Active-tab highlight matches the current URL prefix.
 - [ ] Top bar shows the event pill (with quick switcher), wallet pill (live balance from 0003), and avatar (Profile dropdown).
 - [ ] Profile + Settings page at `/dashboard/profile` includes the "make this event primary" toggle.
 - [ ] Schedule tab pulls from all three sources (0004 schedule widget, 0006 `vendor_meetings`, 0007 `VendorLineItem.deadline_date`) and renders one unified calendar.
-- [ ] In-App Services launcher shows one card per registered service with the correct state and primary action; tapping a card routes to `/dashboard/[event-id]/services/[service]`.
+- [ ] Add-ons launcher shows one card per registered service with the correct state and primary action; tapping a card routes to `/dashboard/[event-id]/services/[service]`.
 - [ ] Couple-side event-scoped routes 404 for users who are not `couple` members of the event.
 - [ ] Guests scanning the event QR for an event they're already a guest of get routed to their personal invitation site (`setnayan.com/[event-slug]?invite=...` from 0002), NOT to the couple's dashboard.
 - [ ] Mobile tap targets are ≥ 44pt; bottom nav stays in the thumb zone.

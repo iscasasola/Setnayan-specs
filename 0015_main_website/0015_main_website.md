@@ -22,7 +22,7 @@ Twelve sections on the homepage, in order:
 4. **The chaos we're fixing** — scattered-tools problem framing
 5. **Built for both sides of the celebration** — two-column "Why Setnayan" block (six couple beats + six vendor beats)
 6. **Maria & Juan: see how it works** — live dashboard preview + four-tab product walkthrough (folds in former Section 4 content)
-7. **In-app services** — apparatus catalog (Papic, Panood, Pamahiya, Pakulay, Pailaw, Pareto, Custom Monogram) — features only, no prices
+7. **Add-ons** — apparatus catalog (Papic, Panood, Pamahiya, Pakulay, Pailaw, Pareto, Custom Monogram) — features only, no prices
 8. **Vendor compatibility & verification** — how vendors plug in, Setnayan Team verification flow
 9. **Event-type readiness board** — Wedding LIVE; others tracked; swaps to social proof at T+90 days post-launch
 10. **PH coverage map** — city-level pins (never barangay public)
@@ -370,11 +370,11 @@ The four bottom-nav tabs from iteration 0000 explained as benefits, mapped one-t
 | Guest List | From save-the-dates to seating charts. | Track every guest, RSVP, plus-one, dietary preference, table assignment, and personal QR — all linked to the same database your invitations and gallery read from. |
 | Vendors | Every vendor, every payment, one ledger. | Track contracts, milestones, deadlines, and crew-meal counts. Calendar-export every payment + every vendor meeting. Vendors stay in sync — you stay in control. |
 | Schedule | Every date, every reminder, every milestone — auto-tracked. | Wedding-day timeline, vendor meetings, payment deadlines, RSVP cutoffs — pulled from across the app into one calendar. Subscribe to .ics so it syncs to your phone. |
-| In-App Services | The features other event apps haven't maximized. | Live stream on YouTube. Designated friends as paparazzi capturing your candid moments. Custom monogram across every output. Mood boards. LED backgrounds. Polished highlight reels. |
+| Add-ons | The features other event apps haven't maximized. | Live stream on YouTube. Designated friends as paparazzi capturing your candid moments. Custom monogram across every output. Mood boards. LED backgrounds. Polished highlight reels. |
 
 **Couple-name rotation note (open question):** "Maria & Juan" is generic-Tagalog. Consider rotating demo names across regional bias points (e.g., Aira & Boy for Visayan, Inday & Bong for Mindanao) — open question per 2026-05-15 synthesis.
 
-### Section 7 — In-app services (apparatus catalog)
+### Section 7 — Add-ons (apparatus catalog)
 
 A grid of feature cards for the paid services. Each card: icon, name, one-paragraph description, "Included in your custom quote" label, "Get your quote →" CTA. **No PHP figures.**
 
@@ -758,7 +758,7 @@ This iteration is shippable when all of the following are true:
 - [ ] Both sides of the hero have working primary + secondary CTAs.
 - [ ] "Chaos panel" Section 3 renders without breaking on screens ≥ 360 px wide.
 - [ ] Four-tab "One app, every moving piece" Section 4 renders all four tab cards with screenshot thumbnails.
-- [ ] In-app services Section 5 renders all 9 cards, each carrying its label ("Free with every account" or "Included in your custom quote") — **no PHP figures anywhere on the public site.**
+- [ ] Add-ons Section 5 renders all 9 cards, each carrying its label ("Free with every account" or "Included in your custom quote") — **no PHP figures anywhere on the public site.**
 - [ ] Vendor compatibility / verification Section 6 renders with both tabs functional.
 - [ ] Outsourcing / pacing / scheduling Section 7 renders.
 - [ ] Vendor flywheel Section 8 progress bar pulls live data from `vendors WHERE status = 'verified'` and renders against the configured target ladder.
@@ -782,7 +782,7 @@ This iteration is shippable when all of the following are true:
 
 1. **Sprint 1** — Next.js marketing route group (`app/(marketing)/...`). Header + footer + announcement bar + brand tokens. Brand config file.
 2. **Sprint 2** — Two-sided split hero with toggle persistence; both sides' copy + CTAs.
-3. **Sprint 3** — Sections 3 (chaos panel) + 4 (one app, every moving piece) + 5 (in-app services catalog).
+3. **Sprint 3** — Sections 3 (chaos panel) + 4 (one app, every moving piece) + 5 (add-ons catalog).
 4. **Sprint 4** — Sections 6 (vendor compatibility / verification) + 7 (outsourcing / pacing / scheduling).
 5. **Sprint 5** — Sections 8 (flywheel) + 9 (event-type readiness board); waitlist email-capture for "Notify me."
 6. **Sprint 6** — Section 10 PH coverage map; PSGC reference table seed; SVG pin overlay.

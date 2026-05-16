@@ -68,7 +68,7 @@ Each tour is a fixed ordered list of steps. Step targets reference `data-tour-id
 
 1. **Welcome modal** (centered, no spotlight) — "Welcome to your Setnayan dashboard, [first_name]. Let me show you around in under a minute." · Buttons: `Skip tour` · `Let's go`
 2. **Overview tab** — Title: "Your home base." Body: "This is your overview — today's most important tasks, all in one place." · Target: `[data-tour-id="customer-tab-overview"]`
-3. **Bottom nav tabs** — Title: "Navigate the four sections." Body: "Switch between Guests / Vendors / Schedule / In-App Services with these tabs." · Target: `[data-tour-id="customer-bottom-nav"]`
+3. **Bottom nav tabs** — Title: "Navigate the four sections." Body: "Switch between Guests / Vendors / Schedule / Add-ons with these tabs." · Target: `[data-tour-id="customer-bottom-nav"]`
 4. **Services-launcher grid** — Title: "Tap to start any service." Body: "Save-the-Date, Papic, Live Stream, Custom Monogram, and more — every in-app service starts here." · Target: `[data-tour-id="services-launcher-grid"]`
 5. **Avatar menu (top-right)** — Title: "Your account lives here." Body: "Tap your avatar for Settings, Privacy controls, Payment Methods, and to sign out." · Target: `[data-tour-id="topbar-avatar"]`
 6. **Theme picker** — Title: "Make it yours." Body: "Pick a dashboard look: Setnayan Default, Victorian, Classy, iOS, or Forest Theme." · Target: `[data-tour-id="theme-picker"]`
@@ -82,7 +82,7 @@ Each tour is a fixed ordered list of steps. Step targets reference `data-tour-id
 3. **Company-logo upload prompt** (only if logo missing — step auto-skipped if already uploaded) — Title: "Upload your company logo." Body: "Customers see this in chat and on your marketplace listing. PNG with transparent background works best." · Target: `[data-tour-id="vendor-logo-upload-prompt"]`
 4. **Services tab CTA** — Title: "Create your first service." Body: "Even a single service is enough to publish your profile. Add packages later." · Target: `[data-tour-id="vendor-services-create-cta"]`
 5. **Pro subscription card** — Title: "Optional: go Pro." Body: "Pro Weekly (₱499/wk) unlocks unlimited contracts, boost eligibility, and analytics. Skip for now if you'd rather start free." · Target: `[data-tour-id="vendor-pro-card"]`
-6. **Setnayan in-app services** — Title: "Use Setnayan for your own events too." Body: "Same dashboard, customer view: Papic, Live Stream, Save-the-Date — for your own anniversary, christening, or staff party." · Target: `[data-tour-id="vendor-switch-to-customer-view"]` · Has the "Don't show me this again" checkbox.
+6. **Setnayan add-ons** — Title: "Use Setnayan for your own events too." Body: "Same dashboard, customer view: Papic, Live Stream, Save-the-Date — for your own anniversary, christening, or staff party." · Target: `[data-tour-id="vendor-switch-to-customer-view"]` · Has the "Don't show me this again" checkbox.
 7. **Farewell modal** — "Welcome aboard. Verification takes 3 business days; the help center has a checklist of what's needed." · Buttons: `Finish`
 
 ### 3.3 Guest — `guest_landing_v1` — 4 steps

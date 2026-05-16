@@ -2,8 +2,8 @@
 
 **Iteration number:** 0011
 **Topic:** Panood feature, V1.5 (WebApp track) — YouTube-delivered
-**Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: In-App Services** · URL: `setnayan.com/dashboard/[event-id]/services/panood`
-**Builds on:** 0000 (app shell, sign-in, event-scoped URL, In-App Services launcher), 0003 (apply-then-pay flow, `spend()` primitive)
+**Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/panood`
+**Builds on:** 0000 (app shell, sign-in, event-scoped URL, Add-ons launcher), 0003 (apply-then-pay flow, `spend()` primitive)
 **Status:** Drafted 2026-05-09 · revised 2026-05-09 (apparatus pricing + YouTube-only delivery) · revised 2026-05-10 (Pro Camera Bridge — DSLR feeds, shared SKU with 0012) · revised 2026-05-10 (broadcaster control surfaces — preview/program, audio rail, hold-to-end, mobile slide-to-end, keyboard shortcuts) · **revised 2026-05-16 (Architecture pivot: drop Cloudflare Stream Live composite + Setnayan master YouTube channel · couple BYO YouTube via OAuth · per-day pricing replaces base+add-ons · Broadcast Style Pack retired · see CLAUDE.md 4th 2026-05-16 row)**
 
 > **2026-05-16 PIVOT NOTICE.** The Pricing section below is the **new** V1 SKU lock. The "Delivery architecture", "Pipeline", "Setnayan's master YouTube channel", "Broadcaster control surfaces", and "Broadcast Style Pack" sections further down describe the **prior** Cloudflare-Stream-Live composite architecture and are **retired in V1**. They are kept on disk for historical reference; the V1.5+ build will read only the Pricing section + the new BYO-YouTube delivery model summarized below. Composite-dependent features (lower-thirds, scene cards, 4-mode broadcast styles, ffmpeg overlay) are NOT in V1 because the composite step is gone — couples wanting those use YouTube's own production tools or OBS-style apps writing to their YouTube.

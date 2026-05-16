@@ -17,7 +17,7 @@ In plain language, this iteration delivers six things:
 2. A **list of the events you belong to** after sign-in (with smart auto-jump when there's only one active event).
 3. **Event QR code** generated when an event is created — couples share it so guests can scan and join.
 4. **Join flow via QR scan** — scan the event QR, app detects if you have an account, signs you in (or registers you), asks what role you're joining as, and adds you to the event with that role.
-5. A **simple set of tabs at the bottom of the screen** so couples can move between Guest List, Vendors, Schedule, and In-App Services.
+5. A **simple set of tabs at the bottom of the screen** so couples can move between Guest List, Vendors, Schedule, and Add-ons.
 6. A **launcher page** for all the paid Setnayan features (Panood, Papic, Mood Board, Photo Delivery, LED Background, Wallet).
 
 That's it. No new features, just the shell that holds everything together.
@@ -130,7 +130,7 @@ If the couple has 2+ active events, they see this:
 │  ┌────────────────────────────────────────┐ │
 │  │ ⭐ Maria & Juan                         │ │  ← primary, sorted first
 │  │   August 15, 2026 · 247 guests         │ │
-│  │   In-App Services: 5 · Wallet: 75,000  │ │
+│  │   Add-ons: 5 · Wallet: 75,000  │ │
 │  └────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────┐ │
 │  │   Friend's wedding (collaborator)      │ │
@@ -218,7 +218,7 @@ Once an event is open, this is what the couple sees every screen:
 - **Long-press an event row** (mobile) / **"..." kebab on the event row** (desktop) → "Set as primary." Replaces the prior Settings-based primary-event toggle. Role-switch rows do NOT have a kebab.
 
 **Removed from prior chrome spec (2026-05-14):**
-- **Token wallet pill.** Setnayan's actual payment model is order-and-pay (per iteration 0034); no wallet exists in the product. The pill was spec drift and is dropped from chrome. Other 0000 references to "Wallet" as an In-App Services card / route remain pending a separate cleanup pass.
+- **Token wallet pill.** Setnayan's actual payment model is order-and-pay (per iteration 0034); no wallet exists in the product. The pill was spec drift and is dropped from chrome. Other 0000 references to "Wallet" as an Add-ons card / route remain pending a separate cleanup pass.
 - **Event name + date as a top-strip pill on mobile.** Kept on desktop; on mobile it surfaces only inside the switcher to keep the chrome minimal.
 
 **Deferred to V1.1:**
@@ -231,7 +231,7 @@ Once an event is open, this is what the couple sees every screen:
 | **Guest List** | 👥 | Everything about your guests — the list, your invitation site, place cards, seating chart. |
 | **Vendors** | 💼 | Your vendor list and your budget. |
 | **Schedule** | 📅 | One calendar view for everything time-based — meetings, payment deadlines, your event-day timeline. |
-| **In-App Services** | ✨ | All the paid Setnayan features — Panood, Papic, Mood Board, Photo Delivery, LED, Wallet. |
+| **Add-ons** | ✨ | All the paid Setnayan features — Panood, Papic, Mood Board, Photo Delivery, LED, Wallet. |
 
 The active tab is highlighted. Tapping a tab switches sections. Each tab has its own sub-pages but the bottom nav stays put.
 
@@ -276,7 +276,7 @@ The view renders as a list grouped by date (today / tomorrow / this week / later
 
 The .ics calendar export already exists in 0007 — the Schedule tab adds a "Subscribe to calendar" button that exposes it.
 
-### In-App Services tab
+### Add-ons tab
 
 A launcher grid at `/dashboard/[event-id]/services`. Each card represents one Setnayan feature:
 
@@ -468,16 +468,16 @@ That's the entire upstream dependency list.
 |---|---|
 | 0001 | Dashboard chrome (top bar with event pill + wallet + avatar), bottom-nav routing, "Guest List" tab as the home for the guest list panel. |
 | 0002 | Routes the guest QR admin and the invitation site editor under the Guest List tab. |
-| 0003 | Wallet pill in the chrome (links to wallet panel inside the In-App Services tab). Receipt history page is also reachable from the wallet panel. |
+| 0003 | Wallet pill in the chrome (links to wallet panel inside the Add-ons tab). Receipt history page is also reachable from the wallet panel. |
 | 0004 | Routes the invitation widget editor under the Guest List tab. |
-| 0005 | Adds a Services launcher card; routes the LED editor under the In-App Services tab. |
+| 0005 | Adds a Services launcher card; routes the LED editor under the Add-ons tab. |
 | 0006 | Routes the vendor registry under the Vendors tab. Publishes `vendor_meetings` to the unified Schedule view. |
 | 0007 | Routes the budget panel under the Vendors tab. Publishes `VendorLineItem.deadline_date` to the unified Schedule view. |
 | 0008 | Routes the seating chart under the Guest List tab. |
-| 0009 | Adds a Services launcher card; routes the photo delivery panel under the In-App Services tab. |
-| 0010 | Adds a Services launcher card; routes the mood board under the In-App Services tab. |
-| 0011 | Adds a Services launcher card; routes the live stream panel under the In-App Services tab. |
-| 0012 | Adds a Services launcher card; routes the couple-side gallery + seat purchase under the In-App Services tab. |
+| 0009 | Adds a Services launcher card; routes the photo delivery panel under the Add-ons tab. |
+| 0010 | Adds a Services launcher card; routes the mood board under the Add-ons tab. |
+| 0011 | Adds a Services launcher card; routes the live stream panel under the Add-ons tab. |
+| 0012 | Adds a Services launcher card; routes the couple-side gallery + seat purchase under the Add-ons tab. |
 
 Each downstream iteration's `.md` spec must declare which tab it lives under so the shell knows where to route it.
 
@@ -492,7 +492,7 @@ This is the foundation iteration. **Build 0000 first.** Sprint plan:
 3. **Sprint 3** — Event picker page (`/dashboard`). Auto-jump logic. Empty state for 0-event couples.
 4. **Sprint 4** — Inside-event chrome: top bar (event pill + wallet pill + avatar) + bottom-nav (mobile) / sidebar (desktop). Active-tab highlighting. Routing setup for all four tabs.
 5. **Sprint 5** — Schedule tab (the unified calendar view). Pull from `vendor_meetings`, `VendorLineItem`, and `invitation_widgets`. List view + month grid. .ics export reuse from 0007.
-6. **Sprint 6** — In-App Services launcher grid. Card config manifest. Empty / unbought / connected states. Route to each service's detail page.
+6. **Sprint 6** — Add-ons launcher grid. Card config manifest. Empty / unbought / connected states. Route to each service's detail page.
 7. **Sprint 7** — Profile + Settings page. Avatar dropdown chrome. Sign-out flow.
 8. **Sprint 8** — Polish + acceptance tests.
 
@@ -523,7 +523,7 @@ This iteration is shippable when all of the following are true:
 - [ ] Active-tab highlight matches the current URL prefix.
 - [ ] Top bar shows the event pill (with quick switcher), the wallet pill (with current balance from 0003), and the avatar (with Profile dropdown).
 - [ ] Schedule tab pulls from all three sources (0004, 0006, 0007) and renders one unified calendar.
-- [ ] In-App Services launcher shows one card per registered service with the correct state and primary action.
+- [ ] Add-ons launcher shows one card per registered service with the correct state and primary action.
 - [ ] Tapping a service card routes to that service's detail page under `/dashboard/[event-id]/services/[service]`.
 - [ ] Profile + Settings page is reachable from the avatar dropdown and includes the "make this event primary" toggle.
 - [ ] All event-scoped dashboard routes 404 if the signed-in user is not a `couple` member of that event.

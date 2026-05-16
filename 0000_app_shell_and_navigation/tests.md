@@ -32,7 +32,7 @@ Each section of the spec needs corresponding test coverage. Tick when written.
 - [ ] Guest List tab
 - [ ] Vendors tab
 - [ ] Schedule tab
-- [ ] In-App Services tab
+- [ ] Add-ons tab
 - [ ] Profile + Settings
 - [ ] URL pattern (locked)
 - [ ] Schema changes

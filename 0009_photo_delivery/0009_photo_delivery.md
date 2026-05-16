@@ -1,12 +1,12 @@
 # 0009 — Photo Delivery to Couple's Cloud (Google Drive)
 
 **Type:** Implementation work order (Claude Code ticket)
-**Surface:** Setnayan Web → Couple Dashboard ("Photo Delivery" panel) + Backend background-job worker · **Bottom-nav tab: In-App Services** · URL: `setnayan.com/dashboard/[event-id]/services/photo-delivery`
+**Surface:** Setnayan Web → Couple Dashboard ("Photo Delivery" panel) + Backend background-job worker · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/photo-delivery`
 **Phase:** Phase 1.5 — depends on Phase 1 (events, photos, R2 storage) and the Phase 2 photo-finalization workflow being in place. Implementation can run in parallel with Phase 2 / 3 native-app work.
 **Status:** Ready for Claude Code
 **Date:** 2026-05-08
 **Owner:** Ice (indaleciocasasolaii@gmail.com)
-**Builds on:** 0000 (app shell, sign-in, event-scoped URL, In-App Services launcher), 0001 (events), 0002 (review/release model deferred section), spec 10 (photos, R2 retention)
+**Builds on:** 0000 (app shell, sign-in, event-scoped URL, Add-ons launcher), 0001 (events), 0002 (review/release model deferred section), spec 10 (photos, R2 retention)
 
 ---
 

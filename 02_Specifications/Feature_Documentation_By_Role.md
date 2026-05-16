@@ -40,7 +40,7 @@ Every event-scoped page lives at `/dashboard/[event-id]/[section]`. The bottom n
 1. **Guest List** — see Part 1.3
 2. **Vendors** — see Part 1.6
 3. **Schedule** — unified view of every dated item across the event (vendor meetings, payment deadlines, ceremony milestones)
-4. **In-App Services** — the services launcher grid (Patiktok feed of available add-ons, see Part 1.10)
+4. **Add-ons** — the services launcher grid (Patiktok feed of available add-ons, see Part 1.10)
 
 Plus a profile/settings affordance in the header.
 
@@ -116,7 +116,7 @@ V1 ships palettes only — every guest role + venue gets a 6-color palette. Colo
 
 Stylist persona, inspirations paste board, role outfit galleries, venue segments, concept-vs-actual all DEFERRED until stylist personas exist (V2 / Din Phase 3).
 
-## In-app services launcher — the Patiktok feed (iteration 0017)
+## Add-ons launcher — the Patiktok feed (iteration 0017)
 
 The fourth bottom-nav tab opens into a TikTok-style vertical-feed of every paid service the couple can unlock. Each card is a full-screen pitch for one SKU — visual, brief, with a single CTA. Couples swipe through, tap to learn more, buy with one tap.
 

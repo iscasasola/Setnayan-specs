@@ -1,12 +1,73 @@
 # API Integration Checklist — Prereqs Before Code Starts
 
-> Every external service, account, and integration that must exist *before* Claude Code (or any engineer) starts building. Locked 2026-05-12. Do not skip — building without these set up first will produce code that can't run end-to-end.
+> Every external service, account, and integration that must exist *before* Claude Code (or any engineer) starts building. Locked 2026-05-12 · **Owner Punch List section added 2026-05-16 covering walkthrough items #17-20**. Do not skip — building without these set up first will produce code that can't run end-to-end.
 
 ## Why this comes first
 
 V1 is built on Vercel + Supabase + Cloudflare R2 + GitHub plus seven third-party integrations. The build sequence assumes these are live, billing is set up, and credentials are stored in a shared `.env.example` template. Building without them first produces code that runs locally but can't deploy to a real environment — wasteful.
 
 **Estimated time to complete this checklist: 8–12 hours of admin work.** Most steps are 5–10 minutes each; a handful have multi-day to multi-week approval waits (PH bank account verification, NPC registration, Canon/Nikon/Sony/Fujifilm SDK access requests, Apple Developer Program identity verification).
+
+---
+
+## 🚨 Owner Admin Punch List (V1 Launch · 2026-05-16)
+
+Consolidated punch list of every **owner-side action** needed to unblock V1 launch. Walkthrough items #17-20 closed here. Each row links back to the detailed section below. Status column: 🔴 not started · 🟡 in progress · ✅ done · ⚪ V1.5+ deferred (can wait).
+
+### Critical path · start NOW (longest leads first)
+
+| # | Task | Lead time | Cost | Status | Detail § |
+|---|---|---|---|---|---|
+| #17a | **Google Cloud project + YouTube Data API v3 OAuth verified-app** — write-scope OAuth to a third party requires Google's verified-app review. **Single biggest gating item for V1 Panood.** Without this, no couple can OAuth their YouTube channel; Panood doesn't ship. | **1–4 weeks** (Google review SLA) | Free | 🔴 | § 5.3 |
+| #17b | **DTI Business Name Certificate** — single-proprietorship registration in Setnayan's name. Prerequisite for BIR + Mayor's Permit + bank accounts. | ~3-7 days | ~₱2,000 | 🔴 | § 2.2 |
+| #17c | **BIR Form 2303 Certificate of Registration** — RDO-based tax registration. Required for issuing OR receipts to couples + Form 2307 quarterly issuance to vendors (BIR Marketplace Withholding 1% × 50%). | ~7-14 days after DTI | ~₱500–1,500 | 🔴 | § 2.2 |
+| #17d | **Mayor's Permit** — barangay clearance + municipal business permit. Annual renewal Jan-Feb. | ~7-14 days | ~₱2,500–5,000 | 🔴 | § 2.2 |
+| #18 | **DPO appointment + NPC registration** — Data Protection Officer under RA 10173. Setnayan can appoint internal (owner) or contract one. NPC registration ~₱500 one-time. `dpo@setnayan.com` mailbox setup. | ~1-2 weeks | ₱500 one-time (NPC) + ₱20K/mo if contracted | 🔴 | § 2.3 |
+| #17e | **BDO business savings account** — receiving account for the manual-reconciliation payment flow (V1 ships with this; Maya Business is V1.5+). Daily inbox monitoring + auto-statement download for monthly reconciliation. Requires DTI + BIR 2303 + Mayor's Permit. | ~1-2 weeks after BIR | Free; min balance applies | 🔴 | § 2.1 |
+| #17f | **GCash business account** — second receiving rail. Same BDO prerequisites. | ~3-7 days | Free | 🔴 | § 2.1 |
+| #19a | **Anthropic Console account + workspace "Setnayan"** — unblocks 0032 Contract Intelligence for V1 ship. Spend caps: **$500/mo soft alert · $2,000/mo hard cap · $100/day soft cap**. Models: **Sonnet 4.6** (vision V1.5+ Papic) · **Haiku 4.5** (V1 Contract Intelligence text). Owner signs up at console.anthropic.com → creates workspace → generates API key → pastes into Vercel env. | Same day | $100/day cap = ~₱5,800/day max V1 spend | 🔴 | § 5.4 |
+| #19b | **Persona / Veriff / Onfido signup** — Identity verification for vendor onboarding (gov ID liveness check, ~₱200/check, ~₱535/vendor across the full 12-doc verification). Pick one — Persona is recommended for PH coverage. | ~3-7 days for KYC | Per-check pricing | 🔴 | § 5.6 |
+| #19c | **AMLC sanctions API access** — PEP screening at vendor verification time (12-doc checklist item l). Required by 2026-05-16 vendor verification lock. AMLC provides bulk subscription via PH banks; alternative is World-Check or Refinitiv. | ~7-14 days | ~₱20K-50K/year subscription | 🔴 | § 5.8 |
+| #19d | **Resend account + DKIM/SPF/DMARC** — transactional email (verification codes, payment instructions, comp-gift notifications). Free tier 3,000/mo covers V1; $20/mo for 50K. Domain auth must complete before first email send. | ~1-2 days | Free tier | 🟡 (likely partial) | § 3.1 |
+| #19e | **Sentry production smoke test** — Sentry SDK is wired (PR #17) but the verification step (trigger one controlled error → confirm capture + alerting routes) has not been run. Add `/api/_sentry-smoke-test` route gated to admin emails OR manually throw in a controlled prod context. | Same day | Free tier | 🟡 (SDK wired, not exercised) | § 4.1 + decision-log row 10 (2026-05-16) |
+
+### V1.5+ deferred · can wait until after launch
+
+| # | Task | Lead time | Cost | Status | Detail § |
+|---|---|---|---|---|---|
+| #20a | **Maya Business merchant application** — primary V1.5+ payment gateway with Maya QR Ph (1.5% gateway) as the preferred default rail per 2026-05-16 lock. Replaces PayMongo as primary. | ~2-4 weeks | Per-transaction fees | ⚪ | § 5.7 |
+| #20b | **PayMongo (V1.5+ backup)** — alternative payment processor. Previously primary; now backup under Maya Business primary. | ~1-2 weeks | ~3.5% gateway | ⚪ | § 7.7 |
+| #20c | **GCash Merchant API (V1.5+ alternate rail)** — under Maya Business primary, GCash automated flow is V1.5+ alternate. V1 GCash flow is manual via business account (#17f). | ~4-6 weeks | ~2.5% gateway | ⚪ | § 7.6 |
+| #20d | **Apple Developer Program** — for Papic native iOS V1.5+. Reserve `com.setnayan.papic` + `com.setnayan.app` bundle IDs. Apple identity verification 3-7 days. | ~3-7 days | $99/year | ⚪ | § 6.7 |
+| #20e | **Google Play Console** — for Papic native Android V1.5+. Reserve `com.setnayan.papic` package name. | ~1-3 days | $25 one-time | ⚪ | § 6.8 |
+| #20f | **TikTok OAuth verified app** — Personal-tier Patiktok BYO flow (couple's own TikTok). Scopes: `user.info.basic` + `video.upload` + `video.publish`. TikTok app review ~7-14 days. Setnayan-tier Patiktok (V1) uses Setnayan-owned `@SetnayanWeddings` master handle — single OAuth, no per-couple review needed. | ~7-14 days | Free | 🔴 (Setnayan-tier V1 · 🔴 Personal-tier V1) | § 7.8 |
+| #20g | **Canon / Nikon / Sony / Fujifilm Camera SDK access** — DSLR bridge for Papic V1.5+ Pro Camera Bridge. Each vendor has its own developer program registration with per-vendor lead times. | ~2-8 weeks per SDK | Free for most | ⚪ | § 6.1 / 6.2 / 6.3 / 6.4 |
+| #20h | **Suno Premier music catalog generation** — ~400 owned AI tracks per `02_Specifications/14_Music_Catalogue_Cowork_Playbook.md`. Parallel workstream; engineering builds with placeholders. | ~Several hours of generation time | Suno subscription | ⚪ | § 5.5 |
+
+### Already done · verified live
+
+| # | Task | Status | Detail § |
+|---|---|---|---|
+| 1 | GitHub `iscasasola/setnayan-platform` private repo | ✅ | § 1.1 |
+| 2 | Vercel project (auto-deploys `main`) + custom domain | ✅ | § 1.2 |
+| 3 | Supabase project (Singapore) + RLS posture | ✅ | § 1.3 |
+| 4 | Cloudflare R2 buckets (APAC) — `setnayan-media`, `setnayan-events`, `setnayan-exports`, `setnayan-vendor-verification` | ✅ | § 1.4 |
+| 5 | `setnayan.com` + `setnayan.ph` domain registration | ✅ | § 1.6 |
+| 6 | Anthropic SDK wired (`@anthropic-ai/sdk`) in apps/web | ✅ | § 5.4 (owner-side signup still pending #19a) |
+| 7 | Sentry SDK wired (PR #17) | 🟡 SDK wired, smoke test pending #19e | § 4.1 |
+| 8 | PostHog SDK wired (PR #19) — 3 server-side funnels live | ✅ | § 4.2 |
+| 9 | Daily.co video meetings | ❌ RETIRED 2026-05-16 (do not enable) | § 1.5 |
+| 10 | Cloudflare Stream Live | ❌ RETIRED 2026-05-16 (do not enable) | § 5.1 |
+
+### How to use this punch list
+
+1. **Start the long-leads TODAY.** Items #17a (YouTube verified-app, 1-4 weeks) and #17b/c/d (DTI/BIR/Mayor's Permit, 7-14 days each, sequentially dependent) gate V1 launch. Every day waiting is a day's delay to ship.
+2. **Bundle the same-day items into a single 2-3 hour admin sprint.** Anthropic signup, Resend domain auth, Sentry smoke test, and AMLC inquiry letter all fit in one focused afternoon.
+3. **Pay the costs as they come up.** Total V1 admin spend ~₱30K-50K for the regulatory + DPO + AMLC items + Anthropic monthly ceiling. Apple Developer ($99/yr) + Google Play ($25 one-time) can wait until V1.5+.
+4. **Document API keys in `.env.example`** as each integration goes live. The repo's `.env.example` already has the 2026-05-16 sections for Anthropic / Maya / Persona / AMLC stubbed (commented placeholders); fill them in as keys become available.
+5. **Cross-reference status:** when an item flips ⚪→🔴→🟡→✅, update both this punch list AND the detailed Tier section below. Mismatched status between the two is the most common drift signal.
+
+---
 
 ## Tier 1 — Infrastructure (mandatory, ship-blocking)
 

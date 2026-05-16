@@ -102,7 +102,7 @@ Customer reviews **cannot be deleted** by the vendor. If a vendor believes a rev
 
 ### 3.7 Vendor bundles + Setnayan in-app integration
 
-Vendors may create **bundle packages** combining their own services with Setnayan in-app services (Save-the-Date Maker, Paparazzi seats, Live Stream Base, etc.). When a customer purchases a bundle, the in-app services automatically activate on the customer's event. Bundle pricing is set by the vendor with Setnayan in-app components added at their listed prices (vendor cannot mark up Setnayan SKUs).
+Vendors may create **bundle packages** combining their own services with Setnayan add-ons (Save-the-Date Maker, Paparazzi seats, Live Stream Base, etc.). When a customer purchases a bundle, the add-ons automatically activate on the customer's event. Bundle pricing is set by the vendor with Setnayan in-app components added at their listed prices (vendor cannot mark up Setnayan SKUs).
 
 ### 3.8 Price changes
 
@@ -191,7 +191,7 @@ Vendors can purchase optional premium upgrades through the Vendor Console (itera
 - **Vendor Pro Weekly** (₱499/wk) — analytics dashboard, custom landing page styling, priority support
 - **Sponsored Boost** (₱1,499/wk · certified-only) — extended visibility radius 10km → 30km
 - **Extended Pins** (₱49/wk each) — additional geographic free-transport zones
-- **Custom Vendor Bundles** — create + manage multi-service packages syncing Setnayan in-app services
+- **Custom Vendor Bundles** — create + manage multi-service packages syncing Setnayan add-ons
 
 Premium services are entirely optional. A Standard Verified vendor with no premium services can still take bookings, accept payments, and grow on the platform — the premium tier just amplifies reach.
 
@@ -221,7 +221,7 @@ All comp gifts and promo applications are logged in the admin console with admin
 
 Setnayan's in-app service prices (Save-the-Date, Paparazzi packs, Live Stream Base, etc.) remain **constant** with reviews scheduled at the start of each calendar quarter. Mid-quarter changes are rare and require two-admin approval.
 
-Setnayan may run **time-limited bundle promos** for in-app services (e.g., "Save-the-Date + Paparazzi 5-seat as a bundle for the month of June"). Bundle promos are configured by admin, time-bound, and clearly marked at checkout.
+Setnayan may run **time-limited bundle promos** for add-ons (e.g., "Save-the-Date + Paparazzi 5-seat as a bundle for the month of June"). Bundle promos are configured by admin, time-bound, and clearly marked at checkout.
 
 Vendor exclusive offers (§ 3.3) are not Setnayan promos — they are vendor-funded. Setnayan only promotes them; vendor bears the cost.
 
@@ -321,7 +321,7 @@ CREATE TABLE admin_approval_requests (
 
 ## 10a. Owner / Internal Accounts — permanent unlimited-use grants
 
-Setnayan ownership and designated internal accounts (founder + spouse + designated Setnayan Team members) operate the platform like any other customer for their own personal events — they create events, invite guests, book vendors. **All in-app services are FREE for these accounts permanently** via a dedicated grant flag, distinct from the per-customer comp gifts and per-event unlimited-use grants administered to external customers.
+Setnayan ownership and designated internal accounts (founder + spouse + designated Setnayan Team members) operate the platform like any other customer for their own personal events — they create events, invite guests, book vendors. **All add-ons are FREE for these accounts permanently** via a dedicated grant flag, distinct from the per-customer comp gifts and per-event unlimited-use grants administered to external customers.
 
 **How it works:**
 
@@ -342,11 +342,11 @@ Setnayan ownership and designated internal accounts (founder + spouse + designat
 
 - Internal accounts are marked in the admin console with a 🟣 badge so any admin review knows they're internal
 - Internal-account activity is excluded from the customer-pipeline analytics (so the "booked customers" count reflects actual paying customers)
-- Internal grants are bounded to **in-app services only** — vendor payments through Setnayan Pay still flow normally (the 3% convenience fee is the customer's cost · vendor still receives full amount)
+- Internal grants are bounded to **add-ons only** — vendor payments through Setnayan Pay still flow normally (the 3% convenience fee is the customer's cost · vendor still receives full amount)
 - Setnayan Team operational expense (cost of comping owner accounts ≈ ₱5/render × ~20 renders/year per account = ₱100/year per internal user) is absorbed into operating budget
 - Adding a new internal account requires **two-admin approval** (Ops Lead + one other admin) and a logged rationale ("founder spouse" · "team member onboarding" · etc.)
 
-**Spouse-of-owner-purchases-anything:** the spouse account is internal-flagged and gets the unlimited grant for in-app services. For external purchases (vendor bookings paid through Setnayan Pay), the spouse pays like any other customer — Setnayan Pay convenience fee and vendor payouts flow normally. The owner's wife "can purchase anything on the app" because (a) all Setnayan in-app SKUs are free for her via the internal grant, and (b) she can book any vendor she wants and pay through Setnayan Pay or direct — same as any other customer. No financial favoritism on vendor-side; the in-app services are the only line that's comped.
+**Spouse-of-owner-purchases-anything:** the spouse account is internal-flagged and gets the unlimited grant for add-ons. For external purchases (vendor bookings paid through Setnayan Pay), the spouse pays like any other customer — Setnayan Pay convenience fee and vendor payouts flow normally. The owner's wife "can purchase anything on the app" because (a) all Setnayan in-app SKUs are free for her via the internal grant, and (b) she can book any vendor she wants and pay through Setnayan Pay or direct — same as any other customer. No financial favoritism on vendor-side; the add-ons are the only line that's comped.
 
 ## 10b. Setnayan Team Members — SHARED Monthly Consumable Pool
 

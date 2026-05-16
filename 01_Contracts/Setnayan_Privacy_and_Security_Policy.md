@@ -52,7 +52,7 @@
 
 - Use generic event data (anonymized, aggregated) for platform improvement and machine-learning model training
 - Use specific renders / captures as marketing samples (requires separate written opt-in per § 6)
-- Send promotional communications about new in-app services
+- Send promotional communications about new add-ons
 
 ### 2.3 Never used for
 

@@ -38,7 +38,7 @@ Each section of the spec needs corresponding test coverage. Tick when written.
 - [ ] Section 2 — Two-sided split hero
 - [ ] Section 3 — The chaos we're fixing
 - [ ] Section 4 — One app, every moving piece
-- [ ] Section 5 — In-app services (apparatus catalog)
+- [ ] Section 5 — Add-ons (apparatus catalog)
 - [ ] Section 6 — Vendor compatibility & verification
 - [ ] Section 7 — Outsourcing, pacing, scheduling
 - [ ] Section 8 — The vendor flywheel

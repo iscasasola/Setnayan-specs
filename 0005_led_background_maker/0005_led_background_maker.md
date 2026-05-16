@@ -1,12 +1,12 @@
 # 0005 — 8K LED Background Maker
 
 **Type:** Implementation work order (Claude Code ticket)
-**Surface:** Setnayan Web → Couple Dashboard ("LED Background Maker" panel) + server-side rendering pipeline · **Bottom-nav tab: In-App Services** · URL: `setnayan.com/dashboard/[event-id]/services/led`
+**Surface:** Setnayan Web → Couple Dashboard ("LED Background Maker" panel) + server-side rendering pipeline · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/led`
 **Phase:** Phase 1.5 — depends on Phase 1 (events, dashboard shell, R2 storage) and the locked Hero Monogram from iteration 0004
 **Status:** Ready for Claude Code
 **Date:** 2026-05-08
 **Owner:** Ice (indaleciocasasolaii@gmail.com)
-**Builds on:** 0000 (app shell, sign-in, event-scoped URL, In-App Services launcher), 0004 (Hero Monogram widget — supplies the monogram), 0002 (palette + accent color), spec 10 (R2 storage)
+**Builds on:** 0000 (app shell, sign-in, event-scoped URL, Add-ons launcher), 0004 (Hero Monogram widget — supplies the monogram), 0002 (palette + accent color), spec 10 (R2 storage)
 
 ---
 

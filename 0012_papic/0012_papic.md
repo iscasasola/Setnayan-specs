@@ -2,8 +2,8 @@
 
 **Iteration number:** 0012
 **Topic:** Papic feature, V1
-**Surface:** Couple-side → Setnayan Web Dashboard · **Bottom-nav tab: In-App Services** · Couple URL: `setnayan.com/dashboard/[event-id]/services/papic` (gallery + seat purchase) · Paparazzo-side: native iOS / Android apps (separate)
-**Builds on:** 0000 (app shell, sign-in, event-scoped URL, In-App Services launcher), 0001 (guest data, role taxonomy, `photo_consent`), 0002 (personal QR delivery), 0008 (table QR for fan-out tagging), 0011 (Custom Monogram Pack flag), 0034 (Payments & Cart — Papic seat purchases route through `service_orders` apply-then-pay)
+**Surface:** Couple-side → Setnayan Web Dashboard · **Bottom-nav tab: Add-ons** · Couple URL: `setnayan.com/dashboard/[event-id]/services/papic` (gallery + seat purchase) · Paparazzo-side: native iOS / Android apps (separate)
+**Builds on:** 0000 (app shell, sign-in, event-scoped URL, Add-ons launcher), 0001 (guest data, role taxonomy, `photo_consent`), 0002 (personal QR delivery), 0008 (table QR for fan-out tagging), 0011 (Custom Monogram Pack flag), 0034 (Payments & Cart — Papic seat purchases route through `service_orders` apply-then-pay)
 **Status:** Drafted 2026-05-09 · revised 2026-05-10 (DSLR Pro Camera Bridge + face-detection auto-tag + EXIF/geo metadata + adaptive compression) · token-wallet language purged 2026-05-12 (now PHP-native via 0034) · **V1.5+ deferral + architecture lock 2026-05-16 (see § V1.5+ Architecture Lock below — entire build deferred to V1.5+; architecture frozen now to prevent re-litigation)**
 **Companion specs:** `10_Papic_Feature_Specification.md`, `0011_panood/`, `0034_payments_and_cart/`, `0001_creating_guest_list/`, `0002_qr_invitation_system/`
 

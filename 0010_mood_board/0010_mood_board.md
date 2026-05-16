@@ -2,8 +2,8 @@
 
 **Iteration number:** 0010
 **Topic:** Mood Board V1 — coordinated wedding palettes for roles and venues, with the Setnayan Guide rule engine
-**Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: In-App Services** · URL: `setnayan.com/dashboard/[event-id]/services/mood-board`
-**Builds on:** 0000 (app shell, sign-in, event-scoped URL, In-App Services launcher), 0001 (role taxonomy, per-role guest assignments), 0006 (vendor records — V1 non-blocking context)
+**Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/mood-board`
+**Builds on:** 0000 (app shell, sign-in, event-scoped URL, Add-ons launcher), 0001 (role taxonomy, per-role guest assignments), 0006 (vendor records — V1 non-blocking context)
 **Status:** Drafted 2026-05-09 (supersedes the 2026-05-08 partial placeholder)
 **Companion specs:** `0001_creating_guest_list/`, `0006_vendors_management/` (vendor coordination context)
 

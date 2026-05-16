@@ -76,7 +76,7 @@ All paid SKUs run through the same flow. The prototype demonstrates Papic, Live 
 **V1 payment model (locked).** Two static Setnayan accounts only — **BDO bank transfer** and **GCash**. No automated payment gateway (PayMongo / Stripe / direct GCash API) in V1. Every payment is matched manually by Setnayan Team within 24 hours, against the screenshot + order confirmation the customer submits.
 
 ```
-Customer  →  In-App Services tab  →  picks SKU
+Customer  →  Add-ons tab  →  picks SKU
          →  /apply form (event_id, sku_code, quantity, notes)
          →  service_applications.status = 'pending_payment'
          →  payment-instructions email sent
@@ -103,7 +103,7 @@ Customer  →  In-App Services tab  →  picks SKU
               → if the deposit didn't push through (amount/ref mismatch, no deposit):
                   click "Mismatch — contact customer"
                   Setnayan sends customer a follow-up email asking for clarification
-         →  Customer sees "active" on the In-App Services tab
+         →  Customer sees "active" on the Add-ons tab
          →  In-app notification to all paparazzi crew if Papic was just activated
 ```
 
