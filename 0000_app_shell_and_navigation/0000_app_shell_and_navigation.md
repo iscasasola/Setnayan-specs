@@ -46,16 +46,17 @@ Once signed in, what happens next depends on how many active events they have.
 
 ### Step 2.5 — Picking the event type (when creating a new event)
 
-When the couple taps "+ Create event," the first thing they see is a six-tile event-type picker. Six event types are visible; **only Weddings is selectable in V1**. The other five tiles show with a subtle "Coming soon" badge — the couple can see what's coming but can't pick yet.
+When the couple taps "+ Create event," the first thing they see is a **horizontal event-type carousel** (locked 2026-05-16). Seven event types are visible; **only Weddings is selectable in V1**. The other six tiles show with a subtle "Coming soon" badge — the couple can see what's coming but can't pick yet. The carousel loops infinitely (advancing past the last tile wraps back to the first) so the lineup feels like an evolving roadmap rather than a fixed grid. The **Event name** input is gated by selection — it does not render until the couple picks a tile, removing the "what do I type here?" moment for couples still browsing categories.
 
 | Event type | V1 status | What the tile says when tapped |
 |---|---|---|
-| **Weddings** | ✅ Selectable | Continues to event setup |
+| **Weddings** | ✅ Selectable | Reveals the Event-name input below the carousel |
 | Birthday | Coming soon | "We're working on this — for now, only Weddings is supported." |
 | Celebration | Coming soon | Same message |
 | Travel | Coming soon | Same message |
 | Corporate | Coming soon | Same message |
-| Burial | Coming soon | Same message |
+| Tournament | Coming soon | Same message |
+| Christening | Coming soon | Same message |
 
 When Weddings is tapped, the **simplified single-field event-setup flow** runs (locked 2026-05-14):
 
@@ -107,13 +108,16 @@ Immediately after event creation, the couple sees a four-option choice card. The
 
 Couples picking a paid tier still land on the dashboard immediately — the dashboard shows "Guided Planner pending payment" state until reconciliation completes. They are NOT blocked.
 
-The other five event types stay visible because they're a **product preview** — Setnayan plans to support multiple event types beyond weddings (each with its own iteration set, eventually), and showing the lineup signals the couple that this is a serious event-platform play, not just a wedding app. When future event types ship, no UI rework is needed — the tiles already exist; we just flip the `enabled` flag in the picker config.
+The other six event types stay visible because they're a **product preview** — Setnayan plans to support multiple event types beyond weddings (each with its own iteration set, eventually), and showing the lineup signals the couple that this is a serious event-platform play, not just a wedding app. When future event types ship, no UI rework is needed — the tiles already exist; we just flip the `enabled` flag in the picker config.
 
-Schema:
+Schema (implementation note: ENUM, not CHECK):
 
 ```sql
-ALTER TABLE events ADD COLUMN event_type TEXT NOT NULL DEFAULT 'wedding'
-  CHECK (event_type IN ('wedding', 'birthday', 'celebration', 'travel', 'corporate', 'burial'));
+CREATE TYPE public.event_type AS ENUM (
+  'wedding', 'birthday', 'celebration', 'travel', 'corporate', 'tournament', 'christening'
+);
+
+ALTER TABLE events ADD COLUMN event_type public.event_type NOT NULL DEFAULT 'wedding';
 ```
 
 The default `'wedding'` is a safety net for any pre-0000 events the migration finds — they all get classified as weddings (which is correct for V1).
@@ -357,14 +361,13 @@ This iteration adds two columns to the existing `events` table, plus three new t
 ```sql
 ALTER TABLE events ADD COLUMN is_primary BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE events ADD COLUMN archived   BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE events ADD COLUMN event_type TEXT NOT NULL DEFAULT 'wedding'
-  CHECK (event_type IN ('wedding', 'birthday', 'celebration', 'travel', 'corporate', 'burial'));
+ALTER TABLE events ADD COLUMN event_type public.event_type NOT NULL DEFAULT 'wedding';
 
 CREATE UNIQUE INDEX events_one_primary_per_couple
   ON events (couple_id) WHERE is_primary = TRUE;
 ```
 
-`event_type` defaults to `'wedding'` for any pre-existing rows. V1 only allows the create-event flow to set `'wedding'`; the other five values are reserved for future iterations.
+`event_type` defaults to `'wedding'` for any pre-existing rows. V1 only allows the create-event flow to set `'wedding'`; the other six values are reserved for future iterations.
 
 ### One new `users` table (universal Setnayan account)
 
@@ -504,8 +507,8 @@ Iterations 0001–0012 can ship their internal panels in parallel; each plugs in
 
 This iteration is shippable when all of the following are true:
 
-- [ ] `events.is_primary`, `events.archived`, and `events.event_type` columns exist with the partial unique index on `is_primary` and the CHECK constraint on `event_type`.
-- [ ] Create-event flow shows all six event-type tiles; only "Weddings" is selectable; tapping the others shows the "Coming soon" message.
+- [ ] `events.is_primary`, `events.archived`, and `events.event_type` columns exist with the partial unique index on `is_primary` and the `public.event_type` ENUM covering wedding, birthday, celebration, travel, corporate, tournament, christening.
+- [ ] Create-event flow shows all seven event-type tiles in an infinite horizontal carousel; only "Wedding" is selectable; tapping the others is a no-op (the "Coming soon" badge already conveys the state); the Event-name input is hidden until a tile is picked.
 - [ ] Newly created events have `event_type = 'wedding'`; other values can only be inserted via direct SQL (V1 has no UI path to them).
 - [ ] `users`, `event_join_tokens`, `event_members` tables exist per schema above.
 - [ ] When a couple creates an event, an `event_join_tokens` row is auto-created with a 32-hex token.
