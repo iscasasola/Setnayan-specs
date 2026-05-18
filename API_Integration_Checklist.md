@@ -18,7 +18,7 @@ Consolidated punch list of every **owner-side action** needed to unblock V1 laun
 
 | # | Task | Lead time | Cost | Status | Detail § |
 |---|---|---|---|---|---|
-| #17a | **Google Cloud project + YouTube Data API v3 OAuth verified-app** — write-scope OAuth to a third party requires Google's verified-app review. **Single biggest gating item for V1 Panood.** Without this, no couple can OAuth their YouTube channel; Panood doesn't ship. | **1–4 weeks** (Google review SLA) | Free | 🔴 | § 5.3 |
+| #17a | **Google Cloud project + YouTube Data API v3 OAuth verified-app** — write-scope OAuth to a third party requires Google's verified-app review. **Single biggest gating item for V1 Panood.** Without this, no couple can OAuth their YouTube channel; Panood doesn't ship. **Phase 1 complete 2026-05-18** (project + API + OAuth consent screen + OAuth client + scopes + test users; Client ID/Secret captured, Vercel env paste pending). **Phase 2 verified-app submission pending** on 3 parallel prereqs: privacy YouTube disclosure (PR #116 in flight) · engineering OAuth handshake + `oauth_grants` schema · 1-2 min demo video. | **1–4 weeks** (Google review SLA — sensitive scopes often 3-6 weeks) | Free | 🟡 | § 5.3 |
 | #17b | **DTI Business Name Certificate** — single-proprietorship registration in Setnayan's name. Prerequisite for BIR + Mayor's Permit + bank accounts. | ~3-7 days | ~₱2,000 | 🔴 | § 2.2 |
 | #17c | **BIR Form 2303 Certificate of Registration** — RDO-based tax registration. Required for issuing OR receipts to couples + Form 2307 quarterly issuance to vendors (BIR Marketplace Withholding 1% × 50%). | ~7-14 days after DTI | ~₱500–1,500 | 🔴 | § 2.2 |
 | #17d | **Mayor's Permit** — barangay clearance + municipal business permit. Annual renewal Jan-Feb. | ~7-14 days | ~₱2,500–5,000 | 🔴 | § 2.2 |
@@ -181,7 +181,7 @@ The Daily.co video-meetings feature was retired entirely from V1+ on 2026-05-16.
 - [ ] ~~Submit application to PayMongo (typically 1–2 week approval) — backup integration~~ — superseded by Maya Business primary
 - [ ] Set up sandbox test accounts in Maya Business
 - [ ] Coordinate with BIR for proper invoicing format (BIR Form 2303 + Form 2307 for marketplace withholding 0.5%)
-- [ ] Setnayan Pay convenience fee repriced **3% → 5.5% on top of vendor price** (admin-configurable per method — see 0034 § 6 + 0023 § 3.5d)
+- [ ] Setnayan Pay convenience fee repriced **3% → flat 5.0% on top of vendor price** (admin-configurable per method, defaults uniform · Option B vendor-absorbs-gateway · supersedes the morning's 5.5%/6.5% dual-rate · see 0034 § 6 + 0023 § 3.5d)
 
 **Status:** V1 doesn't use automated gateway; ships with manual reconciliation per current 0034 flow. Maya Business turns on at V1.5+. Approval timeline (2-4 weeks) is the bottleneck.
 
@@ -273,6 +273,8 @@ The Daily.co video-meetings feature was retired entirely from V1+ on 2026-05-16.
 ### 5.3 YouTube Live API — per-couple OAuth (reframed 2026-05-16)
 
 > **Reframed 2026-05-16.** Per the Panood architecture pivot, Setnayan no longer hosts a master YouTube channel for couple broadcasts. **Each couple OAuths their own YouTube channel** at Panood booking time, granting Setnayan write permission to their channel; the broadcaster UI pushes the active camera feed via RTMP to the couple's `liveBroadcasts` resource; the landing page embeds the couple's `liveBroadcasts.id` in an IFrame. Setnayan never touches a master Setnayan-owned YouTube channel for Panood. (Patiktok's `@SetnayanWeddings` master TikTok handle is a separate flow under § 7.2 — that one IS Setnayan-owned for the Setnayan-tier Patiktok SKU.)
+
+> **Phase 1 status (2026-05-18):** Google Cloud project `Setnayan` created (separate from `iCASA ERP`); YouTube Data API v3 enabled; OAuth consent screen configured (User type External · Publishing status Testing · branding pointing to setnayan.com + /privacy + /terms + setnayan.com authorized domain); 2/100 test users registered. Scopes requested: `userinfo.email` + `userinfo.profile` (non-sensitive · auto-approved) + `youtube` + `youtube.upload` (sensitive · trigger 3-6 week verification review). OAuth Client `Setnayan Web — Production` (Web app type) created with JS origins `https://www.setnayan.com` + `https://setnayan.com` and redirect URI `https://www.setnayan.com/api/auth/youtube/callback` (route pending engineering). Client ID + Client Secret captured to owner's secure note — pending Vercel env paste as `GOOGLE_OAUTH_CLIENT_ID` + `GOOGLE_OAUTH_CLIENT_SECRET` (Production + Preview + Development scopes). **Phase 2 verified-app submission gated on 3 parallel prereqs:** (a) privacy policy YouTube disclosure (PR #116 `claude/privacy-youtube-disclosure` on `iscasasola/setnayan-platform` — auto-merge armed); (b) engineering wires `/api/auth/youtube/callback` route + extends `oauth_grants` schema for per-event YouTube refresh tokens; (c) owner records 1-2 min demo video of working OAuth → broadcast creation → landing-page IFrame embed. When all three exist, click Publish app → Submit for Verification in the Google Auth Platform Verification Center.
 
 - [ ] Set up Google Cloud project + YouTube Data API v3 client (Setnayan-owned)
 - [ ] Configure OAuth 2.0 consent screen with verified-app status (required by YouTube for write-scope OAuth from third parties)
