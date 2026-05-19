@@ -294,6 +294,49 @@ CREATE TABLE vendor_contracts (
 
 R2 retention: 5 years post-event, mirroring photographer industry norm and Personal Reels storage policy.
 
+### `vendor_invites` — couple-initiated invitations for off-platform vendors (locked 2026-05-19)
+
+The couple may invite an off-platform vendor (any `event_vendor_relationships` row where `marketplace_vendor_id IS NULL`) to claim a free Setnayan profile. On successful claim, the new marketplace `vendors` row is auto-linked back to the originating `event_vendor_relationships.marketplace_vendor_id`, which transitions the relationship from off-platform to on-platform and unlocks chat (0019) for that couple. UX rules live in `## Invite-to-Setnayan flow — UX rules` below; the vendor-side claim landing page lives in `0022 § Couple-invite claim landing`.
+
+```sql
+CREATE TABLE vendor_invites (
+  invite_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  relationship_id     UUID NOT NULL REFERENCES event_vendor_relationships(relationship_id) ON DELETE CASCADE,
+  invited_by_user_id  UUID NOT NULL,                       -- couple member who sent the invite
+  email               TEXT NOT NULL,                       -- email-only delivery (locked 2026-05-19)
+  business_name       TEXT NOT NULL,                       -- snapshot from the relationship row at invite time
+  service_category    TEXT,                                -- canonical_key or custom service name (snapshot)
+  claim_token         TEXT UNIQUE NOT NULL,                -- URL-safe ~32 char nonce; routes to /vendor/claim/{token}
+  status              TEXT NOT NULL DEFAULT 'pending'
+                        CHECK (status IN ('pending','claimed','expired','revoked','declined')),
+  expires_at          TIMESTAMPTZ NOT NULL,                -- created_at + 90 days
+  sent_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
+  claimed_by_user_id  UUID,                                -- vendor user on claim
+  claimed_vendor_id   UUID REFERENCES vendors(vendor_id),  -- new (or existing) marketplace vendor row on claim
+  claimed_at          TIMESTAMPTZ,
+  declined_at         TIMESTAMPTZ,
+  revoked_at          TIMESTAMPTZ,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX vendor_invites_relationship_idx ON vendor_invites (relationship_id);
+CREATE UNIQUE INDEX vendor_invites_token_idx ON vendor_invites (claim_token);
+-- One live (pending) invite per (relationship_id, normalized email) at a time:
+CREATE UNIQUE INDEX vendor_invites_live_idx
+  ON vendor_invites (relationship_id, LOWER(email))
+  WHERE status = 'pending';
+```
+
+**Server-enforced rules:**
+
+- Invite can only be created when the parent `event_vendor_relationships.marketplace_vendor_id IS NULL`. If a vendor has already been linked, the "Invite to Setnayan" action is hidden on the couple's surface.
+- One pending invite per `(relationship_id, LOWER(email))` at a time. To re-send to the same address, the couple revokes the existing pending invite first (one-tap "Resend" affordance does revoke + create-new atomically).
+- **No cap on total pending invites per event** (locked 2026-05-19).
+- **No cooldown after decline / expire / revoke** (locked 2026-05-19) — couple may re-invite the same email immediately. Email-deliverability throttling is enforced at the transactional-email provider layer (standard de-dupe + bounce handling), not exposed as a UI rule.
+- **Lazy expiration sweep** — when `/vendor/claim/{token}` is opened (or when the couple's vendor list is rendered), the server flips any `status='pending'` rows where `expires_at < now()` to `status='expired'`. No cron job per [[reference_setnayan_cron_strategy]].
+- **Claim resolution:** on successful signup-from-claim, the new marketplace `vendor_id` is written to BOTH `event_vendor_relationships.marketplace_vendor_id` AND `vendor_invites.claimed_vendor_id`, and `vendor_invites.status='claimed'`. The couple's 0019 chat surface unlocks automatically.
+- **Already-on-Setnayan short-circuit:** when the couple submits the invite modal and the entered email matches an existing `users.email` who owns a `vendors` row, the modal switches to a "Connect to existing profile?" path. On confirm, no `vendor_invites` row is created; the existing `vendor_id` is linked directly into `event_vendor_relationships.marketplace_vendor_id`. The existing vendor receives a 0019 system notification that the couple has connected.
+
 ---
 
 ## Computed / derived values
@@ -361,6 +404,59 @@ These power the stats strip at the top of the Vendors page and feed iteration **
 6. **No reminders / push in V1.** In-UI surfacing only. The notifications iteration (V1.1) will own email + push for upcoming meetings the same way it owns payment-deadline reminders.
 7. **No `.ics` export in V1.** Calendar export ships as part of iteration **0007 Budget & Expenses** (which already owns the `.ics` pattern for payment deadlines). Once 0007 lands, meetings will join payments in the same combined calendar feed.
 8. **Din migration path.** When the supplier app ships in Phase 3, vendors will create / propose / reschedule meetings via Din writing to the same `vendor_meetings` table with `created_by_actor='vendor'`. Couples will see vendor-proposed meetings as `status='scheduled'` rows that originated outside their hands; UI affordances to confirm or counter-propose come with the Phase 3 surfaces. Tonight's V1 schema needs no changes for that future.
+
+---
+
+## Invite-to-Setnayan flow — UX rules (locked 2026-05-19)
+
+For every off-platform vendor row (`event_vendor_relationships.marketplace_vendor_id IS NULL`), the vendor detail drawer / mobile sheet exposes a secondary action: **"Invite to Setnayan."** The action is hidden the moment the relationship is linked to a marketplace vendor (whether via claim, Connect, or marketplace-vendor selection in the original add-vendor flow).
+
+### Invite modal — `Invite {Business Name} to claim their profile`
+
+- **Email field:** pre-filled from `event_vendor_relationships.email` (couple can correct). Required.
+- **Copy:** *"We'll email them an invitation to claim a free Setnayan profile. If they sign up, you can message them in-app and your records here will connect to their profile automatically."*
+- **CTA:** **Send invite** → creates the `vendor_invites` row (status `pending`, `expires_at = now() + 90 days`), triggers the transactional email, closes modal, status pill on the relationship row flips to **Invite sent**.
+
+### Already-on-Setnayan detection (in the modal)
+
+On submit, the server checks whether `email` matches an existing `users.email` who owns a `vendors` row. If yes, the modal swaps copy to:
+
+> *"This vendor is already on Setnayan as **{Existing Business Name}**. Connect this engagement to their existing profile?"*
+
+with a single **Connect** CTA. On confirm:
+- No `vendor_invites` row is created.
+- `event_vendor_relationships.marketplace_vendor_id` is set to the existing `vendor_id`.
+- The existing vendor receives a 0019 system notification + Threads entry: *"{Couple display name} added you as their {service_category} for {event_date}."*
+- Chat unlocks for the couple immediately; the toast confirms *"Connected to {Existing Business Name} — chat is now unlocked."*
+
+### Status pill on the relationship row
+
+Replaces the off-platform muted "Manual entry" pill whenever an invite (or Connect) has happened. Pill state derives from the most recent `vendor_invites` row for that relationship, or from `marketplace_vendor_id` directly:
+
+| Pill | Condition |
+|---|---|
+| `Invite sent · {N days left}` | latest `vendor_invites.status = 'pending'` |
+| `Joined Setnayan` | `marketplace_vendor_id IS NOT NULL` (whether via claim or Connect) — also fires a one-time toast on the couple's session: *"{Business Name} joined Setnayan — chat is now unlocked"* |
+| `Declined the invite` | latest `vendor_invites.status = 'declined'` (no `marketplace_vendor_id` set) |
+| `Invite expired` | latest `vendor_invites.status = 'expired'` |
+| `Invite revoked` | latest `vendor_invites.status = 'revoked'` |
+| (no pill) | no invite has ever been sent — fall back to the existing off-platform muted indicator |
+
+The pill has a tap target that opens a small inline menu with contextually relevant actions: **Resend invite** (for declined / expired / revoked / no-pill states), **Revoke** (for pending), or **View Setnayan profile** (for Joined).
+
+### Couple controls — no cap, no cooldown
+
+Both locked 2026-05-19. Couple may have an unlimited number of pending invites across their event, and may immediately re-invite the same email after a decline / expire / revoke. Deliverability hygiene (rate limits, bounce handling) is enforced at the transactional-email provider layer and never surfaced as a UI restriction.
+
+### Privacy on the claim page (identity-only)
+
+The vendor's claim landing page surfaces an identity-only snapshot of the relationship row — business name, contact info, service category, event date, couple display name. The following fields are **explicitly NOT shown pre-claim** (locked 2026-05-19): `package_name`, `package_total_centavos`, any `vendor_inclusions`, any `vendor_payment_milestones`, any `vendor_meetings`. The vendor sees those the moment they finish signup and land in their 0022 Clients pipeline. Full claim-page surface lives in `0022 § Couple-invite claim landing`.
+
+### Failure handling
+
+- **Vendor declines** → couple sees `Declined the invite` pill. The off-platform row stays intact (no chat, full payment-tracking still works). Couple can re-invite the same email immediately.
+- **Vendor ignores for 90 days** → invite flips to `expired` on next access. Pill switches to `Invite expired` with a one-tap **Resend** affordance.
+- **Couple changes their mind** → tap pill → **Revoke**. Pill flips to `Invite revoked`. The vendor's claim link returns "This invite is no longer active" if they later try to open it.
 
 ---
 
@@ -890,6 +986,12 @@ A second worked example block sits next to the default 5.0% example showing "Som
 - "Next meeting" surfaces the soonest upcoming meeting on each vendor card; past-but-still-scheduled meetings render amber and prompt confirmation.
 - Meeting `status` workflow: scheduled → completed (with notes) | cancelled | rescheduled.
 - Meeting writes in V1 are always `created_by_actor='couple'`; schema accepts `'vendor'` and `'setnayan_staff'` for forward compatibility with Din.
+- "Invite to Setnayan" action is visible on every off-platform vendor row (`marketplace_vendor_id IS NULL`) and hidden once the row is linked. Sending an invite creates a `vendor_invites` row, fires a transactional email, and flips the row's status pill to `Invite sent · {N days left}`.
+- Already-on-Setnayan detection: submitting the invite modal with an email that matches an existing vendor owner offers **Connect** instead of **Send invite**. Connect links the existing `vendor_id` directly into `marketplace_vendor_id` without creating a `vendor_invites` row.
+- On vendor claim, `event_vendor_relationships.marketplace_vendor_id` is populated and the couple's 0019 chat surface unlocks automatically — verified by a single one-time toast on the couple's session.
+- The relationship row's status pill cycles correctly through `Invite sent → Joined Setnayan` (claim or Connect path), `Declined the invite`, `Invite expired`, and `Invite revoked` based on the latest `vendor_invites` row plus the linked `marketplace_vendor_id`.
+- Couple may have unlimited pending invites per event and re-invite the same email immediately after decline / expire / revoke (no UI cap, no cooldown).
+- Claim landing page shows identity-only snapshot — `package_*`, `vendor_inclusions`, `vendor_payment_milestones`, and `vendor_meetings` are not surfaced pre-claim.
 
 ---
 
@@ -910,6 +1012,7 @@ A second worked example block sits next to the default 5.0% example showing "Som
 | 2026-05-12 | **Renamed the per-event `vendors` table to `event_vendor_relationships`** (PK column renamed from `vendor_id` to `relationship_id`); added `marketplace_vendor_id UUID REFERENCES vendors(vendor_id)` FK to link the couple's per-event vendor record to the canonical marketplace `vendors` entity declared in 0022. All seven dependent tables in 0006 (`vendor_services`, `vendor_inclusions`, `vendor_payment_milestones`, `vendor_crew`, `vendor_crew_meal_totals` view, `vendor_meetings`, `vendor_contracts`) updated to FK `relationship_id`. | The previous setup had two tables named `vendors` (one in 0006 for the couple's per-event vendor list, one in 0022 for the canonical marketplace vendor entities) which would have caused namespace collision at the Postgres level. Rename clarifies the data model: `event_vendor_relationships` is the join row that says "this couple's event is working with this vendor" and carries the negotiated package details; `vendors` (in 0022) is the canonical marketplace vendor profile shared across all couples who book them. Nullable FK supports the off-platform vendor case (couple enters a custom vendor that isn't on Setnayan's marketplace). |
 | 2026-05-17 | **Vendor disbursement rail tiers locked (V1.5+ Maya Bulk Fund Transfer) — Intra-Maya (instant + free) / InstaPay (< 1 min + ₱10 Setnayan-absorbed) / PESONet (EOD same-day + ₱15 Setnayan-absorbed) · default per payout type per 0034 § 6.7 · vendor override available in 0022 with rebate/upgrade pricing · Maya Bank vendor-recruiting copy surfaces on verification approval email + onboarding tour.** Schema (0034 § 6.9): `vendor_payouts.rail` enum (intra_maya/instapay/pesonet), `rail_chosen_by` enum (default/vendor_preference/admin_override), `batch_id` FK to new `disbursement_batches` table. Failure handling: rejected rows revert to `pending` and rejoin next-day batch; 3 consecutive batch failures for same vendor trigger admin alert + manual-reconciliation fallback. | Three drivers. **First, batched disbursement at scale collapses per-payout admin time from ~5 minutes (click-through) to ~5 seconds (CSV row) — the real value isn't fee savings but operational efficiency.** Annual disbursement-cost absorption stays under 0.3% of platform revenue even at 5,000-couple scale. **Second, the three-tier rail structure maps directly to vendor segments:** verified vendors who want instant gratification get InstaPay free of charge (Setnayan absorbs); price-sensitive coming_soon vendors get reliable EOD via PESONet; Maya Bank vendors get the strictly-best outcome on both sides (instant + free). **Third, Maya Bank vendor-recruiting copy is the single highest-leverage vendor onboarding incentive Setnayan can offer** — every Maya Bank account opened means a vendor who gets instant + free payouts forever AND Setnayan saves the disbursement fee forever. Both sides win; the alignment is real, not promotional. **Vendor override pricing:** rebate-for-downgrade / pay-for-upgrade keeps Setnayan whole while letting individual vendors customize speed/cost trade-off. **Engineering pending:** Maya Business approval (2-4 week SLA per API Integration Checklist) gates the entire V1.5+ disbursement automation; `disbursement_batches` table + columns on `vendor_payouts` ship with the V1.5+ migration; admin console "Today's payouts" queue + Generate-batch-CSV button in 0023; vendor payout-preferences UI in 0022. |
 | 2026-05-16 | **Vendor convenience-fee absorption opt-in locked — `vendors.absorbs_convenience_fee BOOLEAN DEFAULT FALSE` · "No Convenience Fee" badge on marketplace profile when TRUE · cart hides the fee row + customer sees vendor's listed price flat · Setnayan revenue unchanged at 5% gross regardless · snapshot at order-creation time onto `service_orders.vendor_absorbed_fee`.** Full cart math + payout example + customer-side cart treatment lives in `0034 § 6.8 Vendor opt-in: cover the convenience fee for customers`. Vendor settings UI in 0022 with financial preview. Marketing badge surface in 0015 § 8.5. | Two drivers. **First, Filipino couples strongly prefer "all-in" pricing — many wedding vendors already absorb platform fees informally to keep their headline price flush with the booking total customers expect.** Surfacing this as a first-class opt-in turns the informal practice into a structured platform feature with a visible badge, which (a) lets price-competitive vendors compete on transparency without negotiating with Setnayan, (b) gives Setnayan a search-filter chip that couples actually use ("No convenience fee" as a filter), and (c) preserves the canonical 5.0% flat rate on Setnayan's books regardless of vendor choice. **Second, Setnayan's economics are protected by design** — the 5% is always Setnayan's revenue regardless of who shows it on the receipt. Worked example at ₱100K booking: Option A (vendor covers) → vendor receives ₱93,100 (Maya QR Ph) / ₱92,150 (max 2.5% rail); Option B (default) → vendor receives ₱98,000 / ₱97,000. Vendor sacrifices ~5% of revenue for the badge → only opt in if conversion lift exceeds ~5%. The vendor toggle's financial-preview UI in 0022 makes the math obvious so vendors don't accidentally opt in without understanding the cost. **Snapshot discipline:** flag flip applies only to NEW cart_items, consistent with the 2026-05-12 price-snapshot decision in 0034 — vendors flipping mid-cart can't retroactively change pricing for couples already deep in checkout. |
+| 2026-05-19 | **Couple-initiated invite for off-platform vendors locked — new `vendor_invites` table + "Invite to Setnayan" action on every off-platform vendor row (`marketplace_vendor_id IS NULL`).** Locked sub-rules: **(a) email-only delivery** (no SMS in V1; couple can copy the claim link to send via their own Viber/Messenger if desired); **(b) identity-only claim page** — vendor sees business name / contact / service category / event date / couple display name, but NOT `package_*`, `vendor_inclusions`, `vendor_payment_milestones`, or `vendor_meetings` until after signup; **(c) no cooldown after decline** — couple may immediately re-invite the same email; **(d) no cap on pending invites per event**; **(e) 90-day TTL** with lazy expiration sweep at claim-page-render time (no cron, per [[reference_setnayan_cron_strategy]]); **(f) auto-link on claim** — the new marketplace `vendor_id` writes back to `event_vendor_relationships.marketplace_vendor_id`, which unlocks 0019 chat for that couple; **(g) Already-on-Setnayan short-circuit** — if the invited email matches an existing vendor owner, the modal swaps to a Connect flow that links the existing `vendor_id` directly without creating a `vendor_invites` row. Full UX in `## Invite-to-Setnayan flow — UX rules`; schema in `### vendor_invites table`; vendor-side claim landing in `0022 § Couple-invite claim landing`. | Off-platform vendor encoding was already supported (nullable `marketplace_vendor_id` per 2026-05-12 row in this log); this closes the growth loop by turning every couple-encoded off-platform vendor into a free, warm vendor-acquisition signal. **Email-only** avoids SMS-gateway infra and sender-ID provider cost in V1; couples retain full agency to text the link themselves. **Identity-only claim page** avoids leaking the couple's private negotiation data (what they're paying, what's included) to a vendor who has not agreed to join yet — preserves trust on both sides; vendor sees the full state the moment they finish signup. **No cooldown / no cap** honors couple autonomy; deliverability hygiene is handled at the transactional-email provider layer (rate limits, de-dupe, bounce handling) so the UX stays permissive without turning Setnayan's sending domain into a spam source. **90-day TTL** avoids indefinite open tokens lingering in the database. **Auto-link on claim** is the entire point — collapses "off-platform → on-platform" upgrade into a single signup without manual reconnection. **Connect short-circuit** prevents duplicate-vendor pollution when the invited vendor already runs a Setnayan account under a different (older) couple's referral. |
 
 ---
 

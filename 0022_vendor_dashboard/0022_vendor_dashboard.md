@@ -380,6 +380,132 @@ The team label feeds into the 0019 chat identity masking rule — when `show_tea
 
 ---
 
+## 2d. Couple-invite claim landing (locked 2026-05-19)
+
+Cross-iteration: **the couple-side trigger and the `vendor_invites` schema live in 0006 (§ Invite-to-Setnayan flow — UX rules + § vendor_invites table).** This section covers only the vendor-side public claim landing page and the post-signup auto-link logic.
+
+### Route
+
+| Route | Auth | Purpose |
+|---|---|---|
+| `setnayan.com/vendor/claim/{claim_token}` | **Public** (no auth required) | The vendor-side claim landing page. The `claim_token` itself is the only access gate. |
+
+The token is an unguessable URL-safe nonce (~32 chars) generated when the couple sends the invite. There is no rate-limit or guess protection beyond the token's entropy — the volume of brute-force attempts required to enumerate one valid token is computationally infeasible.
+
+### Page surface (default branch — new vendor)
+
+When a vendor opens the claim link and the invited email does NOT correspond to an existing Setnayan user, they see a single-page landing tuned for trust + conversion:
+
+**Hero block.**
+- "**{Couple display name}** invited you to claim your free Setnayan profile."
+- Sub: "They've added you as their **{service_category}** for their wedding on **{event_date formatted in PH long-form, e.g. June 12, 2026}**."
+
+**Identity snapshot card** — read-only mirror of the couple's `event_vendor_relationships` row, identity fields only (locked 2026-05-19):
+- Business name
+- Phone
+- Email (matches the invited email; non-editable)
+- Service category (canonical or custom service name)
+- Couple's display name + event date
+
+**Explicitly NOT surfaced pre-claim** (per the 2026-05-19 privacy lock in 0006):
+- `package_name`, `package_total_centavos`
+- Any `vendor_inclusions` rows
+- Any `vendor_payment_milestones` rows
+- Any `vendor_meetings` rows
+
+These are visible to the vendor inside their 0022 Clients pipeline the moment they finish signup.
+
+**Why-Setnayan strip** (short value props):
+- Free Setnayan vendor profile + marketplace listing
+- In-app chat with the inviting couple unlocks immediately on signup
+- Payment-deadline tracking, contract storage, meeting log all already filled in by the couple
+- Marketplace exposure to other couples planning in the Philippines
+- No upfront cost; no credit card required
+
+**Two CTAs:**
+
+1. **Claim & sign up** → routes the vendor into the standard registration flow (§ 2.1 onward) with three context items attached:
+   - `email` is pre-filled and locked (matches the invite email; vendor cannot edit without abandoning the claim)
+   - The `claim_token` is carried as a query param through every step
+   - A hidden field carries the originating `relationship_id`
+   Vendor proceeds through the normal steps including the mandatory logo gate (§ 2.1b — placeholder logo is acceptable per existing rules).
+
+2. **I'm not this vendor / decline** → confirmation modal: *"We'll let {Couple display name} know and won't email you again about this. Are you sure?"* On confirm:
+   - `vendor_invites.status='declined'`, `vendor_invites.declined_at=now()`
+   - Couple's relationship row pill flips to `Declined the invite`
+   - No vendor account is created
+   - Per the 0006 rules, the couple may re-invite the same email immediately.
+
+### Page surface (Already-have-an-account branch)
+
+When the email on the invite matches an existing `users.email` who owns a `vendors` row, the claim page surface changes:
+
+**Hero block.**
+- "You're already on Setnayan as **{Existing Business Name}**."
+- Sub: "**{Couple display name}** wants to connect their wedding ({event_date}) to your existing profile."
+
+**Single CTA: Sign in & connect** → standard sign-in flow with `claim_token` carried through. On successful sign-in:
+- The existing `vendor_id` is written to `event_vendor_relationships.marketplace_vendor_id` for the originating relationship.
+- `vendor_invites.status='claimed'`, `vendor_invites.claimed_vendor_id` = existing vendor_id, `vendor_invites.claimed_at = now()`, `vendor_invites.claimed_by_user_id` = signed-in user.
+- The vendor lands in 0022 with the new client visible in their Clients pipeline (Inquiry stage by default) and a 0019 system message in Threads: *"{Couple display name} connected you as their {service_category} for {event_date}."*
+- Chat unlocks for both sides immediately.
+
+No `vendor_invites`-driven account creation happens on this branch — the existing vendor row stays as-is.
+
+### Post-signup auto-link logic (default branch only)
+
+At the final step of vendor registration when the registration was reached through a claim link:
+
+1. The newly-created `vendors` row is written as normal — `public_visibility='coming_soon'` per § 2.1c · `logo_r2_key` populated per § 2.1b (real or placeholder).
+2. **Auto-link** in a single transaction:
+   - `event_vendor_relationships.marketplace_vendor_id` ← new `vendor_id`
+   - `vendor_invites.claimed_vendor_id` ← new `vendor_id`
+   - `vendor_invites.claimed_by_user_id` ← new vendor owner's `user_id`
+   - `vendor_invites.claimed_at` ← `now()`
+   - `vendor_invites.status` ← `'claimed'`
+3. The couple's app receives a 0019 system notification + one-time toast: *"{Business Name} joined Setnayan — chat is now unlocked."*
+4. The vendor's Clients pipeline shows the inviting couple as a connected client in the Inquiry stage. The vendor now sees the **full** negotiated state — package, inclusions, milestones, meetings, contracts — that the couple had entered while the vendor was off-platform.
+
+### Failure modes
+
+| Token state | Page surface | What the vendor can do |
+|---|---|---|
+| `pending`, not expired | Default claim landing (or Already-have-account branch) | Claim or decline |
+| `pending`, past `expires_at` | Server flips to `expired` on this access (lazy sweep), then shows: *"This invite link has expired. Please ask {Couple display name} to send you a new one."* | Read-only message, no action |
+| `expired` | Same as above | Read-only |
+| `revoked` | *"This invite is no longer active. If you believe this is a mistake, please contact support."* | Read-only |
+| `claimed` | *"This invite has already been claimed. If that wasn't you, please contact support."* | Read-only |
+| `declined` | *"This invite was previously declined. If you'd like to reconsider, please ask {Couple display name} to send a new one."* | Read-only |
+| Token not found in DB | Generic 404 page (do not leak token-existence info) | — |
+| Parent `relationship_id` deleted | ON DELETE CASCADE removes the invite; same as token-not-found → 404 | — |
+
+### Verification, payout, and Pro implications
+
+A coming_soon vendor created via a claim link is treated **identically** to any other coming_soon vendor:
+- Same verification queue + 12-doc checklist (§ 2.1c + 0006 Vendor Verification flow)
+- Same Setnayan-managed 3-stage payout (20%/60%/20%) until verified (0006 Vendor Payout model)
+- Same Pro subscription path (free tier always; ₱499/week Pro requires verification per § 3)
+- Same Setnayan Pay gating (verified-only)
+
+The couple-invite origin is preserved on the `vendor_invites` row for audit / attribution but does not change any verification, payout, or marketplace status.
+
+### Email template (transactional)
+
+Sent to `vendor_invites.email` at the moment the couple sends the invite. Single-call to the existing transactional email provider; no separate template stored in this iteration.
+
+- **From:** `Setnayan <hello@setnayan.com>` (mailbox already configured per API Integration Checklist)
+- **Subject:** `{Couple display name} added you as their {service_category} on Setnayan`
+- **Body (plaintext + HTML):**
+  - Greeting: *"Hi {Business Name},"*
+  - Hook: *"{Couple display name} is planning their wedding on {event_date} using Setnayan and has added you as their {service_category}."*
+  - Pitch: *"They've already entered your contact info and the details they have on file. Claim your free Setnayan profile to message them directly and see everything they've recorded."*
+  - CTA button: **Claim my profile** → `setnayan.com/vendor/claim/{claim_token}`
+  - Footer: *"Not the right vendor? Just ignore this email — we won't follow up."* + standard Setnayan footer.
+
+The provider's standard rate-limiting + bounce-handling applies; no Setnayan-side throttle is added in V1.
+
+---
+
 ## 3. Pro subscription (locked weekly model)
 
 **Free tier (always):** vendor profile, marketplace listing, basic chat with clients, accepting bookings, manual payment tracking.
