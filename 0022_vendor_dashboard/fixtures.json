@@ -147,5 +147,70 @@
       "duration_hours": 10,
       "crew_size": 4
     }
-  ]
+  ],
+  "couple_invite_claim_landing": {
+    "_doc": "Vendor-side view of the couple-invite claim flow (cross-iteration · trigger lives in 0006 § Invite-to-Setnayan flow · schema in 0006 § vendor_invites table). Two branches: default (new vendor → standard signup) and Already-on-Setnayan (existing vendor → Connect).",
+    "default_branch_example": {
+      "_doc": "Vendor opens /vendor/claim/inv_tBnG7xK_3qDn8RfMsP4v2w from an email invite. Email does NOT match any existing users.email — default branch shown.",
+      "route": "setnayan.com/vendor/claim/inv_tBnG7xK_3qDn8RfMsP4v2w",
+      "auth_required": false,
+      "invite_id": "S89I-CLAIMEDTBNG",
+      "displayed_identity": {
+        "business_name": "Tito Bong's Acoustic Trio",
+        "phone": "+639191104422",
+        "email": "bong.acoustic@gmail.com",
+        "service_category": "acoustic_performer",
+        "couple_display_name": "Maris & Anton",
+        "event_date": "2026-11-10"
+      },
+      "explicitly_hidden_pre_claim": [
+        "package_total_centavos",
+        "vendor_inclusions",
+        "vendor_payment_milestones",
+        "vendor_meetings"
+      ],
+      "cta_primary": "Claim & sign up",
+      "cta_secondary": "I'm not this vendor"
+    },
+    "already_on_setnayan_branch_example": {
+      "_doc": "Vendor opens /vendor/claim/{token} but their email already runs a Setnayan vendor account. Page swaps to the Connect surface.",
+      "matched_existing_vendor_id": "S89V-AKLATAN001",
+      "matched_existing_business_name": "Aklatan Photography",
+      "cta_primary": "Sign in & connect",
+      "cta_secondary": "Decline",
+      "on_connect": {
+        "_doc": "No vendor_invites row creates a new vendor. Existing vendor_id is written to event_vendor_relationships.marketplace_vendor_id; vendor_follows row inserted per 0019.",
+        "writes_to_relationship_id": "S89R-OFFPATBOOTH",
+        "writes_marketplace_vendor_id_back_to": "S89V-AKLATAN001",
+        "auto_inserts_vendor_follows_for": ["S89U-MAR1AKR1ST", "S89U-JUAN0R3Y3S"],
+        "sets_invite_status_to": "claimed",
+        "no_new_vendor_row_created": true
+      }
+    },
+    "post_signup_auto_link_default_branch": {
+      "_doc": "When the default branch completes signup, this single transaction runs.",
+      "writes_event_vendor_relationships.marketplace_vendor_id": "S89V-TITOBONGTRIO",
+      "writes_vendor_invites.claimed_vendor_id": "S89V-TITOBONGTRIO",
+      "writes_vendor_invites.status": "claimed",
+      "inserts_vendor_follows": ["S89U-MAR1AKR1ST", "S89U-JUAN0R3Y3S"],
+      "fires_0019_system_notification": true,
+      "unlocks_chat_for_couple": true,
+      "vendor_visibility_at_creation": "coming_soon"
+    }
+  },
+  "claimed_via_invite_vendor": {
+    "_doc": "Mirror of the same record in 0006 fixtures.json — same vendor row exists from the vendor-side perspective.",
+    "public_id": "S89V-TITOBONGTRIO",
+    "owner_user_id": "S89U-V3ND0RTBONG",
+    "business_name": "Tito Bong's Acoustic Trio",
+    "primary_category": "acoustic_performer",
+    "is_verified": false,
+    "is_pro_subscriber": false,
+    "logo_r2_key": "vendors/S89V-TITOBONGTRIO/logo.png",
+    "city": "Quezon City",
+    "established_year": 2015,
+    "public_visibility": "coming_soon",
+    "created_via_claim_token": "inv_tBnG7xK_3qDn8RfMsP4v2w",
+    "created_at": "2026-11-12T15:22:00+08:00"
+  }
 }
