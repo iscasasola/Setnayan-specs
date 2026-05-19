@@ -134,6 +134,18 @@ Every capability shipped in this iteration is **free for every Setnayan account*
 2. **API** — the create-thread server action (`POST /api/v1/messages/threads`) verifies the follow row exists for the authenticated couple before INSERT into `chat_threads`. Returns `403 FOLLOW_REQUIRED` otherwise.
 3. **RLS** — Postgres RLS policy on `chat_threads INSERT` requires the follow row (defense in depth; the API check is the user-facing failure, RLS is the backstop).
 
+**Booking-implies-follow auto-insert (locked 2026-05-19).**
+
+The follow gate exists to prevent cold marketplace messaging. It does NOT apply to couples with an established booking / work relationship. When `event_vendor_relationships.marketplace_vendor_id` (per 0006) is populated for a couple–vendor pair via any of the three link paths, the **same transaction** atomically inserts a `vendor_follows` row keyed on the linking couple's `user_id` + the linked vendor's `vendor_profile_id`. From the moment the link lands, the couple's `Message` button is enabled and create-thread succeeds.
+
+The three link paths:
+
+- (a) Original **marketplace-vendor selection** in the 0006 add-vendor flow (couple picks a vendor off the marketplace and adds them to their event).
+- (b) **Couple-invite claim** — vendor signs up via `/vendor/claim/{token}` and the post-signup auto-link runs (per 0006 § vendor_invites and 0022 § 2d).
+- (c) **Already-on-Setnayan Connect** — at invite-modal time the email matches an existing vendor owner; couple confirms Connect and the existing `vendor_id` is linked directly (no `vendor_invites` row created).
+
+Standard un-follow behavior remains intact — the couple may un-follow later from the vendor profile, which doesn't destroy any existing thread but does require a re-follow before opening NEW threads. Un-follow does NOT remove the underlying `event_vendor_relationships.marketplace_vendor_id` link; it only removes the auto-inserted `vendor_follows` row.
+
 **Privacy notice — pinned system message at the top of every thread.**
 
 The notice is rendered as the first row of every chat thread, before any user message. It is non-dismissible, does not count toward unread counts, and is not sender-attributable (no avatar, no sender label).
@@ -151,6 +163,7 @@ Canonical copy (locale-resolved per 0015, EN shown):
 - Couple follows: `Message` button enables in-place (no full reload).
 - Couple un-follows a vendor with an existing thread: thread remains usable in `/dashboard/[eventId]/messages/[thread_id]`; only the New-thread action is gated.
 - POST to create-thread API without a follow row returns `403 FOLLOW_REQUIRED` with a `next_action: "follow"` body.
+- Linking a marketplace vendor to an `event_vendor_relationships` row (via marketplace pick, vendor-invite claim per 0006 § vendor_invites, or Already-on-Setnayan Connect) atomically inserts a `vendor_follows` row for the couple; the couple's `Message` button enables immediately without requiring a separate follow step.
 - Privacy notice appears once per thread (idempotent rendering), is not in `chat_messages`, and is locale-resolved.
 
 ---

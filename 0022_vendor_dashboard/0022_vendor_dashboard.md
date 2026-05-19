@@ -446,6 +446,7 @@ When the email on the invite matches an existing `users.email` who owns a `vendo
 
 **Single CTA: Sign in & connect** → standard sign-in flow with `claim_token` carried through. On successful sign-in:
 - The existing `vendor_id` is written to `event_vendor_relationships.marketplace_vendor_id` for the originating relationship.
+- `vendor_follows` row inserted in the same transaction for the couple + existing vendor profile (per 0019 § Booking-implies-follow auto-insert).
 - `vendor_invites.status='claimed'`, `vendor_invites.claimed_vendor_id` = existing vendor_id, `vendor_invites.claimed_at = now()`, `vendor_invites.claimed_by_user_id` = signed-in user.
 - The vendor lands in 0022 with the new client visible in their Clients pipeline (Inquiry stage by default) and a 0019 system message in Threads: *"{Couple display name} connected you as their {service_category} for {event_date}."*
 - Chat unlocks for both sides immediately.
@@ -463,6 +464,7 @@ At the final step of vendor registration when the registration was reached throu
    - `vendor_invites.claimed_by_user_id` ← new vendor owner's `user_id`
    - `vendor_invites.claimed_at` ← `now()`
    - `vendor_invites.status` ← `'claimed'`
+   - `vendor_follows` ← row inserted for the couple's `user_id` + new vendor's `vendor_profile_id` (per **0019 § Booking-implies-follow auto-insert** — enables the couple's `Message` button without a separate follow step)
 3. The couple's app receives a 0019 system notification + one-time toast: *"{Business Name} joined Setnayan — chat is now unlocked."*
 4. The vendor's Clients pipeline shows the inviting couple as a connected client in the Inquiry stage. The vendor now sees the **full** negotiated state — package, inclusions, milestones, meetings, contracts — that the couple had entered while the vendor was off-platform.
 
