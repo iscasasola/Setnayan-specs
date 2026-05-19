@@ -4,14 +4,16 @@
 **Topic:** Papic feature, V1
 **Surface:** Couple-side → Setnayan Web Dashboard · **Bottom-nav tab: Add-ons** · Couple URL: `setnayan.com/dashboard/[event-id]/services/papic` (gallery + seat purchase) · Paparazzo-side: native iOS / Android apps (separate)
 **Builds on:** 0000 (app shell, sign-in, event-scoped URL, Add-ons launcher), 0001 (guest data, role taxonomy, `photo_consent`), 0002 (personal QR delivery), 0008 (table QR for fan-out tagging), 0011 (Custom Monogram Pack flag), 0034 (Payments & Cart — Papic seat purchases route through `service_orders` apply-then-pay)
-**Status:** Drafted 2026-05-09 · revised 2026-05-10 (DSLR Pro Camera Bridge + face-detection auto-tag + EXIF/geo metadata + adaptive compression) · token-wallet language purged 2026-05-12 (now PHP-native via 0034) · **V1.5+ deferral + architecture lock 2026-05-16 (see § V1.5+ Architecture Lock below — entire build deferred to V1.5+; architecture frozen now to prevent re-litigation)**
+**Status:** Drafted 2026-05-09 · revised 2026-05-10 (DSLR Pro Camera Bridge + face-detection auto-tag + EXIF/geo metadata + adaptive compression) · token-wallet language purged 2026-05-12 (now PHP-native via 0034) · architecture lock 2026-05-16 (see § Architecture Lock below) · **V1 promotion 2026-05-18 (prior V1.5+ deferral lifted; architecture + SKU locks below stand; see CLAUDE.md decision log)**
 **Companion specs:** `10_Papic_Feature_Specification.md`, `0011_panood/`, `0034_payments_and_cart/`, `0001_creating_guest_list/`, `0002_qr_invitation_system/`
 
 ---
 
-## V1.5+ Architecture Lock — locked 2026-05-16
+## Architecture Lock — locked 2026-05-16 (V1.5+ deferral lifted 2026-05-18)
 
-> **All Papic SKUs are deferred to V1.5+.** V1 ships without native iOS / Android engineering bandwidth. The architecture is **frozen now** so the V1.5+ build cannot re-litigate decisions already argued through. The "What this iteration ships" section below describes the prior V1 scope and remains canonical for V1.5+ build-time reference; SKU pricing is updated in the V1.5+ SKU table at the end of this section.
+> **2026-05-18 V1 promotion.** Owner promoted the iteration from V1.5+ build-deferred into V1 scope. The architecture lock below and the SKU table at the end of this section stand as the V1 canonical reference. Body text written before the promotion that says "deferred to V1.5+" should be read as "in V1 scope, engineering pending"; the lift only affects the deferral framing — the locked decisions themselves are unchanged.
+>
+> **Original architecture-lock framing (2026-05-16, preserved for context):** All Papic SKUs were deferred to V1.5+. V1 was to ship without native iOS / Android engineering bandwidth. The architecture is **frozen** so the build cannot re-litigate decisions already argued through. The "What this iteration ships" section below describes V1 scope and remains canonical for build-time reference; SKU pricing is in the SKU table at the end of this section.
 
 ### 1. 207-camera mesh per event
 
@@ -77,19 +79,29 @@ Pool sizes are calibrated for typical Filipino-wedding capture counts (200-guest
 
 At **80% of the pool consumed**, the operator UI shows a soft-warning banner: *"You've used 80% of the event credit pool. Add 1,000 more credits for ₱299 to keep shooting freely."* Operator can tap to purchase the **Credits Add-on** (`paparazzi_credits_addon`, ₱299 / +1,000 credits, multi-purchase) inline without leaving the booth flow. Pool depletion is non-blocking — shutter still works after 100%, but each capture posts a warning toast and the couple's dashboard surfaces the overage at event-end with a one-tap top-up button.
 
-### V1.5+ SKU table (deferred build · pricing locked 2026-05-16)
+### V1 SKU table (reactivated 2026-05-17 · Papic HTML-based capture, unlimited guest photographers under the seat-count UX limit)
+
+> **2026-05-17 reactivation lift.** The seat-pack SKUs are reactivated to **V1** because Papic capture is HTML/browser-based (no native-app gating per seat). The seat count is the **official-paparazzi UX limit** that the couple sets — guests can still upload via QR without consuming seats. Cam Bridge becomes a separate tier-structured product per the 2026-05-17 SKU lock (3 product-scoped tiers: per-slot/day, all-slots/day, all-slots/year). The V1.5+ deferral header above is **partially superseded** — seat packs ship in V1; credits/album/book SKUs stay V1.5+ deferred.
+
+| SKU | `service_catalog.sku_code` | Price · Frequency | Scope |
+|---|---|---|---|
+| **3-Paparazzi Pack** | `paparazzi_3_seats` | **₱1,499** · one_time + per_event | 3 paparazzi seats · 5,000-credit pool · 200 guest cams · 150 credits/guest · **V1 (reactivated 2026-05-17)** |
+| **5-Paparazzi Pack** | `paparazzi_5_seats` | **₱2,499** · one_time + per_event | 5 paparazzi seats · 10,000-credit pool · 200 guest cams · 150 credits/guest · **V1 (reactivated 2026-05-17)** |
+| **Camera Add-on (+1 seat)** | `paparazzi_camera_addon` | **₱999** · one_time + per_event + multi-purchase | One additional paid paparazzi seat · **V1 (reactivated 2026-05-17)** |
+| **Cam Bridge (per slot/day)** | `papic_cam_bridge_slot_day` | **₱99** · one_time + per_event + multi-purchase | DSLR-paired Papic seat, one event-day · WiFi-SDK via Papic-binary native app · **V1 (new 2026-05-17)** |
+| **Cam Bridge (all slots/day)** | `papic_cam_bridge_all_slots_day` | **₱249** · one_time + per_event + multi-purchase | DSLR pairing for all Papic seats, one event-day · flat rate · breaks even vs per-slot at ≥3 DSLRs · **V1 (new 2026-05-17)** |
+| **Cam Bridge (all slots/year)** | `papic_cam_bridge_all_slots_annual` | **₱2,499** · annual + all_events | DSLR pairing for all Papic seats, unlimited events for one year · vendor / wedding-photographer subscription · **V1 (new 2026-05-17)** |
+
+**V1.5+ deferred (still build-pending):**
 
 | SKU | `service_catalog.sku_code` | Price | Scope |
 |---|---|---|---|
-| **3-Paparazzi Pack** | `paparazzi_3_seats` | **₱1,499** | 3 paparazzi seats · 5,000-credit pool · 200 guest cams · 150 credits/guest |
-| **5-Paparazzi Pack** | `paparazzi_5_seats` | **₱2,499** | 5 paparazzi seats · 10,000-credit pool · 200 guest cams · 150 credits/guest |
-| **Camera Add-on** | `paparazzi_camera_addon` | **₱999** | One additional paid paparazzi seat · multi-purchase · **repriced from prior ₱1,499 Pro Camera Bridge SKU** |
-| **Credits Add-on** | `paparazzi_credits_addon` | **₱299** | +1,000 pool credits · multi-purchase · in-event upsell at 80% pool warning |
-| **Premium Guest Camera Pack** | `premium_guest_camera_pack` | **₱1,499** | Event-wide flag: every guest gets Lifetime Archive + Drive sync + Auto-Recap + watermark-free downloads + HD video upload. Replaces per-guest gating with one event-wide flag. |
-| **Personal Album (per guest)** | `personal_album_per_guest` | **₱49** | Per-guest digital album · opt-in per guest · low-friction upsell · multi-purchase per event |
-| **Memory Book (per guest)** | `memory_book_per_guest` | **₱249** | Per-guest printable hardcover memory book PDF · opt-in per guest · higher-touch upsell · multi-purchase per event |
+| **Credits Add-on** | `paparazzi_credits_addon` | ₱299 | +1,000 pool credits · multi-purchase · in-event upsell at 80% pool warning |
+| **Premium Guest Camera Pack** | `premium_guest_camera_pack` | ₱1,499 | Event-wide flag: every guest gets Lifetime Archive + Drive sync + Auto-Recap + watermark-free downloads + HD video upload |
+| **Personal Album (per guest)** | `personal_album_per_guest` | ₱49 | Per-guest digital album · opt-in per guest · low-friction upsell |
+| **Memory Book (per guest)** | `memory_book_per_guest` | ₱249 | Per-guest printable hardcover memory book PDF · opt-in per guest |
 
-Pro Camera Bridge for DSLR pairing (Canon · Nikon · Sony · Fujifilm WiFi SDK) is folded into the paid-paparazzi seat's capability set — no longer a separate ₱1,499 SKU. A 5-Paparazzi pack includes DSLR-pairing capability across all 5 seats out of the box.
+Pro Camera Bridge for DSLR pairing (Canon · Nikon · Sony · Fujifilm WiFi SDK) is **no longer the same shared SKU as 0011 Panood**. Each consuming product (Papic / Panood / Patiktok) has its own Cam Bridge tier structure with different pricing (locked 2026-05-17 per CLAUDE.md decision log). The underlying WiFi-SDK pairing tech in the Papic-binary native app is shared; the SKUs that gate it differ per product.
 
 ### Tax-tier note
 

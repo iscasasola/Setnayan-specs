@@ -1,6 +1,8 @@
 # 0024 — Save-the-Date (page reframe · plus the new ₱99 Save-the-Date Video MP4 SKU)
 
 > **Status (updated 2026-05-16):** The page-render SKU is retired (see § Retired SKU below) and Save-the-Date is **Phase 1 of the lifecycle-phased event landing page** in iteration **0002 QR Invitation System**. Separately, a **new** Save-the-Date Video SKU was reintroduced on 2026-05-16 as a downloadable MP4 product — generic templates + AI auto-edit + Setnayan-owned music + couple downloads an MP4 for social sharing. The new SKU is **explicitly distinct** from the retired one (different inputs · different outputs · different SKU code · different engineering pipeline). See § "Save-the-Date Video SKU ₱99" below.
+>
+> **V1 promotion 2026-05-18:** The Save-the-Date Video MP4 SKU is now firmly V1 scope (it was reintroduced as V1 on 2026-05-16 and confirmed in V1 alongside the broader V1.5+ → V1 promotion on 2026-05-18). The retired page-render SKU stays retired. See CLAUDE.md decision log.
 
 ---
 
@@ -44,7 +46,7 @@ The retired SKU's replacement value lives in the free landing page itself plus t
 | Field | Value |
 |---|---|
 | **SKU code** | `save_the_date_video_render` |
-| **Price** | **₱99 / one render** (multi-purchase if couple wants multiple variants — e.g. one for IG with one music category, one for TikTok with a different one) |
+| **Price** | **₱199 / one render** (repriced 2026-05-17 from launch ₱99 — see "Why ₱199" below) · multi-purchase if couple wants multiple variants (e.g. one for IG with one music category, one for TikTok with a different one) |
 | **Input** | **5-10 engagement photos** uploaded via the Setnayan upload widget. Validation: ≤5MB per photo, JPG or PNG, ≥1200×1200 recommended for crop quality |
 | **Templates** | **8-12 generic templates** in V1 (modern minimalist · romantic · vintage · cinematic · fun · etc.) — couple picks one at purchase. FFmpeg compositions with Lottie overlays for animated text. No per-couple custom design in V1 |
 | **AI auto-edit** | Heuristic scene-ordering automatically: faces detected (high-face-count photos earlier in narrative) · landscape vs portrait crop · color-palette match against template. Couple does NOT manually sequence; the algorithm picks the order |
@@ -53,11 +55,13 @@ The retired SKU's replacement value lives in the free landing page itself plus t
 | **Delivery SLA** | Downloadable from couple dashboard within **~5 minutes** of upload completion (FFmpeg compute on Cloudflare Workers, R2 storage) |
 | **Multi-purchase** | Yes — couple can buy multiple renders for different social platforms (₱99 × 2 = two variants, etc.) |
 
-### Why ₱99 — low-friction social-share upsell
+### Why ₱199 — repriced 2026-05-17 from launch ₱99
 
-The ₱99 price point is intentionally a **low-friction social-share upsell, not a margin product**. Cost basis: ~₱5-10 per render (FFmpeg compute + R2 storage + Setnayan-owned music = ~₱0 licensing). The SKU nets ~85-90% gross margin and ~70% net margin under V1 tax tier (Percentage Tax 3% + LBT 1% + Income 25%).
+The launch ₱99 price was framed as a "low-friction social-share upsell, not a margin product" (cost basis: ~₱5-10 per render · FFmpeg compute + R2 storage + Setnayan-owned music = ~₱0 licensing · ~85-90% gross margin · ~70% net margin under V1 tax tier).
 
-The volume play is what matters: at a ₱99 price point and ~30% attach rate on the 1,000-event V1 cohort, that's ~₱30K/mo in pure-funnel revenue — and every social share is a Setnayan-branded MP4 with a `setnayan.com/[couple-slug]` end-card driving traffic back to the platform. The MP4 is a marketing surface as much as a paid product.
+**2026-05-17 reprice rationale:** the new admin Cost Watch primitive (per 0023 § 3.5 · backed by `service_render_costs` table in 0034) makes worst-case-render cost visible to admin in real time. Early instrumentation puts the **highest single render at ~₱45** (vision-heavy footage, full template library access) — at ₱99 the worst-case cost-to-price ratio is **45% (yellow zone)**. At ₱199 the worst-case ratio drops to **23% (green)** with average and p95 sitting comfortably under 15%. Margin discipline at a price point Filipino couples still read as impulse-buy (under ₱200) — the social-share traffic + landing-page end-card play stays intact while Setnayan captures roughly 2× the per-render contribution margin.
+
+**Volume math at the new price:** at ₱199 and ~30% attach rate on the 1,000-event V1 cohort, that's ~₱60K/mo in pure-funnel revenue (up from ~₱30K/mo at ₱99) — and every social share is still a Setnayan-branded MP4 with a `setnayan.com/[couple-slug]` end-card driving traffic back to the platform. The MP4 remains a marketing surface as much as a paid product; the reprice doesn't change the strategic positioning, only the margin capture.
 
 ### Why this is NOT the retired SKU
 

@@ -111,7 +111,6 @@ Sources: WebFetch of `https://www.setnayan.com`, `/sitemap.xml`, `/robots.txt`, 
 | kasalan budget Philippines | TL | Informational → commercial | |
 | Divisoria wedding souvenirs | EN/TL | Transactional | Long-tail; Tabora Street is the IRL competitor. |
 | wedding souvenir ideas Philippines | EN | Informational | Top of funnel; feeds product/category pages. |
-| pamahiya souvenir | TL | Transactional | "Pamahiya" = giveaway/favor in Tagalog. |
 | kasal supplier Cebu | TL/EN | Transactional | |
 | asa makapalit ug wedding supplies | CEB | Transactional | "Where can I buy wedding supplies" in Cebuano — almost zero competition. |
 | kanus-a magpakasal | CEB | Informational | "When to get married" — content opportunity. |

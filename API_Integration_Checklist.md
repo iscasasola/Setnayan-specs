@@ -44,6 +44,17 @@ Consolidated punch list of every **owner-side action** needed to unblock V1 laun
 | #20g | **Canon / Nikon / Sony / Fujifilm Camera SDK access** — DSLR bridge for Papic V1.5+ Pro Camera Bridge. Each vendor has its own developer program registration with per-vendor lead times. | ~2-8 weeks per SDK | Free for most | ⚪ | § 6.1 / 6.2 / 6.3 / 6.4 |
 | #20h | **Suno Premier music catalog generation** — ~400 owned AI tracks per `02_Specifications/14_Music_Catalogue_Cowork_Playbook.md`. Parallel workstream; engineering builds with placeholders. | ~Several hours of generation time | Suno subscription | ⚪ | § 5.5 |
 
+### V1.1 traffic-monetization expansion · post-launch (added 2026-05-19)
+
+These items unlock the 0038 + 0039 iteration specs drafted 2026-05-19. None are V1 launch-blocking; all are V1.1 ramp items that pair with the editorial content cadence.
+
+| # | Task | Lead time | Cost | Status | Detail § |
+|---|---|---|---|---|---|
+| #21a | **Google AdSense publisher account** — site review by Google. Application requires ≥30 pages of content on setnayan.com (0038 editorial articles + 0029 help center together easily satisfy this). After approval, configure topic-exclusion + sensitive-category blocking + Auto Ads OFF in the publisher console. Activation in-app is gated separately on `0023 § 5.1 kill-switch` + owner brand-risk decision-log entry. | ~1-2 weeks (Google site review) | Free signup · ~₱5-20K/mo revenue at 100K pageviews | ⚪ Pending 0038 content | § 9.1 (NEW) |
+| #21b | **Involve Asia affiliate-network signup** — PH-focused affiliate network with deep merchant coverage (Klook, Lazada, Shopee, Agoda, Trip.com, BDO, Vivere). Picked as 0038 primary network. Owner: signup at involve.asia, complete payout details (PH bank account · BIR TIN), apply to per-merchant programs as needed (most auto-approve, a few have editorial review). | ~3-7 days · per-merchant approval ~1-7 days | Free signup · 5% net of commission to Involve Asia · Setnayan keeps the rest | ⚪ Pending 0038 ship | § 9.2 (NEW) |
+| #21c | **Privacy Policy update + NPC re-filing for AdSense cookies** — append "Advertising cookies" section to `01_Contracts/Setnayan_Privacy_and_Security_Policy.md` listing Google AdSense as a third-party processor + describing the 3-category consent banner from 0039 § 2. Re-file with NPC to keep registration current. | ~1-3 days drafting · NPC filing same-day | NPC re-filing fee may apply (check NPC schedule) | ⚪ Pending 0039 activation | § 9.3 (NEW) |
+| #21d | **Featured-vendor lookbook (V1.1 marketing deliverable)** — 1-page PDF for the Boosted Ads outbound playbook (`09_Operations/Boosted_Ads_Activation_Playbook.md`). Designer or owner via Figma. Stored at `04_Marketing/Featured_Vendor_Lookbook_2026Q3.pdf`. Refresh quarterly with updated performance data. | ~1-2 days design | Internal | ⚪ Owed 2026-06-15 | § 9.4 (NEW) |
+
 ### Already done · verified live
 
 | # | Task | Status | Detail § |
@@ -730,6 +741,75 @@ These are integrations + libraries + assets that were referenced across iteratio
 | **Tier 8 total** | **60** |
 
 Of these, ~50 are genuinely new (not previously listed in Tiers 1–7); ~10 are duplicated from earlier tiers for visibility.
+
+---
+
+## Tier 9 — Traffic Monetization (V1.1 · added 2026-05-19)
+
+Items unlocking iterations [0038 Editorial & Affiliates](0038_editorial_and_affiliates/0038_editorial_and_affiliates.md) + [0039 Display Ads](0039_display_ads/0039_display_ads.md) + the existing [Boosted Ads Activation Playbook](09_Operations/Boosted_Ads_Activation_Playbook.md). None of these are V1 launch-blocking — they pair with the editorial content cadence that begins ramp post-launch.
+
+### 9.1 Google AdSense publisher account
+
+- [ ] Owner signs up at `https://www.google.com/adsense`
+- [ ] Setnayan.com submitted for site review (~1-2 week SLA)
+- [ ] **Prerequisite for review:** at least 30 substantive pages of original content on setnayan.com. Help Center (0029) + initial editorial articles (0038) should easily satisfy this combined.
+- [ ] After approval, configure topic-exclusion in publisher console:
+  - Block category: Weddings, Wedding planning, Wedding services, Wedding photography, Wedding catering, Bridal gowns, Wedding venues (full list maintained in `apps/web/lib/ads/excluded_topics.ts`)
+- [ ] Configure sensitive-category blocking in publisher console:
+  - Block: Gambling, Politics, Religion, Dating, Get-rich-quick, Weight loss, Cosmetic surgery
+- [ ] Auto Ads: **OFF** in publisher console (manual placement only)
+- [ ] Anchor Ads + Vignette + Interstitial: **OFF** in publisher console
+- [ ] AdSense Publisher ID copied into Vercel env as `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID`
+- [ ] **Activation in-app gated separately** on:
+  - Two-admin approval in 0023 § 5.1 activation kill-switch (per 0023 § 9.1)
+  - Owner brand-risk sign-off entry in CLAUDE.md decision log on activation day
+  - Privacy Policy updated per § 9.3
+- **Cost:** Free signup · revenue ~₱5-20K/mo at 100K monthly pageviews (PH baseline)
+
+### 9.2 Involve Asia affiliate-network signup
+
+Primary affiliate network for 0038 `/recommendations` curated picks. Deepest PH merchant coverage (Klook, Lazada, Shopee, Agoda, Trip.com, BDO, Vivere).
+
+- [ ] Owner signs up at `https://involve.asia`
+- [ ] Identity verification + W-8BEN-equivalent for payouts
+- [ ] PH bank account on file + BIR TIN for tax reporting
+- [ ] Apply to specific merchant programs as the editorial picks list grows (most auto-approve; a few require editorial review)
+- [ ] Set up postback URL: `https://setnayan.com/api/affiliates/postback?network=involve_asia`
+- [ ] API key + per-merchant offer IDs documented in `apps/web/.env.example`:
+  ```
+  INVOLVE_ASIA_API_KEY=
+  INVOLVE_ASIA_POSTBACK_SECRET=
+  ```
+- [ ] First 5 merchant offers loaded into `affiliate_links` table at editorial-launch
+- **Lead time:** Signup ~3-7 days · per-merchant approval ~1-7 days
+- **Cost:** Free signup · Involve Asia takes 5% net of commission · Setnayan keeps the rest
+
+### 9.3 Privacy Policy update + NPC re-filing for AdSense cookies
+
+- [ ] Append "Advertising cookies" section to `01_Contracts/Setnayan_Privacy_and_Security_Policy.md`:
+  - List Google AdSense as a third-party processor (data shared: page URL, IP-derived country, anonymous browsing signals)
+  - Describe the 3-category consent banner from 0039 § 2 (essential / analytics / advertising)
+  - Document the 12-month consent persistence + revocation path at `setnayan.com/cookie-preferences`
+- [ ] Bump policy `effective_version` (so 0039's policy-version-change re-prompt logic fires for existing visitors)
+- [ ] Re-file with NPC to update Setnayan's data-processing inventory
+- **Lead time:** ~1-3 days drafting · NPC filing same-day
+- **Cost:** NPC re-filing fee may apply (check the current NPC schedule)
+
+### 9.4 Featured-vendor lookbook (V1.1 marketing deliverable)
+
+For the [Boosted Ads Activation Playbook](09_Operations/Boosted_Ads_Activation_Playbook.md) outbound motion.
+
+- [ ] 1-page PDF design produced (designer or owner via Figma)
+- [ ] Cover + tier table + 30-day performance projection range + "How to apply" + testimonial slot
+- [ ] Stored at `04_Marketing/Featured_Vendor_Lookbook_2026Q3.pdf`
+- [ ] Linked from the 0022 marketplace-presence upsell modal as "Download the placement guide"
+- [ ] Refresh quarterly with updated performance data from 0023 § 3.8 Funnels
+- **Owed:** 2026-06-15
+- **Cost:** Internal (no external spend)
+
+### 9.5 Engineering action (single-row reminder)
+
+- [ ] Seed `promo_codes` row for `BOOSTED-LAUNCH-2026` — 20% off month 1 · cap 30 redemptions · expires 2026-06-30 · auto-applies on `vendor_marketing_subscriptions.first_purchase = TRUE` until cap is hit
 
 ---
 

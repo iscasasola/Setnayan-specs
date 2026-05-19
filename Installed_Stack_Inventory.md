@@ -220,7 +220,7 @@ R2 env vars `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` exist in
 | `mood-board.ts` | 9 palette keys (Venue / Couple / Roles) |
 | `notification-actions.ts`, `notification-emit.ts`, `notifications.ts` | In-app notifications |
 | `orders.ts` | Apply-then-pay orders (0034) |
-| `planner.ts` | 9-step Guided Planner state |
+| `planner.ts` | 9-step Setnayan Concierge state (renamed from "Guided Planner" 2026-05-16) |
 | `platform-settings.ts` | BIR + bank + GCash + merchant QR settings |
 | `qr.ts` | QR generation helpers |
 | `receipts.ts` | BIR receipts (VAT split, OR generation) |

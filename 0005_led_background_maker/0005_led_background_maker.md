@@ -2,8 +2,9 @@
 
 **Type:** Implementation work order (Claude Code ticket)
 **Surface:** Setnayan Web → Couple Dashboard ("LED Background Maker" panel) + server-side rendering pipeline · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/led`
-**Phase:** Phase 1.5 — depends on Phase 1 (events, dashboard shell, R2 storage) and the locked Hero Monogram from iteration 0004
+**Phase:** Phase 1 (promoted from V1.5+ on 2026-05-18) — depends on Phase 1 (events, dashboard shell, R2 storage) and the locked Hero Monogram from iteration 0004
 **Status:** Ready for Claude Code
+**V1 promotion 2026-05-18:** Iteration was V1.5+ build-deferred until owner promoted it into V1 scope on 2026-05-18 (see CLAUDE.md decision log). Architecture + SKU locks below stand; engineering capacity planning happens separately. Body references to "V1.5" further down are post-V1 forward-looking ideas (Remotion swap, NDI/SDI output, per-render palette source picker) and are intentionally preserved.
 **Date:** 2026-05-08
 **Owner:** Ice (indaleciocasasolaii@gmail.com)
 **Builds on:** 0000 (app shell, sign-in, event-scoped URL, Add-ons launcher), 0004 (Hero Monogram widget — supplies the monogram), 0002 (palette + accent color), spec 10 (R2 storage)

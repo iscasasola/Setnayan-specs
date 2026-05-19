@@ -1,12 +1,12 @@
 # Iteration 0011 — Panood
 
 **Iteration number:** 0011
-**Topic:** Panood feature, V1.5 (WebApp track) — YouTube-delivered
+**Topic:** Panood feature, V1 (WebApp track) — YouTube-delivered (promoted from V1.5+ on 2026-05-18)
 **Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/panood`
 **Builds on:** 0000 (app shell, sign-in, event-scoped URL, Add-ons launcher), 0003 (apply-then-pay flow, `spend()` primitive)
 **Status:** Drafted 2026-05-09 · revised 2026-05-09 (apparatus pricing + YouTube-only delivery) · revised 2026-05-10 (Pro Camera Bridge — DSLR feeds, shared SKU with 0012) · revised 2026-05-10 (broadcaster control surfaces — preview/program, audio rail, hold-to-end, mobile slide-to-end, keyboard shortcuts) · **revised 2026-05-16 (Architecture pivot: drop Cloudflare Stream Live composite + Setnayan master YouTube channel · couple BYO YouTube via OAuth · per-day pricing replaces base+add-ons · Broadcast Style Pack retired · see CLAUDE.md 4th 2026-05-16 row)**
 
-> **2026-05-16 PIVOT NOTICE.** The Pricing section below is the **new** V1 SKU lock. The "Delivery architecture", "Pipeline", "Setnayan's master YouTube channel", "Broadcaster control surfaces", and "Broadcast Style Pack" sections further down describe the **prior** Cloudflare-Stream-Live composite architecture and are **retired in V1**. They are kept on disk for historical reference; the V1.5+ build will read only the Pricing section + the new BYO-YouTube delivery model summarized below. Composite-dependent features (lower-thirds, scene cards, 4-mode broadcast styles, ffmpeg overlay) are NOT in V1 because the composite step is gone — couples wanting those use YouTube's own production tools or OBS-style apps writing to their YouTube.
+> **2026-05-16 PIVOT NOTICE.** The Pricing section below is the **new** V1 SKU lock. The "Delivery architecture", "Pipeline", "Setnayan's master YouTube channel", "Broadcaster control surfaces", and "Broadcast Style Pack" sections further down describe the **prior** Cloudflare-Stream-Live composite architecture and are **retired in V1**. They are kept on disk for historical reference; the V1 build will read only the Pricing section + the new BYO-YouTube delivery model summarized below. Composite-dependent features (lower-thirds, scene cards, 4-mode broadcast styles, ffmpeg overlay) are NOT in V1 because the composite step is gone — couples wanting those use YouTube's own production tools or OBS-style apps writing to their YouTube.
 **Companion specs:** `09_Panood_Feature_Specification.md`, `0003_token_wallet_and_packs/`, `0012_papic/`
 **Successor iteration:** `0012_papic/` consumes the same shared monogram pack flag this iteration registers, and shares the `pro_camera_bridge_addon` SKU registered here.
 
@@ -14,7 +14,7 @@
 
 ## What this iteration ships
 
-V1.5 (WebApp track) of Panood as defined in the master spec at `09_Panood_Feature_Specification.md`. The architecture has been simplified along two axes since the original draft:
+V1 (WebApp track) of Panood as defined in the master spec at `09_Panood_Feature_Specification.md`. (Promoted from V1.5+ on 2026-05-18; body references to "V1.5+" lower in the file that describe forward-looking enhancements — e.g. 7-8 cam ceiling for industry-event tiers, AI Highlight archive-fetch rescope — are intentionally preserved.) The architecture has been simplified along two axes since the original draft:
 
 The first is a **pricing rule alignment**. Every Panood SKU now prices the Setnayan software tool the couple unlocks — camera-slot count plus capability set — never hours of coverage or human crew. Couples bring their own phones and recruit their own camera operators. The four DIY tiers (1–4) are the entire V1 lineup; the previously-listed crew-bundled Tiers 5–8 are out of V1 scope (they would violate the apparatus rule and CLAUDE.md already lists "Setnayan Roving service tier" as not in V1).
 
@@ -57,10 +57,20 @@ V1 Panood ships **four SKUs** under the BYO-YouTube architecture. Couple OAuths 
 
 | SKU | `service_catalog.sku_code` | Price | Scope | Multi-purchase |
 |---|---|---|---|---|
-| **Daily Broadcast** | `panood_daily_broadcast` | **₱499 / day** | One day of broadcasting to the couple's YouTube channel. Single-cam by default; pair with Camera Sync for multi-cam. | Yes — couple buys one per event-day (prep · ceremony · reception are often 3 separate days) |
-| **Camera Sync (multi-cam add-on)** | `panood_camera_sync_daily` | **₱99 / day** | Unlocks the Setnayan broadcaster UI's multi-cam switching for that day. Without it, Daily Broadcast is single-cam. | Yes — one per day on which multi-cam is wanted |
-| **Annual Streaming** | `panood_annual_streaming` | **₱2,999 / year** | Single-cam unlimited days for one year. Vendor-friendly for vendors who livestream regularly to their own YouTube. | Yes — additional years stack |
-| **Annual Streaming Plus** | `panood_annual_streaming_plus` | **₱3,999 / year** | Multi-cam unlimited days for one year (includes Camera Sync built-in). | Yes — additional years stack |
+| **Daily Broadcast** | `panood_daily_broadcast` | **₱2,499 / day** | One day of **multi-cam (up to 6) broadcasting** to the couple's BYO YouTube · multi-cam is **always built-in** (locked 2026-05-17 V1 SKU lock) | Yes — couple buys one per event-day (prep · ceremony · reception are often 3 separate days) |
+| **Annual Streaming** | `panood_annual_streaming` | **₱19,999 / year** | Multi-cam (up to 6) unlimited days for one year · **ALL events on the account** (vendor / competition-organizer / multi-event subscription) · `time_recurrence=annual`, `event_scope=all_events` | No — single subscription per account, renews annually |
+| **Cam Bridge** | `panood_cam_bridge_slot_day` | **₱199 / slot / day** | DSLR-paired camera slot for the Panood broadcast feed (WiFi-SDK via Papic-binary native app) | Yes — buy N units = N slot-days |
+| **Template Pack (per day)** | `panood_template_pack_daily` | **₱799 / day** | Unlocks overlays + titles + transitions on the broadcast output for one event-day · applies to phone-cam AND Cam-Bridge-DSLR feeds | Yes — one per day on which production styling is wanted |
+| **Template Pack (per year)** | `panood_template_pack_annual` | **₱7,999 / year** | Overlays + titles + transitions · unlimited days for one year · ALL events on the account · pro-broadcaster pack | No — annual subscription |
+
+**Retired same-day 2026-05-17 (collapsed into the always-multi-cam pivot):**
+
+| SKU | Retired price | Reason |
+|---|---|---|
+| `panood_camera_sync_daily` | ₱99 / day | Multi-cam now built into Daily Broadcast — no separate add-on |
+| `panood_annual_streaming_plus` | ₱3,999 / year | Multi-cam now built into Annual Streaming — no Plus tier |
+
+**Max camera count enforced at infrastructure:** Cloudflare Stream Live SFU room config `max_publishers: 6` — couples physically cannot connect a 7th camera. Six is the practical Filipino-wedding sweet spot (typical 2–4 cams · premium 5–6) with stability headroom for phone-broadcaster + average home internet. The 7–8 cam ceiling discussed during the 2026-05-17 architecture review is reserved as a V1.5+ option for industry-event / competition tiers · not in V1.
 
 Custom Monogram Pack (₱1,999) still applies for the landing-page chrome (event-page brand) but **no longer touches the broadcast video itself** — the couple sets their own YouTube channel branding inside YouTube Studio (channel watermark, lower-thirds via YouTube Live Producer, end-cards). Setnayan's landing page wraps the couple's `liveBroadcasts.id` in an IFrame embed and applies the couple's monogram + page chrome around it.
 

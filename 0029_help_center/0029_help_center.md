@@ -79,7 +79,7 @@ New section inside 0023 Admin Console. Detail in section 7.
 
 ## 3. Per-role section structure
 
-### 3.1 Customer (couple) — 6 sections, ~30 articles V1
+### 3.1 Customer (couple) — 7 sections, ~34 articles V1
 
 | # | Section | Article count | Examples |
 |---|---|---|---|
@@ -88,7 +88,8 @@ New section inside 0023 Admin Console. Detail in section 7.
 | 3 | Vendors | 6 | "How do I browse vendors?" / "What's the difference between Verified, Certified, and Boosted?" / "How do I book a vendor?" / "How do I message a vendor?" / "What's a coordinator and how do I add one to a thread?" / "What does my contract with the vendor look like?" |
 | 4 | Payments | 6 | "How does Setnayan's payment process work?" / "How do I pay via BDO?" / "How do I pay via GCash?" / "What's the 3% Setnayan Pay convenience fee?" / "Where's my payment confirmation?" / "How do refunds work?" |
 | 5 | Wedding day services | 4 | "What is Paparazzi?" / "What is Live Stream and how does my YouTube link work?" / "How do I make a Save-the-Date?" / "What's a Custom Monogram Pack?" |
-| 6 | Account & privacy | 3 | "How do I delete my account?" / "How do I export my data?" / "How do I change my event URL slug?" |
+| 6 | Setnayan Concierge | 4 | "What is Setnayan Concierge?" / "How does the 3-day free trial work?" / "Why is my trial unavailable?" *(explains account-level cap + enforcement states · links to appeal flow)* / "How do I appeal a Concierge enforcement?" *(added 2026-05-17)* |
+| 7 | Account & privacy | 3 | "How do I delete my account?" / "How do I export my data?" / "How do I change my event URL slug?" |
 
 ### 3.2 Vendor — 6 sections, ~25 articles V1
 
@@ -209,6 +210,7 @@ When a user clicks "Contact us" anywhere in the help center:
    - `Payments`
    - `Vendors`
    - `Account`
+   - `Concierge` *(added 2026-05-17 — appeals and access issues for Setnayan Concierge)*
    - `Bug report`
    - `Feature request`
    - `Other`
@@ -217,6 +219,7 @@ When a user clicks "Contact us" anywhere in the help center:
    - `Vendors` (customer) → `Vendor not responding` · `Vendor cancelled on us` · `Dispute over deliverables` · `Other vendor issue`
    - `Vendors` (vendor) → `Verification stuck` · `Application rejected — appeal` · `Customer not paying` · `Other`
    - `Account` → `Can't log in` · `Want to delete account` · `Want to export my data` · `Privacy concern` · `Other`
+   - `Concierge` → `Trial unavailable — appeal` · `Concierge unavailable on my account — appeal` · `Question about Setnayan Concierge`
    - `Bug report` → `App crashed` · `Feature not working as described` · `Visual / layout issue` · `Other bug`
    - `Feature request` → free-form description, no subcategory
    - `Other` → free-form description, no subcategory
@@ -234,6 +237,8 @@ When a user clicks "Contact us" anywhere in the help center:
 | `Vendors` (vendor verification / vendor account issues) | Verification / Vendor Accounts Handler |
 | `Account` (customer) | Customer Accounts Handler |
 | `Account` (vendor) | Verification / Vendor Accounts Handler |
+| `Concierge` → `Trial unavailable — appeal` OR `Concierge unavailable on my account — appeal` | **Abuse Review Handler** (single-admin authority per § 4.3 — admin opens 0023 § 3.11 Concierge Abuse tab, reviews flag history, can call `adminLiftConciergeEnforcement` to decrement strike count + reset enforcement level). Added 2026-05-17. |
+| `Concierge` → `Question about Setnayan Concierge` | Customer Accounts Handler |
 | `Bug report` | Ops Lead |
 | `Feature request` | Ops Lead |
 | `Other` | Ops Lead (triages and reassigns) |

@@ -701,3 +701,39 @@ Roughly 8–10 weeks at 1 dev. 5–6 weeks at 2 devs.
 [View this iteration's HTML mockup](computer:///Users/icecasasola/Documents/Claude/Projects/Setnayan%20App/0019_communications/0019_communications.html)
 
 [View this iteration's Word document](computer:///Users/icecasasola/Documents/Claude/Projects/Setnayan%20App/0019_communications/0019_communications.docx)
+
+---
+
+## V1.2 Amendment — Multi-Moderator Vendor Chat (added 2026-05-19)
+
+Per [0048 Multi-Moderator Event Access](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md), vendor chat threads gain moderator-aware visibility in V1.2.
+
+### Memory rule update (PENDING owner sign-off)
+
+Current memory rule: **"Customers initiate vendor chat — only couples can open a thread with a vendor"** ([feedback_setnayan_customer_initiates_chat.md](../../../.claude/projects/-Users-icecasasola/memory/feedback_setnayan_customer_initiates_chat.md)).
+
+**Proposed V1.2 update:** "Couple OR authorized moderator initiates vendor chat. Moderator must have `can_message_vendors=TRUE` permission per their `event_moderators.permissions_json` from [0048](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md). Vendor sees the event context (not the moderator's personal context); replies route to all moderators in the thread with chat-read access, respecting visibility tags."
+
+This unblocks parents of bride/groom + wedding planner moderators from messaging vendors directly (a real PH pattern — parents often coordinate with caterers / venues without bride/groom intermediation).
+
+### Schema additions to `vendor_chat_threads`
+
+```sql
+ALTER TABLE vendor_chat_threads
+  ADD COLUMN initiated_by_user_id UUID NOT NULL REFERENCES users(user_id),
+  ADD COLUMN initiated_by_role_subtype TEXT,             -- snapshot of role at thread creation
+  ADD COLUMN private_to_role TEXT[],
+  ADD COLUMN hidden_from_role TEXT[],
+  ADD COLUMN surprise_for_role TEXT;
+```
+
+### Behavior changes
+
+- **Thread visibility** — chat threads tagged with `private_to_role` / `hidden_from_role` / `surprise_for_role` filter per viewer. Bridal-gown chat thread auto-hides from groom by default (per [0048 § Default-hide rules](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md)).
+- **Reply routing** — vendor sends a reply → in-app notifications + emails route to moderators with chat-read access for that thread (visibility-filtered).
+- **Vendor sees event context** — vendor's view of the thread shows the event name + couple, not the specific moderator's name. Moderator's name appears on individual messages, but the thread identity is the event itself.
+- **Coordinator-join** — existing coordinator-join flow extends: a Setnayan-vendor wedding coordinator can be invited into a thread by the couple OR a moderator with `can_add_moderators=TRUE`. Per-thread join scope respects [0048](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md) visibility tags.
+
+### Force-majeure flow
+
+Force-majeure dispute flow per existing [0019 spec](#) gains per-payer scope from [0049 § Edge cases](../0049_multi_payer_cart/0049_multi_payer_cart.md). Only the specific payer can dispute their share of a split-cost item; the couple can always escalate any dispute.

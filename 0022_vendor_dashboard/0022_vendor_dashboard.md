@@ -165,13 +165,114 @@ When the customer books this service, `crew_size` propagates into the couple's 0
 ### 2.3 Calendar mechanism
 
 ```
-vendor_calendar_blocks(block_id, vendor_id, service_id?, blocked_at, blocked_until, reason)
+vendor_calendar_blocks(block_id, vendor_id, service_id?, blocked_at, blocked_until,
+                       reason, block_label, block_source, is_private, created_at)
 vendor_bookings(booking_id, vendor_id, service_id, event_id, couple_user_id,
                 status enum('inquiry','proposal_sent','accepted','active','completed','cancelled'),
                 booking_date, package_name, total_php, paid_php, created_at)
 ```
 
 When `vendor_bookings.status` is `accepted` or `active`, that date is unavailable on the matching service's calendar (and on the master calendar). Booked dates show as colored blocks.
+
+### 2.3a Intra-day calendar blocks (locked 2026-05-18)
+
+Previously the vendor calendar was full-day granularity (a date was either available or blocked). **2026-05-18 unlocks intra-day blocks at 30-minute granularity** — vendors can now block partial days for off-platform commitments, personal time, or already-scheduled external work, freeing the rest of the day to remain bookable through Setnayan.
+
+**Schema columns added to `vendor_calendar_blocks`:**
+
+```sql
+-- Existing columns
+block_id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+vendor_id       UUID NOT NULL REFERENCES vendors(vendor_id) ON DELETE CASCADE,
+service_id      UUID REFERENCES vendor_services(service_id),
+blocked_at      TIMESTAMPTZ NOT NULL,    -- start (full-day blocks: 00:00 in vendor's TZ)
+blocked_until   TIMESTAMPTZ NOT NULL,    -- end   (full-day blocks: 23:59 in vendor's TZ)
+reason          TEXT,                     -- legacy short reason (kept for backwards-compat)
+
+-- New columns (2026-05-18)
+block_label     TEXT NOT NULL,            -- vendor-defined private label
+                                          -- e.g., "Off-platform shoot", "Personal day"
+block_source    TEXT NOT NULL DEFAULT 'manual'
+                  CHECK (block_source IN ('manual','setnayan_booking','synced_calendar')),
+is_private      BOOLEAN NOT NULL DEFAULT TRUE,  -- couples see "Unavailable" only when TRUE
+created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+CHECK (blocked_until > blocked_at),
+CHECK (EXTRACT(MINUTE FROM blocked_at) IN (0, 30) AND EXTRACT(MINUTE FROM blocked_until) IN (0, 30))
+  -- 30-minute granularity enforced at write time
+```
+
+**Granularity rule.** Block start + end timestamps must align to the 30-minute boundary (`:00` or `:30`). A 9:30am-12:00pm block is valid; a 9:37am-11:53am block is not. The UI snaps to 30-minute increments automatically.
+
+**Block sources (auto-populated):**
+
+- **`manual`** — vendor-created via the "Add Block" modal in the Calendar surface. These carry vendor-defined labels ("Off-platform shoot — Cebu", "Doctor's appointment", "Vacation").
+- **`setnayan_booking`** — auto-populated by trigger when a `vendor_bookings.status` transitions to `accepted` or `active`. Block runs `event_start_time → event_end_time` (or full-day for legacy bookings without time). Label defaults to `{couple_names} · {service_name}`. Always `is_private = FALSE` (couples see "Booked — {date}"); other couples browsing see "Unavailable".
+- **`synced_calendar`** — V1.5+ Google Calendar / iCloud sync. Reserved schema column.
+
+**Privacy model:**
+
+- Default `is_private = TRUE` — couples browsing the vendor see "Unavailable" for that window, no label visible.
+- Vendor can opt to expose specific block labels (toggle in the Add Block modal). Useful when vendor wants to signal capacity transparency ("Booked: large wedding · 200 guests" might reassure a future couple looking at a Saturday).
+- Setnayan-booking source blocks default to `is_private = FALSE` — both parties already know about the booking.
+
+**UI in the Calendar surface:**
+
+- Calendar grid renders blocks visually with colored bars at the time range. **Color coding:**
+  - Setnayan-blue: `setnayan_booking` source
+  - Vendor-grey: `manual` source
+  - Calendar-purple: `synced_calendar` source (V1.5+)
+- "Add Block" button → modal with start datetime (rounded to :00/:30) + end datetime + label + privacy toggle. Multi-day blocks supported.
+- Existing blocks: click to edit label / time / privacy or delete.
+- Mobile view: vertical day-by-day strip with time-range chips per block.
+
+**Couple-side rendering (downstream effect on 0006 marketplace + 0016 § 0b wizard):**
+
+- Vendor search excludes vendors with blocks overlapping the couple's selected wedding date (full-day block check; intra-day is only relevant once the couple has selected a specific ceremony/reception time).
+- Vendor detail pages show greyed-out "Unavailable" windows in the calendar preview; private blocks show only the time range without label.
+- Inquiry/booking form errors if couple selects a blocked time: *"This vendor isn't available during your selected time."*
+- The Concierge wizard's recommendation logic queries `vendor_calendar_blocks` and filters out vendors with conflicting blocks for the couple's date/time.
+
+**Migration note.** Existing `vendor_calendar_blocks` rows (pre-2026-05-18) get `block_label = COALESCE(reason, '(legacy block)')`, `block_source = 'manual'`, `is_private = TRUE` defaults. Full-day legacy blocks remain valid (00:00-23:59 timestamps already snap to the 30-minute boundary). No data loss.
+
+### 2.3b Symmetric vendor wizard — Next Actions surface (locked 2026-05-18 cross-ref to 0016 § 0b)
+
+Mirrors the couple-side Concierge wizard pattern (per 0016 § 0b) for vendors. The vendor's dashboard Home gains a **Next Actions strip** that surfaces the same 3-tier urgency feed as couples get:
+
+| Tier | Vendor-side examples |
+|---|---|
+| 🔴 **Overdue** | Unread couple message > 24h · payout failed retry · verification renewal past due · booked event prep tasks past their hard date |
+| 🟡 **This week** | Tasting scheduled Thursday · ₱45,000 payout clearing Friday · booked event Saturday (T-3 days · final headcount due) · 2 couples viewed your profile but haven't messaged |
+| 🔵 **Next priorities** | 4 NCR couples matched your profile this week · Pro Weekly slot opens Monday · verification renewal in 21 days · 3 unresponded inquiries from last week |
+
+Powered by the same `getNextActions(vendor_id)` server function pattern — deterministic SQL across `vendor_bookings`, `vendor_messages`, `vendor_payouts`, `vendor_subscriptions`, `event_action_log` (for delegate-vendors), `vendor_calendar_blocks`. **₱0 inference cost.**
+
+**Always free for vendors.** Symmetric helper surfaces are part of the "always helping" north-star (memory: `project_setnayan_always_helping_principle.md`) — vendor success drives platform revenue via Setnayan Pay 5%, so the helper layer stays free regardless of vendor tier.
+
+### 2.3c Coordinator multi-couple dashboard (locked 2026-05-18 cross-ref to 0016 § 0d)
+
+Vendors in `canonical_service IN ('wedding_coordination')` (or assigned delegate access to couple events per 0016 § 0d) get a new **"My Couples" tab** on their dashboard. The tab lists all couples they're working with + a badge count per couple derived from `getNextActions(event_id)` scoped to the coordinator's delegate access.
+
+**My Couples list view:**
+
+```
+🔴 Anna & Marco · Feb 14 wedding · 3 overdue items
+🟡 Bea & Carlo · Mar 21 wedding · 2 due this week
+🔵 Cris & Diane · May 30 wedding · all on track
+🔵 Eli & Fina · Jun 12 wedding · all on track
+```
+
+Click into any couple → see their Next Actions feed scoped for the coordinator + the full action log + ability to act on items (confirm payments, schedule meetings, reply in chat, share artifacts — per the "act on behalf of" scope in 0016 § 0d).
+
+**Coordinator's daily login pattern:**
+1. Open dashboard → glance at multi-couple badge counts
+2. Triage couples with red/yellow badges
+3. Click into worst-state couple → review action items → act
+4. Repeat for each couple needing attention
+
+**Audit attribution.** Every action a coordinator takes is logged in `event_action_log` with `performed_by_role = 'coordinator'`. The couple's dashboard surfaces the "your coordinator did X" stream (per 0021 § 2.0a wizard home variant) so the couple has full transparency.
+
+**Coordinator-on-Pro-Weekly synergy.** When a coordinator is on Pro Weekly subscription (`vendor_pro_weekly`), the couples they book automatically unlock Concierge for free (per 0016 § 0c). This creates a virtuous loop: coordinator's value pitch to couples becomes "Subscribe to me and Setnayan unlocks your wedding planner free." Strong driver of Pro Weekly adoption among coordinators specifically.
 
 ### 2.4 Client pipeline
 
@@ -293,7 +394,7 @@ The team label feeds into the 0019 chat identity masking rule — when `show_tea
 - Per-service rich content (videos, expanded gallery)
 - Showcase-event opt-in (0023)
 - Boosted Ads eligibility (5km / 10km / 20km weekly — see § 5b)
-- Sponsored Boost eligibility (Quarterly ₱250K / Annual ₱800K at 30km — see § 5b)
+- Sponsored Boost eligibility (Quarterly ₱249,999 / Annual ₱799,999 at 30km — see § 5b)
 - All Tools Unlock bundle eligibility (₱9,999/year — see § 6B)
 - Coordinator-join permission in couple threads
 - Custom partial payment plans for couples
@@ -461,9 +562,9 @@ A paid weekly add-on that extends a vendor's marketplace reach. Pick a radius:
 
 | Tier | Price | Radius extension | Use case |
 |---|---|---|---|
-| **Boosted Ads 5km** | ₱5,000/week | 5km from pin | Try-this-week local push |
-| **Boosted Ads 10km** | ₱8,000/week | 10km from pin | Citywide reach |
-| **Boosted Ads 20km** | ₱15,000/week | 20km from pin | Regional reach |
+| **Boosted Ads 5km** | ₱4,999/week | 5km from pin | Try-this-week local push |
+| **Boosted Ads 10km** | ₱7,999/week | 10km from pin | Citywide reach |
+| **Boosted Ads 20km** | ₱14,999/week | 20km from pin | Regional reach |
 
 - Verified vendors only · stacks with Pro Weekly · cancel anytime
 - Top-of-search ranking within radius · tiny "Sponsored" pill differentiator
@@ -476,8 +577,8 @@ Premium tier for marquee vendor presence at a fixed 30km radius — long commitm
 
 | Tier | Price | Commitment | Effective monthly rate |
 |---|---|---|---|
-| **Sponsored Boost Quarterly** | ₱250,000 | 3 months | ~₱83,333/mo |
-| **Sponsored Boost Annual** | ₱800,000 | 12 months | ~₱66,666/mo (20% discount vs quarterly × 4) |
+| **Sponsored Boost Quarterly** | ₱249,999 | 3 months | ~₱83,333/mo |
+| **Sponsored Boost Annual** | ₱799,999 | 12 months | ~₱66,666/mo (~20% discount vs quarterly × 4) |
 
 - Verified vendors only · stacks with EVERYTHING (Pro Weekly + Boosted Ads + tool integrations)
 - 30km radius (3× catchment vs default 10km · still density-gated)
@@ -486,7 +587,7 @@ Premium tier for marquee vendor presence at a fixed 30km radius — long commitm
 
 **The prior single ₱1,499/week Sponsored Boost tier is RETIRED.** Weekly demand is now served by Boosted Ads 5km/10km/20km; premium demand is served by the Quarterly/Annual long-commit tier.
 
-**Combined-stack example:** photographer running Pro Weekly + Mood Board integration + Boosted Ads 10km + Sponsored Boost Annual = ₱500 + ₱99 + ₱8,000 (weekly) + ₱800,000/year (~₱15,400/wk amortized) ≈ **~₱24,000/week effective.**
+**Combined-stack example:** photographer running Pro Weekly + Mood Board integration + Boosted Ads 10km + Sponsored Boost Annual = ₱499 + ₱99 + ₱7,999 (weekly) + ₱799,999/year (~₱15,385/wk amortized) ≈ **~₱23,982/week effective.**
 
 **Per-zone availability:** a multi-pin vendor sees the boost available per-zone. If Mariposa has 3 pins (Tagaytay, Manila, Cebu) and 12 / 32 / 28 photography vendors in each 20km respectively, boost is locked in Tagaytay but available in Manila and Cebu independently.
 

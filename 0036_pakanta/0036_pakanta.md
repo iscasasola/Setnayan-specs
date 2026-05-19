@@ -2,7 +2,7 @@
 
 **Iteration number:** 0036
 **Topic:** Custom songwriter service (3-tier · Suno Premier + lyric approval gate · manual workflow V1)
-**Status:** Drafted 2026-05-14 · 3-tier revision locked
+**Status:** Drafted 2026-05-14 · 3-tier revision locked · **V1 promotion 2026-05-18 (confirmed in V1 scope alongside the broader V1.5+ → V1 promotion; see CLAUDE.md decision log)**
 **Display name in app:** *Pakanta · Your Wedding's Own Song*
 **Canonical ID prefix:** S89K- (K for Kanta)
 

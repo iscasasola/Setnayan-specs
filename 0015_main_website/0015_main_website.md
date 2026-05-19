@@ -22,7 +22,7 @@ Twelve sections on the homepage, in order:
 4. **The chaos we're fixing** — scattered-tools problem framing
 5. **Built for both sides of the celebration** — two-column "Why Setnayan" block (six couple beats + six vendor beats)
 6. **Maria & Juan: see how it works** — live dashboard preview + four-tab product walkthrough (folds in former Section 4 content)
-7. **Add-ons** — apparatus catalog (Papic, Panood, Pamahiya, Pakulay, Pailaw, Pareto, Custom Monogram) — features only, no prices
+7. **Add-ons** — apparatus catalog (Papic, Panood, Pakulay, Pailaw, Pareto, Custom Monogram) — features only, no prices
 8. **Vendor compatibility & verification** — how vendors plug in, Setnayan Team verification flow
 9. **Event-type readiness board** — Wedding LIVE; others tracked; swaps to social proof at T+90 days post-launch
 10. **PH coverage map** — city-level pins (never barangay public)
@@ -386,13 +386,12 @@ A grid of feature cards for the paid services. Each card: icon, name, one-paragr
 
 1. **Papic — Designated Paparazzi** — Native iOS/Android app for friends and family. Gesture shutter, QR-tag photos to specific guests or whole tables, untagged photos still land in the couple's gallery. Real-time delivery.
 2. **Panood — Multi-Cam Live Stream** — Up to five cameras, one broadcaster, broadcast on YouTube. Custom monogram + Broadcast Style Pack support. AI Highlight reels post-event.
-3. **Pamahiya — Personal Souvenir Reels** — Every guest renders their own 1–30 second reel from a template library, scored to Setnayan-owned music.
-4. **Pakulay — Mood Board & Palette Engine** — Per-role + per-venue palettes with the Setnayan Guide rule engine catching contrast / temperature / cultural-default mistakes before they hit the printer.
-5. **Pailaw — LED Background Maker** — 8K loop generators for venue LED walls, USB-deliverable for offline playback.
-6. **Pareto — Pro Camera Bridge** — Pair a DSLR (Canon / Nikon / Sony / Fujifilm) with the Papic phone for broadcast-grade glass without changing the operator's workflow.
-7. **Custom Monogram Pack** — One purchase replaces the Setnayan watermark with the couple's monogram across every media output.
-8. **Pro Invitation Widgets** — Pro tiers for Hero / Our Story / Schedule blocks on the personal invitation page.
-9. **AI Video / Edited Highlight** — Auto-curated event highlight reels from Papic + Panood feeds.
+3. **Pakulay — Mood Board & Palette Engine** — Per-role + per-venue palettes with the Setnayan Guide rule engine catching contrast / temperature / cultural-default mistakes before they hit the printer.
+4. **Pailaw — LED Background Maker** — 8K loop generators for venue LED walls, USB-deliverable for offline playback.
+5. **Pareto — Pro Camera Bridge** — Pair a DSLR (Canon / Nikon / Sony / Fujifilm) with the Papic phone for broadcast-grade glass without changing the operator's workflow.
+6. **Custom Monogram Pack** — One purchase replaces the Setnayan watermark with the couple's monogram across every media output.
+7. **Pro Invitation Widgets** — Pro tiers for Hero / Our Story / Schedule blocks on the personal invitation page.
+8. **AI Video / Edited Highlight** — Auto-curated event highlight reels from Papic + Panood feeds.
 
 Each card carries a "Free with every account" or "Included in your custom quote" tag — see the hide-prices decision above.
 
@@ -419,11 +418,11 @@ Anchor: this section's "Apply now" CTA goes to `/register-vendor`.
 
 ### Section 8.5 — Transparent pricing
 
-Canonical pricing-transparency block. Replaces the prior `setnayan.com` live copy `"No subscription, no per-guest fee, no commission on vendor bookings."` — that line is **deprecated** as of 2026-05-16 because it hid the **5.5% Setnayan Pay convenience fee** locked the same day. The fee is paid by the couple on top of the vendor's listed price at checkout; the vendor sees their full listed price (minus only the terminal fee + BIR 1% marketplace withholding, both of which they'd pay on any platform). The vendor-side "no commission, no monthly bill" framing in Sections 5/8 stays intact — that promise is still true because the 5.5% is couple-paid, not deducted from the vendor's price.
+Canonical pricing-transparency block. Replaces the prior `setnayan.com` live copy `"No subscription, no per-guest fee, no commission on vendor bookings."` — that line is **deprecated** as of 2026-05-16 because it hid the **5.0% Setnayan Pay convenience fee** locked the same day (supersedes the morning's 5.5%/6.5% dual-rate lock — owner ratified 3% net design target requires only 5.0% gross). The fee is paid by the couple on top of the vendor's listed price at checkout; the vendor sees their full listed price (minus only the terminal fee + BIR 1% marketplace withholding, both of which they'd pay on any platform). The vendor-side "no commission, no monthly bill" framing in Sections 5/8 stays intact — that promise is still true because the 5.0% is couple-paid, not deducted from the vendor's price.
 
 **Section headline:** Transparent pricing.
 
-**Sub-claim:** Free to plan — the planning tools are free forever. Vendor bookings add a **5.5% Setnayan Pay convenience fee** at checkout, shown on the order summary before you confirm. No subscription, no per-guest fee, no hidden charges.
+**Sub-claim:** Free to plan — the planning tools are free forever. Vendor bookings add a flat **5.0% Setnayan Pay convenience fee** at checkout, shown on the order summary before you confirm. No subscription, no per-guest fee, no hidden charges.
 
 **Three-column transparency strip (icons + one-line claim each):**
 
@@ -431,15 +430,15 @@ Canonical pricing-transparency block. Replaces the prior `setnayan.com` live cop
 |---|---|---|
 | Planning tools | **Free forever** | Guest list, RSVP, seating, budget, mood board, schedule — every planning surface is free. No paywall, no per-guest fee. |
 | Add-on apparatus | **À la carte** | Papic, Panood, Custom Monogram, Live Stream, Save-the-Date Video — you only pay when you opt into a specific service. Couple-side prices are listed on `/pricing` and re-shown at checkout. |
-| Vendor bookings | **+5.5% at checkout** | Vendor lists their price. At checkout we add a 5.5% Setnayan Pay convenience fee that powers BIR-compliant receipts, in-app messaging, milestone-protected payments, and platform safety. Your vendor sees their listed price 100%. |
+| Vendor bookings | **+5.0% at checkout** | Vendor lists their price. At checkout we add a flat 5.0% Setnayan Pay convenience fee that powers BIR-compliant receipts, in-app messaging, milestone-protected payments, and platform safety. Your vendor sees their listed price 100%. |
 
 **Worked example block** (right column on desktop / collapsed accordion on mobile):
 
 > **Worked example — ₱100,000 vendor booking**
 > Vendor's listed price: ₱100,000
-> Setnayan Pay convenience fee (5.5%): ₱5,500
-> **You pay at checkout: ₱105,500**
-> Your vendor receives the ₱100,000 listed price (minus their own terminal fee + BIR withholding — same as any payment platform). Setnayan keeps the 5,500 to run the app.
+> Setnayan Pay convenience fee (5.0%): ₱5,000
+> **You pay at checkout: ₱105,000**
+> Your vendor receives the ₱100,000 listed price (minus their own terminal fee + BIR withholding — same as any payment platform). Setnayan keeps the 5,000 to run the app.
 
 **Mobile copy collapse:** The three-column transparency strip stacks to a single column with each row remaining a full card. The worked-example block becomes a tap-to-expand accordion ("See how it works") to keep above-the-fold density mobile-readable.
 
@@ -653,7 +652,7 @@ Each vendor's landing page (`setnayan.com/v/{vendor-slug}`) displays their revie
   - Photo carousel (if any photos attached)
   - Vendor's response (if any) shown as quoted card below the review
 - **Filter empty state:** "No reviews match this filter yet."
-- **No-review empty state on vendors with 0 reviews:** "This vendor has no reviews yet. Bookings completed through Setnayan generate reviews 24 hours after the event."
+- **No-review empty state on vendors with 0 reviews:** primary line *"This vendor still has no review."* — muted sub-line *"Bookings through Setnayan generate a review request 24 hours after the event."* (Owner 2026-05-18: shorter, polite, brand-voice empty state — replaces the wordier original line. Same rule applies to every empty state on every Setnayan surface — no engineering jargon visible to users post-launch.)
 
 ### Exclusive Setnayan offer row (locked 2026-05-12)
 

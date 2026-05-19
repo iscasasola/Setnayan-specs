@@ -675,8 +675,8 @@ The verification flow gates which vendors can offer Setnayan Pay to couples, whi
 | Stage | Price | Paid by | Notes |
 |---|---|---|---|
 | Initial Verification | **FREE** | Setnayan absorbs ~₱535/vendor | Treated as customer acquisition cost — keeps onboarding funnel frictionless |
-| Annual Re-verification | **₱1,500/year** | Vendor | Light-touch yearly refresh — re-checks docs are current |
-| Re-verification after demotion | **₱2,500** | Vendor | Higher gate to discourage demotion churn (vendor is paying to climb back up from coming_soon state) |
+| Annual Re-verification | **₱1,499/year** | Vendor | Light-touch yearly refresh — re-checks docs are current (charm-corrected 2026-05-17) |
+| Re-verification after demotion | **₱2,499** | Vendor | Higher gate to discourage demotion churn (vendor is paying to climb back up from coming_soon state · charm-corrected 2026-05-17) |
 
 ### Required documents (all 12 — no exceptions)
 
@@ -716,8 +716,8 @@ The verification flow gates which vendors can offer Setnayan Pay to couples, whi
 - **Setnayan Pay unlocks for couples** (couples can ONLY use Setnayan Pay with verified vendors)
 - Custom partial payment plan configuration
 - Pro Weekly subscription access (₱499/wk)
-- Sponsored Boost eligibility (Quarterly ₱250K / Annual ₱800K)
-- Boosted Ads eligibility (5km ₱5K / 10km ₱8K / 20km ₱15K per week)
+- Sponsored Boost eligibility (Quarterly ₱249,999 / Annual ₱799,999)
+- Boosted Ads eligibility (5km ₱4,999 / 10km ₱7,999 / 20km ₱14,999 per week)
 - All Tools Unlock bundle access (₱9,999/year)
 - Immediate full payout (no 3-stage hold)
 - Higher marketplace search ranking
@@ -793,6 +793,29 @@ A verified vendor is auto-demoted if they accumulate **3+ disputes within 30 day
 4. Removes Boosted Ads / Sponsored Boost eligibility
 5. Email + in-app notification to vendor with re-verification fee (₱2,500) and link to apply
 
+### Disbursement rail tiers (V1.5+ Maya Bulk Fund Transfer, locked 2026-05-17)
+
+Once Maya Business goes live as the V1.5+ primary gateway, all vendor payouts batch through **Maya Business Bulk Fund Transfer** (one CSV upload per day). Three rails are available; the rail chosen determines settlement time + Setnayan's absorbed disbursement cost. Full routing logic + schema lives in **0034 § 6.7 Outbound — Setnayan pays vendor** and **§ 6.9 `disbursement_batches` table**.
+
+| Rail | Vendor sees money | Setnayan absorbs | Used for |
+|---|---|---|---|
+| **Intra-Maya** (vendor has Maya Bank account) | **Instant · 24/7 · free** | **₱0** | All payout types when vendor's disbursement bank is Maya Bank |
+| **InstaPay** (Maya → any PH bank) | < 1 minute · 24/7 incl. weekends | ~₱10 per payout (bulk rate) | Verified vendor immediate payout to non-Maya destinations |
+| **PESONet** (Maya → any PH bank) | EOD same banking day · T+1 weekends/holidays | ~₱15 per payout (bulk rate) | Coming_soon vendor 3-stage milestone releases · payouts < ₱500 or > ₱500K |
+
+**Maya Bank vendor-recruiting copy** (verification flow + onboarding surfaces):
+
+> **Get paid instantly, free, 24/7 — open a Maya Bank business account.**
+> Or get paid in under a minute to any PH bank, including weekends (InstaPay).
+> Standard payout settles end of business day (PESONet) — default for milestone releases.
+
+The verification approval email + the 0022 Vendor Dashboard onboarding tour both surface the Maya Bank option as the **strongest single payout-experience win** vendors can take — instant + free is a real upgrade vs the EOD/PESONet default. Setnayan benefits too: every Maya Bank vendor onboarded is a zero-fee payout for life.
+
+**Vendor override** (in 0022 Vendor Dashboard payout preferences):
+
+- Verified vendors may downgrade their default to PESONet — earns a ₱5/payout rebate credit (Setnayan saves ~₱5/payout in exchange)
+- Coming_soon vendors may upgrade individual milestone payouts to InstaPay — vendor absorbs the ₱5 difference deducted from that milestone
+
 ---
 
 ## What's NOT in V1 (don't backdoor in)
@@ -807,6 +830,45 @@ A verified vendor is auto-demoted if they accumulate **3+ disputes within 30 day
 - Multi-event vendor copy ("use my photographer from cousin's wedding") — copy-vendor flow lives in V1.1.
 
 ---
+
+## Convenience-fee absorption opt-in (locked 2026-05-16 PM)
+
+Vendors may opt in to **absorb the 5.0% Setnayan Pay convenience fee** out of their own listed price rather than have it added on top of the customer's bill at checkout. Vendors who opt in earn a public-facing **"No Convenience Fee" badge** on their marketplace profile, search results, and detail page. Setnayan's revenue from each booking is unchanged either way — only the visibility of the fee at the cart shifts. The full cart math, customer-side cart treatment, and the worked payout example live in **0034 § 6.8 Vendor opt-in: cover the convenience fee for customers**.
+
+### Schema
+
+A single boolean on the canonical `vendors` table (defined formally alongside the marketplace vendor profile in 0022):
+
+```sql
+ALTER TABLE vendors ADD COLUMN absorbs_convenience_fee BOOLEAN NOT NULL DEFAULT FALSE;
+```
+
+The flag is read by the cart math in 0034 at the moment a `cart_items` row is created against a vendor booking, and snapshotted onto `service_orders.vendor_absorbed_fee` so a vendor flipping the toggle later doesn't retroactively change in-progress orders (consistent with the 2026-05-12 "price snapshot at add-to-cart time" decision in 0034).
+
+### Vendor-side surface (per 0022 dashboard settings)
+
+A toggle in the Settings panel of the 0022 Vendor Dashboard:
+
+> **Cover the Setnayan Pay convenience fee for customers**
+> Show your customers the price they pay — no extra 5% line at checkout. Earn the **"No Convenience Fee"** badge on your profile.
+>
+> [ Toggle: OFF / ON ]
+>
+> **Your net on a sample ₱100,000 booking:**
+> - **If you cover the fee (badge ON):** Maya QR Ph → ₱93,100 · Cards (max 2.5%) → ₱92,150
+> - **If customer pays (default):** Maya QR Ph → ₱98,000 · Cards (max 2.5%) → ₱97,000
+
+Toggle changes are single-admin authority for the vendor (their own account), logged in `vendor_audit_log`, and apply only to NEW cart_items snapshotted after the change.
+
+### Customer-side surface
+
+- **Marketplace listing / search results:** vendors with `absorbs_convenience_fee = TRUE` render a **"No Convenience Fee"** chip next to their name. A search filter chip "No convenience fee" lets couples narrow to vendors who absorb.
+- **Vendor profile page:** badge appears in the trust-signals strip alongside the verification badge. Tap reveals: "This vendor covers the platform convenience fee. The price you see is the price you pay."
+- **Cart drawer (per 0034 § 3.2):** when a vendor booking with `vendor_absorbed_fee = TRUE` is in the cart, the convenience-fee row renders as `"Convenience fee  ✓ covered by vendor  ₱0.00"` in muted text. Customer still sees a clear line item but understands the math.
+
+### Marketing positioning (per 0015 main website § 8.5)
+
+A second worked example block sits next to the default 5.0% example showing "Some vendors cover the convenience fee — look for the badge. With these vendors, the listed price is the all-in price." Engineering hooks into `apps/web/app/(marketing)/page.tsx` and the eventual `/pricing` page.
 
 ## Acceptance criteria
 
@@ -843,9 +905,11 @@ A verified vendor is auto-demoted if they accumulate **3+ disputes within 30 day
 | 2026-05-09 | **Contracts in R2 with 5-year retention** | Mirrors photographer industry norm and Setnayan's existing photo retention policy. Aligns the storage lifecycle across the platform. |
 | 2026-05-09 | **PHP-primary, no token display anywhere** in this iteration | Vendor money never touches Setnayan's books, so no reason to render in tokens. Tokens are for Setnayan SKUs only. |
 | 2026-05-09 | **Meetings live in vendor profiles in V1; vendor-managed in Din.** Couple records meetings (title, datetime, mode, location/link, agenda, attendees, notes) on each vendor's detail page. The soonest upcoming meeting per vendor is surfaced as "Next meeting" on the card. The `vendor_meetings` table includes a `created_by_actor` column (`'couple'` in V1) so Din can later write `'vendor'` rows into the same table without migration. | Couples already track meetings in scattered notes, message threads, or memory. Centralizing them on the vendor profile mirrors how planners actually work, and the schema's forward-compatibility column means Phase 3 (Din) can take over without reshaping data. No `.ics` export here — that lives in 0007 Budget, which already owns the calendar pattern; once 0007 ships, meetings join payment deadlines in one feed. |
-| 2026-05-16 | **Vendor Verification flow locked — FREE initial / ₱1,500 annual renewal / ₱2,500 re-verification after demotion · 12-document checklist · all-or-nothing (no partial verified state) · 3-5 business day SLA · documents in `setnayan-vendor-verification` R2 bucket.** Verified tier unlocks Setnayan Pay for couples, Pro Weekly access, Boosted Ads, Sponsored Boost, All Tools Unlock, immediate payout, and Featured Vendor eligibility. Coming_soon tier is restricted to marketplace profile + listing only with Setnayan-managed 3-stage payout (20%/60%/20%). | The FREE initial onboarding lowers vendor activation friction while the 12-doc bar filters out non-serious applicants at zero cost to Setnayan's revenue model. The renewal fee (₱1,500/yr) covers Setnayan's ongoing trust-maintenance cost; the post-demotion fee (₱2,500) discourages demotion churn. The Setnayan Pay gate is the spine of the marketplace's trust signal — only verified vendors get the in-app convenience-fee rail (5.5% on top of vendor price per 0034). Coming_soon vendors get a path to inclusion (marketplace listing + 3-stage payout) without compromising couple safety. |
+| 2026-05-16 | **Vendor Verification flow locked — FREE initial / ₱1,499 annual renewal / ₱2,499 re-verification after demotion (charm-corrected 2026-05-17 from ₱1,500 / ₱2,500) · 12-document checklist · all-or-nothing (no partial verified state) · 3-5 business day SLA · documents in `setnayan-vendor-verification` R2 bucket.** Verified tier unlocks Setnayan Pay for couples, Pro Weekly access, Boosted Ads, Sponsored Boost, All Tools Unlock, immediate payout, and Featured Vendor eligibility. Coming_soon tier is restricted to marketplace profile + listing only with Setnayan-managed 3-stage payout (20%/60%/20%). | The FREE initial onboarding lowers vendor activation friction while the 12-doc bar filters out non-serious applicants at zero cost to Setnayan's revenue model. The renewal fee (₱1,499/yr) covers Setnayan's ongoing trust-maintenance cost; the post-demotion fee (₱2,499) discourages demotion churn. The Setnayan Pay gate is the spine of the marketplace's trust signal — only verified vendors get the in-app convenience-fee rail (flat 5.0% on top of vendor price per 0034, locked 2026-05-16 evening · supersedes the morning's 5.5%/6.5% dual-rate). Coming_soon vendors get a path to inclusion (marketplace listing + 3-stage payout) without compromising couple safety. |
 | 2026-05-16 | **Vendor Payout model locked — verified = immediate full payout T+1; coming_soon = 3-stage milestone release 20/60/20 with T-14 + T+7 dispute windows.** Demote-to-coming_soon trigger: 3+ disputes within 30 days. Setnayan absorbs the ₱15-25 outbound disbursement fee per payout. BIR Form 2307 issued quarterly to all vendors. | Coming_soon 3-stage release puts a real-money escrow safety net behind unverified vendors — couples don't lose deposits to no-show low-trust providers. Verified vendors are trusted to deliver, so payout is immediate (T+1) less only gateway fee + BIR withholding — no Setnayan deduction. The auto-release-on-silence pattern (T+14 + T+7 7-day windows) keeps the workflow lightweight: couples confirm or stay silent; silence = approval. |
 | 2026-05-12 | **Renamed the per-event `vendors` table to `event_vendor_relationships`** (PK column renamed from `vendor_id` to `relationship_id`); added `marketplace_vendor_id UUID REFERENCES vendors(vendor_id)` FK to link the couple's per-event vendor record to the canonical marketplace `vendors` entity declared in 0022. All seven dependent tables in 0006 (`vendor_services`, `vendor_inclusions`, `vendor_payment_milestones`, `vendor_crew`, `vendor_crew_meal_totals` view, `vendor_meetings`, `vendor_contracts`) updated to FK `relationship_id`. | The previous setup had two tables named `vendors` (one in 0006 for the couple's per-event vendor list, one in 0022 for the canonical marketplace vendor entities) which would have caused namespace collision at the Postgres level. Rename clarifies the data model: `event_vendor_relationships` is the join row that says "this couple's event is working with this vendor" and carries the negotiated package details; `vendors` (in 0022) is the canonical marketplace vendor profile shared across all couples who book them. Nullable FK supports the off-platform vendor case (couple enters a custom vendor that isn't on Setnayan's marketplace). |
+| 2026-05-17 | **Vendor disbursement rail tiers locked (V1.5+ Maya Bulk Fund Transfer) — Intra-Maya (instant + free) / InstaPay (< 1 min + ₱10 Setnayan-absorbed) / PESONet (EOD same-day + ₱15 Setnayan-absorbed) · default per payout type per 0034 § 6.7 · vendor override available in 0022 with rebate/upgrade pricing · Maya Bank vendor-recruiting copy surfaces on verification approval email + onboarding tour.** Schema (0034 § 6.9): `vendor_payouts.rail` enum (intra_maya/instapay/pesonet), `rail_chosen_by` enum (default/vendor_preference/admin_override), `batch_id` FK to new `disbursement_batches` table. Failure handling: rejected rows revert to `pending` and rejoin next-day batch; 3 consecutive batch failures for same vendor trigger admin alert + manual-reconciliation fallback. | Three drivers. **First, batched disbursement at scale collapses per-payout admin time from ~5 minutes (click-through) to ~5 seconds (CSV row) — the real value isn't fee savings but operational efficiency.** Annual disbursement-cost absorption stays under 0.3% of platform revenue even at 5,000-couple scale. **Second, the three-tier rail structure maps directly to vendor segments:** verified vendors who want instant gratification get InstaPay free of charge (Setnayan absorbs); price-sensitive coming_soon vendors get reliable EOD via PESONet; Maya Bank vendors get the strictly-best outcome on both sides (instant + free). **Third, Maya Bank vendor-recruiting copy is the single highest-leverage vendor onboarding incentive Setnayan can offer** — every Maya Bank account opened means a vendor who gets instant + free payouts forever AND Setnayan saves the disbursement fee forever. Both sides win; the alignment is real, not promotional. **Vendor override pricing:** rebate-for-downgrade / pay-for-upgrade keeps Setnayan whole while letting individual vendors customize speed/cost trade-off. **Engineering pending:** Maya Business approval (2-4 week SLA per API Integration Checklist) gates the entire V1.5+ disbursement automation; `disbursement_batches` table + columns on `vendor_payouts` ship with the V1.5+ migration; admin console "Today's payouts" queue + Generate-batch-CSV button in 0023; vendor payout-preferences UI in 0022. |
+| 2026-05-16 | **Vendor convenience-fee absorption opt-in locked — `vendors.absorbs_convenience_fee BOOLEAN DEFAULT FALSE` · "No Convenience Fee" badge on marketplace profile when TRUE · cart hides the fee row + customer sees vendor's listed price flat · Setnayan revenue unchanged at 5% gross regardless · snapshot at order-creation time onto `service_orders.vendor_absorbed_fee`.** Full cart math + payout example + customer-side cart treatment lives in `0034 § 6.8 Vendor opt-in: cover the convenience fee for customers`. Vendor settings UI in 0022 with financial preview. Marketing badge surface in 0015 § 8.5. | Two drivers. **First, Filipino couples strongly prefer "all-in" pricing — many wedding vendors already absorb platform fees informally to keep their headline price flush with the booking total customers expect.** Surfacing this as a first-class opt-in turns the informal practice into a structured platform feature with a visible badge, which (a) lets price-competitive vendors compete on transparency without negotiating with Setnayan, (b) gives Setnayan a search-filter chip that couples actually use ("No convenience fee" as a filter), and (c) preserves the canonical 5.0% flat rate on Setnayan's books regardless of vendor choice. **Second, Setnayan's economics are protected by design** — the 5% is always Setnayan's revenue regardless of who shows it on the receipt. Worked example at ₱100K booking: Option A (vendor covers) → vendor receives ₱93,100 (Maya QR Ph) / ₱92,150 (max 2.5% rail); Option B (default) → vendor receives ₱98,000 / ₱97,000. Vendor sacrifices ~5% of revenue for the badge → only opt in if conversion lift exceeds ~5%. The vendor toggle's financial-preview UI in 0022 makes the math obvious so vendors don't accidentally opt in without understanding the cost. **Snapshot discipline:** flag flip applies only to NEW cart_items, consistent with the 2026-05-12 price-snapshot decision in 0034 — vendors flipping mid-cart can't retroactively change pricing for couples already deep in checkout. |
 
 ---
 

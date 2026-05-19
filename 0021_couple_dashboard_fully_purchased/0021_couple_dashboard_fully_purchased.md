@@ -67,10 +67,10 @@ Home is the daily-driver. Couples spend more time here than anywhere else. The l
 
 **Top-to-bottom order:**
 
-1. **Warm welcome row.** "Good morning, Aira" + date + "14 days until you marry Boy in Tagaytay" in italic Cormorant. Right-side: **Mode toggle pill** — `✦ Guided · DIY`.
+1. **Warm welcome row.** "Good morning, Aira" + date + "14 days until you marry Boy in Tagaytay" in italic Cormorant. Right-side: **Mode toggle pill** — `✦ Concierge · DIY` (label updated 2026-05-16; replaces "Guided" per the Setnayan Concierge rebrand).
 2. **Stage strip.** 6-stage lifecycle bar with the current stage highlighted. Labels under each pip. No "stage banner" wall block — just the strip.
 3. **Hero · NEXT UP card.** ONE highlight: the most imminent thing the couple needs to do/attend. Tomorrow's walkthrough by default. Single CTA button + a soft "view full schedule" link. Gradient-accent background distinguishes it from everything else.
-4. **Your wedding journey · step N of 9.** The Guided Planner checklist (see 2.0b). Steps 1–6 collapsed and dim if completed. Step 7 (current) expanded with mini-checklist + CTA. Steps 8–9 dim placeholders ahead.
+4. **Your wedding journey · step N of 9.** The Setnayan Concierge checklist (see 2.0b). Steps 1–6 collapsed and dim if completed. Step 7 (current) expanded with mini-checklist + CTA. Steps 8–9 dim placeholders ahead.
 5. **Continue planning · 8-tile navigation grid.** All 9 surfaces accessible from one grid: Guests · Vendors · Schedule · Services · Seat Plan · Landing Page · QR Hub · Gallery. Each tile shows a one-line metric ("156 ✓ · 23 pending").
 6. **Recent activity.** Compact dashed-divider list. 4-5 most recent events.
 7. **Setnayan Pay info card.** Small, one-line — opt-in convenience reminder, not a sales pitch.
@@ -82,13 +82,13 @@ Home is the daily-driver. Couples spend more time here than anywhere else. The l
 - "Vendor readiness" 6-row table → Vendors tab
 - QR codes 4-tile section → QR Hub surface
 - Planning artifacts 3-card section → represented in the new navigation grid
-- "What's next" 3-card row → consolidated into the Guided journey current-step block + the NEXT UP hero
+- "What's next" 3-card row → consolidated into the Concierge journey current-step block + the NEXT UP hero
 
 The result is a Home that scans in 3 seconds: hero · journey · grid. The detail still exists; it just lives where it belongs.
 
-### 2.0b Guided Planner · the 9-step journey (locked 2026-05-14 as paid optional SKU)
+### 2.0b Setnayan Concierge · the 9-step journey (simplified 2026-05-17 to single-SKU + 3-day trial)
 
-**Access model updated 2026-05-14.** The 9-step Guided Planner journey is now an **optional paid SKU** with three pricing tiers, defined canonically in iteration 0016 § 0 and CLAUDE.md decision log entry of the same date. **DIY mode is the free default** for every event; Guided is the upgrade.
+**Access model updated 2026-05-17.** The 9-step Setnayan Concierge journey is an **optional paid SKU** — single tier `concierge_complete` at ₱4,999 / 12 months — with a **card-less 3-day free trial** (one per account, not per event). The 2026-05-16 ₱2,499 Essentials tier was retired same-week per the second 2026-05-17 decision-log row; the 7-day per-event preview was replaced by the 3-day account-level trial in the same lock. Defined canonically in iteration 0016 § 0. **DIY mode is the free default** for every event; Concierge is the upgrade.
 
 A wedding journey is a **9-step checklist** that maps to the 6 lifecycle stages:
 
@@ -104,56 +104,97 @@ A wedding journey is a **9-step checklist** that maps to the 6 lifecycle stages:
 | 8 | Event day | Event Day | The day |
 | 9 | Post-event | Wrap | Days 1–30 after |
 
-### Three dashboard surface variants
+### Four dashboard surface variants (plus enforcement overlay)
 
-The dashboard Home renders one of three states based on `events.guided_planner_status` (schema lives in iteration 0016 § 0):
+The dashboard Home renders one of four event-state variants based on `events.concierge_status`, with an additional enforcement-state overlay that modifies the upgrade banner copy when `users.concierge_enforcement_level != 'none'`. Schema lives in iteration 0016 § 0; column rename history: `guided_planner_status` (2026-05-14) → `concierge_status` (2026-05-16) · enum value `'preview'` → `'trial'` (2026-05-17 · 3-day trial replaces 7-day preview · one trial per account, not per event).
 
-**(A) DIY mode** (`guided_planner_status = 'diy'` · default for every new event):
+**(A) DIY mode** (`concierge_status = 'diy'` · default for every new event):
 - 10-tile grid + activity feed (no journey checklist)
-- **Upgrade banner pinned at the top** of the Home surface with the savings ladder:
+- **Upgrade banner pinned at the top** of the Home surface — single-SKU offer + 3-day-trial entry (the trial CTA hides when `users.concierge_trial_used_at IS NOT NULL` OR `users.concierge_enforcement_level IN ('trial_banned', 'full_banned')`):
   ```
   ┌─────────────────────────────────────────────────────────────┐
-  │ ✨ Activate Guided Planner — your assistant for setting     │
-  │    your plans in the right direction.                       │
+  │ ✨ Activate Setnayan Concierge — your wedding-planning      │
+  │    assistant. 5× cheaper than a human coordinator.          │
   │                                                              │
-  │    1-Week Pass · ₱99   │   3-Month · ₱999 (save 22%)        │
-  │    12-Month · ₱1,999 (save 61%) BEST VALUE                  │
+  │    Setnayan Concierge · ₱4,999 / 12 months                  │
+  │    ₱13.69 / day. Honeymoon planning included.               │
   │                                                              │
-  │    [Compare plans →]   [Continue with DIY ✕]                │
+  │    [Continue with Concierge]   [Try 3 days free]   [✕]      │
   └─────────────────────────────────────────────────────────────┘
   ```
 - Couples can dismiss the banner (state stored in `users.dashboard_dismissed_banners`); reappears every 14 days OR when wedding date < T-90 days OR after every checkout
 - All 10 dashboard tiles fully functional — no feature gating on tools themselves
 - Each step links to the relevant surface(s) for couples who want to manually use the navigation
+- The "Try 3 days free" CTA calls `start_concierge_trial(event_id)` → similarity check + account-level cap check → on pass flips status to `'trial'` (variant B); if abuse-flagged shows the under-review modal instead
 
-**(B) Active Guided** (`guided_planner_status = 'active'`):
+**(B) Trial Concierge** (`concierge_status = 'trial'` · 3-day card-less taste of full Concierge features):
+- Full Concierge feature surface enabled for 3 days — 9-step journey checklist, daily nudges, priority vendor matching, honeymoon planning tile
+- **Trial-countdown banner pinned at the top** of the Home surface:
+  ```
+  ┌─────────────────────────────────────────────────────────────┐
+  │ ✦ Trial · X days left                                       │
+  │ Continue with Setnayan Concierge — ₱4,999 / 12 months       │
+  │                                                              │
+  │    [Buy Setnayan Concierge]                                 │
+  └─────────────────────────────────────────────────────────────┘
+  ```
+- 9-step journey rendered identically to (C) Active
+- No payment-pending state on the trial itself — couples are NOT charged at any point during the 3 days
+- At T+3, daily cron flips status to `'expired'` (variant D) regardless of whether the couple has bought
+- Account-level cap means a couple who used their trial on Event A cannot get another trial by creating Event B on the same account
+
+**(C) Active Concierge** (`concierge_status = 'active'` · paid):
 - 9-step journey checklist surfaced prominently on Home with the per-step states:
   - Completed: dim with checkmark + month it was completed
   - Current: highlighted with accent gradient + mini-todo list + CTA
   - Future: dim placeholder with the date it'll activate
 - Each step links to the relevant surface(s) so couples can dive in without hunting
-- Days-remaining strip in the header: "Guided Planner active · X weeks remaining" with [Extend] CTA
-- When `guided_planner_expires_at - NOW() < 14 days` → renewal nudge banner appears
+- Days-remaining strip in the header reads "Setnayan Concierge active · X weeks remaining" with [Extend] CTA — X reflects the **wedding-anchored** `concierge_expires_at` (per iteration 0016 § 0 formula: `LEAST(wedding+30d, activated+24mo)`, min `activated+12mo`)
+- When `concierge_expires_at - NOW() < 14 days` → renewal nudge banner appears
+- Full feature set: daily nudges, priority vendor matching, honeymoon-planning tile (no Essentials-vs-Complete differentiation — single SKU as of 2026-05-17)
+- **Long-engagement advisory** — if `events.concierge_long_engagement_advised_at IS NULL` AND `events.wedding_date > concierge_activated_at + INTERVAL '24 months'`, a one-time inline advisory renders below the days-remaining strip with the "renew closer to your wedding" copy + a [Got it] dismiss action that stamps `concierge_long_engagement_advised_at`. Fires when wedding_date is first set (typically via Concierge Step 1 OR Profile) — the dashboard surfaces it on next page load rather than as a hard modal interrupt.
 
-**(C) Expired Guided** (`guided_planner_status = 'expired'`):
+**(D) Expired Concierge** (`concierge_status = 'expired'`):
 - 9-step journey **still visible but greyed-out** (so couples can see progress they made + entice re-purchase)
-- Reactivation banner: "Reactivate Guided Planner — ₱99/wk · ₱999/3mo · ₱1,999/12mo"
+- Reactivation banner: "Reactivate Setnayan Concierge — ₱4,999 / 12 months"
 - All 10 dashboard tiles remain fully functional (same as DIY — no tool gating, just no active assistant layer)
+- The 3-day trial is NOT offered again from this state (one trial per account · `users.concierge_trial_used_at` is set on first trial)
+
+### Enforcement-state overlay (NEW 2026-05-17)
+
+When `users.concierge_enforcement_level != 'none'`, the upgrade banner above is replaced or augmented per the tier:
+
+| Enforcement level | Banner treatment |
+|---|---|
+| `'none'` (default) | Standard upgrade banner per variants A/B/C/D above |
+| `'warning'` | Standard banner + small inline notice: *"Heads-up: your account was flagged once for review. The trial remains available; further flags may limit access."* (audit-only) |
+| `'trial_banned'` | Upgrade banner shows only the [Continue with Concierge] CTA (trial CTA hidden). Inline notice: *"3-day trial unavailable on this account. Purchase to access Setnayan Concierge."* + [Why? Appeal ticket →] link to 0029 help center |
+| `'full_banned'` | Upgrade banner replaced entirely with: *"Setnayan Concierge unavailable on this account. Contact support if you believe this is in error."* + [Open appeal ticket →] CTA to 0029. Couple can still use DIY mode normally; all 10 dashboard tiles remain functional |
+
+The overlay applies whether the event is in DIY (A), Active (C), or Expired (D). It does NOT apply to events in Trial (B) — those are already mid-trial so enforcement state doesn't change the in-trial experience until trial expiry.
 
 ### Schema
 
 ```sql
 -- Defined canonically in iteration 0016 § 0; restated here for clarity:
 ALTER TABLE events
-  ADD COLUMN guided_planner_status TEXT
+  ADD COLUMN concierge_status TEXT
     NOT NULL DEFAULT 'diy'
-    CHECK (guided_planner_status IN ('diy', 'active', 'expired')),
-  ADD COLUMN guided_planner_tier TEXT
-    CHECK (guided_planner_tier IN ('1week', '3month', '12month')),
-  ADD COLUMN guided_planner_expires_at TIMESTAMPTZ;
+    CHECK (concierge_status IN ('diy', 'trial', 'active', 'expired')),
+  ADD COLUMN concierge_tier TEXT
+    CHECK (concierge_tier IN ('complete')),               -- Essentials retired 2026-05-17; enum kept for forward-compat
+  ADD COLUMN concierge_expires_at TIMESTAMPTZ;
+-- events.concierge_preview_used_at RETIRED 2026-05-17 — replaced by users.concierge_trial_used_at (account-level cap)
 
--- 9-step journey state (kept as before — auto-populated whether DIY or Guided,
--- but rendered prominently ONLY in Guided/Expired modes; DIY couples see grid only):
+ALTER TABLE users
+  ADD COLUMN concierge_trial_used_at        TIMESTAMPTZ,                                                                  -- one trial per account
+  ADD COLUMN concierge_abuse_strike_count   INT NOT NULL DEFAULT 0,
+  ADD COLUMN concierge_enforcement_level    TEXT NOT NULL DEFAULT 'none'
+                                            CHECK (concierge_enforcement_level IN ('none', 'warning', 'trial_banned', 'full_banned'));
+-- See iteration 0016 § 0 for the full users-table schema (5 additional enforcement-audit columns) + the concierge_abuse_flags table.
+
+-- 9-step journey state (kept as before — auto-populated whether DIY or paid,
+-- but rendered prominently ONLY in Preview/Active/Expired modes; DIY couples see grid only):
 CREATE TABLE event_journey_steps (
   event_id   UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
   step_id    SMALLINT NOT NULL CHECK (step_id BETWEEN 1 AND 9),
@@ -163,11 +204,122 @@ CREATE TABLE event_journey_steps (
 );
 ```
 
-The 9 rows are seeded when the event is created — even for DIY couples — so that decisions persist across mode flips. If a DIY couple completes Step 1 (sets date + venue) and then activates Guided later, the journey reflects the work already done. Steps auto-complete based on real platform actions (e.g., Step 3 marks complete when invitations have been sent + at least 1 RSVP recorded; Step 4 marks complete when ≥3 vendors are in Accepted or Active stage; etc.). Couples can also manually mark a step done or undo it.
+The 9 rows are seeded when the event is created — even for DIY couples — so that decisions persist across mode flips. If a DIY couple completes Step 1 (sets date + venue) and then activates Concierge later, the journey reflects the work already done. Steps auto-complete based on real platform actions (e.g., Step 3 marks complete when invitations have been sent + at least 1 RSVP recorded; Step 4 marks complete when ≥3 vendors are in Accepted or Active stage; etc.). Couples can also manually mark a step done or undo it.
 
-**Note on the prior `users.planner_mode` column:** the 2026-05-14 lock supersedes the original "guided is default + opt-out to DIY" model. The state has moved from `users.planner_mode` (account-level) to `events.guided_planner_status` (event-level, since couples may run DIY on one event and Guided on another). If `users.planner_mode` exists in the live schema, it's now ignored / can be dropped.
+**Note on the prior `users.planner_mode` column:** the 2026-05-14 lock superseded the original "guided is default + opt-out to DIY" model. The state moved from `users.planner_mode` (account-level) to `events.guided_planner_status` (event-level), and the 2026-05-16 repricing renamed `guided_planner_status` → `concierge_status` (plus the enum widening for the new `'preview'` state and the tier value swap to `'essentials' | 'complete'`). If `users.planner_mode` or any `guided_planner_*` columns still exist in the live schema, they are now ignored / pending the rename migration described in iteration 0016 § 0 Migration note.
 
 ---
+
+### 2.0b' Wizard surfaces (locked 2026-05-18 cross-ref to 0016 §§ 0b/0c/0d)
+
+The 9-step journey above (§ 2.0b) is the static spine. **2026-05-18 adds the active wizard layer** that conducts the planning in real-time — turning the 9-step checklist from "what you should do" into "what's next for you specifically." Wizard surfaces appear when `events.concierge_status IN ('active','trial')`; DIY home stays marketplace-forward.
+
+The wizard's full architecture, schema, and behavior is locked in 0016 §§ 0b-0e. This section describes how the wizard surfaces render on 0021 Home.
+
+#### Wizard home variants (one codebase, conditional layer)
+
+Both DIY and Concierge couples see the same Home layout (§ 2.0a) — same routes, same artifact tiles, same data substrate. The difference is what occupies the top half of the screen:
+
+**DIY home (concierge_status = 'diy' or 'expired'):**
+- Warm welcome row + Stage strip + NEXT UP hero (unchanged)
+- 9-step journey block remains, but Steps are self-driven (no active nudges)
+- **Marketplace-forward block** above the navigation grid: vendor search bar + recommended categories ("Browse photographers · Search venues in NCR · Find your caterer")
+- 3 free brain questions remaining indicator
+- Subtle "Upgrade to Concierge for active help (₱2,499 or free with any Pro Weekly vendor)" CTA at the bottom of the page — never persistent banner pressure
+
+**Concierge home (concierge_status = 'active' or 'trial'):**
+- Warm welcome row + Stage strip + NEXT UP hero (unchanged)
+- **Next Actions strip** replaces the marketplace-forward block — see § 2.0b'.1 below
+- **Concierge Plan tile** in the navigation grid — see § 2.0b'.2 below
+- 9-step journey block remains but each step now surfaces its active sub-tasks (per the canonical wedding timeline in [`04_Planning_Timelines.md`](../02_Specifications/18_Concierge_Brain/04_Planning_Timelines.md))
+- "Your coordinator did X" stream visible if a coordinator is delegated to this event — see § 2.0b'.3 below
+- No quota indicator (unlimited brain Q&A)
+
+#### 2.0b'.1 Next Actions strip
+
+A 3-tier scrollable card row at the top of Concierge home, sourced from `getNextActions(event_id)`. Cards refresh on every page load (no separate cron per PR #47 cron lock).
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ 🔴 OVERDUE        🟡 THIS WEEK      🔵 NEXT PRIORITIES        │
+│ ─────────────     ─────────────     ─────────────             │
+│ • ₱25K deposit    • Tasting Fri 3pm • Browse 6 venues in NCR  │
+│   due 2d ago      • Stylist quote   • Lock your reception     │
+│   [Pay now]         expires Sat       venue first             │
+│ • Photographer    • Florist meeting  [See venues]             │
+│   meeting was       Sat 10am                                  │
+│   yesterday       [Add to cal]                                │
+│   [Mark done]                                                 │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Source tables** (the strip aggregates these — no new tables): `event_vendors`, `vendor_meetings`, `payment_milestones` (0007), `event_journey_steps` (0016), `event_guests` (0001), `mood_board_palettes` (0010), `seat_plan_status` (0008), and the canonical wedding timeline applied against `events.wedding_date`.
+
+**Empty-state copy** (per the "no dev text post-launch" rule in 2026-05-18 fifth decision-log row): when all three tiers are empty (a calm planning week), the strip shows a single line — *"You're caught up. Setnayan Concierge will surface what's next as your wedding gets closer."* No banner, no upsell, no nag.
+
+#### 2.0b'.2 Concierge Plan tile (in the navigation grid)
+
+The "Continue planning" tile grid gains one new tile when Concierge is active:
+
+```
+┌────────────────────┐
+│ ✦ Your Plan        │
+│                    │
+│ Tier 3 · 150 guests│
+│ NCR · Catholic     │
+│ Feb 14, 2027       │
+│                    │
+│ Generated 6 days ago│
+└────────────────────┘
+```
+
+Click → opens the **personalized plan document** (per 0016 § 0b plan generation). This is the take-away artifact generated at intake — couple can re-read anytime. Static after generation; regenerates only when an anchor fact changes (date moves >3 months, guest count ±50, etc.).
+
+**Important:** the plan tile survives downgrade. If the couple drops to DIY, the tile remains as a read-only document. Plan never deletes (per 0016 § 0b data permanence subsection — "data is never deleted, period").
+
+#### 2.0b'.3 Coordinator activity stream (when a coordinator is delegated)
+
+When a coordinator is booked AND delegate-access is granted (per 0016 § 0d), Home gets a new collapsible section below the Next Actions strip:
+
+```
+This week your coordinator Anna handled:
+  ✓ Confirmed ₱25,000 deposit received by Caterer Y · Wed 11am
+  ✓ Rescheduled Photographer X tasting to Saturday · Wed 2pm
+  ✓ Shared your mood-board palette with Florist Z · Thu 9am
+  ✓ Replied to Florist Z's quote question · Thu 9am
+
+  See all actions →
+```
+
+Sourced from `event_action_log WHERE performed_by_role = 'coordinator' AND event_id = ? ORDER BY performed_at DESC LIMIT 5`. Click "See all actions" → opens a chronological full-history view of every coordinator action on this event.
+
+Builds trust + transparency. Couples see their coordinator-fee being spent on real work. Coordinator can't ghost the couple — every action is logged with timestamp.
+
+#### 2.0b'.4 Smart intake on upgrade (DIY → Concierge)
+
+When a DIY couple upgrades to Concierge (via direct ₱2,499 purchase OR via booking a Pro Weekly vendor), the wizard pre-fills intake forms from existing event data and only asks the **missing pieces**:
+
+| Field | If already in event data | If missing |
+|---|---|---|
+| Wedding date | Pre-fill from `events.wedding_date` | Required |
+| Region | Pre-fill from `events.region` | Required |
+| Guest count | Pre-fill from count of `event_guests` rows | Optional — wizard estimates |
+| Religious tradition | NOT typically in event data | **Required — must ask** |
+| Foundation state | NOT in event data | **Required — must ask** |
+| Working-budget tier | Sometimes in event data | Optional — wizard infers |
+
+Upgrade intake reduces to ~2-3 questions instead of 5 for couples who've been on DIY for weeks. Wizard activates immediately after submission.
+
+#### 2.0b'.5 Trial-end conversion (per 0016 § 0 trial logic + brand-truth framing)
+
+If the couple is on trial (T+0 through T+3) and approaching expiry, Home shows a contextual banner:
+
+- **T+0 trial start** — Welcome modal: *"Your trial just started — here's everything Concierge does for the next 3 days. Plan stays saved forever."*
+- **T+1 / T+2** — Persistent in-app banner: *"X days left in your trial."*
+- **T+2 morning** — Modal: *"1 day left — want to keep going?"* with primary CTA *"Keep Concierge — ₱2,499"* + secondary *"Continue with DIY"*.
+- **T+3 expiry** — Final modal then `concierge_status` flips to `expired` on the cron sweep; couple wakes to DIY UI + a *"You can come back anytime — your plan stays right here"* card.
+
+Trial-end CTA copy focuses on the value of the active helper. **Never threatens data loss** — per the "data permanence is a brand truth" subsection in 0016 § 0b, nothing is deleted on downgrade. The trial-end prompt sells the wizard, not data survival.
 
 ### 2.0c Profile avatar = dashboard home shortcut
 
@@ -609,7 +761,445 @@ Iterations 0024–0035 were drafted after the dashboard's 9 surfaces were locked
 
 ---
 
+## 10. Date change with booked vendors (locked 2026-05-17)
+
+Couples can edit their event date at any time, but the friction scales with how many confirmed vendors are attached. The rule keys off **current confirmed-vendor count**, not history — a couple who has never booked, or whose vendors have all backed out, gets a clean date-edit path. Once even one vendor is confirmed, date changes become a multi-party negotiation with vendor consent, mandatory reason capture, and admin mediation as the escalation tier.
+
+*Additionally subject to per-vendor acceptance cutoffs (§ 13) — if any confirmed vendor is past their date-change cutoff at the current proximity to event, the standard flow described below is blocked entirely and admin override is the only forward path.*
+
+### 10.1 Confirmation gate · triggered only when ≥1 confirmed vendor
+
+The date-edit affordance always renders; the friction wraps around it. On tap, the dashboard counts confirmed vendors by status:
+
+| Booking status | Counts toward gate? | Reason |
+|---|---|---|
+| Confirmed / paid | ✅ Yes | Real commitment on both sides |
+| In cart / draft | ❌ No | No commitment yet — couple is still shopping |
+| In active mediation | ✅ Yes | Booking has NOT yet been released; vendor still expects this date |
+| Cancelled / refunded | ❌ No | Relationship is closed |
+
+**If the count is zero,** the date picker opens immediately. No warning, no reason field — free planning state.
+
+**If the count is ≥1,** a confirmation modal blocks the change:
+
+> You have **N confirmed vendors** for **{current_date}**. Changing the date requires each of them to confirm the new schedule.
+>
+> **Affected:** {first 2–3 vendor names}, +{remaining} more
+>
+> If a vendor can't accommodate the new date, your booking with them moves to chat negotiation.
+>
+> **Why are you changing the date?** [text field, required, min 30 chars]
+>
+> [Keep current date] [Continue]
+
+Tone is informative, not alarmist — couples reaching this modal are usually already stressed (venue flooded, family conflict, force majeure, work transfer). The reason field is required because every change involving booked vendors must have a documented motivation — vendors receive it in their schedule-change notification (so they understand the ask before deciding), and admin reviews patterns if a dispute later escalates.
+
+### 10.2 Schedule check + customer-facing result
+
+On Continue, the system queries each confirmed vendor's calendar against the proposed new date. Two outcomes:
+
+- **All vendors available** → *"Your schedule change is available for all vendors. Waiting for their confirmation."*
+- **Partial conflict** → *"Your schedule change is available for X vendors but conflicts for Y vendors. We cannot apply this change until all vendors accept."*
+
+In both cases the event date is **not yet changed**. The original date holds. The proposed change sits in a pending state until every affected vendor has either accepted or rejected. The couple's dashboard surfaces a banner during this state: *"Date change pending vendor confirmation · N of M responded."*
+
+### 10.3 Pending-state freeze
+
+While the date change is pending:
+
+- **Original date holds** on the couple's dashboard, in vendor calendars, and on the public landing page (0021 § 7 Landing Page)
+- **No further date attempts** — couple cannot stack a second proposed change; the action is disabled with hint *"Resolve the current pending change first"*
+- **Payments paused** for affected bookings (no new milestone charges fire during the window — 0034 honors this freeze flag)
+- **Vendor slot frozen** — vendors cannot release the original slot to another booking until the negotiation resolves; both original and proposed dates are held
+
+This prevents either party from moving the goalposts mid-negotiation.
+
+### 10.4 Vendor response window · auto-resolve on timeout
+
+Each notified vendor has **48 hours** to respond (V1 default; configurable per vendor at onboarding, 24–72 hr range). Their dashboard surfaces an action card with the new date + couple's reason + Accept / Decline buttons + a soft "Open chat to discuss" link.
+
+| Vendor action | Result |
+|---|---|
+| Accept | Moves to "accepted" sub-state; change applies only when ALL affected vendors have accepted |
+| Decline | Booking enters chat negotiation (§ 10.5) — change does NOT auto-fail |
+| No response past 48 hr | Auto-escalates to admin mediation tier (§ 10.6) |
+| Couple cancels the request | All sub-states clear; event reverts to original date; no penalty |
+
+### 10.5 Chat negotiation · decline path
+
+When a vendor declines, the existing customer↔vendor chat thread (per the customer-initiates-chat rule — couples open threads, vendors only reply) gains a **structured action card** so the negotiation produces real state transitions rather than free-text agreements that the system can't parse:
+
+| Action card | Who can trigger | What it does |
+|---|---|---|
+| Propose alternate date | Either side | Embedded date picker; counterpart sees a card with Accept / Decline buttons |
+| Accept this date | Either side | Single-tap commit; transitions the booking's date if the other side has also accepted |
+| Cancel this booking | Couple only | Drops this vendor from the event; refund routes through § 2.2 Refund / dispute menu |
+| Escalate to support | Either side | Opens an admin mediation ticket (§ 10.6) |
+
+The structured-card requirement is **load-bearing**. Agreements made in prose are invisible to the state machine, so the booking would sit frozen indefinitely. Action cards convert verbal agreement into a real status transition. Iteration 0019 must support interactive action cards as a first-class message type — this is a hard dependency for the date-change flow shipping.
+
+**Couple-side timeout:** if the couple ghosts an active chat negotiation for **72 hours** (no message and no card interaction), the change request auto-cancels and the event reverts to the original date. The vendor receives a notification that the negotiation closed without resolution.
+
+### 10.6 Admin mediation tier · escalation
+
+Chat negotiation escalates to admin mediation when:
+
+- Either side clicks **Escalate to support** in the chat action card
+- The 48-hour vendor response window expires without a response
+- The 72-hour couple-side chat timeout fires
+
+A ticket opens in the admin console (0023). Setnayan's Disputes Handler joins the thread — same pattern as the force-majeure flow in 0019 + the refund/dispute menu in § 2.2. The mediator selects from a fixed outcome enum (no free-text resolutions, because every outcome maps to a concrete state transition):
+
+| Mediation outcome | State transition |
+|---|---|
+| Vendor reconsiders → accept new date | Booking date updates; pending state clears; payments resume |
+| Couple stays on original date | Pending state clears; original date holds; no refund; no penalty |
+| Vendor swap | Setnayan helps source an alternate vendor; this booking enters cancellation refund flow per § 2.2 |
+| Full refund + cancellation | This vendor only; other bookings unaffected; refund routes through 0034 |
+| Reschedule-fee compromise | Vendor accepts new date with a documented fee per their contract; couple pays via 0034 |
+
+Every outcome logs to `dispute_resolutions` (0023 schema) with the cause `cause = 'date_change_dispute'` and the chosen outcome enum.
+
+### 10.7 Race condition · vendor back-out during negotiation
+
+A confirmed vendor can independently back out (cancel their booking) while a date-change negotiation is in flight. Two cases:
+
+- **Departure drops confirmed-vendor count to zero** → the in-flight negotiation **auto-resolves**. The date change applies immediately; no further confirmation needed from the now-empty vendor list. The couple sees a passive notification: *"All remaining vendors backed out — your date change has been applied."*
+- **Departure drops count but stays ≥1** → negotiation continues with the remaining vendors only; the departed vendor's slot releases independently. The couple's pending-state banner updates to reflect the new vendor count.
+
+### 10.8 "Door reopened" banner
+
+When the confirmed-vendor count transitions from ≥1 → 0 for any reason (last vendor backs out, all bookings released, every booking ends in cancellation outcome from mediation), the couple's dashboard surfaces a passive banner on Home:
+
+> All vendors have been released — you can now change your event date freely.
+
+Banner placement: directly below the NEXT UP hero card on Home (per § 2.0a). Dismisses on first date-edit attempt OR after 14 days. Without this affordance, couples may not realize the gate has lifted — many continue planning around the old date long after the constraint dissolved.
+
+### 10.9 Reschedule-fee policy · admin-managed per-vendor
+
+Vendor contracts commonly include reschedule fees scaled to event proximity (typical: no fee 60+ days out, 50% inside 30 days, 100% inside 14 days). Vendors capture their reschedule policy at onboarding (0006 § Vendor onboarding); the policy surfaces to the couple inside the § 10.1 confirmation modal **when at least one affected vendor has a non-zero fee at the current proximity to the event**:
+
+> ⚠ Some of your vendors charge a reschedule fee at this proximity to your wedding:
+> · Casa Manila Catering — ₱15,000 (50% inside 30 days)
+> · Bloomwood Florals — ₱5,000 (flat fee inside 14 days)
+>
+> Fees apply only if the vendor accepts the new date. You'll see the final amount before confirming.
+
+V1 leaves fee enforcement as a **manual mediator action** — the mediator references the vendor's stated policy when negotiating outcomes in § 10.6 and applies the fee via the existing 0034 milestone-payment flow. Automated fee debits land in iteration 0034 Phase 2.
+
+### 10.10 Max date changes per event lifecycle
+
+Hard cap: **2 successful date changes** per event. Attempts beyond the cap are gated behind admin override — couple files a request via 0029 help center, admin reviews and approves on a case-by-case basis. Cancelled or reverted requests don't count toward the cap; only changes that actually applied. Prevents thrash and protects vendor goodwill on the platform.
+
+---
+
+## 11. Venue change with booked vendors (locked 2026-05-17)
+
+Venue changes follow the **same multi-party state machine as § 10 Date change** — gate triggered by ≥1 confirmed vendor, required reason, pending-state freeze, 48 hr vendor response window, 72 hr couple chat timeout, chat negotiation with structured action cards, admin mediation tier, door-reopened banner, 2-changes cap. Two material differences capture the venue-specific logic below; everything else is identical to § 10 and is not re-stated.
+
+*Additionally subject to per-vendor acceptance cutoffs (§ 13) — if any confirmed vendor is past their venue-change cutoff at the current proximity to event, the standard flow described below is blocked entirely and admin override is the only forward path.*
+
+### 11.1 Coverage check (replaces schedule check)
+
+Where § 10 polls each vendor's calendar for date availability, § 11 polls each vendor's **service capability for the new venue**. The check considers:
+
+- **Service-area radius** — does the new venue fall within the vendor's stated service radius (set at onboarding per 0006)?
+- **Permits / licensing** — does the vendor hold the permits/licenses required by the new venue's municipality? Catering and mobile bar are the common gotchas (LGU food-and-beverage permits don't always cross municipal lines).
+- **Equipment compatibility** — can the vendor's equipment service the new venue? Lights & sound rigging, live stream camera mounts, broadcast power requirements all care about the venue's physical layout and electrical infrastructure.
+- **Venue house rules** — some venues forbid outside vendors of specific categories (in-house catering only, in-house florals only). The new venue's vendor-allowlist is consulted; if the booked vendor isn't on it, the check returns conflict.
+
+Customer-facing result strings parallel § 10.2:
+
+- **All vendors can service the new venue** → *"Your venue change is available for all vendors. Waiting for their confirmation."*
+- **Partial conflict** → *"Your venue change is available for X vendors but is in conflict for Y vendors. We cannot apply this change until all vendors accept."*
+
+### 11.2 Auto-accept policy · short-distance moves bypass the gate
+
+Vendors set a **service-area auto-accept radius** at onboarding (0006) — e.g., *"auto-accept any venue within 50 km of my home base."* When the new venue falls inside the radius AND every other coverage-check dimension passes, the booking transitions automatically without firing the vendor confirmation card.
+
+The couple still sees the proposed-change modal and supplies a reason; the schedule check still runs; vendors still receive an in-app + email notification of the venue change. They just don't have to actively accept — silence equals consent inside the auto-accept envelope.
+
+This cuts negotiation volume materially for the common case (e.g., changing from one Tagaytay venue to another). Vendors who prefer explicit confirmation set the radius to 0 km and get the standard card on every venue change.
+
+### 11.3 Relocation fee policy (replaces reschedule fee)
+
+Vendors with travel-dependent cost structures (catering, lights & sound, live stream, mobile bar) capture a **relocation-fee policy** at onboarding instead of a reschedule-fee policy. Examples:
+
+- *"Free within 30 km; ₱5,000 per additional 10 km."*
+- *"Free within Metro Manila; ₱15,000 flat for Tagaytay; case-by-case beyond."*
+- *"₱8,000 equipment transport fee for any venue change inside T-30 days."*
+
+The fee surfaces in the § 11 confirmation modal when at least one affected vendor has a non-zero relocation fee for the proposed venue. Same admin-mediator-applies-it pattern as § 10.9; auto-debit lands in 0034 Phase 2.
+
+### 11.4 Mediation outcomes (parallel to § 10.6)
+
+The admin mediator selects from the same fixed enum as § 10 with venue-specific labels:
+
+| Mediation outcome | State transition |
+|---|---|
+| Vendor reconsiders → service new venue | Booking venue updates; pending state clears; payments resume |
+| Couple stays at original venue | Pending state clears; original venue holds; no refund; no penalty |
+| Vendor swap | Setnayan helps source an alternate vendor; this booking enters cancellation refund flow per § 2.2 |
+| Full refund + cancellation | This vendor only; other bookings unaffected; refund routes through 0034 |
+| Relocation-fee compromise | Vendor accepts new venue with a documented fee per their policy; couple pays via 0034 |
+
+### 11.5 Public landing page (0021 § 7 surface) holds during pending state
+
+Venue is one of the three top-of-page facts on the couple's public landing page (date + venue + couple name). During a pending venue change, the landing page **continues to show the original venue** — same freeze rule as the date change in § 10.3. Guests should not see a venue change before vendors have confirmed it.
+
+When the change applies, the landing page updates server-side and any guests who've already RSVP'd receive a notification email per 0028.
+
+---
+
+## 12. Guest count change · monotonic ratchet (locked 2026-05-17)
+
+Guest count is a numeric attribute that **only ratchets upward** once vendors have committed to a number. The state machine borrows the chat/mediation/admin scaffold from § 10 but with a fundamentally different shape: decreases are blocked outright at the UI layer (no negotiation), and only **guest-count-dependent vendors** are affected (subset of all vendors).
+
+*Additionally subject to per-vendor acceptance cutoffs (§ 13) — if any confirmed guest-count-dependent vendor is past their guest-count cutoff at the current proximity to event, the standard increase flow described below is blocked entirely and admin override is the only forward path.*
+
+### 12.1 Which vendors are guest-count-dependent
+
+A per-vendor flag (`is_guest_count_dependent`, captured at vendor onboarding per 0006) marks whether the vendor plans against the guest count. V1 defaults:
+
+| Vendor category | Default flag | Why |
+|---|---|---|
+| Catering | TRUE | Ingredients, plates, crew rostered per head |
+| Florals | TRUE | Centerpieces + bouquets scale with table count |
+| Mobile bar | TRUE | Inventory + bartender count scales with head count |
+| Lights & sound | TRUE | Rigging coverage scales with guest area / floor plan |
+| Name cards / favors / printable invites | TRUE | Per-guest items |
+| Photography | FALSE | One team covers any headcount within reasonable bounds |
+| Videography | FALSE | Same as photography |
+| HMUA | FALSE | Bridal-party-only scope; independent of guest count |
+| Planner / coordinator | FALSE | Capacity scales by event complexity, not headcount |
+| Broadcast (Panood / live stream) | FALSE | Cameras + hours purchased separately |
+
+Vendors can override the default at onboarding (e.g., a florist who works pinpoint-arrangements regardless of guest count flips the flag to FALSE; a planner who charges per-head flips it to TRUE).
+
+Only dependent vendors receive the confirmation card on a guest-count change. Independent vendors are notified passively (in-app + email) but their booking is unaffected.
+
+### 12.2 The ratchet rule
+
+The **planning guest count** is monotonic upward per event:
+
+- Floor = MAX(all confirmed counts ever in this event's history)
+- The minus stepper on the guest-count field is **disabled** when count equals current floor; hint reads *"Cannot decrease below confirmed floor — vendors have already committed to N guests"*
+- Increases require vendor confirmation (state machine per § 12.4)
+- Decreases require admin override (§ 12.7)
+
+The planning count is **distinct from**:
+
+- **Invited count** — how many invitations were sent (managed in Guest List, no impact on vendors)
+- **RSVP count** — how many guests confirmed attendance (managed automatically as RSVPs flow in)
+- **Actual attendance** — day-of headcount (recorded post-event for reporting)
+
+Vendors plan against the planning count. RSVPs may come in lower; the couple still pays for the committed count because vendors have already committed inventory + crew at that level.
+
+### 12.3 Confirmation gate (only on increase)
+
+When the couple raises the count and ≥1 dependent vendor is confirmed, a modal blocks the change:
+
+> You're changing the guest count from **200** to **220**. This requires each guest-count-dependent vendor to confirm they can scale up.
+>
+> **Per-vendor cost impact:**
+> · Casa Manila Catering — +20 plates × ₱1,200 = **+₱24,000**
+> · Bloomwood Florals — +2 tables × ₱5,500 = **+₱11,000**
+> · Lumiere Lights & Sound — flat (capacity ceiling not reached)
+>
+> **Total cost increase:** ₱35,000
+>
+> Once vendors confirm, this count becomes your new floor — you can increase further later, but **you won't be able to decrease back below 220**.
+>
+> **Why are you changing the count?** [text field, required, min 30 chars]
+>
+> [Keep current count] [Continue]
+
+Per-head pricing is captured at vendor booking (0006); the modal surfaces a real-time delta calculation before the couple commits.
+
+### 12.4 Capacity check (replaces schedule / coverage check)
+
+The system checks each dependent vendor's **headcount capacity at the current proximity to the event**:
+
+- Vendor's stated maximum capacity for this service tier
+- Lead-time-adjusted capacity (vendors often have lower max capacity inside T-14 days because crew can't be rostered fast)
+- Currently allocated capacity (vendor may have other bookings competing for crew/inventory)
+
+Result strings parallel § 10.2 / § 11.1:
+
+- **All vendors can scale up** → *"Your guest count change is available for all vendors. Waiting for their confirmation."*
+- **Partial conflict** → *"Your guest count change is available for X vendors but exceeds capacity for Y vendors. We cannot apply this change until all vendors accept."*
+
+### 12.5 Vendor response window + chat negotiation
+
+Identical to § 10.4–10.5 with capacity-specific outcomes. Vendor accepts → commits to the new count + new price. Vendor declines → chat negotiation with structured cards (Propose alternate count / Accept this count / Cancel booking / Escalate to support). 48 hr / 72 hr timeouts as before.
+
+### 12.6 Ratchet enforcement on vendor back-out
+
+When a dependent vendor backs out independently (cancellation), their commitment to the current floor dissolves — but **the floor itself doesn't reset**. Remaining dependent vendors still plan at the higher count, so the couple cannot decrease.
+
+If a *new* vendor joins later, their starting commitment is the current floor (or higher, never lower). Vendors who cannot meet the current floor at onboarding aren't bookable — the catalog gates them out for this event.
+
+### 12.7 Decrease override · admin-mediated
+
+Couples experiencing genuine catastrophic cancellation (force majeure, mass family withdrawal, venue capacity reduction by force) can request a floor reduction via 0029 help center. The admin mediator then negotiates with each affected vendor case-by-case:
+
+- Vendor accepts the reduction (often with a partial refund of pre-purchased inventory) → floor lowers for that vendor's commitment
+- Vendor declines → couple still pays the higher amount, but vendor receives a "couple requested reduction; vendor declined" note in the event log (useful for review-time context)
+
+The floor is **per-vendor in the override path**, not event-wide — because vendors negotiate individually based on their inventory commitment. This is the only path through which the floor can move downward; it does not surface in the couple's UI as a self-serve affordance.
+
+### 12.8 Seating chart side-effects
+
+When a guest-count change applies, downstream surfaces auto-update:
+
+- **Seating chart (0008)** — adds tables to absorb the new count, using the current per-table capacity (8 / 10 / 12 depending on configuration); couple can manually re-arrange
+- **Print pack** — flagged "outdated" until couple re-publishes (table QRs may have new positions)
+- **Name cards / favors** — quantity field on the printable-invites vendor's order line auto-updates
+- **Catering vendor's plate count** — `vendor_event_window` ↦ `confirmed_guest_count` column updates on vendor accept
+
+These are passive side-effects (no additional confirmation needed) because the vendor side already accepted the new count.
+
+### 12.9 Audit + ratchet history
+
+Every confirmed count change writes a row to `event_guest_count_log(event_id, old_count, new_count, reason, requested_at, applied_at, change_type ∈ {'increase','decrease_override'})`. Surfaces in:
+
+- Admin console (0023) — for mediator context when reviewing a dispute or override
+- Couple's audit feed (0021 § 3.5 Recent activity) — *"Guest count increased from 200 to 220 · vendors confirmed"*
+- Vendor dashboard (0022) — *"Couple increased guest count for [event] to 220 · you accepted"*
+
+---
+
+## 13. Per-vendor change-acceptance cutoffs (locked 2026-05-17)
+
+The state machines in § 10 / § 11 / § 12 govern *whether* a confirmed vendor agrees to a proposed change. § 13 governs *whether the couple can even initiate* such a change at the current proximity to event. Each vendor declares — at onboarding — how close to the event they're willing to accept changes to date, venue, and guest count. Once any confirmed vendor passes their stated cutoff for a given change type, the standard flow is blocked outright for that event; the only forward path is admin override.
+
+Applies uniformly to all three change types (date, venue, guest count). Applies only to vendor bookings — Setnayan platform SKUs (Papic, Panood, Patiktok, LED, AI Highlights, etc.) have their own pre-event activation / rendering / fulfillment windows handled separately.
+
+### 13.1 The three cutoff fields
+
+Captured on the vendor record at onboarding (0006). Snapshotted to the booking at confirmation time (§ 13.5).
+
+| Field | Meaning | NULL means |
+|---|---|---|
+| `date_change_cutoff_days_before_event` | Last day before event date this vendor accepts a **date** change. | Vendor refuses date changes entirely (extremely rare; not seeded by default) |
+| `venue_change_cutoff_days_before_event` | Last day this vendor accepts a **venue** change. | Vendor refuses venue changes entirely |
+| `guest_count_change_cutoff_days_before_event` | Last day this vendor accepts a **guest count** change. | Vendor is not guest-count-dependent (per § 12.1); the field is N/A |
+
+Cutoff windows are **inclusive of the day itself** — e.g., a cutoff of T-30 means the change can be initiated up to and including the calendar day 30 days before the event. Day T-29 is past cutoff. Day-end is the cliff (Asia/Manila timezone).
+
+### 13.2 V1 default values by vendor category
+
+Pre-filled on vendor account creation (0006) so vendors don't need to configure manually. Vendors can edit any value at any time, subject to the retroactivity rule (§ 13.5).
+
+| Vendor category | Date | Venue | Guest count | Notes |
+|---|---|---|---|---|
+| Catering | 30 | 21 | 14 | Ingredient sourcing + crew rostering lead time |
+| Florals | 21 | 14 | 10 | Flower wholesaler lead time + table-count locking |
+| Mobile bar | 21 | 14 | 7 | Inventory + bartender rostering |
+| Lights & sound | 14 | 21 | 7 | Rigging crew + equipment dispatch (venue more lead-time sensitive than date) |
+| Name cards / favors / print | 21 | 14 | 10 | Print runs lock once started |
+| Photography | 7 | 3 | NULL | Pair of photographers can adapt close-to-event |
+| Videography | 7 | 3 | NULL | Same |
+| HMUA | 7 | 3 | NULL | Bridal-party-only scope independent of headcount |
+| Planner / coordinator | 7 | 3 | 7 | Coordinator helps execute changes; their own cutoff is short |
+| Live stream / broadcast | 3 | 3 | NULL | Equipment-only; can pivot close to event |
+
+These are **starter values** — owner should review and adjust based on real vendor feedback during V1 onboarding. Vendors retain final say.
+
+### 13.3 Pre-flight check on every change attempt
+
+Runs immediately when the couple taps any of: edit-date affordance, edit-venue affordance, increment-guest-count stepper. The check evaluates each confirmed vendor (per § 10.1 / § 11.1 / § 12.3 status counting) against their snapshotted cutoff for the corresponding change type.
+
+| Result | Behavior |
+|---|---|
+| All affected vendors are within their acceptance window | Standard flow proceeds — confirmation modal → schedule/coverage/capacity check → vendor cards |
+| One or more affected vendors are past their cutoff | Standard flow is **blocked**; the past-cutoff modal fires (§ 13.4) |
+
+### 13.4 Past-cutoff modal copy
+
+Replaces the standard confirmation modal entirely. No reason field, no Continue button, no vendor cards.
+
+> {Date / Venue / Guest count} changes are no longer accepted by some of your vendors at this proximity to your wedding.
+>
+> **Blocking vendors:**
+> · Casa Manila Catering — accepts date changes up to **Oct 16, 2026** (T-30 days). Today is **Oct 25, 2026**.
+> · Bloomwood Florals — accepts date changes up to **Oct 23, 2026** (T-23 days).
+>
+> If you have a genuine emergency (force majeure, family crisis, venue collapse), you can request an admin override and we'll reach out to each vendor individually.
+>
+> [Close]   [Request admin override →]
+
+The "Request admin override" CTA routes to 0029 help center with the form pre-populated (change type, affected vendors, current proximity). Couple supplies the reason there; admin mediator picks it up (§ 13.6).
+
+### 13.5 Retroactivity rule · snapshotting at booking confirmation
+
+When a vendor's booking is confirmed, the **then-current values** of all three cutoff fields are snapshotted to `vendor_event_window.effective_date_cutoff` / `effective_venue_cutoff` / `effective_guest_count_cutoff` for that specific event. These snapshotted values are what § 13.3 checks against — NOT the live vendor record.
+
+Why: without snapshotting, a vendor who senses friction with a couple could shorten their cutoff to 90 days the moment they expected a reschedule request, instantly blocking the couple. The snapshot rule means the contract terms in effect when the couple chose this vendor are the binding ones for this event.
+
+Vendor edits to the live record apply to **future bookings only**. The vendor's own dashboard (0022) shows both the live values and a per-event snapshot table when applicable — they need to know what they've committed to for in-flight events.
+
+### 13.6 In-flight protection
+
+Changes that were **initiated before the cutoff date and are currently pending** (in vendor confirmation, in chat negotiation, or in admin mediation) continue to run to completion even if the cutoff falls during the negotiation window. Cutoffs apply only to NEW attempts.
+
+Example: couple submits a guest count change on Oct 14 (T-32, well before catering's T-14 guest count cutoff). Negotiation drags on; by Oct 30 (T-16) the couple has not received vendor confirmation. Even though the catering cutoff (T-14, falling on Nov 1) is now within 2 days, the in-flight request remains valid and the vendor can still respond. The cutoff is for INITIATION, not for resolution.
+
+This prevents the system from auto-failing valid changes just because a vendor took a long time to respond.
+
+### 13.7 Admin override path
+
+Only forward path when one or more vendors are past cutoff. Flow:
+
+1. Couple files a request via 0029 help center → form captures change type, affected vendors, proposed new value, reason (free text, min 100 chars), evidence upload (optional)
+2. Admin mediator reviews the case
+3. Mediator reaches out to each past-cutoff vendor individually (in-app message, email, or phone, mediator's discretion)
+4. **Vendor agrees** → mediator applies the change via the 0023 admin console (bypasses cutoff for this case only)
+5. **Vendor declines** → couple's only remaining option is to cancel that vendor's booking (refund flow per § 2.2) and find a replacement vendor
+
+Override actions log to `dispute_resolutions` with `cause = 'past_cutoff_override'`, the original cutoff value, the proximity at which the override applied, and the mediator's notes. Useful for refining V1 defaults — if a category consistently grants overrides, the seed value is too conservative.
+
+### 13.8 Vendor-side surfacing (forward dep on 0022)
+
+Vendor dashboard (0022) needs:
+
+- **Settings → Change Acceptance Policy** — three fields with the live defaults; vendor can edit; tooltip explains the snapshot rule so vendors understand edits don't affect in-flight events
+- **Per-event snapshot table** — for each currently-confirmed booking, the snapshotted cutoff values are shown read-only. Lets the vendor see exactly what they've committed to for each event.
+
+V1 spec — landing in 0022. § 13 here defines the data model and the couple-side behavior; the vendor surfaces are forward-dep on 0022.
+
+---
+
 ## 7. Companions
 
 - `0021_couple_dashboard_fully_purchased.html` — interactive 5-surface walkthrough with web + mobile parity.
 - `0021_couple_dashboard_fully_purchased.docx` — stakeholder mirror.
+
+---
+
+## V1.2 Amendment — Multi-Moderator + Multi-Payer (added 2026-05-19)
+
+Per [0048 Multi-Moderator Event Access](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md) and [0049 Multi-Payer Cart](../0049_multi_payer_cart/0049_multi_payer_cart.md), the couple dashboard becomes **role-aware** in V1.2. The "fully-purchased state" preview retains its current shape but every surface now renders per the viewer's `event_moderators.role_subtype`.
+
+### Header changes
+
+A new role badge appears at the top of every dashboard surface: **"Viewing as Bride"** / **"Viewing as Parent of Bride"** / **"Viewing as Maid of Honor"** etc. Tap → switch between roles if user has multiple roles on the same event (rare but possible per [0048 § Edge cases](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md)).
+
+### Visibility-aware rendering
+
+Every panel respects `event_moderators.permissions_json` + row-level `private_to_role[]` / `hidden_from_role[]` / `surprise_for_role` tags from [0048](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md). Specific impacts:
+
+- **Guest list panel** — Maid of Honor / Family Helpers see only their assigned side; couple + parents see all.
+- **Budget panel** — hidden items show as "Reserved — Bride's items ₱X" (aggregate preserved, line items hidden) for the surprise-target role; full breakdown for non-hidden viewers.
+- **Vendors panel** — vendor chat threads tagged `private_to_role` filter per viewer; bridal_gown thread auto-hides from groom.
+- **Cart panel** — per-role attribution display per [0049 § Cart view per role](../0049_multi_payer_cart/0049_multi_payer_cart.md). Current viewer's items separated from "Other moderators' items (FYI)".
+- **Calendar / Schedule panel** — hidden events show sanitized title ("Personal Appointment") in the hidden-from role's view; time block preserved.
+- **Day-of timeline** — visibility flags respected; surprise items (e.g., first-dance custom song) hidden from designated `surprise_for_role` until day-of.
+
+### New surface: `/dashboard/{eventId}/moderators`
+
+Per [0048 § UX surfaces](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md). Lists all moderators with role, status, permissions summary. CTA: "+ Invite moderator". Visible to couple + moderators with `can_add_moderators=TRUE` permission.
+
+### Forward-compat note
+
+V1.2 amendments don't change V1.1 behavior for solo-couple events (events with only `bride` + `groom` in `event_moderators`). Backfill migration ensures every existing event auto-creates `bride` + `groom` moderator rows.

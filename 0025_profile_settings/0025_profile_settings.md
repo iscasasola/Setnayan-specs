@@ -43,7 +43,7 @@ The other five tabs are the conventional surface every user expects to find unde
 
 ### 2.1 Shared shell, role-driven sections
 
-The Settings surface is one React component (`<SettingsShell />`) parameterized by the current role. It renders **seven** tabs in a left-rail layout on desktop and a horizontal scroll on mobile (Tab 7 Guided Planner added 2026-05-14). Each tab's visibility is gated by role:
+The Settings surface is one React component (`<SettingsShell />`) parameterized by the current role. It renders **seven** tabs in a left-rail layout on desktop and a horizontal scroll on mobile (Tab 7 Setnayan Concierge added 2026-05-14 as "Guided Planner"; renamed to "Setnayan Concierge" 2026-05-16 per the repricing lock). Each tab's visibility is gated by role:
 
 | Tab | Customer | Vendor | Admin |
 |---|---|---|---|
@@ -53,7 +53,7 @@ The Settings surface is one React component (`<SettingsShell />`) parameterized 
 | 4. URL & Slug | full (event slug) | full (vendor slug) | n/a (hidden) |
 | 5. Payment Methods | full | n/a (vendor payouts live in 0022 § 6) | n/a (hidden) |
 | 6. Privacy & Data | full | full | partial (cannot self-delete · § 6.2 exception) |
-| **7. Guided Planner** | **full (per event)** | **n/a (hidden)** | **n/a (hidden)** |
+| **7. Setnayan Concierge** | **full (per event)** | **n/a (hidden)** | **n/a (hidden)** |
 
 A user with multiple roles (`event_members.member_type` spans couple + guest, or a customer who later becomes a vendor) sees the Settings cog jump them to the role-appropriate Settings page. Switching role via the top-chrome "Switch view" pill (per one-app-three-doorways) re-renders Settings against the new role context.
 
@@ -296,17 +296,17 @@ The "Read the full Privacy & Security Policy" link routes to `setnayan.com/priva
 
 ---
 
-### 3.7 Tab 7 — Guided Planner (added 2026-05-14 · customer-only · per-event)
+### 3.7 Tab 7 — Setnayan Concierge (added 2026-05-14 as "Guided Planner"; repriced + renamed 2026-05-16; simplified to single-SKU + 3-day trial 2026-05-17 · customer-only · per-event)
 
-Per the 2026-05-14 Guided Planner lock (CLAUDE.md decision log + iteration 0016 § 0), each event independently runs in DIY mode (free default) or Guided mode (paid). This tab surfaces the per-event status + activation + extension controls.
+Per the 2026-05-17 Setnayan Concierge lock (CLAUDE.md decision log second 2026-05-17 row + iteration 0016 § 0), each event runs in DIY mode (free default) or Concierge mode (paid · single SKU ₱4,999) or Trial mode (card-less 3-day taste). This tab surfaces the per-event status + activation controls + the account-level trial cap + the enforcement-state UI.
 
-If the customer has multiple active events, an event picker at the top of the tab swaps the rendered status. Each event's Guided Planner status is independent — couple may run DIY on Event A and Guided 12-Month on Event B.
+If the customer has multiple active events, an event picker at the top of the tab swaps the rendered status. Each event's Setnayan Concierge status is independent — couple may run DIY on Event A and paid Concierge on Event B — but the **trial is account-level** (one trial across all of the couple's events, not one per event), and the enforcement state is also account-level.
 
 #### 3.7.1 Current status panel
 
-Reads `events.guided_planner_status`, `_tier`, `_expires_at` and renders one of three states:
+Reads `events.concierge_status`, `events.concierge_expires_at`, `users.concierge_trial_used_at`, and `users.concierge_enforcement_level` and renders one of four event-states with the enforcement overlay if applicable:
 
-**DIY state** (`guided_planner_status = 'diy'`):
+**DIY state** (`concierge_status = 'diy'`):
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ {event_name}                                             │
@@ -316,105 +316,172 @@ Reads `events.guided_planner_status`, `_tier`, `_expires_at` and renders one of 
 │ available, but you won't get timeline help, deadline    │
 │ alerts, or vendor picks matched to your style.          │
 │                                                          │
-│ [ Compare Guided Planner plans → ]                       │
+│ [ Buy Setnayan Concierge · ₱4,999 ]                     │
+│ [ Try 3 days free — no card required ]                  │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Active state** (`guided_planner_status = 'active'`):
+The "Try 3 days free" CTA is hidden if ANY of:
+- `users.concierge_trial_used_at IS NOT NULL` (account has already used its one trial — see "Trial used" empty-state below)
+- `users.concierge_enforcement_level IN ('trial_banned', 'full_banned')`
+
+**Trial-used empty-state inline** (DIY + `users.concierge_trial_used_at IS NOT NULL`):
+> *You've used your free 3-day trial on this account. Buy Setnayan Concierge anytime to continue with the full experience.*
+
+**Trial state** (`concierge_status = 'trial'`):
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ {event_name}                                             │
-│ Currently: Guided Planner · {tier} tier                 │
+│ Currently: 3-day Trial · {days_remaining} days left     │
+│                                                          │
+│ You're trying the full Setnayan Concierge experience.   │
+│ Trial ends: {expires_at formatted}                      │
+│                                                          │
+│ Continue with:                                           │
+│ [ Buy Setnayan Concierge · ₱4,999 ]                     │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Active state** (`concierge_status = 'active'`):
+```
+┌─────────────────────────────────────────────────────────┐
+│ {event_name}                                             │
+│ Currently: Setnayan Concierge · active                  │
 │                                                          │
 │ Active until: {expires_at formatted}                    │
 │ Days remaining: {N}                                      │
 │                                                          │
-│ [ Extend my plan ]   [ Cancel Guided Planner ]          │
+│ [ Extend my plan ]   [ Cancel Setnayan Concierge ]      │
 └─────────────────────────────────────────────────────────┘
 ```
 
-When `days_remaining < 14` → renewal nudge banner appears at the top of the tab AND on the dashboard Home per iteration 0021 § 2.0b (variant B).
+When `days_remaining < 14` → renewal nudge banner appears at the top of the tab AND on the dashboard Home per iteration 0021 § 2.0b (variant C).
 
-**Expired state** (`guided_planner_status = 'expired'`):
+**Expired state** (`concierge_status = 'expired'`):
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ {event_name}                                             │
-│ Currently: DIY mode (Guided Planner expired)            │
+│ Currently: DIY mode (Setnayan Concierge expired)        │
 │                                                          │
-│ Your Guided Planner expired on {expires_at}.            │
+│ Your Setnayan Concierge expired on {expires_at}.        │
 │ Your progress is saved — reactivate anytime to pick up  │
 │ where you left off.                                     │
 │                                                          │
-│ [ Reactivate Guided Planner → ]                          │
+│ [ Reactivate Setnayan Concierge → ]                     │
 └─────────────────────────────────────────────────────────┘
 ```
 
-#### 3.7.2 Plan comparison card
+The "Try 3 days free" CTA is NOT offered from the Expired state (trial is one-shot per account; consumed earlier in the account's lifecycle).
 
-When customer taps "Compare plans" or "Reactivate" → renders the four-option chooser identical to iteration 0000 § 2.5b:
+#### 3.7.2 Enforcement-state overlay (NEW 2026-05-17)
+
+When `users.concierge_enforcement_level != 'none'`, a notice panel renders **above** the status panel from 3.7.1. The notice copy + actions vary by tier:
+
+| Enforcement level | Notice copy + actions |
+|---|---|
+| `'warning'` | *"Heads-up — your account was flagged once for review and cleared with a warning. Your 3-day trial remains available; further flags may limit access."* (audit-only · no action buttons) |
+| `'trial_banned'` | *"3-day trial unavailable on this account. You can still purchase Setnayan Concierge anytime."* + [ Why this happened — appeal ticket → ] (opens 0029 help-center ticket) |
+| `'full_banned'` | *"Setnayan Concierge unavailable on this account. Contact support if you believe this is in error."* + [ Open appeal ticket → ]. Status panel below shows ONLY DIY state (no purchase CTAs) regardless of `events.concierge_status` |
+
+#### 3.7.3 Plan comparison card
+
+When customer taps "Buy Setnayan Concierge" or "Reactivate" → renders the two-option chooser identical to iteration 0000 § 2.5b:
 
 ```
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│ DIY MODE     │  │ 1-WEEK PASS  │  │ 3-MONTH PLAN │  │ 12-MONTH ✨   │
-│ Free         │  │ ₱99          │  │ ₱999         │  │ ₱1,999       │
-│              │  │              │  │ save 22%     │  │ BEST VALUE   │
-│              │  │              │  │              │  │ save 61%     │
-│              │  │ Try it for   │  │ 13 weeks of  │  │ 52 weeks —   │
-│              │  │ a week.      │  │ guided plan- │  │ a full year. │
-│              │  │              │  │ ning.        │  │              │
-│              │  │              │  │              │  │              │
-│ [Keep DIY]   │  │ [Buy ₱99]    │  │ [Buy ₱999]   │  │ [Buy ₱1,999] │
-└──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘
+┌──────────────────┐  ┌──────────────────────────────┐
+│ DIY MODE         │  │ SETNAYAN CONCIERGE  ✨        │
+│ Free             │  │ ₱4,999 / 12 months           │
+│                  │  │ ₱13.69 / day                 │
+│ All tools.       │  │                              │
+│ Plan at your     │  │ Full 9-step roadmap +        │
+│ own pace.        │  │ daily nudges + priority      │
+│                  │  │ vendor matching + honeymoon. │
+│                  │  │ Less than ₱25K coordinator.  │
+│ [Keep DIY]       │  │ [Buy ₱4,999]                 │
+└──────────────────┘  └──────────────────────────────┘
+
+   Not ready to commit? [ Try 3 days free → ] (no card required)
 ```
 
-#### 3.7.3 Activation / extension flow
+The 3-day-trial link follows the same gating rules as 3.7.1: hidden when account has used trial OR is `'trial_banned'`/`'full_banned'`.
 
-Tapping "Buy ₱X" routes to checkout per iteration 0034 apply-then-pay:
-1. `service_orders` row created with the relevant `guided_planner_*` SKU
+#### 3.7.4 Activation flow
+
+Tapping "Buy ₱4,999" routes to checkout per iteration 0034 apply-then-pay:
+1. `service_orders` row created with `concierge_complete` SKU (499,900 centavos). Blocked at this step if `users.concierge_enforcement_level = 'full_banned'`.
 2. Customer receives BDO/GCash payment instructions
 3. Customer pays externally
 4. Admin reconciles per 0034 § 4
-5. On `service_orders.status = 'paid'`, the activation hook (0034 § 4.4) calls `activate_guided_planner(event_id, tier, order_id)`:
-   - If `guided_planner_status` was `'diy'` or `'expired'` → flip to `'active'`, set `_tier`, set `_expires_at = NOW() + duration`
-   - If `guided_planner_status` was already `'active'` → extend: `_expires_at = current_expires_at + duration` (additive — stacks the new purchase on top of remaining time)
+5. On `service_orders.status = 'paid'`, the activation hook (0034 § 4.4) calls `activate_concierge(event_id, order_id)`:
+   - If `concierge_status` was `'diy'`, `'trial'`, or `'expired'` → flip to `'active'`, set `concierge_tier = 'complete'`, stamp `concierge_activated_at = NOW()`, compute `concierge_expires_at` per the **wedding-anchored formula** `LEAST(GREATEST(events.wedding_date + INTERVAL '30 days', NOW() + INTERVAL '12 months'), NOW() + INTERVAL '24 months')` (defaults to `NOW() + INTERVAL '12 months'` if `wedding_date IS NULL`). Trial is overwritten cleanly if a couple buys mid-trial.
+   - If `concierge_status` was already `'active'` → extend: re-run the formula against the new `wedding_date` (if changed) and the existing `concierge_activated_at`; apply extend-only (never shrink).
 
-In-app + email notification fires on activation (per 0028).
+**Wedding-date update recompute.** When the couple later sets or updates `events.wedding_date` via Concierge Step 1 or Profile edit, the database trigger (or app-layer hook) calls `recompute_concierge_expiry(event_id)`:
+- Recomputes `concierge_expires_at` per the formula using the current `concierge_activated_at`
+- **Extend-only rule:** writes the new value only if it's later than the current `concierge_expires_at`; if earlier, no-op (couple keeps the runway they paid for)
+- If the new `wedding_date > concierge_activated_at + INTERVAL '24 months'` AND `events.concierge_long_engagement_advised_at IS NULL`, fires the long-engagement advisory and stamps the column
 
-#### 3.7.4 Cancel flow
+**Long-engagement advisory copy** (in-app + email per 0028):
 
-Tapping "Cancel Guided Planner" surfaces a confirmation:
+> *"Your wedding is more than 24 months away. Setnayan Concierge covers up to 24 months from your purchase date — you'll lose access ~{N} months before your wedding day. We recommend renewing closer to your wedding for full coverage."*
 
-> Cancelling will end your Guided Planner access at the end of your current paid period ({expires_at formatted}). You'll keep all your planning progress and can reactivate anytime. **Setnayan does not offer pro-rated refunds for unused time** — for refund requests, contact the DPO via Tab 6.
+In-app + email notification also fires on activation (separate from the advisory) per 0028.
+
+#### 3.7.5 Trial start flow
+
+Tapping "Try 3 days free" calls `start_concierge_trial(event_id)` server-side directly — no checkout, no order row, no payment instructions. The handler:
+1. Validates `users.concierge_trial_used_at IS NULL` (account-level cap)
+2. Validates `users.concierge_enforcement_level NOT IN ('trial_banned', 'full_banned')`
+3. Runs cross-account similarity check (per iteration 0016 § 0 detection signals) against all trial-used accounts
+4. On pass → flips event status to `'trial'`, sets `concierge_expires_at = NOW() + INTERVAL '3 days'`, stamps `users.concierge_trial_used_at = NOW()`; UI refreshes to Trial-state panel (3.7.1 variant Trial) and dashboard Home flips to variant B per iteration 0021
+5. On similarity-check hit → inserts `concierge_abuse_flags(status='pending_review')` row + returns `under_review` error; UI shows modal *"Your account is under review. Contact support if you believe this is in error."* with [ Open appeal ticket → ] CTA; **trial slot is NOT consumed** (so a falsely-flagged user later cleared by admin can still start their trial)
+
+In-app notification "Trial started — you have 3 days of Setnayan Concierge" fires immediately on success (per 0028).
+
+#### 3.7.6 Cancel flow
+
+Tapping "Cancel Setnayan Concierge" surfaces a confirmation:
+
+> Cancelling will end your Setnayan Concierge access at the end of your current paid period ({expires_at formatted}). You'll keep all your planning progress and can reactivate anytime. **Setnayan does not offer pro-rated refunds for unused time** — for refund requests, contact the DPO via Tab 6.
 
 If customer confirms:
-- `guided_planner_status` stays `'active'` until `_expires_at`
+- `concierge_status` stays `'active'` until `concierge_expires_at`
 - A `cancellation_requested_at` flag is set so the renewal nudge banner is suppressed
 - At expiry, cron flips to `'expired'` per the standard daily sweep
 - Pro-rated refund requests are admin-handled (out of scope for this surface); per § 9.1 single-admin authority for refunds ≤ ₱25K
 
-#### 3.7.5 Server actions
+#### 3.7.7 Server actions
 
 ```ts
-// apps/web/app/dashboard/profile/guided-planner/actions.ts
+// apps/web/app/dashboard/profile/concierge/actions.ts
 
-export async function activateGuidedPlanner({
+export async function activateConcierge({
   eventId,
-  tier,
   orderId,
-}: ActivateInput): Promise<Result>;
+}: ActivateInput): Promise<Result>;        // single SKU as of 2026-05-17 (no tier arg)
 
-export async function extendGuidedPlanner({
-  eventId,
-  additionalTier,
-  orderId,
-}: ExtendInput): Promise<Result>;
-
-export async function cancelGuidedPlanner({
+export async function cancelConcierge({
   eventId,
 }: CancelInput): Promise<Result>;
+
+export async function startConciergeTrial({  // renamed 2026-05-17 from startConciergePreview
+  eventId,
+}: TrialInput): Promise<Result>;             // returns { status: 'started' | 'already_used' | 'enforcement_blocked' | 'under_review' }
 ```
 
-All three enforce RLS: only event members with `member_type = 'couple'` can mutate; admins can override per § 9.1.
+All three enforce RLS: only event members with `member_type = 'couple'` can mutate; admins can override per § 9.1. `startConciergeTrial` is idempotent and returns the existing trial row if one was already issued for the event AND under-review responses do not consume the account-level trial slot.
+
+**Admin-side server actions** (called from the 0023 Concierge Abuse tab, not from this Settings surface — listed here for cross-reference):
+
+```ts
+// apps/web/app/admin/concierge-abuse/actions.ts
+
+export async function adminClearConciergeFlag({ flagId, adminUserId, notes }): Promise<Result>;
+export async function adminConfirmConciergeAbuse({ flagId, adminUserId, notes }): Promise<Result>;
+export async function adminLiftConciergeEnforcement({ userId, adminUserId, notes }): Promise<Result>;
+```
+
+See iteration 0023 § Concierge Abuse for the queue + admin workflow.
 
 ---
 

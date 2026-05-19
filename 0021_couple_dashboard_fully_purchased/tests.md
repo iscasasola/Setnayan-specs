@@ -24,8 +24,8 @@ Each section of the spec needs corresponding test coverage. Tick when written.
 - [ ] Active Setnayan apparatus
 - [ ] State around the wedding
 - [ ] 2. The 8 surfaces
-- [ ] 2.0a Home layout · Guided mode default · DIY toggle
-- [ ] 2.0b Guided Planner · the 9-step journey
+- [ ] 2.0a Home layout · Concierge mode default · DIY toggle
+- [ ] 2.0b Setnayan Concierge · the 9-step journey
 - [ ] 2.0c Profile avatar = dashboard home shortcut
 - [ ] 2.1 QR token rules — per QR type (locked)
 - [ ] 2.2 Naming — Papic · Patiktok · Panood (the media trio)

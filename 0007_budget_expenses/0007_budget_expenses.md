@@ -315,3 +315,52 @@ This iteration is shippable when all of the following are true:
 [View this iteration's HTML mockup](computer:///Users/icecasasola/Documents/Claude/Projects/Setnayan%20App/0007_budget_expenses/0007_budget_expenses.html)
 
 [View this iteration's Word document](computer:///Users/icecasasola/Documents/Claude/Projects/Setnayan%20App/0007_budget_expenses/0007_budget_expenses.docx)
+
+---
+
+## V1.2 Amendment — Per-Payer Attribution + Visibility Tags (added 2026-05-19)
+
+Per [0048 Multi-Moderator Event Access](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md) and [0049 Multi-Payer Cart](../0049_multi_payer_cart/0049_multi_payer_cart.md), budget line items extend to track per-payer attribution + role-based visibility in V1.2.
+
+### Schema additions to `budget_line_items`
+
+```sql
+ALTER TABLE budget_line_items
+  ADD COLUMN paid_by_role TEXT[],                          -- mirror of paid_by_role from cart line items
+  ADD COLUMN linked_order_line_item_id UUID REFERENCES service_order_line_items(line_item_id),
+  ADD COLUMN private_to_role TEXT[],
+  ADD COLUMN hidden_from_role TEXT[],
+  ADD COLUMN surprise_for_role TEXT,
+  ADD COLUMN amount_revealed_to_aggregate BOOLEAN NOT NULL DEFAULT TRUE;
+```
+
+### Automatic flow from cart
+
+When a cart line item checks out via [0049](../0049_multi_payer_cart/0049_multi_payer_cart.md) checkout flow, a corresponding `budget_line_items` row is auto-created with:
+- Same `paid_by_role` as the cart item
+- `linked_order_line_item_id` populated for traceability
+- Same visibility tags propagated
+
+### Budget view changes
+
+Three new views on `/dashboard/{eventId}/budget`:
+
+1. **"Who paid what"** tab — group budget lines by `paid_by_role`. Shows "Bride: ₱X / Parent of Bride: ₱Y / Ninang Lita: ₱Z" subtotals. Useful for couples managing multi-payer reality.
+2. **"By category"** tab (existing) — extended to show payer attribution per line item.
+3. **"Pending"** tab — items added to cart but not yet paid; grouped by attributed payer for tracking.
+
+### Visibility-aware aggregate
+
+Critical leak-prevention rule from [0048 § Aggregate budget handling](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md):
+
+- Hidden line items (e.g., bridal_gown order in groom's view) show as "Reserved — Bride's items ₱X" with line items hidden but total preserved.
+- Groom's aggregate total rounded to nearest ₱5K to prevent reverse-calculation of hidden item exact amount.
+- Bride + parents see full breakdown.
+
+### CSV export
+
+Existing budget CSV export gains a `paid_by_role` column. Couples exporting for off-platform accounting see per-payer attribution.
+
+### Forward-compat
+
+V1.1 single-couple events backfill with `paid_by_role: ['bride', 'groom']` (joint attribution) on existing budget lines. UI hides the per-payer view if the event has only `bride` + `groom` moderators (no real multi-payer to show).

@@ -1,6 +1,6 @@
 # 0018 — Supplies Marketplace
 
-**Status:** drafted 2026-05-11
+**Status:** drafted 2026-05-11 · **V1 promotion 2026-05-18 (prior V1.5+ build-deferral lifted; see CLAUDE.md decision log)**
 **Iteration:** 0018
 **Surface:** Cross-platform marketplace for physical goods + rentals + print fulfillment
 **Dependencies:** 0000 App Shell, 0003 Billing Rail, 0006 Vendors Management, 0017 Patiktok, 0005 LED Background, 0008 Seating Chart, 0009 Photo Delivery, all keepsake SKUs

@@ -4,15 +4,26 @@
 
 ## What's where
 
-This README is the entry point. The four files at root that you read in this order get any new collaborator productive in 30 minutes.
+This README is the entry point. The five files at root that you read in this order get any new collaborator productive in 30 minutes.
 
 | File | Purpose | When to read |
 |---|---|---|
 | **`README.md`** *(this file)* | Project overview + folder map | First — orientation |
-| **`CLAUDE.md`** | Project context for AI sessions (auto-loaded by Claude Code) | Second — what's been decided |
+| **`CLAUDE.md`** | Project context for AI sessions (auto-loaded by Claude Code) — **decision log at bottom** | Second — what's been decided |
 | **`API_Integration_Checklist.md`** | External services + accounts that must exist *before* code starts | Third — prereqs |
 | **`CLAUDE_Code_Build_Prompt.md`** | Detailed build prompt — tech stack, UI/UX standards, code conventions | Fourth — handoff to Claude Code |
 | **`COWORK.md`** | How Cowork mode should navigate this project | Fifth — for ongoing Cowork sessions |
+
+### Daily-driver status anchors
+
+These four files are the freshest source of truth on **what's actually built right now**. Read these before drilling into individual iteration folders:
+
+| File | Purpose | Last refreshed |
+|---|---|---|
+| **`V1_Gap_Analysis_Status.md`** | Spec-side audit: which V1 features are speced, tiered, retired | 2026-05-17 |
+| **`App_Build_Status.md`** | Code-shipped audit: spec vs `origin/main`, per-iteration status | 2026-05-18 |
+| **`Installed_Stack_Inventory.md`** | What's wired under the hood — routes (45), migrations, server actions, integrations, env vars | 2026-05-16 |
+| **`Live_Site_Snapshot_2026-05-18/`** | Public-site behavioral audit — 13 routes captured, with cross-reference docs for buttons, forms, prices, functions | 2026-05-18 |
 
 ## Folder structure
 
@@ -89,7 +100,17 @@ Setnayan Project/
 │   ├── 0003_token_wallet_and_packs/   (retired iteration)
 │   └── 0020_admin_console/            (superseded by 0023)
 │
-└── (iterations) 0000_app_shell_and_navigation/ through 0024_save_the_date/
+├── Live_Site_Snapshot_2026-05-18/     ← Public-site audit (13 routes + 4 cross-ref docs)
+│   ├── README.md                      ← snapshot index + drift flags
+│   ├── _BUTTONS.md                    ← all links + buttons by source page
+│   ├── _FORMS.md                      ← all form inputs by source page
+│   ├── _PRICES.md                     ← all ₱ figures + FREE claims, by price and by page
+│   ├── _FUNCTIONS.md                  ← all H1–H4 headings in nested hierarchy
+│   ├── {route}.md × 13                ← per-route readable copy
+│   ├── raw/                           ← raw SSR HTML backup
+│   └── rendered/                      ← inventory JSONs + extract.py
+│
+└── (iterations) 0000_app_shell_and_navigation/ through 0047_style_driven_marketplaces/
     Each iteration folder contains the three deliverables:
     – {iteration}.md  (engineering spec)
     – {iteration}.html  (interactive web + mobile prototype)
@@ -144,8 +165,8 @@ When Claude Code, Cowork, or other AI tools start a session:
 
 ## Status
 
-V1 iterations drafted through 0024. Production code build has not yet begun — awaiting API integration setup (see API_Integration_Checklist.md). Engineering brief at `02_Specifications/13_Engineering_Brief.docx`.
+V1 iterations drafted through 0047 (active set: 0000–0035 + selected 0036+). Production code is shipping on `origin/main` — see `App_Build_Status.md` for per-iteration spec-vs-code status. Live site is at https://www.setnayan.com — see `Live_Site_Snapshot_2026-05-18/` for the public-site audit. Engineering brief at `02_Specifications/13_Engineering_Brief.docx`.
 
 ---
 
-*Last revised 2026-05-12. Source of truth for project orientation. If this file conflicts with CLAUDE.md, CLAUDE.md wins for decision history; README.md wins for folder structure.*
+*Last revised 2026-05-19. Source of truth for project orientation. If this file conflicts with CLAUDE.md, CLAUDE.md wins for decision history; README.md wins for folder structure.*

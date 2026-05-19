@@ -57,7 +57,7 @@ Plus the **central anchors**:
 | 5 | Day-of guest experience | ✅ | **0031 Day-of Guest Experience** — Spec: `0031_day_of_guest/0031_day_of_guest.md`. 570 lines. Live-event mode auto-activates T-1hr to T+8hr on the personal landing page. 6 cards: What's happening · Your table · Live photo wall · Video guestbook · Live schedule · Coordinator broadcast. Offline-first PWA shell for weak-signal venues. 5-mode lifecycle. |
 | 6 | Crew meal management UX for catering vendor | ✅ | `0006_vendors_management/0006_vendors_management.md` adds the `vendor_services.crew_size` + `crew_meal_required` columns. `0022_vendor_dashboard/0022_vendor_dashboard.md` § 2.2a surfaces the service editor stepper for "How many of your team will be on-site?". Aggregates into 0007 Budget crew meal totals. |
 | 7 | Public API for third-party integrations (future-proofing only) | ✅ | **0033 Public API Foundation** — Spec: `0033_public_api_foundation/0033_public_api_foundation.md`. 624 lines. Cloudflare Workers gateway + OAuth2 PKCE + 16 scopes + rate-limit tiers + webhook delivery infra + `developers.setnayan.com` portal. NO public endpoints turn on in V1; plumbing only. Phased V1.5 rollout: A (events read) → B (webhooks) → C (vendor browse) → D (bookings). |
-| 8 | Analytics event tracking for product metrics (funnel) + **0035 Observability shipped 2026-05-16** | ✅ | **0023 funnel analytics** — `0023_admin_console/0023_admin_console.md` § 3.8 — Funnel analytics layer. 7 V1 funnels (customer signup → first booking · vendor signup → first booking · Guided adoption · DIY browse · Save-the-Date · Paparazzi · Pro upgrade). Schema: `funnel_events` table. New "Funnels" tab in 0023 dashboard with cohort breakdowns + period compare. **0035 Observability** — `0035_observability/` iteration shipped. **Sentry** (PR #17) wired for error tracking on `apps/web` + `apps/desktop` — `NEXT_PUBLIC_SENTRY_DSN` + server-side `SENTRY_DSN` + `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT` env vars whitelisted in `turbo.json` `build.env`. **PostHog** (PR #19) wired for product analytics with 3 server-side funnels live (signups → first event → first paid order; vendor signups → profile complete → first booking; week-over-week); 4 more funnels (Save-the-Date · Papic · Pro upgrade · Guided Planner adoption) go through PostHog Insights dashboards. **Pending owner-side action:** Sentry prod smoke test (trigger one controlled error to verify capture + alerting routing) — bundle with long-pole admin sprint per decision-log row 10 (2026-05-16). |
+| 8 | Analytics event tracking for product metrics (funnel) + **0035 Observability shipped 2026-05-16** | ✅ | **0023 funnel analytics** — `0023_admin_console/0023_admin_console.md` § 3.8 — Funnel analytics layer. 7 V1 funnels (customer signup → first booking · vendor signup → first booking · Setnayan Concierge adoption · DIY browse · Save-the-Date · Paparazzi · Pro upgrade). Schema: `funnel_events` table. New "Funnels" tab in 0023 dashboard with cohort breakdowns + period compare. **0035 Observability** — `0035_observability/` iteration shipped. **Sentry** (PR #17) wired for error tracking on `apps/web` + `apps/desktop` — `NEXT_PUBLIC_SENTRY_DSN` + server-side `SENTRY_DSN` + `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT` env vars whitelisted in `turbo.json` `build.env`. **PostHog** (PR #19) wired for product analytics with 3 server-side funnels live (signups → first event → first paid order; vendor signups → profile complete → first booking; week-over-week); 4 more funnels (Save-the-Date · Papic · Pro upgrade · Setnayan Concierge adoption) go through PostHog Insights dashboards. **Pending owner-side action:** Sentry prod smoke test (trigger one controlled error to verify capture + alerting routing) — bundle with long-pole admin sprint per decision-log row 10 (2026-05-16). |
 
 ---
 
@@ -188,10 +188,10 @@ Today's lock adds five new V1 spec deliverables to the gap-analysis ledger. None
 
 | # | Item | Status | Where it landed |
 |---|---|---|---|
-| 1 | **Setnayan Pay commission model (5.5% on top of vendor price, admin-configurable per method, BIR 0.5% pass-through, Maya Business V1.5+ primary gateway, Maya QR Ph preferred rail, Setnayan absorbs ₱15-25 disbursement fee)** | ✅ Spec | `0034_payments_and_cart/0034_payments_and_cart.md` § 6 (full rewrite — 5.5%/6.5% per method, BIR Withholding 0.5%, Maya Business V1.5+, payout breakdown table, schema updates). `0023_admin_console/0023_admin_console.md` § 3.5d (admin-configurable payment-method config table + history). Engineering pending: schema migrations, BIR 2307 generation, gateway integration. |
-| 2 | **Vendor Verification flow (FREE initial / ₱1,500 annual renewal / ₱2,500 re-verification after demotion · 12-document checklist · all-or-nothing · 3-5 BD SLA · `setnayan-vendor-verification` R2 bucket)** | ✅ Spec | `0006_vendors_management/0006_vendors_management.md` new "Vendor Verification flow" section (pricing table + 12-doc checklist + category-specific extras + process + tier perks/limitations + schema). `0023_admin_console/0023_admin_console.md` § 3.2a (verification queue refinement). `API_Integration_Checklist.md` Persona/Veriff/Onfido + AMLC additions. |
+| 1 | **Setnayan Pay commission model (flat 5.0% on top of vendor price · Option B vendor-absorbs-gateway · admin-configurable per method defaulting uniform · BIR 0.5% pass-through · Maya Business V1.5+ primary gateway · Maya QR Ph preferred rail · Setnayan absorbs ₱15-25 disbursement fee)** | ✅ Spec | `0034_payments_and_cart/0034_payments_and_cart.md` § 6 (full rewrite — flat 5.0% targeting 3% net at worst-case tax wedge · supersedes morning's 5.5%/6.5% dual-rate · BIR Withholding 0.5% · Maya Business V1.5+ · payout breakdown table · schema updates). `0023_admin_console/0023_admin_console.md` § 3.5d (admin-configurable payment-method config table + history; all rails default 5.0%). Engineering pending: schema migrations, BIR 2307 generation, gateway integration. |
+| 2 | **Vendor Verification flow (FREE initial / ₱1,499 annual renewal / ₱2,499 re-verification after demotion · charm-corrected 2026-05-17 · 12-document checklist · all-or-nothing · 3-5 BD SLA · `setnayan-vendor-verification` R2 bucket)** | ✅ Spec | `0006_vendors_management/0006_vendors_management.md` new "Vendor Verification flow" section (pricing table + 12-doc checklist + category-specific extras + process + tier perks/limitations + schema). `0023_admin_console/0023_admin_console.md` § 3.2a (verification queue refinement). `API_Integration_Checklist.md` Persona/Veriff/Onfido + AMLC additions. |
 | 3 | **All Tools Unlock bundle ₱9,999/year (Mood Board + Palette + Seating + QR Reader + Advanced Pricing Tier · open to ALL paying vendors)** | ✅ Spec | `0022_vendor_dashboard/0022_vendor_dashboard.md` § 6B (full rewrite — à la carte ₱99/wk listing + All Tools Unlock bundle + schema with `vendor_tool_bundles` table). |
-| 4 | **Marketing tier ladder (Boosted Ads 5km ₱5K/wk · 10km ₱8K/wk · 20km ₱15K/wk · Sponsored Boost Quarterly ₱250K / Annual ₱800K at 30km, verified-only)** | ✅ Spec | `0022_vendor_dashboard/0022_vendor_dashboard.md` § 5b (full rewrite — Boosted Ads tier table + Sponsored Boost long-commit tier table + retire of prior single ₱1,499/wk SKU + stacked-cost example). |
+| 4 | **Marketing tier ladder (Boosted Ads 5km ₱4,999/wk · 10km ₱7,999/wk · 20km ₱14,999/wk · Sponsored Boost Quarterly ₱249,999 / Annual ₱799,999 at 30km, verified-only · charm-corrected + seeded 2026-05-17)** | ✅ Spec | `0022_vendor_dashboard/0022_vendor_dashboard.md` § 5b (full rewrite — Boosted Ads tier table + Sponsored Boost long-commit tier table + retire of prior single ₱1,499/wk SKU + stacked-cost example). Seeded in `0034 § service_catalog (i)` 2026-05-17. |
 | 5 | **Vendor Payout model (verified = immediate full payout T+1; coming_soon = 3-stage milestone 20/60/20 with T-14 + T+7 dispute windows; demote-to-coming_soon at 3+ disputes/30d)** | ✅ Spec | `0006_vendors_management/0006_vendors_management.md` new "Vendor Payout model" section. `0034_payments_and_cart/0034_payments_and_cart.md` § 6.7 (vendor_payouts table + payout_stage enum). |
 
 ### 2026-05-16 — secondary closes
@@ -220,3 +220,77 @@ Pandoc still unavailable. `CLAUDE.docx` + iteration `.docx` mirrors for 0019/002
 ---
 
 **End of 2026-05-16 addendum.**
+
+---
+
+## 2026-05-19 — Traffic monetization V1.1 scope expansion (additive)
+
+Owner-greenlit scope expansion (CLAUDE.md decision log 2026-05-19 sixth row of the day). Four directions to "earn while people browse setnayan.com" — none on the original 2026-05-12 gap list. All four greenlit; two of them shipped as new spec iterations; one is a sales playbook; one is gated on a separate activation sign-off.
+
+**Context before reading this addendum:** Setnayan already monetizes browsing through Boosted Ads + Sponsored Boost (locked 2026-05-16 in [0022 § 5b](0022_vendor_dashboard/0022_vendor_dashboard.md) — ₱4,999–14,999/wk + ₱249,999/qtr + ₱799,999/yr). One vendor on 20km Boosted Ads pays ~₱780K/year; Sponsored Boost Annual is ~₱800K/year. Philippine AdSense baseline is ~₱5–20K/month at 100K monthly pageviews. The expansion below adds **complementary** monetization (long-tail SEO traffic + editorial revenue) rather than competing with Boosted Ads.
+
+| # | Item | Status | Where it landed |
+|---|---|---|---|
+| 1 | **Boosted Ads activation playbook (owner-side sales motion · existing tier ladder shipped 2026-05-16)** | ✅ Doc | `09_Operations/Boosted_Ads_Activation_Playbook.md` — prospect-list SQL · in-app DM outreach template · 4 common objections + counters · tier-to-volume mapping · 30-vendor launch promo `BOOSTED-LAUNCH-2026` 20% off month 1 cap 30 redemptions · featured-vendor lookbook deliverable owed 2026-06-15 · weekly Monday review cadence. No engineering required for the playbook itself. **Engineering action:** seed `promo_codes` row for `BOOSTED-LAUNCH-2026`. |
+| 2 | **Editorial section + curated affiliate links + sponsored content (NEW iteration · V1.1)** | ✅ Spec | `0038_editorial_and_affiliates/0038_editorial_and_affiliates.md` — `setnayan.com/blog` (long-form articles · git-tracked MD pattern matching 0029 Help Center · `apps/web/content/editorial/`) + `setnayan.com/recommendations/[category]` (disclosed curated affiliate picks · Involve Asia primary network · `rel="sponsored nofollow noopener"` mandatory) + Sponsored Content (paid editorial features w/ sticky "Sponsored by X" badge + first-line disclosure + two-admin gate ≥₱100K). New tables: `editorial_articles` + `recommendation_pages` + `affiliate_links` + `affiliate_conversions` + `sponsored_slot_bookings`. PostHog `affiliate_link_clicked` event with no PII. Postback endpoint `POST /api/affiliates/postback?network=:network`. Newsletter sponsorship slot extends 0028. Cross-coordinates with 0022 + 0039. |
+| 3 | **Third-party display ads (NEW iteration · V1.1 · activation-gated)** | ✅ Spec · ⛔ activation gated | `0039_display_ads/0039_display_ads.md` — Google AdSense as V1.1 single network. Public, pre-purchase surfaces only — marketing site + help articles + 0038 editorial + marketplace discovery + vendor landing pages. **Site-wide RA 10173 cookie-consent banner** (new system surface; 3 categories essential/analytics/advertising; 12-month persistence). Hard guardrails: max 1 unit/page · AdSense topic-exclusion of wedding/event categories on vendor profiles + editorial + recommendations + marketplace · Auto Ads OFF · no interstitials. Vendor opt-out toggle on `/vendors/[slug]` (Boosted Ads / Sponsored Boost vendors default OFF). Two-admin activation kill-switch in 0023 § 5.1. Exclusions: logged-in dashboards · guest landing 0002 incl. Phase 4 Public Summary · day-of 0031 · sponsored articles · sponsored newsletter slots · checkout · contact form · cookie-preferences · error pages · vendor verification flows. New tables: `cookie_consent_events` + `adsense_activation_log` + `adsense_daily_revenue`; ALTERs on `users` + `vendors`. CSP middleware update per § 7. **Activation gated on:** AdSense publisher account approval (~1-2 week site review · 0038 must ship first for ≥30 pages of content) + Privacy Policy update + NPC re-filing + separate owner brand-risk sign-off entry in decision log + two-admin approval in 0023 § 5.1. |
+| 4 | **Iteration-number bump (originally 0036/0037 proposed → collisions found → final 0038/0039)** | ✅ Decision logged | `0036_pakanta` (Pakanta songwriter service · drafted 2026-05-14) and `0037_bespoke_monogram` (Bespoke Monogram via DALL-E · drafted 2026-05-14) already occupy 0036/0037. Plus a duplicate `0037_event_day_preload` from the 2026-05-16 retro-numbering. Final numbers for traffic-monetization expansion: **0038** Editorial & Affiliates + **0039** Display Ads. The 0037 duplicate folder reconciliation is **NOT** addressed in this scope — flagged as separate cleanup item for a future Cowork session. |
+
+### Hard NOs surfaced during this lock (do not violate)
+
+- No display ads on logged-in dashboards (0021/0022/0023) — paid product
+- No display ads on guest landing pages (0002 — incl. Phase 4 Public Summary) — guests shared data privately, ads = brand suicide
+- No display ads on day-of guest experience (0031) — sacred to the couple
+- No selling leads to third parties — violates `01_Contracts/Setnayan_Privacy_and_Security_Policy.md`
+- No AdSense Auto Ads — manual-placement only
+- No interstitials / anchor ads / vignette ads — display-only
+- No Outbrain / Taboola / programmatic open-exchange — AdSense managed-network only
+- No native/in-feed advertorial recommendations from third-party — out of policy
+- No display ads on the native iOS/Android (Papic) apps — out of policy
+- No display ads on the desktop app (`apps/desktop`) — out of policy
+- No re-targeting in V1.1 — out of scope, separate iteration if ever revisited
+
+### Engineering hand-off (deferred to engineering worktree)
+
+**0038 Editorial & Affiliates:**
+- Schema migrations: `editorial_articles` + `recommendation_pages` + `affiliate_links` + `affiliate_conversions` + `sponsored_slot_bookings`
+- Next.js routes: `/blog`, `/blog/[slug]`, `/recommendations`, `/recommendations/[category]`
+- MD content build pipeline: scan `apps/web/content/editorial/`, validate frontmatter, upsert at build time
+- PostHog event: `affiliate_link_clicked` + `newsletter_sponsor_clicked`
+- Postback endpoint: `POST /api/affiliates/postback?network=:network`
+- 0023 admin: Editorial tab + Articles / Sponsored slots / Affiliate revenue sub-tabs
+- 0022 vendor: "Display ads on my profile" toggle
+- 0028 email: `sponsored_slot_paid` receipt + newsletter weekly digest + sponsor-slot block
+
+**0039 Display Ads:**
+- Schema migrations: `users.consent_state` + `users.consent_recorded_at` + `users.consent_policy_version` ALTERs; `cookie_consent_events` + `adsense_activation_log` + `adsense_daily_revenue`; `vendors.display_ads_on_profile` ALTER
+- New libs: `apps/web/lib/ads/` (loader + excluded_topics + surface-inclusion map + vendor-opt-out resolver), `apps/web/lib/consent/`
+- New route: `/cookie-preferences`
+- New endpoint: `POST /api/consent/record`
+- 0025 Profile Settings → Privacy & Data: Cookie preferences link
+- 0023 Admin Console → Ads & Consent tab + 3 sub-tabs
+- 0022 Vendor Dashboard → Marketplace presence: Display ads toggle
+- 0028 Email: `consent_updated` template
+- 0029 Help Center: "Cookies & ads on Setnayan" article (lives in 0038 content system)
+- CSP middleware update (script-src + frame-src + img-src + connect-src for AdSense)
+- Daily cron: AdSense Management API pull at 02:00 PH
+
+**Boosted Ads Activation:**
+- Seed `promo_codes` row for `BOOSTED-LAUNCH-2026` (20% off month 1 · cap 30 redemptions · expires 2026-06-30)
+
+### Owner-side actions (pre-activation)
+
+- AdSense publisher account signup at `https://www.google.com/adsense` (~1-2 week review)
+- Involve Asia affiliate-network signup + W-8BEN-equivalent for payouts + merchant connections (Klook, Agoda, Trip.com, BDO, etc.)
+- Privacy Policy update at `01_Contracts/Setnayan_Privacy_and_Security_Policy.md` — add "Advertising cookies" section
+- NPC filings updated to list AdSense as a third-party processor
+- Featured-vendor lookbook produced (designer + owner · due 2026-06-15)
+- Brand-risk sign-off entry in CLAUDE.md decision log on the day of activation (separate row)
+
+### `.docx` regen
+
+Pandoc still unavailable. `0038`, `0039`, `Boosted_Ads_Activation_Playbook.md`, and `CLAUDE.docx` mirrors NOT regenerated — flag for the same future Cowork session that handles the 2026-05-16 backlog.
+
+---
+
+**End of 2026-05-19 addendum.**

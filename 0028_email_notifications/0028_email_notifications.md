@@ -383,6 +383,38 @@ The token resolves to a `email_unsubscribe_tokens` row, flips the matching `noti
 - **Mobile responsiveness:** Single column, max-width 600 px, fluid below 480 px. Tested in Gmail (iOS, Android, web), Apple Mail (iOS, macOS), Outlook (Windows, web). Litmus or similar previews enforced in CI on the React Email components.
 - **Dark mode:** Honor `prefers-color-scheme: dark` in supporting clients via CSS media query — flip cream → ink and ink → cream. Apple Mail and Gmail web honor this; Outlook does not (we don't fight it).
 
+### 10.1 Tone — helping voice, never announcement voice (locked 2026-05-18)
+
+Every email's copy must read as **Setnayan actively helping** the recipient, not Setnayan announcing a system event. This is the "always helping" north-star (memory: `project_setnayan_always_helping_principle.md` · CLAUDE.md 2026-05-18 sixth decision-log row) applied to email tone.
+
+**Pattern:**
+
+| Announcement voice (avoid) | Helping voice (use) |
+|---|---|
+| "Your verification was renewed." | "Your verification renews next month — we'll handle the docs check Tuesday." |
+| "Payment received." | "We've confirmed your ₱25,000 deposit to Caterer Y — Anna (your coordinator) marked it received this morning." |
+| "Trial expired." | "Your trial just ended — your plan and conversations stay saved. Come back anytime by re-activating Concierge." |
+| "New message from Photographer X." | "Photographer X replied to your tasting question — read it here." |
+| "RSVP received from Maria Santos." | "Maria Santos said yes! She's confirmed for your wedding on Feb 14." |
+
+**Mechanics:**
+- Subject lines lead with the helpful action or the human moment, not the system event
+- Pre-header copy expands the warmth ("We've got this handled" / "Here's what's next" / "Pick up where you left off")
+- Body copy positions Setnayan as the proactive party — "we" + helpful verbs ("we've confirmed", "we're tracking", "we'll send you a reminder")
+- Single primary CTA stays — but framed as opening continued help, not completing a transaction
+
+**This pattern also applies to vendor-side notifications.** Vendor emails (booking confirmations, payout notifications, verification renewals, message alerts) shift to helping voice — *"We're processing your ₱45,000 payout — should clear by Friday"* not *"Payout scheduled."*
+
+**Existing V1 templates to revise per this rule:**
+
+- `payment_instructions` · `payment_confirmed` · `refund_processed` — replace transactional language with progress-narrative language
+- `new_vendor_message` · `vendor_status_change` · `vendor_unresponsive_48h` — frame as "here's where things stand" + a helpful next step
+- `rsvp_received` — celebrate the moment, name the guest
+- `wedding_day_reminder` — countdown narrative, not system reminder
+- `save_the_date_sent` · `security_alert` — keep security alert formal (helping doesn't mean casual); but everything else shifts
+
+The 6 brand-truth lines from § 10 (Setnayan visual identity) stay — this is purely a copy direction layered on top.
+
 ---
 
 ## 11. Compliance
@@ -476,3 +508,51 @@ SendGrid as fallback adds zero cost while idle (their free tier covers 100 email
 | BIMI + verified mark certificate deferred to post-launch | VMC costs ~$1,500/year and requires registered trademark on the symbol mark. Setnayan trademark is in flight; once the registration lands, VMC is a 2-week procurement and a DNS record. Until then, Gmail shows our domain initial as the inbox avatar — acceptable. |
 | Plaintext alternative is mandatory, never optional | Gmail's reputation algorithm penalizes HTML-only email; we lose nothing by always shipping both. |
 | Sender domain is `notifications@setnayan.com`, not `setnayan.com` directly | Isolates transactional/marketing reputation from the corporate domain. If a campaign goes sideways, the corporate domain's deliverability is unaffected. |
+
+---
+
+## V1.2 Amendment — Moderator-Aware Notification Routing (added 2026-05-19)
+
+Per [0048 Multi-Moderator Event Access](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md), notifications gain visibility-aware routing in V1.2 to prevent surprise leaks.
+
+### Routing rules per template
+
+| Template | V1.1 recipient | V1.2 recipient (role-aware) |
+|---|---|---|
+| `rsvp_received` | Couple | All moderators with `can_view_guests=TRUE` |
+| `payment_matched` | Couple | Specifically the payer who completed the transaction (per `paid_by_role` from [0049](../0049_multi_payer_cart/0049_multi_payer_cart.md)) |
+| `vendor_inquiry_received` | Couple | Moderator who initiated the chat thread + other moderators with `can_message_vendors=TRUE` (respecting thread visibility tags) |
+| `chat_message` | Couple | Moderators with chat-read access for that thread (filtered by `private_to_role` / `hidden_from_role` / `surprise_for_role`) |
+| `welcome` | Couple | Moderator who just accepted invitation per [0048 § Moderator invitation flow](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md) |
+| `bridal_gown_fitting_ready` (new) | n/a | Bride + moderators who can see bridal_gown orders (parents of bride by default; NOT groom) |
+| `groom_suit_ready` (new) | n/a | Groom + moderators who can see groom_suit orders (parents of groom by default; NOT bride) |
+
+### New templates added in V1.2 (template count 9 → 12+)
+
+- `moderator_invitation_sent` — invitation email/SMS to invitee with role + permissions summary
+- `moderator_invitation_accepted` — confirmation to inviter + welcome to invitee
+- `moderator_removed_from_event` — polite removal notification ("Thank you for helping plan [Couple]'s wedding")
+- `surprise_item_ready` — generic template for surprise-tagged items (e.g., "Your surprise dance song is ready — keep it secret!")
+
+### Per-moderator notification preferences
+
+New `notification_preferences_json` column on `event_moderators` lets each moderator mute specific template types. Defaults:
+- Couples: all enabled
+- Parents: chat_message + payment_matched + RSVP enabled; marketing emails opt-in
+- Sponsors / Family Helpers: schedule + day-of templates only
+- Viewers: weekly digest only
+
+### Surprise-item leak prevention
+
+Notifications referring to hidden items use neutral copy:
+- "Your bridal gown is ready for fitting" → only to bride + parents of bride
+- Groom's notification feed for the same event-day shows: "Bride has an appointment today" (no vendor name, no item details)
+
+Subject lines, preview text, and email body all sanitized per visibility tags.
+
+### Email-forwarding leak risk
+
+If a moderator forwards a Setnayan email to a shared inbox, surprise content could leak to the hidden role. Mitigations:
+- Footer notice: "This email contains private wedding-planning content. Forward only to people who should see it."
+- Per-template `is_sensitive_for_surprise` flag — sensitive templates include extra reminder language
+- No shared-inbox forwarding from Setnayan itself (every recipient is a per-user email address; never a group alias)

@@ -1,6 +1,6 @@
 # 0017 — Patiktok
 
-**Status:** drafted 2026-05-11 · **V1 SKU lock 2026-05-16 (dual-tier per-day model · Setnayan TikTok ₱999/day vs Personal TikTok ₱1,999/day · 40-video soft cap per booth per day · ₱49/+10 overage · see CLAUDE.md 6th 2026-05-16 row)**
+**Status:** drafted 2026-05-11 · **V1 SKU lock 2026-05-16 (dual-tier per-day model · Setnayan TikTok ₱999/day vs Personal TikTok ₱1,999/day · 40-video soft cap per booth per day · ₱49/+10 overage · see CLAUDE.md 6th 2026-05-16 row)** · **V1 build promotion 2026-05-18 (prior V1.5+ build-deferral lifted; SKUs were already V1-priced; see CLAUDE.md decision log)**
 **Iteration:** 0017
 **Surface:** Guest engagement / event-day station
 **Dependencies:** 0000 App Shell, 0002 QR Invitations (personalized QR), 0012 Papic (storage), Setnayan owned-AI music catalogue (cross-workstream), TikTok OAuth (for Personal-tier BYO TikTok flow, added 2026-05-16)
@@ -158,6 +158,8 @@ V1 ships **three SKUs** under a dual-tier per-day model based on **who owns the 
 | **Patiktok — Setnayan TikTok** | `patiktok_setnayan_daily` | **₱999 / day** | One day of Patiktok booth · videos auto-post to **Setnayan's master TikTok handle `@SetnayanWeddings`** (or similar) · Setnayan retains ad-revenue upside if the compilation goes viral · couple gets the post link + downloadable MP4 with Setnayan-owned music | Yes — couple buys one per event-day |
 | **Patiktok — Personal TikTok** | `patiktok_personal_daily` | **₱1,999 / day** | One day of Patiktok booth · **couple BYO TikTok via OAuth** (one-time OAuth handshake at purchase) · videos auto-post to the couple's own TikTok handle · couple owns all videos + analytics + ad-revenue upside | Yes — couple buys one per event-day |
 | **Patiktok — Video Overage (+10 videos)** | `patiktok_video_overage` | **₱49 / +10 videos** | Extends a booth's daily video allotment by +10 captures (multi-stack: each ₱49 adds 10) · in-event upsell at the booth dashboard when the 40-video soft cap is reached | Yes — operator stacks as many +10 blocks as the event needs |
+| **Patiktok — Cam Bridge (per day)** | `patiktok_cam_bridge_day` | **₱49 / day** | DSLR pairing for the Patiktok booth, one event-day · flat rate (all DSLR slots for that day) · WiFi-SDK via Papic-binary native app · **V1 (new 2026-05-17)** | Yes — couple buys one per event-day on which DSLR is wanted |
+| **Patiktok — Cam Bridge (per year)** | `patiktok_cam_bridge_annual` | **₱249 / year** | DSLR pairing for the Patiktok booth, unlimited events for one year · `time_recurrence=annual`, `event_scope=all_events` · vendor / content-creator subscription · **V1 (new 2026-05-17)** | No — single subscription per account, renews annually |
 
 **Soft cap: 40 captured videos per booth per day.** Booth dashboard shows a live counter. At 40 the operator sees a soft-warning ("You've captured your day's allotted 40 videos · keep recording with the overage add-on") with a one-tap purchase button for the ₱49 / +10 overage SKU. Operator can stack as many overage blocks as the event needs without leaving the booth flow. The soft cap protects Setnayan margin (compilation render + storage + per-clip face-lock processing scales with video count); the in-event upsell at ₱49 keeps margin healthy on outlier high-engagement events.
 

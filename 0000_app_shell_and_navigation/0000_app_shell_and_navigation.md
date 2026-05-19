@@ -68,45 +68,51 @@ The couple types ONE field: **Event name** (default placeholder: `"{first_name}'
 INSERT INTO events (
   event_type,           -- 'wedding'
   event_name,           -- whatever they typed
-  wedding_date,         -- NULL (deferred to Guided Planner Step 1 OR Profile edit)
-  venue_name,           -- NULL (deferred to Guided Planner Step 2 OR Profile edit)
+  wedding_date,         -- NULL (deferred to Setnayan Concierge Step 1 OR Profile edit)
+  venue_name,           -- NULL (deferred to Setnayan Concierge Step 2 OR Profile edit)
   venue_address,        -- NULL (same)
-  guided_planner_status -- 'diy' (default; changes after Step 2.5b)
+  concierge_status      -- 'diy' (default; changes after Step 2.5b)
 ) VALUES (...);
 ```
 
-**No date · no venue · no address asked upfront.** This was a deliberate change from the prior 4-field create form — couples often don't know their date or venue when they sign up, and asking those fields upfront blocked their entry. Date + venue are Steps 1 + 2 of the Guided Planner (iteration 0016) OR easily-filled Profile fields for DIY couples.
+**No date · no venue · no address asked upfront.** This was a deliberate change from the prior 4-field create form — couples often don't know their date or venue when they sign up, and asking those fields upfront blocked their entry. Date + venue are Steps 1 + 2 of the Setnayan Concierge (iteration 0016) OR easily-filled Profile fields for DIY couples.
 
-**Step 2.5b — DIY vs Guided Planner choice card** (locked 2026-05-14)
+**Step 2.5b — DIY vs Setnayan Concierge choice card** (originally locked 2026-05-14 as 4-option Guided Planner card; collapsed to 3-option Setnayan Concierge card 2026-05-16; simplified to 2-option single-SKU card 2026-05-17 per the second 2026-05-17 decision-log row — Essentials retired, 3-day account-level trial replaces 7-day per-event preview)
 
-Immediately after event creation, the couple sees a four-option choice card. The choice determines `events.guided_planner_status`:
+Immediately after event creation, the couple sees a two-option choice card. The choice determines `events.concierge_status`:
 
 ```
    How would you like to plan your wedding?
 
-   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-   │  DIY MODE   │  │  1-WEEK     │  │  3-MONTH    │  │  12-MONTH   │
-   │  Free       │  │  PASS       │  │  PLAN       │  │  PLAN  ✨    │
-   │             │  │  ₱99        │  │  ₱999       │  │  ₱1,999     │
-   │             │  │             │  │  save 22%   │  │  BEST VALUE │
-   │             │  │             │  │             │  │  save 61%   │
-   │ All tools.  │  │ Try it for  │  │ 13 weeks of │  │ 52 weeks —  │
-   │ Plan at     │  │ a week.     │  │ guided      │  │ a full year │
-   │ your pace.  │  │ Decide      │  │ planning.   │  │ of planning │
-   │             │  │ later.      │  │             │  │ + post-     │
-   │             │  │             │  │             │  │ wedding     │
-   │             │  │             │  │             │  │ assistant.  │
-   │             │  │             │  │             │  │             │
-   │ [Start Free]│  │ [Buy ₱99]   │  │ [Buy ₱999]  │  │ [Buy ₱1,999]│
-   └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘
+   (Anchor strip rendered above the cards:
+    Wedding coordinator ₱25,000+   ·   Setnayan Concierge ₱4,999
+    Less than your invitation suite. More than worth it.)
 
-   Optional — activate or change anytime from Settings → Guided Planner.
+   ┌──────────────────┐  ┌──────────────────────────────┐
+   │  DIY MODE        │  │  SETNAYAN CONCIERGE  ✨       │
+   │  Free            │  │  ₱4,999                      │
+   │                  │  │  12 months                   │
+   │                  │  │  ₱13.69 / day                │
+   │                  │  │  Less than ₱25K coordinator. │
+   │ All tools.       │  │ Full 9-step roadmap +        │
+   │ Plan at your     │  │ daily nudges + priority      │
+   │ own pace.        │  │ vendor matching + honeymoon. │
+   │ No timeline      │  │                              │
+   │ help.            │  │                              │
+   │                  │  │                              │
+   │ [Start Free]     │  │ [Buy ₱4,999]                 │
+   └──────────────────┘  └──────────────────────────────┘
+
+      Not ready to commit? [ Try 3 days free → ] (no card required)
+
+      Optional — activate or change anytime from Settings → Setnayan Concierge.
 ```
 
-- **DIY** → `guided_planner_status = 'diy'`; lands directly on dashboard
-- **Any paid tier** → creates an unpaid `service_order` (per 0034 apply-then-pay), routes to checkout instructions screen; once admin reconciles payment, server action `activate_guided_planner(event_id, tier, order_id)` flips `guided_planner_status = 'active'` + sets `guided_planner_tier` + computes `guided_planner_expires_at = NOW() + duration`
+- **DIY** → `concierge_status = 'diy'`; lands directly on dashboard
+- **Try 3 days free** → calls `start_concierge_trial(event_id)` server-side directly (no order, no checkout); on pass flips status to `'trial'` for 3 days with full Concierge features. **One trial per ACCOUNT** (tracked on `users.concierge_trial_used_at`, not per event). The trial link is **hidden when** the account has already used its trial OR `users.concierge_enforcement_level IN ('trial_banned', 'full_banned')`. If the cross-account similarity check fires, trial-start is blocked AND a `concierge_abuse_flags` row is inserted for admin review (couple sees the under-review modal with appeal CTA — see iteration 0016 § 0 Anti-abuse subsection).
+- **Buy ₱4,999** → creates an unpaid `service_order` (per 0034 apply-then-pay) with the `concierge_complete` SKU, routes to checkout instructions screen; once admin reconciles payment, server action `activate_concierge(event_id, order_id)` flips `concierge_status = 'active'` + sets `concierge_tier = 'complete'` + computes `concierge_expires_at = NOW() + INTERVAL '12 months'`. Blocked at the order-creation step if `users.concierge_enforcement_level = 'full_banned'` (purchase path closed on full-banned accounts).
 
-Couples picking a paid tier still land on the dashboard immediately — the dashboard shows "Guided Planner pending payment" state until reconciliation completes. They are NOT blocked.
+Couples picking the paid SKU still land on the dashboard immediately — the dashboard shows "Setnayan Concierge pending payment" state until reconciliation completes. They are NOT blocked unless full-banned.
 
 The other six event types stay visible because they're a **product preview** — Setnayan plans to support multiple event types beyond weddings (each with its own iteration set, eventually), and showing the lineup signals the couple that this is a serious event-platform play, not just a wedding app. When future event types ship, no UI rework is needed — the tiles already exist; we just flip the `enabled` flag in the picker config.
 

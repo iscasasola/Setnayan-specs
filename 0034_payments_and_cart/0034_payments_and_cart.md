@@ -138,7 +138,172 @@ UPDATE service_catalog SET is_active = FALSE WHERE sku_code IN (
 
 -- (e) Save-the-Date Render (retired 2026-05-16 · DIFFERENT product from new save_the_date_video_render)
 UPDATE service_catalog SET is_active = FALSE WHERE sku_code = 'save_the_date_render';
+
+-- (f) Guided Planner 3-tier ladder retired 2026-05-16 · replaced by Setnayan Concierge 2-tier premium model
+--     (CLAUDE.md decision log fifteenth 2026-05-16 row · iteration 0016 § 0)
+UPDATE service_catalog SET is_active = FALSE WHERE sku_code IN (
+  'guided_planner_1week',      -- ₱99 (retired 2026-05-16 · ₱99 floor anchored brand as "cheap app"; replaced by card-less 7-day preview)
+  'guided_planner_3month',     -- ₱999 (retired 2026-05-16 · replaced by concierge_essentials ₱2,499)
+  'guided_planner_12month'     -- ₱1,999 (retired 2026-05-16 · replaced by concierge_complete ₱4,999 → ₱2,499 since 2026-05-18 sixth row)
+);
+
+-- (g) Setnayan Concierge V1 SKUs (originally seeded 2026-05-16 as 2-tier; simplified 2026-05-17 to single-SKU · Essentials retired same-week · card-less 3-day trial is NOT an SKU, handled by server action)
+INSERT INTO service_catalog (sku_code, name, description, category, price_php_centavos, is_multi_purchase, is_active) VALUES
+  ('concierge_essentials',           'Setnayan Concierge — Essentials',  '6-month access · core 9-step roadmap · weekly nudges · standard vendor matching',                            'concierge',     249900, TRUE,  FALSE),  -- retired 2026-05-17 · single-SKU model adopted (Essentials projected to under-convert vs Complete; "save face" tier diluted premium framing)
+  ('concierge_complete',             'Setnayan Concierge',               'Wedding-anchored access (12mo floor · 24mo cap · per event) · active wizard with intake/foundation-first/saturation-aware vendor recs · Next Actions feed · vendor share packs · coordinator delegation · honeymoon planning · unlimited brain Q&A · free if you book any Pro Weekly vendor (per 0016 § 0c)',     'concierge',     249900, TRUE,  TRUE);
 -- ============================================================
+-- price_centavos updated 2026-05-18 sixth decision-log row: 499900 → 249900 (₱4,999 → ₱2,499)
+-- supersedes the 2026-05-17 ₱4,999 lock; rationale = "always helping" north-star · architecture commoditized inference cost to ~₱1/couple steady-state · Pro Weekly bundle aligns vendor + platform incentives · description rewritten to reflect wizard architecture (was "9-step roadmap" framing)
+-- ============================================================
+-- ============================================================
+
+-- ============================================================
+-- 2026-05-17 vendor SKU catch-up batch — seeds the vendor-side SKUs locked in
+-- CLAUDE.md decision-log eighth 2026-05-16 row but not seeded at the time.
+-- All prices charm-corrected to -1 ending per COWORK.md line 75 (rule supersedes
+-- the round-number values in the row-8 prose; row 8 amended in place same-day to
+-- match the charm prices below).
+-- ============================================================
+
+-- (h) Retire the weekly Sponsored Boost (superseded by quarterly/annual long-commit tiers)
+UPDATE service_catalog SET is_active = FALSE WHERE sku_code = 'sponsored_boost_weekly';
+-- ₱1,499/wk (retired 2026-05-16 per 8th row · replaced by sponsored_boost_quarterly + sponsored_boost_annual below)
+
+-- (i) New vendor-side SKUs (2026-05-17 catch-up · all charm-corrected -1)
+INSERT INTO service_catalog (sku_code, name, description, category, price_php_centavos, is_multi_purchase, is_active) VALUES
+  -- All Tools Unlock (capability bundle · open to all paying vendors · not verified-only)
+  ('all_tools_unlock_annual',        'All Tools Unlock (per year)',        'Annual bundle · Mood Board + Palette + Seating Arrangement + QR Reader + Advanced Pricing Tier · saves ~61% vs à-la-carte ₱99/wk × 5 tools × 52 weeks',                                                  'vendor_subscription',   999900, FALSE, TRUE),
+
+  -- Boosted Ads — weekly · verified-only · stacks with Pro Weekly · cancel anytime
+  ('boosted_ads_5km_weekly',         'Boosted Ads — 5km radius (per week)','Marketplace ranking boost within 5km radius · verified-only · stacks with Pro Weekly',                  'vendor_subscription',   499900, TRUE,  TRUE),
+  ('boosted_ads_10km_weekly',        'Boosted Ads — 10km radius (per week)','Marketplace ranking boost within 10km radius · verified-only · stacks with Pro Weekly',                'vendor_subscription',   799900, TRUE,  TRUE),
+  ('boosted_ads_20km_weekly',        'Boosted Ads — 20km radius (per week)','Marketplace ranking boost within 20km radius · verified-only · stacks with Pro Weekly',                'vendor_subscription',  1499900, TRUE,  TRUE),
+
+  -- Sponsored Boost long-commit · 30km radius · verified-only · stacks with everything (Quarterly = 3 months · Annual = 12 months · ~20% savings vs Quarterly × 4)
+  ('sponsored_boost_quarterly',      'Sponsored Boost — Quarterly',        'Premium marketplace placement · 30km radius · verified-only · 3-month commit',                          'vendor_subscription', 24999900, FALSE, TRUE),
+  ('sponsored_boost_annual',         'Sponsored Boost — Annual',           'Premium marketplace placement · 30km radius · verified-only · 12-month commit · ~20% savings vs Quarterly × 4', 'vendor_subscription', 79999900, FALSE, TRUE),
+
+  -- Vendor Verification fees (initial = FREE absorbed by Setnayan · annual renewal + post-demotion re-verification)
+  ('vendor_verification_annual_renewal',     'Vendor Verification — Annual Renewal',         'Annual re-verification fee (initial verification is free · renews per Vendor Agreement § 3.1)',          'vendor_verification',  149900, FALSE, TRUE),
+  ('vendor_verification_reverification',     'Vendor Verification — Re-verification (post-demotion)', 'Re-verification fee after demotion (3+ disputes in rolling 30 days · multi-purchase across lifecycle)', 'vendor_verification',  249900, TRUE,  TRUE);
+-- ============================================================
+
+-- ============================================================
+-- 2026-05-17 V1 SKU lock batch — Pricing & Frequency overhaul
+-- Adds two-dimensional billing model (time × event scope), reactivates Papic
+-- seats + Pro Camera Bridge under product-scoped pricing, pivots Panood to
+-- always-multi-cam (max 6) with collapsed SKU set, adds Cam Bridge across all
+-- three production products (Papic / Panood / Patiktok), adds Panood Template
+-- Pack, reprices Save-the-Date Video. See CLAUDE.md 2026-05-17 decision log.
+-- ============================================================
+
+-- (h) Schema additions: two-dimensional billing model
+--     time_recurrence — how often money flows (one-time vs recurring cadence)
+--     event_scope     — whether the SKU applies to one event or all events on the account
+ALTER TABLE service_catalog
+  ADD COLUMN time_recurrence TEXT NOT NULL DEFAULT 'one_time'
+    CHECK (time_recurrence IN ('one_time','weekly','quarterly','annual','lifetime')),
+  ADD COLUMN event_scope TEXT NOT NULL DEFAULT 'per_event'
+    CHECK (event_scope IN ('per_event','all_events'));
+
+-- (i) Reactivate Papic seats + +1 seat add-on (HTML-based capture, unlimited guests behind the scenes; seat count = official paparazzi UX limit)
+UPDATE service_catalog SET is_active = TRUE
+  WHERE sku_code IN ('paparazzi_3_seats','paparazzi_5_seats','paparazzi_camera_addon');
+
+-- (j) Panood always-multi-cam pivot — max 6 cameras enforced via Cloudflare Stream Live SFU room config max_publishers=6
+UPDATE service_catalog
+SET is_active = TRUE,
+    price_php_centavos = 249900,                          -- ₱2,499/day (was ₱499)
+    description = 'Multi-cam (up to 6) broadcast for one event-day · couple BYO YouTube via OAuth'
+  WHERE sku_code = 'panood_daily_broadcast';
+
+UPDATE service_catalog
+SET is_active = TRUE,
+    price_php_centavos = 1999900,                         -- ₱19,999/year (was ₱2,999)
+    description = 'Multi-cam (up to 6) unlimited days for one year · ALL events on the account · vendor / competition-organizer / multi-event subscription',
+    time_recurrence = 'annual',
+    event_scope = 'all_events'
+  WHERE sku_code = 'panood_annual_streaming';
+
+-- (k) Retire Panood SKUs collapsed by always-multi-cam pivot
+UPDATE service_catalog SET is_active = FALSE
+  WHERE sku_code IN ('panood_camera_sync_daily','panood_annual_streaming_plus');
+
+-- (l) Save-the-Date Video reprice (₱99 → ₱199 · per Cost Watch math, see § 6.X cost-basis discussion)
+UPDATE service_catalog
+SET price_php_centavos = 19900                            -- ₱199/render (was ₱99)
+  WHERE sku_code = 'save_the_date_video_render';
+
+-- (m) Backfill time_recurrence + event_scope for existing recurring SKUs (vendor subscriptions)
+UPDATE service_catalog
+SET time_recurrence = 'weekly', event_scope = 'all_events'
+  WHERE sku_code IN ('vendor_pro_weekly','sponsored_boost_weekly');
+
+-- All other previously-active SKUs default to ('one_time','per_event') via ALTER DEFAULT — no UPDATE needed.
+
+-- (n) New Cam Bridge SKUs — 6 product-scoped tiers (DSLR pairing via WiFi-SDK in the Papic-binary native app)
+INSERT INTO service_catalog (sku_code, name, description, category, price_php_centavos, is_multi_purchase, is_active, time_recurrence, event_scope) VALUES
+  -- Panood Cam Bridge — single tier, premium per-slot pricing (live-broadcast quality)
+  ('panood_cam_bridge_slot_day',       'Panood — Cam Bridge (per slot/day)',     'DSLR-paired camera slot for Panood broadcast, one event-day · WiFi-SDK via Papic-binary native app',           'panood',     19900, TRUE,  TRUE, 'one_time', 'per_event'),
+
+  -- Papic Cam Bridge — 3 tiers (per-slot/day, flat all-slots/day, all-slots annual)
+  ('papic_cam_bridge_slot_day',        'Papic — Cam Bridge (per slot/day)',      'DSLR-paired Papic seat, one event-day',                                                                       'paparazzi',   9900, TRUE,  TRUE, 'one_time', 'per_event'),
+  ('papic_cam_bridge_all_slots_day',   'Papic — Cam Bridge (all slots/day)',     'DSLR pairing for all Papic seats, one event-day · flat rate · breaks even vs per-slot at ≥3 DSLRs',           'paparazzi',  24900, TRUE,  TRUE, 'one_time', 'per_event'),
+  ('papic_cam_bridge_all_slots_annual','Papic — Cam Bridge (all slots/year)',    'DSLR pairing for all Papic seats, unlimited events for one year · vendor / wedding-photographer subscription','paparazzi',  249900, FALSE, TRUE, 'annual',   'all_events'),
+
+  -- Patiktok Cam Bridge — 2 tiers (flat daily, annual)
+  ('patiktok_cam_bridge_day',          'Patiktok — Cam Bridge (per day)',        'DSLR pairing for Patiktok booth, one event-day · flat rate',                                                  'patiktok',    4900, TRUE,  TRUE, 'one_time', 'per_event'),
+  ('patiktok_cam_bridge_annual',       'Patiktok — Cam Bridge (per year)',       'DSLR pairing for Patiktok booth, unlimited events for one year',                                              'patiktok',   24900, FALSE, TRUE, 'annual',   'all_events');
+
+-- (o) New Panood Template Pack SKUs — overlays / titles / transitions for the broadcast output (applies to phone-cam AND Cam-Bridge-DSLR feeds equally)
+INSERT INTO service_catalog (sku_code, name, description, category, price_php_centavos, is_multi_purchase, is_active, time_recurrence, event_scope) VALUES
+  ('panood_template_pack_daily',  'Panood — Template Pack (per day)',  'Overlays + titles + transitions on the Panood broadcast output, one event-day',                                  'panood',  79900, TRUE,  TRUE, 'one_time', 'per_event'),
+  ('panood_template_pack_annual', 'Panood — Template Pack (per year)', 'Overlays + titles + transitions, unlimited days for one year · ALL events on the account · pro-broadcaster pack', 'panood', 799900, FALSE, TRUE, 'annual',   'all_events');
+
+-- (p) service_catalog_price_history extended for frequency audit (separate from price changes)
+ALTER TABLE service_catalog_price_history
+  ADD COLUMN prior_time_recurrence TEXT,
+  ADD COLUMN new_time_recurrence   TEXT,
+  ADD COLUMN prior_event_scope     TEXT,
+  ADD COLUMN new_event_scope       TEXT;
+
+-- ============================================================
+-- 0034.X: service_render_costs — Cost Watch feature (locked 2026-05-17)
+-- Tracks actual per-render Setnayan-incurred cost (AI API + FFmpeg + storage +
+-- bandwidth) for every SKU consumption. Drives the admin Pricing & Catalog
+-- Cost Watch UI: highest single render / avg / p95 / cost-to-price ratio /
+-- health flag. Pricing decisions take "highest single render" as the floor.
+-- ============================================================
+CREATE TABLE service_render_costs (
+    render_id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    sku_code         TEXT NOT NULL REFERENCES service_catalog(sku_code),
+    order_id         UUID REFERENCES service_orders(order_id),     -- NULL for failed renders or free/comp grants
+    user_id          UUID REFERENCES users(user_id),
+    event_id         UUID REFERENCES events(event_id),
+    cost_centavos    INT NOT NULL,                                  -- actual Setnayan-incurred cost for this single render
+    cost_breakdown   JSONB NOT NULL,                                -- e.g. { ai_api: 500, ffmpeg: 200, storage: 100, bandwidth: 50, music_license: 0 }
+    rendered_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    succeeded        BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE INDEX idx_render_costs_sku ON service_render_costs(sku_code, rendered_at DESC);
+CREATE INDEX idx_render_costs_event ON service_render_costs(event_id);
+
+-- Aggregation for admin UI (refreshed hourly via pg_cron or on-access sweep)
+CREATE MATERIALIZED VIEW service_catalog_cost_watch AS
+SELECT
+  sku_code,
+  COUNT(*)                                                                          AS renders_count,
+  MAX(cost_centavos)                                                                AS highest_single_render_centavos,
+  ROUND(AVG(cost_centavos))                                                         AS avg_render_centavos,
+  ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY cost_centavos))::INT           AS p95_render_centavos,
+  MAX(rendered_at)                                                                  AS latest_render_at,
+  (SELECT cost_breakdown FROM service_render_costs s2
+   WHERE s2.sku_code = s1.sku_code AND s2.succeeded = TRUE
+   ORDER BY cost_centavos DESC LIMIT 1)                                             AS highest_render_breakdown
+FROM service_render_costs s1
+WHERE succeeded = TRUE AND rendered_at > NOW() - INTERVAL '90 days'
+GROUP BY sku_code;
 
 -- ============================================================
 -- 0034.2: service_catalog_price_history — audit trail for price changes
@@ -207,7 +372,7 @@ CREATE TABLE service_orders (
   event_id                UUID REFERENCES events(event_id),
   cart_id                 UUID NOT NULL REFERENCES carts(cart_id),
   subtotal_centavos       INT NOT NULL,           -- sum of cart_items.unit_price_centavos * quantity
-  fees_centavos           INT NOT NULL DEFAULT 0, -- Setnayan Pay convenience fee (5.5%/6.5% per method, admin-configurable 2026-05-16); on vendor-booking orders only
+  fees_centavos           INT NOT NULL DEFAULT 0, -- Setnayan Pay convenience fee (flat 5.0%, admin-configurable per method, 2026-05-16 lock supersedes earlier same-day 5.5%/6.5%); on vendor-booking orders only
   total_centavos          INT NOT NULL,           -- subtotal + fees
   payment_method          TEXT NOT NULL CHECK (payment_method IN ('bdo_bank','gcash','setnayan_pay','comp_grant')),
   status                  TEXT NOT NULL DEFAULT 'pending_payment'
@@ -450,7 +615,7 @@ Tapping the cart badge slides up a bottom-sheet drawer (mobile) or a right-side 
 
 - One row per `cart_items` line: SKU name, quantity stepper, line subtotal, remove button
 - Computed subtotal of all line items
-- Applicable fees (Setnayan Pay convenience fee — 5.5% / 6.5% per method, admin-configurable per 2026-05-16 lock — appears only when at least one cart_item is a vendor booking; none in pure in-app SKU carts)
+- Applicable fees (Setnayan Pay convenience fee — flat 5.0%, admin-configurable per method per 2026-05-16 lock — appears only when at least one cart_item is a vendor booking; none in pure in-app SKU carts)
 - Total in large PHP type
 - **Checkout** CTA
 
@@ -464,7 +629,7 @@ Pressing Checkout:
 3. Inserts a `service_orders` row with:
    - `status = 'pending_payment'`
    - `subtotal_centavos` = SUM(cart_items.unit_price_centavos × cart_items.quantity)
-   - `fees_centavos` = applicable convenience fee (3% if Setnayan Pay; 0 otherwise)
+   - `fees_centavos` = applicable convenience fee for vendor bookings via Setnayan Pay, computed as `MAX(subtotal_centavos × setnayan_fee_bps / 10000, min_fee_centavos)` — i.e., 5.0% of subtotal OR ₱50 floor, whichever is higher (per 0023 § 3.5d admin config); 0 for pure in-app SKU carts
    - `total_centavos` = subtotal + fees
    - `payment_method` = customer's choice (BDO or GCash; for Setnayan Pay vendor bookings, fixed)
    - `expires_at` = NOW() + 7 days
@@ -628,9 +793,11 @@ When `service_orders.status` transitions to `paid`, a per-SKU activation hook fi
 | `contract_intelligence_upgrade` | Insert `contract_purchases` row tied to a specific `contracts.contract_id` |
 | `vendor_pro_weekly`     | Insert `vendor_subscriptions` row with 7-day duration                          |
 | `sponsored_boost_weekly`| Insert `vendor_sponsored_boost` row with 7-day duration                        |
-| `guided_planner_1week`  | Call `activate_guided_planner(event_id, '1week', order_id)` — sets `events.guided_planner_status='active'`, `guided_planner_tier='1week'`, `guided_planner_expires_at = NOW() + INTERVAL '7 days'` (extends existing expiry if already active) |
-| `guided_planner_3month` | Same handler with `'3month'` tier; expires_at = NOW() + INTERVAL '13 weeks'    |
-| `guided_planner_12month`| Same handler with `'12month'` tier; expires_at = NOW() + INTERVAL '52 weeks'   |
+| `guided_planner_1week`  | **RETIRED 2026-05-16** — SKU is `is_active=FALSE` in service_catalog. Card-less 3-day trial now handled by `start_concierge_trial(event_id)` server action (no order, no payment); see `concierge_complete` row below.                       |
+| `guided_planner_3month` | **RETIRED 2026-05-16** — replaced by `concierge_complete` row below.          |
+| `guided_planner_12month`| **RETIRED 2026-05-16** — replaced by `concierge_complete` row below.          |
+| `concierge_essentials`  | **RETIRED 2026-05-17** (same-week as introduction) — single-SKU model adopted; Essentials tier dropped. `is_active=FALSE` in service_catalog. Couples who were already on Essentials at the time of retirement keep their access until natural expiry; renewal CTAs route to `concierge_complete`. |
+| `concierge_complete`    | Call `activate_concierge(event_id, order_id)` — sets `events.concierge_status='active'`, `concierge_tier='complete'`, stamps `concierge_activated_at = NOW()`, computes `concierge_expires_at` per the **wedding-anchored formula** `LEAST(GREATEST(events.wedding_date + INTERVAL '30 days', NOW() + INTERVAL '12 months'), NOW() + INTERVAL '24 months')` — defaults to `NOW() + INTERVAL '12 months'` if `wedding_date IS NULL` at activation. Recomputes via `recompute_concierge_expiry(event_id)` when wedding_date is later set (extend-only — couple keeps the runway they paid for if wedding moves earlier). Cleanly overwrites `'trial'` state if couple buys mid-trial. Fails if `users.concierge_enforcement_level = 'full_banned'`. Fires the long-engagement advisory + stamps `events.concierge_long_engagement_advised_at` if `wedding_date > activation + 24 months` at activation time OR at wedding-date-change time. See iteration 0016 § 0 for the full duration table + extend-only rule + advisory de-dup. |
 
 ---
 
@@ -732,42 +899,67 @@ The 0023 admin console surfaces these in the audit-log viewer (§ 365 of 0023) w
 
 ---
 
-## 6. Setnayan Pay convenience fee — 5.5% on top of vendor price (locked 2026-05-16)
+## 6. Setnayan Pay convenience fee — 5.0% flat on top of vendor price (locked 2026-05-16, supersedes earlier same-day 5.5%/6.5% lock)
 
-When the order is a vendor booking routed through Setnayan Pay (not an in-app SKU), a **5.5% convenience fee** is added **on top of** the vendor's listed price. The vendor receives their list price (less terminal/gateway fee + BIR Withholding); Setnayan keeps the 5.5% convenience fee as gross revenue.
+> **V1 vs V1.5+ boundary (clarified 2026-05-17):** V1 ships with the **manual QR + screenshot reconciliation flow** specced in § 3.3 Checkout — customers scan a Setnayan-provided BDO/GCash QR, pay the full vendor list + 5% convenience fee, upload a screenshot, admin manually approves. **V1 has no automated gateway, so no gateway-fee absorption math applies.** Setnayan keeps the full 5% (₱5,000 per ₱100K booking) at ~3.60% net under V1 28% tax wedge — above the 3% net design target by 0.6pp. The gateway-absorption / Option-A-vs-Option-B / Path-A-B-C-D discussion below activates only at **V1.5+ when Maya Business goes live as the automated gateway** per § 6.7 Inbound.
 
-**The previous 3% figure is RETIRED 2026-05-16.** All references to `fees_centavos = subtotal × 3%` in this document should be read as `fees_centavos = subtotal × convenience_fee_bps_for_method / 10000` (admin-configurable per payment method via 0023 § 3.5d).
+When the order is a vendor booking routed through Setnayan Pay (not an in-app SKU), a **flat 5.0% convenience fee** is added **on top of** the vendor's listed price — same rate for every rail (Maya QR Ph, Maya eWallet, GCash, credit card, OTC, bank transfer). The vendor receives their list price (less terminal/gateway fee + BIR Withholding); Setnayan keeps the 5.0% convenience fee as gross revenue. **Setnayan does not absorb the gateway fee** — it passes through to the vendor on payout (Option B in the 2026-05-16 architecture decision).
+
+**Two prior fee rates are RETIRED 2026-05-16:**
+- The original 3% figure (placeholder during manual-reconciliation V1 design) — below operating breakeven at any tax tier
+- The morning 2026-05-16 5.5%/6.5% dual-rate lock — over-collected against the 3% net target the owner ratified
+
+All references to `fees_centavos = subtotal × 3%` or `subtotal × 5.5%/6.5%` in this document should be read as `fees_centavos = subtotal × 500 / 10000` (flat 5.0%, admin-configurable per payment method via 0023 § 3.5d for future rail-cost shocks but defaults uniform).
 
 ### 6.1 Couple-facing cart math
 
-**Example A — Maya QR Ph (preferred default rail · 5.5% Setnayan fee):**
+**Single example — flat across every rail (Maya QR Ph, GCash, cards, OTC, bank transfer):**
 
 Vendor's listed price is ₱100,000.
 
 ```
 Subtotal (vendor list price)              ₱100,000.00
-Setnayan Pay convenience fee (5.5%)         ₱5,500.00
+Setnayan Pay convenience fee (5.0%)         ₱5,000.00
 ──────────────────────────────────────────────────────
-Total                                     ₱105,500.00
+Total                                     ₱105,000.00
 ```
 
 In centavos:
 - `subtotal_centavos = 10000000`
-- `fees_centavos = 550000` (5.5% of 10,000,000 centavos)
-- `total_centavos = 10550000`
+- `fees_centavos = 500000` (5.0% of 10,000,000 centavos)
+- `total_centavos = 10500000`
 
-**Example B — Credit card (premium rail · 6.5% Setnayan fee):**
+The customer sees one line item, one rate, no rail-specific math.
+
+**Minimum fee floor — ₱50 (locked 2026-05-17):** the convenience fee never goes below **₱50** even when 5% × subtotal would be smaller. Formula at checkout is `fees_centavos = MAX(subtotal_centavos × setnayan_fee_bps / 10000, min_fee_centavos)` where `min_fee_centavos = 5000` (₱50) is the default in `payment_method_config` per 0023 § 3.5d (admin-configurable per method).
+
+The floor only activates on vendor bookings below ₱1,000 (the 5%-meets-₱50 crossover). In practice this is rare — most wedding-vendor bookings are ₱8K+. Affects mostly small supply purchases and micro add-ons through the supplies marketplace.
+
+**Worked example — small booking at the floor (₱500 vendor item):**
 
 ```
-Subtotal (vendor list price)              ₱100,000.00
-Setnayan Pay convenience fee (6.5%)         ₱6,500.00
+Subtotal (vendor list price)                ₱500.00
+Setnayan Pay convenience fee (₱50 minimum)   ₱50.00      ← floor (5% × ₱500 = ₱25, floor wins)
 ──────────────────────────────────────────────────────
-Total                                     ₱106,500.00
+Total                                       ₱550.00
 ```
 
-### 6.2 Vendor side of the ledger
+In centavos:
+- `subtotal_centavos = 50000`
+- `fees_centavos = 5000` (₱50 floor, not the ₱25 percentage)
+- `total_centavos = 55000`
 
-The vendor's net payout is the vendor list price minus (a) gateway/terminal fee + (b) BIR Marketplace Withholding 0.5%. **Setnayan does NOT deduct any commission from the vendor side** — the 5.5%/6.5% convenience fee is paid by the couple on top.
+**Crossover point:** the floor stops applying at vendor list price ≥ ₱1,000 (where 5% = ₱50 = floor). At ₱1,000 and above, the standard 5% takes over.
+
+**Vendor opt-in interaction (per § 6.8):** if the vendor absorbs the convenience fee for a small booking, the ₱50 floor still applies — the vendor absorbs ₱50 (not ₱25). The floor protects Setnayan's per-transaction operating cost regardless of which side pays it.
+
+**Customer-facing copy** (cart drawer, marketing site, vendor agreement):
+
+> Setnayan Pay convenience fee — 5% per booking, **₱50 minimum**.
+
+### 6.2 Vendor side of the ledger (Option B — vendor absorbs gateway)
+
+The vendor's net payout is the vendor list price minus (a) gateway/terminal fee + (b) BIR Marketplace Withholding 0.5%. **Setnayan does NOT deduct any commission from the vendor side** — the 5.0% convenience fee is paid by the couple on top. The gateway fee passes through to the vendor as a transparent line item on the payout breakdown.
 
 | Rail | Gateway fee | BIR Withholding | Vendor net on ₱100K | Effective burden |
 |---|---|---|---|---|
@@ -778,18 +970,33 @@ The vendor's net payout is the vendor list price minus (a) gateway/terminal fee 
 | Credit card | 3.0% | 0.5% | ₱96,500 | 3.5% |
 | OTC | 1.5% | 0.5% | ₱98,000 | 2.0% |
 
-Setnayan absorbs the **₱15-25 outbound disbursement fee** per payout — the vendor sees the nominal "net of gateway + BIR" figure on their dashboard without an additional disbursement deduction.
+Setnayan absorbs the **₱15-25 outbound disbursement fee** per payout — the vendor sees the nominal "net of gateway + BIR" figure on their dashboard without an additional disbursement deduction. The vendor agreement names the gateway pass-through explicitly so vendors understand the deduction is the rail's cost, not Setnayan's commission. Vendor Studio subscribers (per iteration 0022) may gain a "gateway-absorbed" perk in V1.5 once subscription rails mature; not in V1.
 
-### 6.3 Setnayan's gross / net at V1 tax tier
+### 6.3 Setnayan's gross / net under both tax tiers
 
-For a ₱100K booking via Maya QR Ph:
+For a ₱100K booking at flat 5.0% (any rail):
 
-- **Setnayan gross:** ₱5,500 (the 5.5% convenience fee)
-- **Setnayan pays its own taxes** from this gross: Percentage Tax 3% (NIRC § 116, non-VAT under ₱3M annual gross threshold) + LBT 1% + Income Tax 25%
-- **Setnayan V1 tax tier net:** ~₱3,960 (3.96% effective)
-- **Setnayan worst-case V2 tax tier net** (12% VAT + 35% IT): ~₱3,143 (3.14% effective)
+- **Setnayan gross:** ₱5,000 (the 5.0% convenience fee)
+- **Setnayan pays its own taxes** from this gross. Gateway fee does NOT touch Setnayan's books under Option B (vendor-side deduction)
+- **V1 small-business tax tier** (Pct Tax 3% + LBT 1% + Income Tax 25% = 28% wedge): net = ₱5,000 × 72% = **₱3,600 (3.60% effective)** — 0.60pp above the 3% net design target
+- **V2 worst-case tax tier** (12% VAT + LBT 2% + Income Tax 25% = ~35% wedge, after Setnayan crosses ₱3M annual gross threshold and VAT-registers): net = ₱5,000 × 65% = **₱3,250 (3.25% effective)** — 0.25pp above the 3% net design target
+- **Extreme worst-case** (37–40% wedge with LBT 3% city + edge-case cost drag): net = ₱5,000 × 60–63% = **₱3,000–₱3,150 (3.00–3.15% effective)** — exactly at or just above the design target
 
-### 6.4 BIR Marketplace Withholding (per RMC No. 8-2024)
+The 5.0% flat rate is the **minimum gross that holds the 3% net floor under every plausible tax scenario.** It supersedes the morning's 5.5%/6.5% lock, which over-collected by ~0.5pp net at V2 tax and was tuned for a higher net target than the owner's actual 3% goal.
+
+### 6.4 Operating headroom and breakeven
+
+The 2.16% net operating-breakeven figure (below which a booking loses money once admin time is counted) is preserved from the retired 5.5% lock. At 5.0% flat:
+
+| Tax tier | Setnayan net | Headroom above 2.16% breakeven |
+|---|---|---|
+| V1 (28% wedge) | 3.60% | +1.44pp (1.67× breakeven) |
+| V2 realistic (35% wedge) | 3.25% | +1.09pp (1.50× breakeven) |
+| Extreme worst (40% wedge) | 3.00% | +0.84pp (1.39× breakeven) |
+
+Even in the extreme-worst tax scenario the rate clears 1.39× operating breakeven — comfortably profitable per booking, with margin for chargebacks (refund-as-loss ~0.5% of gross volume industry-typical), failed transactions, and disbursement-fee absorption.
+
+### 6.5 BIR Marketplace Withholding (per RMC No. 8-2024)
 
 Setnayan acts as the **withholding agent** for the 0.5% BIR Marketplace Withholding (1% × 50% under RMC 8-2024). For each vendor payout:
 
@@ -798,25 +1005,142 @@ Setnayan acts as the **withholding agent** for the 0.5% BIR Marketplace Withhold
 3. Setnayan issues the vendor a **BIR Form 2307** quarterly — creditable against the vendor's own income-tax liability
 4. The withholding line appears on the vendor's payout breakdown in 0022 Vendor Dashboard
 
-### 6.5 Verified-only Setnayan Pay gate (locked 2026-05-16)
+### 6.6 Verified-only Setnayan Pay gate (locked 2026-05-16)
 
 **Couples can ONLY use Setnayan Pay with verified vendors.** Coming_soon vendors are paid direct off-platform (couple pays the vendor's own BDO / GCash account, Setnayan tracks the milestone via 3-stage release per 0006 Payout model). The Setnayan Pay rail is the verification flow's primary unlock.
 
-### 6.6 Payment gateway sequencing
+### 6.7 Payment gateway sequencing
+
+#### Inbound — customer pays Setnayan Pay (couple → Setnayan)
 
 - **V1 launch:** manual reconciliation — current 0034 flow (BDO / GCash QR + screenshot upload + admin approve). No automated gateway.
 - **V1.5+:** **Maya Business** as the primary gateway. Maya QR Ph (1.5% gateway fee) is the **preferred default rail** at checkout. Per-method admin config (0023 § 3.5d) controls: Maya QR / Bank transfer / GCash direct / Maya eWallet / Credit card / OTC.
 - **Daily.co video meetings retired** as part of the same 2026-05-16 lock — no longer a billing line item.
 
-### 6.7 Schema updates
+#### Outbound — Setnayan pays vendor (Setnayan → vendor) (locked 2026-05-17)
+
+V1.5+ vendor disbursement runs through **Maya Business Bulk Fund Transfer**. All vendor payouts due each day batch into one CSV upload via Maya Business Manager. Per-recipient rail is determined at batch-generation time by the routing rule below; vendors can override their default in the 0022 Vendor Dashboard payout preferences.
+
+**Default rail routing:**
+
+| Payout type | Default rail | Vendor sees money | Per-payout cost Setnayan absorbs |
+|---|---|---|---|
+| Verified vendor with Maya Bank account | **Intra-Maya** | **Instant · 24/7** | **₱0** |
+| Verified vendor immediate payout (non-Maya destination) | **InstaPay** | < 1 minute · 24/7 incl. weekends | ~₱10 (bulk rate, est.) |
+| Coming_soon vendor 3-stage milestone (any non-Maya destination) | **PESONet** | EOD same banking day · T+1 weekends/holidays | ~₱15 (bulk rate, est.) |
+| Any payout < ₱500 (uneconomic to InstaPay) | **PESONet** | EOD same banking day | ~₱15 |
+| Any payout > ₱500,000 (above InstaPay cap) | **PESONet** | EOD same banking day | ~₱15 |
+
+**Vendor override** (per 0022 Vendor Dashboard payout preferences):
+
+| Vendor's choice | Cost handling |
+|---|---|
+| Verified vendor downgrades to PESONet | Setnayan saves ₱5/payout · vendor earns a ₱5 monthly rebate credit (or admin-config equivalent incentive) |
+| Coming_soon vendor upgrades milestone to InstaPay | Vendor absorbs the ₱5 difference per payout (deducted from that milestone's payout) |
+| Vendor switches default disbursement bank to Maya Bank | Both parties win: vendor gets instant + free; Setnayan saves the disbursement fee entirely |
+
+**Per-recipient cost source:** Maya Business does not publish bulk pricing — quote-based per business. Published individual rates: intra-Maya FREE · InstaPay outbound ₱15/recipient · PESONet typical ₱15–25/recipient. Bulk products typically discount 30–40% off individual rates → estimated ₱10/recipient InstaPay bulk · ~₱15/recipient PESONet bulk. The numbers in the routing table are the V1.5+ planning assumptions; reconciled to the actual Maya Business quote once the business account is approved per the API Integration Checklist Owner Admin Punch List.
+
+**Annual aggregate cost at scale** (Setnayan's absorbed disbursement fees per year, assuming 70% verified / 30% coming_soon mix, ~30% of vendors on Maya Bank by Year 2):
+
+| Couples/yr | Total payouts/yr | Annual disbursement cost (Setnayan absorbs) |
+|---|---|---|
+| 200 (V1 conservative) | ~320 | ~₱2,500 |
+| 500 (V2 mid-target) | ~800 | ~₱6,500 |
+| 1,000 (Y2 aggressive) | ~1,600 | ~₱13,000 |
+| 5,000 (Y3 scaled) | ~8,000 | ~₱65,000 |
+
+Even at 5,000-couple scale the annual disbursement cost stays under 0.3% of platform revenue — operationally insignificant compared to the labor savings from batching.
+
+**Vendor-recruiting copy** (canonical, lives in 0006 Vendor Verification flow + 0022 onboarding):
+
+> **Get paid instantly, free, 24/7 — open a Maya Bank business account.**
+> Or get paid in under a minute to any PH bank, including weekends (InstaPay).
+> Standard payout settles end of business day (PESONet) — default for milestone releases.
+
+**Failure handling for bulk batches:** if Maya rejects any row in a bulk transfer (invalid account number, KYC mismatch, frozen account, etc.), that row's `vendor_payouts.status` reverts to `pending` and rejoins the next day's batch. Partial-success batches are logged with per-row outcomes in `disbursement_batches.row_outcomes` JSONB. Three consecutive batch failures for the same vendor trigger an admin alert + automatic move to manual reconciliation for that vendor until they update their disbursement details.
+
+### 6.8 Vendor opt-in: cover the convenience fee for customers (locked 2026-05-16 PM)
+
+Vendors may opt in to **absorb the 5.0% convenience fee out of their own listed price** rather than have it shown on the customer's receipt. Vendors who opt in receive a public-facing **"No Convenience Fee" badge** on their marketplace profile, and the customer sees the listed price flat at checkout with no convenience-fee line. Setnayan's revenue is unchanged either way — only the visibility of the fee at the cart shifts.
+
+**Vendor-side flag:** `vendors.absorbs_convenience_fee BOOLEAN NOT NULL DEFAULT FALSE` (defined in 0006 Vendor Management). Vendor toggles in the 0022 Vendor Dashboard settings panel; toggle changes apply only to NEW bookings (existing cart snapshots are frozen per the 2026-05-12 "price snapshot at add-to-cart time" decision).
+
+**Cart math change** for vendor bookings where `vendor.absorbs_convenience_fee = TRUE`:
+
+| Field | Default (Option B) | Vendor absorbs (Option A) |
+|---|---|---|
+| Customer-facing subtotal | ₱100,000 (vendor list) | ₱100,000 (vendor list, unchanged) |
+| Customer-facing convenience fee line | ₱5,000 (5%) | **₱0 (hidden, absorbed)** |
+| Customer-facing total | ₱105,000 | **₱100,000 (all-in)** |
+| Setnayan revenue (gross) | ₱5,000 | ₱5,000 (identical) |
+| Vendor's effective service revenue | ₱100,000 | ₱95,000 (₱5K absorbed) |
+
+**Worked example — ₱100,000 vendor booking, Option A (vendor absorbs):**
+
+```
+Customer's receipt (Option A — No Convenience Fee badge)
+────────────────────────────────────────────────────────
+Service                                   ₱100,000.00
+────────────────────────────────────────────────────────
+You pay                                   ₱100,000.00     ← flat, no fee line
+```
+
+```
+Vendor's payout breakdown (Option A)
+─────────────────────────────────────────────────────────
+Listed price                              ₱100,000.00
+Convenience fee absorbed (5%)              −₱5,000.00     → Setnayan revenue
+─────────────────────────────────────────────────────────
+Service base                               ₱95,000.00
+
+Less: BIR Marketplace Withholding 0.5%       −₱475.00     (creditable via BIR Form 2307)
+Less: Terminal fee — Maya QR Ph 1.5%       −₱1,425.00
+─────────────────────────────────────────────────────────
+Vendor net (best case · Maya QR Ph)        ₱93,100.00
+
+Less: Terminal fee — max 2.5% (worst case) −₱2,375.00
+─────────────────────────────────────────────────────────
+Vendor net (worst case)                    ₱92,150.00
+```
+
+**Side-by-side at ₱100K booking:**
+
+| Rail | Option A — vendor absorbs (badge) | Option B — customer pays (default) | Vendor sacrifices for the badge |
+|---|---|---|---|
+| Maya QR Ph 1.5% (preferred) | ₱93,100 | ₱98,000 | ₱4,900 (~4.9%) |
+| Maya eWallet 2.0% | ₱92,625 | ₱97,500 | ₱4,875 (~4.88%) |
+| Cards / max-2.5% rail | ₱92,150 | ₱97,000 | ₱4,850 (~4.85%) |
+
+**Setnayan's economics are unchanged:** ₱5,000 gross / ~₱3,250 net per ₱100K booking regardless of vendor's choice. The opt-in is purely a vendor-side marketing lever — Filipino couples strongly prefer "all-in" pricing, so the badge can drive measurable conversion lift for vendors whose competitors charge the fee on top.
+
+**Snapshot at order time (immutable for audit):** `service_orders.vendor_absorbed_fee BOOLEAN NOT NULL DEFAULT FALSE` records whether the vendor's flag was TRUE when the cart converted to an order. The order's `fees_centavos` is set to 0 if the vendor absorbed, or `subtotal × 500 / 10000` otherwise. Setnayan's revenue ledger derives the platform cut as `subtotal × 500 / 10000` in both cases — `vendor_absorbed_fee` only changes who is on the hook for it.
+
+**Customer-facing surfaces:**
+- **Vendor marketplace profile (per 0006 / 0022):** "No Convenience Fee" badge renders next to the vendor's name when `vendors.absorbs_convenience_fee = TRUE`. Tap reveals tooltip: "This vendor covers the platform convenience fee. The price you see is the price you pay."
+- **Search results / filter:** filter chip "No convenience fee" available in the marketplace search per 0022
+- **Cart drawer:** when vendor absorbs, the convenience-fee row renders as `"Convenience fee ✓ covered by vendor"` in muted text with `₱0.00`. Customer still sees one line item but understands the math.
+- **Worked-example block on `/pricing`:** an alternate worked example appears next to the default Option B example showing "Some vendors cover the convenience fee — look for the badge."
+
+**Vendor-side surface (per 0022 dashboard settings):**
+- Toggle: "Cover the Setnayan Pay convenience fee for customers (No Convenience Fee badge)"
+- Financial preview: dynamic ₱-amount calculator showing vendor net on a sample booking under both options, side-by-side, with the vendor's actual listed prices
+- Conversion-lift estimate: "Vendors who cover the fee see X% more bookings on average" (sourced from analytics once population data exists; placeholder copy in V1)
+- Toggle change is single-admin authority for the vendor (their own account); logged in `vendor_audit_log` per 0006
+
+### 6.9 Schema updates
 
 ```sql
-ALTER TABLE service_orders ADD COLUMN setnayan_fee_bps INT DEFAULT 550;
+ALTER TABLE service_orders ADD COLUMN setnayan_fee_bps INT DEFAULT 500;
 ALTER TABLE service_orders ADD COLUMN gateway_fee_centavos INT DEFAULT 0;
 ALTER TABLE service_orders ADD COLUMN bir_withholding_centavos INT DEFAULT 0;
 ALTER TABLE service_orders ADD COLUMN vendor_net_centavos INT DEFAULT 0;
 ALTER TABLE service_orders ADD COLUMN disbursement_fee_centavos INT DEFAULT 0;   -- absorbed by Setnayan, tracked for finance
+ALTER TABLE service_orders ADD COLUMN vendor_absorbed_fee BOOLEAN NOT NULL DEFAULT FALSE;   -- snapshot of vendor.absorbs_convenience_fee at order time (locked 2026-05-16 PM, per § 6.8)
 ALTER TABLE service_orders ADD COLUMN payment_method_key TEXT;   -- FK to payment_method_config.method_key
+
+-- New column on vendors (defined formally in 0006 vendors_management):
+-- ALTER TABLE vendors ADD COLUMN absorbs_convenience_fee BOOLEAN NOT NULL DEFAULT FALSE;
 
 CREATE TABLE vendor_payouts (
     payout_id              UUID PRIMARY KEY,
@@ -827,12 +1151,37 @@ CREATE TABLE vendor_payouts (
     gateway_fee_centavos   INT NOT NULL,
     bir_withholding_centavos INT NOT NULL,
     net_centavos           INT NOT NULL,
-    disbursement_method    TEXT CHECK (disbursement_method IN ('maya','gcash','bdo_transfer')),
+    disbursement_method    TEXT CHECK (disbursement_method IN ('maya','gcash','bdo_transfer','other_bank')),
+    rail                   TEXT CHECK (rail IN ('intra_maya','instapay','pesonet')) DEFAULT 'pesonet',  -- locked 2026-05-17 per § 6.7 outbound routing
+    rail_chosen_by         TEXT CHECK (rail_chosen_by IN ('default','vendor_preference','admin_override')) DEFAULT 'default',
+    batch_id               UUID REFERENCES disbursement_batches(batch_id),  -- NULL until included in a Maya Bulk Fund Transfer batch
     disbursement_fee_centavos INT NOT NULL DEFAULT 0,    -- absorbed by Setnayan
+    status                 TEXT NOT NULL DEFAULT 'pending'
+                           CHECK (status IN ('pending','batched','disbursed','failed','manual_reconciliation')),
     initiated_at           TIMESTAMPTZ,
     completed_at           TIMESTAMPTZ,
     bir_form_2307_r2_key   TEXT
 );
+
+-- Maya Bulk Fund Transfer batches (V1.5+ disbursement automation, locked 2026-05-17)
+CREATE TABLE disbursement_batches (
+    batch_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    generated_by_admin_id  UUID NOT NULL REFERENCES users(user_id),
+    rail                   TEXT NOT NULL CHECK (rail IN ('instapay','pesonet','mixed')),
+    csv_r2_key             TEXT NOT NULL,                              -- the uploaded CSV file
+    recipient_count        INT NOT NULL,
+    total_centavos         INT NOT NULL,                                -- sum across all rows
+    status                 TEXT NOT NULL DEFAULT 'pending_upload'
+                           CHECK (status IN ('pending_upload','uploaded','partial_success','complete','failed')),
+    maya_batch_reference   TEXT,                                        -- Maya's returned batch ID once uploaded
+    row_outcomes           JSONB,                                       -- per-row results: { payout_id: 'success'|'failed', reason: '...' }
+    generated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    uploaded_at            TIMESTAMPTZ,
+    completed_at           TIMESTAMPTZ
+);
+
+CREATE INDEX idx_vendor_payouts_status_batch ON vendor_payouts(status, batch_id);
+CREATE INDEX idx_disbursement_batches_status ON disbursement_batches(status, generated_at);
 ```
 
 `payment_method = 'setnayan_pay'` flags this as a vendor booking; service-activation hook on Approve releases vendor-side notification (vendor sees "Booking confirmed by Setnayan" in their 0022 dashboard) instead of activating Setnayan-side services. The payout stage is determined by the vendor's `verification_state`: `verified` → `immediate`; `coming_soon` → `reservation_20` → `pre_event_60` → `post_event_20`.
@@ -905,7 +1254,7 @@ Codes are case-insensitive in admin search but stored uppercase. The full refere
 | 11 | Internal account checkout (`users.is_internal = TRUE`) skips payment screen, order goes directly to `paid` with `comp_grant_id` populated and no `service_order_payments` row. |
 | 12 | Team-pool member with sufficient balance (`team_shared_monthly_allowance.remaining_php >= total`) is fully comped; pool ledger decrements atomically. |
 | 13 | Team-pool member with partial balance pays only the difference via standard flow; comp covers the comped portion. |
-| 14 | Setnayan Pay vendor-booking orders show the convenience fee (5.5% / 6.5% per method per 2026-05-16 lock) as a transparent cart line item; vendor receives list price minus gateway fee minus BIR Withholding 0.5%; verified vendors get immediate full payout, coming_soon vendors get the 3-stage milestone release (20/60/20). |
+| 14 | Setnayan Pay vendor-booking orders show the convenience fee (flat 5.0% per 2026-05-16 lock, supersedes earlier same-day 5.5%/6.5%) as a transparent cart line item; vendor receives list price minus gateway fee minus BIR Withholding 0.5% (Option B — vendor absorbs gateway, Setnayan does NOT); verified vendors get immediate full payout, coming_soon vendors get the 3-stage milestone release (20/60/20). |
 | 15 | Refund (≤ ₱25K, single admin) transitions order to `refunded`, voids the OR per 0026, fires deactivation hooks, sends `refund_processed` email per 0028. |
 | 16 | Reference codes are unique across the entire `service_orders` table; collision retry succeeds within 5 attempts at all realistic transaction volumes. |
 | 17 | Orders in `pending_payment` for > 7 days transition to `expired` via scheduled job; expired orders cannot be paid (customer must re-checkout). |
@@ -1199,8 +1548,13 @@ Compared with the labor cost of manual matching (~5 minutes × ~50 orders/day ×
 | 2026-05-12 | **Resubmission stays on the same order_id.** | When admin rejects "needs more proof," the customer doesn't have to re-add items to their cart. Better UX, same order tracking. `resubmission_count` increments for analytics. |
 | 2026-05-12 | **10-char Crockford base 32 reference codes (no `SET-` prefix in DB).** | 1 trillion namespace is comfortable for V1; collision math gives a 50% chance of collision at ~1M codes — well beyond realistic V1 volume. Crockford alphabet (no 0/O/1/I/L) eliminates customer-typed errors in transfer notes. Prefix shown to customer only, not stored. |
 | 2026-05-12 | **7-day order expiry on `pending_payment`.** | Filipino bank transfers settle within 1–2 business days; 7 days covers weekends + holidays + customer hesitation. After expiry, the customer must re-checkout (which generates a fresh reference code, useful because the prior code may now be polluted with confused customer transfers). |
-| 2026-05-12 | **Setnayan Pay 3% fee is a transparent line item.** ~~3% rate~~ **superseded 2026-05-16 — see next row.** | Hidden fees damage trust. The breakdown surfaces the fee as a separate cart row so customers see exactly what they're paying for. Mirrors how Stripe/PayMongo surface processing fees in their B2C-direct UIs. |
-| 2026-05-16 | **Setnayan Pay convenience fee repriced 3% → 5.5% on top of vendor price (admin-configurable per payment method · cheap rails 5.5% / premium rails 6.5%) · BIR Marketplace Withholding 0.5% pass-through per RMC 8-2024 · Maya Business as V1.5+ primary gateway with Maya QR Ph (1.5%) preferred rail · Setnayan absorbs ₱15-25 outbound disbursement fee per payout · Setnayan Pay gated to verified vendors only (coming_soon vendors pay direct off-platform with Setnayan-managed 3-stage milestone release per 0006).** | The 3% figure was a placeholder during the manual-reconciliation V1 launch and didn't account for the actual tax wedge (Percentage Tax 3% + LBT 1% + Income Tax 25% = ~28% wedge → 3% gross fee × 72% = 2.16% net which is below operating breakeven once admin time per booking is counted). 5.5% lands at ~3.96% net at V1 tax tier — actually profitable per booking. The on-top model preserves vendor pricing autonomy (vendor sets list price without absorbing platform commission); the BIR withholding pass-through delegates BIR's marketplace withholding agent role to Setnayan cleanly; Maya Business unlocks the gateway automation. |
+| 2026-05-12 | **Setnayan Pay 3% fee is a transparent line item.** ~~3% rate~~ **superseded 2026-05-16 — see next rows.** | Hidden fees damage trust. The breakdown surfaces the fee as a separate cart row so customers see exactly what they're paying for. Mirrors how Stripe/PayMongo surface processing fees in their B2C-direct UIs. |
+| 2026-05-16 | **Setnayan Pay convenience fee repriced 3% → 5.5%/6.5% on top of vendor price.** ~~5.5%/6.5% dual-rate~~ **superseded same-day — see next row.** | The 3% figure was a placeholder during the manual-reconciliation V1 launch and didn't account for the actual tax wedge (Percentage Tax 3% + LBT 1% + Income Tax 25% = ~28% wedge → 3% gross fee × 72% = 2.16% net which is below operating breakeven once admin time per booking is counted). The morning 5.5%/6.5% lock fixed the breakeven problem but over-collected against the owner's 3% net design target once worst-case tax was considered. |
+| 2026-05-16 | **Setnayan Pay convenience fee repriced to flat 5.0% (supersedes morning 5.5%/6.5%) · Option B vendor-absorbs-gateway confirmed · admin-configurable per method but uniform by default · BIR Marketplace Withholding 0.5% pass-through per RMC 8-2024 unchanged · Maya Business as V1.5+ primary gateway with Maya QR Ph (1.5%) preferred rail unchanged · Setnayan absorbs ₱15-25 outbound disbursement fee per payout unchanged · Setnayan Pay gated to verified vendors only (coming_soon vendors pay direct off-platform with Setnayan-managed 3-stage milestone release per 0006) unchanged.** | Owner-ratified design target: **3% net to Setnayan after all taxes at worst-case tier**. Math: 3% / (1 − tax_wedge) → V1 28% wedge needs 4.17% gross; V2 realistic 35% wedge (VAT-registered + LBT 2%) needs 4.62% gross; extreme 40% wedge needs 5.00% gross. 5.0% flat is the minimum gross that holds the 3% net floor under every plausible tax scenario with cushion for chargebacks/failed-transactions/disbursement-fee absorption. Yields by tier: V1 → 3.60% net (1.67× operating breakeven); V2 realistic → 3.25% net (1.50×); extreme → 3.00% net (1.39×). **Option B (vendor-absorbs-gateway) confirmed** over Option A (Setnayan-absorbs-gateway) because (a) Stripe Connect / Airbnb / Lazada Marketplace / every PH marketplace works this way so vendors expect it, (b) it insulates Setnayan from gateway rate risk forever (if Maya raises QR Ph from 1.5% → 2%, vendor absorbs not Setnayan), (c) it lets the headline stay at a clean flat 5.0% without rail-specific math at the cart, and (d) Vendor Studio subscribers can be offered a gateway-absorbed perk in V1.5 as a subscription conversion lever without disturbing V1 economics. The dual-rate 5.5%/6.5% from this morning would have netted ~3.58% V1 and ~3.25% V2 — over-collecting by 0.58pp / 0.25pp against the actual target. Flat 5.0% is the disciplined answer. **Annual revenue impact** vs the morning lock at 500 paying couples × ₱300K avg booking through Setnayan Pay: −₱750K gross / −₱540K net per year — accepted because the 3% net target is achieved exactly and the round-number headline strengthens marketing. |
+| 2026-05-17 | **V1.5+ vendor disbursement via Maya Bulk Fund Transfer locked — three-rail routing (Intra-Maya instant+free · InstaPay <1min+₱10 · PESONet EOD+₱15) · default rail per payout type · vendor override in 0022 with ₱5 rebate/upgrade pricing · `disbursement_batches` table + `vendor_payouts.{rail, rail_chosen_by, batch_id, status}` columns added to § 6.9 · failure handling: rejected rows revert to pending + rejoin next-day batch; 3 consecutive failures for same vendor trigger admin alert.** Maya Bank vendor-recruiting copy lives in 0006 Vendor Payout model — "Get paid instantly, free, 24/7 — open a Maya Bank business account" is the canonical onboarding pitch. Setnayan's absorbed disbursement cost stays under 0.3% of platform revenue at every realistic V1.5–V2 scale (₱2,500/yr at 200 couples → ₱65K/yr at 5,000 couples). | Three drivers. **First, operational efficiency vastly outweighs fee savings** — batched disbursement collapses ~5 min/payout click-through to ~5 sec/CSV row; at the 500-couple scale that's ~37 hours/year saved, at 5,000 couples it's ~370 hours/year. **Second, the three-tier rail structure maps to vendor segments cleanly:** Maya Bank vendors win on both sides (instant + free for vendor AND zero cost for Setnayan); InstaPay verified vendors get sub-minute gratification (Setnayan absorbs ₱10); coming_soon milestone releases default to cheap-and-reliable PESONet. **Third, the Maya Bank vendor pitch is structurally aligned** — every account opened benefits both parties forever. Per-recipient bulk pricing is estimated (Maya doesn't publish bulk rates publicly — quote-based per business); locked numbers reconcile to actual Maya Business quote once the merchant account is approved (2-4 week SLA per API Integration Checklist Owner Admin Punch List). |
+| 2026-05-17 | **V1 launch payment-system scope confirmed — V1 ships with the manual QR + screenshot reconciliation flow already specced in § 3.3 + § 6.7 Inbound · Maya Business + automated gateway = V1.5+ only · gateway-absorption cap discussion (Path A/B/C/D from 2026-05-16 PM) deferred to V1.5+ Maya merchant-approval milestone · V1/V1.5+ boundary banner added to § 6 preamble.** V1 economics at flat 5.0% with no gateway absorption: ₱5,000 gross × 72% (V1 28% tax wedge) = ₱3,600 net = 3.60% effective → exceeds the 3% net design target by 0.6pp. BDO-to-BDO and GCash-to-GCash transfers are free via InstaPay rails so Setnayan keeps the full convenience fee in V1. | The prior day's Path A/B/C/D conversation was implicitly V1.5+ because it depended on Maya Business gateway fees being live; the spec didn't surface that boundary clearly. Owner's "V1 = manual QR" confirmation closes the thread — V1 ships with the already-specced manual flow at 3.60% net (above target with zero design tension); the V1.5+ gateway-absorption decision waits for the actual Maya quote + production data. No V1 engineering work pending — manual reconciliation flow already shipped (PR #5 + V1 spec locked 2026-05-12). |
+| 2026-05-17 | **Setnayan Pay convenience fee minimum floor locked at ₱50 — `fees_centavos = MAX(subtotal_centavos × setnayan_fee_bps / 10000, min_fee_centavos)` where `min_fee_centavos` defaults to 5000 (₱50) in `payment_method_config` per 0023 § 3.5d (admin-configurable per method).** Floor activates only on vendor bookings below ₱1,000 (the 5%-meets-₱50 crossover). Customer-facing copy: "Setnayan Pay convenience fee — 5% per booking, ₱50 minimum." Vendor opt-in (per § 6.8) interaction: if vendor absorbs the fee for a small booking, the ₱50 floor still applies to vendor — protects Setnayan's per-transaction operating cost regardless of which side pays. | Owner pick: ₱50 over ₱150/₱200 alternatives. ₱50 × 72% (V1 28% tax wedge) = ₱36 net per small booking — below the V1 ₱80-130 operating cost band (admin time + disbursement absorption), so Setnayan loses ~₱50-90 on each booking below ₱1,000 in V1. **Accepted trade-off:** sub-₱1K vendor bookings are rare in the wedding category (estimated 1-2% of all bookings; supplies/micro-add-ons only); aggregate annual loss is ~₱720 at 200 couples → ~₱3,600 at 1,000 couples — negligible against platform revenue (rounding error). V1.5+ rebalances cleanly: Bulk Fund Transfer drops admin cost to ₱30-50, so ₱36 net at the floor moves to roughly breakeven. ₱50 anchors close to PH payment-processor flat-fee norms (PayMongo ₱5-15, Stripe ~₱17 equivalent) — feels fair to customers · ₱150 felt punitive on small purchases. **Worked example in § 6.1:** ₱500 booking → ₱50 floor (5% × ₱500 = ₱25, floor wins) → customer pays ₱550 total. Crossover at ₱1,000 booking. |
+| 2026-05-16 | **Vendor opt-in to cover the convenience fee — `vendors.absorbs_convenience_fee BOOLEAN DEFAULT FALSE` · "No Convenience Fee" badge when TRUE · cart hides the fee row + customer sees vendor's listed price flat · Setnayan revenue unchanged · snapshot at order-creation onto `service_orders.vendor_absorbed_fee`.** Full vendor-side toggle + financial-preview UI lives in 0022 dashboard; marketplace badge + filter chip in 0006/0022; customer-side cart treatment + worked example in § 6.8 above. | Filipino couples strongly prefer "all-in" pricing — many wedding vendors already absorb platform fees informally. Surfacing this as a first-class opt-in: (a) lets price-competitive vendors compete on transparency without negotiating with Setnayan, (b) gives Setnayan a search-filter chip couples actually use, (c) preserves the canonical 5.0% flat rate regardless of vendor choice (Setnayan's revenue is identical in both options). Worked example at ₱100K booking: Option A (vendor covers) → vendor receives ₱93,100 / ₱92,150 depending on rail; Option B (default) → vendor receives ₱98,000 / ₱97,000. Vendor sacrifices ~5% revenue for the badge — only opt in if conversion lift exceeds ~5%. Toggle financial-preview UI in 0022 makes the cost obvious upfront. Snapshot discipline (flag applies to NEW cart_items only) matches the 2026-05-12 price-snapshot decision. |
 | 2026-05-12 | **Service-activation hooks are Postgres triggers + Edge Function dispatchers.** | Triggers handle the simple cases (insert N seats, flip a boolean flag). Edge Functions handle the complex cases (OR generation per 0026, email send per 0028). All hooks are idempotent so re-running on retry is safe. |
 | 2026-05-12 | **No automated bank-API integration in V1.** | Manual reconciliation is the V1 design constraint. PayMongo evaluation and GCash Merchant API integration are V1.5 candidates only. The schema is ready to support automation drop-in: `service_order_payments.reviewed_by_admin` becomes nullable for auto-approved payments, and a new `auto_approved_at` column can be added without breaking the manual flow. |
 | 2026-05-12 | **Reconciliation matcher proposes; admin disposes.** | The matcher never auto-approves a payment — even at Tier 1 exact-match, admin must click Approve. § 9.1 single-admin authority is preserved end-to-end. Two reasons: (1) PH bank message formats can be spoofed in a forwarded SMS, so an exact-reference-code match alone isn't proof of payment receipt; (2) the V1 manual flow already meets the 24-hr SLA — automation that bypasses admin would skip the human fraud-check layer for a marginal speed gain. The Tier 1 case ends up being a one-click confirmation for admin, which captures ~90% of the labor savings without the trust cost. |
@@ -1228,3 +1582,46 @@ Compared with the labor cost of manual matching (~5 minutes × ~50 orders/day ×
 - `CLAUDE.md` § 10b — Setnayan Team Shared Monthly Pool (capped consumption pool; first-come-first-served)
 - `Setnayan_Vendor_Agreement.md` Refund Rules section — refund policy summary
 - `Setnayan_Privacy_and_Security_Policy.md` — payment proof screenshots are PII; retention follows the events 5-year window
+
+---
+
+## V1.2 Amendment — Multi-Payer Cart (added 2026-05-19)
+
+Per [0049 Multi-Payer Cart](../0049_multi_payer_cart/0049_multi_payer_cart.md) and its dependency on [0048 Multi-Moderator Event Access](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md), the cart + checkout flow extends to support multiple payers in V1.2.
+
+### Schema additions to `service_order_line_items`
+
+```sql
+ALTER TABLE service_order_line_items
+  ADD COLUMN paid_by_role TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+  ADD COLUMN payment_split_percentages JSONB,
+  ADD COLUMN added_to_cart_by_user_id UUID NOT NULL REFERENCES users(user_id),
+  ADD COLUMN payment_status_per_role JSONB NOT NULL DEFAULT '{}'::jsonb,
+  ADD COLUMN private_to_role TEXT[],
+  ADD COLUMN hidden_from_role TEXT[],
+  ADD COLUMN surprise_for_role TEXT,
+  ADD COLUMN visibility_set_by_user_id UUID;
+```
+
+Plus new `vendor_order_receipts` table (one row per payer per line item) — see [0049 § Schema](../0049_multi_payer_cart/0049_multi_payer_cart.md) for full definition.
+
+### Cart UX changes
+
+- **Add-to-cart modal** gains payer-attribution picker ("Who's paying for this? Bride / Parent of Bride / Parent of Groom / Ninang Lita / Custom split") + visibility picker (Visible to all / Private / Hide from / Surprise for).
+- **Cart view** splits into "Your items" (viewer's tagged items) + "Other moderators' items (FYI)" (read-only). See [0049 § Cart view per role](../0049_multi_payer_cart/0049_multi_payer_cart.md).
+- **Checkout button** changes from "Check out" to "Check out my items" — filters to current moderator's tagged items only.
+- **Parallel checkout sessions** supported — multiple moderators can be in checkout simultaneously without race conditions (disjoint item sets per moderator).
+
+### Receipt formatting changes
+
+Vendor receipts now show couple name + ceremony date as primary, payer name as secondary line per PH cultural norm. BIR Form 2307 generation extends to per-payer scope per [0026 BIR tax compliance](../0026_bir_tax_compliance/0026_bir_tax_compliance.md).
+
+### Backwards compat
+
+Pattern A (single-payer, whoever checks out pays everything) preserved. Cart items with empty `paid_by_role` array fall back to Pattern A. Existing V1.1 single-couple checkout flow unchanged.
+
+### Phasing
+
+- **V1.2:** Pattern A (preserved) + Pattern B (per-item attribution)
+- **V1.3:** Pattern C (split-cost per item with percentage split) + per-role default attribution templates + international card payment for foreign moderators
+- **V1.5+:** Cross-payer settlement view (informational; couple settles externally)

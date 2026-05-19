@@ -183,6 +183,45 @@ Return a top-level object:
 
 ---
 
+## 4a. Cross-iteration model reuse — Concierge synthesis (Locked 2026-05-18)
+
+The Anthropic workspace established in § 4 (Claude Console workspace
+"Setnayan" · spend caps locked $500/$2K/$100 · primary text model
+**Claude Haiku 4.5** · Sonnet 4.6 reserved for vision) is **also
+the synthesis backend for the paid-tier Setnayan Concierge**
+conversational planner introduced in 0016 § 0a (locked 2026-05-18).
+
+**No new workspace, no new spend caps, no new model approval.**
+Concierge paid-tier requests flow through the same workspace
+already approved for contract intelligence; cost per concierge
+question (~₱0.50) is one-eighth the per-contract analysis cost,
+so the existing $500 hard cap covers both surfaces with significant
+headroom even at peak.
+
+**Free-tier Concierge synthesis** (DIY 3-question taste + 3-day
+trial) does NOT touch this workspace — it runs against Cloudflare
+Workers AI free tier (`@cf/meta/llama-3.1-8b-instruct-fast`). Only
+the Active Concierge tier (₱4,999/12mo) routes through Anthropic.
+See `02_Specifications/18_Concierge_Brain/00_Architecture.md` § 4
+for the full model-by-tier matrix.
+
+**Failure mode crossover.** When Haiku is rate-limited or the
+Anthropic API returns 5xx for Concierge requests, the synthesis
+falls through to Cloudflare's free Llama 8B (logged as a
+degradation event in `admin_audit_log`). Contract Intelligence
+itself does NOT have this fallback — contract analysis is paid
+and synchronous; couples paying for Contract Intelligence get the
+error toast and a refund-eligible retry, not a degraded fallback.
+
+**Cost watch integration.** Concierge per-message cost
+(`concierge_messages.cost_centavos`) joins the existing
+`service_catalog_cost_watch` health surface in 0023 § 3.12 admin
+add-on management, broken down by tier (DIY vs Active) and by
+synthesis model. The same surface watches Contract Intelligence
+per-analysis cost. One pane of glass for all Anthropic spend.
+
+---
+
 ## 5. Setnayan template clause library
 
 A curated library of lawyer-reviewed PH-compliant clauses across the 14 elements (Section 3). V1 ships ~50 master clauses. Each clause has:

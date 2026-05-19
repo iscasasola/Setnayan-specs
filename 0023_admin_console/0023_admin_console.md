@@ -8,9 +8,9 @@
 
 ---
 
-## 1. The 8 admin surfaces
+## 1. The 10 admin surfaces
 
-The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`.
+The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. (Surface count updated 2026-05-17 from 8 → 9 with the addition of the Concierge Abuse review queue, then from 9 → 10 with the addition of the Add-on Management card view, then 10 → 11 on 2026-05-18 with the addition of the Concierge Brain admin surface — Brain Editor + Unanswered Questions queue + Cost Watch + Cowork sync lane all in one tab.)
 
 | # | Surface | URL section | What it does |
 |---|---|---|---|
@@ -18,12 +18,15 @@ The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`.
 | 2 | **Verification Queues** | `/admin/verify` | Vendor identity verification + service approval + custom-category review — three queues, one screen |
 | 3 | **Payments &amp; Activations** | `/admin/payments` | Customer payment confirmation → service activation hook fires. Refund processing too. |
 | 4 | **Users** | `/admin/users` | All customers + vendors + agents · search · per-user detail with actions (suspend, refund, comp, audit log) · 🟣 internal-account + 🟢 team-member badges |
-| 5 | **Pricing &amp; Catalog** | `/admin/pricing` | SKU price control · comp / freebie tooling · promo codes · price-history audit · internal accounts (§ 3.5b) · payment-receiving accounts (§ 3.5c) |
+| 5 | **Pricing &amp; Catalog** | `/admin/pricing` | SKU price control (tabular grid) · comp / freebie tooling · promo codes · price-history audit · internal accounts (§ 3.5b) · payment-receiving accounts (§ 3.5c). Engineering / audit view. |
 | 6 | **Disputes &amp; Refunds** | `/admin/disputes` | Dispute claim queue · mediation flow · refund + replacement-vendor process |
 | 7 | **Settings** | `/admin/settings` | Platform-wide config · brand-mark management · feature flags · two-admin approval queue · admin role provisioning |
 | 8 | **Website editor** | `/admin/website` | Marketing-site widget management — enable/disable + drag-drop reorder per page (home · /for-vendors · /features · /about). See § 3.10. |
+| 9 | **Concierge Abuse** | `/admin/concierge-abuse` | Multi-account trial-cycling review queue. Tiered enforcement (warning → trial ban → full ban). See § 3.11. Added 2026-05-17. |
+| 10 | **Add-on Management** | `/admin/addons` | App Store-style card view mirroring the customer-facing add-ons grid + admin-only tiles (Concierge etc.) + a second tab for vendor-side add-ons. Per-tile drawer covers eligibility · pricing · current users · statistics. Generates the consolidated `Pricing.md` report from live `service_catalog` + `feature_policy` state. See § 3.12. Added 2026-05-17. |
+| 11 | **Concierge Brain** | `/admin/brain` | Browse + edit `concierge_brain_chunks` (markdown editor + tag autocomplete + cross-ref linker + per-chunk re-embed button + paid-tier-only flag) · queue for `concierge_unanswered_questions` (admin elevates real questions into new chunks) · Cost Watch aggregating per-tier per-model inference spend · Cowork sync lane for content authors. See § 3.13. Added 2026-05-18. |
 
-Mobile uses a 5-tab bottom nav: **Home · Queues · Payments · Users · More**. The "More" tab houses Pricing, Disputes, Settings, and Website editor.
+Mobile uses a 5-tab bottom nav: **Home · Queues · Payments · Users · More**. The "More" tab houses Pricing, Disputes, Settings, Website editor, Concierge Abuse, and Add-on Management.
 
 ---
 
@@ -163,7 +166,83 @@ CREATE INDEX idx_blacklisted_emails_lower
 
 ### 3.5 Pricing &amp; Catalog
 
-**SKU price editor.** The full `service_catalog` table editable inline. Every SKU shows: SKU code, name, current PHP price, prior prices (history), is_active. Edit a price → 24-hour delay before taking effect (gives admin time to roll back) · `service_catalog_price_history` records every change.
+**SKU price editor — full grid (locked 2026-05-17 update).** The full `service_catalog` table editable inline. Every SKU row shows:
+
+| Column | Source | Notes |
+|---|---|---|
+| SKU code | `service_catalog.sku_code` | Read-only after creation |
+| Name | `service_catalog.name` | Editable |
+| Category | `service_catalog.category` | Editable; drives admin filter chips |
+| Current PHP price | `service_catalog.price_php_centavos` | Editable; 24-hour delay |
+| Time recurrence | `service_catalog.time_recurrence` | Editable dropdown: One-time / Weekly / Quarterly / Annual / Lifetime |
+| Event scope | `service_catalog.event_scope` | Editable dropdown: Per event / All events |
+| Multi-purchase | `service_catalog.is_multi_purchase` | Toggle |
+| Active | `service_catalog.is_active` | Toggle |
+| **Highest render** | `service_catalog_cost_watch.highest_single_render_centavos` | Read-only · Cost Watch · 90-day window |
+| **Avg render** | `service_catalog_cost_watch.avg_render_centavos` | Read-only |
+| **p95 render** | `service_catalog_cost_watch.p95_render_centavos` | Read-only |
+| **Cost / Price** | `highest_render ÷ price` | Health flag: 🟢 &lt;30% · 🟡 30–50% · 🔴 &gt;50% |
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ SKU Pricing &amp; Catalog · with Cost Watch                                                  [Period: 90d ▾]      │
+│                                                                                                                │
+│ SKU                            Price       Time-rec   Event-scope     Highest Render   Cost/Price   Health     │
+│ ──────────────────────────────────────────────────────────────────────────────────────────────────            │
+│ panood_daily_broadcast         ₱2,499      One-time   Per event       ₱180 (1d ago)    7%          🟢         │
+│ panood_annual_streaming        ₱19,999     Annual     All events      ₱180 (1d ago)    1%          🟢         │
+│ panood_template_pack_daily     ₱799        One-time   Per event       ₱45 (2d ago)     6%          🟢         │
+│ panood_template_pack_annual    ₱7,999      Annual     All events      ₱45 (2d ago)     0.6%        🟢         │
+│ panood_cam_bridge_slot_day     ₱199        One-time   Per event       ₱30 (1d ago)     15%         🟢         │
+│ papic_cam_bridge_slot_day      ₱99         One-time   Per event       ₱30 (1d ago)     30%         🟡         │
+│ papic_cam_bridge_all_slots_day ₱249        One-time   Per event       ₱90 (3d ago)     36%         🟡         │
+│ papic_cam_bridge_all_slots_annual ₱2,499   Annual     All events      ₱90             3.6%         🟢         │
+│ patiktok_cam_bridge_day        ₱49         One-time   Per event       ₱15 (4d ago)     31%         🟡         │
+│ patiktok_cam_bridge_annual     ₱249        Annual     All events      ₱15             6%          🟢         │
+│ save_the_date_video_render     ₱199        One-time   Per event       ₱45 (3d ago)     23%         🟢         │
+│ ai_video_highlight_60s         ₱1,999      One-time   Per event       ₱185 (90d ago)   9%          🟢         │
+│ ai_edited_highlight_3min       ₱3,499      One-time   Per event       ₱825 (12d ago)   24%         🟢         │
+│ concierge_complete             ₱4,999      One-time   Per event       ₱1,250 (5d ago)  25%         🟢         │
+│ vendor_pro_weekly              ₱499        Weekly     All events      —                —           —          │
+│ ...                                                                                                            │
+│                                                                                                                │
+│ Click a row → edit drawer with all fields · Click "Highest Render" value → cost_breakdown drilldown modal     │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Edit drawer fields:** SKU code (read-only) · Name · Description · Category · PHP Price · Time recurrence dropdown · Event scope dropdown · Multi-purchase toggle · Active toggle. Edit a price OR a frequency dimension → 24-hour delay before taking effect (gives admin time to roll back) · `service_catalog_price_history` records every change including `prior_time_recurrence` / `new_time_recurrence` / `prior_event_scope` / `new_event_scope` columns.
+
+**Frequency-change two-admin approval:** changing a SKU's `time_recurrence` or `event_scope` post-launch is higher-impact than a price tweak (a customer who bought "Annual / all_events" expecting yearly billing for every event won't accept a silent switch to "Quarterly / per_event"). Frequency changes require **two-admin approval per § 9.1**, same gate as mid-quarter price changes >₱500. Existing active subscriptions / multi-event passes **keep their old frequency until natural expiry** — no retroactive billing change (mirrors the 2026-05-12 cart-snapshot principle in 0034 § 3.3).
+
+**Cost Watch drilldown** — clicking the Highest Render value on a SKU row opens:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────┐
+│ Highest render — AI Edited Highlight (3-min) · ₱825 · 12d ago             [Close]  │
+│                                                                                    │
+│  Anthropic Claude Sonnet (vision + edit decisions):  ₱680   (82%)                 │
+│  FFmpeg compute (Cloudflare Worker):                  ₱95    (12%)                 │
+│  R2 storage write (output MP4 ~120MB):                ₱30    (4%)                  │
+│  Bandwidth (couple downloads + dashboard preview):    ₱15    (2%)                  │
+│  Music license (Setnayan-owned):                      ₱0     (0%)                  │
+│  ────────────────────────────────────────────────────────────                     │
+│  Total:                                               ₱825                         │
+│                                                                                    │
+│  Order: SET-A4F2K9R7BX     User: maria@example.com   Event: Maria &amp; Juan          │
+│  Render trigger: vision-heavy footage (24 input clips · 6 face-detection passes)   │
+│                                                                                    │
+│  [ View all 90d renders for this SKU →   View order →   View user → ]              │
+└────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Pricing-recommendation rule of thumb surfaced inline** on each SKU row: keep `highest_single_render_centavos / price_php_centavos < 30%` for healthy margin. Yellow at 30–50%, red >50%. Admin sees at-a-glance which SKUs may need a reprice.
+
+**Schema reminder** (defined in 0034):
+- `service_catalog` extended with `time_recurrence TEXT CHECK (one_time/weekly/quarterly/annual/lifetime)` + `event_scope TEXT CHECK (per_event/all_events)` columns
+- `service_render_costs` table — per-render cost ledger (cost_centavos + cost_breakdown JSONB)
+- `service_catalog_cost_watch` materialized view — 90-day MAX/AVG/p95 aggregations refreshed hourly
+
+**Instrumentation phasing (locked 2026-05-17):** V1 ships table + materialized view + admin UI columns as read-only with the 3 highest-COGS SKUs instrumented first — **AI Edited Highlight 3-min** (highest), **AI Video Highlight 60s**, **Setnayan Concierge** (Claude Sonnet calls). Remaining SKUs (Save-the-Date Video, Panood, Custom Monogram, Patiktok, Cam Bridge tiers) get instrumentation in V1.5+ as the engineering catches up.
 
 **Comp / freebie tool.** Admin can grant any SKU free to any user:
 
@@ -370,17 +449,18 @@ V1.5+ when Maya Business goes live as the primary gateway (per 0034 § Setnayan 
 │                                                                                         │
 │ Method                  Setnayan fee  Gateway fee  Vendor net*  Preferred  Active       │
 │ ───────────────────────────────────────────────────────────────────────────────────     │
-│ Maya QR Ph              5.5%          1.5%         97.5%         ★ default  ✅          │
-│ GCash direct            5.5%          1.5%         97.5%                    ✅          │
-│ Bank transfer (BDO/etc) 5.5%          0% (manual)  99.5%                    ✅          │
-│ Maya eWallet            5.5%          2.0%         97.0%                    ✅          │
+│ Maya QR Ph              5.0%          1.5%         98.0%         ★ default  ✅          │
+│ GCash direct            5.0%          1.5%         98.0%                    ✅          │
+│ Bank transfer (BDO/etc) 5.0%          0% (manual)  99.5%                    ✅          │
+│ Maya eWallet            5.0%          2.0%         97.5%                    ✅          │
 │ Credit card (Mastercard/│                                                                │
-│  Visa)                  6.5%          3.0%         96.5%                    ✅          │
+│  Visa)                  5.0%          3.0%         96.5%                    ✅          │
 │ OTC (7-Eleven, M Lhuill │                                                                │
-│  ier, etc.)             5.5%          1.5%         97.5%                    ✅          │
+│  ier, etc.)             5.0%          1.5%         98.0%                    ✅          │
 │                                                                                         │
 │ * Vendor net = 100% − gateway fee − BIR Withholding 0.5%                                │
-│   Setnayan keeps the 5.5%/6.5% convenience fee gross; pays own taxes from that          │
+│   Setnayan keeps the flat 5.0% convenience fee gross; pays own taxes from that          │
+│   (Option B — vendor absorbs gateway, Setnayan does NOT)                                │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -392,8 +472,9 @@ V1.5+ when Maya Business goes live as the primary gateway (per 0034 § Setnayan 
 CREATE TABLE payment_method_config (
     method_key            TEXT PRIMARY KEY,    -- 'maya_qr','gcash_direct','bdo_transfer','maya_ewallet','credit_card','otc'
     display_label         TEXT NOT NULL,
-    setnayan_fee_bps      INT NOT NULL,        -- 550 = 5.5%; 650 = 6.5% (basis points)
-    gateway_fee_bps       INT NOT NULL,        -- 150 = 1.5%; 300 = 3.0%
+    setnayan_fee_bps      INT NOT NULL,        -- 500 = 5.0% flat default; admin-configurable per method, basis points (was 550/650 dual-rate pre-2026-05-16 evening lock)
+    gateway_fee_bps       INT NOT NULL,        -- 150 = 1.5%; 300 = 3.0% (Option B — vendor absorbs)
+    min_fee_centavos      INT NOT NULL DEFAULT 5000,    -- ₱50 floor, locked 2026-05-17 · fees_centavos = MAX(subtotal × bps / 10000, min_fee_centavos)
     is_preferred_default  BOOLEAN NOT NULL DEFAULT FALSE,
     is_active             BOOLEAN NOT NULL DEFAULT TRUE,
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -435,11 +516,75 @@ CREATE TABLE vendor_tier_history (
 );
 ```
 
+### 3.5f Payment Options Policy Matrix (locked 2026-05-17)
+
+Admin-configurable matrix controlling which payment methods are available **per account-type scope**. Each method defined in `payment_method_config` (per § 3.5d) can be independently enabled or disabled for four scopes:
+
+- **Customers** (couples paying Setnayan)
+- **Vendors** (un-certified / coming_soon)
+- **Certified Vendors** (verified vendors — Setnayan Pay payee side)
+- **Events** (per-event override that supersedes the account-type default)
+
+The cart logic in [0034 § 3.3 Checkout](Documents/Claude/Projects/Setnayan/0034_payments_and_cart/0034_payments_and_cart.md) reads the policy for the active customer's scope before rendering available rails. Per-event override (if set) takes precedence over account-type defaults.
+
+**Admin grid view:**
+
+```
+┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Payment Options Policy · per account-type scope                                                  │
+│                                                                                                   │
+│ Method                  Customers   Vendors   Certified Vendors   Notes                          │
+│ ────────────────────────────────────────────────────────────────────────────────────             │
+│ BDO QR (V1 manual)         [✓]       [✓]            [✓]           V1 active                      │
+│ GCash QR (V1 manual)       [✓]       [✓]            [✓]           V1 active                      │
+│ Maya QR Ph (V1.5+)         [✓]       [✗]            [✓]           Verified-only Setnayan Pay     │
+│ GCash direct (V1.5+)       [✓]       [✗]            [✓]                                          │
+│ Maya eWallet (V1.5+)       [✓]       [✗]            [✓]                                          │
+│ Credit card (V1.5+)        [✓]       [✗]            [✓]           Premium rail                   │
+│ OTC (V1.5+)                [✓]       [✗]            [✓]                                          │
+│ Bank transfer manual       [✓]       [✓]            [✓]                                          │
+│                                                                                                   │
+│ Per-event overrides: 3 active · [View overrides table]                                           │
+└───────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Schema extension** (extends `payment_method_config` from § 3.5d):
+
+```sql
+ALTER TABLE payment_method_config ADD COLUMN enabled_for_customers BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE payment_method_config ADD COLUMN enabled_for_vendors_coming_soon BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE payment_method_config ADD COLUMN enabled_for_vendors_certified BOOLEAN NOT NULL DEFAULT TRUE;
+
+-- Per-event override: a specific event can override the account-type default
+CREATE TABLE event_payment_options_override (
+    event_id          UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
+    method_key        TEXT NOT NULL REFERENCES payment_method_config(method_key),
+    enabled           BOOLEAN NOT NULL,
+    set_by_admin_id   UUID NOT NULL REFERENCES users(user_id),
+    reason            TEXT,                        -- e.g., "VIP wedding · enable all rails"
+    set_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (event_id, method_key)
+);
+
+CREATE INDEX idx_event_payment_options_event ON event_payment_options_override(event_id);
+```
+
+**Resolution order at checkout** (read by the cart logic in 0034 § 3.3):
+
+1. If the cart belongs to a specific event AND that event has rows in `event_payment_options_override`, use those rows for any methods listed.
+2. For methods not overridden at the event level, fall back to the account-type default from `payment_method_config.enabled_for_*`.
+3. Customer scope: read `enabled_for_customers`.
+4. Vendor-payee scope (used by the payouts side, not checkout): read `enabled_for_vendors_coming_soon` or `enabled_for_vendors_certified` depending on `verification_state`.
+
+**Why single-admin authority for policy toggles:** consistent with § 3.5d — these are business-policy levers, not security-critical fields. Changes are logged in the standard admin audit log (`admin_audit_log` per § 365). A separate `payment_options_policy_history` table is not needed — `payment_method_config_history` already snapshots the full row on every change including the new scope columns.
+
+**V1 vs V1.5+ scope:** schema lands in V1 (matrix is sparse — only BDO QR, GCash QR, and bank-transfer-manual are populated). When Maya Business is approved at V1.5+, the matrix expands automatically as the new method rows insert via § 3.5d migration. No code change needed to onboard new methods; the admin just flips toggles on the new rows.
+
 ### 3.6 Disputes &amp; Refunds
 
 The dispute resolution queue. Each claim shows:
 
-- Couple + vendor + service + amount paid (if any · 3% Setnayan Pay convenience fee customers may seek refund of)
+- Couple + vendor + service + amount paid (if any · 5.0% Setnayan Pay convenience fee customers may seek refund of, per 0034 § 6 locked 2026-05-16 PM)
 - What stage the vendor was at when the breach was reported
 - Couple's claim narrative + evidence (chat history, screenshots, file uploads)
 - Vendor's response (if provided)
@@ -632,6 +777,357 @@ Each row: drag handle · order # · widget label · enabled toggle · gate-type 
 **Mobile:** Lives under "More" tab. Single-column list with drag handles operable via long-press; toggle column on the right.
 
 **Cross-references:** iteration 0015 § Widget architecture; CLAUDE.md decision-log entry 2026-05-15 widget refactor + vendor public_visibility.
+
+---
+
+### 3.11 Concierge Abuse review queue (locked 2026-05-17)
+
+New tab in the admin console (alongside Users · Verification · Payments · Disputes · Funnels · Reviews · Website Editor) for reviewing multi-account trial-cycling flags raised by the iteration 0016 Setnayan Concierge anti-abuse framework. See iteration 0016 § 0 Anti-abuse subsection for the detection signals + tiered-enforcement model.
+
+**Tab visibility:** all admin roles. **Action authority:** single-admin per § 4.3 (review decisions are reversible — admin can lift enforcement via the appeal flow without two-admin approval).
+
+#### 3.11.1 Queue view (default)
+
+Default filter: `status = 'pending_review'` flags, sorted by `similarity_score DESC` then `created_at ASC` (highest-confidence + oldest-pending at top so admin doesn't get distracted by recent low-score noise). Top of the page shows three metric chips: **{N} pending** · **{N} cleared (last 7d)** · **{N} confirmed (last 7d)**.
+
+Each row displays:
+
+| Column | Source | Notes |
+|---|---|---|
+| Flagged account | `concierge_abuse_flags.flagged_user_id` + `users.full_name` + `users.email` | Click → opens admin Users surface for that account |
+| Event | `events.event_name` + `events.wedding_date` + `events.venue_name` for the event that triggered the flag | The event the couple was attempting to start a trial on |
+| Similarity score | `concierge_abuse_flags.similarity_score` (NUMERIC 0–1) | Visual: a small horizontal bar (red ≥ 0.85, amber 0.7–0.85, green < 0.7) — V1 threshold for trial-block is ≥ 0.7 |
+| Signals fired | `concierge_abuse_flags.signals` (JSONB) | Compact chip row: 📅 same-date · 🏛 same-venue · 📍 same-address · 👫 name-overlap · 📞 same-phone · 💳 same-payment · 🌐 same-IP. Critical signals (phone / payment) styled in red |
+| Matched accounts | `concierge_abuse_flags.matched_user_ids` | Stack of small avatars + count chip "+N matches"; click expands per-match comparison panel (see 3.11.2) |
+| Account strikes | `users.concierge_abuse_strike_count` | "0 strikes" / "1 strike (warning)" / "2 strikes (trial banned)" pill — colored by current enforcement level |
+| Created | `concierge_abuse_flags.created_at` | Relative timestamp ("3 min ago" / "yesterday") |
+| Actions | inline buttons | [Clear (false positive)] · [Confirm abuse] · [⋯] (View full account · Open audit log · Compare side-by-side) |
+
+#### 3.11.2 Per-match comparison panel (drilldown)
+
+Clicking a row expands into a side-by-side comparison of the flagged account's event vs each matched trial-used account's event. Three columns: signal type / flagged-account value / matched-account value, with the matching signals highlighted. Admin can scan and decide: is this the same person on a new account (abuse) or a different couple at the same venue/date (false positive — common for popular Tagaytay venues on Saturday afternoons).
+
+#### 3.11.3 Admin actions
+
+**Clear (false positive)** — calls `adminClearConciergeFlag(flag_id, admin_user_id, notes)`:
+- `concierge_abuse_flags.status` → `'cleared'`
+- No strike incremented on the flagged account
+- Flagged user receives in-app notification: *"Your account was flagged for review and cleared. Your 3-day Setnayan Concierge trial is available."*
+- Required: free-form `admin_notes` (≥ 10 chars) explaining why this was a false positive (audit-trail input)
+
+**Confirm abuse** — calls `adminConfirmConciergeAbuse(flag_id, admin_user_id, notes)`:
+- `concierge_abuse_flags.status` → `'confirmed_abuse'`
+- `users.concierge_abuse_strike_count` increments by 1
+- `users.concierge_enforcement_level` auto-bumps per the tier table: strike 1 → `'warning'` · strike 2 → `'trial_banned'` · strike 3+ → `'full_banned'`
+- `users.concierge_enforcement_at` + `_by` + `_reason` stamped
+- Flagged user receives in-app + email notification (per 0028) with the new state + appeal-ticket CTA
+- Required: free-form `admin_notes` (≥ 20 chars) — this is the audit-trail justification for the strike; surfaces in the user's audit log + the appeal review if the user contests
+- Side-effect: any in-flight `concierge_abuse_flags` rows for the same `flagged_user_id` still in `'pending_review'` are auto-cleared (single-flag-per-strike to prevent double-counting bulk-flag bursts)
+
+**Decline-to-decide (defer)** — admin can leave the flag in `'pending_review'` and come back to it. No state change. Flagged account remains trial-blocked while in `'pending_review'` (the trial-start UI shows the under-review modal).
+
+#### 3.11.4 Appeal-driven enforcement reversal
+
+When a banned account submits a 0029 help-center ticket via the in-app appeal CTA, the ticket routes to the abuse-review admin role. Reviewing admin opens the user's account in this 3.11 surface (linked from the ticket) and can call `adminLiftConciergeEnforcement(user_id, admin_user_id, notes)`:
+- `users.concierge_abuse_strike_count` decrements by 1 (clamps at 0)
+- `users.concierge_enforcement_level` re-derives from the new strike count per the tier table (typically resets to `'warning'` if strike count drops to 1, or `'none'` if drops to 0)
+- All historical `concierge_abuse_flags` rows for this user with `status = 'confirmed_abuse'` are flagged with `admin_notes` referencing the appeal ticket ID + the reviewing admin's notes — they are NOT deleted (audit trail preserved)
+- User receives in-app + email notification: *"Your appeal was reviewed and your Setnayan Concierge access has been restored. Reason: {admin_notes}."*
+
+#### 3.11.5 Mobile
+
+The queue is admin-only and tablet/desktop-first. On mobile (admin opens from phone), the queue renders as a stacked-card list — each card shows the flagged account header, similarity score chip, signals row, and a single primary action ("Review"); tapping "Review" opens the per-match comparison panel as a full-screen sheet with the Clear / Confirm / Defer actions at the bottom.
+
+#### 3.11.6 Schema (defined canonically in iteration 0016 § 0)
+
+```sql
+-- Restated here for surface readability; canonical definition lives in iteration 0016 § 0.
+CREATE TABLE concierge_abuse_flags (
+  flag_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  flagged_user_id   UUID NOT NULL REFERENCES users(user_id),
+  matched_user_ids  UUID[] NOT NULL,
+  similarity_score  NUMERIC NOT NULL,
+  signals           JSONB NOT NULL,
+  status            TEXT NOT NULL DEFAULT 'pending_review'
+                    CHECK (status IN ('pending_review', 'cleared', 'confirmed_abuse')),
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reviewed_at       TIMESTAMPTZ,
+  reviewed_by       UUID REFERENCES users(user_id),
+  admin_notes       TEXT
+);
+CREATE INDEX idx_concierge_abuse_flags_status ON concierge_abuse_flags(status, created_at DESC);
+```
+
+**RLS:** admin-only read/write via `is_admin()` predicate. Couples MUST NOT be able to query this table directly — flag visibility to the flagged user is exclusively through the in-app notification + appeal-ticket flow, not via a direct RLS-readable surface.
+
+**Cross-references:** iteration 0016 § 0 Anti-abuse subsection (detection signals · tiered enforcement model · server-action signatures); iteration 0025 § 3.7.2 Enforcement-state overlay (customer-side surface); iteration 0029 (appeal-ticket category + routing).
+
+---
+
+### 3.12 Add-on Management · card-view mirror of customer add-ons (locked 2026-05-17)
+
+A new top-level admin surface at `/admin/addons` that mirrors the customer-facing add-ons grid visually, with each tile opening into an admin-only settings drawer. Complements (does NOT replace) the existing § 3.5 Pricing & Catalog tabular grid — § 3.5 is the engineering / audit view (all SKUs, spreadsheet density); § 3.12 is the product / strategy view (customer-parity tiles, richer per-SKU drill-down). Both edit the same underlying tables (`service_catalog`, `feature_policy`, `event_feature_policy_override`).
+
+**Purpose.** Single admin surface where every purchasable thing (couple-side + vendor-side + admin-only SKUs like Concierge) is configurable from one place: who can buy it, what it costs, who's using it right now, and how it's performing. Output: generates the consolidated `Pricing.md` report (corpus root) on demand from live database state.
+
+#### 3.12.1 Layout · two-tab card grid
+
+URL: `/admin/addons`. Tabs at top:
+
+| Tab | What it shows |
+|---|---|
+| **Customer Add-ons** | Card grid mirroring `/dashboard/[event_id]/add-ons` (per iteration 0021 § 4.4) — same tile order, same icons, same visual chrome — PLUS admin-only tiles for SKUs not in the customer grid (Setnayan Concierge, Same-Day Edit, Pakanta tiers, Bespoke Monogram, custom Save-the-Date Video, etc.) |
+| **Vendor Add-ons** | Card grid of vendor-purchasable SKUs (Vendor Pro Weekly · Extended Pin · Boosted Ads 5/10/20km · Sponsored Boost Quarterly/Annual · 5 tool integrations · All Tools Unlock Bundle · QR Retrieval drop-in). No customer-side parallel — this IS the canonical visualization of vendor SKUs |
+
+Each card displays:
+
+- SKU icon (sourced from the customer surface for visual parity)
+- SKU name
+- Current price + 2D billing chip (e.g., "₱2,499 · per_event · one_time" or "₱19,999 · all_events · annual")
+- Eligibility state indicator at a glance — small dots: 🟢 enabled for couples · 🟢 enabled for vendors_certified · ⚫ disabled for vendors_coming_soon (one dot per account type per `feature_policy`)
+- Lifetime purchase count
+- Cost Watch health flag (🟢/🟡/🔴 per iteration 0023 § 3.5 instrumentation) when available
+
+Tile order matches the customer surface as closely as possible so admin's mental model maps cleanly. Admin-only tiles (Concierge etc.) appear at the END of the Customer Add-ons grid in a separate "Admin-only / hidden from grid" sub-section so they don't disrupt visual parity above.
+
+#### 3.12.2 Per-SKU settings drawer
+
+Click any tile → opens a right-side drawer (full height, 480 px wide) with 4 tabs:
+
+##### Tab 1 · Eligibility
+
+Per-account-type toggles backed by `feature_policy`:
+
+- `enabled_for_couples` (boolean toggle)
+- `enabled_for_vendors_coming_soon` (boolean toggle)
+- `enabled_for_vendors_certified` (boolean toggle)
+
+For each disabled tier, the corresponding `block_reason_*` text field becomes editable (free text shown to the user as the disabled-CTA tooltip on customer / vendor surfaces).
+
+Below the matrix: **Per-event override table** sourced from `event_feature_policy_override` — rows of `(event_id, enabled, reason, set_by_admin_id, set_at)`. Admin can search by event_id, add a new override row, or remove an existing one. Useful when an admin needs to disable a specific feature for a specific account in dispute / abuse-review / contractual-exception scenarios.
+
+Save action writes a new `admin_audit_log` row with `before_state_json` + `after_state_json` per the iteration 0023 § 2 audit pattern.
+
+##### Tab 2 · Pricing
+
+Read-only summary plus an edit panel:
+
+- **SKU code** (read-only; from `service_catalog.feature_key`)
+- **Current price** (₱ + centavos)
+- **`time_recurrence`** dropdown — one_time / weekly / quarterly / annual / lifetime
+- **`event_scope`** dropdown — per_event / all_events
+- **Effective from** (when this price became active)
+- **Last edited by** (admin name + timestamp)
+
+**Edit panel** — admin clicks "Edit price" → form opens:
+
+- New price field (with charm-ladder helper showing nearest valid value)
+- Delta calculation (e.g., "+₱500" or "-₱200") with auto-flag if > ₱500 (triggers two-admin gate per § 4)
+- Frequency edit — if `time_recurrence` or `event_scope` changes, **mandatory two-admin approval** (per the 2026-05-17 frequency-change rule). Existing active subscriptions keep the old frequency until natural expiry (cart-snapshot principle).
+- Reason field (free text, required, min 30 chars · written to `service_catalog_price_history.reason`)
+- Save → either applies immediately (small delta · no frequency change) or routes to two-admin queue (large delta or frequency change)
+
+**Price-history table inline** — last 10 changes from `service_catalog_price_history` with prior price · new price · prior frequency · new frequency · admin · reason · timestamp.
+
+##### Tab 3 · Current users
+
+List of accounts with active orders for this SKU:
+
+- Account name · account type (couple / vendor / certified vendor) · purchase date · order status · order amount
+- For recurring SKUs (weekly / quarterly / annual): subscription state (active · paused · expired) + days remaining
+- Filter chips: Couples · Vendors · All
+- Search box: by event_id, user_id, or account email
+- Each row clickable → opens the user detail page in § 3.4
+
+For one-time SKUs (e.g., Papic 5-seat), shows lifetime purchases (one per event). For recurring SKUs (e.g., Vendor Pro Weekly), shows currently-active subscriptions only with a separate count for lifetime purchases.
+
+##### Tab 4 · Statistics
+
+Usage + revenue + Cost Watch metrics:
+
+- **Total purchases (lifetime)** — count from `orders` joined to `order_lines`
+- **Active subscriptions** (recurring SKUs only) — count of orders in `'paid'` or `'fulfilled'` state with `time_recurrence != 'one_time'` and no expiry yet
+- **Total revenue (lifetime)** — sum of order_line amounts for this SKU
+- **Revenue this month / quarter / year** — windowed
+- **Conversion rate** — purchases ÷ unique-event-id-views (when funnel analytics § 3.8 has captured the tile-view event)
+- **Distinct events using this SKU** — count of unique `event_id` values
+- **Cost Watch metrics** (from `service_catalog_cost_watch` materialized view):
+  - Highest single render cost
+  - Average render cost
+  - p95 render cost
+  - Cost-to-price ratio + 🟢/🟡/🔴 health flag
+  - Drilldown link → opens cost_breakdown JSONB modal per § 3.5
+- **Time series chart** — purchases per week / month (bar chart, last 12 weeks default, year selector)
+
+For SKUs without enough volume yet, individual metrics render as *"Not enough data yet"* rather than `0`.
+
+#### 3.12.3 Pricing Report Generation (Pricing.md regeneration)
+
+Button in the panel header (top-right): **"Generate Pricing Report"**. Action:
+
+1. Server queries current `service_catalog` + `feature_policy` + `service_catalog_price_history` + `service_catalog_cost_watch` state
+2. Renders a templated Markdown matching the structure of the existing [corpus-root `Pricing.md`](../Pricing.md) (§ 1 rules · § 2 couple-side SKUs · § 3 Concierge · § 4 vendor-side · § 5 vendor-to-couple fee structures · § 6 cost-per-event reference · § 7 drift notes · § 8 retired SKUs · § 9 companion artifacts · § 10 cross-references · § 11 update protocol)
+3. Writes to two locations:
+   - **Snapshot:** `/admin/addons/reports/{ISO_timestamp}.md` — immutable audit copy, never overwritten
+   - **Canonical:** corpus-root `Pricing.md` — overwritten with the latest snapshot (the "always current" reference)
+4. Triggers pandoc regeneration: `Pricing.docx` mirror updates from `Pricing.md`
+5. Shows a confirmation toast: *"Pricing report generated · 47 active SKUs · 23 retired · last regenerated 2026-05-17 14:32 by Maria"*
+
+The button is single-admin authority — generation is a read-only-from-DB operation, no state mutations. Only writes the report files.
+
+#### 3.12.4 Future automation (V1.5+ deferred)
+
+- **Nightly auto-regeneration** — pg_cron job runs `Generate Pricing Report` action at 02:00 Asia/Manila daily so `Pricing.md` is never more than 24 hours stale even if admins forget to manually trigger
+- **Slack / email notification on SKU change** — whenever a `service_catalog` row is edited (price or frequency), a webhook fires to owner's Slack + email with a diff
+- **Pricing report `.pdf` mirror** — same generation flow but also outputs PDF (via pandoc) for owner deck-embedding
+- **External read API** — `GET /api/v1/pricing` returns the current pricing JSON for partners / press / integrations (vendor agreements may eventually reference this endpoint instead of a frozen contract appendix)
+
+All four deferred to V1.5+; V1 ships with manual button-triggered regeneration.
+
+#### 3.12.5 Mobile parity
+
+Card grid renders as 2-column on phone (1-column on narrow viewports). Drawer becomes a bottom sheet (full-height swipe-up) per the existing 0023 mobile pattern. All 4 tabs in the drawer remain accessible — no feature gating on mobile.
+
+#### 3.12.6 Schema · no new tables, leverages existing
+
+This surface is a UI layer over existing tables. No schema additions required:
+
+- `service_catalog` — SKU definitions + prices + 2D billing
+- `service_catalog_price_history` — price-change audit
+- `feature_policy` + `event_feature_policy_override` — eligibility (from 2026-05-17 App Store hero-CTA row)
+- `service_render_costs` + `service_catalog_cost_watch` — Cost Watch
+- `orders` + `order_lines` — purchases / users / revenue
+- `admin_audit_log` — admin-action audit
+
+The "Pricing Report Generation" output writes new files to disk (`/admin/addons/reports/{ts}.md` snapshots + corpus-root `Pricing.md`) but no new DB tables.
+
+#### 3.12.7 Cross-references
+
+- Iteration 0021 § 4.4 — the customer add-ons surface this admin view mirrors
+- Iteration 0021 App Store hero-CTA model (locked 2026-05-17) — the 5-state CTA resolver (`add` / `request_sent` / `launch` / `blocked` / `expired`) drives the customer tile state; admin sees aggregate state ("85% of couples in `add` state for Panood; 12% `request_sent`; 3% `launch`") in the Statistics tab
+- Iteration 0023 § 3.5 — engineering / audit Pricing & Catalog grid (tabular alternative)
+- Iteration 0023 § 3.5d — Payment Method fee table (admin-edited similar pattern)
+- Iteration 0023 § 3.5e — Vendor Tier Perks Management (admin-edited similar pattern)
+- Iteration 0023 § 3.5f — Payment Options Policy Matrix (per-account-type policy primitive, same conceptual model)
+- Corpus root [`Pricing.md`](../Pricing.md) — generated report output
+
+---
+
+### 3.13 Concierge Brain admin surface (locked 2026-05-18)
+
+**Purpose.** The single admin tab where the Setnayan Concierge brain's content (the curated Filipino-wedding knowledge base) is **viewed**, **edited**, **grown**, and **monitored**. Four subviews under one route `/admin/brain`. Cross-references the brain architecture in `02_Specifications/18_Concierge_Brain/00_Architecture.md` (locked 2026-05-18 row 2) and the wizard architecture in 0016 § 0b (this same-day lock).
+
+**Governance.** Single-admin authority for brain edits (mirrors 0006 review-gate appeal pattern). Every edit is audit-logged in `admin_audit_log` with `target_table = 'concierge_brain_chunks'`. Quality compounds over time — admin reviews top-hit cached Q&A answers (sorted by `hit_count`) and hand-tweaks for accuracy / brand voice; hand-edits propagate to every future couple in that combination via the cache-forever architecture.
+
+#### 3.13a Subview 1 — Brain Editor (the primary surface)
+
+The markdown editor for `concierge_brain_chunks`. Lists all chunks across the 8 topic files (`01_Filipino_Cultural_Reference.md` · `02_Regional_Pricing_Benchmarks.md` · `03_Seasonal_Weather_Reference.md` · `04_Planning_Timelines.md` · `05_Legal_BIR_Reference.md` · `06_Setnayan_Feature_Reference.md` · `07_Vendor_Decision_Logic.md` · `08_Budget_Allocation_Reference.md`) plus any custom chunks created post-launch.
+
+**List view columns:**
+- Topic file (sortable / filterable)
+- Chunk title
+- Tags (chip-rendered)
+- Applies to (audience filter)
+- Paid-tier-only flag (🔒 chip when TRUE)
+- Tier visibility (DIY / Trial / Active dots)
+- Last verified date + reviewer
+- Hit count (how many times retrieved by Q&A in last 30 days)
+- Embedding status (✅ current / ⚠ stale-flagged for regenerate)
+- Active toggle
+
+**Edit drawer (right side, 720px wide, 5 tabs):**
+
+1. **Content** — markdown editor with live preview (50/50 split). Renders the chunk exactly as the LLM will see it when retrieved. Saves to `concierge_brain_chunks.body`.
+2. **Metadata** — tags (autocomplete from existing tags + free-input new tags), applies-to selector, cross-ref linker (autocompletes iteration paths + other brain chunks), paid-tier-only checkbox, tier visibility toggles (DIY / Trial / Active), source citation field (required — "no anonymous common knowledge" per brain README governance).
+3. **Embedding** — current embedding status, `embedding_generated_at` timestamp, manual "Regenerate now" button (fires `regenerate_chunk_embedding(chunk_id, admin_user_id)` — single Cloudflare neuron call, idempotent). Auto-flags as `stale` when body changes; next nightly sweep regenerates.
+4. **Retrieval stats** — last-30-day retrieval count, average rank position when retrieved, top 5 query embeddings that matched, top 5 cached responses derived from this chunk. Helps admin identify high-leverage chunks for quality review.
+5. **Audit log** — chronological list of edits with admin user, before/after diff, timestamp. Read-only.
+
+**Bulk operations** (top toolbar):
+- "Regenerate all stale embeddings" (admin-triggered nightly sweep fallback)
+- "Export all chunks as `.md` archive" (for Cowork sync — see § 3.13d)
+- "Bulk flag for review" (when a brain content audit is needed)
+
+#### 3.13b Subview 2 — Unanswered Questions queue
+
+Lists `concierge_unanswered_questions` rows — questions that retrieved zero chunks above similarity threshold OR returned the canned "I'm not sure about that yet" fallback. These represent **real demand for brain content that doesn't exist yet**, so they drive brain growth from couple usage patterns.
+
+**Queue columns:**
+- Question text (truncated)
+- Frequency (count of similar questions in last 30 days)
+- First asked / last asked
+- Couple tier when asked (DIY / Trial / Active)
+- Admin action status (pending / authored / out-of-scope)
+
+**Per-row admin actions:**
+- **Author chunk** → opens the Brain Editor drawer pre-filled with the question as the prompt context; admin writes the chunk that answers this question; saves into the appropriate `topic_file`. The cached Q&A response for similar queries auto-regenerates on next access.
+- **Mark out-of-scope** → flags the question as "intentionally not in the brain" (e.g., gift recommendations · jokes · off-topic). Future similar questions return a polite "Setnayan Concierge can't help with that — try the help center" response.
+- **Merge with existing chunk** → if the question is answered by an existing chunk but the embedding didn't surface it, admin can re-tag / re-embed the existing chunk to capture this query pattern.
+
+Queue sorts by frequency descending — admin triages high-leverage chunks first.
+
+#### 3.13c Subview 3 — Concierge Cost Watch
+
+Aggregates `concierge_messages.cost_centavos` + plan-generation costs + ad-hoc Q&A costs broken down by synthesis model, tier, and time window. Feeds the existing `service_catalog_cost_watch` pattern from § 3.5.
+
+**Surface charts:**
+- Daily inference spend (Llama free / Haiku paid) with the Cloudflare 10K-neurons/day cap as a reference line
+- Cache hit rate over time (target 95%+ at steady state)
+- Cost per active concierge couple (target ~₱1/year at steady state)
+- Top 10 most-cached responses by hit count
+- Top 10 most-expensive un-cached queries (admin reviews to add to the brain or improve retrieval)
+
+**Alerts:**
+- Cloudflare free-tier 80%+ daily usage → admin notification
+- Anthropic spend > ₱X/day → admin notification
+- Cache hit rate drops below 80% → admin investigates (likely brain edit invalidated too many cached responses; admin can do a planned regenerate sweep)
+
+#### 3.13d Subview 4 — Cowork sync lane
+
+The secondary authoring path for non-Setnayan-team content contributors (cultural consultants, regional pricing analysts, legal advisors). Workflow:
+
+1. Admin generates a Cowork share link for a specific topic file or set of chunks
+2. External author opens the link in Cowork (markdown editing in a separate workspace)
+3. Author writes / edits chunks following the README authoring template
+4. On save, Cowork posts back to Setnayan via a webhook
+5. The new/edited chunks land in this subview as **pending review**
+6. Admin reviews each pending chunk → approve (lands in `concierge_brain_chunks`, embedding generated) or reject (sends feedback to the Cowork doc for revision)
+
+**Cowork sync rules:**
+- All Cowork-authored chunks default to `is_active = FALSE` until admin approves
+- Embedding generation only fires on admin approval (saves cost during draft cycles)
+- Cowork access is per-topic-file scoped (a cultural consultant doesn't get edit access to legal/BIR chunks)
+- Single-admin-authority discipline still applies — Cowork authors *propose*, Setnayan admin *approves*
+
+**V1.5+:** GitHub Actions-style "request-changes" workflow with inline diff comments back to Cowork. V1 ships approve / reject with text feedback.
+
+#### Schema
+
+No new tables required. Uses existing infrastructure:
+- `concierge_brain_chunks` (locked in brain architecture 2026-05-18 row 2 — see `18_Concierge_Brain/00_Architecture.md` § 5)
+- `concierge_unanswered_questions` (locked in brain architecture row 2)
+- `concierge_response_cache` (cache-forever per this same-day row 6 supersedes the 24h TTL)
+- `concierge_messages` (per row 2, with `synthesis_model` + `cost_centavos` columns feeding Cost Watch)
+- New columns on `concierge_brain_chunks` for Cowork pending state: `cowork_authored_by TEXT NULL · cowork_pending_review BOOLEAN NOT NULL DEFAULT FALSE`
+
+#### Mobile placement
+
+Concierge Brain joins the "More" tab on mobile (alongside Pricing, Disputes, Settings, Website editor, Concierge Abuse, Add-on Management). Mobile UI is read-only for content (admin reviews chunks on phone) — editing happens on desktop where the markdown editor + drawer fit.
+
+#### V1 vs V1.5+ scope
+
+**V1 ships:**
+- Brain Editor (subview 1) — full CRUD
+- Unanswered Questions queue (subview 2) — basic queue + author-chunk flow
+- Cost Watch (subview 3) — basic charts + alerts
+- Cowork sync lane (subview 4) — manual share-link + webhook-back
+
+**V1.5+ defers:**
+- Real-time collaborative editing in the Brain Editor itself
+- GitHub Actions-style inline diff comments in Cowork
+- Automated chunk-quality scoring (LLM-generated quality scores for cached answers)
+- Multi-language chunk variants (mirroring 0025 EN/TL/CEB locale toggle)
+- A/B testing infrastructure for cached Q&A responses
 
 ---
 

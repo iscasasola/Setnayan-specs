@@ -1,96 +1,748 @@
-# Setnayan Wedding Planning Reference + Guided Planner SKU
+# Setnayan Wedding Planning Reference + Setnayan Concierge SKU
 
-> Master reference for the Plan Builder's category sequence, importance tiers, per-head budget allocation per couple's tier, sub-event + sibling-event handling, post-wedding coordination, vendor registration schema, and representative PH wedding venue inventory. **Locked 2026-05-14 as optional paid SKU; DIY is free default.** Companion HTMLs: `0016_plan_builder_prototype.html` (main), `0016_guided_vs_diy_flow.html`, `0016_venue_food_flow.html`.
+> Master reference for the Plan Builder's category sequence, importance tiers, per-head budget allocation per couple's tier, sub-event + sibling-event handling, post-wedding coordination, vendor registration schema, and representative PH wedding venue inventory. **Simplified 2026-05-17 to single-SKU model + 3-day card-less trial + tiered abuse enforcement (supersedes the 2026-05-16 2-tier ladder); DIY remains free default.** Companion HTMLs: `0016_plan_builder_prototype.html` (main), `0016_guided_vs_diy_flow.html`, `0016_venue_food_flow.html`.
 
 ---
 
-## 0. Access Model — DIY vs Guided Planner (Locked 2026-05-14)
+## 0. Access Model — DIY vs Setnayan Concierge (Locked 2026-05-17)
 
-The wedding-planning content in Sections 1–N below describes Setnayan's complete planning system. **Couples access this content in one of two modes**, locked 2026-05-14:
+The wedding-planning content in Sections 1–N below describes Setnayan's complete planning system. **Couples access this content in one of two modes**, simplified 2026-05-17 (supersedes the 2026-05-16 2-tier ladder which retired the Essentials SKU same-week; see CLAUDE.md decision log second 2026-05-17 row for the full rationale):
 
 ### DIY mode (free, default for every event)
 
 - **Cost:** Free. No purchase required.
 - **What couples see:** Full access to every dashboard surface — guest list, vendor tracker, budget, seating chart, mood board, etc. The planning categories from Section 1 are organized as a 10-tile launcher on iteration 0021's dashboard.
 - **What couples DON'T see:** No active timeline, no deadline alerts, no daily nudges, no vendor-pick recommendations matched to event style, no step-by-step roadmap. Couples discover and navigate the tools on their own.
-- **Switch to Guided:** Anytime from Settings → Guided Planner OR via the upgrade banner on the dashboard.
+- **Switch to Concierge:** Anytime from Settings → Setnayan Concierge OR via the upgrade banner on the dashboard. Couples can also start a card-less **3-day free trial** of Concierge without paying — see the Trial subsection below — provided their account hasn't already used a trial AND isn't under abuse enforcement.
 
-### Guided Planner (paid · 3 pricing tiers)
+### Setnayan Concierge (paid · single SKU · wedding-anchored access)
 
-| SKU | Duration | Price | Per-week | vs Week-by-Week | Savings |
-|---|---|---|---|---|---|
-| `guided_planner_1week` | 1 week | **₱99** | ₱99/wk | baseline | — |
-| `guided_planner_3month` | 13 weeks | **₱999** | ₱76.85/wk | ₱99 × 13 = ₱1,287 | **₱288 (22%)** |
-| `guided_planner_12month` | 52 weeks | **₱1,999** | ₱38.44/wk | ₱99 × 52 = ₱5,148 | **₱3,149 (61%)** · **flagship** |
+| SKU | Access duration | Price | Features |
+|---|---|---|---|
+| `concierge_complete` | **Wedding-anchored** — `LEAST(wedding_date + 30 days, activation + 24 months)`, min `activation + 12 months` | **₱2,499** | Full 9-step roadmap · daily nudges · priority vendor matching · honeymoon planning included |
+
+**Access duration is wedding-anchored** (locked 2026-05-17 third decision-log row). Every paying couple gets:
+- A **12-month floor** from activation — so couples who haven't entered a wedding date yet, OR couples with a very-soon wedding, still receive a full year of Concierge access (including post-wedding tail).
+- A **24-month cap** from activation — so couples with long engagements (e.g., 3-year-out weddings) don't get an unbounded ₱2,499-for-5-years experience. The cap protects per-event economics; long-engagement couples receive a one-time advisory to renew closer to the wedding (see below).
+- Between those bounds, access runs until `wedding_date + 30 days` — so couples planning 18 months out get 18.5 months of access (with the post-wedding tail), couples planning 8 months out hit the 12-month floor.
+
+**Access-duration examples:**
+
+| Wedding from activation | `concierge_expires_at` | Notes |
+|---|---|---|
+| Not yet entered (NULL) | activation + 12 months | Default; recomputes when date is set |
+| 3 months | activation + 12 months | 12-month floor wins · couple gets ~9 months post-wedding tail |
+| 8 months | activation + 12 months | 12-month floor |
+| 12 months | wedding + 30 days (≈ 12.5 months from activation) | Wedding+30 wins |
+| 18 months | wedding + 30 days (≈ 18.5 months) | Wedding+30 |
+| 24 months | activation + 24 months | 24-month cap |
+| **36 months** | **activation + 24 months** | **Cap · couple sees long-engagement advisory** |
+
+**Pricing rationale (locked 2026-05-17).** ₱2,499 lands in the "wedding-line-item reasonable zone" (₱3,999–7,999) alongside invitation suites, prenup shoots, custom monograms, and premium wedding websites — where Filipino couples already spend without blinking. **5× cheaper than the cheapest human wedding coordinator** (₱25,000+) — the strongest single anchor in the marketplace comparison set. **Single SKU (not a tier ladder)** signals product confidence — the Apple iPhone playbook (one price per model · optional add-ons not optional tiers), not a SaaS discount stack. The 2026-05-16 ₱2,499 Essentials tier was retired same-week: it projected to under-convert vs Complete (the ₱500/6-month savings math didn't anchor) and added a "save face" branch that diluted the premium-product framing. Net revenue per Concierge customer is now uniformly ₱2,499.
 
 **What couples get:**
 - 9-step expert roadmap (the Locked Sequence in § 1) walked through step-by-step instead of self-serve
 - Smart timeline auto-built from wedding date + venue book date + lead-time matrix
 - Deadline alerts (in-app + email per iteration 0028) at T-90, T-30, T-7, T-1 day per category
-- Vendor picks matched to event style + budget tier (pulls from iteration 0006 marketplace; ranks by 0010 Mood Board palette match)
+- Priority vendor picks matched to event style + budget tier (pulls from iteration 0006 marketplace; ranks by 0010 Mood Board palette match) — verified-badge vendors surface first
 - Daily nudges on the "next thing to do" pinned at the top of iteration 0021 dashboard
-- Post-wedding coordination prompts (per § Post-event content below) — marriage certificate pickup, thank-you cards, honeymoon coordination
+- Post-wedding coordination prompts (per § Post-event content below) — marriage certificate pickup, thank-you cards
+- Honeymoon planning surface (Concierge's 12-month runway covers the post-wedding tail)
 
-**Pre-paid blocks** — V1 uses one-time payment via apply-then-pay (BDO + GCash). No recurring auto-renewal. Couples can stack purchases (buy a 1-Week now + another 1-Week next week, or upgrade from 3-Month to 12-Month — remaining weeks of the lower-tier purchase don't refund but new tier's access duration starts from purchase date).
+**Pre-paid blocks** — V1 uses one-time payment via apply-then-pay (BDO + GCash). No recurring auto-renewal. Couples can re-purchase after expiry — the dashboard "Reactivate" CTA leads to checkout. **Re-purchase is always at the full ₱2,499** (locked 2026-05-17 follow-up) — no loyalty discount, no extension-rate, no returning-customer SKU. Each purchase is treated as a fresh activation: extends `concierge_expires_at` per the wedding-anchored formula using the new activation moment as the anchor.
 
-**Auto-renew lands at V1.5** — pending GCash Merchant API approval. Until then, manual renewal via the Settings → Guided Planner "Buy Another Plan" CTA.
+**Auto-renew lands at V1.5** — pending GCash Merchant API approval. Until then, manual renewal via the Settings → Setnayan Concierge "Buy Another Plan" CTA.
 
-**Access doesn't end at wedding date.** A 12-Month purchased 8 months before the wedding gives 4 months of post-wedding planning assistance (anniversaries, baptisms, family reunion planning, etc. — Setnayan's broader event types unlock over time per CLAUDE.md scope).
+**Access doesn't end at the wedding date.** The 30-day post-wedding extension built into the formula above gives every couple a tail for marriage-certificate pickup, thank-you cards, and honeymoon coordination. Couples with engagements ≤ 12 months get longer post-wedding tails because the 12-month floor adds runway beyond `wedding+30`.
+
+**Wedding-date update behavior (extend-only).** If the couple updates `events.wedding_date` after activation, `concierge_expires_at` recomputes per the formula above — **but only extends, never shrinks**. A couple who postpones their wedding gets more runway automatically. A couple who moves their wedding earlier keeps the original `expires_at` value (they already paid for that runway). The recomputation fires from the `events.wedding_date` update trigger via `recompute_concierge_expiry(event_id)`.
+
+**Long-engagement advisory (one-time).** When `wedding_date` is set or updated to a value more than 24 months from `concierge_activated_at`, a one-time in-app + email advisory fires (per 0028):
+
+> *"Your wedding is more than 24 months away. Setnayan Concierge covers up to 24 months from your purchase date — you'll lose access ~{N} months before your wedding day. We recommend renewing closer to your wedding for full coverage."*
+
+The advisory is stamped on `events.concierge_long_engagement_advised_at` to prevent re-fire on subsequent date updates. Couples who postpone past 24 months again later see the advisory once per advisory-firing transition (not every save).
+
+### 3-day card-less free trial (locked 2026-05-17)
+
+Replaces the 2026-05-16 7-day per-event preview. **No charge. No card required. No bait-and-switch.**
+
+- **One trial per account** (not per event). Tracked on `users.concierge_trial_used_at`. Closes the prior loophole where a couple could create Event A, exhaust trial, then create Event B for another trial on the same account.
+- Couples in DIY mode can start a trial from the dashboard upgrade banner OR Settings → Setnayan Concierge OR the inline "Not ready to commit? Try 3 days free →" link below the choice card (per iteration 0000 § 2.5b).
+- Trial surfaces the **full Concierge feature set** (9-step roadmap, daily nudges, priority vendor matching, honeymoon planning) for 3 days.
+- A persistent banner above the dashboard reads: *"Trial · X days left → Continue with Setnayan Concierge (₱2,499)"*.
+- At T+3 the daily expiry-sweep cron flips `concierge_status = 'expired'` and the event returns to DIY (all planning progress preserved — the 9-step journey rows in `event_journey_steps` remain populated).
+- **Trial-start gating** — the `start_concierge_trial(event_id)` server action is blocked when ANY of:
+  - `users.concierge_trial_used_at IS NOT NULL` (already used)
+  - `users.concierge_enforcement_level IN ('trial_banned', 'full_banned')` (under enforcement)
+  - Cross-account similarity check fires (see next subsection) — trial-start blocked AND flag inserted into `concierge_abuse_flags`
+
+### Anti-abuse — tiered enforcement on multi-account trial cycling (locked 2026-05-17)
+
+The 3-day trial is generous, but the multi-account abuse vector is real: a single person could create N accounts with near-identical wedding profiles to harvest N×3 days of free Concierge. The framework below catches that without permanently banning legitimate edge cases (sibling couples · wedding-planner agencies managing multiple clients · same venue + different couples on different dates).
+
+**Detection — runs on trial-start attempt only** (cheapest detection path; doesn't run on every event create). When a new account calls `start_concierge_trial(event_id)`, similarity check executes against the full set of `users.concierge_trial_used_at IS NOT NULL` accounts using these weighted signals:
+
+| Signal | Weight | Source |
+|---|---|---|
+| Same `wedding_date` (exact match) | High | `events.wedding_date` |
+| Same venue name (fuzzy match · token-set ratio ≥ 0.85) | High | `events.venue_name` |
+| Same venue address | High | `events.venue_address` |
+| Same couple-name overlap (full-name token match ≥ 0.6) | High | `events.event_name` / `users.full_name` |
+| Same phone number across accounts | **Critical · auto-flag** | `users.phone` |
+| Same payment-method fingerprint (BDO last4 / GCash mobile) | **Critical · auto-flag** | payment-method records |
+| Same device fingerprint / IP (≤14-day window) | Medium | session metadata |
+
+Composite score ≥ threshold → trial-start BLOCKED + flag inserted into `concierge_abuse_flags` (status `'pending_review'`) + couple sees *"Your account is under review. Contact support if you believe this is in error."* with a 0029 help-center ticket CTA. **No auto-ban** — admin decides.
+
+**Tiered penalties — admin-actioned via 0023 Concierge Abuse tab.** Each confirmed-abuse decision increments `users.concierge_abuse_strike_count` and bumps `users.concierge_enforcement_level`:
+
+| Strike | Enforcement level | Effect |
+|---|---|---|
+| 1 | `'warning'` | Audit only · trial still works · in-app notification "Your account was flagged for review and cleared with a warning." |
+| 2 | `'trial_banned'` | Trial blocked · purchase ₱2,499 Concierge still allowed · banner in Settings explains state + appeal CTA |
+| 3+ | `'full_banned'` | Trial blocked · purchase blocked · Concierge feature entirely unavailable on this account · banner with appeal CTA |
+
+`'none'` (default) = no flags confirmed. Admin can decrement strikes via the appeal flow (0029 help-center ticket → admin Clear action) which audit-logs the reversion.
+
+**Appeal path.** Banned accounts see explanatory copy + CTA *"Setnayan Concierge unavailable on this account. Contact support if you believe this is in error."* → opens a 0029 help-center ticket routed to the abuse-review admin role. Admin can lift the ban (decrement strike count + reset `concierge_enforcement_level`) with reason logged. See 0023 § Concierge Abuse for the queue + admin actions, and 0029 for the appeal ticket category.
 
 ### Choice card on event creation (iteration 0000)
 
-After the couple enters their event name, four options appear:
+After the couple enters their event name, two options appear (collapsed from the 2026-05-16 three-option card — Essentials retired):
 
 ```
-┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐
-│ DIY MODE   │  │ 1-WEEK     │  │ 3-MONTH    │  │ 12-MONTH ✨ │
-│ Free       │  │ PASS       │  │ PLAN       │  │ PLAN       │
-│            │  │ ₱99        │  │ ₱999       │  │ ₱1,999     │
-│            │  │            │  │ save 22%   │  │ BEST VALUE │
-│            │  │            │  │            │  │ save 61%   │
-│ All tools. │  │ Try it for │  │ 13 weeks   │  │ 52 weeks — │
-│ Plan at    │  │ a week.    │  │ of guided  │  │ full year  │
-│ your pace. │  │ Decide     │  │ planning.  │  │ + post-    │
-│ No         │  │ later.     │  │            │  │ wedding    │
-│ timeline   │  │            │  │            │  │ assistant. │
-│ help.      │  │            │  │            │  │            │
-│            │  │            │  │            │  │            │
-│[Start Free]│  │ [Buy ₱99]  │  │ [Buy ₱999] │  │[Buy ₱1,999]│
-└────────────┘  └────────────┘  └────────────┘  └────────────┘
+┌──────────────────┐  ┌──────────────────────────────┐
+│  DIY MODE        │  │  SETNAYAN CONCIERGE  ✨       │
+│  Free            │  │  ₱2,499                      │
+│                  │  │  12 months                   │
+│                  │  │  ₱13.69 / day                │
+│                  │  │  Less than ₱25K coordinator. │
+│ All tools.       │  │ Full 9-step roadmap +        │
+│ Plan at your     │  │ daily nudges + priority      │
+│ own pace.        │  │ vendor matching + honeymoon. │
+│ No timeline      │  │                              │
+│ help.            │  │                              │
+│                  │  │                              │
+│ [Start Free]     │  │ [Buy ₱2,499]                 │
+└──────────────────┘  └──────────────────────────────┘
 
-         Optional — activate or change anytime from Settings.
+      Not ready to commit? [ Try 3 days free → ] (no card required)
+
+      Optional — activate or change anytime from Settings → Setnayan Concierge.
 ```
 
-### Schema additions on `events`
+The 3-day-trial inline link is hidden when the account has already used its trial OR is under `'trial_banned'` / `'full_banned'` enforcement.
+
+Per the pricing-page anchor strategy (carried forward from the 2026-05-16 lock), the choice card should be preceded by the human-coordinator anchor strip — *"Wedding coordinator ₱25,000+ · Setnayan Concierge ₱2,499"* — so couples mentally compare against the real alternative (human planner), not against free apps.
+
+### Schema additions
+
+**On `events`** (same shape as 2026-05-16; preview state retained as `'trial'` semantics but column names unchanged):
 
 ```sql
 ALTER TABLE events
-  ADD COLUMN guided_planner_status TEXT
+  ADD COLUMN concierge_status TEXT
     NOT NULL DEFAULT 'diy'
-    CHECK (guided_planner_status IN ('diy', 'active', 'expired')),
-  ADD COLUMN guided_planner_tier TEXT
-    CHECK (guided_planner_tier IN ('1week', '3month', '12month')),
-  ADD COLUMN guided_planner_expires_at TIMESTAMPTZ;
+    CHECK (concierge_status IN ('diy', 'trial', 'active', 'expired')),
+  ADD COLUMN concierge_tier TEXT
+    CHECK (concierge_tier IN ('complete')),                    -- Essentials retired 2026-05-17; enum kept for forward-compat
+  ADD COLUMN concierge_activated_at TIMESTAMPTZ,               -- stamped when status first flips to 'active' (referenced by expires_at formula + advisory)
+  ADD COLUMN concierge_expires_at TIMESTAMPTZ,                 -- wedding-anchored: LEAST(wedding_date+30d, activated+24mo), min activated+12mo
+  ADD COLUMN concierge_long_engagement_advised_at TIMESTAMPTZ; -- one-time advisory de-dup when wedding > 24mo from activation
+-- events.concierge_preview_used_at RETIRED 2026-05-17 (moved to users.concierge_trial_used_at — account-level cap)
 ```
+
+The `'preview'` value is renamed to `'trial'` to match the 3-day card-less framing; if the prior `'preview'` value has already shipped to production it can be remapped via text round-trip cast in the same migration. The `concierge_tier` CHECK constraint is left in place as a single-value enum (`'complete'`) so future tier reintroductions don't require a re-migration; current code treats it as non-NULL when `concierge_status IN ('trial', 'active')`.
+
+**On `users`** — account-level trial cap + abuse-enforcement state:
+
+```sql
+ALTER TABLE users
+  ADD COLUMN concierge_trial_used_at        TIMESTAMPTZ,      -- one trial per account, account-level cap
+  ADD COLUMN concierge_abuse_strike_count   INT NOT NULL DEFAULT 0,
+  ADD COLUMN concierge_enforcement_level    TEXT NOT NULL DEFAULT 'none'
+                                            CHECK (concierge_enforcement_level IN ('none', 'warning', 'trial_banned', 'full_banned')),
+  ADD COLUMN concierge_enforcement_at       TIMESTAMPTZ,
+  ADD COLUMN concierge_enforcement_by       UUID REFERENCES users(user_id),
+  ADD COLUMN concierge_enforcement_reason   TEXT;
+```
+
+**New table `concierge_abuse_flags`** — abuse-review audit trail (powers the 0023 Concierge Abuse tab):
+
+```sql
+CREATE TABLE concierge_abuse_flags (
+  flag_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  flagged_user_id   UUID NOT NULL REFERENCES users(user_id),
+  matched_user_ids  UUID[] NOT NULL,                                  -- the trial-used accounts that triggered the match
+  similarity_score  NUMERIC NOT NULL,
+  signals           JSONB NOT NULL,                                   -- which signals fired, e.g. {"date":true,"venue":true,"phone":false}
+  status            TEXT NOT NULL DEFAULT 'pending_review'
+                    CHECK (status IN ('pending_review', 'cleared', 'confirmed_abuse')),
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reviewed_at       TIMESTAMPTZ,
+  reviewed_by       UUID REFERENCES users(user_id),
+  admin_notes       TEXT
+);
+
+CREATE INDEX idx_concierge_abuse_flags_status ON concierge_abuse_flags(status, created_at DESC);
+```
+
+**Migration note (engineering):** the 2026-05-16 `events.concierge_preview_used_at` column is **retired in the same migration** (if shipped). The 2026-05-14 `guided_planner_*` columns (if they ever shipped) likewise rename through the same pass per the 2026-05-16 migration note above. RLS posture on `concierge_abuse_flags` — admin-only read/write via the existing `is_admin()` predicate; no couple-side exposure.
 
 ### Daily expiry sweep
 
-Cron job (depends on Phase 1 of `Install_Sequence_V1.md` — Vercel Cron OR Cloudflare Cron Triggers):
+Cron job (depends on Phase 1 of `Install_Sequence_V1.md` — Supabase pg_cron + pg_net per V1 cron strategy). One pass handles both trial-expiry and active-expiry:
 
 ```sql
 UPDATE events
-SET guided_planner_status = 'expired'
-WHERE guided_planner_status = 'active'
-  AND guided_planner_expires_at < NOW();
+SET concierge_status = 'expired'
+WHERE concierge_status IN ('active', 'trial')
+  AND concierge_expires_at < NOW();
 ```
 
-On status flip → in-app notification + email (per 0028) → DIY dashboard surface variant takes over.
+On status flip → in-app notification + email (per 0028) → DIY dashboard surface variant takes over. Notification copy differs by source state: trial-expired emphasizes "Continue with Setnayan Concierge (₱2,499) to keep your roadmap"; active-expired emphasizes "Reactivate to pick up where you left off."
 
 ### Server actions
 
-- `activate_guided_planner(event_id, tier, order_id)` — flips status to 'active', sets tier + expires_at
-- `extend_guided_planner(event_id, additional_tier, order_id)` — purchased-on-top extension; expires_at extends by duration of new purchase
-- `cancel_guided_planner(event_id)` — early cancel; sets `guided_planner_status='expired'` immediately (refund handled by admin per existing 0034 refund flow; pro-rated refund optional admin action)
+- `activate_concierge(event_id, order_id)` — flips status to `'active'`, sets `concierge_tier = 'complete'`, stamps `concierge_activated_at = NOW()`, computes `concierge_expires_at` per the wedding-anchored formula: `LEAST(GREATEST(events.wedding_date + INTERVAL '30 days', NOW() + INTERVAL '12 months'), NOW() + INTERVAL '24 months')`. If `events.wedding_date IS NULL` at activation, expires_at defaults to `NOW() + INTERVAL '12 months'` (the 12-month floor); it will recompute when wedding_date is later set via `recompute_concierge_expiry`. If status was already `'trial'`, the trial is overwritten cleanly. If `users.concierge_enforcement_level = 'full_banned'` → fails with `enforcement_blocked` error. If `events.wedding_date` is already set and exceeds `NOW() + INTERVAL '24 months'`, fires the long-engagement advisory and stamps `events.concierge_long_engagement_advised_at`.
+- `recompute_concierge_expiry(event_id)` (NEW 2026-05-17) — fired from the `events.wedding_date` update trigger OR app-layer hook in the Concierge Step 1 + Profile edit flows. Recomputes `concierge_expires_at` per the formula above using the current `concierge_activated_at` as the activation anchor. **Extend-only rule:** if the new expires_at would be later than the current value, update; if earlier, no-op (couple keeps the runway they paid for). If the new `wedding_date` exceeds `concierge_activated_at + INTERVAL '24 months'` AND `concierge_long_engagement_advised_at IS NULL`, fires the long-engagement advisory + stamps the column. Safe to call repeatedly (idempotent — extend-only + advisory de-dup).
+- `cancel_concierge(event_id)` — early cancel; sets a `cancellation_requested_at` flag (status stays `'active'` until natural expiry — couple keeps the access they paid for); pro-rated refund optional admin action per 0034 refund flow.
+- `start_concierge_trial(event_id)` (renamed from `start_concierge_preview` 2026-05-17) — pre-flight checks: (a) `users.concierge_trial_used_at IS NULL` (account-level cap) · (b) `users.concierge_enforcement_level NOT IN ('trial_banned', 'full_banned')` · (c) cross-account similarity check (returns score + signals). If all pass → flips event status to `'trial'`, sets `concierge_expires_at = NOW() + INTERVAL '3 days'`, stamps `users.concierge_trial_used_at = NOW()`. If similarity check fires → inserts row into `concierge_abuse_flags(status='pending_review')` and returns `under_review` error WITHOUT consuming the trial slot (so a falsely-flagged user who's later cleared can still start their trial). Idempotent on retry within an event that's already `'trial'` (returns existing trial row).
+- `admin_clear_concierge_flag(flag_id, admin_user_id, notes)` — admin action from 0023 Concierge Abuse tab; sets `concierge_abuse_flags.status = 'cleared'`, no strike increment, in-app notification to flagged user.
+- `admin_confirm_concierge_abuse(flag_id, admin_user_id, notes)` — admin action; sets `concierge_abuse_flags.status = 'confirmed_abuse'`, increments `users.concierge_abuse_strike_count`, auto-bumps `concierge_enforcement_level` per the tier table (1→`'warning'`, 2→`'trial_banned'`, 3+→`'full_banned'`), audit-logs the transition, in-app + email notification to flagged user.
+- `admin_lift_concierge_enforcement(user_id, admin_user_id, notes)` — admin action invoked via the 0029 appeal-ticket flow; decrements strike count + resets `concierge_enforcement_level` (typically `'none'`), audit-logs.
+
+---
+
+## 0a. Concierge AI Brain (Locked 2026-05-18)
+
+The Setnayan Concierge surface evolves from a static 9-step checklist
+into a conversational planner powered by a curated Filipino-wedding
+knowledge base ("the Brain") + a free-tier embedding/synthesis
+pipeline + a paid-tier Haiku 4.5 synthesizer. The existing access
+model (DIY default · 3-day card-less trial · `concierge_complete`
+₱2,499/12mo) is preserved unchanged; the AI is the engine *inside*
+that surface.
+
+Canonical brain architecture + chunk template + governance rules
+live in `02_Specifications/18_Concierge_Brain/`. This section is the
+0016-side contract — what the iteration surfaces to couples and how
+the access tiers gate the brain.
+
+### Free-question quota — 3 questions per event (locked 2026-05-18)
+
+Every DIY-mode event gets **3 free concierge questions**. Counter
+lives on the `events` row (`concierge_free_questions_used INT NOT
+NULL DEFAULT 0` with `CHECK (concierge_free_questions_used BETWEEN 0
+AND 3)`). Counter increments only after a successful LLM response
+(failures don't burn quota). Resets to 0 only on admin override (no
+self-serve reset).
+
+**Why per-event and not per-account.** V1 is one event per couple
+(Wedding only). Per-event aligns with the existing
+`events.concierge_status` state machine. When V2 unlocks additional
+event types per couple, each event gets its own 3-question allowance —
+matches the existing 0021 separation between events.
+
+**Why 3 specifically.** Q1 = "is this real?"; Q2 = first substantive
+question; Q3 = pattern emerges (the AI references prior turns,
+surfaces specifically Filipino context, suggests deep-link CTAs).
+The cliffhanger lands at Q3 with the mental model now "this is
+useful" instead of "let me see if this is useful." Lower (1 or 2)
+doesn't earn the conviction; higher (5+) gives away the moat and
+cannibalizes the trial conversion.
+
+### Surface integration — chat widget on dashboard Home
+
+The conversational surface renders as the Concierge chat widget on
+the dashboard Home (0021 § 2.0a). Responsive default per the
+session-wide rule:
+
+- **Mobile**: bottom-sheet that drags up from the persistent
+  "Ask the Concierge" pill in the thumb-zone
+- **Desktop**: right-side drawer (480px) anchored to the
+  Concierge journey block
+
+In DIY mode the widget collapses to a single CTA tile ("Ask Setnayan
+Concierge — 3 free questions") above the 10-tile grid. After Q3 the
+tile flips to the trial-upsell card (existing variant per § 0).
+
+In Trial + Active modes the widget is always-available with a chat
+history sidebar (paid tier only — DIY is stateless).
+
+### Tier capability matrix
+
+| Capability | DIY (free) | Trial (3 days) | Concierge Complete (₱2,499/12mo) |
+|---|:---:|:---:|:---:|
+| Questions per event | 3 | unlimited | unlimited |
+| Synthesis model | Llama 3.1 8B (Cloudflare free) | Llama 3.1 8B | Claude Haiku 4.5 (0032 workspace) |
+| Brain chunk access | non-paid-only chunks | full | full |
+| Event-data integration in prompt | ❌ | partial (guest count, venue) | full (guest list status, vendor ledger, budget tier, milestone schedule) |
+| Conversation history persisted | ❌ (stateless) | session-scoped | 12-month thread per event |
+| Daily proactive nudges | ❌ | ❌ | ✓ (per the 9-step journey) |
+| Honeymoon planning depth | ❌ | ❌ | ✓ (paid-tier-only chunks) |
+| Priority vendor matching | ❌ | ❌ | ✓ |
+
+The DIY tier deliberately exposes **quality** (Filipino fluency,
+Setnayan feature awareness, sensible answers). The paid tier adds
+**personalization** (your specific event data) + **persistence**
+(memory across the 12 months) + **proactive surfacing** (daily
+nudges). Same engine, different prompts, different state.
+
+### Schema additions
+
+```sql
+-- Free-question quota counter
+ALTER TABLE events
+  ADD COLUMN concierge_free_questions_used INT NOT NULL DEFAULT 0
+  CHECK (concierge_free_questions_used BETWEEN 0 AND 3);
+
+-- Conversation history (paid + trial only — DIY is stateless)
+CREATE TABLE concierge_conversations (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id        UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  user_id         UUID NOT NULL REFERENCES users(id),
+  started_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_message_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE concierge_messages (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id     UUID NOT NULL REFERENCES concierge_conversations(id) ON DELETE CASCADE,
+  role                TEXT NOT NULL CHECK (role IN ('user','assistant')),
+  body                TEXT NOT NULL,
+  retrieved_chunk_ids UUID[] NOT NULL DEFAULT '{}',
+  synthesis_model     TEXT,
+  tokens_in           INT,
+  tokens_out          INT,
+  cost_centavos       INT NOT NULL DEFAULT 0,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Unanswered questions feed brain growth
+CREATE TABLE concierge_unanswered_questions (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id        UUID NOT NULL REFERENCES events(id),
+  user_id         UUID NOT NULL REFERENCES users(id),
+  question_text   TEXT NOT NULL,
+  reason          TEXT NOT NULL,            -- 'no_chunks_above_threshold' | 'llm_refused' | 'admin_flagged'
+  reviewed_by     UUID REFERENCES users(id),
+  reviewed_at     TIMESTAMPTZ,
+  resolution      TEXT,                     -- 'new_chunk_authored' | 'out_of_scope' | 'duplicate'
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+Brain-chunk table + response-cache table + retrieval indexes are
+spec'd in `18_Concierge_Brain/00_Architecture.md` § 5. They sit
+under the brain spec rather than 0016 because they're cross-iteration
+infrastructure (referenced by future iterations that want to use the
+brain — see V2 candidates in § 12 of that doc).
+
+### Server actions
+
+- `ask_concierge(event_id, user_id, question_text)` — full RAG
+  pipeline per `18_Concierge_Brain/00_Architecture.md` § 3.
+  Returns `{response, sources, remaining_free_questions,
+  upgrade_card_state, synthesis_model}`. Increments
+  `events.concierge_free_questions_used` only on successful response
+  (failures don't burn quota).
+- `admin_reset_concierge_free_questions(event_id, admin_user_id,
+  reason)` — admin override under § 0023 admin actions; resets
+  counter to 0 with `admin_audit_log` row. Single-admin authority.
+
+### Fallback when free-tier exhausted
+
+When Cloudflare Workers AI returns rate-limit error (free tier
+exhausted for the day across all couples), DIY responses fall back
+to **chunk-1 verbatim** — return the top-1 retrieved chunk's body
+text directly with a footer note: "Quick answer below — full
+personalized answer when daily capacity resets in the morning."
+Paid tier falls through cleanly to Haiku (different provider, no
+shared quota). This degradation path means the free experience
+never hard-fails; it just gets less polished on rate-limit days.
+
+### Acceptance criteria additions to tests.md
+
+- DIY couple asking Q1–Q3 gets full LLM responses; Q4 renders trial
+  upsell card with zero LLM call
+- DIY response stamped `synthesis_model = 'llama-3.1-8b'`; Active
+  response stamped `'claude-haiku-4-5'`
+- Trial couple's Haiku-equivalent answer NEVER includes event-data
+  integration (guest count, vendor list); only Active does
+- Cloudflare 429 simulation → DIY response falls back to chunk-1
+  verbatim with capacity-reset footer
+- Anthropic 5xx simulation on Active → response falls through to
+  Llama 8B with degradation log row in `admin_audit_log`
+- Chunk `paid_tier_only = TRUE` never retrieved for DIY/Trial
+- Successful Q3 response on DIY → next interaction renders trial
+  upsell card (no LLM call) regardless of question text
+- `events.concierge_free_questions_used` only increments on
+  successful LLM response; failures preserve quota
+- Admin reset action audit-logged in `admin_audit_log` with
+  reason text
+
+### Launch-promo exclusion (cross-ref CLAUDE.md 2026-05-18 row 1)
+
+The Setnayan launch promo locked earlier on 2026-05-18 makes 16
+zero-marginal-cost SKUs FREE until 2027-03-31; `concierge_complete`
+₱2,499/12mo is **explicitly excluded** from that promo. The promo
+row's original rationale ("real coordinator labor") predates this
+section's AI-evolution lock — under the new architecture, the
+per-paid-couple inference cost is ~₱25 over 12 months (negligible),
+NOT coordinator labor. The exclusion still holds for a different
+reason: **the paid value is the event-data integration +
+12-month thread persistence + 9-step daily nudges + paid-tier-only
+brain chunks (honeymoon planning · priority vendor matching),
+not the LLM call itself.** Free-tier DIY (3 Q · stateless ·
+generic-but-Filipino) demonstrates quality; paid tier demonstrates
+**your-wedding-specific** personalization. Two products on the
+same engine, deliberately differentiated.
+
+`service_catalog.launch_promo_until` stays `NULL` for the
+`concierge_complete` SKU. No app-layer change to the promo
+helpers in `apps/web/lib/sku-catalog.ts` — Concierge isn't in
+`LAUNCH_PROMO_SKU_CODES` and the AI-brain evolution doesn't
+add it.
+
+### Cross-iteration touchpoints
+
+- **0021 Couple Dashboard § 2.0a upgrade banner**: when couple
+  reaches Q3 and is in DIY mode, the existing banner's "Try 3 days
+  free" CTA gets a contextual prefix ("Love this? Keep going free
+  for 3 days. ↓").
+- **0023 Admin Console**: new tabs for Brain Editor, Unanswered
+  Questions queue, and Concierge Cost Watch. Spec'd in
+  `18_Concierge_Brain/00_Architecture.md` § 10.
+- **0029 Help Center**: appeals for admin reset of free-question
+  quota route through the existing help-ticket flow alongside
+  trial-ban appeals.
+- **0032 Contract Intelligence**: shares the Anthropic workspace
+  and Haiku 4.5 model — see 0032 § 4a (added 2026-05-18).
+- **0035 Observability**: adds `concierge_*` event funnels (asked,
+  responded, exhausted, trial_triggered, converted_to_paid) to the
+  PostHog 3-event base set.
+
+---
+
+## 0b. Concierge Wizard Architecture (Locked 2026-05-18)
+
+This section is the **active-wizard layer** that sits on top of the AI Brain (§ 0a). The Brain answers questions; the Wizard **drives the planning flow**. Together they form the paid-tier experience that justifies the ₱2,499 SKU.
+
+### The split — Brain vs Wizard
+
+| Layer | What it does | Cost mechanism |
+|---|---|---|
+| **AI Brain (§ 0a)** | Retrieves cultural/legal/pricing/feature knowledge from `concierge_brain_chunks` and synthesizes an answer when the couple asks a free-form question | LLM call (Llama free / Haiku paid), cached forever by `hash(query_embedding, chunk_ids, combination_bucket)` |
+| **Wizard (this section)** | Decides what to ask/recommend/nudge **next** based on event state (intake answers, booked vendors, payment status, wedding-date countdown) | Deterministic state machine + template engine. **₱0 cost.** |
+
+The wizard's "personal feel" comes from **event-data substitution at render time** (couple's names, exact date, exact guest count, locked vendors), not LLM paraphrasing. Templates with variable interpolation produce indistinguishable output for a fraction of the cost.
+
+### The conducted flow
+
+After a couple activates Concierge (via direct purchase, trial, or Pro Weekly bundle — see § 0c), the wizard runs them through this flow:
+
+1. **Intake forms (Stage 1)** — 5 structured form fields, no free-form sentence input: wedding date · religious tradition (Catholic / Christian non-Catholic / Civil / Muslim / Other) · estimated guest count (50/80/100/150/200/250/300+) · region (NCR / Cebu / Davao / Tagaytay / Boracay / Other) · working-budget tier (the 5 tiers from § 4) · foundation status (church / venue / both / neither). Forms-only. **₱0 inference cost.**
+
+2. **Foundation lock (Stage 2)** — branches off the foundation answer:
+   - **Neither** → ask which to anchor (default recommendation: venue first; peak-month dates lock fast in PH)
+   - **Church only** → lock the church; recommend reception venues within 30km radius
+   - **Venue only** → lock the venue; recommend churches within 30km (skip if Civil)
+   - **Both** → lock both; validate distance is reasonable; advance to Stage 3
+   - **Civil only** → skip church branch entirely
+
+3. **Vendor recommendations (Stage 3)** — proximity-based + saturation-aware. **Single-pick categories** (per § Saturation Rules below) lock at first booking; **multi-pick categories** (cocktail booths) saturate at the sub-tag level. Vendor radius defaults to 8km per § 2.
+
+4. **Tracking layer (Stage 4)** — the **Next Actions surface** aggregates `event_vendors`, `vendor_meetings`, payment milestones (0007), guest list status (0001), seat plan status (0008), mood board status (0010), and journey progress into a 3-tier feed:
+   - 🔴 **Overdue** — past hard-lock window for a still-unbooked category, or unpaid payment milestone past due
+   - 🟡 **This week** — meetings, payments due, vendor quotes expiring
+   - 🔵 **Next priorities** — Locked-Sequence-aware (highest-importance unbooked category surfaces next)
+
+5. **Vendor share packs (Stage 5)** — once a vendor is booked AND the relevant artifact is ready, the wizard offers to bundle the artifact subset that vendor needs (photographer gets palette + role roster + schedule; caterer gets final headcount + dietary + seat plan; florist gets palette + venue list + role bouquet assignments; coordinator gets the master pack). V1 delivery rides on 0019 chat (PDF/CSV attached to existing thread); V1.5+ adds a vendor-portal magic-link view.
+
+### Personalized plan generation (1-prompt per novel combination, cached forever)
+
+After intake completes, the wizard fires **one Haiku 4.5 call** to generate a personalized plan tailored to the couple's intake answers. The prompt stuffs in the relevant brain chunks retrieved by the intake combination plus the couple's specific facts.
+
+The plan template is **cached by combination hash** to drive the per-couple cost toward ₱0:
+
+```
+plan_signature_hash = hash(
+  religion, region, guest_count_bucket, budget_tier, foundation_state, season
+)
+
+→ Lookup concierge_plan_templates WHERE signature_hash = X
+  → HIT  → use cached plan template, substitute the couple's names/date/specific facts at render time → ₱0
+  → MISS → 1 Haiku call (~₱1), cache the result indefinitely, substitute → ₱1 (once for that combination, forever)
+```
+
+There are ~19,200 possible input combinations (5 religions × 6 regions × 8 guest buckets × 5 budget tiers × 4 foundation states × 4 seasons), but the distribution is heavily skewed (NCR Catholic 150-guest tier-3 is a thousand times more common than Boracay Muslim 80-guest tier-5). Admin pre-seeds the top 100 combinations at launch (~₱100 platform cost) so the first 100 couples all hit cache. Marginal cost per paid couple approaches ₱0 as the cache saturates over time.
+
+The plan is **regenerated** when an anchor fact changes (wedding date moves > 3 months, guest count changes ± 50, budget tier changes, region changes, religion changes). Re-runs cost the same ₱0/₱1 and are rare. The cached plan template is **admin-editable** for quality — the first generation for a new combination can be hand-tweaked by admin before the next 50 couples in that combination see it.
+
+### Cache invalidation
+
+When admin edits a brain chunk via the Brain Editor (0023), plan templates that reference that chunk are flagged `stale`. They regenerate lazily on next access — no mass-regenerate batch needed.
+
+### Couples see the plan as a take-away document
+
+The personalized plan stays visible to the couple as a static document they can re-open anytime — even on DIY downgrade. Surfaced as "Your Setnayan Plan" tile on the dashboard. Maximizes the "Setnayan handed me a plan" perception. Per § Data Permanence below, the plan survives forever.
+
+### Vendor saturation rules
+
+The wizard enforces single-pick / multi-pick discipline for the 28 canonical_services declared in [0006 § Data model](../0006_vendors_management/0006_vendors_management.md). Locked 2026-05-18:
+
+- **Hard single-pick (9 categories)** — wizard caps at 1, hard: `ceremony_venue`, `reception_venue`, `wedding_coordination`, `officiant`, `wedding_rings`, `honeymoon_planner`, `bridal_gown`, `groom_suit`, `transportation_bridal_car`
+- **Soft single-pick (12 categories)** — wizard defaults to 1, couple may explicitly add a 2nd: `catering`, `photography`, `videography`, `same_day_edit`, `prenup_shoot`, `drone`, `cake_desserts`, `florals`, `invitation_print`, `stationery_signage`, `souvenirs_giveaways`, `dj_emcee_host`
+- **Multi-pick uncapped (7 categories)** — wizard never saturates: `hmua`, `entourage_attire`, `transportation_guest_shuttle`, `lights_sound`, `live_band`, `acoustic_performer`, `choir_string_quartet`
+- **Multi-pick with sub-tag saturation (2 categories)** — multi at canonical level, 1 per sub-tag:
+  - `mobile_bar` → `cocktail` · `coffee` · `juice` · `tea` · `perfume` · `dessert_drinks`
+  - `photobooth` → `classic` · `mirror` · `360` · `slow_mo` · `polaroid`
+
+Sub-tags ride on existing `vendor_packages.recommended_for_tags TEXT[]`. Wizard saturation logic checks tag intersection within the canonical, not just canonical count. Custom services (`event_custom_services`) are always multi-pick uncapped — the couple defined them, they own the cap.
+
+### Canonical wedding timeline (the wizard's calendar engine)
+
+Each vendor category has two timestamps: `start_surfacing_months_before` (when the wizard first nudges) and `hard_lock_months_before` (when the wizard escalates to 🔴 Overdue). The gap is the couple's research-decide-inquire window (typically 2-3 months for major vendors). Full timeline lives in the Brain at [`04_Planning_Timelines.md`](../02_Specifications/18_Concierge_Brain/04_Planning_Timelines.md) (filled with canonical content 2026-05-18).
+
+The wizard reads `events.wedding_date` + `events.religious_tradition` and surfaces the appropriate cards as Next Actions:
+
+```
+For each category in the wedding's plan:
+  months_until_wedding = (events.wedding_date - NOW()) / 30
+  IF months_until_wedding <= start_surfacing AND not booked
+    → surface in Next Actions (priority by phase order)
+  IF months_until_wedding <= hard_lock AND not booked
+    → escalate to 🔴 Overdue tier
+  IF months_until_wedding > start_surfacing
+    → not surfaced yet (will surface when its time comes)
+```
+
+PH-specific hard floors: marriage license has a 4-month application window (120-day validity); Pre-Cana needs 60-90 day parish notice; custom bridal gown needs 3-6 month production lead.
+
+### Compressed-timeline handling
+
+If a couple gets engaged with a short window (e.g., 6 months from wedding), the wizard:
+1. Computes `months_until_wedding = 6`
+2. Identifies all categories whose `start_surfacing >= 6` — past their ideal window
+3. Surfaces them all at once with a 🟡 banner: *"You're working with a compressed timeline. Here are 8 things to tackle in parallel, ordered by urgency."*
+4. Flags impossible-in-time items (e.g., "Custom gown won't be ready — consider off-the-rack alternatives")
+
+The marriage license is the only **hard floor** — it can't be applied for more than 4 months before the wedding regardless of urgency.
+
+### Data permanence is a brand truth
+
+Setnayan never deletes wedding data on downgrade, trial expiry, or cancel. The only deletion event is **explicit account deletion via support**. The trial-end CTA focuses on the value of the active helper — never threatens loss of data, because no loss occurs. Data permanence surfaces only where couples might doubt it: help center FAQ, Settings → Concierge tab, post-trial DIY state.
+
+### DIY ↔ Concierge UI = one codebase, conditional wizard layer
+
+Same routes, same artifact surfaces, same data substrate. The **wizard layer** (Next Actions strip, proactive nudges, weekly email digest via 0028, active vendor recommendations, saturation enforcement, unlimited brain Q&A) is conditional on `concierge_status IN ('active','trial')`. DIY home is marketplace-forward; Concierge home is wizard-forward. Downgrade is non-destructive — all artifacts + the personalized plan template + Q&A history survive as read-only documents; only the active wizard surfaces disappear.
+
+**Smart intake on upgrade:** if a DIY couple later upgrades to Concierge, pre-fill the intake form from existing event data (date, region we have, guest count) and only ask the missing pieces (religion, foundation state, budget tier).
+
+### Symmetric vendor wizard — always free for vendors
+
+The same wizard pattern applies to the vendor side via 0022:
+- **Next Actions surface for vendors:** "3 unread couple messages · ₱45,000 payout clearing Friday · 2 NCR couples matched your profile · verification renewal in 21 days"
+- **Vendor onboarding plan generation:** 1-prompt Haiku call at signup, cached by `(category, region, tier, capacity_bucket)` — ~1,700 combos
+- **Always free for vendors** — vendor success = booked weddings = platform revenue via Setnayan Pay 5%
+
+### Triggering / cron policy
+
+Per PR #47 cron lock, no new cron jobs. The wizard's Next Actions surface is **state-evaluated on access** — when the couple opens the dashboard, the server runs `getNextActions(event_id)` and returns the current feed. The weekly email digest piggy-backs on the existing email batcher (one of the 2 grandfathered cron jobs) which iterates eligible events at send time.
+
+---
+
+## 0c. Pro Weekly bundles Concierge (Locked 2026-05-18)
+
+When a couple books a vendor whose `vendor_pro_weekly` subscription is active, that couple **auto-unlocks Concierge for their wedding-anchored window at no additional charge**. This is the primary funnel from vendor subscriptions into couple wizard engagement.
+
+### Mechanics
+
+```
+Couple books a Pro Weekly vendor (contract uploaded → status='booked')
+   → trigger fires: event_concierge_unlock_via_vendor(event_id, vendor_id)
+   → IF events.concierge_status IN ('diy','expired')
+     → set concierge_status = 'active'
+     → set concierge_unlock_source = 'vendor_pro_weekly_perk'
+     → set concierge_unlock_via_vendor_id = <vendor_id>
+     → set concierge_activated_at = NOW()
+     → compute concierge_expires_at per the wedding-anchored formula
+     → in-app notification + email: "Concierge unlocked through your booking with {vendor_name}"
+   → ELSE no-op (couple already on Concierge — perk doesn't extend; existing access continues)
+```
+
+### Schema additions
+
+```sql
+ALTER TABLE events
+  ADD COLUMN concierge_unlock_source TEXT
+    CHECK (concierge_unlock_source IN ('purchased', 'trial', 'vendor_pro_weekly_perk')),
+  ADD COLUMN concierge_unlock_via_vendor_id UUID REFERENCES vendors(id);
+```
+
+### Activation trigger
+
+**First booking confirmed (contract uploaded)** — not first inquiry, not first deposit. The contract upload is the strongest commitment signal the couple has made; before that point a couple could inquire with many vendors without indicating they'll actually use the platform.
+
+### All vendor categories qualify
+
+Every Pro Weekly vendor (photographer, caterer, coordinator, florist, HMUA, etc.) unlocks the perk for couples who book them. This simplifies the product story ("Every vendor on Pro Weekly gives their couples free Concierge") and drives broader Pro Weekly adoption.
+
+### What happens if the vendor cancels Pro Weekly later
+
+**The couple's existing unlock persists.** Their `concierge_status` stays `active` until natural expiry per the wedding-anchored formula. Don't punish couples for vendor decisions; the perk was already earned.
+
+Future couples who would have booked that vendor (now off Pro Weekly) don't get the auto-unlock. They can still pay ₱2,499 directly for the same access.
+
+### Supplements (not replaces) the direct ₱2,499 path
+
+Couples who want Concierge **before** booking any vendor can still pay ₱2,499 directly (existing checkout flow per 0034). Couples who naturally book a Pro Weekly vendor get it free as a side-effect. Both paths land on the same `concierge_status = 'active'` state and the same wizard experience.
+
+### Economics
+
+| Per Pro Weekly vendor / year | Number |
+|---|---|
+| Pro Weekly revenue (₱499/wk × 52) | **₱25,948** |
+| Avg couples booked / vendor / year | 10–30 (varies by category) |
+| Concierge marginal cost × 20 couples | ~₱20 |
+| **Net margin per Pro Weekly vendor** | **~₱25,928 (99.9%)** |
+
+The bundling cost is rounding error. Pro Weekly becomes substantially more attractive to vendors; Setnayan's revenue per vendor barely moves.
+
+### Marketing copy
+
+Pro Weekly vendor-facing surfaces in 0022 + the `/for-vendors` marketing site gain three new lines:
+
+> *"Subscribe to Pro Weekly and give every couple you book free Setnayan Concierge — a ₱2,499 value per couple."*
+
+> *"Couples planning with Concierge come to you with their mood board, palette, guest count, and dietary already shared. Less prep, faster proposals, better-fit bookings."*
+
+> *"Couples actively using Concierge book 3× more vendors through Setnayan. Pro Weekly makes you the vendor that unlocks that experience for them."*
+
+### Coordinator-specific value
+
+Coordinators on Pro Weekly are the strongest case for the bundle: their value pitch becomes "Subscribe to me and Setnayan unlocks your wedding planner." Combined with coordinator delegation (§ 0d), this creates a virtuous loop — coordinators sell Pro Weekly to themselves implicitly by selling Setnayan Concierge to their couples.
+
+---
+
+## 0d. Coordinator delegation (Locked 2026-05-18)
+
+When a couple books a coordinator (any vendor in canonical category `wedding_coordination`), that coordinator **auto-receives scoped delegate access** to the couple's event. The coordinator can read the couple's Next Actions feed, act on items on the couple's behalf, and the couple sees every action attributed to the coordinator.
+
+### Schema
+
+Two new tables:
+
+```sql
+-- Who has delegated access to which event
+CREATE TABLE event_delegates (
+  event_id           UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
+  delegate_user_id   UUID NOT NULL REFERENCES users(user_id),
+  delegate_vendor_id UUID REFERENCES vendors(id),
+  role               TEXT NOT NULL CHECK (role IN ('coordinator','planner')),
+  granted_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  granted_by_user_id UUID NOT NULL REFERENCES users(user_id),
+  revoked_at         TIMESTAMPTZ,
+  PRIMARY KEY (event_id, delegate_user_id)
+);
+
+-- Audit trail: who did what, when (powers attribution + transparency)
+CREATE TABLE event_action_log (
+  id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id             UUID NOT NULL REFERENCES events(event_id),
+  action_type          TEXT NOT NULL,
+    -- examples: payment_confirmed · meeting_scheduled · vendor_replied
+    --           artifact_shared · action_marked_done
+  action_target_id     UUID,
+  performed_by_user_id UUID NOT NULL REFERENCES users(user_id),
+  performed_by_role    TEXT NOT NULL CHECK (performed_by_role IN ('couple','coordinator','planner','system')),
+  notes                TEXT,
+  performed_at         TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX event_action_log_event_idx ON event_action_log (event_id, performed_at DESC);
+```
+
+### Auto-grant trigger
+
+Booking confirmation (contract uploaded) for any vendor with `canonical_service IN ('wedding_coordination')` fires `grant_coordinator_delegate(event_id, vendor_id, vendor_user_id)`. The couple is asked to confirm delegate access at booking confirmation; default = accepted (paying for a coordinator implies "do my coordination work"). Couple can revoke from the vendor list at any time.
+
+### Scope of "act on behalf of"
+
+| Coordinator CAN do | Coordinator CANNOT do |
+|---|---|
+| Mark payments confirmed once received | Charge the couple's payment method |
+| Schedule / reschedule vendor meetings | Change the wedding date |
+| Reply in vendor chat threads (per 0019) | Book new vendors without couple approval |
+| Share artifacts (mood board, palette, guest list) with vendors | Edit the guest list (add/remove guests) |
+| Update vendor notes on the couple's vendor cards | Cancel bookings |
+| Mark action items "done" | Delete the event |
+
+V1.5+ adds a per-couple toggle "let my coordinator book new vendors without my confirmation" for couples who want full delegation. V1 default = couple must confirm new bookings.
+
+### Couple-side "your coordinator did X" stream
+
+The couple's dashboard surfaces a chronological stream of coordinator actions:
+
+```
+This week your coordinator Anna handled:
+  ✓ Confirmed ₱25,000 deposit received by Caterer Y · Wed 11am
+  ✓ Rescheduled Photographer X tasting to Saturday · Wed 2pm
+  ✓ Shared your mood-board palette with Florist Z · Thu 9am
+  ✓ Replied to Florist Z's quote question · Thu 9am
+```
+
+Every entry pulls from `event_action_log WHERE performed_by_role = 'coordinator'`. Builds trust — couple sees their money being spent doing real work.
+
+### Coordinator-side multi-couple dashboard
+
+In 0022, coordinators get a new "My Couples" view showing all their booked couples with badge counts derived from `getNextActions(event_id)` scoped to delegate access:
+
+```
+Your couples this month:
+  🔴 Anna & Marco · Feb 14 wedding · 3 overdue items
+  🟡 Bea & Carlo · Mar 21 wedding · 2 due this week
+  🔵 Cris & Diane · May 30 wedding · all on track
+  🔵 Eli & Fina · Jun 12 wedding · all on track
+```
+
+Click into any couple → see their Next Actions feed scoped for the coordinator + action history. The coordinator's daily login pattern looks like "open dashboard → scan badge counts → triage couples with red/yellow → act on items."
+
+### Notification when coordinator acts
+
+Each action logged in `event_action_log` fires an in-app notification + email (per 0028) to the couple:
+
+> *"Anna (your coordinator) confirmed your ₱25,000 deposit was received by Caterer Y."*
+
+Couple can tap the line to see the action log entry with timestamp + notes.
+
+### Why this is V1, not V1.5+
+
+The Pro Weekly bundle (§ 0c) makes coordinator delegation strategically important in V1:
+- Coordinators on Pro Weekly drive Concierge adoption for their couples
+- The delegation feature makes Pro Weekly *more valuable* to coordinators specifically
+- Network-effect: coordinator becomes a daily Setnayan user → couples expect this experience → coordinators competing for couples must offer it → more coordinators subscribe to Pro Weekly
+
+V1.5+ extends delegation to other vendor categories (e.g., a stylist with mood-board delegate access) if/when the case arises. V1 keeps it scoped to coordinators only.
+
+---
+
+## 0e. Intra-day vendor calendar blocks (cross-ref to 0022)
+
+Vendors can create **intra-day blocks** in their 0022 calendar with custom labels — previously the calendar was full-day granularity. Locked 2026-05-18.
+
+Full mechanics, schema, and UX live in 0022's calendar section. Summary here for cross-reference:
+
+- **Granularity:** 30-minute increments
+- **Label privacy:** private by default (couples see "Unavailable", not the label); vendor can opt to expose specific labels
+- **Block sources:** `manual` (vendor-created) · `setnayan_booking` (auto-populated from confirmed bookings) · `synced_calendar` (V1.5+ Google Calendar sync)
+- **Schema:** new `vendor_calendar_blocks` table (`vendor_id`, `starts_at`, `ends_at`, `block_label`, `block_source`, `is_private`)
+- **Effect on couple marketplace:** vendor search excludes vendors with blocks overlapping the couple's wedding date; vendor detail pages show greyed "Unavailable" windows without labels
+- **Effect on the Concierge wizard:** the recommendation filter queries `vendor_calendar_blocks` and excludes blocked vendors from "next vendor" cards
+
+Relevant because the wizard recommendation logic in § 0b depends on `vendor_calendar_blocks` being honored — a vendor on a multi-day off-platform shoot shouldn't be recommended for a couple's same-week event.
 
 ---
 

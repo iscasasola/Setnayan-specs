@@ -647,4 +647,72 @@ This file is part of the codebase, not a one-shot reference.
 - When a sequencing-rot bug is found, log it in §6 with the file + line, then patch it in the originating spec on the next pass.
 - This file should never grow past ~700 lines. If it does, split shared contracts (§3) into a sibling `00b_Shared_Contracts.md`.
 
+---
+
+## 7. V1.1 Iterations — content engine + multi-faith expansion (drafted 2026-05-19)
+
+Per the 2026-05-19 CLAUDE.md decision log, 5 V1.1 iterations drafted as the structural answer to WedMeGood's content/inspiration moat. Pilot ships on V1 surface; V1.1 lands ~6-8 weeks post-pilot.
+
+**Master taxonomy reference (read this first):** [Vendor_Taxonomy_V1_Master.md](./Vendor_Taxonomy_V1_Master.md) consolidates all 192 vendor sub-categories with phase mapping (V1.1 base → V1.1.x → V1.2 → V1.3+ → V1.5+), faith activation timeline, SETNAYAN SERVICE inserts, PH-specific moat list, and per-phase vendor recruitment targets. Future iteration drafting + recruitment planning reference that doc first, then drill into the iteration specs below.
+
+| # | Folder | Status | Built | One-liner |
+|---|---|---|---|---|
+| 0043 | `0043_wedding_type_picker/` | drafted 2026-05-19 | | Two-axis Wedding Type Picker (Ceremony × Venue × conditional sub-type × optional secondary ceremony) — 7 ceremony types + 7 venue settings + Muslim ethno-cultural sub-types + Mixed-faith secondary picker. V1.1 ships 2 active + 4 Coming Soon with email capture; schema all 7 from day 1 to avoid migrations. Drives downstream filtering, Concierge branching, showcase faceting. |
+| 0044 | `0044_per_category_schemas/` | drafted 2026-05-19 | | Per-canonical-service attribute schema framework + shared attribute groups (faith_compatibility incl. halal_certified/halal_compatible/inc_friendly/kosher/vegetarian/vegan/lenten_compliant/allergen_aware; dietary_accommodations; geographic_service_areas; pricing_signal; vendor_credentials). V1.1 ships schemas for 15 top canonical_services. |
+| 0045 | `0045_product_catalogs/` | drafted 2026-05-19 | | `vendor_products` table — products as first-class entities for ~20 of 115 canonical_services (consumables + portfolio types). Compound queries (attribute AND product). Cart line-item snapshot pattern. Setnayan first-party services populate via same schema with SETNAYAN SERVICE badge. SEO at product-URL level doubles SEO surface vs WedMeGood. |
+| 0046 | `0046_wedding_showcase/` | drafted 2026-05-19 | | Wedding Showcase (Real Weddings) — vendor-initiated → couple-approves → vendor-submits-3 → couple-picks-1 trigger flow. Faceted browse (City × Ceremony × Venue × Theme × Budget × Season) per-combination SEO landing pages. Vendor portfolio auto-populator + product "used at N weddings" badges. Real budget brackets + day-of timeline are unique data WedMeGood lacks. |
+| 0047 | `0047_style_driven_marketplaces/` | drafted 2026-05-19 | | 7 style-driven vendor marketplaces sequenced V1.1.x (Stylist first → Food → Photo → Music → Attire → Host → Stations&Booths). 5-column vendor mega-menu (WedMeGood pattern). Stations & Booths new category (30 sub-types, PH-cocktail-hour). SETNAYAN SERVICE badge inserts. Smart-default filtering by ceremony_type. |
+
+### V1.1 dependency arrows
+
+```
+0043 ← 0001 (events), 0006 (vendors+canonical), 0016 (Concierge), 0021 (couple dashboard)
+0044 ← 0006 (canonical_services), 0022 (vendor dashboard), 0043 (ceremony defaults)
+0045 ← 0006, 0022, 0034 (cart line items), 0044 (schema framework)
+0046 ← 0001, 0006, 0007, 0015, 0019, 0021, 0023, 0028, 0034, 0043, 0044, 0045
+0047 ← 0006, 0015, 0019, 0034, 0043, 0044, 0045, 0046
+```
+
+Strict forward sequencing preserved — every dependency points to a lower iteration number.
+
+### Sequencing within V1.1
+
+V1.1 base ship: 0043 + 0044 + 0045 + 0046 + 0047-Stylist marketplace ship together.
+
+V1.1.1 → V1.1.6: remaining marketplaces (0047 sub-launches) at ~2-week cadence per [0047 § Phasing](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md).
+
+---
+
+## 8. V1.2 Iterations — multi-moderator + multi-payer (drafted 2026-05-19)
+
+Per the 2026-05-19 CLAUDE.md decision log, 2 V1.2 iterations drafted to support Filipino-wedding multi-user planning (couple + parents + sponsors + entourage attendants + external planner) with surprise-restriction rules (bridal gown / groom suit / barong / designated surprise items default-hide from spouse target).
+
+| # | Folder | Status | Built | One-liner |
+|---|---|---|---|---|
+| 0048 | `0048_multi_moderator_event_access/` | drafted 2026-05-19 | | Multi-moderator event access — `event_moderators` table with 11 role_subtypes (bride · groom · parent_of_bride · parent_of_groom · maid_of_honor · best_man · wedding_planner_external · ninong · ninang · family_helper · viewer) + permission templates per role + row-level visibility tags (`private_to_role[]` · `hidden_from_role[]` · `surprise_for_role`) enforced via Supabase RLS + default-hide trigger for bridal_gown / groom_suit / barong canonical_services + moderator invitation flow (email + SMS). |
+| 0049 | `0049_multi_payer_cart/` | drafted 2026-05-19 | | Multi-payer cart — `paid_by_role[]` attribution on cart line items + per-moderator parallel checkout sessions + receipt formatting (couple name primary, payer name secondary per PH cultural norm) + BIR Form 2307 per-payer generation. Pattern A (single-payer, V1.1 preserved) + Pattern B (per-item attribution, V1.2 default) + Pattern C (split-cost per item, V1.3+). |
+
+### V1.2 amendments to existing iterations (no new iteration; inline amendments added 2026-05-19)
+
+- **0007** Budget & Expenses — `paid_by_role[]` + visibility tags + `linked_order_line_item_id` schema; new "Who paid what" view; aggregate rounding for hidden viewers
+- **0019** Communications — vendor chat threads gain `initiated_by_role_subtype` + visibility tags; memory rule update pending owner sign-off ("Couple OR authorized moderator initiates vendor chat")
+- **0021** Couple Dashboard — role-aware header badge ("Viewing as Bride / Parent of Bride / Maid of Honor"); per-panel visibility filtering; new `/dashboard/{eventId}/moderators` surface
+- **0028** Email Notifications — moderator-aware routing per template; 4 new templates (`moderator_invitation_sent` · `moderator_invitation_accepted` · `moderator_removed_from_event` · `surprise_item_ready`); per-moderator `notification_preferences_json`
+- **0034** Payments & Cart — `paid_by_role[]` + `payment_split_percentages` + `payment_status_per_role` + `added_to_cart_by_user_id` + visibility tags schema; per-role cart view; parallel checkout sessions; `vendor_order_receipts` table
+
+### V1.2 dependency arrows
+
+```
+0048 ← 0001 (events), 0007 (budget visibility), 0019 (chat visibility), 0021 (dashboard role-aware), 0028 (notification routing), 0034 (cart visibility)
+0049 ← 0007 (budget per-payer), 0028 (payment notifications), 0034 (cart + order infra), 0048 (event_moderators role model)
+```
+
+Strict forward sequencing preserved — every dependency points to a lower iteration number.
+
+### Sequencing within V1.2
+
+V1.2 base ship: 0048 + 0049 ship together after V1.1 marketplace launches wrap. Engineering ~3-5 weeks (schema + RLS policies + UI + invitation flow + cart attribution + receipt format).
+
+V1.3 layers: Pattern C split-cost cart + Messenger integration + `partner1`/`partner2` roles + per-role default attribution templates.
+
 — end —
