@@ -708,11 +708,11 @@ Roughly 8–10 weeks at 1 dev. 5–6 weeks at 2 devs.
 
 Per [0048 Multi-Moderator Event Access](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md), vendor chat threads gain moderator-aware visibility in V1.2.
 
-### Memory rule update (PENDING owner sign-off)
+### Memory rule update (APPROVED 2026-05-19)
 
-Current memory rule: **"Customers initiate vendor chat — only couples can open a thread with a vendor"** ([feedback_setnayan_customer_initiates_chat.md](../../../.claude/projects/-Users-icecasasola/memory/feedback_setnayan_customer_initiates_chat.md)).
+Updated memory rule: **"Customer-side actor (couple OR authorized moderator) initiates vendor chat"** ([feedback_setnayan_customer_initiates_chat.md](../../../.claude/projects/-Users-icecasasola/memory/feedback_setnayan_customer_initiates_chat.md)) — owner-approved 2026-05-19, superseding the prior couple-only rule.
 
-**Proposed V1.2 update:** "Couple OR authorized moderator initiates vendor chat. Moderator must have `can_message_vendors=TRUE` permission per their `event_moderators.permissions_json` from [0048](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md). Vendor sees the event context (not the moderator's personal context); replies route to all moderators in the thread with chat-read access, respecting visibility tags."
+**V1.2 framing:** Couple OR authorized moderator initiates vendor chat. Moderator must have `can_message_vendors=TRUE` permission per their `event_moderators.permissions_json` from [0048](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md). Defaults: couple (bride + groom) + parents of bride/groom + wedding_planner_external = YES; sponsors (ninong/ninang) / family helpers / viewers / maid_of_honor / best_man = NO. Couple can override per individual moderator. Vendor sees the event context (not the moderator's personal context); replies route to all moderators in the thread with chat-read access, respecting visibility tags.
 
 This unblocks parents of bride/groom + wedding planner moderators from messaging vendors directly (a real PH pattern — parents often coordinate with caterers / venues without bride/groom intermediation).
 

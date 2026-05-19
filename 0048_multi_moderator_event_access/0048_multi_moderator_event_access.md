@@ -426,13 +426,13 @@ Top of every event dashboard surface shows the current user's role:
 
 ---
 
-## Memory rule update flag
+## Memory rule update (APPROVED 2026-05-19)
 
-Current memory rule: **"Customers initiate vendor chat — only couples can open a thread with a vendor"** ([feedback_setnayan_customer_initiates_chat.md](../../../.claude/projects/-Users-icecasasola/memory/feedback_setnayan_customer_initiates_chat.md)).
+Updated memory rule: **"Customer-side actor (couple OR authorized moderator) initiates vendor chat"** ([feedback_setnayan_customer_initiates_chat.md](../../../.claude/projects/-Users-icecasasola/memory/feedback_setnayan_customer_initiates_chat.md)) — owner-approved 2026-05-19, superseding the prior couple-only rule.
 
-**Proposed update:** "Couple OR authorized moderator initiates vendor chat. Moderator must have `can_message_vendors=TRUE` permission. Vendor sees the event context (not the moderator's personal context); replies route to all moderators in the thread with chat-read access (respecting visibility tags)."
+**V1.2 framing:** Couple OR authorized moderator initiates vendor chat. Moderator must have `can_message_vendors=TRUE` permission per their `event_moderators.permissions_json`. Defaults: couple + parents of bride/groom + wedding_planner_external = YES; sponsors / family helpers / viewers / maid_of_honor / best_man = NO. Couple can override per individual moderator. Vendor sees the event context (not the moderator's personal context); replies route to all moderators in the thread with chat-read access (respecting visibility tags).
 
-**Owner sign-off required** before [0019](../0019_communications/0019_communications.md) amendment proceeds.
+**[0019](../0019_communications/0019_communications.md) V1.2 amendment unblocked** — rule update no longer pending.
 
 ---
 
@@ -484,4 +484,4 @@ Current memory rule: **"Customers initiate vendor chat — only couples can open
 
 ## Decision log
 
-- **2026-05-19 — Iteration drafted.** Multi-moderator event access concept locked. 11 role_subtypes covering PH wedding multi-user reality (couple + parents + entourage attendants + sponsors + external planner + family helpers + viewers). Default-hide rules auto-apply to bridal_gown / groom_suit / barong / surprise-tagged items per "Default-hide on attire + designated surprise items" owner choice. Manual visibility tags (`private_to_role` / `hidden_from_role` / `surprise_for_role`) extend per-row. RLS policies enforce visibility server-side. Aggregate budget rounded for hidden viewers to prevent reverse-calculation leak. Memory rule update flagged: "Customers initiate vendor chat" → "Couple or authorized moderator initiates vendor chat" (owner sign-off pending).
+- **2026-05-19 — Iteration drafted.** Multi-moderator event access concept locked. 11 role_subtypes covering PH wedding multi-user reality (couple + parents + entourage attendants + sponsors + external planner + family helpers + viewers). Default-hide rules auto-apply to bridal_gown / groom_suit / barong / surprise-tagged items per "Default-hide on attire + designated surprise items" owner choice. Manual visibility tags (`private_to_role` / `hidden_from_role` / `surprise_for_role`) extend per-row. RLS policies enforce visibility server-side. Aggregate budget rounded for hidden viewers to prevent reverse-calculation leak. Memory rule update **APPROVED 2026-05-19**: "Customers initiate vendor chat" → "Couple or authorized moderator initiates vendor chat" (permission-gated via `can_message_vendors`).
