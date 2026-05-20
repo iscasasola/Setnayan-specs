@@ -1131,6 +1131,72 @@ Concierge Brain joins the "More" tab on mobile (alongside Pricing, Disputes, Set
 
 ---
 
+### 3.14 Operations & Hiring — Growth Cockpit (locked 2026-05-20, shipped PR #211 + #212)
+
+Owner-facing dashboard at `/admin/operations-hiring`, accessible only to internal/admin users per the existing admin layout auth gate. Tracks bottleneck signals + milestone forecasts + hiring roadmap tied to the Jan 30, 2027 launch-promo sunset. Routes alerts to `iscasasolaii@gmail.com` via the existing Resend infra in [[0028]].
+
+**Dashboard panels (server-rendered on every load):**
+
+| Panel | Surfaces |
+|---|---|
+| **NOW** | Verified active vendors · signups last week · signups prior week · refresh timestamp |
+| **NEXT MILESTONE** | 3 forecasts (100 / 1,000 / 5,000 vendor targets) with projected dates from 4-week moving average × growth-rate adjustment |
+| **Bottleneck signals** | Live traffic-light (green/yellow/red) on 6 signals — vendor verification backlog · customer support response · marketing pipeline w-o-w · open disputes · engineering blockers (manual) · founder time on one function (manual self-report) |
+| **Hiring roadmap** | 4 seeded Jan 30, 2027 sunset deadlines (Sep 30 CS Lead · Oct 31 Marketing Lead · Nov 30 Verification Lead · Dec 30 CSM) with days-until countdowns (rose-700 highlight when <30 days) |
+| **Unacknowledged alerts banner** | Top-of-page rose-50 banner showing recent unacknowledged alerts |
+| **Sweep footer** | Per-page-load summary of alerts fired + emails sent/failed |
+
+**Signal thresholds (green / yellow / red):**
+
+| Signal | Green | Yellow | Red |
+|---|---|---|---|
+| Vendor verification backlog | < 10 / week | 10–25 / week | > 25 / week |
+| Customer support response | < 2h avg | 2–24h avg | > 24h avg |
+| Engineering blockers | 0 critical | 1 critical | > 1 critical for 2+ weeks |
+| Marketing pipeline | growing w-o-w | flat 2 weeks | declining 2 weeks |
+| Open disputes | < 2 / week | 2–5 / week | > 5 / week |
+| Founder time on one function | < 30% | 30–50% | > 50% |
+
+**Schema** (`supabase/migrations/20260523000000_hiring_guide_owner_alerts.sql`):
+
+- `owner_alerts` — fired alert log with acknowledgement workflow
+- `founder_time_log` — weekly self-report for the "founder time" signal
+- `hiring_roadmap` — seeded with 4 Pulse 2 deadlines (admin updates status: not_open → sourcing → interviewing → offer_extended → hired)
+- `bottleneck_signals_current` materialized view — refresh-on-access pattern (no `pg_cron` per [[reference_setnayan_cron_strategy]])
+- RLS: admin + internal-only
+
+**On-access alert sweep** (`apps/web/lib/hiring-guide/alert-engine.ts`):
+
+Every page load of `/admin/operations-hiring` triggers `runHiringAlertSweep()`:
+
+1. Refresh stale signals if `refreshed_at` is >1 hour old
+2. Detect signal flips (red-level fires email + 7-day suppression to prevent fatigue)
+3. Detect milestone hits (deduped per milestone; 1,000-vendor hit emails note marketing-SKU unlock per [[CLAUDE.md]] decision log row)
+4. Detect hiring countdowns (T-30/T-14/T-7 days from each hire-by date, deduped per role+threshold)
+5. Insert into `owner_alerts` + dispatch email (best-effort — email failure doesn't roll back the alert log)
+
+**4 email templates** (`apps/web/lib/hiring-guide/emails.ts`, dispatched via [[0028]] Resend infra):
+
+- `sendHiringWeeklyDigestEmail` — recurring Mon 8am PHT (caller wires schedule)
+- `sendBottleneckAlertEmail` — fires on signal flip to red
+- `sendMilestoneHitEmail` — fires when verified-vendor count crosses 100 / 1,000 / 5,000 / 25,000
+- `sendHiringCountdownEmail` — fires T-30 / T-14 / T-7 days before each hire-by date
+
+Owner email resolved via `process.env.OWNER_NOTIFICATION_EMAIL` (fallback `iscasasolaii@gmail.com` per [[reference_setnayan_owner_email]]).
+
+**Admin nav placement:** new "Operations · Hiring & Growth" entry in `apps/web/app/admin/_components/admin-nav.tsx`, sitting between Content and Funnels.
+
+**Bumps admin surface count: 11 → 12** (per § 1 admin surface list).
+
+**Out of scope at V1 (separate follow-ons):**
+- HTML email rendering (templates remain plain-text per existing 0028 pattern)
+- Weekly digest scheduling (manual trigger via dashboard load for now)
+- Founder time-log entry form (currently DB insert via SQL)
+- Engineering blockers signal automated wiring (manual for now)
+- `refresh_bottleneck_signals` RPC (queries.ts falls back gracefully)
+
+---
+
 ## 4. Two-admin approval pattern (locked scope per Vendor Agreement § 9.1)
 
 The "four-eyes" two-admin pattern applies ONLY to high-stakes, irreversible, or fraud-adjacent actions. Routine operational work — payment reconciliation, vendor verification, comp gifts within bounds, standard refunds, tier moves within policy — is **single-admin authority** so the team can run the day-to-day at speed.

@@ -510,6 +510,32 @@ The provider's standard rate-limiting + bounce-handling applies; no Setnayan-sid
 
 ## 3. Pro subscription (locked weekly model)
 
+> **⚠️ SUPERSEDED 2026-05-20 — see CLAUDE.md decision log "Free/Pro/Max 3-tier vendor pricing locked".**
+>
+> The single ₱499/wk Pro Weekly tier below is **replaced by a Free/Pro/Max 3-tier ladder** built around operating-model personas, NOT feature gating. The content below remains as historical context until a follow-on PR rewrites this section in full. The locked authoritative pricing is:
+>
+> | Tier | Price | Persona | Mega-menu columns | Radius |
+> |---|---|---|---|---|
+> | **Free** | ₱0 | Solo operator | 1 | 10 km |
+> | **Pro** | ₱4,999/wk · ₱199,999/yr | Established mid-tier studio (2–5 person team · ₱500k–2M/mo revenue) | 2–3 | 25 km |
+> | **Max** | ₱24,999/wk · ₱999,999/yr | Production company (multi-department · ₱2M+/mo) | All 5 | 100 km |
+>
+> Tier caps operate at the **mega-menu column level** (5 columns from `apps/web/lib/taxonomy.ts`), NOT at the 28-enum or 192-row level. All tiers get **unlimited bookings** (aligned with "always helping" principle + 5% Pay fee carries revenue).
+>
+> **Launch promo locked 2026-05-20:** all new vendor accounts get **FREE Pro + 50km radius until Jan 30, 2027**. Founding-vendor lifetime locked rate ₱3,999/wk for vendors converting to paid Pro by sunset (20% off standard, lapse forfeits). Max tier announced + launches Jan 30, 2027 as a marketing event.
+>
+> **Free for all tiers (not Pro-gated):** profile · marketplace listing · full reviews (5-dimension + text + photos) · file sharing in chat (per [[0019]]) · contract upload + dual e-sign (per V1 Gap Tier 1 #3) · calendar sync (Google/Apple) · push notifications · self-tag editorial claim (per [[0046]]) · Service Range Limiter (vendor-declared within tier cap).
+>
+> **Add-ons above any tier** (separate purchases, gated by 1,000-vendor + 5,000-weekly-visit traffic threshold per CLAUDE.md 2026-05-20 row):
+> - Boosted Ads 25km/50km/100km/Nationwide — ₱4,999 / ₱9,999 / ₱14,999 / ₱19,999 per week
+> - Sponsored Boost Quarterly / Annual — ₱249,999 / ₱799,999
+> - **Profile Spotlight "Merchant of the Week"** (3 weekly slots, Pro+Max only) — seasonal pricing tied to SEARCH season (NOT wedding execution): Peak ₱3,499/wk · Shoulder ₱2,499/wk · Off-peak ₱1,499/wk
+> - SMS pay-per-use ₱5/text OR packs (₱99/100, ₱499/600, ₱999/1,500)
+> - Extended Pins ₱49/wk each (Pro only; Max includes unlimited)
+> - Advanced Analytics ₱99/wk or ₱4,999/yr (Pro only; Max bundles)
+>
+> Full historical context preserved below for reference.
+
 **Free tier (always):** vendor profile, marketplace listing, basic chat with clients, accepting bookings, manual payment tracking.
 
 **Pro tier (₱499/week — verified vendors only, locked 2026-05-16):**

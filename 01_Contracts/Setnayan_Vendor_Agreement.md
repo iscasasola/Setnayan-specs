@@ -135,6 +135,35 @@ Every vendor-side message in Setnayan chat (iteration 0019 Communications) displ
 
 **Customer-side chat avatars** behave the same way per the Privacy Policy — customers always show their personal profile photo (or the photo-placeholder gradient if none uploaded). The "company-logo masking" rule applies only to vendor-side accounts.
 
+### 3.11 Google Drive sync for vendor deliverables — data-controller / data-processor delineation (V1.5+ Pro/Max feature, locked 2026-05-20)
+
+When a Pro or Max vendor opts in to Google Drive sync for storing client deliverables (per [[0019]] § External Storage Integrations and [[0022]] § Connected Accounts), the data-control relationship between Vendor and Setnayan changes for those specific files:
+
+**Files stored in Vendor's own Google Drive** (large client deliverables — full wedding photo albums at original resolution, 4K video originals, edited highlight reels):
+- **Vendor is the data controller** for these files under RA 10173 (Data Privacy Act of 2012)
+- Vendor controls retention, deletion, sharing permissions, and access
+- Setnayan obtains a limited `drive.file` OAuth scope — meaning Setnayan can only see/touch files Setnayan itself created within the Vendor's `/Setnayan/{event-slug}/` folder hierarchy; the Vendor's existing Google Drive contents remain private to the Vendor
+- If Vendor revokes Setnayan's Google Drive access, files become inaccessible to the Vendor's couples via the Setnayan platform (compressed preview copies stored separately on Setnayan R2 remain available per the next bullet)
+- Vendor agrees to Google's Terms of Service for Drive storage; Setnayan is not responsible for Google's pricing changes, storage caps, or service availability
+
+**Compressed-preview copies on Setnayan R2** (1920px JPEG previews, 400px thumbnails, 1080p H.264 video previews):
+- **Setnayan is the data processor** for these compressed copies, on Vendor's behalf
+- Stored separately from the masters to guarantee couple-side performance + preview availability if Vendor's Google Drive disconnects
+- Subject to all standard Setnayan data-processing terms (encryption at rest, access controls, audit logs, RA 10173 compliance)
+- Vendor can request deletion of all compressed previews via support; deletion propagates within 7 days
+
+**E-sign contracts** (vendor contract PDFs with dual canvas-captured signatures): remain **Setnayan-custodial under RA 8792** (Electronic Commerce Act of 2000) regardless of Google Drive sync status. E-sign records are NOT offloaded to Google Drive. The Vendor's Google Drive may receive a mirror copy for the Vendor's own records (under Vendor data-control), but the legal-record-of-execution stays in Setnayan R2 for audit compliance.
+
+**Vendor warranties** when opting in to Google Drive sync:
+- Vendor has a valid Google account with sufficient Drive storage capacity
+- Vendor will not use the Setnayan-created folder hierarchy (`/Setnayan/{event-slug}/...`) for any non-Setnayan content
+- Vendor will not delete or modify Setnayan-created files in a way that would break couple-side access without first notifying affected couples
+- Vendor accepts that disconnecting Drive access mid-engagement may degrade couple experience and may, in extreme cases, count as failure-to-deliver under § 4
+
+**Couple-side UX guarantee:** couples never see Google Drive branding within the Setnayan platform. All file access is mediated through Setnayan UI; signed URLs minted via Drive API in real-time. Couples do not need a Google account.
+
+**Cross-references:** [[0019]] § External Storage Integrations (chat file infrastructure), [[0022]] § Connected Accounts tab (vendor enable / disable UX), [[0023]] (admin visibility into sync state per vendor), [CLAUDE.md decision log 2026-05-20 "GDrive hybrid storage"](../CLAUDE.md).
+
 ## 4. Refunds, Force Majeure, and Failure to Deliver
 
 ### 4.1 Vendor fails to deliver the service

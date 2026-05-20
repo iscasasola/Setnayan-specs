@@ -229,6 +229,50 @@ Every template specification below states:
 
 ---
 
+### 6.11 `hiring_weekly_digest` (owner-only — locked 2026-05-20, shipped PR #212)
+
+- **Category:** account (owner notification class)
+- **Subject:** `Setnayan Growth Digest — Week of {week_label}`
+- **Body:** Plain-text — vendor count + signups (with w-o-w growth %) + weekly bookings + Setnayan 5% revenue + bottleneck signals (🔴🟡🟢) + milestone forecasts + hiring countdowns + dashboard URL. Text-only following the existing `sendVendorInviteEmail` pattern; HTML follow-on deferred.
+- **Trigger:** Recurring Mon 8am PHT — caller wires the schedule (manual page-load OK during V1; cron deferred per [[reference_setnayan_cron_strategy]]).
+- **Suppression:** No suppression — owner notification.
+- **Recipient:** `process.env.OWNER_NOTIFICATION_EMAIL` (fallback `iscasasolaii@gmail.com` per [[reference_setnayan_owner_email]]).
+- **Variables:** `{verifiedActiveVendors, signupsLastWeek, signupsPriorWeek, weeklyBookingsPhp, setnayanRevenue5pctPhp, bottlenecks[], hireByCountdowns[], milestones[], dashboardUrl}`.
+
+### 6.12 `hiring_bottleneck_alert` (owner-only — locked 2026-05-20, shipped PR #212)
+
+- **Category:** account
+- **Subject:** `🚨 Setnayan Alert — {signal_label} at {level}`
+- **Body:** Current value + threshold + recommended role + salary range + 7-day suppression notice + dashboard URL.
+- **Trigger:** Fires from `runHiringAlertSweep()` on-access sweep when a bottleneck signal flips to red (yellow is dashboard-only, not emailed). Signal flips checked per dashboard load.
+- **Suppression:** 7-day suppression after fire (queried against `owner_alerts.fired_at`) to prevent alert fatigue.
+- **Recipient:** Owner notification email (per 6.11).
+- **Variables:** `{signal, level, currentValue, threshold, recommendedRole, recommendedSalaryRange, dashboardUrl}`.
+
+### 6.13 `hiring_milestone_hit` (owner-only — locked 2026-05-20, shipped PR #212)
+
+- **Category:** account
+- **Subject:** `🎉 Milestone — {milestone_value} verified vendors`
+- **Body:** Celebratory open line + milestone label + "This milestone unlocks:" block (when applicable — e.g., 1,000 unlocks Marketing SKUs + 50% launch discount for first 30 pre-registered vendors) + dashboard URL.
+- **Trigger:** Fires once per milestone target (100 / 1,000 / 5,000 / 25,000 verified vendors) via on-access sweep. Deduped against `owner_alerts.milestone_value`.
+- **Suppression:** Permanent — once a milestone fires, it never re-fires.
+- **Recipient:** Owner notification email.
+- **Variables:** `{milestoneValue, milestoneLabel, unlocks[], dashboardUrl}`.
+
+### 6.14 `hiring_countdown` (owner-only — locked 2026-05-20, shipped PR #212)
+
+- **Category:** account
+- **Subject:** `{urgency} {role_title} hire` (urgency labels: "30 days to", "⚠️ 2 weeks to", "🚨 1 week to")
+- **Body:** Hire-by date + salary range + current status + related bottleneck signal if applicable + notes + dashboard URL.
+- **Trigger:** Fires at T-30 / T-14 / T-7 days before each `hiring_roadmap.hire_by_date` (deduped per role + threshold pair). Skipped for roles with status `hired` or `deferred`.
+- **Suppression:** Dedup per (role, threshold) — each role fires each of the 3 thresholds exactly once.
+- **Recipient:** Owner notification email.
+- **Variables:** `{role, daysRemaining, bottleneckStatus, dashboardUrl}`.
+
+**Cross-references:** all 4 templates wired in PR #212. Sweep entrypoint at `apps/web/lib/hiring-guide/alert-engine.ts`. Templates at `apps/web/lib/hiring-guide/emails.ts`. Dashboard at `/admin/operations-hiring` per [[0023]] § 3.14.
+
+---
+
 ## 7. Schema
 
 ```sql
