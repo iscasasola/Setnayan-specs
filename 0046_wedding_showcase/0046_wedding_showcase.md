@@ -517,6 +517,232 @@ WedMeGood's editorial moat is a content-team cost center. Setnayan's showcase mo
 
 ---
 
+## 0046 extensions locked 2026-05-20 — auto-editorial pipeline + DIY editor + self-tag + 2-tier credit + Keepsake Bundle + new data captures
+
+The 2026-05-18 base spec covers vendor-initiated showcases with couple consent. This 2026-05-20 extension adds six new surfaces that emerged from the V1.5 inspiration strategy session. All sit inside this iteration (no new 0050 iteration needed — the "0036_inspiration" placeholder name used in CLAUDE.md decision-log rows 2026-05-20 refers to these extensions of 0046).
+
+### Wedding-slug lifecycle — single URL morphs through phases
+
+The same canonical `setnayan.com/[event-slug]` URL evolves through four states over the event lifecycle:
+
+```
+Slug created → Pre-event (T-90d → T-1h)     — invitation, invite-token-gated, guest-hydrated per [[0002]]
+            → Live event (T-1h → T+8h)      — day-of guest experience per [[0031]]
+            → Cooldown (T+8h → T+30d)       — private gallery for guests only
+            → Editorial (T+30d → forever)   — public showcase if couple opts in, anonymized fallback otherwise
+```
+
+QR codes printed months in advance keep resolving to the same slug regardless of lifecycle phase. Privacy invariants from [[0015]] § "Privacy invariants" hold at every phase — only opted-in couples flip to the public editorial phase; default anonymization = initials.
+
+### Multi-vendor self-tag claim flow (parallel to vendor-initiated)
+
+The base spec's vendor-initiated flow assumes the vendor proactively requests a showcase. Many weddings have vendors who DIDN'T initiate but who deserve credit on photos the showcase publishes. **Self-tag** lets any vendor (verified marketplace participant) claim credit on a published wedding photo, gated by 4-layer moderation.
+
+**Tag types per photo:**
+
+| Tag type | Cardinality | Example |
+|---|---|---|
+| `primary_credit` | 1 per photo | The photographer who shot it |
+| `service_credit` | N per photo | Florals · cake · venue · makeup credits |
+| `featured_service` | N per photo, links to vendor's catalog row | "These centerpieces" → that specific `vendor_services` row |
+
+**4-layer moderation pipeline:**
+
+| Layer | Check | Outcome |
+|---|---|---|
+| Auto-1 | Vendor verified + covers that canonical_service + active in that city around event date | Auto-approve within 5 min if all yes |
+| Auto-2 | Vendor has 5+ approved claims with no recent disputes | Reputation auto-approval bypass |
+| Couple veto | Couple sees a digest ("3 new claims on your wedding photos") and can confirm/dispute | Dispute auto-revokes |
+| Admin | Disputed or low-reputation claims hit moderation queue ([[0023]]) | 48-hr SLA manual review |
+
+**Anti-spam:**
+- 5 claims per vendor per day cap
+- 3 rejected claims in 30 days → 30-day claim ban
+- Couples can permanently block a vendor from their wedding's photos
+- Verified + reputable path bypasses queue
+
+**New schema additions:**
+
+```sql
+CREATE TABLE wedding_showcase_vendor_claims (
+  claim_id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  showcase_id         UUID NOT NULL REFERENCES wedding_showcases(showcase_id) ON DELETE CASCADE,
+  capture_id          UUID NOT NULL REFERENCES wedding_showcase_captures(capture_id) ON DELETE CASCADE,
+  vendor_id           UUID NOT NULL REFERENCES vendors(vendor_id),
+  canonical_service   TEXT NOT NULL REFERENCES canonical_service_schemas(canonical_service),
+  tag_type            TEXT NOT NULL CHECK (tag_type IN ('primary_credit','service_credit','featured_service')),
+  featured_service_id UUID REFERENCES vendor_services(service_id),       -- nullable, only for featured_service tag_type
+  description         TEXT,                                              -- vendor's optional one-line ("centerpieces + ceremony arch")
+  status              TEXT NOT NULL DEFAULT 'pending'
+                        CHECK (status IN ('pending','auto_approved','admin_approved','rejected','revoked')),
+  reviewed_by         UUID REFERENCES users(user_id),
+  reviewed_at         TIMESTAMPTZ,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX wedding_showcase_vendor_claims_capture_idx ON wedding_showcase_vendor_claims(capture_id);
+CREATE INDEX wedding_showcase_vendor_claims_vendor_idx ON wedding_showcase_vendor_claims(vendor_id);
+```
+
+### Two-tier editorial credit (verified vs. claimed)
+
+The credit shown on each photo + the showcase vendor strip distinguishes vendors by their relationship to Setnayan Pay:
+
+| Tier | Triggered when | Visual treatment | Vendor cost | Moderation |
+|---|---|---|---|---|
+| **Verified** | Vendor closed through Setnayan Pay for that event (payment record + booking record both present in `bookings`) | Premium featured-strip placement · "Verified Setnayan booking" badge · vendor analytics included · bundle CTA inclusion | Already paid 5% Pay fee — no extra | None (Setnayan Pay transaction IS the verification) |
+| **Claimed** | Vendor self-tagged via above flow | Normal credit in the credits list · no premium strip · no analytics dashboard · lower visual prominence | Free | 4-layer moderation per above |
+
+This reframes the **5% Setnayan Pay convenience fee** (per [[0015]] § "Pricing transparency") as a complete platform-participation value bundle:
+
+| Phase | What the 5% buys |
+|---|---|
+| Pre-booking | Discovery, chat with identity masking, in-platform messaging protection |
+| Booking | Payment processing, escrow, dispute resolution, BIR-compliant OR receipts |
+| Day-of | Coordinator chat join (if applicable), day-of guest experience integration |
+| Post-event | **Verified vendor credit in showcase + premium featured-strip + bundle inquiry + analytics dashboard** |
+
+Off-platform bookings get only `claimed` credit — structurally reinforcing the booking funnel.
+
+### DIY editor — couple builds their own showcase
+
+Parallel to vendor-initiated trigger flow, couples can author their own showcase directly. Phase 0 of the editorial product (lowest engineering cost, no AI dependencies):
+
+**Editor surface:** `/dashboard/[eventId]/showcase/edit` (couple-only)
+
+**Slot interactions:**
+- **Hero** — couple uploads hero image, sets initials, sees auto-populated date + city
+- **Mood** — couple can drag in mood-board palette swatch from [[0001]]; one-line intention statement
+- **Chapter blocks (N drag-orderable)** — per chapter: label · photo grid up to 8 photos · 200-word reflection · optional 5-sec clip embed · vendor credits picker (browse credited vendors from `wedding_showcase_vendor_credits`)
+- **Real numbers sidebar** — auto-populated from event data: guest count · vendor count · avg vendor rating · hours documented · Setnayan Pay processed (optional toggle)
+- **Vendor strip** — auto-populated from `wedding_showcase_vendor_credits` (couple can re-order)
+- **Preview + Publish** — full-page preview, couple toggles `is_published=TRUE`
+
+No AI, no auto-curation. Couple's own content + own reflections + own picks. Storage of uploaded photos via R2 + GDrive offload pattern (see GDrive extension below).
+
+### Auto editorial — template-driven data-fed pipeline (Phase 1 of editorial product)
+
+For couples who prefer zero effort, Setnayan auto-generates a publishable draft template-filled from event data. **Template-first, NOT LLM-generated.** Couple reviews + edits before publish.
+
+**9-stage pipeline (T-event-end + 14 days trigger):**
+
+1. **Data harvest** — pull from `events` + `papic_photos` + `panood_clips` + `bookings` + `vendor_services` + schedule + reviews + couple opt-in consent flags
+2. **Image AI extraction** (V2 add-on, deferred from V1.5) — palette + moment classification + style fingerprint + vendor work detection
+3. **Template selector** — picks story arc (church / garden / beach / modern / traditional) from event metadata
+4. **Chapter slot binding** — every slot is data-driven; no LLM-generated prose. Couple's own 200-word reflections fill the body
+5. **Photo curator** — algorithmically picks 30–40 photos: per-chapter quota (5 per chapter) · diversity scoring (wide/medium/detail) · couple-approved · vendor coverage
+6. **Vendor tag pre-population** — auto-credits booked vendors from `bookings` ledger (no claim flow needed for these)
+7. **Trilingual generation** — translation pass (LLM cheap-tier OR human review depending on tier)
+8. **Couple review window** — draft delivered T+14d; 30-day review window; auto-publish OR couple-publish-early
+9. **Publish + notification** — vendors notified, untagged elements become claimable via self-tag, engagement tracking starts
+
+**AI polish narrow optional V2 add-on only:**
+- Filipino-moment chapter labels from cached generic set (cord & veil → "The cord that binds")
+- Couple reflection grammar polish (couple sees both, picks one)
+- Per-editorial LLM cost: <₱20 (Claude Haiku tier)
+
+No image AI, no FFmpeg, no Sonnet polish at V1.5. Per-editorial cost = ₱0 for V1.5 Phase 0 + Phase 1.
+
+### Setnayan-Curated Premium tier — admin picks, Setnayan funds
+
+Top 5–10 showcases per month get the full AI multimedia treatment, funded by Setnayan as content marketing (~₱2–4k/mo line item). Admin curates which showcases get the premium investment via [[0023]] § Setnayan-curated featured showcases (already specced in 0046 base).
+
+**No vendor sponsorship tier** — vendors already pay 5% Pay fee; charging again for editorial credit double-bills the same value. Setnayan funds the AI premium for quality reasons (best weddings featured, not richest-vendor weddings), not vendor reasons.
+
+### Couple Keepsake Bundle — ₱2,499 post-event upsell SKU
+
+Optional purchase couples can make after their showcase publishes:
+
+- Print-ready PDF (full showcase formatted for ~50-page coffee-table book printer)
+- Photo bundle download (compressed previews in ZIP)
+- Panood SDE reel download
+- Wedding playlist artifact (track list + Pakanta-generated song if purchased per [[0036]])
+
+Schema addition:
+
+```sql
+ALTER TABLE service_catalog
+  ADD COLUMN IF NOT EXISTS sku TEXT;
+
+INSERT INTO service_catalog (sku, display_name_en, price_centavos, category, is_active)
+VALUES ('couple_keepsake_bundle', 'Wedding Showcase Keepsake Bundle', 249900, 'showcase', TRUE)
+ON CONFLICT (sku) DO NOTHING;
+```
+
+Couple-side checkout via [[0034]] cart. Doesn't break [[0015]] § "Free to plan" lock — Keepsake is post-event finished-product, not planning.
+
+### Net-new data captures — wedding_guest_reviews + vendor_event_feedback
+
+Two new third-party voice sources for showcase pull-quotes + vendor BTS blurbs that WedMeGood structurally lacks:
+
+**`wedding_guest_reviews`** — post-event email to attendees via [[0031]] QR scans; optional 60-sec form: 1 rating + 1 quote.
+
+```sql
+CREATE TABLE wedding_guest_reviews (
+  review_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id            UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
+  guest_id            UUID REFERENCES guests(guest_id),                  -- nullable, anonymous submissions OK
+  rating              INT CHECK (rating BETWEEN 1 AND 5),
+  quote               TEXT,
+  attribution_opt_in  BOOLEAN NOT NULL DEFAULT FALSE,                    -- guest opts in to show their name
+  display_name        TEXT,                                              -- shown only if attribution_opt_in=TRUE
+  submitted_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX wedding_guest_reviews_event_idx ON wedding_guest_reviews(event_id);
+```
+
+Privacy: anonymous default per RA 10173; guest must opt in to display name. Used for showcase pull-quotes: *"First time I cried at a wedding. — Tita Cora, guest"*.
+
+**`vendor_event_feedback`** — vendor dashboard prompt 7 days post-event: private rating of couple experience + optional public-quote opt-in.
+
+```sql
+CREATE TABLE vendor_event_feedback (
+  feedback_id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  vendor_id           UUID NOT NULL REFERENCES vendors(vendor_id),
+  event_id            UUID NOT NULL REFERENCES events(event_id),
+  private_rating      INT CHECK (private_rating BETWEEN 1 AND 5),       -- vendor's rating of the couple, private
+  public_quote        TEXT,                                              -- vendor's BTS blurb, public opt-in
+  public_opt_in       BOOLEAN NOT NULL DEFAULT FALSE,
+  submitted_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX vendor_event_feedback_vendor_idx ON vendor_event_feedback(vendor_id);
+CREATE INDEX vendor_event_feedback_event_idx ON vendor_event_feedback(event_id);
+```
+
+Private ratings feed admin bad-actor-couple flagging. Public quotes (opt-in) become vendor BTS blurbs in showcases: *"We sourced the calla lilies from a Benguet farm at 5 AM. — Florist X"*.
+
+Both schemas slot 2 new email templates in [[0028]]: `wedding_guest_review_request` + `vendor_couple_feedback_request`.
+
+### Phasing of 0046 extensions
+
+| Phase | What ships | Duration | Cost |
+|---|---|---|---|
+| **0046 base (already drafted)** | Vendor-initiated showcase trigger + couple consent + facets + browse | (drafted) | — |
+| **0046 ext Phase 0** | DIY editor + self-tag claim flow + 4-layer moderation + 2-tier credit linkage + Couple Keepsake SKU | ~2–3 weeks dev | ₱0 LLM cost |
+| **0046 ext Phase 1** | Auto-editorial template-driven pipeline + photo curator algorithm + Filipino-moment detection + vendor tag pre-population | ~3–4 weeks dev | ₱0 LLM (template-first) |
+| **0046 ext Phase 2** | AI polish narrow add-on + Setnayan-Curated Premium (full AI multimedia) + new data captures (guest reviews + vendor feedback) | V2 only | ~₱200-400/editorial |
+
+### Updated dependencies
+
+This extension consumes:
+
+- [[0001]] events + mood board palette
+- [[0002]] guest invitation slug + token hydration
+- [[0006]] vendors + vendor reviews + canonical_service_schemas (192-entry v11 taxonomy per [[0044]])
+- [[0007]] budget aggregations for real-numbers sidebar
+- [[0011]] Panood clips for SDE embed
+- [[0012]] Papic photos for showcase captures
+- [[0028]] new email templates: `wedding_guest_review_request`, `vendor_couple_feedback_request`
+- [[0031]] QR scan data for guest-review email targeting
+- [[0034]] cart for Couple Keepsake checkout
+- [[0036]] Pakanta song for Keepsake playlist artifact (optional)
+
+This extension consumed by:
+
+- [[0015]] homepage Featured Real Weddings hero (already specced in 0046 base)
+- [[0023]] admin moderation queue for self-tag claims + Curated Premium picker
+
 ## Decision log
 
 - **2026-05-18 — Iteration drafted.** Vendor-initiated → couple-approves → vendor-submits-3 → couple-picks-1 trigger flow locks the asymmetric trust pattern. Faceted browse (City × Ceremony × Venue × Theme × Budget × Season) creates SEO landing pages per filter combination. Vendor portfolio auto-population + product "used at N weddings" badges close the cold-start problem differently than WedMeGood (vendor-populated content engine instead of editorial team). Setnayan-curated editorial showcases seed launch content (5-10 from pilot cohort). Couple privacy controls (full/first-name/anonymous + unpublish + photo veto) preserve agency. Real budget brackets + day-of timeline are unique data WedMeGood structurally lacks.
+
+- **2026-05-20 — Six extensions added** (this section above). Self-tag claim flow + 2-tier credit linked to 5% Pay fee + DIY editor + auto-editorial template pipeline + Curated Premium funded by Setnayan + Couple Keepsake ₱2,499 SKU + new data captures (`wedding_guest_reviews` + `vendor_event_feedback`). Replaces the placeholder "0036_inspiration" iteration name used in 2026-05-20 CLAUDE.md decision-log rows — all the work lives in this iteration (0046) as extensions, not a new iteration. Phasing: Phase 0 (DIY + self-tag + 2-tier credit + Keepsake) is V1.5 priority; Phase 1 (Auto-editorial) is V1.5 secondary; Phase 2 (AI polish + new data captures + Curated Premium) is V2.
