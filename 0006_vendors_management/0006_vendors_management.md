@@ -107,6 +107,24 @@ honeymoon_planner
 
 **Note on `wedding_coordination` (locked 2026-05-12):** Wedding coordinators register as a regular vendor under this canonical key and use the same 0022 vendor dashboard as photographers, caterers, and every other category — there is **no separate "coordinator" platform role**. Coordinators receive two special permissions on top of standard vendor capability: (a) per-thread join into customer ↔ vendor chats per 0019 § Coordinator-join flow (the couple invites them into vendor threads as needed) and (b) broadcast access on day-of guest experience surfaces per 0031. Both permissions are scoped to the events that booked them and revoke automatically at event-end + 30 days.
 
+### Note on this enum vs. v11 taxonomy (clarification 2026-05-20)
+
+The 28-value `vendor_category` enum above is the **original couple-side per-event categorization layer** for `event_vendors` (per-event vendor cards tracked by the couple). It is **not** the marketplace taxonomy.
+
+The marketplace's **canonical taxonomy is 192 entries in `canonical_service_schemas`** seeded by iteration 0044 (`supabase/migrations/20260521040000_iteration_0044_v11_full_taxonomy_seeds.sql`), grouped into **5 mega-menu columns** via `apps/web/lib/taxonomy.ts`:
+
+1. **Capture** (Visual) — photographers, videographers, drones, SDE, pre-nup locations
+2. **Music & Entertainment** — bands, DJs, choirs, choreographers, hosts
+3. **Food & Beverage** — catering, cake, bar, stations & booths
+4. **Look** — bridal wear, groom wear, beauty, jewelry, decor
+5. **Ceremony · Coordination · Logistics · Stationery · Travel** — officiants, planners, transport, invitations, honeymoon
+
+Authoritative spec: [`02_Specifications/Vendor_Taxonomy_V1_Master.md`](../02_Specifications/Vendor_Taxonomy_V1_Master.md). 192-entry per-category attribute schemas: [`0044_per_category_schemas`](../0044_per_category_schemas/0044_per_category_schemas.md).
+
+**Pro/Max tier caps** (per CLAUDE.md decision-log entry 2026-05-20 "Free/Pro/Max 3-tier vendor pricing") operate at the **mega-menu column level** (Free = 1 column · Pro = 2–3 columns · Max = all 5), NOT at the 28-enum or 192-row level. A photographer covering 9 Capture-column sub-categories still counts as **1 column** under tier-cap accounting.
+
+The 28-value enum here remains in use for `event_vendors.category` (the couple's per-event vendor list), as a pragmatic categorization that doesn't need to mirror every marketplace facet.
+
 ### `event_vendor_relationships` table
 
 > **Note (locked 2026-05-12):** This table tracks the COUPLE's per-event list of vendors they're working with. It is distinct from the marketplace `vendors` table (declared in 0022) which holds the canonical platform vendor entities. When a couple selects a marketplace vendor, this table's `marketplace_vendor_id` FK links them; for couple-entered custom vendors (off-platform), `marketplace_vendor_id` stays NULL. The previous name `vendors` was renamed to `event_vendor_relationships` to remove the collision with the marketplace table; the primary key column is `relationship_id` (not `vendor_id`) to make joins explicit.

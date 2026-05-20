@@ -2,6 +2,8 @@
 
 **Locked 2026-05-19.** Companion to [0022 § 5b](../0022_vendor_dashboard/0022_vendor_dashboard.md) (Boosted Ads + Sponsored Boost spec) and the 2026-05-19 traffic-monetization decision-log row. **This is an owner-side playbook — no engineering changes required to execute.** Engineering work for Boosted Ads itself already landed via 0022 § 5b lock (2026-05-16).
 
+> **⏸️ ACTIVATION DEFERRED 2026-05-19 (afternoon).** Outbound execution is paused until the verified-vendor pipeline is live in production. Specifically: this playbook is dormant until (a) 0006 vendor management ships verification queue + verification state machine in production, AND (b) at least one batch of vendors has completed verification with `verification_state = 'verified'` in the DB. Both prerequisites unlock the prospect-list SQL in Step 1 below. Owner directive: "Wait until verified-vendor pipeline is live" (per AskUserQuestion 2026-05-19 afternoon). Until then, do NOT send outbound DMs to pilot vendors as a real sales motion — pilot vendors haven't gone through verification, don't have the booking-volume signal, and selling to them now would burn a relationship without a real product to deliver. The 30-vendor launch promo (`BOOSTED-LAUNCH-2026` 20% off month 1 cap 30 redemptions) seed timing should align with this activation, not happen earlier. Featured-vendor lookbook (due 2026-06-15 per API checklist § 9.4) can proceed in parallel — it's not gated on verified vendors existing.
+
 ---
 
 ## Why this doc exists

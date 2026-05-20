@@ -67,13 +67,14 @@ The advisory is stamped on `events.concierge_long_engagement_advised_at` to prev
 
 Replaces the 2026-05-16 7-day per-event preview. **No charge. No card required. No bait-and-switch.**
 
-- **One trial per account** (not per event). Tracked on `users.concierge_trial_used_at`. Closes the prior loophole where a couple could create Event A, exhaust trial, then create Event B for another trial on the same account.
+- **One trial per account AND one trial per event** (dual-scope lock, owner-locked 2026-05-20 superseding the 2026-05-17 per-account-only rule). Tracked on `users.concierge_trial_used_at` AND `events.concierge_trial_used_at` (plus `events.concierge_trial_started_by_user_id` for audit). The first host on an event to start the trial consumes BOTH slots. Closes two loopholes at once: (a) the per-account scenario where a couple creates Event A, exhausts trial, then creates Event B for another trial on the same account (per-account check); (b) the V1.2 multi-moderator scenario where multiple hosts on the same event each spend their own per-account trial slot against the same wedding (per-event check). On a trial-start attempt where the event's slot is already consumed by another moderator, the action returns `already_used_on_event` and surfaces the banner copy *"Another host on this event already started the 3-day trial. Buy Setnayan Concierge anytime to continue."* — the would-be second host's account trial slot is NOT consumed (still available against a different event).
 - Couples in DIY mode can start a trial from the dashboard upgrade banner OR Settings → Setnayan Concierge OR the inline "Not ready to commit? Try 3 days free →" link below the choice card (per iteration 0000 § 2.5b).
 - Trial surfaces the **full Concierge feature set** (9-step roadmap, daily nudges, priority vendor matching, honeymoon planning) for 3 days.
 - A persistent banner above the dashboard reads: *"Trial · X days left → Continue with Setnayan Concierge (₱2,499)"*.
 - At T+3 the daily expiry-sweep cron flips `concierge_status = 'expired'` and the event returns to DIY (all planning progress preserved — the 9-step journey rows in `event_journey_steps` remain populated).
 - **Trial-start gating** — the `start_concierge_trial(event_id)` server action is blocked when ANY of:
-  - `users.concierge_trial_used_at IS NOT NULL` (already used)
+  - `events.concierge_trial_used_at IS NOT NULL` (per-event slot already consumed by another moderator — locked 2026-05-20)
+  - `users.concierge_trial_used_at IS NOT NULL` (account already used)
   - `users.concierge_enforcement_level IN ('trial_banned', 'full_banned')` (under enforcement)
   - Cross-account similarity check fires (see next subsection) — trial-start blocked AND flag inserted into `concierge_abuse_flags`
 

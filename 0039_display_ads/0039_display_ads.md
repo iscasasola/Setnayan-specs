@@ -1,5 +1,9 @@
 # Iteration 0039 — Display Ads (Third-party)
 
+> **🚫 RETIRED 2026-05-19.** This iteration is no longer in scope. AdSense enrollment is blocked for the Setnayan owner's Google account: AdSense-for-YouTube was auto-deactivated due to YouTube channel inactivity, and the account is locked to AdSense-for-YouTube only (no AdSense-for-Content enrollment path forward). Creating a fresh Google account to circumvent the block carries a high risk of permanent ban via Google's duplicate-AdSense identity checks. Path A (drop display ads entirely from V1.1) chosen — yield was already ~₱5-20K/mo at 100K pageviews vs Boosted Ads ~₱780K/yr per 20km vendor, so the brand-risk vs revenue trade-off no longer favors keeping this surface. Cookie-consent banner scope dropped from V1.1 (no third-party trackers means RA 10173 first-party PostHog opt-out is sufficient). Full retirement context: CLAUDE.md decision-log ninth 2026-05-19 row. **Do not implement.** Folder + spec kept as a tombstone for future reference; if a different ad-network path opens (Ezoic, direct AdSense via incorporated entity, etc.) a new iteration number replaces this one.
+
+---
+
 **Iteration number:** 0039
 **Topic:** Third-party display advertising (Google AdSense as V1.1 single network) running on **public, pre-purchase setnayan.com surfaces only**. Requires a site-wide RA 10173-compliant cookie-consent layer (new system surface). **Owner brand-risk sign-off required at activation** — this iteration ships in code as ✅ but flips ON only after explicit owner go-ahead.
 **Surface:** Marketing site (`setnayan.com`, `setnayan.com/about`, `setnayan.com/pricing`, `setnayan.com/help/*` per § 3 inclusion list), `/blog` article pages + `/recommendations` category pages (from 0038), vendor landing pages (`setnayan.com/vendors/[slug]`), marketplace discovery (`setnayan.com/vendors` filter results). Plus a new site-wide **Cookie Consent Banner** (first-party consent management).

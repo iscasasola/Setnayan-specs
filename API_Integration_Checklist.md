@@ -1,6 +1,6 @@
 # API Integration Checklist — Prereqs Before Code Starts
 
-> Every external service, account, and integration that must exist *before* Claude Code (or any engineer) starts building. Locked 2026-05-12 · **Owner Punch List section added 2026-05-16 covering walkthrough items #17-20**. Do not skip — building without these set up first will produce code that can't run end-to-end.
+> Every external service, account, and integration that must exist *before* Claude Code (or any engineer) starts building. Locked 2026-05-12 · **Owner Punch List section added 2026-05-16 covering walkthrough items #17-20** · **Re-audited 2026-05-20 against `origin/main`** — see updated status column; many items previously listed have flipped ✅ ship since 2026-05-14, and four crypto-secret items + Google Drive OAuth verified-app review were newly surfaced. Do not skip — building without these set up first will produce code that can't run end-to-end.
 
 ## Why this comes first
 
@@ -25,7 +25,9 @@ Consolidated punch list of every **owner-side action** needed to unblock V1 laun
 | #18 | **DPO appointment + NPC registration** — Data Protection Officer under RA 10173. Setnayan can appoint internal (owner) or contract one. NPC registration ~₱500 one-time. `dpo@setnayan.com` mailbox setup. | ~1-2 weeks | ₱500 one-time (NPC) + ₱20K/mo if contracted | 🔴 | § 2.3 |
 | #17e | **BDO business savings account** — receiving account for the manual-reconciliation payment flow (V1 ships with this; Maya Business is V1.5+). Daily inbox monitoring + auto-statement download for monthly reconciliation. Requires DTI + BIR 2303 + Mayor's Permit. | ~1-2 weeks after BIR | Free; min balance applies | 🔴 | § 2.1 |
 | #17f | **GCash business account** — second receiving rail. Same BDO prerequisites. | ~3-7 days | Free | 🔴 | § 2.1 |
-| #19a | **Anthropic Console account + workspace "Setnayan"** — unblocks 0032 Contract Intelligence for V1 ship. Spend caps: **$500/mo soft alert · $2,000/mo hard cap · $100/day soft cap**. Models: **Sonnet 4.6** (vision V1.5+ Papic) · **Haiku 4.5** (V1 Contract Intelligence text). Owner signs up at console.anthropic.com → creates workspace → generates API key → pastes into Vercel env. | Same day | $100/day cap = ~₱5,800/day max V1 spend | 🔴 | § 5.4 |
+| ~~#19a~~ | ~~**Anthropic Console account + workspace "Setnayan"** — unblocks 0032 Contract Intelligence for V1 ship.~~ | — | — | ❌ **DEFERRED 2026-05-18** — 0032 Contract Intelligence RETIRED in migration `20260518200000_vendor_contracts_dual_esign_retire_0032.sql`, replaced by free dual e-signature on every vendor contract (no AI in V1). Anthropic now V1.5+ only for 0011/0012 highlights. | § 5.4 |
+| #19f | **Generate crypto secrets** — `ENCRYPTION_KEY` (AES-256-GCM, used by `lib/encryption.ts` PR #152) · `CRON_SECRET` · `OAUTH_REFRESH_CRON_SECRET` · `INTERNAL_WORKER_SECRET`. Without these, OAuth flows fail to decrypt + admin/cron endpoints return 401. Generate each with `openssl rand -base64 32`, paste into Vercel env. | Same day (5 min) | Free | 🔴 | (new — added 2026-05-20) |
+| #19g | **Google Drive OAuth verified-app submission** — Drive scopes for 0009 Photo Delivery (Sept 2026 ship) + 0012 Papic. Separate from #17a (YouTube scopes). Same ~3-6 weeks Google review SLA. Engineering shipped 2026-05-19/20 (PRs #147, #150, #152, #153); owner needs to set up Google Cloud OAuth consent screen for Drive scopes + submit for verified-app review. | 1-6 weeks Google review | Free | 🟡 | (new — added 2026-05-20) |
 | #19b | **Persona / Veriff / Onfido signup** — Identity verification for vendor onboarding (gov ID liveness check, ~₱200/check, ~₱535/vendor across the full 12-doc verification). Pick one — Persona is recommended for PH coverage. | ~3-7 days for KYC | Per-check pricing | 🔴 | § 5.6 |
 | #19c | **AMLC sanctions API access** — PEP screening at vendor verification time (12-doc checklist item l). Required by 2026-05-16 vendor verification lock. AMLC provides bulk subscription via PH banks; alternative is World-Check or Refinitiv. | ~7-14 days | ~₱20K-50K/year subscription | 🔴 | § 5.8 |
 | #19d | **Resend account + DKIM/SPF/DMARC** — transactional email (verification codes, payment instructions, comp-gift notifications). Free tier 3,000/mo covers V1; $20/mo for 50K. Domain auth must complete before first email send. | ~1-2 days | Free tier | 🟡 (likely partial) | § 3.1 |
@@ -44,31 +46,55 @@ Consolidated punch list of every **owner-side action** needed to unblock V1 laun
 | #20g | **Canon / Nikon / Sony / Fujifilm Camera SDK access** — DSLR bridge for Papic V1.5+ Pro Camera Bridge. Each vendor has its own developer program registration with per-vendor lead times. | ~2-8 weeks per SDK | Free for most | ⚪ | § 6.1 / 6.2 / 6.3 / 6.4 |
 | #20h | **Suno Premier music catalog generation** — ~400 owned AI tracks per `02_Specifications/14_Music_Catalogue_Cowork_Playbook.md`. Parallel workstream; engineering builds with placeholders. | ~Several hours of generation time | Suno subscription | ⚪ | § 5.5 |
 
-### V1.1 traffic-monetization expansion · post-launch (added 2026-05-19)
+### V1.1 traffic-monetization expansion · post-launch (added 2026-05-19 · 0039 retired same-day)
 
-These items unlock the 0038 + 0039 iteration specs drafted 2026-05-19. None are V1 launch-blocking; all are V1.1 ramp items that pair with the editorial content cadence.
+These items unlock the 0038 iteration spec drafted 2026-05-19. None are V1 launch-blocking; all are V1.1 ramp items that pair with the editorial content cadence. **#21a + #21c removed 2026-05-19 afternoon** after AdSense access was confirmed blocked for the owner's Google account (AdSense-for-YouTube inactivity deactivation; no AdSense-for-Content enrollment path forward). 0039 retired same-day.
 
 | # | Task | Lead time | Cost | Status | Detail § |
 |---|---|---|---|---|---|
-| #21a | **Google AdSense publisher account** — site review by Google. Application requires ≥30 pages of content on setnayan.com (0038 editorial articles + 0029 help center together easily satisfy this). After approval, configure topic-exclusion + sensitive-category blocking + Auto Ads OFF in the publisher console. Activation in-app is gated separately on `0023 § 5.1 kill-switch` + owner brand-risk decision-log entry. | ~1-2 weeks (Google site review) | Free signup · ~₱5-20K/mo revenue at 100K pageviews | ⚪ Pending 0038 content | § 9.1 (NEW) |
-| #21b | **Involve Asia affiliate-network signup** — PH-focused affiliate network with deep merchant coverage (Klook, Lazada, Shopee, Agoda, Trip.com, BDO, Vivere). Picked as 0038 primary network. Owner: signup at involve.asia, complete payout details (PH bank account · BIR TIN), apply to per-merchant programs as needed (most auto-approve, a few have editorial review). | ~3-7 days · per-merchant approval ~1-7 days | Free signup · 5% net of commission to Involve Asia · Setnayan keeps the rest | ⚪ Pending 0038 ship | § 9.2 (NEW) |
-| #21c | **Privacy Policy update + NPC re-filing for AdSense cookies** — append "Advertising cookies" section to `01_Contracts/Setnayan_Privacy_and_Security_Policy.md` listing Google AdSense as a third-party processor + describing the 3-category consent banner from 0039 § 2. Re-file with NPC to keep registration current. | ~1-3 days drafting · NPC filing same-day | NPC re-filing fee may apply (check NPC schedule) | ⚪ Pending 0039 activation | § 9.3 (NEW) |
+| ~~#21a~~ | ~~Google AdSense publisher account~~ | — | — | 🚫 **REMOVED 2026-05-19 — 0039 retired (AdSense access blocked)** | — |
+| #21b | **Involve Asia affiliate-network signup** — PH-focused affiliate network with deep merchant coverage (Klook, Lazada, Shopee, Agoda, Trip.com, BDO, Vivere). Picked as 0038 primary network. Owner: signup at involve.asia, complete payout details (PH bank account · BIR TIN), apply to per-merchant programs as needed (most auto-approve, a few have editorial review). | ~3-7 days · per-merchant approval ~1-7 days | Free signup · 5% net of commission to Involve Asia · Setnayan keeps the rest | 🟡 **Submitted 2026-05-19 · awaiting network approval (3-7 business days)** | § 9.2 (NEW) |
+| ~~#21c~~ | ~~Privacy Policy update + NPC re-filing for AdSense cookies~~ | — | — | 🚫 **REMOVED 2026-05-19 — no third-party trackers means RA 10173 first-party PostHog opt-out is sufficient (already in 0025 Privacy & Data tab)** | — |
 | #21d | **Featured-vendor lookbook (V1.1 marketing deliverable)** — 1-page PDF for the Boosted Ads outbound playbook (`09_Operations/Boosted_Ads_Activation_Playbook.md`). Designer or owner via Figma. Stored at `04_Marketing/Featured_Vendor_Lookbook_2026Q3.pdf`. Refresh quarterly with updated performance data. | ~1-2 days design | Internal | ⚪ Owed 2026-06-15 | § 9.4 (NEW) |
 
-### Already done · verified live
+### Already done · verified live (refreshed 2026-05-20)
 
 | # | Task | Status | Detail § |
 |---|---|---|---|
-| 1 | GitHub `iscasasola/setnayan-platform` private repo | ✅ | § 1.1 |
+| 1 | GitHub `iscasasola/setnayan-platform` **public** repo (flipped public 2026-05-14, AGPL-3.0) | ✅ | § 1.1 |
 | 2 | Vercel project (auto-deploys `main`) + custom domain | ✅ | § 1.2 |
-| 3 | Supabase project (Singapore) + RLS posture | ✅ | § 1.3 |
-| 4 | Cloudflare R2 buckets (APAC) — `setnayan-media`, `setnayan-events`, `setnayan-exports`, `setnayan-vendor-verification` | ✅ | § 1.4 |
+| 3 | Supabase project (Singapore) + RLS posture + **76 migrations** | ✅ | § 1.3 |
+| 4 | Cloudflare R2 buckets (APAC) — `setnayan-media`, `setnayan-thread-files`, `setnayan-vendor-contracts`, `setnayan-samples`, `setnayan-vendor-verification`, `setnayan-bir-2307` (6 total) + R2 client + uploads wired 2026-05-14 PR #18 | ✅ | § 1.4 |
 | 5 | `setnayan.com` + `setnayan.ph` domain registration | ✅ | § 1.6 |
-| 6 | Anthropic SDK wired (`@anthropic-ai/sdk`) in apps/web | ✅ | § 5.4 (owner-side signup still pending #19a) |
+| 6 | ~~Anthropic SDK wired (`@anthropic-ai/sdk`)~~ | ❌ NOT WIRED — was queued for 0032 which retired 2026-05-18; SDK install deferred to V1.5+ | § 5.4 |
 | 7 | Sentry SDK wired (PR #17) | 🟡 SDK wired, smoke test pending #19e | § 4.1 |
-| 8 | PostHog SDK wired (PR #19) — 3 server-side funnels live | ✅ | § 4.2 |
+| 8 | PostHog SDK wired (PR #19) — 3 server-side funnels live + 4 PostHog funnel links at `/admin/funnels` (PR #26) | ✅ | § 4.2 |
 | 9 | Daily.co video meetings | ❌ RETIRED 2026-05-16 (do not enable) | § 1.5 |
 | 10 | Cloudflare Stream Live | ❌ RETIRED 2026-05-16 (do not enable) | § 5.1 |
+| 11 | **Resend** — SDK + 9 of 10 V1 email templates wired (PR #8, #20, #28) | ✅ wired; V1 auto-confirms signup so non-blocking | § 3.1 |
+| 12 | **TanStack Query + persisters + idb-keyval + tracked-mutation wrapper** (PR #10 caching foundation) | ✅ | (caching strategy spec) |
+| 13 | **R2 storage migration off Supabase Storage** (PR #18) | ✅ — uploads via `lib/uploads.ts` + `@aws-sdk/client-s3` | § 1.4 |
+| 14 | **`pdf-lib`** — BIR 2307 + OR receipt generation | ✅ shipped | (0026) |
+| 15 | **Per-couple OAuth grants table** (migration 54, 2026-05-16) | ✅ — supports YouTube + Drive + TikTok | (0011/0009/0017) |
+| 16 | **YouTube OAuth code (0011 Panood)** — lib + 3 routes + cron refresh | ✅ engineering; 🟡 Google verified-app review pending (#17a) | § 5.3 |
+| 17 | **Google Drive OAuth code (0012 Papic)** — `lib/papic-drive.ts` + routes (migrations 53-55, 67) | ✅ engineering; 🟡 Drive scopes verified-app pending #19g | § 5.3 |
+| 18 | **Photo Delivery Drive OAuth code (0009)** — `lib/photo-delivery-drive.ts` + routes (PRs #147, #150, #152, #153) | ✅ engineering; 🟡 Drive scopes verified-app pending #19g | § 5.3 |
+| 19 | **TikTok OAuth code (0017 Patiktok)** — `lib/patiktok-tiktok.ts` + 2 routes (migration 50-52) | ✅ engineering; 🟡 TikTok app review pending #20f | § 7.8 |
+| 20 | **Vendor verification webhooks** — Persona + Veriff webhook routes wired (`/api/webhooks/persona`, `/api/webhooks/veriff`) | ✅ scaffolding; 🟡 owner signup pending #19b | § 5.6 |
+| 21 | **Vendor reviews + force-majeure queue** (PRs #24, #26) — couple form, vendor reply, public profile, admin queue, couple-side disputes | ✅ | (0006/admin) |
+| 22 | **Public marketplace `/vendors` + couple-initiated invite for off-platform vendors `/vendor/claim/[token]`** (PRs #24, #137) | ✅ | (0006/0022) |
+| 23 | **Dual e-sign for vendor contracts** (migration 61, 2026-05-18) — REPLACES the retired 0032 AI flow with free dual e-sign on every contract | ✅ shipped | (replaces 0032) |
+| 24 | **Concierge wizard architecture + pgvector schema** (migration 64, 2026-05-18) | ✅ schema shipped; UI wiring in flight | (0016) |
+| 25 | **Supplies foundation** (migrations 69-70, PRs #143, #146, #148) — vendors, SKUs, pricing resolver, orders | ✅ | (0018 — NEW) |
+| 26 | **LED background foundation** (migration 74, PR #150) | ✅ schema | (0005 — NEW) |
+| 27 | **Multi-moderator V1.2 foundation** (migration 66) | ✅ Phase A only — NOT V1 launch | (0048 — V1.2) |
+| 28 | **Per-surface guided tours** (PR #138) — all 4 roles | ✅ | (0030) |
+| 29 | **`/api/v1` read-only public API** — events, guests, vendors, reviews + scope-gated `sk_live_*` keys (PR #27) | ✅ | (0033) |
+| 30 | **EN/TL locale toggle** (PR #28) — hand-rolled `lib/i18n/` (no `next-intl` dep) | ✅ | (0025) |
+| 31 | **Pilot Mode launch promo** (migration 60) — free until March 2027 banner | ✅ wired; needs `NEXT_PUBLIC_PILOT_MODE_FREE_UNTIL` env | (launch promo) |
+| 32 | **Account-lifecycle redesign** — Delete vs Blacklist (PR #9 + blacklist table) | ✅ | (0025) |
+| 33 | **Day-of mode** (PR #11 + #12) — T-3d → T+1d auto-activation + 6 cards | ✅ | (0036) |
+| 34 | **Couple waitlist signups** (migration 62) — `/waitlist` capture for soft-launch demand | ✅ | (marketing) |
 
 ### How to use this punch list
 
@@ -302,23 +328,19 @@ The Daily.co video-meetings feature was retired entirely from V1+ on 2026-05-16.
 
 **Spec refs:** `0011_panood/0011_panood.md` § Pricing — V1 SKU lock 2026-05-16, CLAUDE.md 2026-05-16 4th row, `0033_public_api_foundation/0033_public_api_foundation.md` § oauth_grants schema (extended for per-event YouTube refresh-token storage).
 
-### 5.4 Anthropic Claude API — **LOCKED 2026-05-16**
+### 5.4 Anthropic Claude API — **DEFERRED 2026-05-18 (0032 retired)**
 
-- [ ] Sign up for Anthropic Console account under Setnayan-owned email
-- [ ] Create workspace **"Setnayan"** within the console
-- [ ] Set spend caps: **$500/month soft alert · $2,000/month hard cap · $100/day soft cap** (locked 2026-05-16)
-- [ ] Generate API key, store in `.env` as `ANTHROPIC_API_KEY`
-- [ ] Enable prompt caching on the contract-analysis prompt template (0032) and the AI-highlight scene-selection prompt (V1.5+ Papic)
-- [ ] **Model config (2026-05-16 lock):**
-  - Primary text model: **Claude Haiku 4.5** for Contract Intelligence (0032 text extraction) — ~80% cheaper than Sonnet, comparable accuracy on Filipino-language wedding contracts
-  - Vision model: **Claude Sonnet 4.6** for AI Video Highlight + AI Edited Highlight (V1.5+ Papic) — reserved for when Papic ships
-  - V1.5+ fallback: OpenAI GPT-4 (separate API key in `OPENAI_API_KEY` when needed)
-- [ ] Add usage monitoring dashboard alert at 80% of monthly cap ($400/mo trigger)
-- [ ] Unblocks 0032 Contract Intelligence for V1 ship — this was the last open dependency
+**Status:** Was locked 2026-05-16 to unblock 0032 Contract Intelligence. **0032 was retired 2026-05-18** in migration `20260518200000_vendor_contracts_dual_esign_retire_0032.sql` and replaced with free dual e-signature on every vendor contract (no AI analysis in V1). Anthropic signup is therefore **NOT a V1 prereq** and **NOT in the V1 critical path**.
 
-**Cost (updated 2026-05-16):** ~**₱1 per contract analysis** (Haiku 4.5 input ~$0.80/M + output ~$4/M tokens). V1 spend at 500 analyses/month = ~$6.50/mo — well inside the $500/mo soft alert (4× safety margin). AI Highlights (Sonnet 4.6) cost line N/A until Papic V1.5+ ships.
+**Remaining V1.5+ rationale:** Anthropic still queued for 0011 AI highlights + 0012 Papic AI scene selection when those features ship in V1.5+. Defer signup until then. Env vars + spend caps remain reserved in `.env.example` for the eventual V1.5+ activation.
 
-**Spec refs:** `0032_contract_intelligence/0032_contract_intelligence.md`, `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row § 13 (Anthropic API setup).
+- [ ] ~~Sign up for Anthropic Console account under Setnayan-owned email~~ → defer to V1.5+ render-pipeline phase
+- [ ] ~~Create workspace "Setnayan" within the console~~ → defer
+- [ ] ~~Set spend caps: $500/month soft alert · $2,000/month hard cap · $100/day soft cap~~ → spec preserved; activate when needed
+- [ ] ~~Generate API key, store in `.env` as `ANTHROPIC_API_KEY`~~ → defer
+- [ ] ~~Unblocks 0032 Contract Intelligence for V1 ship~~ → no longer applicable; 0032 retired
+
+**Spec refs:** `0032_contract_intelligence/0032_contract_intelligence.md` (note: spec retains the original AI design for reference only — the SKU rows `contract_intelligence_upgrade` are `is_active=FALSE` on `service_catalog`). `CLAUDE.md` 2026-05-18 decision-log row covering the 0032 retirement + dual e-sign replacement.
 
 ### 5.6 Persona / Veriff / Onfido — Identity verification (NEW 2026-05-16 · Tier 2)
 
@@ -744,27 +766,18 @@ Of these, ~50 are genuinely new (not previously listed in Tiers 1–7); ~10 are 
 
 ---
 
-## Tier 9 — Traffic Monetization (V1.1 · added 2026-05-19)
+## Tier 9 — Traffic Monetization (V1.1 · added 2026-05-19 · 0039 retired same-day)
 
-Items unlocking iterations [0038 Editorial & Affiliates](0038_editorial_and_affiliates/0038_editorial_and_affiliates.md) + [0039 Display Ads](0039_display_ads/0039_display_ads.md) + the existing [Boosted Ads Activation Playbook](09_Operations/Boosted_Ads_Activation_Playbook.md). None of these are V1 launch-blocking — they pair with the editorial content cadence that begins ramp post-launch.
+Items unlocking iteration [0038 Editorial & Affiliates](0038_editorial_and_affiliates/0038_editorial_and_affiliates.md) + the existing [Boosted Ads Activation Playbook](09_Operations/Boosted_Ads_Activation_Playbook.md). None of these are V1 launch-blocking — they pair with the editorial content cadence that begins ramp post-launch.
 
-### 9.1 Google AdSense publisher account
+**0039 Display Ads RETIRED 2026-05-19** — AdSense-for-YouTube inactivity deactivation on the owner's Google account blocks AdSense-for-Content enrollment (Path A chosen). All AdSense + cookie-consent + Privacy Policy NPC re-file items removed from this tier. Full context: CLAUDE.md decision log Ninth 2026-05-19 row.
 
-- [ ] Owner signs up at `https://www.google.com/adsense`
-- [ ] Setnayan.com submitted for site review (~1-2 week SLA)
-- [ ] **Prerequisite for review:** at least 30 substantive pages of original content on setnayan.com. Help Center (0029) + initial editorial articles (0038) should easily satisfy this combined.
-- [ ] After approval, configure topic-exclusion in publisher console:
-  - Block category: Weddings, Wedding planning, Wedding services, Wedding photography, Wedding catering, Bridal gowns, Wedding venues (full list maintained in `apps/web/lib/ads/excluded_topics.ts`)
-- [ ] Configure sensitive-category blocking in publisher console:
-  - Block: Gambling, Politics, Religion, Dating, Get-rich-quick, Weight loss, Cosmetic surgery
-- [ ] Auto Ads: **OFF** in publisher console (manual placement only)
-- [ ] Anchor Ads + Vignette + Interstitial: **OFF** in publisher console
-- [ ] AdSense Publisher ID copied into Vercel env as `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID`
-- [ ] **Activation in-app gated separately** on:
-  - Two-admin approval in 0023 § 5.1 activation kill-switch (per 0023 § 9.1)
-  - Owner brand-risk sign-off entry in CLAUDE.md decision log on activation day
-  - Privacy Policy updated per § 9.3
-- **Cost:** Free signup · revenue ~₱5-20K/mo at 100K monthly pageviews (PH baseline)
+### ~~9.1 Google AdSense publisher account~~ 🚫 REMOVED 2026-05-19
+
+This section removed when 0039 retired. AdSense is not in V1.1 scope. Tombstone reference for future agents:
+
+- 0039 spec retained at `0039_display_ads/0039_display_ads.md` with RETIRED top banner
+- Future-revisit gate: if Setnayan incorporates as a registered corporation (separate corporate TIN + Google account) AND editorial + Boosted Ads revenue prove insufficient post-V1.1, a NEW iteration (not 0039 revival) can re-spec display ads from clean state with a different ad-network choice
 
 ### 9.2 Involve Asia affiliate-network signup
 
@@ -784,16 +797,15 @@ Primary affiliate network for 0038 `/recommendations` curated picks. Deepest PH 
 - **Lead time:** Signup ~3-7 days · per-merchant approval ~1-7 days
 - **Cost:** Free signup · Involve Asia takes 5% net of commission · Setnayan keeps the rest
 
-### 9.3 Privacy Policy update + NPC re-filing for AdSense cookies
+### ~~9.3 Privacy Policy update + NPC re-filing for AdSense cookies~~ 🚫 REMOVED 2026-05-19
 
-- [ ] Append "Advertising cookies" section to `01_Contracts/Setnayan_Privacy_and_Security_Policy.md`:
-  - List Google AdSense as a third-party processor (data shared: page URL, IP-derived country, anonymous browsing signals)
-  - Describe the 3-category consent banner from 0039 § 2 (essential / analytics / advertising)
-  - Document the 12-month consent persistence + revocation path at `setnayan.com/cookie-preferences`
-- [ ] Bump policy `effective_version` (so 0039's policy-version-change re-prompt logic fires for existing visitors)
-- [ ] Re-file with NPC to update Setnayan's data-processing inventory
-- **Lead time:** ~1-3 days drafting · NPC filing same-day
-- **Cost:** NPC re-filing fee may apply (check the current NPC schedule)
+This section removed when 0039 retired. RA 10173 posture for V1.1 is satisfied by:
+
+- PostHog opt-out (already in 0025 Profile Settings → Privacy & Data tab) — first-party analytics consent
+- No third-party trackers means no additional processor disclosure needed
+- No cookie-consent banner is required (PostHog is first-party with its own opt-out; no AdSense to disclose)
+
+If a future iteration introduces any third-party tracker, the Privacy Policy update + NPC re-filing will be needed then — but it's not in V1.1 scope.
 
 ### 9.4 Featured-vendor lookbook (V1.1 marketing deliverable)
 

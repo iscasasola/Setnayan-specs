@@ -19,9 +19,19 @@
 
 5 paid paparazzi + 200 guest cameras (cap) + 1 couple seat = **207 cameras** per event. Each guest receives **150 captured-photo credits**, bundled free in the Premium Guest Camera Pack (event-wide ₱1,499 SKU). The 5 paid paparazzi seats share a **pooled credit pool** (see § 8 below) rather than per-paparazzo quotas.
 
-### 2. Drive transfer at T+30d
+### 2. Drive sync to couple's archive (mode set via iteration 0009 Photo Delivery)
 
-Setnayan retains the canonical archive in R2 until T+30d post-event. At T+30d, the couple OAuths their Google account and Setnayan pushes the full archive (photos, videos, Auto-Recap, XMP/EXIF metadata) to the couple's `Setnayan/[Event Name]/` Drive folder root. **Couple owns the archive from T+30d onward.** Drive transfer is one-way; subsequent edits in Setnayan (e.g. couple un-hides a photo during the 7-day review window) do NOT re-sync to Drive — review window closes at T+7d, Drive transfer happens at T+30d, so this is not a real-world conflict.
+Drive sync timing + mechanics live in **iteration 0009 Photo Delivery** — Papic is one of the photo sources that feeds the 0009 R2-to-Drive pipeline. The couple OAuths their Google account via the 0009 setup panel and Setnayan pushes the full archive (photos, videos, Auto-Recap, XMP/EXIF metadata) to the couple's `Setnayan/[Event Name]/` Drive folder root.
+
+**Sync mode is set per event (locked 2026-05-20):**
+- **`manual_release`** (default) — Setnayan retains photos in R2 through the event + 7-day review window. Couple clicks "Release to Drive" via the 0009 panel after reviewing; background job pushes the archive to Drive in batches.
+- **`auto_sync`** (opt-in) — photos stream to Drive in real-time as they land in R2 throughout the event. Couple sees the archive grow live; no release gate.
+
+**Original T+30d transfer model (2026-05-16 architecture lock) is RETIRED** by the 2026-05-20 per-event mode toggle. The 90-day cold-tier safety window (§ 3 below) and XMP/EXIF embedding (§ 4 below) still apply — both trigger on first successful Drive write per photo, regardless of mode.
+
+Drive transfer remains **one-way**: subsequent edits in Setnayan (e.g. couple un-hides a photo during review) do NOT re-sync to Drive once a photo has been delivered. For `manual_release` mode this is moot since the review window closes before release. For `auto_sync` mode this means a photo hidden in Setnayan after first sync remains in the couple's Drive — couples can delete it from Drive manually.
+
+**Couple owns the archive from first Drive write onward.**
 
 ### 3. Cold-tier 90-day safety window
 

@@ -1,6 +1,8 @@
 # Setnayan V1 Gap-Analysis Status
 
-**Locked 2026-05-12.** This is the single-pane view of every Tier 1 / Tier 2 / Tier 3 gap item raised during the 2026-05-12 gap audit and where each one landed. Open any file path below directly to see the work.
+**Locked 2026-05-12. Last refreshed 2026-05-20** to reflect 0032 Contract Intelligence retirement (2026-05-18) and the 51-migration burst landing on `origin/main` 2026-05-14 → 2026-05-20.
+
+This is the single-pane view of every Tier 1 / Tier 2 / Tier 3 gap item raised during the 2026-05-12 gap audit and where each one landed. Open any file path below directly to see the work.
 
 ---
 
@@ -26,7 +28,7 @@ Plus the **central anchors**:
 |---|---|---|---|
 | 1 | Account deletion + data export (RA 10173 § 16(e) + § 18) | ✅ | **0025 Profile Settings** — Privacy & Data tab. Spec: `0025_profile_settings/0025_profile_settings.md`. Mirror: `0025_profile_settings/0025_profile_settings.docx`. Settings surface lives INSIDE the existing 0021/0022/0023 dashboards (per your direction) — not a new top-level surface. |
 | 2 | BIR / tax compliance (ORs · VAT · EWT · Form 2307) | ✅ | **0026 BIR Tax Compliance** — Spec: `0026_bir_tax_compliance/0026_bir_tax_compliance.md`. 681 lines. Schema: 6 new tables + 8 column ALTERs. Effective-dated `setnayan_tax_config` so rate changes don't break historical ORs. **External tax accountant review gate before launch** flagged in spec. |
-| 3 | E-signature for vendor contracts | ✅ | **Hybrid path:** (a) V1 manual signing flow documented in Vendor Agreement § 12.1 (vendor scans signed PDF back, R2 bucket `setnayan-vendor-contracts`); (b) Optional digital upgrade specced as **0032 Contract Intelligence + Builder** at ₱199/contract OR free with Vendor Pro Weekly. |
+| 3 | E-signature for vendor contracts | ✅ | **Updated 2026-05-18:** (a) Manual signing flow per Vendor Agreement § 12.1 retained as fallback; (b) ~~0032 Contract Intelligence + Builder paid upgrade~~ **RETIRED 2026-05-18** — replaced by **free dual e-signature on every vendor contract** (no AI in V1). Migration `20260518200000_vendor_contracts_dual_esign_retire_0032.sql` flipped 0032 SKUs to `is_active=FALSE` and added vendor contract upload + dual-signature schema. Vendor uploads contract PDF, picks event/couple, both parties sign with canvas-captured signatures; signatures stored as PNG image URLs in R2 with IP + UA + timestamp (RA 8792 compliant). Notary integration explicitly excluded by owner (PH Notarial Law jurisdiction restrictions). Routes: `/dashboard/[eventId]/contracts/[contractId]` (couple) + `/vendor-dashboard/contracts/[contractId]` (vendor). `lib/contracts.ts`. |
 | 4 | Customer notification fallback for critical events (email only · no SMS in V1) | ✅ | **0028 Email Notification Fallback** — Spec: `0028_email_notifications/0028_email_notifications.md`. 10 V1 templates. Provider: Resend (SendGrid fallback). 3 new tables + 1 materialized view for delivery metrics. RFC 8058 one-click unsubscribe. |
 | 5 | Marketplace search & vendor discovery | ✅ | **No new iteration needed** (per your read — Guided already handles auto-recommendation, DIY uses filter popup). Extension documented in `0006_vendors_management/0006_vendors_management.md` § "DIY-mode vendor browse — filter popup" with 11 filter chips + 7 sort options + URL-shareable state. |
 
@@ -199,7 +201,7 @@ Today's lock adds five new V1 spec deliverables to the gap-analysis ledger. None
 | # | Item | Status | Where it landed |
 |---|---|---|---|
 | 6 | **Video meetings (Daily.co) RETIRED** | ✅ Spec | `0019_communications/0019_communications.md` top-banner amendment + scope/pricing strikethroughs + external-tool handoff pattern. `0022_vendor_dashboard/0022_vendor_dashboard.md` Pro Weekly + Threads + cross-iteration handoff updates. `CLAUDE.md` 2026-05-11 Daily.co rows amended with strikethrough + cross-reference. |
-| 7 | **Anthropic Console workspace "Setnayan" + spend caps + Haiku 4.5 (Contract Intelligence) + Sonnet 4.6 (vision) + GPT-4 V1.5+ fallback** | ✅ Spec | `0032_contract_intelligence/0032_contract_intelligence.md` status flipped to UNBLOCKED 2026-05-16 + model swap to Haiku 4.5 + cost recalc (₱5 → ~₱1 per call) + decision log row added. `App_Build_Status.md` Anthropic Claude API row + 0032 row updated. `API_Integration_Checklist.md` Anthropic Console row added. |
+| 7 | ~~**Anthropic Console workspace "Setnayan"** + spend caps + Haiku 4.5 (Contract Intelligence) + Sonnet 4.6 (vision) + GPT-4 V1.5+ fallback~~ | 🚫 **DEFERRED 2026-05-18** | 0032 Contract Intelligence retired 2026-05-18 (migration `20260518200000_vendor_contracts_dual_esign_retire_0032.sql`) and replaced by free dual e-sign on every vendor contract. Anthropic signup is **no longer a V1 prereq**. Env vars + spend caps preserved in `.env.example` for V1.5+ 0011/0012 AI highlights activation; defer signup until then. |
 | 8 | **AI Edited Highlight 3-min repriced ₱4,999 → ₱3,499** | ✅ Spec | Updated wherever the SKU pricing appears in Strategy + spec corpus + status anchors. |
 
 ### Engineering hand-off (deferred to engineering worktree)
@@ -209,13 +211,13 @@ Today's lock adds five new V1 spec deliverables to the gap-analysis ledger. None
 - Maya Business gateway integration (V1.5+)
 - Persona/Veriff/Onfido ID verification webhook handlers
 - AMLC sanctions API integration
-- Anthropic Console workspace signup + API key in env vars + spend-cap monitoring
-- Dispute counter cron (30-day rolling window for auto-demote trigger)
-- Vendor payout dispatcher (T+1 verified · T-14/T+7 coming_soon stages)
+- ~~Anthropic Console workspace signup + API key in env vars + spend-cap monitoring~~ — **DEFERRED 2026-05-18 (0032 retired)**; reactivate when V1.5+ 0011/0012 highlights ship
+- Dispute counter cron (30-day rolling window for auto-demote trigger) — ✅ shipped at `/api/admin/cron/dispute-counter` (`CRON_SECRET` gated)
+- Vendor payout dispatcher (T+1 verified · T-14/T+7 coming_soon stages) — partial: `lib/payouts.ts` + `vendor_payouts` table shipped; dispatcher worker still pending
 
 ### `.docx` regen
 
-Pandoc still unavailable. `CLAUDE.docx` + iteration `.docx` mirrors for 0019/0022/0006/0023/0034/0032 NOT regenerated — flag for future Cowork session when pandoc returns.
+**Pandoc returned 2026-05-20** (`pandoc 3.9.0.2` at `/Users/icecasasola/.local/bin/pandoc`). Backlog `.docx` mirrors needing regen: `CLAUDE.docx`, `0019_communications.docx`, `0022_vendor_dashboard.docx`, `0006_vendors_management.docx`, `0023_admin_console.docx`, `0034_payments_and_cart.docx`, `0032_contract_intelligence.docx` (mark retired), `V1_Gap_Analysis_Status.docx` (this file), plus iteration `.docx` mirrors for any iteration touched by the 2026-05-14 → 2026-05-20 burst. Run during next Cowork session via the COWORK.md lines 44-54 sequence.
 
 ---
 
@@ -294,3 +296,57 @@ Pandoc still unavailable. `0038`, `0039`, `Boosted_Ads_Activation_Playbook.md`, 
 ---
 
 **End of 2026-05-19 addendum.**
+
+---
+
+## 2026-05-19 — Traffic monetization scope refinement (afternoon)
+
+Same-day refinement of the morning's traffic monetization lock. After the spec landed, owner started the actual signups:
+
+- **Involve Asia signup** — submitted successfully. Network-level approval expected in 3-7 business days. Account configured as Individual / Content site / Setnayan property / Travel + Fashion + Home & Living categories / Philippines / PHP. Status: 🟡 pending approval.
+- **Google AdSense signup** — **blocked.** Owner's Google account has an existing AdSense-for-YouTube product that was auto-deactivated due to YouTube channel inactivity. Per Google's post-2021 product split, this account never enrolled in AdSense-for-Content and there's no enrollment path forward. Three alternate URLs (`/adsense/signup`, `/adsense/new`, `adsense.google.com`) all redirected back to the deactivation screen. Sidebar showed no Sites tab. Creating a fresh Google account to circumvent the block would risk a permanent ban via Google's duplicate-AdSense identity checks (phone · payment · IP · beneficial owner). Path A (drop display ads entirely from V1.1) chosen.
+
+### 2026-05-19 addendum refinement
+
+| # | Original direction | New status | Notes |
+|---|---|---|---|
+| 1 | Boosted Ads activation playbook | ✅ Unchanged | Doc + 30-vendor launch promo + featured-vendor lookbook deliverable all stay on track |
+| 2 | 0038 Editorial section + curated affiliate links | ✅ Unchanged | Spec locked; Involve Asia signup submitted today; awaiting 3-7 business day approval |
+| 3 | 0038 Sponsored content + newsletter sponsorship | ✅ Unchanged | Spec locked; activates once 0038 ships |
+| 4 | **0039 Third-party display ads** | **🚫 RETIRED 2026-05-19** | AdSense block confirmed; 0039 spec flipped to tombstone; cookie-consent banner scope dropped (no third-party trackers means RA 10173 first-party PostHog opt-out is sufficient); engineering scope shrinks significantly |
+
+### Engineering scope removed via 0039 retirement
+
+The following items were specced earlier today but are now NOT needed:
+
+- **Schema:** `users.consent_state` JSONB column, `users.consent_recorded_at`, `users.consent_policy_version`, `cookie_consent_events` table, `adsense_activation_log` table, `adsense_daily_revenue` table, `vendors.display_ads_on_profile` ALTER
+- **Routes:** `/cookie-preferences` (full settings page), `/api/consent/record` (POST endpoint)
+- **Libraries:** `apps/web/lib/ads/`, `apps/web/lib/consent/` (loader, excluded_topics, surface-inclusion map, vendor-opt-out resolver, banner component, consent-state hook, server-side resolver)
+- **Admin surfaces:** 0023 § 5.1 activation kill-switch, "Ads & Consent" tab + 3 sub-tabs
+- **Vendor surfaces:** 0022 vendor dashboard "Display ads on my profile" toggle
+- **Email templates:** 0028 `consent_updated` template
+- **Help articles:** 0029 "Cookies & ads on Setnayan" article
+- **Middleware:** CSP changes to `apps/web/middleware.ts` (script-src + frame-src + img-src + connect-src AdSense entries)
+- **Cron:** daily AdSense Management API pull at 02:00 PH
+- **Privacy Policy:** "Advertising cookies" section + NPC re-filing (no third-party processor to disclose)
+
+### Owner-side actions removed
+
+- Google AdSense publisher account signup (#21a in API checklist) — REMOVED
+- Privacy Policy update + NPC re-filing for AdSense cookies (#21c in API checklist) — REMOVED
+
+### Owner-side actions kept
+
+- Involve Asia signup (#21b) — IN PROGRESS (submitted today, awaiting approval)
+- Featured-vendor lookbook for Boosted Ads playbook (#21d) — due 2026-06-15
+- Seed `promo_codes` row for `BOOSTED-LAUNCH-2026` (engineering action #21e in API checklist Tier 9 § 9.5) — pending
+
+### Files updated in this refinement
+
+- `0039_display_ads/0039_display_ads.md` — top banner flipped to 🚫 RETIRED with reason
+- `CLAUDE.md` — iteration table 0039 row strikethrough + new decision log row (Ninth 2026-05-19 row after the V1.2 spec lock cluster)
+- `App_Build_Status.md` — V1.1 spec drafted 7→6 · Retired bucket 4→5 (adds 0039) · 0039 detail row updated
+- `V1_Gap_Analysis_Status.md` (this file) — new section appended here
+- `API_Integration_Checklist.md` Tier 9 — AdSense rows + Privacy Policy NPC re-file rows removed; Involve Asia + Featured-vendor lookbook + promo_codes seed kept
+
+**End of 2026-05-19 afternoon refinement.**
