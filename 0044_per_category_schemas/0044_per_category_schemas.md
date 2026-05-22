@@ -454,14 +454,25 @@ CREATE INDEX vendor_attrs_payload_gin ON vendor_service_attributes USING GIN (at
       "type": "multi_select",
       "options": ["boho", "modern_minimalist", "traditional_filipino", "garden_organic", "beach_coastal", "rustic", "industrial", "vintage_classic", "fairytale_romantic", "moody_dark", "cultural_specific"]
     },
+    "treatment_specializations": {
+      "type": "multi_select",
+      "options": ["ceiling", "wall", "surroundings", "tunnel"],
+      "label": "Which decor treatments do you provide? (Locked 2026-05-22 per owner directive — same 4 keys also serve as moodboard Composite Scene layer categories in 0010 Professional Mood Board.)"
+    },
     "mood_board_uploads_count": { "type": "int", "min": 5, "label": "Upload at least 5 mood boards" },
     "venue_styling_capable": { "type": "boolean" },
     "props_inventory_listed": { "type": "boolean" },
     "rental_options_available": { "type": "boolean" }
   },
-  "filter_facets": ["theme_specialties", "starting_price_centavos", "service_regions"]
+  "filter_facets": ["theme_specialties", "treatment_specializations", "starting_price_centavos", "service_regions"]
 }
 ```
+
+**Treatment specializations — dual landing** (locked 2026-05-22): the four `treatment_specializations` options (`ceiling` · `wall` · `surroundings` · `tunnel`) serve two surfaces from a single attribute:
+1. **Vendor marketplace facet** — couples filter the Stylist marketplace by which decor treatments a stylist provides (e.g., "show me stylists who do ceiling treatments").
+2. **Moodboard Composite Scene layer categories** — the same four keys index the layered transparent-PNG asset library in [0010 Professional Mood Board](../0010_mood_board/0010_mood_board.md#professional-mood-board-v11--composite-scene-generator), so a Composite Scene render can decompose into per-treatment layers each tagged with the appropriate palette binding.
+
+Same pattern as `mobile_bar` sub-tags (cocktail / coffee / juice / etc.) and `photobooth` sub-tags (classic / mirror / 360 / etc.) — one attribute, multiple downstream consumers.
 
 ### `photo_booth` (and 360 / GIF / Patiktok variants — see [0047](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md) Stations & Booths)
 

@@ -1,8 +1,34 @@
 # Setnayan V1 Gap-Analysis Status
 
-**Locked 2026-05-12. Last refreshed 2026-05-20** to reflect 0032 Contract Intelligence retirement (2026-05-18) and the 51-migration burst landing on `origin/main` 2026-05-14 → 2026-05-20.
+**Locked 2026-05-12. Last refreshed 2026-05-22 post 17-PR sprint** — PRs #272-#289 closed payments idempotency (#277), observability end-to-end (#275/#280/#289), health endpoints (#275), retired-strings lint guard (#276), email-link CI audit (#288), schema.org Pro pricing (#278), sitemap (#279), Patiktok + Pakanta marketing surfaces (#281), Setnayan Pay worked example + actor terminology sweep (#282), day-of PWA Phase 1 (#284), admin nav consolidation (#285), couple dashboard TILES expansion (#287).
+
+**Previous refresh:** 2026-05-20 (0032 Contract Intelligence retirement + 51-migration burst).
 
 This is the single-pane view of every Tier 1 / Tier 2 / Tier 3 gap item raised during the 2026-05-12 gap audit and where each one landed. Open any file path below directly to see the work.
+
+---
+
+## 🚀 2026-05-22 17-PR sprint — gap-resolution summary
+
+| Gap (informal — not all are in the formal Tier 1/2/3 list) | Resolving PR(s) | Status flip |
+|---|---|---|
+| Payments idempotency / double-submit race conditions | #277 | 🔴 → ✅ |
+| Health-check endpoints for uptime monitoring (Better Stack) | #275 | 🔴 → ✅ |
+| Sentry production smoke-test path | #280 | 🟡 → 🟡 (endpoint wired, owner verification pending) |
+| Observability typecheck — every server action instrumented | #289 | 🟡 → ✅ |
+| CI guard against retired marketing strings (Pareto / Custom Monogram Pack) | #276 | n/a → ✅ |
+| Email link validity CI audit | #288 | 🔴 → ✅ |
+| schema.org `Offer` + `PriceSpecification` for Pro pricing | #278 | 🔴 → ✅ |
+| Sitemap completeness (all live routes indexed) | #279 | 🔴 → ✅ |
+| Patiktok + Pakanta marketing surface coverage | #281 | 🔴 → ✅ |
+| Setnayan Pay worked example freshness | #282 | 🟡 → ✅ |
+| Actor terminology sweep in marketing copy ("couple" → "customer/host") | #282 | 🔴 → ✅ |
+| Day-of guest PWA Phase 1 (offline shell + service-worker fallback) | #284 | 🟡 → ✅ |
+| Orphan rule enforcement — admin nav consolidation + dashboard TILES + vendor compare redirect | #274 + #285 + #287 | 🔴 → ✅ |
+| Public Editorial + Concierge Brain consent in Privacy Policy v1 | #273 | 🟡 → ✅ |
+| service_catalog price/feature corrections | #272 | 🟡 → ✅ |
+
+**Net effect on Tier counters:** Tier 1 stays at 5/5. Tier 2 stays at 7/7. Tier 3 stays at 8/8. The new ✅ resolutions above sit outside the formal Tier 1/2/3 gap list — they're informal-but-load-bearing items surfaced during prior audit cycles (esp. the 2026-05-20 engineering-ownership audit) and resolved in today's autonomous PR burst.
 
 ---
 
@@ -59,7 +85,7 @@ Plus the **central anchors**:
 | 5 | Day-of guest experience | ✅ | **0031 Day-of Guest Experience** — Spec: `0031_day_of_guest/0031_day_of_guest.md`. 570 lines. Live-event mode auto-activates T-1hr to T+8hr on the personal landing page. 6 cards: What's happening · Your table · Live photo wall · Video guestbook · Live schedule · Coordinator broadcast. Offline-first PWA shell for weak-signal venues. 5-mode lifecycle. |
 | 6 | Crew meal management UX for catering vendor | ✅ | `0006_vendors_management/0006_vendors_management.md` adds the `vendor_services.crew_size` + `crew_meal_required` columns. `0022_vendor_dashboard/0022_vendor_dashboard.md` § 2.2a surfaces the service editor stepper for "How many of your team will be on-site?". Aggregates into 0007 Budget crew meal totals. |
 | 7 | Public API for third-party integrations (future-proofing only) | ✅ | **0033 Public API Foundation** — Spec: `0033_public_api_foundation/0033_public_api_foundation.md`. 624 lines. Cloudflare Workers gateway + OAuth2 PKCE + 16 scopes + rate-limit tiers + webhook delivery infra + `developers.setnayan.com` portal. NO public endpoints turn on in V1; plumbing only. Phased V1.5 rollout: A (events read) → B (webhooks) → C (vendor browse) → D (bookings). |
-| 8 | Analytics event tracking for product metrics (funnel) + **0035 Observability shipped 2026-05-16** | ✅ | **0023 funnel analytics** — `0023_admin_console/0023_admin_console.md` § 3.8 — Funnel analytics layer. 7 V1 funnels (customer signup → first booking · vendor signup → first booking · Setnayan Concierge adoption · DIY browse · Save-the-Date · Paparazzi · Pro upgrade). Schema: `funnel_events` table. New "Funnels" tab in 0023 dashboard with cohort breakdowns + period compare. **0035 Observability** — `0035_observability/` iteration shipped. **Sentry** (PR #17) wired for error tracking on `apps/web` + `apps/desktop` — `NEXT_PUBLIC_SENTRY_DSN` + server-side `SENTRY_DSN` + `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT` env vars whitelisted in `turbo.json` `build.env`. **PostHog** (PR #19) wired for product analytics with 3 server-side funnels live (signups → first event → first paid order; vendor signups → profile complete → first booking; week-over-week); 4 more funnels (Save-the-Date · Papic · Pro upgrade · Setnayan Concierge adoption) go through PostHog Insights dashboards. **Pending owner-side action:** Sentry prod smoke test (trigger one controlled error to verify capture + alerting routing) — bundle with long-pole admin sprint per decision-log row 10 (2026-05-16). |
+| 8 | Analytics event tracking for product metrics (funnel) + **0035 Observability end-to-end 2026-05-22** | ✅ | **0023 funnel analytics** — `0023_admin_console/0023_admin_console.md` § 3.8 — Funnel analytics layer. 7 V1 funnels (customer signup → first booking · vendor signup → first booking · Setnayan Concierge adoption · DIY browse · Save-the-Date · Paparazzi · Pro upgrade). Schema: `funnel_events` table. New "Funnels" tab in 0023 dashboard with cohort breakdowns + period compare. **0035 Observability** — `0035_observability/` iteration shipped end-to-end 2026-05-22. **Sentry** (PR #17) wired for error tracking; smoke-test endpoint `/api/admin/sentry-smoke-test` shipped 2026-05-22 via PR #280 (admin-gated controlled-error trigger). **PostHog** (PR #19) wired with 3 server-side funnels live + 4 PostHog Insights funnels. **`/api/health` + `/api/health/deep` endpoints** shipped 2026-05-22 via PR #275 (Better Stack uptime can now ping). **Observability typecheck** via PR #289 confirms every server action is Sentry-instrumented cleanly. **Pending owner-side action:** trigger the smoke-test endpoint to verify Sentry capture + email/Slack alerting routing (endpoint is live; need one click + check Sentry inbox). |
 
 ---
 

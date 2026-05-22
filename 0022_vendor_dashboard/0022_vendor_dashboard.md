@@ -1037,6 +1037,63 @@ Iterations 0024–0035 were drafted after the vendor dashboard's 6 surfaces were
 
 ---
 
+## 11. Specialized Pro Tools subscription management (V1.x+ · locked 2026-05-22)
+
+Cross-reference to the 3-layer vendor model locked in CLAUDE.md decision log (fifth 2026-05-22 row "Specialized Pro Tools architecture locked"). Vendors hold per-service Specialized Pro Tools subscriptions / render-pack credits on top of their universal Free / Pro / Max vendor tier (§ 3). The two tier systems are independent — a Free Vendor can subscribe to Professional Mood Board; a Pro Vendor can stay on Free Mood Board.
+
+### 11.1 Pro Tools surface in vendor dashboard
+
+New tab in the vendor dashboard top nav: **"Pro Tools"** (between Calendar and Settings). Renders the catalog of 14 Specialized Pro Tools available to the vendor based on their canonical_service registration:
+
+| State | UI treatment |
+|---|---|
+| Available to this vendor (matches their service category) | Active card with "Subscribe" CTA |
+| Held by this vendor (subscription active OR pack credits > 0) | Active card with "Manage" CTA + balance indicator |
+| Not applicable (vendor's service category doesn't match) | Hidden |
+
+### 11.2 Professional Mood Board (the V1.1 first launch)
+
+Surfaces per the [0010 Professional Mood Board pricing model](../0010_mood_board/0010_mood_board.md#professional-mood-board-v11--composite-scene-generator): pay-per-render packs (₱199 single · ₱8,999 / 50-pack · ₱24,999 / 150-pack) · NO subscription · no activation gate. Vendor dashboard UI:
+
+- **Render credit balance** displayed prominently (e.g., "37 renders remaining").
+- **Buy renders** CTA → modal with the 3-pack ladder + purchase via [0034 cart](../0034_payments_and_cart/0034_payments_and_cart.md) flow.
+- **Render history** — list of past compositions, which couple/event they were generated for, palette snapshot, regenerate CTA.
+- **Compose new scene** CTA — opens the Composite Scene generator UI per [0010 § Composite Scene architecture (Path C)](../0010_mood_board/0010_mood_board.md#composite-scene-architecture-path-c).
+
+When a stylist holds render credits, the [Stylist marketplace](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md) renders a "Professional Mood Board enabled" badge on the stylist's card — signals to couples that this stylist can generate AI-composited scene visualizations of their wedding (per host access pattern from the 2026-05-22 lock — hosts reach renders by hiring a stylist who holds Mood Board credits).
+
+### 11.3 Other 13 Specialized Pro Tools (placeholder pricing)
+
+| SKU | Cost shape | Vendor service category | Placeholder price |
+|---|---|---|---|
+| Professional Coordination | Pure code | `wedding_coordination` | ₱888/wk |
+| Professional Catering | Pure code | `catering` | ₱888/wk |
+| Professional HMUA | Pure code | `hmua` | ₱888/wk |
+| Professional Music DJ/Emcee/Host | Pure code | `dj_emcee_host` | ₱888/wk |
+| Professional Live Band | Pure code | `band_live_music` | ₱888/wk |
+| Professional Cake/Desserts | Pure code | `cake_desserts` | ₱888/wk |
+| Professional Sound/Lighting | Pure code | `lights_sound` | ₱888/wk |
+| Professional Rings/Officiant/Transport/Booth | Pure code | various | ₱888/wk |
+| Professional Photo Tools | Hybrid | `photographer` | ₱888/wk |
+| Professional Video Tools | AI | `videographer` | ₱888/wk |
+| Professional Florist | AI | `florist` | ₱888/wk |
+| Professional Stationery | AI | `invitation_print` / `stationery_signage` | ₱888/wk |
+| Professional Attire | AI | `bridal_gown` / `groom_suit` / `entourage_attire` | ₱888/wk |
+
+The ₱888/wk pricing is a deliberate non-charm placeholder (real production prices end in -1 per [COWORK.md line 75](../COWORK.md)) so all 13 SKUs are visually flagged as "refine before launch" in the pricing sheet. Final pricing TBD per SKU — pure-code SKUs likely settle in ₱499-₱999/wk range, AI SKUs in ₱1,999-₱2,999/wk range with bundled allowance + overage packs.
+
+### 11.4 Engineering pending
+
+- Vendor dashboard "Pro Tools" tab UI
+- Per-SKU subscription state + render-pack credit tracking on the `vendors` table
+- Render-pack purchase flow integration with [0034 cart](../0034_payments_and_cart/0034_payments_and_cart.md)
+- Composite Scene generator UI for stylists with active Mood Board credits
+- Marketplace badge surface for "Professional Mood Board enabled" stylists
+
+Gated on V1 pilot completion + V1.1 marketplace launch sequence per [project_setnayan_pilot_timeline](../).
+
+---
+
 ## 9. Companions and next steps
 
 - `0022_vendor_dashboard.html` — interactive 6-surface walkthrough.

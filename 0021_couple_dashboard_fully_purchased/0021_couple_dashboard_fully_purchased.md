@@ -65,15 +65,22 @@ Mobile uses the 4-tab bottom-nav from 0000 (Guests / Vendors / Schedule / Servic
 
 Home is the daily-driver. Couples spend more time here than anywhere else. The layout is intentionally **calmer than a dashboard** — closer to a friend giving you the day's checklist than an analytics screen.
 
-**Top-to-bottom order:**
+**Top-to-bottom order** (updated 2026-05-20 · three-bucket guide model — see CLAUDE.md decision log "Home is the guide" row):
 
 1. **Warm welcome row.** "Good morning, Aira" + date + "14 days until you marry Boy in Tagaytay" in italic Cormorant. Right-side: **Mode toggle pill** — `✦ Concierge · DIY` (label updated 2026-05-16; replaces "Guided" per the Setnayan Concierge rebrand).
 2. **Stage strip.** 6-stage lifecycle bar with the current stage highlighted. Labels under each pip. No "stage banner" wall block — just the strip.
-3. **Hero · NEXT UP card.** ONE highlight: the most imminent thing the couple needs to do/attend. Tomorrow's walkthrough by default. Single CTA button + a soft "view full schedule" link. Gradient-accent background distinguishes it from everything else.
-4. **Your wedding journey · step N of 9.** The Setnayan Concierge checklist (see 2.0b). Steps 1–6 collapsed and dim if completed. Step 7 (current) expanded with mini-checklist + CTA. Steps 8–9 dim placeholders ahead.
-5. **Continue planning · 8-tile navigation grid.** All 9 surfaces accessible from one grid: Guests · Vendors · Schedule · Services · Seat Plan · Landing Page · QR Hub · Gallery. Each tile shows a one-line metric ("156 ✓ · 23 pending").
-6. **Recent activity.** Compact dashed-divider list. 4-5 most recent events.
-7. **Setnayan Pay info card.** Small, one-line — opt-in convenience reminder, not a sales pitch.
+3. **Hero · NEXT UP card.** ONE highlight pulled from the top of the **NOW / THIS WEEK** bucket (see #4) — the most imminent thing the couple needs to do/attend. Default fallback when that bucket is empty: tomorrow's calendar item. Single CTA button + a soft "view full schedule" link. Gradient-accent background distinguishes it from everything else.
+4. **Guide buckets · NEW · locked 2026-05-20.** The active home guide rendered as three tactical buckets — the truth-telling layer that surfaces to **all couples (DIY and Concierge)** because hard floors are facts, not personalized service:
+   - **NOW / THIS WEEK** — every step whose `latest_by_days_before_wedding` floor is approaching OR whose earliest-comfortable-start window has already passed. In compressed-timeline scenarios (couple is 6 months out instead of 12) this bucket front-loads aggressively — most steps pile here, NOT paced evenly across remaining months. Examples for a 6-mo-out couple: *start church paperwork · apply for marriage license · send save-the-dates · book photographer / coordinator · finalize venue if not yet locked.* Card surface: title, one-line context, latest-by date, primary CTA, optional "why this matters" tooltip.
+   - **COMING WEEKS** — steps whose earliest-comfortable-start is still ahead but before the near-wedding window. Examples: *finalize guest list · lock mood board + outfits · send formal invites.*
+   - **NEAR WEDDING** — steps whose floor sits intentionally close to the wedding date regardless of how compressed the couple is. These stay put. Examples: *RSVP deadline (T-30d) · final fittings (T-14d) · caterer final headcount (T-14d) · day-of timeline confirm (T-7d).*
+
+   **Source data** lives in iteration 0016 § 1 "Latest-by floors per category" — 18 vendor categories + 12 hard-floor sub-tasks (pre-Cana, marriage license, CENOMAR, save-the-date, etc.), each with a `latest_by_days_before_wedding` value. Bucket assignment is computed per page load: `computed_deadline = wedding_date - latest_by`, then `today` vs the comfortable-start window determines which bucket the step renders in. No cron — refreshed on Home view (per PR #47 cron lock).
+5. **Done · NEW · locked 2026-05-20.** Completed steps sink to this section at the bottom, rendered dim with checkmark + month completed. They never disappear — couples value seeing progress. If a couple manually un-completes a step (per 2.0b's undo affordance), it bubbles back to its appropriate bucket. Empty in early-planning state; grows as the wedding approaches.
+6. **Your wedding journey · step N of 9.** The high-level Setnayan Concierge lifecycle overview (see 2.0b). Steps 1–6 collapsed and dim if completed. Step 7 (current) expanded with mini-checklist + CTA. Steps 8–9 dim placeholders ahead. This block is the *lifecycle overview* (where am I in the 9-stage arc); the **guide buckets in #4 above are the tactical "what do I do this week" layer.** Both visible by design — buckets answer "what now," journey answers "where am I in the bigger story."
+7. **Continue planning · 8-tile navigation grid.** All 9 surfaces accessible from one grid: Guests · Vendors · Schedule · Services · Seat Plan · Landing Page · QR Hub · Gallery. Each tile shows a one-line metric ("156 ✓ · 23 pending").
+8. **Recent activity.** Compact dashed-divider list. 4-5 most recent events.
+9. **Setnayan Pay info card.** Small, one-line — opt-in convenience reminder, not a sales pitch.
 
 **Removed from V1 Home** (moved to their proper tabs):
 - Full "Active Setnayan apparatus" detail cards → Services tab
@@ -84,7 +91,7 @@ Home is the daily-driver. Couples spend more time here than anywhere else. The l
 - Planning artifacts 3-card section → represented in the new navigation grid
 - "What's next" 3-card row → consolidated into the Concierge journey current-step block + the NEXT UP hero
 
-The result is a Home that scans in 3 seconds: hero · journey · grid. The detail still exists; it just lives where it belongs.
+The result is a Home that scans in seconds — hero · buckets · grid — with the journey overview and Done section as supporting context. The detail still exists; it just lives where it belongs.
 
 ### 2.0b Setnayan Concierge · the 9-step journey (simplified 2026-05-17 to single-SKU + 3-day trial)
 

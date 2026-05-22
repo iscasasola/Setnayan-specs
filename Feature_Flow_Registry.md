@@ -1,9 +1,11 @@
 # Setnayan — Feature & Flow Registry
 
-**Last generated:** 2026-05-20 (initial cut — engineering ownership audit)
-**Surface audited:** every `apps/web/app/**/page.tsx` on `origin/main` of `iscasasola/setnayan-platform` as of `f2f8d84` (or later)
-**Owner:** senior-dev engineering audit, handoff from owner 2026-05-20
+**Last generated:** 2026-05-22 (refreshed post 17-PR autonomous sprint)
+**Surface audited:** every `apps/web/app/**/page.tsx` + `apps/web/app/api/**/route.ts` on `origin/main` of `iscasasola/setnayan-platform`
+**Owner:** senior-dev engineering audit (initial cut 2026-05-20; refresh 2026-05-22)
 **Companion docs:** [App_Build_Status.md](App_Build_Status.md) (what shipped) · [V1_Gap_Analysis_Status.md](V1_Gap_Analysis_Status.md) (spec coverage) · [Installed_Stack_Inventory.md](Installed_Stack_Inventory.md) (deps) · this doc (is each shipped surface reachable + does something + leads somewhere)
+
+**Audit-trail note (2026-05-22):** Refreshed after 17-PR autonomous sprint landing tasks #3–#22, #25. Routes touched: `/vendors/compare` (now 307 redirect → retired), `/dashboard/[eventId]/schedule` (TILES + day-of), `/dashboard/[eventId]/disputes` (TILES + admin force-majeure inbound), `/admin/settings/payment-methods` (admin-nav Money group), `/[slug]` (ISR + day-of-mode wiring), `/privacy`, `/features`, `/pricing`. New routes added: `/api/health`, `/api/health/deep`, `/api/admin/sentry-smoke-test`. See [CLAUDE.md decision-log 2026-05-22](CLAUDE.md) for full PR-to-row trail.
 
 ---
 
@@ -29,7 +31,7 @@ The **Flag** column closes the loop. One per row:
 
 | Bucket | Total | ✅ wired | 🟠 partial | ⚠️ scaffold | 🔴 no-entry | 🚫 retired |
 |---|---|---|---|---|---|---|
-| Marketing + Public | 12 | 12 | 0 | 0 | 0 | 0 |
+| Marketing + Public | 13 | 12 | 0 | 0 | 0 | 1 |
 | Auth + Guest + Claim | 10 | 10 | 0 | 0 | 0 | 0 |
 | Couple Dashboard Core | 10 | 10 | 0 | 0 | 0 | 0 |
 | Couple Add-ons | 14 | 6 | 1 | 7 | 0 | 0 |
@@ -37,9 +39,12 @@ The **Flag** column closes the loop. One per row:
 | Vendor Dashboard | 15 | 15 | 0 | 0 | 0 | 0 |
 | Admin Console | 19 | 19 | 0 | 0 | 0 | 0 |
 | Public API docs | 1 | 1 | 0 | 0 | 0 | 0 |
-| **Total** | **99** | **91** | **1** | **7** | **0** | **0** |
+| Health + Ops API | 3 | 3 | 0 | 0 | 0 | 0 |
+| **Total** | **103** | **94** | **1** | **7** | **0** | **1** |
 
-**Headline reading:** **91 of 99 shipped routes are fully wired** (entry → action → outcome). The 8 remaining problem rows are **all in-flight add-on scaffolds** (0005/0009/0011/0012/0017/0018) blocked on external owner action (Google Drive verified-app, YouTube verified-app, TikTok app review, Cloudflare Stream Live, supplier onboarding) — these are NOT engineering blockers. Plus 1 🟠 partial: panood/reviews has read surface live but write surface gated on paid-Panood traction by spec.
+**Headline reading:** **94 of 103 routes are fully wired** (entry → action → outcome). The 7 remaining ⚠️ rows are **all in-flight add-on scaffolds** (0005/0009/0011/0012/0017/0018) blocked on external owner action (Google Drive verified-app, YouTube verified-app, TikTok app review, Cloudflare Stream Live, supplier onboarding) — these are NOT engineering blockers. Plus 1 🟠 partial (panood/reviews — read live, write gated on paid-Panood traction by spec) and 1 🚫 retired (`/vendors/compare` — 307 redirect via PR #274; reactivation deferred to V1.2 per `feedback_setnayan_vendor_compare_v1_2`).
+
+**Delta vs 2026-05-20:** 99 → 103 routes (+4: `/api/health`, `/api/health/deep`, `/api/admin/sentry-smoke-test`, `/vendors/compare` row re-added as retired). ✅ wired 91 → 94 (+3 new API endpoints all ship live + functional). 🔴 no-entry stays at 0 (resolved orphans from 2026-05-20 audit remain resolved; today's PRs added TILES + admin-nav entry-points for surfaces that previously had implicit-only entry).
 
 **Audit-trail note:** the initial agent pass false-positive flagged 5 routes that were already correctly wired. Each was verified against `origin/main` source code:
 - `/dashboard` chrome drift → already fixed in PRs [#67](https://github.com/iscasasola/setnayan-platform/pull/67) + [#99](https://github.com/iscasasola/setnayan-platform/pull/99) + [#127](https://github.com/iscasasola/setnayan-platform/pull/127). `event-switcher.tsx` + `outer-dashboard-header.tsx` ship the monogram + caret popover and single-strip top-nav.
@@ -54,6 +59,18 @@ See [CLAUDE.md decision-log 2026-05-20 rows 442-444](CLAUDE.md) for the full cor
 ---
 
 ## Top dead-end findings (drives the Phase 2 punch list)
+
+### ✅ RESOLVED 2026-05-22 — `/vendors/compare` ([#274](https://github.com/iscasasola/setnayan-platform/pull/274))
+
+V1.1 routing-rule enforcement: `/vendors/compare` now serves a `307` redirect to `/vendors?notice=compare_v1_2`. The notice toast tells the user the compare view is V1.2 scope and offers to add them to a notify-list. Reactivation gated on V1.2 spec lock per [[feedback_setnayan_vendor_compare_v1_2]]. Row preserved in the registry as 🚫 retired with reactivation note.
+
+### ✅ RESOLVED 2026-05-22 — `/admin/settings/payment-methods` admin-nav entry ([#285](https://github.com/iscasasola/setnayan-platform/pull/285))
+
+Previously reachable only via direct URL or `/admin/settings` deep-link. PR #285 adds the route to the admin top-nav under the "Money" group (alongside `/admin/payments`, `/admin/payouts`, `/admin/receipts`, `/admin/bir/2307`). The read-only V1 amber banner stays — admins now have explicit nav-level access to the rate config.
+
+### ✅ RESOLVED 2026-05-22 — `/dashboard/[eventId]/schedule` + `/disputes` TILES entry ([#287](https://github.com/iscasasola/setnayan-platform/pull/287))
+
+Both routes shipped without TILES grid entries. PR #287 adds `schedule` tile (Clock icon, between Vendors and Budget) and `disputes` tile (AlertTriangle icon, conditional render — only shows if event has open force-majeure flags OR active disputes). Schedule tile also wired into the day-of card on event home for T-1d → T+1d window.
 
 ### ✅ RESOLVED — `/dashboard` chrome drift (false-positive corrected)
 
@@ -101,17 +118,18 @@ Initial Phase 1 agent rows flagged these as problems; direct source verification
 | Route | Iter | Role | Title/purpose | Entry points | Primary actions | State persisted | Outcome | Flag |
 |---|---|---|---|---|---|---|---|---|
 | `/` | 0015 | public | Homepage, 12 marketing sections | Nav: SiteHeader | "Sign up free" → /signup · "Browse vendors" → /vendors · "For vendors" → /for-vendors | none | Renders only | ✅ |
-| `/features` | 0015 | public | Feature catalog deep-dive for couples | Nav: SiteHeader · footer | "Start planning" → /signup · "For vendors" → /for-vendors | none | Renders only | ✅ |
+| `/features` | 0015 | public | Feature catalog deep-dive for couples (Patiktok + Pakanta cards added [#281](https://github.com/iscasasola/setnayan-platform/pull/281)) | Nav: SiteHeader · footer | "Start planning" → /signup · "For vendors" → /for-vendors | none | Renders only | ✅ |
 | `/for-vendors` | 0015 | public | Vendor acquisition landing | Nav: SiteHeader · `/` (TwoSides) | "List your business free" → /signup?as=vendor · pricing CTAs | none | Renders only | ✅ |
 | `/help` | 0029 | public | Help center with role-filtered articles | Nav: SiteHeader · footer | "Send message" → submitHelpMessage · role tiles → ?role= | `help_messages` | Toast + stay or redirect with status param | ✅ |
 | `/how-it-works` | 0015 | public | Platform map: six roles + flow chart | Nav: SiteHeader · footer | "Start planning free" → /signup · "List your business free" → /signup?as=vendor | none | Renders only | ✅ |
-| `/pricing` | 0015 | public | Couple-side pricing: Concierge + add-ons | Nav: SiteHeader · /for-vendors links | "Start 3-day free trial" → /signup?intent=concierge · "See vendor pricing" → /for-vendors | none | Renders only | ✅ |
-| `/privacy` | 0015 | public | Privacy policy (RA 10173 draft) | Footer · /help links | (none) | none | Renders only | ✅ |
+| `/pricing` | 0015 | public | Couple-side pricing: Concierge + add-ons (5% Setnayan Pay worked example + actor-terminology copy refresh [#282](https://github.com/iscasasola/setnayan-platform/pull/282)) | Nav: SiteHeader · /for-vendors links | "Start 3-day free trial" → /signup?intent=concierge · "See vendor pricing" → /for-vendors | none | Renders only | ✅ |
+| `/privacy` | 0015 | public | Privacy policy (RA 10173) — expanded coverage of subprocessors + retention windows + RA 8792 audit trail [#273](https://github.com/iscasasola/setnayan-platform/pull/273) | Footer · /help links | (none) | none | Renders only | ✅ |
 | `/terms` | 0015 | public | Terms of service (starter draft) | Footer · /help links | (none) | none | Renders only | ✅ |
 | `/weddings` | 0046 | public | Real weddings showcase index (Dec 1, 2026 cutover) | Nav: SiteHeader (BrowseStrip) | "Browse vendors" → /vendors · "Create account" → /signup | `event_editorials` (Phase B) | Renders only (static today) | ✅ |
 | `/waitlist` | 0015 | public | Couple waitlist (pre-launch Dec 1, 2026) | Nav: AnnouncementBar · `/` Hero | "Join the waitlist" → joinCoupleWaitlist · "Browse vendors" → /vendors | `couple_waitlist` | Redirect to /waitlist?status=joined or error param | ✅ |
 | `/vendors` | 0006 + 0043 | public | Public marketplace browse + filter (incl. wedding-type compatibility) | Nav: SiteHeader (Browse) · `/` BrowseStrip · footer | "Apply filters" → GET /vendors · search → GET /vendors?q= · "Follow" → FollowGate · "Verified only" toggle · "Match my wedding" toggle (couples with event only, opt-in) [#170](https://github.com/iscasasola/setnayan-platform/pull/170) | `vendor_profiles` (incl. `compatible_ceremony_types` + `compatible_venue_settings` from 0043) · `vendor_follows` · `events.ceremony_type` + `venue_setting` (read for matching) | Renders filtered list or empty state | ✅ |
-| `/v/[slug]` | 0006 | public | Canonical vendor profile + reviews | /vendors card → "View profile" · search results | "Follow vendor" → FollowGate · contact links · "Load more reviews" → ?reviewsPage= | `vendor_profiles` · `vendor_reviews` · `vendor_follows` | Renders profile or 404 if hidden | ✅ |
+| `/v/[slug]` | 0006 | public | Canonical vendor profile + reviews (schema.org Pro 4999 markup [#278](https://github.com/iscasasola/setnayan-platform/pull/278)) | /vendors card → "View profile" · search results · sitemap [#279](https://github.com/iscasasola/setnayan-platform/pull/279) | "Follow vendor" → FollowGate · contact links · "Load more reviews" → ?reviewsPage= | `vendor_profiles` · `vendor_reviews` · `vendor_follows` | Renders profile or 404 if hidden | ✅ |
+| `/vendors/compare` | 0006 | public | (RETIRED V1.1 → V1.2) Multi-vendor compare view | `/vendors` list links (legacy, now redirected) | (none — 307 redirect to `/vendors?notice=compare_v1_2`) [#274](https://github.com/iscasasola/setnayan-platform/pull/274) | none | Redirect surfaces a notice toast with V1.2 notify CTA | 🚫 retired (V1.2 reactivation per `feedback_setnayan_vendor_compare_v1_2`) |
 
 ### Auth + Guest + Vendor Claim (10)
 
@@ -119,7 +137,7 @@ Initial Phase 1 agent rows flagged these as problems; direct source verification
 |---|---|---|---|---|---|---|---|---|
 | `/login` | 0015 | public | Sign in (email + magic link) | SiteHeader · for-vendors · how-it-works · features footer · /join · /vendor/claim/finalize | "Sign in" → signInWithPassword · "Email magic link" → signInWithMagicLink | `auth.users` | Redirect to `next` param or `/` | ✅ |
 | `/signup` | 0015 | public | Create couple or vendor account | features hero · how-it-works · pricing · /[slug] · /join · /vendor/claim | "Create account" → signUp · account_type radio | `auth.users` · `users.public_summary_consent_at` | Confirmation email or auto-confirmed; redirect to `next` | ✅ |
-| `/[slug]` | 0002 | guest | Public wedding QR landing + RSVP | QR code (buildInvitationUrl) · emailed invites | "Submit RSVP" → submitRsvp · "Decline" → clear session | `guests` (rsvp_status, meal_preference, dietary_restrictions, notes, rsvp_responded_at) | Redirect to /[slug]/welcome for unconfirmed +1s; else stay + revalidate | ✅ |
+| `/[slug]` | 0002 | guest | Public wedding QR landing + RSVP (ISR + GuestPreload + DayOfBanner + day-of-mode wiring [#284](https://github.com/iscasasola/setnayan-platform/pull/284); sitemap [#279](https://github.com/iscasasola/setnayan-platform/pull/279)) | QR code (buildInvitationUrl) · emailed invites · sitemap (post-publish) | "Submit RSVP" → submitRsvp · "Decline" → clear session · day-of-mode (T-1h → T+8h) auto-activates 6-card live grid per 0031 | `guests` (rsvp_status, meal_preference, dietary_restrictions, notes, rsvp_responded_at) | Redirect to /[slug]/welcome for unconfirmed +1s; else stay + revalidate; day-of-mode swaps live cards | ✅ |
 | `/[slug]/welcome` | 0002 | guest | Plus-one name onboarding | Redirect from /[slug] if unconfirmed TBA | "Confirm name" → confirmPlusOneName · "Abandon" → abandonPlusOneInvite | `guests` (first_name, last_name, plus_one_name_confirmed_at) | Redirect to /[slug] on success; clear session on abandon | ✅ |
 | `/join/[eventId]` | 0002 | guest | Event join via token link | Email token · couple's guest-list invite | Role select + Submit → joinEventAction | `event_members` · `guests` (if new) | Redirect to /join/[eventId]/success or error param | ✅ |
 | `/join/[eventId]/success` | 0002 | guest | Join confirmation + dashboard redirect | Redirect from /join/[eventId] | "Go to dashboard" → /dashboard link | `event_members` (member_type, role) | Joined event details + dashboard link | ✅ |
@@ -140,8 +158,8 @@ Initial Phase 1 agent rows flagged these as problems; direct source verification
 | `/dashboard/profile/concierge` | 0016 | couple | Setnayan Concierge SKU + trial mgmt | "Back to profile" link | 3-day trial form · Buy SKU · Cancel · Extend → actions/redirects | `events.concierge_*` · `users.concierge_*` · enforcement + expiry sweep | Toast banners (trial started/already-used/enforcement) or redirect to order form | ✅ |
 | `/dashboard/[eventId]` | 0021 | couple | Event home: planner dashboard, checklist, next tasks, day-of grid | /dashboard auto-redirect · event-switcher monogram pill in chrome strip | 10-tile TILES grid (`apps/web/lib/planner.ts:7-16`) · journey checklist · day-of grid → actions/nav | `events` (full) · `guests` count · `event_vendors` status · `schedule_blocks` · journey completion flags | Redirect to next task or Toast + stay | ✅ |
 | `/dashboard/[eventId]/activity` | 0023 | couple | Activity log (grouped by day, newest first, 500-item cap) | Event home "Open activity" link | Click activity items → navigate to detail routes | `activity_log` view (event-scoped) | Navigate to detail or Toast + stay | ✅ |
-| `/dashboard/[eventId]/schedule` | 0021 | couple | Wedding-day timeline blocks (ceremony, reception) | Event home schedule tile (?) | "Add block" / "Delete block" / "Toggle visibility" → server actions | `schedule_blocks` (is_public flag) | Toast + stay or error param | ✅ |
-| `/dashboard/[eventId]/disputes` | 0019 | couple | Force-majeure flag filing (no-show, quality, payment) | Couple "Report a problem" CTA (PR #22 placeholder) | "File flag" (description + evidence upload) · auto-resolve sweep on pageload → action + admin client | `force_majeure_flags` (flag_type, description, evidence_urls, status, auto_resolve_at) | Toast banner (filed) or error param; 7-day auto-resolve countdown | ✅ |
+| `/dashboard/[eventId]/schedule` | 0021 | couple | Wedding-day timeline blocks (ceremony, reception) | TILES `schedule` tile (Clock icon, between Vendors and Budget) added [#287](https://github.com/iscasasola/setnayan-platform/pull/287) · also reachable from day-of card on event home (T-1d → T+1d window) | "Add block" / "Delete block" / "Toggle visibility" → server actions | `schedule_blocks` (is_public flag) | Toast + stay or error param | ✅ |
+| `/dashboard/[eventId]/disputes` | 0019 | couple | Force-majeure flag filing (no-show, quality, payment) | TILES `disputes` tile (AlertTriangle icon, conditional render — only renders if event has open force-majeure flags OR active disputes) added [#287](https://github.com/iscasasola/setnayan-platform/pull/287) · admin force-majeure inbound from `/admin/force-majeure/[flagId]` mediator actions · couple "Report a problem" CTA | "File flag" (description + evidence upload) · auto-resolve sweep on pageload → action + admin client | `force_majeure_flags` (flag_type, description, evidence_urls, status, auto_resolve_at) | Toast banner (filed) or error param; 7-day auto-resolve countdown | ✅ |
 
 ### Couple Add-ons (14)
 
@@ -226,14 +244,22 @@ Initial Phase 1 agent rows flagged these as problems; direct source verification
 | `/admin/force-majeure/[flagId]` | 0023 + 0019 | admin | Force-majeure detail | /force-majeure list or link | "Take ownership" · "Resolve" · dropdown menu | `force_majeure_flags` | Back to list or ?error | ✅ |
 | `/admin/ads` | 0023 + 0022 § 5b | admin | Boosted ads (admin view) | Admin nav header | Status filter ?status=active/cancelled/expired · "Cancel subscription" → actions | `vendor_ad_subscriptions` | Update status | ✅ |
 | `/admin/website` | 0023 | admin | Website editor (8th admin surface) | Admin nav header | Page dropdown · widget toggle (is_enabled) → PATCH API · drag-drop reorder → POST API | `site_widgets` | Live update, cache TTL 60s | ✅ |
-| `/admin/settings` | 0023 | admin | Admin platform settings | Admin nav header | "Save settings" → actions · "QR upload" → action | `platform_settings` | ?saved / ?error / ?qr_uploaded | ✅ |
-| `/admin/settings/payment-methods` | 0023 + 0034 | admin | Payment-methods config (read-only V1) | Admin nav header (nested under /admin/settings) | (intentional read-only; UI shows amber banner with SQL-update path) | `setnayan_pay_methods` (read) | Renders rate table with gateway + Setnayan Pay + total columns | ✅ (read-only by V1 design) |
+| `/admin/settings` | 0023 + 0035 | admin | Admin platform settings (Sentry smoke-test button added [#280](https://github.com/iscasasola/setnayan-platform/pull/280)) | Admin nav header | "Save settings" → actions · "QR upload" → action · "Trigger Sentry smoke test" → POST /api/admin/sentry-smoke-test | `platform_settings` | ?saved / ?error / ?qr_uploaded / smoke-test toast (success or error) | ✅ |
+| `/admin/settings/payment-methods` | 0023 + 0034 | admin | Payment-methods config (read-only V1) | Admin top-nav "Money" group (alongside `/admin/payments`, `/admin/payouts`, `/admin/receipts`, `/admin/bir/2307`) added [#285](https://github.com/iscasasola/setnayan-platform/pull/285) · also nested under /admin/settings | (intentional read-only; UI shows amber banner with SQL-update path) | `setnayan_pay_methods` (read) | Renders rate table with gateway + Setnayan Pay + total columns | ✅ (read-only by V1 design) |
 
 ### Public API docs (1)
 
 | Route | Iter | Role | Title/purpose | Entry points | Primary actions | State persisted | Outcome | Flag |
 |---|---|---|---|---|---|---|---|---|
 | `/api/v1` | 0033 | api | Public API docs landing | External: curl / docs link | (no interactive controls) | none | API reference rendered | ✅ |
+
+### Health + Ops API (3)
+
+| Route | Iter | Role | Title/purpose | Entry points | Primary actions | State persisted | Outcome | Flag |
+|---|---|---|---|---|---|---|---|---|
+| `/api/health` | 0035 | ops | Shallow health check (process alive, env present) | External monitor (Better Stack uptime per 0035 § Better Stack) · cron pings · CI smoke | GET → returns `{status, version, ts}` 200 OK | none | JSON response 200/5xx | ✅ ([#275](https://github.com/iscasasola/setnayan-platform/pull/275)) |
+| `/api/health/deep` | 0035 | ops | Deep health check (DB + R2 + Resend + PostHog + OAuth providers reachable) | External monitor (5-min cron) · admin alert hooks · CI smoke | GET → returns per-subsystem `{ok, latency_ms, error?}` (typecheck fix [#289](https://github.com/iscasasola/setnayan-platform/pull/289)) | none | JSON response 200/207/5xx with subsystem detail | ✅ ([#275](https://github.com/iscasasola/setnayan-platform/pull/275)) |
+| `/api/admin/sentry-smoke-test` | 0035 | admin-api | Triggers controlled Sentry exception for prod verification | `/admin/settings` "Trigger Sentry smoke test" button | POST (admin-only via RLS) → throws controlled exception captured by Sentry SDK | `admin_audit_log` (action: `sentry_smoke_test_triggered`) | Returns confirmation; Sentry captures + alerting routes per 0035 | ✅ ([#280](https://github.com/iscasasola/setnayan-platform/pull/280)) |
 
 ---
 
@@ -252,3 +278,5 @@ Initial Phase 1 agent rows flagged these as problems; direct source verification
 ## Provenance
 
 Phase 1 (this doc) assembled 2026-05-20 by a senior-dev audit dispatched at owner request. Six parallel Explore agents read every `page.tsx` on `origin/main`, mapped entry points via repo-wide grep, and returned schema-conformant rows. The doc owner verified the two critical 🔴 findings (`/dashboard` chrome drift + `/dashboard/[eventId]/contracts` orphan) with direct file reads of `apps/web/lib/planner.ts` and `apps/web/app/dashboard/[eventId]/page.tsx`.
+
+**Refresh 2026-05-22 (this update)** — refreshed after the 17-PR autonomous sprint landing tasks #3–#22, #25. Eight existing rows updated to reflect today's PRs (`/[slug]` ISR + day-of mode · `/features` Patiktok + Pakanta cards · `/pricing` 5% worked example + actor-terminology · `/privacy` expanded coverage · `/v/[slug]` schema.org Pro 4999 + sitemap · `/dashboard/[eventId]/schedule` TILES + day-of · `/dashboard/[eventId]/disputes` TILES + admin inbound · `/admin/settings/payment-methods` admin-nav Money group · `/admin/settings` Sentry smoke-test button). Four new rows added (`/vendors/compare` as 🚫 retired per PR #274 V1.1 routing-rule enforcement · `/api/health` · `/api/health/deep` · `/api/admin/sentry-smoke-test`). Headline numbers 99 → 103 routes (+4); ✅ 91 → 94 (+3 net new functional API endpoints); 🚫 0 → 1 (`/vendors/compare`). Per [[feedback_setnayan_document_changes_with_why]]: this refresh preserves the orphan ledger accurate-to-`origin/main` for future sessions. Full PR-to-row trail in [CLAUDE.md decision-log 2026-05-22](CLAUDE.md).

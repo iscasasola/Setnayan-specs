@@ -296,6 +296,223 @@ When stylists are introduced (V2 / Din), `scope_type` flips to `'stylist'` and `
 
 ---
 
+## Visual preview pillars · Location feel + Dress codes (locked 2026-05-21)
+
+The Mood Board is more than palette picking — it visualizes what the wedding will actually look like. **Three pillars** drive this together (actors are `customer` = account holder · `host` = role on a specific event via `event_members`, per the 2026-05-21 terminology lock — see CLAUDE.md):
+
+| Pillar | What hosts see | Asset source | Color-controlled by |
+|---|---|---|---|
+| **Palette** | Per-role + per-venue palettes · master palette · contrast rules (existing sections above) | Host's direct picks · pre-template packs · image extraction | (input — hosts set this) |
+| **Location feel** | Tagged venue photos with decor recolored | V1 internet placeholders → V1.x Higgsfield-generated → V1.x+ stylist uploads | Venue palettes (Church · Reception · Cocktail · custom) |
+| **Dress codes** | Tagged figure photos with clothing recolored | V1 internet placeholders → V1.x Higgsfield-generated | Role palettes (entourage) + **Guest Dress Code palette** (NEW) |
+
+All three pillars share the same palette data substrate and render via the **Color Range Manipulator + HSL pixel substitution** pipeline.
+
+### Card layout
+
+```
+[ Photo of place / person ]
+[ █ ][ █ ][ █ ][ █ ][ █ ][ █ ]   ← horizontal palette swatches (the palette applied to that photo)
+```
+
+Same pattern for both pillars. Mobile = single column scroll. Desktop = 2–3 column grid.
+
+### Color Range Manipulator (the tagging tool)
+
+Photoshop-style color-range selection — the universal tagging tool used to prep every asset (Setnayan content team for the library in V1, stylists for their uploads in V1.x).
+
+**Workflow (one-time per photo on intake):**
+1. Eyedropper-click a color in the photo (e.g., the drapery)
+2. Adjust **fuzziness/tolerance slider** to expand/contract the matched range (catches the same color across all instances in the photo)
+3. Assign to a **palette slot** (Slot 1 / 2 / 3 / 4 / 5 / 6)
+4. Repeat for up to 6 slots per photo
+5. Save — photo ships with a color-range map per slot
+
+**Technical:**
+- ΔE in CIELAB color space for perceptually accurate matching (more natural than RGB Euclidean)
+- Tolerance slider mapped to ΔE 5–30 range
+- HSL substitution on render (keep L + S, swap H to palette color) → preserves lighting + texture
+- Per-photo color-range map: `{slot_id, sampled_hex, tolerance_delta_e, region_label}` × up to 6 slots
+- All rendering browser-side via Canvas API · ~₱0 marginal cost per host view
+- Real-time at sub-megapixel; thumbnail-first for portfolio scrolling
+
+**Tool access in V1:** Setnayan content team only (uploading + tagging library assets). Stylists gain access in V1.x as part of the stylist persona work (previously deferred to V1.5+, pulled forward by this lock). Hosts view-only in V1; optional in V1.x+.
+
+### Guest Dress Code palette (new palette type)
+
+In addition to existing Role palettes (per entourage role) and Venue palettes (per venue), the moodboard adds a **Guest Dress Code palette** — colors the host wants their general guests to wear.
+
+- Single Guest Dress Code palette per event (not per-role)
+- Same 6-color cap, same input paths (hex / picker / named-color autocomplete) as Role + Venue palettes
+- Feeds the Dress codes pillar's "general guest" figure cards
+- Optional — hosts without a dress code preference skip it; general-guest cards render in neutral defaults
+
+### Asset sourcing strategy
+
+| Phase | Source | Why |
+|---|---|---|
+| **V1 (soft-beta / pre-launch only)** | Internet-sourced placeholder photos uploaded by Setnayan team | Demo the mechanic on launch day; **disallowed at public hard-launch** for IP reasons |
+| **V1.x** | Higgsfield-AI-generated photos (Setnayan-owned IP) | Content team batch-generates ~100–200 venue scenes + ~100–200 figures; tags each via Color Range Manipulator; replaces internet placeholders |
+| **V1.x+** | Stylist real-photo uploads | Stylists upload their actual work; same Color Range Manipulator tool; their photos slot into the library alongside Setnayan-generated assets |
+
+**IP cutover discipline:** internet placeholders are **disallowed at public hard-launch**. Higgsfield migration must complete before broader traffic.
+
+**Library composition (target):** Filipino-first content — figures with Filipino features (mestizo, native, Chinese-Filipino across age + body type ranges) wearing typical Filipino-wedding guest attire (terno, modern Filipiniana, formal cocktail dresses, barong tagalog, modern suits, kids' formal wear, mother-of-the-bride wraps). Venues span Filipino wedding contexts (Tagaytay garden, Manila hotel ballroom, Catholic cathedral interior, beach reception, hacienda-style estate, modern Manila reception space).
+
+### Save / lock mechanism
+
+Hosts save photo+palette combinations as the event's current pinned moodboard state.
+
+| Action | Behavior |
+|---|---|
+| Host browses tagged photos; palette auto-renders | View-only |
+| Host clicks **Save to moodboard** | `(asset_id, palette_snapshot_json)` persists to `event_moodboard_saves` |
+| Saved entries appear on Home moodboard view + on the moodboard tab itself | "Locked" = pinned as current preferred state |
+| Host can swap photos, edit palette, re-save | "Locked" is not immutable — change anytime |
+| Multiple saves per event | Typically one per Location feel slot (Reception · Church · Cocktail) + one per Dress codes card (Bride · Bridesmaids · Groomsmen · Guests · etc.) |
+| Palette snapshot captured at save time | If the event's master palette shifts later, saved entries surface a *"palette has shifted since you saved · re-render?"* prompt |
+
+### Data model additions
+
+```sql
+-- Guest Dress Code palette (new event-level palette type)
+ALTER TABLE event_palettes
+  ADD COLUMN palette_type TEXT NOT NULL DEFAULT 'role'
+    CHECK (palette_type IN ('role', 'venue', 'guest_dress_code'));
+-- Existing role/venue palettes back-filled to their respective types.
+-- Guest Dress Code palette has palette_type='guest_dress_code', exactly one per event (enforced at app layer).
+
+-- Library asset table (Setnayan team-uploaded + V1.x Higgsfield + V1.x+ stylist uploads)
+CREATE TABLE moodboard_library_assets (
+  asset_id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  asset_type     TEXT NOT NULL CHECK (asset_type IN ('venue_scene', 'figure_attire')),
+  asset_subtype  TEXT,                                                            -- 'reception' / 'church' / 'cocktail' for venue; 'bride' / 'groom' / 'bridesmaid' / 'guest_female' / 'guest_male' / etc. for figure
+  storage_url    TEXT NOT NULL,                                                   -- R2 / CDN URL of the source photo
+  source         TEXT NOT NULL CHECK (source IN ('internet_placeholder', 'higgsfield_generated', 'stylist_upload')),
+  uploaded_by    UUID REFERENCES users(user_id),
+  approved_at    TIMESTAMPTZ,                                                     -- content team review gate before hosts see it
+  retired_at     TIMESTAMPTZ,                                                     -- for V1 placeholder cutover at hard-launch
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Color-range map per asset (one row per palette slot tagged)
+CREATE TABLE moodboard_asset_color_ranges (
+  asset_id        UUID NOT NULL REFERENCES moodboard_library_assets(asset_id) ON DELETE CASCADE,
+  slot_id         SMALLINT NOT NULL CHECK (slot_id BETWEEN 1 AND 6),
+  sampled_hex     CHAR(7) NOT NULL,                                               -- e.g., '#a83b2d'
+  tolerance_de    NUMERIC NOT NULL CHECK (tolerance_de BETWEEN 5 AND 30),         -- ΔE tolerance for matching
+  region_label    TEXT,                                                            -- e.g., 'drapery', 'bridesmaid dress', 'centerpiece florals'
+  PRIMARY KEY (asset_id, slot_id)
+);
+
+-- Couple save / lock state
+CREATE TABLE event_moodboard_saves (
+  save_id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id           UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
+  pillar             TEXT NOT NULL CHECK (pillar IN ('location_feel', 'dress_codes')),
+  pillar_slot        TEXT NOT NULL,                                                -- 'reception' / 'church' / 'cocktail' for location; 'bride' / 'bridesmaid' / 'guests' / etc. for dress codes
+  asset_id           UUID NOT NULL REFERENCES moodboard_library_assets(asset_id),
+  palette_snapshot   JSONB NOT NULL,                                               -- the 6-color palette at save time
+  saved_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (event_id, pillar, pillar_slot)                                            -- one save per pillar+slot combination
+);
+```
+
+### V1 acceptance gates
+
+- Setnayan team uploads a placeholder photo, tags up to 6 color regions via the Color Range Manipulator, and publishes to the library
+- Couple opens moodboard → sees library assets per pillar (Location feel · Dress codes) rendered in their current master palette
+- Couple saves a (photo, palette) pairing → it appears on their Home moodboard view
+- Couple re-opens a saved pairing, swaps to a different library asset or edits their palette, and re-saves
+- Library assets marked `source='internet_placeholder'` show an inline "Concept visualization · placeholder" label
+- Internet placeholder upload flow disabled by feature flag at hard-launch (V1.x onward — only `higgsfield_generated` and `stylist_upload` sources accepted in production)
+- Color range manipulator handles ΔE 5–30 tolerance; HSL substitution preserves shadows/highlights; render at sub-megapixel runs at 60fps in modern browsers
+
+### Cross-references
+
+- [0001 Guestlist](../0001_creating_guest_list/0001_creating_guest_list.md) — feeds guest count, role assignments
+- [0006 Vendors marketplace](../0006_vendors_management/0006_vendors_management.md) — stylist persona work (V1.x) hooks here
+- [0008 Seating chart](../0008_seating_chart_editor/0008_seating_chart_editor.md) — Reception palette + figure tagging dovetail with table styling
+- [0037 Bespoke monogram](../0037_bespoke_monogram/0037_bespoke_monogram.md) — palette feeds monogram production
+- [0024 Save the Date Video](../0024_save_the_date/0024_save_the_date.md) · [0005 LED Background](../0005_led_background_maker/0005_led_background_maker.md) · [0002 Invite](../0002_qr_invitation_system/0002_qr_invitation_system.md) — all consume the same palette story
+- CLAUDE.md decision log "Moodboard expanded · 3 pillars" row (2026-05-21) — canonical lock
+
+---
+
+## Professional Mood Board (V1.1+) · Composite Scene generator
+
+Locked 2026-05-22 (CLAUDE.md decision log row "Specialized Pro Tools architecture locked"). The 3-pillar Mood Board above is the **Free Mood Board** baseline available to every host and stylist. **Professional Mood Board** is the paid AI-powered tier, ships V1.1 parallel with the Stylist marketplace launching first per [0047 sequencing](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md).
+
+### Free vs Professional split
+
+| Capability | Free Mood Board | Professional Mood Board |
+|---|---|---|
+| Palette Maker · 6 colors per palette | ✅ | ✅ |
+| Role + venue palettes | ✅ | ✅ |
+| Setnayan Guide rule engine | ✅ | ✅ |
+| 20 pre-template themes | ✅ | ✅ |
+| Image extraction (pick colors from photo) | ✅ | ✅ |
+| Saved palette library | ✅ | ✅ |
+| Color name autocomplete (~300 entries) | ✅ | ✅ |
+| Visual preview pillars (Location feel · Dress codes — V1 internet placeholders / V1.x Higgsfield) | ✅ | ✅ |
+| Color Range Manipulator (Photoshop-style eyedropper + tolerance + palette assignment) | View-only | ✅ Full access |
+| **Composite Scene generator** — host pastes reference photos → AI composite → auto-segmented layered output | — | ✅ |
+| **Live palette-driven recoloring** across composite scene | — | ✅ |
+| **AI palette suggestions** (e.g., "propose 3 palettes for a Tagaytay garden wedding") | — | ✅ |
+
+### Composite Scene architecture (Path C)
+
+1. **Reference upload** — host pastes N reference photos (ceiling inspo · wall inspo · surroundings inspo · dress inspo · venue refs) into a Pinterest-style upload board.
+2. **AI composite** — Setnayan calls image-AI provider (Higgsfield / Recraft V3 / Flux 1.1 Pro / Midjourney V7 — model choice revisited V1.x per cost + quality eval) with prompt: *"Combine these reference photos into one cohesive Filipino wedding reception scene matching this 6-color palette."* Returns one composite render (10-60 sec generation · ~₱30 API cost).
+3. **Auto-segmentation** — SAM2 (Meta) or MaskRCNN runs on the generated composite, auto-tags regions: ceiling · wall · floor · surroundings · tunnel · figures (bride · groom · entourage · sponsors · guests) · florals · lighting. Free or near-free; runs in a Cloudflare Worker.
+4. **Region → layer mapping** — each tagged region becomes a Color Range Manipulator-controllable layer in the existing 3-pillar architecture above.
+5. **Live recolor** — host drags a swatch in the palette → all bound regions recolor in browser at ~60fps via Canvas API. No new API calls per recolor.
+
+Each layer carries its own Color Range Manipulator tags. Palette changes → all bound layers re-render → composite re-renders. The four stylist treatments from [0044 `stylist_decorator`](../0044_per_category_schemas/0044_per_category_schemas.md) (`ceiling` · `wall` · `surroundings` · `tunnel`) become first-class layer categories in the Composite Scene library — same four keys serve both vendor filtering (marketplace facet) and moodboard rendering (composite layers).
+
+### Pricing — pay-per-render, NO subscription, no activation gate
+
+Use anytime. Render packs (charm-priced):
+
+| Pack | Renders | Price | Per-render | Discount |
+|---|---|---|---|---|
+| Single | 1 | **₱199** | ₱199 | — |
+| Studio | 50 | **₱8,999** | ₱180 | 9.5% |
+| Production | 150 | **₱24,999** | ₱167 | 16.3% |
+
+Margin check (image-AI API ~₱30/render):
+- Single ₱199 = 85% margin
+- 50-pack avg ₱180/render = 75% margin
+- 150-pack avg ₱167/render = 68% margin
+
+Healthy across the ladder. Owner directive locking the model: *"professional mood board pricing should be per render. just render cost. use anytime, no activation needed."*
+
+### Host access pattern
+
+Hosts (couples) cannot trigger Composite Scene renders directly without purchasing packs. Two paths:
+- **Stylist-mediated** (recommended) — host pins a stylist who has Professional Mood Board pack credits; stylist generates the composite render for the client using their credits; host views and refines via palette manipulation in the moodboard.
+- **DIY direct** — host purchases their own render pack and triggers Composite Scene generation themselves.
+
+Drives Stylist marketplace adoption while preserving DIY access for self-directed couples.
+
+### Industry positioning
+
+Premium 3D event design renderings cost $800-$10K (₱45K-₱560K) per render at top design studios (Designblendz · RealRender3D · EtherealCreators · ConceptWeddingDesigns · BrideVue · VenuePreview). Setnayan delivers comparable visualization at ₱167-₱199/render = **99%+ savings**. AI render quality = 70-85% of premium 3D (stylized photo-quality vs photorealistic 3D); indistinguishable at thumbnail / social-share scale; quality gap closes quarterly with image AI improvements.
+
+**Marketing copy locked 2026-05-22:** *"Stop quoting clients ₱45,000+ for design renders. Generate unlimited concept visualizations with Professional Mood Board from ₱167/render. Win more bookings."* (Stylist-facing, outcome-led; aligns with stylist-mediated host access pattern above.)
+
+### Cross-service engine reuse
+
+The Composite Scene engine (image AI + auto-segment + layer + palette recoloring) is foundation for downstream Professional Tools:
+- **Professional Florist Tools** — bouquet visualizer (same engine, flowers-specific asset library)
+- **Professional Attire Tools** — try-on visualizer (same engine, garment-overlay layer library)
+- **Professional Cake/Desserts Tools** — cake design from theme (same engine, cake-specific library)
+- **Professional Stationery** — AI invitation designer (same engine, stationery layer library)
+
+→ Professional Mood Board's ~6-week engineering amortizes over 5+ downstream Specialized Pro Tools SKUs per CLAUDE.md 2026-05-22 decision-log row.
+
+---
+
 ## Mobile thumb-zone UX
 
 The mobile mockup follows the thumb-zone rule: **all primary touch targets in the lower third of the screen**.

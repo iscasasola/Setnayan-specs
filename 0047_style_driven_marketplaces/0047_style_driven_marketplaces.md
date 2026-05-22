@@ -239,6 +239,7 @@ Primary search: **palette ΔE matching**. Couple sets their palette in [0010 moo
 
 Filter sidebar:
 - **Theme tags** — Boho / Modern / Traditional Filipino / Garden / Beach / Industrial / Vintage / Cultural-specific
+- **Treatment specializations** (locked 2026-05-22 per [0044 `stylist_decorator`](../0044_per_category_schemas/0044_per_category_schemas.md)) — Ceiling / Wall / Surroundings / Tunnel
 - **Past venues styled** — checkbox of PH wedding venues
 - **Signature flowers** — for stylists who specialize in florals too
 - **Service regions**
@@ -249,8 +250,11 @@ Result card:
 - 2x3 grid of their mood boards (sorted by ΔE match to couple's palette)
 - "Match score: 87% to your palette" badge
 - "Visit profile · Pin stylist · Message" CTAs
+- **"Professional Mood Board enabled"** badge if stylist holds render pack credits (per [0010 Professional Mood Board pay-per-render model](../0010_mood_board/0010_mood_board.md#professional-mood-board-v11--composite-scene-generator)) — signals to couples that this stylist can generate Composite Scene visualizations of their wedding
 
-Couple flow: scroll → pin matching stylists → message with palette + board reference auto-filled ("I love your 'Tropical Boho' board for our garden wedding — let's chat").
+Couple flow: scroll → pin matching stylists → message with palette + board reference auto-filled ("I love your 'Tropical Boho' board for our garden wedding — let's chat"). If stylist has Professional Mood Board credits, message thread offers "Request a Composite Scene render" CTA → stylist consumes 1 render credit to generate AI-composited scene from couple's references + palette → couple receives in thread + refines via Color Range Manipulator.
+
+**Professional Mood Board ships V1.1 parallel with this Stylist marketplace launch.** Locked 2026-05-22 (CLAUDE.md decision log row "Specialized Pro Tools architecture locked"). Pay-per-render pack pricing: **₱199 single · ₱8,999 / 50-pack · ₱24,999 / 150-pack** · NO subscription · no activation gate · stylist-mediated host access is the primary marketing positioning (*"Stop quoting clients ₱45,000+ for design renders — generate unlimited concept visualizations from ₱167/render. Win more bookings."*) per Cross-service engine reuse, the Composite Scene engine built for Mood Board also powers the future Florist bouquet visualizer · Attire try-on visualizer · Cake design from theme · Stationery AI invitation designer (5+ downstream Specialized Pro Tools SKUs amortize Mood Board's ~6-week engineering investment).
 
 ### Food marketplace (`/vendors/food/`)
 

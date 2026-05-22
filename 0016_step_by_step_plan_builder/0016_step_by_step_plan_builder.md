@@ -795,6 +795,107 @@ The plan builder routes couples through categories in this order. The order is d
 - **Honeymoon** (coordination + budget line)
 - **Wedding registry / thank-you cards** (curated external links in V1; Setnayan SKU in V2)
 
+### Latest-by floors per category (locked 2026-05-20)
+
+Each category has a **hard `latest_by_days_before_wedding`** floor — the latest date a couple can still meaningfully act on it. Computed deadline = `wedding_date - latest_by`. Past the floor → step is overdue / hard-blocked / forfeited.
+
+The **front-load compression rule** (locked same decision-log row): if a couple's wedding is closer than the soft phase window (e.g., 6 months for a Phase 2 category that prefers 8–12), the category collapses to "do today / this week" on the 0021 Home buckets — NOT paced evenly across remaining runway. Closer-to-wedding floors stay where they are regardless of compression.
+
+The **completion-sink rule** (same row): completed steps sink to a "Done" section on Home (per 0021 § 2.0a #5), rendered dim with checkmark + completion month. They never disappear (couples value seeing progress). Manual un-complete bubbles the step back to its appropriate bucket.
+
+**Category floors:**
+
+| # | Category | Soft window | `latest_by_days_before_wedding` | Notes |
+|---|---|---|---|---|
+| 1 | Ceremony venue | 8–12 mo | 180 | Top venues book 12+ mo; floor is "still bookable somewhere reasonable" |
+| 2 | Reception venue | 8–12 mo | 180 | Coupled to ceremony via 8km rule |
+| 3 | Catering | 8–12 mo | 90 | Headcount-lock = T-14d (own sub-task floor below) |
+| 4 | Photography | 8–12 mo | 90 | Top tier gone by then; floor is "available" |
+| 5 | Wedding Coordinator | 8–12 mo | 90 | Same |
+| 6 | Bridal gown · Groom suit | 6+ mo custom | 90 | Custom = 90d minimum; off-the-rack / rush tailoring = 30d |
+| 7 | Stylist | 4–8 mo | 60 | Bundled with venue often |
+| 8 | Florals | 4–8 mo | 45 | Bundled with stylist often |
+| 9 | Lights and Sounds | 4–8 mo | 45 | Bundled with venue / stylist often |
+| 10 | Cake | 4–8 mo | 45 | Bundled at hotels; solo at gardens |
+| 11 | Host / Emcee | 3–6 mo | 30 | |
+| 12 | Band / DJ | 3–6 mo | 30 | Multi-vendor allowed |
+| 13 | Cocktail vendors | 3–6 mo | 30 | Multi-slot |
+| 14 | HMUA | 2–4 mo | 30 | Coverage roster |
+| 15 | Bridal car | 2–4 mo | 30 | Bundled at hotels |
+| 16 | Dressing room / Hotel stay | 2–4 mo | 14 | Bundled at hotels; guest blocks need earlier |
+| 17 | Invitations (formal) | 2–4 mo | 45 | Need final guest list first |
+| 18 | Rings | 2–4 mo | 30 | Couple-led; often external |
+
+**Hard-floor sub-tasks (added 2026-05-20):**
+
+These are PH-specific lead-time items that aren't vendor categories but DO belong on the guide. They become first-class rows on the 0021 Home buckets — most populate NOW / THIS WEEK for any compressed-timeline couple.
+
+| # | Sub-task | `latest_by_days_before_wedding` | Why the floor |
+|---|---|---|---|
+| H1 | **Pre-Cana seminar** | 30 | Parish-scheduled · monthly or quarterly cadence; must complete before canonical interview |
+| H2 | **Canonical interview** | 30 | Priest's availability; church paperwork can't close without it |
+| H3 | **Baptismal + confirmation certificates** | 60 | 5–14 day request from home parish |
+| H4 | **CENOMAR (PSA)** | 60 | 5–7 business days from PSA |
+| H5 | **Marriage license application** | 10 | Mandatory 10-day posting period · license valid 120 days · best to apply T-120d |
+| H6 | **Save-the-date send** | 90 | OFW / balikbayan guests need 90d for flights / leave |
+| H7 | **Formal invitation send** | 45 | RSVP window needs 30–45 days |
+| H8 | **RSVP deadline (on invite)** | 30 | Caterer headcount-lock buffer |
+| H9 | **Caterer final headcount** | 14 | Industry-standard caterer floor |
+| H10 | **Final fittings** | 14 | Last alteration window |
+| H11 | **Day-of timeline confirm** | 7 | All vendors briefed on final timeline |
+| H12 | **Pre-nup shoot** | 60 | 2–6 mo before; floor is "before save-the-dates ideally" |
+
+**Bucket assignment on 0021 Home § 2.0a:**
+
+- **NOW / THIS WEEK** — any category / sub-task where `today + comfortable_start_window > computed_deadline` OR `today > computed_deadline - 7d`. In compressed-timeline scenarios this bucket front-loads aggressively.
+- **NEAR WEDDING** — sub-tasks whose floor sits intentionally close to the wedding date and stay there regardless of compression: H8 RSVP deadline (T-30d) · H9 caterer headcount (T-14d) · H10 final fittings (T-14d) · H11 day-of timeline confirm (T-7d).
+- **COMING WEEKS** — everything else not yet completed.
+- **DONE** — sinks at the bottom (per § 2.0a #5).
+
+`comfortable_start_window` is the soft-window upper bound in days (e.g., 8–12 mo = 360d). The exact data lookup lives in the iteration's data layer, not in this spec — this section locks the floors and the rules, not the implementation.
+
+### Setnayan service entry points on the wedding timeline (locked 2026-05-20)
+
+Where each Setnayan service plugs into the timeline. This is the **cross-sell / upsell timing map** — sister table to "Latest-by floors per category" above. It answers *"when does the platform surface this service to the couple?"* rather than *"when must the couple finish this task?"* Drives Home bucket cross-sell prompts (0021 § 2.0a), Concierge wizard daily nudges (paid tier), and email digest content per phase (0028).
+
+**Priority-13 services (locked with owner 2026-05-20):**
+
+| # | Service | Iteration | Sensible entry | Hard floor | Why this timing |
+|---|---|---|---|---|---|
+| 1 | **Setnayan Guestlist** | [0001](../0001_creating_guest_list/0001_creating_guest_list.md) | T-10mo | T-90d (save-the-dates need it) | Then continuous: save-the-date list → invite list → RSVP → headcount → seating |
+| 2 | **Setnayan Moodboard** | [0010](../0010_mood_board/0010_mood_board.md) | T-9mo | T-60d (palette must lock) | Drives florals, stylist, cake, LED, monogram, video |
+| 3 | **Palette** | 0010 (subset of Moodboard) | T-9mo | T-60d | Locks color story for all downstream design vendors |
+| 4 | **Save the Date Video** | [0024](../0024_save_the_date/0024_save_the_date.md) | T-6mo | **T-90d** (ships with written save-the-date) | Companion piece to written save-the-date |
+| 5 | **Setnayan Seat Planner** | [0008](../0008_seating_chart_editor/0008_seating_chart_editor.md) | T-2mo (draft) | T-14d (table QRs minted, print pack ready) | Needs RSVPs partially in; locks at headcount lock |
+| 6 | **Invite (QR)** | [0002](../0002_qr_invitation_system/0002_qr_invitation_system.md) | T-3mo (design) | **T-45d** (send) | QR powers RSVP + Papic face enrollment + day-of scans |
+| 7 | **Monogram** | [0037](../0037_bespoke_monogram/0037_bespoke_monogram.md) | T-3mo | T-30d (production) | Needs palette locked; applies to invite, LED, video, signage |
+| 8 | **Pakanta · Music Creator** | [0036](../0036_pakanta/0036_pakanta.md) | T-3mo | T-30d (playlist locked) | Ceremony + reception music; needs program + dance choices |
+| 9 | **LED Background** | [0005](../0005_led_background_maker/0005_led_background_maker.md) | T-2mo (design) | T-30d render · T-7d USB ships | Needs palette + monogram first |
+| 10 | **Papic** | [0012](../0012_papic/0012_papic.md) | T-3mo (couple sets up) | T-14d (face enrollment via RSVP) | Guests face-enroll via invite QR while RSVPing |
+| 11 | **Panood** | [0011](../0011_panood/0011_panood.md) | T-2mo (setup) | T-14d (cameras tested, broadcaster briefed) | Live stream config + camera bindings |
+| 12 | **Patiktok** | [0017](../0017_patiktok/0017_patiktok.md) | T-3mo (book) | T-14d (booth confirmed, branded, props arranged) | **Photobooth-style installation capturing vertical TikTok-format videos at venue** — guests use during cocktail / reception; deliverables shared post-event via QR/email. NOT a digital guest-shot reel feed (scope corrected 2026-05-20). |
+| 13 | **Paprint** | net-new (no iteration yet — recommended next slot for V1.x) | T-1mo (order) | T-7d (delivery to venue/couple) | Physical printing of all Setnayan-generated QR codes: save-the-date · invitation · table QR (Papic seat-finder) · day-of guest portal · Patiktok download · seating/signage prints. Files finalize at T-14d after seating + headcount lock; prints ship 7–10 days before wedding. |
+
+**Deferred to V1.x (not in the priority-13 timeline mapping):**
+
+Setnayan Budget (0007) · Setnayan Vendors marketplace (0006) · Contract Intelligence (0032) · Setnayan Supplies (0018) · Invitation Widgets Pro (0004) · Pro Camera Bridge (Papic hardware accessory) · Broadcast Style Pack (Panood add-on) · Day-of Guest portal (0031) · AI Video Highlight 60s (Papic / Panood post-event add-on) · AI Edited Highlight 3-min (Papic / Panood post-event add-on) · Photo Delivery to Drive (0009) · Template Add-ons · Concierge layer (0016 itself — note: the personalization layer, not a standalone service). These have seat reserved for V1.x service-map extensions; they don't block V1 launch.
+
+**How this drives Home buckets (0021 § 2.0a):**
+
+The Home guide surfaces service offers as cross-sell prompts within the appropriate bucket, AT each service's sensible-entry point. Example: a couple at T-3mo sees the *"Add Papic to your event"* card in the COMING WEEKS bucket; at T-1mo it migrates to NOW / THIS WEEK with countdown ("Your wedding is in 30 days — Papic setup deadline 16 days"). Past-floor service offers don't render (no point selling Save the Date Video to a couple 60 days out — already past T-90d floor).
+
+**How this drives the Concierge wizard upsell logic:**
+
+The Concierge wizard's daily nudges (paid layer) reference this table to time service-offer notifications. DIY couples see the same entry points as static cards in the Home buckets (no daily push); Concierge couples get proactive in-app + email nudges when a service's sensible-entry point is approaching.
+
+**Paprint = net-new spec slot:**
+
+Paprint is not yet drafted as an iteration. Recommended next step: spin up `0050_paprint` (or next available V1.x slot) covering (a) order intake — which QR cards, sizes, quantities · (b) print fulfillment partner integration · (c) delivery tracking + venue-direct ship option · (d) reprint handling for late guest adds. Coordinates with 0008 (table QRs), 0002 (invite QRs), 0031 (day-of guest QRs), 0017 (Patiktok download QRs), 0012 (Papic seat QRs).
+
+**Patiktok scope correction (2026-05-20):**
+
+Iteration 0017's spec body may need a scope review against the locked definition above ("photobooth for TikTok-format videos") if it describes a different mechanism. Flagged for follow-up — not blocking this lock.
+
 ---
 
 ## 2. The 8km Proximity Rule

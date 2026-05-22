@@ -16,19 +16,34 @@
 
 ---
 
-## 1. Top-level structure (5-column vendor mega-menu)
+## 1. Top-level structure (12 PH-grounded wedding folders)
 
-Adopted from WedMeGood pattern (per session screenshot analysis) and locked in [0047 § The 5-column vendor mega-menu](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md).
+**Updated 2026-05-20.** Migrated from 5-column WedMeGood-style mega-menu to a 12-folder Filipino-wedding-culture-grounded taxonomy ordered by PH booking timeline. See [CLAUDE.md decision log 2026-05-20 "Marketplace taxonomy remap"](../CLAUDE.md) for rationale. The legacy 5-column structure remains in § 2 below as the row-by-row mapping reference; § 1 here is the catalog rendering source-of-truth.
 
-| # | Column | Couple-facing label | Marketplace route |
-|---|---|---|---|
-| 1 | **Capture** (Visual) | Photographers · Videographers · Pre-Nup Locations | `/vendors/photography/` + `/vendors/pre-nup-locations/` |
-| 2 | **Music & Entertainment** | Bands · DJs · Hosts · Choreographers | `/vendors/music/` + `/vendors/hosts/` |
-| 3 | **Food & Beverage** | Catering · Cake · Bar · Stations & Booths | `/vendors/food/` + `/vendors/stations-booths/` |
-| 4 | **Look** (Attire / Beauty / Decor) | Bridal Wear · Groom Wear · Beauty · Jewelry · Decor | `/vendors/attire/` + `/vendors/beauty/` + `/vendors/decor/` |
-| 5 | **Ceremony · Coordination · Logistics · Stationery · Travel** | Officiants · Planners · Logistics · Invitations · Honeymoon | `/vendors/coordination/` + `/vendors/logistics/` + `/vendors/stationery/` + `/vendors/travel/` |
+**Ordering principle:** earliest bookings first (Ceremony locks the date 12-18 months out), latest last (Logistics + Travel slip into 1-3 months pre-event).
 
-Mobile pattern (per [Responsive UI default](../CLAUDE.md) feedback): single "Browse Vendors" bottom-sheet drawer with collapsible category groups, drill-down to sub-categories.
+| # | Folder | Children | Book by | Cultural anchor |
+|---|---|---|---|---|
+| 1 | **Ceremony** | 17 | 12-18+ months | Multi-faith officiant bundle (Catholic · Christian · INC · Muslim · Cultural · Civil) + pre-marriage seminars + paperwork |
+| 2 | **Reception** | filter-only | 12-18+ months | Backed by existing `venue_setting` enum (banquet_hall · garden · beach · destination · heritage · outdoor_tent · civil_registrar); combined-venue badge marks 5 settings that also host ceremony — V1.2 venue iteration adds bookable venue records |
+| 3 | **Planning, Logistics & Travel** | 28 | 12-18 months (planner first) | Wedding planner + Pamamanhikan · Despedida · Sponsor Coord [PH] + transport + outdoor rentals (generator for brownouts · weather forecaster for Tagaytay · bug repellent) + honeymoon |
+| 4 | **Photo & Video** | 15 | 12+ months | Top photographers/videographers scarcest; Pre-Nup shoot has its own PH-specific sub-section |
+| 5 | **Catering** | 20 | 9-12 months | Lechonero + Mini Lechon + Halo-Halo as named PH-Signature sub-section; Halal [Muslim] + Mocktail-Only [INC] as faith-specific sub-section |
+| 6 | **Attire** | 23 | 6-9 months | Filipiniana (Terno · Maria Clara · Balintawak) + Barong Tagalog as own sub-sections; Muslim cultural variants (Maranao · Tausug · Yakan); **Sponsor attire (Ninang · Ninong)** as first-class sub-section |
+| 7 | **Hair & Makeup** | 13 | 6-12 months | **Family Makeup [PH]** for multi-generational glam; pre-wedding wellness regimen (spa · derm · dental); Muslim Henna Artist |
+| 8 | **Music & Program** | 16 | 6-9 months | Host/Emcee folded here (per Option A); Kulintang [Muslim·PH] + Rondalla + Folk performers as Cultural sub-section; Pre-Cana Dance Trainer [PH] |
+| 9 | **Decor, Florals & Sound** | 14 | 4-6 months | Capiz · Hacienda Heritage · Maranao Okir [Muslim] as Cultural Décor sub-section; Setnayan Pailaw + Custom Monogram; Lights & Sound merged in for event-design coherence |
+| 10 | **Rings & Accessories** | 11 | 3-4 months | Engagement + Wedding rings; **Sponsor Corsage [PH]** as first-class sub-item |
+| 11 | **Booths & Stations** | 16 | 2-3 months | Setnayan signature category — photo / tech / wellness / mystic booths. Carved out from old Col 3 catering dump |
+| 12 | **Invitations & Keepsakes** | 19 | 3-6 months | Live craft booths (calligraphy · embroidery · portrait painter) + **Pasalubong Box · Sponsor Token · Godchild Token [all PH]** as Souvenirs sub-section |
+
+**Total: 192 canonical_services** (zero new schema — pure reorganization of the existing 192 from `canonical_service_schemas`).
+
+**Religion-default-on filter (2026-05-20).** When a couple has set `events.ceremony_type` (Catholic / Christian / INC / Muslim / Cultural / Civil), the marketplace auto-filters both vendor cards (`matchEvent=true`) AND catalog tiles to faith-compatible items. Cross-faith (untagged) tiles always surface — they're the secular base. Couple toggles off via `?match=0` ("Show all faiths" pill). Civil couples (no faith) keep all faith-tagged tiles hidden by default.
+
+**Sub-section rendering.** Each folder renders visible sub-section headers within it (e.g. Attire → Bridal · Filipiniana · Faith-Modest · Groom · Bridal Party · Sponsors). Couples scan the spec sub-sections naturally without two levels of click.
+
+**Mobile pattern** (per [Responsive UI default](../CLAUDE.md)): folder tabs horizontally scrollable, tiles stack 2-up, sub-section headers stay sticky as the user scrolls within a folder.
 
 ---
 

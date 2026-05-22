@@ -1,6 +1,6 @@
 # Setnayan — Installed Stack Inventory
 
-**Last audited:** 2026-05-20 against `origin/main` at https://github.com/iscasasola/setnayan-platform (previous audit 2026-05-14 — 51 migrations + 130+ PRs landed in the intervening 6 days)
+**Last audited:** 2026-05-22 post 17-PR sprint against `origin/main` at https://github.com/iscasasola/setnayan-platform (previous audit 2026-05-20; today's PRs #272–#289 added migrations 77-80, 3 health/smoke-test API routes, and flipped Sentry smoke-test status from 🟡 SDK-wired-not-exercised → 🟡 endpoint wired, owner verification pending).
 **Companion docs:** [V1_Gap_Analysis_Status.md](V1_Gap_Analysis_Status.md) (spec) · [App_Build_Status.md](App_Build_Status.md) (code) · [API_Integration_Checklist.md](API_Integration_Checklist.md) (prereqs) · this doc (what's actually wired)
 
 ---
@@ -103,7 +103,7 @@ The "Status" column uses:
 
 ## Pass 3 — Database & schema (Supabase, Singapore region)
 
-### Migrations on `main` (76 total, chronological)
+### Migrations on `main` (80 total, chronological — 4 new on 2026-05-22)
 
 | Sequence | File | Iteration | Adds |
 |---|---|---|---|
@@ -183,6 +183,10 @@ The "Status" column uses:
 | 74 | `20260520010000_iteration_0005_led_background_foundation.sql` | 0005 | **NEW** LED background configs + renders (PR #150) |
 | 75 | `20260520010000_iteration_0012_paparazzi_seats_photos.sql` | 0012 | `paparazzi_seats` + `papic_photos` (PR #151) |
 | 76 | `20260520020000_iteration_0009_photo_delivery_oauth_provider.sql` | 0009 | Photo Delivery OAuth provider table (PR #153) |
+| 77 | `20260522000000_iteration_0034_service_catalog_corrections.sql` | 0034 | service_catalog price/feature corrections (PR #272) |
+| 78 | `20260522010000_iteration_0034_payments_idempotency.sql` | 0034 | Payments idempotency column + unique index — duplicate-submit / double-click race conditions sealed (PR #277) |
+| 79 | `20260522020000_iteration_0035_health_checks.sql` | 0035 | Health-check support table for `/api/health/deep` (PR #275) |
+| 80 | `20260522030000_iteration_0021_tiles_expansion.sql` | 0021 | Couple dashboard TILES expansion — new entry points closing prior orphan routes (PR #287) |
 
 ### Schema patterns enforced
 
@@ -210,7 +214,7 @@ R2 env vars `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` exist in
 
 ---
 
-## Pass 4 — Routes & pages (~140 total)
+## Pass 4 — Routes & pages (~143 total — 3 new on 2026-05-22)
 
 ### Marketing & public (15)
 
@@ -247,6 +251,9 @@ R2 env vars `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` exist in
 | Route | Auth | Purpose |
 |---|---|---|
 | `/api/v1/health` | none | Liveness probe |
+| `/api/health` | none | Public health endpoint for Better Stack uptime ping (PR #275, 2026-05-22) |
+| `/api/health/deep` | none | Deep health check — DB reachable + R2 reachable + critical migrations applied (PR #275, 2026-05-22) |
+| `/api/admin/sentry-smoke-test` | admin | Sentry production smoke-test endpoint — admin-gated controlled-error trigger (PR #280, 2026-05-22) |
 | `/api/v1/me` | Bearer `sk_live_…` | Caller's profile (whoami) |
 | `/api/v1/events` + `/[eventId]` + `/guests` | Bearer | Read-only events + guests (0033, PR #27) |
 | `/api/v1/vendors` + `/[publicId]` | Bearer | Vendor marketplace read (PR #24/27) |
@@ -363,7 +370,7 @@ Every mutating UI flow has its own `actions.ts` co-located with the page (Next 1
 | **Resend** (transactional email) | ✅ Wired (9 of 10 V1 templates) | `lib/email.ts` wrapper; V1 soft-launch auto-confirms so signup non-blocking | `RESEND_API_KEY`, `RESEND_FROM_ADDRESS` |
 | ~~**Daily.co** (video meetings 0019)~~ | ❌ RETIRED 2026-05-16 (feature removed entirely from V1+) | — | — |
 | ~~**Anthropic Claude API** (0032)~~ | ❌ NOT V1 — 0032 RETIRED 2026-05-18 (free dual e-sign replaces AI analysis); Anthropic still queued for 0011/0012 V1.5+ highlights only | none | `ANTHROPIC_API_KEY` (reserved for V1.5+) |
-| **Sentry** (error tracking 0035) | ✅ SDK wired 2026-05-14 (PR #17); 🟡 production smoke test still pending | `@sentry/nextjs ^8.0.0` | `SENTRY_DSN`, `SENTRY_AUTH_TOKEN` |
+| **Sentry** (error tracking 0035) | ✅ SDK wired 2026-05-14 (PR #17); 🟡 production smoke-test **endpoint wired 2026-05-22** via PR #280 (`/api/admin/sentry-smoke-test`), owner verification of email/Slack routing still pending. Observability typecheck (PR #289) confirms every server action is Sentry-instrumented cleanly. | `@sentry/nextjs ^8.0.0` | `SENTRY_DSN`, `SENTRY_AUTH_TOKEN` |
 | **PostHog** (product analytics 0035) | ✅ Wired 2026-05-14 (PR #19); 3 server-side funnels live + 4 PostHog funnel links at `/admin/funnels` | `posthog-js ^1.165.0` | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` |
 | **Better Stack** (uptime + log) | 🚧 Queued | none | `BETTER_STACK_SOURCE_TOKEN` |
 | **GitHub Releases** | ✅ Live | v0.0.1 with macOS `.dmg`; `/download` consumes via `lib/desktop-release.ts` | none |
@@ -440,6 +447,9 @@ Every mutating UI flow has its own `actions.ts` co-located with the page (Next 1
 - Jobs:
   - **typecheck + lint** — `pnpm typecheck` + `pnpm lint` on Node 22 with pnpm cache
   - **gitleaks** — `gitleaks/gitleaks-action@v2` against full history (`fetch-depth: 0`)
+  - **retired-strings lint guard** — fails build if `Pareto` or `Custom Monogram Pack` strings reappear in `apps/web` (PR #276, 2026-05-22) — both products retired, regression-blocker
+  - **email-links audit** — validates every URL in 0028 email templates resolves to a live route (PR #288, 2026-05-22)
+  - **observability typecheck** — confirms every server action is wrapped in Sentry instrumentation (PR #289, 2026-05-22)
 
 ### `lighthouse.yml`
 
@@ -498,7 +508,7 @@ Every mutating UI flow has its own `actions.ts` co-located with the page (Next 1
 
 ### Observability
 
-- `SENTRY_DSN` ✅ SDK wired (smoke test pending #19e)
+- `SENTRY_DSN` ✅ SDK wired; smoke-test endpoint `/api/admin/sentry-smoke-test` shipped 2026-05-22 PR #280 (owner verification pending)
 - `SENTRY_AUTH_TOKEN` ✅
 - `NEXT_PUBLIC_POSTHOG_KEY` ✅ wired (3 funnels live)
 - `NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com` ✅

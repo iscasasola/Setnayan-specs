@@ -106,6 +106,20 @@
 
 > **Verify:** LED prices not directly grepped from 0005 iteration .md in the latest sweep. Cross-check against iteration 0005 before using in production.
 
+### 2.9 Professional Mood Board · Composite Scene renders (iteration 0010 V1.1)
+
+Pay-per-render pack pricing locked 2026-05-22 — NO subscription, no activation gate, use anytime. Render = AI-generated composite of host's reference photos + couple's palette, auto-segmented into layered transparent PNGs for live Color Range Manipulator recoloring. Per [0010 § Professional Mood Board (V1.1+) · Composite Scene generator](0010_mood_board/0010_mood_board.md#professional-mood-board-v11--composite-scene-generator).
+
+| SKU | Renders | Price | Centavos | Per-render | Margin (API ~₱30) | Status | Source |
+|---|---|---|---|---|---|---|---|
+| Professional Mood Board · Single render | 1 | ₱199 | 19,900 | ₱199 | 85% | ACTIVE (V1.1) | [0010_mood_board.md § Professional Mood Board](0010_mood_board/0010_mood_board.md#professional-mood-board-v11--composite-scene-generator) · [CLAUDE.md 2026-05-22 fifth row](CLAUDE.md) |
+| Professional Mood Board · Studio pack | 50 | ₱8,999 | 899,900 | ₱180 | 75% | ACTIVE (V1.1) | same |
+| Professional Mood Board · Production pack | 150 | ₱24,999 | 2,499,900 | ₱167 | 68% | ACTIVE (V1.1) | same |
+
+**Host access pattern:** hosts (couples) cannot trigger renders directly without purchasing packs. Two paths: (a) **stylist-mediated** — host pins a stylist who holds Professional Mood Board credits; stylist generates the render for them; (b) **DIY direct** — host purchases their own pack. Drives stylist marketplace adoption while preserving DIY access.
+
+**Industry positioning:** premium 3D event design renderings cost ₱45K-₱560K per render at top design studios; Setnayan delivers comparable visualization at ₱167-₱199/render = 99%+ savings. Marketing copy locked: *"Stop quoting clients ₱45,000+ for design renders. Generate unlimited concept visualizations with Professional Mood Board from ₱167/render. Win more bookings."*
+
 ---
 
 ## 3. Setnayan Concierge (iteration 0016)
@@ -163,6 +177,32 @@ These are what verified vendors pay Setnayan for visibility, tools, and integrat
 | SKU | Price | Centavos | Status | Source |
 |---|---|---|---|---|
 | QR Retrieval (per-event access for non-Pro vendors) | ₱500 / event | 50,000 | ACTIVE | [0022_vendor_dashboard.md:349](0022_vendor_dashboard/0022_vendor_dashboard.md) |
+
+### 4.6 Specialized Pro Tools · per-service AI / specialized-coding add-ons (V1.x+ rollout · locked 2026-05-22)
+
+Per-service Professional [Tool] subscriptions independent of the universal Free/Pro/Max vendor tier (§ 4.1-4.5). A vendor in any tier can subscribe to any Specialized Pro Tool matching their canonical_service. Per [CLAUDE.md 2026-05-22 fifth decision-log row](CLAUDE.md) and [0022 § 11 Specialized Pro Tools subscription management](0022_vendor_dashboard/0022_vendor_dashboard.md).
+
+**13 SKUs at ₱888/wk PLACEHOLDER pricing** — deliberately non-charm-priced marker so they're impossible to miss when finalizing. Final pricing TBD per SKU; pure-code likely settles ₱499-₱999/wk, AI likely ₱1,999-₱2,999/wk with bundled allowance + overage packs.
+
+| SKU | Cost shape | Vendor service category | Price (placeholder) | Status |
+|---|---|---|---|---|
+| Professional Coordination | Pure code | `wedding_coordination` | ₱888 / week | PLACEHOLDER · V1.x |
+| Professional Catering | Pure code | `catering` | ₱888 / week | PLACEHOLDER · V1.x |
+| Professional HMUA | Pure code | `hmua` | ₱888 / week | PLACEHOLDER · V1.x |
+| Professional Music DJ/Emcee/Host | Pure code | `dj_emcee_host` | ₱888 / week | PLACEHOLDER · V1.x+ |
+| Professional Live Band | Pure code | `band_live_music` | ₱888 / week | PLACEHOLDER · V1.x+ |
+| Professional Cake/Desserts | Pure code | `cake_desserts` | ₱888 / week | PLACEHOLDER · V1.x+ |
+| Professional Sound/Lighting | Pure code | `lights_sound` | ₱888 / week | PLACEHOLDER · V1.x+ |
+| Professional Rings/Officiant/Transport/Booth | Pure code | various | ₱888 / week | PLACEHOLDER · V1.x+ |
+| Professional Photo Tools | Hybrid (OpenCV + AI ranking) | `photographer` | ₱888 / week | PLACEHOLDER · V1.x |
+| Professional Video Tools | AI (video editing) | `videographer` | ₱888 / week | PLACEHOLDER · V1.x |
+| Professional Florist | AI (bouquet visualizer · reuses Mood Board engine) | `florist` | ₱888 / week | PLACEHOLDER · V1.x |
+| Professional Stationery | AI (invitation designer) | `invitation_print` / `stationery_signage` | ₱888 / week | PLACEHOLDER · V1.x+ |
+| Professional Attire | AI (try-on visualizer · reuses Mood Board engine) | `bridal_gown` / `groom_suit` / `entourage_attire` | ₱888 / week | PLACEHOLDER · V1.x+ |
+
+> **Professional Mood Board (§ 2.9 above)** is the 14th SKU in this portfolio but ships pay-per-render packs instead of subscription. Owner directive: *"mood board out"* of the ₱888 placeholder set; its pack pricing is the FINAL model.
+
+**V1.x rollout sequencing:** Professional Mood Board ships V1.1 first (parallel with Stylist marketplace launch per [0047](0047_style_driven_marketplaces/0047_style_driven_marketplaces.md)) · Professional Coordination second · Photo + Video + Catering + Florist third batch · others V1.x+ as marketplaces launch.
 
 ---
 
@@ -362,4 +402,4 @@ When a price changes:
 
 ---
 
-*Last regenerated: 2026-05-17*
+*Last regenerated: 2026-05-22 (Specialized Pro Tools architecture + Professional Mood Board pack pricing + 13-SKU placeholder added per CLAUDE.md fifth 2026-05-22 decision-log row)*
