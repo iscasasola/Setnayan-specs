@@ -117,12 +117,12 @@
 |---|---|---|---|
 | 27 | Wedding Hosts / MCs (split from `dj_emcee_host`) | `[0006]` (split) | V1.1 base |
 
-**Choreographers**
+**Choreographers** _(phase promoted V1.2 → V1.1 on 2026-05-24 — the Today's Focus wizard now surfaces a `dance_instructor` card at position 20 with canonical service `choreographer`; couples need a vendor list to pick from at launch.)_
 | # | Sub-category | Status | Phase |
 |---|---|---|---|
-| 28 | Entourage Choreographer | `[NEW]` `[PH-specific]` | V1.2 |
-| 29 | First Dance Choreographer | `[NEW]` | V1.2 |
-| 30 | Pre-Cana Dance Trainer | `[NEW]` `[PH-specific]` | V1.2 |
+| 28 | Entourage Choreographer | `[NEW]` `[PH-specific]` | V1.1 |
+| 29 | First Dance Choreographer | `[NEW]` | V1.1 |
+| 30 | Pre-Cana Dance Trainer | `[NEW]` `[PH-specific]` | V1.1 |
 
 **Column 2 total: 15 sub-categories** (4 in V1.1 base / 6 in V1.1.3 / 3 in V1.2 / 1 in V1.4 / 2 in V1.5+)
 
@@ -167,6 +167,11 @@
 | 48 | Wine / Whiskey / Cigar Bar | `[NEW]` | V1.1.6 |
 | 49 | Mocktail Bar (booth-scale) | `[NEW]` `[Faith: INC + Muslim]` | V1.1.6 |
 | 50 | Tea Ceremony / Tea Bar | `[NEW]` | V1.1.6 |
+| 50a | Donut Wall / Display | `[NEW]` (added 2026-05-24 per owner directive) | V1.1.6 |
+| 50b | Sorbetes Cart | `[NEW]` `[PH-specific]` (added 2026-05-24 per owner directive) | V1.1.6 |
+| 50c | Food Cart (Generic) | `[NEW]` (added 2026-05-24 per owner directive · catch-all for cart-vendors who don't fit a specific category — e.g., taco cart · fish ball / chicharon / kakanin cart · kebab cart · samosa cart · shawarma cart · takoyaki cart · banana cue / camote cue cart) | V1.1.6 |
+
+**Branded-vendor note (added 2026-05-24):** Branded chains (e.g., Dunkin Donuts, J.Co Donuts, Selecta Sorbetes) surface as vendor profiles UNDER the appropriate sub-category (Donut Wall, Sorbetes Cart, Ice Cream Cart) rather than as their own sub-categories. The taxonomy stays generic; the marketplace surfaces specific branded vendors via vendor_profiles rows tagged to the relevant sub-category. Souvenir booth coverage is similarly distributed across Visual & Keepsake (#57-64) + Skill & Craft (#65-70) groups — no generic "Souvenir Booth" sub-category needed; couples pick from the more specific keepsake/craft sub-types.
 
 *Sensory & Beauty Stations (6)*
 | # | Sub-category | Status | Phase |
@@ -208,7 +213,7 @@
 | 73 | LED Dance Floor | `[NEW]` | V1.1.6 |
 | 74 | **Setnayan Patiktok** (TikTok Booth) | `[SETNAYAN SERVICE]` | V1.1 base |
 
-**Column 3 total: 44 sub-categories** (6 in V1.1 base / 5 in V1.1.1 / 28 in V1.1.6 / others gated by faith)
+**Column 3 total: 47 sub-categories** (6 in V1.1 base / 5 in V1.1.1 / 31 in V1.1.6 — Donut Wall + Sorbetes Cart + Food Cart Generic added 2026-05-24 / others gated by faith)
 
 ---
 
@@ -448,6 +453,31 @@ Per [0047 § SETNAYAN SERVICE inserts](../0047_style_driven_marketplaces/0047_st
 
 **Total: 8-9 SETNAYAN SERVICE entries** surfacing as first-class marketplace listings.
 
+### Today's Focus wizard coverage (added 2026-05-24)
+
+Every Setnayan paid service now has a dedicated wizard card in Today's Focus, surfacing the SKU inside the host's planning carousel (not just inside the marketplace search):
+
+| Service | Iteration | Wizard card | Position |
+|---|---|---|---|
+| Monogram (free + Bespoke ₱2,999) | [0037](../0037_bespoke_monogram/0037_bespoke_monogram.md) | `monogram` | 7 |
+| Mood board (free) — inspiration | [0010](../0010_mood_board/0010_mood_board.md) | `mood_board` | 15 |
+| Mood board (free) — rendered approval | [0010](../0010_mood_board/0010_mood_board.md) | `rendered_mood_board` | 17 |
+| Pakanta (₱1,999-₱9,999) | [0036](../0036_pakanta/0036_pakanta.md) | `pakanta` | 19 |
+| LED Background / Pailaw | [0005](../0005_led_background_maker/0005_led_background_maker.md) | `led_background` | 22 |
+| Save-the-Date Video (₱199/render) | [0024](../0024_save_the_date/0024_save_the_date.md) | `save_the_date_video` | 32 |
+| Website upgrades (Monogram Hero ₱1,999 + Live Schedule ₱999) | [0004](../0004_invitation_widgets/0004_invitation_widgets.md) | `website_upgrade` | 28 |
+| Papic | [0012](../0012_papic/0012_papic.md) | `papic` | 29 |
+| Panood | [0011](../0011_panood/0011_panood.md) | `panood` | 30 |
+| Patiktok | [0017](../0017_patiktok/0017_patiktok.md) | `patiktok` | 31 |
+| Same-Day Edit (₱9,999+) | [0011](../0011_panood/0011_panood.md) SDE | `same_day_edit` | 33 |
+| Paprint | [0050](../0050_paprint/0050_paprint.md) | `paprint` | 53 |
+| AI Highlights (₱999 / ₱2,999) | (post-event vision-AI) | `ai_highlights` | 60 |
+| Couple Keepsake Bundle (₱2,499) | [0046](../0046_wedding_showcase/0046_wedding_showcase.md) Keepsake | `keepsake_bundle` | 61 |
+
+**Marketplace insert pattern stays intact** — couples can still discover these services via the marketplace listings table above; the wizard adds a SECOND discovery path through the active-planning carousel.
+
+**Host-task wizard cards (NOT vendor categories)** — for completeness: the wizard also includes 6 host-action cards that are not vendor taxonomy entries: `food_tasting` (12) · `song_list` (25) · `complete_guest_list` (36) · `gap_fill_guest_list` (40) · `gift_registry` (37) · `wedding_rehearsal` (55). These are couple-actions captured in the planning flow but don't surface in the vendor marketplace.
+
 ---
 
 ## 5. Faith activation cross-cutting timeline
@@ -580,15 +610,57 @@ Per [0043 phasing](../0043_wedding_type_picker/0043_wedding_type_picker.md):
 
 ---
 
-## 10. Maintenance log
+## 10. Presentation pattern · Creations vs Locked (locked 2026-05-24)
+
+**Lock context.** Owner directive 2026-05-24 closing a multi-turn architectural conversation: vendor categories split into two distinct presentation patterns based on how the vendor's offering is shopped, NOT based on what the vendor sells. Grid layout, search, filter, lock CTA, and compare flow are identical across all categories — what differs is the per-vendor TILE CONTENT (one hero photo vs multi-photo portfolio carousel).
+
+### The two patterns
+
+**Pattern A · Creations** — vendor sells *multiple curated services* that act as portfolio cards. Couples scroll the vendor's range, pick "this look" / "this menu" / "this song set," and what gets locked is one specific service inside the vendor's catalog (backed by `vendor_services` from [iteration 0045](../0045_product_catalogs/0045_product_catalogs.md)). Vendor tile in the grid surfaces 3–5 service photos cycling (auto-rotate on hover · 2×2 collage · or primary + thumbnail strip — final treatment TBD on the V1.1 multi-photo PR).
+
+**Pattern B · Locked presentation** — vendor sells one fixed offering (a physical space, a person, a single rig, a single setup). One photo per vendor in the grid; locking the vendor locks the whole thing.
+
+### Category assignment
+
+| Pattern | Categories |
+|---|---|
+| **Creations** | Photographer · Videographer · Same-Day Edit editor · Prenup shoot specialist · Stylist · Florist · Catering · Cake / desserts · Attire (gown · suit · shoes · entourage · parents) · HMUA · Live band · Acoustic performer · Choir / string quartet · DJ · Host / MC · Choreographer · Live painter · Calligrapher · Magician / entertainer · Invitation designer · Stationery / signage · Souvenirs / favors · Rings / jewelry · STD video editor |
+| **Locked** | Reception venue · Ceremony venue (church / mosque / INC chapel / civil registrar) · Officiant · Accommodation / hotel · Photobooth (per sub-tag — classic · mirror · 360 · polaroid · slow-mo) · Mobile bar (per sub-tag — cocktail · coffee · perfume · dessert · juice · tea) · Pyrotechnics / cold sparklers · Lights + Sound rig · Wedding coordinator (tier-based packages, not creations) · Drone operator · Bridal car · Inflatable / kids rentals |
+
+### Filter approach per pattern (locked 2026-05-24)
+
+| Filter family | Pattern + cards | Rationale |
+|---|---|---|
+| **Region → City cascade** | Pattern B vendors with fixed address (Reception · Officiant when parish-bound · Stylist hub-city V1.x) | Vendor has a physical address that doesn't move; couples shop by region first when city isn't decided |
+| **Distance from Reception (10km initial · stepper)** | Pattern B vendors anchored to Reception (Ceremony · Accommodation · Lights+Sound · Mobile Bar · Photobooth · Pyro · Drone) | Reception is already locked by the time these render; proximity matters for day-of logistics |
+| **Reviews-first · no geographic filter** | All Pattern A vendors + Pattern B vendors who travel routinely (Bridal Car · Coordinator) | Vendors travel; portfolio + reviews + sample work matter more than km from venue |
+
+### V1 vs V1.1 split
+
+- **V1 (current state · this lock)** — grid layout, search, filter, lock CTA, compare flow all uniform across categories. Tile renders ONE photo per vendor regardless of pattern.
+- **V1.1 (follow-up PR)** — Pattern A vendor tiles upgrade to 3–5 photo carousel/collage sourced from `vendor_services.primary_photo_r2_key`. Pattern B vendor tiles unchanged (1 hero photo).
+
+The grid primitive (`VendorPickGridCard`) is pattern-agnostic — the tile component branches based on `vendor.presentation_pattern` resolved from a new column added to `vendor_profiles` (or derived from category) in the V1.1 PR.
+
+### Cross-reference
+
+- [Iteration 0045 Product Catalogs](../0045_product_catalogs/0045_product_catalogs.md) — provides the multi-service schema (`vendor_services`) that powers Pattern A tile content
+- [Iteration 0006 Vendors Management § canonical_services + § vendor saturation](../0006_vendors_management/0006_vendors_management.md) — saturation rules (hard-single · soft-single · multi) are orthogonal to presentation pattern; a vendor can be Pattern A (creations) AND soft-single (one lock per event) at the same time
+- [CLAUDE.md decision log 2026-05-24 "Creations vs Locked spec lock"](../CLAUDE.md) — canonical lock row with full table + filter approach
+
+---
+
+## 11. Maintenance log
 
 | Date | Change | Affected |
 |---|---|---|
 | 2026-05-19 | Initial consolidation. Taxonomy + phasing + recruitment plan locked across 192 sub-categories spanning V1.1 → V1.5+. Sourced from session work 2026-05-18 → 2026-05-19. | Whole doc |
 | 2026-05-19 | Cross-reference note added: V1.2 introduces multi-moderator event access ([0048](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md)) + multi-payer cart ([0049](../0049_multi_payer_cart/0049_multi_payer_cart.md)). Vendor taxonomy + phasing unchanged; couples can now have multiple moderators (parents · sponsors · maid of honor · etc.) each able to add to cart and pay independently. Vendor profile + onboarding unchanged by V1.2 (vendor sees event context, not individual moderator context). Affects how couples + moderators interact with the marketplace + Wedding Showcase, not the taxonomy itself. | § 9 Cross-references (this row) |
+| 2026-05-24 | **Presentation pattern lock** — categories split Creations (multi-service portfolio · 3–5 photo tile · V1.1 upgrade) vs Locked (single hero · 1 photo tile · V1 current). Filter approach also locked: Region→City cascade for fixed-address Pattern B · Distance from Reception for Reception-anchored Pattern B · Reviews-first for Pattern A + travelling Pattern B. | New § 10 + this row |
 
 When updating this doc:
 - New sub-category → append row in matching column section + bump column total + update grand total
 - Phase shift → update phase column + cumulative tally table
 - Faith activation → strike-through "Coming Soon" markers + update faith activation timeline
 - Re-numbering → if # collisions, re-number in sequence from 1; cross-references in iteration specs update accordingly
+- New presentation-pattern category → append to the matching cell in § 10 + add maintenance log row
