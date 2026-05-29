@@ -360,6 +360,8 @@ Tier 4 — outermost ring:
 
 `Publish` is the single moment QR tokens become real and downstream consumers can read them.
 
+> **Table QR vs guest QR — cross-reference (2026-05-22):** The `tables.qr_token` minted here (`setnayan://table/{token}`) is **a SEPARATE token from `guests.qr_token`** (the canonical per-guest token declared in [0001](../0001_creating_guest_list/0001_creating_guest_list.md) and explained in [0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md)). The place-card print pack downloaded from this iteration carries each guest's existing `guests.qr_token` — no new token at print time. Table QRs (on table tents) fan tags to all guests seated at the table (capped at 10 per photo per 0012's tag-cap rule); guest QRs (on place cards) tag exactly one person. Both are first-class scan vectors in 0012; they don't compete or overlap.
+
 ### What `Publish` does (server-side, atomic)
 
 1. Validate every `attending` guest has a `table_assignment_id` (warn but don't block — couples sometimes finalize seating after invitations are out).

@@ -12,6 +12,39 @@
 
 ---
 
+## Architectural lock · the Phase 4 page IS the editorial (2026-05-22)
+
+> **The standalone-showcase trigger model from the 2026-05-18 base spec below is SUPERSEDED by the 2026-05-19 row 426 architectural lock + the 2026-05-22 unified QR lifecycle lock. The Phase 4 (T+30d → forever) state of [0002 § Event Landing Page lifecycle](../0002_qr_invitation_system/0002_qr_invitation_system.md) IS the wedding's editorial by default. No separate `wedding_showcases` trigger row is created; the `events` row itself carries the editorial state once it crosses the T+30d boundary AND the couple has not opted out via the 8 RA 10173 guardrails locked 2026-05-19 (Third row).**
+
+**What stays canonical from the 2026-05-18 base spec below:**
+
+- The **`wedding_showcase_facets` index layer** (lines 192–218 below) — pre-computed faceted browse data for `/real-weddings/`. Refreshed on `events.completed_at + 30d` boundary AND on couple-edit. This stays as the index optimization for the cross-wedding browse surface.
+- The **`/real-weddings/` faceted browse page** (lines 224–246 below) + per-facet SEO landing pages. The browse surface is real.
+- The **`wedding_showcase_vendor_credits` table** (lines 124–145 below) — the join between events + vendors for "Weddings I worked on" surfaces. Stays canonical. Auto-populated from `event_vendor_relationships.delivered_at` (set per 0006's TIER 1 vendor scan-confirm) for VERIFIED credits + from `wedding_showcase_vendor_claims` (per 2026-05-20 extension below) for CLAIMED credits.
+- The **`wedding_showcase_product_credits` table** (lines 169–186 below) — product-level credits auto-populated from cart history. Stays canonical.
+- All 2026-05-20 extensions below (DIY editor · self-tag claim flow · 4-layer moderation · 2-tier credit linkage · Couple Keepsake Bundle · `wedding_guest_reviews` · `vendor_event_feedback`) stay canonical AS features OF Phase 4. They are not standalone trigger primitives; they are the editorial's authoring + claim + monetization + voice-source layers.
+
+**What is structurally retired:**
+
+- The standalone **`wedding_showcases` trigger table** (lines 91–121 below) — its `status` state machine (`requested` → `couple_approved` → `awaiting_vendor_captures` → `awaiting_couple_picks` → `published`) is retired. The Phase 4 page activates automatically at T+30d unless the couple opts out; vendor-initiated "request to feature" + couple-approves + vendor-submits-3 + couple-picks-1 is **not the model**.
+- The 4-step vendor-initiated trigger flow (lines 29–86 below) — vendors don't trigger a separate showcase object. Vendors who delivered (TIER 1 verified or TIER 2 self-claim per 2026-05-22 0002 + 0006 lock) get credited in the Phase 4 editorial automatically; the editorial publishes whether the vendor explicitly opts in or not (vendors retain a per-credit remove action via 0046 base § "Vendor controls" line 374).
+- The standalone **`wedding_showcase_captures` table** (lines 147–166 below) — vendor-submits-up-to-3, couple-picks-1 mechanic is retired in favor of the 2026-05-20 DIY editor + self-tag claim flow (vendors claim credit on specific photos rather than submitting candidates).
+
+**Why this lands cleanly:**
+
+Per the 2026-05-19 row 426 architectural call, every couple's Phase 4 page is the wedding showcase by default — no editorial team needed; content fills organically from Dec 1 2026 couple-launch onward. The 0046 iteration retains ownership of the **cross-wedding index/browse layer** (faceted `/real-weddings/`, vendor portfolio "Weddings I worked on", product "used at N weddings" badges, Setnayan-curated Featured selection) while [0002 Phase 4](../0002_qr_invitation_system/0002_qr_invitation_system.md) + the 2026-05-20 0046 extensions own the **per-wedding editorial surface** itself.
+
+The cross-iteration ownership split locked at 2026-05-19 row 426 stands: 0002 owns per-wedding canonical page (the Phase 4 editorial surface) · 0046 owns the cross-wedding browse + faceted SEO landing pages + vendor-portfolio auto-population + product-credit auto-population + Setnayan-curated Featured admin surface.
+
+### Cross-references
+
+- **[0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md)** — canonical lock for 3 lifecycle states · 4 scan actors · Phase 4 editorial mode entry point.
+- **[0006 § Vendor scan at venue · TIER 1 / TIER 2](../0006_vendors_management/0006_vendors_management.md)** — vendor scan flow that writes to `event_vendor_relationships.delivered_at` (TIER 1 auto-credit) or `wedding_showcase_vendor_claims` (TIER 2 self-claim). Auto-feeds `wedding_showcase_vendor_credits` for both tiers.
+- **CLAUDE.md decision-log row 2026-05-22** — the unified QR/lifecycle/vendor-scan lock that produced this section.
+- **CLAUDE.md decision-log row 2026-05-19 Third row** — the original "Phase 4 IS the editorial" architectural call.
+
+---
+
 ## What this iteration ships
 
 A wedding showcase system where every completed wedding (where the couple consents) becomes a permanent, structured, searchable case study that:

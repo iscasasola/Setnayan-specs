@@ -28,6 +28,8 @@ Today they answer those by asking the nearest cousin, squinting at a paper progr
 
 ## 2. Auto-activation logic (five lifecycle modes)
 
+> **Cross-reference · unified QR lifecycle (2026-05-22):** The five modes below (`coming_soon` / `pre_event` / `live` / `recap` / `archive`) are this iteration's implementation-level state machine for the day-of guest surface. They are the **same URL** as the 3-state cross-iteration framing locked in [0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md): State 1 Invitation rolls up `coming_soon` + `pre_event` (0002's Phase 1–3) · State 2 Event proper = `live` (this iteration's primary contribution) · State 3 Editorial rolls up `recap` + `archive` (0002's Phase 4). Mode-selection here is the granular state machine; the 3-state lock is the cross-iteration framing. Guest hydration on `live` mode uses the **same `?invite=[guest_token]` query param** as the Invitation state — magic-link cookie set in State 1 carries into State 2 without re-scanning.
+
 The landing page reads `events.event_date`, `events.timezone`, and `NOW()` on every render and selects one of five modes. Mode selection is cached client-side for 60 seconds and recomputed on every navigation. The couple can manually override via `events.live_mode_override`.
 
 | Mode | Time window | What the guest sees | Default state |

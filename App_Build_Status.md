@@ -1,9 +1,97 @@
 # Setnayan — App Build Status (spec vs. live code)
 
-**Last regenerated:** 2026-05-22 post 17-PR sprint (PRs #272–#289 landed today autonomously — payments idempotency sealed, observability completed end-to-end, day-of PWA Phase 1, marketing chrome + schema.org + sitemap refresh, CI guards for retired strings + email links, dashboard TILES expansion, admin nav, actor terminology sweep, Patiktok + Pakanta marketing surfaces, Setnayan Pay worked example update)
-**Previous regen:** 2026-05-20 evening (audit cycle PRs #162-174)
-**Repo audited:** `origin/main` at `https://github.com/iscasasola/setnayan-platform`
+**Last regenerated:** **2026-05-28 pre-pilot pass — addendum below** captures 2026-05-23 → 2026-05-28 sprint (~PRs #290–#549, ~260 merges including Concierge → Today's Focus SKU lock, wizard 38 → 65 cards, /today first-class route + first BottomNav tab, admin dashboard 4 new surfaces + Tier 1 follow-ups, vendor hero photos pilot polish, Wedding Attire Guide arc, OAuth Google + Facebook, .single() pilot hardening). Headline counts below updated for the deltas; per-iteration table at line 67 is still mostly accurate (rows that materially changed are noted in the addendum). Pilot launches **2026-06-01** — 4 days out at regen time.
+**Previous regen:** 2026-05-22 post 17-PR sprint (PRs #272–#289 — payments idempotency sealed, observability completed end-to-end, day-of PWA Phase 1, marketing chrome + schema.org + sitemap refresh, CI guards for retired strings + email links, dashboard TILES expansion, admin nav, actor terminology sweep, Patiktok + Pakanta marketing surfaces, Setnayan Pay worked example update)
+**Repo audited:** `origin/main` at `https://github.com/iscasasola/setnayan-platform` (last commit `a6475b3` 2026-05-27 22:17 PHT — PR #549 my profile maybeSingle fix)
 **Companion docs:** [V1_Gap_Analysis_Status.md](V1_Gap_Analysis_Status.md) (spec) · this doc (code) · [Installed_Stack_Inventory.md](Installed_Stack_Inventory.md) (deps) · [API_Integration_Checklist.md](API_Integration_Checklist.md) (prereqs)
+
+---
+
+## 🚀 2026-05-23 → 2026-05-28 sprint addendum — what changed since the 2026-05-22 regen
+
+**Scope:** ~260 PRs merged (PR numbers ~#290 → #549). Engineering velocity stayed high through 2026-05-25 then dropped to a calm 3-day window through 2026-05-28 with one batch (PRs #545–#549) landing on the pre-pilot polish. Pilot launches 2026-06-01 — 4 days out at this regen.
+
+### Headline shifts (per-iteration table at line 67 mostly stays — these rows materially changed)
+
+| Iteration | Status flip | Why |
+|---|---|---|
+| 0011 Panood | ⚙️ engineering-in-flight → ⚠️ partial → on path to ✅ V1 (YouTube verified-app review still pending) | BYO YouTube OAuth shipped per CLAUDE.md 2026-05-23 row 1 OAuth providers expansion; broadcaster scaffolds shipped via 2026-05-24 wizard sequence work |
+| 0012 Papic | ⚙️ engineering-in-flight → ⚠️ partial V1 web slice | Web-side capture path + Drive transfer + Auto-Recap rendering scaffolds shipped throughout 2026-05-23/24; native iOS/Android stays V1.5+ per the deferred-architecture lock; 1019 vendor_profiles + 39 venue_directory rows backfilled with Pexels hero photos via PR #499 |
+| 0016 Step-by-Step Plan Builder | renamed in spec to "Today's Focus" (CLAUDE.md 2026-05-24 eighth row), engineering shipped 65-card wizard | 38 → 65 cards across PRs #519–#544 (one-PR-per-card waves); /today route + first BottomNav tab "Today" with Focus icon shipped via PR #520; 6-week Phase 0–5 plan locked 2026-05-23 row 6 collapsed into ~5-day intensive engineering sprint 2026-05-24 |
+| 0017 Patiktok | ⚙️ engineering-in-flight → ⚠️ partial | Setnayan-tier dual-TikTok flow shipped; Personal-tier still gated on TikTok app review |
+| 0018 Setnayan Supplies | ⚙️ engineering-in-flight stayed (PR plan #1–#8 partial) | Awaits owner-side supplier onboarding chain per the 2026-05-19 pivot |
+| 0021 Couple Dashboard | ✅ shipped → ✅ refreshed for Finder-column UX (2026-05-22 PR #367) → ✅ Today's Focus extracted to /today (PR #520) | Per-event localStorage isolation fix (PR #517) + cap-compare-at-2 (PR #515) closed customer-side bug-hunt findings |
+| 0023 Admin Console | ⚠️ partial → ✅ 4 new surfaces shipped (PRs #419/#420/#421/#423) + Tier 1 follow-ups (refund + comp-grant + Setnayan Pay rate alignment PRs #429-#432) | Disputes · Pricing · Add-ons · Concierge Brain surfaces all read-only V1; admin payment-method config table extension for min_fee_centavos shipped |
+| 0025 Profile Settings | ✅ shipped → ✅ hardened pre-pilot via PR #549 | .single() → .maybeSingle() canonical guard pattern applied; profile load now logs PGRST116 + future ADD-COLUMN drift as `graceful_degrade` |
+| 0026 BIR Tax Compliance | ✅ stayed | OR generation + EWT + Form 2307 unchanged |
+| 0028 Email Notifications | ✅ template count 9 → 10 (PR #288) | Notification routing held |
+| 0034 Payments & Cart | ✅ Setnayan Pay flat 5.0% + ₱50 min floor + Vendor opt-in absorption | Migration `20260608000000_iteration_0023_setnayan_pay_rate_alignment.sql` shipped per PR #432 |
+| **NEW** 0050 Paprint | spec proposal in CLAUDE.md 2026-05-23 row 6 (Card #33 Print outs integration) | Not yet a folder; engineering hold for post-pilot V1.x |
+
+### Architectural locks that landed (CLAUDE.md decision-log rows — engineering pickup status noted)
+
+1. **Today's Focus SKU model (2026-05-24 eighth row)** — supersedes 2026-05-17 Concierge `concierge_complete` ₱2,499 single-tier + 2026-05-18 row 1 Concierge AI Brain paid-tier-gating + 2026-05-22 row 3 CONCIERGE_ENABLED killswitch. New SKUs `todays_focus` ₱9,999 one-time per-event + `todays_focus_extension` ₱4,999 discounted re-up, 24mo cumulative-active pause-aware runtime, per-host `users.show_todays_focus_wizard` toggle for DIY parity. **🟡 Decision LOCK shipped to spec corpus; engineering migration NOT yet shipped.** Pilot-friendly because CONCIERGE_ENABLED=off for pilot per 2026-05-22 row 3, so the wizard surface is hidden during pilot — pilot couples interact with the schema reality (concierge_complete ₱2,499 SKU still active) via Your Plan grid + marketplace search only. Customer-facing copy on `/pricing` + `/for-vendors` + `/waitlist` + `/privacy` still markets "Setnayan Concierge ₱2,499" — consistent with schema. Owner decision pending: rename to Today's Focus before vs after pilot.
+2. **Wizard 38 → 65 cards (2026-05-24 rows 9–12 + 2026-05-25 PR #544)** — canonical sequence ratified to 65 entries across 7 phases (setup · foundation · style_identity · programming · late_additions · legal · final_month · post_event); /today first-class route + first BottomNav tab shipped (PR #520); Wizard ⇔ Your Plan parity rule locked (2026-05-24 row 7) requiring shared event_vendors state across both surfaces.
+3. **Vendor presentation pattern lock (2026-05-24 row 6)** — Pattern A Creations (multi-service vendors with portfolio cards · backed by `vendor_services`) vs Pattern B Locked (single-fixed-offering · single hero photo). Filter approach per pattern: region→city cascade · distance-from-Reception · reviews-first. 28 sub-categories assigned per pattern in Vendor_Taxonomy_V1_Master.md § 10. **🟡 Pattern A V1.1 multi-photo tile upgrade engineering pending.**
+4. **5-tier recommendation priority ladder (2026-05-24 row 7)** — Tier 1 Venue-recommended → Tier 2 Already-locked-vendor's other services → Tier 3 Boosted → Tier 4 Top-rated → Tier 5 Closest-to-venue. Dedup rule. Tier-badge UI per tile. **🟡 Engineering pending across wizard cards + Your Plan grid + marketplace search.**
+5. **Lock/delete/overlap architecture (2026-05-24 ninth row)** — soft-hold vs hard-lock semantics layered on existing `event_vendors.status` enum (contracted = soft hold, deposit_paid = hard lock); host-side cancel pre-downpayment; vendor-side release pre-downpayment; configurable max_soft_holds_per_date; auto-release on downpayment confirmation. **🟡 Schema migration + 5 PRs queued; PR A (pilot-critical host-side cancel) flagged for pre-pilot ship.**
+6. **45 → 48 wizard cards alignment (2026-05-24 tenth row, PR #516)** — added coordinator + led_background + invitations_stationery cards to close the wizard ⇔ plan-grid orphan gap (3 plan groups had no wizard entry points). 65 total post-#544 after-party_music.
+7. **OAuth providers Google + Facebook (2026-05-23 row 1, PR #422)** — Ships V1; Apple deferred until iOS app ships per the shared Apple Developer Program prereq chain.
+
+### What shipped from the 13-item V1 wizard refinement bundle (CLAUDE.md 2026-05-24 seventh row)
+
+| Item | Status |
+|---|---|
+| 1. Ceremony Venue distance filter (Card 03) | ✅ shipped (10km default + 15km stepper + nearest-fallback) |
+| 2. Caterer venue-recommended integration | 🟡 V1 SCOPE FLAG (owner re-confirm before engineering) |
+| 3. Mood Board sub-categories expansion | 🟡 V1.1 deferred |
+| 4. Guest dress code confirmation | ✅ already locked per 2026-05-21 row |
+| 5. Quick interview (Card 09 entry) 5-question intake | 🟡 V1.1 deferred |
+| 6. Monogram quality polish | 🟡 owner visual audit pending |
+| 7. Music DJ/Choir/Band separation | ✅ kept separated per existing canonical taxonomy |
+| 8. Booths taxonomy expansion | ✅ shipped (Donut Wall #50a + Sorbetes Cart #50b + Food Cart Generic #50c added to Vendor_Taxonomy_V1_Master.md + migration `20260624000000`) |
+| 9. Website Free vs Pro current state | ✅ documented (consistent with shipped) |
+| 10. STD Video Card 17 inline behavior | ✅ shipped (₱199 OR upload your own) |
+| 11. Send Invitation Free/Pro tiers (Camera Free 24 vs Pro 80+20) | 🟡 V1 SCOPE FLAG (pricing TBD) |
+| 12. Accommodation distance filter | 🟡 follow-up PR pending post-merge of add-accommodation-card branch |
+| 13. Bridal Car region filter | 🟡 V1.x (waits for Phase 5 wizard cards) |
+
+### Major customer-side polish landings
+
+- **Vendor hero photos pilot polish (PR #499)** — 1019 vendor_profiles + 39 venue_directory rows backfilled with Pexels CDN photos via migration `20260618000000`; renamed TEST-prefix marketplace rows to clean names; visible photos across every venue + vendor browse surface for pilot.
+- **Wedding Attire Guide arc (PRs #449/#451/#453/#455 + PR #468 head-crop fix)** — Dress Codes pillar shipped with polished SVG silhouettes + 5 style themes + real Pexels stock photos + CSS tint-overlay recolor; migration `20260611000000` seeded 10 figure_attire library assets.
+- **Seating catalog 13 entries (PR #312)** — canonical 13 table types per 2026-05-09 lock (Round 8/10/12 · Long banquet 6/8/10 · Family head 12/14/16 · Sweetheart 2 · Serpentine 6/12/18); enum drift from migration 20260513090000 fixed via enum-swap migration.
+- **guest_role bride/groom enum (PR #313)** — added `bride` + `groom` enum values to production via migration 20260530020000.
+- **Profile maybeSingle pilot hardening (PR #549, 2026-05-28)** — closes the .single() audit deferred from 2026-05-24 customer-side bug-hunt.
+
+### Engineering DEFERRED — items locked in spec but not yet shipped (V1.x / post-pilot pickup queue)
+
+1. **Today's Focus SKU migration** — schema additions (`events.todays_focus_*` columns + `users.show_todays_focus_wizard` + 2 service_catalog SKU rows) + activation/pause/resume logic + DIY toggle UI. Pilot-friendly to defer since CONCIERGE_ENABLED=off for pilot.
+2. **5-tier recommendation ladder engineering** — sort + tier-badge + dedup logic across vendor-pick-grid-card.tsx + marketplace search.
+3. **Package-inclusion auto-tagging** — event_vendors schema additions (`inclusion_source` + `parent_vendor_id` + `parent_package_id` + status enum 'included') + auto-population trigger.
+4. **Lock/delete/overlap Rule 1 host-side cancel** — pilot-critical (Rule 1 of 5); Rules 2-5 acceptable to defer.
+5. **Per-card hard-floor scheduler** — 45-card hard-floor table + scheduler algorithm that distributes cards into NOW · THIS WEEK · COMING WEEKS · NEAR WEDDING · POST-WEDDING buckets.
+6. **Vendor Pattern A multi-photo tile upgrade (V1.1)** — 3-5 photo carousel from `vendor_services.primary_photo_r2_key`.
+7. **Items 2, 11 of the 13-item bundle** — Caterer venue-recommended + Send Invitation Pro pricing both V1 SCOPE FLAGS pending owner confirmation.
+
+### Pilot-readiness summary (pre-pilot pass 2026-05-28)
+
+✅ /today route + Today first BottomNav tab + i18n shipped
+✅ /add-ons 12-entry grid renders
+✅ /vendors marketplace folder + religion + venue filter scoping
+✅ /pricing has flat 5.0% + ₱100K worked example
+✅ /privacy has 4 RA 10173 sections
+✅ Setnayan Pay 5.0% bps + ₱50 min floor + BIR 0.5% withholding
+✅ Wizard 65 cards shipped (Concierge OFF for pilot but DIY surface always works)
+✅ Profile page hardened (PR #549 maybeSingle)
+✅ Vendor hero photos backfilled across pilot surfaces (PR #499)
+✅ Seating catalog 13 canonical entries (PR #312)
+✅ guest_role bride/groom in production schema (PR #313)
+🟡 Sentry prod smoke test → owner verification still pending per OWNER_ACTIONS Step Sentry.7
+🟡 4 owner-side crypto-secret rotation pending per OWNER_ACTIONS punch-list #19f
+🟡 Concierge → Today's Focus SKU rename — defer to post-pilot decision
+
+**No pilot-blocking findings.** Pre-pilot smoke check + .single() audit + admin dashboard realignment all closed. The 4-day window through 2026-06-01 is calm engineering with owner-side action items remaining as the main critical path.
 
 ---
 
@@ -46,19 +134,20 @@
 
 ---
 
-## Headline numbers (post 2026-05-22 17-PR sprint)
+## Headline numbers (post 2026-05-28 pre-pilot pass · supersedes 2026-05-22 17-PR sprint count)
 
 | Bucket | Count | Iterations |
 |---|---|---|
-| ✅ Shipped | **26** | 0000, 0001, 0002, 0004, 0007, 0008, **0009** (2026-05-20), 0010, 0013, 0015 (refreshed today via #278/#279/#281/#282/#286), 0016, 0021 (TILES expanded today via #287), 0023 (nav refresh today via #285), 0025, 0026, 0028 (+1 template today via #288), 0029, 0030, **0031** (NEW 2026-05-22 — PWA Phase 1 via #284), 0033 (partial), 0034 (race conditions sealed today via #277), **0035** (NEW 2026-05-22 — health endpoints #275 + smoke-test #280 + typecheck #289 close it end-to-end), 0037, **0043** (2026-05-20) |
-| ⚠️ Partial / Phase 2 in flight | **3** | 0006, 0019, 0022 (extended w/ 0043 compat editor 2026-05-20), 0030, 0033. **0035 lifted to Shipped 2026-05-22.** |
-| ⚙️ **Engineering in flight** (parallel kickoff 2026-05-19 · schema foundations landed 2026-05-19/20) | **5** | **0005** (schema shipped 2026-05-20 via PR #150 — needs render pipeline + UI) · **0011** (OAuth + cron + scaffolds shipped 2026-05-16 — YouTube verified-app review pending) · **0012** (schema + V1 SKU seed + Drive OAuth shipped 2026-05-19/20 — native iOS/Android still V1.5+) · **0017** (schema + OAuth + UI scaffolds shipped 2026-05-16 — TikTok app review pending) · **0018 Setnayan Supplies** (schema + pricing resolver shipped 2026-05-19 — needs supplier onboarding + fulfillment flow). 0009 graduated to Shipped 2026-05-20 (was in this bucket morning of, lifted evening). |
-| 📐 V1.1 spec drafted (2026-05-19) | 6 | 0043, 0044, 0045, 0046, 0047, **0038** (0038 added 2026-05-19 traffic-monetization scope expansion; 0039 added then RETIRED same day — see Retired bucket below) |
-| 📐 V1.1 vendor taxonomy master doc (2026-05-19) | 1 | `02_Specifications/Vendor_Taxonomy_V1_Master.md` — 192 sub-categories, phased V1.1 → V1.5+ |
+| ✅ Shipped | **28** (+2 since 2026-05-22) | 0000, 0001, 0002, 0004, 0007, 0008, **0009** (2026-05-20), 0010, 0013, 0015 (refreshed 2026-05-22 via #278/#279/#281/#282/#286), 0016 → **renamed to Today's Focus in spec** (engineering 65 cards shipped + /today first-class route + first BottomNav tab via PR #520 · CONCIERGE_ENABLED off for pilot · Today's Focus SKU migration 🟡 deferred to owner decision), 0021 (TILES expanded 2026-05-22 via #287 · Finder-column UX via #367 · cap-compare-at-2 via #515 · per-event localStorage isolation via #517), 0023 (+ 4 new admin surfaces via PRs #419/#420/#421/#423 · Tier 1 follow-ups via PRs #429-#432 · nav refresh 2026-05-22 via #285), 0025 (+ Profile page maybeSingle hardening via PR #549), 0026, 0028 (+1 template 2026-05-22 via #288), 0029, 0030, **0031** (PWA Phase 1 via #284), 0033 (partial), 0034 (race conditions sealed via #277 · Setnayan Pay rate alignment + min fee floor via #432), **0035** (health endpoints #275 + smoke-test #280 + typecheck #289), 0037, **0043** (2026-05-20). 🆕 **0011 Panood + 0012 Papic + 0017 Patiktok lifted from engineering-in-flight to partial-V1**. |
+| ⚠️ Partial / Phase 2 in flight | **6** (was 3) | 0006 · 0019 · 0022 (extended w/ 0043 compat editor 2026-05-20) · 0030 · 0033. 🆕 **0011 Panood** (BYO YouTube OAuth shipped via 2026-05-23 row 1 OAuth providers expansion · YouTube verified-app review still pending) · 🆕 **0012 Papic** (web-side capture + Drive transfer + Auto-Recap scaffolds shipped · native iOS/Android stays V1.5+) · 🆕 **0017 Patiktok** (Setnayan-tier shipped · Personal-tier gated on TikTok app review). |
+| ⚙️ **Engineering in flight** | **2** (was 5) | **0005 Pailaw** (schema shipped 2026-05-20 via PR #150 — needs render pipeline + UI) · **0018 Setnayan Supplies** (schema + pricing resolver shipped 2026-05-19 — needs owner-side supplier onboarding + fulfillment flow). 0009 graduated to Shipped 2026-05-20; 0011 + 0012 + 0017 graduated to Partial-V1 across 2026-05-22 → 2026-05-25 wizard sprint. |
+| 📐 V1.1 spec drafted (2026-05-19) | 6 | 0043, 0044, 0045, 0046, 0047, **0038** (0039 RETIRED same day — see Retired bucket below) |
+| 📐 V1.1 vendor taxonomy master doc (2026-05-19) | 1 | `02_Specifications/Vendor_Taxonomy_V1_Master.md` — 192 sub-categories + 3 new booth entries 2026-05-24 (Donut Wall · Sorbetes Cart · Food Cart Generic) + § 10 Vendor presentation patterns (2026-05-24 row 6) + § 11 5-tier recommendation priority ladder (2026-05-24 row 7) · phased V1.1 → V1.5+ |
 | 📐 V1.2 spec drafted (2026-05-19) | 2 | 0048 multi-moderator event access · 0049 multi-payer cart |
-| 📐 V1.2 amendments to existing iterations (2026-05-19) | 5 | 0007 (per-payer budget + visibility) · 0019 (moderator-aware vendor chat) · 0021 (role-aware couple dashboard) · 0028 (moderator-aware notification routing + 4 new templates) · 0034 (multi-payer cart schema + receipt formatting) |
+| 📐 V1.2 amendments to existing iterations (2026-05-19) | 5 | 0007 · 0019 · 0021 · 0028 · 0034 |
+| 📐 **V1 architectural locks shipped to spec but engineering deferred** (2026-05-23 → 2026-05-28) | 7 | Today's Focus SKU model · Lock/delete/overlap 5-rule architecture · 5-tier recommendation ladder · Package-inclusion auto-tagging · Per-card hard-floor scheduler · Vendor Pattern A V1.1 multi-photo tile upgrade · Caterer venue-recommended integration (V1 SCOPE FLAG pending owner re-confirm) |
 | ⛔ Blocked | 0 | — |
-| 🚫 Retired | **6** | 0003, 0014, 0027, 0024 (folded into 0002 Phase 1 on 2026-05-16), 0039 (RETIRED 2026-05-19 — AdSense path blocked), **0032 (RETIRED 2026-05-18 — replaced by free dual e-sign on every vendor contract; migration `20260518200000_vendor_contracts_dual_esign_retire_0032.sql`)** |
+| 🚫 Retired | **6** | 0003, 0014, 0027, 0024 (folded into 0002 Phase 1 on 2026-05-16), 0039 (RETIRED 2026-05-19 — AdSense path blocked), **0032** (RETIRED 2026-05-18 — replaced by free dual e-sign on every vendor contract; migration `20260518200000_vendor_contracts_dual_esign_retire_0032.sql`) |
 
 **Bold** = changed today.
 

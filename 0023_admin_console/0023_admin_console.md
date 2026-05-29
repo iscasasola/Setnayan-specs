@@ -8,25 +8,53 @@
 
 ---
 
-## 1. The 10 admin surfaces
+## 1. The 28 admin surfaces
 
-The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. (Surface count updated 2026-05-17 from 8 → 9 with the addition of the Concierge Abuse review queue, then from 9 → 10 with the addition of the Add-on Management card view, then 10 → 11 on 2026-05-18 with the addition of the Concierge Brain admin surface — Brain Editor + Unanswered Questions queue + Cost Watch + Cowork sync lane all in one tab.)
+The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. Surface count refreshed 2026-05-23 to enumerate ALL shipped admin routes — the prior 11-surface table (2026-05-18) listed only the speced surfaces and silently missed the 12 operational surfaces that shipped during the V1 build burst (Funnels, Payouts, Receipts, BIR 2307, Ads, Demo vendors, Events, Help inbox, Force majeure, Moodboard library, Operations & Hiring, Taxonomy, plus Reviews). The 4 missing-from-code surfaces from the prior table (Disputes, Pricing, Add-on Management, Concierge Brain) all shipped in the 2026-05-23 admin alignment batch ([PRs #419 · #420 · #421 · #423](https://github.com/iscasasola/setnayan-platform/pulls?q=is%3Apr+merged%3A2026-05-23)). Table below is grouped by the actual `apps/web/app/admin/_components/admin-nav.tsx` structure so spec readers see what an admin sees on the left rail.
 
-| # | Surface | URL section | What it does |
-|---|---|---|---|
-| 1 | **Home** | `/admin` | Queue overview · today's actions · alerts · platform health metrics · Team Pool widget (for team members) |
-| 2 | **Verification Queues** | `/admin/verify` | Vendor identity verification + service approval + custom-category review — three queues, one screen |
-| 3 | **Payments &amp; Activations** | `/admin/payments` | Customer payment confirmation → service activation hook fires. Refund processing too. |
-| 4 | **Users** | `/admin/users` | All customers + vendors + agents · search · per-user detail with actions (suspend, refund, comp, audit log) · 🟣 internal-account + 🟢 team-member badges |
-| 5 | **Pricing &amp; Catalog** | `/admin/pricing` | SKU price control (tabular grid) · comp / freebie tooling · promo codes · price-history audit · internal accounts (§ 3.5b) · payment-receiving accounts (§ 3.5c). Engineering / audit view. |
-| 6 | **Disputes &amp; Refunds** | `/admin/disputes` | Dispute claim queue · mediation flow · refund + replacement-vendor process |
-| 7 | **Settings** | `/admin/settings` | Platform-wide config · brand-mark management · feature flags · two-admin approval queue · admin role provisioning |
-| 8 | **Website editor** | `/admin/website` | Marketing-site widget management — enable/disable + drag-drop reorder per page (home · /for-vendors · /features · /about). See § 3.10. |
-| 9 | **Concierge Abuse** | `/admin/concierge-abuse` | Multi-account trial-cycling review queue. Tiered enforcement (warning → trial ban → full ban). See § 3.11. Added 2026-05-17. |
-| 10 | **Add-on Management** | `/admin/addons` | App Store-style card view mirroring the customer-facing add-ons grid + admin-only tiles (Concierge etc.) + a second tab for vendor-side add-ons. Per-tile drawer covers eligibility · pricing · current users · statistics. Generates the consolidated `Pricing.md` report from live `service_catalog` + `feature_policy` state. See § 3.12. Added 2026-05-17. |
-| 11 | **Concierge Brain** | `/admin/brain` | Browse + edit `concierge_brain_chunks` (markdown editor + tag autocomplete + cross-ref linker + per-chunk re-embed button + paid-tier-only flag) · queue for `concierge_unanswered_questions` (admin elevates real questions into new chunks) · Cost Watch aggregating per-tier per-model inference spend · Cowork sync lane for content authors. See § 3.13. Added 2026-05-18. |
+| Group | # | Surface | URL section | What it does |
+|---|---|---|---|---|
+| — | 1 | **Overview** | `/admin` | Queue summary · today's actions · alerts · platform health · Team Pool widget (§ 10b · 🟢 team-member accounts) |
+| Queues | 2 | **Verification** | `/admin/verify` | Vendor identity verification + service approval + custom-category review · 12-doc checklist (§ 3.2) |
+| Queues | 3 | **Payments** | `/admin/payments` | Manual BDO/GCash reconciliation → activation hook · refund processing (§ 3.3) |
+| Queues | 4 | **Reviews** | `/admin/reviews` | Review moderation queue · self-review gate appeals (per 2026-05-15 dual-role lock — single-admin override-publish authority) |
+| Queues | 5 | **Help inbox** | `/admin/help` | Customer + vendor support tickets · topic-routed (per 0029 Help Center) · structured contact-form intake |
+| Queues | 6 | **Force majeure** | `/admin/force-majeure` | Force-majeure mediation escalations from chat threads · couple-side & vendor-side date/venue change flows (per 0019 § force majeure) |
+| Queues | 7 | **Concierge abuse** | `/admin/concierge-abuse` | Multi-account trial-cycling review · tiered enforcement (warning → trial ban → full ban) per § 3.11 · added 2026-05-17 |
+| Queues | 8 | **Disputes** | `/admin/disputes` | Dispute claim queue reading `vendor_disputes` · status + category filters · stats banner · V1 read-only list; detail + resolve actions V1.x · TIER 2 venue-scan self-claim sub-queue (per 2026-05-22 unified QR lock — § 3.6 + cross-ref) · added 2026-05-23 |
+| Directory | 9 | **Users** | `/admin/users` | All customers + vendors + agents · search · per-user detail with actions (suspend, refund, comp, audit log) · 🟣 internal-account + 🟢 team-member badges |
+| Directory | 10 | **Events** | `/admin/events` | All events directory · admin actions (force-end, delete, archive, lifecycle-phase override) |
+| Directory | 11 | **Vendors** | `/admin/vendors` | Vendor profiles directory · per-vendor edit form at `/admin/vendors/[vendorProfileId]/edit` |
+| Directory | 12 | **Venues** | `/admin/venues` | Venue directory · new venue CTA at `/admin/venues/new` · detail at `/admin/venues/[id]` |
+| Directory | 13 | **Demo vendors** | `/admin/demo-vendors` | Demo vendor management for pre-launch + pilot mode (§ pilot scope per [[project_setnayan_pilot_timeline]]) |
+| Money | 14 | **Payouts** | `/admin/payouts` | Vendor payout dispatch + Maya Bulk Fund Transfer batches (V1.5+) · manual reconciliation · 3-stage milestone tracking for coming_soon vendors (per 2026-05-17 disbursement lock) |
+| Money | 15 | **Pricing** | `/admin/pricing` | Read-only SKU catalog reading `service_catalog` · category + active-state + billing-model filters · stats banner · V1 read-only; edit form + Cost Watch + price-history audit ship V1.x (per 2026-05-22 read-mostly admin pattern) · added 2026-05-23 |
+| Money | 16 | **Receipts** | `/admin/receipts` | BIR-compliant Official Receipts per order · per-order audit (per 0026 BIR compliance) |
+| Money | 17 | **BIR 2307** | `/admin/bir/2307` | Quarterly Form 2307 PDFs for vendor EWT reporting (per 0026 BIR compliance) |
+| Money | 18 | **Ads** | `/admin/ads` | Boosted Ads + Sponsored Boost vendor management (per 0022 § 5b vendor marketing tiers) |
+| Money | 19 | **Payment methods** | `/admin/settings/payment-methods` | Per-method config (rates · eligibility per account type · active flag) · read-only V1 banner pattern · also reachable from Settings group below |
+| Content | 20 | **Taxonomy** | `/admin/taxonomy` | Vendor canonical_services taxonomy management — 192-row v11 taxonomy across 12 wedding folders (per 2026-05-20 marketplace remap) |
+| Content | 21 | **Website editor** | `/admin/website` | Marketing-site widget management — enable/disable + drag-drop reorder per page (home · /for-vendors · /features · /about) · see § 3.10 |
+| Content | 22 | **Add-ons** | `/admin/addons` | App Store-style card view of customer SKUs reading `service_catalog` + `feature_policy` · Pricing Report download generates `Pricing.md` snapshot from live DB · per-card eligibility dots · vendor add-ons tab Coming soon · added 2026-05-23 (V1 single tab; V1.x adds per-SKU drawer + vendor tab + edit affordances) |
+| Content | 23 | **Concierge brain** | `/admin/brain` | Browse `concierge_brain_chunks` grouped by 8 topic files (Filipino Cultural Reference · Regional Pricing Benchmarks · Seasonal Weather · Planning Timelines · Legal BIR · Setnayan Feature Reference · Vendor Decision Logic · Budget Allocation) · paid-tier-only badge · is_stale flag · hit_count_30d · pilot banner ("Concierge is OFF for pilot — content authoring lands ahead of post-pilot launch") · V1 read-only browse; Unanswered Questions queue + Cost Watch + per-chunk re-embed land V1.x · added 2026-05-23 |
+| Content | 24 | **Moodboard library** | `/admin/moodboard-library` | Higgsfield-generated asset library + Color Range Manipulator + treatment specializations (ceiling · wall · surroundings · tunnel) per 2026-05-21 Visual preview pillars lock |
+| Operations | 25 | **Hiring & Growth** | `/admin/operations-hiring` | Owner-only growth cockpit · hiring forecasts · bottleneck signals (verification backlog · support response time · engineering blockers · marketing pipeline · disputes volume · founder time) · pulse model state (per 2026-05-20 hiring predictive guide lock) |
+| — | 26 | **Funnels** | `/admin/funnels` | PostHog funnel deep-links · conversion analytics · ext-link to PostHog dashboard for cohort + retention views |
+| Settings | 27 | **Platform settings** | `/admin/settings` | Brand-mark management · feature flags · two-admin approval queue · admin role provisioning · internal accounts (§ 3.5b) · payment-receiving accounts (§ 3.5c) · BIR config (§ 3.5d) · feature-policy grid (§ 3.5e — V1.x) · payment-method policy matrix (§ 3.5f — V1.x) · brand-active UI theme picker (per 2026-05-15 theme system lock) · Setnayan Pay convenience-fee rate config (per 2026-05-17 row 16) |
+| Settings | 28 | **Demo mode** | `/admin/settings/demo-mode` | Demo-mode toggle for pre-launch + pilot · feeds `NEXT_PUBLIC_PILOT_MODE_FREE_UNTIL` env-derived state |
 
-Mobile uses a 5-tab bottom nav: **Home · Queues · Payments · Users · More**. The "More" tab houses Pricing, Disputes, Settings, Website editor, Concierge Abuse, and Add-on Management.
+**Sub-routes accessible via parent list pages** (not standalone nav entries):
+- `/admin/disputes/[disputeId]` — dispute detail + resolve actions (V1.x)
+- `/admin/force-majeure/[flagId]` — force-majeure flag detail
+- `/admin/vendors/[vendorProfileId]/edit` — vendor profile edit form
+- `/admin/venues/[id]` — venue detail · `/admin/venues/new` — create form
+- `/admin/pricing/[skuCode]` — SKU detail + edit form (V1.x)
+- `/admin/addons?sku=<sku_code>` — expanded card via URL state (Finder-column pattern per PR #367)
+- `/admin/addons/pricing-report` — `Pricing.md` snapshot download route handler
+
+Mobile uses a 5-tab bottom nav: **Home · Queues · Directory · Money · More**. The "More" tab houses Content + Operations + Funnels + Settings.
+
+> **Vendor TIER 2 self-claim moderation · cross-reference (2026-05-22):** The vendor scan-at-venue flow locked 2026-05-22 (per [0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md) + [0006 § Vendor scan at venue · TIER 1 / TIER 2](../0006_vendors_management/0006_vendors_management.md)) routes TIER 2 self-claims into the existing 4-layer moderation pipeline locked 2026-05-20 (vendor verified + canonical service coverage + active-in-city + couple veto + admin). Admin review queue lives on surface 6 (Disputes & Refunds) as a new sub-queue alongside the existing dispute claim queue — claims tagged `claim_source = 'venue_qr_scan'` get a +5% bump in auto-approval probability (physical presence at the venue at event-time is a strong legitimacy signal). The 48-hr SLA from the 2026-05-20 lock applies. Anti-spam caps (5 claims/day · 3 rejections in 30 days = 30-day ban · couple permanent block) inherited from 2026-05-20.
 
 ---
 

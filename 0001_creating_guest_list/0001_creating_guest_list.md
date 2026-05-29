@@ -52,6 +52,12 @@ This sits inside the couple dashboard. Nested under the existing dashboard shell
 
 ---
 
+## QR token model · cross-reference (2026-05-22)
+
+The `guests.qr_token` column declared in the schema below is the **canonical token** for the unified QR lifecycle model locked in [0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md). One QR per actor — each `guests` row including each plus-one row (per `plus_one_of_guest_id` below) gets its own 32-hex `qr_token`, generated at row insert via `DEFAULT encode(gen_random_bytes(16), 'hex')`, unique per guest. **The same token drives four scan uses across four actors:** anonymous browser hydration · paparazzi tag (0012) · Patiktok booth auto-tag (0017) · day-of LIVE view hydration (0031). Token rotation never breaks photo-tag history — `photo_tags.guest_id` is the immutable join; the QR token is just the lookup key.
+
+---
+
 ## Data model
 
 ### `guests` table

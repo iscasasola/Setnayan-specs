@@ -26,6 +26,8 @@ Couples search BOTH levels:
 
 This is the second layer of structural depth vs WedMeGood's free-text-and-photo-gallery model.
 
+> **Vendor scan-at-venue product picker · cross-reference (2026-05-22):** When a TIER 2 vendor self-claims credit on a wedding via the venue-master-QR scan (per [0006 § Vendor scan at venue · TIER 1 / TIER 2](../0006_vendors_management/0006_vendors_management.md) + [0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md)), the scan-time form includes a **product picker** sourcing rows from this iteration's `vendor_products` table (filtered to the scanning vendor's own products). Vendor picks the specific product they delivered ("Spanish Latte coffee booth" · "3-tier chocolate ganache cake" · "Maria Clara terno") — links the editorial credit to a specific catalog row, not just the canonical_service. Drives the "Used at N real weddings" badge on each product page (see 0046 § product profile integration). `wedding_showcase_vendor_claims.product_id` (added in 2026-05-22 0006 schema extension) is the FK back to this iteration's `vendor_products(product_id)`.
+
 ---
 
 ## Schema

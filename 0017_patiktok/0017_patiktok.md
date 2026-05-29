@@ -20,6 +20,8 @@ Patiktok is a **TikTok-style mimic station** placed at the wedding venue. Guests
 
 **Filipino branding:** "Patiktok" = "to TikTok" (PH conversational form). Pairs with Papic (capture) and Panood (broadcast) in the Setnayan product family.
 
+> **QR token model · cross-reference (2026-05-22):** The Patiktok booth's kiosk app reads the guest's **same `guests.qr_token`** (declared in [0001](../0001_creating_guest_list/0001_creating_guest_list.md), canonical per [0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md)) when a guest steps up to record their clip. The token auto-tags the guest's just-rendered TikTok clip to them — same join key as Papic photo tagging in 0012. No separate Patiktok-specific token; no separate signup form at the booth (the QR scan IS the guest identification). Guests who haven't received their QR card yet can still record clips (untagged-still-delivered guarantee inherited from 0012's 2026-05-09 lock); they retroactively tag via the booth's "Was this you?" prompt on their personal invitation page post-event.
+
 ## What's included in the Patiktok Station Pack
 
 | Component | Description |

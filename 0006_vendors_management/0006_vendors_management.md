@@ -64,6 +64,61 @@ setnayan.com/dashboard/vendors/coverage       — service coverage view (tab)
 
 ---
 
+## Vendor scan at venue · TIER 1 / TIER 2 (locked 2026-05-22)
+
+Each event carries a **master QR** encoding `https://setnayan.com/{event-slug}` (no token suffix · distinct from the per-guest `guests.qr_token` system in [0002](../0002_qr_invitation_system/0002_qr_invitation_system.md)). Couples already share this QR publicly via Facebook posts, save-the-date PDFs, and the wedding website footer. Starting 2026-05-22 the **same master QR** also drives in-app vendor delivery confirmation + self-claim at the venue.
+
+The vendor scan flow is **part of the unified QR lifecycle model** locked in [0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md). This section owns the schema + the vendor-side UX contract; 0002 owns the cross-iteration framing.
+
+### Scan-time branch · TIER 1 / TIER 2
+
+When a vendor signed into the Setnayan app scans the event master QR at the venue, the app branches on relationship state:
+
+| State | Branch | What scan does | Verification | Editorial credit tier |
+|---|---|---|---|---|
+| **TIER 1 · Verified booking** | `event_vendor_relationships.marketplace_vendor_id = <this vendor>` AND a settled Setnayan Pay order exists for this event | Confirm-delivery CTA ("Confirm you delivered {package_name} to {couple_names} today"). On confirm: stamps `delivered_at = NOW()` + `delivered_via = 'venue_qr_scan'` + flips editorial credit to **VERIFIED** per the 2026-05-20 two-tier model. Setnayan Pay transaction IS the verification — no admin review. | Automatic | **VERIFIED** badge + premium featured-strip placement + vendor analytics dashboard + bundle CTA inclusion (per CLAUDE.md 2026-05-20 "Two-tier editorial credit system locked") |
+| **TIER 2 · Self-claim** | Vendor account exists, but no booking with this event (off-platform vendor, or platform-discovered-but-paid-off-platform) | Claim-credit form: canonical_service picker (28-enum below) → sub-category picker (from 0044's 192-row taxonomy) → product picker (from 0045's `vendor_products` for this vendor, optional) → one-line description (200 chars). Creates a `wedding_showcase_vendor_claims` row with `status = 'pending'` AND `claim_source = 'venue_qr_scan'` (claims via scan get a +5% bump in auto-approval probability). | Routed to 4-layer moderation pipeline locked 2026-05-20 (vendor verified status + canonical service coverage + active-in-city + couple veto + admin) | **CLAIMED** badge (normal credit, lower visual prominence, no premium strip) |
+| **No vendor account on this device** | Sign-in / vendor-signup / claim-existing-invite-token via the 2026-05-19 `vendor_invites` flow (existing § Invite-to-Setnayan below) | Prompt-to-sign-in OR jump-to-`/register-vendor` OR enter pending-invite token if the couple already emailed one (gates on email matching) | n/a (sign-in is the gate) | n/a |
+
+### Schema additions
+
+Two new columns on `event_vendor_relationships` (extends the existing 2026-05-12 schema above):
+
+```sql
+ALTER TABLE event_vendor_relationships
+  ADD COLUMN delivered_at TIMESTAMPTZ,
+  ADD COLUMN delivered_via TEXT CHECK (delivered_via IN ('venue_qr_scan','vendor_dashboard_confirm','admin_marked'));
+```
+
+The `wedding_showcase_vendor_claims` row schema already lives in [0046 § extensions locked 2026-05-20 line 567](../0046_wedding_showcase/0046_wedding_showcase.md) — vendor-self-claim writes flow through that table. The 2026-05-22 lock adds two new columns to that schema to track the scan vector:
+
+```sql
+ALTER TABLE wedding_showcase_vendor_claims
+  ADD COLUMN claim_source TEXT NOT NULL DEFAULT 'vendor_dashboard'
+    CHECK (claim_source IN ('vendor_dashboard','venue_qr_scan','admin_added')),
+  ADD COLUMN product_id UUID REFERENCES vendor_products(product_id);  -- nullable; from 0045
+```
+
+`claim_source = 'venue_qr_scan'` gives the moderation pipeline a higher base auto-approval probability — being physically at the venue at event-time is a strong signal of legitimacy.
+
+### Anti-abuse caps (2026-05-20 caps re-stated)
+
+Inherited from the 2026-05-20 two-tier editorial-credit lock — applies to all `wedding_showcase_vendor_claims` regardless of `claim_source`:
+
+- **5 claims/day** per vendor account (cap)
+- **3 rejected claims in 30 days** = 30-day claim ban for that vendor
+- **Couple permanent block** — couples can permanently block a vendor from claiming credit on their wedding (writes to `vendor_blocks` table, per 0046)
+- **Scan-vector geofence** — `claim_source = 'venue_qr_scan'` requires the scanning device's GPS fix (if available) to fall within 50 km of the event venue's stored coordinates. Failures downgrade the claim to `'vendor_dashboard'` and add a `geofence_mismatch_warning` flag for the moderation queue.
+
+### Cross-iteration touches
+
+- **[0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md)** — canonical lock for the 3 lifecycle states · 4 scan actors · master QR vs guest QR distinction.
+- **[0023 admin console](../0023_admin_console/0023_admin_console.md)** — moderation queue for TIER 2 claims; 48-hr SLA per the 2026-05-20 lock.
+- **[0045 product catalogs](../0045_product_catalogs/0045_product_catalogs.md)** — product picker UX for TIER 2 self-claim. Vendor selects the specific product they delivered (Spanish Latte coffee booth · 3-tier chocolate ganache cake · Maria Clara terno) so the editorial credit links to a specific catalog row, not just the canonical_service.
+- **[0046 § extensions](../0046_wedding_showcase/0046_wedding_showcase.md)** — the editorial-credit chip on Phase 4 reads the `wedding_showcase_vendor_claims` table; VERIFIED tier vendors get the premium featured-strip placement.
+
+---
+
 ## Data model
 
 ### `canonical_services` — hardcoded enum

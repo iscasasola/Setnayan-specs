@@ -1,6 +1,26 @@
 # Theme System — Implementation Spec
 
-**Locked:** 2026-05-12
+> **🚫 RETIRED 2026-05-22** — see CLAUDE.md decision-log row "Ship Facebook
+> white/blue brand pivot + Light/Dark/Auto theme". The 5-theme system documented
+> below (Setnayan Default · Victorian · Classy · iOS · Forest Theme) was
+> replaced by an iOS-style 3-mode picker (Light · Dark · Auto) over Facebook
+> white/blue brand colors.
+>
+> **What stays:** the wedding landing page chrome at `apps/web/app/[slug]/page.tsx`
+> remains driven by each couple's mood-board palette per iteration 0010 + 0002.
+> Per-couple monogram colors, mood-board palettes, save-the-date renders, and
+> Patiktok booth backgrounds are unchanged — those are creative-output palettes,
+> NOT app chrome.
+>
+> **What was retired:** the 5 `[data-theme]` CSS variable blocks, the 5-swatch
+> profile picker, the per-layout `data-theme={theme}` wrapper, the
+> `theme_preference` ENUM values `setnayan_default` / `victorian` / `classy` /
+> `forest_champagne` (legacy `'ios'` value migrated to the new `'auto'` mode).
+>
+> **Historical content preserved below per [[feedback_setnayan_document_changes_with_why]]
+> for audit + future revisit if the personalization layer ever returns.**
+
+**Locked:** 2026-05-12 — **RETIRED 2026-05-22**
 **Pilot file:** `0021_couple_dashboard_fully_purchased/0021_couple_dashboard_fully_purchased.html`
 **Rollout targets:** 0022 (vendor dashboard) · 0023 (admin console) · 0024 (save-the-date)
 **Memory reference:** `project_setnayan_themes_and_icons.md`
@@ -37,16 +57,17 @@ locked spec.
 
 ## 2. The 5 themes
 
-### 2.1 Setnayan Default (`:root`)
+### 2.1 Setnayan Default (`:root`) — Clean Editorial palette
 
-> Accent swapped from terracotta to deep burgundy on 2026-05-15 (name unchanged; `users.theme_preference` schema key `'setnayan_default'` preserved — accent-token-only update, no data migration).
+> **Repaletted 2026-05-29 to Clean Editorial / Premium Event SaaS direction** (CLAUDE.md 2026-05-29 row "🎨 CLEAN EDITORIAL PALETTE LOCK"). Token name + `users.theme_preference` schema key `'setnayan_default'` preserved — value swap only, no data migration. Prior accent swaps (2026-05-15 burgundy `#7A1F2B`, original terracotta `#C97B4B`) retired.
 
-- `--page-bg: #FAF6F0` (warm cream) · `--surface: #FFFFFF`
-- `--ink: #1A1A1A` · `--ink-soft: #6B6B6B`
-- `--accent: #7A1F2B` (deep burgundy / wine) · `--accent-deep: #4F1019` · `--accent-soft: #D9B8BD`
+- `--page-bg: #FBFBFA` (Warm Alabaster · primary surface · 60% rule) · `--surface: #FFFFFF`
+- `--ink: #1E2229` (Deep Obsidian · WCAG AAA contrast 16.42:1 on alabaster) · `--ink-soft: #6B6B6B`
+- `--accent: #C5A059` (Royal Champagne Gold · 10% rule · active nav · borders · highlights · eyebrow rules) · `--accent-deep: #A88340` (champagne hover · WCAG-friendlier on small text) · `--accent-soft: #F4ECD8` (light wash · selected-state backgrounds)
+- `--cta: #5C2542` (Rich Mulberry · primary interactive buttons · Sign Up · Create Event · Submit · Lock Vendor · WCAG AAA 12.84:1 on alabaster · white text WCAG AAA 9.13:1) · `--cta-hover: #4A1D36` (subtle press-down shade · ~6% darker HSL) · `--cta-soft: #F5E8EE` (light mulberry wash)
 - Body: **Manrope** 400/500/600 · Display: **Cormorant Garamond italic** 500 · Mono: **DM Mono** 400
 - Icon stroke: **1.75**
-- Prior terracotta tokens (`#C97B4B / #8C4A28 / #E8C9B0`) retired from the default; admin can re-seed as a custom theme via `brand_config_versions` if desired.
+- Retired prior tokens (preserved as historical reference): ~~`#FAF6F0` cream~~ · ~~`#1A1A1A` ink~~ · ~~`#7A1F2B` burgundy / `#4F1019` deep-wine / `#D9B8BD` soft-wine~~ · ~~`#C97B4B` terracotta + `#8C4A28` + `#E8C9B0`~~. Admin can re-seed retired palettes as named custom themes via `brand_config_versions` if desired.
 
 ### 2.2 Victorian (`[data-theme="victorian"]`)
 - `--page-bg: #FAF1E6` (aged paper) · `--surface: #FBF6EC`

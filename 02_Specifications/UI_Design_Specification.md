@@ -70,7 +70,7 @@ Setnayan is **NOT** a wallet/credits product — payment is order-and-pay only. 
 
 | Theme | Primary | Accent | Mood |
 |---|---|---|---|
-| **Setnayan Default** (default) | Burgundy `#7A1F2B` | Cream `#FAF7F2` · near-black ink | Modern, warm, default — replaced terracotta on 2026-05-15 |
+| **Setnayan Default** (default) | Mulberry CTA `#5C2542` + Champagne accent `#C5A059` | Alabaster `#FBFBFA` · Obsidian `#1E2229` ink | Premium Event SaaS · editorial — Clean Editorial palette locked 2026-05-29 (supersedes burgundy 2026-05-15 + terracotta original) |
 | **Victorian** | Deep wine + cream | Gold filigree | Heritage, formal |
 | **Classy** | Neutral mid-grey + black | Champagne | Minimal, editorial |
 | **iOS** | iOS systemBackground | iOS systemBlue | Tech-forward, light |

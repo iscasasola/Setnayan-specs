@@ -24,6 +24,7 @@ while content is filled in iteratively.
 | `06_Setnayan_Feature_Reference.md` | What Panood/Papic/LED/Pakanta do · pricing · how to access (cross-ref iteration tree) |
 | `07_Vendor_Decision_Logic.md` | What to book first · category dependencies · price-vs-tier guidance (cross-ref 0006) |
 | `08_Budget_Allocation_Reference.md` | Working-budget tier definitions · category allocation tables (mirrors 0016 § 5) |
+| `09_Date_Selection_Cultural_Logic.md` | 5-layer cultural reasoning for wedding dates (Catholic · Chinese-Filipino numerology · Filipino folk · practical reality · Western astrology) · powers Wizard Card 01 Set Wedding Date |
 
 ## Chunk authoring template
 
@@ -82,6 +83,7 @@ Subsequent paragraphs add depth the LLM can paraphrase from.}
 | Setnayan feature reference (06_) | ✓ (drives upsell) | ✓ | ✓ |
 | Vendor decision logic (07_) | generic only | personalized | personalized + priority match |
 | Budget allocation (08_) | tier overview | full tables | full tables + event-data integration |
+| Date selection cultural logic (09_) | ✓ (card view + 3 free follow-up questions) | ✓ (unlimited follow-ups) | ✓ (unlimited follow-ups + intake-personalized primary-layer resolution) |
 | Honeymoon planning | ✗ | ✗ | ✓ |
 | 9-step journey deep-dive | ✗ | ✓ | ✓ |
 

@@ -117,6 +117,21 @@ Pro Camera Bridge for DSLR pairing (Canon · Nikon · Sony · Fujifilm WiFi SDK)
 
 All V1.5+ Papic SKUs net **~65-72% margin** under V1 tax tier (Percentage Tax 3% + Local Business Tax 1% + Income Tax 25% — non-VAT lock). Cold-tier R2 + 90-day safety window cuts long-tail storage cost ~80% vs the prior hot-tier indefinite retention model.
 
+### QR scan token — defers to 0002 unified model (cross-ref 2026-05-22)
+
+Paparazzi scan the **same `guests.qr_token`** (32-hex opaque, from 0001's schema) that opens the guest's invitation page in a browser and hydrates the day-of LIVE view in 0031. No separate Papic-specific peer-tag token; no separate scan vector. The single token drives four scan uses across four actors per the **canonical lock in [0002 § Unified QR Code Lifecycle Model](../0002_qr_invitation_system/0002_qr_invitation_system.md)** locked 2026-05-22.
+
+Locked behaviors preserved from prior 0012 + 2026-05-09 decisions, restated here for build-time clarity:
+
+- **Paparazzi scan** writes `photo_tags.guest_id = <guest> AND source = 'individual_qr'` (the existing 0012 line 583 contract).
+- **Tag-once trust handshake** (2026-05-09): a paparazzo scanning a guest's QR once gates 5+ minutes of subsequent shots from that paparazzo as auto-tagged to that guest, no rescanning needed.
+- **Untagged-still-delivered guarantee** (2026-05-09): photos with no scan / face-match / pick action still upload to the couple's gallery; they just don't get a guest tag.
+- **Max 10 tags per photo** (2026-05-09): combined guest QR + table QR + auto-face + manual Pick + table fan-out caps at 10 tags total per photo.
+- **Table QR (`setnayan://table/{token}`)** is a SEPARATE token from `guests.qr_token`. Per 0008's lock, table QRs are minted only at seating-chart publish. A table-QR scan fans tags to every guest seated at that table (alphabetized + truncated at the 10-cap).
+- **Token rotation never breaks tag history.** `photo_tags.guest_id` is the immutable join; the QR token is just the lookup key. A re-issued QR (per 0002's per-guest Re-issue action) invalidates the magic-link cookie + the printed QR but does not unlink the guest from already-tagged photos.
+
+For the cross-iteration framing (3 lifecycle states · 4 scan actors · vendor TIER 1/TIER 2 scan addition · Phase 4 editorial guest hydration), defer to [0002 § Unified QR Code Lifecycle Model (canonical lock 2026-05-22)](../0002_qr_invitation_system/0002_qr_invitation_system.md).
+
 ---
 
 ## What this iteration ships
