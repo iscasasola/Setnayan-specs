@@ -746,3 +746,36 @@ When in doubt, **this brief is canon** for v2.1 decisions. The older docs in `/d
 This is being built so Claire and Ice can ship their own wedding through it on **December 18, 2026**. Every decision — the 0% commission, the 100 free founder tokens, the price-protection commitment, the "we never charge if we can't bring you customers" framing — is rooted in that.
 
 Build it like it's going to be the first wedding on it. Because it is.
+
+---
+
+## 16 · Amendments
+
+Lock-in-order list of refinements to this brief. Each amendment cites a CLAUDE.md decision-log row at corpus root that carries the canonical WHY. The brief body above stays authoritative on everything NOT in this list; everything in this list supersedes the brief body for the cited section.
+
+### Amendment 1 (2026-05-28) · Annual vendor subscriptions
+
+Per CLAUDE.md eleventh 2026-05-28 row "v2.1 amendment · Vendor verification fees RETIRED + Pro Vendor annual ₱19,999/yr + Enterprise Vendor annual ₱54,999/yr added". Supersedes § 2.2 + § 3 monthly-only Pro/Enterprise. Vendor verification annual renewal ₱1,499/yr + re-verification after demotion ₱2,499 both RETIRED (lifetime badge model).
+
+### Amendment 2 (2026-05-30) · Vendor matrix from screenshot
+
+Per CLAUDE.md 2026-05-30 row "🔒 V2.1 BRIEF AMENDMENT #2 LOCKED · vendor matrix from owner screenshot adopted as canonical". Supersedes § 3 vendor matrix and the eleventh 2026-05-28 amendment's Pro Annual price. Key shifts: Pro 28-day prepaid ₱2,499 (not ₱1,999/mo) · Pro Annual ₱24,999/yr (~23% off, not ~17%) · Boosters surface reinstated · Add Branch ₱999/28-day SKU reinstated · hybrid-anonymity reveal mechanic (Free + Verified vendor business name HIDDEN until vendor sends first chat reply · then revealed globally · Pro + Enterprise show real name from day 1).
+
+### Amendment 2 refinement (2026-05-30) · Venue exception + Bark screen names
+
+Per CLAUDE.md 2026-05-30 row "V2.1 BRIEF AMENDMENT #2 REFINEMENT · venue exception locked + engineering kickoff for the screen-name reveal mechanic from line 544 row". Extends Amendment 2:
+
+- **Venue exception** — vendors whose `vendor_profiles.services` array overlaps with `ARRAY['religious_venue', 'venue']` ALWAYS show real `business_name` regardless of tier or reveal-timestamp. Ceremony + reception venues are physical places with addresses, GMB listings, and SEO discoverability; anonymizing them breaks search + makes admin-seeded famous venues (Conrad · Shangri-La · Cebu Marriott · etc.) pointless.
+
+- **Bark-format screen names** — Free + Verified non-venue vendors get auto-generated `vendor_profiles.screen_name` like `"Manila Wedding Photographer #4218"` on signup. Format: `{City} {Canonical Service Display Label} #{ID}` with monotonic ID per `(city, canonical_service)` namespace via `vendor_screen_name_sequences` table. Persists forever — never regenerated even if vendor changes services or location_city.
+
+- **Pro + Enterprise = real name from day 1** — paid tier visibility privilege. Tracked via new `vendor_tier_state` ENUM (`free`/`verified`/`pro`/`enterprise`) on `vendor_profiles.tier_state`. Backfilled from `verification_state='verified'` for existing rows; Pro + Enterprise stay admin-flippable for pilot.
+
+- **Platform-wide unlock on first vendor reply** — `vendor_profiles.name_revealed_at` (PR #662) or `real_name_unlocked_at` (PR #673 · duplicate column, V1.x cleanup) stamps `NOW()` on first vendor `chat_messages` INSERT with `sender_role='vendor'`. Once stamped, real `business_name` shows everywhere globally · NOT per-customer · NOT per-thread.
+
+- **Helper** `resolveVendorDisplayName()` in `apps/web/lib/vendors.ts` returns real `business_name` when: services contain venue-exempt key · OR `isPaidTier === true` · OR `name_revealed_at !== null`. Otherwise returns stored `screen_name` if present, else legacy computed `"{service} · {city}"` placeholder.
+
+**Schema** ships via migration `20260714000000_v2_screen_name_reveal_mechanic.sql` (PR #673). Helper extension ships via PR #677. Both merged 2026-05-30 pre-pilot.
+
+**What's NOT in this amendment** — admin surfaces continue showing real `business_name` (moderation/payouts/disputes need it). Plan grid + messaging UI continue using direct `business_name` reads in V1 (vendors shown there are already in chat with the couple → name globally revealed by trigger anyway). Cleanup of duplicate `real_name_unlocked_at` column from PR #673 → deferred V1.x post-pilot.
+

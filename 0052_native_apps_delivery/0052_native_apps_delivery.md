@@ -1,6 +1,6 @@
-# Iteration 0043 — Native Apps Delivery (iOS · iPadOS · Android · macOS · Windows)
+# Iteration 0052 — Native Apps Delivery (iOS · iPadOS · Android · macOS · Windows)
 
-**Iteration number:** 0043 (collision flag — see Open Questions § OQ-1 below; `0043_wedding_type_picker.md` already occupies this number per V1.1 lock 2026-05-19)
+**Iteration number:** 0052 (originally proposed as 0043 per CLAUDE.md 2026-05-15 lock · renumbered 2026-05-29 because 0043 was already taken by V1.1 Wedding Type Picker per CLAUDE.md 2026-05-19 row 425 · owner picked Option B from OQ-1 resolution turn on 2026-05-29 to minimize corpus churn)
 **Topic:** V1.5+ multi-platform native app rollout — true native Papic shells (Swift on iOS, Kotlin on Android) + Capacitor mobile wrapper (iOS + Android) + Tauri desktop wrappers (macOS + Windows) shipped end-to-end so Setnayan runs as a first-class app on every surface a Filipino couple, vendor, or operator touches.
 **Surface:** Cross-cutting · instruments every couple-facing + vendor-facing + admin-facing route the web build serves, plus offline-only native surfaces for Papic capture (iteration 0012) and Patiktok booth (iteration 0017) and day-of guest (iteration 0031).
 **Distribution paths:** Apple App Store (iOS + iPadOS) · Mac App Store (macOS) · Google Play (Android) · Microsoft Store (Windows) · direct downloads at `setnayan.com/download` (.dmg for macOS · .exe for Windows · TestFlight for iOS beta).
@@ -161,7 +161,7 @@ The plan headers match TaskList Tasks #2–#6 verbatim so the spec and tasks sta
 
 | Deliverable | Claude Code time |
 |---|---|
-| Initialize Capacitor 7 project in a new worktree `~/Setnayan/.claude/worktrees/0043-native-apps/` off `iscasasola/setnayan-platform` main · `npx cap init Setnayan com.setnayan.app` · `npx cap add ios` + `npx cap add android` | 0.5 day |
+| Initialize Capacitor 7 project in a new worktree `~/Setnayan/.claude/worktrees/0052-native-apps/` off `iscasasola/setnayan-platform` main · `npx cap init Setnayan com.setnayan.app` · `npx cap add ios` + `npx cap add android` | 0.5 day |
 | Configure Capacitor build to consume the existing Next.js production build · `output: 'standalone'` with bundled offline assets for the day-of + Papic + Patiktok routes · `server.url` fallback for online surfaces · feature-flag controlled via `NEXT_PUBLIC_NATIVE_SHELL_ENABLED='ios'` / `'android'` | 1 day |
 | Initialize Tauri 2.0 project in same worktree under `desktop/` · `cargo tauri init` for macOS + Windows targets · base `tauri.conf.json` with allowlist + window config + system tray scaffolding | 1 day |
 | Implement 3 basic Capacitor plugins (camera + geo + biometric stubs) · TypeScript plugin shells + Swift + Kotlin native skeletons that compile cleanly · plugin permission requests wired to `Info.plist` (iOS) + `AndroidManifest.xml` (Android) | 2 days |
@@ -260,7 +260,7 @@ These are externals Claude Code cannot accelerate. The chain runs in **parallel*
 Engineering produces:
 
 1. **Builds** — iOS `.ipa` (App Store Connect upload format), Android `.aab` (Google Play upload format), macOS `.dmg` (notarized, ready for direct distribution), Windows `.exe` (code-signed, ready for direct distribution).
-2. **Spec corpus** — this iteration file (`0043_native_apps_delivery.md`) + `.docx` mirror.
+2. **Spec corpus** — this iteration file (`0052_native_apps_delivery.md`) + `.docx` mirror.
 3. **Store metadata packages** — 4 zips (App Store · Google Play · Microsoft Store · Mac App Store) per § 7 Week 5.
 4. **Direct-download surface** — updated `setnayan.com/download` page with platform-detected download CTAs.
 
@@ -280,7 +280,7 @@ This separation lets engineering run independently of admin calendar. When admin
 
 **Zero pilot impact.** Reasoning:
 
-1. All engineering work runs on a **separate worktree** branched off `iscasasola/setnayan-platform` main at the start of Week 1. The worktree is at `~/Setnayan/.claude/worktrees/0043-native-apps/` and does not feed back into `apps/web/` production until V1.5+ cutover day (post-pilot).
+1. All engineering work runs on a **separate worktree** branched off `iscasasola/setnayan-platform` main at the start of Week 1. The worktree is at `~/Setnayan/.claude/worktrees/0052-native-apps/` and does not feed back into `apps/web/` production until V1.5+ cutover day (post-pilot).
 2. The Capacitor + Tauri shells consume the existing Next.js production build via `output: 'standalone'` — they are **downstream consumers** of the web build, not modifiers of it.
 3. The new Capacitor plugins are isolated TypeScript + Swift + Kotlin code in the worktree; they do not ship to the web build until the web build's feature-detection layer is wired to them (also post-pilot).
 4. The 6 capabilities the V1 web build already supports (camera via `getUserMedia` · geo via `navigator.geolocation` · face recognition via MediaPipe · etc.) continue to work in V1 pilot exactly as today; the native plugin tier is **additive fidelity upgrade** for V1.5+, not a V1 dependency.
@@ -297,7 +297,7 @@ This separation lets engineering run independently of admin calendar. When admin
 |---|---|
 | **0012 Papic** | Native architecture lock at § Architecture Lock (Swift + Kotlin · SQLite WAL · BGTaskScheduler/WorkManager · Apple Vision / ML Kit · DSLR SDK matrix) — this iteration ports the lock to actual code in Week 3 |
 | **0017 Patiktok** | Booth offline behavior — Capacitor shell hosts the booth UI · capture goes through the camera plugin · video files queue in IndexedDB until WiFi returns |
-| **0031 Day-of guest** | PWA shell shipped via PR #284 · iteration 0043 inherits the same offline contract for guest landing page when launched from the native Capacitor shell |
+| **0031 Day-of guest** | PWA shell shipped via PR #284 · iteration 0052 inherits the same offline contract for guest landing page when launched from the native Capacitor shell |
 | **0037 Event-Day Pre-load** | IndexedDB cache + service-worker offline daemon — Capacitor shell reuses the same `prefetchEventBundle()` + `PRELOAD_ASSETS` postMessage shape · native plugins wire into the same offline daemon contract |
 | **0035 Observability** | Sentry SDK per-runtime · this iteration adds Capacitor + Tauri runtimes · DSN injected via Capacitor env config + Tauri config |
 | **V2 Phase G** | IndexedDB + service-worker offline daemon (`NEXT_PUBLIC_OFFLINE_DAEMON_ENABLED` env-flag · DEFAULT OFF for pilot per CLAUDE.md 2026-05-29 row "V2 Cutover Round 2") · this iteration is the native-app surface that benefits most from Phase G's offline scaffolding |
@@ -387,7 +387,7 @@ These need owner ratification **before Week 1 engineering starts**. Defaults (re
 
 | ID | Question | Recommended default | Block? |
 |---|---|---|---|
-| **OQ-1** | Iteration number collision — `0043_wedding_type_picker.md` already exists at the corpus root for the V1.1 Wedding Type Picker lock (per CLAUDE.md 2026-05-19 row 425). The CLAUDE.md 2026-05-15 row explicitly proposed `0043_native_apps_delivery` for native apps **before** 0043 got taken. Per owner directive, this iteration uses 0043 as instructed. Recommended resolution: keep 0043 for native apps (the more visible iteration · this folder · with a `.md` file in a subfolder per canonical pattern) and renumber the wedding type picker to `0051_wedding_type_picker` (next free slot after `0050_venue_directory`). Alternative: keep wedding type picker at 0043, renumber native apps to 0051. | Renumber wedding type picker to 0051 · keep native apps at 0043 per CLAUDE.md 2026-05-15 explicit lock | Yes — owner must pick before Week 5 status-anchor pass |
+| **OQ-1** | ✅ **RESOLVED 2026-05-29.** Iteration number collision — CLAUDE.md 2026-05-15 row proposed `0043_native_apps_delivery` for native apps, but CLAUDE.md 2026-05-19 row 425 (V1.1 content engine) actually used 0043 for Wedding Type Picker first. Owner picked **Option B** on resolution turn: renumber native apps to **0052** (next free slot after the V1.1 + V1.2 iterations · `0043_wedding_type_picker.md` stays unchanged). Native apps spec folder + file renamed from `0043_native_apps_delivery/` → `0052_native_apps_delivery/` · all internal references updated · lower corpus churn than the alternative (renaming Wedding Type Picker would have touched 0044/0045/0046/0047/0048 cross-references in the locked V1.1 content engine spec set). | N/A · resolved | No · resolved |
 | **OQ-2** | Tauri version pin — Tauri 2.0 was released April 2026 · ships mobile builds (which we don't need · Capacitor covers mobile) + desktop. Tauri 1.x is the LTS line through end-2026. Recommended: pin Tauri 2.0 for desktop because the WebView2 + WKWebView APIs are more current and the auto-updater is improved. | Tauri 2.0 | No · default OK |
 | **OQ-3** | iPadOS layout via responsive CSS inside iOS app OR Apple Catalyst variant? Recommended: responsive CSS inside iOS Capacitor build. Catalyst would force a separate macOS variant that Tauri already covers more cleanly. | Responsive CSS inside iOS Capacitor build | No · default OK |
 | **OQ-4** | macOS distribution — direct .dmg only, OR direct .dmg + Mac App Store? Recommended: direct .dmg only for V1.5+ initial cut. Mac App Store rejection rates on Tauri-style apps are non-trivial and the direct download via `setnayan.com/download` is more frictionless for the target B2B audience (vendors + admins). Mac App Store can ship in V1.5+1 once we have a stable direct-download baseline. | Direct .dmg only | No · default OK · revisit V1.5+1 |
@@ -398,7 +398,7 @@ These need owner ratification **before Week 1 engineering starts**. Defaults (re
 | **OQ-9** | Native shell cutover day — coordinate with V2 publisher cutover (target ~2026-06-15 to 2026-06-25 per CLAUDE.md V2 Cutover Round 2 row) OR ship as a separate post-V2-stabilization milestone? Recommended: ship as separate post-V2-stabilization milestone · target ~6–8 weeks after pilot launch · gives V2 publisher surface time to stabilize before adding new native-shell surface. | Separate post-V2-stabilization milestone | No · default OK |
 | **OQ-10** | Setnayan Productions video calls (Daily.co OR Twilio Video per v2.1 brief § 11) on native shells — wrap existing JS SDK via Capacitor or use native SDK? Recommended: wrap the JS SDK via Capacitor for V1.5+ initial cut · native SDK integration is a V1.6+ polish item if pilot data shows JS SDK performance issues on mobile. | Wrap JS SDK via Capacitor | No · default OK |
 
-**Owner action requested:** ratify OQ-1 (iteration number collision) **before Week 5 status-anchor pass** so the renumbering propagates cleanly through the status anchors. The other 9 OQs can ride their recommended defaults unless owner objects before respective deliverable date.
+**Owner action requested:** none blocking. OQ-1 resolved 2026-05-29 (Option B · native apps renumbered to 0052). OQ-2 through OQ-10 ride their recommended defaults unless owner objects before respective deliverable date.
 
 ---
 
@@ -406,7 +406,7 @@ These need owner ratification **before Week 1 engineering starts**. Defaults (re
 
 | Path | Purpose |
 |---|---|
-| `0043_native_apps_delivery.md` | This file — engineering spec corpus |
-| `0043_native_apps_delivery.docx` | `.docx` mirror — regenerate via pandoc once owner ratifies OQ-1 + at Week 5 status-anchor pass per established convention |
+| `0052_native_apps_delivery.md` | This file — engineering spec corpus |
+| `0052_native_apps_delivery.docx` | `.docx` mirror — regenerate via pandoc once owner ratifies OQ-1 + at Week 5 status-anchor pass per established convention |
 | `tests.md` | Per-platform acceptance criteria mirror of § 13 — to be added at Week 5 |
 | `fixtures.json` | Sample build metadata + signing certificate fingerprints — to be added at Week 5 |

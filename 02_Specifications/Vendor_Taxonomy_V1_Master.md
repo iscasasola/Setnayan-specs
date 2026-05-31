@@ -4,6 +4,8 @@
 
 **Status.** Drafted 2026-05-19 · Consolidates session-locked taxonomy work from V1.5→V1 promotion (2026-05-18) + V1.1 content-engine spec drafting (2026-05-19) into one read-once reference.
 
+> **⚠️ SUPERSEDED (visible structure) — shipped to production 2026-05-31.** The 12-folder / ~196-canonical structure documented below is now the *historical* reference. The marketplace ships the **10-parent shrink** (Venue · Planning · Feast · Design · Program · Documentary · Look · Booths · Prints · Transport) — see [Vendor_Taxonomy_Shrink_2026-05-30.md](../Vendor_Taxonomy_Shrink_2026-05-30.md) (live via PR #689) + the CLAUDE.md decision log 2026-05-31. The canonical **KEYS** below are unchanged (vendors keep their `services[]` tags) — only the parent grouping moved + 3 new canonicals were added (`orchestra`, `fireworks_pyro`, `led_video_wall`). This doc's full rewrite to the 10-parent model is a deferred follow-up.
+
 **Authoritative iteration specs (this doc consolidates, doesn't replace):**
 - [0006_vendors_management](../0006_vendors_management/0006_vendors_management.md) — canonical_services enum source-of-truth
 - [0043_wedding_type_picker](../0043_wedding_type_picker/0043_wedding_type_picker.md) — ceremony_type × venue_setting axes that gate faith/cultural categories
