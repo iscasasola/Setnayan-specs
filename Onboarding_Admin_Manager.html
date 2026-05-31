@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setnayan · Admin · Onboarding Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFBFA;--ink:#1E2229;--ink-soft:#4F535B;--ink-faint:#8A8E96;
+    --line:rgba(30,34,41,.10);--line-2:rgba(30,34,41,.18);
+    --gold:#C5A059;--gold-deep:#A88340;--gold-wash:#F4ECD8;
+    --mulberry:#5C2542;--mulberry-deep:#4A1D36;--mulberry-wash:#F4E9EE;
+    --sage:#5E7E58;--sage-wash:#EAF0E8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(1200px 700px at 12% -8%,#F6F1E6 0%,rgba(246,241,230,0) 55%),#EFEBE2;padding:38px 24px 56px}
+  .wrap{max-width:1080px;margin:0 auto}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-deep);display:flex;align-items:center;gap:9px}
+  .kicker::before{content:"";width:24px;height:1.5px;background:var(--gold)}
+  h1{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:40px;margin-top:9px}
+  .sub{color:var(--ink-soft);font-size:14px;margin-top:7px;max-width:74ch;line-height:1.55}
+  .secthead{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin:30px 0 12px}
+
+  /* admin window */
+  .win{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 28px 60px -42px rgba(30,34,41,.5)}
+  .winbar{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);background:#fcfbf8}
+  .winbar .dots{display:flex;gap:6px}
+  .winbar .dots i{width:10px;height:10px;border-radius:50%;background:var(--line-2)}
+  .winbar .path{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-faint)}
+  .winbar .save{margin-left:auto;background:var(--mulberry);color:#fff;border:0;font-family:inherit;font-weight:700;font-size:12.5px;padding:8px 16px;border-radius:9px;cursor:pointer}
+
+  .winhead{display:flex;align-items:flex-end;justify-content:space-between;padding:18px 20px 12px}
+  .winhead .ttl{font-size:20px;font-weight:800;letter-spacing:-.01em}
+  .winhead .ds{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+  .winhead .count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint)}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;padding:10px 14px;border-bottom:1px solid var(--line)}
+  tbody td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#fcfbf8}
+  .svc{font-weight:700;color:var(--ink)}
+  .svc small{display:block;font-weight:500;color:var(--ink-faint);font-size:11.5px;margin-top:1px}
+
+  .chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;border-radius:99px;padding:4px 10px}
+  .chip.live{color:var(--sage);background:var(--sage-wash)}
+  .chip.soon{color:var(--gold-deep);background:var(--gold-wash)}
+  .chip.no{color:var(--ink-faint);background:rgba(30,34,41,.06)}
+  .chip .d{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+  .sw{width:40px;height:23px;border-radius:99px;background:var(--line-2);position:relative;cursor:pointer;flex:0 0 auto;transition:background .15s}
+  .sw.on{background:var(--mulberry)}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .sw.on::after{left:20px}
+  .ord{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft)}
+  .ord.off{color:var(--ink-faint);opacity:.5}
+  .star{font-size:15px;color:var(--gold)}
+  .star.off{color:var(--line-2)}
+  .blurb{color:var(--ink-soft);font-size:12.5px;font-style:italic;max-width:200px}
+  .blurb.off{color:var(--ink-faint);opacity:.5}
+
+  /* flow */
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin-top:6px}
+  .fbox{flex:1 1 200px;min-width:180px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px}
+  .fbox.cfg{border-style:dashed;background:#fcfbf8}
+  .fbox.dst{border-color:rgba(92,37,66,.3)}
+  .fbox .ft{font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep)}
+  .fbox .fn{font-size:15px;font-weight:700;margin-top:5px}
+  .fbox .fd{font-size:12px;color:var(--ink-soft);margin-top:4px;line-height:1.45}
+  .arr{display:flex;align-items:center;justify-content:center;padding:0 10px;color:var(--ink-faint);flex:0 0 auto}
+  .arr svg{width:22px;height:22px}
+  .arr small{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+
+  .rules{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .rule{display:flex;align-items:center;gap:9px;font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 13px}
+  .rule .k{font-weight:700}
+  .rule .pill{font-size:10px;font-weight:700;border-radius:99px;padding:3px 9px;text-transform:uppercase;letter-spacing:.03em}
+  .rule .pill.buy{color:#fff;background:var(--mulberry)}
+  .rule .pill.notify{color:var(--gold-deep);background:var(--gold-wash)}
+  .rule .pill.hide{color:var(--ink-faint);background:rgba(30,34,41,.06)}
+  .rule .ar{color:var(--ink-faint)}
+  footer{margin-top:28px;font-size:12px;color:var(--ink-faint);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Admin console · iteration 0023</div>
+  <h1>Onboarding Manager</h1>
+  <p class="sub">Pick which services appear in the customer onboarding — manual curation on top of the automatic build-status filter. Toggle, reorder, feature, or rewrite the blurb, no deploy needed.</p>
+
+  <div class="secthead">What you see — the page</div>
+  <div class="win">
+    <div class="winbar"><div class="dots"><i></i><i></i><i></i></div><div class="path">setnayan.com/admin/onboarding</div><button class="save">Save</button></div>
+    <div class="winhead">
+      <div><div class="ttl">Services in onboarding</div><div class="ds">Drag to reorder · ★ feature · toggle to offer. Build status decides buyable vs “notify me.”</div></div>
+      <div class="count">4 offered · 19 total</div>
+    </div>
+    <table>
+      <thead><tr><th>Service</th><th>Build status</th><th>Offer</th><th>Order</th><th>Featured</th><th>Onboarding blurb</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="svc">Today's Focus<small>₱1,499 · vs ₱20,000</small></span></td>
+          <td><span class="chip live"><span class="d"></span>Live</span></td>
+          <td><div class="sw on"></div></td>
+          <td><span class="ord">1</span></td>
+          <td><span class="star">★</span></td>
+          <td><span class="blurb">“Tells you what to do next, every step.”</span></td>
+        </tr>
+        <tr>
+          <td><span class="svc">Papic — Guest Cameras<small>₱2,999 · vs ₱32,000</small></span></td>
+          <td><span class="chip soon"><span class="d"></span>Coming soon</span></td>
+          <td><div class="sw on"></div></td>
+          <td><span class="ord">2</span></td>
+          <td><span class="star off">★</span></td>
+          <td><span class="blurb">“Every guest's phone becomes a camera.”</span></td>
+        </tr>
+        <tr>
+          <td><span class="svc">Panood — Livestream<small>₱3,499/day · vs ₱17,500</small></span></td>
+          <td><span class="chip soon"><span class="d"></span>Coming soon</span></td>
+          <td><div class="sw on"></div></td>
+          <td><span class="ord">3</span></td>
+          <td><span class="star">★</span></td>
+          <td><span class="blurb">“Family abroad watch live.”</span></td>
+        </tr>
+        <tr>
+          <td><span class="svc">Animated Monogram<small>₱2,499 · vs ₱15,500</small></span></td>
+          <td><span class="chip soon"><span class="d"></span>Coming soon</span></td>
+          <td><div class="sw on"></div></td>
+          <td><span class="ord">4</span></td>
+          <td><span class="star off">★</span></td>
+          <td><span class="blurb">“Your names, drawn into a mark.”</span></td>
+        </tr>
+        <tr>
+          <td><span class="svc">Pro Website<small>₱5,499 · vs ₱25,000</small></span></td>
+          <td><span class="chip soon"><span class="d"></span>Coming soon</span></td>
+          <td><div class="sw"></div></td>
+          <td><span class="ord off">—</span></td>
+          <td><span class="star off">★</span></td>
+          <td><span class="blurb off">“Your own site + custom link.”</span></td>
+        </tr>
+        <tr>
+          <td><span class="svc">Pakanta — Your Song<small>₱2,499 · vs ₱12,500</small></span></td>
+          <td><span class="chip no"><span class="d"></span>Not built</span></td>
+          <td><div class="sw"></div></td>
+          <td><span class="ord off">—</span></td>
+          <td><span class="star off">★</span></td>
+          <td><span class="blurb off">“Your own wedding song.”</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="secthead">How it flows</div>
+  <div class="flow">
+    <div class="fbox"><div class="ft">Admin sets it</div><div class="fn">Onboarding Manager</div><div class="fd">Toggle / order / feature / blurb · single-admin · audit-logged.</div></div>
+    <div class="arr"><div style="text-align:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><small>writes</small></div></div>
+    <div class="fbox cfg"><div class="ft">Config</div><div class="fn">onboarding_offerings</div><div class="fd">service · enabled · order · featured · blurb override.</div></div>
+    <div class="arr"><div style="text-align:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><small>read by</small></div></div>
+    <div class="fbox dst"><div class="ft">Customer sees it</div><div class="fn">Picker + Your Plan</div><div class="fd">Composed with build status — see rules below.</div></div>
+  </div>
+
+  <div class="rules">
+    <div class="rule"><span class="k">On + Live</span><span class="ar">→</span><span class="pill buy">Buyable</span></div>
+    <div class="rule"><span class="k">On + Coming soon</span><span class="ar">→</span><span class="pill notify">Notify me</span><span style="color:var(--ink-faint);font-size:11.5px">· comparison teaser, no charge</span></div>
+    <div class="rule"><span class="k">Off</span><span class="ar">→</span><span class="pill hide">Hidden</span></div>
+  </div>
+
+  <footer>Honesty preserved: the admin can <i>offer</i> anything, but build status still decides what's <i>charged</i> — never sell what isn't live. Service cards (blueprint §3.3 + the add-on review) are the library this page toggles from.</footer>
+</div>
+</body>
+</html>

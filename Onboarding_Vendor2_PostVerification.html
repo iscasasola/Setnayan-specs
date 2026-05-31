@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setnayan · Vendor Onboarding #2 — Post-verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --ink-soft:#4F535B; --line:rgba(30,34,41,.10);
+    --gold:#C5A059; --gold-soft:#F4ECD8; --mulberry:#5C2542; --mulberry-soft:#F2E7EC;
+    --sage:#5B7563; --sage-soft:#E7EFE9; --muted:#9A9A95;
+    --serif:'Instrument Serif',Georgia,serif; --body:'Manrope',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#ECE9E3;color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:26px 12px}
+  .title-strip{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6b6b66;margin-bottom:16px}
+  .title-strip b{color:var(--mulberry)}
+  .device{width:392px;max-width:100%;height:812px;background:var(--paper);border-radius:42px;box-shadow:0 30px 70px rgba(30,34,41,.22),0 0 0 11px #15171b,0 0 0 13px #2a2d33;
+    overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:140px;height:26px;background:#15171b;border-radius:0 0 16px 16px;z-index:30}
+  .prog{height:3px;background:var(--line);margin:30px 22px 0;border-radius:9px;overflow:hidden;flex:none}
+  .prog-fill{height:100%;background:var(--gold);width:20%;transition:width .35s ease}
+  .screenwrap{flex:1;overflow-y:auto;overflow-x:hidden}
+  .screen{display:none;padding:22px 22px 8px;min-height:100%;flex-direction:column}
+  .screen.active{display:flex}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:500}
+  .h{font-family:var(--serif);font-style:italic;font-weight:400;font-size:33px;line-height:1.06;margin:9px 0 8px;letter-spacing:-.01em}
+  .h.sm{font-size:27px}
+  .lede{color:var(--ink-soft);font-size:14.5px;line-height:1.5;margin-bottom:16px}
+  .badge-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:18px}
+  .seal{width:96px;height:96px;border-radius:99px;background:var(--sage-soft);display:flex;align-items:center;justify-content:center;font-size:46px;color:var(--sage);box-shadow:0 0 0 8px rgba(91,117,99,.10)}
+  .verbadge{display:inline-flex;align-items:center;gap:6px;margin-top:14px;background:var(--sage);color:#fff;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:6px 13px;border-radius:99px}
+  .wallet{border:1px solid var(--gold);background:linear-gradient(135deg,#fff,var(--gold-soft));border-radius:16px;padding:16px;margin-top:22px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 28px rgba(197,160,89,.18)}
+  .wallet .coin{width:46px;height:46px;border-radius:99px;background:var(--gold);color:#3a2c0a;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex:none}
+  .wallet .t{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--ink);line-height:1.1}
+  .wallet .s{font-size:12px;color:#6f5520;margin-top:2px}
+  .checklist{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .ck{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--ink)}
+  .ck .x{width:22px;height:22px;border-radius:99px;background:var(--sage-soft);color:var(--sage);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none;margin-top:1px}
+  .ck b{font-weight:700}
+  .ck .s{color:var(--ink-soft);font-weight:400;font-size:12.5px}
+  .ck .was{font-size:11px;color:var(--muted)}
+  .tier{border:1px solid var(--line);background:#fff;border-radius:16px;padding:15px 16px;margin-top:12px;position:relative}
+  .tier.here{border-color:var(--sage);background:var(--sage-soft)}
+  .tier.pro{border-color:var(--mulberry)}
+  .tier.ent{border-color:var(--gold)}
+  .tier .row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .tier .nm{font-weight:800;font-size:17px}
+  .tier .pr{font-weight:800;font-size:15px;color:var(--mulberry)}
+  .tier.here .pr{color:var(--sage)}
+  .tier .tl{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--ink);margin:4px 0 8px}
+  .tier .li{font-size:12.5px;color:var(--ink-soft);line-height:1.55}
+  .tier .li b{color:var(--ink);font-weight:700}
+  .tier .heretag{position:absolute;top:-9px;right:14px;background:var(--sage);color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:99px}
+  .note{font-size:12px;color:var(--ink-soft);font-style:italic;margin-top:14px;line-height:1.45}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:4px 0 16px;background:#fff}
+  .seg button{border:none;background:#fff;padding:11px 20px;font-size:14px;font-weight:700;color:var(--ink-soft);cursor:pointer;font-family:var(--body)}
+  .seg button.on{background:var(--mulberry);color:#fff}
+  .save{font-size:11px;font-weight:800;color:var(--sage);margin-left:8px}
+  .bill{border:1px solid var(--line);background:#fff;border-radius:15px;padding:15px 16px;margin-top:6px}
+  .bill .row{display:flex;align-items:baseline;justify-content:space-between}
+  .bill .nm{font-weight:800;font-size:16px}
+  .bill .pr{font-weight:800;font-size:18px;color:var(--mulberry)}
+  .bill .tl{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink-soft);margin-top:2px}
+  .recap{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+  .nav{flex:none;display:flex;align-items:center;gap:12px;padding:14px 22px calc(20px + env(safe-area-inset-bottom));background:linear-gradient(0deg,var(--paper) 70%,transparent);border-top:1px solid var(--line)}
+  .back{background:none;border:none;color:var(--ink-soft);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--body);padding:8px}
+  .btn{flex:1;background:var(--mulberry);color:#fff;border:none;border-radius:13px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--body);transition:.15s}
+  .btn:hover{background:#4a1d36}
+  .ghost{display:block;text-align:center;color:var(--ink-soft);font-size:13px;margin-top:10px;text-decoration:none;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="title-strip">Setnayan · Vendor onboarding <b>#2 — Post-verification</b> · loads on the vendor's first login after they're verified · one-time · 5 screens</div>
+
+  <div class="device">
+    <div class="notch"></div>
+    <div class="prog"><div class="prog-fill" id="pf"></div></div>
+
+    <div class="screenwrap" id="sw">
+
+      <!-- 1 VERIFIED + TOKEN DROP -->
+      <section class="screen active">
+        <div class="eyebrow">Verified</div>
+        <div class="badge-wrap">
+          <div class="seal">✓</div>
+          <div class="verbadge">✓ Verified business</div>
+        </div>
+        <div class="h" style="text-align:center;margin-top:16px">You're verified.</div>
+        <div class="lede" style="text-align:center">We checked your documents — you're the real thing. Couples trust a verified business, and your badge is live.</div>
+        <div class="wallet">
+          <div class="coin">+100</div>
+          <div><div class="t">100 founder tokens</div><div class="s">added straight to your wallet — our welcome gift.</div></div>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 2 WHAT UNLOCKED -->
+      <section class="screen">
+        <div class="eyebrow">Now unlocked</div>
+        <div class="h sm">Here's what just changed.</div>
+        <div class="checklist">
+          <div class="ck"><span class="x">✓</span><div><b>Star ratings now show</b><div class="s">Couples see your reviews on your profile.</div></div></div>
+          <div class="ck"><span class="x">✓</span><div><b>20&nbsp;km reach</b> <span class="was">· was 10&nbsp;km</span><div class="s">More couples nearby can find you.</div></div></div>
+          <div class="ck"><span class="x">✓</span><div><b>Up to 20 inquiries / week</b> <span class="was">· was 10</span><div class="s">More chances to get booked, every week.</div></div></div>
+          <div class="ck"><span class="x">✓</span><div><b>Up to 3 categories</b> <span class="was">· was 1</span><div class="s">List more of what you do.</div></div></div>
+          <div class="ck"><span class="x">✓</span><div><b>Earn bonus tokens</b><div class="s">Recommend Setnayan to your couples, get tokens back.</div></div></div>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 3 BENEFITS GOOD/BETTER/BEST -->
+      <section class="screen">
+        <div class="eyebrow">Grow when ready</div>
+        <div class="h sm">Want to go further?</div>
+        <div class="lede">You're set on Verified for free. Here's what the paid plans add — only when you're ready.</div>
+
+        <div class="tier here">
+          <div class="heretag">You're here</div>
+          <div class="row"><span class="nm">Verified</span><span class="pr">Free</span></div>
+          <div class="tl">Get found and trusted.</div>
+          <div class="li">Badge · star ratings · 20&nbsp;km · 20 inquiries/wk · up to 3 categories · earn bonus tokens.</div>
+        </div>
+
+        <div class="tier pro">
+          <div class="row"><span class="nm">Pro</span><span class="pr">₱2,499 / 28 days</span></div>
+          <div class="tl">Run your business.</div>
+          <div class="li"><b>Your name shown</b> in browse · <b>unlimited inquiries</b> · 50&nbsp;km · video calls · <b>all</b> reviews shown · your own website + custom slug · file sharing · specialized tools · bundle maker · <b>3 team logins</b>.</div>
+        </div>
+
+        <div class="tier ent">
+          <div class="row"><span class="nm">Enterprise</span><span class="pr">₱5,499 / 28 days</span></div>
+          <div class="tl">Run it at scale.</div>
+          <div class="li">Everything in Pro, plus <b>your whole team (unlimited logins)</b> · <b>unlimited categories</b> · <b>unlimited daily bookings</b> · 100&nbsp;km. For studios, multi-branch, high-volume vendors.</div>
+        </div>
+
+        <div class="note">The real jump to Enterprise is <b>team + scale + volume</b> — not just distance.</div>
+        <div style="flex:1;min-height:6px"></div>
+      </section>
+
+      <!-- 4 BILLING -->
+      <section class="screen">
+        <div class="eyebrow">Choose your plan</div>
+        <div class="h sm">Monthly or yearly?</div>
+        <div class="lede">Pay one 28-day block at a time, or a year up front — yearly saves you ₱7,488 on Pro and ₱16,488 on Enterprise.</div>
+        <div class="seg" id="seg"><button class="on" data-c="mo">28-day</button><button data-c="yr">Yearly <span class="save" style="color:#cdbf9c">save up to ₱16k</span></button></div>
+
+        <div class="bill">
+          <div class="row"><span class="nm">Pro</span><span class="pr" id="pro-pr">₱2,499<span style="font-size:12px;color:var(--muted);font-weight:600"> / 28 days</span></span></div>
+          <div class="tl">Run your business.<span class="save" id="pro-save" style="display:none">save ₱7,488/yr</span></div>
+        </div>
+        <div class="bill" style="margin-top:10px">
+          <div class="row"><span class="nm">Enterprise</span><span class="pr" id="ent-pr">₱5,499<span style="font-size:12px;color:var(--muted);font-weight:600"> / 28 days</span></span></div>
+          <div class="tl">Run it at scale.<span class="save" id="ent-save" style="display:none">save ₱16,488/yr</span></div>
+        </div>
+        <div class="note">No auto-charge surprises — you pay for a 28-day block or a year up front, and renew when you choose.</div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 5 STAY VERIFIED / DONE -->
+      <section class="screen">
+        <div class="eyebrow">You're all set</div>
+        <div class="h sm">You're ready to get booked.</div>
+        <div class="lede">Stay on Verified as long as you like — it's free. Upgrade to Pro or Enterprise any time from your dashboard.</div>
+        <div class="recap">
+          <div class="ck"><span class="x">✓</span><div><b>Verified badge live</b></div></div>
+          <div class="ck"><span class="x">✓</span><div><b>100 founder tokens</b> in your wallet</div></div>
+          <div class="ck"><span class="x">✓</span><div><b>Listing + microsite</b> up and findable</div></div>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+    </div><!-- /screenwrap -->
+
+    <div class="nav">
+      <button class="back" id="back">Back</button>
+      <button class="btn" id="cont">See what's unlocked</button>
+      <a class="ghost" id="ghost" style="display:none">Stay Verified — free</a>
+    </div>
+  </div>
+
+<script>
+  const screens=[...document.querySelectorAll('.screen')];
+  const pf=document.getElementById('pf'), sw=document.getElementById('sw');
+  const back=document.getElementById('back'), cont=document.getElementById('cont'), ghost=document.getElementById('ghost');
+  const labels=["See what's unlocked","Want to go further?","Compare plans","Start Pro","Go to my dashboard"];
+  let i=0;
+  function show(n){
+    i=Math.max(0,Math.min(screens.length-1,n));
+    screens.forEach((s,k)=>s.classList.toggle('active',k===i));
+    pf.style.width=((i+1)/screens.length*100)+'%';
+    back.style.visibility=i===0?'hidden':'visible';
+    cont.textContent=labels[i]||'Continue';
+    ghost.style.display=(i===2||i===3)?'block':'none';
+    sw.scrollTop=0;
+  }
+  back.onclick=()=>show(i-1);
+  cont.onclick=()=>{ if(i===screens.length-1){ cont.textContent='✓ Done'; } else show(i+1); };
+  ghost.onclick=()=>show(4);
+  // billing toggle
+  const seg=document.getElementById('seg');
+  const proPr=document.getElementById('pro-pr'), entPr=document.getElementById('ent-pr');
+  const proSave=document.getElementById('pro-save'), entSave=document.getElementById('ent-save');
+  seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    seg.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    const yr=b.dataset.c==='yr';
+    proPr.innerHTML = yr ? '₱24,999<span style="font-size:12px;color:var(--muted);font-weight:600">/yr</span>' : '₱2,499<span style="font-size:12px;color:var(--muted);font-weight:600"> / 28 days</span>';
+    entPr.innerHTML = yr ? '₱54,999<span style="font-size:12px;color:var(--muted);font-weight:600">/yr</span>' : '₱5,499<span style="font-size:12px;color:var(--muted);font-weight:600"> / 28 days</span>';
+    proSave.style.display = yr ? 'inline' : 'none';
+    entSave.style.display = yr ? 'inline' : 'none';
+  });
+  show(0);
+</script>
+</body>
+</html>

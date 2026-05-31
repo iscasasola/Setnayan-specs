@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setnayan · Vendor Onboarding #1 — Signup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --ink-soft:#4F535B; --line:rgba(30,34,41,.10);
+    --gold:#C5A059; --gold-soft:#F4ECD8; --mulberry:#5C2542; --mulberry-soft:#F2E7EC;
+    --sage:#5B7563; --sage-soft:#E7EFE9; --muted:#9A9A95; --danger:#9b3a3a;
+    --serif:'Instrument Serif',Georgia,serif; --body:'Manrope',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#ECE9E3;color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:26px 12px}
+  .title-strip{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6b6b66;margin-bottom:16px}
+  .title-strip b{color:var(--mulberry)}
+  .device{width:392px;max-width:100%;height:812px;background:var(--paper);border-radius:42px;box-shadow:0 30px 70px rgba(30,34,41,.22),0 0 0 11px #15171b,0 0 0 13px #2a2d33;
+    overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:140px;height:26px;background:#15171b;border-radius:0 0 16px 16px;z-index:30}
+  .prog{height:3px;background:var(--line);margin:30px 22px 0;border-radius:9px;overflow:hidden;flex:none}
+  .prog-fill{height:100%;background:var(--gold);width:8%;transition:width .35s ease}
+  .screenwrap{flex:1;overflow-y:auto;overflow-x:hidden}
+  .screen{display:none;padding:22px 22px 8px;min-height:100%;flex-direction:column}
+  .screen.active{display:flex}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:500}
+  .h{font-family:var(--serif);font-style:italic;font-weight:400;font-size:33px;line-height:1.06;margin:9px 0 8px;letter-spacing:-.01em}
+  .h.sm{font-size:27px}
+  .lede{color:var(--ink-soft);font-size:14.5px;line-height:1.5;margin-bottom:16px}
+  .glimpse{border:1px solid var(--line);background:#fff;border-radius:15px;padding:15px;font-family:var(--serif);font-style:italic;font-size:18px;color:var(--ink);line-height:1.25;margin-top:6px}
+  .choices{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+  .choice{text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:14px 15px;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;transition:.15s;font-family:var(--body)}
+  .choice:hover{border-color:var(--gold)}
+  .choice.sel{border-color:var(--mulberry);background:var(--mulberry-soft);box-shadow:inset 0 0 0 1px var(--mulberry)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--gold)}
+  .chip.sel{border-color:var(--mulberry);background:var(--mulberry);color:#fff}
+  .field{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px 14px;font-size:15px;font-family:var(--body);color:var(--ink);margin-top:4px}
+  .field::placeholder{color:var(--muted)}
+  .label{font-size:12px;font-weight:700;color:var(--ink-soft);margin:14px 0 0}
+  .preview{border:1px dashed var(--gold);background:var(--gold-soft);border-radius:13px;padding:13px 14px;margin-top:14px;font-size:13.5px;color:#6f5520;line-height:1.45}
+  .preview b{color:#4f3c12}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin-top:6px;background:#fff}
+  .seg button{border:none;background:#fff;padding:9px 16px;font-size:13px;font-weight:700;color:var(--ink-soft);cursor:pointer;font-family:var(--body)}
+  .seg button.on{background:var(--mulberry);color:#fff}
+  .photos{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .photo{aspect-ratio:1;border:1px dashed var(--line);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:20px}
+  .listing-card{border:1px solid var(--line);background:#fff;border-radius:15px;overflow:hidden;margin-top:16px;box-shadow:0 8px 22px rgba(30,34,41,.06)}
+  .listing-card .ph{height:96px;background:linear-gradient(135deg,#e9e2d4,#d9cdba);display:flex;align-items:flex-end;padding:9px}
+  .listing-card .ph .tag{background:rgba(255,255,255,.9);border-radius:99px;font-size:10px;font-weight:700;padding:4px 9px;color:var(--ink)}
+  .listing-card .body{padding:12px 13px}
+  .listing-card .nm{font-weight:800;font-size:15px}
+  .listing-card .sub{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .listing-card .pr{font-weight:800;color:var(--mulberry);margin-top:7px;font-size:15px}
+  .checklist{display:flex;flex-direction:column;gap:11px;margin-top:6px}
+  .ck{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--ink)}
+  .ck .x{width:21px;height:21px;border-radius:99px;background:var(--sage-soft);color:var(--sage);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none;margin-top:1px}
+  .ck b{font-weight:700}
+  .ck .s{color:var(--ink-soft);font-weight:400;font-size:12.5px}
+  .punch{border-left:3px solid var(--mulberry);padding:4px 0 4px 13px;margin-top:16px;font-family:var(--serif);font-style:italic;font-size:18px;color:var(--ink);line-height:1.25}
+  .inquiry{border:1px solid var(--line);background:#fff;border-radius:15px;padding:15px;box-shadow:0 10px 26px rgba(30,34,41,.08)}
+  .inquiry .who{font-weight:800;font-size:15px}
+  .inquiry .det{font-size:13px;color:var(--ink-soft);margin-top:3px}
+  .inquiry .reply{margin-top:13px;width:100%;background:var(--mulberry);color:#fff;border:none;border-radius:11px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;font-family:var(--body);display:flex;align-items:center;justify-content:center;gap:7px}
+  .inquiry .reply .tok{background:rgba(255,255,255,.18);border-radius:99px;padding:2px 8px;font-size:11px}
+  .cmp{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .cmp th,.cmp td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  .cmp thead th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);background:#faf7f1}
+  .cmp td.them{color:var(--danger);font-weight:700}
+  .cmp td.us{color:var(--sage);font-weight:800}
+  .cmp tr.keep td{font-size:15px;font-weight:800}
+  .cmp tr.keep td.them{color:var(--ink-soft)}
+  .cmp tr:last-child td{border-bottom:none}
+  .packs{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+  .pack{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);background:#fff;border-radius:13px;padding:13px 15px;cursor:pointer;transition:.15s}
+  .pack:hover{border-color:var(--gold)}
+  .pack.sel{border-color:var(--mulberry);background:var(--mulberry-soft);box-shadow:inset 0 0 0 1px var(--mulberry)}
+  .pack .l .n{font-weight:800;font-size:16px}
+  .pack .l .s{font-size:11.5px;color:var(--ink-soft)}
+  .pack .r{text-align:right}
+  .pack .r .t{font-weight:800;font-size:15px;color:var(--mulberry)}
+  .pack .r .per{font-size:10.5px;color:var(--muted)}
+  .pack.feat{position:relative}
+  .pack.feat::after{content:'best value';position:absolute;top:-9px;right:13px;background:var(--gold);color:#3a2c0a;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:99px}
+  .freegift{border:1px solid var(--sage);background:var(--sage-soft);border-radius:13px;padding:13px 14px;margin-top:14px;font-size:13.5px;color:#2f4234;line-height:1.45}
+  .freegift b{color:#1f2e23}
+  .nav{flex:none;display:flex;align-items:center;gap:12px;padding:14px 22px calc(20px + env(safe-area-inset-bottom));background:linear-gradient(0deg,var(--paper) 70%,transparent);border-top:1px solid var(--line)}
+  .back{background:none;border:none;color:var(--ink-soft);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--body);padding:8px}
+  .btn{flex:1;background:var(--mulberry);color:#fff;border:none;border-radius:13px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--body);transition:.15s}
+  .btn:hover{background:#4a1d36}
+  .sub-link{display:block;text-align:center;color:var(--ink-soft);font-size:13px;margin-top:10px;text-decoration:none;font-weight:600}
+  .foot-note{font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:14px;font-style:italic}
+</style>
+</head>
+<body>
+  <div class="title-strip">Setnayan · Vendor onboarding <b>#1 — Signup</b> · 12 screens · tap Continue to walk through</div>
+
+  <div class="device">
+    <div class="notch"></div>
+    <div class="prog"><div class="prog-fill" id="pf"></div></div>
+
+    <div class="screenwrap" id="sw">
+
+      <!-- 1 WELCOME -->
+      <section class="screen active">
+        <div class="eyebrow">For vendors</div>
+        <div class="h">Run your business, not your DMs.</div>
+        <div class="lede">Couples come to Setnayan ready to book. We hand you the inquiry — and you keep 100% of the sale. List your business free, today.</div>
+        <div class="glimpse">An inbox of couples who already chose to reach out to you.</div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 2 HQ -->
+      <section class="screen">
+        <div class="eyebrow">Where you work</div>
+        <div class="h sm">Where's your home base?</div>
+        <div class="lede">We show you to couples nearby. You can widen your reach later.</div>
+        <div class="label">City or province</div>
+        <input class="field" placeholder="e.g., Manila" value="Manila" />
+        <div class="preview">📍 <b>Manila · 10&nbsp;km reach</b> on the Free plan.<br/>You'll appear as <b>“Manila Wedding Photographer #4218.”</b> Your real name unlocks the first time you reply to a couple.</div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 3 YEARS -->
+      <section class="screen">
+        <div class="eyebrow">Your experience</div>
+        <div class="h sm">How long have you been in weddings?</div>
+        <div class="lede">We turn this into a quiet trust badge on your profile.</div>
+        <div class="chips" data-single>
+          <span class="chip">Just starting</span>
+          <span class="chip">1–2 years</span>
+          <span class="chip">3–5 years</span>
+          <span class="chip sel">5–10 years</span>
+          <span class="chip">10+ years</span>
+        </div>
+        <div class="preview">Your profile will read: <b>“8 years in weddings.”</b></div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 4 CATEGORY -->
+      <section class="screen">
+        <div class="eyebrow">What you do</div>
+        <div class="h sm">What's your main service?</div>
+        <div class="lede">Pick your primary craft. You can add more in a moment.</div>
+        <div class="chips" data-single>
+          <span class="chip sel">Photographer</span>
+          <span class="chip">Videographer</span>
+          <span class="chip">Caterer</span>
+          <span class="chip">Florist</span>
+          <span class="chip">Hair &amp; Makeup</span>
+          <span class="chip">Coordinator</span>
+          <span class="chip">Cake</span>
+          <span class="chip">Lights &amp; Sound</span>
+          <span class="chip">DJ / Host</span>
+          <span class="chip">Gowns &amp; Suits</span>
+          <span class="chip">Venue</span>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 5 FIRST PACKAGE -->
+      <section class="screen">
+        <div class="eyebrow">Your first package</div>
+        <div class="h sm">Put one package up.</div>
+        <div class="lede">This goes live on the marketplace the second you finish. Couples can find it today.</div>
+        <div class="label">Package name</div>
+        <input class="field" placeholder="e.g., Full-day Wedding Coverage" value="Full-day Wedding Coverage" />
+        <div class="label">Price</div>
+        <div class="seg"><button class="on">Fixed</button><button>Range</button></div>
+        <input class="field" style="margin-top:8px" placeholder="₱" value="₱75,000" />
+        <div class="label">Inclusions</div>
+        <div class="chips">
+          <span class="chip sel">8 hours</span><span class="chip sel">2 shooters</span>
+          <span class="chip sel">Online gallery</span><span class="chip">Same-day teaser</span>
+          <span class="chip">Prints</span>
+        </div>
+        <div class="label">Photos (3–5)</div>
+        <div class="photos"><div class="photo">＋</div><div class="photo">＋</div><div class="photo">＋</div><div class="photo">＋</div></div>
+        <div style="flex:1;min-height:6px"></div>
+      </section>
+
+      <!-- 6 OTHER SERVICES -->
+      <section class="screen">
+        <div class="eyebrow">More to offer?</div>
+        <div class="h sm">Do you offer anything else?</div>
+        <div class="lede">Add more services to show up in more searches.</div>
+        <div class="chips">
+          <span class="chip">＋ Prenup shoot</span><span class="chip">＋ Same-day edit</span>
+          <span class="chip">＋ Drone</span><span class="chip">＋ Photo booth</span>
+        </div>
+        <div class="preview">Free lists <b>1 category.</b> Verified, Pro and Enterprise list more — we'll cover that once you're verified.</div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 7 PAIN -->
+      <section class="screen">
+        <div class="eyebrow">We get it</div>
+        <div class="h sm">What's the hard part of getting clients?</div>
+        <div class="lede">No wrong answer — this just helps us help you.</div>
+        <div class="chips">
+          <span class="chip">Paying for ads</span><span class="chip sel">Couples who ghost</span>
+          <span class="chip sel">Endless DMs</span><span class="chip">Tire-kickers</span>
+          <span class="chip">Slow seasons</span><span class="chip">Getting found</span>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 8 FREE TOUR -->
+      <section class="screen">
+        <div class="eyebrow">What you get free</div>
+        <div class="h sm">All of this, free — forever.</div>
+        <div class="checklist">
+          <div class="ck"><span class="x">✓</span><div><b>Marketplace listing</b><div class="s">Couples find you by craft, place and style.</div></div></div>
+          <div class="ck"><span class="x">✓</span><div><b>Your own microsite</b><div class="s">A clean page with your work + an inquire button.</div></div></div>
+          <div class="ck"><span class="x">✓</span><div><b>Portfolio + chat</b><div class="s">Show your work, talk to couples in-app.</div></div></div>
+          <div class="ck"><span class="x">✓</span><div><b>Receive inquiries</b><div class="s">Real couples reaching out, not cold leads.</div></div></div>
+          <div class="ck"><span class="x">✓</span><div><b>0% commission</b><div class="s">On every booking. We never touch your sale.</div></div></div>
+        </div>
+        <div class="punch">We never take a cut of your sale. Not 5%. Not 15%. Zero.</div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 9 NOTIFICATIONS -->
+      <section class="screen">
+        <div class="eyebrow">Stay ready</div>
+        <div class="h sm">Never miss an inquiry.</div>
+        <div class="lede">A couple reaching out is a real chance to get booked. We'll ping you the moment one lands.</div>
+        <div class="glimpse">🔔 “Maria &amp; Juan just sent you an inquiry.”</div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 10 DEMO TOKEN -->
+      <section class="screen">
+        <div class="eyebrow">A real inquiry</div>
+        <div class="inquiry">
+          <div class="who">Maria &amp; Juan</div>
+          <div class="det">Manila · Dec 18, 2026 — looking for a wedding photographer.</div>
+          <button class="reply">Reply <span class="tok">1 token · ₱250</span></button>
+        </div>
+        <div class="h sm" style="margin-top:20px">Your sale is 100% yours.</div>
+        <div class="lede" style="margin-bottom:4px">Other platforms take a cut of every booking — often <b>15%</b> — just to hand you a lead. On a ₱1,000,000 wedding, that's <b>₱150,000 gone.</b> We don't want a peso of your sale. You pay <b>one token</b> to answer a couple who's actually looking to book.</div>
+        <table class="cmp">
+          <thead><tr><th>On a ₱1,000,000 booking</th><th>Others</th><th>Setnayan</th></tr></thead>
+          <tbody>
+            <tr><td>Commission taken</td><td class="them">−₱150,000</td><td class="us">₱0</td></tr>
+            <tr><td>Cost to reach the lead</td><td class="them">in the 15%</td><td class="us">₱250</td></tr>
+            <tr class="keep"><td>You keep</td><td class="them">₱850,000</td><td class="us">₱999,750</td></tr>
+          </tbody>
+        </table>
+        <div class="foot-note">“15%” = what platforms that take a cut of your sale typically charge (10–20%). The math holds either way.</div>
+        <div style="flex:1;min-height:6px"></div>
+      </section>
+
+      <!-- 11 PROFILE LIVE -->
+      <section class="screen">
+        <div class="eyebrow">You're on the map</div>
+        <div class="h sm">Your business is live.</div>
+        <div class="lede">Couples can find you right now. Here's your marketplace card.</div>
+        <div class="listing-card">
+          <div class="ph"><span class="tag">📸 Photographer · Manila</span></div>
+          <div class="body">
+            <div class="nm">Manila Wedding Photographer #4218</div>
+            <div class="sub">8 years in weddings · 10&nbsp;km · ⭐ new</div>
+            <div class="pr">Full-day Coverage · ₱75,000</div>
+          </div>
+        </div>
+        <div class="lede" style="margin-top:16px">Add tokens so you're ready to answer the first inquiry that lands.</div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 12 TOKEN BUNDLE -->
+      <section class="screen">
+        <div class="eyebrow">Get ready to answer</div>
+        <div class="h sm">Start with tokens.</div>
+        <div class="lede">Each token answers one inquiry — one real chance to get booked. The bigger the pack, the cheaper per token.</div>
+        <div class="packs" data-single>
+          <div class="pack"><div class="l"><div class="n">4 tokens</div><div class="s">try it out</div></div><div class="r"><div class="t">₱1,000</div><div class="per">₱250 each</div></div></div>
+          <div class="pack"><div class="l"><div class="n">10 tokens</div><div class="s">a busy month</div></div><div class="r"><div class="t">₱2,300</div><div class="per">₱230 each</div></div></div>
+          <div class="pack sel feat"><div class="l"><div class="n">25 tokens</div><div class="s">a full season</div></div><div class="r"><div class="t">₱5,250</div><div class="per">₱210 each</div></div></div>
+          <div class="pack"><div class="l"><div class="n">50 tokens</div><div class="s">go all in</div></div><div class="r"><div class="t">₱9,500</div><div class="per">₱190 each</div></div></div>
+          <div class="pack"><div class="l"><div class="n">100 tokens</div><div class="s">best per token</div></div><div class="r"><div class="t">₱18,000</div><div class="per">₱180 each</div></div></div>
+        </div>
+        <div class="freegift">🎁 <b>+100 free founder tokens</b> when you verify your business before launch. We'll review your docs and add them straight to your wallet.</div>
+        <div class="foot-note">Staying free is honest: a Free vendor still gets a listing and still <b>receives</b> inquiries — tokens just let you <b>answer</b> them.</div>
+        <div style="flex:1;min-height:6px"></div>
+      </section>
+
+    </div><!-- /screenwrap -->
+
+    <div class="nav">
+      <button class="back" id="back">Back</button>
+      <button class="btn" id="cont">Continue</button>
+    </div>
+  </div>
+
+<script>
+  const screens=[...document.querySelectorAll('.screen')];
+  const pf=document.getElementById('pf'), sw=document.getElementById('sw');
+  const back=document.getElementById('back'), cont=document.getElementById('cont');
+  const labels=['List my business · free','Continue','Continue','Continue','Publish my listing',
+    'Continue','Continue','Continue','Turn on alerts','Continue','Continue','Verify my business'];
+  let i=0;
+  function show(n){
+    i=Math.max(0,Math.min(screens.length-1,n));
+    screens.forEach((s,k)=>s.classList.toggle('active',k===i));
+    pf.style.width=((i+1)/screens.length*100)+'%';
+    back.style.visibility=i===0?'hidden':'visible';
+    cont.textContent=labels[i]||'Continue';
+    sw.scrollTop=0;
+  }
+  back.onclick=()=>show(i-1);
+  cont.onclick=()=>{ if(i===screens.length-1){ cont.textContent='✓ Submitted'; } else show(i+1); };
+  // chip / pack single + multi select
+  document.querySelectorAll('.chips,.packs').forEach(group=>{
+    const single=group.hasAttribute('data-single');
+    group.querySelectorAll('.chip,.pack').forEach(el=>{
+      el.addEventListener('click',()=>{
+        if(single) group.querySelectorAll('.chip,.pack').forEach(x=>x.classList.remove('sel'));
+        el.classList.toggle('sel');
+      });
+    });
+  });
+  show(0);
+</script>
+</body>
+</html>

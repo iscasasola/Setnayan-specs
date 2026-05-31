@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setnayan · Customer Onboarding · Part A (navigable)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFBFA;--ink:#1E2229;--ink-soft:#4F535B;--ink-faint:#8A8E96;
+    --line:rgba(30,34,41,.10);--line-2:rgba(30,34,41,.16);
+    --gold:#C5A059;--gold-deep:#A88340;--gold-wash:#F4ECD8;
+    --mulberry:#5C2542;--mulberry-deep:#4A1D36;--mulberry-wash:#F4E9EE;
+    --sage:#6E8B6A;--sage-wash:#EAF0E8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{
+    font-family:'Manrope',system-ui,sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px 18px;
+    background:radial-gradient(1100px 700px at 18% -10%,#F6F1E6 0%,rgba(246,241,230,0) 55%),radial-gradient(900px 600px at 112% 120%,#F3ECE0 0%,rgba(243,236,224,0) 50%),#EFEBE2;
+    color:var(--ink);
+  }
+  .caption{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);text-align:center;line-height:1.7}
+  .caption b{color:var(--ink-soft);font-weight:500}
+
+  .phone{
+    width:393px;height:852px;border-radius:46px;background:var(--paper);
+    box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 40px 80px -30px rgba(30,34,41,.45),0 12px 30px -12px rgba(30,34,41,.25);
+    border:1px solid rgba(30,34,41,.08);position:relative;overflow:hidden;display:flex;flex-direction:column;
+  }
+  .phone::before{content:"";position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:28px;border-radius:0 0 16px 16px;background:var(--paper);box-shadow:0 1px 0 var(--line);z-index:9}
+
+  /* chrome */
+  .chrome{padding:44px 22px 0;flex:0 0 auto}
+  .topbar{display:flex;align-items:center;justify-content:space-between;height:24px}
+  .back{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink-soft);display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600;padding:4px;visibility:hidden}
+  .back svg{width:16px;height:16px}
+  .wordmark{display:flex;align-items:center;gap:6px;font-weight:800;letter-spacing:.15em;font-size:12px}
+  .wordmark .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--gold-wash)}
+  .step{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--ink-faint);min-width:42px;text-align:right}
+  .progress{height:3px;border-radius:99px;background:var(--line);margin-top:12px;overflow:hidden}
+  .progress > i{display:block;height:100%;width:11%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold-deep));transition:width .35s cubic-bezier(.4,0,.2,1)}
+
+  /* stage */
+  .stage{flex:1;position:relative;overflow:hidden}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;padding:18px 22px 26px}
+  .screen.active{display:flex;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .scroll{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;overflow-y:auto}
+  .scroll.top{justify-content:flex-start;padding-top:6px}
+
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep);display:flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:18px;height:1.5px;background:var(--gold)}
+  h2{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:33px;line-height:1.04;letter-spacing:-.01em;margin-top:10px}
+  .sub{font-size:14px;line-height:1.5;color:var(--ink-soft);margin-top:8px}
+
+  /* option cards */
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+  .opt{display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;
+    background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:15px 16px;transition:.14s;font-family:inherit}
+  .opt:hover{border-color:var(--line-2)}
+  .opt.sel{border-color:var(--mulberry);background:var(--mulberry-wash)}
+  .opt .ico{width:38px;height:38px;border-radius:11px;background:var(--gold-wash);color:var(--mulberry);display:flex;align-items:center;justify-content:center;font-size:19px;flex:0 0 auto}
+  .opt .txt .t{font-size:15px;font-weight:700;color:var(--ink)}
+  .opt .txt .d{font-size:12.5px;color:var(--ink-soft);margin-top:1px}
+  .opt .chk{margin-left:auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-2);flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff}
+  .opt.sel .chk{background:var(--mulberry);border-color:var(--mulberry)}
+  .opt .chk svg{width:11px;height:11px;opacity:0}
+  .opt.sel .chk svg{opacity:1}
+
+  /* chips */
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:2px}
+  .chip{cursor:pointer;background:#fff;border:1.5px solid var(--line);border-radius:99px;padding:11px 16px;font-size:13.5px;font-weight:600;color:var(--ink);transition:.14s;font-family:inherit}
+  .chip:hover{border-color:var(--line-2)}
+  .chip.sel{border-color:var(--mulberry);background:var(--mulberry);color:#fff}
+  .softnote{font-size:12px;color:var(--ink-faint);margin-top:10px;line-height:1.5}
+  .softnote b{color:var(--gold-deep)}
+
+  /* inputs */
+  .field{margin-top:2px}
+  .field input{width:100%;font-family:inherit;font-size:18px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:15px 16px;outline:none;transition:.14s}
+  .field input:focus{border-color:var(--mulberry)}
+  .field .help{font-size:12.5px;color:var(--ink-soft);margin-top:9px;line-height:1.5}
+
+  /* footer actions */
+  .foot{flex:0 0 auto;display:flex;flex-direction:column;gap:11px;padding-top:14px}
+  .cta{appearance:none;border:0;cursor:pointer;width:100%;background:var(--mulberry);color:#fff;font-family:'Manrope';font-weight:700;font-size:16px;height:54px;border-radius:16px;box-shadow:0 12px 24px -14px rgba(92,37,66,.6);transition:.12s}
+  .cta:hover{background:var(--mulberry-deep);transform:translateY(-1px)}
+  .skip{text-align:center;font-size:13.5px;color:var(--ink-soft);background:none;border:0;cursor:pointer;font-family:inherit}
+  .skip u{color:var(--mulberry);text-decoration:none;border-bottom:1.5px solid rgba(92,37,66,.25);font-weight:700}
+  .fine{text-align:center;font-size:11px;color:var(--ink-faint)}
+  .hi{width:120px;height:4.5px;border-radius:99px;background:rgba(30,34,41,.16);margin:6px auto 0}
+
+  /* welcome-specific */
+  .glimpse{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px 20px 16px;box-shadow:0 18px 40px -30px rgba(30,34,41,.5);position:relative}
+  .allset{position:absolute;top:16px;right:16px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);background:var(--sage-wash);border-radius:99px;padding:5px 9px;font-weight:500}
+  .mc{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--gold);color:var(--mulberry);font-family:'Instrument Serif',serif;font-size:19px;background:var(--gold-wash)}
+  .names{font-family:'Instrument Serif',serif;font-size:23px;margin-top:12px}
+  .date{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .date b{color:var(--gold-deep);font-weight:700}
+  .div{height:1px;background:var(--line);margin:14px 0 11px}
+  .ck{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-soft);margin-bottom:8px}
+  .ck b{color:var(--ink);font-weight:600}
+  .ck .t{width:16px;height:16px;border-radius:50%;background:var(--sage-wash);color:var(--sage);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .ck .t svg{width:9px;height:9px}
+  .bighead{font-family:'Instrument Serif',serif;font-style:italic;font-size:46px;line-height:.98;letter-spacing:-.01em}
+  .bighead .ap{color:var(--gold)}
+
+  /* processing */
+  .spinwrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+  .spin{width:54px;height:54px;border-radius:50%;border:3px solid var(--gold-wash);border-top-color:var(--gold);animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .oauth{display:flex;flex-direction:column;gap:10px;width:100%}
+  .ob{display:flex;align-items:center;justify-content:center;gap:10px;height:50px;border-radius:14px;border:1.5px solid var(--line-2);background:#fff;font-weight:700;font-size:14.5px;color:var(--ink);cursor:pointer;font-family:inherit}
+  .ob.fb{background:#1877F2;color:#fff;border-color:#1877F2}
+</style>
+</head>
+<body>
+  <div class="caption">Setnayan · Customer Onboarding · <b>Part A — navigable prototype</b><br>tap “Start planning · free”, then Continue, to step through · login lands on screen 9</div>
+
+  <div class="phone">
+    <div class="chrome">
+      <div class="topbar">
+        <button class="back" id="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Back</button>
+        <div class="wordmark"><span class="dot"></span>SETNAYAN</div>
+        <div class="step" id="step">01 / 09</div>
+      </div>
+      <div class="progress"><i id="bar"></i></div>
+    </div>
+
+    <div class="stage" id="stage">
+
+      <!-- 1 · WELCOME -->
+      <section class="screen active">
+        <div class="scroll">
+          <div class="glimpse">
+            <div class="allset">All set</div>
+            <div class="mc">M&nbsp;J</div>
+            <div class="names">Maria &amp; Juan</div>
+            <div class="date">December 18, 2026 · <b>202 days to go</b></div>
+            <div class="div"></div>
+            <div class="ck"><span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Manila Cathedral</b> · venue locked</span></div>
+            <div class="ck"><span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Photographer</b> · shortlisted</span></div>
+            <div class="ck"><span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Today's Focus</b> · on track</span></div>
+          </div>
+          <div>
+            <div class="eyebrow">Plan it all in one place</div>
+            <div class="bighead" style="font-style:italic;margin-top:12px">Set na <span class="ap">'</span>yan.</div>
+            <p class="sub" style="margin-top:12px">Your whole wedding — vendors, budget, guests, the day itself — in one place, without the chaos.</p>
+          </div>
+        </div>
+        <div class="foot">
+          <button class="cta" onclick="next()">Start planning · free</button>
+          <button class="skip">Already have an account? <u>Log in</u></button>
+          <div class="fine">Free to start. No card needed.</div>
+        </div>
+      </section>
+
+      <!-- 2 · ROLE -->
+      <section class="screen">
+        <div class="scroll top">
+          <div><div class="eyebrow">About you</div><h2>What's your role?</h2><p class="sub">So we tailor the plan to how you're helping.</p></div>
+          <div class="opts">
+            <button class="opt" onclick="pick(this)"><span class="ico">👰</span><span class="txt"><span class="t">Bride</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+            <button class="opt" onclick="pick(this)"><span class="ico">🤵</span><span class="txt"><span class="t">Groom</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+            <button class="opt" onclick="pick(this)"><span class="ico">💛</span><span class="txt"><span class="t">Someone else</span><span class="d">Parent, planner, or part of the entourage</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          </div>
+        </div>
+        <div class="foot"><button class="cta" onclick="next()">Continue</button></div>
+      </section>
+
+      <!-- 3 · CHOOSE YOUR WEDDING -->
+      <section class="screen">
+        <div class="scroll top">
+          <div><div class="eyebrow">Your wedding</div><h2>What kind of wedding?</h2><p class="sub">This is what matches you to the right vendors and officiant.</p></div>
+          <div class="opts">
+            <button class="opt" onclick="pick(this)"><span class="ico">⛪</span><span class="txt"><span class="t">Catholic</span><span class="d">Church ceremony · Pre-Cana</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+            <button class="opt" onclick="pick(this)"><span class="ico">📜</span><span class="txt"><span class="t">Civil</span><span class="d">Judge or registrar</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+            <button class="opt" onclick="pick(this)"><span class="ico">🤝</span><span class="txt"><span class="t">Mixed</span><span class="d">Two ceremonies / interfaith</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          </div>
+          <p class="softnote"><b>Coming soon</b> — Christian · INC · Muslim · Cultural. Tap to be notified when your ceremony goes live.</p>
+        </div>
+        <div class="foot"><button class="cta" onclick="next()">Continue</button></div>
+      </section>
+
+      <!-- 4 · NAME -->
+      <section class="screen">
+        <div class="scroll top">
+          <div><div class="eyebrow">Your wedding</div><h2>What's this wedding called?</h2></div>
+          <div class="field"><input type="text" placeholder="Maria &amp; Juan" /><div class="help">This becomes your monogram and your free website link — <b style="color:var(--gold-deep)">setnayan.com/maria-juan</b>.</div></div>
+        </div>
+        <div class="foot"><button class="cta" onclick="next()">Continue</button></div>
+      </section>
+
+      <!-- 5 · DATE -->
+      <section class="screen">
+        <div class="scroll top">
+          <div><div class="eyebrow">Your wedding</div><h2>When's the big day?</h2><p class="sub">We map every deadline backward from here. You can change it anytime.</p></div>
+          <div class="field"><input type="date" value="2026-12-18" /></div>
+          <div class="chips"><button class="chip" onclick="pickChip(this)">We're not sure yet</button></div>
+        </div>
+        <div class="foot"><button class="cta" onclick="next()">Continue</button></div>
+      </section>
+
+      <!-- 6 · LOCATION -->
+      <section class="screen">
+        <div class="scroll top">
+          <div><div class="eyebrow">Your wedding</div><h2>Where will it be?</h2><p class="sub">A venue or city helps us find vendors near you.</p></div>
+          <div class="field"><input type="text" placeholder="Venue or city — e.g. Manila" /></div>
+          <div class="chips">
+            <button class="chip" onclick="pickChip(this,true)">Hotel / Ballroom</button>
+            <button class="chip" onclick="pickChip(this,true)">Garden</button>
+            <button class="chip" onclick="pickChip(this,true)">Beach</button>
+            <button class="chip" onclick="pickChip(this,true)">Destination</button>
+            <button class="chip" onclick="pickChip(this,true)">Heritage</button>
+            <button class="chip" onclick="pickChip(this,true)">Tent</button>
+            <button class="chip" onclick="pickChip(this,true)">City Hall</button>
+          </div>
+          <div class="chips"><button class="chip" onclick="pickChip(this)">Still looking</button></div>
+        </div>
+        <div class="foot"><button class="cta" onclick="next()">Continue</button></div>
+      </section>
+
+      <!-- 7 · PAX -->
+      <section class="screen">
+        <div class="scroll top">
+          <div><div class="eyebrow">The day</div><h2>How many guests?</h2><p class="sub">A rough number is fine — it sizes your caterer and venue.</p></div>
+          <div class="chips">
+            <button class="chip" onclick="pickChip(this)">Under 50</button>
+            <button class="chip" onclick="pickChip(this)">50–150</button>
+            <button class="chip" onclick="pickChip(this)">150–300</button>
+            <button class="chip" onclick="pickChip(this)">300+</button>
+          </div>
+        </div>
+        <div class="foot"><button class="cta" onclick="next()">Continue</button></div>
+      </section>
+
+      <!-- 8 · BUDGET -->
+      <section class="screen">
+        <div class="scroll top">
+          <div><div class="eyebrow">The day</div><h2>What's your budget?</h2><p class="sub">We'll match vendors and a plan that fit it. No judgment.</p></div>
+          <div class="opts">
+            <button class="opt" onclick="pick(this)"><span class="txt"><span class="t">Under ₱250,000</span><span class="d">Intimate &amp; smart</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+            <button class="opt" onclick="pick(this)"><span class="txt"><span class="t">₱250,000 – ₱500,000</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+            <button class="opt" onclick="pick(this)"><span class="txt"><span class="t">₱500,000 – ₱1,000,000</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+            <button class="opt" onclick="pick(this)"><span class="txt"><span class="t">₱1,000,000+</span><span class="d">The full celebration</span></span><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          </div>
+        </div>
+        <div class="foot"><button class="cta" onclick="next()">Continue</button></div>
+      </section>
+
+      <!-- 9 · CUSTOMIZING + ACCOUNT (login moment) -->
+      <section class="screen">
+        <div class="scroll" id="custom-scroll">
+          <div class="spinwrap" id="customizing">
+            <div class="spin"></div>
+            <div><div class="eyebrow" style="justify-content:center">Almost there</div><h2 style="text-align:center;margin-top:8px">Customizing your plan…</h2><p class="sub" style="text-align:center">Matching vendors, mapping your deadlines.</p></div>
+          </div>
+          <div id="account" style="display:none">
+            <div class="eyebrow">Save your plan</div>
+            <h2>Create your free account</h2>
+            <p class="sub">Your wedding, your shortlist, your timeline — saved and yours. Free, always.</p>
+            <div class="oauth" style="margin-top:18px">
+              <button class="ob"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A11 11 0 0 0 12 1 11 11 0 0 0 2.18 7.06L5.84 9.9C6.71 7.31 9.14 5.38 12 5.38z"/></svg>Continue with Google</button>
+              <button class="ob fb"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.93-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12z"/></svg>Continue with Facebook</button>
+              <button class="ob">Continue with email</button>
+            </div>
+          </div>
+        </div>
+        <div class="foot" id="custom-foot" style="display:none">
+          <div class="fine">By continuing you agree to our Terms &amp; Privacy.</div>
+          <div class="hi"></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+  const screens=[...document.querySelectorAll('.screen')];
+  const bar=document.getElementById('bar'), step=document.getElementById('step'), back=document.getElementById('back');
+  let i=0;
+  function render(){
+    screens.forEach((s,k)=>s.classList.toggle('active',k===i));
+    const n=i+1, total=screens.length;
+    bar.style.width=(n/total*100)+'%';
+    step.textContent=String(n).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+    back.style.visibility=i===0?'hidden':'visible';
+    if(i===screens.length-1){ runCustomizing(); }
+  }
+  function next(){ if(i<screens.length-1){i++;render();} }
+  function prev(){ if(i>0){i--;render();} }
+  back.addEventListener('click',prev);
+  function pick(el){ el.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel')); el.classList.add('sel'); }
+  function pickChip(el,multi){ if(!multi){el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));} el.classList.toggle('sel'); }
+  let customRan=false;
+  function runCustomizing(){
+    if(customRan) return; customRan=true;
+    const c=document.getElementById('customizing'), a=document.getElementById('account'), f=document.getElementById('custom-foot');
+    setTimeout(()=>{ c.style.display='none'; a.style.display='block'; f.style.display='flex'; }, 1600);
+  }
+  render();
+</script>
+</body>
+</html>
