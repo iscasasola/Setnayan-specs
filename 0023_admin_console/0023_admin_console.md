@@ -33,7 +33,7 @@ The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. 
 | Money | 17 | **BIR 2307** | `/admin/bir/2307` | Quarterly Form 2307 PDFs for vendor EWT reporting (per 0026 BIR compliance) |
 | Money | 18 | **Ads** | `/admin/ads` | Boosted Ads + Sponsored Boost vendor management (per 0022 § 5b vendor marketing tiers) |
 | Money | 19 | **Payment methods** | `/admin/settings/payment-methods` | Per-method config (rates · eligibility per account type · active flag) · read-only V1 banner pattern · also reachable from Settings group below |
-| Content | 20 | **Taxonomy** | `/admin/taxonomy` | Vendor canonical_services taxonomy management — the **10-parent shrunk taxonomy** (per 2026-05-30 shrink + the 2026-06-03 **Design › Digital Services** child; supersedes the old 192-row/12-folder model). Surfaces the parent → child-tile tree incl. Digital Services (Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw). Also: SKU catalog (`/admin/pricing` + `/admin/addons`) needs a `digital_services` category bucket; **Pakanta / Pro Website / Live Venue Photo Wall have no `service_catalog` SKU rows yet** (gap). Detailed CRUD-vs-view spec TODO. See [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md) |
+| Content | 20 | **Taxonomy** | `/admin/taxonomy` | Vendor canonical_services taxonomy management — the **10-parent shrunk taxonomy** (per 2026-05-30 shrink + the 2026-06-03 **Design › Digital Services** child; supersedes the old 192-row/12-folder model). Surfaces the parent → child-tile tree incl. Digital Services (Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw). The purchasable SKUs all exist in the V2 retail catalog (`platform_retail_catalog_v2` · flat · no category column) — Animated Monogram ₱2,499 · Pro Website ₱2,999 · Live Venue Photo Wall ₱3,499 · Pakanta ₱3,499 · Pailaw/Live Background (`LIVE_BACKGROUND`) ₱2,499 — priced in `/admin/pricing` + `/admin/addons` as flat SKUs (the Digital-Services grouping is taxonomy-only). Detailed CRUD-vs-view spec TODO. See [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md) |
 | Content | 21 | **Website editor** | `/admin/website` | Marketing-site widget management — enable/disable + drag-drop reorder per page (home · /for-vendors · /features · /about) · see § 3.10 |
 | Content | 22 | **Add-ons** | `/admin/addons` | App Store-style card view of customer SKUs reading `service_catalog` + `feature_policy` · Pricing Report download generates `Pricing.md` snapshot from live DB · per-card eligibility dots · vendor add-ons tab Coming soon · added 2026-05-23 (V1 single tab; V1.x adds per-SKU drawer + vendor tab + edit affordances) |
 | Content | 23 | **Concierge brain** | `/admin/brain` | Browse `concierge_brain_chunks` grouped by 8 topic files (Filipino Cultural Reference · Regional Pricing Benchmarks · Seasonal Weather · Planning Timelines · Legal BIR · Setnayan Feature Reference · Vendor Decision Logic · Budget Allocation) · paid-tier-only badge · is_stale flag · hit_count_30d · pilot banner ("Concierge is OFF for pilot — content authoring lands ahead of post-pilot launch") · V1 read-only browse; Unanswered Questions queue + Cost Watch + per-chunk re-embed land V1.x · added 2026-05-23 |
@@ -1222,6 +1222,26 @@ Owner email resolved via `process.env.OWNER_NOTIFICATION_EMAIL` (fallback `iscas
 - Founder time-log entry form (currently DB insert via SQL)
 - Engineering blockers signal automated wiring (manual for now)
 - `refresh_bottleneck_signals` RPC (queries.ts falls back gracefully)
+
+---
+
+### 3.15 Taxonomy management (`/admin/taxonomy` · drafted 2026-06-03)
+
+Surfaces the live marketplace **vendor taxonomy** so admins can see exactly how every `canonical_service` maps into the browsable catalog. Source of truth is the code-side `TAXONOMY_MAP` in `apps/web/lib/taxonomy.ts` (mirrors the 2026-05-30 shrink + [02_Specifications/Vendor_Taxonomy_V1_Master.md](../02_Specifications/Vendor_Taxonomy_V1_Master.md)); the DB holds the `canonical_service_schemas` rows.
+
+**What it shows (V1 · read-only view):**
+
+- The **10-parent → tile → canonical** tree (Venue · Planning · Feast · **Design** · Program · Documentary · Look · Booths · Prints · Transport), each parent expandable to its tiles, each tile to the `canonical_services` mapped under it.
+- Per canonical: its `tile`, the `phase` badge (V1.1 base … V1.5+), and flags — `setnayan` (first-party insert · ✦ badge), `ph` (PH-specific), `faith`, `rental`, `tradition`.
+- **`marketplaceHidden`** canonicals (the 20 retired officiant/paperwork rows) in a collapsed "Hidden" group.
+- An **"Unmapped" bucket** — any `canonical_service_schemas` row with no `TAXONOMY_MAP` entry surfaces here so admins spot drift the moment a DB row lands without a code mapping.
+- **Vendor counts per tile** (same `vendor-counts` source as the public `/vendors` strip) so admins see which tiles are thin/empty.
+
+**Design › Digital Services (2026-06-03).** The new 8th Design tile renders here with its three Setnayan-first-party canonicals — `setnayan_pakanta` · `setnayan_custom_monogram` · `setnayan_pailaw` (all ✦) — plus any 3rd-party digital vendors that register under it. Patiktok shows under Booths › Photo Booth. The tile is a **generic, vendor-listable** category (not a Setnayan-only shelf). Shipped to `taxonomy.ts` via PR #836. See [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md).
+
+**Relationship to the SKU catalog.** This surface manages the **marketplace category tree** (where vendors list + couples browse), NOT the purchasable Setnayan SKUs — those live in `/admin/pricing` + `/admin/addons` reading the V2 `platform_retail_catalog_v2`. A couple buys *Pakanta the SKU* via the catalog; a vendor lists under *Digital Services the category* via the taxonomy. The V2 retail catalog is **flat (no category column)**, so the Digital-Services grouping lives only here + in `taxonomy.ts`.
+
+**V1 read-only; CRUD lands V1.x** (per the 2026-05-22 read-mostly admin pattern). V1 is a viewer — taxonomy edits ship via `taxonomy.ts` PRs + `canonical_service_schemas` migrations (the code path, the same way the Digital Services tile shipped). V1.x adds in-console affordances: add / rename / reorder tiles, toggle `marketplaceHidden`, re-point a canonical's tile, and a "resolve unmapped" action — all gated behind the two-admin pattern (§4) for structural changes, since they reshape the public marketplace.
 
 ---
 

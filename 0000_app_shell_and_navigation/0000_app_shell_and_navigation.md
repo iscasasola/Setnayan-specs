@@ -202,7 +202,7 @@ Once an event is open, this is what the couple sees every screen:
 | Event identity in chrome | monogram only | monogram + event-name pill |
 
 **Monogram (left):**
-- Renders the canonical event monogram from iteration 0004 — `events.monogram_svg` (auto-generated case) or `events.monogram_uploaded_url` (uploaded case). Falls back to a 1–2-letter circle of the event-name's initials for events that haven't created a Hero Monogram yet.
+- Renders the canonical event monogram from iteration 0004 — `events.monogram_svg` (auto-generated case) or `events.monogram_uploaded_url` (uploaded case). **The auto-generated `events.monogram_svg` IS the free onboarding auto-monogram** (owner-locked 2026-06-03) — the screen-5 "What should we call it?" free auto-mark (initials + chosen luxe gold frame + premium font · the 0037 free baseline), persisted from the create-event flow per the [Onboarding Blueprint](../Onboarding_Blueprint_2026-05-30.md) — so **every couple's switcher icon is their own gold-framed monogram from the moment onboarding completes**. At chrome size (~28px) the icon renders **letters-forward** (initials + a simple ring); the ornate frame reads in the larger onboarding medallion + the Website-editor monogram, not the tiny switcher disc. Falls back to a 1–2-letter circle of the event-name's initials **only for the pre-onboarding edge case** (events created before this binding, or a path that skipped screen 5).
 - **Tap** → returns to the event dashboard from any sub-page.
 - **Long-press** (mobile) / **caret affordance ▾** (desktop) → opens the event switcher (see below).
 - **Empty state** (signed in, zero events) → behavior depends on the user's role (locked 2026-05-15, amends 2026-05-14 chrome row):
