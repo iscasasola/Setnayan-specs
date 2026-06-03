@@ -2,6 +2,8 @@
 
 **Status.** Design-locked 2026-05-30 with the owner. **SHIPPED to production 2026-05-31** via PR [#689](https://github.com/iscasasola/setnayan-platform/pull/689) — owner override of the post-pilot lock ("Ship it now"). Supersedes the *visible* structure in [02_Specifications/Vendor_Taxonomy_V1_Master.md](02_Specifications/Vendor_Taxonomy_V1_Master.md) (12 folders / ~196 canonicals) with the shrunk **10-parent / ~53-tile** wedding taxonomy. **Code-only, no migration** — all 196 canonicals preserved (canonical key-set diff: zero removed → no orphaned vendors), 3 new canonicals added (`orchestra` · `fireworks_pyro` · `led_video_wall`), 20 officiant/paperwork canonicals set `marketplaceHidden`. **Deferred follow-ups** (not correctness blockers, every canonical stays mapped): the DB-side cleanup in §6 (retire hidden rows · vendor re-tag · facet attributes) + the Master-doc rewrite. See CLAUDE.md decision log 2026-05-31.
 
+> **⚠️ AMENDMENT 2026-06-03 — Setnayan in-app services re-mapped + new `DESIGN › Digital Services` tile.** Owner re-placed the first-party services: a NEW **`Design › Digital Services`** tile (Design's 8th) now hosts **Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Live Background (Pailaw)** — pulling Pakanta out of Program, Monogram out of Stylist/Decorator, Pailaw out of LED Wall, and adding Pro Website + Live Venue Photo Wall to the marketplace for the first time. **`Booths › Photo Booth`** now also hosts **Patiktok** (folded from its own former Booths entry) **+ Pabati** (new). Documentary is unchanged (Papic → Photo & Video · Panood → Livestream · Editorial → Editorial); **Guest Stories · SDE · Thank You Video are Papic add-ons**, not tiles. §2, §3 and §6 below carry the amended placements inline. **Code not yet shipped** — the `apps/web/lib/taxonomy.ts` re-grouping is a separate follow-up PR. See the 2026-06-03 decision-log row.
+
 **Scope — wedding only.** V1 is weddings-only (other event types stay "Coming soon"). When Birthday / Christening / Debut etc. activate later, each gets its own tile set; the shared parents (Food · Photo & Video · Booths · Program · Design · Transport · Planning) reuse, the wedding-only ones (Venue › Ceremony, bridal LOOK) don't apply.
 
 ---
@@ -27,7 +29,7 @@ Result: ~196 canonicals → ~55 visible tiles (Setnayan services absorbed as opt
 | **VENUE** | Reception · Ceremony |
 | **PLANNING** | Coordinator / Planner |
 | **FEAST** | Cake · Catering · Stations |
-| **DESIGN** | Stylist / Decorator · Florist · Lights & Sound · Dance Floor · Outdoor · Fireworks · LED Wall |
+| **DESIGN** | Stylist / Decorator · Florist · Lights & Sound · Dance Floor · Outdoor · Fireworks · LED Wall · Digital Services |
 | **PROGRAM** | Live Band · Choir · Orchestra · Wedding Singer · DJ · Choreographer · Performers · Host / MC |
 | **DOCUMENTARY** | Photo & Video · Editorial · Livestream |
 | **LOOK** | Bride's Attire · Groom's Attire · Women's Attire · Men's Attire · Filipiniana & Barongs · HMUA · Grooming · Wellness & Fitness · Jewelleries & Accessories |
@@ -37,13 +39,17 @@ Result: ~196 canonicals → ~55 visible tiles (Setnayan services absorbed as opt
 
 **Parent order (locked 2026-05-31):** 1 Venue → 2 Planning → 3 Feast → 4 Design → 5 Program → 6 Documentary → 7 Look → 8 Booths → 9 Prints → 10 Transport. This is the marketplace browse / folder-tab order — the wedding's build sequence (the place → who runs it → what's served → how it looks → the show → capturing it → how you look → the extras → the paper → getting there). **Browse order ≠ booking urgency:** Photo & Video (Documentary, #6) should still be booked *early* via the Today's Focus wizard deadlines — top photo/video books 12+ months out — even though it sits 6th in the browse.
 
-**~48 tiles across 10 parents** (down from ~196). BOOTHS is the heaviest (15); LOOK is 9 (attire + beauty + adornment).
+**~49 tiles across 10 parents** (down from ~196; `Digital Services` added to DESIGN 2026-06-03). BOOTHS is the heaviest (15); LOOK is 9 (attire + beauty + adornment); DESIGN is now 8.
 
-**Setnayan services live under their parent category** — *not* a separate ★ tier (owner directive 2026-05-30 "Setnayan services can live under the categories"): Concierge → Planning · Pakanta → Program · Pailaw + Monogram → Design · Patiktok → Booths · Papic + AI Highlight + Save-the-Date → Documentary › Photo & Video · Panood → Documentary › Livestream · the Setnayan editorial service → Documentary › Editorial. **No visible tile carries a "Setnayan" label** — the services sit inside the generic category tiles.
+**Setnayan services live under their parent category** — *not* a separate ★ tier (owner directive 2026-05-30 "Setnayan services can live under the categories"; **placements amended 2026-06-03** — see the amendment banner up top): Concierge → Planning · **Pakanta + Animated Monogram + Pro Website + Live Venue Photo Wall + Live Background (Pailaw) → Design › Digital Services** (new tile) · **Patiktok + Pabati → Booths › Photo Booth** · Papic (with **Guest Stories · SDE · Thank You Video** as add-ons) → Documentary › Photo & Video · Panood → Documentary › Livestream · the Setnayan editorial service → Documentary › Editorial. **No visible tile carries a "Setnayan" label** — the services sit inside the generic category tiles.
 
 **DOCUMENTARY = Photo & Video · Editorial · Livestream** (3 tiles). **Photo & Video** is one tile — photographer / videographer / drone / SDE / pre-nup are facets inside it (photographer-only vs both = a filter); documentation *outputs* (albums · photo books · highlight reels · save-the-date videos) are vendor package inclusions, **not tiles** — most photo/video vendors already bundle them. **Editorial** = the published real-wedding feature (Setnayan's editorial + any third-party feature as options). **Livestream** = event broadcast coverage (Panood is the Setnayan option). Newspaper / print announcement — **removed** (owner call 2026-05-30; fading tradition, not worth a tile).
 
 **Feast › Stations vs Booths › Food Cart** — Stations = chef-attended live stations *within* the catering spread (carving, pasta, sushi). Booths/Carts = standalone hired experiences (coffee cart, sorbetes, donut wall). Keep the line at "part of the catering" vs "separate hired vendor."
+
+**Design › Digital Services (added 2026-06-03)** — the home for Setnayan's digital / AI-generated productions: **Pakanta** (custom song) · **Animated Monogram** · **Pro Website** · **Live Venue Photo Wall** · **Live Background / Pailaw**. It reads as a generic tile — a future 3rd-party monogram designer, wedding-website builder, or LED-content studio could populate it too — so it does *not* reintroduce a "Setnayan-branded" tier; at launch its membership is simply all first-party. This pulls Pakanta out of Program, Animated Monogram out of Stylist / Decorator, and Live Background out of LED Wall (**LED Wall now = 3rd-party LED video walls only**). ⚠️ Discoverability trade-off (owner-acknowledged): a couple browsing the **Program** music shelf will no longer find Pakanta there.
+
+**Booths › Photo Booth — Patiktok + Pabati live here (added 2026-06-03)** — **Patiktok** (vertical TikTok-format clip booth) folds in from its own former Booths entry, and **Pabati** (short video-greeting product) enters the marketplace for the first time, both as options under the Photo Booth tile.
 
 ---
 
@@ -135,8 +141,8 @@ VENUE › Reception, filter-only via `venue_setting`. V1.2 adds bookable venue r
 | entourage_choreographer · first_dance_choreographer · pre_cana_dance_trainer | **PROGRAM › Choreographer** (consolidate 3 → 1; type = facet) |
 | acoustic_performer · wedding_entertainment · kulintang_ensemble · rondalla_ensemble · folk_performer | **PROGRAM › Performers** (consolidate; cultural = filter) |
 | host_emcee | **PROGRAM › Host / Emcee** |
-| setnayan_pakanta ★ | **PROGRAM › Pakanta ★** |
-| setnayan_panood ★ | **PROGRAM › Panood ★** |
+| setnayan_pakanta ★ | **DESIGN › Digital Services** (amended 2026-06-03 · moved from Program) |
+| setnayan_panood ★ | **DOCUMENTARY › Livestream** (corrected 2026-06-03 · the §2 prose + the folder-4 Photo&Video map already placed it here) |
 
 ### Current folder 9 — Decor / Florals / Sound (14)
 | Current canonical | Destination |
@@ -149,8 +155,8 @@ VENUE › Reception, filter-only via `venue_setting`. V1.2 adds bookable venue r
 | led_dance_floor | **DESIGN › Dance Floor** |
 | *(NEW canonical)* | **DESIGN › Fireworks** — cold sparklers · pyro · special effects |
 | *(NEW canonical)* | **DESIGN › LED Wall** — third-party LED video walls |
-| setnayan_pailaw ★ | Setnayan option under **DESIGN › LED Wall** (animated LED background) |
-| setnayan_custom_monogram ★ | Setnayan option under **DESIGN › Stylist / Decorator** (custom monogram) |
+| setnayan_pailaw ★ | Setnayan option under **DESIGN › Digital Services** (amended 2026-06-03 · moved from LED Wall) |
+| setnayan_custom_monogram ★ | Setnayan option under **DESIGN › Digital Services** (amended 2026-06-03 · moved from Stylist / Decorator) |
 
 ### Current folder 10 — Rings & Accessories (11) → now under LOOK
 | Current canonical | Destination |
@@ -172,7 +178,7 @@ VENUE › Reception, filter-only via `venue_setting`. V1.2 adds bookable venue r
 | mini_nail_bar | **BOOTHS › Mini Nail Bar** |
 | hair_touchup_station · aromatherapy_station | facet: wellness under Massage Chair / Mini Nail Bar |
 | tarot_astrology · palmistry_reader | **BOOTHS › Tarot / Astrology / Palmistry** |
-| setnayan_patiktok ★ | **BOOTHS › Patiktok ★** |
+| setnayan_patiktok ★ | **BOOTHS › Photo Booth** (amended 2026-06-03 · folded under Photo Booth · joined by Pabati) |
 
 ### Current folder 12 — Invitations & Keepsakes (19)
 | Current canonical | Destination |
@@ -223,6 +229,7 @@ These replace the ~136 retired/merged categories. None is a tile.
 - ⏳ `0045` product catalogs · `0006` vendor onboarding — vendors re-tag against the new structure.
 - ⏳ Today's Focus wizard cards + SEO surfaces — reference canonicals; reconcile.
 - ⏳ `02_Specifications/Vendor_Taxonomy_V1_Master.md` — rewrite to match (still the 12-folder / 196 canonical reference).
+- ⏳ **(amended 2026-06-03) `DESIGN › Digital Services` re-grouping — NOT yet shipped** (this 2026-05-31 lock predates the change). `apps/web/lib/taxonomy.ts` + marketplace components: add the new Design tile · re-parent `setnayan_pakanta` / `setnayan_custom_monogram` / `setnayan_pailaw` into it · fold `setnayan_patiktok` + add a new `pabati` option under Photo Booth · surface Pro Website + Live Venue Photo Wall as Digital-Services options. See the 2026-06-03 decision-log row.
 
 **Pilot timing — override.** The original recommendation was to land this post-pilot; the owner directed **"Ship it now"** on 2026-05-31, so the 10-parent taxonomy went live the day before the 2026-06-01 pilot. The ship was de-risked by keeping it **code-only with every canonical preserved** (a key-set diff confirmed zero drops) — a re-grouping, not a destructive migration.
 

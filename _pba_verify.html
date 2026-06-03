@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pile mirror — bottom gap</title>
+<style>
+  :root{
+    --topbar-h:62px; --head-h:38px; --botnav-h:90px; /* calc(66 + safe-area) ~ 90 */
+    --paper:#FBFBFA; --ink:#1E2229; --card:#FFFFFF; --line:rgba(30,34,41,.1);
+    --gold-deep:#C5A059; --mulberry:#5C2542; --ink-soft:#4F535B;
+    --serif:Georgia,serif; --mono:ui-monospace,monospace; --sans:system-ui,sans-serif;
+    --navh:66px; /* the fixed CustomerBottomNav height */
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:var(--sans)}
+  /* EventLayout wrapper chain (the part the earlier mirror omitted) */
+  .layout-pb{padding-bottom:80px}                 /* <div className="pb-20"> mobile */
+  .main{max-width:none;padding:24px 16px}         /* <main className="px-4 py-6"> */
+  /* .pba */
+  .pba{position:relative;margin-top:-24px;background:var(--paper);color:var(--ink)}
+  .pba .topbar{position:sticky;top:0;z-index:60;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:var(--topbar-h);padding:0 18px;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
+  .pba .topbar b{font-family:var(--serif);font-style:italic;font-size:15px}
+  .pba .body{max-width:760px;margin:0 auto}
+  .pba .intro{display:flex;flex-direction:column;gap:14px;padding:26px 22px 16px;min-height:calc(100svh - var(--topbar-h) - var(--botnav-h));background:var(--paper)}
+  .pba .intro-h{font-family:var(--serif);font-style:italic;font-size:29px;color:var(--ink)}
+  .pba .cat-head{position:sticky;top:calc(var(--topbar-h) + var(--idx,0) * var(--head-h));z-index:25;width:100%;height:var(--head-h);background:var(--paper);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px;border:0;border-bottom:1px solid var(--line)}
+  .pba .cat-head .nm{font-family:var(--serif);font-style:italic;font-size:18px;color:var(--ink)}
+  .pba .cat-head .amt{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-deep)}
+  .pba .end-spacer{padding:30px 18px var(--botnav-h)}
+  .pba .endcard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;background:var(--mulberry);color:#fff;border-radius:22px;padding:24px 22px 22px;min-height:300px;justify-content:center}
+  .pba .end-h{font-family:var(--serif);font-style:italic;font-size:26px;color:#fff}
+  /* fixed bottom nav */
+  .botnav{position:fixed;left:0;right:0;bottom:0;height:var(--botnav-h);background:#F4F2EC;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;font-family:var(--sans);font-size:11px;color:var(--ink-soft);z-index:40}
+</style>
+</head>
+<body>
+  <div class="layout-pb">
+    <main class="main">
+      <div class="pba" id="pba">
+        <div class="topbar"><b>Chosen ₱0</b><span style="font-family:var(--mono);font-size:9px;opacity:.7">₱O</span></div>
+        <div class="body">
+          <div class="intro"><div class="intro-h">Where your day stands</div><div style="margin-top:auto;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)">↑ Scroll up to begin</div></div>
+          <div class="cats" id="cats"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <nav class="botnav"><span>Home</span><span>Guests</span><span>Vendors</span><span>Website</span><span>Add-ons</span><span>More</span></nav>
+<script>
+  const CATS=['Venue','Planning','Feast','Design','Program','Documentary','Look','Booths','Prints','Transport'];
+  const cats=document.getElementById('cats');
+  CATS.forEach((n,i)=>{ const h=document.createElement('div'); h.className='cat-head'; h.style.setProperty('--idx',i);
+    h.innerHTML=`<span class="nm">${n}</span><span class="amt">${i===0?'5 SHORTLISTED':'NOT STARTED'}</span>`; cats.appendChild(h); });
+  const recap=document.createElement('div'); recap.className='end-spacer';
+  recap.innerHTML='<div class="endcard"><div class="end-h">~18 hours saved so far</div><div style="font-size:11.5px;color:rgba(255,255,255,.8);max-width:280px">It’s all coming together beautifully.</div></div>';
+  cats.appendChild(recap); // recap INSIDE .cats (post-#720)
+  window.recap=recap;
+
+  window.gapReport=()=>{
+    window.scrollTo(0,document.documentElement.scrollHeight);
+    const rc=recap.querySelector('.endcard').getBoundingClientRect();
+    const navTop=document.querySelector(".botnav").getBoundingClientRect().top;
+    return { scrollH:document.documentElement.scrollHeight, innerH:window.innerHeight,
+      recapCardBottom:Math.round(rc.bottom), navTop:Math.round(navTop),
+      gapAboveNav:Math.round(navTop-rc.bottom),  // >0 = white dead space above the nav
+      docBottomBelowRecap:Math.round(document.documentElement.scrollHeight-(rc.bottom+window.scrollY)) };
+  };
+  // apply candidate fix: cancel outer wrapper bottom padding so recap is terminal
+  window.applyFix=(pbaMB, endPB)=>{
+    document.getElementById('pba').style.marginBottom = pbaMB;
+    recap.style.paddingBottom = endPB;
+    return window.gapReport();
+  };
+</script>
+</body>
+</html>

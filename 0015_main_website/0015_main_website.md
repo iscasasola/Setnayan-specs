@@ -395,6 +395,8 @@ A grid of feature cards for the paid services. Each card: icon, name, one-paragr
 
 Each card carries a "Free with every account" or "Included in your custom quote" tag — see the hide-prices decision above.
 
+**Digital Services on the website — add as SEPARATE cards (owner-locked 2026-06-03).** The in-app marketplace now groups five Setnayan digital productions under a `Design › Digital Services` child tile — but **the website keeps them flat and separate** (owner: *"they will all be visible on the website but they are all separate entities"*). **Do NOT add a "Digital Services" grouping header on the site.** Add the missing services as their own cards here, each a separate entity: **Pakanta** (custom AI wedding song · 0036) · **Animated Monogram** (rename card 6 "Custom Monogram Pack" → Animated Monogram · 0037) · **Pro Website** (premium invitation + event page + editorial · distinct from card 7 "Pro Invitation Widgets" · 0004) · **Live Venue Photo Wall** (live collage + live count). Also align card names to the canon (Papic not "Paparazzi", Panood not "Live Stream", Pailaw for "LED Background Maker"). Canonical names + the full website-vs-marketplace divergence rule: [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md).
+
 ### Section 8 — Vendor compatibility & verification
 
 Tabbed module that flips between "What you get as a vendor" and "How verification works."

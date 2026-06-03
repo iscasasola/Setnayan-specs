@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Papic · Real-time gallery — couple & guest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --soft:#5C6166; --line:rgba(30,34,41,.10);
+    --champ:#C5A059; --champ-deep:#A8843F; --mul:#5C2542; --surface:#FFFFFF;
+    --sans:'Inter',system-ui,sans-serif; --serif:'Cormorant Garamond',serif; --mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{
+    font-family:var(--sans); background:#EDEAE3; color:var(--ink);
+    -webkit-font-smoothing:antialiased; padding:34px 18px 56px;
+  }
+  .head{max-width:880px;margin:0 auto 26px;text-align:center}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--champ-deep)}
+  h1{font-family:var(--serif);font-style:italic;font-weight:500;font-size:34px;line-height:1.1;margin:.28em 0 .12em}
+  .sub{color:var(--soft);font-size:14.5px;max-width:560px;margin:0 auto;line-height:1.5}
+  .stage{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;max-width:980px;margin:0 auto}
+  .col{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .coltag{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft)}
+  .coltag b{color:var(--ink)}
+
+  /* phone */
+  .phone{width:372px;height:760px;background:var(--paper);border-radius:42px;
+    box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 28px 60px -22px rgba(30,34,41,.45);
+    border:9px solid #14171c;overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:128px;height:25px;background:#14171c;border-radius:0 0 16px 16px;z-index:40}
+  .screen{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+  .scroll{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  /* top bar */
+  .top{padding:30px 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--paper);position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line)}
+  .top .ttl{display:flex;align-items:center;gap:9px}
+  .iconbtn{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink);background:var(--surface)}
+  .top h2{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+  .top .small{font-family:var(--serif);font-style:italic;font-size:19px;font-weight:500}
+  .live{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--champ-deep);background:rgba(197,160,89,.12);border:1px solid rgba(197,160,89,.32);padding:5px 9px;border-radius:999px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--champ);box-shadow:0 0 0 0 rgba(197,160,89,.55);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(197,160,89,.5)}70%{box-shadow:0 0 0 7px rgba(197,160,89,0)}100%{box-shadow:0 0 0 0 rgba(197,160,89,0)}}
+
+  .meta{padding:9px 16px 4px;color:var(--soft);font-size:12.5px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .new{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:#fff;background:var(--champ-deep);padding:4px 9px;border-radius:999px;transition:opacity .4s;opacity:0}
+  .new.show{opacity:1}
+
+  /* tabs / chips */
+  .chips{display:flex;gap:7px;padding:8px 16px 10px;overflow-x:auto;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;font-size:12.5px;font-weight:500;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--soft);background:var(--surface);white-space:nowrap}
+  .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .tabs{display:flex;gap:4px;padding:9px 16px 6px}
+  .tab{font-size:13.5px;font-weight:600;padding:7px 4px;color:var(--soft);border-bottom:2px solid transparent;margin-right:14px}
+  .tab.on{color:var(--ink);border-color:var(--champ)}
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(var(--cols,2),1fr);gap:6px;padding:6px 12px 16px;transition:gap .18s}
+  .grid.dense{gap:4px}
+  .grid.dense .tile{border-radius:8px}
+  .grid.dense .ov{display:none}          /* zoom out → clean mosaic, labels drop away */
+  .grid.dense .clipbadge,.grid.dense .heart{transform:scale(.85)}
+  /* density control (pinch on mobile · tap on desktop) */
+  .densityrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 16px;border-bottom:1px solid var(--line);background:var(--paper)}
+  .dhint{font-size:11.5px;color:var(--soft);display:inline-flex;align-items:center;gap:5px}
+  .density{display:inline-flex;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .dbtn{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:1.6px;align-content:center;padding:6px 8px;border-radius:999px;cursor:pointer;border:0;background:transparent}
+  .dbtn span{width:3px;height:3px;border-radius:1px;background:var(--soft);opacity:.5}
+  .dbtn.on{background:var(--ink)} .dbtn.on span{background:var(--paper);opacity:1}
+  .tile{position:relative;aspect-ratio:1;border-radius:13px;overflow:hidden;background:var(--g,linear-gradient(135deg,#cdb49a,#a98a63));box-shadow:0 1px 0 var(--line)}
+  .tile img{width:100%;height:100%;object-fit:cover;display:block}
+  .tile .ov{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 7px;background:linear-gradient(transparent,rgba(20,23,28,.74));display:flex;align-items:flex-end;justify-content:space-between;gap:6px}
+  .crew{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:#fff}
+  .crew svg{opacity:.85}
+  .tag{font-size:10px;font-weight:600;color:#1E2229;background:rgba(255,255,255,.92);padding:2px 7px;border-radius:999px}
+  .tag.muted{color:#fff;background:rgba(255,255,255,.18)}
+  .clipbadge{position:absolute;top:7px;right:7px;display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:600;color:#fff;background:rgba(20,23,28,.6);padding:2px 6px;border-radius:999px;backdrop-filter:blur(2px)}
+  .freshring{box-shadow:0 0 0 2px var(--champ), 0 1px 0 var(--line)}
+  .heart{position:absolute;top:7px;right:7px;width:25px;height:25px;border-radius:50%;background:rgba(20,23,28,.42);display:grid;place-items:center;color:#fff;backdrop-filter:blur(2px)}
+  .heart.liked{color:#ff7591}
+  .pop{animation:pop .55s cubic-bezier(.2,.9,.3,1.2)}
+  @keyframes pop{0%{transform:scale(.6) translateY(-8px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+
+  /* guest reel card */
+  .reel{margin:10px 12px 2px;display:flex;gap:12px;align-items:center;background:var(--mul);color:#fff;border-radius:16px;padding:12px}
+  .reel .thumb{width:54px;height:84px;border-radius:10px;background:linear-gradient(160deg,#a98a63,#7c5d3f);flex:0 0 auto;position:relative;overflow:hidden}
+  .reel .thumb img{width:100%;height:100%;object-fit:cover}
+  .reel .play{position:absolute;inset:0;display:grid;place-items:center;color:#fff}
+  .reel h3{margin:0 0 3px;font-size:14.5px;font-weight:700;letter-spacing:-.01em}
+  .reel p{margin:0;font-size:11.5px;color:rgba(255,255,255,.78);line-height:1.4}
+  .reel .go{margin-top:7px;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#1E2229;background:var(--champ);padding:5px 11px;border-radius:999px}
+
+  .foot{padding:9px 16px 16px;color:var(--soft);font-size:11.5px;text-align:center;border-top:1px solid var(--line)}
+  .legend{max-width:880px;margin:30px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:14px 40px}
+  .legend .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .legend h4{margin:0 0 6px;font-size:13px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--champ-deep)}
+  .legend ul{margin:0;padding-left:17px;color:var(--soft);font-size:13px;line-height:1.6}
+  .legend b{color:var(--ink);font-weight:600}
+  @media(max-width:560px){.legend{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="eyebrow">Papic · in-app · concept preview</div>
+    <h1>Every shot, the moment it happens.</h1>
+    <p class="sub">As your five-friend crew shoots, photos stream straight into your gallery. The couple sees the whole wedding live; each guest sees the photos of them — and can spin a reel.</p>
+  </div>
+
+  <div class="stage">
+    <!-- ============ COUPLE ============ -->
+    <div class="col">
+      <div class="coltag"><b>Couple</b> · your whole wedding, live</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="top">
+          <div class="ttl">
+            <span class="iconbtn" aria-hidden>‹</span>
+            <h2>Wedding gallery</h2>
+          </div>
+          <span class="live"><span class="dot"></span>Live</span>
+        </div>
+        <div class="meta">
+          <span><b id="cCount" style="color:var(--ink)">248</b> photos · 5 crew shooting</span>
+          <span class="new" id="cNew">✨ <span id="cNewN">12</span> new</span>
+        </div>
+        <div class="chips">
+          <span class="chip on">All</span>
+          <span class="chip">Of us</span>
+          <span class="chip">Untagged</span>
+          <span class="chip">Clips</span>
+          <span class="chip">By crew</span>
+        </div>
+        <div class="densityrow">
+          <span class="dhint">⊟ Pinch to zoom &mdash; or tap to resize</span>
+          <div class="density" id="cDensity">
+            <button class="dbtn on" data-c="2" style="--n:2" aria-label="2 per row"><span></span><span></span><span></span><span></span></button>
+            <button class="dbtn" data-c="3" style="--n:3" aria-label="3 per row"><span></span><span></span><span></span><span></span><span></span><span></span></button>
+            <button class="dbtn" data-c="4" style="--n:4" aria-label="4 per row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></button>
+          </div>
+        </div>
+        <div class="scroll" id="cScroll">
+          <div class="grid" id="cGrid">
+            <div class="tile freshring" data-img="1"><div class="ov"><span class="crew">◐ Tita Marites</span><span class="tag">You +3</span></div></div>
+            <div class="tile freshring" data-img="2"><span class="clipbadge">▶ 0:04</span><div class="ov"><span class="crew">◐ Kuya Paolo</span><span class="tag">Clip</span></div></div>
+            <div class="tile" data-img="3"><div class="ov"><span class="crew">◐ Ate Len</span><span class="tag muted">Untagged</span></div></div>
+            <div class="tile" data-img="4"><div class="ov"><span class="crew">◐ Tito Boy</span><span class="tag">You</span></div></div>
+            <div class="tile" data-img="5"><div class="ov"><span class="crew">◐ Ate Len</span><span class="tag">Kids · 4</span></div></div>
+            <div class="tile" data-img="6"><div class="ov"><span class="crew">◐ Kuya Paolo</span><span class="tag">You +1</span></div></div>
+            <div class="tile" data-img="1"><div class="ov"><span class="crew">◐ Tita Marites</span><span class="tag">Sponsors</span></div></div>
+            <div class="tile" data-img="3"><div class="ov"><span class="crew">◐ Tito Boy</span><span class="tag muted">Untagged</span></div></div>
+          </div>
+        </div>
+        <div class="foot">Press &amp; hold any photo to hide it — your 7-day review window before it’s shared.</div>
+      </div></div>
+    </div>
+
+    <!-- ============ GUEST ============ -->
+    <div class="col">
+      <div class="coltag"><b>Guest</b> · the photos of you</div>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="top">
+          <div class="ttl">
+            <span class="iconbtn" aria-hidden>‹</span>
+            <h2 class="small">Maria &amp; Juan</h2>
+          </div>
+          <span class="live"><span class="dot"></span>Live</span>
+        </div>
+        <div class="tabs">
+          <span class="tab on">Of you</span>
+          <span class="tab">Everyone’s</span>
+        </div>
+        <div class="meta">
+          <span><b id="gCount" style="color:var(--ink)">9</b> photos of you · added live</span>
+          <span class="new" id="gNew">✨ <span id="gNewN">2</span> new</span>
+        </div>
+        <div class="scroll">
+          <div class="reel">
+            <div class="thumb" data-img="1"><div class="play" aria-hidden>▶</div></div>
+            <div>
+              <h3>Make your reel</h3>
+              <p>Turn your favorites into a 15-second souvenir — vertical, ready to post.</p>
+              <span class="go">Build my reel →</span>
+            </div>
+          </div>
+          <div class="grid" id="gGrid">
+            <div class="tile" data-img="1"><span class="heart liked" aria-hidden>♥</span></div>
+            <div class="tile" data-img="6"><span class="heart" aria-hidden>♥</span></div>
+            <div class="tile" data-img="4"><span class="heart liked" aria-hidden>♥</span></div>
+            <div class="tile" data-img="3"><span class="heart" aria-hidden>♥</span></div>
+            <div class="tile" data-img="5"><span class="heart" aria-hidden>♥</span></div>
+            <div class="tile" data-img="2"><span class="clipbadge">▶ 0:05</span><span class="heart" aria-hidden>♥</span></div>
+          </div>
+        </div>
+        <div class="foot">Yours to keep — save to your phone and share anywhere.</div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="card">
+      <h4>Couple view</h4>
+      <ul>
+        <li><b>Live feed</b> — every crew photo appears the instant it uploads, newest first, with a fresh-photo ring.</li>
+        <li><b>Filters</b> — All · Of us · Untagged · Clips · By crew (which friend shot it).</li>
+        <li><b>Untagged still delivered</b> — photos with no tag yet still land in your gallery.</li>
+        <li><b>7-day review</b> — hide any shot before the gallery opens to guests.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Guest view</h4>
+      <ul>
+        <li><b>Of you</b> — the photos you’re tagged in (QR scan + face), streaming live.</li>
+        <li><b>Make your reel</b> — a 15-second vertical souvenir from your favorites.</li>
+        <li><b>Everyone’s</b> — the moments the couple shares with all guests.</li>
+        <li><b>Save &amp; share</b> — keep your photos, post them anywhere.</li>
+      </ul>
+    </div>
+  </div>
+
+<script>
+  // Wire the candid photos onto every [data-img] tile (gradient shows if a file is missing).
+  const GR=['linear-gradient(135deg,#cdb49a,#a98a63)','linear-gradient(150deg,#b89a78,#7c5d3f)','linear-gradient(140deg,#d8c4a6,#b39169)','linear-gradient(160deg,#c2a079,#8a6a48)','linear-gradient(135deg,#e0cca0,#b89a6e)','linear-gradient(150deg,#9c7f5d,#5c4630)'];
+  function paint(el){
+    const n=el.dataset.img; el.style.setProperty('--g',GR[(n-1)%6]);
+    const img=new Image(); img.src='assets/papic-gallery/g'+n+'.webp';
+    img.onload=()=>{ if(el.querySelector('img'))return; el.insertBefore(img,el.firstChild); };
+  }
+  document.querySelectorAll('.tile[data-img], .reel .thumb[data-img]').forEach(paint);
+
+  // Real-time stream: pop a new photo onto the couple grid every few seconds.
+  const cGrid=document.getElementById('cGrid'), cCount=document.getElementById('cCount'),
+        cNew=document.getElementById('cNew'), cNewN=document.getElementById('cNewN'),
+        gNew=document.getElementById('gNew'), gNewN=document.getElementById('gNewN'),
+        gCount=document.getElementById('gCount');
+  const crews=['Tita Marites','Kuya Paolo','Ate Len','Tito Boy'];
+  const tags=['You +2','Sponsors','Kids · 3','Guests','You','Maria +1'];
+  let total=248, gtotal=9, gnew=2;
+  function flash(el){el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2600);}
+  function stream(){
+    const n=(Math.floor(Math.random()*6)+1);
+    const t=document.createElement('div');
+    t.className='tile freshring pop'; t.dataset.img=n;
+    const crew=crews[Math.floor(Math.random()*crews.length)];
+    const ofYou=Math.random()<0.4;
+    const tag=ofYou?'You +'+(Math.floor(Math.random()*3)+1):tags[Math.floor(Math.random()*tags.length)];
+    t.innerHTML='<div class="ov"><span class="crew">◐ '+crew+'</span><span class="tag">'+tag+'</span></div>';
+    cGrid.insertBefore(t,cGrid.firstChild); paint(t);
+    // demote the previous fresh tiles after a beat
+    [...cGrid.querySelectorAll('.tile')].slice(3).forEach(x=>x.classList.remove('freshring'));
+    while(cGrid.children.length>16) cGrid.removeChild(cGrid.lastChild);
+    total++; cCount.textContent=total; cNewN.textContent=(+cNewN.textContent+1); flash(cNew);
+    if(ofYou){ gtotal++; gCount.textContent=gtotal; gnew++; gNewN.textContent=gnew; flash(gNew); }
+  }
+  // ---- grid density: tap the control (desktop) or pinch the feed (mobile) ----
+  const dens=document.getElementById('cDensity'), cScroll=document.getElementById('cScroll');
+  let cols=2;
+  function setCols(c){
+    cols=Math.max(2,Math.min(4,c));
+    cGrid.style.setProperty('--cols',cols);
+    cGrid.classList.toggle('dense',cols>=3);
+    dens.querySelectorAll('.dbtn').forEach(b=>b.classList.toggle('on',+b.dataset.c===cols));
+  }
+  dens.querySelectorAll('.dbtn').forEach(b=>b.addEventListener('click',()=>setCols(+b.dataset.c)));
+  // pinch (two-finger) on the live feed — pinch open = bigger photos (fewer cols), pinch closed = more
+  let pd=0;
+  cScroll.addEventListener('touchmove',e=>{
+    if(e.touches.length!==2)return;
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    if(!pd){pd=d;return;}
+    if(d-pd>42){setCols(cols-1);pd=d;} else if(pd-d>42){setCols(cols+1);pd=d;}
+  },{passive:true});
+  cScroll.addEventListener('touchend',()=>{pd=0;});
+
+  setTimeout(()=>{flash(cNew);flash(gNew);},600);
+  setInterval(stream, 3400);
+</script>
+</body>
+</html>

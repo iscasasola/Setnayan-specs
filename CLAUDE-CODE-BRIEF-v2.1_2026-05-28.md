@@ -779,3 +779,23 @@ Per CLAUDE.md 2026-05-30 row "V2.1 BRIEF AMENDMENT #2 REFINEMENT · venue except
 
 **What's NOT in this amendment** — admin surfaces continue showing real `business_name` (moderation/payouts/disputes need it). Plan grid + messaging UI continue using direct `business_name` reads in V1 (vendors shown there are already in chat with the couple → name globally revealed by trigger anyway). Cleanup of duplicate `real_name_unlocked_at` column from PR #673 → deferred V1.x post-pilot.
 
+
+---
+
+## Amendment 3 — Verified-only marketplace · Free tier retired (owner 2026-06-01)
+
+Amends **§3 (vendor tier matrix)**. Canonical lock: CLAUDE.md decision-log row 2026-06-01 "🔒 Verified-only marketplace — vendor tier REMODELLED."
+
+**The rule.** A vendor must pass Setnayan's verification **before any of its services appear on the marketplace.** Before that, the vendor has a full dashboard but **zero marketplace presence** (not in browse/search, no public `/v/[slug]`, no couple inquiries).
+
+**Tier model — a lifecycle *state* + 3 marketplace tiers (the §3 4-tier matrix's "Free" column is RETIRED):**
+- **Registered (unverified)** — *state*, not a tier · dashboard-only · ₱0 · zero marketplace presence.
+- **Verified** — free marketplace floor · ₱0 (+ verification; fee ₱0-vs-₱1,499 still the open item) · the old "Verified" feature set · name hidden-until-first-reply (the hybrid-anonymity now applies *here*, Free being gone).
+- **Pro** — ₱2,499 / 28 days · real name shown · offered post-verification.
+- **Enterprise** — ₱5,499 / 28 days · offered post-verification.
+
+The old "Free" tier's two roles split: dashboard-only-minimal → the **Registered state**; free-floor-on-marketplace → **Verified**.
+
+**Knock-on:** `vendors.public_visibility` default `coming_soon` → **`unverified`** (the 2026-05-15 "coming_soon muted card" behavior retired) · the couple onboarding "all-vs-verified" screen + `events.vendor_pool_preference` retired · DIY "Verified only" browse toggle moot · hybrid-anonymity simplifies to "Verified hidden-until-reply / Pro+ shown / venue exception holds."
+
+Full remodelled matrix: [Vendor_Match_Personalization_2026-06-01.md](Vendor_Match_Personalization_2026-06-01.md) §5.1.

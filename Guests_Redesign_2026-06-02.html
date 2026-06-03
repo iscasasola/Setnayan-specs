@@ -1,0 +1,1249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Setnayan · Guests (redesign 2026-06-02)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,600;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Setnayan — Customer Dashboard · Guests (redesign prototype)
+   Clean Editorial palette (alabaster/obsidian/champagne/mulberry).
+   Responsive: ≥1024px = desktop table + sidebar facets.
+                <1024px  = mobile cards + chip rail + bottom-sheet
+                           filters (covers tablet too — fixes the
+                           640–1023 "table-but-no-filters" dead zone).
+   ============================================================ */
+:root{
+  --paper:#FBFBFA; --surface:#FFFFFF;
+  --ink:#1E2229; --ink-soft:#5C6066; --ink-faint:#8A8F96;
+  --line:rgba(30,34,41,.10); --line-strong:rgba(30,34,41,.16);
+  --gold:#C5A059; --gold-deep:#A88340; --gold-wash:#F6EFDD;
+  --mulberry:#5C2542; --mulberry-deep:#4A1D36; --mulberry-wash:#F5E8EE;
+  /* RSVP semantics */
+  --go:#047857; --go-bg:#D9F3E6; --pend:#9A6213; --pend-bg:#FBEFD3;
+  --dec:#A1213C; --dec-bg:#FBE2E6; --may:#5C6066; --may-bg:rgba(30,34,41,.07);
+  /* side tints (avatar) */
+  --bride:#A1213C; --bride-bg:#FCE5EA; --groom:#0B5A8A; --groom-bg:#E1F0FA;
+  --both:#6B3FA0; --both-bg:#EFE7F7;
+  --r-card:14px; --r-pill:999px;
+  --font:'Manrope',system-ui,sans-serif; --mono:'DM Mono',ui-monospace,monospace;
+  --serif:'Cormorant Garamond',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+body{padding-bottom:96px} /* clearance for mobile bottom nav */
+button,input,select{font-family:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep)}
+.muted{color:var(--ink-soft)}
+
+/* ---- shell ---- */
+.wrap{max-width:1180px;margin:0 auto;padding:20px 18px 0}
+@media(min-width:1024px){ .wrap{padding:30px 28px 0} body{padding-bottom:30px} }
+
+/* ---- header ---- */
+.head{display:flex;flex-direction:column;gap:14px}
+.head-top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.h1{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.h1 .n{font-family:var(--serif);font-weight:600;font-size:38px;font-style:italic;margin-right:4px}
+.actions{display:none;gap:8px;align-items:center}
+@media(min-width:1024px){ .actions{display:flex} .h1{font-size:34px} }
+.btn{height:42px;display:inline-flex;align-items:center;gap:7px;border-radius:11px;padding:0 16px;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid transparent;white-space:nowrap;transition:.15s}
+.btn-primary{background:var(--mulberry);color:#fff}
+.btn-primary:hover{background:var(--mulberry-deep)}
+.btn-ghost{background:var(--surface);border-color:var(--line-strong);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--ink-soft)}
+.icon-btn{height:42px;width:42px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:var(--surface);border:1px solid var(--line-strong);cursor:pointer}
+.icon-btn:hover{border-color:var(--ink-soft)}
+.icon-btn svg{width:18px;height:18px}
+/* compact seating + share chips in header */
+.chip-link{height:42px;display:inline-flex;align-items:center;gap:8px;border-radius:11px;padding:0 13px;background:var(--surface);border:1px solid var(--line-strong);font-size:13px;font-weight:500;color:var(--ink)}
+.chip-link:hover{border-color:var(--gold)}
+.chip-link .ic{width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:var(--gold-wash);color:var(--gold-deep)}
+.chip-link svg{width:15px;height:15px}
+.chip-link .sub{font-size:10.5px;color:var(--ink-faint)}
+/* overflow menu */
+.menu-wrap{position:relative}
+.menu{position:absolute;right:0;top:48px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px rgba(30,34,41,.14);padding:6px;min-width:188px;z-index:60;display:none}
+.menu.open{display:block}
+.menu a,.menu button{display:flex;width:100%;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:13.5px;background:none;border:none;text-align:left;cursor:pointer}
+.menu a:hover,.menu button:hover{background:var(--gold-wash)}
+.menu svg{width:15px;height:15px;color:var(--ink-soft)}
+
+/* ---- stats strip ---- */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:18px}
+@media(min-width:560px){ .stats{grid-template-columns:repeat(3,1fr)} }
+@media(min-width:1024px){ .stats{grid-template-columns:repeat(5,1fr)} }
+.stat{display:flex;flex-direction:column;gap:6px;padding:11px 13px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;transition:.15s}
+.stat:hover{border-color:var(--line-strong)}
+.stat.on{border-color:var(--gold);background:var(--gold-wash)}
+.stat.readonly{cursor:default}
+.stat .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.stat .v{align-self:flex-start;font-weight:700;font-size:16px;padding:1px 9px;border-radius:var(--r-pill)}
+.v.t-total{background:rgba(30,34,41,.06);color:var(--ink)}
+.v.t-go{background:var(--go-bg);color:var(--go)} .v.t-pend{background:var(--pend-bg);color:var(--pend)}
+.v.t-dec{background:var(--dec-bg);color:var(--dec)} .v.t-plus{background:var(--gold-wash);color:var(--gold-deep)}
+
+/* ---- toolbar ---- */
+.toolbar{display:flex;gap:8px;margin-top:16px;align-items:center}
+.search{flex:1;position:relative}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--ink-faint)}
+.search input{width:100%;height:44px;border-radius:12px;border:1px solid var(--line-strong);background:var(--surface);padding:0 14px 0 40px;font-size:14px}
+.search input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(197,160,89,.18)}
+.sortsel{height:44px;border-radius:12px;border:1px solid var(--line-strong);background:var(--surface);padding:0 34px 0 14px;font-size:13.5px;font-weight:500;cursor:pointer;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238A8F96' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.sortsel.desk{display:none} @media(min-width:1024px){ .sortsel.desk{display:block} }
+.filter-btn{display:none} /* mobile is list-first (search+sort+quick-add); desktop uses sidebar facets */
+.filter-btn .badge{margin-left:6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--gold);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.filter-btn .badge[hidden]{display:none}
+
+/* ---- mobile chip rail ---- */
+.chiprail{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chiprail::-webkit-scrollbar{display:none}
+@media(min-width:1024px){ .chiprail{display:none} }
+.fchip{flex:0 0 auto;height:36px;display:inline-flex;align-items:center;gap:6px;padding:0 14px;border-radius:var(--r-pill);border:1px solid var(--line-strong);background:var(--surface);font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer}
+.fchip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.fchip.more{border-style:dashed;color:var(--gold-deep);border-color:var(--gold)}
+
+/* ---- mobile: list-first (owner 2026-06-02) ----
+   The whole screen is the guest list. Header = search + sort + quick-add.
+   Each row = First Last + role; tapping a row opens the guest's info. */
+.m-only{display:none}
+@media(max-width:1023px){
+  .stats{display:none}        /* no stats strip — the list owns the screen */
+  .chiprail{display:none}     /* no chip rail — search + sort do the work  */
+  .fab{display:none}          /* quick-add lives in the docked bar instead  */
+  .m-only{display:inline-flex}
+  .head{gap:10px}
+  body{padding-bottom:152px}  /* clear the docked bar + bottom nav          */
+  /* search + sort + quick-add dock to the bottom, right above the nav */
+  .toolbar{
+    position:fixed; left:0; right:0; bottom:72px; z-index:46; margin:0;
+    padding:10px 16px; gap:8px;
+    background:var(--surface); border-top:1px solid var(--line);
+    box-shadow:0 -8px 22px rgba(30,34,41,.07);
+  }
+  /* in select-mode the docked search bar becomes the selection bar */
+  body.selmode .toolbar{display:none}
+  body.selmode .mselbar{display:flex}
+  body.selmode .bulkbar{display:none}   /* mobile uses .mselbar, not the desktop bar */
+  body.selmode .hsel{display:none}
+}
+/* mobile header "Select" button + bottom selection bar */
+.hsel{height:34px;padding:0 13px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;align-items:center;gap:6px}
+.hsel svg{width:15px;height:15px;color:var(--gold-deep)}
+.mselbar{position:fixed;left:0;right:0;bottom:72px;z-index:47;display:none;align-items:center;gap:10px;padding:10px 16px;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 22px rgba(30,34,41,.08)}
+.msel-x{width:38px;height:38px;border-radius:10px;border:1px solid var(--line-strong);background:var(--surface);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;color:var(--ink)}
+.msel-x svg{width:17px;height:17px}
+.msel-cnt{font-size:13.5px;font-weight:600}
+.msel-cnt b{color:var(--gold-deep)}
+.msel-act{height:38px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:0 14px}
+.msel-act.primary{background:var(--mulberry);color:#fff;margin-left:auto}
+.msel-act.primary:active{background:var(--mulberry-deep)}
+.msel-act.danger{background:var(--dec-bg);color:var(--dec);padding:0 13px}
+/* .tbtn/.addbtn carry no display — .m-only owns visibility so they stay mobile-only */
+.tbtn{height:44px;width:44px;border-radius:12px;background:var(--surface);border:1px solid var(--line-strong);align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
+.tbtn:active{border-color:var(--ink-soft);background:rgba(30,34,41,.03)}
+.tbtn svg{width:19px;height:19px;color:var(--ink)}
+.addbtn{height:44px;border-radius:12px;padding:0 15px;background:var(--mulberry);color:#fff;border:none;font-size:13.5px;font-weight:600;align-items:center;gap:6px;cursor:pointer;flex:0 0 auto;white-space:nowrap}
+.addbtn:active{background:var(--mulberry-deep)}
+.addbtn .pl{font-size:18px;line-height:0;margin-top:-1px}
+
+/* ---- team bride / team groom segmented control ---- */
+.teamseg{display:flex;gap:6px;margin:16px 0 2px}
+.tseg{flex:1;min-width:0;height:44px;border-radius:13px;border:1px solid var(--line-strong);background:var(--surface);
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;
+  font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;padding:0 4px;
+  transition:background .14s ease,border-color .14s ease,color .14s ease}
+.tseg:active{transform:translateY(1px)}
+.tseg .tdot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.tseg .tdot.s-bride{background:var(--bride)} .tseg .tdot.s-groom{background:var(--groom)}
+.tseg .tc{font-style:normal;font-weight:700;font-size:11.5px;color:var(--ink-soft);margin-left:1px}
+@media(min-width:1024px){ .teamseg{max-width:420px} .tseg{font-size:13.5px;gap:7px;padding:0 10px} }
+.tseg.on{color:#fff;border-color:transparent}
+.tseg.on[data-team="all"]{background:var(--ink)}
+.tseg.on[data-team="bride"]{background:var(--bride)}
+.tseg.on[data-team="groom"]{background:var(--groom)}
+.tseg.on .tc{color:rgba(255,255,255,.82)}
+.tseg.on .tdot{box-shadow:0 0 0 2px rgba(255,255,255,.55)}
+
+/* ---- body grid ---- */
+.body{display:grid;grid-template-columns:1fr;gap:22px;margin-top:18px}
+@media(min-width:1024px){ .body{grid-template-columns:236px 1fr;gap:26px} }
+
+/* ---- sidebar (desktop) ---- */
+.side{display:none}
+@media(min-width:1024px){ .side{display:block;position:sticky;top:24px;align-self:start} }
+.facet{margin-bottom:22px}
+.facet h3{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+.facet h3 button{width:24px;height:24px;border-radius:7px;border:none;background:none;cursor:pointer;color:var(--ink-soft)}
+.facet h3 button:hover{background:var(--gold-wash)}
+.facet ul{list-style:none;display:flex;flex-direction:column;gap:2px}
+.vlink{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;border-radius:9px;font-size:13.5px;color:var(--ink-soft);cursor:pointer}
+.vlink:hover{background:rgba(30,34,41,.04)}
+.vlink.on{background:var(--gold-wash);color:var(--gold-deep);font-weight:600}
+.vlink .ct{font-size:11px;color:var(--ink-faint)}
+.grow{display:flex;flex-direction:column;gap:3px}
+.glink{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;border-radius:9px;font-size:13px;cursor:pointer}
+.glink .lbl{display:flex;align-items:center;gap:7px}
+.glink .dot{width:8px;height:8px;border-radius:50%}
+.glink .ct{font-size:11px;opacity:.7}
+.g-bride{background:#FCE9ED;color:#8E2740} .g-bride .dot{background:var(--bride)}
+.g-groom{background:#E4F1FB;color:#0B5A8A} .g-groom .dot{background:var(--groom)}
+.g-both{background:#F0E9F8;color:#5A3490} .g-both .dot{background:var(--both)}
+.tags{display:flex;flex-wrap:wrap;gap:7px}
+.tag{padding:4px 10px;border-radius:var(--r-pill);font-size:12px;background:rgba(30,34,41,.05);color:var(--ink-soft);cursor:pointer}
+.tag.on{background:var(--gold);color:#fff}
+
+/* ---- desktop table ---- */
+.tablecard{display:none;border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;background:var(--surface)}
+@media(min-width:1024px){ .tablecard{display:block} }
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead th{background:rgba(30,34,41,.025);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-align:left;font-weight:500;padding:12px 12px}
+tbody td{padding:11px 12px;border-top:1px solid rgba(30,34,41,.06);vertical-align:middle;font-size:14px}
+tbody tr:hover{background:rgba(197,160,89,.05)}
+tbody tr.sel{background:rgba(197,160,89,.09)}
+.col-chk{width:42px} .col-role{width:23%} .col-grp{width:20%} .col-rsvp{width:128px} .col-act{width:48px}
+.namecell{display:flex;align-items:center;gap:11px;min-width:0}
+.av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.av.s-bride{background:var(--bride-bg);color:var(--bride)} .av.s-groom{background:var(--groom-bg);color:var(--groom)} .av.s-both{background:var(--both-bg);color:var(--both)}
+.namecell .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.namecell .p1{font-size:11.5px;color:var(--ink-faint)}
+.chk{width:17px;height:17px;border-radius:5px;border:1.5px solid var(--line-strong);cursor:pointer;appearance:none;-webkit-appearance:none;display:inline-block;position:relative;background:var(--surface)}
+.chk:checked{background:var(--gold);border-color:var(--gold)}
+.chk:checked::after{content:"";position:absolute;left:5px;top:1.5px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.grpchips{display:flex;flex-wrap:wrap;gap:4px}
+.gchip{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:var(--r-pill);max-width:13ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gchip.g-bride{background:#FCE9ED;color:#8E2740} .gchip.g-groom{background:#E4F1FB;color:#0B5A8A} .gchip.g-both{background:#F0E9F8;color:#5A3490}
+.dash{color:var(--ink-faint)}
+
+/* inline-editable pills (RSVP + role) — the new feature */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:var(--r-pill);font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid transparent;line-height:1.4;transition:.12s}
+.pill .car{width:11px;height:11px;opacity:.55}
+.pill:hover{filter:brightness(.97);box-shadow:0 0 0 2px rgba(30,34,41,.05)}
+.p-go{background:var(--go-bg);color:var(--go)} .p-pend{background:var(--pend-bg);color:var(--pend)}
+.p-dec{background:var(--dec-bg);color:var(--dec)} .p-may{background:var(--may-bg);color:var(--may)}
+.rolepill{background:rgba(30,34,41,.05);color:var(--ink)}
+.rolepill .swatch{width:8px;height:8px;border-radius:50%;border:1px solid rgba(30,34,41,.1)}
+.row-act{width:30px;height:30px;border-radius:8px;border:none;background:none;cursor:pointer;color:var(--ink-faint);display:inline-flex;align-items:center;justify-content:center}
+.row-act:hover{background:rgba(30,34,41,.06);color:var(--ink)}
+.row-act svg{width:17px;height:17px}
+
+/* popover (inline edit + row kebab) */
+.pop{position:fixed;z-index:80;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px rgba(30,34,41,.18);padding:6px;min-width:178px;display:none}
+.pop.open{display:block}
+.pop .ph{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);padding:6px 9px 4px}
+.popitem{display:flex;width:100%;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;font-size:13.5px;background:none;border:none;text-align:left;cursor:pointer}
+.popitem:hover{background:var(--gold-wash)}
+.popitem .swatch{width:9px;height:9px;border-radius:50%}
+.popitem .ck{margin-left:auto;width:14px;height:14px;color:var(--gold-deep)}
+.popdiv{height:1px;background:var(--line);margin:5px 6px}
+.popsub{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);padding:7px 9px 3px}
+
+/* ---- mobile cards ---- */
+.mlist{display:flex;flex-direction:column;gap:8px}
+@media(min-width:1024px){ .mlist{display:none} }
+.sectionhdr{display:flex;align-items:center;gap:8px;margin:14px 2px 4px}
+.sectionhdr:first-child{margin-top:0}
+.sectionhdr .t{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+.sectionhdr .ln{flex:1;height:1px;background:var(--line)}
+.card{display:flex;align-items:center;gap:11px;padding:13px 12px;border-radius:13px;border:1px solid var(--line);background:var(--surface);cursor:pointer;transition:background .12s,border-color .12s}
+.card:active{background:rgba(197,160,89,.07)}
+.card.sel{border-color:var(--gold);background:var(--gold-wash)}
+.card .strip{width:4px;align-self:stretch;border-radius:3px;margin:-3px 2px -3px -4px}
+.strip.s-bride{background:var(--bride)} .strip.s-groom{background:var(--groom)} .strip.s-both{background:var(--both)}
+.card .mid{flex:1;min-width:0}
+.card .nm{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .rolemini{font-size:12px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px;margin-top:3px}
+.card .rolemini .swatch{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.card .chev{width:18px;height:18px;color:var(--ink-faint);flex:0 0 auto}
+body.selmode .card .chev{display:none}
+.card-chk{display:none}
+body.selmode .card-chk{display:inline-flex}
+
+/* ---- floating + bottom sheet scaffolding ---- */
+.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;background:var(--mulberry);color:#fff;border:none;font-size:28px;font-weight:300;cursor:pointer;box-shadow:0 10px 26px rgba(92,37,66,.4);z-index:40}
+@media(min-width:1024px){ .fab{display:none} }
+.botnav{position:fixed;left:0;right:0;bottom:0;height:72px;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:45;padding-bottom:env(safe-area-inset-bottom)}
+@media(min-width:1024px){ .botnav{display:none} }
+.navtab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;color:var(--ink-faint);cursor:pointer}
+.navtab svg{width:21px;height:21px}
+.navtab.on{color:var(--gold-deep)}
+
+.scrim{position:fixed;inset:0;background:rgba(30,34,41,.42);z-index:90;opacity:0;pointer-events:none;transition:.2s}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:95;background:var(--surface);border-radius:20px 20px 0 0;transform:translateY(110%);transition:transform .26s cubic-bezier(.2,.8,.2,1);max-height:86vh;display:flex;flex-direction:column}
+.sheet.open{transform:translateY(0)}
+.sheet .grip{width:42px;height:4px;border-radius:2px;background:var(--line-strong);margin:10px auto 4px}
+.sheet .shead{display:flex;align-items:center;justify-content:space-between;padding:8px 18px 12px;border-bottom:1px solid var(--line)}
+.sheet .shead h2{font-size:17px;font-weight:700}
+.sheet .sclose{background:none;border:none;cursor:pointer;color:var(--ink-soft);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.sheet .sbody{overflow-y:auto;padding:16px 18px 20px}
+.sheet .sfoot{padding:12px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:10px}
+.sheet .sfoot .btn{flex:1;justify-content:center}
+
+.fgroup{margin-bottom:18px}
+.fgroup .fh{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:9px}
+.fopts{display:flex;flex-wrap:wrap;gap:8px}
+.fopt{height:38px;padding:0 14px;border-radius:var(--r-pill);border:1px solid var(--line-strong);background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.fopt.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.fopt .dot{width:8px;height:8px;border-radius:50%}
+
+/* rsvp mobile sheet options */
+.rsvpopt{display:flex;width:100%;align-items:center;gap:12px;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;margin-bottom:8px;font-size:15px;font-weight:600}
+.rsvpopt .badge{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px}
+.rsvpopt .ck{margin-left:auto;color:var(--gold-deep)}
+.rsvpopt.act{border-color:var(--gold);background:var(--gold-wash)}
+.rsvpopt.act::after{content:"✓";margin-left:auto;color:var(--gold-deep);font-weight:700}
+
+/* ---- guest detail + quick-add sheet form ---- */
+.dhead{display:flex;align-items:center;gap:13px;padding:2px 0 6px}
+.dhead .av{width:48px;height:48px;font-size:15px}
+.dhead .nm{font-size:18px;font-weight:700;line-height:1.15;letter-spacing:-.01em}
+.dhead .sub{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+.drow{padding:15px 0;border-top:1px solid var(--line)}
+.drow:first-child{border-top:none;padding-top:6px}
+.drow .dl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px}
+.dchips{display:flex;flex-wrap:wrap;gap:8px}
+.dchip{height:40px;padding:0 15px;border-radius:var(--r-pill);border:1px solid var(--line-strong);background:var(--surface);font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.12s}
+.dchip:active{transform:scale(.97)}
+.dchip .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.dchip.on{border-color:transparent;color:#fff}
+.dchip.on.r-go{background:var(--go-bg);color:var(--go)} .dchip.on.r-pend{background:var(--pend-bg);color:var(--pend)}
+.dchip.on.r-dec{background:var(--dec-bg);color:var(--dec)} .dchip.on.r-may{background:var(--may-bg);color:var(--may)}
+.dchip.on.s-on{background:var(--ink);color:var(--paper)}
+.dselect,.dinput{width:100%;height:46px;border-radius:12px;border:1px solid var(--line-strong);background:var(--surface);font-size:14px;color:var(--ink)}
+.dinput{padding:0 14px}
+/* ---- possible-duplicate warning (smart quick-add) ---- */
+.dupwarn{margin:13px 0 2px;border:1px solid var(--gold);background:var(--gold-wash);border-radius:13px;padding:12px 13px}
+.dw-head{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--gold-deep);margin-bottom:9px;line-height:1.3}
+.dw-head svg{width:17px;height:17px;flex:0 0 auto}
+.dw-row{display:flex;align-items:center;gap:11px;padding:8px 9px;border-radius:10px;background:var(--surface);border:1px solid var(--line);margin-bottom:7px}
+.dw-row .av{width:38px;height:38px;font-size:12.5px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700}
+.dw-mid{min-width:0;flex:1}
+.dw-nm{font-size:14px;font-weight:650;color:var(--ink);line-height:1.2}
+.dw-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dw-tag{flex:0 0 auto;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:var(--r-pill)}
+.dw-exact{background:var(--bride-bg);color:var(--bride)} .dw-nick{background:var(--both-bg);color:var(--both)} .dw-typo{background:rgba(197,160,89,.20);color:var(--gold-deep)}
+.dw-dismiss{margin-top:2px;background:none;border:none;color:var(--gold-deep);font-size:12.5px;font-weight:600;cursor:pointer;padding:5px 2px;text-decoration:underline;text-underline-offset:2px}
+.dw-add2{margin-top:6px;width:100%;height:40px;border:1.5px solid var(--line);border-radius:11px;background:#fff;color:var(--ink-soft);font-size:13px;font-weight:650;cursor:pointer}
+.dw-add2:active{transform:scale(.985)}
+.btn-primary.warn{background:var(--gold-deep)} .btn-primary.warn:hover{background:#8c6c2f}
+.sfoot .addmore{margin-right:auto;background:none;border:none;color:var(--mulberry);font-weight:700;font-size:13px;cursor:pointer;padding:8px 2px}
+.add-toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(8px);z-index:90;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:10px 16px;border-radius:var(--r-pill);box-shadow:0 8px 22px rgba(30,34,41,.22);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+.add-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.addhint-top{font-size:12px;line-height:1.45;color:var(--ink-soft);background:var(--gold-wash);border:1px solid #ECE0C2;border-radius:11px;padding:9px 12px;margin:0 0 4px}
+.dl-opt{font-family:var(--sans,inherit);font-weight:500;font-size:9.5px;letter-spacing:.04em;color:var(--ink-faint);text-transform:none;margin-left:5px}
+.dl-hint{display:block;font-family:var(--sans,inherit);font-weight:500;font-size:11px;letter-spacing:0;text-transform:none;color:var(--ink-faint);margin-top:4px}
+.gnew{height:40px;border-radius:var(--r-pill);border:1px dashed var(--gold);color:var(--gold-deep);background:var(--surface);font-size:13px;font-weight:600;padding:0 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.gnew-input{height:40px;border-radius:var(--r-pill);border:1px solid var(--gold);background:var(--surface);font-size:13px;color:var(--ink);padding:0 14px;width:150px;outline:none}
+.dselect{font-weight:500;padding:0 36px 0 14px;-webkit-appearance:none;appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238A8F96' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.dselect:focus,.dinput:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(197,160,89,.18)}
+.dinput::placeholder{color:var(--ink-faint)}
+
+/* ---- bulk action bar ---- */
+.bulkbar{position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--ink);color:var(--paper);display:none;align-items:center;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -8px 28px rgba(30,34,41,.25)}
+@media(min-width:1024px){body.selmode .bulkbar{display:flex}}
+@media(min-width:1024px){
+  .bulkbar{left:auto;right:auto;bottom:auto;position:sticky;top:14px;margin:0 0 14px;border-radius:14px;border:1px solid var(--gold);background:rgba(251,251,250,.96);backdrop-filter:blur(6px);color:var(--ink);box-shadow:0 8px 24px rgba(30,34,41,.1);flex-wrap:wrap}
+}
+.bulkbar .cnt{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px}
+.bulkbar .cnt .num{min-width:24px;height:24px;padding:0 7px;border-radius:var(--r-pill);background:var(--gold);color:#fff;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.bulkbar .bsel{height:36px;border-radius:9px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);color:inherit;padding:0 30px 0 12px;font-size:13px;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' opacity='.7'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+@media(min-width:1024px){ .bulkbar .bsel{border-color:var(--line-strong);background:var(--surface);color:var(--ink);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238A8F96' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") } }
+.bulkbar .bapply{height:36px;border-radius:9px;border:none;background:var(--gold);color:#fff;font-weight:600;font-size:13px;padding:0 16px;cursor:pointer}
+.bulkbar .bdel{height:36px;border-radius:9px;border:1px solid rgba(255,120,140,.4);background:rgba(255,120,140,.12);color:#ffd9df;font-weight:600;font-size:13px;padding:0 13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+@media(min-width:1024px){ .bulkbar .bdel{border-color:#F1B6BE;background:#FBE2E6;color:#A1213C} }
+.bulkbar .bdel svg{width:14px;height:14px}
+.bulkbar .bclear{margin-left:auto;background:none;border:none;color:inherit;opacity:.8;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:5px}
+.bulkbar .bclear svg{width:14px;height:14px}
+.bulkbar .scroll{display:flex;align-items:center;gap:10px;overflow-x:auto;flex:1;scrollbar-width:none}
+.bulkbar .scroll::-webkit-scrollbar{display:none}
+
+.empty{border:1px dashed var(--line-strong);border-radius:14px;background:var(--surface);padding:34px 20px;text-align:center;color:var(--ink-soft)}
+
+/* tiny screen-reader-ish note pill at very top for reviewers */
+.protonote{max-width:1180px;margin:0 auto;padding:8px 18px 0;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+</style>
+</head>
+<body>
+<div class="protonote">Setnayan · Guests redesign · prototype 2026-06-02 · resize or open on phone</div>
+
+<div class="wrap">
+  <!-- ============ HEADER ============ -->
+  <header class="head">
+    <div class="head-top">
+      <div>
+        <p class="eyebrow">Guest list · Maria &amp; Juan</p>
+        <h1 class="h1"><span class="n" id="hCount">20</span> guests</h1>
+      </div>
+      <button class="hsel m-only" id="enterSelBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Select</button>
+      <div class="actions">
+        <a class="chip-link" href="#" title="Seating chart">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+          <span><span style="font-weight:600;font-size:13px;display:block">Seating</span><span class="sub">who sits where</span></span>
+        </a>
+        <button class="icon-btn" id="shareBtn" title="Share invite link" aria-label="Share invite link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </button>
+        <div class="menu-wrap">
+          <button class="icon-btn" id="moreBtn" aria-label="More actions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+          </button>
+          <div class="menu" id="moreMenu">
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Import CSV</a>
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Quick add list</a>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="dAdd"><span style="font-size:17px;line-height:0;margin-top:-1px">+</span> Add guest</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ TEAM BRIDE / TEAM GROOM ============ -->
+  <div class="teamseg" id="teamSeg" role="tablist" aria-label="Filter by side">
+    <button class="tseg on" data-team="all" role="tab" aria-selected="true">Everyone<i class="tc" id="tcAll">20</i></button>
+    <button class="tseg" data-team="bride" role="tab" aria-selected="false"><span class="tdot s-bride"></span>Team Bride<i class="tc" id="tcBride">0</i></button>
+    <button class="tseg" data-team="groom" role="tab" aria-selected="false"><span class="tdot s-groom"></span>Team Groom<i class="tc" id="tcGroom">0</i></button>
+  </div>
+
+  <!-- ============ STATS / RSVP FILTERS ============ -->
+  <ul class="stats" id="stats">
+    <li><button class="stat readonly" data-rsvp=""><span class="lbl">Invited</span><span class="v t-total" id="sTotal">20</span></button></li>
+    <li><button class="stat" data-rsvp="attending"><span class="lbl">Attending</span><span class="v t-go" id="sGo">11</span></button></li>
+    <li><button class="stat" data-rsvp="pending"><span class="lbl">Pending</span><span class="v t-pend" id="sPend">7</span></button></li>
+    <li><button class="stat" data-rsvp="declined"><span class="lbl">Declined</span><span class="v t-dec" id="sDec">1</span></button></li>
+    <li><button class="stat readonly"><span class="lbl">Plus-ones</span><span class="v t-plus" id="sPlus">3</span></button></li>
+  </ul>
+
+  <!-- ============ TOOLBAR ============ -->
+  <div class="toolbar">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" type="text" placeholder="Search guests…" autocomplete="off">
+    </div>
+    <!-- desktop: inline sort select -->
+    <select class="sortsel desk" id="sort">
+      <option value="role">Sort: By role</option>
+      <option value="last">Sort: Last name (A–Z)</option>
+      <option value="first">Sort: First name (A–Z)</option>
+      <option value="rsvp">Sort: RSVP status</option>
+      <option value="newest">Sort: Newest first</option>
+    </select>
+    <!-- desktop: filters opener (mobile uses the filter sheet too if needed) -->
+    <button class="btn btn-ghost filter-btn" id="openFilters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Filters<span class="badge" id="fbadge" hidden>1</span>
+    </button>
+    <!-- mobile: sort + quick-add -->
+    <button class="tbtn m-only" id="mSort" aria-label="Sort guests" title="Sort">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 6h13M3 12h9M3 18h5"/><path d="m17 16 3 3 3-3M20 19V8"/></svg>
+    </button>
+    <button class="addbtn m-only" id="mAdd"><span class="pl">+</span> Add</button>
+  </div>
+
+  <!-- ============ MOBILE CHIP RAIL ============ -->
+  <div class="chiprail" id="chiprail">
+    <button class="fchip on" data-view="all">All</button>
+    <button class="fchip" data-rsvp="pending">Pending</button>
+    <button class="fchip" data-rsvp="attending">Going</button>
+    <button class="fchip" data-view="vip_family">VIP family</button>
+    <button class="fchip" data-view="wedding_party">Wedding party</button>
+    <button class="fchip" data-view="principal_sponsors">Sponsors</button>
+    <button class="fchip more" id="openFilters2">+ More filters</button>
+  </div>
+
+  <!-- ============ BODY ============ -->
+  <div class="body">
+    <!-- sidebar facets (desktop) -->
+    <aside class="side">
+      <div class="facet">
+        <h3>View</h3>
+        <ul id="viewList">
+          <li><span class="vlink on" data-view="all">All guests <span class="ct">20</span></span></li>
+          <li><span class="vlink" data-view="vip_family">VIP family <span class="ct">3</span></span></li>
+          <li><span class="vlink" data-view="wedding_party">Wedding party <span class="ct">4</span></span></li>
+          <li><span class="vlink" data-view="principal_sponsors">Principal sponsors <span class="ct">2</span></span></li>
+          <li><span class="vlink" data-view="secondary_sponsors">Secondary sponsors <span class="ct">3</span></span></li>
+          <li><span class="vlink" data-view="bearers_flower_girl">Bearers &amp; flower girl <span class="ct">2</span></span></li>
+          <li><span class="vlink" data-view="officiants">Officiants <span class="ct">1</span></span></li>
+        </ul>
+      </div>
+      <div class="facet">
+        <h3><span>Groups</span><button title="New group">＋</button></h3>
+        <div class="grow">
+          <span class="glink g-bride" data-view="group:cf"><span class="lbl"><span class="dot"></span>College Friends</span><span class="ct">2</span></span>
+          <span class="glink g-groom" data-view="group:bk"><span class="lbl"><span class="dot"></span>Barkada</span><span class="ct">2</span></span>
+          <span class="glink g-both" data-view="group:wk"><span class="lbl"><span class="dot"></span>Work</span><span class="ct">1</span></span>
+        </div>
+      </div>
+      <div class="facet">
+        <h3>Custom tags</h3>
+        <div class="tags">
+          <span class="tag">VIP</span><span class="tag">Flying in</span><span class="tag">Needs ride</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- main list -->
+    <div style="min-width:0">
+      <!-- bulk bar (sticky desktop / fixed-bottom mobile) -->
+      <div class="bulkbar" id="bulkbar">
+        <div class="scroll">
+          <span class="cnt"><span class="num" id="bulkCount">0</span> selected</span>
+          <select class="bsel" id="bulkRole"><option value="">Assign role…</option>
+            <optgroup label="Couple"><option>Bride</option><option>Groom</option></optgroup>
+            <optgroup label="Wedding party"><option>Maid of Honor</option><option>Best Man</option><option>Bridesmaid</option><option>Groomsman</option></optgroup>
+            <optgroup label="Sponsors"><option>Principal Sponsor</option><option>Candle Sponsor</option><option>Veil Sponsor</option></optgroup>
+          </select>
+          <select class="bsel" id="bulkSide"><option value="">Assign side…</option><option>Bride's side</option><option>Groom's side</option><option>Both sides</option></select>
+          <select class="bsel" id="bulkGroup"><option value="">Add to group…</option><option>College Friends</option><option>Barkada</option><option>Work</option><option>+ New group…</option></select>
+          <button class="bapply">Apply</button>
+          <button class="bdel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete</button>
+        </div>
+        <button class="bclear" id="bulkClear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Clear</button>
+      </div>
+
+      <!-- DESKTOP TABLE -->
+      <div class="tablecard">
+        <table>
+          <thead><tr>
+            <th class="col-chk"><input type="checkbox" class="chk" id="checkAll" aria-label="Select all"></th>
+            <th>Name</th>
+            <th class="col-role">Role</th>
+            <th class="col-grp">Groups</th>
+            <th class="col-rsvp">RSVP</th>
+            <th class="col-act"></th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE CARDS -->
+      <div class="mlist" id="mlist"></div>
+
+      <div class="empty" id="empty" hidden>No guests match your filters.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MOBILE FAB + BOTTOM NAV ============ -->
+<button class="fab" id="fab" aria-label="Add guest">+</button>
+<nav class="botnav">
+  <a class="navtab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</a>
+  <a class="navtab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home</a>
+  <a class="navtab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Guests</a>
+  <a class="navtab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>Website</a>
+  <a class="navtab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</a>
+</nav>
+
+<!-- Mobile selection bar — replaces the docked search bar in select-mode -->
+<div class="mselbar" id="mselbar">
+  <button class="msel-x" id="mselCancel" aria-label="Cancel selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <span class="msel-cnt"><b id="mselCount">0</b> selected</span>
+  <button class="msel-act primary" id="mselGroup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add to group</button>
+  <button class="msel-act danger" id="mselDelete" aria-label="Delete selected"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+</div>
+
+<!-- ============ SCRIM + SHEETS ============ -->
+<div class="scrim" id="scrim"></div>
+
+<!-- Filter sheet (mobile) -->
+<div class="sheet" id="filterSheet">
+  <div class="grip"></div>
+  <div class="shead"><h2>Filter guests</h2><button class="sclose" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="sbody">
+    <div class="fgroup"><div class="fh">RSVP</div><div class="fopts" data-grp="rsvp">
+      <button class="fopt on" data-rsvp="">Any</button><button class="fopt" data-rsvp="attending">Attending</button><button class="fopt" data-rsvp="pending">Pending</button><button class="fopt" data-rsvp="declined">Declined</button><button class="fopt" data-rsvp="maybe">Maybe</button>
+    </div></div>
+    <div class="fgroup"><div class="fh">Side</div><div class="fopts" data-grp="side">
+      <button class="fopt on" data-side="">Any</button><button class="fopt" data-side="bride"><span class="dot" style="background:var(--bride)"></span>Bride's</button><button class="fopt" data-side="groom"><span class="dot" style="background:var(--groom)"></span>Groom's</button><button class="fopt" data-side="both"><span class="dot" style="background:var(--both)"></span>Both</button>
+    </div></div>
+    <div class="fgroup"><div class="fh">Role group</div><div class="fopts" data-grp="view">
+      <button class="fopt on" data-view="all">All</button><button class="fopt" data-view="vip_family">VIP family</button><button class="fopt" data-view="wedding_party">Wedding party</button><button class="fopt" data-view="principal_sponsors">Principal sponsors</button><button class="fopt" data-view="secondary_sponsors">Secondary sponsors</button><button class="fopt" data-view="bearers_flower_girl">Bearers &amp; flower girl</button><button class="fopt" data-view="officiants">Officiants</button>
+    </div></div>
+    <div class="fgroup"><div class="fh">Groups</div><div class="fopts" data-grp="view">
+      <button class="fopt" data-view="group:cf"><span class="dot" style="background:var(--bride)"></span>College Friends</button><button class="fopt" data-view="group:bk"><span class="dot" style="background:var(--groom)"></span>Barkada</button><button class="fopt" data-view="group:wk"><span class="dot" style="background:var(--both)"></span>Work</button>
+    </div></div>
+    <div class="fgroup"><div class="fh">Custom tags</div><div class="fopts">
+      <button class="fopt">VIP</button><button class="fopt">Flying in</button><button class="fopt">Needs ride</button>
+    </div></div>
+  </div>
+  <div class="sfoot"><button class="btn btn-ghost" id="filterClear">Clear all</button><button class="btn btn-primary" data-close>Show <span id="filterCount">20</span></button></div>
+</div>
+
+<!-- RSVP edit sheet (mobile) -->
+<div class="sheet" id="rsvpSheet">
+  <div class="grip"></div>
+  <div class="shead"><h2 id="rsvpSheetTitle">Set RSVP</h2><button class="sclose" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="sbody">
+    <button class="rsvpopt" data-set="attending"><span class="badge" style="background:var(--go-bg);color:var(--go)">✓</span>Attending</button>
+    <button class="rsvpopt" data-set="pending"><span class="badge" style="background:var(--pend-bg);color:var(--pend)">⏳</span>Pending</button>
+    <button class="rsvpopt" data-set="declined"><span class="badge" style="background:var(--dec-bg);color:var(--dec)">✕</span>Declined</button>
+    <button class="rsvpopt" data-set="maybe"><span class="badge" style="background:var(--may-bg);color:var(--may)">?</span>Maybe</button>
+  </div>
+</div>
+
+<!-- Guest detail sheet (mobile) — opened by tapping a row -->
+<div class="sheet" id="guestSheet">
+  <div class="grip"></div>
+  <div class="shead"><h2 id="guestTitle">Guest</h2><button class="sclose" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="sbody" id="guestBody"></div>
+  <div class="sfoot"><button class="btn btn-ghost" id="guestRemove" style="color:var(--dec);border-color:#F1B6BE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" width="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Remove</button><button class="btn btn-primary" data-close>Done</button></div>
+</div>
+
+<!-- Quick-add sheet (mobile) -->
+<div class="sheet" id="addSheet">
+  <div class="grip"></div>
+  <div class="shead"><h2>Quick add guest</h2><button class="sclose" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="sbody">
+    <p class="addhint-top">Set the team, role &amp; group once — every name you add below keeps them. Change the chips to start a new batch.</p>
+    <div class="drow"><div class="dl">Side · team</div><div class="dchips" id="addSide">
+      <button class="dchip on s-on" data-side="bride"><span class="dot" style="background:var(--bride)"></span>Team Bride</button>
+      <button class="dchip" data-side="groom"><span class="dot" style="background:var(--groom)"></span>Team Groom</button>
+      <button class="dchip" data-side="both"><span class="dot" style="background:var(--both)"></span>Both</button>
+    </div></div>
+    <div class="drow"><div class="dl">Role in the wedding</div><select class="dselect" id="addRole"></select></div>
+    <div class="drow"><div class="dl">Group <span class="dl-opt">optional</span></div><div class="dchips" id="addGroup"></div></div>
+    <div class="drow"><div class="dl">Name <span class="dl-hint">↵ jumps to last name · ↵ again saves &amp; starts the next</span></div>
+      <input class="dinput" id="addFn" placeholder="First name" autocomplete="off" enterkeyhint="next" style="margin-bottom:9px">
+      <input class="dinput" id="addLn" placeholder="Last name" autocomplete="off" enterkeyhint="done">
+      <div class="dupwarn" id="dupWarn" hidden></div>
+    </div>
+  </div>
+  <div class="sfoot"><button class="addmore" id="addAnother">＋ Save &amp; add another</button><button class="btn btn-primary" id="addSave">Add guest</button></div>
+</div>
+<div class="add-toast" id="addToast"></div>
+
+<!-- Sort sheet (mobile) -->
+<div class="sheet" id="sortSheet">
+  <div class="grip"></div>
+  <div class="shead"><h2>Sort guests</h2><button class="sclose" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="sbody">
+    <button class="rsvpopt sortopt" data-sort="role">By role group</button>
+    <button class="rsvpopt sortopt" data-sort="first">First name (A–Z)</button>
+    <button class="rsvpopt sortopt" data-sort="last">Last name (A–Z)</button>
+    <button class="rsvpopt sortopt" data-sort="rsvp">RSVP status</button>
+    <button class="rsvpopt sortopt" data-sort="newest">Recently added</button>
+  </div>
+</div>
+
+<!-- Add-to-group sheet (mobile, bulk) -->
+<div class="sheet" id="groupSheet">
+  <div class="grip"></div>
+  <div class="shead"><h2 id="groupTitle">Add to group</h2><button class="sclose" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="sbody">
+    <div id="groupOpts"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <input class="dinput" id="newGroupName" placeholder="New group name…" autocomplete="off" style="flex:1">
+      <button class="btn btn-primary" id="newGroupAdd" style="flex:0 0 auto">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Inline popover (desktop RSVP + role edit, + row kebab) -->
+<div class="pop" id="pop"></div>
+
+<script>
+/* ---------------- data ---------------- */
+const RSVP = {
+  attending:{l:'Attending',c:'p-go',i:'✓'}, pending:{l:'Pending',c:'p-pend',i:'⏳'},
+  declined:{l:'Declined',c:'p-dec',i:'✕'}, maybe:{l:'Maybe',c:'p-may',i:'?'}
+};
+const ROLE_GROUPS = {
+  couple:{l:'Couple', sw:'#C5A059'}, vip_family:{l:'VIP family', sw:'#A88340'},
+  wedding_party:{l:'Wedding party', sw:'#6B3FA0'}, principal_sponsors:{l:'Principal sponsors', sw:'#0B5A8A'},
+  secondary_sponsors:{l:'Secondary sponsors', sw:'#1E7F6E'}, bearers_flower_girl:{l:'Bearers & flower girl', sw:'#C2643A'},
+  officiants:{l:'Officiants', sw:'#5C6066'}, guest:{l:'Guests', sw:'#9AA0A6'}
+};
+const ROLE = {
+  bride:{l:'Bride',g:'couple'}, groom:{l:'Groom',g:'couple'},
+  bride_parents:{l:"Bride's Parents",g:'vip_family'}, groom_parents:{l:"Groom's Parents",g:'vip_family'},
+  bride_immediate_family:{l:"Bride's Family",g:'vip_family'}, groom_immediate_family:{l:"Groom's Family",g:'vip_family'},
+  maid_of_honor:{l:'Maid of Honor',g:'wedding_party'}, best_man:{l:'Best Man',g:'wedding_party'},
+  bridesmaid:{l:'Bridesmaid',g:'wedding_party'}, groomsman:{l:'Groomsman',g:'wedding_party'},
+  principal_sponsor:{l:'Principal Sponsor',g:'principal_sponsors'},
+  candle_sponsor:{l:'Candle Sponsor',g:'secondary_sponsors'}, veil_sponsor:{l:'Veil Sponsor',g:'secondary_sponsors'},
+  cord_sponsor:{l:'Cord Sponsor',g:'secondary_sponsors'}, coin_sponsor:{l:'Coin Sponsor',g:'secondary_sponsors'},
+  ring_bearer:{l:'Ring Bearer',g:'bearers_flower_girl'}, flower_girl:{l:'Flower Girl',g:'bearers_flower_girl'},
+  officiant:{l:'Officiant',g:'officiants'}, guest:{l:'Guest',g:'guest'}
+};
+const SIDE = {bride:"Bride's side", groom:"Groom's side", both:'Both sides'};
+let G = [
+  {id:1, fn:'Maria', ln:'Santos', side:'bride', role:'bride', rsvp:'attending', groups:[]},
+  {id:2, fn:'Juan', ln:'Cruz', side:'groom', role:'groom', rsvp:'attending', groups:[]},
+  {id:3, fn:'Elena', ln:'Santos', side:'bride', role:'bride_parents', rsvp:'attending', groups:[]},
+  {id:4, fn:'Roberto', ln:'Santos', side:'bride', role:'bride_parents', rsvp:'attending', groups:[]},
+  {id:5, fn:'Carmen', ln:'Cruz', side:'groom', role:'groom_parents', rsvp:'pending', groups:[]},
+  {id:6, fn:'Boy', ln:'Reyes', dn:'Tito Boy & Tita Cora', side:'both', role:'principal_sponsor', rsvp:'attending', groups:[]},
+  {id:7, fn:'Ramon', ln:'Lim', dn:'Ramon & Mia Lim', side:'both', role:'principal_sponsor', rsvp:'pending', groups:[]},
+  {id:8, fn:'Carla', ln:'Mendoza', side:'bride', role:'maid_of_honor', rsvp:'attending', groups:['cf']},
+  {id:9, fn:'Marco', ln:'Reyes', side:'groom', role:'best_man', rsvp:'attending', groups:['bk']},
+  {id:10, fn:'Sofia', ln:'Reyes', side:'bride', role:'bridesmaid', rsvp:'pending', groups:['cf']},
+  {id:11, fn:'Liam', ln:'De la Cruz', side:'groom', role:'groomsman', rsvp:'attending', groups:['bk']},
+  {id:12, fn:'Patricia', ln:'Cruz', side:'groom', role:'candle_sponsor', rsvp:'attending', groups:[]},
+  {id:13, fn:'Adela', ln:'Reyes', dn:'Lola Adela', side:'bride', role:'bride_immediate_family', rsvp:'attending', plus:'+ Andres T.', groups:[]},
+  {id:14, fn:'Joaquin', ln:'Tan', side:'groom', role:'veil_sponsor', rsvp:'pending', groups:[]},
+  {id:15, fn:'Sofia', ln:'Tan', side:'groom', role:'cord_sponsor', rsvp:'pending', groups:[]},
+  {id:16, fn:'Andres', ln:'Bautista', side:'groom', role:'ring_bearer', rsvp:'attending', groups:[]},
+  {id:17, fn:'Jenny', ln:'Bautista', side:'groom', role:'flower_girl', rsvp:'attending', groups:[]},
+  {id:18, fn:'Jose', ln:'Aquino', dn:'Fr. Jose Aquino', side:'both', role:'officiant', rsvp:'attending', groups:[]},
+  {id:19, fn:'Paolo', ln:'Santos', dn:'Paolo & Anna Santos', side:'bride', role:'guest', rsvp:'declined', groups:['wk']},
+  {id:20, fn:'Diego', ln:'Ramos', side:'groom', role:'guest', rsvp:'pending', plus:'+ TBA', groups:[]},
+];
+const GROUP_LABEL = {cf:{l:'College Friends',s:'bride'}, bk:{l:'Barkada',s:'groom'}, wk:{l:'Work',s:'both'}};
+
+/* ---------------- state ---------------- */
+const state = {q:'', rsvp:'', side:'', view:'all', sort:'role', team:'all'};
+const selected = new Set();
+let selMode=false; // mobile: explicit multi-select mode (also true while any selected)
+
+const disp = g => g.dn || (g.fn+' '+g.ln);
+const initials = g => ((g.fn[0]||'')+(g.ln[0]||'')).toUpperCase();
+const grpOf = g => ROLE[g.role].g;
+
+function matches(g){
+  if(state.rsvp && g.rsvp!==state.rsvp) return false;
+  if(state.side && g.side!==state.side) return false;
+  // Team Bride / Team Groom — shared ('both') guests belong to each team
+  if(state.team==='bride' && !(g.side==='bride'||g.side==='both')) return false;
+  if(state.team==='groom' && !(g.side==='groom'||g.side==='both')) return false;
+  if(state.view!=='all'){
+    if(state.view.startsWith('group:')){ if(!g.groups.includes(state.view.slice(6))) return false; }
+    else if(grpOf(g)!==state.view) return false;
+  }
+  if(state.q){
+    const hay=[g.fn,g.ln,g.dn||'',ROLE[g.role].l,SIDE[g.side],RSVP[g.rsvp].l,
+      ...g.groups.map(gid=>GROUP_LABEL[gid].l)].join(' ').toLowerCase();
+    if(!hay.includes(state.q)) return false;
+  }
+  return true;
+}
+function sortFn(a,b){
+  switch(state.sort){
+    case 'first': return a.fn.localeCompare(b.fn);
+    case 'rsvp': { const r={attending:0,pending:1,maybe:2,declined:3}; return r[a.rsvp]-r[b.rsvp]; }
+    case 'role': { const ord=Object.keys(ROLE_GROUPS); return (ord.indexOf(grpOf(a))-ord.indexOf(grpOf(b))) || a.ln.localeCompare(b.ln) || a.fn.localeCompare(b.fn); }
+    case 'newest': return b.id-a.id;
+    default: return a.ln.localeCompare(b.ln) || a.fn.localeCompare(b.fn);
+  }
+}
+
+/* ---------------- render ---------------- */
+function rolePillHTML(g){
+  const grp=ROLE[g.role].g;
+  return `<span class="pill rolepill" data-edit="role" data-id="${g.id}"><span class="swatch" style="background:${ROLE_GROUPS[grp].sw}"></span>${ROLE[g.role].l}<svg class="car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></span>`;
+}
+function rsvpPillHTML(g, tapClass=''){
+  const r=RSVP[g.rsvp];
+  return `<span class="pill ${r.c} ${tapClass}" data-edit="rsvp" data-id="${g.id}">${r.l}<svg class="car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></span>`;
+}
+function grpChipsHTML(g){
+  if(!g.groups.length) return '<span class="dash">—</span>';
+  return '<div class="grpchips">'+g.groups.map(gid=>{
+    const gr=GROUP_LABEL[gid]; return `<span class="gchip g-${gr.s}">${gr.l}</span>`;
+  }).join('')+'</div>';
+}
+
+function render(){
+  const rows=G.filter(matches).sort(sortFn);
+  // counts
+  document.getElementById('hCount').textContent=G.length;
+  document.getElementById('sTotal').textContent=G.length;
+  document.getElementById('sGo').textContent=G.filter(g=>g.rsvp==='attending').length;
+  document.getElementById('sPend').textContent=G.filter(g=>g.rsvp==='pending').length;
+  document.getElementById('sDec').textContent=G.filter(g=>g.rsvp==='declined').length;
+  document.getElementById('sPlus').textContent=G.filter(g=>g.plus).length;
+  document.getElementById('filterCount').textContent=rows.length;
+  // team bride / team groom counts (shared 'both' guests count on each team)
+  document.getElementById('tcAll').textContent=G.length;
+  document.getElementById('tcBride').textContent=G.filter(g=>g.side==='bride'||g.side==='both').length;
+  document.getElementById('tcGroom').textContent=G.filter(g=>g.side==='groom'||g.side==='both').length;
+  document.querySelectorAll('#teamSeg .tseg').forEach(t=>{const on=t.dataset.team===state.team;t.classList.toggle('on',on);t.setAttribute('aria-selected',on);});
+
+  // desktop tbody (flat sorted)
+  const tb=document.getElementById('tbody');
+  tb.innerHTML=rows.map(g=>`
+    <tr class="${selected.has(g.id)?'sel':''}">
+      <td><input type="checkbox" class="chk rowchk" data-id="${g.id}" ${selected.has(g.id)?'checked':''} aria-label="Select ${disp(g)}"></td>
+      <td><div class="namecell"><span class="av s-${g.side}">${initials(g)}</span><div style="min-width:0"><div class="nm">${disp(g)}</div>${g.plus?`<div class="p1">${g.plus}</div>`:''}</div></div></td>
+      <td>${rolePillHTML(g)}</td>
+      <td>${grpChipsHTML(g)}</td>
+      <td>${rsvpPillHTML(g)}</td>
+      <td><button class="row-act" data-edit="kebab" data-id="${g.id}" aria-label="Row actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></td>
+    </tr>`).join('');
+
+  // mobile cards — grouped into role-group sections only when sorting "By role";
+  // every other sort renders a clean flat list.
+  const ml=document.getElementById('mlist');
+  if(state.sort!=='role' || state.view.startsWith('group:')){
+    ml.innerHTML=rows.map(cardHTML).join('');
+  } else {
+    const order=Object.keys(ROLE_GROUPS);
+    let html='';
+    for(const grp of order){
+      const seg=rows.filter(g=>grpOf(g)===grp);
+      if(!seg.length) continue;
+      html+=`<div class="sectionhdr"><span class="t">${ROLE_GROUPS[grp].l} · ${seg.length}</span><span class="ln"></span></div>`;
+      html+=seg.map(cardHTML).join('');
+    }
+    ml.innerHTML=html;
+  }
+
+  const none=rows.length===0;
+  document.getElementById('empty').hidden=!none;
+  document.querySelector('.tablecard').style.display=none?'none':'';
+  syncBulk(); updateFilterBadge();
+}
+function cardHTML(g){
+  // Mobile row: First Last + role. Tapping the row opens the guest's info.
+  return `<div class="card ${selected.has(g.id)?'sel':''}" data-card="${g.id}">
+    <span class="strip s-${g.side}"></span>
+    <input type="checkbox" class="chk rowchk card-chk" data-id="${g.id}" ${selected.has(g.id)?'checked':''} aria-label="Select ${disp(g)}">
+    <span class="av s-${g.side}">${initials(g)}</span>
+    <div class="mid">
+      <div class="nm">${disp(g)}</div>
+      <div class="rolemini"><span class="swatch" style="background:${ROLE_GROUPS[grpOf(g)].sw}"></span>${ROLE[g.role].l}</div>
+    </div>
+    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+  </div>`;
+}
+
+/* ---------------- bulk ---------------- */
+function syncBulk(){
+  document.body.classList.toggle('selmode', selMode || selected.size>0);
+  document.getElementById('bulkCount').textContent=selected.size;
+  const mc=document.getElementById('mselCount'); if(mc) mc.textContent=selected.size;
+  const all=document.getElementById('checkAll');
+  const vis=G.filter(matches);
+  all.checked = vis.length>0 && vis.every(g=>selected.has(g.id));
+  all.indeterminate = !all.checked && vis.some(g=>selected.has(g.id));
+}
+
+/* ---------------- popovers (desktop inline edit) ---------------- */
+const pop=document.getElementById('pop');
+function closePop(){ pop.classList.remove('open'); pop.innerHTML=''; }
+function positionPop(){
+  const el=pop._anchor; if(!el) return;
+  const r=el.getBoundingClientRect();
+  // close if the anchor scrolled out of view
+  if(r.bottom<0||r.top>window.innerHeight){ closePop(); return; }
+  const pr=pop.getBoundingClientRect();
+  let left=r.left, top=r.bottom+6;
+  if(left+pr.width>window.innerWidth-10) left=window.innerWidth-pr.width-10;
+  if(top+pr.height>window.innerHeight-10) top=r.top-pr.height-6;
+  pop.style.left=Math.max(10,left)+'px'; pop.style.top=Math.max(10,top)+'px';
+}
+function openPopAt(el, html){
+  pop.innerHTML=html; pop._anchor=el; pop.classList.add('open'); positionPop();
+}
+function rsvpPop(g){
+  return `<div class="ph">Set RSVP</div>`+Object.entries(RSVP).map(([k,v])=>
+    `<button class="popitem" data-act="rsvp" data-id="${g.id}" data-val="${k}"><span class="swatch" style="background:var(--${k==='attending'?'go':k==='pending'?'pend':k==='declined'?'dec':'may'})"></span>${v.l}${g.rsvp===k?'<svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}</button>`).join('');
+}
+function rolePop(g){
+  const order=['couple','vip_family','wedding_party','principal_sponsors','secondary_sponsors','bearers_flower_girl','officiants','guest'];
+  let h=`<div class="ph">Assign role</div>`;
+  for(const grp of order){
+    const roles=Object.entries(ROLE).filter(([,v])=>v.g===grp);
+    if(!roles.length) continue;
+    h+=`<div class="popsub">${ROLE_GROUPS[grp].l}</div>`;
+    h+=roles.map(([k,v])=>`<button class="popitem" data-act="role" data-id="${g.id}" data-val="${k}"><span class="swatch" style="background:${ROLE_GROUPS[grp].sw}"></span>${v.l}${g.role===k?'<svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}</button>`).join('');
+  }
+  return h;
+}
+function kebabPop(g){
+  return `<div class="ph">${disp(g)}</div>
+    <button class="popitem">✎ Edit details</button>
+    <button class="popitem">✉ Resend invitation</button>
+    <div class="popdiv"></div>
+    <button class="popitem" style="color:var(--dec)">🗑 Remove guest</button>`;
+}
+
+/* ---------------- events ---------------- */
+let rsvpTarget=null, suppressTap=false;
+document.addEventListener('click', e=>{
+  // swallow the click that immediately follows a long-press select
+  if(suppressTap){ suppressTap=false; if(e.target.closest('.card[data-card]')) return; }
+  const editEl=e.target.closest('[data-edit]');
+  // inline pills / kebab
+  if(editEl){
+    const g=G.find(x=>x.id==editEl.dataset.id);
+    const kind=editEl.dataset.edit;
+    const isMobile=window.innerWidth<1024;
+    if(kind==='rsvp'){
+      if(document.body.classList.contains('selmode')) return;
+      if(isMobile){ rsvpTarget=g; document.getElementById('rsvpSheetTitle').textContent='RSVP · '+disp(g); openSheet('rsvpSheet'); }
+      else openPopAt(editEl, rsvpPop(g));
+      e.stopPropagation(); return;
+    }
+    if(kind==='role'){ if(!isMobile){ openPopAt(editEl, rolePop(g)); e.stopPropagation(); return; } }
+    if(kind==='kebab'){ openPopAt(editEl, kebabPop(g)); e.stopPropagation(); return; }
+  }
+  // popover item chosen
+  const pi=e.target.closest('.popitem[data-act]');
+  if(pi){
+    const g=G.find(x=>x.id==pi.dataset.id);
+    if(pi.dataset.act==='rsvp') g.rsvp=pi.dataset.val;
+    if(pi.dataset.act==='role') g.role=pi.dataset.val;
+    closePop(); render(); return;
+  }
+  // row checkbox
+  const rc=e.target.closest('.rowchk');
+  if(rc){ const id=+rc.dataset.id; if(rc.checked) selected.add(id); else selected.delete(id); render(); return; }
+  // mobile card tap → open the guest's info (toggle selection in select-mode)
+  const cardEl=e.target.closest('.card[data-card]');
+  if(cardEl){
+    const id=+cardEl.dataset.card, g=G.find(x=>x.id===id);
+    if(document.body.classList.contains('selmode')){
+      if(selected.has(id)) selected.delete(id); else selected.add(id); render();
+    } else openGuest(g);
+    return;
+  }
+  // close popover on outside click
+  if(!e.target.closest('.pop')) closePop();
+});
+
+document.getElementById('checkAll').addEventListener('change', e=>{
+  const vis=G.filter(matches);
+  if(e.target.checked) vis.forEach(g=>selected.add(g.id)); else vis.forEach(g=>selected.delete(g.id));
+  render();
+});
+document.getElementById('bulkClear').addEventListener('click', ()=>{ selected.clear(); render(); });
+
+// search (live)
+let t; document.getElementById('search').addEventListener('input', e=>{
+  clearTimeout(t); t=setTimeout(()=>{ state.q=e.target.value.trim().toLowerCase(); render(); }, 120);
+});
+// sort (live)
+document.getElementById('sort').addEventListener('change', e=>{ state.sort=e.target.value; markSort(); render(); });
+
+// stat cards
+document.getElementById('stats').addEventListener('click', e=>{
+  const b=e.target.closest('.stat'); if(!b||b.classList.contains('readonly')&&b.dataset.rsvp===undefined) {}
+  if(!b) return;
+  if(b.dataset.rsvp!==undefined && !b.classList.contains('readonly')){
+    state.rsvp = state.rsvp===b.dataset.rsvp ? '' : b.dataset.rsvp;
+    syncStatUI(); render();
+  } else if(b.dataset.rsvp===''){ state.rsvp=''; syncStatUI(); render(); }
+});
+function syncStatUI(){
+  document.querySelectorAll('#stats .stat').forEach(s=>{
+    s.classList.toggle('on', s.dataset.rsvp!==undefined && s.dataset.rsvp===state.rsvp && !s.classList.contains('readonly') || (s.dataset.rsvp==='' && state.rsvp===''));
+  });
+}
+
+// team bride / team groom segmented control
+document.getElementById('teamSeg').addEventListener('click', e=>{
+  const t=e.target.closest('.tseg'); if(!t) return;
+  state.team=t.dataset.team; render();
+});
+
+// desktop sidebar views + groups
+document.querySelectorAll('.side [data-view]').forEach(el=>{
+  el.addEventListener('click', ()=>{ state.view=el.dataset.view; syncViewUI(); render(); });
+});
+function syncViewUI(){
+  document.querySelectorAll('.side [data-view]').forEach(el=>el.classList.toggle('on', el.dataset.view===state.view || (el.dataset.view==='all' && state.view==='all')));
+}
+
+// mobile chip rail
+document.getElementById('chiprail').addEventListener('click', e=>{
+  const c=e.target.closest('.fchip'); if(!c||c.classList.contains('more')) return;
+  if(c.dataset.rsvp!==undefined){ state.rsvp = state.rsvp===c.dataset.rsvp?'':c.dataset.rsvp; state.view='all'; }
+  else if(c.dataset.view!==undefined){ state.view = c.dataset.view; state.rsvp=''; }
+  syncChips(); syncStatUI(); render();
+});
+function syncChips(){
+  document.querySelectorAll('#chiprail .fchip').forEach(c=>{
+    if(c.classList.contains('more')) return;
+    let on=false;
+    if(c.dataset.view==='all') on = state.view==='all' && !state.rsvp && !state.side; // "All" = truly unfiltered
+    else if(c.dataset.rsvp!==undefined) on = c.dataset.rsvp===state.rsvp;
+    else if(c.dataset.view!==undefined) on = c.dataset.view===state.view;
+    c.classList.toggle('on', on);
+  });
+}
+
+/* ---------------- sheets ---------------- */
+function openSheet(id){ document.getElementById('scrim').classList.add('open'); document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeSheets(){ document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open')); document.getElementById('scrim').classList.remove('open'); document.body.style.overflow=''; }
+document.getElementById('scrim').addEventListener('click', closeSheets);
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click', closeSheets));
+document.getElementById('openFilters').addEventListener('click', ()=>openSheet('filterSheet'));
+document.getElementById('openFilters2').addEventListener('click', ()=>openSheet('filterSheet'));
+
+// filter sheet options
+document.querySelectorAll('#filterSheet .fopts').forEach(grp=>{
+  grp.addEventListener('click', e=>{
+    const o=e.target.closest('.fopt'); if(!o) return;
+    const g=grp.dataset.grp;
+    grp.querySelectorAll('.fopt').forEach(x=>x.classList.remove('on'));
+    o.classList.add('on');
+    if(g==='rsvp'){ state.rsvp=o.dataset.rsvp||''; }
+    if(g==='side'){ state.side=o.dataset.side||''; }
+    if(g==='view'){ state.view=o.dataset.view||'all'; }
+    updateFilterBadge(); syncChips(); syncStatUI(); render();
+  });
+});
+document.getElementById('filterClear').addEventListener('click', ()=>{
+  state.rsvp=''; state.side=''; state.view='all';
+  document.querySelectorAll('#filterSheet .fopt').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('#filterSheet .fopts').forEach(grp=>{ const first=grp.querySelector('.fopt'); if(first&&(first.dataset.rsvp===''||first.dataset.side===''||first.dataset.view==='all')) first.classList.add('on'); });
+  updateFilterBadge(); syncChips(); syncStatUI(); render();
+});
+function updateFilterBadge(){
+  let n=0; if(state.rsvp)n++; if(state.side)n++; if(state.view!=='all')n++;
+  const b=document.getElementById('fbadge'); b.hidden=n===0; b.textContent=n;
+}
+
+// rsvp mobile sheet
+document.querySelectorAll('#rsvpSheet .rsvpopt').forEach(o=>{
+  o.addEventListener('click', ()=>{ if(rsvpTarget){ rsvpTarget.rsvp=o.dataset.set; } closeSheets(); render(); });
+});
+
+/* ---------------- mobile: guest detail + quick-add + sort ---------------- */
+function roleOptions(cur){
+  const order=['couple','vip_family','wedding_party','principal_sponsors','secondary_sponsors','bearers_flower_girl','officiants','guest'];
+  return order.map(grp=>{
+    const roles=Object.entries(ROLE).filter(([,v])=>v.g===grp);
+    if(!roles.length) return '';
+    return `<optgroup label="${ROLE_GROUPS[grp].l}">`+roles.map(([k,v])=>`<option value="${k}" ${k===cur?'selected':''}>${v.l}</option>`).join('')+`</optgroup>`;
+  }).join('');
+}
+const RCLS={attending:'r-go',pending:'r-pend',declined:'r-dec',maybe:'r-may'};
+const esc=s=>(s||'').replace(/"/g,'&quot;');
+
+// --- guest detail (tap a row) ---
+let detailG=null;
+function openGuest(g){ detailG=g; renderGuest(); openSheet('guestSheet'); }
+function renderGuest(){
+  const g=detailG; if(!g) return;
+  document.getElementById('guestTitle').textContent='Guest details';
+  document.getElementById('guestBody').innerHTML=`
+    <div class="dhead">
+      <span class="av s-${g.side}">${initials(g)}</span>
+      <div><div class="nm">${disp(g)}</div><div class="sub">${ROLE[g.role].l} · ${SIDE[g.side]}</div></div>
+    </div>
+    <div class="drow"><div class="dl">RSVP</div><div class="dchips">
+      ${['attending','pending','declined','maybe'].map(k=>`<button class="dchip ${g.rsvp===k?'on '+RCLS[k]:''}" data-rsvp-set="${k}">${RSVP[k].l}</button>`).join('')}
+    </div></div>
+    <div class="drow"><div class="dl">Role in the wedding</div><select class="dselect" id="guestRole">${roleOptions(g.role)}</select></div>
+    <div class="drow"><div class="dl">Side</div><div class="dchips">
+      ${['bride','groom','both'].map(s=>`<button class="dchip ${g.side===s?'on s-on':''}" data-side-set="${s}"><span class="dot" style="background:var(--${s})"></span>${SIDE[s]}</button>`).join('')}
+    </div></div>
+    <div class="drow"><div class="dl">Groups</div><div class="dchips">
+      ${Object.entries(GROUP_LABEL).map(([gid,gr])=>`<button class="dchip ${g.groups.includes(gid)?'on s-on':''}" data-grp-toggle="${gid}"><span class="dot" style="background:var(--${gr.s})"></span>${gr.l}</button>`).join('')}
+    </div></div>
+    <div class="drow"><div class="dl">Plus-one</div><input class="dinput" id="guestPlus" placeholder="Add a +1 (name or “TBA”)" value="${esc(g.plus)}"></div>
+    <div class="drow"><div class="dl">Contact</div>
+      <input class="dinput" id="guestEmail" placeholder="Email address" value="${esc(g.email)}" style="margin-bottom:9px">
+      <input class="dinput" id="guestPhone" placeholder="Mobile number" value="${esc(g.phone)}">
+    </div>`;
+}
+const guestSheet=document.getElementById('guestSheet');
+guestSheet.addEventListener('click', e=>{
+  const g=detailG; if(!g) return;
+  const rs=e.target.closest('[data-rsvp-set]'); if(rs){ g.rsvp=rs.dataset.rsvpSet; renderGuest(); render(); return; }
+  const sd=e.target.closest('[data-side-set]'); if(sd){ g.side=sd.dataset.sideSet; renderGuest(); render(); return; }
+  const gt=e.target.closest('[data-grp-toggle]'); if(gt){ const gid=gt.dataset.grpToggle, i=g.groups.indexOf(gid); if(i>=0) g.groups.splice(i,1); else g.groups.push(gid); renderGuest(); render(); return; }
+});
+guestSheet.addEventListener('change', e=>{ const g=detailG; if(g && e.target.id==='guestRole'){ g.role=e.target.value; renderGuest(); render(); } });
+guestSheet.addEventListener('input', e=>{ const g=detailG; if(!g) return;
+  if(e.target.id==='guestPlus') g.plus=e.target.value.trim()||undefined;
+  if(e.target.id==='guestEmail') g.email=e.target.value.trim()||undefined;
+  if(e.target.id==='guestPhone') g.phone=e.target.value.trim()||undefined;
+});
+document.getElementById('guestRemove').addEventListener('click', ()=>{
+  if(detailG){ const i=G.indexOf(detailG); if(i>=0) G.splice(i,1); selected.delete(detailG.id); detailG=null; }
+  closeSheets(); render();
+});
+
+// --- quick-add ---
+document.getElementById('addRole').innerHTML=roleOptions('guest');
+document.getElementById('addSide').addEventListener('click', e=>{ const c=e.target.closest('.dchip'); if(!c) return;
+  document.querySelectorAll('#addSide .dchip').forEach(x=>x.classList.remove('on','s-on')); c.classList.add('on','s-on'); });
+
+/* ===== possible-duplicate detection ===== */
+// Canonical first-name map so nicknames collapse: Mike → michael, Bob → robert …
+const NICKMAP=(()=>{
+  const groups={
+    michael:['mike','mikey','mick','micky'], robert:['rob','bob','bobby','robbie','bert'],
+    william:['will','bill','billy','willy'], richard:['rich','rick','dick','richie','ricky'],
+    james:['jim','jimmy','jamie'], john:['johnny','jon','jack'], joseph:['joe','joey','pepe'],
+    charles:['charlie','chuck'], thomas:['tom','tommy'], christopher:['chris','toby'],
+    daniel:['dan','danny'], matthew:['matt','matty'], nicholas:['nick','nico','nicky'],
+    anthony:['tony','tonio'], andrew:['andy','drew'], edward:['ed','eddie','ted','teddy'],
+    benjamin:['ben','benny','benji'], alexander:['alex','xander'], patrick:['pat','paddy'],
+    samuel:['sam','sammy'], david:['dave','davey'], stephen:['steve','steven'], peter:['pete','petey'],
+    francisco:['cisco','paco','frank','kiko'], antonio:['tony','tonio'], ricardo:['ricky','rick','ric'],
+    eduardo:['ed','eddie'], emmanuel:['emman','manny','noel'], juan:['johnny'],
+    elizabeth:['liz','beth','betty','eliza','lizzy','liza','betsy'], margaret:['maggie','meg','peggy','marge'],
+    katherine:['kate','katie','kathy','kat','cathy','catherine'], jennifer:['jen','jenny','jenna'],
+    patricia:['pat','patty','tricia','trish'], jessica:['jess','jessie'], christina:['tina','christine'],
+    rebecca:['becca','becky'], victoria:['vicky','tori','vic'], alexandra:['alex','sandra','lexi','sandy'],
+    maria:['marie','mary','mia','ria'], teresa:['tess','tessa','terry'], rosa:['rose','rosie'],
+    cristina:['tin','tina','cris'], angelica:['angel','angie','gel'], catalina:['cathy','lina'],
+  };
+  const m={}; for(const [canon,nicks] of Object.entries(groups)){ m[canon]=canon; nicks.forEach(n=>m[n]=canon); } return m;
+})();
+const norm=s=>(s||'').trim().toLowerCase().replace(/[^a-z]/g,'');
+const canonFirst=s=>{ const n=norm(s); return NICKMAP[n]||n; };
+function lev(a,b){ a=norm(a); b=norm(b); const m=a.length,n=b.length; if(!m)return n; if(!n)return m;
+  let prev=Array.from({length:n+1},(_,i)=>i);
+  for(let i=1;i<=m;i++){ const cur=[i]; for(let j=1;j<=n;j++){ cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+(a[i-1]===b[j-1]?0:1)); } prev=cur; }
+  return prev[n];
+}
+const lenTol=s=>{ const L=norm(s).length; return L<=4?1:(L<=7?2:3); }; // typo tolerance scales with length
+function nameMatch(a,b,allowNick){ const na=norm(a),nb=norm(b); if(!na||!nb)return false;
+  if(na===nb)return 'exact';
+  if(allowNick && canonFirst(a)===canonFirst(b))return 'nick';
+  if(lev(a,b)<=Math.min(lenTol(a),lenTol(b)))return 'typo';
+  return false;
+}
+function findDuplicates(fn,ln){
+  if(norm(fn).length<2 || norm(ln).length<2) return [];
+  const ord={exact:0,nick:1,typo:2}, out=[];
+  for(const g of G){ const f=nameMatch(fn,g.fn,true), l=nameMatch(ln,g.ln,false);
+    if(f && l){ const kind=(f==='exact'&&l==='exact')?'exact':(f==='nick'||l==='nick')?'nick':'typo'; out.push({g,kind}); } }
+  return out.sort((a,b)=>ord[a.kind]-ord[b.kind]).slice(0,3);
+}
+let dupDismissed=false;
+const sideLabel=s=> s==='both'?'Both sides' : s==='bride'?"Bride's side" : "Groom's side";
+/* ===== batch group picker (sticky across rapid adds) ===== */
+let addGroupSel=null;
+function renderAddGroups(){
+  const box=document.getElementById('addGroup');
+  box.innerHTML=`<button class="dchip ${addGroupSel===null?'on s-on':''}" data-g="">None</button>`
+    + Object.entries(GROUP_LABEL).map(([gid,gr])=>`<button class="dchip ${addGroupSel===gid?'on s-on':''}" data-g="${gid}"><span class="dot" style="background:var(--${gr.s})"></span>${gr.l}</button>`).join('')
+    + `<button class="gnew" id="addGroupNew">＋ New</button>`;
+}
+document.getElementById('addGroup').addEventListener('click', e=>{
+  const nw=e.target.closest('#addGroupNew');
+  if(nw){
+    nw.outerHTML=`<input class="gnew-input" id="addGroupNewInput" placeholder="New group name…" enterkeyhint="done">`;
+    const inp=document.getElementById('addGroupNewInput'); inp.focus();
+    const commit=()=>{ const name=inp.value.trim(); if(name){ const gid='g'+(groupSeq++); GROUP_LABEL[gid]={l:name, s:(document.querySelector('#addSide .dchip.on')?.dataset.side)||'both'}; addGroupSel=gid; } renderAddGroups(); };
+    inp.addEventListener('keydown', ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); commit(); } else if(ev.key==='Escape'){ renderAddGroups(); } });
+    inp.addEventListener('blur', commit);
+    return;
+  }
+  const c=e.target.closest('.dchip[data-g]'); if(!c) return;
+  addGroupSel=c.dataset.g||null; renderAddGroups();
+});
+
+/* ===== smart add state: Done / Add guest / Add anyway + duplicate warning ===== */
+function renderAddState(){
+  const fn=document.getElementById('addFn').value, ln=document.getElementById('addLn').value;
+  const hasName=!!(norm(fn)||norm(ln));
+  const box=document.getElementById('dupWarn'), btn=document.getElementById('addSave');
+  const dups=(hasName && !dupDismissed)?findDuplicates(fn,ln):[];
+  if(dups.length){
+    const TAG={exact:'Already added',nick:'Same person?',typo:'Typo?'};
+    box.innerHTML=`<div class="dw-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>You may have already added ${dups.length>1?'these guests':'this guest'}</div>`
+      + dups.map(({g,kind})=>`<div class="dw-row"><span class="av s-${g.side}">${initials(g)}</span><div class="dw-mid"><div class="dw-nm">${disp(g)}</div><div class="dw-sub">${(ROLE[g.role]?.l)||'Guest'} · ${sideLabel(g.side)}</div></div><span class="dw-tag dw-${kind}">${TAG[kind]}</span></div>`).join('')
+      + `<button class="dw-add2" id="dupAdd">＋ No — add as a different person</button>`;
+    box.hidden=false; btn.textContent='Skip — already added'; btn.classList.add('warn');
+  } else {
+    box.hidden=true; btn.classList.remove('warn'); btn.textContent=hasName?'Add guest':'Done';
+  }
+}
+['addFn','addLn'].forEach(id=>document.getElementById(id).addEventListener('input', ()=>{ dupDismissed=false; renderAddState(); }));
+document.getElementById('dupWarn').addEventListener('click', e=>{ if(e.target.closest('#dupAdd')){ forceAdd(true); } });
+
+/* ===== keyboard fast-add: ↵ first→last, ↵ last→save & start the next ===== */
+document.getElementById('addFn').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('addLn').focus(); } });
+document.getElementById('addLn').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); if(dupActive()){ skipDuplicate(); } else { saveGuest(true); } } });
+
+/* ===== save — names clear, batch context (team · role · group) stays sticky ===== */
+let addToastT=null;
+function addToast(msg){ const t=document.getElementById('addToast'); t.textContent=msg; t.classList.add('show'); clearTimeout(addToastT); addToastT=setTimeout(()=>t.classList.remove('show'),1700); }
+function clearNames(){ document.getElementById('addFn').value=''; document.getElementById('addLn').value=''; dupDismissed=false; renderAddState(); }
+/* a flagged duplicate is showing right now */
+function dupActive(){ const fn=document.getElementById('addFn').value, ln=document.getElementById('addLn').value; return !!(norm(fn)||norm(ln)) && !dupDismissed && findDuplicates(fn,ln).length>0; }
+/* agree it's a duplicate: DON'T add, clear the inputs, start again */
+function skipDuplicate(){ clearNames(); addToast('Skipped — already on your list'); document.getElementById('addFn').focus(); }
+/* override: it's genuinely a different person — add despite the match */
+function forceAdd(keepOpen){ dupDismissed=true; saveGuest(keepOpen); }
+function saveGuest(keepOpen){
+  const fn=document.getElementById('addFn').value.trim(), ln=document.getElementById('addLn').value.trim();
+  if(!fn && !ln){ if(keepOpen) document.getElementById('addFn').focus(); else closeSheets(); return; }
+  const role=document.getElementById('addRole').value;
+  const side=document.querySelector('#addSide .dchip.on')?.dataset.side||'bride';
+  const id=Math.max(0,...G.map(x=>x.id))+1;
+  G.push({id, fn:fn||ln, ln:fn?ln:'', side, role, rsvp:'pending', groups:addGroupSel?[addGroupSel]:[]});
+  render(); clearNames();
+  if(keepOpen){ addToast(`${(fn||ln)} added`); document.getElementById('addFn').focus(); }
+  else closeSheets();
+}
+document.getElementById('addSave').addEventListener('click', ()=>{ if(dupActive()){ skipDuplicate(); } else { saveGuest(false); } });
+document.getElementById('addAnother').addEventListener('click', ()=>{ if(dupActive()){ skipDuplicate(); } else { saveGuest(true); } });
+renderAddGroups(); renderAddState();
+
+// --- sort sheet ---
+function markSort(){ document.querySelectorAll('#sortSheet .sortopt').forEach(o=>o.classList.toggle('act', o.dataset.sort===state.sort)); }
+document.querySelectorAll('#sortSheet .sortopt').forEach(o=>o.addEventListener('click', ()=>{
+  state.sort=o.dataset.sort; document.getElementById('sort').value=state.sort; markSort(); closeSheets(); render();
+}));
+
+// --- toolbar mobile buttons ---
+document.getElementById('mSort').addEventListener('click', ()=>{ markSort(); openSheet('sortSheet'); });
+function openAddSheet(){ clearNames(); openSheet('addSheet'); setTimeout(()=>document.getElementById('addFn').focus(),90); }
+document.getElementById('mAdd').addEventListener('click', openAddSheet);
+document.getElementById('dAdd')?.addEventListener('click', openAddSheet);
+document.getElementById('fab')?.addEventListener('click', openAddSheet);
+
+// --- multi-select mode ---
+function enterSel(){ selMode=true; document.body.classList.add('selmode'); syncBulk(); }
+function exitSel(){ selMode=false; selected.clear(); document.body.classList.remove('selmode'); render(); }
+document.getElementById('enterSelBtn').addEventListener('click', enterSel);
+document.getElementById('mselCancel').addEventListener('click', exitSel);
+document.getElementById('mselDelete').addEventListener('click', ()=>{ if(!selected.size) return; G=G.filter(g=>!selected.has(g.id)); exitSel(); });
+
+// add selected guests to a group
+function addSelectedToGroup(gid){ G.forEach(g=>{ if(selected.has(g.id) && !g.groups.includes(gid)) g.groups.push(gid); }); closeSheets(); exitSel(); }
+const GW={bride:'#FCE9ED',groom:'#E4F1FB',both:'#F0E9F8'}, GI={bride:'#8E2740',groom:'#0B5A8A',both:'#5A3490'};
+function renderGroupSheet(){
+  document.getElementById('groupTitle').textContent=`Add ${selected.size} ${selected.size===1?'guest':'guests'} to a group`;
+  document.getElementById('groupOpts').innerHTML=Object.entries(GROUP_LABEL).map(([gid,gr])=>
+    `<button class="rsvpopt grpopt" data-gid="${gid}"><span class="badge" style="background:${GW[gr.s]};color:${GI[gr.s]}">${gr.l[0]}</span>${gr.l}</button>`).join('');
+}
+document.getElementById('mselGroup').addEventListener('click', ()=>{ if(!selected.size) return; renderGroupSheet(); openSheet('groupSheet'); });
+document.getElementById('groupOpts').addEventListener('click', e=>{ const o=e.target.closest('.grpopt'); if(o) addSelectedToGroup(o.dataset.gid); });
+let groupSeq=1;
+document.getElementById('newGroupAdd').addEventListener('click', ()=>{
+  const f=document.getElementById('newGroupName'), name=f.value.trim(); if(!name){ f.focus(); return; }
+  const gid='g'+(groupSeq++); GROUP_LABEL[gid]={l:name, s:'both'}; f.value=''; addSelectedToGroup(gid);
+});
+
+// --- long-press a row → enter select-mode ---
+const mlistEl=document.getElementById('mlist');
+let lpTimer=null;
+mlistEl.addEventListener('pointerdown', e=>{
+  const c=e.target.closest('.card[data-card]'); if(!c || e.target.closest('.rowchk')) return;
+  const id=+c.dataset.card;
+  lpTimer=setTimeout(()=>{ lpTimer=null; enterSel(); if(!selected.has(id)){ selected.add(id); } suppressTap=true; render(); if(navigator.vibrate) navigator.vibrate(8); }, 420);
+});
+['pointerup','pointercancel','pointerleave'].forEach(ev=>mlistEl.addEventListener(ev, ()=>clearTimeout(lpTimer)));
+mlistEl.addEventListener('scroll', ()=>clearTimeout(lpTimer), true);
+
+// header overflow menu
+const moreMenu=document.getElementById('moreMenu');
+document.getElementById('moreBtn').addEventListener('click', e=>{ e.stopPropagation(); moreMenu.classList.toggle('open'); });
+document.addEventListener('click', e=>{ if(!e.target.closest('.menu-wrap')) moreMenu.classList.remove('open'); });
+
+window.addEventListener('resize', closePop);
+window.addEventListener('scroll', ()=>{ if(pop.classList.contains('open')) positionPop(); }, true);
+
+document.getElementById('sort').value=state.sort;
+render(); syncStatUI(); syncChips(); markSort();
+</script>
+</body>
+</html>

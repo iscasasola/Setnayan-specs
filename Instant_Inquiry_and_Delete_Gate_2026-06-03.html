@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Setnayan · Instant Inquiry Seeding + Delete-Gate &amp; Nudge — prototype 2026-06-03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     SETNAYAN — INSTANT INQUIRY SEEDING + COUPLE-SIDE DELETE-GATE + NUDGE
+     Throwaway design canvas — NOT production code.
+     Behavioural contract for: Vendor_Match §7b.1 (one-tap-confirm fan-out)
+       + Service_Schedule §T1.6 (7-day delete-gate + nudge + vendor accept/decline).
+       · LEFT  — Couple's dashboard "Services" (= onboarding picks) + the gate/nudge sheets
+       · RIGHT — Vendor's inquiries + the "you've been nudged · accept or decline" popup
+     Palette: Clean Editorial (locked 2026-05-29).
+     ============================================================ */
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --ink-soft:#4F535B; --ink-faint:#8A8E96;
+    --line:#E7E3DA; --line-soft:#F0ECE3; --surface:#FFFFFF; --surface-soft:#F4F2EC;
+    --gold:#C5A059; --gold-deep:#A8843F; --gold-wash:#F7F0E0;
+    --mulberry:#5C2542; --mulberry-deep:#4A1D36; --mulberry-wash:#F4EAEE;
+    --emerald:#2F7D5B; --emerald-wash:#EAF3EE;
+    --danger:#B23B34; --danger-wash:#F7EAE9;
+    --display:'Saira Condensed',sans-serif; --serif:'Cormorant Garamond',Georgia,serif;
+    --sans:'Manrope',system-ui,sans-serif; --mono:'DM Mono',ui-monospace,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--sans);color:var(--ink);min-height:100vh;padding:30px 16px 60px;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(1200px 600px at 50% -200px,#efece4 0%,#e6e2d8 60%,#ded9cd 100%)}
+
+  /* ---- page head ---- */
+  .pagehead{max-width:880px;margin:0 auto 18px;text-align:center}
+  .pagehead .eb{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep)}
+  .pagehead h1{font-family:var(--serif);font-style:italic;font-weight:600;font-size:32px;margin:6px 0 8px;color:var(--ink)}
+  .pagehead p{max-width:640px;margin:0 auto;font-size:13.5px;line-height:1.6;color:var(--ink-soft)}
+  .legend{display:inline-flex;gap:16px;margin-top:13px;flex-wrap:wrap;justify-content:center;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink-soft)}
+  .legend b{color:var(--ink);font-weight:600}
+
+  /* ---- demo bar ---- */
+  .demobar{max-width:880px;margin:0 auto 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;background:var(--ink);border-radius:16px;padding:14px 18px}
+  .dlabel{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+  .demobtn{border:0;border-radius:999px;background:var(--gold);color:var(--ink);font-family:var(--sans);font-weight:700;font-size:13px;padding:10px 16px;cursor:pointer;transition:transform .1s,opacity .2s}
+  .demobtn:active{transform:scale(.97)}
+  .demobtn[disabled]{opacity:.4;cursor:not-allowed}
+  .demobtn.reset{background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.25);font-weight:500}
+  .demostep{font-family:var(--sans);font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.85);flex-basis:100%;text-align:center;min-height:18px}
+  .demostep b{color:var(--gold);font-weight:700}
+
+  /* ---- frames ---- */
+  .frames{max-width:880px;margin:0 auto;display:flex;gap:26px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+  .framewrap{flex:0 0 auto;width:390px;max-width:100%}
+  .framelabel{display:flex;align-items:center;gap:8px;margin:0 4px 9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase}
+  .framelabel .dot{width:9px;height:9px;border-radius:50%}
+  .framelabel.couple .dot{background:var(--mulberry)} .framelabel.vendor .dot{background:var(--gold)}
+  .framelabel .who{color:var(--ink);font-weight:600} .framelabel .what{color:var(--ink-soft)}
+
+  .frame{position:relative;width:390px;max-width:100%;height:724px;border-radius:30px;overflow:hidden;background:var(--paper);
+    box-shadow:0 30px 60px -28px rgba(0,0,0,.5),0 0 0 9px #14171c,0 0 0 10px rgba(255,255,255,.06)}
+  .scroll{height:100%;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  /* ---- topbar ---- */
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:9px;padding:14px 18px 12px;background:rgba(251,251,250,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .brandmark{width:22px;height:22px;flex:0 0 auto}
+  .brandwm{font-family:var(--display);font-weight:700;letter-spacing:.04em;font-size:15px;color:var(--ink)}
+  .brandwm small{font-family:var(--mono);font-weight:400;font-size:9px;letter-spacing:.14em;color:var(--ink-faint);margin-left:5px;vertical-align:1px}
+  .topbar .spacer{flex:1}
+  .bell{position:relative;width:30px;height:30px;border-radius:999px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface)}
+  .bell svg{width:15px;height:15px;stroke:var(--ink);fill:none;stroke-width:1.7}
+  .bell .dot{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--mulberry);color:#fff;font-size:9.5px;font-weight:700;display:grid;place-items:center;border:2px solid var(--paper);transition:transform .2s}
+  .bell .dot.pop{transform:scale(1.35)}
+
+  .body{padding:16px 16px 26px}
+  .body > * + *{margin-top:14px}
+
+  /* ---- mini anchor ---- */
+  .anchor .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep)}
+  .anchor .couple{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:28px;line-height:1;letter-spacing:-.005em;color:var(--ink);margin-top:4px}
+  .anchor .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px;font-size:12.5px;color:var(--ink-soft)}
+  .anchor .meta .s{color:var(--ink-faint)}
+
+  /* ---- card ---- */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:15px}
+  .card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .card-h .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep)}
+  .card-h .edit{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);text-decoration:none;cursor:pointer}
+
+  /* ---- seeding banner ---- */
+  .seed{border:1px solid #ecdfc2;background:linear-gradient(180deg,#fbf5e7,#f7f0e0);border-radius:15px;padding:14px;margin-bottom:14px;overflow:hidden;transition:opacity .35s,max-height .45s var(--ease),margin .35s,padding .35s}
+  .seed.hide{opacity:0;max-height:0;margin-bottom:0;padding-top:0;padding-bottom:0;border-width:0}
+  .seed .st{display:flex;align-items:flex-start;gap:10px}
+  .seed .star{font-size:17px;line-height:1.2;color:var(--gold)}
+  .seed .h{font-family:var(--serif);font-style:italic;font-weight:600;font-size:18px;line-height:1.12;color:var(--ink)}
+  .seed .sub{font-size:11.5px;color:#6f5a2c;margin-top:3px;line-height:1.45}
+  .seed .acts{display:flex;gap:9px;margin-top:12px}
+  .seed-send{flex:1;border:0;border-radius:12px;background:var(--mulberry);color:#fff;font-family:var(--sans);font-weight:700;font-size:13.5px;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 10px 22px -12px rgba(92,37,66,.6);transition:background .12s,transform .1s}
+  .seed-send:active{transform:translateY(1px)} .seed-send:hover{background:var(--mulberry-deep)}
+  .seed-rev{flex:0 0 auto;border:1px solid rgba(92,37,66,.3);background:#fff;color:var(--mulberry);border-radius:12px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;padding:0 14px;cursor:pointer}
+  .seed-rev:hover{background:var(--mulberry-wash)}
+  .seed.sent-note{background:var(--emerald-wash);border-color:#cfe6d8}
+  .seed.sent-note .h{color:var(--emerald)} .seed.sent-note .star{color:var(--emerald)} .seed.sent-note .sub{color:#2f6b50}
+
+  .svc-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);margin:2px 0 2px}
+
+  /* ---- service rows ---- */
+  .svc{display:flex;align-items:center;gap:11px;padding:11px 2px;position:relative;transition:opacity .4s,transform .4s,background .2s;border-radius:10px}
+  .svc + .svc{border-top:1px solid var(--surface-soft)}
+  .svc.tap{cursor:pointer}
+  .svc.tap:hover{background:var(--surface-soft)}
+  .svc.hero{margin:0 -6px;padding:11px 8px}
+  .svc.hero.stale{background:var(--danger-wash)}
+  .svc.hero.flash{animation:rowflash .9s var(--ease)}
+  @keyframes rowflash{0%{background:var(--gold-wash)}100%{background:transparent}}
+  .svc.gone{opacity:0;transform:translateX(26px);height:0;padding-top:0;padding-bottom:0;pointer-events:none}
+  .svc .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;background:var(--surface-soft);flex:0 0 auto}
+  .svc .nb{flex:1;min-width:0}
+  .svc .nm{font-size:13.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px}
+  .svc .nm .lk{font-size:10px;color:var(--ink-faint)}
+  .svc .sub{font-size:11px;color:var(--ink-faint);margin-top:1px}
+  .svc .sub b{color:var(--ink-soft);font-weight:600}
+  .pill{font-size:10.5px;font-weight:700;border-radius:999px;padding:4px 9px;white-space:nowrap;flex:0 0 auto}
+  .pill.ok{background:var(--emerald-wash);color:var(--emerald)}
+  .pill.go{background:var(--gold-wash);color:var(--gold-deep)}
+  .pill.todo{background:transparent;color:var(--ink-faint);border:1px solid var(--line)}
+  .pill.warn{background:var(--danger-wash);color:var(--danger)}
+  .vx{flex:0 0 auto;width:26px;height:26px;border:1px solid var(--line);background:var(--surface);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:15px;line-height:1;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+  .vx:hover{background:var(--danger-wash);color:var(--danger);border-color:#e7c9c6}
+  .vx[hidden]{display:none}
+  .chev{color:var(--ink-faint);font-size:15px;flex:0 0 auto}
+  .more-svc{margin-top:12px;display:block;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);border-top:1px solid var(--surface-soft);padding-top:12px;text-decoration:none;cursor:pointer}
+  .needs{margin-top:2px;display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--danger)}
+  .needs .d{width:6px;height:6px;border-radius:50%;background:var(--danger)}
+
+  /* ---- vendor side ---- */
+  .vintro .h{font-family:var(--serif);font-style:italic;font-weight:600;font-size:23px;color:var(--ink)}
+  .vintro .s{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+  .empty-inq{border:1.5px dashed var(--line);border-radius:16px;padding:26px 16px;text-align:center;color:var(--ink-faint);font-size:12.5px;background:rgba(30,34,41,.012)}
+  .inq{border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden;transition:box-shadow .3s}
+  .inq.pulse{animation:inqpulse 1s var(--ease) 2}
+  @keyframes inqpulse{0%{box-shadow:0 0 0 0 rgba(197,160,89,.5)}100%{box-shadow:0 0 0 13px rgba(197,160,89,0)}}
+  .inq .top{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line-soft);font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep)}
+  .inq .top .grow{flex:1}
+  .inq .top .tk{color:var(--mulberry)}
+  .inq .bd{padding:13px 14px}
+  .inq .who{font-family:var(--sans);font-weight:700;font-size:15.5px;color:var(--ink);display:flex;align-items:center;gap:7px}
+  .inq .who .mask{font-style:italic;font-weight:600;font-family:var(--serif);font-size:17px;color:var(--ink-soft)}
+  .inq .det{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+  .tag{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:var(--surface-soft);color:var(--ink-soft)}
+  .inq .note{margin-top:10px;font-size:11.5px;line-height:1.4;color:var(--ink-soft)}
+  .inq .nudgeflag{margin-top:10px;display:flex;align-items:center;gap:7px;background:var(--danger-wash);border:1px solid #e7c9c6;border-radius:10px;padding:8px 10px;font-size:11px;color:var(--danger);font-weight:600}
+  .inq .acts{display:flex;gap:8px;margin-top:13px}
+  .btn{flex:1;border-radius:11px;font-family:var(--sans);font-weight:700;font-size:13px;padding:11px;cursor:pointer;transition:background .12s,transform .1s,border-color .12s}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{border:0;background:var(--mulberry);color:#fff}
+  .btn.primary:hover{background:var(--mulberry-deep)}
+  .btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink-soft)}
+  .btn.ghost:hover{border-color:var(--ink-faint)}
+  .btn.danger{background:#fff;border:1.5px solid #e7c9c6;color:var(--danger)}
+  .btn.danger:hover{background:var(--danger-wash)}
+  .inq.done .bd{opacity:.96}
+  .inq.accepted{border-color:#cfe6d8}
+  .inq.accepted .top{color:var(--emerald)}
+  .inq.declined .top{color:var(--ink-faint)}
+
+  /* ---- backdrop + sheets (scoped to frame) ---- */
+  .backdrop{position:absolute;inset:0;background:rgba(20,16,12,.4);opacity:0;pointer-events:none;transition:opacity .35s;z-index:40;backdrop-filter:blur(1px)}
+  .backdrop.show{opacity:1;pointer-events:auto}
+  .sheet{position:absolute;left:0;right:0;bottom:0;z-index:50;background:var(--paper);border-radius:24px 24px 0 0;
+    box-shadow:0 -20px 50px -24px rgba(40,30,15,.5);transform:translateY(102%);opacity:0;pointer-events:none;
+    transition:transform .42s var(--ease),opacity .35s var(--ease);
+    display:flex;flex-direction:column;border-top:1px solid var(--line);max-height:92%}
+  .sheet.open{transform:translateY(0);opacity:1;pointer-events:auto}
+  .grip{width:42px;height:5px;border-radius:999px;background:rgba(30,34,41,.18);margin:11px auto 4px}
+  .sheet-head{padding:6px 20px 14px;border-bottom:1px solid var(--line-soft)}
+  .sheet-head .row{display:flex;align-items:flex-start;gap:12px}
+  .sheet-head h2{font-family:var(--serif);font-style:italic;font-weight:600;font-size:23px;line-height:1.1;margin:0;flex:1;color:var(--ink)}
+  .sheet-head p{margin:6px 0 0;color:var(--ink-soft);font-size:12.5px;line-height:1.5}
+  .sheet-head .verbatim{margin-top:8px;font-style:italic;color:var(--ink);background:var(--surface-soft);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:8px 11px;font-size:12.5px;line-height:1.45}
+  .x{border:1px solid var(--line);background:var(--surface);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);font-size:16px;line-height:0;flex:0 0 auto}
+  .sheet-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+  .countdown{display:flex;align-items:center;gap:10px;background:var(--gold-wash);border:1px solid #ecdfc2;border-radius:12px;padding:11px 13px}
+  .countdown .num{font-family:var(--serif);font-style:italic;font-weight:600;font-size:26px;color:var(--gold-deep);line-height:1}
+  .countdown .tx{font-size:11.5px;color:#6f5a2c;line-height:1.4}
+  .why{font-size:11.5px;color:var(--ink-faint);line-height:1.5}
+  .sheet-foot{padding:6px 18px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:9px}
+  .sheet-foot .rowbtns{display:flex;gap:9px}
+  .nudgespent{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);text-align:center}
+
+  /* ---- vendor nudge popup (centered modal in frame) ---- */
+  .popup{position:absolute;left:18px;right:18px;top:50%;z-index:50;transform:translateY(-46%) scale(.94);opacity:0;pointer-events:none;
+    background:var(--paper);border-radius:22px;border:1px solid var(--line);box-shadow:0 30px 60px -20px rgba(0,0,0,.5);transition:transform .34s var(--ease),opacity .3s;overflow:hidden}
+  .popup.open{transform:translateY(-50%) scale(1);opacity:1;pointer-events:auto}
+  .popup .ph{display:flex;align-items:center;gap:9px;padding:15px 18px 11px}
+  .popup .ring{width:38px;height:38px;border-radius:50%;background:var(--danger-wash);border:1px solid #e7c9c6;display:grid;place-items:center;font-size:18px;flex:0 0 auto}
+  .popup .ph .k{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--danger)}
+  .popup .ph .t{font-family:var(--serif);font-style:italic;font-weight:600;font-size:19px;color:var(--ink);line-height:1.05}
+  .popup .pb{padding:0 18px 8px}
+  .popup .pb p{font-size:13px;line-height:1.5;color:var(--ink-soft)}
+  .popup .pb p b{color:var(--ink)}
+  .popup .pdet{display:flex;flex-wrap:wrap;gap:5px;margin-top:11px}
+  .popup .pacts{display:flex;gap:9px;padding:13px 18px calc(16px + env(safe-area-inset-bottom))}
+
+  /* ---- toast (scoped to frame) ---- */
+  .toast{position:absolute;left:50%;bottom:20px;transform:translateX(-50%) translateY(18px);background:var(--ink);color:#fff;font-family:var(--sans);font-size:12.5px;font-weight:600;padding:11px 17px;border-radius:999px;box-shadow:0 12px 30px -10px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:90;max-width:88%;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast b{color:var(--gold)} .toast.good b{color:#8fe0ad}
+
+  .footnote{max-width:880px;margin:28px auto 0;font-size:12px;line-height:1.7;color:var(--ink-soft);background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px 20px}
+  .footnote b{color:var(--ink)} .footnote .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mulberry);display:block;margin-bottom:7px}
+  .footnote ul{margin:8px 0 0;padding-left:18px} .footnote li{margin:4px 0}
+  .footnote code{font-family:var(--mono);font-size:11px;background:var(--surface-soft);padding:1px 5px;border-radius:5px}
+
+  @media(max-width:840px){.frames{gap:34px}}
+</style>
+</head>
+<body>
+
+  <div class="pagehead">
+    <div class="eb">Prototype · 2026-06-03</div>
+    <h1>Instant inquiry seeding → the delete-gate &amp; nudge</h1>
+    <p>Onboarding picks become the dashboard <b>Services</b> list. Setnayan pre-fills the best-fit vendors; the couple seeds them with <b>one tap</b>. A seeded inquiry can't be dropped on a whim — it clears the <b>7-day gate</b> only when the vendor <b>accepts</b> or the request goes <b>stale</b>, at which point the couple chooses <b>delete or nudge</b>.</p>
+    <div class="legend">
+      <span><b>Left</b> · couple dashboard</span>
+      <span><b>Right</b> · vendor inquiries</span>
+      <span><b>Gate</b> · Vendor_Match §7b.1 + Service_Schedule §T1.6</span>
+    </div>
+  </div>
+
+  <div class="demobar">
+    <span class="dlabel">Demo controls</span>
+    <button class="demobtn" id="skipBtn">⏩ Simulate · 7 days pass</button>
+    <button class="demobtn reset" id="resetBtn">↺ Reset</button>
+    <div class="demostep" id="narrator"></div>
+  </div>
+
+  <div class="frames">
+
+    <!-- ===================== COUPLE FRAME ===================== -->
+    <div class="framewrap">
+      <div class="framelabel couple"><span class="dot"></span><span class="who">Couple</span><span class="what">— Maria &amp; Juan · dashboard</span></div>
+      <div class="frame" id="coupleFrame">
+        <div class="scroll">
+
+          <div class="topbar">
+            <svg class="brandmark" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3.5c4.6 2.9 7.4 4.2 11.8 4.6 .4 6.7-1.1 13.7-11.8 20.4C5.3 21.8 3.8 14.8 4.2 8.1 8.6 7.7 11.4 6.4 16 3.5Z" fill="none" stroke="#C5A059" stroke-width="1.6"/><path d="M16 9.5l1.6 3.4 3.7.4-2.8 2.5.8 3.6L16 17.6l-3.3 1.8.8-3.6-2.8-2.5 3.7-.4z" fill="#C5A059"/></svg>
+            <span class="brandwm">SETNAYAN</span>
+            <span class="spacer"></span>
+            <span class="bell" aria-label="notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot" id="cBell">2</span></span>
+          </div>
+
+          <div class="body">
+            <section class="anchor">
+              <p class="eyebrow">Your wedding</p>
+              <h1 class="couple">Maria &amp; Juan</h1>
+              <div class="meta"><span>Dec 18, 2026</span><span class="s">·</span><span>199 days to go</span><span class="s">·</span><span>Manila · 150 pax</span></div>
+            </section>
+
+            <section class="card">
+              <div class="card-h"><span class="k">Services · from onboarding</span><a class="edit" id="editLink">Add</a></div>
+
+              <!-- seeding banner (one-tap confirm) -->
+              <div class="seed" id="seedBanner">
+                <div class="st">
+                  <span class="star">✦</span>
+                  <div>
+                    <div class="h">6 best-fit matches are ready</div>
+                    <div class="sub">We pre-filled the top vendors for each category you picked — <b>3 per category</b>, available on Dec 18. Send your first inquiries in one tap.</div>
+                  </div>
+                </div>
+                <div class="acts">
+                  <button class="seed-send" id="sendAll"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>Send all · one tap</button>
+                  <button class="seed-rev" id="reviewPicks">Adjust 1–5</button>
+                </div>
+              </div>
+
+              <p class="svc-h">The categories you chose</p>
+
+              <!-- static context rows -->
+              <div class="svc tap" data-cat="Reception venue"><span class="ic">🥂</span><div class="nb"><div class="nm">Reception venue <span class="lk">🔒</span></div><div class="sub">Cebu Marriott · booked</div></div><span class="pill ok">Locked</span><span class="chev">›</span></div>
+
+              <!-- HERO row — the gated inquiry -->
+              <div class="svc hero" id="heroRow"><span class="ic">📷</span><div class="nb"><div class="nm">Photographer</div><div class="sub" id="heroSub">Lens &amp; Co. <b>+2</b> · pre-filled best-fit</div><div id="heroNeeds"></div></div><span class="pill go" id="heroPill">Ready</span><button class="vx" id="heroX" hidden aria-label="Remove">×</button><span class="chev" id="heroChev">›</span></div>
+
+              <div class="svc tap" data-cat="Catering"><span class="ic">🍽️</span><div class="nb"><div class="nm">Catering <span class="lk">🔒</span></div><div class="sub">Casa Manila · HALAL · booked</div></div><span class="pill ok">Locked</span><span class="chev">›</span></div>
+              <div class="svc tap" data-cat="Florist"><span class="ic">💐</span><div class="nb"><div class="nm">Florist</div><div class="sub">Bloom &amp; Co. · quote ₱45,000</div></div><span class="pill go">Quote in</span><span class="chev">›</span></div>
+              <div class="svc tap" data-cat="Cake"><span class="ic">🎂</span><div class="nb"><div class="nm">Cake</div><div class="sub">Matched to your taste</div></div><span class="pill todo">Pick one</span><span class="chev">›</span></div>
+              <div class="svc tap" data-cat="Hair &amp; makeup"><span class="ic">💄</span><div class="nb"><div class="nm">Hair &amp; makeup</div><div class="sub">Matched to your taste</div></div><span class="pill todo">Pick one</span><span class="chev">›</span></div>
+
+              <a class="more-svc" id="seeAll">See all 6 categories you chose →</a>
+            </section>
+          </div>
+        </div>
+
+        <!-- backdrop + sheets -->
+        <div class="backdrop" id="cBackdrop"></div>
+
+        <!-- soft-explain (before gate clears) -->
+        <div class="sheet" id="softSheet">
+          <div class="grip"></div>
+          <div class="sheet-head"><div class="row"><h2>Give them a moment</h2><button class="x" data-close>×</button></div>
+            <p>We've reached out to <b>Lens &amp; Co.</b> for you. They get a fair window to reply before you can remove them.</p>
+          </div>
+          <div class="sheet-body">
+            <div class="countdown"><span class="num" id="softDays">7</span><span class="tx">days left before you can delete — or you can nudge them now to bump the request.</span></div>
+            <p class="why">Because Setnayan sent this inquiry on your behalf, an un-answered request can't be dropped on day one. It clears the gate when <b>Lens &amp; Co. accepts</b> or after <b>7 days</b> of silence.</p>
+          </div>
+          <div class="sheet-foot">
+            <button class="btn primary" data-close>Got it</button>
+          </div>
+        </div>
+
+        <!-- delete-or-nudge (gate cleared by 7-day stale) -->
+        <div class="sheet" id="gateSheet">
+          <div class="grip"></div>
+          <div class="sheet-head"><div class="row"><h2>Lens &amp; Co. hasn't responded</h2><button class="x" data-close>×</button></div>
+            <div class="verbatim" id="gateVerbatim">"Lens &amp; Co. has not responded to your inquiry. Do you want to delete them, or we nudge them?"</div>
+          </div>
+          <div class="sheet-body">
+            <p class="why">It's been <b>7 days</b> with no reply. Nudging re-pings them and resets the window; deleting frees the slot for another photographer.</p>
+            <p class="nudgespent" id="nudgeSpent" hidden>You've already nudged once — this time you can delete.</p>
+          </div>
+          <div class="sheet-foot">
+            <div class="rowbtns">
+              <button class="btn danger" id="gateDelete">Delete</button>
+              <button class="btn primary" id="gateNudge">Nudge them</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- free remove (after accept — gate lifted) -->
+        <div class="sheet" id="removeSheet">
+          <div class="grip"></div>
+          <div class="sheet-head"><div class="row"><h2>Remove Lens &amp; Co.?</h2><button class="x" data-close>×</button></div>
+            <p>They've accepted and your chat is open — you can remove them freely now. This ends the conversation on your side.</p>
+          </div>
+          <div class="sheet-foot">
+            <div class="rowbtns">
+              <button class="btn ghost" data-close>Keep</button>
+              <button class="btn danger" id="freeRemove">Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="toast" id="cToast"></div>
+      </div>
+    </div>
+
+    <!-- ===================== VENDOR FRAME ===================== -->
+    <div class="framewrap">
+      <div class="framelabel vendor"><span class="dot"></span><span class="who">Vendor</span><span class="what">— Lens &amp; Co. · inquiries</span></div>
+      <div class="frame" id="vendorFrame">
+        <div class="scroll">
+
+          <div class="topbar">
+            <svg class="brandmark" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3.5c4.6 2.9 7.4 4.2 11.8 4.6 .4 6.7-1.1 13.7-11.8 20.4C5.3 21.8 3.8 14.8 4.2 8.1 8.6 7.7 11.4 6.4 16 3.5Z" fill="none" stroke="#C5A059" stroke-width="1.6"/><path d="M16 9.5l1.6 3.4 3.7.4-2.8 2.5.8 3.6L16 17.6l-3.3 1.8.8-3.6-2.8-2.5 3.7-.4z" fill="#C5A059"/></svg>
+            <span class="brandwm">SETNAYAN<small>VENDOR</small></span>
+            <span class="spacer"></span>
+            <span class="bell" aria-label="notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot" id="vBell">0</span></span>
+          </div>
+
+          <div class="body">
+            <section class="vintro">
+              <div class="h">Your inquiries</div>
+              <div class="s">New booking requests land here. Accept pays a region-weighted token burn, reveals names &amp; opens chat.</div>
+            </section>
+
+            <div id="vSlot">
+              <div class="empty-inq" id="vEmpty">No inquiries yet.<br>When a couple sends a request, it appears here.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- nudge popup -->
+        <div class="backdrop" id="vBackdrop"></div>
+        <div class="popup" id="nudgePopup">
+          <div class="ph"><span class="ring">🔔</span><div><div class="k">You've been nudged</div><div class="t">New inquiry request</div></div></div>
+          <div class="pb">
+            <p><b>A couple in Manila</b> has requested an inquiry — accept or decline?</p>
+            <div class="pdet"><span class="tag">Photographer</span><span class="tag">Dec 18, 2026</span><span class="tag">150 guests</span><span class="tag">Manila</span></div>
+          </div>
+          <div class="pacts">
+            <button class="btn ghost" id="popDecline">Decline</button>
+            <button class="btn primary" id="popAccept">Accept · 6 tokens · NCR</button>
+          </div>
+        </div>
+
+        <div class="toast" id="vToast"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footnote">
+    <span class="k">What this prototype locks in</span>
+    <b>One-tap confirm seeding</b> (Vendor_Match §7b.1): the dashboard Services list <b>is</b> the couple's onboarding picks; best-fit vendors are pre-filled and sent with a single tap — near-instant, but consent-gated by that tap (not auto-blasted).
+    <ul>
+      <li><b>Delete-gate</b> (Service_Schedule §T1.6): a pending inquiry is non-deletable. The <code>×</code> soft-explains with a countdown until the gate clears.</li>
+      <li><b>Clears on accept</b> — the vendor accepts (token paid + names revealed + chat) → removal is free thereafter. Or <b>clears on 7-day stale</b> → the <i>delete-or-nudge</i> prompt.</li>
+      <li><b>Nudge</b> fires the vendor's <i>"you've been nudged · accept or decline"</i> popup and resets the 7-day clock (default cap 1 nudge, then delete-only — §6 flag f).</li>
+      <li><b>Hybrid-anonymity:</b> the vendor sees a masked <i>"A couple in Manila"</i> until they accept; the couple's real name reveals only on the token-paid accept.</li>
+      <li>Un-inquired rows (e.g. <i>Pick one</i>) carry no gate; locked vendors show no <code>×</code> at all.</li>
+    </ul>
+  </div>
+
+<script>
+(function(){
+  var $ = function(s,r){return (r||document).querySelector(s);};
+  // photo: preflight | fresh | stale | accepted | declined | removed
+  var S = {sent:false, photo:'preflight', nudges:0};
+
+  var heroRow=$('#heroRow'), heroPill=$('#heroPill'), heroSub=$('#heroSub'),
+      heroX=$('#heroX'), heroChev=$('#heroChev'), heroNeeds=$('#heroNeeds'),
+      seedBanner=$('#seedBanner'), vSlot=$('#vSlot'), narrator=$('#narrator'),
+      skipBtn=$('#skipBtn'), cBell=$('#cBell'), vBell=$('#vBell');
+
+  /* ---------- toasts ---------- */
+  function toast(which, html, good){
+    var t = which==='c' ? $('#cToast') : $('#vToast');
+    t.innerHTML = html; t.className = 'toast' + (good?' good':'');
+    void t.offsetWidth; t.classList.add('show');
+    clearTimeout(t._t); t._t = setTimeout(function(){t.classList.remove('show');}, 2600);
+  }
+
+  /* ---------- sheets / popups ---------- */
+  function openSheet(id){ $('#cBackdrop').classList.add('show'); $(id).classList.add('open'); }
+  function closeCouple(){ $('#cBackdrop').classList.remove('show'); ['#softSheet','#gateSheet','#removeSheet'].forEach(function(s){$(s).classList.remove('open');}); }
+  function openPopup(){ $('#vBackdrop').classList.add('show'); $('#nudgePopup').classList.add('open'); }
+  function closePopup(){ $('#vBackdrop').classList.remove('show'); $('#nudgePopup').classList.remove('open'); }
+
+  $('#cBackdrop').addEventListener('click', closeCouple);
+  $('#vBackdrop').addEventListener('click', closePopup);
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){closeCouple();closePopup();} });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function(b){ b.addEventListener('click', closeCouple); });
+
+  /* ---------- bell helper ---------- */
+  function bumpBell(el, n){ el.textContent = n; el.classList.add('pop'); setTimeout(function(){el.classList.remove('pop');}, 220); }
+
+  /* ---------- render ---------- */
+  function render(){
+    // seeding banner
+    if(S.sent){ seedBanner.classList.add('hide'); } else { seedBanner.classList.remove('hide','sent-note'); }
+
+    // hero row
+    heroRow.classList.remove('stale');
+    heroX.hidden = true; heroChev.style.display='';
+    heroNeeds.innerHTML='';
+    var p = S.photo;
+    if(p==='preflight'){
+      heroPill.className='pill go'; heroPill.textContent='Ready';
+      heroSub.innerHTML='Lens &amp; Co. <b>+2</b> · pre-filled best-fit';
+    } else if(p==='fresh'){
+      heroPill.className='pill go'; heroPill.textContent = S.nudges>0 ? 'Nudged' : 'Sent · waiting';
+      heroSub.innerHTML = S.nudges>0 ? 'Lens &amp; Co. · re-pinged · clock reset' : 'Lens &amp; Co. <b>+2</b> · sent just now';
+      heroX.hidden=false; heroChev.style.display='none';
+    } else if(p==='stale'){
+      heroRow.classList.add('stale');
+      heroPill.className='pill warn'; heroPill.textContent='No reply · 7d';
+      heroSub.innerHTML='Lens &amp; Co. · no response';
+      heroNeeds.innerHTML='<span class="needs"><span class="d"></span>Needs you</span>';
+      heroX.hidden=false; heroChev.style.display='none';
+    } else if(p==='accepted'){
+      heroPill.className='pill ok'; heroPill.textContent='Accepted · chat';
+      heroSub.innerHTML='Lens &amp; Co. · names revealed · tap to chat';
+      heroX.hidden=false; heroChev.style.display='none';
+    } else if(p==='declined'){
+      heroPill.className='pill todo'; heroPill.textContent='Unavailable';
+      heroSub.innerHTML='Lens &amp; Co. declined · no longer available for your date';
+      heroX.hidden=false; heroChev.style.display='none';
+    } else if(p==='removed'){
+      heroRow.classList.add('gone');
+    }
+
+    // vendor slot
+    renderVendor();
+    // skip button availability
+    skipBtn.disabled = !(S.sent && S.photo==='fresh');
+    // narrator
+    narrate();
+  }
+
+  function renderVendor(){
+    if(!S.sent){ vSlot.innerHTML='<div class="empty-inq" id="vEmpty">No inquiries yet.<br>When a couple sends a request, it appears here.</div>'; return; }
+    var p=S.photo, html='';
+    if(p==='fresh' || p==='stale'){
+      var nudged = S.nudges>0;
+      html =
+        '<div class="inq'+(nudged?' pulse':'')+'" id="vInq">'+
+          '<div class="top"><span>New inquiry</span><span class="grow"></span><span>'+(p==='stale'?'7 days waiting':'just now')+'</span></div>'+
+          '<div class="bd">'+
+            '<div class="who"><span class="mask">A couple in Manila</span></div>'+
+            '<div class="det"><span class="tag">Photographer</span><span class="tag">Dec 18, 2026</span><span class="tag">150 guests</span><span class="tag">Catholic</span></div>'+
+            (nudged?'<div class="nudgeflag">🔔 They nudged you — still awaiting your reply</div>':'<div class="note">Accept reveals their names &amp; opens chat (6 tokens).</div>')+
+            '<div class="acts"><button class="btn ghost" id="inqDecline">Decline</button><button class="btn primary" id="inqAccept">Accept · 6 tokens · NCR</button></div>'+
+          '</div>'+
+        '</div>';
+    } else if(p==='accepted'){
+      html =
+        '<div class="inq accepted done"><div class="top"><span>In conversation</span><span class="grow"></span><span class="tk">6 tokens · revealed</span></div>'+
+          '<div class="bd"><div class="who">Maria &amp; Juan</div>'+
+            '<div class="det"><span class="tag">Photographer</span><span class="tag">Dec 18, 2026</span><span class="tag">Manila</span></div>'+
+            '<div class="note">Names revealed, chat open. Take it from here.</div>'+
+            '<div class="acts"><button class="btn primary" id="msgBtn">Message</button></div></div></div>';
+    } else if(p==='declined'){
+      html='<div class="inq declined done"><div class="top"><span>Declined</span><span class="grow"></span><span>slot reopened</span></div>'+
+            '<div class="bd"><div class="who"><span class="mask">A couple in Manila</span></div><div class="note">You declined this request. The date is free for other couples.</div></div></div>';
+    } else if(p==='removed'){
+      html='<div class="empty-inq">Inquiry withdrawn by the couple.<br>The date is free for other couples.</div>';
+    }
+    vSlot.innerHTML = html;
+    // wire vendor inquiry buttons
+    if($('#inqAccept')) $('#inqAccept').addEventListener('click', accept);
+    if($('#inqDecline')) $('#inqDecline').addEventListener('click', decline);
+    if($('#msgBtn')) $('#msgBtn').addEventListener('click', function(){ toast('v','Opening chat with <b>Maria &amp; Juan</b>'); });
+  }
+
+  function narrate(){
+    var m;
+    if(!S.sent) m='Onboarding picked 6 categories. We pre-filled the best-fit vendors — tap <b>Send all · one tap</b> to seed the first inquiries.';
+    else if(S.photo==='fresh' && S.nudges===0) m='Inquiry sent to Lens &amp; Co. Tap the <b>×</b> on Photographer — you <b>can’t</b> drop them yet (we just reached out). Or let the vendor act on the right.';
+    else if(S.photo==='fresh' && S.nudges>0) m='Nudged — the vendor got a <b>pop-up</b> and the 7-day clock reset. They can still Accept / Decline. Skip 7 days again to see <b>delete-only</b>.';
+    else if(S.photo==='stale') m='7 days passed with no reply. Tap the <b>×</b> on Photographer — now you get <b>Delete or Nudge</b>.';
+    else if(S.photo==='accepted') m='Accepted → token paid, names revealed, chat open. The <b>×</b> now removes <b>freely</b> — the gate is lifted.';
+    else if(S.photo==='declined') m='Declined — you’re freed and they drop with a <b>“no longer available”</b> notice. Tap <b>×</b> to clear the row.';
+    else if(S.photo==='removed') m='Removed. Add another photographer anytime, or <b>↺ Reset</b> to replay the flow.';
+    narrator.innerHTML = m;
+  }
+
+  /* ---------- actions ---------- */
+  function sendAll(){
+    S.sent=true; S.photo='fresh';
+    bumpBell(vBell,1);
+    render();
+    toast('c','Inquiries sent to your top matches ✓', true);
+    setTimeout(function(){ toast('v','New inquiry from a Manila couple'); }, 700);
+  }
+
+  function heroXClick(){
+    if(S.photo==='fresh'){ $('#softDays').textContent = S.nudges>0 ? '7' : '7'; openSheet('#softSheet'); }
+    else if(S.photo==='stale'){
+      var spent = S.nudges>=1;
+      $('#nudgeSpent').hidden = !spent;
+      $('#gateNudge').disabled = spent;
+      $('#gateNudge').style.display = spent ? 'none' : '';
+      $('#gateDelete').style.flex = spent ? '1' : '';
+      openSheet('#gateSheet');
+    }
+    else if(S.photo==='accepted'){ openSheet('#removeSheet'); }
+    else if(S.photo==='declined'){ S.photo='removed'; render(); toast('c','Cleared Lens &amp; Co.'); }
+  }
+
+  function skip7(){
+    if(S.sent && S.photo==='fresh'){ S.photo='stale'; render(); toast('c','7 days passed — still no reply from Lens &amp; Co.'); }
+  }
+
+  function gateDelete(){ S.photo='removed'; S.sent=true; closeCouple(); render(); toast('c','Removed Lens &amp; Co.'); toast('v','Inquiry withdrawn by the couple'); }
+  function gateNudge(){
+    if(S.nudges>=1) return;
+    S.nudges=1; S.photo='fresh'; closeCouple(); render();
+    bumpBell(vBell, 2);
+    toast('c','We nudged Lens &amp; Co. 🔔 · 7-day clock reset', true);
+    setTimeout(openPopup, 480);
+  }
+  function freeRemove(){ S.photo='removed'; closeCouple(); render(); toast('c','Removed Lens &amp; Co.'); }
+
+  function accept(){
+    S.photo='accepted'; closePopup(); render();
+    bumpBell(cBell, 3);
+    toast('v','Accepted · 6 tokens · names revealed', true);
+    setTimeout(function(){ toast('c','Lens &amp; Co. accepted — chat open ✓', true); }, 650);
+  }
+  function decline(){
+    S.photo='declined'; closePopup(); render();
+    bumpBell(cBell, 3);
+    toast('v','Declined · slot reopened');
+    setTimeout(function(){ toast('c','Lens &amp; Co. is no longer available for your date'); }, 650);
+  }
+
+  function reset(){
+    S={sent:false, photo:'preflight', nudges:0};
+    heroRow.classList.remove('gone','flash');
+    closeCouple(); closePopup();
+    cBell.textContent='2'; vBell.textContent='0';
+    render();
+  }
+
+  /* ---------- wire ---------- */
+  $('#sendAll').addEventListener('click', sendAll);
+  $('#reviewPicks').addEventListener('click', function(){ toast('c','Pre-filled from your taste — swap or set 1–5 per category'); });
+  heroX.addEventListener('click', function(e){ e.stopPropagation(); heroXClick(); });
+  $('#gateDelete').addEventListener('click', gateDelete);
+  $('#gateNudge').addEventListener('click', gateNudge);
+  $('#freeRemove').addEventListener('click', freeRemove);
+  $('#popAccept').addEventListener('click', accept);
+  $('#popDecline').addEventListener('click', decline);
+  skipBtn.addEventListener('click', skip7);
+  $('#resetBtn').addEventListener('click', reset);
+  $('#editLink').addEventListener('click', function(){ toast('c','Add another category to your services'); });
+  $('#seeAll').addEventListener('click', function(){ toast('c','All 6 categories you picked in onboarding'); });
+  Array.prototype.forEach.call(document.querySelectorAll('.svc.tap'), function(r){
+    r.addEventListener('click', function(){ toast('c','Opening '+ (r.getAttribute('data-cat')||'category') +' workspace'); });
+  });
+  heroRow.addEventListener('click', function(){ if(S.photo==='accepted') toast('c','Opening chat with Lens &amp; Co.'); });
+
+  render();
+})();
+</script>
+</body>
+</html>

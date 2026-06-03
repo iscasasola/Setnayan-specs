@@ -439,6 +439,8 @@ vs **WedMeGood's ~30 generic vendor categories** with one shared filter UI acros
 
 ## 4. SETNAYAN SERVICE inserts (the badge pattern)
 
+> **⚠️ AMENDED 2026-06-03 (live placements moved).** The table below reflects the pre-shrink 5-column model. In the live 10-parent taxonomy the Setnayan inserts now sit at: **Concierge → Planning · Pakanta + Animated Monogram + Pro Website + Live Venue Photo Wall + Live Background (Pailaw) → Design › Digital Services (new tile) · Patiktok + Pabati → Booths › Photo Booth · Papic (+ Guest Stories / SDE / Thank You Video add-ons) → Documentary › Photo & Video · Panood → Documentary › Livestream · Editorial → Documentary › Editorial.** See [Vendor_Taxonomy_Shrink_2026-05-30.md](../Vendor_Taxonomy_Shrink_2026-05-30.md) + the 2026-06-03 decision-log row. The table here is kept for its historical intra-tile ranking notes only.
+
 Per [0047 § SETNAYAN SERVICE inserts](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md), first-party services appear as marketplace listings with a distinct visual badge. They populate per the same [0044 schema](../0044_per_category_schemas/0044_per_category_schemas.md) + [0045 product catalog](../0045_product_catalogs/0045_product_catalogs.md) framework as third-party vendors.
 
 | Setnayan service | Marketplace placement | Iteration |

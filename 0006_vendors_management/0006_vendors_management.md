@@ -156,9 +156,12 @@ photobooth
 souvenirs_giveaways
 wedding_rings
 honeymoon_planner
+digital_services
 ```
 
-(28 canonical services. Order roughly matches wedding-planning priority. Final list reviewed in HTML mockup; add/remove via PR.)
+(29 canonical services. Order roughly matches wedding-planning priority. Final list reviewed in HTML mockup; add/remove via PR.)
+
+**`digital_services` added 2026-06-03** — the marketplace **Design › Digital Services** child (the Setnayan digital-productions tile: Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw). It is a **generic, vendor-listable** category — 3rd-party monogram designers / wedding-website builders / LED-content studios can register under it, with the 5 Setnayan services surfacing as options inside. Full per-surface mapping: [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md).
 
 **Note on `wedding_coordination` (locked 2026-05-12):** Wedding coordinators register as a regular vendor under this canonical key and use the same 0022 vendor dashboard as photographers, caterers, and every other category — there is **no separate "coordinator" platform role**. Coordinators receive two special permissions on top of standard vendor capability: (a) per-thread join into customer ↔ vendor chats per 0019 § Coordinator-join flow (the couple invites them into vendor threads as needed) and (b) broadcast access on day-of guest experience surfaces per 0031. Both permissions are scoped to the events that booked them and revoke automatically at event-end + 30 days.
 

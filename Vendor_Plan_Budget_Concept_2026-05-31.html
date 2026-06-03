@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Concept · Vendors tab — cover + 10 folders + motion + card detail + 3-line cost</title>
+<!--
+  ONE COMBINED CONCEPT (self-contained HTML, no build, no node_modules).
+  Now data-driven: all 10 taxonomy folders render from the FOLDERS array (like the
+  real React app maps over WEDDING_FOLDER_ORDER) so the full sticky-stacking shows.
+  Locked folder order: Venue · Planning · Feast · Design · Program · Documentary ·
+  Look · Booths · Prints · Transport.
+  Shows: cover screen (docks on scroll) · child curve-merge · coverflow + snap +
+  vibrate · card→detail (What's included + Service + Transport + Food total).
+  Palette: Clean Editorial (paper #FBFBFA · ink #1E2229 · gold #C5A059 · mulberry #5C2542).
+  Concept only — shipped React lives in apps/web/.../vendors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --ink-soft:#4F535B;
+    --gold:#C5A059; --gold-deep:#8C6932;
+    --mulberry:#5C2542; --mulberry-deep:#4A1D36;
+    --line:rgba(30,34,41,.12); --line-soft:rgba(30,34,41,.07);
+    --serif:"Cormorant Garamond",Georgia,serif;
+    --sans:"Manrope",-apple-system,system-ui,sans-serif;
+    --mono:"DM Mono",ui-monospace,Menlo,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1); --spring:cubic-bezier(.34,1.3,.5,1);
+    --topbar-h:60px; --head-h:38px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:#e9e6df;font-family:var(--sans);color:var(--ink);display:flex;flex-direction:column;align-items:center;padding:22px 12px 40px;min-height:100vh}
+
+  .phone{width:393px;max-width:100%;height:812px;background:var(--paper);border-radius:30px;overflow:hidden;position:relative;box-shadow:0 30px 70px -30px rgba(0,0,0,.5);border:1px solid rgba(0,0,0,.08)}
+  .deck{position:relative;width:200%;height:100%;display:flex;transition:transform .5s var(--ease)}
+  .phone.detail .deck{transform:translateX(-50%)}
+  .pane{width:50%;height:100%;position:relative}
+  .scroll{height:100%;overflow-y:auto;scroll-behavior:smooth;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  /* dark sticky budget bar */
+  .topbar{position:sticky;top:0;z-index:30;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:var(--topbar-h);padding:0 18px}
+  .topbar .fig{display:flex;align-items:baseline;gap:7px;line-height:1.2}
+  .topbar .figk{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);width:46px}
+  .topbar .figv{font-family:var(--serif);font-style:italic;font-weight:600;font-size:19px}
+  .topbar .rangev{font-family:var(--serif);font-style:italic;font-weight:600;font-size:13px;color:rgba(255,255,255,.6)}
+  .topbar .tgt{font-family:var(--serif);font-style:italic;font-weight:600;font-size:14px;text-align:right}
+  .topbar .status{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);text-align:right;margin-top:3px}
+  .meter{height:3px;background:rgba(30,34,41,.1)}
+  .meter .fill{height:100%;width:45%;background:var(--gold)}
+
+  /* COVER */
+  .intro{min-height:calc(812px - var(--topbar-h));display:flex;flex-direction:column;justify-content:center;gap:16px;padding:30px 24px 40px;transform-origin:top center;will-change:transform,opacity}
+  .intro-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep)}
+  .intro-h{font-family:var(--serif);font-style:italic;font-size:40px;line-height:1.02;margin:2px 0 6px}
+  .istat{display:flex;gap:10px}
+  .ibox{flex:1;background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 15px}
+  .ik{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)}
+  .iv{font-family:var(--serif);font-style:italic;font-weight:600;font-size:20px;margin-top:3px;white-space:nowrap}
+  .lock-next{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:2px}
+  .ln-tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
+  .ln-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid var(--line)}
+  .ln-row:first-of-type{border-top:0}
+  .ln-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .ln-dot.over{background:#b23b34}.ln-dot.soon{background:var(--gold)}.ln-dot.next{background:var(--ink-soft)}
+  .ln-name{font-family:var(--serif);font-style:italic;font-weight:600;font-size:15px;flex:1}
+  .ln-when{font-family:var(--mono);font-size:8px;letter-spacing:.05em;text-transform:uppercase}
+  .ln-when.over{color:#b23b34}.ln-when.soon{color:var(--gold-deep)}.ln-when.next{color:var(--ink-soft)}
+  .intro-cta{margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .intro-cta .chev{font-size:20px;animation:bob 1.5s var(--ease) infinite}
+  @keyframes bob{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(-6px);opacity:1}}
+
+  /* category folders (sticky stacking) */
+  .cat{border-top:1px solid var(--line)}
+  .cat-head{position:sticky;top:var(--topbar-h);z-index:5;background:var(--paper);display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:var(--head-h);padding:11px 18px;border-bottom:1px solid var(--line)}
+  .cat-head .nm{font-family:var(--serif);font-style:italic;font-weight:600;font-size:18px}
+  .cat-head .amt{font-family:var(--serif);font-style:italic;font-weight:600;font-size:13.5px}
+  .cat-head .amt.zero{font-family:var(--mono);font-style:normal;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-deep)}
+  .cat-body{padding:14px 0 20px}
+  .child-block{transform-origin:top center;will-change:transform,opacity}
+  .child-name{display:flex;align-items:center;justify-content:space-between;padding:4px 20px 8px}
+  .child-name .cn{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .chip{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:rgba(197,160,89,.16);color:var(--gold-deep)}
+
+  /* rail + cards */
+  .rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 46px 12px;scrollbar-width:none;perspective:1200px}
+  .rail::-webkit-scrollbar{display:none}
+  .card{position:relative;flex:0 0 250px;scroll-snap-align:center;will-change:transform,opacity}
+  .v{display:block;width:100%;text-align:left;padding:0;font:inherit;color:inherit;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:box-shadow .35s var(--ease)}
+  .v:hover{box-shadow:0 10px 30px -18px rgba(0,0,0,.4)}
+  .v .img{height:118px;background:linear-gradient(135deg,#3a3f47,#565b63);display:flex;align-items:center;justify-content:center}
+  .v .ini{font-family:var(--serif);font-style:italic;font-size:28px;color:rgba(255,255,255,.7)}
+  .v .meta{padding:12px 14px 14px}
+  .v .vn{font-weight:700;font-size:14.5px}
+  .v .dist{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--ink-soft);margin-top:2px}
+  .v .stars{color:var(--gold);font-size:14px;letter-spacing:2px;margin-top:8px}
+  .v .stars .rc{font-family:var(--mono);font-size:8px;color:var(--ink-soft);margin-left:5px}
+  .v .badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  .bdg{font-family:var(--mono);font-size:7.5px;letter-spacing:.07em;text-transform:uppercase;padding:3px 7px;border-radius:999px;background:rgba(30,34,41,.06);color:var(--ink-soft)}
+  .bdg.verified{color:#2e7d4f;background:rgba(46,125,79,.1)}
+  .bdg.setnayan{color:var(--mulberry);background:rgba(92,37,66,.1)}
+  .v .price{font-family:var(--serif);font-style:italic;font-weight:600;font-size:20px;margin-top:7px}
+  .v .price small{font-family:var(--mono);font-style:normal;font-size:7.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-top:1px}
+  .v .tap{margin-top:9px;font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep)}
+  .card.chosen .v{border:3px solid var(--gold);box-shadow:0 0 0 3px rgba(197,160,89,.32)}
+  .pcorner{position:absolute;top:9px;right:9px;z-index:2;font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--mulberry);border-radius:999px;padding:5px 9px}
+  .add{flex:0 0 120px;scroll-snap-align:center;display:flex;text-decoration:none}
+  .add .inner{flex:1;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:rgba(92,37,66,.05);border:1.5px dashed rgba(92,37,66,.4);border-radius:18px;color:var(--mulberry);text-align:center}
+  .add .plus{font-size:24px;font-weight:300}
+  .add .at{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase}
+
+  .endcard{margin:26px 18px 30px;background:var(--mulberry);color:#fff;border-radius:22px;padding:22px;text-align:center}
+  .end-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+  .end-h{font-family:var(--serif);font-style:italic;font-weight:600;font-size:24px;margin:3px 0}
+  .end-stats{display:flex;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.2)}
+  .end-stats>div{flex:1;border-left:1px solid rgba(255,255,255,.14)}
+  .end-stats>div:first-child{border-left:0}
+  .esv{font-family:var(--serif);font-style:italic;font-weight:600;font-size:22px}
+  .esk{font-family:var(--mono);font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:4px}
+
+  /* detail pane */
+  .d-scroll{height:100%;overflow-y:auto;scrollbar-width:none}
+  .d-scroll::-webkit-scrollbar{display:none}
+  .d-top{position:sticky;top:0;z-index:5;background:var(--paper);padding:14px 18px;border-bottom:1px solid var(--line)}
+  .back{appearance:none;border:0;background:transparent;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);cursor:pointer}
+  .back:hover{color:var(--ink)}
+  .d-body{padding:18px}
+  .d-hero{display:flex;gap:14px;align-items:flex-start}
+  .d-logo{width:56px;height:56px;border-radius:50%;flex:none;background:linear-gradient(135deg,#3a3f47,#565b63);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);font-family:var(--serif);font-style:italic;font-size:23px}
+  .d-id .cat{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+  .d-id h2{font-family:var(--serif);font-style:italic;font-weight:600;font-size:24px;line-height:1.05;margin:3px 0 2px}
+  .d-id .city{font-size:12px;color:var(--ink-soft)}
+  .lockchip{margin-left:auto;flex:none;font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#2e7d4f;background:rgba(46,125,79,.12);border-radius:999px;padding:5px 9px}
+  .sect{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px}
+  .sect h3{font-family:var(--serif);font-style:italic;font-weight:600;font-size:17px;margin:0 0 4px}
+  .sect .sub{font-size:11px;color:var(--ink-soft);margin:0 0 12px;line-height:1.45}
+  .pkg-from{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 12px}
+  .inc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+  .inc li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;line-height:1.35}
+  .inc .ck{width:16px;height:16px;flex:none;margin-top:1px;border-radius:50%;background:var(--gold);position:relative}
+  .inc .ck::after{content:"";position:absolute;left:5px;top:2px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .inc .ck.opt{background:rgba(30,34,41,.18)}
+  .inc .opt-tag{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-left:5px}
+  .cost-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 0}
+  .cost-row .lbl{font-size:13.5px;color:var(--ink-soft)}
+  .cost-in{display:inline-flex;align-items:center;gap:5px}
+  .cost-in .peso{color:var(--ink-soft);font-size:13px}
+  .cost-in input{width:118px;border:1px solid var(--line);border-radius:9px;padding:7px 9px;text-align:right;font:600 14px var(--sans);color:var(--ink);background:#fff}
+  .cost-in input:focus{outline:none;border-color:var(--gold)}
+  .cost-total{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:12px}
+  .cost-total .lbl{font-weight:600;font-size:14px}
+  .cost-total .val{font-family:var(--serif);font-style:italic;font-weight:600;font-size:22px}
+  .cost-dep{display:flex;align-items:center;justify-content:space-between;padding-top:8px;font-size:13px;color:var(--ink-soft)}
+  .save{margin-top:14px;appearance:none;border:0;border-radius:999px;background:var(--mulberry);color:#fff;font:600 13px var(--sans);padding:12px 18px;cursor:pointer}
+  .save:hover{background:var(--mulberry-deep)}
+  .formula{margin-top:11px;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;color:var(--ink-soft);text-align:center}
+
+  .legend{max-width:393px;margin:16px auto 0;font-family:var(--mono);font-size:10px;line-height:1.7;color:#6b6256;text-align:center}
+  .legend b{color:#3a3530}
+</style>
+</head>
+<body>
+  <div class="phone" id="phone">
+    <div class="deck">
+
+      <!-- ===================== LIST PANE ===================== -->
+      <div class="pane">
+        <div class="scroll" id="scroll">
+          <div class="topbar">
+            <div>
+              <div class="fig"><span class="figk">Chosen</span><span class="figv">₱312k</span></div>
+              <div class="fig"><span class="figk">Range</span><span class="rangev">₱486k–₱642k</span></div>
+            </div>
+            <div>
+              <div class="tgt">of ₱700k</div>
+              <div class="status">on track</div>
+            </div>
+          </div>
+          <div class="meter"><div class="fill"></div></div>
+
+          <!-- COVER -->
+          <section class="intro" id="intro">
+            <div>
+              <div class="intro-eyebrow">Your budget &amp; plan</div>
+              <h1 class="intro-h">Where your<br>day stands</h1>
+            </div>
+            <div class="istat">
+              <div class="ibox"><div class="ik">Chosen</div><div class="iv">₱312,000</div></div>
+              <div class="ibox"><div class="ik">Could land</div><div class="iv">₱486k–₱642k</div></div>
+              <div class="ibox"><div class="ik">Target</div><div class="iv">₱700,000</div></div>
+            </div>
+            <div class="lock-next">
+              <div class="ln-tag">What to lock next</div>
+              <div class="ln-row"><span class="ln-dot over"></span><span class="ln-name">Caterer</span><span class="ln-when over">12d overdue · 🔥 4 eyeing</span></div>
+              <div class="ln-row"><span class="ln-dot soon"></span><span class="ln-name">Photographer</span><span class="ln-when soon">8d left</span></div>
+              <div class="ln-row"><span class="ln-dot next"></span><span class="ln-name">Host / MC</span><span class="ln-when next">Next up</span></div>
+            </div>
+            <div class="intro-cta">Scroll to your 10 categories<span class="chev">↓</span></div>
+          </section>
+
+          <!-- all 10 folders render here from FOLDERS[] -->
+          <div id="cats"></div>
+
+          <div class="endcard">
+            <div class="end-eyebrow">Look how far you&rsquo;ve come</div>
+            <div class="end-h">3 locked · 7 shortlisted</div>
+            <div class="end-stats">
+              <div><div class="esv">~9h</div><div class="esk">saved</div></div>
+              <div><div class="esv">128</div><div class="esk">searched</div></div>
+              <div><div class="esv">3</div><div class="esk">finalized</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== DETAIL PANE ===================== -->
+      <div class="pane">
+        <div class="d-scroll" id="dscroll">
+          <div class="d-top"><button class="back" onclick="closeDetail()">‹ Back to plan</button></div>
+          <div class="d-body">
+            <div class="d-hero">
+              <div class="d-logo" id="d-logo">JR</div>
+              <div class="d-id">
+                <div class="cat" id="d-cat">Photographer</div>
+                <h2 id="d-name">Jaime Reyes Studios</h2>
+                <div class="city" id="d-city">Quezon City · 6km from your venue</div>
+              </div>
+              <span class="lockchip">Locked</span>
+            </div>
+
+            <div class="sect">
+              <h3>What&rsquo;s included</h3>
+              <p class="pkg-from">From the "Full-Day Wedding" package</p>
+              <ul class="inc">
+                <li><span class="ck"></span><span>10-hour full-day coverage (prep → reception)</span></li>
+                <li><span class="ck"></span><span>2 lead photographers + 1 assistant</span></li>
+                <li><span class="ck"></span><span>Same-Day Edit slideshow (3–5 min)</span></li>
+                <li><span class="ck"></span><span>300+ edited high-res photos · online gallery</span></li>
+                <li><span class="ck"></span><span>Engagement / pre-nup shoot (half day)</span></li>
+                <li><span class="ck opt"></span><span>Drone aerial coverage<span class="opt-tag">optional</span></span></li>
+                <li><span class="ck opt"></span><span>Leather-bound 40-page album<span class="opt-tag">optional</span></span></li>
+              </ul>
+            </div>
+
+            <div class="sect">
+              <h3>Costing</h3>
+              <p class="sub">The amount you&rsquo;ll budget is the service price + transport + food allowance. Leave a line blank to count it as ₱0.</p>
+              <div class="cost-row"><span class="lbl">Service price</span><span class="cost-in"><span class="peso">₱</span><input type="number" value="98000" oninput="recalc()" id="svc" /></span></div>
+              <div class="cost-row"><span class="lbl">Transport cost</span><span class="cost-in"><span class="peso">₱</span><input type="number" value="8000" oninput="recalc()" id="trn" /></span></div>
+              <div class="cost-row"><span class="lbl">Food allowance</span><span class="cost-in"><span class="peso">₱</span><input type="number" value="4000" oninput="recalc()" id="food" /></span></div>
+              <div class="cost-total"><span class="lbl">Total</span><span class="val" id="total">₱110,000</span></div>
+              <div class="cost-dep"><span>Deposit paid</span><span>₱30,000</span></div>
+              <button class="save" onclick="this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save costs',1400)">Save costs</button>
+              <p class="formula" id="formula">₱98,000 service + ₱8,000 transport + ₱4,000 food = ₱110,000</p>
+            </div>
+
+            <div style="margin-top:16px;text-align:center"><a href="#" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);text-decoration:none">Open full workspace · payments · contract · chat →</a></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="legend">
+    All <b>10 folders</b> render from data &amp; stack as you scroll · cover docks ·
+    children curve-merge · cards coverflow + snap (buzz on a phone).<br>
+    Tap any card → <b>What&rsquo;s included</b> + live <b>Service + Transport + Food</b> total.
+  </p>
+
+<script>
+  // ---------- 10 folders, locked order (Venue→Transport) ----------
+  var FOLDERS = [
+    { name:'Venue', amt:'₱180,000', children:[
+      { cn:'Reception Venue', chip:'Locked', cards:[
+        {ini:'GG', vn:'Glass Garden', city:'Tagaytay · 38km', stars:5, rc:54, badges:['verified'], price:'₱180,000', sub:'Service + Transport + Food', chosen:true},
+        {ini:'BV', vn:'Bayview Hall', city:'Pasay · 14km', stars:4, rc:22, badges:['verified'], price:'₱150,000', sub:'Service only'} ]},
+      { cn:'Ceremony Venue', chip:'6mo left', cards:[
+        {ini:'MC', vn:'Manila Cathedral', city:'Intramuros · 12km', stars:5, rc:120, badges:['setnayan'], price:'₱25,000', sub:'Church fee'} ]},
+    ]},
+    { name:'Planning', amt:'Plan it', zero:true, children:[
+      { cn:'Coordinator', chip:'5mo left', cards:[
+        {ini:'EV', vn:'Ever After Events', city:'Makati · 10km', stars:5, rc:41, badges:['verified','setnayan'], price:'₱60,000', sub:'Service only'} ]},
+    ]},
+    { name:'Feast', amt:'Plan it', zero:true, children:[
+      { cn:'Caterer', chip:'12d overdue', cards:[
+        {ini:'HG', vn:'Hearth & Garden', city:'Tagaytay · 38km', stars:5, rc:62, badges:['verified'], price:'₱2,400/pax', sub:'Service only · + transport + food'} ]},
+      { cn:'Cake', chip:'3mo left', cards:[
+        {ini:'SW', vn:'Sweet Layers', city:'QC · 7km', stars:5, rc:28, badges:[], price:'₱18,000', sub:'Service only'} ]},
+    ]},
+    { name:'Design', amt:'₱46,000', children:[
+      { cn:'Stylist', chip:'Locked', cards:[
+        {ini:'AT', vn:'Atelier Tan', city:'Makati · 11km', stars:5, rc:33, badges:['verified','setnayan'], price:'₱46,000', sub:'Service + Transport + Food', chosen:true} ]},
+      { cn:'Florist', chip:'2mo left', cards:[
+        {ini:'BL', vn:'Bloom Lab', city:'Pasig · 9km', stars:4, rc:19, badges:[], price:'₱28,000', sub:'Service only'} ]},
+    ]},
+    { name:'Program', amt:'Plan it', zero:true, children:[
+      { cn:'Host / MC', chip:'Next up', cards:[
+        {ini:'RB', vn:'RJ Bautista', city:'QC · 6km', stars:5, rc:50, badges:['verified'], price:'₱22,000', sub:'Service only'} ]},
+      { cn:'Band / DJ', chip:'6mo left', cards:[
+        {ini:'NS', vn:'Night Sound Co.', city:'Mandaluyong · 8km', stars:4, rc:24, badges:[], price:'₱35,000', sub:'Service only'} ]},
+    ]},
+    { name:'Documentary', amt:'₱110,000', children:[
+      { cn:'Photographer', chip:'8d left', cards:[
+        {ini:'JR', vn:'Jaime Reyes Studios', city:'QC · 6km', stars:5, rc:48, badges:['verified','setnayan'], price:'₱110,000', sub:'Service + Transport + Food', chosen:true},
+        {ini:'LF', vn:'Lumière Films PH', city:'Makati · 11km', stars:5, rc:31, badges:['verified'], price:'₱98,000', sub:'Service only · + transport + food'} ]},
+      { cn:'Videographer', chip:'3w left', cards:[
+        {ini:'CM', vn:'Cinema Manila Co.', city:'Pasig · 9km', stars:4, rc:17, badges:['new'], price:'Price on inquiry'} ]},
+    ]},
+    { name:'Look', amt:'Plan it', zero:true, children:[
+      { cn:"Bride's Attire", chip:'4mo left', cards:[
+        {ini:'VC', vn:'Veluz Couture', city:'Makati · 11km', stars:5, rc:70, badges:['verified'], price:'₱85,000', sub:'Service only'} ]},
+      { cn:'Hair & Makeup', chip:'3mo left', cards:[
+        {ini:'GM', vn:'Glow by Mia', city:'QC · 5km', stars:5, rc:44, badges:['setnayan'], price:'₱30,000', sub:'Service only · + transport'} ]},
+    ]},
+    { name:'Booths', amt:'Plan it', zero:true, children:[
+      { cn:'Photo Booth', chip:'2mo left', cards:[
+        {ini:'SB', vn:'Snap Booth', city:'Pasig · 9km', stars:4, rc:21, badges:[], price:'₱18,000', sub:'Service only'} ]},
+      { cn:'Mobile Bar', chip:'2mo left', cards:[
+        {ini:'TC', vn:'The Cart Co.', city:'Makati · 10km', stars:5, rc:15, badges:[], price:'₱24,000', sub:'Service only'} ]},
+    ]},
+    { name:'Prints', amt:'Plan it', zero:true, children:[
+      { cn:'Invitations', chip:'4mo left', cards:[
+        {ini:'PP', vn:'Paper & Press', city:'QC · 7km', stars:5, rc:38, badges:['setnayan'], price:'₱45,000', sub:'Service only'} ]},
+    ]},
+    { name:'Transport', amt:'Plan it', zero:true, children:[
+      { cn:'Bridal Car', chip:'1mo left', cards:[
+        {ini:'CC', vn:'Classic Cars MNL', city:'Makati · 11km', stars:5, rc:26, badges:['verified'], price:'₱20,000', sub:'Service + Transport'} ]},
+    ]},
+  ];
+
+  function badgeLabel(b){ return b==='verified'?'Verified':b==='setnayan'?'Setnayan':'New'; }
+  function cardHTML(c){
+    var stars = c.stars ? '<div class="stars">'+'★'.repeat(c.stars)+'<span style="color:rgba(30,34,41,.18)">'+'★'.repeat(5-c.stars)+'</span><span class="rc">'+c.rc+'</span></div>' : '';
+    var badges = (c.badges&&c.badges.length) ? '<div class="badges">'+c.badges.map(function(b){return '<span class="bdg '+b+'">'+badgeLabel(b)+'</span>';}).join('')+'</div>' : '';
+    var sub = c.sub ? '<small>'+c.sub+'</small>' : '';
+    return '<div class="card'+(c.chosen?' chosen':'')+'">'
+      + (c.chosen?'<span class="pcorner">★ Chosen</span>':'')
+      + '<button class="v" onclick="openDetail(this)" data-name="'+c.vn+'" data-city="'+c.city+'" data-ini="'+c.ini+'">'
+      + '<div class="img"><span class="ini">'+c.ini+'</span></div>'
+      + '<div class="meta">'
+      + '<div class="vn">'+c.vn+'</div>'
+      + '<div class="dist">'+c.city+'</div>'
+      + stars + badges
+      + '<div class="price">'+c.price+sub+'</div>'
+      + '<div class="tap">Tap to view →</div>'
+      + '</div></button></div>';
+  }
+  function railHTML(ch){
+    return '<div class="child-block"><div class="child-name"><span class="cn">'+ch.cn+'</span><span class="chip">'+ch.chip+'</span></div>'
+      + '<div class="rail">'+ch.cards.map(cardHTML).join('')
+      + '<a class="add" href="#"><span class="inner"><span class="plus">+</span><span class="at">Find more</span></span></a></div></div>';
+  }
+  function folderHTML(f){
+    return '<section class="cat"><div class="cat-head"><span class="nm">'+f.name+'</span><span class="amt'+(f.zero?' zero':'')+'">'+f.amt+'</span></div>'
+      + '<div class="cat-body">'+f.children.map(railHTML).join('')+'</div></section>';
+  }
+  document.getElementById('cats').innerHTML = FOLDERS.map(folderHTML).join('');
+
+  // ---------- navigation ----------
+  function openDetail(btn){
+    if(btn){
+      document.getElementById('d-name').textContent = btn.dataset.name;
+      document.getElementById('d-city').textContent = btn.dataset.city + ' from your venue';
+      document.getElementById('d-logo').textContent = btn.dataset.ini;
+    }
+    document.getElementById('phone').classList.add('detail');
+    document.getElementById('dscroll').scrollTop=0;
+  }
+  function closeDetail(){ document.getElementById('phone').classList.remove('detail'); }
+  function peso(n){ return '₱'+Number(n||0).toLocaleString('en-PH'); }
+  function recalc(){
+    var s=+document.getElementById('svc').value||0,t=+document.getElementById('trn').value||0,f=+document.getElementById('food').value||0,total=s+t+f;
+    document.getElementById('total').textContent=peso(total);
+    document.getElementById('formula').textContent=peso(s)+' service + '+peso(t)+' transport + '+peso(f)+' food = '+peso(total);
+  }
+
+  // ---------- scroll-driven motion (after render so rails exist) ----------
+  (function(){
+    var scroller=document.getElementById('scroll');
+    var intro=document.getElementById('intro');
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var raf=0, snap=new WeakMap();
+    function frame(){
+      raf=0;
+      var vh=scroller.clientHeight||1, sr=scroller.getBoundingClientRect();
+      // sizeIntro — dock + scale + fade
+      var ir=intro.getBoundingClientRect(), introTop=ir.top - sr.top;
+      var p=Math.min(1,Math.max(0,-introTop/(ir.height||1)));
+      intro.style.transform='scale('+(1-p*0.06).toFixed(4)+')';
+      intro.style.opacity=(1-p*0.6).toFixed(3);
+      // syncStates — child curve-merge
+      var focus=sr.top + vh*0.40;
+      document.querySelectorAll('.child-block').forEach(function(el){
+        var r=el.getBoundingClientRect(), c=r.top+r.height/2, norm=Math.min(1,Math.abs(c-focus)/vh);
+        el.style.transform='scale('+(1-norm*0.10).toFixed(4)+')';
+        el.style.opacity=(1-norm*0.35).toFixed(3);
+      });
+      // curveRail — coverflow + snap buzz
+      document.querySelectorAll('.rail').forEach(function(rail){
+        var rr=rail.getBoundingClientRect(), center=rr.left+rr.width/2, half=rr.width/2||1;
+        var cards=rail.querySelectorAll('.card,.add'), nearest=-1, nd=Infinity;
+        cards.forEach(function(card,i){
+          var cr=card.getBoundingClientRect(), d=cr.left+cr.width/2-center, n=Math.max(-1,Math.min(1,d/half));
+          card.style.transform='perspective(1200px) rotateY('+(n*-15).toFixed(2)+'deg) scale('+(1-Math.abs(n)*0.12).toFixed(4)+')';
+          card.style.opacity=(1-Math.abs(n)*0.4).toFixed(3);
+          var ad=Math.abs(d); if(ad<nd){nd=ad;nearest=i;}
+        });
+        var prev=snap.get(rail); if(prev===undefined)prev=-1;
+        if(nearest!==-1&&nearest!==prev){ snap.set(rail,nearest); if(prev!==-1&&'vibrate'in navigator){try{navigator.vibrate(7)}catch(e){}} }
+      });
+    }
+    function schedule(){ if(!raf) raf=requestAnimationFrame(frame); }
+    frame();
+    scroller.addEventListener('scroll',schedule,{passive:true});
+    document.querySelectorAll('.rail').forEach(function(r){ r.addEventListener('scroll',schedule,{passive:true}); });
+    window.addEventListener('resize',schedule,{passive:true});
+  })();
+</script>
+</body>
+</html>

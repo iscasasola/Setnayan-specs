@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Website tab — restructure preview (PR #704)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  /* ── Clean Editorial palette (CLAUDE.md 2026-05-29 lock · exact prod hexes) ── */
+  :root{
+    --paper:#FBFBFA;        /* bg-cream */
+    --white:#FFFFFF;
+    --ink:#1E2229;          /* text-ink */
+    --gold:#C5A059;         /* text-terracotta (accent) */
+    --gold-700:#8C6932;     /* terracotta-700 */
+    --mulberry:#5C2542;     /* bg-mulberry (CTA) */
+    --mulberry-600:#4A1D36;
+    --font-sans:'Manrope',system-ui,-apple-system,sans-serif;
+    --font-serif:'Cormorant Garamond',Georgia,serif;
+    --font-mono:'DM Mono','SFMono-Regular',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-sans);
+    background:#E9E6DF;            /* neutral stage behind the phone */
+    color:var(--ink);
+    min-height:100vh;
+    padding:28px 16px 60px;
+    display:flex;flex-direction:column;align-items:center;gap:18px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* caption above the phone */
+  .stage-label{text-align:center;max-width:393px}
+  .stage-label .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-700)}
+  .stage-label h1{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:26px;margin-top:4px}
+  .stage-label p{font-size:13px;color:rgba(30,34,41,.6);margin-top:4px;line-height:1.5}
+
+  /* ── iPhone 15 Pro frame · 393 × 852 ── */
+  .phone{
+    width:393px;max-width:100%;height:852px;
+    background:var(--paper);
+    border-radius:46px;
+    border:11px solid #11131a;
+    box-shadow:0 24px 60px rgba(17,19,26,.28);
+    overflow:hidden;position:relative;
+  }
+  .notch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:30px;background:#11131a;border-radius:18px;z-index:30}
+  /* status bar */
+  .statusbar{height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font-size:13px;font-weight:600;color:var(--ink)}
+  /* app top chrome (mimics dashboard outer header strip) */
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid rgba(30,34,41,.08);background:var(--paper)}
+  .appbar .brand{display:flex;align-items:center;gap:7px}
+  .appbar .markdot{width:22px;height:22px;border-radius:6px;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:13px}
+  .appbar .evt{font-size:12px;color:rgba(30,34,41,.6)}
+  .appbar .avatar{width:26px;height:26px;border-radius:50%;background:var(--mulberry);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+  /* scroll viewport = phone screen minus status/appbar/bottomnav */
+  .screen{height:calc(852px - 50px - 47px - 64px);overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .screen::-webkit-scrollbar{width:5px}
+  .screen::-webkit-scrollbar-thumb{background:rgba(30,34,41,.15);border-radius:3px}
+  .pad{padding:18px 16px 28px;display:flex;flex-direction:column;gap:38px}  /* space-y-10-ish between steps */
+
+  /* generic helpers */
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:7px}
+  .eyebrow svg{width:14px;height:14px}
+  .serif-h{font-family:var(--font-serif);font-style:italic;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+  .muted{color:rgba(30,34,41,.6)}
+  .tiny{font-size:12px;line-height:1.5}
+
+  /* page header */
+  .pagehead{display:flex;flex-direction:column;gap:7px}
+  .pagehead h1{font-size:30px}
+  .pagehead .slug{font-family:var(--font-mono);font-size:13px;color:rgba(30,34,41,.6);word-break:break-all}
+
+  /* ── Public URL card ── */
+  .card{border:1px solid rgba(30,34,41,.1);background:var(--paper);border-radius:14px;padding:18px}
+  .urlcard .lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(30,34,41,.55)}
+  .urlcard h2{font-size:19px;font-weight:600;letter-spacing:-.01em;margin-top:3px}
+  .urlchip{border:1px solid rgba(30,34,41,.1);background:rgba(255,255,255,.6);border-radius:10px;padding:11px 14px;margin-top:12px;font-family:var(--font-mono);font-size:14px;word-break:break-all}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .btn{height:42px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:9px;padding:0 16px;font-size:13.5px;font-weight:600;cursor:pointer;border:0}
+  .btn svg{width:16px;height:16px}
+  .btn-mulberry{background:var(--mulberry);color:#fff}
+  .btn-ghost{background:var(--paper);color:var(--ink);border:1px solid rgba(30,34,41,.2)}
+  .slugedit{margin-top:12px;border:1px solid rgba(30,34,41,.1);background:rgba(255,255,255,.4);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;font-size:13.5px;font-weight:500;color:rgba(30,34,41,.75)}
+  .slugedit .l{display:flex;align-items:center;gap:8px}
+  .slugedit .l svg{width:14px;height:14px;color:var(--gold)}
+  .slugedit .e{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(30,34,41,.45)}
+  .qrwrap{display:flex;align-items:flex-start;gap:14px;margin-top:16px}
+  .qrbox{width:104px;height:104px;border:1px solid rgba(30,34,41,.1);background:#fff;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .qrbox svg{width:74px;height:74px;color:var(--ink)}
+  .qrcap{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(30,34,41,.5);text-align:center;margin-top:6px}
+  .preview-head{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px}
+  .preview-head .lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(30,34,41,.55)}
+  .preview-head .open{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--gold)}
+  .preview-head .open svg{width:13px;height:13px}
+  .iframe-mock{border:1px solid rgba(30,34,41,.1);border-radius:10px;overflow:hidden;background:#fff;height:230px;position:relative}
+  .iframe-mock .lp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:linear-gradient(160deg,#FBF6EC 0%,#F3E7D3 100%)}
+  .iframe-mock .lp .mono-m{font-family:var(--font-serif);font-style:italic;font-size:46px;color:var(--gold);line-height:1}
+  .iframe-mock .lp .nm{font-family:var(--font-serif);font-style:italic;font-size:20px}
+  .iframe-mock .lp .dt{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(30,34,41,.55)}
+
+  /* ── journey section ── */
+  .step{display:flex;flex-direction:column;gap:11px}
+  .step-head{display:flex;flex-direction:column;gap:4px}
+  .step-head .st{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+  .step-head h2{font-size:24px}
+  .step-head p{font-size:13px;color:rgba(30,34,41,.6);line-height:1.5}
+  .rows{display:flex;flex-direction:column;gap:8px;list-style:none}
+
+  /* ── journey row ── */
+  .row{display:flex;align-items:center;gap:14px;border:1px solid rgba(30,34,41,.1);background:var(--paper);border-radius:14px;padding:14px;text-decoration:none;color:inherit}
+  .row.soon{background:rgba(251,251,250,.5)}
+  .row .ic{width:40px;height:40px;flex-shrink:0;border-radius:10px;border:1px solid rgba(30,34,41,.1);background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center}
+  .row.soon .ic{background:rgba(251,251,250,.6)}
+  .row .ic svg{width:20px;height:20px;color:var(--gold)}
+  .row.soon .ic svg{color:rgba(30,34,41,.35)}
+  .row .body{min-width:0;flex:1}
+  .row .body .t{font-size:14px;font-weight:600}
+  .row .body .b{font-size:12px;color:rgba(30,34,41,.55);margin-top:1px;line-height:1.4}
+  .row.soon .body .t{color:rgba(30,34,41,.5)}
+  .row.soon .body .b{color:rgba(30,34,41,.4)}
+  .row .chev{flex-shrink:0}
+  .row .chev svg{width:16px;height:16px;color:rgba(30,34,41,.4)}
+  .soon-chip{flex-shrink:0;border:1px solid rgba(30,34,41,.15);background:var(--paper);border-radius:999px;padding:5px 10px;font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(30,34,41,.45)}
+
+  /* ── Free vs Pro ── */
+  .fvp-head{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(30,34,41,.55);margin-bottom:11px}
+  .fvp-grid{display:flex;flex-direction:column;gap:14px}
+  .fvp-card{border-radius:14px;padding:18px}
+  .fvp-free{border:1px solid rgba(30,34,41,.1);background:var(--paper)}
+  .fvp-pro{border:1px solid rgba(197,160,89,.3);background:rgba(255,255,255,.7)}
+  .fvp-card .pe{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .fvp-free .pe{color:rgba(30,34,41,.55)}
+  .fvp-pro .pe{color:var(--gold);display:flex;align-items:center;gap:6px}
+  .fvp-pro .pe svg{width:12px;height:12px}
+  .fvp-card h3{font-size:19px;font-weight:600;letter-spacing:-.01em;margin-top:3px;display:flex;align-items:center;gap:8px}
+  .fvp-card h3 svg{width:20px;height:20px;color:var(--gold)}
+  .fvp-card .sub{font-size:13px;color:rgba(30,34,41,.65);margin-top:5px;line-height:1.5}
+  .fvp-list{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .fvp-list li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:rgba(30,34,41,.8);line-height:1.4}
+  .fvp-list li svg{width:16px;height:16px;flex-shrink:0;margin-top:1px}
+  .fvp-free .fvp-list li svg{color:#047857}
+  .fvp-pro .fvp-list li svg{color:var(--gold)}
+  .fvp-price{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:18px}
+  .fvp-price .amt{font-size:24px;font-weight:600;letter-spacing:-.01em}
+  .fvp-price .sl{font-size:12px;color:rgba(30,34,41,.55)}
+  .fvp-up{margin-top:12px;width:100%;height:42px;border:0;border-radius:9px;background:var(--mulberry);color:#fff;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .fvp-up svg{width:16px;height:16px}
+
+  /* footer note */
+  .foot{border:1px solid rgba(30,34,41,.1);background:rgba(251,251,250,.6);border-radius:14px;padding:18px;font-size:13px;color:rgba(30,34,41,.65);line-height:1.55}
+
+  /* bottom nav */
+  .bottomnav{position:absolute;bottom:0;left:0;right:0;height:64px;background:var(--paper);border-top:1px solid rgba(30,34,41,.08);display:grid;grid-template-columns:repeat(6,1fr);align-items:center;padding-bottom:6px}
+  .bottomnav .tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:rgba(30,34,41,.45)}
+  .bottomnav .tab svg{width:19px;height:19px}
+  .bottomnav .tab.active{color:var(--gold)}
+</style>
+</head>
+<body>
+
+  <div class="stage-label">
+    <p class="eyebrow">Static preview · PR #704</p>
+    <h1>Website tab · mobile</h1>
+    <p>iPhone 15 Pro · 393&times;852. A faithful mockup of the shipped <code>page.tsx</code> + <code>journey.tsx</code> in the Clean Editorial palette. Scroll inside the phone. Not the live app — the real page is auth-gated.</p>
+  </div>
+
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:41</span><span>&#9679;&#9679;&#9679; &#9650; &#9737;</span></div>
+
+    <!-- outer dashboard chrome (single-strip, mobile) -->
+    <div class="appbar">
+      <div class="brand">
+        <span class="markdot">M</span>
+        <span class="evt">Maria &amp; Juan</span>
+      </div>
+      <span class="avatar">M</span>
+    </div>
+
+    <div class="screen">
+      <div class="pad">
+
+        <!-- PAGE HEADER -->
+        <header class="pagehead">
+          <p class="eyebrow"><i data-lucide="globe"></i> Wedding website</p>
+          <h1 class="serif-h">Maria &amp; Juan</h1>
+          <p class="slug">setnayan.com/maria-and-juan</p>
+        </header>
+
+        <!-- STEP 1 · YOUR WEDDING ADDRESS -->
+        <section class="step">
+          <div class="step-head">
+            <span class="st">Step 1</span>
+            <h2 class="serif-h">Your wedding address</h2>
+            <p>The one link and QR every guest uses — to RSVP, find the venue, and follow along.</p>
+          </div>
+
+          <!-- public URL card -->
+          <div class="card urlcard">
+            <p class="lbl">Your public URL</p>
+            <h2>Share this with every guest</h2>
+            <div class="urlchip">https://setnayan.com/maria-and-juan</div>
+            <div class="btnrow">
+              <button class="btn btn-mulberry"><i data-lucide="copy"></i> Copy link</button>
+              <button class="btn btn-ghost"><i data-lucide="external-link"></i> Open in new tab</button>
+            </div>
+            <div class="slugedit">
+              <span class="l"><i data-lucide="pencil"></i> Change your slug</span>
+              <span class="e">Edit</span>
+            </div>
+            <div class="qrwrap">
+              <div>
+                <div class="qrbox"><i data-lucide="qr-code"></i></div>
+                <p class="qrcap">Public QR</p>
+              </div>
+            </div>
+            <div class="preview-head">
+              <span class="lbl">Live preview</span>
+              <span class="open">Open full preview <i data-lucide="arrow-right"></i></span>
+            </div>
+            <div class="iframe-mock">
+              <div class="lp">
+                <div class="mono-m">M&amp;J</div>
+                <div class="nm">Maria &amp; Juan</div>
+                <div class="dt">December 18, 2026</div>
+              </div>
+            </div>
+            <p class="tiny muted" style="margin-top:8px">This is what every guest sees when they scan their QR.</p>
+          </div>
+
+          <!-- step 1 rows -->
+          <ul class="rows">
+            <a class="row" href="#"><span class="ic"><i data-lucide="users"></i></span><div class="body"><div class="t">Manage RSVPs</div><div class="b">7 guests still to hear from.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="lock"></i></span><div class="body"><div class="t">Set who can view</div><div class="b">Public, unlisted, or private — change anytime.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="download"></i></span><div class="body"><div class="t">Download your QR</div><div class="b">PNG with your monogram — print it, post it, share it.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+          </ul>
+        </section>
+
+        <!-- STEP 2 · SAVE THE DATE & INVITATION -->
+        <section class="step">
+          <div class="step-head">
+            <span class="st">Step 2</span>
+            <h2 class="serif-h">Save the date &amp; your invitation</h2>
+            <p>Shape the page your guests see before the big day.</p>
+          </div>
+          <ul class="rows">
+            <a class="row" href="#"><span class="ic"><i data-lucide="pencil"></i></span><div class="body"><div class="t">Edit your branding</div><div class="b">Monogram, names, and your invitation-site styling.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="image-plus"></i></span><div class="body"><div class="t">Edit your hero photo</div><div class="b">The full-bleed banner at the top of your page.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="camera"></i></span><div class="body"><div class="t">Edit photo moments</div><div class="b">Phone-down, cameras welcome, or reserved for your paparazzo.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="shirt"></i></span><div class="body"><div class="t">Edit dress code</div><div class="b">Headline, palette, and dos &amp; don&rsquo;ts for your guests.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="layout-grid"></i></span><div class="body"><div class="t">Customize widgets</div><div class="b">Show, hide, and reorder the sections on your page.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="video"></i></span><div class="body"><div class="t">Save-the-Date video</div><div class="b">A 60-second teaser from the template gallery.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <li class="row soon"><span class="ic"><i data-lucide="wand-2"></i></span><div class="body"><div class="t">Animated monogram</div><div class="b">Your monogram draws itself in over a custom video or photo.</div></div><span class="soon-chip">Coming soon</span></li>
+            <li class="row soon"><span class="ic"><i data-lucide="qr-code"></i></span><div class="body"><div class="t">Custom QR for every guest</div><div class="b">A personal QR per guest that opens their own invitation.</div></div><span class="soon-chip">Coming soon</span></li>
+          </ul>
+        </section>
+
+        <!-- STEP 3 · ON THE DAY -->
+        <section class="step">
+          <div class="step-head">
+            <span class="st">Step 3</span>
+            <h2 class="serif-h">On the day</h2>
+            <p>What goes live while your guests are celebrating.</p>
+          </div>
+          <ul class="rows">
+            <a class="row" href="#"><span class="ic"><i data-lucide="eye"></i></span><div class="body"><div class="t">Preview day-of mode</div><div class="b">See exactly what guests see from one hour before to eight after.</div></div><span class="chev"><i data-lucide="arrow-up-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="tv"></i></span><div class="body"><div class="t">Live stream — Panood</div><div class="b">Broadcast your ceremony to the guests who can&rsquo;t be there.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <li class="row soon"><span class="ic"><i data-lucide="monitor-play"></i></span><div class="body"><div class="t">Live photo wall</div><div class="b">Guest photos on the venue screen as they&rsquo;re taken.</div></div><span class="soon-chip">Coming soon</span></li>
+            <a class="row" href="#"><span class="ic"><i data-lucide="camera"></i></span><div class="body"><div class="t">Candid capture — Papic for guests</div><div class="b">Turn your guests&rsquo; phones into a shared candid camera.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="aperture"></i></span><div class="body"><div class="t">Paparazzo seats — Papic</div><div class="b">Dedicated capture seats for the shooters you pick.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+            <a class="row" href="#"><span class="ic"><i data-lucide="film"></i></span><div class="body"><div class="t">Patiktok booth</div><div class="b">A vertical-reel booth your guests can play with.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+          </ul>
+        </section>
+
+        <!-- STEP 4 · AFTER THE WEDDING -->
+        <section class="step">
+          <div class="step-head">
+            <span class="st">Step 4</span>
+            <h2 class="serif-h">After the wedding</h2>
+            <p>Turn your day into a keepsake — coming soon.</p>
+          </div>
+          <ul class="rows">
+            <li class="row soon"><span class="ic"><i data-lucide="newspaper"></i></span><div class="body"><div class="t">Create your editorial</div><div class="b">A magazine-style story of your wedding, right on your page.</div></div><span class="soon-chip">Coming soon</span></li>
+            <li class="row soon"><span class="ic"><i data-lucide="star"></i></span><div class="body"><div class="t">Collect reviews</div><div class="b">Invite your guests and vendors to leave a note.</div></div><span class="soon-chip">Coming soon</span></li>
+            <li class="row soon"><span class="ic"><i data-lucide="images"></i></span><div class="body"><div class="t">Pick your photos</div><div class="b">Curate the gallery your guests get to keep.</div></div><span class="soon-chip">Coming soon</span></li>
+            <li class="row soon"><span class="ic"><i data-lucide="heart"></i></span><div class="body"><div class="t">Thank-you video</div><div class="b">A short thank-you to everyone who celebrated with you.</div></div><span class="soon-chip">Coming soon</span></li>
+          </ul>
+        </section>
+
+        <!-- STEP 5 · KEEP YOUR PHOTOS -->
+        <section class="step">
+          <div class="step-head">
+            <span class="st">Step 5</span>
+            <h2 class="serif-h">Keep your photos</h2>
+            <p>Save the full album to your own Google Drive.</p>
+          </div>
+          <ul class="rows">
+            <a class="row" href="#"><span class="ic"><i data-lucide="cloud"></i></span><div class="body"><div class="t">Sync to Google Drive</div><div class="b">Connect Drive so every photo lands in your own folder.</div></div><span class="chev"><i data-lucide="arrow-right"></i></span></a>
+          </ul>
+        </section>
+
+        <!-- FREE VS PRO (existing panel) -->
+        <section>
+          <div class="fvp-head">Free vs Pro</div>
+          <div class="fvp-grid">
+            <article class="fvp-card fvp-free">
+              <p class="pe">Always free</p>
+              <h3>Your wedding website</h3>
+              <p class="sub">Everything below ships the moment your event is created — no upgrade needed.</p>
+              <ul class="fvp-list">
+                <li><i data-lucide="check-circle-2"></i> Public URL with your branded QR code</li>
+                <li><i data-lucide="check-circle-2"></i> Hero photo + countdown to your wedding date</li>
+                <li><i data-lucide="check-circle-2"></i> RSVP form, guest list, and personal invitations</li>
+                <li><i data-lucide="check-circle-2"></i> Day-of schedule for your guests</li>
+                <li><i data-lucide="check-circle-2"></i> Photo moments, dress code, and venue map widgets</li>
+                <li><i data-lucide="check-circle-2"></i> Public, unlisted, or private — your call</li>
+                <li><i data-lucide="check-circle-2"></i> Your website stays live forever — no time limit</li>
+              </ul>
+            </article>
+            <article class="fvp-card fvp-pro">
+              <p class="pe"><i data-lucide="sparkles"></i> Pro upgrade</p>
+              <h3><i data-lucide="wand-2"></i> Monogram Hero</h3>
+              <p class="sub">Animated monogram trace + your own video or photo background.</p>
+              <ul class="fvp-list">
+                <li><i data-lucide="check-circle-2"></i> Your monogram draws itself in on page load</li>
+                <li><i data-lucide="check-circle-2"></i> Custom video or photo background behind the monogram</li>
+                <li><i data-lucide="check-circle-2"></i> PNG monogram converts to SVG so it can animate</li>
+                <li><i data-lucide="check-circle-2"></i> Preview the result before you pay</li>
+              </ul>
+              <div class="fvp-price"><span class="amt">&#8369;1,999</span><span class="sl">one-time, for this event</span></div>
+              <button class="fvp-up">Upgrade <i data-lucide="arrow-up-right"></i></button>
+            </article>
+            <article class="fvp-card fvp-pro">
+              <p class="pe"><i data-lucide="sparkles"></i> Pro upgrade</p>
+              <h3><i data-lucide="calendar-clock"></i> Live Schedule</h3>
+              <p class="sub">Light up the &lsquo;happening now&rsquo; moment on your schedule.</p>
+              <ul class="fvp-list">
+                <li><i data-lucide="check-circle-2"></i> &ldquo;Happening now&rdquo; highlight on the day-of schedule widget</li>
+                <li><i data-lucide="check-circle-2"></i> Auto-scrolls to the current moment for guests</li>
+                <li><i data-lucide="check-circle-2"></i> Glows on the venue screen when each block kicks in</li>
+                <li><i data-lucide="check-circle-2"></i> Works on phones, tablets, and the big screen</li>
+              </ul>
+              <div class="fvp-price"><span class="amt">&#8369;999</span><span class="sl">one-time, for this event</span></div>
+              <button class="fvp-up">Upgrade <i data-lucide="arrow-up-right"></i></button>
+            </article>
+          </div>
+        </section>
+
+        <!-- FOOTER NOTE -->
+        <footer class="foot">
+          Your wedding URL is live from the moment your event is created. Guests can scan the QR or open the link anytime — it stays the same throughout your engagement, on the day itself, and as your wedding becomes a keepsake page after.
+        </footer>
+
+      </div>
+    </div>
+
+    <!-- bottom nav (customer 6-tab, single row) -->
+    <nav class="bottomnav">
+      <span class="tab"><i data-lucide="sparkles"></i>Today</span>
+      <span class="tab"><i data-lucide="home"></i>Home</span>
+      <span class="tab"><i data-lucide="users"></i>Guests</span>
+      <span class="tab active"><i data-lucide="globe"></i>Website</span>
+      <span class="tab"><i data-lucide="store"></i>Add-ons</span>
+      <span class="tab"><i data-lucide="menu"></i>More</span>
+    </nav>
+  </div>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>

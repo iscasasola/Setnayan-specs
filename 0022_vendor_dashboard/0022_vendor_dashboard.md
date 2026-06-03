@@ -44,6 +44,8 @@ vendors(
 )
 ```
 
+**`digital_services` is a registrable category (2026-06-03).** `service_category_primary` / `service_category_secondary[]` draw from the marketplace taxonomy, which now includes the **Design › Digital Services** child. A 3rd-party digital vendor (freelance monogram designer · wedding-website builder · LED-content studio) can register under it — it is a **generic, vendor-listable** category, not a Setnayan-only shelf; the 5 Setnayan services (Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw) surface as options inside the same tile. Canonical key `digital_services` added to the `0006` enum. See [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md).
+
 ### 2.1b Mandatory vendor logo (locked 2026-05-12)
 
 Every vendor must upload a company logo as part of registration. The logo is a **hard-blocking requirement** at the verification stage — vendors cannot submit their registration application without one, and Setnayan Team verification cannot approve a vendor whose `logo_r2_key` is missing.

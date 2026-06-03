@@ -1,0 +1,79 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=393,initial-scale=1">
+<style>
+:root{--m-paper:#FBFBFA;--m-ink:#1E2229;--m-ink-soft:#5C6660;--m-orange:#C5A059;--m-orange-2:#8C6932;--m-orange-4:#F4ECD8;--m-mulberry:#5C2542;--font-serif:'Cormorant Garamond',Georgia,serif;--font-sans:system-ui,sans-serif;--font-mono:ui-monospace,monospace}
+body{margin:0}
+</style></head><body>
+<!-- This mirror pastes the overlay component's CSS + a sample markup to verify layout -->
+<div id="root"></div>
+<script>
+// CSS lifted verbatim from category-search-overlay.tsx CSS const
+const CSS = `
+.csov{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;
+  --paper:var(--m-paper,#FBFBFA);--ink:var(--m-ink,#1E2229);--ink-soft:var(--m-ink-soft,#5C6660);
+  --gold:var(--m-orange,#C5A059);--gold-deep:var(--m-orange-2,#8C6932);--mulberry:var(--m-mulberry,#5C2542);
+  --line:rgba(30,34,41,.1);
+  --serif:var(--font-serif,'Cormorant Garamond',serif);--sans:var(--font-sans,'Manrope',system-ui,sans-serif);--mono:var(--font-mono,'DM Mono',ui-monospace,monospace);
+  background:var(--paper);color:var(--ink);font-family:var(--sans)}
+.csov *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.csov .head{flex:0 0 auto;padding:14px 18px 12px;border-bottom:1px solid var(--line);background:var(--paper)}
+.csov .x{width:38px;height:38px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1}
+.csov .eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep);margin:12px 0 3px}
+.csov .title{font-family:var(--serif);font-style:italic;font-size:27px;line-height:1.04;color:var(--ink)}
+.csov .scope{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--ink-soft);margin-top:6px}
+.csov .results{flex:1 1 auto;overflow-y:auto;padding:14px 16px 18px}
+.csov .r{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:16px;background:#fff;padding:11px;margin-bottom:10px}
+.csov .r.added{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.csov .r .img{flex:0 0 64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#efe9df,#e4dccd);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:20px;font-weight:600;color:var(--gold-deep)}
+.csov .r .meta{flex:1 1 auto;min-width:0}
+.csov .r .vn{font-family:var(--serif);font-style:italic;font-size:17px;font-weight:600;line-height:1.12;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.csov .r .sub{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:3px;font-family:var(--mono);font-size:8.5px;letter-spacing:.03em;color:var(--ink-soft)}
+.csov .r .stars{color:var(--gold-deep)}
+.csov .r .badge{display:inline-flex;align-items:center;gap:3px;border-radius:999px;padding:2px 6px;text-transform:uppercase}
+.csov .r .badge.v{color:var(--gold-deep);background:rgba(197,160,89,.16)}
+.csov .r .badge.b{color:var(--mulberry);background:rgba(92,37,66,.1)}
+.csov .r .addbtn{flex:0 0 auto;align-self:center;border:1px solid var(--mulberry);background:var(--mulberry);color:#fff;border-radius:999px;padding:8px 14px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;min-height:38px}
+.csov .r .addbtn.done{border-color:var(--gold);background:transparent;color:var(--gold-deep)}
+.csov .foot{flex:0 0 auto;display:flex;gap:10px;align-items:center;padding:12px 16px;border-top:1px solid var(--line);background:var(--paper)}
+.csov .searchwrap{flex:1 1 auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;background:#fff;padding:0 14px;min-height:44px}
+.csov .searchwrap input{flex:1;border:0;outline:0;background:transparent;font-family:var(--sans);font-size:14px;color:var(--ink);min-width:0}
+.csov .searchwrap .si{color:var(--ink-soft);font-size:15px}
+.csov .filterbtn{flex:0 0 auto;display:flex;align-items:center;gap:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:999px;padding:0 16px;min-height:44px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
+.csov .filterbtn .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+`;
+const VENDORS = [
+  {n:"Casa Ardiente Pavilion",city:null,d:4.2,r:4.9,rev:128,v:true,b:true,added:false},
+  {n:"Manila Wedding Photographer #4218",city:null,d:6.1,r:4.8,rev:96,v:true,b:false,added:false},
+  {n:"National Shrine of the Sacred Heart",city:null,d:8.4,r:4.7,rev:54,v:true,b:false,added:true},
+  {n:"Lumina Garden Events",city:"Tagaytay",d:18.9,r:4.6,rev:41,v:false,b:false,added:false},
+  {n:"Quezon City Wedding Photographer #5102",city:null,d:null,r:null,rev:0,v:false,b:false,added:false},
+];
+function init(s){return s.split(/\s+/).filter(Boolean).slice(0,1).map(x=>x.toUpperCase()).join('').slice(0,2)||'·';}
+const rows = VENDORS.map(x=>`<div class="r${x.added?' added':''}">
+  <div class="img">${init(x.n)}</div>
+  <div class="meta">
+    <div class="vn">${x.n}</div>
+    <div class="sub">
+      ${x.r!==null&&x.rev?`<span class="stars">★ ${x.r.toFixed(1)} (${x.rev})</span>`:''}
+      ${x.d!==null?`<span>${x.d} km</span>`:(x.city?`<span>${x.city}</span>`:'')}
+      ${x.v?'<span class="badge v">Verified</span>':''}
+      ${x.b?'<span class="badge b">Featured</span>':''}
+    </div>
+  </div>
+  <button class="addbtn${x.added?' done':''}">${x.added?'✓ Added':'+ Add'}</button>
+</div>`).join('');
+document.getElementById('root').innerHTML = `<style>${CSS}</style>
+<div class="csov">
+  <div class="head">
+    <button class="x">✕</button>
+    <div class="eyebrow">Add to your plan</div>
+    <div class="title">Reception venue</div>
+    <div class="scope">Showing only reception venue vendors · 5 near you</div>
+  </div>
+  <div class="results">${rows}</div>
+  <div class="foot">
+    <div class="searchwrap"><span class="si">⌕</span><input type="search" placeholder="Search reception venue…"></div>
+    <button class="filterbtn"><span class="dot"></span>Filter</button>
+  </div>
+</div>`;
+</script>
+</body></html>

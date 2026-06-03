@@ -15,9 +15,9 @@
 
 A couple-facing dashboard panel that **uploads the entire finalized wedding photo + clip archive to a Google Drive folder the couple controls.** The couple connects their Drive via OAuth, picks a sync mode for the event, and either reviews/approves photos through the existing 7-day review window before clicking "Release to Drive" (manual mode) — or lets photos flow into Drive in real-time as they land in R2 (auto-sync mode). Setnayan's backend runs a background job that uploads in batches with retry/resume, and notifies the couple when each upload (or the final release) completes.
 
-**Sync mode is set per event** (added 2026-05-20 per owner clarification):
-- **`manual_release`** (default) — couple clicks "Release to Drive" once they've finished reviewing. Lower Drive API cost; couple stays in control of when photos leave Setnayan. Matches the original spec workflow.
-- **`auto_sync`** (opt-in) — every photo that lands in R2 streams to Drive in real-time (Papic captures from iteration 0012 and photographer uploads alike). No release gate. Couple sees the archive grow live during the event.
+**Sync mode is set per event** (added 2026-05-20; default flipped to `auto_sync` 2026-06-01 per owner):
+- **`auto_sync`** (DEFAULT, 2026-06-01) — every photo that lands in R2 streams to the couple's Drive in real-time (Papic captures from iteration 0012 and photographer uploads alike). No release gate; the couple sees their archive grow live during the event. **Graceful default:** live mirroring fires once the couple has connected their Drive (OAuth); if they haven't connected pre-event — or their Drive is storage-limited — the archive holds in R2 and `auto_sync` back-fills the moment they connect, so the default never breaks. Couples are nudged to connect their Drive early (onboarding "Link Now" + a pre-event reminder) so live sync can actually fire. **Direct ≠ bypass:** media still flows through Setnayan/R2 first — required for auto-tagging (face + QR), same-day guest delivery, the gallery, the 7-day review window, and offline-resilient capture; `auto_sync` is a real-time *mirror* to the couple's Drive, not a device-to-Drive bypass.
+- **`manual_release`** (opt-out) — couple clicks "Release to Drive" once they've finished reviewing. Lower Drive API cost; couple stays in control of when photos leave Setnayan. The explicit choice for couples who'd rather review-then-release than sync live.
 
 This is the "deliverables-to-the-couple" pipeline and the **downstream drain of every photo source** that feeds R2 — Papic captures from iteration 0012 (in R2-default storage mode), photographer uploads via the existing vendor delivery flow, and Auto-Recap output from 0012 § 5. Wedding photographers traditionally hand over a hard drive or shared folder of photos after the event; Setnayan replaces that ceremony with an automated push to the couple's own cloud. Once delivered, the couple owns the complete archive in their own Drive — Setnayan also keeps an R2 backup for 5 years per spec 10's retention policy, but the couple's primary archive is on their account.
 
@@ -81,13 +81,16 @@ ALTER TABLE events ADD COLUMN photo_delivery_account_email TEXT;
   -- Stored from OAuth profile claim, displayed in the panel ("m••• @ gmail.com")
 ALTER TABLE events ADD COLUMN photo_delivery_status TEXT NOT NULL DEFAULT 'idle'
   CHECK (photo_delivery_status IN ('idle', 'connected', 'releasing', 'uploading', 'paused', 'complete', 'failed'));
-ALTER TABLE events ADD COLUMN photo_delivery_sync_mode TEXT NOT NULL DEFAULT 'manual_release'
+ALTER TABLE events ADD COLUMN photo_delivery_sync_mode TEXT NOT NULL DEFAULT 'auto_sync'
   CHECK (photo_delivery_sync_mode IN ('manual_release', 'auto_sync'));
-  -- Set per event (added 2026-05-20 per owner clarification). 'manual_release' =
-  -- couple clicks Release after the 7-day review window; 'auto_sync' = photos
-  -- stream to Drive in real-time as they land in R2 (Papic captures + photographer
-  -- uploads alike). The background job branches on this column to decide whether
-  -- to wait for photos_released_at or fire on each new photos row insertion.
+  -- Set per event (added 2026-05-20; DEFAULT flipped 'manual_release' → 'auto_sync'
+  -- 2026-06-01 per owner). 'auto_sync' (default) = photos stream to the couple's
+  -- Drive in real-time as they land in R2 (Papic captures + photographer uploads)
+  -- ONCE their Drive is connected; if not connected / storage-limited the archive
+  -- holds in R2 and back-fills on connect (the default never breaks). 'manual_release'
+  -- (opt-out) = couple clicks Release after the 7-day review window. The background
+  -- job branches on this column + Drive-connect state to wait for photos_released_at /
+  -- connect or fire on each new photos row insertion.
 ALTER TABLE events ADD COLUMN photo_delivery_progress_pct INT NOT NULL DEFAULT 0;
 ALTER TABLE events ADD COLUMN photo_delivery_started_at TIMESTAMPTZ;
 ALTER TABLE events ADD COLUMN photo_delivery_completed_at TIMESTAMPTZ;

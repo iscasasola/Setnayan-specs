@@ -61,6 +61,8 @@ The dashboard is event-scoped at `setnayan.com/dashboard/[event_id]/...`. Eight 
 
 Mobile uses the 4-tab bottom-nav from 0000 (Guests / Vendors / Schedule / Services). Surfaces 1 (Overview), 6 (Seat Plan), 7 (Landing Page), 8 (QR Hub), 9 (Gallery) are reached via Home cards or the **dashboard home icon** (see 2.0a below).
 
+**Digital Services group in the Services tab (2026-06-03).** The Services / Add-ons surface groups the five Setnayan digital productions — **Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw** — under a **"Digital Services"** section (mirroring the marketplace `Design › Digital Services` child), each carrying the **✦ Setnayan** badge and its **canonical name**. This fixes the prototype's label drift — retire "Paparazzi"→Papic, "Live Stream"→Panood, "LED Background"→Pailaw, "Invitation Bundle"→Pro Website, "Custom Monogram"→Animated Monogram. Pakanta + Live Venue Photo Wall are currently **missing** from the prototype and must be added. Full canon: [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md).
+
 ### 2.0a Home layout · Guided mode default · DIY toggle
 
 Home is the daily-driver. Couples spend more time here than anywhere else. The layout is intentionally **calmer than a dashboard** — closer to a friend giving you the day's checklist than an analytics screen.
