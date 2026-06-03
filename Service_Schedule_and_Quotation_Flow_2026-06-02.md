@@ -128,6 +128,8 @@ Each service page shows: the active quotation (photos + line items + linked serv
 
 > **Two payment realities on the dashboard** (keep the service-page status unambiguous): **(a) external vendor services** = tracked-only, vendor-set deadlines, off-platform money, customer-approves-the-figure (this doc). **(b) Setnayan Productions SKUs** (Papic, Panood, etc.) = real Setnayan checkout (apply-then-pay / future Setnayan Pay). Different payment realities; same dashboard.
 
+> **In-app Setnayan services are EXEMPT from this entire lifecycle (owner-locked 2026-06-03).** The Track-1 engagement machinery (inquiry → Accept/Decline → token → whitelist → lock → vendor-approved-confirm, the date-as-hard-gate T1.5, the capacity slot-consume, and the T1.6 7-day couple-delete-gate / nudge) is **external-vendor-only.** Setnayan's own in-app services (`is_setnayan_service = true` · Papic · Panood · Pakanta · Save-the-Date · …) are **always-on and Setnayan-fulfilled**, so they never enter this state machine — an inquiry against them would otherwise sit in `requested` **forever** (no outside vendor to Accept). They are **add-and-pay** via the [0034](0034_payments_and_cart/0034_payments_and_cart.md) apply-then-pay checkout, available regardless of the wedding date. The same `is_setnayan_service` flag that floats them to the top of the marketplace also carves them out here. See DECISION_LOG 2026-06-03 "♾️ In-app services are ALWAYS-ON + direct-checkout".
+
 ---
 
 ## 4 · What this supersedes / reconciles

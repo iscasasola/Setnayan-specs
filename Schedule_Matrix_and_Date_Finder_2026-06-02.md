@@ -29,6 +29,8 @@ The honesty fix that makes empty calendars safe — never call a no-data vendor 
 | ◇ No conflicts on file | The vendor has no data for that day | "No conflicts on file — confirm with vendor" |
 | ✗ Busy | The vendor is full / blocked that date | "Booked" |
 
+**In-app Setnayan services are EXCLUDED from this matrix (owner-locked 2026-06-03).** The availability states + date-gate here are **external-vendor-only.** Setnayan's own in-app services (`is_setnayan_service = true`) are **always-available** (Setnayan-fulfilled · no wedding-date constraint), so they never date-gate, never consume `daily_booking_capacity`, and never appear as a row in the find-your-date grid — they're add-and-pay anytime ([0034](0034_payments_and_cart/0034_payments_and_cart.md)). See DECISION_LOG 2026-06-03 "♾️ In-app services are ALWAYS-ON + direct-checkout".
+
 ## 2. Capacity-aware blocking (the 2026-06-02 refinement)
 
 A date is **not** blocked the moment someone pays — it's blocked when the vendor **runs out of slots for that day.**

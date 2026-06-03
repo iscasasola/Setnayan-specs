@@ -88,28 +88,39 @@ Every vendor must upload a company logo as part of registration. The logo is a *
 
 The vendor's logo is the customer's primary visual handle on the vendor across every Setnayan surface. Per § 3.10 of the Vendor Agreement and the 0019 chat identity masking rule, the customer never sees the individual sender's profile photo on vendor-side messages — they see the logo. A vendor without a logo would leave the customer staring at a default avatar placeholder on every chat bubble, which (a) breaks brand consistency, (b) downgrades the vendor's perceived professionalism, (c) is visually indistinguishable from a vendor who hasn't been verified yet. Making logo upload mandatory at registration removes that failure mode.
 
-### 2.1a Vendor-proposed custom categories
+### 2.1a Vendor-proposed custom categories & details
 
-Vendors aren't locked into the 28 canonical wedding service categories. If their offering doesn't fit (e.g., "Heirloom photo restoration," "Filipino-Catholic ceremony coordination," "Bespoke barong tailoring"), they propose a custom category from the service editor.
+Vendors aren't locked into the marketplace taxonomy (the **10-parent / ~53-tile** shrunk model — see [Vendor_Taxonomy_Shrink_2026-05-30.md](../Vendor_Taxonomy_Shrink_2026-05-30.md)). If their offering doesn't fit, they request a new node from the service editor at one of two grains:
+
+- a new **category / child-tile** — a whole shopping decision with no existing tile (rare); or
+- a new **detail / facet** within an existing tile — a refinement (e.g. a new shoot-type under Photo & Video, a new booth type) — the common case post-shrink.
+
+(New **parent families** — the 10 top-level groups — are owner-level structural calls, not vendor-requestable.)
 
 **Flow:**
 
-1. **Publish today as private label.** New category is saved on the vendor's services immediately. It's visible to couples viewing that vendor's page but doesn't appear in the marketplace's category-filter dropdown yet.
-2. **Admin review (3 business days).** Setnayan Team checks: is this duplicated? does the naming fit the taxonomy? is it scoped sensibly?
-3. **Outcome A — promoted to global.** Category enters the canonical taxonomy. Other vendors can opt into it. The proposing vendor keeps the "first vendor" credit.
-4. **Outcome B — kept private.** Category remains a private label scoped to the proposing vendor's record. They keep using it; it doesn't appear in marketplace filters.
+1. **Publish today as private label.** The node is saved on the vendor's services immediately — visible to couples viewing that vendor's page, but not yet in the marketplace's category-filter dropdown / facet list.
+2. **Admin review (3 business days)** — routed to the 0023 §3.2c *Custom category & detail review* queue, which answers *"does this already exist in our taxonomy?"* (duplication · naming fit · scope).
+3. **Four outcomes:**
+   - **Map to existing** — "your *X* is our existing *Y*": the vendor's service is **re-pointed onto the matched canonical**; the private-label row is retired (`scope='merged'`, `merged_into_category_id` set) and the vendor is notified. No new node created.
+   - **Promote to global** — genuinely new: the node enters the canonical taxonomy, the proposing vendor keeps the **"first-vendor" credit**, and it auto-appears in the onboarding picker, couple browse, and filters.
+   - **Keep private** — valid but niche: remains scoped to the proposing vendor's record.
+   - **Reject** — mis-scoped, with reason.
 
 **Schema:**
 
 ```
 service_categories(
   category_id, name, parent_family,
-  scope enum('canonical','private'),
+  scope enum('canonical','private','merged'),
+  merged_into_category_id?,            -- set when scope='merged'; points at the canonical it mapped to
   proposed_by_vendor_id?, proposed_at?,
   reviewed_at?, reviewed_by_admin_id?,
   description, created_at
 )
 ```
+
+On a **map-to-existing** outcome, `vendor_services.service_category` (or, for detail-grain requests, the facet attribute payload) re-points from the private-label to the matched canonical. The `merged_into_category_id` count is a **demand signal** — when many vendors are mapped *X→Y*, that's the trigger that *X* has earned its own node (demand-driven, admin-gated expansion). See DECISION_LOG 2026-06-03 "🌳 Admin-gated expandable taxonomy".
 
 Matches the existing admin curation workflow (CLAUDE.md 2026-05-XX: "stylist/vendor additions to globally-shared template libraries go to admin review queue. Admin approves for global use OR keeps isolated").
 
@@ -151,6 +162,8 @@ vendor_services(
 ```
 
 Multi-service vendors hold multiple rows. Each service has its own calendar (per Pro feature).
+
+**Setnayan's own in-app services use this same object (clarified 2026-06-03).** Setnayan's first-party services (Papic · Panood · Pakanta · Patiktok · Pailaw · Animated Monogram · Pro Website · …) are **listings on the Setnayan first-party vendor account**, priced through this exact template — that account, run by the Setnayan team via this dashboard, **is** the "admin control" the owner means (*"controlled by our admin account"*). `pricing_model`/`per_pax_tiers_json`/`min_pax`/`max_pax` carry **per-pax** (the 2026-06-01 **100-pax floor + per-50 increment** = `min_pax = 100` + 50-step tiers, **no new columns**); the Universal Service Template's BASIC *Time* coverage + `price_unit` + FEES line items carry **per-hour / per-event** and **added costs**; `inclusions_md` / INCLUSIONS carry **inclusions**. There is **no separate admin SKU-catalog pricing editor** for these — see DECISION_LOG 2026-06-03 "🧾 In-app services pricing IS the vendor template".
 
 ### 2.2a Crew size on service definition (locked 2026-05-12)
 
