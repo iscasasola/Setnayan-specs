@@ -221,7 +221,7 @@ Once an event is open, this is what the couple sees every screen:
 - Mobile pattern: bottom sheet rises from the bottom.
 - Desktop pattern: dropdown / popover anchored under the monogram caret.
 - Contents (top to bottom):
-  1. `+ Add event` row → opens the same hero-photo event-type carousel as a bottom sheet (mobile) / popover (desktop), with all nine event types live + tappable. (The earlier "tap an upcoming tile to be notified" copy was removed 2026-06-03 — no notify flow exists. The in-app subtitle still reads *"…more event types unlock over time,"* which is roadmap-flavored; a copy tweak to fully match "keep everything live" is a noted follow-up.)
+  1. `+ Add event` row → opens the same hero-photo event-type carousel as a bottom sheet (mobile) / popover (desktop), with all nine event types live + tappable. Subtitle: *"Swipe through and tap the one you're planning."* (The earlier "tap an upcoming tile to be notified" copy was removed 2026-06-03 — no notify flow; the "more event types unlock over time" line was replaced 2026-06-04 (#928) to match the all-live state.)
   2. Event list — primary first, marked with star; each row showing monogram + event name + wedding-date pill (or "date TBD" when `wedding_date IS NULL`).
   3. **Role-switch rows** (locked 2026-05-15) — thin separator above, then:
      - **Shop console** — visible when the user is a vendor owner (`vendors.owner_user_id = auth.uid()`) OR sits in any `vendor_service_agents.member_id` row. Tap routes to iteration 0022. When the user sits across multiple vendors, this expands into a sub-menu listing each vendor with its logo + business name; tap one to enter that shop console.
