@@ -69,7 +69,7 @@ The four onboarding basics already exist (`events.event_date` · region · `even
 | Basic | Applies as | Where it bites | Notes |
 |---|---|---|---|
 | **Wedding date** | HARD filter (available-on-date) **OR** candidate-set resolution | every category | **2 modes (owner 2026-06-01, merged from 3).** *Specific dates* (`date_candidates DATE[]`, **1–4**, clustered within a live-shrinking ±90-day window · 1 date = the old exact case) **and** *Flexible window* (`date_window_start…date_window_end`, ≤30 days inclusive): the date isn't fixed — a vendor passes if free on **any** candidate day (the 1–4 discrete dates, or any day in the span), and the wedding date *converges* on the candidate all the couple's chosen vendors share (see note). A single specific date behaves like a hard available-on-date filter. Vendors with no calendar data are treated as available (don't punish unset). |
-| **Region / area** | HARD filter (serves-area) | every category | vendor's reach radius (tier-bound: Free 10km … Enterprise 100km) must cover the couple's region centroid (or exact venue coords once set). |
+| **Reception proximity** *(was "Region / area")* | HARD filter (serves-area) | every category | **`haversine(area, vendor_base) ≤ service_radius` OR `area ∈ vendor served-area tags`** (HYBRID — radius tier-bound Free 10km … Enterprise 100km is the local default; explicit tags carry declared far coverage, per service), anchored on the chosen **reception venue's coords** (§2a). **Auto-derived region membership is never the filter** — see §2b (2026-06-04 · hybrid amended same day). |
 | **Estimated pax** | HARD filter (accommodates-pax) | **capacity-bound categories only** | Reception venue (seats ≥ pax), Catering (caters ≥ pax), Stations (servings), Guest Shuttle (seats), Lights & Sound (room scale). Ignored everywhere else (a monogram designer has no headcount limit). |
 | **Target budget** | SOFT sort + display | every category | only the *total* budget is captured (no per-category allocation in V1.x), so budget **nudges in-budget vendors up** as a tiebreaker and shows an "in your range" chip — it never excludes. (Per-category budget allocation is a later refinement; it would also wire the Plan + Budget accordion's range math.) |
 
@@ -86,6 +86,20 @@ The four onboarding basics already exist (`events.event_date` · region · `even
 - **Anchor precedence:** locked reception → oldest-'considering' reception (stable first-saved-wins, so the anchor doesn't thrash while the couple explores) → region centroid / onboarding fallback (never blanked). Coords resolve from `vendor_profiles.hq_*` (marketplace) OR `venue_directory.hq_*` (admin-seeded).
 - "Nearby" then means **near the party** — the metric that drives vendor logistics + the 0007 Transportation budget line.
 - **The other half of directive 3 — reception availability *gating the candidate dates* — is the deferred find-date build** ([Schedule_Matrix_and_Date_Finder_2026-06-02.md](Schedule_Matrix_and_Date_Finder_2026-06-02.md) §5a), kept separate so the shipped distance-anchor didn't touch the date-finder on a live pilot.
+
+---
+
+## 2b · Region is a display label, not the filter — CORRECTION (owner-asked · 2026-06-04)
+
+**Supersedes** the earlier framing in §2 (region row) + the Onboarding Blueprint that treated **`events.region` as the area hard-filter** ("derive region so the area-filter works"). The actual area gate is **proximity to the reception anchor** (§2a):
+
+- **Coverage = proximity OR declared service-area tag (HYBRID · amended 2026-06-04 PM, owner-asked):** a vendor serves the couple's area **C** iff **`haversine(C, vendor_base) ≤ vendor.service_radius`** (Free 10km … Enterprise 100km — the *local* default) **OR** **C (or C's region) ∈ the vendor's explicit served-area tags** (`service_regions`, extended to city grain). The radius auto-covers nearby cities so vendors needn't enumerate them; the tags carry **declared coverage beyond the radius** — e.g. a caterer **based in La Union who serves Quezon City tags "Quezon City,"** and a QC couple matches **via the tag** even though the straight-line distance exceeds every radius tier. Coverage is declared **per service** (a vendor's catering service may tag different areas than their other listings). This is **not** a return to region-membership matching: only the vendor's *explicit* tag counts — region is **never auto-derived from the vendor's HQ as a bucket** — so it's vendor-asserted coverage layered on top of distance. The couple's region is otherwise just a **display label** (the "Metro Manila" chip).
+- **The reception venue is the stored anchor.** `events` persists the chosen **reception venue identity + `venue_latitude`/`venue_longitude`**. Onboarding's **"pick up to 2 areas" is transient** — it scopes the *reception-venue search* only and is **not stored** and **not a hard filter**. Once a reception venue is chosen, its coords are the anchor; the areas are discarded.
+- **Two implementation calls (easy to revisit):**
+  1. **Distance = straight-line (haversine)** — free + instant. **Drive-time / road distance is a V2 upgrade**, not V1.
+  2. **Out-of-range vendors are hidden with a count + names** — surfaced as "N vendors outside range: …" (mirrors the §6 "Expand search" affordance), **not greyed in place**.
+
+Until a reception venue is chosen, the anchor falls back per §2a precedence (locked reception → oldest-considering reception → region centroid / onboarding fallback — never blanked), so proximity sort still works pre-anchor.
 
 ---
 

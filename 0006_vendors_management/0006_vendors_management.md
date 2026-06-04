@@ -549,7 +549,7 @@ The DIY-mode vendor browse view (at `/dashboard/{event-id}/vendors/browse`) show
 - **Price band** (range slider in ₱ with histogram backdrop showing distribution of vendor packages)
 - **Available on date** (date picker; defaults to event date)
 - **Tier filter** (any / Standard Verified / Certified / Boosted)
-- **Distance radius from venue** (10 / 20 / 30 / 50 km; default 30 km — uses event venue lat/lon as origin)
+- **Distance radius from venue** (10 / 20 / 30 / 50 km; default 30 km — origin is the **chosen reception venue's lat/lon**, the stored event anchor). This couple-set *discovery* radius is distinct from the vendor's own **"serves my area" hard filter** — `distance(reception_venue, vendor) ≤ vendor.service_radius` (Free 10km … Enterprise 100km). **Region is a display label, not a matching filter** (owner correction 2026-06-04 — supersedes the earlier "derive region so the area-filter works"); distance is straight-line in V1 (drive-time = V2), and out-of-range vendors are hidden with a count + names. Canonical model: [Vendor_Match_Personalization §2a/§2b](../Vendor_Match_Personalization_2026-06-01.md) + DECISION_LOG 2026-06-04.
 - **Years operating** (any / 1+ / 3+ / 5+ years)
 - **Has Setnayan-exclusive offer** (toggle)
 - **Has reviews** (toggle)

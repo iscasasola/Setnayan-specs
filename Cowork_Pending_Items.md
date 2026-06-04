@@ -2,7 +2,7 @@
 
 > Consolidated handoff for the next Cowork session(s). Each row is an item that needs Cowork-style spec work (iteration `.md` edits, contract drafting, `.docx` mirror regen, or owner-validation). Source-of-truth for full context is the playbook + CLAUDE.md decision-log entries cited per row. **This file is a navigation aid — do not duplicate spec content here; it will drift.**
 
-**Last updated:** 2026-05-14
+**Last updated:** 2026-06-04 (§D #10 clarified — Model-B prices ₱9,999/₱2,999 are owner-locked, only the market-test is open · §C SEO-playbook row deduped). 2026-06-03: item #4 retitled/resolved — boost offering landed in 0042 §6.5 + 0023 §3.16; `0036` reassigned to Pakanta.
 
 **Today's contributing decisions** (CLAUDE.md decision log — search by phrase):
 - "Top-nav redesign locked" — nav-chrome amendments + iteration 0003 wallet drift
@@ -20,8 +20,8 @@
 | 1 | **Iteration 0018 — publicly indexable browse pages.** `/supplies/*` must be available without login (cart/checkout auth-only). Templates needed: `/supplies`, `/supplies/[category]`, `/supplies/[category]/[city]`, `/supplies/p/[id]/[slug]` with `Product` + `Offer` + `AggregateRating` schema. Without this, no `/supplies` URLs can rank. | `0018_supplies_marketplace/` | Playbook §1, §4.4, §5.1, §7 |
 | 2 | **Iterations 0006 + 0022 — public vendor profile spec.** `/v/[slug]` needs a "Public profile (SEO-indexable)" subsection committing to slug + public bio + services + packages + photos + city + verified status + reviews as public fields. Without this, no vendor pages can rank. | `0006_vendors_management/` + `0022_vendor_dashboard/` | Playbook §1, §4.4, §5.1 |
 | 3 | **Iteration 0015 — homepage featured-fairs section.** Add an H2 strip surfacing currently-active boosted bridal fairs (max 3, per §11.3.1), with `Event` JSON-LD per fair. Hide when no fair is active. | `0015_main_website/` | Playbook §11.3, §11.3.1 |
-| 4 | **New iteration `0036_bridal_fair_boost_service/`.** Cover: SKU definitions (`boost_featured_only`, `boost_featured_plus_email`), eligibility criteria for fairs, fairs data model (fairs, vendor-fair junction, couple-fair registrations), discount-code redemption mechanics, attribution + tracking, slot-management state machine (per §11.3.1), launch-gate counters + `boost_service_open` flag (per §11.7.1), admin override mechanics for both slot pinning and gate flip. Also: `/fairs` index page + `/fairs/[fair-slug]` template per §11.2. | New iteration folder | Playbook §11.2, §11.3.1, §11.7, §11.7.1 |
-| 5 | **`01_Contracts/Bridal_Fair_Boost_Service_Agreement.md`.** Contract boilerplate covering Model A + Model B terms, deliverables on both sides, discount-code mechanics, cancellation handling, IP / use-of-marks, term length, exclusivity. | `01_Contracts/` | Playbook §11.7, §11.7.1 |
+| 4 | **Fair-to-couple boost offering — mostly RESOLVED 2026-06-03.** `0036` was reassigned to Pakanta; the offering is now spec'd across **`0042` §6.5** (SKUs `boost_featured_plus_email` ₱9,999 + `boost_featured_only` ₱2,999), **`0023` §3.16 + surface #29** (slot management, admin override, broadcast), and playbook §11.x. ~~SKU definitions · fairs data model · discount-code mechanics · slot-management state machine · launch-gate counters + `boost_service_open` flag · admin override~~ → done. **Genuine leftover only:** public `/fairs` index + `/fairs/[fair-slug]` page templates (still unbuilt — **overlaps item #3**). | `0042` §6.5 + `0023` §3.16 (done) · `/fairs` templates → `0042`/`0015` | Playbook §11.2, §11.3.1, §11.7 |
+| ~~5~~ | ~~**`01_Contracts/Bridal_Fair_Boost_Service_Agreement.md`.** Contract boilerplate covering Model A + Model B terms, deliverables on both sides, discount-code mechanics, cancellation handling, IP / use-of-marks, term length, exclusivity.~~ **DONE 2026-06-03** — drafted (v1 draft). Model A barter + Model B cash (₱9,999 / ₱2,999), funnel-code mechanics, cancellation, IP/use-of-marks, term, signature block. ⚠ OWNER-VALIDATE items flagged inline (discount %, perk, eligibility, exclusivity, Model A quarterly cap) — see §D #8–#16. | `01_Contracts/` | Playbook §11.7, §11.7.1 |
 
 ---
 
@@ -43,9 +43,21 @@ Per `COWORK.md` lines 53–54, after modifying any iteration `.md` file, regener
 | `0000_app_shell_and_navigation/0000_app_shell_and_navigation.md` | `0000_app_shell_and_navigation.docx` |
 | `0004_invitation_widgets/0004_invitation_widgets.md` | `0004_invitation_widgets.docx` |
 | `0028_email_notifications/0028_email_notifications.md` | `0028_email_notifications.docx` |
-| `02_Specifications/17_SEO_and_AI_Discoverability_Playbook.md` (NEW) | `02_Specifications/17_SEO_and_AI_Discoverability_Playbook.docx` |
+| ~~`02_Specifications/17_SEO_and_AI_Discoverability_Playbook.md` (NEW)~~ | ~~`…Playbook.docx`~~ — ✅ **already regenerated (see table below); was double-listed · deduped 2026-06-04** |
 
 `CLAUDE.md` is not typically mirrored — verify per project convention.
+
+**2026-06-04 modifications — ✅ mirrors REGENERATED this session** (pandoc 2.9 was available in the Cowork sandbox):
+
+| `.md` file modified | `.docx` mirror | Status |
+|---|---|---|
+| `Vendor_Match_Personalization_2026-06-01.md` (§2 region row + new §2b) | `Vendor_Match_Personalization_2026-06-01.docx` | ✅ regenerated |
+| `Onboarding_Blueprint_2026-05-30.md` (screen-7 area amendment + **UI-table rows 59/68/97 reconciled** to the search/GPS + pick-up-to-2 model — completed the amendment that had lagged) | `Onboarding_Blueprint_2026-05-30.docx` | ✅ regenerated (re-run after the UI-row fix) |
+| `0006_vendors_management/0006_vendors_management.md` (proximity-match note) | `0006_vendors_management/0006_vendors_management.docx` | ✅ regenerated |
+| `02_Specifications/17_SEO_and_AI_Discoverability_Playbook.md` (2026-06-03 0036→0042/0023 repoint) | `…/17_SEO_and_AI_Discoverability_Playbook.docx` | ✅ regenerated |
+| `0044_per_category_schemas/0044_per_category_schemas.md` (geo note + `reception_venue` & `ceremony_venue` schemas + enum migration) | `0044_per_category_schemas/0044_per_category_schemas.docx` | ✅ regenerated |
+
+`DECISION_LOG.md` + `CLAUDE.md` are not mirrored. (Note: the "pandoc not installed in the code env" caveat at the top of §C is true for the *code* worktree but not the Cowork sandbox — mirrors can be regenerated here.)
 
 ---
 
@@ -57,7 +69,7 @@ These are starting recommendations in the playbook that need owner validation ag
 |---|---|---|---|
 | 8 | Vendor booth-fee discount % for fair-registration via Setnayan | 10–15% range | §11.7 + §11.7 open decisions |
 | 9 | Customer perk default for fair-registration via Setnayan | One of: free welcome kit / fast-track entry / first-100-arrivals giveaway (organizer-choice in V1) | §11.7 |
-| 10 | Model B cash tier prices | Rough PH industry ranges anchored to Kasal.com / Bridestory PH featured-listing rates; needs validation with Themes & Motifs and regional fair operators | §11.7 |
+| 10 | Model B cash tier prices | **Owner-locked 2026-06-03: ₱9,999 (`boost_featured_plus_email`) + ₱2,999 (`boost_featured_only`)** — settled for contracts/specs (already in 0042 §6.5 + the signed-agreement draft). The open action is a *market-test* with Themes & Motifs + regional operators before publishing as a public rate / scaling past launch partners — the number is **not** still in flux. | §11.7 + DECISION_LOG 2026-06-03 |
 | 11 | Launch-gate vendor threshold | 500 verified vendors | §11.7.1 |
 | 12 | Launch-gate couple-account threshold | 10,000 active couple accounts | §11.7.1 |
 | 13 | "Active" couple-account definition | Proposed: signed in within last 90 days | §11.7.1 |

@@ -8,6 +8,8 @@
 
 ## The one-line idea
 
+> **Couple-facing free-tool name:** this "Find your date" surface is the **Wedding Date Aligner** — #15 in [Time_and_Money_Saved_Model_2026-06-01.md](Time_and_Money_Saved_Model_2026-06-01.md) §H (free · ₱999 value · ~3h saved).
+
 **The wedding date is an OUTPUT, not an input.** The couple gives a few candidate dates (or a date window) plus the vendors they want; the system returns **which date keeps the most of those vendors available**, and flags the trade-offs. One shared engine (candidate-date overlap) powers BOTH the "Find your date" matrix AND the honest "someone's eyeing your date" signal.
 
 ## Plain-English glossary (so this reads in Cowork)

@@ -46,23 +46,27 @@ Once signed in, what happens next depends on how many active events they have.
 
 ### Step 2.5 — Picking the event type (when creating a new event)
 
-When the couple taps "+ Create event," the first thing they see is a **horizontal event-type carousel** (locked 2026-05-16). Seven event types are visible; **only Weddings is selectable in V1**. The other six tiles show with a subtle "Coming soon" badge — the couple can see what's coming but can't pick yet. The carousel loops infinitely (advancing past the last tile wraps back to the first) so the lineup feels like an evolving roadmap rather than a fixed grid. The **Event name** input is gated by selection — it does not render until the couple picks a tile, removing the "what do I type here?" moment for couples still browsing categories.
+When the couple taps "+ Create event," the first thing they see is a **swipeable hero-photo carousel of event types** (redesigned 2026-06-03 from emoji tiles — PR #882). Each type is a full-bleed photo card; the couple swipes/scrolls horizontally through all of them (arrows + dots assist on desktop — it no longer loops infinitely). Eleven event types are shown. **Weddings and Debuts are live** — full-color cards with a gold "Available" badge, tappable (Wedding → onboarding flow; Debut → create-event form). The other nine render grayscale with a "Coming soon" badge and are not tappable. On the full-page picker the **Event name** input still appears only after a card is picked. Hero photos live at `apps/web/public/event-types/{type}.webp`.
 
-| Event type | V1 status | What the tile says when tapped |
+| Event type | V1 status | What the card does when tapped |
 |---|---|---|
-| **Weddings** | ✅ Selectable | Reveals the Event-name input below the carousel |
-| Birthday | Coming soon | "We're working on this — for now, only Weddings is supported." |
-| Celebration | Coming soon | Same message |
-| Travel | Coming soon | Same message |
-| Corporate | Coming soon | Same message |
-| Tournament | Coming soon | Same message |
-| Christening | Coming soon | Same message |
+| **Wedding** | ✅ Live (full-color, gold "Available" badge, tappable) | Routes into the onboarding flow |
+| **Debut** | ✅ Live (full-color, gold "Available" badge, tappable) | Routes into the create-event form (Event-name input on the full-page picker) |
+| Birthday | Coming soon (grayscale, not tappable) | No-op — "We're working on this. For now, Weddings and Debuts are supported." |
+| Celebration | Coming soon (grayscale, not tappable) | Same |
+| Travel | Coming soon (grayscale, not tappable) | Same |
+| Corporate | Coming soon (grayscale, not tappable) | Same |
+| Tournament | Coming soon (grayscale, not tappable) | Same |
+| Christening | Coming soon (grayscale, not tappable) | Same |
+| Anniversary | Coming soon (grayscale, not tappable) | Same |
+| Graduation | Coming soon (grayscale, not tappable) | Same |
+| Reunion | Coming soon (grayscale, not tappable) | Same |
 
 When Weddings is tapped, the **simplified single-field event-setup flow** runs (locked 2026-05-14):
 
 **Step 2.5a — Event-name-only entry**
 
-The couple types ONE field: **Event name** (default placeholder: `"{first_name}'s Wedding"` autopopulated from `users.full_name`). They tap **Create event**. The event is created with:
+The couple types ONE field: **Event name** (default placeholder: `"{first_name}'s Wedding"` autopopulated from `users.full_name`). **The Event name auto-formats to Smart PH-aware title case live as they type** (same `titleCaseName()` rule the guest list uses — see [0001](../0001_creating_guest_list/0001_creating_guest_list.md) + DECISION_LOG 2026-06-03; the seeding `users.full_name` is itself title-cased at sign-up). They tap **Create event**. The event is created with:
 
 ```sql
 INSERT INTO events (
@@ -114,7 +118,7 @@ Immediately after event creation, the couple sees a two-option choice card. The 
 
 Couples picking the paid SKU still land on the dashboard immediately — the dashboard shows "Setnayan Concierge pending payment" state until reconciliation completes. They are NOT blocked unless full-banned.
 
-The other six event types stay visible because they're a **product preview** — Setnayan plans to support multiple event types beyond weddings (each with its own iteration set, eventually), and showing the lineup signals the couple that this is a serious event-platform play, not just a wedding app. When future event types ship, no UI rework is needed — the tiles already exist; we just flip the `enabled` flag in the picker config.
+The other nine event types stay visible because they're a **product preview** — Setnayan plans to support multiple event types beyond weddings and debuts (each with its own iteration set, eventually), and showing the lineup signals the couple that this is a serious event-platform play, not just a wedding app. When future event types ship, no UI rework is needed — the cards already exist; we just flip the `enabled` flag in the picker config (which turns the grayscale "Coming soon" card into a full-color, tappable "Available" one).
 
 Schema (implementation note: ENUM, not CHECK):
 
@@ -219,7 +223,7 @@ Once an event is open, this is what the couple sees every screen:
 - Mobile pattern: bottom sheet rises from the bottom.
 - Desktop pattern: dropdown / popover anchored under the monogram caret.
 - Contents (top to bottom):
-  1. `+ Add event` row.
+  1. `+ Add event` row. The in-app add-event sheet copy reads: *"Weddings and debuts are live now. Swipe through to see what's on the way — more event types unlock over time."* (The earlier "tap an upcoming tile to be notified" line was removed 2026-06-03 — no notify flow exists.)
   2. Event list — primary first, marked with star; each row showing monogram + event name + wedding-date pill (or "date TBD" when `wedding_date IS NULL`).
   3. **Role-switch rows** (locked 2026-05-15) — thin separator above, then:
      - **Shop console** — visible when the user is a vendor owner (`vendors.owner_user_id = auth.uid()`) OR sits in any `vendor_service_agents.member_id` row. Tap routes to iteration 0022. When the user sits across multiple vendors, this expands into a sub-menu listing each vendor with its logo + business name; tap one to enter that shop console.
@@ -514,7 +518,7 @@ Iterations 0001–0012 can ship their internal panels in parallel; each plugs in
 This iteration is shippable when all of the following are true:
 
 - [ ] `events.is_primary`, `events.archived`, and `events.event_type` columns exist with the partial unique index on `is_primary` and the `public.event_type` ENUM covering wedding, birthday, celebration, travel, corporate, tournament, christening.
-- [ ] Create-event flow shows all seven event-type tiles in an infinite horizontal carousel; only "Wedding" is selectable; tapping the others is a no-op (the "Coming soon" badge already conveys the state); the Event-name input is hidden until a tile is picked.
+- [ ] Create-event flow shows all eleven event types as full-bleed hero-photo cards in a swipeable horizontal carousel (no infinite loop; arrows + dots assist on desktop); "Wedding" and "Debut" are live and tappable (Wedding → onboarding flow, Debut → create-event form) with a gold "Available" badge; the other nine render grayscale with a "Coming soon" badge and are no-ops; on the full-page picker the Event-name input is hidden until a card is picked.
 - [ ] Newly created events have `event_type = 'wedding'`; other values can only be inserted via direct SQL (V1 has no UI path to them).
 - [ ] `users`, `event_join_tokens`, `event_members` tables exist per schema above.
 - [ ] When a couple creates an event, an `event_join_tokens` row is auto-created with a 32-hex token.

@@ -20,7 +20,7 @@ Twelve sections on the homepage, in order:
 2. **Hero (three-question framing)** — "Planning an event? / Looking for vendors? / A vendor looking for customers?" with brand-reveal eyebrow + single primary + ghost secondary CTAs
 3. **Real numbers (count-gated)** — stats appear when 100+ vendors / 25+ events / 1,000+ couples / 5+ cities thresholds met; muted single-line placeholder pre-threshold
 4. **The chaos we're fixing** — scattered-tools problem framing
-5. **Built for both sides of the celebration** — two-column "Why Setnayan" block (six couple beats + six vendor beats)
+5. **Built for both sides of the celebration** — two-column "Why Setnayan" block (six couple beats + seven vendor beats)
 6. **Maria & Juan: see how it works** — live dashboard preview + four-tab product walkthrough (folds in former Section 4 content)
 7. **Add-ons** — apparatus catalog (Papic, Panood, Pakulay, Pailaw, Pareto, Custom Monogram) — features only, no prices
 8. **Vendor compatibility & verification** — how vendors plug in, Setnayan Team verification flow
@@ -343,6 +343,7 @@ Core positioning — the "Why Setnayan" two-column block. Concrete operating-too
 
 **Right column — For vendors**
 - **Free listing.** Profile, chat with couples, accept bookings — no monthly fee to start.
+- **There's always a place for what you do.** Niche service, new craft, something we've never listed? The directory grows to fit it — you're never an "Other," and you're credited as its first vendor.
 - **Real calendar** with team roles, agent privacy redaction, per-service scoping.
 - **In-app payments** with BIR receipts and EWT / 2307 handled for you.
 - **Pipeline and proposals** from inquiry to completed booking.

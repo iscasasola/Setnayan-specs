@@ -966,7 +966,7 @@ Upcoming bridal fairs
 - Admin-console calendar view of accepted + waitlist fairs with their T-60 windows for the next 6 months
 - `accepted_at` timestamp on each boost-service record (for FIFO queue ordering)
 - `slot_pinned` boolean on each boost-service record (for admin override)
-- Daily cron transitioning fairs through their states: `pending → featured → past` based on date math
+- ~~Daily cron transitioning fairs through their states~~ → **superseded 2026-06-03 (cron-free lock):** state (`pending → featured → past`) computes **on-read** (per page load, like the deadline scheduler), and the customer broadcast + email blasts are **admin-triggered** from the 0023 § 3.16 Promoted Events surface (timed blasts use Resend scheduled-sends, not a Setnayan polling cron)
 - Email automations triggered at: deal signed (welcome), T-60 (page-live notice), T-30 (initial blast), T-7 (final reminder), T+1 (thank-you + post-event survey)
 
 ### 11.4 Free-during-launch positioning amplified
@@ -996,8 +996,8 @@ Already covered in §6.4 of the playbook as a brand-signal move. With the vendor
 Adding this section surfaces three spec items not currently locked:
 
 1. **Iteration `0015_main_website` — featured-fairs section on homepage.** Add a new H2 strip surfacing the next 1–3 currently-active boosted bridal fairs, with `Event` JSON-LD per fair. Hide when no fair is active.
-2. **New iteration / spec for `/fairs/[fair-slug]` template.** Either add a new iteration (e.g., `0036_bridal_fair_boost_service`) or extend `0015_main_website` to include the fair-page template + `/fairs` index page. Cover: schema, URL pattern, dual-CTA layout, organizer attribution, booth-pricing data model, vendor-fair association table.
-3. **Boost service offering spec.** What's included (homepage feature + per-fair landing page + sitemap inclusion + email-blast inclusion?), what's the price/partnership terms, eligibility criteria for fairs to qualify, contract template if relevant. This is partly a §01_Contracts/ document and partly a §0036 spec.
+2. **`/fairs` index + `/fairs/[fair-slug]` page templates** — the genuine leftover. The boost-service offering itself now lives in **`0042_industry_events_b2b` §6.5** (SKUs) + **`0023_admin_console` §3.16** (slot management / broadcast); `0036` was reassigned to Pakanta. Still unbuilt: the public fair-page templates (schema, URL pattern, dual-CTA layout, organizer attribution, booth-pricing data model, vendor-fair association table) — add to `0042` or extend `0015_main_website`.
+3. **Boost service offering spec.** What's included (homepage feature + per-fair landing page + sitemap inclusion + email-blast inclusion?), what's the price/partnership terms, eligibility criteria for fairs to qualify, contract template if relevant. This is partly a §01_Contracts/ document and partly an iteration spec — now landed in `0042_industry_events_b2b` §6.5 + `0023_admin_console` §3.16.
 
 All three should be raised at the next Cowork session. Until they're spec'd:
 
@@ -1005,7 +1005,7 @@ All three should be raised at the next Cowork session. Until they're spec'd:
 - **§11.1 vendor-acquisition SEO ships** without spec changes — `/for-vendors` is already in 0015 nav, just needs the SEO layer.
 - **§§11.2–11.3 fair pages + homepage feature** are gated on spec — don't ship until iteration spec exists.
 
-### 11.7 Boost-service pricing framework (starting point for `0036_bridal_fair_boost_service`)
+### 11.7 Boost-service pricing framework (now implemented in `0042_industry_events_b2b` §6.5 + `0023_admin_console` §3.16)
 
 Added 2026-05-14 as scratch input for the boost-service offering spec flagged in §11.6 #3. **Important caveat up front:** the ranges below are reasoned from general PH bridal-fair industry knowledge and PH wedding-marketplace comparables (Kasal.com, Bridestory PH featured-listing rates). The PH bridal-fair industry doesn't publish sponsorship rates publicly, so actual numbers require owner-side market knowledge or validation conversations with PH fair operators (Themes & Motifs, regional CWES, etc.) before any rate is published as a Setnayan price. **Treat as starting framework, not contract-grade rates.**
 
@@ -1109,14 +1109,14 @@ The "inverse case" ranges are anchored to PH directory featured-listing comparab
 
 #### Pricing-ladder discipline
 
-Once cash starts moving in either direction, all Setnayan-set prices snap to the **`-1` charm pricing ladder** per `COWORK.md`: `₱49 / ₱99 / ₱199 / ₱499 / ₱999 / ₱1,499 / ₱1,999 / ₱2,499 / ₱2,999 / ₱4,999`. Common fits: featured-only at **₱2,999/cycle**, featured + email blast at **₱4,999/cycle**. Don't quote round numbers (₱3,000, ₱5,000, etc.) — they violate the brand-consistency rule.
+Once cash starts moving in either direction, all Setnayan-set prices snap to the **`-1` charm pricing ladder** per `COWORK.md`: `₱49 / ₱99 / ₱199 / ₱499 / ₱999 / ₱1,499 / ₱1,999 / ₱2,499 / ₱2,999 / ₱4,999`. Common fits: featured-only at **₱2,999/cycle**, featured + email blast at **₱9,999/cycle** (owner-locked 2026-06-03 · priced up from the earlier ₱4,999 starting suggestion for the 3-slot scarcity + qualified audience — see DECISION_LOG + 0042 § 6.5). Don't quote round numbers (₱3,000, ₱5,000, etc.) — they violate the brand-consistency rule.
 
 #### Where the boost-service spec lands
 
 This framework should be drafted at the next Cowork session into:
 
 1. **`01_Contracts/Bridal_Fair_Boost_Service_Agreement.md`** — the contract boilerplate covering Model A + Model B terms, deliverables on both sides, discount-code mechanics, cancellation, IP/use-of-marks, term length.
-2. **`0036_bridal_fair_boost_service/`** (new iteration folder) — the offering itself: SKU definitions (e.g., `boost_featured_only`, `boost_featured_plus_email`), eligibility criteria for fairs to qualify (legitimate organizer, minimum fair size, geographic coverage), the `fairs` data model (table schema for fairs, booths, vendor-fair junction, couple-fair registrations), discount-code redemption mechanics, attribution + tracking.
+2. **`0042_industry_events_b2b` §6.5 + `0023_admin_console` §3.16** (✅ landed 2026-06-03 — `0036` was reassigned to Pakanta) — the offering itself: SKU definitions (`boost_featured_only` ₱2,999, `boost_featured_plus_email` ₱9,999), eligibility criteria for fairs to qualify (legitimate organizer, minimum fair size, geographic coverage), the `fairs` data model (table schema for fairs, booths, vendor-fair junction, couple-fair registrations), discount-code redemption mechanics, attribution + tracking, slot management + admin override + broadcast. **Genuine leftover:** public `/fairs` index + `/fairs/[fair-slug]` page templates (still unbuilt).
 3. **`CLAUDE.md` SKU table** — append the Model B SKUs once owner-validated prices are locked.
 
 #### Discount-code mechanics (engineering shape, for the Cowork session to lock)

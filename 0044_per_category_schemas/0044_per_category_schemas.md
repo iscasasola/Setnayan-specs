@@ -168,13 +168,15 @@ CREATE INDEX vendor_attrs_payload_gin ON vendor_service_attributes USING GIN (at
       "international_destination"
     ]
   },
-  "travel_radius_km_from_base": { "type": "int" },
+  "travel_radius_km_from_base": { "type": "int", "label": "Service radius (km from base) — the LOCAL-DEFAULT serves-area gate (auto-covers nearby cities); combine with the service_regions tags below for declared far coverage; tier-bound Free 10 / Pro 20 / Business 50 / Enterprise 100" },
   "willing_to_travel_destination": { "type": "boolean" },
   "destination_travel_fee_centavos": { "type": "int", "required_if": "willing_to_travel_destination=true" }
 }
 ```
 
 **Inherited by:** every canonical_service (universal).
+
+> **⚠ Serves-area = proximity OR declared tag — HYBRID (correction 2026-06-04, amended same-day PM · supersedes both "derive region so the area-filter works" AND the radius-only first pass).** The "this vendor serves my area" hard filter is **`haversine(reception_anchor, vendor_base) ≤ travel_radius_km_from_base` OR `area ∈ service_regions`**, anchored on the couple's **chosen reception venue coords** (`events.venue_latitude/longitude` — the stored anchor; see [Vendor_Match_Personalization §2b](../Vendor_Match_Personalization_2026-06-01.md) + DECISION_LOG 2026-06-04). **`service_regions` is now AUTHORITATIVE — part of the gate, not display-only:** it holds the vendor's **explicit served areas** at **region OR city grain** (extend the options with key cities so "serves Quezon City" is expressible exactly), and a couple's chosen **city matches if the city, or its region, is in this set** — so a La-Union-based caterer who tags `quezon_city`/`metro_manila` serves a QC wedding even though it's >100km from base (radius alone would miss it). The radius stays the **local default** (auto-covers nearby cities so vendors needn't enumerate them); tags add **declared far coverage**, declared **per service**. It is **not** region-membership matching: only the vendor's *explicit* tag counts, never an auto-derived HQ-region bucket; `events.region` is **not** a filter column. Two V1 implementation calls: distance is **straight-line (haversine)**, drive-time is a V2 upgrade; out-of-range vendors are **hidden with a count + names**, not greyed in place.
 
 ### `pricing_signal` (consumed by every category)
 
@@ -598,7 +600,66 @@ Same pattern as `mobile_bar` sub-tags (cocktail / coffee / juice / etc.) and `ph
 }
 ```
 
-V1.1 schemas above cover ~15 of ~115 canonical_services. Remaining schemas (entourage_attire, drone, prenup_shoot, lighting_sound, choir_string_quartet, transportation_guest_shuttle, invitation_print, stationery_signage, souvenirs_giveaways, wedding_rings, honeymoon_planner, dessert_station, live_cooking_station, lechonero, tea_ceremony_station, plus the [0047 Stations & Booths](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md) sub-categories, plus the wedding-type-specialty categories from [0043 § Cultural/Folk](../0043_wedding_type_picker/0043_wedding_type_picker.md)) roll out V1.2.
+### `reception_venue` (the owner's flagship · added 2026-06-04)
+
+The reception venue is the couple's **distance anchor** for every other vendor (its coords are stored on `events`, see `geographic_service_areas` note above). Its **venue-type enum reconciles + supersedes the legacy `venue_setting` enum** from 0006 (the owner's reception list is richer). **`civil_registrar` does NOT belong here — it is a *ceremony* setting** (see `ceremony_venue` below); keeping the two axes separate is the core of this reconciliation.
+
+```jsonc
+{
+  "shared_attribute_groups": ["faith_compatibility", "geographic_service_areas", "pricing_signal", "vendor_credentials"],
+  "category_specific_attributes": {
+    "venue_types": {
+      "type": "multi_select",
+      "label": "Reception venue type (supersedes legacy `venue_setting`)",
+      "options": [
+        "hotel_ballroom_function_hall", "events_place_pavilion", "convention_exhibition_center",
+        "garden", "beach_waterfront", "resort_destination", "heritage_hacienda",
+        "restaurant_private_dining", "tent_open_field", "clubhouse"
+      ]
+    },
+    "indoor_outdoor": { "type": "enum", "options": ["indoor", "outdoor", "either"] },
+    "seated_capacity_min": { "type": "int", "label": "Min seated capacity" },
+    "seated_capacity_max": { "type": "int", "label": "Max seated capacity — drives the capacity-bound pax hard-filter (seats ≥ pax)" },
+    "in_house_catering": {
+      "type": "enum",
+      "label": "In-house catering (the PH wrinkle — affects the couple's separate Catering match)",
+      "options": ["required_in_house_only", "in_house_available_byo_allowed", "byo_caterer_only_no_in_house"]
+    },
+    "corkage_or_byo_fee_centavos": { "type": "int", "required_if": "in_house_catering=in_house_available_byo_allowed" },
+    "gender_separated_capable": { "type": "boolean", "label": "Can run a gender-separated reception (Muslim protocol — feeds faith_compatibility)" }
+  },
+  "filter_facets": ["venue_types", "indoor_outdoor", "seated_capacity_max", "in_house_catering", "faith_compatibility", "starting_price_centavos", "service_regions"],
+  "minimum_fields": ["venue_types", "indoor_outdoor", "seated_capacity_max", "in_house_catering", "service_regions"]
+}
+```
+
+**In-house-catering reconciliation (PH wrinkle):** when a couple's chosen reception has `in_house_catering = required_in_house_only`, the separate **Catering** match for that event is suppressed/satisfied (the venue supplies it) — surfaced to the couple as "Catering is included with your venue" rather than an empty catering shortlist. `in_house_available_byo_allowed` keeps the Catering tile active (with the corkage/BYO fee shown). `byo_caterer_only_no_in_house` makes Catering a required separate match. This is the couple-facing behavior; the exact UI lands in 0021/0006, but the **schema flag lives here** so the matcher can read it.
+
+### `ceremony_venue` (added 2026-06-04 — the place axis, distinct from `0043 ceremony_type`)
+
+`0043 ceremony_type` is the **faith/kind** axis (catholic / civil / muslim / inc / mixed …). `ceremony_venue.ceremony_settings` is the **place** axis. They are orthogonal — a `civil` ceremony can happen at a garden OR a civil registrar; a `catholic` ceremony at a church OR (rarely) a garden with dispensation. **`civil_registrar` lives here, on the ceremony axis — never on `reception_venue.venue_types`.**
+
+```jsonc
+{
+  "shared_attribute_groups": ["faith_compatibility", "geographic_service_areas", "pricing_signal", "vendor_credentials"],
+  "category_specific_attributes": {
+    "ceremony_settings": {
+      "type": "multi_select",
+      "options": ["church", "chapel", "garden", "beach", "civil_registrar", "mosque", "inc_locale", "ancestral_home", "same_as_reception"]
+    },
+    "seated_capacity_max": { "type": "int" },
+    "officiant_provided": { "type": "boolean", "label": "Venue provides/coordinates an officiant (else couple books `officiant_priest_minister` separately)" }
+  },
+  "filter_facets": ["ceremony_settings", "faith_compatibility", "starting_price_centavos", "service_regions"],
+  "minimum_fields": ["ceremony_settings", "service_regions"]
+}
+```
+
+**`same_as_reception`** is a couple-side convenience value (one venue hosts both); when set, the ceremony inherits the reception's coords + capacity and no separate ceremony-venue match runs.
+
+**Legacy enum migration note (for engineering):** the old `venue_setting` enum (0006) is **deprecated** in favor of `reception_venue.venue_types` + `ceremony_venue.ceremony_settings`. Migration maps each old value to the new split (e.g. legacy `garden` → both axes offer `garden`; legacy `civil_registrar` → `ceremony_venue` only). `events.region` is **not** revived as a filter column (see the proximity correction above).
+
+V1.1 schemas above cover ~17 of ~115 canonical_services. Remaining schemas (entourage_attire, drone, prenup_shoot, lighting_sound, choir_string_quartet, transportation_guest_shuttle, invitation_print, stationery_signage, souvenirs_giveaways, wedding_rings, honeymoon_planner, dessert_station, live_cooking_station, lechonero, tea_ceremony_station, plus the [0047 Stations & Booths](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md) sub-categories, plus the wedding-type-specialty categories from [0043 § Cultural/Folk](../0043_wedding_type_picker/0043_wedding_type_picker.md)) roll out V1.2.
 
 ---
 
@@ -668,6 +729,8 @@ Schemas WILL change over time. The framework handles this via `schema_version`:
 
 Migration cadence: schemas can evolve weekly; vendor profiles re-validate lazily on next login. No mass migration required.
 
+**Finalized = forever (the durability guarantee · owner-locked 2026-06-03).** Once an admin **Finalizes** a node in `/admin/taxonomy` ([0023 §3.15](../0023_admin_console/0023_admin_console.md)), its leaf + refinement schema are **live permanently** — additive only. This is why versioning is load-bearing: a schema may **add** refinements forever, but a refinement a couple has **already picked must never be destructively dropped or orphaned** — `schema_version_at_fill` keeps the historical fill valid, and removal is a soft-deprecate (`hidden_in_ui`), never a hard delete of selected data. A finalized leaf is removed only via the explicit, two-admin-gated delete / collapse / flatten flows — never silently or on a schedule.
+
 ---
 
 ## Quality control
@@ -697,7 +760,7 @@ Per the "vendors populate the venue" thesis, quality control is critical:
 
 1. **JSONB vs typed columns?** Storing attributes in JSONB is flexible but loses type safety. Alternative: generate typed columns per canonical_service via DDL migrations. Recommend JSONB for V1.1 (flexibility), revisit if query performance becomes an issue at scale.
 2. **Multi-language support for attribute labels?** Vendor onboarding wizard needs EN/TL/Cebuano labels per field. Where does translation live — in `canonical_service_schemas` JSONB or in a separate i18n table? Recommend JSONB with `label_en` / `label_tl` / `label_ceb` per field.
-3. **Vendor-suggested schema additions.** A vendor offering an unusual service may request a new attribute field. Admin-approval flow? Or open-text "Other" field with admin curation pipeline?
+3. **Vendor-suggested schema additions — RESOLVED 2026-06-03 (admin-gated expandable taxonomy lock).** A vendor offering an unusual service requests a new **detail/facet** from the service editor; it publishes as a private-label attribute pending review, then routes to the 0023 §3.2c *Custom category & detail review* queue. Admin's four outcomes apply at facet grain: **map-to-existing** (re-point to an existing facet value/field), **promote-to-global** (add the field/value to the tile's `category_specific_attributes` schema + bump `schema_version`), **keep-private**, or **reject**. The open-text `"other"` value baked into multi-selects (e.g. lines 201–202, 313) is the lightweight on-ramp — vendor picks "Other", admin later curates it via the same queue. **Framing — "Other" is a doorway, not a destination:** a service is never *left* in Other; it surfaces in the §3.2c queue and is curated into a real home (mapped to an existing value, or promoted to its own). This backs the vendor-facing promise *"There's always a place for what you do"* ([0015 §5](../0015_main_website/0015_main_website.md) · [0022 §2.1a](../0022_vendor_dashboard/0022_vendor_dashboard.md) · DECISION_LOG 2026-06-03 "🌿 Vendor promise"). See DECISION_LOG 2026-06-03 "🌳 Admin-gated expandable taxonomy".
 4. **Filter-facet weighting.** Should vendors with more complete profiles rank higher than those with minimal profiles? Recommend yes (encourages completeness), but weight conservatively to avoid burying smaller new vendors.
 5. **Schema export for vendor onboarding via CSV.** Power-user vendors with many products may want to bulk-upload via CSV/spreadsheet. Worth building a CSV importer for V1.2+.
 

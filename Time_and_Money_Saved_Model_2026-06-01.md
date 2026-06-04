@@ -4,6 +4,8 @@
 
 **Scope note.** The peso values below are **market-equivalent guidance** — what the equivalent tool/service costs *elsewhere* — NOT Setnayan SKU prices (Setnayan gives these **free**). They are the owner-supplied basis for the *money-saved* calc and stay distinct from the locked `service_catalog` SKU prices. Design-lock · V1.x post-pilot · prototype + spec only.
 
+> **⚠️ FINALIZED 2026-06-03 — §H + §I are now authoritative (they supersede the §A–§F time values).** The §A–§F 10-feature model (headline ₱42,992 · 745h) was reconciled to the owner's full **33-item** list, **practical-time-audited**, and **locked** (owner 2026-06-03): the 4 new tools approved (Songlist Maker · Wedding Date Aligner · Food Planner · Contract Compiler), the inflated time trimmed (Website 350→50h · Dashboard 0.5→0.25h/day · etc.). **Final headline (typical couple): computed ~₱63,500 · ~295 hours → marketing round-down _"₱60,000+ · 250+ hours — saved, free."_** *(money values raised to defensible market-equivalents 2026-06-03 — see §H.4; time unchanged.)* See §H (final master + formula), §I (audit, applied), and the closing **Final locked values** table.
+
 ---
 
 ## A · The 10 free features — money + time (owner-supplied)
@@ -120,3 +122,132 @@ timeSaved  = (3 × categories)          // filtering (3h/category)
 - `Onboarding_Blueprint_2026-05-30.md` §3.3 (the free-baseline list + the vs-elsewhere comparison) · `Vendors_Plan_Budget_Tab_Spec_2026-05-31.md` §6 (hours-saved benchmark open item, now resolved here).
 - The free-baseline list is locked in CLAUDE.md (High Res Archive free-baseline + Google-Drive auto-sync rows, 2026-06-01).
 - Iterations: 0001 guest list · 0006 vendors/marketplace · 0007 budget · 0008 seating · 0010 mood board · 0016 Today's Focus · 0021 dashboard · 0031 day-of guest.
+
+---
+
+## H · Reconciled 33-item master — FINAL (owner-locked 2026-06-03)
+
+The owner's free-tools list = **33 labels**, de-duplicating to **~16 value drivers**. All values below are **locked (owner 2026-06-03)** — the four new tools approved, the §I time-trims applied, money confirmed. Status key: ✅ locked · ◻︎ quality / no-hours (anti-double-count) · ⊘ vendor-side, excluded from the couple total.
+
+> **Two label corrections (owner 2026-06-03):** #33 is **Contract Compiler** (not "Contact"); **Food Planner** = a Songlist-style **menu + dietary builder for caterers** (owner: *"like the songlists but for caterers"*). Both now have **spec homes (2026-06-03):** **Food Planner** → [Vendor_Compatibility_and_Master_Songlist §7](Vendor_Compatibility_and_Master_Songlist_2026-06-03.md) (the catering twin of the master song list); **Contract Compiler** → [Contract_Compiler_2026-06-03.md](Contract_Compiler_2026-06-03.md). **Songlist Maker** already lives in that compatibility doc (the couple `event_song_picks` picker); **Wedding Date Aligner** in [Schedule_Matrix_and_Date_Finder](Schedule_Matrix_and_Date_Finder_2026-06-02.md). **Free/paid boundary kept clean:** the free Contract Compiler **organizes** contracts (upload · key terms · e-sign status · payment/renewal deadlines); the paid **0032 Contract Intelligence** AI clause-analysis (₱199/contract) stays paid. The free Food Planner is a **preference list**; the paid vendor **Professional Catering** constraint-solver stays paid.
+
+### H.1 · The 33 labels → value drivers (final · money raised 2026-06-03)
+
+| # | Label | Driver | Money | Time | Scales by | |
+|---|---|---|---|---|---|---|
+| 1 | Setnayan AI | (AI layer) | — | — | — | ◻︎ powers monogram + recs + dates |
+| 2 | Planner | Advanced Filtering Planner | **₱4,999** | 3h | **per category** | ✅ ↑ |
+| 3–5 | RSVP + Event + Editorial | Website (triple) | **₱14,999** | **50h** | flat | ✅ ↑ (still < ₱25K Pro) |
+| 6 | Songlist Maker | Songlist Maker | **₱1,499** | 3h | flat | ✅ ↑ |
+| 7 | Mood Board | Mood Board | **₱3,999** | **5h** | flat | ✅ ↑ |
+| 8 | Seat Plan | Guest Planner (seat + list) | **₱2,999** | 12h | flat | ✅ ↑ |
+| 9 | Budget + Payment Reminders | Budget Tracker | ₱3,999 | 12h | flat | ✅ held (+ late-fee savings) |
+| 10–11 | Scheduler · Checklist | → Dashboard | — | — | — | ◻︎ fold into Dashboard |
+| 12 | Mood Board *(dup)* | = #7 | — | — | — | ◻︎ counted once |
+| 13 | Monogram | Basic Monogram | **₱1,499** | **4h** | flat | ✅ ↑ (< ₱2,999 paid bespoke) |
+| 14 + 17 | Recommended + Unlimited Bidding | Marketplace (vs expos) | ₱2,500 | **10h** | **per expo replaced** | ✅ held (×expo) |
+| 15 | Wedding Date Aligner | Date Aligner | **₱1,499** | 3h | flat | ✅ ↑ |
+| 16 | Comparison | Vendor Comparison | **₱2,499** | **1h** | **per shortlisted** | ✅ ↑ |
+| 18 | Chat Service | One-place chat | — | 0.5h | per locked vendor | ✅ |
+| 19 | Video Call | (quality) | — | — | — | ◻︎ |
+| 20 | Invite Outside Vendors | BYO-vendor invite | — | 1h | per invited vendor | ✅ |
+| 21–24 | Verified Badge · Reviews · Real Weddings · Collision Alert | Trust | — | — | — | ◻︎ quality |
+| 25 | Custom Taxonomy | (vendor-side) | — | — | — | ⊘ excluded |
+| 26 | Drive Sync | Drive media sync (permanent copy) | ₱5,000 | 5h | flat | ✅ held (at corpus ₱5K) |
+| 27 | Dashboard | Dashboard hub | ₱3,999 | **0.25h** | **per day to wedding** | ✅ held |
+| 28 | Day-of Guest Portal | Day-of portal (0031) | **₱1,999** | 6h | flat | ✅ ↑ |
+| 29 | QR Code | Free branded / invite QR | ₱999 | 2h | flat | ✅ held (< ₱1,499 paid Custom QR) |
+| 30 | Inquiry Fan-Out | Inquiry fan-out | — | **0.5h** | **per category** | ✅ trimmed 1.5→0.5 |
+| 31 | Payment Reminders | (in Budget #9) | *late fees* | — | — | ✅ |
+| 32 | Food Planner | Food Planner (caterer prefs) | **₱1,499** | 4h | flat | ✅ ↑ approved |
+| 33 | Contract Compiler | Contract organizer | **₱1,999** | 3h | flat | ✅ ↑ approved |
+
+*↑ = money raised to a defensible market-equivalent (2026-06-03); **held** = already at an honest ceiling or capped by a paid SKU. Time values untouched — the §I audit stands. Rationale in §H.4.*
+
+### H.4 · Money raised to defensible market-equivalents (owner 2026-06-03)
+
+Owner: *"you can price them higher if possible."* Raised **only** where the PH market honestly supports a higher "what you'd pay elsewhere" figure; **held** where we are already at an honest ceiling or capped by a paid SKU. (Money only — time is the §I-audited set and does not move.)
+
+| Item | Was | Now | Basis |
+|---|---|---|---|
+| Filtering Planner | ₱3,999 | **₱4,999** | vendor-sourcing is a core wedding-planner deliverable |
+| Website (triple) | ₱12,999 | **₱14,999** | corpus cites **₱25K** elsewhere for the *Pro* site; free basic = 3 surfaces, kept below Pro |
+| Guest Planner | ₱1,999 | **₱2,999** | guest management + a real seating-chart deliverable |
+| Mood Board | ₱2,999 | **₱3,999** | a stylist design concept / styling consult |
+| Comparison | ₱1,999 | **₱2,499** | quote-vetting across shortlisted vendors |
+| Monogram | ₱999 | **₱1,499** | a designer monogram — kept under the ₱2,999 paid bespoke |
+| Songlist · Food · Date Aligner | ₱999 ea | **₱1,499 ea** | per-area planner consult (music / menu / date) |
+| Day-of Portal | ₱1,499 | **₱1,999** | a slice of day-of guest coordination |
+| Contract Compiler | ₱1,499 | **₱1,999** | contract organization / review |
+| **Held** | — | — | Budget ₱3,999 · Dashboard ₱3,999 (no clean "elsewhere" equiv) · Drive ₱5,000 (at corpus figure) · Marketplace ₱2,500/expo (×expo amplifies) · QR ₱999 (must stay **below** the ₱1,499 paid Custom QR) |
+
+**Credibility check:** the new typical total **~₱63,500** is still **less than a single mid-tier PH wedding-planner fee** (₱50K–150K) — so "you saved ₱60K+ in tools/services you'd otherwise pay for" reads as conservative, not inflated.
+
+### H.2 · Parameterized formula (final · trims applied · money raised)
+
+```
+moneySaved = 38,992                    // 8 flat drivers, RAISED (Filtering 4,999 + Website 14,999 + Guest 2,999
+           //                              + Budget 3,999 + Monogram 1,499 + Comparison 2,499 + Dashboard 3,999 + Mood 3,999)
+           + 2,500 × exposReplaced     // Marketplace (held)
+           + 5,000                     // Drive Sync #26 (held)
+           +   999                     // QR free #29 (held)
+           + 1,499  // Songlist #6   +  1,499  // Date Aligner #15  +  1,999  // Day-of #28
+           + 1,499  // Food Planner #32  +  1,999  // Contract Compiler #33
+        //  = 53,486 + 2,500 × exposReplaced
+
+timeSaved  = 3    × categories     // Filtering            (unchanged — the money raise does not touch time)
+           + 0.5  × categories     // Inquiry fan-out      (trimmed 1.5→0.5)
+           + 1    × shortlisted    // Vendor Comparison    (trimmed 3→1)
+           + 10   × exposReplaced  // Marketplace          (trimmed 24→10)
+           + 0.25 × runwayDays     // Dashboard            (trimmed 0.5→0.25)
+           + 0.5  × lockedVendors  // Chat        (~8 typ.)
+           + 1    × invitedVendors // BYO invite  (~2 typ.)
+           + 109  flat             // Website 50 + Guest 12 + Budget 12 + Monogram 4 + Drive 5 + QR 2 + Day-of 6 + Mood 5 + Songlist 3 + Date 3 + Food 4 + Contract 3
+```
+
+*Mood Board moved to the flat bucket (build-once, share-free), so `designVendors` no longer drives time. Time is unchanged by the money raise.*
+
+### H.3 · Scenario range (final · per couple)
+
+| Couple | cat / short / runway / expo | Money | Time |
+|---|---|---|---|
+| Lean | 5 / 8 / 180 / 2 | **~₱58,500** | **~205h** |
+| **Typical** | 10 / 15 / 365 / 4 | **~₱63,500** | **~295h** |
+| Big wedding | 14 / 25 / 540 / 5 | **~₱66,000** | **~380h** |
+
+**Headline (typical):** computed **~₱63,500 · ~295 hours** → **marketing round-down for credibility: _"₱60,000+ · 250+ hours — saved, free."_**
+
+---
+
+## I · Practical-time audit (2026-06-03) — applied
+
+The audit that produced the trims now live in §H. **Money is market-equivalent (raised 2026-06-03 per §H.4); the original *time* headline (745h) was inflated** — it exceeded the ~200–500h a whole DIY wedding takes, with Website 350h + Dashboard 183h = **72%** of it. **Owner approved all trims 2026-06-03.**
+
+| Feature | Was | Now ✅ | Why |
+|---|---|---|---|
+| Website (triple) | 350h | **50h** | 350h = ~9 FT weeks; a DIY 3-site build is ~40–60h. |
+| Dashboard | 0.5h/day (183h) | **0.25h/day (~91h)** | Weddings plan in bursts, not daily; key off ~150 active days. |
+| Vendor Comparison | 3h/short (45h) | **1h/short (15h)** | ~1h to gather + normalize a quote. |
+| Marketplace / expos | 24h/expo (96h) | **10h/expo (40h)** | A real expo is ~6–8h incl. travel. |
+| Inquiry Fan-Out | 1.5h/cat (15h) | **0.5h/cat (5h)** | Messaging 3 vendors ≈ 20–30 min; overlaps Filtering. |
+| Mood Board | 2h/design (10h) | **5h flat** | Build once, share free — stop double-counting the build. |
+| Monogram | 8h | **4h** | The free mark auto-generates instantly. |
+| Filtering · Guest · Budget · Drive · QR · Chat · Invite · Day-of | — | **kept** | Already modest + believable. |
+
+**Net:** time headline **745h → ~295h** (typical); money **raised to market-equivalents (§H.4) → ~₱63,500**. Lead with the round-down **"₱60,000+ · 250+ hours."**
+
+---
+
+## ✅ Final locked values (owner 2026-06-03)
+
+| Item | Money | Time | Note |
+|---|---|---|---|
+| Songlist Maker (#6) | ₱1,499 | 3h | music must-play / do-not-play list for DJ/band |
+| Wedding Date Aligner (#15) | ₱1,499 | 3h | candidate-date ↔ vendor-availability convergence |
+| Drive Sync (#26) | ₱5,000 | 5h | full credit — the Drive copy is permanent (held) |
+| Day-of Portal (#28) | ₱1,999 | 6h | guests self-serve table / schedule / photos |
+| QR Code (#29) | ₱999 | 2h | free branded/invite QR — held below the ₱1,499 paid SKU |
+| **Food Planner (#32)** | ₱1,499 | 4h | menu + dietary/allergy/halal prefs for the caterer · spec'd in [Vendor_Compatibility §7](Vendor_Compatibility_and_Master_Songlist_2026-06-03.md) (catering twin of the song list) |
+| **Contract Compiler (#33)** | ₱1,999 | 3h | organize vendor contracts (≠ paid 0032 AI analysis) · spec'd in [Contract_Compiler_2026-06-03.md](Contract_Compiler_2026-06-03.md) |
+| Money raise (§H.4) | ↑ applied | — | Filtering 4,999 · Website 14,999 · Guest 2,999 · Mood 3,999 · Comparison 2,499 · Monogram 1,499 — held: Budget · Dashboard · Drive · Marketplace · QR |
+| §I time trims | — | applied | Website 50 · Dashboard 0.25/day · Comparison 1/short · Marketplace 10/expo · Inquiry 0.5/cat · Mood 5 flat · Monogram 4 |

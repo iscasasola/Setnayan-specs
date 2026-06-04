@@ -8,9 +8,9 @@
 
 ---
 
-## 1. The 28 admin surfaces
+## 1. The 29 admin surfaces
 
-The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. Surface count refreshed 2026-05-23 to enumerate ALL shipped admin routes — the prior 11-surface table (2026-05-18) listed only the speced surfaces and silently missed the 12 operational surfaces that shipped during the V1 build burst (Funnels, Payouts, Receipts, BIR 2307, Ads, Demo vendors, Events, Help inbox, Force majeure, Moodboard library, Operations & Hiring, Taxonomy, plus Reviews). The 4 missing-from-code surfaces from the prior table (Disputes, Pricing, Add-on Management, Concierge Brain) all shipped in the 2026-05-23 admin alignment batch ([PRs #419 · #420 · #421 · #423](https://github.com/iscasasola/setnayan-platform/pulls?q=is%3Apr+merged%3A2026-05-23)). Table below is grouped by the actual `apps/web/app/admin/_components/admin-nav.tsx` structure so spec readers see what an admin sees on the left rail.
+The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. Surface count refreshed 2026-05-23 to enumerate ALL shipped admin routes — the prior 11-surface table (2026-05-18) listed only the speced surfaces and silently missed the 12 operational surfaces that shipped during the V1 build burst (Funnels, Payouts, Receipts, BIR 2307, Ads, Demo vendors, Events, Help inbox, Force majeure, Moodboard library, Operations & Hiring, Taxonomy, plus Reviews). The 4 missing-from-code surfaces from the prior table (Disputes, Pricing, Add-on Management, Concierge Brain) all shipped in the 2026-05-23 admin alignment batch ([PRs #419 · #420 · #421 · #423](https://github.com/iscasasola/setnayan-platform/pulls?q=is%3Apr+merged%3A2026-05-23)). Table below is grouped by the actual `apps/web/app/admin/_components/admin-nav.tsx` structure so spec readers see what an admin sees on the left rail. **(#29 Promoted Events is the first forward-spec row — spec'd 2026-06-03 · V1.6 · not yet shipped; every other row mirrors a shipped route.)**
 
 | Group | # | Surface | URL section | What it does |
 |---|---|---|---|---|
@@ -33,7 +33,7 @@ The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. 
 | Money | 17 | **BIR 2307** | `/admin/bir/2307` | Quarterly Form 2307 PDFs for vendor EWT reporting (per 0026 BIR compliance) |
 | Money | 18 | **Ads** | `/admin/ads` | Boosted Ads + Sponsored Boost vendor management (per 0022 § 5b vendor marketing tiers) |
 | Money | 19 | **Payment methods** | `/admin/settings/payment-methods` | Per-method config (rates · eligibility per account type · active flag) · read-only V1 banner pattern · also reachable from Settings group below |
-| Content | 20 | **Taxonomy** | `/admin/taxonomy` | Vendor canonical_services taxonomy management — the **10-parent shrunk taxonomy** (per 2026-05-30 shrink + the 2026-06-03 **Design › Digital Services** child; supersedes the old 192-row/12-folder model). Surfaces the parent → child-tile tree incl. Digital Services (Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw). The purchasable SKUs all exist in the V2 retail catalog (`platform_retail_catalog_v2` · flat · no category column) — Animated Monogram ₱2,499 · Pro Website ₱2,999 · Live Venue Photo Wall ₱3,499 · Pakanta ₱3,499 · Pailaw/Live Background (`LIVE_BACKGROUND`) ₱2,499 — priced in `/admin/pricing` + `/admin/addons` as flat SKUs (the Digital-Services grouping is taxonomy-only). Detailed CRUD-vs-view spec TODO. See [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md) |
+| Content | 20 | **Taxonomy** | `/admin/taxonomy` | Vendor canonical_services taxonomy management — the **10-parent shrunk taxonomy** (per 2026-05-30 shrink + the 2026-06-03 **Design › Digital Services** child; supersedes the old 192-row/12-folder model). Surfaces the parent → child-tile tree incl. Digital Services (Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw). The purchasable SKUs all exist in the V2 retail catalog (`platform_retail_catalog_v2` · flat · no category column) — Animated Monogram ₱2,499 · Pro Website ₱2,999 · Live Venue Photo Wall ₱3,499 · Pakanta ₱3,499 · Pailaw/Live Background (`LIVE_BACKGROUND`) ₱2,499 — priced in `/admin/pricing` + `/admin/addons` as flat SKUs (the Digital-Services grouping is taxonomy-only). Full **visual CRUD editor** — drag card tree (add / edit / rename / delete / drag-to-move) with pending vendor requests reviewed **in place** (4 outcomes), per §3.15. See [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md) |
 | Content | 21 | **Website editor** | `/admin/website` | Marketing-site widget management — enable/disable + drag-drop reorder per page (home · /for-vendors · /features · /about) · see § 3.10 |
 | Content | 22 | **Add-ons** | `/admin/addons` | App Store-style card view of customer SKUs reading `service_catalog` + `feature_policy` · Pricing Report download generates `Pricing.md` snapshot from live DB · per-card eligibility dots · vendor add-ons tab Coming soon · added 2026-05-23 (V1 single tab; V1.x adds per-SKU drawer + vendor tab + edit affordances) |
 | Content | 23 | **Concierge brain** | `/admin/brain` | Browse `concierge_brain_chunks` grouped by 8 topic files (Filipino Cultural Reference · Regional Pricing Benchmarks · Seasonal Weather · Planning Timelines · Legal BIR · Setnayan Feature Reference · Vendor Decision Logic · Budget Allocation) · paid-tier-only badge · is_stale flag · hit_count_30d · pilot banner ("Concierge is OFF for pilot — content authoring lands ahead of post-pilot launch") · V1 read-only browse; Unanswered Questions queue + Cost Watch + per-chunk re-embed land V1.x · added 2026-05-23 |
@@ -42,6 +42,7 @@ The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. 
 | — | 26 | **Funnels** | `/admin/funnels` | PostHog funnel deep-links · conversion analytics · ext-link to PostHog dashboard for cohort + retention views |
 | Settings | 27 | **Platform settings** | `/admin/settings` | Brand-mark management · feature flags · two-admin approval queue · admin role provisioning · internal accounts (§ 3.5b) · payment-receiving accounts (§ 3.5c) · BIR config (§ 3.5d) · feature-policy grid (§ 3.5e — V1.x) · payment-method policy matrix (§ 3.5f — V1.x) · brand-active UI theme picker (per 2026-05-15 theme system lock) · Setnayan Pay convenience-fee rate config (per 2026-05-17 row 16) |
 | Settings | 28 | **Demo mode** | `/admin/settings/demo-mode` | Demo-mode toggle for pre-launch + pilot · feeds `NEXT_PUBLIC_PILOT_MODE_FREE_UNTIL` env-derived state |
+| Content | 29 | **Promoted Events** | `/admin/promoted-events` | 🆕 **spec'd 2026-06-03 · V1.6 · unbuilt.** Compile the fairs/events Setnayan promotes (0042 boost-service roster · 3-slot cap · exhibitor rosters) + **Generate mass schedule** → broadcast into customers' Home Upcoming-schedules (in-region default / all-customers / segment) + § 3.4a card + 0028 blast · cron-free admin-triggered (supersedes § 11.3.1 daily-cron) · see § 3.16 |
 
 **Sub-routes accessible via parent list pages** (not standalone nav entries):
 - `/admin/disputes/[disputeId]` — dispute detail + resolve actions (V1.x)
@@ -119,10 +120,15 @@ Three sub-queues stacked on one screen:
 - Admin checks: photos are real, pricing isn't predatory, inclusions match the service category
 - First service: approval required · subsequent edits: auto-approved unless heuristic triggers (price drops 50%+, new event type added, category change)
 
-**3.2c Custom category review**
-- Vendor proposes a new service category (per 0022 §2.1a)
-- Admin decides: promote to global canonical taxonomy, keep as private label, or reject
-- "First vendor" credit attaches if promoted to global
+**3.2c Custom category & detail review**
+- Vendor requests a new node — a **category / child-tile** OR a **detail / facet** within an existing tile (per 0022 §2.1a + 0044 Open Q#3). It publishes as a **private-label** immediately (on the vendor's page only, not in marketplace filters) pending review.
+- Admin answers *"does this already exist in our taxonomy?"* with **four outcomes:**
+  - **Map to existing** — "your *X* is our existing *Y*": re-point the vendor's `vendor_services.service_category` (or facet payload) onto the matched canonical, retire the private-label row (`scope='merged'` + `merged_into_category_id`), notify the vendor. No new node.
+  - **Promote to global** — genuinely new: node enters the canonical taxonomy (vendor keeps the **"first-vendor" credit**) and auto-appears in the onboarding category picker, couple browse, and filters.
+  - **Keep private** — valid but niche: scoped to the proposing vendor only.
+  - **Reject** — mis-scoped, with reason.
+- **Demand signal:** a high `merged_into_category_id` count for the same target is the trigger that the requested node has earned promotion — admin-gated expansion, driven by real vendor demand.
+- New **parent families** (the 10 top-level groups) are owner-level structural calls, not vendor-requestable.
 
 Each queue item has standard actions: Approve · Reject · Request more info · Flag for senior admin.
 
@@ -1225,23 +1231,108 @@ Owner email resolved via `process.env.OWNER_NOTIFICATION_EMAIL` (fallback `iscas
 
 ---
 
-### 3.15 Taxonomy management (`/admin/taxonomy` · drafted 2026-06-03)
+### 3.15 Taxonomy management (`/admin/taxonomy` · viewer drafted 2026-06-03 · **visual editor** speced 2026-06-03)
 
-Surfaces the live marketplace **vendor taxonomy** so admins can see exactly how every `canonical_service` maps into the browsable catalog. Source of truth is the code-side `TAXONOMY_MAP` in `apps/web/lib/taxonomy.ts` (mirrors the 2026-05-30 shrink + [02_Specifications/Vendor_Taxonomy_V1_Master.md](../02_Specifications/Vendor_Taxonomy_V1_Master.md)); the DB holds the `canonical_service_schemas` rows.
+Surfaces the live marketplace **vendor taxonomy** as an editable **visual tree** so admins can both see and reshape how every `canonical_service` maps into the browsable catalog. The viewer's source of truth is the code-side `TAXONOMY_MAP` in `apps/web/lib/taxonomy.ts` (mirrors the 2026-05-30 shrink + [02_Specifications/Vendor_Taxonomy_V1_Master.md](../02_Specifications/Vendor_Taxonomy_V1_Master.md)); the DB holds the `canonical_service_schemas` rows. **For live editing (below), the tree structure moves DB-backed** so admin changes take effect without a deploy — `taxonomy.ts` reads through to it.
 
-**What it shows (V1 · read-only view):**
+**Finalize = permanent publish (the durability guarantee · owner-locked 2026-06-03).** Admin **Finalize** — the **promote-to-global / [new ✓]** outcome below — is the **commit point**: it publishes a node + its refinements **live to every surface and keeps them there forever.** Once finalized, a leaf (and its refinements) is **permanent + additive** across marketplace browse, onboarding pickers, in-tile filters, and the best-match score — it is **never auto-removed, never expired, never silently dropped.** A finalized node leaves the catalog *only* through the explicit, two-admin-gated **delete / collapse / flatten** flows below (deliberate admin action). Because the tree is **DB-backed**, Finalize takes effect with **no deploy / no engineer in the loop**; because the §3.2c review mints a permanent node *only* on promote-to-global (map-to-existing merely re-points), "forever" attaches to **accepted-as-new** nodes, not every raw request. *Scope note:* this grows **refinement depth within the stable couple categories + new vendor leaves** — the couple-side per-event `vendor_category` 28-enum stays curated and does **not** auto-expand (see the consumer table below).
 
-- The **10-parent → tile → canonical** tree (Venue · Planning · Feast · **Design** · Program · Documentary · Look · Booths · Prints · Transport), each parent expandable to its tiles, each tile to the `canonical_services` mapped under it.
-- Per canonical: its `tile`, the `phase` badge (V1.1 base … V1.5+), and flags — `setnayan` (first-party insert · ✦ badge), `ph` (PH-specific), `faith`, `rental`, `tradition`.
-- **`marketplaceHidden`** canonicals (the 20 retired officiant/paperwork rows) in a collapsed "Hidden" group.
-- An **"Unmapped" bucket** — any `canonical_service_schemas` row with no `TAXONOMY_MAP` entry surfaces here so admins spot drift the moment a DB row lands without a code mapping.
-- **Vendor counts per tile** (same `vendor-counts` source as the public `/vendors` strip) so admins see which tiles are thin/empty.
+**The surface — a visual drag card tree (NOT a table · owner-locked 2026-06-03).**
+
+The taxonomy renders as an interactive tree of **node-cards** of **flexible depth (2–4 tiers)** — never a data grid. Every category is either a **branch** (holds sub-categories · no details of its own) or a **leaf** (holds details · no sub-categories):
+
+- **Tier 1 — Parent family** (10: Venue · Planning · Feast · **Design** · Program · Documentary · Look · Booths · Prints · Transport). Always a branch; owner-level (not vendor-requestable).
+- **Tier 2 — Child category** (the ~53 "tiles"). A **leaf with details** when it has no sub-categories (most tiles) — **or a branch** when it nests grandchildren (e.g. **Look › Bride's Attire** → Bridal Gown · Filipiniana · Bridesmaid). Card shows icon, vendor count (same `vendor-counts` source as the public `/vendors` strip), `phase` badge, and flags — `✦` setnayan, `ph`, `faith`, `rental`, `tradition`.
+- **Tier 3 — Grandchild category** (optional · e.g. **Bridal Gown** under Bride's Attire). A leaf with its own details.
+- **Details (refinements)** live **only on the leaf** — the deepest category on that branch (*"only the last card has details"*). Each detail **carries a photo sample** (`sample_photo_r2_key`): the asset the **onboarding** visual picker grabs (Recraft generates one where no real photo exists; non-visual details like "halal-certified" / "alcohol-free" fall back to an icon so onboarding never shows a blank tile). Details are the 0044 per-category attributes + the canonicals mapped under the leaf.
+
+**Leaf ↔ branch is a hard rule.** A leaf shows `＋ detail`; a branch shows `＋ sub-category`. Adding the first sub-category to a leaf **converts it to a branch** — the editor prompts to **move its existing details down into a sub-category** (no detail is silently orphaned · removing the last sub-category reverts it to a leaf).
+
+**Browse vs. onboarding (shrink intact · locked 2026-06-03).** This depth powers **onboarding's visual pickers + in-tile filtering** — it does **not** deepen marketplace **vendor-browse**, which stays parent → child (~53 tiles) per the 2026-05-30 shrink (couples shop "Bride's Attire" vendors, then filter by gown type). Grandchildren/details are refinement + onboarding structure, not new browse tiles. Setnayan's own services live as leaves/listings in this same tree, so a newly created service auto-surfaces in onboarding + the couple's service list.
+
+Each card carries a **drag handle (⠿)**, inline **rename/edit (✎)**, and an **overflow menu (⋯)**. The `marketplaceHidden` canonicals (the 20 retired officiant/paperwork rows) sit in a collapsed **"Hidden"** group; an **"Unmapped" bucket** still catches any `canonical_service_schemas` row with no tree placement (drift detection — surfaces the moment a DB row lands without a mapping).
+
+**Full CRUD by direct manipulation:**
+
+- **Add** — on a branch: `＋ sub-category` (child or grandchild); on a leaf: `＋ detail` (with its photo sample) **plus a visible `＋ sub-category` affordance that converts the leaf to a branch** (running the move-details/vendors step below) — so creating a grandchild is a first-class action, not buried in a menu. The new card opens in inline-edit mode (label → auto-slug → flags / photo).
+- **Rename** — inline on the card (✎ / double-click).
+- **Edit** — ✎ opens the node panel: label, slug, flags, `marketplaceHidden`, description, and (for ✦ nodes) the paired SKU link into `/admin/pricing`.
+- **Delete** — ⋯ → Delete, **guarded** (see below).
+- **Move** — drag a card by its handle to **re-parent** (drop onto another parent/tile) or **reorder** among siblings. Persists to the DB-backed tree (parent · tile · `sort_order`); `taxonomy.ts`'s `TILE_PARENT` / `WEDDING_TILE_ORDER` / `WEDDING_TILE_LABEL` / `WEDDING_TILE_SLUG` read through.
+
+**Pending vendor requests show IN PLACE on the tree (no separate queue · owner-locked 2026-06-03).**
+
+The §3.2c review is *unified into this tree* — there is no separate request table. A vendor's proposed node (from 0022 §2.1a, at category/child-tile OR detail/facet grain) renders as a **dashed ghost card nested under the exact parent/tile the vendor proposed it under**, with a **PENDING** pill + "from Vendor #X". The four outcomes are inline card actions:
+
+- **[map→]** — drag the ghost onto an existing node (or pick from a "map to…" search) → re-points the vendor's service to that canonical, ghost clears, `scope='merged'` + `merged_into_category_id` set, vendor notified.
+- **[new ✓]** — promote-to-global: the ghost **solidifies into a real node in place**; vendor keeps first-vendor credit; it auto-appears in onboarding/browse/filters.
+- **[✕]** — opens a two-way close: **Keep private** (scoped to that vendor) or **Reject** (with reason).
+
+A **"▣ N pending"** badge on each affected parent + a **"Show pending only"** filter let admins sweep requests fast. The standing queue actions (Request more info · Flag for senior admin) live in the ghost card's ⋯.
+
+**Guardrails (destructive-op safety):**
+
+- **No orphaned vendors.** A node with vendors tagged or children attached **cannot be deleted/merged-away until its vendors are remapped** — admin drags them to another node or uses "merge into…". (The same zero-orphan principle the 2026-05-30 shrink enforced.)
+- **Two-admin gate (§4)** on structural changes that reshape the public marketplace — **delete · re-parent a populated tile · rename a global canonical · promote-to-global**. Low-risk edits (reorder within a parent, edit a description, toggle a non-public flag) are single-admin.
+- **Audit log.** Every add/edit/rename/delete/move/merge writes `admin_audit_log` (action · before/after JSON · admin · optional reason), mirroring `vendor_visibility_change`.
+
+**Mobile.** The tree collapses to a drill-down accordion (parent → tiles → details); move via long-press-drag or a "Move to…" sheet; ghost request cards render the same inline actions, stacked.
 
 **Design › Digital Services (2026-06-03).** The new 8th Design tile renders here with its three Setnayan-first-party canonicals — `setnayan_pakanta` · `setnayan_custom_monogram` · `setnayan_pailaw` (all ✦) — plus any 3rd-party digital vendors that register under it. Patiktok shows under Booths › Photo Booth. The tile is a **generic, vendor-listable** category (not a Setnayan-only shelf). Shipped to `taxonomy.ts` via PR #836. See [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md).
 
 **Relationship to the SKU catalog.** This surface manages the **marketplace category tree** (where vendors list + couples browse), NOT the purchasable Setnayan SKUs — those live in `/admin/pricing` + `/admin/addons` reading the V2 `platform_retail_catalog_v2`. A couple buys *Pakanta the SKU* via the catalog; a vendor lists under *Digital Services the category* via the taxonomy. The V2 retail catalog is **flat (no category column)**, so the Digital-Services grouping lives only here + in `taxonomy.ts`.
 
-**V1 read-only; CRUD lands V1.x** (per the 2026-05-22 read-mostly admin pattern). V1 is a viewer — taxonomy edits ship via `taxonomy.ts` PRs + `canonical_service_schemas` migrations (the code path, the same way the Digital Services tile shipped). V1.x adds in-console affordances: add / rename / reorder tiles, toggle `marketplaceHidden`, re-point a canonical's tile, and a "resolve unmapped" action — all gated behind the two-admin pattern (§4) for structural changes, since they reshape the public marketplace.
+**Build status.** The **viewer ships V1**; the **visual editor is speced for V1.x** (owner-locked 2026-06-03, superseding the earlier "CRUD lands V1.x · spec TODO"). The key build dependency is **moving the tree grouping from the code constant (`TAXONOMY_MAP`) to a DB-backed model** — a self-referential **`parent_id`** + **`tier`** + **`sort_order`** on `service_categories` (arbitrary depth — supersedes the flat `parent_family`-only model; it already carries `scope`/`merged_into_category_id` per 0022 §2.1a), plus a **`sample_photo_r2_key`** on each leaf detail — so admin edits are live without a deploy, with `taxonomy.ts` reading through to it. Until that lands, edits continue via `taxonomy.ts` PRs + `canonical_service_schemas` migrations (the code path the Digital Services tile shipped through). Structural ops gate behind the two-admin pattern (§4).
+
+**Change-safety & referential integrity (owner-asked 2026-06-03 · "make sure all is accommodated").** The taxonomy is a **classification layer** over a **stable entity layer**, so reshaping it never breaks operations. Three invariants make every add / rename / move / grandchild-split / merge safe:
+
+1. **Reference by immutable key/id — never by label or path.** Services, vendors, and the couple's lists store the stable `canonical_key` / `category_id` (`vendors.service_category_primary` · `vendor_services.service_category` · `event_custom_services.canonical_key`). **Rename changes the display label, not the key/slug; re-parent changes a node's `parent_id`, not its id.** Keys + slugs are immutable; a deliberate slug change or a merge emits a **301 redirect** and `merged_into_category_id` forwards old references. Display strings already stored as point-in-time *snapshots* (the "added you as their {service_category}" thread message · `event_vendor_relationships.service_category` "snapshot") keep their historical label by design.
+2. **Operations hang off the entity layer, not the category.** `vendor_bookings(vendor_id, service_id, event_id, …)` · `vendor_calendar_blocks(vendor_id, service_id, …)` · 0019 threads (vendor + event + couple) · 0007 budget (relationship/vendor) · 0034 orders (`service_key`/`order_id`) all key off **vendor / service / event / order ids** — **none join to a category node to function.** Re-classifying a service changes only its `service_category`/`category_id`; its `service_id` is unchanged, so **every booking, calendar block, master-calendar entry, thread, budget line, and order is untouched** (an in-flight booking survives a move). Vendor detail pages link by `vendor_id` (`/dashboard/vendors/[vendor_id]`), never by category — so they never 404 on a taxonomy change.
+3. **Every structural change is atomic, logged, and propagating.** The re-point is one transaction + an `admin_audit_log` row; affected vendors are notified; the destination leaf's 0044 facet schema is re-validated; slugs/merges redirect. No silent path-breaks.
+
+**Leaf → branch with live services (the owner's rule · 2026-06-03).** When a child-**leaf that has services** is split into grandchildren, the admin **must designate the grandchild that receives all existing services** (*"move all the services inside a specific grand child category"*). The editor **blocks the split until a destination leaf is chosen**, then runs it atomically: `UPDATE vendor_services SET service_category = <grandchild_key> WHERE service_category = <old_leaf_key>` — **the same re-point also updates each affected vendor's own profile fields** (`vendors.service_category_primary` / `service_category_secondary[]` that referenced the old leaf) **and their `vendor_service_attributes` (0044 facet payload)**, plus the couple-side lists and the leaf's details — writes the audit row, **notifies each affected vendor** ("your *X* service is now under *Bride's Attire › Bridal Gown* — confirm your gown-type details"), and prompts **facet re-validation** against the grandchild's schema. **Invariant: a vendor and every service listing are always tagged to a *leaf*, never a branch** — so when a leaf becomes a branch, all of its vendor / service / profile / facet references move down to the chosen grandchild in one transaction. Fine-grained redistribution afterward (a vendor who actually belongs in a *different* grandchild) is a normal map/move, safe under the same invariants.
+
+**Deleting / collapsing a sub-category (the inverse · owner-confirmed 2026-06-03).** Because vendors + details must live on a leaf, a grandchild that holds them can't be deleted into thin air — the editor asks where its contents go:
+
+- **(a) Merge into a sibling grandchild** — its vendors + details re-point to a chosen sibling; the child stays a branch.
+- **(b) Move into a new grandchild** — create + name a replacement (a relocate / rename).
+- **(c) Collapse to the child** — available only when it's the *last* grandchild, or via an explicit **"Flatten to leaf"** action on the branch: all grandchildren dissolve and their vendors + details merge **up** into the child, which reverts branch → leaf (details de-dup by label; vendors re-point).
+
+A child can't be half-branch / half-leaf, so contents return to the child **only when all grandchildren collapse** — you can't pull one grandchild up while siblings remain. An empty grandchild deletes with no prompt. Every variant uses the same atomic re-point + vendor-notify + facet re-validate + `admin_audit_log` as the split, and is gated by the two-admin pattern; bookings / calendars / threads stay untouched (they key off `service_id` / `vendor_id`). **Symmetric inverse:** the split moves contents **down** into a grandchild; deleting a grandchild moves them **sideways** (sibling) or **up** (flatten).
+
+**Who follows automatically vs. needs a build:**
+
+| Consumer | On a taxonomy change | Why |
+|---|---|---|
+| **Onboarding pickers** | ✅ auto-follows | reads the live tree by id at render — a new grandchild/detail appears next load |
+| **Marketplace browse + filters** | ✅ auto-follows (stays parent→child per the shrink) | reads keys live; grandchildren/details are filters *within* a tile, not new browse tiles |
+| **Vendor calendars / bookings / master calendar** | ✅ untouched | key off `vendor_id`+`service_id`, not category |
+| **0019 threads · 0007 budget · 0034 orders** | ✅ untouched | key off vendor/service/event/order ids |
+| **Couple's saved category checklist / shortlist** | ✅ resolves by id (+ `merged_into` redirect) | stable-id reference |
+| **Slug-based SEO / category landing pages** | ⚠ needs a stable-slug + 301 rule | URLs are the one place a label/path leak could break links (this is the shrink's deferred SEO follow-up) |
+| **Today's Focus wizard cards** | ⚠ reference canonicals — reconcile | hardcoded canonical refs (deferred shrink follow-up) |
+| **Couple-side per-event `vendor_category` 28-enum** | ⚠ does NOT auto-follow | separate hardcoded PG enum (0006), PR-only — not the marketplace taxonomy |
+
+The ✅ rows are safe by construction; the ⚠ rows are the explicit build/reconcile items.
+
+---
+
+### 3.16 Promoted Events & Broadcast Schedule (`/admin/promoted-events` · spec'd 2026-06-03 · V1.6 · unbuilt)
+
+The owner-asked admin control room: **compile the events Setnayan promotes** (wedding fairs first; any admin-curated calendar item by design) **and broadcast them into customers' Home schedules en masse.** It pairs with — does not replace — the auto-computed per-service deadline timeline (that needs no admin action; it's computed per page load from `planning_deadlines`). This surface owns the *admin-curated* layer the timeline can't derive on its own.
+
+**A · Compile (the roster).** A unified table + calendar of every promotable event:
+- **Wedding fairs** from 0042 (`industry_events` + the § 6.5 boost-service): name · dates · venue + region · organizer · boost model (A barter / B cash ₱9,999) · 3-slot status + T-60 featured window (SEO Playbook § 11.3.1) · exhibitor roster (`industry_event_attendees` `attendance_type='exhibitor'`) · waitlist position. **The 3-concurrent-featured cap + waitlist + admin pin live here** — this surface is where the playbook's proposed `0036` admin-calendar actually lands (0036 → Pakanta; the boost folded into 0042 + here).
+- **Setnayan-organized events** + **seasonal nudges** — the surface is event-type-agnostic; fairs are just the first concrete type.
+
+**B · Generate mass schedule (the broadcast).** Per event, **"Generate mass schedule"** opens a compose step:
+1. **Audience** (a per-broadcast admin control, not a global setting): **In-region** (default · ~100km radius vs `events.venue_latitude/longitude`, matching the § 3.4a couple-Home card) · **All customers** (national "mass" reach for major or non-geo events) · **Segment** (event type / planning stage / region). A live **"reaches N couples"** counter renders before send.
+2. **Place on the timeline** — injects the event into matching couples' Home **"Upcoming schedules"** as a dated item (optional T-30 / T-7 reminder rungs mirroring the boost email cadence). Mechanically a published `promoted_event_broadcasts` row read at **query-time** by `lib/upcoming-items.ts` (the same on-read merge the deadline scheduler uses) — **no per-customer rows, no cron** ([[project_setnayan_cron_free]]).
+3. **Fire channels** — the § 3.4a couple-Home card (in-region) + optional 0028 email blast. **Cron-free trigger:** the admin button is the on-demand send; any timed T-30 / T-7 blasts are **Resend scheduled-sends** (provider-held), never a Setnayan polling cron. This admin-triggered action **supersedes § 11.3.1's proposed daily-cron** state machine.
+
+**Audit + gates.** Every broadcast writes `admin_audit_log` (`action_type='mass_schedule_broadcast'` · event · audience · reach count). A national **All-customers** send is high blast-radius → **two-admin** (§ 4); **In-region** is single-admin (threshold owner-tunable). **Recall** removes the published row (the item drops from schedules on next view; already-sent emails can't be recalled).
+
+**Schema (new · V1.6):** `promoted_event_broadcasts (broadcast_id, source_kind{fair|setnayan_organized|seasonal}, source_ref, audience_type{in_region|all|segment}, audience_params JSONB, region_center, radius_km, schedule_item_date, reminder_offsets INT[], email_blast{none|immediate|scheduled}, status{draft|published|recalled}, reaches_count, created_by, approved_by, created_at)` · RLS admin-only `FOR ALL` via `public.is_admin()` + authenticated `SELECT` on `status='published'` rows for the on-read upcoming-items join. Reuses 0042's `industry_events` + `industry_event_attendees` — no duplication.
 
 ---
 

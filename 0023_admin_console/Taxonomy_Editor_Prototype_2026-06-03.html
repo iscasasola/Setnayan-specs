@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SETNAYAN · Admin · Taxonomy Editor (prototype)</title>
+<style>
+  :root{
+    --alabaster:#FBFBFA; --obsidian:#1E2229; --gold:#C5A059; --mulberry:#5C2542;
+    --ink:#1E2229; --ink-soft:#6b7079; --line:#e8e6e1; --card:#ffffff;
+    --gold-soft:#f5edda; --gold-line:#e3d2ab; --mulberry-soft:#f4ebef; --mulberry-line:#e3cdd6;
+    --shadow:0 1px 2px rgba(30,34,41,.04),0 4px 16px rgba(30,34,41,.06);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--alabaster);color:var(--ink);
+    font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+
+  header{position:sticky;top:0;z-index:30;background:rgba(251,251,250,.86);
+    backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+  .bar{max-width:1080px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px}
+  .brand{font-family:Georgia,serif;font-weight:700;letter-spacing:.14em;font-size:15px}
+  .brand b{color:var(--gold)}
+  .crumb{color:var(--ink-soft);font-size:13px;letter-spacing:.04em}
+  .spacer{flex:1}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);cursor:pointer;user-select:none}
+  .switch{width:38px;height:22px;border-radius:99px;background:#d9d6d0;position:relative;transition:.18s}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:.18s}
+  .toggle.on .switch{background:var(--mulberry)}
+  .toggle.on .switch::after{left:18px}
+  .pendpill{font-size:12px;font-weight:600;color:var(--mulberry);background:var(--mulberry-soft);
+    border:1px solid var(--mulberry-line);padding:3px 9px;border-radius:99px}
+
+  main{max-width:1080px;margin:0 auto;padding:18px 20px 120px}
+  .lead .serif{font-family:Georgia,serif;font-size:24px;margin:8px 0 2px}
+  .lead p{color:var(--ink-soft);margin:0 0 14px;max-width:64ch}
+
+  .legend{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:12.5px;color:var(--ink-soft);
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:20px}
+  .legend b{color:var(--ink)} .legend .g{color:var(--gold)} .legend .m{color:var(--mulberry)}
+
+  .family{margin:0 0 26px}
+  .fhead{display:flex;align-items:center;gap:10px;padding:0 4px 9px;border-bottom:2px solid var(--gold);margin-bottom:12px}
+  .fname{font-family:Georgia,serif;font-size:18px;letter-spacing:.12em;text-transform:uppercase}
+  .fmeta{color:var(--ink-soft);font-size:12.5px}
+  .lock{font-size:11px;color:var(--ink-soft);border:1px solid var(--line);border-radius:99px;padding:2px 7px}
+  .fhead .spacer{flex:1}
+  .addtile{font-size:13px;font-weight:600;color:var(--gold);background:var(--gold-soft);border:1px solid var(--gold-line);
+    border-radius:99px;padding:5px 12px;cursor:pointer}
+  .addtile:hover{background:#efe2c6}
+
+  .tilelist{display:flex;flex-direction:column;gap:9px;min-height:8px}
+  .tilelist.drop{outline:2px dashed var(--gold-line);outline-offset:4px;border-radius:12px}
+
+  .tile{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:12px 13px;box-shadow:var(--shadow);transition:box-shadow .12s,opacity .12s}
+  .tile:hover{box-shadow:0 2px 4px rgba(30,34,41,.05),0 8px 22px rgba(30,34,41,.09)}
+  .tile.dragging{opacity:.45;border-style:dashed}
+  .grip{cursor:grab;color:#c3c0ba;display:grid;grid-template-columns:repeat(2,3px);gap:3px;padding:5px 2px;flex:0 0 auto}
+  .grip i{width:3px;height:3px;border-radius:50%;background:currentColor;display:block}
+  .chev{flex:0 0 auto;width:20px;height:20px;border:none;background:none;color:var(--ink-soft);cursor:pointer;font-size:11px;transition:transform .15s}
+  .chev.open{transform:rotate(90deg)}
+  .ticon{flex:0 0 auto;font-size:16px;width:22px;text-align:center}
+  .tlabel{font-weight:600;cursor:text}
+  .tlabel:focus{outline:2px solid var(--gold-line);border-radius:5px;padding:0 3px}
+  .branchtag{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--mulberry);background:var(--mulberry-soft);border:1px solid var(--mulberry-line);border-radius:5px;padding:2px 6px}
+  .leaftag{font-size:10px;font-weight:700;letter-spacing:.05em;color:#5b6b3d;background:#eef3e3;border:1px solid #d8e3c2;border-radius:5px;padding:2px 6px}
+  .grow{flex:1;min-width:6px}
+  .count{font-size:12px;color:var(--ink-soft);background:#f3f1ec;border-radius:99px;padding:3px 9px;font-variant-numeric:tabular-nums;flex:0 0 auto}
+  .flags{display:flex;gap:4px;flex:0 0 auto}
+  .flag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 5px;color:#8a7a4f;background:var(--gold-soft);border:1px solid var(--gold-line)}
+  .flag.sn{color:var(--gold);background:#fbf4e3}
+  .flag.ph,.flag.faith,.flag.rental,.flag.trad{color:var(--ink-soft);background:#f2f0ea;border-color:var(--line)}
+  .iconbtn{flex:0 0 auto;width:28px;height:28px;border-radius:8px;border:1px solid transparent;background:none;color:var(--ink-soft);cursor:pointer;font-size:14px;display:grid;place-items:center}
+  .iconbtn:hover{background:#f2f0ea;border-color:var(--line)}
+
+  .details{margin:2px 0 0 40px;padding:11px 13px;background:#faf9f6;border:1px solid var(--line);border-radius:12px}
+  .dhint{color:var(--ink-soft);font-size:12.5px;margin:0 0 10px;letter-spacing:.02em}
+  .dhint b{color:var(--ink)}
+
+  /* photo-sample detail cards */
+  .photogrid{display:flex;flex-wrap:wrap;gap:10px}
+  .dcard{width:108px;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;position:relative;box-shadow:var(--shadow)}
+  .dcard.sn{border-color:var(--gold-line)}
+  .thumb{height:64px;display:grid;place-items:center;font-size:26px}
+  .thumb.addt{background:#f3f1ec;color:var(--gold);font-size:26px;cursor:pointer}
+  .dlabel{padding:7px 9px;font-size:12px;font-weight:600;line-height:1.25;cursor:text}
+  .dlabel:focus{outline:2px solid var(--gold-line)}
+  .dcard .sn-dot{position:absolute;top:5px;left:6px;font-size:11px;color:var(--gold);background:rgba(255,255,255,.9);border-radius:50%;width:18px;height:18px;display:grid;place-items:center}
+  .dcard .x{position:absolute;top:5px;right:6px;background:rgba(255,255,255,.88);border-radius:50%;width:18px;height:18px;display:grid;place-items:center;font-size:11px;color:#8a7a4f;cursor:pointer}
+  .dcard .x:hover{color:var(--mulberry)}
+  .dcard.add{cursor:pointer;border-style:dashed;width:108px}
+  .photolbl{font-size:10px;color:var(--ink-soft);position:absolute;bottom:30px;right:6px;background:rgba(255,255,255,.85);border-radius:4px;padding:0 4px}
+
+  /* grandchild category cards */
+  .gchildlist{display:flex;flex-direction:column;gap:8px;margin-bottom:9px}
+  .gchild{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 12px}
+  .gcwrap > .details{margin-left:22px;background:#fff}
+  .addsub{font-size:12.5px;color:var(--ink-soft);background:none;border:1px dashed var(--line);border-radius:99px;padding:6px 12px;cursor:pointer}
+  .addsub:hover{border-color:var(--gold);color:var(--gold)}
+  .splitrow{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:7px;align-items:flex-start}
+  .splithint{font-size:12px;color:var(--ink-soft)}
+
+  /* ghost / pending */
+  .ghostcard{display:flex;align-items:center;gap:11px;border:1.5px dashed var(--mulberry-line);background:var(--mulberry-soft);border-radius:var(--radius);padding:11px 13px}
+  .ghostcard.inset{margin-top:9px}
+  .pp{font-size:10px;font-weight:800;letter-spacing:.08em;color:#fff;background:var(--mulberry);border-radius:5px;padding:3px 7px;flex:0 0 auto}
+  .glabel{font-weight:600}
+  .gfrom{font-size:12px;color:var(--mulberry);opacity:.85}
+  .gactions{display:flex;gap:7px;flex:0 0 auto}
+  .ga{font-size:12.5px;font-weight:600;border-radius:9px;padding:6px 11px;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+  .ga.map{color:var(--ink);background:#fff;border-color:var(--line)} .ga.map:hover{border-color:var(--gold)}
+  .ga.new{color:#fff;background:var(--gold);border-color:var(--gold)} .ga.new:hover{filter:brightness(.96)}
+  .ga.no{color:var(--mulberry);background:#fff;border-color:var(--mulberry-line);width:34px;text-align:center;padding:6px 0}
+  .ga.no:hover{border-color:var(--mulberry)}
+
+  .pop{position:fixed;z-index:60;background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 10px 40px rgba(0,0,0,.16);padding:6px;min-width:210px}
+  .pop button{display:flex;width:100%;align-items:center;gap:9px;background:none;border:none;border-radius:8px;padding:9px 11px;font-size:13.5px;color:var(--ink);cursor:pointer;text-align:left}
+  .pop button:hover{background:#f4f2ec}
+  .pop button.danger{color:#a4282b}
+  .pop .sep{height:1px;background:var(--line);margin:4px 2px}
+
+  .scrim{position:fixed;inset:0;z-index:55;background:rgba(30,34,41,.32);display:grid;place-items:center;padding:20px}
+  .modal{background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.28);width:min(460px,100%);overflow:hidden}
+  .modal h3{font-family:Georgia,serif;margin:0;padding:18px 20px 6px;font-size:19px}
+  .modal .body{padding:4px 20px 8px;color:var(--ink-soft);font-size:14px}
+  .modal .body b{color:var(--ink)}
+  .search{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:14px system-ui;margin:6px 0}
+  .optlist{max-height:240px;overflow:auto;margin:2px 0 6px}
+  .opt{display:flex;justify-content:space-between;gap:10px;padding:9px 11px;border-radius:9px;cursor:pointer}
+  .opt:hover{background:#f4f2ec} .opt small{color:var(--ink-soft)}
+  .modal .foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 18px}
+  .btn{font:600 13.5px system-ui;border-radius:10px;padding:9px 15px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink)}
+  .btn.primary{background:var(--obsidian);color:#fff;border-color:var(--obsidian)}
+  .btn.warn{background:#a4282b;color:#fff;border-color:#a4282b}
+  .twoadmin{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--gold);background:var(--gold-soft);border:1px solid var(--gold-line);border-radius:9px;padding:8px 11px;margin:6px 0 2px}
+
+  #toasts{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;gap:9px;max-width:340px}
+  .toast{background:var(--obsidian);color:#fff;border-radius:11px;padding:11px 14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:pop .25s ease;display:flex;gap:9px;align-items:flex-start}
+  .toast.gold{background:#3a3320;border-left:3px solid var(--gold)}
+  .toast.mul{background:#39202c;border-left:3px solid #b46c87}
+  @keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+
+  @media(max-width:640px){
+    .bar{flex-wrap:wrap;gap:10px}
+    .flags{display:none}
+    .tile,.gchild{flex-wrap:wrap}
+    .gactions{width:100%;justify-content:flex-end;margin-top:4px}
+    .ghostcard{flex-wrap:wrap}
+    .details{margin-left:10px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <span class="brand">SET<b>·</b>NAYAN</span>
+    <span class="crumb">Admin · /admin/taxonomy</span>
+    <span class="spacer"></span>
+    <span class="pendpill" id="pcount">0 pending</span>
+    <span class="toggle" id="ponly"><span class="switch"></span> Show pending only</span>
+  </div>
+</header>
+
+<main>
+  <div class="lead">
+    <div class="serif">Vendor taxonomy</div>
+    <p>A category tree of flexible depth. A card is a <b>branch</b> (holds sub-categories) or a <b>leaf</b> (holds details). <b>Details live only on the leaf</b> — and each detail carries a photo sample that onboarding grabs for its visual pickers. Vendor-browse stays parent → child (~53 tiles); this depth feeds onboarding + refinement.</p>
+  </div>
+
+  <div class="legend">
+    <span><b>⠿</b> drag to move</span>
+    <span><b>›</b> expand</span>
+    <span><b>✎</b> rename · <b>⋯</b> menu</span>
+    <span><span class="m">BRANCH</span> = has sub-categories</span>
+    <span><span style="color:#5b6b3d">LEAF</span> = has photo'd details</span>
+    <span><span class="g">✦</span> Setnayan</span>
+    <span><span class="m">▢ dashed</span> = pending request</span>
+  </div>
+
+  <div id="tree"></div>
+</main>
+<div id="toasts"></div>
+
+<script>
+let _id=0; const nid=p=>p+(++_id);
+const D=l=>({id:nid('d_'),label:l,sn:/✦/.test(l)});
+const leaf=(label,vendors,flags,details)=>({id:nid('t_'),label,vendors,flags:flags||[],details:(details||[]).map(D)});
+const branch=(label,vendors,flags,children)=>({id:nid('t_'),label,vendors,flags:flags||[],children});
+const gc=(label,details,vendors)=>({id:nid('gc_'),label,details:(details||[]).map(D),vendors:vendors||0});
+
+const data={parents:[
+  {key:'VENUE',icon:'🏛',tiles:[leaf('Reception',18),leaf('Ceremony',12)]},
+  {key:'PLANNING',icon:'🗂',tiles:[leaf('Coordinator / Planner',44,[],['Full','Partial','Day-of','Month-of']),leaf('Concierge',1,['sn'])]},
+  {key:'FEAST',icon:'🍽',tiles:[leaf('Cake',29),leaf('Catering',51,['faith'],['Plated','Buffet','Halal-certified','Alcohol-free']),leaf('Stations',14)]},
+  {key:'DESIGN',icon:'🎨',tiles:[
+     leaf('Stylist / Decorator',38,['trad']),leaf('Florist',27),leaf('Lights & Sound',19),leaf('Dance Floor',8),
+     leaf('Outdoor',12),leaf('Fireworks',5),leaf('LED Wall',9),
+     leaf('Digital Services',4,['sn'],['Pakanta ✦','Animated Monogram ✦','Pro Website ✦','Live Venue Photo Wall ✦','Live Background · Pailaw ✦'])]},
+  {key:'PROGRAM',icon:'🎤',tiles:[leaf('Live Band',22),leaf('Choir',9),leaf('Orchestra',3),leaf('Wedding Singer',15),leaf('DJ',31),leaf('Choreographer',7),leaf('Performers',11),leaf('Host / MC',18)]},
+  {key:'DOCUMENTARY',icon:'📷',tiles:[
+     leaf('Photo & Video',142,[],['Photographer-only','Videographer-only','Engagement','Pre-nup','Drone / aerial','Album','Same-Day Edit','Highlight reel']),
+     leaf('Editorial',6),leaf('Livestream',11,['sn'])]},
+  {key:'LOOK',icon:'👗',tiles:[
+     /* a BRANCH — demonstrates the grandchild tier + leaf-only-details rule */
+     branch("Bride's Attire",0,['trad'],[
+        gc('Bridal Gown',['A-line','Mermaid','Ball gown','Empire','Sheath'],22),
+        gc('Filipiniana',['Maria Clara','Balintawak','Terno'],9),
+        gc('Bridesmaid Dress',['Long','Cocktail','Mismatched'],14)]),
+     leaf("Groom's Attire",33,['rental'],['Tuxedo','Suit','Barong Tagalog']),
+     leaf("Women's Attire",21),leaf("Men's Attire",17),leaf('Filipiniana & Barongs',14,['trad','ph']),
+     leaf('HMUA',58,[],['Airbrush','Traditional','Hair styling','Family glam']),leaf('Grooming',12),leaf('Wellness & Fitness',9),leaf('Jewelleries & Accessories',26)]},
+  {key:'BOOTHS',icon:'🎪',tiles:[leaf('Mobile Bar',21),leaf('Coffee / Espresso',16),leaf('Mocktail',8),leaf('Food Truck',12),leaf('Dessert',19),leaf('Massage Chair',6),leaf('Food Cart',23),
+     leaf('Photo Booth',33,[],['GIF','360°','Polaroid','Magic Mirror','Patiktok ✦','Pabati ✦']),
+     leaf('Perfume Bar',4),leaf('Arcade / Games',7),leaf('Henna / Tattoo',5),leaf('Mini Nail Bar',6),leaf('Tarot / Astrology / Palmistry',5),leaf('Caricature / Calligraphy / Painting',9),leaf('Engraving / Embroidery',7)]},
+  {key:'PRINTS',icon:'🖋',tiles:[leaf('Printing',24),leaf('Souvenir / Giveaways',31,['ph'])]},
+  {key:'TRANSPORT',icon:'🚗',tiles:[leaf('Bridal Car',28,['rental'],['Vintage / classic','Horse-drawn carriage','Yacht / boat']),leaf('Guest Shuttle',14),leaf('Escort',6)]},
+]};
+
+let pending=[
+  {id:nid('g_'),grain:'tile',parent:'DOCUMENTARY',label:'Heirloom Photo Restoration',vendor:'#214'},
+  {id:nid('g_'),grain:'detail',parent:'DOCUMENTARY',owner:'Photo & Video',label:'Underwater Shoot',vendor:'#338'},
+  {id:nid('g_'),grain:'detail',parent:'LOOK',owner:'Bridal Gown',label:'Couture / Bespoke',vendor:'#277'},
+];
+
+const FLAGTXT={sn:'✦',ph:'PH',faith:'Faith',rental:'Rental',trad:'Tradition'};
+const EMOJI=[['mermaid','🧜'],['ball gown','👗'],['a-line','👰'],['empire','👰'],['sheath','👗'],['maria clara','🌸'],['balintawak','🌸'],['terno','🌸'],['filipiniana','🌸'],['barong','🤵'],['tuxedo','🤵'],['suit','🤵'],['bridesmaid','💐'],['long','👗'],['cocktail','🥂'],['mismatched','🎨'],['gown','👰'],['airbrush','💄'],['traditional','💄'],['hair','💇'],['family','👨‍👩‍👧'],['photographer','📷'],['videographer','🎥'],['engagement','💍'],['pre-nup','📸'],['drone','🚁'],['aerial','🚁'],['album','📕'],['same-day','🎬'],['highlight','✨'],['underwater','🌊'],['couture','✂️'],['halal','🥩'],['alcohol','🚫'],['plated','🍽'],['buffet','🍲'],['full','🗂'],['partial','🗂'],['day-of','📆'],['month-of','📆'],['pakanta','🎵'],['monogram','🅜'],['website','🌐'],['photo wall','🖼'],['pailaw','💡'],['background','💡'],['patiktok','📱'],['pabati','🎬'],['vintage','🚗'],['carriage','🐴'],['yacht','⛵'],['360','🌀'],['gif','🎞'],['polaroid','📸'],['magic','🪞']];
+function emojiFor(l){l=l.toLowerCase();for(const[k,e]of EMOJI)if(l.includes(k))return e;return '🖼';}
+function hue(l){let h=0;for(let i=0;i<l.length;i++)h=(h*31+l.charCodeAt(i))%360;return h;}
+function thumbStyle(l){const h=hue(l);return 'background:linear-gradient(135deg,hsl('+h+',52%,84%),hsl('+((h+38)%360)+',48%,71%))';}
+
+let expanded=new Set(), pendingOnly=false; let TILES={};
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+function parentByKey(k){return data.parents.find(p=>p.key===k);}
+function isBranch(t){return Array.isArray(t.children)&&t.children.length>0;}
+function tileVendors(t){return isBranch(t)?t.children.reduce((s,g)=>s+(g.vendors||0),0):(t.vendors||0);}
+function indexTiles(){TILES={};data.parents.forEach(p=>p.tiles.forEach(t=>TILES[t.id]=t));}
+function findTile(id){for(const p of data.parents){const i=p.tiles.findIndex(t=>t.id===id);if(i>-1)return{tile:p.tiles[i],parent:p,index:i};}return null;}
+function findLeafByLabel(lbl){for(const p of data.parents)for(const t of p.tiles){if(t.label===lbl&&!isBranch(t))return t;if(isBranch(t))for(const g of t.children)if(g.label===lbl)return g;}return null;}
+function toast(msg,kind,icon){const w=document.getElementById('toasts');const e=el('div','toast'+(kind?' '+kind:''));e.innerHTML='<span>'+(icon||'✓')+'</span><span>'+msg+'</span>';w.appendChild(e);setTimeout(()=>{e.style.transition='.3s';e.style.opacity='0';e.style.transform='translateY(6px)';setTimeout(()=>e.remove(),320)},3400);}
+function pendCount(){document.getElementById('pcount').textContent=pending.length+' pending';}
+
+/* ---- render ---- */
+function render(){
+  indexTiles();
+  const tree=document.getElementById('tree');tree.innerHTML='';
+  data.parents.forEach(p=>{
+    const hasPending=pending.some(g=>g.parent===p.key);
+    if(pendingOnly && !hasPending) return;
+    const fam=el('section','family');
+    const head=el('div','fhead');
+    head.innerHTML='<span class="ticon">'+p.icon+'</span><span class="fname">'+p.key+'</span>'+
+      '<span class="fmeta">'+p.tiles.length+' tiles · '+p.tiles.reduce((s,t)=>s+tileVendors(t),0)+' vendors</span>'+
+      '<span class="lock" title="Parent families are owner-level">🔒</span><span class="spacer"></span>';
+    const add=el('button','addtile','＋ tile');add.onclick=()=>addTile(p);head.appendChild(add);fam.appendChild(head);
+    const list=el('div','tilelist');list.dataset.parent=p.key;fam.appendChild(list);
+    p.tiles.forEach(t=>list.appendChild(tileCard(t,p)));
+    pending.filter(g=>g.parent===p.key&&g.grain==='tile').forEach(g=>list.appendChild(ghostCard(g)));
+    list.addEventListener('dragover',e=>{e.preventDefault();const drag=document.querySelector('.tile.dragging');if(!drag)return;list.classList.add('drop');const a=dragAfter(list,e.clientY);if(a==null)list.appendChild(drag);else list.insertBefore(drag,a);});
+    list.addEventListener('dragleave',e=>{if(!list.contains(e.relatedTarget))list.classList.remove('drop');});
+    list.addEventListener('drop',e=>{e.preventDefault();list.classList.remove('drop');});
+    tree.appendChild(fam);
+  });
+  pendCount();
+}
+
+function tileCard(t,p){
+  const open=expanded.has(t.id), brnch=isBranch(t);
+  const card=el('div','tile');card.dataset.id=t.id;card.draggable=true;
+  const grip=el('span','grip');grip.innerHTML='<i></i><i></i><i></i><i></i><i></i><i></i>';grip.title='Drag to move';card.appendChild(grip);
+  const chev=el('button','chev'+(open?' open':''),'▶');chev.onclick=()=>{open?expanded.delete(t.id):expanded.add(t.id);render();};card.appendChild(chev);
+  const lab=el('span','tlabel');lab.textContent=t.label;card.appendChild(lab);
+  card.appendChild(el('span',brnch?'branchtag':'leaftag',brnch?'BRANCH':'LEAF'));
+  card.appendChild(el('span','grow'));
+  card.appendChild(el('span','count',tileVendors(t)+' ▸'));
+  if(t.flags.length){const fl=el('span','flags');t.flags.forEach(f=>fl.appendChild(el('span','flag '+f,FLAGTXT[f]||f)));card.appendChild(fl);}
+  const ren=el('button','iconbtn','✎');ren.title='Rename';ren.onclick=()=>renameInline(card,t);card.appendChild(ren);
+  const menu=el('button','iconbtn','⋯');menu.onclick=e=>tileMenu(e,t,p);card.appendChild(menu);
+  card.addEventListener('dragstart',()=>card.classList.add('dragging'));
+  card.addEventListener('dragend',()=>{card.classList.remove('dragging');rebuildFromDOM();const loc=findTile(t.id);if(loc){toast('Moved <b>'+t.label+'</b> → '+loc.parent.key,'gold','⠿');}render();});
+  if(!open) return card;
+  const wrap=el('div');wrap.appendChild(card);
+  wrap.appendChild(brnch?branchPanel(t):leafPanel(t,true));
+  return wrap;
+}
+
+function leafPanel(owner,isTile){
+  const det=el('div','details');
+  det.appendChild(el('p','dhint','Details — refinements, <b>each with a photo sample</b> grabbed by onboarding:'));
+  const grid=el('div','photogrid');
+  (owner.details||[]).forEach(d=>grid.appendChild(detailCard(d,owner)));
+  const add=el('div','dcard add');add.innerHTML='<div class="thumb addt">＋</div><div class="dlabel">add detail</div>';
+  add.onclick=()=>{const d=D('New detail');owner.details.push(d);expanded.add(owner.id);render();};
+  grid.appendChild(add);det.appendChild(grid);
+  pending.filter(g=>g.grain==='detail'&&g.owner===owner.label).forEach(g=>det.appendChild(ghostCard(g,true)));
+  if(isTile){
+    const split=el('div','splitrow');
+    split.appendChild(el('span','splithint','Needs more structure? Give it grandchild categories — this leaf becomes a branch and its details + vendors move into the first one:'));
+    const b=el('button','addsub','＋ sub-category  (make grandchildren)');b.onclick=()=>convertToBranch(owner);
+    split.appendChild(b);det.appendChild(split);
+  }
+  return det;
+}
+function detailCard(d,owner){
+  const c=el('div','dcard'+(d.sn?' sn':''));
+  const th=el('div','thumb');th.setAttribute('style',thumbStyle(d.label));th.innerHTML='<span>'+emojiFor(d.label)+'</span>';c.appendChild(th);
+  c.appendChild(el('span','photolbl','photo'));
+  if(d.sn)c.appendChild(el('span','sn-dot','✦'));
+  const x=el('span','x','✕');x.title='Remove';x.onclick=()=>{owner.details=owner.details.filter(z=>z.id!==d.id);toast('Removed “'+d.label.replace(' ✦','')+'”','mul','✕');render();};c.appendChild(x);
+  const lb=el('div','dlabel');lb.textContent=d.label.replace(' ✦','');c.appendChild(lb);
+  lb.onclick=()=>{lb.contentEditable=true;lb.focus();const old=d.label;lb.onblur=()=>{lb.contentEditable=false;d.label=(lb.textContent.trim()||old).replace(' ✦','')+(d.sn?' ✦':'');};lb.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();lb.blur();}};};
+  return c;
+}
+function branchPanel(t){
+  const det=el('div','details');
+  det.appendChild(el('p','dhint','Sub-categories — <b>“'+t.label+'” is a branch</b>, so details live on its children (the leaves):'));
+  const list=el('div','gchildlist');
+  t.children.forEach(g=>list.appendChild(gchildCard(g,t)));
+  det.appendChild(list);
+  const add=el('button','addsub','＋ sub-category');add.onclick=()=>{const g=gc('New sub-category',[]);t.children.push(g);expanded.add(g.id);render();};
+  det.appendChild(add);
+  return det;
+}
+function gchildCard(g,parentTile){
+  const open=expanded.has(g.id);
+  const wrap=el('div','gcwrap');
+  const card=el('div','gchild');
+  const chev=el('button','chev'+(open?' open':''),'▶');chev.onclick=()=>{open?expanded.delete(g.id):expanded.add(g.id);render();};card.appendChild(chev);
+  const lab=el('span','tlabel');lab.textContent=g.label;card.appendChild(lab);
+  card.appendChild(el('span','leaftag','LEAF'));
+  card.appendChild(el('span','grow'));
+  card.appendChild(el('span','count',(g.vendors||0)+' ▸'));
+  card.appendChild(el('span','count',(g.details?g.details.length:0)+' details'));
+  const ren=el('button','iconbtn','✎');ren.onclick=()=>renameInline(card,g);card.appendChild(ren);
+  const del=el('button','iconbtn','🗑');del.title='Delete sub-category';del.onclick=()=>deleteGrandchild(g,parentTile);card.appendChild(del);
+  wrap.appendChild(card);
+  if(open)wrap.appendChild(leafPanel(g));
+  return wrap;
+}
+
+function ghostCard(g){
+  const c=el('div','ghostcard'+(g.grain==='detail'?' inset':''));
+  c.appendChild(el('span','pp','PENDING'));
+  c.appendChild(Object.assign(el('span','glabel'),{textContent:g.label}));
+  c.appendChild(el('span','gfrom','· from Vendor '+g.vendor+(g.grain==='tile'?' · proposed new tile':' · proposed detail')));
+  c.appendChild(el('span','grow'));
+  const act=el('span','gactions');
+  const map=el('button','ga map','map →');map.onclick=()=>openMap(g);
+  const nw=el('button','ga new','new ✓');nw.onclick=()=>promote(g);
+  const no=el('button','ga no','✕');no.onclick=e=>closeMenu(e,g);
+  act.append(map,nw,no);c.appendChild(act);return c;
+}
+
+/* ---- drag rebuild ---- */
+function dragAfter(list,y){const els=[...list.querySelectorAll('.tile:not(.dragging)')];return els.reduce((cl,ch)=>{const b=ch.getBoundingClientRect();const o=y-b.top-b.height/2;return(o<0&&o>cl.o)?{o,e:ch}:cl;},{o:-Infinity,e:null}).e;}
+function rebuildFromDOM(){document.querySelectorAll('.tilelist').forEach(list=>{const p=parentByKey(list.dataset.parent);const ids=[...list.querySelectorAll('.tile[data-id]')].map(n=>n.dataset.id);p.tiles=ids.map(id=>TILES[id]).filter(Boolean);});indexTiles();}
+
+/* ---- CRUD ---- */
+function addTile(p){const t=leaf('New category',0,[],[]);p.tiles.push(t);render();setTimeout(()=>{const card=document.querySelector('.tile[data-id="'+t.id+'"]');if(card)renameInline(card,t,true);},20);}
+function renameInline(card,node,fresh){
+  const lab=card.querySelector('.tlabel');if(!lab)return;const old=node.label;
+  const inp=el('span','tlabel');inp.contentEditable=true;inp.textContent=fresh?'':node.label;lab.replaceWith(inp);inp.focus();
+  if(!fresh){const r=document.createRange();r.selectNodeContents(inp);const s=getSelection();s.removeAllRanges();s.addRange(r);}
+  inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();inp.blur();}else if(e.key==='Escape'){inp.onblur=null;node.label=old;render();}};
+  inp.onblur=()=>{node.label=inp.textContent.trim()||old;render();toast((fresh?'Added ':'Renamed → ')+'<b>'+node.label+'</b>','gold','✎');};
+}
+function tileMenu(e,t,p){
+  e.stopPropagation();closePop();const pop=el('div','pop');
+  const mk=(txt,fn,cls)=>{const b=el('button',cls,txt);b.onclick=()=>{closePop();fn();};return b;};
+  pop.appendChild(mk('✎  Rename',()=>renameInline(document.querySelector('.tile[data-id="'+t.id+'"]'),t)));
+  pop.appendChild(mk('⇄  Move to family…',()=>moveTo(t,p)));
+  if(!isBranch(t))pop.appendChild(mk('🌿  Add sub-category (→ branch)',()=>convertToBranch(t),'addsubbtn'));
+  if(isBranch(t))pop.appendChild(mk('🍃  Flatten to leaf (merge sub-categories up)',()=>flattenBranch(t),'flattenbtn'));
+  pop.appendChild(mk('✦  Toggle Setnayan flag',()=>{t.flags.includes('sn')?t.flags=t.flags.filter(f=>f!=='sn'):t.flags.unshift('sn');render();toast('Flag updated','gold','✦');}));
+  pop.appendChild(el('div','sep'));
+  pop.appendChild(mk('🗑  Delete',()=>deleteTile(t,p),'danger'));
+  placePop(pop,e);
+}
+function convertToBranch(t){
+  const nV=t.vendors||0, nD=(t.details||[]).length, def=t.label+' — General';
+  const moving=(nV?'<b>'+nV+' vendor'+(nV>1?'s':'')+'</b>':'')+(nV&&nD?' and ':'')+(nD?'<b>'+nD+' detail'+(nD>1?'s':'')+'</b>':'');
+  modal({
+    title:'Convert “'+t.label+'” to a branch?',
+    body:'A branch holds sub-categories — and <b>vendors + details must live on a leaf</b>. '+
+      (nV||nD ? moving+' will move into the sub-category you name (so nothing is orphaned):' : 'A first sub-category will be created:')+
+      '<input id="gcname" class="search" value="'+def+'">'+
+      (nV?'<div style="font-size:12px;color:var(--ink-soft);margin-top:2px">↳ each of the '+nV+' vendor'+(nV>1?'s':'')+' is re-tagged to the new sub-category, keeps every booking + calendar slot, and is notified to confirm their details.</div>':''),
+    twoadmin:true,
+    foot:[{t:'Cancel',f:closeModal},{t:(nV?'Create & move '+nV+' vendor'+(nV>1?'s':''):'Create sub-category'),cls:'primary',f:()=>{
+      const name=((document.getElementById('gcname')||{}).value||def).trim()||def;
+      const g=gc(name,[],nV); g.details=t.details||[];
+      t.children=[g]; t.details=[]; t.vendors=0;
+      closeModal(); expanded.add(t.id); expanded.add(g.id);
+      toast('Converted “'+t.label+'” → branch · moved '+nV+' vendor'+(nV!==1?'s':'')+' + '+nD+' detail'+(nD!==1?'s':'')+' into “'+name+'”','gold','🌿');
+      if(nV) toast(nV+' vendor'+(nV>1?'s':'')+' re-tagged + notified — bookings/calendars untouched','mul','✉');
+      render();
+    }}]
+  });
+}
+function dedupeDetails(a,b){const seen=new Set((a||[]).map(d=>d.label.toLowerCase()));const out=[...(a||[])];(b||[]).forEach(d=>{const k=d.label.toLowerCase();if(!seen.has(k)){out.push(d);seen.add(k);}});return out;}
+function deleteGrandchild(g,parentTile){
+  const nV=g.vendors||0,nD=(g.details||[]).length,siblings=parentTile.children.filter(z=>z.id!==g.id);
+  if(nV===0&&nD===0){parentTile.children=siblings;if(!parentTile.children.length){parentTile.details=[];toast('Removed last sub-category — “'+parentTile.label+'” is a leaf again','gold','⇄');}else toast('Deleted empty “'+g.label+'”','mul','🗑');render();return;}
+  if(siblings.length===0){
+    modal({title:'Delete “'+g.label+'” — the last sub-category?',body:'It holds <b>'+nV+' vendor'+(nV!==1?'s':'')+'</b>'+(nD?' + <b>'+nD+' detail'+(nD!==1?'s':'')+'</b>':'')+'. As the last sub-category, deleting it <b>collapses “'+parentTile.label+'” back to a leaf</b> — its vendors + details move up into the child.',twoadmin:true,foot:[{t:'Cancel',f:closeModal},{t:'Collapse to “'+parentTile.label+'”',cls:'primary',f:()=>{parentTile.details=g.details||[];parentTile.vendors=nV;parentTile.children=[];closeModal();expanded.add(parentTile.id);toast('Collapsed “'+g.label+'” up — “'+parentTile.label+'” is a leaf again ('+nV+' vendors · '+nD+' details)','gold','↩');render();}}]});return;
+  }
+  closeModal();scrim=el('div','scrim');const m=el('div','modal');
+  m.innerHTML='<h3>Delete “'+g.label+'” — where do its services go?</h3><div class="body">It holds <b>'+nV+' vendor'+(nV!==1?'s':'')+'</b>'+(nD?' + <b>'+nD+' detail'+(nD!==1?'s':'')+'</b>':'')+'. Move them so nothing is orphaned:</div><div class="twoadmin">🛡 Two-admin gate — structural change</div>';
+  const list=el('div','optlist');
+  siblings.forEach(s=>{const o=el('div','opt');o.innerHTML='<span>↳ Merge into “'+s.label+'”</span><small>'+(s.vendors||0)+' vendors</small>';o.onclick=()=>{s.vendors=(s.vendors||0)+nV;s.details=dedupeDetails(s.details,g.details);parentTile.children=parentTile.children.filter(z=>z.id!==g.id);closeModal();toast('Merged “'+g.label+'” → “'+s.label+'” · '+nV+' vendors re-tagged + notified','gold','⇄');render();};list.appendChild(o);});
+  const o2=el('div','opt');o2.innerHTML='<span>➕ Move into a NEW sub-category</span><small>create + rename with ✎</small>';o2.onclick=()=>{const ng=gc('New sub-category',[],nV);ng.details=g.details||[];const i=parentTile.children.findIndex(z=>z.id===g.id);parentTile.children[i]=ng;closeModal();expanded.add(ng.id);toast('Moved “'+g.label+'” into a new sub-category · rename it with ✎','gold','➕');render();};list.appendChild(o2);
+  m.appendChild(list);const f=el('div','foot');const c=el('button','btn','Cancel');c.onclick=closeModal;f.appendChild(c);m.appendChild(f);
+  scrim.appendChild(m);scrim.onclick=e=>{if(e.target===scrim)closeModal();};document.body.appendChild(scrim);
+}
+function flattenBranch(t){
+  const kids=t.children||[];const totV=kids.reduce((s,g)=>s+(g.vendors||0),0);let det=[];kids.forEach(g=>{det=dedupeDetails(det,g.details);});
+  modal({title:'Flatten “'+t.label+'” to a leaf?',body:'Its <b>'+kids.length+' sub-categories</b> dissolve and everything merges up into “'+t.label+'”: <b>'+totV+' vendors</b> + <b>'+det.length+' details</b> (de-duped by name). It becomes a leaf again.',twoadmin:true,foot:[{t:'Cancel',f:closeModal},{t:'Flatten · merge all up',cls:'primary',f:()=>{t.children=[];t.details=det;t.vendors=totV;closeModal();expanded.add(t.id);toast('Flattened “'+t.label+'” → leaf · '+totV+' vendors + '+det.length+' details merged up','gold','🍃');render();}}]});
+}
+function deleteTile(t,p){
+  if(isBranch(t)){const v=tileVendors(t);modal({title:'“'+t.label+'” is a branch',body:'It has <b>'+t.children.length+' sub-categories</b> ('+v+' vendors total). Flatten it to a leaf first (merge sub-categories up) so nothing is orphaned, then delete.',foot:[{t:'Cancel',f:closeModal},{t:'Flatten to leaf…',cls:'primary',f:()=>{closeModal();flattenBranch(t);}}]});return;}
+  if((t.vendors||0)>0){modal({title:'Can’t delete — vendors are tagged',body:'<b>'+t.label+'</b> has <b>'+t.vendors+' vendors</b> listed under it. Remap them first so none are orphaned.',foot:[{t:'Cancel',f:closeModal},{t:'Merge into…',cls:'primary',f:()=>{closeModal();mergePicker(t,p);}}]});return;}
+  modal({title:'Delete “'+t.label+'”?',body:'No vendors tagged — safe to remove. This is a structural change to the public marketplace.',twoadmin:true,foot:[{t:'Cancel',f:closeModal},{t:'Delete',cls:'warn',f:()=>{p.tiles.splice(p.tiles.indexOf(t),1);closeModal();toast('Deleted “'+t.label+'” · logged to audit','mul','🗑');render();}}]});
+}
+function mergePicker(t,p){const cands=[];data.parents.forEach(pp=>pp.tiles.forEach(x=>{if(x.id!==t.id)cands.push({label:x.label,parent:pp.key,obj:x});}));pickModal('Merge “'+t.label+'” into…','Its '+t.vendors+' vendors move to the chosen node, then “'+t.label+'” is removed.',cands,c=>{c.obj.vendors=(c.obj.vendors||0)+t.vendors;p.tiles.splice(p.tiles.indexOf(t),1);closeModal();toast('Merged <b>'+t.label+'</b> → '+c.label,'gold','⇄');render();});}
+function moveTo(t,p){const cands=data.parents.filter(x=>x.key!==p.key).map(x=>({label:x.key,obj:x}));pickModal('Move “'+t.label+'” to family…','',cands,c=>{p.tiles.splice(p.tiles.indexOf(t),1);c.obj.tiles.push(t);closeModal();toast('Moved <b>'+t.label+'</b> → '+c.label,'gold','⇄');render();});}
+
+/* ---- pending ---- */
+function promote(g){twoAdminThen(()=>{
+   if(g.grain==='tile'){const p=parentByKey(g.parent);const t=leaf(g.label,1,[],[]);p.tiles.push(t);expanded.add(t.id);}
+   else{const owner=findLeafByLabel(g.owner);if(owner){owner.details=owner.details||[];owner.details.push(D(g.label));expanded.add(owner.id);}}
+   pending=pending.filter(x=>x.id!==g.id);toast('Promoted <b>'+g.label+'</b> to global · first-vendor credit → Vendor '+g.vendor,'gold','✓');render();
+ },'Promote “'+g.label+'” to the global taxonomy');}
+function openMap(g){const cands=[];data.parents.forEach(p=>p.tiles.forEach(t=>{cands.push({label:t.label,parent:p.key,obj:t,kind:'tile'});(t.details||[]).forEach(d=>cands.push({label:d.label.replace(' ✦',''),parent:p.key+' › '+t.label,kind:'detail'}));(t.children||[]).forEach(gch=>{cands.push({label:gch.label,parent:p.key+' › '+t.label,kind:'gc'});(gch.details||[]).forEach(d=>cands.push({label:d.label,parent:p.key+' › '+t.label+' › '+gch.label,kind:'detail'}));});}));
+  pickModal('Map “'+g.label+'” to an existing node','Vendor '+g.vendor+'’s service re-points onto the node you pick. No new node is created.',cands,c=>{if(c.kind==='tile')c.obj.vendors=(c.obj.vendors||0)+1;pending=pending.filter(x=>x.id!==g.id);closeModal();toast('Mapped Vendor '+g.vendor+'’s “'+g.label+'” → <b>'+c.label+'</b>','gold','→');render();});}
+function closeMenu(e,g){e.stopPropagation();closePop();const pop=el('div','pop');const mk=(txt,fn,cls)=>{const b=el('button',cls,txt);b.onclick=()=>{closePop();fn();};return b;};
+  pop.appendChild(mk('🔒  Keep private to vendor',()=>{pending=pending.filter(x=>x.id!==g.id);toast('Kept “'+g.label+'” private to Vendor '+g.vendor,null,'🔒');render();}));
+  pop.appendChild(mk('✕  Reject (notify vendor)',()=>{pending=pending.filter(x=>x.id!==g.id);toast('Rejected “'+g.label+'” · Vendor '+g.vendor+' notified','mul','✕');render();},'danger'));
+  pop.appendChild(el('div','sep'));pop.appendChild(mk('↩  Request more info',()=>toast('Asked Vendor '+g.vendor+' for more info',null,'↩')));placePop(pop,e);}
+function twoAdminThen(fn,label){modal({title:'Second-admin approval',body:'<b>'+label+'</b> reshapes the public marketplace, so it needs a second admin to approve.',twoadmin:true,foot:[{t:'Cancel',f:closeModal},{t:'Approve (demo)',cls:'primary',f:()=>{closeModal();toast('2nd-admin approved ✓','gold','✓');fn();}}]});}
+
+/* ---- infra ---- */
+function placePop(pop,e){document.body.appendChild(pop);const r=e.target.getBoundingClientRect();let x=r.right-pop.offsetWidth,y=r.bottom+6;if(y+pop.offsetHeight>innerHeight)y=r.top-pop.offsetHeight-6;pop.style.left=Math.max(8,x)+'px';pop.style.top=y+'px';setTimeout(()=>document.addEventListener('click',closePop,{once:true}),0);}
+function closePop(){document.querySelectorAll('.pop').forEach(p=>p.remove());}
+let scrim=null;
+function modal({title,body,foot,twoadmin}){closeModal();scrim=el('div','scrim');const m=el('div','modal');m.innerHTML='<h3>'+title+'</h3><div class="body">'+body+'</div>';if(twoadmin)m.querySelector('.body').after(el('div','twoadmin','🛡 Two-admin gate — structural change'));const f=el('div','foot');foot.forEach(b=>{const btn=el('button','btn'+(b.cls?' '+b.cls:''),b.t);btn.onclick=b.f;f.appendChild(btn);});m.appendChild(f);scrim.appendChild(m);scrim.onclick=e=>{if(e.target===scrim)closeModal();};document.body.appendChild(scrim);}
+function pickModal(title,sub,cands,onPick){closeModal();scrim=el('div','scrim');const m=el('div','modal');m.innerHTML='<h3>'+title+'</h3>'+(sub?'<div class="body">'+sub+'</div>':'');const s=el('input','search');s.placeholder='Search…';m.appendChild(s);const list=el('div','optlist');m.appendChild(list);const draw=q=>{list.innerHTML='';cands.filter(c=>c.label.toLowerCase().includes(q)).slice(0,40).forEach(c=>{const o=el('div','opt');o.innerHTML='<span>'+c.label+'</span><small>'+(c.parent||'')+'</small>';o.onclick=()=>onPick(c);list.appendChild(o);});if(!list.children.length)list.appendChild(el('div','opt','<small>No match</small>'));};draw('');s.oninput=()=>draw(s.value.toLowerCase());const f=el('div','foot');const c=el('button','btn','Cancel');c.onclick=closeModal;f.appendChild(c);m.appendChild(f);scrim.appendChild(m);scrim.onclick=e=>{if(e.target===scrim)closeModal();};document.body.appendChild(scrim);s.focus();}
+function closeModal(){if(scrim){scrim.remove();scrim=null;}}
+
+document.getElementById('ponly').onclick=function(){pendingOnly=!pendingOnly;this.classList.toggle('on',pendingOnly);render();};
+
+/* start with the depth example + a couple of leaves open */
+['Bride\'s Attire','Bridal Gown','Photo & Video','Digital Services'].forEach(lbl=>{for(const p of data.parents)for(const t of p.tiles){if(t.label===lbl)expanded.add(t.id);if(t.children)for(const g of t.children)if(g.label===lbl)expanded.add(g.id);}});
+render();
+</script>
+</body>
+</html>

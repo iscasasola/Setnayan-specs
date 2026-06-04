@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Setnayan · Two-Location Dashboard — strategy prototype 2026-06-04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --ink-soft:#4F535B; --ink-faint:#8A8E96;
+    --line:#E7E3DA; --surface:#FFFFFF; --surface-soft:#F4F2EC;
+    --gold:#C5A059; --gold-deep:#A88340; --gold-wash:#F7F0E0;
+    --mulberry:#5C2542; --mulberry-deep:#4A1D36; --mulberry-wash:#F5E8EE;
+    --emerald:#2F7D5B; --emerald-wash:#EAF3EE;
+    --display:'Saira Condensed',sans-serif; --serif:'Cormorant Garamond',Georgia,serif;
+    --sans:'Manrope',system-ui,sans-serif; --mono:'DM Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--sans);background:radial-gradient(1200px 600px at 50% -200px,#efece4 0%,#e6e2d8 60%,#ded9cd 100%);color:var(--ink);min-height:100vh;padding:24px 0 40px;-webkit-font-smoothing:antialiased}
+  .stage-cap{max-width:440px;margin:0 auto 12px;padding:0 18px;text-align:center}
+  .stage-cap .k{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep)}
+  .stage-cap .t{font-family:var(--serif);font-style:italic;font-size:19px;margin-top:3px}
+  .stage-cap .s{font-size:12px;color:var(--ink-soft);margin-top:5px;line-height:1.5}
+
+  /* prototype mode toggle — shows the candidate→decided arc */
+  .modebar{max-width:440px;margin:11px auto 16px;display:flex;gap:7px;justify-content:center;align-items:center}
+  .modebar .ml{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+  .modebar button{font-family:var(--sans);font-weight:700;font-size:11.5px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);cursor:pointer}
+  .modebar button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .phone{width:392px;max-width:calc(100vw - 24px);height:min(824px,calc(100vh - 150px));margin:0 auto;background:var(--paper);border-radius:34px;position:relative;overflow:hidden;box-shadow:0 30px 70px -28px rgba(30,34,41,.45),0 0 0 1px rgba(30,34,41,.06);display:flex;flex-direction:column}
+
+  .topbar{display:flex;align-items:center;gap:9px;padding:12px 14px;background:rgba(251,251,250,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:20}
+  .switch{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 9px 4px 4px;cursor:pointer}
+  .switch .mono{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--display);font-weight:700;font-size:11px;display:grid;place-items:center}
+  .switch .car{font-size:10px;color:var(--ink-faint)}
+  .brand{flex:1;display:flex;align-items:center;justify-content:center;gap:6px}
+  .brand svg{width:17px;height:17px}
+  .brand .wm{font-family:var(--display);font-weight:700;letter-spacing:.05em;font-size:13px}
+  .ic{position:relative;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+  .ic svg{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:1.8}
+  .ic .dot{position:absolute;top:-3px;right:-3px;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:var(--mulberry);color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center;border:2px solid var(--paper)}
+
+  .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .screen{display:none;padding:15px 16px 22px}
+  .screen.on{display:block}
+  .screen > * + *{margin-top:13px}
+
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep)}
+  .couple{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:30px;line-height:.98;margin-top:5px}
+  .meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px;font-size:12.5px;color:var(--ink-soft)}
+  .meta .sep{color:var(--ink-faint)}
+  .pips{display:flex;gap:5px;margin-top:12px}
+  .pip{flex:1;height:4px;border-radius:999px;background:var(--line)}
+  .pip.done{background:var(--gold)}
+  .pip.now{background:var(--gold);box-shadow:0 0 0 3px var(--gold-wash)}
+  .pips-lbl{margin-top:7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  hr.sec{border:0;border-top:1px solid var(--line);margin:3px 0}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 15px}
+  .card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+  .card-h .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
+  .seeall{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);text-decoration:none;cursor:pointer}
+
+  /* ── "Your two places" card (the 2-location anchor on Home) ── */
+  .places{border-left:3px solid var(--gold)}
+  .places .card-h .k{color:var(--gold-deep)}
+  .place{display:flex;align-items:flex-start;gap:11px;padding:7px 0}
+  .place .pdot{width:11px;height:11px;border-radius:50%;margin-top:4px;flex:0 0 auto}
+  .pdot.cer{background:var(--gold)} .pdot.rec{background:var(--emerald)} .pdot.con{background:var(--ink-faint)}
+  .place .pb{flex:1;min-width:0}
+  .place .role{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+  .place .pn{font-size:16px;font-weight:700;line-height:1.12;margin-top:2px}
+  .place .pr{font-size:11.5px;color:var(--ink-faint);margin-top:2px}
+  .place .pedit{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);background:var(--gold-wash);padding:5px 9px;border-radius:999px;cursor:pointer;align-self:center;white-space:nowrap}
+  .travel{display:flex;align-items:center;gap:9px;margin:1px 0 1px 4px;padding:5px 0 5px 12px;border-left:2px dashed var(--line)}
+  .travel .ti{font-size:14px}
+  .travel .tt{font-size:11px;color:var(--ink-soft)}
+  .travel .tt b{color:var(--mulberry);font-weight:700}
+  .places-foot{display:block;margin-top:11px;text-align:center;font-size:11px;color:var(--ink-soft);border-top:1px solid var(--surface-soft);padding-top:11px;line-height:1.45}
+  .places-foot b{color:var(--gold-deep)}
+  .compare-cta{width:100%;margin-top:8px;padding:11px;justify-content:center}
+
+  .needs{border-left:3px solid var(--mulberry)}
+  .needs .card-h .k{color:var(--mulberry)}
+  .nu{display:flex;align-items:center;gap:10px;padding:8px 0}
+  .nu + .nu{border-top:1px solid var(--surface-soft)}
+  .nu .b{flex:1;min-width:0}
+  .nu .t{font-size:13px;line-height:1.3}
+  .nu .sub{font-size:11px;color:var(--ink-faint);margin-top:1px}
+  .btn{flex:0 0 auto;border:0;border-radius:999px;font-family:var(--sans);font-weight:700;font-size:11.5px;padding:7px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .btn.mul{background:var(--mulberry);color:#fff}
+  .btn.out{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+
+  .detail .kv{display:flex;flex-direction:column}
+  .kvr{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--surface-soft)}
+  .kvr:first-child{border-top:0}
+  .kk{font-size:12px;color:var(--ink-faint)}
+  .kvv{font-size:12.5px;color:var(--ink);font-weight:600;text-align:right}
+  .kvv .pdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 2px}
+  .detail-foot{display:block;margin-top:12px;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);border-top:1px solid var(--surface-soft);padding-top:11px;text-decoration:none;cursor:pointer}
+
+  .bigbtn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--ink);color:#fff;border:0;border-radius:16px;padding:14px 15px;cursor:pointer;font-family:var(--sans)}
+  .bigbtn .bi{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);display:grid;place-items:center;font-size:17px;flex:0 0 auto}
+  .bigbtn .bb{flex:1;min-width:0}
+  .bigbtn .bt{font-size:14px;font-weight:700;display:block}
+  .bigbtn .bs{font-size:11px;color:#cbb98e;margin-top:2px;display:block}
+  .bigbtn .bch{color:rgba(255,255,255,.5);font-size:18px;flex:0 0 auto}
+
+  /* ── LOCATION LENS — segmented place filter (Service · Schedule · Seat plan) ── */
+  .loclens{display:flex;gap:6px;background:var(--surface-soft);border-radius:999px;padding:3px;margin:2px 0 8px}
+  .loclens button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:0;background:none;font-family:var(--sans);font-weight:700;font-size:11.5px;color:var(--ink-soft);padding:8px 4px;border-radius:999px;cursor:pointer;transition:.12s}
+  .loclens button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px -1px rgba(30,34,41,.2)}
+  .loclens .ld{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .ld.cer{background:var(--gold)} .ld.rec{background:var(--emerald)}
+  .ld.both{background:linear-gradient(90deg,var(--gold) 0 50%,var(--emerald) 50% 100%)}
+  .lenscap{font-size:11px;color:var(--ink-faint);margin:0 2px 12px;line-height:1.45}
+
+  .group-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin:14px 2px 8px}
+  .ph-h{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:24px;letter-spacing:-.01em}
+  .ph-sub{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.5}
+  .merge-note{margin-top:10px;display:flex;align-items:center;gap:8px;background:var(--gold-wash);border:1px solid #ecdfc2;border-radius:12px;padding:9px 11px;font-size:11.5px;color:#6f5a2c;line-height:1.4}
+
+  /* vendor row + location tag */
+  .vbk{display:flex;align-items:center;gap:11px;padding:11px 12px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+  .vbk + .vbk{margin-top:8px}
+  .vbk.hide{display:none}
+  .vbk .vi{width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;font-family:var(--display);font-weight:700;font-size:13px;display:grid;place-items:center;flex:0 0 auto}
+  .vbk .vb{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .vbk .vn{font-size:13.5px;font-weight:700}
+  .vbk .vc{font-size:11px;color:var(--ink-faint)}
+  .vloc{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-top:1px}
+  .vloc .ld{width:7px;height:7px;border-radius:50%}
+  .vbk .vs{font-family:var(--mono);font-size:9px;letter-spacing:.03em;padding:3px 8px;border-radius:999px;white-space:nowrap;text-align:right}
+  .vs.ok{background:var(--emerald-wash);color:var(--emerald)} .vs.due{background:var(--mulberry-wash);color:var(--mulberry)} .vs.quote{background:var(--gold-wash);color:var(--gold-deep)}
+
+  /* ── SCHEDULE — venue legs + travel block ── */
+  .sched-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .back{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;font-size:15px;color:var(--ink)}
+  .sched-top h2{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:23px}
+  .dayhdr{background:var(--ink);color:#fff;border-radius:14px;padding:12px 14px;margin:2px 0 12px}
+  .dayhdr .k{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+  .dayhdr .t{font-family:var(--serif);font-style:italic;font-size:17px;margin-top:3px}
+  .dayhdr .pub{font-size:10.5px;color:#cbb98e;margin-top:5px;display:flex;align-items:center;gap:7px}
+  .dayhdr .pub b{color:#fff;font-weight:600}
+  .leg{transition:.18s}
+  .leg.dim{opacity:.3}
+  .leghdr{display:flex;align-items:center;gap:9px;margin:2px 2px 8px}
+  .leghdr .ld{width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+  .leghdr .lh{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:17px;letter-spacing:.01em}
+  .leghdr .lr{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-left:6px}
+  .leghdr .ln2{flex:1;border-top:1px solid var(--line)}
+  .tl{position:relative;padding-left:4px}
+  .tlrow{display:flex;gap:12px;padding:2px 0 15px;position:relative}
+  .tlrow .time{flex:0 0 auto;width:56px;font-family:var(--mono);font-size:11px;color:var(--ink-soft);padding-top:1px;text-align:right}
+  .tlrow .rail{flex:0 0 auto;width:14px;display:flex;flex-direction:column;align-items:center}
+  .tlrow .node{width:11px;height:11px;border-radius:50%;background:var(--surface);border:2px solid var(--gold);margin-top:3px}
+  .tlrow.rec .node{border-color:var(--emerald)}
+  .tlrow.key .node{background:var(--gold)} .tlrow.rec.key .node{background:var(--emerald)}
+  .tlrow .stem{flex:1;width:2px;background:var(--line);margin-top:2px}
+  .tlrow:last-child .stem{display:none}
+  .tlrow .ec{flex:1;min-width:0;padding-bottom:2px}
+  .tlrow .et{font-size:13.5px;font-weight:600;line-height:1.3}
+  .tlrow .es{font-size:11px;color:var(--ink-faint);margin-top:1px}
+  .travelblock{display:flex;gap:12px;align-items:center;background:var(--mulberry-wash);border:1px solid #e7cdd8;border-radius:14px;padding:12px 14px;margin:2px 0 14px}
+  .travelblock .tbi{width:34px;height:34px;border-radius:10px;background:var(--mulberry);color:#fff;display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+  .travelblock .tbb{flex:1;min-width:0}
+  .travelblock .tbt{font-size:13px;font-weight:700;color:var(--mulberry-deep)}
+  .travelblock .tbs{font-size:11px;color:var(--ink-soft);margin-top:2px}
+  .addbtn{margin:4px auto 2px;display:block;width:max-content;background:var(--mulberry);color:#fff;border:0;border-radius:999px;font-family:var(--sans);font-weight:700;font-size:12.5px;padding:11px 20px;cursor:pointer;box-shadow:0 10px 24px -10px rgba(92,37,66,.6)}
+
+  .sub-row{display:flex;align-items:center;gap:11px;padding:12px 13px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+  .sub-row + .sub-row{margin-top:8px}
+  .sub-row .si{width:34px;height:34px;border-radius:10px;background:var(--surface-soft);display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+  .sub-row .sb{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .sub-row .st{font-size:13.5px;font-weight:700}
+  .sub-row .ss{font-size:11px;color:var(--ink-faint)}
+  .sub-row .ch{color:var(--ink-faint)}
+  .placetag{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft)}
+  .placetag .ld{width:7px;height:7px;border-radius:50%}
+
+  .botnav{display:grid;grid-template-columns:repeat(5,1fr);background:rgba(251,251,250,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:7px 4px calc(8px + env(safe-area-inset-bottom));z-index:20}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:var(--ink-faint);background:none;border:0;cursor:pointer;font-family:var(--sans);font-weight:600}
+  .tab svg{width:20px;height:20px;stroke:var(--ink-faint);fill:none;stroke-width:1.8}
+  .tab.on{color:var(--mulberry)} .tab.on svg{stroke:var(--mulberry)}
+
+  .footnote{max-width:472px;margin:18px auto 0;padding:0 22px;text-align:left;font-size:11.5px;color:#6e6a60;line-height:1.65}
+  .footnote b{color:var(--ink)}
+  .footnote .pdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 1px}
+</style>
+</head>
+<body>
+
+  <div class="stage-cap">
+    <div class="k">Strategy prototype · 2026-06-04</div>
+    <div class="t">One wedding, two places</div>
+    <div class="s">Recommended model: <b>one dashboard</b> — location is a <b>lens</b>, never a second dashboard. Each place gets a <b>role</b> (Ceremony · Reception), and the day-of schedule becomes a two-leg journey with the travel between them.</div>
+  </div>
+
+  <div class="modebar">
+    <span class="ml">Prototype phases:</span>
+    <button id="mode-con" onclick="setMode('considering')">Still deciding</button>
+    <button id="mode-dec" class="on" onclick="setMode('decided')">Roles set</button>
+  </div>
+
+  <div class="phone" id="phone">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="switch" title="Switch event / console"><span class="mono">M&amp;J</span><span class="car">▾</span></div>
+      <div class="brand">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3.5c4.6 2.9 7.4 4.2 11.8 4.6 .4 6.7-1.1 13.7-11.8 20.4C5.3 21.8 3.8 14.8 4.2 8.1 8.6 7.7 11.4 6.4 16 3.5Z" fill="none" stroke="#C5A059" stroke-width="1.6"/><path d="M16 9.5l1.6 3.4 3.7.4-2.8 2.5.8 3.6L16 17.6l-3.3 1.8.8-3.6-2.8-2.5 3.7-.4z" fill="#C5A059"/></svg>
+        <span class="wm">SETNAYAN</span>
+      </div>
+      <div class="ic" title="Notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot">3</span></div>
+      <div class="ic" onclick="go('messages')" title="Messages"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.4 9 9 0 0 1-3.9-.9L3 20.5l1.6-4.4a8.3 8.3 0 0 1-1.1-4.1A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg><span class="dot">2</span></div>
+    </div>
+
+    <!-- BODY -->
+    <div class="body" id="bodyScroll">
+
+      <!-- ============ HOME ============ -->
+      <section class="screen on" id="home">
+        <div>
+          <p class="eyebrow">Your wedding</p>
+          <h1 class="couple">Maria &amp; Juan</h1>
+          <div class="meta"><span>Dec 18, 2026</span><span class="sep">·</span><span>199 days to go</span><span class="sep">·</span><span>Catholic ceremony</span></div>
+          <div class="pips"><i class="pip done"></i><i class="pip done"></i><i class="pip now"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></div>
+          <div class="pips-lbl">Stage 3 of 6 · Building your team</div>
+        </div>
+
+        <hr class="sec" />
+
+        <!-- YOUR TWO PLACES · DECIDED (roles set) -->
+        <section class="card places" id="placesDecided">
+          <div class="card-h"><span class="k">Your two places</span><span class="seeall">Change</span></div>
+          <div class="place">
+            <span class="pdot cer"></span>
+            <div class="pb"><div class="role">Ceremony</div><div class="pn">Quezon City</div><div class="pr">Metro Manila · NCR · San Agustin area</div></div>
+            <span class="pedit">Ceremony</span>
+          </div>
+          <div class="travel"><span class="ti">🚐</span><span class="tt"><b>~1h 50m</b> · 58 km between venues · guest shuttle planned</span></div>
+          <div class="place">
+            <span class="pdot rec"></span>
+            <div class="pb"><div class="role">Reception</div><div class="pn">Tagaytay</div><div class="pr">CALABARZON · ridge garden venue</div></div>
+            <span class="pedit">Reception</span>
+          </div>
+          <span class="places-foot">Vendors, schedule &amp; seat plan are organized by place. <b>Changed your mind — just one place?</b> Tap Change.</span>
+        </section>
+
+        <!-- YOUR TWO PLACES · CONSIDERING (candidate areas, no roles yet) -->
+        <section class="card places" id="placesDeciding" style="display:none">
+          <div class="card-h"><span class="k">You're considering two places</span></div>
+          <div class="place">
+            <span class="pdot con"></span>
+            <div class="pb"><div class="role">Candidate</div><div class="pn">Quezon City</div><div class="pr">Metro Manila · NCR · 12 vendors match</div></div>
+            <span class="pedit">Set role</span>
+          </div>
+          <div class="place">
+            <span class="pdot con"></span>
+            <div class="pb"><div class="role">Candidate</div><div class="pn">Tagaytay</div><div class="pr">CALABARZON · 18 vendors match</div></div>
+            <span class="pedit">Set role</span>
+          </div>
+          <button class="btn mul compare-cta">Compare the two places →</button>
+          <span class="places-foot">Explore vendors in both, then tell us which is the <b>ceremony</b> and which is the <b>reception</b> — or just pick one.</span>
+        </section>
+
+        <!-- WEDDING DETAILS (compact) -->
+        <section class="card detail">
+          <div class="card-h"><span class="k">Your wedding details</span><span class="seeall">Edit</span></div>
+          <div class="kv">
+            <div class="kvr"><span class="kk">Places</span><span class="kvv"><span class="pdot cer"></span>Quezon City → <span class="pdot rec"></span>Tagaytay</span></div>
+            <div class="kvr"><span class="kk">Guests</span><span class="kvv">~150</span></div>
+            <div class="kvr"><span class="kk">Budget</span><span class="kvv">₱650K – ₱950K</span></div>
+            <div class="kvr"><span class="kk">Style</span><span class="kvv">Classic, timeless</span></div>
+          </div>
+          <span class="detail-foot">See all wedding settings →</span>
+        </section>
+
+        <!-- WEDDING-DAY SCHEDULE -->
+        <button class="bigbtn" onclick="go('schedule')">
+          <span class="bi">💍</span>
+          <span class="bb"><span class="bt">Wedding-day schedule</span><span class="bs">Ceremony in QC → reception in Tagaytay · with the travel between</span></span>
+          <span class="bch">›</span>
+        </button>
+
+        <!-- NEEDS YOU (unified — never split by place) -->
+        <section class="card needs">
+          <div class="card-h"><span class="k">Needs you · 2</span></div>
+          <div class="nu"><div class="b"><div class="t">₱25,000 payment to confirm</div><div class="sub">Casa Verde Tagaytay · awaiting your screenshot</div></div><button class="btn mul">Review</button></div>
+          <div class="nu"><div class="b"><div class="t">Confirm your guest shuttle</div><div class="sub">QC → Tagaytay · 1 of 2 places to lock</div></div><button class="btn out">Open</button></div>
+        </section>
+      </section>
+
+      <!-- ============ SERVICE (vendors, filtered by place) ============ -->
+      <section class="screen" id="service">
+        <div class="ph-h">Service</div>
+        <div class="ph-sub">Vendors and in-app services, in one place.</div>
+
+        <!-- LOCATION LENS -->
+        <div class="group-lbl" style="margin-top:12px">Filter by place</div>
+        <div class="loclens" id="lensService">
+          <button data-loc="all" class="on" onclick="setLens('all')">All</button>
+          <button data-loc="qc" onclick="setLens('qc')"><span class="ld cer"></span>Quezon City</button>
+          <button data-loc="tagaytay" onclick="setLens('tagaytay')"><span class="ld rec"></span>Tagaytay</button>
+        </div>
+        <p class="lenscap" id="lensCapService">Showing vendors for <b>both places</b>. Many cover both; place-specific ones are tagged.</p>
+
+        <div class="group-lbl">Your team</div>
+        <div class="vbk" data-loc="both"><span class="vi">L</span><span class="vb"><span class="vn">Lens &amp; Co.</span><span class="vc">Photo &amp; video</span><span class="vloc"><span class="ld both"></span>Covers both places</span></span><span class="vs ok">BOOKED</span></div>
+        <div class="vbk" data-loc="qc"><span class="vi">SA</span><span class="vb"><span class="vn">San Agustin Coordinator</span><span class="vc">Ceremony coordinator</span><span class="vloc"><span class="ld cer"></span>Quezon City</span></span><span class="vs ok">BOOKED</span></div>
+        <div class="vbk" data-loc="tagaytay"><span class="vi">CV</span><span class="vb"><span class="vn">Casa Verde Tagaytay</span><span class="vc">Reception venue</span><span class="vloc"><span class="ld rec"></span>Tagaytay</span></span><span class="vs due">DEPOSIT DUE · ₱25,000</span></div>
+        <div class="vbk" data-loc="tagaytay"><span class="vi">K</span><span class="vb"><span class="vn">Kanto Catering</span><span class="vc">Catering</span><span class="vloc"><span class="ld rec"></span>Tagaytay</span></span><span class="vs quote">QUOTE · ₱180,000</span></div>
+        <div class="vbk" data-loc="qc"><span class="vi">SS</span><span class="vb"><span class="vn">Sakristia Strings</span><span class="vc">Ceremony musicians</span><span class="vloc"><span class="ld cer"></span>Quezon City</span></span><span class="vs quote">QUOTE · ₱22,000</span></div>
+        <div class="vbk" data-loc="both"><span class="vi">B</span><span class="vb"><span class="vn">Bloom &amp; Co.</span><span class="vc">Florist · both venues</span><span class="vloc"><span class="ld both"></span>Covers both places</span></span><span class="vs quote">QUOTE · ₱45,000</span></div>
+        <div class="vbk" data-loc="both"><span class="vi">GS</span><span class="vb"><span class="vn">GoShuttle PH</span><span class="vc">Guest transport · QC → Tagaytay</span><span class="vloc"><span class="ld both"></span>Both places</span></span><span class="vs quote">QUOTE · ₱18,000</span></div>
+
+        <button class="bigbtn" style="margin-top:11px"><span class="bi">🏛️</span><span class="bb"><span class="bt" id="browseLine">Browse the marketplace</span><span class="bs">Matched to your style + place coverage</span></span><span class="bch">›</span></button>
+      </section>
+
+      <!-- ============ SCHEDULE (event day · two legs + travel) ============ -->
+      <section class="screen" id="schedule">
+        <div class="sched-top"><button class="back" onclick="go('home')">‹</button><h2>Wedding day</h2></div>
+        <div class="dayhdr">
+          <div class="k">The wedding day · two places</div>
+          <div class="t">Saturday · December 18, 2026</div>
+          <div class="pub"><span class="pdot cer"></span><b>Quezon City</b> &nbsp;→&nbsp; <span class="pdot rec"></span><b>Tagaytay</b></div>
+        </div>
+
+        <div class="loclens" id="lensSchedule">
+          <button data-loc="all" class="on" onclick="setLens('all')">Whole day</button>
+          <button data-loc="qc" onclick="setLens('qc')"><span class="ld cer"></span>Ceremony</button>
+          <button data-loc="tagaytay" onclick="setLens('tagaytay')"><span class="ld rec"></span>Reception</button>
+        </div>
+        <p class="lenscap">One day, two venues — here's the whole journey, including the move between them.</p>
+
+        <!-- LEG 1 · QUEZON CITY -->
+        <div class="leg" data-leg="qc">
+          <div class="leghdr"><span class="ld cer"></span><span class="lh">Quezon City</span><span class="lr">Ceremony</span><span class="ln2"></span></div>
+          <div class="tl">
+            <div class="tlrow cer"><span class="time">11:00 AM</span><span class="rail"><span class="node"></span><span class="stem"></span></span><div class="ec"><div class="et">Hair &amp; makeup call time</div><div class="es">Bridal suite · Seda Vertis North</div></div></div>
+            <div class="tlrow cer"><span class="time">1:00 PM</span><span class="rail"><span class="node"></span><span class="stem"></span></span><div class="ec"><div class="et">First look &amp; couple photos</div><div class="es">Lens &amp; Co.</div></div></div>
+            <div class="tlrow cer key"><span class="time">2:30 PM</span><span class="rail"><span class="node"></span><span class="stem"></span></span><div class="ec"><div class="et">Ceremony</div><div class="es">San Agustin Church · Quezon City</div></div></div>
+          </div>
+        </div>
+
+        <!-- TRAVEL BLOCK -->
+        <div class="travelblock" data-leg="travel">
+          <span class="tbi">🚐</span>
+          <div class="tbb"><div class="tbt">Travel to Tagaytay · ~1h 50m · 58 km</div><div class="tbs">Guest shuttle (GoShuttle PH) leaves QC 3:45 PM · couple convoy 3:30 PM</div></div>
+        </div>
+
+        <!-- LEG 2 · TAGAYTAY -->
+        <div class="leg" data-leg="tagaytay">
+          <div class="leghdr"><span class="ld rec"></span><span class="lh">Tagaytay</span><span class="lr">Reception</span><span class="ln2"></span></div>
+          <div class="tl">
+            <div class="tlrow rec"><span class="time">6:00 PM</span><span class="rail"><span class="node"></span><span class="stem"></span></span><div class="ec"><div class="et">Cocktails &amp; guest arrival</div><div class="es">Casa Verde · ridge terrace</div></div></div>
+            <div class="tlrow rec key"><span class="time">7:00 PM</span><span class="rail"><span class="node"></span><span class="stem"></span></span><div class="ec"><div class="et">Reception program</div><div class="es">Grand pavilion</div></div></div>
+            <div class="tlrow rec"><span class="time">8:00 PM</span><span class="rail"><span class="node"></span><span class="stem"></span></span><div class="ec"><div class="et">Dinner</div><div class="es">Kanto Catering</div></div></div>
+            <div class="tlrow rec"><span class="time">9:00 PM</span><span class="rail"><span class="node"></span><span class="stem"></span></span><div class="ec"><div class="et">First dance</div><div class="es"></div></div></div>
+            <div class="tlrow rec"><span class="time">10:30 PM</span><span class="rail"><span class="node"></span></span><div class="ec"><div class="et">Send-off</div><div class="es">Sparkler exit · sea of clouds backdrop</div></div></div>
+          </div>
+        </div>
+        <button class="addbtn">＋ Add program block</button>
+      </section>
+
+      <!-- ============ GUESTS (unified list · seat plan is reception-scoped) ============ -->
+      <section class="screen" id="guests">
+        <div class="ph-h">Guests</div>
+        <div class="ph-sub">One guest list for the whole wedding — the same people, both places.</div>
+        <div class="merge-note">↳ Seat plan is tied to the <b>reception venue</b> (where people sit for dinner). The ceremony seats by tier.</div>
+        <div class="group-lbl">Manage</div>
+        <button class="sub-row"><span class="si">👥</span><span class="sb"><span class="st">Guest list</span><span class="ss">62 added · 20 RSVP'd · one list, both places</span></span><span class="ch">›</span></button>
+        <button class="sub-row"><span class="si">🪑</span><span class="sb"><span class="st">Seat plan</span><span class="placetag"><span class="ld rec"></span>Tagaytay reception</span></span><span class="ch">›</span></button>
+        <button class="sub-row"><span class="si">🔳</span><span class="sb"><span class="st">Guest &amp; table QR codes</span><span class="ss">Check-in at both venues</span></span><span class="ch">›</span></button>
+      </section>
+
+      <!-- ============ WEBSITE ============ -->
+      <section class="screen" id="website">
+        <div class="ph-h">Website</div>
+        <div class="ph-sub">One landing page — guests see both places, the schedule &amp; how to get between them.</div>
+        <div class="group-lbl">Build</div>
+        <button class="sub-row"><span class="si">🌐</span><span class="sb"><span class="st">Landing &amp; invitation</span><span class="ss">setnayan.com/maria-juan · shows both venues + map</span></span><span class="ch">›</span></button>
+        <button class="sub-row"><span class="si">🗺️</span><span class="sb"><span class="st">Getting there</span><span class="ss">QC ceremony · Tagaytay reception · shuttle info</span></span><span class="ch">›</span></button>
+        <button class="sub-row"><span class="si">🖼️</span><span class="sb"><span class="st">Gallery</span><span class="ss">Shared photo wall</span></span><span class="ch">›</span></button>
+      </section>
+
+      <!-- ============ MESSAGES ============ -->
+      <section class="screen" id="messages">
+        <div class="sched-top"><button class="back" onclick="go('home')">‹</button><h2>Messages</h2></div>
+        <button class="sub-row"><span class="si">L</span><span class="sb"><span class="st">Lens &amp; Co.</span><span class="ss">Sounds great, see you on the 18th!</span></span><span class="ch">›</span></button>
+        <button class="sub-row"><span class="si">CV</span><span class="sb"><span class="st">Casa Verde Tagaytay</span><span class="ss">Deposit details for your reception</span></span><span class="ch">›</span></button>
+        <button class="sub-row"><span class="si">GS</span><span class="sb"><span class="st">GoShuttle PH</span><span class="ss">Here's the QC → Tagaytay quote · ₱18,000</span></span><span class="ch">›</span></button>
+      </section>
+
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="botnav">
+      <button class="tab on" id="t-home" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Home</button>
+      <button class="tab" id="t-guests" onclick="go('guests')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Guests</button>
+      <button class="tab" id="t-service" onclick="go('service')"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Service</button>
+      <button class="tab" id="t-website" onclick="go('website')"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h4"/></svg>Website</button>
+      <button class="tab" id="t-more" onclick="go('home')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.6"/><circle cx="5" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>More</button>
+    </nav>
+
+  </div>
+
+  <p class="footnote">
+    <b>The model in one line:</b> two locations = <b>one event, one dashboard</b> — location is a <b>lens</b>, not a fork.<br>
+    · <b>One thing stays whole:</b> the couple, guest list, budget total, messages, the website — never split by place.<br>
+    · <b>Each place gets a role:</b> <span class="pdot cer"></span> Ceremony (QC) · <span class="pdot rec"></span> Reception (Tagaytay). The two onboarding "candidate areas" resolve into roles here — toggle <b>Still deciding ⇄ Roles set</b> above to see both phases.<br>
+    · <b>Three surfaces gain a place filter</b> (the lens): <b>Service</b> (vendors tagged + filtered), <b>Schedule</b> (two legs + the travel block), <b>Seat plan</b> (tied to the reception venue).<br>
+    · <b>Graceful collapse:</b> pick just one place and the lens, roles &amp; travel block disappear — single-venue couples never see two-location chrome.<br>
+    · <b>Vendor side:</b> each vendor only sees the leg they serve; the couple sees the whole picture.
+  </p>
+
+<script>
+  const screens=['home','schedule','guests','service','website','messages'];
+  const tabFor={home:'t-home',guests:'t-guests',service:'t-service',website:'t-website'};
+  function go(id){
+    screens.forEach(s=>document.getElementById(s).classList.toggle('on', s===id));
+    Object.values(tabFor).forEach(t=>document.getElementById(t).classList.remove('on'));
+    const lit = (id==='schedule') ? 'home' : id;
+    if(tabFor[lit]) document.getElementById(tabFor[lit]).classList.add('on');
+    document.getElementById('bodyScroll').scrollTop=0;
+    applyLens();
+  }
+
+  // LOCATION LENS — one state, drives Service (filter vendors) + Schedule (dim the other leg)
+  let lens='all';
+  function setLens(p){ lens=p; applyLens(); }
+  function applyLens(){
+    document.querySelectorAll('.loclens button').forEach(b=>b.classList.toggle('on', b.dataset.loc===lens));
+    // Service — show vendor if 'all', exact place, or 'both'
+    document.querySelectorAll('#service .vbk[data-loc]').forEach(v=>{
+      const loc=v.dataset.loc, show = lens==='all'||loc===lens||loc==='both';
+      v.classList.toggle('hide', !show);
+    });
+    const cap=document.getElementById('lensCapService');
+    if(cap) cap.innerHTML = lens==='all'
+      ? 'Showing vendors for <b>both places</b>. Many cover both; place-specific ones are tagged.'
+      : 'Showing vendors that cover <b>'+(lens==='qc'?'Quezon City':'Tagaytay')+'</b> (plus those serving both).';
+    const bl=document.getElementById('browseLine');
+    if(bl) bl.textContent = lens==='all' ? 'Browse the marketplace' : 'Browse '+(lens==='qc'?'Quezon City':'Tagaytay')+' vendors';
+    // Schedule — keep both legs visible (it's a journey) but dim the one not in focus
+    document.querySelectorAll('#schedule .leg').forEach(leg=>{
+      leg.classList.toggle('dim', lens!=='all' && leg.dataset.leg!==lens);
+    });
+  }
+
+  // PROTOTYPE: candidate-areas ⇄ roles-set
+  function setMode(m){
+    document.getElementById('placesDeciding').style.display = m==='considering'?'block':'none';
+    document.getElementById('placesDecided').style.display = m==='decided'?'block':'none';
+    document.getElementById('mode-con').classList.toggle('on', m==='considering');
+    document.getElementById('mode-dec').classList.toggle('on', m==='decided');
+  }
+</script>
+</body>
+</html>

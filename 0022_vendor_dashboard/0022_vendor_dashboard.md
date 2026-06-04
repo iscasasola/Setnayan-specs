@@ -97,13 +97,19 @@ Vendors aren't locked into the marketplace taxonomy (the **10-parent / ~53-tile*
 
 (New **parent families** — the 10 top-level groups — are owner-level structural calls, not vendor-requestable.)
 
+**The promise behind this flow — "There's always a place for what you do."** A vendor whose offering we haven't listed is never dropped into a generic "Other" bucket — there is no such tile (the 2026-05-30 shrink keeps a tile only for a real shopping decision; see [Vendor_Taxonomy_Shrink_2026-05-30.md](../Vendor_Taxonomy_Shrink_2026-05-30.md)). Their service goes live on their own page immediately, then earns a real home in the directory. The service-editor affordance reads:
+
+> **Don't see your exact service?** Add it. It's live on your profile right away — and our team gives it a permanent place in the directory, with you credited as its first vendor.
+
+Honest about the mechanism, not over-promised: "Other" is a **doorway, not a destination** (the open-text on-ramp per [0044](../0044_per_category_schemas/0044_per_category_schemas.md) Open Q#3), and a genuinely-new public node is **admin-gated** — *map-to-existing* is a valid, common outcome, so a new tile is curated in, not granted on demand. See DECISION_LOG 2026-06-03 "🌿 Vendor promise".
+
 **Flow:**
 
 1. **Publish today as private label.** The node is saved on the vendor's services immediately — visible to couples viewing that vendor's page, but not yet in the marketplace's category-filter dropdown / facet list.
 2. **Admin review (3 business days)** — routed to the 0023 §3.2c *Custom category & detail review* queue, which answers *"does this already exist in our taxonomy?"* (duplication · naming fit · scope).
 3. **Four outcomes:**
    - **Map to existing** — "your *X* is our existing *Y*": the vendor's service is **re-pointed onto the matched canonical**; the private-label row is retired (`scope='merged'`, `merged_into_category_id` set) and the vendor is notified. No new node created.
-   - **Promote to global** — genuinely new: the node enters the canonical taxonomy, the proposing vendor keeps the **"first-vendor" credit**, and it auto-appears in the onboarding picker, couple browse, and filters.
+   - **Promote to global** — genuinely new: the node enters the canonical taxonomy, the proposing vendor keeps the **"first-vendor" credit**, and it auto-appears in the onboarding picker, couple browse, and filters. The vendor is notified: *"Good news — '{service}' now has its own place in the Setnayan directory, and you're the first vendor in it."*
    - **Keep private** — valid but niche: remains scoped to the proposing vendor's record.
    - **Reject** — mis-scoped, with reason.
 

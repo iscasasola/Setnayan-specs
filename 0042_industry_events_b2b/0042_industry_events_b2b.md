@@ -58,8 +58,9 @@ Setnayan's V1 + V1.5 (after 0040 + 0041 ship) is a consumer marketplace: couples
 | 8 | Notification triggers (vendor opt-in: "Notify me about industry events in [Metro Manila / National / etc.]") | 0.5 day |
 | 9 | Email digest: weekly "Industry events near you" via Resend (extends iteration 0028) | 0.5 day |
 | 10 | Marketing copy + onboarding nudge for first-time organizers | 0.5 day |
+| 11 | **(V1.6 couple-side)** Home fair-promotion card + "vendors from your list are there" cross-ref (`industry_event_attendees` `attendance_type='exhibitor'` ∩ couple `event_vendors`), ≈100km proximity gate, zero-match fallback (§ 3.4a) | 1 day |
 
-**Total:** ~7-8 days with parallel agents.
+**Total:** ~8-9 days with parallel agents.
 
 **Pre-launch partnership target:** Get GMBF organizers to list their 2026/2027 events on Setnayan first as a launch case study.
 
@@ -116,6 +117,15 @@ This keeps the user model simple — no new "organizer" account type.
 ### 3.4 Cross-listing: industry events visible on public marketplace too
 
 Couples planning weddings often attend bridal fairs to meet vendors in person before booking. So `/industry-events` is **public** (no auth required), browsable by couples too. The vendor dashboard tab `/vendor-dashboard/opportunities` is a **filtered, action-oriented** view of the same data (with vendor-specific actions like Apply-as-exhibitor).
+
+### 3.4a Couple-side fair promotion · "the vendors from your list are there" (V1.6 · owner-locked 2026-06-03)
+
+Beyond the public `/industry-events` browse, an upcoming fair is **promoted on the couple's dashboard Home** when it's near their event region (≈100km proximity gate: the fair venue vs `events.venue_latitude/longitude`). The card cross-references the **fair's confirmed exhibitor roster against the couple's own vendor picks** and leads with **"N vendors from your list will be there"** — turning a generic listing into a personal reason to attend: go meet, in person, the vendors you're already considering, before you book.
+
+- **Match key:** couple `event_vendors` picks → `vendor_profile_id` → ∈ `industry_event_attendees` WHERE `attendance_type = 'exhibitor'` AND `industry_event_id = <fair>`. Only **platform** vendors match; the couple's off-platform / custom picks (0006 hybrid registry) have no `vendor_profile_id` and are silently excluded from the count.
+- **Why this is V1.6, not V1 Home:** the cross-ref needs a real exhibitor roster, which exists only once vendors self-apply as exhibitors (this iteration's `industry_event_attendees`). Owner chose "ride 0042" over a lightweight admin-tagged version on V1 Home (AskUserQuestion, 2026-06-03).
+- **Lineage:** this is the **complement** of the retired Concierge "Behavior B" fair-prep card (CLAUDE.md 2026-05-23), which surfaced *what categories you still need*. That card died with the Today's Focus wizard; its successor re-homes onto Home and answers the inverse — *which of your chosen vendors are there*.
+- **Zero-match fallback:** if none of the couple's picks are exhibiting, the card degrades to the generic "what to look for" prompt (their still-open categories), so there's always a reason to attend.
 
 ---
 
@@ -356,6 +366,22 @@ Setnayan as organizer earns:
 ### 6.4 Partner-fair commission (V2)
 
 If Setnayan facilitates exhibitor booth booking (vendor pays through Setnayan instead of directly to organizer), Setnayan takes a commission (5-10%). Deferred to V2 — requires booth-booking flow which depends on 0034 payments maturity.
+
+### 6.5 Fair-to-couple boost · "promote your fair to our couples" (owner-locked 2026-06-03)
+
+The revenue line the owner asked for: a **fair organizer pays Setnayan to promote their event to all our ongoing couples** — distinct from §6.2's vendor-facing Sponsored notification (this targets the *couple* audience). Mechanically it bundles the existing boost-service deliverables (SEO Playbook §11.3 / §11.7): the homepage **featured-fairs strip** slot (hard cap 3 concurrent · T-60 window) + a **dedicated email blast** to all in-region couples (T-30 + T-7 via 0028) + the **§3.4a couple-Home promotion card** ("N vendors from your list will be there").
+
+| SKU key | Tier | Setnayan provides | Price |
+|---|---|---|---|
+| `boost_featured_plus_email` | **Featured + email blast** | Homepage strip + `/fairs/[slug]` + email blast to all in-region couples + §3.4a couple-Home card | **₱9,999 / fair cycle** |
+| `boost_featured_only` | Featured only | Homepage strip + `/fairs/[slug]` + §3.4a card, no dedicated blast | ₱2,999 / fair cycle *(playbook ladder · not separately re-confirmed)* |
+
+- **Headline `₱9,999/cycle` is owner-locked (2026-06-03)** — priced **up** from the playbook's ₱4,999 starting suggestion to reflect the **3-slot scarcity** (only 3 concurrent boosted fairs nationally · §11.3.1) + the hyper-qualified in-market couple audience. Supersedes SEO Playbook §11.7's ₱4,999 example.
+- **Model A barter alternative** stays an organizer choice (no cash; the fair gives Setnayan a free booth + stage time + sponsor billing + the discount-code funnel — §11.7 Model A). Organizer picks Model A or the cash tier at signup.
+- **Launch gate (AND):** the paid cash boost does **not** open until **500 verified vendors AND 10,000 active couples** (§11.7.1). Pre-gate, lead with Model A / early-mover terms — promoting to a tiny base for ₱9,999 cash would sour the partnership. Admin manual-override for strategic launch partners (e.g. Themes & Motifs).
+- **Validation caveat:** ₱9,999 is owner-locked but still wants a real PH fair-operator validation conversation before it's published as a public rate (§11.7).
+- **Home reconciliation:** this folds the SEO Playbook's proposed `0036_bridal_fair_boost_service` into **0042** (0036 was reassigned to Pakanta). Contract boilerplate still lands at `01_Contracts/Bridal_Fair_Boost_Service_Agreement.md`. CLAUDE.md SKU / cost-sheet append pending operator-validation.
+- **Admin home:** the fair roster is compiled and broadcast from **0023 § 3.16 Promoted Events & Broadcast Schedule** (`/admin/promoted-events`) — the admin clicks *Generate mass schedule* to push the fair into in-region couples' Home Upcoming-schedules + fire the blast (cron-free; supersedes § 11.3.1's daily-cron sketch).
 
 ---
 
