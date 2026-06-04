@@ -77,19 +77,19 @@ Per `COWORK.md` lines 53–54, after modifying any iteration `.md` file, regener
 
 ## D. Owner-validation items (decisions to make, not specs to draft)
 
-These are starting recommendations in the playbook that need owner validation against real PH market conversations before being locked:
+**✅ RESOLVED 2026-06-04 (owner).** All items below are locked. Authoritative copy now lives in `01_Contracts/Bridal_Fair_Boost_Service_Agreement.md` + DECISION_LOG 2026-06-04; playbook §11.7/§11.7.1 amended to match. These remain *operationally* worth revisiting against real PH-operator conversations, but they no longer block — they're locked defaults you override per deal.
 
-| # | What | Current default | Source |
-|---|---|---|---|
-| 8 | Vendor booth-fee discount % for fair-registration via Setnayan | 10–15% range | §11.7 + §11.7 open decisions |
-| 9 | Customer perk default for fair-registration via Setnayan | One of: free welcome kit / fast-track entry / first-100-arrivals giveaway (organizer-choice in V1) | §11.7 |
-| 10 | Model B cash tier prices | **Owner-locked 2026-06-03: ₱9,999 (`boost_featured_plus_email`) + ₱2,999 (`boost_featured_only`)** — settled for contracts/specs (already in 0042 §6.5 + the signed-agreement draft). The open action is a *market-test* with Themes & Motifs + regional operators before publishing as a public rate / scaling past launch partners — the number is **not** still in flux. | §11.7 + DECISION_LOG 2026-06-03 |
-| 11 | Launch-gate vendor threshold | 500 verified vendors | §11.7.1 |
-| 12 | Launch-gate couple-account threshold | 10,000 active couple accounts | §11.7.1 |
-| 13 | "Active" couple-account definition | Proposed: signed in within last 90 days | §11.7.1 |
-| 14 | Eligibility threshold for fairs to qualify for boost (minimum size, organizer reputation, geographic coverage, etc.) | Not yet locked | §11.7 open decisions |
-| 15 | Exclusivity rules (can Setnayan boost competing fairs in same city in same month?) | Not yet locked | §11.7 open decisions |
-| 16 | Cap on free Model A deals per quarter (Setnayan's on-site staffing has real cost) | Not yet locked | §11.7 open decisions |
+| # | Item | Locked value (2026-06-04) |
+|---|---|---|
+| 8 | Vendor booth discount | **Fair-offered only** — the Fair decides whether to extend one, sets the rate, bears the cost; Setnayan neither sets nor funds it. (Softens Model A's former "mandatory discount" → fair's-choice in both models; a Fair offering none still qualifies.) The owner's earlier "tokens" remark = a *different* concept, NOT the retired wallet. |
+| 9 | Couple perk | **Fair picks one** (welcome kit / fast-track / first-100 giveaway) |
+| 10 | Model B price | **₱9,999** (`boost_featured_plus_email`) + **₱2,999** (`boost_featured_only`) · public market-test still advised |
+| 11 | Launch-gate vendors | **500 verified vendors** |
+| 12 | Launch-gate couples | **10,000 active couples** |
+| 13 | "Active" couple | **A couple with a live, non-expired event that has had activity in the last 90 days** (not login-recency) · changes the gate counter query |
+| 14 | Fair eligibility | **Legit registered organizer + 20+ booths _or_ 500+ expected attendance + fixed published date/venue** |
+| 15 | Exclusivity | **None in V1** (may boost competing fairs, subject to the 3-slot cap; sell exclusivity as a premium later) |
+| 16 | Model-A barter cap | **2–4 deals/quarter at pilot** (team-bandwidth-tied); beyond that, cash only |
 
 ---
 

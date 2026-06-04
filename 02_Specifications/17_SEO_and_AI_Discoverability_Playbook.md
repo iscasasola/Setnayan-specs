@@ -1021,7 +1021,7 @@ Added 2026-05-14 as scratch input for the boost-service offering spec flagged in
 The boost service does **not** open for signups until Setnayan reaches **both** of the following platform-readiness thresholds:
 
 - **At least 500 verified vendors** with public `/v/[slug]` profiles
-- **At least 10,000 active couple accounts** (definition of "active" TBD by Cowork — proposed: signed in within last 90 days)
+- **At least 10,000 active couple accounts** — *active* = a couple with a **live, non-expired event that has had activity in the last 90 days** (owner-locked 2026-06-04; not login-recency)
 
 Both must be hit (**AND gate**). Hitting only one is insufficient — the fair organizer's value on both sides of the platform depends on real numbers in both audiences. A fair organizer needs (a) couples to see the homepage feature and email blasts, AND (b) vendors to engage the Setnayan-issued discount funnel into the fair.
 
@@ -1041,6 +1041,8 @@ Both must be hit (**AND gate**). Hitting only one is insufficient — the fair o
 - `/for-event-creators` page flips from waitlist to active-signup
 
 **Numbers caveat:** 500 vendors / 10,000 couples are starting recommendations anchored to (a) §11.7's audience-leverage trigger, (b) competitor scale (Bride Worthy = 2,107 listings, Bridestory PH = thousands of vendors), (c) the audience size a fair organizer can credibly justify partnering for. Owner should validate against real PH fair-operator conversations — smaller regional fairs may engage at lower numbers; majors like Themes & Motifs may need higher.
+
+> **✅ §D owner-locked 2026-06-04.** The boost-service business settings are now locked — vendor discount = **fair-offered only** · couple perk = **fair picks one** · launch gate **500 vendors + 10K couples** · *active couple* = **live non-expired event w/ 90-day activity** · eligibility = **legit organizer + 20+ booths or 500+ attendance + fixed date/venue** · **no V1 exclusivity** · Model-A cap **2–4/quarter pilot** · price **₱9,999 / ₱2,999**. Authoritative copy: `01_Contracts/Bridal_Fair_Boost_Service_Agreement.md` + DECISION_LOG 2026-06-04. Ranges elsewhere in §11.7 are superseded where they conflict.
 
 **Why AND, not OR:**
 
@@ -1080,10 +1082,10 @@ Both audiences need real density before a boost partnership is honest.
 
 | Audience | Discount | Mechanism |
 |---|---|---|
-| Vendors who register for the fair via Setnayan | **10–15% off the fair's standard booth fee** | Setnayan-issued unique code, redeemed at the fair organizer's vendor-booking checkout |
+| Vendors who register for the fair via Setnayan | **A booth discount where the fair elects to offer one** (the fair sets the rate + bears the cost; owner-locked 2026-06-04 — not Setnayan-set) | Setnayan-issued unique code, redeemed at the fair organizer's vendor-booking checkout |
 | Couples who register for the fair via Setnayan | **Free welcome kit / fast-track entry / first-100-arrivals giveaway** (organizer's choice; one of the three minimum) | Setnayan-issued QR or badge presented at fair entrance |
 
-The discount is non-negotiable for Model A — it's how Setnayan justifies the boost service value-exchange. Without it, the funnel doesn't work for either party.
+The booth discount is **fair-offered, not mandatory** (owner-locked 2026-06-04) — Setnayan negotiates for it as part of the Model A in-kind exchange where the fair extends one, but a fair that offers no discount still qualifies; the couple perk + free booth + sponsor billing + stage time carry the value-exchange.
 
 #### Model B — Cash tiers (paid sponsorship)
 

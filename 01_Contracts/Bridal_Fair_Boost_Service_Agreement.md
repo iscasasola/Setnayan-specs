@@ -28,13 +28,13 @@ This Agreement is between **Setnayan** (the "Platform") and the **Fair Organizer
 Boost does not open for signups until Setnayan reaches **both** (AND gate):
 
 - **≥ 500 verified vendors** with public `/v/[slug]` profiles, **and**
-- **≥ 10,000 active couple accounts** (active = signed in within the last 90 days ⚠ **OWNER-VALIDATE** definition).
+- **≥ 10,000 active couple accounts** (active = a couple with a **live, non-expired event that has had activity in the last 90 days** — owner-locked 2026-06-04; *not* login-recency).
 
 **Admin manual override** (0023 § 3.16): Setnayan may open Boost to a strategic launch partner before the gate is met. Any pre-gate deal is logged in the admin audit trail with reason, and the Organizer is told in writing that audience numbers are still ramping (see §6 transparency clause).
 
 ### 2.2 Fair eligibility (Organizer-side)
 
-To qualify, the Fair and Organizer must meet ⚠ **OWNER-VALIDATE** minimum criteria — starting recommendation:
+To qualify, the Fair and Organizer must meet these minimum criteria (owner-locked 2026-06-04):
 
 - Legitimate, identifiable organizer (registered business or established event brand);
 - Minimum fair scale (e.g., 20+ vendor booths and/or 500+ expected couple attendance);
@@ -63,9 +63,9 @@ Both models are offered simultaneously. The Organizer selects the model that fit
 - **Major-sponsor billing** for Setnayan on all Fair marketing collateral (printed banners, programs, social collaterals, press releases) — at minimum, logo placement equivalent to a Major Sponsor tier;
 - **One free booth** at the Fair (single 3×3m or equivalent) for Setnayan to demo, onboard, and run the discount-code redemption desk;
 - **Stage announcements** — 1–3 minutes during opening + one additional mid-event spot (Setnayan supplies the script);
-- Honoring the **funnel discount codes** in §4.
+- Honoring the **funnel discount codes** in §4 **where the Fair elects to extend a booth discount** (fair-offered; see §4).
 
-No money flows in either direction under Model A. The discount is the Fair's customer-acquisition expense; Setnayan is paid in funnel attribution + brand exposure + free booth + sponsor billing.
+No money flows in either direction under Model A. Where the Fair extends a booth discount, that discount is the Fair's customer-acquisition expense; Setnayan is paid in funnel attribution + brand exposure + free booth + sponsor billing. A Fair that offers no discount still qualifies for Model A.
 
 ### 3.2 Model B — Cash (paid sponsorship)
 
@@ -90,8 +90,8 @@ Model B follows Setnayan's standard apply-then-pay rail (0034): the Organizer re
 
 | Audience | Benefit | Mechanism |
 |---|---|---|
-| Vendors who register for the Fair via Setnayan | **10–15% off the standard booth fee** ⚠ **OWNER-VALIDATE** (single % vs. tiered) | Setnayan-issued unique code, redeemed at the Organizer's vendor-booking checkout |
-| Couples who register for the Fair via Setnayan | **One of: free welcome kit / fast-track entry / first-100-arrivals giveaway** ⚠ **OWNER-VALIDATE** (Organizer's choice; min. one) | Setnayan-issued QR / badge presented at Fair entrance |
+| Vendors who register for the Fair via Setnayan | **A booth discount — only where the Fair elects to offer one** (owner-locked 2026-06-04). The Fair sets the rate and bears the cost; Setnayan neither sets nor funds it. No discount applies when the Fair offers none. | Setnayan-issued unique code, redeemed at the Organizer's vendor-booking checkout |
+| Couples who register for the Fair via Setnayan | **One of: free welcome kit / fast-track entry / first-100-arrivals giveaway** — the **Fair picks one** (owner-locked 2026-06-04; min. one) | Setnayan-issued QR / badge presented at Fair entrance |
 
 **Mechanics (binding where codes are used):**
 
@@ -99,7 +99,7 @@ Model B follows Setnayan's standard apply-then-pay rail (0034): the Organizer re
 - The code is shown on `/fairs/[fair-slug]` only to authenticated Setnayan users who clicked the Fair's "Apply for a booth" / "Register to attend" CTA.
 - Redemption happens in the **Organizer's own** booth-booking / registration checkout; the Organizer applies the discount and reports redemptions back to Setnayan (webhook or end-of-event reconciliation report).
 - Codes **expire at the Fair's start date**. One code per user per Fair; non-transferable.
-- For **Model A**, honoring the codes is mandatory and the discount is the Organizer's expense. For **Model B**, codes are optional.
+- The booth discount is **fair-offered in both models** (owner-locked 2026-06-04): the Fair chooses whether to extend one and sets the rate. Under **Model A** Setnayan negotiates for it as part of the in-kind exchange where the Fair offers it; under **Model B** it's optional. Either way the discount is the Fair's cost, never Setnayan's — and a Fair offering none still qualifies.
 
 ---
 
@@ -110,8 +110,8 @@ Model B follows Setnayan's standard apply-then-pay rail (0034): the Organizer re
   - *Model A* — either party may withdraw up to **14 days before the Fair**; after that, in-kind commitments (collateral already printed, slot already promoted) stand.
   - *Model B* — refundable in full if cancelled **before the Featured slot goes live**; **50% refundable** ⚠ **OWNER-VALIDATE** once live but more than 14 days pre-Fair; **non-refundable** within 14 days of the Fair (production + email already committed).
 - **Cancellation by Setnayan:** Setnayan may pull a Boost (with pro-rata Model B refund) if the Fair is cancelled, misrepresented, or the Organizer breaches §6 / §8.
-- **Exclusivity:** ⚠ **OWNER-VALIDATE** — V1 starting position: Setnayan does **not** guarantee category or geographic exclusivity and may boost more than one Fair, including in the same city/month, subject to the 3-slot homepage cap. Any agreed exclusivity window must be written into the signature block.
-- **Model A volume cap:** ⚠ **OWNER-VALIDATE** — Setnayan may cap the number of free Model A deals per quarter (on-site staffing has real cost); beyond the cap, only Model B is offered.
+- **Exclusivity:** **none in V1** (owner-locked 2026-06-04). Setnayan does **not** guarantee category or geographic exclusivity and may boost more than one Fair, including in the same city/month, subject to the 3-slot homepage cap. (Exclusivity may be offered as a paid premium in a later version.) Any specially-negotiated exclusivity must be written into the signature block.
+- **Model A volume cap:** **2–4 free Model A deals per quarter at pilot** (owner-locked 2026-06-04; tied to Setnayan's on-site-staffing bandwidth — physical presence has real cost). Beyond the cap, only Model B (cash) is offered.
 
 ---
 
