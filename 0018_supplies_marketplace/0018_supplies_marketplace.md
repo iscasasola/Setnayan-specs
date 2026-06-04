@@ -168,6 +168,22 @@ Trade-off: requires Setnayan to carry cash-flow risk (pay vendor wholesale even 
 | **0034 Payments & Cart** | NEW wholesale-payout flow on `vendor_payouts` table (alongside existing commission-payout flow for 0006 marketplace bookings). `vendor_payouts.payout_type` enum gains `'wholesale'`. |
 | **All physical SKUs** | NFC pendants · arras coins · QR cards · save-the-date physical mailers — moved from "one-off SKUs" to Setnayan Supplies fulfilled |
 
+## Public browse pages (SEO-indexable · per Playbook §5.1, §4.4) — added 2026-06-04
+
+**Locked (Cowork 2026-06-04 · resolves SEO-pending item #1):** the `/supplies/*` browse tree is **public and indexable** — no login to browse; **auth gates only cart + checkout**. Without these public URLs, no `/supplies` page can rank (Playbook §1, §5.1, §7).
+
+| Page | URL | Schema | Min depth |
+|---|---|---|---|
+| Supplies hub | `/supplies` | `ItemList` + `BreadcrumbList` + `FAQPage` | 800 words + category grid |
+| Category | `/supplies/[category]` | `ItemList` + `BreadcrumbList` + `FAQPage` | 600 words + product grid |
+| Category × city | `/supplies/[category]/[city]` | `ItemList` + `BreadcrumbList` | 400 words + city-filtered grid |
+| Product detail | `/supplies/p/[id]/[slug]` | `Product` + `Offer` (priceCurrency `PHP`) + `AggregateRating`/`Review` (real reviews only) | 250 words + spec data |
+
+- **Titles / meta** follow Playbook §5.2 patterns (e.g. `Wedding Supplies Philippines — Print, Rentals & Keepsakes | Setnayan`).
+- **Indexable** in `sitemap.xml`; canonical self-references; cart/checkout/state URLs blocked in `robots.txt` (Playbook §4.3).
+- **Auth boundary:** browse = public; add-to-cart, checkout, order history = login-required.
+- Full SEO substance (content depth, hub-and-spoke internal linking, JSON-LD shapes) lives in **Playbook §4.4 / §5.1–5.3 / §4.8** — not duplicated here.
+
 ## Schema additions (new + extends existing)
 
 ```sql

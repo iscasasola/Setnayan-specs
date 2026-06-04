@@ -614,6 +614,23 @@ CREATE INDEX idx_site_widgets_by_page ON site_widgets(page, display_order);
 
 ---
 
+## Homepage featured bridal fairs + public `/fairs` pages (SEO · per Playbook §11.2–11.3.1) — added 2026-06-04
+
+**Locked (Cowork 2026-06-04 · resolves SEO-pending items #3 + #4):**
+
+**Homepage strip (`/`):** an H2 "Upcoming bridal fairs" section surfacing **currently-active boosted fairs, hard cap 3** (slot rules §11.3.1). Each card links to its `/fairs/[fair-slug]`. Emits a schema.org **`Event`** JSON-LD block per featured fair (alongside the homepage `Organization` + `WebSite` + `BreadcrumbList`). **When no fair is active, the section is hidden entirely** (no empty/thin block — Google penalizes it). Featured state computes **on-read** (cron-free lock), windowed T-60 → T+1.
+
+**Public `/fairs` pages:**
+
+| Page | URL | Schema | Depth |
+|---|---|---|---|
+| Fairs index | `/fairs` | `ItemList` + `BreadcrumbList` | upcoming/active fairs sorted by date |
+| Fair landing | `/fairs/[fair-slug]` | `Event` (offline; `offers` = couple-register `price 0` + vendor-booth `price {tier}`) + `BreadcrumbList` + `FAQPage` | 600–1,200 words: organizer credit, date/venue/map, participating-vendor links (`/v/[slug]`), booth-tier pricing, past-fair gallery, FAQ |
+
+- Multi-audience surface (couple register · vendor book a booth · organizer credit) — Playbook §11.2.
+- **Title:** `{Fair} — {Date} {City} Bridal Fair | Setnayan`; in `sitemap-fairs.xml`; canonical self-reference.
+- **Boost SKUs, slot-management state machine, admin pin/override** live in `0042` §6.5 + `0023` §3.16 / surface #29 — not duplicated here. Full SEO substance in **Playbook §11.2–11.3.1**.
+
 ## Routes
 
 ```

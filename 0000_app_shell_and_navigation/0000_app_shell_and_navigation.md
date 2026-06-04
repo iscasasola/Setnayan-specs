@@ -18,7 +18,7 @@ In plain language, this iteration delivers six things:
 3. **Event QR code** generated when an event is created — couples share it so guests can scan and join.
 4. **Join flow via QR scan** — scan the event QR, app detects if you have an account, signs you in (or registers you), asks what role you're joining as, and adds you to the event with that role.
 5. A **simple set of tabs at the bottom of the screen** so couples can move between Guest List, Vendors, Schedule, and Add-ons.
-6. A **launcher page** for all the paid Setnayan features (Panood, Papic, Mood Board, Photo Delivery, LED Background, Wallet).
+6. A **launcher page** for all the paid Setnayan features (Panood, Papic, Mood Board, Photo Delivery, LED Background). *(2026-06-04: "Wallet" removed — the token wallet is retired; payment is order-and-pay per 0034. See § wallet-drift note.)*
 
 That's it. No new features, just the shell that holds everything together.
 
@@ -46,21 +46,19 @@ Once signed in, what happens next depends on how many active events they have.
 
 ### Step 2.5 — Picking the event type (when creating a new event)
 
-When the couple taps "+ Create event," the first thing they see is a **swipeable hero-photo carousel of event types** (redesigned 2026-06-03 from emoji tiles — PR #882). Each type is a full-bleed photo card; the couple swipes/scrolls horizontally through all of them (arrows + dots assist on desktop — it no longer loops infinitely). Eleven event types are shown. **Weddings and Debuts are live** — full-color cards with a gold "Available" badge, tappable (Wedding → onboarding flow; Debut → create-event form). The other nine render grayscale with a "Coming soon" badge and are not tappable. On the full-page picker the **Event name** input still appears only after a card is picked. Hero photos live at `apps/web/public/event-types/{type}.webp`.
+When the couple taps "+ Create event," the first thing they see is a **swipeable hero-photo carousel of event types** (redesigned 2026-06-03 from emoji tiles — PR #882). Each type is a full-bleed photo card; the couple swipes/scrolls horizontally through all of them (arrows + dots assist on desktop — it no longer loops infinitely). **All nine event types are live** — full-color cards with a gold "Available" badge, all tappable. **Wedding** routes into the onboarding flow; **every other type** routes into the create-event form (Event-name input on the full-page picker). There is **no "coming soon" tier and no notify-me flow** — owner decision "keep everything live" (2026-06-03 · #884 "unlock all events"), which superseded the earlier Wedding+Debut-only staging. On the full-page picker the **Event name** input still appears only after a card is picked. Hero photos live at `apps/web/public/event-types/{type}.webp`. The live roster is the nine in `apps/web/app/dashboard/create-event/_components/event-types.ts` (Anniversary / Graduation / Reunion exist as DB enum values only — seedable, not picker cards yet).
 
 | Event type | V1 status | What the card does when tapped |
 |---|---|---|
 | **Wedding** | ✅ Live (full-color, gold "Available" badge, tappable) | Routes into the onboarding flow |
-| **Debut** | ✅ Live (full-color, gold "Available" badge, tappable) | Routes into the create-event form (Event-name input on the full-page picker) |
-| Birthday | Coming soon (grayscale, not tappable) | No-op — "We're working on this. For now, Weddings and Debuts are supported." |
-| Celebration | Coming soon (grayscale, not tappable) | Same |
-| Travel | Coming soon (grayscale, not tappable) | Same |
-| Corporate | Coming soon (grayscale, not tappable) | Same |
-| Tournament | Coming soon (grayscale, not tappable) | Same |
-| Christening | Coming soon (grayscale, not tappable) | Same |
-| Anniversary | Coming soon (grayscale, not tappable) | Same |
-| Graduation | Coming soon (grayscale, not tappable) | Same |
-| Reunion | Coming soon (grayscale, not tappable) | Same |
+| **Debut** | ✅ Live | Routes into the create-event form |
+| **Gender Reveal** | ✅ Live | Routes into the create-event form |
+| **Birthday** | ✅ Live | Routes into the create-event form |
+| **Celebration** | ✅ Live | Routes into the create-event form |
+| **Travel** | ✅ Live | Routes into the create-event form |
+| **Corporate** | ✅ Live | Routes into the create-event form |
+| **Tournament** | ✅ Live | Routes into the create-event form |
+| **Christening** | ✅ Live | Routes into the create-event form |
 
 When Weddings is tapped, the **simplified single-field event-setup flow** runs (locked 2026-05-14):
 
@@ -118,7 +116,7 @@ Immediately after event creation, the couple sees a two-option choice card. The 
 
 Couples picking the paid SKU still land on the dashboard immediately — the dashboard shows "Setnayan Concierge pending payment" state until reconciliation completes. They are NOT blocked unless full-banned.
 
-The other nine event types stay visible because they're a **product preview** — Setnayan plans to support multiple event types beyond weddings and debuts (each with its own iteration set, eventually), and showing the lineup signals the couple that this is a serious event-platform play, not just a wedding app. When future event types ship, no UI rework is needed — the cards already exist; we just flip the `enabled` flag in the picker config (which turns the grayscale "Coming soon" card into a full-color, tappable "Available" one).
+All nine event types in the picker are **live** (owner: "keep everything live," 2026-06-03). The lineup still signals Setnayan's broader **event-platform** ambition beyond weddings — more event types get added over time as their iterations mature (Anniversary, Graduation, and Reunion already exist as DB enum values awaiting a picker card + hero photo). Adding one is a picker-config change — a roster entry in `event-types.ts` (`enabled: true`) + a `public/event-types/{type}.webp` hero photo — not UI rework.
 
 Schema (implementation note: ENUM, not CHECK):
 
@@ -223,7 +221,7 @@ Once an event is open, this is what the couple sees every screen:
 - Mobile pattern: bottom sheet rises from the bottom.
 - Desktop pattern: dropdown / popover anchored under the monogram caret.
 - Contents (top to bottom):
-  1. `+ Add event` row. The in-app add-event sheet copy reads: *"Weddings and debuts are live now. Swipe through to see what's on the way — more event types unlock over time."* (The earlier "tap an upcoming tile to be notified" line was removed 2026-06-03 — no notify flow exists.)
+  1. `+ Add event` row → opens the same hero-photo event-type carousel as a bottom sheet (mobile) / popover (desktop), with all nine event types live + tappable. (The earlier "tap an upcoming tile to be notified" copy was removed 2026-06-03 — no notify flow exists. The in-app subtitle still reads *"…more event types unlock over time,"* which is roadmap-flavored; a copy tweak to fully match "keep everything live" is a noted follow-up.)
   2. Event list — primary first, marked with star; each row showing monogram + event name + wedding-date pill (or "date TBD" when `wedding_date IS NULL`).
   3. **Role-switch rows** (locked 2026-05-15) — thin separator above, then:
      - **Shop console** — visible when the user is a vendor owner (`vendors.owner_user_id = auth.uid()`) OR sits in any `vendor_service_agents.member_id` row. Tap routes to iteration 0022. When the user sits across multiple vendors, this expands into a sub-menu listing each vendor with its logo + business name; tap one to enter that shop console.
@@ -245,7 +243,7 @@ Once an event is open, this is what the couple sees every screen:
 | **Guest List** | 👥 | Everything about your guests — the list, your invitation site, place cards, seating chart. |
 | **Vendors** | 💼 | Your vendor list and your budget. |
 | **Schedule** | 📅 | One calendar view for everything time-based — meetings, payment deadlines, your event-day timeline. |
-| **Add-ons** | ✨ | All the paid Setnayan features — Panood, Papic, Mood Board, Photo Delivery, LED, Wallet. |
+| **Add-ons** | ✨ | All the paid Setnayan features — Panood, Papic, Mood Board, Photo Delivery, LED. *(Wallet removed 2026-06-04 — token wallet retired; order-and-pay per 0034.)* |
 
 The active tab is highlighted. Tapping a tab switches sections. Each tab has its own sub-pages but the bottom nav stays put.
 
@@ -316,7 +314,7 @@ Tapping a card routes to that service's detail page:
 
 | Service | URL | Owned by |
 |---|---|---|
-| Wallet | `/dashboard/[event-id]/services/wallet` | 0003 |
+| ~~Wallet~~ | ~~`/dashboard/[event-id]/services/wallet`~~ | ~~0003~~ — **RETIRED 2026-06-04** · token wallet removed; no wallet route exists. Payment is order-and-pay (0034). |
 | Mood Board | `/dashboard/[event-id]/services/mood-board` | 0010 |
 | LED Background | `/dashboard/[event-id]/services/led` | 0005 |
 | Photo Delivery | `/dashboard/[event-id]/services/photo-delivery` | 0009 |
@@ -518,7 +516,7 @@ Iterations 0001–0012 can ship their internal panels in parallel; each plugs in
 This iteration is shippable when all of the following are true:
 
 - [ ] `events.is_primary`, `events.archived`, and `events.event_type` columns exist with the partial unique index on `is_primary` and the `public.event_type` ENUM covering wedding, birthday, celebration, travel, corporate, tournament, christening.
-- [ ] Create-event flow shows all eleven event types as full-bleed hero-photo cards in a swipeable horizontal carousel (no infinite loop; arrows + dots assist on desktop); "Wedding" and "Debut" are live and tappable (Wedding → onboarding flow, Debut → create-event form) with a gold "Available" badge; the other nine render grayscale with a "Coming soon" badge and are no-ops; on the full-page picker the Event-name input is hidden until a card is picked.
+- [ ] Create-event flow shows all nine event types as full-bleed hero-photo cards in a swipeable horizontal carousel (no infinite loop; arrows + dots assist on desktop); all nine are live and tappable (Wedding → onboarding flow, every other type → create-event form) with a gold "Available" badge; there is no "coming soon" tier and no notify flow; on the full-page picker the Event-name input is hidden until a card is picked.
 - [ ] Newly created events have `event_type = 'wedding'`; other values can only be inserted via direct SQL (V1 has no UI path to them).
 - [ ] `users`, `event_join_tokens`, `event_members` tables exist per schema above.
 - [ ] When a couple creates an event, an `event_join_tokens` row is auto-created with a 32-hex token.

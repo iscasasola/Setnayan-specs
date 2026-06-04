@@ -13,6 +13,20 @@
 
 ---
 
+## ✅ Done this session — 2026-06-04 (SEO-surfacing + wallet-drift batch)
+
+| Item | Resolution |
+|---|---|
+| §A #1 — 0018 supplies indexable pages | ✅ `0018` § **Public browse pages (SEO-indexable)** — `/supplies/*` public + auth-gated cart/checkout, schema + titles per Playbook §4.4/§5.1/§5.2 |
+| §A #2 — public vendor profile | ✅ `0006` § **Public vendor profile** (`/v/[slug]`, `LocalBusiness` + `AggregateRating`) + `0022` § **Public profile** (vendor authoring/visibility) |
+| §A #3 + #4 — featured fairs + `/fairs` templates | ✅ `0015` § **Homepage featured bridal fairs + public `/fairs` pages** (`Event` JSON-LD, hide-when-none, §11.2–11.3.1) |
+| §B #6 — 0003 dead-folder reference | ◐ **Partial** — Connection Map row tombstoned (0003 marked RETIRED → 0034). ⚠ Deep `spend()`-woven prose reconciliation (§3.3, build order, checklists) still owed. |
+| §B #7 — 0000 wallet drift | ◐ **Partial** — launcher + Add-ons card + route table cleaned (wallet retired → 0034). ⚠ ASCII balance line + build-order/checklist prose still mention wallet. |
+
+> `.docx` mirrors for 0018 / 0006 / 0022 / 0015 / 0000 regenerated this session. **Still open after this:** §B #6/#7 deeper prose reconciliation · §D owner-validation #8–16 (your calls) · §E code/external.
+
+---
+
 ## A. Pending `[SPEC CHANGE]` flags (need new spec work)
 
 | # | What | Where it amends | Source |

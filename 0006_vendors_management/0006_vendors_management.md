@@ -1042,6 +1042,17 @@ Toggle changes are single-admin authority for the vendor (their own account), lo
 
 A second worked example block sits next to the default 5.0% example showing "Some vendors cover the convenience fee — look for the badge. With these vendors, the listed price is the all-in price." Engineering hooks into `apps/web/app/(marketing)/page.tsx` and the eventual `/pricing` page.
 
+## Public vendor profile (SEO-indexable · `/v/[slug]`) — added 2026-06-04
+
+**Locked (Cowork 2026-06-04 · resolves SEO-pending item #2):** every published vendor gets a **public, indexable profile** at `/v/[slug]`. Without a committed public-field set, no vendor page can rank (Playbook §1, §4.4, §5.1).
+
+- **Public fields:** `slug` · public bio (300+ words narrative) · services + packages · portfolio photos · city / coverage area · **verified-status** badge · reviews + `AggregateRating` (real reviews only — faking triggers a manual action). These render without login.
+- **Schema:** `LocalBusiness` (subtype `WeddingService`, `addressCountry: "PH"`, `addressRegion`, `addressLocality`, lat/long when available) + `AggregateRating`/`Review` + `BreadcrumbList` (Playbook §4.4).
+- **Title / meta:** `{Vendor} — Wedding {Category} in {City} | Setnayan` (Playbook §5.2, template #8).
+- **Indexable** in `sitemap.xml`; canonical self-reference. **Hybrid-anonymity interplay:** Free + Verified vendors stay name-masked in browse/cards until first chat reply, but the **public `/v/[slug]` profile is the SEO surface** — slug + bio are indexable per the vendor's visibility tier (reconcile with the vendor hybrid-anonymity lock; Pro+ always visible).
+- **Vendor controls these fields from the 0022 dashboard** (see 0022 § Public profile).
+- Full SEO substance lives in **Playbook §4.4 / §5.1–5.3** — not duplicated here.
+
 ## Acceptance criteria
 
 - Couple can add a vendor with manually entered business name, contact, phone, email, website, notes, day-of arrival.

@@ -1028,6 +1028,15 @@ Bulk work (service authoring, plan-and-proposal building) defaults to desktop wi
 
 ---
 
+## Public profile (vendor-controlled · `/v/[slug]`) — added 2026-06-04
+
+**Locked (Cowork 2026-06-04 · resolves SEO-pending item #2, vendor side):** the vendor's **public SEO profile** at `/v/[slug]` (spec'd in 0006 § Public vendor profile) is **authored and visibility-controlled from this dashboard**.
+
+- Vendor edits the indexable fields here: public bio, services + packages, portfolio photos, coverage city/area, slug (URL & Slug tab, 0025).
+- Profile-completeness nudge surfaces in Home (a thin/empty profile won't rank — Playbook §5.3 depth minimums).
+- Visibility tier (Free/Verified name-masking → reveals on first chat reply; Pro+ always visible) governs what the public profile exposes — see the vendor hybrid-anonymity lock + 0006.
+- Schema + title/meta + indexability are the 0006/Playbook §4.4/§5.2 responsibility; this surface only authors the content.
+
 ## 8. Cross-iteration handoffs
 
 - **0006 Vendors** — extends the couple-side vendor profile with the vendor's own authoring surface here.
