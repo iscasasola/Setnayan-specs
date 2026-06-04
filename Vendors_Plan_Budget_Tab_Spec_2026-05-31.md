@@ -29,12 +29,18 @@ Two stacked figures on the left + budget guardrail on the right:
 - Numbers are short in the bar (precise figures live in the overview).
 - **Budget model (iteration 0007):** a booked vendor's true cost is **3 lines — Package + Transportation + Crew Meal**; in-app/Setnayan services and the venue anchor have none. The card surfaces the Package price; **Chosen, Range, and the vendor detail must roll up all three.** (The prototype sums Package only — wire the full 3-line rollup.)
 
-### B. Landing overview — "Your Budget & Plan" (forward / motivating; must fit ONE screen, no internal scroll)
-The default first view. Everything here drives *search / add / finalize more*:
-1. **Estimated budget** (tap to change) | **Budget chosen** — 2-col.
-2. **Your plan could land between** `₱lo – ₱hi` (precise).
-3. **What to lock next** — the action centerpiece. Top **3** most-urgent categories (overdue first, then due-within-20-days), each row: category name · what's in play (`N options in play` / `no vendor picked yet`) · `🔥 X eyeing your date` · right-aligned `X days overdue` (red) or `lock in X days` (amber). A `+N more need attention` line if there are more. If nothing is overdue/due-soon → header flips to **"Next up"** and shows the single nearest upcoming category.
-4. `↑ Scroll up to begin`.
+### B. Landing overview — "Where your day stands" (eyebrow: "Your budget & plan") (forward / motivating; must fit ONE screen, no internal scroll)
+The default first view. Everything here drives *search / add / finalize more*. **Two states** — an empty cover (no picks yet) and the populated cover below.
+
+> **⚠ Updated 2026-06-04 (shipped) — the populated cover is now DIRECTIVE, not just a scoreboard.** The Find→Shortlist→Lock loop used to be taught ONLY on the empty cover; the moment the couple had a single pick it vanished and they were dropped into bare rails not knowing what to do. The populated cover now LEADS with the next action and keeps the loop in view. (`NextAction` + `LoopLegend` + `AlsoComingUp` in `plan-budget-accordion.tsx`.)
+
+1. **"Do this next" banner** — the action centerpiece. Promotes the **single most-urgent category** (`dueList[0]`, else the calm `upNext`) into a **tappable jump** to that category's rail (`#group-{id}`). Verb adapts: never-locked → **"Start with {category}"** · overdue → **"Lock your {category}"** · else → **"Choose your {category}"**. Sub-line = how many they've shortlisted there (`N shortlisted — compare & lock one` / `1 shortlisted — ready to lock` / `Find one to shortlist`) + the timeline (`Xd left` / `Xd overdue` / `time to start`). When nothing's pressing → a calm **"You're on pace — nothing's urgent, browse any category below."**
+2. **Find → Shortlist → Lock legend** — a compact, always-present 3-step strip so the mechanic stays in view once the couple is working the rails (previously empty-state-only).
+3. **Estimate · Chosen · Could-land** — a 3-box row (Estimate = budget target, set via the top bar · Chosen = Σ locked · Could-land = `₱lo–₱hi`) + the **Plan-vs-budget meter** (tracks Range-high vs target: On track / Getting close / Over budget).
+4. **"Also coming up"** — the *remaining* due categories (`dueList[1..]`; the banner already owns the top one). Each row: category · `👀 X eyeing your date` · right-aligned `Xd left` (amber) / `Xd overdue` (red) / `Time to start`. Omitted entirely when the banner covers everything (the calm/empty cases) — so the deadline info is never shown twice.
+5. **`Swipe up to view your services ↓`** (was "Scroll up to begin" / "Swipe to start viewing the services").
+
+*(The empty cover — shown until the first shortlist — keeps its 3-step **Shortlist → Compare → Lock it in** explainer + "Add your first category".)*
 
 ### C. The accordion (scroll-driven)
 - **10 parent categories** as sticky headers that pin/pile at the top (`top = i × headH`, headH = 32px). Header shows icon + name + the category's locked total.
@@ -47,6 +53,7 @@ Each child category (and each named slot inside multi-slot children like Bride's
 - **Per-block lock**: each card fully clears the bottom nav *before* it locks (`lockTop = vh − cardHeight − 14px`) — tall cards lock higher, short cards lower, all end fully visible. A **gentle scroll-snap + haptic tick** fires only when a card rests within ~70px of its lock line (never a category-crossing yank — see "regression" note in §9).
 - **Both axes buzz:** the horizontal coverflow also fires a haptic tick as the centered card changes; the vertical fires on the per-block snap. Both gentle, both best-effort (no iOS web vibration — §9).
 - **Empty category** (no vendors yet) → not a rail; a slim one-line **`+ [Category] add`** row (its own reveal block) that opens the add-a-service search.
+- **First-run coaching (2026-06-04):** the first time the couple has shortlisted something but locked nothing yet, a **dismissible coachmark** sits at the top of the category list (what the eye hits on swipe-up) — *Tap a card · Compare side by side · **Lock this pick** (updates your budget + notifies the vendor, changeable anytime)* — plus a one-time **Lock helper** line under the first lockable card. Both appear ONLY in that "I have cards, now what?" window, self-retire after the first lock, and remember dismissal (`localStorage 'pba_coach_v1'`). Gated by `recap.shortlisted > 0 && recap.finalized === 0`.
 
 ### E. Bottom recap — "Look how far you've come" (accomplishment; fills the bottom half)
 Appears when all 10 categories are piled at the top (scrolled to the end). A **mulberry card** anchored to the bottom:
