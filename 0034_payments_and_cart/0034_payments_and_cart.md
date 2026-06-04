@@ -1,5 +1,7 @@
 # Iteration 0034 — Payments & Cart Flow
 
+> **⚠ LIVE-SITE RECONCILIATION 2026-06-04.** A **vendor-side token economy is now LIVE on setnayan.com** — this iteration's "token wallet fully retired / PHP-only everywhere" assumption is no longer complete. Vendors buy token packs (4/₱1,000 · 10/₱2,400 · 25/₱5,500 · 50/₱10,000 · 100/₱18,000), receive 100 complimentary tokens on verification, and redeem them against any "Token Worthy" couple SKU at a dashboard-set rate. Customer-side stays apply-then-pay PHP (no customer wallet). The cart/reconciliation schema must accommodate vendor token balances + token-redemption as a payment path. See `Pricing.md § 0.C`. ⚠ Site also contradicts itself on vendor commission (0% vs flat 5% Setnayan Pay) — `Pricing.md § 0.1`.
+
 - **Surface:** Customer cart (lives inside 0021 services launcher) + Admin reconciliation (lives inside 0023 § 3.3 Payments & Activations)
 - **Status:** drafted 2026-05-12
 - **Builds on:** 0000 (users + auth) · 0006 (vendor records via `event_vendor_relationships`) · 0013 (platform stack — Supabase + R2)
@@ -1625,3 +1627,70 @@ Pattern A (single-payer, whoever checks out pays everything) preserved. Cart ite
 - **V1.2:** Pattern A (preserved) + Pattern B (per-item attribution)
 - **V1.3:** Pattern C (split-cost per item with percentage split) + per-role default attribution templates + international card payment for foreign moderators
 - **V1.5+:** Cross-payer settlement view (informational; couple settles externally)
+
+---
+
+## Vendor Payment Options — off-platform direct rail (added 2026-06-04)
+
+> Shipped 2026-06-04 (PR #969, merged). Lets a vendor publish their OWN payment destinations so couples pay them **directly, off-platform** — Setnayan takes 0% and never holds the money (RA 11967 non-party-publisher posture). This is the operational UI for the `direct` payment path, distinct from Setnayan Pay (the +3% Setnayan-processed path). Built against the real shipped schema (`vendor_profiles` / `event_vendors` / `event_vendor_payments`), not the earlier draft tables.
+
+### Locked rules (owner, 2026-06-04)
+1. **Payment links are Pro & Enterprise only.** QR + bank/e-wallet details are open to all vendor tiers (Free/Verified included). Links are the most-abused surface, so they're reserved for paid, accountable tiers. Enforced server-side (active paid `vendor_pro_weekly`/`all_tools_unlock_annual` order); the couple never sees a non-pro vendor's link.
+2. **Standing platform-wide vigilance disclosure.** Anywhere a payment to a vendor is shown or notified, Setnayan must state it does NOT control or hold that money and caution the customer to verify the details + only pay vendors they trust (Setnayan can't reverse/mediate an off-platform payment).
+
+### Schema — `vendor_payment_methods` (migration 20260820000000)
+- `payment_method_id` uuid PK · `vendor_profile_id` -> `vendor_profiles` (ON DELETE CASCADE) · `method_type` in {bank, qr, link} · `label` · bank fields (`provider`, `account_name`, `account_number`) · qr (`qr_r2_key`, `decoded_destination`) · link (`link_url`, `link_domain`) · `note` · `is_primary` · `is_shown` · `moderation_status` in {approved, pending_review, held, removed} · `moderation_note` · timestamps.
+- RLS at CREATE TABLE: **Pattern A owner** — a vendor CRUDs only rows under their own `vendor_profiles` row. Couples never query this table directly; they read a booked vendor's published methods through a server action (admin client, server-filtered to booked + shown + approved + tier-allowed). Admin moderates via the service role.
+- Guards: per-type payload CHECK; partial-unique **one-primary-per-vendor** index; moderation-queue index.
+- Plus additive nullable `event_vendor_payments.proof_r2_key` (couple's receipt screenshot in the 0007 budget log).
+
+### Link allowlist + moderation
+- Allowlisted provider domains (maya.me · maya.ph · paypal.me · paypal.com · stripe.com · buy.stripe.com · gcash.com · bpi.com.ph · unionbankph.com · qrph.org) publish instantly (`approved`). Off-allowlist links -> `pending_review` (admin clears). URL shorteners (bit.ly, tinyurl, etc.) are blocked outright.
+- Admin moderation surface `/admin/payment-options` shows the decoded destination + domain/allowlist check per entry; approve / hold / remove, audit-logged.
+
+### Surfaces (one feature, three actors)
+- **Vendor** (`/vendor-dashboard/payment-options`, see 0022): the "How clients pay you" editor.
+- **Couple** (per-vendor budget card, see 0007): the `VendorDirectPay` settlement rail — disclosure banner, copyable bank details, QR modal with decoded destination, "leaving Setnayan" interstitial before any link, optional receipt upload.
+- **Admin** (`/admin/payment-options`, see 0023): the moderation queue.
+
+### V1 scope notes
+- QR "decoded destination" is **vendor-declared** in V1 (the vendor states where the QR sends money; admin verifies against the image). Real server-side QR image decode is a fast-follow.
+- A second couple mount point (the per-vendor workspace page) is a fast-follow; the budget card carries it in V1.
+- No email currently notifies an off-platform vendor payment, so the vigilance disclosure lives in-app; if such an email is added, the line goes there.
+
+## First-Party Setnayan Services — inline order-and-pay on the per-service workspace (added 2026-06-05)
+
+> Shipped 2026-06-05 (setnayan-platform PR #981, merged). When a couple opens a finalized **first-party Setnayan service** (an `event_vendors` pick whose marketplace profile is `is_setnayan_service`), the per-service workspace (`/dashboard/[eventId]/vendors/[vendorId]/workspace`) now lets them **pay inline**, and a Setnayan **admin accepts** the payment at `/admin/payments`. This is the **interim** mechanism until the automated payment system goes live **2027-01-01**. Owner directive: *"can we apply this vendor direct-pay to our services as well, and admin will accept the payments?"*
+
+### Distinct from the Vendor Payment Options rail above
+This is **not** the off-platform vendor rail. The two are deliberately opposite:
+
+| | Vendor Payment Options (2026-06-04) | First-party Setnayan services (this section) |
+|---|---|---|
+| Who receives the money | the **third-party vendor**, off-platform | **Setnayan** (its own service) |
+| Setnayan's role | 0%, never holds the money (RA 11967) | merchant — Setnayan IS the payee |
+| Disclosure | non-custody vigilance banner ("you're paying the vendor directly… Setnayan can't reverse it") | first-party — *"You're paying Setnayan, not a third-party vendor … our team confirms each transfer by hand"* |
+| Spine | `vendor_payment_methods` + `event_vendor_payments` | the canonical **apply-then-pay** `orders` + `payments` flow (this iteration) |
+
+Applying the vendor non-custody banner to a first-party Setnayan service would be **wrong** — the money does go to Setnayan — so the copy is the inverse.
+
+### Reuse, not new infra
+The whole apply-then-pay spine already shipped; this is purely wiring it onto the workspace for service picks:
+- **Couple pays** Setnayan's own BDO/GCash receiving accounts from `platform_settings` (§ 3.4 / § 3.5).
+- The existing **`InlineCheckoutDrawer`** (the single-surface pay + screenshot + reference drawer used on the 7 add-on SKU pages) is mounted on the workspace, pre-filled with the service's price + name + the `platform_settings` accounts. Submit lands a real `orders` + `payments` row via the shipped `submitOrderAction`.
+- **Admin accepts** at `/admin/payments` (§ 4) — `approvePayment` → payment `matched` (+ optional order `paid`) / reject / request-resubmit, unchanged.
+- No schema change, no new payment store, no FK bridge from `event_vendors` to `orders`.
+
+### Order keying + status
+- Orders are keyed by a stable `service_key = setnayan_service__{category}`. It won't collide with any pax-priced SKU, so `submitOrderAction` trusts the pick's plan price (no voucher matches — correct, these are plan-priced not promo SKUs). The same key drives the workspace **live status strip** (latest non-terminal order → status pill + reference + amount + Track/upload-proof deep-link), so a couple who already paid sees status instead of re-paying.
+- Price precedence mirrors the workspace hero: package locked centavos → snapshot itemized (pesos×100) → host `total_cost_php` (pesos×100). Unpriced picks fall back to a "we'll email instructions" message.
+- **V1 limitation:** the per-category key means two distinct Setnayan services in the *same* category on one event share a status lookup. Acceptable for V1 (one-per-category is the norm; the consequence is a slightly-broad status hint, never a money error). A precise per-pick key/link is a fast-follow.
+
+### Surfaces (one feature, three actors)
+- **Couple** — the per-service workspace pay panel (this section).
+- **Admin** — `/admin/payments` acceptance (§ 4), unchanged; first-party-service orders appear in the same queue as add-on SKU orders.
+- **Setnayan ops** — the order carries `service_key = setnayan_service__{category}` + the service name as its description for legibility in the queue.
+
+### Cross-references
+- Completes the locked **"in-app services = vendor listings · always-on · add-and-pay via 0034"** model (couple-side memory). Related spec homes: **0006** (vendors management — the service pick), **0021** (couple dashboard — the per-service workspace).
+- See `DECISION_LOG.md` 2026-06-05 row.
