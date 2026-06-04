@@ -8,7 +8,7 @@
 
 ---
 
-## 1. The 29 admin surfaces
+## 1. The 31 admin surfaces
 
 The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. Surface count refreshed 2026-05-23 to enumerate ALL shipped admin routes — the prior 11-surface table (2026-05-18) listed only the speced surfaces and silently missed the 12 operational surfaces that shipped during the V1 build burst (Funnels, Payouts, Receipts, BIR 2307, Ads, Demo vendors, Events, Help inbox, Force majeure, Moodboard library, Operations & Hiring, Taxonomy, plus Reviews). The 4 missing-from-code surfaces from the prior table (Disputes, Pricing, Add-on Management, Concierge Brain) all shipped in the 2026-05-23 admin alignment batch ([PRs #419 · #420 · #421 · #423](https://github.com/iscasasola/setnayan-platform/pulls?q=is%3Apr+merged%3A2026-05-23)). Table below is grouped by the actual `apps/web/app/admin/_components/admin-nav.tsx` structure so spec readers see what an admin sees on the left rail. **(#29 Promoted Events is the first forward-spec row — spec'd 2026-06-03 · V1.6 · not yet shipped; every other row mirrors a shipped route.)**
 
@@ -26,6 +26,8 @@ The admin logs in at `setnayan.com` → role-router sends them to `/admin/...`. 
 | Directory | 10 | **Events** | `/admin/events` | All events directory · admin actions (force-end, delete, archive, lifecycle-phase override) |
 | Directory | 11 | **Vendors** | `/admin/vendors` | Vendor profiles directory · per-vendor edit form at `/admin/vendors/[vendorProfileId]/edit` |
 | Directory | 12 | **Venues** | `/admin/venues` | Venue directory · new venue CTA at `/admin/venues/new` · detail at `/admin/venues/[id]` |
+| Directory | 30 | **Wedding types** | `/admin/wedding-types` | 🆕 SHIPPED 2026-06-03 (#895). Per-religion launch gate ([0043](../0043_wedding_type_picker/0043_wedding_type_picker.md)) — readiness counts (compatible vendors + ceremonial venues per `ceremony_type`, from `compatible_ceremony_types[]`) vs an editable threshold · **Open / Hold (coming-soon) / Disable**. Flipping a religion greys it (non-selectable) in BOTH the onboarding faith picker and the create-event picker. Writes `wedding_type_launch_status`. |
+| Directory | 31 | **Wedding traditions** | `/admin/wedding-traditions` | 🆕 SHIPPED 2026-06-03 (#898). Per-religion "What to expect" content editor ([0043](../0043_wedding_type_picker/0043_wedding_type_picker.md)) — edit / add / remove / reorder the traditions items shown on each couple's `/paperwork` guide · **Load starter content** copies the code defaults · drives the `wedding_tradition_items` table (code `lib/wedding-traditions.ts` is the fallback + seed source). |
 | Directory | 13 | **Demo vendors** | `/admin/demo-vendors` | Demo vendor management for pre-launch + pilot mode (§ pilot scope per [[project_setnayan_pilot_timeline]]) |
 | Money | 14 | **Payouts** | `/admin/payouts` | Vendor payout dispatch + Maya Bulk Fund Transfer batches (V1.5+) · manual reconciliation · 3-stage milestone tracking for coming_soon vendors (per 2026-05-17 disbursement lock) |
 | Money | 15 | **Pricing** | `/admin/pricing` | Read-only SKU catalog reading `service_catalog` · category + active-state + billing-model filters · stats banner · V1 read-only; edit form + Cost Watch + price-history audit ship V1.x (per 2026-05-22 read-mostly admin pattern) · added 2026-05-23 |

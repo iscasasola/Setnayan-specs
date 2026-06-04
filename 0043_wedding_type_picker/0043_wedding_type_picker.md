@@ -44,6 +44,7 @@ V1.1 ships with **2 faith buckets visible** (Catholic + Civil) and **4 "Coming S
 | `christian` | Born Again / Evangelical / Protestant pastor | Contemporary worship music; generally allows alcohol; flexible dress codes | Umbrella for JIL, CCF, Victory, Baptists, Methodists, etc. |
 | `muslim` | Muslim Imam (Bureau of Muslim Affairs registered) | Halal-only catering; mahr exchange; wali consent; two male Muslim witnesses; gender-separation common; Nikah + Walima | Requires `ceremony_sub_type` for ethno-cultural group |
 | `cultural` | Tribal elder / cultural officiant | Varies by tradition (Igorot, Cordillera, Maranao folk, Manobo, etc.) | Requires `ceremony_sub_type` for specific tradition |
+| `chinese` | Family elders (tea ceremony) + paired-rite officiant | Tea ceremony honoring elders; betrothal gifts (guo da li); Chinese banquet (lauriat); often **paired** with a church/civil rite for the legal marriage (frequently modeled as `mixed`) | Tsinoy / Filipino-Chinese; **activated 2026-06-03** (#885 added coming-soon → #889 active) |
 | `mixed` | Dual officiants | Two ceremony chains, two officiant types, often two venue components | Requires `secondary_ceremony_type` |
 
 ### Axis B — Venue Setting (required)
@@ -375,6 +376,18 @@ These are advisory pre-highlights, surfaced as "We think this might be you — c
 - Consumes: [0001](../0001_creating_guest_list/0001_creating_guest_list.md) (events table base), [0006](../0006_vendors_management/0006_vendors_management.md) (vendors + canonical_services), [0016](../0016_step_by_step_plan_builder/0016_step_by_step_plan_builder.md) (Concierge wizard host), [0021](../0021_couple_dashboard_fully_purchased/0021_couple_dashboard_fully_purchased.md) (couple dashboard event settings host)
 - Provides: `events.ceremony_type` + `events.venue_setting` + `events.ceremony_sub_type` + `events.is_mixed_ceremony` + `events.secondary_ceremony_type` + `wedding_type_launch_status` table + `couple_wedding_type_notify_signups` table + `vendors.compatible_ceremony_types[]` + `vendors.compatible_venue_settings[]`
 - Consumed by: [0044](../0044_per_category_schemas/0044_per_category_schemas.md), [0045](../0045_product_catalogs/0045_product_catalogs.md), [0046](../0046_wedding_showcase/0046_wedding_showcase.md), [0047](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md), [0016](../0016_step_by_step_plan_builder/0016_step_by_step_plan_builder.md) Concierge wizard, [0006](../0006_vendors_management/0006_vendors_management.md) vendor marketplace filtering, [0028](../0028_email_notifications/0028_email_notifications.md) email templates
+
+---
+
+## Per-religion updates — SHIPPED 2026-06-03/04
+
+Three owner-directed changes shipped to code; this section reconciles the spec.
+
+**1. Chinese ceremony type — ACTIVE.** Added 2026-06-03 as the lone coming-soon faith (#885), then activated the same day (#889). Fully selectable: tea ceremony honoring elders + betrothal gifts (guo da li) + Chinese banquet (lauriat), often **paired** with a church/civil rite for the legal marriage. Migration `20260804000000` widened the four ceremony CHECK constraints to permit `chinese`; `20260806000000` flipped its `wedding_type_launch_status` row to `active`.
+
+**2. Per-religion vendor-readiness GATE — wired + admin-controlled (#895).** `wedding_type_launch_status` is now a live admin control at **`/admin/wedding-types`** (see [0023](../0023_admin_console/0023_admin_console.md)): per religion it shows the count of compatible vendors + ceremonial venues (from `compatible_ceremony_types[]` — the officiant/ceremony/food signal) vs an editable threshold, with **Open / Hold (coming-soon) / Disable**. Flipping a religion to coming-soon **greys it (non-selectable) in BOTH the onboarding faith picker AND the create-event picker** — the gate is enforced couple-side (the onboarding faith chips are now data-driven from `wedding_type_launch_status`, with a graceful all-available fallback on read error). Owner intent: "open a religion when its vendors are enough to cater it." All 6 religions currently stay live per the "keep everything live" decision (DECISION_LOG 2026-06-04).
+
+**3. Per-religion traditions GUIDE — on /paperwork, DB-backed + admin-editable (#890 + #898).** Each couple's `/paperwork` page leads with a "What to expect — your {religion} wedding" guide (overview + signature items tagged officiant / ceremony / food / custom, + "confirm with your {officiant}"), companion to the existing per-religion document/deadline engine (`lib/paperwork.ts` `DOCUMENTS_BY_CEREMONY_TYPE`). Content lives in the **`wedding_tradition_items`** table (migration `20260807000000`), edited at **`/admin/wedding-traditions`** (see [0023](../0023_admin_console/0023_admin_console.md)); the code module `lib/wedding-traditions.ts` is the fallback + seed source. ⚠️ The starter content is general guidance pending owner/clergy validation (esp. INC, Muslim, Cultural, Chinese).
 
 ---
 
