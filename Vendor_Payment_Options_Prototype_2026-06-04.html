@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setnayan · Vendor Payment Options Prototype</title>
+<style>
+  :root{
+    --alabaster:#FBFBFA; --obsidian:#1E2229; --gold:#C5A059; --mulberry:#5C2542;
+    --ink:#1E2229; --muted:#6b6f76; --line:#e7e5e1; --card:#ffffff;
+    --good:#2f7d52; --warn:#b4791f; --bad:#9b3030; --soft:#f4f2ee;
+    --shadow:0 1px 2px rgba(30,34,41,.04), 0 8px 24px rgba(30,34,41,.06);
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--alabaster); color:var(--ink); -webkit-font-smoothing:antialiased; line-height:1.45;}
+  .serif{font-family:Georgia,"Times New Roman",serif;}
+  h1,h2,h3{margin:0; font-weight:600; letter-spacing:-.01em;}
+  button{font:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+  input,select{font:inherit;}
+  .wrap{max-width:760px; margin:0 auto; padding:0 20px;}
+
+  /* top bar */
+  .topbar{position:sticky; top:0; z-index:40; background:rgba(251,251,250,.86); backdrop-filter:blur(10px);
+          border-bottom:1px solid var(--line);}
+  .topbar .wrap{display:flex; align-items:center; gap:18px; height:62px; max-width:980px;}
+  .brand{font-family:Georgia,serif; font-weight:600; font-size:21px; letter-spacing:.14em; color:var(--mulberry);}
+  .brand b{color:var(--gold); font-weight:600;}
+  .roles{margin-left:auto; display:flex; gap:6px; background:var(--soft); padding:4px; border-radius:999px;}
+  .roles button{padding:7px 16px; border-radius:999px; font-size:13.5px; color:var(--muted); font-weight:550;}
+  .roles button.on{background:var(--obsidian); color:#fff;}
+  .tag{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); border:1px solid var(--gold);
+       padding:3px 8px; border-radius:999px;}
+
+  .view{display:none; padding:26px 0 90px;}
+  .view.on{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+  .eyebrow{font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .lead{color:var(--muted); font-size:14.5px; margin:4px 0 0;}
+  h1.big{font-size:27px;}
+
+  .ctx{display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; background:var(--card); border:1px solid var(--line);
+       border-radius:var(--r); padding:13px 16px; box-shadow:var(--shadow); margin:18px 0 20px;}
+  .ctx .who{font-family:Georgia,serif; font-size:17px;}
+  .chip{font-size:12.5px; color:var(--muted); display:inline-flex; gap:6px; align-items:center;}
+  .chip b{color:var(--ink); font-weight:600;}
+
+  /* plan segmented control */
+  .planwrap{margin-left:auto; display:flex; align-items:center; gap:9px;}
+  .planwrap .lbl{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted);}
+  .planseg{display:flex; gap:4px; background:var(--soft); padding:4px; border-radius:999px;}
+  .planseg button{padding:6px 13px; border-radius:999px; font-size:12.5px; color:var(--muted); font-weight:600;}
+  .planseg button.on{background:var(--obsidian); color:#fff;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow);}
+  .card .pad{padding:18px;}
+  .badge{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:3px 9px; border-radius:999px;}
+  .b-gold{background:#faf4e8; color:#8a6a26; border:1px solid #ecdcb8;}
+  .b-good{background:#eef6f0; color:var(--good);}
+  .b-mul{background:#f6eef2; color:var(--mulberry);}
+  .b-grey{background:var(--soft); color:var(--muted);}
+  .b-warn{background:#fbf3e3; color:var(--warn);}
+  .b-bad{background:#f8ecec; color:var(--bad);}
+
+  .btn{padding:10px 15px; border-radius:10px; font-size:13.5px; font-weight:600; border:1px solid var(--line); background:#fff; text-align:center; display:inline-flex; align-items:center; gap:7px; justify-content:center;}
+  .btn.primary{background:var(--obsidian); color:#fff; border-color:var(--obsidian);}
+  .btn.gold{background:var(--gold); color:#23170a; border-color:var(--gold);}
+  .btn.block{display:flex; width:100%;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn.sm{padding:7px 12px; font-size:12.5px;}
+  .btn.tiny{padding:5px 10px; font-size:12px; border-radius:8px;}
+
+  /* iOS switch */
+  .sw{width:40px; height:23px; border-radius:999px; background:#d6d2ca; position:relative; transition:.2s; flex:0 0 auto;}
+  .sw.on{background:var(--good);}
+  .sw::after{content:''; position:absolute; top:2px; left:2px; width:19px; height:19px; border-radius:50%; background:#fff; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .sw.on::after{left:19px;}
+
+  /* payment-method card (vendor) */
+  .pm{display:flex; gap:13px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:15px; box-shadow:var(--shadow); margin-bottom:11px; position:relative; overflow:hidden;}
+  .pm .ic{width:44px; height:44px; border-radius:11px; background:var(--soft); display:flex; align-items:center; justify-content:center; font-size:20px; flex:0 0 auto;}
+  .pm .body{flex:1; min-width:0;}
+  .pm .nm{font-size:14.5px; font-weight:600; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .pm .dt{font-size:13px; color:var(--ink); margin-top:3px; word-break:break-all;}
+  .pm .nt{font-size:12px; color:var(--muted); margin-top:5px;}
+  .pm .row{display:flex; align-items:center; gap:14px; margin-top:12px; flex-wrap:wrap;}
+  .pm .row .lk{font-size:12px; color:var(--mulberry); font-weight:600;}
+  .pm .row .swlbl{font-size:12px; color:var(--muted); display:flex; align-items:center; gap:8px; cursor:pointer;}
+  .pm.locked .ic,.pm.locked .nm,.pm.locked .dt,.pm.locked .nt{opacity:.45;}
+  .lockbar{margin-top:12px; background:#faf6ee; border:1px dashed #e3cf9f; border-radius:10px; padding:10px 12px; font-size:12.5px; color:#7a5d23; display:flex; align-items:center; gap:10px;}
+  .lockbar b{color:#6b4f17;}
+
+  .star{font-size:16px; line-height:1; cursor:pointer; color:#d2cdc4;}
+  .star.on{color:var(--gold);}
+
+  /* add composer */
+  .adder{border:1px dashed #cfcabf; border-radius:12px; padding:16px; margin-top:6px;}
+  .types{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:4px 0 0;}
+  .type{border:1px solid var(--line); border-radius:12px; padding:14px 10px; text-align:center; cursor:pointer; background:#fff; transition:.15s; position:relative;}
+  .type:hover{border-color:#cfc7b6;}
+  .type.on{border-color:var(--gold); box-shadow:0 0 0 2px #f1e4c6 inset; background:#fffdf8;}
+  .type.lock{cursor:not-allowed; background:var(--soft);}
+  .type .ico{font-size:23px;}
+  .type .nm{font-size:13px; font-weight:600; margin-top:7px;}
+  .type .meta{font-size:10.5px; color:var(--muted); margin-top:3px;}
+  .type .prochip{position:absolute; top:7px; right:7px; font-size:9px; letter-spacing:.08em; text-transform:uppercase; background:#faf4e8; color:#8a6a26; border:1px solid #ecdcb8; padding:1px 6px; border-radius:999px;}
+
+  .fields{margin-top:16px; display:none;}
+  .fields.on{display:block; animation:fade .2s ease;}
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:5px; font-weight:600;}
+  .field input,.field select{width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--ink);}
+  .field .hint{font-size:11.5px; color:var(--muted); margin-top:5px;}
+  .field .hint.ok{color:var(--good);}
+  .allow{font-size:11.5px; color:var(--muted); margin-top:6px; background:var(--soft); border-radius:8px; padding:8px 10px;}
+  .allow b{color:var(--ink);}
+
+  .upsell{background:linear-gradient(135deg,#fbf6ec,#f7efdd); border:1px solid #ecdcb8; border-radius:12px; padding:16px; text-align:center;}
+  .upsell h3{font-family:Georgia,serif; font-size:17px; color:#6b4f17;}
+  .upsell p{font-size:12.5px; color:#7a5d23; margin:6px 0 12px;}
+
+  /* customer settlement */
+  .due{background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:18px; margin-bottom:16px;}
+  .due .amt{font-family:Georgia,serif; font-size:30px; color:var(--mulberry);}
+  .due .meta{font-size:12.5px; color:var(--muted); margin-top:2px;}
+  .progress{height:7px; border-radius:999px; background:var(--soft); margin:13px 0 6px; overflow:hidden;}
+  .progress i{display:block; height:100%; background:var(--gold); width:50%;}
+  .disclose{display:flex; gap:10px; background:#faf6ee; border:1px dashed #e3cf9f; border-radius:12px; padding:12px 14px; font-size:12.5px; color:#7a5d23; margin:14px 0;}
+  .disclose b{color:#6b4f17;}
+  .disclose .q{margin-left:auto; color:#8a6a26; font-weight:600; cursor:pointer; white-space:nowrap;}
+
+  .rail{border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; background:#fff;}
+  .rail.alt{background:var(--soft); border-style:dashed;}
+  .rail .rh{display:flex; align-items:center; gap:9px; margin-bottom:4px;}
+  .rail .rh h3{font-size:15px;}
+  .rail .rsub{font-size:12px; color:var(--muted); margin-bottom:12px;}
+  .feefree{font-size:11px; font-weight:600; color:var(--good); background:#eef6f0; padding:2px 8px; border-radius:999px;}
+  .feepct{font-size:11px; font-weight:600; color:var(--warn); background:#fbf3e3; padding:2px 8px; border-radius:999px;}
+
+  .payopt{display:flex; gap:12px; align-items:center; border:1px solid var(--line); border-radius:11px; padding:13px; margin-bottom:9px; background:#fff;}
+  .payopt .ic{width:40px; height:40px; border-radius:10px; background:var(--soft); display:flex; align-items:center; justify-content:center; font-size:18px; flex:0 0 auto;}
+  .payopt .body{flex:1; min-width:0;}
+  .payopt .t{font-size:13.5px; font-weight:600;}
+  .payopt .s{font-size:12px; color:var(--muted); margin-top:1px; word-break:break-all;}
+  .decoded{display:inline-flex; gap:5px; align-items:center; font-size:11px; color:var(--good); background:#eef6f0; border-radius:999px; padding:2px 8px; margin-top:4px;}
+
+  .cpy{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px dashed var(--line); font-size:13.5px;}
+  .cpy:last-child{border-bottom:none;}
+  .cpy .k{color:var(--muted); width:110px; flex:0 0 auto; font-size:12px;}
+  .cpy .v{font-weight:600; word-break:break-all;}
+  .cpy button{margin-left:auto; flex:0 0 auto;}
+
+  .payline{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--line); font-size:14px;}
+  .payline.total{border-bottom:none; font-weight:700;}
+  .upload{border:2px dashed #d8d4cc; border-radius:12px; padding:22px; text-align:center; color:var(--muted); font-size:13.5px; margin-top:8px; cursor:pointer;}
+  .upload.done{border-style:solid; border-color:var(--good); color:var(--good); background:#f3f8f4;}
+
+  /* admin */
+  .arow{display:flex; gap:13px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:15px; box-shadow:var(--shadow); margin-bottom:11px;}
+  .arow.flag{border-left:3px solid var(--bad);}
+  .arow .ic{width:42px; height:42px; border-radius:10px; background:var(--soft); display:flex; align-items:center; justify-content:center; font-size:19px; flex:0 0 auto;}
+  .arow .body{flex:1; min-width:0;}
+  .arow .t{font-size:14px; font-weight:600;}
+  .arow .s{font-size:12.5px; color:var(--muted); margin-top:3px; word-break:break-all;}
+  .arow .acts{display:flex; gap:7px; margin-top:11px; flex-wrap:wrap;}
+
+  .secthead{display:flex; align-items:center; gap:10px; margin:24px 0 12px;}
+  .secthead h2{font-family:Georgia,serif; font-size:19px;}
+  .sectsub{font-size:12.5px; color:var(--muted); margin:-4px 0 14px;}
+
+  /* modal */
+  .scrim{position:fixed; inset:0; background:rgba(30,34,41,.46); display:none; align-items:center; justify-content:center; z-index:60; padding:20px;}
+  .scrim.on{display:flex;}
+  .modal{background:#fff; border-radius:18px; max-width:400px; width:100%; padding:24px; box-shadow:0 24px 60px rgba(0,0,0,.25); animation:fade .2s ease;}
+  .modal h3{font-family:Georgia,serif; font-size:20px;}
+  .modal p{font-size:13px; color:var(--muted); margin:9px 0;}
+  .urlbox{background:var(--soft); border:1px solid var(--line); border-radius:10px; padding:12px 13px; font-size:13.5px; font-weight:600; word-break:break-all; margin:13px 0; display:flex; align-items:center; gap:9px;}
+  .modal .leave-note{font-size:12px; color:#7a5d23; background:#faf6ee; border:1px dashed #e3cf9f; border-radius:10px; padding:10px 12px;}
+  .modal .acts{display:flex; gap:9px; margin-top:18px;}
+  .qrbox{display:flex; flex-direction:column; align-items:center; gap:12px; margin:6px 0 2px;}
+  .qr{width:188px; height:188px; padding:12px; background:#fff; border:1px solid var(--line); border-radius:12px;}
+
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--obsidian); color:#fff;
+         padding:12px 18px; border-radius:12px; font-size:13.5px; opacity:0; pointer-events:none; transition:.3s; z-index:80; box-shadow:0 12px 30px rgba(0,0,0,.25); max-width:90vw; text-align:center;}
+  .toast.on{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .legend{font-size:12px; color:var(--muted); margin-top:34px; border-top:1px solid var(--line); padding-top:16px;}
+  .legend b{color:var(--ink);}
+  .legend code{background:var(--soft); padding:1px 6px; border-radius:5px; font-size:11.5px;}
+  .hide{display:none!important;}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <div class="brand">SET<b>·</b>NAYAN</div>
+  <span class="tag">Payment options prototype</span>
+  <div class="roles">
+    <button data-role="vend" class="on" onclick="setRole('vend')">Vendor</button>
+    <button data-role="cust" onclick="setRole('cust')">Customer</button>
+    <button data-role="adm" onclick="setRole('adm')">Admin</button>
+  </div>
+</div></div>
+
+<!-- ============================ VENDOR ============================ -->
+<section class="view on" id="vend"><div class="wrap">
+  <div class="eyebrow">Vendor dashboard · Payments</div>
+  <h1 class="serif big">How clients pay you</h1>
+  <p class="lead">Add the ways couples can pay you <b>directly</b>. Setnayan takes <b>0%</b> and never touches this money — these details show on the client's payment screen the moment they book you.</p>
+
+  <div class="ctx">
+    <span class="who">Maria Santos Photography</span>
+    <span class="chip">📍 <b>Tagaytay</b></span>
+    <span class="chip">📸 <b>Photo &amp; Video</b></span>
+    <div class="planwrap">
+      <span class="lbl">Simulate plan</span>
+      <div class="planseg" id="planseg">
+        <button data-plan="free" onclick="setPlan('free')">Free</button>
+        <button data-plan="pro" class="on" onclick="setPlan('pro')">Pro</button>
+        <button data-plan="ent" onclick="setPlan('ent')">Enterprise</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pmlist"></div>
+
+  <button class="btn block" id="addBtn" style="margin-top:4px;" onclick="toggleAdder()">＋ Add payment option</button>
+
+  <div class="adder hide" id="adder">
+    <div style="font-size:13px; font-weight:600; margin-bottom:10px;">What kind of payment option?</div>
+    <div class="types">
+      <div class="type" id="t-bank" onclick="pickType('bank')">
+        <div class="ico">🏦</div><div class="nm">Bank / e-wallet</div><div class="meta">Account details</div>
+      </div>
+      <div class="type" id="t-qr" onclick="pickType('qr')">
+        <div class="ico">▦</div><div class="nm">QR code</div><div class="meta">Upload an image</div>
+      </div>
+      <div class="type" id="t-link" onclick="pickType('link')">
+        <div class="prochip" id="linkProchip">Pro</div>
+        <div class="ico">🔗</div><div class="nm">Payment link</div><div class="meta">One-tap checkout</div>
+      </div>
+    </div>
+
+    <!-- bank fields -->
+    <div class="fields" id="f-bank">
+      <div class="field"><label>Provider</label>
+        <select><option>BDO — Bank transfer</option><option>GCash</option><option>Maya</option><option>BPI</option><option>UnionBank</option><option>Metrobank</option></select>
+      </div>
+      <div class="field"><label>Account name</label><input value="Maria Santos" /></div>
+      <div class="field"><label>Account number / mobile</label><input placeholder="e.g. 0917 555 1234 or 1234-5678" /></div>
+      <div class="field"><label>Note to client (optional)</label><input placeholder="e.g. 50% downpayment to confirm the date" /></div>
+      <button class="btn primary block" onclick="saveOption()">Save payment option</button>
+    </div>
+
+    <!-- qr fields -->
+    <div class="fields" id="f-qr">
+      <div class="field"><label>Upload your payment QR</label>
+        <div class="upload" onclick="this.classList.add('done'); this.textContent='✓ gcash-qr.png — Setnayan will decode the destination';">⬆ Tap to upload a QR image (PNG/JPG)</div>
+      </div>
+      <div class="allow">🔍 <b>We decode every QR</b> server-side and show the client exactly where it sends money — so a wrong or swapped QR can't slip through.</div>
+      <div class="field" style="margin-top:12px;"><label>Caption (optional)</label><input placeholder="e.g. Scan with GCash or any QR Ph app" /></div>
+      <button class="btn primary block" onclick="saveOption()">Save payment option</button>
+    </div>
+
+    <!-- link fields -->
+    <div class="fields" id="f-link">
+      <div class="field"><label>Your payment link</label><input id="linkInput" placeholder="https://maya.me/yourname" oninput="checkDomain(this.value)" /></div>
+      <div class="hint" id="linkHint">Use your own checkout — Maya, PayPal, Stripe, GCash, or your bank's pay-link.</div>
+      <div class="allow" id="linkAllow">✅ <b>Allowed domains</b>: maya.me · paypal.me · stripe.com · gcash.com · bpi.com.ph · qrph.* — links elsewhere are held for a quick admin review. URL shorteners (bit.ly, etc.) are blocked.</div>
+      <div class="field" style="margin-top:12px;"><label>Note to client (optional)</label><input placeholder="e.g. Card or e-wallet, instant confirmation" /></div>
+      <button class="btn primary block" onclick="saveOption()">Save payment link</button>
+    </div>
+
+    <!-- link upsell (free tier) -->
+    <div class="fields" id="f-linklock">
+      <div class="upsell">
+        <h3>🔗 Payment links are a Pro &amp; Enterprise feature</h3>
+        <p>One-tap links are the most-abused payment surface, so we reserve them for paid, accountable tiers. QR codes and bank details stay free for everyone.</p>
+        <button class="btn gold" onclick="setPlan('pro'); toast('Switched to Pro — payment links unlocked')">Upgrade to Pro · ₱2,499 / 28d</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <b>What this screen does:</b> stores the vendor's own payment destinations as <code>vendor_payment_methods</code> rows. Nothing here moves money — it's a notice board the client reads. <b>Plan gate:</b> flip <i>Simulate plan</i> to <b>Free</b> and the payment-<i>link</i> option locks (QR + bank stay open) — and the link also vanishes from the Customer screen. That's the owner-locked <b>links = Pro &amp; Enterprise only</b> rule, end to end.
+  </div>
+</div></section>
+
+<!-- ============================ CUSTOMER ============================ -->
+<section class="view" id="cust"><div class="wrap">
+  <div class="eyebrow">Maria &amp; Jio · Budget · Maria Santos Photography</div>
+  <h1 class="serif big">Settle your downpayment</h1>
+
+  <div class="due">
+    <div class="amt">₱25,000</div>
+    <div class="meta">Downpayment · 50% of ₱50,000 package · due to confirm Dec 12, 2026</div>
+    <div class="progress"><i></i></div>
+    <div class="meta">₱25,000 paid · ₱25,000 remaining</div>
+  </div>
+
+  <!-- DIRECT RAIL -->
+  <div class="rail">
+    <div class="rh"><h3>Pay Maria Santos directly</h3><span class="feefree">0% fee</span></div>
+    <div class="rsub">Choose any option below. The money goes straight to the vendor.</div>
+
+    <div class="disclose">
+      <span>🔒</span>
+      <div><b>Setnayan doesn't control or hold payments to vendors.</b> You're paying Maria Santos Photography directly — confirm these details are really theirs before you send, and only pay vendors you trust. Setnayan can't reverse or mediate an off-platform payment.</div>
+      <span class="q" onclick="toast('Off-platform by design — keeps your fee at ₱0. Setnayan only stores a copy of your proof for your records, and never touches the money (RA 11967).')">Why?</span>
+    </div>
+
+    <div id="custMethods"></div>
+  </div>
+
+  <!-- SETNAYAN PAY RAIL -->
+  <div class="rail alt">
+    <div class="rh"><h3>Or pay through Setnayan</h3><span class="feepct">+3% = ₱750</span></div>
+    <div class="rsub">We collect into Setnayan's account and release to the vendor. Available because Maria Santos is <b>Verified</b>. Adds a convenience fee.</div>
+    <div class="payline"><span>Downpayment</span><span>₱25,000</span></div>
+    <div class="payline"><span>Setnayan Pay convenience fee (3%)</span><span>₱750</span></div>
+    <div class="payline total"><span>You pay</span><span>₱25,750</span></div>
+    <button class="btn block" style="margin-top:12px;" onclick="toast('Setnayan Pay flow → BDO / GCash QR into Setnayan, admin reconciles (existing 0034 path)')">Pay ₱25,750 via Setnayan</button>
+  </div>
+
+  <!-- mark paid -->
+  <div class="secthead"><h2 class="serif">Already paid?</h2></div>
+  <div class="sectsub">Upload your receipt so it's logged to your budget and Maria Santos is notified.</div>
+  <div class="upload" id="proof" onclick="this.classList.add('done'); this.textContent='✓ receipt-screenshot.png attached';">⬆ Tap to upload your payment receipt</div>
+  <button class="btn primary block" style="margin-top:12px;" onclick="recordPaid()">Mark ₱25,000 as paid</button>
+
+  <div class="legend">
+    <b>What this screen does:</b> renders the vendor's <i>published</i> payment options for the booked service, lets the couple pay <b>off-platform</b>, and records proof into the budget ledger (0007). The <b>two rails</b> map to the existing <code>vendor_bookings.payment_routing</code> switch (<code>direct</code> ↔ <code>setnayan_pay</code>). Switch the vendor's plan to <b>Free</b> on the Vendor tab — the Maya link disappears here too.
+  </div>
+</div></section>
+
+<!-- ============================ ADMIN ============================ -->
+<section class="view" id="adm"><div class="wrap">
+  <div class="eyebrow">Admin · Trust &amp; Safety</div>
+  <h1 class="serif big">Payment option review</h1>
+  <p class="lead">Setnayan never touches vendor↔couple money — but because we <i>display</i> these destinations, we screen links &amp; QRs for fraud. Decoded destination + domain is shown for every entry.</p>
+
+  <div class="secthead"><h2 class="serif">Needs review</h2></div>
+  <div class="arow flag">
+    <div class="ic">🔗</div>
+    <div class="body">
+      <div class="t">Payment link · <span class="badge b-grey">Verde Catering</span> <span class="badge b-bad">held</span></div>
+      <div class="s">Destination: <b>bit.ly/verde-pay-now</b> — ⚠ URL shortener, not on the allowlist, true target hidden.</div>
+      <div class="acts">
+        <button class="btn tiny" onclick="toast('Opened resolved destination in sandbox')">Resolve &amp; preview</button>
+        <button class="btn tiny primary" onclick="toast('Removed — vendor asked to paste a direct provider link')">Remove &amp; notify</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="secthead"><h2 class="serif">Cleared</h2></div>
+  <div class="arow">
+    <div class="ic">🔗</div>
+    <div class="body">
+      <div class="t">Payment link · <span class="badge b-grey">Maria Santos Photography</span> <span class="badge b-gold">Pro</span></div>
+      <div class="s">Destination: <b>maya.me/mariasantos</b> · domain <b>maya.me</b> ✓ on allowlist · published 2026-06-03.</div>
+      <div class="acts">
+        <button class="btn tiny" onclick="toast('Link disabled pending vendor contact')">Disable</button>
+      </div>
+    </div>
+  </div>
+  <div class="arow">
+    <div class="ic">▦</div>
+    <div class="body">
+      <div class="t">QR code · <span class="badge b-grey">Maria Santos Photography</span></div>
+      <div class="s">Decoded: <b>GCash · 0917 555 1234 · Maria Santos</b> ✓ valid QR Ph payload · matches the bank detail on file.</div>
+      <div class="acts">
+        <button class="btn tiny" onclick="toast('QR disabled pending vendor contact')">Disable</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <b>What this screen does:</b> the governance leg. Free/Verified vendors can publish QR + bank details; <b>payment links are Pro &amp; Enterprise only</b>, and every link/QR is decoded so a swapped destination is visible before a couple ever sees it. <b>Liability posture:</b> intermediary / non-party publisher — display + store-a-copy, never process — keeping the RA 11967 line intact (PH counsel owns the final word).
+  </div>
+</div></section>
+
+<!-- leaving-Setnayan interstitial -->
+<div class="scrim" id="leaveScrim">
+  <div class="modal">
+    <h3>You're leaving Setnayan</h3>
+    <p>You'll be taken to the vendor's own payment page:</p>
+    <div class="urlbox"><span>🔗</span><span id="leaveUrl">https://maya.me/mariasantos</span></div>
+    <div class="leave-note"><b>Setnayan doesn't control this payment.</b> You're paying Maria Santos Photography directly — make sure the address above is really theirs. Setnayan can't recover money sent to the wrong place.</div>
+    <div class="acts">
+      <button class="btn block" onclick="closeScrim('leaveScrim')">Cancel</button>
+      <button class="btn primary block" onclick="closeScrim('leaveScrim'); toast('Opened maya.me/mariasantos in a new tab')">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR modal -->
+<div class="scrim" id="qrScrim">
+  <div class="modal">
+    <h3>Scan to pay</h3>
+    <div class="qrbox">
+      <svg class="qr" id="qrSvg" viewBox="0 0 29 29" shape-rendering="crispEdges" aria-label="payment QR code"></svg>
+      <span class="decoded">✓ Decoded by Setnayan · GCash · 0917 555 1234 · Maria Santos</span>
+    </div>
+    <p style="text-align:center;">We read this QR for you so you can confirm where it sends money before you scan.</p>
+    <button class="btn block" onclick="closeScrim('qrScrim')">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ---------- role switching ---------- */
+  function setRole(r){
+    document.querySelectorAll('.roles button').forEach(b=>b.classList.toggle('on', b.dataset.role===r));
+    document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id===r));
+    window.scrollTo({top:0});
+  }
+
+  /* ---------- vendor plan + payment methods ---------- */
+  let plan = 'pro';                       // free | pro | ent
+  const linkAllowed = () => plan==='pro' || plan==='ent';
+
+  let methods = [
+    {id:'m1', type:'bank', icon:'🏦', nm:'BDO · Bank transfer', dt:'Maria Santos · ****4521', nt:'Full payment or 50% downpayment to confirm the date', primary:true,  shown:true},
+    {id:'m2', type:'qr',   icon:'▦',  nm:'GCash QR',            dt:'0917 555 1234 · Maria Santos', decoded:'GCash · 0917 555 1234', nt:'Scan with GCash or any QR Ph app', primary:false, shown:true},
+    {id:'m3', type:'link', icon:'🔗', nm:'Maya payment link',   dt:'maya.me/mariasantos', nt:'Card or e-wallet · instant confirmation', primary:false, shown:true},
+  ];
+
+  function setPlan(p){
+    plan = p;
+    document.querySelectorAll('#planseg button').forEach(b=>b.classList.toggle('on', b.dataset.plan===p));
+    document.getElementById('linkProchip').textContent = p==='ent' ? 'Enterprise' : 'Pro';
+    renderMethods(); renderCustomer();
+    // keep composer honest if it's open on the link tab
+    if(!linkAllowed() && currentType==='link') pickType('link');
+  }
+
+  function renderMethods(){
+    const host = document.getElementById('pmlist');
+    host.innerHTML = '';
+    methods.forEach(m=>{
+      const lockedLink = (m.type==='link' && !linkAllowed());
+      const el = document.createElement('div');
+      el.className = 'pm' + (lockedLink ? ' locked' : '');
+      el.innerHTML = `
+        <div class="ic">${m.icon}</div>
+        <div class="body">
+          <div class="nm">${m.nm}
+            ${m.primary ? '<span class="badge b-gold">★ Primary</span>' : ''}
+            ${m.type==='link' ? '<span class="badge b-mul">Pro feature</span>' : ''}
+          </div>
+          <div class="dt">${m.dt}</div>
+          <div class="nt">${m.nt}</div>
+          ${ lockedLink ? `
+            <div class="lockbar">🔒 <div><b>Hidden from clients.</b> Payment links need Pro or Enterprise. <a onclick="setPlan('pro')" style="color:#6b4f17;font-weight:700;cursor:pointer;text-decoration:underline">Upgrade</a> to show it.</div></div>
+          ` : `
+            <div class="row">
+              <span class="star ${m.primary?'on':''}" title="Make primary" onclick="makePrimary('${m.id}')">★</span>
+              <label class="swlbl">Show to clients <span class="sw ${m.shown?'on':''}" onclick="toggleShown('${m.id}',event)"></span></label>
+              <span class="lk" style="cursor:pointer" onclick="toast('Edit ${m.nm}')">Edit</span>
+              <span class="lk" style="cursor:pointer;color:var(--bad)" onclick="delOption('${m.id}')">Delete</span>
+            </div>
+          `}
+        </div>`;
+      host.appendChild(el);
+    });
+  }
+  function makePrimary(id){ methods.forEach(m=>m.primary = m.id===id); renderMethods(); toast('Set as primary'); }
+  function toggleShown(id,e){ e.stopPropagation(); const m=methods.find(x=>x.id===id); m.shown=!m.shown; renderMethods(); renderCustomer(); }
+  function delOption(id){ methods = methods.filter(m=>m.id!==id); renderMethods(); renderCustomer(); toast('Payment option removed'); }
+
+  /* ---------- add composer ---------- */
+  let currentType = null;
+  function toggleAdder(){
+    const a = document.getElementById('adder');
+    a.classList.toggle('hide');
+    if(!a.classList.contains('hide')){ currentType=null; ['bank','qr','link','linklock'].forEach(t=>document.getElementById('f-'+t).classList.remove('on')); document.querySelectorAll('.type').forEach(t=>t.classList.remove('on')); }
+  }
+  function pickType(t){
+    currentType = t;
+    document.querySelectorAll('.type').forEach(x=>x.classList.remove('on'));
+    document.getElementById('t-'+t).classList.add('on');
+    ['bank','qr','link','linklock'].forEach(x=>document.getElementById('f-'+x).classList.remove('on'));
+    const linkTile = document.getElementById('t-link');
+    if(t==='link'){
+      if(linkAllowed()){ document.getElementById('f-link').classList.add('on'); linkTile.classList.remove('lock'); }
+      else { document.getElementById('f-linklock').classList.add('on'); linkTile.classList.add('lock'); }
+    } else {
+      document.getElementById('f-'+t).classList.add('on');
+    }
+  }
+  function checkDomain(v){
+    const hint = document.getElementById('linkHint');
+    const ok = /(maya\.me|paypal\.me|stripe\.com|gcash\.com|bpi\.com\.ph|qrph)/i.test(v);
+    const short = /(bit\.ly|tinyurl|cutt\.ly|t\.co|is\.gd)/i.test(v);
+    if(!v){ hint.className='hint'; hint.textContent='Use your own checkout — Maya, PayPal, Stripe, GCash, or your bank\'s pay-link.'; return; }
+    if(short){ hint.className='hint'; hint.style.color='var(--bad)'; hint.textContent='⚠ URL shorteners are blocked — paste your provider\'s real link.'; return; }
+    if(ok){ hint.className='hint ok'; hint.style.color=''; hint.textContent='✓ Recognised provider — publishes instantly.'; }
+    else { hint.className='hint'; hint.style.color='var(--warn)'; hint.textContent='Unknown domain — will publish after a quick admin review.'; }
+  }
+  function saveOption(){ toggleAdder(); toast('Payment option saved — now live on the client\'s payment screen'); }
+
+  /* ---------- customer settlement ---------- */
+  function renderCustomer(){
+    const host = document.getElementById('custMethods');
+    host.innerHTML = '';
+    const visible = methods.filter(m => m.shown && (m.type!=='link' || linkAllowed()));
+    if(!visible.length){ host.innerHTML = '<div class="rsub">This vendor hasn\'t published a direct payment option yet — message them in chat.</div>'; return; }
+    visible.forEach(m=>{
+      if(m.type==='bank'){
+        host.innerHTML += `
+          <div class="payopt" style="display:block">
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+              <div class="ic">🏦</div>
+              <div class="body"><div class="t">${m.nm} ${m.primary?'<span class="badge b-gold">★</span>':''}</div><div class="s">${m.nt}</div></div>
+            </div>
+            <div class="cpy"><span class="k">Account name</span><span class="v">Maria Santos</span><button class="btn tiny" onclick="copyT('Maria Santos')">Copy</button></div>
+            <div class="cpy"><span class="k">Account no.</span><span class="v">0012 3456 4521</span><button class="btn tiny" onclick="copyT('0012 3456 4521')">Copy</button></div>
+            <div class="cpy"><span class="k">Bank</span><span class="v">BDO Unibank</span><button class="btn tiny" onclick="copyT('BDO Unibank')">Copy</button></div>
+          </div>`;
+      } else if(m.type==='qr'){
+        host.innerHTML += `
+          <div class="payopt">
+            <div class="ic">▦</div>
+            <div class="body"><div class="t">${m.nm}</div><div class="s">${m.nt}</div><span class="decoded">✓ Decoded · GCash · 0917 555 1234</span></div>
+            <button class="btn sm" onclick="openQR()">Show QR</button>
+          </div>`;
+      } else if(m.type==='link'){
+        host.innerHTML += `
+          <div class="payopt">
+            <div class="ic">🔗</div>
+            <div class="body"><div class="t">${m.nm}</div><div class="s">${m.dt}</div></div>
+            <button class="btn sm primary" onclick="openLeave('https://maya.me/mariasantos')">Pay</button>
+          </div>`;
+      }
+    });
+  }
+  function copyT(t){ try{ navigator.clipboard && navigator.clipboard.writeText(t); }catch(e){} toast('Copied: '+t); }
+  function recordPaid(){
+    const proof = document.getElementById('proof');
+    if(!proof.classList.contains('done')){ toast('Upload your receipt first'); return; }
+    toast('₱25,000 logged to your budget · Maria Santos has been notified');
+  }
+
+  /* ---------- modals ---------- */
+  function openLeave(url){ document.getElementById('leaveUrl').textContent=url; document.getElementById('leaveScrim').classList.add('on'); }
+  function openQR(){ document.getElementById('qrScrim').classList.add('on'); }
+  function closeScrim(id){ document.getElementById(id).classList.remove('on'); }
+  document.querySelectorAll('.scrim').forEach(s=>s.addEventListener('click',e=>{ if(e.target===s) s.classList.remove('on'); }));
+
+  /* ---------- toast ---------- */
+  let tT;
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('on'),2600); }
+
+  /* ---------- decorative QR (deterministic, no external image) ---------- */
+  function buildQR(){
+    const N=29, svg=document.getElementById('qrSvg'); let rects='';
+    const finder=(x,y)=>{ for(let i=0;i<7;i++)for(let j=0;j<7;j++){ const edge=(i===0||i===6||j===0||j===6); const core=(i>=2&&i<=4&&j>=2&&j<=4); if(edge||core) rects+=`<rect x="${x+j}" y="${y+i}" width="1" height="1"/>`; } };
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+      const inFinder=(x<8&&y<8)||(x>N-9&&y<8)||(x<8&&y>N-9);
+      if(inFinder) continue;
+      if(((x*7 + y*13 + x*y) % 3)===0) rects+=`<rect x="${x}" y="${y}" width="1" height="1"/>`;
+    }
+    finder(0,0); finder(N-7,0); finder(0,N-7);
+    svg.innerHTML = `<rect width="${N}" height="${N}" fill="#fff"/><g fill="#1E2229">${rects}</g>`;
+  }
+
+  /* ---------- init ---------- */
+  renderMethods(); renderCustomer(); buildQR();
+</script>
+</body>
+</html>

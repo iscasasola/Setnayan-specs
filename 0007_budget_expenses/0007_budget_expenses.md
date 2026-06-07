@@ -1,5 +1,15 @@
 # Iteration 0007 — Budget & Expenses
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Commission is 0% — "0% commission, ever."** Any "Setnayan Pay 3% convenience fee" / Setnayan-Pay-processed-vendor-booking language in this body is RETIRED. The budget surface settles vendor money **off-platform**: `app/dashboard/[eventId]/budget/page.tsx` resolves each finalized vendor's published payment methods into a `VendorDirectPay` rail with a vigilance disclosure ("Setnayan does not control or hold payments to vendors"). Setnayan never holds or charges the money.
+> - **0003 token wallet is RETIRED.** This spec's "Setnayan platform costs auto-populate from the 0003 wallet `WalletSpend`" mechanism does not exist — platform SKUs are paid via 0034 apply-then-pay (`orders`/`payments`), not a wallet. The "WalletSpend read-only consumer" section is dead.
+> - **Ledger SHIPPED:** off-platform vendor payment log (`logPayment` → `event_vendor_payments`, with optional `proof_r2_key` receipt upload), the per-vendor line items, rollup, and direct-pay rail (PR #969) are live.
+> - **Allocation engine SHIPPED (2026-06-05, PRs #996/#1000)** atop the ledger: `lib/budget-allocation.ts` + couple "Suggested budget split" (peso-pin tilt sheet, Cushion/shortfall readouts, confidence chips) + Layer-1 behavioral capture (`budget_allocation_decisions`, RLS couple-own, RA 10173 erasable). See the appended 2026-06-05 amendment near the bottom — that part is current.
+> - **Today's Focus ₱1,499** (not "Setnayan Concierge ₱4,999") is the planner SKU, if the body references the concierge.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0007
 **Topic:** Couple's wedding budget tracker — vendor payment ledger
 **Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: Vendors** (sub-section: Budget) · URL: `setnayan.com/dashboard/[event-id]/budget`
@@ -364,3 +374,51 @@ Existing budget CSV export gains a `paid_by_role` column. Couples exporting for 
 ### Forward-compat
 
 V1.1 single-couple events backfill with `paid_by_role: ['bride', 'groom']` (joint attribution) on existing budget lines. UI hides the per-payer view if the event has only `bride` + `groom` moderators (no real multi-payer to show).
+
+---
+
+## Vendor direct-pay settlement rail (added 2026-06-04)
+
+> Shipped 2026-06-04 (PR #969). On each booked vendor's budget card, a `VendorDirectPay` rail shows that vendor's published payment options so the couple can pay **directly, off-platform**. Canonical spec + schema: **0034 -> "Vendor Payment Options — off-platform direct rail"**.
+>
+> Couple-side specifics: an always-on **vigilance disclosure** ("Setnayan doesn't control or hold payments to vendors... confirm the details are theirs, only pay vendors you trust, Setnayan can't reverse an off-platform payment"); copyable bank details; a QR modal showing the decoded destination; a "you're leaving Setnayan" interstitial before any payment link. The existing payment log (`event_vendor_payments` via `logPayment`) gains an optional **receipt upload** (`proof_r2_key`). Methods are fetched server-side per booked vendor (couples never query the vendor's payment table directly).
+
+---
+
+## Budget Planner — Allocation Engine + Behavioral Capture (added 2026-06-05)
+
+> **This iteration is the PRIMARY HOME for the budget *allocation* layer.** Full design: `Budget_Planner_Allocation_Engine_2026-06-05.md` (corpus root) · `DECISION_LOG.md` 2026-06-05. Privacy/consent details (RA 10173 opt-out + erasure for the behavioral layer) live in **0025**; admin weight/benchmark tuning + the two-admin data-export gate live in **0023**. A NEW V1.x capability — design locked this session.
+
+**Allocation sits ATOP this iteration's existing ledger.** Everything above tracks what *booked* vendors **actually** cost. The allocation layer answers a different question — *what should each service cost?* — **recommended BEFORE the couple picks anyone.** Tracking = actuals; allocation = a pre-pick ₱ target + range per service. The two never replace each other; `lib/budget.ts` + the V2.x plan/budget tab stay the tracking layer.
+
+### Spine — median → proportion → ₱ target
+
+For the set of service **leaves** the couple selects: `weight_L = median(solo prices on leaf L)` → `share_L = weight_L / Σ weights` → `₱target_L = share_L × budget`. One leaf selected = 100% of budget (owner's ₱1M base case: budget ₱1M, reception venue only → ₱1M target). Adding services re-normalizes every share **down**; dropping services grows the rest.
+
+### Median rule (LOCKED) — solo single-leaf prices only
+
+The median is built **only** from `vendor_services.starting_price_php` rows where one row = one `canonical_service` priced standalone. **Bundles are EXCLUDED:** `vendor_packages` / `vendor_package_items` carry multiple services under one price ("the service has links to other services") — even an item's `replacement_value_centavos` is excluded (intra-bundle accounting, not a standalone market price). Including a ₱500k all-in package would poison the leaf's median upward and distort every downstream share. **Forward-flag:** the finer "linked-services-on-card" concept ([[project_setnayan_booking_ruleset]]) is not a schema field yet — when linked cards ship, a **solo-vs-linked marker on `vendor_services`** is needed so the median filter drops those too. Until then "exclude bundles" fully covers the rule.
+
+### Refinement tiers (same spine)
+
+- **Tier 1 — correctness (non-optional):** (1) **Market-scoped median** computed over eligible vendors via the *same* matcher **GATE** (region · venue type · pax band · ceremony — `Customer_Vendor_Marketplace_Architecture` §2; [[project_setnayan_leaf_match_contract]]). One eligibility definition, two consumers — **reuse the gate; don't fork it.** (2) **Pricing-axis normalization** — pax-axis leaves (venue, catering) median the per-head rate × the couple's pax; flat leaves (monogram, coordinator) median the flat price ([[project_setnayan_pax_based_pricing]]). (3) **Fixed-then-proportion** — known Setnayan SKUs are carved off the top as fixed lines; the proportion runs only over `(budget − Σ fixed)`. Never hand a known SKU a "median share."
+- **Tier 2 — honesty/usability:** (4) **Band not point** — carry **p25 – median – p75** → "₱X–₱Y to work in" (collapses to one price at n=1, widens with inventory). (5) **Feasibility clamp + shortfall** — floor each target at the leaf's cheapest real solo price; if `Σ floors > budget`, say *"you're ₱X short for these N services"* instead of printing impossible targets (never-impossible, cousin of never-empty). (6) **Thin-data fallback** — below a **minimum-N** of solo prices, fall back to an **admin-seeded benchmark** labeled *"rough estimate"* + a per-leaf **confidence** (sample count + spread). This is the *only* place a non-market number enters: admin-set, **never invented**.
+- **Tier 3 — personal:** couple **tilt** (below).
+
+### Tilt (LOCKED — guide, never rule)
+
+The whole engine is advisory: defaults you can override, never rails; the suggested number stays visible so the couple sees how far they've strayed. **Primary gesture = peso-pin, pre-filled with the median.** Tapping a leaf opens **one bottom sheet** (mobile) / popover (desktop): a **₱ field (pre-filled)** + a **splurge / standard / save dial** (low-effort path for small leaves the couple has no peso opinion on) + the live **% and range** as **readouts** (never inputs — nobody thinks "venue should be 38%"). **"Reset to suggested" is always one tap.** Peso-primary because the headline move — setting the venue budget before the first venue search — is inherently a peso decision ([[feedback_setnayan_ux_is_north_star]]).
+
+### Cushion — slack-first absorption (LOCKED)
+
+**Core principle: no auto-calculated leaf ever exceeds its own median.** When `budget > Σ medians`, the leftover parks as a visible **Cushion** line — we do **not** inflate leaves above their market median to fill the budget (dishonest + nudges overspend). Absorption order when a leaf is tilted up: (1) drain **Cushion** first (→ 0, nothing else moves, no warning) → (2) **proportional drain** of unpinned leaves → (3) hit a leaf's **soft floor** → still goes below but now **warns** ("most photographers here start around ₱Y") → (4) past the whole budget → Cushion goes negative → *"over budget by ₱X"* (still never blocked). **Symmetric:** pinning below the median returns freed money to the **Cushion** (not silently onto other leaves). **One mechanic, both regimes:** in the tight regime Cushion is already 0, so a tilt goes straight to proportional drain. `surplusMode` config: **`'park'` (default, endorsed)** vs `'distribute'` (naive — collapses to 1-leaf=100%). Keeps warnings rare → meaningful.
+
+### Behavioral capture — Setnayan's strategic EDGE (staged)
+
+Per event, per leaf, capture: **default-vs-final** (revealed preference vs anchor) · **pin-order / first-touched** (strongest "what I care about most" signal) · **what got cut to fund a tilt** — tagged with **budget band · region · pax band · event type**. **Staged role (sequence, not binary):** *now* → median-only, data captured but **inert** (founder-only, no data yet) → *at min-N per segment* → powers **guidance copy** ("couples like you spend ~X% on venue") — annotates the number, never changes it, ship-first, zero risk → *at high-N + validated* → a **bounded default-nudge** (capped deviation, market median retained as anchor/floor). Never a full replacement — guards the **feed-its-own-tail** drift (defaults derived from tilts that started from defaults).
+
+### Build state — SHIPPED 2026-06-05 (engine PR #996 · couple + admin UI PR #1000)
+
+- **Pure engine `apps/web/lib/budget-allocation.ts`** — `computeBudgetAllocation()`, mirrors `lib/compat-score.ts`; all weights/knobs in **one admin-tunable config constant**; **NO prices invented** (median reader scoped via the matcher's gate).
+- **Layer-1 capture migration `20260824000000_budget_allocation_decisions`** — **RLS at CREATE** · couple-own-only (`current_event_ids`) · admins **INTENTIONALLY no blanket read** (gated + audited path only) · **RA 10173 erasable**. **APPLIED to prod** (2026-06-05, co-applied during PR #998's migration push).
+- **Couple planner UI BUILT (PR #1000)** — a "Suggested budget split" on this budget tab: per-service suggested ₱ + range + share% + confidence chip, the **Cushion** / over-budget / shortfall readouts, and a **peso-pin tilt sheet** (Splurge / Standard / Save dial + free ₱ + reset-to-suggested). The **pure engine runs client-side** so every tilt is instant; Save writes the Layer-1 snapshot. Backed by `lib/budget-allocation-data.ts` (`resolveAllocationInputs`) + migration `20260826000000_budget_planner_config_benchmarks` (admin config + per-leaf benchmark seeds; **applied to prod**). Still follow-on: Setnayan-SKU fixed carve-out, pax-axis normalization, pin re-hydration from the last snapshot, and driving the leaf set from the couple's actual selected services (V1 uses the admin-curated benchmark set).

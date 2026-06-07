@@ -2,10 +2,89 @@
 
 > **Purpose.** Single consolidated view of every Setnayan-platform price + vendor-side fee structure. Each row cross-references the owning iteration `.md` where the canonical decision lives — this doc is a navigable index, not the source of truth.
 >
-> **Last sweep:** 2026-05-17
+> **Last sweep:** 2026-06-04 — **LIVE-SITE RECONCILIATION.** Realigned to the published catalog on setnayan.com (`/pricing`, `/`, `/features`, `/for-vendors`, `/how-it-works`). The live site is now the source of truth; where it contradicts itself, `/pricing` wins. See **§ 0** for the authoritative live catalog and **§ 0.1** for unresolved site-internal contradictions the owner must settle. Sections § 2–§ 8 below are the pre-reconciliation spec history, retained for lineage but **superseded by § 0 wherever they disagree.**
 > **Update protocol** (see § 11): when a price changes, update the owning iteration `.md` → CLAUDE.md decision log → this doc → regenerate `Pricing.docx` via pandoc.
 >
-> **Known drift:** the CLAUDE.md § Cost-per-event cheat sheet (line 117) is stale in places — see § 7 below for which rows need refreshing.
+> **Known drift:** the CLAUDE.md § Cost-per-event cheat sheet is stale in places — see § 7. As of 2026-06-04 the larger drift is spec-vs-live-site; see § 0 and the standalone `Site_vs_Spec_Reconciliation_2026-06-04.md`.
+
+---
+
+## 0. LIVE SITE CATALOG — authoritative as of 2026-06-04
+
+> Mirrors setnayan.com/pricing exactly. Each customer SKU carries a build state the site shows: **Live**, **In build**, or **Coming soon**. `[Token]` = "Token Worthy" — redeemable with vendor tokens at a rate the vendor sets in their dashboard. This section supersedes §§ 2–8 wherever they disagree.
+
+### 0.A Couple-side software SKUs
+
+| SKU | Price | Build state | What the site says |
+|---|---|---|---|
+| Animated Monogram | ₱2,499 | **Live** | Bespoke Monogram with Animation |
+| Custom QR per Guest | ₱1,499 | **Live** | 1 QR code per guest (up to 250 pax) |
+| Indoor Blueprint | ₱1,499 | **Live** | Guided from entrance to table |
+| Papic (5 Seats) `[Token]` | ₱2,999 | **Live** | Unlimited photos + unlimited videos for 5 hours |
+| Papic Guest (Disposable Camera) `[Token]` | from ₱2,999 | **Live** | 24 photos + 10 × 5-second videos |
+| Today's Focus | ₱1,499 | **Live** | Assisted planning (the AI planner — replaces "Setnayan Concierge" naming) |
+| High Res Archive | ₱2,999 / yr | In build | Yearly archive, billed per year |
+| Live Background `[Token]` | ₱2,499 | In build | LED wall design background with monogram (was "Pailaw"/LED Background) |
+| Panood (Website Add-on) `[Token]` | ₱3,499 / day | In build | Live streaming per day embedded on the event page |
+| Patiktok `[Token]` | ₱2,499 | In build | Up to 250 TikTok recordings |
+| Pro Website `[Token]` | ₱5,499 | In build | Premium invitation + event page + editorial |
+| Call-Time Escalator | ₱1,999 | Coming soon | SMS update to all vendors |
+| Camera Bridge | ₱1,999 | Coming soon | Connect DSLR to Papic and Panood |
+| Guest Stories (Papic Add-on) | ₱1,999 | Coming soon | 30-second story maker for guests |
+| Live Venue Photo Wall `[Token]` | ₱2,499 | Coming soon | Live photo collage with live count |
+| Pabati | ₱999 | Coming soon | Up to 300 × 5-second videos |
+| Pakanta `[Token]` | ₱2,499 | Coming soon | Create a special song for the couple (single SKU — was 3 tiers) |
+| Pakulay | ₱0 | Coming soon | Free mood board · palette + visual identity for every account |
+| SDE (Papic Add-on) `[Token]` | ₱3,499 | Coming soon | 3-minute video compilation from Papic (a.k.a. "Same-Day Edit") |
+| Thank You Video (Papic Add-on) `[Token]` | ₱5,499 | Coming soon | 5-minute thank-you video for attendees |
+
+### 0.B Bundles
+
+| Bundle | Price | Scope |
+|---|---|---|
+| Setnayan Guided Planner Suite | ₱11,999 | one-time, per event |
+| Setnayan Comprehensive Media Pack Bundle | ₱16,999 | one-time, per event |
+
+### 0.C Vendor-side (canonical = `/pricing`)
+
+| SKU | Price | Annual | Notes |
+|---|---|---|---|
+| Pro Vendor (28-day prepaid block) | ₱2,499 / 28 days | ₱24,999 / yr (save ₱7,488 · 23%) | 1 category · 5 sub-seats · free vendor site · 100 complimentary tokens once verified |
+| Enterprise Vendor (28-day prepaid block) | ₱5,499 / 28 days | ₱54,999 / yr (save ₱16,488 · 23%) | all categories · unlimited sub-seats · 100 tokens |
+| Additional Branch (per branch) | ₱999 / 28 days | — | Enterprise only · apply-then-pay (0034) · BUILT 2026-06-05 (price ₱999 charm + Enterprise gate owner-locked 2026-06-05; supersedes the prior "Pro+ only") |
+| Feature boost (per feature, 7 days) | 4–100 tokens | — | redeemed from token balance |
+
+**Token packs** (vendors top up; redeem against any `[Token]` couple SKU at the vendor's dashboard rate):
+
+| Pack | Price |
+|---|---|
+| 4 tokens | ₱1,000 |
+| 10 tokens | ₱2,400 |
+| 25 tokens | ₱5,500 |
+| 50 tokens | ₱10,000 |
+| 100 tokens | ₱18,000 |
+
+Verified vendors receive **100 complimentary tokens** once verification is approved.
+
+**Vendor token sinks (what a token buys):** (1) **answer a matched inquiry** — 1–3 tokens (₱100–₱300) to unlock a couple, idempotent per (vendor·event), covers ALL the vendor's services, banded by the wedding's region (see DECISION_LOG 2026-06-05 burn-reprice); (2) **redeem** against any `[Token]` couple SKU at the vendor's dashboard rate; (3) **feature boost** (4–100 tokens / 7 days); (4) **🆕 sync an outside event = 1 token (₱100)** — adds an off-platform event to the vendor's stats + free compile-all-events portfolio website + earns **1 verified review** + blocks the date on the shared anti-double-book calendar (owner-locked 2026-06-05; see [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Part C2).
+
+### 0.D How money flows (per `/pricing`)
+
+- **You → Setnayan:** software SKUs above, paid at 100% retail. PHP only · BIR receipts on every transaction.
+- **You → Vendor (off-platform):** vendor packages settle directly with the vendor (bank / GCash / in person). Setnayan takes **0% commission**.
+- **Vendor → Setnayan:** 28-day prepaid subscription for marketplace presence + token top-ups to redeem software for their own events.
+
+---
+
+## 0.1 UNRESOLVED SITE-INTERNAL CONTRADICTIONS — owner must settle
+
+The live site disagrees with itself. `/pricing` is treated as canonical above, but these need a real decision and a single-source fix on the website:
+
+1. **Vendor Pro price appears four different ways.** `/pricing` ₱2,499 / 28 days · homepage ₱1,999 / 28 days · `/for-vendors` ₱4,999 / **week** (founder ₱3,999/wk) · `/how-it-works` ₱499 / **week**. These are different *models*, not typos.
+2. **Commission.** Homepage + `/pricing` say **0% commission**; `/for-vendors` says Setnayan Pay is a **flat 5.0%** on every booking. Mutually exclusive.
+3. **Verification badge.** Homepage charges **₱1,499 lifetime + ₱499 refresh**; `/pricing` and `/for-vendors` say listing/verification is free with **100 complimentary tokens** on approval.
+4. **"Today's Focus" vs "Setnayan Concierge."** The AI planner SKU is **Today's Focus ₱1,499** (homepage, `/pricing`). But `/for-vendors` still advertises a free **"Setnayan Concierge"** worth **₱2,499** per booked couple. Same product two names + two prices, or two different things? Decide and unify.
+5. **Enterprise** (₱5,499 / 28 days) and **Today's Focus** (₱1,499) are consistent across pages — no action.
 
 ---
 
@@ -16,7 +95,7 @@
 - **Display format:** ₱ with comma separators (₱4,999 not ₱4999).
 - **Charm pricing ladder** (locked 2026-05-08, refined 2026-05-12, B2B tiers charm-corrected 2026-05-17): ₱49, ₱99, ₱199, ₱499, ₱999, ₱1,499, ₱1,999, ₱2,499, ₱2,999, ₱4,999, ₱9,999, ₱19,999, ₱24,999. Higher tiers follow the same -1 pattern (₱49,999, ₱99,999, ₱249,999, ₱799,999 for B2B).
 - **Apparatus pricing principle:** every SKU prices the tool / service / capability — never raw hardware, labor, or hours (except per-day / per-hour capacity units for time-bounded services like Panood).
-- **Wallet retired** (2026-05-11): the iteration 0003 token wallet is decommissioned. All payment is **apply-then-pay direct in PHP** with manual admin reconciliation. No wallet / balance / tokens UI anywhere in the product (memory rule).
+- **Payment model (reconciled 2026-06-04):** customers pay **apply-then-pay direct in PHP** with manual admin reconciliation (BIR receipt on every software purchase). The iteration 0003 *customer* token wallet stays retired — couples never see a token balance. **However, a vendor-side token economy is now LIVE on the site:** vendors buy token packs (4–100 tokens, ₱1,000–₱18,000), receive 100 complimentary tokens on verification, and redeem them against any "Token Worthy" couple SKU (marked `[Token]` in § 0) at a rate they set in their dashboard. This reverses the blanket "no tokens UI anywhere" memory rule — tokens exist on the **vendor** side only. See § 0.C.
 - **No-refund SKUs** are marked explicitly; refundable SKUs default to 14-day refund window unless otherwise stated.
 - **2D billing model** (locked 2026-05-17): every `service_catalog` row carries `time_recurrence ∈ (one_time, weekly, quarterly, annual, lifetime)` × `event_scope ∈ (per_event, all_events)`. Lets per-event couple SKUs and annual-all-events vendor / organizer subscriptions live in the same table without enum collision. See [0034 Payments & Cart](0034_payments_and_cart/0034_payments_and_cart.md) service_catalog seed sections (h)–(p).
 - **Cost Watch primitive** (locked 2026-05-17): every paid SKU consumption logs actual Setnayan-incurred cost + `cost_breakdown JSONB` to `service_render_costs`. Materialized view `service_catalog_cost_watch` exposes highest-render / avg / p95 / cost-to-price ratio + 🟢/🟡/🔴 health flag inline in the [0023 admin console § 3.5](0023_admin_console/0023_admin_console.md). Pricing decisions use "highest single render" as the floor.

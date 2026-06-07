@@ -11,7 +11,7 @@ This is the single document to read first. After this, the deeper context lives 
 
 ## 1 · What Setnayan is, in one paragraph
 
-Setnayan is a discovery + planning platform for Filipino weddings. Couples plan their wedding with free tools (guest list, RSVP, budget, mood board, schedule, personal wedding website, per-guest QR, verified vendor directory, unlimited bidding, reviews). Vendors get a free profile, can verify once (₱1,499) for a lifetime badge, and use **tokens** (₱180–₱250 each) to respond to couple bid requests. Setnayan takes **0% commission** on vendor bookings — it never sees the money between vendor and couple. Revenue is subscription + tokens + Setnayan Productions (a 22-service à-la-carte catalog Setnayan sells directly to couples).
+Setnayan is a discovery + planning platform for Filipino weddings. Couples plan their wedding with free tools (guest list, RSVP, budget, mood board, schedule, personal wedding website, per-guest QR, verified vendor directory, unlimited bidding, reviews). Vendors get a free profile, can verify once (₱1,499) for a lifetime badge, and use **tokens** (₱100 each · region-weighted 1–3 per lead = ₱100/₱200/₱300, banded by the wedding region's minimum wage) to respond to couple bid requests. Setnayan takes **0% commission** on vendor bookings — it never sees the money between vendor and couple. Revenue is subscription + tokens + Setnayan Productions (a 22-service à-la-carte catalog Setnayan sells directly to couples).
 
 ---
 
@@ -31,9 +31,9 @@ Setnayan is a discovery + planning platform for Filipino weddings. Couples plan 
 |---|---|---|---|
 | **Vendor verification** | ₱1,499 one-time | Vendor | At onboarding · lifetime verified badge |
 | **Document refresh** | ₱499 | Vendor | When business documents change |
-| **Pro subscription** | ₱1,999 / month | Verified vendors | Recurring · 1 category · 5 team accounts |
-| **Enterprise subscription** | ₱5,499 / month | Verified vendors | Recurring · multi-category · unlimited team accounts |
-| **Bidding token packs** | ₱1,000 → ₱18,000 | Vendor | As needed (₱180–₱250 per token) |
+| **Pro subscription** | ₱2,499–₱3,999 / 28 days (region-tiered) | Verified vendors | Recurring · 1 category · 5 team accounts · current built pilot ₱499/wk → sunsetting at token cutover |
+| **Enterprise subscription** | ₱5,499–₱8,499 / 28 days (region-tiered) | Verified vendors | Recurring · multi-category · unlimited team accounts · not yet built |
+| **Bidding token packs** | ₱100 / token · packs 4/10/25/50/100 | Vendor | As needed · region-weighted 1–3 tokens (₱100/₱200/₱300, min-wage banded) to answer a lead |
 | **Boosted Ads** | ₱1,200 / wk | Pro+ vendors | Pausable any time |
 | **Sponsored Boost** | By category | Pro+ vendors | Quarterly or annual |
 | **On-site verification + content package** | Vendor-set range · Request bid | Vendor (premium) | One-off |
@@ -49,15 +49,14 @@ Setnayan is a discovery + planning platform for Filipino weddings. Couples plan 
 - **Earn**
   - 100-token founder bonus on verification (until 31 Jan 2027).
   - +1 token every time a vendor's recommendation link drives a couple's purchase of a Setnayan Productions Token-Worthy service AND the service is used at the event (handshake-confirmed).
-- **Buy**
-  - 4 tokens · ₱1,000 (₱250 ea)
-  - 10 tokens · ₱2,400 (₱240 ea)
-  - 25 tokens · ₱5,500 (₱220 ea)
-  - 50 tokens · ₱10,000 (₱200 ea)
-  - 100 tokens · ₱18,000 (₱180 ea)
-- **Spend**
-  - **1 token to accept a couple's bid request and start a chat thread.** Without tokens, vendors can still receive bid requests but cannot respond.
-  - The token covers the entire conversation: chat, video call (Verified+), file sharing (Pro+), final quote, acceptance. No per-message or per-call charges.
+- **Buy** *(canonical source: `Token_Economy_Flow_Map_2026-06-01.html`)*
+  - **₱100 per token, flat** — one universal token. **No per-token volume discount.**
+  - Pack sizes: 4 · 10 · 25 · 50 · 100. **Bulk orders earn bonus tokens on top** (buy a larger pack → extra tokens free, not a cheaper per-token price) — bonus ladder owner-to-set, never invented.
+  - *₱100/token is the only rate (owner: "no more 250" + flat-price-with-bonus-tokens, 2026-06-04).*
+- **Spend — region-weighted burn to answer a qualified lead**
+  - Cost is keyed to the **wedding's region**, flat within a band, **never by booking size**, banded by the region's **minimum wage**: lowest-wage regions (Bicol · E.Visayas · Zamboanga · SOCCSKSARGEN · Caraga · BARMM) **1** · regional hubs (Cebu · Iloilo · Davao · CDO · CAR · Ilocos · Cagayan · MIMAROPA) **2** · NCR/CALABARZON/Central Luzon **3** tokens (= **₱100 / ₱200 / ₱300**, ₱300 ceiling). _Repriced 2026-06-05 — supersedes the 3‑4‑5‑6 ladder. Region→band stored admin-editable; re-band only when a wage order crosses a threshold._
+  - One burn covers the entire conversation: chat, video call (Verified+), file sharing (Pro+), final quote, acceptance. No per-message or per-call charges.
+  - Without tokens, vendors can still receive bid requests but cannot answer.
 - **Handshake liability**
   - When a vendor earns a token via Productions referral, they're accountable for the service being used at the event. A two-party handshake at delivery confirms it. Failure to deliver claws the token back and may trigger a Trust & Safety case.
 
@@ -65,7 +64,7 @@ Setnayan is a discovery + planning platform for Filipino weddings. Couples plan 
 
 ## 3 · Vendor tier matrix (4 tiers · the canonical feature gates)
 
-| Capability | FREE | VERIFIED | PRO (₱1,999/mo) | ENTERPRISE (₱5,499/mo) |
+| Capability | FREE | VERIFIED | PRO (₱2,499–₱3,999 / 28d · region) | ENTERPRISE (₱5,499–₱8,499 / 28d · region) |
 |---|---|---|---|---|
 | Profile + microsite | ✓ | ✓ | ✓ | ✓ |
 | In-app chat (couple-initiated) | ✓ | ✓ | ✓ | ✓ |
@@ -193,13 +192,13 @@ Two delivery models:
 
 Stages:
 1. **Bid Request** — couple submits a brief through the marketplace or vendor microsite. Costs the couple nothing; couple can submit unlimited bid requests.
-2. **Chat** — vendor spends 1 token to accept the bid request and open the thread. Chat is freeform; vendor and couple discuss, share files (Pro+), do video calls (Verified+), iterate on a quote.
+2. **Chat** — vendor spends tokens to answer the bid request and open the thread (pilot: 1 token · post-pilot: region-weighted 1–3 by the wedding's region = ₱100/₱200/₱300, min-wage banded). Chat is freeform; vendor and couple discuss, share files (Pro+), do video calls (Verified+), iterate on a quote.
 3. **Quote** — vendor builds a custom quote inside the chat thread. Couple sees the quote.
 4. **Accept** — couple accepts the quote. Booking is now locked in the couple's coordination dashboard (no money flows through Setnayan — vendor and couple settle directly).
 5. **Completed** — after the event, the booking moves to Completed. Reviews open 24 hours after the event date. Only couples who actually went through the Setnayan bid flow can review.
 
 ### Backend rules
-- A vendor must have an unspent token to accept a bid request. Without tokens, bid requests sit in the inbox unread by the vendor.
+- A vendor must have enough tokens to answer a bid request (pilot: 1 · post-pilot: 1–3 by region = ₱100/₱200/₱300, min-wage banded). Without tokens, bid requests sit in the inbox unread by the vendor.
 - A vendor cannot start a chat thread with a couple cold. Threads are always couple-initiated via a bid request.
 - A couple's contact details (phone, email) are NOT automatically exposed to the vendor. Communication happens inside Setnayan's chat. Vendors can optionally list a "Direct Line" phone on their profile so couples can call them — that's the vendor's choice, never the couple's.
 
@@ -414,7 +413,7 @@ Same pattern. The Vendor dashboard's Tokens tab is the most new code (token ledg
 
 ### Phase 8 · Bid flow (4 days)
 - Bid Request submission (couple side) → costs nothing, no token check.
-- Vendor accepts → token deduction transaction (atomic: check balance >= 1, decrement, create Thread, return).
+- Vendor accepts → token deduction transaction (atomic: check balance >= answer cost [pilot 1 · post-pilot 3–6 by region], decrement, create Thread, return).
 - Thread API: messages, file attachments (Pro+ only), video call signaling (Verified+ only via Daily.co / Twilio Video).
 - Quote builder inside thread → couple accepts → Booking created (status: "accepted", paidVia: null since Setnayan doesn't process the money).
 

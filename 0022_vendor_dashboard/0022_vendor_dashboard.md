@@ -1,10 +1,25 @@
 # 0022 — Vendor Dashboard, Comprehensive Interactive Prototype
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Vendor host route is `/vendor-dashboard`, NOT `/dashboard/vendor/...`** (the §1 URL is wrong). Shipped as **~24 routes**, desktop 4-group sidebar (Home / Work / Grow / Business) + mobile 5-tab bottom-nav (Home·Bookings·Messages·Earnings·More) — far beyond the speced "6 surfaces." Real surfaces include profile, bookings, messages, services, contracts, repertoire, attributes, marketing, verify, reviews, moodboard-library, earnings, payment-options, tokens, redeem-code, team, branches, manpower, notifications, tax-documents, more.
+> - **Commission is 0% ("0% commission, ever") and vendor↔customer money is OFF-PLATFORM (RA 11967).** Setnayan never holds checkout money; every vendor-payment surface must disclose this + a vigilance caution. Any "Setnayan Pay 3%/5%" sitting-between model is RETIRED.
+> - **Vendor token economy is LIVE (distinct from the retired customer wallet 0003).** Accepting a couple inquiry burns 1–3 tokens (₱100/200/300, region-banded via the admin-editable `token_burn_bands` table) through `unlock_vendor_event` in `lib/chat-actions.ts`; insufficient balance blocks the accept (pay-to-answer). Founder bonus = 100 free tokens on verification. Packs 4/₱1,000 … 100/₱18,000.
+> - **Vendor tiers (28-day prepaid):** Free ₱0 · Pro ₱2,499/28d (or ₱24,999/yr) · Enterprise ₱5,499/28d (or ₱54,999/yr) · Additional Branch ₱999/28d · standalone Verification badge ₱1,499. The §2.4a "Pro Weekly ₱499/wk" subscription model is superseded.
+> - **Known shipped gaps:** Tokens "Buy" CTA is non-functional (no `/tokens/buy` checkout); no calendar/availability block-entry UI; moodboard-library 404s for dual-role users (audit-flagged).
+> - **The 2026-06-05 reviews/portfolio/sync amendment above is forward-spec, NOT fully built** (event-bound 250+ guest-level reviews · free compile-all-events portfolio website · 1-token outside-event sync). Treat as roadmap, not as-shipped.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Purpose.** Show how a vendor uses Setnayan end-to-end — from enrollment through running a roster of paid clients. The mirror of 0021 (the couple-side dashboard) for the supplier side of the marketplace. Aligns with the locked decisions on apply-then-pay, Pro weekly subscription, multi-service calendars, and in-app crew rates.
 >
 > **Status:** drafted 2026-05-11
 > **Companions:** `0022_vendor_dashboard.html` (interactive walkthrough) · `0022_vendor_dashboard.docx` (stakeholder mirror)
 > **Vendor in scenario:** Mariposa Bloom Photography · Tagaytay · 6 yrs operating · 3 services authored · 12 clients in pipeline · Pro weekly subscription active
+
+---
+
+> **AMENDMENT 2026-06-05 (owner-locked) — vendor reviews · free portfolio website · unified calendar · outside-event sync.** Net-new vendor mechanics landed this session; canonical spec = [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](../Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Parts C1/C3/C4/C5. In brief: (1) **event-bound reviews** — in-app events earn up to **250+ guest-level reviews** (one per verified guest), synced outside events earn **exactly 1**; (2) the **free vendor website** (surface 6 / § 2.1) becomes a **compile-all-events portfolio** auto-populated from in-app + synced events — MUST honor hybrid-anonymity (anonymize-until-reveal for Free/Verified, or public named portfolio = Pro+); (3) the **Calendar** (surface 3) is the org-level shared anti-double-book schedule, EXTENDED so vendors register their **own off-platform events** (no manual typing; 1 booked/day); (4) **sync an outside event for 1 token (₱100)** → adds it to stats + portfolio + 1 review + a calendar block. Reputation **flywheel** (tenure → more weddings → more reviews) is the retention promise.
 
 ---
 
@@ -1130,3 +1145,11 @@ Gated on V1 pilot completion + V1.1 marketplace launch sequence per [project_set
 - `0022_vendor_dashboard.docx` — stakeholder mirror.
 - Iteration **0023** (drafted) — Admin Console — Setnayan operations dashboard for verification, payments, disputes, internal accounts, Team Pool, two-admin approval queue.
 - Iteration **0024** (drafted) — Save-the-Date Maker — 30 head-turning templates, customer uploads 3-8 video clips, render in 3 formats, ₱49 per render.
+
+---
+
+## Payment Options surface — "How clients pay you" (added 2026-06-04)
+
+> Shipped 2026-06-04 (PR #969). A Money-group surface at `/vendor-dashboard/payment-options` where the vendor publishes their own payment destinations (bank/e-wallet details, an uploaded QR, or a payment link) so couples pay them directly, off-platform. Canonical spec + schema: **0034 -> "Vendor Payment Options — off-platform direct rail"**.
+>
+> Vendor-side specifics: add / delete / set-primary / show-hide each method; a type picker; QR upload to R2; live link domain classification (allowlist green / unknown-domain "pending review" / shortener blocked). **Payment links are gated to Pro & Enterprise** vendors (active paid subscription) — Free/Verified vendors see an upgrade upsell; QR + bank stay open to all tiers. RLS: a vendor owns only their own rows.

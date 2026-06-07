@@ -1,5 +1,15 @@
 # 0001 — Create Guest List Management
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **This iteration is SHIPPED and is one of the 18 free planning tools** (no SKU, no payment). The guest list is live at `/dashboard/[eventId]/guests`.
+> - **The layout was substantially redesigned after this spec** (PRs #1034/#1035/#1037/#1039, see the 2026-06-05 amendment already in this file): photo-first, importance-ordered (Bride #1 / Groom #2), role-tiered, **desktop = row/table · mobile = photo grid**. The original "Filipino Heritage theme · two-column table everywhere" layout described below is superseded by that amendment.
+> - **Route is event-scoped `/dashboard/[eventId]/guests`**, not the flat `setnayan.com/dashboard/guests` shown in the Route section.
+> - **Guest photos + a per-event `guest_face_enrollments` table shipped** (Gmail avatar / RSVP selfie, RA 10173 biometric consent) — net-new vs the original spec; Papic (0012) face-tagging consumption is later.
+> - Otherwise the core guest CRUD / RSVP / roles / filters described here match what shipped.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Type:** Implementation work order (Claude Code ticket)
 **Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: Guest List** · URL: `setnayan.com/dashboard/[event-id]/guests`
 **Builds on:** 0000 (app shell, sign-in, event picker, bottom-nav routing, `users` + `event_members` tables, event-scoped URLs)
@@ -15,6 +25,15 @@
 The couple-facing guest list management page on the Setnayan web dashboard. The couple uses this page to add, edit, categorize, filter, and track RSVPs for every guest invited to their wedding. This is the foundational data surface for the entire wedding lifecycle — invitations, seating chart, paparazzi seat assignments, vendor coordination, and gallery access all read off the guest list.
 
 This is the first concrete feature being built for Setnayan, and it's gated by being on web (per the locked Phase 1 sequence).
+
+> **⚠ Amended 2026-06-05 — the guest list is photo-first, importance-ordered + tiered · DESKTOP = row/table, MOBILE = photo grid (shipped · setnayan-platform PRs #1034 / #1035 / #1037 / #1039).** The original layout described below is **superseded**. Current behavior:
+> - **Photo-first, layout split by surface.** Every guest has a photo (`object-cover`) with a side-tinted **initials fallback**. **Desktop (sm+) = a row/TABLE** — the photo is a round thumbnail in the Name cell (PR #1039, reverting the desktop card-grid per owner "guest on desktop mode will be row/table style not grid style"). **Mobile (<sm) = a photo-card GRID.** (PR #1034 first replaced the old table + stacked-list with a grid on both surfaces; #1039 returned desktop to a table.)
+> - **Guest-supplied photos.** A guest's photo comes from their **Gmail-login avatar** (captured at the join flow) or an **RSVP selfie** taken front-camera on their `/[slug]` invitation. The selfie is **face-recognition grade** — stored full-res in a new per-event `guest_face_enrollments` table (`consent_at`, `revoked_at`, partial-unique one-live-per-guest) that **Papic (0012) will consume** to auto-tag candids; matching/embeddings remain a later Papic build. Prominent but **skippable**, behind a separate RA 10173 biometric-consent checkbox. Priority ladder: `selfie > couple_upload > oauth_google > initials`.
+> - **Default arrangement = wedding importance** (PR #1035). **Bride is always #1, Groom always #2** (pinned first under *every* sort), then by role: VIP/immediate family → wedding party → principal → secondary sponsors → bearers/flower girl → officiants → plain guests. Canonical order = `ROLE_IMPORTANCE` in `lib/role-groups.ts`. The old alphabetical-by-enum "Role" sort is retired.
+> - **Tiered by role** (PR #1037 + #1039). On the importance view both surfaces break into role-tier sections with subtle headers (Bride & Groom · Wedding Party · … · Guests; empty tiers skipped). **Desktop table:** a tier header row precedes each tier's rows. **Mobile grid densities:** **Bride & Groom share a 2-up row**, special-role tiers **2-up**, plain **Guests 3-up**. Any non-importance sort renders flat (no tier headers).
+> - **Revocation (RA 10173):** the guest gets a "Remove my photo & face data" control; the couple's `photo_consent` toggle also revokes the enrollment.
+>
+> Full detail in `DECISION_LOG.md` (2026-06-05). The page-composition + functional sections below are kept for historical context, but any layout / default-sort lines they contain are superseded by this callout.
 
 ---
 
@@ -115,6 +134,19 @@ CREATE TABLE guests (
   dietary_restrictions TEXT,
   photo_consent       BOOLEAN NOT NULL DEFAULT TRUE,
     -- PH Data Privacy Act compliance. FALSE means face-blur in the gallery (per spec 10).
+    -- Turning this OFF also revokes any live face-recognition enrollment (2026-06-05).
+  photo_url           TEXT,
+    -- Display photo for the guest-list grid (added 2026-06-05). An r2://setnayan-media/...
+    -- ref, a raw Google avatar URL (when photo_source='oauth_google'), or NULL → initials.
+  photo_source        TEXT CHECK (photo_source IS NULL OR photo_source IN
+                        ('oauth_google', 'selfie', 'couple_upload')),
+    -- Display-photo priority ladder: selfie > couple_upload > oauth_google.
+  photo_updated_at    TIMESTAMPTZ,
+  photo_set_by_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    -- The face-RECOGNITION asset + biometric consent live in a SEPARATE per-event table,
+    -- guest_face_enrollments (full-res asset_url · consent_at NOT NULL · revoked_at ·
+    -- partial-unique one-live-per-guest · RLS Pattern B). Papic (0012) consumes asset_url.
+    -- A Gmail avatar is display-only and never creates an enrollment.
   table_assignment_id UUID REFERENCES tables(table_id) ON DELETE SET NULL,
   invited_to_blocks   TEXT[] NOT NULL DEFAULT ARRAY['ceremony', 'reception']::TEXT[],
     -- Multi-select: which schedule blocks this guest is invited to.
@@ -244,12 +276,16 @@ The mobile detail screen and add-guest flow are full-screen sheets, not modals o
 
 ### Must work end-to-end
 
-- **List view** — server-side fetch of all guests for the couple's event_id. Render as table on desktop, card list on mobile.
+- **List view** — server-side fetch of all guests for the couple's event_id. Per the 2026-06-05 amendment at the top: **desktop renders a row/table** (photo thumbnail per row), **mobile renders a photo-card grid**. Default-sorted by wedding importance (Bride #1, Groom #2, then by role) and broken into role-tier sections (desktop = tier header rows; mobile = per-tier grid densities couple 2-up · special roles 2-up · guests 3-up). Other sorts render flat. _(Superseded the original "Render as table on desktop, card list on mobile" — the importance order + tiering + photos are the new parts.)_
 - **Search** — fuzzy match on first_name, last_name, display_name, household name, custom_tags. Client-side filter on already-loaded data is fine for V1.
 - **Filter** — by RSVP status, side, group_category, role family (sponsor / entourage / bearer / guest), custom tag, household. Filters are additive.
 - **Sort** — by last name (default), first name, RSVP responded_at, role.
 - **Add guest** — form per modal mockup. Validates client + server. On submit, INSERT row, refresh list, show toast "{Name} added to guest list."
 - **Name auto-formatting (live · Smart PH-aware title case)** — First name, Last name, plus-one First/Last, and Household auto-format to title case *as the couple types* (first letter of each word upper, the rest lower) with Filipino exceptions: particles stay lowercase (`de`, `del`, `dela`, `de la`, `de los`, `delos`, `ng`, `y`, `at`) unless they are the first or last token · Roman-numeral suffixes `II`–`X` → all-caps · `Jr`/`Sr` cased · `Mc`+next-letter capitalized ("McDonald") while plain `Mac` is left alone (so PH surnames like "Macaraeg" aren't mangled to "MacAraeg") · single-letter-before-apostrophe `O'`/`D'` capitalize after the apostrophe ("O'Brien") while a possessive `'s` stays lower ("Juan's") · each hyphen segment capitalized ("Mary-Jane"). **CSV-imported `first_name`/`last_name` are normalized the same way on import.** **Display name is excluded** — it is a deliberate nickname/handle and is left exactly as typed. Eng: one shared `titleCaseName()` util is used as the client input formatter (transform the whole field value on each input event + restore caret position) AND re-applied server-side in `addGuestAction` / edit / the CSV row mapper as the source of truth (client formatting is UX-only, never trusted). Owner-locked 2026-06-03 — see DECISION_LOG.
+- **Name normalization (server-side hygiene · shipped 2026-06-05, PR #1004)** — every guest-name write path (detailed Add-guest form, quick-add sheet, CSV import) runs a shared `normalizeGuestName()` before insert: Unicode **NFC**-normalize, drop zero-width / BOM / soft-hyphen / bidi formatting chars, fold all C0/C1 control chars + every Unicode whitespace (NBSP, ideographic space, …) to one ASCII space, trim, and clamp to **80 chars**. This is the source-of-truth hygiene pass that makes two visually identical names store + dedupe + sort identically regardless of pasted spreadsheet/PDF junk; an entry that is only invisible characters collapses to empty and is rejected by the required-name check. **Casing is left untouched here** — the Smart PH-aware title-casing above is the separate input-layer concern (naive Title-Case would mangle "de la Cruz" / "Ng").
+- **Duplicate detection on add (shipped 2026-06-05, PRs #1004/#1005)** — guests match on **both** first AND last name (so two distinct "Marias" don't false-fire), via a shared `lib/guest-dedupe` matcher with three tiers: **exact** (normalized-equal), **nick** (nickname map, Western + Filipino — Mike↔Michael, Kiko↔Francisco, …), and **typo** (Levenshtein within a length-scaled tolerance).
+  - **Quick-add sheet + detailed Add-guest form** show a live, **non-blocking** warning ("Already added" / "Same person?" / "Typo?") with role·side + a link to each match; the couple can still add (two guests legitimately can share a name).
+  - **CSV import** auto-**skips exact-normalized duplicates** — within the uploaded file AND against the existing list — so a re-import never doubles the list; the success banner reports the duplicate count separately from invalid rows. Fuzzy (nick/typo) matches are deliberately **not** auto-skipped on bulk import (a guess shouldn't silently drop a distinct guest); that judgment stays with the interactive forms.
 - **Edit guest** — open detail drawer, click Edit, fields become editable. Save persists.
 - **Delete guest** — soft delete or hard delete? Soft delete (set `deleted_at`) is safer — couples sometimes accidentally remove guests. Add `deleted_at TIMESTAMPTZ` column and filter it out of queries.
 - **Bulk import CSV** — accept CSV with columns: first_name, last_name, side, group, role, household, plus_one_allowed, email, mobile. Validate, show preview, commit on confirm. 200-row max for V1.
@@ -300,6 +336,9 @@ The mobile detail screen and add-guest flow are full-screen sheets, not modals o
 - [ ] Detail drawer opens on row click, closes on X or click-outside.
 - [ ] Mobile FAB opens the add-guest flow as a full-screen sheet.
 - [ ] CSV import accepts a sample 20-row CSV (provide a fixture in the test suite).
+- [ ] **Name normalization on every write path.** Leading/trailing + repeated internal whitespace collapses, zero-width / NBSP / control chars are stripped, names NFC-normalize, and names cap at 80 — on the detailed form, quick-add, AND CSV import. An entry that is only invisible characters is rejected as a missing name.
+- [ ] **Duplicate warning on add.** A first+last that exactly / nickname / typo matches an existing guest surfaces a non-blocking warning (with a link to the match) on both the quick-add sheet and the detailed Add-guest form; the couple can dismiss and add anyway.
+- [ ] **CSV import dedupes.** Re-importing a file whose rows are already on the list inserts 0 new guests and reports them as duplicates (not an error); a file containing the same person twice inserts them once.
 - [ ] Sample seed data for development: ~15 guests covering bride's side, groom's side, paired sponsors, paired guest household, entourage roles, bearers, flower girl, officiant, declined RSVP. Use the names from the mockup so visual review is straightforward (Cora & Boy Reyes, Ramon & Mia Lim, Carla Mendoza, Marco Reyes, Lola Adela Reyes, Joaquin & Sofia Tan, Sofia Reyes, Liam De la Cruz, Jenny Bautista, Paolo & Anna Santos, Fr. Jose Aquino, Patricia Cruz).
 - [ ] Server-side authorization: a couple can only read/write guests for their own events. Test with two events and verify isolation.
 - [ ] All writes are atomic — no partial guest records on failure.

@@ -1,10 +1,25 @@
 # 0023 — Admin Console (Setnayan Operations Dashboard)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Admin console is `/admin/...` with ~53 routes** (the "31 admin surfaces" §1 count is stale — was 51 at the audit baseline, +`/admin/notifications` + `/admin/token-bands` since). Desktop 6-group sidebar (Home / Queues / Directory / Money / Insights / Manage) + mobile 5-tab bottom-nav (Home·Queues·Directory·Money·More). Shipped routes not in the table include: `/admin/notifications`, `/admin/token-bands`, `/admin/connection-logs`, `/admin/budget-planner`, `/admin/discount-codes`, `/admin/songs`, `/admin/growth`, `/admin/offline`, `/admin/telemetry`.
+> - **Disputes are now resolvable inline** (PR #1054 added `resolveDispute` in `app/admin/disputes/actions.ts` + the admin notifications bell/reader) — supersedes the "#8 Disputes V1 read-only list" note.
+> - **BIR (0026) is RETIRED.** `/admin/bir/2307` is a tombstone (`redirect`, "RETIRED 2026-05-29"); surfaces #16 Receipts / #17 BIR 2307 are being retired per 2026-06-07 owner authorization. Treat BIR cross-refs as historical.
+> - **Token-burn governance shipped:** `/admin/token-bands` edits the region→band (₱100/200/300) map the vendor inquiry-accept burn reads (PR #1057). The seeded band→region map is **pending owner ratification**.
+> - **Payment model = apply-then-pay, manual single-admin approval (no automated charge).** `/admin/payments` `approvePayment` flips `payments=matched`/`orders=paid` — the only "paid" lever; zero real money moves. **Commission is 0%; vendor↔customer money is OFF-PLATFORM (RA 11967).** `/admin/pricing` is still read-only.
+> - **Known shipped gaps:** `/admin/payment-options` + `/admin/connection-logs` are desktop-only (no mobile path); telemetry/offline are pilot stubs.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Purpose.** The Setnayan internal admin surface — what Setnayan Team operators see and use to run the marketplace. Mirror of 0021 (couple) and 0022 (vendor) for the third role-routed doorway. Concrete answers to: how do we manage vendors, approve verification, confirm payments, set prices, give freebies, resolve disputes, run the Guarantee?
 >
 > **Status:** drafted 2026-05-11
 > **Companions:** `0023_admin_console.html` · `0023_admin_console.docx`
 > **Admin in scenario:** Cara Aquino · Setnayan Operations Lead · joined 2026-04 · responsible for verification + payments + disputes
+
+---
+
+> **AMENDMENT 2026-06-05 (owner-locked) — zero-tolerance review-fraud enforcement.** Canonical spec = [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](../Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Part C6. Reviews are **event-bound** (no review without a proven event). A **proven fake event** (staged to farm reviews/stats) = **account TERMINATION, start from scratch — NO 3-strike**, admin-adjudicated via the **Reviews** queue (surface #4) + **Users** (suspend/terminate). This is **distinct from and stricter than** the tiered Concierge trial-abuse enforcement (surface #7 · warning → trial ban → full ban) — the two policies coexist for two different abuse vectors. Guest-level reviews (up to 250+ per in-app event) and the single review from a 1-token outside-event sync both flow through surface #4 moderation + the always-on NSFW filter.
 
 ---
 
@@ -1469,3 +1484,39 @@ Iterations 0024–0035 + CLAUDE.md decisions (§ 9.1 / § 10a / § 10b) were dra
 - `0023_admin_console.html` — interactive 7-surface walkthrough
 - `0023_admin_console.docx` — stakeholder mirror
 - The admin console is operationally critical for Setnayan launch · ships alongside 0015 (marketing site)
+
+---
+
+## Payment-option moderation queue (added 2026-06-04)
+
+> Shipped 2026-06-04 (PR #969). New admin surface at `/admin/payment-options` (Queues group): screens vendor-published payment **links + QRs** for fraud. Shows the decoded destination + domain/allowlist check per entry; **approve / hold / remove**, audit-logged. Off-allowlist links and URL shorteners surface here for review before a couple ever sees them. Governance only — approving does NOT make Setnayan the payment processor; vendor<->couple money is always off-platform. Canonical spec: **0034 -> "Vendor Payment Options — off-platform direct rail"**.
+
+---
+
+## Budget Planner controls (added 2026-06-05)
+
+> **New V1.x admin capability.** Two admin responsibilities for the couple-side **Budget Planner allocation engine** (the top-down "what each service should cost" recommender, layered on the 0007 tracking ledger). Engine/planner home = **0007**; couple-side consent/opt-out/RA 10173 erasure = **0025**. **Build state:** the admin surface is **BUILT 2026-06-05 (PR #1000)** — `/admin/budget-planner` (Money nav group) ships the benchmark-seeding table, the engine-knob form, and the de-identified insights table; migration `20260826000000` (config + benchmarks) **applied to prod**. Built on the PR #996 engine + the `20260824000000` capture table. Still follow-on: the dedicated de-identified Layer-2 table + cron-free rollup, and the two-admin raw-export flow. Full design: `Budget_Planner_Allocation_Engine_2026-06-05.md` §3/§7/§8/§10 · `DECISION_LOG.md` 2026-06-05.
+
+### A · Allocation engine tuning (single admin-tunable config)
+
+The engine's behavior lives in **one admin-tunable config constant** (the same pattern as the future `COMPAT_WEIGHTS` surface — `lib/compat-score.ts`), not scattered magic numbers. Admin-set knobs:
+
+- **`minSampleN`** — the floor count of solo vendor prices a leaf needs before its real-market median is trusted (below it, the thin-data fallback fires).
+- **Confidence cutoffs** — the sample-count + spread thresholds that drive each leaf's `"rough estimate"` vs confident label.
+- **`bandPct`** — the shopping-band width around the median (the `p25–median–p75` "₱X–₱Y to work in" range; fixed ±% vs category-specific).
+- **`surplusMode`** — `'park'` (default · leftover shows as the explicit **Cushion** line, no leaf inflated above its market median) vs `'distribute'`.
+
+The engine reads solo `vendor_services.starting_price_php`, **GATE-scoped to the couple's market** (region · venue type · pax band · ceremony — the same eligibility gate the matcher runs), to compute each leaf's median. Bundles/packages are excluded (intra-bundle accounting, not standalone market price).
+
+**Benchmark seeds (the one non-market input).** When a leaf has **fewer than `minSampleN`** solo prices, the engine falls back to a **per-leaf BENCHMARK price the admin seeds**. These seeds are the **ONLY non-market numbers in the engine** — they are **owner/admin-set and NEVER invented** ([[project_setnayan_pax_based_pricing]]). Every benchmark edit is audit-logged (`admin_audit_log`, action `budget_benchmark_seed_changed`, before/after + reason).
+
+### B · Behavioral-data governance (most-protected data class)
+
+The couple's allocation choices are captured as a first-party behavioral dataset — Setnayan's edge, and a **most-protected class** (§7). Governance is privacy-by-design:
+
+- **No blanket admin read of raw Layer-1.** Admins get **NO blanket read** of the identified, per-event `budget_allocation_decisions` table — enforced at **RLS** (couple-own-only via canonical `current_event_ids`; aggregation runs as service-role).
+- **Raw / bulk export sits behind two gates.** Any raw-layer access or bulk export of behavioral data requires the **TWO-ADMIN approval gate** (§ 4) **plus** an **access audit log** entry — who exported what, when, and why.
+- **Dashboards read de-identified Layer-2 only.** Admin trend / effectiveness dashboards (**"trending services"**, **"effective services"**, upsell signals) read **ONLY the de-identified Layer-2 aggregates** — segment-keyed (budget band · region · pax band · event type · leaf), aggregate + **minimum-N / k-anonymity** so a thin segment can't re-identify a couple. PII never crosses into Layer-2.
+- **Insights dashboard BUILT (PR #1000) — Layer-2 table is the follow-on.** The admin insights dashboard ships now: it aggregates the Layer-1 snapshots **on-the-fly via the service-role client with the min-N / k-anonymity gate** (admins see patterns, never raw rows). Still follow-on: a dedicated **de-identified Layer-2 table** + its **cron-free** on-write/`after()` rollup ([[project_setnayan_cron_free]]) for scale, and the gated **two-admin raw-export** flow.
+
+**Upsell rule.** "Push more services to a client" uses **that client's own data + de-identified population patterns** — NEVER one couple's identifiable data to target another.

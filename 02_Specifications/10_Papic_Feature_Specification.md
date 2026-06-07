@@ -217,6 +217,24 @@ When a guest uses an unlocked template to render their personal reel, Setnayan's
 
 Music cost is now ₱0 because Setnayan owns the catalogue outright — no annual licensing fee, no per-render charge, no Artlist/Musicbed dependence. See companion playbook for the music-generation strategy.
 
+### Papic Guest — Marginal cost basis (owner-locked 2026-06-07)
+
+> ⚠ AS-BUILT cost frame for the **Papic Guest (disposable-camera-per-guest)** SKU — 24 photos + 10×5s clips per guest, **one flat price up to 250 pax**. Its **only** marginal cost is **R2 storage**; every other component is ₱0.
+
+- **Face recognition / auto-tagging — ₱0.** Runs **on-device** in the native capture app (iOS Vision / Android ML Kit + a bundled embedding model). The phone does the compute, so there is **no cloud face-API charge** and **biometric data never leaves the device** (gold-standard RA 10173). Web-upload fallback uses a self-hosted open model → still ₱0 metered (your own compute only). Never a paid cloud face API.
+- **Monogram / logo overlay — ₱0.** Stamping the couple's logo onto photos is a template overlay; if the couple **uploads their own transparent-background file** there is no generation cost at all. (Bespoke AI generation via Recraft is the *only* metered exception platform-wide, ~₱50, and applies to the Animated Monogram SKU — not to Papic Guest.)
+- **Renders / filters — ₱0** (template composites on own infra) · **egress — ₱0** (R2 free egress).
+
+**Storage cost** (R2 ≈ ₱7.5/GB lifetime — 3-mo full-res hot → compressed for the 5-yr retention tail):
+
+| Guest count | Media (~190 MB/guest) | R2 cost |
+|---|---|---|
+| 100 pax | ~19 GB | ~₱143 |
+| 200 pax | ~38 GB | ~₱285 |
+| 250 pax (flat-price ceiling) | ~47.5 GB | ~₱356 |
+
+So Papic Guest's true COGS at the 250-pax ceiling is **~₱356 (storage only)** → against ₱1,500, **~76% margin**. This supersedes the older "~₱150–₱200 cloud-fee per event" basis for the per-guest disposable SKU (the on-device-face decision removed the only metered AI line).
+
 ### The Tagging System
 
 QR-driven tagging is the spine of how Papic photos become navigable instead of a 2,000-photo wall to scroll. Both tiers ship with the same tagging system.

@@ -47,7 +47,7 @@ Owner-side action items reset for V2 (different BIR posture — Setnayan as publ
 
 **Vendor-side subscriptions (28-day prepaid blocks):** Pro Vendor ₱1,999/28-day (1 category lock · max 5 sub-seats) · Enterprise ₱5,499/28-day (multi-category · unlimited sub-accounts).
 
-**Vendor-side token packs (5 tiers at baseline ₱250/token):** 4 tokens ₱1,000 · 10 tokens ₱2,400 · 25 tokens ₱5,500 · 50 tokens ₱10,000 · 100 tokens ₱18,000.
+**Vendor-side token packs (₱100/token flat · sizes 4/10/25/50/100 · no discount — bulk earns bonus tokens on top):** superseded the ₱250-baseline ladder 2026-06-04 ("no more 250"), see `Price_Reconciliation_2026-06-04.md`.
 
 **Manpower fulfillment:** ₱15,000 flat-rate vendor crew SKU. Setnayan handles ₱0 (offline cash). 2-token deduction from claiming vendor's wallet stamps Vendor ID as event owner-stamp.
 
@@ -89,7 +89,7 @@ Each phase ships as 1-5 PRs auto-merged on green per [[feedback_setnayan_pr_auto
 
 **Phase E · Telemetry endpoints + 14-token stacking** (Task #7 · ~5 days) — 7 telemetry checkpoint endpoints (Papic file-volume · Panood RTMP duration · Patiktok WASM render · Pabati guest clips · SDE callback · Camera Bridge transit · Live Wall WebSocket) · 14-token stacking ladder consumes `execute_manpower_telemetry_reward()` · 45-day voucher expiry lazy-eval.
 
-**Phase F-Bid · Bid/RFP marketplace** (Task #13 · ~3-5 days · added 2026-05-28 per owner "we do it now") — `couple_briefs` + `vendor_bid_submissions` tables · 3-tier brief valuation (Tier 1 ₱<20k = 1 token · Tier 2 ₱20k-₱100k = 3 tokens · Tier 3 ₱100k+ destination = 5-8 tokens sliding) · couple brief-authoring surface at `/dashboard/[eventId]/briefs/new` · vendor bid-inbox at `/vendor-dashboard/bid-inbox` · token deduction via `consume_vendor_assets()` atomic on bid submission · admin moderation queue (per 0023 § 6 Disputes pattern) · RLS (vendor reads briefs in their canonical_service coverage · couples read own · admin reads all). High-valuation brief token sink drains excess vendor balances per blueprint Part 2 § 2.
+**Phase F-Bid · Bid/RFP marketplace** (Task #13 · ~3-5 days · added 2026-05-28 per owner "we do it now") — `couple_briefs` + `vendor_bid_submissions` tables · region-weighted token burn to answer (1–3 tokens = ₱100/₱200/₱300, ₱300 ceiling · banded by the wedding region's **minimum wage**: low-wage 1 · hubs 2 · NCR/CALABARZON/C.Luzon 3 · keyed to the wedding's region, **never by booking size** · repriced 2026-06-05 from 3‑4‑5‑6, see `Token_Economy_Flow_Map_2026-06-01.html`) · couple brief-authoring surface at `/dashboard/[eventId]/briefs/new` · vendor bid-inbox at `/vendor-dashboard/bid-inbox` · token deduction via `consume_vendor_assets()` atomic on bid submission · admin moderation queue (per 0023 § 6 Disputes pattern) · RLS (vendor reads briefs in their canonical_service coverage · couples read own · admin reads all). ~~High-valuation brief token sink drains excess vendor balances~~ — retired with the by-booking-value model (2026-06-03); the burn is now region-weighted, flat within a band.
 
 **Phase F · Manpower flow + 2-token handshake** (Task #8 · ~3 days) — ₱15k manpower SKU surface · 2-token handshake fee deduction via `consume_vendor_assets()` · admin audit · vendor stamping for token rewards. BIR-exempt leg per blueprint Part 3 § Payment Flow.
 
@@ -119,6 +119,8 @@ Each phase ships as 1-5 PRs auto-merged on green per [[feedback_setnayan_pr_auto
 | ~2026-07-05 → 07-10 | **Phase J · spec repaper** | All iteration .md updates · status anchors · Pricing.md · memory files · .docx mirrors. Ends V1→V2 transition. |
 
 Public launch (target 2026-12-01 per [[project_setnayan_pilot_timeline]]) ships V2 architecture as the canonical baseline. Owner's December 2026 wedding is the dogfood anchor for V2.
+
+> **Gate before announcing public piloting:** run `Pre_Public_Pilot_Hardening_2026-06-04.md` — Part A copy-resistance/IP (matching engine confirmed server-side; rate-limit/bot-protect public surfaces; anti-scrape ToS + trademark + trade-secret) and Part B data-security (RLS layer verified strong; fix the HTTP edge — security headers/CSP + rate limiting — plus the `SETNAYAN_DEMO_MODE` prod foot-gun, RA 10173 hard-delete/breach-runbook, and PII-in-logs scrubbing). The closed 2026-06-01 pilot does not need it; the public announcement does.
 
 ---
 

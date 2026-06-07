@@ -48,9 +48,38 @@ Guests and admins do **not** get these funnels — they keep the lighter Driver.
 | **Religion / tradition** *(if Religious or Mixed)* | **`ceremony_type`** (+ **`secondary_ceremony_type`** when Mixed) — Catholic live; Christian · INC · Muslim · Cultural "coming soon" → notify | create-event (0043) | religion-match vendor filtering · officiant auto-resolve · faith-aware copy. **Mixed = multi-select capped at exactly 2** (rolling — a 3rd pick drops the first · owner 2026-06-01) → each tradition pre-sets its own dietary + religion-match + protocols. **HALAL pre-lock (owner 2026-06-01):** Muslim → HALAL-certified + alcohol-free pre-locked · INC → alcohol-free pre-locked (faith-correct: INC = alcohol-free, Muslim = halal) — on food/bar categories on the prefs screen. |
 | **Wedding name** · Bride first + last · Groom first + last | `events.display_name` (friendly "First & First" pair) **+ `events.bride_first_name` · `bride_last_name` · `groom_first_name` · `groom_last_name`** (full names) | create-event | monogram (first-name initials) · invitation + website full names · website slug · chrome. **Four distinct fields (owner 2026-06-04):** caret auto-starts at **Bride first** · **Enter** walks first→last→first→last then closes the keyboard · the **monogram's gold frame shows from the start (muted draft) and brightens once all four are in** (gentle pop + "✦ Your monogram" caption). |
 | **Wedding date** | `events.date_mode` (`specific`/`window`) + `events.event_date` (final, resolved) + `event_date_precision` · `events.date_candidates DATE[]` (specific, 1–4) · `events.date_window_start`/`date_window_end` (flexible window) | create-event / wizard | **Inline calendar, limited today → +3 years (36-month cap), no past dates** (owner 2026-06-01). **TWO modes (owner 2026-06-01, merged from 3):** **Specific dates** = pick **1–4 candidate dates** (1 date = a valid set, absorbing the old "exact" single mode) · **Flexible window** = a start+end span ≤30 days inclusive. **Live-shrinking 90-day cluster (owner 2026-06-01):** in Specific mode, once ≥1 date is picked the selectable window = `[max(picked)−90d, min(picked)+90d]` (±3 months) — it shrinks as the set spreads; at 4 dates the calendar locks (picked days still removable to swap). The date isn't the couple's preference but the candidate **all chosen vendors are free** — a 1–4-date set or a contiguous span both resolve through the **same vendor-availability convergence** at shortlist/lock time, stamping the final `event_date` (highly synced to vendors as their schedules fill). **Nugget bank** surfaces what the candidates share (all Saturdays / all weekends / same month / same season / numerology / cluster span), framed around vendor scheduling. Drives countdown · Today's Focus scheduling · vendor availability. |
-| **Area(s)** *(not venue type · ⚠ amended 2026-06-04)* | couple picks **up to 2 areas** to *search for a reception venue* AND as the **Phase-1 working anchor** (the area's city centroid drives location filtering while no venue is locked); the stored anchor is the **chosen reception venue + coords** (`events.venue_latitude/longitude`), NOT `events.region`. Region kept only as an optional display label. | onboarding → settings | **Phase 1:** area centroid = location filter (always-on, even pre-venue). **Phase 2:** **realigns** to the chosen reception coords once locked. **Phase 3 (shortlist):** vendors labeled with which area/venue they're nearest to. (Vendor_Match §2a/§2b) |
+| **Area(s)** *(not venue type · ⚠ amended 2026-06-04 · ⚠⚠ persistence REVERSED 2026-06-05 → see §3.0a)* | couple picks **up to 2 areas** to *search for a reception venue* AND as the **Phase-1 working anchor** (the area's city centroid drives location filtering while no venue is locked); the stored anchor is the **chosen reception venue + coords** (`events.venue_latitude/longitude`), NOT `events.region`. Region kept only as an optional display label. | onboarding → settings | **Phase 1:** area centroid = location filter (always-on, even pre-venue). **Phase 2:** **realigns** to the chosen reception coords once locked. **Phase 3 (shortlist):** vendors labeled with which area/venue they're nearest to. (Vendor_Match §2a/§2b) |
 | **Estimated pax — EXACT drag line (10− → 500+) PAIRED with an always-on "Exact count" number box + a live VIBE PHOTO** (owner 2026-06-01) | `events.estimated_pax` (the **exact** number — can be **below 10 or above 500** via the box; "not sure" = **Skip**) | Today's Focus card #2 | **sets the starting headcount we share with vendors** + the **exact-capacity** hard-filter + personalizes the step-9 totals · sub copy: *"Your starting headcount, shared with vendors — be as specific as you can for the best matches."* **Photo-driven (owner 2026-06-01 · "create a more attractive way of showing the pax · an ideal vibe of a wedding with that number of pax · so onboarding doesn't feel like an interview alone"):** a **hero PHOTO** in the viewzone shows what a wedding at that scale feels like, with a caption (tier name + one warm line) over a dark scrim — this **replaces the old cost-data nugget**. **Five photo tiers (Filipino wedding scenes, generated via Recraft · `assets/pax/t1–t5.webp` · palette-gradient fallback):** **≤25** *Intimate · civil* — "Just you and your closest few — an unhurried, personal day" (covers the **civil-of-5** case the owner raised) · **26–80** *Warm & intimate* · **81–200** *The classic size* · **201–400** *Grand* · **401+ / 500+** *A grand fiesta*. **Two synced inputs** — drag the slider OR type in the box: (i) **slider in 10–500** → the box mirrors it live; (ii) **type 10–500** → the slider moves in real time; (iii) **type >500** → the slider parks at the **500+** end + the box holds the exact figure (e.g. 800); (iv) **type <10** → the slider parks at the **10−** end + box holds it (e.g. **5**); (v) **drag *onto* an open end (10− or 500+)** → the box goes **blank with a placeholder** so they enter the precise figure. **No snapping** (continuous, 1-guest steps). Readout shows the exact number, or **"500+"** / **"Under 10"** at an open end, with **correct grammar** (*"1 guest"* singular, else *"guests"*). The count is the pricing **floor** ("they cannot go lower than this" · couples grow their list up to it). Big-serif readout + gold-fill track + mulberry thumb + the labeled "Exact count" box in the **tapzone**; default 150. *(Superseded: the 5-chip ladder, the 50-step snap, the slider-max auto-grow, the **50-guest floor** → now **10−**, and the cost-data per-head nugget — the photo + emotional caption is the nugget now; the per-head insight lives on the budget screen.)* |
 | **Estimated budget — photo-driven feel bands · range = MEDIAN per-head ±20% (owner 2026-06-01)** — Essentials · Simple · Classic · Elevated · Premium · Luxury · No limit *(owner 2026-06-01: "Still figuring" removed — it duplicated No limit)* | `events.estimated_budget_centavos` (band median × pax) + a **new `events.budget_band` enum** (the chosen feel) — *eng: band → a centavos range; add `budget_band` or derive* | Today's Focus card | **the displayed range = ±20% of the band's median per-head** — i.e. the **initial price range vendors quote** for the guest count · recommendation ranking · shortlist budget. Per-head **medians**: Essentials ₱2,000 · Simple ₱3,500 · Classic ₱5,000 · Elevated ₱7,500 · Premium ₱11,000 · Luxury ₱15,000 (each ×0.8 → ×1.2 = the shown band, then × pax, **rounded to nearest ₱50k** with a collapse-nudge so small-pax ranges stay visible). **Photo-driven (owner 2026-06-01 "show how these different budgets would differ in looks"):** each band shows a **reception look-photo** (lean → opulent · `assets/budget/{band}.webp` · Recraft) that swaps on pick so the couple *sees* the production difference; **Classic is default-highlighted** as the ideal/recommended setup; **No limit deselects all bands** → a "No ceiling · the best of everything" top-end state (shows the luxury look). |
+
+### 3.0a · Canonical onboarding outputs — the 20 fields onboarding MUST persist (19 outputs + recommended-per-leaf · owner-locked 2026-06-05)
+
+Owner enumerated the definitive take-from-onboarding list. Reconciled to the **live `apps/web` commit** (`app/onboarding/wedding/actions.ts › commitOnboardingWedding`), which is **ahead of §3.0 above** in places — `region`, the shortlist→reception anchor, `mood_feel_key`, and `music_playlist_seed` already ship; the §3.0 "area transient / not stored" line and the `monogram_svg` reference are **stale and superseded here**. Build plan for the gaps: **`Onboarding_Canonical_Fields_Build_Plan_2026-06-05.md`** — **G1–G4 CLOSED 2026-06-05 (PR #1040)**: role → `event_moderators`, area picks → `style_preferences.search_areas`, taxonomy picks → `style_preferences.interested_categories`, basic palette → `style_preferences.basic_moodboard`. Only the **vendor** ≤3/leaf/location recommendation fan-out under #11 remains. #20 (recommended in-app add-ons per chosen leaf) also shipped (PR #1040).
+
+| # | Field | Persisted to | Status |
+|---|---|---|---|
+| 1 | Bride's name | `events.bride_name` (+ first guest-list row) | ✅ shipped |
+| 2 | Groom's name | `events.groom_name` (+ second guest-list row) | ✅ shipped |
+| 3 | You (if helper) | signing user = `event_members.user_id` (Google identity) + **role** → `event_moderators.role_subtype` (bride/groom direct · helper → `family_helper` · null → `partner1`; auto-accepted first host, 0048 `PERMISSION_TEMPLATES`) | ✅ **shipped (G1 · PR #1040, 2026-06-05)** |
+| 4 | Monogram | `events.monogram_frame_key` + `events.monogram_font_key` | ✅ shipped *(supersedes `monogram_svg`)* |
+| 5 | Type of wedding | `events.ceremony_type` + `events.is_mixed_ceremony` | ✅ shipped |
+| 6 | Religion | `events.ceremony_type` (+ `events.secondary_ceremony_type` for Mixed) | ✅ shipped |
+| 7 | Target dates | `events.date_mode` + `date_candidates[]` / `date_window_start`·`end` | ✅ shipped |
+| 8 | Target location | `events.region` + `venue_latitude/longitude` (primary pick centroid) + the up-to-2 area picks → `style_preferences.search_areas` | ✅ **shipped (G2 · PR #1040)** *(reversed the 2026-06-04 transient lock)* |
+| 9 | Pax | `events.estimated_pax` | ✅ shipped |
+| 10 | Budget | `events.budget_band` + `events.estimated_budget_centavos` | ✅ shipped |
+| 11 | Services to look for *(= the taxonomy picks)* | ✅ picks persisted → `style_preferences.interested_categories[]` (PR #1040). The **vendor** ≤3/leaf/location recommendation fan-out (reception-anchored #18, else the 2 areas #8) stays a follow-on | 🟡 **picks persisted (G3 · PR #1040); vendor fan-out pending** |
+| 12 | Reception venue type | `events.venue_setting` (derived) + `style_preferences.reception` | ✅ shipped |
+| 13 | Ceremony venue type | `events.style_preferences.ceremony` (display blob) | 🟡 display-only; matching = Phase A2 |
+| 14 | Catering type | `events.style_preferences.{cuisine,serviceStyle,dietary}` | 🟡 display-only; matching = Phase A2 |
+| 15 | Photo & Video | `events.style_preferences.{pvLook,pvNeed,pvIncluded}` | 🟡 display-only; matching = Phase A2 |
+| 16 | Song list | `events.music_playlist_seed[]` + `event_song_picks` | ✅ shipped |
+| 17 | Basic Moodboard | `events.mood_feel_key` + the derived `FEELS[feel]` palette → `style_preferences.basic_moodboard` (0010 baseline; null for `others`/none) | ✅ **shipped (G4 · PR #1040)** |
+| 18 | First reception venue | `event_vendors` (status `considering`) → `recomputeReceptionAnchor` → `venue_latitude/longitude` | ✅ shipped |
+| 19 | In-app services | `events.style_preferences.interested_services` (Your Plan / Boost & enhance) | ✅ shipped (G5) |
+| 20 | Recommended services *(per chosen leaf)* | the pick-matched in-app add-ons (`PICK_TO_INAPP` — every leaf → ≥1, deduped to ≤14) pre-added to `style_preferences.interested_services` | ✅ shipped (PR #1040 · owner 2026-06-05) |
+
+**Location lock reversed (owner 2026-06-05):** the 2026-06-04 "area pick is a transient search scope · NOT stored" lock (the §3.0 Area row + the two bullets under it) is **superseded** — the area pick(s) now persist. `events.region` already lands a single key; the build seeds `events.venue_latitude/longitude` from the primary area's centroid so distance filtering works **pre-venue** (the Phase-1 working anchor), with the real reception-venue coords overwriting it once a venue is shortlisted (unchanged). Matching still anchors on the reception venue when one is present.
 
 **What the study changed (the fix):**
 - **Kind of wedding → religion / tradition (two steps), owner-corrected 2026-05-30.** Couples first pick the *kind* (Religious · Civil · Mixed), then — for Religious/Mixed — the *faith* (Catholic live; others coming soon). Together they resolve `ceremony_type`. **`venue_setting` moves OUT of onboarding** — it's set later (event settings / wizard); onboarding asks **region** instead.
@@ -110,23 +139,22 @@ The lean 14 (§3.1) predates the **Vendor Match Personalization** lock ([Vendor_
 
 **Religion + certifications in the flow** (per the owner's 2026-06-01 add): screen 4 (faith) pre-sets HALAL / alcohol-free + religion-match; screen 11 surfaces the **HALAL / dietary confirm inline** (+ opt-in). Category-compliance certs (drone CAAP · pyro · venue insurance) are **not** onboarding questions — too niche — they're inline-refine filters when browsing that category (Vendor Match Personalization §5b).
 
-### 3.2 · "Your Plan" — the end-screen (owner-designed)
+### 3.2 · "Your Plan" + the in-app-services flow — the end screens (owner-REDESIGNED 2026-06-05)
 
-Not a paywall, a **plan summary**. Free-first so trust is built before any price appears. Three stacked sections:
+Not a paywall, a **plan summary** — free-first so trust is built before any price appears. **Reframed 2026-06-05** (shipped: PR #1016 free value + opt-ins · PR #1018 powerful Freebies · PR #1021 the à-la-carte services flow) to **lead with the free value, then ask, then offer — across three screens (14→16)**.
 
-1. **Everything you get free** — dashboard, marketplace + your shortlist, free wedding website, mood board, guest list, Today's Focus DIY essentials. *"All of this is yours, ₱0."*
-2. **Boosters matched to *your* wedding** — 2–4 paid add-ons chosen from their funnel answers, each with a one-line "why this fits you." Personalization rules (examples):
-   - **Big church wedding + relatives abroad / high guest count** → Panood livestream + Today's Focus ("Catholic weddings carry the most paperwork — we map every deadline")
-   - **Style-forward (mood-board heavy)** → Animated Monogram + Pro Website
-   - **Budget-conscious / intimate** → Today's Focus + Save-the-Date video
-   - **Young / social** → Papic + Patiktok
-   - Today's Focus is the anchor for everyone ("keep the guidance going").
-3. **Your package · 10% off, one payment** *(LOCKED)* — everything they picked, founder price, as a **pre-order**: live services unlock now, coming-soon ones unlock the day they ship, with a credit/refund if any is ever dropped. (Picker is interest-only — prices + the vs-elsewhere comparison reveal *here*.)
-4. **Or get it all → Pro Bundle ₱24,999** (~50% off à la carte) — auto-steer here if their picks would total more than the bundle.
+**Screen 14 · Your Plan.**
+1. **Free-value showcase** — a swipeable card per free tool, each with **⏱ time saved** + the **market-equivalent "what you'd pay elsewhere"**, the elsewhere price **struck through → a gold *Free*** (apparatus rule: a tool, not hired people / DIY toil); a big serif ₱-total + hours **hero** counts up; closes on a mulberry **seal** tally. Numbers come from the locked **Time & Money Saved model §H/§I** (`computeOnboardingSavings` per-driver breakdown — single source, no invented figures). Typical ≈ **₱63.5K · ≈290 hrs** → round-down *"₱60,000+ · 250+ hours — saved, free."* Free **website** + **monogram** are labelled **"Basic"** (vs the paid Pro Website / Animated Monogram).
+2. **"Keep guiding me" — free opt-in (default ON).** The free per-service deadline timeline + what-to-do-next guidance (₱0 → `events.style_preferences.guidance_opt_in`). **KEPT free guidance — NOT the removed Today's Focus brand/SKU** (retired 2026-06-05; no "Today's Focus"/"Concierge" wording in the UI).
+3. **"Reach my best matches" — opt-in (default OFF · explicit consent · RA 10173)** + a **1–5 "inquiries per category" stepper** (default 3). When ON, the commit fans the first inquiry to the **top-N best-fit vendors per picked category** (idempotent — one thread per (event, vendor); the founder-only pool caps the real count). When OFF, nothing is sent.
 
-Quiet **"Continue with the free plan"** that never punishes the skip.
+**Screen 15 · Boost & enhance** *(replaces the retired bundle).* A browsable carousel of paid in-app services; tapping a card opens a **full detail** — benefit copy + Setnayan price + **"you save ₱X vs hiring [role]"** (apparatus rule). Multi-select adds to the couple's interested set. (Live = buyable; in-build/coming-soon = "notify me" per §3.5. Card prices follow the v2 customer catalog in production; the in-shell `SVC` demo prices are a flagged stand-in.)
 
-*Optional (parked):* one honest contrast line on this screen — *"A wedding planner charges ₱X+; your plan here starts free."* — owner to decide.
+**Screen 16 · Services you're interested in** *(terminal).* A summary of the selected services + a running **total + total saved**, then **[Purchase Now]** and a quiet **"continue with the free plan"** link. Purchase Now commits the event, persists the picks (`events.style_preferences.interested_services`), and routes to the dashboard **Services** tab to complete payment **per service via the existing 0034 apply-then-pay** (no in-onboarding charge; no multi-item cart). Continue-free drops the picks → Home.
+
+**Retired 2026-06-05:** the single budget-matched **bundle** (`MatchedBundle`) + its 10%-off one-payment pre-order — superseded by the à-la-carte screens 15–16. The §3.3 apparatus rule + §3.5 add-on library still govern the paid services shown on screen 15; the **free-tool** money+time figures live in `Time_and_Money_Saved_Model_2026-06-01.md` §H.
+
+*Sync status (2026-06-05):* the prototype `Onboarding_Wedding_Flow_2026-06-01.html` #screen-plan + this file's `.docx` mirror still show the pre-redesign layout — flagged in DECISION_LOG as a follow-up mirror.
 
 ### 3.3 · Customer services — price comparison + the apparatus rule (owner data 2026-05-30)
 
@@ -235,21 +263,21 @@ Each card carries **four canonical fields**: a **picker blurb** (interest-only, 
 ### 4.1 · The 0%-vs-15% pitch (vendor demo screen)
 
 **Beat 1 — the inquiry lands:**
-> *Maria & Juan are looking for a wedding photographer in Manila for Dec 18. They sent you an inquiry.*  →  **[ Reply · 1 token ]**
+> *Maria & Juan are looking for a wedding photographer in Manila for Dec 18. They sent you an inquiry.*  →  **[ Reply · 6 tokens ]**
 
-**Beat 2 — why that token is nothing:**
+**Beat 2 — why those tokens are nothing:**
 > ## Your sale is 100% yours.
 > Other platforms take a cut of every booking — often **15%** — just for handing you a lead. On a ₱1,000,000 wedding, that's **₱150,000 gone.**
 >
-> We don't want a peso of your sale. You pay **1 token (₱250)** to answer an inquiry from a couple who's *actually looking to book*. That's the whole cost — even on a ₱1,000,000 booking, we ask for one token. It just helps us run the app.
+> We don't want a peso of your sale. You pay a **flat region token cost — 6 tokens (₱600) in Metro Manila, fewer elsewhere** — to answer an inquiry from a couple who's *actually looking to book*. That's the whole cost — even on a ₱1,000,000 booking, it's the same flat token burn. It just helps us run the app.
 
 **Kill-shot table:**
 
 | On a ₱1,000,000 booking | Other platforms | Setnayan |
 |---|---|---|
 | Commission taken | −₱150,000 (15%) | **₱0** |
-| Cost to reach the lead | (inside the 15%) | 1 token · ₱250 |
-| **You keep** | ₱850,000 | **₱999,750** |
+| Cost to reach the lead | (inside the 15%) | 6 tokens · ₱600 (NCR) |
+| **You keep** | ₱850,000 | **₱999,400** |
 
 *Comparative-claim safety:* attribute "15%" to a category, not a named rival (*"platforms that take a cut of your sale charge up to 15%"*), or use a range (*"10–20%"*). The ₱1M math stays just as devastating.
 
@@ -258,7 +286,7 @@ Each card carries **four canonical fields**: a **picker blurb** (interest-only, 
 > ## Start with tokens.
 > *Each token answers one inquiry — one real chance to get booked.*
 >
-> Token packs: **4 · 10 · 25 · 50 · 100** — per-token price drops as the pack grows (₱250 → ~₱180).
+> Token packs: **4 · 10 · 25 · 50 · 100** — **₱100/token flat**; bigger packs come with **bonus tokens on top** (no per-token discount · bonus ladder owner-to-set · locked 2026-06-04).
 >
 > **+100 free tokens** when you verify your business before launch.
 >
@@ -323,7 +351,7 @@ The real Pro→Enterprise jump (§6) is **team + scale + volume**, never just ra
 | Bring in outside clients | ✓ | ✓ | ✓ | ✓ | — |
 | Share inquire link | — | — | ✓ | ✓ | — |
 | Recommend Setnayan services | — | ✓ | ✓ | ✓ | — |
-| **Price** | ₱0 | ₱0 | **₱2,499 / 28 days** | **₱5,499 / 28 days** | — |
+| **Price** | ₱0 | ₱0 | **₱2,499–₱3,999 / 28 days** (region · built pilot ₱499/wk → sunsetting) | **₱5,499–₱8,499 / 28 days** (region · not yet built) | — |
 
 *Reading notes:* "Token bonus qualified" = earn free tokens by recommending Setnayan services to your booked couples. "Onboarding bundle maker" = a vendor's own custom couple-intake tool (distinct from these three onboardings). Booster column = token cost to temporarily boost that feature for a window.
 
@@ -331,11 +359,11 @@ The real Pro→Enterprise jump (§6) is **team + scale + volume**, never just ra
 
 ## 7 · Token economics (reference)
 
-- **1 token = ₱250** baseline (cheaper per token in bigger packs, down to ~₱180).
-- **1 token = answer / engage 1 inquiry** — unlocks chat + reveals your name + video + quote.
-- **0% commission** on bookings — the token is the *only* per-engagement charge, flat regardless of booking size (₱250 on a ₱1M booking).
-- **Earn** bonus tokens (not just buy) via "Recommend Setnayan services" (Token Bonus Qualified, Verified+).
-- **100 free founder tokens** on verification before launch — delivered in onboarding #2.
+- **₱100 per token, flat** (sizes 4/10/25/50/100 · **no per-token discount** · **bulk orders earn bonus tokens on top**, ladder owner-to-set). Owner-locked 2026-06-04 ("no more 250" + flat-price-with-bonus-tokens). Canonical source `Token_Economy_Flow_Map_2026-06-01.html`.
+- **Region-weighted burn to answer an inquiry** — banded by the wedding region's **minimum wage**: lowest-wage regions **1** · regional hubs **2** · NCR/CALABARZON/Central Luzon **3** tokens (= **₱100 / ₱200 / ₱300**, ₱300 ceiling), keyed to the wedding's region, flat within a band, **never by booking size** (repriced 2026-06-05, supersedes 3‑4‑5‑6). Answering unlocks chat + reveals your name + video + quote.
+- **0% commission** on bookings — tokens are the *only* per-engagement charge, flat regardless of booking size (on a ₱1M booking you still pay only the region's token burn, never a percentage).
+- **Earn** bonus tokens (not just buy) via "Recommend Setnayan services" (Token Bonus Qualified, Verified+) — credited back into the same wallet you spend on leads.
+- **100 free founder tokens** on verification before 31 Jan 2027 — delivered in onboarding #2.
 
 ---
 
@@ -351,7 +379,7 @@ The real Pro→Enterprise jump (§6) is **team + scale + volume**, never just ra
 | Screen granularity | Defaulted: one concept/screen — *confirm* |
 | Customer "Your Plan" contrast line | Optional — *owner to decide* |
 | **Verified price** | **₱0 — RESOLVED 2026-05-30.** Verified is genuinely free (no one-time badge fee). Onboarding #2's "stay Verified — free" line is accurate. |
-| **Pro/Enterprise cadence** | **28-day prepaid block — RESOLVED 2026-05-30.** Shown as "₱2,499 / 28 days" + "₱5,499 / 28 days." Annual ₱24,999 / ₱54,999 (savings ₱7,488 / ₱16,488 = ~3 cycles, already computed on 13 blocks/yr). |
+| **Pro/Enterprise cadence** | **28-day prepaid block — RESOLVED 2026-05-30.** Shown as "₱2,499 / 28 days" + "₱5,499 / 28 days." Annual ₱24,999 / ₱54,999 (savings ₱7,488 / ₱16,488 = ~3 cycles, already computed on 13 blocks/yr). **Superseded 2026-06-03 → region-tiered:** Pro ₱2,499–₱3,999 · Enterprise ₱5,499–₱8,499 / 28 days (base→NCR); pilot ships flat base. See `Token_Economy_Flow_Map_2026-06-01.html`. |
 | **Pakanta price** | **₱2,499 — RESOLVED 2026-05-30** (owner-confirmed; matches catalog + §3.3). Still reconcile vs the live `platform_retail_catalog_v2` row at engineering time. Other booster + token-pack prices still pulled from `v2-catalog.ts` / `Pricing.md` at copy-draft time. |
 
 ---

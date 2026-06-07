@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Setnayan · Onboarding Bundle Builder (admin)</title>
+<!-- ADMIN PROTOTYPE 2026-06-07 · composes the TWO packages couples see in onboarding Stage 4.
+     Pick items → auto-sums the "worth" (list) price → set a discounted package price → savings/%
+     computed live. Per-item prices are EDITABLE here (prices are illustrative/owner-set; the locked
+     SKU table is the seed). Feeds the onboarding s4bundle offer. Clean Editorial design system. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --ink-soft:#4F535B; --ink-faint:#8A8F97;
+    --gold:#C5A059; --gold-deep:#A88340; --gold-wash:#F4ECD8;
+    --mulberry:#5C2542; --mulberry-deep:#4A1D36; --mulberry-wash:#F5E8EE;
+    --line:rgba(30,34,41,.1); --line-2:rgba(30,34,41,.18); --surface:#fff;
+    --sans:'Manrope',-apple-system,system-ui,sans-serif;
+    --serif:'Cormorant Garamond',Georgia,serif;
+    --mono:'DM Mono',ui-monospace,monospace;
+    --ok:#2D6A4A; --ok-wash:#E7F1EB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#E9E6DF;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;
+    line-height:1.45;padding:24px 18px 60px;}
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  /* ── top bar ── */
+  .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
+  .brandlock{display:inline-flex;align-items:center;gap:9px;}
+  .blmark{width:26px;height:26px;}
+  .wm{font-family:var(--mono);font-size:12px;letter-spacing:.34em;color:var(--gold-deep);font-weight:500;}
+  .badge-admin{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--mulberry);background:var(--mulberry-wash);border:1px solid rgba(92,37,66,.2);border-radius:999px;padding:3px 9px;}
+  .bar-sp{flex:1}
+  .btn{font-family:var(--sans);font-weight:600;font-size:13px;border-radius:999px;padding:9px 16px;cursor:pointer;
+    border:1px solid var(--line-2);background:var(--surface);color:var(--ink);transition:.15s;}
+  .btn:hover{border-color:var(--gold);color:var(--gold-deep);}
+  .btn.primary{background:var(--mulberry);color:#fff;border-color:var(--mulberry);}
+  .btn.primary:hover{background:var(--mulberry-deep);color:#fff;}
+  h1{font-family:var(--serif);font-weight:600;font-size:32px;letter-spacing:-.01em;margin:14px 0 2px;}
+  .sub{color:var(--ink-soft);font-size:14px;max-width:680px;margin-bottom:4px;}
+  .note-illus{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--ink-faint);margin-bottom:20px;}
+  .note-illus b{color:var(--gold-deep);font-weight:500;}
+
+  /* ── layout ── */
+  .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:start;}
+  @media(max-width:880px){.grid{grid-template-columns:1fr;}}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 18px 20px;
+    box-shadow:0 1px 0 rgba(30,34,41,.02);}
+  .panel-h{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;}
+  .panel-t{font-family:var(--serif);font-weight:600;font-size:21px;}
+  .panel-c{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+  .panel-d{font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;}
+
+  /* ── catalog ── */
+  .search{width:100%;border:1px solid var(--line-2);border-radius:11px;padding:10px 13px;font-size:13.5px;
+    font-family:var(--sans);margin-bottom:14px;background:var(--paper);}
+  .search:focus{outline:none;border-color:var(--gold);}
+  .catgrp{margin-bottom:14px;}
+  .catgrp-h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);
+    margin:0 0 7px 2px;display:flex;align-items:center;gap:8px;}
+  .catgrp-h::after{content:'';flex:1;height:1px;background:var(--line);}
+  .item{display:flex;align-items:center;gap:11px;padding:9px 4px;border-bottom:1px solid var(--line);}
+  .item:last-child{border-bottom:none;}
+  .item-main{flex:1;min-width:0;}
+  .item-l{font-weight:600;font-size:13.5px;}
+  .item-d{font-size:11.5px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pwrap{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line-2);border-radius:9px;
+    padding:4px 7px;background:var(--paper);}
+  .pwrap .peso{font-family:var(--mono);font-size:12px;color:var(--ink-faint);}
+  .pin{width:58px;border:none;background:transparent;font-family:var(--mono);font-size:13px;color:var(--ink);
+    text-align:right;}
+  .pin:focus{outline:none;color:var(--gold-deep);}
+  .assign{display:flex;gap:5px;}
+  .abtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);
+    font-family:var(--mono);font-size:12px;font-weight:500;color:var(--ink-faint);cursor:pointer;transition:.13s;}
+  .abtn:hover{border-color:var(--gold);}
+  .abtn.on-a{background:var(--gold-wash);border-color:var(--gold);color:var(--gold-deep);}
+  .abtn.on-b{background:var(--mulberry-wash);border-color:var(--mulberry);color:var(--mulberry);}
+  .note-tag{font-family:var(--mono);font-size:9px;color:var(--gold-deep);background:var(--gold-wash);
+    border-radius:4px;padding:1px 4px;margin-left:6px;letter-spacing:.02em;}
+
+  /* ── bundle editors ── */
+  .bundles{display:flex;flex-direction:column;gap:18px;}
+  .bcard{border:1px solid var(--line-2);border-radius:16px;padding:16px;background:var(--surface);position:relative;}
+  .bcard.tag-a{box-shadow:inset 4px 0 0 var(--gold);}
+  .bcard.tag-b{box-shadow:inset 4px 0 0 var(--mulberry);}
+  .bc-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .bc-chip{font-family:var(--mono);font-size:10px;letter-spacing:.1em;font-weight:500;border-radius:6px;padding:3px 7px;}
+  .tag-a .bc-chip{background:var(--gold-wash);color:var(--gold-deep);}
+  .tag-b .bc-chip{background:var(--mulberry-wash);color:var(--mulberry);}
+  .name-in{flex:1;border:none;border-bottom:1.5px solid var(--line-2);font-family:var(--serif);font-weight:600;
+    font-size:21px;padding:2px 0;background:transparent;color:var(--ink);}
+  .name-in:focus{outline:none;border-color:var(--gold);}
+  .star{width:30px;height:30px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);
+    cursor:pointer;font-size:14px;color:var(--ink-faint);transition:.13s;}
+  .star.on{background:var(--gold);border-color:var(--gold);color:#fff;}
+  .tagline-in{width:100%;border:none;font-size:12.5px;color:var(--ink-soft);background:transparent;
+    margin-bottom:12px;font-family:var(--sans);}
+  .tagline-in:focus{outline:none;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;min-height:24px;}
+  .chip{font-size:11.5px;background:var(--paper);border:1px solid var(--line);border-radius:999px;
+    padding:3px 9px 3px 10px;display:inline-flex;align-items:center;gap:6px;}
+  .chip .x{cursor:pointer;color:var(--ink-faint);font-size:13px;line-height:1;}
+  .chip .x:hover{color:var(--mulberry);}
+  .chip .cp{font-family:var(--mono);font-size:10px;color:var(--ink-faint);}
+  .chip.bonus{background:var(--ok-wash);border-color:rgba(45,106,74,.25);}
+  .empty{font-size:12px;color:var(--ink-faint);font-style:italic;padding:4px 2px;}
+
+  .calc{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:9px;}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .row .lab{font-size:12.5px;color:var(--ink-soft);}
+  .row .lab small{display:block;font-size:10.5px;color:var(--ink-faint);}
+  .worth{font-family:var(--mono);font-size:15px;color:var(--ink);}
+  .price-in-wrap{display:inline-flex;align-items:center;border:1.5px solid var(--mulberry);border-radius:10px;
+    padding:5px 10px;background:var(--mulberry-wash);}
+  .price-in-wrap .peso{font-family:var(--mono);color:var(--mulberry);font-size:15px;}
+  .price-in{width:84px;border:none;background:transparent;font-family:var(--mono);font-size:17px;font-weight:500;
+    color:var(--mulberry-deep);text-align:right;}
+  .price-in:focus{outline:none;}
+  .pct-in-wrap{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:9px;
+    padding:4px 9px;background:var(--paper);}
+  .pct-in{width:40px;border:none;background:transparent;font-family:var(--mono);font-size:13px;text-align:right;color:var(--ink);}
+  .pct-in:focus{outline:none;color:var(--gold-deep);}
+  .save-line{display:flex;align-items:center;gap:8px;}
+  .save-pill{font-family:var(--mono);font-size:11px;letter-spacing:.04em;font-weight:500;border-radius:999px;
+    padding:4px 11px;background:var(--ok-wash);color:var(--ok);border:1px solid rgba(45,106,74,.25);}
+  .save-pill.warn{background:#FBE9E7;color:#B03A2E;border-color:rgba(176,58,46,.25);}
+  .timer-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);}
+  .timer-in{width:50px;border:1px solid var(--line-2);border-radius:7px;padding:4px 6px;font-family:var(--mono);
+    font-size:12px;text-align:center;background:var(--paper);}
+  .timer-in:focus{outline:none;border-color:var(--gold);}
+
+  /* ── preview modal (phone frame) ── */
+  .ovl{position:fixed;inset:0;background:rgba(30,34,41,.5);display:none;align-items:center;justify-content:center;
+    z-index:50;padding:20px;backdrop-filter:blur(3px);}
+  .ovl.show{display:flex;}
+  .ovl-close{position:absolute;top:18px;right:22px;color:#fff;font-size:30px;cursor:pointer;font-family:var(--serif);}
+  .phone{width:380px;max-width:94vw;height:780px;max-height:92vh;background:var(--paper);border-radius:30px;
+    overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.4);border:1px solid var(--line-2);}
+  .ph-top{padding:16px 22px 12px;flex:0 0 auto;}
+  .ph-brand{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
+  .ph-body{flex:1;overflow-y:auto;padding:4px 20px 20px;}
+  .ph-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:7px;}
+  .ph-h{font-family:var(--serif);font-weight:600;font-size:27px;line-height:1.08;margin-bottom:7px;}
+  .ph-p{font-size:13px;color:var(--ink-soft);margin-bottom:8px;}
+  .ai-anchor{background:var(--ink);color:var(--paper);border-radius:14px;padding:13px 15px;margin:12px 0 16px;}
+  .ai-anchor .t{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);}
+  .ai-anchor .timer{font-family:var(--mono);font-size:13px;color:#fff;}
+  .ai-anchor.ended .timer{color:#E6A;}
+  .bdl{border:1px solid var(--line-2);border-radius:16px;padding:15px;margin-bottom:14px;position:relative;background:var(--surface);}
+  .bdl.reco{border-color:var(--gold);box-shadow:0 6px 24px rgba(168,131,64,.16);}
+  .bdl-reco{position:absolute;top:-10px;left:15px;background:var(--gold);color:#fff;font-family:var(--mono);
+    font-size:9.5px;letter-spacing:.08em;border-radius:999px;padding:3px 10px;}
+  .bdl-cat{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px;}
+  .bdl-name{font-family:var(--serif);font-weight:600;font-size:23px;margin-bottom:5px;}
+  .bdl-desc{font-size:12.5px;color:var(--ink-soft);margin-bottom:11px;}
+  .bdl-price{display:flex;align-items:baseline;gap:9px;margin-bottom:9px;}
+  .bdl-now{font-family:var(--serif);font-weight:600;font-size:30px;color:var(--mulberry);}
+  .bdl-was{font-family:var(--mono);font-size:13px;color:var(--ink-faint);text-decoration:line-through;}
+  .bdl-save{font-family:var(--mono);font-size:10.5px;color:var(--ok);background:var(--ok-wash);border-radius:999px;padding:3px 9px;}
+  .bdl-items{font-size:11.5px;color:var(--ink-soft);line-height:1.6;border-top:1px solid var(--line);padding-top:9px;}
+  .bdl-items b{color:var(--ink);font-weight:600;}
+  .bdl-cta{display:block;width:100%;text-align:center;background:var(--mulberry);color:#fff;border:none;
+    border-radius:999px;padding:12px;font-family:var(--sans);font-weight:600;font-size:14px;margin-top:11px;cursor:pointer;}
+  .bdl.reco .bdl-cta{background:var(--gold-deep);}
+  .ph-free{text-align:center;font-size:12.5px;color:var(--ink-faint);margin-top:6px;text-decoration:underline;}
+
+  /* export modal */
+  .exp{background:var(--surface);border-radius:16px;padding:22px;max-width:560px;width:94vw;max-height:86vh;overflow:auto;}
+  .exp h3{font-family:var(--serif);font-size:22px;margin-bottom:4px;}
+  .exp p{font-size:13px;color:var(--ink-soft);margin-bottom:12px;}
+  .exp textarea{width:100%;height:300px;font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-2);
+    border-radius:10px;padding:12px;background:var(--paper);color:var(--ink);resize:vertical;}
+  .foot{margin-top:24px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);line-height:1.7;}
+  .foot b{color:var(--gold-deep);font-weight:500;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar">
+    <span class="brandlock">
+      <svg class="blmark" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18.5" stroke="#A88340" stroke-width="1.3"/><path d="M13 25c0-4 3-5 7-5s7-1 7-5-3-5-7-5" stroke="#A88340" stroke-width="1.6" stroke-linecap="round"/><path d="M27 15c0 4-3 5-7 5" stroke="#C5A059" stroke-width="1.6" stroke-linecap="round"/><line x1="20" y1="4" x2="20" y2="36" stroke="#A88340" stroke-width="1.1"/></svg>
+      <span class="wm">SETNAYAN</span>
+    </span>
+    <span class="badge-admin">Admin · Onboarding</span>
+    <span class="bar-sp"></span>
+    <button class="btn" onclick="openExport()">⤓ Export config</button>
+    <button class="btn primary" onclick="openPreview()">Preview as couple →</button>
+  </div>
+
+  <h1>Onboarding Bundle Builder</h1>
+  <p class="sub">Compose the <b>two packages</b> couples are offered in Stage 4. Assign items to <b>Bundle A</b> and <b>Bundle B</b>, name each, and the <b>"worth" price auto-sums</b> from the items. Then set the <b>discounted package price</b> — savings &amp; % compute live.</p>
+  <p class="note-illus"><b>CANONICAL pricing — premium stance (2026-06-08):</b> Essentials <b>₱12,999</b> (worth ₱22,492) · Complete <b>₱27,999</b> (worth ₱47,982) · Setnayan AI <b>₱3,999</b>. The full <b>18-service catalog</b> is loaded — the "worth" auto-sum now reconciles exactly to ₱22,492 / ₱47,982. Source: <b>Pricing_Canonical_2026-06-08.md</b>. <b>↔</b> An item can sit in A, B, both, or neither.</p>
+
+  <div class="grid">
+
+    <!-- ─────────── CATALOG ─────────── -->
+    <div class="panel">
+      <div class="panel-h"><span class="panel-t">Item catalog</span><span class="panel-c" id="catCount"></span></div>
+      <p class="panel-d">Tap <b>A</b> / <b>B</b> to add an item to a bundle. Edit any price inline.</p>
+      <input class="search" id="search" placeholder="Search items…" oninput="renderCatalog()">
+      <div id="catalog"></div>
+    </div>
+
+    <!-- ─────────── BUNDLES ─────────── -->
+    <div class="bundles">
+      <div class="bcard tag-a" id="ed-A">
+        <div class="bc-top">
+          <span class="bc-chip">BUNDLE A</span>
+          <input class="name-in" id="name-A" value="Essentials" oninput="onName('A')">
+          <button class="star" id="star-A" title="Mark Best value" onclick="toggleStar('A')">★</button>
+        </div>
+        <input class="tagline-in" id="tag-A" value="Setnayan AI + Animated Monogram + Custom QR + Pro RSVP + Event & Editorial Website + Papic Guests + Guest Stories." oninput="onTag('A')">
+        <div class="chips" id="chips-A"></div>
+        <div class="calc" id="calc-A"></div>
+      </div>
+
+      <div class="bcard tag-b" id="ed-B">
+        <div class="bc-top">
+          <span class="bc-chip">BUNDLE B</span>
+          <input class="name-in" id="name-B" value="Complete" oninput="onName('B')">
+          <button class="star on" id="star-B" title="Mark Best value" onclick="toggleStar('B')">★</button>
+        </div>
+        <input class="tagline-in" id="tag-B" value="Everything in Essentials, plus every paid service — your whole wedding, run for you." oninput="onTag('B')">
+        <div class="chips" id="chips-B"></div>
+        <div class="calc" id="calc-B"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="foot">
+    <b>How it feeds onboarding:</b> these two bundles render on the Stage 4 <b>s4bundle</b> screen — the
+    "worth" is the struck-through full price, the package price is the first-purchase promo, and the timer is the
+    30-min first-purchase window (after it expires the price reverts to the worth/full price). <b>·</b>
+    Bonuses (₱0 items) show as free inclusions. <b>·</b> Use <b>Export config</b> to hand the JSON to the build.
+  </p>
+</div>
+
+<!-- ── PREVIEW MODAL ── -->
+<div class="ovl" id="previewOvl">
+  <span class="ovl-close" onclick="closeModal('previewOvl')">×</span>
+  <div class="phone">
+    <div class="ph-top">
+      <div class="ph-brand"><svg class="blmark" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18.5" stroke="#A88340" stroke-width="1.3"/><path d="M13 25c0-4 3-5 7-5s7-1 7-5-3-5-7-5" stroke="#A88340" stroke-width="1.6" stroke-linecap="round"/><path d="M27 15c0 4-3 5-7 5" stroke="#C5A059" stroke-width="1.6" stroke-linecap="round"/><line x1="20" y1="4" x2="20" y2="36" stroke="#A88340" stroke-width="1.1"/></svg><span class="wm">SETNAYAN</span></div>
+    </div>
+    <div class="ph-body">
+      <div class="ph-eyebrow">Make it unforgettable</div>
+      <div class="ph-h" id="pvH">One-time offer, just for today.</div>
+      <div class="ph-p">Build the wedding once — let Setnayan run it. These two packages are first-purchase only.</div>
+      <div class="ai-anchor" id="pvAnchor">
+        <div class="t">First-purchase price ends in <span class="timer" id="pvTimer">30:00</span></div>
+      </div>
+      <div id="pvBundles"></div>
+      <div class="ph-free">Or keep planning free →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── EXPORT MODAL ── -->
+<div class="ovl" id="exportOvl">
+  <span class="ovl-close" onclick="closeModal('exportOvl')">×</span>
+  <div class="exp">
+    <h3>Bundle config</h3>
+    <p>Drop this into the onboarding's Stage 4 (`BUNDLES`) or hand it to the build. Prices in PHP.</p>
+    <textarea id="exportTA" readonly></textarea>
+    <div style="margin-top:12px;text-align:right;"><button class="btn primary" onclick="copyExport()">Copy</button></div>
+  </div>
+</div>
+
+<script>
+/* ══════════ CATALOG — seeded from the locked SKU table (illustrative/editable) ══════════ */
+/* CANONICAL 18 paid services — Pricing_Canonical_2026-06-08.md (premium stance). Worth sums:
+   Essentials (8) = ₱22,492 · Complete (18) = ₱47,982. Event Website is now PAID (₱1,999);
+   Editorial Website ₱7,999. Free-tier features (Schedule/Budget/Guest List/Seat Plan/RSVP/
+   Mood Board) are NOT à-la-carte SKUs — they're free, so they're not in this catalog. */
+var CATALOG=[
+  {k:'setnayan_ai',      cat:'Planning / AI',   l:'Setnayan AI',       d:'Full match / sort / cross-ref + planning workspace', p:3999},
+  {k:'animated_monogram',cat:'Brand & Invites', l:'Animated Monogram', d:'Bespoke monogram, drawn live on open',               p:1999},
+  {k:'custom_qr',        cat:'Brand & Invites', l:'Custom QR',         d:'QR Code Personalized · per guest',                   p:999},
+  {k:'pro_rsvp',         cat:'Brand & Invites', l:'Pro RSVP',          d:'Premium RSVP flow + management',                     p:1999},
+  {k:'event_website',    cat:'Brand & Invites', l:'Event Website',     d:'Your event page',                                    p:1999},
+  {k:'editorial_website',cat:'Brand & Invites', l:'Editorial Website', d:'Magazine-style wedding site',                        p:7999},
+  {k:'papic_guests',     cat:'Capture (Papic)', l:'Papic Guests',      d:'Guest candid capture',                               p:1999},
+  {k:'papic_5seats',     cat:'Capture (Papic)', l:'Papic 5 Seats',     d:'5 friends shoot candids · live gallery',             p:2999},
+  {k:'camera_bridge',    cat:'Capture (Papic)', l:'Camera Bridge',     d:'DSLR → Papic / Panood',                              p:1499},
+  {k:'guest_stories',    cat:'Video & Media',   l:'Guest Stories',     d:'30s story maker',                                    p:1499},
+  {k:'pabati',           cat:'Video & Media',   l:'Pabati',            d:'Up to 300 × 5s greetings',                           p:999},
+  {k:'patiktok',         cat:'Video & Media',   l:'Patiktok',          d:'Up to 250 TikTok recordings',                        p:1499},
+  {k:'thank_you',        cat:'Video & Media',   l:'Thank You',         d:'Post-wedding thank-you film',                        p:3499},
+  {k:'same_day_edit',    cat:'Video & Media',   l:'Same Day Edit',     d:'3-min film, screened same night',                    p:4999},
+  {k:'photowall',        cat:'Video & Media',   l:'PhotoWall',         d:'Live collage + guest count',                         p:2499},
+  {k:'live_background',   cat:'Video & Media',   l:'Live Background',   d:'LED wall design + monogram',                         p:2499},
+  {k:'panood',           cat:'Video & Media',   l:'Panood',            d:'Multi-cam livestream / day',                         p:2499},
+  {k:'pakanta',          cat:'Audio',           l:'Pakanta',           d:'A custom song for your day',                         p:2499}
+];
+var PRICE={}; CATALOG.forEach(function(it){ PRICE[it.k]=it.p; });
+var byKey={}; CATALOG.forEach(function(it){ byKey[it.k]=it; });
+
+/* ══════════ STATE — the two bundles (canonical inclusions) ══════════ */
+var B={
+  A:{ name:'Essentials', tag:'Setnayan AI + Animated Monogram + Custom QR + Pro RSVP + Event & Editorial Website + Papic Guests + Guest Stories.',
+      items:['setnayan_ai','animated_monogram','custom_qr','pro_rsvp','event_website','editorial_website','papic_guests','guest_stories'],
+      packagePrice:12999, best:false, timer:30 },
+  B:{ name:'Complete', tag:'Everything in Essentials, plus every paid service — your whole wedding, run for you.',
+      items:['setnayan_ai','animated_monogram','custom_qr','pro_rsvp','event_website','editorial_website','papic_guests','guest_stories','papic_5seats','camera_bridge','pabati','patiktok','thank_you','same_day_edit','photowall','live_background','panood','pakanta'],
+      best:true, packagePrice:27999, timer:30 }
+};
+
+function peso(n){ return '₱'+Math.round(n).toLocaleString('en-US'); }
+function listPrice(key){ return B[key].items.reduce(function(s,k){ return s+(PRICE[k]||0); },0); }
+
+/* ── catalog render ── */
+function renderCatalog(){
+  var q=(document.getElementById('search').value||'').toLowerCase();
+  var host=document.getElementById('catalog'); host.innerHTML='';
+  var groups={}, order=[];
+  CATALOG.forEach(function(it){
+    if(q && (it.l+' '+it.d+' '+it.cat).toLowerCase().indexOf(q)<0) return;
+    if(!groups[it.cat]){ groups[it.cat]=[]; order.push(it.cat); }
+    groups[it.cat].push(it);
+  });
+  order.forEach(function(cat){
+    var g=document.createElement('div'); g.className='catgrp';
+    g.innerHTML='<div class="catgrp-h">'+cat+'</div>';
+    groups[cat].forEach(function(it){
+      var inA=B.A.items.indexOf(it.k)>=0, inB=B.B.items.indexOf(it.k)>=0;
+      var row=document.createElement('div'); row.className='item';
+      row.innerHTML=
+        '<div class="item-main"><div class="item-l">'+it.l+(it.note?'<span class="note-tag">'+it.note+'</span>':'')+'</div>'
+          +'<div class="item-d">'+it.d+'</div></div>'
+        +'<span class="pwrap"><span class="peso">₱</span><input class="pin" type="number" min="0" step="100" value="'+PRICE[it.k]+'" data-k="'+it.k+'"></span>'
+        +'<span class="assign">'
+          +'<button class="abtn'+(inA?' on-a':'')+'" data-b="A" data-k="'+it.k+'">A</button>'
+          +'<button class="abtn'+(inB?' on-b':'')+'" data-b="B" data-k="'+it.k+'">B</button>'
+        +'</span>';
+      g.appendChild(row);
+    });
+    host.appendChild(g);
+  });
+  // wire price inputs
+  host.querySelectorAll('.pin').forEach(function(inp){
+    inp.addEventListener('input',function(){ PRICE[this.dataset.k]=Math.max(0,parseInt(this.value||'0',10)); renderBundle('A'); renderBundle('B'); });
+  });
+  host.querySelectorAll('.abtn').forEach(function(btn){
+    btn.addEventListener('click',function(){ toggleItem(this.dataset.b, this.dataset.k); });
+  });
+  document.getElementById('catCount').textContent=CATALOG.length+' items';
+}
+
+function toggleItem(key, k){
+  var arr=B[key].items, i=arr.indexOf(k);
+  if(i>=0) arr.splice(i,1); else arr.push(k);
+  renderCatalog(); renderBundle(key);
+}
+
+/* ── bundle editor render ── */
+function renderBundle(key){
+  var b=B[key];
+  // chips
+  var chipHost=document.getElementById('chips-'+key); chipHost.innerHTML='';
+  if(b.items.length===0){ chipHost.innerHTML='<span class="empty">No items yet — tap '+key+' on a catalog item.</span>'; }
+  b.items.forEach(function(k){
+    var it=byKey[k], free=(PRICE[k]===0);
+    var c=document.createElement('span'); c.className='chip'+(free?' bonus':'');
+    c.innerHTML=it.l+' <span class="cp">'+(free?'free':peso(PRICE[k]))+'</span> <span class="x" data-k="'+k+'">×</span>';
+    chipHost.appendChild(c);
+  });
+  chipHost.querySelectorAll('.x').forEach(function(x){ x.addEventListener('click',function(){ toggleItem(key,this.dataset.k); }); });
+
+  // calc
+  var list=listPrice(key), pkg=b.packagePrice, save=list-pkg, pct=list>0?Math.round(save/list*100):0;
+  var bad=save<0;
+  var calc=document.getElementById('calc-'+key);
+  calc.innerHTML=
+    '<div class="row"><span class="lab">Worth <small>auto-summed from '+b.items.length+' item'+(b.items.length===1?'':'s')+'</small></span>'
+      +'<span class="worth">'+peso(list)+'</span></div>'
+    +'<div class="row"><span class="lab">Package price <small>what the couple pays (discounted)</small></span>'
+      +'<span class="price-in-wrap"><span class="peso">₱</span><input class="price-in" type="number" min="0" step="100" id="pp-'+key+'" value="'+pkg+'"></span></div>'
+    +'<div class="row"><span class="save-line">'
+        +'<span class="save-pill'+(bad?' warn':'')+'">'+(bad?'⚠ price &gt; worth':'Save '+peso(Math.max(0,save)))+'</span>'
+        +'<span class="pct-in-wrap">−<input class="pct-in" type="number" min="0" max="100" id="pct-'+key+'" value="'+Math.max(0,pct)+'">% off</span>'
+      +'</span>'
+      +'<span class="timer-row">Promo <input class="timer-in" type="number" min="0" id="tm-'+key+'" value="'+b.timer+'"> min</span></div>';
+
+  document.getElementById('pp-'+key).addEventListener('input',function(){
+    B[key].packagePrice=Math.max(0,parseInt(this.value||'0',10)); renderBundle(key);
+  });
+  document.getElementById('pct-'+key).addEventListener('input',function(){
+    var p=Math.min(100,Math.max(0,parseInt(this.value||'0',10)));
+    B[key].packagePrice=Math.round(listPrice(key)*(1-p/100)); renderBundle(key);
+  });
+  document.getElementById('tm-'+key).addEventListener('input',function(){ B[key].timer=Math.max(0,parseInt(this.value||'0',10)); });
+}
+
+function onName(key){ B[key].name=document.getElementById('name-'+key).value; }
+function onTag(key){ B[key].tag=document.getElementById('tag-'+key).value; }
+function toggleStar(key){
+  B[key].best=!B[key].best;
+  document.getElementById('star-'+key).classList.toggle('on',B[key].best);
+}
+
+/* ── preview (couple-facing Stage 4) ── */
+function bundlePreviewCard(key){
+  var b=B[key], list=listPrice(key), pkg=b.packagePrice, save=Math.max(0,list-pkg), pct=list>0?Math.round(save/list*100):0;
+  var paid=b.items.filter(function(k){return PRICE[k]>0;}).map(function(k){return byKey[k].l;});
+  var free=b.items.filter(function(k){return PRICE[k]===0;}).map(function(k){return byKey[k].l;});
+  var h='<div class="bdl'+(b.best?' reco':'')+'">';
+  if(b.best) h+='<span class="bdl-reco">★ Best value</span>';
+  h+='<div class="bdl-cat">Package '+key+'</div>';
+  h+='<div class="bdl-name">'+(b.name||'Untitled')+'</div>';
+  h+='<div class="bdl-desc">'+(b.tag||'')+'</div>';
+  h+='<div class="bdl-price"><span class="bdl-now">'+peso(pkg)+'</span>'
+    +(save>0?'<span class="bdl-was">'+peso(list)+'</span><span class="bdl-save">save '+peso(save)+' · '+pct+'% off</span>':'')+'</div>';
+  h+='<div class="bdl-items"><b>'+paid.length+' included:</b> '+paid.join(' · ')
+    +(free.length?'<br><b>Free:</b> '+free.join(', '):'')+'</div>';
+  h+='<button class="bdl-cta">Choose '+(b.name||'this')+'</button>';
+  h+='</div>';
+  return h;
+}
+var pvTick=null, pvDeadline=null;
+function openPreview(){
+  // order: best-value first
+  var keys=['A','B'].sort(function(a,c){ return (B[c].best?1:0)-(B[a].best?1:0); });
+  document.getElementById('pvBundles').innerHTML=keys.map(bundlePreviewCard).join('');
+  document.getElementById('previewOvl').classList.add('show');
+  var mins=Math.max(B.A.timer,B.B.timer)||30;
+  pvDeadline=Date.now()+mins*60000;
+  paintPvTimer(); if(pvTick) clearInterval(pvTick); pvTick=setInterval(paintPvTimer,1000);
+}
+function paintPvTimer(){
+  var left=pvDeadline-Date.now(), a=document.getElementById('pvAnchor'), t=document.getElementById('pvTimer');
+  if(left<=0){ a.classList.add('ended'); t.textContent='ended — full price'; if(pvTick){clearInterval(pvTick);pvTick=null;} return; }
+  var s=Math.round(left/1000), m=Math.floor(s/60), ss=s%60; t.textContent=m+':'+(ss<10?'0':'')+ss;
+}
+
+/* ── export ── */
+function openExport(){
+  var cfg={}; ['A','B'].forEach(function(key){
+    var b=B[key], list=listPrice(key);
+    cfg[key]={ name:b.name, tagline:b.tag, bestValue:b.best, promoMinutes:b.timer,
+      worthPHP:list, packagePricePHP:b.packagePrice, savePHP:Math.max(0,list-b.packagePrice),
+      items:b.items.map(function(k){ return {key:k, label:byKey[k].l, pricePHP:PRICE[k]}; }) };
+  });
+  document.getElementById('exportTA').value=JSON.stringify(cfg,null,2);
+  document.getElementById('exportOvl').classList.add('show');
+}
+function copyExport(){ var t=document.getElementById('exportTA'); t.select(); try{document.execCommand('copy');}catch(e){} }
+function closeModal(id){ var el=document.getElementById(id); el.classList.remove('show'); if(id==='previewOvl'&&pvTick){clearInterval(pvTick);pvTick=null;} }
+document.querySelectorAll('.ovl').forEach(function(o){ o.addEventListener('click',function(e){ if(e.target===o) closeModal(o.id); }); });
+
+/* ── boot ── */
+renderCatalog(); renderBundle('A'); renderBundle('B');
+</script>
+</body>
+</html>

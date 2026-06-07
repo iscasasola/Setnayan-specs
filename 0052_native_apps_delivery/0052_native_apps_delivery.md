@@ -1,5 +1,15 @@
 # Iteration 0052 — Native Apps Delivery (iOS · iPadOS · Android · macOS · Windows)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped (see also the detailed "As-built correction" callout already inline below):
+> - **The mobile shell is a Capacitor REMOTE-URL shell, not a bundled build.** `apps/mobile/` (Capacitor 8) sets `server.url → https://www.setnayan.com` and the native WebView loads the live, server-rendered site; native hardware bridges via plugins. `output: 'export'` was rejected and `output: 'standalone'` is NOT bundled into the shell — this supersedes all "bundled standalone / offline web assets" language in the lock table, per-platform rows, and Week-1 tasks below.
+> - **Android is BUILT; iOS/macOS/Windows are NOT.** Shipped (PRs #1044/#1048): branded Android project + deep-link intent-filters (App Links `/dashboard` + `setnayan://`) + offline-fallback `BridgeWebViewClient` + web-side `NativeBridge`; `gradlew assembleDebug` green. iOS not generated (needs Xcode/CocoaPods); Tauri desktop (macOS/Windows) not started. Native apps remain a **V1.5+ DEFERRED** item overall.
+> - **Online-first, not offline-first for the shell.** The whole app is RLS/Supabase/server-action-driven; true offline stays scoped to the native Papic path (0012). The installable PWA remains the locked V1 mobile surface.
+> - **OAuth via embedded WebView is blocked** — must move to system-browser before social login can be enabled in the shell (deferred).
+> - Cross-cutting (unrelated to this iteration but for corpus consistency): commission is **0%** (any "Setnayan Pay 3%/5%" is retired); the planner SKU is **"Today's Focus" ₱1,499**; **Pakanta is a single ₱2,499 SKU**; the **customer token wallet (0003) is retired** while the **vendor token economy is live** (burn-on-answer wired, PR #1057); **BIR (0026) is retiring**.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0052 (originally proposed as 0043 per CLAUDE.md 2026-05-15 lock · renumbered 2026-05-29 because 0043 was already taken by V1.1 Wedding Type Picker per CLAUDE.md 2026-05-19 row 425 · owner picked Option B from OQ-1 resolution turn on 2026-05-29 to minimize corpus churn)
 **Topic:** V1.5+ multi-platform native app rollout — true native Papic shells (Swift on iOS, Kotlin on Android) + Capacitor mobile wrapper (iOS + Android) + Tauri desktop wrappers (macOS + Windows) shipped end-to-end so Setnayan runs as a first-class app on every surface a Filipino couple, vendor, or operator touches.
 **Surface:** Cross-cutting · instruments every couple-facing + vendor-facing + admin-facing route the web build serves, plus offline-only native surfaces for Papic capture (iteration 0012) and Patiktok booth (iteration 0017) and day-of guest (iteration 0031).
@@ -7,6 +17,20 @@
 **Builds on:** 0012 (Papic native architecture lock) · 0017 (Patiktok booth offline behavior) · 0031 (day-of guest PWA shell baseline) · 0037 (Event-Day Pre-load CTA + IndexedDB cache) · 0035 (Sentry SDK is per-runtime · adds Capacitor + Tauri runtimes) · V2 Phase G (IndexedDB + service-worker offline daemon — `NEXT_PUBLIC_OFFLINE_DAEMON_ENABLED` env-flag · DEFAULT OFF for pilot per CLAUDE.md V2 Cutover Round 2 row 2026-05-29).
 **Status:** Drafted 2026-05-29 · scope **V1.5+** post-pilot (zero pilot impact per § Pilot risk assessment below).
 **Canonical ID prefix:** S43-
+
+---
+
+> ## ⚠ As-built correction — 2026-06-07 (read before trusting the architecture rows below)
+>
+> The first native slices have **shipped to `main`** (setnayan-platform PR **#1044** + **#1048**) and the **as-built architecture differs from the bundled-build model described in this doc.** Where this doc and the as-built conflict, **the as-built wins**; the rows below are the original 2026-05-29 plan.
+>
+> **Shipped reality — the non-Papic mobile shell is a Capacitor REMOTE-URL shell, not a bundled build:**
+> - The shell (`apps/mobile/`, Capacitor 8) sets `server.url` → the **hosted app** (`https://www.setnayan.com`) and the native WebView loads the live site; native hardware (Camera / Network / Bluetooth-LE) bridges to the web JS via plugins. The single Next.js codebase is untouched.
+> - **`output: 'export'` was rejected** — `apps/web` is server-rendered (`output: 'standalone'`, 111 Server Actions, 60 API routes, middleware Supabase auth, 417 dynamic routes); a static export drops all of it and fails the build.
+> - **`output: 'standalone'` is NOT bundled into the Capacitor shell either.** `standalone` is a Node-server build (Tauri/container consumer), never Capacitor-bundleable. The Capacitor shell carries only a tiny offline-fallback `www/index.html`, not the web assets. **This supersedes the bundled-`standalone`/offline-assets language in the lock table (row ~31), the wrapper-code row (~51), the Week-1 task (~165), and § "downstream consumers" (~284).**
+> - **Offline:** the whole app is RLS/Supabase/server-action-driven and is **online-first** in the shell; true offline stays scoped to the **native Papic** path (per 0012), and the installable **PWA** remains the locked V1 mobile surface. The original "pure server.url fails the offline constraint" rationale (row ~31) was overridden — connectivity-dependent shell was accepted for the non-Papic surfaces.
+>
+> **Shipped so far:** Android project generated + branded (real PWA app icon) + deep-link intent-filters (App Links `/dashboard` + `setnayan://`) + release signing scaffold (gitignored `keystore.properties`) + offline fallback (`BridgeWebViewClient`) → `gradlew assembleDebug` **green**. Web-side `NativeBridge` (Android BACK fix · splash · status-bar · `appUrlOpen`) + `'capacitor'` client-type + `.well-known/{assetlinks.json,apple-app-site-association}` scaffolds. **iOS not yet generated** (needs Xcode + CocoaPods). **Deferred:** Papic native camera wiring (device), OAuth-via-system-browser (embedded-WebView OAuth is blocked — fix before enabling social login), release keystore + Apple enrollment + real `.well-known` hashes. Full detail: `DECISION_LOG.md` 2026-06-07 rows + [[project_setnayan_native_shell_capacitor]].
 
 ---
 
@@ -410,3 +434,100 @@ These need owner ratification **before Week 1 engineering starts**. Defaults (re
 | `0052_native_apps_delivery.docx` | `.docx` mirror — regenerate via pandoc once owner ratifies OQ-1 + at Week 5 status-anchor pass per established convention |
 | `tests.md` | Per-platform acceptance criteria mirror of § 13 — to be added at Week 5 |
 | `fixtures.json` | Sample build metadata + signing certificate fingerprints — to be added at Week 5 |
+
+---
+
+## 16. Service independence & app-linking contract (the Messenger-↔-Facebook model)
+
+**Added 2026-06-05** · owner directive: *"I plan to make these [in-app services] independent apps as well when we start making apps on Android and iOS. Make sure they are independent and can link up with Setnayan when needed — like Facebook Messenger and the Facebook app."*
+
+This section **extends** § 2 (locked architecture) and § 5 (deep-link handoff). It does **not** override the § 2 single-shell lock. The app-family is an **additive, opt-in, per-service packaging** on the same foundation: **the unified app ships first (§ 2 as-is); a service splits into its own installable app only when it earns it — Papic first.**
+
+### 16.1 What actually makes apps "independent yet linkable"
+
+"Independent app that links up" (Messenger ↔ Facebook · Threads ↔ Instagram · Pages Manager) is **not** a mobile-packaging property — it is four backend/architecture properties. Get these and "one app with modules" vs "a family of apps" becomes a per-service build-time choice; you can even ship both for one service (Facebook ships the full app AND a standalone Messenger).
+
+| Pillar | Requirement | Setnayan today |
+|---|---|---|
+| **1. One identity, many clients (SSO)** | Every app shares one account + session · no re-auth on handoff | `setnayan-platform` is already the auth shell · Supabase Auth issues the session · a standalone app adopts it via shared-session handoff (iOS `ASWebAuthenticationSession` + App-Group keychain · Android Account Manager / Custom Tabs token). The `@setnayan/capacitor-secure-storage` plugin (§ 5) already stores the OAuth refresh token — the same store shares it across a sibling app. |
+| **2. Deep-link handoff contract** | App A opens App B at a screen with context (`open Papic for event S89E-…`) with graceful fallback to install/web | Universal Links (iOS) + App Links (Android) on `setnayan.com/*` + custom scheme `setnayan://`. § 5 already specs in-process handoff (Capacitor shell → native Papic); a separate-app split reuses the **same** contract — the only delta is the target is a different installed binary, with App-Store/web fallback when absent. |
+| **3. One backend, thin clients** | The "service" is a backend capability; the app is just a face on it | Already true — each service is a `lib/<service>.ts` + `app/api/<service>` pair over shared Supabase. A standalone app is a second client of the same API + RLS. |
+| **4. Graceful degradation** | If the companion app isn't installed, do it inline or *offer* install — never hard-block | Design rule. **Avoid the Messenger forced-install mistake**: a couple must never be walled out of a flow for lacking a second app. The unified app always keeps an inline path; the standalone app is an *upgrade*, not a gate. |
+
+### 16.2 Codebase audit — extraction readiness as of 2026-06-05
+
+Audit of `apps/web` (couple / vendor / admin / guest / papic route trees). **Result: services are logic-independent of each other and of the role apps; the only systemic coupling is checkout, and `packages/shared` is effectively empty so the shared platform-SDK is trapped inside `apps/web`.**
+
+**Positives (the hard things — already done):**
+- **No cross-service coupling.** No `lib/<service>.ts` imports another service's lib. Services are mutually independent. ✅
+- **Per-service logic isolation.** Every service is its own `lib/<service>.ts` (`papic-seats` · `papic-drive` · `papic-guest` · `panood-youtube` · `patiktok` · `led-background` · `animated-monogram` · `monogram` · `save-the-date` · `songs`) + own `app/api/<service>` + own telemetry. ✅
+- **`app/papic` is already extraction-ready.** The capture surface (token entry `claim/[token]` · `seat/[token]` · `guest`) imports only its own actions + `lib/papic-guest` + `lib/guest-session` + `lib/drive-copy` + the Supabase client. **Zero couple-dashboard imports · zero checkout coupling.** Already a standalone surface with its own actor. ✅
+
+**The one systemic gap (the extraction blocker):**
+- **Checkout lives inside the couple role-app.** `app/dashboard/[eventId]/_components/inline-checkout-drawer.tsx` (which itself imports `app/dashboard/[eventId]/checkout/actions`) is imported by **7 paid add-on surfaces** (papic · patiktok · save-the-date · panood · animated-monogram · custom-qr-guest · indoor-blueprint). Every paid service reaches *sideways into couple-dashboard internals* for order-and-pay.
+- **`packages/shared` is effectively empty** (`src/index.ts` only). The de-facto platform-SDK (`lib/orders` · `lib/auth` · `lib/platform-settings` · `lib/qr` · `lib/v2/sku-catalog-v2` · `lib/drive-copy` · `lib/supabase/*`) lives **inside `apps/web`**, not in an extractable package — a second app can't import it without dragging in the whole web app.
+- Minor: **two checkout/CTA patterns coexist** (`inline-checkout-drawer` vs `app/_components/app-store/state-cta`); panood uses both. Unify before any split.
+
+### 16.3 The boundary rule (enforce in V1 — this is "make sure they stay independent")
+
+No app is built in V1 (web-first · § 11 zero-pilot-impact stands). What V1 **must** do is hold one import boundary so the packaging choice stays open and cheap:
+
+> **A service module may import only:** (a) its own `lib/<service>` + `app/<service-routes>`, (b) the shared platform-SDK (`@setnayan/shared`), (c) the design system, (d) the shared checkout surface (`@setnayan/checkout`).
+> **It may NOT import from** `app/dashboard/*`, `app/vendor-dashboard/*`, `app/admin/*`, or another service's internals.
+
+Make it mechanical, not aspirational: an **ESLint `no-restricted-imports` / `eslint-plugin-boundaries` rule** in CI fails any service file that reaches into a role-app's `_components`. That single rule turns "independent" from a hope into an invariant — at zero pilot cost.
+
+**Two targeted refactors** retire the § 16.2 gap (V1-safe · do before *any* split, NOT before pilot):
+1. **Promote the platform-SDK** `apps/web/lib/{orders,auth,platform-settings,qr,sku-catalog,drive-copy,supabase}` → `packages/shared` (or a new `packages/platform`). Every client (couple · vendor · Papic · any standalone service) imports the SDK from the package.
+2. **Promote checkout** (`inline-checkout-drawer` + `checkout/actions`) out of the couple-dashboard route tree into a shared `@setnayan/checkout` surface, so a service mounts order-and-pay without importing couple-dashboard internals.
+
+### 16.4 Which services become standalone apps (selective — not blanket)
+
+The test is **distinct actor + heavy interactive/offline surface**, not "it is a SKU." This mirrors what Facebook actually did — split Messenger · Business Suite · Ads Manager; kept Events · Marketplace · Watch *inside* the main app — and has been re-merging since. Blanket per-feature apps are a maintenance + forced-install-friction trap (N store listings · N review cycles · N crash dashboards · cross-app SSO friction).
+
+**Primary axis is by ROLE, and it is already physically split in the route tree:** `app/dashboard` (couple) · `app/vendor-dashboard` (vendor) · `app/admin` (admin) · `app/[slug]` (guest microsite) · `app/papic` (paparazzi/guest). The "app family" is primarily **Couple app · Vendor app · Admin app** (guest is link-first).
+
+**Service-app axis (sits under the role axis) — per-service verdict:**
+
+| Service | Operating actor | Surface today | Standalone-app verdict |
+|---|---|---|---|
+| **Papic (capture)** | Paparazzi / guest (token entry) | `app/papic` — already top-level · already specced native (0012 + § 3) | **YES — first split.** Distinct actor (not the couple) · capture + tag + offline-at-venue + P2P mesh. This is the "Messenger." |
+| **Patiktok booth** | Booth operator | `add-ons/patiktok/booth` | **Candidate (V1.6+).** Real capture surface · operator actor. Split if booth usage justifies it. |
+| **Day-of guest (0031)** | Guest | mode-flag on `app/[slug]` via `lib/day-of-mode` · already PWA | **Candidate / stays link-first.** Guest actor, but a web link is often the better UX — keep PWA-first, app optional. |
+| Panood (setup) | Couple (config) · viewers watch YouTube | `add-ons/panood` | **No.** Config form on the couple side; *viewing* is a YouTube link, never an app. |
+| LED Background · Save-the-Date · Animated Monogram | Couple (configure + pay) | `add-ons/*` | **No.** Configure-and-pay forms → backend render job. Stay modules inside the Couple app. |
+| Pakanta | Couple (brief) | wizard card (`_components/wizard-cards/pakanta-*`) | **No.** A one-time intake form — not even a route. Stays in the couple wizard. |
+
+### 16.5 Sequence
+
+1. **V1 (now):** land the § 16.3 ESLint boundary rule · keep new service UI behind the module boundary · build NO split (pilot-safe).
+2. **V1.5 (§ 2 / § 7):** ship the **unified** Capacitor/Tauri apps per § 2, with Papic as the native module via in-process deep-link (already specced).
+3. **V1.5+1 (first split):** perform the two § 16.3 refactors (SDK + checkout → shared), then package **Papic as a standalone installable app** that adopts the shared session and links back via the § 16.1 contract. The unified app keeps an inline Papic-purchase path (graceful degradation).
+4. **V1.6+ (data-driven):** split further services (Patiktok booth · day-of) only if usage justifies the maintenance multiplier.
+
+### 16.6 New open questions
+
+| ID | Question | Recommended default | Block? |
+|---|---|---|---|
+| **OQ-11** | Selective split (role apps + Papic · rest stay modules) vs blanket per-SKU apps? | **Selective** — role-axis + Papic first; the rest stay modules. Blanket per-SKU apps multiply store/maintenance overhead for form-based services with no standalone audience. | No · default OK · owner may widen |
+| **OQ-12** | Timing of the SDK + checkout extraction (§ 16.3 refactors) — bundle into V1.5 unified-app work, or defer to first split (V1.5+1)? | **Defer to first split** — the unified app doesn't need the package boundary; only a *second installable* app does. Land the ESLint rule now to stop new coupling; do the physical move when Papic splits. | No · default OK |
+
+### 16.7 Full-app candidacy sweep — three rationales (the whole surface, not just the 7 SKUs)
+
+**Added 2026-06-05** · owner: *"also the monogram maker, and all other features in the app that can be an independent app."* Extends § 16.4 from the 7 SKU services to the **entire route tree** (couple `app/dashboard/[eventId]/*` · vendor `app/vendor-dashboard/*` · admin `app/admin/*` · guest `app/[slug]` · `app/papic` · marketing).
+
+**Headline: "can be an independent app" is true of almost any surface; "should be" is true of few.** The instinct to make *every* feature its own app mixes three different rationales — keep them separate. Apply this test per feature:
+
+- **Different actor than the couple?** → **(A) distinct-actor app.**
+- **Same couple-actor, but a self-contained artifact someone would want *without* planning a full wedding here?** → **(B) top-of-funnel maker tool** (free · watermarked · converts to sign-up — the Canva-free-tool play; success metric = conversion, *not* in-event use).
+- **Only meaningful *inside* the planning flow?** → **(C) stays a module** (splitting fragments one person's workflow across icons — the anti-pattern Facebook walked back).
+
+| Category | Why | Features | App decision |
+|---|---|---|---|
+| **(A) Distinct-actor apps** | A *different person* uses it · often at-venue/offline | **Papic** (paparazzi/guest) · **Day-of guest** 0031 (guest) · **Patiktok booth** (operator) · **Vendor app** (`vendor-dashboard/*`) · **Admin app** (`admin/*`) | **Build as apps** at native rollout. Role apps already route-split; Papic first (§ 16.4). A vendor *lite* app (notifications + messages + bookings — the "Business Suite" subset) is the natural V1.6+ vendor split. |
+| **(B) Top-of-funnel maker tools** | Same couple-actor, but a shareable artifact with standalone pull · **acquisition funnel, NOT an in-event service** | **Monogram Maker** (the 23-animation studio · `Monogram_Maker_Plan_2026-06-05.md`) · **Save-the-Date maker** · **Mood board / Pakulay** (already ₱0) · **Wedding-website / invitation maker** (`website` / `invitation` / `site-editor`) | **Optional free standalone web tools / PWAs**, judged on sign-up conversion. e.g. a "Setnayan Monogram Maker" anyone can use free → watermarked output → "claim it on your wedding page." Marketing decision, owner-gated; **not** part of the in-event app family. |
+| **(C) Stays a module** | One actor's interwoven workflow · no standalone audience | Couple: guests · budget · seating · schedule · contracts · documents · paperwork · disputes · orders · checkout · vendors-browse · event-qr · hosts · sponsors · manpower · activity · today/for-you. Services: **Panood** (config; viewing = YouTube link) · **LED Background** (config; offline USB-delivery → a *desktop* companion at most) · **Pakanta** (intake form). All vendor + admin sub-features (they live inside their role app). | **Keep as modules**, reached by deep-link from the role app — never their own icon. |
+
+**Monogram Maker — explicit verdict (owner asked directly):** the rich 23-animation studio is a genuine creative *tool*, but its **in-event** role is still a Couple-app module (§ 16.4 stands). Its standalone-app case is **category B** — a *free top-of-funnel maker* measured by sign-up conversion, not in-event usage. So: keep it a module in the Couple app **and** (owner's call) optionally ship a free standalone monogram maker as an acquisition surface. The *same* code module behind the § 16.3 boundary serves both — which is exactly why the boundary discipline matters.
+
+**Chat / Messages — the literal Messenger analogy:** Setnayan's `messages` (couple↔vendor inquiry) is the closest analogue to "Messenger," but it's **planning-bounded** (you don't message wedding vendors forever), so it's **(C) a module** surfaced inside both role apps — not a standalone Messenger-style app. Revisit only if engagement data shows sustained standalone chat use.

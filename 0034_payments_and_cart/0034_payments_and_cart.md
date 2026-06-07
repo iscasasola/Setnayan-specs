@@ -1,5 +1,15 @@
 # Iteration 0034 — Payments & Cart Flow
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Apply-then-pay core is REAL and shipped — but on a leaner schema/flow.** Couple add-on checkout: `app/dashboard/[eventId]/checkout/actions.ts` `submitOrderAction` writes an `orders` row at `status='submitted'` + a `payments` row at `status='pending'` with screenshot upload. Admin approves at `/admin/payments` (`approvePayment`, `promote_order`) → `payments='matched'` + `orders='paid'`. That admin click is the only "paid" lever — **zero real money moves**. The canonical tables in code are `orders` / `payments` (not the spec's 8-table `service_orders` / `service_order_payments` / `carts` / `cart_items` set verbatim; statuses are `submitted`/`pending`/`matched`/`paid`, not the § 2.5 `pending_payment`/`proof_submitted`/… enum).
+> - **Setnayan Pay convenience fee is RETIRED (2026-05-28 V2 cutover).** Per `app/admin/payments/actions.ts`: the 5% (and earlier 3%/5.5%/6.5%) Setnayan Pay convenience-fee dispatcher is retired; vendor↔customer money is **off-platform with 0% commission**. The § 2 `fees_centavos` / `setnayan_fee_bps` 5% line item and the "Setnayan Pay 3% fee" framing are dead. Vendor↔customer money never flows through the cart (RA 11967).
+> - **No fixed in-app SKU price list in the DB the way § 2 seeds it.** SKUs/catalog live in `lib/v2-catalog.ts` with build states (`live`/`in_build`/`coming_soon`/`not_built`); prices/SKUs match the live site (e.g. Animated Monogram ₱2,499, Papic ₱2,999, Pakanta single ₱2,499 `not_built`), NOT the retired charm-ladder INSERT batches (paparazzi_3/5_seats, Concierge, Guided Planner ladder, live_stream_*) that dominate this spec.
+> - **Vendor token economy is LIVE and is the live-checkout's main "wallet"** — burn-on-answer wired (1–3 tokens / ₱100–₱300, `token_burn_bands`, PR #1057). The customer token wallet (0003) stays **retired**. The 2026-06-04 reconciliation block below correctly flags the vendor tokens but predates the burn-on-answer wiring.
+> - **Comp/self-comp:** comp grants + internal/team flags exist but do **not** auto-pay an add-on order (the inline drawer ignores them); only `createSelfCompOrder` (vendor team owners) mints a comp'd paid order. The § 3.1a 12-per-quarter self-comp trigger is not the shipped mechanism.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **⚠ LIVE-SITE RECONCILIATION 2026-06-04.** A **vendor-side token economy is now LIVE on setnayan.com** — this iteration's "token wallet fully retired / PHP-only everywhere" assumption is no longer complete. Vendors buy token packs (4/₱1,000 · 10/₱2,400 · 25/₱5,500 · 50/₱10,000 · 100/₱18,000), receive 100 complimentary tokens on verification, and redeem them against any "Token Worthy" couple SKU at a dashboard-set rate. Customer-side stays apply-then-pay PHP (no customer wallet). The cart/reconciliation schema must accommodate vendor token balances + token-redemption as a payment path. See `Pricing.md § 0.C`. ⚠ Site also contradicts itself on vendor commission (0% vs flat 5% Setnayan Pay) — `Pricing.md § 0.1`.
 
 - **Surface:** Customer cart (lives inside 0021 services launcher) + Admin reconciliation (lives inside 0023 § 3.3 Payments & Activations)
@@ -1654,8 +1664,8 @@ Pattern A (single-payer, whoever checks out pays everything) preserved. Cart ite
 - **Admin** (`/admin/payment-options`, see 0023): the moderation queue.
 
 ### V1 scope notes
-- QR "decoded destination" is **vendor-declared** in V1 (the vendor states where the QR sends money; admin verifies against the image). Real server-side QR image decode is a fast-follow.
-- A second couple mount point (the per-vendor workspace page) is a fast-follow; the budget card carries it in V1.
+- QR **decoded destination is read server-side** (PR #1019, 2026-06-05): on save, Setnayan fetches the uploaded image from R2, rasterises it via `sharp`, and runs `jsQR` to extract the actual payload — so the stored `decoded_destination` is what the QR truly encodes (anti-swap), not a vendor claim. An unreadable image falls back to the vendor's typed note AND routes the method to `pending_review` for admin verification.
+- The couple settlement rail is mounted on **both** the per-vendor budget card AND the per-vendor **workspace page** (`.../vendors/[vendorId]/workspace`) — the latter wired in main alongside this feature.
 - No email currently notifies an off-platform vendor payment, so the vigilance disclosure lives in-app; if such an email is added, the line goes there.
 
 ## First-Party Setnayan Services — inline order-and-pay on the per-service workspace (added 2026-06-05)

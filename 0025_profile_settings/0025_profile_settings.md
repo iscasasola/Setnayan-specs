@@ -1,5 +1,15 @@
 # Iteration 0025 — Profile Settings & Privacy Controls
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - Profile settings ship at **`/dashboard/profile`** (single shared shell), NOT the `/dashboard/[event-id]/settings/`, `/dashboard/vendor/settings/`, `/admin/settings/profile` URL trio described here. It exposes profile fields, soft-delete-my-account (30-day grace), and a conditional Concierge link — not the full 7-tab left-rail.
+> - **Tab 2 Appearance is GONE: the theme picker was light-locked 2026-06-04.** Setnayan always renders light; `users.theme_preference` is dormant (see `_components/theme-provider.tsx`). The 5-theme picker + Victorian/Classy/iOS/Forest variants in § 3.2 are not in the product.
+> - **Tab 7 Setnayan Concierge (₱4,999 · 3-day trial · enforcement tiers) is effectively OFF:** `CONCIERGE_ENABLED = false` in `lib/concierge.ts`, so the entire § 3.7 surface is gated off. The planner SKU on the live site is **"Today's Focus" ₱1,499**, not "Setnayan Concierge ₱4,999," and the couple-app planning *wizard* is retired (SKU/branding persists on the site only).
+> - **Tab 5 Payment Methods:** Setnayan order payment is **apply-then-pay + manual admin approval** (no card charge); any "Setnayan Pay 3% convenience fee" in the payment-history copy is RETIRED — **commission is 0%**. Off-platform vendor pay (the 2026-06-04 note at the bottom) is correct: Setnayan never holds vendor money.
+> - § 3.6.2 already flags the soft-delete + 30-day-grace model as deprecated for admin actions; the shipped *user-side* `softDeleteAccount` still does a 30-day soft-delete (kept, not replaced). The 0026/BIR-fed "Tax Documents" sub-tab is moot — **BIR (0026) is being retired** and the vendor tax-documents page redirects.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0025
 **Topic:** Profile Settings surface and the RA 10173 privacy-controls layer (account deletion + data export). Lives inside each existing dashboard (customer / vendor / admin) as a shared shell with role-specific tabs enabled.
 **Surface:** All three role surfaces under their respective dashboards. Same component shell, role-driven section visibility.
@@ -281,7 +291,25 @@ Two toggles, both default OFF (explicit opt-in per RA 10173):
 
 Withdrawal is immediate. Any in-flight email campaigns drop the user from the next batch within 24h.
 
-#### 3.6.5 DPO contact
+#### 3.6.5 Budget Planner behavioral data (added 2026-06-05)
+
+The Budget Planner's allocation engine (home: 0007) captures the couple's actual money-allocation choices as a **first-party behavioral-decision dataset** (`budget_allocation_decisions`: per-leaf default-vs-final, pin signals / first-touched order, what got cut to fund a tilt, tagged with budget band · region · pax band · event type). The owner designated this an **edge** and the platform's **most-protected data class** — its handling under RA 10173 is governed here.
+
+**Two-layer model with a hard wall between them:**
+
+1. **Layer 1 — identified / operational.** Per-event rows, **couple-OWN-ONLY** under RLS (canonical `current_event_ids`); admins get **no blanket read** (gated + audited access only). This is **RA 10173 erasable**. In *this* Privacy & Data tab it therefore must:
+   - **(a)** be **INCLUDED in the couple's data export** (§ 6.1) — a `budget_allocation_decisions.json` entry alongside the other exported artifacts;
+   - **(b)** be **deleted on account deletion** (cascades with the event) AND **directly erasable by the couple** here, independent of full account deletion;
+   - **(c)** carry a **consent / opt-out toggle** governing the de-identified analytics use (Layer 2). Default posture follows the marketing-consent pattern (§ 6.4); withdrawal stops new contributions to the analytical layer.
+2. **Layer 2 — de-identified / analytical.** Pseudonymized, identity stripped, **segment-keyed** (budget band · region · pax band · event type · leaf), surfaced only as **aggregate + minimum-N (k-anonymity)** so a thin segment can't re-identify a couple. **PII never crosses into Layer 2.** This is what powers the "couples like you" guidance copy + admin trend analytics, and it **persists as non-personal data even after Layer-1 erasure** (erasing the couple's identified rows does not unwind anonymous aggregates already computed).
+
+**System of record = first-party Supabase Postgres (Singapore).** NEVER a 3rd-party analytics SaaS as system of record; PostHog/GA (0035) may mirror **aggregates** for dashboards only.
+
+**Build state:** the Layer-1 table shipped 2026-06-05 (PR #996, migration `20260824000000_budget_allocation_decisions`, RLS couple-own-only at `CREATE TABLE` time; admins intentionally no blanket read). The export inclusion (a), direct couple-erase (b), and the analytics opt-out toggle (c) are a **follow-on UI wiring in this iteration**.
+
+> Full design: `Budget_Planner_Allocation_Engine_2026-06-05.md` §6–§7 · `DECISION_LOG.md` 2026-06-05. Engine / planner home = 0007; admin governance (two-admin export gate + access audit) = 0023.
+
+#### 3.6.6 DPO contact
 
 Static block at the bottom of the Privacy tab:
 
@@ -634,3 +662,9 @@ The two RA 10173 features (export + deletion) are in Sprint 1 because launching 
 - **Vendor Agreement § 10a / § 10b** — internal-account markers consumed by Tab 1 (display badge) and Tab 6 (deletion exception)
 
 The iteration ships when all six tabs are reachable from the Settings cog on every dashboard, the schema in § 4 is live in Supabase, the two background sweepers in § 5 are scheduled, and the export + deletion flows have passed end-to-end privacy review.
+
+---
+
+## Payment Options (vendor) — note (added 2026-06-04)
+
+> Shipped 2026-06-04 (PR #969). Vendors manage where couples pay them directly via the dedicated **"How clients pay you"** surface in the vendor dashboard (`/vendor-dashboard/payment-options`) — see 0022 + the canonical spec in **0034 -> "Vendor Payment Options — off-platform direct rail"** — not a settings tab. Distinct from the customer-side "Payment Methods" informational tab (this doc, Payment Methods) which covers Setnayan-processed order payments. Off-platform vendor payments are 0% / never held by Setnayan.

@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setnayan · Marketplace Architecture Prototype</title>
+<style>
+  :root{
+    --alabaster:#FBFBFA; --obsidian:#1E2229; --gold:#C5A059; --mulberry:#5C2542;
+    --ink:#1E2229; --muted:#6b6f76; --line:#e7e5e1; --card:#ffffff;
+    --good:#2f7d52; --warn:#b4791f; --bad:#9b3030; --soft:#f4f2ee;
+    --shadow:0 1px 2px rgba(30,34,41,.04), 0 8px 24px rgba(30,34,41,.06);
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--alabaster); color:var(--ink); -webkit-font-smoothing:antialiased; line-height:1.45;}
+  .serif{font-family:Georgia,"Times New Roman",serif;}
+  h1,h2,h3{margin:0; font-weight:600; letter-spacing:-.01em;}
+  button{font:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 20px;}
+
+  /* top bar */
+  .topbar{position:sticky; top:0; z-index:40; background:rgba(251,251,250,.86); backdrop-filter:blur(10px);
+          border-bottom:1px solid var(--line);}
+  .topbar .wrap{display:flex; align-items:center; gap:18px; height:62px;}
+  .brand{font-family:Georgia,serif; font-weight:600; font-size:21px; letter-spacing:.14em; color:var(--mulberry);}
+  .brand b{color:var(--gold); font-weight:600;}
+  .roles{margin-left:auto; display:flex; gap:6px; background:var(--soft); padding:4px; border-radius:999px;}
+  .roles button{padding:7px 16px; border-radius:999px; font-size:13.5px; color:var(--muted); font-weight:550;}
+  .roles button.on{background:var(--obsidian); color:#fff;}
+  .tag{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); border:1px solid var(--gold);
+       padding:3px 8px; border-radius:999px;}
+
+  .view{display:none; padding:26px 0 80px;}
+  .view.on{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+  .eyebrow{font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .lead{color:var(--muted); font-size:14.5px; margin:4px 0 0;}
+  .ctx{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; background:var(--card); border:1px solid var(--line);
+       border-radius:var(--r); padding:12px 16px; box-shadow:var(--shadow); margin-bottom:20px;}
+  .ctx .who{font-family:Georgia,serif; font-size:17px;}
+  .chip{font-size:12.5px; color:var(--muted); display:inline-flex; gap:6px; align-items:center;}
+  .chip b{color:var(--ink); font-weight:600;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden;}
+  .card .pad{padding:16px;}
+  .vhead{display:flex; gap:13px; align-items:flex-start;}
+  .logo{width:48px; height:48px; border-radius:11px; background:linear-gradient(135deg,#efe9df,#e3d8c4); flex:0 0 auto;
+        display:flex; align-items:center; justify-content:center; font-family:Georgia,serif; color:var(--mulberry); font-size:18px;}
+  .vname{font-size:15.5px; font-weight:600;}
+  .vname .masked{color:var(--muted); font-style:italic; font-weight:500;}
+  .vmeta{font-size:12.5px; color:var(--muted); margin-top:2px;}
+  .ring{margin-left:auto; width:54px; height:54px; flex:0 0 auto; border-radius:50%;
+        display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; position:relative;}
+  .ring small{font-size:9px; font-weight:600; color:var(--muted); position:absolute; bottom:7px;}
+  .badge{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:3px 9px; border-radius:999px;}
+  .b-gold{background:#faf4e8; color:#8a6a26; border:1px solid #ecdcb8;}
+  .b-good{background:#eef6f0; color:var(--good);}
+  .b-mul{background:#f6eef2; color:var(--mulberry);}
+  .b-grey{background:var(--soft); color:var(--muted);}
+  .b-warn{background:#fbf3e3; color:var(--warn);}
+  .b-bad{background:#f8ecec; color:var(--bad);}
+  .vrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:11px;}
+  .excl{margin-top:12px; background:#faf6ee; border:1px dashed #e3cf9f; border-radius:10px; padding:9px 11px; font-size:12.5px; color:#7a5d23;}
+  .excl b{color:#6b4f17;}
+  .actions{display:flex; gap:8px; margin-top:14px;}
+  .btn{padding:9px 14px; border-radius:10px; font-size:13.5px; font-weight:600; border:1px solid var(--line); background:#fff; flex:1; text-align:center;}
+  .btn.primary{background:var(--obsidian); color:#fff; border-color:var(--obsidian);}
+  .btn.gold{background:var(--gold); color:#23170a; border-color:var(--gold);}
+  .btn.ghost{background:#fff;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn.sm{flex:0 0 auto; padding:7px 12px; font-size:12.5px;}
+
+  /* modal */
+  .scrim{position:fixed; inset:0; background:rgba(30,34,41,.46); display:none; align-items:center; justify-content:center; z-index:60; padding:20px;}
+  .scrim.on{display:flex;}
+  .modal{background:#fff; border-radius:18px; max-width:430px; width:100%; padding:24px; box-shadow:0 24px 60px rgba(0,0,0,.25);}
+  .modal h3{font-family:Georgia,serif; font-size:20px;}
+  .casualty{margin:14px 0; border:1px solid var(--line); border-radius:12px; overflow:hidden;}
+  .casualty .it{display:flex; align-items:center; gap:10px; padding:10px 13px; font-size:13px; border-top:1px solid var(--line);}
+  .casualty .it:first-child{border-top:none;}
+  .casualty .it .x{margin-left:auto; color:var(--bad); font-size:11.5px; font-weight:600;}
+  .note{font-size:12.5px; color:var(--muted); background:var(--soft); border-radius:10px; padding:10px 12px;}
+
+  /* payment / countdown */
+  .pay{max-width:520px;}
+  .clock{font-family:Georgia,serif; font-size:30px; letter-spacing:.04em; color:var(--mulberry);}
+  .timerbox{display:flex; align-items:center; gap:14px; background:#f6eef2; border:1px solid #e6cfd9; border-radius:12px; padding:14px 16px; margin:14px 0;}
+  .payline{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--line); font-size:14px;}
+  .payline:last-child{border-bottom:none; font-weight:700;}
+  .upload{border:2px dashed #d8d4cc; border-radius:12px; padding:22px; text-align:center; color:var(--muted); font-size:13.5px; margin-top:8px;}
+  .upload.done{border-style:solid; border-color:var(--good); color:var(--good); background:#f3f8f4;}
+
+  /* vendor */
+  .secthead{display:flex; align-items:center; gap:12px; margin:26px 0 12px;}
+  .secthead h2{font-family:Georgia,serif; font-size:20px;}
+  .alerts{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;}
+  .alert{display:flex; gap:10px; align-items:center; background:#fff; border:1px solid var(--line); border-left:3px solid var(--gold);
+         border-radius:10px; padding:11px 14px; box-shadow:var(--shadow); cursor:pointer;}
+  .alert b{font-size:18px; font-family:Georgia,serif;}
+  .alert span{font-size:12.5px; color:var(--muted);}
+  .funnel{display:flex; gap:8px; align-items:stretch; margin:6px 0 4px; flex-wrap:wrap;}
+  .stage{flex:1; min-width:120px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:13px 14px; position:relative;}
+  .stage .n{font-family:Georgia,serif; font-size:26px;}
+  .stage .l{font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em;}
+  .stage .d{font-size:11px; color:var(--gold); font-weight:600; margin-top:3px;}
+  table.svc{width:100%; border-collapse:collapse; font-size:13.5px;}
+  table.svc th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); padding:8px 10px; border-bottom:1px solid var(--line);}
+  table.svc td{padding:10px; border-bottom:1px solid var(--line);}
+  table.svc tr:last-child td{border-bottom:none;}
+  .coach{display:flex; gap:11px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--line);}
+  .coach:last-child{border-bottom:none;}
+  .coach .ic{width:30px; height:30px; border-radius:8px; background:var(--soft); display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .coach .t{font-size:13.5px; font-weight:600;}
+  .coach .s{font-size:12.5px; color:var(--muted);}
+  .tabs{display:flex; gap:4px; background:var(--soft); padding:4px; border-radius:12px; margin:4px 0 16px; flex-wrap:wrap;}
+  .tabs button{padding:8px 14px; border-radius:9px; font-size:13px; color:var(--muted); font-weight:550;}
+  .tabs button.on{background:#fff; color:var(--ink); box-shadow:var(--shadow);}
+  .tabpane{display:none;} .tabpane.on{display:block;}
+  .hubcard{display:flex; gap:13px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; box-shadow:var(--shadow); margin-bottom:11px;}
+  .hubcard .body{flex:1;}
+  .hubcard .ttl{font-size:14.5px; font-weight:600;}
+  .hubcard .sub{font-size:12.5px; color:var(--muted); margin-top:2px;}
+  .pill{font-size:11px; font-weight:600; padding:2px 8px; border-radius:999px;}
+  .right{margin-left:auto; text-align:right;}
+  .stamp{font-size:11.5px; color:var(--muted);}
+  .sectsub{font-size:12.5px; color:var(--muted); margin:-4px 0 12px;}
+  .toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--obsidian); color:#fff;
+         padding:12px 18px; border-radius:12px; font-size:13.5px; opacity:0; pointer-events:none; transition:.3s; z-index:80; box-shadow:0 12px 30px rgba(0,0,0,.25);}
+  .toast.on{opacity:1; transform:translateX(-50%) translateY(0);}
+  .backlink{font-size:13px; color:var(--mulberry); font-weight:600; display:inline-flex; gap:6px; align-items:center; margin-bottom:14px;}
+  .hide{display:none!important;}
+  .legend{font-size:12px; color:var(--muted); margin-top:30px; border-top:1px solid var(--line); padding-top:14px;}
+  .legend b{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <div class="brand">SET<b>·</b>NAYAN</div>
+  <span class="tag">Architecture prototype</span>
+  <div class="roles">
+    <button data-role="cust" class="on" onclick="setRole('cust')">Customer</button>
+    <button data-role="vend" onclick="setRole('vend')">Vendor</button>
+    <button data-role="adm" onclick="setRole('adm')">Admin</button>
+  </div>
+</div></div>
+
+<!-- ============================ CUSTOMER ============================ -->
+<section class="view on" id="cust"><div class="wrap">
+
+  <!-- discovery -->
+  <div id="cust-discover">
+    <div class="eyebrow">Find a vendor · Catering</div>
+    <h1 class="serif" style="font-size:27px;">Best matches for your wedding</h1>
+    <p class="lead">Sorted by compatibility — distance, your dates, reviews & what you picked. Vendors below your match floor are folded under “show more”.</p>
+    <div class="ctx" style="margin-top:16px;">
+      <span class="who">Maria &amp; Jio</span>
+      <span class="chip">📅 <b>Dec 12, 2026</b> <span style="color:var(--muted)">(+2 candidate dates)</span></span>
+      <span class="chip">📍 <b>Tagaytay</b></span>
+      <span class="chip">👥 <b>180 pax</b></span>
+      <span class="chip">⛪ <b>Catholic · Garden</b></span>
+    </div>
+
+    <div class="grid" id="vgrid"></div>
+    <button class="btn ghost" style="margin-top:16px; max-width:260px;" onclick="toast('7 lower-match vendors shown')">Show 7 more lower-match options</button>
+  </div>
+
+  <!-- waiting -->
+  <div id="cust-waiting" class="hide" style="max-width:520px;">
+    <a class="backlink" onclick="custScreen('discover')">← Back to matches</a>
+    <div class="card"><div class="pad" style="text-align:center; padding:40px 24px;">
+      <div class="logo" style="margin:0 auto 14px; width:60px; height:60px; font-size:24px;">A</div>
+      <h2 class="serif" style="font-size:22px;">Request sent to Aroma Catering Co.</h2>
+      <p class="lead">Waiting for the vendor to confirm the date and send their payment details. Your other shortlisted vendors are <b>held, not removed</b> — nothing changes unless this booking confirms.</p>
+      <div class="badge b-warn" style="margin-top:16px;">⏳ Awaiting vendor</div>
+      <div style="margin-top:22px;"><button class="btn primary" style="max-width:280px; margin:0 auto;" onclick="custScreen('pay')">▶ Simulate: vendor accepts &amp; sends details</button></div>
+    </div></div>
+  </div>
+
+  <!-- payment -->
+  <div id="cust-pay" class="hide pay">
+    <a class="backlink" onclick="custScreen('discover')">← Matches</a>
+    <div class="eyebrow">Reserve your date</div>
+    <h1 class="serif" style="font-size:25px;">Downpayment — Aroma Catering Co.</h1>
+    <div class="timerbox" id="timerbox">
+      <div><div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--mulberry);">Pay within</div>
+        <div class="clock" id="clock">48:00:00</div></div>
+      <div style="font-size:12.5px; color:var(--muted); margin-left:auto; max-width:170px;">Your slot on <b>Dec 12</b> is held exclusively for you until the timer ends.</div>
+    </div>
+    <div class="card"><div class="pad">
+      <div style="font-size:12.5px; color:var(--muted); margin-bottom:8px;">Send your downpayment to the vendor’s account, then upload your proof. <b>Setnayan never holds your money</b> — it’s paid directly to the vendor.</div>
+      <div class="payline"><span>GCash</span><span><b>0917 555 0148</b> · Aroma Catering</span></div>
+      <div class="payline"><span>Reference</span><span>SN-K4P2Q9ZT</span></div>
+      <div class="payline"><span>Downpayment (30%)</span><span>₱26,700</span></div>
+    </div></div>
+    <div class="upload" id="proof" onclick="uploadProof()">📎 Tap to upload a screenshot of your payment</div>
+    <div id="paydone" class="hide">
+      <div class="badge b-good" style="margin-top:14px;">✓ Proof submitted · awaiting vendor verification (48 hrs)</div>
+      <p class="lead">When the vendor taps <b>Payment Verified</b>, your booking locks, it lands on your schedule, and balance reminders are set for both of you. Switch to the <b>Vendor</b> tab to play their side.</p>
+      <p class="lead" style="font-size:12.5px; margin-top:8px;">Uploaded the wrong screenshot, or asked to resend? <a style="color:var(--mulberry); font-weight:600; cursor:pointer;" onclick="reUpload()">Replace proof</a></p>
+    </div>
+  </div>
+
+  <div class="legend"><b>This flow renders:</b> the compatibility-% gate+score · hybrid-anonymity (name hidden until reply) · the required Setnayan Exclusive · the lock <b>consent modal</b> (removals previewed, executed only on payment-verified) · the off-platform payment with the 48-hr hold + proof upload.</div>
+</div></section>
+
+<!-- ============================ VENDOR ============================ -->
+<section class="view" id="vend"><div class="wrap">
+
+  <!-- vendor home -->
+  <div id="vend-home">
+    <div class="eyebrow">Vendor home · Aroma Catering Co.</div>
+    <h1 class="serif" style="font-size:25px;">How your business is doing</h1>
+
+    <div class="alerts" style="margin-top:14px;">
+      <div class="alert" onclick="vendGo('hub','requests')"><b>3</b><span>Lock requests<br>to approve</span></div>
+      <div class="alert" onclick="vendGo('hub','verify')"><b>2</b><span>Payments<br>to verify</span></div>
+      <div class="alert" onclick="vendGo('hub','inq')"><b>9</b><span>New<br>inquiries</span></div>
+    </div>
+
+    <div class="secthead"><h2>Your funnel · last 30 days</h2></div>
+    <div class="funnel">
+      <div class="stage"><div class="n">1,240</div><div class="l">Search reach</div></div>
+      <div class="stage"><div class="n">86</div><div class="l">Inquiries</div><div class="d">6.9% of reach</div></div>
+      <div class="stage"><div class="n">31</div><div class="l">White-listed</div><div class="d">36% of inq.</div></div>
+      <div class="stage"><div class="n">9</div><div class="l">Locked events</div><div class="d">29% of white</div></div>
+    </div>
+
+    <div class="secthead"><h2>By service</h2></div>
+    <div class="card"><div class="pad" style="padding:6px 12px;">
+      <table class="svc">
+        <tr><th>Service</th><th>Views</th><th>Inquiries</th><th>Locked</th></tr>
+        <tr><td><b>Plated Set Menu (180pax)</b></td><td>540</td><td>22</td><td>6</td></tr>
+        <tr><td>Buffet Package</td><td>410</td><td>11</td><td>3</td></tr>
+        <tr><td>Grazing Table add-on</td><td>290</td><td>2</td><td>0</td></tr>
+      </table>
+    </div></div>
+
+    <div class="secthead"><h2>Recommendations</h2><span class="badge b-gold">Coaching</span></div>
+    <div class="sectsub">Specific, benchmarked, one-tap. Genuine improvement first — paid options are just one route.</div>
+    <div class="card"><div class="pad">
+      <div class="coach"><div class="ic">📷</div><div><div class="t">Add photos to “Grazing Table”</div><div class="s">It gets views but almost no inquiries — you have 4 photos; top-quartile caterers have 15+. <a style="color:var(--mulberry); font-weight:600;">Add photos →</a></div></div></div>
+      <div class="coach"><div class="ic">⏱️</div><div><div class="t">Reply faster</div><div class="s">Your response rate is 58% vs a 75% category median. Faster replies lift white→locked. <a style="color:var(--mulberry); font-weight:600;">See unanswered →</a></div></div></div>
+      <div class="coach"><div class="ic">📍</div><div><div class="t">Your 20 km radius is capping reach</div><div class="s">38 couples searched just outside your range this month. Widen service area or add Tagaytay as a served region. <a style="color:var(--mulberry); font-weight:600;">Edit areas →</a></div></div></div>
+    </div></div>
+  </div>
+
+  <!-- vendor hub -->
+  <div id="vend-hub" class="hide">
+    <a class="backlink" onclick="vendScreen('home')">← Vendor home</a>
+    <div class="eyebrow">Action hub</div>
+    <h1 class="serif" style="font-size:24px;">Bookings</h1>
+    <div class="tabs">
+      <button data-tab="inq" class="on" onclick="hubTab('inq')">Inquiries</button>
+      <button data-tab="requests" onclick="hubTab('requests')">Lock requests</button>
+      <button data-tab="verify" onclick="hubTab('verify')">To verify</button>
+      <button data-tab="cancelled" onclick="hubTab('cancelled')">Cancelled</button>
+    </div>
+
+    <div class="tabpane on" id="tab-inq">
+      <div class="sectsub">Free to view & decline. Chat needs an unlock — you only pay to pursue a lead you want.</div>
+      <div class="hubcard">
+        <div class="logo">M</div>
+        <div class="body"><div class="ttl">Maria &amp; Jio · Dec 12, 2026 · 180 pax</div>
+          <div class="sub">Garden · Tagaytay · budget ₱70–90k · wants plated Filipino-Spanish</div></div>
+        <div class="right"><span class="badge b-good">Strong match</span><br>
+          <div class="actions" style="margin-top:10px;">
+            <button class="btn ghost sm" onclick="toast('Decline reason required → sent to couple')">Decline (free)</button>
+            <button class="btn gold sm" onclick="toast('Unlocked: 6 tokens · chat + all your services + auto-favorite')">Unlock to chat · 6 tokens</button>
+          </div></div>
+      </div>
+      <div class="hubcard">
+        <div class="logo">R</div>
+        <div class="body"><div class="ttl">Rina &amp; Paolo · Jan 2027 (window) · 120 pax</div>
+          <div class="sub">Free on 2 of their 3 candidate dates</div></div>
+        <div class="right"><span class="badge b-grey">New</span><br>
+          <div class="actions" style="margin-top:10px;">
+            <button class="btn ghost sm" onclick="toast('Declined')">Decline</button>
+            <button class="btn gold sm" onclick="toast('Unlocked')">Unlock · 4 tokens</button>
+          </div></div>
+      </div>
+    </div>
+
+    <div class="tabpane" id="tab-requests">
+      <div class="sectsub">Accepting sends your payment details and places an exclusive 48-hr hold on that date.</div>
+      <div class="hubcard" id="lockreq">
+        <div class="logo">M</div>
+        <div class="body"><div class="ttl">Maria &amp; Jio want to lock you</div>
+          <div class="sub">Plated Set Menu · <b>Dec 12, 2026</b> · ₱89,000 · downpayment ₱26,700</div></div>
+        <div class="right"><span class="badge b-mul">Lock request</span><br>
+          <div class="actions" style="margin-top:10px;">
+            <button class="btn ghost sm" onclick="toast('Declined with reason')">Decline</button>
+            <button class="btn primary sm" onclick="acceptLock()">Accept · send details</button>
+          </div></div>
+      </div>
+    </div>
+
+    <div class="tabpane" id="tab-verify">
+      <div class="sectsub">Confirm within 48 hrs of the couple’s upload. Real money already moved — don’t leave it hanging.</div>
+      <div class="hubcard" id="verifycard">
+        <div class="logo">M</div>
+        <div class="body"><div class="ttl">Maria &amp; Jio · proof uploaded</div>
+          <div class="sub">₱26,700 via GCash · ref SN-K4P2Q9ZT · <a style="color:var(--mulberry); font-weight:600; cursor:pointer;" onclick="viewShot()">View screenshot</a></div>
+          <div class="stamp" id="verifytimer" style="margin-top:5px;">⏳ 47:31 left to verify</div></div>
+        <div class="right">
+          <div class="actions" style="margin-top:2px; flex-direction:column; gap:7px;">
+            <button class="btn primary sm" onclick="verifyPay()">✓ Payment verified</button>
+            <button class="btn ghost sm" onclick="toast('Resend request sent to couple')">Resend request</button>
+            <button class="btn ghost sm" onclick="toast('Transaction cancelled · logged')">Cancel</button>
+          </div></div>
+      </div>
+    </div>
+
+    <div class="tabpane" id="tab-cancelled">
+      <div class="sectsub">Audit trail of cancelled / lapsed transactions.</div>
+      <div class="hubcard"><div class="logo" style="background:#eee;">D</div>
+        <div class="body"><div class="ttl">Dana &amp; Leo · Nov 8</div><div class="sub">Cancelled by couple — “changed caterer direction”</div></div>
+        <div class="right"><span class="badge b-bad">Cancelled</span></div></div>
+      <div class="hubcard"><div class="logo" style="background:#eee;">T</div>
+        <div class="body"><div class="ttl">Tin &amp; Marco · Oct 22</div><div class="sub">Lapsed — pay-window expired, slot reopened</div></div>
+        <div class="right"><span class="badge b-grey">Lapsed</span></div></div>
+    </div>
+  </div>
+
+  <div class="legend"><b>This flow renders:</b> the vendor <b>home dashboard</b> (funnel reach→inquiry→white→locked, per-service stats, coaching) vs the <b>bookings hub</b> (the action inbox) · pay-to-pursue (free decline / token to chat) · accept-lock → send details → <b>Payment Verified</b> → booked.</div>
+</div></section>
+
+<!-- ============================ ADMIN ============================ -->
+<section class="view" id="adm"><div class="wrap">
+  <div class="eyebrow">Admin · Force majeure queue</div>
+  <h1 class="serif" style="font-size:24px;">Reported events</h1>
+  <p class="lead">Either party can report. No-fault — vendor isn’t penalised. Help the couple via the resolution ladder.</p>
+
+  <div class="card" style="margin-top:16px;"><div class="pad">
+    <div style="display:flex; gap:12px; align-items:flex-start;">
+      <div class="logo" style="background:#f6eef2;">⛈️</div>
+      <div style="flex:1;">
+        <div class="ttl" style="font-size:15.5px; font-weight:600;">Aira &amp; Ken · Dec 6, 2026 · Aroma Catering</div>
+        <div class="sub" style="font-size:12.5px; color:var(--muted);">Reported by <b>customer</b> · Typhoon signal #3, venue area · timers paused</div>
+        <div style="margin-top:8px;"><span class="badge b-mul">No-fault</span> <span class="badge b-grey">Downpayment ₱24,000 on file</span></div>
+      </div>
+    </div>
+    <div style="margin-top:14px; font-size:12.5px; color:var(--muted);">Resolution ladder:</div>
+    <div class="actions" style="margin-top:8px;">
+      <button class="btn primary" onclick="toast('Offering 4 of the vendor’s open dates — couple gets priority hold')">① Reschedule · offer 4 dates</button>
+      <button class="btn ghost" onclick="toast('Matcher filtered to available-on-date + same category')">② Find replacement</button>
+      <button class="btn ghost" onclick="toast('Refund/credit coordination opened')">③ Refund / credit</button>
+    </div>
+  </div></div>
+
+  <div class="card" style="margin-top:14px;"><div class="pad">
+    <div style="display:flex; gap:12px; align-items:flex-start;">
+      <div class="logo" style="background:#faf4e8;">🎬</div>
+      <div style="flex:1;">
+        <div class="ttl" style="font-size:15.5px; font-weight:600;">Bea &amp; Sam · AI Highlight (Setnayan digital service)</div>
+        <div class="sub" style="font-size:12.5px; color:var(--muted);">Reported by <b>customer</b> · render unusable after venue power loss</div>
+      </div>
+    </div>
+    <div class="actions" style="margin-top:12px;">
+      <button class="btn gold" onclick="toast('Digital service → free re-render queued · no ladder needed')">Free re-render (digital)</button>
+    </div>
+  </div></div>
+
+  <div class="legend"><b>This flow renders:</b> both-party force-majeure reports → no-fault record → the resolution ladder (reschedule-4 with priority / replace / refund), and the <b>digital-service branch</b> (free extend / re-render).</div>
+</div></section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- vendor discovery data ---------- */
+const VENDORS = [
+  {init:'A', name:'Aroma Catering Co.', masked:false, score:92, ring:'#2f7d52', dist:'8 km · Tagaytay', price:'from ₱89k / 180 pax', tags:[['Filipino-Spanish','b-grey'],['Plated · Buffet','b-grey'],['Halal-friendly','b-good']], excl:'Free Setnayan live photo wall (₱2,999 value) when you book in-app', lockable:true},
+  {init:'V', name:'Hidden until they reply', masked:true, score:84, ring:'#C5A059', dist:'15 km · Silang', price:'from ₱76k / 150 pax', tags:[['Filipino · Fusion','b-grey'],['Buffet','b-grey']], excl:'Free dessert station upgrade on in-app booking', lockable:false},
+  {init:'K', name:'Hidden until they reply', masked:true, score:71, ring:'#C5A059', dist:'22 km · Alfonso', price:'from ₱68k / 150 pax', tags:[['Filipino','b-grey'],['Family-style','b-grey']], excl:'10% off via Setnayan Exclusive', lockable:false},
+  {init:'L', name:'Lakbay Feasts', masked:false, score:58, ring:'#b4791f', dist:'34 km · Nasugbu', price:'from ₱61k / 150 pax', tags:[['Filipino','b-grey']], excl:'Free Pakanta jingle clip on booking', lockable:false}
+];
+function renderVendors(){
+  document.getElementById('vgrid').innerHTML = VENDORS.map((v,i)=>`
+    <div class="card"><div class="pad">
+      <div class="vhead">
+        <div class="logo">${v.masked?'•':v.init}</div>
+        <div><div class="vname ${v.masked?'':''}">${v.masked?'<span class="masked">'+v.name+'</span>':v.name}</div>
+          <div class="vmeta">${v.dist} · ${v.price}</div></div>
+        <div class="ring" style="background:conic-gradient(${v.ring} ${v.score}%, #ececec 0);">
+          <div style="position:absolute; inset:5px; background:#fff; border-radius:50%;"></div>
+          <span style="position:relative; z-index:1;">${v.score}<small style="position:static;">%</small></span></div>
+      </div>
+      <div class="vrow">${v.tags.map(t=>`<span class="badge ${t[1]}">${t[0]}</span>`).join('')}</div>
+      <div class="excl">★ <b>Setnayan Exclusive:</b> ${v.excl}</div>
+      <div class="actions">
+        <button class="btn ghost" onclick="toast('${v.masked?'Inquiry sent — free. Vendor pays to reply.':'Chat opens after the vendor replies'}')">${v.masked?'Inquire (free)':'Chat'}</button>
+        <button class="btn primary" onclick="${v.lockable?'openLock()':'inquireFirst()'}">Lock</button>
+      </div>
+    </div></div>`).join('');
+}
+renderVendors();
+function inquireFirst(){ toast('Inquire first — you can lock once you’ve agreed terms'); }
+
+/* ---------- role + screen routing ---------- */
+function setRole(r){
+  document.querySelectorAll('.roles button').forEach(b=>b.classList.toggle('on', b.dataset.role===r));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id===r));
+  window.scrollTo({top:0});
+}
+function custScreen(s){
+  ['discover','waiting','pay'].forEach(x=>document.getElementById('cust-'+x).classList.toggle('hide', x!==s));
+  if(s==='pay') startClock();
+  window.scrollTo({top:0});
+}
+function vendScreen(s){
+  ['home','hub'].forEach(x=>document.getElementById('vend-'+x).classList.toggle('hide', x!==s));
+  window.scrollTo({top:0});
+}
+function vendGo(s,tab){ vendScreen(s); if(tab) hubTab(tab); }
+
+/* ---------- lock consent modal ---------- */
+function openLock(){ document.getElementById('scrim').classList.add('on'); }
+function closeLock(){ document.getElementById('scrim').classList.remove('on'); }
+function confirmLock(){ closeLock(); custScreen('waiting'); }
+
+/* ---------- countdown ---------- */
+let clockTimer;
+function startClock(){
+  clearInterval(clockTimer);
+  let total = 48*3600; // seconds
+  const el = document.getElementById('clock');
+  clockTimer = setInterval(()=>{
+    total--; if(total<0){clearInterval(clockTimer); return;}
+    const h=String(Math.floor(total/3600)).padStart(2,'0');
+    const m=String(Math.floor(total%3600/60)).padStart(2,'0');
+    const s=String(total%60).padStart(2,'0');
+    el.textContent=`${h}:${m}:${s}`;
+  },1000);
+}
+function uploadProof(){
+  const p=document.getElementById('proof');
+  p.classList.add('done'); p.innerHTML='✓ payment_screenshot.png uploaded';
+  document.getElementById('paydone').classList.remove('hide');
+  flipTimer(true);
+  toast('Proof submitted — vendor has 48 hrs to verify');
+}
+function reUpload(){
+  const p=document.getElementById('proof');
+  p.classList.remove('done'); p.innerHTML='📎 Tap to upload a screenshot of your payment';
+  document.getElementById('paydone').classList.add('hide');
+  flipTimer(false); startClock();
+  toast('Re-upload your payment proof');
+}
+function flipTimer(submitted){
+  const tb=document.getElementById('timerbox');
+  if(submitted){
+    clearInterval(clockTimer);
+    tb.style.background='#eef6f0'; tb.style.borderColor='#cfe6d6';
+    tb.innerHTML='<div><div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--good);">Awaiting verification</div><div class="clock" style="color:var(--good); font-size:21px;">Vendor has up to 48 hrs</div></div><div style="font-size:12.5px; color:var(--muted); margin-left:auto; max-width:175px;">We’ll notify you the moment they confirm — nothing more to do on your end.</div>';
+  } else {
+    tb.style.background=''; tb.style.borderColor='';
+    tb.innerHTML='<div><div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--mulberry);">Pay within</div><div class="clock" id="clock">48:00:00</div></div><div style="font-size:12.5px; color:var(--muted); margin-left:auto; max-width:170px;">Your slot on <b>Dec 12</b> is held exclusively for you until the timer ends.</div>';
+  }
+}
+
+/* ---------- vendor hub ---------- */
+function hubTab(t){
+  document.querySelectorAll('#vend-hub .tabs button').forEach(b=>b.classList.toggle('on', b.dataset.tab===t));
+  document.querySelectorAll('#vend-hub .tabpane').forEach(p=>p.classList.toggle('on', p.id==='tab-'+t));
+}
+function acceptLock(){
+  document.getElementById('lockreq').innerHTML='<div class="logo">M</div><div class="body"><div class="ttl">Maria &amp; Jio — payment details sent</div><div class="sub">Exclusive 48-hr hold placed on Dec 12. Awaiting their proof.</div></div><div class="right"><span class="badge b-warn">Hold · 48h</span></div>';
+  toast('Payment details auto-sent · Dec 12 held exclusively');
+}
+function verifyPay(){
+  document.getElementById('verifycard').innerHTML='<div class="logo" style="background:#eef6f0;">M</div><div class="body"><div class="ttl">Maria &amp; Jio · BOOKED ✓</div><div class="sub">Dec 12 locked · added to both schedules · balance reminders set</div></div><div class="right"><span class="badge b-good">Locked</span></div>';
+  toast('Verified → booked. Other shortlisted vendors now pruned on the couple’s side.');
+}
+
+/* ---------- payment-proof lightbox ---------- */
+function viewShot(){ document.getElementById('shotScrim').classList.add('on'); }
+function closeShot(){ document.getElementById('shotScrim').classList.remove('on'); }
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),2600);
+}
+</script>
+
+<!-- consent modal -->
+<div class="scrim" id="scrim"><div class="modal">
+  <h3>Lock Aroma Catering Co.?</h3>
+  <p class="lead" style="margin-top:8px;">Locking commits you to <b>Dec 12, 2026</b>. To keep your plan consistent, this will remove options that no longer fit:</p>
+  <div class="casualty">
+    <div class="it">🍽️ 3 other shortlisted caterers <span class="x">will be removed</span></div>
+    <div class="it">🎂 “Sweet North” cake <span class="x">doesn’t serve Garden · removed</span></div>
+    <div class="it">🏛️ 1 reception venue (different location) <span class="x">removed</span></div>
+  </div>
+  <div class="note">Nothing is deleted yet. These are removed <b>only when your downpayment is verified</b> — if the booking falls through, your shortlist stays intact.</div>
+  <div class="actions" style="margin-top:18px;">
+    <button class="btn ghost" onclick="closeLock()">Cancel</button>
+    <button class="btn primary" onclick="confirmLock()">Continue</button>
+  </div>
+</div></div>
+
+<!-- payment-proof lightbox (vendor taps "View screenshot") -->
+<div class="scrim" id="shotScrim" onclick="if(event.target===this)closeShot()"><div class="modal" style="max-width:360px; padding:0; overflow:hidden;">
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--line);">
+    <div style="font-size:13px; font-weight:600;">Payment proof · Maria &amp; Jio</div>
+    <button onclick="closeShot()" style="font-size:18px; color:var(--muted);">✕</button>
+  </div>
+  <div style="padding:18px; background:var(--soft);">
+    <div style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px; max-width:280px; margin:0 auto; box-shadow:var(--shadow);">
+      <div style="text-align:center; color:var(--good); font-size:34px; line-height:1;">✓</div>
+      <div style="text-align:center; font-weight:700; font-size:15px; margin-top:6px;">Payment Successful</div>
+      <div style="text-align:center; font-family:Georgia,serif; font-size:30px; margin:10px 0 16px;">₱26,700.00</div>
+      <div class="payline" style="font-size:13px;"><span style="color:var(--muted)">Sent to</span><span><b>Aroma Catering</b></span></div>
+      <div class="payline" style="font-size:13px;"><span style="color:var(--muted)">Mobile</span><span>0917 555 0148</span></div>
+      <div class="payline" style="font-size:13px;"><span style="color:var(--muted)">Ref No.</span><span>SN-K4P2Q9ZT</span></div>
+      <div class="payline" style="font-size:13px; font-weight:400;"><span style="color:var(--muted)">Date</span><span>Dec 10, 2026 · 2:14 PM</span></div>
+    </div>
+    <div style="text-align:center; font-size:11.5px; color:var(--muted); margin-top:12px;">📎 payment_screenshot.png · uploaded by the couple · pinch to zoom</div>
+  </div>
+  <div class="actions" style="padding:14px 16px; gap:8px;">
+    <button class="btn ghost sm" style="flex:1;" onclick="closeShot()">Close</button>
+    <button class="btn primary sm" style="flex:1;" onclick="closeShot(); verifyPay();">✓ Payment verified</button>
+  </div>
+</div></div>
+
+</body>
+</html>

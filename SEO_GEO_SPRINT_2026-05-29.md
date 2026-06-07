@@ -327,7 +327,7 @@ Each item links to `/vendors?folder=<slug>` (existing folder-scoped catalog per 
 - Pakanta ₱2,499 (per CLAUDE.md tenth 2026-05-28 row v2.1 update)
 - Pro Vendor ₱1,999/mo + Enterprise ₱5,499/mo
 - Pro Vendor ₱19,999/yr + Enterprise ₱54,999/yr (per CLAUDE.md eleventh 2026-05-28 row · note these are spec-locked but NOT yet rendering on /pricing · render them as part of this PR)
-- 5 token packs (4/10/25/50/100 tokens at ₱180–₱250/token)
+- 5 token packs (4/10/25/50/100 tokens at ₱100/token flat · bulk earns bonus tokens on top, no discount · locked 2026-06-04)
 
 **Pattern per SKU:**
 ```ts

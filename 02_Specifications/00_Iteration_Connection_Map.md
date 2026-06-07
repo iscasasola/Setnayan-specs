@@ -21,7 +21,7 @@
 | **0000** | `0000_app_shell_and_navigation/` | **drafted 2026-05-09** | ⚠ Phase 1 | **App shell foundation — universal Setnayan account, login, event picker, primary event auto-jump, event QR + scan-to-join flow with role picker, four bottom-nav tabs (Guest List / Vendors / Schedule / Add-ons), event-scoped URL pattern, services launcher, unified Schedule view** |
 | 0001 | `0001_creating_guest_list/` | drafted | ✅ | Guest list, household model, role taxonomy, `guests.qr_token`, base `events` table |
 | 0002 | `0002_qr_invitation_system/` | drafted | ✅ v2 | Personal invitation site at `setnayan.com/[event-slug]?invite=…`, `setnayan://[entity]/[id]?token=…` URI scheme, `scan_events`, `events.palette_finalized_at` |
-| ~~0003~~ | ~~`0003_token_wallet_and_packs/`~~ **(no folder · RETIRED)** | **RETIRED 2026-05-11** | ⛔ | **Token wallet retired** — replaced by order-and-pay (apply-then-pay) in **0034**. The `service_catalog` table + `create_service_order(...)` primitive survive under 0034; the wallet / `spend()` / pack-purchase half does NOT exist in product. *(Tombstone: the `0003_token_wallet_and_packs/` folder referenced below was never created. ⚠ Deeper reconciliation still owed — this map's `spend()`-woven prose (§3.3, build order, checklists) predates the retirement; see Cowork worklist §B #6.)* |
+| ~~0003~~ | ~~`0003_token_wallet_and_packs/`~~ **(no folder · RETIRED)** | **RETIRED 2026-05-11** | ⛔ | **Token wallet retired** — replaced by order-and-pay (apply-then-pay) in **0034**. The `service_catalog` table + `create_service_order(...)` primitive survive under 0034; the wallet / `spend()` / pack-purchase half does NOT exist in product. *(Tombstone: the `0003_token_wallet_and_packs/` folder referenced below was never created. ✅ Reconciled 2026-06-04 — the chrome wallet-pill, the `.../services/wallet` route, and the §3.3 `spend()` primitive are retired below; every remaining "iteration → 0003: `spend()` / pack / wallet" line in the per-iteration / build-order / checklist sections is **historical** and reads as "0034: `service_orders`, apply-then-pay." `service_catalog` survives under 0034. Customer wallet only — the live **vendor** Bidding-Token system is separate and unaffected.)* |
 | 0004 | `0004_invitation_widgets/` | drafted | | 11 widgets (Basic / Pro tier), `invitation_widgets`, palette-lock cascade, Hero Monogram editor, `pro_*` service rows |
 | 0005 | `0005_led_background_maker/` | drafted | | 10 Lottie templates, 8K/4K/1080p MP4 renders, hosted live URL, R2 delivery |
 | 0006 | `0006_vendors_management/` | drafted | | 28 canonical services + custom, flexible `vendor_payment_milestones`, `vendor_crew` totals, `vendor_meetings`, R2 contracts |
@@ -83,7 +83,7 @@ Every iteration's user-facing surface lives under the event-scoped URL pattern a
 | **Guest List** | Guests → `/dashboard/[event-id]/guests` → 0001 · Invitation Site → `/dashboard/[event-id]/invitation` → 0002 + 0004 · Seating → `/dashboard/[event-id]/seating` → 0008 |
 | **Vendors** | Vendor List → `/dashboard/[event-id]/vendors` → 0006 · Budget → `/dashboard/[event-id]/budget` → 0007 |
 | **Schedule** | Unified calendar → `/dashboard/[event-id]/schedule` → 0000 (pulls from 0004, 0006, 0007) |
-| **Add-ons** | Launcher grid → `/dashboard/[event-id]/services` → 0000 · Wallet → `.../services/wallet` → 0003 · Mood Board → `.../services/mood-board` → 0010 · LED → `.../services/led` → 0005 · Photo Delivery → `.../services/photo-delivery` → 0009 · Panood → `.../services/panood` → 0011 · Papic → `.../services/papic` → 0012 |
+| **Add-ons** | Launcher grid → `/dashboard/[event-id]/services` → 0000 · Mood Board → `.../services/mood-board` → 0010 · LED → `.../services/led` → 0005 · Photo Delivery → `.../services/photo-delivery` → 0009 · Panood → `.../services/panood` → 0011 · Papic → `.../services/papic` → 0012 |
 
 **Auto-jump rule (after sign-in):** 0 events → welcome screen; 1 active event → jump into that event's Guest List tab; 2+ active events → show the event picker. `events.is_primary` is a UI sort hint only — it doesn't change jump logic.
 
@@ -105,9 +105,9 @@ setnayan://[entity_type]/[entity_id]?token=[token]
 
 HTTPS fallback printed alongside every QR: `https://setnayan.com/[event-slug]?invite=[token]`.
 
-### 3.2 `service_catalog` rows (defined in 0003)
+### 3.2 `service_catalog` rows (originally 0003 · **survives under 0034** after the token-wallet retirement)
 
-Every paid V1 surface registers exactly one row in `service_catalog`. PHP centavos is source of truth; tokens are render-time display via `formatPrice()`.
+Every paid V1 surface registers exactly one row in `service_catalog`. PHP centavos is the source of truth; the in-app UI may render a price in tokens (30 tokens = ₱1, **display only — no wallet balance**). *(Row prices below are illustrative/historical — the live `service_catalog` + the CLAUDE.md SKU table are authoritative; several have since been repriced.)*
 
 | service_key | php_centavos | iteration_origin |
 |---|---|---|
@@ -128,11 +128,11 @@ Every paid V1 surface registers exactly one row in `service_catalog`. PHP centav
 
 **Verification.** When a paid surface is built, the test suite must `SELECT * FROM service_catalog WHERE service_key = '…'` and confirm the row exists with the price the spec quotes. The price should never be hard-coded in product code — always read via `service_catalog`.
 
-### 3.3 `spend(walletId, serviceKey, refId)` primitive (defined in 0003)
+### 3.3 ~~`spend(walletId, serviceKey, refId)` primitive (defined in 0003)~~ — **RETIRED 2026-06-04**
 
-Called by every paid iteration. Returns `{ ok: true, txnId }` or `{ ok: false, reason: 'insufficient_balance' }`.
+The customer token-wallet `spend()` primitive was retired with iteration 0003 (2026-05-11). There is **no `spend()`, no `token_transactions`, no wallet balance** in product. Paid surfaces create a **`service_orders`** row and follow the **apply-then-pay** PHP-direct flow under **0034** (admin reconciles BDO / GCash, then activates). `service_catalog` (§3.2) survives as the price source of truth under 0034.
 
-Refunds are positive `token_transactions` rows with `reason = 'refund'`. Iterations 0004, 0011, 0012 are V1 callers.
+*(Customer wallet only — the live **vendor** "Bidding-Token" system in the v2.1 brief is a separate currency and is unaffected.)*
 
 ### 3.4 Lock-palette mechanism (events.palette_finalized_at)
 
@@ -234,7 +234,7 @@ Each section is a contract sheet: what the iteration **provides** to downstream 
 - Profile + Settings at `setnayan.com/dashboard/profile`.
 - Event QR + scan-to-join flow: `event_join_tokens` table (one per event, 32-hex, rotatable) and the `setnayan.com/join/[event-id]?token=...` flow that walks scanners through auth → membership check → role picker → linkage to the event.
 - New `event_members` table (account ↔ event link): `member_type ∈ {couple, guest, vendor}`, `role` (uses 0001's 18-value taxonomy for guests; service slug for vendors), optional `guest_id`/`vendor_id` FKs, `joined_via` enum.
-- Inside-event chrome (couples only) — top bar (event pill + wallet pill from 0003 + avatar) + four-tab bottom nav (mobile) / sidebar (desktop).
+- Inside-event chrome (couples only) — top bar (event pill + avatar — **no wallet pill**; customer wallet retired → 0034) + four-tab bottom nav (mobile) / sidebar (desktop).
 - Event-scoped URL pattern: `setnayan.com/dashboard/[event-id]/[section]`.
 - Unified Schedule view at `setnayan.com/dashboard/[event-id]/schedule` — pulls from `vendor_meetings` (0006), `VendorLineItem.deadline_date` (0007), and `invitation_widgets` schedule widget (0004) plus `events.wedding_date` countdown.
 - Add-ons launcher grid at `setnayan.com/dashboard/[event-id]/services` — shows one card per registered service with state and primary action.
@@ -485,7 +485,7 @@ All 15 integration tests in `0013_platform_stack_and_sync.md` Section C must pas
 - [ ] Event picker sorts the primary event first; "+ Create another event" button is visible.
 - [ ] Inside an event, the four bottom-nav tabs (Guest List / Vendors / Schedule / Add-ons) are visible on mobile and as a sidebar on desktop.
 - [ ] Active-tab highlight matches the current URL prefix.
-- [ ] Top bar shows the event pill (with quick switcher), wallet pill (live balance from 0003), and avatar (Profile dropdown).
+- [ ] Top bar shows the event pill (with quick switcher) and avatar (Profile dropdown). *(No wallet pill — customer wallet retired → order-and-pay per 0034.)*
 - [ ] Profile + Settings page at `/dashboard/profile` includes the "make this event primary" toggle.
 - [ ] Schedule tab pulls from all three sources (0004 schedule widget, 0006 `vendor_meetings`, 0007 `VendorLineItem.deadline_date`) and renders one unified calendar.
 - [ ] Add-ons launcher shows one card per registered service with the correct state and primary action; tapping a card routes to `/dashboard/[event-id]/services/[service]`.

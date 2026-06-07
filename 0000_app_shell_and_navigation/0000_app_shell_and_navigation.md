@@ -1,5 +1,15 @@
 # Iteration 0000 — App Shell & Navigation
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **The DIY-vs-"Setnayan Concierge ₱4,999" choice card (Step 2.5b) is RETIRED.** `CONCIERGE_ENABLED = false` in `lib/concierge.ts`; `create-event/actions.ts` coerces the `concierge_choice` field to `'diy'` (the `trial`/`paid` enum values are dead cutover stubs). The planner SKU on the live site is **"Today's Focus" ₱1,499** (not Concierge ₱4,999), and the couple-app Today's Focus *wizard* is itself retired — guidance now comes from onboarding + per-service deadline timeline.
+> - **The token-wallet pill / Wallet route / "Wallet" Add-ons card are RETIRED** (customer token wallet 0003 retired 2026-05-11; the spec body already strikes most of these). Payment is apply-then-pay per 0034 with manual admin approval — no in-app balance.
+> - **All nine event types are live, but tapping a type now jumps straight into that type's tailored onboarding** (`onboardingHref` — wedding = `/onboarding/wedding`; the rest fall back to the inline name form). The "swipe a hero-photo carousel → pick a card → name field appears" framing is one shipped variant; roster is `event-types.ts`.
+> - **Event-scoped routing shipped as `/dashboard/[eventId]/...`** with tabs Overview/Guests/Vendors/Schedule/Services/Seat-plan/Landing/QR/Gallery + add-ons (richer than the 4-tab Guest List/Vendors/Schedule/Add-ons described here). Add-ons live under `/dashboard/[eventId]/add-ons/...`.
+> - **Vendor accounts are NOT a V1 placeholder** — a full vendor self-service dashboard shipped at `/vendor-dashboard` (~24 routes). The "vendor row is a stub, Din is Phase 3" framing is superseded.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0000
 **Topic:** The app shell. Login, event picker, bottom-nav tabs, event-scoped routing.
 **Status:** Drafted 2026-05-09
@@ -142,7 +152,7 @@ If the couple has 2+ active events, they see this:
 │  ┌────────────────────────────────────────┐ │
 │  │ ⭐ Maria & Juan                         │ │  ← primary, sorted first
 │  │   August 15, 2026 · 247 guests         │ │
-│  │   Add-ons: 5 · Wallet: 75,000  │ │
+│  │   Add-ons: 5 active                  │ │
 │  └────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────┐ │
 │  │   Friend's wedding (collaborator)      │ │
@@ -477,9 +487,9 @@ That's the entire upstream dependency list.
 
 | To | What 0000 publishes |
 |---|---|
-| 0001 | Dashboard chrome (top bar with event pill + wallet + avatar), bottom-nav routing, "Guest List" tab as the home for the guest list panel. |
+| 0001 | Dashboard chrome (top bar with event pill + avatar — **no wallet pill**; customer wallet retired → order-and-pay per 0034), bottom-nav routing, "Guest List" tab as the home for the guest list panel. |
 | 0002 | Routes the guest QR admin and the invitation site editor under the Guest List tab. |
-| 0003 | Wallet pill in the chrome (links to wallet panel inside the Add-ons tab). Receipt history page is also reachable from the wallet panel. |
+| ~~0003~~ | ~~Wallet pill + panel + receipt history~~ — **RETIRED 2026-06-04** (customer token wallet retired 2026-05-11; no wallet pill / panel / route). Payment is order-and-pay per **0034**; `service_catalog` survives under 0034. |
 | 0004 | Routes the invitation widget editor under the Guest List tab. |
 | 0005 | Adds a Services launcher card; routes the LED editor under the Add-ons tab. |
 | 0006 | Routes the vendor registry under the Vendors tab. Publishes `vendor_meetings` to the unified Schedule view. |
@@ -501,7 +511,7 @@ This is the foundation iteration. **Build 0000 first.** Sprint plan:
 1. **Sprint 1** — Login screen + magic-link / password handling (extends existing primitives). Auth session cookie / JWT.
 2. **Sprint 2** — Schema migration: add `is_primary` and `archived` columns to `events`. Backfill `is_primary = TRUE` for the oldest event of each existing couple.
 3. **Sprint 3** — Event picker page (`/dashboard`). Auto-jump logic. Empty state for 0-event couples.
-4. **Sprint 4** — Inside-event chrome: top bar (event pill + wallet pill + avatar) + bottom-nav (mobile) / sidebar (desktop). Active-tab highlighting. Routing setup for all four tabs.
+4. **Sprint 4** — Inside-event chrome: top bar (event pill + avatar — **no wallet pill**; customer wallet retired → order-and-pay per 0034) + bottom-nav (mobile) / sidebar (desktop). Active-tab highlighting. Routing setup for all four tabs.
 5. **Sprint 5** — Schedule tab (the unified calendar view). Pull from `vendor_meetings`, `VendorLineItem`, and `invitation_widgets`. List view + month grid. .ics export reuse from 0007.
 6. **Sprint 6** — Add-ons launcher grid. Card config manifest. Empty / unbought / connected states. Route to each service's detail page.
 7. **Sprint 7** — Profile + Settings page. Avatar dropdown chrome. Sign-out flow.
@@ -532,7 +542,7 @@ This iteration is shippable when all of the following are true:
 - [ ] Tapping an event card in the picker routes to `/dashboard/[event-id]` and lands on the Guest List tab.
 - [ ] Inside an event, the four bottom-nav tabs are visible on mobile and as a sidebar on desktop.
 - [ ] Active-tab highlight matches the current URL prefix.
-- [ ] Top bar shows the event pill (with quick switcher), the wallet pill (with current balance from 0003), and the avatar (with Profile dropdown).
+- [ ] Top bar shows the event pill (with quick switcher) and the avatar (with Profile dropdown). *(No wallet pill — customer token wallet retired; payment is order-and-pay per 0034.)*
 - [ ] Schedule tab pulls from all three sources (0004, 0006, 0007) and renders one unified calendar.
 - [ ] Add-ons launcher shows one card per registered service with the correct state and primary action.
 - [ ] Tapping a service card routes to that service's detail page under `/dashboard/[event-id]/services/[service]`.
