@@ -1,5 +1,17 @@
 # Setnayan Wedding Planning Reference + Setnayan Concierge SKU
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **The planner SKU is "Today's Focus" ₱1,499**, a single one-time purchase. The entire "Setnayan Concierge ₱4,999 / ₱2,499 · wedding-anchored 12–24mo access" model below (the `concierge_expires_at` formula, the access-duration table, the re-purchase rules, the 3-day card-less trial + tiered abuse enforcement) is **superseded** — name + price + access-model all changed.
+> - **The couple-app Today's Focus *wizard* is RETIRED in code (2026-06-03).** `/dashboard/[eventId]/today` now `redirect()`s to event-home; `CONCIERGE_ENABLED = false` (`lib/concierge.ts`). Guidance is replaced by (a) onboarding scoping up front and (b) the per-service deadline timeline (`lib/upcoming-items.ts`, which still owns the Filipino statutory deadlines). The wizard components are left on disk as a revert path but nothing renders them.
+> - **The SKU/branding "Today's Focus ₱1,499" persists on the live site even though the wizard is gone** — i.e. the paid planner is sold/marketed but the in-app 9/65-card wizard surface no longer ships.
+> - **Payment = apply-then-pay + manual admin approval** (no card charge, no auto-renew). Customer token wallet (0003) is RETIRED; this SKU is a discrete PHP order.
+> - The `/for-vendors` "free Setnayan Concierge worth ₱2,499/booked-couple" collision noted in the 2026-06-04 banner is moot — the vendor pitch now leads with 0% commission + the token economy, not a "Concierge."
+>
+> When this body disagrees with the above, **the above wins.**
+
+> **⚠ LIVE-SITE RECONCILIATION 2026-06-04.** The paid AI planner ships on setnayan.com as **"Today's Focus" · ₱1,499** ("assisted planning", build state **Live**) — one purchase, full access through the wedding. This supersedes the "Setnayan Concierge ₱4,999 / 12mo" single-SKU model below (name + price both changed). ⚠ Note `/for-vendors` separately advertises a *free* "Setnayan Concierge" worth ₱2,499 per booked couple — a name/price collision the owner must resolve (see `Pricing.md § 0.1`). Treat the ₱4,999 figure below as retired.
+
 > Master reference for the Plan Builder's category sequence, importance tiers, per-head budget allocation per couple's tier, sub-event + sibling-event handling, post-wedding coordination, vendor registration schema, and representative PH wedding venue inventory. **Simplified 2026-05-17 to single-SKU model + 3-day card-less trial + tiered abuse enforcement (supersedes the 2026-05-16 2-tier ladder); DIY remains free default.** Companion HTMLs: `0016_plan_builder_prototype.html` (main), `0016_guided_vs_diy_flow.html`, `0016_venue_food_flow.html`.
 
 ---

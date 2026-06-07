@@ -1,5 +1,14 @@
 # 0008 — Seating Chart Editor
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **SHIPPED at `app/dashboard/[eventId]/seating/`** (page + `actions.ts` + `floor-plan.tsx`), with the **13-table catalog** from `lib/seating.ts` (`round_8/10/12`, `long_banquet_6/8/10`, `family_head_12/14/16`, `sweetheart_2`, `serpentine_6/12/18`) — note the code names long tables `long_banquet_*` (spec body says `long_*`).
+> - **No customer token wallet anywhere** — this surface has no payment dependency (free planning tool). If a paid "seat arrangement" tool SKU is referenced, the catalog code carries `tool_seat_arrangement_weekly` (Pro-widget style), not a wallet spend; 0003 wallet is RETIRED.
+> - **Cross-cutting:** commission is 0% (no Setnayan Pay 3%); in-app paid SKUs use 0034 apply-then-pay + manual admin approval. None of this is load-bearing for the seating editor, which moves no money.
+> - Verify the actual auto-fill / publish-QR / print-pack scope against the shipped `actions.ts` before quoting this spec's full feature list — treat the spec as the design target, the code as the truth.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Type:** Implementation work order (Claude Code ticket)
 **Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: Guest List** (sub-section: Seating) · URL: `setnayan.com/dashboard/[event-id]/seating`
 **Builds on:** 0000 (app shell, sign-in, event-scoped URL, bottom-nav routing), 0001 (`guests`, role taxonomy, table_assignment_id), 0002 (QR token format)

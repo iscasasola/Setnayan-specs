@@ -1,5 +1,16 @@
 # 0005 — 8K LED Background Maker
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Ships as "Live Background" ₱2,499** (a single flat per-event SKU · build state "In build" on the live site · `[Token]`-redeemable by vendors). The maker UI shipped in-app as **"Pailaw · LED Background Maker"** at `/dashboard/[eventId]/add-ons/led`.
+> - **The à-la-carte pricing ladder in this spec is RETIRED** — the ₱599/₱899 LED tiers, the "Live Playback URL ₱99 + Photo Pool ₱1,999" live-feed add-ons, and per-resolution render pricing are all superseded by the single ₱2,499 "Live Background" SKU.
+> - **Payment is apply-then-pay (0034) with manual admin approval** — no in-app token wallet (customer wallet 0003 retired); vendors may redeem the `[Token]` flag against this SKU via the live vendor token economy.
+> - The marketing `/features` page brands the maker **"Pailaw"** (consistent with the shipped in-app title).
+>
+> When this body disagrees with the above, **the above wins.**
+
+> **⚠ LIVE-SITE RECONCILIATION 2026-06-04.** Ships on setnayan.com/pricing as **"Live Background" · ₱2,499 · Token Worthy · build state "In build"** ("LED wall design background with monogram"). The marketing `/features` page brands the maker **"Pailaw."** This supersedes the ₱599 Standard / ₱899 Custom LED tiers referenced in older pricing docs. Canonical: `Pricing.md § 0`.
+
 **Type:** Implementation work order (Claude Code ticket)
 **Surface:** Setnayan Web → Couple Dashboard ("LED Background Maker" panel) + server-side rendering pipeline · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/led`
 **Phase:** Phase 1 (promoted from V1.5+ on 2026-05-18) — depends on Phase 1 (events, dashboard shell, R2 storage) and the locked Hero Monogram from iteration 0004

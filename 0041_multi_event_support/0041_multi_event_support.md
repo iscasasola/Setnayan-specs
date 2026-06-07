@@ -1,5 +1,15 @@
 # 0041 — Multi-Event Vendor Catalog (Hybrid Taxonomy + Cross-Cutting Tags)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Only wedding ships as a full flow.** The shipped event-type picker (`app/dashboard/create-event/_components/event-types.ts`) lists 9 tiles — wedding · debut · gender_reveal · birthday · celebration · travel · corporate · tournament · christening — but only **wedding** has a real onboarding/planning flow (`onboardingHref: '/onboarding/wedding'`); every other tile is `onboardingHref: null` (placeholder). This does NOT match the spec's "7-value enum: wedding/baptism/debut/birthday/anniversary/corporate/religious_event" naming.
+> - **The "8 clusters → 38 categories" restructure did NOT ship.** The live vendor taxonomy is the ~10-parent / ~53-tile expandable tree (admin-gated, per the taxonomy-governance lock), not the 38-category/8-cluster model drafted here. Couple-side category enum does not auto-expand.
+> - Cross-cutting refinements DID land, but under the locked **"refinements"** terminology (per-leaf attributes feeding the 6-dimension match/score), not the `settings/delivery_type/pricing_model/...` tag set named here.
+> - This is catalog/taxonomy plumbing — **no SKU, no price, no commission, no payment flow.** The cross-cutting price/token reconciliations don't apply, except to note: Setnayan in-app services are first-party vendor listings (0% commission), never a separate admin SKU catalog.
+> - V1.1/V2 deferral boundary (debut V1.1, tournament/pageant V2, `event_schedules` deferred) is broadly intact but should be re-verified against current `origin/main`.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Purpose.** Expand Setnayan from wedding-only to all Filipino life events (baptism, debut, birthday, anniversary, corporate, religious gatherings). Lock the platform's service taxonomy as a **hybrid 3-layer hierarchy + cross-cutting tags** so every vendor manages ONE profile that serves multiple event types, every couple/customer browses by event type with faceted filtering, and edge cases (mascot characters, ice cream carts, cigar lounges) resolve via tags rather than category bloat.
 >
 > **Status:** drafted 2026-05-14 · architecture locked by owner this session after competitive research across Toast, Square, Thumbtack, WeddingWire, TheKnot, Zola, Shopify, Google Product Taxonomy

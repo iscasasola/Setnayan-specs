@@ -1,5 +1,15 @@
 # Iteration 0049 — Multi-Payer Cart with Per-Item Attribution
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **NOT BUILT.** The `paid_by_role[]` + `payment_split_percentages` + `payment_status_per_role` columns exist (added by the 0048 foundation migration `20260519100000_*`), but **no app code reads or writes them.** There is no per-role cart view, no "Check out my items" per-moderator checkout, no `vendor_order_receipts` table, and no budget per-payer view. Pattern B/C never shipped.
+> - **The fee math is RETIRED.** This spec's checkout shows "Setnayan 5% fee + BIR 0.5% withholding" and per-payer BIR Form 2307. All of that is dead: **commission is 0% ("0% commission, ever")**, the **BIR tax surface (0026) is being retired**, and there is no automated charge — in-app SKUs use **apply-then-pay with single-admin manual approval** at `/admin/payments` (no card capture, no marketplace withholding).
+> - **Vendor↔customer money is OFF-PLATFORM (RA 11967).** A vendor venue/service is settled vendor-direct (link/QR/bank shown at settlement); Setnayan never holds or splits the money, so a "multi-payer split-checkout that captures each share" is not how V1 collects vendor payments.
+> - **The retired-SKU "Maya / GCash / Card / Bank" gateway list does not exist** — in-app payment instructions are admin-uploaded BDO + GCash details only, paid externally with a screenshot upload.
+> - **Receipts:** the BIR Official Receipt format shown here is tied to 0026, which is retiring; the shipped `receipts` row is a lightweight in-app record created on admin approval, not a BIR-numbered OR.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0049
 **Topic:** Cart line items get `paid_by_role[]` attribution — moderators can add items to cart, multiple moderators can pay (parents pay venue, couple pays photography, sponsors pay entourage attire). Optional split-cost per item across multiple payers.
 **Surface:** Cart UI extensions ([0034_payments_and_cart](../0034_payments_and_cart/0034_payments_and_cart.md)) + per-item visibility editor ([0048_multi_moderator_event_access](../0048_multi_moderator_event_access/0048_multi_moderator_event_access.md)) + checkout flow (per-moderator subset checkout) + vendor receipts (couple name + payer name)

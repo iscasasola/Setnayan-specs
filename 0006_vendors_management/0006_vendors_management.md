@@ -1,5 +1,15 @@
 # 0006 — Vendors Management
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **"No vendor app, no vendor self-input, every vendor row manually encoded by the couple" is RETIRED.** A full vendor self-service dashboard shipped at `/vendor-dashboard` (~24 routes), and the couple's Vendors tab (`/dashboard/[eventId]/vendors`) shipped as a **Plan + Budget Accordion marketplace surface** (shortlist + per-category picks across the 10 taxonomy folders, 6-dimension matching, "% match" pills), not the flat couple-encoded registry described below.
+> - **Commission is 0% ("0% commission, ever") and vendor↔customer money is OFF-PLATFORM (RA 11967).** Every reference here to "settled **Setnayan Pay** orders" — including the TIER-1 verified-booking branch of the venue master-QR scan — is built on a premise that no longer holds; Setnayan never sits between vendor and couple at checkout. The editorial-credit verification machinery that keys off a settled Setnayan-Pay transaction is unbuilt/historical.
+> - **The vendor token economy is LIVE** (bidding tokens, burn-on-answer wired PR #1057, 100 free founder tokens) — distinct from the retired customer wallet (0003), which this spec already notes is "explicitly NOT used here."
+> - **Vendor tiers shipped as Free / Pro ₱2,499-28d / Enterprise ₱5,499-28d** (+ Additional Branch ₱999, Verification badge ₱1,499). Any "Vendor Pro Weekly" / "₱499-wk" references are stale price history — live wins.
+> - The `vendor_invites` claim-token flow and the per-event vendor registry data model broadly persist; the marketplace + vendor-dashboard layer was added on top.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Type:** Implementation work order (Claude Code ticket)
 **Surface:** Setnayan Web → Couple Dashboard ("Vendors" panel) + responsive mobile · **Bottom-nav tab: Vendors** · URL: `setnayan.com/dashboard/[event-id]/vendors`
 **Phase:** Phase 1 — pre-event planning surface

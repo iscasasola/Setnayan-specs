@@ -1,5 +1,17 @@
 # Iteration 0037 — Bespoke Monogram (AI-Powered)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Ships as "Animated Monogram" · ₱2,499** (`service_key = ANIMATED_MONOGRAM`, lib/animated-monogram.ts, add-ons key `animated-monogram`, route `/dashboard/[eventId]/add-ons/animated-monogram`) — NOT the `bespoke_monogram` ₱2,999 SKU this spec describes.
+> - **The shipped product is NOT the DALL-E brief→generate→30-refinement→vectorize loop.** What shipped is an SVG stroke-trace "drawn live" reveal applied to the event's FREE auto-generated text monogram (lib/monogram.ts + EventMonogram). The free monogram-maker lives at `/dashboard/[eventId]/monogram` (`monogram-maker.tsx`); the paid SKU only unlocks the animated render on the couple's surfaces. No `/bespoke-monogram` route, no brief form, no refinement counter, no `+10 refinements ₱199` add-on shipped.
+> - **The Pro Hero Monogram widget tier (§2, ₱99/₱199) is NOT shipped as priced.** That path is the distinct iteration-0004 `monogram_hero_upgrade` widget (₱1,999, custom video/photo background + Potrace upload), gated separately on the Website tab — and is listed as DEFERRED Pro-widget purchase in the ground truth. Two monogram SKUs coexist; don't conflate them.
+> - **Payment is apply-then-pay + manual admin approval** (0034): the inline-checkout drawer stamps `service_key='ANIMATED_MONOGRAM'`, customer uploads a payment screenshot, admin approves at `/admin/payments`. No card charge. The retired "Custom Monogram Pack ₱1,999" is gone.
+> - **⚠ Folder-number collision:** this `0037_bespoke_monogram` shares the 0037 number with `0037_event_day_preload`. One must be renumbered (owner).
+>
+> When this body disagrees with the above, **the above wins.**
+
+> **⚠ LIVE-SITE RECONCILIATION 2026-06-04.** Ships on setnayan.com/pricing as **"Animated Monogram" · ₱2,499 · build state Live** ("Bespoke Monogram with Animation") — i.e. the bespoke monogram now bundles the animated treatment and is priced ₱2,499 (down from the ₱2,999 spec'd below). The retired "Custom Monogram Pack ₱1,999" is fully gone. Canonical: `Pricing.md § 0`.
+
 **Status:** Concept locked 2026-05-14. **UI refinement needed before engineering can build.**
 **Companion:** Builds on 0002 (QR Invitation System) and 0004 (Invitation Widgets — Hero Monogram).
 **Action:** Cowork session — please walk this spec and refine UI/UX, microcopy, states, and edge cases. Deliver an updated spec + an HTML prototype (same pattern as `0002_qr_invitation_system.html`) before engineering implements.

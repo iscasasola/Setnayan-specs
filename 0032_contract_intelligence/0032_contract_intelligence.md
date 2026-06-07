@@ -1,5 +1,15 @@
 # Iteration 0032 — Contract Intelligence + Builder
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Scope was shrunk to UPLOAD-ONLY (owner, 2026-05-18) — the AI/e-signature spec is NOT built.** Per the header of `lib/contracts.ts`: Setnayan's role is hosting + visibility only; "the dual e-signature flow specified... is dropped." Parties handle signing externally (email, in-person, separate e-sig tool). The shipped surface = `app/vendor-dashboard/contracts` + `app/dashboard/[eventId]/contracts` (couple read side).
+> - **No Contract Intelligence AI.** None of the § 3 14-element Claude detection, § 4 analyze pipeline (pdfplumber/Claude Haiku 4.5), § 5 ~50-clause lawyer-reviewed library, or § 6 compliance gate is wired. No `contract_drafts.detected_elements`, no clause picker, no compliance score/badge.
+> - **No in-app e-signature (§ 7).** No signature pad/typed/drawn capture, no `contract_signatures` rows, no certificate page, no `setnayan.com/c/[id]/verify` tamper-check page. The DB keeps signature columns/`fully_signed` trigger for forward-compat but they're never populated. `ContractStatus` is repurposed: `sent_for_signature` is relabeled "Active / visible to couple"; `fully_signed` is never reached.
+> - **Pricing/positioning superseded.** The ₱199 `contract_builder_single` SKU + "free with Vendor Pro Weekly" framing (§ 10) is stale — Vendor Pro is **₱2,499/28d** (Pro Weekly retired) and **commission is 0%**. Contract hosting is not a charged AI SKU in the shipped upload-only model.
+> - **External-counsel review gate (§ 11) is moot** for the shipped scope (no template clauses are generated). The Anthropic workspace / Concierge cross-reuse (§ 4a) is also moot — Today's Focus replaced Concierge and its wizard is retired in-app.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0032
 **Topic:** AI-powered contract analysis, Setnayan-template contract builder, and in-app e-signature flow for vendors. Detect what a vendor's existing contract covers, fill the gaps with lawyer-reviewed Setnayan clauses, generate a clean PDF, and bind both parties via legally valid PH e-signatures.
 **Surface:** Vendor dashboard (0022) primary; Customer dashboard (0021) for sign-side; Admin (0023) for audit; chat threads (0019) as the delivery channel.

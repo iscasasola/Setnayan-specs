@@ -1,5 +1,15 @@
 # Iteration 0013 — Platform Stack & Sync Setup
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Stack confirmed:** Next.js `apps/web` on Vercel + Supabase (Singapore) + Cloudflare R2 + GitHub are all live and wired, plus Resend email (`lib/email.ts`), R2 helpers (`lib/r2.ts`), and YouTube/Panood (`lib/panood-youtube.ts`). Auth + RLS + realtime are real.
+> - **Native is NOT the Swift/Kotlin/Tauri skeletons in Steps B5–B7.** The shipped native shell is a single **Capacitor remote-URL WebView** (`apps/mobile`, Android built, iOS pending Xcode) that loads the hosted server-rendered site — there is no separate `ios/`, `android/`, or `desktop-macos/` Tauri tree. The macOS Tauri desktop wrapper is likewise not the current path.
+> - **Service-catalog seed (Step B9 / Test C6) is superseded.** SKUs live in `lib/sku-catalog.ts` (apply-then-pay 0034 model), NOT a token-pack-seeded `service_catalog`. The C6 expected rows (`panood_base` etc.) are stale; the live SKU set + prices = the ground-truth catalog. Customer token wallet (0003) is RETIRED.
+> - **Payment (Step A7 / Setnayan Pay):** apply-then-pay with **manual admin approval** is correct, but vendor↔customer money is **OFF-PLATFORM (0% commission)** — Setnayan never charges or holds it. No automated gateway, no card charge anywhere in V1.
+> - **Domain:** production is `setnayan.com` (the historical "" / pre-rename references are dead).
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Refresh banner — 2026-05-12.** Three updates since the 2026-05-09 draft: (1) **Token wallet retired.** All references to `20260509_003_token_wallet.sql` and `service_catalog` seeding through token packs are superseded by iteration 0034's payment + cart schema (`20260512_034_payments_and_cart.sql`). (2) **PayMongo removed from V1.** Setnayan V1 ships with **Setnayan Pay (manual reconciliation per 0034)** — no automated payment gateway. PayMongo evaluation is V1.5 scope only; the Step A7 PayMongo account-creation step is downgraded to optional / future-evaluation. (3) **Brand rename.** All `setnayan.com` URLs in this doc resolve to `setnayan.com` for the active V1 build; the historical `setnayan.com` references are preserved where they describe the pre-rename codebase or migration trail, but the production domain is `setnayan.com`.
 >
 > **Native strategy locked 2026-05-12.** V1 web is React via Vercel + Next.js. V1 native (Papic capture binary, Panood operator binary) uses native SwiftUI iOS + Jetpack Compose Android per the 2026-05-09 CLAUDE.md decision. The reference to React Native / Expo that appears in `CLAUDE_Code_Build_Prompt.md` is **future-evaluation scope only — not V1**. The native skeletons in Steps B5 + B6 below are native (Swift / Kotlin), not Expo. macOS desktop is a Tauri wrapper around the web build (Step B7).

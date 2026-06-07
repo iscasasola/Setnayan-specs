@@ -1,5 +1,14 @@
 # Iteration 0039 — Display Ads (Third-party)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **RETIRED (confirmed) + NOT BUILT.** This iteration was retired 2026-05-19 (AdSense enrollment blocked for the owner's Google account) and nothing shipped: no AdSense integration, no `/cookie-preferences` route, no site-wide cookie-consent banner, no `cookie_consent_events` / `adsense_activation_log` / `adsense_daily_revenue` tables. Do not implement.
+> - RA 10173 consent in V1 is satisfied by first-party PostHog opt-out only (no third-party ad trackers fire), so the elaborate 3-category cookie-consent layer described below is not needed and was not built.
+> - The 0023 admin "ads on/off kill-switch" and the `/vendors/[slug]` vendor ad opt-out toggle referenced here do not exist in code.
+> - No SKU/price/commission impact (this surface generated no revenue and 0% commission is the platform-wide rule regardless).
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **🚫 RETIRED 2026-05-19.** This iteration is no longer in scope. AdSense enrollment is blocked for the Setnayan owner's Google account: AdSense-for-YouTube was auto-deactivated due to YouTube channel inactivity, and the account is locked to AdSense-for-YouTube only (no AdSense-for-Content enrollment path forward). Creating a fresh Google account to circumvent the block carries a high risk of permanent ban via Google's duplicate-AdSense identity checks. Path A (drop display ads entirely from V1.1) chosen — yield was already ~₱5-20K/mo at 100K pageviews vs Boosted Ads ~₱780K/yr per 20km vendor, so the brand-risk vs revenue trade-off no longer favors keeping this surface. Cookie-consent banner scope dropped from V1.1 (no third-party trackers means RA 10173 first-party PostHog opt-out is sufficient). Full retirement context: CLAUDE.md decision-log ninth 2026-05-19 row. **Do not implement.** Folder + spec kept as a tombstone for future reference; if a different ad-network path opens (Ezoic, direct AdSense via incorporated entity, etc.) a new iteration number replaces this one.
 
 ---

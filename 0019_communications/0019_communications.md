@@ -1,5 +1,15 @@
 # Iteration 0019 — Communications (Chat + ~~Video Meetings~~ + File Sharing + Coordinator Join)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **What shipped is text-only chat.** Couple ↔ vendor threads live at `app/dashboard/[eventId]/messages` + `app/vendor-dashboard/messages` (`lib/chat.ts`, `lib/chat-actions.ts`). Messages are **body-only** — there is **no file-sharing / dedicated in-app document readers** column or surface as speced (the contracts/mood-boards/sample-photos-next-to-messages feature is not built).
+> - **Video meetings stay RETIRED** (already noted in the 2026-05-16 banner) — no `/meet` routes, no Daily.co. External tools only.
+> - **Coordinator-join is partial:** `sender_role` includes `'coordinator'`, but the Slack-style per-thread join-authorization flow (couple grants access → vendor notified → participant list) is not evident as a shipped surface.
+> - **Threads are accept-gated, not open chat (2026-06-02 lock).** A thread starts `pending`; the vendor must **accept** (spending tokens — burn-on-answer wired PR #1057) before the chat opens and the vendor name reveals. Vendor identity uses **hybrid-anonymity**: `screen_name` shown until `name_revealed_at` (Free/Verified hidden until accept; Pro/Enterprise always visible) + mandatory company `logo_url`.
+> - Login-driven ghosting nudges replace the never-built 48h "vendor_unresponsive" cron.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **⚠️ AMENDMENT 2026-05-16 — Video meetings RETIRED.** The Daily.co-backed video meetings feature originally speced in this iteration has been **removed entirely from V1+**. Couples and vendors use external tools (Google Meet, Zoom, Messenger, WhatsApp) for video. The chat + file sharing + in-app file viewers + coordinator-join + force-majeure flow all remain in force. Sections below that mention 1:1 / group video meetings, Daily.co SFU, screen share, recording, and in-meeting chat are **historical context only** — they describe a feature that was speced but never shipped. The vendor Pro Weekly "Video meetings via Daily.co" benefit is also removed. See `CLAUDE.md` 2026-05-16 marketplace/payment/verification lock row for full rationale.
 
 **Iteration number:** 0019

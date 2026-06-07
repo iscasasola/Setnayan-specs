@@ -1,5 +1,15 @@
 # Iteration 0044 — Per-Category Vendor Attribute Schemas
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Framework SHIPPED** — `canonical_service_schemas` + `vendor_service_attributes` tables exist, the vendor fill surface is live at `/vendor-dashboard/attributes` (`attribute-field-renderer.tsx`, `lib/vendor-service-attributes.ts`), and admin schema management runs through `/admin/taxonomy`.
+> - **Shipped terminology is "refinements," NOT "attributes/details"** — the per-leaf detail facets this spec calls "category-specific attributes" are uniformly called **refinements** in code/UI (owner-locked 2026-06-03); each refinement carries a `sample_photo_r2_key` for the onboarding picker.
+> - **6-dimension GATE+SCORE matching is LIVE** (`lib/compat-score.ts`) — region / event-type / venue-setting / pax-capacity / venue-type / schedule, plus a `dateHeadroom` rank weight. This is the realized form of the "couple-side filter UX" this spec sketched; the 2026-06-04 hybrid serves-area correction baked into the body (`travel_radius` OR `service_regions`) is accurate.
+> - **NO product-level filters from here** — the compound "attribute AND product" search this spec promises depends on 0045's `vendor_products` table, which **never shipped** (only the band `vendor_songs` repertoire exists). Attribute/refinement filtering is real; product-level filtering is not.
+> - Off-platform vendor money / **0% commission** is the current model — ignore any implied Setnayan-Pay-cut framing.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0044
 **Topic:** Per-canonical-service attribute schema framework + shared attribute groups (faith compatibility, dietary accommodations, etc.) so each marketplace gets the right slots for vendors to fill
 **Surface:** Vendor dashboard onboarding wizard ([0022_vendor_dashboard](../0022_vendor_dashboard/0022_vendor_dashboard.md)) + couple-facing marketplace filter UX ([0006_vendors_management](../0006_vendors_management/0006_vendors_management.md) extended)

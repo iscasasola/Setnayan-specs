@@ -1,5 +1,14 @@
 # 0017 — Patiktok
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Pricing has TWO conflicting realities — the live site wins.** The **live site** lists Patiktok as a **single SKU ₱2,499** (up to 250 TikTok recordings), build state **In build**. The **shipped `lib/sku-catalog.ts`** still encodes this spec's **dual-tier per-day model** — `patiktok_setnayan_tiktok` ₱999/day, `patiktok_personal_tiktok` ₱1,999/day, `patiktok_video_overage` ₱49/+10 (40-video soft cap). Reconcile the internal catalog to the single ₱2,499/250-recording site SKU unless the owner re-confirms the dual-tier model.
+> - **Build state is "In build," not shipped.** Patiktok appears in `lib/drive-copy.ts` (one of the 6 Drive-copy artifacts) and the SKU catalog, but the booth/kiosk capture + face-lock compilation surface is not a live couple-facing flow yet.
+> - **Payment = apply-then-pay + manual admin approval** (no card charge); customer token wallet (0003) is RETIRED. The TikTok BYO-OAuth Personal-tier flow is unbuilt.
+> - Drive-copy of the rendered Patiktok clip to the couple's Google Drive is the locked storage model (R2 = system of record).
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Status:** drafted 2026-05-11 · **V1 SKU lock 2026-05-16 (dual-tier per-day model · Setnayan TikTok ₱999/day vs Personal TikTok ₱1,999/day · 40-video soft cap per booth per day · ₱49/+10 overage · see CLAUDE.md 6th 2026-05-16 row)** · **V1 build promotion 2026-05-18 (prior V1.5+ build-deferral lifted; SKUs were already V1-priced; see CLAUDE.md decision log)**
 **Iteration:** 0017
 **Surface:** Guest engagement / event-day station

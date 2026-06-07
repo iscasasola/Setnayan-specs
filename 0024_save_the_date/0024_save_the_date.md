@@ -1,5 +1,15 @@
 # 0024 — Save-the-Date (page reframe · plus the new ₱99 Save-the-Date Video MP4 SKU)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **The Save-the-Date Video add-on SHIPPED** at `/dashboard/[eventId]/add-ons/save-the-date` (12-template gallery → inline checkout → `service_key='save_the_date_video'`), but it is **NOT one of the live-site public SKUs** — the ground-truth catalog (5 Live / 5 In-build / 9 Coming-soon + 2 bundles + Today's Focus) does not list it. Treat it as a shipped in-app add-on, not a publicly-advertised product.
+> - **Price is internally contradictory in code:** the add-on UI shows **₱99** (`STD_PRICE_PHP = 99` in `lib/save-the-date.ts` + the add-ons-catalog blurb "₱99 per render"), while `lib/sku-catalog.ts` carries `save_the_date_video` at **₱199 (19900 centavos)** with a "repriced 2026-05-17" note. The "₱199" body text below is only half-true; the live render flow charges ₱99. Owner must unify.
+> - Output is **12 templates · 60s video · 3 aspect ratios (vertical + square + horizontal)** per the shipped add-on, not the spec's "8–12 templates · single 9:16 vertical."
+> - **Payment is apply-then-pay + manual admin approval** via the 0034 InlineCheckoutDrawer (no card charge, no 5-minute Cloudflare-Worker render SLA wired). Any "Setnayan Pay 3% convenience fee" or "₱750 (3%)" math elsewhere in this corpus is RETIRED — **commission is 0%**.
+> - The retired page-render `save_the_date_render` SKU and its 4-phase landing lifecycle remain accurate (migrated into 0002).
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Status (updated 2026-05-16):** The page-render SKU is retired (see § Retired SKU below) and Save-the-Date is **Phase 1 of the lifecycle-phased event landing page** in iteration **0002 QR Invitation System**. Separately, a **new** Save-the-Date Video SKU was reintroduced on 2026-05-16 as a downloadable MP4 product — generic templates + AI auto-edit + Setnayan-owned music + couple downloads an MP4 for social sharing. The new SKU is **explicitly distinct** from the retired one (different inputs · different outputs · different SKU code · different engineering pipeline). See § "Save-the-Date Video SKU ₱99" below.
 >
 > **V1 promotion 2026-05-18:** The Save-the-Date Video MP4 SKU is now firmly V1 scope (it was reintroduced as V1 on 2026-05-16 and confirmed in V1 alongside the broader V1.5+ → V1 promotion on 2026-05-18). The retired page-render SKU stays retired. See CLAUDE.md decision log.

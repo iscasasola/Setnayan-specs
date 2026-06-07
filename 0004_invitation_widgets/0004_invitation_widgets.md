@@ -1,5 +1,14 @@
 # 0004 — Invitation Widgets Editor
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **The Pro-tier paid widget upgrades (`monogram_hero_upgrade` ₱1,999 / `pro_widget_schedule` ₱999) are DEFERRED — not shipped.** The ground-truth deferred list calls out "Pro-tier widget purchase (`monogram_hero_upgrade`/`pro_widget_schedule`)" explicitly. The free Basic widget editor shipped under `/dashboard/[eventId]/website` (+ `/invitation`); the per-widget paywall did not.
+> - **Any paid upgrade would route through apply-then-pay (0034) with manual admin approval** — there is no direct PayMongo/Stripe charge (the spec already says this; reaffirmed: no automated charge anywhere in V1).
+> - The monogram on the live site ships as a separate SKU **"Animated Monogram" ₱2,499** (iteration 0037), distinct from this iteration's free Hero Monogram widget — don't conflate the two.
+> - The 11-widget Basic framework + `invitation_widgets` table concept broadly matches the shipped website/widget editor; the reserved Panood/Papic/Patiktok widgets remain unseeded.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Type:** Implementation work order (Claude Code ticket)
 **Surface:** Setnayan Web → Couple Dashboard ("Customize" panel) + invitation site renderer · **Bottom-nav tab: Guest List** · URL: `setnayan.com/dashboard/[event-id]/invitation` (editor — co-located with 0002's QR admin under the same Invitation Site sub-section)
 **Phase:** Phase 1 (web)

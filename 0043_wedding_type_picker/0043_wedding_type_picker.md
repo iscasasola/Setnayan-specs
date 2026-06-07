@@ -1,5 +1,15 @@
 # Iteration 0043 — Wedding Type Picker (Ceremony × Venue × Sub-type)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Largely SHIPPED and accurate** — the two-axis picker (`app/dashboard/create-event/_components/wedding-type-picker.tsx`), the `events` ceremony/venue columns, the admin gate at `/admin/wedding-types`, and the traditions guide at `/admin/wedding-traditions` (DB-backed `wedding_tradition_items`) all exist. The "Per-religion updates — SHIPPED 2026-06-03/04" section at the bottom of this body already reconciles the bulk of it.
+> - **`chinese` ceremony type SHIPPED and ACTIVE** — supersedes the spec's "V1.1 ships 2 active (Catholic + Civil) + 4 Coming Soon" framing. The owner's "keep everything live" decision means all religions are currently selectable, not gated to 2.
+> - **Concierge branching is DEAD** — every reference to the "Concierge wizard branch" (downstream impact table, smart-defaults) is stale: the planner SKU is **Today's Focus ₱1,499** (NOT Setnayan Concierge ₱4,999) and the couple-app Today's Focus wizard is **retired in code**. Faith now drives onboarding + per-service deadline timelines + the `/paperwork` guide, not a wizard branch.
+> - **Vendor↔customer money is OFF-PLATFORM (0% commission)** — any downstream assumption of a Setnayan Pay cut is retired.
+> - Picker enum values confirmed in code: ceremony {catholic, civil, inc, christian, muslim, cultural, chinese, mixed}; venue {banquet_hall, garden, beach, destination, heritage, outdoor_tent, civil_registrar}.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0043
 **Topic:** Two-axis wedding-type picker (Ceremony Type × Venue Setting) with conditional sub-types; powers downstream filtering, Concierge branching, vendor surfacing, and showcase taxonomy
 **Surface:** Couple-side event creation flow ([0001_creating_guest_list](../0001_creating_guest_list/0001_creating_guest_list.md)) + couple dashboard event settings ([0021_couple_dashboard_fully_purchased](../0021_couple_dashboard_fully_purchased/0021_couple_dashboard_fully_purchased.md))

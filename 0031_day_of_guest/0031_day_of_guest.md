@@ -1,5 +1,15 @@
 # Iteration 0031 — Day-of Guest Experience (Live Mode)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Mode router shipped, but simplified.** The public guest page (`app/[slug]/page.tsx`) uses `getDayOfPhase()` (`lib/day-of-mode.ts`) with a coarse phase set (`live` / `post` / pre) surfacing a day-of badge on the landing page — NOT the full five-mode (`coming_soon`/`pre_event`/`live`/`recap`/`archive`) timezone-precise state machine with grace-period flicker prevention and `live_mode_override` enum spec'd in § 2.
+> - **Six-card LIVE surface exists as couple-dashboard components, not the spec'd full guest experience.** `app/dashboard/[eventId]/_components/day-of-mode/` ships `whats-happening-card`, `your-table-card`, `live-photo-wall-card`, `video-guestbook-card`, `live-schedule-card`, `coordinator-broadcast-card`, `banner`, `grid` — but these are dashboard-side; the guest-facing single-scroll thumb-zone live page + bottom action bar (§ 7.1) is not the shipped public surface.
+> - **Offline-first PWA shell (§ 4) is not built** — no service-worker precache/event-shell caching, no background-sync queue for guestbook/acks, no PWA install affordance, none of the § 11 perf-budget Lighthouse gate. The platform is otherwise cron-free (owner lock), so the § 8.3 pre-computed schedule-milestone pushes and § 8.2 email-fallback-on-30-min-idle are not wired as described.
+> - **Rehearsal mode (§ 9) + couple live-location sharing (§ 5.4) + broadcast audience-scoping/acks (§ 5.5) are spec-only** — no evidence of `rehearsal_mode_until`, `couple_live_*`, or `broadcast_acknowledgments` in the shipped flow.
+> - Cross-cutting: any payment/SKU references inherit the 0034 model (apply-then-pay + manual admin approval, **0% commission**, Setnayan Pay convenience fee RETIRED). Photo/reel surfaces depend on Papic, which is `not_built` in the live catalog.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0031
 **Topic:** The guest-facing live-event surface that activates automatically on the wedding day. The guest's personal landing page (already established in 0002) gains a time-aware mode router that flips through five lifecycle modes, with **LIVE mode** (T-1hr → T+8hr) being this iteration's primary contribution: a six-card surface that tells the guest what's happening now, where their table is, what the live photo wall looks like, what video-guestbook prompt to answer, where they are on the day's schedule, and what the couple/coordinator just announced.
 **Surface:** Public guest URL `setnayan.com/{event-slug}` (same URL across all five lifecycle modes — mode is detected, not routed). Couple-facing companion surface lives inside 0021 Couple Dashboard as a "Live event" tab. Coordinator companion surface inherits via the 0019 thread-join permission model.

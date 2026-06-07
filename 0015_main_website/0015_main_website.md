@@ -1,5 +1,15 @@
 # Iteration 0015 — Setnayan Main Marketing Website
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **The 5.0% "Setnayan Pay convenience fee" is RETIRED.** Commission is **0% — "0% commission, ever."** The shipped `/pricing` + `/for-vendors` pages explicitly state "Zero commission on vendor bookings · vendors keep 100% · Setnayan never touches the money." The entire pricing-transparency block here (the +5.0%-at-checkout strip, the ₱5,000-fee worked example, "powers BIR-compliant receipts") is dead copy — do not ship it.
+> - **Vendor money is OFF-PLATFORM (RA 11967).** Setnayan shows the vendor's link/QR/bank at settlement but never holds or charges it; every vendor-payment surface carries a "Setnayan does not hold the money" disclosure.
+> - **Live `/for-vendors` leads with the token economy, not "free during launch" only:** 0% commission · Free profile + Pro ₱2,499/28d (Enterprise ₱5,499/28d) · **100 founder tokens on verification (until 31 Jan 2027)** · token packs · pay-per-result. The 2026-06-05 12-pillar amendment banner already in this doc is the right direction; this confirms it shipped.
+> - **Marketing routes are top-level (`app/for-vendors`, `app/pricing`, `app/features`, `app/how-it-works`), not an `app/(marketing)/...` route group.** Same Next.js codebase as the dashboard, as speced.
+> - **Planner SKU is "Today's Focus" ₱1,499**, not "Setnayan Concierge ₱4,999" — any help/marketing copy referencing the planner uses Today's Focus.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0015
 **Topic:** The public marketing website at `setnayan.com` (working) / `setnayan.com` (current). The single site that introduces Setnayan to couples, event creators, and vendors before they sign up.
 **Surface:** Public web — desktop + mobile responsive. NOT the dashboard app.
@@ -7,6 +17,10 @@
 **Builds on:** 0013 (platform stack), 0000 (auth + apply flow), 0006 (vendor schema), 0014 (PHP-only billing rail).
 **Status:** Re-drafted 2026-05-11 (this turn) — supersedes 2026-05-09 first draft.
 **Phase:** V1 launch-blocking. Couples and vendors can't find Setnayan without a homepage.
+
+---
+
+> **AMENDMENT 2026-06-05 (owner-locked) — canonical `/for-vendors` value proposition.** The vendor-side marketing copy (Section 5 "seven vendor beats" + the `/for-vendors` page) is **superseded where it disagrees** by the 12-pillar pitch in [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](../Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Part A. Thesis: *"We can't promise you a million weddings. We promise that every inquiry counts."* Headlines: **0% commission** · **pay-per-result** (no inquiries → nothing to pay) · **1–3 token (₱100–₱300) unlock covering ALL your services** (vs per-service-listing competitors) · **100 free founder tokens** · **6-dim AI handpicking** · real **event-bound reviews** + **free compile-all-events website** + **never-double-book calendar** + **1-token outside-event sync** · **weddings → every Filipino event**.
 
 ---
 

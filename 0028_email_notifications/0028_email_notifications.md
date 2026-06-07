@@ -1,5 +1,15 @@
 # Iteration 0028 — Email Notification Fallback
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - Email is a **single thin Resend sender** (`lib/email.ts` → `sendEmail`, plaintext only), gated on `RESEND_API_KEY` (no-ops when unset). **None of the heavy infra in this spec is built:** no SendGrid fallback / provider failover, no Cloudflare Queue + dead-letter, no provider webhooks, no `email_dispatches`/`email_suppressions`/`email_unsubscribe_tokens` tables, no React Email templates, no RFC 8058 one-click unsubscribe, no DMARC/BIMI pipeline, no 0023 "Email Operations" admin panel.
+> - Emails fire **inline off notification emits** (`lib/notification-emit.ts`) and specific actions (payments approve, vendor invite, signup, disputes, force-majeure, hiring alerts) — there is no central dispatcher resolving `notification_preferences`, quiet hours, or per-category cadence. HTML rendering is an explicit "follow-on."
+> - The `payment_instructions` / `payment_confirmed` templates describe an **apply-then-pay** flow that is accurate in shape, but the **"3% Setnayan Pay convenience fee"** in § 6.1/§ 6.2 surrounding copy is RETIRED — **commission is 0%**; off-platform vendor money is never charged by Setnayan.
+> - **0026 BIR attachments are dead:** `payment_confirmed`'s "BIR-attached Official Receipt PDF" and any Form-2307 email hooks reference a retiring iteration (0026) — do not wire them.
+> - The owner-only hiring digest/alert/milestone/countdown templates (§ 6.11–6.14) DO have shipped lib equivalents (`lib/hiring-guide/emails.ts`); the V1.2 moderator-aware routing amendment (§ end) is unbuilt forward spec.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0028
 **Topic:** Email-only notification layer that augments the in-UI notifications already shipped across V1 iterations. Covers transactional, coordination, and (opt-in) marketing emails. SMS is explicitly out of V1 scope.
 **Surface:** Cross-cutting infrastructure — no user-facing screen of its own. Surfaces as outbound emails to customers / vendors / admins, plus an Email Operations sub-section inside the 0023 admin console.

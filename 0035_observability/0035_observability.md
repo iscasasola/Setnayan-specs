@@ -1,5 +1,15 @@
 # Iteration 0035 — Observability (Error Monitoring · Product Analytics · Health · Status · On-Call)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Mostly accurate — this is the rare iteration where the spine shipped.** Sentry (`@sentry/nextjs`, `sentry.server.config.ts` + `sentry.edge.config.ts`), PostHog (`posthog-js`, `lib/analytics.ts` server capture + `app/_components/posthog-provider.tsx` + `app/providers.tsx`), and the health endpoints (`/api/health`, `/api/health/deep`, plus an `/api/v1/health`) are all present, with Better Stack named as the intended log-drain/uptime target in the health-route comments.
+> - **Sentry runtime configs are 2 of 3:** only `sentry.server.config.ts` + `sentry.edge.config.ts` ship; the spec's `sentry.client.config.ts` (§ 3.1) is not a separate file in this baseline (client init is folded into the App-Router instrumentation/providers).
+> - **Admin Observability tab + Status page are pilot-stub / not fully wired.** Per AS_BUILT_GROUND_TRUTH § 3, "telemetry/offline are pilot stubs"; the § 10 six-card admin Observability surface and the `status.setnayan.com` Better Stack status page + on-call paging are configuration/owner-action dependencies, not finished in-app surfaces. `/admin/funnels` exists as the PostHog-funnel reader.
+> - **Daily.co is moot.** § 4 health-deep pings Daily.co and § 8 alerts on Daily.co meeting failures, but in-app video meetings were RETIRED (2026-05-16; couples/vendors use external Meet/Zoom). Any Daily.co subsystem check is dead weight.
+> - **Cross-cutting events drift:** the § 5.3 PostHog event list references retired flows — `order_paid` is the shipped paid-event name (apply-then-pay + manual admin approval, **0% commission**, Setnayan Pay fee RETIRED); `affiliate_link_clicked` (0038) and vendor-token/dispute events (PRs #1054/#1057) post-date this spec. Cron-free platform lock means any scheduled erasure/digest jobs (§ 9.6, § 8.3) run via `after()`/`waitUntil`, not crons.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0035
 **Topic:** Production observability stack for Setnayan V1 — Sentry for errors, PostHog for product analytics, Better Stack for uptime + status page + on-call paging, custom health endpoints, structured logging, and a privacy-first telemetry posture (RA 10173).
 **Surface:** Cross-cutting · instruments every iteration; surfaces an admin observability tab inside 0023 Admin Console; consumer-facing status page at `status.setnayan.com`.

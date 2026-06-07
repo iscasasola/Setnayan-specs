@@ -1,5 +1,14 @@
 # 0002 — Guest QR Code System & Event Landing Page
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **The free per-event landing page + guest QR + `?invite=[token]` magic-link flow shipped** (couple editor under `/dashboard/[eventId]/invitation` + `/website`; public page at `/[slug]`; guest "login" = magic invite URL → 60-day guest-session cookie). This is a free planning tool, not a SKU.
+> - **The vendor "scan event master QR → TIER 1 verified-booking / TIER 2 self-claim" flow described here depends on a settled "Setnayan Pay order" — that premise is RETIRED.** Setnayan takes **0% commission** and never holds vendor↔customer money (off-platform, RA 11967), so there is no settled Setnayan-Pay transaction to use as TIER-1 verification. Treat the editorial-credit verification machinery as unbuilt/historical.
+> - **Guest→vendor has no shipped path today** (guest reviews unbuilt as of the ground-truth audit); the four-scan-actor model here is forward spec for the parts beyond guest-self-hydration.
+> - The 3-lifecycle-state model (Invitation → Event-proper → Editorial) and the day-of guest LIVE surface (0031) are partially shipped/partially forward — cross-check 0031 + the gallery surfaces before trusting state-2/3 detail.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Spec note (2026-05-16):** This iteration now also owns the **Event Landing Page** — one free landing page per event at `setnayan.com/{couple-slug}` that morphs through four lifecycle phases (Save-the-Date → Invitation → Logistics → Post-event). Retired iteration 0024 (Save-the-Date) folded into this spec as the Phase 1 hero layout; § 5a of the original 0024 absorbed into the new **Event Landing Page lifecycle** section below. See `CLAUDE.md` decision log 2026-05-16 for the full reframe rationale.
 
 ---

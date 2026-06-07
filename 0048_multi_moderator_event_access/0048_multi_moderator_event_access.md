@@ -1,5 +1,15 @@
 # Iteration 0048 — Multi-Moderator Event Access with Surprise Restrictions
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Schema landed; surprise-enforcement did NOT.** Migrations `20260519100000_iteration_0048_event_moderators_foundation.sql` + `20260522000000_iteration_0048_host_invite_token.sql` shipped the `event_moderators` table, the `moderator_can_see_row()` helper, and the visibility columns (`private_to_role[]`/`hidden_from_role[]`/`surprise_for_role`) — but **no app code reads those visibility tags.** The bridal-gown/groom-suit default-hide trigger, per-item visibility editor, aggregate-budget rounding, and calendar/notification leak-prevention described below are **NOT wired** in the shipped UI.
+> - **13 role_subtypes, not 11.** The CHECK constraint ships `bride, groom, partner1, partner2, parent_of_bride, parent_of_groom, maid_of_honor, best_man, wedding_planner_external, ninong, ninang, family_helper, viewer` — `partner1`/`partner2` were added in V1 (not deferred to V1.3), used to backfill the existing `event_members` 'couple' rows.
+> - **Invite is link/token + EMAIL-ONLY, no SMS, no auto-send.** Shipped UI = `/dashboard/[eventId]/hosts` (invite/revoke) + `/host/accept/[token]` (accept/decline). `invitation_phone` is always written `null` (no SMS in V1), and the action does **not** send the email — the inviter copies the URL and shares it manually (Resend auto-send is a TODO). The `/dashboard/[eventId]/moderators` routes named below were not the shipped path ("hosts" is).
+> - **Sponsors split into a separate table.** Ninong/ninang are managed via a separate shipped `event_sponsors` table + `/dashboard/[eventId]/sponsors` surface, not solely the `event_moderators` role rows envisioned here.
+> - **`can_message_vendors`/moderator-initiates-chat is NOT enforced in code.** The shipped vendor-inquiry/chat path is keyed to event membership, not the `permissions_json` flag.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0048
 **Topic:** Multi-user event access model — events can have multiple moderators beyond the couple (parents, sponsors, maid of honor, family helpers, external planner) with role-based permissions + default-hide rules for surprise reveals (bridal gown, groom suit, designated surprise items)
 **Surface:** Event creation flow ([0001_creating_guest_list](../0001_creating_guest_list/0001_creating_guest_list.md)) + couple dashboard role-aware view ([0021_couple_dashboard_fully_purchased](../0021_couple_dashboard_fully_purchased/0021_couple_dashboard_fully_purchased.md)) + moderator invitation flow + per-row visibility enforcement across cart, vendor chat, budget, calendar, notifications

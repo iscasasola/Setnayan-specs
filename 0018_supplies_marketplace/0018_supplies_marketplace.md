@@ -1,5 +1,14 @@
 # 0018 — Setnayan Supplies (Curated Reseller)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **0018 is a DEFERRED MOCK, not a live reseller.** The shipped surface (`app/dashboard/[eventId]/add-ons/supplies-marketplace/`) renders a **mock catalog** (`_data/products.ts`); **checkout is intentionally NOT built** — the cart's old `/orders/new` link was neutralized into a disabled "Checkout opens soon" affordance (PR per `CONNECTION_MATRIX.md`).
+> - **The supplier-vendor schema is orphaned (data-without-UI):** `supplier_vendor_skus`, `supplier_vendor_sku_pricing`, `supplies_orders`, `supplies_order_line_items` exist but no live flow writes them. The 50%-markup curated-reseller business model is not operational.
+> - **No live BIR / OR-issuance chain.** The 0026 BIR tax surface this iteration depends on is itself **being retired (2026-06-07)**; the Setnayan-as-seller-of-record OR chain described here is unbuilt.
+> - **Payment = apply-then-pay + manual admin approval** when it does ship; customer token wallet (0003) is RETIRED. Real money never moves on a click.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Status:** drafted 2026-05-11 · **V1 promotion 2026-05-18** · **business-model pivot 2026-05-19** (marketplace-commission → Setnayan-sourced resale with 50% markup)
 **Iteration:** 0018
 **Surface:** Cross-platform curated-reseller surface for physical goods + rentals + print fulfillment. **Setnayan is the seller of record** — couples buy from Setnayan, never directly from supplier vendors.

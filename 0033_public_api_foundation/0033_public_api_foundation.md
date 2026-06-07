@@ -1,5 +1,15 @@
 # Iteration 0033 — Public API Foundation
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **The OAuth2/PKCE authorization-server foundation is NOT built.** No `oauth_applications` / `oauth_authorizations` / `api_tokens` / `api_request_log` / `webhook_subscriptions` / `webhook_deliveries` tables (§ 7), no Cloudflare Workers gateway, no opaque-token issuance, no scoped-permission catalog (§ 3), no rate-limit tier table (§ 8). The only OAuth in the codebase is **inbound integration OAuth** for Google/YouTube/Drive (`app/api/oauth/{youtube,drive,photo-delivery}`) — provider sign-in, not Setnayan-as-an-authorization-server.
+> - **No `developers.setnayan.com` developer portal (§ 4)** — no app registration, sandbox tokens, Swagger UI, or metrics surface. No `users.is_developer` flag in the shipped flow.
+> - **No `api.setnayan.com/v{n}` gateway, no OpenAPI 3.1 bundle, no internal-callback routing through a gateway (§ 5).** Resend/Daily.co/GCash/Cloudflare callbacks (where they exist at all) are handled by ordinary Next route handlers / server actions, not the spec'd gateway plumbing.
+> - **No webhook delivery infra (§ 2.6 / § 10.2)** — no HMAC-signed at-least-once delivery queue, no retry schedule, no admin `/admin/api` API-&-Developer-Portal surface (§ 9). Cross-actor notifications ship via the in-app `notifications` table + `emitNotification`/`emitNotification`-style helpers, not webhooks.
+> - **Cron caveat:** the owner locked the platform **cron-free** (Next `after()`/`waitUntil` only); the § 10.2 "Cloudflare Worker on Cron Trigger every 30 sec" webhook drainer would not fire even if built. This iteration is effectively **unimplemented / deferred** — accurate as "foundation-only, NOT in V1 code."
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0033
 **Topic:** Plumbing for a future public API. OAuth2 PKCE authorization server, scoped tokens, rate limiting, schema versioning, webhook delivery infrastructure, and a developer portal. NO public endpoints turn on in V1 — this iteration ships the foundation so V1.5 can flip endpoints on incrementally without retro-fitting auth or rate limiting under fire.
 **Surface:** Customer / vendor / admin (foundation only) + new developer portal subdomain `developers.setnayan.com`.

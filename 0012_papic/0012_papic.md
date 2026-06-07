@@ -1,5 +1,17 @@
 # Iteration 0012 — Papic
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Price split: site says Papic (5 Seats) ₱2,999, CODE ships ₱2,499.** Live site = "Papic (5 Seats) ₱2,999 · Live" + "Papic Guest (Disposable Camera) from ₱2,999 · Live". Shipped code (`lib/sku-catalog.ts`) = `paparazzi_5_seats` **₱2,499** + `paparazzi_3_seats` **₱1,499** (3-seat pack still `isActive` in code but NOT on the live catalog) + `paparazzi_camera_addon` ₱999. The site is authoritative on price/catalog; the ₱2,999 reprice + retiring the 3-seat pack + adding the "Papic Guest disposable camera" SKU have not all landed in code. Flag for owner.
+> - **SHIPPED webapp slice:** couple gallery + seat purchase + `app/papic/{seat,claim,guest}` + `app/api/papic`. Cam Bridge (`papic_cam_bridge_slot_day`) is cataloged but **`isActive=false`** (native Papic binary + DSLR WiFi SDK deferred until pilot wraps). Native iOS/Android Papic capture app is NOT built (Capacitor remote-URL shell only; Android shell built).
+> - **0003 token wallet RETIRED** — Papic seat purchases route through **0034 apply-then-pay** (`orders`/`payments`, manual admin approval), not a wallet/`spend()`. Token-wallet language was already purged 2026-05-12; the vendor token economy (LIVE) is a separate thing and Papic shows "Token Worthy" on the site.
+> - The 207-camera mesh / 150-credit / "Premium Guest Camera Pack ₱1,499" / Auto-Recap economics in this body predate the live catalog — treat as design history, not as-built pricing.
+> - **Cross-cutting:** commission 0% (no Setnayan Pay 3%); vendor↔customer money is off-platform.
+>
+> When this body disagrees with the above, **the above wins.**
+
+> **⚠ LIVE-SITE RECONCILIATION 2026-06-04.** setnayan.com/pricing now sells Papic as: **Papic (5 Seats) ₱2,999** (Token Worthy · unlimited photos + video for 5 hrs · **Live**) and **Papic Guest (Disposable Camera) from ₱2,999** (24 photos + 10×5s clips · **Live**). Papic-anchored add-ons (Coming soon unless noted): **SDE ₱3,499** (3-min compilation), **Thank You Video ₱5,499** (5-min), **Guest Stories ₱1,999** (30s), **Camera Bridge ₱1,999**, **Live Venue Photo Wall ₱2,499**. Supersedes the ₱1,499 / ₱2,499 3-seat/5-seat ladder in the body. Canonical catalog: `Pricing.md § 0`.
+
 **Iteration number:** 0012
 **Topic:** Papic feature, V1
 **Surface:** Couple-side → Setnayan Web Dashboard · **Bottom-nav tab: Add-ons** · Couple URL: `setnayan.com/dashboard/[event-id]/services/papic` (gallery + seat purchase) · Paparazzo-side: native iOS / Android apps (separate)

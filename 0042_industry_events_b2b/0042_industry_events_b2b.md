@@ -1,5 +1,14 @@
 # 0042 — Industry Events & B2B Vendor Marketing (Wedding Fairs, Expos, Networking)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **NOT BUILT.** No `/industry-events` public page, no vendor-dashboard "Industry Events / Opportunities" tab, no `industry_events` table, and no `is_industry_event_organizer` vendor flag exist on `origin/main`. This is a V1.6+ paper spec for a B2B layer that has no code yet.
+> - The spec's revenue tier is "gated on Phase 3 commission decision" — note that commission is now **0% platform-wide** (any 3%/5% Setnayan Pay cut is RETIRED). Any future B2B monetization here must use the live model (apply-then-pay SKUs / paid placements / vendor tokens), not a booking commission.
+> - Booth-booking/payment is explicitly deferred to V1.7 "once 0034 payments stabilizes" — 0034 shipped as apply-then-pay + manual admin approval (no card charge), so any future booth payment inherits that model, not an automated charge.
+> - Depends on 0041 (multi-event catalog), which also has not shipped its 38-category model — see the 0041 AS-BUILT note.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Purpose.** Add a second-tier event layer to Setnayan distinct from the consumer life-event model (0041): **industry events** where the audience is vendors/suppliers, not couples/customers. Captures wedding fairs (e.g. Getting Married Bridal Fair / GMBF), vendor expos, networking mixers, industry conferences, certification workshops, and Setnayan-organized events (à la Bridestory's "Wedding Connect"). Becomes a distribution channel for fair organizers, an opportunity feed for vendors, and an additional revenue surface for Setnayan.
 >
 > **Status:** drafted 2026-05-14 · architecture locked by owner this session

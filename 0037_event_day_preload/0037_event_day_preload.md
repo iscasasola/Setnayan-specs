@@ -1,5 +1,13 @@
 # Iteration 0037 — Event-Day Pre-load (couple + vendor)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **⚠ Folder-number COLLISION:** this iteration shares the number 0037 with `0037_bespoke_monogram`. Two distinct features (event-day pre-load vs the Animated Monogram SKU) carry the same 0037 — one must be renumbered (owner; flagged in ground-truth §8).
+> - The core pre-load mechanic (couple-side "Prepare for event day" CTA + silent auto-prefetch + `lib/event-preload.ts` / `event-bundle-keys.ts`) does appear in the shipped tree, so this spec is largely accurate; treat exact route/component paths (`page.tsx`, `auto-preload-on-event-day.tsx`) and the cited PR #12 as pre-resync references to re-verify against current `origin/main`.
+> - This is plumbing/offline-hydration only — it has **no SKU, no price, no payment flow**, so the cross-cutting price/commission/token reconciliations do not apply here.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0037
 **Topic:** Proactive event-day data + asset pre-load for offline-tolerant dashboards (couple-side T-3d → T+1d CTA + auto-prefetch T-24h → T+12h)
 **Status:** ✅ Shipped via [PR #12](https://github.com/iscasasola/setnayan-platform/pull/12) (2026-05-14) · spec drafted retroactively 2026-05-16

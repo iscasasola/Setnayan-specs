@@ -1,5 +1,14 @@
 # Iteration 0038 — Editorial & Affiliates
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **NOT BUILT.** No `/blog`, `/blog/[slug]`, `/recommendations`, `/recommendations/[category]`, or admin `/editorial` routes exist on `origin/main`. No `editorial_articles` / `recommendation_pages` / `affiliate_links` / `affiliate_conversions` / `sponsored_slot_bookings` tables shipped. This remains a V1.1 paper spec.
+> - The only editorial-named files in the tree are the unrelated couple-onboarding `create-editorial-card.tsx` / `create-editorial-choice-buttons.tsx` wizard cards — they are NOT this iteration's `/blog` or affiliate surface.
+> - **Commission is 0% platform-wide.** Any framing here that assumes a "Setnayan Pay" cut alongside affiliate/sponsored revenue is stale — Setnayan takes 0% on vendor bookings; the only money model in V1 is apply-then-pay in-app SKUs (admin-approved, no card charge) + the vendor token economy.
+> - The companion **0039 Display Ads is RETIRED** (AdSense enrollment blocked) — the AdSense-coordination guardrails referenced throughout (e.g. "AdSense kicks in on article pages per 0039") are moot; no ad layer exists.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0038
 **Topic:** Editorial section on setnayan.com (long-form articles + curated recommendations) with disclosed curated-affiliate links and clearly labelled sponsored-content placements. Layered onto the existing public marketing site as a first-party owned-media monetization surface that complements Boosted Ads / Sponsored Boost without competing for the same inventory.
 **Surface:** Public `setnayan.com/blog`, `setnayan.com/recommendations`, `setnayan.com/blog/[slug]`, `setnayan.com/recommendations/[category]`, plus a new **Editorial** section inside the 0023 admin console for publish workflow + sponsored-content moderation.

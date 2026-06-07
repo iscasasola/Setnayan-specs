@@ -1,5 +1,17 @@
 # Iteration 0011 — Panood
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Price split: site says ₱3,499/day, CODE ships ₱2,499/day.** Live site / ground truth = "Panood (Website Add-on) ₱3,499/day · In build · Token Worthy". Shipped code (`app/dashboard/[eventId]/add-ons/panood/page.tsx` + `lib/sku-catalog.ts`, `panood_daily_broadcast`) is still **₱2,499/day (centavos 249900)** — the live-site repricing to ₱3,499 has NOT landed in code. Annual Streaming = ₱19,999/yr in both. The site is authoritative on price; flag for owner to push the ₱3,499 update into `sku-catalog.ts`.
+> - **SHIPPED surface** at `/dashboard/[eventId]/add-ons/panood/` with `page` + `setup` + `broadcast` + `reviews` routes; SKUs `panood_daily_broadcast` + `panood_annual_streaming` + AI-highlight add-ons (`ai_video_highlight_60s`, `ai_edited_highlight_3min`, `same_day_edit`). `panood_camera_sync` + `panood_annual_streaming_plus` are RETIRED in code (always-multi-cam pivot).
+> - **Token Worthy** on the live site (vendor token economy is LIVE; burn-on-answer wired PR #1057). The "0003 wallet `spend()` primitive" this spec builds on is RETIRED — paid via 0034 apply-then-pay + manual admin approval.
+> - The retired Cloudflare-Stream-Live composite architecture / Broadcast Style Pack sections below are correctly flagged as historical; V1 = BYO-YouTube.
+> - **Cross-cutting:** commission 0% (no Setnayan Pay 3%).
+>
+> When this body disagrees with the above, **the above wins.**
+
+> **⚠ LIVE-SITE RECONCILIATION 2026-06-04.** On setnayan.com/pricing this ships as **"Panood (Website Add-on)" · ₱3,499 / day · build state "In build" · Token Worthy** (livestream per day embedded on the event page). This supersedes the ₱2,499/day "Daily Broadcast" figure used below. SDE / Thank-You / AI-highlight add-ons are now Papic-anchored on the site (see 0012). Prices below are pre-reconciliation; canonical catalog is `Pricing.md § 0` + `Site_vs_Spec_Reconciliation_2026-06-04.md`.
+
 **Iteration number:** 0011
 **Topic:** Panood feature, V1 (WebApp track) — YouTube-delivered (promoted from V1.5+ on 2026-05-18)
 **Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/panood`

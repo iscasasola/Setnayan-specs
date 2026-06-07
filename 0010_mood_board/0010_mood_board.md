@@ -1,5 +1,14 @@
 # Iteration 0010 — Mood Board (Palettes V1)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **SHIPPED simpler than specced.** `app/dashboard/[eventId]/add-ons/mood-board/` ships `palette-editor.tsx` + `visual-preview.tsx` + `wedding-attire-guide.tsx` — a palette + per-role attire-color guide persisting to `events.attire_guide_palette` (JSONB). It does **not** ship the full 7-category "Setnayan Guide rule engine" (cohesion/contrast/60-30-10/master-palette-dedup), the 20 pre-template themes, or the image-color-extraction pipeline as described — treat those as design intent, not as-built.
+> - **Free planning tool** for couples (one of the "18 free planning tools" on the live site). No payment dependency; the `tool_mood_board_weekly` catalog entry is a Pro-widget-style SKU, not a wallet spend.
+> - **0003 token wallet RETIRED**; commission 0%; in-app paid SKUs use 0034 apply-then-pay + manual admin approval — none load-bearing here.
+> - Confirm the shipped component set in code before quoting this spec's rule-engine or template-library claims.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0010
 **Topic:** Mood Board V1 — coordinated wedding palettes for roles and venues, with the Setnayan Guide rule engine
 **Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/mood-board`

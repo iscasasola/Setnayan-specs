@@ -1,5 +1,16 @@
 # Iteration 0036 — Pakanta · Your Wedding's Own Song
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Pakanta is a SINGLE SKU · ₱2,499 — NOT a 3-tier ladder.** The live catalog lists "Pakanta · special song for the couple" at **₱2,499** (Token Worthy, "Coming soon"). The § 3 Basic ₱1,999 / Premium ₱3,999 / Wedding Suite ₱9,999 ladder, the per-tier remake caps, the lyric-approval-gate tier split, and the Wedding-Suite 3-song cohesion machinery (§ 6) are **superseded** unless the owner re-confirms tiers.
+> - **Build state = `not_built`.** `lib/v2-catalog.ts` carries `PAKANTA: 'not_built'`. The shipped surface is a couple-dashboard *intake* stub only (`app/dashboard/[eventId]/pakanta-actions.ts`, `_components/wizard-cards/pakanta-card.tsx`, `pakanta-intake-form.tsx`) — a style/identity wizard card, not the § 7 five-table schema (`pakanta_orders`/`pakanta_suites`/`pakanta_lyric_drafts`/`pakanta_renders`/`event_song_library`), the § 10 `/admin/pakanta` four-tab queue, or the Suno production workflow. No suites, renders, lyric-draft rounds, or library-save-to-renderer integration (§ 12) are wired.
+> - **Payment path is the live 0034 model:** apply-then-pay (couple pays PHP) → manual admin approval, **0% commission**, Setnayan Pay convenience fee RETIRED. It is **also "Token Worthy"** — redeemable by a vendor via the LIVE vendor token economy (burn-on-answer, PR #1057). The customer token wallet (0003) stays retired.
+> - **Charm-pricing convention:** the spec's "-9 endings" (₱1,999/₱3,999/₱9,999) no longer governs; the live single SKU is ₱2,499 (a -99 ending), consistent with the rest of the reconciled catalog.
+>
+> When this body disagrees with the above, **the above wins.**
+
+> **⚠ LIVE-SITE RECONCILIATION 2026-06-04.** setnayan.com/pricing lists Pakanta as a **single SKU · ₱2,499 · Token Worthy · build state "Coming soon"** ("create a special song for the couple"). This supersedes the 3-tier ladder below (Basic ₱1,999 / Premium ₱3,999 / Wedding Suite ₱9,999). If the tiered model is still intended for launch, the site needs updating; until then ₱2,499 single-SKU is canonical. See `Pricing.md § 0`.
+
 **Iteration number:** 0036
 **Topic:** Custom songwriter service (3-tier · Suno Premier + lyric approval gate · manual workflow V1)
 **Status:** Drafted 2026-05-14 · 3-tier revision locked · **V1 promotion 2026-05-18 (confirmed in V1 scope alongside the broader V1.5+ → V1 promotion; see CLAUDE.md decision log)**

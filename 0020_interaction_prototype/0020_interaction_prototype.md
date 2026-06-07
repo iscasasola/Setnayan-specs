@@ -1,5 +1,15 @@
 # 0020 — Setnayan Cross-Iteration Interaction Prototype
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Vendor host route is `/vendor-dashboard`, NOT `/dashboard/vendor`** (the wiring map / §1 imply the latter — it does not exist). Admin is `/admin/...`. Couple stays `/dashboard/[eventId]/...`.
+> - **Payment is apply-then-pay with manual admin approval (no automated charge anywhere).** The §3 "PayMongo confirms / `service_application` → `payment_instructions`" handoff is superseded by iteration 0034: `submitOrderAction` → `orders(submitted)`/`payments(pending)` → admin clicks Approve at `/admin/payments` → `paid`. BDO/GCash are instructional only; zero real money moves. **Vendor↔customer money is OFF-PLATFORM (RA 11967).**
+> - **Commission is 0% ("0% commission, ever").** Any "Setnayan Pay 3%/5% commission" sitting-between-vendor-and-couple model is RETIRED — Setnayan never holds vendor checkout money.
+> - **Vendor token economy is LIVE.** Accepting a couple inquiry burns 1–3 tokens (₱100/200/300, region-banded) via `unlock_vendor_event` in `lib/chat-actions.ts`; insufficient balance blocks the accept. This is the real "Admin confirms payment → activates" replacement for vendor-side qualification. Customer token wallet (0003) is RETIRED.
+> - **Apparatus SKUs/prices in §3 are stale** (Papic 3/5-seat charm ladder, Live Stream Base, Custom Monogram Pack, LED ₱599). Current catalog: Papic (5 Seats) ₱2,999 · Animated Monogram ₱2,499 · Panood ₱3,499/day · Patiktok ₱2,499 · Pakanta single SKU ₱2,499 · Today's Focus ₱1,499 (planner). See ground-truth §1.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Purpose.** Walk the end-to-end interaction surface — Vendor → Customer → Papic operator → Guest — across every paid-feature activation in V1, so we can find misconnections between iterations before any of this turns into code. This is not a new feature spec; it is a **wiring check** over the iterations already drafted (0000–0019).
 >
 > **Status:** drafted 2026-05-11

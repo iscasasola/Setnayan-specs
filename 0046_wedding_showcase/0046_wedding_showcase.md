@@ -1,5 +1,16 @@
 # Iteration 0046 — Wedding Showcase (Real Weddings)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **NOT BUILT** — there is **no** `/real-weddings` browse, **no** showcase tables (`wedding_showcases` / `_vendor_credits` / `_captures` / `_product_credits` / `_facets` / `_vendor_claims` are all absent), **no** couple/vendor showcase routes, and **no** `wedding_guest_reviews` / `vendor_event_feedback` tables. The whole iteration is unshipped.
+> - **The 5% Setnayan Pay fee this spec is built around is RETIRED** — commission is now **0%, ever**, and vendor↔customer money is **off-platform** (RA 11967). The entire "two-tier editorial credit (Verified = paid 5% Pay / Claimed = free)" mechanic and the "what the 5% buys" value-bundle table are obsolete; there is no Setnayan Pay escrow/`bookings` ledger to gate Verified credits on.
+> - **Couple Keepsake Bundle ₱2,499 SKU NOT in the catalog** — it is not in `service_catalog`, not on the live-site pricing page (which lists the canonical ~24 SKUs). Treat as unbuilt/unshipped.
+> - **Guest reviews are unbuilt** — the ground truth notes guest→vendor has no path today and guest reviews are not wired; the per-guest-review model (incl. 0031/0002 capture) is forward spec only.
+> - **No depended-on upstreams exist either** — this consumes 0045 `vendor_products` (unbuilt) and the 0046-extension auto-editorial/AI pipeline; only generic vendor reviews (`/vendor-dashboard/reviews`) ship, unrelated to showcases.
+> - Planner-SKU references should read **Today's Focus ₱1,499**, not Setnayan Concierge ₱4,999.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0046
 **Topic:** Post-wedding showcase as a structured, faceted, vendor-portfolio-auto-populating discovery surface — the Setnayan answer to WedMeGood's Real Weddings editorial moat
 **Surface:** Public website `/real-weddings/` browse + per-showcase pages `/real-weddings/{slug}` + vendor profile "Weddings I worked on" sections + couple dashboard showcase consent flow

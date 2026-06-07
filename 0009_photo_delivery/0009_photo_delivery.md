@@ -1,5 +1,15 @@
 # 0009 — Photo Delivery to Couple's Cloud (Google Drive)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Scaffolded, NOT fully live.** The panel + OAuth routes exist (`app/dashboard/[eventId]/add-ons/photo-delivery/`, `app/api/oauth/photo-delivery/{start,callback}`, `app/api/photo-delivery/{status,disconnect}`), but Drive OAuth is **gated behind `getPhotoDeliveryOAuthConfig().ready`** — it returns `{ ready: false }` until env vars are set, so the connect flow is a stub in prod. The page comment itself says "the real Drive OAuth + Drive API + compression-cron" is not wired.
+> - **Default sync mode in code = `manual_release`**, not the spec's `auto_sync` (the body claims the default flipped to `auto_sync` on 2026-06-01). Code reads `event.photo_delivery_sync_mode ?? 'manual_release'`.
+> - **Cron conflict:** the spec's Cloudflare-Queues batch worker is not the live model — there is an `app/api/cron/photo-delivery-tick` endpoint but **no scheduler is wired** (owner is cron-free; the repo's `/api/cron/*` are dormant). Background delivery via that tick does not fire today.
+> - **Storage architecture superseded** (2026-06-03 lock): R2 is system of record for everything; Google Drive is the couple's permanent COPY of 6 artifacts; 0009 rescopes to that universal Drive-copy layer. The "T+30d / cold-tier 90-day" timing in this body is stale.
+> - **Cross-cutting:** 0003 wallet RETIRED; commission 0%; no in-app charge — none of which this delivery surface touches (it moves no money).
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Type:** Implementation work order (Claude Code ticket)
 **Surface:** Setnayan Web → Couple Dashboard ("Photo Delivery" panel) + Backend background-job worker · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/photo-delivery`
 **Phase:** Phase 1 (promoted from V1.5+ on 2026-05-18) — depends on Phase 1 (events, photos, R2 storage) and the photo-finalization workflow being in place. Implementation can run in parallel with native-app work.

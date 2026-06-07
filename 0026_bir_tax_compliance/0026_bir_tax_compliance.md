@@ -1,5 +1,15 @@
 # Iteration 0026 — BIR / Tax Compliance
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL — and this whole iteration is BEING RETIRED (owner authorization 2026-06-07).** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **The entire vendor-payout / EWT / Form 2307 half of this spec is DEAD.** Setnayan takes **0% commission**, never sits in the booking-money path (vendor↔customer money is OFF-PLATFORM per RA 11967), and is therefore **not a withholding agent** (RR 16-2023 1% Intermediary Tax exemption). `vendor_payouts`, the EWT calculator, `form_2307_issuances`, the quarterly 2307 cron, and the per-vendor Form 2307 download surface have **no live function**. The vendor page `/vendor-dashboard/tax-documents` **redirects** (retired 2026-05-29) and `/admin/bir/2307` **redirects to /admin/money** (retired 2026-05-29). Lib + tables are kept only as audit history for any V1 2307s.
+> - The **"3% Setnayan Pay convenience fee"** that this spec's VAT/Percentage-Tax math is built around (§ 3.3, § 4.3, § 5.2 `setnayan_fee_php`) is **RETIRED** — there is no Setnayan commission/fee to tax. Every "₱750 (3% of ₱25,000)" example is moot.
+> - **Customer-side Official Receipts on first-party software-SKU sales** were the only surviving tax surface (admin `/admin/receipts`); per the 2026-06-07 BIR retirement that surface is also winding down — do not treat the `official_receipts` / `or_sequence_state` / CAS pipeline as live without owner re-confirmation.
+> - In-app SKU payment is **apply-then-pay + manual admin approval** (no automated charge); the OR-on-`paid`-trigger flow describes the right hook point but the broader CAS/eFPS/2307 machinery is not the shipped reality.
+> - **Net:** treat 0026 as a tombstone. Do not build from it.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0026
 **Topic:** Bureau of Internal Revenue (BIR) tax compliance for the Setnayan marketplace. BIR-compliant Official Receipts issued to every paying customer, VAT vs Percentage Tax decision for the 3% Setnayan Pay convenience fee, Expanded Withholding Tax on vendor payouts, quarterly Form 2307 issuance to vendors, and admin-side tax-report exports that feed Setnayan's accountant for eFPS filing.
 **Surface:** Mostly invisible (PDF generation pipelines + admin reports). Customer-facing surface is a "Tax Documents" sub-section of Profile Settings → Privacy & Data (consumed by 0025). Vendor-facing surface is a "Tax Documents" entry in the vendor dashboard's Settings (consumed by 0022). Admin-facing surface is `/admin/finance/tax-reports` (consumed by 0023).

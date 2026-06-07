@@ -1,5 +1,16 @@
 # 0021 — Couple Dashboard, Fully-Purchased State
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **The "Setnayan Concierge ₱4,999" 9-step journey / 3-day trial / DIY-vs-Concierge mode toggle (§§ 2.0a–2.0b') is RETIRED in code.** `lib/concierge.ts` ships `CONCIERGE_ENABLED = false`; the couple-app Today's Focus *wizard* is gone and `/dashboard/[eventId]/today` redirects to event-home (RETIRED 2026-06-03 banner). The planner ships as the **"Today's Focus" SKU at ₱1,499** (not ₱4,999). Concierge schema/enforcement columns + the `concierge_abuse_flags` machinery are dormant. Guidance now = onboarding + per-service deadline timeline (`lib/upcoming-items.ts`), not a paid assistant layer.
+> - **Couple dashboard is event-scoped `/dashboard/[eventId]/...`** — Overview/Guests/Vendors/Schedule/Services/Seat-plan/Landing/QR/Gallery. Vendor search lives in the in-dashboard `/vendors` tab.
+> - **The §1 fully-purchased apparatus table is stale** (Papic 5-seat ₱2,500, Live Stream Base, Custom Monogram Pack ₱2,000, LED ₱599, ₱3,000 Pro Camera Bridge, etc. = retired charm ladder). Current catalog: Papic (5 Seats) ₱2,999 · Animated Monogram ₱2,499 · Panood ₱3,499/day · Patiktok ₱2,499 · Pakanta single SKU ₱2,499. See ground-truth §1.
+> - **In-app SKUs are apply-then-pay (iteration 0034): no card charge.** Customer → InlineCheckoutDrawer → admin approves at `/admin/payments`; BDO/GCash details are instructional only. The §2.3d "Extend / +₱500 / +₱1,000" buy buttons and ₱500 QR-regen fees are spec-era pricing, not the shipped flow.
+> - **Vendor↔customer money is OFF-PLATFORM (RA 11967); commission is 0%.** Any "Setnayan Pay 3% convenience fee / Daily.co MEET button" (§2.2b/§3) is superseded — video meetings retired 2026-05-16; commission "0% ever."
+> - **Reviews are event-bound + guest-level (2026-06-05 owner lock):** up to 250+ guest-level reviews per in-app event; the §2.2d/§2.2d.i visibility + self-review gates still hold but now sit atop that model.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Purpose.** Visualize what a couple's event dashboard looks like 14 days before their wedding with **every paid Setnayan SKU active**. Pure preview — no new product surface is proposed; this validates that the 0000 app shell + every iteration that contributes to the dashboard renders cleanly in the maximal-purchase state.
 >
 > **Status:** drafted 2026-05-11

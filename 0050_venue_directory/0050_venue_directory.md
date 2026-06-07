@@ -1,5 +1,15 @@
 # Iteration 0050 — Venue Directory (V1 — promoted from V1.2 2026-05-22)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **Largely accurate + SHIPPED.** `venue_directory` schema extension + 50-venue `is_demo=TRUE` seed landed; `/venue/[slug]` detail page (`app/venue/[slug]/page.tsx`) renders capacity, day-rate range, amenities, hero image, and a demo banner; `/admin/venues` (+ `/new`, `/[id]`) admin surface and `lib/venue-recommendations.ts` Reception integration shipped.
+> - **Inquiry CTA routes through the HELP CENTER, not a chat thread.** The shipped "Inquire" button links to `/help?topic=venue&venue_slug=...` (with an `AddVenueToPlanButton` for signed-in couples). The "opens a chat thread to the central inquiry queue" flow described below did not ship; dedicated venue chat threads remain a later iteration.
+> - **The "Setnayan Pay 5% convenience fee + BIR 0.5% withholding" is RETIRED.** Commission is **0% ("0% commission, ever")**, the **BIR tax surface (0026) is retiring**, and there is no automated charge — in-app payment is **apply-then-pay with single-admin manual approval**. Vendor/venue money is **off-platform (RA 11967)**: Setnayan never holds or charges a day-rate.
+> - **Real bookability stays deferred.** `is_bookable_via_setnayan` is FALSE for all V1 rows (inquiry-only); calendars, day-rate orders, deposit escrow, and the vendor claim flow are V1.5+ as the spec states.
+> - Cross-reference hygiene: 0034 fee language and 0026 BIR references in this doc are stale per the above.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0050
 **Topic:** Reception folder gets real venue cards backed by `venue_directory`. ~50 synthetic Filipino reception venues across NCR · Tagaytay · Cebu · Davao · Boracay land as `is_demo=TRUE` seed data with capacity, day-rate range, amenities, and faceted compatibility tags. Couples browse + filter + view detail; booking flows through chat inquiry in V1, with calendar-backed real bookability deferred to V1.5+.
 **Surface:** `/vendors` Reception folder + new `/venue/[slug]` detail page (Agent C) + `/dashboard/[eventId]` Reception planning-group [Search] button + admin `/admin/demo-vendors` cleanup batch (extended).

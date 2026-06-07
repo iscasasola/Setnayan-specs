@@ -1,5 +1,15 @@
 # Iteration 0029 — Help Center / FAQ
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - The Help Center shipped as a **single page at `/help`** (`app/help/page.tsx`) — a role-filtered FAQ (`lib/help.ts` `HELP_TOPICS`/`HELP_ROLES`, couple/vendor/guest/admin) with FAQPage schema.org JSON-LD + an inline contact form (`submitHelpMessage`). The deep URL tree in this spec (`/help/[role]`, `/help/[role]/[section]/[slug]`, `/help/contact`, `/dashboard/[role]/help`) **does not exist**; articles are static topic blocks on the one page, not individually-routed.
+> - There is **no SLA-tracked "Support Tickets" queue.** Admin support is a flat message list at `/admin/help` with three statuses (`new` / `in_progress` / `closed`) on a `help_messages` table — no ticket numbers, no SLA timers, no per-role auto-routing, no thumbs-up/down article feedback, no `view_count`/"Popular this week".
+> - Article counts here (≈34 customer / 25 vendor / 15 guest / 20 admin) are aspirational; the shipped `HELP_TOPICS` set is much smaller and brand/discovery-led.
+> - The **"3% Setnayan Pay convenience fee" FAQ article (§ 3.1 Customer Payments)** describes a RETIRED fee — **commission is 0%**. The **"Setnayan Concierge" section (§ 3.1 #6, 4 articles)** is stale: the planner SKU is **"Today's Focus" ₱1,499**, the couple-app Concierge wizard is retired (`CONCIERGE_ENABLED=false`), and the 3-day-trial/enforcement/appeal flow it documents is off.
+> - Payment-help copy must reflect **apply-then-pay + manual admin approval** (no card charge) and **off-platform vendor money** (Setnayan never holds it).
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0029
 **Topic:** Per-role searchable knowledge base + FAQ + structured contact-support routing for Setnayan. Replaces "email Setnayan" with a tiered self-serve help surface that escalates into a ticketed, SLA-tracked admin queue.
 **Surface:** Public `setnayan.com/help` (no login required) plus authenticated `dashboard/[role]/help` deep-links plus a new **Support Tickets** section inside the 0023 admin console.

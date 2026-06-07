@@ -1,5 +1,15 @@
 # Iteration 0045 — Vendor Product Catalogs
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
+> **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
+> - **NOT BUILT** — the core `vendor_products` table does **not** exist (no migration, no code references), there is **no** `/vendor-dashboard/catalog` editor, and **no** product-level cart line items (`vendor_product_id` / `product_name_snapshot` are absent from 0034's schema). The entire generic per-vendor product-catalog layer is unshipped.
+> - **Only shipped slice = the band repertoire** — `/vendor-dashboard/repertoire` backed by `vendor_songs` + the master `songs` catalogue (migrations `20260731…` + `20260828…`). This is the one product-catalog-like surface; it covers the `band_live_music` "songs in repertoire" row only, not the other ~19 product categories (catering dishes, coffee drinks, gowns, vehicles, etc.).
+> - **No product-level SEO URLs** (`/v/{vendor}/products/{product}`), no "Used at N real weddings" product badge (depends on 0046 showcase, also unbuilt), no faith-incompatible-product flagging.
+> - Cross-references to a **5% Setnayan Pay** flow are retired — commission is **0%** and vendor↔customer money is **off-platform**.
+> - The Setnayan first-party SKUs this spec lists (Pakanta, Pailaw/Live Background, Custom Monogram→Animated Monogram, Save-the-Date) ship as in-app services via 0034 apply-then-pay, **not** via this `vendor_products` schema.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Iteration number:** 0045
 **Topic:** Per-vendor product catalog entities (specific dishes on a catering menu, specific drinks on a coffee booth menu, specific gowns in a designer's portfolio, specific songs in a band's repertoire) — the layer beneath attribute schemas
 **Surface:** Vendor dashboard catalog management ([0022_vendor_dashboard](../0022_vendor_dashboard/0022_vendor_dashboard.md)) + couple-facing product-level filters + cart integration ([0034_payments_and_cart](../0034_payments_and_cart/0034_payments_and_cart.md))
