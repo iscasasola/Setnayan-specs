@@ -1,5 +1,13 @@
 # Row-Level Security (RLS) — Canonical Policy Pattern
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas (or "still accurate"):
+> - **Core contract is STILL ACCURATE and SHIPPED.** The base migration `supabase/migrations/20260512000000_setnayan_base.sql` defines all four helpers — `is_admin()`, `current_event_ids()`, `current_vendor_ids(min_role)`, `current_thread_ids()` — as `SECURITY DEFINER STABLE SET search_path=public`, with `GRANT EXECUTE` to `authenticated` (+ `anon` for `is_admin`), exactly as documented. Default-deny + ENABLE-RLS-at-create and the 8-pattern A–H taxonomy are followed in code (policy comments cite the patterns).
+> - **Table names in the §5 mapping table DRIFTED for the 0034 payment spine.** Live tables are **`orders`** + **`payments`** (Pattern G), NOT `service_orders`/`service_order_items`/`service_order_payments`. `reference_code` is a column on `orders`. The reconciliation/inbox table also differs from `payment_inbox_messages` here. Treat the mapping rows for 0026/0032/0033/0034 as spec-era names; cross-check actual table names in `supabase/migrations/` before relying on them.
+> - **Pattern names for retired/changed scopes:** the customer **token wallet (0003) is RETIRED** (no `token_wallets` RLS); the **vendor token economy is LIVE** (`vendor_token_*` tables added later, e.g. `20260821000000_vendor_role_aware_rls.sql`, `20260908000000_vendor_token_burn_on_answer.sql`). **BIR (0026) tables are retiring** — the `official_receipts`/`form_2307`/`setnayan_tax_config` rows are historical. Pattern E `video_meetings`/`meeting_recordings` reflect a retired video-meeting feature.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Locked:** 2026-05-12
 **Scope:** Every Setnayan V1 iteration that declares a Postgres table
 **Backend:** Supabase Postgres (per `0013_platform_stack_and_sync`)

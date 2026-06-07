@@ -1,5 +1,14 @@
 # Sample Render Refresh Program — Setnayan canonical spec
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas (or "still accurate"):
+> - **Unbuilt — this whole program depends on a render pipeline that does not exist.** As of 2026-06-07 there is no template-sample gallery, no `template_samples` / `customer_feedback` tables, no donor-consent flow, no Remotion render layer, and no `r2:setnayan-samples/...` bucket usage in `apps/web` @ `origin/main`. The "bootstrap the owner's wedding against all 30 templates" launch sequence never ran.
+> - **Built on a fully retired SKU + price set.** Nearly every price here is wrong vs. the live catalog: Save-the-Date ₱99, Personal Reel ₱49, LED Background ₱99, AI Video Highlight ₱999, **AI Edited Highlight ₱2,999→₱3,499**, and especially **Same-Day Edit ₱24,999** (live SDE = **₱3,499**). The charm-ladder these reward tiers are built on is superseded by the 2026-06-04 live-site reconciliation — see `AS_BUILT_GROUND_TRUTH_2026-06-07.md` § 1.
+> - **Reward/credit mechanic conflicts with current payment + token model.** The `comp_grant` free-render credits, the 10%-discount-then-tier-reward ladder, and guest-wide credit spread were designed against the old in-app render economy. The live model is **apply-then-pay with manual admin approval** (iteration 0034); the customer token wallet (0003) is RETIRED; comp grants exist in code but do NOT auto-pay an add-on order. Do not treat the reward economics here as current.
+> - **Cross-cutting product facts:** commission is **0%** (no Setnayan Pay 3%/5%); planner SKU = **"Today's Focus" ₱1,499**; **Pakanta = single SKU ₱2,499**; vendor↔customer money is OFF-PLATFORM (RA 11967).
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Status:** Locked 2026-05-12 · **AI Edited Highlight pricing amendment 2026-05-16**
 **Owner:** Operations + Product (admin curation lives in iteration 0023)
 **Touches:** iterations 0005 · 0011 · 0012 · 0023 · 0024 · 0025 · privacy policy

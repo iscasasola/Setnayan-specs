@@ -1,5 +1,12 @@
 # Wedding Attire Guide · AI Generation Prompt Spec
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas:
+> - **Still accurate as a stable technical/asset-generation reference** — no product/pricing/commission drift found. This is a Recraft prompt-template + per-role/per-style parameter spec for a mood-board clipart library; it carries no SKU pricing, no commission, no payment-flow, and no theme-system claims that conflict with the 0%-commission / apply-then-pay / light-locked ground truth. The Phase-1 infra (`apps/web/lib/recraft.ts`, the generation script, the `style_theme` migration) matches the corpus pattern; Phase-2 generation remains owner-gated on Recraft API procurement. Recraft is confirmed as the configured image-gen backend ($RECRAFT_API_KEY).
+> - Minor: the referenced ₱167–₱199/render "Professional Mood Board" SKU (Phase-3, V1.x) is forward-looking and not on the live SKU catalog yet — treat as roadmap, not as-built.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Owns:** prompt-template + per-role parameter table + per-style modifier list + generation workflow for the **50-figure Wedding Attire Guide clipart library** (5 style themes × 10 RoleKey entries).
 
 **Status:** Phase 1 infrastructure shipped (locked 2026-05-23 PM third pass). Phase 2 generation is owner-gated on Recraft API key procurement.

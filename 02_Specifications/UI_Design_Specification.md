@@ -1,5 +1,17 @@
 # Setnayan — UI Design Specification
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Material deltas (this brief is from 2026-05-18 and has drifted on money, themes, and SKUs):
+> - **Commission / "Setnayan Pay 5.0%" is RETIRED.** §3.5, §6.12, §11 (the whole "5.0% rule" + worked-example tile) no longer reflect reality. Live commission is **0% — "0% commission, ever."** Vendor↔customer money is **OFF-PLATFORM** (RA 11967); Setnayan never holds or charges it. In-app SKU payment is **apply-then-pay with manual admin approval** (no automated charge anywhere in V1). Do NOT design a +5% checkout breakdown or worked-example tile.
+> - **"No wallet / no tokens, ever" is only half-true now.** The customer token wallet (0003) IS retired, so the couple-side no-wallet rule holds. But a **vendor-side token economy is LIVE** (burn-on-answer 1–3 tokens ₱100/200/300 banded by wedding region; 100 founder tokens on verification; packs). Vendor surfaces (`/vendor-dashboard/tokens`) DO show a token balance.
+> - **Themes:** the "5 locked themes" (§4.2) and "theme picker in Appearance" (§6.15) never shipped that way and are retired — the app is **light-locked** (single Clean-Editorial light palette; picker removed). Remove the 5-theme requirement from the designer checklist (§13).
+> - **Planner SKU:** any "Setnayan Concierge" / 9-step Guided Planner card (§6.2, §6.3, §8.11) is superseded by **"Today's Focus" ₱1,499** (and the couple-app planner *wizard* is retired in code; only the SKU/branding persists). Drop the Concierge funnel.
+> - **BIR:** the "BIR Official Receipts as a first-class screen" thread (§3.6, §5, §6.13, §10.6, §11) is **retiring** (0026 retired 2026-06-07; admin `bir/2307` tombstoned). Do not design OR/VAT/EWT receipt screens as a launch requirement.
+> - **Admin console** is ~53 routes (6-group desktop sidebar + mobile bottom-nav), not "12 surfaces" (§8). **Vendor dashboard** host is `/vendor-dashboard` (~24 routes, 4-group sidebar), not `/dashboard/vendor`. Charm-pricing "-1 endings" (§4.5, §10.8) is loosely followed at best — live SKUs use ₱2,499/₱1,499/₱2,999 etc. (not -1).
+> - Still broadly accurate: the responsive bottom-nav↔top-tabs pattern, empty/loading/error states, vendor logo-masking in chat, customer-initiates-chat invariant, public-ID `S89X-` mono rendering, Lucide-only iconography, monogram-as-identity.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Purpose:** Hand this to a UI / visual designer. It tells them what every surface of Setnayan V1 is, who uses it, what it must contain, and how it must behave on mobile vs desktop. Anchored against the live product (https://www.setnayan.com), the locked spec corpus (`/Users/icecasasola/Documents/Claude/Projects/Setnayan/`), and the shipped code (`origin/main` of `iscasasola/setnayan-platform`). All pricing is PHP centavos. V1 scope = Wedding only.
 
 **Status:** Generated 2026-05-18. Mirrors locked specs as of 2026-05-17. Re-read `App_Build_Status.md`, `V1_Gap_Analysis_Status.md`, and the matching iteration folder before designing any specific screen — those win on conflict.

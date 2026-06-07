@@ -1,5 +1,12 @@
 # Lucide Icon Migration Spec
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas:
+> - **Still accurate as the icon-system contract.** The shipped React app uses `lucide-react` (`import { Home } from 'lucide-react'`) exactly as §6 prescribes; the inline-SVG `data-icon` renderer described here was only ever a prototype-HTML shim and is moot now that the surfaces are React (the static `0021`–`0024` prototype HTML files are reference artifacts).
+> - One stale tie-in: §8 "Theme contract" claims the five V1 themes recolor icons via `currentColor`. The **5-theme system is retired and the app is light-locked** (see `Theme_System_Implementation_Spec.md` AS-BUILT block) — icons still inherit `currentColor`, but there is only one (light) theme to inherit from. No icon-system change needed.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Status:** Pilot in progress (2026-05-12)
 **Owner:** Frontend chrome team
 **Project rule reference:** "Setnayan minimalist icon system — all icons use Lucide React (Apple-Settings minimalist outline style); emoji-as-icon banned in customer-facing chrome." (locked 2026-05-12, memory: `project_setnayan_themes_and_icons.md`)

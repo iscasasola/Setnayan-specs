@@ -1,5 +1,13 @@
 # Template Catalog V1 — Locked Picks
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas (or "still accurate"):
+> - **The 30 aesthetic templates are a design spec, not shipped renders.** As of 2026-06-07 there are NO Remotion components (`src/templates/{category}/{id}.tsx`), NO `.cube` LUT files, NO Lottie manifests, and NO `template_library/{category}/{id}.json` in `apps/web` @ `origin/main`. The "engineering reads this when building Remotion components" workflow at the bottom was never executed. The aesthetic systems (palettes, typography, motion, storyline pacing) are a valid forward design reference only.
+> - **The SKU-compatibility legend is built on a retired SKU set.** The video SKUs threaded through here — Save-the-Date (STD), AI Video Highlight (AIVH), AI Edited Highlight (AIEH), Same-Day Edit (SDE), LED Background, Personal Reel — and their implied prices predate the 2026-06-04 live-site reconciliation. On the live catalog today these are different: **SDE = ₱3,499** (not ₱24,999), **Patiktok = ₱2,499 couple SKU** (the "₱2,499/booth" note is superseded), Save-the-Date is not in the live 5-live / in-build set. Use `AS_BUILT_GROUND_TRUTH_2026-06-07.md` § 1 for the current catalog.
+> - **Cross-cutting product facts:** commission is **0%**; planner SKU = **"Today's Focus" ₱1,499**; **Pakanta = single SKU ₱2,499**; customer token wallet (0003) RETIRED.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **Source of truth** for which templates ship in Setnayan V1. Each entry locks the template's aesthetic system (palette, typography, motion, music, storyline pacing) and SKU compatibility. Engineering reads this when building Remotion components.
 
 **Status:** under active curation — picks locked as the owner approves each candidate batch.

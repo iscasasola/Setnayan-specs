@@ -1,5 +1,15 @@
 # Database_Schema_Master.sql — Companion Index
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. The consolidated `Database_Schema_Master.sql` was a 2026-05-14 paper merge of the `0000–0035` specs; the **real schema is the applied migrations in `supabase/migrations/`** (~200+ files at origin/main), which advanced well past this index. Deltas:
+> - **Use `supabase/migrations/` as the schema of record, NOT this index.** Base objects (`is_admin`, `generate_public_id`, `current_*` helpers) live in `20260512000000_setnayan_base.sql`; the platform now has many tables this 104-table list never anticipated.
+> - **0034 table names DRIFTED:** shipped tables are **`orders`** + **`payments`** (apply-then-pay; `reference_code` column; admin-approval reconciliation), NOT `service_orders`/`service_order_items`/`service_order_payments`/`payment_inbox_messages`. See `20260513150000_iteration_0034_payments.sql`.
+> - **0003 customer token wallet stays RETIRED** (correctly excluded here) — but a **vendor token economy is now LIVE** (e.g. `vendor_token_grants`, burn-on-answer in `20260908000000_vendor_token_burn_on_answer.sql`, admin-editable `token_burn_bands`); none of those tables appear in this index.
+> - **BIR (0026) is RETIRING** (owner-authorized 2026-06-07) — `official_receipts`/`or_sequence_state`/`setnayan_tax_config`/`form_2307_issuances` are historical, not a live tax surface. **Video meetings (0019)** `video_meetings`/`video_meeting_participants` reflect a retired feature.
+> - Commission is **0%** (any "Setnayan Pay 3%/5% reconciliation" intent in `service_order_items` notes is moot); vendor↔customer money is **OFF-PLATFORM**; the planner ships as "Today's Focus" ₱1,499 (no `concierge` schema is canonical).
+>
+> When this body disagrees with the above, **the above wins.**
+
 Generated 2026-05-14 from feature specs `0000_*` through `0035_*` under
 `/Users/icecasasola/Documents/Claude/Projects/Setnayan/`.
 

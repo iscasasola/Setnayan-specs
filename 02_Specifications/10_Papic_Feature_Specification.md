@@ -1,5 +1,14 @@
 # Papic Feature Specification
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Papic is **Live** in code (`app/papic/*`), but the pricing/SKU shape in this doc is superseded:
+> - **Live SKUs:** the catalog ships **"Papic (5 Seats)" ₱2,999** (unlimited photos+video, 5 hrs) and **"Papic Guest (Disposable Camera)" from ₱2,999** (24 photos + 10×5s clips, confirmed in code as `PAPIC_GUEST · ₱2,999`). The "3 Papic ₱1,500 / 5 Papic ₱2,500 / ₱199-per-template" two-tier model in this doc is RETIRED. (A later owner pax-pricing lock also floated a single ₱4,499 Papic with a 10hr/10K-pool cap + Drive sync — reconcile to the live catalog + `Pricing.md`/`CLAUDE.md` SKU table, which win.)
+> - **Hard product constraints still hold:** 5-second video cap, max 10 tags/photo, untagged-still-delivered guarantee, per-event face-scoping, Personal Reels 9:16 / 1–30s — these are owner-locked and remain accurate.
+> - **Sales/payment model:** Papic is a **first-party Setnayan Productions vendor listing** sold to couples via **apply-then-pay** (manual admin approval), free during the launch window (to 31 Mar 2027) — not an instant "App Unlock" wallet charge. Customer token wallet is RETIRED; **vendor token economy** is the only token system. **Commission is 0%**; vendor↔customer money is OFF-PLATFORM.
+> - **Native vs web:** the spec assumes a native iOS/Android capture app; today Papic ships as a **webapp slice** (native is the Phase-2 / Capacitor-shell direction). Storage is now **R2 = system of record** with a Google-Drive permanent copy (supersedes the "90-day hot / 5-year cold" line).
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Document Version:** 2.0 — FINAL V1 SCOPE
 **Last Updated:** 2026-05-08
 **Owner:** Setnayan Product & Engineering

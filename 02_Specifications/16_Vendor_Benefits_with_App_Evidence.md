@@ -1,5 +1,16 @@
 # 16 — Vendor Benefits & App Evidence
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code (`apps/web` @ `origin/main`) + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. **This audit's central premise is now OBSOLETE** — it was written (2026-05-09) when "there is no vendor account model in V1 / vendors don't log into Setnayan / everything is deferred to Din Phase 3." That world no longer exists. Deltas:
+> - **Vendor accounts SHIPPED.** `/signup?as=vendor` → full `/vendor-dashboard` (24 routes). The repeated "❌ Not specced / ⏳ Deferred to Din Phase 3 / vendor account model deferred" verdicts (1.1, 1.2, 1.3, 2.x, 3.1) are all stale. There is no "Din" — this is the live marketplace.
+> - **Vendor Landing Page + Reviews + Verified Badge are LIVE,** not "❌ Not specced" (§1.3): vendor microsites/profiles, `/vendor-dashboard/reviews` + `/admin/reviews` + couple-side review surfaces, and a standalone **Verification badge ₱1,499** all ship today.
+> - **Data Analytics (§1.1 "❌"):** vendor-side insight surfaces exist (marketing/earnings/demand pulse on Pro+); not the full peer-benchmark engine, but no longer "nothing."
+> - **The "no paid vendor services in V1 / free signup at Din launch" monetization stance is RETIRED.** Live vendor pricing: Free ₱0 · Pro ₱2,499/28d (₱24,999/yr) · Enterprise ₱5,499/28d · Additional Branch ₱999/28d · Verification ₱1,499. **Commission is 0%, ever.** A **vendor token economy is LIVE** (burn-on-answer 1–3 tokens ₱100/200/300 region-banded; 100 free founder tokens). The §5 "TD-1…TD-6 / 14–18 month" ladder and §6 phased pitch are superseded.
+> - **Taxonomy:** the doc's "28 canonical categories" framing predates the live **10-parent taxonomy** (~192 canonical keys) — see `Vendor_Taxonomy_V1_Master.md` + `Vendor_Taxonomy_Shrink_2026-05-30.md`.
+> - Vendor↔customer money is OFF-PLATFORM (RA 11967); Setnayan discloses it holds no money.
+>
+> Treat this doc only as a snapshot of the pre-marketplace gap analysis. When the body disagrees with the above, **the above wins.**
+>
 > Working document. For every benefit Setnayan plans to offer vendors, this doc cites the iteration spec that supports it, OR flags it as not yet supported. The goal is to make sure Setnayan's vendor pitch only promises features the platform actually has — and to identify exactly what would need to ship to deliver the full pitch.
 >
 > **Authored:** 2026-05-09

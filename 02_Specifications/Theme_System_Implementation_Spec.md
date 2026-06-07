@@ -1,5 +1,13 @@
 # Theme System — Implementation Spec
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas:
+> - **The 5-theme runtime picker (Setnayan Default · Victorian · Classy · iOS · Forest) never shipped to production** — it was already self-retired 2026-05-22 (see the legacy banner directly below), and the successor Light/Dark/Auto trio was ALSO removed. As of 2026-06-04 the app is **light-locked**: `apps/web/app/_components/theme-provider.tsx` hard-pins `mode='light'`, `setMode` is a no-op, the `.dark` class is stripped on mount, and `globals.css` carries no `prefers-color-scheme: dark` rule. The Settings → Appearance theme picker is **removed** (`app/dashboard/profile/page.tsx`); `users.theme_preference` is dormant.
+> - The Pro-gated theme-picker claim (§3.1 "Vendor Pro Weekly ₱499/wk") is doubly stale: there is no theme picker AND the planner/vendor pricing has changed (vendor Pro = ₱2,499/28d; commission = **0%**, not the retired Setnayan Pay 3/5%).
+> - What still holds: per-couple creative-output palettes (mood-board, monogram, save-the-date, landing-page chrome) are unchanged — those were never part of this retired app-chrome theme system.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **🚫 RETIRED 2026-05-22** — see CLAUDE.md decision-log row "Ship Facebook
 > white/blue brand pivot + Light/Dark/Auto theme". The 5-theme system documented
 > below (Setnayan Default · Victorian · Classy · iOS · Forest Theme) was

@@ -1,5 +1,13 @@
 # 17 — SEO & AI Discoverability Playbook for Setnayan
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas:
+> - **Largely still accurate as an SEO/GEO playbook** — the technical mechanics (GSC PH targeting, sitemap-index, JSON-LD schema, hreflang en/tl/ceb, CWV targets, hub-and-spoke linking, competitor/keyword landscape, AI-bot allow/disallow posture) are evergreen and unaffected by product/pricing drift. The §8 GEO product-description blurbs already correctly say **"apply-then-pay, no token wallet"** — that customer-side line still holds.
+> - Two business-model footnotes to keep in mind when writing public copy: commission is now **0% ("0% commission, ever")** — never imply a Setnayan Pay 3/5% cut in any indexable marketing/blog page; and a **vendor-side token economy is now live** (the "no token wallet" line is couple-side only). BIR/receipts mentions (§0.12 GBP note, §8 disallow list) reference the **retiring** 0026 surface — fine to keep behind `/admin/*` disallow, but don't lead public SEO copy with "BIR-compliant receipts" as a headline differentiator.
+> - The two `[SPEC CHANGE]` flags (public `/supplies/*` browse + public `/v/[slug]` profiles) remain open/aspirational: the marketplace is founder-only today and supplies (0018) is a deferred mock, so the indexable-surface roadmap is still forward-looking, not as-built.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Status:** Drafted 2026-05-14
 **Owner:** Setnayan operators
 **Target market:** Philippines only (Google.com.ph, PH IPs, TL/CEB queries fair game; diaspora out of scope)

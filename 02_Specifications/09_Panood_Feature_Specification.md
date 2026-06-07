@@ -1,5 +1,14 @@
 # Panood Feature Specification
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Panood exists in code as an **"In build"** SKU, but the pricing/packaging in this doc is fully superseded:
+> - **Live pricing:** Panood is **"Panood (Website Add-on)" ₱3,499/day** (per-day, audience-independent, livestream on the couple's event page) — NOT the "₱2,500 base + ₱1,000/camera + ₱1,000/hour" apparatus model, and NOT the legacy "Pkg 1 ₱4,499 / Pkg 2 ₱7,499" lineup in the revenue section. Charm `-1` PHP-direct pricing applies platform-wide.
+> - **Retired add-on prices:** "AI Video Highlight ₱2,000", "AI Edited Highlight ₱5,000", "Custom Monogram Pack ₱2,000", and the SDE/Thank-You-Video numbers cited here are stale. Current catalog: SDE ₱3,499 · Thank You Video ₱5,499 · the monogram SKU is **"Animated Monogram" ₱2,499** (bundles the animation). Use the ground-truth SKU table.
+> - **Crew tiers stay cut:** the Tier 5–8 "Setnayan Team Stream" bundles + province surcharges (₱24,999–₱79,999, with "3% / 11" style commission columns in the Year-1 revenue table) are CUT and were never built — Setnayan supplies no crew labor. Any "3%/5% commission" or "Team tier" math here is a dead revenue model; **platform commission is 0%**.
+> - **Sales model:** Panood (like all Setnayan Productions) is sold as a **first-party vendor listing** to couples via apply-then-pay (manual admin approval); free during the launch window (to 31 Mar 2027). The YouTube-only delivery architecture (SFU ingest → server compositor → RTMP → YouTube IFrame embed) remains the intended technical design and is the part of this doc still worth reading.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Document Version:** 1.1 (FINAL pricing locked)
 **Last Updated:** 2026-05-08
 **Owner:** Setnayan Product & Engineering

@@ -1,5 +1,16 @@
 # Setnayan Couple Landing Page Feature Specification
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code (`apps/web` @ `origin/main`) + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. The core landing-page *concept* (one canonical event URL, theme + section-toggle model, three lifecycle modes, guest RSVP via magic link) is broadly sound and reflected in the shipped couple dashboard's Landing surface. Deltas / cautions:
+> - **Tier model (Essentials / Premium / Pro Event) is RETIRED.** The "V1 Pricing & Packaging" table gating custom domain / remove-footer / AI copy behind tiers does not match the live SKU model — there is no Essentials/Premium/Pro Event ladder. Couple-side monetization is the per-SKU catalog (premium event-page upgrades surface as add-ons, e.g. **Pro Website ₱5,499** "in build"). Use §1 of the ground-truth doc for the current catalog, not this table.
+> - **"Sulyap" branding is stale** (Part 10.6/10.7): the native capture app/feature ships as **Papic** (the SKU is "Papic (5 Seats) ₱2,999" + "Papic Guest"), and native apps are a **Capacitor remote-URL shell** (Android built; not the standalone iOS/Android app this doc assumes). Treat "Sulyap" as a retired working name.
+> - **Payment is apply-then-pay + manual admin approval** (NOT PayMongo/auto-charge); unlocks that gate Gallery/Live Stream sections fire off `orders='paid'` only after an admin confirms a screenshot at `/admin/payments`.
+> - **Vendor service-completion QR + vendor brand placement** (Part 10.7) is forward/aspirational, not the way the shipped vendor surface works (vendors run a full `/vendor-dashboard`; vendor↔couple money is OFF-PLATFORM per RA 11967).
+> - Companion refs `06_*`/`16_Couple_Landing_Page_Live.html` and the "spec 07 tier section" pointers are pre-resync; cross-check against the ground-truth doc + live Landing surface before relying on them.
+> - Commission/0% and the retired customer token wallet (0003) don't surface in this doc directly; no correction needed there.
+>
+> When this body disagrees with the above, **the above wins.**
+
 **Document Version:** 1.0 — V1 SCOPE
 **Last Updated:** 2026-05-08
 **Owner:** Setnayan Product & Engineering

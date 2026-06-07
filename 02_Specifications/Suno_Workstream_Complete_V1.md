@@ -1,5 +1,14 @@
 # Suno Workstream Complete V1 — Maximize the Monthly Budget
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas (or "still accurate"):
+> - **This is an aspirational one-month Suno production queue, not shipped infrastructure.** As of 2026-06-07, none of the audio workstreams here exist in `apps/web` @ `origin/main`: no sonic logo / notification-sound suite / render bumpers wired into the app, no Patiktok original-tracks library, no founding-vendor theme songs, no multi-event-type or genre-expansion audio packs. There is no audio-asset directory and no render pipeline that would consume any of it.
+> - The **prompt blocks remain reusable as a reference** if the brand-audio + Patiktok-audio layers are ever built, and the Suno safety rule (architectural feel, never name artists/songs, owned-outright) is still the locked principle.
+> - Forward references that have since changed: **Patiktok ships as a couple SKU ₱2,499** (the "₱2,499/booth" framing in older docs is superseded; Patiktok is in-build per the live catalog). The "owner's December 2026 wedding" theme set (§ 5) is a personal/marketing plan, not product.
+> - **Cross-cutting product facts:** commission is **0%**; planner SKU = **"Today's Focus" ₱1,499**; **Pakanta = single SKU ₱2,499**; customer token wallet (0003) RETIRED; the *vendor* token economy is the only live token system.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **What this file is.** The complete Suno Premier generation queue for Setnayan V1. Sister file to `Music_Catalogue_Suno_Prompts_V1.md` (the V1 template music catalogue). This file covers EVERYTHING ELSE the platform needs in audio form — brand sonic identity, app notification sounds, render bumpers, Patiktok original tracks library, founding-vendor theme songs, the owner's wedding day-of theme, marketing/brand video scoring, and forward-looking V1.5 expansion template music.
 
 > **Why one comprehensive file.** Suno Premier credits don't roll over — unused credits expire at month-end. The single most efficient use of the $30 subscription is one focused month where you blitz the full workstream. This file is organized for that sprint.

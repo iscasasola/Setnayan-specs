@@ -1,5 +1,13 @@
 # Music Catalogue · Suno Prompts V1 (Launch Set)
 
+> ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
+> **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas (or "still accurate"):
+> - **Still accurate as a Suno-prompt reference** (the per-template prompt blocks, the "never name an artist" safety rule, the owned-outright licensing convention are all stable and consistent with locked music principles) — BUT the catalogue it generates was never wired into the app. As of 2026-06-07 there is no `music_catalogue/`, no `catalogue_manifest.json`, and no render pipeline in `apps/web` @ `origin/main` that consumes these tracks. The ~77-track V1 launch catalog and the template→music pairings are a forward plan, not as-built.
+> - The template IDs referenced here (HF-01 … CD-04, COB-01…10) live only in the companion `Template_Catalog_V1.md` design doc — there are no corresponding Remotion components, LUTs, or Lottie manifests shipped.
+> - **Cross-cutting product facts** unaffected by this doc but worth flagging for readers: commission is **0%**; planner SKU = **"Today's Focus" ₱1,499**; **Pakanta = single SKU ₱2,499** (the per-wedding song service — distinct from this template-background catalogue); customer token wallet (0003) RETIRED.
+>
+> When this body disagrees with the above, **the above wins.**
+
 > **What this file is.** A paste-ready set of Suno Premier prompts for generating the V1 music catalogue. One prompt per template's locked music pairing, plus an Inspiration Library mapping 35 trending wedding tracks to template architectures. Generate ~3 variants per prompt for couple-to-couple variety, keep the best 1–3 takes per template. Target: ~60–90 final tracks in the launch catalog.
 
 > **Locked decisions referenced:**
