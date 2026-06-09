@@ -33,7 +33,7 @@
 | Website | Basic | Custom | Custom | Custom | ⛔ (uniform microsite) |
 | Website Name (custom slug) | ✗ | ✗ | Custom | Custom | ⛔ |
 | Inquire Link | Link | Link | Link | Link | ✅ (open to all) |
-| **Price + free tokens** (price UPDATED 2026-06-07; bundle REPRICED 2026-06-09) | FREE | FREE | **₱6,000 / 28 days + 5 tokens** · **₱60,000/yr + 50 tokens** | **₱10,000 / 28 days + 10 tokens** · **₱100,000/yr + 100 tokens** | ✅ SHIPPED (#5 PR #1157 · bundle reprice mig `20261011000000`). Bundle was 30/300 · 100/1000 until 2026-06-09. |
+| **Price + free tokens** (price UPDATED 2026-06-07; bundle REPRICED 2026-06-09) | FREE | FREE | **₱6,000 / 28 days + 5 lifetime tokens** · **₱60,000/yr + 50 lifetime tokens** | **₱10,000 / 28 days + 10 lifetime tokens** · **₱100,000/yr + 100 lifetime tokens** | ✅ SHIPPED (#5 PR #1157 · bundle reprice mig `20261011000000`). Bundle was 30/300 · 100/1000 until 2026-06-09. |
 | **Cost per additional Lifetime Token** | **₱100 / token** (FREE may buy — for client import only; owner override 2026-06-07) | ₱100 / token | ₱100 / token | ₱100 / token | ⛔ (buy-token flow not built) |
 | ~~Price (Phase A, superseded)~~ | FREE | FREE | ~~₱3,999/28d (₱39,999/yr)~~ | ~~₱9,999/28d (₱99,999/yr)~~ | shipped in PR #1061, now repriced |
 
