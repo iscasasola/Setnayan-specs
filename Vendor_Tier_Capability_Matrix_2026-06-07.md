@@ -33,7 +33,7 @@
 | Website | Basic | Custom | Custom | Custom | ⛔ (uniform microsite) |
 | Website Name (custom slug) | ✗ | ✗ | Custom | Custom | ⛔ |
 | Inquire Link | Link | Link | Link | Link | ✅ (open to all) |
-| **Price + free tokens** (UPDATED 2026-06-07, supersedes the ₱3,999/₱9,999 below) | FREE | FREE | **₱6,000 / 28 days + 30 tokens** · **₱60,000/yr + 300 tokens** | **₱10,000 / 28 days + 100 tokens** · **₱100,000/yr + 1,000 tokens** | ⛔ to build (Phase A shipped ₱3,999/₱9,999 — now superseded) |
+| **Price + free tokens** (price UPDATED 2026-06-07; bundle REPRICED 2026-06-09) | FREE | FREE | **₱6,000 / 28 days + 5 tokens** · **₱60,000/yr + 50 tokens** | **₱10,000 / 28 days + 10 tokens** · **₱100,000/yr + 100 tokens** | ✅ SHIPPED (#5 PR #1157 · bundle reprice mig `20261011000000`). Bundle was 30/300 · 100/1000 until 2026-06-09. |
 | **Cost per additional Lifetime Token** | **₱100 / token** (FREE may buy — for client import only; owner override 2026-06-07) | ₱100 / token | ₱100 / token | ₱100 / token | ⛔ (buy-token flow not built) |
 | ~~Price (Phase A, superseded)~~ | FREE | FREE | ~~₱3,999/28d (₱39,999/yr)~~ | ~~₱9,999/28d (₱99,999/yr)~~ | shipped in PR #1061, now repriced |
 
@@ -41,7 +41,7 @@
 > - **Prices ↑ + round (not charm/-1):** Pro ₱3,999→**₱6,000**/28d · ₱39,999→**₱60,000**/yr; Enterprise ₱9,999→**₱10,000**/28d · ₱99,999→**₱100,000**/yr. ⚠ These break the brand charm-pricing (-1 endings) lock — owner set them explicitly; flagged, not "corrected."
 > - **NEW — subscriptions bundle free tokens:** Pro +5 (28d) / +50 (annual); Enterprise +10 (28d) / +100 (annual) — **REPRICED 2026-06-09** (was 30/300 · 100/1000). Granted on subscription activation/renewal → belongs to Phase D (no subscription-payment flow exists yet).
 > - **NEW — buy-token rule:** ₱100/token (lifetime = non-expiring `purchased_tokens`). **ALL tiers may buy, INCLUDING FREE** (owner override 2026-06-07: "let FREE buy tokens to import their clients" — supersedes the sheet's "Not Allowed"). FREE's only token sink is the Import Customers gate (1 token/import); buying never unlocks in-app for FREE (tier-blocked regardless of balance). `canBuyTokens()` returns true for all tiers. The buy-token checkout itself isn't built yet (Phase D).
-> - **✅ CONTRADICTION RESOLVED (owner confirmed · shipped PR #1063):** **FREE-VERIFIED is FREE** for in-app answers — ≤10/rolling-week at 0 tokens (gate ✗ stands); only **PRO/ENTERPRISE burn** 1-3 tokens; FREE blocked. This reverted Phase A's verified-burn. Also shipped: the **subscription token bundle** is granted **on admin tier-set** now (Pro +30 / Ent +100 monthly, idempotent) — interim until Phase D self-serve checkout; and `canBuyTokens` (FREE = "Not Allowed", others ₱100/token) is recorded for the Phase D buy-token flow.
+> - **✅ CONTRADICTION RESOLVED (owner confirmed · shipped PR #1063):** **FREE-VERIFIED is FREE** for in-app answers — ≤10/rolling-week at 0 tokens (gate ✗ stands); only **PRO/ENTERPRISE burn** 1-3 tokens; FREE blocked. This reverted Phase A's verified-burn. Also shipped: the **subscription token bundle** is granted **on admin tier-set** + on Phase-D subscription approval (Pro +5 / Ent +10 monthly · +50/+100 annual — **repriced 2026-06-09** from 30/100·300/1000, idempotent); and `canBuyTokens` (FREE = "Not Allowed", others ₱100/token) is recorded for the Phase D buy-token flow.
 
 ## Key reconciliations / conflicts to settle
 
