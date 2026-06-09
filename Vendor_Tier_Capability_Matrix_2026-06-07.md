@@ -16,7 +16,7 @@
 |---|---|---|---|---|---|
 | Distance Coverage (service radius) | ✗ | 20 km | 50 km | Unlimited | ⛔ (only ad-boost `ad_radius_km` exists) |
 | Creating Package = **# service listings per leaf** (owner-defined 2026-06-07) | 2 | 2 | 5 | Unlimited | ⛔ build pending — needs: drop `vendor_services` UNIQUE(vendor,category) + add per-listing `title` + count-cap on create (Option A; 3 sites to fix: `lib/budget.ts` map collision, services-page "Added" gate + title display) |
-| Chat Service | ✗ | Chat | Chat | Chat + Video | ⛔ (chat open to all; no video) |
+| Chat Service | ✗ | Chat | Chat | Chat (~~+ Video~~) | ✅ FREE-blocked (PR #1142). **Video REMOVED 2026-06-09** (owner "let's remove the video calls then") — Enterprise = text Chat like Pro/Verified; reverses the same-day "build Enterprise video" decision. `chat_video` ChatLevel dropped; `/for-vendors` video-call claims stripped. |
 | Parent Categories | 1 | 3 | 3 | Unlimited | ⛔ |
 | Agent Accounts | 0 | 1 | 3 | Unlimited | ⛔ (`max_sub_seats` column dead) |
 | Scheduling | Manual | Hybrid | Hybrid | Hybrid | ⛔ (no manual/hybrid mode) |
