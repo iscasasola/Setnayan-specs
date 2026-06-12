@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vendor Dashboard — Nav Redesign Prototype · 2026-06-08</title>
+<style>
+  /* ── Clean Editorial palette (corpus lock 2026-05-29) ───────────────── */
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --gold:#C5A059; --mulberry:#5C2542;
+    --line:#E7E5E0; --line-2:#D9D6CF; --slate:#6B6E76; --slate-2:#9A9CA2;
+    --paper-2:#F3F1EC; --paper-3:#EDEAE3;
+    --ok:#2E7D5B; --okbg:#E7F2EC; --warn:#9A6B00; --warnbg:#FBF3DF;
+    --lead:#5C2542; --leadbg:#F6EBF0; --info:#2B5C8A; --infobg:#E8F0F7;
+    --shadow:0 1px 2px rgba(30,34,41,.05),0 8px 24px rgba(30,34,41,.06);
+    --r:14px;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--paper-3);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.45;padding:22px 16px 60px}
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+  .mono{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--slate-2)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  a{color:inherit;text-decoration:none}
+
+  /* ── page intro + form-factor toggle ─────────────────────────────── */
+  .intro{max-width:1180px;margin:0 auto 18px}
+  .intro h1{font-size:25px}
+  .intro .eyebrow{color:var(--gold);font-weight:700;letter-spacing:.12em;font-size:11px;text-transform:uppercase;font-family:var(--sans)}
+  .intro p{color:var(--slate);font-size:13.5px;max-width:760px;margin-top:5px}
+  .switch{display:inline-flex;gap:4px;background:var(--paper);border:1px solid var(--line-2);
+    border-radius:999px;padding:4px;margin-top:14px;box-shadow:var(--shadow)}
+  .switch button{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;color:var(--slate)}
+  .switch button.on{background:var(--ink);color:var(--paper)}
+  .legend{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+  .pill{font-size:11px;padding:4px 9px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);color:var(--slate)}
+  .pill b{color:var(--ink)}
+
+  .stage{max-width:1180px;margin:0 auto}
+  .hidden{display:none!important}
+  /* vendor-state: first-run (Free) vs established (Pro) */
+  body[data-vstate='free'] .pro-only{display:none!important}
+  body[data-vstate='pro'] .free-only{display:none!important}
+  body[data-vstate='pro'] .t-pro,body[data-vstate='free'] .t-free{border-color:var(--gold)!important;box-shadow:0 0 0 2px rgba(197,160,89,.25),var(--shadow)}
+  /* vendor categories (MULTI-select) — nav shows the UNION of each category's surfaces */
+  body:not(.has-caterer) .cat-caterer{display:none!important}
+  body:not(.has-band) .cat-band{display:none!important}
+  body:not(.has-photog) .cat-photog{display:none!important}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+
+  /* ════════════ DESKTOP FRAME ════════════ */
+  .desktop{background:var(--paper);border:1px solid var(--line-2);border-radius:18px;
+    overflow:hidden;box-shadow:var(--shadow)}
+  /* top utility bar */
+  .topbar{display:flex;align-items:center;gap:14px;height:56px;padding:0 18px;
+    border-bottom:1px solid var(--line);background:var(--paper)}
+  .brand{display:flex;align-items:baseline;gap:8px}
+  .brand .wm{font-family:var(--serif);font-weight:700;font-size:18px;letter-spacing:.02em}
+  .brand .eb{font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase}
+  .search{flex:1;max-width:340px;height:34px;border:1px solid var(--line-2);border-radius:9px;
+    display:flex;align-items:center;gap:7px;padding:0 11px;color:var(--slate-2);font-size:13px;background:var(--paper-2)}
+  .topbar .spacer{flex:1}
+  .chip{height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 11px;border-radius:999px;
+    border:1px solid var(--line-2);font-size:12.5px;font-weight:600;background:var(--paper)}
+  .chip.token{cursor:pointer;border-color:var(--gold)}
+  .chip.token .coin{color:var(--gold)}
+  .chip.token.low{border-color:var(--warn);background:var(--warnbg);color:var(--warn)}
+  .chip.tier{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .iconbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);display:grid;place-items:center;
+    font-size:15px;position:relative;background:var(--paper)}
+  .iconbtn .dot{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;border-radius:999px;
+    background:var(--mulberry);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+  .avatar{width:32px;height:32px;border-radius:999px;background:var(--mulberry);color:#fff;
+    display:grid;place-items:center;font-size:12px;font-weight:700}
+
+  .dbody{display:grid;grid-template-columns:236px 1fr;min-height:660px}
+  /* sidebar */
+  .sidebar{border-right:1px solid var(--line);padding:14px 10px;background:var(--paper);overflow-y:auto}
+  .navitem{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;font-size:13.5px;
+    font-weight:500;color:var(--ink);position:relative;margin-bottom:2px}
+  .navitem .ic{width:18px;text-align:center;opacity:.8}
+  .navitem:hover{background:var(--paper-2)}
+  .navitem.active{background:var(--ink);color:var(--paper)}
+  .navitem.active .ic{opacity:1}
+  .navitem .count{margin-left:auto;background:var(--mulberry);color:#fff;font-size:11px;font-weight:700;
+    min-width:19px;height:19px;border-radius:999px;display:grid;place-items:center;padding:0 5px}
+  .navitem.active .count{background:var(--gold);color:var(--ink)}
+  .navitem .lock{margin-left:auto;font-size:11px;color:var(--slate-2)}
+  .navprimary{margin-bottom:10px}
+  .grp{margin-top:6px}
+  .grp>.ghead{display:flex;align-items:center;gap:6px;width:100%;padding:8px 11px;border-radius:8px;
+    font-family:var(--mono);font-size:10.5px;color:var(--slate);letter-spacing:.1em}
+  .grp>.ghead:hover{background:var(--paper-2)}
+  .grp>.ghead .car{margin-left:auto;transition:transform .15s;font-size:10px;color:var(--slate-2)}
+  .grp.closed>.ghead .car{transform:rotate(-90deg)}
+  .grp.closed>.gitems{display:none}
+  .gitems .navitem{font-size:13px;padding-left:13px}
+  .gitems .navitem.locked{opacity:.62}
+
+  /* main */
+  .main{padding:22px 24px;overflow-y:auto;background:var(--paper-3)}
+  .ph-h{font-size:21px;margin-bottom:3px}
+  .ph-sub{color:var(--slate);font-size:13px;margin-bottom:18px}
+  .view{display:none}
+  .view.show{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* cards */
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow)}
+  .grid{display:grid;gap:14px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .sig{display:flex;gap:12px;align-items:flex-start}
+  .sig .badge{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:17px;flex-shrink:0}
+  .b-lead{background:var(--leadbg);color:var(--lead)} .b-ok{background:var(--okbg);color:var(--ok)}
+  .b-warn{background:var(--warnbg);color:var(--warn)} .b-info{background:var(--infobg);color:var(--info)}
+  .b-gold{background:#F7EFDD;color:var(--gold)}
+  .sig h4{font-size:14.5px} .sig p{font-size:12.5px;color:var(--slate);margin-top:2px}
+  .sig .cta{margin-top:9px;display:inline-flex;align-items:center;gap:6px}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;font-size:12.5px;font-weight:700}
+  .btn.primary{background:var(--ink);color:var(--paper)} .btn.primary:hover{background:#2c313a}
+  .btn.gold{background:var(--gold);color:var(--ink)} .btn.gold:hover{filter:brightness(.97)}
+  .btn.ghost{border:1px solid var(--line-2);color:var(--ink)} .btn.ghost:hover{background:var(--paper-2)}
+  .btn.sm{padding:6px 11px;font-size:12px}
+  .sectitle{font-size:11px;font-family:var(--mono);color:var(--slate-2);letter-spacing:.1em;margin:22px 0 10px}
+
+  /* inbox master-detail */
+  .inbox{display:grid;grid-template-columns:300px 1fr 244px;gap:0;border:1px solid var(--line);
+    border-radius:var(--r);overflow:hidden;background:var(--paper);min-height:520px;box-shadow:var(--shadow)}
+  .ibx-filters{display:flex;gap:5px;padding:11px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .fil{font-size:11.5px;padding:5px 9px;border-radius:999px;border:1px solid var(--line-2);color:var(--slate);font-weight:600}
+  .fil.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .fil .n{color:var(--mulberry);font-weight:800;margin-left:3px} .fil.on .n{color:var(--gold)}
+  .ibx-list{border-right:1px solid var(--line);overflow-y:auto}
+  .lead{padding:12px 13px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:10px}
+  .lead:hover{background:var(--paper-2)} .lead.sel{background:var(--leadbg)}
+  .lead .av{width:34px;height:34px;border-radius:999px;background:var(--paper-3);display:grid;place-items:center;
+    font-weight:700;font-size:12px;color:var(--mulberry);flex-shrink:0}
+  .lead .nm{font-size:13px;font-weight:700} .lead .ms{font-size:11.5px;color:var(--slate);margin-top:1px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:175px}
+  .lead .tag{font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 6px;border-radius:6px;margin-top:5px;display:inline-block}
+  .t-new{background:var(--leadbg);color:var(--lead)} .t-await{background:var(--warnbg);color:var(--warn)} .t-active{background:var(--okbg);color:var(--ok)}
+  .lead .when{margin-left:auto;font-size:10.5px;color:var(--slate-2)}
+  /* thread */
+  .ibx-thread{display:flex;flex-direction:column}
+  .th-head{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .th-msgs{flex:1;padding:16px;overflow-y:auto;background:var(--paper-3);display:flex;flex-direction:column;gap:10px}
+  .bub{max-width:74%;padding:10px 13px;border-radius:13px;font-size:13px;box-shadow:var(--shadow)}
+  .bub.them{background:var(--paper);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .bub.me{background:var(--ink);color:var(--paper);align-self:flex-end;border-bottom-right-radius:4px}
+  .bub .who{font-size:10px;color:var(--slate-2);margin-bottom:3px;font-weight:700;letter-spacing:.03em}
+  .th-foot{padding:13px 16px;border-top:1px solid var(--line);background:var(--paper)}
+  .gate{background:var(--leadbg);border:1px solid #E7CEDB;border-radius:11px;padding:12px;display:flex;align-items:center;gap:12px}
+  .gate .gt{flex:1;font-size:12px;color:var(--lead)} .gate .gt b{font-weight:800}
+  .composer{display:flex;gap:8px;align-items:center}
+  .composer input{flex:1;height:38px;border:1px solid var(--line-2);border-radius:9px;padding:0 12px;font-size:13px;font-family:inherit}
+  /* context rail */
+  .ibx-ctx{border-left:1px solid var(--line);padding:15px 14px;overflow-y:auto;background:var(--paper)}
+  .ctx-row{display:flex;justify-content:space-between;font-size:12.5px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .ctx-row .k{color:var(--slate)} .ctx-row .v{font-weight:700;text-align:right}
+  .matchbar{height:7px;border-radius:999px;background:var(--paper-3);overflow:hidden;margin-top:6px}
+  .matchbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--mulberry))}
+
+  /* pipeline */
+  .pipe{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .col-h{font-size:11.5px;font-family:var(--mono);letter-spacing:.07em;color:var(--slate);margin-bottom:8px;display:flex;justify-content:space-between}
+  .bk{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:11px;margin-bottom:9px;box-shadow:var(--shadow);cursor:pointer}
+  .bk:hover{border-color:var(--gold)}
+  .bk .bkc{font-size:13px;font-weight:700} .bk .bke{font-size:11.5px;color:var(--slate);margin-top:2px}
+  .bk .bkm{font-size:12px;color:var(--mulberry);font-weight:700;margin-top:6px}
+
+  /* tier matrix */
+  .tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px}
+  .tier{border:1px solid var(--line);border-radius:13px;padding:15px;background:var(--paper);position:relative;box-shadow:var(--shadow)}
+  .tier.cur{border-color:var(--gold);box-shadow:0 0 0 2px rgba(197,160,89,.25),var(--shadow)}
+  .tier .nm{font-family:var(--serif);font-size:17px} .tier .pr{font-size:12.5px;color:var(--slate);margin:2px 0 11px}
+  .tier .badge-cur{position:absolute;top:11px;right:11px;font-size:9.5px;font-weight:800;letter-spacing:.05em;
+    background:var(--gold);color:var(--ink);padding:3px 7px;border-radius:6px;text-transform:uppercase}
+  .tier ul{list-style:none;font-size:12px;color:var(--slate)} .tier li{padding:4px 0;display:flex;gap:7px}
+  .tier li b{color:var(--ink)}
+  .feat-lock{display:flex;align-items:center;gap:10px;padding:11px;border:1px dashed var(--line-2);border-radius:11px;background:var(--paper-2);margin-bottom:9px}
+  .feat-lock .lk{font-size:16px;opacity:.6} .feat-lock .ft{flex:1;font-size:12.5px}
+  .feat-lock .ft b{font-weight:700} .feat-lock .ft span{color:var(--slate)}
+  .feat-lock .req{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+    background:var(--ink);color:var(--paper);padding:3px 8px;border-radius:6px}
+
+  /* generic placeholder list */
+  .rowlist .li{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .rowlist .li:last-child{border:none}
+  .rowlist .li .em{font-size:18px;width:30px;text-align:center}
+  .rowlist .li .tt{font-weight:600;font-size:13.5px} .rowlist .li .ds{font-size:12px;color:var(--slate)}
+  .rowlist .li .rt{margin-left:auto}
+
+  /* booking workspace (deepened daily loop) */
+  .stepper{display:flex;gap:0}
+  .step{flex:1;text-align:center;position:relative;font-size:10px;color:var(--slate-2);font-weight:700;text-transform:uppercase;letter-spacing:.03em;line-height:1.3}
+  .step .dot{width:22px;height:22px;border-radius:999px;background:var(--paper-3);border:2px solid var(--line-2);display:grid;place-items:center;margin:0 auto 5px;font-size:11px;color:var(--slate-2);position:relative;z-index:1}
+  .step.done .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+  .step.cur .dot{background:var(--ink);border-color:var(--ink);color:var(--gold)}
+  .step.cur{color:var(--ink)} .step.done{color:var(--ok)}
+  .step::before{content:'';position:absolute;top:10px;left:-50%;width:100%;height:2px;background:var(--line-2);z-index:0}
+  .step:first-child::before{display:none}
+  .step.done::before,.step.cur::before{background:var(--ok)}
+  .mrow{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .mrow.tot{font-weight:800;border-bottom:none;font-size:14px;padding-top:8px}
+  .tl{list-style:none} .tl li{display:flex;gap:9px;align-items:center;font-size:12px;padding:5px 0;color:var(--slate)}
+  .tl li .td{width:7px;height:7px;border-radius:999px;background:var(--gold);flex-shrink:0}
+  .tl li b{color:var(--ink);font-weight:600} .tl li .dt{margin-left:auto;color:var(--slate-2);font-size:11px}
+  .t-info{background:var(--infobg);color:var(--info)} .t-done{background:#EEEAE0;color:var(--gold)}
+  /* fleshed-out surfaces */
+  .thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .thumb{aspect-ratio:1;border-radius:9px;background:var(--paper-3);display:grid;place-items:center;font-size:18px;color:var(--slate-2);border:1px solid var(--line)}
+  .thumb.add{border:1px dashed var(--line-2);cursor:pointer;font-size:12px;color:var(--slate)}
+  .bars{display:flex;align-items:flex-end;gap:12px;height:130px}
+  .bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;font-size:10px;color:var(--slate-2)}
+  .bcol i{width:100%;max-width:36px;background:var(--gold);border-radius:6px 6px 0 0;display:block}
+  .usebar{height:9px;border-radius:999px;background:var(--paper-3);overflow:hidden}
+  .usebar i{display:block;height:100%;background:var(--mulberry)}
+  .note{font-size:11.5px;color:var(--slate);background:var(--paper-2);border:1px solid var(--line);
+    border-radius:9px;padding:9px 11px;display:flex;gap:8px;align-items:flex-start;margin-top:12px}
+  .note .i{color:var(--gold)}
+
+  /* ════════════ MOBILE FRAME ════════════ */
+  .mobile-wrap{display:flex;gap:36px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+  .phone{width:340px;height:710px;background:var(--paper);border:9px solid var(--ink);border-radius:42px;
+    overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(30,34,41,.22);display:flex;flex-direction:column}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:130px;height:24px;background:var(--ink);
+    border-radius:0 0 16px 16px;z-index:30}
+  .m-top{padding:26px 16px 12px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line);flex-shrink:0}
+  .m-top .ttl{font-family:var(--serif);font-size:19px;font-weight:600}
+  .m-top .spacer{flex:1}
+  .m-chip{height:28px;display:inline-flex;align-items:center;gap:4px;padding:0 9px;border-radius:999px;
+    border:1px solid var(--gold);font-size:11.5px;font-weight:700}
+  .m-chip .coin{color:var(--gold)}
+  .m-chip.low{border-color:var(--warn);background:var(--warnbg);color:var(--warn)}
+  .m-bell{width:30px;height:30px;border-radius:8px;border:1px solid var(--line-2);display:grid;place-items:center;position:relative;font-size:14px}
+  .m-bell .dot{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;border-radius:999px;background:var(--mulberry);
+    color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center}
+  .m-body{flex:1;overflow-y:auto;padding:13px;background:var(--paper-3)}
+  .m-view{display:none} .m-view.show{display:block;animation:fade .18s ease}
+  .m-card{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .m-sig{display:flex;gap:11px;align-items:flex-start}
+  .m-sig .badge{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+  .m-sig h4{font-size:13.5px} .m-sig p{font-size:12px;color:var(--slate);margin-top:2px}
+  .m-sig .cta{margin-top:9px}
+  .m-lead{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer}
+  .m-lead:last-child{border:none}
+  .m-lead .av{width:34px;height:34px;border-radius:999px;background:var(--paper-3);display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--mulberry);flex-shrink:0}
+  .m-lead .nm{font-size:13px;font-weight:700} .m-lead .ms{font-size:11.5px;color:var(--slate);margin-top:1px}
+  .m-lead .tag{font-size:9px;font-weight:800;text-transform:uppercase;padding:2px 5px;border-radius:5px;margin-top:4px;display:inline-block}
+
+  /* mobile More accordion */
+  .m-search{height:36px;border:1px solid var(--line-2);border-radius:9px;display:flex;align-items:center;gap:7px;
+    padding:0 11px;color:var(--slate-2);font-size:13px;margin-bottom:12px;background:var(--paper)}
+  .m-grp{margin-bottom:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+  .m-grp .gh{display:flex;align-items:center;gap:8px;padding:12px 13px;width:100%;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--slate)}
+  .m-grp .gh .car{margin-left:auto;font-size:10px;transition:transform .15s}
+  .m-grp.closed .gh .car{transform:rotate(-90deg)} .m-grp.closed .gi{display:none}
+  .m-grp .gi .it{display:flex;align-items:center;gap:11px;padding:12px 13px;border-top:1px solid var(--line);font-size:13.5px}
+  .m-grp .gi .it .ic{width:18px;text-align:center;opacity:.8}
+  .m-grp .gi .it .lock{margin-left:auto;font-size:11px;color:var(--slate-2)}
+  .m-grp .gi .it.locked{opacity:.6}
+
+  /* bottom nav */
+  .m-nav{height:62px;border-top:1px solid var(--line);display:flex;background:var(--paper);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)}
+  .m-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--slate-2);font-size:10px;font-weight:600;position:relative}
+  .m-tab .ic{font-size:19px}
+  .m-tab.on{color:var(--ink)} .m-tab.on .ic{color:var(--mulberry)}
+  .m-tab .nb{position:absolute;top:7px;right:50%;margin-right:-22px;min-width:15px;height:15px;border-radius:999px;
+    background:var(--mulberry);color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+
+  .caption{text-align:center;font-size:12px;color:var(--slate);margin-top:14px;font-style:italic}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--paper);
+    padding:12px 18px;border-radius:11px;font-size:13px;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.25);
+    transition:transform .25s;z-index:100;display:flex;align-items:center;gap:9px}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  @media(max-width:880px){.g3,.tiers,.pipe{grid-template-columns:1fr 1fr}.inbox{grid-template-columns:1fr}
+    .ibx-list,.ibx-ctx{display:none}.dbody{grid-template-columns:1fr}.sidebar{display:none}}
+</style>
+</head>
+<body data-vstate="pro" class="has-caterer">
+
+<div class="intro">
+  <div class="eyebrow">Setnayan · Iteration 0022 · Proposal</div>
+  <h1>Vendor Dashboard — Navigation Redesign</h1>
+  <p>Compact on mobile, more-at-once on desktop. Same nav source of truth; mobile flattens, desktop expands.
+     Click around — the marquee moves are live: <b>command-center Home</b>, a <b>unified Inbox where answering a lead burns a token</b>,
+     a <b>persistent token chip</b>, <b>tiers-as-Reach with visible locks</b>, and a <b>grouped (not flat) mobile “More”.</b></p>
+  <div class="switch">
+    <button id="sw-d" class="on" onclick="setFF('d')">💻 Desktop</button>
+    <button id="sw-m" onclick="setFF('m')">📱 Mobile</button>
+    <button id="sw-b" onclick="setFF('b')">⇆ Both</button>
+  </div>
+  <div class="switch" style="margin-left:8px">
+    <button id="st-pro" class="on" onclick="setState('pro')">Established · Pro</button>
+    <button id="st-free" onclick="setState('free')">New vendor · Free</button>
+  </div>
+  <div class="switch" style="margin-left:8px" title="Multi-select — a vendor can list under more than one category">
+    <button id="ar-caterer" class="on" onclick="toggleCat('caterer')">🍽 Caterer</button>
+    <button id="ar-photog" onclick="toggleCat('photog')">📷 Photographer</button>
+    <button id="ar-band" onclick="toggleCat('band')">🎸 Band</button>
+  </div>
+  <div class="legend">
+    <span class="pill"><b>Spine:</b> Home · Inbox · Bookings · Earnings · More</span>
+    <span class="pill"><b>Groups:</b> Storefront · Reach · Account</span>
+    <span class="pill">Try: open <b>Inbox</b> → tap a new lead → <b>Answer (◎-3)</b></span>
+    <span class="pill">Try: <b>Reach</b> → see locked Enterprise features</span>
+    <span class="pill">Try: <b>Services</b> → Finish refinements (now step 2, not a tab)</span>
+    <span class="pill">Try: <b>Bookings</b> → open one → mark payment · send &amp; e-sign the contract</span>
+    <span class="pill">Categories are <b>multi-select</b> — turn on 🍽 Caterer + 📷 Photographer and the nav shows the union (Manpower + Moodboard)</span>
+  </div>
+</div>
+
+<!-- ════════════════════ DESKTOP ════════════════════ -->
+<div class="stage" id="stage-d">
+<div class="desktop">
+  <!-- top utility bar -->
+  <div class="topbar">
+    <div class="brand"><span class="wm">Setnayan</span><span class="eb">Vendor</span></div>
+    <div class="search">🔍 Search bookings, couples, services…</div>
+    <div class="spacer"></div>
+    <div class="chip token pro-only" id="d-token" onclick="go('reach-tokens')"><span class="coin">◎</span> <b id="d-token-n">47</b> tokens</div>
+    <div class="chip token free-only" onclick="go('reach-tokens')"><span class="coin">◎</span> 100 founder</div>
+    <div class="chip tier pro-only">Pro ✓</div>
+    <div class="chip tier free-only" style="background:var(--paper);color:var(--slate);border:1px solid var(--line-2)">Free · unverified</div>
+    <div class="iconbtn" onclick="go('account-notif')">🔔<span class="dot">3</span></div>
+    <div class="avatar">LC</div>
+  </div>
+
+  <div class="dbody">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="navprimary">
+        <div class="navitem active" data-view="home" onclick="go('home')"><span class="ic">⌂</span> Home</div>
+        <div class="navitem" data-view="inbox" onclick="go('inbox')"><span class="ic">✉</span> Inbox <span class="count">3</span></div>
+        <div class="navitem" data-view="bookings" onclick="go('bookings')"><span class="ic">▤</span> Bookings <span class="count">2</span></div>
+        <div class="navitem" data-view="earnings" onclick="go('earnings')"><span class="ic">₱</span> Earnings</div>
+      </div>
+
+      <div class="grp" id="grp-store">
+        <button class="ghead" onclick="tg('grp-store')">Storefront <span class="car">▾</span></button>
+        <div class="gitems">
+          <div class="navitem" data-view="store-services" onclick="go('store-services')"><span class="ic">▦</span> Services &amp; packages</div>
+          <div class="navitem cat-band" data-view="store-rep" onclick="go('store-rep')"><span class="ic">♪</span> Repertoire</div>
+          <div class="navitem" data-view="store-profile" onclick="go('store-profile')"><span class="ic">◐</span> Portfolio &amp; profile</div>
+          <div class="navitem" data-view="store-reviews" onclick="go('store-reviews')"><span class="ic">★</span> Reviews</div>
+          <div class="navitem cat-photog" data-view="store-mood" onclick="go('store-mood')"><span class="ic">❖</span> Moodboard library</div>
+        </div>
+      </div>
+
+      <div class="grp" id="grp-reach">
+        <button class="ghead" onclick="tg('grp-reach')">Reach <span class="car">▾</span></button>
+        <div class="gitems">
+          <div class="navitem" data-view="reach-tier" onclick="go('reach-tier')"><span class="ic">✦</span> Verification &amp; tier</div>
+          <div class="navitem" data-view="reach-boost" onclick="go('reach-boost')"><span class="ic">📣</span> Boost &amp; marketing</div>
+          <div class="navitem" data-view="reach-tokens" onclick="go('reach-tokens')"><span class="ic">◎</span> Leads &amp; tokens</div>
+        </div>
+      </div>
+
+      <div class="grp" id="grp-acct">
+        <button class="ghead" onclick="tg('grp-acct')">Account <span class="car">▾</span></button>
+        <div class="gitems">
+          <div class="navitem" data-view="account-team" onclick="go('account-team')"><span class="ic">⊕</span> Team &amp; agents</div>
+          <div class="navitem locked" data-view="account-branches" onclick="go('account-branches')"><span class="ic">🏢</span> Branches <span class="lock">🔒 Ent</span></div>
+          <div class="navitem cat-caterer" data-view="account-manpower" onclick="go('account-manpower')"><span class="ic">⛑</span> Manpower</div>
+          <div class="navitem" data-view="account-pay" onclick="go('account-pay')"><span class="ic">⇄</span> How clients pay you</div>
+          <div class="navitem" data-view="account-notif" onclick="go('account-notif')"><span class="ic">🔔</span> Notifications</div>
+          <div class="navitem" data-view="account-settings" onclick="go('account-settings')"><span class="ic">⚙</span> Settings</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="main" id="d-main">
+
+      <!-- HOME -->
+      <section class="view show" data-v="home">
+        <h2 class="ph-h">Good morning, Lumière Catering</h2>
+        <p class="ph-sub pro-only">Here's what needs you today — Tuesday, Jun 8.</p>
+        <p class="ph-sub free-only">Let's get you open for couples.</p>
+
+        <!-- FREE · first-run state -->
+        <div class="free-only">
+          <div class="card" style="border-color:var(--gold);margin-bottom:16px"><div style="display:flex;gap:12px;align-items:flex-start">
+            <div class="badge b-gold" style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:17px;flex-shrink:0">✦</div>
+            <div style="flex:1"><h4 style="font-size:15px">You're almost open for couples</h4>
+              <p style="font-size:12.5px;color:var(--slate);margin-top:3px">Free vendors build a full profile, but <b>couples can't reach you in-app until you're verified.</b> Verification is free — it puts you in marketplace search and unlocks inquiries.</p>
+              <button class="btn gold sm" style="margin-top:11px" onclick="go('reach-tier')">Get verified — free →</button></div></div></div>
+          <div class="sectitle">Finish your setup</div>
+          <div class="card rowlist">
+            <div class="li"><span class="em" style="color:var(--ok)">✓</span><div style="flex:1"><div class="tt">Business profile created</div></div></div>
+            <div class="li"><span class="em" style="color:var(--ok)">✓</span><div style="flex:1"><div class="tt">Logo &amp; hero uploaded</div></div></div>
+            <div class="li"><span class="em" style="color:var(--warn)">3</span><div style="flex:1"><div class="tt">Add your first service</div><div class="ds">List what couples can book</div></div><div class="rt"><button class="btn ghost sm" onclick="go('store-services')">Add</button></div></div>
+            <div class="li"><span class="em" style="color:var(--warn)">4</span><div style="flex:1"><div class="tt">Fill refinements</div><div class="ds">So you match the right couples</div></div><div class="rt"><button class="btn ghost sm" onclick="go('store-services')">Open</button></div></div>
+            <div class="li"><span class="em" style="color:var(--lead)">5</span><div style="flex:1"><div class="tt">Get verified</div><div class="ds">Unlock search + inquiries + 100 free tokens</div></div><div class="rt"><button class="btn gold sm" onclick="go('reach-tier')">Verify</button></div></div>
+          </div>
+          <div class="grid g2" style="margin-top:14px">
+            <div class="card sig"><div class="badge b-gold">◎</div><div><h4>100 founder tokens on verify</h4><p>~16–33 answered inquiries before you ever buy a token.</p></div></div>
+            <div class="card sig"><div class="badge b-info">↗</div><div><h4>0% commission, ever</h4><p>You only spend a token when you answer a matched couple — never a cut of your booking.</p></div></div>
+          </div>
+        </div>
+
+        <!-- PRO · established state -->
+        <div class="pro-only">
+        <div class="grid g3">
+          <div class="card sig"><div class="badge b-lead">✉</div><div>
+            <h4>3 new leads</h4><p>Pre-matched couples waiting. Answering wins the conversation.</p>
+            <button class="btn gold sm cta" onclick="go('inbox')">Answer now →</button></div></div>
+          <div class="card sig"><div class="badge b-warn">⏱</div><div>
+            <h4>2 replies owed</h4><p>Conversations you've started, now waiting on you.</p>
+            <button class="btn ghost sm cta" onclick="go('inbox')">Open Inbox</button></div></div>
+          <div class="card sig"><div class="badge b-info">◷</div><div>
+            <h4>1 event this week</h4><p>Cruz–Reyes wedding · Sat Jun 12 · Tagaytay · 220 pax.</p>
+            <button class="btn ghost sm cta" onclick="go('bookings')">View booking</button></div></div>
+        </div>
+        <div class="sectitle">Money &amp; account</div>
+        <div class="grid g3">
+          <div class="card sig"><div class="badge b-ok">₱</div><div>
+            <h4>₱45,000 expected</h4><p>Downpayment for Cruz–Reyes — paid <b>off-platform</b> directly to you.</p></div></div>
+          <div class="card sig" id="d-tokencard"><div class="badge b-gold">◎</div><div>
+            <h4><span id="d-tokencard-n">47</span> tokens · ~15 answers left</h4><p>Each lead answer burns 1–3 (region-banded). Top up before you run low.</p>
+            <button class="btn ghost sm cta" onclick="go('reach-tokens')">Buy / redeem</button></div></div>
+          <div class="card sig"><div class="badge b-gold">✦</div><div>
+            <h4>Pro · renews in 18 days</h4><p>You appear in marketplace search up to 50 km. Enterprise widens reach.</p>
+            <button class="btn ghost sm cta" onclick="go('reach-tier')">Compare tiers</button></div></div>
+        </div>
+        <div class="sectitle">From your couples &amp; Setnayan</div>
+        <div class="grid g2">
+          <div class="card sig"><div class="badge b-gold">★</div><div>
+            <h4>New 5-star review</h4><p>“Lumière made our day effortless.” — Santos–Dela Cruz wedding.</p>
+            <button class="btn ghost sm cta" onclick="go('store-reviews')">View &amp; reply</button></div></div>
+          <div class="card sig"><div class="badge b-ok">✓</div><div>
+            <h4>Verified by Setnayan</h4><p>Your business is verified — couples see your trust badge.</p></div></div>
+        </div>
+        <div class="note"><span class="i">◈</span><div>This Home replaces the old “Overview = profile redirect.” It's the single place every <b>customer→vendor</b> signal (new lead, review, cancellation, dispute) and <b>admin</b> signal (verification, payout, tier) lands.</div></div>
+        </div><!-- /pro-only -->
+      </section>
+
+      <!-- INBOX (master-detail) -->
+      <section class="view" data-v="inbox">
+        <h2 class="ph-h">Inbox</h2>
+        <p class="ph-sub">Leads and conversations in one place. Answering a new lead unlocks the couple — and burns tokens.</p>
+        <div class="free-only card" style="text-align:center;padding:34px 20px">
+          <div style="font-size:34px">🔒</div>
+          <h3 style="margin-top:8px">Couples can't reach you yet</h3>
+          <p style="font-size:13px;color:var(--slate);max-width:430px;margin:6px auto 0">Get verified to appear in marketplace search and start receiving inquiries here. Verified vendors answer up to <b>10 inquiries a week, free</b> (no token burn).</p>
+          <button class="btn gold" style="margin:16px auto 0" onclick="go('reach-tier')">Get verified — free →</button>
+        </div>
+        <div class="inbox pro-only">
+          <div class="ibx-list">
+            <div class="ibx-filters">
+              <span class="fil on">New leads<span class="n">3</span></span>
+              <span class="fil">Awaiting you<span class="n">2</span></span>
+              <span class="fil">Active</span>
+              <span class="fil">Archived</span>
+            </div>
+            <div class="lead sel" onclick="selLead(this,0)"><div class="av">CR</div><div>
+              <div class="nm">Cruz–Reyes</div><div class="ms">Hi! Do you cater 220 pax in Tagaytay…</div>
+              <span class="tag t-new">New lead · ◎-3</span></div><span class="when">4m</span></div>
+            <div class="lead" onclick="selLead(this,1)"><div class="av">GA</div><div>
+              <div class="nm">Garcia–Lim</div><div class="ms">We loved your grazing-table set…</div>
+              <span class="tag t-new">New lead · ◎-3</span></div><span class="when">1h</span></div>
+            <div class="lead" onclick="selLead(this,2)"><div class="av">VT</div><div>
+              <div class="nm">Villanueva–Tan</div><div class="ms">Is Dec 20 still open for plated dinner?</div>
+              <span class="tag t-new">New lead · ◎-3</span></div><span class="when">3h</span></div>
+            <div class="lead" onclick="selLead(this,3)"><div class="av">SD</div><div>
+              <div class="nm">Santos–Dela Cruz</div><div class="ms">You: Sending the revised quote now…</div>
+              <span class="tag t-await">Awaiting you</span></div><span class="when">1d</span></div>
+          </div>
+
+          <div class="ibx-thread">
+            <div class="th-head"><div class="av" style="width:34px;height:34px;border-radius:999px;background:var(--paper-3);display:grid;place-items:center;font-weight:700;color:var(--mulberry)">CR</div>
+              <div><div style="font-weight:700;font-size:14px" id="th-name">Cruz–Reyes</div><div class="mono" style="margin:0">Wedding · 220 pax · Tagaytay</div></div></div>
+            <div class="th-msgs" id="th-msgs">
+              <div class="bub them"><div class="who">Couple</div>Hi Lumière! We're getting married Dec 12 in Tagaytay, around 220 guests. Do you cater there, and can we see a plated-dinner package?</div>
+              <div class="bub them"><div class="who">Couple</div>Budget is roughly ₱180k for food. 🙏</div>
+            </div>
+            <div class="th-foot" id="th-foot">
+              <div class="gate" id="th-gate">
+                <div class="gt">This is a <b>new lead</b>. Answering unlocks the full conversation and all your services for this event — it burns <b>3 tokens</b> (NCR band). One unlock covers everything for this couple.</div>
+                <button class="btn gold" onclick="answerLead()">Answer · ◎-3</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ibx-ctx">
+            <div class="mono" style="margin-bottom:6px">Context</div>
+            <div class="ctx-row"><span class="k">Couple</span><span class="v">Cruz &amp; Reyes</span></div>
+            <div class="ctx-row"><span class="k">Event</span><span class="v">Wedding · Dec 12</span></div>
+            <div class="ctx-row"><span class="k">Location</span><span class="v">Tagaytay</span></div>
+            <div class="ctx-row"><span class="k">Guests</span><span class="v">220 pax</span></div>
+            <div class="ctx-row"><span class="k">Budget (food)</span><span class="v">≈ ₱180,000</span></div>
+            <div style="margin-top:12px"><span class="k" style="font-size:12px;color:var(--slate)">Match score</span>
+              <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;margin-top:3px"><span>92%</span><span class="mono" style="margin:0">6-dim</span></div>
+              <div class="matchbar"><i style="width:92%"></i></div></div>
+            <div style="margin-top:14px" class="mono">In their cart</div>
+            <div style="font-size:12.5px;color:var(--slate);margin-top:5px">Plated dinner · Grazing table · Mobile bar</div>
+            <button class="btn primary sm" style="width:100%;justify-content:center;margin-top:14px" onclick="toast('Quote builder (stub)')">Send a quote</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOOKINGS (master-detail) -->
+      <section class="view" data-v="bookings">
+        <h2 class="ph-h">Bookings</h2>
+        <p class="ph-sub">Open a booking to run it end-to-end — payment, contract e-sign, and delivery in one workspace.</p>
+        <div class="free-only card" style="text-align:center;padding:32px 20px">
+          <div style="font-size:32px">📋</div><h3 style="margin-top:8px">No bookings yet</h3>
+          <p style="font-size:13px;color:var(--slate);max-width:440px;margin:6px auto 0">When a couple books you it lands here as a workspace — payment, contract e-sign, and delivery. Get verified to start receiving inquiries.</p>
+          <button class="btn gold" style="margin:16px auto 0" onclick="go('reach-tier')">Get verified — free →</button>
+        </div>
+        <div class="pro-only">
+          <div style="display:flex;gap:6px;margin-bottom:14px">
+            <span class="fil on">Pipeline</span><span class="fil">Contracts</span><span class="fil">Delivery</span><span class="fil">Calendar</span>
+          </div>
+          <div class="inbox" style="grid-template-columns:272px 1fr">
+            <div class="ibx-list" id="bk-list"></div>
+            <div id="bk-workspace" style="padding:18px;overflow-y:auto;background:var(--paper)"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EARNINGS -->
+      <section class="view" data-v="earnings">
+        <h2 class="ph-h">Earnings</h2>
+        <p class="ph-sub">Money in and what's expected — payments settle <b>directly to you, off-platform</b>.</p>
+        <div class="free-only card" style="text-align:center;padding:32px 20px">
+          <div style="font-size:32px">🪙</div><h3 style="margin-top:8px">No earnings yet</h3>
+          <p style="font-size:13px;color:var(--slate);max-width:420px;margin:6px auto 0">Once couples book you, the payments you mark received show up here. Get verified to start receiving inquiries.</p>
+          <button class="btn gold" style="margin:16px auto 0" onclick="go('reach-tier')">Get verified — free →</button>
+        </div>
+        <div class="pro-only">
+          <div class="grid g3" id="earn-tiles"></div>
+          <div class="sectitle">Per booking</div>
+          <div class="card rowlist" id="earn-rows"></div>
+          <div class="sectitle">Received · last 6 months</div>
+          <div class="card"><div class="bars">
+            <div class="bcol"><i style="height:42%"></i>Jan</div>
+            <div class="bcol"><i style="height:68%"></i>Feb</div>
+            <div class="bcol"><i style="height:55%"></i>Mar</div>
+            <div class="bcol"><i style="height:83%"></i>Apr</div>
+            <div class="bcol"><i style="height:72%"></i>May</div>
+            <div class="bcol"><i style="height:100%"></i>Jun</div>
+          </div></div>
+          <div class="note"><span class="i">◈</span><div><b>Setnayan never holds your money.</b> These figures recompute live from the payments you mark received in <b>Bookings</b>. <span style="color:var(--slate)">(RA 11967 — Setnayan is not a party to the payment.)</span></div></div>
+        </div>
+      </section>
+
+      <!-- REACH · tier -->
+      <section class="view" data-v="reach-tier">
+        <h2 class="ph-h">Verification &amp; tier</h2>
+        <p class="ph-sub">Tiers sell <b>reach</b>, not features. Here's exactly what each unlocks — and what you're missing.</p>
+        <div class="tiers">
+          <div class="tier t-free"><div class="badge-cur free-only">Current</div><div class="nm">Free</div><div class="pr">₱0</div><ul>
+            <li>Inquire link only</li><li>1 category</li><li>30 portfolio photos</li><li>Hidden in search</li></ul></div>
+          <div class="tier t-verified"><div class="nm">Verified</div><div class="pr">₱0 · get verified</div><ul>
+            <li><b>In marketplace</b> · 20 km</li><li>3 categories · 1 agent</li><li>10 free lead answers/wk</li><li>50 photos</li></ul>
+            <button class="btn gold sm free-only" style="width:100%;justify-content:center;margin-top:10px" onclick="toast('Verification flow (stub)')">Get verified →</button></div>
+          <div class="tier t-pro"><div class="badge-cur pro-only">Current</div><div class="nm">Pro</div><div class="pr">₱6,000/mo</div><ul>
+            <li>50 km reach</li><li>3 categories · 3 agents</li><li><b>Unlimited</b> lead answers</li><li>Real name day-1 · 100 photos</li></ul></div>
+          <div class="tier t-enterprise"><div class="nm">Enterprise</div><div class="pr">₱10,000/mo</div><ul>
+            <li><b>Unlimited</b> reach</li><li>∞ categories · ∞ agents</li><li>Multi-branch accounts</li><li>Video chat · ∞ photos</li></ul>
+            <button class="btn primary sm" style="width:100%;justify-content:center;margin-top:10px" onclick="toast('Upgrade flow (stub)')">Upgrade →</button></div>
+        </div>
+        <div class="sectitle pro-only">Locked for you on Pro</div>
+        <div class="sectitle free-only">What you'll unlock as you grow</div>
+        <div class="feat-lock"><span class="lk">🏢</span><div class="ft"><b>Branch accounts</b> <span>— run multiple locations under one org with a shared calendar.</span></div><span class="req">Enterprise</span></div>
+        <div class="feat-lock"><span class="lk">🎥</span><div class="ft"><b>Video chat with couples</b> <span>— in-thread video meetings.</span></div><span class="req">Enterprise</span></div>
+        <div class="feat-lock"><span class="lk">∞</span><div class="ft"><b>Unlimited service categories</b> <span>— you're using 3 of 3.</span></div><span class="req">Enterprise</span></div>
+      </section>
+
+      <!-- REACH · tokens -->
+      <section class="view" data-v="reach-tokens">
+        <h2 class="ph-h">Leads &amp; tokens</h2>
+        <p class="ph-sub">Tokens are your cost-of-acquisition: 1 unlock per couple covers all your services for that event.</p>
+        <div class="grid g3">
+          <div class="card" style="text-align:center"><div class="mono">Balance</div>
+            <div style="font-size:34px;font-family:var(--serif);color:var(--gold);margin:4px 0"><span id="d-bal">47</span> ◎</div>
+            <div style="font-size:12px;color:var(--slate)">≈ 15 answers (NCR · 3/answer)</div></div>
+          <div class="card"><div class="mono">Buy a pack</div>
+            <div class="rowlist" style="margin-top:6px">
+              <div class="li"><div class="tt">25 tokens</div><div class="rt"><button class="btn ghost sm" onclick="toast('Checkout (stub)')">₱2,500</button></div></div>
+              <div class="li"><div class="tt">50 tokens</div><div class="rt"><button class="btn ghost sm" onclick="toast('Checkout (stub)')">₱5,000</button></div></div>
+              <div class="li"><div class="tt">100 tokens</div><div class="rt"><button class="btn gold sm" onclick="toast('Checkout (stub)')">₱9,000</button></div></div>
+            </div></div>
+          <div class="card"><div class="mono">Earn / redeem</div>
+            <div style="font-size:12.5px;color:var(--slate);margin-top:8px">Recommend a couple to another vendor, or redeem a Setnayan code.</div>
+            <div style="display:flex;gap:8px;margin-top:12px"><input style="flex:1;height:34px;border:1px solid var(--line-2);border-radius:8px;padding:0 10px;font-family:inherit" placeholder="Enter code"><button class="btn primary sm" onclick="toast('Redeemed (stub)')">Redeem</button></div></div>
+        </div>
+        <div class="sectitle">Recent burns</div>
+        <div class="card rowlist">
+          <div class="li"><span class="em">✉</span><div><div class="tt">Answered Garcia–Lim</div><div class="ds">Jun 8 · NCR band</div></div><div class="rt mono" style="color:var(--mulberry)">−3 ◎</div></div>
+          <div class="li"><span class="em">✉</span><div><div class="tt">Answered Villanueva–Tan</div><div class="ds">Jun 7 · NCR band</div></div><div class="rt mono" style="color:var(--mulberry)">−3 ◎</div></div>
+          <div class="li"><span class="em">✦</span><div><div class="tt">Pro subscription bundle</div><div class="ds">Jun 1 · monthly grant</div></div><div class="rt mono" style="color:var(--ok)">+30 ◎</div></div>
+        </div>
+      </section>
+
+      <!-- generic placeholder views -->
+      <section class="view" data-v="store-services"><h2 class="ph-h">Services &amp; packages</h2>
+        <p class="ph-sub">What couples can book — and what makes each one match. <b>Refinements live inside each service</b>, not in a separate tab.</p>
+        <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+          <div><div class="mono">Match readiness</div><div style="font-size:12.5px;color:var(--slate);margin-top:3px;max-width:400px">Finish each service's refinements to rank higher in couples' search and show a stronger “% match”.</div></div>
+          <div style="text-align:right"><div style="font-size:26px;font-family:var(--serif)">73%</div><div style="font-size:11px;color:var(--slate)">overall</div></div>
+        </div>
+        <div class="card rowlist">
+          <div class="li"><span class="em">🍽</span><div style="flex:1"><div class="tt">Plated dinner</div><div class="ds">from ₱950/pax · 100-pax floor · crew meal required</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:7px;max-width:300px"><div class="matchbar" style="flex:1"><i style="width:80%"></i></div><span style="font-size:11px;color:var(--slate);font-weight:700">80%</span></div></div>
+            <div class="rt"><button class="btn gold sm" onclick="go('store-service-edit')">Finish refinements · 2 left</button></div></div>
+          <div class="li"><span class="em">🧀</span><div style="flex:1"><div class="tt">Grazing table</div><div class="ds">from ₱28,000 · serves 120 · linked: Mobile bar</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:7px;max-width:300px"><div class="matchbar" style="flex:1"><i style="width:40%"></i></div><span style="font-size:11px;color:var(--slate);font-weight:700">40%</span></div></div>
+            <div class="rt"><button class="btn gold sm" onclick="go('store-service-edit')">Finish refinements · 5 left</button></div></div>
+          <div class="li"><span class="em">🍸</span><div style="flex:1"><div class="tt">Mobile bar</div><div class="ds">from ₱22,000 · 4 hrs · add-on</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:7px;max-width:300px"><div class="matchbar" style="flex:1"><i style="width:100%"></i></div><span style="font-size:11px;color:var(--ok);font-weight:700">100% ✓</span></div></div>
+            <div class="rt"><button class="btn ghost sm" onclick="go('store-service-edit')">Edit</button></div></div>
+        </div>
+        <button class="btn primary sm" style="margin-top:14px" onclick="toast('Add a service — refinements are step 2')">+ Add a service</button>
+        <div class="note"><span class="i">◈</span><div><b>Refinements folded in (no separate tab).</b> They're leaf-only — each service carries its own match facets — so they're edited as <b>step 2 of a service</b>. This overview is the only “refinements” surface: a readiness index that links into each service.</div></div></section>
+
+      <!-- per-service refinement step — reached only from Services, never the nav -->
+      <section class="view" data-v="store-service-edit">
+        <button class="btn ghost sm" onclick="go('store-services')">← Services</button>
+        <h2 class="ph-h" style="margin-top:12px">Plated dinner</h2>
+        <p class="ph-sub">Two steps: the offer, then the refinements couples match on.</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px"><span class="fil">1 · The offer ✓</span><span class="fil on">2 · Refinements · 80%</span></div>
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><div class="mono">The offer</div><button class="btn ghost sm" onclick="toast('Edit offer (stub)')">Edit</button></div>
+          <div style="font-size:13px;color:var(--slate);margin-top:8px">₱950 / pax · 100-pax floor · crew meal required · linked: Mobile bar</div>
+        </div>
+        <div class="card">
+          <div class="mono" style="margin-bottom:4px">Refinements — what couples match on</div>
+          <div style="font-size:12px;color:var(--slate);margin-bottom:4px">These power your “% match”. 2 still missing → finish to reach 100%.</div>
+          <div class="rowlist">
+            <div class="li"><span class="em" style="color:var(--ok)">✓</span><div><div class="tt">Cuisine specialties</div><div class="ds">Filipino · Spanish · Fusion</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('Edit (stub)')">Edit</button></div></div>
+            <div class="li"><span class="em" style="color:var(--ok)">✓</span><div><div class="tt">Service regions</div><div class="ds">NCR · CALABARZON · Tagaytay</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('Edit (stub)')">Edit</button></div></div>
+            <div class="li"><span class="em" style="color:var(--ok)">✓</span><div><div class="tt">Capacity range</div><div class="ds">80 – 400 pax</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('Edit (stub)')">Edit</button></div></div>
+            <div class="li"><span class="em" style="color:var(--warn)">!</span><div><div class="tt">Dietary options</div><div class="ds" style="color:var(--warn)">Missing — couples filter on this</div></div><div class="rt"><button class="btn gold sm" onclick="toast('Add (stub)')">Add</button></div></div>
+            <div class="li"><span class="em" style="color:var(--warn)">!</span><div><div class="tt">Plating &amp; service style</div><div class="ds" style="color:var(--warn)">Missing</div></div><div class="rt"><button class="btn gold sm" onclick="toast('Add (stub)')">Add</button></div></div>
+          </div>
+        </div>
+        <div class="note"><span class="i">◈</span><div>Reached only from a service — there's no “Refinements” nav entry. Same leaf-only data as the shipped iteration-0044 <span class="mono" style="display:inline">/attributes</span> surface, just edited in context.</div></div>
+      </section>
+
+      <section class="view" data-v="store-rep">
+        <h2 class="ph-h">Repertoire</h2>
+        <p class="ph-sub">Your performable song set list — this nav item appears because you list under a music category.</p>
+        <div class="card rowlist">
+          <div class="li"><span class="em">🎵</span><div style="flex:1"><div class="tt">First-dance set</div><div class="ds">12 songs · acoustic + full band</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('Edit (stub)')">Edit</button></div></div>
+          <div class="li"><span class="em">🎤</span><div style="flex:1"><div class="tt">Reception party set</div><div class="ds">28 songs · OPM + pop</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('Edit (stub)')">Edit</button></div></div>
+          <div class="li"><span class="em">🎚</span><div style="flex:1"><div class="tt">DJ after-party</div><div class="ds">Open-format · 2 hrs</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('Edit (stub)')">Edit</button></div></div>
+        </div>
+        <div class="note"><span class="i">◈</span><div>This nav item only appears for music acts — the nav <b>flexes to your archetype</b>. Caterers see Manpower here instead.</div></div>
+      </section>
+      <section class="view" data-v="store-profile">
+        <h2 class="ph-h">Portfolio &amp; profile</h2>
+        <p class="ph-sub">Your public page — what couples see. Photo cap scales with tier (Pro = 100).</p>
+        <div class="grid g2">
+          <div class="card">
+            <div class="mono" style="margin-bottom:6px">Profile completeness</div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800"><span>86%</span><span class="mono" style="margin:0">almost there</span></div>
+            <div class="matchbar" style="margin:6px 0 12px"><i style="width:86%"></i></div>
+            <div class="rowlist">
+              <div class="li"><span class="em" style="color:var(--ok)">✓</span><div><div class="tt">Logo &amp; hero</div></div></div>
+              <div class="li"><span class="em" style="color:var(--ok)">✓</span><div><div class="tt">About &amp; contact</div></div></div>
+              <div class="li"><span class="em" style="color:var(--warn)">!</span><div><div class="tt">Refinements</div><div class="ds">73% — finish in Services</div></div><div class="rt"><button class="btn ghost sm" onclick="go('store-services')">Finish</button></div></div>
+            </div>
+            <button class="btn ghost sm" style="margin-top:12px" onclick="toast('Opens your public page (stub)')">View public page ↗</button>
+          </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="mono">Portfolio</div><div style="font-size:11px;color:var(--slate)">12 / 100 used · Pro</div></div>
+            <div class="usebar" style="margin-bottom:12px"><i style="width:12%"></i></div>
+            <div class="thumbs">
+              <div class="thumb">🍽</div><div class="thumb">🥂</div><div class="thumb">🎂</div><div class="thumb">🧀</div>
+              <div class="thumb">🍸</div><div class="thumb">🌿</div><div class="thumb">🍤</div><div class="thumb add" onclick="toast('Upload (stub)')">+ Add</div>
+            </div>
+          </div>
+        </div>
+        <div class="note"><span class="i">◈</span><div><b>Hybrid-anonymity:</b> on Pro your real business name shows day-1. Free &amp; Verified vendors appear anonymized until the first reply to a couple.</div></div>
+      </section>
+      <section class="view" data-v="store-reviews"><h2 class="ph-h">Reviews</h2><p class="ph-sub">Event-bound reviews from verified guests + couples.</p>
+        <div class="card">★★★★★ “Lumière made our day effortless.” — Santos–Dela Cruz <button class="btn ghost sm" style="margin-left:8px" onclick="toast('Reply (stub)')">Reply</button></div></section>
+      <section class="view" data-v="store-mood">
+        <h2 class="ph-h">Moodboard library</h2>
+        <p class="ph-sub">Palette &amp; styling sets couples can browse. Category-conditional.</p>
+        <div class="thumbs" style="grid-template-columns:repeat(3,1fr)">
+          <div class="thumb" style="background:linear-gradient(135deg,#5C2542,#C5A059);color:#fff;font-size:11px;font-weight:700;text-align:center;padding:8px">Mulberry &amp; Gold</div>
+          <div class="thumb" style="background:linear-gradient(135deg,#2E4A3F,#A9BFA2);color:#fff;font-size:11px;font-weight:700;text-align:center;padding:8px">Forest Garden</div>
+          <div class="thumb" style="background:linear-gradient(135deg,#1E2229,#9A9CA2);color:#fff;font-size:11px;font-weight:700;text-align:center;padding:8px">Modern Obsidian</div>
+          <div class="thumb add" onclick="toast('New set (stub)')">+ New set</div>
+        </div>
+      </section>
+
+      <section class="view" data-v="reach-boost">
+        <h2 class="ph-h">Boost &amp; marketing</h2>
+        <p class="ph-sub">Promote your listing to more couples inside your reach radius.</p>
+        <div class="grid g2">
+          <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="mono">Active boost</div><span class="tag t-active">Live</span></div>
+            <div style="font-weight:700;margin-top:8px">Tagaytay weddings</div><div style="font-size:12.5px;color:var(--slate)">₱1,499 / week · 1,240 views · 18 inquiries</div>
+            <button class="btn ghost sm" style="margin-top:11px" onclick="toast('Paused (stub)')">Pause</button></div>
+          <div class="card"><div class="mono">Start a campaign</div>
+            <div style="font-size:12.5px;color:var(--slate);margin-top:8px">Target a region + category for a weekly budget. Boosted vendors can opt out of third-party ads on their page.</div>
+            <button class="btn primary sm" style="margin-top:11px" onclick="toast('New campaign (stub)')">+ New campaign</button></div>
+        </div>
+        <div class="note"><span class="i">◈</span><div>Boost widens <b>reach</b> within your tier's radius (Pro = 50 km). It never changes your match score — couples still see your honest % match.</div></div>
+      </section>
+
+      <section class="view" data-v="account-team">
+        <h2 class="ph-h">Team &amp; agents</h2>
+        <p class="ph-sub">Agent seats scale with tier — Pro includes 3. You're using 1.</p>
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700"><span>Agent seats</span><span>1 of 3 used</span></div>
+          <div class="usebar" style="margin-top:7px"><i style="width:33%"></i></div>
+        </div>
+        <div class="card rowlist">
+          <div class="li"><span class="em">👑</span><div style="flex:1"><div class="tt">Lumière (you)</div><div class="ds">Owner · full access</div></div></div>
+          <div class="li"><span class="em">👤</span><div style="flex:1"><div class="tt">Marco Reyes</div><div class="ds">Agent · sales · scoped to Inbox + 8 assigned services</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('Manage seat (stub)')">Manage</button></div></div>
+        </div>
+        <button class="btn primary sm" style="margin-top:12px" onclick="toast('Invite — 1 of 3 agent seats used')">+ Invite agent · 1 / 3 used</button>
+        <div class="note"><span class="i">◈</span><div>Agents get a <b>role-scoped</b> view (their assigned services + Inbox), not the full dashboard. Downgrading tiers removes extra seats; their data rolls up to you.</div></div>
+      </section>
+      <section class="view" data-v="account-branches"><h2 class="ph-h">Branches <span style="font-size:13px;color:var(--slate-2)">🔒 Enterprise</span></h2>
+        <p class="ph-sub">Run multiple locations under one org, with a shared anti-double-book calendar.</p>
+        <div class="feat-lock"><span class="lk">🏢</span><div class="ft"><b>Branches are an Enterprise feature</b> <span>— you're on Pro.</span></div><button class="btn primary sm" onclick="go('reach-tier')">See Enterprise</button></div></section>
+      <section class="view" data-v="account-manpower">
+        <h2 class="ph-h">Manpower</h2>
+        <p class="ph-sub">Crew roster &amp; per-event meal counts — feeds the couple's budget line automatically.</p>
+        <div class="card rowlist">
+          <div class="li"><span class="em">🧑‍🍳</span><div style="flex:1"><div class="tt">Head chef</div><div class="ds">×1</div></div></div>
+          <div class="li"><span class="em">🔪</span><div style="flex:1"><div class="tt">Sous chef</div><div class="ds">×2</div></div></div>
+          <div class="li"><span class="em">🍴</span><div style="flex:1"><div class="tt">Servers</div><div class="ds">×8</div></div></div>
+          <div class="li"><span class="em">🍸</span><div style="flex:1"><div class="tt">Bartenders</div><div class="ds">×2</div></div></div>
+          <div class="li"><span class="em">📋</span><div style="flex:1"><div class="tt">Coordinator</div><div class="ds">×1</div></div></div>
+        </div>
+        <div class="note"><span class="i">◈</span><div>Crew meal count for <b>Cruz–Reyes</b> (14 crew) auto-populates the couple's budget as a crew-meal + transportation line item.</div></div>
+      </section>
+      <section class="view" data-v="account-pay"><h2 class="ph-h">How clients pay you</h2><p class="ph-sub">Set the QR / bank link / wallet couples use to pay you directly.</p>
+        <div class="note"><span class="i">◈</span><div>This is <b>setup</b>, not daily money — so it lives in Account, while Earnings (revenue) is a primary tab. Links are a Pro/Enterprise perk; QR &amp; bank are all-tier.</div></div>
+        <div class="card" style="margin-top:12px">GCash QR · BDO account · payment link (stub)</div></section>
+      <section class="view" data-v="account-notif"><h2 class="ph-h">Notifications</h2><p class="ph-sub">The bell is the primary entry; this is the full history + preferences.</p>
+        <div class="card rowlist">
+          <div class="li"><span class="em">✉</span><div><div class="tt">New lead · Cruz–Reyes</div><div class="ds">4 minutes ago</div></div></div>
+          <div class="li"><span class="em">★</span><div><div class="tt">New review · Santos–Dela Cruz</div><div class="ds">2 hours ago</div></div></div>
+          <div class="li"><span class="em">₱</span><div><div class="tt">Downpayment expected · ₱45,000</div><div class="ds">Yesterday</div></div></div>
+        </div></section>
+      <section class="view" data-v="account-settings">
+        <h2 class="ph-h">Settings</h2>
+        <p class="ph-sub">Account &amp; preferences.</p>
+        <div class="card rowlist">
+          <div class="li"><span class="em">👤</span><div style="flex:1"><div class="tt">Profile</div><div class="ds">Business name, contact, logo</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('(stub)')">Open</button></div></div>
+          <div class="li"><span class="em">🎨</span><div style="flex:1"><div class="tt">Appearance</div><div class="ds">Theme picker</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('(stub)')">Open</button></div></div>
+          <div class="li"><span class="em">🔔</span><div style="flex:1"><div class="tt">Notifications</div><div class="ds">Email &amp; in-app preferences</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('(stub)')">Open</button></div></div>
+          <div class="li"><span class="em">🔗</span><div style="flex:1"><div class="tt">URL &amp; slug</div><div class="ds">setnayan.com/v/lumiere-catering</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('(stub)')">Open</button></div></div>
+          <div class="li"><span class="em">⇄</span><div style="flex:1"><div class="tt">Payment methods</div><div class="ds">How clients pay you</div></div><div class="rt"><button class="btn ghost sm" onclick="go('account-pay')">Open</button></div></div>
+          <div class="li"><span class="em">🛡</span><div style="flex:1"><div class="tt">Privacy &amp; data</div><div class="ds">RA 10173 — export, deletion, consent</div></div><div class="rt"><button class="btn ghost sm" onclick="toast('(stub)')">Open</button></div></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+<div class="caption">Desktop — persistent sidebar with live counts · always-visible token + tier in the utility bar · Inbox &amp; Bookings as master-detail · context rail on the right.</div>
+</div>
+
+<!-- ════════════════════ MOBILE ════════════════════ -->
+<div class="stage hidden" id="stage-m">
+<div class="mobile-wrap">
+  <div class="phone">
+    <div class="notch"></div>
+    <!-- mobile top -->
+    <div class="m-top">
+      <div class="ttl" id="m-title">Home</div>
+      <div class="spacer"></div>
+      <div class="m-chip pro-only" id="m-token" onclick="mgo('tokens')"><span class="coin">◎</span> <b id="m-token-n">47</b></div>
+      <div class="m-chip free-only" onclick="mgo('tokens')"><span class="coin">◎</span> 100</div>
+      <div class="m-bell" onclick="mgo('more')">🔔<span class="dot">3</span></div>
+    </div>
+
+    <div class="m-body">
+      <!-- HOME -->
+      <div class="m-view show" data-mv="home">
+        <div class="free-only">
+          <div class="m-card" style="border-color:var(--gold)"><div class="m-sig"><div class="badge b-gold">✦</div><div><h4>Almost open for couples</h4><p>Get verified (free) to appear in search &amp; receive inquiries.</p><button class="btn gold sm cta" onclick="mgo('tier')">Get verified →</button></div></div></div>
+          <div class="m-card"><div class="mono" style="margin-bottom:6px">Finish setup</div><div class="rowlist">
+            <div class="li"><span class="em" style="color:var(--ok)">✓</span><div><div class="tt">Profile created</div></div></div>
+            <div class="li"><span class="em" style="color:var(--warn)">!</span><div><div class="tt">Add a service</div></div><div class="rt"><button class="btn ghost sm" onclick="mgo('services')">Add</button></div></div>
+            <div class="li"><span class="em" style="color:var(--lead)">!</span><div><div class="tt">Get verified</div><div class="ds">+100 free tokens</div></div><div class="rt"><button class="btn gold sm" onclick="mgo('tier')">Verify</button></div></div>
+          </div></div>
+          <div class="m-card m-sig"><div class="badge b-info">↗</div><div><h4>0% commission</h4><p>Pay a token only when you answer a matched couple.</p></div></div>
+        </div>
+        <div class="pro-only">
+          <div class="m-card m-sig"><div class="badge b-lead">✉</div><div><h4>3 new leads</h4><p>Pre-matched couples — answer to win.</p><button class="btn gold sm cta" onclick="mgo('inbox')">Answer now →</button></div></div>
+          <div class="m-card m-sig"><div class="badge b-warn">⏱</div><div><h4>2 replies owed</h4><p>Waiting on you.</p></div></div>
+          <div class="m-card m-sig"><div class="badge b-info">◷</div><div><h4>Cruz–Reyes · Sat</h4><p>Dec 12 · Tagaytay · 220 pax.</p></div></div>
+          <div class="m-card m-sig"><div class="badge b-gold">◎</div><div><h4><span id="m-tokencard-n">47</span> tokens · ~15 answers</h4><p>Each answer burns 1–3.</p><button class="btn ghost sm cta" onclick="mgo('tokens')">Top up</button></div></div>
+          <div class="m-card m-sig"><div class="badge b-gold">★</div><div><h4>New 5-star review</h4><p>Santos–Dela Cruz wedding.</p></div></div>
+        </div>
+      </div>
+
+      <!-- INBOX -->
+      <div class="m-view" data-mv="inbox">
+        <div class="free-only m-card" style="text-align:center;padding:26px 16px">
+          <div style="font-size:30px">🔒</div><h4 style="margin-top:6px;font-size:15px">Couples can't reach you yet</h4>
+          <p style="font-size:12px;color:var(--slate);margin-top:5px">Get verified to start receiving inquiries here.</p>
+          <button class="btn gold sm" style="margin:12px auto 0" onclick="mgo('tier')">Get verified →</button>
+        </div>
+        <div class="pro-only">
+        <div style="display:flex;gap:5px;margin-bottom:11px;overflow-x:auto">
+          <span class="fil on" style="white-space:nowrap">New<span class="n">3</span></span>
+          <span class="fil" style="white-space:nowrap">Awaiting<span class="n">2</span></span>
+          <span class="fil" style="white-space:nowrap">Active</span>
+          <span class="fil" style="white-space:nowrap">Archived</span>
+        </div>
+        <div class="m-card" style="padding:4px 13px">
+          <div class="m-lead" onclick="mOpenThread()"><div class="av">CR</div><div><div class="nm">Cruz–Reyes</div><div class="ms">Do you cater 220 pax in Tagaytay…</div><span class="tag t-new">New · ◎-3</span></div></div>
+          <div class="m-lead" onclick="mOpenThread()"><div class="av">GA</div><div><div class="nm">Garcia–Lim</div><div class="ms">We loved your grazing table…</div><span class="tag t-new">New · ◎-3</span></div></div>
+          <div class="m-lead" onclick="mOpenThread()"><div class="av">VT</div><div><div class="nm">Villanueva–Tan</div><div class="ms">Is Dec 20 open for plated?</div><span class="tag t-new">New · ◎-3</span></div></div>
+        </div>
+        </div><!-- /pro-only -->
+      </div>
+
+      <!-- THREAD -->
+      <div class="m-view" data-mv="thread">
+        <button class="btn ghost sm" onclick="mgo('inbox')">← Inbox</button>
+        <div style="margin:10px 0 12px"><div style="font-weight:700;font-size:16px">Cruz–Reyes</div><div class="mono" style="margin:0">Wedding · 220 pax · Tagaytay · 92% match</div></div>
+        <div class="m-card" style="background:var(--paper-3)">
+          <div class="bub them" style="max-width:90%;margin-bottom:9px"><div class="who">Couple</div>Hi! Dec 12, Tagaytay, ~220 guests. Plated-dinner package?</div>
+          <div class="bub them" style="max-width:90%"><div class="who">Couple</div>Budget ≈ ₱180k. 🙏</div>
+        </div>
+        <div class="gate" id="m-gate" style="margin-top:12px">
+          <div class="gt">New lead — answering unlocks this couple &amp; all your services. Burns <b>3 tokens</b>.</div>
+        </div>
+        <button class="btn gold" id="m-answer" style="width:100%;justify-content:center;margin-top:10px" onclick="mAnswer()">Answer · ◎-3</button>
+      </div>
+
+      <!-- BOOKINGS (mobile · list) -->
+      <div class="m-view" data-mv="bookings">
+        <div class="free-only m-card" style="text-align:center;padding:26px 16px">
+          <div style="font-size:30px">📋</div><h4 style="margin-top:6px;font-size:15px">No bookings yet</h4>
+          <p style="font-size:12px;color:var(--slate);margin-top:5px">Bookings land here once couples book you.</p>
+          <button class="btn gold sm" style="margin:12px auto 0" onclick="mgo('tier')">Get verified →</button>
+        </div>
+        <div class="pro-only">
+          <div style="display:flex;gap:5px;margin-bottom:11px;overflow-x:auto">
+            <span class="fil on" style="white-space:nowrap">Pipeline</span><span class="fil" style="white-space:nowrap">Contracts</span><span class="fil" style="white-space:nowrap">Delivery</span></div>
+          <div class="m-card" style="padding:4px 13px" id="m-bk-list"></div>
+          <div class="note"><span class="i">◈</span><div>Tap a booking to open its workspace — same stepper, payment &amp; contract actions as desktop.</div></div>
+        </div>
+      </div>
+
+      <!-- BOOKING WORKSPACE (mobile) -->
+      <div class="m-view" data-mv="booking">
+        <button class="btn ghost sm" onclick="mgo('bookings')">← Bookings</button>
+        <div id="m-bk-workspace" style="margin-top:12px"></div>
+      </div>
+
+      <!-- EARNINGS -->
+      <div class="m-view" data-mv="earnings">
+        <div class="free-only m-card" style="text-align:center;padding:26px 16px">
+          <div style="font-size:30px">🪙</div><h4 style="margin-top:6px;font-size:15px">No earnings yet</h4>
+          <p style="font-size:12px;color:var(--slate);margin-top:5px">Payments you mark received will show here.</p>
+        </div>
+        <div class="pro-only">
+          <div class="m-card" style="text-align:center"><div class="mono">Received · this month</div><div style="font-size:30px;font-family:var(--serif)">₱265,000</div><div style="font-size:12px;color:var(--ok)">4 events delivered</div></div>
+          <div class="m-card" style="text-align:center"><div class="mono">Expected</div><div style="font-size:30px;font-family:var(--serif)">₱310,000</div><div style="font-size:12px;color:var(--slate)">3 confirmed</div></div>
+          <div class="note"><span class="i">◈</span><div><b>Setnayan never holds your money.</b> Couples pay you directly.</div></div>
+        </div>
+      </div>
+
+      <!-- TOKENS -->
+      <div class="m-view" data-mv="tokens">
+        <div class="m-card" style="text-align:center"><div class="mono">Balance</div><div style="font-size:36px;font-family:var(--serif);color:var(--gold)"><span id="m-bal">47</span> ◎</div><div style="font-size:12px;color:var(--slate)">≈ 15 answers</div></div>
+        <div class="m-card"><div class="mono" style="margin-bottom:8px">Buy a pack</div>
+          <div class="rowlist"><div class="li"><div class="tt">25</div><div class="rt"><button class="btn ghost sm" onclick="toast('Checkout (stub)')">₱2,500</button></div></div>
+          <div class="li"><div class="tt">50</div><div class="rt"><button class="btn ghost sm" onclick="toast('Checkout (stub)')">₱5,000</button></div></div>
+          <div class="li"><div class="tt">100</div><div class="rt"><button class="btn gold sm" onclick="toast('Checkout (stub)')">₱9,000</button></div></div></div></div>
+      </div>
+
+      <!-- MORE (grouped accordion) -->
+      <div class="m-view" data-mv="more">
+        <div class="m-search">🔍 Search settings &amp; tools…</div>
+        <div class="m-grp" id="mg-store">
+          <button class="gh" onclick="mtg('mg-store')">Storefront <span class="car">▾</span></button>
+          <div class="gi">
+            <div class="it" onclick="mgo('services')"><span class="ic">▦</span> Services &amp; packages</div>
+            <div class="it" onclick="toast('Portfolio')"><span class="ic">◐</span> Portfolio &amp; profile</div>
+            <div class="it" onclick="toast('Reviews')"><span class="ic">★</span> Reviews</div>
+            <div class="it cat-photog" onclick="toast('Moodboard')"><span class="ic">❖</span> Moodboard library</div>
+          </div>
+        </div>
+        <div class="m-grp" id="mg-reach">
+          <button class="gh" onclick="mtg('mg-reach')">Reach <span class="car">▾</span></button>
+          <div class="gi">
+            <div class="it" onclick="mgo('tier')"><span class="ic">✦</span> Verification &amp; tier</div>
+            <div class="it" onclick="toast('Boost')"><span class="ic">📣</span> Boost &amp; marketing</div>
+            <div class="it" onclick="mgo('tokens')"><span class="ic">◎</span> Leads &amp; tokens</div>
+          </div>
+        </div>
+        <div class="m-grp closed" id="mg-acct">
+          <button class="gh" onclick="mtg('mg-acct')">Account <span class="car">▾</span></button>
+          <div class="gi">
+            <div class="it" onclick="toast('Team — 1/3 seats')"><span class="ic">⊕</span> Team &amp; agents</div>
+            <div class="it locked" onclick="mgo('tier')"><span class="ic">🏢</span> Branches <span class="lock">🔒 Ent</span></div>
+            <div class="it cat-caterer" onclick="toast('Manpower')"><span class="ic">⛑</span> Manpower</div>
+            <div class="it" onclick="toast('Payment setup')"><span class="ic">⇄</span> How clients pay you</div>
+            <div class="it" onclick="toast('Notifications')"><span class="ic">🔔</span> Notifications</div>
+            <div class="it" onclick="toast('Settings')"><span class="ic">⚙</span> Settings</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIER (mobile) -->
+      <div class="m-view" data-mv="tier">
+        <button class="btn ghost sm" onclick="mgo('more')">← More</button>
+        <h4 style="margin:10px 0 3px;font-size:18px">Verification &amp; tier</h4>
+        <p style="font-size:12.5px;color:var(--slate);margin-bottom:12px">Tiers sell reach. You're on Pro.</p>
+        <div class="m-card" style="border-color:var(--gold)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-family:var(--serif);font-size:17px">Pro</div><div style="font-size:12px;color:var(--slate)">₱6,000/mo · current</div></div><span class="tag t-active">Current</span></div>
+          <div style="font-size:12.5px;color:var(--slate);margin-top:9px">50 km · 3 cats · 3 agents · unlimited answers · 100 photos</div></div>
+        <div class="m-card"><div style="font-family:var(--serif);font-size:17px">Enterprise</div><div style="font-size:12px;color:var(--slate)">₱10,000/mo</div>
+          <div style="font-size:12.5px;color:var(--slate);margin-top:9px">Unlimited reach · ∞ cats/agents · branches · video chat</div>
+          <button class="btn primary sm" style="width:100%;justify-content:center;margin-top:11px" onclick="toast('Upgrade (stub)')">Upgrade →</button></div>
+        <div class="feat-lock"><span class="lk">🏢</span><div class="ft"><b>Branches</b> <span>— Enterprise</span></div><span class="req">Ent</span></div>
+        <div class="feat-lock"><span class="lk">🎥</span><div class="ft"><b>Video chat</b> <span>— Enterprise</span></div><span class="req">Ent</span></div>
+      </div>
+
+      <!-- SERVICES (mobile) -->
+      <div class="m-view" data-mv="services">
+        <button class="btn ghost sm" onclick="mgo('more')">← More</button>
+        <div class="m-card" style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+          <div><div class="mono">Match readiness</div><div style="font-size:12px;color:var(--slate);margin-top:2px">Finish refinements to rank higher</div></div>
+          <div style="font-size:22px;font-family:var(--serif)">73%</div>
+        </div>
+        <div class="m-card" style="padding:4px 13px">
+          <div class="m-lead" onclick="mgo('service-edit')"><div class="av">🍽</div><div style="flex:1"><div class="nm">Plated dinner</div><div class="ms">from ₱950/pax</div><div style="display:flex;align-items:center;gap:6px;margin-top:5px"><div class="matchbar" style="flex:1"><i style="width:80%"></i></div><span style="font-size:10px;color:var(--slate);font-weight:700">80%</span></div></div></div>
+          <div class="m-lead" onclick="mgo('service-edit')"><div class="av">🧀</div><div style="flex:1"><div class="nm">Grazing table</div><div class="ms">from ₱28,000</div><div style="display:flex;align-items:center;gap:6px;margin-top:5px"><div class="matchbar" style="flex:1"><i style="width:40%"></i></div><span style="font-size:10px;color:var(--slate);font-weight:700">40%</span></div></div></div>
+          <div class="m-lead" onclick="mgo('service-edit')"><div class="av">🍸</div><div style="flex:1"><div class="nm">Mobile bar</div><div class="ms">from ₱22,000</div><div style="display:flex;align-items:center;gap:6px;margin-top:5px"><div class="matchbar" style="flex:1"><i style="width:100%"></i></div><span style="font-size:10px;color:var(--ok);font-weight:700">100%</span></div></div></div>
+        </div>
+        <button class="btn primary sm" style="width:100%;justify-content:center" onclick="toast('Add a service — refinements are step 2')">+ Add a service</button>
+        <div class="note"><span class="i">◈</span><div>No “Refinements” tab — they're <b>step 2 inside each service</b>. This is the only refinements view: a readiness index.</div></div>
+      </div>
+
+      <!-- SERVICE EDIT (mobile · refinements = step 2) -->
+      <div class="m-view" data-mv="service-edit">
+        <button class="btn ghost sm" onclick="mgo('services')">← Services</button>
+        <div style="margin:10px 0 12px"><div style="font-weight:700;font-size:16px">Plated dinner</div></div>
+        <div style="display:flex;gap:6px;margin-bottom:12px"><span class="fil">1 · Offer ✓</span><span class="fil on">2 · Refinements 80%</span></div>
+        <div class="m-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="mono">The offer</div><button class="btn ghost sm" onclick="toast('Edit (stub)')">Edit</button></div><div style="font-size:12px;color:var(--slate);margin-top:6px">₱950/pax · 100-pax floor · crew meal</div></div>
+        <div class="m-card"><div class="mono" style="margin-bottom:6px">Refinements — couples match on these</div>
+          <div class="rowlist">
+            <div class="li"><span class="em" style="color:var(--ok)">✓</span><div><div class="tt">Cuisine specialties</div><div class="ds">Filipino · Spanish · Fusion</div></div></div>
+            <div class="li"><span class="em" style="color:var(--ok)">✓</span><div><div class="tt">Service regions</div><div class="ds">NCR · Tagaytay</div></div></div>
+            <div class="li"><span class="em" style="color:var(--warn)">!</span><div><div class="tt">Dietary options</div><div class="ds" style="color:var(--warn)">Missing</div></div><div class="rt"><button class="btn gold sm" onclick="toast('Add (stub)')">Add</button></div></div>
+            <div class="li"><span class="em" style="color:var(--warn)">!</span><div><div class="tt">Plating style</div><div class="ds" style="color:var(--warn)">Missing</div></div><div class="rt"><button class="btn gold sm" onclick="toast('Add (stub)')">Add</button></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- bottom nav -->
+    <div class="m-nav">
+      <button class="m-tab on" data-mt="home" onclick="mgo('home')"><span class="ic">⌂</span>Home</button>
+      <button class="m-tab" data-mt="inbox" onclick="mgo('inbox')"><span class="ic">✉</span><span class="nb">3</span>Inbox</button>
+      <button class="m-tab" data-mt="bookings" onclick="mgo('bookings')"><span class="ic">▤</span><span class="nb">2</span>Bookings</button>
+      <button class="m-tab" data-mt="earnings" onclick="mgo('earnings')"><span class="ic">₱</span>Earnings</button>
+      <button class="m-tab" data-mt="more" onclick="mgo('more')"><span class="ic">☰</span>More</button>
+    </div>
+  </div>
+
+  <div style="max-width:300px">
+    <h3 style="font-size:16px;margin-bottom:8px">What's different on mobile</h3>
+    <ul style="font-size:13px;color:var(--slate);line-height:1.7;list-style:none">
+      <li>• <b>5-tab spine</b> in the thumb zone — Home · Inbox · Bookings · ₱ · More.</li>
+      <li>• <b>Home = signal cards</b>, not a profile page. Tap to act.</li>
+      <li>• <b>Token chip</b> pinned in the header; the burn cost shows on the <b>Answer</b> button.</li>
+      <li>• <b>“More” is a 3-section accordion</b> (Storefront / Reach / Account) + search — never a 15-item dump.</li>
+      <li>• <b>Locks are visible</b> (🔒 Ent) with a tap-through to upgrade.</li>
+      <li>• Same group definitions as desktop — one source of truth.</li>
+    </ul>
+    <p class="caption" style="text-align:left;margin-top:14px">Tip: Inbox → tap a lead → <b>Answer · ◎-3</b> to watch the token chip tick down.</p>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast">✓ <span id="toast-msg"></span></div>
+
+<script>
+  let balance = 47;
+  function setState(s){
+    document.body.dataset.vstate=s;
+    document.getElementById('st-pro').classList.toggle('on',s==='pro');
+    document.getElementById('st-free').classList.toggle('on',s==='free');
+    const dm=document.getElementById('d-main'); if(dm) dm.scrollTop=0;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function toggleCat(c){
+    const L={caterer:'Caterer',photog:'Photographer',band:'Band'};
+    const on=document.body.classList.toggle('has-'+c);
+    document.getElementById('ar-'+c).classList.toggle('on',on);
+    const cats=Object.keys(L).filter(x=>document.body.classList.contains('has-'+x));
+    const tierNote = cats.length>=2 ? ` · ${cats.length} categories — cap: Free 1 · Verified/Pro 3 · Enterprise ∞ (all)` : '';
+    toast((cats.length?cats.map(x=>L[x]).join(' + '):'No categories')+' · nav shows the union'+tierNote);
+  }
+  function setFF(ff){
+    document.getElementById('sw-d').classList.toggle('on', ff==='d'||ff==='b');
+    document.getElementById('sw-m').classList.toggle('on', ff==='m'||ff==='b');
+    document.getElementById('sw-b').classList.toggle('on', ff==='b');
+    document.getElementById('stage-d').classList.toggle('hidden', ff==='m');
+    document.getElementById('stage-m').classList.toggle('hidden', ff==='d');
+    if(ff==='b'){document.getElementById('sw-d').classList.remove('on');document.getElementById('sw-m').classList.remove('on');}
+  }
+  // desktop nav
+  function go(v){
+    document.querySelectorAll('#d-main .view').forEach(s=>s.classList.toggle('show', s.dataset.v===v));
+    document.querySelectorAll('.sidebar .navitem').forEach(n=>n.classList.toggle('active', n.dataset.view===v));
+    document.getElementById('d-main').scrollTop=0;
+    if(v==='earnings') renderEarnings();
+  }
+  function tg(id){document.getElementById(id).classList.toggle('closed');}
+  function selLead(el,i){
+    document.querySelectorAll('.ibx-list .lead').forEach(l=>l.classList.remove('sel'));
+    el.classList.add('sel');
+  }
+  function answerLead(){
+    if(balance<3){toast('Not enough tokens — top up');return;}
+    balance-=3; syncBal();
+    document.getElementById('th-gate').outerHTML =
+      '<div style="display:flex;align-items:center;gap:9px;background:var(--okbg);border:1px solid #cfe6da;border-radius:11px;padding:11px;color:var(--ok);font-size:12.5px;font-weight:600;margin-bottom:10px">✓ Unlocked — 3 tokens burned. This couple &amp; all your services are open.</div>'
+      + '<div class="composer"><input placeholder="Write a reply…"><button class="btn primary" onclick="toast(\'Sent\')">Send</button></div>';
+    toast('Lead unlocked · −3 ◎');
+  }
+  // mobile nav
+  function mgo(v){
+    const map={home:'Home',inbox:'Inbox',thread:'Cruz–Reyes',bookings:'Bookings',booking:'Booking',earnings:'Earnings',more:'More',tokens:'Leads & tokens',tier:'Tier',services:'Services',['service-edit']:'Plated dinner'};
+    document.querySelectorAll('.m-view').forEach(s=>s.classList.toggle('show', s.dataset.mv===v));
+    document.getElementById('m-title').textContent = map[v]||'';
+    const tabMap={thread:'inbox',tokens:'more',tier:'more',services:'more',['service-edit']:'more',booking:'bookings'};
+    const tabFor = tabMap[v]||v;
+    document.querySelectorAll('.m-tab').forEach(t=>t.classList.toggle('on', t.dataset.mt===tabFor));
+    document.querySelector('.m-body').scrollTop=0;
+  }
+  function mOpenThread(){mgo('thread');}
+  function mtg(id){document.getElementById(id).classList.toggle('closed');}
+  function mAnswer(){
+    if(balance<3){toast('Not enough tokens');return;}
+    balance-=3; syncBal();
+    document.getElementById('m-gate').outerHTML='<div style="display:flex;align-items:center;gap:8px;background:var(--okbg);border:1px solid #cfe6da;border-radius:11px;padding:11px;color:var(--ok);font-size:12.5px;font-weight:600;margin-top:12px">✓ Unlocked — 3 tokens burned.</div>';
+    document.getElementById('m-answer').outerHTML='<div class="composer" style="margin-top:10px"><input placeholder="Write a reply…"><button class="btn primary" onclick="toast(\'Sent\')">Send</button></div>';
+    toast('Lead unlocked · −3 ◎');
+  }
+  function syncBal(){
+    ['d-token-n','d-token-n','d-tokencard-n','d-bal','m-token-n','m-tokencard-n','m-bal'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.textContent=balance;
+    });
+    const low = balance<10;
+    document.getElementById('d-token').classList.toggle('low',low);
+    document.getElementById('m-token').classList.toggle('low',low);
+  }
+  /* ── Booking workspace engine (deepened daily loop) ── */
+  const TODAY='Jun 8';
+  const BK={
+    vt:{nm:'Villanueva–Tan',ini:'VT',ev:'Wedding',date:'Dec 20, 2026',pax:180,loc:'Taguig',
+        stage:'hold',total:171000,downPaid:false,balPaid:false,contract:'none',svc:'Plated dinner · Mobile bar',
+        tl:[['Couple sent inquiry','Jun 6'],['You answered · −3 ◎','Jun 6'],['Soft-hold placed','Jun 7']]},
+    cr:{nm:'Cruz–Reyes',ini:'CR',ev:'Wedding',date:'Dec 12, 2026',pax:220,loc:'Tagaytay',
+        stage:'downpaid',total:209000,downPaid:true,balPaid:false,contract:'sent',svc:'Plated dinner · Grazing table · Mobile bar',
+        tl:[['Couple sent inquiry','Jun 4'],['You answered · −3 ◎','Jun 4'],['Proposal sent','Jun 5'],['Downpayment ₱45,000 received','Jun 6'],['Contract sent for e-sign','Jun 6']]},
+    gl:{nm:'Garcia–Lim',ini:'GL',ev:'Wedding',date:'Nov 8, 2026',pax:120,loc:'Quezon City',
+        stage:'confirmed',total:114000,downPaid:true,balPaid:false,contract:'executed',svc:'Grazing table',
+        tl:[['Inquiry → answered','May 20'],['Downpayment received','May 24'],['Contract executed','May 25']]},
+    sd:{nm:'Santos–Dela Cruz',ini:'SD',ev:'Wedding',date:'May 24, 2026',pax:200,loc:'Makati',
+        stage:'delivered',total:190000,downPaid:true,balPaid:true,contract:'executed',reviewed:true,svc:'Plated dinner',
+        tl:[['Booked','Mar 2'],['Balance settled','May 23'],['Delivered','May 24'],['★★★★★ review','May 26']]},
+  };
+  let curBk='cr';
+  const STAGES=['hold','downpaid','confirmed','delivered'];
+  const SL={hold:'Soft-hold',downpaid:'Downpaid',confirmed:'Confirmed',delivered:'Delivered'};
+  const ST={hold:'t-await',downpaid:'t-info',confirmed:'t-active',delivered:'t-done'};
+  const peso=n=>'₱'+n.toLocaleString('en-PH');
+  function bkRow(id,cls,onc){const b=BK[id];
+    return `<div class="${cls} ${id===curBk&&cls==='lead'?'sel':''}" onclick="${onc}('${id}')"><div class="av">${b.ini}</div>`
+      +`<div style="flex:1"><div class="nm">${b.nm}</div><div class="ms">${b.date.split(',')[0]} · ${b.pax} pax</div>`
+      +`<span class="tag ${ST[b.stage]}">${SL[b.stage]}</span></div></div>`;}
+  function bkListHTML(){return Object.keys(BK).map(id=>bkRow(id,'lead','selBk')).join('');}
+  function mBkListHTML(){return Object.keys(BK).map(id=>bkRow(id,'m-lead','mSelBk')).join('');}
+  function bookingInner(id,compact){
+    const b=BK[id], down=Math.round(b.total*0.25), bal=b.total-down, si=STAGES.indexOf(b.stage);
+    const stepper=STAGES.map((s,i)=>`<div class="step ${i<si?'done':i===si?'cur':''}"><div class="dot">${i<si?'✓':i+1}</div>${SL[s]}</div>`).join('');
+    const cOrd=['sent','couple_signed','executed'], cLbl={sent:'Sent',couple_signed:'Couple',executed:'Executed'};
+    const cIdx=b.contract==='none'?-1:cOrd.indexOf(b.contract);
+    const csteps=cOrd.map((s,i)=>`<div class="step ${i<cIdx?'done':i===cIdx?'cur':''}"><div class="dot">${i<cIdx?'✓':i+1}</div>${cLbl[s]}</div>`).join('');
+    const cTxt={none:'Not started',sent:'Sent — awaiting couple e-sign',couple_signed:'Couple signed — counter-sign to execute',executed:'Executed ✓'}[b.contract];
+    const mBtn = !b.downPaid?`<button class="btn gold sm" onclick="bkAct('${id}','down')">Mark downpayment received · ${peso(down)}</button>`
+               : !b.balPaid?`<button class="btn gold sm" onclick="bkAct('${id}','bal')">Mark balance received · ${peso(bal)}</button>`
+               : `<span class="tag t-active">Paid in full ✓</span>`;
+    const cBtn = b.contract==='none'?`<button class="btn primary sm" onclick="bkAct('${id}','csend')">Send contract for e-signature</button>`
+               : b.contract==='sent'?`<button class="btn ghost sm" onclick="bkAct('${id}','csign')">▸ Simulate: couple signs</button>`
+               : b.contract==='couple_signed'?`<button class="btn primary sm" onclick="bkAct('${id}','cexec')">Counter-sign &amp; execute</button>`
+               : `<button class="btn ghost sm" onclick="toast('Download contract PDF (stub)')">Download PDF</button>`;
+    const dBtn = b.stage==='confirmed'?`<button class="btn gold sm" onclick="bkAct('${id}','deliver')">Mark delivered</button>`
+               : b.stage==='delivered'?(b.reviewed?`<span class="tag t-done">★★★★★ reviewed</span>`:`<span class="tag t-await">Awaiting couple review</span>`)
+               : `<span style="font-size:11.5px;color:var(--slate)">Confirm the booking first</span>`;
+    const moneyCard=`<div class="card" ${compact?'style="margin-bottom:12px"':''}>
+      <div class="mono" style="margin-bottom:8px">Payment · off-platform</div>
+      <div class="mrow"><span>Package total</span><span>${peso(b.total)}</span></div>
+      <div class="mrow"><span>Downpayment 25%</span><span>${b.downPaid?`<span style='color:var(--ok)'>${peso(down)} ✓</span>`:peso(down)}</span></div>
+      <div class="mrow tot"><span>Balance</span><span>${b.balPaid?`<span style='color:var(--ok)'>${peso(bal)} ✓</span>`:peso(bal)}</span></div>
+      <div style="margin-top:11px">${mBtn}</div>
+      <div style="font-size:11px;color:var(--slate);margin-top:9px">Couple pays you directly — Setnayan never holds the money.</div></div>`;
+    const contractCard=`<div class="card" ${compact?'style="margin-bottom:12px"':''}>
+      <div class="mono" style="margin-bottom:8px">Contract · e-signature</div>
+      <div style="font-size:13px;font-weight:600">${cTxt}</div>
+      <div class="stepper" style="margin-top:10px">${csteps}</div>
+      <div style="margin-top:11px">${cBtn}</div></div>`;
+    const pay = compact?moneyCard+contractCard:`<div class="grid g2" style="margin-bottom:13px">${moneyCard}${contractCard}</div>`;
+    const tl=b.tl.map(x=>`<li><span class="td"></span><b>${x[0]}</b><span class="dt">${x[1]}</span></li>`).join('');
+    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="av" style="width:42px;height:42px;border-radius:999px;background:var(--paper-3);display:grid;place-items:center;font-weight:700;color:var(--mulberry);font-size:13px">${b.ini}</div>
+      <div style="flex:1"><div style="font-family:var(--serif);font-size:18px;font-weight:600">${b.nm}</div>
+        <div class="mono" style="margin:0">${b.ev} · ${b.date} · ${b.pax} pax · ${b.loc}</div></div>
+      <span class="tag ${ST[b.stage]}" style="font-size:11px">${SL[b.stage]}</span></div>
+      <div class="card" style="margin-bottom:13px"><div class="stepper">${stepper}</div></div>
+      ${pay}
+      <div class="card" style="margin-bottom:13px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div><div class="mono">Delivery</div><div style="font-size:12.5px;color:var(--slate);margin-top:4px">${b.svc}</div></div><div>${dBtn}</div></div>
+      <div class="card"><div class="mono" style="margin-bottom:4px">Activity</div><ul class="tl">${tl}</ul></div>`;
+  }
+  function refreshBk(id){curBk=id;
+    const dl=document.getElementById('bk-list'); if(dl) dl.innerHTML=bkListHTML();
+    const dw=document.getElementById('bk-workspace'); if(dw) dw.innerHTML=bookingInner(id,false);
+    const mw=document.getElementById('m-bk-workspace'); if(mw) mw.innerHTML=bookingInner(id,true);
+    const ml=document.getElementById('m-bk-list'); if(ml) ml.innerHTML=mBkListHTML();}
+  function selBk(id){refreshBk(id);}
+  function mSelBk(id){refreshBk(id); mgo('booking');}
+  function bkAct(id,a){const b=BK[id];
+    if(a==='down'){b.downPaid=true;b.tl.push(['Downpayment received',TODAY]);b.stage=(b.contract==='executed')?'confirmed':'downpaid';toast('Downpayment marked received');}
+    if(a==='bal'){b.balPaid=true;b.tl.push(['Balance received',TODAY]);toast('Balance marked received');}
+    if(a==='csend'){b.contract='sent';b.tl.push(['Contract sent for e-sign',TODAY]);toast('Contract sent to couple');}
+    if(a==='csign'){b.contract='couple_signed';b.tl.push(['Couple e-signed',TODAY]);toast('Couple signed — your turn');}
+    if(a==='cexec'){b.contract='executed';b.tl.push(['Contract executed',TODAY]);if(b.downPaid&&b.stage==='downpaid')b.stage='confirmed';toast('Contract executed ✓');}
+    if(a==='deliver'){b.stage='delivered';b.tl.push(['Marked delivered',TODAY]);toast('Marked delivered');}
+    refreshBk(id); renderEarnings();}
+
+  function renderEarnings(){
+    const tiles=document.getElementById('earn-tiles'); if(!tiles) return;
+    let received=0, expected=0, outstanding=0;
+    const rows=Object.keys(BK).map(id=>{const b=BK[id];const down=Math.round(b.total*0.25),bal=b.total-down;
+      const rec=(b.downPaid?down:0)+(b.balPaid?bal:0), out=b.total-rec;
+      received+=rec;
+      if(b.stage==='downpaid'||b.stage==='confirmed') expected+=b.total;
+      if(b.stage!=='hold' && !b.balPaid) outstanding+=out;
+      const ds = b.balPaid?`<div class="ds" style="color:var(--ok)">${peso(b.total)} · paid in full</div>`
+               : b.stage==='hold'?`<div class="ds">Total ${peso(b.total)} · soft-hold · nothing received</div>`
+               : `<div class="ds">Total ${peso(b.total)} · received ${peso(rec)} · balance ${peso(out)}</div>`;
+      const right = b.stage==='delivered'?`<span class="tag t-done">Delivered</span>`:`<button class="btn ghost sm" onclick="go('bookings')">Open</button>`;
+      return `<div class="li"><span class="em">${b.stage==='delivered'?'✓':'💍'}</span><div style="flex:1"><div class="tt">${b.nm} · ${b.date.split(',')[0]}</div>${ds}</div><div class="rt">${right}</div></div>`;
+    }).join('');
+    tiles.innerHTML=
+      `<div class="card"><div class="mono">Received · to date</div><div style="font-size:28px;font-family:var(--serif);margin-top:5px">${peso(received)}</div><div style="font-size:12px;color:var(--ok)">across your bookings</div></div>`+
+      `<div class="card"><div class="mono">Expected · pipeline</div><div style="font-size:28px;font-family:var(--serif);margin-top:5px">${peso(expected)}</div><div style="font-size:12px;color:var(--slate)">downpaid / confirmed</div></div>`+
+      `<div class="card"><div class="mono">Outstanding balances</div><div style="font-size:28px;font-family:var(--serif);margin-top:5px">${peso(outstanding)}</div><div style="font-size:12px;color:var(--warn)">collected on delivery</div></div>`;
+    document.getElementById('earn-rows').innerHTML=rows;
+  }
+
+  let tT;
+  function toast(m){
+    document.getElementById('toast-msg').textContent=m;
+    const t=document.getElementById('toast'); t.classList.add('show');
+    clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),2200);
+  }
+
+  // initial render of the booking master-detail (desktop list+workspace + mobile list)
+  selBk('cr');
+  renderEarnings();
+</script>
+</body>
+</html>

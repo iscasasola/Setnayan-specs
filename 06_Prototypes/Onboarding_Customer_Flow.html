@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setnayan · Customer Onboarding (full flow)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --ink-soft:#4F535B; --line:rgba(30,34,41,.10);
+    --gold:#C5A059; --gold-soft:#F4ECD8; --mulberry:#5C2542; --mulberry-soft:#F2E7EC;
+    --sage:#5B7563; --sage-soft:#E7EFE9; --muted:#9A9A95;
+    --serif:'Instrument Serif',Georgia,serif; --body:'Manrope',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#ECE9E3;color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:26px 12px}
+  .title-strip{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6b6b66;margin-bottom:16px;text-align:center}
+  .title-strip b{color:var(--mulberry)}
+  .device{width:392px;max-width:100%;height:812px;background:var(--paper);border-radius:42px;box-shadow:0 30px 70px rgba(30,34,41,.22),0 0 0 11px #15171b,0 0 0 13px #2a2d33;
+    overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:140px;height:26px;background:#15171b;border-radius:0 0 16px 16px;z-index:30}
+  .prog-row{display:flex;align-items:center;gap:9px;margin:30px 22px 0;flex:none}
+  .prog{height:3px;background:var(--line);border-radius:9px;overflow:hidden;flex:1}
+  .prog-fill{height:100%;background:var(--gold);width:7%;transition:width .35s ease}
+  .step{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+  .screenwrap{flex:1;overflow-y:auto;overflow-x:hidden}
+  .screen{display:none;padding:22px 22px 8px;min-height:100%;flex-direction:column}
+  .screen.active{display:flex}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:500}
+  .h{font-family:var(--serif);font-style:italic;font-weight:400;font-size:33px;line-height:1.06;margin:9px 0 8px;letter-spacing:-.01em}
+  .h.sm{font-size:27px}
+  .lede{color:var(--ink-soft);font-size:14.5px;line-height:1.5;margin-bottom:16px}
+  .glimpse{border:1px solid var(--line);background:#fff;border-radius:15px;padding:15px;font-family:var(--serif);font-style:italic;font-size:18px;color:var(--ink);line-height:1.25;margin-top:6px}
+  .choices{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+  .choice{text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:14px 15px;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;transition:.15s;font-family:var(--body)}
+  .choice:hover{border-color:var(--gold)}
+  .choice.sel{border-color:var(--mulberry);background:var(--mulberry-soft);box-shadow:inset 0 0 0 1px var(--mulberry)}
+  .choice .s{display:block;font-weight:400;font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;transition:.15s;position:relative}
+  .chip:hover{border-color:var(--gold)}
+  .chip.sel{border-color:var(--mulberry);background:var(--mulberry);color:#fff}
+  .chip.soon{opacity:.6}
+  .chip.soon::after{content:'soon';font-family:var(--mono);font-size:8px;letter-spacing:.06em;background:#F0F0EE;color:var(--muted);padding:1px 5px;border-radius:99px;margin-left:6px;text-transform:uppercase}
+  .field{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px 14px;font-size:15px;font-family:var(--body);color:var(--ink);margin-top:4px}
+  .field::placeholder{color:var(--muted)}
+  .label{font-size:12px;font-weight:700;color:var(--ink-soft);margin:14px 0 0}
+  .note{font-size:12.5px;color:var(--ink-soft);margin-top:12px;line-height:1.45}
+  .preview{border:1px dashed var(--gold);background:var(--gold-soft);border-radius:13px;padding:12px 14px;margin-top:14px;font-size:13px;color:#6f5520;line-height:1.45}
+  .oauth{display:flex;flex-direction:column;gap:9px;margin-top:10px}
+  .oauth button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;font-family:var(--body);display:flex;align-items:center;justify-content:center;gap:9px}
+  .oauth button:hover{border-color:var(--gold)}
+  .oauth .g{width:16px;height:16px;border-radius:99px;background:conic-gradient(#ea4335 0 25%,#fbbc05 0 50%,#34a853 0 75%,#4285f4 0)}
+  .oauth .f{width:16px;height:16px;border-radius:4px;background:#1877F2;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .spin{width:46px;height:46px;border-radius:99px;border:3px solid var(--line);border-top-color:var(--mulberry);animation:sp 1s linear infinite;margin:24px auto 10px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .vcard{border:1px solid var(--line);background:#fff;border-radius:15px;overflow:hidden;margin-top:12px;box-shadow:0 8px 22px rgba(30,34,41,.05);position:relative}
+  .vcard .ph{height:84px;background:linear-gradient(135deg,#e9e2d4,#d9cdba);display:flex;align-items:flex-end;padding:8px}
+  .vcard .ph .tag{background:rgba(255,255,255,.9);border-radius:99px;font-size:10px;font-weight:700;padding:3px 9px;color:var(--ink)}
+  .vcard .body{padding:11px 13px}
+  .vcard .nm{font-weight:800;font-size:14px}
+  .vcard .sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px}
+  .vcard .pr{font-weight:800;color:var(--mulberry);margin-top:6px;font-size:14px}
+  .vcard .heart{position:absolute;top:9px;right:9px;width:30px;height:30px;border-radius:99px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;color:var(--muted)}
+  .vcard.kept .heart{background:var(--mulberry);color:#fff;border-color:var(--mulberry)}
+  .recap{border:1px solid var(--line);background:#fff;border-radius:15px;padding:14px 15px;margin-top:6px}
+  .recap .r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+  .recap .r:last-child{border-bottom:none}
+  .recap .r .k{color:var(--ink-soft)}
+  .recap .r .v{font-weight:700}
+  /* Your Plan */
+  .appbanner{border:1px solid var(--gold);background:var(--gold-soft);border-radius:13px;padding:12px 14px;font-size:12.5px;color:#6f5520;line-height:1.45;margin-bottom:16px}
+  .appbanner b{color:#4f3c12}
+  .sech{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:18px 0 9px}
+  .freelist{display:flex;flex-wrap:wrap;gap:7px}
+  .freelist span{font-size:12px;background:var(--sage-soft);color:#2f4234;border-radius:99px;padding:5px 10px;font-weight:600}
+  .pkg{border:1px solid var(--line);background:#fff;border-radius:14px;padding:14px;margin-top:6px}
+  .pkg.live{border-color:var(--sage)}
+  .pkg .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .pkg .nm{font-weight:800;font-size:15px}
+  .pkg .now{font-weight:800;color:var(--mulberry);font-size:15px}
+  .pkg .cmp{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .pkg .cmp s{color:var(--muted)} .pkg .cmp b{color:var(--sage)}
+  .pkg .not{font-size:11px;color:var(--muted);font-style:italic;margin-top:7px}
+  .pkg .st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px;margin-top:9px}
+  .pkg .st.buy{background:var(--mulberry);color:#fff}
+  .pkg .st.notify{background:#fff;color:var(--mulberry);border:1px solid var(--mulberry)}
+  .founder{border:1px solid var(--mulberry);background:var(--mulberry-soft);border-radius:14px;padding:15px;margin-top:18px}
+  .founder .ft{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--ink);line-height:1.2}
+  .founder .fs{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.45}
+  .founder .fs b{color:var(--mulberry)}
+  .nav{flex:none;display:flex;align-items:center;gap:12px;padding:14px 22px calc(20px + env(safe-area-inset-bottom));background:linear-gradient(0deg,var(--paper) 70%,transparent);border-top:1px solid var(--line)}
+  .back{background:none;border:none;color:var(--ink-soft);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--body);padding:8px}
+  .btn{flex:1;background:var(--mulberry);color:#fff;border:none;border-radius:13px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--body);transition:.15s}
+  .btn:hover{background:#4a1d36}
+  .sub-link{display:block;text-align:center;color:var(--ink-soft);font-size:13px;margin-top:10px;text-decoration:none;font-weight:600}
+  .foot-note{font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:14px;font-style:italic}
+</style>
+</head>
+<body>
+  <div class="title-strip">Setnayan · Customer onboarding — <b>full flow, consolidated</b> · 14 screens · tap Continue to walk through</div>
+
+  <div class="device">
+    <div class="notch"></div>
+    <div class="prog-row"><div class="prog"><div class="prog-fill" id="pf"></div></div><div class="step" id="step">1 / 14</div></div>
+
+    <div class="screenwrap" id="sw">
+
+      <!-- 1 WELCOME -->
+      <section class="screen active">
+        <div class="eyebrow">For couples</div>
+        <div class="h">Your whole wedding, in one place.</div>
+        <div class="lede">Guests, vendors, your website, the day itself — and one clear next step at a time. Free to start.</div>
+        <div class="glimpse">Set na 'yan. — that's all set.</div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 2 ROLE -->
+      <section class="screen">
+        <div class="eyebrow">You are the…</div>
+        <div class="h sm">Who's planning?</div>
+        <div class="choices" data-single>
+          <button class="choice sel">Bride</button>
+          <button class="choice">Groom</button>
+          <button class="choice">Both of us</button>
+          <button class="choice">Someone helping <span class="s">parent · planner · entourage</span></button>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 3 KIND OF WEDDING -->
+      <section class="screen">
+        <div class="eyebrow">Your wedding</div>
+        <div class="h sm">What kind of wedding?</div>
+        <div class="lede">We tailor your checklist, timeline and vendors to match.</div>
+        <div class="choices" data-single>
+          <button class="choice sel">Religious ceremony</button>
+          <button class="choice">Civil ceremony</button>
+          <button class="choice">Mixed <span class="s">civil + religious rites</span></button>
+          <button class="choice">Not sure yet</button>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 4 RELIGION TYPE -->
+      <section class="screen">
+        <div class="eyebrow">Faith &amp; tradition</div>
+        <div class="h sm">Which religion or tradition?</div>
+        <div class="lede">For the religious rites — so your requirements (papers, Pre-Cana, timeline) fit. Skip if you chose Civil.</div>
+        <div class="chips" data-single>
+          <span class="chip sel">Catholic</span>
+          <span class="chip soon">Christian</span>
+          <span class="chip soon">Iglesia ni Cristo</span>
+          <span class="chip soon">Muslim</span>
+          <span class="chip soon">Cultural</span>
+        </div>
+        <div class="preview"><b>Catholic is ready now.</b> Pick another and we'll tell you the moment it opens — and still build the rest of your plan.</div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 5 NAME -->
+      <section class="screen">
+        <div class="eyebrow">Name it</div>
+        <div class="h sm">What's this wedding's name?</div>
+        <div class="lede">It titles your plan and your wedding website.</div>
+        <div class="label">Wedding name</div>
+        <input class="field" placeholder="e.g., Maria &amp; Juan" value="Maria &amp; Juan" />
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 6 DATE -->
+      <section class="screen">
+        <div class="eyebrow">The day</div>
+        <div class="h sm">When's the big day?</div>
+        <div class="lede">Even a rough idea helps us pace everything.</div>
+        <input class="field" type="date" value="2026-12-18" />
+        <div class="label">How sure are you?</div>
+        <div class="chips" data-single>
+          <span class="chip sel">Exact date</span><span class="chip">Just the month</span>
+          <span class="chip">Just the year</span><span class="chip">Not sure yet</span>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 7 REGION -->
+      <section class="screen">
+        <div class="eyebrow">Where</div>
+        <div class="h sm">Which region?</div>
+        <div class="lede">So we can find vendors near you. You can set the exact venue later.</div>
+        <div class="chips" data-single>
+          <span class="chip sel">Metro Manila</span>
+          <span class="chip">Cavite · Laguna · Batangas</span>
+          <span class="chip">Pampanga · Bulacan</span>
+          <span class="chip">Baguio · North Luzon</span>
+          <span class="chip">Cebu</span>
+          <span class="chip">Iloilo · Bacolod</span>
+          <span class="chip">Davao</span>
+          <span class="chip">Cagayan de Oro</span>
+          <span class="chip">Palawan</span>
+          <span class="chip">Boracay · Aklan</span>
+          <span class="chip">Somewhere else</span>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 8 PAX -->
+      <section class="screen">
+        <div class="eyebrow">Guests</div>
+        <div class="h sm">How many guests, roughly?</div>
+        <div class="lede">A ballpark is fine — it shapes catering, seating and the booths we suggest.</div>
+        <div class="chips" data-single>
+          <span class="chip">100</span><span class="chip sel">200</span>
+          <span class="chip">250</span><span class="chip">300</span>
+          <span class="chip">500</span><span class="chip">Not sure yet</span>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 9 BUDGET -->
+      <section class="screen">
+        <div class="eyebrow">Budget</div>
+        <div class="h sm">What's your budget, roughly?</div>
+        <div class="lede">Just a range — it tunes what we recommend.</div>
+        <div class="chips" data-single>
+          <span class="chip">₱500k</span><span class="chip sel">₱1M</span>
+          <span class="chip">₱2M</span><span class="chip">₱3M</span>
+          <span class="chip">₱4M</span><span class="chip">₱5M</span>
+          <span class="chip">Still figuring it out</span>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 10 WHAT WOULD YOU LOVE -->
+      <section class="screen">
+        <div class="eyebrow">The fun part</div>
+        <div class="h sm">What would make your day?</div>
+        <div class="lede">Pick anything that sparks joy — no prices here, we'll build it into your plan.</div>
+        <div class="chips">
+          <span class="chip sel">A 65-step planning guide</span>
+          <span class="chip sel">A wedding website</span>
+          <span class="chip sel">Guest phones as cameras</span>
+          <span class="chip">Livestream for family abroad</span>
+          <span class="chip sel">Your own wedding song</span>
+          <span class="chip">Animated monogram</span>
+          <span class="chip">A TikTok booth</span>
+          <span class="chip">Video guestbook</span>
+          <span class="chip">Same-day highlight reel</span>
+          <span class="chip">Keep every original photo</span>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 11 CUSTOMIZING + ACCOUNT -->
+      <section class="screen">
+        <div class="eyebrow">Almost there</div>
+        <div class="spin"></div>
+        <div class="h sm" style="text-align:center">Customizing your plan…</div>
+        <div class="lede" style="text-align:center">Save it — create your account to keep everything you just told us.</div>
+        <div class="oauth">
+          <button><span class="g"></span> Continue with Google</button>
+          <button><span class="f">f</span> Continue with Facebook</button>
+          <button>Continue with email</button>
+        </div>
+        <div class="foot-note" style="text-align:center">Your answers are held safely until you save — nothing's lost.</div>
+        <div style="flex:1;min-height:6px"></div>
+      </section>
+
+      <!-- 12 FIND FIRST VENDOR -->
+      <section class="screen">
+        <div class="eyebrow">First vendor</div>
+        <div class="h sm">Let's find your first vendor.</div>
+        <div class="lede">A few near you in Metro Manila — tap the heart on any you'd like to keep.</div>
+        <div class="vcard kept">
+          <div class="heart">♥</div>
+          <div class="ph"><span class="tag">📸 Photographer · Manila</span></div>
+          <div class="body"><div class="nm">Candid &amp; Co.</div><div class="sub">⭐ 4.9 · 120 weddings · 8&nbsp;km</div><div class="pr">Full-day · from ₱65,000</div></div>
+        </div>
+        <div class="vcard">
+          <div class="heart">♥</div>
+          <div class="ph"><span class="tag">🏛️ Venue · Quezon City</span></div>
+          <div class="body"><div class="nm">The Glass Garden</div><div class="sub">⭐ 4.8 · up to 300 pax · 6&nbsp;km</div><div class="pr">Reception · from ₱180,000</div></div>
+        </div>
+        <div style="flex:1;min-height:6px"></div>
+      </section>
+
+      <!-- 13 STARTING PLAN -->
+      <section class="screen">
+        <div class="eyebrow">Taking shape</div>
+        <div class="h sm">Your plan's taking shape.</div>
+        <div class="lede">Here's what we've got so far.</div>
+        <div class="recap">
+          <div class="r"><span class="k">Wedding</span><span class="v">Maria &amp; Juan</span></div>
+          <div class="r"><span class="k">Kind</span><span class="v">Catholic · religious</span></div>
+          <div class="r"><span class="k">Date</span><span class="v">Dec 18, 2026</span></div>
+          <div class="r"><span class="k">Region</span><span class="v">Metro Manila</span></div>
+          <div class="r"><span class="k">Guests</span><span class="v">~200</span></div>
+          <div class="r"><span class="k">Budget</span><span class="v">~₱1M</span></div>
+          <div class="r"><span class="k">Shortlisted</span><span class="v">Candid &amp; Co.</span></div>
+        </div>
+        <div style="flex:1"></div>
+      </section>
+
+      <!-- 14 YOUR PLAN -->
+      <section class="screen">
+        <div class="eyebrow">Your plan</div>
+        <div class="h sm">Here's your wedding, built.</div>
+        <div class="appbanner">These are <b>tools, not hired people.</b> The “elsewhere” price is hiring the person, crew and gear — Setnayan is the app. You bring your own people and phones.</div>
+
+        <div class="sech">Everything you get free</div>
+        <div class="freelist">
+          <span>Wedding website</span><span>Monogram</span><span>Checklist</span><span>Budget tracker</span>
+          <span>Seat plan</span><span>Guest list</span><span>Mood board</span><span>Compare quotes</span><span>Real reviews</span>
+        </div>
+
+        <div class="sech">Your package · ready now</div>
+        <div class="pkg live">
+          <div class="top"><span class="nm">🎯 Setnayan AI</span><span class="now">₱1,499</span></div>
+          <div style="font-size:12px;color:var(--ink-soft);line-height:1.4;margin-top:6px">Your whole wedding in <b style="color:var(--ink)">65 guided steps</b> — one next thing at a time, from “yes” to “I do.”</div>
+          <div class="cmp"><s>₱20,000 elsewhere</s> · <b>save ₱18,501</b></div>
+          <div class="not">the planning app, not a hired day-of coordinator</div>
+          <span class="st buy">● Add it now</span>
+        </div>
+
+        <div class="sech">Coming soon · for you</div>
+        <div class="pkg">
+          <div class="top"><span class="nm">📸 Guest phones as cameras</span><span class="now">₱2,999</span></div>
+          <div class="cmp"><s>₱32,000 elsewhere</s> · <b>save ₱29,001</b></div>
+          <div class="not">the app, not 20 disposable cams + developing</div>
+          <span class="st notify">○ Notify me</span>
+        </div>
+        <div class="pkg" style="margin-top:9px">
+          <div class="top"><span class="nm">🎵 Your wedding song</span><span class="now">₱2,499</span></div>
+          <div class="cmp"><s>₱12,500 elsewhere</s> · <b>save ₱10,001</b></div>
+          <div class="not">the song studio, not a hired composer + singer</div>
+          <span class="st notify">○ Notify me</span>
+        </div>
+
+        <div class="founder">
+          <div class="ft">Want it all — 10% off, one payment?</div>
+          <div class="fs">Your whole package as a one-time founder bundle. What's live unlocks now; the rest unlocks the day it ships — <b>guaranteed, or your money back</b>. Or grab the <b>Pro Bundle · ₱24,999</b>.</div>
+        </div>
+        <div style="flex:1;min-height:8px"></div>
+      </section>
+
+    </div><!-- /screenwrap -->
+
+    <div class="nav">
+      <button class="back" id="back">Back</button>
+      <button class="btn" id="cont">Start planning · free</button>
+    </div>
+  </div>
+
+<script>
+  const screens=[...document.querySelectorAll('.screen')];
+  const pf=document.getElementById('pf'), sw=document.getElementById('sw'), step=document.getElementById('step');
+  const back=document.getElementById('back'), cont=document.getElementById('cont');
+  const N=screens.length;
+  const labels=['Start planning · free','Continue','Continue','Continue','Continue','Continue','Continue',
+    'Continue','Continue','Build my plan','Create my account','Continue','See my plan','Add Setnayan AI'];
+  let i=0;
+  function show(n){
+    i=Math.max(0,Math.min(N-1,n));
+    screens.forEach((s,k)=>s.classList.toggle('active',k===i));
+    pf.style.width=((i+1)/N*100)+'%';
+    step.textContent=(i+1)+' / '+N;
+    back.style.visibility=i===0?'hidden':'visible';
+    cont.textContent=labels[i]||'Continue';
+    sw.scrollTop=0;
+  }
+  back.onclick=()=>show(i-1);
+  cont.onclick=()=>{ if(i===N-1){ cont.textContent='✓ Added'; } else show(i+1); };
+  document.querySelectorAll('.choices,.chips').forEach(group=>{
+    const single=group.hasAttribute('data-single');
+    group.querySelectorAll('.choice,.chip').forEach(el=>{
+      if(el.classList.contains('soon')) return;
+      el.addEventListener('click',()=>{
+        if(single) group.querySelectorAll('.choice,.chip').forEach(x=>x.classList.remove('sel'));
+        el.classList.toggle('sel');
+      });
+    });
+  });
+  document.querySelectorAll('.vcard .heart').forEach(h=>h.addEventListener('click',e=>{e.stopPropagation();h.closest('.vcard').classList.toggle('kept');}));
+  show(0);
+</script>
+</body>
+</html>

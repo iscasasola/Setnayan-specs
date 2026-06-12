@@ -286,3 +286,19 @@ Scripts used to execute the sweep (kept in `outputs/` for one-time-use auditabil
 - `rename_paths.sh` — atomic batch of `mv` calls for filename and folder renames.
 
 If a future rule change requires another rename pass: edit `rename_rules.py`, run `python3 apply_rename.py --apply` and `python3 apply_rename_docx.py --apply` and `python3 apply_rename_docx_deep.py --apply` and `python3 apply_rename_xlsx.py --apply` in that order, then re-verify with the grep commands above.
+
+---
+
+## 2026-06-12 — Root-level doc migration (file organization, link-preserving)
+
+Decluttered the corpus root (83 loose `.md` → **17 canon only**) per the file-naming convention recorded in `Feature_Catalog_Canon.md` + `CLAUDE.md`.
+
+**Convention:** Canon = undated `Topic.md`, stays at root. Artifacts = `YYYY-MM-DD_Topic.md` (date-first), live in `03_Strategy/` while active. Superseded → `07_Archive/`.
+
+**Moved:** 68 files — 46 → `03_Strategy/`, 22 → `07_Archive/` (superseded handoffs/sprint briefs + the pre-`Feature_Catalog_Canon` pricing drafts `Pricing_Canonical_2026-06-08`, `Price_Reconciliation_2026-06-04`, `Site_vs_Spec_Reconciliation_2026-06-04`). `git mv` where tracked (52 renames — history preserved); plain `mv` for 16 untracked-new files.
+
+**Stayed at root (17 canon):** CLAUDE, README, COWORK, DECISION_LOG, App_Build_Status, V1_Gap_Analysis_Status, Installed_Stack_Inventory, API_Integration_Checklist, AS_BUILT_GROUND_TRUTH_2026-06-07, Pricing, Feature_Catalog_Canon, RETIRED_ITEMS, RENAME_LOG, Feature_Flow_Registry, Cowork_Pending_Items, Known_Todos_Pre_Pilot, CLAUDE-CODE-BRIEF-v2.1_2026-05-28.
+
+**Link preservation (the constraint):** clickable markdown links recomputed as correct relative paths via `os.path.relpath` — 192 inbound (links *to* moved files across 12 docs) + 68 outbound (moved files' own links). Verified with a filesystem link-checker: **0 new broken links introduced.** 3 pre-existing dead links remain in archived files (`OWNER_ACTIONS.md` = repo file; two `Desktop/` paths) — broken before, left as-is. Bare-name/prose mentions left intact (survive as text references).
+
+**Second pass (same day) — mirrors + prototypes:** 25 `.docx`/`.html` mirrors with a moved `.md` sibling followed it into `03_Strategy/`·`07_Archive/` (3 link rewrites). 56 standalone `.html` prototypes (no `.md` sibling) → `06_Prototypes/` (46 link rewrites). 6 `.docx` canon mirrors (App_Build_Status, CLAUDE-CODE-BRIEF-v2.1, CLAUDE, Feature_Flow_Registry, Pricing, V1_Gap_Analysis_Status) correctly stay at root with their canon `.md`. **Final root state: 17 canon `.md` + 6 canon `.docx`** (from ~170 loose files). Final corpus-wide link check: **0 new broken links**; the 1 link into an archived file (`OWNER_ACTIONS.md`) + 15 elsewhere are all pre-existing dead refs to repo files / `computer://` URIs.

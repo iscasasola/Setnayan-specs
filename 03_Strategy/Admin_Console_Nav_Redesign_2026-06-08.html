@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Console — Nav Redesign Prototype · 2026-06-08</title>
+<style>
+  /* ── Clean Editorial palette (corpus lock 2026-05-29) ───────────────── */
+  :root{
+    --paper:#FBFBFA; --ink:#1E2229; --gold:#C5A059; --mulberry:#5C2542;
+    --paper-2:#F4F2EE; --paper-3:#EDEAE3; --line:#E3DFD7; --line-2:#D6D1C7;
+    --slate:#5b6068; --slate-2:#8a9098;
+    /* semantic queue tones */
+    --warn:#9A6B12; --warnbg:#FBF1DE;          /* pending action */
+    --danger:#A33A3A; --dangerbg:#F7E9E7;      /* recourse / urgent */
+    --good:#2F7D5B; --goodbg:#E6F2EB;          /* clear / approved */
+    --info:#2B5C8A; --infobg:#E8F0F7;          /* informational */
+    --lead:#5C2542; --leadbg:#F6EBF0;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --shadow:0 1px 2px rgba(30,34,41,.05),0 4px 14px rgba(30,34,41,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--paper-2);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45;
+       -webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{margin:0;font-weight:700}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+
+  /* ── intro / diagnosis ─────────────────────────────────────────────── */
+  .intro{max-width:1180px;margin:0 auto;padding:26px 24px 6px}
+  .intro .eyebrow{color:var(--gold);font-weight:700;letter-spacing:.13em;font-size:11px;text-transform:uppercase;font-family:var(--sans)}
+  .intro h1{font-size:27px;margin:6px 0 8px;letter-spacing:-.01em}
+  .intro p{color:var(--slate);max-width:880px;margin:0 0 6px}
+  .intro .pend{display:inline-block;margin-top:6px;background:var(--leadbg);color:var(--lead);
+       font-weight:700;font-size:12px;padding:5px 11px;border-radius:999px;border:1px solid #E7CFDB}
+
+  /* ── control bar ───────────────────────────────────────────────────── */
+  .ctl{position:sticky;top:0;z-index:40;background:rgba(251,251,250,.93);backdrop-filter:blur(8px);
+       border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:14px}
+  .ctl-in{max-width:1180px;margin:0 auto;padding:9px 24px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+  .ctl .grp-l{display:flex;align-items:center;gap:7px}
+  .ctl .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--slate-2)}
+  .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden;background:#fff}
+  .seg button{border:0;background:#fff;padding:6px 12px;font-size:12.5px;font-weight:600;color:var(--slate);cursor:pointer;font-family:var(--sans)}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button.on{background:var(--ink);color:#fff}
+  .seg.gold button.on{background:var(--gold);color:var(--ink)}
+  .seg.mul button.on{background:var(--mulberry);color:#fff}
+
+  /* ── frame layout ──────────────────────────────────────────────────── */
+  .wrap{max-width:1180px;margin:18px auto 70px;padding:0 24px;display:flex;gap:22px;align-items:flex-start}
+  body[data-ff='d'] #col-m{display:none}
+  body[data-ff='m'] #col-d{display:none}
+  body[data-ff='b'] .wrap{flex-wrap:wrap}
+  .colcap{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate-2);margin:0 0 8px 2px}
+  #col-d{flex:1 1 700px;min-width:0}
+  #col-m{flex:0 0 392px}
+  body[data-ff='m'] #col-m{margin:0 auto}
+
+  /* ════════════════ DESKTOP ════════════════ */
+  .stage-d{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper);box-shadow:var(--shadow)}
+  /* top utility bar */
+  .util{display:flex;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid var(--line);background:#fff}
+  .brandmark{display:flex;flex-direction:column;line-height:1}
+  .brandmark .wm{font-weight:800;font-size:15px;letter-spacing:.04em}
+  .brandmark .eb{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-top:2px}
+  .util .sp{flex:1}
+  .util .search{flex:0 1 230px;display:flex;align-items:center;gap:7px;background:var(--paper-2);border:1px solid var(--line);
+       border-radius:9px;padding:6px 10px;color:var(--slate-2);font-size:12.5px}
+  .tierbadge{font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;border:1px solid var(--line-2);white-space:nowrap}
+  .tier-internal{background:#F3E9F7;color:#6B2A86;border-color:#E3CFEC}
+  .tier-team{background:var(--goodbg);color:var(--good);border-color:#CDE6D8}
+  .tier-handler{background:var(--paper-2);color:var(--slate)}
+  .bell{position:relative;width:32px;height:32px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;background:#fff;color:var(--slate)}
+  .bell .dot{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;border-radius:999px;background:var(--mulberry);color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+  .avatar{width:32px;height:32px;border-radius:999px;background:var(--mulberry);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+
+  .body-d{display:flex;min-height:560px}
+  /* sidebar */
+  .side{flex:0 0 218px;border-right:1px solid var(--line);background:var(--paper);padding:12px 10px;display:flex;flex-direction:column;gap:3px;overflow:auto;max-height:620px}
+  .side .shdr{padding:4px 8px 2px}
+  .side .shdr .wm{font-weight:800;font-size:15px;letter-spacing:.04em}
+  .side .shdr .eb{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-top:2px}
+  .spine-cap,.grp .gh{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--slate-2);padding:9px 8px 3px}
+  .navitem{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;color:var(--ink);font-size:13.5px;font-weight:500;position:relative}
+  .navitem:hover{background:var(--paper-2)}
+  .navitem.active{background:var(--ink);color:#fff}
+  .navitem .ic{width:17px;text-align:center;opacity:.85;font-size:13px}
+  .navitem.active .ic{opacity:1}
+  .navitem.spine{font-weight:700;font-size:14px}
+  .navitem .count{margin-left:auto;background:var(--warnbg);color:var(--warn);font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:999px;display:grid;place-items:center;padding:0 5px;border:1px solid #ECD9AE}
+  .navitem.active .count{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+  .navitem .lock{margin-left:auto;font-size:11px;color:var(--slate-2)}
+  .grp{display:flex;flex-direction:column}
+  .grp .gh{cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
+  .grp .gh .caret{margin-left:auto;transition:transform .15s;font-size:9px;color:var(--slate-2)}
+  .grp.closed .gh .caret{transform:rotate(-90deg)}
+  .grp.closed .gitems{display:none}
+  .gitems{display:flex;flex-direction:column;gap:2px}
+  .spine-wrap{border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:4px}
+  .side .switchview{margin-top:auto;border-top:1px solid var(--line);padding-top:9px}
+  .switchview .navitem{color:var(--slate)}
+
+  /* main content */
+  .main{flex:1;min-width:0;padding:20px 22px;overflow:auto;max-height:620px;background:var(--paper)}
+  .view{display:none}
+  .view.on{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .vh{margin-bottom:14px}
+  .vh .ve{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
+  .vh h2{font-size:21px;margin:3px 0 3px;letter-spacing:-.01em}
+  .vh p{color:var(--slate);margin:0;max-width:680px;font-size:13px}
+
+  /* cards / tiles */
+  .card{border:1px solid var(--line);border-radius:11px;background:#fff;padding:14px}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:560px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+  /* command-center queue cards */
+  .qsect{margin-bottom:16px}
+  .qsect .qh{display:flex;align-items:baseline;gap:8px;margin:0 0 8px}
+  .qsect .qh h3{font-size:13px}
+  .qsect .qh .qmono{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-2)}
+  .qcard{border:1px solid var(--line);border-radius:11px;background:#fff;padding:13px 14px;cursor:pointer;transition:.12s;position:relative;overflow:hidden}
+  .qcard:hover{border-color:var(--gold);transform:translateY(-1px);box-shadow:var(--shadow)}
+  .qcard .qn{font-size:30px;font-weight:800;line-height:1;letter-spacing:-.02em}
+  .qcard .ql{font-size:12.5px;font-weight:700;margin-top:6px}
+  .qcard .qs{font-size:11px;color:var(--slate);margin-top:2px}
+  .qcard .qtag{position:absolute;top:11px;right:12px;font-size:9px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:6px}
+  .t-warn{background:var(--warnbg);color:var(--warn)} .t-danger{background:var(--dangerbg);color:var(--danger)}
+  .t-good{background:var(--goodbg);color:var(--good)} .t-info{background:var(--infobg);color:var(--info)}
+  .t-lead{background:var(--leadbg);color:var(--lead)}
+  .qcard.zero .qn{color:var(--slate-2)} .qcard.zero{opacity:.72}
+  .qcard .stripe{position:absolute;left:0;top:0;bottom:0;width:4px}
+  .s-warn{background:var(--warn)} .s-danger{background:var(--danger)} .s-good{background:var(--good)} .s-info{background:var(--info)} .s-lead{background:var(--mulberry)}
+
+  /* alerts strip */
+  .alerts{border:1px solid #ECD9AE;background:linear-gradient(180deg,#FDF7EA,#FBF1DE);border-radius:11px;padding:12px 14px}
+  .alerts .arow{display:flex;align-items:center;gap:9px;font-size:12.5px;padding:3px 0;color:#6b5418}
+  .alerts .arow b{color:var(--warn)}
+  /* KPI */
+  .kpi{display:flex;flex-direction:column;gap:1px} .kpi .kn{font-size:20px;font-weight:800;letter-spacing:-.01em}
+  .kpi .kl{font-size:11px;color:var(--slate)}
+  /* activity */
+  .feed{list-style:none;margin:0;padding:0}
+  .feed li{display:flex;gap:9px;padding:7px 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--slate)}
+  .feed li:first-child{border-top:0}
+  .feed .fa{width:6px;height:6px;border-radius:999px;background:var(--gold);margin-top:6px;flex-shrink:0}
+  .feed b{color:var(--ink);font-weight:600}
+  .feed .ft{margin-left:auto;color:var(--slate-2);font-size:11px;white-space:nowrap}
+
+  /* ── WORK workspace (master-detail) ───────────────────────────────── */
+  .work{display:flex;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+  .qrail{flex:0 0 196px;border-right:1px solid var(--line);background:var(--paper);padding:9px 8px;max-height:520px;overflow:auto}
+  .qrail .lanes{display:flex;gap:5px;flex-wrap:wrap;margin:2px 2px 9px}
+  .lane{font-size:10.5px;font-weight:700;padding:3px 7px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--slate);cursor:pointer}
+  .lane.on{background:var(--mulberry);color:#fff;border-color:var(--mulberry)}
+  .qr-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ink)}
+  .qr-item:hover{background:var(--paper-2)} .qr-item.active{background:var(--ink);color:#fff}
+  .qr-item .ic{width:15px;text-align:center;font-size:12px;opacity:.85}
+  .qr-item .count{margin-left:auto;background:var(--warnbg);color:var(--warn);font-size:10.5px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center;padding:0 4px;border:1px solid #ECD9AE}
+  .qr-item.active .count{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+  .qr-item.zero .count{background:var(--paper-3);color:var(--slate-2);border-color:var(--line)}
+  .qr-cap{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-2);padding:9px 9px 4px}
+  .qpane{flex:1;min-width:0;display:flex;flex-direction:column;max-height:520px}
+  .qpane-h{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .qpane-h h3{font-size:15px} .qpane-h .sub{font-size:11.5px;color:var(--slate)}
+  .qpane-h .bulk{margin-left:auto;display:flex;gap:6px}
+  .qbody{flex:1;overflow:auto;padding:12px 14px}
+
+  /* queue rows */
+  .qitem{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;background:#fff;display:flex;gap:12px;align-items:flex-start;transition:.18s}
+  .qitem:hover{border-color:var(--line-2)}
+  .qitem.removing{opacity:0;transform:translateX(40px);height:0;margin:0;padding:0 12px;border-width:0}
+  .qitem .qav{width:38px;height:38px;border-radius:9px;background:var(--paper-3);display:grid;place-items:center;font-weight:700;color:var(--mulberry);flex-shrink:0;font-size:13px}
+  .qitem .qmain{flex:1;min-width:0}
+  .qitem .qt{font-weight:700;font-size:13.5px}
+  .qitem .qmeta{font-size:11.5px;color:var(--slate);margin-top:2px}
+  .qitem .qbadges{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+  .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;border:1px solid transparent}
+  .b-warn{background:var(--warnbg);color:var(--warn)} .b-good{background:var(--goodbg);color:var(--good)}
+  .b-info{background:var(--infobg);color:var(--info)} .b-danger{background:var(--dangerbg);color:var(--danger)}
+  .b-lead{background:var(--leadbg);color:var(--lead)} .b-muted{background:var(--paper-2);color:var(--slate)}
+  .qact{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0}
+  .btn{border:1px solid var(--line-2);background:#fff;color:var(--ink);font-weight:700;font-size:12px;padding:7px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;font-family:var(--sans)}
+  .btn:hover{filter:brightness(.98)}
+  .btn.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn.good{background:var(--good);color:#fff;border-color:var(--good)}
+  .btn.danger{background:#fff;color:var(--danger);border-color:#E2C3C0}
+  .btn.gold{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+  .btn.sm{padding:5px 9px;font-size:11px}
+  .btn.ghost{background:transparent;border-color:var(--line)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+
+  /* reconciliation match card */
+  .match{display:flex;gap:10px;align-items:stretch;margin-top:9px}
+  .match .mside{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--paper)}
+  .match .mside .ml{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-2)}
+  .match .mside .mv{font-size:13px;font-weight:700;margin-top:2px}
+  .match .marrow{display:grid;place-items:center;color:var(--good);font-size:18px}
+  .confbar{height:6px;border-radius:999px;background:var(--paper-3);overflow:hidden;margin-top:8px}
+  .confbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--good))}
+
+  /* empty / cleared state */
+  .cleared{text-align:center;padding:46px 20px;color:var(--slate)}
+  .cleared .big{font-size:40px}
+  .cleared h3{font-size:16px;margin:8px 0 4px;color:var(--ink)}
+
+  /* directory table */
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+  .tbl th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-2);padding:8px 10px;border-bottom:1px solid var(--line)}
+  .tbl td{padding:9px 10px;border-bottom:1px solid var(--line)}
+  .tbl tr:hover td{background:var(--paper-2);cursor:pointer}
+  .fil{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px}
+  .fil button{font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--slate);cursor:pointer}
+  .fil button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* settings rows */
+  .setrow{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+  .setrow:first-child{border-top:0}
+  .setrow .si{flex:1} .setrow .si .st{font-weight:700;font-size:13px} .setrow .si .sd{font-size:11.5px;color:var(--slate)}
+  .gate{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--leadbg);color:var(--lead);border:1px solid #E7CFDB}
+
+  /* bars chart */
+  .bars{display:flex;align-items:flex-end;gap:8px;height:110px;padding-top:6px}
+  .bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;justify-content:flex-end}
+  .bcol i{width:100%;max-width:30px;background:var(--gold);border-radius:5px 5px 0 0;display:block}
+  .bcol span{font-size:10px;color:var(--slate-2)}
+
+  /* note */
+  .note{display:flex;gap:9px;border:1px dashed var(--line-2);border-radius:9px;padding:10px 12px;background:var(--paper);font-size:12px;color:var(--slate);margin-top:10px}
+  .note .i{color:var(--gold);font-weight:800}
+  .note code{background:var(--paper-3);padding:1px 5px;border-radius:4px;font-size:11px;font-family:var(--mono)}
+
+  /* toast */
+  #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;
+    padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.22s;z-index:90;max-width:90vw}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast .tk{color:var(--gold);margin-right:6px}
+
+  /* ════════════════ MOBILE ════════════════ */
+  .stage-m{width:390px;max-width:100%;margin:0 auto;border:1px solid var(--line);border-radius:30px;overflow:hidden;
+    background:var(--paper);box-shadow:0 10px 40px rgba(30,34,41,.14);position:relative;height:780px;display:flex;flex-direction:column}
+  .m-status{height:30px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:11px;font-weight:700;color:var(--ink);flex-shrink:0}
+  .m-top{display:flex;align-items:center;gap:9px;padding:10px 15px;border-bottom:1px solid var(--line);background:#fff;flex-shrink:0}
+  .m-top .wm{font-weight:800;font-size:14px;letter-spacing:.04em}
+  .m-top .eb{font-family:var(--mono);font-size:8px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase}
+  .m-top .sp{flex:1}
+  .m-badge{font-size:10px;font-weight:700;padding:3px 7px;border-radius:999px}
+  .m-bell{position:relative;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;color:var(--slate)}
+  .m-bell .dot{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;border-radius:999px;background:var(--mulberry);color:#fff;font-size:8.5px;font-weight:700;display:grid;place-items:center;padding:0 3px}
+  .m-body{flex:1;overflow:auto;padding:14px;background:var(--paper-2)}
+  .m-view{display:none} .m-view.on{display:block;animation:fade .18s ease}
+  .m-vh{margin-bottom:12px}
+  .m-vh .ve{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
+  .m-vh h2{font-size:20px;margin-top:3px}
+  .m-vh p{color:var(--slate);font-size:12px;margin:3px 0 0}
+
+  .m-qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:9px;display:flex;align-items:center;gap:12px;cursor:pointer;position:relative;overflow:hidden}
+  .m-qcard .stripe{position:absolute;left:0;top:0;bottom:0;width:4px}
+  .m-qcard .qn{font-size:25px;font-weight:800;line-height:1;min-width:40px}
+  .m-qcard.zero .qn{color:var(--slate-2)}
+  .m-qcard .qi{flex:1}
+  .m-qcard .ql{font-size:13px;font-weight:700} .m-qcard .qs{font-size:11px;color:var(--slate);margin-top:1px}
+  .m-qcard .chev{color:var(--slate-2);font-size:16px}
+  .m-sect{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-2);margin:14px 2px 7px}
+
+  .m-alert{background:linear-gradient(180deg,#FDF7EA,#FBF1DE);border:1px solid #ECD9AE;border-radius:11px;padding:11px 13px;margin-bottom:11px;font-size:12px;color:#6b5418}
+  .m-alert b{color:var(--warn)}
+
+  /* mobile quick-approve list */
+  .m-aprow{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;transition:.18s}
+  .m-aprow.removing{opacity:0;transform:translateX(40px);height:0;margin:0;padding:0;border-width:0}
+  .m-aprow .apt{font-weight:700;font-size:13.5px}
+  .m-aprow .apm{font-size:11.5px;color:var(--slate);margin-top:2px}
+  .m-aprow .apb{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+  .m-aprow .apact{display:flex;gap:8px;margin-top:11px}
+  .m-aprow .apact .btn{flex:1;text-align:center;padding:9px}
+
+  /* mobile accordion (More) */
+  .m-acc{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .m-acc .ah{display:flex;align-items:center;gap:9px;padding:13px 14px;cursor:pointer;font-weight:700;font-size:13.5px}
+  .m-acc .ah .caret{margin-left:auto;font-size:10px;color:var(--slate-2);transition:transform .15s}
+  .m-acc.closed .ah .caret{transform:rotate(-90deg)}
+  .m-acc.closed .ab{display:none}
+  .m-acc .ab{padding:0 8px 8px}
+  .m-acc .ar{display:flex;align-items:center;gap:10px;padding:9px 8px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink)}
+  .m-acc .ar .ic{width:18px;text-align:center;color:var(--mulberry)}
+  .m-acc .ar .rs{font-size:10.5px;color:var(--slate);display:block}
+  .m-acc .ar .desktoponly{margin-left:auto;font-size:9px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--slate-2);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+
+  /* mobile search */
+  .m-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;color:var(--slate-2);font-size:13px;margin-bottom:12px}
+  .m-dirrow{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:11px}
+  .m-dirrow .av{width:36px;height:36px;border-radius:999px;background:var(--paper-3);display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--mulberry)}
+  .m-dirrow .dt{font-weight:700;font-size:13px} .m-dirrow .dm{font-size:11px;color:var(--slate)}
+
+  /* bottom nav */
+  .m-tabs{display:flex;border-top:1px solid var(--line);background:#fff;flex-shrink:0;padding-bottom:6px}
+  .m-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 4px;cursor:pointer;color:var(--slate-2);position:relative}
+  .m-tab .ic{font-size:18px;line-height:1}
+  .m-tab .tl{font-size:10px;font-weight:600}
+  .m-tab.on{color:var(--ink)} .m-tab.on .ic{color:var(--mulberry)}
+  .m-tab .nb{position:absolute;top:4px;right:50%;margin-right:-22px;min-width:16px;height:16px;border-radius:999px;background:var(--mulberry);color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+
+  .footnote{max-width:1180px;margin:0 auto 60px;padding:0 24px;color:var(--slate-2);font-size:12px}
+  .footnote code{background:var(--paper-3);padding:1px 5px;border-radius:4px;font-size:11px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}
+  .legend span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--slate)}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+</style>
+</head>
+<body data-ff="d" data-state="backlog" data-viewer="internal">
+
+<div class="intro">
+  <div class="eyebrow">Setnayan · Internal Ops · Iteration 0023</div>
+  <h1>Admin Console — Navigation Redesign</h1>
+  <p>An <b>ops / work-queue</b> reorganization of the admin console for desktop + mobile. Today's 6 noun-domain groups
+  (Home / Queues / Directory / Money / Insights / Manage) are re-cut along the verb an admin actually performs:
+  <b>act on what's pending → look things up → tune the platform</b>. One nav source of truth — desktop expands, mobile flattens.</p>
+  <span class="pend">CONDITIONALLY APPROVED 2026-06-08 · "as long as it's easier to manage" · no live admin code changed yet</span>
+</div>
+
+<!-- ════════════ CONTROL BAR ════════════ -->
+<div class="ctl">
+  <div class="ctl-in">
+    <div class="grp-l"><span class="lbl">View</span>
+      <div class="seg"><button id="ff-d" class="on" onclick="setFF('d')">💻 Desktop</button><button id="ff-m" onclick="setFF('m')">📱 Mobile</button><button id="ff-b" onclick="setFF('b')">⇆ Both</button></div>
+    </div>
+    <div class="grp-l"><span class="lbl">Workload</span>
+      <div class="seg gold"><button id="ws-backlog" class="on" onclick="setState('backlog')">Busy · backlog</button><button id="ws-clear" onclick="setState('clear')">All clear</button></div>
+    </div>
+    <div class="grp-l"><span class="lbl">Who's logged in</span>
+      <div class="seg mul"><button id="vw-internal" class="on" onclick="setViewer('internal')">🟣 Super-admin</button><button id="vw-team" onclick="setViewer('team')">🟢 Team Pool</button><button id="vw-handler" onclick="setViewer('handler')">Handler · scoped</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ════════════════════════════ DESKTOP ════════════════════════════ -->
+  <div id="col-d">
+    <p class="colcap">Desktop · 1280px+ · more-at-once · master-detail</p>
+    <div class="stage-d">
+      <!-- top utility bar -->
+      <div class="util">
+        <div class="brandmark"><span class="wm">SETNAYAN</span><span class="eb">Admin</span></div>
+        <div class="search">🔎 Search users, vendors, events, orders…</div>
+        <div class="sp"></div>
+        <span class="tierbadge tier-internal" id="d-tier">🟣 Internal</span>
+        <div class="bell" onclick="toast('3 unread admin notifications')">🔔<span class="dot" id="d-bell">3</span></div>
+        <div class="avatar">IC</div>
+      </div>
+
+      <div class="body-d">
+        <!-- SIDEBAR -->
+        <aside class="side">
+          <div class="spine-wrap">
+            <div class="spine-cap">Spine</div>
+            <div class="navitem spine active" data-view="home" onclick="go('home')"><span class="ic">⌂</span> Home</div>
+            <div class="navitem spine" data-view="work" onclick="go('work')"><span class="ic">✓</span> Work <span class="count" id="nav-work">0</span></div>
+            <div class="navitem spine" data-view="directory" onclick="go('directory')"><span class="ic">⊞</span> Directory</div>
+          </div>
+
+          <div class="grp" id="g-insights">
+            <div class="gh" onclick="tg('g-insights')"><span>Insights</span><span class="caret">▾</span></div>
+            <div class="gitems">
+              <div class="navitem" data-view="insights" onclick="go('insights')"><span class="ic">📈</span> Growth</div>
+              <div class="navitem" data-view="insights" onclick="go('insights')"><span class="ic">▥</span> Funnels</div>
+              <div class="navitem" data-view="insights" onclick="go('insights')"><span class="ic">⚒</span> Operations &amp; Hiring</div>
+              <div class="navitem" data-view="insights" onclick="go('insights')"><span class="ic">◴</span> Telemetry</div>
+              <div class="navitem" data-view="insights" onclick="go('insights')"><span class="ic">🐞</span> Connection logs</div>
+              <div class="navitem" data-view="insights" onclick="go('insights')"><span class="ic">⚡</span> Offline daemon</div>
+            </div>
+          </div>
+
+          <div class="grp" id="g-money">
+            <div class="gh" onclick="tg('g-money')"><span>Money &amp; Catalog</span><span class="caret">▾</span></div>
+            <div class="gitems">
+              <div class="navitem" data-view="money" onclick="go('money')"><span class="ic">₱</span> Pricing</div>
+              <div class="navitem" data-view="money" onclick="go('money')"><span class="ic">✦</span> Add-ons</div>
+              <div class="navitem" data-view="money" onclick="go('money')"><span class="ic">🏷</span> Discount codes</div>
+              <div class="navitem" data-view="money" onclick="go('money')"><span class="ic">◎</span> Token bands</div>
+              <div class="navitem" data-view="money" onclick="go('money')"><span class="ic">⊟</span> Budget Planner</div>
+              <div class="navitem" data-view="money" onclick="go('money')"><span class="ic">🧾</span> Receipts</div>
+              <div class="navitem" data-view="money" onclick="go('money')"><span class="ic">💳</span> Payment methods <span class="lock" title="two-admin gated">🔒</span></div>
+            </div>
+          </div>
+
+          <div class="grp closed" id="g-platform">
+            <div class="gh" onclick="tg('g-platform')"><span>Platform</span><span class="caret">▾</span></div>
+            <div class="gitems">
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">⚙</span> Settings</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">🌳</span> Taxonomy editor</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">🌐</span> Website</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">📣</span> Ads</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">🧠</span> Setnayan AI brain</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">🎨</span> Moodboard library</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">♪</span> Songs</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">⛪</span> Wedding types</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">📖</span> Wedding traditions</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">🔔</span> Notifications</div>
+              <div class="navitem" data-view="platform" onclick="go('platform')"><span class="ic">🧪</span> Demo mode</div>
+            </div>
+          </div>
+
+          <div class="switchview">
+            <div class="navitem" onclick="toast('Switch to couple / vendor doorway')"><span class="ic">⇄</span> Switch view</div>
+          </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+
+          <!-- ░░ HOME ░░ -->
+          <section class="view on" id="v-home">
+            <div class="vh"><div class="ve">Command center</div><h2>Home</h2>
+              <p>What needs admin action right now. Every pending queue at a glance — tap any card to clear it. <span id="home-sum"></span></p></div>
+
+            <!-- alerts -->
+            <div class="alerts" style="margin-bottom:16px" id="home-alerts">
+              <div class="arow">⚠ <b>Platform alerts</b> · R2 storage at <b>78%</b> of plan · GCash inbox sync last ran 41 min ago · 0 RLS failures (24h)</div>
+            </div>
+
+            <!-- Trust & supply -->
+            <div class="qsect">
+              <div class="qh"><h3>Trust &amp; supply</h3><span class="qmono">verify what enters the marketplace</span></div>
+              <div class="grid g3">
+                <div class="qcard" data-q="verify" onclick="openQ('verify')"><span class="stripe s-warn"></span><span class="qtag t-warn">Queue</span><div class="qn" data-cnt="verify">5</div><div class="ql">Vendors to verify</div><div class="qs">identity + service approval</div></div>
+                <div class="qcard" data-q="taxonomy" onclick="openQ('taxonomy')"><span class="stripe s-info"></span><span class="qtag t-info">Requests</span><div class="qn" data-cnt="taxonomy">4</div><div class="ql">Taxonomy requests</div><div class="qs">new category / refinement</div></div>
+                <div class="qcard" data-q="payopts" onclick="openQ('payopts')"><span class="stripe s-warn"></span><span class="qtag t-warn">Screen</span><div class="qn" data-cnt="payopts">2</div><div class="ql">Payment options</div><div class="qs">vendor bank/QR links to screen</div></div>
+              </div>
+            </div>
+
+            <!-- Money to reconcile -->
+            <div class="qsect">
+              <div class="qh"><h3>Money to reconcile</h3><span class="qmono">apply-then-pay · 24-hr SLA</span></div>
+              <div class="grid g3">
+                <div class="qcard" data-q="payments" onclick="openQ('payments')"><span class="stripe s-warn"></span><span class="qtag t-warn">Queue</span><div class="qn" data-cnt="payments">7</div><div class="ql">Payments to confirm</div><div class="qs">match BDO / GCash → activate</div></div>
+                <div class="qcard" data-q="payouts" onclick="openQ('payouts')"><span class="stripe s-warn"></span><span class="qtag t-warn">Queue</span><div class="qn" data-cnt="payouts">3</div><div class="ql">Payouts to release</div><div class="qs">verified T+1 schedule</div></div>
+                <div class="qcard" data-q="tokensales" onclick="openQ('tokensales')"><span class="stripe s-warn"></span><span class="qtag t-warn">Queue</span><div class="qn" data-cnt="tokensales">2</div><div class="ql">Token sales</div><div class="qs">vendor pack purchases to confirm</div></div>
+              </div>
+            </div>
+
+            <!-- Recourse -->
+            <div class="qsect">
+              <div class="qh"><h3>Recourse</h3><span class="qmono">people waiting on a human decision</span></div>
+              <div class="grid g4">
+                <div class="qcard" data-q="disputes" onclick="openQ('disputes')"><span class="stripe s-danger"></span><span class="qtag t-danger">Urgent</span><div class="qn" data-cnt="disputes">1</div><div class="ql">Open disputes</div><div class="qs">couple ↔ vendor</div></div>
+                <div class="qcard" data-q="fm" onclick="openQ('fm')"><span class="stripe s-danger"></span><span class="qtag t-danger">Urgent</span><div class="qn" data-cnt="fm">1</div><div class="ql">Force majeure</div><div class="qs">event-impacting</div></div>
+                <div class="qcard" data-q="reviews" onclick="openQ('reviews')"><span class="stripe s-info"></span><span class="qtag t-info">Appeals</span><div class="qn" data-cnt="reviews">2</div><div class="ql">Review appeals</div><div class="qs">self-review gate</div></div>
+                <div class="qcard" data-q="abuse" onclick="openQ('abuse')"><span class="stripe s-info"></span><span class="qtag t-info">Review</span><div class="qn" data-cnt="abuse">0</div><div class="ql">AI-abuse flags</div><div class="qs">trial cycling</div></div>
+              </div>
+            </div>
+
+            <!-- Approvals + support -->
+            <div class="qsect">
+              <div class="qh"><h3>Approvals &amp; support</h3><span class="qmono">four-eyes gate + inbox</span></div>
+              <div class="grid g2">
+                <div class="qcard" data-q="approvals" onclick="openQ('approvals')"><span class="stripe s-lead"></span><span class="qtag t-lead">Two-admin</span><div class="qn" data-cnt="approvals">3</div><div class="ql">Two-admin approvals pending</div><div class="qs">another admin is waiting on a second approver — §9.1</div></div>
+                <div class="qcard" data-q="help" onclick="openQ('help')"><span class="stripe s-info"></span><span class="qtag t-info">Tickets</span><div class="qn" data-cnt="help">6</div><div class="ql">Help tickets</div><div class="qs">support inbox · 24-hr SLA</div></div>
+              </div>
+            </div>
+
+            <!-- KPI + activity -->
+            <div class="grid g2" style="margin-top:6px">
+              <div class="card">
+                <div class="qh"><h3>Today at a glance</h3></div>
+                <div class="grid g3" style="margin-top:6px">
+                  <div class="kpi"><span class="kn">14</span><span class="kl">New couples</span></div>
+                  <div class="kpi"><span class="kn">6</span><span class="kl">New vendors</span></div>
+                  <div class="kpi"><span class="kn">₱48,210</span><span class="kl">Confirmed today</span></div>
+                  <div class="kpi"><span class="kn">312</span><span class="kl">Events live</span></div>
+                  <div class="kpi"><span class="kn">1,204</span><span class="kl">All users</span></div>
+                  <div class="kpi"><span class="kn">87</span><span class="kl">Vendor profiles</span></div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="qh"><h3>Recent admin activity</h3></div>
+                <ul class="feed">
+                  <li><span class="fa"></span><span><b>Ben R.</b> confirmed payment <code>S89O-4K2P</code></span><span class="ft">3m</span></li>
+                  <li><span class="fa"></span><span><b>You</b> verified vendor <b>Bloom &amp; Co.</b></span><span class="ft">21m</span></li>
+                  <li><span class="fa"></span><span><b>Ben R.</b> requested two-admin on a <b>₱32K refund</b></span><span class="ft">38m</span></li>
+                  <li><span class="fa"></span><span><b>Maya S.</b> mapped a taxonomy request to <i>Lights &amp; LED</i></span><span class="ft">1h</span></li>
+                  <li><span class="fa"></span><span><b>You</b> released payout to <b>Vista Catering</b></span><span class="ft">2h</span></li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- ░░ WORK ░░ -->
+          <section class="view" id="v-work">
+            <div class="vh"><div class="ve">Workspace · master-detail</div><h2>Work</h2>
+              <p>Every act-on-it surface in one place. Pick a queue, work it without leaving. Filter by <b>handler lane</b> to see only your queues.</p></div>
+            <div class="work">
+              <!-- queue rail -->
+              <div class="qrail">
+                <div class="lanes">
+                  <span class="lane on" data-lane="all" onclick="setLane('all')">All</span>
+                  <span class="lane" data-lane="trust" onclick="setLane('trust')">Trust</span>
+                  <span class="lane" data-lane="money" onclick="setLane('money')">Money</span>
+                  <span class="lane" data-lane="recourse" onclick="setLane('recourse')">Recourse</span>
+                  <span class="lane" data-lane="approvals" onclick="setLane('approvals')">Approvals</span>
+                  <span class="lane" data-lane="support" onclick="setLane('support')">Support</span>
+                </div>
+                <div class="qr-cap">Trust &amp; supply</div>
+                <div class="qr-item active" data-qrail="verify" data-lane="trust" onclick="openQ('verify')"><span class="ic">✦</span> Verify <span class="count" data-cnt="verify">5</span></div>
+                <div class="qr-item" data-qrail="taxonomy" data-lane="trust" onclick="openQ('taxonomy')"><span class="ic">🌳</span> Taxonomy <span class="count" data-cnt="taxonomy">4</span></div>
+                <div class="qr-item" data-qrail="payopts" data-lane="trust" onclick="openQ('payopts')"><span class="ic">💳</span> Pay options <span class="count" data-cnt="payopts">2</span></div>
+                <div class="qr-cap">Money</div>
+                <div class="qr-item" data-qrail="payments" data-lane="money" onclick="openQ('payments')"><span class="ic">🏦</span> Payments <span class="count" data-cnt="payments">7</span></div>
+                <div class="qr-item" data-qrail="payouts" data-lane="money" onclick="openQ('payouts')"><span class="ic">↗</span> Payouts <span class="count" data-cnt="payouts">3</span></div>
+                <div class="qr-item" data-qrail="tokensales" data-lane="money" onclick="openQ('tokensales')"><span class="ic">◎</span> Token sales <span class="count" data-cnt="tokensales">2</span></div>
+                <div class="qr-cap">Recourse</div>
+                <div class="qr-item" data-qrail="disputes" data-lane="recourse" onclick="openQ('disputes')"><span class="ic">⚖</span> Disputes <span class="count" data-cnt="disputes">1</span></div>
+                <div class="qr-item" data-qrail="fm" data-lane="recourse" onclick="openQ('fm')"><span class="ic">🌀</span> Force majeure <span class="count" data-cnt="fm">1</span></div>
+                <div class="qr-item" data-qrail="reviews" data-lane="recourse" onclick="openQ('reviews')"><span class="ic">★</span> Reviews <span class="count" data-cnt="reviews">2</span></div>
+                <div class="qr-item zero" data-qrail="abuse" data-lane="recourse" onclick="openQ('abuse')"><span class="ic">🚩</span> AI abuse <span class="count" data-cnt="abuse">0</span></div>
+                <div class="qr-cap">Approvals &amp; support</div>
+                <div class="qr-item" data-qrail="approvals" data-lane="approvals" onclick="openQ('approvals')"><span class="ic">👥</span> Two-admin <span class="count" data-cnt="approvals">3</span></div>
+                <div class="qr-item" data-qrail="help" data-lane="support" onclick="openQ('help')"><span class="ic">🛟</span> Help <span class="count" data-cnt="help">6</span></div>
+              </div>
+
+              <!-- queue pane -->
+              <div class="qpane">
+                <div class="qpane-h">
+                  <div><h3 id="qpane-t">Verification queue</h3><div class="sub" id="qpane-s">5 vendors awaiting identity + service approval</div></div>
+                  <div class="bulk"><button class="btn sm ghost" onclick="toast('Bulk select — desktop only')">☑ Select</button><button class="btn sm ghost" onclick="toast('Filter by age / value')">⌄ Filter</button></div>
+                </div>
+                <div class="qbody" id="qbody"><!-- queue rows injected --></div>
+              </div>
+            </div>
+            <div class="note"><span class="i">◆</span> <span><b>Bulk + dense work is desktop-first.</b> Master-detail, multi-select, fuzzy-match suggestions and side-by-side review live here. Mobile carries the single-tap approvals (see the 📱 panel).</span></div>
+          </section>
+
+          <!-- ░░ DIRECTORY ░░ -->
+          <section class="view" id="v-directory">
+            <div class="vh"><div class="ve">Look-up · search-first</div><h2>Directory</h2>
+              <p>Find a person, vendor, event or venue. Read-mostly — actions on a record open from its detail drawer.</p></div>
+            <div class="fil">
+              <button class="on">All</button><button>Couples</button><button>Vendors</button><button>Events</button><button>Venues</button><button>🟣 Internal</button><button>🟢 Team Pool</button>
+            </div>
+            <div class="card" style="padding:0;overflow:hidden">
+              <table class="tbl">
+                <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Region</th><th>Joined</th></tr></thead>
+                <tbody>
+                  <tr onclick="toast('Open record → detail drawer')"><td>Ana &amp; Marco</td><td>Couple</td><td><span class="badge b-good">Active · Dec 2026</span></td><td>NCR</td><td>2 days ago</td></tr>
+                  <tr onclick="toast('Open record → detail drawer')"><td>Bloom &amp; Co.</td><td>Vendor · Florist</td><td><span class="badge b-good">Verified</span></td><td>NCR</td><td>1 wk ago</td></tr>
+                  <tr onclick="toast('Open record → detail drawer')"><td>Vista Catering</td><td>Vendor · Caterer</td><td><span class="badge b-warn">Coming soon</span></td><td>CALABARZON</td><td>3 days ago</td></tr>
+                  <tr onclick="toast('Open record → detail drawer')"><td>Liza &amp; Paolo</td><td>Couple</td><td><span class="badge b-good">Active · Feb 2027</span></td><td>C. Visayas</td><td>5 days ago</td></tr>
+                  <tr onclick="toast('Open record → detail drawer')"><td>Casa Ibarra (Tagaytay)</td><td>Venue</td><td><span class="badge b-info">Listed</span></td><td>CALABARZON</td><td>2 wk ago</td></tr>
+                  <tr onclick="toast('Open record → detail drawer')"><td>iscasasolaii@…</td><td>🟣 Internal</td><td><span class="badge b-lead">Owner</span></td><td>—</td><td>founder</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="note"><span class="i">◆</span> <span>Directory is pure record-lookup — <b>Users · Vendors · Events · Venues · Demo vendors</b>. <i>Wedding types / traditions moved to <b>Platform</b></i> (they're governance + content, not look-up). Act-on-it work lives in the Work queues.</span></div>
+          </section>
+
+          <!-- ░░ INSIGHTS ░░ -->
+          <section class="view" id="v-insights">
+            <div class="vh"><div class="ve">Read · desktop dashboards</div><h2>Insights</h2>
+              <p>Analytics &amp; system monitoring — read on a big screen. Growth · Funnels · Operations &amp; Hiring · Telemetry · Connection logs · Offline daemon.</p></div>
+            <div class="grid g4" style="margin-bottom:14px">
+              <div class="card kpi"><span class="kn">3.1%</span><span class="kl">Visitor → couple</span></div>
+              <div class="card kpi"><span class="kn">61%</span><span class="kl">Verify completion</span></div>
+              <div class="card kpi"><span class="kn">₱312K</span><span class="kl">GMV · 30 days</span></div>
+              <div class="card kpi"><span class="kn">2</span><span class="kl">Open faults (24h)</span></div>
+            </div>
+            <div class="card">
+              <div class="qh"><h3>Confirmed revenue · last 7 days</h3></div>
+              <div class="bars">
+                <div class="bcol"><i style="height:38%"></i><span>Mon</span></div><div class="bcol"><i style="height:54%"></i><span>Tue</span></div>
+                <div class="bcol"><i style="height:47%"></i><span>Wed</span></div><div class="bcol"><i style="height:72%"></i><span>Thu</span></div>
+                <div class="bcol"><i style="height:88%"></i><span>Fri</span></div><div class="bcol"><i style="height:64%"></i><span>Sat</span></div>
+                <div class="bcol"><i style="height:41%"></i><span>Sun</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ░░ MONEY & CATALOG ░░ -->
+          <section class="view" id="v-money">
+            <div class="vh"><div class="ve">Tune · set-once config</div><h2>Money &amp; Catalog</h2>
+              <p>Configure what things cost — not the act-now money queues (those moved to Work). Pricing · Add-ons · Discount codes · Token bands · Budget Planner · Receipts · Payment methods 🔒.</p></div>
+            <div class="card" style="padding:0;overflow:hidden">
+              <table class="tbl">
+                <thead><tr><th>SKU</th><th>Price</th><th>Recurrence</th><th>Scope</th><th>Health</th></tr></thead>
+                <tbody>
+                  <tr onclick="toast('Edit drawer · price change = 24-hr delay')"><td>Setnayan AI</td><td>₱3,999</td><td>one-time</td><td>per event</td><td><span class="badge b-good">Live</span></td></tr>
+                  <tr onclick="toast('Edit drawer · price change = 24-hr delay')"><td>Animated Monogram</td><td>₱2,499</td><td>one-time</td><td>per event</td><td><span class="badge b-good">Live</span></td></tr>
+                  <tr onclick="toast('Frequency change = two-admin gated')"><td>Vendor Pro</td><td>₱2,499 / 28d</td><td>recurring <span class="gate">🔒 2-admin</span></td><td>all events</td><td><span class="badge b-good">Live</span></td></tr>
+                  <tr onclick="toast('Token band editor')"><td>Token band · NCR</td><td>₱300 (3◎)</td><td>per answer</td><td>region</td><td><span class="badge b-info">Editable</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="setrow" style="margin-top:14px;border-top:1px solid var(--line)">
+              <div class="si"><div class="st">Payment-receiving accounts (BDO / GCash)</div><div class="sd">Changing the receiving account number is the #1 fraud vector — four-eyes required.</div></div>
+              <span class="gate">🔒 two-admin</span><button class="btn sm" onclick="requireTwoAdmin()">Edit</button>
+            </div>
+          </section>
+
+          <!-- ░░ PLATFORM ░░ -->
+          <section class="view" id="v-platform">
+            <div class="vh"><div class="ve">Tune · config + security</div><h2>Platform</h2>
+              <p>Low-traffic configuration, content catalogs and security. Set once, rarely touched. Sensitive rows show the four-eyes lock instead of hiding.</p></div>
+            <p class="qr-cap" style="padding-left:0">Shipped today</p>
+            <div class="card">
+              <div class="setrow"><div class="si"><div class="st">Settings · BIR tax identity</div><div class="sd">Business name · TIN · address · email · default VAT %. <i>(The real shipped settings page.)</i></div></div><span class="badge b-good">Live</span><button class="btn sm" onclick="toast('Open BIR tax identity')">Open</button></div>
+              <div class="setrow"><div class="si"><div class="st">Taxonomy editor</div><div class="sd">Drag card-tree CRUD. (The <i>requests</i> queue lives in Work.)</div></div><span class="badge b-good">Live</span><button class="btn sm" onclick="toast('Open taxonomy editor')">Open</button></div>
+              <div class="setrow"><div class="si"><div class="st">Website · Ads · Songs · Moodboard library · AI brain</div><div class="sd">Content catalogs &amp; marketing-site widgets.</div></div><span class="badge b-good">Live</span><button class="btn sm" onclick="toast('Open content catalogs')">Open</button></div>
+              <div class="setrow"><div class="si"><div class="st">Wedding types · Wedding traditions</div><div class="sd">Per-religion launch gate (open / coming-soon / disable) + editable "what to expect" content. <b>Moved here from Directory</b> — governance + content, not look-up.</div></div><span class="badge b-info">moved</span><button class="btn sm" onclick="toast('Open wedding types / traditions')">Open</button></div>
+              <div class="setrow"><div class="si"><div class="st">Notifications</div><div class="sd">Cross-actor signal reader — <b>previously had no nav home</b>.</div></div><span class="badge b-info">drift fixed</span><button class="btn sm" onclick="toast('Open notifications reader')">Open</button></div>
+              <div class="setrow"><div class="si"><div class="st">Demo mode · Sentry smoke test</div><div class="sd">Pilot toggles + observability check.</div></div><span class="badge b-good">Live</span><button class="btn sm" onclick="toast('Demo mode')">Open</button></div>
+            </div>
+            <p class="qr-cap" style="padding-left:0">Spec'd · not yet built (becomes net-new)</p>
+            <div class="card">
+              <div class="setrow"><div class="si"><div class="st">Brand &amp; theme</div><div class="sd">Logo · wordmark · active UI theme — propagates to the marketing site.</div></div><span class="badge b-muted">spec'd · unbuilt</span><span class="gate">🔒 two-admin</span></div>
+              <div class="setrow"><div class="si"><div class="st">Feature flags / kill-switches</div><div class="sd">Disable Papic / Panood platform-wide in an emergency.</div></div><span class="badge b-muted">spec'd · unbuilt</span><span class="gate">🔒 two-admin</span></div>
+              <div class="setrow"><div class="si"><div class="st">Two-admin approvals queue</div><div class="sd">Requests are <i>written</i> from Users actions, but no surface lets a 2nd admin approve them. → promoted to <b>Work</b> (§3.3).</div></div><span class="badge b-danger">half-built</span></div>
+              <div class="setrow"><div class="si"><div class="st">Policy matrices · fee config (§3.5e/§3.5f)</div><div class="sd">Per-method fees + payment-options policy matrix.</div></div><span class="badge b-muted">spec'd · unbuilt</span></div>
+            </div>
+            <div class="note"><span class="i">◆</span> <span><b>Reality check:</b> the shipped <code>/admin/settings</code> is just BIR identity + a Payment-methods link + a Sentry test. Internal/Team-Pool management lives on the <b>Users</b> record (Directory), not a Settings tab. The richer Settings hub is mostly a future build — see Appendix A.5.</span></div>
+          </section>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════ MOBILE ════════════════════════════ -->
+  <div id="col-m">
+    <p class="colcap">Mobile · 390px · approvals-on-the-go</p>
+    <div class="stage-m">
+      <div class="m-status"><span>9:41</span><span>Setnayan Admin</span><span>▆ ▆ ▶</span></div>
+      <div class="m-top">
+        <div><div class="wm">SETNAYAN</div><div class="eb">Admin</div></div>
+        <div class="sp"></div>
+        <span class="m-badge tier-internal" id="m-tier">🟣 Internal</span>
+        <div class="m-bell" onclick="toast('3 unread')">🔔<span class="dot">3</span></div>
+      </div>
+
+      <div class="m-body">
+        <!-- m-home -->
+        <section class="m-view on" id="m-home">
+          <div class="m-vh"><div class="ve">Command center</div><h2>What needs you</h2><p id="m-home-sum">19 items across your queues</p></div>
+          <div class="m-alert">⚠ <b>Platform:</b> R2 at 78% · GCash sync 41m ago · 0 RLS failures</div>
+
+          <div class="m-qcard" data-q="approvals" onclick="mOpenQ('approvals')"><span class="stripe s-lead"></span><div class="qn" data-cnt="approvals">3</div><div class="qi"><div class="ql">Two-admin approvals</div><div class="qs">a colleague is waiting on you</div></div><span class="chev">›</span></div>
+          <div class="m-qcard" data-q="verify" onclick="mOpenQ('verify')"><span class="stripe s-warn"></span><div class="qn" data-cnt="verify">5</div><div class="qi"><div class="ql">Vendors to verify</div><div class="qs">identity + service approval</div></div><span class="chev">›</span></div>
+          <div class="m-qcard" data-q="payments" onclick="mOpenQ('payments')"><span class="stripe s-warn"></span><div class="qn" data-cnt="payments">7</div><div class="qi"><div class="ql">Payments to confirm</div><div class="qs">match BDO / GCash</div></div><span class="chev">›</span></div>
+          <div class="m-qcard" data-q="disputes" onclick="mOpenQ('disputes')"><span class="stripe s-danger"></span><div class="qn" data-cnt="disputes">1</div><div class="qi"><div class="ql">Open disputes</div><div class="qs">needs mediation</div></div><span class="chev">›</span></div>
+          <div class="m-sect">More queues</div>
+          <div class="m-qcard zero" data-q="more" onclick="go('m-work')"><div class="qn">+8</div><div class="qi"><div class="ql">All queues</div><div class="qs">payouts · token sales · taxonomy · reviews · help…</div></div><span class="chev">›</span></div>
+        </section>
+
+        <!-- m-work : queue picker -->
+        <section class="m-view" id="m-work">
+          <div class="m-vh"><div class="ve">Workbench</div><h2>Work</h2><p>Tap a queue. On mobile you can clear the single-tap approvals; bulk &amp; master-detail are best on desktop.</p></div>
+          <div class="m-sect">Trust &amp; supply</div>
+          <div class="m-qcard" onclick="mOpenQ('verify')"><span class="stripe s-warn"></span><div class="qn" data-cnt="verify">5</div><div class="qi"><div class="ql">Verify</div><div class="qs">approve / reject vendors</div></div><span class="chev">›</span></div>
+          <div class="m-qcard" onclick="mOpenQ('taxonomy')"><span class="stripe s-info"></span><div class="qn" data-cnt="taxonomy">4</div><div class="qi"><div class="ql">Taxonomy requests</div><div class="qs">map / accept / reject</div></div><span class="chev">›</span></div>
+          <div class="m-sect">Money</div>
+          <div class="m-qcard" onclick="mOpenQ('payments')"><span class="stripe s-warn"></span><div class="qn" data-cnt="payments">7</div><div class="qi"><div class="ql">Payments</div><div class="qs">confirm matched only on mobile</div></div><span class="chev">›</span></div>
+          <div class="m-qcard" onclick="mOpenQ('payouts')"><span class="stripe s-warn"></span><div class="qn" data-cnt="payouts">3</div><div class="qi"><div class="ql">Payouts</div><div class="qs">release</div></div><span class="chev">›</span></div>
+          <div class="m-qcard" onclick="mOpenQ('tokensales')"><span class="stripe s-warn"></span><div class="qn" data-cnt="tokensales">2</div><div class="qi"><div class="ql">Token sales</div><div class="qs">confirm pack</div></div><span class="chev">›</span></div>
+          <div class="m-sect">Recourse &amp; approvals</div>
+          <div class="m-qcard" onclick="mOpenQ('approvals')"><span class="stripe s-lead"></span><div class="qn" data-cnt="approvals">3</div><div class="qi"><div class="ql">Two-admin</div><div class="qs">approve as second admin</div></div><span class="chev">›</span></div>
+          <div class="m-qcard" onclick="mOpenQ('disputes')"><span class="stripe s-danger"></span><div class="qn" data-cnt="disputes">1</div><div class="qi"><div class="ql">Disputes</div><div class="qs">read · mediate</div></div><span class="chev">›</span></div>
+          <div class="m-qcard" onclick="mOpenQ('help')"><span class="stripe s-info"></span><div class="qn" data-cnt="help">6</div><div class="qi"><div class="ql">Help tickets</div><div class="qs">reply</div></div><span class="chev">›</span></div>
+        </section>
+
+        <!-- m-queue : a single quick-approve queue -->
+        <section class="m-view" id="m-queue">
+          <div class="m-vh"><div class="ve" id="mq-eb">Quick approve</div><h2 id="mq-t">Verify</h2><p id="mq-p">Tap-to-clear — the on-the-go subset.</p></div>
+          <a onclick="go('m-work')" style="display:inline-block;color:var(--mulberry);font-weight:700;font-size:12px;margin-bottom:10px;cursor:pointer">‹ All queues</a>
+          <div id="mq-body"></div>
+        </section>
+
+        <!-- m-directory -->
+        <section class="m-view" id="m-directory">
+          <div class="m-vh"><div class="ve">Look-up</div><h2>Directory</h2><p>Search people, vendors, events, venues.</p></div>
+          <div class="m-search">🔎 Search…</div>
+          <div class="m-dirrow"><div class="av">AM</div><div><div class="dt">Ana &amp; Marco</div><div class="dm">Couple · NCR · Dec 2026</div></div></div>
+          <div class="m-dirrow"><div class="av">BC</div><div><div class="dt">Bloom &amp; Co.</div><div class="dm">Vendor · Florist · Verified</div></div></div>
+          <div class="m-dirrow"><div class="av">VC</div><div><div class="dt">Vista Catering</div><div class="dm">Vendor · Caterer · Coming soon</div></div></div>
+          <div class="m-dirrow"><div class="av">LP</div><div><div class="dt">Liza &amp; Paolo</div><div class="dm">Couple · Cebu · Feb 2027</div></div></div>
+        </section>
+
+        <!-- m-more -->
+        <section class="m-view" id="m-more">
+          <div class="m-vh"><div class="ve">More</div><h2>More</h2><p>Read &amp; configure — grouped, never a flat dump. Heavy dashboards open best on desktop.</p></div>
+          <div class="m-acc closed" id="ma-ins"><div class="ah" onclick="mtg('ma-ins')"><span class="ic">📈</span> Insights <span class="caret">▾</span></div>
+            <div class="ab">
+              <div class="ar"><span class="ic">📈</span><span>Growth<span class="rs">acquisition + conversion</span></span><span class="desktoponly">desktop</span></div>
+              <div class="ar"><span class="ic">▥</span><span>Funnels</span><span class="desktoponly">desktop</span></div>
+              <div class="ar"><span class="ic">⚒</span><span>Operations &amp; Hiring</span><span class="desktoponly">desktop</span></div>
+              <div class="ar"><span class="ic">◴</span><span>Telemetry</span><span class="desktoponly">desktop</span></div>
+              <div class="ar"><span class="ic">🐞</span><span>Connection logs</span></div>
+              <div class="ar"><span class="ic">⚡</span><span>Offline daemon</span></div>
+            </div>
+          </div>
+          <div class="m-acc closed" id="ma-money"><div class="ah" onclick="mtg('ma-money')"><span class="ic">₱</span> Money &amp; Catalog <span class="caret">▾</span></div>
+            <div class="ab">
+              <div class="ar"><span class="ic">₱</span><span>Pricing</span></div>
+              <div class="ar"><span class="ic">✦</span><span>Add-ons</span></div>
+              <div class="ar"><span class="ic">🏷</span><span>Discount codes</span></div>
+              <div class="ar"><span class="ic">◎</span><span>Token bands</span></div>
+              <div class="ar"><span class="ic">⊟</span><span>Budget Planner</span></div>
+              <div class="ar"><span class="ic">🧾</span><span>Receipts</span></div>
+              <div class="ar"><span class="ic">💳</span><span>Payment methods <span class="rs">🔒 two-admin</span></span></div>
+            </div>
+          </div>
+          <div class="m-acc closed" id="ma-plat"><div class="ah" onclick="mtg('ma-plat')"><span class="ic">⚙</span> Platform <span class="caret">▾</span></div>
+            <div class="ab">
+              <div class="ar"><span class="ic">⚙</span><span>Settings <span class="rs">🔒 sensitive rows gated</span></span></div>
+              <div class="ar"><span class="ic">🌳</span><span>Taxonomy editor</span><span class="desktoponly">desktop</span></div>
+              <div class="ar"><span class="ic">🌐</span><span>Website</span><span class="desktoponly">desktop</span></div>
+              <div class="ar"><span class="ic">📣</span><span>Ads</span></div>
+              <div class="ar"><span class="ic">🧠</span><span>Setnayan AI brain</span></div>
+              <div class="ar"><span class="ic">🎨</span><span>Moodboard library</span></div>
+              <div class="ar"><span class="ic">♪</span><span>Songs</span></div>
+              <div class="ar"><span class="ic">⛪</span><span>Wedding types<span class="rs">launch gate · moved from Directory</span></span></div>
+              <div class="ar"><span class="ic">📖</span><span>Wedding traditions<span class="rs">content · moved from Directory</span></span></div>
+              <div class="ar"><span class="ic">🔔</span><span>Notifications</span></div>
+              <div class="ar"><span class="ic">🧪</span><span>Demo mode</span></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- bottom nav : 4 tabs -->
+      <nav class="m-tabs">
+        <div class="m-tab on" data-mtab="m-home" onclick="go('m-home')"><span class="ic">⌂</span><span class="tl">Home</span></div>
+        <div class="m-tab" data-mtab="m-work" onclick="go('m-work')"><span class="ic">✓</span><span class="tl">Work</span><span class="nb" id="mtab-work">0</span></div>
+        <div class="m-tab" data-mtab="m-directory" onclick="go('m-directory')"><span class="ic">⊞</span><span class="tl">Directory</span></div>
+        <div class="m-tab" data-mtab="m-more" onclick="go('m-more')"><span class="ic">≡</span><span class="tl">More</span></div>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<div class="footnote">
+  <div class="legend">
+    <span><i style="background:var(--warn)"></i> Pending action (queue)</span>
+    <span><i style="background:var(--danger)"></i> Recourse / urgent</span>
+    <span><i style="background:var(--mulberry)"></i> Two-admin gate</span>
+    <span><i style="background:var(--info)"></i> Informational</span>
+    <span><i style="background:var(--good)"></i> Cleared</span>
+  </div>
+  <p>Clickable prototype for <code>Admin_Console_Nav_Redesign_2026-06-08.md</code>. Toggle <b>View</b> / <b>Workload</b> / <b>Who's logged in</b> above.
+  The marquee flows are live: <b>Verify → approve/reject</b>, <b>Payments → match &amp; confirm</b>, <b>Two-admin → approve as second admin</b> (try it as a Handler vs. Super-admin; you can't approve your own request). Counts cascade to Home, the Work rail and the mobile tab badge. Design only — no live admin code touched.</p>
+</div>
+
+<div id="toast"><span class="tk">✓</span><span id="toast-msg"></span></div>
+
+<script>
+/* ───────────────────────── state ───────────────────────── */
+const COUNTS = {verify:5,taxonomy:4,payopts:2,payments:7,payouts:3,tokensales:2,disputes:1,fm:1,reviews:2,abuse:0,approvals:3,help:6};
+const ZERO   = {verify:0,taxonomy:0,payopts:0,payments:0,payouts:0,tokensales:0,disputes:0,fm:0,reviews:0,abuse:0,approvals:0,help:6};
+let counts = Object.assign({},COUNTS);
+let curViewer = 'internal';   // internal | team | handler
+let curLane = 'all';
+
+/* queue metadata */
+const QMETA = {
+  verify:{t:'Verification queue',s:'vendors awaiting identity + service approval',eb:'Trust · approve / reject'},
+  taxonomy:{t:'Taxonomy requests',s:'new category / refinement proposals',eb:'Trust · map / accept / reject'},
+  payopts:{t:'Payment options',s:'vendor bank / QR / link destinations to screen',eb:'Trust · screen'},
+  payments:{t:'Payments to confirm',s:'apply-then-pay reconciliation · 24-hr SLA',eb:'Money · match & confirm'},
+  payouts:{t:'Payouts to release',s:'verified T+1 release schedule',eb:'Money · release'},
+  tokensales:{t:'Token sales',s:'vendor token-pack purchases to confirm',eb:'Money · confirm'},
+  disputes:{t:'Disputes',s:'couple ↔ vendor conflicts needing mediation',eb:'Recourse · mediate'},
+  fm:{t:'Force majeure',s:'event-impacting escalations',eb:'Recourse · decide'},
+  reviews:{t:'Review appeals',s:'self-review gate appeals',eb:'Recourse · moderate'},
+  abuse:{t:'AI-abuse flags',s:'multi-account trial cycling',eb:'Recourse · review'},
+  approvals:{t:'Two-admin approvals',s:'four-eyes gate · §9.1 major decisions',eb:'Approvals · second sign-off'},
+  help:{t:'Help tickets',s:'support inbox · 24-hr SLA',eb:'Support · reply'}
+};
+
+/* sample queue rows (desktop master-detail) */
+const ROWS = {
+  verify:[
+    {id:'v1',av:'BC',t:'Bloom & Co.',m:'Florist · NCR · 12-doc checklist complete · 1 service pending',b:['<span class="badge b-good">Docs ✓</span>','<span class="badge b-warn">1 service</span>']},
+    {id:'v2',av:'VC',t:'Vista Catering',m:'Caterer · CALABARZON · DTI + BIR uploaded',b:['<span class="badge b-good">Docs ✓</span>']},
+    {id:'v3',av:'GS',t:'Golden Strings',m:'Band · C. Visayas · awaiting valid ID',b:['<span class="badge b-warn">ID missing</span>']},
+    {id:'v4',av:'LM',t:'Lumière Studio',m:'Photographer · NCR · custom-category proposed',b:['<span class="badge b-info">Custom cat.</span>']},
+    {id:'v5',av:'PP',t:'Petal & Plume',m:'Stylist · Davao · all docs verified',b:['<span class="badge b-good">Docs ✓</span>']}
+  ],
+  payments:[
+    {id:'p1',av:'₱',t:'Order S89O-4K2P · ₱3,999',m:'Setnayan AI · Ana & Marco',ref:'S89O-4K2P',amt:'₱3,999',inbox:'GCash · +63•••812 · ₱3,999 · ref 4K2P',conf:96},
+    {id:'p2',av:'₱',t:'Order S89O-7M1Q · ₱2,499',m:'Animated Monogram · Liza & Paolo',ref:'S89O-7M1Q',amt:'₱2,499',inbox:'BDO · ••9012 · ₱2,499 · "monogram"',conf:74},
+    {id:'p3',av:'₱',t:'Order S89O-9XT3 · ₱2,999',m:'Pro Website · couple #318',ref:'S89O-9XT3',amt:'₱2,999',inbox:'GCash · ₱3,000 · no ref',conf:52}
+  ],
+  approvals:[
+    {id:'a1',av:'BR',t:'Refund ₱32,000',m:'Order S89O-2233 · initiated by Ben R.',by:'ben',b:['<span class="badge b-lead">> ₱25K</span>','<span class="badge b-muted">38m ago</span>']},
+    {id:'a2',av:'MS',t:'Add internal account',m:'jane@setnayan.com · 🟣 §10a · by Maya S.',by:'maya',b:['<span class="badge b-lead">Internal</span>']},
+    {id:'a3',av:'IC',t:'Mid-quarter price change',m:'Vendor Pro ₱2,499→₱2,699 · by You',by:'you',b:['<span class="badge b-lead">Pricing</span>','<span class="badge b-warn">your request</span>']}
+  ]
+};
+const VIEWER_NAME = {internal:'you',team:'you',handler:'you'};
+
+/* ───────────────────────── nav / view switching ───────────────────────── */
+function setFF(f){document.body.dataset.ff=f;['d','m','b'].forEach(x=>document.getElementById('ff-'+x).classList.toggle('on',x===f));}
+function go(view){
+  if(view.startsWith('m-')){
+    document.querySelectorAll('.m-view').forEach(v=>v.classList.toggle('on',v.id===view));
+    document.querySelectorAll('.m-tab').forEach(t=>t.classList.toggle('on',t.dataset.mtab===view));
+    return;
+  }
+  document.querySelectorAll('#col-d .view').forEach(v=>v.classList.toggle('on',v.id==='v-'+view));
+  document.querySelectorAll('#col-d .navitem').forEach(n=>n.classList.toggle('active',n.dataset.view===view));
+  document.querySelector('.main').scrollTop=0;
+}
+function tg(id){document.getElementById(id).classList.toggle('closed');}
+function mtg(id){document.getElementById(id).classList.toggle('closed');}
+
+/* open a queue inside Work (desktop) */
+function openQ(q){
+  go('work');
+  document.querySelectorAll('.qr-item').forEach(n=>n.classList.toggle('active',n.dataset.qrail===q));
+  document.getElementById('qpane-t').textContent=QMETA[q].t;
+  document.getElementById('qpane-s').textContent=counts[q]+' · '+QMETA[q].s;
+  renderQueue(q);
+}
+function renderQueue(q){
+  const body=document.getElementById('qbody');
+  if(counts[q]===0){body.innerHTML=clearedHTML(q);return;}
+  if(q==='verify') body.innerHTML=ROWS.verify.map(verifyRow).join('');
+  else if(q==='payments') body.innerHTML=ROWS.payments.map(paymentRow).join('');
+  else if(q==='approvals') body.innerHTML=ROWS.approvals.map(approvalRow).join('');
+  else if(q==='tokensales') body.innerHTML=tokenSalesNote()+tokenSalesRows();
+  else body.innerHTML=genericRows(q);
+}
+function tokenSalesNote(){return '<div class="note" style="margin-top:0;margin-bottom:11px"><span class="i">◎</span> <span>Confirm a pack purchase to credit the wallet — or open the vendor’s <b>wallet</b> (<code>vendors/[id]/tokens</code>) to adjust balance / read the ledger without leaving the queue.</span></div>';}
+function tokenSalesRows(){
+  const ts=[{id:'ts0',av:'LS',t:'Lumière Studio · 25-pack',m:'₱5,500 · GCash · ref TK25-LS'},
+            {id:'ts1',av:'PP',t:'Petal & Plume · 10-pack',m:'₱2,400 · BDO · ref TK10-PP'}];
+  return ts.map(function(r){return `<div class="qitem" id="row-${r.id}">
+    <div class="qav">${r.av}</div>
+    <div class="qmain"><div class="qt">${r.t}</div><div class="qmeta">${r.m}</div><div class="qbadges"><span class="badge b-muted">apply-then-pay</span></div></div>
+    <div class="qact"><button class="btn good" onclick="resolve('tokensales','${r.id}','Confirmed ${r.t} → wallet credited')">✓ Confirm</button>
+      <button class="btn ghost sm" onclick="toast('Open ${r.av} wallet → vendors/[id]/tokens')">◎ Wallet</button>
+      <button class="btn danger sm" onclick="resolve('tokensales','${r.id}','Rejected ${r.t}')">Reject</button></div></div>`;}).join('');
+}
+function clearedHTML(q){return '<div class="cleared"><div class="big">✓</div><h3>'+QMETA[q].t+' — all clear</h3><p>Nothing pending. Set na \'yan.</p></div>';}
+
+/* ── row renderers ── */
+function verifyRow(r){return `<div class="qitem" id="row-${r.id}">
+  <div class="qav">${r.av}</div>
+  <div class="qmain"><div class="qt">${r.t}</div><div class="qmeta">${r.m}</div><div class="qbadges">${r.b.join('')}</div></div>
+  <div class="qact"><button class="btn good" onclick="resolve('verify','${r.id}','Verified ${r.t}')">✓ Approve</button>
+    <button class="btn danger sm" onclick="resolve('verify','${r.id}','Rejected ${r.t}')">Reject</button>
+    <button class="btn ghost sm" onclick="toast('Open 12-doc detail')">View docs</button></div></div>`;}
+
+function paymentRow(r){return `<div class="qitem" id="row-${r.id}">
+  <div class="qav">${r.av}</div>
+  <div class="qmain"><div class="qt">${r.t}</div><div class="qmeta">${r.m}</div>
+    <div class="match">
+      <div class="mside"><div class="ml">Order</div><div class="mv">${r.ref} · ${r.amt}</div></div>
+      <div class="marrow">${r.conf>=80?'⇄':'≈'}</div>
+      <div class="mside"><div class="ml">Matched inbox msg</div><div class="mv">${r.inbox}</div></div>
+    </div>
+    <div class="confbar"><i style="width:${r.conf}%"></i></div>
+    <div class="qmeta" style="margin-top:5px">Fuzzy match confidence <b>${r.conf}%</b> ${r.conf<60?'· <span style="color:var(--danger)">low — verify before confirming</span>':''}</div>
+  </div>
+  <div class="qact"><button class="btn good" onclick="resolve('payments','${r.id}','Confirmed ${r.ref} → activated')">✓ Match &amp; confirm</button>
+    <button class="btn ghost sm" onclick="toast('Request more proof')">Need proof</button>
+    <button class="btn danger sm" onclick="resolve('payments','${r.id}','Rejected ${r.ref}')">Reject</button></div></div>`;}
+
+function approvalRow(r){
+  const mine = (curViewer==='internal'&&r.by==='you')||(r.by==='you');
+  const canApprove = !(r.by==='you');
+  return `<div class="qitem" id="row-${r.id}">
+  <div class="qav">${r.av}</div>
+  <div class="qmain"><div class="qt">${r.t}</div><div class="qmeta">${r.m}</div><div class="qbadges">${r.b.join('')}</div>
+    ${canApprove?'':'<div class="qmeta" style="margin-top:6px;color:var(--danger)">You initiated this — a <b>different</b> admin must approve (four-eyes).</div>'}
+  </div>
+  <div class="qact"><button class="btn good" ${canApprove?'':'disabled'} onclick="resolve('approvals','${r.id}','Approved as second admin — executed')">✓ Approve</button>
+    <button class="btn danger sm" ${canApprove?'':'disabled'} onclick="resolve('approvals','${r.id}','Rejected request')">Reject</button>
+    <button class="btn ghost sm" onclick="toast('Request changes / comment')">Comment</button></div></div>`;}
+
+function genericRows(q){
+  const labels={taxonomy:['Vendor requests “Bridal car detailing”','Vendor requests refinement “drone footage”','Vendor requests “Same-day edit”','Vendor requests “Halal catering”'],
+    payouts:['Vista Catering · ₱18,400 · T+1 due','Bloom & Co. · ₱6,200 · T+1 due','Golden Strings · ₱9,000 · hold (dispute)'],
+    tokensales:['Lumière Studio · 25-pack · ₱5,500 · GCash','Petal & Plume · 10-pack · ₱2,400 · BDO'],
+    disputes:['Couple #214 ↔ Vista Catering · “no-show” · ₱25K paid'],
+    fm:['Typhoon Egay · 3 events in Region IV-A · reschedule window'],
+    reviews:['Self-review appeal · Bloom & Co.','Self-review appeal · Golden Strings'],
+    help:['“How do I change my wedding date?”','“Payment not reflecting”','“Vendor not replying”','“Refund status?”','“Can’t upload monogram”','“Delete my account (RA 10173)”']};
+  const verbs={taxonomy:['Map','Accept','Reject'],payouts:['Release','Hold'],tokensales:['Confirm','Reject'],disputes:['Open','Message'],fm:['Decide'],reviews:['Approve','Strike'],help:['Reply','Assign']};
+  const list=labels[q]||['Item'];const vb=verbs[q]||['Resolve'];
+  return list.map((l,i)=>`<div class="qitem" id="row-${q}${i}">
+    <div class="qav">${q==='help'?'🛟':q==='disputes'||q==='fm'?'⚠':'•'}</div>
+    <div class="qmain"><div class="qt">${l}</div><div class="qmeta">${QMETA[q].s}</div></div>
+    <div class="qact"><button class="btn good" onclick="resolve('${q}','${q}${i}','${vb[0]} — done')">✓ ${vb[0]}</button>
+    ${vb[1]?`<button class="btn ghost sm" onclick="resolve('${q}','${q}${i}','${vb[1]} — done')">${vb[1]}</button>`:''}
+    ${vb[2]?`<button class="btn danger sm" onclick="resolve('${q}','${q}${i}','${vb[2]} — done')">${vb[2]}</button>`:''}</div></div>`).join('');
+}
+
+/* resolve a queue item → animate out, decrement, refresh */
+function resolve(q,id,msg){
+  const row=document.getElementById('row-'+id);
+  if(row){row.classList.add('removing');setTimeout(()=>{if(row)row.remove();},220);}
+  if(counts[q]>0)counts[q]--;
+  refreshCounts();
+  toast(msg);
+  setTimeout(()=>{
+    document.getElementById('qpane-s').textContent=counts[q]+' · '+QMETA[q].s;
+    if(counts[q]===0){const b=document.getElementById('qbody');if(b)b.innerHTML=clearedHTML(q);}
+  },240);
+}
+
+/* ── mobile quick-approve ── */
+function mOpenQ(q){
+  go('m-queue');
+  document.getElementById('mq-t').textContent=QMETA[q].t;
+  document.getElementById('mq-eb').textContent=QMETA[q].eb;
+  const body=document.getElementById('mq-body');
+  if(counts[q]===0){body.innerHTML='<div class="cleared"><div class="big">✓</div><h3>All clear</h3><p>Set na \'yan.</p></div>';return;}
+  document.getElementById('mq-p').textContent = mobileNote(q);
+  body.innerHTML=mobileRows(q);
+}
+function mobileNote(q){
+  if(q==='payments')return 'On mobile you confirm high-confidence matches; low-confidence + bulk are best on desktop.';
+  if(q==='approvals')return 'Approve / reject a colleague’s four-eyes request from your phone.';
+  if(q==='verify')return 'Approve clean vendors; open full 12-doc review on desktop.';
+  return 'Tap to clear the on-the-go subset.';
+}
+function mobileRows(q){
+  if(q==='verify')return ROWS.verify.slice(0,3).map(r=>mAprow(q,r.id,r.t,r.m,'✓ Approve','Reject')).join('')+mDesktopMore('2 more need full doc review — open on desktop');
+  if(q==='payments')return ROWS.payments.filter(r=>r.conf>=80).map(r=>mAprow(q,r.id,r.t+' · '+r.conf+'% match',r.inbox,'✓ Confirm','Reject')).join('')+mDesktopMore('2 low-confidence matches — reconcile on desktop');
+  if(q==='approvals')return ROWS.approvals.map(r=>{
+    const can=r.by!=='you';
+    return `<div class="m-aprow" id="mrow-${r.id}"><div class="apt">${r.t}</div><div class="apm">${r.m}</div>
+      ${can?'':'<div class="apm" style="color:var(--danger);margin-top:5px">You initiated — needs a different admin.</div>'}
+      <div class="apact"><button class="btn good" ${can?'':'disabled'} onclick="mResolve('${r.id}','approvals','Approved as second admin')">✓ Approve</button>
+      <button class="btn danger" ${can?'':'disabled'} onclick="mResolve('${r.id}','approvals','Rejected')">Reject</button></div></div>`;}).join('');
+  if(q==='tokensales')return [['Lumière · 25-pack ₱5,500','GCash · apply-then-pay'],['Petal & Plume · 10-pack ₱2,400','BDO · apply-then-pay']].map(function(r,i){return mAprow('tokensales','tsm'+i,r[0],r[1],'✓ Confirm','Reject');}).join('')+mDesktopMore('Adjust a vendor’s wallet balance / ledger on desktop');
+  /* generic */
+  const g={taxonomy:['Bridal car detailing','Drone footage refinement','Same-day edit','Halal catering'],
+    payouts:['Vista Catering ₱18,400','Bloom & Co. ₱6,200','Golden Strings ₱9,000 (hold)'],
+    tokensales:['Lumière · 25-pack ₱5,500','Petal & Plume · 10-pack ₱2,400'],
+    disputes:['Couple #214 ↔ Vista Catering'],help:['Change wedding date?','Payment not reflecting','Vendor not replying','Refund status?','Can’t upload monogram','Delete account (RA 10173)']};
+  return (g[q]||['Item']).map((l,i)=>mAprow(q,q+'m'+i,l,QMETA[q].s,'✓ Resolve','')).join('');
+}
+function mAprow(q,id,t,m,a1,a2){return `<div class="m-aprow" id="mrow-${id}"><div class="apt">${t}</div><div class="apm">${m}</div>
+  <div class="apact"><button class="btn good" onclick="mResolve('${id}','${q}','${a1.replace(/[^A-Za-z ]/g,'').trim()} — done')">${a1}</button>
+  ${a2?`<button class="btn danger" onclick="mResolve('${id}','${q}','${a2} — done')">${a2}</button>`:''}</div></div>`;}
+function mDesktopMore(txt){return `<div class="note"><span class="i">💻</span> <span>${txt}.</span></div>`;}
+function mResolve(id,q,msg){
+  const row=document.getElementById('mrow-'+id);
+  if(row){row.classList.add('removing');setTimeout(()=>{if(row)row.remove();},220);}
+  if(counts[q]>0)counts[q]--;
+  refreshCounts();toast(msg);
+}
+
+/* ───────────────────────── counts cascade ───────────────────────── */
+function total(){return Object.values(counts).reduce((a,b)=>a+b,0);}
+function refreshCounts(){
+  document.querySelectorAll('[data-cnt]').forEach(el=>{
+    const k=el.dataset.cnt;el.textContent=counts[k];
+    const card=el.closest('.qcard,.qr-item,.m-qcard');
+    if(card)card.classList.toggle('zero',counts[k]===0);
+  });
+  const navwork=document.getElementById('nav-work');navwork.textContent=total();navwork.style.display=total()?'grid':'none';
+  const mtab=document.getElementById('mtab-work');mtab.textContent=total();mtab.style.display=total()?'grid':'none';
+  document.getElementById('home-sum').textContent=total()?(total()+' items waiting · '+counts.approvals+' need a second admin'):'Everything is clear.';
+  document.getElementById('m-home-sum').textContent=total()?(total()+' items across your queues'):'All clear — nothing pending.';
+}
+
+/* ───────────────────────── workload state ───────────────────────── */
+function setState(s){
+  document.body.dataset.state=s;
+  document.getElementById('ws-backlog').classList.toggle('on',s==='backlog');
+  document.getElementById('ws-clear').classList.toggle('on',s==='clear');
+  counts=Object.assign({},s==='clear'?ZERO:COUNTS);
+  refreshCounts();
+  // re-render whatever queue is open
+  const active=document.querySelector('.qr-item.active');
+  if(active)openQ(active.dataset.qrail);
+  if(s==='clear')toast('All queues cleared — the calm state');else toast('Busy day — backlog loaded');
+}
+
+/* ───────────────────────── viewer / permission scope ───────────────────────── */
+function setViewer(v){
+  curViewer=v;
+  ['internal','team','handler'].forEach(x=>document.getElementById('vw-'+x).classList.toggle('on',x===v));
+  const map={internal:['🟣 Internal','tier-internal'],team:['🟢 Team Pool','tier-team'],handler:['Verify Handler','tier-handler']};
+  const dt=document.getElementById('d-tier'),mt=document.getElementById('m-tier');
+  dt.textContent=map[v][0];dt.className='tierbadge '+map[v][1];
+  mt.textContent=map[v][0];mt.className='m-badge '+map[v][1];
+  applyScope(v);
+  if(v==='handler')toast('Handler lane: only Trust queues + read-only elsewhere');
+  else if(v==='team')toast('🟢 Team Pool: full queues · major actions still need a 2nd admin');
+  else toast('🟣 Super-admin: full access incl. initiating two-admin actions');
+}
+/* handler scope = auto-filter Work to the handler's lane + dim config groups */
+function applyScope(v){
+  if(v==='handler'){setLane('trust');document.getElementById('g-platform').style.opacity=.5;document.getElementById('g-money').style.opacity=.5;}
+  else{document.getElementById('g-platform').style.opacity=1;document.getElementById('g-money').style.opacity=1;}
+}
+function setLane(lane){
+  curLane=lane;
+  document.querySelectorAll('.lane').forEach(l=>l.classList.toggle('on',l.dataset.lane===lane));
+  document.querySelectorAll('.qr-item').forEach(it=>{
+    it.style.display=(lane==='all'||it.dataset.lane===lane)?'flex':'none';
+  });
+  document.querySelectorAll('.qr-cap').forEach(c=>c.style.display=(lane==='all')?'block':'none');
+}
+
+/* ───────────────────────── misc ───────────────────────── */
+let tt;
+function toast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2100);}
+function requireTwoAdmin(){
+  if(curViewer==='handler'){toast('🔒 Handlers can’t initiate — needs an admin');return;}
+  toast('🔒 Submitted — a second admin must approve (lands in Two-admin queue)');
+}
+
+/* init */
+refreshCounts();
+renderQueue('verify');
+</script>
+</body>
+</html>

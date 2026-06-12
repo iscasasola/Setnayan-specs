@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Setnayan · Best-Date Calendar (heat + fit, single + range)</title>
+<style>
+  :root{
+    --alabaster:#FBFBFA; --obsidian:#1E2229; --gold:#C5A059; --mulberry:#5C2542;
+    --h0:transparent; --h1:#FBE7D8; --h2:#F6C99A; --h3:#EF9A53; --h4:#E0492F;
+    --line:#ECE9E3; --muted:#9A968E; --green:#2F7A57;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+  body{
+    font-family:-apple-system,"SF Pro Text","Inter",system-ui,sans-serif;
+    background:radial-gradient(120% 90% at 50% 0%,#F3EFE8 0%,#E7E1D7 60%,#DAD3C7 100%);
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;color:var(--obsidian);
+  }
+  .frame{
+    width:390px;height:820px;background:var(--alabaster);border-radius:44px;
+    box-shadow:0 30px 80px rgba(30,34,41,.28),0 2px 0 rgba(255,255,255,.6) inset;
+    overflow:hidden;display:flex;flex-direction:column;position:relative;border:1px solid rgba(30,34,41,.06);
+  }
+  .topbar{padding:16px 24px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .wordmark{font-weight:700;letter-spacing:.34em;font-size:14px;text-indent:.34em;}
+  .tagline{font-size:9.5px;letter-spacing:.05em;color:var(--muted);font-style:italic;}
+  .progress{display:flex;gap:5px;margin-top:7px;}
+  .progress i{width:20px;height:3px;border-radius:2px;background:var(--line);}
+  .progress i.on{background:var(--gold);} .progress i.cur{background:var(--obsidian);}
+
+  .viewzone{padding:4px 22px 2px;}
+  .prompt{font-size:19px;font-weight:650;letter-spacing:-.01em;margin:4px 0 0;}
+  .prompt small{display:block;font-size:12px;font-weight:450;color:var(--muted);margin-top:2px;}
+
+  .nugget{margin-top:9px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 13px;min-height:172px;box-shadow:0 8px 22px rgba(30,34,41,.05);}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:4px 9px;border-radius:999px;background:var(--line);}
+  .chip .dots{letter-spacing:1px;font-size:9px;}
+  .nugget .dateline{font-size:15.5px;font-weight:650;margin:9px 0 2px;}
+  .sect{margin-top:8px;}
+  .sect h5{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+  .sect ul{list-style:none;display:flex;flex-direction:column;gap:3px;}
+  .sect li{font-size:12px;line-height:1.32;color:#43474E;display:flex;gap:6px;align-items:flex-start;}
+  .sect.works li::before{content:"✓";color:var(--green);font-weight:800;flex:0 0 auto;}
+  .sect.watch li::before{content:"⚠";color:var(--mulberry);flex:0 0 auto;font-size:11px;}
+  .alts{margin-top:9px;font-size:11.5px;color:#5C616B;line-height:1.4;}
+  .interest{margin-top:7px;font-size:12px;color:var(--mulberry);background:#F7F1EC;border-radius:9px;padding:6px 9px;line-height:1.35;}
+  .interest b{font-weight:700;}
+  .alts b{color:var(--obsidian);font-weight:600;}
+  .nugget.empty{display:flex;align-items:center;justify-content:center;text-align:center;}
+  .nugget.empty .msg{color:var(--muted);max-width:240px;font-size:13px;line-height:1.4;}
+
+  .tapzone{margin-top:auto;padding:6px 18px 18px;}
+  .modes{display:flex;background:#EFEBE3;border-radius:12px;padding:3px;margin:0 0 10px;}
+  .modes button{flex:1;border:none;background:transparent;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 4px;border-radius:9px;cursor:pointer;letter-spacing:.01em;}
+  .modes button.on{background:#fff;color:var(--obsidian);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+  .monthnav{display:flex;align-items:center;justify-content:space-between;padding:0 4px 8px;}
+  .monthnav button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:15px;color:var(--obsidian);cursor:pointer;line-height:1;}
+  .monthnav .mlabel{font-size:14.5px;font-weight:650;}
+  .dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
+  .dow span{text-align:center;font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cell{aspect-ratio:1/1;border-radius:11px;display:flex;align-items:center;justify-content:center;position:relative;font-size:13.5px;font-weight:550;cursor:pointer;color:var(--obsidian);background:var(--h0);transition:transform .08s;user-select:none;}
+  .cell.blank{visibility:hidden;cursor:default;}
+  .cell.t1{background:var(--h1);} .cell.t2{background:var(--h2);} .cell.t3{background:var(--h3);} .cell.t4{background:var(--h4);color:#fff;font-weight:650;}
+  .cell:active{transform:scale(.92);}
+  .cell .flame{position:absolute;top:2px;right:4px;font-size:8px;line-height:1;}
+  .cell .caut{position:absolute;top:5px;left:6px;width:5px;height:5px;border-radius:50%;background:var(--mulberry);}
+  .cell.t4 .caut{background:#fff;}
+  .cell.sel{box-shadow:0 0 0 2px var(--alabaster),0 0 0 4px var(--gold);}
+  .cell.inrange{box-shadow:inset 0 -3px 0 var(--gold);}
+  .cell.rec{box-shadow:0 0 0 2px var(--alabaster),0 0 0 4px var(--gold);}
+  .cell.rec .star{position:absolute;top:1px;right:3px;font-size:9px;}
+  .cell.today{color:var(--gold);font-weight:750;} .cell.today.t4{color:#fff;}
+  .cell.today::after{content:"";position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--gold);}
+  .cell.past{color:var(--muted);text-decoration:line-through;background:transparent;cursor:default;opacity:.5;}
+  .cell.past .flame,.cell.past .caut{display:none;}
+
+  .legend{display:flex;align-items:center;gap:8px;margin:12px 2px 0;font-size:10px;color:var(--muted);}
+  .legend .ramp{display:flex;gap:3px;flex:1;}
+  .legend .ramp i{height:8px;flex:1;border-radius:2px;border:1px solid rgba(30,34,41,.08);}
+  .legend .ramp i:nth-child(1){background:var(--h0);} .legend .ramp i:nth-child(2){background:var(--h1);}
+  .legend .ramp i:nth-child(3){background:var(--h2);} .legend .ramp i:nth-child(4){background:var(--h3);} .legend .ramp i:nth-child(5){background:var(--h4);}
+  .legend b{font-weight:600;color:#6B6F77;white-space:nowrap;}
+  .cta{width:100%;margin-top:12px;height:48px;border-radius:14px;border:none;background:var(--obsidian);color:var(--alabaster);font-size:14.5px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .08s;}
+  .cta:disabled{opacity:.32;cursor:default;} .cta:not(:disabled):active{transform:translateY(1px);}
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div class="wordmark">SETNAYAN</div>
+      <div class="tagline">Set na 'yan.</div>
+      <div class="progress"><i class="on"></i><i class="on"></i><i class="cur"></i><i></i><i></i></div>
+    </div>
+
+    <div class="viewzone">
+      <div class="prompt" id="prompt">When's the big day?<small id="promptsub">Color = how in-demand · we'll also tell you if it fits your plan.</small></div>
+      <div id="nugget" class="nugget empty"><p class="msg">Tap a date to see how in-demand it is — and whether it fits your plan.</p></div>
+    </div>
+
+    <div class="tapzone">
+      <div class="modes">
+        <button id="m-single" class="on">I have a date</button>
+        <button id="m-range">I'm flexible</button>
+      </div>
+      <div class="monthnav">
+        <button id="prev">‹</button><div class="mlabel" id="mlabel">December 2026</div><button id="next">›</button>
+      </div>
+      <div class="dow"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+      <div class="grid" id="grid"></div>
+      <div class="legend"><b>Open</b><div class="ramp"><i></i><i></i><i></i><i></i><i></i></div><b>🔥 In-demand</b></div>
+      <button class="cta" id="cta" disabled>Choose this date</button>
+    </div>
+  </div>
+
+<script>
+  const TODAY={y:2026,m:6,d:9}; const todayVal=TODAY.y*10000+TODAY.m*100+TODAY.d;
+  const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const DOWN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  function val(y,m,d){return y*10000+m*100+d;}
+
+  // mock couple context (real version reads from onboarding: style lead-time, guests, venue)
+  const CTX={start:TODAY, leadIdealMonths:9};
+  function monthsOut(y,m,d){ return (new Date(y,m-1,d)-new Date(CTX.start.y,CTX.start.m-1,CTX.start.d))/(1000*60*60*24*30.44); }
+
+  // ---- DEMAND (heat) ----
+  const PEAK={12:2,2:2,1:2,11:2,4:1,5:1,10:1};
+  // L.2 observed demand — mock "couples interested" counts (real version = live app stats)
+  const MIN_N=2;     // below this many couples, interest is suppressed (privacy + noise)
+  const SUPPLY=12;   // mock: relevant vendors FREE that day in-region (real = live availability)
+  const INTEREST={'2026-12-12':22,'2026-12-19':14,'2026-12-9':8,'2026-12-5':6,'2026-12-20':4,'2026-12-13':3};
+  function getInterest(y,m,d){ return INTEREST[y+'-'+m+'-'+d]||0; }
+  // RELATIVE TO SUPPLY: boost is driven by demand/available-supply ratio, not an absolute count
+  function pressureBoost(n){ if(n<MIN_N)return {boost:0,ratio:0}; var r=n/SUPPLY; var b=r>=1?4:r>=0.75?3:r>=0.5?2:r>=0.25?1:0; return {boost:b,ratio:r}; }
+  function heat(y,m,d){
+    const dow=new Date(y,m-1,d).getDay(); let s=0; const why=[];
+    const mw=PEAK[m]||0;
+    if(mw>=2){s+=mw;why.push("peak season");} else if(mw===1){s+=mw;why.push("shoulder season");}
+    if(dow===6){s+=2;why.push("Saturday");} else if(dow===0){s+=1;why.push("Sunday");}
+    if(m===d){s+=2;why.push(m+"·"+d+" repeating date");}
+    if(m===2&&d===14){s+=2;why.push("Valentine's");}
+    if(m===d&&dow===6)s+=1;
+    let predTier; if(s<=0)predTier=0; else if(s<=2)predTier=1; else if(s===3)predTier=2; else if(s<=5)predTier=3; else predTier=4;
+    const count=getInterest(y,m,d), pb=pressureBoost(count), boost=pb.boost, tier=Math.min(4,predTier+boost); // demand-pressure escalates the tier
+    let caution=null;
+    if(m===12&&(d===24||d===25))caution="Christmas — most couples avoid this (family obligations, venues closed).";
+    else if(m===12&&d===31)caution="New Year's Eve — popular but vendors charge holiday rates.";
+    return {tier,predTier,count,boost,ratio:pb.ratio,why,caution,dow};
+  }
+  const DLABEL=["Open","Quiet","Popular","In-demand","Hottest"];
+
+  // ---- FIT ("why this day works" for THIS couple) ----
+  function fit(y,m,d){
+    const dow=new Date(y,m-1,d).getDay(); const works=[],watch=[]; let pts=0;
+    const mo=monthsOut(y,m,d);
+    if(mo<3){pts-=2;watch.push("Under 3 months to plan — that's a real rush.");}
+    else if(mo<6){pts-=1;watch.push("Tight runway — under 6 months to plan.");}
+    else if(mo<=15){pts+=1;works.push("Comfortable runway — about "+Math.round(mo)+" months to plan.");}
+    if([11,12,1,2].includes(m)){pts+=1;works.push("Cool, dry season — ideal for photos & guest comfort.");}
+    else if([6,7,8,9].includes(m)){pts-=1;watch.push("Rainy season — line up a wet-weather backup.");}
+    else if([4,5].includes(m)){watch.push("Peak heat — lean toward an air-conditioned venue.");}
+    if(dow===6){pts+=1;works.push("Saturday — easiest day for guests to attend.");}
+    else if(dow!==0){pts-=1;watch.push("Weekday — some guests may need to take leave.");}
+    let label,dots; if(pts>=2){label="Great fit";dots="●●●";} else if(pts===1){label="Good fit";dots="●●○";} else if(pts===0){label="Okay fit";dots="●○○";} else {label="Tough fit";dots="○○○";}
+    return {pts,label,dots,works:works.slice(0,2),watch:watch.slice(0,2)};
+  }
+
+  let mode="single", view={y:2026,m:12}, selected=null, rangeStart=null, rangeEnd=null, recKeys={};
+  const grid=document.getElementById("grid"), nugget=document.getElementById("nugget"), cta=document.getElementById("cta");
+
+  function flames(tier){ return tier===0?"·":"🔥".repeat(tier); }
+
+  function render(){
+    document.getElementById("mlabel").textContent=MONTHS[view.m-1]+" "+view.y;
+    grid.innerHTML="";
+    const first=new Date(view.y,view.m-1,1).getDay(), days=new Date(view.y,view.m,0).getDate();
+    for(let i=0;i<first;i++){const b=document.createElement("div");b.className="cell blank";grid.appendChild(b);}
+    for(let d=1;d<=days;d++){
+      const h=heat(view.y,view.m,d), v=val(view.y,view.m,d), past=v<todayVal;
+      const c=document.createElement("div");
+      c.className="cell "+(past?"past":["","t1","t2","t3","t4"][h.tier]);
+      if(view.y===TODAY.y&&view.m===TODAY.m&&d===TODAY.d)c.classList.add("today");
+      if(mode==="single"&&selected&&selected.y===view.y&&selected.m===view.m&&selected.d===d)c.classList.add("sel");
+      if(mode==="range"&&rangeStart&&rangeEnd){ const a=val(rangeStart.y,rangeStart.m,rangeStart.d),b2=val(rangeEnd.y,rangeEnd.m,rangeEnd.d); if(v>=a&&v<=b2)c.classList.add("inrange"); }
+      const isRec=mode==="range"&&recKeys[v];
+      if(isRec)c.classList.add("rec");
+      c.innerHTML="<span class='num'>"+d+"</span>"
+        +(!past&&h.tier===4?"<span class='flame'>🔥</span>":"")
+        +(!past&&h.caution?"<span class='caut'></span>":"")
+        +(isRec?"<span class='star'>⭐</span>":"");
+      if(!past)c.addEventListener("click",()=>onClick(view.y,view.m,d));
+      grid.appendChild(c);
+    }
+  }
+
+  function onClick(y,m,d){
+    if(mode==="single"){ selected={y,m,d}; recKeys={}; render(); showSingle(y,m,d); }
+    else {
+      if(!rangeStart||(rangeStart&&rangeEnd)){ rangeStart={y,m,d}; rangeEnd=null; recKeys={}; render(); hintRange(); }
+      else {
+        if(val(y,m,d)<val(rangeStart.y,rangeStart.m,rangeStart.d)){ rangeEnd=rangeStart; rangeStart={y,m,d}; }
+        else rangeEnd={y,m,d};
+        computeRange(); render(); showRange();
+      }
+    }
+  }
+
+  function showSingle(y,m,d){
+    const h=heat(y,m,d), f=fit(y,m,d);
+    nugget.className="nugget"; nugget.style.borderColor=h.tier>=3?"var(--h3)":"var(--line)";
+    const dc=["#ECE9E3","#FBE7D8","#F6C99A","#EF9A53","#E0492F"][h.tier], dt=h.tier===4?"#fff":"var(--obsidian)";
+    const watch=f.watch.slice(); if(h.caution)watch.unshift(h.caution);
+    if(h.tier>=3)watch.push("Top vendors book out fast ("+h.why.join(", ")+") — reach out early.");
+    const interestLine = h.count>=MIN_N
+      ? "<div class='interest'>👀 <b>"+h.count+" couples</b> chasing the <b>"+SUPPLY+"</b> vendors free that day ("+Math.round(h.ratio*100)+"% booked-pressure)"+(h.boost>0?" — that's pushed it "+(h.boost>=2?"much ":"")+"hotter.":".")+"</div>"
+      : "";
+    nugget.innerHTML=
+      "<div class='chips'><span class='chip' style='background:"+dc+";color:"+dt+"'>"+flames(h.tier)+" Demand · "+DLABEL[h.tier]+"</span>"
+      +"<span class='chip'>Fit <span class='dots'>"+f.dots+"</span> "+f.label+"</span></div>"
+      +"<div class='dateline'>"+DOWN[h.dow]+", "+MONTHS[m-1]+" "+d+", "+y+"</div>"
+      +interestLine
+      +(f.works.length?"<div class='sect works'><h5>Why this day works</h5><ul>"+f.works.map(x=>"<li>"+x+"</li>").join("")+"</ul></div>":"")
+      +(watch.length?"<div class='sect watch'><h5>Watch-outs</h5><ul>"+watch.slice(0,3).map(x=>"<li>"+x+"</li>").join("")+"</ul></div>":"");
+    cta.disabled=false; cta.textContent=h.tier>=3?"Choose this date — book vendors early":"Choose this date";
+  }
+
+  function computeRange(){
+    recKeys={}; if(!rangeStart||!rangeEnd)return [];
+    let cur=new Date(rangeStart.y,rangeStart.m-1,rangeStart.d); const end=new Date(rangeEnd.y,rangeEnd.m-1,rangeEnd.d); const arr=[];
+    while(cur<=end){
+      const y=cur.getFullYear(),m=cur.getMonth()+1,d=cur.getDate(),v=val(y,m,d);
+      if(v>=todayVal){ const h=heat(y,m,d),f=fit(y,m,d); if(!h.caution||h.tier<4){ arr.push({y,m,d,v,h,f,rec:f.pts*1.5-h.tier}); } }
+      cur.setDate(cur.getDate()+1);
+    }
+    arr.sort((a,b)=>b.rec-a.rec||a.h.tier-b.h.tier);
+    arr.slice(0,3).forEach(x=>recKeys[x.v]=true);
+    window._rangeTop=arr.slice(0,3); return arr;
+  }
+
+  function hintRange(){
+    nugget.className="nugget empty"; nugget.style.borderColor="var(--gold)";
+    nugget.innerHTML="<p class='msg'>Start of your window set. Now tap the <b>end</b> of the range you're open to — we'll find the best date inside it.</p>";
+    cta.disabled=true; cta.textContent="Pick the end of your window";
+  }
+
+  function showRange(){
+    const top=window._rangeTop||[]; if(!top.length){ nugget.className="nugget empty"; nugget.innerHTML="<p class='msg'>No bookable dates in that window — try a later range.</p>"; cta.disabled=true; return; }
+    const b=top[0], dc=["#ECE9E3","#FBE7D8","#F6C99A","#EF9A53","#E0492F"][b.h.tier], dt=b.h.tier===4?"#fff":"var(--obsidian)";
+    const alts=top.slice(1).map(x=>"<b>"+MONTHS[x.m-1]+" "+x.d+"</b> ("+DLABEL[x.h.tier].toLowerCase()+")").join(" · ");
+    nugget.className="nugget"; nugget.style.borderColor="var(--gold)";
+    nugget.innerHTML=
+      "<div class='chips'><span class='chip' style='background:#EFE7D4;color:var(--mulberry)'>⭐ Best in your window</span>"
+      +"<span class='chip' style='background:"+dc+";color:"+dt+"'>"+flames(b.h.tier)+" "+DLABEL[b.h.tier]+"</span>"
+      +"<span class='chip'>Fit <span class='dots'>"+b.f.dots+"</span></span></div>"
+      +"<div class='dateline'>"+DOWN[b.h.dow]+", "+MONTHS[b.m-1]+" "+b.d+", "+b.y+"</div>"
+      +(b.f.works.length?"<div class='sect works'><h5>Why we picked it</h5><ul>"+b.f.works.map(x=>"<li>"+x+"</li>").join("")+"</ul></div>":"")
+      +(alts?"<div class='alts'>Other good options: "+alts+"</div>":"");
+    cta.disabled=false; cta.textContent="Use "+MONTHS[b.m-1]+" "+b.d;
+  }
+
+  function setMode(mm){
+    mode=mm; selected=null; rangeStart=null; rangeEnd=null; recKeys={};
+    document.getElementById("m-single").classList.toggle("on",mm==="single");
+    document.getElementById("m-range").classList.toggle("on",mm==="range");
+    document.getElementById("promptsub").innerHTML = mm==="single"
+      ? "Color = how in-demand · we'll also tell you if it fits your plan."
+      : "Pick a window you're open to — we'll find your best date inside it.";
+    nugget.className="nugget empty";
+    nugget.innerHTML="<p class='msg'>"+(mm==="single"
+      ? "Tap a date to see how in-demand it is — and whether it fits your plan."
+      : "Tap the <b>start</b>, then the <b>end</b> of a window you're flexible about.")+"</p>";
+    cta.disabled=true; cta.textContent=mm==="single"?"Choose this date":"Find my best date"; render();
+  }
+
+  document.getElementById("m-single").addEventListener("click",()=>setMode("single"));
+  document.getElementById("m-range").addEventListener("click",()=>setMode("range"));
+  document.getElementById("prev").addEventListener("click",()=>{view.m--;if(view.m<1){view.m=12;view.y--;}render();});
+  document.getElementById("next").addEventListener("click",()=>{view.m++;if(view.m>12){view.m=1;view.y++;}render();});
+  render();
+</script>
+</body>
+</html>
