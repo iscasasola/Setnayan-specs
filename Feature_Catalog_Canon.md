@@ -40,6 +40,7 @@
 | Pakanta | Your Wedding Song | Owned custom song; becomes the soundtrack of every video | Pro | ₱5,499 · $99 | $156 | ✅ |
 | Cipher | Monogram Maker | Design your two-initial mark | **Free to design** | free | — | ✅ |
 | Animated Monogram | — | Animate + auto-deploy the mark (QR, site, video, LED) | **Pro** | ₱2,499 · $44 | $69 | ✅ |
+| Upload Your Own | event-logo upload | Bring a designer's logo / existing mark into the deploy + animate engine | Free input → Pro to deploy | free | — | ✅ |
 | Kwento | Photo Stories | Guests write a short story on a photo | Free | free | — | ✅ |
 | Kwento Magazine | Memory Magazine | Auto-designed PDF storybook (photos + Kwento + love story) | Free digital / Pro print | free | — | ✅ |
 | Custom QR | Guest QR Codes | Personalized QR per guest for invites + check-in | Pro | ₱999 · $19 | $30 | ➖ |
@@ -50,6 +51,19 @@
 | Seating Chart | — | Interactive table editor + QR + meal counts | Free | free | — | ✅ |
 
 *(Free planning tools — Budget, Guest List, Mood Board — round out the Free tier; not sold separately.)*
+
+### Monogram — three on-ramps (one engine)
+
+The mark can enter the system three ways; all feed the same deploy-everywhere + animate engine, so **"upload" is a path into the paid Animated Monogram, not a separate SKU**:
+
+1. **Make it** — Cipher Monogram Maker (free, in-app).
+2. **AI design it** — Setnayan AI bespoke studio (paid generation).
+3. **Upload your own** — designer's logo / existing event mark (free input). Respects couples who already have a mark, and is essential for non-wedding event types (corporate/debut) that arrive with branding.
+
+- **Pricing:** upload is **free**; deploying/animating any mark = the **₱2,499 Animated Monogram**. No new SKU.
+- **Animation honesty:** uploaded marks get **template reveal animations** (fade/scale/shimmer, and draw-on *if* a real-path SVG). The signature **restroke/draw-on** is Cipher-only (needs stroke data) — surface this in the UI as a gentle nudge, not a block.
+- **Guardrails:** SVG preferred (PNG transparent ≥ min res; offer **vectorize** for low-res raster so it deploys to LED 8K + print); **NSFW moderation** (non-disableable); **ownership attestation** checkbox (it gets baked into renders/print).
+- **→ 0037 spec flag (2026-06-13):** absorb "Upload your own" as a first-class third path in `0037_bespoke_monogram/` — entry choice card (3 options), upload+validate+vectorize flow, the limited-animation set for uploads, and the moderation/attestation gates. Customer surface in the monogram editor; admin moderation surface for flagged uploads.
 
 ---
 
