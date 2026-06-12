@@ -311,6 +311,9 @@ V1.1 will add escalation at 10% (push to crew) and auto-pause at 5% — V1 ships
 
 ## Pro Camera Bridge — DSLR pairing
 
+> **⚠ SUPERSEDED IN PART — see [`Camera_Bridge_Build_Plan_2026-06-11.md`](Camera_Bridge_Build_Plan_2026-06-11.md) (canonical build plan).** Key corrections (research-verified 2026-06-11): (1) the symmetric 4-brand SDK matrix below is **optimistic — only Canon (CCAPI) is a genuine mobile-WiFi capture API**; Sony + Nikon have NO mobile SDK (capability gap, V2-only) and Fujifilm is Android-USB-only with a warranty-voiding EULA → **V1 = Canon bodies only**. (2) Owner extended the bridge to a THIRD surface: **Patiktok** (with Papic + Panood). (3) The Panood target below assumes the **retired** WebRTC→SFU pipeline — the live path must be redefined against BYO-YouTube and is gated on a CCAPI live-view field test. (4) The real parallel axis is SURFACES + now-vs-gated, not brands; critical path = core+mock → Papic sink → true-native Android binary → CanonBridge (~5-6 Claude-Code weeks). (5) **C1+C2 shipped 2026-06-11**: `apps/web/lib/camera-bridge/` (protocol + MockBridge + pairing FSM, 17-test suite) + the BLE→WiFi transport correction in `apps/mobile`.
+
+
 ### What it is
 
 A purchasable add-on that turns one phone seat into a phone + DSLR pair. The phone retains every responsibility it had in V1 — gesture shutter, tag drawer, last-5 strip, face detection, EXIF stamping, adaptive compression, offline queue, upload — but the **optical capture surface** moves to a connected DSLR. The phone fires the DSLR's shutter via vendor SDK; the DSLR captures the photo or clip; the file transfers to the phone over WiFi; from there everything proceeds as in the phone-internal path. A bridge unlock is **per device-pair**, multi-purchase, ₱1,499 each, registered as `pro_camera_bridge_addon` in the service_orders (V1 apply-then-pay) (shared SKU with 0011 — one purchase counts toward whichever surface the paired phone is running, Papic or Panood).
@@ -974,6 +977,814 @@ Sprints 2 and 3 run in parallel with Sprint 1 and start as soon as their backend
 - **0008 (seating chart print pack):** print-pack QR for the personal-card check-in flow already exists in 0008's print pack. Kiosk app reuses it. No new artifact needed; just verify the QR token format matches what the kiosk app expects.
 - **0011 (panood):** the WebRTC ingest pipeline + compositor already accept any WebRTC publish; Sprint 6 only adds the camera-operator mode in the 0012 binary. No 0011 backend changes.
 - **0013 (platform stack):** schemas + buckets in Sprint 0. Block on this before kicking off Sprints 1–3.
+
+---
+
+## Output-layer build order — Live Wall → SDE → Stories → Thank-You (sequenced 2026-06-10)
+
+> **Why this section exists.** The Sprints above sequence the *capture* side (seats, Cam Bridge, face, metadata, offline). They do **not** sequence the **produced-output layer** — Live Photo Wall, SDE, Guest Stories, Thank-You Video. Competitive research (2026-06-10 · memory `project_setnayan_papic_competitive_strategy`, vs Moments / Waldo / Kwikpic / POV / Kululu / Pic-Time) found this layer is Papic's real moat: **no competitor auto-produces a highlight reel / SDE / thank-you with cleared music** — they can't, because they don't own the music. All four SKUs are "Coming soon" today, so the differentiation is the part still unbuilt. This is the order to build them in.
+
+> **Estimates are Claude Code build time, not human-engineer months** (owner convention) + calendar-bound externals called out separately. The legacy "weeks 1–N" sprints above predate that convention. `service_key` for each add-on per `Pricing.md § 0` / `lib/sku-catalog.ts` — these are cataloged but `isActive=false` today; confirm keys at build time.
+
+### Phase 0.A — Gating prerequisite: the live capture feed (must exist first)
+
+Every output feature consumes the same input: tagged Papic photos/clips flowing into the event pool with NSFW + consent + FaceBlock flags resolved. Today the native capture app is **not built** (Capacitor shell only); only the webapp slice + couple gallery ship. **Nothing in this section can light up until the browser-based capture path (paparazzi seats + disposable cameras) is actually emitting photos.** That capture path — not the render pipeline — is the true blocker. Treat "capture emits photos" as the hard prerequisite.
+
+### Cross-cutting privacy rule (applies to all four)
+
+Live Wall, SDE, Stories, and Thank-You all display or compile guest faces. Each must honor the same multi-view rules: **NSFW filter on (cannot disable), FaceBlock-opted guests blurred on the public surface (server-rendered derivative, not CSS), per-event face scope, RA 10173 consent.** The Live Wall is a *public venue projection* — the strictest case: a FaceBlock guest must appear blurred on the wall in real time.
+
+### Phase 0.B — Shared render foundation (needed for SDE/Stories/Thank-You, NOT for Live Wall)
+
+The video features ride one backbone: the template-driven FFmpeg/Remotion render worker + owned-AI music pairing + the ~400-template library. Two seeds already exist in spec — Personal Reels render (1080×1920 H.264 in 30–90 s; acceptance criteria above) and Auto-Recap (FFmpeg, no AI, 60–90 s). SDE/Stories/Thank-You are new *template formats + curation logic* on the same worker, not new pipelines. **Live Wall is photo display (no video encode) and does not depend on this — which is exactly why it goes first.**
+- **Calendar-bound external:** the SDE / Stories / Thank-You template designs + any new music pairings come from the Cowork asset workstream (`14_Music_Catalogue_Cowork_Playbook.md`) — owner-side, runs in parallel, not Claude Code time.
+
+### Phase 1 — Live Photo Wall · ₱2,499 (⚠ price — see drift note)
+
+**What:** a full-screen real-time collage projected at the venue (TV / projector / LED) that fills as paparazzi + disposable cameras shoot, with a live capture count. The in-venue "wow" + the social engine that drives guest participation. Table stakes among capture-camp competitors (POV, Kululu, PhotoShare.ph) and a PH reception expectation (booth live-walls).
+**Why first:** highest visible impact per build-day, no video-render dependency, and the **display surface already shipped** (2026-06-09 — `events.photo_wall_photos` masonry on the recap page, with the standing note to "source the wall from `papic_photos` once 0012 ships its live pipeline"). What's missing is only the *live feed* into it.
+**Depends on:** capture feed (0.A) · NSFW + FaceBlock gates · existing `photo_wall_photos` display.
+**Build:**
+- [ ] `/wall/[event-id]` full-screen display route (no chrome; auto-advancing animated collage; live count badge "N photos captured live · Powered by Setnayan")
+- [ ] Live feed: new approved `papic_photos` for the event (post-NSFW, post-consent) pushed via polling or lightweight realtime
+- [ ] **Server-side FaceBlock** applied to wall frames (a blurred-opt-out guest is blurred on the projection — strict, real-time)
+- [ ] Couple/coordinator moderation: hide-from-wall toggle; honor the live-event override of the 7-day review window
+- [ ] Reuse the recap-page masonry styling for visual continuity
+**Claude Code time:** ~8–11 days (re-scoped + owner-confirmed 2026-06-11 — see the full **Salamisim** section below; the original ~1–2-day guess under-scoped the anonymous-projection security + the server-baked FaceBlock pipeline).
+**Done when:** a photo shot at the venue appears on `/wall/[event-id]` within seconds, FaceBlock guests render blurred, NSFW is filtered, the live count increments.
+
+### Phase 2 — SDE (Same-Day Edit) · ₱4,999 (⚠) · 3-min compilation
+
+**What:** the Filipino wedding ritual — a ~3-minute edited highlight screened *at the reception, same day*. Auto-curated from the event pool, template-driven, scored to owned-AI music. Highest cultural-leverage feature (couples already pay ₱150–300k for SDE-led video packages).
+**Why second:** establishes the **video render backbone** that Stories + Thank-You reuse, and owns an existing behavior rather than teaching a new one.
+**Depends on:** 0.B render foundation · capture feed · SDE template designs (Cowork) · music catalogue.
+**Hard constraint:** *same-day* — the render must complete inside the reception window. Deterministic curation (no per-render AI) + a fast, reliable 3-min 1080p encode.
+**Build:**
+- [ ] Auto-curation heuristic (no per-render AI): rank the pool by quality + face-coverage + moment diversity → shot list; couple/coordinator can nudge
+- [ ] SDE template format (3-min, 16:9 for projection + 9:16 variant), slot timings, monogram intro/outro
+- [ ] Music pairing from the owned catalogue by template `music_pairing_categories`
+- [ ] Render orchestration tuned for same-day latency + a "screen now" handoff to the coordinator
+- [ ] FaceBlock / NSFW honored in the compiled output
+**Claude Code time:** ~3–5 days (curation + SDE template format + same-day render orchestration).
+**Done when:** from a live event pool, an SDE renders within the reception window, plays 16:9 on the venue screen, honors FaceBlock/NSFW, music auto-paired.
+
+### Phase 3 — Guest Stories · ₱1,499 (⚠) · 30-second story maker
+
+**What:** a per-guest 30-second vertical "story" each guest builds from their own tagged photos. The viral, per-guest loop — every guest leaves with something to post.
+**Why third:** it is essentially the **already-specced Personal Reels builder** (1–30 s, 9:16, guest-built, owned music — see *Personal Reels* above) productized to a 30-s story SKU. Cheapest of the four because the builder + render already exist; it just needs story templates + the SKU gate.
+**Depends on:** 0.B render foundation · the existing Personal Reels builder · story template pack (Cowork).
+**Build:**
+- [ ] Story template pack (30-s, 9:16) added to the template library
+- [ ] Scope the existing Personal Reels builder to the Stories SKU (30-s cap, story templates, share targets)
+- [ ] SKU gate via 0034
+**Claude Code time:** ~1–2 days (reuses the reel render + builder).
+**Done when:** a guest with tagged photos builds + renders a 30-s 9:16 story with owned music and shares it.
+
+### Phase 4 — Thank-You Video · ₱3,499 (⚠) · 5-min compilation
+
+**What:** a ~5-minute couple→guests compilation delivered after the event to everyone who attended.
+**Why last:** post-event, **no live or same-day constraint** → the safest to defer; reuses the entire backbone with the loosest deadline.
+**Depends on:** 0.B render foundation · capture feed · attendee list (0001) · email delivery (0028) · thank-you template (Cowork).
+**Build:**
+- [ ] Thank-You template format (5-min), couple-curated or auto-curated from the pool
+- [ ] All-attendee delivery (email-only V1 via 0028, per no-SMS)
+- [ ] FaceBlock / NSFW honored
+**Claude Code time:** ~1–2 days.
+**Done when:** a 5-min thank-you renders post-event and delivers to every attending guest by email.
+
+### Sequence + dependency graph
+
+```
+Phase 0.A capture feed (BLOCKER — must emit photos) ──┬───────────────────────────────────────────┐
+                                                      │                                           │
+Phase 0.B render foundation (FFmpeg/Remotion + music) ┼── Phase 2 SDE ──┬── Phase 3 Stories        │
+   (Cowork: templates/music land in parallel)         │                └── Phase 4 Thank-You       │
+                                                      └── Phase 1 Live Wall (no video dep) ────────┘
+```
+
+Phase 1 (Live Wall) needs only the capture feed, so it ships first and proves the live pipeline. Phase 0.B + Phase 2 (SDE) build the video backbone; Phases 3–4 reuse it. **Total Claude Code build ≈ 1.5–3 weeks**, gated on the capture feed being live and the Cowork template/music assets landing in parallel.
+
+### ⚠ Price reconciliation flag (owner — confirm before these go live)
+
+Today's live site (`setnayan.com/pricing`, fetched 2026-06-10) shows **SDE ₱4,999 · Thank-You ₱3,499 · Guest Stories ₱1,499**. The 2026-06-04 reconciliation line at the top of this file recorded **SDE ₱3,499 · Thank-You ₱5,499 · Guest Stories ₱1,999** — the SDE and Thank-You numbers look **swapped/changed** since. Per source-of-truth order the **live site wins**; the prices in this section use the live-site figures. **Owner: confirm the live-site set and I'll align `Pricing.md § 0` + the line-13 note.** Live Photo Wall ₱2,499 was not re-listed in today's Papic fetch — confirm it still ships at that price.
+
+---
+
+## Kwento — photo-anchored guest messages ("the story behind this moment")
+
+> **Designation:** 0012 Papic · net-new `photo_messages` table · designed 2026-06-10. Owner ask (verbatim intent): *"On Papic we can also create a message/caption on the photo so the people are telling a story to the couple."*
+> **One line:** A guest taps a photo of themselves, tells the couple what was happening, and their words land in the couple's review queue, overlay the Live Wall in real time, and become an on-screen caption (later, a music-ducked voiceover) when that photo plays in the SDE / Thank-You video on Setnayan-owned music.
+> **Shape:** text-caption-first MVP wired to the full sentiment-as-fuel output path. Voice/video is a flagged Phase-2 owner decision (§ Owner sign-offs), **not** V1.
+> **✅ P0–P2 SHIPPED 2026-06-11** (PR #1257, merged; migration `20261113000972` applied + prod-smoked). Live, end to end: `photo_messages` (polymorphic anchor; consent-at-insert; `print_consent` fail-closed; DB interlocks `wall_needs_clean`+`approved_needs_screen`) · `guest_message_blocks` · service-role `submit_photo_message` (cap 10/event incl. rejected · 3/60s burst · edit-resets-moderation, max 3, locked-once-baked) · audited `guest_visible_messages` · one-tap `wall_approve_caption`/`wall_clear_caption` · **Tier-1 EN+TL+CEB moderation lexicon + PH-PII gate** (`lib/kwento-moderation.ts`, 17 tests; Tier-2 OFF per residency rec) · the guest author sheet on the disposable camera (post-shot, consent tick blocks Send) · the couple review queue on the moderation page · the wall lower-third with attribution. Still open per this spec: the guest 24h self-delete surface, the 0028 email nudges, Tier-2 residency sign-off, the standalone-guestbook reconciliation.
+>
+> **Owner sign-offs (locked 2026-06-10):** ✅ **text-only** in V1 · ✅ **free for every guest incl. free Receivers** (monetize the produced video; no new SKU) · ✅ Live Wall = **couple/coordinator one-tap approve-to-wall** (no auto-publish, no hold-delay). The remaining items in § Owner sign-offs stay open for owner decision.
+
+### Why this shape (and what "story" means in V1)
+
+The literal primitive is **one message bound to one photo by one guest** — a caption, not a chaptered narrative builder. V1 ships the caption and brands the aggregate as the story: *the couple's whole collection of Kwento, read together, is the story their guests told them.* The per-photo narrative/chaptered builder is explicitly **V1.1**. Differentiation does not live in the authoring surface — it lives in where the words go (the produced video the platform already plans to ship). Setnayan **owns its music** (Personal Reels music is ₱0, see `0012:1031`); no competitor can legally compile guest UGC + guest-voice narration over owned music. *"The photos tell the story; the guests narrate it."*
+
+### User flow — zero-account guest → couple receives
+
+```
+GUEST (zero-account, S89G-…)
+  │  scans Universal Event QR → name + email → signed event-scoped session
+  │  (existing 0002 magic-link: httpOnly cookie carrying { guest_id, event_id, exp 30d } — a custom
+  │   setnayan_guest_session JWT, NOT a Supabase auth.uid() row — this is load-bearing for RLS below)
+  ▼
+"Photos of you" feed   (existing tagged-photos view; photo_tags.guest_id = me, 0012:740)
+  │  each photo card carries a soft rotating prompt chip:
+  │     "✍️ Ano'ng nangyari dito? Kwentuhan mo sila."  ("What happened here? Tell them.")
+  ▼
+AUTHOR SHEET (inline expand-in-place, no modal, thumb-zone, single screen)
+  │  parent photo pinned · 280-char textarea · emoji · rotating photo-anchored prompt
+  │  MANDATORY write-time consent tickbox (RA 10173 — captured on EVERY message, not "first only")
+  ▼
+SUBMIT → POST /api/papic/messages { photo_id, body_text, consent:true }
+  │  server action validates the guest-session JWT (service_role write — guests have no auth.uid())
+  │  → resolves guest_id from the SESSION (never the rotatable qr_token, per 0012:143)
+  │  → atomic per-guest cap + burst guard inside the insert txn
+  │  → SYNCHRONOUS Tier-1 text gate (EN+TL+CEB lexicon + PH-PII regex) runs BEFORE any surface
+  │  → Tier-2 multilingual classifier runs ASYNC (can only DOWNGRADE clean→flagged; never blocks the send)
+  │       clean   → status='pending', moderation_state='clean',  wall_eligible per § wall rule
+  │       flagged → status='pending', moderation_state='flagged', wall_eligible=FALSE (couple sees it badged)
+  │       blocked → rejected inline at the editor ("Let's keep it sweet 💛 — try rephrasing")
+  ▼
+THREE FAN-OUTS, each with its own gate
+  ├─ COUPLE GALLERY (always)  → couple sees it IMMEDIATELY, full attribution (master view, 0012:992)
+  │                             → rides the existing 7-day review window before PUBLIC unlock (0012:746)
+  ├─ LIVE WALL (if live)       → eligible only after the stricter wall gate (§ Live Wall) overlays the frame
+  │                             (live override of the 7-day window per 0012:1008; couple/coordinator kill switch)
+  └─ PRODUCED-VIDEO POOL       → has_approved_message = deterministic curation BOOST in SDE/Thank-You
+                                 → baked ONLY into FINAL renders produced AFTER approval (§ Erasure)
+  ▼
+Guest keeps Edit / Delete for 24 h (any edit RESETS moderation, see § Edit). RA 10173 erasure always available.
+T+1–2 day Resend email nudge to non-writers (email-only, no SMS).
+```
+
+**Durable identity (load-bearing):** the message binds to `guests.guest_id` (UUID PK), never to `qr_token` or the cookie (`0012:143`). The **stored row** survives QR re-issue, cookie loss, device change. **Authoring/edit/24h-withdraw actions** require a live session, so a rotated QR forces a re-scan before those actions work again — therefore the RA 10173 erasure path is **also** reachable from the couple/admin side so a rotation can never strand an erasure request.
+
+### UX — guest authoring surface (inline in "Photos of you")
+
+```
+┌─────────────────────────────────────┐
+│  [ photo of Tita Baby laughing ]    │   ← parent photo (multi-view resolved)
+│  📸 by Kuya Paparazzi · 7:14 PM      │
+│  ┌─────────────────────────────────┐ │
+│  │ ✍️ Ano'ng nangyari dito?         │ │   ← ghost prompt chip (rotates per visit)
+│  └─────────────────────────────────┘ │
+└─────────────────────────────────────┘
+        ↓ (tapped — expands in place, autofocus)
+┌─────────────────────────────────────┐
+│  [ photo of Tita Baby laughing ]    │
+│  ┌─────────────────────────────────┐ │
+│  │ Right after the first dance —    │ │
+│  │ hindi mapigil ni Tita ang luha   │ │
+│  │ sa sobrang saya 🥹               │ │
+│  │                          198/280 │ │
+│  └─────────────────────────────────┘ │
+│  😊 ❤️ 🥹 🎉                          │
+│  ☑ I'm okay for the couple & guests   │   ← RA 10173 write-time consent (EVERY message; blocks Send)
+│    to see my name + message, and to  │
+│    use it in their wedding video. 💛 │
+│        [  Send to the couple  💌  ]  │   ← primary, thumb-zone bottom
+│        Cancel                        │
+└─────────────────────────────────────┘
+        ↓ (sent)
+  "Naipadala na! 💛 Salamat — your story is on its way to the couple."
+  [ Edit ]  [ Delete ]   ← 24 h
+  "43 kwento na ang naipadala"   ← live social-proof counter
+```
+
+**Accessibility (required, not optional — elderly Tita-Baby guests are a core audience):**
+- WCAG AA contrast on the sheet, textarea, and consent line; visible focus ring; logical focus order.
+- The sheet is fully **keyboard-operable** and dismissible without touch (not tap-only); emoji row and consent box are reachable by Tab.
+- Programmatic labels on the consent checkbox and Send; `aria-live="polite"` on the social-proof counter.
+- `prefers-reduced-motion` disables prompt-chip rotation and slows/stops Live Wall auto-advance.
+- Title-card text in renders is real text; guest-facing playback exposes the message as readable text, never image-only.
+
+### UX — couple's view (new "Kwento" lens in the 0021 gallery)
+
+```
+FILTERS:  [ All ]  [ Photos of us ]  [ Untagged ]  [ Flagged ]  [ 💌 Kwento ●3 ◀NEW ]
+
+⏳ Stories + photos go public in 3d 6h.   [ Extend ]  [ Release early ]   ← reuses the 0012:746 banner
+   Clean messages publish with their photo. Flagged messages stay hidden until you approve.
+
+┌──────────────────────────────────────────────┐
+│  [ photo ]            💌 2 messages            │
+│  Tita Baby Reyes · pending                     │
+│  "Right after the first dance — hindi mapigil  │
+│   ni Tita ang luha sa sobrang saya 🥹"         │
+│        [ Approve ]  [ Hide ]  [ Reject ]       │
+│  ──────────────────────────────────────────── │
+│  ⚠ Marco Cruz · flagged for review             │   ← moderation_state='flagged', couple-only
+│  "[hidden — needs your review]"                │
+│        [ View ]  [ Approve anyway ]  [ Reject ] │
+│  🚫 [ Block this guest from messaging ]         │   ← per-(event,guest) block lever (§ Abuse)
+└──────────────────────────────────────────────┘
+Bulk:  ☑ 12 selected   [ Approve selected ]  [ Hide selected ]
+```
+
+The couple **always sees every message immediately**, full attribution, master view (`0012:992`). `pending` governs only *public* visibility.
+
+### Data model
+
+> **⚠ Schema correction (2026-06-11, surfaced by the Live Photo Wall design).** The `photo_messages.photo_id … REFERENCES photos(photo_id)` below is **broken-on-arrival — there is no `photos` table.** Papic captures live in TWO tables (`papic_photos` = seats · `papic_guest_captures` = disposable cameras). Re-anchor the message to a **polymorphic `(source_table, source_id)`** (or a shared `wall_feed.feed_id`) so a disposable-camera frame — the cohort most likely to write a Kwento — can also carry a caption. See the Salamisim § "Data model" for the canonical polymorphic shape.
+
+One new table, `photo_messages`. Dedicated — **not** `photos.caption` (per-message RA 10173 erasure must be clean; `photos` has no author FK) and **not** an overload of `photo_tags.source` (a tag = who is *in* a photo; a message = authored content).
+
+**Honest reuse statement (corrected):** `photo_messages` **does not mirror `video_guestbook_entries` column-for-column.** Verified: `video_guestbook_entries` (`Database_Schema_Master.sql:1580-1595`) has only `status` + `r2_purged_at` + the `reviewed_*`/`user_deleted_at` erasure columns and a `duration_sec 1–60` cap. It carries **no** `moderation_state`, `moderation_labels`, `wall_eligible`, `hide_from_wall`, or `consent_captured_at`. Those are **net-new** here. `photo_messages` **shares the erasure/status vocabulary** (`status` enum + `submitted_at`/`reviewed_by_*`/`user_deleted_at`/a purge-audit column) and **adds a moderation/wall layer the guestbook lacks.** The couple-review queue is therefore a **query-layer UNION that tolerates NULL `moderation_state` on guestbook rows** — not a free "one schema, no forking" reuse. Text moderation is first-class net-new infra, budgeted as such below.
+
+**Reconciliation (surface to owner):** `photo_messages` (photo-anchored, text) and `video_guestbook_entries` (standalone, video, already shipped couple-side per `0031:6`) **coexist; they do not merge** (merging would force a 60s-video-vs-text cap reconciliation and touch a shipped surface). This is a third guestbook-adjacent construct alongside (a) the 2026-05-09 Wedding-Challenges guestbook lock (`DECISION_LOG.md:50`) and (b) the shipped 0031 table — owner must bless `photo_messages` as the canonical photo-anchored primitive (see Owner sign-offs).
+
+```sql
+-- 0012 extension: photo-anchored guest messages ("Kwento sa Mag-asawa"). TEXT-ONLY in V1.
+-- kind enum reserves room for voice/video (owner decision). Shares status/erasure vocab with
+-- video_guestbook_entries; ADDS a net-new moderation/wall layer that table does not have.
+CREATE TABLE photo_messages (
+  message_id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id          UUID NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,  -- Pattern B scope key
+  photo_id          UUID NOT NULL REFERENCES photos(photo_id) ON DELETE CASCADE,  -- the photo this story is about
+  guest_id          UUID NOT NULL REFERENCES guests(guest_id) ON DELETE CASCADE,  -- DURABLE author; walk-ins mint S89G too
+
+  kind              TEXT NOT NULL DEFAULT 'text' CHECK (kind IN ('text')),        -- voice/video DEFERRED
+
+  body_text         TEXT NOT NULL CHECK (char_length(body_text) BETWEEN 1 AND 280),
+  prompt_text       TEXT,                                                          -- snapshot of the prompt answered
+
+  status            TEXT NOT NULL DEFAULT 'pending'
+                    CHECK (status IN ('pending','approved','rejected','user_deleted')),
+  moderation_state  TEXT NOT NULL DEFAULT 'unscreened'
+                    CHECK (moderation_state IN ('unscreened','clean','flagged','blocked')),
+  moderation_labels JSONB,                                                         -- {profanity,abuse,pii}; PII redacted before any Tier-2 send
+  wall_eligible     BOOLEAN NOT NULL DEFAULT FALSE,
+  hide_from_wall    BOOLEAN NOT NULL DEFAULT FALSE,                                -- real-time kill switch (couple/coordinator)
+  author_publicly_hidden BOOLEAN NOT NULL DEFAULT FALSE,                           -- TRUE if author FaceBlocked → whole msg suppressed publicly
+  baked_into_render BOOLEAN NOT NULL DEFAULT FALSE,                                -- TRUE once compiled into a FINAL render → edits locked
+
+  consent_captured_at  TIMESTAMPTZ NOT NULL,                                       -- RA 10173: mandatory at insert (no escape hatch)
+  submitted_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  edited_at            TIMESTAMPTZ,                                                -- last edit; any edit resets moderation (§ Edit)
+  edit_count           INT NOT NULL DEFAULT 0 CHECK (edit_count <= 3),
+  reviewed_by_couple_at TIMESTAMPTZ,
+  reviewed_by_user_id   UUID REFERENCES users(user_id),
+  user_deleted_at      TIMESTAMPTZ,                                               -- 24h self-withdraw + RA 10173 erasure
+  hard_deleted_at      TIMESTAMPTZ,                                               -- purge-audit (proves the RA 10173 "within N days" SLA)
+  updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- one message per (guest, photo) keeps it a caption, not a comment thread
+  CONSTRAINT uq_photo_messages_author UNIQUE (photo_id, guest_id),
+
+  -- DB-LEVEL surface guards: the "cannot disable NSFW" rule must survive a buggy code path.
+  CONSTRAINT wall_needs_clean     CHECK (wall_eligible = FALSE OR moderation_state = 'clean'),
+  CONSTRAINT approved_needs_screen CHECK (status <> 'approved' OR moderation_state IN ('clean','flagged'))
+);
+```
+
+### RLS — Pattern B; guest reads via one audited RPC; guest writes via service_role
+
+> **⚠ Correction (2026-06-11, verified vs shipped origin/main):** the statement below that `coordinator` is NOT an `event_members.member_type` is **stale corpus drift.** The shipped `public.member_type` ENUM is `('couple','guest','vendor','coordinator')` — so **`coordinator` IS a real member type.** The `thread_join_authorizations` table referenced in this section is **unnecessary and was NOT built** (Salamisim P0, migration `20261104000959`); coordinator moderation authority is simply **`member_type IN ('couple','coordinator')`**.
+
+The load-bearing identity fact: **zero-account guests carry a custom `setnayan_guest_session` JWT, not a Supabase `auth.uid()` row.** So `current_event_ids()` (keyed on `auth.uid()`, `RLS_Policy_Pattern.md:362`) returns nothing for them, and **RLS cannot protect the guest read path at all.**
+
+> **✅ Verified against shipped code (`origin/main`, 2026-06-10).** Confirmed true: `apps/web/lib/guest-session.ts` issues the custom `setnayan_guest_session` JWT (`{guest_id, event_id, qr_token}`, no `auth.uid()`); guest data is read/written through a **service-role admin client with app-level scoping** (`lib/papic-guest.ts`, `lib/supabase/admin.ts` — *"bypasses RLS… perform application-level authorization inside the calling code"*), and the shipped `guest_face_enrollments` migration documents it verbatim: *"writes still flow through the admin-client server actions, so no guest write policy is defined."* **So this service-role + audited-RPC design MATCHES shipped reality — it is consistency-hardening, not a bug fix.** ⚠ The earlier alarm that shipped policies `guests_read_own`/`face_enrollments_select` were broken is a **FALSE POSITIVE from a drifted corpus doc** — those names exist only in `02_Specifications/Database_Schema_Master.sql`; the real shipped policies are `guest_reads_own_row` / `guest_reads_own_face_enrollment` (`TO authenticated`, intentionally for the logged-in-account reader, **not** broken). Live migrations — not the schema-master — are ground truth.
+
+Two corrections follow:
+
+1. **All guest-facing reads go through ONE `SECURITY DEFINER` RPC** (`guest_visible_messages`) that hard-codes the visibility filter in a single audited place — never scattered hand-filters in N server actions. A guest can never receive a `pending`/`flagged`/`rejected`/`user_deleted` row, nor a message whose parent photo is FaceBlock-/consent-hidden for that viewer, nor a FaceBlocked author's message on a public surface.
+2. **Guest writes/edits/withdraws** go through a JWT-gated service-role action; there is **no client-direct guest INSERT/UPDATE policy** (the shipped `face_enrollments` precedent, `0012_papic_migration.sql:349`). Do **not** invent a `current_guest_id()` helper.
+
+```sql
+-- READ (couple + admin see ALL; auth.uid()-bearing members see APPROVED only).
+-- NOTE: 'coordinator' is NOT an event_members.member_type (CHECK is 'couple','guest','vendor',
+-- Database_Schema_Master.sql:180). Coordinator authority comes from thread_join_authorizations on a
+-- coordinator-class thread (the 0031:187/385/425 model), so it is added as an explicit EXISTS branch.
+CREATE POLICY photo_messages_read ON photo_messages FOR SELECT USING (
+  is_admin()
+  OR ( event_id IN (SELECT current_event_ids())
+       AND ( status = 'approved'
+          OR EXISTS (SELECT 1 FROM event_members m
+                     WHERE m.event_id = photo_messages.event_id
+                       AND m.user_id = auth.uid()
+                       AND m.member_type = 'couple') ) )
+);
+
+-- MODERATE (couple + admin always; coordinator via the real authorization mechanism, read+act,
+-- never mode-override — couple-default per 0031:425).
+CREATE POLICY photo_messages_couple_moderate ON photo_messages FOR UPDATE USING (
+  is_admin()
+  OR EXISTS (SELECT 1 FROM event_members m
+             WHERE m.event_id = photo_messages.event_id
+               AND m.user_id = auth.uid() AND m.member_type = 'couple')
+  OR EXISTS (SELECT 1 FROM thread_join_authorizations a            -- coordinator-class authorization
+             JOIN chat_threads t ON t.thread_id = a.thread_id
+             WHERE t.event_id = photo_messages.event_id
+               AND a.user_id = auth.uid() AND a.role = 'coordinator'
+               AND a.revoked_at IS NULL)
+) WITH CHECK ( event_id IN (SELECT current_event_ids()) OR is_admin() );
+
+-- guest_visible_messages(p_event_id, p_guest_id, p_mode) SECURITY DEFINER:
+--   p_mode='public'  → status='approved' AND author_publicly_hidden=FALSE
+--                      AND parent photo visible to p_guest (FaceBlock + photo_consent multi-view join)
+--   p_mode='mine'    → guest_id = p_guest_id (the author's own kwento, any status)
+-- NOTHING else is ever returned. This is the single audited choke point for every guest surface,
+-- the Live Wall feed, the landing-page playback, and the produced-video compile pool.
+-- NO client-direct guest INSERT/UPDATE policy — authoring/edit/withdraw run through the JWT-gated
+-- service-role action (validates setnayan_guest_session → resolves guest_id → caps → text gate → write).
+```
+
+`is_admin()` + `current_event_ids()` are already shipped (`RLS_Policy_Pattern.md:5`). RLS-map entry to add: `photo_messages = Pattern B; member reads = approved-only; guest reads via SECURITY DEFINER guest_visible_messages(); guest writes via service_role` (mirrors `guest_video_guestbook_entries`, `RLS_Policy_Pattern.md:505`).
+
+### Backend logic
+
+**Who may write (eligibility — surfaced with recommendation).** A message is **authored content, not an upload** — it consumes zero capture credits and never touches the retired **All-Guest Unlock** *upload* tier (`0012:192`). Precedent: anonymous-QR-session guests already author UGC free via the video guestbook (`0031:386`).
+
+| Actor | May write text? |
+|---|---|
+| **Receiver** (free, zero-account, no SKU) | ✅ **YES (recommended)** — the participation engine that feeds the moat |
+| **Papic Guest** (paid disposable cam) | ✅ |
+| **Paparazzi** (seat) | ✅ |
+| **Couple / coordinator** | ✅ + moderation authority |
+
+**Anti-flood (concurrency-safe, DB-enforced — not a denormalized counter):** soft cap **10 messages / event / guest** (configurable) enforced by a `SELECT count(*) … FOR UPDATE`-guarded check **inside the insert transaction** (a denormalized `guests.message_count` would race on concurrent submits and drift on `ON DELETE CASCADE` — rejected). **Rejected/blocked messages count toward the cap** so rejection actually throttles a bad actor. Burst limit: **max 3 messages / 60s**. `UNIQUE(photo_id, guest_id)` caps a guest at one message per photo. N blocked attempts → auto-escalate the guest to the admin queue.
+
+**Text NSFW / profanity moderation — NET-NEW infra (flag to owner).** Today's NSFW filter is **image-only** (`0012:992`); zero text moderation exists in the corpus. The un-disableable rule now extends to text:
+- **Tier 1 (synchronous, blocking, ~₱0):** EN + Tagalog + **Cebuano/Bisaya** profanity/slur lexicon + PH PII/doxxing regex (phone/email/address). `clean` → proceeds; `flagged` → pending+badged, wall-ineligible; `blocked` → rejected inline at the editor.
+- **Tier 2 (asynchronous, multilingual classifier):** runs **after** the send so the guest never waits on an external call; it can only **downgrade clean→flagged**, never block. **Data-residency rule:** Tier-1-detected PII is **redacted before any external classification call** (raw phone/email/address never leave the platform); the call is **classification-only, no-retention, never a system of record** (consistent with the first-party-data + OSS-self-host locks). If a self-hosted/regional classifier is available, prefer it to avoid cross-border transfer entirely. **Outage fallback:** Tier-2 unavailable → leave at `flagged` (never auto-public). A held message shows the guest *"held for the couple to review"* — never silent failure; the only appeal is the couple's **Approve anyway**.
+
+### Multi-view visibility — inherits the parent photo, never its own logic
+
+A message inherits the visibility of its parent photo (`0012:992`). Resolved live by the Multi-View Engine, encapsulated in the `guest_visible_messages` RPC:
+
+1. **Couple / host:** sees everything — every message, full attribution, all statuses (`0012:992`).
+2. **Other guests (public):** see a message only if `status='approved'` **AND** the parent photo is visible to that viewer. If the parent photo is FaceBlock- or `photo_consent`-hidden for that viewer, the attached message is **hidden too** (a caption can't leak a blurred guest's identity).
+3. **FaceBlocked author = whole-message public suppression (corrected).** Name-hiding alone is **not** enough — a self-describing body ("as the maid of honor…") + the photo anchor re-identifies a blurred author. So if the author has `faceblock_enabled=TRUE`, the entire message is **suppressed on public surfaces** (`author_publicly_hidden=TRUE`); the couple always sees it in full. The author may optionally opt back into public display at write-time (default = hidden). The Live Wall is the strictest enforcement point.
+
+### 7-day review — two distinct paths
+
+| Surface | Review path |
+|---|---|
+| **Couple gallery / RECAP landing** | Couple sees immediately; **public** unlock waits for approval OR the configurable 0–14d window lapse (`0012:746`). On lapse: **clean publishes with its photo; flagged stays hidden until explicit couple approval** (stated on the countdown banner). Reuses the existing photo review window + bulk hide/unhide. |
+| **Live Wall (LIVE mode)** | Live override of the 7-day window (`0012:1008`), but **never auto-publishes**. **Owner-locked 2026-06-10:** a message reaches the projector **only** on an explicit **couple/coordinator one-tap approve-to-wall** — no auto-publish on filter-clean, no hold-and-display delay. The `wall_eligible ⇒ moderation_state='clean'` DB check still applies underneath (a flagged/blocked message can't be approved to the wall even by mistap), and `flagged` is **never** wall-eligible. A real-time `hide_from_wall` kill switch remains for both couple and coordinator. |
+
+### Edit / delete / erasure (RA 10173) — bait-and-switch closed
+
+- **Edit (author, within 24h, max 3):** **any** edit **resets** the row to `status='pending'`, `moderation_state='unscreened'`, `wall_eligible=FALSE`, `reviewed_by_couple_at=NULL`, pulls it from the Live Wall **and** the compile pool, and re-runs the gate. An already-approved message that is edited drops off public surfaces until re-approved. An audit trail ("changed after you saw it") is shown to the couple. **Once `baked_into_render=TRUE`, edits are locked** (the produced artifact is immutable).
+- **Self-withdraw (24h):** sets `user_deleted_at` → hidden immediately → purged within 24h.
+- **Couple reject:** `status='rejected'` → purged within 7 days. **Reject-for-abuse** retains the body + author `guest_id` in an admin-only evidence store beyond the normal purge (lawful basis: protection of rights/safety) so an abuser can't launder evidence by self-deleting.
+- **Hard erasure / face-data revocation:** `guest_id ON DELETE CASCADE` cascades the message — RA 10173 erasure for free; one guest's erasure never touches another guest's message on the same photo (single-author rows, `0012:607`). `hard_deleted_at` records the purge so the "within N days" SLA is auditable.
+- **Rendered-output erasure (corrected):** approved messages are baked **only into FINAL renders produced after approval** (so any erasure before finalization never reaches a render). If a message is erased/rejected **after** it was compiled into a delivered render, that render is **invalidated and re-queued** (re-render-and-replace) — an erased message must never remain visible in a delivered MP4.
+- **Export-my-data ZIP** must include the guest's `photo_messages` (extends `0031:285`). Retention rides the event media lifecycle (R2 hot 90d → cold → 5-yr purge, `0012:39`), with the faster RA 10173 paths taking precedence downward.
+
+### Abuse controls — block lever + admin escalation (net-new; nothing exists today)
+
+Verified: the corpus has **no** guest block/ban primitive (only a photo-report → couple queue at `0031:119`). The couple must not be the sole moderator of a harassment stream:
+- **Per-(event, guest) block:** couple/coordinator action `Block this guest from messaging` → a `guest_message_blocks` row → the write action refuses further INSERTs from that `guest_id` and hides their existing messages. Admin (0023) override available.
+- **Admin escalation queue (0023):** a guest whose messages are rejected N times, OR whose message trips Tier-2 abuse, surfaces to Setnayan admin for review/ban — not just to the couple.
+- **Report-this-message** guest-facing action, distinct from photo-report.
+
+### Integration — the sentiment-as-fuel path
+
+| Surface | Integration | Cost |
+|---|---|---|
+| **Couple gallery** (no output-phase dependency) | "💌 Kwento" filter + message child under each photo card + reuse the 7-day queue (query-layer UNION) + bulk moderate | near-zero gallery/queue reuse; **moderation layer is net-new.** **Ships first.** |
+| **Live Wall** (Phase 1) | `wall_eligible` lower-third overlays the projected frame; couple/coordinator `hide_from_wall`; FaceBlocked author suppressed | low + the net-new wall-grade text gate. Earliest in-venue "wow." |
+| **SDE** (Phase 2 — moat) | `has_approved_message` = deterministic curation **ranking boost** (`0012:1024`); message text → on-screen **title card / lower-third**; baked only post-approval | low — one template text-slot. **The moat.** |
+| **Thank-You Video** (Phase 4) | Same as SDE; loosest deadline; delivered email-only via 0028 | low |
+| **Guest Stories** (Phase 3 = productized Personal Reels) | The author's own message becomes their 9:16 story's caption/title card on owned music (`0012:1031`) | low |
+| **Personal landing (RECAP/EDITORIAL)** | Approved messages play back under photos, sorted `submitted_at ASC`, named-vs-"A guest" stack, "see all" beyond N, empty-state when a visible photo has no messages; **a message is never shown if its parent photo is hidden to the viewer** (couple-hidden photo suppresses its approved messages publicly too) | near-zero |
+
+**0031 reconciliation:** `photo_messages` (photo-anchored) and `video_guestbook_entries` (standalone) coexist and share one couple-review queue at the query layer; no table merge. The day-of `video guestbook` card (`0031:121`) gains a "Tell their story" entry that opens the photo-anchored author sheet.
+
+### Emotional framing — "Kwento"
+
+Branded **"Kwento"** (Tagalog: *story/tale*), EN-primary + natural Taglish warmth. **Ask at the moment of viewing** (the prompt meets the guest in their own "Photos of you" feed, the #1 participation lever); **use names, never "the couple"**; photo-anchored prompts extend `event_guestbook_prompts` with `context='photo_anchored'` ("Ano'ng nangyari sa litratong ito?" · "What were you feeling here?" · "Best advice for year one."); CTA **"Send to the couple 💌"**; confirmation **"Naipadala na! 💛"**; live "43 kwento na" social-proof counter (reuse `0031:136`); MC/DJ verbal nudge in the couple playbook + T+1–2d Resend email nudge (email-only).
+
+### Notifications (email-only, Resend — flags a 0028 scope touch)
+
+- **Guest:** "your message is live" (on approval) · "the couple is reviewing your note" (on flag). A held message must not be silent.
+- **Couple:** batched **digest** when messages land (not per-message).
+- These extend **0028's fixed 10-template V1 list** — adding message emails is a cross-iteration scope item to surface to the owner.
+
+### Pricing recommendation
+
+**FREE, text-only, for all guests including Receivers.** Text messages are near-zero marginal cost and are the **participation fuel** for the paid output layer; charging would starve the moat. Monetize the *produced video* the messages narrate — **SDE · Thank-You · Guest Stories** (peso figures carry the corpus-wide pricing-drift warning; don't hardcode them). PHP-centavo, **no new SKU.** Consistent with the "free to plan" positioning; a top-of-funnel warmth driver.
+
+### Phased build order (Claude Code time — never human-engineer months)
+
+> Per the timeline-units rule: Claude Code working spans + calendar-bound externals only.
+
+**Prereqs (~0.5 day):** the migration — `photo_messages` + RLS + the `guest_message_blocks` table + `guests.faceblock_enabled` (verified absent today — must land first; the multi-view rule has nothing to read without it) + `event_guestbook_prompts.context`. Apply via `supabase db push --db-url "$SUPABASE_DB_URL"` from a clean worktree (migrations don't auto-apply on main).
+
+| Phase | Scope | Depends on | Claude Code time |
+|---|---|---|---|
+| **P0 — Schema + write-path + moderation** | Migration; `moderateText()` Tier-1 lexicon (EN+TL+CEB) + PII regex + async Tier-2 (PII-redacted, no-retention); JWT-gated service-role write (validate session → resolve guest_id → atomic cap/burst → gate → write); `guest_visible_messages` SECURITY DEFINER RPC; block lever | prereqs | **~1.5–2 days** (text moderation + the audited read RPC are the net-new cost) |
+| **P1 — Guest author surface** | Inline expand-in-place sheet; rotating photo-anchored prompts; mandatory consent line; 24h edit/withdraw with moderation reset; social-proof counter; Resend nudge; **accessibility pass** | P0 | **~1–1.5 days** |
+| **P2 — Couple gallery + moderation** | "💌 Kwento" filter; message child; query-layer UNION queue + bulk moderate + flagged badge / "Approve anyway"; block-this-guest; digest email | P0 | **~1–1.5 days** (rides the built gallery; queue UNION is real refactor, not free) — **ships before any output phase** |
+| **P3 — Live Wall caption overlay** | `wall_eligible` lower-third; couple/coordinator `hide_from_wall`; FaceBlocked-author suppression; wall-grade Tier-2 gate / hold-delay | P0 + the wall (Phase 1) | **~0.5–1 day** |
+| **P4 — SDE / Thank-You title-card + curation boost + re-render-on-erase** | `has_approved_message` ranking signal; `message_slot` text title card; bake-only-after-approval + invalidate-on-erase | P0 + SDE/Thank-You backbone | **~1 day** atop those phases |
+| **P5 — Guest Stories caption** | Author's own message → caption slot in the Personal Reels builder | P0 + Phase 3 (Guest Stories) | **~0.5 day** atop that phase |
+
+**Total net-new: ~5.5–7.5 days Claude Code time**, of which P0–P2 (~3.5–5 days) deliver the complete couple-facing loop independent of the output layer. **Calendar-bound externals:** none unique beyond existing Resend + R2. Voice/video (deferred) would add a transcription→text-moderation step + frame-NSFW + multilingual ASR — out of V1 pending owner sign-off.
+
+### Acceptance criteria
+
+- [ ] A zero-account guest (no `auth.uid()`) can author a message on a photo they're tagged in, with mandatory consent captured at insert; Send is blocked until consent is ticked.
+- [ ] The couple sees every message immediately at full attribution (master view); `pending` gates only public visibility.
+- [ ] **A guest session can never retrieve another guest's `pending`/`flagged`/`rejected` message, nor a message on a photo blurred/consent-hidden for that viewer, nor a FaceBlocked author's message** (integration test against `guest_visible_messages`).
+- [ ] No row can be `wall_eligible=TRUE` unless `moderation_state='clean'`, and none can be `status='approved'` while `unscreened`/`blocked` (DB CHECKs).
+- [ ] Editing an approved message resets it to pending/unscreened and removes it from the wall + compile pool until re-approved; edits are locked once `baked_into_render`.
+- [ ] A blocked guest cannot author further messages; their existing messages are hidden; admin can override.
+- [ ] Tier-1 blocks hard slurs/PII inline; Tier-2 runs async, PII-redacted, and only downgrades clean→flagged; the guest never waits on the external call and is never silently failed.
+- [ ] Live Wall **never auto-publishes**: a message reaches the projector only via an explicit couple/coordinator one-tap approve-to-wall (owner-locked 2026-06-10); coordinator (via `thread_join_authorizations`) and couple can both flip `hide_from_wall` in real time.
+- [ ] RA 10173: guest export ZIP includes their messages; erasure cascades and is auditable via `hard_deleted_at`; an erased message baked into a delivered render triggers re-render-and-replace.
+- [ ] An approved message renders as a real-text title card in SDE/Thank-You over owned music.
+
+### What it does NOT do in V1
+
+- **No voice or video messages** (text-only; the `kind` enum reserves room — owner decision).
+- **No per-photo narrative/chaptered story builder** (one 280-char caption per guest-photo; the aggregate is the "story"). V1.1.
+- **No public comment threads** (`UNIQUE(photo_id, guest_id)` — a caption, not a conversation; no replies between guests).
+- **No re-opening of All-Guest Unlock** (messages are authored content, not uploads; capped + free).
+- **No SMS** anywhere; email-only via Resend.
+- **No self-hosted-classifier requirement** if unavailable — but Tier-2 PII redaction + no-retention is mandatory regardless.
+
+---
+
+## Phase 1 — Live Photo Wall ("Salamisim") · in-venue real-time collage
+
+> **Implements the locked Phase-1 build bullets (`0012:999-1011`) + the Kwento one-tap-approve lock (`0012:1075,1319`).** This section EXPANDS those bullets into the full design. Most of it is a read-layer over what already ships; the genuinely net-new build is the server-side FaceBlock derivative pipeline, the trilingual text gate, and **one durable public feed table + one audited reader RPC** that solve a problem the corpus hand-waved (`0012:1006` "push from papic_photos via polling or lightweight realtime"). Verified against shipped `origin/main` @ `825ab6e`.
+>
+> **The architecture fork that drives this whole design (verified, load-bearing):** Supabase Realtime *honors RLS* — "clients only receive change events for rows they're authorized to SELECT" (`supabase/migrations/20260514140000_enable_realtime_chat.sql:11-13`). The capture tables are **couple-only** RLS (`papic_photos`, `20260520015000:107-127`; `papic_guest_captures` couple-read + admin-all, `20260718000000:91-117`). The venue projection is **anonymous** — a zero-account screen carrying a `jose`-signed `setnayan_guest_session` JWT (`lib/guest-session.ts:1-44`), which Supabase Realtime cannot parse, served by the service-role admin client that bypasses RLS at the app layer (`lib/supabase/admin.ts:1-12`, the exact pattern `lib/papic-guest.ts:99-103` already uses). The only shipped Realtime consumer (`app/_components/chat-message-stream.tsx:26,65,117,152`) runs **authenticated**. **Therefore an anon projection client cannot subscribe to `postgres_changes` on the capture tables, and must not be granted a direct `TO anon` SELECT on any feed table** (that would let any client subscribe to any event's wall by guessing the id, and broadcast a mis-gated row to the open internet). The wall is fed by **server-authorized Realtime Broadcast + a service-role RPC backfill**, never a direct anon table read.
+
+> **✅ P0 + P1 SHIPPED 2026-06-11** (PRs #1228 schema · #1253 feed+projection, both merged; migrations `20261104000959` + `20261112000545` applied to prod). Live now, dark-launched: `wall_ingest` gate chain (LIVE_WALL → photos-only → **NSFW allowlist via the shipped self-hosted nsfwjs screen** → **FaceBlock fail-closed withhold** → consent veto) · the audited `wall_visible_photos` reader · the `wall_retract`/`wall_unhide` kill switch (wall-only vs also-gallery) · single-use screen codes · the anonymous `/wall/[event-id]` projection (claim → masonry + live count + gold-ring tiles + 12s/60s reconcile + freeze-on-drop + wake-lock + teaser modes) · the couple control card on the Papic add-on page · ingest chained after the NSFW screen on BOTH capture paths. **Prod ACLs verified: feed RPCs service-role-only.** P2 (server-baked blur derivatives) = the public-event ship gate; P3 (full control tab + Kwento lower-thirds) + P4 (SW cache + recap freeze) follow.
+
+> **✅ P2 SHIPPED 2026-06-12 (PR #1273, migration `20261115000604` applied + prod-smoked) — THE FACEBLOCK SHIP GATE IS NOW LIVE.** The blanket P1 withhold is replaced by a per-row BAKED requirement. What landed, and where it amends the design below: **(1) Blur-ALL-faces, not match-and-blur-selectively** — `guest_face_enrollments.face_vector` is still NULL (no enroller, no embedding model validated), so the shipped P2 slice blurs EVERY detected face on a FaceBlock event. Over-blur is the conservative superset of the designed per-guest matching (which remains the P2b upgrade path); "withhold-when-uncertain" is interpreted at the PIPELINE level — any bake error (model, R2, decode, upload, RPC) writes no markers and the row stays withheld. **(2) Detector = self-hosted MediaPipe full-range** (tfjs graph model, CPU backend, ~1.2 MB committed weights, the nsfw-screen fs-IOHandler pattern — the "provider choice" calendar item is RESOLVED the same way the NSFW one was). **(3) Recall engineering:** the 192×192 detector input loses distant reception faces (2/6 single-pass on the test fixture) → a TILED sweep (full frame + 4 overlapping 62% quadrants, IoU-deduped) recovers 5/5 frontal; boxes expand 1.6× before Gaussian blur is baked INTO a fresh ≤1600px JPEG derivative (never CSS, never the original object). Honest residual: extreme profiles/occlusions can still be missed — mitigations are the tiled sweep, box expansion, the `wall_retract` kill switch, and the couple-moderated surface; the accepted flip side is an occasional blurred candlestick (false positives are fail-SAFE). **(4) Schema:** `faceblock_baked_at` + `faceblock_faces_found` provenance on both capture tables; service-role-only `wall_record_bake`; `wall_ingest` v2 (FaceBlock event ⇒ require a baked derivative); `wall_visible_photos` v2 (per-row baked check at READ time — a guest flipping FaceBlock ON mid-event hides every un-baked tile on the next read with no cascade, fail-closed by construction). **(5) Surfaces:** both capture `after()` chains run screen → bake → ingest; the couple's guest-detail page gains the "Face privacy · Blur faces on the Live Wall" toggle (beside Photo consent — a day-of request is one checkbox), whose ON fires a bounded newest-25 re-bake sweep so the wall recovers blurred instead of staying dark. 11/11 tests (real detection on committed fixtures; face-crop texture stdev 68.5→20.9 post-bake). **The detection-on-original-resolution clause below is amended:** detection runs on the EXIF-normalized ≤1600px derivative (the wall's own display cap) with tiling carrying small-face recall — original-res tiling at typical 12–48 MP capture sizes would cost 10–30× the CPU for faces the projection cannot resolve anyway.
+>
+> **Owner sign-offs (locked 2026-06-11):** ✅ **full robust build** (~8–11 CC-days — NOT the thin polling demo: the complete server-baked FaceBlock + server-authorized broadcast/backfill feed, real-guest-safe) · ✅ **venue projection default = all-with-consent** (the whole room's cleared photos; distinct from the 0031 phone-card `tagged_only` default; every frame still FaceBlock/NSFW/consent-gated). Standing (not overridden): the FaceBlock ship-gate, the name 'Salamisim' (confirm/replace), and price read at runtime.
+
+> **✅ P0 schema SHIPPED 2026-06-11 (migration `20261104000959`, PR #1228, applied to prod).** Built against the real shipped schema — **three corrections supersede the design below:** (1) **`coordinator` IS a real `public.member_type` enum value** (`'couple','guest','vendor','coordinator'`) — so **`thread_join_authorizations` was NOT created**; every reference to it below is superseded by wall-control authority = **`member_type IN ('couple','coordinator')`** directly. (2) **`events` had no `timezone` column** → added (PH default) for the server-side day-of mode. (3) Shipped tables use a hidden `id BIGSERIAL` PK + a UUID business key (FKs target the UUID); the enrollment table is **`guest_face_enrollments`** with a **`face_vector`** JSONB column (not the spec's `face_enrollments`/`vector_blob`). Net-new objects that DID land: `wall_feed` · `photo_tags` (polymorphic) · `wall_display_sessions` · the wall-state/moderation columns · `guests.faceblock_enabled` · the day-of columns · `wall_feed`→realtime publication. RPCs + `/wall` route + control surface remain P1.
+
+### What it is
+
+A full-screen, no-chrome collage at `/wall/[event-id]` projected on whatever screen the venue has, that fills in real time as paparazzi (`papic_photos`) and paid disposable-camera guests (`papic_guest_captures`) shoot. A hero live count, a "shooting now" presence pill, one-tap-approved Kwento lower-thirds, and a persistent claim-your-camera QR make it the in-venue centerpiece AND the social engine that recruits the next paid `PAPIC_GUEST` camera. It is the cheapest, highest-impact "wow" and the proof of the live pipeline the SDE (Phase 2) consumes (`0012:1062`).
+
+### Two distinct surfaces — never conflate
+
+| Surface | Who | Where | Behavior |
+|---|---|---|---|
+| **Venue projection** | the room | `/wall/[event-id]` big screen | Global, passive, lean-back. All consent-cleared photos, live count, presence, Kwento lower-thirds, join-QR. No controls. |
+| **Phone card** | each guest | 0031 day-of "live-photo-wall" card | Personal, interactive. Defaults to "Photos of me"; save-to-reel / hide-me / report. "All photos" toggle gated on `live_photo_wall_visibility`. **The shipped card (`app/dashboard/[eventId]/_components/day-of-mode/live-photo-wall-card.tsx`) is a coming-soon STUB** in the COUPLE dashboard — the rich guest-facing card (`0031:106-124`) is unbuilt. This phase ships projection-first; the phone card is a separate, budgeted line item (see Build order). |
+
+### Venue / user flow — zero hardware, zero install (~60s)
+
+No cast/pairing infra exists to reuse; Panood's precedent is a browser at a URL with no install (`0011_panood.md:38,40`). UX north star: the venue AV person already knows how to open a browser.
+
+1. Couple/coordinator buys "Live Venue Photo Wall" → a `LIVE_WALL` row lands in `event_software_activations_v2` (reuse the shipped gate, `app/[slug]/_components/editorial/data.ts:550-553`). **Never hardcode the price** (catalog vs corpus drift, `0012:1066`).
+2. From the couple's Photo-Wall control tab → **"Open wall on a screen"** → a sheet shows a **QR + short URL** (`setnayan.com/wall/S89E-…`) + a **rotating 6-char Crockford display code**.
+3. Venue staff opens the URL on any screen (smart-TV browser, laptop+HDMI, mini-PC, tablet→TV, LED controller), enters the code once → the route mints a short-TTL **`wall_display_session`** JWT (modeled on `signGuestSession`, `lib/guest-session.ts:19-25`), requests **`navigator.wakeLock`** (best-effort; see below), and renders 16:9 full-bleed.
+
+The code+QR (not native cast) is deliberate: it lights *any* screen including camera-less smart-TVs (typed code), and is the cheapest "wow." Rate-limit code entry and expire the code after first claim so a guest can't replay it onto a private projection; the control tab can **revoke** a screen ("projecting on N screens" → tap → revoke). `wakeLock` is **best-effort, not guaranteed** — re-request on every `visibilitychange→visible`, add a 1px-looping-muted-video keep-awake fallback for TV browsers that lack the API, and the "Open on a screen" sheet shows a one-line "disable display sleep in the TV's settings" hint.
+
+### Projected-wall UX — `/wall/[event-id]` (16:9, lean-back, zero chrome)
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ⟡ SETNAYAN   Patricia & Miguel · #PatMig2026    ● LIVE   847   🟢        │ ← top strip: monogram (Animated
+│                                                  ●● 9 shooting now          │   Monogram if owned), names, LIVE,
+│   ┌──────┐ ┌────────────┐ ┌──────┐ ┌────────┐  ┌──────────┐               │   live COUNT (animated tick-up),
+│   │ tile │ │    tile     │ │ tile │ │  tile  │  │   tile   │               │   presence pill, connection dot.
+│   └──────┘ │             │ └──────┘ └────────┘  └──────────┘               │
+│   ┌────────┐└────────────┘ ┌──────┐ 🌫(blurred FaceBlock derivative tile)  │ ← CSS-columns masonry (reuse recap
+│   │ ✦ NEW  │ ┌─────┐ ┌─────┴────┐ │tile│        ┌──────────┐               │   break-inside styling). Newest tile
+│   │  tile  │ │tile │ │   tile   │ └────┘        │   tile   │               │   fades+scales in with a 2s gold
+│   └────────┘ └─────┘ └──────────┘               └──────────┘               │   "✦ bagong kuha" ring, then reflows.
+│                                                                            │
+│  ┌──────────────────────────────────────────────────┐  ┌───────┐          │
+│  │ ❝ Ang ganda ng entrance! Congrats best friend ❞    │  │ ▓ QR ▓│          │ ← Kwento lower-third (ONLY on one-tap
+│  │   — Tita Baby (Table 4)                            │  │ join  │          │   approve), over a solid scrim, holds ~8s.
+│  └──────────────────────────────────────────────────┘  └───────┘          │
+│  ⟡ Powered by Setnayan · Papic           📲 Scan to get your camera        │ ← persistent join-QR = the growth loop
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+**Behavior rules.** New tiles prepend with the gold ring, then the wall gently reflows; debounce arrivals into ~800ms batches so a flood reads as elegant motion (breathing, never strobing). Cap ~36–48 on-screen tiles; older recede off-canvas (still in the pool); a ~20s back-catalog rotation re-seeds older tiles so the 2pm lola still gets airtime at 9pm across a 6–8h Filipino reception. The **live count is the hero metric** (animated tick-up, `toLocaleString('en-PH')` per `editorial-content.tsx:618`) and counts **only cleared captures** (= `wall_feed` rows) so the room never sees that something was filtered, and the number always matches what's on screen. **Presence** ("9 shooting now") uses the shipped Realtime presence `.track()` (`chat-message-stream.tsx:184-234`) on a **shooter-role** channel; the projection/control screens track a **distinct display-role** channel so passive screens never inflate "shooting now." Milestone bursts (round numbers) overlay ~4s. **Clips** (`photo_type='clip'`; guest captures are photo-only by schema) are **excluded from the live wall in Phase 1** (collage of photos; muted-autoplay poster tiles are Phase-1.5, capped ≤2 concurrent for low-spec venue browsers).
+
+**Projection legibility (10–30ft viewing).** 1080p baseline; all chrome text ≥ ~28–32px-equivalent; a **TV-safe inner margin (5% all sides)** so the QR / join-bar / count never land in overscan; a **solid scrim behind the Kwento lower-third** (never text-over-photo) for guaranteed contrast; the **6-char display code printed beside the QR** as the cross-room fallback (a phone-screen QR won't scan from 20ft).
+
+### Couple / coordinator control UX
+
+```
+┌─ PHOTO WALL ──────────────────────── ● LIVE · projecting on 1 screen ──────┐
+│  [ ⏸ Pause wall ]   [ Open on a screen ▢QR ]   [ what guests see ↗ ]        │
+│  847 on the wall · 9 shooting · 23 cameras claimed · 5 Kwento pending       │
+│  Guest "All photos" view:  ( ) Tagged-only [default]  (•) All (consent)  ( ) Off │ ← writes events.live_photo_wall_visibility
+├─────────────────────────────────────────────────────────────────────────────│
+│  KWENTO — waiting for your OK to show on the wall (5)                        │
+│  ┌─ [thumb] ❝ Ang ganda ng entrance! ❞ — Tita Baby  ✓clean [✓ Show on wall][Skip] │
+│  ├─ [thumb] ⚠ "[hidden — flagged]" — Anonymous   (approve ✗)        [Dismiss]│ ← approve disabled; DB CHECK backstops a mistap
+├─────────────────────────────────────────────────────────────────────────────│
+│  ON THE WALL NOW — newest first                                             │
+│  [▣][▣][🌫][▣][▣]   🌫=auto-blurred (FaceBlock)                             │
+│   tap any → [ ⊘ Hide from wall ]  [ ⊘⊘ also hide from gallery ]             │ ← two distinct semantics (see kill switch)
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+Lives in a new **`/dashboard/[event-id]/live` → Photo Wall tab** (the route shell is **net-new** — only loose day-of-mode card components exist today). One-tap, no double-confirm. **Pause** = global soft-freeze (ceremony proper, speeches) → a tasteful "✦ the wall resumes shortly" holding card; captures still ingest+gate in the background and flood back on resume. **Coordinator** sees the identical surface; their write authority is checked **per call** via a `thread_join_authorizations` row (`role='coordinator'`, `revoked_at IS NULL`) — **not** an `event_members.member_type` (the shipped CHECK is only `('couple','guest','vendor')`, `0012:1250-1251`) — so a revoke takes effect on the next action.
+
+### Cron-free real-time feed
+
+Architecture in one line: a capture lands → a Next 15 `after()` step runs the privacy gate chain (the capture paths already use `after()` for Drive copy in `app/papic/actions.ts` and `app/api/papic/guest-capture/route.ts`) and, only if it clears, inserts a **`wall_feed`** row pointing at a **gated/blurred derivative** → the `wall_ingest` RPC **server-broadcasts** that tile on `event:{id}:wall` → the anonymous wall renders it. No scheduler (owner lock `project_setnayan_cron_free`).
+
+- **Why a durable table AND broadcast.** The anon wall **subscribes to a Realtime Broadcast channel** (broadcast does not RLS-gate row reads), and uses the durable `wall_feed` table **only for backfill-on-reconnect** through a thin public server route `GET /api/wall/[event-id]/since?cursor=…` that verifies the `wall_display_session` JWT server-side and calls the reader RPC via the **service-role admin client** (the shipped guest-serve pattern). The browser never holds a table-read credential and never calls the DEFINER RPC directly; event-scope comes from the JWT, not a client-controlled query param; the route is per-session rate-limited. A broadcast-only path would silently lose any tile a momentarily-offline projector missed on flaky venue wifi — the table makes recovery durable.
+- **The one audited reader.** `wall_visible_photos(p_event_id, p_since)` SECURITY DEFINER (sibling to the specced `guest_visible_messages`, `0012:1245,1277`) hard-codes the visibility filter in ONE place and **re-evaluates consent + FaceBlock at READ time** (joins live `photo_consent` / `faceblock_enabled`), so even a missed retraction cascade fails closed on the next read. It returns only rows where `wall_hidden_at IS NULL AND wall_safe_r2_key IS NOT NULL` and resolves URLs via the shipped `displayUrlForStoredAsset` (`lib/uploads.ts:99`).
+- **Peak-burst resilience.** Treat Realtime as a "wake up and reconcile" nudge, not a guaranteed firehose: the projector pulls `wall_visible_photos(p_since=cursor)` on a ~10–15s timer *regardless of channel health* (the cron-free single-long-lived-page display loop), so a grand-entrance flood that exceeds Realtime's per-client rate self-heals within one interval. The **hero count is broadcast as a single periodic aggregate** (count over the gated pool), decoupled from per-tile delivery, so a missed tile never desyncs the number.
+- **Weak-wifi survival.** A `/wall/`-scoped service worker caches the last N rendered tiles; on drop the collage **freezes on the last good frame** + amber dot (never whites out); wake-lock keeps the screen on; on reconnect a full `wall_visible_photos(p_since=last_seen)` backfill catches missed inserts **and reconciles retractions** (the reader returns the current visible set, so a tile killed while offline drops on the next read). Connection dot: 🟢 live / 🟡 reconnecting (cached) / 🔴 offline (`0031:400`). This mirrors 0031's "cached last 20 photos" offline rule (`0031:226`). (Do **not** reuse `/api/telemetry/live_wall` as the SW substrate — it is server-to-server only, gated by `INTERNAL_WORKER_SECRET`, which must never reach a venue browser.)
+
+### Server-side privacy / moderation pipeline (the strictest surface in the product)
+
+The wall has **no RLS backstop** (service-role feed). Every gate is the server's responsibility and **fail-closed is non-negotiable** — no verdict yet ⇒ withheld, never shown-then-retracted.
+
+**Per-photo gate chain — runs in `after()` on every capture (both sources):**
+```
+NEW CAPTURE (papic_photos | papic_guest_captures)
+  └─ after():
+     G0 SKU active?     event owns LIVE_WALL (event_software_activations_v2) ──no→ never enters pipeline
+     G1 NSFW classify   synchronous, un-disableable interlock; auto-flag >0.7 (10_Papic:445)
+                        ─flagged→ moderation_state='nsfw_blocked' · STOP
+     G2 RA 10173 consent any tagged guest with photo_consent=FALSE (or guests.deleted_at)? ─yes→ DROP photo · STOP
+     G3 Face detect+match per-event vector store ONLY (guest_face_enrollments, EXCLUDE revoked_at — 20260901000000:44,58)
+     G4 FaceBlock decision  if ANY faceblock_enabled guest may be present:
+                        • detected face of a faceblock guest → bake a SERVER-SIDE blurred derivative → wall_safe_r2_key
+                        • NOT confidently face-free (low light / profile / occlusion) → WITHHOLD whole photo (don't project a maybe)
+                        else → wall_safe_r2_key = a downscaled wall variant of the original
+     G5 INSERT wall_feed only NOW is the photo projection-eligible → broadcast fires
+```
+**The wall reads ONLY `wall_safe_r2_key`, never the original `r2_object_key`.** No derivative ⇒ no `wall_feed` row ⇒ never projected. Face matching is **per-event scoped** (vectors never cross weddings, `0012:992`). **FaceBlock cannot be matcher-gated:** for any event with ≥1 `faceblock_enabled` guest, detection-failure ≠ face-free — if the matcher's confidence the photo is free of a faceblock guest is below a high threshold, **withhold the whole photo** rather than project an unblurred maybe. Detection runs on the **original resolution** (small faces survive) and the blur is baked into the derivative (never detect-on-downscale). The `guest_face_enrollments.face_vector` is **NULL until the unbuilt Papic enroller fills it** (`20260901000000:42`); until enrollment exists, an event with any `faceblock_enabled` guest **withholds all faces** — which is why the public `/wall` route stays behind the FaceBlock pipeline for such events (ship gate, below).
+
+**Kwento caption gate chain — before any lower-third (`0012:1314-1323`):**
+1. **Tier-1 synchronous text moderation** (net-new; un-disableable; today's NSFW is image-only): EN+Tagalog+Cebuano profanity/slur lexicon + PH PII/doxxing regex → `moderation_state` must be `'clean'`; `'flagged'` is never wall-eligible. Tier-2 async classifier can only downgrade clean→flagged; PII redacted before any external call (data-residency lock); outage fallback = leave flagged, never auto-public.
+2. **DB CHECK `wall_needs_clean`** (`wall_eligible=FALSE OR moderation_state='clean'`, `0012:1232`) survives a buggy code path.
+3. **Parent-photo visibility inheritance** — caption suppressed if its anchor photo is FaceBlock/consent-hidden (a caption can't name a blurred guest, `0012:1311`).
+4. **FaceBlocked-author suppression** — if the author has `faceblock_enabled`, the whole message is publicly suppressed (`author_publicly_hidden`, `0012:1312`).
+5. **Explicit one-tap approve-to-wall** — owner-locked 2026-06-10: human gate, no auto-publish, no hold-delay (`0012:1075,1319`). **Interlock:** the approve button is disabled until Tier-2 returns clean, AND any post-approval clean→flagged transition on a projected caption **auto-retracts** the lower-third (the no-hold-delay lock bans auto-PUBLISH on filter-clean; it does not forbid Tier-2 from yanking an already-projected caption — surface this nuance to the owner).
+6. **Edit re-gates** — any author edit resets the row to pending/unscreened, pulls it from wall + compile pool, re-runs the gate (`0012:1323`).
+
+**Kill switch + 7-day live override (two distinct semantics — do not conflate).** The **wall kill switch** flips `wall_hidden_at` on the source capture row (transient, wall-only, reversible) → the `wall_feed` mirror's `wall_hidden_at` follows → broadcast UPDATE → the tile vanishes in <1s. This is **separate** from the shipped `hidden_at` (durable gallery/recap suppression) so a couple hiding a guest from the big screen for a 5-minute speech does **not** delete the photo from their own wedding album; a second affordance ("also hide from gallery") writes `hidden_at` when a genuine durable retraction is wanted. For captions, the canonical kill primitive is the already-locked `photo_messages.hide_from_wall` (`0012:1214`); `wall_feed` mirrors it, never an independent source of truth. The **7-day couple review window is overridden during `live` mode** — photos hit the wall in seconds (`0012:1008,1319`) — with the kill switch + per-call coordinator re-check as the human backstop.
+
+**Mutable-state cascade (RA 10173 reversibility).** Consent/FaceBlock are mutable mid-event. On `photo_consent→FALSE`, `faceblock_enabled→TRUE`, or `guest_face_enrollments.revoked_at` set, a **synchronous fan-out RPC** sets `wall_hidden_at` on EVERY `wall_feed` row tagged to that guest in one transaction (and re-queues blur re-ingest where the intent is blur-not-drop). Belt-and-suspenders: because the reader re-checks consent/FaceBlock at READ time, a missed cascade still fails closed on the next read.
+
+> **Open semantic decision (surface to owner):** `photo_consent=FALSE` = "not in any shared output" → **drop** the whole photo; `faceblock_enabled=TRUE` = "appear blurred" → **composite** (don't lose a group shot because one person opted into blur). Keep the two primitives distinct.
+
+### Data model — reuse-first; reconcile with shipped recap
+
+**Reuse as-is (shipped):** `papic_photos` (seat; `photo_id` UUID; `width_px/height_px/photo_type`; `hidden_at`) + `papic_guest_captures` (guest; `capture_id` UUID + `id` BIGSERIAL; `r2_object_key`; `hidden_at`) = the two capture sources · `events.photo_wall_photos` JSONB + the `LivePhotoWall` masonry (`editorial-content.tsx:606`) = the **recap/archive** render mode · `event_software_activations_v2` `LIVE_WALL` row = activation gate (`data.ts:550-553`) · `displayUrlForStoredAsset` (`lib/uploads.ts:99`) · `guests.photo_consent` · `guest_face_enrollments` (exclude `revoked_at`) · `setnayan_guest_session` JWT shape + service-role admin client · Realtime publication + presence/reconnect machinery · `getDayOfPhase()` (`lib/day-of-mode.ts:80-89`).
+
+**Specced-but-UNBUILT (must ship as prerequisites):** `events.live_mode_override` (`0031:43,350`) · `events.live_photo_wall_visibility DEFAULT 'tagged_only'` (`0031:356-357`) · `photo_tags` (referenced by name in `0031:110,489` — **use this name, not `papic_photo_tags`**, or the "Photos of me" query forks) · `guests.faceblock_enabled` (`0012:1368`) · `photo_messages` + CHECKs (`0012:1197-1233`).
+
+**Net-new (grep-zero today):** **`wall_feed`** (the public-broadcast feed mirror — anon never SELECTs it directly; carries only `wall_safe_r2_key`, never the original key) · `moderation_state` + `wall_safe_r2_key` + `wall_hidden_at` columns on both capture tables · `thread_join_authorizations` (coordinator authority — the corpus RLS at `0012:1270` references it but it does not ship) · `wall_display_sessions` (code/QR → display JWT, short TTL, rotating) · DEFINER RPCs `wall_ingest` / `wall_retract` / `wall_approve_caption` / reader `wall_visible_photos` / `wall_claim_display` / `wall_freeze_recap`.
+
+**Recap convergence (closes the standing note `20261017000000`).** At `recap` handoff, `wall_freeze_recap(p_event_id)` selects the top ~24 `wall_feed` rows by an explicit ranking (face-coverage + quality + chronological diversity, with a couple-override pick list reusing the control grid — the shipped renderer hard-slices `photos.slice(0,24)`), writes **only `wall_safe_r2_key`** (blurred derivatives — never originals) into `events.photo_wall_photos`, and records the full pool count so the recap caption ("847 photos captured live") stays truthful. **One wall, two render modes, one gated pool** — the recap masonry just works, and only fully-gated rows ever bake into the permanent public recap article.
+
+**Broken FK to fix first.** The corpus `photo_messages.photo_id REFERENCES photos(photo_id)` (`0012:1200`) is broken-on-arrival — **there is no `photos` table.** Redesign the caption anchor polymorphically — `(source_table, source_id)` matching the `wall_feed` shape (or a `feed_id` FK) — so a `papic_guest_captures` (disposable-camera) frame can carry a Kwento caption, not just `papic_photos`. The paying disposable-camera cohort is exactly the one most likely to write Kwento.
+
+### 5-mode lifecycle
+
+The wall is a **sub-state of the day-of router, not its own clock.** **Drive the mode SERVER-SIDE from the event's stored date + `events.timezone`** — a venue projection is exactly the "guest-facing renderer" the shipped helper defers tz-correctness to (`day-of-mode.ts:9-10`) — and push the current mode into the feed payload. Do **not** trust the projector machine's local clock (set by random venue AV staff); a wall flipping live an hour early/late is the single most visible failure. `live_mode_override` (couple-set, `0031:43,62-65`) is the authoritative manual control, surfaced as one-tap "Go live now / Hold."
+
+| Mode | Wall behavior |
+|---|---|
+| **coming_soon** (>T-7d) | Teaser: monogram loop + "The wall lights up when the celebration starts" + big claim-your-camera QR. Drives pre-event `PAPIC_GUEST` signups. No photos. |
+| **pre_event** (T-7d..T-1h) | Warmer teaser + countdown; pre-shot getting-ready photos appear; counter at 0. |
+| **live** (T-1h..T+8h) | The real-time projection; 7-day window live-overridden. |
+| **recap** (T+8h..T+30d) | Freeze → `wall_freeze_recap` backfills `events.photo_wall_photos`; `/wall` redirects new loads to the recap render, but **gates the redirect behind `live_mode_override`** so an active projector is never auto-yanked to recap mid-overrun (freeze, don't redirect, a still-mounted live screen). |
+| **archive** (T+30d+) | Read-only last frame / static masonry. |
+
+> **Shipped-vs-spec reality:** the shipped `getDayOfPhase` has only **4 coarse phases** (pre=T-3d, live=T-1h..T+8h, post, inactive) and **cannot distinguish coming_soon vs pre_event vs the T-7d boundary**; the 5-mode/T-7d machine + `live_mode_override` are **0031-spec-only, unbuilt** (`0031:5`). V1 binds to the event-tz-precise computation (recommended) with `live_mode_override` as the safety; the teaser-mode split lands when the 5-mode machine ships.
+
+### Reconciliation — recap, Panood, Kwento, 0031
+
+- **Recap wall:** converge, don't fork (above). Live = broadcast `wall_feed`; recap/archive = the frozen `events.photo_wall_photos` masonry written from the same gated pool.
+- **Panood:** same event-slug origin, two independent surfaces, **zero contention** (Panood = YouTube IFrame CDN, `0011_panood.md:43-44`; wall = R2 tiles via broadcast). A venue runs both on two screens. When both `LIVE_WALL` and Panood are active, the "Open on a screen" chooser offers `/wall/[id]` vs the livestream. "Projecting on N screens" counts `wall_display_sessions` only (excludes Panood viewers); Pause fans out only to wall screens.
+- **Kwento:** the wall is Kwento's strictest enforcement point (`0012:1342`). Lower-thirds render only on the wall renderer, only on one-tap approve, through `guest_visible_messages(p_mode='public')` so suppression is centralized.
+- **0031 phone card:** distinct surface (personalized, interactive). Shares the feed + `live_photo_wall_visibility` (which **defaults to `tagged_only`** per `0031:566` — the **venue projection** showing all-with-consent is a *projection-specific* default owner-ratified 2026-06-11 = all-with-consent (still FaceBlock/NSFW/consent-gated), separate from the phone card's global toggle). The 0031 card deep-links to `/wall/[event-id]` only while the mode is `live`.
+
+### Phased build order — Claude Code time
+
+Estimates assume the capture pipeline (0.A) emits photos — the hard prerequisite (`0012:988`). Calendar-bound externals (NSFW + face-detect model validation on a real photo set; PH-residency-compliant) called out separately.
+
+| Phase | Scope | Claude Code time |
+|---|---|---|
+| **P0 — Schema prerequisites** | Migrations: `wall_feed`; `moderation_state`+`wall_safe_r2_key`+`wall_hidden_at` on both capture tables; `guests.faceblock_enabled`; `photo_tags`; `thread_join_authorizations`+grant/revoke flow; `events.live_mode_override`+`live_photo_wall_visibility`; `photo_messages`+CHECKs (polymorphic anchor); `wall_display_sessions`; `ALTER PUBLICATION`. DEFINER RPC stubs. Apply via `supabase db push`. | **~0.5–1 day** |
+| **P1 — Feed + projection (gates on, faces stubbed)** | `wall_ingest` (G0/G1/G2 + insert + broadcast), `wall_visible_photos` reader, `/api/wall/[id]/since` backfill route, `/wall/[event-id]` renderer (reuse masonry CSS), claim handshake (code+QR+JWT+wakeLock), broadcast subscribe + reconcile-timer + backfill, live counter, presence (shooter vs display roles), new-tile animation, rotation, teaser/processing/empty states, event-tz mode binding. **FaceBlock fail-closed-stubbed** (withhold any photo with a detected face on a faceblock event). **INTERNAL/clean-test-event only.** | **~2–2.5 days** |
+| **P2 — Server-side FaceBlock** | Face detect (original-res) → per-event match → baked blur derivative → `wall_safe_r2_key` → withhold-when-uncertain; CHECK enforcement. The long pole + the public-event ship gate. | **~1.5–3 days** *(+ calendar-bound: NSFW + face-detect provider choice & validation, first-party / PH-residency)* |
+| **P3 — Control + Kwento** | `/dashboard/[id]/live` Photo-Wall tab (incoming grid + one-tap hide + two-tier hide semantics, visibility toggle, pause, open-on-a-screen, screen revoke); coordinator auth branch; `photo_messages` + Tier-1 trilingual text gate + Tier-2 interlock + one-tap approve + lower-third renderer + parent/author suppression + edit-re-gate. | **~2–2.5 days** |
+| **P4 — Resilience + lifecycle + phone card** | Wall-route SW (last-N tile cache, freeze-on-drop, long-lived presigns), connection dot, recap backfill (`wall_freeze_recap`), Panood/screen chooser, wire the 0031 phone-card stub to the feed (Photos-of-me, save-to-reel, hide-me, gated "All photos"). | **~1.5–2 days** |
+
+**Total ~8–11 Claude Code days.** **This is ~3–4× the corpus's locked 1.5–3-week-for-the-whole-output-layer framing for just Phase 1** because the corpus under-scoped the anon-Realtime/RLS problem (it assumed "push from papic_photos via polling or lightweight realtime", `0012:1006`, which an anon projection client cannot do — Realtime honors RLS). The `wall_feed` table + baked FaceBlock derivative pipeline are the delta — **owner-locked 2026-06-11: FULL ROBUST BUILD confirmed** (not the thin polling-only V1) — the complete server-baked FaceBlock + safe broadcast/backfill architecture, real-guest-safe. **Hard ship gate:** the public `/wall` route stays behind P2 for any event with FaceBlock opt-ins — an unblurred opt-out guest projected in front of the whole reception is the highest-blast-radius privacy failure in the product. P1 (NSFW + consent + `wall_hidden_at` kill switch, no opt-out faces) is a demoable "wow" on a clean test event only.
+
+### Acceptance criteria
+
+- [ ] A photo shot at the venue (from either `papic_photos` OR `papic_guest_captures`) appears on `/wall/[event-id]` within seconds; the live count increments and matches on-screen tiles; "shooting now" presence is non-zero while cameras are active.
+- [ ] A FaceBlock-opted guest renders **blurred** on the projection via a server-baked derivative (never CSS blur); a photo the matcher cannot confidently clear of a faceblock guest is **withheld**, not projected.
+- [ ] NSFW and non-consenting (`photo_consent=FALSE`) photos **never** reach the wall (withheld at ingest, never flash-then-retract).
+- [ ] A couple/coordinator `⊘ Hide from wall` removes the tile in <1s and does **not** delete it from the couple's gallery; `⊘⊘ also hide from gallery` writes `hidden_at`.
+- [ ] A Kwento caption reaches the lower-third **only** on explicit one-tap approve; a flagged caption cannot be approved (button disabled + DB CHECK); a clean→flagged Tier-2 downgrade auto-retracts an already-projected caption.
+- [ ] A disposable-camera (`papic_guest_captures`) frame can receive and project a Kwento caption.
+- [ ] On a venue-wifi drop the projector freezes the last good collage (never whites out) + amber dot; on reconnect a backfill catches missed tiles AND reconciles retractions.
+- [ ] Mid-event `faceblock_enabled→TRUE` / consent withdrawal / face-data revoke retracts already-projected photos of that guest within seconds.
+- [ ] A revoked coordinator's hide/approve action 403s on the next call; the couple is unaffected.
+- [ ] At `recap`, the gated pool freezes into `events.photo_wall_photos` (blurred derivatives only) and the shipped recap masonry renders it; an active live projector is not auto-yanked to recap mid-overrun.
+- [ ] N browsers on `/wall/[event-id]` render identically; the control tab shows "projecting on N screens"; Pause/Off fans out to all wall screens only.
+- [ ] No anon client holds a direct SELECT grant on `wall_feed` or any capture table; the projection reaches data only through the service-role-served route.
+
+### What it does NOT do in V1
+
+- No video/clip tiles on the live wall (photo collage only; muted-poster clips are Phase-1.5).
+- No auto-publish of Kwento captions (human one-tap only) and no rich-media captions (text-only, `0012:1075`).
+- No native cast / Chromecast / AirPlay pairing (browser-at-a-URL only).
+- No All-Guest web-shoot tier, no live venue floor-projection mapping, no cross-paparazzi de-dup (spec Part 6).
+- No CSS-only blur anywhere (FaceBlock is server-baked or the photo is withheld).
+- The interactive guest phone card is built last (P4); Phase 1 ships projection-first.
+
+---
+
+## Kwento Magazine — the print/keepsake sibling of the film outputs
+
+> **✅ VARIANT A SHIPPED 2026-06-11** (PR #1261, merged; no migration). The free couple-private A4 keepsake is live: `lib/kwento-magazine.ts` (deterministic gap-bucketing — **curation owns the cap** so a Kwento-anchored photo rescues a slot; "a Kwento earns its photo a slot"; WinAnsi-safe text, emoji gently stripped; full renderer cover→Ang Simula→PH-titled chapters→**Mga Boses**→Salamat, every page "PARA SA INYO LANG") + the couple-gated download route (the SAME `loadEditorialData`/`composeCopy` frame as the recap — no fork; ≤48 curated images, SSRF-guarded, sharp-resized) + the MagazineCard on the Papic add-on page. **The Kwento weave shipped WITH Variant A** (its `photo_messages` dependency landed first, PR #1257). Verified: real 12-page fixture render + 14/14 content assertions on the decompressed streams. **Still deferred per this design:** fontkit/Cormorant polish · P5 async-at-scale + Drive-copy push · Variant B shareable (blur pipeline + consent amendment) · paid print-on-demand (pricing batched to the holistic review).
+
+
+> **Your one-PDF ask = Variant A, Phase 1: a free, beautiful, couple-private photo + storyline magazine, shippable now off existing infra in ~3–5 days Claude Code time.** Everything below it (the Kwento weave, the shareable copy, print-on-demand) is an OPTIONAL follow-on roadmap, each gated on a prerequisite that does not exist yet. The core ask did not balloon; the phasing keeps the warm thing first.
+
+The Kwento Magazine is the **print member of the produced-output family** (§ "produced-output layer" moat) — the same three ingredients as the SDE / Thank-You / Stories film (the Papic photo stream + the guest Kwentos + the couple's storyline), laid out as a magazine PDF instead of rendered as a film. *"The photos tell the story; the guests narrate it"* — now in print. No competitor can compile this book, because none co-owns the captured stream **and** the photo-anchored sentiment **and** the couple's love story in one product.
+
+> ⚠ **DEPENDS ON KWENTO.** The guest-voice layer requires `photo_messages` (designed in this iteration, **not yet built** — zero references in `apps/web`; the corpus FK to a `photos(photo_id)` table is broken-on-arrival, no such table exists). Build the anchor **polymorphically** over the two real capture tables — `(source_table, source_id)` across `papic_photos` (seats) and `papic_guest_captures` (disposable cameras) — matching shipped `photo_tags` / `wall_feed`. A non-polymorphic anchor would silently exclude disposable-camera guests, who are the cohort **most likely to write a Kwento**. The photo + storyline magazine ships before `photo_messages`; the Kwento weave waits on it.
+
+### Magazine structure (page-by-page)
+
+A4 portrait (`595.28 × 841.89`, margin 42 — matching `concept-pdf.ts`), one continuous **auto-paginated** document — the first Setnayan PDF that flows across an unbounded page count. Clean Editorial language (Warm Alabaster paper, Deep Obsidian ink, Royal Champagne Gold, Rich Mulberry accent). Typical wedding ≈ 24–40 pp. SETNAYAN-authored chrome (chapter names, section titles, how-to-read, "Salamat") binds to the couple's `events.story_language` (EN / TL / CEB), defaulting to the same field `composeCopy` already reads — guest Kwentos always render verbatim, never translated.
+
+**FRONT MATTER — the storyline FRAME (from `loadEditorialData` / `composeCopy`)**
+- **P1 · Cover** — Animated Monogram rasterized to static (text-monogram fallback if Lottie-only with no clean single frame — note the visual downgrade) · "A & B" · long-form en-PH date · venue · one **gate-passing** hero photo full-bleed · gold kicker "Ang Kwento ng Aming Kasal." The cover runs the privacy gate FIRST and only ranks gate-passing photos; if none pass (shareable), it falls back to a monogram-only cover — never a blurred/withheld image in the most prominent slot.
+- **P2 · Colophon / "Paano basahin ito"** — one warm paragraph + the day's stats ("147 guests · 892 photos · 64 kwentos · one day") + a moodboard palette swatch row + a 1-line table of contents.
+- **P3–4 · Ang Simula (the prologue)** — `composeCopy` headline / deck / lead paragraphs as flowing body; `love_story.milestones[]` as a vertical gold-dotted rail (the **love-story** timeline, ≤9); `anchors{song/place/injoke/food}` as 4 gold-label cards; `special_message` as the act-closing pull-quote. **Hand-off beat at the Act-I → spine boundary** converts the love-story axis into the wedding-day axis in one sentence (e.g. *"On <eventDateFormatted>, the story they'd been writing for <yearsTogether> years became a single day —"*; both values already computed in `data.ts`) so the two timelines read as one continuous story, not two stapled books.
+
+**THE SPINE — the wedding-day timeline (net-new, `captured_at`-bucketed)** — for each moment chapter in chronological order:
+- **Chapter opener** (½–1 pg): moment name "Ang Seremonya / The Ceremony" · time range · gold rule · chapter-hero photo · one tone-tinted interstitial line from `composeCopy` vocabulary. Openers drop below a minimum photo count (no thin half-empty dividers).
+- **Photo + Kwento spreads** (flowing): rotated archetypes — (1) full-bleed photo + one Kwento as a large lower-third pull-quote; (2) asymmetric 2–4 photo grid + small Kwento cards beside their anchor; (3) quote-forward typographic card (a Kwento whose anchor photo is absent/consent-dropped — words kept, no image).
+- Chapters run the PH-wedding bilingual vocabulary (empty buckets silently skipped): Paghahanda → Seremonya → Panata at Halik → Paglabas → Pagdating sa Reception → Unang Sayaw → Mga Talumpati → Selebrasyon → Paghahatid.
+
+**BACK MATTER**
+- **"Mga Boses" / the guest voices** — orphan approved Kwentos whose anchor photo didn't earn a spread, as a typographic quote-wall (no guest's words ever lost; capped + ranked, overflow stays in the live gallery). In the shareable variant the quote-wall runs the **full** Variant-B Kwento gate identically to inline cards — a self-describing caption is identifying content under RA 10173 and can re-identify a non-consenting **subject** of the omitted anchor photo, not just the author.
+- **Salamat** — closing storyline beat · "From the Couple" · tier-aware credit roll (guests who wrote · vendors) · metrics woven warmly · QR to the living landing page · Setnayan colophon · edition stamp ("Unang Edisyon").
+
+**The weave rule (load-bearing):** the storyline FRAME *opens* and *closes* the book plus thin chapter interstitials — it never competes with the day's chronology. The two timelines stay distinct: `love_story.milestones[]` = love-story frame; `captured_at` buckets = wedding-day spine. Do not conflate (the editorial recap has **no** `captured_at` timeline field — only `love_story`; the spine is wholly net-new).
+
+### Data assembly
+
+**Single source of storyline truth.** Derive the FRAME from the SAME assembly as the editorial recap — do **not** fork it. Extract a shared `assembleStoryFrame(eventId)` over `loadEditorialData(eventId)` (admin-client, best-effort, never throws) + `composeCopy()` (deterministic, **LLM-free, never invents facts**, minimal flattering fallback at `composeLede`). Both the web recap and the magazine call it. Two route-side patches the loader doesn't carry: `events.role_palette` (add `sanitizeRolePalette`, as the concept route already does) and the Animated Monogram R2 asset — both mechanically identical to the existing `displayUrlForStoredAsset → fetch → sharp → embed` path. Make the magazine's **spine query** the single capture-stream source and derive the frame's hero/count from it (the loader already exposes `hero_photo_id`) rather than re-querying `papic_photos` twice.
+
+**The four-layer join (100% net-new):**
+- **Layer A · SPINE** — UNION `papic_photos` + `papic_guest_captures` into one `captured_at`-ordered stream (both `captured_at` columns NOT NULL + indexed → sort is free; guest captures carry no `width_px/height_px`, read via `sharp().metadata()`). `captured_at` is the **only** ordering primitive — no `moment`/`phase` column exists. **Trap:** the shipped `photo_moments` table is an unrelated website etiquette widget (`camera_ok / phone_down / papic_only`), NOT a timeline.
+- **Layer C · TAGS** — `photo_tags` polymorphic `(source_table, source_id)`, shipped; gives who's-in-frame for attribution.
+- **Layer D · KWENTO** — `photo_messages` (build first), polymorphic anchor, `status='approved' AND moderation_state='clean'`. A Kwento inherits its moment by reading its anchor photo's `captured_at`. `UNIQUE(source_table, source_id, guest_id)` enforces one caption per (guest, photo).
+
+**Moment bucketing (deterministic — no per-render AI, matching the SDE lock):**
+1. **Clock-skew normalization FIRST** — seat photos are NTP-stamped; disposable-camera clocks may be unsynced. Per device, estimate an offset by aligning each device's dense burst to the global median timeline, clamp wild outliers, *then* bucket.
+2. **Gap detection is the PRIMARY structural signal** — `captured_at` always exists; walk the stream, a gap `> max(20 min, 1.5× median inter-shot gap)` marks a boundary.
+3. **`events.photo_moments_config.time_label` is a SECONDARY hint only** — it is free text (≤60 chars, ≤8 entries), authored for guest **etiquette** not as a schedule, and often empty/non-parseable. Use it only when a time can be regex-extracted *and* aligns within tolerance to a detected density boundary; otherwise ignore it.
+4. **Labeling** — map ordinal buckets onto the fixed PH bilingual vocabulary; couple can rename / merge / reorder.
+
+**Auto-curation:**
+- **Per-chapter hero** — SDE-style rank: quality + face-coverage (via `photo_tags` count) + has-Kwento bonus. Couple override via `event_editorial.hero_photo_id` / `essay_photo_ids`.
+- **"A Kwento earns its photo a slot"** — every approved Kwento renders. Anchor in the chapter → card beside it. Anchor not in the chapter → promote it in. Chapter full → Kwento drops to the back-matter quote-wall. No guest's words are ever lost.
+- **Density cap** — ~6–9 photos/chapter; Kwento-anchored photos win over silent photos; cut count surfaced ("12 more from this moment in your gallery").
+
+**Empty states (strong shipped precedent — every embed silently skips, every section degrades):**
+
+| Situation | Behavior |
+|---|---|
+| No Kwentos at all | Pure photo-story magazine (timeline + couple story). **Ships before the Kwento table exists** — back-matter reads "The photos tell the story," not a quote-wall. |
+| Chapter has photos, no Kwento | Clean photo spread. |
+| Kwento, anchor photo consent-dropped (shareable) | Quote-forward card — words kept, no image — unless the author is also FaceBlocked/unresolved (then suppress). |
+| Variant-B edition left near-zero usable photos (every photo had a non-consenting tagged guest) | Fall back to a deliberate typographic "Mga Boses" quote-anthology layout (book-of-words, monogram + palette chrome, no empty `framed()` boxes) OR surface to the couple that the shareable edition is photoless and recommend the private edition. |
+| Image fetch fails | `embed()` returns null → slot silently skipped. |
+| Few photos (< ~12 / elopement) | Collapse to one "Ang Araw / The Day" chapter; lean on the always-present FRAME. |
+| Sparse storyline | `composeLede` minimal flattering fallback; Act I shrinks to names + date + monogram, day chapters carry the book. |
+| Guest capture with NULL `r2_object_key` | Skipped (filtered in SQL + silent embed skip). |
+| Animated Monogram is Lottie/animated-only | Text-monogram badge fallback (note the cover downgrade). |
+
+### Generation plan
+
+**Reuse the route + builder split verbatim** (the `concept-pdf.ts` architecture): a pure `buildKwentoMagazine(input): Promise<Uint8Array>` layout lib receiving **pre-resolved JPEG/PNG bytes + resolved text + palette + monogram**, and a route doing **ALL I/O** (auth, RLS, privacy-aware key selection, presign, fetch, sharp-normalize, embed). The privacy fork lives in the route; the lib stays a dumb "lay out ready bytes" layer.
+
+```
+apps/web/lib/kwento-magazine.ts                                    ← pure layout (extends concept-pdf)
+apps/web/app/dashboard/[eventId]/add-ons/kwento-magazine/route.ts  ← all I/O, auth, privacy, maxDuration
+```
+
+**[REUSE] verbatim from `concept-pdf.ts`:** `center`, `fitSize` (long Filipino names), `label` (gold mini-caps), `framed` (gold frame + contained image), `paragraph` (word-wrap), `footer`, brand palette consts, `hexToRgb`, `initialsFrom`, `formatDate`, monogram badge, silent `embed()→null` skip. QR via `QRCode.toBuffer().embedPng` (`seating-pdf.ts`). Mandatory SSRF-guarded fetch `safeFetchImageBytes` (`safe-image-fetch.ts`). R2 resolve `displayUrlForStoredAsset` (`uploads.ts`).
+
+**[NET-NEW] (narrow but real):**
+1. **Cross-page flow + pagination engine — the hardest, beauty-critical piece; budget it as its own sub-item (~1.5–2.5 days alone).** `concept-pdf`'s helpers draw at caller-computed absolute `y` with no page-break awareness — reusable only for *in-block* drawing, not flow. Build a measure → atomic-block → `Cursor.place(block)` abstraction where each archetype declares its height and is placed whole-or-next-page, with running header/footer redraw (generalize `seating-pdf`'s `ensureSpace/addPage` loop). De-risk by shipping P1 with a simpler fixed-grid-per-page layout first and deferring true editorial cross-page text reflow to a polish pass.
+2. **Kwento primitives** — `pullQuote(...)` (oversized serif, gold rule, mulberry attribution) and `kwentoCard(...)` (framed photo + wrapped quote + who's-in-frame).
+3. **Multi-photo editorial slots** — full-bleed `bleed()` (image to page edge, no frame) + the existing margined `framed()`, alternated for rhythm. Each slot declares its pixel box; the route's `sharp(...).resize(boxW, boxH, {fit:'cover'})` normalizes (pdf-lib does NOT resize).
+4. **Chapter-opener band.**
+5. **Fonts — `@pdf-lib/fontkit` + real TTFs (the single net-new dependency, load-bearing).** `ascii()` keeps Latin-1 (so `ñ`/`é` already survive today) but strips emoji, true curly quotes, and any non-Latin script — fatal for a book made OF guest Taglish/emoji (🥹💛). Embed Cormorant Garamond (display serif, matches the recap) + a humanist body serif + DM Mono (eyebrows/timestamps) via `doc.embedFont(ttf)`. Apply a gentle filter (keep accented Latin + curly punctuation; strip only emoji, which text fonts can't render) instead of `ascii()`'s strip. **Never rasterize Kwento text** — keep it real, selectable, searchable text.
+6. **JPEG embed path** — Papic photos are photographic → `sharp.jpeg({quality:82})` → `embedJpg` yields far smaller PDFs than the PNG-everything path.
+
+**Route, budget, scale:**
+```ts
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;  // up from concept's 20; raise toward the Vercel plan ceiling
+```
+Auth `supabase.auth.getUser()` → 401; RLS-scoped reads → 404 on null event. Response `application/pdf` · `Content-Disposition: attachment; filename=<sanitized firstNames>-Kwento-Magazine.pdf` · `Cache-Control: no-store`. **The scale problem is real** — a naive all-at-once `Promise.all` sharp pipeline times out AND OOMs Vercel. Mitigations in order: JPEG · bounded concurrency (`p-limit ~4`) + `limitInputPixels` + `failOn:'truncated'` · fetch only curation-surviving photos · `metadata()` for guest-capture dimensions. **For large / "Complete" editions: render off the request path** via Next 15 `after()` / `waitUntil` (cron-free), store the PDF in R2 keyed `magazines/{event_id}/{edition}/{generated_at}.pdf`, email the couple a download link (reuse 0028 templates). **Accessibility (V1 floor):** set document `/Lang` from `events.story_language`; keep all text as real embedded text (already planned via fontkit); ensure logical content order. Full PDF/UA tagging (structure tree, image alt) is beyond pdf-lib's easy reach — deferred and stated as a known gap, not silently omitted.
+
+**Delivery (honor the locked Drive-copy architecture):** the finished magazine PDF is a **Drive-copy artifact** — after R2 store, call `pushToDriveCopy()` (`lib/drive-copy.ts`) to land it in the couple's permanent Drive folder, joining the six locked artifacts (Papic · Patiktok · Pabati · Pakanta · Monogram · QR codes). Channels: (1) instant download on the request path (Variant A, small editions); (2) `after()`/`waitUntil` → R2 → email link for large / Variant B; (3) Drive-copy as the durable home. *(Owner sign-off: add Kwento Magazine as a 7th `drive_copy_artifacts` type.)*
+
+### Privacy model (LOAD-BEARING — the central product decision)
+
+**One assembly, TWO renders, differing only in *which R2 key* + *which reader*.** Correct-by-construction by reusing the strictest pipeline already in the product (the live wall) — no bespoke magazine privacy logic. **Anchor all privacy primitives to the canonical multi-view + Kwento model (§ Kwento data model / multi-view visibility / 7-day review / RA 10173 erasure) and the live-wall `moderation_state` state machine — NOT a stale "G0–G5" enumeration.** Ground truth today: `moderation_state` DEFAULTS to `'unscreened'` for 100% of photos, the gate-running RPCs are explicitly **unbuilt**, and nothing in `apps/web` ever writes `moderation_state` or `wall_safe_r2_key`. So `displayUrlForStoredAsset` presigns ANY key with zero privacy logic — the gate is 100% the caller's responsibility.
+
+**Variant A — "Para sa atin / Keepsake for us" (couple-PRIVATE · default · ships now):**
+- Reads **original `r2_object_key`** masters, **unblurred** — couple/host always sees 100% (locked, not a toggle).
+- Every approved Kwento in full attribution; no FaceBlock suppression, no consent-drop.
+- **NSFW is an ALLOWLIST, not a blocklist** — include a photo only when `moderation_state='clean'` (affirmatively screened safe), never "everything except `nsfw_blocked`" (an un-screened NSFW photo is `'unscreened'`, not `'nsfw_blocked'`; the un-disableable NSFW rule is satisfied here because only the couple — who already has full master-gallery access — ever sees Variant A). **Block Variant A from every share/email/upload affordance** — the share button must regenerate from the gated Variant-B pipeline, never attach the Variant-A file.
+- Inherits **hard RA 10173 erasure**: a deleted guest / revoked face-data must purge them even from a STORED private artifact + the export-my-data ZIP (DB `ON DELETE CASCADE` does NOT reach into a generated PDF binary — see invalidation below).
+- A discreet "Para sa inyo lang · for you only" colophon **labels** (not "guards") the file; the real control is that the product never moves a Variant-A file off-device on the couple's behalf.
+- **₱0, no new privacy infra. This is the first ship.**
+
+**Variant B — "Para ipamahagi / A copy to share" (SHAREABLE · gated):** a fully separate code path from Variant A — never one parameterized key-selector that can fall through.
+- **Photo-stream SQL fails CLOSED in the query, not in prose:** `WHERE event_id=$1 AND hidden_at IS NULL AND moderation_state='clean' AND wall_safe_r2_key IS NOT NULL`. The route reads `wall_safe_r2_key` into every embed slot and **never references `r2_object_key`**; add a route assertion that throws if any resolved Variant-B key equals an `r2_object_key`. NULL safe key = photo **omitted, never substituted** (no `COALESCE(wall_safe_r2_key, r2_object_key)` — that ships every master).
+- **Photo-level consent as an explicit fail-closed veto** (consent is a column on `guests`, not the photo): exclude a photo if `EXISTS (SELECT 1 FROM photo_tags pt JOIN guests g USING(guest_id) WHERE pt.source_table=s.source_table AND pt.source_id=s.source_id AND g.photo_consent=FALSE)`. Because **untagged ≠ consented**, require an affirmative safe derivative (`wall_safe_r2_key`, which exists only post-gate) rather than inferring consent from the absence of a dissenting tag — untagged raw photos never reach a shareable file by default.
+- **FaceBlock-author suppression off the materialized write-time flag, not a live recompute:** gate Kwento inclusion on `photo_messages.author_publicly_hidden = FALSE` (NOT a live read of `guests.faceblock_enabled`, which is default-FALSE and reads "no preference" as "fine to print" — fatal for zero-account disposable-camera authors with no complete `guests` linkage). If author identity / faceblock linkage is unresolved → treat as suppressed-in-share. A Kwento also inherits its parent photo's visibility (caption hidden if the photo is hidden for the viewer).
+- **Author CONSENT-FOR-PRINT as a DB-enforceable filter:** the captured-Kwento consent string authorizes use in the wedding **video**, not print/PDF/redistribution. Store a consent-version (or cutoff timestamp) per message; render a Kwento into a shareable PDF only when `consent_captured_at` post-dates a string naming "a printed or PDF keepsake you may share." Messages collected under the old video-only string are **Variant-A only** or must be re-prompted.
+- Only **post-approval, post-7-day-window** content (a HARD precondition so the snapshot already excludes provisional content).
+- **Invalidation / blast-radius:** track every generated shareable PDF in `magazine_renders` (`event_id`, `r2_key`, `audience`, `content_hash`, `generated_at`, `stale_at`). Because a distributed copy is **non-retractable**, reduce blast radius at GENERATION time: (a) make Variant B a short-TTL revocable signed link / hosted view by default rather than a free-floating emailed attachment, so revocation kills future access; (b) bake a visible "reflects consents as of <date>" line so it reads as a snapshot; (c) on guest hard-delete / face-data revocation, mark stale + delete the stored R2 PDF (regenerate on next request). Extend `magazine_renders` to **any stored artifact** — including P5's async-stored Variant A; a request-path **streamed** Variant A needs no invalidation (no artifact survives the response).
+
+**TWO hard blockers on Variant B (surface to owner — do NOT silently ship):**
+1. **Consent-for-print** — amend the Kwento consent string (or scope shareable to the closed guest circle the current consent already covers). **Split consent into two scopes:** (a) closed-circle share (couple → their own guests) — an amended string covers this; (b) public / redistribution / commercial (public link, social, **paid print-on-demand**) — requires a separate explicit redistribution consent OR strips all guest-identifiable Kwento + faces regardless of FaceBlock. P5 POD is a public commercial artifact and must be gated on (b), not allowed to ride the Variant-B model.
+2. **Unbuilt pipeline** — Variant B reads `wall_safe_r2_key` + `moderation_state='clean'`, both produced ONLY by the Phase-1 wall-screening RPC (sets `'clean'` + writes the safe key) and the blur-derivative baker. Both are unbuilt → a Variant B built today renders a **completely empty book** (zero photos), even for a wedding with zero FaceBlocked guests. *Enrollment CAPTURE is shipped* (`lib/face-gate.ts`: RSVP-selfie MediaPipe quality gate already populating `guest_face_enrollments.asset_url/quality_score`); what's unbuilt is server-side face **matching** (`face_vector` embeddings, NULL today) + the derivative baker. **Variant B blocks on the entire wall-moderation/derivative pipeline + the consent amendment — both calendar-bound, not Claude-time-bound.**
+
+**The warm UX of the fork:** a single **"Sino ang makakakita nito? / Who's this for?"** choice at generate-time, default private. If any guest opted private, Variant B shows one honest line: *"May ilang bisita na gustong manatiling pribado — ni-blur o inalis namin sila sa kopyang ipamamahagi, para ligtas mong maipadala."* The couple never feels punished; the private edition stays complete.
+
+### Curation UX
+
+**Auto-first, couple-perfectible.** Entry point in the couple dashboard add-ons, beside the mood-board concept book.
+1. **One-tap generate → a finished book** (auto-bucketed clock-skew-normalized, auto-hero'd, auto-placed). Most couples stop here — they open a complete magazine, never a blank editor.
+2. **Magazine editor** (reuse the `photo_moments` editor pattern + the recap hero-pick): rename / merge / reorder / split / hide moment chapters; a prominent **"fewer / more chapters" slider** exposing the gap threshold (front-line fix for the most error-prone step — auto-bucketing); per-chapter hero swap + cover pick via `hero_photo_id` / `essay_photo_ids`; add / remove a photo per chapter; **hide a specific Kwento** from *their* book (include/exclude only — the couple never edits a guest's words).
+3. **Editorial-frame copy** curated-overridable via `event_editorial.draft_json` (same hook the recap uses).
+4. **Guest-side disclosure (the other half of consent):** at Kwento compose-time show a one-line notice ("Your words may appear in the couple's keepsake magazine") + a per-Kwento "keep private to the couple / don't print" toggle (a `print_consent` flag on `photo_messages`) — Variant B suppresses any Kwento whose author declined print, independent of FaceBlock.
+5. **Audience picker** at the top → live preview (low-res first-N-pages PDF, or the editorial recap web page as the on-screen proxy) → download (Variant A) or generate-and-email (large / Variant B).
+6. **Edition versioning** — Kwentos trickle in for weeks post-wedding. `magazine_renders` carries an edition counter + `kwento_count_at_render`; a couple-dashboard nudge ("N new kwentos and M new photos since your last edition — regenerate?") fires off the cron-free post-approval `after()` hook. Distinguish "edition" (couple-named snapshot) from "render" (privacy-invalidation re-bake). POD order freezes content as-of-now. Regenerate is ₱0 and idempotent.
+
+### Pricing recommendation (no figure invented — read at runtime from `service_catalog`)
+
+- **Variant A (couple-private PDF): FREE.** ₱0 marginal cost (all data the couple already created; pdf-lib + sharp, like the free mood-board concept book). A free, beautiful day-in-order keepsake is a retention + word-of-mouth engine and a natural Papic upsell; Filipino warmth says don't gate the couple's own memories.
+- **Variant B (shareable PDF): FREE, gated** on Papic/Kwento being active — same SKU gating as the wall/SDE. **Avoid the "pay more, get less" trap:** do NOT make the paid artifact the blurred one and the free one the complete one. Both digital variants are free; monetization lives in the physical object.
+- **Print-on-demand (physical magazine): PAID — the monetization surface.** A4 portrait already matches standard photo-book trim. **Deferred.** Real owner-scoped work, not hand-waved: a press-prep export profile (screen-RGB → CMYK + 300 dpi + 3 mm bleed), page-count-to-multiple-of-4 padding for perfect binding, explicit back-cover + spine spec, partner min/max page bounds, per-trim COGS, and POD inherits the **public/redistribution** consent scope by definition. Price = print cost + margin, owner-set at runtime.
+
+### Reconciliation with sibling outputs
+
+| Surface | Relationship | Reuse / don't duplicate |
+|---|---|---|
+| **Editorial recap** (`/[slug]`) | Same storyline assembly = single source of truth. Recap = living web scroll; magazine = its printable, timeline-ordered, guest-narrated sibling. Net-new vs recap = ONLY the wedding-day SPINE (recap has no `captured_at` timeline, only `love_story.milestones`) + the Kwento↔photo↔moment weave. | Extract + share `assembleStoryFrame()`; recap web page doubles as the on-screen preview. No storyline re-query; derive the capture stream once. |
+| **Mood-board concept-pdf** | Direct parent — same pdf-lib/sharp/route pattern, palette, footer, ₱0 posture. Concept-pdf renders design intent; the magazine is the first PDF to render guest faces. | Extend concept-pdf primitives; clone the route shell (auth + RLS + maxDuration + filename sanitizer). |
+| **SDE / Thank-You / Stories video** | Sibling, not competitor — same three ingredients, page layout instead of an FFmpeg/Remotion timeline. The cheap/instant/paper member; ships far sooner (no render backbone, no face enrollment for Variant A). | Build the **moment-bucketer once** and share it with the SDE shot-list; share the privacy gate. **Positioning:** the free magazine is the top-of-funnel teaser for the paid motion outputs (print can't move, play music, or carry the Pakanta song) — carry a soft in-book "See this day in motion — your SDE film" CTA + dashboard upsell; measure attach via `lib/add-on-stats.ts`. Free-book-drives-paid-film attach is an owner decision, not an accident. |
+| **Save-the-Date maker** | Shared templated-render aesthetic + Clean Editorial palette/monogram identity. | — |
+
+### Build order (Claude Code time, not human-months)
+
+| Phase | Scope | Depends on | Estimate |
+|---|---|---|---|
+| **P0 — Kwento table** | `photo_messages` migration: polymorphic `(source_table, source_id)` anchor (NOT the broken `photos(photo_id)` FK), RLS Pattern B, `guest_visible_messages()` SECURITY DEFINER RPC, `author_publicly_hidden` + `print_consent` + consent-version columns. Apply via `supabase db push` from a clean worktree (migrations don't auto-apply on main). | owner blesses `photo_messages` as canonical | ~0.5–1 day |
+| **P1 — Magazine MVP (Variant A · photo + storyline · NO Kwento)** | fontkit + TTFs; `lib/kwento-magazine.ts` (flow/pagination engine as its own sub-item; chapter generator; full-bleed + grid slots; pull-quote stub); clock-skew-normalized `captured_at` UNION + gap-primary bucketer + ordinal labels; route (auth/RLS/sharp/JPEG/bounded-concurrency/maxDuration/`/Lang`); `assembleStoryFrame()`; role_palette + Animated-Monogram raster; Drive-copy push; one-tap generate. **Ships today off shipped infra — answers the owner's ask.** | shipped infra only | ~3–5 days |
+| **P2 — Kwento weave** | Four-layer join + `kwentoCard` + attribution via `photo_tags` + "Mga Boses" quote-wall + "earns its photo a slot" rule. | P0 | ~2 days |
+| **P3 — Curation UX** | Auto-compile + couple editor (rename/merge/reorder/split, gap slider, hero/cover swap, photo add/remove, hide-Kwento, audience toggle, live preview, edition nudge) + guest-side print-consent disclosure. | P1 + P2 | ~2–3 days |
+| **P4 — Variant B (shareable)** | Audience picker, fail-closed `wall_safe_r2_key` path + route assertion, photo-consent veto, `author_publicly_hidden` + consent-for-print filters, `magazine_renders` invalidate-on-erasure + short-TTL link, warm notice. | **wall-screening + FaceBlock-derivative pipeline (unbuilt)** + **consent-text amendment** + owner sign-off — calendar-bound | ~2–3 days Claude time + external dependency |
+| **P5 — Async render at scale + Print-on-demand** | `after()`/`waitUntil` + R2 store + email link for large events; CMYK/300dpi/bleed press-prep; page-count + spine + back-cover spec; PH POD partner + paid SKU + redistribution-consent gate. | partner onboarding, price | ~2–4 days Claude time + partner calendar |
+
+**Recommended sequence:** P1 ships the free, beautiful, couple-private photo + storyline magazine NOW. P0 + P2 add the Kwento soul. P3 polishes. P4 (shareable) waits on the face/screening pipeline + the consent amendment. P5 monetizes via print.
+
+### Acceptance criteria
+
+- One-tap generate produces a complete, downloadable A4 PDF — never a blank editor; auto-bucketed chapters in `captured_at` order, auto-heroes, no half-empty dividers.
+- The book opens with the couple's prologue (FRAME) and closes with "Salamat," with the day's chronology as the SPINE between them; the two timelines never conflate.
+- `ñ`, accented Latin, curly quotes, and Taglish render correctly (fontkit + TTF); emoji gently stripped; Kwento text is real selectable/searchable text, never rasterized; `/Lang` set from `story_language`.
+- Variant A reads only unblurred masters that are `moderation_state='clean'`; it exposes **no** share/email/upload affordance; a deleted guest is purged from any stored Variant-A artifact + export ZIP.
+- Variant B reads ONLY `wall_safe_r2_key` where `moderation_state='clean' AND wall_safe_r2_key IS NOT NULL`; the route throws if any resolved key equals an `r2_object_key`; a photo with ANY `photo_consent=FALSE` tagged guest is dropped; an untagged raw photo never enters a shareable file; a FaceBlocked / unresolved author's Kwento is fully suppressed (not merely un-attributed); only post-approval, post-7-day-window Kwentos with print-consent render.
+- A generated shareable PDF is tracked in `magazine_renders` and re-flagged stale when a guest later revokes consent / face-data / sets FaceBlock.
+- Every approved Kwento renders somewhere (beside its photo, a promoted anchor, or the "Mga Boses" wall) or is auditable as suppressed for a privacy reason.
+- Large events render off the request path → R2 → email link without timing out / OOMing; the finished PDF lands in the couple's Drive-copy folder.
+
+### What it does NOT do in V1
+
+- No public link / social posting / commercial redistribution without the separate (b)-scope redistribution consent (and POD print is gated on it).
+- No print-on-demand fulfilment, no CMYK press-prep, no paid SKU (P5 / deferred).
+- No translation of guest Kwentos (verbatim only); no per-render AI (bucketing + copy are deterministic, LLM-free).
+- No editing of a guest's words (couple include/exclude only).
+- No full PDF/UA tagging (structure tree, image alt text) — V1 floor is `/Lang` + real text + logical order.
+- No automated face matching / blur derivatives — Variant B blocks on that unbuilt pipeline; until then only Variant A ships.
 
 ---
 
