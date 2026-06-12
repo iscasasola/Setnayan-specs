@@ -19,7 +19,7 @@
 
 ---
 
-> **AMENDMENT 2026-06-05 (owner-locked) — vendor reviews · free portfolio website · unified calendar · outside-event sync.** Net-new vendor mechanics landed this session; canonical spec = [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](../Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Parts C1/C3/C4/C5. In brief: (1) **event-bound reviews** — in-app events earn up to **250+ guest-level reviews** (one per verified guest), synced outside events earn **exactly 1**; (2) the **free vendor website** (surface 6 / § 2.1) becomes a **compile-all-events portfolio** auto-populated from in-app + synced events — MUST honor hybrid-anonymity (anonymize-until-reveal for Free/Verified, or public named portfolio = Pro+); (3) the **Calendar** (surface 3) is the org-level shared anti-double-book schedule, EXTENDED so vendors register their **own off-platform events** (no manual typing; 1 booked/day); (4) **sync an outside event for 1 token (₱100)** → adds it to stats + portfolio + 1 review + a calendar block. Reputation **flywheel** (tenure → more weddings → more reviews) is the retention promise.
+> **AMENDMENT 2026-06-05 (owner-locked) — vendor reviews · free portfolio website · unified calendar · outside-event sync.** Net-new vendor mechanics landed this session; canonical spec = [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](../03_Strategy/Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Parts C1/C3/C4/C5. In brief: (1) **event-bound reviews** — in-app events earn up to **250+ guest-level reviews** (one per verified guest), synced outside events earn **exactly 1**; (2) the **free vendor website** (surface 6 / § 2.1) becomes a **compile-all-events portfolio** auto-populated from in-app + synced events — MUST honor hybrid-anonymity (anonymize-until-reveal for Free/Verified, or public named portfolio = Pro+); (3) the **Calendar** (surface 3) is the org-level shared anti-double-book schedule, EXTENDED so vendors register their **own off-platform events** (no manual typing; 1 booked/day); (4) **sync an outside event for 1 token (₱100)** → adds it to stats + portfolio + 1 review + a calendar block. Reputation **flywheel** (tenure → more weddings → more reviews) is the retention promise.
 
 ---
 
@@ -59,7 +59,7 @@ vendors(
 )
 ```
 
-**`digital_services` is a registrable category (2026-06-03).** `service_category_primary` / `service_category_secondary[]` draw from the marketplace taxonomy, which now includes the **Design › Digital Services** child. A 3rd-party digital vendor (freelance monogram designer · wedding-website builder · LED-content studio) can register under it — it is a **generic, vendor-listable** category, not a Setnayan-only shelf; the 5 Setnayan services (Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw) surface as options inside the same tile. Canonical key `digital_services` added to the `0006` enum. See [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md).
+**`digital_services` is a registrable category (2026-06-03).** `service_category_primary` / `service_category_secondary[]` draw from the marketplace taxonomy, which now includes the **Design › Digital Services** child. A 3rd-party digital vendor (freelance monogram designer · wedding-website builder · LED-content studio) can register under it — it is a **generic, vendor-listable** category, not a Setnayan-only shelf; the 5 Setnayan services (Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw) surface as options inside the same tile. Canonical key `digital_services` added to the `0006` enum. See [Digital_Services_Cross_Surface_Map_2026-06-03.md](../03_Strategy/Digital_Services_Cross_Surface_Map_2026-06-03.md).
 
 ### 2.1b Mandatory vendor logo (locked 2026-05-12)
 
@@ -105,14 +105,14 @@ The vendor's logo is the customer's primary visual handle on the vendor across e
 
 ### 2.1a Vendor-proposed custom categories & details
 
-Vendors aren't locked into the marketplace taxonomy (the **10-parent / ~53-tile** shrunk model — see [Vendor_Taxonomy_Shrink_2026-05-30.md](../Vendor_Taxonomy_Shrink_2026-05-30.md)). If their offering doesn't fit, they request a new node from the service editor at one of two grains:
+Vendors aren't locked into the marketplace taxonomy (the **10-parent / ~53-tile** shrunk model — see [Vendor_Taxonomy_Shrink_2026-05-30.md](../03_Strategy/Vendor_Taxonomy_Shrink_2026-05-30.md)). If their offering doesn't fit, they request a new node from the service editor at one of two grains:
 
 - a new **category / child-tile** — a whole shopping decision with no existing tile (rare); or
 - a new **detail / facet** within an existing tile — a refinement (e.g. a new shoot-type under Photo & Video, a new booth type) — the common case post-shrink.
 
 (New **parent families** — the 10 top-level groups — are owner-level structural calls, not vendor-requestable.)
 
-**The promise behind this flow — "There's always a place for what you do."** A vendor whose offering we haven't listed is never dropped into a generic "Other" bucket — there is no such tile (the 2026-05-30 shrink keeps a tile only for a real shopping decision; see [Vendor_Taxonomy_Shrink_2026-05-30.md](../Vendor_Taxonomy_Shrink_2026-05-30.md)). Their service goes live on their own page immediately, then earns a real home in the directory. The service-editor affordance reads:
+**The promise behind this flow — "There's always a place for what you do."** A vendor whose offering we haven't listed is never dropped into a generic "Other" bucket — there is no such tile (the 2026-05-30 shrink keeps a tile only for a real shopping decision; see [Vendor_Taxonomy_Shrink_2026-05-30.md](../03_Strategy/Vendor_Taxonomy_Shrink_2026-05-30.md)). Their service goes live on their own page immediately, then earns a real home in the directory. The service-editor affordance reads:
 
 > **Don't see your exact service?** Add it. It's live on your profile right away — and our team gives it a permanent place in the directory, with you credited as its first vendor.
 
