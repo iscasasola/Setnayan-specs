@@ -9,7 +9,44 @@
 
 ---
 
-## 0. LIVE SITE CATALOG — authoritative as of 2026-06-04
+## 00. PRICING — CANONICAL (owner-locked 2026-06-07 "lock it" · supersedes § 0 and §§ 2–8)
+
+> Clean-sheet reprice + catalog prune. **4-tier model; the onboarding paywall presents the 3 paid tiers as the price choice.** Cost basis ≈ R2 storage only → ~95–99% margin. **This section supersedes § 0 below wherever they disagree.** **Site-sync SHIPPED 2026-06-13 (PR #1335)** — homepage/pricing/about/waitlist/how-it-works/signup/privacy/help/llms.txt all realigned; § 00.E status note there.
+
+### 00.A Tiers
+
+| Tier | Price | Includes |
+|---|---|---|
+| Free — Explore | ₱0 | Browse marketplace + personalized match "reveal" preview + Schedule · Budget · Guest List · Seat Plan · Mood Board. **No free RSVP, no free website, no free matching — all paid.** |
+| **Setnayan AI** | **₱3,999** | First paywall — full match / sort / cross-reference (date↔availability · budget · venue · pax · religion · reviews) + planning workspace. Soft-gate reveal. |
+| **Essentials** | **₱12,999** | AI + Animated Monogram + Custom QR + RSVP Pro + Papic Guests + Guest Stories + Event Website + Editorial Website. SRP ₱25,992 → ~50% off. |
+| **Complete** | **₱27,999** | All 19 paid services. SRP ₱53,981 → ~48% off. |
+
+### 00.B À la carte (19 paid)
+
+Setnayan AI ₱3,999 · Animated Monogram ₱1,999 · Custom QR ₱999 · RSVP ₱2,499 · RSVP Pro ₱4,499 · Papic Guests ₱2,999 · Guest Stories ₱1,499 · Event Website ₱1,999 · Editorial Website ₱7,999 · Papic 5 Seats ₱2,999 · Pakanta ₱2,499 · Pabati ₱999 · Panood ₱2,499/day · Live Background ₱2,499 · PhotoWall ₱2,499 · Patiktok ₱1,499 · Camera Bridge ₱1,499 · Thank You ₱3,499 · Same Day Edit ₱4,999. **SRP total ₱53,981.** (RSVP & RSVP Pro are tiers of one product — bundles include the Pro.)
+
+### 00.C Removed (tombstoned 2026-06-07)
+
+Indoor Blueprint · Call-Time Escalator · Pro Website (→ Event + Editorial Website) · High Res Archive · Bundle Guided Planner Suite (₱11,999) · Bundle Comprehensive Media Pack (₱16,999). **Mood Board kept — free.**
+
+### 00.D ⚠ Live-site reversals (need marketing-copy PR + brand sign-off)
+
+1. Setnayan AI free → ₱3,999 paid first-paywall — reverses "Free to plan · Start planning free."
+2. Event Website free → ₱1,999.
+3. RSVP free → ₱2,499 (Pro ₱4,499).
+
+Together these gut the "free to plan / free wedding website" pillars; the free tier is browse + match-preview + 5 planning tools only.
+
+### 00.E Site-sync deltas (PR scope · code/DB)
+
+/admin `platform_retail_catalog_v2`: deactivate the 3 removed Live/In-build SKUs (Indoor Blueprint, High Res Archive, Call-Time Escalator); set à la carte + the 3 tiers; populate `saas_overhead_cost_php` (R2 COGS). Homepage Setnayan AI ₱1,499 → ₱3,999 (conflicts with /pricing). Event Website ₱1,500 → ₱1,999. Reword "Free to plan / free website." Mockup: `Pricing_Page_Mockup_2026-06-07.html`.
+
+> **✅ SHIPPED 2026-06-13 — PR [#1335](https://github.com/iscasasola/setnayan-platform/pull/1335)** (copy + JSON-LD + llms.txt; DB catalogs were already canonical, no migration) + PR [#1336](https://github.com/iscasasola/setnayan-platform/pull/1336) (signed-in vendor-dashboard worked example). **Still open:** ① `saas_overhead_cost_php` population (admin/COGS); ② **RSVP SKU collision — OWNER CALL NEEDED:** prod DB has BOTH `RSVP_PRO_WEBSITE` "RSVP Pro" ₱4,499 AND `PRO_RSVP` "Pro RSVP" ₱1,999 active while base `RSVP_WEBSITE` ₱2,499 is inactive; § 00.B says RSVP ₱2,499 + Pro ₱4,499. ③ **Vendor-side prices in § 0.C / corpus CLAUDE.md were STALE** — DB + live site canon (DECISION_LOG 2026-06-09 reprice): **Pro ₱6,000/28d (₱60,000/yr) · Enterprise ₱10,000/28d (₱100,000/yr) · flat ₱100/token, packs ₱400–₱10,000**; not ₱2,499/₱5,499/₱1,000–₱18,000.
+
+---
+
+## 0. LIVE SITE CATALOG — authoritative as of 2026-06-04 (⚠ SUPERSEDED by § 00 above · 2026-06-07)
 
 > Mirrors setnayan.com/pricing exactly. Each customer SKU carries a build state the site shows: **Live**, **In build**, or **Coming soon**. `[Token]` = "Token Worthy" — redeemable with vendor tokens at a rate the vendor sets in their dashboard. This section supersedes §§ 2–8 wherever they disagree.
 
@@ -22,7 +59,7 @@
 | Indoor Blueprint | ₱1,499 | **Live** | Guided from entrance to table |
 | Papic (5 Seats) `[Token]` | ₱2,999 | **Live** | Unlimited photos + unlimited videos for 5 hours |
 | Papic Guest (Disposable Camera) `[Token]` | from ₱2,999 | **Live** | 24 photos + 10 × 5-second videos |
-| Today's Focus | ₱1,499 | **Live** | Assisted planning (the AI planner — replaces "Setnayan Concierge" naming) |
+| Setnayan AI | ₱1,499 | **Live** | Assisted planning (the AI planner — replaces "Setnayan Concierge" naming) |
 | High Res Archive | ₱2,999 / yr | In build | Yearly archive, billed per year |
 | Live Background `[Token]` | ₱2,499 | In build | LED wall design background with monogram (was "Pailaw"/LED Background) |
 | Panood (Website Add-on) `[Token]` | ₱3,499 / day | In build | Live streaming per day embedded on the event page |
@@ -66,7 +103,7 @@
 
 Verified vendors receive **100 complimentary tokens** once verification is approved.
 
-**Vendor token sinks (what a token buys):** (1) **answer a matched inquiry** — 1–3 tokens (₱100–₱300) to unlock a couple, idempotent per (vendor·event), covers ALL the vendor's services, banded by the wedding's region (see DECISION_LOG 2026-06-05 burn-reprice); (2) **redeem** against any `[Token]` couple SKU at the vendor's dashboard rate; (3) **feature boost** (4–100 tokens / 7 days); (4) **🆕 sync an outside event = 1 token (₱100)** — adds an off-platform event to the vendor's stats + free compile-all-events portfolio website + earns **1 verified review** + blocks the date on the shared anti-double-book calendar (owner-locked 2026-06-05; see [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Part C2).
+**Vendor token sinks (what a token buys):** (1) **answer a matched inquiry** — 1–3 tokens (₱100–₱300) to unlock a couple, idempotent per (vendor·event), covers ALL the vendor's services, banded by the wedding's region (see DECISION_LOG 2026-06-05 burn-reprice); (2) **redeem** against any `[Token]` couple SKU at the vendor's dashboard rate; (3) **feature boost** (4–100 tokens / 7 days); (4) **🆕 sync an outside event = 1 token (₱100)** — adds an off-platform event to the vendor's stats + free compile-all-events portfolio website + earns **1 verified review** + blocks the date on the shared anti-double-book calendar (owner-locked 2026-06-05; see [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](03_Strategy/Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Part C2).
 
 ### 0.D How money flows (per `/pricing`)
 
@@ -83,8 +120,8 @@ The live site disagrees with itself. `/pricing` is treated as canonical above, b
 1. **Vendor Pro price appears four different ways.** `/pricing` ₱2,499 / 28 days · homepage ₱1,999 / 28 days · `/for-vendors` ₱4,999 / **week** (founder ₱3,999/wk) · `/how-it-works` ₱499 / **week**. These are different *models*, not typos.
 2. **Commission.** Homepage + `/pricing` say **0% commission**; `/for-vendors` says Setnayan Pay is a **flat 5.0%** on every booking. Mutually exclusive.
 3. **Verification badge.** Homepage charges **₱1,499 lifetime + ₱499 refresh**; `/pricing` and `/for-vendors` say listing/verification is free with **100 complimentary tokens** on approval.
-4. **"Today's Focus" vs "Setnayan Concierge."** The AI planner SKU is **Today's Focus ₱1,499** (homepage, `/pricing`). But `/for-vendors` still advertises a free **"Setnayan Concierge"** worth **₱2,499** per booked couple. Same product two names + two prices, or two different things? Decide and unify.
-5. **Enterprise** (₱5,499 / 28 days) and **Today's Focus** (₱1,499) are consistent across pages — no action.
+4. **"Setnayan AI" vs "Setnayan Concierge."** The AI planner SKU is **Setnayan AI ₱1,499** (homepage, `/pricing`). But `/for-vendors` still advertises a free **"Setnayan Concierge"** worth **₱2,499** per booked couple. Same product two names + two prices, or two different things? Decide and unify.
+5. **Enterprise** (₱5,499 / 28 days) and **Setnayan AI** (₱1,499) are consistent across pages — no action.
 
 ---
 
