@@ -5,7 +5,7 @@
 > - The tour shipped as a **custom slide-modal**, NOT Driver.js — `app/_components/guided-tour.tsx` (+ `mini-tour.tsx` + `guest-guided-tour.tsx`) reads slide definitions from `lib/tours.ts` (`TOURS` / `TourKey`) and tracks completion in `users.tour_seen_keys` via `lib/tour-actions.ts`. There is no spotlight-on-DOM-element library; slides are centered cards with copy + a Lucide icon.
 > - **Shipped tour roster (6 keys), not the spec's 8/7/4/6-step set:** welcome tours `couple_welcome_v1` (6 slides), `admin_welcome_v1` (5 slides), `guest_welcome_v1`; mini-tours `customer_vendors_v1`, `admin_users_v1`, `admin_force_majeure_v1`. **No dedicated VENDOR welcome tour** and **not the "11 per-surface mini-tours"** described here.
 > - Replay is **not** at `/dashboard/[role]/settings/replay-tour/[tour_key]`; completion state lives in `users.tour_seen_keys` and tours re-fire from layout based on that array.
-> - This iteration is **cosmetic** and largely accurate in intent, but any tour copy that mentions **"Setnayan Concierge"** (planner is now **Today's Focus ₱1,499**; Concierge wizard retired, `CONCIERGE_ENABLED=false`) or a **"3% Setnayan Pay convenience fee"** (RETIRED — **commission is 0%**) is stale.
+> - This iteration is **cosmetic** and largely accurate in intent, but any tour copy that mentions **"Setnayan Concierge"** (planner is now **Setnayan AI ₱1,499**; Concierge wizard retired, `CONCIERGE_ENABLED=false`) or a **"3% Setnayan Pay convenience fee"** (RETIRED — **commission is 0%**) is stale.
 > - Tour analytics into 0023 (§ tour analytics) are not a built surface beyond the `tour_seen_keys` flag.
 >
 > When this body disagrees with the above, **the above wins.**

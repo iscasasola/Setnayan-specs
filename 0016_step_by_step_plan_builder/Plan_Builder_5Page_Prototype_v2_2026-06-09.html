@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Setnayan · Customer Dashboard Services — 5-Page Plan Builder (v2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBFBFA; --ink:#1E2229; --ink-soft:#5C6660; --gold:#C5A059; --gold-deep:#8C6932;
+  --mulberry:#5C2542; --line:rgba(30,34,41,.12); --card:#fff; --good:#2f7d4f; --warn:#9a6a00; --bad:#9b2c4a;
+  --serif:'Cormorant Garamond',serif; --sans:'Manrope',system-ui,sans-serif; --mono:'DM Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#ECE9E2;font-family:var(--sans);color:var(--ink)}
+body{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px}
+.phone{width:100%;max-width:412px;height:860px;max-height:calc(100vh - 48px);background:var(--paper);border-radius:30px;
+  box-shadow:0 30px 80px -30px rgba(30,34,41,.5),0 0 0 1px rgba(30,34,41,.06);overflow:hidden;display:flex;flex-direction:column;position:relative}
+/* top bar */
+.tbar{flex:0 0 auto;background:var(--ink);color:var(--paper);padding:16px 18px 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.tbar .k{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);opacity:.9}
+.tbar h1{font-family:var(--serif);font-style:italic;font-weight:600;font-size:25px;line-height:1;margin:3px 0 0}
+.tbar .bud{text-align:right;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:rgba(255,255,255,.65)}
+.tbar .bud b{display:block;font-family:var(--serif);font-style:italic;font-size:16px;color:#fff;font-weight:600}
+/* screen scroll */
+.screen{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 24px}
+.screen::-webkit-scrollbar{width:0}
+/* bottom nav */
+.nav{flex:0 0 auto;display:flex;border-top:1px solid var(--line);background:rgba(251,251,250,.96);backdrop-filter:blur(8px)}
+.nav button{flex:1;border:0;background:none;padding:9px 0 11px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:var(--ink-soft)}
+.nav button .ic{font-size:16px;line-height:1}
+.nav button .lb{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase}
+.nav button.on{color:var(--mulberry)} .nav button.on .lb{font-weight:600}
+/* generic */
+.eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 4px}
+.sec-h{font-family:var(--serif);font-style:italic;font-size:21px;font-weight:600;margin:0 0 10px}
+.muted{color:var(--ink-soft)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;padding:3px 7px;border-radius:999px}
+.chip.match{color:var(--gold-deep);background:rgba(197,160,89,.16)} .chip.match.fair{color:var(--ink-soft);background:rgba(30,34,41,.06)}
+.chip.lock{color:var(--mulberry);background:rgba(92,37,66,.1)} .chip.ai{color:#3a5bd0;background:rgba(58,91,208,.1)}
+.stars{color:var(--gold-deep)}
+.btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:999px;padding:9px 14px;cursor:pointer;transition:transform .12s var(--ease),background .2s,border-color .2s}
+.btn:active{transform:scale(.96)}
+.btn.pri{background:var(--mulberry);border-color:var(--mulberry);color:#fff}
+.btn.gold{background:var(--gold);border-color:var(--gold-deep);color:#3a2c10}
+.btn.ghost{background:transparent}
+.btn.sm{padding:7px 11px;font-size:9px}
+.btn.full{width:100%;justify-content:center;display:flex}
+/* SUMMARY */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px}
+.stat .n{font-family:var(--serif);font-style:italic;font-weight:600;font-size:30px;line-height:1}
+.stat .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.todo{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.todo:first-of-type{border-top:0}
+.todo .nm{font-weight:600;font-size:13.5px} .todo .d{font-family:var(--mono);font-size:9px;letter-spacing:.04em}
+.d.soon{color:var(--warn)} .d.over{color:var(--bad)} .d.ok{color:var(--ink-soft)}
+.bud-range{font-family:var(--serif);font-style:italic;font-size:24px;font-weight:600}
+.ai-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ai-row .t{font-weight:600;font-size:14px}.ai-row .s{font-size:11.5px;color:var(--ink-soft);margin-top:2px}
+.sw{width:50px;height:29px;border-radius:999px;background:rgba(30,34,41,.2);position:relative;flex:0 0 auto;cursor:pointer;transition:background .25s var(--ease)}
+.sw.on{background:var(--mulberry)} .sw .kn{position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#fff;transition:transform .25s var(--ease);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.sw.on .kn{transform:translateX(21px)}
+/* SHORTLIST accordion */
+.par{border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:10px;overflow:hidden}
+.par>.ph{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;cursor:pointer;background:none;border:0;width:100%;text-align:left}
+.par .ph .nm{font-family:var(--serif);font-style:italic;font-size:18px;font-weight:600}
+.par .ph .meta{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.par .ph .cv{margin-left:8px;color:var(--ink-soft);transition:transform .25s var(--ease)} .par.open .ph .cv{transform:rotate(180deg)}
+.leaf{border-top:1px solid var(--line)}
+.leaf .lh{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer;background:none;border:0;width:100%;text-align:left}
+.leaf .lh .ph2{width:38px;height:38px;border-radius:10px;flex:0 0 auto;background:linear-gradient(135deg,#efe7d6,#e2d7c1);display:flex;align-items:center;justify-content:center;font-size:18px}
+.leaf .lh .nm{font-weight:600;font-size:13.5px}.leaf .lh .sub{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:1px}
+.leaf .lh .cv{margin-left:auto;color:var(--ink-soft);transition:transform .25s var(--ease)} .leaf.open .lh .cv{transform:rotate(180deg)}
+.leaf-body{padding:2px 14px 14px}
+.svc{display:flex;gap:11px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:10px;margin-bottom:9px;position:relative}
+.svc .img{width:74px;height:74px;border-radius:11px;flex:0 0 auto;background:linear-gradient(135deg,#e9d9c4,#cdb8d0);display:flex;align-items:flex-end;justify-content:flex-start;padding:6px;font-size:22px}
+.svc .body{flex:1 1 auto;min-width:0}
+.svc .nm{font-family:var(--serif);font-style:italic;font-size:16.5px;font-weight:600;line-height:1.1}
+.svc .row1{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:4px 0 6px;font-family:var(--mono);font-size:8.5px;color:var(--ink-soft)}
+.svc .price{font-family:var(--serif);font-style:italic;font-weight:600;font-size:15px}
+.svc .acts{display:flex;align-items:center;gap:8px;margin-top:8px}
+.svc .rm{position:absolute;top:8px;right:9px;border:0;background:none;color:var(--ink-soft);font-size:15px;cursor:pointer;line-height:1}
+.endmark{display:flex;align-items:center;gap:9px;margin:2px 0 10px;color:var(--ink-soft)}
+.endmark .ln{flex:1;height:1px;background:var(--line)} .endmark .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.endmark .tx{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase}
+.find-row{display:flex;gap:8px}.find-row .btn{flex:1}
+.dashed{border:1.5px dashed rgba(92,37,66,.35);background:rgba(92,37,66,.03);color:var(--mulberry)}
+/* BUILD */
+.brow{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:11px;margin-bottom:9px}
+.brow.locked{background:rgba(92,37,66,.045);border-color:rgba(92,37,66,.2)}
+.fp{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}
+.fp button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);transition:.15s var(--ease)}
+.fp button.on.flag{background:rgba(58,91,208,.12);border-color:#3a5bd0;color:#3a5bd0}
+.fp button.on.pin{background:rgba(92,37,66,.12);border-color:var(--mulberry);color:var(--mulberry)}
+.bbody{flex:1 1 auto;min-width:0}
+.bbody .nm{font-weight:600;font-size:13.5px}
+.bbody .st{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-top:1px}
+.bbody .val{font-family:var(--serif);font-style:italic;font-size:16px;font-weight:600;margin-top:5px}
+.bbody .willcompute{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--gold-deep)}
+.bbody select,.bbody input{font-family:var(--sans);font-size:13px;border:1px solid var(--line);border-radius:9px;padding:7px 9px;width:100%;margin-top:6px;background:#fff;color:var(--ink)}
+.pickchip{display:inline-flex;align-items:center;gap:6px;background:rgba(30,34,41,.04);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:12px;margin-top:6px;margin-right:6px}
+.pickchip .pp{font-family:var(--serif);font-style:italic;font-weight:600}
+.totbar{position:sticky;bottom:0;background:var(--ink);color:#fff;border-radius:14px;padding:12px 14px;margin:14px 0 12px}
+.totbar .tl{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;font-size:12px}
+.totbar .tl .v{font-family:var(--serif);font-style:italic;font-weight:600;font-size:15px}
+.totbar .tl.grand{border-top:1px solid rgba(255,255,255,.18);margin-top:4px;padding-top:7px}
+.totbar .tl.grand .v{font-size:19px;color:var(--gold)}
+.totbar .lab{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:rgba(255,255,255,.7);text-transform:uppercase}
+.bbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bbtns .btn{justify-content:center;display:flex}
+/* COMPARE */
+.cmpwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
+.cmp{border-collapse:collapse;width:100%;font-size:12px;min-width:340px}
+.cmp th,.cmp td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top;text-align:left}
+.cmp thead th{position:sticky;top:0;background:rgba(30,34,41,.03);font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.cmp .cat{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+.cmp .cat .cv{display:inline-block;transition:transform .2s} .cmp .cat.open .cv{transform:rotate(90deg)}
+.cmp .sv{font-family:var(--serif);font-style:italic;font-weight:600;font-size:13px}
+.cmp .pr{font-family:var(--mono);font-size:10px;color:var(--ink-soft)}
+.cmp .blank{color:rgba(30,34,41,.25)}
+.cmp .inc{font-size:10.5px;color:var(--ink-soft);line-height:1.4;padding-top:3px}
+.cmp .colacts{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.cmp .colacts .btn{padding:5px 6px;font-size:8px}
+.cmp tr.grand td{background:rgba(30,34,41,.03);font-family:var(--serif);font-style:italic;font-weight:600;font-size:14px}
+/* LOCK */
+.lkv{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.lkv .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.lkv .v{font-family:var(--serif);font-style:italic;font-weight:600;font-size:16px;text-align:right}
+.lsvc{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.lsvc .cat{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.lsvc .nm{font-family:var(--serif);font-style:italic;font-weight:600;font-size:15px}
+.lsvc .pr{font-family:var(--serif);font-style:italic;font-weight:600;font-size:15px}
+/* modal + toast */
+.scrim{position:absolute;inset:0;background:rgba(30,34,41,.42);display:flex;align-items:flex-end;justify-content:center;z-index:50;animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{width:100%;background:var(--paper);border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -16px 40px -20px rgba(0,0,0,.5);animation:up .26s var(--ease)}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet h3{font-family:var(--serif);font-style:italic;font-size:21px;font-weight:600;margin:0 0 6px}
+.sheet p{font-size:13px;color:var(--ink-soft);margin:0 0 14px;line-height:1.45}
+.sheet .acts{display:flex;gap:8px;flex-wrap:wrap}.sheet .acts .btn{flex:1;justify-content:center;display:flex}
+.sheet input{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:var(--sans);margin-bottom:12px}
+.qr{width:140px;height:140px;margin:4px auto 14px;display:grid;grid-template-columns:repeat(11,1fr);gap:2px;background:#fff;padding:8px;border:1px solid var(--line);border-radius:12px}
+.qr i{background:var(--ink);border-radius:1px}.qr i.o{background:transparent}
+.ticket{display:inline-flex;align-items:center;gap:6px;background:rgba(197,160,89,.16);color:var(--gold-deep);border-radius:999px;padding:5px 11px;font-family:var(--mono);font-size:10px;margin-bottom:14px}
+.savelist{margin-bottom:12px}.savelist .si{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:6px;font-size:13px}
+.toast{position:absolute;left:50%;bottom:78px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 15px;border-radius:999px;font-size:12px;z-index:60;animation:fade .2s;box-shadow:0 8px 24px -8px rgba(0,0,0,.5);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="tbar" id="tbar"></div>
+  <div class="screen" id="screen"></div>
+  <div class="nav" id="nav"></div>
+</div>
+
+<script>
+"use strict";
+/* ───────────────── DATA ───────────────── */
+const PARENTS = [
+  {id:'venue', label:'Venue', icon:'🏛️', leaves:[
+    {id:'reception', label:'Reception Venue', icon:'🥂'},
+    {id:'ceremony', label:'Ceremony Venue', icon:'⛪'},
+    {id:'accommodation', label:'Accommodation', icon:'🛏️'},
+  ]},
+  {id:'food', label:'Food', icon:'🍽️', leaves:[
+    {id:'catering', label:'Catering', icon:'🍲'},
+    {id:'cake', label:'Cake', icon:'🍰'},
+  ]},
+  {id:'documentary', label:'Photo & Video', icon:'📸', leaves:[
+    {id:'photography', label:'Photography', icon:'📷'},
+    {id:'videography', label:'Videography', icon:'🎬'},
+  ]},
+  {id:'booths', label:'Booths', icon:'🎪', leaves:[
+    {id:'photobooth', label:'Photobooth', icon:'🤳'},
+    {id:'cocktail', label:'Cocktail Bar', icon:'🍸'},
+  ]},
+  {id:'design', label:'Design & Styling', icon:'🎨', leaves:[
+    {id:'florist', label:'Florals & Décor', icon:'💐'},
+  ]},
+  {id:'look', label:'The Look', icon:'💄', leaves:[
+    {id:'hmua', label:'Hair & Makeup', icon:'💋'},
+  ]},
+];
+const LEAF = {}; PARENTS.forEach(p=>p.leaves.forEach(l=>LEAF[l.id]={...l,parent:p.id}));
+const DEADLINES = {reception:240,ceremony:240,catering:200,photography:210,videography:200,cake:75,photobooth:90,cocktail:90,florist:170,hmua:160,accommodation:30};
+
+let SERVICES = [
+ {id:'casa',leaf:'reception',name:'Casa Verde Tagaytay',price:180000,rating:4.8,reviews:42,compat:94,region:'Tagaytay',inc:['8-hr venue use','200 pax capacity','Tables, chairs & linens','Bridal suite']},
+ {id:'altavista',leaf:'reception',name:'Alta Vista Hall',price:150000,rating:4.6,reviews:31,compat:88,region:'Tagaytay',inc:['6-hr venue use','180 pax','House lights & sound']},
+ {id:'feast',leaf:'catering',name:'Feast Manila',price:140000,rating:4.7,reviews:55,compat:90,region:'Tagaytay',inc:['4-course plated','200 pax','Service staff','Menu tasting']},
+ {id:'savory',leaf:'catering',name:'Savory Spoon',price:120000,rating:4.5,reviews:29,compat:80,region:'Manila',inc:['Buffet setup','180 pax','Service staff']},
+ {id:'lumen',leaf:'photography',name:'Lumen Studios',price:85000,rating:4.9,reviews:71,compat:93,region:'Tagaytay',inc:['10-hr coverage','2 photographers','Online gallery','Same-day edit']},
+ {id:'frame',leaf:'photography',name:'Frame & Co.',price:65000,rating:4.6,reviews:40,compat:85,region:'Manila',inc:['8-hr coverage','1 photographer','Online gallery']},
+ {id:'snap',leaf:'photobooth',name:'SnapJoy Booth',price:18000,rating:4.9,reviews:60,compat:91,region:'Tagaytay',inc:['3-hr booth','Unlimited prints','Props & backdrop']},
+ {id:'flashy',leaf:'photobooth',name:'Flashy 360',price:25000,rating:4.7,reviews:38,compat:84,region:'Manila',inc:['360° spinner','3-hr','USB copy']},
+ {id:'cake1',leaf:'cake',name:'Sugar & Lace',price:22000,rating:4.8,reviews:24,compat:86,region:'Tagaytay',inc:['3-tier cake','Dessert table']},
+];
+const svc = id => SERVICES.find(s=>s.id===id);
+const shortlistedFor = leaf => SERVICES.filter(s=>s.leaf===leaf && S.shortlist.has(s.id));
+
+/* ───────────────── STATE ───────────────── */
+const CANDIDATE_DATES = ['Feb 14, 2027','Mar 06, 2027','Apr 18, 2027'];
+const LOCATIONS = ['Tagaytay, Cavite','Manila'];
+let S = {
+  tab:'summary',
+  aiOn:true,
+  viewed:27,
+  openParent:'venue',
+  openLeaf:null,
+  shortlist:new Set(['casa','altavista','feast','savory','lumen','frame','snap','flashy','cake1']),
+  build:{},                         // leaf -> [serviceId,...]
+  rowMode:{},                       // key -> 'flag'|'pin'  (key = 'date'|'budget'|'location'|leafId)
+  anchor:{date:'Feb 14, 2027', budget:600000, location:'Tagaytay, Cavite'},
+  lockedPicks:{reception:'casa'},   // leaf -> serviceId (locked: shown, NOT counted in build budget)
+  lockedAnchorSet:true,
+  savedBuilds:[
+    {name:'Dream Plan', anchor:{date:'Feb 14, 2027',budget:600000,location:'Tagaytay, Cavite'}, picks:{reception:'casa',catering:'feast',photography:'lumen',photobooth:'flashy',cake:'cake1'}},
+    {name:'Budget Plan', anchor:{date:'Mar 06, 2027',budget:430000,location:'Manila'}, picks:{reception:'altavista',catering:'savory',photobooth:'snap'}},
+  ],
+  cmpOpen:new Set(),
+  modal:null,
+};
+// seed default row modes
+S.rowMode = {date:'pin', budget:'pin', location:'pin', reception:'pin'};
+
+/* ───────────────── HELPERS ───────────────── */
+const peso = n => n==null ? '—' : '₱'+Math.round(n).toLocaleString('en-PH');
+const pesoK = n => n>=1000 ? '₱'+Math.round(n/1000)+'K' : peso(n);
+const el = (id)=>document.getElementById(id);
+const star = r => '★ '+r.toFixed(1);
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.querySelector('.phone').appendChild(t); setTimeout(()=>t.remove(),1700); }
+function activeBuildLeaves(){ // leaves with a pick in build (any source), excluding locked
+  return Object.keys(S.build).filter(l=>S.build[l] && S.build[l].length && !S.lockedPicks[l]); }
+function buildTotal(){ let t=0; activeBuildLeaves().forEach(l=>S.build[l].forEach(id=>{const s=svc(id); if(s)t+=s.price;})); return t; }
+function lockedTotal(){ let t=0; Object.values(S.lockedPicks).forEach(id=>{const s=svc(id); if(s)t+=s.price;}); return t; }
+function budgetRange(){ // across shortlisted leaves: sum cheapest..priciest one per leaf
+  let lo=0,hi=0; const seen=new Set();
+  SERVICES.forEach(s=>{ if(!S.shortlist.has(s.id)) return; seen.add(s.leaf); });
+  seen.forEach(l=>{ const arr=shortlistedFor(l).map(s=>s.price); if(arr.length){lo+=Math.min(...arr);hi+=Math.max(...arr);} });
+  return [lo,hi];
+}
+
+/* ───────────────── RENDER ───────────────── */
+const TABS=[['summary','Summary','◷'],['shortlist','Shortlist','❑'],['build','Build','⚒'],['compare','Compare','⇄'],['lock','Lock','🔒']];
+function renderNav(){ el('nav').innerHTML = TABS.map(([id,lb,ic])=>
+  `<button data-act="tab:${id}" class="${S.tab===id?'on':''}"><span class="ic">${ic}</span><span class="lb">${lb}</span></button>`).join(''); }
+function renderTBar(){
+  const titles={summary:'Summary',shortlist:'Shortlist',build:'Build',compare:'Compare',lock:'Lock'};
+  const subs={summary:'Your plan at a glance',shortlist:'Everything you’re considering',build:'Assemble a plan that fits',compare:'Your saved builds, side by side',lock:'Your final wedding plan'};
+  const [lo,hi]=budgetRange();
+  const showBud = S.tab!=='summary';
+  el('tbar').innerHTML = `<div><div class="k">${subs[S.tab]}</div><h1>${titles[S.tab]}</h1></div>`+
+    (showBud?`<div class="bud">Target<b>${pesoK(S.anchor.budget)}</b></div>`:`<div class="bud">Range<b>${pesoK(lo)}–${pesoK(hi)}</b></div>`);
+}
+function render(){ renderTBar(); el('screen').innerHTML = ({summary:vSummary,shortlist:vShortlist,build:vBuild,compare:vCompare,lock:vLock}[S.tab])(); renderNav(); if(S.modal) mountModal(); }
+
+/* ---- SUMMARY ---- */
+function vSummary(){
+  const builds=S.savedBuilds.length, locked=Object.keys(S.lockedPicks).length, sl=S.shortlist.size;
+  const [lo,hi]=budgetRange();
+  const todo=Object.keys(DEADLINES)
+    .filter(l=>!S.lockedPicks[l])
+    .map(l=>({l,nm:LEAF[l].label,d:DEADLINES[l]}))
+    .sort((a,b)=>a.d-b.d).slice(0,4);
+  const dlcls=d=>d<60?'over':d<120?'soon':'ok';
+  return `
+  <div class="stats">
+    <div class="stat"><div class="n">${S.viewed}</div><div class="l">Viewed services</div></div>
+    <div class="stat"><div class="n">${sl}</div><div class="l">Shortlisted</div></div>
+    <div class="stat"><div class="n">${builds}</div><div class="l">Built bundles</div></div>
+    <div class="stat"><div class="n">${locked}</div><div class="l">Locked services</div></div>
+  </div>
+  <div class="panel">
+    <p class="eyebrow">What to complete</p>
+    ${todo.map(t=>`<div class="todo"><span class="nm">${t.nm}</span><span class="d ${dlcls(t.d)}">${t.d<90?'lock soon · ':''}~${t.d}d to lock-by</span></div>`).join('')}
+  </div>
+  <div class="panel">
+    <p class="eyebrow">Budget range · all chosen services</p>
+    <div class="bud-range">${peso(lo)} – ${peso(hi)}</div>
+    <div class="muted" style="font-size:11.5px;margin-top:4px">Cheapest → priciest across everything you’ve shortlisted.</div>
+  </div>
+  <div class="panel ai-row">
+    <div><div class="t">Setnayan AI</div><div class="s">Smart matching, auto-fill & best-fit picks while you build.</div></div>
+    <div class="sw ${S.aiOn?'on':''}" data-act="ai-toggle" role="switch" aria-checked="${S.aiOn}"><span class="kn"></span></div>
+  </div>`;
+}
+
+/* ---- SHORTLIST ---- ("The extras you love" pattern) */
+function vShortlist(){
+  return PARENTS.map(p=>{
+    const open=S.openParent===p.id;
+    const cnt=p.leaves.reduce((n,l)=>n+shortlistedFor(l.id).length,0);
+    return `<div class="par ${open?'open':''}">
+      <button class="ph" data-act="sl-parent:${p.id}">
+        <span><span class="nm">${p.icon} ${p.label}</span></span>
+        <span style="display:flex;align-items:center"><span class="meta">${cnt?cnt+' shortlisted':'none yet'}</span><span class="cv">▾</span></span>
+      </button>
+      ${open ? p.leaves.map(l=>leafBlock(l)).join('') : ''}
+    </div>`;
+  }).join('');
+}
+function leafBlock(l){
+  const open=S.openLeaf===l.id;
+  const items=shortlistedFor(l.id);
+  return `<div class="leaf ${open?'open':''}">
+    <button class="lh" data-act="sl-leaf:${l.id}">
+      <span class="ph2">${l.icon}</span>
+      <span><span class="nm">${l.label}</span><span class="sub">${items.length?items.length+' shortlisted':'nothing here yet'}</span></span>
+      <span class="cv">▾</span>
+    </button>
+    ${open?`<div class="leaf-body">
+      ${items.map(s=>svcCard(s)).join('')}
+      ${items.length?`<div class="endmark"><span class="ln"></span><span class="dot"></span><span class="tx">end of ${l.label.toLowerCase()}</span><span class="ln"></span></div>`:''}
+      <div class="find-row">
+        <button class="btn dashed" data-act="find:${l.id}">＋ Find ${l.label}</button>
+        <button class="btn dashed" data-act="addmanual:${l.id}">✎ Add Manually</button>
+      </div>
+    </div>`:''}
+  </div>`;
+}
+function svcCard(s){
+  const inBuild=(S.build[s.leaf]||[]).includes(s.id);
+  const lockedHere=S.lockedPicks[s.leaf]===s.id;
+  const m=s.compat>=88?'match':'match fair';
+  return `<div class="svc">
+    <button class="rm" data-act="sl-remove:${s.id}" title="Remove from shortlist">×</button>
+    <div class="img">${LEAF[s.leaf].icon}</div>
+    <div class="body">
+      <div class="nm">${s.name}</div>
+      <div class="row1"><span class="chip ${m}">${s.compat}% match</span><span class="stars">${star(s.rating)}</span><span>(${s.reviews})</span><span>· ${s.region}</span></div>
+      <div class="price">${peso(s.price)}</div>
+      <div class="acts">
+        ${lockedHere
+          ? `<span class="chip lock">🔒 In Lock</span>`
+          : inBuild
+            ? `<span class="chip lock">✓ In your build</span><button class="btn sm ghost" data-act="addbuild:${s.id}">Re-add</button>`
+            : `<button class="btn gold sm" data-act="addbuild:${s.id}">＋ Add to build</button>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---- BUILD ---- */
+function buildRow(key,nm,sub,inner,locked){
+  const m=S.rowMode[key];
+  return `<div class="brow ${locked?'locked':''}">
+    <div class="fp">
+      <button class="flag ${m==='flag'?'on flag':''}" data-act="row-flag:${key}" title="Flag — compute this">⚑</button>
+      <button class="pin ${m==='pin'?'on pin':''}" data-act="row-pin:${key}" title="Pin — fixed, won’t change">📌</button>
+    </div>
+    <div class="bbody"><div class="nm">${nm}</div><div class="st">${sub}</div>${inner}</div>
+  </div>`;
+}
+function anchorInner(key){
+  const m=S.rowMode[key];
+  if(S.lockedAnchorSet && (key==='date'||key==='budget'||key==='location'))
+    {} // anchors can still be edited unless you treat them locked; keep editable here
+  if(m==='flag') return `<div class="willcompute">✦ Will compute${S.aiOn?' (AI)':''}</div>`;
+  if(m==='pin'){
+    if(key==='date') return `<select onchange="setAnchor('date',this.value)">${CANDIDATE_DATES.map(d=>`<option ${S.anchor.date===d?'selected':''}>${d}</option>`).join('')}</select>`;
+    if(key==='location') return `<select onchange="setAnchor('location',this.value)">${LOCATIONS.map(d=>`<option ${S.anchor.location===d?'selected':''}>${d}</option>`).join('')}</select>`;
+    if(key==='budget') return `<input type="text" value="${peso(S.anchor.budget)}" onchange="setBudget(this.value)" />`;
+  }
+  return `<div class="muted" style="font-size:12px;margin-top:5px">Not set — flag to compute or pin to fix.</div>`;
+}
+function leafRowInner(leaf){
+  if(S.lockedPicks[leaf]){ const s=svc(S.lockedPicks[leaf]); return `<div class="pickchip"><span>🔒</span><span class="pp">${s.name}</span><span class="muted">${peso(s.price)}</span></div><div class="st" style="margin-top:4px">Locked · not counted in build budget</div>`; }
+  const m=S.rowMode[leaf];
+  const picks=S.build[leaf]||[];
+  if(m==='flag' && !picks.length) return `<div class="willcompute">✦ Will compute${S.aiOn?' (AI · nearest reception, best match)':''}</div>`;
+  if(m==='pin'){
+    const opts=shortlistedFor(leaf);
+    if(!opts.length) return `<div class="muted" style="font-size:12px;margin-top:5px">No shortlist yet — <a href="#" onclick="go('shortlist');return false">find one ›</a></div>`;
+    const cur=picks[0]||'';
+    return `<select onchange="pinPick('${leaf}',this.value)"><option value="">Choose a shortlisted service…</option>${opts.map(o=>`<option value="${o.id}" ${cur===o.id?'selected':''}>${o.name} · ${peso(o.price)}</option>`).join('')}</select>`+pickChips(leaf);
+  }
+  if(picks.length) return pickChips(leaf);
+  return `<div class="muted" style="font-size:12px;margin-top:5px">Not in build.</div>`;
+}
+function pickChips(leaf){
+  const picks=S.build[leaf]||[]; if(!picks.length) return '';
+  const flagged=S.rowMode[leaf]==='flag';
+  return '<div>'+picks.map(id=>{const s=svc(id); return `<span class="pickchip">${flagged?'<span class="chip ai">AI</span>':''}<span class="pp">${s.name}</span><span class="muted">${peso(s.price)}</span></span>`;}).join('')+'</div>';
+}
+function vBuild(){
+  const rows=[
+    buildRow('date','Wedding Date','pick one of your candidate dates',anchorInner('date'),false),
+    buildRow('budget','Budget','your working total',anchorInner('budget'),false),
+    buildRow('location','Location','one of your two locations',anchorInner('location'),false),
+  ];
+  PARENTS.forEach(p=>p.leaves.forEach(l=>{
+    rows.push(buildRow(l.id,l.label,p.label,leafRowInner(l.id),!!S.lockedPicks[l.id]));
+  }));
+  return rows.join('')+`
+  <div class="totbar">
+    <div class="tl"><span class="lab">Locked services (held separately)</span><span class="v">${peso(lockedTotal())}</span></div>
+    <div class="tl"><span class="lab">This build (chosen services)</span><span class="v">${peso(buildTotal())}</span></div>
+    <div class="tl grand"><span class="lab">Total commitment</span><span class="v">${peso(lockedTotal()+buildTotal())}</span></div>
+  </div>
+  <div class="bbtns">
+    <button class="btn" data-act="b-reset">RESET</button>
+    <button class="btn" data-act="b-save">SAVE BUILD</button>
+    <button class="btn gold" data-act="b-compute">COMPUTE</button>
+    <button class="btn pri" data-act="b-lock">LOCK</button>
+  </div>`;
+}
+
+/* ---- COMPARE ---- */
+function vCompare(){
+  if(!S.savedBuilds.length) return `<div class="panel" style="text-align:center;color:var(--ink-soft)">No saved builds yet. Build a plan and tap <b>Save Build</b> to compare versions here.</div>`;
+  const builds=S.savedBuilds;
+  const leaves=[]; const seen=new Set();
+  builds.forEach(b=>Object.keys(b.picks).forEach(l=>{if(!seen.has(l)){seen.add(l);leaves.push(l);}}));
+  const cell=(b,l)=>{ const id=b.picks[l]; if(!id) return `<span class="blank">—</span>`; const s=svc(id);
+    const inc=S.cmpOpen.has(l)?`<div class="inc">${s.inc.map(i=>'· '+i).join('<br>')}</div>`:'';
+    return `<div class="sv">${s.name}</div><div class="pr">${peso(s.price)}</div>${inc}`; };
+  const total=b=>Object.values(b.picks).reduce((t,id)=>t+(svc(id)?svc(id).price:0),0);
+  return `<div class="cmpwrap"><table class="cmp">
+    <thead><tr><th></th>${builds.map((b,i)=>`<th>${b.name}<div class="colacts">
+      <button class="btn sm" data-act="cmp-modify:${i}">MODIFY</button>
+      <button class="btn sm pri" data-act="cmp-lock:${i}">LOCK</button>
+      <button class="btn sm ghost" data-act="cmp-delete:${i}">DELETE</button></div></th>`).join('')}</tr></thead>
+    <tbody>
+      <tr><td class="cat">Date</td>${builds.map(b=>`<td><div class="sv" style="font-size:12px">${b.anchor.date}</div></td>`).join('')}</tr>
+      <tr><td class="cat">Location</td>${builds.map(b=>`<td><div class="pr">${b.anchor.location}</div></td>`).join('')}</tr>
+      ${leaves.map(l=>`<tr><td class="cat ${S.cmpOpen.has(l)?'open':''}" data-act="cmp-expand:${l}"><span class="cv">▸</span> ${LEAF[l].label}</td>${builds.map(b=>`<td>${cell(b,l)}</td>`).join('')}</tr>`).join('')}
+      <tr class="grand"><td>Total</td>${builds.map(b=>`<td>${peso(total(b))}</td>`).join('')}</tr>
+    </tbody>
+  </table></div>
+  <p class="muted" style="font-size:11px;margin-top:10px">Tap a category to expand and compare inclusions. <b>Modify</b> re-opens that build on the Build tab; <b>Lock</b> finalizes it.</p>`;
+}
+
+/* ---- LOCK ---- */
+function vLock(){
+  const leaves=Object.keys(S.lockedPicks);
+  return `<div class="panel">
+    <p class="eyebrow">Locked essentials</p>
+    <div class="lkv"><span class="k">Date</span><span class="v">${S.anchor.date}</span></div>
+    <div class="lkv"><span class="k">Budget</span><span class="v">${peso(S.anchor.budget)}</span></div>
+    <div class="lkv" style="border-bottom:0"><span class="k">Location</span><span class="v">${S.anchor.location}</span></div>
+  </div>
+  <div class="panel">
+    <p class="eyebrow">Locked services</p>
+    ${leaves.length?leaves.map(l=>{const s=svc(S.lockedPicks[l]); return `<div class="lsvc"><span><div class="cat">${LEAF[l].label}</div><div class="nm">${s.name}</div></span><span class="pr">${peso(s.price)}</span></div>`;}).join(''):'<div class="muted" style="font-size:12.5px">Nothing locked yet — lock a build to finalize your vendors.</div>'}
+    ${leaves.length?`<div class="lsvc" style="border-bottom:0"><span class="nm">Total locked</span><span class="pr">${peso(lockedTotal())}</span></div>`:''}
+  </div>`;
+}
+
+/* ───────────────── MODALS ───────────────── */
+function mountModal(){
+  const old=document.querySelector('.scrim'); if(old) old.remove();
+  if(!S.modal) return;
+  const d=document.createElement('div'); d.className='scrim'; d.dataset.scrim='1'; d.innerHTML=`<div class="sheet">${S.modal.html}</div>`;
+  document.querySelector('.phone').appendChild(d);
+}
+function closeModal(){ S.modal=null; const s=document.querySelector('.scrim'); if(s)s.remove(); }
+function replaceModal(leaf,newId){
+  const cur=svc((S.build[leaf]||[])[0]); const nw=svc(newId);
+  S.modal={html:`<h3>Already in your build</h3>
+    <p>Your build already has <b>${cur.name}</b> for ${LEAF[leaf].label}. Replace it with <b>${nw.name}</b> on the Build page?</p>
+    <div class="acts">
+      <button class="btn pri" data-act="rep-replace:${leaf}:${newId}">Replace</button>
+      <button class="btn gold" data-act="rep-both:${leaf}:${newId}">Add Both</button>
+      <button class="btn ghost" data-act="modal-close">Cancel</button>
+    </div>`};
+  mountModal();
+}
+function manualModal(leaf){
+  const pat=[1,1,1,1,1,0,1,1,1,1,1, 1,0,0,0,1,0,1,0,0,0,1, 1,0,1,0,1,0,1,0,1,0,1, 1,0,0,0,1,1,1,0,0,0,1, 1,1,1,1,1,0,1,1,1,1,1, 0,0,0,0,0,0,0,0,0,0,0, 1,0,1,1,0,1,0,1,1,0,1, 0,1,0,0,1,0,1,0,0,1,0, 1,1,0,1,0,1,0,1,1,0,1, 0,1,1,0,1,0,1,0,1,1,0, 1,0,1,1,0,1,1,0,1,0,1];
+  S.modal={html:`<h3>Add your own ${LEAF[leaf].label.toLowerCase()}</h3>
+    <p>We’ll generate a QR code. Your vendor scans it to log in (or create an account) and link to your wedding — so their details sync straight into your plan.</p>
+    <div class="qr">${pat.map(b=>`<i class="${b?'':'o'}"></i>`).join('')}</div>
+    <div class="ticket">🎟️ Syncing a vendor costs 1 ticket</div>
+    <div class="acts"><button class="btn pri" data-act="manual-gen">Generate QR · use 1 ticket</button><button class="btn ghost" data-act="modal-close">Cancel</button></div>`};
+  mountModal();
+}
+function saveModal(){
+  S.modal={html:`<h3>Save this build</h3>
+    <p>Name it so you can compare versions on the Compare tab.</p>
+    <input id="bname" placeholder="e.g. Garden Plan" />
+    ${S.savedBuilds.length?`<p class="eyebrow">Or overwrite an existing build</p><div class="savelist">${S.savedBuilds.map((b,i)=>`<div class="si"><span>${b.name}</span><button class="btn sm" data-act="save-over:${i}">Overwrite</button></div>`).join('')}</div>`:''}
+    <div class="acts"><button class="btn pri" data-act="save-new">Save as new</button><button class="btn ghost" data-act="modal-close">Cancel</button></div>`};
+  mountModal();
+}
+function noCompatModal(leaf){
+  S.modal={html:`<h3>No compatible ${LEAF[leaf].label.toLowerCase()}</h3>
+    <p>None of your shortlisted services fit <b>${LEAF[leaf].label}</b> within what you’ve pinned. Add more options to your shortlist?</p>
+    <div class="acts"><button class="btn pri" data-act="find-compat:${leaf}">Find Compatible</button><button class="btn ghost" data-act="remove-flag:${leaf}">Remove Flag</button></div>`};
+  mountModal();
+}
+
+/* ───────────────── ACTIONS ───────────────── */
+function go(tab){ S.tab=tab; S.modal=null; render(); }
+window.go=go;
+window.setAnchor=(k,v)=>{ S.anchor[k]=v; };
+window.setBudget=(v)=>{ const n=parseInt(String(v).replace(/[^0-9]/g,''),10); if(!isNaN(n)) S.anchor.budget=n; render(); };
+window.pinPick=(leaf,id)=>{ if(id) S.build[leaf]=[id]; else delete S.build[leaf]; render(); };
+
+function compute(){
+  const flagged=Object.keys(S.rowMode).filter(k=>S.rowMode[k]==='flag' && LEAF[k]); // category leaves only
+  let firstMissing=null;
+  flagged.forEach(leaf=>{
+    let opts=shortlistedFor(leaf);
+    if(!opts.length){ if(!firstMissing) firstMissing=leaf; return; }
+    if(S.aiOn){
+      const region=(S.rowMode.location==='pin')?S.anchor.location.split(',')[0].trim():null;
+      opts=[...opts].sort((a,b)=> (region?((b.region===region)-(a.region===region)):0) || (b.compat-a.compat) || (b.rating-a.rating));
+    } else { opts=[...opts].sort((a,b)=>a.price-b.price); }
+    S.build[leaf]=[opts[0].id];
+  });
+  render();
+  if(firstMissing) noCompatModal(firstMissing);
+  else toast(S.aiOn?'AI filled your flagged categories':'Filled flagged categories');
+}
+
+const ACT={
+  'tab':go,
+  'ai-toggle':()=>{ S.aiOn=!S.aiOn; render(); },
+  'sl-parent':id=>{ S.openParent=S.openParent===id?null:id; S.openLeaf=null; render(); },
+  'sl-leaf':id=>{ S.openLeaf=S.openLeaf===id?null:id; render(); },
+  'sl-remove':id=>{ S.shortlist.delete(id); Object.keys(S.build).forEach(l=>{S.build[l]=S.build[l].filter(x=>x!==id); if(!S.build[l].length)delete S.build[l];}); render(); },
+  'find':leaf=>{ toast('Opening marketplace search · '+LEAF[leaf].label); },
+  'addmanual':leaf=>manualModal(leaf),
+  'manual-gen':()=>{ closeModal(); toast('QR generated · 1 ticket used · waiting for vendor to sync'); },
+  'addbuild':id=>{ const s=svc(id); const cur=S.build[s.leaf]||[];
+    if(cur.length && !cur.includes(id)) return replaceModal(s.leaf,id);
+    if(!cur.includes(id)){ S.build[s.leaf]=[...cur,id]; toast('Added to build'); } render(); },
+  'rep-replace':(leaf,id)=>{ S.build[leaf]=[id]; closeModal(); toast('Replaced on Build'); render(); },
+  'rep-both':(leaf,id)=>{ S.build[leaf]=[...(S.build[leaf]||[]),id]; closeModal(); toast('Added both to Build'); render(); },
+  'modal-close':()=>{ closeModal(); },
+  'row-flag':key=>{ S.rowMode[key]=S.rowMode[key]==='flag'?null:'flag'; render(); },
+  'row-pin':key=>{ S.rowMode[key]=S.rowMode[key]==='pin'?null:'pin'; render(); },
+  'b-reset':()=>{ S.build={}; S.rowMode={date:'pin',budget:'pin',location:'pin'}; Object.keys(S.lockedPicks).forEach(l=>S.rowMode[l]='pin'); render(); toast('Build reset to defaults'); },
+  'b-compute':compute,
+  'b-save':saveModal,
+  'save-new':()=>{ const n=(document.getElementById('bname')||{}).value||('Build '+(S.savedBuilds.length+1));
+    S.savedBuilds.push({name:n, anchor:{...S.anchor}, picks:snapshotPicks()}); closeModal(); toast('Saved “'+n+'”'); render(); },
+  'save-over':i=>{ const b=S.savedBuilds[i]; b.anchor={...S.anchor}; b.picks=snapshotPicks(); closeModal(); toast('Overwrote “'+b.name+'”'); render(); },
+  'b-lock':()=>{ activeBuildLeaves().forEach(l=>{ S.lockedPicks[l]=S.build[l][0]; }); S.build={}; S.lockedAnchorSet=true; go('lock'); toast('Build locked'); },
+  'find-compat':leaf=>{ closeModal(); go('shortlist'); S.openParent=LEAF[leaf].parent; S.openLeaf=leaf; render(); toast('Find compatible '+LEAF[leaf].label); },
+  'remove-flag':leaf=>{ S.rowMode[leaf]=null; closeModal(); render(); },
+  'cmp-expand':l=>{ S.cmpOpen.has(l)?S.cmpOpen.delete(l):S.cmpOpen.add(l); render(); },
+  'cmp-delete':i=>{ S.savedBuilds.splice(i,1); render(); toast('Build deleted'); },
+  'cmp-modify':i=>{ const b=S.savedBuilds[i]; S.anchor={...b.anchor}; S.build={}; Object.keys(b.picks).forEach(l=>{S.build[l]=[b.picks[l]];}); S.rowMode={date:'pin',budget:'pin',location:'pin'}; Object.keys(S.lockedPicks).forEach(l=>S.rowMode[l]='pin'); go('build'); toast('Editing “'+b.name+'”'); },
+  'cmp-lock':i=>{ const b=S.savedBuilds[i]; Object.keys(b.picks).forEach(l=>{S.lockedPicks[l]=b.picks[l];}); S.anchor={...b.anchor}; go('lock'); toast('Locked “'+b.name+'”'); },
+};
+function snapshotPicks(){ const o={}; activeBuildLeaves().forEach(l=>o[l]=S.build[l][0]); Object.keys(S.lockedPicks).forEach(l=>o[l]=S.lockedPicks[l]); return o; }
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');
+  if(!t){ const sc=e.target.closest('.scrim'); if(sc && e.target===sc) closeModal(); return; }
+  const [act,...rest]=t.dataset.act.split(':');
+  const fn=ACT[act]; if(fn) fn(...rest);
+});
+render();
+</script>
+</body>
+</html>

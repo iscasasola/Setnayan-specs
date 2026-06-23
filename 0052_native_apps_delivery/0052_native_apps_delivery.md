@@ -6,9 +6,36 @@
 > - **Android is BUILT; iOS/macOS/Windows are NOT.** Shipped (PRs #1044/#1048): branded Android project + deep-link intent-filters (App Links `/dashboard` + `setnayan://`) + offline-fallback `BridgeWebViewClient` + web-side `NativeBridge`; `gradlew assembleDebug` green. iOS not generated (needs Xcode/CocoaPods); Tauri desktop (macOS/Windows) not started. Native apps remain a **V1.5+ DEFERRED** item overall.
 > - **Online-first, not offline-first for the shell.** The whole app is RLS/Supabase/server-action-driven; true offline stays scoped to the native Papic path (0012). The installable PWA remains the locked V1 mobile surface.
 > - **OAuth via embedded WebView is blocked** — must move to system-browser before social login can be enabled in the shell (deferred).
-> - Cross-cutting (unrelated to this iteration but for corpus consistency): commission is **0%** (any "Setnayan Pay 3%/5%" is retired); the planner SKU is **"Today's Focus" ₱1,499**; **Pakanta is a single ₱2,499 SKU**; the **customer token wallet (0003) is retired** while the **vendor token economy is live** (burn-on-answer wired, PR #1057); **BIR (0026) is retiring**.
+> - Cross-cutting (unrelated to this iteration but for corpus consistency): commission is **0%** (any "Setnayan Pay 3%/5%" is retired); the planner SKU is **"Setnayan AI" ₱1,499**; **Pakanta is a single ₱2,499 SKU**; the **customer token wallet (0003) is retired** while the **vendor token economy is live** (burn-on-answer wired, PR #1057); **BIR (0026) is retiring**.
 >
 > When this body disagrees with the above, **the above wins.**
+
+> ## DESIGN ADDITION — 2026-06-10: app launches into LOGIN, not the marketing site
+> **Status: ✅ BUILT 2026-06-13 via setnayan-platform PR #1302** — middleware login-first redirect (bucket-① marketing routes `/` · `/features` · `/for-vendors` · `/pricing` · `/how-it-works` · `/waitlist` · `/download` 307 → `/login`, or `/dashboard` with a session, for app-originated requests) + `SetnayanApp` UA marker via `appendUserAgent` in `apps/mobile/capacitor.config.ts` (detects the first request of a fresh install, before the `setnayan-client-type` cookie exists; Android picks it up at next `cap sync`). Bucket-③ surfaces + legal pages (`/privacy` · `/terms`, store-review-required) stay reachable in-app; web browsers unaffected. *(Originally captured as design-only, owner-requested 2026-06-10.)* Refines the Capacitor shell's entry behavior. Applies to the deferred native apps (Android built, iOS not generated).
+>
+> **Intent (owner, 2026-06-10):** the mobile app should **open directly to login**, not the public website — a user who installed the app has already converted and doesn't need the marketing brochure. "Some parts of the current website will not be available in the app" = the **marketing surface**, omitted from the app.
+>
+> ### Implementation — a client-type-aware root redirect (config, not new architecture)
+> The shell already tags requests as the **`'capacitor'` client-type** and exposes a **`NativeBridge`**. So: when the request is from the app, **`/` redirects to `/login`** (or `/dashboard` if a session exists), skipping the marketing homepage. In-app, any stray marketing route redirects to `/login` (no dead-ends). Existing deep-link intent-filters (App Links `/dashboard` + `setnayan://`) already route into the product. **The web `server.url` stays the same domain** — this is a routing branch, not a separate build. Consistent with the app-independence linking contract ([[project_setnayan_app_linking_contract]]: app = focused product, links back to the marketing web — Messenger↔Facebook).
+>
+> ### The three-bucket boundary (app vs web)
+> | Bucket | Surfaces | In the app? |
+> |---|---|---|
+> | **① Marketing / acquisition** | homepage hero · `/for-vendors` · `/pricing` (marketing page) · `/about` · `/blog` · `/recommendations` (0038) | **No** — web-only; app skips |
+> | **② Auth + product** | `/login` · `/signup` · couple dashboard + planning tools + in-app **Services** (purchase point) · `/vendor-dashboard` · `/admin` | **Yes** — the app *is* this; launch target |
+> | **③ Shareable / guest-facing — MUST stay web** | guest invite landing (0002) · day-of guest (0031) · public vendor microsites `/vendors/[slug]` · wedding showcase (0046) · save-the-date links (0024) · help center (0029) | **Web-reachable always** (guests/prospects have no app); a subset (vendor browse, help) *also* renders inside the authed app |
+>
+> **Critical nuance:** "go straight to login" is the **app-launch experience** — it does NOT remove bucket-③ pages from the web. Guests still open invite links in a browser; SEO still serves vendor/showcase pages. The app omits the *brochure*, not the website's guest-serving + SEO jobs.
+>
+> ### Bonus — helps store approval
+> A thin webview of a *marketing site* risks **Guideline 4.2 (minimum functionality / "just a website")** rejection. Booting straight into login + the real product makes the app unambiguously app-like → better approval odds (complements the 3.1.1 IAP stance in `Global_Readiness_Groundwork_2026-06-10.md` § 9).
+>
+> ### ✅ RESOLVED — owner 2026-06-10
+> 1. **Help center (0029) = BOTH** — renders as an in-app support tab *and* stays public on the web (`/help`, SEO).
+> 2. **Deep-link routing = refined Universal/App-Links rule:**
+>    - **Product URLs** (`/dashboard/*`, `setnayan://`) → **open in the app if installed, else browser → login.** (App already claims these.) This is the owner's "browser unless the app is downloaded" applied to product surfaces.
+>    - **Public / guest URLs** (guest invite 0002, day-of 0031, vendor microsites `/vendors/[slug]`, showcase 0046, save-the-date 0024) → **browser ALWAYS, even if the app is installed** — the app does NOT claim these patterns. Rationale: the app boots into login, so routing a *public* page in-app would hit a login wall (or force a "render-public-without-auth" special case); guests overwhelmingly have no app; browser links stay universally shareable (link previews in Messenger/Viber). Tradeoff accepted: a couple tapping their own invite link also gets the browser (the guest-preview view).
+>    - *Net: app claims only product URLs; everything public falls through to the browser.* (Owner may later opt guest pages into in-app rendering — would add a "render public page without forcing login" rule; not chosen now.)
 
 **Iteration number:** 0052 (originally proposed as 0043 per CLAUDE.md 2026-05-15 lock · renumbered 2026-05-29 because 0043 was already taken by V1.1 Wedding Type Picker per CLAUDE.md 2026-05-19 row 425 · owner picked Option B from OQ-1 resolution turn on 2026-05-29 to minimize corpus churn)
 **Topic:** V1.5+ multi-platform native app rollout — true native Papic shells (Swift on iOS, Kotlin on Android) + Capacitor mobile wrapper (iOS + Android) + Tauri desktop wrappers (macOS + Windows) shipped end-to-end so Setnayan runs as a first-class app on every surface a Filipino couple, vendor, or operator touches.

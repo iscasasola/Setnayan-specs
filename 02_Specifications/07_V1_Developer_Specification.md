@@ -5,7 +5,7 @@
 > - **Brand/scope:** "Filipino-Catholic-first wedding platform" → now SETNAYAN, a PH-first **life-events** platform (weddings are the V1 surface; Catholic is one ceremony branch, not the framing).
 > - **Roles:** the old 5-role model (couple/guest/vendor/coordinator/staff + stylist) is superseded — shipped actors are **customer (couple), vendor, admin, and guest** (guest = a `public.guests` row + magic invite URL, NOT a `users` account). Coordinator/stylist as distinct account types did not ship.
 > - **Payments:** PayMongo + milestone webhooks + "Setnayan holding deposits" never shipped. V1 = **apply-then-pay with manual admin approval** (iteration 0034); BDO/GCash details are instructional only; **vendor↔customer money is OFF-PLATFORM** (RA 11967). **Commission is 0%** — no escrow, no card processor, no automated charge anywhere.
-> - **Tiers/SKUs:** Essentials/Premium/Pro Event wedding tiers are retired; the planner SKU is **Today's Focus ₱1,499** (not "Kasalan"/"Concierge"); customer token wallet RETIRED; a **vendor token economy** (burn-on-answer, 100 free founder tokens) is LIVE.
+> - **Tiers/SKUs:** Essentials/Premium/Pro Event wedding tiers are retired; the planner SKU is **Setnayan AI ₱1,499** (not "Kasalan"/"Concierge"); customer token wallet RETIRED; a **vendor token economy** (burn-on-answer, 100 free founder tokens) is LIVE.
 > - **AI/CV:** "Kasalan AI (Claude Sonnet)" branding and "AWS Rekognition" face tagging are not the shipped naming/stack; treat the schema, RLS sketches, repo layout, and API list here as a **historical design sketch**, not the deployed shape.
 >
 > When this body disagrees with the above, **the above wins.**

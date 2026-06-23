@@ -735,7 +735,7 @@ Recommended `/llms.txt` structure for Setnayan:
 ```markdown
 # Setnayan
 
-> Setnayan (SET-na-yan, from Tagalog "Set na 'yan." — "that's all set") is a Philippines-first life-events platform. V1 surface is weddings, designed to extend to birthdays, travel, corporate, and burial events. Free for couples and guests; free verified business profiles for vendors during launch. Transparent PHP pricing, apply-then-pay model, locally-rooted Filipino voice with EN / TL / CEB localization on the marketing site.
+> Setnayan (SET-na-yan, from Tagalog "Set na 'yan." — "that's all set") is a Philippines-first life-events platform. V1 surface is weddings, designed to extend to birthdays, debuts, christenings, corporate, and more celebrations. Free for couples and guests; free verified business profiles for vendors during launch. Transparent PHP pricing, apply-then-pay model, locally-rooted Filipino voice with EN / TL / CEB localization on the marketing site.
 
 ## Core surfaces
 

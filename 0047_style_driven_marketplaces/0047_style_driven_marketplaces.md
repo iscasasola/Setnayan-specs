@@ -6,7 +6,7 @@
 > - **Filters are GENERIC, not per-category** — the shipped filter drawer (`app/vendors/_components/filter-drawer.tsx`) exposes City + Sort + Verified-only + Match-my-wedding (ceremony/venue) + Show-all-venues + folder/category, not silhouette/neckline/fabric/booth-type/etc. Per-category matching depth comes from the 6-dim `lib/compat-score.ts` GATE+SCORE, not bespoke filter UX.
 > - **No 5-column vendor mega-menu** component exists.
 > - **SETNAYAN SERVICE inserts** — the `is_setnayan_service` flag IS wired in browse + the in-dashboard plan/budget accordion; first-party services surface as supplementary listings (per the locked "in-app services = vendor listings" model), but the named placements in the mega-menu table are aspirational.
-> - **"Setnayan Concierge" SETNAYAN-SERVICE row is stale** — the planner SKU is **Today's Focus ₱1,499**, and the couple-app planner wizard is retired.
+> - **"Setnayan Concierge" SETNAYAN-SERVICE row is stale** — the planner SKU is **Setnayan AI ₱1,499**, and the couple-app planner wizard is retired.
 > - **Showcase discovery hooks (0046) are absent** — every "Used at N real weddings" / inline real-wedding card depends on the unbuilt 0046 showcase + unbuilt 0045 product catalog, so they don't render. Commission is **0%**; vendor↔customer money is **off-platform**.
 >
 > When this body disagrees with the above, **the above wins.**

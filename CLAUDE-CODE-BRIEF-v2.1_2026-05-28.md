@@ -172,7 +172,7 @@ Two delivery models:
 |---|---|---|---|
 | 14 | Pakulay (Mood Board) | **FREE** | Included with every account · cultural conflict catcher |
 | 15 | Custom QR per Guest | ₱1,499 | 1 QR per guest, up to 250 pax |
-| 16 | Today's Focus (Assisted Planning) | ₱1,499 | 65-step concierge planning process |
+| 16 | Setnayan AI (Assisted Planning) | ₱1,499 | 65-step concierge planning process |
 | 17 | Indoor Blueprint | ₱1,499 | Entrance → table guide |
 | 18 | Call-Time Escalator | ₱1,999 | SMS update to all vendors |
 | 19 | Pabati | ₱999 | Up to 300 5-sec videos |
@@ -797,4 +797,4 @@ The old "Free" tier's two roles split: dashboard-only-minimal → the **Register
 
 **Knock-on:** `vendors.public_visibility` default `coming_soon` → **`unverified`** (the 2026-05-15 "coming_soon muted card" behavior retired) · the couple onboarding "all-vs-verified" screen + `events.vendor_pool_preference` retired · DIY "Verified only" browse toggle moot · hybrid-anonymity simplifies to "Verified hidden-until-reply / Pro+ shown / venue exception holds."
 
-Full remodelled matrix: [Vendor_Match_Personalization_2026-06-01.md](Vendor_Match_Personalization_2026-06-01.md) §5.1.
+Full remodelled matrix: [Vendor_Match_Personalization_2026-06-01.md](03_Strategy/Vendor_Match_Personalization_2026-06-01.md) §5.1.

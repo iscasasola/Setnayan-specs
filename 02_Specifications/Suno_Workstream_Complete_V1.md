@@ -5,7 +5,7 @@
 > - **This is an aspirational one-month Suno production queue, not shipped infrastructure.** As of 2026-06-07, none of the audio workstreams here exist in `apps/web` @ `origin/main`: no sonic logo / notification-sound suite / render bumpers wired into the app, no Patiktok original-tracks library, no founding-vendor theme songs, no multi-event-type or genre-expansion audio packs. There is no audio-asset directory and no render pipeline that would consume any of it.
 > - The **prompt blocks remain reusable as a reference** if the brand-audio + Patiktok-audio layers are ever built, and the Suno safety rule (architectural feel, never name artists/songs, owned-outright) is still the locked principle.
 > - Forward references that have since changed: **Patiktok ships as a couple SKU ₱2,499** (the "₱2,499/booth" framing in older docs is superseded; Patiktok is in-build per the live catalog). The "owner's December 2026 wedding" theme set (§ 5) is a personal/marketing plan, not product.
-> - **Cross-cutting product facts:** commission is **0%**; planner SKU = **"Today's Focus" ₱1,499**; **Pakanta = single SKU ₱2,499**; customer token wallet (0003) RETIRED; the *vendor* token economy is the only live token system.
+> - **Cross-cutting product facts:** commission is **0%**; planner SKU = **"Setnayan AI" ₱1,499**; **Pakanta = single SKU ₱2,499**; customer token wallet (0003) RETIRED; the *vendor* token economy is the only live token system.
 >
 > When this body disagrees with the above, **the above wins.**
 
@@ -36,7 +36,7 @@ Suno Premier @ $30/month = 10,000 credits = ~2,000 generations (5 credits/genera
 | Founding-vendor theme songs (10 vendor types × 2 cues) | § 4 | ~60 | ~30 |
 | **Owner's wedding day-of theme** (your December 2026 wedding) | § 5 | ~50 | ~15 |
 | Marketing + brand-video background score | § 6 | ~30 | ~15 |
-| **Multi-event-type music** (kiddie · Christmas · Valentine's · burial · corporate · birthday · anniversary · engagement) | § 7 | ~140 | ~70 |
+| **Multi-event-type music** (kiddie · Christmas · Valentine's · corporate · birthday · anniversary · engagement; ~~burial~~ retired 2026-05-16, § 7.7 dormant) | § 7 | ~140 | ~70 |
 | **Genre-specific expansion library** (hip-hop · EDM · beach relax · love · car-epic product-release) | § 8 | ~150 | ~75 |
 | **Buffer for iteration / re-generation** | | ~150 | n/a |
 | **Total month 1** | | **~1,150 generations** | **~415 final tracks** |
@@ -422,7 +422,7 @@ Background music for setnayan.com marketing surfaces, founder story videos, inve
 
 ## § 7 — Multi-Event-Type Music
 
-Setnayan's locked event-type roadmap covers 6 types beyond weddings (birthday · celebration · travel · corporate · burial). This section produces music for those future event types so they're ready when Setnayan opens to them post-V1 launch.
+Setnayan's event-type roadmap covers the types beyond weddings (birthday · debut · christening · gender reveal · celebration · travel · corporate · tournament · anniversary · graduation · reunion; burial retired 2026-05-16). This section produces music for those future event types so they're ready when Setnayan opens to them post-V1 launch.
 
 ### § 7.1 Kiddie Party · 10 prompts · ~20 generations · ~10 keepers
 
@@ -506,9 +506,9 @@ Setnayan's locked event-type roadmap covers 6 types beyond weddings (birthday ·
 
 **Filename:** `EVENT_engagement_{1-5}.mp3`
 
-### § 7.7 Burial / Memorial · 10 prompts · ~20 generations · ~10 keepers
+### § 7.7 Burial / Memorial · DORMANT (event type owner-retired 2026-05-16 — do NOT generate; prompts kept in case a memorial product ever returns)
 
-For the burial event type in Setnayan's roadmap. Dignified, reflective, supportive of grief without amplifying it.
+~~For the burial event type in Setnayan's roadmap.~~ *(Event type owner-retired 2026-05-16 — section dormant, do not generate.)* Dignified, reflective, supportive of grief without amplifying it.
 
 | # | Suno prompt |
 |---|---|

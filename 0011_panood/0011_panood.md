@@ -614,7 +614,7 @@ Margin: **~98%** at ₱24,999. The flagship anchor that traditional videographer
 
 SDE uses the same **storyline-render** framework as AI Video Highlight + AI Edited Highlight (locked 2026-05-12), just longer + higher-quality. For weddings × Heritage-Filipiniana feel-category, the 5 narrative beats are: anticipation (prep) → climax (vows, kiss) → celebration (reception) → tender moments (parent dance, family reactions) → resolution (closing shots, sparkler exit). Each beat gets ~30–60 seconds of edited material.
 
-For non-wedding event types (when Setnayan opens to birthdays, burials, corporate, travel, celebration), the same SDE infrastructure runs against different story-template manifests per event-type × feel-category combination.
+For non-wedding event types (when Setnayan opens to birthdays, debuts, corporate, travel, celebration — burial retired 2026-05-16), the same SDE infrastructure runs against different story-template manifests per event-type × feel-category combination.
 
 ### Schema additions
 

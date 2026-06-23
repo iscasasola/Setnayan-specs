@@ -1,5 +1,26 @@
 # Iteration 0037 — Bespoke Monogram (AI-Powered)
 
+> ## 🔜 TO BUILD — 2026-06-13 (owner-approved): "Upload your own" — the third on-ramp
+> The mark currently has two entry paths (Cipher Maker · Setnayan AI bespoke). Add a **third: upload an existing monogram / event logo**, for couples who already have a designer's mark and for non-wedding event types (corporate/debut) that arrive with branding. **Not a new SKU** — it's a free *input* into the existing paid `ANIMATED_MONOGRAM` deploy + animate engine.
+> - **Entry choice card** in the Monogram Maker: 3 options (Make it · AI design · Upload your own).
+> - **Upload + validate + vectorize:** SVG preferred; PNG transparent ≥ min res; offer `vectorizer`/Recraft vectorize for low-res raster so it deploys to QR center, LED 8K, and print crisply.
+> - **Animation set for uploads = template reveals only** (`monogram_motion_key` subset: Foil/Bloom/Halo/Stardust + draw-on *iff* real-path SVG). The Cipher **restroke/draw-on** stays Cipher-only (needs stroke data) — surface as a nudge in the UI, not a block.
+> - **Gates:** NSFW moderation (non-disableable, shared image filter) + **ownership-attestation checkbox** (the mark is baked into rendered video + print). New `events.monogram_source` enum (`cipher｜ai｜upload`) + an admin moderation surface for flagged uploads.
+> - Canonical: [`Feature_Catalog_Canon.md`](../Feature_Catalog_Canon.md) §2 "Monogram — three on-ramps."
+
+> ## ✅ AS-BUILT UPDATE — 2026-06-11 (the monogram overhaul — this spec's core vision NOW SHIPS, on a different pipeline)
+> Owner directive ("the monogram we have now is too common… find a better way to execute"). The result ships in **two phases**; both merged to `origin/main` 2026-06-11:
+>
+> **Phase 1 — Motion Library** (PR #1240). The paid `ANIMATED_MONOGRAM` SKU's single stroke-trace draw-on is replaced by **six premium signatures** the couple picks in the Monogram Maker: **Drawn · Foil · Bloom · Editorial · Halo · Stardust** (pure SVG+CSS, `prefers-reduced-motion`-safe). Persisted as `events.monogram_motion_key` (migration `20261111000000`, NULL→'draw'). WHICH motion is free; WHETHER the hero animates stays the SKU gate. Registry: `lib/monogram-motion.ts`.
+>
+> **Phase 2 — Setnayan AI Bespoke Studio** (PR #1245) — **this iteration's actual bespoke-generation vision, finally built, on NATIVE VECTOR instead of DALL-E-raster+vectorizer** (the raster plan never shipped because raster marks can't recolor or stay crisp at QR/print size). In the Monogram Maker, the couple briefs a style direction (**Interlocked · Botanical · Heirloom Crest · Modern Geometric** + optional motif) → **Setnayan AI** (Recraft `recraftv4_1_vector`, palette-steered, vendor never named) returns **4 native-SVG candidate marks per round** → refine with feedback → apply one. The applied mark wins on the **landing hero + maker preview** (`events.monogram_custom_svg`); **QR center + dashboard chrome stay typographic** (small-size legibility). Couple-only RLS table `bespoke_monogram_generations` + the two `events` columns (migration `20261112000000`, applied to prod). Engine: `lib/bespoke-monogram*.ts` (+ a strict reject-don't-repair SVG sanitizer).
+>
+> **SKU model changed:** the ₱2,999 + ₱199-refinement-pack scheme below is **DROPPED** → a **round cap (12/event)** bounds cost; **pricing batched to the owner's holistic review** (studio ships ungated, self-hides when `RECRAFT_API_KEY` is unset — now an optional RUNTIME dep).
+>
+> **⚠ Owner sign-offs still pending:** studio pricing/positioning (free funnel-tool vs paid tier) · confirm the refinement-pack retirement · the `0037_bespoke_monogram` ↔ `0037_event_day_preload` folder-number collision. See `DECISION_LOG.md` (2026-06-11 rows) + repo `CHANGELOG.md`.
+>
+> The 2026-06-07 correction below still holds for SKU NAMES/PRICES: the `ANIMATED_MONOGRAM` ₱2,499 stroke-trace SKU is what Phase 1 generalized into the motion library; the bespoke studio is a separate, currently-ungated surface.
+
 > ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main @ 34347c3c)
 > **This spec is HISTORICAL.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas vs what actually shipped:
 > - **Ships as "Animated Monogram" · ₱2,499** (`service_key = ANIMATED_MONOGRAM`, lib/animated-monogram.ts, add-ons key `animated-monogram`, route `/dashboard/[eventId]/add-ons/animated-monogram`) — NOT the `bespoke_monogram` ₱2,999 SKU this spec describes.

@@ -9,6 +9,13 @@
 >
 > When this body disagrees with the above, **the above wins.**
 
+> ## UPDATE — 2026-06-09 (redesign · couple-facing recolor + 4 chapters · [setnayan-platform #1120](https://github.com/iscasasola/setnayan-platform/pull/1120))
+> Owner: *"fully redesign the mood board… change the colors of specific parts of a photo like a color range selector. then just alter the hue, contrast, brightness or pick from the palette given… Flower? Attires? Reception? Church?"* What shipped:
+> - **The Color Range Manipulator is now COUPLE-FACING** (a new `recolor-studio.tsx`), not admin-only/host-view-only as this body's "Visual preview pillars · 2026-05-21" section says. Couples pick a part of a photo (a pre-tagged color range, or eyedrop a custom area) and either **snap it to a palette color** or **adjust hue / saturation / brightness / contrast** by hand. The shared engine (`apps/web/lib/color-recolor.ts`) gained an `adjust` mode beyond the original hue-swap; all recolor is browser-side Canvas at **₱0 marginal cost**.
+> - **Four chapters** — **Church · Reception · Attire · Flowers** (`moodboard-chapters.tsx`) — replace the old 2-pillar "Location feel + Dress codes" split. **Flowers is net-new** (`asset_type='florals'`; migration `20260924000000`, applied to prod). The silhouette Wedding Attire Guide is kept below the chapters.
+> - **Free vs paid (decision to ratify):** recoloring **pre-tagged library photos = FREE**; the **AI Composite Scene generator** (this body's "Professional Mood Board · Composite Scene generator" — upload refs → AI renders a *new* scene) **stays the paid tier**. The redesign pulls only the cheap browser-recolor half into V1-free.
+> - **Follow-ups:** Recraft-generated Flowers seed photos (chapter shows an empty-state until seeded); this body's broader sections (Setnayan Guide rule engine, 20 themes) remain unbuilt design intent.
+
 **Iteration number:** 0010
 **Topic:** Mood Board V1 — coordinated wedding palettes for roles and venues, with the Setnayan Guide rule engine
 **Surface:** Setnayan Web → Couple Dashboard · **Bottom-nav tab: Add-ons** · URL: `setnayan.com/dashboard/[event-id]/services/mood-board`

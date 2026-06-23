@@ -10,6 +10,42 @@
 >
 > When this body disagrees with the above, **the above wins.**
 
+> ## DESIGN ADDITION — 2026-06-10: "Do-it-yourself, manage everything from the app" (manual-add refinement)
+> **Status: DESIGN ONLY · no code · owner-requested 2026-06-10 ("capture as design only").** Formalizes the self-service / standalone-planner posture and adds one net-new modeling piece. Two of the three parts already exist — this writes down the intended shape.
+>
+> **The intent (owner, 2026-06-10):** when a couple adds a vendor manually, **ask whether they want to connect that vendor to the app.** *Yes* → invite/connect (existing `vendor_invites` flow). *No* → the couple manages that vendor entirely themselves: set the price, list the inclusions for the package, and **link it to other services manually if needed** — so a couple can do everything themselves and **manage their whole wedding from the app even if no vendor ever joins.**
+>
+> ### ① Add-time connect fork — *UX promotion of an existing capability*
+> Today "Invite to Setnayan" is a **secondary action** buried in the vendor detail drawer (see `## Invite-to-Setnayan flow`). This promotes it to an **explicit fork at the moment of adding**:
+> > *"Connect them to Setnayan?  — **Yes, invite them** (they get a free profile · unlocks chat · marketplace grows)  /  **No, I'll manage this myself** (you set the price & inclusions; they're never contacted)."*
+> - **Yes** routes to the existing flow incl. the *already-on-Setnayan Connect short-circuit* (sub-rule (g), 2026-05-19 log).
+> - **No** = today's default off-platform record (`event_vendor_relationships.marketplace_vendor_id IS NULL`). Fully self-managed; the "Invite to Setnayan" drawer action stays available so the couple can still connect later. Reversible, no data loss.
+> - **Privacy is already correct:** in the *No* path the vendor is never contacted and **never sees `package_*` / `vendor_inclusions` / milestones** (locked identity-only claim page, 2026-05-19). "Keep private" is genuinely private by design.
+>
+> ### ② Couple-side structured service-linking — *the one NET-NEW piece*
+> Today the couple gets a **free-form inclusions list** (`vendor_inclusions`) but **no structured *link* between two of their own records.** This adds the couple-side analog of the vendor "✓ comes with X·Y·Z" linked-services (`vendor_service_links` / `vendor_services.is_linked_only`). Blueprint (not applied):
+> ```sql
+> CREATE TABLE event_vendor_links (              -- couple-authored, event-scoped, couple-only RLS
+>   link_id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+>   event_id           UUID NOT NULL,
+>   from_relationship_id UUID NOT NULL REFERENCES event_vendor_relationships(relationship_id),
+>   to_relationship_id   UUID     REFERENCES event_vendor_relationships(relationship_id), -- link to another private record
+>   to_setnayan_service  TEXT,     -- OR link to a Setnayan in-app service the couple has (service_key)
+>   link_type          TEXT NOT NULL DEFAULT 'comes_with'  CHECK (link_type IN ('comes_with','bundled_with')),
+>   note               TEXT,
+>   CHECK (to_relationship_id IS NOT NULL OR to_setnayan_service IS NOT NULL)  -- exactly one target
+> );
+> ```
+> - Renders as the same "✓ comes with X · Y · Z" chip on the couple's **own** vendor card, mirroring the marketplace card.
+> - **Budget roll-up must not double-count** a linked-only item — reuse the existing `is_linked_only = FALSE` budget-median guard (see memory `project_setnayan_linked_services_and_demo_coverage`).
+> - **3-actor:** Couple = full CRUD, entirely private. Vendor = never sees it (even post-connect it stays the couple's view, not imposed). Admin = couple-private, **excluded from marketplace stats / no moderation** (it's the couple's own notes, not an editorial claim).
+>
+> ### ⚠ OPEN — owner to confirm the linking target
+> The blueprint above supports **both** targets (link a private record to *another private record* **or** to a *Setnayan in-app service*). Owner did not pin which is intended — confirm: couple-composes-own-package only, link-to-Setnayan-services only, or both (assumed).
+>
+> ### Why this matters beyond PH
+> This is the clincher for global-readiness: off-platform records already carry full price + inclusions + payment detail, so **a couple in any country can run their whole wedding solo with an empty marketplace.** The marketplace becomes *enrichment, never a requirement.* See `Global_Readiness_Groundwork_2026-06-10.md` § 8.
+
 **Type:** Implementation work order (Claude Code ticket)
 **Surface:** Setnayan Web → Couple Dashboard ("Vendors" panel) + responsive mobile · **Bottom-nav tab: Vendors** · URL: `setnayan.com/dashboard/[event-id]/vendors`
 **Phase:** Phase 1 — pre-event planning surface
@@ -171,7 +207,7 @@ digital_services
 
 (29 canonical services. Order roughly matches wedding-planning priority. Final list reviewed in HTML mockup; add/remove via PR.)
 
-**`digital_services` added 2026-06-03** — the marketplace **Design › Digital Services** child (the Setnayan digital-productions tile: Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw). It is a **generic, vendor-listable** category — 3rd-party monogram designers / wedding-website builders / LED-content studios can register under it, with the 5 Setnayan services surfacing as options inside. Full per-surface mapping: [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md).
+**`digital_services` added 2026-06-03** — the marketplace **Design › Digital Services** child (the Setnayan digital-productions tile: Pakanta · Animated Monogram · Pro Website · Live Venue Photo Wall · Pailaw). It is a **generic, vendor-listable** category — 3rd-party monogram designers / wedding-website builders / LED-content studios can register under it, with the 5 Setnayan services surfacing as options inside. Full per-surface mapping: [Digital_Services_Cross_Surface_Map_2026-06-03.md](../03_Strategy/Digital_Services_Cross_Surface_Map_2026-06-03.md).
 
 **Note on `wedding_coordination` (locked 2026-05-12):** Wedding coordinators register as a regular vendor under this canonical key and use the same 0022 vendor dashboard as photographers, caterers, and every other category — there is **no separate "coordinator" platform role**. Coordinators receive two special permissions on top of standard vendor capability: (a) per-thread join into customer ↔ vendor chats per 0019 § Coordinator-join flow (the couple invites them into vendor threads as needed) and (b) broadcast access on day-of guest experience surfaces per 0031. Both permissions are scoped to the events that booked them and revoke automatically at event-end + 30 days.
 
@@ -559,7 +595,7 @@ The DIY-mode vendor browse view (at `/dashboard/{event-id}/vendors/browse`) show
 - **Price band** (range slider in ₱ with histogram backdrop showing distribution of vendor packages)
 - **Available on date** (date picker; defaults to event date)
 - **Tier filter** (any / Standard Verified / Certified / Boosted)
-- **Distance radius from venue** (10 / 20 / 30 / 50 km; default 30 km — origin is the **chosen reception venue's lat/lon**, the stored event anchor). This couple-set *discovery* radius is distinct from the vendor's own **"serves my area" hard filter** — `distance(reception_venue, vendor) ≤ vendor.service_radius` (Free 10km … Enterprise 100km). **Region is a display label, not a matching filter** (owner correction 2026-06-04 — supersedes the earlier "derive region so the area-filter works"); distance is straight-line in V1 (drive-time = V2), and out-of-range vendors are hidden with a count + names. Canonical model: [Vendor_Match_Personalization §2a/§2b](../Vendor_Match_Personalization_2026-06-01.md) + DECISION_LOG 2026-06-04.
+- **Distance radius from venue** (10 / 20 / 30 / 50 km; default 30 km — origin is the **chosen reception venue's lat/lon**, the stored event anchor). This couple-set *discovery* radius is distinct from the vendor's own **"serves my area" hard filter** — `distance(reception_venue, vendor) ≤ vendor.service_radius` (Free 10km … Enterprise 100km). **Region is a display label, not a matching filter** (owner correction 2026-06-04 — supersedes the earlier "derive region so the area-filter works"); distance is straight-line in V1 (drive-time = V2), and out-of-range vendors are hidden with a count + names. Canonical model: [Vendor_Match_Personalization §2a/§2b](../03_Strategy/Vendor_Match_Personalization_2026-06-01.md) + DECISION_LOG 2026-06-04.
 - **Years operating** (any / 1+ / 3+ / 5+ years)
 - **Has Setnayan-exclusive offer** (toggle)
 - **Has reviews** (toggle)

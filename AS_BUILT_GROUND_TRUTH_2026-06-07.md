@@ -31,7 +31,7 @@
 
 **Bundles:** Setnayan Guided Planner Suite ₱11,999/event · Setnayan Comprehensive Media Pack ₱16,999/event.
 
-**Today's Focus** (AI-assisted planner) ₱1,499 — the planner SKU. (Supersedes the old "Setnayan Concierge ₱4,999".) Note: the couple-app Today's Focus *wizard* is retired in code; the SKU/branding persists on the site.
+**Setnayan AI** (AI-assisted planner) ₱1,499 — the planner SKU. (Supersedes the old "Setnayan Concierge ₱4,999".) Note: the couple-app Setnayan AI *wizard* is retired in code; the SKU/branding persists on the site.
 
 **18 free planning tools** for couples (guest list, RSVP, seating, mood board, budget, QR invites, microsite, etc.).
 
@@ -92,7 +92,7 @@ Interaction loop (RLS-isolated): couple follows → `chat_threads` upsert (UNIQU
 
 ## 7. Retired / deferred (don't build, don't follow old specs that say otherwise)
 
-- **RETIRED:** customer token wallet (0003) · Setnayan Pay commission (now 0%) · BIR tax surface (0026 — retiring 2026-06-07) · Today's Focus wizard (couple-app; SKU persists) · the old charm-ladder SKU set.
+- **RETIRED:** customer token wallet (0003) · Setnayan Pay commission (now 0%) · BIR tax surface (0026 — retiring 2026-06-07) · Setnayan AI wizard (couple-app; SKU persists) · the old charm-ladder SKU set.
 - **DEFERRED (V1.x):** Supplies marketplace (0018, mock) · vendor in-app tier-upgrade + buy-token checkout + calendar block-entry UI · Pro-tier widget purchase (`monogram_hero_upgrade`/`pro_widget_schedule`) · native apps (0052, Capacitor remote-URL shell; Android built). *(NO LONGER deferred — shipped since the audit baseline: admin disputes inline-resolve + admin notifications [PR #1054]; vendor token burn-on-answer + ghosting [PR #1057/#1059].)*
 
 > **⚠ Moving-target note:** this snapshot was taken at code baseline `04931de5`. `origin/main` advances several times/day via parallel sessions — PRs #1054 / #1057 / #1059 already landed after the baseline. The per-iteration re-sync (next phase) must re-baseline to the *current* `origin/main`, not this commit. Always cross-check `DECISION_LOG.md` (bottom) for the latest.

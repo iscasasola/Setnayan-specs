@@ -133,7 +133,7 @@ Beyond the public `/industry-events` browse, an upcoming fair is **promoted on t
 
 - **Match key:** couple `event_vendors` picks → `vendor_profile_id` → ∈ `industry_event_attendees` WHERE `attendance_type = 'exhibitor'` AND `industry_event_id = <fair>`. Only **platform** vendors match; the couple's off-platform / custom picks (0006 hybrid registry) have no `vendor_profile_id` and are silently excluded from the count.
 - **Why this is V1.6, not V1 Home:** the cross-ref needs a real exhibitor roster, which exists only once vendors self-apply as exhibitors (this iteration's `industry_event_attendees`). Owner chose "ride 0042" over a lightweight admin-tagged version on V1 Home (AskUserQuestion, 2026-06-03).
-- **Lineage:** this is the **complement** of the retired Concierge "Behavior B" fair-prep card (CLAUDE.md 2026-05-23), which surfaced *what categories you still need*. That card died with the Today's Focus wizard; its successor re-homes onto Home and answers the inverse — *which of your chosen vendors are there*.
+- **Lineage:** this is the **complement** of the retired Concierge "Behavior B" fair-prep card (CLAUDE.md 2026-05-23), which surfaced *what categories you still need*. That card died with the Setnayan AI wizard; its successor re-homes onto Home and answers the inverse — *which of your chosen vendors are there*.
 - **Zero-match fallback:** if none of the couple's picks are exhibiting, the card degrades to the generic "what to look for" prompt (their still-open categories), so there's always a reason to attend.
 
 ---

@@ -6,7 +6,7 @@
 > - **Vendor money is OFF-PLATFORM (RA 11967).** Setnayan shows the vendor's link/QR/bank at settlement but never holds or charges it; every vendor-payment surface carries a "Setnayan does not hold the money" disclosure.
 > - **Live `/for-vendors` leads with the token economy, not "free during launch" only:** 0% commission · Free profile + Pro ₱2,499/28d (Enterprise ₱5,499/28d) · **100 founder tokens on verification (until 31 Jan 2027)** · token packs · pay-per-result. The 2026-06-05 12-pillar amendment banner already in this doc is the right direction; this confirms it shipped.
 > - **Marketing routes are top-level (`app/for-vendors`, `app/pricing`, `app/features`, `app/how-it-works`), not an `app/(marketing)/...` route group.** Same Next.js codebase as the dashboard, as speced.
-> - **Planner SKU is "Today's Focus" ₱1,499**, not "Setnayan Concierge ₱4,999" — any help/marketing copy referencing the planner uses Today's Focus.
+> - **Planner SKU is "Setnayan AI" ₱1,499**, not "Setnayan Concierge ₱4,999" — any help/marketing copy referencing the planner uses Setnayan AI.
 >
 > When this body disagrees with the above, **the above wins.**
 
@@ -20,7 +20,7 @@
 
 ---
 
-> **AMENDMENT 2026-06-05 (owner-locked) — canonical `/for-vendors` value proposition.** The vendor-side marketing copy (Section 5 "seven vendor beats" + the `/for-vendors` page) is **superseded where it disagrees** by the 12-pillar pitch in [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](../Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Part A. Thesis: *"We can't promise you a million weddings. We promise that every inquiry counts."* Headlines: **0% commission** · **pay-per-result** (no inquiries → nothing to pay) · **1–3 token (₱100–₱300) unlock covering ALL your services** (vs per-service-listing competitors) · **100 free founder tokens** · **6-dim AI handpicking** · real **event-bound reviews** + **free compile-all-events website** + **never-double-book calendar** + **1-token outside-event sync** · **weddings → every Filipino event**.
+> **AMENDMENT 2026-06-05 (owner-locked) — canonical `/for-vendors` value proposition.** The vendor-side marketing copy (Section 5 "seven vendor beats" + the `/for-vendors` page) is **superseded where it disagrees** by the 12-pillar pitch in [`Vendor_Value_Proposition_and_Reviews_2026-06-05.md`](../03_Strategy/Vendor_Value_Proposition_and_Reviews_2026-06-05.md) Part A. Thesis: *"We can't promise you a million weddings. We promise that every inquiry counts."* Headlines: **0% commission** · **pay-per-result** (no inquiries → nothing to pay) · **1–3 token (₱100–₱300) unlock covering ALL your services** (vs per-service-listing competitors) · **100 free founder tokens** · **6-dim AI handpicking** · real **event-bound reviews** + **free compile-all-events website** + **never-double-book calendar** + **1-token outside-event sync** · **weddings → every Filipino event**.
 
 ---
 
@@ -410,7 +410,7 @@ A grid of feature cards for the paid services. Each card: icon, name, one-paragr
 
 Each card carries a "Free with every account" or "Included in your custom quote" tag — see the hide-prices decision above.
 
-**Digital Services on the website — add as SEPARATE cards (owner-locked 2026-06-03).** The in-app marketplace now groups five Setnayan digital productions under a `Design › Digital Services` child tile — but **the website keeps them flat and separate** (owner: *"they will all be visible on the website but they are all separate entities"*). **Do NOT add a "Digital Services" grouping header on the site.** Add the missing services as their own cards here, each a separate entity: **Pakanta** (custom AI wedding song · 0036) · **Animated Monogram** (rename card 6 "Custom Monogram Pack" → Animated Monogram · 0037) · **Pro Website** (premium invitation + event page + editorial · distinct from card 7 "Pro Invitation Widgets" · 0004) · **Live Venue Photo Wall** (live collage + live count). Also align card names to the canon (Papic not "Paparazzi", Panood not "Live Stream", Pailaw for "LED Background Maker"). Canonical names + the full website-vs-marketplace divergence rule: [Digital_Services_Cross_Surface_Map_2026-06-03.md](../Digital_Services_Cross_Surface_Map_2026-06-03.md).
+**Digital Services on the website — add as SEPARATE cards (owner-locked 2026-06-03).** The in-app marketplace now groups five Setnayan digital productions under a `Design › Digital Services` child tile — but **the website keeps them flat and separate** (owner: *"they will all be visible on the website but they are all separate entities"*). **Do NOT add a "Digital Services" grouping header on the site.** Add the missing services as their own cards here, each a separate entity: **Pakanta** (custom AI wedding song · 0036) · **Animated Monogram** (rename card 6 "Custom Monogram Pack" → Animated Monogram · 0037) · **Pro Website** (premium invitation + event page + editorial · distinct from card 7 "Pro Invitation Widgets" · 0004) · **Live Venue Photo Wall** (live collage + live count). Also align card names to the canon (Papic not "Paparazzi", Panood not "Live Stream", Pailaw for "LED Background Maker"). Canonical names + the full website-vs-marketplace divergence rule: [Digital_Services_Cross_Surface_Map_2026-06-03.md](../03_Strategy/Digital_Services_Cross_Surface_Map_2026-06-03.md).
 
 ### Section 8 — Vendor compatibility & verification
 
@@ -476,7 +476,7 @@ A grid of event-type tiles. Each tile has a cover photo, the event-type name, a 
 | Baptism | Coming soon | Officiant + reception bundle |
 | Corporate | Coming soon | Conference AV, team-event venues, corporate emcees |
 | Concerts / Showcases | Coming soon | Stage rental, lights & sound at scale |
-| Burial / Wake | Coming soon | Memorial photographers, livestream condolences |
+| ~~Burial / Wake~~ | **RETIRED 2026-05-16** (owner: "wrong app, wrong moment") | — |
 | Travel | Coming soon | Out-of-town logistics, destination vendor sourcing |
 | Celebration (catch-all) | Coming soon | Generic event type for everything else |
 | ...11+ more event types | Tracked | Will activate as vendor pool reaches per-type readiness threshold |

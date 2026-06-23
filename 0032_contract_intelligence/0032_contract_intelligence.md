@@ -6,7 +6,7 @@
 > - **No Contract Intelligence AI.** None of the § 3 14-element Claude detection, § 4 analyze pipeline (pdfplumber/Claude Haiku 4.5), § 5 ~50-clause lawyer-reviewed library, or § 6 compliance gate is wired. No `contract_drafts.detected_elements`, no clause picker, no compliance score/badge.
 > - **No in-app e-signature (§ 7).** No signature pad/typed/drawn capture, no `contract_signatures` rows, no certificate page, no `setnayan.com/c/[id]/verify` tamper-check page. The DB keeps signature columns/`fully_signed` trigger for forward-compat but they're never populated. `ContractStatus` is repurposed: `sent_for_signature` is relabeled "Active / visible to couple"; `fully_signed` is never reached.
 > - **Pricing/positioning superseded.** The ₱199 `contract_builder_single` SKU + "free with Vendor Pro Weekly" framing (§ 10) is stale — Vendor Pro is **₱2,499/28d** (Pro Weekly retired) and **commission is 0%**. Contract hosting is not a charged AI SKU in the shipped upload-only model.
-> - **External-counsel review gate (§ 11) is moot** for the shipped scope (no template clauses are generated). The Anthropic workspace / Concierge cross-reuse (§ 4a) is also moot — Today's Focus replaced Concierge and its wizard is retired in-app.
+> - **External-counsel review gate (§ 11) is moot** for the shipped scope (no template clauses are generated). The Anthropic workspace / Concierge cross-reuse (§ 4a) is also moot — Setnayan AI replaced Concierge and its wizard is retired in-app.
 >
 > When this body disagrees with the above, **the above wins.**
 

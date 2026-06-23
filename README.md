@@ -119,7 +119,7 @@ Setnayan Project/
 
 ## What Setnayan does in one paragraph
 
-A two-sided marketplace + planning platform for Filipino weddings (V1) that expands to universal events (anniversaries · debuts · corporate · baptisms · burials in later phases). Couples plan their event end-to-end through a Guided or DIY dashboard; vendors apply, get verified, optionally certified, and grow their bookings through Sponsored Boost; the platform monetizes via apparatus-priced add-ons (Save-the-Date renders, Paparazzi seats, Live Stream, AI Highlights, etc.) and a 3% Setnayan Pay convenience fee. PHP-direct apply-then-pay payments in V1; GCash Merchant API automation in V1.5+. Free vendor registration during launch with grandfathered "lifetime free listing" for the first cohort.
+A two-sided marketplace + planning platform for Filipino weddings (V1) that expands to universal events (anniversaries · debuts · corporate · christenings · graduations · reunions in later phases — burial retired 2026-05-16). Couples plan their event end-to-end through a Guided or DIY dashboard; vendors apply, get verified, optionally certified, and grow their bookings through Sponsored Boost; the platform monetizes via apparatus-priced add-ons (Save-the-Date renders, Paparazzi seats, Live Stream, AI Highlights, etc.) and a 3% Setnayan Pay convenience fee. PHP-direct apply-then-pay payments in V1; GCash Merchant API automation in V1.5+. Free vendor registration during launch with grandfathered "lifetime free listing" for the first cohort.
 
 ## Key decisions locked
 

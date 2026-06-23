@@ -8,7 +8,7 @@
 > - **Token wallet (0003) is RETIRED** — the "Token-free pricing (post-2026-05-11)" section is directionally right that the *customer* wallet is gone, but the in-app payment model is **apply-then-pay + manual admin approval** (NOT PayMongo auto-charge; "charged via PayMongo" is inaccurate — BDO/GCash instructions only, admin confirms at `/admin/payments`, zero real money moves).
 > - **Reviews are SHIPPED** (`/vendor-dashboard/reviews`, `/admin/reviews`, couple-side `…/vendors/[vendorId]/review`) — the doc's omission of reviews reflects the old V1 scope.
 > - **Vendor↔customer money is OFF-PLATFORM** (RA 11967); Setnayan only displays the vendor's link/QR/bank at settlement and discloses it holds no money.
-> - SKU prices throughout Part 1 (Add-ons launcher: LED ₱2,000–8,000, Papic 3-seat ₱1,500 / 5-seat ₱2,500, Pro widget ₱100, AI Highlight ₱2,000, etc.) are the **retired charm-ladder set** — current catalog is in §1 of the ground-truth doc (e.g. Papic 5-seat ₱2,999, Animated Monogram ₱2,499, planner = "Today's Focus" ₱1,499 not the Part-1 "Step-by-step plan builder 0016").
+> - SKU prices throughout Part 1 (Add-ons launcher: LED ₱2,000–8,000, Papic 3-seat ₱1,500 / 5-seat ₱2,500, Pro widget ₱100, AI Highlight ₱2,000, etc.) are the **retired charm-ladder set** — current catalog is in §1 of the ground-truth doc (e.g. Papic 5-seat ₱2,999, Animated Monogram ₱2,499, planner = "Setnayan AI" ₱1,499 not the Part-1 "Step-by-step plan builder 0016").
 > - Coordinator/Stylist still deferred — that part is broadly accurate.
 >
 > When this body disagrees with the above, **the above wins.**
@@ -42,7 +42,7 @@ The couple is Setnayan's primary paying user. Everything Setnayan charges for is
 
 ## Account and event
 
-The couple signs up with email + password (universal Setnayan account, not event-scoped). On first login they're walked through creating an event. The event picker shows six tiles — Birthday, Celebration, Travel, Corporate, **Weddings**, Burial — and Weddings is the only one selectable in V1 (the other five are visible as a product preview but show a "Coming soon" badge). After creating their wedding event, the couple is auto-jumped into its dashboard.
+The couple signs up with email + password (universal Setnayan account, not event-scoped). On first login they're walked through creating an event. The event picker shows event-type tiles — **Weddings** plus Birthday, Debut, Christening, Gender Reveal, Celebration, Travel, Corporate, Tournament — and Weddings is the only one selectable in V1 (the others are visible as a product preview with a "Coming soon" badge; burial retired 2026-05-16). After creating their wedding event, the couple is auto-jumped into its dashboard.
 
 A single account can own multiple events. The picker shows all events the account belongs to (as couple, guest, or vendor), with a primary-event affordance and an archived-event filter. One active event auto-jumps in; two or more shows the picker.
 

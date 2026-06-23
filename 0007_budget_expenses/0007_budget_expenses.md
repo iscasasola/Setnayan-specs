@@ -6,7 +6,7 @@
 > - **0003 token wallet is RETIRED.** This spec's "Setnayan platform costs auto-populate from the 0003 wallet `WalletSpend`" mechanism does not exist — platform SKUs are paid via 0034 apply-then-pay (`orders`/`payments`), not a wallet. The "WalletSpend read-only consumer" section is dead.
 > - **Ledger SHIPPED:** off-platform vendor payment log (`logPayment` → `event_vendor_payments`, with optional `proof_r2_key` receipt upload), the per-vendor line items, rollup, and direct-pay rail (PR #969) are live.
 > - **Allocation engine SHIPPED (2026-06-05, PRs #996/#1000)** atop the ledger: `lib/budget-allocation.ts` + couple "Suggested budget split" (peso-pin tilt sheet, Cushion/shortfall readouts, confidence chips) + Layer-1 behavioral capture (`budget_allocation_decisions`, RLS couple-own, RA 10173 erasable). See the appended 2026-06-05 amendment near the bottom — that part is current.
-> - **Today's Focus ₱1,499** (not "Setnayan Concierge ₱4,999") is the planner SKU, if the body references the concierge.
+> - **Setnayan AI ₱1,499** (not "Setnayan Concierge ₱4,999") is the planner SKU, if the body references the concierge.
 >
 > When this body disagrees with the above, **the above wins.**
 

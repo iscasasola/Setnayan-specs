@@ -4,7 +4,7 @@
 > **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code (`apps/web` @ `origin/main`) + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. The taxonomy *keys* + phase mapping here remain a useful reference (vendors keep their `services[]` tags), but several structural + SKU facts have moved:
 > - **Visible structure is the 10-parent shrink, not the 12-folder/192-canonical model** below — this doc already flags it (§ top note) and the live `apps/web/lib/taxonomy.ts` / `lib/vendor-category-taxonomy.ts` ship the 10-parent grouping. The full rewrite to 10-parent is still a deferred follow-up.
 > - **Vendor tiers don't gate on the old 5-col cap** — live ladder is Free (1 category) / Pro ₱2,499/28d (3 cats) / Enterprise ₱5,499/28d (unlimited); Additional Branch ₱999/28d. Tiers sell REACH not category-count features.
-> - **Some Setnayan-service inserts use retired names/prices:** the planner is **"Today's Focus" ₱1,499**, NOT "**Setnayan Concierge**" (#159 / §4 table — Concierge is RETIRED). **Pakanta is a SINGLE SKU ₱2,499** (the "Pakanta ₱1,999–₱9,999" 3-tier in §4's Today's Focus-wizard table is stale). Monogram ships as **"Animated Monogram" ₱2,499** (not "Bespoke ₱2,999"). The whole "Today's Focus wizard coverage" subsection (§4) reflects the **retired couple-app wizard** — that wizard is gone (SKUs persist, the carousel discovery path does not).
+> - **Some Setnayan-service inserts use retired names/prices:** the planner is **"Setnayan AI" ₱1,499**, NOT "**Setnayan Concierge**" (#159 / §4 table — Concierge is RETIRED). **Pakanta is a SINGLE SKU ₱2,499** (the "Pakanta ₱1,999–₱9,999" 3-tier in §4's Setnayan AI-wizard table is stale). Monogram ships as **"Animated Monogram" ₱2,499** (not "Bespoke ₱2,999"). The whole "Setnayan AI wizard coverage" subsection (§4) reflects the **retired couple-app wizard** — that wizard is gone (SKUs persist, the carousel discovery path does not).
 > - **0% commission, ever** (Setnayan never sits between vendor and couple at checkout); a **vendor token economy is LIVE** (burn-on-answer 1–3 tokens ₱100/200/300 region-banded); vendor↔customer money is OFF-PLATFORM (RA 11967).
 > - Cross-ref iteration links (0011 as `0011_panood`, 0043–0047) are pre-resync corpus archive — trust the live taxonomy code + ground-truth doc over folder pointers.
 >
@@ -14,7 +14,7 @@
 
 **Status.** Drafted 2026-05-19 · Consolidates session-locked taxonomy work from V1.5→V1 promotion (2026-05-18) + V1.1 content-engine spec drafting (2026-05-19) into one read-once reference.
 
-> **⚠️ SUPERSEDED (visible structure) — shipped to production 2026-05-31.** The 12-folder / ~196-canonical structure documented below is now the *historical* reference. The marketplace ships the **10-parent shrink** (Venue · Planning · Feast · Design · Program · Documentary · Look · Booths · Prints · Transport) — see [Vendor_Taxonomy_Shrink_2026-05-30.md](../Vendor_Taxonomy_Shrink_2026-05-30.md) (live via PR #689) + the CLAUDE.md decision log 2026-05-31. The canonical **KEYS** below are unchanged (vendors keep their `services[]` tags) — only the parent grouping moved + 3 new canonicals were added (`orchestra`, `fireworks_pyro`, `led_video_wall`). This doc's full rewrite to the 10-parent model is a deferred follow-up.
+> **⚠️ SUPERSEDED (visible structure) — shipped to production 2026-05-31.** The 12-folder / ~196-canonical structure documented below is now the *historical* reference. The marketplace ships the **10-parent shrink** (Venue · Planning · Feast · Design · Program · Documentary · Look · Booths · Prints · Transport) — see [Vendor_Taxonomy_Shrink_2026-05-30.md](../03_Strategy/Vendor_Taxonomy_Shrink_2026-05-30.md) (live via PR #689) + the CLAUDE.md decision log 2026-05-31. The canonical **KEYS** below are unchanged (vendors keep their `services[]` tags) — only the parent grouping moved + 3 new canonicals were added (`orchestra`, `fireworks_pyro`, `led_video_wall`). This doc's full rewrite to the 10-parent model is a deferred follow-up.
 
 **Authoritative iteration specs (this doc consolidates, doesn't replace):**
 - [0006_vendors_management](../0006_vendors_management/0006_vendors_management.md) — canonical_services enum source-of-truth
@@ -129,7 +129,7 @@
 |---|---|---|---|
 | 27 | Wedding Hosts / MCs (split from `dj_emcee_host`) | `[0006]` (split) | V1.1 base |
 
-**Choreographers** _(phase promoted V1.2 → V1.1 on 2026-05-24 — the Today's Focus wizard now surfaces a `dance_instructor` card at position 20 with canonical service `choreographer`; couples need a vendor list to pick from at launch.)_
+**Choreographers** _(phase promoted V1.2 → V1.1 on 2026-05-24 — the Setnayan AI wizard now surfaces a `dance_instructor` card at position 20 with canonical service `choreographer`; couples need a vendor list to pick from at launch.)_
 | # | Sub-category | Status | Phase |
 |---|---|---|---|
 | 28 | Entourage Choreographer | `[NEW]` `[PH-specific]` | V1.1 |
@@ -449,7 +449,7 @@ vs **WedMeGood's ~30 generic vendor categories** with one shared filter UI acros
 
 ## 4. SETNAYAN SERVICE inserts (the badge pattern)
 
-> **⚠️ AMENDED 2026-06-03 (live placements moved).** The table below reflects the pre-shrink 5-column model. In the live 10-parent taxonomy the Setnayan inserts now sit at: **Concierge → Planning · Pakanta + Animated Monogram + Pro Website + Live Venue Photo Wall + Live Background (Pailaw) → Design › Digital Services (new tile) · Patiktok + Pabati → Booths › Photo Booth · Papic (+ Guest Stories / SDE / Thank You Video add-ons) → Documentary › Photo & Video · Panood → Documentary › Livestream · Editorial → Documentary › Editorial.** See [Vendor_Taxonomy_Shrink_2026-05-30.md](../Vendor_Taxonomy_Shrink_2026-05-30.md) + the 2026-06-03 decision-log row. The table here is kept for its historical intra-tile ranking notes only.
+> **⚠️ AMENDED 2026-06-03 (live placements moved).** The table below reflects the pre-shrink 5-column model. In the live 10-parent taxonomy the Setnayan inserts now sit at: **Concierge → Planning · Pakanta + Animated Monogram + Pro Website + Live Venue Photo Wall + Live Background (Pailaw) → Design › Digital Services (new tile) · Patiktok + Pabati → Booths › Photo Booth · Papic (+ Guest Stories / SDE / Thank You Video add-ons) → Documentary › Photo & Video · Panood → Documentary › Livestream · Editorial → Documentary › Editorial.** See [Vendor_Taxonomy_Shrink_2026-05-30.md](../03_Strategy/Vendor_Taxonomy_Shrink_2026-05-30.md) + the 2026-06-03 decision-log row. The table here is kept for its historical intra-tile ranking notes only.
 
 Per [0047 § SETNAYAN SERVICE inserts](../0047_style_driven_marketplaces/0047_style_driven_marketplaces.md), first-party services appear as marketplace listings with a distinct visual badge. They populate per the same [0044 schema](../0044_per_category_schemas/0044_per_category_schemas.md) + [0045 product catalog](../0045_product_catalogs/0045_product_catalogs.md) framework as third-party vendors.
 
@@ -467,9 +467,9 @@ Per [0047 § SETNAYAN SERVICE inserts](../0047_style_driven_marketplaces/0047_st
 
 **Total: 8-9 SETNAYAN SERVICE entries** surfacing as first-class marketplace listings.
 
-### Today's Focus wizard coverage (added 2026-05-24)
+### Setnayan AI wizard coverage (added 2026-05-24)
 
-Every Setnayan paid service now has a dedicated wizard card in Today's Focus, surfacing the SKU inside the host's planning carousel (not just inside the marketplace search):
+Every Setnayan paid service now has a dedicated wizard card in Setnayan AI, surfacing the SKU inside the host's planning carousel (not just inside the marketplace search):
 
 | Service | Iteration | Wizard card | Position |
 |---|---|---|---|
