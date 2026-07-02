@@ -1,0 +1,1860 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Performance · Admin — Setnayan HQ</title>
+<style>
+:root {
+  /* Paper / structure — warm alabaster family */
+  --m-paper:      #FBFBFA;
+  --m-paper-2:    #F4F2EC;
+  --m-ivory:      #EDEAE0;
+  --m-line:       #E2DED4;
+  --m-line-soft:  #ECE8DC;
+
+  /* Ink / text — deep obsidian → slate ladder */
+  --m-ink:        #1E2229;
+  --m-slate:      #4F535B;
+  --m-slate-2:    #6A6E76;
+  --m-slate-3:    #898D94;
+  --m-slate-4:    #B6B9BE;
+
+  /* Champagne gold accent (token name --m-orange kept for back-compat) */
+  --m-orange:     #C5A059;
+  --m-orange-2:   #A88340;
+  --m-orange-3:   #E0CCA0;
+  --m-orange-4:   #F4ECD8;
+
+  /* CTA / active family — Deep Obsidian (token names kept for back-compat) */
+  --m-mulberry:   #1E2229;
+  --m-mulberry-2: #343A44;
+  --m-mulberry-3: #6A6E76;
+  --m-mulberry-4: #ECEDEE;
+
+  /* Secondary chart-series accent — kept visually distinct from ink axis text
+     and from the champagne primary series now that the CTA family reads as
+     near-black. A muted slate-blue reads clearly as a separate data line. */
+  --m-chart-2:    #5B6B7A;
+  --m-chart-2-deep:#3F4C58;
+
+  /* Semantic status colors */
+  --m-blush:      #F4D7C9;   /* error/down/alert surface */
+  --m-blush-deep: #B65A3A;   /* error/down/alert text */
+  --m-sage:       #C5D2BD;   /* healthy/up/live surface */
+  --m-sage-deep:  #4F6B4A;   /* healthy/up/live text */
+
+  /* additional slate for series-3 fallback per spec */
+  --m-slate-3-alt:#898D94;
+
+  /* Semantic aliases */
+  --m-accent:      var(--m-orange);
+  --m-accent-deep: var(--m-orange-2);
+  --m-cta:         var(--m-mulberry);
+  --m-cta-deep:    var(--m-mulberry-2);
+
+  /* Radius scale */
+  --m-r-xs:   4px;
+  --m-r-sm:   8px;
+  --m-r-md:   14px;
+  --m-r-lg:   22px;
+  --m-r-xl:   36px;
+  --m-r-full: 999px;
+
+  /* Elevation */
+  --m-shadow-sm: 0 1px 2px rgba(30,34,41,.05), 0 1px 1px rgba(30,34,41,.04);
+  --m-shadow-md: 0 8px 24px -10px rgba(30,34,41,.18), 0 2px 6px -2px rgba(30,34,41,.08);
+  --m-shadow-lg: 0 40px 80px -30px rgba(30,34,41,.28), 0 10px 30px -8px rgba(30,34,41,.10);
+
+  /* Typography */
+  --m-font-display: Georgia, 'Times New Roman', serif;
+  --m-font-body:    system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* deep-stroke helpers for series fills */
+  --m-blush-fill: color-mix(in srgb, var(--m-blush) 55%, var(--m-paper));
+  --m-sage-fill:  color-mix(in srgb, var(--m-sage) 55%, var(--m-paper));
+
+  /* layout */
+  --shell-sidebar: 264px;
+  --shell-max: 1200px;
+  --shell-max-xl: 1280px;
+}
+
+/* ---- A3 base / reset ---- */
+*,*::before,*::after{box-sizing:border-box}
+html{ -webkit-text-size-adjust:100% }
+body{
+  margin:0;
+  background:var(--m-paper-2);
+  color:var(--m-ink);
+  font-family:var(--m-font-body);
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:var(--m-font-display);font-weight:700;margin:0}
+.tnum{font-variant-numeric:tabular-nums}
+.mono-label{
+  font-family:var(--m-font-body);
+  font-size:11px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--m-slate-2);
+}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--m-mulberry);outline-offset:2px;border-radius:var(--m-r-xs)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- A4 card + pill ---- */
+.m-card {
+  background: var(--m-paper);
+  border: 1px solid var(--m-line);
+  border-radius: var(--m-r-lg);
+  box-shadow: var(--m-shadow-sm);
+  overflow: hidden;
+  transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s ease;
+}
+.m-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--m-shadow-md);
+}
+.m-card-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 18px 12px;
+  border-bottom: 1px solid var(--m-line);
+}
+.m-card-h h3 {
+  flex: 1;
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--m-ink);
+}
+.m-card-h .more {
+  font-family: system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--m-orange);
+  cursor: pointer;
+}
+.m-card-b { padding: 16px 18px; }
+
+.m-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  border-radius: var(--m-r-full);
+  border: 1px solid var(--m-line);
+  background: var(--m-paper);
+  color: var(--m-slate);
+  white-space: nowrap;
+}
+.m-pill--live {
+  color: var(--m-sage-deep);
+  background: color-mix(in srgb, var(--m-sage) 45%, var(--m-paper));
+  border-color: color-mix(in srgb, var(--m-sage-deep) 30%, transparent);
+}
+.m-pill--pending {
+  color: #7A5D24;   /* AA-legible (~4.6:1) on --m-orange-4 for 11px bold status text */
+  background: var(--m-orange-4);
+  border-color: var(--m-orange-3);
+}
+.m-pill--alert {
+  color: #A0502F;   /* darker terracotta than --m-blush-deep — 4.82:1 on the blush pill surface for 11px bold text */
+  background: color-mix(in srgb, var(--m-blush) 50%, var(--m-paper));
+  border-color: color-mix(in srgb, var(--m-blush-deep) 28%, transparent);
+}
+
+/* needs-wiring treatment */
+.m-card.is-wiring{
+  background:var(--m-paper);
+  border-style:dashed;
+  border-color:var(--m-orange-3);
+}
+.m-card.is-wiring .chart-svg,
+.m-card.is-wiring .spark{ opacity:.82 }
+.m-card.is-wiring::before{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(135deg,
+    transparent 0 10px, rgba(197,160,89,.035) 10px 11px);
+  pointer-events:none;
+}
+.m-card{position:relative}
+
+/* ---- B1 shell ---- */
+.shell{display:flex;min-height:100vh}
+.sidebar{
+  width:var(--shell-sidebar);flex:0 0 var(--shell-sidebar);
+  background:var(--m-paper);border-right:1px solid var(--m-line);
+  position:sticky;top:0;height:100vh;overflow-y:auto;padding:0 0 24px;
+}
+.main{flex:1 1 auto;min-width:0}
+@media (max-width:1023px){
+  .sidebar{display:none}
+  .main{padding-bottom:76px}
+}
+
+/* B2/B3 sidebar */
+.sb-brand{padding:18px 18px 14px;border-bottom:1px solid var(--m-line-soft)}
+.sb-word{font-family:var(--m-font-display);font-size:18px;letter-spacing:.04em;color:var(--m-ink);display:block;font-weight:700}
+.sb-brand .mono-label{margin-top:4px}
+.sb-group-label{padding:16px 18px 6px;display:flex;align-items:center;justify-content:space-between}
+.sb-group-label .chev{width:15px;height:15px;color:var(--m-slate-3);stroke-width:1.75}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 18px;font-size:13.5px;color:var(--m-slate);
+  border-left:3px solid transparent;
+}
+.sb-item:hover{background:var(--m-paper-2);color:var(--m-ink)}
+.sb-item .ic{width:17px;height:17px;flex:0 0 17px;stroke-width:1.75}
+.sb-item.is-active{
+  color:var(--m-ink);font-weight:600;
+  background:var(--m-orange-4);
+  border-left-color:var(--m-orange);
+}
+.sb-item.is-active .ic{color:var(--m-orange-2)}
+
+/* B4 topbar */
+.topbar{
+  height:56px;border-bottom:1px solid var(--m-line);background:var(--m-paper);
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  padding:0 24px;position:sticky;top:0;z-index:5;
+}
+.tb-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border:1px solid var(--m-line);border-radius:var(--m-r-full);
+  background:var(--m-paper);color:var(--m-slate);cursor:pointer;
+}
+.tb-btn svg{width:17px;height:17px;stroke-width:1.75}
+.tb-name{font-size:13.5px;color:var(--m-slate);font-weight:600}
+@media(max-width:640px){.tb-name{display:none}}
+.btn-secondary{
+  font:inherit;font-size:13px;font-weight:600;
+  padding:7px 14px;border-radius:var(--m-r-full);
+  border:1px solid var(--m-line);background:var(--m-paper);color:var(--m-ink);cursor:pointer;
+}
+.btn-secondary:hover{background:var(--m-paper-2)}
+
+/* B5 bottom nav */
+.bottomnav{
+  display:none;position:fixed;left:0;right:0;bottom:0;z-index:20;
+  background:var(--m-paper);border-top:1px solid var(--m-line);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+@media (max-width:1023px){.bottomnav{display:flex;justify-content:space-around}}
+.bn-tab{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--m-slate-2);font-size:10px;font-weight:600;padding:4px 8px}
+.bn-tab svg{width:20px;height:20px;stroke-width:1.75}
+.bn-tab.is-active{color:var(--m-orange-2)}
+
+/* B6 page */
+.page{max-width:var(--shell-max);margin:0 auto;padding:40px 24px 56px}
+@media(min-width:1280px){.page{max-width:var(--shell-max-xl)}}
+@media(max-width:640px){.page{padding:24px 16px 40px}}
+
+/* B' page head */
+.page-head{margin-bottom:28px}
+.page-title{font-size:34px;line-height:1.1;color:var(--m-ink)}
+@media(min-width:640px){.page-title{font-size:38px}}
+.page-sub{max-width:64ch;margin:8px 0 0;color:var(--m-slate);font-size:15px}
+.head-controls{margin-top:18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+
+.seg{display:inline-flex;border:1px solid var(--m-line);border-radius:var(--m-r-full);background:var(--m-paper);padding:3px}
+.seg-btn{
+  font:inherit;font-size:13px;font-weight:600;border:0;background:transparent;
+  color:var(--m-slate);padding:5px 14px;border-radius:var(--m-r-full);cursor:pointer;
+}
+.seg-btn.is-on{background:var(--m-mulberry);color:#fff}
+
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-left:auto;font-size:12px;color:var(--m-slate-2)}
+.leg{display:inline-flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot-live{background:var(--m-sage-deep)}
+.dot-wiring{background:var(--m-orange-2);box-shadow:0 0 0 2px var(--m-orange-4)}
+@media(max-width:640px){.legend{margin-left:0}}
+
+/* C KPIs — intentionally 2-up at 375px (verified: no overflow/clipping; single-column would add ~1,000px of scroll on the 7-tile strip) */
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:36px}
+@media(min-width:640px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1200px){.kpis{grid-template-columns:repeat(5,1fr)}}
+.kpi{padding:16px}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.kpi-val{font-family:var(--m-font-display);font-size:30px;font-weight:700;color:var(--m-ink);margin:6px 0 2px;line-height:1}
+.kpi-unit{font-size:15px;color:var(--m-slate-2);margin-left:2px;font-family:var(--m-font-body);font-weight:600}
+.kpi-foot{display:flex;align-items:center;gap:8px}
+.kpi-period{font-size:11px;color:var(--m-slate-2)}
+.delta{font-size:11px;font-weight:700;border-radius:var(--m-r-full);padding:2px 7px}
+.delta-up{background:color-mix(in srgb, var(--m-sage) 45%, var(--m-paper));color:var(--m-sage-deep)}
+.delta-flat{background:var(--m-paper-2);color:var(--m-slate)}
+.delta-warn{background:var(--m-blush);color:var(--m-blush-deep)}
+.spark{width:100%;height:26px;margin-top:10px;display:block}
+
+/* D section shells */
+.sec{margin-bottom:40px}
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec-ic{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;
+  border-radius:var(--m-r-sm);background:color-mix(in srgb,var(--m-orange) 12%,transparent);color:var(--m-orange-2)}
+.sec-ic svg{width:17px;height:17px;stroke-width:1.75}
+.sec-title{font-size:18px;color:var(--m-ink)}
+.sec-blurb{font-size:12.5px;color:var(--m-slate-2);margin:2px 0 0}
+.grid{display:grid;gap:16px}
+.grid-3{grid-template-columns:1fr}
+@media(min-width:768px){.grid-3{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1200px){.grid-3{grid-template-columns:repeat(3,1fr)}}
+.grid-2{grid-template-columns:1fr}
+@media(min-width:768px){.grid-2{grid-template-columns:repeat(2,1fr)}}
+.span-full{grid-column:1/-1}
+
+/* D0b chart card */
+.cc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:15px 16px 10px}
+.cc-titles{min-width:0}
+.cc-title{font-size:15px;color:var(--m-ink);line-height:1.25}
+.cc-src{font-size:11px;color:var(--m-slate-2);margin:3px 0 0;font-family:var(--m-font-body);overflow-wrap:anywhere}
+.cc-pills{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:0 0 auto}
+.cc-body{padding:4px 16px 8px}
+.cc-insight{margin:0;padding:10px 16px 15px;border-top:1px solid var(--m-line-soft);
+  font-size:12.5px;color:var(--m-slate);line-height:1.45}
+.chart-svg{width:100%;height:auto;display:block;overflow:visible}
+.chart-val{font-family:var(--m-font-display);font-size:18px;font-weight:700;color:var(--m-ink)}
+
+/* chart legend row */
+.chart-legend{display:flex;flex-wrap:wrap;gap:12px;margin:2px 0 6px;font-size:11px;color:var(--m-slate-2)}
+.leg-item{display:inline-flex;align-items:center;gap:5px}
+.leg-sq{width:9px;height:9px;border-radius:2px}
+
+/* gauges */
+.gauge{margin:4px 0 12px}
+.gauge:last-child{margin-bottom:2px}
+.gauge-top{display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
+.gauge-metric{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--m-slate-2)}
+.gauge-val{font-family:var(--m-font-display);font-size:18px;font-weight:700;color:var(--m-ink)}
+.gauge-val small{font-size:12px;font-weight:600;color:var(--m-slate-2);font-family:var(--m-font-body)}
+.gauge-tag{margin-left:auto}
+
+/* footer */
+.page-foot{margin-top:8px;padding:16px 18px;border:1px dashed var(--m-orange-3);
+  border-radius:var(--m-r-md);background:var(--m-orange-4);
+  font-size:12.5px;color:var(--m-slate);display:flex;gap:10px;align-items:flex-start}
+.page-foot svg{width:16px;height:16px;flex:0 0 16px;color:var(--m-orange-2);stroke-width:1.75;margin-top:1px}
+
+/* ===== PAGE-SPECIFIC: Context tiles (7-wide) — all seven standing totals on one desktop row ===== */
+@media(min-width:1200px){.kpis.kpis-7{grid-template-columns:repeat(7,1fr)}}
+
+/* ===== PAGE-SPECIFIC: Action Center grid ===== */
+.ac-grid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:640px){.ac-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.ac-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1280px){.ac-grid{grid-template-columns:repeat(4,1fr)}}
+.ac-card{position:relative;padding:14px 16px 14px 18px;display:flex;flex-direction:column;gap:6px}
+.ac-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:var(--m-r-lg) 0 0 var(--m-r-lg)}
+.ac-card.sev-act::before{background:var(--m-blush-deep)}
+.ac-card.sev-watch::before{background:var(--m-orange)}
+.ac-card.sev-ok::before{background:var(--m-sage-deep)}
+.ac-top{display:flex;align-items:center;gap:8px}
+.ac-ic{width:16px;height:16px;stroke-width:1.75;color:var(--m-slate-2);flex:0 0 16px}
+.ac-cat{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--m-slate-2)}
+.ac-dot{width:9px;height:9px;border-radius:50%;margin-left:auto;flex:0 0 9px}
+.ac-dot.sev-act{background:var(--m-blush-deep)}
+.ac-dot.sev-watch{background:var(--m-orange)}
+.ac-dot.sev-ok{background:var(--m-sage-deep)}
+.ac-title{font-size:14px;font-weight:600;color:var(--m-ink);line-height:1.25}
+.ac-val{font-family:var(--m-font-display);font-size:18px;font-weight:700;color:var(--m-ink);line-height:1}
+.ac-thresh{font-size:11px;color:var(--m-slate-2)}
+.ac-todo{font-size:12.5px;color:var(--m-slate);line-height:1.4}
+.ac-foot{display:flex;align-items:center;gap:8px;margin-top:2px}
+.ac-link{font-size:11px;font-weight:600;color:var(--m-cta);text-decoration:underline;text-underline-offset:2px}
+.ac-mode{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border-radius:var(--m-r-full);border:1px solid var(--m-line);color:var(--m-slate-2)}
+.ac-mode.is-auto{background:var(--m-sage);color:var(--m-sage-deep);border-color:transparent}
+
+/* ===== PAGE-SPECIFIC: small-multiples grid ===== */
+.sm-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:900px){.sm-grid{grid-template-columns:repeat(4,1fr)}}
+.sm-card{padding:12px 14px}
+.sm-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--m-slate-2)}
+.sm-val{font-family:var(--m-font-display);font-size:24px;font-weight:700;color:var(--m-ink);margin:4px 0 2px;line-height:1}
+.sm-delta{font-size:11px;font-weight:700}
+
+/* ===== PAGE-SPECIFIC: leaderboard diverging bars ===== */
+.lb{list-style:none;margin:6px 0 2px;padding:0;display:flex;flex-direction:column;gap:8px}
+.lb li{display:grid;grid-template-columns:120px 1fr 64px;align-items:center;gap:8px}
+.lb-metric{font-size:12px;color:var(--m-slate);overflow-wrap:anywhere}
+.lb-track{position:relative;height:14px;background:var(--m-line-soft);border-radius:var(--m-r-full)}
+.lb-track::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--m-slate-4)}
+.lb-fill{position:absolute;top:0;height:14px;border-radius:var(--m-r-full)}
+.lb-fill.pos{left:50%;background:color-mix(in srgb,var(--m-sage) 60%,var(--m-paper));border:1px solid var(--m-sage-deep)}
+.lb-fill.neg{right:50%;background:color-mix(in srgb,var(--m-blush) 60%,var(--m-paper));border:1px solid var(--m-blush-deep)}
+.lb-pct{text-align:right;font-size:12px;font-weight:700}
+.lb-pct.pos{color:var(--m-sage-deep)}.lb-pct.neg{color:var(--m-blush-deep)}
+.lb-nd{font-size:11px;color:var(--m-slate-2);font-style:italic}
+
+/* ===== PAGE-SPECIFIC: Expenses & Receipts ===== */
+.xp-big{font-family:var(--m-font-display);font-size:44px;font-weight:700;color:var(--m-ink);line-height:1;margin:4px 0 2px}
+.xp-sub{font-size:12px;color:var(--m-slate-2);margin:0 0 10px}
+.xp-alert{font-size:12.5px;font-weight:600;color:var(--m-blush-deep);margin:10px 0 2px}
+.xp-forward{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--m-slate-2);margin:2px 0 10px}
+.xp-forward svg{width:14px;height:14px;flex:0 0 14px;stroke-width:1.75;color:var(--m-slate-2)}
+.xp-table-wrap{overflow-x:auto}
+.xp-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.xp-table th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--m-slate-2);padding:6px 10px;border-bottom:1px solid var(--m-line);white-space:nowrap}
+.xp-table th.amt,.xp-table td.amt{text-align:right}
+.xp-table td{padding:7px 10px;border-bottom:1px solid var(--m-line-soft);color:var(--m-slate);white-space:nowrap}
+.xp-table tr:last-child td{border-bottom:0}
+.xp-table td.amt{font-weight:700;color:var(--m-ink)}
+.xp-src{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--m-slate-2)}
+.xp-list{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
+.xp-list li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--m-slate)}
+.xp-list .amt{margin-left:auto;font-weight:700;color:var(--m-ink)}
+.xp-total{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--m-line);font-size:13px;font-weight:600;color:var(--m-ink)}
+.xp-total .amt{margin-left:auto;font-family:var(--m-font-display);font-size:18px;font-weight:700}
+
+/* ---- E signature motion system — scroll-triggered, animates ONCE per card ----
+   Default (no-JS · reduced-motion) = FINAL state. Every pre-animation state is
+   gated behind html.anim (added by JS only when motion is allowed) AND the
+   no-preference media query, so nothing is ever left invisible or zero-scaled.
+   Only transform/opacity animate (compositor-friendly); .sc = animation scope
+   (card), .in = has entered the viewport; --cd = per-card stagger delay,
+   --bd = per-bar/row stagger delay (both set by JS). */
+
+/* F — CSS-only hover polish */
+.chart-svg rect:hover{filter:brightness(1.06)}
+.lb-fill:hover{filter:brightness(1.06)}
+
+@keyframes draw{to{stroke-dashoffset:0}}
+
+@media (prefers-reduced-motion: no-preference){
+  /* B — line/area sequence: gridlines → stroke draw → area fill → ghost line */
+  html.anim .draw{stroke-dasharray:var(--len,4000);stroke-dashoffset:var(--len,4000)}
+  html.anim .sc.in .draw{animation:draw .9s cubic-bezier(.22,.8,.3,1) forwards;
+    animation-delay:calc(var(--cd,0ms) + 150ms)}
+  html.anim .sc.in .draw.d2{animation-delay:calc(var(--cd,0ms) + 270ms)}
+  html.anim .sc.in .draw.d3{animation-delay:calc(var(--cd,0ms) + 390ms)}
+
+  html.anim .sc .chart-svg line:not(.needle){opacity:0}
+  html.anim .sc.in .chart-svg line:not(.needle){opacity:1;
+    transition:opacity .15s ease var(--cd,0ms)}
+
+  html.anim .sc .area-fill{opacity:0}
+  html.anim .sc.in .area-fill{opacity:1;
+    transition:opacity .3s ease calc(var(--cd,0ms) + 1050ms)}
+
+  html.anim .sc .ghost{opacity:0}
+  html.anim .sc.in .ghost{opacity:.55;
+    transition:opacity .25s ease calc(var(--cd,0ms) + 1250ms)}
+
+  html.anim .sc .chart-svg circle{opacity:0}
+  html.anim .sc.in .chart-svg circle{opacity:1;
+    transition:opacity .3s ease calc(var(--cd,0ms) + 1050ms)}
+  /* endpoint dots capping staggered .d2/.d3 strokes wait for THEIR line */
+  html.anim .sc.in .chart-svg circle.c2{transition-delay:calc(var(--cd,0ms) + 1170ms)}
+  html.anim .sc.in .chart-svg circle.c3{transition-delay:calc(var(--cd,0ms) + 1290ms)}
+
+  /* C — columns grow from the shared baseline (y=120 of the 140-high viewBox);
+     stacked segments share one --bd per bar so each stack rises as one piece */
+  html.anim .sc .bar-v{transform-box:view-box;transform-origin:50% 85.715%;
+    transform:scaleY(0);opacity:0}
+  html.anim .sc.in .bar-v{transform:scaleY(1);opacity:1;
+    transition:transform .5s cubic-bezier(.22,.8,.3,1) calc(var(--cd,0ms) + var(--bd,0ms) + 80ms),
+      opacity .25s ease calc(var(--cd,0ms) + var(--bd,0ms) + 80ms)}
+
+  html.anim .sc .bar-h{transform-box:fill-box;transform-origin:left center;
+    transform:scaleX(0);opacity:0}
+  html.anim .sc.in .bar-h{transform:scaleX(1);opacity:1;
+    transition:transform .5s cubic-bezier(.22,.8,.3,1) calc(var(--cd,0ms) + var(--bd,0ms) + 80ms),
+      opacity .25s ease calc(var(--cd,0ms) + var(--bd,0ms) + 80ms)}
+
+  /* C — diverging leaderboard fills grow from the centre axis */
+  html.anim .sc .lb-fill{transform:scaleX(0)}
+  html.anim .sc .lb-fill.pos{transform-origin:left center}
+  html.anim .sc .lb-fill.neg{transform-origin:right center}
+  html.anim .sc.in .lb-fill{transform:scaleX(1);
+    transition:transform .5s cubic-bezier(.22,.8,.3,1) calc(var(--cd,0ms) + var(--bd,0ms) + 80ms)}
+  html.anim .sc .lb-pct{opacity:0}
+  html.anim .sc.in .lb-pct{opacity:1;
+    transition:opacity .3s ease calc(var(--cd,0ms) + var(--bd,0ms) + 380ms)}
+
+  /* E — health status strip cascades left-to-right */
+  html.anim .sc .seg-day{transform-box:fill-box;transform-origin:center;
+    opacity:0;transform:scale(.7)}
+  html.anim .sc.in .seg-day{opacity:1;transform:scale(1);
+    transition:opacity .3s ease calc(var(--cd,0ms) + var(--bd,0ms)),
+      transform .3s cubic-bezier(.22,.8,.3,1) calc(var(--cd,0ms) + var(--bd,0ms))}
+
+  /* E — CWV gauge needle sweeps in from the left edge */
+  html.anim .sc .needle{transform:translateX(var(--nx,0px))}
+  html.anim .sc.in .needle{transform:translateX(0);
+    transition:transform .6s cubic-bezier(.22,.8,.3,1) calc(var(--cd,0ms) + 250ms)}
+
+  /* E — ledger + upcoming-charge rows fade up with a subtle stagger */
+  html.anim .sc .rw{opacity:0;transform:translateY(6px)}
+  html.anim .sc.in .rw{opacity:1;transform:translateY(0);
+    transition:opacity .4s ease calc(var(--cd,0ms) + var(--bd,0ms)),
+      transform .4s cubic-bezier(.22,.8,.3,1) calc(var(--cd,0ms) + var(--bd,0ms))}
+
+  /* E — action-card severity dots: one gentle scale-in, never looping */
+  html.anim .sc .ac-dot{transform:scale(0)}
+  html.anim .sc.in .ac-dot{transform:scale(1);
+    transition:transform .35s cubic-bezier(.22,.8,.3,1) calc(var(--cd,0ms) + 200ms)}
+
+  /* D — numeric readouts count up (JS); delta chips land after the count */
+  html.anim .sc .cnt{opacity:0}
+  html.anim .sc.in .cnt{opacity:1;transition:opacity .2s ease var(--cd,0ms)}
+  html.anim .sc .delta{opacity:0}
+  html.anim .sc.in .delta{opacity:1;
+    transition:opacity .25s ease calc(var(--cd,0ms) + 950ms)}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <nav class="sidebar" aria-label="Primary">
+    <div class="sb-brand">
+      <span class="sb-word">SETNAYAN</span>
+      <span class="mono-label">Setnayan HQ</span>
+    </div>
+
+    <!-- Home -->
+    <div class="sb-group-label"><span class="mono-label">Home</span></div>
+    <a class="sb-item" href="#">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      <span>Overview</span>
+    </a>
+
+    <!-- Work (collapsed) -->
+    <div class="sb-group-label"><span class="mono-label">Work</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+
+    <!-- Directory (collapsed) -->
+    <div class="sb-group-label"><span class="mono-label">Directory</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+
+    <!-- Insights (expanded) -->
+    <div class="sb-group-label"><span class="mono-label">Insights</span></div>
+    <a class="sb-item" href="#">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      <span>Growth</span>
+    </a>
+    <a class="sb-item" href="#">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg>
+      <span>Funnels</span>
+    </a>
+    <a class="sb-item is-active" href="#" aria-current="page">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+      <span>App Performance</span>
+    </a>
+
+    <!-- Money & Catalog (collapsed) -->
+    <div class="sb-group-label"><span class="mono-label">Money &amp; Catalog</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+
+    <!-- Platform (collapsed) -->
+    <div class="sb-group-label"><span class="mono-label">Platform</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <div class="topbar">
+      <button class="tb-btn" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+      </button>
+      <span class="m-pill">ADMIN</span>
+      <span class="tb-name">Setnayan Team</span>
+      <button class="btn-secondary" aria-label="Sign out">Sign out</button>
+    </div>
+
+    <main class="page">
+      <!-- shared vertical series gradients for every area fill -->
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="agOrange" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" style="stop-color:var(--m-orange);stop-opacity:.28"/>
+            <stop offset="1" style="stop-color:var(--m-orange);stop-opacity:.04"/>
+          </linearGradient>
+          <linearGradient id="agChart2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" style="stop-color:var(--m-chart-2);stop-opacity:.28"/>
+            <stop offset="1" style="stop-color:var(--m-chart-2);stop-opacity:.04"/>
+          </linearGradient>
+          <linearGradient id="agSlate3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" style="stop-color:var(--m-slate-3);stop-opacity:.28"/>
+            <stop offset="1" style="stop-color:var(--m-slate-3);stop-opacity:.04"/>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <!-- ===== PAGE HEADER ===== -->
+      <header class="page-head">
+        <h1 class="page-title">App Performance</h1>
+        <p class="page-sub">How the platform is growing and whether it's holding up — the standing totals, what needs your attention next, and the growth and stability trends behind them.</p>
+
+        <div class="head-controls">
+          <div class="seg" role="group" aria-label="Time range">
+            <button class="seg-btn" data-range="3m" aria-pressed="false">3m</button>
+            <button class="seg-btn is-on" data-range="6m" aria-pressed="true">6m</button>
+            <button class="seg-btn" data-range="12m" aria-pressed="false">12m</button>
+          </div>
+          <div class="seg" role="group" aria-label="Granularity">
+            <button class="seg-btn is-on" data-gran="wow" aria-pressed="true">WoW</button>
+            <button class="seg-btn" data-gran="mom" aria-pressed="false">MoM</button>
+          </div>
+          <div class="legend">
+            <span class="leg"><span class="dot dot-live"></span>Live</span>
+            <span class="leg"><span class="dot dot-wiring" style="background:#7A5D24"></span>Partial — wired · sparse data</span>
+            <span class="leg"><span class="dot dot-wiring"></span>Needs wiring — illustrative</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===== CONTEXT STRIP — standing totals ===== -->
+      <section class="kpis kpis-7" aria-label="Standing totals">
+        <div class="m-card kpi">
+          <div class="kpi-top"><p class="mono-label">Total Users</p><span class="m-pill m-pill--live">Live</span></div>
+          <p class="kpi-val tnum">612</p>
+          <div class="kpi-foot"><span class="delta delta-up tnum">&#9650; 22.9%</span></div>
+          <div class="kpi-foot" style="margin-top:2px"><span class="kpi-period">vs previous period</span></div>
+        </div>
+        <div class="m-card kpi">
+          <div class="kpi-top"><p class="mono-label">Vendors</p><span class="m-pill m-pill--live">Live</span></div>
+          <p class="kpi-val tnum">38</p>
+          <div class="kpi-foot"><span class="delta delta-up tnum">&#9650; 22.6%</span></div>
+          <div class="kpi-foot" style="margin-top:2px"><span class="kpi-period">vs previous period</span></div>
+        </div>
+        <div class="m-card kpi">
+          <div class="kpi-top"><p class="mono-label">Services</p><span class="m-pill m-pill--live">Live</span></div>
+          <p class="kpi-val tnum">176</p>
+          <div class="kpi-foot"><span class="delta delta-up tnum">&#9650; 26.6%</span></div>
+          <div class="kpi-foot" style="margin-top:2px"><span class="kpi-period">vs previous period</span></div>
+        </div>
+        <div class="m-card kpi">
+          <div class="kpi-top"><p class="mono-label">Events</p><span class="m-pill m-pill--live">Live</span></div>
+          <p class="kpi-val tnum">289</p>
+          <div class="kpi-foot"><span class="delta delta-up tnum">&#9650; 24.0%</span></div>
+          <div class="kpi-foot" style="margin-top:2px"><span class="kpi-period">vs previous period</span></div>
+        </div>
+        <div class="m-card kpi">
+          <div class="kpi-top"><p class="mono-label">Total Editorials</p><span class="m-pill m-pill--live">Live</span></div>
+          <p class="kpi-val tnum">18</p>
+          <div class="kpi-foot"><span class="delta delta-up tnum">&#9650; +3</span></div>
+          <div class="kpi-foot" style="margin-top:2px"><span class="kpi-period">11 published &middot; vs previous period</span></div>
+        </div>
+        <div class="m-card kpi">
+          <div class="kpi-top"><p class="mono-label">Uptime</p><span class="m-pill m-pill--live">Live</span></div>
+          <p class="kpi-val tnum">99.94<span class="kpi-unit">%</span></p>
+          <div class="kpi-foot"><span class="delta delta-up tnum">&#9650; 0.06pp</span></div>
+          <div class="kpi-foot" style="margin-top:2px"><span class="kpi-period">vs previous period</span></div>
+        </div>
+        <div class="m-card kpi">
+          <div class="kpi-top"><p class="mono-label">Error rate</p><span class="m-pill m-pill--live">Live</span></div>
+          <p class="kpi-val tnum">0.42<span class="kpi-unit">%</span></p>
+          <div class="kpi-foot"><span class="delta delta-up tnum">&#9660; 0.15pp</span></div>
+          <div class="kpi-foot" style="margin-top:2px"><span class="kpi-period">vs previous period</span></div>
+        </div>
+      </section>
+
+      <!-- =========================================================== -->
+      <!-- ZONE 1 — ACTION CENTER -->
+      <!-- =========================================================== -->
+      <section class="sec" aria-labelledby="ac-h">
+        <header class="sec-head">
+          <span class="sec-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg></span>
+          <div>
+            <h2 class="sec-title" id="ac-h">Action Center</h2>
+            <p class="sec-blurb"><strong>3 need action</strong> · 8 to watch · rest healthy</p>
+            <p class="sec-blurb">Money out lives in Expenses &amp; Receipts below.</p>
+          </div>
+        </header>
+
+        <div class="ac-grid" role="list" aria-label="Action items, sorted by severity">
+
+          <!-- ACT 1 -->
+          <article class="m-card ac-card sev-act" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg><span class="ac-cat">AI credits</span><span class="ac-dot sev-act"></span></div>
+            <p class="ac-title">Suno credits low</p>
+            <p class="ac-val tnum">1,240 credits</p>
+            <p class="ac-thresh tnum">&lt; 2,000 floor</p>
+            <p class="ac-todo">Top up before the next Pakanta batch (~9 songs queued)</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Billing &rarr; Suno</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- ACT 2 -->
+          <article class="m-card ac-card sev-act" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg><span class="ac-cat">AI credits</span><span class="ac-dot sev-act"></span></div>
+            <p class="ac-title">OpenAI / DALL&middot;E balance</p>
+            <p class="ac-val tnum">$8.10</p>
+            <p class="ac-thresh tnum">&lt; $10 blocks monogram</p>
+            <p class="ac-todo">Refill — Animated Monogram generation stops at empty</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Billing &rarr; OpenAI</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- ACT 3 -->
+          <article class="m-card ac-card sev-act" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span class="ac-cat">Operational backlog</span><span class="ac-dot sev-act"></span></div>
+            <p class="ac-title">Payments awaiting reconciliation</p>
+            <p class="ac-val tnum">14 orders</p>
+            <p class="ac-thresh tnum">&#8369;71,860 pending &middot; SLA 24h</p>
+            <p class="ac-todo">Match BDO/GCash inbox to orders; 3 are &gt;18h old</p>
+            <div class="ac-foot"><a class="ac-link" href="#">HQ &rarr; Reconciliation</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- WATCH 4 -->
+          <article class="m-card ac-card sev-watch" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg><span class="ac-cat">Plans &amp; limits</span><span class="ac-dot sev-watch"></span></div>
+            <p class="ac-title">R2 storage used</p>
+            <p class="ac-val tnum">63%</p>
+            <p class="ac-thresh tnum">warn at 75%</p>
+            <p class="ac-todo">Watch — Papic galleries growing ~2%/week</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Cloudflare R2</a><span class="ac-mode is-auto">Auto</span></div>
+          </article>
+
+          <!-- WATCH 5 -->
+          <article class="m-card ac-card sev-watch" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg><span class="ac-cat">Plans &amp; limits</span><span class="ac-dot sev-watch"></span></div>
+            <p class="ac-title">Resend monthly send quota</p>
+            <p class="ac-val tnum">58%</p>
+            <p class="ac-thresh tnum">warn at 80%</p>
+            <p class="ac-todo">Watch — RSVP + payment emails trending up</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Resend</a><span class="ac-mode is-auto">Auto</span></div>
+          </article>
+
+          <!-- WATCH 6 -->
+          <article class="m-card ac-card sev-watch" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg><span class="ac-cat">Secrets &amp; keys</span><span class="ac-dot sev-watch"></span></div>
+            <p class="ac-title">R2 API token rotates</p>
+            <p class="ac-val tnum">in 26 days</p>
+            <p class="ac-thresh tnum">rotate &lt; 30 days</p>
+            <p class="ac-todo">Schedule rotation window; regenerate scoped token</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Secrets</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- WATCH 7 -->
+          <article class="m-card ac-card sev-watch" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><span class="ac-cat">Domains &amp; certs</span><span class="ac-dot sev-watch"></span></div>
+            <p class="ac-title">setnayan.ph renews</p>
+            <p class="ac-val tnum">in 21 days</p>
+            <p class="ac-thresh tnum">&lt; 30 days</p>
+            <p class="ac-todo">Confirm auto-renew card on file at registrar</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Domains</a><span class="ac-mode is-auto">Auto</span></div>
+          </article>
+
+          <!-- WATCH 8 -->
+          <article class="m-card ac-card sev-watch" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span class="ac-cat">Operational backlog</span><span class="ac-dot sev-watch"></span></div>
+            <p class="ac-title">Vendors in verification queue</p>
+            <p class="ac-val tnum">5 vendors</p>
+            <p class="ac-thresh tnum">target &lt; 8 &middot; SLA 48h</p>
+            <p class="ac-todo">2 have docs uploaded and are ready to approve</p>
+            <div class="ac-foot"><a class="ac-link" href="#">HQ &rarr; Verification</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- WATCH 9 -->
+          <article class="m-card ac-card sev-watch" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span class="ac-cat">Operational backlog</span><span class="ac-dot sev-watch"></span></div>
+            <p class="ac-title">Editorials awaiting review</p>
+            <p class="ac-val tnum">3 drafts</p>
+            <p class="ac-thresh tnum">target &lt; 5</p>
+            <p class="ac-todo">Review /our-story composes before publish/OG</p>
+            <div class="ac-foot"><a class="ac-link" href="#">HQ &rarr; Editorial</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- WATCH 10 -->
+          <article class="m-card ac-card sev-watch" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span class="ac-cat">Operational backlog</span><span class="ac-dot sev-watch"></span></div>
+            <p class="ac-title">Open disputes</p>
+            <p class="ac-val tnum">2 open</p>
+            <p class="ac-thresh tnum">target 0</p>
+            <p class="ac-todo">Both are payment-proof disputes; request more proof</p>
+            <div class="ac-foot"><a class="ac-link" href="#">HQ &rarr; Disputes</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- WATCH 11 -->
+          <article class="m-card ac-card sev-watch" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span class="ac-cat">Operational backlog</span><span class="ac-dot sev-watch"></span></div>
+            <p class="ac-title">Pax-change requests</p>
+            <p class="ac-val tnum">4 pending</p>
+            <p class="ac-thresh tnum">informational</p>
+            <p class="ac-todo">Confirm crew-meal + seating recompute with couples</p>
+            <div class="ac-foot"><a class="ac-link" href="#">HQ &rarr; Events</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- OK 12 -->
+          <article class="m-card ac-card sev-ok" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg><span class="ac-cat">AI credits</span><span class="ac-dot sev-ok"></span></div>
+            <p class="ac-title">Claude API headroom</p>
+            <p class="ac-val tnum">79% left</p>
+            <p class="ac-thresh tnum">warn at 20%</p>
+            <p class="ac-todo">Healthy — Setnayan AI matchmaking within budget</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Billing &rarr; Anthropic</a><span class="ac-mode is-auto">Auto</span></div>
+          </article>
+
+          <!-- OK 13 -->
+          <article class="m-card ac-card sev-ok" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg><span class="ac-cat">AI credits</span><span class="ac-dot sev-ok"></span></div>
+            <p class="ac-title">Recraft credits</p>
+            <p class="ac-val tnum">6,800 credits</p>
+            <p class="ac-thresh tnum">warn at 1,000</p>
+            <p class="ac-todo">Healthy — marketing image gen ample</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Billing &rarr; Recraft</a><span class="ac-mode is-auto">Auto</span></div>
+          </article>
+
+          <!-- OK 14 -->
+          <article class="m-card ac-card sev-ok" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg><span class="ac-cat">Plans &amp; limits</span><span class="ac-dot sev-ok"></span></div>
+            <p class="ac-title">Supabase DB size</p>
+            <p class="ac-val tnum">41% &middot; compute OK</p>
+            <p class="ac-thresh tnum">warn at 80%</p>
+            <p class="ac-todo">Healthy — nowhere near tier ceiling</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Supabase</a><span class="ac-mode is-auto">Auto</span></div>
+          </article>
+
+          <!-- OK 15 -->
+          <article class="m-card ac-card sev-ok" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg><span class="ac-cat">Plans &amp; limits</span><span class="ac-dot sev-ok"></span></div>
+            <p class="ac-title">Vercel build minutes</p>
+            <p class="ac-val tnum">37%</p>
+            <p class="ac-thresh tnum">warn at 80%</p>
+            <p class="ac-todo">Healthy — Elastic machine + skip-deploys on</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Vercel</a><span class="ac-mode is-auto">Auto</span></div>
+          </article>
+
+          <!-- OK 16 -->
+          <article class="m-card ac-card sev-ok" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg><span class="ac-cat">Plans &amp; limits</span><span class="ac-dot sev-ok"></span></div>
+            <p class="ac-title">Sentry / PostHog events</p>
+            <p class="ac-val tnum">48% / 52%</p>
+            <p class="ac-thresh tnum">upgrade at 90%</p>
+            <p class="ac-todo">Healthy — event quota comfortable this cycle</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Observability</a><span class="ac-mode is-auto">Auto</span></div>
+          </article>
+
+          <!-- OK 17 -->
+          <article class="m-card ac-card sev-ok" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg><span class="ac-cat">Secrets &amp; keys</span><span class="ac-dot sev-ok"></span></div>
+            <p class="ac-title">Service-role key age</p>
+            <p class="ac-val tnum">64 days</p>
+            <p class="ac-thresh tnum">rotate at 90d</p>
+            <p class="ac-todo">Healthy — rotation not yet due</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Secrets</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- OK 18 -->
+          <article class="m-card ac-card sev-ok" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg><span class="ac-cat">Vendor tokens</span><span class="ac-dot sev-ok"></span></div>
+            <p class="ac-title">Token band mint</p>
+            <p class="ac-val tnum">3 bands live</p>
+            <p class="ac-thresh tnum">on demand</p>
+            <p class="ac-todo">Optional — create a new token band if a region needs it</p>
+            <div class="ac-foot"><a class="ac-link" href="#">HQ &rarr; Vendor Tokens</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+          <!-- OK 19 -->
+          <article class="m-card ac-card sev-ok" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg><span class="ac-cat">Domains &amp; certs</span><span class="ac-dot sev-ok"></span></div>
+            <p class="ac-title">SSL / DKIM check</p>
+            <p class="ac-val tnum">all valid</p>
+            <p class="ac-thresh tnum">auto-renew</p>
+            <p class="ac-todo">Healthy — certs + DKIM records passing</p>
+            <div class="ac-foot"><a class="ac-link" href="#">Domains</a><span class="ac-mode is-auto">Auto</span></div>
+          </article>
+
+          <!-- OK 20 -->
+          <article class="m-card ac-card sev-ok" role="listitem">
+            <div class="ac-top"><svg class="ac-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span class="ac-cat">Operational backlog</span><span class="ac-dot sev-ok"></span></div>
+            <p class="ac-title">Open user reports</p>
+            <p class="ac-val tnum">1 open</p>
+            <p class="ac-thresh tnum">target 0</p>
+            <p class="ac-todo">Low-priority content report; triage today</p>
+            <div class="ac-foot"><a class="ac-link" href="#">HQ &rarr; Reports</a><span class="ac-mode">Manual</span></div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- =========================================================== -->
+      <!-- ZONE 1b — EXPENSES & RECEIPTS (money out · all needs wiring) -->
+      <!-- =========================================================== -->
+      <section class="sec" aria-labelledby="xp-h">
+        <header class="sec-head">
+          <span class="sec-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg></span>
+          <div>
+            <h2 class="sec-title" id="xp-h">Expenses &amp; Receipts</h2>
+            <p class="sec-blurb">Every digital peso out, with the receipt to prove it — feeds BIR expense substantiation (iteration 0026).</p>
+          </div>
+        </header>
+
+        <!-- E1 — monthly digital spend · full width · Needs wiring -->
+        <div class="grid" style="margin-bottom:16px">
+          <article class="m-card cc is-wiring span-full" aria-labelledby="e1-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="e1-t" class="cc-title">Monthly digital spend</h3><p class="cc-src">needs a platform_expenses table — none in schema today</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Needs wiring</span><span class="delta delta-up tnum">&#9660; 39.8%</span></div>
+            </div>
+            <div class="cc-body">
+              <div class="chart-legend">
+                <span class="leg-item"><span class="leg-sq" style="background:color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))"></span>Infra</span>
+                <span class="leg-item"><span class="leg-sq" style="background:color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))"></span>AI credits</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-slate-3)"></span>Domains &amp; fees</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-slate-4)"></span>Tools &amp; misc</span>
+                <span class="leg-item"><span class="leg-sq" style="background:color-mix(in srgb,var(--m-sage) 55%,var(--m-paper));border:1px solid var(--m-sage-deep)"></span>Permits &amp; docs</span>
+              </div>
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="Monthly digital spend stacked by category, February to July 2026. Totals run peso 9,300 to a June peak of peso 26,150 from domain renewals plus the SETNAYAN trademark filing, then July at peso 15,750, down 39.8 percent versus June. A ghost line shows the prior period lower.">
+                <text x="4" y="22" class="chart-val tnum" font-family="Georgia, serif" fill="var(--m-ink)">&#8369;15,750</text>
+                <!-- scale 0..28000 -> unit 110/28000=0.003929 ; base y=120 ; band 320/6=53.33 barW 26 -->
+                <g>
+                  <!-- Feb x=13.67 · infra 6100 / ai 2400 / dom 0 / tools 800 / permits 0 · total 9300 -->
+                  <rect x="13.67" y="96.04" width="26" height="23.96" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Feb · Infra &#8369;6,100</title></rect>
+                  <rect x="13.67" y="86.61" width="26" height="9.43" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>Feb · AI credits &#8369;2,400</title></rect>
+                  <rect x="13.67" y="83.46" width="26" height="3.14" fill="var(--m-slate-4)"><title>Feb · Tools &amp; misc &#8369;800</title></rect>
+                  <!-- Mar x=67 · 6100 / 3100 / 1450 / 800 / 0 · total 11450 -->
+                  <rect x="67" y="96.04" width="26" height="23.96" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Mar · Infra &#8369;6,100</title></rect>
+                  <rect x="67" y="83.86" width="26" height="12.18" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>Mar · AI credits &#8369;3,100</title></rect>
+                  <rect x="67" y="78.16" width="26" height="5.70" fill="var(--m-slate-3)"><title>Mar · Domains &amp; fees &#8369;1,450</title></rect>
+                  <rect x="67" y="75.02" width="26" height="3.14" fill="var(--m-slate-4)"><title>Mar · Tools &amp; misc &#8369;800</title></rect>
+                  <!-- Apr x=120.33 · 6350 / 2800 / 0 / 800 / 800 · total 10750 -->
+                  <rect x="120.33" y="95.05" width="26" height="24.95" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Apr · Infra &#8369;6,350</title></rect>
+                  <rect x="120.33" y="84.05" width="26" height="11.00" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>Apr · AI credits &#8369;2,800</title></rect>
+                  <rect x="120.33" y="80.91" width="26" height="3.14" fill="var(--m-slate-4)"><title>Apr · Tools &amp; misc &#8369;800</title></rect>
+                  <rect x="120.33" y="77.77" width="26" height="3.14" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.75"><title>Apr · Permits &amp; docs &#8369;800</title></rect>
+                  <!-- May x=173.67 · 6350 / 4650 / 0 / 1150 / 0 · total 12150 -->
+                  <rect x="173.67" y="95.05" width="26" height="24.95" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>May · Infra &#8369;6,350</title></rect>
+                  <rect x="173.67" y="76.79" width="26" height="18.27" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>May · AI credits &#8369;4,650</title></rect>
+                  <rect x="173.67" y="72.27" width="26" height="4.52" fill="var(--m-slate-4)"><title>May · Tools &amp; misc &#8369;1,150</title></rect>
+                  <!-- Jun x=227 · 7900 / 5200 / 5600 / 1150 / 6300 · total 26150 -->
+                  <rect x="227" y="88.96" width="26" height="31.04" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Jun · Infra &#8369;7,900</title></rect>
+                  <rect x="227" y="68.54" width="26" height="20.43" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>Jun · AI credits &#8369;5,200</title></rect>
+                  <rect x="227" y="46.54" width="26" height="22.00" fill="var(--m-slate-3)"><title>Jun · Domains &amp; fees &#8369;5,600</title></rect>
+                  <rect x="227" y="42.02" width="26" height="4.52" fill="var(--m-slate-4)"><title>Jun · Tools &amp; misc &#8369;1,150</title></rect>
+                  <rect x="227" y="17.27" width="26" height="24.75" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.75"><title>Jun · Permits &amp; docs &#8369;6,300</title></rect>
+                  <!-- Jul x=280.33 · 8200 / 5900 / 0 / 1150 / 500 · total 15750 -->
+                  <rect x="280.33" y="87.79" width="26" height="32.21" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Jul · Infra &#8369;8,200</title></rect>
+                  <rect x="280.33" y="64.61" width="26" height="23.18" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>Jul · AI credits &#8369;5,900</title></rect>
+                  <rect x="280.33" y="60.09" width="26" height="4.52" fill="var(--m-slate-4)"><title>Jul · Tools &amp; misc &#8369;1,150</title></rect>
+                  <rect x="280.33" y="58.13" width="26" height="1.96" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.75"><title>Jul · Permits &amp; docs &#8369;500</title></rect>
+                </g>
+                <!-- ghost prior period totals [8200,8400,8900,9100,12400,9600] -->
+                <polyline class="ghost" fill="none" stroke="var(--m-slate-4)" stroke-width="1.4" stroke-dasharray="4 3" opacity=".55" points="26.67,87.79 80,87.00 133.33,85.04 186.67,84.25 240,71.29 293.33,82.29"/>
+                <!-- total line [9300,11450,10750,12150,26150,15750] -->
+                <polyline class="draw" fill="none" stroke="var(--m-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="26.67,83.46 80,75.02 133.33,77.77 186.67,72.27 240,17.27 293.33,58.13"/>
+                <circle cx="293.33" cy="58.13" r="2.5" fill="var(--m-ink)"><title>Jul · &#8369;15,750 total</title></circle>
+                <text x="26.67" y="133" font-size="8" fill="var(--m-slate)" font-family="system-ui" text-anchor="middle">Feb</text>
+                <text x="80" y="133" font-size="8" fill="var(--m-slate)" font-family="system-ui" text-anchor="middle">Mar</text>
+                <text x="133.33" y="133" font-size="8" fill="var(--m-slate)" font-family="system-ui" text-anchor="middle">Apr</text>
+                <text x="186.67" y="133" font-size="8" fill="var(--m-slate)" font-family="system-ui" text-anchor="middle">May</text>
+                <text x="240" y="133" font-size="8" fill="var(--m-slate)" font-family="system-ui" text-anchor="middle">Jun</text>
+                <text x="293.33" y="133" font-size="8" fill="var(--m-slate)" font-family="system-ui" text-anchor="middle">Jul</text>
+              </svg>
+            </div>
+            <p class="cc-insight">June spike = setnayan.ph renewal + Apple Developer + SETNAYAN trademark filing (IPOPHL); AI credits remain the fastest-growing recurring line.</p>
+          </article>
+        </div>
+
+        <!-- E2 / E3 / E5 -->
+        <div class="grid grid-3" style="margin-bottom:16px">
+
+          <!-- E2 — spend by service · Needs wiring -->
+          <article class="m-card cc is-wiring" aria-labelledby="e2-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="e2-t" class="cc-title">Spend by service — July</h3><p class="cc-src">needs a platform_expenses table — none in schema today</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Needs wiring</span></div>
+            </div>
+            <div class="cc-body">
+              <svg class="chart-svg hb" viewBox="0 0 320 280" role="img" aria-label="July spend per service, horizontal bars. Claude API leads at peso 3,400, then Suno Premier 1,750, Sentry 1,500, Supabase and Better Stack 1,450 each, Vercel 1,150, other infrastructure at peso 2,470, tools and miscellaneous 1,150, Recraft and BIR documentary stamps at peso 500 each, OpenAI 250, R2 180, down to Resend at zero on the free tier. Rows total the peso 15,750 July spend.">
+                <!-- bar x=95 · width = v/3400*220 · row step 21 -->
+                <g font-family="system-ui" font-size="10">
+                  <text x="0" y="16" fill="var(--m-slate)">Claude API</text>
+                  <rect x="95" y="8" width="220" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Claude API · &#8369;3,400</title></rect>
+                  <text x="311" y="17.5" fill="var(--m-ink)" font-weight="700" text-anchor="end" class="tnum">&#8369;3,400</text>
+                  <text x="0" y="37" fill="var(--m-slate)">Suno Premier</text>
+                  <rect x="95" y="29" width="113.24" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Suno Premier · &#8369;1,750</title></rect>
+                  <text x="316" y="38.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;1,750</text>
+                  <text x="0" y="58" fill="var(--m-slate)">Sentry</text>
+                  <rect x="95" y="50" width="97.06" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Sentry · &#8369;1,500</title></rect>
+                  <text x="316" y="59.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;1,500</text>
+                  <text x="0" y="79" fill="var(--m-slate)">Supabase</text>
+                  <rect x="95" y="71" width="93.82" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Supabase · &#8369;1,450</title></rect>
+                  <text x="316" y="80.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;1,450</text>
+                  <text x="0" y="100" fill="var(--m-slate)">Better Stack</text>
+                  <rect x="95" y="92" width="93.82" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Better Stack · &#8369;1,450</title></rect>
+                  <text x="316" y="101.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;1,450</text>
+                  <text x="0" y="121" fill="var(--m-slate)">Vercel</text>
+                  <rect x="95" y="113" width="74.41" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Vercel · &#8369;1,150</title></rect>
+                  <text x="316" y="122.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;1,150</text>
+                  <text x="0" y="142" fill="var(--m-slate)">Other infra</text>
+                  <rect x="95" y="134" width="159.82" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Other infra · &#8369;2,470</title></rect>
+                  <text x="316" y="143.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;2,470</text>
+                  <text x="0" y="163" fill="var(--m-slate)">Tools &amp; misc</text>
+                  <rect x="95" y="155" width="74.41" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Tools &amp; misc · &#8369;1,150</title></rect>
+                  <text x="316" y="164.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;1,150</text>
+                  <text x="0" y="184" fill="var(--m-slate)">Recraft</text>
+                  <rect x="95" y="176" width="32.35" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>Recraft · &#8369;500</title></rect>
+                  <text x="316" y="185.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;500</text>
+                  <text x="0" y="205" fill="var(--m-slate)">BIR doc stamps</text>
+                  <rect x="95" y="197" width="32.35" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>BIR documentary stamps · &#8369;500</title></rect>
+                  <text x="316" y="206.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;500</text>
+                  <text x="0" y="226" fill="var(--m-slate)">OpenAI</text>
+                  <rect x="95" y="218" width="16.18" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>OpenAI · &#8369;250</title></rect>
+                  <text x="316" y="227.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;250</text>
+                  <text x="0" y="247" fill="var(--m-slate)">R2</text>
+                  <rect x="95" y="239" width="11.65" height="12" rx="2" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>R2 · &#8369;180</title></rect>
+                  <text x="316" y="248.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;180</text>
+                  <text x="0" y="268" fill="var(--m-slate)">Resend</text>
+                  <rect x="95" y="260" width="1.5" height="12" fill="var(--m-slate-4)"><title>Resend · &#8369;0 (free tier)</title></rect>
+                  <text x="316" y="269.5" fill="var(--m-slate)" text-anchor="end" class="tnum">&#8369;0 &#183; free tier</text>
+                </g>
+              </svg>
+            </div>
+            <p class="cc-insight">Claude API is the single largest line — Setnayan AI usage growing.</p>
+          </article>
+
+          <!-- E3 — receipt coverage · Needs wiring -->
+          <article class="m-card cc is-wiring" aria-labelledby="e3-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="e3-t" class="cc-title">Receipt coverage</h3><p class="cc-src">needs receipt attachments on the expense table — none in schema today</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Needs wiring</span></div>
+            </div>
+            <div class="cc-body">
+              <p class="xp-big tnum">83%</p>
+              <p class="xp-sub tnum">38 of 46 expenses have a receipt attached</p>
+              <svg class="chart-svg" viewBox="0 0 320 60" role="img" aria-label="Receipt coverage trend over six months rising from 64 to 83 percent, with a dip in April.">
+                <!-- [64,70,68,75,79,83] scale 60..85 -> y=55-(v-60)/25*45 ; x-step 64 -->
+                <line x1="0" y1="55" x2="320" y2="55" stroke="var(--m-line)" stroke-width="1"/>
+                <polyline class="draw" fill="none" stroke="var(--m-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="0,47.8 64,37 128,40.6 192,28 256,20.8 320,13.6"/>
+                <circle cx="320" cy="13.6" r="2.5" fill="var(--m-orange-2)"><title>Jul · 83%</title></circle>
+              </svg>
+              <p class="xp-alert tnum">8 missing receipts — collect before BIR quarter close</p>
+            </div>
+            <p class="cc-insight">Coverage is the BIR substantiation rate — every peso without a receipt is a deduction Setnayan can't defend (iteration 0026).</p>
+          </article>
+
+          <!-- E5 — upcoming charges · Needs wiring -->
+          <article class="m-card cc is-wiring" aria-labelledby="e5-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="e5-t" class="cc-title">Upcoming charges</h3><p class="cc-src">needs recurring-charge rows on the expense table — none in schema today</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Needs wiring</span></div>
+            </div>
+            <div class="cc-body">
+              <ul class="xp-list" aria-label="Upcoming charges by date">
+                <li><span class="m-pill tnum">Aug 1</span><span>Vercel</span><span class="amt tnum">&#8369;1,150</span></li>
+                <li><span class="m-pill tnum">Aug 1</span><span>Supabase</span><span class="amt tnum">&#8369;1,450</span></li>
+                <li><span class="m-pill tnum">Aug 1</span><span>Suno</span><span class="amt tnum">&#8369;1,750</span></li>
+                <li><span class="m-pill tnum">Aug 3</span><span>Sentry</span><span class="amt tnum">&#8369;1,500</span></li>
+                <li><span class="m-pill tnum">Aug 14</span><span>Better Stack</span><span class="amt tnum">&#8369;1,450</span></li>
+                <li><span class="m-pill tnum">Nov 9</span><span>setnayan.com renewal</span><span class="amt tnum">&#8369;950</span></li>
+                <li><span class="m-pill tnum">Jan 20</span><span>Mayor's permit renewal</span><span class="amt tnum">~&#8369;3,500</span></li>
+                <li><span class="m-pill tnum">Jan 20</span><span>Barangay clearance</span><span class="amt tnum">&#8369;800</span></li>
+              </ul>
+              <p class="xp-sub" style="margin:8px 0 0">January permit cluster — renew together</p>
+              <div class="xp-total"><span>Due in the next 30 days</span><span class="amt tnum">&#8369;7,300</span></div>
+            </div>
+            <p class="cc-insight">Same dates the Action Center renewal cards above are watching — this is the peso view of those alerts.</p>
+          </article>
+
+        </div>
+
+        <!-- E4 — expense ledger · full width · Needs wiring -->
+        <div class="grid">
+          <article class="m-card cc is-wiring span-full" aria-labelledby="e4-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="e4-t" class="cc-title">Expense ledger</h3><p class="cc-src">needs a platform_expenses table + R2 receipt objects — none in schema today</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Needs wiring</span></div>
+            </div>
+            <div class="cc-body">
+              <p class="xp-forward"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>Forward invoices to receipts@setnayan.com &middot; or upload — every row needs its receipt.</p>
+              <div class="xp-table-wrap">
+                <table class="xp-table" aria-labelledby="e4-t">
+                  <thead>
+                    <tr><th scope="col">Date</th><th scope="col">Vendor</th><th scope="col">Category</th><th scope="col" class="amt">Amount &#8369;</th><th scope="col">Receipt</th><th scope="col">Source</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td class="tnum">Jul 1</td><td>Claude API</td><td>AI credits</td><td class="amt tnum">3,400</td><td><span class="m-pill m-pill--live">Attached</span></td><td><span class="xp-src">auto-email</span></td></tr>
+                    <tr><td class="tnum">Jul 1</td><td>Suno Premier</td><td>AI credits</td><td class="amt tnum">1,750</td><td><span class="m-pill m-pill--alert">Missing</span></td><td><span class="xp-src">manual</span></td></tr>
+                    <tr><td class="tnum">Jul 1</td><td>Vercel</td><td>Infra</td><td class="amt tnum">1,150</td><td><span class="m-pill m-pill--live">Attached</span></td><td><span class="xp-src">auto-email</span></td></tr>
+                    <tr><td class="tnum">Jul 1</td><td>Supabase</td><td>Infra</td><td class="amt tnum">1,450</td><td><span class="m-pill m-pill--live">Attached</span></td><td><span class="xp-src">auto-email</span></td></tr>
+                    <tr><td class="tnum">Jul 1</td><td>BIR documentary stamps</td><td>Permits &amp; docs</td><td class="amt tnum">500</td><td><span class="m-pill m-pill--alert">Missing</span></td><td><span class="xp-src">manual</span></td></tr>
+                    <tr><td class="tnum">Jun 28</td><td>setnayan.ph renewal</td><td>Domains &amp; fees</td><td class="amt tnum">4,100</td><td><span class="m-pill m-pill--live">Attached</span></td><td><span class="xp-src">manual</span></td></tr>
+                    <tr><td class="tnum">Jun 27</td><td>Apple Developer</td><td>Domains &amp; fees</td><td class="amt tnum">1,500</td><td><span class="m-pill m-pill--alert">Missing</span></td><td><span class="xp-src">manual</span></td></tr>
+                    <tr><td class="tnum">Jun 25</td><td>Sentry</td><td>Infra</td><td class="amt tnum">1,500</td><td><span class="m-pill m-pill--live">Attached</span></td><td><span class="xp-src">auto-email</span></td></tr>
+                    <tr><td class="tnum">Jun 22</td><td>Recraft credits</td><td>AI credits</td><td class="amt tnum">500</td><td><span class="m-pill m-pill--alert">Missing</span></td><td><span class="xp-src">manual</span></td></tr>
+                    <tr><td class="tnum">Jun 15</td><td>IPOPHL trademark filing (SETNAYAN)</td><td>Permits &amp; docs</td><td class="amt tnum">6,300</td><td><span class="m-pill m-pill--live">Attached</span></td><td><span class="xp-src">manual</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <p class="cc-insight">Auto-email rows arrive with their receipt; the manual rows are where the 8 missing receipts hide.</p>
+          </article>
+        </div>
+
+      </section>
+
+      <!-- =========================================================== -->
+      <!-- ZONE 2 — GROWTH -->
+      <!-- =========================================================== -->
+      <section class="sec" aria-labelledby="gr-h">
+        <header class="sec-head">
+          <span class="sec-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></span>
+          <div><h2 class="sec-title" id="gr-h">Growth</h2><p class="sec-blurb">Is it getting bigger?</p></div>
+        </header>
+
+        <!-- G1 — small multiples · full width -->
+        <div class="grid" style="margin-bottom:16px">
+          <article class="m-card cc span-full" aria-labelledby="g1-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="g1-t" class="cc-title">New users, vendors, services &amp; events</h3><p class="cc-src">Source · event_members / users / vendors / vendor_services / events</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--live">Live</span></div>
+            </div>
+            <div class="cc-body">
+              <div class="sm-grid">
+                <!-- Users bars [31,28,37,34,42,39,48,45,53,51,58,61] min28 max61 ; MA line -->
+                <article class="m-card sm-card">
+                  <p class="sm-title">Users</p>
+                  <p class="sm-val tnum">61</p>
+                  <p class="sm-delta delta delta-up">&#9650; +5.2%</p>
+                  <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="New users per period rising from 31 to 61 with a smoothing average also climbing.">
+                    <!-- bars: scale 28..61 -> h=(v-28)/(61-28)*110 ; barW 20 ; band 320/12=26.67 -->
+                    <g fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75">
+                      <rect x="3.33" y="110" width="20" height="10"><title>W1 · 31</title></rect>
+                      <rect x="30" y="120" width="20" height="0"><title>W2 · 28</title></rect>
+                      <rect x="56.67" y="90" width="20" height="30"><title>W3 · 37</title></rect>
+                      <rect x="83.33" y="100" width="20" height="20"><title>W4 · 34</title></rect>
+                      <rect x="110" y="73.33" width="20" height="46.67"><title>W5 · 42</title></rect>
+                      <rect x="136.67" y="83.33" width="20" height="36.67"><title>W6 · 39</title></rect>
+                      <rect x="163.33" y="53.33" width="20" height="66.67"><title>W7 · 48</title></rect>
+                      <rect x="190" y="63.33" width="20" height="56.67"><title>W8 · 45</title></rect>
+                      <rect x="216.67" y="36.67" width="20" height="83.33"><title>W9 · 53</title></rect>
+                      <rect x="243.33" y="43.33" width="20" height="76.67"><title>W10 · 51</title></rect>
+                      <rect x="270" y="20" width="20" height="100"><title>W11 · 58</title></rect>
+                      <rect x="296.67" y="10" width="20" height="110"><title>W12 · 61</title></rect>
+                    </g>
+                    <!-- MA [31,30,32,33,35,36,39,41,44,46,49,52] same scale ; x centers -->
+                    <polyline class="draw" fill="none" stroke="var(--m-chart-2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="13.33,110 40,113.33 66.67,106.67 93.33,103.33 120,96.67 146.67,93.33 173.33,83.33 200,76.67 226.67,66.67 253.33,60 280,50 306.67,40"/>
+                  </svg>
+                </article>
+                <!-- Vendors bars [2,1,3,2,4,3,3,4,3,5,4,4] min1 max5 -->
+                <article class="m-card sm-card">
+                  <p class="sm-title">Vendors</p>
+                  <p class="sm-val tnum">4</p>
+                  <p class="sm-delta delta delta-flat">&#8226; 0.0%</p>
+                  <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="New vendors per period ranging 1 to 5 with a flat-to-rising smoothing average.">
+                    <g fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75">
+                      <!-- scale 1..5 -> h=(v-1)/4*110 -->
+                      <rect x="3.33" y="92.5" width="20" height="27.5"><title>W1 · 2</title></rect>
+                      <rect x="30" y="120" width="20" height="0"><title>W2 · 1</title></rect>
+                      <rect x="56.67" y="65" width="20" height="55"><title>W3 · 3</title></rect>
+                      <rect x="83.33" y="92.5" width="20" height="27.5"><title>W4 · 2</title></rect>
+                      <rect x="110" y="37.5" width="20" height="82.5"><title>W5 · 4</title></rect>
+                      <rect x="136.67" y="65" width="20" height="55"><title>W6 · 3</title></rect>
+                      <rect x="163.33" y="65" width="20" height="55"><title>W7 · 3</title></rect>
+                      <rect x="190" y="37.5" width="20" height="82.5"><title>W8 · 4</title></rect>
+                      <rect x="216.67" y="65" width="20" height="55"><title>W9 · 3</title></rect>
+                      <rect x="243.33" y="10" width="20" height="110"><title>W10 · 5</title></rect>
+                      <rect x="270" y="37.5" width="20" height="82.5"><title>W11 · 4</title></rect>
+                      <rect x="296.67" y="37.5" width="20" height="82.5"><title>W12 · 4</title></rect>
+                    </g>
+                    <!-- MA [2,2,2,2,3,3,3,3,3,4,4,4] -->
+                    <polyline class="draw" fill="none" stroke="var(--m-chart-2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="13.33,92.5 40,92.5 66.67,92.5 93.33,92.5 120,65 146.67,65 173.33,65 200,65 226.67,65 253.33,37.5 280,37.5 306.67,37.5"/>
+                  </svg>
+                </article>
+                <!-- Services bars [8,6,11,9,13,10,15,12,17,14,19,16] min6 max19 -->
+                <article class="m-card sm-card">
+                  <p class="sm-title">Services</p>
+                  <p class="sm-val tnum">16</p>
+                  <p class="sm-delta delta delta-up">&#9650; +14.3%</p>
+                  <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="New services per period ranging 6 to 19 with a rising smoothing average.">
+                    <g fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75">
+                      <!-- scale 6..19 -> h=(v-6)/13*110 -->
+                      <rect x="3.33" y="103.08" width="20" height="16.92"><title>W1 · 8</title></rect>
+                      <rect x="30" y="120" width="20" height="0"><title>W2 · 6</title></rect>
+                      <rect x="56.67" y="77.69" width="20" height="42.31"><title>W3 · 11</title></rect>
+                      <rect x="83.33" y="94.62" width="20" height="25.38"><title>W4 · 9</title></rect>
+                      <rect x="110" y="60.77" width="20" height="59.23"><title>W5 · 13</title></rect>
+                      <rect x="136.67" y="86.15" width="20" height="33.85"><title>W6 · 10</title></rect>
+                      <rect x="163.33" y="43.85" width="20" height="76.15"><title>W7 · 15</title></rect>
+                      <rect x="190" y="69.23" width="20" height="50.77"><title>W8 · 12</title></rect>
+                      <rect x="216.67" y="26.92" width="20" height="93.08"><title>W9 · 17</title></rect>
+                      <rect x="243.33" y="52.31" width="20" height="67.69"><title>W10 · 14</title></rect>
+                      <rect x="270" y="10" width="20" height="110"><title>W11 · 19</title></rect>
+                      <rect x="296.67" y="35.38" width="20" height="84.62"><title>W12 · 16</title></rect>
+                    </g>
+                    <!-- MA [8,7,8,9,10,10,12,12,14,14,16,16] -->
+                    <polyline class="draw" fill="none" stroke="var(--m-chart-2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="13.33,103.08 40,111.54 66.67,103.08 93.33,94.62 120,86.15 146.67,86.15 173.33,69.23 200,69.23 226.67,52.31 253.33,52.31 280,35.38 306.67,35.38"/>
+                  </svg>
+                </article>
+                <!-- Events bars [15,13,18,16,21,19,24,22,27,25,29,31] min13 max31 -->
+                <article class="m-card sm-card">
+                  <p class="sm-title">Events</p>
+                  <p class="sm-val tnum">31</p>
+                  <p class="sm-delta delta delta-up">&#9650; +6.9%</p>
+                  <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="New events per period rising from 15 to 31 with a rising smoothing average.">
+                    <g fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75">
+                      <!-- scale 13..31 -> h=(v-13)/18*110 -->
+                      <rect x="3.33" y="107.78" width="20" height="12.22"><title>W1 · 15</title></rect>
+                      <rect x="30" y="120" width="20" height="0"><title>W2 · 13</title></rect>
+                      <rect x="56.67" y="89.44" width="20" height="30.56"><title>W3 · 18</title></rect>
+                      <rect x="83.33" y="101.67" width="20" height="18.33"><title>W4 · 16</title></rect>
+                      <rect x="110" y="71.11" width="20" height="48.89"><title>W5 · 21</title></rect>
+                      <rect x="136.67" y="83.33" width="20" height="36.67"><title>W6 · 19</title></rect>
+                      <rect x="163.33" y="52.78" width="20" height="67.22"><title>W7 · 24</title></rect>
+                      <rect x="190" y="65" width="20" height="55"><title>W8 · 22</title></rect>
+                      <rect x="216.67" y="34.44" width="20" height="85.56"><title>W9 · 27</title></rect>
+                      <rect x="243.33" y="46.67" width="20" height="73.33"><title>W10 · 25</title></rect>
+                      <rect x="270" y="22.22" width="20" height="97.78"><title>W11 · 29</title></rect>
+                      <rect x="296.67" y="10" width="20" height="110"><title>W12 · 31</title></rect>
+                    </g>
+                    <!-- MA [15,14,15,16,18,18,20,21,23,24,26,28] -->
+                    <polyline class="draw" fill="none" stroke="var(--m-chart-2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="13.33,107.78 40,113.89 66.67,107.78 93.33,101.67 120,89.44 146.67,89.44 173.33,77.22 200,71.11 226.67,58.89 253.33,52.78 280,40.56 306.67,28.33"/>
+                  </svg>
+                </article>
+              </div>
+            </div>
+            <p class="cc-insight">All four acquisition engines are climbing; users and services lead.</p>
+          </article>
+        </div>
+
+        <!-- G2..G6 grid-3 -->
+        <div class="grid grid-3">
+
+          <!-- G2 — new events by type (stacked bars) · Partial -->
+          <article class="m-card cc" aria-labelledby="g2-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="g2-t" class="cc-title">New events by type</h3><p class="cc-src">wired · sparse data · wedding-dominated</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Partial</span></div>
+            </div>
+            <div class="cc-body">
+              <div class="chart-legend">
+                <span class="leg-item"><span class="leg-sq" style="background:color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))"></span>Wedding</span>
+                <span class="leg-item"><span class="leg-sq" style="background:color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))"></span>Debut</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-slate-3)"></span>Birthday</span>
+              </div>
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="New events by type, stacked bars; roughly 90 percent weddings each period, debut and birthday thin. Latest period 31 events.">
+                <!-- band 320/12=26.67 ; barW 16 ; scale max stacked 31 -> unit=110/31=3.548 ; base y=120 -->
+                <!-- W1 wed12 deb2 bir1 -->
+                <g>
+                  <!-- helper: y_wed=120-wed*3.548 ; deb sits above wed ; bir above -->
+                  <!-- W1 x=5.33 -->
+                  <rect x="5.33" y="77.42" width="16" height="42.58" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W1 · Wedding 12</title></rect>
+                  <rect x="5.33" y="70.32" width="16" height="7.10" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W1 · Debut 2</title></rect>
+                  <rect x="5.33" y="66.77" width="16" height="3.55" fill="var(--m-slate-3)"><title>W1 · Birthday 1</title></rect>
+                  <!-- W2 x=32 wed10 deb2 bir1 -->
+                  <rect x="32" y="84.52" width="16" height="35.48" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W2 · Wedding 10</title></rect>
+                  <rect x="32" y="77.42" width="16" height="7.10" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W2 · Debut 2</title></rect>
+                  <rect x="32" y="73.87" width="16" height="3.55" fill="var(--m-slate-3)"><title>W2 · Birthday 1</title></rect>
+                  <!-- W3 x=58.67 wed15 deb2 bir1 -->
+                  <rect x="58.67" y="66.77" width="16" height="53.23" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W3 · Wedding 15</title></rect>
+                  <rect x="58.67" y="59.68" width="16" height="7.10" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W3 · Debut 2</title></rect>
+                  <rect x="58.67" y="56.13" width="16" height="3.55" fill="var(--m-slate-3)"><title>W3 · Birthday 1</title></rect>
+                  <!-- W4 x=85.33 wed13 deb1 bir2 -->
+                  <rect x="85.33" y="73.87" width="16" height="46.13" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W4 · Wedding 13</title></rect>
+                  <rect x="85.33" y="70.32" width="16" height="3.55" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W4 · Debut 1</title></rect>
+                  <rect x="85.33" y="63.23" width="16" height="7.10" fill="var(--m-slate-3)"><title>W4 · Birthday 2</title></rect>
+                  <!-- W5 x=112 wed17 deb3 bir1 -->
+                  <rect x="112" y="59.68" width="16" height="60.32" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W5 · Wedding 17</title></rect>
+                  <rect x="112" y="49.03" width="16" height="10.65" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W5 · Debut 3</title></rect>
+                  <rect x="112" y="45.48" width="16" height="3.55" fill="var(--m-slate-3)"><title>W5 · Birthday 1</title></rect>
+                  <!-- W6 x=138.67 wed15 deb2 bir2 -->
+                  <rect x="138.67" y="66.77" width="16" height="53.23" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W6 · Wedding 15</title></rect>
+                  <rect x="138.67" y="59.68" width="16" height="7.10" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W6 · Debut 2</title></rect>
+                  <rect x="138.67" y="52.58" width="16" height="7.10" fill="var(--m-slate-3)"><title>W6 · Birthday 2</title></rect>
+                  <!-- W7 x=165.33 wed20 deb3 bir1 -->
+                  <rect x="165.33" y="49.03" width="16" height="70.97" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W7 · Wedding 20</title></rect>
+                  <rect x="165.33" y="38.39" width="16" height="10.65" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W7 · Debut 3</title></rect>
+                  <rect x="165.33" y="34.84" width="16" height="3.55" fill="var(--m-slate-3)"><title>W7 · Birthday 1</title></rect>
+                  <!-- W8 x=192 wed18 deb3 bir1 -->
+                  <rect x="192" y="56.13" width="16" height="63.87" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W8 · Wedding 18</title></rect>
+                  <rect x="192" y="45.48" width="16" height="10.65" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W8 · Debut 3</title></rect>
+                  <rect x="192" y="41.94" width="16" height="3.55" fill="var(--m-slate-3)"><title>W8 · Birthday 1</title></rect>
+                  <!-- W9 x=218.67 wed23 deb3 bir1 -->
+                  <rect x="218.67" y="38.39" width="16" height="81.61" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W9 · Wedding 23</title></rect>
+                  <rect x="218.67" y="27.74" width="16" height="10.65" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W9 · Debut 3</title></rect>
+                  <rect x="218.67" y="24.19" width="16" height="3.55" fill="var(--m-slate-3)"><title>W9 · Birthday 1</title></rect>
+                  <!-- W10 x=245.33 wed21 deb3 bir1 -->
+                  <rect x="245.33" y="45.48" width="16" height="74.52" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W10 · Wedding 21</title></rect>
+                  <rect x="245.33" y="34.84" width="16" height="10.65" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W10 · Debut 3</title></rect>
+                  <rect x="245.33" y="31.29" width="16" height="3.55" fill="var(--m-slate-3)"><title>W10 · Birthday 1</title></rect>
+                  <!-- W11 x=272 wed25 deb3 bir1 -->
+                  <rect x="272" y="31.29" width="16" height="88.71" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W11 · Wedding 25</title></rect>
+                  <rect x="272" y="20.65" width="16" height="10.65" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W11 · Debut 3</title></rect>
+                  <rect x="272" y="17.10" width="16" height="3.55" fill="var(--m-slate-3)"><title>W11 · Birthday 1</title></rect>
+                  <!-- W12 x=298.67 wed27 deb3 bir1 total31 -->
+                  <rect x="298.67" y="24.19" width="16" height="95.81" fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.75"><title>W12 · Wedding 27</title></rect>
+                  <rect x="298.67" y="13.55" width="16" height="10.65" fill="color-mix(in srgb,var(--m-chart-2) 55%,var(--m-paper))" stroke="var(--m-chart-2-deep)" stroke-width="0.75"><title>W12 · Debut 3</title></rect>
+                  <rect x="298.67" y="10" width="16" height="3.55" fill="var(--m-slate-3)"><title>W12 · Birthday 1</title></rect>
+                </g>
+              </svg>
+            </div>
+            <p class="cc-insight">~90% weddings — the other types are still thin.</p>
+          </article>
+
+          <!-- G3 — completed services (cumulative area + bars) · Live -->
+          <article class="m-card cc" aria-labelledby="g3-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="g3-t" class="cc-title">Completed services</h3><p class="cc-src">Source · event_vendors completion handshake</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--live">Live</span><span class="delta delta-up tnum">&#9650; +10.0%</span></div>
+            </div>
+            <div class="cc-body">
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="Completed services compounding to 79 cumulative, per-period bars from 3 to 10 (latest period bar omitted). Ghost line shows previous period lower.">
+                <!-- cumulative [3,7,11,16,22,27,34,42,49,58,68,79] scale 0..79 -> y=120-v/79*110 ; x-step 320/11=29.09 -->
+                <!-- per-period bars W1..W11 [3,4,4,5,6,5,7,8,7,9,10] scale 0..11 -> h=v/11*60 (bottom band) baseline 120 ; W12=11 bar omitted (x would exceed viewBox on the 29.09 step) -->
+                <g fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.6">
+                  <rect x="6.09" y="103.64" width="14" height="16.36"><title>W1 · 3 done</title></rect>
+                  <rect x="35.18" y="98.18" width="14" height="21.82"><title>W2 · 4 done</title></rect>
+                  <rect x="64.27" y="98.18" width="14" height="21.82"><title>W3 · 4 done</title></rect>
+                  <rect x="93.36" y="92.73" width="14" height="27.27"><title>W4 · 5 done</title></rect>
+                  <rect x="122.45" y="87.27" width="14" height="32.73"><title>W5 · 6 done</title></rect>
+                  <rect x="151.55" y="92.73" width="14" height="27.27"><title>W6 · 5 done</title></rect>
+                  <rect x="180.64" y="81.82" width="14" height="38.18"><title>W7 · 7 done</title></rect>
+                  <rect x="209.73" y="76.36" width="14" height="43.64"><title>W8 · 8 done</title></rect>
+                  <rect x="238.82" y="81.82" width="14" height="38.18"><title>W9 · 7 done</title></rect>
+                  <rect x="267.91" y="70.91" width="14" height="49.09"><title>W10 · 9 done</title></rect>
+                  <rect x="297" y="65.45" width="14" height="54.55"><title>W11 · 10 done</title></rect>
+                </g>
+                <!-- ghost prev cumulative-ish [2,2,3,3,4,4,5,5,6,6,7,7] scaled 0..79 -->
+                <polyline class="ghost" fill="none" stroke="var(--m-slate-4)" stroke-width="1.4" stroke-dasharray="4 3" opacity=".55" points="0,117.22 29.09,117.22 58.18,115.82 87.27,115.82 116.36,114.43 145.45,114.43 174.55,113.04 203.64,113.04 232.73,111.65 261.82,111.65 290.91,110.25 320,110.25"/>
+                <!-- cumulative area + line -->
+                <path class="area-fill" fill="url(#agOrange)" d="M0,115.82 L29.09,110.25 L58.18,104.68 L87.27,97.72 L116.36,89.37 L145.45,82.41 L174.55,72.66 L203.64,61.52 L232.73,51.77 L261.82,39.24 L290.91,25.32 L320,10 L320,120 L0,120 Z"/>
+                <path class="draw" fill="none" stroke="var(--m-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M0,115.82 L29.09,110.25 L58.18,104.68 L87.27,97.72 L116.36,89.37 L145.45,82.41 L174.55,72.66 L203.64,61.52 L232.73,51.77 L261.82,39.24 L290.91,25.32 L320,10"/>
+                <circle cx="320" cy="10" r="2.5" fill="var(--m-orange-2)"><title>W12 · 79 cumulative</title></circle>
+              </svg>
+            </div>
+            <p class="cc-insight">Real completions compounding to 79 — the truest demand signal.</p>
+          </article>
+
+          <!-- G4 — sales split 3 ways (stacked area + total line) · Live -->
+          <article class="m-card cc" aria-labelledby="g4-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="g4-t" class="cc-title">Sales, split three ways</h3><p class="cc-src">Source · service_orders (PHP)</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--live">Live</span><span class="delta delta-up tnum">&#9650; +10.0%</span></div>
+            </div>
+            <div class="cc-body">
+              <div class="chart-legend">
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-orange)"></span>Setnayan AI subs</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-chart-2)"></span>Vendor tokens+subs</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-slate-3)"></span>Other in-app</span>
+              </div>
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="Revenue split three ways, stacked area; total compounding to peso 11,189 at W12, up 10.0 percent versus the prior period.">
+                <text x="4" y="22" class="chart-val tnum" font-family="Georgia, serif" fill="var(--m-ink)">&#8369;11,189</text>
+                <!-- scale 0..13788 -> y=120-v/13788*110 ; x-step 29.09 -->
+                <!-- monotonic revenue reconciled to G7 Normalized Growth Index (Revenue rebased 100→452) -->
+                <!-- AI layer = 36% of total [891,1052,1221,1417,1675,1907,2237,2522,2905,3244,3663,4028] -->
+                <path class="area-fill" fill="url(#agOrange)" d="M0.0,112.89 L29.09,111.61 L58.18,110.26 L87.27,108.7 L116.36,106.64 L145.45,104.79 L174.55,102.15 L203.64,99.88 L232.73,96.82 L261.82,94.12 L290.91,90.78 L320,87.86 L320,120 L0,120 Z"/>
+                <!-- AI+tokens layer = 58% of total -->
+                <path class="area-fill" fill="url(#agChart2)" d="M0.0,108.54 L29.09,106.49 L58.18,104.31 L87.27,101.79 L116.36,98.47 L145.45,95.49 L174.55,91.25 L203.64,87.59 L232.73,82.66 L261.82,78.31 L290.91,72.92 L320,68.22 L320,120 L0,120 Z"/>
+                <!-- all three: totals [2475,2921,3391,3936,4654,5297,6213,7006,8070,9011,10174,11189] -->
+                <path class="area-fill" fill="url(#agSlate3)" d="M0.0,100.25 L29.09,96.7 L58.18,92.95 L87.27,88.6 L116.36,82.87 L145.45,77.74 L174.55,70.43 L203.64,64.11 L232.73,55.62 L261.82,48.11 L290.91,38.83 L320,30.73 L320,120 L0,120 Z"/>
+                <!-- total line ink -->
+                <path class="draw" fill="none" stroke="var(--m-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M0.0,100.25 L29.09,96.7 L58.18,92.95 L87.27,88.6 L116.36,82.87 L145.45,77.74 L174.55,70.43 L203.64,64.11 L232.73,55.62 L261.82,48.11 L290.91,38.83 L320,30.73"/>
+                <!-- ghost prev totals = 90% of each current period (last step = +10.0%) -->
+                <polyline class="ghost" fill="none" stroke="var(--m-slate-4)" stroke-width="1.4" stroke-dasharray="4 3" opacity=".55" points="0.0,102.23 29.09,99.03 58.18,95.65 87.27,91.74 116.36,86.58 145.45,81.97 174.55,75.39 203.64,69.7 232.73,62.06 261.82,55.3 290.91,46.95 320,39.66"/>
+                <circle cx="320" cy="30.73" r="2.5" fill="var(--m-ink)"><title>W12 · ₱11,189 total</title></circle>
+              </svg>
+            </div>
+            <p class="cc-insight">Revenue compounding to &#8369;11,189 — up 10.0% versus the prior period, with Setnayan AI subs and other in-app carrying it. Reconciled to the Normalized Growth Index below.</p>
+          </article>
+
+          <!-- G5 — first-pick rate (% line + faint count bars) · Partial -->
+          <article class="m-card cc" aria-labelledby="g5-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="g5-t" class="cc-title">First-pick rate</h3><p class="cc-src">wired · sparse data</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Partial</span><span class="delta delta-up tnum">&#9650; +9.1%</span></div>
+            </div>
+            <div class="cc-body">
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="First-pick booking rate rising from 55 to 72 percent; faint bars behind show booking volume.">
+                <!-- faint bookings bars W1..W11 [9,11,13,10,15,14,17,16,19,18,21] scale 0..23 -> h=v/23*90 baseline 120 ; W12=23 bar omitted (x would exceed viewBox on the 29.09 step) -->
+                <g fill="color-mix(in srgb,var(--m-chart-2) 30%,var(--m-paper))">
+                  <rect x="6.09" y="84.78" width="14" height="35.22"><title>W1 · 9 bookings</title></rect>
+                  <rect x="35.18" y="76.96" width="14" height="43.04"><title>W2 · 11 bookings</title></rect>
+                  <rect x="64.27" y="69.13" width="14" height="50.87"><title>W3 · 13 bookings</title></rect>
+                  <rect x="93.36" y="80.87" width="14" height="39.13"><title>W4 · 10 bookings</title></rect>
+                  <rect x="122.45" y="61.30" width="14" height="58.70"><title>W5 · 15 bookings</title></rect>
+                  <rect x="151.55" y="65.22" width="14" height="54.78"><title>W6 · 14 bookings</title></rect>
+                  <rect x="180.64" y="53.48" width="14" height="66.52"><title>W7 · 17 bookings</title></rect>
+                  <rect x="209.73" y="57.39" width="14" height="62.61"><title>W8 · 16 bookings</title></rect>
+                  <rect x="238.82" y="45.65" width="14" height="74.35"><title>W9 · 19 bookings</title></rect>
+                  <rect x="267.91" y="49.57" width="14" height="70.43"><title>W10 · 18 bookings</title></rect>
+                  <rect x="297" y="37.83" width="14" height="82.17"><title>W11 · 21 bookings</title></rect>
+                </g>
+                <!-- % line [55,58,61,57,63,66,64,68,67,70,69,72] scale 40..80 -> y=120-(v-40)/40*110 -->
+                <polyline class="draw" fill="none" stroke="var(--m-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="0,78.75 29.09,70.5 58.18,62.25 87.27,73.25 116.36,56.75 145.45,48.5 174.55,54 203.64,43 232.73,45.75 261.82,37.5 290.91,40.25 320,32"/>
+                <circle cx="320" cy="32" r="2.5" fill="var(--m-orange-2)"><title>W12 · 72%</title></circle>
+              </svg>
+            </div>
+            <p class="cc-insight">Engine #1's top pick gets booked 72% of the time — up from 55%. Base is small at the start (W1 = 9 bookings) — read the trend, not any single week.</p>
+          </article>
+
+          <!-- G6 — reviews (volume bars + avg-rating line) · Live -->
+          <article class="m-card cc" aria-labelledby="g6-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="g6-t" class="cc-title">Reviews</h3><p class="cc-src">Source · vendor reviews (event-bound)</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--live">Live</span><span class="delta delta-up tnum">&#9650; +40.0%</span></div>
+            </div>
+            <div class="cc-body">
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="Review volume bars from 1 to 6 with average rating holding between 4.5 and 4.9 on a right axis.">
+                <!-- volume bars W1..W11 [2,1,3,2,4,3,4,5,4,6,5] scale 0..7 -> h=v/7*110 ; W12=7 bar omitted (x would exceed viewBox on the 29.09 step) -->
+                <g fill="color-mix(in srgb,var(--m-orange) 55%,var(--m-paper))" stroke="var(--m-orange-2)" stroke-width="0.6">
+                  <rect x="6.09" y="88.57" width="14" height="31.43"><title>W1 · 2 reviews</title></rect>
+                  <rect x="35.18" y="104.29" width="14" height="15.71"><title>W2 · 1 review</title></rect>
+                  <rect x="64.27" y="72.86" width="14" height="47.14"><title>W3 · 3 reviews</title></rect>
+                  <rect x="93.36" y="88.57" width="14" height="31.43"><title>W4 · 2 reviews</title></rect>
+                  <rect x="122.45" y="57.14" width="14" height="62.86"><title>W5 · 4 reviews</title></rect>
+                  <rect x="151.55" y="72.86" width="14" height="47.14"><title>W6 · 3 reviews</title></rect>
+                  <rect x="180.64" y="57.14" width="14" height="62.86"><title>W7 · 4 reviews</title></rect>
+                  <rect x="209.73" y="41.43" width="14" height="78.57"><title>W8 · 5 reviews</title></rect>
+                  <rect x="238.82" y="57.14" width="14" height="62.86"><title>W9 · 4 reviews</title></rect>
+                  <rect x="267.91" y="25.71" width="14" height="94.29"><title>W10 · 6 reviews</title></rect>
+                  <rect x="297" y="41.43" width="14" height="78.57"><title>W11 · 5 reviews</title></rect>
+                </g>
+                <!-- ghost prev volume [1,1,2,2,3,2,3,3,3,4,4,5] scale 0..7 -->
+                <polyline class="ghost" fill="none" stroke="var(--m-slate-4)" stroke-width="1.4" stroke-dasharray="4 3" opacity=".55" points="0,104.29 29.09,104.29 58.18,88.57 87.27,88.57 116.36,72.86 145.45,88.57 174.55,72.86 203.64,72.86 232.73,72.86 261.82,57.14 290.91,57.14 320,41.43"/>
+                <!-- avg-rating line [4.6..4.9] right axis 4.0..5.0 -> y=120-(v-4)/1*110 -->
+                <polyline class="draw" fill="none" stroke="var(--m-chart-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="0,54 29.09,65 58.18,43 87.27,54 116.36,32 145.45,43 174.55,43 203.64,32 232.73,43 261.82,32 290.91,32 320,21"/>
+                <text x="318" y="12" font-size="8" fill="var(--m-chart-2)" font-family="system-ui" text-anchor="end">5.0</text>
+                <text x="318" y="118" font-size="8" fill="var(--m-chart-2)" font-family="system-ui" text-anchor="end">4.0</text>
+              </svg>
+            </div>
+            <p class="cc-insight">Small volumes, but ratings hold 4.5–4.9. Rating base is thin (1–7 reviews/period) — treat single-week moves cautiously.</p>
+          </article>
+
+        </div>
+
+        <!-- G7 — Normalized Growth Index · headline full-width -->
+        <div class="grid" style="margin:16px 0">
+          <article class="m-card cc span-full" aria-labelledby="g7-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="g7-t" class="cc-title">Normalized Growth Index</h3><p class="cc-src">Source · all series rebased to 100 at W1</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--live">Live</span></div>
+            </div>
+            <div class="cc-body">
+              <div class="chart-legend">
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-orange)"></span>Revenue</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-orange-2)"></span>Services</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-chart-2)"></span>Users</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-slate-3)"></span>Vendors</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-slate-4)"></span>Events</span>
+              </div>
+              <svg class="chart-svg" viewBox="0 0 320 160" role="img" aria-label="Five rebased growth lines; revenue is the steepest at 452, services second at 266, everything compounding upward.">
+                <!-- scale 100..460 -> y=140-(v-100)/360*130 ; x-step 320/11=29.09 -->
+                <line x1="0" y1="10" x2="320" y2="10" stroke="var(--m-line)" stroke-width="1"/>
+                <line x1="0" y1="75" x2="320" y2="75" stroke="var(--m-line)" stroke-width="1"/>
+                <line x1="0" y1="140" x2="320" y2="140" stroke="var(--m-line)" stroke-width="1"/>
+                <!-- Users [100,109,118,127,138,149,162,174,188,202,217,231] chart-2 -->
+                <polyline class="draw" fill="none" stroke="var(--m-chart-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" points="0,140 29.09,136.75 58.18,133.5 87.27,130.25 116.36,126.28 145.45,122.31 174.55,117.61 203.64,113.28 232.73,108.22 261.82,103.17 290.91,97.75 320,92.69"/>
+                <!-- Vendors [100,106,115,121,132,141,150,161,170,184,196,208] slate-3 -->
+                <polyline class="draw d2" fill="none" stroke="var(--m-slate-3)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" points="0,140 29.09,137.83 58.18,134.58 87.27,132.42 116.36,128.44 145.45,125.19 174.55,121.94 203.64,117.97 232.73,114.72 261.82,109.67 290.91,105.33 320,101.00"/>
+                <!-- Services [100,108,120,131,147,159,177,190,210,226,248,266] orange-2 -->
+                <polyline class="draw d3" fill="none" stroke="var(--m-orange-2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="0,140 29.09,137.11 58.18,132.78 87.27,128.81 116.36,123.03 145.45,118.69 174.55,112.19 203.64,107.50 232.73,100.28 261.82,94.50 290.91,86.56 320,80.06"/>
+                <!-- Events [100,107,116,124,135,144,154,164,177,188,201,214] slate-4 -->
+                <polyline class="draw" fill="none" stroke="var(--m-slate-4)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" points="0,140 29.09,137.47 58.18,134.22 87.27,131.33 116.36,127.36 145.45,124.11 174.55,120.50 203.64,116.89 232.73,112.19 261.82,108.22 290.91,103.53 320,98.83"/>
+                <!-- Revenue [100,118,137,159,188,214,251,283,326,364,411,452] orange thickest -->
+                <polyline class="draw d2" fill="none" stroke="var(--m-orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" points="0,140 29.09,133.50 58.18,126.64 87.27,118.69 116.36,108.22 145.45,98.81 174.55,85.44 203.64,73.89 232.73,58.36 261.82,44.64 290.91,27.69 320,12.89"/>
+                <circle class="c2" cx="320" cy="12.89" r="2.8" fill="var(--m-orange)"><title>Revenue · 452 (4.5× rebased)</title></circle>
+                <circle class="c3" cx="320" cy="80.06" r="2.5" fill="var(--m-orange-2)"><title>Services · 266</title></circle>
+              </svg>
+            </div>
+            <p class="cc-insight"><strong>Revenue is the fastest grower</strong> (4.5× rebased), with services second — everything is compounding, nothing is flat.</p>
+          </article>
+        </div>
+
+        <!-- G8 — %-change leaderboard · full-width · Partial -->
+        <div class="grid">
+          <article class="m-card cc span-full" aria-labelledby="g8-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="g8-t" class="cc-title">Period-over-period %-change leaderboard</h3><p class="cc-src">min-N floor applied</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Partial</span></div>
+            </div>
+            <div class="cc-body">
+              <ul class="lb" aria-label="Period-over-period percent change, ranked">
+                <li><span class="lb-metric">Services</span><span class="lb-track"><span class="lb-fill pos" style="width:27.48%"></span></span><span class="lb-pct pos tnum">+18.3%</span></li>
+                <li><span class="lb-metric">Completed services</span><span class="lb-track"><span class="lb-fill pos" style="width:24.32%"></span></span><span class="lb-pct pos tnum">+16.2%</span></li>
+                <li><span class="lb-metric">Revenue</span><span class="lb-track"><span class="lb-fill pos" style="width:15.02%"></span></span><span class="lb-pct pos tnum">+10.0%</span></li>
+                <li><span class="lb-metric">First-pick rate</span><span class="lb-track"><span class="lb-fill pos" style="width:13.66%"></span></span><span class="lb-pct pos tnum">+9.1%</span></li>
+                <li><span class="lb-metric">Events</span><span class="lb-track"><span class="lb-fill pos" style="width:12.01%"></span></span><span class="lb-pct pos tnum">+8.0%</span></li>
+                <li><span class="lb-metric">Users</span><span class="lb-track"><span class="lb-fill pos" style="width:11.11%"></span></span><span class="lb-pct pos tnum">+7.4%</span></li>
+                <li><span class="lb-metric">Reviews</span><span class="lb-track"><span class="lb-fill pos" style="width:9.01%"></span></span><span class="lb-pct pos tnum">+6.0%</span></li>
+                <li><span class="lb-metric">Vendors</span><span class="lb-track"><span class="lb-fill pos" style="width:7.36%"></span></span><span class="lb-pct pos tnum">+4.9%</span></li>
+                <li><span class="lb-metric">Disputes</span><span class="lb-track"><span class="lb-fill neg" style="width:50%"></span></span><span class="lb-pct neg tnum">&minus;33.3%</span></li>
+                <li><span class="lb-metric">Error rate</span><span class="lb-track"><span class="lb-fill neg" style="width:39.49%"></span></span><span class="lb-pct neg tnum">&minus;26.3%</span></li>
+                <li><span class="lb-metric">Debut events</span><span class="lb-track"></span><span class="lb-nd">insufficient data</span></li>
+                <li><span class="lb-metric">Birthday events</span><span class="lb-track"></span><span class="lb-nd">insufficient data</span></li>
+              </ul>
+            </div>
+            <p class="cc-insight">Services and completed services lead the last period; revenue is up a steadier 10.0%. Disputes and error-rate falling is good. Debut/birthday bases too small to trust.</p>
+          </article>
+        </div>
+
+      </section>
+
+      <!-- =========================================================== -->
+      <!-- ZONE 3 — STABILITY -->
+      <!-- =========================================================== -->
+      <section class="sec" aria-labelledby="st-h">
+        <header class="sec-head">
+          <span class="sec-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></span>
+          <div><h2 class="sec-title" id="st-h">Stability</h2><p class="sec-blurb">Is it working?</p></div>
+        </header>
+
+        <div class="grid grid-2">
+
+          <!-- S1 — uptime & health status strip · Live -->
+          <article class="m-card cc" aria-labelledby="s1-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="s1-t" class="cc-title">Uptime &amp; health status</h3><p class="cc-src">current live · 14-day history needs wiring</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--live">Live</span></div>
+            </div>
+            <div class="cc-body">
+              <svg class="chart-svg hs" viewBox="0 0 320 40" role="img" aria-label="14 daily health checks; D6 degraded and D7 down, all other days up.">
+                <!-- 14 segments, step 22.86, width 19.4 -->
+                <g>
+                  <rect x="0" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D1 · up</title></rect>
+                  <rect x="22.86" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D2 · up</title></rect>
+                  <rect x="45.71" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D3 · up</title></rect>
+                  <rect x="68.57" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D4 · up</title></rect>
+                  <rect x="91.43" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D5 · up</title></rect>
+                  <rect x="114.29" y="8" width="19.4" height="24" rx="2" fill="var(--m-orange)"><title>D6 · degraded</title></rect>
+                  <rect x="137.14" y="8" width="19.4" height="24" rx="2" fill="var(--m-blush)" stroke="var(--m-blush-deep)" stroke-width="1"><title>D7 · down</title></rect>
+                  <rect x="160" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D8 · up</title></rect>
+                  <rect x="182.86" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D9 · up</title></rect>
+                  <rect x="205.71" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D10 · up</title></rect>
+                  <rect x="228.57" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D11 · up</title></rect>
+                  <rect x="251.43" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D12 · up</title></rect>
+                  <rect x="274.29" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D13 · up</title></rect>
+                  <rect x="297.14" y="8" width="19.4" height="24" rx="2" fill="var(--m-sage)"><title>D14 · up</title></rect>
+                </g>
+                <text x="0" y="6" font-size="9" fill="var(--m-slate-3)" font-family="system-ui">D1</text>
+                <text x="320" y="6" font-size="9" fill="var(--m-slate-3)" font-family="system-ui" text-anchor="end">D14</text>
+              </svg>
+            </div>
+            <p class="cc-insight">One short blip on D6–D7 (R2 signed-URL latency → 4m30s partial outage), resolved.</p>
+          </article>
+
+          <!-- S2 — error rate over time · Live -->
+          <article class="m-card cc" aria-labelledby="s2-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="s2-t" class="cc-title">Error rate over time</h3><p class="cc-src">Source · Sentry (lower is better)</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--live">Live</span></div>
+            </div>
+            <div class="cc-body">
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="Error rate around 0.4 to 0.6 percent with a W5 spike to 0.88 percent, back to about 0.42 percent since. Lower is better.">
+                <text x="4" y="22" class="chart-val tnum" font-family="Georgia, serif" fill="var(--m-ink)">0.42%</text>
+                <!-- [0.57,0.54,0.61,0.49,0.88,0.52,0.44,0.47,0.41,0.45,0.39,0.42] scale 0.3..0.9 -> y=120-(v-0.3)/0.6*110 -->
+                <path class="area-fill" fill="url(#agOrange)" d="M0,70.5 L29.09,76 L58.18,63.17 L87.27,85.17 L116.36,13.67 L145.45,79.67 L174.55,94.33 L203.64,88.83 L232.73,99.83 L261.82,92.5 L290.91,103.5 L320,98 L320,120 L0,120 Z"/>
+                <path class="draw" fill="none" stroke="var(--m-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M0,70.5 L29.09,76 L58.18,63.17 L87.27,85.17 L116.36,13.67 L145.45,79.67 L174.55,94.33 L203.64,88.83 L232.73,99.83 L261.82,92.5 L290.91,103.5 L320,98"/>
+                <circle cx="116.36" cy="13.67" r="2.5" fill="var(--m-orange-2)"><title>W5 · 0.88%</title></circle>
+              </svg>
+            </div>
+            <p class="cc-insight">W5 spike (0.88%) aligns with the D6–D7 health blip; back to ~0.4% since. Lower is better here.</p>
+          </article>
+
+          <!-- S3 — API speed p95 · Needs wiring -->
+          <article class="m-card cc is-wiring" aria-labelledby="s3-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="s3-t" class="cc-title">API speed (p95)</h3><p class="cc-src">synthetic sample — not wired</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Needs wiring</span></div>
+            </div>
+            <div class="cc-body">
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="p95 API latency steady near 235 milliseconds with a W5 spike to 512 milliseconds. Illustrative until wired.">
+                <!-- [240,255,238,268,512,246,232,251,228,239,221,235] scale 200..520 -> y=120-(v-200)/320*110 -->
+                <polyline class="draw" fill="none" stroke="var(--m-chart-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="0,106.25 29.09,101.09 58.18,106.94 87.27,96.63 116.36,12.75 145.45,104.19 174.55,109.00 203.64,102.47 232.73,110.38 261.82,106.60 290.91,112.79 320,107.97"/>
+                <circle cx="116.36" cy="12.75" r="2.5" fill="var(--m-chart-2)"><title>W5 · 512ms</title></circle>
+              </svg>
+            </div>
+            <p class="cc-insight">p95 spike mirrors the outage window; steady ~235ms otherwise. Illustrative until wired.</p>
+          </article>
+
+          <!-- S4 — page speed (Lighthouse line + 3 gauges) · Partial -->
+          <article class="m-card cc" aria-labelledby="s4-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="s4-t" class="cc-title">Page speed</h3><p class="cc-src">wired · sparse data — Lighthouse per production deploy</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--pending">Partial</span></div>
+            </div>
+            <div class="cc-body">
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="Lighthouse score steady around 90 across eight deploys.">
+                <!-- [90,89,91,88,92,90,93,91] 8 pts x-step 320/7=45.71 scale 85..95 -> y=120-(v-85)/10*110 -->
+                <line x1="0" y1="10" x2="320" y2="10" stroke="var(--m-line)" stroke-width="1"/>
+                <line x1="0" y1="120" x2="320" y2="120" stroke="var(--m-line)" stroke-width="1"/>
+                <polyline class="draw" fill="none" stroke="var(--m-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="0,65 45.71,76 91.43,54 137.14,87 182.86,43 228.57,65 274.29,32 320,54"/>
+                <circle cx="320" cy="54" r="2.5" fill="var(--m-orange-2)"><title>Deploy 8 · Lighthouse 91</title></circle>
+              </svg>
+              <!-- 3 CWV gauges -->
+              <div class="gauge" style="margin-top:12px">
+                <div class="gauge-top"><span class="gauge-metric">LCP</span><span class="gauge-val tnum">2.1 <small>s</small></span><span class="gauge-tag"><span class="m-pill m-pill--live">Good</span></span></div>
+                <svg class="chart-svg" viewBox="0 0 320 16" role="img" aria-label="Largest Contentful Paint 2.1 seconds, in the good band.">
+                  <rect x="0" y="5" width="200" height="6" rx="3" fill="color-mix(in srgb,var(--m-sage) 60%,var(--m-paper))"/>
+                  <rect x="200" y="5" width="120" height="6" rx="3" fill="color-mix(in srgb,var(--m-orange) 45%,var(--m-paper))"/>
+                  <line class="needle" style="--nx:-168px" x1="168" y1="2" x2="168" y2="14" stroke="var(--m-ink)" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="gauge">
+                <div class="gauge-top"><span class="gauge-metric">INP</span><span class="gauge-val tnum">180 <small>ms</small></span><span class="gauge-tag"><span class="m-pill m-pill--live">Good</span></span></div>
+                <svg class="chart-svg" viewBox="0 0 320 16" role="img" aria-label="Interaction to Next Paint 180 milliseconds, in the good band.">
+                  <rect x="0" y="5" width="200" height="6" rx="3" fill="color-mix(in srgb,var(--m-sage) 60%,var(--m-paper))"/>
+                  <rect x="200" y="5" width="120" height="6" rx="3" fill="color-mix(in srgb,var(--m-orange) 45%,var(--m-paper))"/>
+                  <line class="needle" style="--nx:-180px" x1="180" y1="2" x2="180" y2="14" stroke="var(--m-ink)" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="gauge">
+                <div class="gauge-top"><span class="gauge-metric">CLS</span><span class="gauge-val tnum">0.08</span><span class="gauge-tag"><span class="m-pill m-pill--live">Good</span></span></div>
+                <svg class="chart-svg" viewBox="0 0 320 16" role="img" aria-label="Cumulative Layout Shift 0.08, in the good band.">
+                  <rect x="0" y="5" width="160" height="6" rx="3" fill="color-mix(in srgb,var(--m-sage) 60%,var(--m-paper))"/>
+                  <rect x="160" y="5" width="160" height="6" rx="3" fill="color-mix(in srgb,var(--m-orange) 45%,var(--m-paper))"/>
+                  <line class="needle" style="--nx:-128px" x1="128" y1="2" x2="128" y2="14" stroke="var(--m-ink)" stroke-width="2"/>
+                </svg>
+              </div>
+            </div>
+            <p class="cc-insight">Lighthouse steady ~90; all three Core Web Vitals in the good band.</p>
+          </article>
+
+          <!-- S5 — reports trend (stacked bars by status) · Live · full width -->
+          <article class="m-card cc span-full" aria-labelledby="s5-t">
+            <div class="cc-head">
+              <div class="cc-titles"><h3 id="s5-t" class="cc-title">Reports trend by status</h3><p class="cc-src">Source · content reports · rising = worse (inverse-good)</p></div>
+              <div class="cc-pills"><span class="m-pill m-pill--live">Live</span></div>
+            </div>
+            <div class="cc-body">
+              <div class="chart-legend">
+                <span class="leg-item"><span class="leg-sq" style="background:color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))"></span>Open</span>
+                <span class="leg-item"><span class="leg-sq" style="background:color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))"></span>Actioned</span>
+                <span class="leg-item"><span class="leg-sq" style="background:var(--m-slate-3)"></span>Dismissed</span>
+              </div>
+              <svg class="chart-svg" viewBox="0 0 320 140" role="img" aria-label="Report volume stacked by status; low totals of 1 to 4 per period, mostly actioned or dismissed. Rising bars would be the bad signal.">
+                <!-- band 320/12=26.67 barW 16 ; max stacked total 4 -> unit=110/4=27.5 ; base y=120 -->
+                <!-- stack bottom open -> actioned -> dismissed -->
+                <!-- W1 x=5.33 open1 act0 dis1 -->
+                <g>
+                  <rect x="5.33" y="92.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W1 · Open 1</title></rect>
+                  <rect x="5.33" y="65" width="16" height="27.5" fill="var(--m-slate-3)"><title>W1 · Dismissed 1</title></rect>
+                  <!-- W2 x=32 open0 act1 dis0 -->
+                  <rect x="32" y="92.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W2 · Actioned 1</title></rect>
+                  <!-- W3 x=58.67 open1 act1 dis0 -->
+                  <rect x="58.67" y="92.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W3 · Open 1</title></rect>
+                  <rect x="58.67" y="65" width="16" height="27.5" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W3 · Actioned 1</title></rect>
+                  <!-- W4 x=85.33 open2 act0 dis1 -->
+                  <rect x="85.33" y="65" width="16" height="55" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W4 · Open 2</title></rect>
+                  <rect x="85.33" y="37.5" width="16" height="27.5" fill="var(--m-slate-3)"><title>W4 · Dismissed 1</title></rect>
+                  <!-- W5 x=112 open1 act2 dis1 total4 -->
+                  <rect x="112" y="92.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W5 · Open 1</title></rect>
+                  <rect x="112" y="37.5" width="16" height="55" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W5 · Actioned 2</title></rect>
+                  <rect x="112" y="10" width="16" height="27.5" fill="var(--m-slate-3)"><title>W5 · Dismissed 1</title></rect>
+                  <!-- W6 x=138.67 open2 act1 dis0 -->
+                  <rect x="138.67" y="65" width="16" height="55" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W6 · Open 2</title></rect>
+                  <rect x="138.67" y="37.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W6 · Actioned 1</title></rect>
+                  <!-- W7 x=165.33 open1 act2 dis1 total4 -->
+                  <rect x="165.33" y="92.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W7 · Open 1</title></rect>
+                  <rect x="165.33" y="37.5" width="16" height="55" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W7 · Actioned 2</title></rect>
+                  <rect x="165.33" y="10" width="16" height="27.5" fill="var(--m-slate-3)"><title>W7 · Dismissed 1</title></rect>
+                  <!-- W8 x=192 open1 act1 dis2 total4 -->
+                  <rect x="192" y="92.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W8 · Open 1</title></rect>
+                  <rect x="192" y="65" width="16" height="27.5" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W8 · Actioned 1</title></rect>
+                  <rect x="192" y="10" width="16" height="55" fill="var(--m-slate-3)"><title>W8 · Dismissed 2</title></rect>
+                  <!-- W9 x=218.67 open0 act2 dis1 -->
+                  <rect x="218.67" y="65" width="16" height="55" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W9 · Actioned 2</title></rect>
+                  <rect x="218.67" y="37.5" width="16" height="27.5" fill="var(--m-slate-3)"><title>W9 · Dismissed 1</title></rect>
+                  <!-- W10 x=245.33 open1 act1 dis1 -->
+                  <rect x="245.33" y="92.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W10 · Open 1</title></rect>
+                  <rect x="245.33" y="65" width="16" height="27.5" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W10 · Actioned 1</title></rect>
+                  <rect x="245.33" y="37.5" width="16" height="27.5" fill="var(--m-slate-3)"><title>W10 · Dismissed 1</title></rect>
+                  <!-- W11 x=272 open1 act2 dis0 -->
+                  <rect x="272" y="92.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W11 · Open 1</title></rect>
+                  <rect x="272" y="37.5" width="16" height="55" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W11 · Actioned 2</title></rect>
+                  <!-- W12 x=298.67 open1 act1 dis1 -->
+                  <rect x="298.67" y="92.5" width="16" height="27.5" fill="color-mix(in srgb,var(--m-blush) 55%,var(--m-paper))" stroke="var(--m-blush-deep)" stroke-width="0.6"><title>W12 · Open 1</title></rect>
+                  <rect x="298.67" y="65" width="16" height="27.5" fill="color-mix(in srgb,var(--m-sage) 55%,var(--m-paper))" stroke="var(--m-sage-deep)" stroke-width="0.6"><title>W12 · Actioned 1</title></rect>
+                  <rect x="298.67" y="37.5" width="16" height="27.5" fill="var(--m-slate-3)"><title>W12 · Dismissed 1</title></rect>
+                </g>
+              </svg>
+            </div>
+            <p class="cc-insight">Volumes low; mostly actioned or dismissed — rising bars would be the bad signal here.</p>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ===== HONESTY FOOTER ===== -->
+      <footer class="page-foot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span><strong>Illustrative data — not live.</strong> Live panels use data we already collect; Partial panels are wired but still sparse; Needs-wiring panels are one integration step away. Rates are preferred over raw counts on small bases, and a minimum-N floor hides percentages where the base is too small to trust.</span>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- ============ BOTTOM NAV (mobile) ============ -->
+  <nav class="bottomnav" aria-label="Primary mobile">
+    <a class="bn-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><span>Home</span></a>
+    <a class="bn-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span>Work</span></a>
+    <a class="bn-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Directory</span></a>
+    <a class="bn-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h.01"/></svg><span>Money</span></a>
+    <a class="bn-tab is-active" href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg><span>Insights</span></a>
+    <a class="bn-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/></svg><span>More</span></a>
+  </nav>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Cosmetic segmented toggles, scoped per group
+  document.querySelectorAll('.seg-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var group = b.closest('.seg');
+      group.querySelectorAll('.seg-btn').forEach(function (x) {
+        x.classList.remove('is-on');
+        x.setAttribute('aria-pressed', 'false');
+      });
+      b.classList.add('is-on');
+      b.setAttribute('aria-pressed', 'true');
+    });
+  });
+
+  // ===== Premium scroll-into-view motion system — everything animates ONCE =====
+  // Motion safety: under prefers-reduced-motion (or no IntersectionObserver) we
+  // bail here, html.anim is never added, and every element keeps its final state.
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !('IntersectionObserver' in window)) return;
+
+  // NOTE: .sm-card is deliberately NOT a scope — the G1 small multiples nest
+  // inside their .cc wrapper, and two ancestors in SCOPE would double-fire the
+  // descendant reveal selectors (counter reset-to-0 replay, desynced bars).
+  // The outer .cc owns them once via owns()/closest(SCOPE).
+  var SCOPE = '.kpi, .ac-card, .cc';
+
+  // Exact path length for each drawable stroke (draw-in via stroke-dashoffset)
+  document.querySelectorAll('path.draw, polyline.draw').forEach(function (p) {
+    try { p.style.setProperty('--len', p.getTotalLength()); } catch (e) { /* no-op */ }
+  });
+
+  // ---- D: count-up helpers. Real value stays in markup (no-JS / reduced-motion
+  // safe); tabular-nums means no layout shift; exact text restored at the end.
+  function prepCounter(el) {
+    var node = el.firstChild;
+    if (!node || node.nodeType !== 3) return null;
+    var raw = node.nodeValue;
+    var m = raw.match(/([\d,]+\.?\d*)/);
+    if (!m) return null;
+    var v = parseFloat(m[1].replace(/,/g, ''));
+    if (isNaN(v)) return null;
+    return {
+      node: node, raw: raw, val: v,
+      dec: (m[1].split('.')[1] || '').length,
+      commas: m[1].indexOf(',') > -1,
+      pre: raw.slice(0, m.index),
+      suf: raw.slice(m.index + m[1].length)
+    };
+  }
+  function fmt(v, c) {
+    var s = v.toFixed(c.dec);
+    if (c.commas) {
+      var parts = s.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      s = parts.join('.');
+    }
+    return c.pre + s + c.suf;
+  }
+  function runCounter(c) {
+    var t0 = performance.now(), D = 800;
+    c.node.nodeValue = fmt(0, c);
+    function tick(now) {
+      var t = Math.min((now - t0) / D, 1);
+      var e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      c.node.nodeValue = t < 1 ? fmt(c.val * e, c) : c.raw;
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // ---- Prep every animation scope (card): tag bars/rows, assign staggers.
+  // Guard: a scope that contains another scope would arm its descendants'
+  // motion with its own --cd while the inner card's observer entry replays
+  // them — so container scopes holding other scopes are excluded outright.
+  var scopes = Array.prototype.slice.call(document.querySelectorAll(SCOPE))
+    .filter(function (sc) { return !sc.querySelector(SCOPE); });
+  scopes.forEach(function (sc) {
+    sc.classList.add('sc');
+    function owns(el) { return el.closest(SCOPE) === sc; }
+
+    // numeric readouts that count up
+    sc._counters = [];
+    sc.querySelectorAll('.kpi-val, .xp-big, .sm-val, .gauge-val, .chart-val, .xp-total .amt')
+      .forEach(function (el) {
+        if (!owns(el)) return;
+        var c = prepCounter(el);
+        if (c) { el.classList.add('cnt'); sc._counters.push(c); }
+      });
+
+    // bars: stacked segments of one column share the same x, hence one --bd —
+    // the whole stack rises together from the baseline
+    sc.querySelectorAll('.chart-svg').forEach(function (svg) {
+      if (!owns(svg) || svg.closest('.gauge')) return;
+      var rects = svg.querySelectorAll('rect');
+      if (!rects.length) return;
+      if (svg.classList.contains('hs')) {          // health strip cascade
+        rects.forEach(function (r, i) {
+          r.classList.add('seg-day');
+          r.style.setProperty('--bd', (i * 12) + 'ms');
+        });
+      } else if (svg.classList.contains('hb')) {   // horizontal bars
+        rects.forEach(function (r, i) {
+          r.classList.add('bar-h');
+          r.style.setProperty('--bd', (i * 40) + 'ms');
+        });
+      } else {                                     // vertical columns / stacks
+        var xs = [];
+        rects.forEach(function (r) {
+          var x = parseFloat(r.getAttribute('x'));
+          if (xs.indexOf(x) < 0) xs.push(x);
+        });
+        xs.sort(function (a, b) { return a - b; });
+        rects.forEach(function (r) {
+          r.classList.add('bar-v');
+          r.style.setProperty('--bd',
+            (xs.indexOf(parseFloat(r.getAttribute('x'))) * 40) + 'ms');
+        });
+      }
+    });
+
+    // diverging leaderboard rows
+    sc.querySelectorAll('.lb li').forEach(function (li, i) {
+      if (owns(li)) li.style.setProperty('--bd', (i * 40) + 'ms');
+    });
+
+    // ledger + upcoming-charge rows
+    sc.querySelectorAll('.xp-table tbody tr, .xp-list li').forEach(function (r, i) {
+      if (!owns(r)) return;
+      r.classList.add('rw');
+      r.style.setProperty('--bd', (i * 30) + 'ms');
+    });
+  });
+
+  // Arm the pre-animation states only now that everything is tagged
+  document.documentElement.classList.add('anim');
+
+  // ---- A: one IntersectionObserver for all cards; each fires once.
+  // Cards already visible on load share the first batch and get the stagger.
+  var first = true;
+  var io = new IntersectionObserver(function (entries) {
+    var batch = entries.filter(function (e) { return e.isIntersecting; });
+    batch.forEach(function (e, i) {
+      var el = e.target;
+      io.unobserve(el);
+      var d = first ? i * 90 : 0;
+      el.style.setProperty('--cd', d + 'ms');
+      el.classList.add('in');
+      if (el._counters && el._counters.length) {
+        setTimeout(function () { el._counters.forEach(runCounter); }, d);
+      }
+    });
+    if (entries.length) first = false;
+  }, { threshold: 0.25 });
+  scopes.forEach(function (sc) { io.observe(sc); });
+});
+</script>
+</body>
+</html>
