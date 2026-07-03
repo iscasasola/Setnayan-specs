@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SETNAYAN — Customer Card respine (design prototype)</title>
+<style>
+  :root{
+    --alabaster:#F6F4EF; --paper:#FFFFFF; --obsidian:#191919; --ink:#2B2A28; --ink2:#56524B;
+    --gold:#C2A05B; --gold-soft:#EADFC4; --line:#E8E3D9; --line2:#F0ECE3; --muted:#928B7E;
+    --inquiry:#2F6FB0; --inquiry-bg:#EAF1F8; --lock:#B5852A; --lock-bg:#F8F0DD;
+    --pay:#3E8B59; --pay-bg:#E8F2EA; --review:#7A5AC9; --review-bg:#F0EAFB; --report:#C0564A; --report-bg:#FAE9E6;
+    --wait:#C9822B; --wait-bg:#F7EBD9; --terra:#B85C38; --terra-bg:#F7E9E2;
+    --shadow:0 1px 2px rgba(25,25,25,.05),0 10px 30px rgba(25,25,25,.06); --shadow-sm:0 1px 2px rgba(25,25,25,.05);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--alabaster);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1240px;margin:0 auto;padding:16px 16px 74px}
+  h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em}
+  .caption{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .caption .t{font-size:13px;color:var(--muted)} .caption .t b{color:var(--ink)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow-sm);margin-bottom:16px}
+  .tgroup{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .tglabel{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+  .vbtn{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 13px;font-size:12px;cursor:pointer;box-shadow:var(--shadow-sm);color:var(--ink);font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+  .vbtn:hover{border-color:var(--gold)}
+  .vbtn.active{background:var(--obsidian);color:#fff;border-color:var(--obsidian)}
+  .vbtn .ico{width:14px;height:14px}
+  .sep{width:1px;height:26px;background:var(--line);margin:0 4px;align-self:center}
+
+  .ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;display:block}
+  .vchk{width:11px;height:11px;stroke:var(--gold);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-1px}
+
+  /* device staging */
+  body.d .phone{display:none} body.m .desktop{display:none}
+  .desktop{background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .winbar{display:flex;align-items:center;gap:7px;padding:9px 14px;border-bottom:1px solid var(--line);background:#FBFAF7}
+  .winbar i{width:11px;height:11px;border-radius:50%;background:#E2DDD3;display:block}
+  .winbar .url{margin-left:8px;font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:7px;padding:3px 11px}
+  .dmain{padding:0}
+
+  /* phone frame */
+  .phone{display:flex;justify-content:center}
+  .pscreen{width:390px;background:var(--paper);border:1px solid var(--line);border-radius:34px;overflow:hidden;box-shadow:var(--shadow);position:relative}
+  .pstat{height:26px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--ink2);border-bottom:1px solid var(--line2);background:#FBFAF7}
+  .pbody{position:relative;min-height:660px}
+
+  .pane{padding:16px 18px}
+  .pmain .pane{padding:13px 14px}
+
+  /* ===== shared idioms ===== */
+  .rowlabel{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+  .rowlabel:first-of-type{margin-top:2px} .rl-note{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+  .pill{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;display:inline-block}
+  .pill.booked{color:var(--pay);background:var(--pay-bg)} .pill.conv{color:var(--inquiry);background:var(--inquiry-bg)}
+  .pill.outside{color:var(--ink2);background:var(--line2)} .pill.done{color:var(--muted);background:var(--line2)}
+  .pill.quoted{color:var(--wait);background:var(--wait-bg)}
+  .src-badge{font-size:10px;font-weight:700;border-radius:999px;padding:2px 9px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+  .src-badge .ico{width:11px;height:11px}
+  .src-badge.inhouse{color:var(--terra);background:var(--terra-bg)} .src-badge.imported{color:var(--ink2);background:var(--line2)}
+  .b{border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+  .b .ico{width:14px;height:14px}
+  .b.primary{background:var(--obsidian);color:#fff} .b.ghost{background:#fff;border:1px solid var(--line);color:var(--ink2)} .b.gold{background:var(--gold);color:#fff}
+  .b.ghost:hover{border-color:var(--gold)} .b[disabled]{opacity:.45;cursor:not-allowed}
+  .link{font-size:11.5px;color:var(--gold);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .link .ico{width:13px;height:13px}
+
+  /* ===== Messenger (View 1) ===== */
+  .msgr{display:grid;grid-template-columns:262px 1fr 268px;border:1px solid var(--line);border-radius:0;overflow:hidden;background:#fff;height:592px;position:relative}
+  .pmain .msgr{grid-template-columns:1fr;height:660px;border:none;border-radius:0}
+  .msg-list{border-right:1px solid var(--line);overflow:auto;display:flex;flex-direction:column}
+  .ml-head{padding:13px 14px 9px;font-size:15px;font-weight:700;border-bottom:1px solid var(--line2);display:flex;align-items:center;justify-content:space-between}
+  .ml-head .n{font-size:11px;font-weight:700;color:var(--muted);background:var(--line2);border-radius:999px;padding:2px 8px}
+  .mthread{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;border-bottom:1px solid var(--line2)}
+  .mthread:hover{background:#FBFAF7} .mthread.on{background:#F1EDE5}
+  .mthread .av{width:40px;height:40px;border-radius:50%;background:var(--alabaster);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--ink2);flex:0 0 auto}
+  .mthread .av .ico{width:20px;height:20px;color:var(--muted)}
+  .mt-b{flex:1;min-width:0} .mt-n{font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px} .mt-l{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .mt-t{font-size:10.5px;color:var(--muted);flex:0 0 auto;align-self:flex-start}
+  .mt-inqtag{font-size:9px;font-weight:700;color:var(--wait);background:var(--wait-bg);border-radius:999px;padding:1px 6px}
+  .undot{display:inline-block;width:7px;height:7px;background:var(--report);border-radius:50%}
+
+  .msg-conv{display:flex;flex-direction:column;min-width:0}
+  .mc-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:#FBFAF7}
+  .mc-back{display:none;border:none;background:none;cursor:pointer;color:var(--ink2);padding:0} .mc-back .ico{width:20px;height:20px}
+  .mc-head .av{width:34px;height:34px;border-radius:50%;background:var(--alabaster);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--ink2);flex:0 0 auto}
+  .mc-head .av .ico{width:18px;height:18px;color:var(--muted)}
+  .mc-n{font-size:13.5px;font-weight:700;flex:1;min-width:0} .mc-s{font-size:11px;color:var(--muted);font-weight:500;margin-top:1px}
+  .mc-info{border:none;background:none;cursor:pointer;color:var(--ink2);padding:6px;border-radius:8px;display:flex} .mc-info .ico{width:18px;height:18px} .mc-info:hover{background:var(--line2)}
+  .mc-body{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:#faf9f7}
+  .bub{max-width:74%;padding:8px 12px;border-radius:15px;font-size:12.5px}
+  .bub.them{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
+  .bub.me{align-self:flex-end;background:var(--obsidian);color:#fff;border-bottom-right-radius:4px}
+  .bub .bt{display:block;font-size:9px;opacity:.55;margin-top:3px}
+  .msg-input{display:flex;gap:8px;padding:11px 12px;border-top:1px solid var(--line);align-items:center}
+  .msg-input input{flex:1;border:1px solid var(--line);border-radius:999px;padding:9px 14px;font-size:12.5px;font-family:inherit;outline:none}
+  .msg-input .b{padding:8px;border-radius:50%} .msg-input .b .ico{width:16px;height:16px}
+  .msg-inq{display:flex;align-items:center;gap:8px;padding:11px 12px;border-top:1px solid var(--line);font-size:11.5px;color:#7a5d2a;background:var(--wait-bg)} .msg-inq .ico{width:14px;height:14px;color:var(--wait);flex:0 0 auto}
+  .conv-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:12.5px;text-align:center;padding:24px}
+  .conv-empty .ico{width:34px;height:34px;color:var(--line)}
+
+  /* info rail */
+  .msg-info{border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:auto;background:#FBFAF7}
+  .pmain .msg-info{display:none}
+  .mi-head{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--line);font-size:12px;font-weight:700}
+  .mi-x{border:none;background:none;cursor:pointer;color:var(--muted);padding:0;display:none} .mi-x .ico{width:18px;height:18px}
+  .mi-card{padding:16px 14px;text-align:center;border-bottom:1px solid var(--line2)}
+  .mi-card .av.lg{width:54px;height:54px;border-radius:50%;background:var(--alabaster);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--ink2);margin:0 auto 8px}
+  .mi-card .av.lg .ico{width:26px;height:26px;color:var(--muted)}
+  .mi-nm{font-size:14px;font-weight:700} .mi-badges{display:flex;gap:6px;justify-content:center;margin-top:7px;flex-wrap:wrap}
+  .mi-rows{margin-top:14px;text-align:left;display:flex;flex-direction:column;gap:10px}
+  .mi-rows>div{display:flex;flex-direction:column;gap:2px} .mi-rows span{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em} .mi-rows b{font-size:12px;font-weight:600}
+  .mi-rows .locked-v{color:var(--lock);display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:11.5px} .mi-rows .locked-v .ico{width:12px;height:12px}
+  .mi-sync{display:flex;align-items:flex-start;gap:7px;margin:12px 12px 8px;padding:8px 10px;font-size:10.5px;color:#3e6b4c;background:var(--pay-bg);border:1px solid #cfe6d5;border-radius:9px;line-height:1.4} .mi-sync .ico{width:13px;height:13px;color:var(--pay);flex:0 0 auto;margin-top:1px}
+  .mi-actions{padding:2px 12px 6px;display:flex;flex-direction:column;gap:6px}
+  .mi-actions button{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 11px;cursor:pointer;font-family:inherit;text-align:left} .mi-actions button:hover{border-color:var(--gold)} .mi-actions button .ico{width:15px;height:15px;color:var(--ink2);flex:0 0 auto}
+  .mi-profile{margin:6px 12px 14px;width:calc(100% - 24px);justify-content:center;background:var(--obsidian);color:#fff;border:none;border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px} .mi-profile .ico{width:15px;height:15px}
+  /* mobile slide-over */
+  .pmain .msg-info.open{display:flex;position:absolute;inset:0;z-index:8;border-left:none}
+  .pmain .mi-x{display:flex}
+  .pmain .msg-conv{display:none} .pmain .msgr.open .msg-list{display:none} .pmain .msgr.open .msg-conv{display:flex} .pmain .mc-back{display:flex}
+
+  /* ===== Full Customer Card (View 2) ===== */
+  .cc-sticky{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);padding:14px 22px 0}
+  .pmain .cc-sticky{padding:12px 14px 0}
+  .cc-hero{display:flex;align-items:center;gap:14px}
+  .cc-hero .av{width:56px;height:56px;border-radius:14px;background:var(--alabaster);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:var(--ink2);flex:0 0 auto}
+  .cc-id{flex:1;min-width:0} .cc-n{font-size:19px;font-weight:700;line-height:1.15} .cc-m{font-size:12.5px;color:var(--muted);margin:3px 0 0}
+  .cc-badges{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .cc-acts{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 12px}
+  .pmain .cc-acts{gap:6px}
+  .cc-acts .b{padding:8px 12px}
+  /* pipeline */
+  .pipe{display:flex;align-items:center;gap:0;margin:2px 0 14px;overflow-x:auto}
+  .pstep{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+  .pdot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);flex:0 0 auto}
+  .pdot .ico{width:13px;height:13px}
+  .plab{font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .pline{width:26px;height:2px;background:var(--line);margin:0 4px;flex:0 0 auto}
+  .pmain .pline{width:14px}
+  .pstep.done .pdot{background:var(--pay);border-color:var(--pay);color:#fff} .pstep.done .plab{color:var(--ink2)}
+  .pstep.done + .pline{background:var(--pay)}
+  .pstep.cur .pdot{background:var(--obsidian);border-color:var(--obsidian);color:#fff;box-shadow:0 0 0 4px rgba(25,25,25,.09)} .pstep.cur .plab{color:var(--ink);font-weight:700}
+  /* tabs */
+  .cc-tabs{display:flex;gap:2px;border-bottom:1px solid transparent}
+  .pmain .cc-tabs{overflow-x:auto;gap:6px;padding-bottom:8px}
+  .cc-tab{font-size:12.5px;font-weight:600;color:var(--ink2);padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+  .cc-tab:hover{color:var(--ink)}
+  .cc-tab.on{color:var(--ink);border-bottom-color:var(--gold)}
+  .pmain .cc-tab{border:1px solid var(--line);border-radius:999px;background:#fff;padding:7px 14px}
+  .pmain .cc-tab.on{background:var(--obsidian);color:#fff;border-color:var(--obsidian)}
+
+  .cc-body{padding:16px 22px}
+  .pmain .cc-body{padding:14px}
+
+  /* generic cards */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px} .pmain .grid2{grid-template-columns:1fr}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:14px;box-shadow:var(--shadow-sm)}
+  .card .h{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--ink2)} .card .h .ico{width:15px;height:15px;color:var(--gold)}
+  .card .big{font-size:22px;font-weight:700;margin-top:8px;line-height:1.1} .card .big .frac{font-size:13px;color:var(--muted);font-weight:600}
+  .card .s{font-size:11.5px;color:var(--muted);margin-top:3px} .card .s b{color:var(--ink2);font-weight:600}
+  .card .krow{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:7px 0;border-top:1px solid var(--line2)} .card .krow:first-of-type{border-top:none;padding-top:9px} .card .krow .k{color:var(--muted)} .card .krow .v{font-weight:600;text-align:right}
+  .chipset{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .minichip{font-size:11px;font-weight:600;color:var(--ink2);background:var(--line2);border-radius:999px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px} .minichip .ico{width:12px;height:12px;color:var(--muted)}
+  .minichip.ask{background:var(--inquiry-bg);color:var(--inquiry)}
+  .miscount{display:flex;gap:14px;margin-top:9px;flex-wrap:wrap} .misc{font-size:11.5px;color:var(--muted)} .misc b{color:var(--ink);font-weight:700;font-size:13px;display:block}
+  .empty{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;background:#FBFAF7;border:1px dashed var(--line);border-radius:10px;padding:11px 12px;margin-top:8px} .empty .ico{width:15px;height:15px;color:var(--muted);flex:0 0 auto}
+
+  /* style card swatches + monogram */
+  .segrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line2)} .segrow:first-of-type{border-top:none}
+  .segrow .sn{font-size:11.5px;color:var(--ink2);width:82px;flex:0 0 auto;font-weight:600}
+  .sw{display:flex;gap:5px} .sw i{width:17px;height:17px;border-radius:50%;border:1px solid rgba(0,0,0,.06);display:block}
+  .mono{width:58px;height:58px;border-radius:13px;border:1px solid var(--gold-soft);background:linear-gradient(135deg,#FBF7EF,#F3EBDC);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .mono b{font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:600;color:var(--gold);letter-spacing:.02em}
+  .stylehead{display:flex;align-items:center;gap:13px;margin-bottom:6px}
+
+  /* locked row (disclosure ladder) */
+  .lockrow{display:flex;align-items:center;gap:10px;background:var(--lock-bg);border:1px solid #ECD9BD;border-radius:11px;padding:11px 13px;margin-top:8px}
+  .lockrow .ico{width:16px;height:16px;color:var(--lock);flex:0 0 auto}
+  .lockrow .lk-b{flex:1;min-width:0} .lockrow .lk-t{font-size:12.5px;font-weight:600;color:#7a5d2a} .lockrow .lk-s{font-size:11px;color:#93762f;margin-top:1px}
+
+  /* quote / payment rows */
+  .qrow{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-left-width:3px;border-radius:11px;padding:11px 13px;background:#fff;margin-bottom:8px}
+  .qrow.sent{border-left-color:var(--inquiry)} .qrow.declined{border-left-color:var(--muted);opacity:.72}
+  .qrow .qv{font-size:13px;font-weight:700;flex:0 0 auto;width:56px} .qrow .qb{flex:1;min-width:0} .qrow .qamt{font-size:14px;font-weight:700} .qrow .qmeta{font-size:11px;color:var(--muted);margin-top:2px}
+  .qrow .qstat{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 9px;flex:0 0 auto} .qstat.viewed{color:var(--pay);background:var(--pay-bg)} .qstat.dec{color:var(--muted);background:var(--line2)}
+  .payhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .paybar{height:8px;background:var(--line2);border-radius:4px;overflow:hidden;margin:4px 0 12px} .payfill{height:100%;background:var(--pay);border-radius:4px}
+  .mile{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#FCFBF8;margin-bottom:8px}
+  .mile .mck{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line);flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+  .mile .mck.on{background:var(--pay);border-color:var(--pay)} .mile .mck.on .ico{width:12px;height:12px;stroke:#fff}
+  .mile .mb{flex:1;min-width:0} .mile .mt{font-size:13px;font-weight:600} .mile .mm{font-size:11px;color:var(--muted);margin-top:1px}
+  .mile .mtag{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 9px;flex:0 0 auto} .mtag.paid{color:var(--pay);background:var(--pay-bg)} .mtag.open{color:var(--lock);background:var(--lock-bg)}
+  .expect{display:flex;align-items:center;gap:9px;background:#FBF4E6;border:1px solid var(--gold-soft);border-radius:11px;padding:11px 13px;margin:4px 0 12px;font-size:12.5px;color:#6b5d3c} .expect .ico{width:16px;height:16px;color:var(--gold);flex:0 0 auto} .expect b{color:var(--ink)}
+
+  /* files */
+  .frow{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:11px;padding:10px 13px;background:#fff;margin-bottom:8px}
+  .frow .fq{width:36px;height:36px;border-radius:9px;background:var(--alabaster);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);flex:0 0 auto} .frow .fq .ico{width:18px;height:18px}
+  .frow .fb{flex:1;min-width:0} .frow .ft{font-size:13px;font-weight:600} .frow .fm{font-size:11px;color:var(--muted);margin-top:1px}
+  .frow .fdir{font-size:10px;font-weight:700;border-radius:999px;padding:2px 8px;flex:0 0 auto} .fdir.you{color:var(--inquiry);background:var(--inquiry-bg)} .fdir.them{color:var(--terra);background:var(--terra-bg)}
+  .frow .dl{color:var(--muted);cursor:pointer;flex:0 0 auto} .frow .dl .ico{width:16px;height:16px}
+
+  /* schedule timeline */
+  .tl{display:flex;flex-direction:column;gap:8px}
+  .tlrow{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-left-width:3px;border-left-color:var(--line);border-radius:11px;padding:11px 13px;background:#fff}
+  .tlrow.mine{border-left-color:var(--gold);background:#FCFBF8}
+  .tlrow .tt{font-size:12px;font-weight:700;color:var(--ink2);width:66px;flex:0 0 auto}
+  .tlrow .tb{flex:1;min-width:0} .tlrow .tn{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap} .tlrow .tm{font-size:11px;color:var(--muted);margin-top:2px}
+  .tlrow .yourtag{font-size:9.5px;font-weight:700;color:var(--gold);background:#FBF4E6;border:1px solid var(--gold-soft);border-radius:999px;padding:1px 7px}
+  .tlrow .req{font-size:11px;color:var(--muted);cursor:pointer;flex:0 0 auto;align-self:center} .tlrow .req:hover{color:var(--gold)}
+  .calltime{display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,#FBF4E6,#FCF8EE);border:1px solid var(--gold-soft);border-radius:14px;padding:14px 16px;margin-bottom:12px} .pmain .calltime{flex-wrap:wrap}
+  .calltime .ct-ic{width:40px;height:40px;border-radius:11px;background:#fff;border:1px solid var(--gold-soft);display:flex;align-items:center;justify-content:center;color:var(--gold);flex:0 0 auto} .calltime .ct-ic .ico{width:20px;height:20px}
+  .calltime .ct-b{flex:1;min-width:0} .calltime .ct-t{font-size:14px;font-weight:700} .calltime .ct-s{font-size:12px;color:var(--ink2);margin-top:3px}
+
+  /* activity */
+  .feed{display:flex;flex-direction:column;gap:9px}
+  .fitem{display:flex;gap:12px;align-items:flex-start}
+  .fitem .fdot{width:30px;height:30px;border-radius:9px;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);flex:0 0 auto} .fitem .fdot .ico{width:15px;height:15px}
+  .fitem.sys .fdot{color:var(--inquiry);background:var(--inquiry-bg);border-color:transparent}
+  .fitem.pay .fdot{color:var(--pay);background:var(--pay-bg);border-color:transparent}
+  .fitem .fc{flex:1;min-width:0;padding-bottom:4px}
+  .fitem .fh{font-size:13px;font-weight:600} .fitem .fs{font-size:11.5px;color:var(--muted);margin-top:1px} .fitem .fwhen{font-size:10.5px;color:var(--muted);flex:0 0 auto}
+  .note{border:1px solid var(--gold-soft);background:#FDFAF3;border-radius:11px;padding:11px 13px}
+  .note .nh{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:var(--lock)} .note .nh .ico{width:13px;height:13px}
+  .note .ntext{font-size:12.5px;color:var(--ink);margin-top:5px} .note .nmeta{font-size:10.5px;color:var(--muted);margin-top:5px}
+  .note.due{border-color:#ECD9BD;background:var(--lock-bg)} .note.due .nh{color:#7a5d2a}
+  .composer{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff;margin-top:12px}
+  .composer textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;font-family:inherit;resize:vertical;min-height:56px;outline:none}
+  .composer textarea:focus{border-color:var(--gold)}
+  .composer .crow{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
+  .remindchip{font-size:11px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 11px;cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:6px} .remindchip .ico{width:13px;height:13px} .remindchip.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+  .composer .b{margin-left:auto}
+  .note-priv{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted);margin-bottom:7px} .note-priv .ico{width:13px;height:13px;color:var(--lock)}
+
+  /* imported empty-state */
+  .invitecard{display:flex;align-items:center;gap:13px;background:linear-gradient(120deg,#FBF4E6,#FCF8EE);border:1px solid var(--gold-soft);border-radius:14px;padding:14px 16px;margin-bottom:12px} .invitecard .ico{width:22px;height:22px;color:var(--gold);flex:0 0 auto} .invitecard .iv-b{flex:1;min-width:0} .invitecard .iv-t{font-size:13.5px;font-weight:700} .invitecard .iv-s{font-size:12px;color:var(--ink2);margin-top:2px}
+
+  /* toast */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--obsidian);color:#fff;font-size:12.5px;font-weight:600;padding:11px 16px;border-radius:999px;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.25s;z-index:100;display:flex;align-items:center;gap:8px;max-width:88vw}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)} .toast .ico{width:15px;height:15px;stroke:#9ED9AE;flex:0 0 auto}
+
+  .footnote{position:fixed;left:50%;bottom:0;transform:translateX(-50%);font-size:10.5px;color:var(--muted);background:rgba(246,244,239,.92);border:1px solid var(--line);border-bottom:none;border-radius:9px 9px 0 0;padding:5px 14px;z-index:60}
+</style>
+</head>
+<body class="d">
+<div class="wrap">
+  <div class="caption">
+    <div class="t"><b>SETNAYAN — Customer Card respine.</b> One card, two sizes: the Messenger info rail (small) and the full Customer Card page (large).</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="tgroup">
+      <span class="tglabel">View</span>
+      <button class="vbtn" data-view="messenger" id="vw-messenger">Messenger</button>
+      <button class="vbtn active" data-view="card" id="vw-card">Customer Card</button>
+    </div>
+    <span class="sep"></span>
+    <div class="tgroup">
+      <span class="tglabel">Customer</span>
+      <button class="vbtn active" data-cust="RT">RT</button>
+      <button class="vbtn" data-cust="MJ">MJ</button>
+      <button class="vbtn" data-cust="GM">GM</button>
+    </div>
+    <span class="sep"></span>
+    <div class="tgroup">
+      <span class="tglabel">Stage</span>
+      <button class="vbtn" data-stage="inquiry">Inquiry accepted</button>
+      <button class="vbtn active" data-stage="booked">Booked</button>
+    </div>
+    <span class="sep"></span>
+    <div class="tgroup">
+      <span class="tglabel">Device</span>
+      <button class="vbtn active" data-dev="d">Desktop</button>
+      <button class="vbtn" data-dev="m">Mobile</button>
+    </div>
+  </div>
+
+  <div class="desktop">
+    <div class="winbar"><i></i><i></i><i></i><span class="url" id="dUrl">setnayan.com/vendor</span></div>
+    <div class="dmain" id="dBody"></div>
+  </div>
+
+  <div class="phone">
+    <div class="pscreen"><div class="pstat">9:41</div>
+      <div class="pbody pmain" id="pBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+<div class="footnote">Design prototype · Customer Card respine · 2026-07-03 · not app code</div>
+
+<script>
+/* ===== Lucide line icons (one family · no emoji) ===== */
+const IC={
+  home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+  user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  filetext:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5M14 13H8M14 17H8M10 9H8"/>',
+  news:'<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0V11a1 1 0 0 1 1-1h1"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/>',
+  folder:'<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>',
+  cal:'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>',
+  wallet:'<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h16v3"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h3v-4z"/>',
+  lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  chevL:'<path d="m15 18-6-6 6-6"/>',
+  chevR:'<path d="m9 18 6-6-6-6"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+  palette:'<path d="M12 22a10 10 0 1 1 10-10c0 1.5-1 2.5-2.5 2.5H17a2 2 0 0 0-2 2c0 .5.2 1 .5 1.4.3.4.5.9.5 1.4a2 2 0 0 1-2 2z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/>',
+  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  church:'<path d="M12 2v6M9 5h6M6 22V12l6-4 6 4v10"/><path d="M10 22v-4h4v4M4 22h16"/>',
+  coins:'<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  image:'<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',
+  edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/>',
+  seat:'<path d="M4 18v3M20 18v3M6 18v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2M6 14V7a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v7"/>',
+  utensils:'<path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2M5 2v20M12 15v7M12 2a5 5 0 0 1 0 10z"/>',
+  arrowr:'<path d="M5 12h14M13 5l7 7-7 7"/>',
+  rocket:'<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5z"/>',
+  handshake:'<path d="m11 17 2 2a1 1 0 1 0 3-3M13 12l3.5 3.5a1 1 0 1 0 3-3l-3.6-3.6a1 1 0 0 0-.7-.3H9.6a.6.6 0 0 0-.4.2l-3 3"/><path d="m2 12 3-3 4 4M14 16l-3 3M18 14l-2 2"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+};
+function svg(n,cls){return `<svg class="${cls||'ico'}" viewBox="0 0 24 24">${IC[n]||''}</svg>`}
+
+/* ===== state ===== */
+let view='card';       // 'messenger' | 'card'
+let cust='RT';         // 'RT' | 'MJ' | 'GM'
+let stage='booked';    // 'inquiry' | 'booked'
+let tab='overview';    // overview | quote | files | schedule | activity
+let msgThread='RT';    // selected thread cust key
+let msgOpen=false;     // mobile: conversation open
+let railOpen=false;    // mobile: info rail slide-over
+let remindOn=false;    // note composer: remind chip
+let notes=[];          // appended activity notes
+
+/* ===== data (shared with Vendor_Dashboard prototype) ===== */
+const CUST={
+  RT:{nm:'Reyes – Tan',first:'Ana',ev:'Wedding',day:'Sat, Jul 5',loc:'Tagaytay',
+    venue:'Taal Vista Hotel', addr:'Kilometer 60, Aguinaldo Highway, Tagaytay City, Cavite',city:'Tagaytay area',
+    svc:'Wedding Photography · full-day coverage', ask:'Same-Day Edit',
+    source:'inhouse', thread:true,
+    pill:{inquiry:'quoted',booked:'booked'}, statusLabel:{inquiry:'Quote sent',booked:'Booked'},
+    pipe:{inquiry:1,booked:2},   // index of current step
+    attend:138, invited:150, pending:8, maybe:3, declined:4,
+    ceremony:'Catholic', space:'Outdoor garden',
+    budgetLo:'₱40,000',budgetHi:'₱60,000',budgetShared:true,
+    palette:{Ceremony:['#E9E3D6','#C9B48A','#7C6A4F','#3C3327','#A6785C'],Reception:['#F3E7D5','#D8A66A','#9C5A3C','#5A3A2A','#E7C79A'],Bride:['#FBF3EC','#E6C7B4','#C99A7E'],Groom:['#2B2A28','#56524B','#928B7E']},
+    mono:'R&T'},
+  MJ:{nm:'Maria & Jose',first:'Maria',ev:'Prenup',day:'in planning',loc:'Lipa',
+    venue:'Mataas na Kahoy overlook',addr:'Mataas na Kahoy, Batangas',city:'Lipa / Batangas',
+    svc:'Prenup shoot · half-day',ask:'',
+    source:'inhouse', thread:true,
+    pill:{inquiry:'conv',booked:'conv'}, statusLabel:{inquiry:'In-conversation',booked:'In-conversation'},
+    pipe:{inquiry:1,booked:1},
+    attend:0, invited:0, pending:0, maybe:0, declined:0,
+    ceremony:'—', space:'Outdoor',
+    budgetLo:'',budgetHi:'',budgetShared:false,
+    palette:{Ceremony:['#EDE6D8','#C7A46E','#7A5B3A'],Reception:['#F2E4CE','#D69C55','#93582F']},
+    mono:'M&J'},
+  GM:{nm:'Garcia – Mendoza',first:'Leah',ev:'Wedding',day:'Sat, Aug 1',loc:'Cavite',
+    venue:'—',addr:'Cavite',city:'Cavite',
+    svc:'Wedding Photography',ask:'',
+    source:'imported', thread:false,
+    pill:{inquiry:'outside',booked:'outside'}, statusLabel:{inquiry:'Imported',booked:'Imported'},
+    pipe:{inquiry:2,booked:2},
+    attend:0, invited:0, pending:0, maybe:0, declined:0,
+    ceremony:'Catholic', space:'—',
+    budgetLo:'',budgetHi:'',budgetShared:false,
+    palette:{Ceremony:['#E7E0D2','#C4A06A']},
+    mono:'G&M'},
+};
+/* thread conversations */
+const MSGS={
+  RT:{unread:true,time:'2h',inquiry:false,msgs:[
+    {from:'them',text:'Hi! Are you free for our wedding on July 5?',time:'Mon 10:02'},
+    {from:'me',text:'Yes — I have you pencilled in. So happy for you both!',time:'Mon 10:15'},
+    {from:'them',text:'We sent the downpayment yesterday. Can we lock the date?',time:'2h'}]},
+  MJ:{unread:true,time:'1d',inquiry:true,msgs:[
+    {from:'them',text:'Hi, is a prenup shoot in Lipa possible next month?',time:'1d'}]},
+};
+
+/* ===== helpers ===== */
+function isBooked(){return stage==='booked'}
+function toast(msg){const t=document.getElementById('toast');t.innerHTML=svg('check')+' '+msg;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('show'),2600);}
+function actToast(label){toast(label+' — synced across your store')}
+
+const QUICK=[['filetext','Send quote','Quote sent'],['news','Send contract','Contract sent for e-sign'],['folder','Share files','Files shared'],['cal','Propose schedule','Schedule proposed'],['wallet','Log payment','Payment logged']];
+
+/* ===== VIEW 1 — Messenger ===== */
+function threadList(){
+  const order=['RT','MJ']; // GM has no thread
+  return order.map(k=>{
+    const c=CUST[k],m=MSGS[k],last=m.msgs[m.msgs.length-1];
+    const masked=m.inquiry;
+    const nm=masked?'New Customer':c.nm;
+    const av=masked?svg('user'):k;
+    const preview=masked?'New inquiry — accept to see who they are':(last.from==='me'?'You: ':'')+last.text;
+    return `<div class="mthread ${k===msgThread?'on':''}" data-thread="${k}">
+      <div class="av">${av}</div>
+      <div class="mt-b"><div class="mt-n">${nm}${m.unread?' <span class="undot"></span>':''}${masked?' <span class="mt-inqtag">Inquiry</span>':''}</div>
+      <div class="mt-l">${preview}</div></div>
+      <span class="mt-t">${m.time}</span></div>`;
+  }).join('');
+}
+function conversation(){
+  const c=CUST[msgThread],m=MSGS[msgThread];
+  if(!m) return `<div class="conv-empty">${svg('msg')}<div>No thread yet with ${c.nm}.</div></div>`;
+  const masked=m.inquiry;
+  const nm=masked?'New Customer':c.nm, av=masked?svg('user'):msgThread;
+  const bubbles=m.msgs.map(b=>`<div class="bub ${b.from}">${b.text}<span class="bt">${b.time}</span></div>`).join('');
+  const foot=masked
+    ? `<div class="msg-inq">${svg('lock')}<span>New inquiry — <b>accept to reply</b> and reveal their details.</span><button class="b primary" style="margin-left:auto" data-accept="1">Accept</button></div>`
+    : `<div class="msg-input"><input placeholder="Message ${c.first}…"/><button class="b primary" data-toast="Message sent">${svg('send')}</button></div>`;
+  return `<div class="mc-head">
+      <button class="mc-back" data-msgback="1">${svg('chevL')}</button>
+      <div class="av">${av}</div>
+      <div style="flex:1;min-width:0"><div class="mc-n">${nm}</div><div class="mc-s">${masked?'Awaiting your accept':c.svc.split(' · ')[0]+' · '+c.loc}</div></div>
+      <button class="mc-info" data-rail="1" title="Details">${svg('info')}</button></div>
+    <div class="mc-body">${bubbles}</div>${foot}`;
+}
+function infoRail(){
+  const c=CUST[msgThread],m=MSGS[msgThread];
+  const masked=m&&m.inquiry;
+  const nm=masked?'New Customer':c.nm, av=masked?svg('user'):msgThread;
+  const statusPill=masked?`<span class="pill conv">New inquiry</span>`:`<span class="pill ${c.pill[stage]}">${c.statusLabel[stage]}</span>`;
+  const srcBadge=`<span class="src-badge ${c.source==='inhouse'?'inhouse':'imported'}">${svg(c.source==='inhouse'?'handshake':'download')} ${c.source==='inhouse'?'In-house':'Imported'}</span>`;
+  // event snapshot — masked shows city + estimate; ladder locks address pre-book
+  const snap = masked
+    ? `<div><span>Event</span><b>Wedding · a Saturday in July</b></div>
+       <div><span>Location</span><b>${c.city}</b></div>
+       <div><span>Service</span><b>${c.svc.split(' · ')[0]}</b></div>
+       <div><span>Guests</span><b>~150 (estimate)</b></div>`
+    : `<div><span>Event</span><b>${c.ev} · ${c.day}</b></div>
+       <div><span>Location</span><b>${isBooked()?c.venue+', '+c.loc:c.city}</b></div>
+       <div><span>Service</span><b>${c.svc.split(' · ')[0]}</b></div>
+       <div><span>Guests</span><b>${c.attend?c.attend+' / '+c.invited:'—'}</b></div>`;
+  const acts=QUICK.map(a=>`<button data-qa="${a[1]}"${masked?' disabled':''}>${svg(a[0])} ${a[1]}</button>`).join('');
+  return `<div class="mi-head"><span>Customer</span><button class="mi-x" data-rail="1">${svg('chevR')}</button></div>
+    <div class="mi-card">
+      <div class="av lg">${av}</div>
+      <div class="mi-nm">${nm}</div>
+      <div class="mi-badges">${statusPill}${srcBadge}</div>
+      <div class="mi-rows">${snap}</div>
+    </div>
+    <div class="rowlabel" style="padding:0 14px 2px">Quick actions</div>
+    <div class="mi-sync">${svg('check')} Every action here syncs across your store — calendar, quotes, contracts, files &amp; the couple's page.</div>
+    <div class="mi-actions">${acts}</div>
+    <button class="mi-profile" data-openprofile="1"${masked?' disabled':''}>${svg('user')} Full customer profile ${svg('arrowr')}</button>`;
+}
+function messengerBody(){
+  const rail=CUST[msgThread]?infoRail():'';
+  return `<div class="msgr ${msgOpen?'open':''} ${railOpen?'':''}">
+      <div class="msg-list"><div class="ml-head"><span>Messages</span><span class="n">2 new</span></div>${threadList()}</div>
+      <div class="msg-conv">${conversation()}</div>
+      <div class="msg-info ${railOpen?'open':''}">${rail}</div>
+    </div>`;
+}
+
+/* ===== VIEW 2 — Full Customer Card ===== */
+function pipeline(){
+  const c=CUST[cust], steps=['Inquiry','Quoted','Booked','Delivered','Reviewed'];
+  const curr=c.pipe[stage];
+  let h='';
+  steps.forEach((s,i)=>{
+    const cls=i<curr?'done':i===curr?'cur':'';
+    h+=`<div class="pstep ${cls}"><div class="pdot">${i<curr?svg('check'):(i+1)}</div><span class="plab">${s}</span></div>`;
+    if(i<steps.length-1)h+=`<div class="pline"></div>`;
+  });
+  return `<div class="pipe">${h}</div>`;
+}
+function cardHeader(){
+  const c=CUST[cust];
+  const statusPill=`<span class="pill ${c.pill[stage]}">${c.statusLabel[stage]}</span>`;
+  const srcBadge=`<span class="src-badge ${c.source==='inhouse'?'inhouse':'imported'}">${svg(c.source==='inhouse'?'handshake':'download')} ${c.source==='inhouse'?'In-house':'Imported'}</span>`;
+  const meta=c.ev+' · '+c.day+(c.loc?' · '+c.loc:'');
+  const acts=[['msg','Message','open-messenger'],['filetext','Send quote','Send quote'],['news','Contract','Contract sent for e-sign'],['folder','Files','Files shared'],['cal','Schedule','Schedule proposed'],['wallet','Log payment','Payment logged']];
+  const actHtml=acts.map((a,i)=>`<button class="b ${i===0?'primary':'ghost'}" data-headact="${a[2]}">${svg(a[0])} ${a[1]}</button>`).join('');
+  const tabs=[['overview','Overview'],['quote','Quote & Payments'],['files','Files'],['schedule','Schedule'],['activity','Activity']];
+  return `<div class="cc-sticky">
+    <div class="cc-hero">
+      <div class="av">${cust}</div>
+      <div class="cc-id"><div class="cc-n">${c.nm}</div><div class="cc-m">${meta}</div>
+        <div class="cc-badges">${statusPill}${srcBadge}</div></div>
+    </div>
+    <div class="cc-acts">${actHtml}</div>
+    ${pipeline()}
+    <div class="cc-tabs">${tabs.map(t=>`<button class="cc-tab ${t[0]===tab?'on':''}" data-tab="${t[0]}">${t[1]}</button>`).join('')}</div>
+  </div>`;
+}
+/* --- disclosure ladder locked row --- */
+function lockRow(t,s){return `<div class="lockrow">${svg('lock')}<div class="lk-b"><div class="lk-t">${t}</div><div class="lk-s">${s}</div></div></div>`}
+
+/* --- Overview tab --- */
+function tabOverview(){
+  const c=CUST[cust];
+  // Event snapshot
+  const snapVenue = isBooked()
+    ? `<div class="krow"><span class="k">Venue</span><span class="v">${c.venue}</span></div>
+       <div class="krow"><span class="k">Address</span><span class="v">${c.addr}</span></div>`
+    : `<div class="krow"><span class="k">Area</span><span class="v">${c.city}</span></div>`;
+  const snap=`<div class="card">
+    <div class="h">${svg('cal')} Event snapshot</div>
+    <div style="margin-top:8px">
+      <div class="krow"><span class="k">Date</span><span class="v">${c.day}</span></div>
+      ${snapVenue}
+    </div>
+    <div class="chipset">
+      <span class="minichip">${svg('church')} ${c.ceremony} ceremony</span>
+      <span class="minichip">${svg('sun')} ${c.space}</span>
+    </div>
+    ${isBooked()?'':lockRow('Exact venue address','Unlocks when they book you — you see the area for now.')}
+  </div>`;
+  // Headcount
+  const head = c.attend
+    ? `<div class="card">
+        <div class="h">${svg('users')} Headcount</div>
+        <div class="big">${c.attend} attending <span class="frac">/ ${c.invited} invited</span></div>
+        <div class="miscount"><span class="misc"><b>${c.pending}</b>pending</span><span class="misc"><b>${c.maybe}</b>maybe</span><span class="misc"><b>${c.declined}</b>declined</span></div>
+        <div class="s" style="margin-top:8px">RSVPs still moving — numbers may firm up closer to the day.</div>
+      </div>`
+    : `<div class="card"><div class="h">${svg('users')} Headcount</div><div class="empty">${svg('info')} No guest list yet — this fills in once they start their RSVPs.</div></div>`;
+  // Service requested
+  const asked = c.ask?` · <span style="color:var(--inquiry);font-weight:600">+${c.ask} asked about</span>`:'';
+  const svcCard=`<div class="card"><div class="h">${svg('camera')} Service requested</div>
+    <div class="s" style="margin-top:8px;font-size:12.5px;color:var(--ink)"><b>${c.svc}</b>${asked}</div>
+    <div class="s" style="margin-top:4px">What the couple asked for when they reached out.</div></div>`;
+  // Style card
+  const segs=Object.keys(c.palette).map(k=>`<div class="segrow"><span class="sn">${k}</span><span class="sw">${c.palette[k].map(col=>`<i style="background:${col}"></i>`).join('')}</span></div>`).join('');
+  const styleCard=`<div class="card"><div class="h">${svg('palette')} Style</div>
+    <div class="stylehead" style="margin-top:9px"><div class="mono"><b>${c.mono}</b></div><div style="font-size:11.5px;color:var(--muted)">Their monogram &amp; palettes, pulled from the mood board.</div></div>
+    ${segs}
+    <span class="link" data-toast="Opening mood board" style="margin-top:10px">${svg('image')} Open mood board</span></div>`;
+  // Budget band
+  const budget = c.budgetShared
+    ? `<div class="card"><div class="h">${svg('wallet')} Budget band</div>
+        <div class="big">${c.budgetLo} – ${c.budgetHi}</div>
+        <div class="s" style="margin-top:3px">shared by the couple</div>
+        <div class="minichip" style="margin-top:9px;background:var(--pay-bg);color:var(--pay)">${svg('check')} Couple opted in to share</div></div>`
+    : `<div class="card"><div class="h">${svg('wallet')} Budget band</div>
+        <div class="empty">${svg('lock')} Not shared — the couple hasn't opted to share a budget yet.</div>
+        <div class="s" style="margin-top:7px">You'll see a band here if they choose to share it with vendors.</div></div>`;
+  // Date capacity
+  const dateLine=`<div class="card"><div class="h">${svg('clock')} Date capacity</div>
+    <div class="s" style="margin-top:7px;font-size:12.5px;color:var(--ink)">Their date: <b>${c.day.replace('Sat, ','').replace('Sun, ','')}</b> · ${c.ev==='Prenup'?'your calendar is open':'your last open slot that day'}</div>
+    <span class="link" data-toast="Opening your calendar" style="margin-top:8px">${svg('cal')} Open calendar</span></div>`;
+  return `<div class="grid2">${snap}${head}</div>
+    <div class="grid2" style="margin-top:12px">${svcCard}${styleCard}</div>
+    <div class="grid2" style="margin-top:12px">${budget}${dateLine}</div>`;
+}
+
+/* --- Quote & Payments tab --- */
+function tabQuote(){
+  const c=CUST[cust];
+  const quotes=cust==='RT'
+   ? [['v2','₱52,999','Sent Jun 21 · Viewed Jun 22 · valid until Jul 1','sent','Viewed','viewed'],
+      ['v1','₱58,999','Sent Jun 18 · Declined Jun 20','declined','Declined','dec']]
+   : cust==='MJ'
+   ? [['v1','₱18,999','Sent Jun 28 · Viewed Jun 29 · valid until Jul 12','sent','Viewed','viewed']]
+   : [];
+  const qBlock = quotes.length
+   ? quotes.map(q=>`<div class="qrow ${q[3]}"><span class="qv">Quote ${q[0]}</span><div class="qb"><div class="qamt">${q[1]}</div><div class="qmeta">${q[2]}</div></div><span class="qstat ${q[5]}">${q[4]}</span></div>`).join('')
+   : `<div class="empty">${svg('filetext')} No quotes sent yet.</div>`;
+  // payment schedule (RT booked). Pre-book / MJ / GM: quote-only state
+  let payBlock;
+  if(cust==='RT' && isBooked()){
+    payBlock=`<div class="payhead"><div class="card-h2" style="font-weight:700;font-size:13px">Payment schedule</div><span class="link" data-toast="Opening payment log">History ›</span></div>
+      <div class="paybar"><div class="payfill" style="width:38%"></div></div>
+      <div class="mile"><span class="mck on">${svg('check')}</span><div class="mb"><div class="mt">Downpayment · ₱20,000</div><div class="mm">Paid Jun 24 · GCash</div></div><span class="mtag paid">Paid</span></div>
+      <div class="mile"><span class="mck"></span><div class="mb"><div class="mt">Balance · ₱32,999</div><div class="mm">Due Jul 1 · before the event</div></div><span class="mtag open">Open</span></div>
+      <div class="expect">${svg('coins')}<span>Expected this month: <b>₱32,999</b></span></div>
+      <button class="b primary" data-qa="Log payment received">${svg('wallet')} Log payment received</button>`;
+  } else {
+    payBlock=`<div class="payhead"><div style="font-weight:700;font-size:13px">Payment schedule</div></div>
+      <div class="empty">${svg('wallet')} No payments yet — a schedule appears once they book you and pay a downpayment.</div>`;
+  }
+  return `<div class="rowlabel">Quotation</div>
+    ${qBlock}
+    <button class="b ghost" data-qa="New quote sent" style="margin-top:4px">${svg('filetext')} New quote</button>
+    <div class="rowlabel" style="margin-top:20px">Payments</div>
+    ${payBlock}`;
+}
+
+/* --- Files tab --- */
+function tabFiles(){
+  const files=cust==='RT'
+   ? [['news','contract.pdf','You · Jun 22','you','You'],
+      ['image','moodboard.pdf','Couple · Jun 19','them','Couple'],
+      ['image','venue-layout.jpg','Couple · Jun 21','them','Couple']]
+   : cust==='MJ'
+   ? [['image','inspo-pinboard.jpg','Couple · Jun 27','them','Couple']]
+   : [];
+  const rows=files.length
+   ? files.map(f=>`<div class="frow"><span class="fq">${svg(f[0])}</span><div class="fb"><div class="ft">${f[1]}</div><div class="fm">${f[2]}</div></div><span class="fdir ${f[3]}">${f[4]}</span><span class="dl" data-toast="Downloading ${f[1]}">${svg('download')}</span></div>`).join('')
+   : `<div class="empty">${svg('folder')} No files shared yet.</div>`;
+  return `<div class="rowlabel">Shared files <span class="rl-note">· both directions</span></div>
+    ${rows}
+    <button class="b ghost" data-qa="Files shared" style="margin-top:4px">${svg('folder')} Share files</button>`;
+}
+
+/* --- Schedule tab --- */
+function tabSchedule(){
+  const c=CUST[cust];
+  if(!isBooked() && cust==='RT'){
+    return `<div class="rowlabel">Day-of timeline</div>
+      ${lockRow('Full day-of timeline','Unlocks when they book you — you can propose a call time now.')}
+      <div class="calltime" style="margin-top:12px">
+        <div class="ct-ic">${svg('clock')}</div>
+        <div class="ct-b"><div class="ct-t">Suggested call time · 12:00 PM</div><div class="ct-s">2-hr setup before the ceremony (2:00 PM).</div></div>
+        <button class="b gold" data-toast="Call time requested — sent to the couple">Request this call time</button>
+      </div>`;
+  }
+  if(cust!=='RT'){
+    return `<div class="rowlabel">Day-of timeline</div><div class="empty">${svg('cal')} No day-of timeline yet — it builds out closer to the event.</div>`;
+  }
+  const tl=[
+    ['12:00 PM','Vendor call time','Taal Vista Hotel · setup',true],
+    ['1:15 PM','Bride prep + details','Bridal suite',true],
+    ['2:00 PM','Ceremony','Chapel on the Hill',true],
+    ['3:30 PM','Cocktails + couple portraits','Garden terrace',true],
+    ['5:00 PM','Reception program','Grand ballroom',true],
+    ['9:00 PM','Send-off','Main lobby',false],
+  ];
+  const rows=tl.map(r=>`<div class="tlrow ${r[3]?'mine':''}">
+    <span class="tt">${r[0]}</span>
+    <div class="tb"><div class="tn">${r[1]}${r[3]?' <span class="yourtag">Your slot</span>':''}</div><div class="tm">${r[2]}</div></div>
+    <span class="req" data-toast="Change requested for &quot;${r[1]}&quot;">Request a change</span>
+  </div>`).join('');
+  return `<div class="calltime">
+      <div class="ct-ic">${svg('clock')}</div>
+      <div class="ct-b"><div class="ct-t">Suggested call time · 12:00 PM</div><div class="ct-s">2-hr setup before the ceremony (2:00 PM).</div></div>
+      <button class="b gold" data-toast="Call time requested — sent to the couple">Request this call time</button>
+    </div>
+    <div class="rowlabel">Day-of timeline <span class="link" data-toast="Timeline added to your calendar (.ics)" style="float:right">${svg('download')} Add to calendar (.ics)</span></div>
+    <div class="tl">${rows}</div>`;
+}
+
+/* --- Activity tab --- */
+function tabActivity(){
+  const c=CUST[cust];
+  const baseSys=cust==='RT'
+   ? [['sys','handshake','Inquiry accepted','You accepted this inquiry','Jun 20'],
+      ['sys','filetext','Quote v2 sent','₱52,999 · valid until Jul 1','Jun 21'],
+      ['pay','wallet','Downpayment received','₱20,000 · GCash','Jun 24'],
+      ['sys','check','Marked complete','Pending — awaiting the event day','—']]
+   : cust==='MJ'
+   ? [['sys','handshake','Inquiry accepted','You accepted this inquiry','Jun 27'],
+      ['sys','filetext','Quote v1 sent','₱18,999 · valid until Jul 12','Jun 28']]
+   : [['sys','download','Imported to your book','Added from your own client list','Jun 15']];
+  // built-in private note for RT
+  const seedNotes=cust==='RT'
+   ? [{text:'Couple wants extra coverage of the grand entrance — confirm second shooter.',meta:'You · Jun 22',due:false}]
+   : [];
+  const allNotes=[...seedNotes,...notes.filter(n=>n.cust===cust)];
+  const feedSys=baseSys.map(f=>`<div class="fitem ${f[0]}"><div class="fdot">${svg(f[1])}</div><div class="fc"><div class="fh">${f[2]}</div><div class="fs">${f[3]}</div></div><span class="fwhen">${f[4]}</span></div>`).join('');
+  const feedNotes=allNotes.map(n=>`<div class="fitem"><div class="fdot">${svg('lock')}</div><div class="fc"><div class="note ${n.due?'due':''}"><div class="nh">${svg('lock')} ${n.due?'Follow-up · '+n.dueLabel:'Only your team sees this'}</div><div class="ntext">${n.text}</div><div class="nmeta">${n.meta}</div></div></div></div>`).join('');
+  const composer=`<div class="composer">
+      <div class="note-priv">${svg('lock')} Private note — only your team sees this.</div>
+      <textarea id="noteText" placeholder="Add a note about ${c.first}…"></textarea>
+      <div class="crow">
+        <span class="remindchip ${remindOn?'on':''}" data-remind="1">${svg('clock')} Remind me${remindOn?' · in 3 days':''}</span>
+        <button class="b primary" data-addnote="1">${svg('check')} Save note</button>
+      </div>
+    </div>`;
+  return `<div class="rowlabel">History <span class="rl-note">· newest first · notes + system events</span></div>
+    <div class="feed">${feedNotes}${feedSys}</div>
+    ${composer}`;
+}
+
+function cardBody(){
+  const c=CUST[cust];
+  let inner;
+  if(c.source==='imported' && tab==='overview'){
+    // imported hint at top of overview
+    inner=`<div class="invitecard">${svg('rocket')}<div class="iv-b"><div class="iv-t">Invite them to SETNAYAN — free</div><div class="iv-s">${c.first}'s wedding lives in your own list. Invite the couple and their planning syncs here automatically.</div></div><button class="b gold" data-toast="Invite sent to the couple">Invite couple</button></div>`+tabOverview();
+  } else {
+    inner={overview:tabOverview,quote:tabQuote,files:tabFiles,schedule:tabSchedule,activity:tabActivity}[tab]();
+  }
+  return cardHeader()+`<div class="cc-body">${inner}</div>`;
+}
+
+/* ===== render ===== */
+function render(){
+  const c=CUST[cust];
+  document.getElementById('dUrl').textContent = view==='messenger'
+    ? 'setnayan.com/vendor/messages'
+    : 'setnayan.com/vendor/customers/'+cust.toLowerCase();
+  const body = view==='messenger'?messengerBody():cardBody();
+  document.getElementById('dBody').innerHTML=body;
+  document.getElementById('pBody').innerHTML=body;
+
+  // wire (both frames)
+  document.querySelectorAll('[data-thread]').forEach(el=>el.onclick=()=>{msgThread=el.dataset.thread;msgOpen=true;MSGS[msgThread]&&(MSGS[msgThread].unread=false);render()});
+  document.querySelectorAll('[data-msgback]').forEach(el=>el.onclick=()=>{msgOpen=false;railOpen=false;render()});
+  document.querySelectorAll('[data-rail]').forEach(el=>el.onclick=()=>{railOpen=!railOpen;render()});
+  document.querySelectorAll('[data-accept]').forEach(el=>el.onclick=()=>{if(MSGS[msgThread]){MSGS[msgThread].inquiry=false;CUST[msgThread].pill.inquiry='conv';}toast('Inquiry accepted — you can reply now');render()});
+  document.querySelectorAll('[data-openprofile]').forEach(el=>el.onclick=()=>{if(el.hasAttribute('disabled'))return;cust=msgThread;view='card';tab='overview';syncToolbar();render()});
+  document.querySelectorAll('[data-qa]').forEach(el=>el.onclick=()=>{if(el.hasAttribute('disabled'))return;actToast(el.dataset.qa)});
+  document.querySelectorAll('[data-headact]').forEach(el=>el.onclick=()=>{const v=el.dataset.headact;if(v==='open-messenger'){view='messenger';msgThread=cust;msgOpen=true;syncToolbar();render();}else{actToast(v)}});
+  document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{tab=el.dataset.tab;render()});
+  document.querySelectorAll('[data-toast]').forEach(el=>el.onclick=()=>toast(el.dataset.toast));
+  document.querySelectorAll('[data-remind]').forEach(el=>el.onclick=()=>{remindOn=!remindOn;render()});
+  document.querySelectorAll('[data-addnote]').forEach(el=>el.onclick=()=>{
+    const boxes=document.querySelectorAll('#noteText'); let txt='';
+    boxes.forEach(b=>{if(b.value.trim())txt=b.value.trim()});
+    if(!txt)txt='(quick note)';
+    notes.push({cust,text:txt,meta:'You · Jul 3',due:remindOn,dueLabel:'due Jul 6'});
+    remindOn=false;
+    toast(notes[notes.length-1].due?'Note saved — reminder set for Jul 6':'Private note saved');
+    render();
+  });
+}
+function syncToolbar(){
+  document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===view));
+  document.querySelectorAll('[data-cust]').forEach(x=>x.classList.toggle('active',x.dataset.cust===cust));
+  document.querySelectorAll('[data-stage]').forEach(x=>x.classList.toggle('active',x.dataset.stage===stage));
+}
+/* toolbar */
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{view=b.dataset.view;if(view==='messenger'){msgThread=CUST[cust].thread?cust:'RT';msgOpen=false;railOpen=false;}syncToolbar();render()});
+document.querySelectorAll('[data-cust]').forEach(b=>b.onclick=()=>{cust=b.dataset.cust;tab='overview';if(view==='messenger'){msgThread=CUST[cust].thread?cust:'RT';msgOpen=false;railOpen=false;}syncToolbar();render()});
+document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{stage=b.dataset.stage;syncToolbar();render()});
+document.querySelectorAll('[data-dev]').forEach(b=>b.onclick=()=>{document.body.className=b.dataset.dev;document.querySelectorAll('[data-dev]').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
+render();
+</script>
+</body>
+</html>
