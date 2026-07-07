@@ -6,6 +6,8 @@
 
 ---
 
+> **⚠ SUPERSEDED IN PART — shipped-code reconciliation 2026-07-08 (see `../DECISION_LOG.md` same-day "Crew-Meal Marketplace — shipped-code reconciliation" row).** § 5's token model below was written against a token economy that does NOT match `origin/main`: there are **no free tokens on verification** (retired `20270110320020`), **no per-SKU/per-category rate** (the burn is per-region-band + per-tier; one burn covers all of a vendor's services per event), and **FREE-tier vendors can't accept in-app at all**. **Owner locked Option 1: crew-meal providers are treated as REGULAR vendors** — free listing, but accepting a connection requires Verified+ and burns the normal region-band token via the existing `acceptInquiry`→`unlock_vendor_event` path (no new token code, no low crew-meal rate, no tier bypass). Read § 5 as "the connect gate = the standard vendor gate," not the per-SKU-rate scheme described. Service-area radius reuses the existing vendor **branch pin** (`branch_radius_km`); the micro-category lands via the code-generated `apps/web/lib/taxonomy.ts`.
+
 ## 1. The model — proximity is the product
 
 Crew meals are the one wedding cost where **being near the venue = being cheaper**. A kitchen already cooking near the venue adds crew meals at near-marginal cost — no separate delivery run, no second transport fee. So this whole feature is a **venue-proximity match**: the couple's reception venue is the fixed point, and the app surfaces food providers whose service area covers it, sorted so **nearest is cheapest**.

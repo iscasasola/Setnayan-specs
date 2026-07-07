@@ -32,7 +32,7 @@ This plan turns the 2026-07-08 discussion into a shippable, staged delta. Papic 
 - **Intelligence (free, always):** face tagging (opt-in) → per-guest galleries · face blocking (opt-in, RA 10173).
 - **Deliverables:** host gallery (sees all) · per-guest custom gallery · auto Personal Reel · **direct download + ZIP export** · Google Drive sync (full-res → couple's Drive).
 - **Words layer:** Kwento ₱299 whole-event → flows to the Alaala / "Our Story" page.
-- **Add-ons (all gated on active Papic):** Thank You ₱2,499 · **Stories FREE** · Pabati ₱1,299/day · Camera Bridge ₱1,299/day · Live Photo Wall ₱2,499/day · Live Background · High Res Archive · Personal-Reel templates.
+- **Add-ons — pricing reset 2026-07-08 (owner, cost-vs-value pass):** **FREE →** Stories · Personal Reels · **Kwento** (was ₱299) · **Pabati** (was ₱1,299/day). **PRICED →** Thank You ₱2,499 · **Auto-Recap ₱1,499 (new)** · Camera Bridge ₱499/day (was ₱1,299) · Live Photo Wall ₱2,499/day · High Res Archive ₱2,999/yr. *(Live Background = own SKU, out of Papic scope.)* Principle: **cost = floor, price = value** — ₱0-cost ≠ auto-free; Kwento + Pabati dropped to free as deliberate engagement gives.
 - **Lives on:** the event website + day-of guest page, forever. **Patiktok = separate (0017), not here.**
 
 ---
@@ -61,10 +61,13 @@ Research on `origin/main` shows most of Papic is live. Re-planning built things 
 
 Each phase is one (or a small stack of) PR(s); schema/migrations land first, RLS at `CREATE TABLE` time, `changelog.d/` fragment per PR, auto-merge per repo default.
 
-### Phase 0 — Pricing-surface truth (small, ship first)
-- **Fix the Stories row.** `app/_components/home/pricing-data.ts:137,187` renders `PAPIC_ADDON_STORIES` at a paid `/guest·day` fallback (₱20) — contradicts canonical **Stories FREE**. Make Stories render **FREE** on both the popup and `app/pricing/page.tsx` (+ `_papic-estimator.tsx`), or drop the paid row. Confirm the `PAPIC_ADDON_STORIES` catalog row is deactivated in the live catalog.
-- **Verify** Kwento (₱299), Ltd/Unli, caps, Camera Bridge, Pabati, Thank You, Live Photo Wall all read from catalog and match `Pricing.md § 2.1`.
-- **No Kwento change.**
+### Phase 0 — Pricing reset (2026-07-08 owner decision) — ship first
+Catalog + surfaces must reflect the new price sheet (`Pricing.md § 2.1`):
+- **Deactivate / zero to FREE:** `KWENTO` (was ₱299), `PABATI` (was ₱1,299/day), and the stale paid `PAPIC_ADDON_STORIES` row (₱20 fallback). Make all three render **FREE** on the pricing page (`app/pricing/page.tsx` + `_papic-estimator.tsx`), the popup (`app/_components/home/pricing-data.ts`), and `/admin/pricing`.
+- **Add new SKU:** `AUTO_RECAP` = **₱1,499** (149,900 centavos), gate-pending the render box.
+- **Reprice Camera Bridge** `CAMERA_BRIDGE` → **₱499/day** (49,900 · was ₱1,299/day).
+- **Verify unchanged:** Ltd ₱30 / Unli ₱100 / caps ₱15,000 · Live Photo Wall ₱2,499/day · Thank You ₱2,499 · High Res Archive ₱2,999/yr all read from catalog.
+- **Guardrail:** `pricing-data.ts` must not fall back to a paid number for a now-free SKU — free is free regardless of catalog row presence.
 
 ### Phase 1 — Capture UX (verify — mostly already shipped)
 - **Verify** D1: `app/papic/guest/_components/papic-guest-capture.tsx` — tap = photo, hold = video with fill-ring to 5 s, release-early shorter clip, 5 s hard cap. Fix only if it still forces exactly-5 s.

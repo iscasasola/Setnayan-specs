@@ -44,8 +44,8 @@
 | 3D Plan | ₱2,499 | Live |
 | Kwento | ₱299 (whole event) | Live |
 | Live Background | ₱499 | In build |
-| Live Studio multicam | ₱3,499/day | In build (single-cam livestream FREE; renamed from "Panood") |
-| Camera Bridge | ₱1,299/day | Coming soon (flat, event-wide) |
+| Live Studio — Mobile / Desktop | ₱1,299/day · ₱2,499/day | In build (single-cam livestream FREE · YouTube via couple's OBS · device-repackaged 2026-07-08, was ₱3,499/day multicam; see `Live_Studio_Repackaging_2026-07-08.md`) |
+| Camera Bridge (DSLR · independent) | ₱499/day | Coming soon (flat, event-wide · independent `CAMERA_BRIDGE`, decoupled from Papic + Live Studio · owner 2026-07-08; consolidates "Pro Camera Sync") |
 | Guest Stories | cap ₱2,000/day (₱20/cam·day) | Coming soon |
 | Live Photo Wall | ₱2,499/day | Coming soon |
 | Cinematic Reveal / STD openings | ₱1,499 | Coming soon |

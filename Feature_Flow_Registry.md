@@ -7,7 +7,7 @@
 > - **Commission = 0%**, every vendor booking, every tier — no 3%/5% Setnayan Pay cut.
 > - **Vendor subs:** Solo ₱999/28d (₱9,999/yr) · Pro ₱2,499/28d (₱24,999/yr) · Enterprise ₱4,999/28d (₱49,999/yr) · verification FREE · 100 free tokens on verify · flat ₱100/token packs. Old ₱6,000/₱10,000 + ₱2,499/₱5,499 + per-week vendor prices are RETIRED.
 > - **Couple website:** FREE 4-in-1 site (Save-the-Date · RSVP · Event · Editorial) + unlimited free RSVP + ONE **Couple Website PRO ₱1,999** upgrade. The separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs are RETIRED.
-> - **Animated Monogram ₱1,999** · **Live Studio multicam ₱3,499/day** (single-cam livestream FREE; "Panood" renamed → Live Studio) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
+> - **Animated Monogram ₱1,999** · **Live Studio** Mobile ₱1,299/day · Desktop ₱2,499/day (single-cam livestream FREE; YouTube via couple's OBS; device-repackaged 2026-07-08) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
 > - **Couple tiers:** Free ₱0 · Setnayan AI (₱499 first 28d → ₱799/28d). **NO BUNDLES** — Essentials ₱12,999 + Complete ₱27,999 REMOVED 2026-06-29.
 
 **Last generated:** 2026-05-22 (refreshed post 17-PR autonomous sprint)

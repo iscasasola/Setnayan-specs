@@ -1,5 +1,8 @@
 # Panood Multi-Camera Live-Production Controller — Architecture & Build Plan (2026-06-26)
 
+> ## 🔒 SUPERSEDED IN PART 2026-07-08 — read [`Live_Studio_Repackaging_2026-07-08.md`](Live_Studio_Repackaging_2026-07-08.md) first
+> The **packaging, pricing, and infra direction** in this doc are superseded by the 2026-07-08 owner repackaging: Live Studio is now **device-tiered** (Mobile ₱1,299/day online · Desktop ₱2,499/day offline-capable · Free 1-cam), **YouTube ships via the couple's own OBS** (₱0 relay), and the whole V1 is **₱0 marginal cost** — so the **self-hosted-LiveKit / server-mixer / cloud-relay plan below is DEFERRED OUT OF V1** (client-side compositing + OBS covers everything decided). The **controller feature set, UI zones, wall/screen model, camera onboarding, and console research below remain valid reference.** Canonical model + prices: [`Live_Studio_Repackaging_2026-07-08.md`](Live_Studio_Repackaging_2026-07-08.md) + DECISION_LOG 2026-07-08.
+
 > Owner asked (2026-06-26): "we want to make the multicam controller now." This is the
 > design output (3 architectures → judged → staged plan) + the build-specs for the 3 fenced
 > add-ons. Source: design workflow `wf_a210946e-2a2`.

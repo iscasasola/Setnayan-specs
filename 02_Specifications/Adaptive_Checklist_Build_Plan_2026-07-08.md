@@ -58,6 +58,20 @@ Consequences that shape every PR below:
 
 ## 3. Build sequence — PR by PR
 
+> **✅ SHIPPED 2026-07-08 (autonomous build · 8 PRs).** The whole engine is wired and live/landing:
+> - **PR-0** [#2862](https://github.com/iscasasola/setnayan-platform/pull/2862) MERGED — non-wedding events stop rendering the wedding checklist (`isWeddingEvent` guard).
+> - **lane C** [#2864](https://github.com/iscasasola/setnayan-platform/pull/2864) MERGED — `checklist-event-type-defs.ts` (8 types).
+> - **lane D** [#2866](https://github.com/iscasasola/setnayan-platform/pull/2866) MERGED — `leaf-surfacing.ts` re-ranker.
+> - **PR-2** [#2867](https://github.com/iscasasola/setnayan-platform/pull/2867) MERGED — per-type seeding (`buildSeedRows`, wedding byte-identical).
+> - **PR-1a** [#2869](https://github.com/iscasasola/setnayan-platform/pull/2869) MERGED — live budget health-check card (`computeBudgetHealth` wired).
+> - **PR-4** [#2871](https://github.com/iscasasola/setnayan-platform/pull/2871) MERGED — "you might also want" leaf suggestions (fit-gate + diversity, `leaf-suggestions.ts`).
+> - **PR-1b** [#2874](https://github.com/iscasasola/setnayan-platform/pull/2874) auto-merging — vendor-progress pills (`resolveCategoryState` wired).
+>
+> **Verification bar:** every PR unit-tested (73 tests), typeclean, full CI (build/e2e/lighthouse/12 lints), flag-safe (wedding byte-identical, additive/null-safe cards), auto-merged on green.
+>
+> **REMAINING — owner-gated:** PR-5 (Setnayan AI optimize + watch-guard wiring). The AI go-live flip stays a held owner decision (charges couples); not flipped autonomously. Inert notification plumbing can be built on request.
+
+
 Every PR is flag-gated and default-OFF; the wedding checklist output must stay byte-identical until each flag flips. Order is correctness → engine → per-type → leaf-surfacing → AI.
 
 ### PR-0 · Fix the live null-ceremony bug *(ship standalone, now)*

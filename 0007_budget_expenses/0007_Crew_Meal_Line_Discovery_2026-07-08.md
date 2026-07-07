@@ -4,6 +4,8 @@
 
 ---
 
+> **⚠ SUPERSEDED IN PART — shipped-code reconciliation 2026-07-08 (see `../DECISION_LOG.md` same-day "Crew-Meal Marketplace — shipped-code reconciliation" row).** Phase-1's "one connection token at a low crew-meal rate" is superseded: the shipped gate has **no per-category rate** and **FREE-tier vendors can't accept**, so **crew-meal providers use the STANDARD vendor connect gate** (Verified+, region-band burn via `acceptInquiry`→`unlock_vendor_event`) — owner-locked Option 1. Also: the crew-count auto-aggregation this surface assumes is **greenfield** (built new; `crew_size` lives on `vendor_services`, the couple's crew-meal line is the hand-entered `event_vendors.food_allowance_php`).
+
 ## 1. Where it surfaces — 3 entry points, one primary
 
 **Primary — the Crew Meal budget line.** This is the highest-intent moment: the couple is already looking at "~18 crew meals · ₱7,200" (the auto-aggregated estimate). A one-line nudge — *"Providers near your venue can supply these for less"* — expands into a **nearest-first list** of crew-meal providers whose service area covers the reception venue. Each result shows distance-from-venue, ₱/meal, and the concrete **peso savings vs. the current estimate**. The savings number is the pitch.
