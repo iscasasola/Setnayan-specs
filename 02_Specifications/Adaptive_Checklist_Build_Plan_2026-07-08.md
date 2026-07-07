@@ -117,6 +117,56 @@ These modules exist with **zero callers**; nothing here is a rewrite, it's conne
 
 ---
 
+## 6. Parallel vs sequential execution
+
+**Governing rule (this repo's convention):** lanes are split by **file ownership** — work is parallel-safe only when the file sets are disjoint. The finding that dictates the whole schedule: **every step that touches `lib/checklist.ts` or the checklist render surface (`app/dashboard/[eventId]/checklist/page.tsx` + `checklist-actions.ts`) must serialize on those files. Everything net-new (new libs, seed data, the AI notification scaffold) parallelizes.**
+
+### Dependency graph
+
+```
+                          ┌───────────── the SERIAL SPINE (one lane owns checklist.ts + render) ─────────────┐
+PR-0 null-fix ─(merge 1st, tiny)─► PR-2 extract→def ─► PR-1 wire engine ─► PR-3 seed 8 types
+                                        ▲                    ▲                    │
+  ── Wave-1 PARALLEL net-new libs ──    │                    │                    │
+  B  new taxonomy reader ──────────────────────────────────►┘                    │
+  C  EventTypeChecklistDef + 9 defs ────┘                                         │
+  D  leaf-surfacing libs (fit-gate + reranker) ──────────────► PR-4 integrate ◄───┘
+  E  AI notif plumbing (types+allowlist+inert route) ────────► PR-5 integrate (gated)
+```
+
+### Waves
+
+| Wave | Lane | Work | Files it OWNS | Parallel-safe? |
+|---|---|---|---|---|
+| **1** | A | **PR-0** null-ceremony fix | `checklist.ts` (predicate ~81) + `checklist-actions.ts` (ceremony read ~72) | Ships first; tiny. Merge before Wave 2 so the serial lane rebases onto a correct base. |
+| **1** | B | **new taxonomy reader** (replaces the dead stub) | `lib/checklist-taxonomy.ts` (full rewrite) | ✅ isolated file |
+| **1** | C | **EventTypeChecklistDef + the 9 type defs** | NEW `lib/checklist-event-type-defs.ts` | ✅ net-new |
+| **1** | D | **leaf-surfacing libs** (fit-gate query + diversity re-ranker, unit-tested standalone) | NEW `lib/leaf-surfacing.ts` (+ reranker) | ✅ net-new |
+| **1** | E | **AI notification plumbing** (add AI types to the `NotificationType` union + `emitNotification` allowlists + inert `/api/notify-ai` scaffold, flag-off) | `lib/notifications.ts`, `lib/notification-emit.ts`, NEW route | ⚠ touches shared notif infra — solo lane, inert/byte-identical while flag off |
+| **2** | **S** (serial spine) | **PR-2 extract→def** then **PR-1 wire engine** — extract the 4 wedding constants into Lane C's def (wedding byte-identical gate), then wire `computeBudgetHealth` + `resolveCategoryState` + Lane B's reader into render/seed | `checklist.ts`, `checklist-budget.ts`, `checklist-state.ts`, `checklist/page.tsx`, `checklist-actions.ts` | ❌ **the critical path** — one lane, sequential within it |
+| **3** | S | **PR-3 seed 8 types** + `date_model='input'` path (staged, christening first) | `event_type_profiles` seed data + the date-path branch | after Wave 2 |
+| **4** | D→S | **PR-4 integrate** leaf libs as state-aware `needs_decision` prompts | reads Lane D libs; writes into the wired render | after PR-1 (needs the state machine live); best after PR-3 (per-type leaf universe) |
+| **5** | E→S | **PR-5 integrate** AI optimize + watch-guard event-driven wiring | reads Lane E plumbing; the trigger→emit path | after PR-1; **gated** by the go-live flip + the `perEventPricingEnabled` gate fix |
+
+### Critical path (what gates wall-clock)
+
+`PR-0 → PR-2 → PR-1 → PR-3 → PR-4 → PR-5`. Everything on lanes B/C/D/E is **built in parallel during Wave 1** and merely *consumed* by the spine, so it never extends the timeline — it only has to be *ready* when the spine reaches its integration point.
+
+### The one real ordering decision — refactor before wire
+
+§ 3 lists PR-1 (wire) before PR-2 (de-hardcode), but for a clean single-lane serialization the execution order **swaps to PR-2 → PR-1**: extract the wedding constants into the def *first* (a pure refactor, byte-identical wedding seed, testable with the engine still off), *then* wire the engine to read the def **once**. Wiring first then de-hardcoding would touch `checklist.ts` twice and fight itself on rebase. (User-facing value is identical either way — nothing ships to couples until the flag flips.)
+
+### Merge discipline
+- Every PR **flag-gated, default-OFF, byte-identical** until flipped — the wedding checklist can't regress mid-build.
+- Parallel lanes run in **separate worktrees** (repo convention) so disjoint file sets never collide.
+- **Regression gate on the spine:** a snapshot test asserting the wedding checklist seed + render output is identical before/after PR-2 and PR-1.
+- Lane E stays inert until PR-5 — no AI notification can fire while its flag is off.
+
+### Can-start-now
+Wave 1's five lanes can all begin immediately and concurrently. PR-0 is minutes and should merge first; B/C/D/E develop in parallel while the spine waits on nothing but PR-0.
+
+---
+
 ## 5. Open decisions (owner)
 
 1. **Leaf-task grain vs. plan-group grain.** Today tasks are 22 plan groups; leaf-surfacing (§ 4) introduces ~201-leaf granularity. Do leaves become first-class checklist tasks, or stay *suggestions* that roll up into a plan-group task once added? *Recommend: suggestions that roll up — keeps the core list legible, adds depth on demand.*
