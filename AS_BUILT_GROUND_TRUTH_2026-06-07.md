@@ -1,6 +1,6 @@
-# AS-BUILT GROUND TRUTH — 2026-06-07
+# AS-BUILT GROUND TRUTH — 2026-06-07 (§§ 1, 2, 8, 9 re-synced 2026-06-18)
 
-> **THIS IS THE CANONICAL REFERENCE.** Source of truth = the **live site (https://www.setnayan.com)** + the **shipped code** (`Setnayan-App` / `apps/web` on `origin/main`). The iteration spec folders (`0000_*`…`0052_*`) and the dated handoffs are **reconciled TO this document**, not the other way around. When an old spec disagrees with this file, this file (and the live site / code) wins. Built during the 2026-06-07 full-resync directive.
+> **THIS IS THE CANONICAL REFERENCE.** Source of truth = the **live site (https://www.setnayan.com)** + the **shipped code** (`Setnayan-App` / `apps/web` on `origin/main`). The iteration spec folders (`0000_*`…`0052_*`) and the dated handoffs are **reconciled TO this document**, not the other way around. When an old spec disagrees with this file, this file (and the live site / code) wins. Built during the 2026-06-07 full-resync directive. **§§ 1, 2, 8 updated + § 9 added 2026-06-18** via live-site crawl (setnayan.com homepage, /pricing, /for-vendors, /help, /our-story, /vendors).
 
 ---
 
@@ -14,43 +14,80 @@
 
 ---
 
-## 1. Customer / couple SKU catalog (live site · 2026-06-07)
+## 1. Customer / couple SKU catalog (live site · 2026-06-18 re-sync · ⚠ supersedes 2026-06-07 snapshot)
 
-**Live (5):**
-| SKU | Price | Note |
+> Canonical prices are from **Pricing.md § 00** (owner-locked 2026-06-07) — confirmed against live site 2026-06-18.
+>
+> **⚠ 2026-06-29 live-site delta (supersedes the § 00.B mirror below where they disagree):** the public `/pricing` à-la-carte catalog has moved to the **2026-06-14 website-collapse addendum — now LIVE.** Standalone **RSVP · RSVP Pro · Event Website · Editorial Website** are **gone** from à la carte; the only website SKU is **Couple Website PRO ₱1,999** (Live). Free tier keeps the 4-in-1 couple website + unlimited RSVP; the single ₱1,999 PRO unlock is the upgrade. **Save-the-Date Cinematic Openings / Cinematic Reveal ₱1,499** is the priced reveal opening. The two bundles (Essentials ₱12,999 / Complete ₱27,999) were **REMOVED 2026-06-29** — there are now no bundles, only Free + Setnayan AI (₱499 first 28d → ₱799/28d) + à-la-carte SKUs. The table below is corrected to the live site.
+
+**Free tools (8 — homepage feature grid 2026-06-18):** Guest List · Seat Plan · Budget · Timeline · Mood Board · Checklist · Save the Date (base content film, free) · Website (4-in-1 couple website · see 2026-06-14 free-website addendum). ⚠ Pricing page § 00 describes Free as "schedule, budget, guest list, seat plan, mood board" only — homepage and pricing page are not fully reconciled; owner to confirm final free-tier copy.
+
+**Paywall (couple · Pricing.md § 00.A · bundles REMOVED 2026-06-29):**
+
+| Tier | Price | Includes |
 |---|---|---|
-| Animated Monogram | ₱2,499 | Bespoke monogram WITH animation |
-| Custom QR per Guest | ₱1,499 | 1 QR/guest, up to 250 pax |
-| Indoor Blueprint | ₱1,499 | Guided entrance→table |
-| Papic (5 Seats) | ₱2,999 | Unlimited photos + video, 5 hrs |
-| Papic Guest (Disposable Camera) | from ₱2,999 | 24 photos + 10×5s clips |
+| Free — Explore | ₱0 | Free tools above + marketplace browse + match preview |
+| **Setnayan AI** | **₱499 first 28-day cycle (intro) → ₱799/28-day cycle** | Full matchmaking (date ↔ availability · budget · venue · pax · religion · reviews) + guided planning workspace |
 
-**In build (5):** High Res Archive ₱2,999/yr · Live Background ₱2,499 · Panood (Website Add-on) ₱3,499/day · Patiktok ₱2,499 (up to 250 recordings) · Pro Website ₱5,499.
+> The **Essentials ₱12,999** and **Complete ₱27,999** bundles were **REMOVED 2026-06-29**. There are no bundles — couples pay Free ₱0 or Setnayan AI (₱499 first 28d → ₱799/28d) plus individual à-la-carte SKUs below.
 
-**Coming soon (9):** Call-Time Escalator ₱1,999 · Camera Bridge ₱1,999 · Guest Stories ₱1,999 · Live Venue Photo Wall ₱2,499 · Pabati ₱999 · **Pakanta ₱2,499 (SINGLE SKU)** · Pakulay ₱0 · SDE ₱3,499 · Thank You Video ₱5,499.
+**À la carte software (live `/pricing` catalog · corrected 2026-06-29 to prod DB):**
 
-**Bundles:** Setnayan Guided Planner Suite ₱11,999/event · Setnayan Comprehensive Media Pack ₱16,999/event.
+| SKU | Price | Build state (live /pricing) |
+|---|---|---|
+| Setnayan AI | ₱499 first 28d → ₱799/28d | Live (first paywall) |
+| Animated Monogram | ₱1,999 | Live |
+| **Couple Website PRO** | **₱1,999** | **Live** — single website unlock; collapses the old RSVP / RSVP Pro / Event Website / Editorial Website SKUs (2026-06-14 addendum) |
+| Custom QR per Guest | FREE | Live |
+| Pabati | ₱1,299/day | Live |
+| Pakanta | ₱2,499 | Live (ONE SKU — old 3-tier ₱1,999/₱3,999/₱9,999 retired) |
+| 3D Plan | ₱2,499 | Live |
+| Kwento | ₱299 (whole event) | Live |
+| Live Background | ₱499 | In build |
+| Live Studio multicam | ₱3,499/day | In build (single-cam livestream FREE; renamed from "Panood") |
+| Camera Bridge | ₱1,299/day | Coming soon (flat, event-wide) |
+| Guest Stories | cap ₱2,000/day (₱20/cam·day) | Coming soon |
+| Live Photo Wall | ₱2,499/day | Coming soon |
+| Cinematic Reveal / STD openings | ₱1,499 | Coming soon |
+| Thank You Video | ₱2,499 | Coming soon |
+| Papic Unli | ₱100/cam·day (cap ₱15,000/day) | Live |
+| Papic Ltd | ₱30/cam·day (cap ₱15,000/day) | Live |
 
-**Setnayan AI** (AI-assisted planner) ₱1,499 — the planner SKU. (Supersedes the old "Setnayan Concierge ₱4,999".) Note: the couple-app Setnayan AI *wizard* is retired in code; the SKU/branding persists on the site.
+> **RETIRED — must NOT read as live/priced:** Patiktok · Same Day Edit (SDE) · Indoor Blueprint · High Res Archive · Call-Time Escalator · Pro Website · Papic 5-Seats · Papic Guest · standalone RSVP / RSVP Pro · standalone Event Website / Editorial Website · customer token wallet · "Setnayan Concierge" (→ Setnayan AI ₱499 first 28d → ₱799/28d).
 
-**18 free planning tools** for couples (guest list, RSVP, seating, mood board, budget, QR invites, microsite, etc.).
+**Tombstoned SKUs (do not implement):** Indoor Blueprint · Call-Time Escalator · Pro Website · High Res Archive · Patiktok · the Essentials ₱12,999 + Complete ₱27,999 bundles (REMOVED 2026-06-29). Mood Board kept — free.
+
+**Homepage premium feature grid (confirmed live 2026-06-18):** Setnayan AI · Monogram · Papic · Live Studio · Pakanta · **Contracts** · **Cinematic Reveal**. ("Contracts" = couple-facing contract management per 0032 — price TBD, was ₱199/contract in old spec; "Cinematic Reveal" = premium Save-the-Date opening per 0024 redesign 2026-06-17, priced **₱1,499**; owner to confirm Contracts price. Patiktok is RETIRED — removed from the grid.)
+
+**Pakulay** — free mood board, "included free with every couple account" per help center 2026-06-18 (matches § 00.C: tombstoned as standalone SKU; merged into free tier).
 
 ---
 
-## 2. Vendor offering + economy (live site · 2026-06-07)
+## 2. Vendor offering + economy (live site · 2026-06-18 re-sync · ⚠ supersedes 2026-06-07 snapshot)
 
-**Tiers (28-day prepaid):**
-- **Free** ₱0 — verified profile, in-app chat, pipeline, service packages, ≤15 photos, calendar+.ics, ≤10 bids/wk, 10km radius.
-- **Pro** ₱2,499/28d (or ₱24,999/yr, save 23%) — 1 category, 5 accounts, unlimited photos + bids, 20km radius, video calls, star ratings, hybrid scheduling, AI proposal builder, demand pulse, benchmarks.
-- **Enterprise** ₱5,499/28d (or ₱54,999/yr) — multi-category, unlimited accounts, 50km radius.
+**Tiers (28-day prepaid / annual · corrected 2026-06-29 to prod DB):**
+- **Free (Verified)** ₱0 — verified profile, in-app chat, bid pipeline, service packages, calendar+.ics, 1 category, 1 team account, 10km boost radius, up to 10 free couple unlocks/wk.
+- **Solo** ₱999/28d (or ₱9,999/yr).
+- **Pro** ₱2,499/28d (or ₱24,999/yr) — 3 categories, 3 sub-seats, 20km radius, AI Proposal Builder, Demand Pulse, Category Benchmarks, Reverse-Image Theft Monitoring, custom microsite slug, priority support (sub-4h).
+- **Enterprise** ₱4,999/28d (or ₱49,999/yr) — all categories, unlimited accounts, 50–100km radius, quarterly business review, co-listing with Setnayan Productions.
 - **Additional Branch** ₱999/28d.
-- **Verification badge** ₱1,499 (standalone).
+- **Verification badge** FREE (₱1,499 fee retired — PR #1316; owner 2026-06-04 authorization).
 
-**Commission: 0% — "0% commission, ever."** Vendor keeps 100%; Setnayan never sits between vendor and couple at checkout. **(Supersedes any "Setnayan Pay 3%/5% commission" language in old specs — that is RETIRED.)**
+**Commission: 0% — "0% commission, forever."** Vendor keeps 100%; Setnayan never sits between vendor and couple at checkout.
 
-**Tokens (bidding economy, persists — distinct from the retired customer wallet 0003):** spend tokens to accept couple inquiries; earn by recommending Productions services that get used. Founder bonus **100 free tokens on verification** (valid until 31 Jan 2027). Packs: 4/₱1,000 · 10/₱2,400 · 25/₱5,500 · 50/₱10,000 · 100/₱18,000. Burn is one idempotent unlock per (vendor, event). **Burn-on-answer is now WIRED (PR #1057):** accepting an inquiry burns **1–3 tokens (₱100/200/300) banded by the wedding's region** via the admin-editable `token_burn_bands` table (`/admin/token-bands`; the band→region map is seeded but **pending owner ratification**). Insufficient balance blocks the accept (pay-to-answer; the 100 founder tokens cushion new vendors). Login-driven ghosting nudges (PR #1059) replace the never-built 48h cron. The public site leads with "0% commission" + token packs.
+**Token economy (bidding — distinct from retired customer wallet 0003):** 100 free tokens on verification. Burn 1–3 tokens (₱100/₱200/₱300) to accept a couple inquiry, banded by wedding region, via admin-editable `token_burn_bands` table. One idempotent unlock per (vendor, event). Burn-on-answer WIRED (PR #1057). Ghosting nudges WIRED (PR #1059). Token-back mechanic **RETIRED 2026-06-15** (owner: "we will retire this idea"; never wired). Founder 100-free-token deadline promo (31 Jan 2027) pulled from `/for-vendors` copy.
 
-**Vendor onboarding:** register in ~3 min (profile/photos/services/calendar) → verification in 24h → first proposal next week. Path `/signup?as=vendor`.
+**Token packs (flat ₱100/token · confirmed /pricing 2026-06-18):**
+
+| Pack | Price |
+|---|---|
+| 4 tokens | ₱400 |
+| 10 tokens | ₱1,000 |
+| 25 tokens | ₱2,500 |
+| 50 tokens | ₱5,000 |
+| 100 tokens | ₱10,000 |
+
+**Vendor onboarding:** register in ~3 min (profile/photos/services/calendar) → verification in 24h → first proposal next week. Path `/signup?as=vendor`. CTA on /for-vendors: "Register your business — free" · "Book a 15-min demo".
 
 ---
 
@@ -99,8 +136,109 @@ Interaction loop (RLS-isolated): couple follows → `chat_threads` upsert (UNIQU
 
 ---
 
-## 8. Open contradictions to settle (owner)
+## 8. Open contradictions / owner-call items (updated 2026-06-18)
 
-- **Pakanta:** live site = single SKU ₱2,499; old `0036` spec = 3-tier (₱1,999/₱3,999/₱9,999). Re-sync to single SKU unless owner re-confirms tiers.
+- **Pakanta: ✅ RESOLVED** — single SKU ₱2,499 confirmed on live site (help center 2026-06-18). Old 0036 3-tier spec (₱1,999/₱3,999/₱9,999) is superseded.
 - **Folder collision:** two `0037_*` folders (`0037_bespoke_monogram` + `0037_event_day_preload`) — renumber one.
-- **Vendor Pro price history:** old specs cite ₱1,999/₱499-wk variants; live = ₱2,499/28d. Live wins.
+- **Website free vs paid: ✅ RESOLVED on public surface (2026-06-23).** The 2026-06-14 addendum is **live**: free 4-in-1 couple website (incl. unlimited RSVP) + a single **Couple Website PRO ₱1,999** upgrade. À-la-carte no longer sells RSVP / Event Website / Editorial Website separately.
+- **Cinematic Reveal price: ✅ RESOLVED.** The premium Save-the-Date opening (homepage "Cinematic Reveal") is **₱1,499**. Buy flow shipped #1705/#1709/#1718.
+- **Contracts (couple-side) price: ⏳ STILL OPEN.** "Contracts" listed as a premium couple feature on the homepage. No price shown on `/pricing` (not a public à-la-carte SKU). Old 0032 spec: ₱199/contract or free unlimited with Vendor Pro. Owner to confirm current price and tier placement.
+- **RSVP SKU collision (from § 00.E): ✅ RESOLVED on public surface.** RSVP is no longer a standalone à-la-carte SKU on `/pricing` (folded into the free website + Couple Website PRO ₱1,999). *Residual:* any stale prod-DB RSVP catalog rows may still need a cleanup pass so DB matches the collapsed public model.
+- **Vendor Pro price / commission / verification / AI-vs-Concierge: ✅ RESOLVED.** Every page (`/`, `/pricing`, `/for-vendors`, `/how-it-works`) shows uniform **Solo ₱999/28d · Pro ₱2,499/28d · Enterprise ₱4,999/28d · 0% commission · free verification**, and the planner is **Setnayan AI** everywhere (now ₱499 first 28d → ₱799/28d; no "Concierge", no ₱1,499).
+
+---
+
+## 10. Post-baseline features shipped since 2026-06-07 (notable additions · 2026-06-18 audit)
+
+### 10a. Kwento — Narrative infrastructure layer (Phases 1 + 2 shipped 2026-06-18)
+
+Kwento began as a ≤280-char photo-message box. Phases 1+2 upgrade it to the **narrative infrastructure layer** of the event.
+
+| Phase | What shipped | PR |
+|---|---|---|
+| Phase 1 | `FaceBlock` serve-path guard — `getWallSnapshot()` fetches `guests.faceblock_enabled` at serve-time; suppresses caption if true. Fixed TS2367 narrowing error. | #1721 |
+| Phase 2 | **Flash tier (≤50 chars)** — migration `20270115000000_kwento_voice_depth.sql` adds `voice_depth ∈ {flash, story}` on `photo_messages` + `kwento_flash_auto_wall` on `events`. Flash auto-walls after 5s when clean (coordinator kill-switch). Story stays in couple-review queue. Notifications debounced (one `kwento_story_batch` email / 10 min / event). Admin Flash auto-wall toggle in console. | #1722 |
+| Phase 2 (density) | **Density Map** — `lib/kwento-density.ts` aggregates Kwento counts per photo; Alaala hub shows "Most storied moments" row + "Mga Boses" pull-quotes when data exists; gallery thumbnails get density dots (gold ≥3, amber 2, grey). | #1724 |
+
+**Three voice depths (shipped/spec'd):**
+- **Flash** ≤50 chars — Live Wall lower-third caption; venue projection feed; fires immediately after shutter.
+- **Story** ≤280 chars — existing shipped format; couple review queue → Magazine pull-quote → Auto-Recap voices.
+- **Column** 200–400 words — invite-only; couple-selected contributors write byline editorial pieces; surfaces in Alaala editorial page. *(Phases 3–4 queued.)*
+
+**Phases 3–6 queued:** Assignment Board · Column tier · Editorial assembly engine · Vendor voice.
+
+**Spec:** `02_Specifications/Kwento_Monumental_Upgrade_2026-06-18.md` · `02_Specifications/Kwento_Automation_Failproof_2026-06-18.md`
+
+---
+
+### 10b. Save-the-Date — Redesigned 2026-06-17 · Reveals SHIPPED
+
+The original ₱99/₱199 video-render SKU is **RETIRED**. The entire 0024 iteration was redesigned 2026-06-17.
+
+**Current model:**
+- **FREE = the content film** — a continuous, scrubbable 7-beat multi-slide film (auto-advances: monogram → names+date → ceremony venue → reception venue → message/media → "formal invitation to follow" → add-to-calendar). Mood Board colours auto-inherit. Part of the free 4-in-1 couple website.
+- **PREMIUM = the reveal "filter"** — a cinematic opening layered ON TOP of the free film (reveal plays → lifts → content film auto-plays). Currently ₱1,499/event (first unlock per event). Priced via admin catalog.
+
+**Five reveal templates:**
+1. **Sheer veil** — WebGL Verlet cloth simulation; owner-approved physics (47-iteration interactive loop); `veil-reveal.tsx`
+2. **Two-flap (vertical split)** — cathedral/church doors
+3. **Two-flap (horizontal split)** — top/bottom
+4. **Four-flap** — envelope-style
+5. **Church doors** — rigid hinged
+
+**Build state:**
+- Veil reveal: ✅ PORTED PR #1671 (flag-gated `NEXT_PUBLIC_STD_REVEAL=1`)
+- STD openings ₱1,499 buy flow: ✅ SHIPPED PRs #1705 / #1709 (fail-proofed) / #1718 (handshake gate)
+- Content film (PR4 — the 7-beat free film): 🟡 **in build**
+- Invite-launch-date field + add-to-calendar dual-event: 🟡 in build
+- Mood Board colour auto-inherit for reveals: ✅ wired via `site-palette.ts`
+
+**Spec:** `0024_save_the_date/0024_Save_the_Date_Content_and_Customization_2026-06-17.md` · `0024_Veil_Reveal_Spec_2026-06-17.md` · `0024_Reveal_Tuning_and_Door_Spec_2026-06-17.md`
+
+---
+
+### 10c. Adaptive Checklist — Foundation shipped 2026-06-17 (PR #1646)
+
+The couple-side Checklist is no longer static; it adapts to the couple's event type, vendor picks, and budget signals.
+
+**Core philosophy:** wedding date is the **OUTPUT** of vendor discovery (not the input). Checklist guides "start with what matters → explore venues → let priorities find your date."
+
+**Three-layer structure:**
+| Layer | What it contains |
+|---|---|
+| Layer 1 — Static backbone | Paperwork · Attire · Guests · Logistics — same for every couple, fixed order |
+| Layer 2 — Taxonomy-driven vendor tasks | Auto-seeded from event type + `interested_categories` onboarding picks; different event types → different task lists |
+| Layer 3 — Adaptive state machine | Per-category state: `not_started → searching → in_progress → done` (or `excluded/deferred`). Seeded from `event_vendors` signals in Explore. |
+
+**Onboarding pre-fill:** by the time the couple opens the checklist, guest count, budget, ceremony type, and vendor picks are already set → `guest_estimate` and `set_budget` tasks auto-complete.
+
+**Phase 1 ordering (reception-first):** reception venue shortlisting comes before ceremony venue → leads to `/find-date` Schedule Matrix → date locked.
+
+**Budget health-check:** `buffer = total − committed − projected(min..max) − paperwork`. Shown as a best-case / worst-case range.
+
+**Build state:** PR #1646 foundation committed. Full taxonomy integration + budget health-check pending.
+
+**Per-event-type expansion (2026-07-08, owner "generate the checklist for each event"):** the wedding-shaped checklist is being de-hardcoded into an `EventTypeChecklistDef` (date-model · anchor · backbone · statutory pack · phase order per type) with all 8 enabled non-wedding types defined — advances past the V1 wedding-only lock (deliberate owner decision). Spec-only so far; repo PR pending.
+
+**Spec:** `02_Specifications/Adaptive_Checklist_Design_2026-06-17.md` (wedding-shaped design) + `02_Specifications/Adaptive_Checklist_Event_Type_Definitions_2026-07-08.md` (per-event-type framework + all 9 type defs)
+
+---
+
+## 9. Public site navigation + messaging (live 2026-06-18)
+
+**Header nav:** Explore · For vendors · Our story · Journal · Real Stories
+**Auth CTAs:** Sign in · Start planning
+**Hero headline (live 2026-06-23):** "A thousand choices. The same questions, over and over." / sub: "Say it once — and find your perfect fit."
+**Primary hero CTA:** "Start your wedding planning here — free" · "0% commission · always"
+**Brand wordmark:** SET NA 'YAN · tagline "Filipino wedding planning + verified vendors"
+**Homepage feature grid (16, live 2026-06-23):** Guest List · Seat Plan · Budget · Timeline · Mood Board · Checklist · Save the Date · Website (8 free) — Setnayan AI · Papic · Monogram · Live Studio · Pakanta · Contracts · Cinematic Reveal · Patiktok (8 premium).
+**Footer:** Help · Real Stories · Journal · Monogram maker · For vendors · Mac app · Privacy · Terms · Sign in · © 2026 Setnayan · "Made in the Philippines"
+
+**Brand + mission (from /our-story):**
+- Four pillars (live /our-story 2026-06-23): **Papic** (guest-captured candids) · **Live Studio** (livestream / remote attendance) · **Kwento** (guest-contributed stories paired with photos) · **Editorial** (a printed page with an embedded code linking back to the living digital memory)
+- Positioning: "Everyone gives you a record. We give you an Alaala."
+- "Weddings have always been planned for the couple. We built the first platform where every guest is part of it."
+
+**Launch dates (from help center 2026-06-18):** Pilot June 1, 2026 · Public December 1, 2026.
+
+**192 verified vendor categories** searchable across the Philippines (from /for-vendors copy).

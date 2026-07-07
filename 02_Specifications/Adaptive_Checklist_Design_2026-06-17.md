@@ -3,6 +3,7 @@
 **Status:** Spec complete · build queued  
 **Code:** `apps/web/lib/checklist.ts` · `apps/web/app/dashboard/[eventId]/checklist/`  
 **PR:** #1646 (foundation commits shipped)
+**Sibling (per-event-type):** [`Adaptive_Checklist_Event_Type_Definitions_2026-07-08.md`](Adaptive_Checklist_Event_Type_Definitions_2026-07-08.md) — this doc is **wedding-shaped**; the sibling de-hardcodes its four wedding-only assumptions into an `EventTypeChecklistDef` and defines all 8 non-wedding types. Read them together.
 
 ---
 
@@ -146,7 +147,7 @@ Together these account for 60–75 % of most PH wedding budgets. Booked immediat
 ### Tier 3 — The rest of the event-type taxonomy
 **Not a hardcoded list.** Computed at runtime from the couple's `interested_categories` picks, filtered through the active event type's plan-group tree, minus whatever is already covered by Tier 1 + Tier 2.
 
-Different event types carry different taxonomies → Tier 3 looks different for a debut, a birthday, or a corporate event. The helper `checklistTier3PlanGroups(interestedPlanGroups)` derives this dynamically. Defined in `apps/web/lib/checklist.ts`.
+Different event types carry different taxonomies → Tier 3 looks different for a debut, a birthday, or a corporate event. The helper `checklistTier3PlanGroups(interestedPlanGroups)` derives this dynamically. Defined in `apps/web/lib/checklist.ts`. → Per-type anchors, core clusters, and Tier-3 plan groups for all 9 types: [`Adaptive_Checklist_Event_Type_Definitions_2026-07-08.md` § 5](Adaptive_Checklist_Event_Type_Definitions_2026-07-08.md).
 
 ### Paperwork line (separate from the 3 vendor tiers)
 Costs computed from `ceremony_type` + `region`:
