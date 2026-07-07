@@ -2,7 +2,7 @@
 
 **Date assembled:** 2026-07-05
 **PIC:** SETNAYAN SOFTWARE DEVELOPMENT SERVICE (sole proprietorship of Indalecio S. Casasola II · DTI Business Name No. 8297508)
-**DPO:** Indalecio Sacdalan Casasola II · [TO CONFIRM — DPO email]
+**DPO:** Indalecio Sacdalan Casasola II · iscasasolaii@gmail.com
 **Status:** **DRAFT — filing-ready, NOT yet filed.** Every document is built to a compliant RA 10173 / NPC baseline ahead of counsel. For DPO (the owner) + PH counsel finalization, then filing/keepsake. **Not a substitute for legal review.**
 
 ---

@@ -189,7 +189,7 @@ In the event of a data breach affecting personal data:
 - **Within 72 hours of confirmation:** Setnayan notifies the National Privacy Commission (NPC) per RA 10173
 - **Within 72 hours of confirmation:** Affected users notified in-app + via email of: what data was accessed, when, what we're doing about it, what they should do (change password, monitor accounts)
 - **Public disclosure:** breach summary posted on `setnayan.com/security` within 7 days
-- **DPO contact:** [TO CONFIRM — DPO email] for breach inquiries; phone hotline for severity-high incidents
+- **DPO contact:** iscasasolaii@gmail.com for breach inquiries; phone hotline for severity-high incidents
 
 ## 9. Data Protection Officer (DPO)
 
@@ -200,7 +200,7 @@ Setnayan's DPO is registered with the Philippine National Privacy Commission. Th
 - Privacy complaints
 - Breach notifications
 
-**DPO contact:** [TO CONFIRM — DPO email] · response within 7 business days for non-urgent requests; immediate for breach notifications.
+**DPO contact:** iscasasolaii@gmail.com · response within 7 business days for non-urgent requests; immediate for breach notifications.
 
 ## 10. Cross-border data transfers (amended 2026-05-16)
 
@@ -274,7 +274,7 @@ The person graph is **adults-only** today; **data about minors is not processed.
 Every Setnayan account holder has the right to:
 
 1. **Be informed** of what personal data is collected and how it's used (this document)
-2. **Access** their personal data — request a copy via `[TO CONFIRM — DPO email]`
+2. **Access** their personal data — request a copy via `iscasasolaii@gmail.com`
 3. **Object** to processing — opt out of specific data uses
 4. **Rectify** errors in their data — edit their profile + request corrections
 5. **Erase / block** their data — delete their account

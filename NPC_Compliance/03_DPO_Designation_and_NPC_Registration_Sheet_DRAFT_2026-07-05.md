@@ -24,7 +24,7 @@
 | **Proprietor / owner** | Indalecio S. Casasola II · owner sign-up email: iscasasolaii@gmail.com |
 | **Domains / public surfaces** | setnayan.com · setnayan.ph |
 | **Registered / principal office address** | `[TO CONFIRM]` |
-| **Data Protection Officer (DPO)** | **Indalecio Sacdalan Casasola II** · [TO CONFIRM — DPO email] |
+| **Data Protection Officer (DPO)** | **Indalecio Sacdalan Casasola II** · iscasasolaii@gmail.com |
 | **DPO position / title** | `[TO CONFIRM]` |
 | **DPO employment basis (employee / contractor / outsourced)** | `[TO CONFIRM]` |
 | **DPO other contact (mobile / landline)** | `[TO CONFIRM]` |
@@ -46,7 +46,7 @@
 | Field | Value |
 |---|---|
 | **Designated DPO** | **Indalecio Sacdalan Casasola II** |
-| **Official DPO email** | [TO CONFIRM — DPO email] |
+| **Official DPO email** | iscasasolaii@gmail.com |
 | **Position / title within the organization** | `[TO CONFIRM]` |
 | **Employment basis** | `[TO CONFIRM]` (employee / independent contractor / outsourced service provider) |
 | **Other contact (mobile / landline)** | `[TO CONFIRM]` |
@@ -55,7 +55,7 @@
 
 as its **Data Protection Officer**, accountable for the organization's compliance with RA 10173, its Implementing Rules and Regulations, and all applicable NPC issuances.
 
-> **NPC registration of DPO contact details (required).** RA 10173 and NPC issuances require that the DPO's contact details be **registered with the National Privacy Commission** and made available to data subjects and the NPC. The DPO's contact details are carried into Part B (NPC registration data sheet) and are published to data subjects via the Privacy & Security Policy (`[TO CONFIRM — DPO email]`). This designation is not complete for NPC purposes until the DPO's details are filed through the NPC Registration System.
+> **NPC registration of DPO contact details (required).** RA 10173 and NPC issuances require that the DPO's contact details be **registered with the National Privacy Commission** and made available to data subjects and the NPC. The DPO's contact details are carried into Part B (NPC registration data sheet) and are published to data subjects via the Privacy & Security Policy (`iscasasolaii@gmail.com`). This designation is not complete for NPC purposes until the DPO's details are filed through the NPC Registration System.
 
 ## A.2 Duties and functions of the DPO
 
@@ -82,7 +82,7 @@ Per NPC Advisory No. 2017-01, the DPO shall, at minimum:
 
 | Channel | Value |
 |---|---|
-| **DPO email (published to data subjects)** | [TO CONFIRM — DPO email] |
+| **DPO email (published to data subjects)** | iscasasolaii@gmail.com |
 | **In-policy contact point** | Policy § 9 — Data subject access / rectification / erasure / restriction / breach inquiries |
 | **Breach hotline (severity-high)** | `[TO CONFIRM]` (Policy § 8 references a phone hotline for severity-high incidents) |
 
@@ -151,7 +151,7 @@ NPC mandatory registration of a data processing system is generally triggered wh
 |---|---|
 | DPO full name | **Indalecio Sacdalan Casasola II** |
 | DPO position / title | `[TO CONFIRM]` |
-| DPO email | [TO CONFIRM — DPO email] |
+| DPO email | iscasasolaii@gmail.com |
 | DPO contact number | `[TO CONFIRM]` |
 | DPO office address | `[TO CONFIRM]` (default to PIC principal office unless separate) |
 

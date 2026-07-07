@@ -17,7 +17,7 @@ The accountability record RA 10173 (Data Privacy Act of 2012) and its IRR requir
 | **Registered business address** | `[TO CONFIRM]` |
 | **Total headcount / employees** | `[TO CONFIRM]` |
 | **NPC registration number (if already registered)** | `[TO CONFIRM]` |
-| **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · [TO CONFIRM — DPO email] (registered with the NPC per policy §9) |
+| **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · iscasasolaii@gmail.com (registered with the NPC per policy §9) |
 | **DPO response SLA** | 7 business days (non-urgent); immediate for breach notifications |
 | **Breach notification** | NPC + affected users within 72 hours of confirmation (policy §8) |
 | **Estimated data-subject counts (customers / vendors / guests)** | `[TO CONFIRM]` |

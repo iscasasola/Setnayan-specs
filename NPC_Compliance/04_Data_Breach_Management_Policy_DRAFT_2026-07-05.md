@@ -7,7 +7,7 @@
 | Field | Detail |
 |---|---|
 | **Personal Information Controller (PIC)** | SETNAYAN SOFTWARE DEVELOPMENT SERVICE — sole proprietorship of Indalecio Sacdalan Casasola II · DTI Business Name No. 8297508. Brand: **Setnayan**. |
-| **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · [TO CONFIRM — DPO email] |
+| **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · iscasasolaii@gmail.com |
 | **Document owner** | Data Protection Officer |
 | **Version / date** | DRAFT v0.1 · 2026-07-05 |
 | **Review cadence** | At least annually, and after any notifiable breach |
@@ -61,7 +61,7 @@ Per NPC Circular 16-03 § 5, the PIC constitutes a Data Breach Response Team res
 
 | Role | Held by | Core responsibilities |
 |---|---|---|
-| **DBRT Lead / Data Protection Officer** | Indalecio Sacdalan Casasola II · [TO CONFIRM — DPO email] | Overall accountability; convenes the DBRT; makes the notifiability determination (§ 5); signs and files NPC and data-subject notifications; primary NPC liaison. |
+| **DBRT Lead / Data Protection Officer** | Indalecio Sacdalan Casasola II · iscasasolaii@gmail.com | Overall accountability; convenes the DBRT; makes the notifiability determination (§ 5); signs and files NPC and data-subject notifications; primary NPC liaison. |
 | **PIC / Business Owner** | Indalecio Sacdalan Casasola II (SETNAYAN SOFTWARE DEVELOPMENT SERVICE) | Ultimate PIC accountability under RA 10173; approves external communications and remediation spend; authorizes sub-processor escalation. |
 | **Technical / Engineering Lead** | `[TO CONFIRM]` | Detection, containment, eradication, recovery; evidence preservation; forensic timeline; coordination with Vercel/Supabase/Cloudflare support. |
 | **Security / Operations Coordinator** | `[TO CONFIRM]` | Monitors Sentry / Better Stack / PostHog alerts; triages user-reported incidents; maintains the breach register; runs the annual drill. |
@@ -115,7 +115,7 @@ Setnayan reduces breach likelihood and impact through the organizational, physic
 ### 4.1 How incidents are detected
 
 1. **Automated monitoring / alerts** — Sentry error spikes, Better Stack downtime/heartbeat failures, PostHog anomalies, Supabase advisors, auth rate-limit triggers.
-2. **User / data-subject reports** — a customer, vendor, or guest reports suspicious activity or exposure via [TO CONFIRM — DPO email] or in-app support (0029 Help Center ticket).
+2. **User / data-subject reports** — a customer, vendor, or guest reports suspicious activity or exposure via iscasasolaii@gmail.com or in-app support (0029 Help Center ticket).
 3. **Sub-processor notifications** — Vercel, Supabase, Cloudflare, Resend, or an identity-verification provider notifies Setnayan of a security event affecting Setnayan data. Setnayan's knowledge for the 72-hour clock arises when it receives such notice with sufficient detail (see § 5.1).
 4. **Internal discovery** — a team member or contractor identifies a misconfiguration, leaked credential, RLS gap, or anomalous audit-log entry.
 
@@ -184,7 +184,7 @@ A **preliminary** notification may be filed within 72 hours with available facts
 1. A description of the **nature of the breach** and the **personal data** possibly involved.
 2. **Measures taken** by Setnayan to address the breach.
 3. **Measures the data subject may take** to reduce risk (e.g. change password, enable 2FA, monitor bank/e-wallet activity, revoke face data via the "Delete my face data" link).
-4. **DPO contact** — [TO CONFIRM — DPO email] (and severity-high hotline `[TO CONFIRM]`) for questions and assistance.
+4. **DPO contact** — iscasasolaii@gmail.com (and severity-high hotline `[TO CONFIRM]`) for questions and assistance.
 
 ---
 
@@ -253,7 +253,7 @@ After every notifiable breach (and periodically for aggregated non-notifiable in
 ├──────────────────────────────────────────────────────────────────────────┤
 │                                                                            │
 │  1. DETECT                                                                 │
-│     Sentry / Better Stack alert · user report ([TO CONFIRM — DPO email]) ·         │
+│     Sentry / Better Stack alert · user report (iscasasolaii@gmail.com) ·         │
 │     sub-processor notice · internal discovery                              │
 │         │  report to DPO + Ops Coordinator ≤ 1 hour                        │
 │         ▼                                                                   │

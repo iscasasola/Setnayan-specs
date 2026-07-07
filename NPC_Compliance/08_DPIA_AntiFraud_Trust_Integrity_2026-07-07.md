@@ -15,7 +15,7 @@
 | Field | Value |
 |---|---|
 | **Personal Information Controller (PIC)** | SETNAYAN SOFTWARE DEVELOPMENT SERVICE — sole proprietorship of Indalecio Sacdalan Casasola II · DTI Business Name Reg. No. 8297508. Operating brand: Setnayan. |
-| **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · [TO CONFIRM — DPO email] · registered (or registration in progress `[TO CONFIRM]`) with the NPC |
+| **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · iscasasolaii@gmail.com · registered (or registration in progress `[TO CONFIRM]`) with the NPC |
 | **DPIA owner** | DPO (Indalecio Sacdalan Casasola II) |
 | **Processing assessed** | Anti-Fraud & Trust Integrity — identity clustering + vendor fraud detection/scoring + two-stage enforcement — register R-08 |
 | **Governing policy** | `01_Contracts/Setnayan_Privacy_and_Security_Policy.md` § 1.1 (identity/device/payment data collected), § 2 (purposes), § 3 (storage/RLS), § 4 (retention), § 10 (sub-processors/cross-border) — **an Anti-Fraud amendment is REQUIRED and not yet drafted (see §6)** |

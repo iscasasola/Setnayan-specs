@@ -70,7 +70,7 @@ Terms used in this Manual carry the meanings assigned by RA 10173 and its IRR:
 | Field | Value |
 |---|---|
 | Designated DPO | **Indalecio Sacdalan Casasola II** |
-| DPO contact | **[TO CONFIRM — DPO email]** |
+| DPO contact | **iscasasolaii@gmail.com** |
 | NPC DPO registration | `[TO CONFIRM]` |
 
 The DPO is the organization's accountable officer for data privacy and the single point of contact for data subjects and for the NPC. The DPO's responsibilities include:
@@ -125,7 +125,7 @@ Data subjects are informed of the nature, purpose, and extent of processing befo
 
 - Registration-time acceptance of the Privacy & Security Policy (logged per user).
 - A published privacy notice on `setnayan.com/privacy` and a changelog at `setnayan.com/privacy/changelog`; material changes carry 30 days' notice and a re-consent prompt where processing changes.
-- The DPO's contact ([TO CONFIRM — DPO email]) is published as the channel for questions and rights requests.
+- The DPO's contact (iscasasolaii@gmail.com) is published as the channel for questions and rights requests.
 
 ### 4.2 Legitimate Purpose
 
@@ -195,17 +195,17 @@ Disposal occurs by automated purge at the retention boundary or on a validated d
 
 ## 6. Data Subject Rights
 
-Every data subject has the following rights under RA 10173. All are exercised by contacting **[TO CONFIRM — DPO email]** (and, for several, via in-app settings surfaces).
+Every data subject has the following rights under RA 10173. All are exercised by contacting **iscasasolaii@gmail.com** (and, for several, via in-app settings surfaces).
 
 | # | Right | How to exercise / PIC response |
 |---|---|---|
 | 1 | **Right to be informed** | Via this Manual, the published privacy notice, and registration-time disclosures. |
-| 2 | **Right to access** | Request a copy of personal data held, via [TO CONFIRM — DPO email]. **Response: within 7 business days** for non-urgent requests. |
-| 3 | **Right to object** | Opt out of specific data uses (e.g., marketing samples, promotional email) via settings or [TO CONFIRM — DPO email]. |
-| 4 | **Right to rectification** | Edit profile in-app; request corrections via [TO CONFIRM — DPO email]. |
+| 2 | **Right to access** | Request a copy of personal data held, via iscasasolaii@gmail.com. **Response: within 7 business days** for non-urgent requests. |
+| 3 | **Right to object** | Opt out of specific data uses (e.g., marketing samples, promotional email) via settings or iscasasolaii@gmail.com. |
+| 4 | **Right to rectification** | Edit profile in-app; request corrections via iscasasolaii@gmail.com. |
 | 5 | **Right to erasure or blocking** | Delete account via the in-app "Delete my account" surface; **confirmed within 30 days**; cascade per § 5.5, with statutory-retention exceptions. |
 | 6 | **Right to damages** | File a complaint with the NPC for violations; the PIC cooperates with any NPC proceeding. |
-| 7 | **Right to data portability** | Export event data, photos, and chat history in a machine-readable format, via [TO CONFIRM — DPO email] or in-app export. |
+| 7 | **Right to data portability** | Export event data, photos, and chat history in a machine-readable format, via iscasasolaii@gmail.com or in-app export. |
 | 8 | **Right to be notified** | Notification of any breach affecting the subject's data, per § 9. |
 
 Person-graph specific rights: a data subject may decline connection requests, remove confirmed connections, hide individual life-story items per-person (without affecting the host's gallery), and opt out of an event's story entirely; deletion cascades to their connections and story-item references.
@@ -219,7 +219,7 @@ Person-graph specific rights: a data subject may decline connection requests, re
 - **Vendor verification consent.** Vendors give explicit, itemized consent at registration for DTI lookup, third-party ID/liveness verification, portfolio reverse-image search, reference calls, and AMLC sanctions screening.
 - **Marketing samples.** Use of a customer's renders/captures as marketing samples requires a **separate written opt-in**, revocable at any time; existing materials are removed within 90 days of revocation.
 - **Person graph.** Connections require **mutual confirmation** (no one-sided edges); life-story items rely on existing event photo-consent and are individually hide-able/opt-out-able; trusted-circle recommendations are aggregate-only.
-- **Withdrawal.** Consent may be withdrawn at any time through settings or [TO CONFIRM — DPO email], without affecting the lawfulness of prior processing.
+- **Withdrawal.** Consent may be withdrawn at any time through settings or iscasasolaii@gmail.com, without affecting the lawfulness of prior processing.
 - **Material changes** to processing carry 30 days' advance notice and a re-consent prompt at next login where the change affects data use.
 
 ---
@@ -255,7 +255,7 @@ The PIC maintains a documented incident-response and breach-management process. 
 - **NPC notification.** Where the breach is notifiable, the NPC is notified **within 72 hours** of knowledge/confirmation, consistent with RA 10173 and NPC Circular 16-03.
 - **Data-subject notification.** Affected data subjects are notified **within 72 hours** (in-app + email) of what data was involved, when, remedial actions taken, and recommended protective steps.
 - **Public disclosure.** A breach summary is posted on `setnayan.com/security` within 7 days where appropriate.
-- **DPO channel.** Breach inquiries go to **[TO CONFIRM — DPO email]**; a hotline is used for high-severity incidents.
+- **DPO channel.** Breach inquiries go to **iscasasolaii@gmail.com**; a hotline is used for high-severity incidents.
 - **Records.** All incidents and responses are documented for the mandatory breach report and NPC review.
 
 > The full procedure — response team, severity matrix, containment/eradication/recovery steps, notification templates, and the breach register — is maintained in the **Data Breach Management Policy**: `NPC_Compliance/04_Data_Breach_Management_Policy_DRAFT_2026-07-05.md`.
@@ -274,7 +274,7 @@ Minors' data and legacy/post-mortem processing are **not undertaken now**; when 
 
 ## 11. Inquiries, Complaints & NPC Contact
 
-- **Data subject inquiries and complaints** are directed to the DPO at **[TO CONFIRM — DPO email]**. The DPO acknowledges and responds within the timelines in § 6, coordinates rectification/erasure/objection, and maintains a record of complaints and their resolution.
+- **Data subject inquiries and complaints** are directed to the DPO at **iscasasolaii@gmail.com**. The DPO acknowledges and responds within the timelines in § 6, coordinates rectification/erasure/objection, and maintains a record of complaints and their resolution.
 - **Escalation to the NPC.** A data subject who is not satisfied may lodge a complaint with the **National Privacy Commission**:
 
   > National Privacy Commission

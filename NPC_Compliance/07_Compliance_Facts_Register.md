@@ -20,7 +20,7 @@
 ## 2. DPO & team — ✅ supplied
 | Field | Value |
 |---|---|
-| DPO | **Indalecio Sacdalan Casasola II** (the proprietor/PIC also serves as DPO) · [TO CONFIRM — DPO email] · **already registered on the NPC DPO system (2026-07-07)** |
+| DPO | **Indalecio Sacdalan Casasola II** (the proprietor/PIC also serves as DPO) · iscasasolaii@gmail.com · **already registered on the NPC DPO system (2026-07-07)** |
 | DPO employment basis | Internal — the proprietor/PIC also acts as DPO (2-person founding team). ⚠ **PIC = DPO:** NPC generally prefers a DPO with autonomy from the controller; for a 2-person sole proprietorship this is commonly accepted — counsel to confirm and, if kept, note a short independence rationale in the designation sheet (doc 03). |
 | DPO phone / designation date | *(to set — recommend stamping the date the manual is adopted)* |
 | Total headcount | **2** — Indalecio S. Casasola II (proprietor + DPO) + Claire E. Buanhog (VP, co-founder) |
@@ -65,7 +65,7 @@
 
 ## 7. Remaining true unknowns (short list for owner/DPO + Claire/VP)
 1. Barangay + ZIP for the address (if the NPC form requires granularity)
-2. The DPO (owner) contact email + phone + the designation/adoption date
+2. The DPO (owner) contact phone + the designation/adoption date *(email supplied: iscasasolaii@gmail.com)*
 3. PostHog instance region (US vs EU cloud)
 4. Which sub-processors have a signed DPA on file
 5. Whether to adopt the light NDA / training / device-hygiene notes (recommended)
