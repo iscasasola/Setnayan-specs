@@ -87,6 +87,7 @@ Deduped by meaning. "Canonical current" applies the source-of-truth order (live 
 |---|---|---|---|---|---|
 | **Free Vendor tier** | **₱0** | live | All sources ₱0. 1 category, no in-app inquiries, 20km radius. | locked | `lib/vendor-tier-caps.ts:169` |
 | **Verified Vendor tier** | **₱0 (free during launch)** | live | All sources ₱0. ≤10 in-app inquiry unlocks/week free. | locked | `lib/vendor-tier-caps.ts:170`; gate `20260911000000:14` |
+| **Solo Vendor tier** (Free→Pro in-between · **PROPOSED 2026-06-24**) | **₱2,000/28d** (owner-set 2026-06-24; annual ≈**₱20,000/yr** at ~23% prepay) — **provisional / holistic-pass** | **proposed — not built** | Reach-not-features rung for the solo single-discipline vendor (one photographer/HMUA/host/coordinator — largest PH vendor segment by count). Unlocks vs Free/Verified: **always-visible identity** (lifts the hide-until-first-reply anonymity veil — the biggest reach win for a name-is-the-business solo) + **search-rank boost** + **unlimited portfolio** (vs 15-photo Free cap) + **recurring monthly vendor-token allotment**. Stays **1 category · 1 seat**; Pro growth tools (AI proposal builder, demand analytics, portfolio-theft monitor) stay **Pro+** (open fork: lite slice to Solo? rec = keep Pro+). Double duty — softens the ₱0→₱6,000 cliff **and** densifies the couple-side browsable marketplace. Lands between Kasal Gold ₱10k/yr & Platinum ₱30k/yr; ⅓ of Pro (clean ₱0→₱20k→₱60k→₱100k ladder). ~100% margin → no cost floor; priced for density acquisition. | **PROPOSED (holistic pass)** | NEW — would add `vendor_billing_catalog.solo_vendor_monthly/annual` + a rung in `lib/vendor-tier-caps.ts` (`TIER_PRICE_PHP`) + tier-cap gating |
 | **Pro Vendor (28-day)** | **₱6,000/28d** | live | Live ₱6,000/28d · Code ₱6,000 (`vendor-tier-caps.ts:171`, migration `20260911000000:24`) · DB `pro_vendor_monthly` ₱6,000 · corpus: §00.E/memory ₱6,000 **canonical**; §0.C/repo-CLAUDE.md stale **₱2,499**; homepage ₱1,999; /for-vendors ₱4,999/wk (founder ₱3,999/wk); /how-it-works ₱499/wk; §4.1 ₱499/wk; Phase-A ₱3,999 | locked (DB canon) | DB `vendor_billing_catalog.pro_vendor_monthly`; `lib/vendor-tier-caps.ts:171`; migration `20260911000000` |
 | **Pro Vendor (annual)** | **₱60,000/yr** | live | Live/Code/DB ₱60,000 ("save ₱18,000 / 23%") · corpus stale ₱24,999/yr (§0.C) | locked | DB `pro_vendor_annual`; `vendor-tier-caps.ts:171` |
 | **Enterprise Vendor (28-day)** | **₱10,000/28d** | live | Live/Code/DB ₱10,000 · corpus stale **₱5,499** (§0.C/repo-CLAUDE.md); Phase-A ₱9,999 | locked (DB canon) | DB `enterprise_vendor_monthly`; `vendor-tier-caps.ts:172`; migration `20260911000000` |
@@ -105,7 +106,8 @@ Deduped by meaning. "Canonical current" applies the source-of-truth order (live 
 | **Token burn — answer matched inquiry** | **1/2/3 tokens (₱100/₱200/₱300)** region wage-banded | live | All sources: flat ₱100/token, 1–3 tokens by wedding-region band. Idempotent per (vendor,event). Tier-gated. Memory: shipped bands ₱100/200/300; older model section had 3/4/5/6 weighting (base / W.Visayas-C.Luzon / CALABARZON-C.Visayas / NCR) **pending owner ratify**. | locked (band→region map pending) | `token_burn_bands` seed; memory `vendor_token_model`; PR #1057/#1061/#1063 |
 | **Token sink — feature boost** (per feature, 7 days) | **4–100 tokens** | live *(corpus)* | Pricing.md §0.C — feature-boost sink, 4–100 tokens, 7-day duration | locked (spec) | Pricing.md §0.C |
 | **Token sink — sync outside event** | **1 token (₱100)** | live *(corpus)* / coming_soon *(memory: code NOT built)* | §0.C / DECISION_LOG 2026-06-05 / memory: 1 token | locked (spec) / unbuilt | Pricing.md §0.C; needs wiring into 0034 wallet |
-| **Token sink — import customers** | **1 token (₱100, all tiers incl. Free)** | in_build | DECISION_LOG 2026-06-07 line 727 | locked (Phase D, not fully built) | capability matrix; checkout unbuilt |
+| **Token sink — import customers** | **₱0 — RETIRED (import now FREE, owner 2026-06-24)** | retired | Was 1 token (₱100, all tiers incl. Free) — the only Free-tier sink. Owner-decided FREE: import = the CRM on-ramp + acquisition engine, not a revenue line. See DECISION_LOG 2026-06-24. | **RETIRED** (was locked) | `import_external_client()` burn to be removed; capability matrix |
+| **Token sink — review sync** | **₱0 — DROP (owner direction 2026-06-24)** | retired (direction) | Was sync=1 token to convert a synced/imported event into 1 review. Owner direction: drop it — imports earn **1 couple-authenticated review** free; couple-claim is the integrity gate, not a fee. | **DROP** (was locked) | review model; DECISION_LOG 2026-06-24 |
 | **Complimentary tokens on verification** | **100 free tokens** (until 31 Jan 2027) | live | All sources agree. Pro/Enterprise also bundle 100 each. | locked | `vendor_billing_catalog`; for-vendors copy |
 | **Subscription bundled free tokens (Pro)** | **+5/28d · +50/yr** (lifetime) | live | Code `vendor-tier-caps.ts:186-194`; repriced 2026-06-09 from 30/300; made lifetime | locked | migrations `20261011000000` + `20261012000000` |
 | **Subscription bundled free tokens (Enterprise)** | **+10/28d · +100/yr** (lifetime) | live | Repriced 2026-06-09 from 100/1000 | locked | `vendor-tier-caps.ts:193` |
@@ -229,13 +231,20 @@ Deduped by meaning. "Canonical current" applies the source-of-truth order (live 
 
 ## 8. OPEN PRICING QUESTIONS for the holistic pass (consolidated, deduped)
 
+> ✅ **OWNER RULING 2026-06-14 (couple website) — resolves Q3 + Q22, restructures the Free tier.** The couple `/[slug]` site becomes a **FREE 4-in-1** (Save-the-Date · RSVP · Event · Editorial) with **unlimited free RSVP collection** (REVERSES "Free-Explore has no free RSVP/website" — the free-website pillar is restored, no longer hollow), monetized by **ONE PRO unlock `COUPLE_WEBSITE_PRO` ₱3,999 (flat, one-time/event; premium positioning — owner "we do not want to look cheap", NO discount theater; parity with Setnayan AI ₱3,999)** that upgrades premium across all 4 phases (premium template library · custom domain · badge removal · premium motion · premium editorial layouts). The free tier carries the Setnayan brand on every page (footer badge · OG card · splash ident · RSVP-confirmation CTA · email footer · QR center — **chrome only, never on the couple's photos**); PRO removes it. **This single PRO SKU supersedes the RSVP three-way collision + `EVENT_WEBSITE` ₱1,999 + `PRO_WEBSITE`/Editorial ₱7,999.** Holistic-pass to-dos: (a) reprice/retire those rows into one `COUPLE_WEBSITE_PRO` ₱3,999 in `platform_retail_catalog_v2`; (b) **owner-confirm Editorial Website ₱7,999 fully absorbs** (big retire) vs survives as a separate ultra-premium tier; (c) **recompute Essentials/Complete SRP + composition** (they bundled RSVP Pro + Event + Editorial ≈ ₱14,497 SRP, now one ₱3,999 line); (d) re-validate the homepage "free to plan / free website" copy (now TRUE again). Provisional amount, admin-set, executed in the one-shot pass — captured here + DECISION_LOG 2026-06-14, not yet wired.
+
 **New this session (2026-06-14):**
 1. **Zone-walkthrough-video monetization (PR6 #1393)** — built **ungated/free** as coordinator-labor (not a Setnayan SKU). **Do NOT gate before the holistic pass.** Decide whether to monetize the walkthrough hosting/tool at all; must stay delegatable so a no-coordinator couple does it free (DIY-parity lock).
 2. **Paid seat-pass PR4 pricing (UNBUILT)** — the one remaining unbuilt seat-finding slice (Custom-QR personalized arrival / paid seat pass). SKU rename, amounts, and whether to add a narrow guest-experience mini-bundle finalize in the holistic pass, gated before app-store upload.
 
 **Carried open items:**
 3. **RSVP SKU collision** — three rows (₱4,499 active / ₱1,999 active / ₱2,499 inactive). Settle name + price + build state + align code reader keys. *(THE single flagged-open item.)*
-4. **Setnayan AI live state** — flip `SETNAYAN_AI_PAYWALL_ENABLED` to go live at ₱3,999? Verify checkout `service_key` matches entitlement gate.
+4. **Setnayan AI live state — ✅ FLIPPED ON 2026-06-22 (owner explicit go-live via AskUserQuestion). ₱3,999 paywall now ENFORCED in prod.** Set `platform_settings.id=1.setnayan_ai_paywall_enabled = true` via `supabase db query` (the #1996 DB toggle — no redeploy; resolver DB-first + uncached → live on the next request). **OFF-SWITCH:** set that column back to `NULL` (defer to env → OFF) or `false`. ⚠ The paid-vs-free DEFAULT + dashboard-vs-onboarding PLACEMENT decision (2026-06-21 lock) is NOT resolved by the flip — enforcement is live but the positioning question is still open for the holistic pass. Pre-flip de-risk record (still accurate as mechanism reference):
+   - **The gate:** `SETNAYAN_AI_PAYWALL_ENABLED` (boolean env var, **default OFF** — unset = OFF on prod today; not in `.env.example`). The ONE gate for the whole feature — no other env flag entangles it (introduced 2026-06-08, commit `b27c545e`, "govern now free, monetize next"). Logic in `apps/web/lib/setnayan-ai.ts`: `isSetnayanAiPaywallEnabled()` (L33) · `isSetnayanAiActive()` (L45) · `shouldOfferSetnayanAiPurchase()` (L67).
+   - **What flipping ON does (verified vs code + live site 2026-06-22):** AI becomes active **only** for events with the purchased entitlement `events.setnayan_ai_active` (stamped by `lib/sku-activation.ts` on a confirmed `SETNAYAN_AI` order). A non-purchasing couple is NOT silently dumped to generic search — they get a **soft-paywall taste**: the vendor list still renders (generic region order; no %-match pills — `category-search.ts` ~L583; no proximity sort — falls back to review order ~L666; Home hides Today's-One-Thing / Roadmap / Upcoming / Checklist) PLUS a top-of-shortlist "See your ranked shortlist · Unlock Setnayan AI" CTA (`vendors/page.tsx` ~L528) → the dormant buy surface `/studio/setnayan-ai` (live only when `paywallOn && !active && !owns`, `page.tsx` L96). Onboarding is **unaffected** — its ₱3,999 "Your Plan" keep-card is a catalog price display (`onboarding-pricing.ts` L273), no paywall check.
+   - **Why parked (resolve FIRST):** (a) the **2026-06-21 lock** moved AI activation OUT of onboarding to the dashboard but left **paid-vs-free default placement OPEN**; (b) a **copy-vs-enforcement gap** — `/pricing` (live: "₱3,999 · The first paid tier", confirmed 2026-06-22) + homepage ("One purchase at ₱3,999") already sell AI as paid, while enforcement gives it free with the flag OFF; (c) verify the checkout `service_key` is `SETNAYAN_AI` and matches the entitlement gate end-to-end.
+   - **Go-live (now a no-redeploy DB toggle — supersedes the `vercel env` flip, PR #1996 2026-06-22):** flip from `/admin/integrations` ("Setnayan AI — paywall" card → `setAiPaywall`), which sets tri-state `platform_settings.setnayan_ai_paywall_enabled` (NULL = defer to env · TRUE = on · FALSE = off; migration `20270209911535`, applied to prod). `resolveSetnayanAiPaywallEnabled()` (`lib/integration-config.ts`) reads **DB-first**, with env `SETNAYAN_AI_PAYWALL_ENABLED` now only the NULL-fallback. Column ships NULL → env OFF → AI stays FREE (still parked). ⚠ PR #1996 flagged an owner sign-off: shipped DB-first/env-fallback (a clean on/off toggle) rather than the design's "OR-wins."
+   - **Verified 2026-06-22 (de-risk pass, flag still OFF):** Precondition #3 (paid→unlock chain) — normal path INTACT end-to-end (`SETNAYAN_AI` literal consistent buy→order→hook→`events.setnayan_ai_active` stamp; column exists; refund-reversal + bundle children covered) **but one break-on-flip BUG:** `createSelfCompOrder` (`apps/web/app/dashboard/[eventId]/orders/actions.ts` ~L264-333) writes `status='paid'` without calling `activateOrderSku`, so a vendor/admin self-comped `SETNAYAN_AI` order is *owned-but-unprovisioned* (gate stays dark, no re-buy). Narrow blast radius (self-comp only, not couple checkout); **FIXED via PR #1999** (auto-merge armed 2026-06-22 — `createSelfCompOrder` now calls `activateOrderSku` after the paid insert, mirroring `approvePayment`). Precondition #2 (copy) — public surfaces show ₱3,999 paid, but 3 JSON-LD blocks (`app/page.tsx` ×2, `app/layout.tsx`) framed AI as free-included with no price (engines ingest as canonical) + stale ₱1,499 comments in `lib/wedding-essentials.ts` + `lib/officiant-auto-resolve.ts`; **FIXED via PR #2000** (auto-merge armed 2026-06-22 — description/featureList reframed to "optional paid upgrades · (paid add-on)"; comments made price-agnostic, NOT hardcoded to ₱3,999, per the admin-managed-prices rule + pending holistic pass). **Both pre-flip code fixes now shipped (#1999 + #2000).** Full chronological record: DECISION_LOG 2026-06-22.
 5. **SDE price** — five values (₱3,499/₱4,999/₱8,999/₱9,999/₱24,999); needs one decision.
 6. **Animated Monogram** — live ₱1,999 vs code-hardcode ₱2,499 vs spec ₱2,999; Cipher Studio free default; fix hardcode to read ₱1,999 from catalog.
 7. **Pakanta** — single ₱2,499 SKU vs 3-tier ladder (₱1,999/₱3,999/₱9,999); surface which; confirm no orphaned Premium/Suite rows.
@@ -291,6 +300,12 @@ Deduped by meaning. "Canonical current" applies the source-of-truth order (live 
 46. **Crew-rate marketplace (vendor Pro)** — live Pro capability; almost certainly a free bundled directory — just confirm it's not a fee surface.
 47. **"Editorial credits" (vendor Pro)** — live Pro unlock; "credits" implies countable — confirm uncapped-bundled vs paid top-up (ties to 0038).
 
+**(D) Surfaced by the 2026-06-24 competitive-monetization session:**
+49. **Import-customer gate → RETIRED; import now FREE** (owner 2026-06-24) — was 1 token/₱100 all-tiers; no longer charged. Import = the CRM on-ramp + acquisition engine. *(resolved)*
+50. **Review-sync token → DROP; imports earn 1 couple-authenticated review** (owner direction) — vs ≤250 guest-level for fully on-platform; couple-claim is the integrity gate, not a fee. *(resolved direction)*
+51. **🔑 THE BIG ONE — meter connection per-event AT ALL?** burn-to-answer ₱100/200/300 (locked 2026-06-05) **vs bundle unlimited connection into the reach subscription** (leak-proof; aligns with "tiers sell reach not features"). Per-connection tolls are structurally dodgeable (new-account/proxy/coordinator-host) → defend with economics, not identity-policing; durable money = reach + couple media. *(OPEN — holistic pass)*
+52. **Solo vendor tier ₱2,000/28d** (new Free→Pro rung, §4) — confirm at holistic pass + the lite-growth-tools fork (rec: keep Pro+) + a time-boxed founding-vendor launch rate + the Free-vs-Verified ₱0 redundancy cleanup. *(OPEN)*
+
 > _Cleanly resolved (no new price): Setnayan Productions = the **same** /pricing SKUs (Token-Worthy vs Direct split) → resolves Q31. · Additional Branch **₱999/28d** is live (Enterprise add-on) → partial-resolves Q19. · `/how-it-works` now shows **₱6,000/28d** (stale ₱499/wk gone). · Founder bonus **100 free tokens until 31 Jan 2027**; pay rail = **QR pilot, card+bank later** (automated rail dormant, Q10)._
 
 > Per owner: the **whole-catalog holistic pricing review is deferred until after all features are done.** Do NOT settle any per-feature price piecemeal or AskUserQuestion on price before that single pass.
@@ -316,3 +331,82 @@ Deduped by meaning. "Canonical current" applies the source-of-truth order (live 
 | **Pricing reference docs (history, not canon)** | `Pricing.md` §00 (canonical intent) / §0 (live-site 2026-06-04) / §§2–8 (spec history); `Feature_Catalog_Canon.md`; `DECISION_LOG.md`; `AS_BUILT_GROUND_TRUTH_2026-06-07.md`; iteration `0004/0005/0011/0012/0016/0022/0024/0026/0031/0032/0036/0037` `.md`; auto-memory `project_setnayan_pricing_tiers.md` + `pax_based_pricing.md` + `vendor_token_model.md` | Update in lockstep with DB after the holistic pass; **DB is the tie-breaker** |
 
 **Bottom line for the future pass:** change customer prices in **`platform_retail_catalog_v2`** / **`platform_package_catalog`** (via a single new canonical migration), vendor prices in **`vendor_billing_catalog`**, fees in `lib/payouts.ts` + `lib/vendor-earnings.ts` (+ `setnayan_pay_methods`), then sweep the **per-page hardcodes** (`custom-qr-guest` ₱1,499, `animated-monogram` ₱2,499-vs-catalog-₱1,999, `panood/setup` mock), the **`lib/v2-catalog.ts` reader keys** (fix the `PRO_RSVP` vs `RSVP_PRO_WEBSITE` key mismatch), the **vendor public-surface copy** (single-source ₱6,000/₱10,000 + savings-% 17/23/25% + "Setnayan Concierge" perk rename), and finally re-sync `Pricing.md §00` + `Feature_Catalog_Canon.md` + auto-memory to match the DB.
+
+---
+
+## 10. Stackable bundle architecture (PROPOSED 2026-06-15 — owner-iterated this session)
+
+> Status: **proposed design, prices PROVISIONAL** (holistic-pass-later). Captures the owner's bundle direction from the 2026-06-15 session. Replaces the earlier overlapping family-bundle sketch. Not yet wired to `platform_package_catalog`.
+
+**The problem with the prior sketch:** the family bundles SHARED SKUs (Planning Bundle and Website Bundle both contained Website PRO + Monogram + Custom QR), so buying two bundles double-charged the overlap → they couldn't be bought together. **Fix = non-overlapping families:** every paid SKU lives in exactly ONE family, so any combination stacks in one checkout with no double-charge. "Buy all five" = the Complete tier.
+
+**FREE tier (no bundle, ₱0):** planning workspace (Schedule · Budget · Guest List · Seat Plan · Mood Board/Pakulay) · basic 4-in-1 website + unlimited RSVP · **Kwento + Kwento Magazine** (guest messages + the couple-private PDF — both free) · 8 print PDFs (incl. basic QR · basic monogram · basic save-the-date).
+
+**Five non-overlapping paid families (each SKU placed exactly once):**
+1. **Planning** — Setnayan AI (single SKU; the ranked match).
+2. **Website & Invite** — Website PRO (4-in-1) + Animated Monogram + **Custom QR** + Print Pack. *(Custom QR lives HERE — it's the branded invitation QR. Papic tagging + Salamisim work on the FREE default per-guest QR; Custom QR is only the branded skin, NOT a Papic dependency.)*
+3. **Papic (Capture)** — **Papic 5 Seats _OR_ Papic Guests** (pick-one capture mode — they're two ways to do the same job; a couple rarely needs both, and the choice roughly halves the capture cost) + Guest Stories + **Salamisim** (= Live PhotoWall, ₱2,499) + Camera Bridge.
+4. **Live & Venue** — Panood (livestream) + Patiktok + Pabati + Live Background (LED).
+5. **Keepsake** — Editorial Magazine + Digital Photo Book + Same Day Edit + Thank You Video + Pakanta. *(SDE + Thank You moved OUT of Papic into here — they're post-wedding PRODUCED media, a different moment.)*
+
+**Roll-up:** Essentials = a subset of families; **Complete ₱27,999 = all five families** (extra ~15% over buying the families separately). Every paid SKU appears once across the five families = the full à-la-carte set.
+
+**Feature-placement answers (owner asked):** Kwento = **free** (no SKU). Kwento Magazine PDF = **free**. Salamisim = **₱2,499** (the Live PhotoWall SKU — yes it's priced; the ₱1,999 seen earlier was a hero-combo with Custom QR, not standalone). PDFs = mostly free; only Editorial Magazine + Photo Book are paid keepsakes (₱2,499 each / ₱3,999 pack) + optional ₱999 Print Pack.
+
+**Open build items (queued, not yet built):**
+- **Multi-bundle cart** — add several bundles, pay once. The non-overlap design makes the dedup trivial; the bundle-charge server re-resolution already shipped (PR #1441).
+- **Pick-one Papic capture** — the Papic family offers 5 Seats *or* Guests as a choice (keeps the priciest family affordable). Needs the bundle/catalog wiring.
+- **Match-surface soft-paywall banner** — surface the "Unlock Setnayan AI" CTA on the gated vendors/match page (helper `shouldOfferSetnayanAiPurchase` already shipped in the AI buy-surface PR #1433).
+
+**Pricing-architecture policy — web-checkout, NOT in-app IAP (owner now registered on Apple Developer 2026-06-15):** every bundle/SKU purchase must route through **web checkout** (Apple Pay on web = 0% store cut). Selling these (digital) SKUs via iOS in-app purchase would trigger Apple IAP at 15–30%, gutting the ~95–99% margins. The native app deep-links to web checkout; IAP only where Apple ultimately forces it. Decide the IAP-vs-web-link split BEFORE App Store submission (Apple anti-steering is the gating risk). Apple Developer registration also unblocks native iOS Papic + Camera Bridge DSLR pairing (Phase 2).
+
+**Amounts stay provisional** — the exact family-bundle prices (and whether Essentials survives as a named mid-tier) are set in the single holistic pricing pass, not piecemeal.
+
+---
+
+## 11. Vendor billing cadence + per-shop storage cap (CAPTURED 2026-06-20 — owner session)
+
+> Status: **provisional inputs for the holistic pricing pass.** Owner asked to "keep this." Analytical backing lives in `Papic_5yr_Storage_Cost_Model.xlsx` (corpus root — Calculator / Scenarios / BreakEven tabs).
+
+**Billing cadence — ₱6,000/28d vs ₱1,500/7d (identical money: 1,500 × 4 = 6,000/28d):**
+- **Direction: bill MONTHLY (₱6,000/28d), but DISPLAY the small unit** — "from ₱1,500/week" or "₱214/day, less than one supplier meal." Captures the low-barrier psychology of the small number AND the low ongoing friction of monthly billing. Cadence and presentation are separable.
+- **Why not weekly billing:** weekly = **4× the MANUAL BDO/GCash reconciliation load** + 4× the suspension-risk surface (a missed weekly verification darkens the shop) + higher churn (vendor re-decides every week) + a "rented/gig" feel. Monthly = ¼ the ops, signals a premium business tool, matches how a vendor budgets (like rent).
+- **Strongest lever is value-anchoring, not cadence:** "₱6,000/month vs. ONE booking worth ₱30K–₱100K." One booking pays the whole year. Lead with ROI.
+- Keep a **weekly plan only as a SECONDARY option** (seasonal visibility boost), never the default.
+
+**Per-shop storage caps** (R2 = **₱0.855/GB-month** Standard, $0.015 × ₱57; **egress = ₱0**, so portfolio views cost nothing).
+
+> ⚠ **Scope (owner clarification 2026-06-20):** this 50 GB / 250 GB cap is the **vendor's OWN portfolio uploads only** (their shop — work photos, sample videos, logo). It does **NOT** include any **couple/customer** photos or videos. Couple/event media (Papic galleries, Save-the-Date, etc.) is a **separate storage pool** accounted under the per-event SKU economics (`Papic_5yr_Storage_Cost_Model.xlsx` — paid per event, ~50 yrs of storage pre-funded by one sale). The two pools never mix and are funded by different products (vendor subscription vs per-event SKU).
+
+| Tier | Storage cap | Your cost/mo | Margin on storage |
+|---|---|---|---|
+| Free vendor | 2 GB | ~₱2 | — |
+| **Pro (₱6,000)** | **50 GB** | **~₱43** | **~99%** |
+| Enterprise (₱10,000) | 250 GB | ~₱214 | ~98% |
+
+- **Principle: storage must NEVER be the reason a vendor upgrades.** Tiers sell **reach** (categories · agents · visibility), not gigabytes. Set the Pro cap generously (50 GB) so it's a non-issue; the cap exists only to stop a multi-TB raw-video dump.
+- A ₱6,000 Pro vendor's true storage expense is **~₱40–85/mo** → one of the highest-margin lines in the business (~99%).
+
+**Amounts stay provisional** — exact figures set in the single holistic pricing pass, not piecemeal.
+
+### §11.A — Tax-aware pricing floor (STANDING RULE — owner-affirmed 2026-06-20: "we should always have the tax-aware pricing floor")
+
+> Apply to **EVERY** priced SKU — in the holistic pass and in the admin catalog. No price ships without clearing this floor.
+
+**Levies that scale with GROSS revenue (taken off the top, *before* you cover cost):**
+- **Income tax — reserve 30%** (conservative planning convention; the accountant optimizes the actual regime — 8%-flat vs graduated + 3% percentage — but we always *plan* at 30%).
+- **BIR percentage tax ≈ 3% of gross** (non-VAT, < ₱3M/yr; becomes 12% VAT above the ₱3M threshold).
+- **LGU business permit / Local Business Tax ≈ 0.5–0.75% of prior-year gross** + fixed regulatory fees (fire/sanitary/garbage) — **scales with declared sales**, renews annually.
+- ⇒ Combined **gross-based** levies ≈ **~3.7% of every peso**, *then* the 30% reserve on what remains.
+
+**The floor formula:**
+`price ≥ (cost + target_margin) ÷ (1 − 0.30 − 0.037)`
+A price must clear (a) cost, (b) the ~3.7% gross levies, and (c) leave enough that the 30% income-tax reserve still beats the target margin.
+
+**The principle — MARGIN = TAX-SURVIVABILITY:**
+- **High-margin digital SKUs** (Papic · monogram · AI · websites · ~95–99% margin) shrug off the stack — 30% of fat profit still keeps ~⅔ of revenue.
+- **Low-margin / commodity lines** (storage, hardware, anything near-cost) **die** — the ~3.7% gross levy *alone* can exceed the margin. Worked example: **1 TB storage @ ₱899** (R2 cost ₱855) nets **~₱8/mo** after the full stack → one FX wobble = a loss.
+
+**Locked consequences:**
+1. **Build revenue on high-margin digital SKUs; never ship a thin-margin commodity line.**
+2. **Storage = baked into the Pro tier, NOT sold as a product** (its cost absorbed by the ~99%-margin subscription). If an upgrade is offered at all, price it near-cost as a **retention convenience** (tax-aware floor still applies), justified by *integration value* (the portfolio is seen by booking couples) — **never as margin**. You cannot out-price subsidized hyperscalers regardless: **iCloud 2 TB = ₱599/mo = ₱0.29/GB retail — BELOW our ₱0.855/GB wholesale R2 cost** (storage is their iPhone loss-leader). Supersedes the earlier "₱499/₱799/₱1,499/₱2,499 storage-upgrade ladder" sketch — that was margin-thinking and ignored the tax stack.

@@ -1,17 +1,18 @@
-# 00 — Concierge Brain Architecture (Locked 2026-05-18)
+# 00 — Concierge Brain Architecture (Locked 2026-05-18 · rebranded 2026-06-29)
 
 Technical architecture for the AI-powered evolution of the Setnayan
-Concierge surface (iteration **0016**). Free-tier inference for the
+AI surface (iteration **0016**). Free-tier inference for the
 DIY 3-question taste + trial, paid-tier Haiku 4.5 for the
-₱4,999/12mo Concierge Complete SKU.
+₱499/28-day-cycle Setnayan AI subscription.
 
 ## 1. Goal
 
-Evolve the existing Setnayan Concierge from a static 9-step checklist
+Evolve the existing Setnayan AI from a static 9-step checklist
 into a conversational planner that answers couples' real questions
 grounded in a curated Filipino-wedding knowledge base. Free for the
-first 3 questions per event; sustained access via the existing
-₱4,999/12mo `concierge_complete` SKU.
+first 3 questions per event; sustained access via the
+₱499/28-day-cycle Setnayan AI subscription (active from purchase
+until the event date, then auto-ends right after the wedding).
 
 ## 2. Non-goals
 
@@ -19,9 +20,9 @@ first 3 questions per event; sustained access via the existing
   available everywhere for free). The brain's value is Filipino-context
   fluency that competitors cannot match.
 - Not a vendor matching algorithm. That lives in 0006 marketplace +
-  the Guided-mode recommender. The concierge can *refer* couples to
+  the Guided-mode recommender. Setnayan AI can *refer* couples to
   vendor matches but doesn't replace the marketplace.
-- Not a payment / cart agent. The concierge can explain SKUs and
+- Not a payment / cart agent. Setnayan AI can explain SKUs and
   pricing but checkout still happens in 0034.
 
 ## 3. End-to-end query flow
@@ -84,13 +85,17 @@ projected V1 launch traffic of ~100 new couples/day × 3 free questions
 buffer for 5× growth.
 
 **Paid-tier cost ceiling.** Claude Haiku 4.5 at ~₱0.50/query × ~50
-questions per couple over a 12-month engagement = ~₱25 inference cost
-per paid couple. Against ₱4,999 MRR equivalent, that's 0.5% of revenue
+questions per couple over the engagement = ~₱25 inference cost
+per paid couple. Against ₱499/28-day-cycle recurring revenue across
+the engagement, inference stays a low single-digit share of revenue
 — negligible.
 
 ## 5. Schema additions
 
-All new tables/columns sit alongside existing 0016 concierge schema.
+All new tables/columns sit alongside the existing 0016 Setnayan AI
+schema. (The `concierge_*` table/column/action names below are the
+shipped database identifiers and stay as-is — only the product name
+and pricing rebrand.)
 
 ```sql
 -- Brain chunks (the curated knowledge base)
@@ -182,12 +187,12 @@ DIY couple asks Q1 → answer + "2 free questions left" footer chip
 DIY couple asks Q2 → answer + "1 free question left" footer chip
 DIY couple asks Q3 → answer (most useful answer · references prior 2)
                    + "You've reached your 3 free questions. Setnayan
-                      Concierge can keep helping for the next 12 months —
+                      AI can keep helping all the way to your wedding —
                       try 3 days free, no card needed."
-                   + [Continue with Concierge ₱4,999] [Try 3 days free]
+                   + [Continue with Setnayan AI ₱499/mo] [Try 3 days free]
 DIY couple asks Q4 → renders the upsell card only; no LLM call,
                      no quota charge. CTA leads to /dashboard's existing
-                     concierge-trial entry point (already shipped per
+                     Setnayan AI trial entry point (already shipped per
                      0016 § 0).
 ```
 
@@ -202,7 +207,7 @@ quota): the synthesis prompt for paid couples includes structured
 context from their actual event:
 
 ```
-You are the Setnayan Concierge for {couple_names}'s wedding on
+You are Setnayan AI for {couple_names}'s wedding on
 {wedding_date} in {venue_location}.
 
 Event facts:
@@ -210,7 +215,7 @@ Event facts:
 - Budget tier: {working_budget_tier}
 - Vendors booked: {comma-separated category list with status}
 - Outstanding payment milestones in next 30 days: {count and total ₱}
-- Current concierge journey step: {step_label}
+- Current planning journey step: {step_label}
 
 Knowledge base context (top-8 retrieved chunks):
 {chunk_bodies}

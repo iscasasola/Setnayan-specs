@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vendor Dashboard — 5-Menu Reorg · Functional Map (2026-07-01)</title>
+<style>
+  :root{
+    --alabaster:#F7F5F1; --paper:#FFFFFF; --obsidian:#1A1A1A; --ink:#2B2B2B;
+    --gold:#C9A86A; --gold-soft:#EBDFC6; --line:#E4DFD7; --muted:#8A8378;
+    --live:#3F8F5B; --live-bg:#E8F2EA; --build:#7A5AC9; --build-bg:#EFEAFB;
+    --partial:#C18A2B; --partial-bg:#F6EEDD;
+    --admin:#7A5AC9; --customer:#2F6FB0; --guest:#2E8B8B; --cond:#9A8F80;
+    --shadow:0 1px 2px rgba(26,26,26,.06),0 8px 24px rgba(26,26,26,.07);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--alabaster);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-weight:600;letter-spacing:-.01em;margin:0}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 80px}
+
+  /* header */
+  header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+  .brand{display:flex;flex-direction:column;gap:3px}
+  .brand .word{font-size:20px;font-weight:700;letter-spacing:.14em}
+  .brand .word b{color:var(--gold)}
+  .brand .sub{font-size:12px;color:var(--muted);letter-spacing:.04em}
+  .toggles{display:flex;gap:8px;align-items:center}
+  .btn{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 14px;
+    font-size:12.5px;cursor:pointer;color:var(--ink);box-shadow:var(--shadow);transition:.15s}
+  .btn:hover{border-color:var(--gold)}
+  .btn.active{background:var(--obsidian);color:#fff;border-color:var(--obsidian)}
+
+  /* legend */
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;background:var(--paper);
+    border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:18px;box-shadow:var(--shadow)}
+  .legend .lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+  .pill{font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;text-transform:uppercase}
+  .pill.live{color:var(--live);background:var(--live-bg)}
+  .pill.build{color:var(--build);background:var(--build-bg)}
+  .pill.partial{color:var(--partial);background:var(--partial-bg)}
+  .chip{font-size:10px;font-weight:600;padding:1.5px 6px;border-radius:5px;letter-spacing:.02em}
+  .chip.admin{color:var(--admin);background:#efeafb}
+  .chip.customer{color:var(--customer);background:#e7f0f9}
+  .chip.guest{color:var(--guest);background:#e3f1f1}
+  .chip.cond{color:var(--cond);background:#efece7}
+
+  /* device stage */
+  .stage{display:grid;grid-template-columns:1fr 408px;gap:26px;align-items:start}
+  body.only-desktop .phone{display:none}
+  body.only-desktop .stage{grid-template-columns:1fr}
+  body.only-mobile .desktop{display:none}
+  body.only-mobile .stage{grid-template-columns:408px;just-content:center;justify-items:center}
+  @media(max-width:1080px){.stage{grid-template-columns:1fr}.phone{justify-self:center}}
+
+  /* desktop frame */
+  .desktop{background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .d-chrome{display:flex;align-items:center;gap:7px;padding:9px 14px;border-bottom:1px solid var(--line);background:#fbfaf8}
+  .d-chrome .tl{display:flex;gap:6px}.tl i{width:11px;height:11px;border-radius:50%;background:#e0dbd2;display:block}
+  .d-chrome .addr{margin-left:8px;font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--line);
+    border-radius:7px;padding:3px 10px;flex:1}
+  .d-body{display:grid;grid-template-columns:190px 1fr;min-height:560px}
+  .d-rail{border-right:1px solid var(--line);padding:12px 9px;background:#fbfaf8}
+  .d-rail .rl{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;
+    font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px}
+  .d-rail .rl .ic{width:18px;display:flex;align-items:center;justify-content:center}
+  .ico{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;display:block}
+  .d-rail .rl .ico{width:17px;height:17px}
+  .tile .ic .ico{width:20px;height:20px}
+  .m-head .ic .ico{width:24px;height:24px}
+  .stack .h .ico{width:16px;height:16px;display:inline-block;vertical-align:-3px}
+  .d-rail .rl:hover{background:#f1ede6}
+  .d-rail .rl.active{background:var(--obsidian);color:#fff}
+  .d-rail .rl.active .ic{color:#fff}
+  .d-rail .topchip{display:flex;align-items:center;justify-content:space-between;margin:4px 6px 12px;
+    font-size:11px;color:var(--muted)}
+  .d-rail .tk{font-weight:700;color:var(--gold)}
+  .d-main{padding:18px 20px;overflow:auto}
+
+  /* phone frame */
+  .phone{width:408px;background:#111;border-radius:42px;padding:11px;box-shadow:0 18px 50px rgba(0,0,0,.22);position:sticky;top:18px}
+  .p-screen{background:var(--alabaster);border-radius:32px;overflow:hidden;height:760px;display:flex;flex-direction:column;position:relative}
+  .p-status{height:34px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);font-weight:600}
+  .p-status:after{content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);width:96px;height:20px;background:#111;border-radius:0 0 16px 16px}
+  .p-head{padding:6px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+  .p-head .ttl{font-size:17px;font-weight:700}
+  .p-head .tk{font-size:11px;font-weight:700;color:var(--gold);background:var(--gold-soft);padding:3px 9px;border-radius:999px}
+  .p-main{flex:1;overflow:auto;padding:4px 14px 14px}
+  .p-nav{display:flex;border-top:1px solid var(--line);background:var(--paper)}
+  .p-nav .nv{flex:1;text-align:center;padding:8px 2px 11px;font-size:10px;color:var(--muted);cursor:pointer;font-weight:600}
+  .p-nav .nv .ic{display:flex;justify-content:center;margin-bottom:2px}
+  .p-nav .nv .ico{width:18px;height:18px}
+  .p-nav .nv.active{color:var(--obsidian)}
+  .p-nav .nv.active .ic{filter:none}
+
+  /* hub content (shared) */
+  .menu-title{font-size:16px;font-weight:700;margin-bottom:2px}
+  .menu-desc{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .rowlabel{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+  .tiles{display:grid;gap:9px}
+  .d-main .tiles.cols4{grid-template-columns:repeat(4,1fr)}
+  .d-main .tiles.cols3{grid-template-columns:repeat(3,1fr)}
+  .d-main .tiles.cols2{grid-template-columns:repeat(2,1fr)}
+  .d-main .tiles.cols1{grid-template-columns:1fr}
+  .p-main .tiles.cols4,.p-main .tiles.cols3{grid-template-columns:repeat(2,1fr)}
+  .p-main .tiles.cols2,.p-main .tiles.cols1{grid-template-columns:1fr}
+  .tile{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:12px;
+    padding:12px 11px;cursor:pointer;transition:.14s;min-height:84px;display:flex;flex-direction:column;gap:5px}
+  .tile:hover{border-color:var(--gold);transform:translateY(-1px);box-shadow:var(--shadow)}
+  .tile.build{border-style:dashed;border-color:#cdbff0;background:#fcfbff}
+  .tile.locked{opacity:.6;background:#faf9f7}
+  .tile.locked .ic{filter:grayscale(1)}
+  .lockbadge{font-size:9.5px;font-weight:700;color:#8a7f70;background:#efece7;padding:2px 7px;border-radius:999px;white-space:nowrap;display:inline-flex;align-items:center;gap:3px}
+  .lockbadge .ico{width:11px;height:11px}
+  .tile .ic{font-size:19px}
+  .tile .nm{font-size:13px;font-weight:600;line-height:1.2}
+  .tile .mini{font-size:10.5px;color:var(--muted)}
+  .tile .corner{position:absolute;top:8px;right:8px}
+  .tile .chips{display:flex;gap:3px;flex-wrap:wrap;margin-top:auto}
+  .wide{grid-column:1/-1}
+  .stack{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:9px}
+  .stack .h{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;justify-content:space-between}
+  .stack .sub{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .stack ul{margin:8px 0 0;padding-left:16px;font-size:12px;color:var(--ink)}
+  .stack ul li{margin-bottom:3px}
+  .respond{font-size:10.5px;font-weight:700;color:#fff;background:var(--obsidian);border-radius:7px;padding:4px 9px;display:inline-block;margin-top:6px}
+
+  /* detail modal */
+  .scrim{position:fixed;inset:0;background:rgba(26,26,26,.42);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .scrim.open{display:flex}
+  .modal{background:var(--paper);border-radius:16px;max-width:520px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.3)}
+  .m-head{padding:18px 20px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper)}
+  .m-head .row1{display:flex;align-items:center;gap:10px}
+  .m-head .ic{font-size:24px}
+  .m-head h3{font-size:18px}
+  .m-head .path{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:.02em}
+  .m-body{padding:14px 20px 20px}
+  .m-sec{margin-bottom:14px}
+  .m-sec .lab{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .m-sec p{margin:0;font-size:13px}
+  .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;background:#f4f1ec;border:1px solid var(--line);
+    border-radius:5px;padding:1.5px 6px;display:inline-block;margin:2px 3px 2px 0;color:#5a5246}
+  .close{position:absolute;top:14px;right:16px;font-size:20px;cursor:pointer;color:var(--muted);border:none;background:none}
+  .note{background:#fbf7ee;border:1px solid var(--gold-soft);border-radius:9px;padding:9px 11px;font-size:12px;color:#6b5d3c}
+  .foot{margin-top:26px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6}
+</style>
+</head>
+<body class="show-both">
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="word">SET<b>NAYAN</b> · Vendor</div>
+      <div class="sub">5-Menu Reorganization · Functional Map &amp; Click-through Prototype · 2026-07-01</div>
+    </div>
+    <div class="toggles">
+      <button class="btn" data-view="only-desktop">Desktop</button>
+      <button class="btn active" data-view="show-both">Both</button>
+      <button class="btn" data-view="only-mobile">Mobile</button>
+      <span style="width:1px;height:22px;background:var(--line);margin:0 3px"></span>
+      <button class="btn tier" data-tier="fu">Free · Unverified</button>
+      <button class="btn tier" data-tier="fv">Free · Verified</button>
+      <button class="btn tier" data-tier="solo">Solo</button>
+      <button class="btn tier active" data-tier="pro">Pro</button>
+      <button class="btn tier" data-tier="ent">Enterprise</button>
+    </div>
+  </header>
+
+  <div class="legend">
+    <span class="lg"><span class="pill live">Live</span> already built</span>
+    <span class="lg"><span class="pill partial">Partial</span> data exists, surface needed</span>
+    <span class="lg"><span class="pill build">To build</span> net-new</span>
+    <span class="lg"><span class="chip admin">Admin</span> wired to admin console</span>
+    <span class="lg"><span class="chip customer">Customer</span> wired to couple</span>
+    <span class="lg"><span class="chip guest">Guest</span> public-facing</span>
+    <span class="lg"><span class="chip cond">Category</span> shows only for matching vendor type</span>
+    <span class="lg" style="color:var(--ink)">› Click any tile for its functions, tables &amp; connections</span>
+  </div>
+
+  <div class="stage">
+    <!-- DESKTOP -->
+    <div class="desktop">
+      <div class="d-chrome"><span class="tl"><i></i><i></i><i></i></span>
+        <span class="addr">setnayan.com/vendor-dashboard</span></div>
+      <div class="d-body">
+        <nav class="d-rail" id="dRail">
+          <div class="topchip"><span>Pro · Verified</span><span class="tk">◎ 240</span></div>
+        </nav>
+        <div class="d-main" id="dMain"></div>
+      </div>
+    </div>
+
+    <!-- MOBILE -->
+    <div class="phone">
+      <div class="p-screen">
+        <div class="p-status">9:41</div>
+        <div class="p-head"><span class="ttl" id="pTitle">Overview</span><span class="tk" id="pTok">◎ 240</span></div>
+        <div class="p-main" id="pMain"></div>
+        <div class="p-nav" id="pNav"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="note" style="text-align:left;max-width:760px;margin:0 auto 14px">
+      <b>⚠ REORG SAFETY RULE (from the 22-agent audit · verdict: major-gaps):</b> keep every <code class="code" style="margin:0">/vendor-dashboard/&lt;route&gt;</code> path MOUNTED — only re-group / relabel in the nav. ~13 cross-actor deep-links (admin + couple notification <code class="code" style="margin:0">relatedUrl</code> + <code class="code" style="margin:0">revalidatePath</code>) and 41 nav refs hard-code these paths; <b>moving a route silently breaks them.</b> Verify must stay routable even when its UI folds into Profile. Partnerships must keep its path (admin redirects back to it).
+    </div>
+    Design-only prototype · no app code changed · companion to the functional audit of all 29 live vendor surfaces.<br/>
+    When the “To build” tiles ship, sync the marketing surface: <b>/for-vendors</b> + <code class="code" style="margin:0">lib/vendor-benefits.ts</code>.
+  </div>
+</div>
+
+<!-- detail modal -->
+<div class="scrim" id="scrim">
+  <div class="modal" id="modal" style="position:relative">
+    <button class="close" id="mClose">×</button>
+    <div class="m-head">
+      <div class="row1"><span class="ic" id="mIc">◻︎</span><h3 id="mName">—</h3><span id="mPill"></span></div>
+      <div class="path" id="mPath"></div>
+    </div>
+    <div class="m-body" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+/* ============ FUNCTIONAL MAP DATA (from the code audit) ============ */
+const C={A:'admin',Cu:'customer',G:'guest',Co:'cond'};
+const MENUS=[
+ {key:'overview',label:'Overview',ic:'🏠',desc:'Command center — what needs you today.',
+  sections:[
+   {custom:'whatsnew'},
+   {custom:'ongoing'},
+   {custom:'upcoming'}
+  ]},
+
+ {key:'shop',label:'My Shop',ic:'🛍️',desc:'Everything that defines your shop and your reach.',
+  rows:[
+   {label:'Identity',cols:4,tiles:[
+     {id:'profile',ic:'👤',nm:'Profile',mini:'Info + documents + Verify',st:'live',ch:[C.A,C.G],
+      path:'/vendor-dashboard/profile  (Verify folded in)',
+      what:'Edit shop info & branding; upload the documents the verification application needs. Verify now lives inside Profile as a status block + document uploads — the admin verification handshake is unchanged.',
+      fns:['saveVendorProfile','toggleVendorBackendCount','ensureDraftApplication','updateDocUpload','submitApplication','withdrawApplication'],
+      tbls:['vendor_profiles','vendor_verification_applications','vendor_tier_history','admin_audit_log'],
+      conn:'Admin verification queue reviews the application; public /v/[slug] reflects the verified badge.'},
+     {id:'website',ic:'🌐',nm:'Website',mini:'Your public page',st:'live',ch:[C.G],
+      path:'/vendor-dashboard/website',
+      what:'Live preview + edit of the public vendor page “as couples see it”. Open-live and customize what guests/couples see.',
+      fns:['(editor surface)'],tbls:['vendor_profiles'],conn:'Renders the guest-facing /v/[slug] page.'},
+     {id:'team',ic:'👥',nm:'Team',mini:'Add members',st:'live',ch:[],
+      path:'/vendor-dashboard/team',
+      what:'Invite members, set roles (owner/agent/viewer), and assign which services each agent can handle.',
+      fns:['inviteVendorTeamMember','updateVendorTeamMember','removeVendorTeamMember','setVendorAgentServices'],
+      tbls:['users','vendor_team_members','vendor_service_agents','vendor_services'],conn:'Agent seats are tier-gated.'},
+     {id:'branch',ic:'🏢',nm:'Branch',mini:'Extra locations · Pro 2 · Ent 10',st:'live',ch:[C.A],lock:'pro',
+      path:'/vendor-dashboard/branches',
+      what:'Add extra location “accounts” (documents required). Cap: Solo 1 · Pro 2 · Enterprise 10 accounts (account = branch). ⚠ Code change: branches are Enterprise-only today (createBranch hard-fails if tier!==enterprise, uncapped) → extend to Solo/Pro and enforce the 1/2/10 count.',
+      fns:['createBranch','renewBranch','cancelBranch'],tbls:['vendor_branches','orders','payments'],
+      conn:'Each branch is a paid 28-day add-on → admin payment reconciliation. Current guard: Enterprise-only.'}
+   ]},
+   {label:'Plan & wallet',cols:3,tiles:[
+     {id:'subscription',ic:'👑',nm:'Subscription',mini:'Free · Solo · Pro · Enterprise',st:'live',ch:[C.A],
+      path:'/vendor-dashboard/subscription',
+      what:'Pick / upgrade the tier. Tier sets reach, agent seats, branch eligibility and category cap.',
+      fns:['startSubscriptionPurchase'],tbls:['vendor_profiles','orders'],conn:'Purchase → admin reconciliation.'},
+     {id:'tokens',ic:'🪙',nm:'Tokens',mini:'Track & buy',st:'live',ch:[C.A],
+      path:'/vendor-dashboard/tokens',
+      what:'Token wallet — balance, packs, purchase, grant & redemption history. Tokens are burned to answer inquiries.',
+      fns:['startTokenPurchase'],tbls:['vendor_wallets','vendor_token_purchases','token_grants_log','token_redemptions_log','earned_token_vouchers'],
+      conn:'Purchases → admin reconciliation.'},
+     {id:'codes',ic:'🎟️',nm:'Special Codes',mini:'Activate benefits',st:'live',ch:[C.A],
+      path:'/vendor-dashboard/redeem-code',
+      what:'Redeem a Setnayan-issued voucher code to receive tokens or activate a benefit.',
+      fns:['redeemVendorTokenVoucher'],tbls:['vendor_wallets','vendor_profiles'],conn:'Codes are issued from the admin console.'}
+   ]},
+   {label:'Acquisition QR',cols:2,tiles:[
+     {id:'shortlistqr',ic:'📲',nm:'Shortlist QR',mini:'Scan → added to shortlist',st:'build',ch:[C.Cu],lock:'verified',
+      path:'NEW · vendor-generated QR',
+      what:'Your QR. A couple scans it at registration and you are auto-added to THEIR shortlist — for a declared event-type + service. (Today’s /vendor/claim flow is the inverse: couple-invites-vendor. This is vendor→couple.)',
+      fns:['(to build) generateShortlistQr · bindEventTypeService · onScanAddToShortlist'],
+      tbls:['(new) shortlist binding','event_vendors','vendor_follows'],
+      conn:'Writes into the couple’s shortlist; couple sees you pre-added.'},
+     {id:'lockqr',ic:'🔒',nm:'Locked QR',mini:'Scan → locked + initial pay',st:'build',ch:[C.Cu,C.A],lock:'verified',
+      path:'NEW · per-customer QR (largest new build)',
+      what:'A customized QR per customer that auto-locks you as their vendor for one category — requires an initial payment received, and carries your payment-schedule for them. Indicate event-type + service + amount paid + payment options.',
+      fns:['(to build) issueLockedQr · recordInitialPayment · lockCategory · attachPaymentSchedule'],
+      tbls:['(new) lock records','event_vendors','orders','payments','vendor_service_payment_schedules'],
+      conn:'Lock writes to couple’s vendor list; payment → admin reconciliation; schedule shown to couple.'}
+   ]},
+   {label:'Proof & relationships',cols:3,tiles:[
+     {id:'stories',ic:'✨',nm:'Stories',mini:'Editorials you’re tagged in',st:'live',ch:[C.G,C.Cu],
+      path:'/vendor-dashboard/real-stories',
+      what:'Shows how many editorials/Real Stories you’re tagged in. Click → view all; each is shareable to your Facebook Page.',
+      fns:['(read + share)'],tbls:['events','event_members','users'],conn:'Couple publishes the editorial; public /realstories shows it.'},
+     {id:'reviews',ic:'⭐',nm:'Reviews',mini:'Avg score → all reviews',st:'live',ch:[C.Cu,C.G,C.A],
+      path:'/vendor-dashboard/reviews',
+      what:'Shows your average score. Click → all reviews + comments. Reply to a review or flag one as fake.',
+      fns:['postVendorReply','submitFlagAsFake'],tbls:['vendor_reviews'],
+      conn:'Couples write (event-bound, zero fakes); guests read on your public page; admin reviews flags.'},
+     {id:'recap',ic:'🎬',nm:'Recap',mini:'10×5s day-of clips',st:'build',ch:[C.G,C.Co],
+      path:'NEW · day-of capture + My Shop library',
+      what:'⚠ AUDIT: KEEP the existing /recaps as the read-only post-event Facebook SHARE loop (couple + admin publish event_recaps). The day-of 10×5s capture is a SEPARATE new build — do NOT reframe /recaps into it or the share loop breaks. This tile = the existing library; capture lives on the day-of screen.',
+      fns:['(existing) share to FB','(to build, separate) captureRecapClip(≤5s, ≤10)'],tbls:['event_recaps','(new) vendor recap clips'],
+      conn:'event_recaps written by couple + admin (vendor does NOT own it); vendor view is read-only proof-of-work + FB share.'}
+   ]},
+   {label:'Audience',cols:2,tiles:[
+     {id:'favorites',ic:'💚',nm:'Saved by couples',mini:'Your followers — count-first',st:'build',ch:[C.Cu],
+      path:'NEW · vendor-facing',
+      what:'Count-first list of couples who SAVED/followed you (vendor_follows = couple-follows-vendor). ⚠ AUDIT: DEAD WIRE today — no vendor surface reads vendor_follows and no new-event notify exists; fully net-new. Must be count-first + hybrid-anonymity-aware (don’t expose couple identity prematurely — PII risk).',
+      fns:['(to build) listFollowers','notifyOnFollowerNewEvent'],tbls:['vendor_follows','events'],
+      conn:'Couple writes the follow; vendor needs a new read path + a new-event notify trigger.'},
+     {id:'recommend',ic:'🤝',nm:'Recommend',mini:'Mutual-accept · worked-together proof',st:'partial',ch:[C.Cu],
+      path:'/vendor-dashboard/partnerships',
+      what:'How many shops recommended you. Click → who, with the option to return the recommendation and add shops you recommend. The connection is MUTUAL-ACCEPT (both shops confirm) — no admin gate. A “worked together” signal is DERIVED automatically when both shops were locked/booked on the same couple’s event (no manual verified badge, no admin).',
+      fns:['(rework) mutualAcceptRecommendation','(to build) deriveWorkedTogether(shared event_vendors)'],tbls:['vendor_partnerships','vendor_profiles','event_vendors'],
+      conn:'Vendor-to-vendor, both must accept. “Worked together” is proven from event_vendors co-occurrence — fraud-proof, zero admin. ⚠ AUDIT: today this surface is admin-curated (two-admin HQ verify) and READ-ONLY on the vendor side (no actions.ts). Mutual-accept REPLACES that admin model — a real build, not a relabel.'}
+   ]}
+  ]},
+
+ {key:'customers',label:'My Customers',ic:'📅',desc:'Calendar, your book of business, money in, and the per-customer workspace.',
+  rows:[
+   {label:'Schedule',cols:1,tiles:[
+     {id:'calendar',ic:'🗓️',nm:'Monthly Calendar',mini:'Filter by service · day view · open customer',st:'live',ch:[C.Cu],wide:true,
+      path:'/vendor-dashboard/calendar',
+      what:'Month grid filtered by your services / schedules / blocked dates. Tap a day → day view; tap a schedule → opens that customer. One schedule pool per service category.',
+      fns:['createCalendar','editCalendar','addManualBlock','removeBlock','updatePoolCapacity','reassignCategoryPool','importExternalClient'],
+      tbls:['vendor_calendar_blocks','vendor_schedule_pools','vendor_schedule_pool_categories','vendor_schedule_calendar_services','vendor_services'],
+      conn:'Bookings hold live schedule slots from couples.'}
+   ]},
+   {label:'Inbox & book of business',cols:1,tiles:[
+     {id:'bookings',ic:'📥',nm:'Bookings · Inquiry inbox',mini:'Pending inquiries — Accept burns the token',st:'live',ch:[C.Cu],wide:true,lock:'verified',
+      path:'/vendor-dashboard/bookings',
+      what:'AUDIT FIX — this was missing and is the single biggest gap. The pending/unaccepted inquiry inbox: Accept or Decline each. ⚠ The token burn fires HERE on ACCEPT (once per couple-event, covering all services; returning customer = flat 1), NOT per chat message. Importing an outside client on Calendar also burns 1. Without this tile the customer funnel is broken.',
+      fns:['acceptInquiry (unlock_vendor_event · burns token)','declineInquiry'],tbls:['chat_threads (inquiry_status)','chat_messages'],conn:'Couple inquiry lands here; accepting opens the thread + the booking.'},
+     {id:'customerlist',ic:'📇',nm:'Customer List',mini:'Booked · In-conversation · Outside clients',st:'live',ch:[C.Cu],wide:true,
+      path:'/vendor-dashboard/clients',
+      what:'AUDIT FIX — real code buckets are Booked, In-conversation (accepted), and imported Outside-clients — NOT the couple-side terms shortlist/locked/ready/completed.',
+      fns:['(list + filter)'],tbls:['event_vendors','events','event_members'],conn:'Each row is a couple’s event.'},
+     {id:'messages',ic:'💬',nm:'Messages',mini:'Chat with accepted couples',st:'live',ch:[C.Cu],wide:true,lock:'verified',
+      path:'/vendor-dashboard/messages  → integrated into My Customers',
+      what:'AUDIT FIX — token burn is NOT here; it fires on Accept in Bookings. This is the chat thread after acceptance. Payment confirm/clear also happens INSIDE the thread (pay-confirm-actions), booking-scoped.',
+      fns:['(thread send)','confirm_vendor_payment / clear_vendor_payment_plan'],tbls:['chat_threads','chat_messages','event_members'],
+      conn:'Direct line to the couple after acceptance.'}
+   ]},
+   {label:'Money in',cols:2,tiles:[
+     {id:'earnings',ic:'💰',nm:'Ongoing Payments',mini:'Track + mark received, per customer',st:'live',ch:[C.Cu],
+      path:'/vendor-dashboard/earnings  (moved here · reframed)',
+      what:'The ACTIVE money operation: ongoing/expected payments per customer (downpayment, balance) and mark each received — off-platform, Setnayan never holds the money. Pairs with Payment Options (set up where customers send payment, right beside it).',
+      fns:['(read · recompute)','markPaymentReceived'],tbls:['payments','event_vendor_payments','vendor_payouts','platform_settings'],conn:'Couples pay off-platform; 0% commission. Full historical ledger lives in My Performance → Transactions.'},
+     {id:'payopts',ic:'🏦',nm:'Payment Options',mini:'Where customers pay you',st:'live',ch:[C.Cu],
+      path:'/vendor-dashboard/payment-options',
+      what:'Set up the accounts (BDO/GCash/etc.) customers send payment to, pick a primary, toggle which show.',
+      fns:['addPaymentMethod','deletePaymentMethod','setPrimaryPaymentMethod','togglePaymentMethodShown'],
+      tbls:['vendor_payment_methods','orders'],conn:'Couples see these as “how to pay this vendor”.'}
+   ]},
+   {label:'Per-customer workspace',cols:1,tiles:[
+     {id:'opencustomer',ic:'🗂️',nm:'Open Customer',mini:'Category-conditional workspace',st:'partial',ch:[C.Cu,C.Co],wide:true,
+      path:'/vendor-dashboard/clients/[eventId]  (to be reworked)',
+      what:'One place to run a booking end-to-end. Shared tools: schedule-for-client, contracts, file sharing, proposals, chat, mark-complete, suggest-schedule-change. The DELIVERY tools SWAP by your category — caterer sees Production Sheet, planner sees Seat Plan, bar sees Cocktail layout, photographer sees Editorial Media.',
+      fns:['vendorMarkServiceComplete','suggestScheduleChange','uploadVendorContract','publishContractToCouple','cancelContract','createProposal','sendProposal','respondToProposal','addPortionRule (caterer)','set/move Cocktail booth+sign (bar)','submitVendorEditorialMedia (photo)'],
+      tbls:['event_vendors','vendor_contracts','vendor_proposals','event_schedule_blocks','event_schedule_suggestions','vendor_portion_rules','editorial_vendor_media'],
+      conn:'Publish contract → couple signs; send proposal → couple; schedule suggestion → couple’s schedule.'}
+   ]}
+  ]},
+
+ {key:'performance',label:'My Performance',ic:'📈',desc:'How you’re doing — demand, funnel, money ledger.  (Mostly net-new.)',
+  rows:[
+   {label:'Insight',cols:3,tiles:[
+     {id:'demand',ic:'📡',nm:'Demand Radar',mini:'Who’s searching your category',st:'build',ch:[],lock:'verified',
+      path:'NEW',what:'De-identified demand signal — what couples search/need in your category & area. ⚠ AUDIT: vendor_market_stats EXISTS but NO vendor-dashboard file reads it today (dead wire to connect); min-N protected.',
+      fns:['(to build)'],tbls:['vendor_market_stats','(behavioral, min-N)'],conn:'Edge behavioral data — currently read only by couple/explore, never vendor-side.'},
+     {id:'funnel',ic:'🔻',nm:'Funnel',mini:'View → inquiry → booking',st:'build',ch:[],lock:'verified',
+      path:'NEW',what:'Conversion funnel from profile view to booked event. ⚠ AUDIT: inquiry→booking % already shows in Home stats; upstream stages (impressions/saves) are NOT instrumented yet — must add those first or it double-counts.',
+      fns:['(to build)'],tbls:['vendor_market_stats','event_vendors','chat_threads'],conn:'Needs upstream instrumentation before it’s meaningful.'},
+     {id:'reports',ic:'📑',nm:'Reports',mini:'Disputes / issues raised',st:'build',ch:[C.A,C.Cu],
+      path:'NEW',what:'Reports & disputes that involve your shop, with status. Genuinely net-new vendor view.',
+      fns:['(to build)'],tbls:['(disputes)'],conn:'Mirrors admin/customer dispute records.'},
+     {id:'shortlistradar',ic:'🎯',nm:'Shortlist Radar',mini:'Saved-by-couples over time',st:'build',ch:[C.Cu],lock:'verified',
+      path:'NEW',what:'How often you’re saved/shortlisted over time. ⚠ AUDIT: a TREND is impossible today — un-saving DELETES the vendor_follows row (no append-only log). Needs a follow-events log table first.',
+      fns:['(to build) + new append-only follow log'],tbls:['vendor_follows (no history)'],conn:'Needs a history table; current table is current-state only.'},
+     {id:'performance',ic:'🏆',nm:'Performance',mini:'Responsiveness · rating health',st:'partial',ch:[],lock:'verified',
+      path:'Ships TODAY in Home (VendorStatsPanel)',what:'AUDIT FIX — this already ships in Home via VendorStatsPanel + vendor_activity_stats. RE-HOME it here, don’t rebuild. Keep platform_health_score HIDDEN (HQ-internal only).',
+      fns:['(re-home existing)'],tbls:['vendor_activity_stats','vendor_reviews'],conn:'Already computed; just relocate the panel.'},
+     {id:'transactions',ic:'🧾',nm:'Transactions',mini:'All payments · annual/monthly · animated graph',st:'partial',ch:[C.A],
+      path:'Substantially ships as /earnings',what:'Complete ledger of ALL payments (ongoing + completed), annual/monthly with an animated graph. ⚠ AUDIT: substantially EXISTS as /earnings — extend that, don’t build from scratch. Distinct from per-customer Ongoing Payments in My Customers.',
+      fns:['(extend /earnings)','renderAnimatedTrendGraph'],tbls:['orders','payments','event_vendor_payments'],conn:'Source rows reconciled by admin; read-only analytical view.'}
+   ]}
+  ]},
+
+ {key:'services',label:'My Services',ic:'🧰',desc:'What you sell, your coverage, and your category specialist tools.',
+  rows:[
+   {label:'Catalog',cols:2,tiles:[
+     {id:'coverage',ic:'🗺️',nm:'Service Coverage',mini:'Which services you cater + attributes',st:'partial',ch:[C.A],
+      path:'NEW framing · uses /attributes',
+      what:'Declare which taxonomy services you cover and fill the match attributes couples filter on (leaf-only refinements). Propose a new category if yours is missing.',
+      fns:['saveVendorServiceAttribute','removeVendorServiceAttribute','proposeCategory'],
+      tbls:['vendor_service_attributes','canonical_service_schemas','shared_attribute_groups','taxonomy_category_requests'],
+      conn:'proposeCategory → admin taxonomy queue.'},
+     {id:'addservice',ic:'➕',nm:'My Service / Add',mini:'Create service · price · pax · assign team',st:'live',ch:[],
+      path:'/vendor-dashboard/services (+ /new/[category])',
+      what:'Create a service with attributes, photos, starting price (pax), estimated +pax pricing, time slots, payment schedule, links. Commit to publish; assign to a team agent.',
+      fns:['createVendorService','updateVendorService','setServiceLinks','setServicePaymentSchedule','addServiceTimeSlot','deleteServiceTimeSlot','commitVendorService','toggleVendorServiceActive','deleteVendorService'],
+      tbls:['vendor_services','vendor_service_links','vendor_service_payment_schedules','vendor_service_time_slots','vendor_branches','vendor_service_agents'],
+      conn:'Published services appear on your public page + search.'}
+   ]},
+   {label:'Specialist tools — only Repertoire is truly category-gated',cols:3,tiles:[
+     {id:'manpower',ic:'👷',nm:'Manpower',mini:'Day-of gig marketplace (2-token accept)',st:'live',ch:[],
+      path:'/vendor-dashboard/manpower',
+      what:'AUDIT FIX — NOT a caterer-gated crew tool. It’s a host-paid day-of GIG MARKETPLACE: post/accept/complete gigs (accepting burns 2 tokens). ⚠ The couple crew-meal budget line comes from event_vendors.food_allowance_php, NOT manpower_gigs — that bridge is a dead-end (gig cash stays off-platform, host→crew).',
+      fns:['postManpowerGig','acceptManpowerGig','completeGig','cancelGig'],
+      tbls:['manpower_gigs','vendor_wallets'],conn:'Host pays crew off-platform; not in the couple budget.'},
+     {id:'moodboard',ic:'🎨',nm:'Moodboard',mini:'Stylist asset gallery (admin-approved)',st:'live',ch:[C.A],
+      path:'/vendor-dashboard/moodboard-library',
+      what:'Upload stylist palette assets + color ranges. ⚠ AUDIT FIX — NOT category-gated; it’s admin-approval-gated before assets go live.',
+      fns:['uploadStylistAsset','saveStylistColorRanges','deleteStylistAsset'],
+      tbls:['moodboard_library_assets','moodboard_asset_color_ranges','users'],conn:'Feeds couple moodboards after admin approval.'},
+     {id:'repertoire',ic:'🎵',nm:'Repertoire',mini:'Music act song sets',st:'live',ch:[C.Co],
+      path:'/vendor-dashboard/repertoire',
+      what:'Manage your song sets (band/singer/DJ/orchestra/choir). The ONLY genuinely category-conditional tool (isMusicVendor gate) — hidden for non-music vendors.',
+      fns:['addRepertoireSong','removeRepertoireSong'],tbls:['vendor_songs'],conn:'Shown to couples choosing songs.'}
+   ]}
+  ]}
+];
+
+/* day-of note appended under Recap context */
+const DAYOF={ic:'🎥',nm:'Day-of screen (Recap capture)',mini:'10×5s service clips',st:'build',
+  what:'A live-event surface (not one of the 5 menus) that activates the day you serve an event. Capture up to 10 × 5-second clips of your service → publishes into the couple’s recap.'};
+
+/* ============ RENDER ============ */
+let active='overview';
+let tierState='pro';
+function tierMeta(){
+  const m={
+    fu:{label:'Free · Unverified',tok:'◎ 0'},
+    fv:{label:'Free · Verified',tok:'◎ 100'},
+    solo:{label:'Solo · Verified',tok:'◎ 120'},
+    pro:{label:'Pro · Verified',tok:'◎ 240'},
+    ent:{label:'Enterprise · Verified',tok:'◎ 240'},
+  };
+  return m[tierState]||m.pro;
+}
+function lockReason(t){
+  if(!t.lock)return null;
+  const verified=['fv','solo','pro','ent'].includes(tierState);
+  const proPlus=['pro','ent'].includes(tierState);
+  if(t.lock==='verified')return verified?null:'Verify to unlock';
+  if(t.lock==='pro')return proPlus?null:'Pro plan';
+  if(t.lock==='enterprise')return tierState==='ent'?null:'Enterprise';
+  return null;
+}
+const dRail=document.getElementById('dRail'),dMain=document.getElementById('dMain'),
+      pMain=document.getElementById('pMain'),pNav=document.getElementById('pNav'),pTitle=document.getElementById('pTitle');
+
+function pillHtml(st){const m={live:'Live',partial:'Partial',build:'To build'};return `<span class="pill ${st}">${m[st]}</span>`}
+function chipsHtml(ch){const m={admin:'Admin',customer:'Customer',guest:'Guest',cond:'Category'};
+  return (ch||[]).map(c=>`<span class="chip ${c}">${m[c]}</span>`).join('')}
+
+/* Emoji → Lucide line-icon renderer (one icon family · prose markers like ⚠ ✓ pass through). */
+function svg(p){return `<svg class="ico" viewBox="0 0 24 24">${p}</svg>`}
+const LIC={
+  '🏠':'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+  '🛍':'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  '📅':'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>',
+  '🗓':'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>',
+  '📆':'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>',
+  '📈':'<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  '🧰':'<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  '👤':'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  '🌐':'<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  '👥':'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  '🏢':'<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"/><path d="M2 22h20"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/>',
+  '👑':'<path d="m3 8 4.5 4L12 6l4.5 6L21 8l-2 11H5L3 8z"/><path d="M5 20h14"/>',
+  '🪙':'<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
+  '🎟':'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/>',
+  '📲':'<rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3M21 21v.01M12 7v3a2 2 0 0 1-2 2H7M12 3h.01M12 16v.01M16 12h1M21 12v.01M12 21v-1"/>',
+  '🔒':'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  '✨':'<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/>',
+  '⭐':'<path d="M12 2 15.09 8.26 22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 6.91-1.01z"/>',
+  '🎬':'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18M17 3v18M3 7.5h4M17 7.5h4M3 12h18M3 16.5h4M17 16.5h4"/>',
+  '🎥':'<path d="m22 8-6 4 6 4V8z"/><rect width="14" height="12" x="2" y="6" rx="2"/>',
+  '💚':'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.49 4.04 3 5.5l7 7Z"/>',
+  '🤝':'<path d="m15.5 12.9 1.5 8.5-5-3-5 3 1.5-8.5"/><circle cx="12" cy="8" r="6"/>',
+  '📇':'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 8h.01M7 12h.01M7 16h.01M11 8h6M11 12h6M11 16h6"/>',
+  '📥':'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  '💬':'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  '💰':'<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h16v3"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h3v-4z"/>',
+  '🏦':'<path d="M3 22h18"/><path d="M6 18V11M10 18V11M14 18V11M18 18V11"/><path d="M12 2 21 7H3z"/>',
+  '🗂':'<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>',
+  '📡':'<path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 8.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 8.6"/><path d="M19.1 1.9a8.69 8.69 0 0 1 0 12.2"/><path d="M12 11v11"/>',
+  '🔻':'<path d="M22 3H2l8 9.46V19l4 2v-8.54z"/>',
+  '📑':'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5M16 13H8M16 17H8M10 9H8"/>',
+  '🎯':'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  '🏆':'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0z"/>',
+  '🧾':'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/>',
+  '🗺':'<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M9 4v13M15 7v13"/>',
+  '➕':'<circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/>',
+  '👷':'<path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5M4 15v-3a6 6 0 0 1 6-6M20 15v-3a6 6 0 0 0-6-6"/>',
+  '🎨':'<path d="M12 22a10 10 0 1 1 10-10c0 1.5-1 2.5-2.5 2.5H17a2 2 0 0 0-2 2c0 .5.2 1 .5 1.4.3.4.5.9.5 1.4a2 2 0 0 1-2 2z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/>',
+  '🎵':'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  '🆕':'<circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/>',
+  '⏳':'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  '🚀':'<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+  '📦':'<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
+};
+function lic(e){if(!e)return '';const k=String(e).replace(/️/g,'');return LIC[k]?svg(LIC[k]):e;}
+function tileHtml(t){
+  const lr=lockReason(t);
+  return `<div class="tile ${t.st==='build'?'build':''} ${t.wide?'wide':''} ${lr?'locked':''}" data-id="${t.id}">
+    <div class="corner">${lr?`<span class="lockbadge">${lic('🔒')} ${lr}</span>`:pillHtml(t.st)}</div>
+    <div class="ic">${lic(t.ic)}</div>
+    <div class="nm">${t.nm}</div>
+    <div class="mini">${t.mini||''}</div>
+    <div class="chips">${chipsHtml(t.ch)}</div>
+  </div>`;
+}
+
+function overviewHtml(){
+  const free=tierState==='fu'?`
+  <div class="stack" style="border-color:var(--gold-soft);background:#fbf7ee">
+    <div class="h">${lic('🚀')} Finish setting up <span class="pill build">Free · new</span></div>
+    <div class="sub">Couples can’t reach you yet. Get verified to unlock Messages, reach &amp; 100 founder tokens.</div>
+    <ul><li>☐ Complete Profile + upload documents</li><li>☐ Add at least one Service</li><li>☐ Submit verification → <span class="respond">Verify now</span></li></ul>
+    <div class="sub" style="margin-top:8px">✓ 0% commission always &nbsp;·&nbsp; ✓ 100 tokens on verify &nbsp;·&nbsp; ✓ Free during launch</div>
+  </div>`:'';
+  return free + `
+  <div class="stack"><div class="h">${lic('🆕')} What’s new <span class="pill build">To build</span></div>
+    <div class="sub">Decision-needed tasks — each with a respond button. (Passive alerts stay in the 🔔 bell.)</div>
+    <ul>
+      <li>New <b>inquiries</b> → <span class="respond">Answer ◎-1</span></li>
+      <li><b>Lock requests</b> (from Locked QR) → <span class="respond">Confirm lock</span></li>
+      <li><b>Payments</b> to confirm → <span class="respond">Mark received</span></li>
+      <li>New <b>reviews</b> → <span class="respond">Reply</span></li>
+      <li><b>Reports</b> / disputes → <span class="respond">Open</span></li>
+    </ul>
+  </div>
+  <div class="stack"><div class="h">${lic('⏳')} Ongoing <span class="pill build">To build</span></div>
+    <div class="sub">Seen but not yet complete — your open tasks until you finish them.</div></div>
+  <div class="stack"><div class="h">${lic('📆')} Upcoming Schedules <span class="pill partial">Partial</span></div>
+    <div class="sub">List of your upcoming events (data: vendor_schedule_pool_bookings). Tap a row → open customer.</div></div>`;
+}
+
+function capsCardHtml(){
+  return `<div class="stack" style="border-color:var(--gold-soft);background:#fbf7ee">
+    <div class="h">${lic('📦')} Tier limits — accounts &amp; services <span class="pill partial">Locked design · code change pending</span></div>
+    <div class="sub">“Account” = branch / location (existing sub-location account). TWO service limits: per-leaf cap STAYS, a per-account ceiling is ADDED on top.</div>
+    <ul>
+      <li><b>Solo</b> — 1 account · ≤3 services/leaf · ≤5 services/account</li>
+      <li><b>Pro</b> — 2 accounts · ≤5 services/leaf · ≤10 services/account</li>
+      <li><b>Enterprise</b> — 10 accounts · unlimited/leaf · unlimited/account</li>
+    </ul>
+    <div class="sub" style="margin-top:6px">⚠ Code change needed: branches are <b>Enterprise-only</b> today → extend to Solo/Pro with the 1/2/10 count cap · add a <code class="code" style="margin:0">servicesPerAccount</code> ceiling beside <code class="code" style="margin:0">servicesPerLeaf</code> · raise the flat 24 UI cap. Free-tier numbers TBD.</div>
+  </div>`;
+}
+function renderMenu(into,isPhone){
+  const m=MENUS.find(x=>x.key===active);
+  let html=`<div class="menu-title">${isPhone?'':m.ic+' '}${m.label}</div><div class="menu-desc">${m.desc}</div>`;
+  if(m.key==='overview'){html+=overviewHtml();}
+  else{
+    if(m.key==='services'){html+=capsCardHtml();}
+    m.rows.forEach(r=>{
+      html+=`<div class="rowlabel">${r.label}</div><div class="tiles cols${r.cols}">`;
+      r.tiles.forEach(t=>html+=tileHtml(t));
+      html+=`</div>`;
+    });
+  }
+  into.innerHTML=html;
+  into.querySelectorAll('.tile').forEach(el=>el.onclick=()=>openDetail(el.dataset.id));
+}
+
+function renderRail(){
+  const tm=tierMeta();
+  let html=`<div class="topchip"><span>${tm.label}</span><span class="tk">${tm.tok}</span></div>`;
+  MENUS.forEach(m=>{html+=`<div class="rl ${m.key===active?'active':''}" data-k="${m.key}"><span class="ic">${lic(m.ic)}</span>${m.label}</div>`});
+  dRail.innerHTML=html;
+  dRail.querySelectorAll('.rl').forEach(el=>el.onclick=()=>{active=el.dataset.k;renderAll()});
+}
+function renderNav(){
+  pNav.innerHTML=MENUS.map(m=>`<div class="nv ${m.key===active?'active':''}" data-k="${m.key}"><span class="ic">${lic(m.ic)}</span>${m.label.replace('My ','')}</div>`).join('');
+  pNav.querySelectorAll('.nv').forEach(el=>el.onclick=()=>{active=el.dataset.k;renderAll()});
+}
+function renderAll(){
+  renderRail();renderNav();
+  renderMenu(dMain,false);renderMenu(pMain,true);
+  pTitle.textContent=MENUS.find(x=>x.key===active).label;
+  document.getElementById('pTok').textContent=tierMeta().tok;
+}
+
+/* detail modal */
+const scrim=document.getElementById('scrim');
+function findTile(id){for(const m of MENUS){if(m.rows)for(const r of m.rows)for(const t of r.tiles)if(t.id===id)return t;}return null;}
+function openDetail(id){
+  const t=findTile(id);if(!t)return;
+  document.getElementById('mIc').innerHTML=lic(t.ic);
+  document.getElementById('mName').textContent=t.nm;
+  document.getElementById('mPill').innerHTML=pillHtml(t.st);
+  document.getElementById('mPath').textContent=t.path||'';
+  const lr=lockReason(t);
+  const lockMsg = lr==='Enterprise' ? 'requires the Enterprise tier.'
+    : lr==='Pro plan' ? 'requires the Pro plan or higher (Solo 1 account · Pro 2 · Enterprise 10).'
+    : 'verify your shop to unlock — Free·Unverified vendors aren’t reachable by couples yet.';
+  let b=lr?`<div class="note">${lic('🔒')} Locked in the ${tierMeta().label} state — ${lockMsg}</div>`:'';
+  b+=`<div class="m-sec"><div class="lab">What happens here</div><p>${t.what}</p></div>`;
+  b+=`<div class="m-sec"><div class="lab">Functions</div><p>${(t.fns||[]).map(f=>`<span class="code">${f}</span>`).join('')}</p></div>`;
+  b+=`<div class="m-sec"><div class="lab">Database tables</div><p>${(t.tbls||[]).map(f=>`<span class="code">${f}</span>`).join('')}</p></div>`;
+  b+=`<div class="m-sec"><div class="lab">Connections</div><p>${chipsHtml(t.ch)} &nbsp;${t.conn||''}</p></div>`;
+  if(t.id==='recap'){b+=`<div class="note"><b>${lic(DAYOF.ic)} ${DAYOF.nm}</b> — ${DAYOF.what}</div>`;}
+  document.getElementById('mBody').innerHTML=b;
+  scrim.classList.add('open');
+}
+document.getElementById('mClose').onclick=()=>scrim.classList.remove('open');
+scrim.onclick=e=>{if(e.target===scrim)scrim.classList.remove('open')};
+
+/* view toggle */
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{
+  document.body.className=b.dataset.view;
+  document.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+});
+document.querySelectorAll('[data-tier]').forEach(b=>b.onclick=()=>{
+  tierState=b.dataset.tier;
+  document.querySelectorAll('[data-tier]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  renderAll();
+});
+
+renderAll();
+</script>
+</body>
+</html>

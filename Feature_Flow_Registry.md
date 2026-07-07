@@ -1,5 +1,15 @@
 # Setnayan — Feature & Flow Registry
 
+> ## ⚠ AS-BUILT CORRECTION — 2026-06-29 (live-site / prod-DB sync)
+>
+> **Canonical = setnayan.com + [`AS_BUILT_GROUND_TRUTH_2026-06-07.md`](AS_BUILT_GROUND_TRUTH_2026-06-07.md) + [`Pricing.md § 00`](Pricing.md).** Where the body below disagrees, the live site wins. Current canon (prod DB 2026-06-29):
+> - **AI planner = "Setnayan AI" — ₱499 first 28-day cycle (intro) → ₱799/28-day cycle** (paid first-paywall subscription) — the "Setnayan Concierge ₱4,999" / "₱1,499" / "free planner" names+prices are RETIRED.
+> - **Commission = 0%**, every vendor booking, every tier — no 3%/5% Setnayan Pay cut.
+> - **Vendor subs:** Solo ₱999/28d (₱9,999/yr) · Pro ₱2,499/28d (₱24,999/yr) · Enterprise ₱4,999/28d (₱49,999/yr) · verification FREE · 100 free tokens on verify · flat ₱100/token packs. Old ₱6,000/₱10,000 + ₱2,499/₱5,499 + per-week vendor prices are RETIRED.
+> - **Couple website:** FREE 4-in-1 site (Save-the-Date · RSVP · Event · Editorial) + unlimited free RSVP + ONE **Couple Website PRO ₱1,999** upgrade. The separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs are RETIRED.
+> - **Animated Monogram ₱1,999** · **Live Studio multicam ₱3,499/day** (single-cam livestream FREE; "Panood" renamed → Live Studio) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
+> - **Couple tiers:** Free ₱0 · Setnayan AI (₱499 first 28d → ₱799/28d). **NO BUNDLES** — Essentials ₱12,999 + Complete ₱27,999 REMOVED 2026-06-29.
+
 **Last generated:** 2026-05-22 (refreshed post 17-PR autonomous sprint)
 **Surface audited:** every `apps/web/app/**/page.tsx` + `apps/web/app/api/**/route.ts` on `origin/main` of `iscasasola/setnayan-platform`
 **Owner:** senior-dev engineering audit (initial cut 2026-05-20; refresh 2026-05-22)
@@ -124,7 +134,7 @@ Initial Phase 1 agent rows flagged these as problems; direct source verification
 | `/for-vendors` | 0015 | public | Vendor acquisition landing | Nav: SiteHeader · `/` (TwoSides) | "List your business free" → /signup?as=vendor · pricing CTAs | none | Renders only | ✅ |
 | `/help` | 0029 | public | Help center with role-filtered articles | Nav: SiteHeader · footer | "Send message" → submitHelpMessage · role tiles → ?role= | `help_messages` | Toast + stay or redirect with status param | ✅ |
 | `/how-it-works` | 0015 | public | Platform map: six roles + flow chart | Nav: SiteHeader · footer | "Start planning free" → /signup · "List your business free" → /signup?as=vendor | none | Renders only | ✅ |
-| `/pricing` | 0015 | public | Couple-side pricing: Concierge + add-ons (5% Setnayan Pay worked example + actor-terminology copy refresh [#282](https://github.com/iscasasola/setnayan-platform/pull/282)) | Nav: SiteHeader · /for-vendors links | "Start 3-day free trial" → /signup?intent=concierge · "See vendor pricing" → /for-vendors | none | Renders only | ✅ |
+| `/pricing` | 0015 | public | Couple-side pricing: Concierge + add-ons (the PR [#282](https://github.com/iscasasola/setnayan-platform/pull/282) "5% Setnayan Pay worked example" is stale — fee RETIRED to 0% at the 2026-06-07 reset; verify live copy) | Nav: SiteHeader · /for-vendors links | "Start 3-day free trial" → /signup?intent=concierge · "See vendor pricing" → /for-vendors | none | Renders only | ✅ |
 | `/privacy` | 0015 | public | Privacy policy (RA 10173) — expanded coverage of subprocessors + retention windows + RA 8792 audit trail [#273](https://github.com/iscasasola/setnayan-platform/pull/273) | Footer · /help links | (none) | none | Renders only | ✅ |
 | `/terms` | 0015 | public | Terms of service (starter draft) | Footer · /help links | (none) | none | Renders only | ✅ |
 | `/weddings` | 0046 | public | Real weddings showcase index (Dec 1, 2026 cutover) | Nav: SiteHeader (BrowseStrip) | "Browse vendors" → /vendors · "Create account" → /signup | `event_editorials` (Phase B) | Renders only (static today) | ✅ |

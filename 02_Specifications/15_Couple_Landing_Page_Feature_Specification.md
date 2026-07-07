@@ -2,8 +2,8 @@
 
 > ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
 > **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code (`apps/web` @ `origin/main`) + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. The core landing-page *concept* (one canonical event URL, theme + section-toggle model, three lifecycle modes, guest RSVP via magic link) is broadly sound and reflected in the shipped couple dashboard's Landing surface. Deltas / cautions:
-> - **Tier model (Essentials / Premium / Pro Event) is RETIRED.** The "V1 Pricing & Packaging" table gating custom domain / remove-footer / AI copy behind tiers does not match the live SKU model — there is no Essentials/Premium/Pro Event ladder. Couple-side monetization is the per-SKU catalog (premium event-page upgrades surface as add-ons, e.g. **Pro Website ₱5,499** "in build"). Use §1 of the ground-truth doc for the current catalog, not this table.
-> - **"Sulyap" branding is stale** (Part 10.6/10.7): the native capture app/feature ships as **Papic** (the SKU is "Papic (5 Seats) ₱2,999" + "Papic Guest"), and native apps are a **Capacitor remote-URL shell** (Android built; not the standalone iOS/Android app this doc assumes). Treat "Sulyap" as a retired working name.
+> - **Tier model (Essentials / Premium / Pro Event) is RETIRED.** The "V1 Pricing & Packaging" table gating custom domain / remove-footer / AI copy behind tiers does not match the live SKU model — there is no Essentials/Premium/Pro Event ladder. Couple-side monetization is the per-SKU catalog (premium event-page upgrades surface as add-ons — the free 4-in-1 couple website plus ONE **Couple Website PRO ₱1,999**; the old separate "Pro Website"/RSVP/RSVP Pro/Event Website/Editorial Website à-la-carte SKUs are retired). Use §1 of the ground-truth doc for the current catalog, not this table.
+> - **"Sulyap" branding is stale** (Part 10.6/10.7): the native capture app/feature ships as **Papic** (the SKU is now per-camera — **Papic Unli ₱100/cam·day** and **Papic Ltd ₱30/cam·day**, both capped ₱15,000/day; the old "Papic (5 Seats)" + "Papic Guest" flat SKUs are retired), and native apps are a **Capacitor remote-URL shell** (Android built; not the standalone iOS/Android app this doc assumes). Treat "Sulyap" as a retired working name.
 > - **Payment is apply-then-pay + manual admin approval** (NOT PayMongo/auto-charge); unlocks that gate Gallery/Live Stream sections fire off `orders='paid'` only after an admin confirms a screenshot at `/admin/payments`.
 > - **Vendor service-completion QR + vendor brand placement** (Part 10.7) is forward/aspirational, not the way the shipped vendor surface works (vendors run a full `/vendor-dashboard`; vendor↔couple money is OFF-PLATFORM per RA 11967).
 > - Companion refs `06_*`/`16_Couple_Landing_Page_Live.html` and the "spec 07 tier section" pointers are pre-resync; cross-check against the ground-truth doc + live Landing surface before relying on them.
@@ -346,6 +346,18 @@ Sixty days after the wedding date, the page automatically transitions from **pub
 - Gallery section remains active per the Paparazzi 5-year retention policy (spec 10)
 - Live Stream section shows replay (per spec 09 retention)
 - Couple can manually reactivate to **published** (e.g., for an anniversary post)
+
+### The Editorial — Your Front-Page Story (positioning · owner-stated 2026-06-14)
+
+> The post-event phase of the page is the **Editorial** — *the front-page story of your life.* It tells the story of how the day went, and unlike a newspaper it doesn't keep that story in still photos alone: it holds **moments** — short videos of the night, photos and short clips of people enjoying themselves, and **guests telling you their true best wishes.** It is **a place to keep everything, not just photos** — *"like Harry Potter's newspaper, but now it's ours."*
+
+Three things make it that:
+
+- **A living, moving page** — figures in the story are silent looping videos that come alive (tap for sound), with short clips and a moving front-page frame — the *Daily Prophet* feel. (Mechanics: the "Daily Prophet rule" + front-page newspaper engine + Living-Moments strip in `03_Strategy/Wedding_Website_Effects_and_Editing_Spec_2026-06-11.md`.)
+- **Your guests' words** — the best wishes guests leave (Kwento) surface as pull-quotes in the story, so the people who were there help tell it.
+- **Printable, with a QR back to the living story** — a printable keepsake version is generated, carrying a QR that the couple and every guest can scan to always return to the full, moving Editorial online. (Mechanics: the PDF keepsake, effects-spec build-order ④.)
+
+This is the **destination** where Papic's moments, Panood's broadcast, and Kwento's words come to rest as one keepsake. It stays **money-free** — the front-page story of the day, never a show of what was spent. (⚠ Not to be confused with iteration **0038 "Editorial & Affiliates,"** which is the platform's marketing blog — a different "Editorial.")
 
 ### Soft-launch URL pattern
 

@@ -1,5 +1,15 @@
 # Setnayan V1 Gap-Analysis Status
 
+> ## ⚠ AS-BUILT CORRECTION — 2026-06-29 (live-site / prod-DB sync)
+>
+> **Canonical = setnayan.com + [`AS_BUILT_GROUND_TRUTH_2026-06-07.md`](AS_BUILT_GROUND_TRUTH_2026-06-07.md) + [`Pricing.md § 00`](Pricing.md).** Where the body below disagrees, the live site wins. Current canon (prod DB 2026-06-29):
+> - **AI planner = "Setnayan AI" ₱3,999** (paid first paywall) — the "Setnayan Concierge ₱4,999" / "₱1,499" / "free planner" names+prices are RETIRED.
+> - **Commission = 0%**, every vendor booking, every tier — no 3%/5% Setnayan Pay cut.
+> - **Vendor subs:** Solo ₱999/28d (₱9,999/yr) · Pro ₱2,499/28d (₱24,999/yr) · Enterprise ₱4,999/28d (₱49,999/yr) · verification FREE · 100 free tokens on verify · flat ₱100/token packs. Old ₱6,000/₱10,000 + ₱2,499/₱5,499 + per-week vendor prices are RETIRED.
+> - **Couple website:** FREE 4-in-1 site (Save-the-Date · RSVP · Event · Editorial) + unlimited free RSVP + ONE **Couple Website PRO ₱1,999** upgrade. The separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs are RETIRED.
+> - **Animated Monogram ₱1,999** · **Live Studio multicam ₱3,499/day** (single-cam livestream FREE; "Panood" renamed → Live Studio) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
+> - **Couple tiers:** Free ₱0 · Setnayan AI ₱3,999. **NO BUNDLES** — Essentials ₱12,999 + Complete ₱27,999 REMOVED 2026-06-29.
+
 **Locked 2026-05-12. Last refreshed 2026-05-22 post 17-PR sprint** — PRs #272-#289 closed payments idempotency (#277), observability end-to-end (#275/#280/#289), health endpoints (#275), retired-strings lint guard (#276), email-link CI audit (#288), schema.org Pro pricing (#278), sitemap (#279), Patiktok + Pakanta marketing surfaces (#281), Setnayan Pay worked example + actor terminology sweep (#282), day-of PWA Phase 1 (#284), admin nav consolidation (#285), couple dashboard TILES expansion (#287).
 
 **Previous refresh:** 2026-05-20 (0032 Contract Intelligence retirement + 51-migration burst).
@@ -130,14 +140,14 @@ These came up during the same conversation and also landed:
 0001_creating_guest_list/         → guest list, RSVP
 0002_qr_invitation_system/        → personal QR + slug system + **Event Landing Page** (4 lifecycle phases: Save-the-Date / Invitation / Logistics / Post-event · absorbs retired 0024 as Phase 1)
 0003_token_wallet_and_packs/      → [RETIRED 2026-05-11]
-0004_invitation_widgets/          → 11 widgets · 2 V1 paid upgrades (Monogram Hero ₱1,999 no-refund + Live Schedule ₱999) · 3 V1.5+ reserved (Panood/Papic/Patiktok)
+0004_invitation_widgets/          → 11 widgets · 2 V1 paid upgrades (Monogram Hero ₱1,999 no-refund + Live Schedule ₱999) · 3 V1.5+ reserved (Live Studio [formerly Panood]/Papic/Patiktok)
 0005_led_background_maker/        → 8K LED templates
 0006_vendors_management/          → vendor registry, filter popup, reviews schema, crew_size
 0007_budget_expenses/             → couple's payment ledger
 0008_seating_chart_editor/        → table layout + QR print pack
 0009_photo_delivery/              → Google Drive integration
 0010_mood_board/                  → palettes + Setnayan Guide rule engine
-0011_panood/                      → Panood — V1 SKU lock 2026-05-16: BYO YouTube via OAuth · per-day pricing (Daily Broadcast ₱499 · Camera Sync ₱99 · Annual ₱2,999 · Annual Plus ₱3,999) · Cloudflare-composite SKUs retired
+0011_panood/                      → Live Studio (formerly Panood; folder path 0011_panood/ unchanged) — V1 SKU lock 2026-05-16: BYO YouTube via OAuth · per-day pricing (Daily Broadcast ₱499 · Camera Sync ₱99 · Annual ₱2,999 · Annual Plus ₱3,999) · Cloudflare-composite SKUs retired. (Renamed 2026-06-29; paid multicam tier ₱4,999 → ₱3,499/day — see DECISION_LOG.md 2026-06-29.)
 0012_paparazzi/ or 0012_papic/    → Papic — V1.5+ deferral with **architecture lock 2026-05-16**: 207-cam mesh + Drive transfer T+30d + cold-tier 90-day window + pooled credits + Auto-Recap; SKUs frozen at V1.5+ build-time (paparazzi_3_seats ₱1,499 · paparazzi_5_seats ₱2,499 · paparazzi_camera_addon ₱999 · paparazzi_credits_addon ₱299 · premium_guest_camera_pack ₱1,499 · personal_album_per_guest ₱49 · memory_book_per_guest ₱249)
 0013_platform_stack_and_sync/     → Vercel + Supabase + R2 + GitHub setup
 0014_v1_1_polish/                 → queued; no folder yet

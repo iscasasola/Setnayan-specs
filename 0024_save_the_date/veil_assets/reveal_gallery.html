@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Save the Date — 7 Reveal Templates</title>
+<style>
+  :root{--bg:#14110f;--ink:#c9bda9;--mut:#8c8174}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,Arial,sans-serif}
+  header{padding:22px 24px 6px}
+  h1{font-family:Georgia,serif;font-weight:500;font-size:22px;margin:0 0 2px;color:#e7dcc7}
+  .sub{font-size:13px;color:var(--mut)}
+  .palette{display:flex;gap:8px;align-items:center;padding:12px 24px}
+  .palette label{font-size:12px;color:var(--mut);margin-right:2px}
+  .sw{width:24px;height:24px;border-radius:50%;border:1px solid #ffffff22;cursor:pointer;padding:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;padding:14px 24px 40px}
+  .card{background:#1b1713;border:1px solid #2a231c;border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center}
+  .card canvas{border-radius:8px;background:#0e0c0a;cursor:pointer}
+  .fam{align-self:flex-start;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7a6f60;margin:0 0 8px}
+  .nm{font-family:Georgia,serif;font-size:15px;color:#e7dcc7;margin:10px 0 1px;text-align:center}
+  .ac{font-size:11px;color:var(--mut);text-align:center}
+  footer{padding:0 24px 30px;font-size:11px;color:#6f655a}
+</style>
+</head>
+<body>
+<header>
+  <h1>Save the Date — the reveal library</h1>
+  <div class="sub">7 templates · 4 rigid envelopes · 2 veils · 1 curtain · each loops open → hold → close</div>
+</header>
+<div class="palette">
+  <label>Palette</label>
+  <button class="sw" data-c="#f3ece1" title="Ivory" style="background:#f3ece1"></button>
+  <button class="sw" data-c="#e8d6b0" title="Champagne" style="background:#e8d6b0"></button>
+  <button class="sw" data-c="#e9cdcb" title="Blush" style="background:#e9cdcb"></button>
+  <button class="sw" data-c="#cfd9d2" title="Sage" style="background:#cfd9d2"></button>
+  <button class="sw" data-c="#dfe3ea" title="Something blue" style="background:#dfe3ea"></button>
+  <button class="sw" data-c="#7a3b52" title="Mulberry" style="background:#7a3b52"></button>
+  <span class="sub" style="margin-left:8px">click a card to replay it</span>
+</div>
+<div class="grid" id="grid"></div>
+<footer>Procedural preview — final build renders true scanned paper / lace / wax with real cloth physics. Couple customizes <b style="color:#c9bda9;font-weight:500">colour only</b> (auto-filled from their Mood Board); the gold thread + structure stay locked.</footer>
+<script>
+(function(){
+  var CARDS=[
+    {id:'fourflap', fam:'Rigid envelope', nm:'Four-flap', ac:'flaps open to the corners'},
+    {id:'twoV',     fam:'Rigid envelope', nm:'Two-flap vertical', ac:'splits down the middle'},
+    {id:'twoH',     fam:'Rigid envelope', nm:'Two-flap horizontal', ac:'splits across'},
+    {id:'doors',    fam:'Rigid envelope', nm:'Church doors', ac:'swing open'},
+    {id:'veilSheer',fam:'Veil', nm:'Sheer · multi-touch', ac:'lift up & over the crown'},
+    {id:'veilCrown',fam:'Veil', nm:'Crown-pinned · folding', ac:'hem up & back over the crown'},
+    {id:'curtain',  fam:'Curtain', nm:'Curtain of the veil', ac:'two panels part left & right'}
+  ];
+  var CW=224, CH=300;
+  var pal={base:'#f3ece1'};
+  function derive(){ var b=pal.base; return {paper:b, flap:darken(b,0.07), ink:'#403930', gold:'#cb9e4b', accent:darken(b,0.16), veil:b, line:darken(b,0.30)}; }
+  function hexA(hex,a){ hex=hex.replace('#',''); if(hex.length===3)hex=hex.split('').map(function(c){return c+c}).join(''); var n=parseInt(hex,16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
+  function darken(hex,f){ hex=hex.replace('#',''); if(hex.length===3)hex=hex.split('').map(function(c){return c+c}).join(''); var n=parseInt(hex,16); return 'rgb('+Math.round(((n>>16)&255)*(1-f))+','+Math.round(((n>>8)&255)*(1-f))+','+Math.round((n&255)*(1-f))+')'; }
+  function ease(t){ return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; }
+  function lerp(a,b,t){ return a+(b-a)*t; }
+
+  function drawInvite(x,w,h,P){
+    x.fillStyle=P.paper; x.fillRect(0,0,w,h);
+    x.strokeStyle=hexA(P.gold,0.5); x.lineWidth=1; x.strokeRect(11,11,w-22,h-22);
+    x.textAlign='center'; x.textBaseline='middle';
+    x.fillStyle=P.gold; x.font='italic '+Math.round(h*0.17)+'px Georgia'; x.fillText('A     J', w/2, h*0.40);
+    x.font=Math.round(h*0.085)+'px Georgia'; x.fillText('&', w/2, h*0.40);
+    x.fillStyle=P.ink; x.font=Math.round(h*0.05)+'px Georgia'; x.fillText('S A V E   T H E   D A T E', w/2, h*0.56);
+    x.fillStyle=hexA(P.ink,0.8); x.font=Math.round(h*0.044)+'px Georgia'; x.fillText('14 · 12 · 2026', w/2, h*0.63);
+  }
+  function teardrop(cx,cy,L,Wd,ang){ var p=[],n=16; for(var i=0;i<=n;i++){ var t=i/n*6.2832,r=(1-Math.cos(t))/2,xx=Wd*Math.sin(t)*Math.pow(r,0.8),yy=-L*r; p.push([cx+xx*Math.cos(ang)-yy*Math.sin(ang),cy+xx*Math.sin(ang)+yy*Math.cos(ang)]); } return p; }
+  function star(x,cx,cy,R,col,al){ x.strokeStyle=hexA(col,al); x.lineWidth=1; for(var k=0;k<8;k++){ var a=k/8*6.2832,p=teardrop(cx,cy,R,R*0.42,a); x.beginPath(); x.moveTo(p[0][0],p[0][1]); for(var i=1;i<p.length;i++)x.lineTo(p[i][0],p[i][1]); x.closePath(); x.stroke(); } }
+  function laceHem(x,X,yB,w,P){
+    var units=Math.max(6,Math.round(w/24)), period=w/units, r=period*0.42, topE=yB-r-2;
+    x.strokeStyle=hexA('#ffffff',0.8); x.lineWidth=1.3;
+    for(var u=0;u<units;u++){ var cx=X+period*(u+0.5); x.beginPath(); x.arc(cx,topE,r,0,Math.PI,false); x.stroke();
+      star(x,cx,topE-3,period*0.26,'#ffffff',0.8);
+      for(var a=18;a<170;a+=26){ var ar=a*Math.PI/180,ox=cx+Math.cos(ar)*(r+3),oy=topE+Math.sin(ar)*(r+3); x.fillStyle=hexA('#ffffff',0.85); x.beginPath(); x.arc(ox,oy,1.3,0,6.2832); x.fill(); } }
+  }
+  function veilFabric(x,X,Y,w,h,P){
+    x.save(); x.beginPath(); x.rect(X,Y,w,h); x.clip();
+    x.fillStyle=hexA(P.veil,0.30); x.fillRect(X,Y,w,h);
+    for(var fx=0; fx<w; fx+=2){ var ph=fx/w*5*6.2832; var br=0.20*(0.5+0.5*Math.sin(ph)); x.fillStyle=hexA(P.veil,br); x.fillRect(X+fx,Y,2,h); }
+    x.strokeStyle=hexA('#ffffff',0.09); x.lineWidth=1;
+    for(var d=-h; d<w+h; d+=9){ x.beginPath(); x.moveTo(X+d,Y); x.lineTo(X+d+h,Y+h); x.stroke(); x.beginPath(); x.moveTo(X+d,Y+h); x.lineTo(X+d+h,Y); x.stroke(); }
+    for(var s=0;s<7;s++){ var sx=X+((s*53)%w), sy=Y+((s*97)%(h*0.8)); star(x,sx,sy,4,'#ffffff',0.4); }
+    laceHem(x,X,Y+h,w,P);
+    x.restore();
+  }
+  function flapShade(x,pts,P){ x.beginPath(); x.moveTo(pts[0][0],pts[0][1]); for(var i=1;i<pts.length;i++)x.lineTo(pts[i][0],pts[i][1]); x.closePath();
+    x.fillStyle=P.flap; x.fill(); x.strokeStyle=hexA(P.line,0.6); x.lineWidth=1; x.stroke(); }
+
+  var drawer={
+    fourflap:function(x,w,h,P,p){ var op=ease(p),cx=w/2,cy=h/2;
+      function fl(em,a,b){ var ax=lerp(cx,em[0],op),ay=lerp(cy,em[1],op); flapShade(x,[a,b,[ax,ay]],P);
+        x.strokeStyle=hexA(P.line,0.4); x.beginPath(); x.moveTo((a[0]+b[0])/2,(a[1]+b[1])/2); x.lineTo(ax,ay); x.stroke(); }
+      fl([w/2,0],[0,0],[w,0]); fl([w/2,h],[0,h],[w,h]); fl([0,h/2],[0,0],[0,h]); fl([w,h/2],[w,0],[w,h]);
+    },
+    twoV:function(x,w,h,P,p){ var op=ease(p), dw=w/2*(1-op);
+      x.fillStyle=P.flap; x.fillRect(0,0,dw,h); x.fillRect(w-dw,0,dw,h);
+      var g=x.createLinearGradient(dw-14,0,dw,0); g.addColorStop(0,hexA(P.line,0)); g.addColorStop(1,hexA(P.line,0.45)); x.fillStyle=g; x.fillRect(dw-14,0,14,h);
+      var g2=x.createLinearGradient(w-dw,0,w-dw+14,0); g2.addColorStop(0,hexA(P.line,0.45)); g2.addColorStop(1,hexA(P.line,0)); x.fillStyle=g2; x.fillRect(w-dw,0,14,h);
+      x.strokeStyle=hexA(P.line,0.4); x.strokeRect(0.5,0.5,dw,h-1); x.strokeRect(w-dw+0.5,0.5,dw-1,h-1);
+    },
+    twoH:function(x,w,h,P,p){ var op=ease(p), dh=h/2*(1-op);
+      x.fillStyle=P.flap; x.fillRect(0,0,w,dh); x.fillRect(0,h-dh,w,dh);
+      var g=x.createLinearGradient(0,dh-14,0,dh); g.addColorStop(0,hexA(P.line,0)); g.addColorStop(1,hexA(P.line,0.45)); x.fillStyle=g; x.fillRect(0,dh-14,w,14);
+      var g2=x.createLinearGradient(0,h-dh,0,h-dh+14); g2.addColorStop(0,hexA(P.line,0.45)); g2.addColorStop(1,hexA(P.line,0)); x.fillStyle=g2; x.fillRect(0,h-dh,w,14);
+      x.strokeStyle=hexA(P.line,0.4); x.strokeRect(0.5,0.5,w-1,dh); x.strokeRect(0.5,h-dh+0.5,w-1,dh-1);
+    },
+    doors:function(x,w,h,P,p){ var op=ease(p), dw=w/2*(1-op);
+      x.save(); x.beginPath(); x.moveTo(0,h); x.lineTo(0,h*0.24); x.quadraticCurveTo(w/2,-h*0.04,w,h*0.24); x.lineTo(w,h); x.closePath(); x.clip();
+      function door(X,dir){ x.fillStyle=darken(P.flap,0.06); x.fillRect(X,0,dw,h);
+        x.strokeStyle=hexA(P.line,0.55); x.lineWidth=1.4;
+        var inset=dw*0.18; if(dw>30){ x.strokeRect(X+inset,h*0.20,dw-2*inset,h*0.28); x.strokeRect(X+inset,h*0.54,dw-2*inset,h*0.30); }
+        var ix = dir>0 ? X+dw : X; x.fillStyle=hexA(P.gold,0.8); x.beginPath(); x.arc(ix-dir*5,h*0.52,2.4,0,6.2832); x.fill();
+        var g=x.createLinearGradient(ix-dir*16,0,ix,0); g.addColorStop(0,hexA(P.line,0)); g.addColorStop(1,hexA(P.line,0.4)); x.fillStyle=g; x.fillRect(Math.min(ix,ix-dir*16),0,16,h);
+      }
+      door(0,1); door(w-dw,-1); x.restore();
+      x.strokeStyle=hexA(P.line,0.5); x.lineWidth=1.4; x.beginPath(); x.moveTo(0,h*0.24); x.quadraticCurveTo(w/2,-h*0.04,w,h*0.24); x.stroke();
+    },
+    veilSheer:function(x,w,h,P,p){ var op=ease(p); var yOff=-op*h*1.18; x.save(); x.globalAlpha=Math.max(0,1-Math.max(0,(op-0.72)/0.28)); veilFabric(x,0,yOff,w,h,P); x.restore(); },
+    veilCrown:function(x,w,h,P,p){ var op=ease(p); var sc=Math.max(0.001,1-op*0.96); x.save(); x.translate(0,0); x.scale(1,sc); x.globalAlpha=Math.max(0,1-Math.max(0,(op-0.78)/0.22)); veilFabric(x,0,0,w,h,P); x.restore(); },
+    curtain:function(x,w,h,P,p){ var op=ease(p), pw=(w/2)*(1-op); if(pw>1){ veilFabric(x,0,0,pw,h,P); veilFabric(x,w-pw,0,pw,h,P);
+      x.fillStyle=hexA(P.line,0.3); x.fillRect(pw-3,0,3,h); x.fillRect(w-pw,0,3,h); } }
+  };
+
+  var grid=document.getElementById('grid'), cells=[];
+  CARDS.forEach(function(c,idx){
+    var card=document.createElement('div'); card.className='card';
+    var fam=document.createElement('div'); fam.className='fam'; fam.textContent=c.fam; card.appendChild(fam);
+    var cv=document.createElement('canvas'); var dpr=Math.min(2,window.devicePixelRatio||1);
+    cv.width=CW*dpr; cv.height=CH*dpr; cv.style.width=CW+'px'; cv.style.height=CH+'px';
+    var ctx=cv.getContext('2d'); ctx.scale(dpr,dpr); card.appendChild(cv);
+    var nm=document.createElement('div'); nm.className='nm'; nm.textContent=c.nm; card.appendChild(nm);
+    var ac=document.createElement('div'); ac.className='ac'; ac.textContent=c.ac; card.appendChild(ac);
+    grid.appendChild(card);
+    var cell={c:c, ctx:ctx, off:idx*0.62, replay:0};
+    cv.addEventListener('click',function(){ cell.replay=performance.now(); });
+    cells.push(cell);
+  });
+
+  function prog(time, off){ var T=4.6; var lt=(((time/1000)+off)%T)/T; if(lt<0.12)return 0; if(lt<0.55)return ease((lt-0.12)/0.43); if(lt<0.9)return 1; return 1-ease((lt-0.9)/0.10); }
+  function loop(ts){
+    var P=derive();
+    cells.forEach(function(cell){
+      var p; if(cell.replay){ var dt=(ts-cell.replay)/1000; if(dt<2.0){ p=ease(Math.min(1,dt/1.6)); } else { p=0; cell.replay=0; } }
+      if(p===undefined) p=prog(ts, cell.off);
+      var x=cell.ctx; x.clearRect(0,0,CW,CH);
+      drawInvite(x,CW,CH,P);
+      drawer[cell.c.id](x,CW,CH,P,p);
+    });
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  Array.prototype.forEach.call(document.querySelectorAll('.sw'),function(b){ b.onclick=function(){ pal.base=b.getAttribute('data-c'); }; });
+})();
+</script>
+</body>
+</html>

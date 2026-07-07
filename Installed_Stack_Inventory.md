@@ -1,5 +1,15 @@
 # Setnayan — Installed Stack Inventory
 
+> ## ⚠ AS-BUILT CORRECTION — 2026-06-29 (live-site / prod-DB sync)
+>
+> **Canonical = setnayan.com + [`AS_BUILT_GROUND_TRUTH_2026-06-07.md`](AS_BUILT_GROUND_TRUTH_2026-06-07.md) + [`Pricing.md § 00`](Pricing.md).** Where the body below disagrees, the live site wins. Current canon (prod DB 2026-06-29):
+> - **AI planner = "Setnayan AI" ₱3,999** (paid first paywall) — the "Setnayan Concierge ₱4,999" / "₱1,499" / "free planner" names+prices are RETIRED.
+> - **Commission = 0%**, every vendor booking, every tier — no 3%/5% Setnayan Pay cut.
+> - **Vendor subs:** Solo ₱999/28d (₱9,999/yr) · Pro ₱2,499/28d (₱24,999/yr) · Enterprise ₱4,999/28d (₱49,999/yr) · verification FREE · 100 free tokens on verify · flat ₱100/token packs. Old ₱6,000/₱10,000 + ₱2,499/₱5,499 + per-week vendor prices are RETIRED.
+> - **Couple website:** FREE 4-in-1 site (Save-the-Date · RSVP · Event · Editorial) + unlimited free RSVP + ONE **Couple Website PRO ₱1,999** upgrade. The separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs are RETIRED.
+> - **Animated Monogram ₱1,999** · **Live Studio multicam ₱3,499/day** (single-cam livestream FREE; "Panood" renamed → Live Studio) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
+> - **Couple tiers:** Free ₱0 · Setnayan AI ₱3,999. **NO BUNDLES** — Essentials ₱12,999 + Complete ₱27,999 REMOVED 2026-06-29.
+
 **Last audited:** 2026-05-22 post 17-PR sprint against `origin/main` at https://github.com/iscasasola/setnayan-platform (previous audit 2026-05-20; today's PRs #272–#289 added migrations 77-80, 3 health/smoke-test API routes, and flipped Sentry smoke-test status from 🟡 SDK-wired-not-exercised → 🟡 endpoint wired, owner verification pending).
 **Companion docs:** [V1_Gap_Analysis_Status.md](V1_Gap_Analysis_Status.md) (spec) · [App_Build_Status.md](App_Build_Status.md) (code) · [API_Integration_Checklist.md](API_Integration_Checklist.md) (prereqs) · this doc (what's actually wired)
 
@@ -264,7 +274,7 @@ R2 env vars `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` exist in
 | `/api/slugs/check` | session | Slug-availability debounce |
 | `/api/download/mac` | none | Redirects to GitHub Releases `.dmg` |
 | `/api/upload` | session | R2 upload endpoint (PR #18) |
-| `/api/oauth/youtube/start` + `/callback` + `/disconnect` | session | 0011 Panood YouTube OAuth |
+| `/api/oauth/youtube/start` + `/callback` + `/disconnect` | session | 0011 Live Studio (formerly Panood) YouTube OAuth |
 | `/api/oauth/drive/start` + `/callback` + `/disconnect` | session | 0012 Papic Drive OAuth |
 | `/api/oauth/photo-delivery/start` + `/callback` | session | 0009 Photo Delivery Drive OAuth (PR #153) |
 | `/api/tiktok/auth/start` + `/callback` | session | 0017 Patiktok TikTok OAuth |
@@ -374,7 +384,7 @@ Every mutating UI flow has its own `actions.ts` co-located with the page (Next 1
 | **PostHog** (product analytics 0035) | ✅ Wired 2026-05-14 (PR #19); 3 server-side funnels live + 4 PostHog funnel links at `/admin/funnels` | `posthog-js ^1.165.0` | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` |
 | **Better Stack** (uptime + log) | 🚧 Queued | none | `BETTER_STACK_SOURCE_TOKEN` |
 | **GitHub Releases** | ✅ Live | v0.0.1 with macOS `.dmg`; `/download` consumes via `lib/desktop-release.ts` | none |
-| **YouTube Data API v3 + OAuth** (0011 Panood live-stream relay) | 🟡 Engineering shipped 2026-05-16; Google verified-app review pending (Phase 2 of #17a) | `lib/panood-youtube.ts` + 3 OAuth routes + cron refresh | `YOUTUBE_OAUTH_CLIENT_ID/_SECRET/_REDIRECT_URI` |
+| **YouTube Data API v3 + OAuth** (0011 Live Studio [formerly Panood] live-stream relay) | 🟡 Engineering shipped 2026-05-16; Google verified-app review pending (Phase 2 of #17a) | `lib/panood-youtube.ts` + 3 OAuth routes + cron refresh | `YOUTUBE_OAUTH_CLIENT_ID/_SECRET/_REDIRECT_URI` |
 | **Google Drive OAuth** (0012 Papic + 0009 Photo Delivery) | 🟡 Code shipped 2026-05-19/20; Google verified-app NOT yet submitted for Drive scopes | `lib/papic-drive.ts`, `lib/photo-delivery-drive.ts` + 5 OAuth routes | `GOOGLE_DRIVE_OAUTH_*`, `PHOTO_DELIVERY_OAUTH_REDIRECT_URI` |
 | **TikTok OAuth** (0017 Patiktok) | 🟡 Code shipped 2026-05-16; TikTok app review pending | `lib/patiktok-tiktok.ts` + 2 routes | `TIKTOK_CLIENT_KEY/_SECRET/_REDIRECT_URI/_SETNAYAN_REFRESH_TOKEN` |
 | **Persona** (vendor KYC) | 🟡 Webhook + env wired; owner signup pending #19b | `app/api/webhooks/persona/route.ts`, `lib/vendor-verification.ts` | `PERSONA_API_KEY`, `PERSONA_TEMPLATE_ID` |

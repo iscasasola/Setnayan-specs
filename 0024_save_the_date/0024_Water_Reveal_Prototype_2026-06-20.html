@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Setnayan · Water Reveal Prototype (2026-06-20 · WebGL)</title>
+<style>
+  :root{ color-scheme: dark; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; height:100%; background:#05090b; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  #app{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+  #stage{ position:relative; overflow:hidden; background:#06100e; box-shadow:0 30px 80px rgba(0,0,0,.6); }
+  #cv{ display:block; width:100%; height:100%; touch-action:none; }
+  .hint{ position:absolute; left:50%; bottom:18px; transform:translateX(-50%); padding:8px 16px; border-radius:999px; background:rgba(6,14,12,.5); color:#f0e3c8; font-size:13px; pointer-events:none; transition:opacity .5s; white-space:nowrap; }
+  .chip{ position:absolute; left:14px; top:13px; padding:5px 11px; border-radius:999px; background:rgba(6,14,12,.45); color:#cbb988; font-size:11px; letter-spacing:.07em; text-transform:uppercase; pointer-events:none; }
+  .toolbar{ position:absolute; right:12px; top:11px; display:flex; gap:8px; }
+  .tbtn{ border:1px solid rgba(220,200,150,.35); background:rgba(6,14,12,.5); color:#f0e3c8; font-size:12px; padding:7px 12px; border-radius:10px; cursor:pointer; }
+  .tbtn:active{ transform:scale(.97); }
+  #panel{ position:absolute; right:0; top:0; height:100%; width:262px; max-width:82%; background:rgba(5,11,10,.88); backdrop-filter:blur(8px); border-left:1px solid rgba(220,200,150,.18); padding:54px 16px 16px; overflow-y:auto; transform:translateX(100%); transition:transform .25s ease; }
+  #panel.open{ transform:translateX(0); }
+  .row{ margin-bottom:13px; }
+  .row .lab{ display:flex; justify-content:space-between; font-size:11.5px; color:#b9c2bd; margin-bottom:4px; }
+  .row .lab b{ color:#f0e3c8; font-weight:500; }
+  .row input[type=range]{ width:100%; accent-color:#cb9e4b; }
+  .panel-actions button{ width:100%; margin-top:6px; border:1px solid rgba(220,200,150,.35); background:rgba(20,30,24,.6); color:#f0e3c8; font-size:12.5px; padding:9px; border-radius:10px; cursor:pointer; }
+  #err{ position:absolute; left:10px; bottom:64px; right:10px; color:#ffb4a8; font-size:11px; font-family:monospace; white-space:pre-wrap; pointer-events:none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div class="chip">water reveal · webgl</div>
+    <div class="toolbar">
+      <button class="tbtn" id="riseBtn">Replay</button>
+      <button class="tbtn" id="gearBtn">Tune</button>
+    </div>
+    <div class="hint" id="hint">the film plays itself · hold to pause · tap the water</div>
+    <div id="err"></div>
+    <div id="panel"></div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const errEl=document.getElementById('err');
+  function fail(m){ errEl.textContent=String(m); console.error(m); }
+  if(typeof THREE==='undefined'){ fail('three.js failed to load'); return; }
+
+  const MARK_D='M 1859.526,3749.781 C 1458.028,3717.757 1065.454,3548.554 758.3406,3241.44 451.2286,2934.328 282.2397,2541.742 250.2195,2140.255 l 1326.8215,1.536 V 661.7647 C 1368.543,727.4195 1172.067,841.5416 1006.804,1006.804 768.3191,1245.29 633.8543,1548.261 602.7217,1859.526 H 250 C 282.024,1458.028 451.2265,1065.455 758.3406,758.3406 1065.453,451.2287 1458.039,282.2396 1859.526,250.2195 V 2422.739 H 661.7647 c 65.6549,208.498 179.7773,404.975 345.0393,570.237 238.486,238.486 541.457,372.95 852.722,404.083 z m 280.948,0 1.537,-1609.307 h 280.948 v 1197.761 c 208.498,-65.655 404.974,-179.776 570.237,-345.039 238.485,-238.486 372.95,-541.457 404.082,-852.722 H 3750 c -32.024,401.498 -201.226,794.071 -508.341,1101.185 -307.112,307.112 -699.697,476.101 -1101.185,508.122 z m 0,-1890.255 c 32.025,-401.498 201.227,-794.073 508.341,-1101.1854 0.658,-0.6584 1.316,-1.3173 1.975,-1.9754 -80.395,-42.041 -163.892,-76.0428 -249.331,-101.7389 -85.439,-25.696 -172.821,-43.0864 -260.985,-51.9046 V 250.2195 c 401.497,32.0253 794.073,201.0094 1101.185,508.1211 307.114,307.1134 476.317,699.6874 508.341,1101.1854 h -352.722 c -31.132,-311.265 -165.597,-614.236 -404.082,-852.722 -15.719,-15.7189 -32.464,-29.741 -48.727,-44.5564 -15.975,14.4789 -31.774,29.1397 -47.191,44.5564 -238.485,238.486 -372.95,541.457 -404.082,852.722 z';
+  const GOLD='#cb9e4b';
+  const ORCHID=['#e8a9c4','#f3d6e2','#f5eef2'];
+  const KOISRC=[ {file:'water_assets/koi1.webp',forward:0.95}, {file:'water_assets/koi2.webp',forward:2.25}, {file:'water_assets/koi3.webp',forward:0.30} ];
+  const S={koi:3,koiSize:38,koiSpeed:22,orbs:4,lilies:4,petals:6,tint:38,refraction:30,caustics:24,shadows:40,decay:70,strength:50,emergeSpeed:26,sheen:64};
+  const dials=[
+    ['koi','Koi fish',0,9],['koiSize','Koi size',30,100],['koiSpeed','Koi grace',10,100],
+    ['orbs','Floating lights',0,9],['lilies','Lily pads',0,9],['petals','Petals',0,100],
+    ['refraction','Refraction',0,100],['caustics','Caustics + flicker',0,100],['shadows','Shadows',0,100],
+    ['tint','Water darkness',0,100],['decay','Ripple linger',0,100],['strength','Tap / wake',0,100],
+    ['emergeSpeed','Rise speed',0,100],['sheen','Monogram glow',0,100]
+  ];
+  const panel=document.getElementById('panel');
+  dials.forEach(([k,lab,mn,mx])=>{
+    const w=document.createElement('div'); w.className='row';
+    w.innerHTML='<div class="lab"><span>'+lab+'</span><b id="v_'+k+'">'+S[k]+'</b></div>';
+    const inp=document.createElement('input'); inp.type='range'; inp.min=mn; inp.max=mx; inp.step=1; inp.value=S[k];
+    inp.addEventListener('input',()=>{S[k]=+inp.value; document.getElementById('v_'+k).textContent=inp.value; if(['koi','orbs','lilies'].includes(k))scheduleRebuild();});
+    w.appendChild(inp); panel.appendChild(w);
+  });
+  const acts=document.createElement('div'); acts.className='panel-actions'; acts.innerHTML='<button id="resetBtn">Reset</button>'; panel.appendChild(acts);
+
+  const stage=document.getElementById('stage'),cv=document.getElementById('cv');
+  let W=360,H=583,DPR=Math.min(2,window.devicePixelRatio||1);
+  let simW,simH,h0,h1;
+  let bottomCv,bctx,surfaceCv,sctx,fieldCv,fctx,fieldImg,contentCv;
+  let kois=[],floats=[],petals=[];
+  let laneX0,laneX1,laneY0,laneY1,monoCY;
+  let emergeP=0,emerging=false,breached=false,lastTap=0,foodT=null,foodLife=0,grabbed=null,prevEmergeP=0,settlePhase=0;
+  let revealP=0,revealing=false;
+  // ---------- journey (auto-play 9-beat film — locked spine, NO on-screen chrome) ----------
+  let journeyT=0, paused=false, curBeat=-1, beatSpr=[], holdTimer=null;
+  const FIX={names:'Maria & Jose', date:'December 16, 2026', ceremony:'Manila Cathedral', reception:'The Peninsula Manila', city:'Makati', launch:'September 2026'};
+  // each text beat = EYEBROW (spaced small-caps) / MAIN (the one fact, warm gold) / SUB (italic), framed by hairline rules + a fleuron (fact beats)
+  const COPY=[
+    {eb:'Together with their families', main:FIX.names, sub:'are getting married', hero:true, cy:0.38},
+    {eb:'Save the date', main:FIX.date, sub:'a Wednesday evening', frame:true, cy:0.40},
+    {eb:'The ceremony', main:FIX.ceremony, sub:'We’ll exchange our vows here', frame:true, cy:0.41},
+    {eb:'The celebration', main:FIX.reception, sub:'in '+FIX.city+' — we’ll celebrate together', frame:true, cy:0.40},
+    {main:'We can’t wait to celebrate with you', sentiment:true, cy:0.37},
+    {eb:'The formal invitation', main:'Arrives '+FIX.launch, sub:'with all the details to follow', frame:true, cy:0.39},
+    {eb:'Save the date', main:FIX.date, action:'Add to calendar', frame:true, terminal:true, cy:0.42}
+  ];
+  const BEATS=[
+    {key:'preroll',dur:1700},
+    {key:'monogram',dur:3200,onStart:()=>startEmerge()},
+    {key:'names',dur:3800,spr:0},
+    {key:'date',dur:4400,spr:1},
+    {key:'ceremony',dur:3400,spr:2,ferry:-1},
+    {key:'reception',dur:3400,spr:3,ferry:1},
+    {key:'sentiment',dur:3600,spr:4,soft:true},
+    {key:'invitation',dur:3600,spr:5},
+    {key:'terminal',dur:600000,spr:6,terminal:true}
+  ];
+  const tStarts=[]; (function(){let a=0;for(const b of BEATS){tStarts.push(a);a+=b.dur;}})();
+  function beatAt(jt){ for(let i=BEATS.length-1;i>=0;i--){ if(jt>=tStarts[i]) return i; } return 0; }
+  function jumpTo(i){ i=Math.max(1,Math.min(BEATS.length-1,i)); journeyT=tStarts[i]+1; curBeat=-1; paused=false; if(i>=2){emergeP=1;breached=true;emerging=false;} else {emergeP=0;emerging=false;} const h=document.getElementById('hint'); if(h)h.style.opacity='0'; }
+  function replay(){ journeyT=0;curBeat=-1;emerging=false;emergeP=0;breached=false;paused=false;if(h0){h0.fill(0);h1.fill(0);}petals=petals.filter(p=>!p.drop);const h=document.getElementById('hint'); if(h)h.style.opacity='1'; }
+
+  // ---------- assets ----------
+  let waterImg=new Image(), waterReady=false; waterImg.onload=()=>{waterReady=true;};
+  waterImg.src='water_assets/aisle.webp';
+  let orbSpr=null,lilySpr=null,lotusSpr=null;
+  function loadSpr(file,setFn){ const im=new Image(); im.onload=()=>{ try{setFn(keySprite(im,0));}catch(e){fail(e.message);} }; im.onerror=()=>fail('load fail '+file); im.src=file; }
+  loadSpr('water_assets/orb.webp',  s=>orbSpr=s);
+  loadSpr('water_assets/lily.webp', s=>lilySpr=s);
+  loadSpr('water_assets/lotus.webp',s=>lotusSpr=s);
+  const koiSpr=[]; let koiLoaded=0;
+  KOISRC.forEach((src,idx)=>{ const im=new Image(); im.onload=()=>{ koiSpr[idx]=keySprite(im,src.forward); koiLoaded++; if(koiLoaded===KOISRC.length && simW) seedKoi(); }; im.onerror=()=>fail('koi load fail '+src.file); im.src=src.file; });
+  function keySprite(img,forward){
+    const t=document.createElement('canvas'); t.width=img.naturalWidth; t.height=img.naturalHeight; const tx=t.getContext('2d'); tx.drawImage(img,0,0);
+    const im=tx.getImageData(0,0,t.width,t.height); const a=im.data;
+    for(let i=0;i<a.length;i+=4){ const r=a[i],g=a[i+1],b=a[i+2]; const lum=0.299*r+0.587*g+0.114*b; const al=lum<16?0:lum<44?(lum-16)/28:1; a[i+3]=Math.round(a[i+3]*al); }
+    tx.putImageData(im,0,0);
+    const diag=Math.ceil(Math.hypot(t.width,t.height));
+    const r=document.createElement('canvas'); r.width=diag; r.height=diag; const rx=r.getContext('2d');
+    rx.translate(diag/2,diag/2); rx.rotate(-forward); rx.drawImage(t,-t.width/2,-t.height/2);
+    const rd=rx.getImageData(0,0,diag,diag).data; let minx=diag,miny=diag,maxx=0,maxy=0;
+    for(let p=0;p<rd.length;p+=4){ if(rd[p+3]>96){ const q=p>>2,px=q%diag,py=(q/diag)|0; if(px<minx)minx=px; if(px>maxx)maxx=px; if(py<miny)miny=py; if(py>maxy)maxy=py; } }
+    const bw=Math.max(2,maxx-minx+1),bh=Math.max(2,maxy-miny+1);
+    const o=document.createElement('canvas'); o.width=bw; o.height=bh; o.getContext('2d').drawImage(r,minx,miny,bw,bh,0,0,bw,bh);
+    return {canvas:o,w:bw,h:bh,cx:bw/2,cy:bh/2,len:bw};
+  }
+  const markImg=new Image(); let markReady=false; markImg.onload=()=>{markReady=true;};
+  markImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5333.3335 5333.3335" width="240" height="240"><path d="'+MARK_D+'" fill="'+GOLD+'" fill-rule="nonzero" transform="matrix(1.3333333,0,0,-1.3333333,0,5333.3333)"/></svg>');
+
+  // ---------- VIDEO BASE (drop-in) — point VIDEO_BASE_URL at an R2/Kling cinematic aisle-water loop ----------
+  // '' keeps the aisle.webp photo as the base (the literal default + the live fallback). The shader
+  // refraction/caustics/koi/reveal all run identically over a video frame as over the photo.
+  const USE_VIDEO_BASE=true; const VIDEO_BASE_URL=''; // ← set to e.g. 'water_assets/aisle_loop.mp4'
+  let videoEl=null,videoReady=false,videoFailed=false;
+  function reducedMotion(){ try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;} }
+  function dataSaver(){ try{return navigator.connection&&navigator.connection.saveData;}catch(e){return false;} }
+  function setupVideo(){
+    if(videoEl||!USE_VIDEO_BASE||!VIDEO_BASE_URL) return;        // create-once / disabled → photo base
+    if(reducedMotion()||dataSaver()){ videoFailed=true; return; }
+    if(navigator.getBattery){ navigator.getBattery().then(b=>{ if(b.level<0.15&&!b.charging) videoFailed=true; }); }
+    const v=document.createElement('video');
+    v.muted=true; v.defaultMuted=true; v.playsInline=true; v.setAttribute('playsinline','');
+    v.autoplay=true; v.loop=true; v.crossOrigin='anonymous'; v.preload='auto';
+    v.addEventListener('canplay',()=>{ videoReady=true; v.play().catch(()=>{}); });
+    v.addEventListener('error',()=>{ videoFailed=true; videoReady=false; });
+    v.src=VIDEO_BASE_URL; videoEl=v;
+  }
+  function drawBase(c){
+    const usingVideo=USE_VIDEO_BASE&&!videoFailed&&videoEl&&videoReady&&videoEl.readyState>=2&&!videoEl.paused;
+    if(usingVideo){ const iw=videoEl.videoWidth||W,ih=videoEl.videoHeight||H,sc=Math.max(W/iw,H/ih),dw=iw*sc,dh=ih*sc; try{ c.drawImage(videoEl,(W-dw)/2,(H-dh)/2,dw,dh); return; }catch(e){ videoFailed=true; } }
+    if(waterReady){ const iw=waterImg.naturalWidth,ih=waterImg.naturalHeight,sc=Math.max(W/iw,H/ih),dw=iw*sc,dh=ih*sc; c.drawImage(waterImg,(W-dw)/2,(H-dh)/2,dw,dh); }
+    else { c.fillStyle='#0b1a18'; c.fillRect(0,0,W,H); }
+  }
+
+  function rand(a,b){return a+Math.random()*(b-a);}
+  function gx2(px){return px/W*simW;} function gy2(py){return py/H*simH;}
+  // the reflecting pool is a perspective trapezoid — narrow at the far (top) end, wider near (bottom)
+  function laneXAt(y){ const f=Math.max(0,Math.min(1,(y-laneY0)/(laneY1-laneY0))); return [W*(0.43-0.10*f), W*(0.57+0.10*f)]; }
+  // perspective SIZE: small at the far (top) end, large near (bottom)
+  function depthScale(y){ const f=Math.max(0,Math.min(1,(y-laneY0)/(laneY1-laneY0))); return 0.5+0.95*f; }
+
+  // ---------- WebGL ----------
+  let renderer,scene,cam,mat,bottomTex,surfaceTex,fieldTex,contentTex;
+  const VERT='varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0); }';
+  const FRAG=`
+    precision highp float;
+    varying vec2 vUv;
+    uniform sampler2D bottomTex, surfaceTex, fieldTex, contentTex;
+    uniform float time, flicker, refrAmt, causAmt, shadAmt, sheen, aspect, reveal, uLY0, uLY1;
+    float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
+    float vnoise(vec2 p){ vec2 i=floor(p),f=fract(p); float a=hash(i),b=hash(i+vec2(1.,0.)),c=hash(i+vec2(0.,1.)),d=hash(i+vec2(1.,1.)); vec2 u=f*f*(3.-2.*f); return mix(mix(a,b,u.x),mix(c,d,u.x),u.y); }
+    void main(){
+      vec2 uv=vUv;
+      vec4 fld=texture2D(fieldTex,uv);
+      vec2 n=(fld.rg-0.5)*2.0;           // surface normal xy from heightmap
+      float curv=(fld.b-0.5)*2.0;        // curvature/height
+      // POOL MASK — water effects (refraction/caustics/glints) only inside the reflecting pool, never on the banks
+      float sy=1.0-uv.y;
+      float lf=clamp((sy-uLY0)/(uLY1-uLY0),0.0,1.0);
+      float hw=0.07+0.10*lf;
+      float pool=step(uLY0,sy)*step(sy,uLY1)*(1.0-smoothstep(hw-0.03,hw,abs(uv.x-0.5)));
+      n*=pool; curv*=pool;
+      vec2 ruv=clamp(uv + n*refrAmt, 0.001, 0.999);
+      vec3 col=texture2D(bottomTex,ruv).rgb;   // refracted pond + koi
+      // caustics: two scrolling noise octaves, sharpened to filaments, candle-flicker
+      float c = vnoise(ruv*vec2(aspect,1.0)*9.0 + vec2(time*0.05, time*0.035));
+      c += 0.7*vnoise(ruv*vec2(aspect,1.0)*16.0 - vec2(time*0.04, time*0.028));
+      c = pow(max(0.0, c-0.95), 2.2)*2.2;
+      float caus = c*causAmt*flicker*(0.6+0.8*max(0.0,-curv))*pool;  // focus in troughs, pool only
+      col += vec3(caus*1.0, caus*0.82, caus*0.46);
+      // ripple specular glints (candlelight catching wavelets)
+      float spec=pow(max(0.0, n.x*0.6 - n.y*0.5),3.0);
+      col += vec3(0.55,0.5,0.34)*spec*causAmt*flicker*1.4;
+      // dual-layer shadow: surface elements cast soft shadow onto the bottom (koi)
+      vec2 lo=vec2(0.012, 0.018);        // light from upper-left → shadow lower-right
+      float sh=texture2D(surfaceTex, uv+lo).a*0.6 + texture2D(surfaceTex, uv+lo*2.0).a*0.4;
+      col *= (1.0 - shadAmt*sh);
+      // surface layer on top (orbs/lilies/petals/monogram), slightly refracted
+      vec4 surf=texture2D(surfaceTex, uv + n*refrAmt*0.15);
+      col=mix(col, surf.rgb, surf.a);
+      // reveal-out: expanding circular wipe to the save-the-date page
+      if(reveal>0.001){
+        vec2 p=(uv-0.5); p.x*=aspect; float d=length(p);
+        float edge=reveal*1.25; float w=0.085;
+        float inside=1.0-smoothstep(edge-w, edge, d);
+        float ring=smoothstep(edge-w*1.6, edge-w*0.3, d)-smoothstep(edge-w*0.3, edge+w, d);
+        vec2 cuv=clamp(uv + n*refrAmt*ring*4.0, 0.0,1.0);
+        vec3 content=texture2D(contentTex,cuv).rgb;
+        col=mix(col, content, inside);
+        col += vec3(0.95,0.85,0.6)*ring*(0.6+0.4*flicker); // bright shedding rim
+      }
+      gl_FragColor=vec4(col,1.0);
+    }`;
+
+  function initGL(){
+    renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:false,preserveDrawingBuffer:true});
+    renderer.setPixelRatio(DPR);
+    scene=new THREE.Scene(); cam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+    bottomTex=new THREE.Texture(); surfaceTex=new THREE.Texture(); fieldTex=new THREE.Texture(); contentTex=new THREE.Texture();
+    [bottomTex,surfaceTex,fieldTex,contentTex].forEach(tx=>{ tx.minFilter=THREE.LinearFilter; tx.magFilter=THREE.LinearFilter; tx.generateMipmaps=false; tx.wrapS=tx.wrapT=THREE.ClampToEdgeWrapping; });
+    mat=new THREE.ShaderMaterial({ uniforms:{
+      bottomTex:{value:bottomTex}, surfaceTex:{value:surfaceTex}, fieldTex:{value:fieldTex}, contentTex:{value:contentTex},
+      time:{value:0}, flicker:{value:1}, refrAmt:{value:0.03}, causAmt:{value:0.5}, shadAmt:{value:0.4}, sheen:{value:0.6}, aspect:{value:W/H}, reveal:{value:0}, uLY0:{value:0.46}, uLY1:{value:0.84}
+    }, vertexShader:VERT, fragmentShader:FRAG });
+    const quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat); scene.add(quad);
+    const gl=renderer.getContext(); const sh=gl.getShaderInfoLog;
+    if(mat.program&&mat.program.diagnostics){ fail(mat.program.diagnostics.fragmentShader.log||''); }
+  }
+
+  function setup(){
+    const vh=Math.max(320,window.innerHeight||812), vw=Math.max(280,window.innerWidth||375);
+    H=vh; W=Math.min(vw,Math.round(vh/1.62));
+    stage.style.width=W+'px'; stage.style.height=H+'px';
+    if(!renderer) initGL();
+    renderer.setSize(W,H,false); cv.style.transformOrigin='50% 16%'; cv.style.willChange='transform';
+    if(mat) mat.uniforms.aspect.value=W/H;
+    // the reflecting-pool water lane inside the aisle photo (koi + floats live here)
+    laneX0=W*0.33; laneX1=W*0.67; laneY0=H*0.46; laneY1=H*0.84; monoCY=H*0.62;
+    simW=200; simH=Math.max(2,Math.round(simW*H/W));
+    h0=new Float32Array(simW*simH);h1=new Float32Array(simW*simH);
+    bottomCv=document.createElement('canvas'); bottomCv.width=W; bottomCv.height=H; bctx=bottomCv.getContext('2d');
+    surfaceCv=document.createElement('canvas'); surfaceCv.width=W; surfaceCv.height=H; sctx=surfaceCv.getContext('2d');
+    fieldCv=document.createElement('canvas'); fieldCv.width=simW; fieldCv.height=simH; fctx=fieldCv.getContext('2d'); fieldImg=fctx.createImageData(simW,simH);
+    buildContent(); setupVideo(); buildBeatSprites();
+    bottomTex.image=bottomCv; surfaceTex.image=surfaceCv; fieldTex.image=fieldCv; contentTex.image=contentCv;
+    bottomTex.needsUpdate=surfaceTex.needsUpdate=fieldTex.needsUpdate=contentTex.needsUpdate=true;
+    seedFloats(); if(koiLoaded===KOISRC.length) seedKoi();
+  }
+
+  function buildContent(){
+    contentCv=document.createElement('canvas'); contentCv.width=W; contentCv.height=H; const c=contentCv.getContext('2d');
+    const g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#f7f1e6'); g.addColorStop(1,'#efe6d4'); c.fillStyle=g; c.fillRect(0,0,W,H);
+    c.fillStyle='rgba(120,90,40,0.06)'; for(let i=0;i<40;i++){c.beginPath();c.arc(Math.random()*W,Math.random()*H,Math.random()*40,0,7);c.fill();}
+    if(markReady){ const ms=W*0.26; c.globalAlpha=0.95; c.drawImage(markImg,W/2-ms/2,H*0.20-ms/2,ms,ms); c.globalAlpha=1; }
+    c.fillStyle='#7a5a2a'; c.textAlign='center';
+    c.font='600 '+(W*0.085)+'px Georgia, serif'; c.fillText('Maria & Jose', W/2, H*0.46);
+    c.font='italic '+(W*0.04)+'px Georgia, serif'; c.fillStyle='#9a7a44'; c.fillText('together with their families', W/2, H*0.52);
+    c.font='600 '+(W*0.05)+'px Georgia, serif'; c.fillStyle='#7a5a2a'; c.fillText('SAVE THE DATE', W/2, H*0.60);
+    c.font='600 '+(W*0.07)+'px Georgia, serif'; c.fillText('December 16, 2026', W/2, H*0.66);
+    c.font=(W*0.038)+'px Georgia, serif'; c.fillStyle='#9a7a44'; c.fillText('Manila Cathedral', W/2, H*0.72);
+  }
+  function spaced(s){ return s.toUpperCase().split('').join(' '); }  // thin-space tracked small-caps eyebrow
+  function rule(c,cx,y,half,col){ c.save(); c.strokeStyle=col; c.globalAlpha=0.5; c.lineWidth=1.4;
+    c.beginPath(); c.moveTo(cx-half,y); c.lineTo(cx-W*0.016,y); c.moveTo(cx+W*0.016,y); c.lineTo(cx+half,y); c.stroke();
+    c.globalAlpha=0.82; c.fillStyle=col; for(let k=0;k<5;k++){ const a=-Math.PI/2+k*1.2566; c.beginPath(); c.ellipse(cx+Math.cos(a)*W*0.006,y+Math.sin(a)*W*0.006,W*0.0044,W*0.0018,a,0,7); c.fill(); }
+    c.beginPath(); c.arc(cx,y,W*0.0026,0,7); c.fill(); c.restore(); }
+  // one beat = a fine-stationery card: EYEBROW (spaced small-caps) / MAIN (the fact, warm gold) / SUB (italic) + hairline rules & fleuron
+  function makeCard(cp){
+    const cc=document.createElement('canvas'); cc.width=W; cc.height=H; const c=cc.getContext('2d'); c.textAlign='center';
+    const gold='#eccf86', dim='#cbb988', cx=W/2, cy=H*(cp.cy||0.40);
+    const mfont=w=>(cp.sentiment?'italic 500 ':'600 ')+w+'px Georgia,serif';
+    let ms=W*(cp.hero?0.088:cp.sentiment?0.058:0.066);
+    c.font=mfont(ms); while(c.measureText(cp.main).width>W*0.86 && ms>W*0.05){ ms-=1; c.font=mfont(ms); }
+    const ebSize=W*0.04, subSize=W*0.041, ebY=cy-ms*0.82, subY=cy+ms*0.5+subSize, actY=cy+ms*0.5+(cp.sub?subSize+W*0.06:W*0.07);
+    const topR=ebY-ebSize-W*0.022, botR=(cp.action?actY+W*0.03:cp.sub?subY+W*0.022:cy+ms*0.18);
+    const mcy=(topR+botR)/2, mh=botR-topR;
+    const sg=c.createRadialGradient(cx,mcy,4,cx,mcy,W*0.52); sg.addColorStop(0,'rgba(6,10,12,0.24)'); sg.addColorStop(0.72,'rgba(6,10,12,0.1)'); sg.addColorStop(1,'rgba(6,10,12,0)');
+    c.save(); c.fillStyle=sg; c.beginPath(); c.ellipse(cx,mcy,W*0.5,Math.max(W*0.16,mh*0.72),0,0,7); c.fill(); c.restore();
+    const paint=()=>{
+      if(cp.eb){ c.fillStyle=dim; c.font='500 '+ebSize+'px Georgia,serif'; c.fillText(spaced(cp.eb),cx,ebY); }
+      c.fillStyle=gold; c.font=mfont(ms); c.fillText(cp.main,cx,cy);
+      if(cp.sub){ c.save(); c.globalAlpha=0.92; c.fillStyle=dim; c.font='italic 400 '+subSize+'px Georgia,serif'; c.fillText(cp.sub,cx,subY); c.restore(); }
+      if(cp.action){ c.fillStyle=gold; c.font='500 '+(W*0.04)+'px Georgia,serif'; c.fillText(spaced(cp.action),cx,actY); }
+      if(cp.frame){ const rw=W*0.09; rule(c,cx,topR,rw,dim); rule(c,cx,botR,rw,dim); }
+    };
+    c.shadowColor='rgba(0,0,0,0.85)'; c.shadowBlur=22; paint(); c.shadowBlur=10; paint(); c.shadowBlur=0;
+    return cc;
+  }
+  function buildBeatSprites(){ beatSpr=COPY.map(cp=>makeCard(cp)); }
+  function drawBeats(c){
+    const i=curBeat; if(i<1)return; const b=BEATS[i]; if(b.spr==null)return; const sprC=beatSpr[b.spr]; if(!sprC)return;
+    const lp=Math.max(0,Math.min(1,(journeyT-tStarts[i])/b.dur));
+    const inF=b.soft?0.30:0.18, inA=Math.min(1,lp/inF);
+    const outA=b.terminal?1:(1-Math.max(0,(lp-0.82)/0.18));
+    const a=Math.max(0,inA*outA); if(a<=0.01)return;
+    const yoff=(1-inA)*(b.soft?24:40) + (b.terminal?0:Math.max(0,(lp-0.82)/0.18)*(b.soft?-30:44));
+    c.save(); c.globalAlpha=a; c.drawImage(sprC,0,yoff); c.restore();
+  }
+
+  function seedKoi(){
+    kois=[];
+    for(let i=0;i<S.koi;i++){
+      const spr=koiSpr[i%koiSpr.length]; const len=(46+Math.random()*22)*(S.koiSize/54);
+      const ky=rand(laneY0+14,laneY1-14), kxr=laneXAt(ky);
+      kois.push({x:rand(kxr[0]+8,kxr[1]-8),y:ky,ang:Math.random()*7,spr,scl:len/spr.len,
+        baseSpd:(0.16+Math.random()*0.12),phase:Math.random()*7,beat:0.05+Math.random()*0.02,swim:0.4,
+        depth:0.7+Math.random()*0.25,depthPh:Math.random()*7,seed:Math.random()*100,tgt:null,curious:Math.random()<0.7});
+    }
+  }
+  function seedFloats(){
+    floats=[];
+    // place floaters inside the perspective pool, biased toward the edges
+    const place=()=>{ const y=rand(laneY0+12,laneY1-12), r=laneXAt(y), lw=r[1]-r[0]; const x=(Math.random()<0.5?rand(r[0]+8,r[0]+lw*0.34):rand(r[1]-lw*0.34,r[1]-8)); return {x,y}; };
+    for(let i=0;i<S.orbs;i++){const p=place();floats.push({type:'orb',x:p.x,y:p.y,size:11+Math.random()*7,vx:0,vy:0,ph:Math.random()*7,glow:0.85+Math.random()*0.25});}
+    for(let i=0;i<S.lilies;i++){const p=place();floats.push({type:(Math.random()<0.25?'lotus':'lily'),x:p.x,y:p.y,size:14+Math.random()*10,vx:0,vy:0,ph:Math.random()*7});}
+  }
+
+  function impulse(px,py,amt,rad){const gx=Math.round(gx2(px)),gy=Math.round(gy2(py));rad=rad||2;for(let yy=-rad;yy<=rad;yy++)for(let xx=-rad;xx<=rad;xx++){const x=gx+xx,y=gy+yy;if(x<1||x>=simW-1||y<1||y>=simH-1)continue;const d=Math.hypot(xx,yy);if(d>rad)continue;h0[y*simW+x]-=amt*(1-d/rad);}}
+  function waveAt(px,py){const gx=Math.round(gx2(px)),gy=Math.round(gy2(py));if(gx<0||gx>=simW||gy<0||gy>=simH)return 0;return h0[gy*simW+gx];}
+  function gradX(px,py){const gx=Math.round(gx2(px)),gy=Math.round(gy2(py));if(gx<1||gx>=simW-1||gy<1||gy>=simH-1)return 0;const i=gy*simW+gx;return h0[i-1]-h0[i+1];}
+  function gradY(px,py){const gx=Math.round(gx2(px)),gy=Math.round(gy2(py));if(gx<1||gx>=simW-1||gy<1||gy>=simH-1)return 0;const i=gy*simW+gx;return h0[i-simW]-h0[i+simW];}
+  function stepWater(){const damp=0.928+(S.decay/100)*0.06;for(let y=1;y<simH-1;y++){const row=y*simW;for(let x=1;x<simW-1;x++){const i=row+x;let v=(h0[i-1]+h0[i+1]+h0[i-simW]+h0[i+simW])*0.5-h1[i];v*=damp;h1[i]=v;}}const t=h0;h0=h1;h1=t;
+    if(Math.random()<0.004){const x=1+((Math.random()*(simW-2))|0),y=1+((Math.random()*(simH-2))|0);h0[y*simW+x]-=0.06;}}
+  function ringImpulse(cx,cy,r,amt){const N=Math.max(12,(r*0.55)|0);for(let i=0;i<N;i++){const a=i/N*6.2832;impulse(cx+Math.cos(a)*r,cy+Math.sin(a)*r,amt,1);}}
+  function riseDisplace(){
+    const ms=W*0.30,R=ms*0.46,cx=W/2,cy=monoCY,z=emergeP,vz=z-prevEmergeP;
+    if(emerging){ if(z<0.5&&vz>0)impulse(cx,cy,-vz*40,Math.max(3,(gx2(R)*0.4)|0));
+      const cr=z<0.5?R*(0.35+0.65*z/0.5):R*(1-(Math.max(0,z-0.72)/0.28)*0.45);
+      if(Math.abs(vz)>0.0004)ringImpulse(cx,cy,Math.max(5,cr),vz*72);
+    } else if(emergeP>=1){ settlePhase+=0.04; if(Math.random()<0.18)ringImpulse(cx,cy,R*0.82,Math.cos(settlePhase)*0.1); }
+    prevEmergeP=emergeP;
+  }
+
+  // build the normal+height field texture from the CPU heightmap
+  function buildField(){
+    const d=fieldImg.data, K=20, Kh=14;
+    for(let y=0;y<simH;y++){const row=y*simW;for(let x=0;x<simW;x++){
+      const i=row+x,xm=x>0?i-1:i,xp=x<simW-1?i+1:i,ym=y>0?i-simW:i,yp=y<simH-1?i+simW:i;
+      const nx=(h0[xm]-h0[xp]), ny=(h0[ym]-h0[yp]); const o=i*4;
+      d[o]=Math.max(0,Math.min(255,128+nx*K)); d[o+1]=Math.max(0,Math.min(255,128+ny*K)); d[o+2]=Math.max(0,Math.min(255,128+h0[i]*Kh)); d[o+3]=255;
+    }}
+    fctx.putImageData(fieldImg,0,0); fieldTex.needsUpdate=true;
+  }
+
+  // ---------- bottom layer (pond + submerged mark + koi) ----------
+  function drawBottom(t){
+    const c=bctx; c.clearRect(0,0,W,H); c.globalAlpha=1;
+    drawBase(c);
+    const dk=0.62+0.38*(1-S.tint/100); c.fillStyle='rgba(0,0,0,'+(1-dk)+')'; c.fillRect(0,0,W,H);
+    drawMarkSubmerged(c);
+    kois.forEach(K=>drawKoiSprite(c,K,t));
+  }
+  function drawMarkSubmerged(c){
+    if(!markReady||emergeP>=0.55)return;
+    const ms=W*0.19,cx=W/2,cy=monoCY,p=emergeP/0.55,wob=waveAt(cx,cy);
+    c.save();c.translate(cx+wob*0.7,cy+wob*0.5);c.scale((0.82+0.18*p),(0.82+0.18*p)*0.6);c.globalAlpha=0.3+0.5*p;c.globalCompositeOperation='lighter';c.drawImage(markImg,-ms/2,-ms/2,ms,ms);c.restore();c.globalCompositeOperation='source-over';
+  }
+  function drawKoiSprite(c,K,t){
+    const s=K.spr, sc=K.scl*depthScale(K.y);
+    const n=16, stripW=s.w/n, amp=s.h*sc*(0.10+0.20*K.swim), waves=1.25;
+    ctxShadow(c,K,sc);
+    c.save(); c.translate(K.x, K.y); c.rotate(K.ang); c.globalAlpha=0.66+0.30*K.depth;
+    const dStrip=stripW*sc+0.7;
+    for(let i=0;i<n;i++){ const headFrac=i/(n-1), tail=1-headFrac; const oy=amp*Math.pow(tail,1.45)*Math.sin(K.phase - headFrac*Math.PI*waves); const dx=(i*stripW - s.cx)*sc; c.drawImage(s.canvas, i*stripW,0, stripW,s.h, dx, -s.cy*sc+oy, dStrip, s.h*sc); }
+    c.restore();
+  }
+  function ctxShadow(c,K,sc){ const s=K.spr, shO=(1-K.depth)*s.len*sc*0.18; c.save(); c.globalAlpha=0.20; c.fillStyle='#000'; c.beginPath(); c.ellipse(K.x+shO*0.5,K.y+shO, s.len*sc*0.32, s.len*sc*0.13, K.ang,0,7); c.fill(); c.restore(); }
+
+  function updateKoi(t){
+    const m=26;
+    kois.forEach(K=>{
+      if(!K.tgt||Math.hypot(K.tgt.x-K.x,K.tgt.y-K.y)<48){const ty=rand(laneY0+16,laneY1-16),tr=laneXAt(ty);K.tgt={x:rand(tr[0]+10,tr[1]-10),y:ty};}
+      const aim=(foodLife>0&&K.curious)?foodT:K.tgt;
+      const desired=Math.atan2(aim.y-K.y,aim.x-K.x);
+      const dd=((desired-K.ang+Math.PI*3)%(Math.PI*2))-Math.PI;
+      const maxTurn=(0.006+0.006*K.baseSpd)*(S.koiSpeed/42);
+      K.ang+=Math.max(-maxTurn,Math.min(maxTurn,dd*0.06));
+      const surge=0.80+0.20*Math.sin(t*0.00045+K.seed);
+      const spd=K.baseSpd*(S.koiSpeed/42)*surge; K.swim=Math.min(1,spd/0.34);
+      K.x+=Math.cos(K.ang)*spd;K.y+=Math.sin(K.ang)*spd;
+      const kr=laneXAt(K.y); if(K.x<kr[0]+m){K.x=kr[0]+m;K.tgt=null;} if(K.x>kr[1]-m){K.x=kr[1]-m;K.tgt=null;} if(K.y<laneY0+m){K.y=laneY0+m;K.tgt=null;} if(K.y>laneY1-m){K.y=laneY1-m;K.tgt=null;}
+      K.phase+=K.beat*0.6+spd*0.42; K.depth=0.74+Math.sin(t*0.00032+K.depthPh)*0.16;
+      if(Math.sin(K.phase)>0.9)impulse(K.x-Math.cos(K.ang)*K.spr.len*K.scl*0.42,K.y-Math.sin(K.ang)*K.spr.len*K.scl*0.42,0.05,1);
+    });
+  }
+
+  // ---------- surface layer (lilies/orbs/petals + emerged mark) ----------
+  function updateFloats(){
+    const PUSH=1.1;
+    floats.forEach(f=>{ if(f===grabbed)return;
+      f.vx+=gradX(f.x,f.y)*PUSH;f.vy+=gradY(f.x,f.y)*PUSH; f.vx*=0.8;f.vy*=0.8;f.x+=f.vx;f.y+=f.vy;f.ph+=0.012;
+      const fr=laneXAt(f.y), lxo=fr[0]+f.size*0.6, lxi=fr[1]-f.size*0.6, lyo=laneY0+f.size*0.6, lyi=laneY1-f.size*0.6;
+      if(f.x<lxo){f.x=lxo;f.vx*=-0.35;}if(f.x>lxi){f.x=lxi;f.vx*=-0.35;}
+      if(f.y<lyo){f.y=lyo;f.vy*=-0.35;}if(f.y>lyi){f.y=lyi;f.vy*=-0.35;}
+    });
+  }
+  function drawSurface(t){
+    const c=sctx; c.clearRect(0,0,W,H);
+    floats.forEach(f=>drawFloat(c,f,t));
+    drawPetals(c);
+    drawMarkEmerged(c,t);
+    drawBeats(c);
+  }
+  function drawFloat(c,f,t){
+    const wob=waveAt(f.x,f.y),x=f.x,y=f.y,s=f.size*depthScale(f.y),grab=(f===grabbed);
+    if(f.type==='orb'){
+      const rg=c.createRadialGradient(x,y,1,x,y,s*3.0);rg.addColorStop(0,'rgba(255,232,184,'+(0.5*f.glow)+')');rg.addColorStop(0.4,'rgba(255,194,120,'+(0.2*f.glow)+')');rg.addColorStop(1,'rgba(255,180,90,0)');
+      c.save();c.globalCompositeOperation='lighter';c.fillStyle=rg;c.beginPath();c.arc(x+wob*1.2,y+wob,s*3.0,0,7);c.fill();c.restore();
+      if(orbSpr){ const sc=s*2.0/orbSpr.h; c.save(); c.globalAlpha=grab?1:0.96; c.drawImage(orbSpr.canvas, x-orbSpr.w*sc/2, y-orbSpr.h*sc/2, orbSpr.w*sc, orbSpr.h*sc); c.restore(); }
+    } else {
+      const spr=(f.type==='lotus')?lotusSpr:lilySpr; if(!spr)return;
+      const sc=s*1.6/Math.max(spr.w,spr.h), dw=spr.w*sc, dh=spr.h*sc;
+      c.save();c.globalAlpha=0.30;c.fillStyle='#03110b';c.beginPath();c.ellipse(x+dw*0.06,y+dh*0.09,dw*0.46,dh*0.42,0,0,7);c.fill();c.restore();
+      c.save();c.translate(x+wob*0.5,y+wob*0.4);c.rotate(f.ph*0.04);c.globalAlpha=0.97;c.drawImage(spr.canvas,-dw/2,-dh/2,dw,dh);c.restore();
+    }
+  }
+  function drawMarkEmerged(c,t){
+    if(!markReady||emergeP<0.45)return;
+    const ms=W*0.19,cx=W/2,cy=monoCY,p=(emergeP-0.45)/0.55,glow=S.sheen/100,bob=Math.sin(t*0.0018)*ms*0.012*(emergeP>=1?1:0.3);
+    c.save();c.translate(cx,cy+bob);c.scale((0.95+0.05*Math.min(1,p)),(0.95+0.05*Math.min(1,p))*0.6);
+    c.globalCompositeOperation='lighter';const hg=c.createRadialGradient(0,0,ms*0.1,0,0,ms*0.85);hg.addColorStop(0,'rgba(255,226,150,'+(0.16+0.5*glow)+')');hg.addColorStop(1,'rgba(255,200,110,0)');c.fillStyle=hg;c.beginPath();c.arc(0,0,ms*0.85,0,7);c.fill();
+    c.globalCompositeOperation='source-over';c.globalAlpha=Math.min(1,p*1.6);c.drawImage(markImg,-ms/2,-ms/2,ms,ms);c.globalAlpha=1;
+    c.restore();
+  }
+  function splashRing(){const cx=W/2,cy=monoCY;impulse(cx,cy,9,5);for(let i=0;i<16;i++){const a=Math.random()*7,r=W*0.1*Math.random();petals.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r,vx:Math.cos(a)*(1+Math.random()),vy:Math.sin(a)*(1+Math.random()),s:2+Math.random()*2,life:1,drop:true});}}
+  function drawPetals(c){
+    const rate=S.petals/100;if(rate>0&&Math.random()<rate*0.04){const py=rand(laneY0,laneY1),pr=laneXAt(py);petals.push({x:rand(pr[0],pr[1]),y:py,vx:0,vy:0,s:3+Math.random()*3,life:1,hue:Math.random()<0.5?0:1});}
+    for(let i=petals.length-1;i>=0;i--){const p=petals[i];
+      if(p.drop){p.x+=p.vx;p.y+=p.vy;p.vx*=0.94;p.vy*=0.94;p.life-=0.02;if(p.life<=0){petals.splice(i,1);continue;}c.fillStyle='rgba(225,235,238,'+p.life*0.6+')';c.beginPath();c.arc(p.x,p.y,p.s*p.life,0,7);c.fill();continue;}
+      p.vx+=gradX(p.x,p.y)*3.5;p.vy+=gradY(p.x,p.y)*3.5;p.vx*=0.9;p.vy*=0.9;p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=0;if(p.x>W)p.x=W;if(p.y<0)p.y=0;if(p.y>H)p.y=H;
+      const col=p.hue?'rgba(224,170,190,':'rgba(232,180,150,',pds=p.s*depthScale(p.y);c.save();c.translate(p.x,p.y);c.rotate(p.x*0.02);c.fillStyle=col+'0.85)';c.beginPath();c.ellipse(0,0,pds,pds*0.55,0,0,7);c.fill();c.restore();}
+  }
+
+  // candle flicker (sum of sines)
+  function flickerAt(t){ return 0.82 + 0.18*(0.5*Math.sin(t*0.011)+0.3*Math.sin(t*0.027+1.3)+0.2*Math.sin(t*0.038+2.1)); }
+
+  function startEmerge(){if(emerging||emergeP>0)return;emerging=true;emergeP=0;breached=false;document.getElementById('hint').style.opacity='0';}
+  function startReveal(){if(emergeP<0.9){startEmerge();return;} if(revealing)return; revealing=true; }
+
+  let started=false;
+  function loop(ts){
+    requestAnimationFrame(loop);
+    if(!h0||!renderer) return;
+    if(beatSpr.length && !paused){ journeyT+=16; const bi=beatAt(journeyT); if(bi!==curBeat){ curBeat=bi; const b=BEATS[bi]; if(bi>=2&&emergeP<1&&!emerging){emergeP=1;breached=true;} if(b.onStart)b.onStart(); } }
+    // dolly: a gentle forward "walk" toward the altar arch, clock-driven, applied to the whole composited frame (no desync)
+    { const wr=Math.max(0,Math.min(1,(journeyT-tStarts[1])/(tStarts[8]-tStarts[1]))); const walk=wr*wr*(3-2*wr); const z=1+0.12*walk; const moving=curBeat>=1&&curBeat<8; const bob=Math.sin(journeyT*0.0028)*0.3*(moving?1:0.2); cv.style.transform='scale('+z.toFixed(4)+') translateY('+bob.toFixed(3)+'%)'; }
+    stepWater(); if(foodLife>0)foodLife--; updateKoi(ts); updateFloats();
+    if(emerging){const sp=0.0015+(S.emergeSpeed/100)*0.0042;emergeP=Math.min(1,emergeP+sp*16);if(!breached&&emergeP>0.5){breached=true;splashRing();}if(emergeP>=1)emerging=false;}
+    riseDisplace();
+    if(revealing){ revealP=Math.min(1,revealP+0.009); }
+    drawBottom(ts); drawSurface(ts); buildField();
+    bottomTex.needsUpdate=true; surfaceTex.needsUpdate=true;
+    const u=mat.uniforms;
+    u.time.value=ts*0.06; u.flicker.value=flickerAt(ts);
+    u.refrAmt.value=0.012+S.refraction/100*0.035; u.uLY0.value=laneY0/H; u.uLY1.value=laneY1/H;
+    u.causAmt.value=S.caustics/100*0.85;
+    u.shadAmt.value=S.shadows/100*0.6;
+    u.sheen.value=S.sheen/100; u.reveal.value=revealP;
+    renderer.render(scene,cam);
+  }
+
+  // ---------- interaction ----------
+  function pos(ev){const r=cv.getBoundingClientRect();const t=ev.touches?ev.touches[0]:ev;return {x:(t.clientX-r.left)/r.width*W,y:(t.clientY-r.top)/r.height*H};}
+  function pickFloat(p){let best=null,bd=1e9;floats.forEach(f=>{const d=Math.hypot(f.x-p.x,f.y-p.y);if(d<f.size+14&&d<bd){bd=d;best=f;}});return best;}
+  let down=false;
+  let downP=null,downT=0,moved=false,held=false;
+  cv.addEventListener('pointerdown',e=>{down=true;moved=false;held=false;const p=pos(e);downP=p;downT=Date.now();
+    if(videoEl&&videoEl.paused&&!videoFailed){ videoEl.play().catch(()=>{}); }  // iOS gesture unlock
+    const f=pickFloat(p);
+    if(f){grabbed=f;f.vx=0;f.vy=0;return;}
+    impulse(p.x,p.y,3+S.strength/100*6,3);foodT={x:p.x,y:p.y};foodLife=170;
+    clearTimeout(holdTimer); holdTimer=setTimeout(()=>{held=true;paused=true;},250);   // press-and-hold = pause
+  });
+  cv.addEventListener('pointermove',e=>{if(!down)return;const p=pos(e); if(downP&&Math.hypot(p.x-downP.x,p.y-downP.y)>8){moved=true;clearTimeout(holdTimer);}
+    if(grabbed){const nx=Math.max(grabbed.size+8,Math.min(W-grabbed.size-8,p.x)),ny=Math.max(grabbed.size+6,Math.min(H-grabbed.size-6,p.y));grabbed.vx=(nx-grabbed.x);grabbed.vy=(ny-grabbed.y);grabbed.x=nx;grabbed.y=ny;impulse(nx,ny,2.4+S.strength/100*3,3);return;}
+    impulse(p.x,p.y,1.4+S.strength/100*3,2);foodT={x:p.x,y:p.y};foodLife=120;
+  });
+  window.addEventListener('pointerup',()=>{down=false;clearTimeout(holdTimer);
+    if(grabbed){grabbed.vx*=0.6;grabbed.vy*=0.6;grabbed=null;}
+    else if(held){paused=false;}                                   // release a hold → resume
+    else if(!moved && Date.now()-downT<260 && downP){              // quick tap = invisible step (no on-screen chrome)
+      if(downP.x<W*0.33) jumpTo(curBeat-1); else if(downP.x>W*0.67) jumpTo(curBeat+1);
+    }
+  });
+  document.addEventListener('visibilitychange',()=>{ if(!videoEl)return; if(document.hidden){try{videoEl.pause();}catch(e){}} else if(!videoFailed){videoEl.play().catch(()=>{});} });
+
+  document.getElementById('riseBtn').onclick=replay;
+  document.getElementById('gearBtn').onclick=()=>panel.classList.toggle('open');
+  document.getElementById('resetBtn').onclick=replay;
+
+  let rebT=null;function scheduleRebuild(){clearTimeout(rebT);rebT=setTimeout(()=>{const ep=emergeP,em=emerging;setup();emergeP=ep;emerging=em;},150);}
+  let rzT=null;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{const ep=emergeP,em=emerging;setup();emergeP=ep;emerging=em;},200);});
+
+  try{ setup(); }catch(e){ fail(e.message+'\n'+e.stack); }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

@@ -39,7 +39,7 @@ Each section of the spec needs corresponding test coverage. Tick when written.
 - [ ] 5.1 Owner Internal Accounts (§ 10a)
 - [ ] 5.2 Setnayan Team Shared Monthly Pool (§ 10b)
 - [ ] 5.3 Pool reset on month boundary
-- [ ] 6. Setnayan Pay convenience fee (3%)
+- [ ] 6. ~~Setnayan Pay convenience fee (3%)~~ **RETIRED to 0% at the 2026-06-07 reset** — verify NO convenience fee is charged: customer total = SKU/booking price, no fee line; vendor↔customer money settles off-platform at 0% commission. (Historically drafted 3% → repriced flat 5.0% on 2026-05-16, both now retired.)
 - [ ] 7. Receipts (per 0026)
 - [ ] 8. Refunds
 - [ ] 9. Reference code uniqueness + retry

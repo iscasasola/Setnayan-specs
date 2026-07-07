@@ -2,12 +2,14 @@
 
 > ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
 > **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Papic is **Live** in code (`app/papic/*`), but the pricing/SKU shape in this doc is superseded:
-> - **Live SKUs:** the catalog ships **"Papic (5 Seats)" ₱2,999** (unlimited photos+video, 5 hrs) and **"Papic Guest (Disposable Camera)" from ₱2,999** (24 photos + 10×5s clips, confirmed in code as `PAPIC_GUEST · ₱2,999`). The "3 Papic ₱1,500 / 5 Papic ₱2,500 / ₱199-per-template" two-tier model in this doc is RETIRED. (A later owner pax-pricing lock also floated a single ₱4,499 Papic with a 10hr/10K-pool cap + Drive sync — reconcile to the live catalog + `Pricing.md`/`CLAUDE.md` SKU table, which win.)
+> - **Live SKUs (per-camera, 2026-06-29 canon):** Papic is now priced **per camera·day** — **Papic Unli ₱100/cam·day** (unlimited photos+video) and **Papic Ltd ₱30/cam·day** (limited capture), **both capped at ₱15,000/day**. The older flat "Papic (5 Seats) ₱2,999" + "Papic Guest (Disposable Camera) ₱2,999" SKUs, the "3 Papic ₱1,500 / 5 Papic ₱2,500 / ₱199-per-template" two-tier model, and the single ₱4,499 pax-pricing draft in this doc are all **RETIRED**. Reconcile to the live catalog + `Pricing.md`/`CLAUDE.md` SKU table, which win.
 > - **Hard product constraints still hold:** 5-second video cap, max 10 tags/photo, untagged-still-delivered guarantee, per-event face-scoping, Personal Reels 9:16 / 1–30s — these are owner-locked and remain accurate.
 > - **Sales/payment model:** Papic is a **first-party Setnayan Productions vendor listing** sold to couples via **apply-then-pay** (manual admin approval), free during the launch window (to 31 Mar 2027) — not an instant "App Unlock" wallet charge. Customer token wallet is RETIRED; **vendor token economy** is the only token system. **Commission is 0%**; vendor↔customer money is OFF-PLATFORM.
 > - **Native vs web:** the spec assumes a native iOS/Android capture app; today Papic ships as a **webapp slice** (native is the Phase-2 / Capacitor-shell direction). Storage is now **R2 = system of record** with a Google-Drive permanent copy (supersedes the "90-day hot / 5-year cold" line).
 >
 > When this body disagrees with the above, **the above wins.**
+>
+> **➕ 2026-06-29 price refresh** (live-site sync — supersedes any stale prices in the banner above): Setnayan AI **₱3,999** (paid first paywall) · Animated Monogram **₱1,999** · Live Studio (Panood) multicam **₱3,499/day** (single-cam livestream FREE) · Pakanta **₱2,499** (one SKU) · Cinematic Reveal **₱1,499** · vendor Pro **₱2,499** / Enterprise **₱4,999** per 28-day · **0% commission · verification FREE** · couple website = free 4-in-1 + ONE **Couple Website PRO ₱1,999** (old separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs retired) · couple tiers **Free ₱0 · Setnayan AI ₱3,999** (Essentials/Complete bundles REMOVED 2026-06-29). Canon: `AS_BUILT_GROUND_TRUTH_2026-06-07.md` § 1 + `Pricing.md` § 00.
 
 **Document Version:** 2.0 — FINAL V1 SCOPE
 **Last Updated:** 2026-05-08
@@ -44,6 +46,18 @@
 ---
 
 ## Part 1 — Executive Summary
+
+### Why Papic Exists — the Human Layer (positioning · owner-stated 2026-06-14)
+
+> **This frame is canonical and wins on conflict with any "second-shooter replacement" language elsewhere in this doc.** Papic does **not** replace the couple's photography team and is **not** there to hunt the "best parts" of the night — that is the photographer's job. Papic is the **human / guest-presence layer**: it captures the reactions, emotions, candids, and stories a hired photographer structurally cannot be everywhere to catch. **Let the photographers take the grandest moments; let Papic take the precious ones** — the moments the couple was too busy to witness, the small things they could never see.
+
+The three Papic products each carry a distinct emotional job, and together they form one system:
+
+- **Papic Guest (disposable camera)** is not an ordinary photo-share bucket. Its purpose is to let *every* guest share their **own** personal experience of the night — the moments the couple can no longer see. A friend's joke, the short clip of the tunnel the couple paid for, guests quietly appreciating the reception. It is how a guest connects to the couple even while the couple is busy, and how the human-side candids photographers miss make it home.
+- **Papic 5 Seats** is the inverse of "more cameras." Its real goal is to **free guests to stop filming and live the moment with their own two eyes** — the way the most precious moments were once kept by memory, not by phone. The five designated seats then catch the **reaction shots** one photographer can't be everywhere for: how guests look at the first kiss, the faces amazed at the reception the couple worked so hard for. Five seats exist precisely because the human side of a wedding can't be grasped by a single lens.
+- **Kwento** is the **words** layer. Because the couple didn't see it, a guest leaves a message — a story, a *chismis* — about a small-but-memorable moment, anchored to the photo it happened in, all kept in one place. It is the back-story of the great moments the couple would otherwise miss, told to them by the people who were there.
+
+The job, across all three: surface the **human side of the wedding** — presence, candor, reaction, and the stories the couple couldn't be in two places to live. (How those moments become lasting keepsakes — reels, SDE, stories, thank-you films on owned music — is the produced-output layer; that's *how* they matter, this section is *why*.)
 
 ### What Papic Is
 

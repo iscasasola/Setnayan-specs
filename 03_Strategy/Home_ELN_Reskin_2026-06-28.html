@@ -1,0 +1,1294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setnayan — Keep your memories. Plan your moments.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* Cool greige system (ELN-style), Setnayan content */
+    --bg:#F2F2F0;          /* ELN live: rgb(242,242,240) */
+    --bg-2:#E9E7E2;
+    --ink:#54514D;         /* ELN keeps text SOFT — warm dark taupe, not black */
+    --grey:#8C8884;        /* near ELN body grey rgb(152,148,144) */
+    --grey-2:#A8A4A0;
+    --line:rgba(42,43,46,.12);
+    --pop1:#9A7BC9;        /* the one gradient pop (a la ELN's purple) */
+    --pop2:#C5A059;        /* a whisper of Setnayan gold inside the pop */
+    --sans:-apple-system,BlinkMacSystemFont,'Inter','SF Pro Display',sans-serif;
+    --r:999px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
+  /* Scroll is LOCKED until the gate opens */
+  body{overflow:hidden}
+  body.open{overflow-y:auto}
+  html.snap{scroll-snap-type:y mandatory}
+  a{color:inherit;text-decoration:none}
+
+  /* ── Liquid glass primitives ───────────────────────────── */
+  /* ELN-faithful glass: subtle 7px blur, mid-grey ~30%, no border, no shadow */
+  .glass{backdrop-filter:blur(7px) saturate(1.05);-webkit-backdrop-filter:blur(7px) saturate(1.05);
+    background:rgba(150,150,150,.26);border:none;box-shadow:none;border-radius:var(--r)}
+  .glass-dark{backdrop-filter:blur(7px) saturate(1.05);-webkit-backdrop-filter:blur(7px) saturate(1.05);
+    background:rgba(140,140,140,.30);border:none;box-shadow:none;border-radius:var(--r)}
+
+  /* ── Floating nav (fixed, centered) ────────────────────── */
+  .nav{position:fixed;top:22px;left:50%;transform:translateX(-50%);z-index:60;display:flex;gap:8px;align-items:center}
+  .nav .logo{width:46px;height:46px;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;transition:transform .2s ease}
+  .nav .logo:hover{transform:scale(1.06)}
+  .nav .logo:active{transform:scale(.96)}
+  .nav .logo svg{width:20px;height:20px}
+  .nav .links{display:flex;gap:4px;padding:6px}
+  .nav .links a{color:#fff;font-size:14px;font-weight:500;padding:9px 16px;border-radius:var(--r);transition:background .2s}
+  .nav .links a:hover{background:rgba(255,255,255,.16)}
+  .nav .signin{display:flex;align-items:center;color:#fff;font-size:14px;font-weight:600;padding:11px 18px;cursor:pointer;white-space:nowrap;transition:background .2s,transform .2s}
+  .nav .signin:hover{background:rgba(255,255,255,.16)}
+  .nav .signin:active{transform:scale(.97)}
+  body.open .nav .logo,body.open .nav .links,body.open .nav .signin{backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);background:rgba(255,255,255,.5);border-color:rgba(255,255,255,.6)}
+  body.open .nav .logo{color:var(--ink)}body.open .nav .links a,body.open .nav .signin{color:var(--ink)}
+  @media(max-width:480px){
+    .nav{top:14px;gap:5px}
+    .nav .logo{width:40px;height:40px}.nav .logo svg{width:18px;height:18px}
+    .nav .links{padding:5px;gap:0}
+    .nav .links a{padding:8px 9px;font-size:12.5px}
+    .nav .signin{padding:9px 12px;font-size:12.5px}
+  }
+  @media(max-width:360px){
+    .nav .links a{padding:8px 7px;font-size:12px}
+    .nav .signin{padding:9px 10px;font-size:12px}
+  }
+
+  /* ── HERO (fullscreen monochrome film, no-scroll gate) ─── */
+  .hero{position:relative;height:100vh;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;color:#fff;scroll-snap-align:start}
+  .film{position:absolute;inset:0;z-index:0}
+  /* desaturated cinematic scene, built in CSS (stands in for a real soft event film) */
+  /* two cross-fading scene layers — stand-ins for the looping memory films
+     that the dock carousels through (clicking a thumbnail swaps the hero) */
+  .film .scene{position:absolute;inset:0;background-size:cover;transition:opacity .9s ease;will-change:opacity}
+  .film .bokeh{position:absolute;inset:0;background:
+    radial-gradient(circle at 22% 32%, rgba(255,255,255,.22), transparent 9%),
+    radial-gradient(circle at 72% 26%, rgba(255,255,255,.16), transparent 8%),
+    radial-gradient(circle at 84% 64%, rgba(255,255,255,.12), transparent 10%),
+    radial-gradient(circle at 38% 72%, rgba(255,255,255,.10), transparent 11%),
+    radial-gradient(circle at 12% 80%, rgba(255,255,255,.10), transparent 9%);filter:blur(2px)}
+  .film .vignette{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 42%, transparent 40%, rgba(20,22,26,.55) 100%)}
+  .film .grain{position:absolute;inset:0;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  /* bottom scrim — keeps the dock + cookie on a consistent dark base so the
+     glass buttons read uniformly regardless of the film behind them */
+  .film .scrim{position:absolute;left:0;right:0;bottom:0;height:260px;background:linear-gradient(to top,rgba(16,17,20,.55),transparent)}
+
+  .hero-mid{position:relative;z-index:2;text-align:center;padding:0 24px;transition:opacity .5s ease,transform .5s ease}
+  .kick{font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:500;margin-bottom:22px}
+  .htitle{font-size:clamp(2.6rem,7vw,80px);font-weight:600;line-height:1.0;letter-spacing:-.035em;margin:0}
+  .hsub{font-size:clamp(1rem,2.4vw,1.35rem);font-weight:300;color:rgba(255,255,255,.82);margin:18px 0 0;letter-spacing:-.01em}
+  .hctas{margin-top:34px;display:flex;flex-direction:column;align-items:center;gap:16px}
+  .pill-cta{display:inline-flex;align-items:center;gap:9px;color:#fff;font-size:15px;font-weight:500;padding:14px 26px;cursor:pointer}
+  .learn{display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,.78);font-size:13px;letter-spacing:.04em;cursor:pointer;background:none;border:none;font-family:var(--sans)}
+  .learn .arr{animation:bob 1.6s ease-in-out infinite;display:inline-block}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+
+  /* dock of 5 pillar widgets */
+  .dock{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:10px;padding:10px}
+  .dock .w{width:78px;height:52px;border-radius:11px;cursor:pointer;position:relative;overflow:hidden;
+    background:#6b6e74 center/cover no-repeat;border:1px solid rgba(255,255,255,.28);
+    box-shadow:0 6px 16px rgba(0,0,0,.22);transition:transform .22s ease,box-shadow .22s ease}
+  .dock .w::after{content:'▶';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.9);font-size:11px;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+  .dock .w:hover{transform:translateY(-6px)}
+  .dock .w.active{box-shadow:0 0 0 2px rgba(255,255,255,.9),0 8px 20px rgba(0,0,0,.3)}
+  .dock .w .lab{position:absolute;top:-30px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.08em;white-space:nowrap;color:#fff;background:rgba(20,22,26,.6);backdrop-filter:blur(8px);padding:4px 9px;border-radius:var(--r);opacity:0;transition:opacity .2s;text-transform:uppercase;z-index:2}
+  .dock .w:hover .lab{opacity:1}
+  .scene-cap{position:absolute;bottom:96px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.82);transition:opacity .3s ease}
+  @media(max-width:560px){.dock .w{width:62px;height:42px}}
+
+  /* cookie pill */
+  .cookie{position:fixed;bottom:22px;right:22px;z-index:60;display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:13px;color:#fff}
+  body.open .cookie{color:var(--ink)}
+  body.open .cookie{backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);background:rgba(255,255,255,.5);border-color:rgba(255,255,255,.6)}
+  .cookie button{background:none;border:none;font-family:var(--sans);font-size:13px;cursor:pointer;color:inherit;font-weight:500;opacity:.85}
+  .cookie button:hover{opacity:1}
+  .cookie .mng{opacity:.6;font-weight:400}
+
+  /* ── CONTENT (revealed after gate opens) ───────────────── */
+  .content{background:var(--bg)}
+  .manifesto{height:100dvh;display:flex;align-items:center;justify-content:center;padding:max(56px,7vh) 24px;text-align:center;scroll-snap-align:start}
+  .manifesto p{max-width:880px;margin:0;font-size:clamp(1.6rem,3.6vw,2.7rem);font-weight:400;line-height:1.32;color:var(--grey);letter-spacing:-.02em}
+  .manifesto p b{color:var(--ink);font-weight:500}
+
+  .pillar{height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:max(52px,6vh) 24px;text-align:center;scroll-snap-align:start;overflow:hidden}
+  .pnum{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--grey-2);font-weight:500}
+  .pname{font-size:clamp(1.6rem,3.6vw,2.5rem);font-weight:600;letter-spacing:-.025em;margin:9px 0 0}
+  .pdef{max-width:540px;font-size:clamp(.92rem,1.7vw,1.05rem);font-weight:300;color:var(--grey);line-height:1.5;margin:11px 0 0}
+  .psample{margin-top:22px;width:100%;max-width:560px}
+  .card{border-radius:22px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.7);box-shadow:0 30px 80px rgba(20,22,26,.10);backdrop-filter:blur(10px);overflow:hidden;text-align:left}
+  .chead{padding:11px 16px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey-2)}
+  .ph{background:repeating-linear-gradient(45deg,#D9D6CF,#D9D6CF 9px,#E4E1DB 9px,#E4E1DB 18px)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:30px;max-width:560px}
+  .chip{font-size:13px;color:var(--grey);padding:8px 15px;border-radius:var(--r);background:rgba(255,255,255,.5);border:1px solid var(--line)}
+  .chip.live{color:var(--ink);font-weight:500}
+  .soon{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--pop1);margin-left:5px}
+  /* in-depth feature cards per pillar (horizontal carousel — drag / swipe) */
+  .pfeats{max-width:880px;margin:22px auto 0;text-align:left;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:4px 24px 12px;cursor:grab;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24px,#000 calc(100% - 40px),transparent 100%);
+    mask-image:linear-gradient(90deg,transparent 0,#000 24px,#000 calc(100% - 40px),transparent 100%)}
+  .pfeats::-webkit-scrollbar{display:none}
+  .pfeats.dragging{cursor:grabbing;scroll-snap-type:none}
+  .pfeat{flex:0 0 clamp(220px,74vw,250px);scroll-snap-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px 12px;transition:box-shadow .18s ease}
+  .pfeat:hover{box-shadow:0 12px 28px rgba(20,22,26,.06)}
+  .pfeat .fl em{font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--pop1);white-space:nowrap;display:inline-block;margin-top:2px}
+  .pfeat .ic{width:32px;height:32px;border-radius:9px;background:var(--bg-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--pop2);font-size:15px;margin-bottom:11px}
+  .pfeat .fn{font-size:14px;font-weight:600;color:var(--ink)}
+  .pfeat .fl{font-size:12.5px;line-height:1.5;color:var(--grey);margin-top:4px}
+  /* interactive preview widget — click a feature card to swap the mock */
+  .pfeat{cursor:pointer}
+  .pfeat.sel{border-color:var(--pop2);box-shadow:0 0 0 1px var(--pop2),0 12px 28px rgba(20,22,26,.06)}
+  .pwidget{max-width:560px;margin:0 auto}
+  .pw-frame{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 30px 70px rgba(20,22,26,.10)}
+  .pw-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--bg-2)}
+  .pw-bar .d{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .pw-bar .u{margin-left:8px;flex:1;height:19px;border-radius:6px;background:#fff;border:1px solid var(--line);font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--grey-2);display:flex;align-items:center;padding:0 9px}
+  .pw-screen{position:relative;height:clamp(200px,32vh,300px);background:var(--bg);text-align:left}
+  .pmock{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .4s ease;overflow:hidden;padding:18px;display:flex;flex-direction:column}
+  .pmock.on{opacity:1;pointer-events:auto}
+  .mk-t{font-family:var(--serif);font-style:italic;font-size:17px;color:#2f2d2a;margin-bottom:12px}
+  .m-ev .g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .m-ev .e{border:1px solid var(--line);border-radius:11px;padding:13px 8px;display:flex;flex-direction:column;gap:7px;align-items:center;text-align:center;font-size:11px;color:var(--ink);font-weight:500}
+  .m-ev .e .gl{font-size:17px;color:var(--pop2)}
+  .m-ev .e.on{border-color:var(--pop2);background:rgba(197,160,89,.1)}
+  .m-ed .mast{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid #2f2d2a;padding-bottom:6px}
+  .m-ed .mast .nm{font-family:var(--serif);font-style:italic;font-size:16px;color:#2f2d2a}
+  .m-ed .mast .dt{font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-2)}
+  .m-ed .hero{height:84px;border-radius:8px;margin:10px 0 9px;background:linear-gradient(135deg,#cfccc4,#9a9da2 68%,#62656b)}
+  .m-ed .hl{font-family:var(--serif);font-style:italic;font-size:18px;color:#2f2d2a;line-height:1.08}
+  .m-ed .ln{height:5px;border-radius:3px;background:var(--line);margin-top:6px}
+  .m-ed .share{margin-top:auto;display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:11px}
+  .m-ed .share .lb{font-size:10.5px;color:var(--grey);margin-right:2px}
+  .m-ed .share .si{width:27px;height:27px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:#2f2d2a;font-weight:600}
+  .m-db .cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .m-db .c{border:1px solid var(--line);border-radius:10px;padding:11px}
+  .m-db .c .lab{font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-2)}
+  .m-db .c .v{font-size:15px;font-weight:600;color:#2f2d2a;margin-top:3px}
+  .m-db .c .s{font-size:10px;color:var(--grey);margin-top:2px}
+  .m-db .bar{height:6px;border-radius:3px;background:var(--bg-2);margin-top:8px;overflow:hidden}
+  .m-db .bar i{display:block;height:100%;background:var(--pop2)}
+  /* generic preview-mock primitives (reused across pillars) */
+  .mk-h{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey-2);margin-bottom:11px}
+  .mrow{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink)}
+  .mrow:last-child{border-bottom:none}
+  .mdot{width:22px;height:22px;border-radius:50%;background:var(--bg-2);border:1px solid var(--line);flex:none}
+  .mchip{margin-left:auto;font-size:9px;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:var(--r);border:1px solid var(--line);color:var(--grey-2);white-space:nowrap}
+  .mchip.ok{color:#46663f;border-color:#bcd0b2;background:#eaf0e5}
+  .mchip.warn{color:#7a5fb0;border-color:#d6c8ea;background:#f1ecf8}
+  .mbar{height:7px;border-radius:4px;background:var(--bg-2);overflow:hidden}
+  .mbar i{display:block;height:100%;background:var(--pop2)}
+  .mgrid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .mtile{border:1px solid var(--line);border-radius:10px;padding:11px}
+  .mtile .lab{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-2)}
+  .mtile .v{font-size:14px;font-weight:600;color:#2f2d2a;margin-top:3px}
+  .msw{height:30px;border-radius:8px;border:1px solid rgba(0,0,0,.04)}
+  .mcal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;font-size:10px;color:var(--grey-2);text-align:center}
+  .mcal span{padding:6px 0;border-radius:6px}
+  .mcal .on{background:var(--pop2);color:#2f2d2a;font-weight:600}
+  .mcal .free{background:rgba(197,160,89,.16);color:#97742f}
+  .mck{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink);padding:5px 0}
+  .mbox{width:15px;height:15px;border-radius:4px;border:1.4px solid var(--line);flex:none;position:relative}
+  .mbox.on{background:#4F6B4A;border-color:#4F6B4A}
+  .mbox.on::after{content:'';position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
+  .mtbl{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--pop2);position:relative}
+  .mtbl::after{content:'';position:absolute;inset:11px;border-radius:50%;background:rgba(197,160,89,.16)}
+  .mtl-row{display:flex;gap:11px;align-items:baseline;padding:6px 0;font-size:11px;color:var(--ink)}
+  .mtl-row .t{font-family:var(--mono);font-size:9px;color:#97742f;width:50px;flex:none}
+  .mbtn-s{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:#fff;background:var(--ink);border-radius:var(--r);padding:8px 14px;margin-top:auto;align-self:flex-start}
+  /* === Ala Ala · "Every event type" chip grid (all 14 real types) === */
+  .me-evhead{margin-bottom:11px}
+  .me-evgrid{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+  .me-ev{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;border:1px solid var(--line);border-radius:999px;padding:5px 11px 5px 8px;background:#fff;font-size:11px;font-weight:500;color:var(--ink);line-height:1;white-space:nowrap}
+  .me-ev .me-gl{font-size:13px;line-height:1;filter:saturate(1.05)}
+  .me-ev.me-soon{background:transparent;border-style:dashed;color:var(--grey-2)}
+  .me-ev.me-soon .me-gl{opacity:.55}
+  .me-ev .me-tag{font-family:var(--mono);font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--pop1);margin-left:1px}
+  .me-evnote{margin-top:auto;padding-top:10px;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-2)}
+  .m-ev.on{overflow-y:auto}  /* scroll-safety: never clip the 14-type grid on short screens */
+  @media (max-width:340px){.me-ev{font-size:10px;padding:4px 9px 4px 7px}.me-ev .me-gl{font-size:12px}}
+  /* === Ala Ala · Editorials — magazine storyline beat === */
+  .me-ed{padding:16px 18px}
+  .me-ed.on{overflow-y:auto}
+  .me-mast{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid #2f2d2a;padding-bottom:6px;gap:10px}
+  .me-mast .nm{font-family:var(--serif);font-style:italic;font-size:17px;color:#2f2d2a;line-height:1}
+  .me-mast .dt{font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-2);white-space:nowrap}
+  .me-beat{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#97742f;margin:11px 0 3px}
+  .me-hl{font-family:var(--serif);font-style:italic;font-size:21px;line-height:1.04;color:#2f2d2a;margin:0}
+  .me-spread{display:grid;grid-template-columns:74px 1fr;gap:11px;margin-top:11px;align-items:start}
+  .me-fig{height:64px;border-radius:8px;background:linear-gradient(135deg,#d8cdbb,#a9b0b8 58%,#62656b);position:relative;overflow:hidden}
+  .me-fig::after{content:'';position:absolute;inset:0;background:radial-gradient(120% 80% at 30% 22%,rgba(255,255,255,.35),transparent 55%)}
+  .me-narr{font-size:11.5px;line-height:1.5;color:var(--grey);margin:0}
+  .me-narr b{color:var(--ink);font-weight:500}
+  .me-quote{position:relative;margin:13px 0 0;padding:2px 0 0 18px;border-left:2px solid var(--pop2)}
+  .me-quote .qm{position:absolute;left:5px;top:-4px;font-family:var(--serif);font-style:italic;font-size:26px;line-height:1;color:var(--pop2)}
+  .me-quote p{font-family:var(--serif);font-style:italic;font-size:14.5px;line-height:1.32;color:#2f2d2a;margin:0}
+  .me-quote .att{display:block;margin-top:5px;font-size:10px;letter-spacing:.02em;color:var(--grey-2);font-family:var(--sans)}
+  .me-share{margin-top:13px;display:flex;align-items:center;gap:7px;border-top:1px solid var(--line);padding-top:11px}
+  .me-share .lb{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey-2);margin-right:1px}
+  .me-share .si{width:25px;height:25px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:#2f2d2a}
+  .me-share .more{margin-left:auto;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#97742f}
+  @media(max-width:680px){ .me-spread{grid-template-columns:1fr} .me-fig{height:74px} }
+  /* === Ala Ala · Dashboard — single-event command center === */
+  .m-db2 .me-evhd{display:flex;align-items:flex-start;gap:10px;border-bottom:1.5px solid #2f2d2a;padding-bottom:9px;margin-bottom:9px}
+  .m-db2 .me-evhd .mk{width:34px;height:34px;border-radius:9px;flex:none;background:linear-gradient(135deg,#cfccc4,#a7a39b 70%,#7d7a73);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:14px;color:#fff}
+  .m-db2 .me-evhd .meta{min-width:0;flex:1}
+  .m-db2 .me-evhd .nm{font-family:var(--serif);font-style:italic;font-size:17px;color:#2f2d2a;line-height:1.05}
+  .m-db2 .me-evhd .sub{font-family:var(--mono);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--grey-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-db2 .me-evhd .cd{font-family:var(--serif);font-style:italic;font-size:13px;color:#97742f;white-space:nowrap;align-self:center}
+  .m-db2 .me-tag{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#97742f;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .m-db2 .me-tag::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--pop2);flex:none}
+  .m-db2 .me-mods{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+  .m-db2 .me-mod{border:1px solid var(--line);border-radius:9px;padding:9px 9px 8px;display:flex;flex-direction:column;gap:5px;min-width:0}
+  .m-db2 .me-mod .lab{font-family:var(--mono);font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-2)}
+  .m-db2 .me-mod .v{font-size:12px;font-weight:600;color:#2f2d2a;line-height:1.1}
+  .m-db2 .me-mod .v small{font-weight:400;color:var(--grey);font-size:10px}
+  .m-db2 .me-mod .mbar{height:5px;margin-top:1px}
+  .m-db2 .me-mod .mchip{margin-left:0;align-self:flex-start}
+  .m-db2 .me-mod.live{border-color:var(--pop2);background:rgba(197,160,89,.07)}
+  .m-db2 .me-foot{margin-top:auto;display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+  .m-db2 .me-foot .lb{font-size:10.5px;color:var(--grey);margin-right:auto}
+  .m-db2 .me-foot .si{width:25px;height:25px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:#2f2d2a;font-weight:600;flex:none}
+  .m-db2 .me-foot .si.go{border-color:var(--pop2);color:#97742f}
+  @media(max-width:680px){ .m-db2 .me-mods{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:680px){
+    .pwidget{max-width:286px}
+    .pw-frame{border-radius:30px;border:7px solid #1c1e22}
+    .pw-bar{justify-content:center;background:#1c1e22;border-bottom:none;padding:7px 0}
+    .pw-bar .d,.pw-bar .u{display:none}
+    .pw-bar::after{content:'';width:46px;height:5px;border-radius:3px;background:rgba(255,255,255,.28)}
+    .pw-screen{height:clamp(320px,46vh,448px)}
+    .m-ev .g{grid-template-columns:repeat(2,1fr)}
+  }
+  .pfeat .fl em{font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--pop1);white-space:nowrap;display:inline-block;margin-top:2px}
+
+  /* per-pillar samples */
+  .s-mh{padding:14px;display:grid;gap:8px}
+  .s-mh .row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .s-mh .row div{aspect-ratio:1;border-radius:8px}
+  .s-mh .play{background:#34363B;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px}
+  .s-ala{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px}
+  .s-ala .t{aspect-ratio:1.1;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--ink);font-size:12px;font-weight:500}
+  .s-ala .t span{font-size:18px}
+  .s-ai{padding:20px}
+  .matchc{border:1px solid var(--line);border-radius:18px;padding:18px;background:rgba(255,255,255,.7)}
+  .matchc .top{display:flex;align-items:center;gap:11px}
+  .matchc .lg{width:42px;height:42px;border-radius:11px;background:#34363B;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600}
+  .matchc .nm{font-weight:600}.matchc .ct{font-size:12px;color:var(--grey-2)}
+  .mpct{display:inline-block;margin:13px 0;font-weight:600;font-size:13px;color:#3B6D4F;background:#E2EFE5;border:1px solid #BcD8C4;padding:5px 12px;border-radius:var(--r)}
+  .mr{display:flex;gap:8px;align-items:center;font-size:13px;margin:7px 0}.mr b{color:#3B6D4F}
+  .s-mk{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:16px}
+  .vc{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:rgba(255,255,255,.6)}
+  .vc .img{height:58px}.vc .b{padding:9px 11px}
+  .vname{font-size:12px;font-weight:500}.vname.m{color:var(--grey-2);font-weight:400}
+  .vmeta{font-size:10px;color:var(--grey-2);margin-top:2px}
+
+  .close{height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px 24px;scroll-snap-align:start}
+  .close h2{font-size:clamp(1.8rem,5vw,3rem);font-weight:400;letter-spacing:-.025em;color:var(--grey);max-width:760px;margin:0}
+  .close h2 b{color:var(--ink);font-weight:600}
+  .btn-dark{margin-top:30px;display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:#fff;font-size:15px;font-weight:500;padding:15px 30px;border-radius:var(--r);cursor:pointer;border:none;font-family:var(--sans)}
+  footer{padding:34px 24px;display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--grey-2);letter-spacing:.04em}
+
+  /* kinetic feelings ticker (ELN /info device) */
+  .ticker{height:100dvh;padding:0 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;scroll-snap-align:start}
+  .word{font-size:clamp(2rem,5.5vw,3.5rem);font-weight:500;letter-spacing:-.03em;color:var(--grey-2);opacity:.18;line-height:1.18;transition:opacity .25s ease,color .25s ease}
+  .word .suf{font-weight:300;opacity:0;transition:opacity .3s ease}
+  .word.active{color:var(--ink);opacity:1}
+  .word.active .suf{opacity:1;color:var(--grey)}
+
+  /* Real Stories gallery (ELN /work device) */
+  .stories{height:100dvh;padding:max(52px,6vh) 24px;text-align:center;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:940px;margin:48px auto 0}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .storyc{position:relative;border-radius:24px;overflow:hidden;min-height:clamp(168px,26vh,228px);display:flex;flex-direction:column;justify-content:flex-end;text-align:center;color:#fff;padding:24px 22px;cursor:pointer}
+  .storyc .img{position:absolute;inset:0;z-index:0}
+  .storyc .ov{position:absolute;inset:0;z-index:0;background:linear-gradient(to top,rgba(20,22,26,.62),rgba(20,22,26,.05) 60%)}
+  .storyc .c{position:relative;z-index:1;transition:transform .3s ease}
+  .storyc:hover .c{transform:translateY(-4px)}
+  .storyc .lab{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+  .storyc .ti{font-size:clamp(1.5rem,3vw,2rem);font-weight:600;letter-spacing:-.02em;margin:9px 0 4px}
+  .storyc .su{font-size:13px;color:rgba(255,255,255,.82);margin-bottom:18px}
+  .storyc .lm{display:inline-flex;align-items:center;color:#fff;font-size:13px;font-weight:500;padding:11px 22px}
+  .g1{background:linear-gradient(155deg,#CFCCC4,#9A9DA2 64%,#65686E)}
+  .g2{background:linear-gradient(150deg,#C7C9CC,#9396A2 60%,#5A5E6B)}
+  .g3{background:linear-gradient(160deg,#D3CFC6,#A59E92 62%,#6E665B)}
+  .g4{background:linear-gradient(150deg,#C4C6C2,#9AA09A 60%,#5F665F)}
+
+  /* Download band */
+  .dlrow{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:42px auto 0;max-width:660px}
+  .dltile{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:128px;padding:18px 20px;border-radius:18px;background:rgba(140,140,140,.14);border:1px solid var(--line);transition:transform .2s ease}
+  .dltile .nm{font-size:14px;font-weight:500;color:var(--ink)}
+  .dltile .sb{font-size:10px;color:var(--grey-2);letter-spacing:.1em;text-transform:uppercase}
+  .dltile.live{cursor:pointer}
+  .dltile.live:hover{transform:translateY(-3px)}
+  .dltile.soon{opacity:.55}
+  .dlweb{margin-top:22px;display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:#fff;font-size:15px;font-weight:500;padding:14px 28px;border-radius:var(--r);cursor:pointer;border:none;font-family:var(--sans)}
+
+  .ribbon{position:fixed;left:0;top:0;z-index:80;background:rgba(20,22,26,.55);backdrop-filter:blur(8px);color:#fff;font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:5px 12px;border-bottom-right-radius:8px}
+  /* ===== Top-nav overlays (Prices / Download / Sign in) ===== */
+  .ov{position:fixed;inset:0;z-index:200;display:none;align-items:flex-start;justify-content:center;padding:max(5vh,28px) 16px;overflow-y:auto;background:rgba(38,38,36,.46);backdrop-filter:blur(9px) saturate(1.05);-webkit-backdrop-filter:blur(9px) saturate(1.05);opacity:0;transition:opacity .22s ease}
+  .ov.open{display:flex;opacity:1}
+  .ov-card{background:var(--bg);border:1px solid rgba(255,255,255,.7);border-radius:22px;width:100%;max-width:880px;margin:auto;padding:32px 32px 26px;box-shadow:0 30px 90px rgba(20,22,26,.22);position:relative;animation:ovIn .26s cubic-bezier(.2,.7,.2,1)}
+  @keyframes ovIn{from{transform:translateY(14px);opacity:.4}to{transform:none;opacity:1}}
+  .ov-x{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink);transition:background .15s;z-index:2}
+  .ov-x:hover{background:var(--bg-2)}
+  .ov-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-2)}
+  .ov-title{font-family:var(--serif);font-style:italic;font-size:clamp(1.7rem,3.8vw,2.5rem);color:var(--ink);margin:6px 0 5px;letter-spacing:-.01em;line-height:1.04}
+  .ov-sub{color:var(--grey);font-size:13.5px;line-height:1.5;margin:0 0 22px;max-width:620px}
+  .pr-tiers{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+  .pr-tier{border:1px solid var(--line);border-radius:14px;padding:15px 14px;background:#fff;display:flex;flex-direction:column;gap:5px}
+  .pr-tier.hot{border-color:var(--pop2);box-shadow:0 0 0 1px var(--pop2)}
+  .pr-tier .t{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-2)}
+  .pr-tier .p{font-family:var(--serif);font-style:italic;font-size:24px;color:var(--ink);line-height:1}
+  .pr-tier .d{font-size:11.5px;color:var(--grey);line-height:1.45;margin-top:2px}
+  .pr-alh{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#97742f;margin:24px 0 12px;display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:18px}
+  .pr-alh:first-of-type{border-top:0;padding-top:0;margin-top:6px}
+  .pr-sub{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey-2);margin:13px 2px 6px;padding-left:2px}
+  .pr-alh::after{content:'';flex:1;height:1px;background:var(--line)}
+  .pr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 20px}
+  .pr-papic{background:rgba(197,160,89,.06);border-radius:12px;padding:3px 16px;margin-bottom:8px}
+  .pr-papic .pr-row{border-bottom-color:rgba(197,160,89,.18)}
+  .pr-free{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px}
+  .pr-f{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12px;color:var(--ink);background:#fff}
+  .pr-f::before{content:'✓';color:#46663f;font-weight:700;font-size:10px}
+  .pr-est{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 18px;margin-bottom:18px}
+  .pr-est .grp{display:flex;flex-direction:column;gap:9px;min-width:180px;flex:1}
+  .pr-est .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .pr-est .lab{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-2)}
+  .pr-est .val{font-family:var(--serif);font-style:italic;font-size:18px;color:var(--ink)}
+  .pr-est input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;background:var(--line);outline:none;margin:0}
+  .pr-est input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--pop2);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 5px rgba(20,22,26,.2)}
+  .pr-est input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--pop2);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 5px rgba(20,22,26,.2)}
+  .pr-est .hint{flex-basis:100%;font-size:11px;color:var(--grey-2);line-height:1.45}
+  .pr-row .v small{font-weight:400;color:var(--grey-2);font-size:10px;letter-spacing:0}
+  .pr-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:7px 0;font-size:12.5px}
+  .pr-row .n{color:var(--ink)}
+  .pr-row .v{font-weight:600;color:#2f2d2a;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .pr-foot{margin-top:20px;font-size:11.5px;color:var(--grey-2);line-height:1.5}
+  .dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+  .dl-card{border:1px solid var(--line);border-radius:14px;padding:18px 16px;background:#fff;text-align:left;cursor:pointer;transition:box-shadow .18s,border-color .18s;display:block}
+  .dl-card:hover{border-color:var(--pop2);box-shadow:0 10px 26px rgba(20,22,26,.07)}
+  .dl-card.match{border-color:var(--pop2);box-shadow:0 0 0 1px var(--pop2)}
+  .dl-card .ic{font-size:22px;color:var(--ink);margin-bottom:9px}
+  .dl-card .t{font-size:15px;font-weight:600;color:#2f2d2a}
+  .dl-card .s{font-size:11.5px;color:var(--grey-2);margin-top:3px}
+  .dl-stores{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px;margin-top:4px}
+  .dl-store{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:11px;padding:10px 16px;font-size:13px;color:var(--ink);background:#fff;cursor:pointer}
+  .dl-store .ic{font-size:16px}
+  .si-in{width:100%;border:1px solid var(--line);border-radius:11px;padding:13px 15px;font-size:14px;font-family:var(--sans);color:var(--ink);background:#fff;margin-bottom:10px}
+  .si-in:focus{outline:none;border-color:var(--pop2)}
+  .si-btn{width:100%;background:var(--ink);color:#fff;border:none;border-radius:11px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .si-or{display:flex;align-items:center;gap:10px;color:var(--grey-2);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin:14px 0}
+  .si-or::before,.si-or::after{content:'';flex:1;height:1px;background:var(--line)}
+  .si-g{width:100%;background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px;font-size:13.5px;color:var(--ink);cursor:pointer;font-family:var(--sans);display:flex;align-items:center;justify-content:center;gap:8px}
+  .si-foot{font-size:12.5px;color:var(--grey);margin:18px 0 0}
+  .si-foot a{color:#97742f;cursor:pointer;font-weight:500}
+  .vd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+  .vd-card{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}
+  .vd-card .ic{width:34px;height:34px;border-radius:10px;background:var(--bg-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:#97742f;font-size:16px;margin-bottom:11px}
+  .vd-card .t{font-size:15px;font-weight:600;color:#2f2d2a;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .vd-card .t .soon{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--pop1);border:1px solid #d9cbea;border-radius:20px;padding:1px 6px;font-weight:500}
+  .vd-card .d{font-size:12.5px;color:var(--grey);line-height:1.5;margin-top:4px}
+  .vd-cta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .vd-btn{background:var(--ink);color:#fff;border:none;border-radius:11px;padding:14px 24px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .vd-link{background:none;border:none;color:var(--grey);font-size:13px;cursor:pointer;font-family:var(--sans)}
+  .vb-stat{font-size:13.5px;color:var(--ink);background:rgba(197,160,89,.06);border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin-bottom:22px;line-height:1.5}
+  .vb-stat b{color:#2f2d2a}
+  .vb-stat .soonkey{color:var(--grey-2);font-size:12px}
+  .vb-group{margin-bottom:20px}
+  .vb-h{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#97742f;margin:0 0 11px;display:flex;align-items:center;gap:10px}
+  .vb-h::after{content:'';flex:1;height:1px;background:var(--line)}
+  .vb-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 16px}
+  .vb-item{padding:9px 0;border-bottom:1px solid var(--line)}
+  .vb-item .n{font-size:13px;font-weight:600;color:#2f2d2a;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .vb-item .n .soon{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--pop1);border:1px solid #d9cbea;border-radius:20px;padding:1px 6px;font-weight:500}
+  .vb-item .b{font-size:11.5px;color:var(--grey);line-height:1.45;margin-top:3px}
+  @media(max-width:680px){.vb-grid{grid-template-columns:1fr}}
+  @media(max-width:680px){
+    .pr-tiers{grid-template-columns:1fr 1fr}
+    .pr-grid{grid-template-columns:1fr}
+    .dl-grid{grid-template-columns:1fr}
+    .vd-grid{grid-template-columns:1fr}
+    .ov-card{padding:26px 20px 22px}
+  }
+</style>
+</head>
+<body>
+<div class="ribbon">Prototype · ELN-style reskin</div>
+
+<!-- Floating glass nav -->
+<nav class="nav">
+  <div class="logo glass-dark" role="button" tabindex="0" aria-label="Home" title="Home" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goHome();}">
+    <svg viewBox="0 0 5333.3335 5333.3335" fill="none" aria-label="Setnayan"><defs><clipPath id="proto-mark-clip" clipPathUnits="userSpaceOnUse"><path d="M 0,0 H 4000 V 4000 H 0 Z"/></clipPath></defs><path d="M 1859.526,3749.781 C 1458.028,3717.757 1065.454,3548.554 758.3406,3241.44 451.2286,2934.328 282.2397,2541.742 250.2195,2140.255 l 1326.8215,1.536 V 661.7647 C 1368.543,727.4195 1172.067,841.5416 1006.804,1006.804 768.3191,1245.29 633.8543,1548.261 602.7217,1859.526 H 250 C 282.024,1458.028 451.2265,1065.455 758.3406,758.3406 1065.453,451.2287 1458.039,282.2396 1859.526,250.2195 V 2422.739 H 661.7647 c 65.6549,208.498 179.7773,404.975 345.0393,570.237 238.486,238.486 541.457,372.95 852.722,404.083 z m 280.948,0 1.537,-1609.307 h 280.948 v 1197.761 c 208.498,-65.655 404.974,-179.776 570.237,-345.039 238.485,-238.486 372.95,-541.457 404.082,-852.722 H 3750 c -32.024,401.498 -201.226,794.071 -508.341,1101.185 -307.112,307.112 -699.697,476.101 -1101.185,508.122 z m 0,-1890.255 c 32.025,-401.498 201.227,-794.073 508.341,-1101.1854 0.658,-0.6584 1.316,-1.3173 1.975,-1.9754 -80.395,-42.041 -163.892,-76.0428 -249.331,-101.7389 -85.439,-25.696 -172.821,-43.0864 -260.985,-51.9046 V 250.2195 c 401.497,32.0253 794.073,201.0094 1101.185,508.1211 307.114,307.1134 476.317,699.6874 508.341,1101.1854 h -352.722 c -31.132,-311.265 -165.597,-614.236 -404.082,-852.722 -15.719,-15.7189 -32.464,-29.741 -48.727,-44.5564 -15.975,14.4789 -31.774,29.1397 -47.191,44.5564 -238.485,238.486 -372.95,541.457 -404.082,852.722 z" fill="currentColor" fill-rule="nonzero" transform="matrix(1.3333333,0,0,-1.3333333,0,5333.3333)" clip-path="url(#proto-mark-clip)"/></svg>
+  </div>
+  <div class="links glass-dark"><a onclick="openPricing()">Prices</a><a onclick="handleDownload()">Download</a><a onclick="openOv('ovVendors')">Vendors</a></div>
+  <div class="signin glass-dark" role="button" tabindex="0" aria-label="Sign in" onclick="openOv('ovSignin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openOv('ovSignin');}">Sign in</div>
+</nav>
+
+<!-- ===== Top-nav overlays ===== -->
+<div class="ov" id="ovPricing" role="dialog" aria-modal="true" aria-label="Pricing">
+  <div class="ov-card">
+    <button class="ov-x" onclick="closeOv('ovPricing')" aria-label="Close">✕</button>
+    <div class="ov-eyebrow">Pricing · in Philippine pesos</div>
+    <h2 class="ov-title">Plan free. Pay only for what you add.</h2>
+    <p class="ov-sub">Planuhan, Likhaan and Ala Ala are free, end to end. Add the planning brain when you want it, and pick up any service à la carte. 0% vendor commission, always.</p>
+    <div class="pr-tiers">
+      <div class="pr-tier"><div class="t">Free</div><div class="p">₱0</div><div class="d">The full Planuhan planner, the free Likhaan studio, a live event page, and Ala Ala basics — enough to plan a real event, end to end, and start keeping it.</div></div>
+      <div class="pr-tier hot"><div class="t">Setnayan AI</div><div class="p">₱499<span style="font-size:.5em;font-weight:400;letter-spacing:0">/mo</span></div><div class="d">Adds Surian — the planning brain that filters the vendors that fit you, paces your checklist, and guides your budget.</div></div>
+    </div>
+    <div class="pr-est">
+      <div class="grp">
+        <div class="top"><span class="lab">Guests</span><span class="val" id="estG">150</span></div>
+        <input type="range" id="rngG" min="5" max="500" step="5" value="150" oninput="recalcPrices()" aria-label="Number of guests">
+      </div>
+      <div class="grp">
+        <div class="top"><span class="lab">Event days</span><span class="val" id="estD">1 day</span></div>
+        <input type="range" id="rngD" min="1" max="7" step="1" value="1" oninput="recalcPrices()" aria-label="Number of event days">
+      </div>
+      <div class="hint">Per-guest and per-day lines update live; flat items don’t change. Papic is per guest, capped at ₱15,000/day. Rough estimate — set exact pax, days &amp; options in the app.</div>
+    </div>
+
+    <div class="pr-alh">Planuhan · plan it all — free</div>
+    <div class="pr-free">
+      <span class="pr-f">Guest list &amp; RSVP</span>
+      <span class="pr-f">2D seat plan</span>
+      <span class="pr-f">Personalized QR · per guest</span>
+      <span class="pr-f">Budget &amp; payments</span>
+      <span class="pr-f">Schedule &amp; checklist</span>
+      <span class="pr-f">Mood board</span>
+      <span class="pr-f">Printable plans</span>
+    </div>
+    <div class="pr-grid">
+      <div class="pr-row"><span class="n">3D Plan · full 3D + guest seat-finder on your site</span><span class="v">₱2,499</span></div>
+    </div>
+
+    <div class="pr-alh">Likhaan · make it beautiful</div>
+    <div class="pr-free">
+      <span class="pr-f">Your event page</span>
+      <span class="pr-f">Single-camera livestream</span>
+      <span class="pr-f">Papic gallery &amp; filters</span>
+      <span class="pr-f">First 5 cameras free</span>
+    </div>
+    <div class="pr-sub">Couple Website · Save-the-Date · RSVP · Event · Editorial</div>
+    <div class="pr-grid pr-papic">
+      <div class="pr-row"><span class="n">The whole 4-in-1 site + unlimited RSVP</span><span class="v" style="color:#4F6B4A;font-weight:600">Free</span></div>
+      <div class="pr-row"><span class="n">Reveal · cinematic STD openings</span><span class="v">₱1,499</span></div>
+      <div class="pr-row"><span class="n">STD video upload</span><span class="v">₱100</span></div>
+      <div class="pr-row"><span class="n">Photo gallery upload</span><span class="v">₱100</span></div>
+      <div class="pr-row"><span class="n">Waze / Google Map link</span><span class="v">₱100</span></div>
+      <div class="pr-row"><span class="n">Themes · RSVP + Event + Editorial</span><span class="v">₱1,000</span></div>
+      <div class="pr-row" style="font-weight:600;color:var(--ink)"><span class="n">Unlock All · Couple Website PRO</span><span class="v">₱1,999</span></div>
+    </div>
+    <div class="pr-sub">Papic · candid capture, all in one place</div>
+    <div class="pr-grid pr-papic">
+      <div class="pr-row"><span class="n">Gallery view · camera filters</span><span class="v" style="color:#4F6B4A;font-weight:600">Free</span></div>
+      <div class="pr-row"><span class="n">First 5 cameras · 5 photos + 1 video each</span><span class="v" style="color:#4F6B4A;font-weight:600">Free</span></div>
+      <div class="pr-row" data-model="perGuestDay" data-rate="30" data-cap="15000"><span class="n">Papic Ltd · 30 photos + 10×5s</span><span class="v">₱30/guest·day</span></div>
+      <div class="pr-row" data-model="perGuestDay" data-rate="100" data-cap="15000"><span class="n">Papic Unli · unlimited</span><span class="v">₱100/guest·day</span></div>
+      <div class="pr-row" data-model="perDay" data-rate="1299"><span class="n">Camera Bridge · DSLR, all cameras</span><span class="v">₱1,299/day</span></div>
+      <div class="pr-row" data-model="perGuestDay" data-rate="20" data-cap="2000" data-floor="200"><span class="n">Stories · add-on</span><span class="v">₱20/guest·day</span></div>
+      <div class="pr-row"><span class="n">Kwento · whole event</span><span class="v">₱299</span></div>
+      <div class="pr-row"><span class="n">Thank You · add-on</span><span class="v">₱2,499</span></div>
+      <div class="pr-row" data-model="perDay" data-rate="1299"><span class="n">Pabati · add-on</span><span class="v">₱1,299/day</span></div>
+      <div class="pr-row" data-model="perDay" data-rate="2499"><span class="n">Live Photo Wall</span><span class="v">₱2,499/day</span></div>
+      <div class="pr-row" data-model="perDay" data-rate="15000"><span class="n">Unlock all of Papic · daily max</span><span class="v">₱15,000/day</span></div>
+    </div>
+    <div class="pr-sub">Identity, music &amp; the big screen</div>
+    <div class="pr-grid">
+      <div class="pr-row"><span class="n">Animated Monogram</span><span class="v">₱1,999</span></div>
+      <div class="pr-row"><span class="n">Pakanta · your wedding song</span><span class="v">₱2,499</span></div>
+      <div class="pr-row"><span class="n">Live Background · video or template bg</span><span class="v">₱499</span></div>
+      <div class="pr-row" data-model="perDay" data-rate="3499"><span class="n">Live Studio · multicam <span style="color:#4F6B4A;font-weight:500">· single-cam free</span></span><span class="v">₱3,499/day</span></div>
+    </div>
+    <div style="font-size:11px;color:var(--grey-2);line-height:1.55;margin:2px 0 6px;padding:0 2px">Your site is a hub — <strong style="color:var(--ink);font-weight:600">Papic gallery · Live Photo Wall · livestream · Pakanta · Animated Monogram · 3D Plan</strong> auto-appear on it, free or paid. Bought on their own; the website just gathers them.</div>
+
+    <div class="pr-alh">Surian · the planning brain</div>
+    <div class="pr-grid">
+      <div class="pr-row" style="font-weight:600;color:var(--ink)"><span class="n">Setnayan AI · vendor-fit matching · paced checklist · budget guidance</span><span class="v">₱499/mo</span></div>
+    </div>
+
+    <div class="pr-alh">Ala Ala · keep the memories — free</div>
+    <div class="pr-free">
+      <span class="pr-f">Ala Ala memory hub</span>
+      <span class="pr-f">Editorials</span>
+    </div>
+
+    <div class="pr-alh">Tiangge · find your vendors — free</div>
+    <div class="pr-free">
+      <span class="pr-f">Browse all vendors</span>
+      <span class="pr-f">0% commission · every booking</span>
+    </div>
+
+    <p class="pr-foot">Prices render live from the Setnayan catalog and are admin-managed. Planuhan, Ala Ala and Tiangge stay free end to end, and the single-camera livestream is free too. No bundles — pick exactly what you want, à la carte.</p>
+  </div>
+</div>
+
+<div class="ov" id="ovDownload" role="dialog" aria-modal="true" aria-label="Download">
+  <div class="ov-card" style="max-width:640px">
+    <button class="ov-x" onclick="closeOv('ovDownload')" aria-label="Close">✕</button>
+    <div class="ov-eyebrow">Download · <span id="dlDetected">your device</span></div>
+    <h2 class="ov-title">Setnayan, on every screen.</h2>
+    <p class="ov-sub">One account, everywhere. Grab the desktop app, install the web app, or get it on your phone.</p>
+    <div class="dl-grid">
+      <a class="dl-card" id="dlMac" href="#" onclick="event.preventDefault()"><div class="ic">⌘</div><div class="t">macOS</div><div class="s">Apple silicon &amp; Intel · .dmg</div></a>
+      <a class="dl-card" id="dlWin" href="#" onclick="event.preventDefault()"><div class="ic">⊞</div><div class="t">Windows</div><div class="s">64-bit · .msi</div></a>
+      <a class="dl-card" href="#" onclick="event.preventDefault()"><div class="ic">◍</div><div class="t">Web app · PWA</div><div class="s">Install from your browser</div></a>
+    </div>
+    <div class="dl-stores">
+      <a class="dl-store" href="#" onclick="event.preventDefault()"><span class="ic">↧</span>App Store · iPhone &amp; iPad</a>
+      <a class="dl-store" href="#" onclick="event.preventDefault()"><span class="ic">▶</span>Google Play · Android</a>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovSignin" role="dialog" aria-modal="true" aria-label="Sign in">
+  <div class="ov-card" style="max-width:400px;text-align:center">
+    <button class="ov-x" onclick="closeOv('ovSignin')" aria-label="Close">✕</button>
+    <div class="ov-eyebrow">Welcome back</div>
+    <h2 class="ov-title" style="margin-bottom:16px">Sign in</h2>
+    <input class="si-in" type="email" placeholder="you@email.com" aria-label="Email address" />
+    <button class="si-btn" onclick="event.preventDefault()">Continue</button>
+    <div class="si-or">or</div>
+    <button class="si-g" onclick="event.preventDefault()"><span style="font-weight:700;margin-right:6px">G</span>Continue with Google</button>
+    <button class="si-g" onclick="event.preventDefault()" style="margin-top:8px"><span style="margin-right:6px"></span>Continue with Apple</button>
+    <p class="si-foot">New here? <a onclick="closeOv('ovSignin')">Start planning, free →</a></p>
+  </div>
+</div>
+
+<div class="ov" id="ovVendors" role="dialog" aria-modal="true" aria-label="For vendors">
+  <div class="ov-card">
+    <button class="ov-x" onclick="closeOv('ovVendors')" aria-label="Close">✕</button>
+    <div class="ov-eyebrow">Setnayan for vendors</div>
+    <h2 class="ov-title">Get found by couples planning right now.</h2>
+    <p class="ov-sub">List your business, get matched to the couples who actually fit, and run every booking, chat, and calendar in one place. Free while we launch — and 0% commission, always.</p>
+    <div class="vd-grid">
+      <div class="vd-card"><div class="ic">⊘</div><div class="t">0% commission, forever</div><div class="d">Couples pay you directly. You keep 100% — we never take a cut, on or off platform.</div></div>
+      <div class="vd-card"><div class="ic">✓</div><div class="t">Free to list &amp; verify</div><div class="d">A free business profile and a free verified badge — no fee just to be here.</div></div>
+      <div class="vd-card"><div class="ic">◎</div><div class="t">Faith &amp; region matchmaking <span class="soon">Soon</span></div><div class="d">Matched by the rites you serve — Catholic, Muslim, Chinese/Tsinoy, Mixed — and where your crew travels.</div></div>
+      <div class="vd-card"><div class="ic">▦</div><div class="t">One profile, every life event <span class="soon">Soon</span></div><div class="d">Weddings, debuts, christenings, corporate and more — your reviews and history carry into each.</div></div>
+      <div class="vd-card"><div class="ic">◆</div><div class="t">Run it all in one place <span class="soon">Soon</span></div><div class="d">Bookings, quotes, RA 8792 e-contracts, calendar, clients, threads — one dashboard.</div></div>
+      <div class="vd-card"><div class="ic">⌖</div><div class="t">Only the leads that fit <span class="soon">Soon</span></div><div class="d">Charged only for matched, intent-qualified inquiries — never junk, never to merely exist.</div></div>
+    </div>
+    <div class="vb-stat"><b>45+ ways we help you win.</b> 0% commission and free listing + verification are live today; the rest is in active build and marked “Soon” until it ships. <span class="soonkey">The “Soon” tags clear as features go live.</span></div>
+
+    <div class="vb-group"><div class="vb-h">Discovery &amp; lead quality</div><div class="vb-grid">
+      <div class="vb-item"><div class="n">0% commission, forever</div><div class="b">Keep every peso — we never take a cut, on or off platform.</div></div>
+      <div class="vb-item"><div class="n">Faith &amp; region matchmaking <span class="soon">Soon</span></div><div class="b">Found by the rites you serve — Catholic, Muslim, Chinese/Tsinoy, Mixed and more — and the provinces your crew covers.</div></div>
+      <div class="vb-item"><div class="n">Date-open priority <span class="soon">Soon</span></div><div class="b">Couples filter for who’s free; a current calendar ranks you up.</div></div>
+      <div class="vb-item"><div class="n">Lead capture + matchmaking <span class="soon">Soon</span></div><div class="b">Every couple who finds you is a captured, well-fitted lead.</div></div>
+      <div class="vb-item"><div class="n">Shortlist radar <span class="soon">Soon</span></div><div class="b">See who saved you; get alerted when a rival enters your date.</div></div>
+      <div class="vb-item"><div class="n">First-look window <span class="soon">Soon</span></div><div class="b">Reply fast → a head-start slot in front of new couples.</div></div>
+      <div class="vb-item"><div class="n">Booked-out waitlist <span class="soon">Soon</span></div><div class="b">Fully booked? Couples wait instead of bouncing.</div></div>
+      <div class="vb-item"><div class="n">Style-twin discovery <span class="soon">Soon</span></div><div class="b">Real Stories send look-alike couples to your past work.</div></div>
+    </div></div>
+
+    <div class="vb-group"><div class="vb-h">Booking, contracts &amp; operations</div><div class="vb-grid">
+      <div class="vb-item"><div class="n">Automated bookings <span class="soon">Soon</span></div><div class="b">Inquiries become a real pipeline with quotes + milestones.</div></div>
+      <div class="vb-item"><div class="n">Ultimate team calendar <span class="soon">Soon</span></div><div class="b">One calendar across every service and crew member.</div></div>
+      <div class="vb-item"><div class="n">Headcount that quotes itself <span class="soon">Soon</span></div><div class="b">Quotes auto-update from the couple’s guest list + your crew.</div></div>
+      <div class="vb-item"><div class="n">One-tap RA 8792 contracts <span class="soon">Soon</span></div><div class="b">Pull, fill, e-sign in-app — legally valid, no printing.</div></div>
+      <div class="vb-item"><div class="n">Deposit reservation, lock-free <span class="soon">Soon</span></div><div class="b">A recorded deposit holds the date; the money goes to you.</div></div>
+      <div class="vb-item"><div class="n">Double-booking guard <span class="soon">Soon</span></div><div class="b">A held slot blocks a second booking, per service + role.</div></div>
+      <div class="vb-item"><div class="n">Change-order trail <span class="soon">Soon</span></div><div class="b">Mid-plan changes become logged, acknowledged orders.</div></div>
+      <div class="vb-item"><div class="n">Day-of run-of-show <span class="soon">Soon</span></div><div class="b">A shared live timeline + a clean delivery handover.</div></div>
+    </div></div>
+
+    <div class="vb-group"><div class="vb-h">Money &amp; payments</div><div class="vb-grid">
+      <div class="vb-item"><div class="n">Set your price once <span class="soon">Soon</span></div><div class="b">Packages + rates power every quote you send.</div></div>
+      <div class="vb-item"><div class="n">GCash or bank, your call <span class="soon">Soon</span></div><div class="b">Couples pay you directly to your GCash/BDO — we never hold your money, never take a cut.</div></div>
+      <div class="vb-item"><div class="n">PH-style milestone tracking <span class="soon">Soon</span></div><div class="b">Log reservation → progress → balance with proof, the way PH couples pay.</div></div>
+      <div class="vb-item"><div class="n">No-show downpayment protection <span class="soon">Soon</span></div><div class="b">A documented, defensible cancellation policy.</div></div>
+      <div class="vb-item"><div class="n">Payday calendar <span class="soon">Soon</span></div><div class="b">Every milestone due-date on one cash-flow timeline.</div></div>
+    </div></div>
+
+    <div class="vb-group"><div class="vb-h">Trust, reputation &amp; anti-fraud</div><div class="vb-grid">
+      <div class="vb-item"><div class="n">Verified badge, free</div><div class="b">A 12-doc check; no copycat can fake your official page.</div></div>
+      <div class="vb-item"><div class="n">No pay-to-rank, no fake reviews <span class="soon">Soon</span></div><div class="b">We screen fraud — which protects honest vendors most.</div></div>
+      <div class="vb-item"><div class="n">Dispute mediation <span class="soon">Soon</span></div><div class="b">A neutral team reviews the record before your rating moves.</div></div>
+      <div class="vb-item"><div class="n">Contract-on-record protection <span class="soon">Soon</span></div><div class="b">A timestamped, RA 8792-valid paper trail.</div></div>
+      <div class="vb-item"><div class="n">Reverse-image theft watch <span class="soon">Soon</span></div><div class="b">Reposts of your portfolio get flagged as yours.</div></div>
+      <div class="vb-item"><div class="n">Receipt-backed reviews <span class="soon">Soon</span></div><div class="b">Every star is a real “booked through Setnayan” client.</div></div>
+      <div class="vb-item"><div class="n">Right-of-reply on reviews <span class="soon">Soon</span></div><div class="b">One public, professional reply under any review.</div></div>
+    </div></div>
+
+    <div class="vb-group"><div class="vb-h">Marketing, exposure &amp; editorial</div><div class="vb-grid">
+      <div class="vb-item"><div class="n">Search-ready microsite <span class="soon">Soon</span></div><div class="b">A profile built to rank on Google and inside Setnayan.</div></div>
+      <div class="vb-item"><div class="n">Auto-shared to our socials <span class="soon">Soon</span></div><div class="b">Your couples’ moments hit our FB/IG/TikTok with your name.</div></div>
+      <div class="vb-item"><div class="n">Featured in Real Wedding stories <span class="soon">Soon</span></div><div class="b">Credited beside the photos, with a permanent backlink.</div></div>
+      <div class="vb-item"><div class="n">Editorial &amp; Journal spotlights <span class="soon">Soon</span></div><div class="b">In front of buyers at the exact moment of intent.</div></div>
+      <div class="vb-item"><div class="n">Spotlight awards <span class="soon">Soon</span></div><div class="b">Top performers earn a homepage feature money can’t buy.</div></div>
+      <div class="vb-item"><div class="n">Off-season promos <span class="soon">Soon</span></div><div class="b">We flag lean months so your offer gets surfaced.</div></div>
+      <div class="vb-item"><div class="n">Couple referral rewards <span class="soon">Soon</span></div><div class="b">Happy couples refer; both get a perk, tracked in-app.</div></div>
+    </div></div>
+
+    <div class="vb-group"><div class="vb-h">Data, analytics &amp; pricing intelligence</div><div class="vb-grid">
+      <div class="vb-item"><div class="n">Category benchmarks <span class="soon">Soon</span></div><div class="b">Your funnel vs anonymized peers in your exact category.</div></div>
+      <div class="vb-item"><div class="n">Profile score &amp; fix-it tips <span class="soon">Soon</span></div><div class="b">What’s holding you back, ranked by inquiry lift.</div></div>
+      <div class="vb-item"><div class="n">Price-position meter <span class="soon">Soon</span></div><div class="b">Under-priced, on-market, or premium for your category.</div></div>
+      <div class="vb-item"><div class="n">Demand radar <span class="soon">Soon</span></div><div class="b">Which dates, regions, and looks couples book hardest.</div></div>
+      <div class="vb-item"><div class="n">Won &amp; lost reasons <span class="soon">Soon</span></div><div class="b">Why couples said yes or walked — fix the real leak.</div></div>
+      <div class="vb-item"><div class="n">Quote-to-booking funnel <span class="soon">Soon</span></div><div class="b">Where couples drop off + each booking’s source.</div></div>
+      <div class="vb-item"><div class="n">Peso-per-lead scorecard <span class="soon">Soon</span></div><div class="b">True cost of each booked couple vs your spend.</div></div>
+    </div></div>
+
+    <div class="vb-group"><div class="vb-h">Ecosystem, crew &amp; growth</div><div class="vb-grid">
+      <div class="vb-item"><div class="n">Pay only for inquiries that fit <span class="soon">Soon</span></div><div class="b">Charged only for matched intent — never junk, never to exist.</div></div>
+      <div class="vb-item"><div class="n">One profile, every life event <span class="soon">Soon</span></div><div class="b">One listing across weddings, debuts, birthdays, christenings, corporate and more — your reviews + history carry into each.</div></div>
+      <div class="vb-item"><div class="n">Team sub-accounts <span class="soon">Soon</span></div><div class="b">Scoped logins for crew; one clean business identity.</div></div>
+      <div class="vb-item"><div class="n">Resell Setnayan Productions <span class="soon">Soon</span></div><div class="b">Bundle Papic, Live Studio, monogram, or Pakanta into your quote.</div></div>
+      <div class="vb-item"><div class="n">White-label the couple tools <span class="soon">Soon</span></div><div class="b">Hand couples the seating, mood board &amp; schedule under your brand.</div></div>
+      <div class="vb-item"><div class="n">Crew-rate marketplace <span class="soon">Soon</span></div><div class="b">Earn a cut on your crew, or pull a vetted hand at a posted rate.</div></div>
+      <div class="vb-item"><div class="n">Setnayan-certified partner <span class="soon">Soon</span></div><div class="b">Get badged to deliver in-app services; couples routed to you.</div></div>
+    </div></div>
+    <div class="vd-cta">
+      <button class="vd-btn" onclick="event.preventDefault()">Register your business · free</button>
+      <button class="vd-link" onclick="closeOv('ovVendors')">Maybe later</button>
+    </div>
+  </div>
+</div>
+
+<!-- HERO — fullscreen, scroll locked -->
+<section class="hero" id="hero">
+  <div class="film" aria-hidden="true">
+    <div class="scene" id="sceneA"></div><div class="scene" id="sceneB" style="opacity:0"></div><div class="bokeh"></div><div class="vignette"></div><div class="grain"></div><div class="scrim"></div>
+  </div>
+
+  <div class="hero-mid" id="heroMid">
+    <div class="kick" id="hKick">Set na ’yan</div>
+    <h1 class="htitle" id="hTitle">Keep your memories.<br>Plan your moments.</h1>
+    <p class="hsub" id="hSub">The independent hub to keep a lifetime of memories — and plan any event, free.</p>
+    <div class="hctas">
+      <a class="pill-cta glass-dark" href="#" onclick="event.preventDefault()">Start planning&nbsp;·&nbsp;free</a>
+      <button class="learn" id="hLearn" onclick="heroLearn()">Learn more <span class="arr">↓</span></button>
+    </div>
+  </div>
+
+  <!-- The 5 pillars as the dock: each swaps the hero photo + its description -->
+  <div class="scene-cap" id="sceneLabel"></div>
+  <div class="dock" id="dock">
+    <div class="w" onclick="selectPillar(0)"><span class="lab">Ala Ala · Memory Hub</span></div>
+    <div class="w" onclick="selectPillar(1)"><span class="lab">Likhaan · Creative Studio</span></div>
+    <div class="w" onclick="selectPillar(2)"><span class="lab">Planuhan · Planner</span></div>
+    <div class="w" onclick="selectPillar(3)"><span class="lab">Surian · Setnayan AI</span></div>
+    <div class="w" onclick="selectPillar(4)"><span class="lab">Tiangge · Marketplace</span></div>
+  </div>
+</section>
+
+<!-- Cookie pill (voice riff) -->
+<div class="cookie glass-dark" id="cookie">
+  Cookies help us remember
+  <button onclick="this.parentElement.style.display='none'">Accept</button>
+  <button class="mng" onclick="this.parentElement.style.display='none'">Manage</button>
+</div>
+
+<!-- CONTENT — revealed when the gate opens -->
+<main class="content" id="content">
+
+  <section class="manifesto">
+    <p>Setnayan is where the memories of every event in your life are kept — the ones you <b>hold</b> and the ones you <b>attend</b>. Most tools you open for one event and close. This is the place your celebrations live, so you come back for the next one. Plan it, run it, remember it — and <b>keep it, for life.</b></p>
+  </section>
+
+  <!-- Kinetic feelings ticker (ELN /info translated) -->
+  <section class="ticker" id="ticker">
+    <div class="word"><span class="w">Joy</span><span class="suf">, kept forever.</span></div>
+    <div class="word"><span class="w">Tears</span><span class="suf">, kept forever.</span></div>
+    <div class="word"><span class="w">Laughter</span><span class="suf">, kept forever.</span></div>
+    <div class="word"><span class="w">Vows</span><span class="suf">, kept forever.</span></div>
+    <div class="word"><span class="w">Family</span><span class="suf">, kept forever.</span></div>
+    <div class="word"><span class="w">The first dance</span><span class="suf">, kept forever.</span></div>
+    <div class="word"><span class="w">Presence</span><span class="suf">, kept forever.</span></div>
+    <div class="word"><span class="w">Wonder</span><span class="suf">, kept forever.</span></div>
+    <div class="word"><span class="w">Togetherness</span><span class="suf">, kept forever.</span></div>
+    <div class="word"><span class="w">Every moment</span><span class="suf">, kept forever.</span></div>
+  </section>
+
+  <!-- 01 Memories Hub -->
+  <section class="pillar" id="p1">
+    <div class="pnum">01 — Ala Ala · Your collection of memories, kept for life</div>
+    <h2 class="pname">A photo album is a record. This is a memory.</h2>
+    <p class="pdef">This is the heart of it. The plan ends when the day ends; the memory doesn’t have to. Every event you <em>hold</em> and every event you <em>attend</em> lands here — your growing collection of memories, kept safe, accumulating year over year in one place that belongs to you. Not a tool you close after the day. A home you keep coming back to.</p>
+    <div class="psample"><div class="pwidget" id="awAla">
+      <div class="pw-frame">
+        <div class="pw-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">setnayan.com/ala-ala</span></div>
+        <div class="pw-screen">
+          <div class="pmock m-ev on" data-i="0">
+            <div class="me-evhead">
+              <div class="mk-t" style="margin-bottom:3px">Every event type</div>
+              <div class="mk-h" style="margin-bottom:0">10 ready · more coming</div>
+            </div>
+            <div class="me-evgrid">
+              <span class="me-ev"><span class="me-gl">💍</span>Wedding</span>
+              <span class="me-ev"><span class="me-gl">👑</span>Debut</span>
+              <span class="me-ev"><span class="me-gl">🎈</span>Gender Reveal</span>
+              <span class="me-ev"><span class="me-gl">🎂</span>Birthday</span>
+              <span class="me-ev"><span class="me-gl">🥂</span>Celebration</span>
+              <span class="me-ev"><span class="me-gl">✈️</span>Travel</span>
+              <span class="me-ev"><span class="me-gl">🏢</span>Corporate</span>
+              <span class="me-ev"><span class="me-gl">🏆</span>Tournament</span>
+              <span class="me-ev"><span class="me-gl">🕯️</span>Christening</span>
+              <span class="me-ev"><span class="me-gl">📅</span>Simple Event</span>
+              <span class="me-ev me-soon"><span class="me-gl">💞</span>Anniversary<span class="me-tag">Soon</span></span>
+              <span class="me-ev me-soon"><span class="me-gl">🎓</span>Graduation<span class="me-tag">Soon</span></span>
+              <span class="me-ev me-soon"><span class="me-gl">🤝</span>Reunion<span class="me-tag">Soon</span></span>
+              <span class="me-ev me-soon"><span class="me-gl">🌟</span>Gala Night<span class="me-tag">Soon</span></span>
+            </div>
+            <div class="me-evnote">One memory hub for every life event — not weddings alone.</div>
+          </div>
+          <div class="pmock me-ed" data-i="1">
+            <div class="me-mast"><span class="nm">Alaala</span><span class="dt">The Reyes Wedding · Edition 01</span></div>
+            <div class="me-beat">Beat 03 · The Ceremony</div>
+            <h3 class="me-hl">The first look.</h3>
+            <div class="me-spread">
+              <div class="me-fig"></div>
+              <p class="me-narr">He turned, and the whole room went quiet. <b>Twenty-two years</b> of friends and family, holding one breath at once.</p>
+            </div>
+            <div class="me-quote">
+              <span class="qm">“</span>
+              <p>I have never seen Lolo cry like that. The boy he raised, all grown — at the end of the aisle.</p>
+              <span class="att">— Tita Let, on the bride’s side</span>
+            </div>
+            <div class="me-share">
+              <span class="lb">Share</span>
+              <span class="si">f</span><span class="si">◎</span><span class="si">𝕏</span><span class="si">↗</span>
+              <span class="more">Read full edition →</span>
+            </div>
+          </div>
+          <div class="pmock m-db2" data-i="2">
+            <div class="me-evhd">
+              <div class="mk">M&amp;J</div>
+              <div class="meta">
+                <div class="nm">Maria &amp; Jose</div>
+                <div class="sub">Wedding · Tagaytay Highlands</div>
+              </div>
+              <div class="cd">Dec 12</div>
+            </div>
+            <div class="me-tag">One event · everything in one place</div>
+            <div class="me-mods">
+              <div class="me-mod live"><span class="lab">Guests</span><span class="v">166<small> / 213</small></span><div class="mbar"><i style="width:78%"></i></div></div>
+              <div class="me-mod live"><span class="lab">Budget</span><span class="v">62%<small> settled</small></span><div class="mbar"><i style="width:62%"></i></div></div>
+              <div class="me-mod"><span class="lab">Schedule</span><span class="v">9 items</span><span class="mchip">on track</span></div>
+              <div class="me-mod"><span class="lab">Seat plan</span><span class="v">18 tables</span><span class="mchip">draft</span></div>
+              <div class="me-mod"><span class="lab">Services</span><span class="v">5 active</span><span class="mchip">2 new</span></div>
+              <div class="me-mod"><span class="lab">Memories</span><span class="v">Editorial</span><span class="mchip">ready</span></div>
+            </div>
+            <div class="me-foot">
+              <span class="lb">Come back · share · revisit</span>
+              <span class="si" title="Share">↗</span>
+              <span class="si go" title="Revisit on the anniversary">♡</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="pfeats">
+      <div class="pfeat sel" onclick="selFeat('awAla',0,this)"><div class="ic">◈</div><div class="fn">Every event type</div><div class="fl">Ten event types ready today — wedding, debut, birthday, christening, gender reveal, celebration, travel, corporate, tournament, and a simple event — with anniversary, graduation, reunion, and gala night rolling out. The widest variety in the market. <em>10 live · 4 rolling out</em></div></div>
+      <div class="pfeat" onclick="selFeat('awAla',1,this)"><div class="ic">¶</div><div class="fn">Editorials</div><div class="fl">Far more memorable than scribbling in a photo album. Every event becomes an editorial — a real storyline you can relive, as if you were there again: write-ups, photos, what your guests said, and short clips (not full films) — shareable straight to your socials. The front-page story of your life.</div></div>
+      <div class="pfeat" onclick="selFeat('awAla',2,this)"><div class="ic">▦</div><div class="fn">Dashboard</div><div class="fl">The all-in-one command center for a single event — guests, budget, schedule, services, and memories in one place you come back to, share, and revisit on the anniversaries. (Your home lists every event; this one runs the event itself.)</div></div>
+    </div>
+  </section>
+
+  <!-- 02 Likhaan -->
+  <section class="pillar" id="p2">
+    <div class="pnum">02 — Likhaan · Creative Studio</div>
+    <h2 class="pname">Your event has a look. Give it a voice.</h2>
+    <p class="pdef"><em>Likhaan</em> means “a place to create.” A free studio that turns your plan into something guests can see and feel — an adaptive website that stays alive, your own monogram, Papic candid capture, Live Studio, and the 3D Plan. And it keeps growing.</p>
+    <div class="psample"><div class="pwidget" id="awLikhaan">
+      <div class="pw-frame">
+        <div class="pw-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">setnayan.com/claire-and-ice</span></div>
+        <div class="pw-screen">
+          <div class="pmock on" data-i="0">
+            <div style="height:72px;border-radius:10px;background:linear-gradient(120deg,#E7DCC8,#B7C2B0);margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:21px;color:#5b5347">Claire &amp; Ice</div>
+            <div style="display:flex;gap:8px;font-size:10px;font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--grey-2);margin-bottom:13px"><span>Story</span><span>·</span><span>Schedule</span><span>·</span><span>RSVP</span><span>·</span><span>Gallery</span></div>
+            <div class="mline" style="width:90%;margin-bottom:8px"></div><div class="mline" style="width:80%;margin-bottom:8px"></div><div class="mline" style="width:86%"></div>
+            <div class="mk-h" style="margin:15px 0 0;color:#97742f">One link · updates live as your plan changes</div>
+          </div>
+          <div class="pmock" data-i="1">
+            <div class="mk-h">Logo &amp; monogram</div>
+            <div style="display:flex;justify-content:center;padding:6px 0 16px"><div style="width:90px;height:90px;border:1.5px solid var(--pop2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:32px;color:#5b5347">C&amp;I</div></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+              <div class="mtile" style="text-align:center;padding:11px 0;font-family:var(--serif);font-style:italic;color:#97742f">C&amp;I</div>
+              <div class="mtile" style="text-align:center;padding:11px 0;font-family:var(--serif);font-style:italic;color:#97742f">C&amp;I</div>
+              <div class="mtile" style="text-align:center;padding:11px 0;font-family:var(--serif);font-style:italic;color:#97742f">C&amp;I</div>
+              <div class="mtile" style="text-align:center;padding:11px 0;font-family:var(--serif);font-style:italic;color:#97742f">C&amp;I</div>
+            </div>
+            <div class="mk-h" style="margin:13px 0 0;color:var(--grey)">One mark — invite, signage, gallery, save-the-date.</div>
+          </div>
+          <div class="pmock" data-i="2">
+            <div class="mk-h">Papic · gallery</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+              <div style="position:relative;height:54px;border-radius:8px;background:linear-gradient(135deg,#cdbfa6,#9fa99a)"><span style="position:absolute;bottom:4px;left:4px;font-size:8px;background:rgba(0,0,0,.45);color:#fff;padding:1px 6px;border-radius:10px">Maria</span></div>
+              <div style="position:relative;height:54px;border-radius:8px;background:linear-gradient(135deg,#b7c2b0,#8a8f86)"><span style="position:absolute;bottom:4px;left:4px;font-size:8px;background:rgba(0,0,0,.45);color:#fff;padding:1px 6px;border-radius:10px">Jose</span></div>
+              <div style="position:relative;height:54px;border-radius:8px;background:linear-gradient(135deg,#d8cdbb,#b1a692)"></div>
+              <div style="position:relative;height:54px;border-radius:8px;background:linear-gradient(135deg,#a9b0b8,#7d848c)"></div>
+              <div style="position:relative;height:54px;border-radius:8px;background:linear-gradient(135deg,#cabfa9,#9aa194)"><span style="position:absolute;bottom:4px;left:4px;font-size:8px;background:rgba(0,0,0,.45);color:#fff;padding:1px 6px;border-radius:10px">Kuya Ben</span></div>
+              <div style="position:relative;height:54px;border-radius:8px;background:linear-gradient(135deg,#c0c6bd,#8f958c)"><span style="position:absolute;top:4px;right:5px;font-size:9px;color:#fff;opacity:.85">⦰</span></div>
+            </div>
+            <div class="mk-h" style="margin:12px 0 0;color:#97742f">Tag by QR today · auto face-tagging rolling out</div>
+          </div>
+          <div class="pmock" data-i="3">
+            <div class="mk-h">Live Studio · live</div>
+            <div style="position:relative;height:118px;border-radius:10px;background:linear-gradient(120deg,#757d86,#383f47);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px">▷<span style="position:absolute;top:9px;left:9px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;background:#b3402f;color:#fff;padding:2px 8px;border-radius:20px">● LIVE</span><span style="position:absolute;top:11px;right:10px;font-family:var(--mono);font-size:9px;color:#fff;opacity:.9">2,418 watching</span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px"><div class="msw ph" style="height:32px;border-radius:7px"></div><div class="msw ph" style="height:32px;border-radius:7px"></div><div class="msw ph" style="height:32px;border-radius:7px"></div></div>
+            <div class="mk-h" style="margin:11px 0 0;color:#97742f">For everyone who couldn’t make the trip · live streaming rolling out</div>
+          </div>
+          <div class="pmock" data-i="4">
+            <div class="mk-h">3D Plan · walk to your seat</div>
+            <div style="position:relative;border:1px solid var(--line);border-radius:10px;height:128px;margin-top:4px;overflow:hidden">
+              <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:46%;height:7px;border-radius:4px;background:rgba(197,160,89,.45)"></div>
+              <div style="position:absolute;top:7px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:8px;color:var(--grey-2)">STAGE</div>
+              <div style="position:absolute;inset:34px 18px 14px;display:flex;align-items:center;justify-content:space-around;flex-wrap:wrap;gap:8px">
+                <span class="mtbl"></span><span class="mtbl" style="border-color:#4F6B4A;border-width:2.2px"></span><span class="mtbl"></span><span class="mtbl"></span>
+              </div>
+              <span style="position:absolute;bottom:16px;left:24px;font-size:9px;font-family:var(--mono);color:#4F6B4A">● You → Table 7</span>
+            </div>
+            <div class="mk-h" style="margin:10px 0 0;color:#97742f">2D live today · 3D walk-to-seat on the roadmap</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="pfeats">
+      <div class="pfeat sel" onclick="selFeat('awLikhaan',0,this)"><div class="ic">◷</div><div class="fn">Adaptive website</div><div class="fl">A single-link event page that changes and adapts to what’s happening, in real time. No more static sites — it adjusts from planning all the way to the end of the event, finishing as your very own editorial.</div></div>
+      <div class="pfeat" onclick="selFeat('awLikhaan',1,this)"><div class="ic">❖</div><div class="fn">Logo &amp; monogram</div><div class="fl">Logo and monogram designs that stay simple, but far more efficient than what’s on the market — your mark across every surface of the event.</div></div>
+      <div class="pfeat" onclick="selFeat('awLikhaan',2,this)"><div class="ic">◎</div><div class="fn">Papic</div><div class="fl">Modern event capture — themes, face-blocking, and face tagging. Tag by QR today; auto face-tagging is rolling out. Either way, every photo lands in your gallery. <em>Auto-tagging rolling out</em></div></div>
+      <div class="pfeat" onclick="selFeat('awLikhaan',3,this)"><div class="ic">▷</div><div class="fn">Live Studio</div><div class="fl">Document the event without high-end cameras — stream it live to everyone who couldn’t be there. <em>Live streaming rolling out</em></div></div>
+      <div class="pfeat" onclick="selFeat('awLikhaan',4,this)"><div class="ic">⬡</div><div class="fn">3D Plan</div><div class="fl">Your 2D seat plan, guest list, and mood board are free. The full 3D Plan — a 3D walk-to-seat your guests open right on your website — is the paid unlock, ₱2,499. 2D live today; <em>3D on the roadmap</em>.</div></div>
+      <div class="pfeat"><div class="ic">✦</div><div class="fn">And it keeps growing</div><div class="fl">We continuously add new creative tools to push your event further — and they land already connected to everything you’ve made.</div></div>
+    </div>
+  </section>
+
+  <!-- 03 Planuhan -->
+  <section class="pillar" id="p3">
+    <div class="pnum">03 — Planuhan · Planner</div>
+    <h2 class="pname">Your spreadsheet doesn’t know your day.</h2>
+    <p class="pdef"><em>Planuhan</em> means “a place to plan.” A free, connected suite where every piece talks to the others — guest list, seat plan, budget, date picker, checklist, scheduler. Change one thing and the whole plan stays honest. The reason to open the app on a Tuesday night.</p>
+    <div class="psample"><div class="pwidget" id="awPlanuhan">
+      <div class="pw-frame">
+        <div class="pw-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">setnayan.com/planuhan</span></div>
+        <div class="pw-screen">
+          <div class="pmock on" data-i="0">
+            <div class="mk-h">Guest list · 166 / 213 going</div>
+            <div class="mrow"><span class="mdot"></span>Maria Santos<span class="mchip ok">Going</span></div>
+            <div class="mrow"><span class="mdot"></span>Jose Reyes<span class="mchip ok">Going</span></div>
+            <div class="mrow"><span class="mdot"></span>Tita Let<span class="mchip">No reply</span></div>
+            <div class="mrow"><span class="mdot"></span>Unknown — not on your list<span class="mchip warn">Gate-crasher</span></div>
+            <div class="mrow"><span class="mdot"></span>Kuya Ben<span class="mchip ok">Going</span></div>
+          </div>
+          <div class="pmock" data-i="1">
+            <div class="mk-h">Seat plan · reception</div>
+            <div style="height:8px;width:60%;margin:6px auto 18px;border-radius:4px;background:rgba(197,160,89,.3)"></div>
+            <div style="display:flex;justify-content:center;gap:18px;flex-wrap:wrap"><span class="mtbl"></span><span class="mtbl"></span><span class="mtbl"></span><span class="mtbl"></span><span class="mtbl"></span><span class="mtbl"></span></div>
+            <div class="mk-h" style="margin:18px 0 0;color:var(--grey)">Rules keep the right people together — and apart.</div>
+          </div>
+          <div class="pmock" data-i="2">
+            <div class="mk-h">Mood board · your palette</div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px">
+              <div class="msw" style="background:#E7DCC8"></div><div class="msw" style="background:#B7C2B0"></div><div class="msw" style="background:#C9A96E"></div><div class="msw" style="background:#8A6F55"></div><div class="msw" style="background:#EDEAE0"></div>
+            </div>
+            <div class="mgrid2"><div class="msw ph" style="height:64px;border-radius:10px"></div><div class="msw ph" style="height:64px;border-radius:10px"></div></div>
+            <div class="mbtn-s" style="margin-top:14px">Share with all vendors →</div>
+          </div>
+          <div class="pmock" data-i="3">
+            <div class="mk-h">Budget · 62% settled</div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin-bottom:5px">Catering<span style="color:var(--grey-2)">paid</span></div><div class="mbar"><i style="width:100%"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin:12px 0 5px">Venue<span style="color:var(--grey-2)">50%</span></div><div class="mbar"><i style="width:50%"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin:12px 0 5px">Photography<span style="color:var(--grey-2)">30%</span></div><div class="mbar"><i style="width:30%"></i></div>
+            <div class="mk-h" style="margin:16px 0 0;color:#97742f">Next due · Caterer final · in 12 days</div>
+          </div>
+          <div class="pmock" data-i="4">
+            <div class="mk-h">Date picker · December 2026</div>
+            <div class="mcal">
+              <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+              <span>·</span><span>1</span><span>2</span><span>3</span><span class="free">4</span><span>5</span><span class="free">6</span>
+              <span>7</span><span>8</span><span class="free">9</span><span>10</span><span>11</span><span class="on">12</span><span>13</span>
+              <span>14</span><span class="free">15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class="free">20</span>
+            </div>
+            <div class="mk-h" style="margin:14px 0 0;color:#97742f">Dec 12 · 9 vendors free that day</div>
+          </div>
+          <div class="pmock" data-i="5">
+            <div class="mk-h">Checklist · 3 of 5 done</div>
+            <div class="mck"><span class="mbox on"></span>Book the venue</div>
+            <div class="mck"><span class="mbox on"></span>Send save-the-dates</div>
+            <div class="mck"><span class="mbox on"></span>Lock the caterer</div>
+            <div class="mck"><span class="mbox"></span>Final headcount</div>
+            <div class="mck"><span class="mbox"></span>Print seating QR sheets</div>
+          </div>
+          <div class="pmock" data-i="6">
+            <div class="mk-h">Print / export</div>
+            <div class="mdoc" style="flex:1;border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px;display:flex;flex-direction:column;gap:8px">
+              <div class="mline" style="width:50%;height:8px;background:var(--pop2);opacity:.5"></div>
+              <div class="mbar" style="background:none"><span></span></div>
+              <div class="mline" style="width:92%"></div><div class="mline" style="width:84%"></div><div class="mline" style="width:88%"></div><div class="mline" style="width:60%"></div>
+            </div>
+            <div class="mbtn-s" style="margin-top:14px">↧ Export PDF</div>
+          </div>
+          <div class="pmock" data-i="7">
+            <div class="mk-h">Scheduler · day-of</div>
+            <div class="mtl-row"><span class="t">2:00 PM</span>Crew call · setup begins</div>
+            <div class="mtl-row"><span class="t">4:00 PM</span>Ceremony</div>
+            <div class="mtl-row"><span class="t">6:30 PM</span>Reception · dinner</div>
+            <div class="mtl-row"><span class="t">8:00 PM</span>First dance</div>
+            <div class="mtl-row"><span class="t">10:30 PM</span>Send-off</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="pfeats">
+      <div class="pfeat sel" onclick="selFeat('awPlanuhan',0,this)"><div class="ic">◍</div><div class="fn">Guest list</div><div class="fl">Guests self-RSVP, each with their own QR code, and you add anyone yourself. Flag gate-crashers — people who RSVP but aren’t on your list — and give every guest a personal assistant. <em>Gate-crasher flagging + assistant rolling out</em></div></div>
+      <div class="pfeat" onclick="selFeat('awPlanuhan',1,this)"><div class="ic">⊞</div><div class="fn">Seat plan</div><div class="fl">So much easier, with clean integration to the guest list. Set rules so the guests who should be kept apart always are. 2D live today. <em>3D walk-to-seat rolling out</em></div></div>
+      <div class="pfeat" onclick="selFeat('awPlanuhan',2,this)"><div class="ic">❑</div><div class="fn">Mood board</div><div class="fl">Create palettes and collect your inspirations in one place — then share them with all your vendors in one tap.</div></div>
+      <div class="pfeat" onclick="selFeat('awPlanuhan',3,this)"><div class="ic">₱</div><div class="fn">Budget planner</div><div class="fl">Track every payment in one place, with a schedule that guides you to what’s due next — so nothing slips.</div></div>
+      <div class="pfeat" onclick="selFeat('awPlanuhan',4,this)"><div class="ic">◷</div><div class="fn">Date picker</div><div class="fl">No longer a one-pick gamble. No research, no statistics to chase — we hand you the best information on your target dates, with tips and a list of every compatible vendor free that day.</div></div>
+      <div class="pfeat" onclick="selFeat('awPlanuhan',5,this)"><div class="ic">✓</div><div class="fn">Checklist</div><div class="fl">A guide that makes sure you don’t skip the things that make your event work.</div></div>
+      <div class="pfeat" onclick="selFeat('awPlanuhan',6,this)"><div class="ic">▤</div><div class="fn">Printable PDF</div><div class="fl">Free to print — seating, mood board, QR, and invites today, with every Planuhan tool rolling out. <em>All tools printable rolling out</em></div></div>
+      <div class="pfeat" onclick="selFeat('awPlanuhan',7,this)"><div class="ic">◔</div><div class="fn">Scheduler</div><div class="fl">The complete schedule of everything you need, so nothing is forgotten.</div></div>
+    </div>
+  </section>
+
+  <!-- 04 Surian -->
+  <section class="pillar" id="p4">
+    <div class="pnum">04 — Surian · Setnayan AI</div>
+    <h2 class="pname">Twelve tabs, and you’ve decided nothing.</h2>
+    <p class="pdef"><em>Surian</em> means “where every option is weighed.” The quiet planning brain — the attention of a full coordination team, checking every option against your plan instantly. It narrows the field to a few good options, reshapes your checklist, and guides your budget, so you choose instead of drown. <span style="opacity:.7">Unlocks with a paid tier.</span></p>
+    <div class="psample"><div class="pwidget" id="awSurian">
+      <div class="pw-frame">
+        <div class="pw-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">setnayan.com/surian</span></div>
+        <div class="pw-screen">
+          <div class="pmock on" data-i="0">
+            <div class="mk-h">Smart filtering · photography</div>
+            <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:13px"><span style="font-family:var(--serif);font-style:italic;font-size:28px;color:#2f2d2a">6</span><span style="font-size:11px;color:var(--grey)">of 847 vendors fit your plan</span></div>
+            <div class="mrow"><span class="mdot"></span>Studio Sereno<span class="mchip ok">92% fit</span></div>
+            <div class="mrow"><span class="mdot"></span>Lumière Films<span class="mchip ok">88% fit</span></div>
+            <div class="mrow"><span class="mdot"></span>North Light Co.<span class="mchip ok">85% fit</span></div>
+            <div class="mk-h" style="margin:13px 0 0;color:#97742f">Budget · date · style — every option checked instantly</div>
+          </div>
+          <div class="pmock" data-i="1">
+            <div class="mk-h">Adaptive checklist · reshaped</div>
+            <div class="mck"><span class="mbox on"></span>Lock the date</div>
+            <div class="mck"><span class="mbox on"></span>Book the venue</div>
+            <div class="mck"><span class="mbox"></span>Book the caterer<span style="color:#97742f;margin-left:8px;font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em">now, to stay on pace</span></div>
+            <div class="mck"><span class="mbox"></span>Send save-the-dates</div>
+            <div class="mck"><span class="mbox"></span>Final headcount</div>
+            <div class="mk-h" style="margin:12px 0 0;color:#97742f">Re-paced for Dec 12 · 164 days out</div>
+          </div>
+          <div class="pmock" data-i="2">
+            <div class="mk-h">Smart budgeting · ₱420,000</div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin-bottom:5px">Venue<span style="color:var(--grey-2)">35%</span></div><div class="mbar"><i style="width:35%"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin:11px 0 5px">Catering<span style="color:var(--grey-2)">30%</span></div><div class="mbar"><i style="width:30%"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin:11px 0 5px">Photography<span style="color:var(--grey-2)">12%</span></div><div class="mbar"><i style="width:12%"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin:11px 0 5px">Everything else<span style="color:var(--grey-2)">23%</span></div><div class="mbar"><i style="width:23%"></i></div>
+            <div class="mk-h" style="margin:14px 0 0;color:#97742f">Adjusts as guests, date, and choices shift</div>
+          </div>
+          <div class="pmock" data-i="3">
+            <div class="mk-h">Auto Build · 150 pax</div>
+            <div class="mrow">Venue<span class="mchip">from ₱120,000</span></div>
+            <div class="mrow">Catering · 150 pax<span class="mchip">from ₱150,000</span></div>
+            <div class="mrow">Photography<span class="mchip">from ₱45,000</span></div>
+            <div class="mrow">Coordination<span class="mchip">from ₱35,000</span></div>
+            <div class="mk-h" style="margin:13px 0 0;color:var(--pop1)">One tap · from each vendor’s starting price for your pax · coming soon</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="pfeats">
+      <div class="pfeat sel" onclick="selFeat('awSurian',0,this)"><div class="ic">⌖</div><div class="fn">Smart filtering</div><div class="fl">Thinking of many things at once is hard. The adaptive system paces and adjusts itself to filter your planning, so any service you pick fits your plan — no more inquiring into dead ends and losing hours.</div></div>
+      <div class="pfeat" onclick="selFeat('awSurian',1,this)"><div class="ic">✓</div><div class="fn">Adaptive checklist</div><div class="fl">An advanced checklist that adjusts and computes all your steps, for steady-paced planning with far less stress.</div></div>
+      <div class="pfeat" onclick="selFeat('awSurian',2,this)"><div class="ic">₱</div><div class="fn">Smart budgeting</div><div class="fl">Always know exactly where your budget stands, and it adjusts properly as guests, dates, and choices shift.</div></div>
+      <div class="pfeat" onclick="selFeat('awSurian',3,this)"><div class="ic">◆</div><div class="fn">Auto Build</div><div class="fl">No time to line up vendors? One tap builds a full service set from each vendor’s starting price for your guest count (your pax is shown up front), ready to adjust. <em>Coming soon</em></div></div>
+    </div>
+  </section>
+
+  <!-- 05 Tiangge -->
+  <section class="pillar" id="p5">
+    <div class="pnum">05 — Tiangge · Marketplace</div>
+    <h2 class="pname">And when you want vendors — verified, 0% commission.</h2>
+    <p class="pdef"><em>Tiangge</em> — the marketplace, when you want it. You don’t need it to get full value: Planuhan, Likhaan, and Ala Ala stand on their own. But when you’re ready for vendors, they’re verified, with real reviews and a track record, the right price, and 0% commission. Supporting cast — there when you’re ready, invisible when you’re not.</p>
+    <div class="psample"><div class="pwidget" id="awTiangge">
+      <div class="pw-frame">
+        <div class="pw-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">setnayan.com/marketplace</span></div>
+        <div class="pw-screen">
+          <div class="pmock on" data-i="0">
+            <div class="mk-h">Verified vendors</div>
+            <div class="mrow"><span class="mdot"></span>Studio Sereno · Photography<span class="mchip ok">✓ Verified</span></div>
+            <div class="mrow"><span class="mdot"></span>Bloom &amp; Co. Florals<span class="mchip ok">✓ Verified</span></div>
+            <div class="mrow"><span class="mdot"></span>Manila Caterer<span class="mchip ok">✓ Verified</span></div>
+            <div class="mrow"><span class="mdot"></span>Tagaytay Coordinator<span class="mchip ok">✓ Verified</span></div>
+            <div class="mk-h" style="margin:12px 0 0;color:#97742f">Checked before they ever reach you</div>
+          </div>
+          <div class="pmock" data-i="1">
+            <div class="mk-h">Track record · Studio Sereno</div>
+            <div style="display:flex;gap:9px;align-items:baseline;margin-bottom:11px"><span style="font-family:var(--serif);font-style:italic;font-size:26px;color:#2f2d2a">4.9</span><span style="color:var(--pop2);letter-spacing:1px">★★★★★</span><span style="font-size:11px;color:var(--grey)">· 3 past events</span></div>
+            <div class="mtile" style="margin-bottom:8px;font-size:11.5px;color:var(--ink);line-height:1.45">“Showed up early, delivered in a week.” <span style="color:var(--grey-2)">— Ana, Dec 2025</span></div>
+            <div class="mtile" style="font-size:11.5px;color:var(--ink);line-height:1.45">“Exactly the look we moodboarded.” <span style="color:var(--grey-2)">— Paolo, Oct 2025</span></div>
+            <div class="mk-h" style="margin:12px 0 0;color:#97742f">Verified reviews from real events — not a curated portfolio</div>
+          </div>
+          <div class="pmock" data-i="2">
+            <div class="mk-h">Performance breakdown</div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin-bottom:5px">Response time<span style="color:var(--grey-2)">avg 2 hrs</span></div><div class="mbar"><i style="width:92%"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin:11px 0 5px">Re-book rate<span style="color:var(--grey-2)">78%</span></div><div class="mbar"><i style="width:78%"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin:11px 0 5px">Completion<span style="color:var(--grey-2)">100%</span></div><div class="mbar"><i style="width:100%"></i></div>
+            <div class="mk-h" style="margin:14px 0 0;color:var(--pop1)">The numbers behind the rating · rolling out</div>
+          </div>
+          <div class="pmock" data-i="3">
+            <div class="mk-h">Your custom quote</div>
+            <div class="mrow">Coverage · 8 hrs<span class="mchip">included</span></div>
+            <div class="mrow">Second shooter<span class="mchip ok">added</span></div>
+            <div class="mrow">Same-day reel<span class="mchip ok">added</span></div>
+            <div class="mrow">Album · 30 pages<span class="mchip ok">added</span></div>
+            <div class="mk-h" style="margin:12px 0 0;color:#97742f">Every spec you want — at the right price, not one-size-fits-all</div>
+          </div>
+          <div class="pmock" data-i="4">
+            <div class="mk-h">Setnayan Exclusive</div>
+            <div class="mtile" style="text-align:center;padding:22px 14px">
+              <div style="font-size:24px;color:var(--pop2)">✦</div>
+              <div style="font-family:var(--serif);font-style:italic;font-size:19px;color:#2f2d2a;margin-top:7px">Free engagement shoot</div>
+              <div style="font-size:11px;color:var(--grey);margin-top:5px">Only when you book Studio Sereno through Setnayan</div>
+            </div>
+            <div class="mk-h" style="margin:12px 0 0;color:#97742f">A gift from every vendor — found only here</div>
+          </div>
+          <div class="pmock" data-i="5">
+            <div class="mk-h">What you pay</div>
+            <div class="mrow">Vendor’s price<span style="margin-left:auto;color:var(--ink)">₱85,000</span></div>
+            <div class="mrow">Setnayan commission<span style="margin-left:auto;color:#46663f;font-weight:600">₱0</span></div>
+            <div class="mrow" style="border-bottom:none"><b style="font-size:13px;color:#2f2d2a">You pay</b><span style="margin-left:auto;font-family:var(--serif);font-style:italic;font-size:21px;color:#2f2d2a">₱85,000</span></div>
+            <div class="mk-h" style="margin:11px 0 0;color:#97742f">0% commission · no cut off the top</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="pfeats">
+      <div class="pfeat sel" onclick="selFeat('awTiangge',0,this)"><div class="ic">✓</div><div class="fn">Verified &amp; checked</div><div class="fl">Every vendor is verified and checked before they ever reach you.</div></div>
+      <div class="pfeat" onclick="selFeat('awTiangge',1,this)"><div class="ic">▥</div><div class="fn">Track record you can trust</div><div class="fl">Verified reviews and a real track record from their past events — not a portfolio they curated to flatter themselves.</div></div>
+      <div class="pfeat" onclick="selFeat('awTiangge',2,this)"><div class="ic">▲</div><div class="fn">Performance breakdown</div><div class="fl">Response time, re-book rate, and completion — the numbers that show how a vendor actually performs. <em>Rolling out</em></div></div>
+      <div class="pfeat" onclick="selFeat('awTiangge',3,this)"><div class="ic">❖</div><div class="fn">Customized, at the right price</div><div class="fl">No one price, one product for everyone. You keep the personal experience of talking to your vendors and customizing everything to the very end — every specification you want, at the right price.</div></div>
+      <div class="pfeat" onclick="selFeat('awTiangge',4,this)"><div class="ic">✦</div><div class="fn">Setnayan Exclusive</div><div class="fl">Each vendor gives you a special gift available only at Setnayan — plus special discounts, gifts, and benefits.</div></div>
+      <div class="pfeat" onclick="selFeat('awTiangge',5,this)"><div class="ic">⊘</div><div class="fn">0% commission</div><div class="fl">What the vendor charges is what you pay. We don’t take a cut off the top.</div></div>
+    </div>
+  </section>
+
+  <!-- Real Stories gallery (ELN /work translated) -->
+  <section class="stories" id="stories">
+    <div class="pnum">Real Stories</div>
+    <h2 class="pname">The front-page story of your day.</h2>
+    <p class="pdef" style="margin-left:auto;margin-right:auto">A living archive of real celebrations — each one unique in feeling, faith, and place.</p>
+    <div class="grid2">
+      <article class="storyc"><div class="img g1"></div><div class="ov"></div><div class="c">
+        <div class="lab">Edition 01 · Wedding</div><div class="ti">Claire &amp; Ice</div><div class="su">La Castellana, Negros · December</div>
+        <span class="lm glass-dark">Read the story</span></div></article>
+      <article class="storyc"><div class="img g2"></div><div class="ov"></div><div class="c">
+        <div class="lab">Edition 02 · Wedding</div><div class="ti">Maria &amp; Jose</div><div class="su">A garden in Tagaytay</div>
+        <span class="lm glass-dark">Read the story</span></div></article>
+      <article class="storyc"><div class="img g3"></div><div class="ov"></div><div class="c">
+        <div class="lab">Edition 03 · Debut</div><div class="ti">Lena turns 18</div><div class="su">A candlelit night in Cebu</div>
+        <span class="lm glass-dark">Read the story</span></div></article>
+      <article class="storyc"><div class="img g4"></div><div class="ov"></div><div class="c">
+        <div class="lab">Edition 04 · Reunion</div><div class="ti">The Reyes Reunion</div><div class="su">Three generations, one long table</div>
+        <span class="lm glass-dark">Read the story</span></div></article>
+    </div>
+  </section>
+
+  <!-- Pricing (free-floor; no hardcoded numbers) -->
+  <section class="pillar" id="pricing">
+    <div class="pnum">Pricing</div>
+    <h2 class="pname">Start free. Stay if it earns you.</h2>
+    <p class="pdef">No tricks at the floor — the free tier is a real planner, not a demo: the full Planuhan suite, the free Likhaan studio, a live event page, and Ala Ala basics. Add Surian and premium Likhaan when you want the brain and the polish. The full breakdown lives on the pricing page.</p>
+    <button class="btn-dark" onclick="event.preventDefault()">See full pricing</button>
+  </section>
+
+  <!-- Download band -->
+  <section class="pillar" id="download">
+    <div class="pnum">Get the app</div>
+    <h2 class="pname">Laptop at midnight. Phone in the venue.</h2>
+    <p class="pdef">Tablet on the couch a year later, walking back through it. Browser, phone, tablet — the same plan and the same memories, in sync. One account, every screen.</p>
+    <div class="dlrow">
+      <div class="dltile soon"><span class="nm">iPhone &amp; iPad</span><span class="sb">App Store · soon</span></div>
+      <div class="dltile soon"><span class="nm">Android</span><span class="sb">Google Play · soon</span></div>
+      <div class="dltile live"><span class="nm">Mac</span><span class="sb">macOS · download</span></div>
+      <div class="dltile soon"><span class="nm">Windows</span><span class="sb">Installer · soon</span></div>
+    </div>
+    <button class="dlweb" onclick="event.preventDefault()">◍ Launch web app</button>
+  </section>
+
+  <section class="close">
+    <h2>One place that plans it, runs it, remembers it, and keeps it. <b>You’ll be back for the next one.</b> Set na ’yan.</h2>
+    <button class="btn-dark">Start planning · free</button>
+  </section>
+
+  <footer>
+    <span>Setnayan · setnayan.com</span><span>Ala Ala · Likhaan · Planuhan · Surian · Tiangge</span><span>© 2026 · Made in the Philippines</span>
+  </footer>
+</main>
+
+<script>
+  // The no-scroll gate: scroll is locked until "Learn more" / a dock widget /
+  // a nav link opens it. Mirrors Setnayan's existing PostHeroReveal mechanic.
+  let opened=false;
+  function openGate(targetId){
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!opened){
+      opened=true;
+      document.body.classList.add('open');
+      document.documentElement.classList.add('snap');
+      const mid=document.getElementById('heroMid');
+      mid.style.opacity='0';mid.style.transform='translateY(-12px)';
+    }
+    const dest = targetId ? document.getElementById(targetId) : document.getElementById('content');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      dest.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+    }));
+  }
+
+  // Logo = Home. Returns to the cinematic landing: restore the hero, smooth-
+  // scroll to the top, then re-lock the gate (the homepage IS the gate).
+  function goHome(){
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const m=document.getElementById('heroMid');
+    m.style.opacity='1';m.style.transform='none';
+    resetHome();
+    window.scrollTo({top:0,behavior:reduce?'auto':'smooth'});
+    const relock=()=>{document.body.classList.remove('open');opened=false;};
+    if(reduce) relock(); else setTimeout(relock,560);
+  }
+
+  // The dock = the 5 pillars. Selecting one swaps the full-screen hero PHOTO and
+  // shows that pillar's name + short description; the constant "Start planning ·
+  // free" stays, and "Learn more" jumps to the pillar's full section (bookmark)
+  // below. Real desaturated hero photos drop in later; CSS gradients stand in.
+  const HOME_SCENE='radial-gradient(120% 80% at 50% 18%, #9DA2A8 0%, #7E838A 38%, #595D64 70%, #3C3F45 100%)';
+  const PILLARS=[
+    {id:'p1', name:'Ala Ala', role:'Memory Hub',   head:'A photo album is a record. This is a memory.', desc:'Where your celebrations live on — every event you hold and every event you attend, kept for life.', photo:'radial-gradient(120% 85% at 50% 25%, #B0ABA4 0%, #847d74 42%, #524c44 78%, #34302b 100%)'},
+    {id:'p2', name:'Likhaan', role:'Creative Studio', head:'Your event has a look. Give it a voice.', desc:'A free studio that turns your plan into the invite, the page, the monogram, the capture — one look across it all.', photo:'radial-gradient(90% 80% at 50% 40%, #B6ADBA 0%, #837b8a 42%, #463f4d 82%)'},
+    {id:'p3', name:'Planuhan', role:'Planner',        head:'The planner that does the work.', desc:'Guest list, seating, budget, schedule, mood board — one connected suite, free, for any event.', photo:'radial-gradient(120% 90% at 50% 30%, #ABAEB2 0%, #7d8084 44%, #45484d 100%)'},
+    {id:'p4', name:'Surian', role:'Setnayan AI',     head:'Twelve tabs. No decision.',       desc:'The quiet planning brain — the attention of a full coordination team, checking every option against your plan instantly.', photo:'radial-gradient(100% 85% at 50% 35%, #A6AEB6 0%, #757d86 44%, #383f47 100%)'},
+    {id:'p5', name:'Tiangge', role:'Marketplace',  head:'Vendors, verified. 0% commission.', desc:'When you want vendors, they are here — verified reviews and a track record, the right price, and zero commission.', photo:'linear-gradient(160deg, #BBB4AC 0%, #8a8077 46%, #524a40 100%)'},
+  ];
+  const sceneLayers=[document.getElementById('sceneA'),document.getElementById('sceneB')];
+  let sceneCur=0, currentPillar=null;
+  sceneLayers[0].style.background=HOME_SCENE;
+  document.querySelectorAll('.dock .w').forEach((w,i)=>{ if(PILLARS[i]) w.style.backgroundImage=PILLARS[i].photo; });
+  function crossFadeScene(bg){
+    const next=sceneLayers[1-sceneCur], prev=sceneLayers[sceneCur];
+    next.style.background=bg; next.style.opacity='1'; prev.style.opacity='0';
+    sceneCur=1-sceneCur;
+  }
+  function applyHero(kick,title,sub,learn){
+    document.getElementById('hKick').textContent=kick;
+    document.getElementById('hTitle').innerHTML=title;
+    document.getElementById('hSub').textContent=sub;
+    document.getElementById('hLearn').innerHTML=learn;
+  }
+  function selectPillar(i){
+    const p=PILLARS[i]; currentPillar=i;
+    crossFadeScene(p.photo);
+    applyHero(`0${i+1} · ${p.name} — ${p.role}`, p.head, p.desc, 'Learn more <span class="arr">→</span>');
+    document.querySelectorAll('.dock .w').forEach((w,j)=>w.classList.toggle('active',j===i));
+  }
+  function resetHome(){
+    currentPillar=null;
+    crossFadeScene(HOME_SCENE);
+    applyHero('Set na ’yan', 'Keep your memories.<br>Plan your moments.', 'The independent hub to keep a lifetime of memories — and plan any event, free.', 'Learn more <span class="arr">↓</span>');
+    document.querySelectorAll('.dock .w').forEach(w=>w.classList.remove('active'));
+  }
+  function heroLearn(){ if(currentPillar===null) openGate(); else openGate(PILLARS[currentPillar].id); }
+
+  // Kinetic feelings ticker: the word nearest the viewport's vertical center
+  // blooms ("[word], kept forever.") and darkens; neighbours fade by distance.
+  // Mirrors espaciolanube /info. Runs on the page's normal scroll (post-gate).
+  const tWords = Array.from(document.querySelectorAll('.ticker .word'));
+  let tScheduled=false;
+  function updateTicker(){
+    tScheduled=false;
+    const mid=window.innerHeight/2;
+    let best=null,bestD=Infinity;
+    for(const w of tWords){
+      const r=w.getBoundingClientRect();
+      const d=Math.abs(r.top+r.height/2-mid);
+      if(d<bestD){bestD=d;best=w;}
+      w.style.opacity=Math.max(0.14,1-d/(window.innerHeight*0.55)).toFixed(3);
+      w.classList.remove('active');
+    }
+    if(best && bestD<window.innerHeight*0.16){best.classList.add('active');best.style.opacity='1';}
+  }
+  window.addEventListener('scroll',()=>{if(!tScheduled){tScheduled=true;requestAnimationFrame(updateTicker);}},{passive:true});
+  window.addEventListener('resize',updateTicker);
+  updateTicker();
+
+  // Drag-to-scroll for the feature carousels (native swipe on touch).
+  document.querySelectorAll('.pfeats').forEach(function(track){
+    var down=false,sx=0,sl=0,moved=false,pid=null;
+    track.addEventListener('pointerdown',function(e){
+      moved=false;                         // reset for every interaction (so taps never look like drags)
+      if(e.pointerType!=='mouse')return;   // touch/pen: let native scroll-snap handle the swipe
+      down=true;sx=e.clientX;sl=track.scrollLeft;pid=e.pointerId;
+    });
+    track.addEventListener('pointermove',function(e){
+      if(!down)return;
+      var dx=e.clientX-sx;
+      if(!moved && Math.abs(dx)>4){         // only NOW is it a drag — capture so the scroll stays smooth
+        moved=true;track.classList.add('dragging');
+        try{track.setPointerCapture(pid);}catch(_){}
+      }
+      if(moved){track.scrollLeft=sl-dx;}
+    });
+    var end=function(){down=false;track.classList.remove('dragging');if(pid!=null){try{track.releasePointerCapture(pid);}catch(_){}pid=null;}};
+    track.addEventListener('pointerup',end);track.addEventListener('pointercancel',end);
+    track.addEventListener('click',function(e){if(moved){e.preventDefault();e.stopPropagation();}},true);  // swallow click only after a real drag
+  });
+
+  // Click a feature card -> swap that pillar widget's preview mock.
+  function selFeat(widgetId,i,card){
+    var w=document.getElementById(widgetId);
+    if(w){ w.querySelectorAll('.pmock').forEach(function(m){ m.classList.toggle('on', +m.dataset.i===i); }); }
+    var track=card.closest('.pfeats');
+    if(track){ track.querySelectorAll('.pfeat').forEach(function(c){ c.classList.remove('sel'); }); }
+    card.classList.add('sel');
+    // snap the chosen card to the horizontal centre so it lines up with the preview shown above
+    if(track){ var target=card.offsetLeft-(track.clientWidth-card.offsetWidth)/2; track.scrollTo({left:Math.max(0,target),behavior:'smooth'}); }
+  }
+
+  /* ===== Top-nav overlays: Prices / Download / Sign in ===== */
+  function openOv(id){ var o=document.getElementById(id); if(!o)return; o._opener=document.activeElement; o.classList.add('open'); document.documentElement.style.overflow='hidden'; var f=o.querySelector('input,button,a'); if(f)setTimeout(function(){try{f.focus();}catch(e){}},60); }
+  function closeOv(id){ var o=document.getElementById(id); if(!o)return; o.classList.remove('open'); if(!document.querySelector('.ov.open'))document.documentElement.style.overflow=''; if(o._opener&&o._opener.focus)try{o._opener.focus();}catch(e){} }
+  function openPricing(){ openOv('ovPricing'); recalcPrices(); }
+  // Live à-la-carte estimate: recompute per-day / per-camera / per-guest lines from the Guests + Days sliders
+  function recalcPrices(){
+    var gEl=document.getElementById('rngG'), dEl=document.getElementById('rngD'); if(!gEl||!dEl)return;
+    var g=+gEl.value, d=+dEl.value;
+    document.getElementById('estG').textContent=g;
+    document.getElementById('estD').textContent=d+(d>1?' days':' day');
+    var peso=function(n){return '₱'+Math.round(n).toLocaleString();};
+    document.querySelectorAll('#ovPricing .pr-row[data-model]').forEach(function(r){
+      var m=r.dataset.model, rate=+r.dataset.rate||0, cap=+r.dataset.cap||Infinity, v=r.querySelector('.v'); if(!v)return;
+      if(m==='perGuestDay'){ var floor=+r.dataset.floor||0, raw=rate*g, pd=Math.max(floor,Math.min(raw,cap)), tag=raw>=cap?'daily max':(raw<floor?'min':g+' guests'); v.innerHTML=peso(pd*d)+' <small>· '+tag+(d>1?' × '+d+'d':'')+'</small>'; }
+      else if(m==='perSeatDay'){ v.innerHTML=peso(rate*d)+'/seat'+(d>1?' <small>· '+d+'d</small>':''); }
+      else if(m==='perDay'){ v.innerHTML= d>1 ? peso(rate*d)+' <small>· '+d+'d</small>' : peso(rate)+'/day'; }
+      else if(m==='perGuest'){ v.innerHTML=peso(rate)+' <small>· '+(g<=250?g+' guests':'250+ tiers')+'</small>'; }
+    });
+  }
+
+  // App-store + desktop download targets (placeholders — swap for the real listings on the live site)
+  var STORE={ appstore:'https://apps.apple.com/app/setnayan', play:'https://play.google.com/store/apps/details?id=com.setnayan.app' };
+  function handleDownload(){
+    var ua=navigator.userAgent||'';
+    if(/android/i.test(ua)){ window.location.href=STORE.play; return; }                 // phone (Android) -> Google Play
+    if(/iphone|ipad|ipod/i.test(ua)){ window.location.href=STORE.appstore; return; }     // phone/tablet (iOS) -> App Store
+    // laptop / desktop -> show the download panel, highlighting the detected OS
+    var mac=/mac/i.test(ua), win=/win/i.test(ua);
+    var det=document.getElementById('dlDetected'); if(det)det.textContent= mac?'macOS':win?'Windows':'your computer';
+    var mc=document.getElementById('dlMac'), wc=document.getElementById('dlWin');
+    if(mc)mc.classList.toggle('match',mac); if(wc)wc.classList.toggle('match',win);
+    openOv('ovDownload');
+  }
+
+  // backdrop click + Escape close every overlay
+  document.querySelectorAll('.ov').forEach(function(o){ o.addEventListener('click',function(e){ if(e.target===o)closeOv(o.id); }); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var o=document.querySelector('.ov.open'); if(o)closeOv(o.id); } });
+</script>
+</body>
+</html>

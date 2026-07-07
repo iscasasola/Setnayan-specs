@@ -176,7 +176,7 @@ These are mostly **guest + couple + coordinator** features (event-day surfaces);
 
 | Bucket | Examples | Store can tax it? |
 |---|---|---|
-| **Real-world wedding services** | vendor bookings, Papic, Panood, planning, printed QR cards | **No — exempt (0%)**, even in-app. Vendor↔customer money is off-platform anyway (RA 11967). |
+| **Real-world wedding services** | vendor bookings, Papic, Live Studio, planning, printed QR cards | **No — exempt (0%)**, even in-app. Vendor↔customer money is off-platform anyway (RA 11967). |
 | **First-party digital SKUs** | couple-side Setnayan AI, Animated Monogram, digital templates, AI highlight | Only if sold through in-app billing |
 | **Vendor recurring digital** | **Pro / Enterprise subscriptions on 28-day + 1-year cadences** (owner-confirmed 2026-06-11) **+ vendor token packs** | Only if sold through in-app billing — **but this is the single largest exposure**: subscriptions + in-app currency are the textbook IAP categories, and the revenue is recurring + high-value |
 
@@ -188,7 +188,7 @@ Outside payment for digital goods is **explicitly permitted** — Apple's own gu
 
 - **Vendors** subscribe (28-day or annual) and buy token packs **on the web vendor dashboard** via GCash/BDO. A future native vendor app just lets them **sign in** with the subscription they already own — it never *sells* it in-app, so there's no IAP and no commission.
 - **Couples** buy the AI plan + digital SKUs on the web; the native app unlocks what they already own.
-- **Real-world services** (bookings, Papic, Panood, planning) route to external payment — which the stores *require* anyway (Apple **3.1.3**, Google Play Payments policy).
+- **Real-world services** (bookings, Papic, Live Studio, planning) route to external payment — which the stores *require* anyway (Apple **3.1.3**, Google Play Payments policy).
 
 → Result: **0% store fee across the entire catalog — including the vendor 28-day + annual subscriptions** — as long as the checkout never lives inside in-app billing.
 
@@ -215,7 +215,7 @@ Outside payment for digital goods is **explicitly permitted** — Apple's own gu
 
 | Surface | In native app? |
 |---|---|
-| Real-world service checkout (vendor booking, Papic, Panood) | ✅ allowed (external payment) |
+| Real-world service checkout (vendor booking, Papic, Live Studio) | ✅ allowed (external payment) |
 | Digital-SKU purchase (AI plan, monogram, templates) | ❌ web-only; native shows unlock/status |
 | Vendor subscription + token purchase | ❌ web-only; native is **sign-in / unlock only** |
 | "Add to Wallet" pass (T2-5) | ✅ allowed — not a purchase |

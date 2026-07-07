@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SETNAYAN — Entity Map Console (design prototype)</title>
+<style>
+  :root{
+    --alabaster:#F6F4EF; --paper:#FFFFFF; --obsidian:#191919; --ink:#2B2A28; --ink2:#56524B;
+    --gold:#C2A05B; --gold-soft:#EADFC4; --line:#E8E3D9; --line2:#F0ECE3; --muted:#928B7E;
+    --sky:#2F6FB0; --sky-bg:#EAF1F8; --lock:#B5852A; --lock-bg:#F8F0DD;
+    --ok:#3E8B59; --ok-bg:#E8F2EA; --violet:#7A5AC9; --violet-bg:#F0EAFB;
+    --report:#C0564A; --report-bg:#FAE9E6; --wait:#C9822B; --wait-bg:#F7EBD9;
+    --terra:#B85C38; --terra-bg:#F7E9E2;
+    /* entity hue ramp — one warm-to-cool ladder so types read as a family */
+    --e-user:#4C7BA6;   --e-user-bg:#EAF1F7;
+    --e-event:#B58A3A;  --e-event-bg:#F7EFDC;
+    --e-guest:#6E9B6A;  --e-guest-bg:#EDF3EC;
+    --e-vendor:#8A5FB0; --e-vendor-bg:#F1EAF8;
+    --e-service:#B85C38;--e-service-bg:#F7E9E2;
+    --e-order:#3E8B59;  --e-order-bg:#E8F2EA;
+    --e-thread:#2F6FB0; --e-thread-bg:#EAF1F8;
+    --e-billing:#B5852A;--e-billing-bg:#F8F0DD;
+    --e-org:#7A5AC9;    --e-org-bg:#F0EAFB;
+    --shadow:0 1px 2px rgba(25,25,25,.05),0 10px 30px rgba(25,25,25,.06);
+    --shadow-sm:0 1px 2px rgba(25,25,25,.05);
+    --shadow-pop:0 8px 40px rgba(25,25,25,.14),0 2px 8px rgba(25,25,25,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--alabaster);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;overflow:hidden}
+  h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em}
+  button{font-family:inherit}
+  .ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;display:block;flex:0 0 auto}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+  /* ── app frame ── */
+  .app{display:flex;flex-direction:column;height:100vh}
+  .topbar{display:flex;align-items:center;gap:14px;padding:11px 20px;background:var(--paper);
+    border-bottom:1px solid var(--line);flex:0 0 auto;z-index:20}
+  .brand{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .brand .t{font-size:15px;font-weight:700;letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+  .brand .t .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+  .brand .s{font-size:11.5px;color:var(--muted)}
+
+  /* control toggle (Map | Tables) */
+  .ctrl-toggle{display:flex;gap:4px;background:var(--alabaster);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .ctrl-toggle button{border:none;background:none;border-radius:999px;padding:7px 16px;font-size:12.5px;font-weight:600;
+    cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:7px}
+  .ctrl-toggle button .ico{width:15px;height:15px}
+  .ctrl-toggle button.on{background:var(--obsidian);color:#fff;box-shadow:var(--shadow-sm)}
+
+  .searchwrap{position:relative;margin-left:auto;flex:0 0 auto}
+  .searchwrap .ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted)}
+  #search{width:250px;border:1px solid var(--line);border-radius:999px;padding:8px 14px 8px 32px;font-size:12.5px;
+    outline:none;background:var(--alabaster);color:var(--ink)}
+  #search:focus{border-color:var(--gold);background:#fff}
+
+  /* scope bar */
+  .scopebar{display:flex;align-items:center;gap:10px;padding:8px 20px;background:var(--paper);
+    border-bottom:1px solid var(--line);flex:0 0 auto;flex-wrap:wrap;z-index:19}
+  .scope-lab{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .scopepick{display:flex;gap:6px;flex-wrap:wrap}
+  .schip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 13px;font-size:12px;
+    cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+  .schip:hover{border-color:var(--gold)}
+  .schip.on{background:var(--obsidian);color:#fff;border-color:var(--obsidian)}
+  .schip .ico{width:14px;height:14px}
+  .schip .sub{font-size:10px;color:var(--muted);font-weight:600}
+  .schip.on .sub{color:rgba(255,255,255,.72)}
+  .scope-note{margin-left:auto;font-size:11.5px;color:var(--ink2);display:flex;align-items:center;gap:7px}
+  .scope-note .ico{width:14px;height:14px;color:var(--gold)}
+
+  /* legend */
+  .legend{display:flex;align-items:center;gap:13px;flex-wrap:wrap;font-size:11px;color:var(--ink2)}
+  .legend .li{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .legend .sw{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+
+  .stage{display:flex;flex:1 1 auto;min-height:0;position:relative}
+
+  /* ── MINDMAP ── */
+  .mapwrap{flex:1 1 auto;min-width:0;position:relative;overflow:hidden;
+    background:
+      radial-gradient(circle at 1px 1px, rgba(146,139,126,.16) 1px, transparent 0) 0 0/26px 26px,
+      var(--alabaster);cursor:grab}
+  .mapwrap.grabbing{cursor:grabbing}
+  #mapsvg{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .edge{stroke:#C9C1B2;stroke-width:1.4;fill:none;transition:stroke .15s,stroke-width .15s}
+  .edge.hot{stroke:var(--gold);stroke-width:2}
+  .edge-lab{font-size:9.5px;fill:var(--muted);paint-order:stroke;stroke:var(--alabaster);stroke-width:3px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  .node{cursor:pointer}
+  .node .chip-bg{fill:#fff;stroke-width:1.4;transition:filter .12s}
+  .node:hover .chip-bg{filter:drop-shadow(0 4px 10px rgba(25,25,25,.14))}
+  .node.sel .chip-bg{stroke-width:2.4}
+  .node.dim{opacity:.32}
+  .node .chip-ic{stroke-width:1.75;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .node .chip-lab{font-size:11px;font-weight:600;fill:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;dominant-baseline:middle}
+  .node .chip-ct{font-size:9.5px;font-weight:700;fill:var(--muted);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;dominant-baseline:middle}
+  .node.big .chip-lab{font-size:12.5px;font-weight:700}
+
+  .mapctl{position:absolute;right:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;z-index:5}
+  .mapctl button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--paper);
+    color:var(--ink2);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)}
+  .mapctl button:hover{border-color:var(--gold);color:var(--ink)}
+  .mapctl button .ico{width:17px;height:17px}
+  .maphint{position:absolute;left:16px;bottom:16px;z-index:5;font-size:11px;color:var(--muted);
+    background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:9px;padding:6px 11px;
+    display:flex;align-items:center;gap:7px;backdrop-filter:blur(4px)}
+  .maphint .ico{width:13px;height:13px;color:var(--gold)}
+
+  /* ── TABLES ── */
+  .tblstage{display:flex;flex:1 1 auto;min-height:0}
+  .tblrail{width:230px;flex:0 0 auto;background:var(--paper);border-right:1px solid var(--line);
+    overflow-y:auto;padding:12px 10px 40px}
+  .tblrail .rail-title{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+    padding:8px 10px 6px}
+  .tblfolder{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;cursor:pointer;color:var(--ink2)}
+  .tblfolder:hover{background:var(--alabaster)}
+  .tblfolder.on{background:var(--obsidian);color:#fff}
+  .tblfolder .ico{width:17px;height:17px}
+  .tblfolder .lbl{flex:1;font-size:13px;font-weight:600}
+  .tblfolder .ct{font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+  .tblfolder.on .ct{color:rgba(255,255,255,.7)}
+
+  .tblmain{flex:1 1 auto;min-width:0;overflow-y:auto;padding:22px 26px 60px}
+  .tblhead{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+  .tblhead .h{font-size:20px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:11px}
+  .tblhead .h .ico{width:21px;height:21px}
+  .tblhead .sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .tblsearch{position:relative}
+  .tblsearch .ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted)}
+  .tblsearch input{width:230px;border:1px solid var(--line);border-radius:999px;padding:8px 14px 8px 32px;font-size:12px;
+    outline:none;background:var(--alabaster)}
+  .tblsearch input:focus{border-color:var(--gold);background:#fff}
+
+  .etable{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;font-size:12.5px}
+  .etable th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    padding:11px 15px;background:var(--alabaster);border-bottom:1px solid var(--line);white-space:nowrap}
+  .etable td{padding:11px 15px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .etable tr:last-child td{border-bottom:none}
+  .etable tbody tr{cursor:pointer}
+  .etable tbody tr:hover td{background:#fdfcf9}
+  .et-name{font-weight:600;color:var(--ink);display:flex;align-items:center;gap:9px}
+  .et-ic{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .et-ic .ico{width:14px;height:14px}
+  .et-id{font-size:10.5px;color:var(--muted)}
+  .et-sub{font-size:11px;color:var(--muted)}
+
+  .badge{font-size:9.5px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;
+    display:inline-flex;align-items:center;gap:4px;text-transform:uppercase;letter-spacing:.04em}
+  .badge.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-transform:none;letter-spacing:0}
+  .badge .ico{width:11px;height:11px}
+  .badge.ok{background:var(--ok-bg);color:var(--ok)}
+  .badge.wait{background:var(--wait-bg);color:#8a6220}
+  .badge.sky{background:var(--sky-bg);color:var(--sky)}
+  .badge.violet{background:var(--violet-bg);color:var(--violet)}
+  .badge.terra{background:var(--terra-bg);color:var(--terra)}
+  .badge.neutral{background:var(--line2);color:var(--ink2)}
+  .badge.gold{background:var(--lock-bg);color:var(--lock)}
+  .badge.report{background:var(--report-bg);color:var(--report)}
+
+  .empty{color:var(--muted);font-size:12.5px;border:1px dashed var(--line);border-radius:12px;padding:22px;
+    text-align:center;background:var(--alabaster)}
+
+  /* ── ENTITY CARD (the hinge) ── */
+  .scrim{position:fixed;inset:0;background:rgba(25,25,25,.28);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .card{position:fixed;top:0;right:0;height:100vh;width:452px;max-width:96vw;background:var(--paper);
+    border-left:1px solid var(--line);box-shadow:var(--shadow-pop);transform:translateX(100%);
+    transition:transform .24s cubic-bezier(.4,0,.1,1);z-index:50;display:flex;flex-direction:column}
+  .card.on{transform:translateX(0)}
+
+  .card-crumb{display:flex;align-items:center;gap:6px;padding:10px 14px 0;flex:0 0 auto;flex-wrap:wrap;min-height:12px}
+  .crumb-b{border:none;background:none;cursor:pointer;color:var(--muted);font-size:11px;font-weight:600;
+    display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:7px}
+  .crumb-b:hover{background:var(--line2);color:var(--ink)}
+  .crumb-b .ico{width:12px;height:12px}
+  .crumb-sep{color:var(--line);font-size:11px}
+  .crumb-cur{font-size:11px;font-weight:700;color:var(--ink2);padding:3px 4px;display:inline-flex;align-items:center;gap:5px}
+
+  .card-head{display:flex;align-items:center;gap:12px;padding:12px 16px 14px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .card-head .av{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    flex:0 0 auto;font-weight:700;font-size:15px;position:relative}
+  .card-head .av .ico{width:22px;height:22px}
+  .card-head .ti{flex:1;min-width:0}
+  .card-head .ti .nm{font-size:17px;font-weight:700;letter-spacing:-.01em;line-height:1.15;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card-head .ti .row2{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}
+  .card-head .ti .id{font-size:10.5px;color:var(--muted)}
+  .card-x{border:none;background:none;cursor:pointer;color:var(--muted);padding:7px;border-radius:9px;display:flex;align-self:flex-start}
+  .card-x:hover{background:var(--line2);color:var(--ink)}
+
+  .status-line{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line2);
+    background:var(--alabaster);flex:0 0 auto;flex-wrap:wrap;font-size:12px;color:var(--ink2)}
+  .status-line .ico{width:14px;height:14px;color:var(--ok)}
+  .status-line b{color:var(--ink);font-weight:600}
+
+  .card-body{flex:1;overflow-y:auto;padding:16px}
+  .sect{margin-bottom:18px}
+  .sect > .lab{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+    margin-bottom:9px;display:flex;align-items:center;gap:7px}
+  .sect > .lab .ico{width:13px;height:13px;color:var(--gold)}
+  .sect > .lab .n{font-size:9.5px;font-weight:700;color:var(--muted);background:var(--line2);border-radius:999px;padding:1px 7px}
+
+  /* key-value block */
+  .kv{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+  .kv .r{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:9px 13px;border-top:1px solid var(--line2)}
+  .kv .r:first-child{border-top:none}
+  .kv .r .k{color:var(--muted)}
+  .kv .r .v{font-weight:600;text-align:right}
+  .kv .r .v.mono{font-weight:600}
+
+  /* connection rail — chips grouped by edge */
+  .edgegroup{margin-bottom:12px}
+  .edgegroup .eg-lab{font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;display:flex;align-items:center;gap:7px}
+  .edgegroup .eg-lab .verb{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+    background:var(--line2);border-radius:999px;padding:1px 7px}
+  .conn-list{display:flex;flex-wrap:wrap;gap:7px}
+  .conn{border:1px solid var(--line);border-radius:10px;padding:6px 10px 6px 7px;background:#fff;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;max-width:100%;transition:border-color .12s,box-shadow .12s}
+  .conn:hover{border-color:var(--gold);box-shadow:var(--shadow-sm)}
+  .conn .cav{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+    font-size:9.5px;font-weight:700}
+  .conn .cav .ico{width:13px;height:13px}
+  .conn .cb{min-width:0}
+  .conn .cn{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+  .conn .cs{font-size:10px;color:var(--muted)}
+  .conn.count{cursor:default;color:var(--muted);border-style:dashed}
+  .conn.count:hover{border-color:var(--line);box-shadow:none}
+
+  /* actions row */
+  .actions{display:flex;flex-wrap:wrap;gap:8px}
+  .btn{border:none;border-radius:9px;padding:9px 13px;font-size:12.5px;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+  .btn .ico{width:14px;height:14px}
+  .btn.primary{background:var(--obsidian);color:#fff}
+  .btn.gold{background:var(--gold);color:#fff}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink2)}
+  .btn.ghost:hover{border-color:var(--gold)}
+
+  /* lifecycle ribbon (guest) */
+  .ribbon{display:flex;align-items:center;gap:0;margin:2px 0 4px;overflow-x:auto;padding-bottom:2px}
+  .rstep{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+  .rdot{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);background:#fff;display:flex;align-items:center;
+    justify-content:center;font-size:10px;font-weight:700;color:var(--muted);flex:0 0 auto}
+  .rdot .ico{width:12px;height:12px}
+  .rlab{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .rline{width:20px;height:2px;background:var(--line);margin:0 3px;flex:0 0 auto}
+  .rstep.done .rdot{background:var(--ok);border-color:var(--ok);color:#fff}
+  .rstep.done .rlab{color:var(--ink2)}
+  .rstep.done + .rline{background:var(--ok)}
+  .rstep.cur .rdot{background:var(--obsidian);border-color:var(--obsidian);color:#fff;box-shadow:0 0 0 4px rgba(25,25,25,.08)}
+  .rstep.cur .rlab{color:var(--ink);font-weight:700}
+
+  /* activation / billing sub-cards */
+  .subcard{border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:#fff;margin-bottom:9px}
+  .subcard .sc-top{display:flex;align-items:center;gap:9px}
+  .subcard .sc-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .subcard .sc-ic .ico{width:16px;height:16px}
+  .subcard .sc-b{flex:1;min-width:0}
+  .subcard .sc-n{font-size:13px;font-weight:700}
+  .subcard .sc-m{font-size:11px;color:var(--muted);margin-top:1px}
+  .subcard .sc-body{margin-top:9px;font-size:12px;color:var(--ink2)}
+  .memtok{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line2);font-size:12px}
+  .memtok:first-child{border-top:none;padding-top:2px}
+  .memtok .mt-n{display:flex;align-items:center;gap:8px}
+  .memtok .mt-n .mav{width:22px;height:22px;border-radius:6px;background:var(--e-user-bg);color:var(--e-user);
+    display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+  .memtok .mt-bal{font-weight:700;font-variant-numeric:tabular-nums}
+  .memtok .mt-bal.zero{color:var(--muted);font-weight:600}
+  .infoline{font-size:11px;color:#7a5d2a;background:var(--wait-bg);border:1px solid #e7cfa6;border-radius:9px;
+    padding:8px 11px;display:flex;align-items:flex-start;gap:7px;line-height:1.45;margin-top:2px}
+  .infoline .ico{width:13px;height:13px;color:var(--wait);margin-top:1px;flex:0 0 auto}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--obsidian);
+    color:#fff;border-radius:11px;padding:11px 18px;font-size:12.5px;font-weight:600;box-shadow:var(--shadow-pop);
+    display:flex;align-items:center;gap:9px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:80;max-width:88vw}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast .ico{width:15px;height:15px;color:#9ad9ac}
+
+  .footer{position:fixed;left:50%;bottom:0;transform:translateX(-50%);font-size:10.5px;color:var(--muted);
+    background:rgba(246,244,239,.92);border:1px solid var(--line);border-bottom:none;border-radius:9px 9px 0 0;
+    padding:5px 15px;z-index:30;text-align:center}
+
+  /* narrow fallback */
+  @media (max-width:900px){
+    body{overflow:auto}
+    .app{height:auto}
+    .topbar{flex-wrap:wrap}
+    .searchwrap{margin-left:0;flex:1 1 100%;order:5}
+    #search{width:100%}
+    .mapwrap{min-height:62vh}
+    .tblstage{flex-direction:column}
+    .tblrail{width:100%;border-right:none;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px;padding:10px}
+    .tblrail .rail-title{width:100%}
+    .tblfolder{flex:0 0 auto;padding:7px 11px}
+    .tblmain{padding:16px}
+    .card{width:100%}
+    .scope-note{margin-left:0;flex:1 1 100%}
+    .legend{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ── TOP BAR ── -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="t"><span class="dot"></span>Entity Map Console</div>
+      <div class="s">The whole platform as one graph — walk it, or list it. Same records, two windows.</div>
+    </div>
+    <div class="ctrl-toggle" id="ctrlToggle">
+      <button data-ctrl="map" class="on"><svg class="ico" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="7" r="2.4"/><circle cx="12" cy="17" r="2.4"/><path d="M8 7l8 .5M7.4 8 11 15M16.6 9 13 15.4"/></svg>Map</button>
+      <button data-ctrl="tables"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14h18M9 4v16"/></svg>Tables</button>
+    </div>
+    <div class="searchwrap">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="search" type="search" placeholder="Find any entity by name or id…" autocomplete="off" />
+    </div>
+  </div>
+
+  <!-- ── SCOPE BAR ── -->
+  <div class="scopebar">
+    <span class="scope-lab">Scope</span>
+    <div class="scopepick" id="scopePick">
+      <button class="schip on" data-scope="platform"><svg class="ico" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2c3 3 3 17 0 20M12 2c-3 3-3 17 0 20"/></svg>Platform <span class="sub">type-level</span></button>
+      <button class="schip" data-scope="event"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>Maria &amp; Jose <span class="sub">one event</span></button>
+      <button class="schip" data-scope="vendor"><svg class="ico" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"/><path d="M2 22h20M10 6h4M10 10h4M10 14h4"/></svg>Lumina Studios <span class="sub">one vendor</span></button>
+    </div>
+    <div class="scope-note" id="scopeNote"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span></span></div>
+  </div>
+
+  <!-- ── LEGEND BAR ── -->
+  <div class="scopebar" style="padding-top:7px;padding-bottom:7px">
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <!-- MAP -->
+    <div class="mapwrap" id="mapwrap">
+      <svg id="mapsvg" xmlns="http://www.w3.org/2000/svg"><g id="mapg"></g></svg>
+      <div class="maphint"><svg class="ico" viewBox="0 0 24 24"><path d="M5 9a2 2 0 1 1 4 0v4M9 11a2 2 0 1 1 4 0v2M13 12a2 2 0 1 1 4 0v3a5 5 0 0 1-5 5H9.5a5 5 0 0 1-3.5-1.5L3 16"/></svg>Drag to pan · scroll or ± to zoom · click a node</div>
+      <div class="mapctl">
+        <button id="zoomIn" title="Zoom in"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button id="zoomOut" title="Zoom out"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+        <button id="zoomFit" title="Fit to view"><svg class="ico" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+      </div>
+    </div>
+
+    <!-- TABLES -->
+    <div class="tblstage" id="tblstage" style="display:none">
+      <nav class="tblrail" id="tblrail"></nav>
+      <main class="tblmain" id="tblmain"></main>
+    </div>
+  </div>
+</div>
+
+<!-- ── ENTITY CARD ── -->
+<div class="scrim" id="scrim"></div>
+<aside class="card" id="card">
+  <div class="card-crumb" id="cardCrumb"></div>
+  <div class="card-head" id="cardHead"></div>
+  <div class="status-line" id="cardStatus"></div>
+  <div class="card-body" id="cardBody"></div>
+</aside>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"><svg class="ico" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span id="toastMsg">Saved</span></div>
+
+<div class="footer">Design prototype · Entity Map Console · 2026-07-04 · not app code · Every panel is a window onto the same map — nothing here is a copy.</div>
+
+<script>
+"use strict";
+/* ═════════════════════════════════════════════════════════════════════════
+   ICON LIBRARY — Lucide-style 1.75px line paths (inline; no network)
+   ═════════════════════════════════════════════════════════════════════════ */
+const IP={
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 5a3.5 3.5 0 0 1 0 7M22 21a7 7 0 0 0-4-6.3"/>',
+  heart:'<path d="M12 21s-8-4.6-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.4-8 11-8 11z"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>',
+  building:'<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"/><path d="M2 22h20M10 6h4M10 10h4M10 14h4M10 18h4"/>',
+  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/>',
+  tag:'<path d="M20 12 12 20l-8-8V4h8l8 8z"/><circle cx="7.5" cy="7.5" r="1.3"/>',
+  receipt:'<path d="M5 22V4a1 1 0 0 1 1.4-.9L9 4l3-1.4L15 4l2.6-1.9A1 1 0 0 1 19 3v19l-3-1.6L13 22l-3-1.6L7 22l-2-1.4z"/><path d="M8 8h8M8 12h6"/>',
+  chat:'<path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  wallet:'<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h16v3"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h3v-4z"/>',
+  coins:'<circle cx="8" cy="8" r="5.5"/><path d="M18 10.4A5.5 5.5 0 1 1 10.4 18"/><path d="M7 6h1v4M15.5 14l.6.6-2.4 2.4"/>',
+  crown:'<path d="m3 8 3.5 3L12 5l5.5 6L21 8v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8z"/>',
+  ring:'<circle cx="12" cy="14" r="6"/><path d="m9 6 3-3 3 3M9 6h6l-3 3-3-3z"/>',
+  seat:'<path d="M4 18v3M20 18v3M6 18v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2M6 14V7a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v7"/>',
+  qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h.01M18 18h3v3"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  mail:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  sparkles:'<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="m9 12 2 2 4-4"/>',
+  pin:'<path d="M12 21s-6-5.7-6-11a6 6 0 0 1 12 0c0 5.3-6 11-6 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  link:'<path d="M9 15 15 9M10.5 6.5 12 5a4 4 0 0 1 6 6l-1.5 1.5M13.5 17.5 12 19a4 4 0 0 1-6-6l1.5-1.5"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  chevL:'<path d="m15 18-6-6 6-6"/>',
+  chevR:'<path d="m9 18 6-6-6-6"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+  map:'<circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="7" r="2.4"/><circle cx="12" cy="17" r="2.4"/><path d="M8 7l8 .5M7.4 8 11 15M16.6 9 13 15.4"/>',
+  video:'<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3z"/>',
+  play:'<path d="M6 4v16l14-8z"/>',
+  bolt:'<path d="M13 2 3 14h7l-1 8 10-12h-7z"/>',
+  key:'<circle cx="7.5" cy="15.5" r="4.5"/><path d="m11 12 8-8 3 3M16 5l3 3"/>',
+  layers:'<path d="m12 3 9 5-9 5-9-5 9-5zM3 13l9 5 9-5M3 18l9 5 9-5"/>',
+};
+function svg(name,cls){ return '<svg class="ico'+(cls?' '+cls:'')+'" viewBox="0 0 24 24">'+(IP[name]||IP.tag)+'</svg>'; }
+
+/* entity-type visual vocabulary (hue + icon) — one family */
+const TYPE={
+  user:   {lab:'User',    ic:'user',    c:'var(--e-user)',   bg:'var(--e-user-bg)'},
+  event:  {lab:'Event',   ic:'heart',   c:'var(--e-event)',  bg:'var(--e-event-bg)'},
+  guest:  {lab:'Guest',   ic:'users',   c:'var(--e-guest)',  bg:'var(--e-guest-bg)'},
+  vendor: {lab:'Vendor',  ic:'building',c:'var(--e-vendor)', bg:'var(--e-vendor-bg)'},
+  service:{lab:'Service card',ic:'tag', c:'var(--e-service)',bg:'var(--e-service-bg)'},
+  order:  {lab:'Order / activation',ic:'receipt',c:'var(--e-order)',bg:'var(--e-order-bg)'},
+  thread: {lab:'Thread',  ic:'chat',    c:'var(--e-thread)', bg:'var(--e-thread-bg)'},
+  billing:{lab:'Billing', ic:'wallet',  c:'var(--e-billing)',bg:'var(--e-billing-bg)'},
+  org:    {lab:'Org',     ic:'building',c:'var(--e-org)',    bg:'var(--e-org-bg)'},
+};
+
+/* ═════════════════════════════════════════════════════════════════════════
+   SEED DATA — one flat registry of records keyed by fake-plausible ids.
+   Every card and node reads from ENT[id]; connections reference other ids so
+   the map and the tables are literally the same graph.
+   ═════════════════════════════════════════════════════════════════════════ */
+const ENT={};
+function E(o){ ENT[o.id]=o; return o.id; }
+
+/* ── EVENT: Maria & Jose ── */
+E({id:'S89E-MJ7K3PQ2VX', type:'event', name:"Maria & Jose's Wedding", initials:'MJ',
+  status:{ic:'clock',txt:'<b>Planning</b> · 214 days out · slug live'},
+  kv:[['Date','Sat, Feb 14 2027'],['Venue','Taal Vista Hotel, Tagaytay'],['Venue status','Booked'],['Type','Wedding'],['Slug','setnayan.com/maria-jose']],
+  edges:[
+    {verb:'hosted by', to:['S89U-MARIA9KD3F1','S89U-JOSE4MN7B2K']},
+    {verb:'co-planned by', to:['S89U-TITAROSA88Q']},
+    {verb:'guests', count:'187 invited · 142 RSVP’d', to:['S89G-ALDO2KX9','S89G-BEA77MQ4','S89G-CARLO3PZ','S89G-DIWATA5F','S89G-ENZO8BQ2','S89G-FELI4KND'],more:181},
+    {verb:'vendors booked', to:['S89V-LUMINA5STDO','S89V-BLOOMFIELD3','S89V-TAALVISTA9H','S89V-CANTATA7BND','S89V-SWEETLEAF2C']},
+    {verb:'in-app services', to:['S89S-PAPICMJ0021','S89S-STDMJ00450X']},
+    {verb:'orders', to:['S89O-PAPICPAID77','S89O-STDPEND0091']},
+  ]});
+
+/* event hosts + co-planner (users) */
+E({id:'S89U-MARIA9KD3F1', type:'user', name:'Maria Santos', initials:'MS',
+  status:{ic:'check',txt:'<b>Active</b> · joined via email · signed in 2h ago'},
+  kv:[['Email','maria.santos@gmail.com'],['Joined','Nov 2026'],['Account origin','Direct sign-up']],
+  edges:[
+    {verb:'host of', to:['S89E-MJ7K3PQ2VX']},
+    {verb:'in threads', to:['S89T-MJLUMINA001','S89T-MJBLOOM0022']},
+  ], roles:[{r:'Host of',of:'S89E-MJ7K3PQ2VX',role:'Owner-host'}]});
+E({id:'S89U-JOSE4MN7B2K', type:'user', name:'Jose Ramos', initials:'JR',
+  status:{ic:'check',txt:'<b>Active</b> · joined via Maria’s invite'},
+  kv:[['Email','jose.ramos@outlook.com'],['Joined','Nov 2026'],['Account origin','Invited by co-host']],
+  edges:[{verb:'host of', to:['S89E-MJ7K3PQ2VX']}],
+  roles:[{r:'Host of',of:'S89E-MJ7K3PQ2VX',role:'Co-host'}]});
+E({id:'S89U-TITAROSA88Q', type:'user', name:'Rosa Delgado', initials:'RD',
+  status:{ic:'check',txt:'<b>Active</b> · added as co-planner by the couple'},
+  kv:[['Email','tita.rosa@yahoo.com'],['Joined','Dec 2026'],['Account origin','Direct sign-up']],
+  edges:[{verb:'co-planner of', to:['S89E-MJ7K3PQ2VX']}],
+  roles:[{r:'Co-planner at',of:'S89E-MJ7K3PQ2VX',role:'Planner'}]});
+
+/* a guest who also claimed a user account — the guest→user bridge */
+E({id:'S89U-ALDO2GUEST9', type:'user', name:'Aldo Reyes', initials:'AR',
+  status:{ic:'check',txt:'<b>Active</b> · claimed from a guest invite'},
+  kv:[['Email','aldo.reyes@gmail.com'],['Joined','Jan 2027'],['Account origin','Claimed guest QR']],
+  edges:[{verb:'claimed from guest', to:['S89G-ALDO2KX9']}],
+  roles:[{r:'Guest-claimed at',of:'S89E-MJ7K3PQ2VX',role:'Guest'}]});
+
+/* named guests */
+const GUESTS=[
+  {id:'S89G-ALDO2KX9', nm:'Aldo Reyes', ini:'AR', state:2, table:'Table 3 · Seat 2', qr:true, tagged:12, plus:'S89G-BEA77MQ4', claimed:'S89U-ALDO2GUEST9'},
+  {id:'S89G-BEA77MQ4', nm:'Bea Cruz', ini:'BC', state:1, table:'Table 3 · Seat 3', qr:true, tagged:5, plus:'S89G-ALDO2KX9'},
+  {id:'S89G-CARLO3PZ', nm:'Carlo Lim', ini:'CL', state:1, table:'Table 7 · Seat 1', qr:true, tagged:3, plus:null},
+  {id:'S89G-DIWATA5F', nm:'Diwata Flores', ini:'DF', state:0, table:'Unassigned', qr:false, tagged:0, plus:null},
+  {id:'S89G-ENZO8BQ2', nm:'Enzo Tan', ini:'ET', state:2, table:'Table 1 · Seat 5', qr:true, tagged:9, plus:null},
+  {id:'S89G-FELI4KND', nm:'Feli Ong', ini:'FO', state:1, table:'Table 1 · Seat 6', qr:true, tagged:7, plus:null},
+];
+const GSTATE=['Invited','RSVP’d','Claimed account'];
+GUESTS.forEach(g=>{
+  E({id:g.id, type:'guest', name:g.nm, initials:g.ini,
+    status:{ic:g.state===0?'mail':'check',txt:'Lifecycle · <b>'+GSTATE[g.state]+'</b>'},
+    guest:g,
+    kv:[['State',GSTATE[g.state]],['Seat',g.table],['Personal QR',g.qr?'Issued':'Not issued'],['Tagged photos',String(g.tagged)]],
+    edges:[
+      {verb:'belongs to', to:['S89E-MJ7K3PQ2VX']},
+      ...(g.plus?[{verb:'plus-one', to:[g.plus]}]:[]),
+      ...(g.claimed?[{verb:'claimed account', to:[g.claimed]}]:[]),
+    ]});
+});
+
+/* vendors booked at the event */
+E({id:'S89V-LUMINA5STDO', type:'vendor', name:'Lumina Studios', initials:'LS',
+  status:{ic:'shield',txt:'<b>Verified</b> · Pro (28-day) · Photo &amp; Video'},
+  verified:true, org:true,
+  kv:[['Leaf','Photographer'],['Tier','Pro · 28-day'],['Verification','Verified Jun 2026'],['Client events','3']],
+  edges:[
+    {verb:'members', to:['S89U-LUMOWNER01','S89U-LUMMGR0022','S89U-LUMSTAFF03']},
+    {verb:'service cards', to:['S89S-LUMPHOTO001','S89S-LUMVIDEO002','S89S-LUMDRONE003','S89S-LUMSDE00004']},
+    {verb:'subscription', to:['S89B-LUMINASUB01']},
+    {verb:'member tokens', to:['S89B-LUMTOKPOOL9']},
+    {verb:'booked at', to:['S89E-MJ7K3PQ2VX','S89E-RTAN00WED22','S89E-GARC00MEN31']},
+  ]});
+E({id:'S89V-BLOOMFIELD3', type:'vendor', name:'Bloomfield Florals', initials:'BF',
+  status:{ic:'shield',txt:'<b>Verified</b> · Solo tier · Florist'},verified:true,
+  kv:[['Leaf','Florist'],['Tier','Solo'],['Client events','—']],
+  edges:[{verb:'booked at', to:['S89E-MJ7K3PQ2VX']},{verb:'in thread', to:['S89T-MJBLOOM0022']}]});
+E({id:'S89V-TAALVISTA9H', type:'vendor', name:'Taal Vista Hotel', initials:'TV',
+  status:{ic:'shield',txt:'<b>Verified</b> · Enterprise · Reception Venue'},verified:true,
+  kv:[['Leaf','Reception Venue'],['Tier','Enterprise']],
+  edges:[{verb:'booked at', to:['S89E-MJ7K3PQ2VX']}]});
+E({id:'S89V-CANTATA7BND', type:'vendor', name:'Cantata Live Band', initials:'CB',
+  status:{ic:'info',txt:'<b>Unverified</b> · imported to the couple’s book'},
+  kv:[['Leaf','Live Band'],['Source','Imported by couple']],
+  edges:[{verb:'booked at', to:['S89E-MJ7K3PQ2VX']}]});
+E({id:'S89V-SWEETLEAF2C', type:'vendor', name:'Sweetleaf Cakes', initials:'SC',
+  status:{ic:'shield',txt:'<b>Verified</b> · Solo tier · Cake'},verified:true,
+  kv:[['Leaf','Wedding Cake'],['Tier','Solo']],
+  edges:[{verb:'booked at', to:['S89E-MJ7K3PQ2VX']}]});
+
+/* ── VENDOR ORG: Lumina Studios members + service cards + billing ── */
+E({id:'S89U-LUMOWNER01', type:'user', name:'Paolo Vega', initials:'PV',
+  status:{ic:'crown',txt:'<b>Owner</b> at Lumina Studios · 40 tokens'},
+  kv:[['Email','paolo@luminastudios.ph'],['Org role','Owner'],['Token balance','40']],
+  edges:[{verb:'member of', to:['S89V-LUMINA5STDO']}],
+  roles:[{r:'Member at',of:'S89V-LUMINA5STDO',role:'Owner'}]});
+E({id:'S89U-LUMMGR0022', type:'user', name:'Grace Uy', initials:'GU',
+  status:{ic:'check',txt:'<b>Manager</b> at Lumina Studios · 12 tokens'},
+  kv:[['Email','grace@luminastudios.ph'],['Org role','Manager'],['Token balance','12']],
+  edges:[{verb:'member of', to:['S89V-LUMINA5STDO']},{verb:'in threads', to:['S89T-MJLUMINA001']}],
+  roles:[{r:'Member at',of:'S89V-LUMINA5STDO',role:'Manager'}]});
+E({id:'S89U-LUMSTAFF03', type:'user', name:'Nico Bautista', initials:'NB',
+  status:{ic:'check',txt:'<b>Staff</b> at Lumina Studios · 0 tokens'},
+  kv:[['Email','nico@luminastudios.ph'],['Org role','Staff'],['Token balance','0']],
+  edges:[{verb:'member of', to:['S89V-LUMINA5STDO']}],
+  roles:[{r:'Member at',of:'S89V-LUMINA5STDO',role:'Staff'}]});
+
+/* vendor service cards → taxonomy leaves */
+E({id:'S89S-LUMPHOTO001', type:'service', name:'Full-Day Photography', initials:'PH',
+  status:{ic:'tag',txt:'Published by <b>Lumina Studios</b> · inquire → book'},
+  kv:[['Leaf','Photographer'],['Price','₱54,999'],['Refinements answered','6 of 6 · schema v7'],['Booking model','Inquire → thread → book']],
+  edges:[{verb:'published by', to:['S89V-LUMINA5STDO']},{verb:'leaf', count:'Photographer', to:[]},{verb:'booked into', to:['S89E-MJ7K3PQ2VX']}]});
+E({id:'S89S-LUMVIDEO002', type:'service', name:'Cinematic Videography', initials:'VD',
+  status:{ic:'tag',txt:'Published by <b>Lumina Studios</b> · inquire → book'},
+  kv:[['Leaf','Videographer'],['Price','₱62,999'],['Refinements answered','5 of 6 · schema v7']],
+  edges:[{verb:'published by', to:['S89V-LUMINA5STDO']}]});
+E({id:'S89S-LUMDRONE003', type:'service', name:'Drone Coverage', initials:'DR',
+  status:{ic:'tag',txt:'Published by <b>Lumina Studios</b> · add-on'},
+  kv:[['Leaf','Drone Coverage'],['Price','₱9,999'],['Refinements answered','3 of 4 · schema v7']],
+  edges:[{verb:'published by', to:['S89V-LUMINA5STDO']}]});
+E({id:'S89S-LUMSDE00004', type:'service', name:'Same-Day Edit', initials:'SD',
+  status:{ic:'tag',txt:'Published by <b>Lumina Studios</b> · add-on'},
+  kv:[['Leaf','Same-Day Edit'],['Price','₱18,999'],['Refinements answered','4 of 4 · schema v7']],
+  edges:[{verb:'published by', to:['S89V-LUMINA5STDO']}]});
+
+/* vendor billing: subscription (org) + token pool (per member) */
+E({id:'S89B-LUMINASUB01', type:'billing', name:'Pro Subscription', initials:'$',
+  status:{ic:'wallet',txt:'<b>Pro · 28-day cycle</b> · renews Jul 22 · ₱6,000'},
+  billing:'sub',
+  kv:[['Belongs to','Lumina Studios (org)'],['Tier','Pro'],['Cycle','28 days'],['Amount','₱6,000 / cycle'],['Renews','Jul 22 2026']],
+  edges:[{verb:'subscription of', to:['S89V-LUMINA5STDO']}]});
+E({id:'S89B-LUMTOKPOOL9', type:'billing', name:'Member Token Balances', initials:'◈',
+  status:{ic:'coins',txt:'<b>52 tokens</b> across 3 members · personal, not org-shared'},
+  billing:'tokens',
+  members:[['S89U-LUMOWNER01','Paolo Vega','PV',40],['S89U-LUMMGR0022','Grace Uy','GU',12],['S89U-LUMSTAFF03','Nico Bautista','NB',0]],
+  edges:[{verb:'held by members of', to:['S89V-LUMINA5STDO']}]});
+
+/* Lumina's other client events (referenced from vendor card) */
+E({id:'S89E-RTAN00WED22', type:'event', name:'Reyes–Tan Wedding', initials:'RT',
+  status:{ic:'check',txt:'<b>Booked</b> · Jul 5 · Tagaytay'},
+  kv:[['Date','Sat, Jul 5 2026'],['Venue','Taal Vista Hotel'],['Type','Wedding']],
+  edges:[{verb:'vendor', to:['S89V-LUMINA5STDO']}]});
+E({id:'S89E-GARC00MEN31', type:'event', name:'Garcia–Mendoza Wedding', initials:'GM',
+  status:{ic:'clock',txt:'<b>Inquiry</b> · Aug 1 · Cavite'},
+  kv:[['Date','Sat, Aug 1 2026'],['Type','Wedding']],
+  edges:[{verb:'vendor', to:['S89V-LUMINA5STDO']}]});
+
+/* ── IN-APP SERVICES (published by SETNAYAN org) ── */
+E({id:'S89S-PAPICMJ0021', type:'service', name:'Papic · 5 Seats', initials:'PC', setnayan:true,
+  status:{ic:'bolt',txt:'In-app · published by <b>SETNAYAN</b> · order → pay → activate'},
+  activation:{state:'ACTIVE',line:'Activated Jan 12 · eventSkuActive = true · 5 seats claimed'},
+  kv:[['Publisher','SETNAYAN (is_setnayan_service)'],['SKU','₱2,999'],['Activation','ACTIVE'],['For event','Maria & Jose']],
+  edges:[{verb:'published by', count:'SETNAYAN org', to:[]},{verb:'active on', to:['S89E-MJ7K3PQ2VX']},{verb:'via order', to:['S89O-PAPICPAID77']}]});
+E({id:'S89S-STDMJ00450X', type:'service', name:'Save-the-Date · Cinematic Opening', initials:'ST', setnayan:true,
+  status:{ic:'clock',txt:'In-app · published by <b>SETNAYAN</b> · awaiting payment'},
+  activation:{state:'PENDING PAYMENT',line:'Order placed Jan 20 · eventSkuActive = false until admin confirms'},
+  kv:[['Publisher','SETNAYAN (is_setnayan_service)'],['SKU','₱799'],['Activation','PENDING PAYMENT'],['For event','Maria & Jose']],
+  edges:[{verb:'published by', count:'SETNAYAN org', to:[]},{verb:'ordered for', to:['S89E-MJ7K3PQ2VX']},{verb:'via order', to:['S89O-STDPEND0091']}]});
+
+/* orders / activations */
+E({id:'S89O-PAPICPAID77', type:'order', name:'Order · Papic 5 Seats', initials:'✓',
+  status:{ic:'check',txt:'<b>Paid → Active</b> · ₱2,999 · GCash · confirmed Jan 12'},
+  kv:[['SKU','Papic · 5 Seats'],['Amount','₱2,999'],['Reference','P4K9-2M7X'],['Rail','GCash'],['Status','paid → activated']],
+  edges:[{verb:'activates', to:['S89S-PAPICMJ0021']},{verb:'for event', to:['S89E-MJ7K3PQ2VX']}]});
+E({id:'S89O-STDPEND0091', type:'order', name:'Order · Save-the-Date Opening', initials:'…',
+  status:{ic:'clock',txt:'<b>Pending payment</b> · ₱799 · reference issued'},
+  kv:[['SKU','Save-the-Date · Cinematic Opening'],['Amount','₱799'],['Reference','9QW3-KD21'],['Status','pending_payment · 7-day expiry']],
+  edges:[{verb:'will activate', to:['S89S-STDMJ00450X']},{verb:'for event', to:['S89E-MJ7K3PQ2VX']}]});
+
+/* threads */
+E({id:'S89T-MJLUMINA001', type:'thread', name:'Maria & Jose ↔ Lumina Studios', initials:'💬',
+  status:{ic:'chat',txt:'<b>Open</b> · vendor answered · token burned once'},
+  kv:[['Between','Maria & Jose · Lumina Studios'],['Answered by','Grace Uy (Manager)'],['Token','1 burned · once per vendor-event'],['Messages','14']],
+  edges:[{verb:'couple', to:['S89U-MARIA9KD3F1']},{verb:'vendor', to:['S89V-LUMINA5STDO']},{verb:'answered by', to:['S89U-LUMMGR0022']}]});
+E({id:'S89T-MJBLOOM0022', type:'thread', name:'Maria & Jose ↔ Bloomfield Florals', initials:'💬',
+  status:{ic:'chat',txt:'<b>Open</b> · awaiting vendor reply · masked'},
+  kv:[['Between','Maria & Jose · Bloomfield Florals'],['State','Vendor hidden until they reply'],['Messages','2']],
+  edges:[{verb:'couple', to:['S89U-MARIA9KD3F1']},{verb:'vendor', to:['S89V-BLOOMFIELD3']}]});
+
+/* ═════════════════════════════════════════════════════════════════════════
+   PLATFORM SCOPE — type-level nodes (one per entity TYPE, with live-ish counts)
+   These are synthetic "type" records so the platform map has clickable nodes.
+   ═════════════════════════════════════════════════════════════════════════ */
+E({id:'TYPE-USERS', type:'user', name:'Users', initials:'U', typeNode:true,
+  status:{ic:'user',txt:'<b>8,412</b> accounts · hosts, co-planners, vendor members, claimed guests'},
+  kv:[['Total','8,412'],['Hosts','3,105'],['Vendor members','1,240'],['Claimed guests','2,067']],
+  edges:[
+    {verb:'host events', to:['TYPE-EVENTS']},
+    {verb:'are members of', to:['TYPE-VENDORS']},
+    {verb:'claimed from', to:['TYPE-GUESTS']},
+    {verb:'sit in', to:['TYPE-THREADS']},
+  ]});
+E({id:'TYPE-EVENTS', type:'event', name:'Events', initials:'E', typeNode:true,
+  status:{ic:'heart',txt:'<b>1,190</b> events · weddings + the wider event market'},
+  kv:[['Total','1,190'],['Active planning','642'],['Booked venue','388'],['Archived','160']],
+  edges:[
+    {verb:'hosted by', to:['TYPE-USERS']},
+    {verb:'have', to:['TYPE-GUESTS']},
+    {verb:'book', to:['TYPE-VENDORS']},
+    {verb:'activate', to:['TYPE-SERVICES']},
+    {verb:'generate', to:['TYPE-ORDERS']},
+  ]});
+E({id:'TYPE-GUESTS', type:'guest', name:'Guests', initials:'G', typeNode:true,
+  status:{ic:'users',txt:'<b>96,330</b> guests · invited → RSVP’d → may claim an account'},
+  kv:[['Total','96,330'],['RSVP’d','61,204'],['Claimed accounts','2,067'],['With personal QR','58,900']],
+  edges:[
+    {verb:'belong to', to:['TYPE-EVENTS']},
+    {verb:'may become', to:['TYPE-USERS']},
+  ]});
+E({id:'TYPE-VENDORS', type:'vendor', name:'Vendors', initials:'V', typeNode:true,
+  status:{ic:'building',txt:'<b>1,240</b> vendor orgs · free-during-launch profiles'},
+  kv:[['Total orgs','1,240'],['Verified','980'],['Pro / Enterprise','312'],['Setnayan (in-app)','1 — SETNAYAN']],
+  edges:[
+    {verb:'staffed by', to:['TYPE-USERS']},
+    {verb:'publish', to:['TYPE-SERVICES']},
+    {verb:'booked at', to:['TYPE-EVENTS']},
+    {verb:'carry', to:['TYPE-BILLING']},
+    {verb:'answer in', to:['TYPE-THREADS']},
+  ]});
+E({id:'TYPE-SERVICES', type:'service', name:'Service cards', initials:'S', typeNode:true,
+  status:{ic:'tag',txt:'<b>5,870</b> cards · vendor cards + SETNAYAN in-app cards'},
+  kv:[['Total','5,870'],['Vendor cards','5,849'],['In-app (SETNAYAN)','21'],['Bound to a leaf','5,870']],
+  edges:[
+    {verb:'published by', to:['TYPE-VENDORS']},
+    {verb:'activate via', to:['TYPE-ORDERS']},
+  ]});
+E({id:'TYPE-ORDERS', type:'order', name:'Orders & activations', initials:'O', typeNode:true,
+  status:{ic:'receipt',txt:'<b>3,402</b> orders · apply → pay → activate (eventSkuActive)'},
+  kv:[['Total','3,402'],['Paid / active','2,988'],['Pending payment','290'],['Refunded','124']],
+  edges:[
+    {verb:'activate', to:['TYPE-SERVICES']},
+    {verb:'raised on', to:['TYPE-EVENTS']},
+  ]});
+E({id:'TYPE-THREADS', type:'thread', name:'Threads', initials:'T', typeNode:true,
+  status:{ic:'chat',txt:'<b>4,110</b> threads · couple ↔ vendor, token-gated to answer'},
+  kv:[['Total','4,110'],['Answered','3,004'],['Awaiting reply','1,106']],
+  edges:[
+    {verb:'connect', to:['TYPE-USERS']},
+    {verb:'and', to:['TYPE-VENDORS']},
+  ]});
+E({id:'TYPE-BILLING', type:'billing', name:'Billing', initials:'B', typeNode:true,
+  status:{ic:'wallet',txt:'<b>312 subs</b> (org) · <b>token packs</b> (per member)'},
+  kv:[['Active subscriptions','312 — belong to orgs'],['Tokens in circulation','48,200 — personal to members'],['Rate','₱100 / token'],['Commission','0%']],
+  edges:[
+    {verb:'subscriptions of', to:['TYPE-VENDORS']},
+  ]});
+
+/* ═════════════════════════════════════════════════════════════════════════
+   PRECOMPUTED LAYOUTS — one per scope. {id, x, y} in graph space.
+   ═════════════════════════════════════════════════════════════════════════ */
+const LAYOUTS={
+  platform:[
+    {id:'TYPE-USERS',    x:520, y:120, big:1},
+    {id:'TYPE-EVENTS',   x:520, y:300, big:1},
+    {id:'TYPE-GUESTS',   x:250, y:420, big:1},
+    {id:'TYPE-VENDORS',  x:800, y:300, big:1},
+    {id:'TYPE-SERVICES', x:800, y:470, big:1},
+    {id:'TYPE-ORDERS',   x:560, y:470, big:1},
+    {id:'TYPE-THREADS',  x:260, y:210, big:1},
+    {id:'TYPE-BILLING',  x:1040,y:300, big:1},
+  ],
+  event:[
+    {id:'S89E-MJ7K3PQ2VX', x:560, y:300, big:1},
+    // hosts + planner
+    {id:'S89U-MARIA9KD3F1', x:300, y:150},
+    {id:'S89U-JOSE4MN7B2K', x:420, y:90},
+    {id:'S89U-TITAROSA88Q', x:180, y:230},
+    // guests
+    {id:'S89G-ALDO2KX9', x:200, y:380},
+    {id:'S89G-BEA77MQ4', x:150, y:470},
+    {id:'S89G-CARLO3PZ', x:270, y:500},
+    {id:'S89G-DIWATA5F', x:390, y:520},
+    {id:'S89G-ENZO8BQ2', x:340, y:430},
+    {id:'S89G-FELI4KND', x:470, y:470},
+    {id:'S89U-ALDO2GUEST9', x:120, y:340},
+    // vendors
+    {id:'S89V-LUMINA5STDO', x:850, y:190},
+    {id:'S89V-BLOOMFIELD3', x:930, y:290},
+    {id:'S89V-TAALVISTA9H', x:900, y:390},
+    {id:'S89V-CANTATA7BND', x:790, y:430},
+    {id:'S89V-SWEETLEAF2C', x:970, y:180},
+    // in-app services + orders
+    {id:'S89S-PAPICMJ0021', x:640, y:470},
+    {id:'S89S-STDMJ00450X', x:560, y:520},
+    {id:'S89O-PAPICPAID77', x:720, y:520},
+    {id:'S89O-STDPEND0091', x:640, y:570},
+    // threads
+    {id:'S89T-MJLUMINA001', x:730, y:100},
+  ],
+  vendor:[
+    {id:'S89V-LUMINA5STDO', x:560, y:300, big:1},
+    // members
+    {id:'S89U-LUMOWNER01', x:300, y:180},
+    {id:'S89U-LUMMGR0022', x:250, y:300},
+    {id:'S89U-LUMSTAFF03', x:300, y:420},
+    // service cards
+    {id:'S89S-LUMPHOTO001', x:830, y:170},
+    {id:'S89S-LUMVIDEO002', x:900, y:270},
+    {id:'S89S-LUMDRONE003', x:900, y:370},
+    {id:'S89S-LUMSDE00004', x:830, y:450},
+    // billing
+    {id:'S89B-LUMINASUB01', x:560, y:520},
+    {id:'S89B-LUMTOKPOOL9', x:400, y:520},
+    // client events
+    {id:'S89E-MJ7K3PQ2VX', x:620, y:110},
+    {id:'S89E-RTAN00WED22', x:730, y:150},
+    {id:'S89E-GARC00MEN31', x:790, y:80},
+  ],
+};
+
+/* which edges to DRAW on the map for each scope (from → to, with a verb) */
+function scopeEdges(scope){
+  const layout=LAYOUTS[scope];
+  const present=new Set(layout.map(n=>n.id));
+  const out=[];
+  layout.forEach(n=>{
+    const rec=ENT[n.id]; if(!rec||!rec.edges) return;
+    rec.edges.forEach(eg=>{
+      (eg.to||[]).forEach(t=>{
+        if(present.has(t)){ out.push({from:n.id, to:t, verb:eg.verb}); }
+      });
+    });
+  });
+  // de-dupe reciprocal edges (keep first)
+  const seen=new Set(), dedup=[];
+  out.forEach(e=>{ const k=[e.from,e.to].sort().join('|'); if(!seen.has(k)){seen.add(k);dedup.push(e);} });
+  return dedup;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   STATE
+   ═════════════════════════════════════════════════════════════════════════ */
+const state={
+  control:'map',        // 'map' | 'tables'
+  scope:'platform',     // 'platform' | 'event' | 'vendor'
+  table:'users',        // active table folder
+  tableSearch:'',
+  cardStack:[],         // breadcrumb of entity ids
+  view:{x:0,y:0,k:1},    // map pan/zoom
+};
+const SCOPE_NOTE={
+  platform:'One node per entity type — counts are platform-wide. Click a type to open its card.',
+  event:'Row-level: the couple, their guests, booked vendors, in-app services and orders.',
+  vendor:'Row-level: the org, its members-with-roles, service cards, billing and client events.',
+};
+
+/* ═════════════════════════════════════════════════════════════════════════
+   MINDMAP RENDER
+   ═════════════════════════════════════════════════════════════════════════ */
+const SVGNS='http://www.w3.org/2000/svg';
+const mapg=document.getElementById('mapg');
+const mapsvg=document.getElementById('mapsvg');
+const mapwrap=document.getElementById('mapwrap');
+let highlightId=null;   // node to pulse after a cross-jump
+
+function nodeWidth(rec){
+  const base=rec.name.length*6.6+52;
+  return Math.max(96, Math.min(220, base)) + (rec.typeNode?18:0);
+}
+function renderMap(){
+  mapg.innerHTML='';
+  const layout=LAYOUTS[state.scope];
+  const pos={}; layout.forEach(n=>pos[n.id]=n);
+  const edges=scopeEdges(state.scope);
+
+  // edges first (under nodes)
+  edges.forEach((e,i)=>{
+    const a=pos[e.from], b=pos[e.to];
+    const path=document.createElementNS(SVGNS,'path');
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    const dx=b.x-a.x, dy=b.y-a.y;
+    // gentle curve: bow the control point perpendicular a touch
+    const cx=mx - dy*0.08, cy=my + dx*0.08;
+    path.setAttribute('d','M'+a.x+' '+a.y+' Q'+cx+' '+cy+' '+b.x+' '+b.y);
+    path.setAttribute('class','edge');
+    path.dataset.from=e.from; path.dataset.to=e.to;
+    mapg.appendChild(path);
+    // edge label — always on for platform, else on hover
+    if(state.scope==='platform'){
+      const t=document.createElementNS(SVGNS,'text');
+      t.setAttribute('x',cx); t.setAttribute('y',cy-2);
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('class','edge-lab');
+      t.textContent=e.verb;
+      mapg.appendChild(t);
+    }
+  });
+
+  // nodes
+  layout.forEach(n=>{
+    const rec=ENT[n.id]; if(!rec) return;
+    const t=TYPE[rec.type];
+    const w=nodeWidth(rec), h=n.big?38:32;
+    const g=document.createElementNS(SVGNS,'g');
+    g.setAttribute('class','node'+(n.big?' big':'')+(highlightId===n.id?' sel':''));
+    g.setAttribute('transform','translate('+(n.x-w/2)+','+(n.y-h/2)+')');
+    g.dataset.id=n.id;
+
+    const bg=document.createElementNS(SVGNS,'rect');
+    bg.setAttribute('class','chip-bg');
+    bg.setAttribute('width',w); bg.setAttribute('height',h);
+    bg.setAttribute('rx',h/2);
+    bg.setAttribute('fill', highlightId===n.id ? t.bg : '#fff');
+    bg.setAttribute('stroke', t.c);
+    g.appendChild(bg);
+
+    // icon puck
+    const puck=document.createElementNS(SVGNS,'circle');
+    puck.setAttribute('cx',h/2); puck.setAttribute('cy',h/2); puck.setAttribute('r',h/2-6);
+    puck.setAttribute('fill',t.bg);
+    g.appendChild(puck);
+    const ic=document.createElementNS(SVGNS,'svg');
+    ic.setAttribute('viewBox','0 0 24 24');
+    ic.setAttribute('x',h/2-8); ic.setAttribute('y',h/2-8);
+    ic.setAttribute('width',16); ic.setAttribute('height',16);
+    ic.setAttribute('class','chip-ic');
+    ic.setAttribute('stroke',t.c); ic.setAttribute('fill','none');
+    ic.innerHTML=IP[rec.setnayan?'bolt':t.ic]||IP.tag;
+    g.appendChild(ic);
+
+    // label
+    const lab=document.createElementNS(SVGNS,'text');
+    lab.setAttribute('class','chip-lab');
+    lab.setAttribute('x',h-2); lab.setAttribute('y',h/2+1);
+    lab.textContent=rec.name.length>26?rec.name.slice(0,24)+'…':rec.name;
+    g.appendChild(lab);
+
+    // count / id micro-line for type nodes
+    if(rec.typeNode && rec.kv){
+      const ct=document.createElementNS(SVGNS,'text');
+      ct.setAttribute('class','chip-ct');
+      ct.setAttribute('x',h-2); ct.setAttribute('y',h/2+13);
+      ct.textContent=rec.kv[0][1];
+      g.appendChild(ct);
+      lab.setAttribute('y',h/2-4);
+    }
+
+    g.addEventListener('click',(e)=>{e.stopPropagation();openCard(n.id,true);});
+    g.addEventListener('mouseenter',()=>hotEdges(n.id,true));
+    g.addEventListener('mouseleave',()=>hotEdges(n.id,false));
+    mapg.appendChild(g);
+  });
+
+  applyView();
+}
+function hotEdges(id,on){
+  mapg.querySelectorAll('.edge').forEach(p=>{
+    if(p.dataset.from===id||p.dataset.to===id){
+      p.classList.toggle('hot',on);
+      if(on) p.parentNode.appendChild(p); // raise
+    }
+  });
+}
+function applyView(){
+  mapg.setAttribute('transform','translate('+state.view.x+','+state.view.y+') scale('+state.view.k+')');
+}
+function fitView(){
+  const layout=LAYOUTS[state.scope];
+  const xs=layout.map(n=>n.x), ys=layout.map(n=>n.y);
+  const minX=Math.min(...xs)-140,maxX=Math.max(...xs)+140,minY=Math.min(...ys)-90,maxY=Math.max(...ys)+90;
+  const bw=maxX-minX, bh=maxY-minY;
+  const rect=mapwrap.getBoundingClientRect();
+  const k=Math.min(rect.width/bw, rect.height/bh, 1.15);
+  state.view.k=k;
+  state.view.x=(rect.width-bw*k)/2 - minX*k;
+  state.view.y=(rect.height-bh*k)/2 - minY*k;
+  applyView();
+}
+
+/* pan + zoom */
+let panning=false, panStart=null;
+mapwrap.addEventListener('mousedown',(e)=>{
+  if(e.target.closest('.node')||e.target.closest('.mapctl')) return;
+  panning=true; panStart={x:e.clientX,y:e.clientY,vx:state.view.x,vy:state.view.y};
+  mapwrap.classList.add('grabbing');
+});
+window.addEventListener('mousemove',(e)=>{
+  if(!panning) return;
+  state.view.x=panStart.vx+(e.clientX-panStart.x);
+  state.view.y=panStart.vy+(e.clientY-panStart.y);
+  applyView();
+});
+window.addEventListener('mouseup',()=>{panning=false;mapwrap.classList.remove('grabbing');});
+mapwrap.addEventListener('wheel',(e)=>{
+  e.preventDefault();
+  const rect=mapwrap.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  const factor=e.deltaY<0?1.12:0.89;
+  const nk=Math.max(0.4,Math.min(2.4,state.view.k*factor));
+  // zoom to cursor
+  state.view.x=mx-(mx-state.view.x)*(nk/state.view.k);
+  state.view.y=my-(my-state.view.y)*(nk/state.view.k);
+  state.view.k=nk; applyView();
+},{passive:false});
+function zoomBy(f){
+  const rect=mapwrap.getBoundingClientRect();
+  const mx=rect.width/2, my=rect.height/2;
+  const nk=Math.max(0.4,Math.min(2.4,state.view.k*f));
+  state.view.x=mx-(mx-state.view.x)*(nk/state.view.k);
+  state.view.y=my-(my-state.view.y)*(nk/state.view.k);
+  state.view.k=nk; applyView();
+}
+document.getElementById('zoomIn').onclick=()=>zoomBy(1.2);
+document.getElementById('zoomOut').onclick=()=>zoomBy(0.83);
+document.getElementById('zoomFit').onclick=()=>fitView();
+mapwrap.addEventListener('click',(e)=>{ if(!e.target.closest('.node')) { /* background click: nothing */ } });
+
+/* ═════════════════════════════════════════════════════════════════════════
+   TABLES RENDER
+   ═════════════════════════════════════════════════════════════════════════ */
+const TABLES=[
+  {key:'users',    lab:'Users',            type:'user',    ic:'user'},
+  {key:'events',   lab:'Events',           type:'event',   ic:'heart'},
+  {key:'guests',   lab:'Guests',           type:'guest',   ic:'users'},
+  {key:'vendors',  lab:'Vendors',          type:'vendor',  ic:'building'},
+  {key:'services', lab:'Service cards',    type:'service', ic:'tag'},
+  {key:'orders',   lab:'Orders & activations',type:'order',ic:'receipt'},
+  {key:'threads',  lab:'Threads',          type:'thread',  ic:'chat'},
+  {key:'billing',  lab:'Billing (subs & tokens)',type:'billing',ic:'wallet'},
+];
+/* which real records fall under each table (exclude synthetic TYPE-* nodes) */
+function recordsFor(key){
+  const t=TABLES.find(x=>x.key===key).type;
+  return Object.values(ENT).filter(r=>r.type===t && !r.typeNode);
+}
+const TABLE_COLS={
+  users:[['Name','name'],['Roles','roles'],['Origin','origin'],['Status','status']],
+  events:[['Event','name'],['Date','date'],['Vendors','vendors'],['Status','status']],
+  guests:[['Guest','name'],['Lifecycle','life'],['Seat','seat'],['Tagged','tagged']],
+  vendors:[['Vendor','name'],['Leaf','leaf'],['Tier','tier'],['Status','status']],
+  services:[['Service card','name'],['Leaf','leaf'],['Publisher','pub'],['Model','model']],
+  orders:[['Order','name'],['Amount','amt'],['Reference','ref'],['Status','status']],
+  threads:[['Thread','name'],['Between','between'],['State','tstate'],['Msgs','msgs']],
+  billing:[['Billing item','name'],['Belongs to','belongs'],['Kind','kind'],['Detail','detail']],
+};
+function cell(r,col){
+  const kv=k=>{const f=(r.kv||[]).find(x=>x[0].toLowerCase()===k.toLowerCase());return f?f[1]:'—';};
+  switch(col){
+    case 'roles': return r.roles ? r.roles.map(x=>x.role).join(', ') : '—';
+    case 'origin': return kv('Account origin');
+    case 'date': return kv('Date');
+    case 'vendors':{const eg=(r.edges||[]).find(e=>e.verb==='vendors booked');return eg?eg.to.length:'—';}
+    case 'life': return r.guest?GSTATE[r.guest.state]:'—';
+    case 'seat': return r.guest?r.guest.table:'—';
+    case 'tagged': return r.guest?String(r.guest.tagged):'—';
+    case 'leaf': return kv('Leaf');
+    case 'tier': return kv('Tier');
+    case 'pub': return r.setnayan?'SETNAYAN':kv('Published by')||(r.edges||[]).some(e=>e.verb==='published by')?'Vendor org':'—';
+    case 'model': return r.setnayan?'order → activate':'inquire → book';
+    case 'amt': return kv('Amount');
+    case 'ref': return kv('Reference');
+    case 'between': return kv('Between');
+    case 'tstate': return kv('State')!=='—'?kv('State'):'Open';
+    case 'msgs': return kv('Messages');
+    case 'belongs': return r.billing==='sub'?'Org':'Members';
+    case 'kind': return r.billing==='sub'?'Subscription':'Tokens';
+    case 'detail': return r.billing==='sub'?kv('Amount')+' · '+kv('Cycle'):(r.members?r.members.reduce((a,m)=>a+m[3],0)+' tokens':'—');
+    default: return '';
+  }
+}
+function statusChip(r){
+  const map={
+    'S89U':'ok','event':'ok'
+  };
+  // derive a chip from record type/state
+  if(r.type==='order') return r.id.includes('PEND')?'<span class="badge wait">'+svg('clock')+'Pending</span>':'<span class="badge ok">'+svg('check')+'Paid</span>';
+  if(r.type==='vendor') return r.verified?'<span class="badge ok">'+svg('shield')+'Verified</span>':'<span class="badge neutral">Unverified</span>';
+  if(r.type==='service'&&r.setnayan) return r.activation.state==='ACTIVE'?'<span class="badge ok">'+svg('check')+'Active</span>':'<span class="badge wait">'+svg('clock')+'Pending</span>';
+  if(r.type==='event') return '<span class="badge ok">'+svg('check')+'Active</span>';
+  return '<span class="badge ok">'+svg('check')+'Active</span>';
+}
+function renderTables(){
+  // rail
+  const rail=document.getElementById('tblrail');
+  rail.innerHTML='<div class="rail-title">Entity tables</div>'+TABLES.map(t=>{
+    const n=recordsFor(t.key).length;
+    return '<div class="tblfolder'+(state.table===t.key?' on':'')+'" data-table="'+t.key+'">'
+      +'<span style="color:'+TYPE[t.type].c+'">'+svg(t.ic)+'</span>'
+      +'<span class="lbl">'+t.lab+'</span><span class="ct">'+n+'</span></div>';
+  }).join('');
+  rail.querySelectorAll('[data-table]').forEach(el=>el.onclick=()=>{state.table=el.dataset.table;state.tableSearch='';renderTables();});
+
+  // main
+  const t=TABLES.find(x=>x.key===state.table);
+  let recs=recordsFor(state.table);
+  const q=state.tableSearch.toLowerCase();
+  if(q) recs=recs.filter(r=>r.name.toLowerCase().includes(q)||r.id.toLowerCase().includes(q)
+    ||(r.kv||[]).some(kv=>String(kv[1]).toLowerCase().includes(q)));
+  const cols=TABLE_COLS[state.table];
+  const rows=recs.length?recs.map(r=>{
+    const tds=cols.map(c=>{
+      if(c[1]==='name'){
+        return '<td><div class="et-name"><span class="et-ic" style="background:'+TYPE[r.type].bg+';color:'+TYPE[r.type].c+'">'
+          +svg(r.setnayan?'bolt':TYPE[r.type].ic)+'</span><div><div>'+esc(r.name)+'</div><div class="et-id mono">'+r.id+'</div></div></div></td>';
+      }
+      if(c[1]==='status') return '<td>'+statusChip(r)+'</td>';
+      return '<td class="et-sub">'+esc(String(cell(r,c[1])))+'</td>';
+    }).join('');
+    return '<tr data-row="'+r.id+'">'+tds+'</tr>';
+  }).join(''):'';
+  const main=document.getElementById('tblmain');
+  main.innerHTML='<div class="tblhead"><div><div class="h"><span style="color:'+TYPE[t.type].c+'">'+svg(t.ic)+'</span>'+t.lab+'</div>'
+    +'<div class="sub">'+recs.length+' record'+(recs.length===1?'':'s')+' · click a row to open its card</div></div>'
+    +'<div class="tblsearch">'+svg('user').replace(IP.user,IP.eye)+'<input id="tblSearchInput" placeholder="Filter these rows…" value="'+esc(state.tableSearch)+'"/></div></div>'
+    +(recs.length
+      ? '<table class="etable"><thead><tr>'+cols.map(c=>'<th>'+c[0]+'</th>').join('')+'</tr></thead><tbody>'+rows+'</tbody></table>'
+      : '<div class="empty">'+svg('info')+' No records match “'+esc(state.tableSearch)+'”.</div>');
+  const si=document.getElementById('tblSearchInput');
+  si.oninput=()=>{state.tableSearch=si.value;renderTablesRowsOnly();};
+  main.querySelectorAll('[data-row]').forEach(el=>el.onclick=()=>openCard(el.dataset.row,true));
+}
+/* keep focus while typing in the table search */
+function renderTablesRowsOnly(){
+  const t=TABLES.find(x=>x.key===state.table);
+  let recs=recordsFor(state.table);
+  const q=state.tableSearch.toLowerCase();
+  if(q) recs=recs.filter(r=>r.name.toLowerCase().includes(q)||r.id.toLowerCase().includes(q)
+    ||(r.kv||[]).some(kv=>String(kv[1]).toLowerCase().includes(q)));
+  const cols=TABLE_COLS[state.table];
+  const body=document.querySelector('.etable tbody');
+  const wrap=document.querySelector('.tblmain');
+  if(!recs.length){
+    // replace whole table area with empty note but keep the head/search
+    let tbl=document.querySelector('.etable');
+    if(tbl) tbl.outerHTML='<div class="empty" id="tblEmpty">'+svg('info')+' No records match “'+esc(state.tableSearch)+'”.</div>';
+    return;
+  }
+  const rowsHtml=recs.map(r=>{
+    const tds=cols.map(c=>{
+      if(c[1]==='name') return '<td><div class="et-name"><span class="et-ic" style="background:'+TYPE[r.type].bg+';color:'+TYPE[r.type].c+'">'
+        +svg(r.setnayan?'bolt':TYPE[r.type].ic)+'</span><div><div>'+esc(r.name)+'</div><div class="et-id mono">'+r.id+'</div></div></div></td>';
+      if(c[1]==='status') return '<td>'+statusChip(r)+'</td>';
+      return '<td class="et-sub">'+esc(String(cell(r,c[1])))+'</td>';
+    }).join('');
+    return '<tr data-row="'+r.id+'">'+tds+'</tr>';
+  }).join('');
+  let tbl=document.querySelector('.etable'), emptyEl=document.getElementById('tblEmpty');
+  if(!tbl && emptyEl){
+    emptyEl.outerHTML='<table class="etable"><thead><tr>'+cols.map(c=>'<th>'+c[0]+'</th>').join('')+'</tr></thead><tbody></tbody></table>';
+    tbl=document.querySelector('.etable');
+  }
+  if(tbl){ tbl.querySelector('tbody').innerHTML=rowsHtml;
+    tbl.querySelectorAll('[data-row]').forEach(el=>el.onclick=()=>openCard(el.dataset.row,true)); }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ENTITY CARD (the hinge)
+   ═════════════════════════════════════════════════════════════════════════ */
+const cardEl=document.getElementById('card');
+const scrim=document.getElementById('scrim');
+function openCard(id,fresh){
+  if(!ENT[id]){toast('That record isn’t in this demo slice.');return;}
+  if(fresh) state.cardStack=[id];
+  else state.cardStack.push(id);
+  renderCard();
+  cardEl.classList.add('on'); scrim.classList.add('on');
+}
+function cardBack(){
+  if(state.cardStack.length>1){ state.cardStack.pop(); renderCard(); }
+}
+function crumbTo(i){ state.cardStack=state.cardStack.slice(0,i+1); renderCard(); }
+function closeCard(){ cardEl.classList.remove('on'); scrim.classList.remove('on'); }
+
+function connChip(id){
+  const r=ENT[id]; if(!r) return '';
+  const t=TYPE[r.type];
+  const ic=r.setnayan?'bolt':t.ic;
+  return '<div class="conn" data-conn="'+id+'"><span class="cav" style="background:'+t.bg+';color:'+t.c+'">'+svg(ic)+'</span>'
+    +'<div class="cb"><div class="cn">'+esc(r.name)+'</div><div class="cs">'+t.lab+' · '+r.id.slice(0,9)+'…</div></div></div>';
+}
+function countChip(txt){ return '<div class="conn count"><span class="cav" style="background:var(--line2);color:var(--muted)">'+svg('layers')+'</span><div class="cb"><div class="cn">'+esc(txt)+'</div><div class="cs">summary</div></div></div>'; }
+
+function renderCard(){
+  const id=state.cardStack[state.cardStack.length-1];
+  const r=ENT[id]; const t=TYPE[r.type];
+
+  /* breadcrumb */
+  const crumb=document.getElementById('cardCrumb');
+  if(state.cardStack.length>1){
+    let h='<button class="crumb-b" data-back="1">'+svg('chevL')+'Back</button>';
+    state.cardStack.forEach((cid,i)=>{
+      const cr=ENT[cid];
+      if(i===state.cardStack.length-1){ h+='<span class="crumb-sep">›</span><span class="crumb-cur">'+esc(cr.name)+'</span>'; }
+      else { h+=(i===0?'':'<span class="crumb-sep">›</span>')+'<button class="crumb-b" data-crumb="'+i+'">'+esc(cr.name)+'</button>'; }
+    });
+    crumb.innerHTML=h;
+  } else crumb.innerHTML='';
+
+  /* header */
+  const head=document.getElementById('cardHead');
+  const badges=[];
+  if(r.verified) badges.push('<span class="badge ok">'+svg('shield')+'Verified</span>');
+  if(r.setnayan) badges.push('<span class="badge terra">'+svg('bolt')+'In-app · SETNAYAN</span>');
+  if(r.typeNode) badges.push('<span class="badge neutral">Type-level</span>');
+  if(r.org) badges.push('<span class="badge violet">Org</span>');
+  head.innerHTML='<div class="av" style="background:'+t.bg+';color:'+t.c+'">'
+    +(r.initials&&r.initials.length<=3&&/^[A-Z0-9&$◈…✓]+$/i.test(r.initials)?('<b>'+r.initials+'</b>'):svg(r.setnayan?'bolt':t.ic))+'</div>'
+    +'<div class="ti"><div class="nm">'+esc(r.name)+'</div>'
+    +'<div class="row2"><span class="badge neutral">'+t.lab+'</span>'+badges.join('')+'<span class="id mono">'+r.id+'</span></div></div>'
+    +'<button class="card-x" id="cardX">'+svg('x')+'</button>';
+
+  /* status line */
+  const st=document.getElementById('cardStatus');
+  st.innerHTML=(r.status?svg(r.status.ic)+'<span>'+r.status.txt+'</span>':'');
+
+  /* body */
+  let body='';
+
+  // guest lifecycle ribbon
+  if(r.type==='guest' && r.guest){
+    const steps=['Invited','RSVP’d','Claimed'];
+    let rb='';
+    steps.forEach((s,i)=>{
+      const cls=i<r.guest.state?'done':i===r.guest.state?'cur':'';
+      rb+='<div class="rstep '+cls+'"><div class="rdot">'+(i<r.guest.state?svg('check'):(i+1))+'</div><span class="rlab">'+s+'</span></div>';
+      if(i<steps.length-1) rb+='<div class="rline"></div>';
+    });
+    body+='<div class="sect"><div class="lab">'+svg('bolt')+'Lifecycle</div><div class="ribbon">'+rb+'</div>'
+      +(r.guest.qr?'<div class="infoline" style="background:var(--ok-bg);border-color:#cfe6d5;color:#3e6b4c">'+svg('qr').replace('color:#7a5d2a','')+'<span>Personal QR issued · powers photo tagging &amp; check-in.</span></div>'
+        :'<div class="infoline"><span></span>'+svg('info')+'<span>No personal QR yet — issues on RSVP.</span></div>')+'</div>';
+  }
+
+  // key-values
+  if(r.kv){
+    body+='<div class="sect"><div class="lab">'+svg('info')+'Details</div><div class="kv">'
+      +r.kv.map(kv=>'<div class="r"><span class="k">'+esc(kv[0])+'</span><span class="v'+(/^[₱S]/.test(String(kv[1]))?' mono':'')+'">'+esc(String(kv[1]))+'</span></div>').join('')
+      +'</div></div>';
+  }
+
+  // in-app activation block (service · setnayan variant)
+  if(r.type==='service' && r.setnayan && r.activation){
+    const active=r.activation.state==='ACTIVE';
+    body+='<div class="sect"><div class="lab">'+svg('bolt')+'Per-event activation</div>'
+      +'<div class="subcard"><div class="sc-top"><div class="sc-ic" style="background:'+(active?'var(--ok-bg)':'var(--wait-bg)')+';color:'+(active?'var(--ok)':'var(--wait)')+'">'+svg(active?'check':'clock')+'</div>'
+      +'<div class="sc-b"><div class="sc-n">'+r.activation.state+'</div><div class="sc-m">order → pay → activate · not inquire → thread → book</div></div></div>'
+      +'<div class="sc-body">'+esc(r.activation.line)+'</div></div>'
+      +'<div class="infoline"><span></span>'+svg('info')+'<span>Same card grammar as a vendor service — different edge. This one is published by the SETNAYAN org (<span class="mono">is_setnayan_service</span>).</span></div></div>';
+  }
+
+  // vendor billing blocks (subscription = org, tokens = per member)
+  if(r.type==='billing' && r.billing==='sub'){
+    body+='<div class="sect"><div class="lab">'+svg('wallet')+'Subscription — belongs to the org</div>'
+      +'<div class="infoline"><span></span>'+svg('info')+'<span>The subscription is the <b>organisation’s</b>. Tokens are separate and personal to each member — see the token card.</span></div></div>';
+  }
+  if(r.type==='billing' && r.billing==='tokens' && r.members){
+    body+='<div class="sect"><div class="lab">'+svg('coins')+'Tokens — personal to each member</div><div class="subcard">'
+      +r.members.map(m=>'<div class="memtok" data-conn="'+m[0]+'"><span class="mt-n"><span class="mav">'+m[2]+'</span>'+esc(m[1])+'</span><span class="mt-bal'+(m[3]===0?' zero':'')+'">'+m[3]+' ◈</span></div>').join('')
+      +'</div><div class="infoline"><span></span>'+svg('info')+'<span>Tokens burn to <b>answer an inquiry</b> (once per vendor-event). They are not a way to buy SKUs.</span></div></div>';
+  }
+
+  // vendor: members-with-roles shown as a labelled group even if also in edges
+  // roles block on a user card
+  if(r.roles && r.roles.length){
+    body+='<div class="sect"><div class="lab">'+svg('key')+'Roles</div><div class="conn-list" style="flex-direction:column">'
+      +r.roles.map(role=>{
+        const ref=ENT[role.of]; const rt=ref?TYPE[ref.type]:null;
+        return '<div class="conn" data-conn="'+role.of+'" style="width:100%"><span class="cav" style="background:'+(rt?rt.bg:'var(--line2)')+';color:'+(rt?rt.c:'var(--muted)')+'">'+svg(rt?rt.ic:'link')+'</span>'
+          +'<div class="cb"><div class="cn">'+role.r+' '+esc(ref?ref.name:'—')+'</div><div class="cs">Role · '+role.role+'</div></div></div>';
+      }).join('')+'</div></div>';
+  }
+
+  // connections rail — grouped by edge verb
+  if(r.edges && r.edges.length){
+    body+='<div class="sect"><div class="lab">'+svg('link')+'Connections</div>';
+    r.edges.forEach(eg=>{
+      const chips=(eg.to||[]).map(connChip).filter(Boolean);
+      if(!chips.length && !eg.count) return;
+      body+='<div class="edgegroup"><div class="eg-lab"><span class="verb">'+esc(eg.verb)+'</span>'
+        +(eg.to&&eg.to.length?'<span style="color:var(--muted);font-size:10.5px">'+eg.to.length+(eg.more?'+':'')+'</span>':'')+'</div>'
+        +'<div class="conn-list">'+chips.join('')
+        +(eg.count?countChip(eg.count):'')
+        +(eg.more?countChip('+'+eg.more+' more '+(TYPE[ENT[eg.to[0]].type]?TYPE[ENT[eg.to[0]].type].lab.toLowerCase():'records')):'')
+        +'</div></div>';
+    });
+    body+='</div>';
+  }
+
+  // actions row + show-on-map
+  const onMap=LAYOUTS[state.scope] && LAYOUTS[state.scope].some(n=>n.id===r.id)
+    || jumpScopeFor(r.id)!==null;
+  body+='<div class="sect"><div class="lab">'+svg('bolt')+'Actions</div><div class="actions">';
+  if(!r.typeNode) body+='<button class="btn primary" data-act="Opened full record">'+svg('eye')+'Open full record</button>';
+  if(onMap) body+='<button class="btn gold" data-showmap="'+r.id+'">'+svg('map')+'Show on map</button>';
+  body+=cardActionsFor(r);
+  body+='</div></div>';
+
+  document.getElementById('cardBody').innerHTML=body;
+
+  // wire
+  document.getElementById('cardX').onclick=closeCard;
+  cardEl.querySelectorAll('[data-conn]').forEach(el=>el.onclick=()=>openCard(el.dataset.conn,false));
+  cardEl.querySelectorAll('[data-back]').forEach(el=>el.onclick=cardBack);
+  cardEl.querySelectorAll('[data-crumb]').forEach(el=>el.onclick=()=>crumbTo(+el.dataset.crumb));
+  cardEl.querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>toast(el.dataset.act));
+  cardEl.querySelectorAll('[data-showmap]').forEach(el=>el.onclick=()=>showOnMap(el.dataset.showmap));
+}
+function cardActionsFor(r){
+  switch(r.type){
+    case 'user': return '<button class="btn ghost" data-act="Message sent">'+svg('send')+'Message</button>';
+    case 'event': return '<button class="btn ghost" data-act="Opened couple dashboard">'+svg('eye')+'Dashboard</button>';
+    case 'vendor': return '<button class="btn ghost" data-act="Opened vendor profile">'+svg('building')+'Profile</button>';
+    case 'guest': return '<button class="btn ghost" data-act="Resent invite">'+svg('mail')+'Resend invite</button>';
+    case 'order': return '<button class="btn ghost" data-act="Opened reconciliation">'+svg('receipt')+'Reconcile</button>';
+    case 'thread': return '<button class="btn ghost" data-act="Opened thread">'+svg('chat')+'Open thread</button>';
+    default: return '';
+  }
+}
+
+/* which scope owns a given entity id (for cross-jump) */
+function jumpScopeFor(id){
+  for(const s of ['event','vendor','platform']){
+    if(LAYOUTS[s] && LAYOUTS[s].some(n=>n.id===id)) return s;
+  }
+  return null;
+}
+function showOnMap(id){
+  // switch to map control; pick a scope that contains this node
+  let scope=state.scope;
+  if(!(LAYOUTS[scope] && LAYOUTS[scope].some(n=>n.id===id))){
+    scope=jumpScopeFor(id)||state.scope;
+  }
+  setControl('map');
+  if(scope!==state.scope){ setScope(scope,true); }
+  closeCard();
+  highlightId=id;
+  renderMap();
+  // center the node
+  const node=LAYOUTS[scope].find(n=>n.id===id);
+  if(node){
+    const rect=mapwrap.getBoundingClientRect();
+    state.view.k=Math.max(state.view.k,0.95);
+    state.view.x=rect.width/2 - node.x*state.view.k;
+    state.view.y=rect.height/2 - node.y*state.view.k;
+    applyView();
+  }
+  toast('Centered on the map — '+ENT[id].name);
+  setTimeout(()=>{ highlightId=null; renderMap(); }, 2400);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   CONTROL / SCOPE SWITCHING
+   ═════════════════════════════════════════════════════════════════════════ */
+function setControl(c){
+  state.control=c;
+  document.querySelectorAll('#ctrlToggle button').forEach(b=>b.classList.toggle('on',b.dataset.ctrl===c));
+  document.getElementById('mapwrap').style.display=c==='map'?'':'none';
+  document.getElementById('tblstage').style.display=c==='tables'?'flex':'none';
+  // scope bar + legend only meaningful for the map; keep visible but soften for tables
+  document.querySelector('.scopebar').style.opacity=c==='map'?'1':'.55';
+  if(c==='map'){ renderMap(); fitView(); }
+  else renderTables();
+}
+function setScope(scope,noFit){
+  state.scope=scope;
+  document.querySelectorAll('#scopePick .schip').forEach(b=>b.classList.toggle('on',b.dataset.scope===scope));
+  document.querySelector('#scopeNote span').textContent=SCOPE_NOTE[scope];
+  renderLegend();
+  if(state.control==='map'){ renderMap(); if(!noFit) fitView(); }
+}
+function renderLegend(){
+  // show only the types present in the active scope
+  const layout=LAYOUTS[state.scope];
+  const present=[...new Set(layout.map(n=>ENT[n.id].type))];
+  const order=['user','event','guest','vendor','service','order','thread','billing'];
+  const items=order.filter(t=>present.includes(t));
+  document.getElementById('legend').innerHTML='<span class="scope-lab" style="margin-right:2px">Legend</span>'
+    +items.map(t=>'<span class="li"><span class="sw" style="background:'+TYPE[t].c+'"></span>'+TYPE[t].lab+'</span>').join('')
+    +'<span class="li" style="color:var(--muted)"><span class="sw" style="background:#C9C1B2"></span>edge = relationship</span>';
+}
+
+/* toggle + scope wiring */
+document.querySelectorAll('#ctrlToggle button').forEach(b=>b.onclick=()=>setControl(b.dataset.ctrl));
+document.querySelectorAll('#scopePick .schip').forEach(b=>b.onclick=()=>setScope(b.dataset.scope));
+
+/* global search — jumps to the best-matching entity's card */
+document.getElementById('search').addEventListener('keydown',(e)=>{
+  if(e.key!=='Enter') return;
+  const q=e.target.value.trim().toLowerCase(); if(!q) return;
+  const hit=Object.values(ENT).find(r=>!r.typeNode && (r.name.toLowerCase().includes(q)||r.id.toLowerCase().includes(q)));
+  if(hit){ openCard(hit.id,true); toast('Found '+hit.name); }
+  else toast('Nothing matches “'+e.target.value.trim()+'” in this slice.');
+});
+
+/* toast */
+let toastT=null;
+function toast(msg){
+  const el=document.getElementById('toast');
+  document.getElementById('toastMsg').innerHTML=esc(msg);
+  el.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('on'),2600);
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeCard(); });
+window.addEventListener('resize',()=>{ if(state.control==='map') fitView(); });
+
+/* boot */
+setScope('platform',true);
+setControl('map');
+</script>
+</body>
+</html>

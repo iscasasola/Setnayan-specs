@@ -37,7 +37,7 @@ hard-guarded wedding-only in the taxonomy design).
 - **Phase machine** — every event type has a before/during/after.
 - **Most of the §2 widget matrix** (lifecycle spec) — countdown · venue · schedule · what-to-wear ·
   guest QR card · RSVP form · Find My Table · Happening Now · coordinator broadcast · Live Photo
-  Wall · Watch Live (Panood) · Papic gallery · thank-you · highlight reel. None know they're at a wedding.
+  Wall · Watch Live (Live Studio) · Papic gallery · thank-you · highlight reel. None know they're at a wedding.
 - **Review system + vendor showcase + favorite-from-review flywheel** — event-bound, not
   wedding-bound. Cross-event-type it gets *stronger*: a debut guest favorites the caterer for
   her own future wedding. (Except travel — R1 removes the layer entirely there.)
@@ -74,9 +74,9 @@ Dropping vendors makes travel *cleaner*: it deletes exactly the layers that didn
 ## 4. Tournament — multi-date, per-day service binding (R2)
 
 - **Model:** one tournament event with multiple **event days** (match days / legs / finals).
-  Each day carries its own service activation — Panood on day 1 and day 3, Papic seats on finals
+  Each day carries its own service activation — Live Studio on day 1 and day 3, Papic seats on finals
   day, photo wall each match day. **Services bind to an event day, not the event.**
-- **The pricing primitive already supports it:** Panood is already priced **per day**.
+- **The pricing primitive already supports it:** Live Studio is already priced **per day**.
 - **One new phase state:** between match days the site is neither "before" nor "live" — it's
   **in-season** (standings · results so far · next-match countdown).
   Tournament lifecycle = `RSVP → [Live ⇄ In-season]× → Editorial` (season recap after the final).
@@ -106,7 +106,7 @@ Corporate is not one shape. Split into:
     **seating chart** — galas are table-seated, so the seat-plan editor + Find My Table transfer directly.
   - **Event phase** → **red carpet = Papic's single best non-wedding use case** (candid capture +
     face-tag + live photo wall) · winner announcements → coordinator broadcast or a small
-    **winners ticker** widget · Panood livestreams the program.
+    **winners ticker** widget · Live Studio livestreams the program.
   - **Editorial phase** → the newspaper front page was *made* for this: "BEST ACTRESS — …" lead
     headline, **winners roll**, red-carpet photo essay. Least editorial adaptation of any type.
   - **Only net-new widgets (all small):** nominees list (before) · winners ticker (during) ·

@@ -107,7 +107,7 @@ A second wave (session 2026-06-04). They split by *how* they act on a date — k
 - *Couple's life:* honeymoon alignment (leave + destination season); couple priority weighting (tunes the §D mode) + tie-break transparency.
 - *Cultural cautions (§F soft-caution · owner 2026-06-04):* Ghost Month, Sukob, Catholic Lent/Advent, Ramadan — surface an honest *"here's why many avoid it; you can still choose it"* note and gently lower rank; **never disqualify.**
 
-> **Open question (not a factor — flag for owner):** Setnayan's own **crewed** services (Papic / Panood) use finite real crews on a day. Is the locked "in-app services are always-on" rule truly unbounded, or do crewed SKUs need a per-day capacity? Settle before the Aligner implies Setnayan is free on any date.
+> **Open question (not a factor — flag for owner):** Setnayan's own **crewed** services (Papic / Live Studio) use finite real crews on a day. Is the locked "in-app services are always-on" rule truly unbounded, or do crewed SKUs need a per-day capacity? Settle before the Aligner implies Setnayan is free on any date.
 
 ---
 

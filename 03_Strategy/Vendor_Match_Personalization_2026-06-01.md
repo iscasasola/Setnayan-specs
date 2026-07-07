@@ -148,7 +148,7 @@ The full 10-parent / ~48-tile taxonomy. **Capture mode legend:**
 | **Live Band · DJ · Choir · Orchestra · Wedding Singer · Performers** | **Music vibe / genre** | Acoustic · Pop / Top 40 · OPM · Jazz / lounge · Classical / strings · Showband / hype | new *music-vibe* facet + ensemble-type | 🅐 (one "music vibe" question covers the cluster) · 🅒 (refine per tile) | |
 | **Host / MC** | Hosting style | Formal · Fun / hype · Bilingual (TL/EN) | style attr | 🅒 | |
 | **Choreographer** | Routine type | Entourage · First-dance · Both | type facet | 🅒 | |
-| *(Pakanta ★ · Panood ★)* | Setnayan options under Program / Documentary | | | | |
+| *(Pakanta ★ · Live Studio ★)* | Setnayan options under Program / Documentary | | | | |
 
 ### DOCUMENTARY
 | Tile | Preference dimension | Options | Source facet | Capture | Cap? |

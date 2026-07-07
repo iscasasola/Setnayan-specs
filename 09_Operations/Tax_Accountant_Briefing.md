@@ -46,14 +46,9 @@
 
 ---
 
-### Decision 2 — The 5% Setnayan Pay convenience fee tax treatment
+### Decision 2 — ~~The 5% Setnayan Pay convenience fee tax treatment~~ ❌ WITHDRAWN (no convenience fee)
 
-**Engineering assumption:** The 5% surcharge is Setnayan's gross revenue, taxable at the platform's elected rate (3% Percentage Tax → ₱150 of every ₱5,000 in fees owed to BIR; or 12% VAT layered if VAT-registered).
-
-**What we need you to confirm:**
-- Is the 5% surcharge taxable in full as Setnayan's gross receipt? Or is there an argument it's a pass-through payment service that's exempt?
-- If Setnayan absorbs the 5% on behalf of vendors (the "No Convenience Fee" opt-in badge per 0034 § 6.8), does the tax treatment change? (Setnayan's gross is the same; vendor's revenue is reduced by the absorbed 5% — affects vendor's own income tax)
-- Should the OR issued to the couple itemize the 5% separately, or just show the total?
+> **WITHDRAWN — no CPA input needed.** Setnayan charges **no convenience fee (0%)** and **no commission (0%)** on vendor bookings; vendor↔customer money settles **off-platform** (Setnayan never holds checkout funds, RA 11967). The 5%/3% Setnayan Pay surcharge this decision asked about was RETIRED at the 2026-06-07 reset and does not exist in the launch product, so there is nothing for the CPA to validate here. (Decision number retained to keep cross-references stable; the remaining decisions — VAT election, EWT on payouts, OR formatting for first-party SKUs — are unaffected.) Setnayan's taxable receipts are its **first-party in-app SKU sales** only.
 
 ---
 
@@ -104,14 +99,11 @@
 
 ---
 
-### Decision 7 — Vendor-of-record disclosure on customer OR
+### Decision 7 — ~~Vendor-of-record disclosure on customer OR~~ ❌ LARGELY MOOT (Setnayan not in the vendor money path)
 
-**Engineering assumption:** The customer's OR shows Setnayan as the seller (Setnayan's TIN, OR Permit No.) for the 5% convenience fee portion, AND identifies the vendor as the seller for the underlying vendor service.
-
-**What we need you to confirm:**
-- Is a single combined OR acceptable, or does the customer need two ORs (one from Setnayan for the fee, one from the vendor for the service)?
-- If two ORs, can Setnayan issue both on the vendor's behalf as an agent? Or must the vendor issue their own?
-- Does the OR template need to include the vendor's TIN even when Setnayan is the issuer?
+> **Mostly moot post-2026-06-07 reset.** Because there is **no convenience fee** and vendor↔customer payments settle **off-platform**, Setnayan never receives vendor-booking money and so issues **no OR for a vendor service or fee** — the vendor issues their own OR directly to the couple for their service (their normal billing). Setnayan issues ORs **only for its own first-party in-app SKUs**.
+>
+> **Residual question still worth your confirmation:** when a couple buys a first-party Setnayan SKU (e.g. Papic, Save-the-Date), the OR shows Setnayan as the sole seller (Setnayan's TIN + OR Permit No.) — confirm that single-seller OR is correct and no vendor disclosure is required, since no vendor is party to that sale.
 
 ---
 

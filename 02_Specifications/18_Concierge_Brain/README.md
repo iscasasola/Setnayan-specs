@@ -1,8 +1,10 @@
-# 18 — Setnayan Concierge AI Brain
+# 18 — Setnayan AI Brain
 
-Curated knowledge base that powers the Setnayan Concierge conversational
-surface (iteration **0016 § 0a**). The brain is the structured "what the
-concierge knows" content layer; the synthesis model is the runtime LLM
+> **Renamed: "Setnayan Concierge" → "Setnayan AI" (2026-06-29). Folder path kept for history.**
+
+Curated knowledge base that powers the Setnayan AI conversational
+surface (iteration **0016 § 0a**). The brain is the structured "what
+Setnayan AI knows" content layer; the synthesis model is the runtime LLM
 that paraphrases brain content into a personalized answer.
 
 **Status:** Locked 2026-05-18 (architecture). Content authoring is a
@@ -73,7 +75,7 @@ Subsequent paragraphs add depth the LLM can paraphrase from.}
 
 ## Free tier vs paid tier — which chunks each can reach
 
-| Chunk category | DIY (3-question free) | Trial (3 days) | Concierge Complete (₱4,999/12mo) |
+| Chunk category | DIY (3-question free) | Trial (3 days) | Setnayan AI (₱499/28-day cycle) |
 |---|:---:|:---:|:---:|
 | Filipino cultural reference (01_) | ✓ | ✓ | ✓ |
 | Regional pricing benchmarks (02_) | ✓ | ✓ | ✓ |
@@ -98,17 +100,23 @@ Subsequent paragraphs add depth the LLM can paraphrase from.}
   profiles live in 0006 marketplace; the brain talks about
   *categories* and *decision logic*, not individual vendors.
 
-## Pricing posture — Concierge stays paid
+## Pricing posture — Setnayan AI is the first paywall
+
+**Setnayan AI is ₱499 per 28-day cycle** (marketed as ₱499/month) — a
+subscription that runs from purchase until the event date, then
+auto-ends right after the wedding. It is the **first paywall** above the
+free DIY tier (Free ₱0). There are no Essentials/Complete bundles — those
+were removed 2026-06-29. The old one-time ladder (₱4,999 / ₱2,499 /
+₱1,499 with 12-month/24-month windows) is retired.
 
 The 2026-05-18 launch promo makes 16 zero-marginal-cost SKUs FREE
-until 2027-03-31. **`concierge_complete` ₱4,999/12mo is EXCLUDED
-from that promo and stays paid throughout** — see CLAUDE.md
-decision-log rows 1 and 3 of 2026-05-18 + iteration 0016 § 0a
-"Launch-promo exclusion" subsection.
+until 2027-03-31. **Setnayan AI is EXCLUDED from that promo and stays
+paid throughout** — see CLAUDE.md decision-log rows 1 and 3 of
+2026-05-18 + iteration 0016 § 0a "Launch-promo exclusion" subsection.
 
 The exclusion holds because the paid tier's value is the
-event-data-personalized, 12-month-persistent, nudge-driven planner
-+ paid-tier-only chunks (honeymoon planning · priority vendor
+event-data-personalized, persistent-through-the-engagement, nudge-driven
+planner + paid-tier-only chunks (honeymoon planning · priority vendor
 matching). The free DIY tier (3 questions per event, stateless,
 generic-but-Filipino-fluent) demonstrates the brain's quality;
 the paid tier demonstrates **your-wedding-specific** personalization.

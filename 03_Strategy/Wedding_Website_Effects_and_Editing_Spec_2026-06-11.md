@@ -276,7 +276,7 @@ from progressively deeper camera positions. Not a V1 dependency.
   SKU light-ups: **Papic** → photo essay + Living-Moments 5s clip strip + per-guest tagged
   pickup (QR); **SDE** → "Watch the Film" hero embed; **Thank-You Video** → couple's video
   message block; **Patiktok** → booth-reels row; **Pabati** → guest video-wishes wall;
-  **Panood** → ceremony replay block; **Guest Stories** → story-reel row; **Pakanta** → the
+  **Live Studio** → ceremony replay block; **Guest Stories** → story-reel row; **Pakanta** → the
   couple's song as page soundtrack + "their song" credit line + scores every rendered film;
   **Animated/Bespoke Monogram** → masthead nameplate mark animates; **High Res Archive** →
   full-gallery delivery banner (originals, 1-year); **Live Photo Wall** → "the wall, frozen"
@@ -433,7 +433,7 @@ Every purchased in-app service surfaces as a **block on the live page** — not 
 
 | Service | On-day block | Personalized | Storage |
 |---|---|---|---|
-| **Panood** (live stream) | "Watch Live" YouTube embed; replay → Editorial | yes (remote/can't-attend) | YouTube only (never Drive) |
+| **Live Studio** (live stream) | "Watch Live" YouTube embed; replay → Editorial | yes (remote/can't-attend) | YouTube only (never Drive) |
 | **Papic** galleries | "Your Gallery" = their tagged photos + full gallery, live | yes (per-guest tags) | R2 + Drive copy |
 | **Papic Live Wall** (Salamisim) | venue projection mirrored on guest phone | shared | R2 |
 | **Pabati** | "Leave a video well-wish" + guestbook wall → Editorial/thank-you | yes (their message) | R2 + Drive copy |
@@ -447,14 +447,14 @@ Every purchased in-app service surfaces as a **block on the live page** — not 
 - **Background music = all phases incl. Editorial.** One shared soundtrack, `site_bg_music_source` = upload OR Pakanta. **Pakanta is special on Editorial:** it's the **only music that can also be the backing track for the produced videos** (SDE · Thank-You Video · highlight reel) because renders are owned-music-only (licensing lock) — an **uploaded track plays as ambient site music but CANNOT legally score a rendered video.** Editor copy: "Use Pakanta and it also becomes your videos' soundtrack."
 - **Thank-You = YES on Editorial** — free thank-you note + paid **Thank-You Video** (₱5,499/§2 matrix), **personalized per guest** (§7.1, addressed to them + their photos). The closing beat of the recap.
 - **Live Background** is the one service without a native guest block (venue LED) → resolved as above.
-- **Not guest-web blocks:** Setnayan AI (planning workspace) · Camera Bridge (DSLR→Papic/Panood enabler) · Mood board (feeds theme) · vendor-side SKUs.
+- **Not guest-web blocks:** Setnayan AI (planning workspace) · Camera Bridge (DSLR→Papic/Live Studio enabler) · Mood board (feeds theme) · vendor-side SKUs.
 
 **Three rules:** (1) **Owned-gated** — a block renders only if the couple bought it; guests
 **never see upsells** on the live page; the **couple's editor** is the only place unowned
 services show an "Add X" card. *(Today these are nav-out cards in `site-editor`; the work is
 to render them as real owned-gated guest blocks on the public Event page.)* (2)
 **Personalized** — same engine ("Your Gallery", remote-guest stream promotion). (3)
-**Storage honored** — Panood = YouTube only; galleries/Pabati = R2 + Drive copy. **Registry
+**Storage honored** — Live Studio = YouTube only; galleries/Pabati = R2 + Drive copy. **Registry
 pattern:** any future service plugs in by declaring its phase(s) + guest block — no bespoke
 wiring. **Commercial:** the Event page is the payoff surface where the couple sees what they
 paid for come alive → word-of-mouth.
@@ -468,7 +468,7 @@ paid for come alive → word-of-mouth.
 
 | Service | RSVP (before) | EVENT (on the day) | EDITORIAL (after) | Status |
 |---|---|---|---|---|
-| Panood | — | **Watch Live** embed (remote guests first) | Ceremony **replay** | block wiring queued |
+| Live Studio | — | **Watch Live** embed (remote guests first) | Ceremony **replay** | block wiring queued |
 | Live Photo Wall (Salamisim) | — | **Live wall** — venue projection `/wall/[eventId]` + mirrored guest block | **The Wall, Frozen** — mosaic incl. looping 5s clips | wall CODE BUILT; guest block + frozen recap queued |
 | Papic gallery | — | **LIVE gallery** — photos/clips flow in as captured; "Be a candid camera" CTA | Photo essay · **Living Moments** 5s strip · per-guest QR pickup | capture live; blocks queued |
 | **Kwento** (guest photo-stories) | — | story capture rides Papic flow | **Kwento block** — approved guest stories as captioned pull-quotes beside their anchor photo, woven through the article + wall; **Kwento Magazine** PDF = keepsake sibling | schema in prod; UI unbuilt |
@@ -486,7 +486,7 @@ paid for come alive → word-of-mouth.
 | Spatial backdrop | **the world** (film scrub) | off (venue-WiFi rule) | off (newsprint aesthetic) | LIVE |
 | Live Background (LED) | — | venue hardware (no web block; optional Event backdrop echo) | — | spec'd |
 | High Res Archive | — | — | originals-delivery banner | queued |
-| Camera Bridge | — | enabler (feeds Papic/Panood) | — | core shipped |
+| Camera Bridge | — | enabler (feeds Papic/Live Studio) | — | core shipped |
 | Couple-side only (never guest blocks) | colspan: Setnayan AI · Drive photo-delivery · playlist seed · contracts · supplies · bundles | | | — |
 
 ## 8. Notifications model — action-first, cron-light

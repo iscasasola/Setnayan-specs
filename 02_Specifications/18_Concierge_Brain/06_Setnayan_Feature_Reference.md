@@ -2,7 +2,7 @@
 
 **Authoring status:** Filled 2026-05-18. Each chunk paraphrases an iteration spec in couple-friendly language for the wizard's couple-facing copy + the brain's free-tier Q&A surface. Couple sees these answers when they ask "what does Setnayan do for X?".
 
-**Authoring rule.** Every chunk cites the iteration it summarizes. Pricing fields re-verify against `service_catalog` + `Pricing.md` before each release. Filled with canonical content reflecting the 2026-05-18 lock set (₱2,499 Concierge, Pro Weekly bundle, wizard architecture).
+**Authoring rule.** Every chunk cites the iteration it summarizes. Pricing fields re-verify against `service_catalog` + `Pricing.md` before each release. Rebranded 2026-06-29: the paid planner is **Setnayan AI — ₱499 per 28-day cycle** (a subscription, active from purchase until the event date, then auto-ends right after the wedding; the first paywall over Free ₱0). The old one-time "Setnayan Concierge" ladder (₱4,999 / ₱2,499 / ₱1,499) and the Essentials/Complete bundles are retired.
 
 ---
 
@@ -23,7 +23,7 @@ Each guest gets a personal QR code via the QR Invitations feature (0002), so RSV
 - "Can I edit the guest list after sending invitations?"
 
 ### Caveats / what NOT to say
-- Don't say it's free on the Concierge tier — it's free for everyone (DIY and paid).
+- Don't say it's free on the Setnayan AI tier — it's free for everyone (DIY and paid).
 
 ---
 
@@ -123,7 +123,7 @@ The seating chart auto-fills from your Guest List role assignments (sponsors →
 
 Setnayan's Budget tool is free for every couple. Track every wedding expense with a three-line model per vendor: **Package** (the contract amount) + **Crew Meal** (per-crew-member meal cost if applicable) + **Transport** (if vendor charges outside their service radius). Set payment milestones (Reservation · Downpayment · Interim · Balance) and Setnayan reminds you when each is due.
 
-Export your full payment schedule as an `.ics` calendar file so it lands in your iCal/Google Calendar with reminders. If you're using Setnayan Concierge, the wizard reads these milestones and surfaces them in your Next Actions feed (🔴 Overdue · 🟡 This week).
+Export your full payment schedule as an `.ics` calendar file so it lands in your iCal/Google Calendar with reminders. If you're using Setnayan AI, the wizard reads these milestones and surfaces them in your Next Actions feed (🔴 Overdue · 🟡 This week).
 
 ### Common follow-ups
 - "What's a typical vendor payment schedule?"
@@ -131,20 +131,20 @@ Export your full payment schedule as an `.ics` calendar file so it lands in your
 - "What's a crew meal?"
 
 ### Caveats / what NOT to say
-- Don't tie this feature to Concierge — the Budget tool is fully usable on DIY.
+- Don't tie this feature to Setnayan AI — the Budget tool is fully usable on DIY.
 
 ---
 
-## Setnayan Concierge (iteration 0016) — the active wizard · ₱2,499
+## Setnayan AI (iteration 0016) — the active wizard · ₱499/month
 
-**Tags:** concierge, paid, wizard, journey, upsell, free-via-pro-weekly
+**Tags:** setnayan-ai, paid, wizard, journey, upsell, subscription
 **Applies to:** all couples (paid tier)
-**Cross-ref:** 0016 § 0b wizard architecture, 0016 § 0c Pro Weekly bundle
-**Last verified:** 2026-05-18 · Setnayan team
+**Cross-ref:** 0016 § 0b wizard architecture
+**Last verified:** 2026-06-29 · Setnayan team
 
-Setnayan Concierge is the **active wizard** that conducts your wedding planning. At ₱2,499 for the full wedding-anchored access window (12 months floor, 24 months cap), it's a one-time purchase per event — no subscription.
+Setnayan AI is the **active wizard** that conducts your wedding planning. It's **₱499 per 28-day cycle** (marketed as ₱499/month) — a subscription that stays active from the moment you purchase it right up to your event date, then auto-ends just after the wedding. It's the **first paywall** above the free DIY tier; there are no bundles to buy.
 
-What you get on Concierge:
+What you get on Setnayan AI:
 
 - A personalized wedding plan generated from your intake answers (date, guest count, religion, region, budget tier, foundation status)
 - Active Next Actions feed: what's overdue, what's due this week, what's next priority
@@ -152,19 +152,19 @@ What you get on Concierge:
 - Auto-share packs to your vendors (mood board to florist, guest list to caterer, etc.)
 - Coordinator delegation — if you hire a coordinator on Setnayan, they get scoped access to act on your behalf
 - Weekly email digest summarizing what's pending
-- Unlimited free-form questions to the Concierge brain (vs 3 per event on DIY)
+- Unlimited free-form questions to the Setnayan AI brain (vs 3 per event on DIY)
 - Honeymoon planning support
 
-**Free if you book any Pro Weekly vendor.** When you book a vendor with an active Pro Weekly subscription, Concierge automatically unlocks for your wedding-anchored window — no additional charge. Pay ₱2,499 only if you want Concierge immediately, before booking any vendor.
+You can start with a **card-less 3-day free trial** before the first ₱499 cycle bills. Because it's a subscription, you only keep paying while you're actively planning — it ends itself once the wedding has passed.
 
 ### Common follow-ups
-- "What's the difference between DIY and Concierge?"
-- "Can I try Concierge before paying?"
-- "What's a Pro Weekly vendor?"
+- "What's the difference between DIY and Setnayan AI?"
+- "Can I try Setnayan AI before paying?"
+- "Does the subscription stop after the wedding?"
 
 ### Caveats / what NOT to say
-- Don't say Concierge replaces a human coordinator — it's a planning aid, not a person.
-- Don't quote ₱4,999 — that price was retired 2026-05-18.
+- Don't say Setnayan AI replaces a human coordinator — it's a planning aid, not a person.
+- Don't quote the old one-time prices (₱4,999 / ₱2,499 / ₱1,499) — Setnayan AI is now a ₱499/28-day-cycle subscription.
 
 **This chunk is the upsell answer when DIY couples hit their 3 free-question cap.**
 
@@ -179,14 +179,14 @@ What you get on Concierge:
 
 Every Setnayan account starts on DIY mode. You get unrestricted access to the marketplace: browse all vendors, contact whoever you want, build your own list. No wizard guidance, no proactive nudges, no auto-share packs — you drive everything yourself.
 
-DIY couples also get **3 free questions** to the Concierge brain per event. After 3 questions, the upgrade prompt appears.
+DIY couples also get **3 free questions** to the Setnayan AI brain per event. After 3 questions, the upgrade prompt appears.
 
-All artifact tools (Guest List, Mood Board, Seating, Budget) are fully available on DIY. The only difference between DIY and Concierge is whether the wizard actively *conducts* the planning or you do.
+All artifact tools (Guest List, Mood Board, Seating, Budget) are fully available on DIY. The only difference between DIY and Setnayan AI is whether the wizard actively *conducts* the planning or you do.
 
 ### Common follow-ups
 - "What can I actually do for free?"
 - "Why would I pay if DIY has everything?"
-- "How do I switch to Concierge later?"
+- "How do I switch to Setnayan AI later?"
 
 ### Caveats / what NOT to say
 - Don't disparage DIY — many couples plan beautifully on DIY.
@@ -220,9 +220,9 @@ A ₱99 SKU that turns 5-10 of your photos into a 30-60 second 1080×1920 vertic
 **Cross-ref:** 0029 help center
 **Last verified:** 2026-05-18 · Setnayan team
 
-Setnayan's Help Center is where couples + vendors escalate beyond the concierge brain. When the wizard can't answer something, or when there's a dispute, payment issue, account problem, or trial-ban appeal — file a help ticket. The Setnayan operations team handles tickets in priority order.
+Setnayan's Help Center is where couples + vendors escalate beyond the Setnayan AI brain. When the wizard can't answer something, or when there's a dispute, payment issue, account problem, or trial-ban appeal — file a help ticket. The Setnayan operations team handles tickets in priority order.
 
-The help center is also the **appeal path** for: account enforcement (trial-ban / full-ban appeals route here), concierge unanswered questions (admin can elevate a question into a new brain chunk), and vendor disputes.
+The help center is also the **appeal path** for: account enforcement (trial-ban / full-ban appeals route here), Setnayan AI unanswered questions (admin can elevate a question into a new brain chunk), and vendor disputes.
 
 ### Common follow-ups
 - "How long until I get a response?"
@@ -255,15 +255,15 @@ Free for every couple-vendor pair. Replaces the retired AI contract-analysis SKU
 
 ---
 
-## Daily Concierge Nudges (paid-tier only)
+## Daily Setnayan AI Nudges (paid-tier only)
 
-**Tags:** concierge, nudges, daily, paid-only, upsell, paid_tier_only
-**Applies to:** paid Concierge couples only
+**Tags:** setnayan-ai, nudges, daily, paid-only, upsell, paid_tier_only
+**Applies to:** paid Setnayan AI couples only
 **Cross-ref:** 0016 § 0b wizard architecture, 0028 emails
-**Last verified:** 2026-05-18 · Setnayan team
+**Last verified:** 2026-06-29 · Setnayan team
 **paid_tier_only: TRUE**
 
-Paid Concierge couples get the wizard's full active-helping pattern: daily check-ins based on the 9-step journey + the canonical wedding timeline. The wizard surfaces what's overdue, what's due this week, what's next, and when major decisions should be made (food tasting · marriage license window · mood board lock).
+Paid Setnayan AI couples get the wizard's full active-helping pattern: daily check-ins based on the 9-step journey + the canonical wedding timeline. The wizard surfaces what's overdue, what's due this week, what's next, and when major decisions should be made (food tasting · marriage license window · mood board lock).
 
 DIY couples don't get the daily nudges — they get static tools + 3 free brain questions. The proactive layer (nudges + reminders + recommendations) is the paid moat.
 
@@ -279,18 +279,18 @@ DIY couples don't get the daily nudges — they get static tools + 3 free brain 
 ## Honeymoon Planning (paid-tier only)
 
 **Tags:** honeymoon, planning, paid-only, premium, paid_tier_only
-**Applies to:** paid Concierge couples only
+**Applies to:** paid Setnayan AI couples only
 **Cross-ref:** 0016 § 0 access model, 0021 couple dashboard
-**Last verified:** 2026-05-18 · Setnayan team
+**Last verified:** 2026-06-29 · Setnayan team
 **paid_tier_only: TRUE**
 
-Setnayan Concierge includes honeymoon planning support — destination recommendations, visa/passport timing reminders, off-season pricing tips, and pre/post-wedding scheduling. Particularly useful for international honeymoons where visa processing takes weeks.
+Setnayan AI includes honeymoon planning support — destination recommendations, visa/passport timing reminders, off-season pricing tips, and pre/post-wedding scheduling. Particularly useful for international honeymoons where visa processing takes weeks.
 
-V1 ships honeymoon planning as part of the Concierge wizard's tracking layer; V1.5+ deepens with curated destination guides + booking integrations.
+V1 ships honeymoon planning as part of the Setnayan AI wizard's tracking layer; V1.5+ deepens with curated destination guides + booking integrations.
 
 ### Common follow-ups
 - "Can Setnayan book my honeymoon?"
-- "What destinations does Concierge recommend?"
+- "What destinations does Setnayan AI recommend?"
 
 ### Caveats / what NOT to say
 - Don't promise booking integrations in V1 — V1 is planning support only.

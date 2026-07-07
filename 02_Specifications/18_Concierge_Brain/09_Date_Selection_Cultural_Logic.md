@@ -1,6 +1,6 @@
 # 09 — Date Selection Cultural Logic
 
-**Authoring status:** Locked 2026-05-24. Powers the "Why this date works for you" surface on Wizard Card 01 (Set Wedding Date) per CLAUDE.md 2026-05-23 row 6 (V1 Concierge active-wizard scope expansion) + the Concierge AI chat's deep-dive answers when couples ask follow-up questions about their date.
+**Authoring status:** Locked 2026-05-24 · rebranded 2026-06-29 (Setnayan Concierge → Setnayan AI). Powers the "Why this date works for you" surface on Wizard Card 01 (Set Wedding Date) per CLAUDE.md 2026-05-23 row 6 (V1 active-wizard scope expansion) + the Setnayan AI chat's deep-dive answers when couples ask follow-up questions about their date.
 
 **Posture:** Give it all, layered. Filipino couples are syncretic by default — the Catholic couple's lola still warns about *sukob*, the Chinese-Filipino couple still wants the Marian month, the urban couple still wants the practical math. The card surfaces 2-3 curated reasons tailored to the couple's primary belief system; the expand-all view exposes all five layers honestly. Contradictions across layers get named, not hidden. See CLAUDE.md 2026-05-24 row "Holistic date-reasoning approach locked" for the architectural rationale.
 
@@ -49,7 +49,7 @@ The Catholic Church discourages marriages during penitential seasons — **Lent*
 
 **All Souls / All Saints** (November 1-2) is also commonly avoided as a wedding date — not because of canon law but because Filipino families spend these days at cemeteries honoring the dead. Practically, your guests won't be available; emotionally, the day's meaning sits in mourning rather than celebration.
 
-If your candidate date falls within Lent, Advent, or near All Souls / All Saints, surface this as a layer-1 caution. Many Filipino Catholic couples explicitly choose other dates once they understand the liturgical context. If a couple is set on a date inside one of these windows, the Setnayan Concierge can still support them — just acknowledge the trade-off honestly rather than pretending the date is liturgically neutral.
+If your candidate date falls within Lent, Advent, or near All Souls / All Saints, surface this as a layer-1 caution. Many Filipino Catholic couples explicitly choose other dates once they understand the liturgical context. If a couple is set on a date inside one of these windows, the Setnayan AI can still support them — just acknowledge the trade-off honestly rather than pretending the date is liturgically neutral.
 
 ### Common follow-ups
 - "Can we get married during Lent?"
@@ -223,7 +223,7 @@ The number **4 (四 / *sì*)** sounds nearly identical to *sǐ* (死), meaning *
 
 **Ghost Month** (the 7th lunar month in the Chinese calendar, typically falling in August or early September of the solar calendar) is widely avoided for weddings in Chinese-Filipino families. The belief is that during this month, the gates of the spirit world open and ghosts roam freely — important life events (weddings, business openings, major moves, surgeries) are postponed to avoid bad luck or attracting unwelcome spiritual attention.
 
-**Ghost Month varies year to year** because it's lunar — in 2026 it falls roughly August 23 - September 21; in 2027 it falls roughly August 12 - September 10. The Setnayan Concierge should calculate the current year's Ghost Month dates and surface a layer-2 caution for Chinese-Filipino couples considering dates in that window.
+**Ghost Month varies year to year** because it's lunar — in 2026 it falls roughly August 23 - September 21; in 2027 it falls roughly August 12 - September 10. The Setnayan AI should calculate the current year's Ghost Month dates and surface a layer-2 caution for Chinese-Filipino couples considering dates in that window.
 
 **Not all Chinese-Filipino families observe Ghost Month strictly.** Younger urban families sometimes choose to ignore it; older or more traditional families observe it firmly. For couples whose families are mixed (one observant, one not), Ghost Month can become a family-political issue — the couple should know about it before locking the date so the family conversation happens with full context, not after the invitations are printed.
 
@@ -276,6 +276,55 @@ Doubled dates compound numerological meaning and are highly prized by Chinese-Fi
 
 ---
 
+## Layer 2: Chinese-Filipino Numerology — Four Pillars / BaZi (八字) date-check (delegated)
+
+**Tags:** date-selection, chinese, bazi, four-pillars, ba-zi, compatibility, birth-date, birth-time, zodiac, five-elements, fortune-teller, almanac, auspicious-date
+**Applies to:** Chinese-Filipino couples + couples honoring Chinese-side family
+**Cross-ref:** Layer 2 lucky-numbers + avoid-4 + Ghost Month chunks · `Chinese_Wedding_Traditions_Reference_2026-06-28.md` § 2 · vendor leaf *Date / Feng-shui Consultant*
+**Source:** Four Pillars of Destiny (BaZi 八字) tradition · Tong Sing (通勝) almanac · Chinese cultural references
+**Last verified:** 2026-06-28 · Setnayan team (⚠ pending named-authority verification before any prescriptive copy ships)
+
+Beyond lucky/unlucky *numbers*, many Chinese-Filipino families select the wedding date through the **Four Pillars of Destiny (八字, BaZi)** — a reading built from each partner's **exact birth year, month, day, AND hour.** Each of those four "pillars" yields two characters (a Heavenly Stem 天干 + an Earthly Branch 地支), eight in total, which map to the **Five Elements (Wood · Fire · Earth · Metal · Water).** A specialist reads the bride's and groom's charts together two ways: **(1) compatibility** — do their elements balance and complement, or clash (相沖) — and **(2) date selection** — choosing a wedding day/month/year that is auspicious for *both* charts and avoids a zodiac clash.
+
+**The birth hour matters, not just the birth date.** This is the key practical point for couples: a proper BaZi reading needs the *time of birth* of each partner (the "hour pillar"), which most people don't have memorized — it's on the birth certificate or known by a parent. Couples who want a BaZi date-check should gather both partners' birth date **and approximate time of birth** before consulting a specialist.
+
+**Setnayan's posture is advisory + delegation — never a verdict.** Setnayan does not compute Four-Pillar charts or pronounce on compatibility. When a couple wants this, Setnayan AI explains what a BaZi date-check involves, notes the birth-date-and-time requirement, and routes them to a **date / feng-shui specialist** (vendor leaf) who performs the reading. The couple's own candidate dates still get the number-numerology + Ghost-Month layers that Setnayan AI *does* surface. The app never tells a couple their charts "clash" or that a marriage is ill-fated.
+
+### Common follow-ups
+- "What is BaZi / the Four Pillars?"
+- "Do you need our birth times?"
+- "Can the app check if we're compatible?"
+- "Where do we get a proper date reading done?"
+
+### Caveats / what NOT to say
+- **Never** render a deterministic compatibility or "your charts clash" verdict — this is specialist territory and a harmful failure mode.
+- Don't imply BaZi is binding on non-Chinese-Filipino couples.
+- Don't store or display birth *time* unless the couple opted into the date-check feature and consented — it's sensitive personal data (RA 10173); purpose-limit it to this use.
+
+---
+
+## Layer 2: Chinese-Filipino Numerology — Mourning-proximity avoidance
+
+**Tags:** date-selection, chinese, mourning, funeral, bereavement, taboo, 100-days, avoid
+**Applies to:** Chinese-Filipino couples + couples with Chinese-side family
+**Cross-ref:** Layer 2 lucky-numbers chunk · `Chinese_Wedding_Traditions_Reference_2026-06-28.md` § 4
+**Source:** Chinese folk tradition · Tong Sing references
+**Last verified:** 2026-06-28 · Setnayan team
+
+Chinese-Filipino families typically avoid holding a wedding **close to a death or funeral in the immediate family** — conservatively within **100 days, and in stricter families up to a year.** A joyful event during a mourning period is felt to disrespect the deceased and to mix incompatible energies (the "double event" taboo). Observant families will postpone a wedding rather than hold it inside this window.
+
+**Surface this gently and only when relevant.** Setnayan never asks intrusively about a death in the family. But if a couple raises a recent bereavement, or asks why a relative is uneasy about the date, Setnayan AI can explain the mourning-proximity custom and note that the usual resolution is to shift the date past the observed window. As with every cultural layer, it's advisory — the couple decides.
+
+### Common follow-ups
+- "Is it bad luck to marry soon after a funeral?"
+- "How long should we wait after a death in the family?"
+
+### Caveats / what NOT to say
+- Don't volunteer this unprompted — it's tied to grief; only surface it when the couple opens the topic.
+- Don't state a single "correct" waiting period — practice ranges from 100 days to a year by family.
+
+---
+
 ## Layer 3: Filipino Folk — Sukob (sibling marriage spacing)
 
 **Tags:** date-selection, folk, filipino, sukob, sibling, marriage, same-year, taboo
@@ -290,7 +339,7 @@ Doubled dates compound numerological meaning and are highly prized by Chinese-Fi
 
 **Practical workaround for couples in conflict with sukob.** If two siblings are engaged and want to marry in the same year, traditional Filipino practice offers two workarounds: (1) the older sibling marries first (Filipino tradition prioritizes the order of birth in major life events), or (2) the second wedding incorporates a small symbolic offering or counter-ritual to "buy back" the protection — some families consult a *manghuhula* (folk healer/diviner) or a *babaylan* (in regions where this tradition survives).
 
-**The Setnayan Concierge should flag sukob when relevant.** If the wizard intake captures sibling information (some couples mention it; not all do), and a sibling's wedding is within the same calendar year, surface this as a layer-3 caution. If no sibling information is captured, don't ask intrusively — but mention sukob in the "things some Filipino families think about" framing in the full expand-all view.
+**The Setnayan AI should flag sukob when relevant.** If the wizard intake captures sibling information (some couples mention it; not all do), and a sibling's wedding is within the same calendar year, surface this as a layer-3 caution. If no sibling information is captured, don't ask intrusively — but mention sukob in the "things some Filipino families think about" framing in the full expand-all view.
 
 ### Common follow-ups
 - "What is sukob?"
@@ -315,9 +364,9 @@ Filipino folk tradition reads **rain on a wedding day as a blessing**, not a set
 
 **This matters for couple psychology during rainy-season weddings.** If a couple is planning a June-September wedding (which overlaps with the Philippine rainy season per 03_Seasonal_Weather_Reference.md), the folk-blessing reading gives them a positive frame even if the weather doesn't cooperate. Surface this layer-3 reading when the candidate date is in rainy season — it turns a potential anxiety into a positive cultural anchor.
 
-**Don't oversell the blessing reading.** Rain still causes practical disruption (outdoor venue washouts, guest transportation issues, photo-quality challenges). The Setnayan Concierge should surface the cultural blessing AND the practical risk in the same layered view — the couple decides how to weigh them.
+**Don't oversell the blessing reading.** Rain still causes practical disruption (outdoor venue washouts, guest transportation issues, photo-quality challenges). The Setnayan AI should surface the cultural blessing AND the practical risk in the same layered view — the couple decides how to weigh them.
 
-**The blessing reading pairs well with practical-layer planning.** If a couple chooses a rainy-season date, the Concierge can guide them toward indoor backup plans, garden-with-tent setups, or rain-friendly venue choices while still affirming the cultural reading that rain itself is auspicious.
+**The blessing reading pairs well with practical-layer planning.** If a couple chooses a rainy-season date, Setnayan AI can guide them toward indoor backup plans, garden-with-tent setups, or rain-friendly venue choices while still affirming the cultural reading that rain itself is auspicious.
 
 ### Common follow-ups
 - "Is rain really good luck at a Filipino wedding?"
@@ -344,7 +393,7 @@ Filipino folk tradition holds that a wedding should not happen within the same y
 
 **Modern practice varies.** Many Filipino families soften the rule to "wait at least a few months" or "don't have the wedding before the 40-day prayers (*pasiyam*) are complete." Others observe a full year. Some shift the wedding's tone (smaller, quieter) rather than postpone it entirely.
 
-**The Setnayan Concierge should not pry into death history.** Don't ask intake questions about family deaths — that's intrusive. But if a couple raises it (e.g., "my grandmother just passed, are we okay to keep our date?"), the Brain should acknowledge the layered Filipino tradition + practical sensitivity, and frame the decision as the couple's to make in consultation with both families. The Brain doesn't adjudicate when the mourning window has passed.
+**The Setnayan AI should not pry into death history.** Don't ask intake questions about family deaths — that's intrusive. But if a couple raises it (e.g., "my grandmother just passed, are we okay to keep our date?"), the Brain should acknowledge the layered Filipino tradition + practical sensitivity, and frame the decision as the couple's to make in consultation with both families. The Brain doesn't adjudicate when the mourning window has passed.
 
 ### Common follow-ups
 - "Can we still get married if my parent just passed?"
@@ -369,7 +418,7 @@ Filipino tradition holds that the wedding should follow the *pamamanhikan* (form
 
 **Modern practice varies considerably.** Urban Filipino couples often skip pamamanhikan entirely (the families have already met casually) or compress it to a single ceremonial dinner shortly before the wedding. Traditional families still observe the interval — particularly in Visayas / Mindanao and in rural communities.
 
-**This layer is rarely a deciding factor for date selection** because the couple usually has already done the pamamanhikan timing math implicitly by the time they're choosing a wedding date. The Setnayan Concierge should surface it as context if the wizard captures pamamanhikan timing in intake, or as a "did you know" item in the full expand-all view.
+**This layer is rarely a deciding factor for date selection** because the couple usually has already done the pamamanhikan timing math implicitly by the time they're choosing a wedding date. The Setnayan AI should surface it as context if the wizard captures pamamanhikan timing in intake, or as a "did you know" item in the full expand-all view.
 
 **Don't ask about pamamanhikan in intake unless the wizard already does.** It's a specific cultural data point that some couples find meaningful and others find intrusive.
 
@@ -466,7 +515,7 @@ For Filipino couples with overseas family members (OFWs, US/Canada/UK/Middle Eas
 
 - **August (US summer break)** — secondary US-based family window, but overlaps with Philippine typhoon season.
 
-**For couples with multiple OFW family members across regions**, the alignment math gets complex. Setnayan Concierge can help by surfacing the homecoming windows for the couple's specified regions, but the family needs to coordinate directly — the Brain can't promise alignment will work for all family members in all years.
+**For couples with multiple OFW family members across regions**, the alignment math gets complex. Setnayan AI can help by surfacing the homecoming windows for the couple's specified regions, but the family needs to coordinate directly — the Brain can't promise alignment will work for all family members in all years.
 
 **OFW alignment often outweighs other layers.** A couple with critical-attendance OFW siblings may choose a December date despite the liturgical complexity (Advent), the cost premium (peak season), or the weather (humid but not typhoon-active). The Brain should surface this as a *primary* layer-4 anchor when the couple's intake captures significant OFW family presence.
 
@@ -498,7 +547,7 @@ Friday weddings in the Philippines typically run **15-30% below Saturday rates**
 - **Bands / DJs / hosts** — Friday rates often comparable to Saturday for entertainment-heavy vendors (they work Friday nights anyway)
 - **Photobooth / cocktail booth** — generally flat-rated regardless of day, but availability is much higher on Friday
 
-**For a typical 150-guest Manila wedding**, the Friday-vs-Saturday savings on venue + photo team + florist alone can total ₱40,000-₱100,000, comparable to one or two major SKU add-ons (Save-the-Date Video + Custom Monogram Pack + LED Background, etc.). Setnayan Concierge surfaces this as practical-budget framing for budget-conscious couples.
+**For a typical 150-guest Manila wedding**, the Friday-vs-Saturday savings on venue + photo team + florist alone can total ₱40,000-₱100,000, comparable to one or two major SKU add-ons (Save-the-Date Video + Custom Monogram Pack + LED Background, etc.). Setnayan AI surfaces this as practical-budget framing for budget-conscious couples.
 
 **Trade-offs to flag:**
 - **Working guests** — Friday evening ceremonies require guests to take leave or rush from work. Manila traffic compounds this; provincial commutes (e.g., Tagaytay venues) become difficult.
@@ -568,7 +617,7 @@ This is a complementary layer to Layer 1's Catholic reading (Friday Hour of Merc
 
 **The Venus association extends beyond Friday weekdays.** The Venus calendar cycle (Venus's heliacal rising-setting cycle, approximately 584 days) has historically been used for choosing wedding timing in some astrological traditions. For most Filipino couples this depth of detail isn't relevant — the surface-level Friday-as-Venus's-day reading is sufficient.
 
-**Don't oversell the astrological layer** — it's a meaningful layer for couples who care about it, and irrelevant to couples who don't. The Setnayan Concierge should surface this layer when the couple's intake hints at astrological openness (questions about moon phases, Mercury retrograde, zodiac compatibility) and stay quiet otherwise.
+**Don't oversell the astrological layer** — it's a meaningful layer for couples who care about it, and irrelevant to couples who don't. The Setnayan AI should surface this layer when the couple's intake hints at astrological openness (questions about moon phases, Mercury retrograde, zodiac compatibility) and stay quiet otherwise.
 
 ### Common follow-ups
 - "Why is Friday associated with love?"
@@ -619,7 +668,7 @@ Western astrological tradition reads the moon's phases as carrying different ene
 - **Full moon** — illumination, completion, peak energy. Highly visible weddings (large guest lists, dramatic outdoor ceremonies) sometimes scheduled for full moons; the dramatic full-moon photo opportunity is a bonus.
 - **Waning moon** (full → new) — release, letting go, ending. Generally avoided for new beginnings like weddings.
 
-**Don't oversell this layer.** Moon-phase astrology is a niche consideration for Filipino couples — usually only mentioned by couples who have already shown astrological interest in earlier intake. The Concierge can surface moon-phase reading when relevant and skip it otherwise.
+**Don't oversell this layer.** Moon-phase astrology is a niche consideration for Filipino couples — usually only mentioned by couples who have already shown astrological interest in earlier intake. Setnayan AI can surface moon-phase reading when relevant and skip it otherwise.
 
 **Layered with Chinese tradition (Layer 2):** the Chinese calendar is fundamentally lunar, and Chinese-Filipino numerology already incorporates lunar timing (Ghost Month is the 7th *lunar* month, not the 7th solar month). Couples honoring Chinese tradition don't need additional Western moon-phase framing; the Chinese framework already covers it.
 
@@ -643,11 +692,11 @@ Western astrological tradition reads the moon's phases as carrying different ene
 
 **Mercury retrograde** (the visual phenomenon when Mercury appears to move backward against the background stars, occurring 3-4 times per year for about 3 weeks each) is widely cited in popular Western astrology as a period to avoid important agreements, contracts, and travel. Some astrologically-oriented couples avoid scheduling weddings during Mercury retrograde windows.
 
-**Mercury retrograde dates change every year.** Sample windows from recent years: late March through mid-April; late July through mid-August; mid-November through early December. Specific dates for the current year should be looked up from a reliable ephemeris (the Setnayan Concierge can integrate this as an automated date check if astrological framing matters to the couple).
+**Mercury retrograde dates change every year.** Sample windows from recent years: late March through mid-April; late July through mid-August; mid-November through early December. Specific dates for the current year should be looked up from a reliable ephemeris (the Setnayan AI can integrate this as an automated date check if astrological framing matters to the couple).
 
 **The practical concern** behind Mercury retrograde framing is that the phenomenon traditionally signals miscommunication, delays, technical failures, and contract complications. For a wedding day with many moving parts (vendor coordination, guest travel, ceremony scripts, photo timing), the retrograde concern resonates with people who've experienced communication chaos during retrograde periods.
 
-**For most Filipino couples, this layer is irrelevant.** Mercury retrograde concern is more common in urban / younger / non-religious Filipino couples than in traditional Catholic or rural communities. The Concierge should surface this layer only when the couple's intake hints at astrological interest.
+**For most Filipino couples, this layer is irrelevant.** Mercury retrograde concern is more common in urban / younger / non-religious Filipino couples than in traditional Catholic or rural communities. Setnayan AI should surface this layer only when the couple's intake hints at astrological interest.
 
 ### Common follow-ups
 - "Is our date during Mercury retrograde?"
@@ -667,7 +716,7 @@ Western astrological tradition reads the moon's phases as carrying different ene
 **Source:** Setnayan internal architectural decision (2026-05-24)
 **Last verified:** 2026-05-24 · Setnayan team
 
-The five layers (Catholic / Liturgical · Chinese-Filipino Numerology · Filipino Folk · Practical Reality · Western Astrology) don't compete — they coexist. Filipino couples typically carry multiple layers simultaneously, often without conscious awareness that they're layered traditions. The Setnayan Concierge surfaces all five honestly, lets the couple weight them, and names contradictions when they appear.
+The five layers (Catholic / Liturgical · Chinese-Filipino Numerology · Filipino Folk · Practical Reality · Western Astrology) don't compete — they coexist. Filipino couples typically carry multiple layers simultaneously, often without conscious awareness that they're layered traditions. The Setnayan AI surfaces all five honestly, lets the couple weight them, and names contradictions when they appear.
 
 **How to weight layers for the curated 2-3 reasons on the wizard card:**
 
@@ -742,7 +791,7 @@ The tone score is advisory, not prescriptive — couples can always proceed with
 │  │  Tap to expand the full layered reading          │    │
 │  └──────────────────────────────────────────────────┘    │
 │                                                          │
-│  [Ask Setnayan Concierge about this date →]              │
+│  [Ask Setnayan AI about this date →]                     │
 │  [Set this date →] [Try another date]                    │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -757,7 +806,7 @@ The tone score is advisory, not prescriptive — couples can always proceed with
 | Curated reason 2 | Primary or secondary layer chunk's first paragraph | Truncated similarly |
 | Curated reason 3 | Tertiary layer or another primary chunk | Collapsed by default; expands on tap |
 | Expand-all view | Full chunks from all 5 layers, organized as collapsible sections | Auto-opens the primary layer; others collapsed |
-| Concierge chat handoff | Brain retrieval flow per 00_Architecture.md | Pre-loads the chunks already shown on the card |
+| Setnayan AI chat handoff | Brain retrieval flow per 00_Architecture.md | Pre-loads the chunks already shown on the card |
 
 ### Primary-layer resolution
 
@@ -836,9 +885,9 @@ The tone pill is more than a color — it carries a short text:
 
 Tap the pill to expand into the full tone explanation.
 
-### Concierge chat handoff
+### Setnayan AI chat handoff
 
-When the couple taps "Ask Setnayan Concierge about this date," the chat surface receives:
+When the couple taps "Ask Setnayan AI about this date," the chat surface receives:
 - All 5 layer chunks that were considered for this date
 - The primary-layer resolution
 - The tone-scoring result

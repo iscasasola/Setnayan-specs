@@ -138,6 +138,8 @@ same as the Phase 1–2b cadence.
 
 ## 12 · Lock vs Flag (owner refinement 2026-06-09) — supersedes the deferred bulk-auto-fill
 
+> **🚫 SUPERSEDED 2026-06-16 — kept for lineage.** This 2-state Lock/Flag control is replaced by the **3-state Locked/Auto/Excluded solver** in **[`Build_3State_Solver_2026-06-16.md`](Build_3State_Solver_2026-06-16.md)** (legacy mapping: Lock→Locked · Flag→Auto · neither→Excluded). Read that doc for the current Build design.
+
 A per-**category** two-state control, distinct from the macro "What is fixed?" selector (§4a). It makes the auto-fill explicit + per-category (better + safer than a blind bulk-add):
 
 | State | Meaning | Solver |
@@ -151,3 +153,16 @@ A per-**category** two-state control, distinct from the macro "What is fixed?" s
 **Build (flag-dark PRs):**
 - **PR-1 — foundation:** the Flag marker + persistence (`budget_category_flags`, couple-own RLS) + the Summary Lock/Flag/open UX + the free/paid messaging. *(No vendor write — safe.)*
 - **PR-2 — generation:** the action — Setnayan AI auto-adds the top-compat match to the Shortlist for each flagged category; regular surfaces the options. Reuses `category-search` + `compat-score` + the add-to-shortlist insert. *(The write pipeline — built + verified deliberately.)*
+
+---
+
+## 13 · Phase 3d — the 3-State Solver (2026-06-16) → see dedicated doc
+
+The § 12 two-state control evolved (owner session 2026-06-16) into a full **3-state Locked/Auto/Excluded** solver across every row (taxonomy rows + Date/Budget/Location), with `Reset · Build · Save As`, Setnayan-AI-aware Auto, a marketplace fallback search, and a vendor re-quote nudge. **Canonical spec: [`Build_3State_Solver_2026-06-16.md`](Build_3State_Solver_2026-06-16.md).** Highlights:
+
+- **Rows = quoted inquiries only** (`total_cost_php != null`) + the 3 dimension rows.
+- **Auto:** OFF = cheapest quote that fits budget · ON = the deterministic `compat-score` engine (reception-anchored + refinements + ladder) ranking among the couple's quotes.
+- **Fallback:** Auto can't fit → marketplace search (top 10, +5), ordered by a **hidden** compat %.
+- **Nudge:** a quoted vendor who passes date+location but fails budget → in-thread "create a new proposition?" (one per `(event,vendor,service)`, reply-gated, English, budget withheld).
+- **Depends on Improvement ①** (vendor-authored quotes → `total_cost_php`), greenlit 2026-06-16.
+- **Open owner sign-offs** in that doc § 9 (hidden-% scope · budget-number reveal · Save-As naming · Auto icon · reply-gate · inquiries-only sourcing).

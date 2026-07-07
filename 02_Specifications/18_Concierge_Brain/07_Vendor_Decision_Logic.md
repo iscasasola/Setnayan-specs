@@ -1,8 +1,8 @@
 # 07 — Vendor Decision Logic
 
-**Authoring status:** Filled 2026-05-18. Cross-references 0006 vendors_management (canonical service taxonomy + payment milestones + verification flow) and 0016 § 1 The Locked Sequence. These chunks teach the concierge how to *talk about vendor decisions* without becoming a marketplace replacement.
+**Authoring status:** Filled 2026-05-18. Cross-references 0006 vendors_management (canonical service taxonomy + payment milestones + verification flow) and 0016 § 1 The Locked Sequence. These chunks teach Setnayan AI how to *talk about vendor decisions* without becoming a marketplace replacement.
 
-**Important constraint.** The brain talks about *categories* and *decision criteria*, not individual vendors. Individual vendor matching lives in 0006 marketplace + the Concierge wizard's recommendation logic. The brain can deep-link to the marketplace ("See top venues that match your criteria → [Open marketplace]") but does not name specific vendors in chunks (vendor names rotate; chunks would go stale instantly).
+**Important constraint.** The brain talks about *categories* and *decision criteria*, not individual vendors. Individual vendor matching lives in 0006 marketplace + the Setnayan AI wizard's recommendation logic. The brain can deep-link to the marketplace ("See top venues that match your criteria → [Open marketplace]") but does not name specific vendors in chunks (vendor names rotate; chunks would go stale instantly).
 
 ---
 
@@ -129,16 +129,16 @@ Three coordinator tiers in PH practice:
 - **Partial planning** — coordinator joins 4-6 months before. Helps with vendor selection, contracts, timeline. ₱40K-80K typical. Best for couples who want help but have time.
 - **Full planning** — coordinator joins from engagement. Handles everything end-to-end. ₱80K-200K+ typical. Best for couples who are short on time / decision fatigue.
 
-**Setnayan Concierge handles much of the partial-planning load** (vendor recommendations, timeline nudges, payment tracking, auto-share-packs). You still need a human OTD coordinator for the wedding day itself — Concierge doesn't replace that.
+**Setnayan AI handles much of the partial-planning load** (vendor recommendations, timeline nudges, payment tracking, auto-share-packs) for ₱499 per 28-day cycle. You still need a human OTD coordinator for the wedding day itself — Setnayan AI doesn't replace that.
 
-**If you book your coordinator through Setnayan and they're on Pro Weekly**, Concierge unlocks for free as a perk of their subscription. You also get coordinator delegation — your coordinator can act on action items in your dashboard, and you see attributed updates ("Anna confirmed your Caterer Y deposit").
+**If you book a coordinator through Setnayan**, you also get coordinator delegation — your coordinator can act on action items in your dashboard, and you see attributed updates ("Anna confirmed your Caterer Y deposit").
 
 ### Common follow-ups
-- "Can Setnayan Concierge replace a coordinator?"
-- "Do I need an OTD if I have Concierge?"
+- "Can Setnayan AI replace a coordinator?"
+- "Do I need an OTD if I have Setnayan AI?"
 
 ### Caveats / what NOT to say
-- Don't say Concierge replaces a human coordinator — they're complementary.
+- Don't say Setnayan AI replaces a human coordinator — they're complementary.
 
 ---
 
@@ -175,8 +175,8 @@ Custom is the **hardest deadline** in your timeline — most Filipino-couture de
 
 Setnayan vendors fall into two tiers:
 
-- **Verified** — passed the 12-document verification flow (DTI, BIR 2303, Mayor's Permit, gov ID, bank verification, portfolio review, client references, AMLC sanctions screen, live selfie + ID liveness). Verified badge visible on profile. Can receive Setnayan Pay (the 5% in-app payment rail). Eligible for Pro Weekly, Boosted Ads, Sponsored Boost.
-- **Coming Soon** — registered but not yet verified. Marketplace profile + listing only. 3-stage Setnayan-managed payout (20%/60%/20%) if booked.
+- **Verified** — passed the verification flow. Verified badge visible on profile. Eligible for Pro Weekly, Boosted Ads, Sponsored Boost. _(Commission is 0%; vendor↔customer money is settled off-platform per RA 11967 — Setnayan never sits in the booking-money path. The retired 5% Setnayan Pay rail no longer applies.)_
+- **Coming Soon** — registered but not yet verified. Marketplace profile + listing only. _(Vendor↔customer money is off-platform; the retired 3-stage Setnayan-managed payout no longer applies.)_
 
 **For couples:** Verified is the safer choice — it's been through KYC + AMLC screening. Coming Soon vendors are still real businesses, but Setnayan hasn't completed the trust verification yet. Couples can still book Coming Soon vendors with appropriate caution (signed contract, clear deliverables).
 
@@ -189,25 +189,23 @@ Setnayan vendors fall into two tiers:
 
 ---
 
-## "No Convenience Fee" badge — what it means
+## Vendor pricing — no convenience fee, ever
 
-**Tags:** no-convenience-fee, badge, vendor, opt-in, pricing, setnayan-pay
+> **RETIRED to 0% at the 2026-06-07 reset.** This chunk previously described a 5.0% Setnayan Pay convenience fee and a "No Convenience Fee" badge that let vendors absorb it. Both are gone — there is no per-booking fee for anyone to absorb or display a badge about.
+
+**Tags:** zero-commission, vendor, pricing, off-platform
 **Applies to:** all couples
-**Cross-ref:** 0006 § convenience-fee absorption, 0034 § 6.8
-**Last verified:** 2026-05-18 · Setnayan team
+**Cross-ref:** 0034 § 6.8
+**Last verified:** 2026-06-29 · Setnayan team
 
-Setnayan Pay charges a 5.0% convenience fee on top of vendor price by default — visible at checkout. Some vendors opt to **absorb that fee themselves** rather than have it added to the customer bill. Those vendors get the "No Convenience Fee" badge on their profile + search results + detail page.
-
-The badge means: the price you see on their profile is the all-in price. No extra 5% at checkout.
-
-Vendor revenue from Setnayan Pay is the same either way — the 5% always goes to Setnayan. What changes is whether the customer sees it as a line item.
+Setnayan charges **0% commission and no convenience fee** on vendor bookings. The price you see on a vendor's profile is the all-in price; couples settle with vendors off-platform (Setnayan does not sit in the money path).
 
 ### Common follow-ups
-- "Why would a vendor absorb the fee?"
-- "Should I prefer vendors with this badge?"
+- "Does Setnayan add a fee when I book a vendor?" → No — 0% commission, no convenience fee.
+- "Is the vendor's listed price the final price?" → Yes — Setnayan adds nothing on top.
 
 ### Caveats / what NOT to say
-- Don't recommend prioritizing this badge — it's a vendor's pricing strategy, not a quality signal.
+- Don't describe any per-booking percentage fee, commission, or fee-absorption badge — none exist.
 
 ---
 
@@ -224,7 +222,7 @@ Typical PH wedding-vendor payment ladders:
 - **4-partial + Balance** — for high-value bookings (venue + catering); spreads payment over 4 milestones leading up to the wedding
 - **Lump Sum** — usually only for low-cost vendors (cake, save-the-date video); paid in full at booking
 
-Setnayan's Budget tool tracks these milestones automatically and reminds you 7 days before each is due. If you're on Concierge, the wizard surfaces overdue payments in your Next Actions feed.
+Setnayan's Budget tool tracks these milestones automatically and reminds you 7 days before each is due. If you're on Setnayan AI, the wizard surfaces overdue payments in your Next Actions feed.
 
 ### Common follow-ups
 - "What's a normal reservation fee?"
@@ -333,7 +331,7 @@ Setnayan's dispute escalation path:
 3. **Force-majeure flow** — for typhoon/disaster cancellations; admin coordinates replacement vendor or refund per the force-majeure clause in your contract
 4. **Refund processing** — admin-actioned via 0023 disputes queue if applicable
 
-Setnayan acts as mediator when both parties paid through Setnayan Pay. For off-platform bookings, Setnayan can advise but enforcement is between the parties.
+Setnayan can advise and mediate via the help-center ticket flow, but because vendor↔customer money is settled off-platform (RA 11967 · 0% commission), payment enforcement is ultimately between the parties per their signed contract.
 
 ### Common follow-ups
 - "What if my vendor just disappears?"

@@ -1,3 +1,5 @@
+> **🔴 SETNAYAN AI PRICE SUPERSEDED 2026-07-02 (owner-locked): ₱499 first 28-day cycle (intro) → ₱799/28-day cycle.** Single tier, unlock-all, event-anchored. Every ₱3,999 / ₱1,499 *Setnayan AI planner* figure below is RETIRED — the ₱499/28d that was the working price is now the first-cycle intro (non-AI SKU prices unaffected). Canonical: `Pricing.md` §00.A + DECISION_LOG 2026-07-02 + [[project_setnayan_pricing_tiers]].
+
 # Setnayan Monetization Blueprint (2026-06-14)
 ### "Plan the whole wedding free; pay only for the decision and the memory"
 

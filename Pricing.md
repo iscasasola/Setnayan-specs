@@ -18,13 +18,12 @@
 | Tier | Price | Includes |
 |---|---|---|
 | Free — Explore | ₱0 | Browse marketplace + personalized match "reveal" preview + Schedule · Budget · Guest List · Seat Plan · Mood Board. **No free RSVP, no free website, no free matching — all paid.** |
-| **Setnayan AI** | **₱3,999** | First paywall — full match / sort / cross-reference (date↔availability · budget · venue · pax · religion · reviews) + planning workspace. Soft-gate reveal. |
-| **Essentials** | **₱12,999** | AI + Animated Monogram + Custom QR + RSVP Pro + Papic Guests + Guest Stories + Event Website + Editorial Website. SRP ₱25,992 → ~50% off. |
-| **Complete** | **₱27,999** | All 19 paid services. SRP ₱53,981 → ~48% off. |
+| **Setnayan AI** | **₱499 first 28-day cycle (intro) → ₱799/28-day cycle** [🔴 owner-locked 2026-07-02 — the ₱499 first cycle MATCHES the live catalog ₱499/`per_28d`, so cycle 1 is enforceable NOW; only the ₱799 recurring step-up needs the billing PR] | First paywall — full match / sort / cross-reference (date↔availability · budget · venue · pax · religion · reviews) + planning workspace + the secretary/guard/coach assistant. Soft-gate reveal. **✅ FINALIZED 2026-06-30 (owner "follow the redesign · go fully live") — per-USER SUBSCRIPTION — ₱499 first 28-day cycle (intro) then ₱799 per 28-day cycle (owner-locked 2026-07-02). Live DB `platform_retail_catalog_v2.SETNAYAN_AI` = ₱499 / `per_28d` (mig `20270322883953`). One subscription covers ALL of a user's events (read-side fan-out via `user_ai_subscription.active_until` → `isSetnayanAiActiveForUser`); never double-charges a couple on shared/co-hosted events; runs from activation UNTIL `events.event_date`, then auto-ends (lazy expiry, no charges past the event). Supersedes the prior ₱3,999 one-time per-EVENT model. ⚠ GO-LIVE GATE: the per-user gate must be wired into the 6 experience surfaces + `setnayan_ai_per_user_enabled` flipped + `SETNAYAN_AI_SUB` SKU activated + the per-event `SETNAYAN_AI` row retired — flag-flip alone does NOT deliver AI (surfaces still read the per-event entitlement). INF/TRD personalization stays dormant pending DPO sign-off.** |
+| ~~Essentials ₱12,999~~ · ~~Complete ₱27,999~~ | — | **🚫 BUNDLE TIERS REMOVED 2026-06-29 (owner: "no more essentials and complete").** `GUIDED_PACK` + `MEDIA_PACK` deactivated (live as of PR #2409). The ladder is now **Free → Setnayan AI (₱499 first 28d → ₱799/28d) → à-la-carte** (no bundles). |
 
-### 00.B À la carte (19 paid)
+### 00.B À la carte (no bundles — Free → Setnayan AI → these)
 
-Setnayan AI ₱3,999 · Animated Monogram ₱1,999 · Custom QR ₱999 · RSVP ₱2,499 · RSVP Pro ₱4,499 · Papic Guests ₱2,999 · Guest Stories ₱1,499 · Event Website ₱1,999 · Editorial Website ₱7,999 · Papic 5 Seats ₱2,999 · Pakanta ₱2,499 · Pabati ₱999 · Panood ₱2,499/day · Live Background ₱2,499 · PhotoWall ₱2,499 · Patiktok ₱1,499 · Camera Bridge ₱1,499 · Thank You ₱3,499 · Same Day Edit ₱4,999. **SRP total ₱53,981.** (RSVP & RSVP Pro are tiers of one product — bundles include the Pro.)
+Setnayan AI ₱499 first 28-day cycle (intro) → ₱799/28-day cycle (per-USER subscription · owner-locked 2026-07-02; the prior ₱499/28d working price is now the first-cycle intro, ₱799 the new recurring; supersedes the ₱3,999 one-time) · Couple Website PRO ₱4,999 (umbrella · unlocks pro touches across Save the Date · RSVP · on-the-day · Editorial; reprice + owner-lock 2026-07-04, was ₱1,999) · Editorial PRO ₱3,499 (à-la-carte editorial authoring; also included in Couple Website PRO · new 2026-07-04) · Animated Monogram ₱1,999 · Pakanta ₱2,499 · 3D Plan ₱2,499 (priced · gate-pending) · Live Studio multicam ₱3,499/day (single-cam livestream FREE) · Live Background ₱499 · Live Photo Wall ₱2,499/day · Pabati ₱1,299/day · Thank You ₱2,499 · Guest Stories **FREE** (client-rendered · owner-locked free; the stale `PAPIC_ADDON_STORIES` ₱2,000 catalog row was deactivated 2026-06-30) · Kwento ₱299 (whole event) · Camera Bridge ₱1,299/day (event-wide) · Papic Unli ₱100/cam·day · Papic Ltd ₱30/cam·day (both cap ₱15,000/day) · Unlock-all-Papic ₱15,000/day · Custom QR FREE. **No bundles** — Essentials/Complete removed 2026-06-29; the prior fixed "19-paid / SRP ₱48,483" framing is retired with them. SRP = live sum of the à-la-carte SKUs above. (Retired & no longer listed: RSVP/RSVP Pro/Event Website/Editorial Website standalone, Papic Guests, Papic 5 Seats, paid Stories line, Same-Day Edit, Patiktok.)
 
 ### 00.C Removed (tombstoned 2026-06-07)
 
@@ -44,6 +43,28 @@ Together these gut the "free to plan / free wedding website" pillars; the free t
 
 > **✅ SHIPPED 2026-06-13 — PR [#1335](https://github.com/iscasasola/setnayan-platform/pull/1335)** (copy + JSON-LD + llms.txt; DB catalogs were already canonical, no migration) + PR [#1336](https://github.com/iscasasola/setnayan-platform/pull/1336) (signed-in vendor-dashboard worked example). **Still open:** ① `saas_overhead_cost_php` population (admin/COGS); ② **RSVP SKU collision — OWNER CALL NEEDED:** prod DB has BOTH `RSVP_PRO_WEBSITE` "RSVP Pro" ₱4,499 AND `PRO_RSVP` "Pro RSVP" ₱1,999 active while base `RSVP_WEBSITE` ₱2,499 is inactive; § 00.B says RSVP ₱2,499 + Pro ₱4,499. ③ **Vendor-side prices in § 0.C / corpus CLAUDE.md were STALE** — DB + live site canon (DECISION_LOG 2026-06-09 reprice): **Pro ₱6,000/28d (₱60,000/yr) · Enterprise ₱10,000/28d (₱100,000/yr) · flat ₱100/token, packs ₱400–₱10,000**; not ₱2,499/₱5,499/₱1,000–₱18,000.
 
+### 00.F Website-SKU collapse — NOW LIVE (live-site sync 2026-06-23)
+
+The **2026-06-14 addendum** (single PRO website unlock) is **live on `/pricing`**. This supersedes the § 00.B treatment of the website/RSVP SKUs:
+
+- **🔄 2026-07-04 owner reprice + new SKU (SUPERSEDES the ₱1,999 figures below) — Couple Website PRO ₱1,999 → ₱4,999 + new à-la-carte Editorial PRO ₱3,499.** Couple Website PRO is confirmed as the **UMBRELLA** that unlocks **all** pro website-lifecycle features across the four phases — **Save the Date · RSVP · On the day · Editorial**. New standalone **`EDITORIAL_PRO` ₱3,499** buys just the editorial-authoring perk (name the moments · tell each story · arrange the front page); a Couple Website PRO order **also confers** it AND **`STD_PREMIUM_OPENINGS`** (the Cinematic Reveal — owner same-day confirmation: "unlocks all pro features … Save the date, rsvp, event(on the day), editorial"; both stay purchasable à la carte), wired via `SKU_OWNERSHIP_ALIASES` in `lib/entitlements.ts` (since `COUPLE_WEBSITE_PRO` can't nest in `BUNDLE_CHILD_SKUS`). Applied live to `platform_retail_catalog_v2` + repo PR (migration `20270511151471`). ⚠ Note: this table stores prices as **whole PHP numeric** (`4999.00`, `3499.00`), NOT centavos. The ₱1,999 figures in the 2026-06-29 note below are now historical.
+- **🔄 2026-06-29 owner reprice + remodel — Couple Website is now an à-la-carte unlock menu OR one "Unlock All" bundle.** Free tier keeps the **4-in-1 site (Save-the-Date · RSVP · Event · Editorial) + unlimited RSVP**. Premium is bought per-unlock or as **Couple Website PRO = "Unlock All" ₱1,999** (was ₱3,999) _(now ₱4,999 — see 2026-07-04 note above)_:
+  - **Reveal** · cinematic STD openings — **₱1,499** (`STD_PREMIUM_OPENINGS`, **live**; ₱799→₱800→₱1,499, repriced up 2026-06-29 per the pricing audit)
+  - STD video upload — ₱100 (`STD_VIDEO_UPLOAD`, inactive · unbuilt)
+  - Photo gallery upload — ₱100 (`WEBSITE_GALLERY_UPLOAD`, inactive · unbuilt)
+  - Waze / Google Map linking — ₱100 (`WEBSITE_MAP_LINKING`, inactive · unbuilt)
+  - Themes (RSVP + Event + Editorial) — ₱1,000 (`WEBSITE_THEMES`, inactive · unbuilt)
+  - **Editorial PRO = `EDITORIAL_PRO` ₱3,499** (à-la-carte editorial-authoring unlock · new 2026-07-04; also conferred by Couple Website PRO)
+  - **Unlock All = `COUPLE_WEBSITE_PRO` ₱4,999** (repriced 2026-07-04 from ₱1,999 · the umbrella across STD · RSVP · on-the-day · Editorial). _These are **website-only** unlocks._
+- **🔌 The website is a HUB — auto-integrations (2026-06-29 owner; corrects the prior "3D inside PRO" line).** Features the couple owns **surface on the site automatically, free or paid** — they are **separate SKUs, NOT website unlocks**: **3D Plan** (renamed 2026-06-29 from "3D Seating" / "3D Seat Plan"; **FREE** = 2D seat plan + guest list + mood board; **PAID** unlocks the full 3D + the website seat-finder integration — `SEATING_3D` **₱2,499** (was ₱999 same day — repriced up after competitor research: guest-facing animated 3D is whitespace, closest per-event comps charge ~$97–250 for 2D-only), standalone SKU **OUTSIDE** Couple Website PRO — inactive until the `eventSkuActive('SEATING_3D')` gate is wired, since the 3D lab is on-for-everyone behind `NEXT_PUBLIC_SEATING_3D` today) · **Live Photo Wall** · **Live Streaming / Live Studio** · **Papic + Gallery** · **Pakanta** (backing song) · **Animated Monogram** (site chrome). Owning/buying the feature is what lights it up on the site; the website just gathers them.
+- **Watermark policy change:** the "Powered by Setnayan" watermark is **never removed — it stays subtle for everyone** (free + paid). It is **no longer a paid perk** (supersedes the prior model where watermark-removal was PRO's only live perk).
+- The old standalone SKUs (**RSVP ₱2,499 · RSVP Pro ₱4,499 · Event Website ₱1,999 · Editorial Website ₱7,999**) stay **retired/inactive** (DB lineage only).
+- **⚠ Build gap:** of the website unlocks above, only **Reveal** is shipped. STD video / gallery / map / themes gating is **UNBUILT** — the à-la-carte rows are seeded **INACTIVE** in `platform_retail_catalog_v2` as build targets; do not activate until each gate ships. So ₱1,999 PRO has **no live functional perk yet beyond Reveal.** (Auto-integration rendering on the site is partly live — Papic gallery, Live Studio embed, monogram chrome — and partly unbuilt — 3D seat-finder, Live Photo Wall on-site.) See DECISION_LOG 2026-06-29.
+- **§ 00.E note ② (RSVP SKU collision) — public surface RESOLVED:** RSVP is no longer a standalone public SKU. *Residual:* prod-DB rows (`RSVP_PRO_WEBSITE` ₱4,499 / `PRO_RSVP` ₱1,999 / inactive `RSVP_WEBSITE` ₱2,499) still want a cleanup pass so the catalog table matches the collapsed public model.
+- *Residual copy-lag:* the Essentials bundle string on `/pricing` still lists "Pro RSVP + Event Website + Editorial Website" by their old names — a marketing-copy fix, not a catalog change.
+
+> ⚠ **Owner sign-off flag:** this records a load-bearing SKU change (4 website/RSVP SKUs → 1 PRO unlock). It is **not a new decision** — it's the owner's 2026-06-14 addendum, now confirmed live on the site. Surfaced here per the corpus load-bearing-change rule.
+
 ---
 
 ## 0. LIVE SITE CATALOG — authoritative as of 2026-06-04 (⚠ SUPERSEDED by § 00 above · 2026-06-07)
@@ -54,40 +75,42 @@ Together these gut the "free to plan / free wedding website" pillars; the free t
 
 | SKU | Price | Build state | What the site says |
 |---|---|---|---|
-| Animated Monogram | ₱2,499 | **Live** | Bespoke Monogram with Animation |
-| Custom QR per Guest | ₱1,499 | **Live** | 1 QR code per guest (up to 250 pax) |
-| Indoor Blueprint | ₱1,499 | **Live** | Guided from entrance to table |
-| Papic (5 Seats) `[Token]` | ₱2,999 | **Live** | Unlimited photos + unlimited videos for 5 hours |
-| Papic Guest (Disposable Camera) `[Token]` | from ₱2,999 | **Live** | 24 photos + 10 × 5-second videos |
-| Setnayan AI | ₱1,499 | **Live** | Assisted planning (the AI planner — replaces "Setnayan Concierge" naming) |
-| High Res Archive | ₱2,999 / yr | In build | Yearly archive, billed per year |
-| Live Background `[Token]` | ₱2,499 | In build | LED wall design background with monogram (was "Pailaw"/LED Background) |
-| Panood (Website Add-on) `[Token]` | ₱3,499 / day | In build | Live streaming per day embedded on the event page |
-| Patiktok `[Token]` | ₱2,499 | In build | Up to 250 TikTok recordings |
-| Pro Website `[Token]` | ₱5,499 | In build | Premium invitation + event page + editorial |
-| Call-Time Escalator | ₱1,999 | Coming soon | SMS update to all vendors |
-| Camera Bridge | ₱1,999 | Coming soon | Connect DSLR to Papic and Panood |
+| Animated Monogram | ₱1,999 | **Live** | Bespoke Monogram with Animation |
+| Custom QR per Guest | **FREE** 2026-06-29 (was ₱1,499/₱999) | **Live** | Now FREE (owner) — full per-guest QR personalization; `CUSTOM_QR_GUEST` → ₱0 active. Drives adoption. |
+| ~~Indoor Blueprint~~ | ~~₱1,499~~ | **🚫 RETIRED** | Removed (`INDOOR_BLUEPRINT` inactive in DB; see § 31 "Removed"). |
+| ~~Papic (5 Seats)~~ | ~~₱2,999~~ | **SUPERSEDED** | Replaced by the per-camera model (Papic Ltd ₱30/cam·day · Unli ₱100/cam·day); `PAPIC_SEATS` inactive. |
+| ~~Papic Guest (Disposable Camera)~~ | ~~₱2,999~~ | **SUPERSEDED** | Replaced by the per-camera model (Papic Ltd = 30 photos + 10×5s per camera); `PAPIC_GUEST` inactive. |
+| Setnayan AI | ₱499 first 28d → ₱799/28d | **Live** | Assisted planning (the AI planner — replaces "Setnayan Concierge" naming) |
+| ~~High Res Archive~~ | ~~₱2,999 / yr~~ | **🚫 RETIRED** | Removed (`HIGH_RES_ARCHIVE` inactive in DB; see § 31 "Removed"). |
+| Live Background | **₱499** | In build | **Repositioned 2026-06-29** (owner): self-serve — couple places a VIDEO or picks a BACKGROUND from the Setnayan template library for the venue screen. Was ₱2,499 "LED wall design + monogram" service (repriced down + simplified to resolve the Animated Monogram overlap). |
+| Live Studio (formerly Panood) — single-cam livestream | **FREE** | Live #2219 | Couple goes live to their own YouTube, embedded free on the event page + auto-archive |
+| Live Studio (formerly Panood) — multicam control room | ₱3,499 / day | Foundation built · video pending infra | 9-feature controller: multi-cam YouTube + in-house live · switching · overlays · highlight generator · Photowall/LED→screen · multi-screen control (the paid upgrade) |
+| ~~Patiktok~~ `[Token]` | ~~₱2,499~~ | **RETIRED 2026-06-29** | Cut (owner "delete all data about patiktok"). SKU `PATIKTOK_COMPILER` deactivated. See `RETIRED_ITEMS.md`. |
+| ~~Pro Website~~ | ~~₱5,499~~ | **SUPERSEDED** | Collapsed into **Couple Website PRO ₱1,999** + à-la-carte unlocks; the DB `PRO_WEBSITE` row is the inactive "Editorial Website" ₱7,999 (lineage only). |
+| ~~Call-Time Escalator~~ | ~~₱1,999~~ | **🚫 RETIRED** | Removed (`CALL_TIME_ESCALATOR` inactive in DB; see § 31 "Removed"; SMS is not in V1). |
+| Camera Bridge — Papic (`CAMERA_BRIDGE`) | ₱1,299 / day (flat · unlocks DSLR for ALL Papic cameras) | ACTIVE | Connect a DSLR / external camera into Papic — event-wide unlock (repriced 2026-06-29 from ₱100/seat·day) |
+| Camera Bridge — Live Studio | **Included free** in Live Studio ₱3,499/day | INCLUDED | Connect a DSLR / external camera into the multicam control room — no per-camera fee (owner 2026-06-26 "make it free"; standalone `PANOOD_CAMERA_BRIDGE` SKU removed) |
 | Guest Stories (Papic Add-on) | ₱1,999 | Coming soon | 30-second story maker for guests |
-| Live Venue Photo Wall `[Token]` | ₱2,499 | Coming soon | Live photo collage with live count |
-| Pabati | ₱999 | Coming soon | Up to 300 × 5-second videos |
+| Live Venue Photo Wall (`LIVE_WALL`) | ₱2,499 / day | **Live** | Live photo collage with live count (repriced 2026-06-29 → ₱2,499/day per audit) |
+| Pabati | ₱1,299 / day | Coming soon | Up to 300 × 5-second videos (repriced 2026-06-29) |
 | Pakanta `[Token]` | ₱2,499 | Coming soon | Create a special song for the couple (single SKU — was 3 tiers) |
 | Pakulay | ₱0 | Coming soon | Free mood board · palette + visual identity for every account |
-| SDE (Papic Add-on) `[Token]` | ₱3,499 | Coming soon | 3-minute video compilation from Papic (a.k.a. "Same-Day Edit") |
-| Thank You Video (Papic Add-on) `[Token]` | ₱5,499 | Coming soon | 5-minute thank-you video for attendees |
+| ~~SDE (Papic Add-on)~~ | ~~₱3,499~~ | **RETIRED 2026-06-28** | Removed fully (PR #2362; owner "remove SDE fully"). Stories + Auto-Recap kept. See `RETIRED_ITEMS.md`. (The separate Panood human-curated "Same-Day Edit" ₱24,999 is ALSO retired 2026-06-28 — owner "remove same day edit".) |
+| Thank You Video (Papic Add-on) `[Token]` | ₱2,499 | Coming soon | 5-minute thank-you video for attendees (repriced 2026-06-29 → ₱2,499 per audit) |
 
 ### 0.B Bundles
 
-| Bundle | Price | Scope |
-|---|---|---|
-| Setnayan Guided Planner Suite | ₱11,999 | one-time, per event |
-| Setnayan Comprehensive Media Pack Bundle | ₱16,999 | one-time, per event |
+> **🚫 ALL BUNDLES REMOVED 2026-06-29 (owner: "no more essentials and complete").** Both bundle tiers are cut — `GUIDED_PACK` ("Setnayan Essentials" ₱12,999) + `MEDIA_PACK` ("Setnayan Complete" ₱27,999) deactivated in `platform_package_catalog`. (The older "Guided Planner Suite ₱11,999 / Comprehensive Media Pack ₱16,999" names were already stale aliases of those same codes.) **The model has NO bundles:** Free → Setnayan AI (₱499 first 28d → ₱799/28d) → à-la-carte SKUs. `PAPIC_UNLOCK` ₱15,000/day is an à-la-carte Papic-day SKU, NOT a tier bundle — it stays active.
 
 ### 0.C Vendor-side (canonical = `/pricing`)
 
+> **🔄 2026-06-29 owner reprice (supersedes the ₱6,000/₱10,000 "canon" in the § 0/§ 0.1 banners above + DECISION_LOG 2026-06-09):** Solo **₱999/28d · ₱9,999/yr** · Pro **₱2,499/28d · ₱24,999/yr** · Enterprise **₱4,999/28d · ₱49,999/yr** (all ~23% annual prepay discount). Aligns the vendor floor closer to the PH benchmark (Kasal.com) per the 2026-06-29 pricing audit. Applied to `vendor_billing_catalog`. 0% commission unchanged. **🖥 Display ordering (owner 2026-06-29): lead with the ANNUAL price, show the 28-day/monthly as the SECONDARY option** — the 28-day run-rate (×13.04 cycles/yr) sits at the top of each Kasal band, so the ~23% annual prepay is what makes the tier competitive; annual must be the hero. ⚠ **Live `/for-vendors` + `/pricing` vendor table still render monthly-first — code change pending (apps/web).**
+
 | SKU | Price | Annual | Notes |
 |---|---|---|---|
-| Pro Vendor (28-day prepaid block) | ₱2,499 / 28 days | ₱24,999 / yr (save ₱7,488 · 23%) | 1 category · 5 sub-seats · free vendor site · 100 complimentary tokens once verified |
-| Enterprise Vendor (28-day prepaid block) | ₱5,499 / 28 days | ₱54,999 / yr (save ₱16,488 · 23%) | all categories · unlimited sub-seats · 100 tokens |
+| **Solo Vendor** | **₱999 / 28 days** | **₱9,999 / yr** (~23%) | 1 category · 0 sub-seats · free vendor site · NEW canonical 2026-06-29 |
+| Pro Vendor (28-day prepaid block) | **₱2,499 / 28 days** | **₱24,999 / yr** (~23%) | 3 categories · 3 sub-seats · free vendor site · 100 complimentary tokens once verified |
+| Enterprise Vendor (28-day prepaid block) | **₱4,999 / 28 days** | **₱49,999 / yr** (~23%) | all categories · unlimited sub-seats · 100 tokens · repriced 2026-06-29 |
 | Additional Branch (per branch) | ₱999 / 28 days | — | Enterprise only · apply-then-pay (0034) · BUILT 2026-06-05 (price ₱999 charm + Enterprise gate owner-locked 2026-06-05; supersedes the prior "Pro+ only") |
 | Feature boost (per feature, 7 days) | 4–100 tokens | — | redeemed from token balance |
 
@@ -113,9 +136,11 @@ Verified vendors receive **100 complimentary tokens** once verification is appro
 
 ---
 
-## 0.1 UNRESOLVED SITE-INTERNAL CONTRADICTIONS — owner must settle
+## 0.1 ~~UNRESOLVED~~ SITE-INTERNAL CONTRADICTIONS — ✅ RESOLVED 2026-06-23
 
-The live site disagrees with itself. `/pricing` is treated as canonical above, but these need a real decision and a single-source fix on the website:
+> **✅ RESOLVED (live-site re-crawl 2026-06-23).** All five items below are **gone from the live site** — the 2026-06-09 vendor reprice + PRs #1335/#1336 unified every page. Current live state across `/`, `/pricing`, `/for-vendors`, `/how-it-works`: **Pro ₱6,000/28d · Enterprise ₱10,000/28d · 0% commission everywhere · verification free during launch · Setnayan AI ₱3,999** (no "Concierge", no ₱1,499 planner, no 5% commission, no ₱1,499 verification badge). The list below is retained as lineage of what *used* to contradict.
+
+The live site disagreed with itself (snapshot 2026-06-04). `/pricing` was treated as canonical, and these have since been settled and single-sourced on the website:
 
 1. **Vendor Pro price appears four different ways.** `/pricing` ₱2,499 / 28 days · homepage ₱1,999 / 28 days · `/for-vendors` ₱4,999 / **week** (founder ₱3,999/wk) · `/how-it-works` ₱499 / **week**. These are different *models*, not typos.
 2. **Commission.** Homepage + `/pricing` say **0% commission**; `/for-vendors` says Setnayan Pay is a **flat 5.0%** on every booking. Mutually exclusive.
@@ -144,39 +169,51 @@ The live site disagrees with itself. `/pricing` is treated as canonical above, b
 
 ### 2.1 Papic — paparazzi capture
 
+> **⚠ 2026-06-29 owner update (supersedes the per-cam caps below):** Papic Ltd + Unli both cap at **₱15,000/day** (was ₱6,000 / ₱10,000); Ltd = **30 photos + 10×5s**. Add-ons are now per-camera(≈guest) rates scaling to a daily cap with a min floor: **Stories ₱20/cam·day** (min ₱200 / max ₱2,000) · **Kwento ₱5/cam·day** (min ₱50 / max ₱500) · **Pabati ₱500/day** · **Photo Wall ₱1,000/day**; Pabati + Kwento + Photo Wall sit **under Papic**. Needs catalog per-guest/floor/cap fields (flat-only today). See DECISION_LOG 2026-06-29 + `0012_papic.md`.
+
 | SKU | Price | Centavos | Status | Source |
 |---|---|---|---|---|
-| Papic 3-seat | ₱1,499 | 149,900 | ACTIVE | [0012_papic.md:86](0012_papic/0012_papic.md) |
-| Papic 5-seat | ₱2,499 | 249,900 | ACTIVE | [0012_papic.md:87](0012_papic/0012_papic.md) |
-| + Camera (per additional seat, multi-purchase) | ₱999 | 99,900 | ACTIVE | [0012_papic.md:88](0012_papic/0012_papic.md) |
-| + Credits (per +1,000 capture-pool credits, multi-purchase) | ₱299 | 29,900 | **V1.5+ DEFERRED** | [0012_papic.md:78](0012_papic/0012_papic.md) |
-| Cam Bridge — per slot / per day | ₱99 | 9,900 | ACTIVE | [0012_papic.md:89](0012_papic/0012_papic.md) |
-| Cam Bridge — all slots / per day | ₱249 | 24,900 | ACTIVE | [0012_papic.md:90](0012_papic/0012_papic.md) |
-| Cam Bridge — annual (all seats, unlimited events) | ₱2,499 | 249,900 | ACTIVE | [0012_papic.md:91](0012_papic/0012_papic.md) |
-| Premium Guest Camera Pack (event-wide: archive + Drive sync + auto-recap + watermark-free) | ₱1,499 | 149,900 | **V1.5+ DEFERRED** | [0012_papic.md:98](0012_papic/0012_papic.md) |
-| Personal Album (per guest, opt-in digital album) | ₱49 | 4,900 | **V1.5+ DEFERRED** | [0012_papic.md:99](0012_papic/0012_papic.md) |
-| Memory Book (per guest, opt-in printable hardcover PDF) | ₱249 | 24,900 | **V1.5+ DEFERRED** | [0012_papic.md:100](0012_papic/0012_papic.md) |
-| Per Template (premade unlock, multi-purchase) | ₱49 | 4,900 | ACTIVE | [0012_papic.md:173](0012_papic/0012_papic.md) |
+| **Papic Ltd** (30 photos + 10×5s clips) | **₱30 / camera·day** | per-cam | ACTIVE · per-camera (≈ per-guest) · **5-cam min → ₱150** · **cap ₱15,000/day** | [0012_papic.md](0012_papic/0012_papic.md) |
+| **Papic Unli** (unlimited · full-res Drive archive) | **₱100 / camera·day** | per-cam | ACTIVE · per-camera · **cap ₱15,000/day** | [0012_papic.md](0012_papic/0012_papic.md) |
+| **Unlock all of Papic** (`PAPIC_UNLOCK` · daily max / bundle) | **₱15,000 / day** | 1,500,000 | ACTIVE | [0012_papic.md](0012_papic/0012_papic.md) |
+| Stories (Papic add-on) | **₱20 / camera·day** | per-cam | ACTIVE · **min ₱200 / max ₱2,000/day** | [0012_papic.md](0012_papic/0012_papic.md) |
+| Kwento (words-on-photo · Papic add-on) | **₱299** (whole event · flat) | 29,900 | ACTIVE · 2026-06-29 — ₱299 unlocks the WHOLE event (was ₱299/day → flat to avoid per-day stacking; was ₱5/cam·day cap ₱500) | [0012_papic.md](0012_papic/0012_papic.md) |
+| Thank You (Papic add-on) | **₱2,499** | 249,900 | ACTIVE (flat · repriced 2026-06-29 from ₱1,500) | [0012_papic.md](0012_papic/0012_papic.md) |
+| Pabati (video guestbook · **under Papic**) | **₱1,299 / day** | 129,900 | ACTIVE · repriced 2026-06-29 (₱500→₱999→₱1,299/day) | [0012_papic.md](0012_papic/0012_papic.md) |
+| Live Photo Wall (`LIVE_WALL` · **under Papic**) | **₱2,499 / day** | 249,900 | ACTIVE · repriced 2026-06-29 (₱1,000→₱1,499→₱2,499/day) | [0012_papic.md](0012_papic/0012_papic.md) |
+| Camera Bridge (DSLR → Papic · `CAMERA_BRIDGE`) | **₱1,299 / day** (flat · unlocks DSLR for ALL Papic cameras) | 129,900 | ACTIVE · repriced 2026-06-29 (was ₱100/seat·day; now event-wide unlock — priced as the Papic differentiator) | [0012_papic.md](0012_papic/0012_papic.md) |
+| Papic Free tier (owner 2026-06-29) | **Gallery view + camera filters + first 5 cameras free** (5 photos + 1 video each) | 0 | ACTIVE | [0012_papic.md](0012_papic/0012_papic.md) |
+| ~~Papic 3-seat / 5-seat / +Camera / +Credits / Cam-Bridge-tiers~~ | — | — | **SUPERSEDED** by the per-camera model above | — |
+| Premium Guest Camera Pack · Personal Album · Memory Book · Per Template | (see `0012_papic.md`) | — | **V1.5+ DEFERRED** | [0012_papic.md](0012_papic/0012_papic.md) |
 
 > **Note on V1.5+ deferred SKUs in Papic:** seat SKUs + camera add-on + Cam Bridge tiers + per-template ship in V1. The 4 deferred SKUs (Credits, Premium Guest Camera Pack, Personal Album, Memory Book) reactivate in V1.5+ — they're documented here for spec continuity, not as bookable items at launch.
 
-### 2.2 Panood — live broadcast
+### 2.2 Live Studio (formerly Panood) — live broadcast
+
+> **⚠ 2026-06-26 packaging LOCK (owner-set price + coverage) — TWO TIERS:**
+> - **FREE — single-camera livestream** (₱0, shipped #2219): the couple goes live to their OWN YouTube (phone or laptop) → embedded free on the event page → auto-archived on their channel. Available to every couple, no purchase. This is the ONLY free Panood tier. ("Every service free to use" — the locked positioning.)
+> - **PAID — multicam control room** (`PANOOD_SYSTEM` — internal SKU key kept; display name now "Live Studio") · **₱3,499/day** (owner-set 2026-06-29, down from the 2026-06-26 ₱4,999 — itself up from ₱2,499). Unlocks the full controller, all locked until purchased: **(1)** multi-cam YouTube live streaming · **(2)** live streaming · **(3)** Photowall → screen · **(4)** LED Wall → screen · **(5)** extended screen control · **(6)** multicam controller · **(7)** overlays · **(8)** highlight generator (live replays) · **(9)** camera switch. Capabilities: connect multiple cameras · control multiple screens · broadcast via YouTube · also run an in-house (offline/local) live stream. **Foundation BUILT** (PR1-5: cameras #2242 · screens #2252 · control plane #2255 · control-room page #2256 · camera-join #2259); the media core + walking-skeleton (real video) pending the DB-creds refresh + the self-host media server.
+> - **No standalone SKU retired** (owner 2026-06-26): Panood's highlight generator = LIVE replays during the broadcast — the post-event edit SKUs (AI Highlight / Thank You) stay separate _(SDE fully RETIRED 2026-06-28)_; and Panood ROUTES Photowall + LED-Wall content to screens — the PhotoWall / Live-Background (LED) content SKUs stay separate.
+>
+> The rows below are the PRE-LOCK ladder kept for lineage — single-cam is now free, "Daily Broadcast" is the paid multicam tier (now ₱3,499/day · renamed Live Studio), Annual is folded, and the Cam-Bridge/AI rows are scoped add-ons (kept, not retired). See `DECISION_LOG.md` 2026-06-26 + `Panood_Multicam_Architecture_2026-06-26.md`.
 
 | SKU | Price | Centavos | Status | Source |
 |---|---|---|---|---|
-| Daily Broadcast (up to 6 cams, per event-day) | ₱2,499 / day | 249,900 | ACTIVE | [0011_panood.md:60](0011_panood/0011_panood.md) |
+| **Single-camera livestream** (own YouTube → event page → auto-archive) | **FREE** | 0 | ACTIVE #2219 | `Panood_Multicam_Architecture_2026-06-26.md` |
+| **Multicam control room** (9-feature controller: multi-cam YouTube + in-house live · switching · overlays · highlight generator · Photowall/LED→screen · multi-screen control) | ₱3,499 / day | 349,900 | foundation built · video pending infra | [0011_panood.md:60](0011_panood/0011_panood.md) |
 | Annual Streaming (unlimited days, all events on account) | ₱19,999 / year | 1,999,900 | ACTIVE | [0011_panood.md:61](0011_panood/0011_panood.md) |
-| Cam Bridge — per slot / per day | ₱199 | 19,900 | ACTIVE | [0011_panood.md:62](0011_panood/0011_panood.md) |
-| Cam Bridge — all slots / per day | ₱249 | 24,900 | ACTIVE | [0011_panood.md:62](0011_panood/0011_panood.md) |
-| Cam Bridge — annual (all seats, unlimited events) | ₱2,499 / year | 249,900 | ACTIVE | [0011_panood.md:62](0011_panood/0011_panood.md) |
+| Camera Bridge (DSLR/external cam → Live Studio control room) | **Included free** in Live Studio ₱3,499/day | 0 | INCLUDED (owner 2026-06-26 · no separate SKU) | [0011_panood.md:62](0011_panood/0011_panood.md) |
+| ~~Cam Bridge — all slots / per day~~ · ~~annual~~ | — | — | SUPERSEDED → unified ₱200/cam/day | — |
 | Template Pack — per event-day | ₱799 | 79,900 | ACTIVE | [0011_panood.md:63](0011_panood/0011_panood.md) |
 | Template Pack — annual (all events) | ₱7,999 / year | 799,900 | ACTIVE | [0011_panood.md:63](0011_panood/0011_panood.md) |
 | Broadcast Style Pack (News / Cinematic / Sports / Royalty + transitions, event-wide) | ₱2,999 | 299,900 | ACTIVE | [0011_panood.md:523](0011_panood/0011_panood.md) |
 | AI Video Highlight (60-second auto-edit) | ₱1,999 / render | 199,900 | ACTIVE — multi-purchase | [0011_panood.md:98](0011_panood/0011_panood.md) |
 | AI Edited Highlight (3-minute auto-edit, repriced 2026-05-16 from ₱4,999) | ₱3,499 / render | 349,900 | ACTIVE — multi-purchase | [0011_panood.md:98](0011_panood/0011_panood.md) |
-| Same-Day Edit (post-event human-curated highlight) | ₱24,999 / event | 2,499,900 | ACTIVE — multi-purchase | [0011_panood.md:575](0011_panood/0011_panood.md) |
+| ~~Same-Day Edit (post-event human-curated highlight)~~ | ~~₱24,999 / event~~ | — | **RETIRED 2026-06-28** (owner "remove same day edit") — see `RETIRED_ITEMS.md` | ~~[0011_panood.md:575]~~ |
 
-### 2.3 Patiktok — guest reel builder (iteration 0017)
+### 2.3 ~~Patiktok — guest reel builder (iteration 0017)~~ — 🚫 RETIRED 2026-06-29
+
+> **Patiktok is CUT** (owner "remove patiktok. delete all data about patiktok"). All SKUs below RETIRED; `PATIKTOK_COMPILER` deactivated + `setnayan_patiktok` taxonomy hidden. Rows kept for lineage only. See `RETIRED_ITEMS.md` + DECISION_LOG 2026-06-29.
 
 | SKU | Price | Centavos | Status | Source |
 |---|---|---|---|---|
@@ -202,16 +239,18 @@ The live site disagrees with itself. `/pricing` is treated as canonical above, b
 
 | SKU | Price | Centavos | Status | Source |
 |---|---|---|---|---|
-| Pakanta Basic (1 song, 1 style, 24-hr turnaround, no lyric approval) | ₱1,999 | 199,900 | ACTIVE | [0036_pakanta.md:37](0036_pakanta/0036_pakanta.md) |
-| Pakanta Premium (1 song, 2 versions, 3 remakes, lyric approval, 2–5 day) | ₱3,999 | 399,900 | ACTIVE | [0036_pakanta.md:38](0036_pakanta/0036_pakanta.md) |
-| Pakanta Wedding Suite (3 DNA-matched songs, 3 remakes total, 5–7 day) | ₱9,999 | 999,900 | ACTIVE | [0036_pakanta.md:39](0036_pakanta/0036_pakanta.md) |
+| Pakanta (single SKU — custom AI-generated wedding song) | ₱2,499 | 249,900 | ACTIVE | prod DB `platform_retail_catalog_v2` (2026-06-29) · [0036_pakanta.md](0036_pakanta/0036_pakanta.md) |
 
-### 2.7 Bespoke Monogram (iteration 0037)
+> **Repriced 2026-06-29:** the prior 3-tier Pakanta ladder (Basic ₱1,999 / Premium ₱3,999 / Wedding Suite ₱9,999) is RETIRED — Pakanta is now ONE SKU at ₱2,499 (prod DB canon).
+
+### 2.7 Animated Monogram (iteration 0037)
 
 | SKU | Price | Centavos | Status | Source |
 |---|---|---|---|---|
-| Bespoke Monogram (AI-generated luxury mark, 30 refinements included) | ₱2,999 | 299,900 | ACTIVE — **NO REFUND** | [0037_bespoke_monogram.md:23](0037_bespoke_monogram/0037_bespoke_monogram.md) |
-| Bespoke Monogram + 10 Refinements | ₱199 | 19,900 | ACTIVE — multi-buyable | [0037_bespoke_monogram.md:101](0037_bespoke_monogram/0037_bespoke_monogram.md) |
+| Animated Monogram (AI-generated luxury mark + animation, 30 refinements included) | ₱1,999 | 199,900 | ACTIVE — **NO REFUND** | prod DB `platform_retail_catalog_v2` (2026-06-29) · [0037_bespoke_monogram.md](0037_bespoke_monogram/0037_bespoke_monogram.md) |
+| Animated Monogram + 10 Refinements | ₱199 | 19,900 | ACTIVE — multi-buyable | [0037_bespoke_monogram.md:101](0037_bespoke_monogram/0037_bespoke_monogram.md) |
+
+> **Renamed + repriced:** ships as **Animated Monogram ₱1,999** (prod DB canon) — NOT "Bespoke Monogram ₱2,999" and NOT ₱2,499.
 
 ### 2.8 LED Background (iteration 0005)
 
@@ -238,16 +277,13 @@ Pay-per-render pack pricing locked 2026-05-22 — NO subscription, no activation
 
 ---
 
-## 3. Setnayan Concierge (iteration 0016)
+## 3. Setnayan AI (iteration 0016)
 
-Single-SKU model locked 2026-05-17 (Essentials ₱2,499 tier retired same-week).
+> **RENAMED + REPRICED → SUBSCRIPTION (finalized 2026-06-30, owner "follow the redesign"):** the "Setnayan Concierge ₱4,999" SKU is RETIRED, and the prior **₱3,999 one-time per-event** model is now SUPERSEDED. Setnayan AI ships as a **per-USER subscription — ₱499 first 28-day cycle (intro) → ₱799/28-day cycle** (owner-locked 2026-07-02) — ONE subscription covers ALL of a user's events, runs from activation until each event's date then auto-ends. Adds the assistant layer (secretary/guard/coach + 33-template deterministic library) on top of the matchmaking layer. Prices are catalog-managed (prod DB `platform_retail_catalog_v2`). See [[project_setnayan_ai_subscription_redesign]].
 
 | SKU | Price | Centavos | Status | Source |
 |---|---|---|---|---|
-| Setnayan Concierge Complete (12-month access · 9-step roadmap · daily nudges · priority vendor matching · honeymoon planning included) | ₱4,999 / 12mo | 499,900 | ACTIVE — single tier | [0016_step_by_step_plan_builder.md:22](0016_step_by_step_plan_builder/0016_step_by_step_plan_builder.md) |
-| Concierge 3-day free trial (card-less, one per account, abuse-gated) | FREE | 0 | ACTIVE | [0016_step_by_step_plan_builder.md:66](0016_step_by_step_plan_builder/0016_step_by_step_plan_builder.md) |
-
-**Expiry rule** (per iteration 0016 § 0): `concierge_expires_at = LEAST(wedding_date + 30 days, concierge_activated_at + 24 months)`, minimum `activated_at + 12 months`. Wedding-anchored, not purchase-anchored.
+| Setnayan AI (per-user subscription · matchmaking + secretary/guard/coach assistant) | ₱499 first 28d → ₱799/28d | 39,900 → 79,900 | LIVE catalog (`SETNAYAN_AI` = ₱499 `per_28d`). Per-user entitlement engine built but GO-LIVE-gated — see § 00.A. | prod DB `platform_retail_catalog_v2` (2026-06-30) · [0016_step_by_step_plan_builder.md](0016_step_by_step_plan_builder/0016_step_by_step_plan_builder.md) |
 
 ---
 
@@ -397,7 +433,7 @@ See [0021 § 13](0021_couple_dashboard_fully_purchased/0021_couple_dashboard_ful
 | Broadcast Style Pack | ~₱5 (LUT swaps) | ₱2,999 | ~99% |
 | AI Video Highlight | ~₱10 (Claude API + ffmpeg) | ₱1,999 | ~99% |
 | AI Edited Highlight (3-min) | ~₱30 (Claude API + ffmpeg + theme template) | ₱3,499 | ~99% |
-| Same-Day Edit | (human editor billable to Setnayan) | ₱24,999 | — |
+| ~~Same-Day Edit~~ | ~~(human editor billable to Setnayan)~~ | ~~₱24,999~~ | **RETIRED 2026-06-28** |
 | Pakanta Wedding Suite | ~₱200 (Suno credits + Claude API) | ₱9,999 | 85–90% |
 | Vendor Pro Weekly | ₱0 (analytics + landing styling) | ₱499 / wk | ~100% |
 | All Tools Unlock Bundle | ₱0 | ₱9,999 / yr | ~100% |
@@ -478,7 +514,7 @@ These binary artifacts are the financial source-of-truth for owner-side budgetin
 | [0003 (retired)](RETIRED_ITEMS.md) | Token Wallet — retired 2026-05-11, no longer active |
 | [0004 Invitation Widgets](0004_invitation_widgets/0004_invitation_widgets.md) | Monogram Hero, Live Schedule |
 | [0005 LED Background](0005_led_background_maker/0005_led_background_maker.md) | LED Standard + Custom tier |
-| [0011 Panood](0011_panood/0011_panood.md) | All Panood SKUs + AI Highlights + SDE |
+| [0011 Panood](0011_panood/0011_panood.md) | All Panood SKUs + AI Highlights _(SDE retired 2026-06-28)_ |
 | [0012 Papic](0012_papic/0012_papic.md) | All Papic SKUs |
 | [0016 Step-by-Step Plan Builder](0016_step_by_step_plan_builder/0016_step_by_step_plan_builder.md) | Setnayan Concierge tier + trial |
 | [0021 Couple Dashboard](0021_couple_dashboard_fully_purchased/0021_couple_dashboard_fully_purchased.md) | Active apparatus table § 1 + vendor-to-couple fee policies § 10.9 / § 11.3 / § 12.3 / § 13.2 |

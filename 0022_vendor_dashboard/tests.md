@@ -42,9 +42,9 @@ Each section of the spec needs corresponding test coverage. Tick when written.
 - [ ] 5b. Sponsored Boost · ₱1,499/week · extends visibility from 10km to 30km
 - [ ] 5c. Vendor-controlled final price + payment routing
 - [ ] Rule 1 — Vendor controls the final agreed price
-- [ ] Rule 2 — Payments outside the app by default · Setnayan Pay as the V1 opt-in (3%)
-- [ ] Rule 3 — Tax treatment when Setnayan receives payments
-- [ ] Rule 4 — Setnayan Pay convenience fee (locked 2026-05-12 per task #37 pivot — supersedes earlier 5% Guarantee model)
+- [ ] Rule 2 — Payments settle off-platform · 0% fee, 0% commission (Setnayan Pay convenience fee RETIRED 2026-06-07; the old "3% opt-in" path is no longer offered)
+- [ ] ~~Rule 3 — Tax treatment when Setnayan receives payments~~ (RETIRED — Setnayan no longer receives vendor-booking payments; off-platform only)
+- [ ] ~~Rule 4 — Setnayan Pay convenience fee~~ (RETIRED to 0% at the 2026-06-07 reset)
 - [ ] 2d. Couple-invite claim landing (locked 2026-05-19) — public route, default + Already-on-Setnayan branches, post-signup auto-link, failure modes, transactional email template
 
 ## Acceptance criteria
@@ -69,8 +69,8 @@ Claims drawn from the spec that the implementation must satisfy. Each one needs 
 
 Every pricing path needs a test. Verify amount, currency, applied discount/comp, and that the order row matches the displayed price.
 
-| Direct (default) | ₱85,000 to vendor | ₱85,000 | ₱0 |
-| Setnayan Pay | ₱87,550 to Setnayan | ₱85,000 (full) | ₱2,550 (3%) |
+| Direct (default · the only live path) | ₱85,000 to vendor | ₱85,000 | ₱0 |
+| ~~Setnayan Pay~~ (RETIRED to 0% 2026-06-07) | ~~₱87,550 to Setnayan~~ → off-platform | ₱85,000 (full, direct) | ₱0 (no fee) |
 | Volume | 4% | Packages &gt; ₱150K · volume discount on big contracts |
 | Tiny floor | min ₱500 | Contracts &lt; ₱10K · keeps small-policy economics sane |
 | B · Specialized tool integrations | ₱99/week each | 100% (license fee) | Yes — billed weekly with Pro |

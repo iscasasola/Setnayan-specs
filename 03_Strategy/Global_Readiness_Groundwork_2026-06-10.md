@@ -181,7 +181,7 @@ The split that makes "the rest are the same" precise: **everything that doesn't 
 | Plot own vendors → invite → marketplace grows | ✅ Yes | Registry + `vendor_invites` are country-neutral |
 | Chat with vendors after they join | ✅ Yes | Country-neutral |
 | **Pay a vendor** | ✅ Yes | Vendor↔customer money is **off-platform everywhere** (RA 11967) — Setnayan never touches it, so no currency work needed |
-| **Pay Setnayan for its own SKUs** (Papic · Monogram · Save-the-Date · Pakanta · Panood) | ⛔ Waits on the pack | Needs currency (§3.1) + payment rail (§3.3) + tax/receipt (§2 #4) |
+| **Pay Setnayan for its own SKUs** (Papic · Monogram · Save-the-Date · Pakanta · Live Studio) | ⛔ Waits on the pack | Needs currency (§3.1) + payment rail (§3.3) + tax/receipt (§2 #4) |
 | **Paid vendor tiers + token economy** | ⛔ Waits on the pack | Priced in PHP, banded to PH wages |
 
 ### Phased expansion this unlocks
@@ -206,7 +206,7 @@ Expansion adds a dimension beyond *country*: the **sales channel** (web · iOS �
 | Money type | Apple/Google cut? | Why |
 |---|---|---|
 | **Vendor bookings** (real-world services — photo, catering, venue) | **None** | Store cut applies to *digital* goods only; real-world services are exempt — **and** these are already off-platform (RA 11967). Double-safe. |
-| **Setnayan's own digital SKUs** (Papic · Animated Monogram · Save-the-Date · Pakanta · Panood) | **15–30% if sold via IAP** | These are digital content consumed in-app → store IAP rules apply. |
+| **Setnayan's own digital SKUs** (Papic · Animated Monogram · Save-the-Date · Pakanta · Live Studio) | **15–30% if sold via IAP** | These are digital content consumed in-app → store IAP rules apply. |
 
 So it's not "in-app services cost more everywhere" — it's "the renders/templates/digital features we sell *ourselves* lose 15% when bought inside the app store." Vendor money is untouched.
 
@@ -236,7 +236,7 @@ The §3.1/§3.2 price seam gains a third axis: **price + take-rate per (country 
 
 ## 10 · Channel-aware price model (the data shape for §9)
 
-The concrete shape that lets one SKU carry web / iOS / Android prices. **Applies only to Setnayan's own digital SKUs** (`is_setnayan_service = true` + digital deliverable — Papic, Monogram, Save-the-Date, Pakanta, Panood). **Vendor bookings have no channel axis** (off-platform, RA 11967 — never an IAP). Three tables + a derivation rule (blueprint, not applied):
+The concrete shape that lets one SKU carry web / iOS / Android prices. **Applies only to Setnayan's own digital SKUs** (`is_setnayan_service = true` + digital deliverable — Papic, Monogram, Save-the-Date, Pakanta, Live Studio). **Vendor bookings have no channel axis** (off-platform, RA 11967 — never an IAP). Three tables + a derivation rule (blueprint, not applied):
 
 ```sql
 -- (a) base price list — the WEB reference price, per SKU × country  (= §3.2)

@@ -4,7 +4,7 @@
 > **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas (or "still accurate"):
 > - **The format + generator are STILL ACCURATE and SHIPPED.** `supabase/migrations/20260512000000_setnayan_base.sql` defines `generate_public_id(type_letter)` with the exact Crockford alphabet `0123456789ABCDEFGHJKMNPQRSTVWXYZ` and emits `'S89' || upper(type_letter) || '-' || <10-char body>`; its `COMMENT` literally reads "Generates a S89<TYPE>-<10-char Crockford base 32> public identifier." `S89U-`/`S89V-`/`S89E-` etc. hold.
 > - **Order-ID delta (§2/§5):** the 0034 payment spine ships as table **`orders`** (not `service_orders`), and the customer-facing code on it is the **`reference_code`** column (8-char Crockford per `AS_BUILT_GROUND_TRUTH_2026-06-07` §4 / 0034 reconciliation) — the `reference_code → public_id` rename and the `S89O-`-10-char migration described in §5 were **not applied** to the shipped table. Verify against `20260513150000_iteration_0034_payments.sql` before quoting an order-ID shape.
-> - Pricing/commission/SKU truths elsewhere (0% commission, "Setnayan AI" ₱1,499 planner, retired customer token wallet, live vendor token economy, retiring BIR) do not affect this ID doc, but note the reserved `B`/`C`/`R`/`T` letters reference features whose spec names have since shifted.
+> - Pricing/commission/SKU truths elsewhere (0% commission, "Setnayan AI" ₱3,999 planner, retired customer token wallet, live vendor token economy, retiring BIR) do not affect this ID doc, but note the reserved `B`/`C`/`R`/`T` letters reference features whose spec names have since shifted.
 >
 > When this body disagrees with the above, **the above wins.**
 

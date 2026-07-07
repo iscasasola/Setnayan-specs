@@ -265,7 +265,7 @@ The DESIGN tile (Design's 8th) that gathers Setnayan's **digital / AI-generated 
 - **Specific needs:** turnaround · rights/usage
 - **Onboarding pick:** n/a (Setnayan editorial is the default surface)
 
-### Livestream `[PROPOSED — Panood is Setnayan; 3rd-party schema]`
+### Livestream `[PROPOSED — Live Studio is Setnayan; 3rd-party schema]`
 - **Schedule:** Date · stream hours
 - **Match facet — services:** multi-cam · single-cam · platform [YouTube · FB · Zoom] · recording · with-screen-at-venue
 - **Specific needs:** camera count · operator included

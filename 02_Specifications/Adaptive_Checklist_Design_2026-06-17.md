@@ -107,7 +107,7 @@ The `needs_decision` prompt only fires for categories with no `event_vendors` si
 └─────────────────────────────────────────────────┘
 ```
 
-Layer 2 is seeded via `lib/checklist-taxonomy.ts` (build queued) which reads the active event type's plan-group tree and the couple's picks, then calls `ensureChecklistSeeded()` on first open and on each subsequent open (top-up mechanism — new taxonomy categories added by admin automatically appear).
+Layer 2 is *intended* to be seeded via `lib/checklist-taxonomy.ts` reading the active event type's plan-group tree and the couple's picks. ⚠ **Code-verified 2026-07-08:** this is NOT built — `lib/checklist-taxonomy.ts` is a 28-line stub (returns `interested_categories`, reads no plan-group tree) with **zero callers**, and only `ensureChecklistSeeded()` (Layer 1, `checklist-actions.ts:40`) actually fires. Layer 2 wiring is net-new work, not a top-up on existing code. See [`Adaptive_Checklist_Event_Type_Definitions_2026-07-08.md` § 1](Adaptive_Checklist_Event_Type_Definitions_2026-07-08.md) for the verified gap + de-hardcode plan.
 
 ---
 

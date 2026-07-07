@@ -10,7 +10,7 @@
 
 ## 1 · The lock in one paragraph
 
-**Cloudflare R2 is the single system of record for every media artifact Setnayan generates.** Capture, render, and generation all happen on R2. **Google Drive is the couple's permanent copy** — not the primary store. Setnayan keeps each artifact **high-res hot on R2 for 3 months**, then **compresses it** to a cold copy (the 5-year retention guarantee holds on the compressed version); the **High Res Archive ₱2,999/yr** SKU opts an event out of compression and keeps Setnayan's high-res copy. The couple gets their copy two ways: a **download-all** (local copy) and an **auto-sync into their own Google Drive**. The Drive sync covers six deliverable artifacts — **Pakanta · Monogram · Papic · Patiktok · Pabati · QR codes**. **Panood is carved out entirely**: live streaming and its archive live on YouTube (the couple's own channel via BYO-YouTube OAuth), never on Drive.
+**Cloudflare R2 is the single system of record for every media artifact Setnayan generates.** Capture, render, and generation all happen on R2. **Google Drive is the couple's permanent copy** — not the primary store. Setnayan keeps each artifact **high-res hot on R2 for 3 months**, then **compresses it** to a cold copy (the 5-year retention guarantee holds on the compressed version); the **High Res Archive ₱2,999/yr** SKU opts an event out of compression and keeps Setnayan's high-res copy. The couple gets their copy two ways: a **download-all** (local copy) and an **auto-sync into their own Google Drive**. The Drive sync covers six deliverable artifacts — **Pakanta · Monogram · Papic · Patiktok · Pabati · QR codes**. **Live Studio is carved out entirely**: live streaming and its archive live on YouTube (the couple's own channel via BYO-YouTube OAuth), never on Drive.
 
 This supersedes the earlier "R2 hot 90 days → IA cold 5 years" line and the Papic "R2 → Drive transfer at T+30d" note.
 
@@ -32,7 +32,7 @@ This supersedes the earlier "R2 hot 90 days → IA cold 5 years" line and the Pa
                           (runs during the high-res window, so the couple keeps
                            the high-res original forever in their own Drive)
 
-   Panood ─────▶  ▶ YouTube live  +  YouTube archive (couple's channel)   ── SEPARATE RAIL
+   Live Studio ─▶  ▶ YouTube live  +  YouTube archive (couple's channel)   ── SEPARATE RAIL
 ```
 
 **Why this shape.** Setnayan pays for only **3 months of high-res hot storage**; after that it compresses its own copy to shed cost, while the couple's high-res original already lives in *their* Drive. The couple never depends on Setnayan keeping high-res, and Setnayan never depends on the couple keeping their Drive folder — each side holds an independent copy. Drive is the *destination*, never the *engine*: live streaming stays YouTube, render stays FFmpeg, photo tagging / face-detect / gallery stay in the app.
@@ -70,9 +70,9 @@ One "Connect your Google Drive" per event creates one event folder; each service
 
 ---
 
-## 5 · Panood carve-out (explicit)
+## 5 · Live Studio carve-out (explicit)
 
-**Panood is NOT in the Drive copy set.** Google Drive cannot ingest or serve a live broadcast. Panood's rails:
+**Live Studio is NOT in the Drive copy set.** Google Drive cannot ingest or serve a live broadcast. Live Studio's rails:
 
 - **Live delivery:** YouTube (BYO-YouTube via OAuth — already locked 2026-05-16, `lib/panood-youtube.ts`).
 - **Archive:** YouTube auto-archive on the couple's own channel.
@@ -98,10 +98,10 @@ Generalize these into one `pushToDriveCopy()` module + one "Connect Drive" flow.
 
 | File | Change |
 |---|---|
-| `CLAUDE.md` (corpus root) — Architecture summary › Storage | Replace *"Cloudflare R2 (PH-region buckets) — hot 90 days, IA cold 5 years"* with the 3-month-high-res → compress model + "Google Drive = couple's permanent copy (download + auto-sync)". Add the Drive-copy set (6 artifacts) and the Panood carve-out to the locked-constraints list. |
+| `CLAUDE.md` (corpus root) — Architecture summary › Storage | Replace *"Cloudflare R2 (PH-region buckets) — hot 90 days, IA cold 5 years"* with the 3-month-high-res → compress model + "Google Drive = couple's permanent copy (download + auto-sync)". Add the Drive-copy set (6 artifacts) and the Live Studio carve-out to the locked-constraints list. |
 | `0009_photo_delivery/0009_photo_delivery.md` | Rescope from "Google Drive integration for photo delivery" → **universal Drive-copy layer**: one Connect-Drive per event, one event folder, six artifact subfolders, `drive.file` scope, async copy worker. |
 | `0012_paparazzi/0012_papic.md` | Storage section: **R2 = system of record**. Retire "R2 → Drive transfer at T+30d." Add: finalized tagged photos+clips auto-copy to the couple's Drive during the 3-month high-res window. |
-| `0011_panood/0011_panood.md` + `0011_panood_offline_note.md` | State Panood is **excluded from the Drive copy layer** (YouTube live + YouTube archive only). Delete the offline-note "recording → R2 archive that 0009 can push to Drive" line. |
+| `0011_panood/0011_panood.md` + `0011_panood_offline_note.md` | State Live Studio is **excluded from the Drive copy layer** (YouTube live + YouTube archive only). Delete the offline-note "recording → R2 archive that 0009 can push to Drive" line. |
 | `0017_patiktok/0017_patiktok.md` | Storage/dependency: source of record = R2 (not "Papic (storage)"). Add: rendered compilation MP4 auto-copies to `/Patiktok/` in the couple's Drive. |
 | `0036_pakanta/…md` | Add: final song file copies to `/Pakanta/` in the couple's Drive. |
 | `0037_bespoke_monogram/…md` + `0004_invitation_widgets/…md` | Add: monogram SVG + animation export copies to `/Monogram/`. |

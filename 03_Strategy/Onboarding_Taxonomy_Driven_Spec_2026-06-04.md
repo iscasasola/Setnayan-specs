@@ -18,7 +18,7 @@ Deciding principle: **selling vs. planning.**
 | **Customer dashboard › Services** (planning) | **ALL categories.** Available add normally; not-yet-available add as a plan slot marked *"we'll help you source this"* + a demand signal | The dashboard is a wedding-**planning** tool — its job is to help the couple plan the whole wedding, not just what's in stock today. |
 | **Vendor listings inside a category** (both) | **Supply-gated** — real available vendors, else *"coming soon / Setnayan can help"* | Never show phantom listings. |
 
-**"Available" =** a category has **≥1 bookable vendor OR a Setnayan first-party service** (Papic, Pakanta, Panood, Monogram, Pa-ilaw, Patiktok…). First-party seeding is the standard marketplace cold-start move and keeps the founder-only catalog from looking barren.
+**"Available" =** a category has **≥1 bookable vendor OR a Setnayan first-party service** (Papic, Pakanta, Live Studio, Monogram, Pa-ilaw, Patiktok…). First-party seeding is the standard marketplace cold-start move and keeps the founder-only catalog from looking barren.
 
 **Self-healing:** every surface reads availability live — a category appears in onboarding, or flips from "we'll source this" → bookable on the dashboard, the moment supply lands. No deploy.
 

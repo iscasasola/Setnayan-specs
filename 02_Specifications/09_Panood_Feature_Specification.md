@@ -1,13 +1,17 @@
+> ⚠ RENAMED 2026-06-29: Panood → **Live Studio**; paid multicam repriced ₱4,999 → ₱3,499/day. (Internal SKU key PANOOD_SYSTEM unchanged.) See DECISION_LOG.md 2026-06-29.
+
 # Panood Feature Specification
 
 > ## WARNING: AS-BUILT CORRECTION — 2026-06-07 (reconciled to live site + origin/main)
 > **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Panood exists in code as an **"In build"** SKU, but the pricing/packaging in this doc is fully superseded:
 > - **Live pricing:** Panood is **"Panood (Website Add-on)" ₱3,499/day** (per-day, audience-independent, livestream on the couple's event page) — NOT the "₱2,500 base + ₱1,000/camera + ₱1,000/hour" apparatus model, and NOT the legacy "Pkg 1 ₱4,499 / Pkg 2 ₱7,499" lineup in the revenue section. Charm `-1` PHP-direct pricing applies platform-wide.
-> - **Retired add-on prices:** "AI Video Highlight ₱2,000", "AI Edited Highlight ₱5,000", "Custom Monogram Pack ₱2,000", and the SDE/Thank-You-Video numbers cited here are stale. Current catalog: SDE ₱3,499 · Thank You Video ₱5,499 · the monogram SKU is **"Animated Monogram" ₱2,499** (bundles the animation). Use the ground-truth SKU table.
+> - **Retired add-on prices:** "AI Video Highlight ₱2,000", "AI Edited Highlight ₱5,000", "Custom Monogram Pack ₱2,000", and the SDE/Thank-You-Video numbers cited here are stale. Current catalog: SDE / Same-Day Edit is **RETIRED** · Thank You Video ₱2,499 · the monogram SKU is **"Animated Monogram" ₱1,999** (bundles the animation). Use the ground-truth SKU table.
 > - **Crew tiers stay cut:** the Tier 5–8 "Setnayan Team Stream" bundles + province surcharges (₱24,999–₱79,999, with "3% / 11" style commission columns in the Year-1 revenue table) are CUT and were never built — Setnayan supplies no crew labor. Any "3%/5% commission" or "Team tier" math here is a dead revenue model; **platform commission is 0%**.
 > - **Sales model:** Panood (like all Setnayan Productions) is sold as a **first-party vendor listing** to couples via apply-then-pay (manual admin approval); free during the launch window (to 31 Mar 2027). The YouTube-only delivery architecture (SFU ingest → server compositor → RTMP → YouTube IFrame embed) remains the intended technical design and is the part of this doc still worth reading.
 >
 > When this body disagrees with the above, **the above wins.**
+>
+> **➕ 2026-06-29 price refresh** (live-site sync — supersedes any stale prices in the banner above): Setnayan AI **₱3,999** (paid first paywall) · Animated Monogram **₱1,999** · Live Studio (Panood) multicam **₱3,499/day** (single-cam livestream FREE) · Pakanta **₱2,499** (one SKU) · Cinematic Reveal **₱1,499** · vendor Pro **₱2,499** / Enterprise **₱4,999** per 28-day · **0% commission · verification FREE** · couple website = free 4-in-1 + ONE **Couple Website PRO ₱1,999** (old separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs retired) · couple tiers **Free ₱0 · Setnayan AI ₱3,999** (Essentials/Complete bundles REMOVED 2026-06-29). Canon: `AS_BUILT_GROUND_TRUTH_2026-06-07.md` § 1 + `Pricing.md` § 00.
 
 **Document Version:** 1.1 (FINAL pricing locked)
 **Last Updated:** 2026-05-08
@@ -113,6 +117,12 @@ Follow the sprint plan in **Part 17** and check off items in **Part 24**. Do not
 ---
 
 ## Part 1 — Executive Summary
+
+### Why Panood Exists — Presence Across Distance (positioning · owner-stated 2026-06-14)
+
+> **This is the canonical *why*; the multi-camera production tooling described below is the *how*.** Panood is not, at heart, broadcast tooling — it is **presence across distance.** It exists for the people the couple most wants in the room but who cannot physically be there: **the lola who is bedridden, the relatives who are abroad** — anyone whose body can't make it to the venue. Its goal is to give them the chance to **see the wedding as if they were there** — not a grainy single-phone afterthought, but **multiple cameras carrying every angle of the day so no story is left untold.**
+
+Panood is one half of Setnayan's **"presence" pair**, alongside Papic. **Papic** brings the *human moments of the day* to a couple too busy to catch them — the reactions and candids they couldn't see. **Panood** brings the *people who can't attend* into the day itself. Both sell presence, not production. (This is the same split the competitive comparison already draws: *"I want my mom in Toronto to watch"* is Panood; *"I want every candid the photographer missed"* is Papic.) Public copy should lead with **who you bring into the room**, not the camera count.
 
 ### What Panood Is
 

@@ -119,7 +119,7 @@ Setnayan Project/
 
 ## What Setnayan does in one paragraph
 
-A two-sided marketplace + planning platform for Filipino weddings (V1) that expands to universal events (anniversaries · debuts · corporate · christenings · graduations · reunions in later phases — burial retired 2026-05-16). Couples plan their event end-to-end through a Guided or DIY dashboard; vendors apply, get verified, optionally certified, and grow their bookings through Sponsored Boost; the platform monetizes via apparatus-priced add-ons (Save-the-Date renders, Paparazzi seats, Live Stream, AI Highlights, etc.) and a 3% Setnayan Pay convenience fee. PHP-direct apply-then-pay payments in V1; GCash Merchant API automation in V1.5+. Free vendor registration during launch with grandfathered "lifetime free listing" for the first cohort.
+A two-sided marketplace + planning platform for Filipino weddings (V1) that expands to universal events (anniversaries · debuts · corporate · christenings · graduations · reunions in later phases — burial retired 2026-05-16). Couples plan their event end-to-end through a Guided or DIY dashboard; vendors apply, get verified, optionally certified, and grow their bookings through Sponsored Boost; the platform monetizes via apparatus-priced add-ons (Save-the-Date renders, Paparazzi seats, Live Stream, AI Highlights, etc.) — commission is 0% and there is no Setnayan Pay convenience fee (vendors settle off-platform). PHP-direct apply-then-pay payments in V1; GCash Merchant API automation in V1.5+. Free vendor registration during launch with grandfathered "lifetime free listing" for the first cohort.
 
 ## Key decisions locked
 
@@ -128,7 +128,7 @@ See CLAUDE.md decision log for the full chronology. Major locks:
 - **Brand:** SETNAYAN wordmark (full spelling) + custom symbol mark at `setnayan_logo.svg`. Brand-origin "Set na 'yan." Domain `setnayan.com` + `setnayan.ph`.
 - **Pricing:** -1 charm pricing across all SKUs (Save-the-Date ₱49, Paparazzi packs ₱1,499/₱2,499, Live Stream Base ₱2,499, Custom Monogram ₱1,999, Broadcast Style ₱2,999, AI Edited Highlight ₱3,499 [repriced 2026-05-16 from ₱4,999], etc.)
 - **Payment:** Apply-then-pay V1 (static BDO + GCash, manual reconciliation, 24-hr activation SLA). PayMongo / GCash Merchant API for V1.5.
-- **Brand-character payments:** 3% Setnayan Pay convenience fee on customer side when paying vendor through Setnayan.
+- **Payments:** 0% commission · **no Setnayan Pay convenience fee** (the 3%→5.0% fee was RETIRED at the 2026-06-07 reset; vendors settle off-platform, Setnayan does not hold money).
 - **Vendor tiers:** Boosted · Certified · Standard Verified. Certified requires on-site visit. Boost requires Certified.
 - **Admin roles (7 granular):** Ops Lead · Transactions · Verification · Disputes · Payments · Customer Accounts · Vendor Accounts. Two-admin approval for provisioning + role changes + grants >₱10K retail.
 - **Tech stack:** Vercel (Next.js) + Supabase (Postgres + Auth + Realtime + Edge Fns) + Cloudflare R2 (PH region) + GitHub. Multi-platform clients: web PWA, native iOS/Android (Papic capture), Tauri shell for macOS desktop.

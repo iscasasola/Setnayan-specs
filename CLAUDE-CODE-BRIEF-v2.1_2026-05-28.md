@@ -1,3 +1,5 @@
+> **🔴 SETNAYAN AI PRICE SUPERSEDED 2026-07-02 (owner-locked): ₱499 first 28-day cycle (intro) → ₱799/28-day cycle.** Single tier, unlock-all, event-anchored. Every ₱3,999 / ₱1,499 *Setnayan AI planner* figure below is RETIRED — the ₱499/28d that was the working price is now the first-cycle intro (non-AI SKU prices unaffected). Canonical: `Pricing.md` §00.A + DECISION_LOG 2026-07-02 + [[project_setnayan_pricing_tiers]].
+
 # Setnayan · Build Brief for Claude Code
 
 **Project:** Setnayan — the first Filipino-built operating system for weddings (other event types follow)
@@ -47,8 +49,8 @@ Setnayan is a discovery + planning platform for Filipino weddings. Couples plan 
 ### 2.4 · Token economy
 
 - **Earn**
-  - 100-token founder bonus on verification (until 31 Jan 2027).
-  - +1 token every time a vendor's recommendation link drives a couple's purchase of a Setnayan Productions Token-Worthy service AND the service is used at the event (handshake-confirmed).
+  - 100-token founder bonus on verification (until 31 Jan 2027). _(The dated promo was pulled from `/for-vendors` public copy 2026-06-15, PR #1446 — underlying grant-code status separate.)_
+  - ~~+1 token every time a vendor's recommendation link drives a couple's purchase of a Setnayan Productions Token-Worthy service AND the service is used at the event (handshake-confirmed).~~ **🚫 RETIRED 2026-06-15 (owner: "we will retire this idea").** The "token back" / Productions-referral earn does NOT exist and was never wired. Code deleted (the `token-stacking` calculator + the 7 `/api/telemetry/<media>` routes + `insert.ts` + the `/admin/telemetry` viewer; `telemetry_events` dropped by migration `20261228000000`) and removed from `/for-vendors` (PRs #1462 + this one). The `productions_referral_earn` / `_clawback` ledger reasons + the `telemetry_reward` / `referral_reward` grant_sources are likewise dead. See DECISION_LOG 2026-06-15.
 - **Buy** *(canonical source: `Token_Economy_Flow_Map_2026-06-01.html`)*
   - **₱100 per token, flat** — one universal token. **No per-token volume discount.**
   - Pack sizes: 4 · 10 · 25 · 50 · 100. **Bulk orders earn bonus tokens on top** (buy a larger pack → extra tokens free, not a cheaper per-token price) — bonus ladder owner-to-set, never invented.
@@ -57,8 +59,8 @@ Setnayan is a discovery + planning platform for Filipino weddings. Couples plan 
   - Cost is keyed to the **wedding's region**, flat within a band, **never by booking size**, banded by the region's **minimum wage**: lowest-wage regions (Bicol · E.Visayas · Zamboanga · SOCCSKSARGEN · Caraga · BARMM) **1** · regional hubs (Cebu · Iloilo · Davao · CDO · CAR · Ilocos · Cagayan · MIMAROPA) **2** · NCR/CALABARZON/Central Luzon **3** tokens (= **₱100 / ₱200 / ₱300**, ₱300 ceiling). _Repriced 2026-06-05 — supersedes the 3‑4‑5‑6 ladder. Region→band stored admin-editable; re-band only when a wage order crosses a threshold._
   - One burn covers the entire conversation: chat, video call (Verified+), file sharing (Pro+), final quote, acceptance. No per-message or per-call charges.
   - Without tokens, vendors can still receive bid requests but cannot answer.
-- **Handshake liability**
-  - When a vendor earns a token via Productions referral, they're accountable for the service being used at the event. A two-party handshake at delivery confirms it. Failure to deliver claws the token back and may trigger a Trust & Safety case.
+- **Handshake liability** — **🚫 RETIRED 2026-06-15 with the Productions-referral earn (above).** Moot — vendors no longer earn tokens for referrals.
+  - ~~When a vendor earns a token via Productions referral, they're accountable for the service being used at the event. A two-party handshake at delivery confirms it. Failure to deliver claws the token back and may trigger a Trust & Safety case.~~
 
 ---
 
@@ -76,7 +78,7 @@ Setnayan is a discovery + planning platform for Filipino weddings. Couples plan 
 | Bidding token packs | Buy | Buy | Buy | Buy |
 | Founder bonus 100 tokens (until 31 Jan 2027) | — | On verification | On verification | On verification |
 | Ongoing token bonus qualification | — | ✓ | ✓ | ✓ |
-| Earn tokens from Productions referrals | ✓ | ✓ | ✓ | ✓ |
+| ~~Earn tokens from Productions referrals~~ 🚫 RETIRED 2026-06-15 | — | — | — | — |
 | **Boost radius** | **10 km** | **20 km** | **50 km** | **100 km** |
 | Sponsored Boost · top of category search | — | — | ✓ | ✓ |
 | Boosted Ads (₱1,200/wk add-on) | — | — | ✓ | ✓ |
@@ -183,7 +185,7 @@ Two delivery models:
 ### 5.3 · Productions ↔ vendors
 
 - Pro+ vendors can **resell** Productions services at their markup. Vendor pays Setnayan at wholesale, vendor bills couple at marked-up rate, vendor keeps the spread.
-- Pro+ vendors **earn 1 token** every time a couple buys a Token-Worthy service via the vendor's recommendation link AND the service is used at the event (handshake-confirmed). This is the platform's organic distribution channel.
+- ~~Pro+ vendors **earn 1 token** every time a couple buys a Token-Worthy service via the vendor's recommendation link AND the service is used at the event (handshake-confirmed). This is the platform's organic distribution channel.~~ **🚫 RETIRED 2026-06-15 (owner) — the Productions-referral "token back" does not exist; code + page copy removed.**
 - Productions services are operated by Setnayan; vendors can apply to be on the e-prod roster (Panood broadcasters, Papic crew leads, AI Reel editors) and earn per-gig at platform rates.
 
 ---

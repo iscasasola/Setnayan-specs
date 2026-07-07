@@ -18,7 +18,7 @@ Consolidated punch list of every **owner-side action** needed to unblock V1 laun
 
 | # | Task | Lead time | Cost | Status | Detail § |
 |---|---|---|---|---|---|
-| #17a | **Google Cloud project + YouTube Data API v3 OAuth verified-app** — write-scope OAuth to a third party requires Google's verified-app review. **Single biggest gating item for V1 Panood.** Without this, no couple can OAuth their YouTube channel; Panood doesn't ship. **Phase 1 complete 2026-05-18** (project + API + OAuth consent screen + OAuth client + scopes + test users; redirect URI corrected to `/api/oauth/youtube/callback` to match shipped engineering code; Client ID/Secret captured, Vercel env paste pending as `YOUTUBE_OAUTH_*`). **Engineering already shipped** (lib + routes + cron + UI all in main via `20b21fc` on 2026-05-16). **Phase 2 verified-app submission pending** on 2 prereqs (was 3): privacy YouTube disclosure ✅ shipped (PR #116) · 1-2 min demo video pending owner. | **1–4 weeks** (Google review SLA — sensitive scopes often 3-6 weeks) | Free | 🟡 | § 5.3 |
+| #17a | **Google Cloud project + YouTube Data API v3 OAuth verified-app** — write-scope OAuth to a third party requires Google's verified-app review. **Single biggest gating item for V1 Live Studio (formerly Panood).** Without this, no couple can OAuth their YouTube channel; Live Studio doesn't ship. **Phase 1 complete 2026-05-18** (project + API + OAuth consent screen + OAuth client + scopes + test users; redirect URI corrected to `/api/oauth/youtube/callback` to match shipped engineering code; Client ID/Secret captured, Vercel env paste pending as `YOUTUBE_OAUTH_*`). **Engineering already shipped** (lib + routes + cron + UI all in main via `20b21fc` on 2026-05-16). **Phase 2 verified-app submission pending** on 2 prereqs (was 3): privacy YouTube disclosure ✅ shipped (PR #116) · 1-2 min demo video pending owner. | **1–4 weeks** (Google review SLA — sensitive scopes often 3-6 weeks) | Free | 🟡 | § 5.3 |
 | #17b | **DTI Business Name Certificate** — single-proprietorship registration in Setnayan's name. Prerequisite for BIR + Mayor's Permit + bank accounts. | ~3-7 days | ~₱2,000 | 🔴 | § 2.2 |
 | #17c | **BIR Form 2303 Certificate of Registration** — RDO-based tax registration. Required for issuing OR receipts to couples + Form 2307 quarterly issuance to vendors (BIR Marketplace Withholding 1% × 50%). | ~7-14 days after DTI | ~₱500–1,500 | 🔴 | § 2.2 |
 | #17d | **Mayor's Permit** — barangay clearance + municipal business permit. Annual renewal Jan-Feb. | ~7-14 days | ~₱2,500–5,000 | 🔴 | § 2.2 |
@@ -44,6 +44,7 @@ Consolidated punch list of every **owner-side action** needed to unblock V1 laun
 | #21b-2 | **Capture `IG_USER_ID`** — after #21b, read the IG Business account id (Graph API Explorer `GET /me/accounts?fields=instagram_business_account` with the page token, or Meta Business settings) and paste it into Vercel env as `IG_USER_ID`. The same `META_PAGE_ACCESS_TOKEN` authorizes IG posting once it carries `instagram_content_publish` + `instagram_basic` + `pages_show_list`. | Minutes | Free | 🔴 | IG auto-posting (Phase B — code shipped #1322) |
 | #21c | **TikTok for Developers app + Content Posting API "Direct Post" audit** — register at developers.tiktok.com, request Content Posting API, submit for the Direct-Post audit. **The long pole — runs on TikTok's clock.** Until approved, the pipeline runs assisted-manual (rendered 9:16 video + copy-caption card in the Social Queue). Env: `TIKTOK_CLIENT_KEY` · `TIKTOK_CLIENT_SECRET`. | Days–weeks (audit) | Free | 🔴 | TikTok auto-posting (Phase C) |
 | #21c-2 | **Verify a PULL_FROM_URL domain + capture `TIKTOK_ACCESS_TOKEN`** — after #21c clears, verify `www.setnayan.com` (or the card-route host) as a content-source domain in the TikTok dev portal, OAuth the Setnayan TikTok account, paste the user token into Vercel env as `TIKTOK_ACCESS_TOKEN`. Note: TikTok tokens are short-lived — a refresh-token loop is a follow-on before fully hands-off. **Until done, the shipped pipeline (#1328) runs assisted-manual: it renders the 9:16 card + caption in /admin/social-queue for a 30-sec manual post.** | Minutes (after audit) | Free | 🔴 | TikTok auto-posting (Phase C — code shipped #1328) |
+| #21d | **Meta Marketing API access (separate from #21a's page-publishing token)** — for the new HQ **Marketing → Ads** surface (owner directive 2026-07-01, real Meta Ads Manager integration — live campaigns/spend/results in HQ, not a manual log). Needs a Business Manager account, an ad account ID, and an access token scoped `ads_management` + `ads_read` (page-publishing's `pages_manage_posts` scope does NOT cover ads data). Paste into Vercel env once minted: `META_AD_ACCOUNT_ID` · `META_ADS_ACCESS_TOKEN` (placeholder names — confirm at build time). **Blocks all Ads-surface code** — no menu item exists yet in HQ (deliberately, to avoid a dead link) until these land + read-vs-write scope is confirmed with the owner (reporting-only vs. creating/editing campaigns from HQ — write access is materially bigger scope + liability). | Same day–days (Business Manager + ad account setup) | Free (Meta doesn't charge for API access; ad spend itself is separate) | 🔴 | HQ Marketing → Ads (not yet built) |
 
 ### App-store distribution track · start when mobile is greenlit (added 2026-06-11)
 
@@ -57,6 +58,16 @@ Consolidated punch list of every **owner-side action** needed to unblock V1 laun
 | #21c-2 | **Verify a PULL_FROM_URL domain + capture `TIKTOK_ACCESS_TOKEN`** — after #21c clears, verify `www.setnayan.com` (or the card-route host) as a content-source domain in the TikTok dev portal, OAuth the Setnayan TikTok account, paste the user token into Vercel env as `TIKTOK_ACCESS_TOKEN`. Note: TikTok tokens are short-lived — a refresh-token loop is a follow-on before fully hands-off. **Until done, the shipped pipeline (#1328) runs assisted-manual: it renders the 9:16 card + caption in /admin/social-queue for a 30-sec manual post.** | Minutes (after audit) | Free | 🔴 | TikTok auto-posting (Phase C — code shipped #1328) |
 | #21d | **VAPID web-push keys** — `npx web-push generate-vapid-keys` + 3 Vercel envs. **No store account needed** — see repo `OWNER_ACTIONS.md` 2026-06-11 entry for exact steps. | 5 min | Free | ✅ (keys set 2026-06-11 · verified live on Production 2026-06-13) | Web Push (shipped 2026-06-11, PR #1229 — LIVE on Production) |
 | #21e | **Pre-submission compliance pack** — before the first store submission: walk proposal §6.4 (payments DO/DON'T matrix) + §7 remedies (account deletion ✅ · UGC report/block ✅ · NSFW filter · push/offline ✅), fill both stores' privacy forms from `Store_Privacy_Labels_Answer_Sheet_2026-06-11.md`, PH-counsel review of the native purchase/sign-in flows. | owner + counsel | — | 🔴 | App Review approval without rejection loops |
+
+### Event-type onboarding activation track (added 2026-06-24 · 0053 Phase 3)
+
+> The per-type onboarding engine shipped to `main` (iteration 0053 Phase 3 · PRs #2123/#2124/#2126/#2127) but ships **DARK** — every non-wedding `/onboarding/[type]` route 404s and the create-event picker keeps its inline name-form until these owner switches are flipped. No code change needed to activate; weddings are unaffected either way. Full context: spec `0053_event_type_engine/0053_event_type_engine.md` + memory `project_setnayan_onboarding_engine`.
+
+| # | Task | Lead time | Cost | Status | Detail § |
+|---|---|---|---|---|---|
+| #22a | **Flip the experience-quiz flag** — set Vercel env `NEXT_PUBLIC_EXPERIENCE_QUIZ_ENABLED=true` (Production + Preview). Lights up the experience quiz + the `/onboarding/[type]` route + the picker's non-wedding branch. NEXT_PUBLIC = build-time inlined, so redeploy after setting. **The single switch that turns on non-wedding onboarding.** | 5 min + redeploy | Free | 🔴 | 0053 Phase 3 |
+| #22b | **Apply the experience-persona migration** — apply `supabase/migrations/20270208703382_events_experience_persona.sql` to prod (the `experience_persona` / `experience_for_whom` / `experience_axes` columns). Until applied, the commit's persona-intent write is flag-guarded off; the flow still works but doesn't persist the persona. Apply via Supabase MCP `execute_sql` + `migration repair` (never `db push`). | 5 min | Free | 🔴 | 0053 Phase 3 |
+| #22c | **(optional) No-login anon-draft onboarding** — set `NEXT_PUBLIC_ANON_ONBOARDING_ENABLED=true` **and** enable Supabase `enable_anonymous_sign_ins` (the null-email trigger `20270205204166` already shipped). Lets a visitor complete onboarding without an account (a Supabase anonymous session is minted at commit; "secure your plan" converts it). Without it, onboarding requires sign-in at commit (unchanged contract). | 10 min | Free | ⚪ | 0053 Phase 3 |
 
 ### V1.5+ deferred · can wait until after launch
 
@@ -91,7 +102,8 @@ These items unlock the 0038 iteration spec drafted 2026-05-19. None are V1 launc
 | 1 | GitHub `iscasasola/setnayan-platform` **public** repo (flipped public 2026-05-14, AGPL-3.0) | ✅ | § 1.1 |
 | 2 | Vercel project (auto-deploys `main`) + custom domain | ✅ | § 1.2 |
 | 3 | Supabase project (Singapore) + RLS posture + **76 migrations** | ✅ | § 1.3 |
-| 4 | Cloudflare R2 buckets (APAC) — `setnayan-media`, `setnayan-thread-files`, `setnayan-vendor-contracts`, `setnayan-samples`, `setnayan-vendor-verification`, `setnayan-bir-2307` (6 total) + R2 client + uploads wired 2026-05-14 PR #18 | ✅ | § 1.4 |
+| 4 | Cloudflare R2 buckets (APAC) — `setnayan-media`, `setnayan-thread-files`, `setnayan-vendor-contracts`, `setnayan-samples`, `setnayan-vendor-verification` (5 canonical per `lib/r2.ts` `R2_BUCKETS`) + R2 client + uploads wired 2026-05-14 PR #18 | ⚠️ | § 1.4 |
+| 4a | ⚠️ **Provisioning drift caught 2026-07-05:** `setnayan-vendor-verification` was marked ✅ here but **never actually created in R2** — every vendor verification-doc upload failed with a masked network error (presign OK, browser PUT → `NoSuchBucket`, no CORS headers → XHR `onerror`). **Created 2026-07-05** (APAC / Standard / private) + CORS applied. Lesson: mark a bucket ✅ only after confirming it in the R2 dashboard, not on code-wired. `setnayan-bir-2307` is NOT in the code's `R2_BUCKETS` — drop it from the "6 total" claim. | ✅ (fixed) | § 1.4 |
 | 5 | `setnayan.com` + `setnayan.ph` domain registration | ✅ | § 1.6 |
 | 6 | ~~Anthropic SDK wired (`@anthropic-ai/sdk`)~~ | ❌ NOT WIRED — was queued for 0032 which retired 2026-05-18; SDK install deferred to V1.5+ | § 5.4 |
 | 7 | Sentry SDK wired (PR #17) | 🟡 SDK wired, smoke test pending #19e | § 4.1 |
@@ -103,7 +115,7 @@ These items unlock the 0038 iteration spec drafted 2026-05-19. None are V1 launc
 | 13 | **R2 storage migration off Supabase Storage** (PR #18) | ✅ — uploads via `lib/uploads.ts` + `@aws-sdk/client-s3` | § 1.4 |
 | 14 | **`pdf-lib`** — BIR 2307 + OR receipt generation | ✅ shipped | (0026) |
 | 15 | **Per-couple OAuth grants table** (migration 54, 2026-05-16) | ✅ — supports YouTube + Drive + TikTok | (0011/0009/0017) |
-| 16 | **YouTube OAuth code (0011 Panood)** — lib + 3 routes + cron refresh | ✅ engineering; 🟡 Google verified-app review pending (#17a) | § 5.3 |
+| 16 | **YouTube OAuth code (0011 Live Studio [formerly Panood])** — lib + 3 routes + cron refresh | ✅ engineering; 🟡 Google verified-app review pending (#17a) | § 5.3 |
 | 17 | **Google Drive OAuth code (0012 Papic)** — `lib/papic-drive.ts` + routes (migrations 53-55, 67) | ✅ engineering; 🟡 Drive scopes verified-app pending #19g | § 5.3 |
 | 18 | **Photo Delivery Drive OAuth code (0009)** — `lib/photo-delivery-drive.ts` + routes (PRs #147, #150, #152, #153) | ✅ engineering; 🟡 Drive scopes verified-app pending #19g | § 5.3 |
 | 19 | **TikTok OAuth code (0017 Patiktok)** — `lib/patiktok-tiktok.ts` + 2 routes (migration 50-52) | ✅ engineering; 🟡 TikTok app review pending #20f | § 7.8 |
@@ -171,12 +183,14 @@ These items unlock the 0038 iteration spec drafted 2026-05-19. None are V1 launc
 ### 1.4 Cloudflare R2 buckets (PH region)
 
 - [ ] Create Cloudflare account
-- [ ] Provision three R2 buckets in PH region:
-   - `setnayan-media` — couple/guest photos, paparazzi captures, save-the-date renders
-   - `setnayan-thread-files` — chat attachments (0019)
-   - `setnayan-vendor-verification` — vendor DTI/SEC/ID documents (private)
-- [ ] Set R2 bucket policies — `setnayan-media` allows signed reads; `setnayan-thread-files` and `setnayan-vendor-verification` block all public reads
-- [ ] Configure CORS for production + staging domains
+- [ ] Provision **all five** R2 buckets in APAC — the canonical set is `R2_BUCKETS` in `apps/web/lib/r2.ts`; a bucket the code names but R2 lacks fails EVERY upload to it with a masked network error (see § "Provisioning drift" 2026-07-05):
+   - `setnayan-media` — couple/guest photos, paparazzi captures, save-the-date renders (public signed reads)
+   - `setnayan-thread-files` — chat attachments (0019) (private)
+   - `setnayan-vendor-contracts` — signed contract PDFs (private)
+   - `setnayan-samples` — sample/demo assets (private)
+   - `setnayan-vendor-verification` — vendor DTI/SEC/ID documents (private) ✅ created 2026-07-05
+- [ ] Set R2 bucket policies — `setnayan-media` allows signed reads; the other four block all public reads
+- [ ] **Configure CORS on EVERY bucket** `<FileUpload>` PUTs to (all 5) for production + staging domains — CORS is per-bucket; a missing/mismatched policy shows as "Upload failed… check your connection" with no HTTP status. Canonical policy + one-shot script: `apps/web/scripts/r2-cors.sh` (`AllowedOrigins` must include `https://www.setnayan.com` **with** the `www`).
 - [ ] Set up API tokens for signed URL generation (5-min TTL for sensitive media)
 - [ ] Verify free egress is active (it should be — Cloudflare's signature R2 feature)
 
@@ -290,7 +304,7 @@ The Daily.co video-meetings feature was retired entirely from V1+ on 2026-05-16.
 - [ ] BetterStack or UptimeRobot for `setnayan.com` + key API endpoints
 - [ ] Configure SMS alerts to Ops Lead phone
 
-## Tier 5 — Media + AI Pipeline (mandatory for Papic/Panood/AI Highlights · 2026-05-16: Save-the-Date dropped from this tier)
+## Tier 5 — Media + AI Pipeline (mandatory for Papic/Live Studio [formerly Panood]/AI Highlights · 2026-05-16: Save-the-Date dropped from this tier)
 
 ### 5.1 Cloudflare Stream Live — **RETIRED 2026-05-16**
 
@@ -344,7 +358,7 @@ The Daily.co video-meetings feature was retired entirely from V1+ on 2026-05-16.
 - [ ] Configure OAuth 2.0 consent screen with verified-app status (required by YouTube for write-scope OAuth from third parties)
 - [ ] Request OAuth scope verification from Google: `https://www.googleapis.com/auth/youtube` + `https://www.googleapis.com/auth/youtube.upload` (Google reviews the request; typical 1-4 weeks for verified-app status)
 - [ ] Extend `oauth_grants` schema to persist per-couple YouTube refresh tokens + token expiry + granted scopes (one row per event, tied to `events.event_id`)
-- [ ] Implement OAuth handshake at Panood SKU purchase time — couple completes consent in a popup, refresh token written to `oauth_grants`
+- [ ] Implement OAuth handshake at Live Studio (formerly Panood) SKU purchase time — couple completes consent in a popup, refresh token written to `oauth_grants`
 - [ ] Implement `liveBroadcasts.insert` for the couple's channel with `monetizationDetails.monetization: false` and `contentDetails.latencyPreference: ultraLow` (couple decides monetization on their own channel post-event)
 - [ ] Implement `liveStreams.insert` to get the RTMP ingest URL + stream key for the **broadcaster web UI's active-feed push** (not Cloudflare Stream relay — § 5.1 is retired)
 - [ ] Landing-page IFrame embed: fetch the couple's `liveBroadcasts.id` from `oauth_grants` and render `https://www.youtube.com/embed/{video_id}` in the landing page's hero

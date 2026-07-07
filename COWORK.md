@@ -181,7 +181,7 @@ When the user asks about implementation status, default to: "drafted, not yet bu
 5. **Filipino warmth in EN voice** — luxurious, modern, not marketing-y. "Set na 'yan." is the heartbeat.
 6. **Couple ≠ couple-only** — customer model supports 2 co-organizers, 1 user across many events.
 7. **Privacy first** — RA 10173 compliant; face vectors per-event-scoped; 5-year event retention.
-8. **3% Setnayan Pay convenience fee** — not 5% Guarantee (deferred to V1.5+).
+8. **0% commission · no Setnayan Pay convenience fee** — the 3%→5.0% fee was RETIRED at the 2026-06-07 reset (vendors settle off-platform).
 9. **Tier-strict marketplace ranking** — Boosted > Certified > Standard Verified.
 10. **Seven granular admin roles** with two-admin approval for provisioning + role changes.
 

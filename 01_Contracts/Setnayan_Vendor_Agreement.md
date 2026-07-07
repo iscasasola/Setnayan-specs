@@ -68,9 +68,9 @@ Setnayan ranks vendors in three tiers. Marketplace results sort Tier 1 → Tier 
 
 ### 3.1 Payment routing
 
-Vendors agree to accept payments routed through Setnayan when the customer chooses the **Setnayan Pay** option at checkout. A **3% convenience fee** is added to the customer's invoice (paid by customer, not deducted from vendor's earning). Vendor receives **full booking price** to their nominated bank or e-wallet account.
+Vendor↔customer payments settle **off-platform** (direct GCash / bank transfer / cash). Setnayan does **not** hold checkout funds and charges **no convenience fee (0%)** and **no commission (0%)** on any booking. Vendor receives the **full booking price** directly from the customer. *(The earlier Setnayan Pay routing model — a 3% convenience fee added to the customer's invoice — was RETIRED to 0% at the 2026-06-07 reset.)*
 
-Customers may always opt out of Setnayan Pay and pay the vendor directly via GCash / bank transfer / cash. In that case, no convenience fee applies and Setnayan does not handle the funds. Either way, Setnayan tracks the milestone in the customer's Budget surface.
+Setnayan tracks each payment milestone in the customer's Budget surface for the couple's convenience, but does not route, hold, or disburse the money.
 
 ### 3.2 Payment methods at vendor preference
 
@@ -171,7 +171,7 @@ When a Pro or Max vendor opts in to Google Drive sync for storing client deliver
 If the vendor fails to provide the contracted service (no-show, abandons mid-event, delivers materially different from agreement):
 
 - **Unpaid balance** is not transferred to the vendor
-- **Already-paid amounts** routed through Setnayan Pay are returned to the customer in full within 5 business days
+- Because payment settles off-platform (Setnayan holds no funds), the customer recovers any already-paid amounts directly from the vendor; Setnayan facilitates the dispute but does not refund money it never held
 - The vendor's tier may be downgraded or suspended depending on severity
 - Customer may post a review documenting the failure (which cannot be deleted per § 3.6)
 
@@ -357,7 +357,7 @@ Setnayan ownership and designated internal accounts (founder + spouse + designat
 - `users.account_type = 'customer'` with `users.is_internal = TRUE` on the owner + spouse + designated team accounts
 - A permanent `unlimited_use_grant` row is auto-issued at account creation for these users, with `scope = 'all_services'` and `expiry = null`
 - All apply-then-pay flows (Save-the-Date renders, Paparazzi packs, Live Stream, AI Highlights, Custom Monogram, etc.) check the grant before generating a payment instruction — internal accounts skip directly to `status='paid'` with `comp_grant_id` populated and `amount_paid_php = 0`
-- Vendor bookings flowing through Setnayan Pay still charge the customer's card / bank (the 3% convenience fee still applies if used), but Setnayan in-app SKUs are zero-cost
+- Vendor bookings settle off-platform between the customer and the vendor (no convenience fee — RETIRED to 0% at the 2026-06-07 reset), but Setnayan in-app SKUs are zero-cost
 - Internal accounts still see the full marketplace, can book vendors, can use Guided / DIY modes, can invite guests — the only difference is the per-render cost is comped
 
 **Why this exists:**
@@ -371,11 +371,11 @@ Setnayan ownership and designated internal accounts (founder + spouse + designat
 
 - Internal accounts are marked in the admin console with a 🟣 badge so any admin review knows they're internal
 - Internal-account activity is excluded from the customer-pipeline analytics (so the "booked customers" count reflects actual paying customers)
-- Internal grants are bounded to **add-ons only** — vendor payments through Setnayan Pay still flow normally (the 3% convenience fee is the customer's cost · vendor still receives full amount)
+- Internal grants are bounded to **add-ons only** — vendor payments settle off-platform and flow normally (no convenience fee — RETIRED to 0% at the 2026-06-07 reset · vendor receives full amount direct)
 - Setnayan Team operational expense (cost of comping owner accounts ≈ ₱5/render × ~20 renders/year per account = ₱100/year per internal user) is absorbed into operating budget
 - Adding a new internal account requires **two-admin approval** (Ops Lead + one other admin) and a logged rationale ("founder spouse" · "team member onboarding" · etc.)
 
-**Spouse-of-owner-purchases-anything:** the spouse account is internal-flagged and gets the unlimited grant for add-ons. For external purchases (vendor bookings paid through Setnayan Pay), the spouse pays like any other customer — Setnayan Pay convenience fee and vendor payouts flow normally. The owner's wife "can purchase anything on the app" because (a) all Setnayan in-app SKUs are free for her via the internal grant, and (b) she can book any vendor she wants and pay through Setnayan Pay or direct — same as any other customer. No financial favoritism on vendor-side; the add-ons are the only line that's comped.
+**Spouse-of-owner-purchases-anything:** the spouse account is internal-flagged and gets the unlimited grant for add-ons. For external purchases (vendor bookings), the spouse pays like any other customer — vendor payments settle off-platform with no convenience fee (RETIRED to 0% at the 2026-06-07 reset). The owner's wife "can purchase anything on the app" because (a) all Setnayan in-app SKUs are free for her via the internal grant, and (b) she can book any vendor she wants and pay the vendor directly — same as any other customer. No financial favoritism on vendor-side; the add-ons are the only line that's comped.
 
 ## 10b. Setnayan Team Members — SHARED Monthly Consumable Pool
 
@@ -383,7 +383,7 @@ ALL Setnayan team members **except the 2 owners** (owner + spouse, who hold the 
 
 **The formula:**
 
-- The shared pool is funded at **0.5% of prior-month total Setnayan platform sales** (gross in-app SKU revenue + Setnayan Pay convenience-fee revenue)
+- The shared pool is funded at **0.5% of prior-month total Setnayan platform sales** (gross in-app SKU revenue; the former Setnayan Pay convenience-fee revenue line is RETIRED to 0% at the 2026-06-07 reset and no longer contributes)
 - The pool is **capped at ₱10,000 per month TOTAL** across the entire team — if 0.5% of sales would exceed that, only ₱10,000 is allocated
 - The pool is **use-it-or-lose-it** — any unused balance at month-end is forfeited and does NOT carry over to the next month
 - **First-come-first-served** — any eligible team member can spend against the shared remaining balance until it hits zero; once exhausted, the rest of the month is at standard rates for everyone
@@ -430,7 +430,7 @@ ALL Setnayan team members **except the 2 owners** (owner + spouse, who hold the 
 - Adding a team member to the shared-pool eligibility list requires **two-admin approval** (Ops Lead + one other admin) + logged rationale
 - Team member must hold an active admin role (one of the seven granular roles in § 9) — losing the role revokes pool eligibility going forward
 - Owner-pair (§ 10a) is NOT eligible to draw from this pool — they already have unlimited grants; their in-app orders never touch the team pool
-- Vendor payments routed through Setnayan Pay still charge normally (the 3% convenience fee applies); only Setnayan in-app SKUs are eligible
+- Vendor payments settle off-platform with no convenience fee (RETIRED to 0% at the 2026-06-07 reset); only Setnayan in-app SKUs are eligible
 - The 🟣 internal badge from § 10a is NOT applied to team-member accounts; they are visually identified in admin console with a separate 🟢 badge ("Team Member · Shared Pool Access")
 - Team-member activity IS included in customer-pipeline analytics (the bounded pool represents real platform engagement that should appear in usage signals)
 - All pool consumption surfaces in the admin audit log with user attribution
@@ -447,7 +447,7 @@ ALL Setnayan team members **except the 2 owners** (owner + spouse, who hold the 
 | Access model | Unlimited per person | First-come-first-served against shared pool |
 | Admin badge | 🟣 | 🟢 |
 | Pipeline analytics | Excluded | Included |
-| Vendor payments | Pay normally (3% fee applies) | Pay normally (3% fee applies) |
+| Vendor payments | Pay vendor direct off-platform (0% fee) | Pay vendor direct off-platform (0% fee) |
 
 ## 11. Internal Expense Tracking (V1 → V2)
 

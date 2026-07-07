@@ -1,7 +1,7 @@
 # 04 — Planning Timelines
 
 **Authoring status:** Locked 2026-05-18. Canonical Filipino wedding
-planning timeline driving the Concierge wizard's calendar/nudge logic.
+planning timeline driving the Setnayan AI wizard's calendar/nudge logic.
 Anchored against 0016 § 1 Locked Sequence + authoritative PH sources
 (Bride and Breakfast, M Catering and Events, Storia, Hillcreek Gardens,
 Nuptials, FilipiKnow). Each chunk follows the README authoring template
@@ -22,7 +22,7 @@ These are the major commitments because they're the hardest to rebook on Filipin
 
 Set your **wedding date** first if you haven't already — every booking depends on this. Have a working budget in mind even if it's rough: it sizes which tier of venue, caterer, and photographer you should be browsing.
 
-If you're getting married in less than 12 months, this whole list compresses into "do all of these in parallel, starting today." Some categories (custom bridal gowns, popular venues during peak season) may not be available — Setnayan Concierge will flag which categories are still feasible and which need a workaround.
+If you're getting married in less than 12 months, this whole list compresses into "do all of these in parallel, starting today." Some categories (custom bridal gowns, popular venues during peak season) may not be available — Setnayan AI will flag which categories are still feasible and which need a workaround.
 
 ### Common follow-ups
 - "We're at 9 months — am I already too late?"
@@ -116,7 +116,7 @@ Your florist should now have your full palette + venue diagrams. They'll propose
 
 3 to 4 months before the wedding, the **legal and operational layer** locks. Apply for your **marriage license** at the Local Civil Registry (LCR) — but **not earlier than 4 months out**, because the license is only valid for 120 days. Schedule your **Pre-Cana or Marriage Encounter** sessions if you're having a Catholic wedding (parish needs 60-90 days notice). Submit your **church requirements**: CENOMAR (Certificate of No Marriage Record), baptismal certificate, confirmation certificate, and the canonical interview with the parish priest. Book your **host or emcee** for the reception. **Invitations finalized and printed**, then **invitations sent** at 2-3 months for RSVP buffer. **Begin RSVP tracking** in Setnayan's Guest List tool as responses come in.
 
-The **marriage license is the hardest deadline** in the entire timeline. Applying earlier than 4 months means the 120-day clock will expire before your wedding date. Applying later than 3 months means you risk the LCR's 10-day publication period bumping into your timeline. Setnayan Concierge will surface this specific reminder at the right week.
+The **marriage license is the hardest deadline** in the entire timeline. Applying earlier than 4 months means the 120-day clock will expire before your wedding date. Applying later than 3 months means you risk the LCR's 10-day publication period bumping into your timeline. Setnayan AI will surface this specific reminder at the right week.
 
 For Filipino Catholic weddings, the parish's specific document requirements vary — your priest may also require seminars beyond Pre-Cana (Family Life or Couple-for-Christ). Confirm the full list with your specific parish at this stage.
 
@@ -243,13 +243,13 @@ Adjust for ceremony tradition (Civil ceremonies are shorter; Muslim weddings hav
 **Cross-ref:** 0016 § Post-event, 0034 vendor reviews
 **Last verified:** 2026-05-18 · Setnayan team
 
-After the wedding, Setnayan Concierge stays helpful for 30 days (and beyond if your access window extends). Key post-event tasks:
+Setnayan AI keeps helping right up to your wedding date; its ₱499/28-day-cycle subscription auto-ends just after the wedding. These post-event tasks still matter even once the subscription has wrapped — keep them on your own checklist:
 
 - **Marriage certificate pickup** at ~T+14 days from PSA or the LCR where you applied. The certificate is the legal document needed for name changes, passport updates, and visa applications.
 - **Thank-you cards** sent to guests within 30-60 days. Filipino practice is more relaxed here than Western tradition, but a personal thank-you to principal sponsors and gift-givers is expected.
 - **Vendor reviews** on Setnayan's marketplace — your reviews help other couples and reward vendors who delivered well.
 - **Photo & video delivery** — most photo teams deliver edited galleries 30-90 days post-wedding; video can be 60-180 days for full edits.
-- **Honeymoon** — if you booked through Setnayan Concierge's honeymoon planning, your itinerary stays in the dashboard.
+- **Honeymoon** — if you booked through Setnayan AI's honeymoon planning, your itinerary stays in the dashboard.
 
 ### Common follow-ups
 - "How do I get my marriage certificate from PSA?"
@@ -284,7 +284,7 @@ Book in this order for the smoothest planning:
 9. **Bridal car** — fleet inventory is limited
 10. **Bridal gown + groom suit** — custom designs need 3-6 month lead
 
-After these are locked, the operational decisions (invitations, seating, photobooth, dance choreographer, lights/sound details, attire fittings, cake design, save-the-dates) flow from them in the natural order surfaced by the Concierge wizard.
+After these are locked, the operational decisions (invitations, seating, photobooth, dance choreographer, lights/sound details, attire fittings, cake design, save-the-dates) flow from them in the natural order surfaced by the Setnayan AI wizard.
 
 ### Common follow-ups
 - "What if I find a photographer before a venue?"
@@ -318,7 +318,7 @@ The optimal application window is **4 months before the wedding**. Walk into the
 
 After application, the LCR posts a 10-day public notice (the "10-day publication period"). After that, the license is issued — and the 120-day clock starts on issuance, not application.
 
-Setnayan Concierge surfaces this specific timing reminder at the right week to make sure you apply at the optimal moment.
+Setnayan AI surfaces this specific timing reminder at the right week to make sure you apply at the optimal moment.
 
 ### Common follow-ups
 - "What if our marriage license expires before the wedding?"
@@ -351,7 +351,7 @@ Common parish requirements for Catholic weddings:
 
 **Schedule your Pre-Cana at 4-5 months out** — many parishes only run Pre-Cana monthly or bimonthly, so leaving it later than 4 months may force you into a slot that conflicts with other planning.
 
-Setnayan Concierge surfaces a reminder at the 5-month mark specifically for Catholic couples. If you're combining Catholic + Civil ceremonies, both sets of requirements stack — start the Pre-Cana track 6 months out for safety.
+Setnayan AI surfaces a reminder at the 5-month mark specifically for Catholic couples. If you're combining Catholic + Civil ceremonies, both sets of requirements stack — start the Pre-Cana track 6 months out for safety.
 
 ### Common follow-ups
 - "Do we have to do Pre-Cana?"
@@ -407,7 +407,7 @@ If you're working on a compressed timeline (< 6 months) or feel overwhelmed by t
 - Sending invitations before sponsors confirm (their names go on the invitations)
 - Applying for the marriage license earlier than 4 months out (it expires)
 
-The Setnayan Concierge wizard handles this triage automatically — it surfaces what's urgent right now, what's coming up next week, and what can safely wait. If your wedding is closer than the standard windows, the wizard will flag impossible-in-time items (e.g., "custom gown won't be ready") so you can pivot to alternatives.
+The Setnayan AI wizard handles this triage automatically — it surfaces what's urgent right now, what's coming up next week, and what can safely wait. If your wedding is closer than the standard windows, the wizard will flag impossible-in-time items (e.g., "custom gown won't be ready") so you can pivot to alternatives.
 
 ### Common follow-ups
 - "We're getting married in 4 months — what should we do FIRST?"

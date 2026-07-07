@@ -236,7 +236,7 @@ Example: 250 guests × ₱18,000/head = ₱4.5M working budget. Couples at this 
 
 ### Common follow-ups
 - "What does Tier 5 actually include?"
-- "Do Tier 5 weddings use Setnayan Concierge?"
+- "Do Tier 5 weddings use Setnayan AI?"
 
 ### Caveats / what NOT to say
 - Don't promise Tier 5 couples a generic experience — they expect custom.
@@ -263,7 +263,7 @@ Signals that you should **upgrade your tier**:
 - You want a specific vendor (designer gown, top-tier photographer) that doesn't fit your current tier
 - Your guest count is smaller than typical for your tier (50 guests at Tier 3 means each head gets more spend)
 
-The Concierge wizard surfaces gentle prompts when your booked-vendor pattern doesn't match your declared tier — *"Your current vendor mix suggests Tier 3 spending, but you selected Tier 2. Want to update?"*
+The Setnayan AI wizard surfaces gentle prompts when your booked-vendor pattern doesn't match your declared tier — *"Your current vendor mix suggests Tier 3 spending, but you selected Tier 2. Want to update?"*
 
 ### Common follow-ups
 - "How do I tell my partner we should downgrade?"
@@ -327,24 +327,23 @@ Categories where couples save money but regret it:
 
 ---
 
-## 5.0% Setnayan Pay fee — where it shows up in budget
+## Vendor payments in your budget — no fee to add
 
-**Tags:** setnayan-pay, fee, budget, 5-percent, no-convenience-fee
-**Applies to:** couples paying vendors through Setnayan Pay
-**Cross-ref:** 0034 § 6, 0006 § convenience-fee absorption
-**Last verified:** 2026-05-18 · Setnayan team
+> **RETIRED to 0% at the 2026-06-07 reset.** This chunk previously told couples to budget a 5.0% Setnayan Pay convenience fee on vendor bookings. That fee is gone — there is nothing extra to factor in.
 
-When you pay a Setnayan-verified vendor via Setnayan Pay (in-app GCash/BDO/credit card rail), Setnayan adds a 5.0% convenience fee on top of the vendor's listed price.
+**Tags:** zero-commission, budget, off-platform, vendor-payment
+**Applies to:** all couples
+**Cross-ref:** 0034 § 6
+**Last verified:** 2026-06-29 · Setnayan team
 
-Example: vendor quotes ₱100,000 for photography → Setnayan Pay cart shows ₱100,000 + ₱5,000 convenience fee = ₱105,000 total.
+Setnayan charges **0% commission and no convenience fee** on vendor bookings, so there is nothing to add on top of a vendor's quote. The price a vendor quotes is the price you budget.
 
-**Exception: "No Convenience Fee" badge vendors** absorb the fee themselves. Their listed price is the all-in price; no extra 5% at checkout.
+Example: vendor quotes ₱100,000 for photography → you budget ₱100,000. Setnayan adds nothing.
 
-Factor the 5% into your working budget if you plan to pay most vendors through Setnayan Pay. Setnayan's Budget tool can auto-add the 5% to vendor line items when they're paid through SP.
+You settle with vendors off-platform; Setnayan's Budget tool tracks those payments but never adds a platform fee.
 
 ### Common follow-ups
-- "Why is there a 5% fee?"
-- "Should I pay outside Setnayan to avoid the fee?"
+- "Does Setnayan add a fee to my vendor budget?" → No — 0% commission, no convenience fee.
 
 ### Caveats / what NOT to say
-- Don't recommend off-platform payment to avoid the fee — couples lose Setnayan's dispute mediation + Concierge auto-unlock via Pro Weekly bundle.
+- Don't tell couples to reserve any percentage for a Setnayan booking fee — there isn't one.

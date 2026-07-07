@@ -28,7 +28,7 @@ Required documents (PSA-issued unless noted):
 
 Apply at the LCR of either party's city or municipality of residence (your choice). After application, the LCR posts a 10-day public notice. After the notice period, the license is issued and the 120-day clock starts.
 
-Setnayan Concierge surfaces this specific timing reminder at the right week if you're on the paid tier.
+Setnayan AI surfaces this specific timing reminder at the right week if you're on the paid tier.
 
 ### Common follow-ups
 - "Where do we apply for the marriage license?"
@@ -138,27 +138,24 @@ Consult a family law attorney if you're considering a prenup — generic templat
 
 ---
 
-## Setnayan Pay 5.0% convenience fee — disclosure
+## Vendor payments — 0% commission, no convenience fee
 
-**Tags:** setnayan-pay, fee, 5-percent, disclosure, vendor-payment, transparency
-**Applies to:** couples using Setnayan Pay
-**Cross-ref:** 0034 § 6, 0006 § convenience-fee absorption, 08_Budget_Allocation_Reference.md
-**Last verified:** 2026-05-18 · Setnayan team
+> **RETIRED to 0% at the 2026-06-07 reset.** The 5.0% Setnayan Pay convenience fee described in earlier drafts of this chunk is gone. Commission is **0% — "0% commission, ever."** Vendor↔customer money is settled **off-platform** (RA 11967); Setnayan never holds or charges a fee on a vendor booking.
 
-When you pay a Setnayan-verified vendor through Setnayan Pay (in-app GCash / BDO / credit card rail), Setnayan adds a **5.0% convenience fee** on top of the vendor's listed price. Setnayan Pay receives this as the platform's compensation for: KYC + AMLC screening of vendors, dispute mediation, escrow during 3-stage payouts for coming_soon vendors, and the technical rails (PayMongo + Maya Bulk Fund Transfer integration).
+**Tags:** setnayan-pay, fee, zero-commission, disclosure, vendor-payment, transparency
+**Applies to:** all couples
+**Cross-ref:** 0034 § 6, 08_Budget_Allocation_Reference.md
+**Last verified:** 2026-06-29 · Setnayan team
 
-**This fee is visible at checkout** — Filipino consumer transparency norms require disclosure before the couple commits. Setnayan Pay does NOT add hidden charges.
-
-**Exception:** vendors with the **"No Convenience Fee" badge** absorb the 5% themselves. Their listed price is the all-in price. Setnayan's revenue is the same either way; the difference is only whether the customer sees the fee as a line item.
+Setnayan charges **no commission and no convenience fee** on vendor bookings. The vendor's listed price is the all-in price; couples settle with vendors off-platform (Setnayan does not sit in the money path). The only in-app charges are for first-party Setnayan SKUs (e.g. Setnayan AI, Animated Monogram, Panood), which are paid apply-then-pay with manual admin approval.
 
 ### Common follow-ups
-- "What is the 5% fee for?"
-- "Can I pay vendors outside Setnayan to avoid the fee?"
-- "Is the fee refundable if the vendor doesn't deliver?"
+- "Does Setnayan take a cut of what I pay my vendors?" → No — 0% commission, ever.
+- "Is there a fee for paying vendors through Setnayan?" → No convenience fee; vendor money is settled off-platform.
 
 ### Caveats / what NOT to say
-- Don't disparage vendors who don't absorb the fee — most don't, and it's their pricing strategy.
-- Don't recommend off-platform payment as a way to avoid the fee — couples lose Setnayan's dispute mediation + Concierge Pro Weekly bundle unlock.
+- Don't describe any per-booking percentage fee or commission — there is none.
+- Don't reference a "No Convenience Fee" badge — that mechanic is retired along with the fee itself.
 
 ---
 

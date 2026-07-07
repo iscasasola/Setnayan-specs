@@ -18,7 +18,7 @@ Every surface must use the **canonical name**. The prototypes currently use inco
 | **Live Venue Photo Wall** | Live collage + live guest count at the venue | Design › Digital Services | (v2.1 §5 #10) | — |
 | **Pailaw** *(Live Background)* | LED-wall design with monogram loop | Design › Digital Services | 0005 | "LED Background" used alone (keep as descriptor, anchor to **Pailaw**) |
 | **Papic** | Designated-paparazzi capture | Documentary › Photo & Video | 0012 | "Paparazzi" as the product name (it's the tagline) |
-| **Panood** | Multi-cam livestream | Documentary › Livestream | 0011 | "Live Stream" as the product name |
+| **Live Studio** | Multi-cam livestream | Documentary › Livestream | 0011 | "Live Stream" as the product name · formerly "Panood" |
 | **Patiktok** | Vertical TikTok-format clip booth | Booths › Photo Booth | 0017 | — |
 | **Pabati** | Short 5-sec video greetings | Booths › Photo Booth | (v2.1 §5 #19) | — |
 | **Editorial** | Real-wedding editorial feature | Documentary › Editorial | 0046 | — |
@@ -43,7 +43,7 @@ Every surface must use the **canonical name**. The prototypes currently use inco
 
 `Digital Services` is a **generic, vendor-listable category** — NOT a Setnayan-only shelf. At launch its members are all first-party (the 5 above), but the tile is architected so a 3rd-party monogram designer, wedding-website builder, or LED-content studio can register under it later. This is why it does **not** reintroduce a "Setnayan-branded" tier — it reads as a normal Design child to couples and vendors alike. (Evidence: `Service_Specifications_2026-06-02.md` Digital Services tile + `Vendor_Taxonomy_Shrink_2026-05-30.md` §2.)
 
-**How Setnayan's first-party services are populated (owner-locked 2026-06-03).** Setnayan's **main internal account operates its own first-party vendor account** — the Setnayan services (Papic · Panood · Pakanta · Pailaw · Animated Monogram · Pro Website · Live Venue Photo Wall · Patiktok · Pabati · …) are **vendor listings under that account**, managed via the normal vendor dashboard (0022) and tagged to their canonical category (the `setnayan: true` canonicals in `taxonomy.ts`). They surface like any vendor's listings but **float to the top** of every category they appear in (`is_setnayan_service` on the `vendor_market_stats` view · owner directive 2026-05-22 *"Setnayan will always be on top of all services when there is a service of setnayan"*). **Implication for the customer Services tab:** the choice-driven pre-add list should be **sourced from the Setnayan vendor account's listings for the couple's chosen categories** — converging the in-app `ADD_ONS` launcher (`vendors/_components/in-app-services-section.tsx`) with the same vendor model the marketplace uses, rather than a hardcoded SKU list.
+**How Setnayan's first-party services are populated (owner-locked 2026-06-03).** Setnayan's **main internal account operates its own first-party vendor account** — the Setnayan services (Papic · Live Studio · Pakanta · Pailaw · Animated Monogram · Pro Website · Live Venue Photo Wall · Patiktok · Pabati · …) are **vendor listings under that account**, managed via the normal vendor dashboard (0022) and tagged to their canonical category (the `setnayan: true` canonicals in `taxonomy.ts`). They surface like any vendor's listings but **float to the top** of every category they appear in (`is_setnayan_service` on the `vendor_market_stats` view · owner directive 2026-05-22 *"Setnayan will always be on top of all services when there is a service of setnayan"*). **Implication for the customer Services tab:** the choice-driven pre-add list should be **sourced from the Setnayan vendor account's listings for the couple's chosen categories** — converging the in-app `ADD_ONS` launcher (`vendors/_components/in-app-services-section.tsx`) with the same vendor model the marketplace uses, rather than a hardcoded SKU list.
 
 ---
 
@@ -51,7 +51,7 @@ Every surface must use the **canonical name**. The prototypes currently use inco
 
 Owner: *"for the website, they will all be visible on the website but they are all separate entities."*
 
-- **Public website** = a **flat catalog of separate service entities**. Every Setnayan service (the 5 digital + Papic · Panood · Pakulay · Pareto/Camera Bridge · AI Highlight · etc.) is its **own card**. No "Digital Services" header, no grouping, no bucket.
+- **Public website** = a **flat catalog of separate service entities**. Every Setnayan service (the 5 digital + Papic · Live Studio · Pakulay · Pareto/Camera Bridge · AI Highlight · etc.) is its **own card**. No "Digital Services" header, no grouping, no bucket.
 - **In-app marketplace** = the 5 digital services **grouped** under the Design › Digital Services child tile.
 
 Both are correct. The website sells each capability on its own merits; the marketplace organizes shopping by category. Do not "fix" the website to mirror the marketplace grouping.

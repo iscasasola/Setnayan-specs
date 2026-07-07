@@ -5,12 +5,14 @@
 > - **Commission / "Setnayan Pay 5.0%" is RETIRED.** §3.5, §6.12, §11 (the whole "5.0% rule" + worked-example tile) no longer reflect reality. Live commission is **0% — "0% commission, ever."** Vendor↔customer money is **OFF-PLATFORM** (RA 11967); Setnayan never holds or charges it. In-app SKU payment is **apply-then-pay with manual admin approval** (no automated charge anywhere in V1). Do NOT design a +5% checkout breakdown or worked-example tile.
 > - **"No wallet / no tokens, ever" is only half-true now.** The customer token wallet (0003) IS retired, so the couple-side no-wallet rule holds. But a **vendor-side token economy is LIVE** (burn-on-answer 1–3 tokens ₱100/200/300 banded by wedding region; 100 founder tokens on verification; packs). Vendor surfaces (`/vendor-dashboard/tokens`) DO show a token balance.
 > - **Themes:** the "5 locked themes" (§4.2) and "theme picker in Appearance" (§6.15) never shipped that way and are retired — the app is **light-locked** (single Clean-Editorial light palette; picker removed). Remove the 5-theme requirement from the designer checklist (§13).
-> - **Planner SKU:** any "Setnayan Concierge" / 9-step Guided Planner card (§6.2, §6.3, §8.11) is superseded by **"Setnayan AI" ₱1,499** (and the couple-app planner *wizard* is retired in code; only the SKU/branding persists). Drop the Concierge funnel.
+> - **Planner SKU:** any "Setnayan Concierge" / 9-step Guided Planner card (§6.2, §6.3, §8.11) is superseded by **"Setnayan AI" ₱3,999** (and the couple-app planner *wizard* is retired in code; only the SKU/branding persists). Drop the Concierge funnel.
 > - **BIR:** the "BIR Official Receipts as a first-class screen" thread (§3.6, §5, §6.13, §10.6, §11) is **retiring** (0026 retired 2026-06-07; admin `bir/2307` tombstoned). Do not design OR/VAT/EWT receipt screens as a launch requirement.
 > - **Admin console** is ~53 routes (6-group desktop sidebar + mobile bottom-nav), not "12 surfaces" (§8). **Vendor dashboard** host is `/vendor-dashboard` (~24 routes, 4-group sidebar), not `/dashboard/vendor`. Charm-pricing "-1 endings" (§4.5, §10.8) is loosely followed at best — live SKUs use ₱2,499/₱1,499/₱2,999 etc. (not -1).
 > - Still broadly accurate: the responsive bottom-nav↔top-tabs pattern, empty/loading/error states, vendor logo-masking in chat, customer-initiates-chat invariant, public-ID `S89X-` mono rendering, Lucide-only iconography, monogram-as-identity.
 >
 > When this body disagrees with the above, **the above wins.**
+>
+> **➕ 2026-06-29 price refresh** (live-site sync — supersedes any stale prices in the banner above): Setnayan AI **₱3,999** (paid first paywall) · Animated Monogram **₱1,999** · Live Studio (Panood) multicam **₱3,499/day** (single-cam livestream FREE) · Pakanta **₱2,499** (one SKU) · Cinematic Reveal **₱1,499** · vendor Pro **₱2,499** / Enterprise **₱4,999** per 28-day · **0% commission · verification FREE** · couple website = free 4-in-1 + ONE **Couple Website PRO ₱1,999** (old separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs retired) · couple tiers **Free ₱0 · Setnayan AI ₱3,999** (Essentials/Complete bundles REMOVED 2026-06-29). Canon: `AS_BUILT_GROUND_TRUTH_2026-06-07.md` § 1 + `Pricing.md` § 00.
 
 **Purpose:** Hand this to a UI / visual designer. It tells them what every surface of Setnayan V1 is, who uses it, what it must contain, and how it must behave on mobile vs desktop. Anchored against the live product (https://www.setnayan.com), the locked spec corpus (`/Users/icecasasola/Documents/Claude/Projects/Setnayan/`), and the shipped code (`origin/main` of `iscasasola/setnayan-platform`). All pricing is PHP centavos. V1 scope = Wedding only.
 
@@ -61,7 +63,7 @@ Setnayan is **NOT** a wallet/credits product — payment is order-and-pay only. 
 2. **No wallet UI.** No balance. No tokens. No credits. No wallet pill in chrome. Ever.
 3. **Free planning forever.** Guest list, RSVP, seating, budget, schedule, mood board, basic personal invitation page — never paywalled.
 4. **À la carte add-ons.** Optional features (Monogram Hero ₱1,999, Live Schedule ₱999, Save-the-Date Video ₱99, day-of services, vendor boost) are one-shot orders. Not subscriptions.
-5. **Setnayan Pay convenience fee = flat 5.0%** on top of vendor's listed price, paid by couple at checkout. Always show the all-in number AND the worked example.
+5. **No convenience fee — 0% commission, ever (RETIRED to 0% at the 2026-06-07 reset).** Vendor↔customer money is settled off-platform (RA 11967); Setnayan never holds or charges a per-booking fee. Do NOT design a +5% checkout breakdown or worked-example tile. The vendor's listed price is the all-in price.
 6. **BIR Official Receipts** on every checkout (OR number, VAT split, vendor TIN, EWT row when applicable). Receipt is a first-class screen, not a footnote.
 7. **Two-admin approval gate** on major admin decisions (price changes, deletions, blacklist, payment-method config). Routine ops = single-admin. Visualize the co-sign step.
 8. **Responsive by default.** Every surface ships desktop + mobile. Bottom nav on mobile = top tabs on desktop. Bottom sheets on mobile = dropdowns/poppers on desktop. Do not design mobile-only or desktop-only screens.
@@ -125,7 +127,7 @@ Lucide icons exclusively (`lucide-react`). No custom icons in chrome. Sizes 16 /
 | 5 | Interactive demo | *"Maria & Juan: every moving piece, in one app."* | Live couple-dashboard mockup with role/theme toggles |
 | 6 | Four core tabs | Guest List · Vendors · Schedule · In-App Services | Quad-card or tabbed module |
 | 7 | Day-of services grid | 10 service cards | 4-up desktop / 2-up tablet / 1-up mobile |
-| 8 | Pricing (transparent) | Free / À la carte / 5.0% checkout fee | 3-column tier table + worked example |
+| 8 | Pricing (transparent) | Free / À la carte / 0% commission on vendor bookings | 3-column tier table (no +5% checkout fee — retired) |
 | 9 | Event-type roadmap | Wedding live + 8 coming-soon | Grid with "Live" badge and notify-me inputs |
 | 10 | Geographic coverage | *"From Luzon to Mindanao."* | PH map illustration, city pins |
 | 11 | Closing CTA | *"Set na 'yan."* | Two CTAs (couple + vendor) |
@@ -322,7 +324,7 @@ Anything V1.5+ shows as **"Coming soon"** with notify-me capture.
 ### 6.12 Orders `/dashboard/[eventId]/orders`
 
 - Order list with state (Quoted / Paid / Awaiting reconciliation / Completed / Disputed)
-- Per-order detail at `/[orderId]`: line items · +5.0% breakdown · BIR receipt link · vendor handoff
+- Per-order detail at `/[orderId]`: line items · BIR receipt link · vendor handoff _(no +5% convenience-fee breakdown — retired to 0% at the 2026-06-07 reset)_
 - "Create order" `/new` (manual order entry from a vendor offer)
 
 ### 6.13 Receipts `/receipts/[receiptId]`
@@ -334,8 +336,9 @@ Standalone receipt view (shareable URL). Renders:
 - Line items
 - VAT split
 - EWT (Form 2307) row when applicable
-- Setnayan Pay convenience fee line
 - "Download PDF" CTA
+
+_(No Setnayan Pay convenience-fee line — the fee is retired to 0% as of the 2026-06-07 reset.)_
 
 ### 6.14 Day-of mode — auto-activates T-1h to T+8h
 
@@ -620,8 +623,9 @@ Every checkout produces an OR with:
 - Vendor TIN (auto-formatted)
 - VAT split
 - EWT (Form 2307) row when applicable
-- Setnayan convenience fee line (informational; vendor receives gross)
 - Downloadable PDF (via `pdf-lib`, queued)
+
+_(No Setnayan convenience-fee line — retired to 0% at the 2026-06-07 reset.)_
 
 ### 10.7 Public IDs
 
@@ -644,38 +648,24 @@ Never show a balance. Never show "tokens". Never show "credits". Payment is **or
 
 ---
 
-## 11. Setnayan Pay / pricing UI
+## 11. Pricing UI
 
-### 11.1 The 5.0% rule
+> **RETIRED to 0% at the 2026-06-07 reset.** The "5.0% rule" + +5% worked-example tile this section described are gone. Commission is **0% — "0% commission, ever."** Vendor↔customer money is settled off-platform (RA 11967); Setnayan never holds or charges a per-booking fee. Do NOT design a +5% breakdown or worked-example tile anywhere.
 
-Vendor lists ₱X. Couple pays ₱X × 1.05 at checkout. Vendor receives ₱X (less their gateway fee + BIR 0.5%).
+### 11.1 The 0%-commission rule
 
-**Display convention:** Always show the all-in number (couple-facing) AND the vendor-listed number where relevant. Tooltip explains the breakdown.
+Vendor lists ₱X. Couple pays ₱X — the vendor's listed price is the all-in price. Setnayan adds nothing on top. Vendor↔customer settlement is off-platform.
 
-### 11.2 Worked-example tile (reusable component)
+**Display convention:** Show the vendor-listed price as the single, final number. No couple-facing "all-in vs listed" split, because there is no fee to split.
 
-```
-Vendor lists:        ₱100,000
-Setnayan Pay (5.0%): +₱5,000
-─────────────────────────────
-You pay:             ₱105,000
-Vendor receives:     ₱100,000
-```
+### 11.2 In-app SKU payment methods (V1)
 
-Use this tile on:
-- Pricing page
-- Homepage pricing section
-- Cart / checkout
-- Order detail
-- Vendor service detail (when in couple view)
-
-### 11.3 Payment methods (V1)
+First-party Setnayan SKUs (e.g. Setnayan AI, Animated Monogram, Panood) are paid apply-then-pay with manual admin approval:
 
 - **Bank transfer (BDO)** — manual reconciliation
 - **GCash QR** — manual reconciliation
-- Admin-configurable per method (default uniform 5.0%)
 
-V1.5+ unlocks Maya Business gateway + Maya QR Ph as primary rail.
+No automated charge anywhere in V1. V1.5+ may add a gateway, but this does NOT reintroduce any per-booking convenience fee.
 
 ---
 
@@ -708,7 +698,7 @@ Confirm each before approving mockups:
 - [ ] Vendor identity is always the logo, never the personal photo
 - [ ] BIR receipt is a first-class screen, not a footnote
 - [ ] All prices use charm endings (-1)
-- [ ] All pricing surfaces include the +5.0% worked-example tile
+- [ ] No pricing surface shows a +5% convenience-fee or worked-example tile (fee retired to 0% — 2026-06-07 reset)
 - [ ] Couple-only chat initiation honored (vendor surfaces show Reply, not New)
 - [ ] Day-of mode banner is unmissable in the T-1h to T+8h window
 - [ ] Verification badges (hidden / coming_soon / verified / archived) visually distinct
@@ -768,7 +758,7 @@ If a screen isn't in this doc but you find it on the live site or in `apps/web/a
 0031 day_of_guest/                Live-event mode for guests
 0032 contract_intelligence/       AI contract analysis (Claude Haiku 4.5)
 0033 public_api_foundation/       OAuth2 (plumbing only)
-0034 payments_and_cart/           Setnayan Pay 5.0% · order-and-pay
+0034 payments_and_cart/           apply-then-pay · 0% commission (no convenience fee)
 0035 observability/               Sentry + PostHog
 0037 event_day_preload/           T-3d / T+1d pre-load CTA
 ```

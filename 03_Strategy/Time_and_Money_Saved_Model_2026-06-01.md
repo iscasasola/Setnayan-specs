@@ -42,7 +42,7 @@
 
 ## C · Additional time-savers (proposed — confirm the per-unit rates)
 
-We know the **paid** apparatus (Papic, Panood, Save-the-Date video, etc.) saves cash; these are extra **time** savers worth crediting:
+We know the **paid** apparatus (Papic, Live Studio, Save-the-Date video, etc.) saves cash; these are extra **time** savers worth crediting:
 
 | Feature | Why it saves time | Proposed rate |
 |---|---|---|

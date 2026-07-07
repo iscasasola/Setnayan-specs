@@ -67,7 +67,7 @@ Ranked by expected impact × effort to ship.
 
 ### 🥇 #1. Visual evidence per benefit — small photo per row
 **Impact:** Massive. The single biggest gap. Per Finding #3.
-**What it looks like:** Each `.bli-rich` row gains a 56×56 rounded thumbnail on the left — a real wedding photo showing the actual outcome (a candid Papic shot · a still from an SDE highlight reel · an album-art-style Pakanta cover · a printed QR table card · a guest watching Panood from abroad on a tablet · etc.). Same wedding-photo aesthetic as the pax + budget + feel screens already shipped.
+**What it looks like:** Each `.bli-rich` row gains a 56×56 rounded thumbnail on the left — a real wedding photo showing the actual outcome (a candid Papic shot · a still from an SDE highlight reel · an album-art-style Pakanta cover · a printed QR table card · a guest watching Live Studio from abroad on a tablet · etc.). Same wedding-photo aesthetic as the pax + budget + feel screens already shipped.
 **Generation:** ~16 Recraft images at ~520² · Setnayan watermark inherits from the existing CSS overlay rule.
 **Effort:** ~1 hr · CSS + Recraft batch + image preload.
 

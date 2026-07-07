@@ -30,7 +30,19 @@ The current checklist hard-codes four wedding-only assumptions. Each must lift i
 | **Phase-1 reception→ceremony→find-date→lock ordering** | 12-step wedding sequence (§ 4 of the design doc) | `phase_ordering[]` — a per-type ordered task list |
 | **Paperwork line = marriage license + CENOMAR + church + pre-Cana** | Catholic-wedding statutory pack | `statutory_pack[]` — type- + faith-scoped; empty for most types |
 
-Everything else already generalizes cleanly and needs **no** code change: the three-layer structure, the adaptive state machine (§ 6 of the design doc), the budget health-check formula, the terminology-slot system, and `ensureChecklistSeeded()`'s re-seed-on-open. Layer 2's plan-group tree is *already* read from `event_type_profiles` per type — that pipe exists; the types just have no rows.
+⚠ **Code-verified 2026-07-08 (two Explore traces on `origin/main`) — the earlier assumption that "the rest already generalizes cleanly" is WRONG. Only Layer 1 exists at runtime.**
+
+| Component | Claimed state | Verified state |
+|---|---|---|
+| `ensureChecklistSeeded()` (Layer 1 backbone) | fires | ✅ **FIRES** — called on checklist page + home card (`checklist-actions.ts:40`); reliably seeds the wedding template |
+| `checklist-taxonomy.ts` (Layer 2) | "build queued, reads plan-group tree" | 🔴 **DEAD STUB** — 28 lines, returns `interested_categories`, reads no `event_type_profiles` tree, **0 callers** |
+| `checklist-state.ts` (Layer 3 state machine) | present | 🔴 **DEAD** — every export has **0 callers** repo-wide; never executes |
+| `checklist-budget.ts` `computeBudgetHealth` (health-check + Tier-3) | present | 🔴 **DEAD** — **0 callers**; the only "taxonomy-driven" Tier-3 code never runs |
+| reads `event_type` | — | 🔴 **NEVER** — grep across all checklist files = 0 matches; only `ceremony_type` |
+
+So this is **not a de-hardcode-and-lift job — Layers 2, 3, and the budget engine must be WIRED for the first time** (they're written but unreferenced), *on top of* lifting the wedding constants. The `event_type_profiles` plan-group pipe the design doc assumed is **not** actually read by any live code.
+
+🔴 **Pre-existing live bug (pilot blocker), must fix in PR-1:** `isChurchCeremony(null) === true` (`checklist.ts:81-82`) means every non-wedding event (null `ceremony_type`) today renders the **full Catholic-wedding checklist** — marriage license, CENOMAR, pre-Cana, ninong/ninang. Confidently wrong, ships now.
 
 ---
 
@@ -214,9 +226,12 @@ Catch-all for anniversary / reunion / general party. Deliberately the thinnest d
 ## 6. Build sequence & open owner calls
 
 **Sequence (schema/data first, per the repo per-iteration workflow):**
-1. **PR-1 · De-hardcode.** Lift the four wedding constants (§ 1) into `EventTypeChecklistDef`; re-express wedding from the def so the live wedding checklist is byte-for-byte unchanged (regression gate: wedding output identical before/after). Flag-gated.
-2. **PR-2 · Seed the 8 defs** into `event_type_profiles` sibling data + wire `date_model='input'` path (skip `/find-date`, count deadlines back from the set date). Each type behind the existing "Coming soon"→enabled toggle so they can go live one at a time.
-3. **PR-3 · Plan-group trees.** Ensure each type's Layer-2 taxonomy tree exists in `event_type_profiles` (admin data task, not code) so Tier 3 populates.
+1. **PR-1 · De-hardcode + fix the live bug.** Lift the four wedding constants (§ 1) into `EventTypeChecklistDef`; re-express wedding from the def so the live wedding checklist is byte-for-byte unchanged (regression gate: wedding output identical before/after). **Also fix `isChurchCeremony(null)` (§ 1) so a non-wedding event stops rendering the Catholic-wedding checklist** — the smallest standalone fix and a current-pilot correctness issue; can ship ahead of the rest.
+2. **PR-2 · WIRE Layers 2 + 3 + budget (they are dead code today, not partial).** Give `checklist-taxonomy.ts` a real reader of the event type's plan-group tree; call `resolveCategoryState` from the render path; call `computeBudgetHealth` from the checklist/budget surface. This is net-new wiring the design doc assumed already existed.
+3. **PR-3 · Seed the 8 defs** into `event_type_profiles` sibling data + wire `date_model='input'` path (skip `/find-date`, count deadlines back from the set date). Each type behind the existing "Coming soon"→enabled toggle so they can go live one at a time.
+4. **PR-4 · Plan-group trees.** Ensure each type's Layer-2 taxonomy tree exists in `event_type_profiles` (admin data task, not code) so Tier 3 populates.
+
+**Setnayan AI dependency (verified 2026-07-08):** the paid intelligence layer this checklist leans on (§ 6 of the design doc's six-input directive) is itself **dormant** — the per-user gate IS wired into all 6 surfaces, but all flags default OFF (runtime = free per-event toggle, no payment checked), and the watch-guard trigger engine has **zero proactive firing path** (no cron/webhook/DB-trigger; not wired to `emitNotification`; AI notification types don't exist in the `NotificationType` union). See the corrected recon table in [`Setnayan_AI_Realtime_Notifications_2026-07-02.md` § 2](../Setnayan_AI_Realtime_Notifications_2026-07-02.md). So "Setnayan AI powers the adaptive checklist" is **aspirational in code today** — the checklist's own free rule engine (Layers 1–3, once wired) is the near-term deliverable.
 
 **Open owner calls:**
 1. **Travel (§ 5.7)** — vendor checklist, or a separate itinerary surface? It's the one type that doesn't fit the shortlist-a-vendor-per-category model. *Recommend:* interim vendor checklist as above; revisit an itinerary builder post-launch.

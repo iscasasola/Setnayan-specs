@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Setnayan · Koi Reveal (3D · 2026-06-20)</title>
+<style>
+  :root{ color-scheme:dark; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; height:100%; background:#04080a; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  #app{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+  #stage{ position:relative; overflow:hidden; background:#06100e; box-shadow:0 30px 80px rgba(0,0,0,.6); }
+  #cv{ display:block; width:100%; height:100%; touch-action:none; }
+  .chip{ position:absolute; left:14px; top:13px; padding:5px 11px; border-radius:999px; background:rgba(6,14,12,.45); color:#cbb988; font-size:11px; letter-spacing:.07em; text-transform:uppercase; pointer-events:none; }
+  .toolbar{ position:absolute; right:12px; top:11px; display:flex; gap:8px; }
+  .tbtn{ border:1px solid rgba(220,200,150,.35); background:rgba(6,14,12,.5); color:#f0e3c8; font-size:12px; padding:7px 12px; border-radius:10px; cursor:pointer; }
+  .tbtn:active{ transform:scale(.97); }
+  .hint{ position:absolute; left:50%; bottom:18px; transform:translateX(-50%); padding:8px 16px; border-radius:999px; background:rgba(6,14,12,.5); color:#f0e3c8; font-size:13px; pointer-events:none; transition:opacity .6s; white-space:nowrap; }
+  #err{ position:absolute; left:10px; bottom:46px; right:10px; color:#ffb4a8; font-size:11px; font-family:monospace; white-space:pre-wrap; pointer-events:none; }
+  #panel{ position:absolute; right:0; top:0; height:100%; width:250px; max-width:82%; background:rgba(5,11,10,.9); backdrop-filter:blur(8px); border-left:1px solid rgba(220,200,150,.18); padding:54px 16px 16px; overflow-y:auto; transform:translateX(100%); transition:transform .25s ease; }
+  #panel.open{ transform:translateX(0); }
+  .row{ margin-bottom:12px; }
+  .row .lab{ display:flex; justify-content:space-between; font-size:11.5px; color:#b9c2bd; margin-bottom:4px; }
+  .row .lab b{ color:#f0e3c8; font-weight:500; }
+  .row input[type=range]{ width:100%; accent-color:#cb9e4b; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div class="chip">koi reveal · 3D</div>
+    <div class="toolbar">
+      <button class="tbtn" id="riseBtn">Rise ↑</button>
+      <button class="tbtn" id="gearBtn">Tune</button>
+    </div>
+    <div class="hint" id="hint">tap the water · double-tap to reveal</div>
+    <div id="err"></div>
+    <div id="panel"></div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const errEl=document.getElementById('err');
+  const fail=m=>{ errEl.textContent=String(m&&m.stack||m); console.error(m); };
+  if(typeof THREE==='undefined'){ fail('three.js failed to load'); return; }
+  window.addEventListener('error',e=>fail(e.message));
+
+  // ---- monogram path (Setnayan mark) ----
+  const MARK_D='M 1859.526,3749.781 C 1458.028,3717.757 1065.454,3548.554 758.3406,3241.44 451.2286,2934.328 282.2397,2541.742 250.2195,2140.255 l 1326.8215,1.536 V 661.7647 C 1368.543,727.4195 1172.067,841.5416 1006.804,1006.804 768.3191,1245.29 633.8543,1548.261 602.7217,1859.526 H 250 C 282.024,1458.028 451.2265,1065.455 758.3406,758.3406 1065.453,451.2287 1458.039,282.2396 1859.526,250.2195 V 2422.739 H 661.7647 c 65.6549,208.498 179.7773,404.975 345.0393,570.237 238.486,238.486 541.457,372.95 852.722,404.083 z m 280.948,0 1.537,-1609.307 h 280.948 v 1197.761 c 208.498,-65.655 404.974,-179.776 570.237,-345.039 238.485,-238.486 372.95,-541.457 404.082,-852.722 H 3750 c -32.024,401.498 -201.226,794.071 -508.341,1101.185 -307.112,307.112 -699.697,476.101 -1101.185,508.122 z m 0,-1890.255 c 32.025,-401.498 201.227,-794.073 508.341,-1101.1854 0.658,-0.6584 1.316,-1.3173 1.975,-1.9754 -80.395,-42.041 -163.892,-76.0428 -249.331,-101.7389 -85.439,-25.696 -172.821,-43.0864 -260.985,-51.9046 V 250.2195 c 401.497,32.0253 794.073,201.0094 1101.185,508.1211 307.114,307.1134 476.317,699.6874 508.341,1101.1854 h -352.722 c -31.132,-311.265 -165.597,-614.236 -404.082,-852.722 -15.719,-15.7189 -32.464,-29.741 -48.727,-44.5564 -15.975,14.4789 -31.774,29.1397 -47.191,44.5564 -238.485,238.486 -372.95,541.457 -404.082,852.722 z';
+  const GOLD='#cb9e4b';
+  const KOITEX=['water_assets/koi1.webp','water_assets/koi2.webp','water_assets/koi3.webp'];
+
+  const S={ koi:6, speed:50, tilt:42, ripple:55, caustics:55, sheen:62, riseSpeed:40 };
+  const dials=[ ['koi','Koi',1,10],['speed','Swim grace',10,100],['tilt','Camera tilt',10,80],
+    ['ripple','Ripple',0,100],['caustics','Caustics',0,100],['sheen','Monogram glow',0,100],['riseSpeed','Rise speed',10,100] ];
+  const panel=document.getElementById('panel');
+  dials.forEach(([k,lab,mn,mx])=>{ const w=document.createElement('div'); w.className='row';
+    w.innerHTML='<div class="lab"><span>'+lab+'</span><b id="v_'+k+'">'+S[k]+'</b></div>';
+    const inp=document.createElement('input'); inp.type='range'; inp.min=mn;inp.max=mx;inp.step=1;inp.value=S[k];
+    inp.oninput=()=>{ S[k]=+inp.value; document.getElementById('v_'+k).textContent=inp.value; if(k==='koi')rebuildKoi(); if(k==='tilt')placeCamera(); };
+    w.appendChild(inp); panel.appendChild(w); });
+  document.getElementById('gearBtn').onclick=()=>panel.classList.toggle('open');
+
+  // ====================================================================
+  // Scene
+  // ====================================================================
+  const stage=document.getElementById('stage'), cv=document.getElementById('cv');
+  const DPR=Math.min(2,window.devicePixelRatio||1);
+  let W=360,H=583, PW=60, PH=98;                       // pond extent in world units
+  const SURF=0, FLOOR=-16;                              // y of water surface / pond floor
+  let renderer,scene,cam;
+  let waterMesh,waterGeo,floorMesh, markMesh, causticMat;
+  const clock={t:0};
+
+  renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:false});
+  renderer.setPixelRatio(DPR);
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color('#05100e');
+  scene.fog=new THREE.Fog('#06201c', 60, 200);          // depth haze → underwater feel
+  cam=new THREE.PerspectiveCamera(42, W/H, 1, 600);
+
+  // lights — warm key (sun glints) + cool fill (pond bounce)
+  const key=new THREE.DirectionalLight('#ffe6b8', 1.15); key.position.set(-30,70,20); scene.add(key);
+  scene.add(new THREE.HemisphereLight('#bfe9d8','#06120f', 0.75));
+  scene.add(new THREE.AmbientLight('#244', 0.35));
+
+  function placeCamera(){
+    const tl=THREE.MathUtils.degToRad(S.tilt);          // 0 = straight down, 90 = side-on
+    const dist=PH*1.18;
+    cam.position.set(0, Math.cos(tl)*dist, Math.sin(tl)*dist*0.92);
+    cam.lookAt(0,-3,0);
+  }
+
+  // ---------- pond floor (textured + caustic overlay) ----------
+  const texLoader=new THREE.TextureLoader();
+  function buildFloor(){
+    const g=new THREE.PlaneGeometry(PW*2.2, PH*2.2, 1,1); g.rotateX(-Math.PI/2);
+    const m=new THREE.MeshStandardMaterial({ color:'#16312a', roughness:1, metalness:0 });
+    texLoader.load('water_assets/water.webp', tx=>{ tx.encoding=THREE.sRGBEncoding; tx.wrapS=tx.wrapT=THREE.RepeatWrapping; m.map=tx; m.color.set('#5a6f64'); m.needsUpdate=true; }, undefined, ()=>{});
+    floorMesh=new THREE.Mesh(g,m); floorMesh.position.y=FLOOR; scene.add(floorMesh);
+    // caustic light: animated additive plane just above the floor
+    const cg=new THREE.PlaneGeometry(PW*2.2, PH*2.2, 1,1); cg.rotateX(-Math.PI/2);
+    causticMat=new THREE.ShaderMaterial({ transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+      uniforms:{ t:{value:0}, amt:{value:S.caustics/100} },
+      vertexShader:'varying vec2 v; void main(){ v=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+      fragmentShader:`varying vec2 v; uniform float t,amt;
+        float h(vec2 p){p=fract(p*vec2(127.1,311.7));p+=dot(p,p+34.5);return fract(p.x*p.y);}
+        float n(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),u.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),u.x),u.y);}
+        void main(){ vec2 p=v*vec2(7.0,12.0);
+          float c=n(p+vec2(t*0.06,t*0.04))+0.7*n(p*1.8-vec2(t*0.05,t*0.03));
+          c=pow(max(0.0,c-0.95),2.4)*2.6;
+          gl_FragColor=vec4(vec3(c*1.0,c*0.85,c*0.5)*amt,1.0);} `});
+    const cm=new THREE.Mesh(cg,causticMat); cm.position.y=FLOOR+0.4; scene.add(cm);
+  }
+
+  // ---------- water surface (interactive ripple sim displacing the plane) ----------
+  let simW=120, simH, h0,h1;
+  function buildWater(){
+    simH=Math.round(simW*PH/PW);
+    h0=new Float32Array(simW*simH); h1=new Float32Array(simW*simH);
+    waterGeo=new THREE.PlaneGeometry(PW*2, PH*2, simW-1, simH-1); waterGeo.rotateX(-Math.PI/2);
+    const m=new THREE.MeshStandardMaterial({ color:'#114a40', transparent:true, opacity:0.46,
+      roughness:0.06, metalness:0.0, side:THREE.DoubleSide, envMapIntensity:1 });
+    m.onBeforeCompile=sh=>{ // a touch of teal depth + brighten crests handled by normals/spec
+    };
+    waterMesh=new THREE.Mesh(waterGeo,m); waterMesh.position.y=SURF; waterMesh.renderOrder=2; scene.add(waterMesh);
+  }
+  const gi=(x,y)=>y*simW+x;
+  function impulse(nx,ny,amt,rad){ // nx,ny in 0..1 pond UV
+    const gx=Math.round(nx*(simW-1)), gy=Math.round(ny*(simH-1)); rad=rad||2;
+    for(let yy=-rad;yy<=rad;yy++)for(let xx=-rad;xx<=rad;xx++){ const x=gx+xx,y=gy+yy; if(x<1||x>=simW-1||y<1||y>=simH-1)continue; const d=Math.hypot(xx,yy); if(d>rad)continue; h0[gi(x,y)]+=amt*(1-d/rad); }
+  }
+  function ringImpulse(nx,ny,rpx,amt){ const r=Math.max(2,rpx*(simW/(PW*2))); const N=Math.max(14,(r*0.6)|0); for(let i=0;i<N;i++){const a=i/N*6.2832; impulse(nx+Math.cos(a)*r/(simW),ny+Math.sin(a)*r/(simH),amt,1);} }
+  function stepWater(){
+    const damp=0.965;
+    for(let y=1;y<simH-1;y++){ const row=y*simW; for(let x=1;x<simW-1;x++){ const i=row+x;
+      let v=(h0[i-1]+h0[i+1]+h0[i-simW]+h0[i+simW])*0.5-h1[i]; v*=damp; h1[i]=v; } }
+    const tmp=h0;h0=h1;h1=tmp;
+    if(Math.random()<0.004){const x=1+((Math.random()*(simW-2))|0),y=1+((Math.random()*(simH-2))|0);h0[gi(x,y)]+=0.05;}
+    // push sim heights into the plane geometry + recompute normals (lighting → glints)
+    const pos=waterGeo.attributes.position, amp=0.6+S.ripple/100*2.6;
+    for(let y=0;y<simH;y++)for(let x=0;x<simW;x++){ const vi=y*simW+x; pos.setY(vi, h0[gi(x,y)]*amp); }
+    pos.needsUpdate=true; waterGeo.computeVertexNormals();
+  }
+  function waveAt(nx,ny){ const gx=Math.round(nx*(simW-1)),gy=Math.round(ny*(simH-1)); if(gx<0||gx>=simW||gy<0||gy>=simH)return 0; return h0[gi(gx,gy)]; }
+
+  // world(x,z) <-> pond uv(0..1)
+  const worldToU=x=> (x/(PW)+1)/2, worldToV=z=> (z/(PH)+1)/2;
+
+  // ====================================================================
+  // Procedural 3D koi  (research-accurate subcarangiform swim)
+  // ====================================================================
+  const NSEG=34, NRING=10;                              // spine samples, cross-section points
+  let kois=[];
+  const koiTextures=[];
+  KOITEX.forEach((f,idx)=>texLoader.load(f, tx=>{ tx.encoding=THREE.sRGBEncoding; tx.flipY=true; koiTextures[idx]=tx;
+    // meshes are built at boot (before async textures arrive) — back-fill the map now
+    kois.forEach(k=>{ if(k.texIdx===idx){ k.mesh.material.map=tx; k.mesh.material.color.set('#ffffff'); k.mesh.material.needsUpdate=true; } });
+  }, undefined, ()=>{}));
+
+  // body profile: half-width(z) and half-height(y) along the spine s∈[0,1] (0=head,1=tail tip)
+  // Koi seen from a tilted-top camera: a long teardrop — blunt head, broad back
+  // widest ~⅓ back, slimming to a narrow caudal peduncle. Width (visible from top)
+  // is the dominant dimension; height (dorsal depth) is shallower so it reads as a
+  // fish, not a round tube.
+  function widthAt(s){
+    if(s<0.05) return 0.26+0.74*Math.sqrt(s/0.05)*0.5;     // blunt rounded nose
+    const shoulder=smooth(0.04,0.30,s);                    // widen behind the head
+    const taper=1-smooth(0.34,0.9,s)*0.92;                 // slim to the peduncle
+    return Math.max(0.05, (0.5+0.5*shoulder)*taper);
+  }
+  function heightAt(s){
+    if(s<0.05) return 0.22+0.5*Math.sqrt(s/0.05);
+    const body=smooth(0.03,0.32,s);
+    const taper=1-smooth(0.4,0.92,s)*0.86;
+    return Math.max(0.04, 0.62*(0.45+0.55*body)*taper);    // shallower than width
+  }
+  function smooth(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
+
+  // forked caudal tail (in local x[root→tip] × y[vertical] plane) + a teardrop pectoral
+  const _cs=new THREE.Shape(); _cs.moveTo(0,0); _cs.lineTo(0.95,0.6); _cs.quadraticCurveTo(0.78,0.18,0.7,0); _cs.quadraticCurveTo(0.78,-0.18,0.95,-0.6); _cs.closePath();
+  const CAUDAL_GEO=new THREE.ShapeGeometry(_cs);
+  const _ps=new THREE.Shape(); _ps.moveTo(0,0); _ps.quadraticCurveTo(0.5,0.32,1.0,0.12); _ps.quadraticCurveTo(0.55,-0.1,0,0); _ps.closePath();
+  const PECT_GEO=new THREE.ShapeGeometry(_ps);
+
+  function buildKoiMesh(texIdx){
+    const verts=(NSEG)*(NRING), pos=new Float32Array(verts*3), uv=new Float32Array(verts*2);
+    const idx=[];
+    for(let i=0;i<NSEG;i++){ const s=i/(NSEG-1);
+      for(let j=0;j<NRING;j++){ const a=j/NRING*Math.PI*2, vi=i*NRING+j;
+        uv[vi*2]=s; uv[vi*2+1]= 0.5+0.5*Math.cos(a)*0.96; }
+    }
+    for(let i=0;i<NSEG-1;i++)for(let j=0;j<NRING;j++){ const a=i*NRING+j, b=i*NRING+(j+1)%NRING, c=(i+1)*NRING+j, d=(i+1)*NRING+(j+1)%NRING; idx.push(a,c,b, b,c,d); }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    g.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+    g.setIndex(idx);
+    const tex=koiTextures[texIdx]||null;
+    const mat=new THREE.MeshStandardMaterial({ map:tex, color: tex?'#ffffff':'#e7e2d8', roughness:0.55, metalness:0.0 });
+    const fish=new THREE.Mesh(g,mat);
+    // fins — translucent, soft. A FORKED caudal fan + small swept pectorals.
+    const finCol = tex? '#e9b894' : '#f0d9c4';
+    const finMat=new THREE.MeshStandardMaterial({ color:finCol, transparent:true, opacity:0.5, roughness:0.7, side:THREE.DoubleSide, depthWrite:false });
+    const caudal=new THREE.Mesh(CAUDAL_GEO, finMat); fish.add(caudal);
+    const pL=new THREE.Mesh(PECT_GEO, finMat.clone()), pR=new THREE.Mesh(PECT_GEO, finMat.clone());
+    fish.add(pL); fish.add(pR);
+    fish.userData.fins={caudal,pL,pR};
+    return fish;
+  }
+
+  function rebuildKoi(){
+    kois.forEach(k=>scene.remove(k.mesh)); kois=[];
+    for(let i=0;i<S.koi;i++){
+      const BL=6.2+Math.random()*3.4;                    // body length (world units)
+      const texIdx=i%KOITEX.length;
+      const mesh=buildKoiMesh(texIdx);
+      mesh.scale.setScalar(1);
+      scene.add(mesh);
+      kois.push({ mesh, BL, texIdx,
+        x:rand(-PW*0.6,PW*0.6), z:rand(-PH*0.6,PH*0.6), depth:rand(2.0,7.5), depthPh:Math.random()*7,
+        ang:Math.random()*7, phase:Math.random()*7, vel:0, seed:Math.random()*100,
+        gait:'coast', gaitT:rand(600,2200), arousal:Math.random()<0.3?0.06:0.35,
+        tgt:null, tgtTimer:rand(2500,7000), pectPh:Math.random()*7,
+        bend:new Float32Array(NSEG) });
+    }
+  }
+  function rand(a,b){return a+Math.random()*(b-a);}
+
+  // amplitude envelope (BL units) — PNAS unified: y = 0.05 - 0.13x + 0.28x^2, clamped ≥0
+  function envAmp(s){ return Math.max(0.0, 0.05 - 0.13*s + 0.28*s*s); }
+
+  function updateKoi(k, dt, t){
+    // ---- gait state machine: burst-and-coast (research: koi cruise this way) ----
+    k.gaitT-=dt;
+    if(k.arousal<0.12){ k.gait='hover'; }
+    else if(k.gaitT<=0){
+      if(k.gait==='burst'){ k.gait='coast'; k.gaitT=rand(1100,2600); }
+      else { k.gait='burst'; k.gaitT=rand(280,560); }
+    }
+    // ---- target / heading (lazy curves, slow yaw) ----
+    k.tgtTimer-=dt;
+    if(!k.tgt||k.tgtTimer<=0||Math.hypot(k.tgt.x-k.x,k.tgt.z-k.z)<6){ k.tgt={x:rand(-PW*0.7,PW*0.7),z:rand(-PH*0.7,PH*0.7)}; k.tgtTimer=rand(2500,7000); }
+    const aim=(foodLife>0&&k.arousal>0.2)?{x:food.x,z:food.z}:k.tgt;
+    const desired=Math.atan2(aim.z-k.z, aim.x-k.x);
+    let dd=((desired-k.ang+Math.PI*3)%(Math.PI*2))-Math.PI;
+    const turn=(0.9+1.6*Math.abs(k.vel))*dt/1000 * (S.speed/50);
+    k.ang+=Math.max(-turn,Math.min(turn,dd*0.9));
+    // ---- speed by gait ----
+    const peak=(0.7+1.1*k.arousal)*(S.speed/50)*k.BL*0.0016; // world units / ms baseline
+    if(k.gait==='burst'){ k.vel += (peak-k.vel)*0.12; k.phase += dt*(0.011+0.016*(S.speed/50)); }
+    else if(k.gait==='coast'){ k.vel *= Math.pow(0.965,dt/16.7); k.phase += dt*0.0016; }   // tail nearly still, glide
+    else { k.vel *= Math.pow(0.94,dt/16.7); k.phase += dt*0.0009; }                          // hover
+    const step=k.vel*dt;
+    k.x+=Math.cos(k.ang)*step; k.z+=Math.sin(k.ang)*step;
+    // soft pond bounds
+    const bx=PW*0.82, bz=PH*0.82;
+    if(k.x<-bx){k.x=-bx;k.tgt=null;} if(k.x>bx){k.x=bx;k.tgt=null;}
+    if(k.z<-bz){k.z=-bz;k.tgt=null;} if(k.z>bz){k.z=bz;k.tgt=null;}
+    // depth: slow vertical drift; resters sit deeper; sinking slower than rising
+    const tgtDepth = k.arousal<0.12 ? 5.5 : 2.6 + Math.sin(t*0.0002+k.depthPh)*1.5 - (foodLife>0&&k.arousal>0.2?1.8:0);
+    const dr=tgtDepth-k.depth; k.depth += dr*(dr<0?0.0009:0.0015)*dt;
+
+    // ---- body wave (subcarangiform): amplitude grows head→tail, wave travels faster than swim ----
+    const active = k.gait==='burst' ? 1 : (k.gait==='coast'? Math.max(0, 1-(2600-k.gaitT)/600):0.12);
+    const ampScale = (0.9+0.5*k.arousal) * THREE.MathUtils.clamp(active,0,1);
+    const lambda=1.0;                                   // ~one wave on the body
+    for(let i=0;i<NSEG;i++){ const s=i/(NSEG-1);
+      // head recoil: small anti-phase nose wag, pivot ~0.35
+      const recoil = (s<0.35? (0.35-s)*0.18 : 0);
+      k.bend[i] = (envAmp(s)*ampScale - recoil*envAmp(0.0)*ampScale) * k.BL *
+                  Math.sin(k.phase - s/lambda*Math.PI*2);
+    }
+
+    // ---- write geometry (bend laterally in local z, align rings to spine tangent) ----
+    const g=k.mesh.geometry, pos=g.attributes.position;
+    let px=0, pz=0;                                      // accumulate spine in local space (x forward)
+    const seglen=k.BL/(NSEG-1);
+    const spineX=new Float32Array(NSEG), spineZ=new Float32Array(NSEG);
+    for(let i=0;i<NSEG;i++){ spineX[i]=i*seglen - k.BL*0.5; spineZ[i]=k.bend[i]; }
+    for(let i=0;i<NSEG;i++){ const s=i/(NSEG-1);
+      // tangent for ring orientation
+      const i0=Math.max(0,i-1), i1=Math.min(NSEG-1,i+1);
+      const tx=spineX[i1]-spineX[i0], tz=spineZ[i1]-spineZ[i0]; const tl=Math.hypot(tx,tz)||1;
+      const dirx=tx/tl, dirz=tz/tl;                      // spine direction
+      const nxz_x=-dirz, nxz_z=dirx;                     // lateral (in-plane) normal
+      const hw=widthAt(s)*k.BL*0.16, hh=heightAt(s)*k.BL*0.16;
+      for(let j=0;j<NRING;j++){ const a=j/NRING*Math.PI*2, vi=i*NRING+j;
+        const cz=Math.cos(a), cy=Math.sin(a);
+        const lx=spineX[i] + nxz_x*cz*hw;
+        const lz=spineZ[i] + nxz_z*cz*hw;
+        const ly=cy*hh;
+        pos.setXYZ(vi, lx, ly, lz);
+      }
+    }
+    pos.needsUpdate=true; g.computeVertexNormals();
+
+    // ---- fins ----
+    const F=k.mesh.userData.fins;
+    // caudal: vertical forked fan at the tail tip, angled to follow the tail's sweep
+    const tailAng=Math.atan2(spineZ[NSEG-1]-spineZ[NSEG-4], spineX[NSEG-1]-spineX[NSEG-4]);
+    const cf=F.caudal; cf.position.set(spineX[NSEG-1], 0, spineZ[NSEG-1]);
+    cf.scale.set(k.BL*0.30, k.BL*0.26, 1);
+    cf.rotation.set(0, -tailAng, 0); cf.rotation.x=0; cf.rotation.z=0;  // stays vertical, yaw with tail
+    // pectorals: small, just behind the head, swept back; gentle scull when hovering
+    const scull=Math.sin(t*0.011+k.pectPh)*(k.gait==='hover'?0.55:0.16);
+    const hx=spineX[Math.floor(NSEG*0.24)], hw=widthAt(0.24)*k.BL*0.16;
+    F.pL.position.set(hx, -k.BL*0.02, hw*0.7); F.pL.scale.set(k.BL*0.16,k.BL*0.13,1); F.pL.rotation.set(0.5, -2.2-scull, 0);
+    F.pR.position.set(hx, -k.BL*0.02, -hw*0.7); F.pR.scale.set(k.BL*0.16,k.BL*0.13,1); F.pR.rotation.set(-0.5, 2.2+scull, 0);
+
+    // ---- place + orient the whole fish ----
+    k.mesh.position.set(k.x, SURF-k.depth + waveAt(worldToU(k.x),worldToV(k.z))*0.4, k.z);
+    k.mesh.rotation.set(0, -k.ang, 0);
+    // depth tint (research: absorb R then G; veil teal; dim with depth)
+    const dt01=THREE.MathUtils.clamp((k.depth-1.5)/8,0,1)*0.7;
+    const m=k.mesh.material; if(m.map){ m.color.setRGB(1-0.3*dt01, 1-0.14*dt01, Math.min(1,0.96+0.04*dt01)); }
+    // gentle wake only on the active stroke
+    if(k.gait==='burst'&&Math.sin(k.phase)>0.9) impulse(worldToU(k.x-Math.cos(k.ang)*k.BL*0.5),worldToV(k.z-Math.sin(k.ang)*k.BL*0.5),0.05,1);
+  }
+
+  // ====================================================================
+  // Monogram — physics-staged emergence
+  // ====================================================================
+  let emergeP=0, emerging=false, prevE=0, breached=false, settleT=0;
+  function buildMark(){
+    const cvs=document.createElement('canvas'); cvs.width=cvs.height=512; const cx=cvs.getContext('2d');
+    cx.clearRect(0,0,512,512);
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5333.3335 5333.3335" width="512" height="512"><path d="'+MARK_D+'" fill="'+GOLD+'" fill-rule="nonzero" transform="matrix(1.3333333,0,0,-1.3333333,0,5333.3333)"/></svg>';
+    const im=new Image();
+    im.onload=()=>{ cx.drawImage(im,0,0,512,512); tex.needsUpdate=true; };
+    im.onerror=()=>fail('mark svg fail');
+    im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+    const tex=new THREE.CanvasTexture(cvs); tex.encoding=THREE.sRGBEncoding;
+    const mat=new THREE.MeshStandardMaterial({ map:tex, transparent:true, color:'#caa24f', emissive:'#3a2a08', roughness:0.35, metalness:0.4, side:THREE.DoubleSide, depthWrite:false });
+    const sz=PW*0.7; markMesh=new THREE.Mesh(new THREE.PlaneGeometry(sz,sz), mat);
+    markMesh.rotation.x=-Math.PI/2;                      // lie flat, facing up
+    markMesh.position.set(0, FLOOR+4, 0); markMesh.visible=true; markMesh.renderOrder=3; scene.add(markMesh);
+  }
+  const easeInOut=p=>p<0.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+  function updateMark(dt,t){
+    if(!markMesh)return;
+    if(emerging){ const sp=(0.0006+(S.riseSpeed/100)*0.0012)*dt; emergeP=Math.min(1,emergeP+sp); if(emergeP>=1)emerging=false; }
+    const vE=emergeP-prevE;
+    const cx=0,cz=0, U=worldToU(cx),V=worldToV(cz);
+    // STAGE A submerged ascent (0→0.42) : deep→near surface, eased
+    // STAGE B meniscus dome + hold (0.42→0.5): lift water, slow
+    // STAGE C breach (~0.5): one ring, gold ignites   STAGE D drain (0.5→0.85)
+    // STAGE E damped settle bob (0.85→1)
+    let depth;
+    if(emergeP<0.42){ const p=easeInOut(emergeP/0.42); depth=(FLOOR+4)+( (SURF+2) - (FLOOR+4) )*p*0.94; }
+    else if(emergeP<0.5){ const p=(emergeP-0.42)/0.08; depth=(SURF-1.0)+ p*1.0; if(vE>0) impulse(U,V, vE*6, Math.max(3,(0.18*simW)|0)); } // dome up
+    else { const p=(emergeP-0.5)/0.5; // breach + drain + settle
+      if(!breached){ breached=true; settleT=0; ringImpulse(U,V, PW*0.42, 0.5); ringImpulse(U,V, PW*0.24, 0.35); }
+      // damped settle bob toward equilibrium just above the surface
+      settleT+=dt/1000; const eq=SURF+2.2, B=2.6, tau=0.55, T=0.85;
+      const bob=B*Math.exp(-settleT/tau)*Math.cos(2*Math.PI*settleT/T);
+      depth=eq+bob*(emergeP>=1?1:0.6);
+      // emit a ring at each settle peak (stepping down)
+      if(emergeP>=1 && Math.abs(Math.cos(2*Math.PI*settleT/T))>0.985 && Math.random()<0.3) ringImpulse(U,V,PW*0.3, 0.06);
+    }
+    markMesh.position.y=depth;
+    // draw UNDER the translucent water while submerged (so it reads underwater),
+    // and ON TOP once it breaches the surface
+    markMesh.renderOrder = depth < SURF ? 1 : 3;
+    // waterline color-temp flip: cool/dim/translucent below → warm/bright/opaque gold above
+    const above=THREE.MathUtils.clamp((depth-SURF)/4,0,1);
+    const m=markMesh.material;
+    m.opacity=0.35+0.65*Math.max(above, emergeP*0.4);
+    m.emissiveIntensity=1;
+    m.emissive.setRGB(0.04+0.5*above*(S.sheen/100), 0.03+0.32*above*(S.sheen/100), 0.01+0.06*above);
+    m.color.setRGB(0.55+0.45*above, 0.5+0.42*above, 0.35+0.25*above);
+    const sc=0.7+0.3*easeInOut(Math.min(1,emergeP/0.5))+ (above>0?0.0:0); markMesh.scale.setScalar(sc);
+    prevE=emergeP;
+  }
+  function startRise(){ if(emerging||emergeP>0)return; emerging=true; emergeP=0; breached=false; document.getElementById('hint').style.opacity='0'; }
+
+  // ---------- food / interaction ----------
+  let food={x:0,z:0}, foodLife=0;
+  const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
+  function pickWater(ev){ const r=cv.getBoundingClientRect(); const cxp=(ev.touches?ev.touches[0]:ev).clientX-r.left, cyp=(ev.touches?ev.touches[0]:ev).clientY-r.top;
+    ndc.set(cxp/W*2-1, -(cyp/H*2-1)); ray.setFromCamera(ndc,cam);
+    const hit=ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0), -SURF), new THREE.Vector3());
+    return hit; }
+  let lastTap=0;
+  cv.addEventListener('pointerdown',ev=>{ const p=pickWater(ev); if(!p)return;
+    impulse(worldToU(p.x),worldToV(p.z), 0.5+S.ripple/100*0.8, 3); food={x:p.x,z:p.z}; foodLife=2600;
+    const now=performance.now? performance.now():Date.now(); if(now-lastTap<340) startRise(); lastTap=now; });
+  cv.addEventListener('pointermove',ev=>{ if(!ev.buttons&&!(ev.touches&&ev.touches.length))return; const p=pickWater(ev); if(!p)return; impulse(worldToU(p.x),worldToV(p.z),0.25,2); food={x:p.x,z:p.z}; foodLife=1500; });
+  document.getElementById('riseBtn').onclick=startRise;
+
+  // ---------- resize / boot ----------
+  function resize(){ const vh=window.innerHeight, vw=window.innerWidth; H=vh; W=Math.min(vw,Math.round(vh/1.62));
+    stage.style.width=W+'px'; stage.style.height=H+'px'; renderer.setSize(W,H,false); cam.aspect=W/H; cam.updateProjectionMatrix(); placeCamera(); }
+  window.addEventListener('resize',()=>{ clearTimeout(window._rz); window._rz=setTimeout(resize,150); });
+
+  let last=0;
+  function loop(ts){ const dt=Math.min(40, ts-last||16); last=ts; clock.t=ts*0.001;
+    try{
+      stepWater();
+      if(foodLife>0)foodLife-=dt;
+      for(const k of kois) updateKoi(k,dt,ts);
+      updateMark(dt,ts);
+      if(causticMat){ causticMat.uniforms.t.value=clock.t; causticMat.uniforms.amt.value=S.caustics/100; }
+      renderer.render(scene,cam);
+    }catch(e){ fail(e); return; }
+    requestAnimationFrame(loop);
+  }
+
+  try{
+    buildFloor(); buildWater(); buildMark(); rebuildKoi(); resize();
+    requestAnimationFrame(loop);
+  }catch(e){ fail(e); }
+})();
+</script>
+</body>
+</html>

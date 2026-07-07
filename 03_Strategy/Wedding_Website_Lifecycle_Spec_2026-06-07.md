@@ -48,7 +48,7 @@ Legend — **Free** · **SKU** (lights up when the add-on is owned) · **Pro** (
 | Live Photo Wall | · | ✓ | · | SKU · Live Venue Photo Wall / Papic |
 | Video Guestbook | · | ✓ | · | Free *(0031; Pabati tie possible)* |
 | Coordinator Broadcast | · | ✓ | · | Free *(0031)* |
-| Watch Live | · | ✓ | ✓ *(replay)* | SKU · Panood ₱3,499/day |
+| Watch Live | · | ✓ | ✓ *(replay)* | SKU · Live Studio ₱3,499/day |
 | Savour the Moment + Gallery | · | ✓ | ✓ | SKU · Papic |
 | Service Showcase | · | · | ✓ | **Pro/Enterprise vendors only** |
 | Event Feedback Wall | · | · | ✓ | Free *(vendor voices Pro/Ent only)* |
@@ -137,7 +137,7 @@ The editorial write-up is **auto-generated (free)** — an LLM composes the news
 | | Vendor tier · photos · profile link | showcase gate (Pro/Ent) | ✅ `vendor_profiles` |
 | | Services planned w/ Setnayan / total | impact stat 12/28 | 🧮 `event_vendors` vs 28 cats |
 | | **Match rank at selection** (#1 match?) | impact stat 8/12 first-pick | 🆕 **persist leaf-match rank at `finalizeVendor`** |
-| | Add-ons owned (Papic/Panood/Pakanta…) | which elements + article | ✅ `orders` |
+| | Add-ons owned (Papic/Live Studio/Pakanta…) | which elements + article | ✅ `orders` |
 | **Reviews** ||||
 | | Guest (≤250) · vendor (Pro/Ent) · couple reviews + stars | What They Said · pull quotes | 🆕 review system (§3) |
 | | Extracted highlights/sentiment | article color · quotes | 🧮 LLM from reviews |
@@ -209,7 +209,7 @@ The website is **clustered into two paid tiers** (simpler than the earlier per-e
 **Basic/Pro split — owner-confirmed 2026-06-07:**
 - **Basic = "RSVP Website" (₱2,500)** — the full invitation/response site (static-monogram hero, greeting, countdown, details, venue, schedule, dress code, what-to-bring, our photos, our love story, special message, save-the-date upload, QR card, RSVP, login-to-save).
 - **Pro = +₱2,000 (₱4,500)** — **includes ALL advanced website features**: the **"Event Website"** (during / live day-of) + the **"Editorial Website"** (after / recap) + premium chrome (animated/custom monogram, scrub-video hero, looping bg music, the editorial engine). *"Pro already includes all the advanced features of the website."*
-- **Service add-ons** (Papic · Panood · Pakanta · etc.) remain **separate purchases** that light up their own elements on whichever tier.
+- **Service add-ons** (Papic · Live Studio · Pakanta · etc.) remain **separate purchases** that light up their own elements on whichever tier.
 
 ### 6.10 Platform pricing — FINAL (owner 2026-06-07 · "use this")
 "Premium stance." Supersedes §6.9 (Basic/Pro) and every earlier figure this session. Internally consistent — the 18 à-la-carte SKUs sum to **₱47,982**; Essentials' components sum to **₱22,492** (both verified).
@@ -226,7 +226,7 @@ The website is **clustered into two paid tiers** (simpler than the earlier per-e
 - *Planning/AI:* Setnayan AI **₱3,999**
 - *Brand & Invites:* Animated Monogram **₱1,999** · Custom QR **₱999** · Pro RSVP **₱1,999** · Event Website **₱1,999** · Editorial Website **₱7,999**
 - *Capture (Papic):* Papic Guests **₱1,999** · Papic 5 Seats **₱2,999** · Camera Bridge **₱1,499**
-- *Video & Media:* Guest Stories **₱1,499** · Pabati **₱999** · Patiktok **₱1,499** · Thank You **₱3,499** · Same Day Edit **₱4,999** · PhotoWall **₱2,499** · Live Background **₱2,499** · Panood **₱2,499/day**
+- *Video & Media:* Guest Stories **₱1,499** · Pabati **₱999** · Patiktok **₱1,499** · Thank You **₱3,499** · Same Day Edit **₱4,999** · PhotoWall **₱2,499** · Live Background **₱2,499** · Live Studio **₱2,499/day**
 - *Audio:* Pakanta **₱2,499**
 - Margins ~95–99% (cost ≈ R2 storage ≤₱1,000/event). *(Owner also has a "Removed / no longer offered" list — not captured here; confirm what was cut.)*
 

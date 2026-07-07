@@ -4,6 +4,16 @@
 >
 > **Status (2026-06-12):** Naming system = **LOCKED** (owner-approved). Prices = **current working set** from the 2026-06-12 strategy session — supersedes `Pricing.md`, `Pricing_Canonical_2026-06-08.md`, `Price_Reconciliation_2026-06-04.md` (archive those). Prices remain owner-adjustable until a final holistic sign-off; this is the latest recommended set.
 
+> ## ⚠ AS-BUILT CORRECTION — 2026-06-29 (live-site / prod-DB sync)
+>
+> **Canonical = setnayan.com + [`AS_BUILT_GROUND_TRUTH_2026-06-07.md`](AS_BUILT_GROUND_TRUTH_2026-06-07.md) + [`Pricing.md § 00`](Pricing.md).** Where the body below disagrees, the live site wins. Current canon (prod DB 2026-06-29):
+> - **AI planner = "Setnayan AI" — ₱499 first 28-day cycle (intro) → ₱799/28-day cycle** (paid first-paywall subscription) — the "Setnayan Concierge ₱4,999" / "₱1,499" / "free planner" names+prices are RETIRED.
+> - **Commission = 0%**, every vendor booking, every tier — no 3%/5% Setnayan Pay cut.
+> - **Vendor subs:** Solo ₱999/28d (₱9,999/yr) · Pro ₱2,499/28d (₱24,999/yr) · Enterprise ₱4,999/28d (₱49,999/yr) · verification FREE · 100 free tokens on verify · flat ₱100/token packs. Old ₱6,000/₱10,000 + ₱2,499/₱5,499 + per-week vendor prices are RETIRED.
+> - **Couple website:** FREE 4-in-1 site (Save-the-Date · RSVP · Event · Editorial) + unlimited free RSVP + ONE **Couple Website PRO ₱1,999** upgrade. The separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs are RETIRED.
+> - **Animated Monogram ₱1,999** · **Live Studio multicam ₱3,499/day** (single-cam livestream FREE; "Panood" renamed → Live Studio) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
+> - **Couple tiers:** Free ₱0 · Setnayan AI (₱499 first 28d → ₱799/28d). **NO BUNDLES** — Essentials ₱12,999 + Complete ₱27,999 REMOVED 2026-06-29.
+
 ---
 
 ## 1. Naming system (LOCKED)
@@ -47,7 +57,7 @@
 | RSVP Website | — | Wedding site + RSVP | **Free — the funnel** | free | — | ⚠️ |
 | Event Website | — | Full site; wakes into live mode on the day | Pro | ₱1,999 · $35 | $55 | ➖ |
 | Editorial Website | — | Premium magazine-style site | Pro | ₱4,999 · $89 | $140 | ➖ |
-| Setnayan AI | — | Planning + vendor matchmaking (first paywall — kept low for conversion) | Pro | ₱3,999 · $69 | $108 | ✅ |
+| Setnayan AI | — | Planning + vendor matchmaking (first paywall — kept low for conversion) | Pro | ₱499 intro → ₱799/28d | — | ✅ |
 | Seating Chart | — | Interactive table editor + QR + meal counts | Free | free | — | ✅ |
 
 *(Free planning tools — Budget, Guest List, Mood Board — round out the Free tier; not sold separately.)*
@@ -96,5 +106,5 @@ The mark can enter the system three ways; all feed the same deploy-everywhere + 
 - **International:** Apple/Google IAP, which auto-converts your USD price to local currencies. **Markup ×1.571** (assume 30% cut → net +10% vs local). **Default to the 30% assumption** — if you get the 15% small-business rate, the extra margin is yours (~+33%).
 - **Basic = free (the funnel)**, Pro = paid (the revenue). Free basics (Website, Monogram design, Kwento, Seating, planning tools) drive sign-ups + virality; Pro upgrades + Papic add-ons make the money.
 - **Never sell FaceBlock** (privacy/compliance/trust).
-- **Setnayan AI stays low** (₱3,999) — its job is first-purchase conversion, not margin.
+- **Setnayan AI stays low** (₱499 intro → ₱799/28d) — its job is first-purchase conversion, not margin.
 - International strategy: lead marketing with the **output/media features** (cheaper than global market even marked-up); use free basics as the funnel (commodity features go premium once marked-up).

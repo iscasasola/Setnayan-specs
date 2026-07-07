@@ -86,14 +86,16 @@ See §4 — the most ambitious net-new mechanic. **Fully SHIPPED:** engine + sea
 
 Supersedes the locked flat *"< 14 days"* last-minute rule (`Customer_Vendor_Marketplace_Architecture_2026-06-04` Stage-1 gate) with a **configurable range**.
 
+> **🔄 START IS NOW VENDOR-OWNED (owner refinement 2026-06-16 — SHIPPED PR #1524).** The last-minute START is **no longer a platform per-leaf value** — it's the **vendor's per-service RECOMMENDED LEAD TIME** (`vendor_services.recommended_lead_time_months`, NEW): the normal/comfortable lead for regular effort ("book by here, no rush"). *Why:* applicability varies per vendor — a photographer who needs no prep can serve whenever the schedule is open; a custom-gown maker needs months. The platform shouldn't guess it per category. The three vendor-declared points per service: **(1) recommended lead time** = the START · **(2) last-minute range** `[recommended_lead → cutoff]` · **(3) hard cutoff** (`last_minute_end_months`, unchanged) = latest they can accept. NULL recommended lead → no last-minute range → always bookable whenever the schedule permits. The platform `last_minute_start` is retired as the driver (kept only as a soft fallback when a vendor leaves it blank). Vendor UI adds the field + a commitment nudge ("honor bookings up to your accept-until date"). The category-wide AI-off-empty rule (§4.2) deliberately stays on the platform group START so one vendor can't black out a whole category. **Dark-by-data** — nothing changes until vendors fill in lead times. The table below is the original 2026-06-08 framing; rows 1's "Set by / Grain" are superseded by the above.
+
 ### 4.1 — Two boundaries, split platform/vendor
 
 | Boundary | Set by | Grain | Meaning |
 |---|---|---|---|
-| **Last-minute START** | Setnayan (platform) | **per leaf service** | The designed month when "last-minute" *begins* for that category (a cake, a stylist, a venue each need different lead times — the platform owns this). |
+| **Last-minute START** | ~~Setnayan (platform)~~ → **the vendor (2026-06-16)** | **per their service** | The vendor's **recommended lead time** — the normal lead for regular effort; "last-minute" *begins* here. (Was platform per-leaf; now `vendor_services.recommended_lead_time_months`.) |
 | **Last-minute END (floor)** | the vendor | **per their service** | *"I'll still accept a booking until this month before the wedding."* Default if blank; **`0` = until the night before.** |
 
-**Last-minute = the range `[platform START → vendor END]`.**
+**Last-minute = the range `[vendor recommended-lead START → vendor END]`** (both vendor-owned since 2026-06-16).
 
 ### 4.2 — Three zones, by time-remaining (R = months to wedding)
 

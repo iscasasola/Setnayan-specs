@@ -4,7 +4,7 @@
 > **This doc is HISTORICAL/REFERENCE.** Authoritative current state = the live site (www.setnayan.com) + shipped code + `AS_BUILT_GROUND_TRUTH_2026-06-07.md`. Deltas (or "still accurate"):
 > - **This is an unbuilt asset-generation production playbook, not a shipped feature.** As of 2026-06-07 there is NO `music_catalogue/` or `template_library/` asset directory, NO `catalogue_manifest.json`/`library_index.json`, NO Remotion/FFmpeg reel-render pipeline, and NO Personal Reels render flow in `apps/web` @ `origin/main`. The Suno-driven music run and the 500-template generation run described here were never executed in code. Treat the whole document as a forward production plan / reference, not as-built.
 > - **Technique/method is still directionally usable** if/when the render layer is built (Suno-owned AI music, no major-label tracks, instrumental-only, architectural prompts, owned-outright licensing) — these remain locked product principles. But the volume targets (600 tracks / 500 templates) and the Saturday-session logistics are aspirational.
-> - **Cross-cutting product facts** that supersede anything implied here: commission is **0%** (no Setnayan Pay 3%/5%); the AI planner SKU is **"Setnayan AI" ₱1,499** (not "Concierge ₱4,999"); **Pakanta is a single SKU ₱2,499** (3-tier collapsed in `lib/v2/sku-catalog-v2.ts`); the customer token wallet (0003) is RETIRED; the live SDE SKU is **₱3,499** (not the ₱24,999 figure used in sister refresh docs).
+> - **Cross-cutting product facts** that supersede anything implied here: commission is **0%** (no Setnayan Pay 3%/5%); the AI planner SKU is **"Setnayan AI" ₱3,999** (not "Concierge ₱4,999"); **Pakanta is a single SKU ₱2,499** (3-tier collapsed in `lib/v2/sku-catalog-v2.ts`); the customer token wallet (0003) is RETIRED; the **SDE / Same-Day Edit SKU is RETIRED 2026-06-28** (the ₱3,499 figure cited in sister refresh docs no longer ships).
 >
 > When this body disagrees with the above, **the above wins.**
 
@@ -807,6 +807,200 @@ Template run (Saturday late or follow-up day):
 2. Cowork uses Claude/Gemini to generate templates against the schema
 3. Validate, render-test, log
 4. Done — both creative-asset libraries are live
+
+---
+
+## 16. V1 Starter-10 catalogue + beat-synced cut timing (2026-06-28)
+
+> **Decision (owner-signed 2026-06-28):** rather than wait on the aspirational 600-track / 500-template run, ship Guest Stories on a **curated starter set of 10 owned tracks**. Generation method = **Suno** (per the locked "owned forever, no per-render license" principle — not a per-render or third-party-licensed source). The list + per-track beatmap is locked; only the audio render is pending a Suno session. This section is additive — the Section 5/6 manifest and Section 12 template schema still apply; the fields below extend them.
+
+### 16.1 The 10 tracks
+
+Two each in the wedding-heavy families, one each for the narrative and dance-floor moments. `energy` is the 5-point shape (intro → drop) that drives cut cadence. **Tracks are full-length (~60–120s); a 30s window is selected per track** (§16.6).
+
+| # | Title | Category | Mood | BPM | Energy shape | Filename |
+|---|---|---|---|---|---|---|
+| 1 | Velvet Court | `bridgerton_feel` | romantic · dramatic | 95 | slow-build | `BR_001_95bpm_velvet-court.mp3` |
+| 2 | Candlelit Vows | `bridgerton_feel` | intimate · tender | 88 | gentle-flat | `BR_002_88bpm_candlelit-vows.mp3` |
+| 3 | The Story of Us | `taylor_swift_feel` | narrative · warm | 100 | verse-chorus arc | `TS_001_100bpm_story-of-us.mp3` |
+| 4 | Dance Floor Gold | `michael_jackson_feel` | celebration · funk | 112 | beat-driven | `MJ_001_112bpm_dance-floor-gold.mp3` |
+| 5 | After Hours | `jazz` | mellow · cocktail | 90 | steady-low | `JZ_001_90bpm_after-hours.mp3` |
+| 6 | Manila Bossa | `jazz` | breezy · light swing | 105 | light-lift | `JZ_002_105bpm_manila-bossa.mp3` |
+| 7 | Sunday Light | `sunday_morning_vibes` | soft · unhurried | 80 | unhurried | `SM_001_80bpm_sunday-light.mp3` |
+| 8 | Paper Boats | `sunday_morning_vibes` | tender · fingerpicked | 76 | lullaby | `SM_002_76bpm_paper-boats.mp3` |
+| 9 | Goldenhour Lo-Fi | `hip_hop` | head-nod · modern | 90 | groove-steady | `HH_001_90bpm_goldenhour-lofi.mp3` |
+| 10 | Sa'Yo | `hip_hop` | energetic · drop-heavy | 120 | drop-heavy | `HH_002_120bpm_sayo.mp3` |
+
+### 16.2 The 10 Suno prompts
+
+Instrumental-only, sound-described, BPM + tempo arc baked in (per Section 5 prompt principles — never name an artist; the sound is the descriptor).
+
+> **Length model = full-length tracks, windowed to 30s (model B, owner-locked 2026-06-28 — reverses the earlier "exactly 30s" lock).** Let Suno write a complete song (~60–120s) with a real chorus/hook, then point `best_30s_window_start` at the strongest 30 seconds. This sounds better than a forced 30s composition because the render runs over the section built to be the emotional peak. Append `, full-length song with a clear chorus/hook section, instrumental` to each prompt below. Window-selection rules live in §16.6.
+
+1. **Velvet Court** — `String quartet cover of a modern pop melody, baroque chamber, romantic and dramatic, 95 BPM, instrumental, period-drama feel, soft pizzicato intro building to a full-bow climax then easing`
+2. **Candlelit Vows** — `Harpsichord and string quartet duet, regency-era romantic, intimate, 88 BPM, instrumental, gentle steady dynamics, tender chamber, no big climax`
+3. **The Story of Us** — `Acoustic pop instrumental with fingerpicked guitar, warm piano, and light strings, mid-tempo narrative, 100 BPM, instrumental, soft verse lifting to an emotional bridge swell`
+4. **Dance Floor Gold** — `Funky pop instrumental, tight syncopated bassline, bright brass stabs, four-on-the-floor groove, 112 BPM, instrumental, danceable, punchy chorus drop, vibrant`
+5. **After Hours** — `Smooth jazz piano trio, brushed drums, upright bass, mellow cocktail-lounge mood, 90 BPM, instrumental, relaxed steady swing, intimate late-night`
+6. **Manila Bossa** — `Bossa nova instrumental, nylon-string guitar, soft shaker, warm vibraphone, breezy tropical, 105 BPM, instrumental, light swing, gentle lift in the chorus`
+7. **Sunday Light** — `Warm folk instrumental, fingerpicked acoustic guitar, soft Rhodes, light ambient pads, unhurried Sunday-morning calm, 80 BPM, instrumental, gentle and airy, minimal dynamics`
+8. **Paper Boats** — `Tender fingerpicked guitar with soft glockenspiel and subtle strings, lullaby-like, 76 BPM, instrumental, intimate and delicate, slow and steady, nostalgic`
+9. **Goldenhour Lo-Fi** — `Lo-fi hip hop instrumental, dusty boom-bap drums, mellow Rhodes chords, vinyl crackle, warm head-nod groove, 90 BPM, instrumental, relaxed and modern, steady`
+10. **Sa'Yo** — `Trap-soul instrumental, deep 808 bass, crisp hi-hats, emotive piano melody building to a hard beat drop, 120 BPM, instrumental, modern and cinematic, strong dynamic contrast`
+
+### 16.3 Beatmap — manifest extension
+
+Each track's `catalogue_manifest.json` entry (Section 6) gains a `beatmap` object, **computed once at ingestion** (open-source analyzer, e.g. `librosa` — owner sign-off open on the exact tool). Everything else in the Section 6 entry is unchanged.
+
+```json
+"beatmap": {
+  "bpm": 95,
+  "bpm_confidence": 0.97,
+  "beats_per_bar": 4,
+  "first_downbeat_ms": 410,
+  "downbeats_ms": [410, 2936, 5463, 7989, 10515, 13042, 15568, 18094, 20621],
+  "energy_samples": [
+    {"t_ms": 0, "e": 0.18}, {"t_ms": 8000, "e": 0.41},
+    {"t_ms": 16000, "e": 0.86}, {"t_ms": 24000, "e": 0.79}
+  ],
+  "sections": [
+    {"label": "intro", "start_ms": 0,     "end_ms": 8000,  "energy": "low"},
+    {"label": "build", "start_ms": 8000,  "end_ms": 16000, "energy": "rising"},
+    {"label": "drop",  "start_ms": 16000, "end_ms": 30000, "energy": "high"}
+  ],
+  "analyzer": "librosa-0.10",
+  "analyzed_at": "2026-06-28T00:00:00Z"
+}
+```
+
+`downbeats_ms` is the load-bearing array — the only timestamps a cut is allowed to land on, and it spans the **whole** track. The Section 6 entry keeps the real `length_seconds` (~60–120) and a real `best_30s_window_start` (the ms offset of the chosen 30s window, snapped to a downbeat). `sections` cover the full track; the render clips to the window. See §16.6 for the windowing rules.
+
+### 16.4 Beat-synced template — Section 12 extension
+
+Templates may set `timing_mode: "beat_synced"` (default stays `"fixed"` so the legacy `duration_ms` slots keep working — beat-sync is opt-in per template). Beat-synced templates drop per-slot `duration_ms` and add a `cut_pattern`:
+
+```json
+"timing_mode": "beat_synced",
+"cut_pattern": {
+  "snap_to": "downbeat",
+  "default_hold_bars": 1,
+  "energy_response": {
+    "low":    {"hold_bars": 2,   "transition": "cross_fade_500ms"},
+    "rising": {"hold_bars": 1,   "transition": "cross_fade_300ms"},
+    "high":   {"hold_bars": 0.5, "transition": "hard_cut"}
+  },
+  "downbeat_accent": "zoom_punch"
+},
+"slots": [
+  {"position": 1, "source": "memorable_clip_1", "transition_in": "auto", "ken_burns": null},
+  {"position": 2, "source": "guest_pick_1",     "transition_in": "auto", "ken_burns": "push_left_to_right"}
+],
+"min_slots": 3,
+"target_duration_ms": "from_request"
+```
+
+> The per-slot `ken_burns` stub above is widened into a full `camera_move` object in **§16.9** (push / pan / roll / `orbit_feel` + auto-reframe + depth parallax) — the "filmed, not slideshowed" look the owner asked for. Default stays `null` (no move), so legacy templates are unaffected.
+
+### 16.5 Render algorithm (deterministic — no per-render AI)
+
+1. Couple picks a track + target duration (1–30s) → load that track's `beatmap`.
+2. Start the playhead at `best_30s_window_start`; snap to the first `downbeats_ms` ≥ that point.
+3. Per slot: find the `section` the playhead is in → read `energy_response[section.energy].hold_bars` → advance that many bars → place the cut on the next `downbeats_ms` entry. `transition_in: "auto"` resolves to that section's transition; a strong downbeat gets `downbeat_accent`.
+4. Keep filling slots until accumulated time reaches `target_duration_ms`; clamp to `min_slots`.
+5. Result: soft intros hold 2 bars; the drop cuts every half-bar — emergent from one track's beatmap, identical every render.
+
+> ⚠ **Still pending the render layer.** The 10 prompts, the beatmap, and the `cut_pattern` are all data/spec you can lock now. The *visible* result (clips actually cutting on the beat in a downloadable MP4) waits on the Remotion/FFmpeg render pipeline, which does not yet exist in `apps/web` (see top-of-doc banner). Beat-sync adds **₱0** per render — the analysis is amortized once per track.
+
+### 16.6 30-second window selection (model B)
+
+Tracks are full-length; the render runs over a 30s slice. The window is chosen **once at ingestion** and stored as `best_30s_window_start` (ms offset). Rules:
+
+1. **Pick the strongest 30s.** Usually the chorus/hook, or any section with its own mini arc (build → peak → settle). A person picks it during curation, or energy-peak detection on `energy_samples` suggests it (highest 30s rolling-average energy that still includes a lead-in).
+2. **Snap the start to a downbeat.** `best_30s_window_start` must equal a value in `downbeats_ms` (or the nearest one), so cuts are on-beat from the first frame.
+3. **Clean in and out.** The render applies a 0.5s audio fade-in at the window start, and either a fade-out at +30,000ms **or** lands the window end on a downbeat / section boundary so it never stops mid-phrase. Stored hint: optional `window_end_style: "fade" | "downbeat"`.
+4. **Beatmap is window-relative at render time.** Only `downbeats_ms` and `sections` falling inside `[best_30s_window_start, best_30s_window_start + 30000]` are used; the §16.5 algorithm runs unchanged within that span. A shorter reel (1–29s) uses the same start with a shorter span.
+
+Manifest impact: `best_30s_window_start` is a real per-track integer again (not 0); optionally add `window_end_style`. Everything else in §16.3 is unchanged.
+
+### 16.7 Two soundtrack sources + two render paths (owner-locked 2026-06-28)
+
+The couple picks one of two sources. The **same beat-sync cut engine** (§16.4–§16.5) drives both — only the render *location* differs, and that difference is a compliance boundary, not a UX one.
+
+| | **Source A — Our music** | **Source B — Your music (upload)** |
+|---|---|---|
+| Catalogue | 1 of the 10 owned tracks | Couple uploads an audio file |
+| 30s window | Couple scrubs + picks (default = our suggested `best_30s_window_start`) | Couple scrubs + picks the cut |
+| Analysis | once at ingestion (server, librosa) | once on the couple's device (Web Audio API beat detection) |
+| **Render location** | **server-side OR client-side** (we own the music — no restriction) | **client-side ONLY** (in-browser compositor) |
+| Audio on our servers | yes (owned) | **never enters the server render pipeline** |
+
+**Why the split (the load-bearing rule):** rendering copyrighted music server-side makes Setnayan the direct infringer (CLAUDE.md gotcha #1). Client-side render means the couple's **own device** composites and exports the reel — Setnayan never reproduces or distributes their uploaded song. That is the only compliant way to offer BYO music, and it **reverses the "BYO music in Personal Reels" V1-exclusion** (owner-accepted, eyes open).
+
+**Transition vocabulary (both sources, chosen from energy):**
+
+| Transition | When | `cut_pattern` mapping |
+|---|---|---|
+| **Crossfade** | soft / low-energy sections | `energy_response.low.transition = "cross_fade_*"` |
+| **Hard cut** | on the beat, mid-energy | `energy_response.rising.transition = "hard_cut"` |
+| **Pop** (scale/zoom punch) | strong downbeats / peaks | `downbeat_accent = "zoom_punch"` (a.k.a. "pop"), `energy_response.high` |
+
+**Build implication (both still unbuilt, and they are DIFFERENT infra):**
+- Source A server render → Remotion/FFmpeg on Workers (the pipeline tracked in [[project_setnayan_no_video_render_pipeline]]).
+- Source B client render → an in-browser compositor (WebCodecs / `ffmpeg.wasm` / Canvas + MediaRecorder). Separate build; the uploaded audio stays on-device end to end.
+- The cut engine (`beatmap` → `cut_pattern` → cut list) is shared code that runs in either location — write it once, render-target-agnostic.
+
+### 16.8 Proposed build sequence (2026-06-28 — not yet owner-locked beyond the client-first principle)
+
+Driving insight: **client-side render covers both sources**, so building the in-browser compositor first ships the whole feature with **zero server infra**; the server pipeline drops from blocker → later optimization. CC-time = Claude Code working sessions (not calendar); externals called out separately.
+
+| Phase | What | CC-time | Infra |
+|---|---|---|---|
+| **0 · Foundation** | Shared cut engine (pure logic, unit-testable, no renderer) + librosa ingestion → `catalogue_manifest.json` + R2 CORS | ~1–2 | none (+ **owner Suno session** for the 10 tracks, calendar) |
+| **1 · Live preview** | In-page player runs the cut list over photos + `<audio>` — beat-sync you can see/hear, no file. Both sources. First visible payoff | ~2–3 | none |
+| **2 · Client render → MP4** | In-browser compositor (WebCodecs / `ffmpeg.wasm`) exports the reel on-device. **Both sources ship here**; BYO compliant (render never hits our servers) | ~4–6 | **none — feature ships** |
+| **3 · Server render (optional)** | **FFmpeg-only on an Oracle A1 Always-Free box (₱0)** — optimization for weak devices / batch, and the always-on **Auto-Recap** path (no device present). **Owned (Suno) music only, never BYO.** Shares the box + the pure cut/command engine with the Auto-Recap prototype (`0012_papic/Render_Prototype_Oracle_30s_2026-06-28.md`; outputs capped at 30s). Remotion deferred — heavy on ARM. | ~3–5 | **owner: create the Oracle A1** (Always-Free, no monthly cost; capacity-contended — retry past "out of capacity") |
+
+**Risk flag (Phase 2):** in-browser video encoding is fiddly on mobile — `ffmpeg.wasm` is heavy/slow on phones, WebCodecs support varies (mobile Safari is the long pole). Run a short encode spike on a mid-range Android **before** committing the full phase.
+
+### 16.9 Camera-move layer — stills that feel filmed (owner-directed 2026-06-29)
+
+**Goal:** a still photo (or a static / lightly-panning clip) should read as if a real camera glided around it — push-in, slow pan, a touch of roll — so a Guest Story built from photos feels *shot*, not slideshowed. This is the "Vids AI · Reels Video Editor" effect the owner flagged (their App-Store ad: a flat "Before" still → a moving, camera-circling "After"). It is the produced-output moat for Stories — the thing that makes our reels look premium without a per-render bill.
+
+**Honesty note — what this is and isn't.** It is **not** a true 360° orbit. One photo can never reveal an angle it didn't capture (the back of a head, a new side). What the ad does — and what we copy — is a **fake-depth camera move**: virtual push-in + 2.5D parallax + auto-reframe, which *together* read as a circling camera. A real orbit needs generative image-to-video — expensive, billed per render, and it breaks the "template-driven render, no per-render AI" lock (CLAUDE.md). We ship the cheap deterministic illusion, never the generative orbit.
+
+**This is an enrichment of the existing `ken_burns` slot field, not a new system.** §16.4 already reserves `ken_burns` per slot — today a one-move stub (`"push_left_to_right"`). We widen that one string into a `camera_move` object the **shared, render-target-agnostic cut engine** (§16.7) reads. Beatmap, `cut_pattern`, and the two render paths are all unchanged.
+
+```json
+"slots": [
+  {
+    "position": 2,
+    "source": "guest_pick_1",
+    "transition_in": "auto",
+    "camera_move": {
+      "type": "push_in",        // push_in | pull_out | pan_l | pan_r | pan_u | pan_d | roll_cw | roll_ccw | orbit_feel
+      "amount": 0.12,            // 0–1 — how far the move travels over the slot's hold
+      "ease": "in_out",         // linear | in_out | accel
+      "auto_reframe": true,      // keep the detected subject centred as the camera moves
+      "parallax": "subtle"       // none | subtle | strong  (needs a depth map — see cost tiers)
+    }
+  }
+]
+```
+
+- **`orbit_feel`** is the headline preset = `push_in` + a small pan + `parallax:"strong"` + `auto_reframe`. That combination is what produces the "camera circling the subject" look the owner pointed at.
+- **Beat-sync composes for free.** `downbeat_accent:"zoom_punch"` (§16.4) still fires on top: the camera *glides*, and on a strong downbeat it *punches* the zoom. Glide + on-beat punch is the whole feel — two existing fields cooperating, no new machinery.
+
+**Three cost tiers (mirror the §16.7 render-location split):**
+
+| Tier | What it adds | When computed | Marginal cost |
+|---|---|---|---|
+| **1 · Camera move** | push / pan / roll / ease + on-beat zoom punch | per render, pure math | **₱0** — deterministic in the shared cut engine |
+| **2 · Auto-reframe** | subject detection keeps the person centred | **once per photo at ingest** | **₱0 recurring** — self-hosted OSS detector, one pass on upload |
+| **3 · Depth parallax** | foreground/background separate → the 2.5D "orbit" depth | **once per photo at ingest** (store a depth map) | **₱0 recurring** — self-hosted OSS depth model on upload |
+
+The **recurring per-render cost stays ₱0 at every tier.** The only spend is one-time compute when a photo is first ingested, and that runs on self-hosted OSS (no API, no license, no per-photo fee) — consistent with [[project_setnayan_marginal_cost_model]] and the OSS-self-host preference.
+
+**Where it runs — NOT blocked by the dead server pipeline.** The camera move is shared, render-target-agnostic code, exactly like the cut engine (§16.7). It runs **client-side**, so it's **visible in the Phase-1 live preview** (§16.8) and ships in the **Phase-2 client render** with zero server infra. Tier 1 needs no ingest work and can be prototyped immediately; Tiers 2–3 light up `auto_reframe` / `parallax` once the ingest depth + subject pass exists. **No new phase, no new infra** — it folds into the §16.8 sequence (P1 preview shows Tier-1 moves over photos; P2 bakes them into the MP4; Tiers 2–3 are an ingest-side add that never touches the render path).
 
 [Open this playbook](computer:///Users/icecasasola/Documents/Claude/Projects/Setnayan/14_Music_Catalogue_Cowork_Playbook.md)
 

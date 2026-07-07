@@ -15,6 +15,7 @@
 | **0020 Admin Console (v1)** | SUPERSEDED 2026-05-12 | Iteration 0023 (admin console v2 with .md + .html) | `07_Archive/0020_admin_console/` (tombstone) |
 | **0027 E-signature** | RETIRED before drafting | Manual PDF signing in V1 + PandaDoc/DocuSign in V1.5 | No folder; documented in Vendor Agreement § 12.1 |
 | **0014 V1.1 Polish** | QUEUED (no folder yet) | — | Empty placeholder for post-V1 polish work |
+| **0017 Patiktok** | RETIRED 2026-06-29 (owner "delete all data about patiktok") | — (guest TikTok-reel concept cut) | `0017_patiktok/` (tombstone). DB: `PATIKTOK_COMPILER` deactivated + `setnayan_patiktok` taxonomy hidden + 6 inactive `patiktok_*` service_catalog rows. **PENDING a removal PR:** drop the 6 `patiktok_*` tables (`patiktok_oauth_state/grants`, `patiktok_music_tracks`, `patiktok_source_clips`, `patiktok_render_jobs`, `patiktok_render_job_clips`), delete inactive catalog rows, remove the app code. See DECISION_LOG 2026-06-29. |
 
 The retirement principle: **tombstone, don't delete.** Each retired folder keeps a one-line README pointing at its replacement so anyone navigating by iteration number lands somewhere meaningful.
 
@@ -100,6 +101,12 @@ V1 ships in-UI surfacing across every iteration that needs it, plus the email ch
 - Native iOS/Android camera-operator apps for Live Stream (V1 is pure WebApp + YouTube delivery)
 - Same-Day Edit (vision-AI cost too high at ~₱9,500/event; revisit V1.1)
 - Cloudflare Stream Player viewer embed (delivery is YouTube-only; viewer count uncapped)
+
+### Papic — retired SKUs
+
+- **SDE (Same-Day Edit) — Papic add-on · RETIRED 2026-06-28 (owner "remove SDE fully").** The ~3-minute crew-delivered video compilation add-on (serviceKey `SDE`, sku `same_day_edit`, was ₱3,499→₱4,999/₱7,999). Ripped out of the code fully (PR #2362): dedicated `/admin/sde` + `/studio/sde` surfaces deleted, removed from catalogs/entitlements (MEDIA_PACK 18→17), offline service codes (7→6), onboarding/marketing/pricing; forward migration `20270316029217_remove_sde.sql` drops `events.sde_*` columns + soft-deactivates catalog rows. **Kept (NOT retired):** Stories (free story-maker) and Auto-Recap (60–90s auto highlight) — both were entangled with SDE in code and deliberately preserved.
+
+- **SDE (Same-Day Edit) — Panood/flagship human-curated render · RETIRED 2026-06-28 (owner "remove same day edit").** The separate ₱24,999/event "post-event human-curated highlight" (3–5 min cinematic film, `0011_panood.md §583`) — distinct from the Papic add-on above, corpus-only (no code/DB SKU ever shipped). Removed from `Pricing.md` (catalog + cost-shape + bundle-map rows) + `0011_panood.md` (§583 RETIRED banner + the §112 mention) + the `/features` marketing copy (PR #2370). SDE is now FULLY dead in both forms. Surviving render outputs: Stories (free) + Auto-Recap (≤30s).
 
 ### Other deferred surfaces
 

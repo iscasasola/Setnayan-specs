@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SETNAYAN — Taxonomy Studio (design prototype)</title>
+<style>
+  :root{
+    --alabaster:#F6F4EF; --paper:#FFFFFF; --obsidian:#191919; --ink:#2B2A28; --ink2:#56524B;
+    --gold:#C2A05B; --gold-soft:#EADFC4; --line:#E8E3D9; --line2:#F0ECE3; --muted:#928B7E;
+    --sky:#2F6FB0; --sky-bg:#EAF1F8; --lock:#B5852A; --lock-bg:#F8F0DD;
+    --ok:#3E8B59; --ok-bg:#E8F2EA; --violet:#7A5AC9; --violet-bg:#F0EAFB;
+    --report:#C0564A; --report-bg:#FAE9E6; --wait:#C9822B; --wait-bg:#F7EBD9;
+    --terra:#B85C38; --terra-bg:#F7E9E2;
+    --shadow:0 1px 2px rgba(25,25,25,.05),0 10px 30px rgba(25,25,25,.06);
+    --shadow-sm:0 1px 2px rgba(25,25,25,.05);
+    --shadow-pop:0 8px 40px rgba(25,25,25,.14),0 2px 8px rgba(25,25,25,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--alabaster);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;overflow:hidden}
+  h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em}
+  button{font-family:inherit}
+  .ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;display:block;flex:0 0 auto}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+  /* ── app frame ── */
+  .app{display:flex;flex-direction:column;height:100vh}
+  .topbar{display:flex;align-items:center;gap:14px;padding:11px 20px;background:var(--paper);
+    border-bottom:1px solid var(--line);flex:0 0 auto;z-index:20}
+  .brand{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .brand .t{font-size:15px;font-weight:700;letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+  .brand .t .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+  .brand .s{font-size:11.5px;color:var(--muted)}
+  .searchwrap{position:relative;margin-left:auto;flex:0 0 auto}
+  .searchwrap .ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted)}
+  #search{width:260px;border:1px solid var(--line);border-radius:999px;padding:8px 14px 8px 32px;font-size:12.5px;
+    outline:none;background:var(--alabaster);color:var(--ink)}
+  #search:focus{border-color:var(--gold);background:#fff}
+  .viewchips{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .vchip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-size:11.5px;
+    cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .vchip:hover{border-color:var(--gold)}
+  .vchip.active{background:var(--obsidian);color:#fff;border-color:var(--obsidian)}
+  .vchip .n{font-size:10px;font-weight:700;color:var(--muted);background:var(--line2);border-radius:999px;padding:0 6px}
+  .vchip.active .n{background:rgba(255,255,255,.18);color:#fff}
+
+  .stage{display:flex;flex:1 1 auto;min-height:0;position:relative}
+
+  /* ── left rail ── */
+  .rail{width:246px;flex:0 0 auto;background:var(--paper);border-right:1px solid var(--line);
+    overflow-y:auto;padding:12px 10px 40px}
+  .rail-group{margin-bottom:8px}
+  .rail-title{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+    padding:12px 10px 6px}
+  .folder{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;cursor:pointer;
+    color:var(--ink2);position:relative}
+  .folder:hover{background:var(--alabaster)}
+  .folder.on{background:var(--obsidian);color:#fff}
+  .folder .ico{width:17px;height:17px;color:var(--gold)}
+  .folder.on .ico{color:var(--gold-soft)}
+  .folder .lbl{flex:1;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .folder .ct{font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+  .folder.on .ct{color:rgba(255,255,255,.7)}
+  .folder.warn .ico{color:var(--wait)}
+  .folder.req .ico{color:var(--sky)}
+  .folder .badge-dot{position:absolute;left:23px;top:7px;min-width:15px;height:15px;padding:0 4px;border-radius:999px;
+    background:var(--report);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .rail-sep{height:1px;background:var(--line2);margin:8px 6px}
+
+  /* ── center ── */
+  .center{flex:1 1 auto;min-width:0;overflow-y:auto;padding:22px 26px 60px}
+  .center-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:4px;flex-wrap:wrap}
+  .center-head .h{font-size:21px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:11px}
+  .center-head .h .ico{width:22px;height:22px;color:var(--gold)}
+  .center-head .sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .center-meta{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .scope-note{font-size:12px;color:var(--ink2);background:var(--alabaster);border:1px solid var(--line);
+    border-radius:10px;padding:8px 12px;margin:14px 0 18px;display:flex;align-items:center;gap:9px}
+  .scope-note .ico{width:15px;height:15px;color:var(--ok)}
+  .scope-note.miss{border-color:#e7cfa6;background:var(--wait-bg);color:#7a5d2a}
+  .scope-note.miss .ico{color:var(--wait)}
+
+  /* tile grid */
+  .tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:16px}
+  .tile-card{background:var(--paper);border:1px solid var(--line);border-radius:15px;overflow:hidden;
+    box-shadow:var(--shadow-sm);cursor:pointer;display:flex;flex-direction:column;position:relative;
+    transition:box-shadow .15s,border-color .15s,transform .12s}
+  .tile-card:hover{box-shadow:var(--shadow);border-color:var(--gold-soft);transform:translateY(-1px)}
+  .tile-card.dragging{opacity:.42;box-shadow:none}
+  .tile-card.drop-target{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft)}
+  .tile-banner{height:78px;position:relative;display:flex;align-items:flex-end;justify-content:space-between;padding:9px 11px}
+  .tile-banner .grip{width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,.82);
+    display:flex;align-items:center;justify-content:center;cursor:grab;color:var(--ink2);
+    box-shadow:var(--shadow-sm);opacity:0;transition:opacity .12s}
+  .tile-card:hover .grip{opacity:1}
+  .tile-banner .grip:active{cursor:grabbing}
+  .tile-banner .grip .ico{width:14px;height:14px}
+  .tile-scope-chip{font-size:9.5px;font-weight:700;background:rgba(255,255,255,.9);border-radius:999px;
+    padding:3px 9px;color:var(--ink2);box-shadow:var(--shadow-sm);white-space:nowrap;
+    display:inline-flex;align-items:center;gap:5px}
+  .tile-scope-chip .ico{width:11px;height:11px;color:var(--sky)}
+  .tile-body{padding:11px 13px 13px;flex:1;display:flex;flex-direction:column;gap:7px}
+  .tile-title{display:flex;align-items:center;gap:9px}
+  .tile-title .ic-wrap{width:30px;height:30px;border-radius:9px;background:var(--alabaster);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--ink);flex:0 0 auto}
+  .tile-title .ic-wrap .ico{width:16px;height:16px}
+  .tile-title .nm{font-size:14.5px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+  .tile-stats{font-size:11.5px;color:var(--ink2);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .tile-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:1px}
+  .add-tile{border:1.5px dashed var(--line);border-radius:15px;background:transparent;color:var(--muted);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+    min-height:172px;font-size:12.5px;font-weight:600}
+  .add-tile:hover{border-color:var(--gold);color:var(--gold);background:#fffdf8}
+  .add-tile .ico{width:22px;height:22px}
+
+  .badge{font-size:9.5px;font-weight:700;border-radius:999px;padding:2px 8px;white-space:nowrap;
+    display:inline-flex;align-items:center;gap:4px;text-transform:uppercase;letter-spacing:.04em}
+  .badge.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-transform:none;letter-spacing:0}
+  .badge.phase{background:var(--ok-bg);color:var(--ok)}
+  .badge.phase.later{background:var(--wait-bg);color:#8a6220}
+  .badge.faith{background:var(--wait-bg);color:#8a6220}
+  .badge.setnayan{background:var(--terra-bg);color:var(--terra)}
+  .badge.ph{background:var(--sky-bg);color:var(--sky)}
+  .badge.rental{background:var(--line2);color:var(--ink2)}
+  .badge.neutral{background:var(--line2);color:var(--ink2)}
+  .badge.faithall{background:#fff;color:var(--muted);border:1px solid var(--line)}
+  .badge.gate-live{background:var(--ok-bg);color:var(--ok)}
+  .badge.gate-soon{background:var(--wait-bg);color:#8a6220}
+  .badge.gate-off{background:var(--report-bg);color:var(--report)}
+
+  /* ── inspector ── */
+  .scrim{position:fixed;inset:0;background:rgba(25,25,25,.28);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .inspector{position:fixed;top:0;right:0;height:100vh;width:440px;max-width:94vw;background:var(--paper);
+    border-left:1px solid var(--line);box-shadow:var(--shadow-pop);transform:translateX(100%);
+    transition:transform .24s cubic-bezier(.4,0,.1,1);z-index:50;display:flex;flex-direction:column}
+  .inspector.on{transform:translateX(0)}
+  .insp-head{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .insp-head .ic-wrap{width:34px;height:34px;border-radius:10px;background:var(--alabaster);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--ink);flex:0 0 auto}
+  .insp-head .ic-wrap .ico{width:18px;height:18px}
+  .insp-head .ti{flex:1;min-width:0}
+  .insp-head .ti .nm{font-size:15.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .insp-head .ti .sl{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:4px}
+  .insp-head .ti .sl .ico{width:11px;height:11px}
+  .insp-x{border:none;background:none;cursor:pointer;color:var(--muted);padding:7px;border-radius:9px;display:flex}
+  .insp-x:hover{background:var(--line2);color:var(--ink)}
+  .insp-tabs{display:flex;gap:2px;padding:0 12px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .insp-tab{font-size:12.5px;font-weight:600;color:var(--ink2);padding:11px 14px;cursor:pointer;
+    border:none;background:none;border-bottom:2px solid transparent}
+  .insp-tab:hover{color:var(--ink)}
+  .insp-tab.on{color:var(--ink);border-bottom-color:var(--gold)}
+  .insp-body{flex:1;overflow-y:auto;padding:16px}
+  .tabpane{display:none} .tabpane.on{display:block}
+
+  .fld{margin-bottom:16px}
+  .fld > .lab{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+    margin-bottom:7px;display:flex;align-items:center;gap:6px}
+  .fld > .lab .ico{width:12px;height:12px}
+  .txt{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:13px;font-family:inherit;
+    outline:none;color:var(--ink);background:#fff}
+  .txt:focus{border-color:var(--gold)}
+  .txt[readonly]{background:var(--alabaster);color:var(--ink2)}
+  .txt.ro-lock{display:flex;align-items:center;gap:7px}
+  .slug-ro{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+    background:var(--alabaster);color:var(--ink2);font-size:12.5px}
+  .slug-ro .ico{width:13px;height:13px;color:var(--lock)}
+  .slug-ro .mono{flex:1}
+
+  /* live mini preview — the ONE signature moment */
+  .preview-card{border:1px solid var(--gold-soft);border-radius:14px;overflow:hidden;background:#fff;
+    box-shadow:0 6px 22px rgba(194,160,91,.14);margin-bottom:6px}
+  .preview-banner{height:66px;position:relative;display:flex;align-items:flex-end;padding:9px 11px}
+  .preview-icwrap{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.9);
+    display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:var(--shadow-sm)}
+  .preview-icwrap .ico{width:18px;height:18px}
+  .preview-meat{padding:10px 12px 12px}
+  .preview-meat .pnm{font-size:15px;font-weight:700;letter-spacing:-.01em}
+  .preview-meat .psub{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .preview-cap{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);
+    display:flex;align-items:center;gap:6px;margin-bottom:8px}
+  .preview-cap .ico{width:12px;height:12px}
+
+  /* icon picker */
+  .icon-search{margin-bottom:9px}
+  .icon-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;max-height:150px;overflow-y:auto;
+    border:1px solid var(--line);border-radius:11px;padding:8px;background:var(--alabaster)}
+  .icon-opt{aspect-ratio:1;border:1px solid transparent;border-radius:9px;background:#fff;display:flex;
+    align-items:center;justify-content:center;cursor:pointer;color:var(--ink2)}
+  .icon-opt:hover{border-color:var(--gold-soft);color:var(--ink)}
+  .icon-opt.sel{border-color:var(--gold);background:var(--gold-soft);color:var(--ink)}
+  .icon-opt .ico{width:18px;height:18px}
+
+  /* photo swatch row */
+  .photo-row{display:flex;align-items:center;gap:10px}
+  .photo-cur{width:64px;height:44px;border-radius:9px;border:1px solid var(--line);overflow:hidden;flex:0 0 auto}
+  .swatches{display:flex;gap:6px;flex-wrap:wrap}
+  .sw{width:30px;height:30px;border-radius:8px;border:2px solid transparent;cursor:pointer}
+  .sw.sel{border-color:var(--obsidian);box-shadow:0 0 0 2px #fff inset}
+
+  .chipset{display:flex;gap:7px;flex-wrap:wrap}
+  .toggle-chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:12px;
+    cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:6px;user-select:none}
+  .toggle-chip:hover{border-color:var(--gold)}
+  .toggle-chip.on{background:var(--obsidian);color:#fff;border-color:var(--obsidian)}
+  .toggle-chip .ico{width:12px;height:12px}
+  .radio2{display:flex;gap:8px;margin-bottom:10px}
+  .radio2 .r{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;font-size:12.5px;
+    color:var(--ink2);text-align:center;font-weight:600}
+  .radio2 .r.on{background:var(--obsidian);color:#fff;border-color:var(--obsidian)}
+  .hint{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.45}
+
+  .btn{border:none;border-radius:9px;padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+  .btn .ico{width:14px;height:14px}
+  .btn.primary{background:var(--obsidian);color:#fff}
+  .btn.gold{background:var(--gold);color:#fff}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink2)}
+  .btn.ghost:hover{border-color:var(--gold)}
+  .btn.danger{background:#fff;border:1px solid #e6c3bd;color:var(--report)}
+  .btn.danger:hover{background:var(--report-bg)}
+  .btn.tiny{padding:6px 10px;font-size:11px;border-radius:8px}
+  .insp-foot{border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:9px;align-items:center;flex:0 0 auto;background:var(--paper)}
+  .insp-foot .status{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .insp-foot .status .ico{width:13px;height:13px;color:var(--ok)}
+
+  /* services tab */
+  .svc-row{border:1px solid var(--line);border-radius:11px;margin-bottom:9px;background:#fff;overflow:hidden}
+  .svc-main{display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer}
+  .svc-main:hover{background:var(--alabaster)}
+  .svc-caret{color:var(--muted);transition:transform .15s} .svc-row.open .svc-caret{transform:rotate(90deg)}
+  .svc-caret .ico{width:14px;height:14px}
+  .svc-id{flex:1;min-width:0}
+  .svc-id .nm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .svc-id .key{font-size:10.5px;color:var(--muted)}
+  .svc-badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:150px}
+  .svc-tools{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:0 12px 11px}
+  .mini-sel{border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:11.5px;background:#fff;color:var(--ink2);font-family:inherit}
+  .svc-detail{border-top:1px solid var(--line2);padding:12px;background:var(--alabaster);display:none}
+  .svc-row.open .svc-detail{display:block}
+
+  /* refinements editor */
+  .ref-card{border:1px solid var(--line);border-radius:11px;background:#fff;margin-bottom:10px;overflow:hidden}
+  .ref-head{display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid var(--line2)}
+  .ref-head .rn{font-size:12.5px;font-weight:700}
+  .ref-head .rk{font-size:10px;color:var(--muted)}
+  .ref-head .rtype{margin-left:auto;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--violet);background:var(--violet-bg);border-radius:999px;padding:2px 8px}
+  .ref-opts{display:flex;gap:7px;flex-wrap:wrap;padding:11px 12px}
+  .opt-chip{border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:11.5px;color:var(--ink);
+    display:inline-flex;align-items:center;gap:6px;background:#fff}
+  .opt-chip.retired{color:var(--muted);background:var(--line2);text-decoration:line-through;border-style:dashed}
+  .opt-chip .x{color:var(--muted);cursor:pointer;font-weight:700}
+  .opt-chip .thumb{width:16px;height:16px;border-radius:4px}
+  .add-mini{display:flex;gap:7px;align-items:center;padding:0 12px 12px;flex-wrap:wrap}
+  .add-mini input{border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:11.5px;font-family:inherit;outline:none;min-width:120px}
+  .add-mini input:focus{border-color:var(--gold)}
+  .notechip{font-size:11px;color:#7a5d2a;background:var(--wait-bg);border:1px solid #e7cfa6;border-radius:9px;
+    padding:7px 10px;display:flex;align-items:flex-start;gap:7px;margin:2px 0 12px;line-height:1.45}
+  .notechip .ico{width:13px;height:13px;color:var(--wait);margin-top:1px}
+  .schema-line{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:4px}
+  .schema-line .mono{color:var(--ink2)}
+
+  /* refinements/onboarding tab — photo grids */
+  .leaf-block{border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:14px;overflow:hidden}
+  .leaf-bhead{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--line2)}
+  .leaf-bhead .ln{font-size:13px;font-weight:700}
+  .leaf-bhead .lk{margin-left:auto;font-size:10px;color:var(--muted)}
+  .leaf-lock{display:flex;align-items:flex-start;gap:8px;margin:0 13px;padding:8px 10px;background:var(--lock-bg);
+    border:1px solid #e7d3a0;border-radius:9px;font-size:11px;color:#7a5d2a;line-height:1.45}
+  .leaf-lock .ico{width:13px;height:13px;color:var(--lock);margin-top:1px;flex:0 0 auto}
+  .opt-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;padding:13px}
+  .opt-photo{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;position:relative;cursor:grab}
+  .opt-photo .thumb{height:56px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .opt-photo .cap{font-size:11px;font-weight:600;text-align:center;padding:6px 4px 8px;color:var(--ink)}
+  .opt-photo .drag{position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:6px;background:rgba(255,255,255,.85);
+    display:flex;align-items:center;justify-content:center;color:var(--ink2);opacity:0;transition:opacity .12s}
+  .opt-photo:hover .drag{opacity:1}
+  .opt-photo .drag .ico{width:11px;height:11px}
+  .add-photo-opt{border:1.5px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:6px;color:var(--muted);min-height:82px;cursor:pointer;padding:8px}
+  .add-photo-opt:hover{border-color:var(--gold);color:var(--gold)}
+  .add-photo-opt .ico{width:18px;height:18px}
+  .add-photo-opt .req{font-size:9px;font-weight:700;color:var(--report);background:var(--report-bg);border-radius:999px;padding:1px 7px}
+
+  /* delete dialog */
+  .dlg-scrim{position:fixed;inset:0;background:rgba(25,25,25,.42);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60;
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  .dlg-scrim.on{opacity:1;pointer-events:auto}
+  .dlg{width:440px;max-width:100%;background:var(--paper);border-radius:16px;box-shadow:var(--shadow-pop);overflow:hidden;
+    transform:scale(.96);transition:transform .2s}
+  .dlg-scrim.on .dlg{transform:scale(1)}
+  .dlg-head{display:flex;align-items:flex-start;gap:11px;padding:18px 18px 4px}
+  .dlg-head .warn-ic{width:38px;height:38px;border-radius:11px;background:var(--report-bg);color:var(--report);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .dlg-head .warn-ic .ico{width:19px;height:19px}
+  .dlg-head .h{font-size:15.5px;font-weight:700;letter-spacing:-.01em}
+  .dlg-head .s{font-size:12.5px;color:var(--ink2);margin-top:3px;line-height:1.45}
+  .dlg-body{padding:14px 18px 4px}
+  .dlg-foot{padding:14px 18px 18px;display:flex;gap:9px;justify-content:flex-end}
+  .sel-full{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;background:#fff;
+    color:var(--ink);font-family:inherit;margin-bottom:11px}
+
+  /* vocab tables */
+  .vtable{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;font-size:12.5px}
+  .vtable th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    padding:11px 14px;background:var(--alabaster);border-bottom:1px solid var(--line);white-space:nowrap}
+  .vtable td{padding:11px 14px;border-bottom:1px solid var(--line2);vertical-align:middle}
+  .vtable tr:last-child td{border-bottom:none}
+  .vtable tr:hover td{background:#fdfcf9}
+  .vt-name{font-weight:600;color:var(--ink)}
+  .vt-key{font-size:10.5px;color:var(--muted)}
+  .grain{display:flex;flex-direction:column;gap:4px}
+  .grain .row{display:flex;align-items:center;gap:8px}
+  .usage{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .linkrow{display:flex;gap:12px;flex-wrap:wrap;margin-top:5px}
+  .xlink{font-size:11px;color:var(--gold);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .xlink:hover{text-decoration:underline}
+  .xlink .ico{width:11px;height:11px}
+
+  /* switch */
+  .sw-toggle{position:relative;width:38px;height:22px;border-radius:999px;background:var(--line);cursor:pointer;
+    transition:background .15s;flex:0 0 auto;border:none}
+  .sw-toggle::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;
+    box-shadow:var(--shadow-sm);transition:transform .15s}
+  .sw-toggle.on{background:var(--ok)} .sw-toggle.on::after{transform:translateX(16px)}
+  .sw-toggle.locked{background:var(--line2);cursor:not-allowed;opacity:.6}
+  .sw-wrap{display:flex;align-items:center;gap:9px}
+  .sw-wrap .lbl{font-size:11.5px;color:var(--ink2)}
+
+  /* requests view */
+  .req-card{border:1px dashed #e0b78c;border-radius:14px;background:#fffdf9;padding:15px 16px;margin-bottom:14px}
+  .req-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .req-top .rl{font-size:15px;font-weight:700}
+  .req-top .rf{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .req-note{font-size:12.5px;color:var(--ink2);margin:7px 0 10px}
+  .demand{font-size:11.5px;color:var(--sky);background:var(--sky-bg);border-radius:9px;padding:7px 11px;
+    display:inline-flex;align-items:center;gap:7px;margin-bottom:12px}
+  .demand .ico{width:14px;height:14px}
+  .req-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .req-sel{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:11.5px;background:#fff;color:var(--ink2);font-family:inherit}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--obsidian);
+    color:#fff;border-radius:11px;padding:11px 18px;font-size:12.5px;font-weight:600;box-shadow:var(--shadow-pop);
+    display:flex;align-items:center;gap:9px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:80}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast .ico{width:15px;height:15px;color:#9ad9ac}
+  .toast a{color:var(--gold-soft);text-decoration:underline;cursor:pointer}
+
+  .empty{color:var(--muted);font-size:12.5px;border:1px dashed var(--line);border-radius:12px;padding:18px;text-align:center;background:var(--alabaster)}
+
+  /* narrow fallback */
+  @media (max-width:860px){
+    body{overflow:auto}
+    .app{height:auto}
+    .rail{position:static;width:100%;border-right:none;border-bottom:1px solid var(--line);
+      display:flex;flex-wrap:wrap;gap:4px;padding:10px}
+    .rail-group,.rail-sep{width:100%}
+    .rail-group{display:flex;flex-wrap:wrap;gap:4px}
+    .rail-title{width:100%;padding:6px 4px}
+    .folder{flex:0 0 auto;padding:7px 11px}
+    .folder .ct{margin-left:4px}
+    .stage{flex-direction:column}
+    .center{padding:16px}
+    .inspector{width:100%}
+    .searchwrap{margin-left:0;flex:1 1 100%;order:5}
+    #search{width:100%}
+    .topbar{flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ── TOP BAR ── -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="t"><span class="dot"></span>Taxonomy Studio</div>
+      <div class="s">Every category, refinement, icon and photo — one place, live on save.</div>
+    </div>
+    <div class="viewchips" id="viewchips">
+      <button class="vchip active" data-view="all">All</button>
+      <button class="vchip" data-view="faith">Faith-tagged <span class="n" id="chipFaith">0</span></button>
+      <button class="vchip" data-view="scoped">Event-scoped <span class="n" id="chipScoped">0</span></button>
+      <button class="vchip" data-view="unfiled">Unfiled <span class="n">0</span></button>
+      <button class="vchip" data-view="requests">Requests <span class="n">2</span></button>
+    </div>
+    <div class="searchwrap">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="search" type="search" placeholder="Find a tile or service…" autocomplete="off" />
+    </div>
+  </div>
+
+  <div class="stage">
+    <!-- ── LEFT RAIL ── -->
+    <nav class="rail" id="rail"></nav>
+
+    <!-- ── CENTER ── -->
+    <main class="center" id="center"></main>
+  </div>
+</div>
+
+<!-- ── INSPECTOR ── -->
+<div class="scrim" id="scrim"></div>
+<aside class="inspector" id="inspector">
+  <div class="insp-head">
+    <div class="ic-wrap" id="inspIcon"></div>
+    <div class="ti">
+      <div class="nm" id="inspName">Tile</div>
+      <div class="sl"><svg class="ico" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span class="mono" id="inspSlug">slug</span></div>
+    </div>
+    <button class="insp-x" id="inspClose" title="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="insp-tabs">
+    <button class="insp-tab on" data-tab="details">Details</button>
+    <button class="insp-tab" data-tab="services">Services</button>
+    <button class="insp-tab" data-tab="refinements">Refinements</button>
+  </div>
+  <div class="insp-body">
+    <div class="tabpane on" id="pane-details"></div>
+    <div class="tabpane" id="pane-services"></div>
+    <div class="tabpane" id="pane-refinements"></div>
+  </div>
+  <div class="insp-foot">
+    <div class="status"><svg class="ico" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span id="inspStatus">Active · live on /explore</span></div>
+    <button class="btn primary" style="margin-left:auto" id="inspSave"><svg class="ico" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>Save</button>
+  </div>
+</aside>
+
+<!-- ── DELETE DIALOG ── -->
+<div class="dlg-scrim" id="delScrim">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div class="warn-ic"><svg class="ico" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+      <div>
+        <div class="h">Delete this tile?</div>
+        <div class="s" id="delSub">This tile still holds services and refinements — choose where they go.</div>
+      </div>
+    </div>
+    <div class="dlg-body">
+      <div class="fld" style="margin-bottom:10px">
+        <div class="lab">Move everything to</div>
+        <select class="sel-full" id="delDest"></select>
+      </div>
+      <div class="fld" style="margin-bottom:4px">
+        <div class="lab">Type the tile name to confirm</div>
+        <input class="txt" id="delConfirm" placeholder="Type the tile name…" autocomplete="off" />
+        <div class="hint">Deleting is permanent. Everything filed here moves to the tile you pick above; nothing is lost.</div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn ghost" id="delCancel">Cancel</button>
+      <button class="btn danger" id="delGo" disabled>Move &amp; delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"><svg class="ico" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span id="toastMsg">Saved</span></div>
+
+<script>
+"use strict";
+/* ─────────────────────────────────────────────────────────────────────────
+   ICON LIBRARY — Lucide-style 1.75px line paths (inline; no network)
+   ───────────────────────────────────────────────────────────────────────── */
+const IP = {
+  building2:'<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/>',
+  clipboard:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h4"/>',
+  utensils:'<path d="M3 2v7a3 3 0 0 0 3 3v0a3 3 0 0 0 3-3V2M6 2v9M14 2v20M18 2c-1.5 0-3 1-3 4v7h6"/>',
+  flower:'<circle cx="12" cy="12" r="2.5"/><path d="M12 9.5V4M12 14.5V20M9.5 12H4M14.5 12H20M9.9 9.9 6 6M14.1 14.1 18 18M14.1 9.9 18 6M9.9 14.1 6 18"/>',
+  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/>',
+  shirt:'<path d="M20.4 3.5 16 2a4 4 0 0 1-8 0L3.6 3.5a2 2 0 0 0-1.4 2.2l.8 3.9L6 8v11a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8l3 1.6.8-3.9a2 2 0 0 0-1.4-2.2z"/>',
+  tent:'<path d="M3.5 21 12 4l8.5 17M12 4v17M6 21l6-9 6 9"/>',
+  mail:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  car:'<path d="M5 17h14M4 17l1.5-6a2 2 0 0 1 2-1.5h9a2 2 0 0 1 2 1.5L22 17"/><path d="M2 17h20v3H2z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/>',
+  cake:'<path d="M4 20V13a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7M2 20h20M12 7V4M12 4l1.5-1.5M12 4 10.5 2.5M4 15c1.3 1 2.7 1 4 0s2.7-1 4 0 2.7 1 4 0 2.7-1 4 0"/>',
+  chef:'<path d="M6 13V9a4 4 0 0 1 .5-2A3.5 3.5 0 0 1 12 5a3.5 3.5 0 0 1 5.5 2 4 4 0 0 1 .5 2v4M6 13h12M7 13v6a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-6"/>',
+  coffee:'<path d="M4 8h12v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M16 9h2a2 2 0 0 1 0 6h-2"/><path d="M7 4V2M11 4V2"/>',
+  martini:'<path d="M4 4h16l-8 9-8-9zM12 13v7M8 20h8"/>',
+  truck:'<rect x="1" y="7" width="14" height="9" rx="1"/><path d="M15 10h4l3 3v3h-7"/><circle cx="6" cy="17" r="1.6"/><circle cx="18" cy="17" r="1.6"/>',
+  icecream:'<path d="M12 3a4 4 0 0 0-4 4h8a4 4 0 0 0-4-4zM8 7l4 14 4-14"/>',
+  sparkles:'<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/>',
+  gamepad:'<path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"/><rect x="2" y="6" width="20" height="12" rx="4"/>',
+  scissors:'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8 8l12 12M8 16 20 4"/>',
+  palette:'<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2a10 10 0 1 0 0 20 2.5 2.5 0 0 0 2-4 2.5 2.5 0 0 1 2-4h1a3 3 0 0 0 3-3 8 8 0 0 0-8-9z"/>',
+  gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M4 12v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8M12 8v13"/><path d="M12 8S10 2 7 4s3 4 5 4M12 8s2-6 5-4-3 4-5 4"/>',
+  printer:'<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/>',
+  award:'<circle cx="12" cy="9" r="6"/><path d="m9 14-1.5 8L12 20l4.5 2L15 14"/>',
+  heart:'<path d="M12 21s-8-4.6-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.4-8 11-8 11z"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 5a3.5 3.5 0 0 1 0 7M22 21a7 7 0 0 0-4-6.3"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/>',
+  video:'<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3z"/>',
+  disc:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/>',
+  lightbulb:'<path d="M9 18h6M10 22h4M8 14a6 6 0 1 1 8 0c-.8.8-1 1.5-1 3H9c0-1.5-.2-2.2-1-3z"/>',
+  fire:'<path d="M12 2s5 4 5 9a5 5 0 0 1-10 0c0-2 1-3 1-3s0 2 2 2c0-3-1-5 2-8z"/>',
+  scan:'<path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M7 12h10"/>',
+  monitor:'<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  star:'<path d="m12 2 3 6.5 7 .8-5.2 4.7 1.4 6.9L12 17.6 5.4 20.9l1.4-6.9L1.6 9.3l7-.8L12 2z"/>',
+  crown:'<path d="m3 8 3.5 3L12 5l5.5 6L21 8v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8z"/>',
+  ring:'<circle cx="12" cy="14" r="6"/><path d="m9 6 3-3 3 3M9 6h6l-3 3-3-3z"/>',
+  brush:'<path d="M9.5 14.5 3 21M14 3l7 7-4 4-7-7 4-4zM7 12l5 5"/>',
+  landmark:'<path d="M3 21h18M4 10h16M5 21V10M9 21V10M15 21V10M19 21V10M12 3 4 7h16l-8-4z"/>',
+  glass:'<path d="M6 3h12l-1 6a5 5 0 0 1-10 0L6 3zM12 14v6M8 20h8"/>',
+  pin:'<path d="M12 21s-6-5.7-6-11a6 6 0 0 1 12 0c0 5.3-6 11-6 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  tree:'<path d="M12 22v-6M8 16h8l-3-4h2l-3-4h2L12 2 9 8h2L8 12h2l-3 4z"/>',
+  wine:'<path d="M8 3h8l-.5 5a3.5 3.5 0 0 1-7 0L8 3zM12 12v7M8 21h8"/>',
+  book:'<path d="M4 4a2 2 0 0 1 2-2h13v18H6a2 2 0 0 0-2 2V4z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H19"/>',
+  tag:'<path d="M20 12 12 20l-8-8V4h8l8 8z"/><circle cx="7.5" cy="7.5" r="1.3"/>',
+  package:'<path d="m12 2 9 5v10l-9 5-9-5V7l9-5z"/><path d="m3 7 9 5 9-5M12 12v10"/>',
+  hand:'<path d="M18 11V6a2 2 0 0 0-4 0M14 6V4a2 2 0 0 0-4 0v6M10 6a2 2 0 0 0-4 0v8a6 6 0 0 0 12 0v-3"/>',
+};
+function svg(name,cls){ return '<svg class="ico'+(cls?' '+cls:'')+'" viewBox="0 0 24 24">'+(IP[name]||IP.tag)+'</svg>'; }
+
+/* photo banner gradients (CSS only — vary hues so cards feel photographed) */
+const GRADS = [
+  'linear-gradient(135deg,#e9d9c2,#cbb58e)','linear-gradient(135deg,#d7e2ec,#a9c1d6)',
+  'linear-gradient(135deg,#e7d0cf,#c99b95)','linear-gradient(135deg,#d9e4d2,#a8c0a0)',
+  'linear-gradient(135deg,#e4dcea,#bcaed0)','linear-gradient(135deg,#efe2c9,#d8bf94)',
+  'linear-gradient(135deg,#d5e6e4,#a3ccc7)','linear-gradient(135deg,#f0dcd0,#d6a98e)',
+  'linear-gradient(135deg,#dee0e8,#b3b7c7)','linear-gradient(135deg,#e8dccb,#c8b28a)',
+  'linear-gradient(135deg,#e2d7e8,#b9a6c9)','linear-gradient(135deg,#dbe7d9,#adc6a6)',
+];
+function gradAt(i){ return GRADS[i % GRADS.length]; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SEED DATA — mirrors lib/taxonomy.ts (10 parents · real tile labels · real
+   canonical keys with phase/faith/setnayan/ph/rental flags). Trimmed to a
+   demo-sized slice: 6 folders carry full tiles+services, the rest carry
+   representative tiles.
+   ───────────────────────────────────────────────────────────────────────── */
+const FOLDERS = [
+  {key:'venue',       label:'Venue',       icon:'building2'},
+  {key:'planning',    label:'Planning',    icon:'clipboard'},
+  {key:'feast',       label:'Feast',       icon:'utensils'},
+  {key:'design',      label:'Design',      icon:'flower'},
+  {key:'program',     label:'Program',     icon:'music'},
+  {key:'documentary', label:'Documentary', icon:'camera'},
+  {key:'look',        label:'Look',        icon:'shirt'},
+  {key:'booths',      label:'Booths',      icon:'tent'},
+  {key:'prints',      label:'Prints',      icon:'mail'},
+  {key:'transport',   label:'Transport',   icon:'car'},
+];
+
+// each service: {name, key, phase, faith?, setnayan?, ph?, rental?}
+const TILES = {
+  // ── VENUE ──
+  reception:{folder:'venue',label:'Reception',icon:'landmark',scope:'all',svc:[
+    {name:'Reception Venue',key:'reception_venue',phase:'V1.1 base'},
+    {name:'Hotel Ballroom',key:'hotel_ballroom',phase:'V1.1 base'},
+    {name:'Garden / Beach Venue',key:'garden_beach_venue',phase:'V1.1.1'},
+    {name:'Accommodation Block',key:'accommodation',phase:'V1.1 base'},
+  ]},
+  ceremony_venue:{folder:'venue',label:'Ceremony',icon:'ring',scope:'all',svc:[
+    {name:'Catholic Church',key:'catholic_church',phase:'V1.1 base',faith:'Catholic'},
+    {name:'Garden Ceremony',key:'garden_ceremony',phase:'V1.1.1'},
+    {name:'Mosque',key:'mosque',phase:'V1.1.4',faith:'Muslim'},
+    {name:'INC Chapel',key:'inc_chapel',phase:'V1.3',faith:'INC',ph:true},
+  ]},
+  // ── PLANNING ──
+  coordinator:{folder:'planning',label:'Coordinator / Planner',icon:'clipboard',scope:'all',svc:[
+    {name:'On-the-Day Coordinator',key:'otd_coordinator',phase:'V1.1 base'},
+    {name:'Full Planning',key:'full_planning',phase:'V1.1 base'},
+    {name:'Setnayan Concierge',key:'setnayan_concierge',phase:'V1.1 base',setnayan:true},
+    {name:'Pamamanhikan Coordinator',key:'pamamanhikan_coordinator',phase:'V1.2',ph:true},
+    {name:'Sponsor Coordinator',key:'sponsor_coordinator',phase:'V1.2',ph:true},
+  ]},
+  // ── FEAST ──
+  catering:{folder:'feast',label:'Catering',icon:'chef',scope:'all',faithTag:1,svc:[
+    {name:'Catering',key:'catering',phase:'V1.1 base'},
+    {name:'Lechonero',key:'lechonero',phase:'V1.1 base',ph:true},
+    {name:'Halal Catering Specialists',key:'halal_catering',phase:'V1.1.1',faith:'Muslim'},
+    {name:'Grazing Tables',key:'grazing_table',phase:'V1.1.6'},
+  ]},
+  cake:{folder:'feast',label:'Cake',icon:'cake',scope:'all',svc:[
+    {name:'Wedding Cake',key:'wedding_cake',phase:'V1.1 base'},
+    {name:'Cupcake Tower',key:'cupcake_tower',phase:'V1.1.6'},
+    {name:'Naked / Semi-naked Cake',key:'naked_cake',phase:'V1.1.6'},
+  ]},
+  stations:{folder:'feast',label:'Stations',icon:'utensils',scope:'all',svc:[
+    {name:'Carving Station',key:'carving_station',phase:'V1.1.1'},
+    {name:'Pasta Station',key:'pasta_station',phase:'V1.1.6'},
+    {name:'Cheese & Charcuterie',key:'cheese_station',phase:'V1.1.6'},
+  ]},
+  // ── DESIGN ──
+  stylist_decorator:{folder:'design',label:'Stylist / Decorator',icon:'brush',scope:'all',faithTag:1,svc:[
+    {name:'Event Stylist',key:'event_stylist',phase:'V1.1 base'},
+    {name:'Capiz Native Decor',key:'capiz_native_decor',phase:'V1.2',ph:true},
+    {name:'Chuppah Rental',key:'chuppah_rental',phase:'V1.1.1',faith:'Jewish',rental:true},
+    {name:'Hacienda Heritage Decor',key:'hacienda_heritage_decor',phase:'V1.2',ph:true},
+  ]},
+  florist:{folder:'design',label:'Florist',icon:'flower',scope:'all',svc:[
+    {name:'Florist',key:'florist',phase:'V1.1 base'},
+    {name:'Bouquet Preservation',key:'bouquet_preservation',phase:'V1.1.6'},
+  ]},
+  digital_services:{folder:'design',label:'Digital Services',icon:'monitor',scope:'all',setnayanTag:1,svc:[
+    {name:'Setnayan Custom Monogram',key:'setnayan_custom_monogram',phase:'V1.1 base',setnayan:true},
+    {name:'LED Wall Loop',key:'led_wall_loop',phase:'V1.1 base',setnayan:true},
+    {name:'Save-the-Date Film',key:'save_the_date_film',phase:'V1.1 base',setnayan:true},
+  ]},
+  outdoor:{folder:'design',label:'Outdoor',icon:'tree',scope:'all',svc:[
+    {name:'Tent Rental',key:'tent_rental',phase:'V1.2',rental:true},
+    {name:'Generator Rental',key:'generator_rental',phase:'V1.2',rental:true},
+  ]},
+  // ── PROGRAM ──
+  live_band:{folder:'program',label:'Live Band',icon:'music',scope:'all',svc:[
+    {name:'Live Band',key:'live_band',phase:'V1.1 base'},
+    {name:'Acoustic Duo',key:'acoustic_duo',phase:'V1.1.1'},
+  ]},
+  host_mc:{folder:'program',label:'Host / MC',icon:'mic',scope:'all',svc:[
+    {name:'Host / Emcee',key:'host_mc',phase:'V1.1 base'},
+  ]},
+  dj:{folder:'program',label:'DJ',icon:'disc',scope:'all',svc:[
+    {name:'DJ',key:'dj',phase:'V1.1 base'},
+  ]},
+  choir:{folder:'program',label:'Choir',icon:'users',scope:'all',svc:[
+    {name:'Wedding Choir',key:'wedding_choir',phase:'V1.1.1',faith:'Catholic'},
+  ]},
+  // ── DOCUMENTARY ──
+  photo_video:{folder:'documentary',label:'Photo & Video',icon:'camera',scope:'all',svc:[
+    {name:'Photographer',key:'photographer',phase:'V1.1 base'},
+    {name:'Videographer',key:'videographer',phase:'V1.1 base'},
+    {name:'Drone Coverage',key:'drone_coverage',phase:'V1.1.1'},
+  ]},
+  editorial:{folder:'documentary',label:'Editorial',icon:'book',scope:'all',svc:[
+    {name:'Same-Day Edit',key:'same_day_edit',phase:'V1.1.1'},
+  ]},
+  livestream:{folder:'documentary',label:'Livestream',icon:'video',scope:'all',setnayanTag:1,svc:[
+    {name:'Panood Livestream',key:'panood_livestream',phase:'V1.1 base',setnayan:true},
+  ]},
+  // ── LOOK ──
+  brides_attire:{folder:'look',label:"Bride's Attire",icon:'shirt',scope:'all',svc:[
+    {name:'Bridal Gown (Custom)',key:'bridal_gown_custom',phase:'V1.1 base'},
+    {name:'Gown Rental',key:'gown_rental',phase:'V1.1 base',rental:true},
+    {name:'Filipiniana Terno',key:'filipiniana_terno',phase:'V1.1.1',ph:true},
+  ]},
+  hmua:{folder:'look',label:'HMUA',icon:'sparkles',scope:'all',svc:[
+    {name:'Hair & Makeup Artist',key:'hmua',phase:'V1.1 base'},
+    {name:'Airbrush Makeup',key:'airbrush_makeup',phase:'V1.1.1'},
+  ]},
+  // ── BOOTHS ──
+  mobile_bar:{folder:'booths',label:'Mobile Bar',icon:'martini',scope:'all',svc:[
+    {name:'Mobile Bar',key:'mobile_bar',phase:'V1.1 base'},
+    {name:'Whiskey & Cigar Bar',key:'whiskey_cigar_bar',phase:'V1.1.6'},
+  ]},
+  coffee_espresso:{folder:'booths',label:'Coffee / Espresso',icon:'coffee',scope:'all',svc:[
+    {name:'Coffee Booth',key:'coffee_booth',phase:'V1.1 base'},
+    {name:'Tea Bar',key:'tea_bar',phase:'V1.1.6'},
+  ]},
+  food_cart:{folder:'booths',label:'Food Cart',icon:'icecream',scope:'all',svc:[
+    {name:'Halo-Halo Station',key:'halo_halo_station',phase:'V1.1.6',ph:true},
+    {name:'Ice Cream Cart',key:'ice_cream_cart',phase:'V1.1.6'},
+    {name:'Sorbetes Cart',key:'sorbetes_cart',phase:'V1.1.6',ph:true},
+    {name:'Cotton Candy Cart',key:'cotton_candy_cart',phase:'V1.1.6'},
+  ]},
+  photo_booth:{folder:'booths',label:'Photo Booth',icon:'camera',scope:'all',svc:[
+    {name:'Photo Booth',key:'photo_booth',phase:'V1.1 base'},
+    {name:'360 Video Booth',key:'video_booth_360',phase:'V1.1.1'},
+  ]},
+  // ── PRINTS ──
+  printing:{folder:'prints',label:'Printing',icon:'printer',scope:'all',svc:[
+    {name:'Invitation Printing',key:'invitation_printing',phase:'V1.1 base'},
+    {name:'Signage & Seat Cards',key:'signage_printing',phase:'V1.1.1'},
+  ]},
+  souvenir_giveaways:{folder:'prints',label:'Souvenir / Giveaways',icon:'gift',scope:'all',svc:[
+    {name:'Souvenirs & Giveaways',key:'souvenir_giveaways',phase:'V1.1 base'},
+  ]},
+  // ── TRANSPORT ──
+  bridal_car:{folder:'transport',label:'Bridal Car',icon:'car',scope:'all',svc:[
+    {name:'Bridal Car',key:'bridal_car',phase:'V1.1 base'},
+    {name:'Vintage Car',key:'vintage_car',phase:'V1.1.1',rental:true},
+  ]},
+  guest_shuttle:{folder:'transport',label:'Guest Shuttle',icon:'truck',scope:'all',svc:[
+    {name:'Guest Shuttle',key:'guest_shuttle',phase:'V1.1 base'},
+  ]},
+};
+
+// Event-scope a couple of tiles for the "Event-scoped" demo
+TILES.reception.scope='all';
+TILES.led_wall = undefined; // ensure clean
+// tiles that are scoped to specific events (chips demo)
+const SCOPED = {
+  photo_booth:['wedding','debut','birthday'],
+  arcade:['birthday','debut'],
+};
+TILES.photo_booth.scope='wedding, debut, birthday';
+// give some scoped tiles across folders for the Event-scoped count = 7
+[['digital_services','wedding, debut'],['livestream','wedding, debut, corporate'],
+ ['souvenir_giveaways','wedding, debut, christening'],['coffee_espresso','wedding, birthday, corporate'],
+ ['food_cart','wedding, birthday, debut'],['guest_shuttle','wedding, corporate']].forEach(([k,s])=>{ if(TILES[k]) TILES[k].scope=s; });
+
+// which folders carry tiles (order preserved)
+const TILES_BY_FOLDER = {};
+FOLDERS.forEach(f=>TILES_BY_FOLDER[f.key]=[]);
+Object.entries(TILES).forEach(([k,t])=>{ if(t) TILES_BY_FOLDER[t.folder].push(k); });
+
+/* Event types — the 12-row vocabulary (couple picker + category scoping grains) */
+const EVENT_TYPES = [
+  {key:'wedding',      label:'Wedding',       status:'active',  usage:184, picker:true,  retired:false},
+  {key:'debut',        label:'Debut',         status:'active',  usage:41,  picker:true,  retired:false},
+  {key:'birthday',     label:'Birthday',      status:'active',  usage:33,  picker:true,  retired:false},
+  {key:'christening',  label:'Christening',   status:'active',  usage:12,  picker:true,  retired:false},
+  {key:'corporate',    label:'Corporate',     status:'active',  usage:9,   picker:true,  retired:false},
+  {key:'tournament',   label:'Tournament',    status:'active',  usage:2,   picker:false, retired:false},
+  {key:'graduation',   label:'Graduation',    status:'active',  usage:5,   picker:true,  retired:false},
+  {key:'reunion',      label:'Reunion',       status:'active',  usage:3,   picker:false, retired:false},
+  {key:'anniversary',  label:'Anniversary',   status:'active',  usage:7,   picker:true,  retired:false},
+  {key:'gender_reveal',label:'Gender Reveal', status:'active',  usage:4,   picker:true,  retired:false},
+  {key:'travel',       label:'Travel',        status:'inactive',usage:0,   picker:false, retired:true },
+  {key:'celebration',  label:'Celebration',   status:'active',  usage:6,   picker:true,  retired:false},
+];
+
+/* Faiths — launch gate + readiness (mirrors faith-registry.ts + launch status) */
+const FAITHS = [
+  {key:'Catholic', label:'Catholic',   gate:'live', ready:'12 / 12', tagged:38},
+  {key:'Christian',label:'Christian',  gate:'live', ready:'9 / 10',  tagged:14},
+  {key:'Muslim',   label:'Muslim',     gate:'live', ready:'8 / 10',  tagged:11},
+  {key:'INC',      label:'INC',        gate:'soon', ready:'5 / 10',  tagged:6 },
+  {key:'Jewish',   label:'Jewish',     gate:'soon', ready:'3 / 10',  tagged:4 },
+  {key:'Chinese',  label:'Chinese',    gate:'soon', ready:'6 / 12',  tagged:9 },
+  {key:'Civil',    label:'Civil',      gate:'live', ready:'10 / 10', tagged:2 },
+  {key:'Born Again',label:'Born Again',gate:'soon', ready:'4 / 10',  tagged:5 },
+  {key:'Aglipayan',label:'Aglipayan',  gate:'off',  ready:'1 / 10',  tagged:1 },
+  {key:'Hindu',    label:'Hindu',      gate:'off',  ready:'0 / 10',  tagged:0 },
+];
+
+/* Requests — 2 pending vendor category proposals (four-outcome) */
+const REQUESTS = [
+  {label:'Grazing Table Specialist', from:'Feasted Manila', note:'We only do luxe grazing spreads — currently we get lumped under generic Catering.', demand:'3 vendors previously mapped to Catering'},
+  {label:'Neon Sign Rental', from:'Glow & Co.', note:'Custom LED neon signage for receptions — no home for us in the current tree.', demand:'2 vendors previously mapped to Signage & Seat Cards'},
+];
+
+/* Icon-picker glyph set (~24) */
+const PICKER_ICONS = ['building2','clipboard','utensils','flower','music','camera','shirt','tent','mail','car',
+  'cake','chef','coffee','martini','truck','icecream','sparkles','gamepad','scissors','palette','gift','printer',
+  'award','heart','users','mic','video','disc','lightbulb','fire','landmark','ring','brush','glass','pin','tree',
+  'wine','book','tag','package','crown','star','monitor','scan','hand'];
+
+/* Refinement schema (Details→Services expanded row + Refinements tab) — the
+   catering leaf, real field keys from the Catering/Halal model doc. */
+const CATERING_REFINEMENTS = [
+  {name:'Cuisine specialties', key:'cuisine_specialties', type:'multi_select', opts:[
+    {label:'Filipino'},{label:'Chinese'},{label:'Continental'},{label:'Japanese'},
+    {label:'Halal-certified'},{label:'Vegetarian'},{label:'Halal specialty',retired:true}]},
+  {name:'Service regions', key:'service_regions', type:'multi_select', opts:[
+    {label:'Metro Manila'},{label:'Cavite'},{label:'Laguna'},{label:'Tagaytay'},{label:'BARMM'}]},
+  {name:'Halal capability', key:'halal_capability', type:'single_select', opts:[
+    {label:'Certified'},{label:'Accommodates'},{label:'Not offered'}]},
+];
+/* onboarding-card leaves (Refinements tab) with photo-grid options */
+const ONBOARD_LEAVES = [
+  {name:'Cuisine style', key:'cuisine_style', locked:false, opts:[
+    {emoji:'🍲',label:'Filipino',hue:'#e7d0b6'},{emoji:'🥢',label:'Chinese',hue:'#e6c6c0'},
+    {emoji:'🍝',label:'Continental',hue:'#d7dfe8'},{emoji:'🍱',label:'Japanese',hue:'#d3e2d4'},
+    {emoji:'🥗',label:'Vegetarian',hue:'#d6e2cd'}]},
+  {name:'Ceremony options', key:'ceremony_options', locked:true, opts:[
+    {emoji:'⛪',label:'Church',hue:'#e2d9c6'},{emoji:'🌿',label:'Garden',hue:'#d5e3d3'},
+    {emoji:'🕌',label:'Mosque',hue:'#d8e0cf'},{emoji:'🏛️',label:'Civil',hue:'#dedfe6'}]},
+];
+
+/* ─────────────────────────────────────────────────────────────────────────
+   STATE
+   ───────────────────────────────────────────────────────────────────────── */
+let state = { view:'venue', search:'', openTile:null, tab:'details',
+  inspIcon:'landmark', inspPhoto:0, inspScopeMode:'universal' };
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RENDER — LEFT RAIL
+   ───────────────────────────────────────────────────────────────────────── */
+function tileCount(fk){ return (TILES_BY_FOLDER[fk]||[]).length; }
+function renderRail(){
+  const rail = document.getElementById('rail');
+  let h = '<div class="rail-group"><div class="rail-title">Categories</div>';
+  FOLDERS.forEach(f=>{
+    const on = state.view===f.key ? ' on':'';
+    h += '<div class="folder'+on+'" data-folder="'+f.key+'">'+svg(f.icon)+
+         '<span class="lbl">'+f.label+'</span><span class="ct">'+tileCount(f.key)+'</span></div>';
+  });
+  h += '</div><div class="rail-sep"></div><div class="rail-group">';
+  h += '<div class="folder warn'+(state.view==='unfiled'?' on':'')+'" data-folder="unfiled">'+svg('package')+
+       '<span class="lbl">Unfiled</span><span class="ct">0</span></div>';
+  h += '<div class="folder req'+(state.view==='requests'?' on':'')+'" data-folder="requests">'+svg('hand')+
+       '<span class="lbl">Requests</span><span class="ct">2</span><span class="badge-dot">2</span></div>';
+  h += '</div><div class="rail-sep"></div><div class="rail-group"><div class="rail-title">Vocabularies</div>';
+  h += '<div class="folder'+(state.view==='vocab_events'?' on':'')+'" data-folder="vocab_events">'+svg('star')+
+       '<span class="lbl">Event types</span><span class="ct">12</span></div>';
+  h += '<div class="folder'+(state.view==='vocab_faiths'?' on':'')+'" data-folder="vocab_faiths">'+svg('landmark')+
+       '<span class="lbl">Faiths</span><span class="ct">'+FAITHS.length+'</span></div>';
+  h += '</div>';
+  rail.innerHTML = h;
+  rail.querySelectorAll('.folder').forEach(el=>{
+    el.addEventListener('click',()=>{ state.view=el.dataset.folder; state.search=''; document.getElementById('search').value=''; syncViewChips(); renderCenter(); renderRail(); });
+  });
+}
+function syncViewChips(){
+  document.querySelectorAll('.vchip').forEach(c=>{
+    const v=c.dataset.view;
+    const active = (v==='all' && FOLDERS.some(f=>f.key===state.view)) ||
+                   (v==='unfiled'&&state.view==='unfiled') ||
+                   (v==='requests'&&state.view==='requests') ||
+                   (v==='faith'&&state.view==='faith') ||
+                   (v==='scoped'&&state.view==='scoped');
+    c.classList.toggle('active',active);
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RENDER — CENTER (dispatch)
+   ───────────────────────────────────────────────────────────────────────── */
+function renderCenter(){
+  const c = document.getElementById('center');
+  if(state.view==='requests'){ c.innerHTML = renderRequests(); wireRequests(); return; }
+  if(state.view==='unfiled'){ c.innerHTML = renderUnfiled(); return; }
+  if(state.view==='vocab_events'){ c.innerHTML = renderEventVocab(); wireVocab(); return; }
+  if(state.view==='vocab_faiths'){ c.innerHTML = renderFaithVocab(); return; }
+  if(state.view==='faith'||state.view==='scoped'){ c.innerHTML = renderFilterView(state.view); wireTiles(); return; }
+  c.innerHTML = renderFolder(state.view); wireTiles();
+}
+
+function tileBadges(t){
+  let b='';
+  const svc=t.svc||[];
+  const refs = t.key==='catering'||t.label==='Catering'?CATERING_REFINEMENTS.length:(svc.length? Math.max(1,Math.round(svc.length/2)):0);
+  const faith = svc.filter(s=>s.faith).length;
+  const setn = svc.some(s=>s.setnayan);
+  if(faith>0) b+='<span class="badge faith">'+faith+' faith</span>';
+  if(setn) b+='<span class="badge setnayan">Setnayan</span>';
+  if(svc.some(s=>s.ph)) b+='<span class="badge ph">PH</span>';
+  if(svc.some(s=>s.rental)) b+='<span class="badge rental">Rental</span>';
+  return b;
+}
+function refCount(t){
+  if(t.label==='Catering') return CATERING_REFINEMENTS.length;
+  const n=(t.svc||[]).length; return n? Math.max(1,Math.round(n/2)):0;
+}
+function scopeChip(t){
+  if(!t.scope || t.scope==='all')
+    return '<span class="tile-scope-chip">All events</span>';
+  return '<span class="tile-scope-chip">'+svg('star')+t.scope+'</span>';
+}
+function tileCardHTML(key,idx){
+  const t = TILES[key]; if(!t) return '';
+  const svc = t.svc||[];
+  return '<div class="tile-card" data-tile="'+key+'" draggable="true" style="">'+
+    '<div class="tile-banner" style="background:'+gradAt(idx)+'">'+
+      '<div class="grip" title="Drag to reorder">'+svg('scan')+'</div>'+
+      scopeChip(t)+
+    '</div>'+
+    '<div class="tile-body">'+
+      '<div class="tile-title"><span class="ic-wrap">'+svg(t.icon)+'</span><span class="nm">'+t.label+'</span></div>'+
+      '<div class="tile-stats">'+svc.length+' service'+(svc.length===1?'':'s')+' · '+refCount(t)+' refinement'+(refCount(t)===1?'':'s')+'</div>'+
+      '<div class="tile-badges">'+tileBadges(t)+'</div>'+
+    '</div></div>';
+}
+function renderFolder(fk){
+  const f = FOLDERS.find(x=>x.key===fk);
+  const keys = (TILES_BY_FOLDER[fk]||[]).filter(k=>matchTile(k));
+  const scoped = keys.filter(k=>TILES[k].scope && TILES[k].scope!=='all').length;
+  let head = '<div class="center-head"><div><div class="h">'+svg(f.icon)+f.label+'</div>'+
+    '<div class="sub">'+ (f.key==='venue'?'The place — where it happens.':
+      f.key==='feast'?'What&rsquo;s served — food, cake, stations.':
+      f.key==='design'?'How it looks — styling, flowers, digital.':
+      f.key==='program'?'The show — music, hosts, performers.':
+      f.key==='booths'?'The extras — bars, carts, interactive booths.':
+      'Bookable tiles filed under '+f.label+'.')+'</div></div>'+
+    '<div class="center-meta">'+keys.length+' tiles'+(scoped?' · '+scoped+' event-scoped':'')+'</div></div>';
+  let note = '<div class="scope-note"><span></span>'+svg('scan')+'Drag a card by its handle to reorder. Click any card to open the inspector — rename, swap icon &amp; photo, scope to events, edit services &amp; refinements. Everything saves live to <b style="margin:0 4px">/explore</b>.</div>';
+  let grid = '<div class="tile-grid" id="tileGrid">';
+  keys.forEach((k,i)=> grid += tileCardHTML(k,i));
+  grid += '<button class="add-tile" id="addTile">'+svg('mail').replace('ico','ico').replace(IP.mail,'<path d="M12 5v14M5 12h14"/>')+'Add tile</button>';
+  grid += '</div>';
+  if(keys.length===0 && state.search) grid = '<div class="empty">No tiles match &ldquo;'+esc(state.search)+'&rdquo; in '+f.label+'.</div>';
+  return head+note+grid;
+}
+function renderFilterView(kind){
+  // gather tiles across folders matching the filter
+  const all = Object.keys(TILES).filter(k=>TILES[k]);
+  let keys;
+  if(kind==='faith') keys = all.filter(k=>(TILES[k].svc||[]).some(s=>s.faith)).filter(matchTile);
+  else keys = all.filter(k=>TILES[k].scope && TILES[k].scope!=='all').filter(matchTile);
+  const title = kind==='faith'?'Faith-tagged tiles':'Event-scoped tiles';
+  const sub = kind==='faith'
+    ? 'Tiles holding at least one faith-scoped service. Faith is INCLUDE-only — a tagged service surfaces only for matching couples.'
+    : 'Tiles restricted to specific event types. Unscoped tiles are universal (serve every event).';
+  let head='<div class="center-head"><div><div class="h">'+svg(kind==='faith'?'landmark':'star')+title+'</div><div class="sub">'+sub+'</div></div><div class="center-meta">'+keys.length+' tiles</div></div>';
+  let grid='<div class="tile-grid" id="tileGrid">';
+  keys.forEach((k,i)=>grid+=tileCardHTML(k,i));
+  grid+='</div>';
+  if(keys.length===0) grid='<div class="empty">Nothing matches the current filter/search.</div>';
+  return head+grid;
+}
+function renderUnfiled(){
+  return '<div class="center-head"><div><div class="h">'+svg('package')+'Unfiled</div>'+
+    '<div class="sub">Services with no tile mapping — they still show in the vendor &ldquo;add a service&rdquo; picker, but the marketplace can&rsquo;t bucket them until they&rsquo;re filed.</div></div>'+
+    '<div class="center-meta">0 unfiled</div></div>'+
+    '<div class="empty" style="padding:32px">'+svg('scan')+'<div style="margin-top:10px;font-weight:600;color:var(--ink)">Nothing unfiled</div>Every canonical service is placed on a tile. When a vendor proposes a new service, it lands here to be filed.</div>';
+}
+
+/* ── Requests view ── */
+function renderRequests(){
+  let h='<div class="center-head"><div><div class="h">'+svg('hand')+'Vendor category requests</div>'+
+    '<div class="sub">Promote to global &middot; map to existing &middot; keep private &middot; reject. Vendor proposals from the services editor land here.</div></div>'+
+    '<div class="center-meta">2 pending</div></div>';
+  REQUESTS.forEach((r,i)=>{
+    h+='<div class="req-card"><div class="req-top"><span class="rl">'+r.label+'</span><span class="rf">from '+r.from+'</span></div>'+
+      '<div class="req-note">'+r.note+'</div>'+
+      '<div class="demand">'+svg('star')+'Demand signal — '+r.demand+'. Consider promoting to its own tile.</div>'+
+      '<div class="req-actions">'+
+        '<select class="req-sel" title="Promote under folder"><option>Promote under folder…</option>'+FOLDERS.map(f=>'<option>'+f.label+'</option>').join('')+'</select>'+
+        '<button class="btn tiny ghost" data-req="promote" data-i="'+i+'" style="color:var(--ok);border-color:#bfe0c8">Promote to global ✓</button>'+
+        '<select class="req-sel" title="Map to existing"><option>Map to existing…</option>'+allServiceNames().map(n=>'<option>'+n+'</option>').join('')+'</select>'+
+        '<button class="btn tiny ghost" data-req="map" data-i="'+i+'" style="color:var(--sky);border-color:#bcd4ea">Map →</button>'+
+        '<button class="btn tiny ghost" data-req="private" data-i="'+i+'">Keep private</button>'+
+        '<button class="btn tiny ghost" data-req="reject" data-i="'+i+'" style="color:var(--report);border-color:#e6c3bd">Reject</button>'+
+      '</div></div>';
+  });
+  return h;
+}
+function wireRequests(){
+  document.querySelectorAll('[data-req]').forEach(b=>b.addEventListener('click',()=>{
+    const map={promote:'Promoted to a global tile',map:'Mapped to an existing service',private:'Kept private for this vendor',reject:'Request rejected'};
+    toast(map[b.dataset.req]+' — live on /explore', true);
+  }));
+}
+function allServiceNames(){
+  const out=[]; Object.values(TILES).forEach(t=>{ if(t&&t.svc) t.svc.forEach(s=>out.push(s.name)); });
+  return [...new Set(out)].sort();
+}
+
+/* ── Event vocab table ── */
+function renderEventVocab(){
+  let h='<div class="center-head"><div><div class="h">'+svg('star')+'Event types</div>'+
+    '<div class="sub">Two grains per event, side by side — <b>Category scoping</b> (which categories serve it) and <b>Couple launch</b> (does it show in the create-event picker). Retiring an event forces it off the picker.</div></div>'+
+    '<div class="center-meta">12 event types</div></div>';
+  h+='<div style="overflow-x:auto"><table class="vtable"><thead><tr>'+
+    '<th>Event</th><th>Category scoping</th><th>Couple launch</th><th>Links</th></tr></thead><tbody>';
+  EVENT_TYPES.forEach(e=>{
+    const statusBadge = e.status==='active'
+      ? '<span class="badge gate-live">active</span>'
+      : '<span class="badge gate-off">inactive</span>';
+    const pickerLocked = e.retired;
+    h+='<tr><td><span class="vt-name">'+e.label+'</span><div class="vt-key mono">'+e.key+'</div></td>'+
+      '<td><div class="grain"><div class="row">'+statusBadge+'<span class="usage">'+e.usage+' events using it</span></div></div></td>'+
+      '<td><div class="sw-wrap"><button class="sw-toggle'+(e.picker&&!pickerLocked?' on':'')+(pickerLocked?' locked':'')+'" data-ev="'+e.key+'" '+(pickerLocked?'disabled title="Retired — forced off"':'')+'></button>'+
+        '<span class="lbl">'+(pickerLocked?'Retired — off':(e.picker?'Shown in picker':'Hidden from picker'))+'</span></div></td>'+
+      '<td><div class="linkrow"><span class="xlink">'+svg('tag')+'Scope categories</span><span class="xlink">'+svg('clipboard')+'Onboarding profile</span><span class="xlink">'+svg('book')+'Onboarding content</span></div></td></tr>';
+  });
+  h+='</tbody></table></div>';
+  return h;
+}
+function wireVocab(){
+  document.querySelectorAll('.sw-toggle[data-ev]').forEach(t=>{
+    if(t.classList.contains('locked')) return;
+    t.addEventListener('click',()=>{
+      const on=t.classList.toggle('on');
+      const ev=EVENT_TYPES.find(x=>x.key===t.dataset.ev); if(ev) ev.picker=on;
+      t.nextElementSibling.textContent = on?'Shown in picker':'Hidden from picker';
+      toast((on?'Now showing in the couple picker':'Hidden from the couple picker')+' — live on save', true);
+    });
+  });
+}
+
+/* ── Faith vocab table ── */
+function renderFaithVocab(){
+  let h='<div class="center-head"><div><div class="h">'+svg('landmark')+'Faiths (wedding types)</div>'+
+    '<div class="sub">Launch gate + readiness per faith. A faith goes Live only when its ceremony flow, papers and copy are ready; couples can&rsquo;t pick a Coming-soon faith yet.</div></div>'+
+    '<div class="center-meta">'+FAITHS.length+' faiths</div></div>';
+  h+='<div style="overflow-x:auto"><table class="vtable"><thead><tr>'+
+    '<th>Faith</th><th>Launch gate</th><th>Readiness</th><th>Tagged services</th></tr></thead><tbody>';
+  FAITHS.forEach(f=>{
+    const gate = f.gate==='live'?'<span class="badge gate-live">Live</span>':
+      f.gate==='soon'?'<span class="badge gate-soon">Coming soon</span>':'<span class="badge gate-off">Disabled</span>';
+    h+='<tr><td><span class="vt-name">'+f.label+'</span><div class="vt-key mono">'+f.key.toLowerCase().replace(/\s+/g,'_')+'</div></td>'+
+      '<td>'+gate+'</td><td><span class="usage">'+f.ready+' steps ready</span></td>'+
+      '<td><span class="usage">'+f.tagged+' service'+(f.tagged===1?'':'s')+'</span></td></tr>';
+  });
+  h+='</tbody></table></div>';
+  return h;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   TILE INTERACTIONS — click to inspect + drag to reorder
+   ───────────────────────────────────────────────────────────────────────── */
+function wireTiles(){
+  const grid=document.getElementById('tileGrid'); if(!grid) return;
+  grid.querySelectorAll('.tile-card').forEach(card=>{
+    card.addEventListener('click',(e)=>{ if(e.target.closest('.grip')) return; openInspector(card.dataset.tile); });
+  });
+  const addBtn=document.getElementById('addTile');
+  if(addBtn) addBtn.addEventListener('click',()=>toast('New tile added — name it in the inspector · live on /explore', true));
+  enableDnD(grid);
+}
+let dragEl=null;
+function enableDnD(grid){
+  grid.querySelectorAll('.tile-card').forEach(card=>{
+    card.addEventListener('dragstart',(e)=>{ dragEl=card; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+    card.addEventListener('dragend',()=>{ card.classList.remove('dragging'); grid.querySelectorAll('.drop-target').forEach(x=>x.classList.remove('drop-target')); if(dragEl){ toast('Order saved — live on /explore', true);} dragEl=null; });
+    card.addEventListener('dragover',(e)=>{ e.preventDefault(); if(!dragEl||dragEl===card||card.classList.contains('add-tile'))return;
+      const after = shouldPlaceAfter(card,e.clientX);
+      grid.querySelectorAll('.drop-target').forEach(x=>x.classList.remove('drop-target'));
+      card.classList.add('drop-target');
+      if(after) card.after(dragEl); else card.before(dragEl);
+    });
+  });
+}
+function shouldPlaceAfter(card,x){ const r=card.getBoundingClientRect(); return x > r.left + r.width/2; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   INSPECTOR
+   ───────────────────────────────────────────────────────────────────────── */
+let curTileKey=null;
+function openInspector(key){
+  const t=TILES[key]; if(!t) return;
+  curTileKey=key;
+  state.inspIcon=t.icon; state.inspPhoto=Object.keys(TILES).indexOf(key)%GRADS.length;
+  state.inspScopeMode=(t.scope&&t.scope!=='all')?'scoped':'universal';
+  state.tab='details';
+  document.getElementById('inspIcon').innerHTML=svg(t.icon);
+  document.getElementById('inspName').textContent=t.label;
+  document.getElementById('inspSlug').textContent=key;
+  document.getElementById('inspStatus').textContent='Active · live on /explore';
+  setTab('details');
+  renderDetails(); renderServicesTab(); renderRefinementsTab();
+  document.getElementById('scrim').classList.add('on');
+  document.getElementById('inspector').classList.add('on');
+}
+function closeInspector(){
+  document.getElementById('scrim').classList.remove('on');
+  document.getElementById('inspector').classList.remove('on');
+  curTileKey=null;
+}
+function setTab(tab){
+  state.tab=tab;
+  document.querySelectorAll('.insp-tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  document.querySelectorAll('.tabpane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pane-'+tab).classList.add('on');
+}
+
+/* Details tab */
+function renderDetails(){
+  const t=TILES[curTileKey];
+  const p=document.getElementById('pane-details');
+  const scopeChips = EVENT_TYPES.filter(e=>e.status==='active').map(e=>{
+    const on = state.inspScopeMode==='scoped' && t.scope && t.scope.split(', ').map(s=>s.toLowerCase().replace(/ /g,'_')).includes(e.key);
+    return '<span class="toggle-chip'+(on?' on':'')+'" data-scopechip="'+e.key+'">'+e.label+'</span>';
+  }).join('');
+  p.innerHTML =
+    '<div class="preview-cap">'+svg('heart')+'As couples see it on /explore</div>'+
+    '<div class="preview-card" id="previewCard">'+
+      '<div class="preview-banner" id="previewBanner" style="background:'+gradAt(state.inspPhoto)+'">'+
+        '<div class="preview-icwrap" id="previewIc">'+svg(state.inspIcon)+'</div></div>'+
+      '<div class="preview-meat"><div class="pnm" id="previewNm">'+t.label+'</div>'+
+        '<div class="psub">'+(t.svc||[]).length+' services · from top-rated vendors</div></div>'+
+    '</div>'+
+    '<div style="height:8px"></div>'+
+    '<div class="fld"><div class="lab">'+svg('tag')+'Display name</div>'+
+      '<input class="txt" id="renameInput" value="'+esc(t.label)+'" /></div>'+
+    '<div class="fld"><div class="lab">'+svg('scan')+'Slug (read-only)</div>'+
+      '<div class="slug-ro">'+svg('scan').replace(IP.scan,'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>')+'<span class="mono">'+curTileKey+'</span></div></div>'+
+    '<div class="fld"><div class="lab">'+svg('sparkles')+'Icon</div>'+
+      '<input class="txt icon-search" id="iconSearch" placeholder="Search icons…" autocomplete="off" />'+
+      '<div class="icon-grid" id="iconGrid"></div></div>'+
+    '<div class="fld"><div class="lab">'+svg('camera')+'Photo</div>'+
+      '<div class="photo-row"><div class="photo-cur" id="photoCur" style="background:'+gradAt(state.inspPhoto)+'"></div>'+
+        '<div class="swatches" id="swatches"></div>'+
+        '<button class="btn ghost tiny" id="clearPhoto">Clear</button></div>'+
+      '<div class="hint">Pick a banner. Replace uploads a real photo; Clear falls back to the icon tint.</div></div>'+
+    '<div class="fld"><div class="lab">'+svg('star')+'Which events is this tile for?</div>'+
+      '<div class="radio2"><div class="r'+(state.inspScopeMode==='universal'?' on':'')+'" data-scope="universal">Universal (all events)</div>'+
+        '<div class="r'+(state.inspScopeMode==='scoped'?' on':'')+'" data-scope="scoped">Scoped to&hellip;</div></div>'+
+      '<div class="chipset" id="scopeChips" style="'+(state.inspScopeMode==='scoped'?'':'opacity:.4;pointer-events:none')+'">'+scopeChips+'</div>'+
+      '<div class="hint">Universal is the fail-open default. Scope only when a tile truly doesn&rsquo;t belong to some events.</div></div>'+
+    '<div class="fld"><div class="lab">'+svg('scan')+'Status</div>'+
+      '<div class="chipset"><span class="toggle-chip on">Active</span><span class="toggle-chip">Hidden</span></div></div>'+
+    '<button class="btn danger" id="delBtn" style="width:100%;justify-content:center;margin-top:6px">'+svg('scissors').replace(IP.scissors,'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6"/>')+'Delete tile</button>';
+  buildIconGrid('');
+  buildSwatches();
+  wireDetails();
+}
+function buildIconGrid(filter){
+  const g=document.getElementById('iconGrid'); if(!g) return;
+  const list=PICKER_ICONS.filter(n=>n.includes(filter.toLowerCase()));
+  g.innerHTML=list.map(n=>'<button class="icon-opt'+(n===state.inspIcon?' sel':'')+'" data-icon="'+n+'" title="'+n+'">'+svg(n)+'</button>').join('') || '<div style="grid-column:1/-1;color:var(--muted);font-size:11.5px;text-align:center;padding:8px">No icon matches</div>';
+  g.querySelectorAll('.icon-opt').forEach(b=>b.addEventListener('click',()=>{
+    state.inspIcon=b.dataset.icon;
+    g.querySelectorAll('.icon-opt').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
+    document.getElementById('previewIc').innerHTML=svg(state.inspIcon);
+    document.getElementById('inspIcon').innerHTML=svg(state.inspIcon);
+  }));
+}
+function buildSwatches(){
+  const s=document.getElementById('swatches'); if(!s) return;
+  s.innerHTML=GRADS.map((g,i)=>'<div class="sw'+(i===state.inspPhoto?' sel':'')+'" data-sw="'+i+'" style="background:'+g+'"></div>').join('');
+  s.querySelectorAll('.sw').forEach(el=>el.addEventListener('click',()=>{
+    state.inspPhoto=+el.dataset.sw;
+    s.querySelectorAll('.sw').forEach(x=>x.classList.remove('sel')); el.classList.add('sel');
+    document.getElementById('previewBanner').style.background=gradAt(state.inspPhoto);
+    document.getElementById('photoCur').style.background=gradAt(state.inspPhoto);
+  }));
+}
+function wireDetails(){
+  const ri=document.getElementById('renameInput');
+  ri.addEventListener('input',()=>{ document.getElementById('previewNm').textContent=ri.value||'Untitled tile'; });
+  document.getElementById('iconSearch').addEventListener('input',(e)=>buildIconGrid(e.target.value));
+  document.getElementById('clearPhoto').addEventListener('click',()=>{
+    document.getElementById('previewBanner').style.background='var(--alabaster)';
+    document.getElementById('photoCur').style.background='var(--alabaster)';
+    toast('Photo cleared — falls back to the icon tint', false);
+  });
+  document.querySelectorAll('.radio2 .r').forEach(r=>r.addEventListener('click',()=>{
+    state.inspScopeMode=r.dataset.scope;
+    document.querySelectorAll('.radio2 .r').forEach(x=>x.classList.toggle('on',x===r));
+    const chips=document.getElementById('scopeChips');
+    if(state.inspScopeMode==='scoped'){ chips.style.opacity='1'; chips.style.pointerEvents='auto'; }
+    else { chips.style.opacity='.4'; chips.style.pointerEvents='none'; }
+  }));
+  document.querySelectorAll('[data-scopechip]').forEach(ch=>ch.addEventListener('click',()=>ch.classList.toggle('on')));
+  document.getElementById('delBtn').addEventListener('click',openDelete);
+}
+
+/* Services tab */
+function renderServicesTab(){
+  const t=TILES[curTileKey];
+  const p=document.getElementById('pane-services');
+  const svc=t.svc||[];
+  let h='<div class="hint" style="margin:0 0 12px">Canonical services filed on this tile. Set a faith scope per row, move a service to another tile, or expand a row to edit its refinement schema.</div>';
+  svc.forEach((s,i)=>{
+    const badges=[
+      '<span class="badge phase'+(s.phase&&s.phase.startsWith('V1.1')?'':' later')+'">'+s.phase+'</span>',
+      s.faith?'<span class="badge faith">'+s.faith+'</span>':'<span class="badge faithall">faith: all</span>',
+      s.setnayan?'<span class="badge setnayan">Setnayan</span>':'',
+      s.ph?'<span class="badge ph">PH</span>':'',
+      s.rental?'<span class="badge rental">Rental</span>':'',
+    ].join('');
+    const expanded = (curTileKey==='catering' && i===2); // Halal row pre-expanded
+    h+='<div class="svc-row'+(expanded?' open':'')+'" data-svc="'+i+'">'+
+      '<div class="svc-main"><span class="svc-caret">'+svg('scan').replace(IP.scan,'<path d="m9 6 6 6-6 6"/>')+'</span>'+
+        '<div class="svc-id"><div class="nm">'+s.name+'</div><div class="key mono">'+s.key+'</div></div>'+
+        '<div class="svc-badges">'+badges+'</div></div>'+
+      '<div class="svc-tools">'+
+        '<select class="mini-sel"><option>faith: '+(s.faith||'all')+'</option>'+FAITHS.map(f=>'<option>'+f.label+'</option>').join('')+'<option>Universal (everyone)</option></select>'+
+        '<select class="mini-sel"><option>Move to tile…</option>'+Object.keys(TILES).filter(k=>TILES[k]).map(k=>'<option'+(k===curTileKey?' selected':'')+'>'+TILES[k].label+'</option>').join('')+'</select>'+
+      '</div>'+
+      '<div class="svc-detail">'+refinementsEditorHTML(curTileKey)+'</div>'+
+    '</div>';
+  });
+  if(svc.length===0) h+='<div class="empty">No services filed here yet.</div>';
+  p.innerHTML=h;
+  p.querySelectorAll('.svc-main').forEach(m=>m.addEventListener('click',()=>{
+    m.closest('.svc-row').classList.toggle('open');
+  }));
+  wireRefEditor(p);
+  p.querySelectorAll('.mini-sel').forEach(sel=>sel.addEventListener('change',()=>toast('Saved — live on /explore', true)));
+}
+function refinementsEditorHTML(key){
+  const refs = key==='catering'?CATERING_REFINEMENTS:[
+    {name:'Customization', key:'customization', type:'multi_select', opts:[{label:'Plain'},{label:'Custom monogram'},{label:'Custom logo'}]},
+    {name:'Coverage hours', key:'coverage_hours', type:'single_select', opts:[{label:'4 hrs'},{label:'8 hrs'},{label:'Whole day'}]},
+  ];
+  let h='<div class="schema-line">Leaf refinements — the attribute schema vendors answer.</div>';
+  refs.forEach(r=>{
+    h+='<div class="ref-card"><div class="ref-head"><div><div class="rn">'+r.name+'</div><div class="rk mono">'+r.key+'</div></div>'+
+      '<span class="rtype">'+r.type+'</span></div>'+
+      '<div class="ref-opts">'+r.opts.map(o=>'<span class="opt-chip'+(o.retired?' retired':'')+'">'+(o.retired?'':'')+esc(o.label)+(o.retired?' · retired':' <span class="x">×</span>')+'</span>').join('')+
+        '<span class="opt-chip" style="border-style:dashed;color:var(--muted);cursor:pointer" data-addopt="'+r.key+'">'+svg('star').replace(IP.star,'<path d="M12 5v14M5 12h14"/>')+'Add option</span>'+
+      '</div></div>';
+  });
+  h+='<div class="notechip">'+svg('scan').replace(IP.scan,'<path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/>')+'Option names can&rsquo;t be renamed once vendors have answered — add a new option + retire the old one instead.</div>';
+  h+='<div class="add-mini"><input placeholder="New refinement name…" /><select class="mini-sel"><option>multi_select</option><option>single_select</option><option>boolean</option></select>'+
+    '<button class="btn tiny ghost" data-addref="1">'+svg('star').replace(IP.star,'<path d="M12 5v14M5 12h14"/>')+'Add refinement</button></div>';
+  h+='<div class="schema-line">Saving bumps <span class="mono">schema v7 → v8</span> for this leaf.</div>';
+  return h;
+}
+function wireRefEditor(root){
+  root.querySelectorAll('[data-addopt]').forEach(b=>b.addEventListener('click',(e)=>{e.stopPropagation();toast('Option added — vendors can pick it now', true);}));
+  root.querySelectorAll('[data-addref]').forEach(b=>b.addEventListener('click',(e)=>{e.stopPropagation();toast('Refinement added — schema bumped to v8', true);}));
+  root.querySelectorAll('.opt-chip .x').forEach(x=>x.addEventListener('click',(e)=>{e.stopPropagation();
+    const chip=x.closest('.opt-chip'); chip.classList.add('retired'); chip.innerHTML=chip.textContent.replace('×','')+' · retired';
+    toast('Option retired — kept for vendors who answered it', false);
+  }));
+}
+
+/* Refinements tab — onboarding cards with photo grids */
+function renderRefinementsTab(){
+  const p=document.getElementById('pane-refinements');
+  let h='<div class="hint" style="margin:0 0 14px">Onboarding cards — the option grids a vendor sees when adding this service. Each option carries a photo. Drag to reorder. Projectable leaves (those powering vendor matching) are add/remove-locked.</div>';
+  ONBOARD_LEAVES.forEach(leaf=>{
+    h+='<div class="leaf-block"><div class="leaf-bhead"><div class="ln">'+leaf.name+'</div><span class="badge mono neutral">'+leaf.key+'</span><span class="lk mono">'+(leaf.locked?'projectable':'editable')+'</span></div>';
+    if(leaf.locked) h+='<div class="leaf-lock">'+svg('scan').replace(IP.scan,'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>')+'Ceremony options power vendor matching — add/remove is locked. Rename copy and swap photos freely.</div>';
+    h+='<div class="opt-photo-grid">';
+    leaf.opts.forEach(o=>{
+      h+='<div class="opt-photo" draggable="true"><span class="drag">'+svg('scan')+'</span>'+
+        '<div class="thumb" style="background:'+o.hue+'">'+o.emoji+'</div><div class="cap">'+o.label+'</div></div>';
+    });
+    if(!leaf.locked){
+      h+='<div class="add-photo-opt" data-addphoto="'+leaf.key+'">'+svg('camera')+'<span>Add option</span><span class="req">photo required</span></div>';
+    }
+    h+='</div></div>';
+  });
+  p.innerHTML=h;
+  p.querySelectorAll('[data-addphoto]').forEach(b=>b.addEventListener('click',()=>toast('Upload a photo to add this option — photo is required', false)));
+  // drag reorder within a grid
+  p.querySelectorAll('.opt-photo-grid').forEach(grid=>{
+    let de=null;
+    grid.querySelectorAll('.opt-photo').forEach(el=>{
+      el.addEventListener('dragstart',()=>{de=el;el.style.opacity='.4';});
+      el.addEventListener('dragend',()=>{el.style.opacity='';if(de)toast('Option order saved', true);de=null;});
+      el.addEventListener('dragover',(e)=>{e.preventDefault();if(!de||de===el)return;
+        const r=el.getBoundingClientRect(); if(e.clientX>r.left+r.width/2) el.after(de); else el.before(de);});
+    });
+  });
+}
+
+/* Delete dialog */
+function openDelete(){
+  const t=TILES[curTileKey]; const svc=(t.svc||[]).length; const refs=refCount(t);
+  document.getElementById('delSub').innerHTML='This tile still holds <b>'+svc+' service'+(svc===1?'':'s')+'</b> and <b>'+refs+' refinement set'+(refs===1?'':'s')+'</b> — choose where they go.';
+  const dest=document.getElementById('delDest');
+  dest.innerHTML=Object.keys(TILES).filter(k=>TILES[k]&&k!==curTileKey).map(k=>'<option value="'+k+'">'+TILES[k].label+' ('+FOLDERS.find(f=>f.key===TILES[k].folder).label+')</option>').join('');
+  const conf=document.getElementById('delConfirm'); conf.value=''; conf.placeholder='Type "'+t.label+'"';
+  document.getElementById('delGo').disabled=true;
+  document.getElementById('delScrim').classList.add('on');
+  conf.oninput=()=>{ document.getElementById('delGo').disabled = conf.value.trim().toLowerCase()!==t.label.toLowerCase(); };
+}
+function closeDelete(){ document.getElementById('delScrim').classList.remove('on'); }
+
+/* ── search matching ── */
+function matchTile(key){
+  if(!state.search) return true;
+  const t=TILES[key]; if(!t) return false;
+  const q=state.search.toLowerCase();
+  if(t.label.toLowerCase().includes(q)) return true;
+  return (t.svc||[]).some(s=>s.name.toLowerCase().includes(q)||s.key.toLowerCase().includes(q));
+}
+
+/* ── toast ── */
+let toastT=null;
+function toast(msg,withLink){
+  const el=document.getElementById('toast');
+  document.getElementById('toastMsg').innerHTML = esc(msg);
+  el.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('on'), 2600);
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   WIRING (global)
+   ───────────────────────────────────────────────────────────────────────── */
+document.getElementById('search').addEventListener('input',(e)=>{
+  state.search=e.target.value.trim();
+  // if searching from a vocab/requests view, jump back to the active folder or keep filter views
+  if(!FOLDERS.some(f=>f.key===state.view) && state.view!=='faith' && state.view!=='scoped'){
+    state.view='venue'; renderRail(); syncViewChips();
+  }
+  renderCenter();
+});
+document.querySelectorAll('.vchip').forEach(c=>c.addEventListener('click',()=>{
+  const v=c.dataset.view;
+  if(v==='all'){ state.view='venue'; }
+  else if(v==='faith'){ state.view='faith'; }
+  else if(v==='scoped'){ state.view='scoped'; }
+  else if(v==='unfiled'){ state.view='unfiled'; }
+  else if(v==='requests'){ state.view='requests'; }
+  syncViewChips(); renderRail(); renderCenter();
+}));
+document.querySelectorAll('.insp-tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+document.getElementById('inspClose').addEventListener('click',closeInspector);
+document.getElementById('scrim').addEventListener('click',closeInspector);
+document.getElementById('inspSave').addEventListener('click',()=>{
+  const t=TILES[curTileKey]; const ri=document.getElementById('renameInput');
+  if(t&&ri){ t.label=ri.value||t.label; t.icon=state.inspIcon;
+    if(state.inspScopeMode==='scoped'){
+      const sel=[...document.querySelectorAll('#scopeChips .toggle-chip.on')].map(x=>EVENT_TYPES.find(e=>e.key===x.dataset.scopechip).label);
+      t.scope=sel.length?sel.join(', '):'all';
+    } else t.scope='all';
+  }
+  closeInspector(); renderRail(); renderCenter();
+  toast('Saved — live on /explore', true);
+});
+document.getElementById('delCancel').addEventListener('click',closeDelete);
+document.getElementById('delGo').addEventListener('click',()=>{
+  const dest=document.getElementById('delDest');
+  const destLabel = dest.options[dest.selectedIndex].text;
+  const key=curTileKey;
+  // move services then delete
+  if(TILES[key]){ TILES[dest.value].svc=(TILES[dest.value].svc||[]).concat(TILES[key].svc||[]); TILES[key]=undefined;
+    TILES_BY_FOLDER[state.view]=(TILES_BY_FOLDER[state.view]||[]).filter(k=>k!==key); }
+  closeDelete(); closeInspector();
+  // rebuild by-folder maps
+  FOLDERS.forEach(f=>TILES_BY_FOLDER[f.key]=[]); Object.entries(TILES).forEach(([k,t])=>{if(t)TILES_BY_FOLDER[t.folder].push(k);});
+  renderRail(); renderCenter();
+  toast('Tile deleted — everything moved to '+destLabel, false);
+});
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ closeDelete(); closeInspector(); } });
+
+/* boot */
+(function seedChipCounts(){
+  const faith = Object.values(TILES).reduce((n,t)=>n+((t&&t.svc)?t.svc.filter(s=>s.faith).length:0),0);
+  const scoped = Object.keys(TILES).filter(k=>TILES[k]&&TILES[k].scope&&TILES[k].scope!=='all').length;
+  const fe=document.getElementById('chipFaith'); if(fe) fe.textContent=faith;
+  const se=document.getElementById('chipScoped'); if(se) se.textContent=scoped;
+})();
+renderRail(); syncViewChips(); renderCenter();
+</script>
+</body>
+</html>

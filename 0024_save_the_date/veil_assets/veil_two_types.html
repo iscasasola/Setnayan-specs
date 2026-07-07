@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Setnayan Veil — 2 veils + curtain · framed on the card</title>
+<style>
+  html,body{margin:0;height:100%;background:#14110f;font-family:system-ui,Arial,sans-serif;overflow:hidden}
+  #stage{position:fixed;inset:0;background:radial-gradient(120% 100% at 50% 40%, #2a221c 0%, #14110f 74%)}
+  #top{position:fixed;left:0;right:0;top:0;display:flex;gap:8px;align-items:center;padding:10px 16px;background:rgba(27,23,19,.78);backdrop-filter:blur(6px);z-index:5}
+  #bar{position:fixed;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;gap:14px;align-items:center;padding:11px 16px;background:rgba(27,23,19,.82);backdrop-filter:blur(6px)}
+  label{font-size:13px;color:#c9bda9}
+  .tg{font-size:13px;padding:7px 13px;border-radius:7px;border:1px solid #3a322a;background:#241e18;color:#c9bda9;cursor:pointer}
+  .tg.on{background:#cb9e4b;color:#14110f;border-color:#cb9e4b}
+  .sw{width:26px;height:26px;border-radius:50%;border:1px solid #00000033;cursor:pointer;padding:0}
+  input[type=color]{width:38px;height:30px;border:none;background:none;padding:0;cursor:pointer}
+  input[type=range]{width:120px}
+  #hint{margin-left:auto;font-size:12px;color:#8c8174}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="top">
+  <span style="font-size:12px;color:#8c8174;margin-right:4px">Reveal:</span>
+  <button id="t1" class="tg on">Sheer · multi-touch</button>
+  <button id="t2" class="tg">Crown-pinned · folding</button>
+  <button id="t3" class="tg">Curtain · parts</button>
+  <span id="hint">grab anywhere · drag up to lift up &amp; over</span>
+</div>
+<div id="bar">
+  <label>Veil colour</label>
+  <input id="col" type="color" value="#f3ece1"/>
+  <button class="sw" data-c="#f3ece1" title="Ivory" style="background:#f3ece1"></button>
+  <button class="sw" data-c="#e8d6b0" title="Champagne" style="background:#e8d6b0"></button>
+  <button class="sw" data-c="#e9cdcb" title="Blush" style="background:#e9cdcb"></button>
+  <button class="sw" data-c="#cfd9d2" title="Sage" style="background:#cfd9d2"></button>
+  <button class="sw" data-c="#7a3b52" title="Mulberry" style="background:#7a3b52"></button>
+  <label style="margin-left:10px">S depth</label><input id="sd" type="range" min="0" max="200" value="100"/>
+  <label>Wind</label><input id="wd" type="range" min="0" max="100" value="40"/>
+  <button id="reset" class="tg" style="margin-left:8px">reset</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var stage=document.getElementById('stage');
+  function size(){return [window.innerWidth, window.innerHeight];}
+  var W,H; var s0=size(); W=s0[0]; H=s0[1];
+  var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setSize(W,H); renderer.outputEncoding=THREE.sRGBEncoding;
+  stage.appendChild(renderer.domElement); renderer.domElement.style.display='block';
+
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(42, W/H, 0.1, 100); camera.position.set(0,0,6.6);
+  scene.add(new THREE.HemisphereLight(0xfff6e8,0x241c16,0.6));
+  var key=new THREE.SpotLight(0xfff3e0,1.5,50,Math.PI/5,0.6,1.0); key.position.set(2.4,3.6,5.5); scene.add(key);
+  var dir=new THREE.DirectionalLight(0xffe9c6,0.45); dir.position.set(-3,1,3); scene.add(dir);
+
+  // ---- invitation CARD behind the veil ----
+  function cardTex(){
+    var c=document.createElement('canvas'); c.width=620; c.height=820; var x=c.getContext('2d');
+    x.fillStyle='#241c15'; x.fillRect(0,0,620,820);
+    x.fillStyle='#2e251c'; x.fillRect(20,20,580,780);
+    x.strokeStyle='rgba(203,158,75,0.6)'; x.lineWidth=2; x.strokeRect(44,44,532,732);
+    x.strokeStyle='rgba(203,158,75,0.3)'; x.lineWidth=1; x.strokeRect(54,54,512,712);
+    x.textAlign='center'; x.textBaseline='middle'; x.fillStyle='#d8b572';
+    x.font='30px Georgia'; x.fillText('SAVE  THE  DATE', 310, 150);
+    x.font='italic 230px Georgia'; x.fillStyle='#cb9e4b';
+    x.shadowColor='rgba(203,158,75,0.45)'; x.shadowBlur=26;
+    x.fillText('A', 200, 420); x.fillText('J', 430, 420); x.shadowBlur=0;
+    x.font='italic 120px Georgia'; x.fillStyle='#b88f49'; x.fillText('&', 315, 440);
+    x.font='34px Georgia'; x.fillStyle='#cdb88f'; x.fillText('14 · 12 · 2026', 310, 620);
+    x.font='22px Georgia'; x.fillStyle='#9c8a68'; x.fillText('Tagaytay, Philippines', 310, 670);
+    var t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=renderer.capabilities.getMaxAnisotropy(); return t;
+  }
+  var cardZ=-0.25;
+  var card=new THREE.Mesh(new THREE.PlaneGeometry(3.3,4.36), new THREE.MeshBasicMaterial({map:cardTex(),transparent:true}));
+  card.position.z=cardZ; scene.add(card);
+
+  var GOLD='#cb9e4b';
+  var markPath="M 1859.526,3749.781 C 1458.028,3717.757 1065.454,3548.554 758.3406,3241.44 451.2286,2934.328 282.2397,2541.742 250.2195,2140.255 l 1326.8215,1.536 V 661.7647 C 1368.543,727.4195 1172.067,841.5416 1006.804,1006.804 768.3191,1245.29 633.8543,1548.261 602.7217,1859.526 H 250 C 282.024,1458.028 451.2265,1065.455 758.3406,758.3406 1065.453,451.2287 1458.039,282.2396 1859.526,250.2195 V 2422.739 H 661.7647 c 65.6549,208.498 179.7773,404.975 345.0393,570.237 238.486,238.486 541.457,372.95 852.722,404.083 z m 280.948,0 1.537,-1609.307 h 280.948 v 1197.761 c 208.498,-65.655 404.974,-179.776 570.237,-345.039 238.485,-238.486 372.95,-541.457 404.082,-852.722 H 3750 c -32.024,401.498 -201.226,794.071 -508.341,1101.185 -307.112,307.112 -699.697,476.101 -1101.185,508.122 z m 0,-1890.255 c 32.025,-401.498 201.227,-794.073 508.341,-1101.1854 0.658,-0.6584 1.316,-1.3173 1.975,-1.9754 -80.395,-42.041 -163.892,-76.0428 -249.331,-101.7389 -85.439,-25.696 -172.821,-43.0864 -260.985,-51.9046 V 250.2195 c 401.497,32.0253 794.073,201.0094 1101.185,508.1211 307.114,307.1134 476.317,699.6874 508.341,1101.1854 h -352.722 c -31.132,-311.265 -165.597,-614.236 -404.082,-852.722 -15.719,-15.7189 -32.464,-29.741 -48.727,-44.5564 -15.975,14.4789 -31.774,29.1397 -47.191,44.5564 -238.485,238.486 -372.95,541.457 -404.082,852.722 z";
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5333.3335 5333.3335" width="140" height="140"><path d="'+markPath+'" fill="'+GOLD+'" fill-rule="nonzero" transform="matrix(1.3333333,0,0,-1.3333333,0,5333.3333)"/></svg>';
+  var markURL='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  function rnd(s){ var x=Math.sin(s*99.13)*43758.5; return x-Math.floor(x); }
+  function teardrop(cx,cy,L,Wd,ang){ var p=[],n=16; for(var i=0;i<=n;i++){ var t=i/n*6.2832,r=(1-Math.cos(t))/2,xx=Wd*Math.sin(t)*Math.pow(r,0.8),yy=-L*r; p.push([cx+xx*Math.cos(ang)-yy*Math.sin(ang),cy+xx*Math.sin(ang)+yy*Math.cos(ang)]); } return p; }
+  function starLace(g,cx,cy,R){ g.strokeStyle='rgba(255,255,255,0.85)'; g.lineWidth=1; for(var k=0;k<8;k++){ var a=k/8*6.2832,p=teardrop(cx,cy,R,R*0.42,a); g.beginPath(); g.moveTo(p[0][0],p[0][1]); for(var i=1;i<p.length;i++)g.lineTo(p[i][0],p[i][1]); g.closePath(); g.stroke(); } g.fillStyle='rgba(255,255,255,0.9)'; for(var b=0;b<6;b++){ var aa=b/6*6.2832; g.beginPath(); g.arc(cx+Math.cos(aa)*R*0.2,cy+Math.sin(aa)*R*0.2,1.1,0,6.2832); g.fill(); } }
+  function floret(g,cx,cy,R){ g.fillStyle='rgba(255,255,255,0.6)'; for(var k=0;k<5;k++){ var a=k/5*6.2832,p=teardrop(cx,cy,R,R*0.5,a); g.beginPath(); g.moveTo(p[0][0],p[0][1]); for(var i=1;i<p.length;i++)g.lineTo(p[i][0],p[i][1]); g.closePath(); g.fill(); } g.fillStyle='rgba(255,255,255,0.85)'; g.beginPath(); g.arc(cx,cy,R*0.2,0,6.2832); g.fill(); }
+
+  var Cw=1024, Ch=1280;
+  var mat=new THREE.MeshStandardMaterial({ color:new THREE.Color('#f3ece1'), roughness:0.84, metalness:0.0, transparent:true, opacity:0.9, side:THREE.DoubleSide, depthWrite:false, emissive:new THREE.Color(GOLD), emissiveIntensity:0.8 });
+  mat.onBeforeCompile=function(sh){
+    sh.vertexShader='varying vec3 vWP;varying vec3 vNN;\n'+sh.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvWP=(modelMatrix*vec4(transformed,1.0)).xyz;vNN=normalize(mat3(modelMatrix)*objectNormal);');
+    sh.fragmentShader='varying vec3 vWP;varying vec3 vNN;\n'+sh.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\nvec3 V=normalize(cameraPosition-vWP);float fr=pow(1.0-abs(dot(V,normalize(vNN))),1.8);gl_FragColor.rgb+=fr*0.7;gl_FragColor.a=clamp(gl_FragColor.a+fr*0.5,0.0,1.0);');
+  };
+  function buildTextures(markImg){
+    var mw=document.createElement('canvas'); mw.width=mw.height=130; var mc=mw.getContext('2d');
+    if(markImg){ mc.drawImage(markImg,0,0,130,130); mc.globalCompositeOperation='source-in'; mc.fillStyle='#fff'; mc.fillRect(0,0,130,130); mc.globalCompositeOperation='source-over'; }
+    var a=document.createElement('canvas'); a.width=Cw; a.height=Ch; var g=a.getContext('2d');
+    var e=document.createElement('canvas'); e.width=Cw; e.height=Ch; var ge=e.getContext('2d');
+    g.fillStyle='#000'; g.fillRect(0,0,Cw,Ch); ge.fillStyle='#000'; ge.fillRect(0,0,Cw,Ch);
+    g.strokeStyle='rgba(255,255,255,0.40)'; g.lineWidth=1;
+    for(var d=-Ch; d<Cw+Ch; d+=11){ g.beginPath(); g.moveTo(d,0); g.lineTo(d+Ch,Ch); g.stroke(); g.beginPath(); g.moveTo(d,Ch); g.lineTo(d+Ch,0); g.stroke(); }
+    var laceTop=Ch*0.88;
+    for(var i=0;i<40;i++){ var px=rnd(i+1)*Cw, py=80+rnd(i+7)*(laceTop-140); if(rnd(i+3)>0.5) starLace(g,px,py,9+rnd(i+9)*5); else floret(g,px,py,7+rnd(i+5)*4); }
+    if(markImg){ for(var k=0;k<12;k++){ var mx=80+rnd(k*2+11)*(Cw-160), my=120+rnd(k*2+4)*(laceTop-220), ms=34; g.globalAlpha=0.4; g.drawImage(mw,mx-ms/2,my-ms/2,ms,ms); g.globalAlpha=1; ge.drawImage(mw,mx-ms/2,my-ms/2,ms,ms); } }
+    var units=22, period=Cw/units, rscal=period*0.46, baseE=Ch-3, topE=baseE-rscal, topTrim=topE-rscal*1.5;
+    g.save(); g.beginPath(); g.rect(0,topTrim,Cw,topE-topTrim);
+    for(var u=0;u<units;u++){ var cxs=period*(u+0.5); g.moveTo(cxs+rscal,topE); g.arc(cxs,topE,rscal,0,Math.PI,false); }
+    g.clip();
+    g.strokeStyle='rgba(255,255,255,0.32)'; g.lineWidth=1;
+    for(var d2=-Ch; d2<Cw+Ch; d2+=6){ g.beginPath(); g.moveTo(d2,topTrim); g.lineTo(d2+Ch,Ch); g.stroke(); g.beginPath(); g.moveTo(d2,Ch); g.lineTo(d2+Ch,topTrim); g.stroke(); }
+    g.restore();
+    for(var u2=0;u2<units;u2++){ var cx2=period*(u2+0.5); starLace(g,cx2,topE-3,period*0.30); }
+    g.strokeStyle='rgba(255,255,255,0.85)'; g.lineWidth=1.5;
+    for(var u3=0;u3<units;u3++){ var cx3=period*(u3+0.5); g.beginPath(); g.arc(cx3,topE,rscal,0,Math.PI,false); g.stroke(); for(var aa=14;aa<170;aa+=20){ var ar=aa*Math.PI/180, ox=cx3+Math.cos(ar)*(rscal+4), oy=topE+Math.sin(ar)*(rscal+4); g.fillStyle='rgba(255,255,255,0.9)'; g.beginPath(); g.arc(ox,oy,1.5,0,6.2832); g.fill(); } }
+    var aT=new THREE.CanvasTexture(a); aT.anisotropy=renderer.capabilities.getMaxAnisotropy();
+    var eT=new THREE.CanvasTexture(e); eT.anisotropy=renderer.capabilities.getMaxAnisotropy(); eT.encoding=THREE.sRGBEncoding;
+    mat.alphaMap=aT; mat.emissiveMap=eT; mat.needsUpdate=true;
+  }
+  var img=new Image(); img.onload=function(){ buildTextures(img); }; img.onerror=function(){ buildTextures(null); }; img.src=markURL;
+
+  // ---- cloth scene constants ----
+  var crownY=2.55, veilH=4.85, frontZ=0.5, hemHalf=1.95, wallZ=cardZ+0.12;
+  var FOLDFREQ=1.7, FOLDAMP=1.2, PLEAT=0.24, Wind=0.40, Sdepth=1.0;
+  function lerp(a,b,t){ return a+(b-a)*t; }
+  function foldZ(bx,v,time){ var ph=bx*FOLDFREQ, fd=0.30+0.70*v, Ry=crownY-v*veilH;
+    return FOLDAMP*Sdepth*0.6667*Math.sin(ph)*fd + 0.34*Math.sin(bx*4.0+1.0)*fd + Wind*(0.12+v*0.5)*Math.sin(bx*1.3+time*1.05)*Math.sin(Ry*0.8-time*0.7); }
+
+  function makeCloth(cols,rows){
+    var geo=new THREE.PlaneGeometry(1,1,cols-1,rows-1), n=cols*rows;
+    var pos=new Float32Array(n*3), old=new Float32Array(n*3), U=new Float32Array(n), Vv=new Float32Array(n);
+    for(var r=0;r<rows;r++) for(var c=0;c<cols;c++){ var i=r*cols+c; U[i]=c/(cols-1); Vv[i]=r/(rows-1); pos[i*3]=(U[i]*2-1)*hemHalf; pos[i*3+1]=crownY-Vv[i]*veilH; pos[i*3+2]=frontZ; old[i*3]=pos[i*3]; old[i*3+1]=pos[i*3+1]; old[i*3+2]=frontZ; }
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    var mesh=new THREE.Mesh(geo,mat); scene.add(mesh);
+    return {geo:geo,mesh:mesh,pos:pos,old:old,U:U,V:Vv,cols:cols,rows:rows};
+  }
+  function spring(p,o,i,tx,ty,tz){ var d=0.9; var vx=(p[i*3]-o[i*3])*d,vy=(p[i*3+1]-o[i*3+1])*d,vz=(p[i*3+2]-o[i*3+2])*d; o[i*3]=p[i*3];o[i*3+1]=p[i*3+1];o[i*3+2]=p[i*3+2]; p[i*3]+=vx+(tx-p[i*3])*0.13; p[i*3+1]+=vy+(ty-p[i*3+1])*0.12; p[i*3+2]+=vz+(tz-p[i*3+2])*0.15; if(p[i*3+2]<wallZ)p[i*3+2]=wallZ; }
+  function pin(p,o,i,tx,ty,tz){ tz=Math.max(tz,wallZ); p[i*3]=tx;p[i*3+1]=ty;p[i*3+2]=tz; o[i*3]=tx;o[i*3+1]=ty;o[i*3+2]=tz; }
+
+  var full=makeCloth(46,54), L=makeCloth(26,54), R=makeCloth(26,54);
+  var cOver=0.06;
+
+  // single veil (sheer / crown): fan + crown-pivot lift
+  function simFull(time,lift,topW,maxT){
+    var cT=Math.cos(lift*maxT), sT=Math.sin(lift*maxT), P=full;
+    for(var r=0;r<P.rows;r++) for(var c=0;c<P.cols;c++){ var i=r*P.cols+c,u=P.U[i],v=P.V[i];
+      var Wd=lerp(topW,hemHalf,Math.pow(v,0.7)), bx=(u*2-1)*Wd;
+      var Rx=bx+PLEAT*Math.sin(bx*FOLDFREQ)*(0.45+0.55*v), Ry=crownY-v*veilH, Rz=frontZ+foldZ(bx,v,time);
+      var oy=Ry-crownY, oz=Rz-frontZ, oy2=oy*cT-oz*sT, oz2=oy*sT+oz*cT;
+      var tx=Rx, ty=crownY+oy2, tz=frontZ+oz2; if(tz<wallZ)tz=wallZ;
+      if(r===0) pin(P.pos,P.old,i,Rx*0.97,ty+0.02*Math.sin(time+c),tz); else spring(P.pos,P.old,i,tx,ty,tz);
+    }
+    P.geo.attributes.position.needsUpdate=true; P.geo.computeVertexNormals();
+  }
+  // two curtain panels: P spans [xa,xb]; parts toward rail
+  function simHalf(P,time,lift,xa,xb,rail,innerAtU1){
+    for(var r=0;r<P.rows;r++) for(var c=0;c<P.cols;c++){ var i=r*P.cols+c,u=P.U[i],v=P.V[i];
+      var bx=lerp(xa,xb,u);
+      var Rx=bx+PLEAT*Math.sin(bx*FOLDFREQ)*(0.45+0.55*v), Ry=crownY-v*veilH, Rz=frontZ+foldZ(bx,v,time);
+      var innerness=innerAtU1? u : (1-u);
+      var pf=lift*lerp(0.12,1.0,innerness);
+      var tx=Rx+(rail-Rx)*pf, ty=Ry, tz=Rz; if(tz<wallZ)tz=wallZ;
+      if(r===0) pin(P.pos,P.old,i,tx,ty,tz); else spring(P.pos,P.old,i,tx,ty,tz);
+    }
+    P.geo.attributes.position.needsUpdate=true; P.geo.computeVertexNormals();
+  }
+
+  var MODE='sheer';
+  function setVis(){ full.mesh.visible=(MODE!=='curtain'); L.mesh.visible=R.mesh.visible=(MODE==='curtain'); }
+  setVis();
+
+  var lift=0, liftTarget=0, t0=0;
+  function frame(ts){
+    if(!t0)t0=ts; var time=(ts-t0)/1000; lift+=(liftTarget-lift)*0.06;
+    if(MODE==='sheer') simFull(time,lift,3.0,2.7);
+    else if(MODE==='crown') simFull(time,lift,1.4,1.55);
+    else { simHalf(L,time,lift,-hemHalf,cOver,-hemHalf-0.7,true); simHalf(R,time,lift,-cOver,hemHalf,hemHalf+0.7,false); }
+    renderer.render(scene,camera); requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  function setCol(hex){ mat.color.set(hex); document.getElementById('col').value=hex; }
+  document.getElementById('col').addEventListener('input',function(){ mat.color.set(this.value); });
+  Array.prototype.forEach.call(document.querySelectorAll('.sw'),function(b){ b.onclick=function(){ setCol(b.getAttribute('data-c')); }; });
+  document.getElementById('sd').addEventListener('input',function(){ Sdepth=this.value/100; });
+  document.getElementById('wd').addEventListener('input',function(){ Wind=this.value/100; });
+  document.getElementById('reset').onclick=function(){ acc=0; liftTarget=0; };
+  function pick(t){ MODE=t; setVis(); document.getElementById('t1').classList.toggle('on',t==='sheer'); document.getElementById('t2').classList.toggle('on',t==='crown'); document.getElementById('t3').classList.toggle('on',t==='curtain');
+    document.getElementById('hint').textContent = t==='sheer' ? 'grab anywhere · drag up to lift up & over' : (t==='crown' ? 'scroll / drag · hem lifts up & back, veil stays over the crown' : 'scroll / drag · two cloth panels part to the sides'); }
+  document.getElementById('t1').onclick=function(){ pick('sheer'); };
+  document.getElementById('t2').onclick=function(){ pick('crown'); };
+  document.getElementById('t3').onclick=function(){ pick('curtain'); };
+
+  var acc=0;
+  window.addEventListener('wheel',function(ev){ acc=Math.max(0,Math.min(1,acc+ev.deltaY*0.0016)); liftTarget=acc; },{passive:true});
+  var drag=false,sy=0,sv=0;
+  stage.addEventListener('pointerdown',function(ev){drag=true;sy=ev.clientY;sv=acc;});
+  window.addEventListener('pointermove',function(ev){ if(!drag)return; acc=Math.max(0,Math.min(1,sv+(sy-ev.clientY)*0.004)); liftTarget=acc; });
+  window.addEventListener('pointerup',function(){drag=false;});
+  window.addEventListener('resize',function(){ var s=size(); W=s[0]; H=s[1]; renderer.setSize(W,H); camera.aspect=W/H; camera.updateProjectionMatrix(); });
+})();
+</script>
+</body>
+</html>
