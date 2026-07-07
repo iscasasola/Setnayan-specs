@@ -4,6 +4,16 @@
 >
 > Reference competitor: **Once** (join.once.film) — 22 onboarding/capture screens reviewed 2026-06-26. Source-of-truth order still applies: live site → shipped code → live DB → this doc.
 >
+> ## 🔄 UPDATE 2026-07-08 — owner discussion decisions (supersede conflicting lines below)
+> Full build map: [`Papic_Live_Build_Plan_2026-07-08.md`](Papic_Live_Build_Plan_2026-07-08.md). Deltas that override this doc's body:
+> - **Kwento = ₱299 (whole-event flat), NOT ₱500.** The §"UPDATE 2026-06-26" line 12/14 "Kwento ₱500 — fully paid" is **not adopted** — the live ₱299 (set 2026-06-29) is canonical. The free-vs-paid question is settled: **paid ₱299**.
+> - **Camera themes = 5 FIXED, Papic-specific looks** (Original · Film · Vintage · Cinematic · [5th TBD]). This **reverses** §5's "Look & feel driven by the couple's Mood Board palette, not fixed filters." Themes are fixed presets now; originals always saved.
+> - **Capture = two gestures** (tap = photo · hold = video, ring fills to 5 s, release-early = shorter). Confirms §5's press/long-press; the old four-gesture model stays retired.
+> - **Face tagging + blocking = strict OPT-IN** (RA 10173): guest must affirmatively approve tagging (clear faces only); same for blocking. Stronger than the "opt-out blur" framing.
+> - **Live Photo Wall setup** asks wall resolution + photo count, then a **tile-layout picker** (several options).
+> - **Gallery** adds **direct download + ZIP export.**
+> - **Patiktok is NOT a Papic add-on** — it's its own thing (`0017_patiktok/`). Removed from §8's add-on list below.
+>
 > ## 🔄 UPDATE 2026-06-26 (later) — CAPS + NAMES + ADD-ON PRICES SHIPPED (PR7 · #2265)
 > The funnel + model below are intact; these owner-set numbers supersede the body's provisional figures:
 > - **Per-tier CAPS (replaces the single "~₱6,999 soft ceiling"):** **Papic Ltd** ₱30/cam/day caps at **₱6,000** (≈200 cams) · **Papic Unli** ₱100/cam/day caps at **₱10,000** (≈100 cams). Beyond the cap the tier price is FLAT (300 guests on Ltd = ₱6,000). Caps live in admin-adjustable `events.papic_ltd_cap_php` / `papic_unli_cap_php`.

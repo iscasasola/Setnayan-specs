@@ -7,6 +7,21 @@
 
 ---
 
+## What the Adaptive Checklist IS — and is NOT (governing definition · owner, 2026-07-08)
+
+**It is NOT a printable checklist.** Not a document, not a static to-do list you tick off, not a page you print. If it reads like a fixed list of tasks, it is wrong.
+
+**It IS an execution engine** — an *initiator* that generates **performable tasks** and sequences the couple through them, with **Setnayan AI** plugged in at each decision:
+
+- Each task is an **in-app action the couple executes** (find & lock a vendor · pick the date · set the budget · resolve a clash) — not a checkbox. Every task deep-links into the surface where the doing happens.
+- Its purpose: help the couple **manage planning and finish it as fast and efficiently as possible**, always steering toward the **best option** given everything decided so far.
+- The mechanism is **progressive constraint locking**: decisions are locked **one at a time**, and every lock **re-shapes** the remaining options, the budget buffer, the date window, and the task list — until the whole event is complete. (This is why "the date is an output," § 1, and why a bundle/vendor lock cascades, §§ 13–15.)
+- **Division of labor:** the **checklist initiates and sequences** the decisions; **Setnayan AI optimizes each one** against all live variables (availability · budget · venue · pax · religion · reviews). The two are the same loop, not two features.
+
+> 🔴 **Build implication (verified 2026-07-08):** what ships today is **Layer 1 only** — a static wedding task list, i.e. *precisely the printable checklist this definition rejects*. The progressive-lock / adaptive / best-option behavior lives entirely in the currently-DEAD Layers 2/3 + budget engine (zero callers — see the sibling spec § 1). **Wiring them is therefore the core deliverable, not a follow-on** — it is what converts the document into the engine.
+
+---
+
 ## 0. 🔒 2026-07-08 owner directive — the six inputs the Adaptive Checklist must consider
 
 The Adaptive Checklist is not a standalone task list. It must read from and react to **six systems** (owner, 2026-07-08):
