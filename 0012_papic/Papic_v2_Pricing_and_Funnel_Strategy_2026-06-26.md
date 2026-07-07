@@ -7,7 +7,7 @@
 > ## 🔄 UPDATE 2026-07-08 — owner discussion decisions (supersede conflicting lines below)
 > Full build map: [`Papic_Live_Build_Plan_2026-07-08.md`](Papic_Live_Build_Plan_2026-07-08.md). Deltas that override this doc's body:
 > - **Kwento = ₱299 (whole-event flat), NOT ₱500.** The §"UPDATE 2026-06-26" line 12/14 "Kwento ₱500 — fully paid" is **not adopted** — the live ₱299 (set 2026-06-29) is canonical. The free-vs-paid question is settled: **paid ₱299**.
-> - **Camera themes = 5 FIXED, Papic-specific looks** (Original · Film · Vintage · Cinematic · [5th TBD]). This **reverses** §5's "Look & feel driven by the couple's Mood Board palette, not fixed filters." Themes are fixed presets now; originals always saved.
+> - **Camera themes = 5 FIXED, Papic-specific looks — ALREADY BUILT** (`lib/papic-photo-styles.ts`): `ORIG` (Orig) · `RETRO` (Retro/warm-film) · `MONO` (B&W) · `CINE` (teal-orange cinematic) · `LOMO` (lo-fi toy), default `ORIG`. This **reverses** §5's "Look & feel driven by the couple's Mood Board palette, not fixed filters" — themes are fixed presets, originals always saved (style applied to a copy after face-embed).
 > - **Capture = two gestures** (tap = photo · hold = video, ring fills to 5 s, release-early = shorter). Confirms §5's press/long-press; the old four-gesture model stays retired.
 > - **Face tagging + blocking = strict OPT-IN** (RA 10173): guest must affirmatively approve tagging (clear faces only); same for blocking. Stronger than the "opt-out blur" framing.
 > - **Live Photo Wall setup** asks wall resolution + photo count, then a **tile-layout picker** (several options).

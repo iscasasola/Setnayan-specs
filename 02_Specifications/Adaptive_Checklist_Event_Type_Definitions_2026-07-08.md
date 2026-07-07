@@ -3,6 +3,7 @@
 **Authored:** 2026-07-08 — owner directive ("generate the checklist for each event now")
 **Status:** Spec draft · corpus-first (owner chose corpus review before the repo PR)
 **Home iteration:** 0016 / Adaptive Checklist. Newer dated sibling of [`Adaptive_Checklist_Design_2026-06-17.md`](Adaptive_Checklist_Design_2026-06-17.md) — do NOT re-expand the archive stubs; this file carries the per-type detail.
+**Build plan (PR sequence + market research + leaf-surfacing):** [`Adaptive_Checklist_Build_Plan_2026-07-08.md`](Adaptive_Checklist_Build_Plan_2026-07-08.md).
 **Code targets (repo PR, follows this spec):** `apps/web/lib/checklist.ts` · `apps/web/lib/checklist-taxonomy.ts` · `event_type_profiles` (admin data)
 
 ---
