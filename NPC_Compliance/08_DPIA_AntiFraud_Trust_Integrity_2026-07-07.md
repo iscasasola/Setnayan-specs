@@ -1,6 +1,6 @@
 # Data Privacy Impact Assessment (DPIA) — Anti-Fraud & Trust Integrity (identity clustering · fraud detection · enforcement)
 
-> **DRAFT — for DPO/counsel (Claire E. Buanhog) finalization; not yet adopted.** · 2026-07-07
+> **DRAFT — for DPO (Indalecio Sacdalan Casasola II) + PH counsel finalization; not yet adopted.** · 2026-07-07
 >
 > Prepared under RA 10173 (Data Privacy Act of 2012), its IRR, and NPC guidance on Privacy Impact Assessments (NPC Advisory No. 2017-03 and related issuances). This is the standalone, full DPIA for register row **R-08** (`05_DPIA_Register_DRAFT_2026-07-05.md`). It is **HIGH-risk** because it (a) **repurposes** already-collected personal data (device fingerprint, normalized home address, payment-sender identity) for a **new purpose** without the data subject's active choice, and (b) performs **automated decision-making with significant effects** — it can automatically hide a vendor's livelihood-bearing listing and, on human confirmation, permanently ban it.
 
@@ -8,15 +8,15 @@
 
 > ## ⚠ STATUS — this processing is LIVE IN PRODUCTION as of 2026-07-07, ahead of counsel sign-off (read first)
 >
-> The anti-fraud stack (repo PRs #2834/#2835/#2836/#2838/#2841 · migrations `20270516600000`, `20270517644717`, `20270518682623`) was **shipped to production on 2026-07-07**. The engineering PRs each flagged **"counsel (Claire) review PENDING"** for this RA 10173 processing; the **owner (PIC) elected to ship ahead of that review** to unblock the feature. **This DPIA is therefore a retroactive assessment** — it documents processing that is already occurring and identifies what must still be done (chiefly the **transparency/disclosure gap in §6**) to bring it fully into compliance. **Counsel review remains outstanding and is the gating adoption item.** Nothing in this DPIA should be read as confirming the processing was cleared before launch.
+> The anti-fraud stack (repo PRs #2834/#2835/#2836/#2838/#2841 · migrations `20270516600000`, `20270517644717`, `20270518682623`) was **shipped to production on 2026-07-07**. The engineering PRs each flagged **counsel review PENDING** for this RA 10173 processing; the **owner (PIC) elected to ship ahead of that review** to unblock the feature. **This DPIA is therefore a retroactive assessment** — it documents processing that is already occurring and identifies what must still be done (chiefly the **transparency/disclosure gap in §6**) to bring it fully into compliance. **Counsel review remains outstanding and is the gating adoption item.** Nothing in this DPIA should be read as confirming the processing was cleared before launch.
 
 ## 0. Instrument identity
 
 | Field | Value |
 |---|---|
 | **Personal Information Controller (PIC)** | SETNAYAN SOFTWARE DEVELOPMENT SERVICE — sole proprietorship of Indalecio Sacdalan Casasola II · DTI Business Name Reg. No. 8297508. Operating brand: Setnayan. |
-| **Data Protection Officer (DPO)** | Claire E. Buanhog · dpo@setnayan.com · registered (or registration in progress `[TO CONFIRM]`) with the NPC |
-| **DPIA owner** | DPO (Claire E. Buanhog) |
+| **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · [TO CONFIRM — DPO email] · registered (or registration in progress `[TO CONFIRM]`) with the NPC |
+| **DPIA owner** | DPO (Indalecio Sacdalan Casasola II) |
 | **Processing assessed** | Anti-Fraud & Trust Integrity — identity clustering + vendor fraud detection/scoring + two-stage enforcement — register R-08 |
 | **Governing policy** | `01_Contracts/Setnayan_Privacy_and_Security_Policy.md` § 1.1 (identity/device/payment data collected), § 2 (purposes), § 3 (storage/RLS), § 4 (retention), § 10 (sub-processors/cross-border) — **an Anti-Fraud amendment is REQUIRED and not yet drafted (see §6)** |
 | **Feature specs** | `03_Strategy/Anti_Fraud_Trust_Integrity_2026-07-05.md` §§ 3–6 |
@@ -102,7 +102,7 @@ The design minimizes structurally:
 
 ## 3. Consultation
 
-- **DPO:** prepared for DPO review and sign-off (Claire E. Buanhog). The transparency finding (§6), the lawful-basis mapping (§1.3), the retention gap (AF-8), and the automated-decision rights (§6 / AF-5) are referred to the DPO and PH counsel.
+- **DPO:** prepared for DPO review and sign-off (Indalecio Sacdalan Casasola II). The transparency finding (§6), the lawful-basis mapping (§1.3), the retention gap (AF-8), and the automated-decision rights (§6 / AF-5) are referred to the DPO and PH counsel.
 - **Data subjects:** **not yet consulted or notified** for this specific processing — there is currently **no notice** that device/address/payment data is used to cluster identities for fraud prevention, and no notice to vendors that they may be automatically scored/suspended. Closing that is the §6 recommendation.
 - **External counsel / NPC:** **required** — register R-08 is counsel-first, and the processing shipped ahead of that review (status banner). Counsel to confirm the § 12(f) basis, the § 16(c)/§ 34 automated-decision provisions, the retention rule, and whether an NPC consultation is advisable given the automated-enforcement effect.
 
@@ -179,11 +179,11 @@ With the controls in §5 — above all **service-role-only access**, **no new co
 
 | Role | Name | Signature | Date |
 |---|---|---|---|
-| **Data Protection Officer** | Claire E. Buanhog | ________________________ | `[TO CONFIRM date]` |
+| **Data Protection Officer** | Indalecio Sacdalan Casasola II | ________________________ | `[TO CONFIRM date]` |
 | **Personal Information Controller** | Indalecio Sacdalan Casasola II (for SETNAYAN SOFTWARE DEVELOPMENT SERVICE) | ________________________ | `[TO CONFIRM date]` |
 
 **Next review date:** `[TO CONFIRM date]` (recommend: on publication of the Anti-Fraud Privacy Policy disclosure, at any material change to the clustering signals / scoring thresholds / enforcement model, or 12 months from adoption, whichever is sooner).
 
 ---
 
-*This is a compliant baseline prepared ahead of counsel; it is not a substitute for legal review. To be finalized with Claire E. Buanhog (DPO) and PH counsel. The processing is **live in production as of 2026-07-07 ahead of counsel sign-off** (owner-elected); the transparency/disclosure upgrade (§6) and the outstanding counsel review are the gating items to bring it fully into compliance.*
+*This is a compliant baseline prepared ahead of counsel; it is not a substitute for legal review. To be finalized with Indalecio Sacdalan Casasola II (DPO) and PH counsel. The processing is **live in production as of 2026-07-07 ahead of counsel sign-off** (owner-elected); the transparency/disclosure upgrade (§6) and the outstanding counsel review are the gating items to bring it fully into compliance.*

@@ -1,6 +1,6 @@
 # Setnayan — Records of Processing Activities (RoPA) / Data Inventory
 
-> **DRAFT — for DPO/counsel (Claire E. Buanhog) finalization and NPC filing; not yet adopted. · 2026-07-05**
+> **DRAFT — for DPO (Indalecio Sacdalan Casasola II) + PH counsel finalization and NPC filing; not yet adopted. · 2026-07-05**
 
 The accountability record RA 10173 (Data Privacy Act of 2012) and its IRR require a Personal Information Controller (PIC) to maintain: a register of the Data Processing Systems (DPS) it operates. Each row below is **one DPS**. Sourced from `01_Contracts/Setnayan_Privacy_and_Security_Policy.md` (§1 data collected, §3 where data lives, §4 retention, §6 consent, §10 sub-processors) and `03_Strategy/Compliance_Pack_PersonGraph_DRAFT_2026-07-05.md`. Facts not established in those sources are marked `[TO CONFIRM]` — none invented.
 
@@ -17,7 +17,7 @@ The accountability record RA 10173 (Data Privacy Act of 2012) and its IRR requir
 | **Registered business address** | `[TO CONFIRM]` |
 | **Total headcount / employees** | `[TO CONFIRM]` |
 | **NPC registration number (if already registered)** | `[TO CONFIRM]` |
-| **Data Protection Officer (DPO)** | Claire E. Buanhog · dpo@setnayan.com (registered with the NPC per policy §9) |
+| **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · [TO CONFIRM — DPO email] (registered with the NPC per policy §9) |
 | **DPO response SLA** | 7 business days (non-urgent); immediate for breach notifications |
 | **Breach notification** | NPC + affected users within 72 hours of confirmation (policy §8) |
 | **Estimated data-subject counts (customers / vendors / guests)** | `[TO CONFIRM]` |
@@ -237,7 +237,7 @@ Under **RA 10173 and NPC Circular 17-01** (as amended), a PIC/PIP must register 
 
 **Conclusion.** Registration triggers **#1 (likely), #3, and #4 are met.** Trigger #2 is not (sole prop, sub-250 headcount). Under Circular 17-01 the criteria are **disjunctive** — meeting even one obligates registration, and Setnayan meets at least two independently (risk-to-rights + not-occasional), with the SPI-volume trigger also likely once counts are confirmed.
 
-> **Recommendation:** **Setnayan should register its DPO and Data Processing Systems with the National Privacy Commission** (NPC registration system), and appoint/confirm Claire E. Buanhog as the registered DPO. Registration is advisable on the risk-to-rights and not-occasional grounds alone; the SPI-volume trigger reinforces it. Confirm exact SPI data-subject counts `[TO CONFIRM]` and current NPC registration number `[TO CONFIRM]` before filing to determine whether this is an initial registration or an amendment.
+> **Recommendation:** **Setnayan should register its DPO and Data Processing Systems with the National Privacy Commission** (NPC registration system), and appoint/confirm Indalecio Sacdalan Casasola II as the registered DPO. Registration is advisable on the risk-to-rights and not-occasional grounds alone; the SPI-volume trigger reinforces it. Confirm exact SPI data-subject counts `[TO CONFIRM]` and current NPC registration number `[TO CONFIRM]` before filing to determine whether this is an initial registration or an amendment.
 
 ---
 
@@ -251,4 +251,4 @@ Under **RA 10173 and NPC Circular 17-01** (as amended), a PIC/PIP must register 
 
 ---
 
-*Draft compliance artifact prepared to a compliant baseline ahead of counsel. To be finalized with Claire E. Buanhog (DPO) and PH counsel; this document is not a substitute for legal review and is not yet adopted for NPC filing.*
+*Draft compliance artifact prepared to a compliant baseline ahead of counsel. To be finalized with Indalecio Sacdalan Casasola II (DPO) and PH counsel; this document is not a substitute for legal review and is not yet adopted for NPC filing.*

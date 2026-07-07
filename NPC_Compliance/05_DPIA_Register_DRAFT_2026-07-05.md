@@ -1,6 +1,6 @@
 # Data Privacy Impact Assessment (DPIA) Register + Person Graph DPIA
 
-> **DRAFT — for DPO/counsel (Claire E. Buanhog) finalization; not yet adopted.** · 2026-07-05
+> **DRAFT — for DPO (Indalecio Sacdalan Casasola II) + PH counsel finalization; not yet adopted.** · 2026-07-05
 >
 > Prepared under RA 10173 (Data Privacy Act of 2012), its IRR, and NPC guidance on Privacy Impact Assessments (NPC Advisory No. 2017-03 and related issuances). This register indexes every Setnayan processing system that warrants a DPIA and records its assessment status; Part 2 is the first fully-worked DPIA (the adults-only Person Graph).
 
@@ -11,8 +11,8 @@
 | Field | Value |
 |---|---|
 | **Personal Information Controller (PIC)** | SETNAYAN SOFTWARE DEVELOPMENT SERVICE — sole proprietorship of Indalecio Sacdalan Casasola II · DTI Business Name Reg. No. 8297508. Operating brand: Setnayan. |
-| **Data Protection Officer (DPO)** | Claire E. Buanhog · dpo@setnayan.com · registered (or registration in progress `[TO CONFIRM]`) with the NPC |
-| **Register owner** | DPO (Claire E. Buanhog) |
+| **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · [TO CONFIRM — DPO email] · registered (or registration in progress `[TO CONFIRM]`) with the NPC |
+| **Register owner** | DPO (Indalecio Sacdalan Casasola II) |
 | **Key infrastructure / processors** | Vercel (hosting) · Supabase (Postgres, Singapore region) · Cloudflare R2 (object storage, APAC/PH region) · Resend (transactional email) · Persona / Veriff / Onfido (vendor ID + liveness) · Anthropic (Claude API) / OpenAI (fallback) · AMLC API / ComplyAdvantage (sanctions screening) · DTI Database (business-registration validation) |
 | **Governing policy** | `01_Contracts/Setnayan_Privacy_and_Security_Policy.md` (v1, locked 2026-05-12; Person-Graph amendment 2026-07-05 in DRAFT) |
 | **Register status** | DRAFT — pending DPO adoption |
@@ -90,7 +90,7 @@ Each row is a distinct processing system (or coherent processing activity) asses
 
 ## 2.3 Consultation
 
-- **DPO:** this DPIA is prepared for DPO review and sign-off (Claire E. Buanhog). Two narrow items (cross-event archiving basis; long-lived memory retention basis) are referred to the DPO/counsel for confirmation — see § 2.5.
+- **DPO:** this DPIA is prepared for DPO review and sign-off (Indalecio Sacdalan Casasola II). Two narrow items (cross-event archiving basis; long-lived memory retention basis) are referred to the DPO/counsel for confirmation — see § 2.5.
 - **Data subjects:** consulted at the point of processing via just-in-time consent/notice strings (drafted in the Compliance Pack § 1) rather than a formal survey; mutual-confirmation design means no processing occurs without the counterpart's active choice.
 - **External counsel / NPC:** not required for the adults-only graph beyond the two confirmation items; **required** before any Phase-3 (minors/legacy) work (register R-05).
 
@@ -123,11 +123,11 @@ Residual risk across the person graph is **Low overall.** The design applies dat
 
 | Role | Name | Signature | Date |
 |---|---|---|---|
-| **Data Protection Officer** | Claire E. Buanhog | ________________________ | `[TO CONFIRM date]` |
+| **Data Protection Officer** | Indalecio Sacdalan Casasola II | ________________________ | `[TO CONFIRM date]` |
 | **Personal Information Controller** | Indalecio Sacdalan Casasola II (for SETNAYAN SOFTWARE DEVELOPMENT SERVICE) | ________________________ | `[TO CONFIRM date]` |
 
 **Next review date:** `[TO CONFIRM date]` (recommend: at any material change to the person-graph schema/consent, or 12 months from adoption, whichever is sooner).
 
 ---
 
-*This is a compliant baseline prepared ahead of counsel; it is not a substitute for legal review. To be finalized with Claire E. Buanhog (DPO) and PH counsel. The Person-Graph Privacy Policy amendment publishes only after sign-off; the biometric (R-01), vendor-verification (R-03), and minors/legacy (R-05) DPIAs remain outstanding and counsel-first.*
+*This is a compliant baseline prepared ahead of counsel; it is not a substitute for legal review. To be finalized with Indalecio Sacdalan Casasola II (DPO) and PH counsel. The Person-Graph Privacy Policy amendment publishes only after sign-off; the biometric (R-01), vendor-verification (R-03), and minors/legacy (R-05) DPIAs remain outstanding and counsel-first.*

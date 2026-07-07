@@ -140,8 +140,8 @@ Every admin action is logged with: timestamp, admin user, action type, target us
 
 ### 6.1 Photos and likeness
 
-- Guests opt in to face detection via RSVP profile photo (implicit consent — they uploaded the photo for this purpose)
-- Guests can opt out of face detection at any time via "Photo Consent" toggle in their profile
+- Guests opt in to face recognition via an **explicit, separate, default-OFF consent checkbox** ("face recognition for this wedding") shown at RSVP/selfie capture and at day-of enrolment — distinct from uploading a photo. **No face vector is generated or stored without that explicit opt-in** (RA 10173 sensitive-data consent: freely given, specific, informed, evidenced; the enrolment record itself stamps `consent_at` + `consent_source`). Corrected 2026-07-05 — the prior "implicit consent — uploaded for this purpose" wording was stale vs. shipped code (explicit-consent gate landed per owner directives 2026-06-05 / 2026-06-28).
+- Guests can withdraw at any time — un-checking consent drops the selfie; the "Photo Consent" toggle in their profile revokes any live enrolment (+ clears a selfie display photo) within the next ~5-minute refresh
 - Guests can opt out of being photographed by paparazzi seats — vendors are notified to face-blur these guests in any captures
 - Couples consent to media residency in PH (R2 PH-region buckets)
 
@@ -189,7 +189,7 @@ In the event of a data breach affecting personal data:
 - **Within 72 hours of confirmation:** Setnayan notifies the National Privacy Commission (NPC) per RA 10173
 - **Within 72 hours of confirmation:** Affected users notified in-app + via email of: what data was accessed, when, what we're doing about it, what they should do (change password, monitor accounts)
 - **Public disclosure:** breach summary posted on `setnayan.com/security` within 7 days
-- **DPO contact:** dpo@setnayan.com for breach inquiries; phone hotline for severity-high incidents
+- **DPO contact:** [TO CONFIRM — DPO email] for breach inquiries; phone hotline for severity-high incidents
 
 ## 9. Data Protection Officer (DPO)
 
@@ -200,7 +200,7 @@ Setnayan's DPO is registered with the Philippine National Privacy Commission. Th
 - Privacy complaints
 - Breach notifications
 
-**DPO contact:** dpo@setnayan.com · response within 7 business days for non-urgent requests; immediate for breach notifications.
+**DPO contact:** [TO CONFIRM — DPO email] · response within 7 business days for non-urgent requests; immediate for breach notifications.
 
 ## 10. Cross-border data transfers (amended 2026-05-16)
 
@@ -236,12 +236,45 @@ Continued use of the platform after the notice period constitutes acceptance of 
 
 ---
 
+## Amendment 2026-07-05 — Person Graph (Connections · Life Stories · Trusted-Circle) + Minors/Legacy forward-notice
+
+> Added 2026-07-05 to cover the person-spine features. **Status: DRAFT pending DPO (Indalecio Sacdalan Casasola II) + PH counsel review** — published only after sign-off. Built to RA 10173 by design; this amendment does not replace counsel confirmation. Design: `03_Strategy/People_Graph_and_Lifelong_Identity_2026-07-04.md` + `Stewarded_Branch_Accounts_Phase3_Design_2026-07-05.md`.
+
+### A.1 What is collected / created
+
+- **Person node** — a durable profile (name, optional photo, the events you take part in). Every account is one person; a person may also be seeded by a host (e.g. as a guest) and later *claimed* by the real person, so their own history follows them.
+- **Connections** — a relationship edge between two people (type: spouse/parent/sibling/child/godparent/friend; state: pending → confirmed). Extended relationships (grandparents, cousins, in-laws) are **derived by the system, never stored**.
+- **Life-story items** — **references** (pointers), not copies, to a photo/clip/editorial you appear in, so it can also appear in *your* archive. No image bytes are stored here; the media stays in its one system-of-record.
+- **Trusted-circle signal** — a **computed, aggregated** score of how many people in your circle explicitly endorsed a vendor. Not stored as a per-person record.
+
+### A.2 Lawful basis & consent (opt-in, mutually confirmed)
+
+- **Connections require MUTUAL confirmation** — an edge only becomes real when the *other* person accepts. No one is added one-sided; the graph is never broadcast or browsable.
+- **Cross-person visibility is NAME-ONLY and CONFIRMED-ONLY** — you can see a connected person's *name* only after both confirm, never their email/phone/other details.
+- **Life stories rely on the existing event photo-consent** (given at RSVP). You can **hide** any item from your own story at any time — without affecting the host's gallery — and **opt out** of an event's story entirely.
+- **Trusted-circle recommendations are aggregate-only**, gated by a minimum count (≥ 5), read from **explicit endorsements/reviews only — never from bookings**, and never purchasable. A named endorsement appears only where that person explicitly vouched.
+- **No cross-event face recognition** is used for any of this — association is by tag / QR / confirmed identity only.
+
+### A.3 Your rights over the graph
+
+Decline, hide, opt out, or delete: connection requests can be declined; confirmed connections removed; story items hidden per-person; and full account deletion cascades to your connections and story-item references (the underlying media follows the deletion rules in § 4 / § 11).
+
+### A.4 Retention
+
+Connections and life-story references follow the parent **event / account retention** in § 4; a hidden or opted-out item is suppressed immediately, and a story reference is removed when its source media is deleted or when you opt out. Preservation of memories is intentionally long-lived (the product's purpose) and is justified + disclosed here rather than open-ended without basis.
+
+### A.5 Minors & legacy — NOT processed yet (forward-notice)
+
+The person graph is **adults-only** today; **data about minors is not processed.** A future phase ("stewarded / branch accounts") will let a guardian hold a child's memories until the age of majority (18), and let memories pass down the direct family line as a legacy — **each is counsel-first, will carry its own guardian-consent + post-mortem mechanics and a Data Privacy Impact Assessment, and is not active.** See the Phase-3 design + counsel brief.
+
+---
+
 ## Appendix A — User rights summary (under RA 10173)
 
 Every Setnayan account holder has the right to:
 
 1. **Be informed** of what personal data is collected and how it's used (this document)
-2. **Access** their personal data — request a copy via `dpo@setnayan.com`
+2. **Access** their personal data — request a copy via `[TO CONFIRM — DPO email]`
 3. **Object** to processing — opt out of specific data uses
 4. **Rectify** errors in their data — edit their profile + request corrections
 5. **Erase / block** their data — delete their account
