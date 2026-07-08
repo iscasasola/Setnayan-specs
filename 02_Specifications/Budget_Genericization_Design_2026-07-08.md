@@ -3,6 +3,7 @@
 **Authored:** 2026-07-08 · **v2 (definitive)** — supersedes the same-day v1 study. Owner: "study it, do the best research and make a definitive plan that applies to our app properly and cleanly."
 **Grounded in:** (1) full code study of the 3-layer budget stack, (2) a precise touch-point map of every budget surface on `origin/main`, (3) product research on multi-event budgeting (The Knot Budget Advisor · Zola Cost Index · Bridebook · Cvent · YNAB · corporate/event-pro doctrine), (4) cited PH market-price research per event type (draft seeds, § 6).
 **Siblings:** [`Adaptive_Checklist_Build_Plan_2026-07-08.md`](Adaptive_Checklist_Build_Plan_2026-07-08.md) · [`Adaptive_Checklist_Event_Type_Definitions_2026-07-08.md`](Adaptive_Checklist_Event_Type_Definitions_2026-07-08.md)
+**Product-depth axis (same day):** [`Budget_Product_Definitive_Plan_2026-07-08.md`](Budget_Product_Definitive_Plan_2026-07-08.md) — what the planner + health should BE (reminders · unified numbers · planner↔ledger loop · contributions); §5 there sequences the two plans.
 
 ---
 

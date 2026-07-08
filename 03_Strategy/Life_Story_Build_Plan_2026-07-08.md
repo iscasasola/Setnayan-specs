@@ -172,3 +172,11 @@ Ordered output, **≤ 8 beats total** (bounded-arc evidence, strategy §1):
 ## 10. Explicit non-goals (Phase 1)
 
 Cross-event assembly (1.5, counsel) · the exportable film + music (2) · shared/couple reels · pins UI (v1.1) · minors/guardian flows · any AI voice or persona of any person.
+
+## 11. Period recaps — monthly / yearly videos (owner direction 2026-07-08)
+
+Owner: the same engine should also create **monthly and yearly videos**. Architecturally near-free — the pipeline is pure functions over a moment set, so a recap is the engine pointed at a window: `compileBeats(filterMomentGraph(graph, { from, to }))`. Same weights, ✦ rules, and safety contract.
+
+- **Seam ships with PR-4:** pure `filterMomentGraph(graph, window)` in `lib/life-story-moment-graph.ts` (re-scores nothing; recurrence recomputed within the window view is NOT needed — lifetime recurrence stays the signal, by design: a year with Lola in it should still know she's your person).
+- **v1.1 — in-app recaps:** a period selector on the Life Story route ("Your 2026" · per-month), offered only when a window clears a dignity threshold (≥5 moments — no hollow recaps for quiet months). Yearly is the flagship; late-December drop is culturally timed (Undas→Pasko→New Year) and is the natural OFW share-home artifact.
+- **Phase 2 — exportable recap film:** the yearly recap as a rendered, shareable video (Remotion/FFmpeg + owned music). Natural shape: free in-app yearly recap (retention/emotion hook) · paid export film SKU — **pricing/SKU needs owner sign-off when Phase 2 opens.**
