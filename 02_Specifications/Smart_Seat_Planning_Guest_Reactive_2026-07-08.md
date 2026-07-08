@@ -114,6 +114,45 @@ Recommended order S1 → S2 → S3 → S4 → S5. S1 ships value immediately; S5
 3. **Performance** — reconcile runs on guest writes; it's incremental + debounced, but for 300+ guest lists confirm we accept a short async placement (badge shows "placing…").
 4. **Pricing untouched** — S1 explicitly keeps `estimated_pax`/`final_pax`/`attending` as the pricing basis; the pool is display-only. Confirm that's the intent (vs. making the pool authoritative).
 
+## Shipped PRs (2026-07-08 → 07-09)
+
+Core: **S1 #2907** pax pool · **S2 #2908** reconcile engine · **S3 #2909** wired into 10 guest writes · **S4 #2910** adjacency · **S5 #2912** account auto-surface (flag-off) · **S6 #2913** autoplace toggle + shortfall banner.
+Post-ship gap cleanup (from the 2026-07-08 self-audit): **S7 #2920** reconcile-coverage G1/G2/G4 (addTable · public-RSVP · toggle-on back-fill) · **S8 #2922** S5 completeness G5/G6 (Leave affordance + RA-10173 notice mechanism, still flag-off) · **S9 #2923** G8 per-event adjacency opt-out toggle.
+
+## Verification runbook (gap G7 — needs the owner's live Supabase)
+
+The pure functions are unit-tested (pax 12 · reconcile 6 · seating 31) and every PR
+passed typecheck + lint + CI production build. What was **NOT** exercised: the
+migrations against a live DB, the DB triggers, and the fetch→reconcile→persist glue
+end-to-end. Run these against staging/prod to close G7:
+
+1. **Apply migrations** (`supabase db push`): `…_seating_autoplace_flag`,
+   `…_event_members_account_autosurface`, `…_seating_group_adjacency_flag`,
+   `…_notification_type_event_auto_surfaced`. Confirm the 3 `events`/`event_members`
+   columns + the `guests_hide_autosurfaced_on_decline` trigger exist.
+2. **Auto-seat on add (#3):** on an event with ≥1 table, add a guest → a row appears
+   in `event_seat_assignments` for them. Add past capacity → the "not enough seats"
+   banner shows; add a table → the waiting guest gets seated (G1).
+3. **Re-tier on role change (#4/#9):** change a seated guest's role/group → they move
+   to the right tier/table; a **locked** seat never moves.
+4. **Public RSVP (G2):** confirm attending from `/[slug]` on an unseated guest → seated;
+   decline → seat freed by the `free_seat_on_decline` trigger.
+5. **Toggle (G4/G8):** flip "Auto-seating" off → adds don't seat; on → back-fills.
+   Flip "Keep groups together" off → a group's overflow uses stage order.
+6. **Pax pool (#1/#2):** a fresh event shows `unassigned = estimated_pax`; listing
+   guests fills it; pricing/`final_pax` unchanged.
+7. **Account auto-surface (#7b) stays OFF** — verify no `event_members.auto_surfaced`
+   rows exist with `FEATURE_ACCOUNT_AUTOSURFACE` unset (it must stay off until counsel).
+
+## Not built — with rationale
+
+- **G9 provisional-seat badge — intentionally skipped.** Every unlocked seat is
+  "provisional," and the editor already marks *locked* seats, so a per-seat badge is
+  redundant noise on the 2900-line editor. The header "Auto-seating On/Off" pill +
+  the shortfall banner carry the signal more cleanly.
+- **G10 reconcile debounce — verified a non-issue.** Bulk paths reconcile once;
+  interactive quick-adds are human-paced (one request each), so there's no hot loop.
+
 ## Provenance
 
 Plan grounded 2026-07-08 against a shallow `origin/main` clone. Existing Smart Seat-Plan phases read from migration comments (`20270210578106`, `20270210882937`, `20270211861238`, `20270212992703`) + `lib/seating.ts`. Table coords confirmed in `20260513090000_iteration_0008_seating.sql` (`x_pos`/`y_pos`).
