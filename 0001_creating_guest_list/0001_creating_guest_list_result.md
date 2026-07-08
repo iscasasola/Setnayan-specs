@@ -5,6 +5,8 @@
 **Owner:** Ice (indaleciocasasolaii@gmail.com)
 **Built by:** Claude Code
 
+> **⚠ Correction 2026-07-08 —** three facts below were reconciled against `origin/main` and were wrong (they describe a pre-implementation draft that changed during the build): the baseline migration is **`20260513010000_iteration_0001_guests.sql`** (not `20260508120000_…`), RLS is **Pattern B** via `current_event_ids()` / `event_members` (there is **no `is_couple_of()` helper** anywhere in the repo), and the role enum is **`public.guest_role`** (not `wedding_role`). Full current-truth in [`0001_Guest_Spec_vs_Shipped_Audit_2026-07-08.md`](0001_Guest_Spec_vs_Shipped_Audit_2026-07-08.md). Wrong tokens corrected inline below.
+
 > **Update note (latest pass — 2026-05-09):** the plus-one model was promoted from "string on primary's row" to a first-class `guests` row with its own `qr_token`. New columns `plus_one_of_guest_id` + `plus_one_mode` shipped via migration `20260509000000_plus_one_model.sql`. The Add Guest modal's Row 4 changed from a select to a two-segment toggle; when ON, an inline sub-block reveals first/last name + Full/Limited access-mode radio. `addGuestAction` now creates a second guests row for the +1 with shared household + side + group, mirrored invited_to_blocks, and an auto-generated qr_token. Display logic updated: primary's plus-one cell reads from the linked +1 row, and +1 rows render with a "brought by" subtitle. Details under "Plus-one model v2" below.
 >
 > **Earlier update note:** the work order's add-guest modal section was tightened to specify a fixed 720px width, max-height 90vh with scroll, uniform 46px field height, 10px border-radius, 12px×14px padding, 14px font-size, terracotta focus ring, custom 22×22 checkbox, and a strict 11-row field order. The implementation now matches that spec; details under "Add-guest modal v2" below.
@@ -16,7 +18,7 @@
 The full couple-facing guest list at `setnayan.com/dashboard/guests`, end-to-end:
 
 - **Database layer:** `events`, `wedding_tables`, `households`, `guests` with all 18 Filipino-Catholic wedding role values, soft delete, and the unified QR token field reused by Papic (spec 10).
-- **Auth + RLS:** route gated by middleware (couple must be signed in via Google or Facebook OAuth — cf. `0002` if magic-link is needed for staff later); RLS policies on every new table tied to `is_couple_of(event_id)` so a couple can only read/write guests on their own event.
+- **Auth + RLS:** route gated by middleware (couple must be signed in via Google or Facebook OAuth — cf. `0002` if magic-link is needed for staff later); RLS on every new table follows **Pattern B** — read via `event_id IN (SELECT public.current_event_ids())`, write gated to `event_members WHERE member_type='couple' OR public.is_admin()` — so a couple can only read/write guests on their own event.
 - **Desktop UI** (`/dashboard/guests` at ≥1024px): top nav with event pill, page header with the four primary actions, 5-card stats strip, search + filter chips + sort toolbar, sticky 240px facets sidebar (View / Custom Tags / Events), and the guest list table. Detail drawer slides in from the right on row click.
 - **Mobile UI** (<1024px): per the updated work-order's mobile-native rules — own page header (back / Guests / count / search-icon-with-expand), 3-pill status row (going / pending / declined), 5-default chip rail with `+ More` sheet, side-striped cards (4px left edge bride/groom/both) with 16pt name + single role line + 32pt circular RSVP glyph (✓ / ⏳ / ✕), full-screen detail sheet, full-screen add-guest sheet, 60×60 terracotta FAB respecting the home indicator's safe area, bottom tab bar.
 - **CRUD:** server actions for add, update, soft-delete, and bulk CSV import. All Zod-validated server-side. RSVP toggle inline from the detail drawer.
@@ -31,7 +33,7 @@ The full couple-facing guest list at `setnayan.com/dashboard/guests`, end-to-end
 |---|---|---|
 | Page accessible at `/dashboard/guests` for an authenticated couple | ✓ | Server-side guard in `dashboard/layout.tsx`; middleware redirects unauth → `/login`. |
 | Visual parity to the mockup at 1280px desktop and 390px mobile | ✓ (pending owner sign-off) | All component primitives ported (rsvp-pill, side tag, role chip, filter chip, stat card, mobile card with side stripe, FAB, bottom tab bar). Final pixel checks belong to the owner. |
-| All 18 Filipino-wedding role values | ✓ | Postgres `wedding_role` ENUM matches the work-order list 1:1; surface in the role dropdown via `WEDDING_ROLES`. |
+| All 18 Filipino-wedding role values | ✓ | Postgres `guest_role` ENUM matches the work-order list 1:1 (since grown to ~32 values — bride/groom, immediate family, generic + Muslim-nikah roles). |
 | Side coding (bride / groom / both) in avatar gradient AND side chip | ✓ | `SideAvatar` and `SideTag` components; mobile cards add a 4px left stripe on top. |
 | Stats strip updates reactively on RSVP / add / remove | ✓ | Strip is a memoized derivation over `filteredGuests`; mutations revalidate `/dashboard/guests`. |
 | Search, filter, and sort without page reload | ✓ | All state lives in `guests-page.tsx`. Search is fuzzy across `first_name`, `last_name`, `display_name`, `role`, `group_category`, `custom_tags`. Filters and sort are additive. |
@@ -40,7 +42,7 @@ The full couple-facing guest list at `setnayan.com/dashboard/guests`, end-to-end
 | Mobile FAB opens add-guest as full-screen sheet | ✓ | Dialog is `inset-0` on mobile, capped at 640px on `lg+`. |
 | CSV import accepts a sample 20-row CSV | ✓ | Tested manually with the seed names re-exported to CSV (sample fixture not yet added to the repo — see Deferred). |
 | Sample seed data with mockup names | ✓ | `supabase/seed.sql` covers all the named guests + an officiant + paired sponsors + paired guest household + declined RSVP + pending with TBA plus-ones. |
-| Server-side authorization (RLS isolation between events) | ✓ | All four new tables have `ENABLE ROW LEVEL SECURITY` with policies pinned to `is_couple_of(event_id)`. To verify with a second event, sign in as a different OAuth identity. |
+| Server-side authorization (RLS isolation between events) | ✓ | All four new tables have `ENABLE ROW LEVEL SECURITY` with Pattern-B policies (`current_event_ids()` for reads, `event_members`/`is_admin()` for writes). To verify with a second event, sign in as a different OAuth identity. |
 | Atomic writes | ✓ | `bulkImportGuestsAction` runs all 1–200 inserts in a single `INSERT … VALUES (…), (…)` so a constraint violation rolls the batch. |
 | No `console.log` in production code | ✓ | All logging is `console.error` for unexpected query failures (kept until Sentry is wired). No stray `console.log`. |
 
@@ -50,7 +52,7 @@ The full couple-facing guest list at `setnayan.com/dashboard/guests`, end-to-end
 
 ### Database
 
-- `supabase/migrations/20260508120000_initial_guest_list_schema.sql` — 8 enums + 18-value `wedding_role` + four tables + indexes + RLS policies + `is_couple_of()` helper.
+- `supabase/migrations/20260513010000_iteration_0001_guests.sql` — 8 enums + 18-value `guest_role` + four tables + indexes + Pattern-B RLS policies (`current_event_ids()` / `event_members`).
 - `supabase/seed.sql` — idempotent PL/pgSQL block creating Maria & Juan's event for the founder's auth user, 5 households, 1 wedding table, 14 guests (incl. 4 paired entries).
 
 ### Web app
@@ -115,8 +117,8 @@ The desktop modal in `_components/guest-form-dialog.tsx` was rewritten to the v2
 
 1. **Schema PK naming.** The work order uses domain-prefixed primary keys (`event_id`, `guest_id`, `household_id`, `table_id`) instead of generic `id`. Adopted as authoritative; the older `07_V1_Developer_Specification.md §4.1` had `id` for events. SPEC.md will need a follow-up edit to align if you want consistency across all wedding-domain tables.
 2. **`tables` → `wedding_tables`.** PostgreSQL reserves `tables` as a meta-table reference in some contexts. Renamed the SQL table; FK column on guests is still `table_assignment_id` so the work-order field name is preserved.
-3. **`wedding_role` ENUM, not CHECK.** Picked ENUM per work order's "ENUM is preferred for clarity." Adding a new role later requires `ALTER TYPE wedding_role ADD VALUE …`, which is supported in modern Postgres.
-4. **`is_couple_of()` helper for RLS** instead of inlining the check on every policy. Marked `SECURITY DEFINER` + `STABLE` so it's both safe and cacheable. Bypasses RLS recursion when households/guests look up their event.
+3. **`guest_role` ENUM, not CHECK.** Picked ENUM per work order's "ENUM is preferred for clarity." Adding a new role later requires `ALTER TYPE guest_role ADD VALUE …`, which is supported in modern Postgres (and has happened many times — the enum is now ~32 values).
+4. **RLS = Pattern B (canonical), no bespoke helper.** _(Corrected 2026-07-08 — the earlier `is_couple_of()` claim was wrong; that helper was never created.)_ Reads use `event_id IN (SELECT public.current_event_ids())`; writes gate on `event_members WHERE member_type='couple' OR public.is_admin()`. Recursion is avoided by the `SECURITY DEFINER STABLE` `current_event_ids()` helper, not a per-table one.
 5. **Auth model deviates from the work order's "magic-link auth."** The web app is OAuth-only (Google + Facebook) per a separate decision on 2026-05-07. Apple ships when iOS App Store work begins. Magic-link is only on the admin app for Setnayan Staff. Couple sign-in still works exactly as the work order assumed.
 6. **Filipino Heritage theme tokens replace an earlier aubergine baseline.** Tailwind colors are now CSS-var-driven (`var(--ink)`, `var(--bride-soft)`, etc.) so we can extend the palette without re-running Tailwind. `@apply` cannot resolve CSS-var-based colors so component primitives are written as raw CSS in `globals.css`.
 7. **No shadcn/ui yet.** The work order suggests shadcn for primitives. We didn't pull it in to keep the surface area small for V1; if the next ticket benefits from it, run `npx shadcn-ui init` then port these inline components to shadcn-flavored ones.
@@ -153,7 +155,7 @@ The desktop modal in `_components/guest-form-dialog.tsx` was rewritten to the v2
 ```bash
 # 1. Apply migration + seed
 # Open the Supabase SQL Editor and paste:
-#   supabase/migrations/20260508120000_initial_guest_list_schema.sql
+#   supabase/migrations/20260513010000_iteration_0001_guests.sql
 #   supabase/seed.sql
 # (Both must succeed — seed prints a NOTICE confirming row counts.)
 
