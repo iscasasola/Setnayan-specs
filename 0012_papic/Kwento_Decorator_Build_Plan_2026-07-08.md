@@ -20,7 +20,7 @@ Pure client-side, ₱0. Design to minimize blind-build risk:
 `/api/papic/guest-capture` uses the **`setnayan_guest_session` cookie**; the decorator's natural home `/papic/me/[token]` is **qr_token-scoped**. Slice-1 task: confirm whether that page has a session (the capture handoff at `/papic/seat/[token]` does) — if not, either (a) place the "Decorate" entry on the session-backed capture surface, or (b) add a token-scoped upload route mirroring guest-capture's core. **(a) is preferred** — no new route.
 
 ## Slices
-1. **Editor + persist** — `KwentoDecorator` (photo · filter · emoji stickers · text) → export → upload via guest-capture → lands in gallery. Entry point on the session-backed guest surface. *Visual review on the Vercel preview — this is a UI I can't verify blind.*
+1. **Editor + persist** — ✅ **BUILT · PR #2892 (HELD for visual review, no auto-merge).** `/papic/decorate` + `KwentoDecorator` (photo · 5 filters · emoji stickers · draggable text) → on-device canvas bake → upload via the existing guest-capture route → moderation-gated gallery capture. Entry link on `/papic/me/[token]`. Decorates a device-selected photo (no CORS taint); fractional overlay coords. tsc-clean. *Awaiting owner preview review before merge.*
 2. **Kwento text on the decorated photo** — chain the existing `/api/papic/kwento` author sheet on the returned `captureId` (words + decoration together).
 3. **Polish** — bigger sticker set, more text styles, undo, per-couple sticker themes (mood-board palette).
 
