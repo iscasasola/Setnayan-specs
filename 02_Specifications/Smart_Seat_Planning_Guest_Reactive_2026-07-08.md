@@ -126,10 +126,14 @@ passed typecheck + lint + CI production build. What was **NOT** exercised: the
 migrations against a live DB, the DB triggers, and the fetch→reconcile→persist glue
 end-to-end. Run these against staging/prod to close G7:
 
-1. **Apply migrations** (`supabase db push`): `…_seating_autoplace_flag`,
-   `…_event_members_account_autosurface`, `…_seating_group_adjacency_flag`,
-   `…_notification_type_event_auto_surfaced`. Confirm the 3 `events`/`event_members`
-   columns + the `guests_hide_autosurfaced_on_decline` trigger exist.
+1. **Migrations applied — ✅ VERIFIED IN PROD 2026-07-09** (read-only DB query):
+   `events.seating_autoplace_enabled` · `events.seating_group_adjacency` ·
+   `event_members.auto_surfaced` · `event_members.hidden_at` · triggers
+   `guests_hide_autosurfaced_on_decline` + `guests_free_seat_on_decline` · enum
+   `notification_type.event_auto_surfaced` — all present. Flag-off invariant holds
+   (**0** `auto_surfaced` rows). Steps 2–6 below still need an authenticated app
+   session to drive; step 7 (S5) is gated on counsel — see
+   [`Account_Autosurface_Counsel_Brief_2026-07-09.md`](Account_Autosurface_Counsel_Brief_2026-07-09.md).
 2. **Auto-seat on add (#3):** on an event with ≥1 table, add a guest → a row appears
    in `event_seat_assignments` for them. Add past capacity → the "not enough seats"
    banner shows; add a table → the waiting guest gets seated (G1).
