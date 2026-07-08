@@ -32,7 +32,7 @@ This plan turns the 2026-07-08 discussion into a shippable, staged delta. Papic 
 - **Intelligence (free, always):** face tagging (opt-in) → per-guest galleries · face blocking (opt-in, RA 10173).
 - **Deliverables:** host gallery (sees all) · per-guest custom gallery · auto Personal Reel · **direct download + ZIP export** · Google Drive sync (full-res → couple's Drive).
 - **Words layer:** Kwento ₱299 whole-event → flows to the Alaala / "Our Story" page.
-- **Add-ons — pricing reset 2026-07-08 (owner, cost-vs-value pass):** **FREE →** Stories · Personal Reels · **Kwento** (was ₱299) · **Pabati** (was ₱1,299/day). **PRICED →** Thank You ₱2,499 · **Auto-Recap ₱1,499 (new)** · Camera Bridge ₱499/day (was ₱1,299) · Live Photo Wall ₱2,499/day · High Res Archive ₱2,999/yr. *(Live Background = own SKU, out of Papic scope.)* Principle: **cost = floor, price = value** — ₱0-cost ≠ auto-free; Kwento + Pabati dropped to free as deliberate engagement gives.
+- **Add-ons — pricing reset 2026-07-08 (owner, cost-vs-value pass):** **FREE →** Stories · Personal Reels · **Kwento** (was ₱299) · **Pabati** (was ₱1,299/day). **PRICED →** Camera Bridge ₱499/day (was ₱1,299) · Live Photo Wall ₱2,499/day · High Res Archive ₱2,999/yr. **RETIRED 2026-07-08 (owner "remove auto recap and thank you"):** Auto-Recap + Thank You (the two server-render features) are cut — the render box is no longer needed for Papic. Thank You's true concept = Instagram-style **photo stickers/effects** (client-side ₱0), not a video; build scope TBD. *(Live Background = own SKU, out of Papic scope.)* Principle: **cost = floor, price = value** — ₱0-cost ≠ auto-free; Kwento + Pabati dropped to free as deliberate engagement gives.
 - **Lives on:** the event website + day-of guest page, forever. **Patiktok = separate (0017), not here.**
 
 ---
@@ -95,8 +95,8 @@ The one legally load-bearing new build. Reverses "consent-at-RSVP + opt-out blur
 - **Config store:** `wall_width_px`, `wall_height_px`, `photo_count`, `tile_layout` on the `LIVE_WALL` event config.
 - Correct the stale "NOT in V1" label (Live Photo Wall is shipped) in `CLAUDE.md` + spec Part 6.
 
-### Phase 7 (optional / later) — Auto-Recap server pipeline
-- The **only** feature that needs the server render box (Oracle/Hetzner) — the couple's auto-highlight over the *whole* event, rendered with no device present. **Owner-input-blocked** (see `Render_Pipeline_Hetzner_Build_Plan_2026-06-28.md`). Reels + Stories stay client-side (₱0). Sequence after the client-side surfaces are locked.
+### ~~Phase 7 — Auto-Recap server pipeline~~ — RETIRED 2026-07-08
+- **Cut** (owner "remove auto recap and thank you"). Auto-Recap + Thank You were the only Papic features needing the server render box; with both retired, **the render box is no longer a Papic dependency.** Reels + Stories stay client-side (₱0). The box remains relevant only to non-Papic surfaces, if any.
 
 ### Phase 6 — Website + day-of integration
 - Auto-surface the Papic gallery on the couple's event website (`app/[slug]/…`) + the day-of guest page (0031). Gallery, per-guest "Photos of me", reel CTA. Partly live — finish the unbuilt gates.
@@ -111,7 +111,15 @@ The one legally load-bearing new build. Reverses "consent-at-RSVP + opt-out blur
 
 ## 5. Build sequence & status
 
-**STATUS: PLAN ONLY. No code has started — owner said "plan everything now, finalize once all is ready."** Nothing below runs until you say go.
+**STATUS (2026-07-08): shipped what's genuinely missing — the rest was already built.** Audit found D1/D2/D3 (capture, themes, opt-in consent) + Stories + host ZIP + wall projection all already live. The real gaps are now PRs:
+- ✅ **Phase 0 — pricing display** — PR #2872 **MERGED** (freeOrPrice guard, Stories→Free, Camera Bridge ₱499 fallback).
+- ✅ **D6 — guest "Download my photos"** — PR #2876 **MERGED** (token-scoped ZIP + button).
+- ✅ **D5 — wall photo-count + tile layout** — PR #2880 **MERGED** (migration + 4 layouts + config UI). _(Visual review of the 4 layouts on the live site still welcome.)_
+- **D3 opt-in consent — already built** (`biometric_consent` opt-in + `consent_at` gate); no PR needed.
+- **Owner runtime action:** set `/admin/pricing` dials (Kwento/Pabati→0, Camera Bridge→49900, Auto-Recap→149900-inactive).
+- **Retired 2026-07-08:** Auto-Recap + Thank You (server-render) — cut by owner; render box no longer a Papic dependency. Thank You reframed → Instagram-style photo stickers/effects (scope TBD).
+
+_Original directive (kept for lineage): "plan everything now, finalize once all is ready."_
 
 Recommended order (each is one PR / small stack in `apps/web`, off fresh `origin/main`, `changelog.d/` fragment, auto-merge):
 

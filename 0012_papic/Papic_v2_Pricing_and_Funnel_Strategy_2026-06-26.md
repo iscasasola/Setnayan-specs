@@ -161,9 +161,11 @@ Anchored to the decision log + shipped code (Explore audit 2026-06-26):
 
 ---
 
-## 4.5 Kwento — the words layer (FREE)
+## 4.5 Kwento — the words + decoration layer (FREE)
 
-Kwento is Papic's third pillar (canonical spec Part 1, the *words layer*): a guest attaches a short text — a message, a story, a *chismis* — **anchored to a specific photo or clip**, telling the couple the moment they were too busy to live. Photos/clips are the *what*; Kwento is the *story behind it*.
+Kwento is Papic's third pillar (canonical spec Part 1): a guest attaches something **anchored to a specific photo or clip**, telling the couple the moment they were too busy to live. Photos/clips are the *what*; Kwento is the *story behind it*.
+
+**Expanded 2026-07-08 (owner "this is ideally kwento"):** Kwento is not just a text field — it's the full **photo-decoration / annotation layer**, Instagram-Stories-style: a short text (message / story / *chismis*) **and** **stickers + effects + text overlays** layered on top of the photo. (This absorbs the concept the retired "Thank You" SKU was really reaching for.) Stays **FREE + client-side (₱0)** — the sticker/effects editor runs on the guest's own device and exports like the Stories reel. *Build note: the words layer ships today; the sticker/effects editor (draggable stickers/text/filters over the photo) is a new client-side canvas build, scope/timing TBD.*
 
 - **Who & price:** any guest, **no shooting camera needed** (it's participation, like viewing + reels). **FREE, always** — paywalling a guest's message would be like charging for the guestbook. It enriches the free experience *and* feeds the editorial keepsake.
 - **Where it surfaces:** (1) **inline** on the photo/clip in the gallery, and (2) on the couple's **editorial / Alaala page** as guest-authored columns (the wedding gazette — see `Editorial_Experience_Spec_2026-06-18.md`; "guest columns = Kwento fully realized," ~200–400 words, couple-approved).

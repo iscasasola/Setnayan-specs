@@ -63,3 +63,7 @@ Switch cam · overlays (monogram + frame + lower-third) · **adjustable split ca
 - ~~Camera Bridge scoping~~ — **RESOLVED 2026-07-08**: it's an **independent standalone `CAMERA_BRIDGE` SKU** (₱499/day), decoupled from Papic + Live Studio; consolidates the old "Pro Camera Sync" ₱1,499 + "Pro Camera Bridge" ₱1,500/seat.
 - Camera cap **8** to be validated by the walking-skeleton test (the *recommended* number may land at 5–6 even if the cap stays 8).
 - Whether a smooth in-app YouTube relay (no OBS) is wanted in V1.5 (reintroduces per-event compute).
+
+## 9. Public route
+
+The public **live watch page** is **`/u/[user-slug]/[event-slug]/live`** — a sub-route of the couple's event page under the 2026-07-08 public-URL scheme ([`Public_URL_Architecture_2026-07-08.md`](Public_URL_Architecture_2026-07-08.md)). This is the **viewer** page (the composited feed / YouTube embed); the operator **controller** is a separate authenticated route. ⚠ Depends on the platform migrating events from the shipped flat `/[slug]` to `/u/[user]/[event]` — see the routing doc (owner-to-accept: event-QR breakage + redirects).
