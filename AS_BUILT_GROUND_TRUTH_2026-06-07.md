@@ -18,7 +18,7 @@
 
 > Canonical prices are from **Pricing.md § 00** (owner-locked 2026-06-07) — confirmed against live site 2026-06-18.
 >
-> **⚠ 2026-06-29 live-site delta (supersedes the § 00.B mirror below where they disagree):** the public `/pricing` à-la-carte catalog has moved to the **2026-06-14 website-collapse addendum — now LIVE.** Standalone **RSVP · RSVP Pro · Event Website · Editorial Website** are **gone** from à la carte; the only website SKU is **Couple Website PRO ₱1,999** (Live). Free tier keeps the 4-in-1 couple website + unlimited RSVP; the single ₱1,999 PRO unlock is the upgrade. **Save-the-Date Cinematic Openings / Cinematic Reveal ₱1,499** is the priced reveal opening. The two bundles (Essentials ₱12,999 / Complete ₱27,999) were **REMOVED 2026-06-29** — there are now no bundles, only Free + Setnayan AI (₱499 first 28d → ₱799/28d) + à-la-carte SKUs. The table below is corrected to the live site.
+> **⚠ 2026-06-29 live-site delta (supersedes the § 00.B mirror below where they disagree):** the public `/pricing` à-la-carte catalog has moved to the **2026-06-14 website-collapse addendum — now LIVE.** Standalone **RSVP · RSVP Pro · Event Website · Editorial Website** are **gone** from à la carte; the only website SKU is **Couple Website PRO ₱1,999** (Live). Free tier keeps the 4-in-1 couple website + unlimited RSVP; the single ₱1,999 PRO unlock is the upgrade. **Save-the-Date Cinematic Openings / Cinematic Reveal ₱1,499** is the priced reveal opening. The two bundles (Essentials ₱12,999 / Complete ₱27,999) were **REMOVED 2026-06-29** — there are now no bundles, only Free + Setnayan AI (₱499 one-time) + à-la-carte SKUs. The table below is corrected to the live site.
 
 **Free tools (8 — homepage feature grid 2026-06-18):** Guest List · Seat Plan · Budget · Timeline · Mood Board · Checklist · Save the Date (base content film, free) · Website (4-in-1 couple website · see 2026-06-14 free-website addendum). ⚠ Pricing page § 00 describes Free as "schedule, budget, guest list, seat plan, mood board" only — homepage and pricing page are not fully reconciled; owner to confirm final free-tier copy.
 
@@ -27,37 +27,39 @@
 | Tier | Price | Includes |
 |---|---|---|
 | Free — Explore | ₱0 | Free tools above + marketplace browse + match preview |
-| **Setnayan AI** | **₱499 first 28-day cycle (intro) → ₱799/28-day cycle** | Full matchmaking (date ↔ availability · budget · venue · pax · religion · reviews) + guided planning workspace |
+| **Setnayan AI** | **₱499 one-time (permanent unlock)** | Full matchmaking (date ↔ availability · budget · venue · pax · religion · reviews) + guided planning workspace |
 
-> The **Essentials ₱12,999** and **Complete ₱27,999** bundles were **REMOVED 2026-06-29**. There are no bundles — couples pay Free ₱0 or Setnayan AI (₱499 first 28d → ₱799/28d) plus individual à-la-carte SKUs below.
+> The **Essentials ₱12,999** and **Complete ₱27,999** bundles were **REMOVED 2026-06-29**. There are no bundles — couples pay Free ₱0 or Setnayan AI (₱499 one-time) plus individual à-la-carte SKUs below.
 
 **À la carte software (live `/pricing` catalog · corrected 2026-06-29 to prod DB):**
 
 | SKU | Price | Build state (live /pricing) |
 |---|---|---|
-| Setnayan AI | ₱499 first 28d → ₱799/28d | Live (first paywall) |
-| Animated Monogram | ₱1,999 | Live |
-| **Couple Website PRO** | **₱1,999** | **Live** — single website unlock; collapses the old RSVP / RSVP Pro / Event Website / Editorial Website SKUs (2026-06-14 addendum) |
+| Setnayan AI | ₱499 one-time | Live (first paywall) |
+| Animated Monogram | ₱999 | Live (repriced 2026-07-10, was ₱1,999/₱2,499) |
+| ~~Couple Website PRO~~ | **UNBUNDLED** | Umbrella **deactivated 2026-07-10** — Editorial PRO ₱2,999 + Cinematic Reveal ₱999 now sell standalone; no umbrella SKU |
 | Custom QR per Guest | FREE | Live |
 | Pabati | ₱1,299/day | Live |
 | Pakanta | ₱2,499 | Live (ONE SKU — old 3-tier ₱1,999/₱3,999/₱9,999 retired) |
-| 3D Plan | ₱2,499 | Live |
+| 3D Plan | ₱2,999 | Live (repriced 2026-07-10, was ₱2,499) |
+| Editorial PRO | ₱2,999 | Live (standalone editorial-authoring unlock) |
 | Kwento | ₱299 (whole event) | Live |
 | Live Background | ₱499 | In build |
 | Live Studio — Mobile / Desktop | ₱1,299/day · ₱2,499/day | In build (single-cam livestream FREE · YouTube via couple's OBS · device-repackaged 2026-07-08, was ₱3,499/day multicam; see `Live_Studio_Repackaging_2026-07-08.md`) |
-| Camera Bridge (DSLR · independent) | ₱499/day | Coming soon (flat, event-wide · independent `CAMERA_BRIDGE`, decoupled from Papic + Live Studio · owner 2026-07-08; consolidates "Pro Camera Sync") |
+| Camera Bridge (DSLR · independent) | ₱500/day | Coming soon (flat, event-wide · independent `CAMERA_BRIDGE`, decoupled from Papic + Live Studio · owner 2026-07-08, rounded ₱499→₱500 2026-07-11; consolidates "Pro Camera Sync") |
 | Guest Stories | cap ₱2,000/day (₱20/cam·day) | Coming soon |
-| Live Photo Wall | ₱2,499/day | Coming soon |
-| Cinematic Reveal / STD openings | ₱1,499 | Coming soon |
+| Live Photo Wall | ₱2,500/day | Coming soon |
+| Cinematic Reveal / STD openings | ₱999 | Live (repriced 2026-07-10, was ₱1,499/₱799) |
+| Patiktok | ₱1,499/day | Live (reactivated 2026-07-10 "all features active"; no longer retired) |
 | Thank You Video | ₱2,499 | Coming soon |
 | Papic Unli | ₱100/cam·day (cap ₱15,000/day) | Live |
-| Papic Ltd | ₱30/cam·day (cap ₱15,000/day) | Live |
+| Papic Ltd | ₱30/cam·day (cap ₱9,000/day) | Live |
 
-> **RETIRED — must NOT read as live/priced:** Patiktok · Same Day Edit (SDE) · Indoor Blueprint · High Res Archive · Call-Time Escalator · Pro Website · Papic 5-Seats · Papic Guest · standalone RSVP / RSVP Pro · standalone Event Website / Editorial Website · customer token wallet · "Setnayan Concierge" (→ Setnayan AI ₱499 first 28d → ₱799/28d).
+> **RETIRED — must NOT read as live/priced:** Same Day Edit (SDE) · Indoor Blueprint · High Res Archive · Call-Time Escalator · Pro Website · Papic 5-Seats · Papic Guest · standalone RSVP / RSVP Pro · standalone Event Website / Editorial Website · customer token wallet · "Setnayan Concierge" (→ Setnayan AI ₱499 one-time). _(Patiktok is NO LONGER retired — reactivated 2026-07-10, live ₱1,499/day.)_
 
-**Tombstoned SKUs (do not implement):** Indoor Blueprint · Call-Time Escalator · Pro Website · High Res Archive · Patiktok · the Essentials ₱12,999 + Complete ₱27,999 bundles (REMOVED 2026-06-29). Mood Board kept — free.
+**Tombstoned SKUs (do not implement):** Indoor Blueprint · Call-Time Escalator · Pro Website · High Res Archive · the Essentials ₱12,999 + Complete ₱27,999 bundles (REMOVED 2026-06-29). Mood Board kept — free.
 
-**Homepage premium feature grid (confirmed live 2026-06-18):** Setnayan AI · Monogram · Papic · Live Studio · Pakanta · **Contracts** · **Cinematic Reveal**. ("Contracts" = couple-facing contract management per 0032 — price TBD, was ₱199/contract in old spec; "Cinematic Reveal" = premium Save-the-Date opening per 0024 redesign 2026-06-17, priced **₱1,499**; owner to confirm Contracts price. Patiktok is RETIRED — removed from the grid.)
+**Homepage premium feature grid (confirmed live 2026-06-18):** Setnayan AI · Monogram · Papic · Live Studio · Pakanta · **Contracts** · **Cinematic Reveal**. ("Contracts" = couple-facing contract management per 0032 — price TBD, was ₱199/contract in old spec; "Cinematic Reveal" = premium Save-the-Date opening per 0024 redesign 2026-06-17, priced **₱999** (repriced 2026-07-10, was ₱1,499); owner to confirm Contracts price.)
 
 **Pakulay** — free mood board, "included free with every couple account" per help center 2026-06-18 (matches § 00.C: tombstoned as standalone SKU; merged into free tier).
 
@@ -69,7 +71,8 @@
 - **Free (Verified)** ₱0 — verified profile, in-app chat, bid pipeline, service packages, calendar+.ics, 1 category, 1 team account, 10km boost radius, up to 10 free couple unlocks/wk.
 - **Solo** ₱999/28d (or ₱9,999/yr).
 - **Pro** ₱2,499/28d (or ₱24,999/yr) — 3 categories, 3 sub-seats, 20km radius, AI Proposal Builder, Demand Pulse, Category Benchmarks, Reverse-Image Theft Monitoring, custom microsite slug, priority support (sub-4h).
-- **Enterprise** ₱4,999/28d (or ₱49,999/yr) — all categories, unlimited accounts, 50–100km radius, quarterly business review, co-listing with Setnayan Productions.
+- **Enterprise** ₱7,999/28d (or ₱79,999/yr · repriced 2026-07-10, was ₱4,999) — BOUNDED tier: all categories, up to 10 team accounts, 100km radius, Market Intel (Demand Radar + Price-Position · Pro-and-up), quarterly business review, co-listing with Setnayan Productions.
+- **Custom** from ₱8,999/28d + à-la-carte add-ons — the truly-unlimited "talk to us" tier above Enterprise.
 - **Additional Branch** ₱999/28d.
 - **Verification badge** FREE (₱1,499 fee retired — PR #1316; owner 2026-06-04 authorization).
 
@@ -87,7 +90,7 @@
 | 50 tokens | ₱5,000 |
 | 100 tokens | ₱10,000 |
 
-**Vendor onboarding:** register in ~3 min (profile/photos/services/calendar) → verification in 24h → first proposal next week. Path `/signup?as=vendor`. CTA on /for-vendors: "Register your business — free" · "Book a 15-min demo".
+**Vendor onboarding:** register in ~3 min (profile/photos/services/calendar) → verification in 3–5 business days → first proposal next week. Path `/signup?as=vendor`. CTA on /for-vendors: "Register your business — free" · "Book a 15-min demo".
 
 ---
 
@@ -144,7 +147,7 @@ Interaction loop (RLS-isolated): couple follows → `chat_threads` upsert (UNIQU
 - **Cinematic Reveal price: ✅ RESOLVED.** The premium Save-the-Date opening (homepage "Cinematic Reveal") is **₱1,499**. Buy flow shipped #1705/#1709/#1718.
 - **Contracts (couple-side) price: ⏳ STILL OPEN.** "Contracts" listed as a premium couple feature on the homepage. No price shown on `/pricing` (not a public à-la-carte SKU). Old 0032 spec: ₱199/contract or free unlimited with Vendor Pro. Owner to confirm current price and tier placement.
 - **RSVP SKU collision (from § 00.E): ✅ RESOLVED on public surface.** RSVP is no longer a standalone à-la-carte SKU on `/pricing` (folded into the free website + Couple Website PRO ₱1,999). *Residual:* any stale prod-DB RSVP catalog rows may still need a cleanup pass so DB matches the collapsed public model.
-- **Vendor Pro price / commission / verification / AI-vs-Concierge: ✅ RESOLVED.** Every page (`/`, `/pricing`, `/for-vendors`, `/how-it-works`) shows uniform **Solo ₱999/28d · Pro ₱2,499/28d · Enterprise ₱4,999/28d · 0% commission · free verification**, and the planner is **Setnayan AI** everywhere (now ₱499 first 28d → ₱799/28d; no "Concierge", no ₱1,499).
+- **Vendor Pro price / commission / verification / AI-vs-Concierge: ✅ RESOLVED.** Every page (`/`, `/pricing`, `/for-vendors`, `/how-it-works`) shows uniform **Solo ₱999/28d · Pro ₱2,499/28d · Enterprise ₱4,999/28d · 0% commission · free verification**, and the planner is **Setnayan AI** everywhere (now ₱499 one-time; no "Concierge", no ₱1,499).
 
 ---
 
