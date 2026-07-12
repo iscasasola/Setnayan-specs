@@ -22,7 +22,7 @@
 | **Data subject response SLA** | 15 business days *(the period published in the live privacy notice. The older binding Privacy & Security Policy §9 states 7 business days and is to be reconciled up to 15 — see §11.)* |
 | **BIR registration** | Under the proprietor's existing TIN |
 | **NPC registration** | To be filed under the registered business name |
-| **Public privacy notice** | Published at `setnayan.com/privacy` (effective 2026-05-13; **currently last updated 2026-07-04**). The notice update that adds the faith / minors / e-gift disclosures and corrects the biometric line described in this dossier is **pending** — see §11. |
+| **Public privacy notice** | Published at `setnayan.com/privacy` (effective 2026-05-13; **last updated 2026-07-13** via app PR #3215, adding the faith / family / honoree / e-gift disclosures + Anthropic/Suno subprocessors). The opt-in **biometric** and **device-identifier** sections were already present on `origin/main`. |
 
 ---
 
@@ -87,12 +87,12 @@ To protect couples and vendors from coordinated fraud (a single bad actor — of
 | Re-identification of an individual | Value is a **one-way hash of a random id** (raw value never stored); pseudonymous; no linkage to browsing behavior |
 | Function creep (used beyond fraud) | **Purpose limitation** enforced in code + policy; used only for identity-cluster fraud review; never sold or shared |
 | Over-collection | **Signed-in accounts only**; one hash per (account, device) + a last-seen timestamp; **no IP stored** for this signal |
-| Data-subject unawareness | To be disclosed in the public privacy notice **before** activation (disclosure pending — §11) |
+| Data-subject unawareness | **Already disclosed** in the public privacy notice (the "Device identifier (fraud prevention)" section), ahead of activation |
 | Unlawful retention | Retention clock (life of account; rolling-prune > 24 months); included in data export; deleted on account deletion |
 | Activation without oversight | **Flag-gated OFF**; activation requires DPO sign-off; fully reversible from a single toggle |
 
 ### 4.5 Residual assessment
-With the above controls, residual privacy risk is **LOW**. The remaining gates are (a) the privacy-notice disclosure and (b) the DPO's activation decision.
+With the above controls, residual privacy risk is **LOW**. The privacy-notice disclosure is already published; the remaining gate is the DPO's activation decision.
 
 ---
 
@@ -112,7 +112,7 @@ RA 10173 § 3(l) / § 13 treats as **sensitive** an individual's race/ethnic ori
 
 Users who provide none of the optional categories (religion, civil status, gender, biometric enrolment, dependents) supply no sensitive personal information beyond what a given event type strictly requires. The presence of these sensitive categories is a basis for **NPC registration** (§ 5 IRR registration triggers).
 
-> **v2.0 correction:** the biometric line in the public notice currently reads that Setnayan does **not** collect "face biometrics or any other biometric data." Because an opt-in face-enrolment feature and its consent flow exist (vector storage dormant, image-only today), that flat denial is to be revised to an accurate "optional, opt-in, per-event, currently image-only" statement before the notice republishes — §11.
+> **Note (2026-07-13):** the public notice **already** carries an accurate opt-in **Biometric data (facial recognition)** section (explicit consent, adults 18+, per-event scope, withdrawal → permanent deletion) and a **Device identifier (fraud prevention)** section — the earlier "notice denies biometrics / omits the device identifier" concern came from a **stale local checkout**, not the deployed `origin/main`. Face-vector storage is currently **dormant** (enrolment image-only until the matching model activates), which the section's opt-in framing already accommodates.
 
 ---
 
@@ -194,7 +194,7 @@ Setnayan processes personal data under RA 10173 on the bases recorded in § 3, w
 2. Confirmation of the **NPC registration threshold** applicable to the business.
 
 **Owner / DPO actions (documentation + product):**
-3. **Reconcile the public privacy notice** (`setnayan.com/privacy`) to this dossier before or alongside filing: add disclosures for **faith/ceremony data, minors'/dependents' data, e-gift receiving handles, and the device fingerprint (pre-activation)**; and **correct the biometric line** from a flat denial to the accurate opt-in/image-only statement (§5).
+3. **Public privacy notice — DONE (app PR #3215, 2026-07-13):** added the **faith / family / honoree / e-gift** disclosures + Anthropic/Suno subprocessors; the opt-in **biometric** and **device-identifier** sections were already present. Remaining notice work is wording refinement by counsel, not a coverage gap.
 4. **Reconcile the older corpus documents** to the values in §1: align `iscasasolaii@gmail.com` → `dpo@setnayan.com` and the 7-business-day SLA → 15 in the binding Privacy & Security Policy; add the **10-year floor** and the **vendor-verification retention class** to that policy's §4 retention table; add **Persona, TikTok, Suno** to its §10 subprocessor table.
 5. **Device-fingerprint status:** correct the draft Anti-Fraud Policy amendment's "active since 2026-07-07" language to match the confirmed **flag-OFF** state, and gate the notice disclosure to activation.
 6. **Known product remediation** (tracked, not blocking this draft): account hard-delete does not yet purge chat-message PII (Retention Schedule §4); the `events.signature_details` honoree fields (christening child data, gender-reveal due-date) collect sensitive data without a per-field consent timestamp — **documented as-is per owner direction**, flagged here for a future consent-instrumentation pass; and the dashboard data-minimization tightening in §8.

@@ -102,7 +102,10 @@ The 12-doc checklist is presented to the vendor at registration with explicit co
 | Vendor verification raw uploads (ID, selfie+liveness, bank micro-deposit, portfolio) | 90 days hot | — | Auto-purge after admin approve/reject unless audit hold |
 | Vendor verification audit trail (Persona/AMLC results + admin decision) | 90 days hot | 7 years cold | BIR § 235 + AMLC AML/CTF audit retention |
 | Vendor business permits (DTI / BIR 2303 / Mayor's Permit) | 90 days hot | 7 years cold | Tax/legal retention |
-| Vendor transaction history | 5 years | — | Tax compliance |
+| Payment records + Official Receipts (in-app SKU orders) | **10 years** | — | **Legal floor** — BIR RR 17-2013; not shortened by account deletion |
+| Contracts + e-signatures | **10 years** | — | **Legal floor** — BIR / Civil Code Art. 1144; not shortened by account deletion |
+| Vendor transaction history | **10 years** | — | Tax compliance (BIR RR 17-2013 floor) |
+| E-gift receiving methods (Pabuya — couple's own GCash/bank/e-wallet handle + QR; no amount/ledger stored) | With the event | — | Deleted with the event or by the couple anytime |
 | Chat messages | 5 years | — | Aligned with event retention |
 | ~~Video meeting recordings~~ | ~~90 days~~ | — | **Feature retired 2026-05-16 — no video data stored** |
 | Audit log (admin actions) | 5 years | — | Tax/legal compliance |
@@ -189,7 +192,7 @@ In the event of a data breach affecting personal data:
 - **Within 72 hours of confirmation:** Setnayan notifies the National Privacy Commission (NPC) per RA 10173
 - **Within 72 hours of confirmation:** Affected users notified in-app + via email of: what data was accessed, when, what we're doing about it, what they should do (change password, monitor accounts)
 - **Public disclosure:** breach summary posted on `setnayan.com/security` within 7 days
-- **DPO contact:** iscasasolaii@gmail.com for breach inquiries; phone hotline for severity-high incidents
+- **DPO contact:** dpo@setnayan.com for breach inquiries; phone hotline for severity-high incidents
 
 ## 9. Data Protection Officer (DPO)
 
@@ -200,7 +203,7 @@ Setnayan's DPO is registered with the Philippine National Privacy Commission. Th
 - Privacy complaints
 - Breach notifications
 
-**DPO contact:** iscasasolaii@gmail.com · response within 7 business days for non-urgent requests; immediate for breach notifications.
+**DPO contact:** dpo@setnayan.com · response within 15 business days for non-urgent requests; immediate for breach notifications.
 
 ## 10. Cross-border data transfers (amended 2026-05-16)
 
@@ -221,6 +224,9 @@ Setnayan's primary infrastructure is Singapore (Supabase) + PH region (Cloudflar
 | **DTI Database** | PH | Vendor DTI Business Name Certificate number | Auto-validation of business registration | RA 10173 § 12(c) — necessity for performance of contract |
 | **Maya Business** (V1.5+) | PH | Couple + vendor payment data, vendor disbursement details | Payment gateway processing | RA 10173 § 12(b) — performance of contract |
 | OpenAI GPT-4 (V1.5+ fallback only) | US | Vendor contract text (fallback case only) | Contract Intelligence backup | Same as Anthropic above |
+| **Google LLC** (YouTube / Drive) | US | OAuth tokens + channel/Drive IDs — only when the couple connects the optional Panood or Photo-Delivery/Papic integration | Live broadcast (0011) · photo delivery (0009) | RA 10173 § 12(a) consent (opt-in OAuth); Google API Limited-Use (no AI/ML training) |
+| **TikTok** | US / SG | OAuth tokens + open/union ID — only when the couple connects the optional Patiktok integration | Auto-post booth compilation (0017) | RA 10173 § 12(a) consent (opt-in OAuth) |
+| **Suno** | US | Prompt text only — no guest or personal data | AI music generation for Pakanta (0036) + rendered videos | RA 10173 § 12(b) — owned-catalogue generation; no PII sent |
 
 All US sub-processors are bound by Standard Contractual Clauses (SCCs) or equivalent enforceable data-processing agreements. The Anthropic Console workspace "Setnayan" is configured with zero-retention API mode (the model does not retain prompts or completions after the inference call). Persona/Veriff/Onfido + AMLC API screenings are batch-call-only with no ongoing storage at the sub-processor.
 
@@ -267,6 +273,25 @@ Connections and life-story references follow the parent **event / account retent
 
 The person graph is **adults-only** today; **data about minors is not processed.** A future phase ("stewarded / branch accounts") will let a guardian hold a child's memories until the age of majority (18), and let memories pass down the direct family line as a legacy — **each is counsel-first, will carry its own guardian-consent + post-mortem mechanics and a Data Privacy Impact Assessment, and is not active.** See the Phase-3 design + counsel brief.
 
+> ⚠ **Superseded by events — reconcile (see Amendment 2026-07-13 · flagged for counsel).** This "minors not processed" statement is no longer accurate: the shipped **dependents** feature and certain event onboarding paths (e.g. christening child birth-date/gender, gender-reveal due-date) now process minors'/child data under guardian consent. The wording here is left unchanged pending counsel because it is a load-bearing legal position — it must be rewritten to describe the *actual* guardian-consent basis, not a flat denial.
+
+---
+
+## Amendment 2026-07-13 — reconciliation to the NPC dossier v2.0
+
+Aligns this binding policy to `NPC_Privacy_Compliance_Dossier_2026-07-12.md` (v2.0) and `Privacy_Reconciliation_Home_and_Data_Flows_2026-07-13.md`. Changes made in place:
+
+- **DPO contact standardized** to `dpo@setnayan.com` (the address published on every public surface), replacing `iscasasolaii@gmail.com` in §8, §9, and Appendix A. The gmail remains only as an internal ops-alert inbox.
+- **Response SLA** raised to **15 business days** (§9) to match the live privacy notice (was 7).
+- **§4 retention** now carries the **10-year statutory floor** for payment records + Official Receipts and for contracts + e-signatures (BIR RR 17-2013 / Civil Code Art. 1144), not shortened by account deletion; vendor transaction history aligned to the same floor; an **E-gift (Pabuya)** row added.
+- **§10 sub-processors** add **Google LLC** (YouTube/Drive, opt-in OAuth), **TikTok** (opt-in OAuth), and **Suno** (music generation, no PII).
+
+**Flagged for counsel (NOT changed here):**
+1. **§A.5 minors forward-notice** contradicts the shipped dependents / event-honoree processing of minors' data — must be rewritten to the actual guardian-consent basis (above).
+2. **Public privacy notice** faith/family/honoree/e-gift disclosures shipped separately (app PR #3215); the biometric + device-identifier sections were already present on `origin/main`.
+3. **Known product gap:** account hard-delete does not yet purge chat-message PII (§4 "Chat messages" row + Data Retention Schedule §4).
+4. External counsel review remains the gate before NPC filing; the §3(l)/minors + AMLC-PEP bases in particular.
+
 ---
 
 ## Appendix A — User rights summary (under RA 10173)
@@ -274,7 +299,7 @@ The person graph is **adults-only** today; **data about minors is not processed.
 Every Setnayan account holder has the right to:
 
 1. **Be informed** of what personal data is collected and how it's used (this document)
-2. **Access** their personal data — request a copy via `iscasasolaii@gmail.com`
+2. **Access** their personal data — request a copy via `dpo@setnayan.com`
 3. **Object** to processing — opt out of specific data uses
 4. **Rectify** errors in their data — edit their profile + request corrections
 5. **Erase / block** their data — delete their account
