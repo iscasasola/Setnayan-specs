@@ -30,7 +30,7 @@ Setnayan is a Philippines-first event-planning platform operated by **SETNAYAN S
 
 **Facts.** The product processes, in production, the following sensitive/§ 3(l) categories:
 - **Self-profile (adults):** religion, civil status, gender — optional, opt-in, per-field consent timestamp.
-- **Dependents (may be minors):** a child's **name, birth date, sex, religion**, with guardian-consent timestamps. A household model lets a **spouse account read a shared child's record**, and that access is **retained after separation/annulment** for continued co-parenting.
+- **Dependents (a generic list — person, pet, or anything):** the feature is *not* a minors registry; a `dependent_kind` (person / pet / other) discriminates it. Only a **person** dependent may carry **name, birth date, sex, religion** (guardian-consent timestamps); pets/other carry no sensitive data. When a person-dependent is a **child**, a household model lets a **spouse account read a shared child's record**, retained after separation/annulment for co-parenting. So minors' SPI is a **conditional sub-case of the person kind**, not the table's purpose — but it can occur.
 - **Event honoree data (christening / gender reveal):** a **child's birth date + gender**, and a **pregnancy expected due-date** (health-adjacent) — entered by the account holder into the event record, currently **without a separate per-field consent timestamp** (documented as-is; see dossier § 3 row 4 and § 11 item 6).
 - **Godparents:** name + **email of a third party**, who may receive godchild-birthday reminders.
 

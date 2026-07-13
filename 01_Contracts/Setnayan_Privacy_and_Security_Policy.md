@@ -273,7 +273,7 @@ Connections and life-story references follow the parent **event / account retent
 
 The person graph is **adults-only** today; **data about minors is not processed.** A future phase ("stewarded / branch accounts") will let a guardian hold a child's memories until the age of majority (18), and let memories pass down the direct family line as a legacy — **each is counsel-first, will carry its own guardian-consent + post-mortem mechanics and a Data Privacy Impact Assessment, and is not active.** See the Phase-3 design + counsel brief.
 
-> ⚠ **Superseded by events — reconcile (see Amendment 2026-07-13 · flagged for counsel).** This "minors not processed" statement is no longer accurate: the shipped **dependents** feature and certain event onboarding paths (e.g. christening child birth-date/gender, gender-reveal due-date) now process minors'/child data under guardian consent. The wording here is left unchanged pending counsel because it is a load-bearing legal position — it must be rewritten to describe the *actual* guardian-consent basis, not a flat denial.
+> ⚠ **Superseded — reconcile (see Amendment 2026-07-13 · flagged for counsel).** This "minors not processed" statement is no longer accurate. The **dependents** feature is a generic "someone (or something) you care for" list (`dependent_kind` = person / pet / other); when the person is a **child**, and via certain event paths (christening child birth-date/gender, gender-reveal due-date), a **child's data is processed under guardian consent**. The wording here is left unchanged pending counsel because it is a load-bearing legal position — it must be rewritten to describe the *actual* guardian-consent basis for the person-child case, not a flat denial.
 
 ---
 
@@ -287,7 +287,7 @@ Aligns this binding policy to `NPC_Privacy_Compliance_Dossier_2026-07-12.md` (v2
 - **§10 sub-processors** add **Google LLC** (YouTube/Drive, opt-in OAuth), **TikTok** (opt-in OAuth), and **Suno** (music generation, no PII).
 
 **Flagged for counsel (NOT changed here):**
-1. **§A.5 minors forward-notice** contradicts the shipped dependents / event-honoree processing of minors' data — must be rewritten to the actual guardian-consent basis (above).
+1. **§A.5 minors forward-notice** must be rewritten to the actual guardian-consent basis (above). Note the **dependents feature is generic** (person / pet / anything — app PR #3219, 2026-07-13); minors' data is a **conditional sub-case** of the *person-child* kind, not the table's purpose — but it can still occur, so the flat "minors not processed" wording is inaccurate.
 2. **Public privacy notice** faith/family/honoree/e-gift disclosures shipped separately (app PR #3215); the biometric + device-identifier sections were already present on `origin/main`.
 3. **Known product gap:** account hard-delete does not yet purge chat-message PII (§4 "Chat messages" row + Data Retention Schedule §4).
 4. External counsel review remains the gate before NPC filing; the §3(l)/minors + AMLC-PEP bases in particular.

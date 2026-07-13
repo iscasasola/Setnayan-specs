@@ -66,6 +66,9 @@ These are load-bearing and/or legal; I did not change the notice, the dossier, o
 
 **Not done (needs owner/DPO/counsel):** editing the live `setnayan.com/privacy` notice (code-repo change + legal disclosure), or flipping any feature flag.
 
+### Correction — 2026-07-13: "dependents" is generic, not a minors registry
+Owner: *a dependent "can be a dog, a cat, or anyone — there is no specification that it needs to be a child."* This audit (§A row 2, §C, and the "minors' data" framing throughout) over-characterized the `dependents` table as a minors registry. It is now a generic **"someone (or something) you care for"** list with a `dependent_kind` (person / pet / other) — app PR #3219. Only `kind=person` may carry a birth date / religion / sex under the age fence, and only there does minors' SPI arise (as a **conditional sub-case**, when the adult enters a child). Pets/other carry no sensitive data. Treat every "dependents = minors' data" statement in §A/§C as reframed by this note; the dossier §3/§5 and binding policy were updated to match.
+
 ### Correction — 2026-07-13: the live notice was better than first reported
 When the `/privacy` notice was edited (PR #3215), reading `origin/main` directly revealed the earlier extraction (agent, §A row 5 + §B) was from a **stale local checkout**: the deployed notice **already** carried a proper opt-in **Biometric** section (no "denies biometrics" line) **and** a **Device identifier (fraud prevention)** section. So gaps #5 (biometric denial) and the "notice omits device fingerprint" claim were **not real on the live site**. The genuine notice gaps were narrower — faith/family/honoree/e-gift + Anthropic/Suno — and those are what PR #3215 added. The dossier §5/§4/§11 were corrected to match. Treat §A row 5 and the §B "device-fingerprint disclosure" bullet as superseded by this note.
 
