@@ -27,6 +27,8 @@
 
 **TO SHIP (30 min):** in that worktree: `npx tsc --noEmit` · `npx next lint` · `npx next build` · re-run the seed test + `tests/db/photo-tag-cap.db.test.ts` → commit (Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>) → push → **DRAFT PR** → gates green → `gh pr ready` → auto-merge arms → poll to merge. Merge auto-applies the heal to prod's 4 events (each gains what_to_bring + our_photos; our_love_story reorders 14→16).
 
+> ✅ **SHIPPED 2026-07-23** — committed (`0f2afbcda`), pushed, and opened as **PR [#3598](https://github.com/iscasasola/setnayan-platform/pull/3598)**, auto-merge armed (waiting on required CI). Full `test:db` green (91/91, incl. the 2 new seed tests). The prior session had written all three files but never committed them — this closes that. **Do not re-ship.**
+
 ## § 2 · FIRST ACTION — the two in-flight wave-4 lanes
 
 At session end, two agents were building in parallel. **Check, then resume or finish:**
