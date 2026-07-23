@@ -45,7 +45,7 @@
 | Editorial PRO | ₱2,999 | Live (standalone editorial-authoring unlock) |
 | Kwento | ₱299 (whole event) | Live |
 | Live Background | ₱499 | In build |
-| Live Studio — Mobile / Desktop | ₱1,299/day · ₱2,499/day | In build (single-cam livestream FREE · YouTube via couple's OBS · device-repackaged 2026-07-08, was ₱3,499/day multicam; see `Live_Studio_Repackaging_2026-07-08.md`) |
+| Live Studio — Mobile / Desktop | **₱1,500/day · ₱2,500/day** (repriced 2026-07-20 · PR #3425 · migration `20270827190298`, was ₱1,299/₱2,499 — owner's 2026-07-17 sheet; ⏳ needs `supabase db push` to reach prod) | In build (single-cam livestream FREE · YouTube via couple's OBS · device-repackaged 2026-07-08, was ₱3,499/day multicam; see `Live_Studio_Repackaging_2026-07-08.md`) |
 | Camera Bridge (DSLR · independent) | ₱500/day | Coming soon (flat, event-wide · independent `CAMERA_BRIDGE`, decoupled from Papic + Live Studio · owner 2026-07-08, rounded ₱499→₱500 2026-07-11; consolidates "Pro Camera Sync") |
 | Guest Stories | cap ₱2,000/day (₱20/cam·day) | Coming soon |
 | Live Photo Wall | ₱2,500/day | Coming soon |
@@ -55,9 +55,9 @@
 | Papic Unli | ₱100/cam·day (cap ₱15,000/day) | Live |
 | Papic Ltd | ₱30/cam·day (cap ₱9,000/day) | Live |
 
-> **RETIRED — must NOT read as live/priced:** Same Day Edit (SDE) · Indoor Blueprint · High Res Archive · Call-Time Escalator · Pro Website · Papic 5-Seats · Papic Guest · standalone RSVP / RSVP Pro · standalone Event Website / Editorial Website · customer token wallet · "Setnayan Concierge" (→ Setnayan AI ₱499 one-time). _(Patiktok is NO LONGER retired — reactivated 2026-07-10, live ₱1,499/day.)_
+> **RETIRED — must NOT read as live/priced:** Same Day Edit (SDE) · High Res Archive · Call-Time Escalator · Pro Website · Papic 5-Seats · Papic Guest · standalone RSVP / RSVP Pro · standalone Event Website / Editorial Website · customer token wallet · "Setnayan Concierge" (→ Setnayan AI ₱499 one-time). _(Patiktok is NO LONGER retired — reactivated 2026-07-10, live ₱1,499/day. **Indoor Blueprint is NO LONGER retired-as-priced — reclassified FREE 2026-07-23**, delivered by the free 2D Plan; the ₱1,499 paid SKU is retired, the feature is free.)_
 
-**Tombstoned SKUs (do not implement):** Indoor Blueprint · Call-Time Escalator · Pro Website · High Res Archive · the Essentials ₱12,999 + Complete ₱27,999 bundles (REMOVED 2026-06-29). Mood Board kept — free.
+**Tombstoned SKUs (do not implement):** Call-Time Escalator · Pro Website · High Res Archive · the Essentials ₱12,999 + Complete ₱27,999 bundles (REMOVED 2026-06-29). Mood Board kept — free. **Indoor Blueprint is NOT tombstoned — it is FREE (owner 2026-07-23), delivered by the free 2D Plan** (skeletal seat-plan blueprint · `Seat_Plan_2D3D_Alignment_Directive_2026-07-15.md`); the 3D Plan (`SEATING_3D`) INTEGRATES it as one of its four inputs — owner ₱1,500 (⚠ live catalog still ₱2,999; reprice `3dplan#1` · `3D_Plan_Whats_Next_2026-07-23.md`). ✅ Code fix SHIPPED (PR #3593, auto-merge armed 2026-07-23) — free-ifies the card + studio + both guest surfaces, removing the ₱1,499 buy funnel (`Sell_vs_Deliver_Gap_Audit_2026-07-21.md`). See DECISION_LOG 2026-07-23.
 
 **Homepage premium feature grid (confirmed live 2026-06-18):** Setnayan AI · Monogram · Papic · Live Studio · Pakanta · **Contracts** · **Cinematic Reveal**. ("Contracts" = couple-facing contract management per 0032 — price TBD, was ₱199/contract in old spec; "Cinematic Reveal" = premium Save-the-Date opening per 0024 redesign 2026-06-17, priced **₱999** (repriced 2026-07-10, was ₱1,499); owner to confirm Contracts price.)
 
@@ -78,7 +78,7 @@
 
 **Commission: 0% — "0% commission, forever."** Vendor keeps 100%; Setnayan never sits between vendor and couple at checkout.
 
-**Token economy (bidding — distinct from retired customer wallet 0003):** 100 free tokens on verification. Burn 1–3 tokens (₱100/₱200/₱300) to accept a couple inquiry, banded by wedding region, via admin-editable `token_burn_bands` table. One idempotent unlock per (vendor, event). Burn-on-answer WIRED (PR #1057). Ghosting nudges WIRED (PR #1059). Token-back mechanic **RETIRED 2026-06-15** (owner: "we will retire this idea"; never wired). Founder 100-free-token deadline promo (31 Jan 2027) pulled from `/for-vendors` copy.
+**Token economy (bidding — distinct from retired customer wallet 0003):** 100 free tokens on verification. Burn **a flat 1 token to accept a couple inquiry, uniform across all regions — owner-locked** (flat-1 on 2026-07-11; token unit price raised **₱100 → ₱200 on 2026-07-12**, so the effective lead fee is ₱200/unlock — pending a `vendor_billing_catalog` migration) (supersedes the earlier 1–3 region-banded burn). ⚠ **Shipped code still bands by region** via the admin-editable `token_burn_bands` table read by `unlock_vendor_event` — making the flat-1 lock live = set every band to 1 (or collapse the band lookup to a constant); pending. One idempotent unlock per (vendor, event). Burn-on-answer WIRED (PR #1057). Ghosting nudges WIRED (PR #1059). Token-back mechanic **RETIRED 2026-06-15** (owner: "we will retire this idea"; never wired). Founder 100-free-token deadline promo (31 Jan 2027) pulled from `/for-vendors` copy.
 
 **Token packs (flat ₱100/token · confirmed /pricing 2026-06-18):**
 

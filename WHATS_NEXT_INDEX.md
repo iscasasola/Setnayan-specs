@@ -1,0 +1,129 @@
+# WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
+
+> **Purpose.** A future session will pick this up to execute the outstanding work across ALL "What's Next" docs — **in parallel where safe, sequential where dependent, and never auto-running anything gated** — then **check gaps and fix them**. This index is the operating manual + the register of every active handoff. **Read this whole file before touching any task.**
+>
+> Owner intent (2026-07-18): *"one session do all what's next in parallel and sequential safely, and check gaps and fix them."*
+
+---
+
+## 1 · Global safety rules — DO NOT auto-execute these
+
+An item is **HUMAN-GATED** and must be surfaced for owner/DPO, never done autonomously, if it is any of:
+
+| Gate | Meaning | Examples in the register |
+|---|---|---|
+| `OWNER_DECISION` | a product/pricing/scope choice only the owner makes | Suite nav doorway; pricing § 00 open questions; rich-layer photo-scope |
+| `DPO_COUNSEL` | RA 10173 / NPC-filing / consent-basis ruling | vendor "feature my wedding" rich layer; vendor Papic capture go-live; personalization; faith graph |
+| `FLAG_FLIP_PROD` | flipping a prod env var / admin Data Privacy control that makes a dark feature live | `NEXT_PUBLIC_SUITE`, `vendor_papic_capture` control, any `NEXT_PUBLIC_*_V1` |
+| `COUNSEL_GATED_MIGRATION` | a committed-but-unpushed migration that must NOT `db push` until counsel signs | `20270811377742_vendor_papic_capture_counsel_gated.sql` |
+
+Everything else (write code behind a default-OFF flag, add tests, fix gaps, edit the corpus) is **AUTO-OK** under the standing worktree+PR workflow.
+
+**The rule:** build up to the gate, stop at it, list it. Shipping a flag-dark, fail-closed PR is fine; *activating* it is the human's call.
+
+---
+
+## 2 · Repo + worktree rules (the collision-avoidance keystone)
+
+⚠️ **GAP found while compiling this index:** the four docs cite **three different local repo roots** for the *same* GitHub repo (`github.com/iscasasola/setnayan-platform`):
+- `/Users/icecasasola` (git root; `apps/web` subdir; migrations at `/Users/icecasasola/supabase/migrations/`) — Front-Desk doc.
+- `/Users/icecasasola/Documents/Claude/Projects/setnayan-platform` — Papic v3 doc.
+- `/Users/icecasasola/setnayan-platform-recovered` (+ worktree `setnayan-wt-papic-onday`) — Featured-Weddings doc (this session).
+
+**Before any code work, confirm the ONE canonical checkout** (whichever has `origin` = the GitHub repo and a current `main`). Then, for EVERY task:
+- **Fresh worktree off latest `origin/main`:** `git -C <canonical> fetch origin main && git -C <canonical> worktree add -b claude/<task> <path> origin/main` → `pnpm -C <path> install --frozen-lockfile`.
+- **NEVER `git add .`** (home root has GBs of untracked junk). Stage explicit paths.
+- **Migrations MUST be allocated:** `pnpm -C <path> migration:new "<name>"` — a pre-push hook **rejects round `YYYYMMDD000000` prefixes** (cross-branch collision guard). The main tip moves fast.
+- **One task = one branch = one PR**, then `gh pr merge <#> --auto --merge` (repo standing default).
+- Layout note: git-root holds BOTH `apps/web/` and `supabase/migrations/` (migrations are repo-root, not under apps/web).
+
+**Parallelism is safe only across DISJOINT files + DISJOINT migration needs.** Two tasks that both add a migration, or both edit the same file, will collide → **serialize them**, and **re-fetch `origin/main` before the second** (so its worktree has the first's merge).
+
+---
+
+## 3 · Standard per-item execution schema
+
+Each actionable item (in each doc's "execution metadata" section) should carry:
+
+```
+- id:            <doc-slug>#<n>
+  title:         <what>
+  type:          code | migration | spec | decision | verify
+  depends_on:    [<ids>]          # hard order
+  parallel_safe: yes | no         # no ⇒ shares files/migration-seq with a sibling; serialize
+  safety_gate:   NONE | OWNER_DECISION | DPO_COUNSEL | FLAG_FLIP_PROD | COUNSEL_GATED_MIGRATION
+  touches:       <files / flag / branch / table>   # collision key
+  verify:        <tsc | lint | tests | build | live-check + how>
+  gap:           <if this item IS a gap-fix, what was wrong>
+```
+
+The orchestrator builds one graph from all docs' items, topologically orders `depends_on`, fans out `parallel_safe: yes` items on separate worktrees, serializes the rest, and **routes every non-`NONE` `safety_gate` to a human queue instead of executing it.**
+
+---
+
+## 4 · Gap-check protocol (the "check gaps and fix them" half)
+
+For each doc + its claimed state, verify against reality and fix-or-flag:
+1. **Doc-vs-code drift** — does the shipped claim match `origin/main`? (`git -C … ls-tree`, grep the flag/route/table). Fix stale docs.
+2. **Orphaned surfaces (wayfinding rule)** — any shipped route/flag with no doorway (e.g. Suite is live but nav-less; a page reachable only by URL). Fix = wire the doorway or mark it.
+3. **Missing verification** — code claimed "done" but never exercised (e.g. safe-layer gallery not rendered live; server-action DB paths not run). Fix = add the verify step.
+4. **Fail-open holes** — a gate that should fail-closed but doesn't; a flag defaulting ON; a migration pushed that shouldn't be.
+5. **Cross-doc contradictions** — two docs editing the same SKU/flag/price differently (see §6). Fix = reconcile, log the decision.
+6. Fixes that are code → PR (auto-OK if no gate); fixes that are decisions → the human queue.
+
+---
+
+## 5 · Register of active What's-Next docs (2026-07-18 cohort)
+
+| Doc | Scope | Flag / branch / PRs | State | Top gates |
+|---|---|---|---|---|
+| [`Whats_Next_Suite_AI_Pricing_2026-07-18.md`](Whats_Next_Suite_AI_Pricing_2026-07-18.md) | Suite (guided services surface) · Setnayan AI · pricing § 00 · personalization | ✅ **shipped code = "Suite"** — the Silid→Suite rename MERGED (`/dashboard/[eventId]/suite` · `SUITE_NAME` · `NEXT_PUBLIC_SUITE`); `NEXT_PUBLIC_SUITE="true"` LIVE in prod (verified 2026-07-22). Suite PR-1 + PR-2 (vignette cards #3413) shipped; compare-doorway fix #3482. **Pricing § 00 all shipped 2026-07-22** (PRs #3559 + #3564, migrations pushed to prod). | Suite is LIVE; nav replaces Studio (flag-gated). Remaining = the AI-per-type build + personalization (DPO/counsel/NPC), tracked separately. | ✅ all Suite/pricing `OWNER_DECISION`s RESOLVED; `FLAG_FLIP_PROD` done. |
+| [`0012_papic/Papic_v3_Whats_Next_2026-07-18.md`](0012_papic/Papic_v3_Whats_Next_2026-07-18.md) | Papic v3 pricing recut (capture-points, caps, Papic Lite, quality tiers) | branch `claude/papic-v3-pr3` @ `cd4d89bc2` (12/12 tests, unpushed) | PR-1/PR-2 migrations shipped to prod; caps-consumption code PAUSED; enforcement/Lite not started. **2026-07-19 owner decision: PR-3 (caps consumption) + free-tier/points enforcement land as ONE atomic PR — land-together in flight** (collapses the § 00.0 dual states: 5-free vs 3-free · legacy ₱9k/₱15k caps vs v3 ₱6k/₱10k/₱15k) | shares **papic tables/tier + Pricing.md** with vendor-Papic work → serialize |
+| [`Vendor_Front_Desk_Chatbot_Whats_Next_2026-07-18.md`](Vendor_Front_Desk_Chatbot_Whats_Next_2026-07-18.md) | Vendor AI auto-reply assistant | `NEXT_PUBLIC_VENDOR_AUTOREPLY_V1` (OFF); PR #3397 merged, #3399 open | Phase 1 merged, 2/3a in #3399; 3b+ not built | mostly `AUTO-OK` (flag-dark); `FLAG_FLIP_PROD` to go live |
+| [`Vendor_Featured_Weddings_Whats_Next_2026-07-18.md`](Vendor_Featured_Weddings_Whats_Next_2026-07-18.md) | Vendor on-the-day Papic capture (done) + past-events gallery safe layer (done) + **rich layer** (planned) | `vendor_papic_capture` control (OFF); PRs #3388/#3396/#3400 merged | safe layer LIVE; rich layer planned, gated | `DPO_COUNSEL` (rich layer, capture go-live), `COUNSEL_GATED_MIGRATION` | 
+| [`Coordinator_Whats_Next_2026-07-18.md`](Coordinator_Whats_Next_2026-07-18.md) | Coordinator role — consent gate on invite (done) + propose-a-lock (done) + prep-then-release / filtered run-of-show / day-of broadcast / vendor folder (planned) + follow-ups | `NEXT_PUBLIC_COORDINATOR_CONSENT_GATE_ENABLED` + `NEXT_PUBLIC_COORDINATOR_PROPOSE_LOCK_ENABLED` (both OFF); PRs #3390 + #3401 merged; consent follow-ups #3402 (export) + #3403 (revoked_at) merged | consent + propose-lock flag-off; **P2/P3/P4 SHIPPED flag-dark 2026-07-20** (verified on `main`), only **P1 (DPO-gated)** + follow-ups remain; **§8 carries conforming execution metadata**. **2026-07-19 owner decision: the blanket money wall is SUPERSEDED → CONSENT-SCOPED — lock + checkout allowed when the couple/host has approved that scope in the access limitations** (✅ approver CONFIRMED = couple/host 2026-07-21; DPO sub-decisions ✅ **TEMP-APPROVED 2026-07-21**, provisional). Propose-lock flag **permanent-OFF (dormant)** | `DPO_COUNSEL` (consent flip · P1 parity · autoinvite basis), `OWNER_DECISION` (~~propose-lock flip~~ dormant per 2026-07-19 · checkout audit re-scoped to consent-scoped model · 5 sign-offs), `FLAG_FLIP_PROD` (consent flag) |
+| [`Whats_Next_Repo_Backlog_2026-07-18.md`](Whats_Next_Repo_Backlog_2026-07-18.md) | **The repo axis** (co-equal to this index's doc axis): every open PR (29 · verified live), merged-but-flag-dark feature, owner launch-gate, + repo-specific serialize/gap rules | 29 open PRs (18 ready/11 draft) · ~25 flag-dark features · 6 owner infra gates | verified 2026-07-18; re-`gh pr list` before acting | resolves §7.1 (canonical checkout) · carries the "never flip a public flag" + migration-serialize + dependency-chain rules |
+| [`Competitor_Kuha_Teardown_2026-07-20.md`](Competitor_Kuha_Teardown_2026-07-20.md) | **REFERENCE — not an execution stream.** Code-level teardown of Kuha (kuha.app): the PH white-label rival named as risk #9 in `Papic_Access_Scope_Council_Verdict_2026-07-20.md:229`. Their tiers, their reseller economics, and a feature-by-feature match against Setnayan | none — no branch, no PR, no code | Research complete + self-contained. **Adds no tasks.** Its §7 is **6 owner DECISIONS**; each spawns its own What's-Next item only *after* a ruling | `OWNER_DECISION` ×5 (white-label answer · Seat Finder placement · Live Wall un-hide · Photo Game · event-day packaging); 1 marketing-copy-only item needs no gate. Items 2/3/5 would touch **`Pricing.md` § 00** + seating/Live-Wall → §6 serialization applies |
+| [`3D_Plan_Whats_Next_2026-07-23.md`](3D_Plan_Whats_Next_2026-07-23.md) | **3D Plan** — the integrative product (2D Seat Plan + Guest List + Indoor Blueprint + Mood Board + avatar makers & booths). Host price **₱1,500** (owner 2026-07-23; ₱2,999 + interim ₱1,000 + #3526 couple-discount all retired) | shared-room code shipped flag-OFF `NEXT_PUBLIC_PLAN3D_SHARED_ROOM` (#3041–#3050); 3D booth shipped flag-dark (#3526). **5 build items:** SEATING_3D reprice migration · Mood-Board palette recolour · shared-room flag-flip · 250-pax LOD · actor-layer makers | reprice/recolour/LOD/makers UNBUILT | `FLAG_FLIP_PROD` (shared-room), `OWNER_DECISION` (250-pax LOD alters locked look), **Pricing.md + migration → serialize §6** |
+| [`Indoor_Blueprint_Free_Handoff_2026-07-23.md`](Indoor_Blueprint_Free_Handoff_2026-07-23.md) | **Indoor Blueprint → FREE** (owner 2026-07-23 "indoor blueprint is free and uses the 2D Plan for free"). Retired ₱1,499 SKU → free capability delivered by the free 2D seat plan; one of the 3D Plan's four inputs | ✅ **code SHIPPED** PR [#3593](https://github.com/iscasasola/setnayan-platform/pull/3593) (`claude/indoor-blueprint-free`, auto-merge armed) · no migration · corpus reclassified (Pricing.md §0.A/§00.C · AS_BUILT · DECISION_LOG ×2) | **essentially DONE.** Remaining: ⏳ confirm #3593 merged · optional Maya demo-book scrub (non-billing) · verify the `Seat_Plan_2D3D_Alignment_Directive` "integrative product" section exists | `NONE` (owner-decided, shipped) |
+| Supporting: [`Whats_Next_Suite…§7`], `Pricing_Reprocess_Handoff_2026-06-14.md`, `App_Build_Status.md`, `V1_Gap_Analysis_Status.md`, and ~40 `project_setnayan_*` memories tagged "NOT built"/"resume point" | reference | — | background | — |
+
+> Older handoffs live in `07_Archive/` — historical, do not action.
+
+---
+
+## 6 · Cross-doc collision & dependency matrix (must serialize)
+
+- **`Pricing.md` § 00 / § 2.1** — edited by Suite/AI-pricing **and** Papic v3 **and** (indirectly) vendor Papic tiers. **Serialize all Pricing.md edits; re-fetch between them.** Do not let two parallel tasks both write § 00.
+- **Papic tables + `paparazzi_seats.tier` + `papic_*` migrations** — Papic v3 (`claude/papic-v3-pr3`) and the merged vendor-Papic-capture both touch this area. Any new Papic migration must allocate its prefix AFTER both; serialize Papic-domain migrations.
+- **Migration prefix sequence (global)** — ANY two tasks that add a migration collide on the sequence guard. Treat "adds a migration" as a mutex: allocate + merge one before starting the next, re-fetching main.
+- **`app/v/[slug]/page.tsx`** — the vendor rich layer edits it; if any other task also does, serialize.
+- **DPO/counsel queue (shared human gate)** — rich layer, vendor Papic capture go-live, personalization, faith graph **+ coordinator (consent-flip · P1 prep-release guest-PII parity · autoinvite-consent basis)** all wait on the same DPO. Batch them into ONE counsel packet rather than N.
+- **`app/api/profile/export/route.ts`** — `coordinator#gap-export` AND `featured-weddings#2` both add a consent table to it → **serialize** (this is the §7.4 export gap, now for two tables).
+- **`event_schedule_blocks`** — coordinator `#P2-filtered-ros` + `#P3-broadcast` share the schedule / day-of domain → serialize.
+- **Vendors domain (`app/dashboard/[eventId]/vendors/*`, `finalizeVendor`, `v/[slug]`)** — coordinator `#P4-vendor-folder` + `#checkout-audit` + the merged propose-lock all touch it; `vendors/page.tsx` is a HOT file (already conflicted #3401 ↔ merkado). Serialize coordinator vendor-domain tasks with any other vendor task.
+
+---
+
+## 7 · Known cross-cutting gaps (fix or flag)
+
+1. **Repo-root inconsistency** (§2) — ✅ **RESOLVED 2026-07-18** (see `Whats_Next_Repo_Backlog_2026-07-18.md` §A): GitHub is canonical; the **`/Users/icecasasola/Documents/Claude/Projects/setnayan-platform`** clone hosts the live worktree fleet → use it. The 3 local clones don't share objects, so cross-clone "already built?" checks must go through `gh pr list`, not local `git branch`.
+2. **Suite — ✅ RESOLVED + LIVE (2026-07-22).** The Silid→Suite rename merged, nav REPLACES Studio (flag-gated), and `NEXT_PUBLIC_SUITE="true"` is set in prod. The legacy `/studio` hub now redirects to `/suite` (PR #3559). No open Suite naming/nav/flag items remain.
+3. **Safe-layer gallery + several server-action paths never run live** — need staged live verification with seeded data.
+4. **Consent tables missing from the data export** (`app/api/profile/export/route.ts`) — ✅ **CLOSED 2026-07-19: PR #3402 merged** (both `marketing_share_consents` + `coordinator_access_consents` now in the RA 10173 export), plus **PR #3403 merged** (revoked_at stamped on coordinator access consents when a host is removed). The standing rule remains: any future consent table (e.g. featured-weddings rich layer) must land in the export in the same PR.
+5. **Pricing § 00 not finalized** — ✅ **RESOLVED 2026-07-19 (owner decision #3: "follow what we will code" — the CODE is canonical).** `Pricing.md` § 00 rewritten as a code-sync sheet (§ 00.0, verified vs `origin/main` + live prod DB — in sync through `20270823141500`); the residual open questions (§ 00.G, from the Suite doc § 3) resolve by WRITING CODE (migration/PR first, doc mirrors after) — no longer a doc-blocking `OWNER_DECISION`.
+6. **Counsel/DPO backlog** — multiple gated features stalled on one ruling; batch. **Coordinator consent = ✅ TEMP-APPROVED 2026-07-21** (owner-as-DPO, provisional — biometric scope-out + decline-path=consent); its flag now blocks only on the migration push + making the approval permanent. Others (featured-weddings rich layer, vendor Papic go-live, personalization, faith graph) still await the ruling.
+7. **Coordinator money-scope approver — ✅ RESOLVED 2026-07-21 (owner: "follow your recommendations") = COUPLE/HOST.** The consent-scoped money model (live on `main` behind `NEXT_PUBLIC_COORDINATOR_CONSENT_GATE_ENABLED`, OFF) lets a coordinator lock + checkout **iff the couple/host granted that scope** at invite time. The owner's earlier "guests approval" wording is confirmed to mean the **couple/host** (guests have no standing over event money) — which **matches the shipped code** (couple-approval-based), so **no code change needed**. The flag flip stays **DPO-gated** (item 6 / spec §3a), but the approver ambiguity no longer blocks it. (DECISION_LOG 2026-07-21.)
+8. **PR-number drift in the coordinator rows (§5/§7.4) — trust `gh`, not the cited numbers.** The 2026-07-19 entries cite coordinator PRs **#3401–#3405**; verified vs GitHub, those don't all resolve — the real merged export fixes are **#3467** (export the two missing consent tables + coverage guardrail) + **#3475** (bug-fix: author-scoped export reads returned EMPTY under RLS). The *code* is verified-correct on `main`; only the numbers are off. Per §2, cross-check "already built?" via `gh pr list`, never the doc's PR numbers.
+
+---
+
+## 8 · Per-doc execution-metadata status
+
+- ✅ **This doc's own stream** — `Vendor_Featured_Weddings_Whats_Next_2026-07-18.md` carries a conforming **"Execution metadata"** section (worked example of §3).
+- ⬜ The other three docs predate this schema. When compiling, do a light pass to tag each doc's items with the §3 fields (most facts are already in their tables) — or the orchestrator reads them and builds the graph on the fly.
+
+**Bottom line for the orchestrator:** build the task graph from §5's docs using §3's schema; obey §2 (worktrees/migrations) and §6 (serialize shared files); fan out only `parallel_safe: yes && safety_gate: NONE`; route every gate from §1 to the human queue; run §4 gap-checks continuously and fix-via-PR or flag.
+
+## 2026-07-23 · Open-Browse guest-site program (ACTIVE — resume here)
+**→ [`WHATS_NEXT_Open_Browse_Handoff_2026-07-23.md`](WHATS_NEXT_Open_Browse_Handoff_2026-07-23.md)** — 14 PRs merged (5-tab program PR1-3 done, page.tsx 4,351→608); PR4/PR5 possibly in flight at handoff (§ 2 = first action); PR6-11 briefs + all owner decisions + appointments + flip levers inside. Supersedes older open items where they overlap.
