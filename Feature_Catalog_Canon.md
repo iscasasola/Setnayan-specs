@@ -11,7 +11,7 @@
 > - **Commission = 0%**, every vendor booking, every tier — no 3%/5% Setnayan Pay cut.
 > - **Vendor subs:** Solo ₱999/28d (₱9,999/yr) · Pro ₱2,499/28d (₱24,999/yr) · Enterprise ₱4,999/28d (₱49,999/yr) · verification FREE · 100 free tokens on verify · flat ₱100/token packs. Old ₱6,000/₱10,000 + ₱2,499/₱5,499 + per-week vendor prices are RETIRED.
 > - **Couple website:** FREE 4-in-1 site (Save-the-Date · RSVP · Event · Editorial) + unlimited free RSVP + ONE **Couple Website PRO ₱1,999** upgrade. The separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs are RETIRED.
-> - **Animated Monogram ₱1,999** · **Live Studio** Mobile ₱1,299/day · Desktop ₱2,499/day (single-cam livestream FREE; YouTube via couple's OBS; device-repackaged 2026-07-08) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
+> - **Animated Monogram ₱1,999** · **Live Studio** Mobile **₱1,500**/day · Desktop **₱2,500**/day (repriced 2026-07-20 · PR #3425, was ₱1,299/₱2,499; single-cam livestream FREE; YouTube via couple's OBS; device-repackaged 2026-07-08) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
 > - **Couple tiers:** Free ₱0 · Setnayan AI (₱499 first 28d → ₱799/28d). **NO BUNDLES** — Essentials ₱12,999 + Complete ₱27,999 REMOVED 2026-06-29.
 
 ---
@@ -37,7 +37,7 @@
 | Papic Crew | Paparazzi Crew | Designated friends/family shoot unlimited candid photos+clips, auto-tagged, kept forever | Pro | ₱2,999 · $55 | $87 | ✅ |
 | Papic Guests | Guest Cameras | Per-guest digital disposable camera with a shot limit | Pro | ₱1,999 · $39 | $61 | ✅ |
 | Salamisim | Live Photo Wall | Live photo collage projected at the venue | Pro (needs Papic) | ₱3,499 · $69 | $108 | ✅ |
-| Camera Bridge (was "Pro Camera Sync") | — | Connect a real DSLR (Canon→Nikon/Sony/Fujifilm roadmap) into Papic / Live Studio · **independent SKU** | Pro | ₱499/day (repriced + made independent 2026-07-08, was ₱1,499) | $46 | ➖ |
+| Camera Bridge (was "Pro Camera Sync") | — | Connect a real DSLR (Canon→Nikon/Sony/Fujifilm roadmap) into Papic / Live Studio · **independent SKU** | Pro | **₱500/day** flat event-wide (round-up 2026-07-11, was ₱499; repriced + made independent 2026-07-08, was ₱1,499) — **₱500 is what's on prod** | $46 | ➖ |
 | Smart Photo Sorting | — | AI+QR auto-routes each photo to the guests in it | Free w/ Papic | free | — | ➖ |
 | FaceBlock | Face Privacy | Opt-out guests auto-blurred everywhere | **Free — never sell** | free | — | ✅ |
 | Same-Day Edit | — | Auto-produced highlight film on owned music | Pro (needs Papic) | ₱8,999 · $159 | $250 | ➖ |
@@ -45,7 +45,7 @@
 | Guest Reels | — | Each guest gets a personal short reel | Pro (needs Papic) | ₱1,499 · $26 | $41 | ✅ |
 | Pabati | Video Wishes | Guests record short video greetings | Pro | ₱2,799 · $49 | $77 | ✅ |
 | Patiktok | Reel Booth | Booth for guest TikTok-style vertical reels | Pro | ₱1,499 · $26 | $41 | ➖ |
-| Live Studio (Panood) | Live Stream | Branded event-page livestream (YouTube, no viewer cap) + multicam control room | Pro | Mobile ₱1,299 · Desktop ₱2,499/day | $93/day | ➖ |
+| Live Studio (Panood) | Live Stream | Branded event-page livestream (YouTube, no viewer cap) + multicam control room | Pro | Mobile **₱1,500** · Desktop **₱2,500**/day (repriced 2026-07-20 · PR #3425) | $93/day | ➖ |
 | Pailaw | LED Backdrop | LED stage screen | **Basic** loop ₱2,499 / **Pro** live overlays ₱4,999 | ₱2,499–4,999 | $69 / $138 | ✅ |
 | Pakanta | Your Wedding Song | Owned custom song; becomes the soundtrack of every video | Pro | ₱5,499 · $99 | $156 | ✅ |
 | Cipher | Monogram Maker | Design your two-initial mark | **Free to design** | free | — | ✅ |
@@ -56,7 +56,7 @@
 | Custom QR | Guest QR Codes | Personalized QR per guest for invites + check-in | Pro | ₱999 · $19 | $30 | ➖ |
 | RSVP Website | — | Wedding site + RSVP | **Free — the funnel** | free | — | ⚠️ |
 | Event Website | — | Full site; wakes into live mode on the day | Pro | ₱1,999 · $35 | $55 | ➖ |
-| Editorial Website | — | Premium magazine-style site | Pro | ₱4,999 · $89 | $140 | ➖ |
+| ~~Editorial Website~~ | — | ~~Premium magazine-style site~~ ⚠ **RETIRED as a standalone SKU** — collapsed into **Couple Website PRO** per this file's own 2026-06-29 as-built correction above. Ships as free auto-editorial + the PRO customization unlock. **Do not quote ₱4,999.** | ~~Pro~~ | ~~₱4,999 · $89~~ | ~~$140~~ | 🚫 |
 | Setnayan AI | — | Planning + vendor matchmaking (first paywall — kept low for conversion) | Pro | ₱499 intro → ₱799/28d | — | ✅ |
 | Seating Chart | — | Interactive table editor + QR + meal counts | Free | free | — | ✅ |
 

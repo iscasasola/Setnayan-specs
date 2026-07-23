@@ -70,3 +70,15 @@ watched table changes                    (booking trigger ✅ · availability ed
 1. Cap + quiet-hours values (proposed: ≤3 pushes/wk · 21:00–08:00).
 2. Payment-due email timing (proposed: 7 days + 1 day before).
 3. Whether PR-1 waits for the Wave-1 guard bundle or ships first (they overlap — PR-1 *is* MI-2's push upgrade, "V1.1 (push)" in the MI spec, arriving early because the recon showed the pipes exist).
+
+---
+
+## 8. BUILD NOTE 2026-07-09 — guards notify SHIPPED (the sweep-sourced floor)
+
+Owner-greenlit "make guards notify" (the held PR-5) landed in `apps/web` (branch `feat/guards-notify`). What shipped vs this spec:
+
+- **§ 2 gap rows CLOSED for the sweep path:** `NotificationType` now has `ai_payment_due` (GRD-01, email-allowlisted per § 4.1) + `ai_guard_alert` (GRD-02/GRD-05, in-app only); the trigger engine is wired to `emitNotification()` via `lib/setnayan-ai-guard-plan.ts` (pure planner) + `lib/setnayan-ai-notify.ts` (sweep); the snapshot is no longer budget-only (per-line payment settlement · Overview committed-formula budget · paperwork-pipeline statutory · name-masked vendor-quiet).
+- **Restraint § 4, made persistent:** new table `setnayan_ai_guard_log` (migration `20270527224949`) — 7-day per-key cooldown, ≤3 emissions per sweep, guard-category-only (secretary stays in the digest). Entitlement gate = `isSetnayanAiActiveForUser` incl. the per-event window fix (a lapsed ₱799 window now locks — the `eventOwnsSetnayanAi` early-return bug is fixed, window is authoritative).
+- **Invocation deviates from § 3's DB-trigger→webhook picture (deliberately):** the shipped sources are all *time-based/ledger-state* (payment due · statutory · over-budget), for which § 3 itself prescribes non-trigger delivery. Implementation = the house **lazy sweep** (`after()` in the event dashboard layout, throttled 6h/event via the `__sweep__` ledger row) + the spec's **Resend `scheduledAt`** day-before GRD-01 email (09:00 Asia/Manila, stamped once per due date) for coverage between visits. The § 3 real-time trigger→`/api/notify-ai` path remains UNBUILT because its sources (price-change log, availability log) don't exist — GRD-03/09/10 still can't fire (§ 5 PR-1/PR-2 remain open; this build ≈ PR-3 + the restraint core).
+- **Deviation from § 3's stamp-at-write:** the `scheduledAt` reminder is stamped at first sweep detection, not at line-item write (the ledger write sites were owned by another workstream this round); a payment logged after scheduling doesn't cancel the send — the email copy carries an "already settled? ignore" line. Re-stamp/cancel-on-edit = follow-up.
+- **Security fix alongside:** `/api/notify` now fails CLOSED when `NOTIFY_WEBHOOK_SECRET` is unset (was fail-open).

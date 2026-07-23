@@ -431,7 +431,9 @@ PersonalReel
 
 ### 4.3 Render Pipeline (Personal Reels)
 
-**Architecture:** Cloudflare Workers + R2 + a containerized FFmpeg renderer running on Cloudflare Durable Objects (or a small Hetzner VM pool if Workers' CPU limits prove too tight for 30-second 1080p H.264 encodes).
+> **🔄 SUPERSEDED 2026-07-23 (owner) — the server pipeline below is RETIRED for guest stories.** The reel maker is now **free, client-side, and download-only**: it renders **in the guest's browser** (WebCodecs, ffmpeg.wasm fallback), the output is **downloaded to their phone**, and **Setnayan stores nothing** — no `/reels/render` call, no Cloudflare Queue, no R2 write, no notify. The guest freely picks up to ~10 items (any mix of their own photos + clips — relaxes the "5 guest + 5 couple" split) and chooses BYO-upload music (client-side, § 16.7) or an owned-catalogue track. Zero storage accumulation, ₱0 marginal cost per guest. It is the completion reward for a Papic Challenge (`Papic_Games_and_Vendor_Missions_Spec_2026-07-21.md § 8`). Practical client-side compile depends on the compressed, geo-stripped `clip_web_r2_key` web-copy pipeline. See `DECISION_LOG.md` 2026-07-23. The server-side description below is kept for lineage only.
+
+**Architecture (RETIRED — lineage only):** Cloudflare Workers + R2 + a containerized FFmpeg renderer running on Cloudflare Durable Objects (or a small Hetzner VM pool if Workers' CPU limits prove too tight for 30-second 1080p H.264 encodes).
 
 **Pipeline:**
 

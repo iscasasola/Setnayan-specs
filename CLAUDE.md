@@ -69,12 +69,12 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 | **Bundle:** Setnayan Guided Planner Suite (per event) | ₱11,999 | — |
 | **Bundle:** Setnayan Comprehensive Media Pack (per event) | ₱16,999 | — |
 
-**Vendor-side (canonical = live DB `vendor_billing_catalog` · 2026-07-10 pricing finalization):** Solo **₱999/28d (₱9,999/yr)** · Pro Vendor **₱2,499/28d (₱24,999/yr)** · Enterprise **₱7,999/28d (₱79,999/yr)** · Custom **from ₱8,999/28d** + à-la-carte add-ons · token packs at a **flat ₱100/token (₱400–₱10,000)** · 100 free tokens on verification · commission **0%**. Enterprise is a BOUNDED tier (up to 10 team seats · 100 km reach · unlimited categories); Custom is the truly-unlimited tier above it. Market Intel (Demand Radar + Price-Position) is **Pro-and-up** (owner 2026-07-11). _(Superseded: the ₱6,000/₱10,000 "Ladder A", the earlier ₱2,499/₱5,499 subs + ₱1,000–₱18,000 packs. Public-surface contradictions cleaned by PRs #1335/#1336.)_
+**Vendor-side (canonical = live DB `vendor_billing_catalog` · 2026-07-10 pricing finalization):** Solo **₱999/28d (₱9,999/yr)** · Pro Vendor **₱2,499/28d (₱24,999/yr)** · Enterprise **₱7,999/28d (₱79,999/yr)** · Custom **from ₱8,999/28d** + à-la-carte add-ons · token packs at a **flat ₱200/token (₱1,000–₱20,000)** (owner-confirmed 2026-07-15, anchored at ₱1,000 = 5 tokens; ladder 5/10/25/50/100; shipped PR #3138) · commission **0%** · ~~100 free tokens on verification~~ **RETIRED 2026-06-17** (grant removed via migration `20270110320020`; tokens now come only from admin grants · subscription bundles · purchases). Enterprise is a BOUNDED tier (up to 10 team seats · 100 km reach · unlimited categories); Custom is the truly-unlimited tier above it. Market Intel (Demand Radar + Price-Position) is **Pro-and-up** (owner 2026-07-11). _(Superseded: the ₱6,000/₱10,000 "Ladder A", the earlier ₱2,499/₱5,499 subs + ₱1,000–₱18,000 packs. Public-surface contradictions cleaned by PRs #1335/#1336.)_
 
 ### Hard product constraints
 
-- **5-second hard cap on video clips.** Capped client-side. Not configurable. UI must enforce.
-- **Max 10 tags per photo.** Combined individual + table tags.
+- **~~5-second~~ 10-second hard cap on video clips (owner-reversed 2026-07-22).** Capped client-side. UI must enforce. The old "5-second, not configurable" lock is RETIRED — owner moved the clip currency to **10s = 7 points** (photo still = 1 pt). Ships as an isolated post-metering PR (clip-point value is a hardcoded constant on the fail-closed capture path). See `0012_papic/Papic_One_Pool_Model_Spec_2026-07-22.md § 0`. ⚠ 10s clips are ~2× the bytes and clips don't compress yet → coupled to the clip-web-copy storage PR.
+- **Max 20 LIVE tags per photo (owner-raised 2026-07-23 from 10).** Combined individual + table + face + self-link; removed (tombstoned) tags never count toward the cap. Migration `20270916200000`.
 - **Untagged-still-delivered guarantee.** Every uploaded photo lands in the couple's gallery regardless of tagging status.
 - **Personal Reels:** vertical 9:16 only (1080×1920), 1–30 seconds duration, max 5 guest picks + max 5 couple memorable clips, template-driven render (no per-render AI).
 - **Music:** Setnayan-owned AI-generated catalogue only. No major-label music. No per-render music license fee.
@@ -123,13 +123,13 @@ FaceEnrollment(enrollment_id, event_id, guest_id, source{rsvp_profile|guest_port
 4. Tag intents flush to backend with the upload payload
 5. Backend fans out table-tag to all guests assigned to that table (capped at 10 total tags)
 
-**Personal Reel render:**
-1. Guest finalizes selections in the landing-page builder
-2. POST `/reels/render` with `(event_id, guest_id, template_id, selected_photo_ids, target_duration)`
-3. Validate: template unlocked? photos belong to event? guest is RSVP'd?
-4. Enqueue render job (Cloudflare Queue)
-5. Worker loads template manifest, loads photos+couple-clips+music, generates FFmpeg cmd, encodes 1080×1920 H.264 MP4
-6. Output → R2 → notify guest
+**Personal Reel / Story render (⚠ CLIENT-SIDE, download-only — reversed 2026-07-23, owner):**
+The old server pipeline (`POST /reels/render` → Cloudflare Queue → Worker FFmpeg → `Output → R2 → notify guest`) is **RETIRED for guest stories.** The reel maker is **free** and renders **entirely in the guest's browser**; the output is **downloaded to their phone and Setnayan stores nothing** (no R2 write, no DB row, no shared feed). This matches the BYO-music not-distributor posture (`14_...Playbook.md §16.7`). See `DECISION_LOG.md` 2026-07-23.
+1. Guest opens the reel maker (reward for completing a Papic Challenge — see `0012_papic/Papic_Games_and_Vendor_Missions_Spec_2026-07-21.md §8`)
+2. Guest freely picks up to ~10 items — **any mix of their own Papic photos + clips** (relaxes the locked "5 guest + 5 couple" split) → target 30s, 9:16 1080×1920
+3. Picks music: their own upload (BYO, client-side per §16.7) **or** an owned-catalogue template track
+4. **Browser** loads the template manifest + the guest's source assets (pulled from R2 — prefer the compressed, geo-stripped `clip_web_r2_key` web-copy; egress is free) + music, and renders via WebCodecs (fallback ffmpeg.wasm)
+5. Output MP4 (~15–25 MB) → **guest downloads to phone.** Setnayan holds zero story files → no storage accumulation on our side. Cost to us = ₱0.
 
 ## Music & template assets
 
@@ -170,7 +170,7 @@ Per-render cost: ~₱2–₱5 (FFmpeg compute + R2 storage; music free, CDN egre
 
 ## Payment system (V1 — apply-then-pay)
 
-Setnayan monetizes via **PHP-direct apply-then-pay** with manual reconciliation. The iteration 0003 *customer* token wallet stays **retired** — couples always pay in PHP and never see a token balance. **⚠ Updated 2026-06-04:** a **vendor-side token economy is now LIVE on setnayan.com** — vendors buy token packs (4–100 tokens, ₱1,000–₱18,000), get 100 free tokens on verification, and redeem them against any "Token Worthy" couple SKU (marked `[Token]` in the SKU table) at a dashboard-set rate. So "no tokens anywhere" is no longer accurate: tokens exist on the **vendor** side. See `Pricing.md § 0.C`.
+Setnayan monetizes via **PHP-direct apply-then-pay** with manual reconciliation. The iteration 0003 *customer* token wallet stays **retired** — couples always pay in PHP and never see a token balance. **⚠ Updated 2026-06-04:** a **vendor-side token economy is now LIVE on setnayan.com** — vendors buy token packs (canonical now: flat ₱200/token · ladder 5/10/25/50/100 = ₱1,000–₱20,000 · owner-confirmed 2026-07-15 · shipped PR #3138), ~~get 100 free tokens on verification~~ *(RETIRED 2026-06-17 · migration `20270110320020`)*, and redeem them against any "Token Worthy" couple SKU (marked `[Token]` in the SKU table) at a dashboard-set rate. So "no tokens anywhere" is no longer accurate: tokens exist on the **vendor** side. See `Pricing.md § 0.C`.
 
 - **Payment rails (V1):** static BDO + GCash receiving accounts owned by Setnayan. Customer applies for a service / order → receives payment instructions email with unique reference code → pays externally → Setnayan Team manually verifies against BDO/GCash inboxes within 24-hr SLA → service activates.
 - **PHP-only pricing.** No tokens, no in-app wallet balance, no spending primitive. Each order is a discrete PHP charge tied to a `service_orders` row with `service_key`, `customer_id`, `amount_php`, `reference_code`, `status ∈ pending_payment / paid / failed / refunded`.

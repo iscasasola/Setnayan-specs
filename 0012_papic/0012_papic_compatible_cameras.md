@@ -1,5 +1,7 @@
 # Pro Camera Bridge — Compatible Camera List
 
+> **⚠ SUBSTANTIALLY WRONG — DO NOT BUILD FROM THIS (flagged 2026-07-17).** Adversarially-verified research found this list's premise is false: Fujifilm has **no** third-party mobile WiFi SDK (voids warranty), Canon's "EOS Camera Connect SDK" **doesn't exist** (real path = CCAPI, and the 5D IV / 6D II are **absent** from it), and the Nikon/Sony SDK claims are **unverified**. Canon SDK approvals are ~2–4 weeks (not 1–6), and CCAPI needs a one-time desktop+USB activation per body. **Camera bridge / Papic SLR is SHELVED (owner 2026-07-17).** Canonical reality → [`Camera_Connectivity_Research_2026-07-17.md`](Camera_Connectivity_Research_2026-07-17.md).
+
 > Single canonical list of every DSLR / mirrorless body Setnayan's Pro Camera Bridge supports. Companion to `0012_papic.md` and `0012_papic_sdk_notes.md`. Last revised **2026-05-11**.
 
 The Pro Camera Bridge (₱1,500 per DSLR seat, multi-purchase, shared SKU with 0011 Panood) pairs one phone seat to one camera body over WiFi using the vendor's official SDK. The phone keeps every responsibility it had in V1 — gesture shutter, tag drawer, face detection, EXIF stamping, adaptive compression, offline queue, upload — but the optical capture surface moves to the camera body.

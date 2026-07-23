@@ -143,7 +143,7 @@ Ordered output, **≤ 8 beats total** (bounded-arc evidence, strategy §1):
 
 ## 7. PR-5 — instrumentation, perf, flip
 
-- PostHog (existing 0035 stack, no PII — ids only): `life_story_flash_started/completed/cancelled`, `life_story_perspective_beat_viewed`, `life_story_reel_order_toggled`, `life_story_memoriam_marked`. These are strategy §9's metrics (flash completion, perspective reach, ✦ adoption).
+- PostHog (existing 0035 stack, no PII — ids only): `life_flash_started/completed/cancelled`, `life_flash_perspective_viewed`, `life_flash_reel_reordered`, `life_flash_person_remembered`. These are strategy §9's metrics (flash completion, perspective reach, ✦ adoption). _(Event names reconciled 2026-07-11 to the SHIPPED code names — the `life_story_*` set here predated the Life Story → Life-Flash product rename; code was never renamed and never emitted in prod, so `life_flash_*` is canonical.)_
 - Perf audit: route LCP < 2.5s on preview, flash steady-state ≤ 1 decoded video + 2 images in memory, Lighthouse budget respected (CI already enforces).
 - A11y/safety audit against §6's checklist; then owner QA on Vercel preview with fixtures → owner sets `NEXT_PUBLIC_LIFE_STORY=1` in Vercel → live.
 

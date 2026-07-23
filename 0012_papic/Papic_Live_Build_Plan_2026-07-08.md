@@ -28,7 +28,7 @@ This plan turns the 2026-07-08 discussion into a shippable, staged delta. Papic 
 
 ## 2. The service, as agreed (reference map)
 
-- **Capture (paid, per camera·day):** Papic Ltd ₱30 (30 photos + 10×5 s) · Papic Unli ₱100 (unlimited → Drive archive) · both cap ₱15,000/day · 5-camera min (₱150) · free first-5-cameras funnel (5 photos + 1 video each).
+- **Capture (paid, per camera·day):** Papic Ltd ₱30 (30 photos + 10×5 s) · Papic Unli ₱100 (unlimited → Drive archive) · both cap ₱15,000/day · 5-camera min (₱150) · free first-5-cameras funnel (10 photos + 3×5s clips each · raised 2026-07-10).
 - **Intelligence (free, always):** face tagging (opt-in) → per-guest galleries · face blocking (opt-in, RA 10173).
 - **Deliverables:** host gallery (sees all) · per-guest custom gallery · auto Personal Reel · **direct download + ZIP export** · Google Drive sync (full-res → couple's Drive).
 - **Words layer:** Kwento ₱299 whole-event → flows to the Alaala / "Our Story" page.

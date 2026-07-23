@@ -13,7 +13,7 @@
 >
 > When this body disagrees with the above, **the above wins.**
 >
-> **➕ 2026-06-29 price refresh** (live-site sync — supersedes any stale prices in the banner above): Setnayan AI **₱3,999** (paid first paywall) · Animated Monogram **₱1,999** · Live Studio (Panood) multicam **₱3,499/day** (single-cam livestream FREE) · Pakanta **₱2,499** (one SKU) · Cinematic Reveal **₱1,499** · vendor Pro **₱2,499** / Enterprise **₱4,999** per 28-day · **0% commission · verification FREE** · couple website = free 4-in-1 + ONE **Couple Website PRO ₱1,999** (old separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs retired) · couple tiers **Free ₱0 · Setnayan AI ₱3,999** (Essentials/Complete bundles REMOVED 2026-06-29). Canon: `AS_BUILT_GROUND_TRUTH_2026-06-07.md` § 1 + `Pricing.md` § 00.
+> **➕ 2026-06-29 price refresh** (live-site sync — supersedes any stale prices in the banner above): Setnayan AI **₱3,999** (paid first paywall) · Animated Monogram **₱1,999** · Live Studio (Panood) — ⚠ the ₱3,499/day single multicam tier here is **RETIRED**; device-tiered since 2026-07-08 and repriced 2026-07-20 (PR #3425) to **Mobile ₱1,500/day · Desktop ₱2,500/day** (single-cam livestream FREE) · Pakanta **₱2,499** (one SKU) · Cinematic Reveal **₱1,499** · vendor Pro **₱2,499** / Enterprise **₱4,999** per 28-day · **0% commission · verification FREE** · couple website = free 4-in-1 + ONE **Couple Website PRO ₱1,999** (old separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs retired) · couple tiers **Free ₱0 · Setnayan AI ₱3,999** (Essentials/Complete bundles REMOVED 2026-06-29). Canon: `AS_BUILT_GROUND_TRUTH_2026-06-07.md` § 1 + `Pricing.md` § 00.
 
 > A single reference covering every feature Setnayan ships in V1, organized by the role using it. Companion to the iteration specs in `0000_*` through `0018_*`. Last revised **2026-05-11**.
 
@@ -387,6 +387,8 @@ Admin actions are audit-logged. Read access to a customer's data without their s
 # Part 5 · Roles deferred from V1
 
 ## Coordinator
+
+> **⚠ SUPERSEDED 2026-07-18 — this "deferred / Vendors-tab only" framing is STALE.** The coordinator **host-access model actually shipped** (auto-grant on booking-lock, money wall, revoke, chat-join, seat-plan edit, vendor completion + review). Canonical coordinator truth + industry benchmark + build plan now lives in **[`Coordinator_Role_Feature_Spec_2026-07-18.md`](../Coordinator_Role_Feature_Spec_2026-07-18.md)** (corpus root). The V2-cluster list below is still accurate as the *deferred* tail (multi-staff PIN, scan modes, dietary tracker, thermal badges, post-event PDF, etc.).
 
 Wedding coordinators are power users sitting between the couple and the vendors on the day. The coordinator cluster envisioned for V2 includes:
 

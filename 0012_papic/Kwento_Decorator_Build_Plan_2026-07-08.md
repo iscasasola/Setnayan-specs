@@ -21,8 +21,8 @@ Pure client-side, ₱0. Design to minimize blind-build risk:
 
 ## Slices
 1. **Editor + persist** — ✅ **BUILT · PR #2892 (HELD for visual review, no auto-merge).** `/papic/decorate` + `KwentoDecorator` (photo · 5 filters · emoji stickers · draggable text) → on-device canvas bake → upload via the existing guest-capture route → moderation-gated gallery capture. Entry link on `/papic/me/[token]`. Decorates a device-selected photo (no CORS taint); fractional overlay coords. tsc-clean. *Awaiting owner preview review before merge.*
-2. **Kwento text on the decorated photo** — chain the existing `/api/papic/kwento` author sheet on the returned `captureId` (words + decoration together).
-3. **Polish** — bigger sticker set, more text styles, undo, per-couple sticker themes (mood-board palette).
+2. **Kwento text on the decorated photo** — ✅ **BUILT · same PR #2892 (held).** After a successful save, a caption composer (≤280, explicit consent) anchors a Kwento *story* on the returned `captureId` via the shipped `/api/papic/kwento` contract; only shown when `eventKwentoEnabled`. Words + decoration together.
+3. **Polish** — ✅ **BUILT · same PR #2892 (held).** Bigger sticker set (12 → 24) · undo (add/delete) · tap-away deselect · selection glow + pop (no square) · text-readability pill · mood-board colours merged into the text swatches (`events.role_palette`). Sticker-sizing bug fixed (`cqw`). _(True mood-board-tinted **stickers** — vs colours — remain a future nicety.)_
 
 ## Locks honored
 NSFW screen stays on (via the reused route) · client-side render (₱0) · moderation-gated before the couple sees it · RA 10173 consent rides the capture route's existing opt-in.

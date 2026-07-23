@@ -222,6 +222,36 @@ Legend — Legal basis per RA 10173 §12 (personal info) / §13 (sensitive perso
 | **Security measures** | Service-role/admin-only + deny-by-default RLS at CREATE; non-PII evidence; reversible auto-suspend at high threshold (score ≥90); **irreversible ban never automated** — four-eyes gate + typed confirmation; append-only audit; help-center appeal path; AES-256; TLS 1.3 |
 | **Risk level** | **High** — **Status: LIVE in production since 2026-07-07, ahead of counsel sign-off (owner-elected).** DPIA R-08 drafted (`08_DPIA_AntiFraud_Trust_Integrity_2026-07-07.md`); Privacy Policy Anti-Fraud disclosure + LIA + formal contest path outstanding |
 
+### DPS-13 · Vendor AI Assistant — automated replies + business deep-search (0022)
+
+| Field | Detail |
+|---|---|
+| **Purpose** | The paid Vendor AI add-on, two capabilities: **(a) Auto-reply** — reads a couple's inbound messages + Event Brief (event date, guest count, budget-per-head, venue) in that couple↔vendor thread and drafts/auto-sends replies (and, if the vendor allows, accepts a booking) on the vendor's behalf, shown to the couple labelled "⚡ AI auto-reply"; **(b) Deep Search** — runs AI web-research over the **vendor's own** business across public sources (own website, directories, review sites) and stores a structured business dossier (`vendor_web_dossiers`) the vendor reviews to auto-fill its profile. Both are gated behind the `/admin/data-privacy` controls `vendor_ai_autoreply` + `vendor_deep_search` (fail-closed until DPO-activated) |
+| **Legal basis** | **Contract (§12(b))** — the vendor's paid add-on operating on the vendor's own shop; **Consent (§12(a))** — the couple's own act of messaging that vendor grounds the auto-reply reading their thread. Auto-reply is **automated processing (§34)** with a standing "⚡ AI auto-reply" label and a §16(c) object path (every message still reaches the vendor). Deep Search of already-public third-party content relies on **legitimate interest (§12(f))**, minimised to a business summary with a 180-day retention limit `[TO CONFIRM]` counsel |
+| **Data subjects** | Couples (inbound message text + Event Brief the auto-reply reads) + vendors (own business researched, dossier stored) + incidental third parties named on public web pages (Deep Search, e.g. a reviewer's public name) |
+| **Personal data categories** | **Auto-reply:** couple inbound chat text + structured Event Brief fields (date, pax, budget band, venue) + the vendor's own package/pricing config; generated reply text. **Deep Search:** the vendor's own public business info (name, contact, services, review-derived facts) → `vendor_web_dossiers`. **Never** consumes SPI, face vectors, religion/faith, or the guest list |
+| **SPI?** | **N** — no SPI; biometric, faith, and guest-PII consumption are explicitly carved out |
+| **Recipients / sub-processors** | Supabase (Postgres, Singapore); **Anthropic web_search (US, Deep Search only)** — zero-retention API mode. **Single-tenant isolation**: a vendor's assistant reads only that vendor's own threads/business, never across vendors or across the couple's events |
+| **Cross-border transfer** | SG (Supabase); **US (Anthropic — Deep Search only)** |
+| **Retention** | Deep Search dossier `vendor_web_dossiers` — rolling **180-day** TTL `[TO CONFIRM]`. Auto-reply reads live thread + Event Brief data in place (no separate store beyond the chat system, DPS-07) |
+| **Security measures** | Per-vendor single-tenant isolation; both capabilities **fail-closed** until DPO-activated on the `/admin/data-privacy` control board; "⚡ AI auto-reply" transparency label; SPI / face / guest-list carve-out enforced in code; TLS 1.3; AES-256 |
+| **Risk level** | **Medium** — automated processing (§34) of couple message content + AI web-research that may store incidental third-party PII. Public Privacy Policy §"Vendor AI assistant" + §"Vendor Deep Search" disclosures **LIVE**; the `/admin/data-privacy` controls hold both OFF until DPO sign-off; retention rule + LIA finalization outstanding |
+
+### DPS-14 · Coordinator Delegated Access — consent scopes + prep-then-release (0021)
+
+| Field | Detail |
+|---|---|
+| **Purpose** | Let a couple delegate planning access to a **coordinator** they invite (a planner / family / friend — host-side, not Setnayan staff). At invite the coordinator accepts an RA 10173 **consent modal** scoping access to the couple's **guest list, seating, schedule, and vendor chats**. The couple may optionally grant **"Can finalize vendors"** and **"Can handle payments"** scopes (lock vendors + complete an apply-then-pay checkout on the couple's behalf). **Prep-then-release** lets the coordinator stage run-of-show/schedule blocks privately and release them to the couple (staged blocks hidden from couple/guests/vendors until released). Gated behind the `/admin/data-privacy` controls `coordinator_consent_money` + `coordinator_prep_release` (fail-closed) |
+| **Legal basis** | **Consent (§12(a))** captured on the invite modal + **Contract (§12(b))** — service delivery. Money scopes are **opt-in by the couple**; consistent with the platform-wide rule that **Setnayan never holds, moves, or records the transfer of any money** (the coordinator prepares the same off-platform payment; settlement is direct couple↔vendor) |
+| **Data subjects** | Couples (planning data + optional money authority delegated) + guests (whose PII the coordinator sees within scope) + coordinators |
+| **Personal data categories** | Guest list + RSVP data, seating, schedule / run-of-show, vendor chat threads — scoped to the granted permissions; optional money-adjacent actions (vendor finalize, checkout) when the couple grants the scope; staged prep-release schedule blocks (hidden until released). **Face / biometric data excluded** |
+| **SPI?** | **N** — no new SPI collection; scoped delegated access to the couple's existing planning data (incl. guest PII) |
+| **Recipients / sub-processors** | Supabase (Postgres, Singapore) — RLS event/thread scoping + per-thread coordinator join permission (see DPS-07). **No new sub-processor** |
+| **Cross-border transfer** | SG (Supabase) |
+| **Retention** | Follows the parent event data (DPS-01 / DPS-03 / DPS-07) — 5 years post-event. Coordinator access is **revocable by the couple** at any time; revocation removes access prospectively |
+| **Security measures** | RLS event/thread scoping; consent captured at invite (durable proof); money scopes opt-in **and** separately gated; face/biometric excluded; staged prep-release hidden until released; controls **fail-closed** until DPO-activated; TLS 1.3; AES-256 |
+| **Risk level** | **Medium** — widens a coordinator's access over guest PII and, if the couple grants it, money-adjacent actions. Public Privacy Policy §"Coordinators you invite" disclosure **LIVE**; confirm the DPO ruling before activating the `coordinator_consent_money` control |
+
 ---
 
 ## 2. Threshold analysis — mandatory NPC registration
@@ -248,6 +278,7 @@ Under **RA 10173 and NPC Circular 17-01** (as amended), a PIC/PIP must register 
 - `[TO CONFIRM]` Jurisdictions/retention for Resend, PostHog (analytics), Vercel edge, Suno, and the face-matching engine host.
 - `[TO CONFIRM]` Whether Maya Business (V1.5 payment gateway) is contracted; keep DPS-08 marked "not active" until then.
 - DPS-06 (Person Graph) and the Person Graph amendment publish **only after** DPO/counsel sign-off; minors/legacy (Phase 3) require their own DPIA + NPC consultation before any build-to-live.
+- DPS-13 (Vendor AI) and DPS-14 (Coordinator Delegated Access) are each held **fail-closed** by the in-app `/admin/data-privacy` control board; confirm the DPO ruling + finalize the Deep Search retention rule (180-day) before activating the corresponding controls. `[TO CONFIRM]`
 
 ---
 

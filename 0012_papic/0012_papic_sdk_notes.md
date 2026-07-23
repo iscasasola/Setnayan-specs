@@ -1,5 +1,7 @@
 # Pro Camera Bridge — Vendor SDK Engineering Notes
 
+> **⚠ BUILDS AGAINST SDKs THAT DON'T EXIST — DO NOT USE (flagged 2026-07-17).** This file details per-vendor "mobile SDK" integrations for Canon/Nikon/Sony/Fujifilm, but verified research shows **Fujifilm's is false** (no iOS; Android USB-only), **Canon's named SDK doesn't exist** (the real WiFi path is CCAPI, a plain HTTP REST API — no SDK binary), and **Nikon's + Sony's are unverified**. The specific firmware bugs / millisecond latencies here read as confidently-invented. **Camera bridge / Papic SLR is SHELVED (owner 2026-07-17).** Verified reality → [`Camera_Connectivity_Research_2026-07-17.md`](Camera_Connectivity_Research_2026-07-17.md).
+
 > Companion to `0012_papic.md` and `0011_panood.md`. Audience: engineers implementing the per-brand `CameraBridge` adapter. Updated as integration progresses; last revision **2026-05-10**.
 
 The four supported brands (Canon, Nikon, Sony, Fujifilm) all expose phone-as-companion SDKs over WiFi, but each has a different API surface, transport protocol, registration process, and set of quirks. This file captures what every adapter-author needs to know before writing code, plus a running list of issues found during integration so future sprints don't rediscover them.
