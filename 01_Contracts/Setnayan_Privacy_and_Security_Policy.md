@@ -192,7 +192,7 @@ In the event of a data breach affecting personal data:
 - **Within 72 hours of confirmation:** Setnayan notifies the National Privacy Commission (NPC) per RA 10173
 - **Within 72 hours of confirmation:** Affected users notified in-app + via email of: what data was accessed, when, what we're doing about it, what they should do (change password, monitor accounts)
 - **Public disclosure:** breach summary posted on `setnayan.com/security` within 7 days
-- **DPO contact:** dpo@setnayan.com for breach inquiries; phone hotline for severity-high incidents
+- **DPO contact:** iscasasolaii@gmail.com for breach inquiries; phone hotline for severity-high incidents
 
 ## 9. Data Protection Officer (DPO)
 
@@ -203,7 +203,7 @@ Setnayan's DPO is registered with the Philippine National Privacy Commission. Th
 - Privacy complaints
 - Breach notifications
 
-**DPO contact:** dpo@setnayan.com · response within 15 business days for non-urgent requests; immediate for breach notifications.
+**DPO contact:** iscasasolaii@gmail.com · response within 15 business days for non-urgent requests; immediate for breach notifications.
 
 ## 10. Cross-border data transfers (amended 2026-05-16)
 
@@ -281,7 +281,7 @@ The person graph is **adults-only** today; **data about minors is not processed.
 
 Aligns this binding policy to `NPC_Privacy_Compliance_Dossier_2026-07-12.md` (v2.0) and `Privacy_Reconciliation_Home_and_Data_Flows_2026-07-13.md`. Changes made in place:
 
-- **DPO contact standardized** to `dpo@setnayan.com` (the address published on every public surface), replacing `iscasasolaii@gmail.com` in §8, §9, and Appendix A. The gmail remains only as an internal ops-alert inbox.
+- **DPO contact standardized** to `iscasasolaii@gmail.com` (owner-locked 2026-07-24 — the address on the live `/privacy` page and registered with the NPC DPO system on 2026-07-07) across §8, §9, and Appendix A. The earlier `dpo@setnayan.com` variant is retired.
 - **Response SLA** raised to **15 business days** (§9) to match the live privacy notice (was 7).
 - **§4 retention** now carries the **10-year statutory floor** for payment records + Official Receipts and for contracts + e-signatures (BIR RR 17-2013 / Civil Code Art. 1144), not shortened by account deletion; vendor transaction history aligned to the same floor; an **E-gift (Pabuya)** row added.
 - **§10 sub-processors** add **Google LLC** (YouTube/Drive, opt-in OAuth), **TikTok** (opt-in OAuth), and **Suno** (music generation, no PII).
@@ -299,7 +299,7 @@ Aligns this binding policy to `NPC_Privacy_Compliance_Dossier_2026-07-12.md` (v2
 Every Setnayan account holder has the right to:
 
 1. **Be informed** of what personal data is collected and how it's used (this document)
-2. **Access** their personal data — request a copy via `dpo@setnayan.com`
+2. **Access** their personal data — request a copy via `iscasasolaii@gmail.com`
 3. **Object** to processing — opt out of specific data uses
 4. **Rectify** errors in their data — edit their profile + request corrections
 5. **Erase / block** their data — delete their account

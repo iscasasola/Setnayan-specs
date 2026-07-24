@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Setnayan · Avatar Maker — Prototype 2026-07-19</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* ── Atelier-glass design language (owner-locked 2026-07-12) ───────────── */
+  :root {
+    --obsidian: #101011;
+    --ink: #1c1b19;
+    --greige: #efece6;
+    --greige-2: #e5e0d7;
+    --paper: #f7f5f0;
+    --gold: #b98a2f;
+    --gold-soft: #d4af5a;
+    --line: rgba(28, 27, 25, 0.12);
+    --glass: rgba(255, 255, 255, 0.6);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    background: var(--greige);
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .mono { font-family: 'Space Mono', monospace; }
+
+  /* ── Shell ─────────────────────────────────────────────────────────────── */
+  #app { display: flex; flex-direction: column; height: 100vh; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+    z-index: 5;
+  }
+  .brand { display: flex; align-items: baseline; gap: 12px; }
+  .brand .word { font-weight: 700; letter-spacing: 0.22em; font-size: 13px; }
+  .brand .word .accent { color: var(--gold); }
+  .brand .crumb { font-family: 'Space Mono', monospace; font-size: 11px; color: rgba(28,27,25,0.55); }
+  .proto-tag {
+    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.08em;
+    color: var(--gold); border: 1px solid rgba(185,138,47,0.4); border-radius: 999px;
+    padding: 3px 10px;
+  }
+
+  /* Role switch — the two maker chromes */
+  .role-switch {
+    display: flex; gap: 4px; background: var(--greige-2); border-radius: 999px; padding: 4px;
+  }
+  .role-switch button {
+    font-family: 'Hanken Grotesk', sans-serif; font-size: 12.5px; font-weight: 600;
+    letter-spacing: 0.04em; border: none; background: transparent; color: rgba(28,27,25,0.55);
+    padding: 7px 18px; border-radius: 999px; cursor: pointer; transition: all 0.25s ease;
+  }
+  .role-switch button.active { background: var(--obsidian); color: var(--paper); }
+  .role-switch button.active .dot { background: var(--gold-soft); }
+  .role-switch .dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(28,27,25,0.3); margin-right: 7px; vertical-align: 1px;
+  }
+
+  main { display: flex; flex: 1; min-height: 0; }
+
+  /* ── Stage (3D preview) ────────────────────────────────────────────────── */
+  #stage-wrap { position: relative; flex: 1; min-width: 0; }
+  #stage { position: absolute; inset: 0; }
+  #stage canvas { display: block; }
+  .stage-caption {
+    position: absolute; left: 24px; bottom: 20px; pointer-events: none;
+  }
+  .stage-caption h1 {
+    font-weight: 300; font-size: clamp(26px, 3.4vw, 44px); line-height: 1.05; letter-spacing: -0.01em;
+  }
+  .stage-caption h1 em { font-style: italic; color: var(--gold); }
+  .stage-caption p {
+    font-family: 'Space Mono', monospace; font-size: 11px; color: rgba(28,27,25,0.5);
+    margin-top: 8px;
+  }
+  .stage-hint {
+    position: absolute; right: 24px; bottom: 20px;
+    font-family: 'Space Mono', monospace; font-size: 10px; color: rgba(28,27,25,0.42);
+    pointer-events: none;
+  }
+
+  /* ── Editor panel (glass) ──────────────────────────────────────────────── */
+  aside {
+    width: 372px; flex-shrink: 0; display: flex; flex-direction: column;
+    background: var(--glass);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border-left: 1px solid var(--line);
+    z-index: 4;
+  }
+  .panel-head { padding: 20px 22px 0; }
+  .panel-head .eyebrow {
+    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--gold);
+  }
+  .panel-head h2 { font-weight: 500; font-size: 20px; margin-top: 6px; }
+  .panel-head .sub { font-size: 12.5px; color: rgba(28,27,25,0.55); margin-top: 4px; line-height: 1.45; }
+
+  .slot-tabs {
+    display: flex; gap: 2px; margin: 18px 22px 0; border-bottom: 1px solid var(--line);
+  }
+  .slot-tabs button {
+    font-family: 'Hanken Grotesk', sans-serif; font-size: 12.5px; font-weight: 600;
+    background: none; border: none; cursor: pointer; color: rgba(28,27,25,0.5);
+    padding: 9px 13px; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: color 0.2s;
+  }
+  .slot-tabs button.active { color: var(--ink); border-bottom-color: var(--gold); }
+
+  .panel-body { flex: 1; overflow-y: auto; padding: 18px 22px 8px; }
+  .slot-pane { display: none; }
+  .slot-pane.active { display: block; }
+
+  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .chip {
+    display: flex; flex-direction: column; gap: 3px; text-align: left;
+    background: rgba(255,255,255,0.65); border: 1px solid var(--line);
+    border-radius: 14px; padding: 12px 14px; cursor: pointer;
+    font-family: 'Hanken Grotesk', sans-serif; transition: all 0.18s ease;
+  }
+  .chip:hover { border-color: rgba(185,138,47,0.5); }
+  .chip.active { border-color: var(--gold); background: rgba(212,175,90,0.12); box-shadow: 0 0 0 1px var(--gold); }
+  .chip .name { font-size: 13px; font-weight: 600; }
+  .chip .desc { font-size: 11px; color: rgba(28,27,25,0.5); line-height: 1.35; }
+
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+  .swatch {
+    width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+    border: 2px solid rgba(28,27,25,0.12); transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .swatch.active { box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--gold); transform: scale(1.05); }
+  .swatch-label { font-family: 'Space Mono', monospace; font-size: 10px; color: rgba(28,27,25,0.5); margin-top: 10px; }
+
+  .field { margin-top: 4px; }
+  .field label {
+    display: block; font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: rgba(28,27,25,0.55); margin-bottom: 7px;
+  }
+  .field input[type="text"] {
+    width: 100%; font-family: 'Hanken Grotesk', sans-serif; font-size: 14px;
+    padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px;
+    background: rgba(255,255,255,0.75); color: var(--ink); outline: none;
+  }
+  .field input[type="text"]:focus { border-color: var(--gold); }
+
+  .section-gap { height: 22px; }
+  .section-note {
+    font-size: 11.5px; color: rgba(28,27,25,0.5); line-height: 1.5;
+    border-left: 2px solid rgba(185,138,47,0.35); padding-left: 10px; margin-top: 18px;
+  }
+
+  .panel-foot {
+    padding: 16px 22px 20px; border-top: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .btn-save {
+    flex: 1; font-family: 'Hanken Grotesk', sans-serif; font-size: 14px; font-weight: 600;
+    letter-spacing: 0.03em; background: var(--obsidian); color: var(--paper);
+    border: none; border-radius: 12px; padding: 13px 18px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-save:hover { background: #2a2a2c; }
+  .btn-save .price { color: var(--gold-soft); font-family: 'Space Mono', monospace; font-size: 12px; margin-left: 6px; }
+  .btn-shuffle {
+    font-size: 18px; background: rgba(255,255,255,0.65); border: 1px solid var(--line);
+    border-radius: 12px; width: 46px; height: 46px; cursor: pointer; transition: border-color 0.2s;
+  }
+  .btn-shuffle:hover { border-color: var(--gold); }
+
+  #toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+    background: var(--obsidian); color: var(--paper); font-size: 13px;
+    padding: 11px 20px; border-radius: 999px; opacity: 0; pointer-events: none;
+    transition: all 0.3s ease; z-index: 20;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast .mono { color: var(--gold-soft); }
+
+  /* Vendor chrome tint — the panel itself signals whose maker this is */
+  body.vendor-mode aside { background: rgba(16, 16, 17, 0.82); border-left-color: rgba(255,255,255,0.08); }
+  body.vendor-mode .panel-head h2,
+  body.vendor-mode .slot-tabs button.active { color: var(--paper); }
+  body.vendor-mode .slot-tabs { border-bottom-color: rgba(255,255,255,0.1); }
+  body.vendor-mode .slot-tabs button { color: rgba(247,245,240,0.45); }
+  body.vendor-mode .panel-head .sub,
+  body.vendor-mode .swatch-label,
+  body.vendor-mode .section-note { color: rgba(247,245,240,0.55); }
+  body.vendor-mode .chip { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+  body.vendor-mode .chip .name { color: var(--paper); }
+  body.vendor-mode .chip .desc { color: rgba(247,245,240,0.5); }
+  body.vendor-mode .chip.active { background: rgba(212,175,90,0.14); }
+  body.vendor-mode .field label { color: rgba(247,245,240,0.55); }
+  body.vendor-mode .field input[type="text"] { background: rgba(255,255,255,0.08); color: var(--paper); border-color: rgba(255,255,255,0.14); }
+  body.vendor-mode .panel-foot { border-top-color: rgba(255,255,255,0.1); }
+  body.vendor-mode .btn-save { background: var(--gold); color: var(--obsidian); }
+  body.vendor-mode .btn-save .price { color: rgba(16,16,17,0.7); }
+  body.vendor-mode .btn-shuffle { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); color: var(--paper); }
+
+  @media (max-width: 860px) {
+    main { flex-direction: column; }
+    aside { width: 100%; height: 46vh; border-left: none; border-top: 1px solid var(--line); }
+    .stage-caption h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <span class="word">SETNAYAN<span class="accent">.</span></span>
+      <span class="crumb">3D Plan / Avatar Maker</span>
+    </div>
+    <div class="role-switch" id="roleSwitch">
+      <button data-role="user" class="active"><span class="dot"></span>My Avatar</button>
+      <button data-role="vendor"><span class="dot"></span>My Booth</button>
+    </div>
+    <span class="proto-tag">PROTOTYPE · 2026-07-19</span>
+  </header>
+
+  <main>
+    <div id="stage-wrap">
+      <div id="stage"></div>
+      <div class="stage-caption">
+        <h1 id="stageTitle">This is <em>you</em><br />in the room.</h1>
+        <p id="stageSub">The figure every guest sees at your table, on the dance floor, in the walk.</p>
+      </div>
+      <div class="stage-hint">drag to orbit · scroll to zoom</div>
+    </div>
+
+    <aside id="panel">
+      <!-- Filled by JS: user chrome or vendor chrome -->
+      <div class="panel-head">
+        <div class="eyebrow" id="panelEyebrow">Guest account</div>
+        <h2 id="panelTitle">Build your figure</h2>
+        <p class="sub" id="panelSub">Three pieces, like a minifig — head, torso, legs. Faceless by design; your selfie can replace the head in the room.</p>
+      </div>
+      <div class="slot-tabs" id="slotTabs"></div>
+      <div class="panel-body" id="panelBody"></div>
+      <div class="panel-foot">
+        <button class="btn-shuffle" id="btnShuffle" title="Surprise me">⟲</button>
+        <button class="btn-save" id="btnSave">Save my avatar</button>
+      </div>
+    </aside>
+  </main>
+</div>
+<div id="toast"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RIG CONSTANTS — verbatim from apps/web/lib/figure-sit-bake.ts +
+   kit/figure.tsx (the shipped one-piece blob). The prototype must preview the
+   figure the app actually renders, so every number below is the app's number.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const PELVIS_Y = 0.8, HIP_X = 0.062, THIGH_LEN = 0.34, SHIN_LEN = 0.44;
+const SHOULDER_X = 0.175, SHOULDER_Y = 0.46, UPPER_ARM_LEN = 0.22, FOREARM_LEN = 0.2;
+const NECK_Y = 0.52, HEAD_LIFT = 0.095, HEAD_R = 0.16;
+const LEG_GEO_LEN = 0.36, ARM_GEO_LEN = 0.224;
+const HIP_BLOCK_Y = -0.045;
+const THIGH_SCALE_XZ = 1.14, SHIN_SCALE_XZ = 1.06;
+const SHOE_POS_Y = -SHIN_LEN + 0.055, SHOE_POS_Z = 0.015;
+const SHOE_S = [1.05, 0.85, 1.1];
+const UPPER_ARM_SCALE_XZ = 1, FOREARM_SCALE_XZ = 0.94;
+const THIGH_SCALE_Y = THIGH_LEN / LEG_GEO_LEN, SHIN_SCALE_Y = SHIN_LEN / LEG_GEO_LEN;
+const UPPER_ARM_SCALE_Y = UPPER_ARM_LEN / ARM_GEO_LEN, FOREARM_SCALE_Y = FOREARM_LEN / ARM_GEO_LEN;
+const KNEE_BALL_R = 0.086, HIP_BALL_R = 0.086, ELBOW_BALL_R = 0.059, SHOULDER_BALL_R = 0.068;
+const MANNEQUIN_SURFACE = { roughness: 0.5, metalness: 0.02 };
+
+// Shared geometry (module scope, one buffer each — the kit's own pattern)
+const ARM_GEO = new THREE.CapsuleGeometry(0.058, 0.108, 6, 14);
+const LEG_GEO = new THREE.CapsuleGeometry(0.075, 0.21, 6, 14);
+const HEAD_GEO = new THREE.SphereGeometry(HEAD_R, 28, 20);
+const JOINT_GEO = new THREE.SphereGeometry(1, 20, 16);
+const STUMP_GEO = new THREE.SphereGeometry(0.08, 16, 12);
+const HIP_GEO = (() => { const g = new THREE.CapsuleGeometry(0.115, 0.08, 6, 14); g.scale(1.25, 0.85, 0.95); return g; })();
+const TORSO_GEO = (() => { const g = new THREE.CapsuleGeometry(0.16, 0.24, 10, 24); g.scale(1, 1.02, 0.9); g.translate(0, 0.27, 0); return g; })();
+
+// Gown lathe — the exact GOWN_GEO profile from kit/outfits.ts (torso space)
+function latheProfile(points, segments = 28) {
+  const pts = points.map(([r, y]) => new THREE.Vector2(r, y));
+  pts.push(new THREE.Vector2(0.001, points[points.length - 1][1]));
+  return new THREE.LatheGeometry(pts, segments);
+}
+const GOWN_GEO = latheProfile([
+  [0.045, 0.5], [0.15, 0.44], [0.165, 0.32], [0.108, 0.18],
+  [0.155, 0.02], [0.205, -0.38], [0.245, -0.62],
+]);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PART CATALOG — the lego bricks this prototype proposes. Head / Torso / Legs
+   variants are silhouette-only (the blob stays faceless, owner-locked).
+   ═══════════════════════════════════════════════════════════════════════════ */
+const HEADS = [
+  { id: 'classic',  name: 'Classic',   desc: 'The one-piece ball — today’s figure' },
+  { id: 'topknot',  name: 'Top Knot',  desc: 'A small bun riding high' },
+  { id: 'twinbuns', name: 'Twin Buns', desc: 'Two side buns, playful read' },
+  { id: 'cap',      name: 'Cap',       desc: 'A soft brim over the brow' },
+  { id: 'pouf',     name: 'Pouf',      desc: 'Fuller, rounder crown' },
+];
+const TORSOS = [
+  { id: 'classic', name: 'Classic', desc: 'The soft one-piece capsule' },
+  { id: 'petite',  name: 'Petite',  desc: 'A slighter frame' },
+  { id: 'broad',   name: 'Broad',   desc: 'Wider shoulders, solid read' },
+  { id: 'gown',    name: 'Gown',    desc: 'A-line skirt from the hips' },
+];
+const LEGS = [
+  { id: 'classic', name: 'Classic', desc: 'Chunky one-piece limbs' },
+  { id: 'slender', name: 'Slender', desc: 'A lighter leg line' },
+  { id: 'sturdy',  name: 'Sturdy',  desc: 'Planted, fuller stance' },
+];
+const TINTS = [
+  { id: 'white',     hex: '#ffffff', name: 'Porcelain' },
+  { id: 'champagne', hex: '#e8d9b8', name: 'Champagne' },
+  { id: 'blush',     hex: '#e6c9c4', name: 'Blush' },
+  { id: 'sage',      hex: '#c3cdb9', name: 'Sage' },
+  { id: 'sky',       hex: '#bccbd8', name: 'Sky' },
+  { id: 'lilac',     hex: '#cfc2dc', name: 'Lilac' },
+  { id: 'gold',      hex: '#d4af5a', name: 'Gold' },
+  { id: 'charcoal',  hex: '#4a4a4f', name: 'Charcoal' },
+];
+
+// Vendor side — booth chassis (from kit/booth-templates.ts) + staff garments
+const CHASSIS = [
+  { id: 'COUNTER',  name: 'Counter',  desc: 'Bar / café serving counter' },
+  { id: 'STATION',  name: 'Station',  desc: 'Draped service table' },
+  { id: 'BUFFET',   name: 'Buffet',   desc: 'Long catering spread' },
+  { id: 'VEHICLE',  name: 'Cart',     desc: 'Rolling food cart' },
+  { id: 'BACKDROP', name: 'Backdrop', desc: 'Photo / ceremony frame' },
+  { id: 'RISER',    name: 'Riser',    desc: 'Band / performer stage' },
+];
+const GARMENTS = [
+  { id: 'chef_whites', name: 'Chef Whites', desc: 'Double-breasted, stays white' },
+  { id: 'apron',       name: 'Apron',       desc: 'Bib + straps in your color' },
+  { id: 'vest',        name: 'Vest',        desc: 'Vest over an open shirt' },
+  { id: 'uniform',     name: 'Uniform',     desc: 'Branded polo + badge' },
+  { id: 'robe',        name: 'Robe',        desc: 'Choir robe, gold stole' },
+];
+const BRAND_COLORS = [
+  { id: 'terracotta', hex: '#b9673f', name: 'Terracotta' },
+  { id: 'charcoal',   hex: '#3a3f4d', name: 'Charcoal' },
+  { id: 'service',    hex: '#4f6b5e', name: 'Service Green' },
+  { id: 'burgundy',   hex: '#6e3344', name: 'Burgundy' },
+  { id: 'navy',       hex: '#2f3d5c', name: 'Navy' },
+  { id: 'gold',       hex: '#b98a2f', name: 'Gold' },
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MATERIALS — mannequin satin + the staff garment CanvasTexture, ported from
+   kit/outfits.ts (field colour + one drawn chest detail; front = u 0.5).
+   ═══════════════════════════════════════════════════════════════════════════ */
+const matCache = new Map();
+function mannequinMaterial(tint) {
+  const c = tint || '#ffffff';
+  if (!matCache.has(c)) matCache.set(c, new THREE.MeshStandardMaterial({ color: c, ...MANNEQUIN_SURFACE }));
+  return matCache.get(c);
+}
+function staffGarmentTexture(outfit, color) {
+  const size = 128, canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = outfit === 'apron' ? '#efe8db' : color;
+  ctx.fillRect(0, 0, size, size);
+  if (outfit === 'uniform') { ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(0, 40, size, 10); }
+  const cx = size / 2;
+  if (outfit === 'chef_whites') {
+    ctx.fillStyle = '#a89f90';
+    for (const s of [-1, 1]) for (let y = 34; y <= 88; y += 18) { ctx.beginPath(); ctx.arc(cx + s * 9, y, 3, 0, Math.PI * 2); ctx.fill(); }
+    ctx.strokeStyle = 'rgba(120,112,98,0.35)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx, 26); ctx.lineTo(cx, 100); ctx.stroke();
+  } else if (outfit === 'apron') {
+    ctx.fillStyle = color;
+    ctx.fillRect(cx - 17, 30, 34, 40); ctx.fillRect(cx - 26, 70, 52, 58);
+    ctx.strokeStyle = color; ctx.lineWidth = 5;
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(cx + s * 14, 32); ctx.lineTo(cx + s * 24, 4); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(0,0,0,0.22)'; ctx.lineWidth = 2; ctx.strokeRect(cx - 9, 46, 18, 14);
+  } else if (outfit === 'vest') {
+    ctx.fillStyle = '#f1eee6';
+    ctx.beginPath(); ctx.moveTo(cx - 13, 8); ctx.lineTo(cx + 13, 8); ctx.lineTo(cx, 62); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    for (let y = 70; y <= 100; y += 15) { ctx.beginPath(); ctx.arc(cx, y, 2.5, 0, Math.PI * 2); ctx.fill(); }
+  } else if (outfit === 'uniform') {
+    ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.arc(cx + 18, 28, 4.5, 0, Math.PI * 2); ctx.fill();
+  } else if (outfit === 'robe') {
+    ctx.strokeStyle = '#d4af5a'; ctx.lineWidth = 9;
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(cx + s * 20, 0); ctx.lineTo(cx + s * 6, 96); ctx.stroke(); }
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.flipY = false;
+  return tex;
+}
+function garmentMaterial(outfit, color) {
+  const key = `g|${outfit}|${color}`;
+  if (!matCache.has(key)) matCache.set(key, new THREE.MeshStandardMaterial({
+    color: '#ffffff', map: staffGarmentTexture(outfit, outfit === 'chef_whites' ? '#f6f3ec' : color), roughness: 0.8,
+  }));
+  return matCache.get(key);
+}
+function darken(hex, k) {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = (v) => Math.max(0, Math.min(255, Math.round(v * k)));
+  return '#' + (((ch((n >> 16) & 255) << 16) | (ch((n >> 8) & 255) << 8) | ch(n & 255)).toString(16).padStart(6, '0'));
+}
+function trouserMaterial(outfit, color) {
+  const base = outfit === 'chef_whites' ? '#2c2f36' : darken(color, 0.55);
+  const key = `t|${base}`;
+  if (!matCache.has(key)) matCache.set(key, new THREE.MeshStandardMaterial({ color: base, roughness: 0.85 }));
+  return matCache.get(key);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FIGURE BUILDER — the one-piece rig hierarchy from kit/figure.tsx, with the
+   prototype's lego variants layered on (head add-ons, torso swaps, leg scale).
+   ═══════════════════════════════════════════════════════════════════════════ */
+function buildFigure({ head = 'classic', torso = 'classic', legs = 'classic', tint = '#ffffff', staffOutfit = null, brandColor = '#b9673f' } = {}) {
+  const bodyMat = mannequinMaterial(tint);
+  const garmentMat = staffOutfit ? garmentMaterial(staffOutfit, brandColor) : bodyMat;
+  const legMat = staffOutfit ? trouserMaterial(staffOutfit, brandColor) : bodyMat;
+
+  const legMul = legs === 'slender' ? 0.88 : legs === 'sturdy' ? 1.16 : 1;
+  const torsoScale = torso === 'petite' ? [0.92, 1, 0.92] : torso === 'broad' ? [1.14, 1, 1.08] : [1, 1, 1];
+
+  const root = new THREE.Group();
+  const pelvis = new THREE.Group(); pelvis.position.y = PELVIS_Y; root.add(pelvis);
+
+  const gowned = torso === 'gown' && !staffOutfit;
+  if (!gowned) {
+    const hip = new THREE.Mesh(HIP_GEO, legMat); hip.position.y = HIP_BLOCK_Y; hip.castShadow = true; pelvis.add(hip);
+  }
+
+  // Legs: hip → knee → stump (gown hides the thighs behind the skirt but the
+  // shins still show below the −0.62 hem, exactly like the decor gown shell)
+  const joints = { swing: [] };
+  for (const side of [-1, 1]) {
+    const hipJ = new THREE.Group(); hipJ.position.x = side * HIP_X; pelvis.add(hipJ);
+    const thigh = new THREE.Mesh(LEG_GEO, legMat);
+    thigh.position.y = -THIGH_LEN / 2;
+    thigh.scale.set(THIGH_SCALE_XZ * legMul, THIGH_SCALE_Y, THIGH_SCALE_XZ * legMul);
+    thigh.castShadow = true; hipJ.add(thigh);
+    const hipBall = new THREE.Mesh(JOINT_GEO, legMat); hipBall.scale.setScalar(HIP_BALL_R * legMul); hipJ.add(hipBall);
+    const knee = new THREE.Group(); knee.position.y = -THIGH_LEN; hipJ.add(knee);
+    const shin = new THREE.Mesh(LEG_GEO, legMat);
+    shin.position.y = -SHIN_LEN / 2;
+    shin.scale.set(SHIN_SCALE_XZ * legMul, SHIN_SCALE_Y, SHIN_SCALE_XZ * legMul);
+    shin.castShadow = true; knee.add(shin);
+    const kneeBall = new THREE.Mesh(JOINT_GEO, legMat); kneeBall.scale.setScalar(KNEE_BALL_R * legMul); knee.add(kneeBall);
+    const stump = new THREE.Mesh(STUMP_GEO, legMat);
+    stump.position.set(0, SHOE_POS_Y, SHOE_POS_Z);
+    stump.scale.set(SHOE_S[0] * legMul, SHOE_S[1], SHOE_S[2] * legMul);
+    stump.castShadow = true; knee.add(stump);
+  }
+
+  // Torso group (idle sway target) — torso mesh or gown swap
+  const torsoG = new THREE.Group(); pelvis.add(torsoG);
+  if (gowned) {
+    const gown = new THREE.Mesh(GOWN_GEO, bodyMat); gown.castShadow = true; torsoG.add(gown);
+  } else {
+    const t = new THREE.Mesh(TORSO_GEO, garmentMat); t.scale.set(...torsoScale); t.castShadow = true; torsoG.add(t);
+  }
+
+  // Arms: shoulder → elbow, gentle A-pose so the figure reads relaxed
+  for (const side of [-1, 1]) {
+    const sh = new THREE.Group();
+    sh.position.set(side * SHOULDER_X * (torso === 'broad' ? 1.1 : torso === 'petite' ? 0.94 : 1), SHOULDER_Y, 0);
+    sh.rotation.z = side * 0.1;
+    torsoG.add(sh);
+    const ua = new THREE.Mesh(ARM_GEO, garmentMat);
+    ua.position.y = -UPPER_ARM_LEN / 2;
+    ua.scale.set(UPPER_ARM_SCALE_XZ, UPPER_ARM_SCALE_Y, UPPER_ARM_SCALE_XZ);
+    ua.castShadow = true; sh.add(ua);
+    const shBall = new THREE.Mesh(JOINT_GEO, garmentMat); shBall.scale.setScalar(SHOULDER_BALL_R); sh.add(shBall);
+    const el = new THREE.Group(); el.position.y = -UPPER_ARM_LEN; el.rotation.x = -0.12; sh.add(el);
+    const fa = new THREE.Mesh(ARM_GEO, garmentMat);
+    fa.position.y = -FOREARM_LEN / 2;
+    fa.scale.set(FOREARM_SCALE_XZ, FOREARM_SCALE_Y, FOREARM_SCALE_XZ);
+    fa.castShadow = true; el.add(fa);
+    const elBall = new THREE.Mesh(JOINT_GEO, garmentMat); elBall.scale.setScalar(ELBOW_BALL_R); el.add(elBall);
+  }
+
+  // Head: the faceless ball + the lego add-on silhettes
+  const headG = new THREE.Group(); headG.position.y = NECK_Y; torsoG.add(headG);
+  const lift = new THREE.Group(); lift.position.y = HEAD_LIFT; headG.add(lift);
+  const ball = new THREE.Mesh(HEAD_GEO, bodyMat); ball.castShadow = true; lift.add(ball);
+  if (head === 'pouf') ball.scale.set(1.14, 0.95, 1.06);
+  if (head === 'topknot') {
+    const k = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 12), bodyMat);
+    k.position.set(0, HEAD_R + 0.03, -0.01); k.castShadow = true; lift.add(k);
+  }
+  if (head === 'twinbuns') {
+    for (const s of [-1, 1]) {
+      const b = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 12), bodyMat);
+      b.position.set(s * 0.115, HEAD_R * 0.72, -0.02); b.castShadow = true; lift.add(b);
+    }
+  }
+  if (head === 'cap') {
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(HEAD_R * 1.05, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.45), bodyMat);
+    crown.position.y = 0.015; crown.castShadow = true; lift.add(crown);
+    const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.115, 0.018, 20), bodyMat);
+    brim.position.set(0, 0.055, 0.13); brim.rotation.x = -0.12; brim.castShadow = true; lift.add(brim);
+  }
+
+  root.userData.torsoG = torsoG;
+  root.userData.headG = headG;
+  return root;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOOTH BUILDER — simplified chassis silhouettes of the six featured kinds,
+   greige + wood + gold, with a canvas sign carrying the vendor's name.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const WOOD = new THREE.MeshStandardMaterial({ color: '#8a6f52', roughness: 0.75 });
+const WOOD_D = new THREE.MeshStandardMaterial({ color: '#6b543c', roughness: 0.8 });
+const CLOTH = new THREE.MeshStandardMaterial({ color: '#efe9dd', roughness: 0.9 });
+const DARK = new THREE.MeshStandardMaterial({ color: '#2e2c29', roughness: 0.6 });
+const BRASS = new THREE.MeshStandardMaterial({ color: '#b98a2f', roughness: 0.35, metalness: 0.6 });
+
+function signMesh(text, w = 1.1, brand = '#b98a2f') {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#1c1b19'; ctx.fillRect(0, 0, 512, 128);
+  ctx.strokeStyle = brand; ctx.lineWidth = 6; ctx.strokeRect(10, 10, 492, 108);
+  ctx.fillStyle = '#f7f5f0'; ctx.font = '600 54px "Hanken Grotesk", sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text.slice(0, 18) || 'Your Booth', 256, 68);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, w * 0.25),
+    new THREE.MeshBasicMaterial({ map: tex }));
+  return m;
+}
+function box(w, h, d, mat) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.castShadow = true; return m; }
+
+function buildBooth(kind, signText, brand) {
+  const g = new THREE.Group();
+  if (kind === 'COUNTER') {
+    const body = box(1.7, 0.95, 0.6, WOOD); body.position.y = 0.475; g.add(body);
+    const top = box(1.82, 0.06, 0.72, WOOD_D); top.position.y = 0.98; g.add(top);
+    for (const s of [-1, 1]) { const p = box(0.06, 1.15, 0.06, DARK); p.position.set(s * 0.82, 1.58, -0.22); g.add(p); }
+    const canopy = box(1.9, 0.07, 0.8, BRASS); canopy.position.set(0, 2.18, -0.1); g.add(canopy);
+    const sign = signMesh(signText, 1.3, brand); sign.position.set(0, 1.85, -0.05); g.add(sign);
+  } else if (kind === 'STATION') {
+    const cloth = box(1.5, 0.72, 0.8, CLOTH); cloth.position.y = 0.36; g.add(cloth);
+    const top = box(1.58, 0.05, 0.86, WOOD_D); top.position.y = 0.755; g.add(top);
+    const tray = box(0.5, 0.08, 0.34, BRASS); tray.position.set(-0.35, 0.82, 0); g.add(tray);
+    const tray2 = box(0.36, 0.12, 0.3, DARK); tray2.position.set(0.4, 0.84, 0); g.add(tray2);
+    const sign = signMesh(signText, 1.0, brand); sign.position.set(0, 1.5, -0.2); g.add(sign);
+    for (const s of [-1, 1]) { const p = box(0.045, 0.75, 0.045, DARK); p.position.set(s * 0.45, 1.13, -0.2); g.add(p); }
+  } else if (kind === 'BUFFET') {
+    const cloth = box(2.4, 0.72, 0.75, CLOTH); cloth.position.y = 0.36; g.add(cloth);
+    const top = box(2.5, 0.05, 0.8, WOOD_D); top.position.y = 0.755; g.add(top);
+    for (let i = -2; i <= 2; i++) { const chafer = box(0.34, 0.14, 0.42, BRASS); chafer.position.set(i * 0.44, 0.85, 0); g.add(chafer); }
+    const sign = signMesh(signText, 1.4, brand); sign.position.set(0, 1.55, -0.25); g.add(sign);
+    for (const s of [-1, 1]) { const p = box(0.05, 0.8, 0.05, DARK); p.position.set(s * 0.7, 1.15, -0.25); g.add(p); }
+  } else if (kind === 'VEHICLE') {
+    const body = box(1.5, 0.8, 0.7, new THREE.MeshStandardMaterial({ color: brand, roughness: 0.5 })); body.position.y = 0.75; g.add(body);
+    const top = box(1.6, 0.05, 0.8, WOOD_D); top.position.y = 1.18; g.add(top);
+    for (const s of [-1, 1]) {
+      const w = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.08, 20), DARK);
+      w.rotation.x = Math.PI / 2; w.position.set(s * 0.55, 0.22, 0.36); w.castShadow = true; g.add(w);
+    }
+    const awning = box(1.7, 0.05, 0.9, CLOTH); awning.position.y = 2.0; awning.rotation.x = 0.12; g.add(awning);
+    for (const s of [-1, 1]) { const p = box(0.045, 0.85, 0.045, DARK); p.position.set(s * 0.72, 1.6, -0.3); g.add(p); }
+    const sign = signMesh(signText, 1.15, brand); sign.position.set(0, 1.62, 0.05); g.add(sign);
+  } else if (kind === 'BACKDROP') {
+    const panel = box(2.1, 2.3, 0.08, new THREE.MeshStandardMaterial({ color: '#ded5c4', roughness: 0.9 })); panel.position.set(0, 1.15, -0.35); g.add(panel);
+    const frame = box(2.26, 2.46, 0.05, BRASS); frame.position.set(0, 1.23, -0.4); g.add(frame);
+    for (const [x, y, r] of [[-0.8, 1.9, 0.16], [-0.55, 2.05, 0.11], [0.75, 0.5, 0.15], [0.95, 0.72, 0.1], [0.55, 0.35, 0.09]]) {
+      const bloom = new THREE.Mesh(new THREE.SphereGeometry(r, 14, 10), new THREE.MeshStandardMaterial({ color: '#e6c9c4', roughness: 0.85 }));
+      bloom.position.set(x, y, -0.28); bloom.castShadow = true; g.add(bloom);
+    }
+    const sign = signMesh(signText, 1.1, brand); sign.position.set(0, 2.62, -0.35); g.add(sign);
+  } else if (kind === 'RISER') {
+    const deck = box(2.6, 0.28, 1.7, WOOD); deck.position.set(0, 0.14, -0.3); g.add(deck);
+    const backP = box(2.6, 1.9, 0.06, DARK); backP.position.set(0, 1.23, -1.1); g.add(backP);
+    for (const s of [-1, 1]) {
+      const spk = box(0.3, 0.5, 0.3, DARK); spk.position.set(s * 1.05, 0.53, -0.85); g.add(spk);
+    }
+    const sign = signMesh(signText, 1.3, brand); sign.position.set(0, 2.35, -1.05); g.add(sign);
+  }
+  return g;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCENE
+   ═══════════════════════════════════════════════════════════════════════════ */
+const stageEl = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+stageEl.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog('#efece6', 8, 16);
+const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
+camera.position.set(1.9, 1.55, 3.1);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.95, 0);
+controls.enableDamping = true;
+controls.minDistance = 1.4; controls.maxDistance = 7;
+controls.maxPolarAngle = Math.PI * 0.55;
+
+scene.add(new THREE.HemisphereLight('#fdf9ef', '#b6ad9c', 1.05));
+const key = new THREE.DirectionalLight('#fff6e6', 1.6);
+key.position.set(3, 5, 2.5);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.left = -3; key.shadow.camera.right = 3;
+key.shadow.camera.top = 4; key.shadow.camera.bottom = -1;
+scene.add(key);
+const rim = new THREE.DirectionalLight('#d8e2ef', 0.5);
+rim.position.set(-3, 2.5, -2); scene.add(rim);
+
+// Atelier floor: soft disc + gold ring accent
+const floor = new THREE.Mesh(new THREE.CircleGeometry(4.4, 64),
+  new THREE.MeshStandardMaterial({ color: '#e5e0d7', roughness: 0.95 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const ring = new THREE.Mesh(new THREE.RingGeometry(1.18, 1.21, 72),
+  new THREE.MeshBasicMaterial({ color: '#b98a2f', transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
+ring.rotation.x = -Math.PI / 2; ring.position.y = 0.004; scene.add(ring);
+
+const modelRoot = new THREE.Group(); scene.add(modelRoot);
+
+function resize() {
+  const w = stageEl.clientWidth, h = stageEl.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stageEl);
+resize();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATE + REBUILD
+   ═══════════════════════════════════════════════════════════════════════════ */
+const state = {
+  role: 'user',
+  user: { head: 'classic', torso: 'classic', legs: 'classic', tint: '#ffffff' },
+  vendor: { chassis: 'COUNTER', garment: 'apron', brand: '#b9673f', sign: 'Kape ni Aling Nena' },
+};
+
+let idleTargets = [];
+function rebuild() {
+  while (modelRoot.children.length) {
+    const c = modelRoot.children.pop();
+    modelRoot.remove(c);
+  }
+  idleTargets = [];
+  if (state.role === 'user') {
+    const fig = buildFigure(state.user);
+    modelRoot.add(fig);
+    idleTargets.push(fig);
+    controls.target.lerp(new THREE.Vector3(0, 0.95, 0), 1);
+  } else {
+    const v = state.vendor;
+    const booth = buildBooth(v.chassis, v.sign, v.brand);
+    modelRoot.add(booth);
+    const staff = buildFigure({ ...state.user, torso: state.user.torso === 'gown' ? 'classic' : state.user.torso, staffOutfit: v.garment, brandColor: v.brand });
+    // Staff stands with the booth — behind counters, on the riser, beside carts
+    const pos = { COUNTER: [0, 0, -0.55], STATION: [0, 0, -0.65], BUFFET: [0.5, 0, -0.65], VEHICLE: [0.95, 0, 0], BACKDROP: [0.55, 0, 0.35], RISER: [0, 0.28, -0.45] }[v.chassis] || [0, 0, -0.6];
+    staff.position.set(...pos);
+    modelRoot.add(staff);
+    idleTargets.push(staff);
+    controls.target.lerp(new THREE.Vector3(0, 1.0, 0), 1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UI — two chromes, one panel
+   ═══════════════════════════════════════════════════════════════════════════ */
+const $ = (id) => document.getElementById(id);
+const slotTabs = $('slotTabs'), panelBody = $('panelBody');
+
+function chipGrid(items, activeId, onPick) {
+  const grid = document.createElement('div'); grid.className = 'chips';
+  for (const it of items) {
+    const b = document.createElement('button');
+    b.className = 'chip' + (it.id === activeId ? ' active' : '');
+    b.innerHTML = `<span class="name">${it.name}</span><span class="desc">${it.desc}</span>`;
+    b.onclick = () => { onPick(it.id); render(); rebuild(); };
+    grid.appendChild(b);
+  }
+  return grid;
+}
+function swatchRow(items, activeHex, onPick, label) {
+  const wrap = document.createElement('div');
+  const row = document.createElement('div'); row.className = 'swatches';
+  let activeName = '';
+  for (const it of items) {
+    const s = document.createElement('button');
+    s.className = 'swatch' + (it.hex === activeHex ? ' active' : '');
+    s.style.background = it.hex;
+    s.title = it.name;
+    if (it.hex === activeHex) activeName = it.name;
+    s.onclick = () => { onPick(it.hex); render(); rebuild(); };
+    row.appendChild(s);
+  }
+  wrap.appendChild(row);
+  const lab = document.createElement('div'); lab.className = 'swatch-label';
+  lab.textContent = `${label} — ${activeName}`;
+  wrap.appendChild(lab);
+  return wrap;
+}
+
+let activeSlot = 'head';
+const USER_SLOTS = [
+  { id: 'head', label: 'Head' }, { id: 'torso', label: 'Torso' },
+  { id: 'legs', label: 'Legs' }, { id: 'color', label: 'Color' },
+];
+const VENDOR_SLOTS = [
+  { id: 'booth', label: 'Booth' }, { id: 'staff', label: 'Staff' }, { id: 'sign', label: 'Sign' },
+];
+
+function render() {
+  const isVendor = state.role === 'vendor';
+  document.body.classList.toggle('vendor-mode', isVendor);
+
+  // Header captions per chrome
+  $('stageTitle').innerHTML = isVendor
+    ? 'This is your <em>booth</em><br />on the floor.'
+    : 'This is <em>you</em><br />in the room.';
+  $('stageSub').textContent = isVendor
+    ? 'What couples and guests walk up to in the 3D venue — your booth, your staff, your name.'
+    : 'The figure every guest sees at your table, on the dance floor, in the walk.';
+  $('panelEyebrow').textContent = isVendor ? 'Vendor account' : 'Guest account';
+  $('panelTitle').textContent = isVendor ? 'Build your booth' : 'Build your figure';
+  $('panelSub').textContent = isVendor
+    ? 'Pick the booth, dress your staff, hang your sign. Your own avatar becomes the staff figure at the booth.'
+    : 'Three pieces, like a minifig — head, torso, legs. Faceless by design; your selfie can replace the head in the room.';
+  $('btnSave').innerHTML = isVendor ? 'Save my booth' : 'Save my avatar';
+
+  // Tabs
+  const slots = isVendor ? VENDOR_SLOTS : USER_SLOTS;
+  if (!slots.some((s) => s.id === activeSlot)) activeSlot = slots[0].id;
+  slotTabs.innerHTML = '';
+  for (const s of slots) {
+    const b = document.createElement('button');
+    b.textContent = s.label;
+    b.className = s.id === activeSlot ? 'active' : '';
+    b.onclick = () => { activeSlot = s.id; render(); };
+    slotTabs.appendChild(b);
+  }
+
+  // Body
+  panelBody.innerHTML = '';
+  const pane = document.createElement('div'); pane.className = 'slot-pane active';
+  if (!isVendor) {
+    const u = state.user;
+    if (activeSlot === 'head') pane.appendChild(chipGrid(HEADS, u.head, (v) => (u.head = v)));
+    if (activeSlot === 'torso') pane.appendChild(chipGrid(TORSOS, u.torso, (v) => (u.torso = v)));
+    if (activeSlot === 'legs') pane.appendChild(chipGrid(LEGS, u.legs, (v) => (u.legs = v)));
+    if (activeSlot === 'color') {
+      pane.appendChild(swatchRow(TINTS, u.tint, (v) => (u.tint = v), 'Body tint'));
+      const note = document.createElement('p'); note.className = 'section-note';
+      note.textContent = 'Porcelain white is the room default. A tint follows you across every event you attend — the room can still re-tint crowds to the wedding’s mood board.';
+      pane.appendChild(note);
+    }
+  } else {
+    const v = state.vendor;
+    if (activeSlot === 'booth') pane.appendChild(chipGrid(CHASSIS, v.chassis, (x) => (v.chassis = x)));
+    if (activeSlot === 'staff') {
+      pane.appendChild(chipGrid(GARMENTS, v.garment, (x) => (v.garment = x)));
+      const gap = document.createElement('div'); gap.className = 'section-gap'; pane.appendChild(gap);
+      pane.appendChild(swatchRow(BRAND_COLORS, v.brand, (x) => (v.brand = x), 'Brand color'));
+      const note = document.createElement('p'); note.className = 'section-note';
+      note.textContent = 'The staff figure is your own avatar wearing the garment — head and build carry over from My Avatar.';
+      pane.appendChild(note);
+    }
+    if (activeSlot === 'sign') {
+      const f = document.createElement('div'); f.className = 'field';
+      f.innerHTML = '<label>Booth sign</label>';
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.maxLength = 18; inp.value = v.sign;
+      inp.oninput = () => { v.sign = inp.value; rebuild(); };
+      f.appendChild(inp); pane.appendChild(f);
+      const note = document.createElement('p'); note.className = 'section-note';
+      note.textContent = 'Defaults to your business name. 18 characters — a sign, not a paragraph.';
+      pane.appendChild(note);
+    }
+  }
+  panelBody.appendChild(pane);
+}
+
+// Role switch
+$('roleSwitch').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  state.role = b.dataset.role;
+  for (const x of $('roleSwitch').children) x.classList.toggle('active', x === b);
+  activeSlot = state.role === 'vendor' ? 'booth' : 'head';
+  // Frame the subject: a booth is ~2.6 m of scenery, a figure is 1.56 m tall
+  if (state.role === 'vendor') { camera.position.set(3.4, 2.2, 5.6); controls.target.set(0, 1.1, 0); }
+  else { camera.position.set(1.9, 1.55, 3.1); controls.target.set(0, 0.95, 0); }
+  render(); rebuild();
+});
+
+// Shuffle
+$('btnShuffle').onclick = () => {
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  if (state.role === 'user') {
+    state.user.head = pick(HEADS).id; state.user.torso = pick(TORSOS).id;
+    state.user.legs = pick(LEGS).id; state.user.tint = pick(TINTS).hex;
+  } else {
+    state.vendor.chassis = pick(CHASSIS).id; state.vendor.garment = pick(GARMENTS).id;
+    state.vendor.brand = pick(BRAND_COLORS).hex;
+  }
+  render(); rebuild();
+};
+
+// Save (prototype stub)
+$('btnSave').onclick = () => {
+  const t = $('toast');
+  t.innerHTML = state.role === 'vendor'
+    ? 'Booth saved — <span class="mono">prototype only, nothing persisted</span>'
+    : 'Avatar saved — <span class="mono">prototype only, nothing persisted</span>';
+  t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOOP — slow turntable + the idle sway the room's figures carry
+   ═══════════════════════════════════════════════════════════════════════════ */
+const clock = new THREE.Clock();
+function tick() {
+  requestAnimationFrame(tick);
+  const t = clock.getElapsedTime();
+  if (state.role === 'user') modelRoot.rotation.y = t * 0.25;
+  else modelRoot.rotation.y = Math.sin(t * 0.12) * 0.35;
+  for (const fig of idleTargets) {
+    const tg = fig.userData.torsoG, hg = fig.userData.headG;
+    if (tg) { tg.rotation.z = Math.sin(t * 0.9) * 0.02; tg.rotation.x = Math.sin(t * 0.6) * 0.012; }
+    if (hg) hg.rotation.y = Math.sin(t * 0.45) * 0.08;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+render(); rebuild(); tick();
+</script>
+</body>
+</html>

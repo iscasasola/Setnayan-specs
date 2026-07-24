@@ -1,0 +1,302 @@
+diff --git a/apps/web/app/dashboard/[eventId]/studio/setnayan-ai/page.tsx b/apps/web/app/dashboard/[eventId]/studio/setnayan-ai/page.tsx
+index 85f55ea96..85f65a58c 100644
+--- a/apps/web/app/dashboard/[eventId]/studio/setnayan-ai/page.tsx
++++ b/apps/web/app/dashboard/[eventId]/studio/setnayan-ai/page.tsx
+@@ -90,6 +90,15 @@ export default async function SetnayanAiPage({ params }: Props) {
+   // redeploy); env-fallback when unset. Resolved once, threaded into the gate.
+   const paywallOn = await resolveSetnayanAiPaywallEnabled();
+   const perUserOn = await resolveSetnayanAiPerUserEnabled();
++
++  // Single purchase path: once the per-user subscription gate is flipped on,
++  // Setnayan AI is bought once at the ACCOUNT level (covers every event), so the
++  // per-event purchase here must be unreachable — redirect to the account page.
++  // While the flag is OFF (today) this short-circuits and the page renders
++  // exactly as before, byte-identical. (No extra DB read — perUserOn is already
++  // resolved above.) Placed before any event/catalog work so the per-event buy
++  // surface never paints when the subscription path owns purchasing.
++  if (perUserOn) redirect('/dashboard/setnayan-ai');
+   const aiSubscription = perUserOn
+     ? await getEventHostAiSubscription(createAdminClient(), eventId)
+     : null;
+diff --git a/apps/web/app/dashboard/[eventId]/vendors/_components/category-search-overlay.tsx b/apps/web/app/dashboard/[eventId]/vendors/_components/category-search-overlay.tsx
+index b2e963f35..7f2b2102c 100644
+--- a/apps/web/app/dashboard/[eventId]/vendors/_components/category-search-overlay.tsx
++++ b/apps/web/app/dashboard/[eventId]/vendors/_components/category-search-overlay.tsx
+@@ -20,6 +20,7 @@
+ 
+ import { useCallback, useEffect, useRef, useState } from 'react';
+ import { useModalA11y } from '@/lib/use-modal-a11y';
++import { setnayanAiPurchaseHref } from '@/lib/setnayan-ai';
+ import { createPortal } from 'react-dom';
+ import { saveVendorToPicks } from '@/app/explore/actions';
+ import { haptic } from '@/lib/haptics';
+@@ -132,13 +133,25 @@ export function CategorySearchOverlay({
+   eventId,
+   groupId,
+   label,
++  aiUnlockHref,
+   onClose,
+ }: {
+   eventId: string;
+   groupId: string;
+   label: string;
++  /**
++   * Destination for the "Unlock with Setnayan AI" last-minute CTA. The single
++   * purchase path: the per-event studio buy page while the per-user subscription
++   * gate is off, the account-level subscription page once it's flipped on (the
++   * server resolves it and threads it down). Defaults to the per-event studio
++   * buy page so behavior is byte-identical when omitted.
++   */
++  aiUnlockHref?: string;
+   onClose: () => void;
+ }) {
++  // Default to the per-event studio buy page (the per-user gate OFF case) so the
++  // CTA is byte-identical when the parent doesn't thread a resolved href.
++  const unlockHref = aiUnlockHref ?? setnayanAiPurchaseHref(eventId, false);
+   const [query, setQuery] = useState('');
+   const [verifiedOnly, setVerifiedOnly] = useState(false);
+   // Portal mount guard — see the createPortal note near the return.
+@@ -445,7 +458,7 @@ export function CategorySearchOverlay({
+               Your wedding is close, so {label.toLowerCase()} vendors who book
+               last-minute appear with Setnayan AI on.
+             </p>
+-            <a href={`/dashboard/${eventId}/studio/setnayan-ai`}>
++            <a href={unlockHref}>
+               Unlock with Setnayan AI
+             </a>
+           </div>
+diff --git a/apps/web/app/dashboard/[eventId]/vendors/_components/plan-budget-accordion.tsx b/apps/web/app/dashboard/[eventId]/vendors/_components/plan-budget-accordion.tsx
+index abf7b635f..22552685d 100644
+--- a/apps/web/app/dashboard/[eventId]/vendors/_components/plan-budget-accordion.tsx
++++ b/apps/web/app/dashboard/[eventId]/vendors/_components/plan-budget-accordion.tsx
+@@ -670,6 +670,7 @@ export function PlanBudgetAccordion({
+   model,
+   eventId,
+   reviewStatusByVendorId = new Map(),
++  aiUnlockHref,
+ }: {
+   model: PlanBudgetModel;
+   eventId: string;
+@@ -680,6 +681,14 @@ export function PlanBudgetAccordion({
+    * Absent key  → no badge (e.g. not complete, or no linked profile)
+    */
+   reviewStatusByVendorId?: ReadonlyMap<string, VendorReviewStatus>;
++  /**
++   * Where the "Unlock with Setnayan AI" CTA inside the category-search overlay
++   * points. The server resolves the single purchase path (per-event studio buy
++   * page while the per-user gate is off; the account-level subscription page once
++   * it's flipped on) and threads it down. Defaults to the per-event studio buy
++   * page so this stays byte-identical when the caller omits it.
++   */
++  aiUnlockHref?: string;
+ }) {
+   const rootRef = useRef<HTMLDivElement>(null);
+   // Compare sheet — which child category (≥2 shortlisted) is being compared.
+@@ -933,6 +942,7 @@ export function PlanBudgetAccordion({
+             eventId={eventId}
+             groupId={search.groupId}
+             label={search.label}
++            aiUnlockHref={aiUnlockHref}
+             onClose={() => setSearch(null)}
+           />
+         )}
+diff --git a/apps/web/app/dashboard/[eventId]/vendors/page.tsx b/apps/web/app/dashboard/[eventId]/vendors/page.tsx
+index 94704c3f8..b5f738893 100644
+--- a/apps/web/app/dashboard/[eventId]/vendors/page.tsx
++++ b/apps/web/app/dashboard/[eventId]/vendors/page.tsx
+@@ -28,6 +28,7 @@ import { getTaxonomy } from '@/lib/taxonomy-db';
+ import {
+   isSetnayanAiActiveForUser,
+   shouldOfferSetnayanAiPurchaseForUser,
++  setnayanAiPurchaseHref,
+ } from '@/lib/setnayan-ai';
+ import { getEventHostAiSubscription } from '@/lib/setnayan-ai-server';
+ import {
+@@ -548,9 +549,14 @@ export default async function VendorsPage({ params, searchParams }: Props) {
+   // banner today). Links to the /studio/setnayan-ai buy page (catalog price +
+   // checkout). Renders in both the takeover shortlist slot and the bare return.
+   const aiOffer = shouldOfferSetnayanAiPurchaseForUser(ev, aiGateOpts);
++  // Single purchase path: once the per-user subscription gate is flipped on,
++  // the "Unlock" CTA points at the ACCOUNT-level subscription page (one buy path
++  // for the whole account) instead of the per-event studio buy page. While the
++  // flag is OFF (today), it keeps the per-event href byte-identical to before.
++  const aiUnlockHref = setnayanAiPurchaseHref(eventId, perUserEnabled);
+   const aiOfferBanner = aiOffer ? (
+     <Link
+-      href={`/dashboard/${eventId}/studio/setnayan-ai`}
++      href={aiUnlockHref}
+       className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-mulberry/25 bg-mulberry/5 px-4 py-3 transition-colors hover:bg-mulberry/10"
+     >
+       <span className="text-sm text-ink/80">
+@@ -655,6 +661,7 @@ export default async function VendorsPage({ params, searchParams }: Props) {
+         model={model}
+         eventId={eventId}
+         reviewStatusByVendorId={reviewStatusByVendorId}
++        aiUnlockHref={aiUnlockHref}
+       />
+     </>
+   );
+diff --git a/apps/web/app/onboarding/wedding/_components/onboarding-pricing.ts b/apps/web/app/onboarding/wedding/_components/onboarding-pricing.ts
+index 6d3582bea..1e6d564da 100644
+--- a/apps/web/app/onboarding/wedding/_components/onboarding-pricing.ts
++++ b/apps/web/app/onboarding/wedding/_components/onboarding-pricing.ts
+@@ -202,12 +202,21 @@ const ONBOARDING_PROMO = 0.2;
+  *                 (formatSkuPriceLabel with no pax), matching /pricing's public
+  *                 behavior. The authoritative pax charge is still recomputed
+  *                 server-side at order time by resolvePaxPricedOrderCentavos.
++ * @param opts.perUserEnabled  the per-USER Setnayan-AI subscription gate
++ *                 (resolveSetnayanAiPerUserEnabled, threaded in from page.tsx so
++ *                 this stays a PURE fn). DEFAULT FALSE → byte-identical to today.
++ *                 When TRUE, Setnayan AI is an ACCOUNT-level subscription, not a
++ *                 per-event add-on, so it is EXCLUDED from this per-event
++ *                 onboarding pricing: the `setnayanAi` keep-card is null AND
++ *                 SETNAYAN_AI drops out of every bundle's worth/savings/items.
+  */
+ export function buildOnboardingPricing(
+   customer: V2CustomerSku[],
+   bundles: V2BundleSku[],
+   pax?: number | null,
++  opts: { perUserEnabled?: boolean } = {},
+ ): OnboardingPricing {
++  const { perUserEnabled = false } = opts;
+   // Index by service_code — never rely on array order. fetchV2CustomerCatalog
+   // returns ALL non-TODAYS_FOCUS rows (incl. SETNAYAN_AI, PRO_RSVP, etc.); we
+   // pick only the 14 onboarding keys.
+@@ -251,7 +260,12 @@ export function buildOnboardingPricing(
+   ): OnboardingBundleVM | null => {
+     const pkg = bundles.find((b) => b.package_code === code);
+     if (!pkg) return null;
+-    const rows = members.map((sc) => byCode.get(sc)).filter((s): s is V2CustomerSku => !!s);
++    // When the per-user subscription gate is on, Setnayan AI is bought once at
++    // the account level — so it is NOT part of a per-event bundle's worth/items.
++    const effectiveMembers = perUserEnabled
++      ? members.filter((sc) => sc !== 'SETNAYAN_AI')
++      : members;
++    const rows = effectiveMembers.map((sc) => byCode.get(sc)).filter((s): s is V2CustomerSku => !!s);
+     const worth = rows.reduce((s, sku) => s + sku.retail_price_php, 0);
+     return {
+       code: pkg.package_code,
+@@ -265,8 +279,11 @@ export function buildOnboardingPricing(
+ 
+   // Setnayan AI price straight from the live catalog (it's not an onboarding
+   // "pick" key, so it isn't in `svc`). Null when missing/inactive → the keep-card
+-  // falls back to its own copy without crashing.
+-  const aiSku = byCode.get('SETNAYAN_AI');
++  // falls back to its own copy without crashing. When the per-user subscription
++  // gate is on, AI is an account-level subscription (bought from /dashboard/
++  // setnayan-ai, not as a per-event onboarding keep-card) → null it here so the
++  // single purchase path holds.
++  const aiSku = perUserEnabled ? null : byCode.get('SETNAYAN_AI');
+   const setnayanAi = aiSku
+     ? { price: aiSku.retail_price_php, label: formatSkuPriceLabel(aiSku, null) }
+     : null;
+diff --git a/apps/web/app/onboarding/wedding/page.tsx b/apps/web/app/onboarding/wedding/page.tsx
+index a0a71723c..8b2027b27 100644
+--- a/apps/web/app/onboarding/wedding/page.tsx
++++ b/apps/web/app/onboarding/wedding/page.tsx
+@@ -27,6 +27,7 @@ import { fetchOnboardingBgMusicUrl } from '@/lib/platform-settings';
+ import { getOnboardingRefinements, getOnboardingTiles } from '@/lib/onboarding-refinements';
+ import { getBudgetBands } from '@/lib/budget-bands';
+ import { hiddenOnboardingExtraCats } from '@/lib/onboarding-availability';
++import { resolveSetnayanAiPerUserEnabled } from '@/lib/integration-config';
+ import { OnboardingShell } from './_components/onboarding-shell';
+ import { buildOnboardingPricing } from './_components/onboarding-pricing';
+ 
+@@ -78,7 +79,7 @@ export default async function OnboardingWeddingPage({
+   // Fetch the active wedding religions alongside auth so the faith picker can
+   // gate on the launch status (admin /admin/wedding-types flips these). Returns
+   // null on any read error → the shell falls back to its built-in soon flags.
+-  const [userRes, activeFaiths, customerSkus, bundles, bgMusicUrl, refinements, hiddenCats, dynamicTiles, budgetBands] = await Promise.all([
++  const [userRes, activeFaiths, customerSkus, bundles, bgMusicUrl, refinements, hiddenCats, dynamicTiles, budgetBands, aiPerUserEnabled] = await Promise.all([
+     supabase.auth.getUser(),
+     fetchActiveCeremonyTypes(supabase),
+     fetchV2CustomerCatalog(),
+@@ -98,6 +99,11 @@ export default async function OnboardingWeddingPage({
+     // Admin-tunable budget feel-bands (owner 2026-06-19, screen 9). DB-first,
+     // falls back to BUDGET_BANDS_FALLBACK on any read error/empty.
+     getBudgetBands(),
++    // Per-USER Setnayan-AI subscription gate (DB-first, default FALSE). When on,
++    // Setnayan AI is an account-level subscription, so it's excluded from the
++    // per-event onboarding pricing (keep-card + bundle worth). Byte-identical
++    // when off (the resolver short-circuits to FALSE on any read error).
++    resolveSetnayanAiPerUserEnabled(),
+   ]);
+   const user = userRes.data.user;
+   // Build the onboarding pricing view-model from the live admin catalog. No
+@@ -106,7 +112,9 @@ export default async function OnboardingWeddingPage({
+   // formatSkuPriceLabel (matches /pricing's public no-pax behavior). The
+   // authoritative pax charge is still recomputed server-side at order time by
+   // resolvePaxPricedOrderCentavos in submitOrderAction (unchanged).
+-  const pricing = buildOnboardingPricing(customerSkus, bundles);
++  const pricing = buildOnboardingPricing(customerSkus, bundles, undefined, {
++    perUserEnabled: aiPerUserEnabled,
++  });
+   return (
+     <OnboardingShell
+       authed={!!user}
+diff --git a/apps/web/lib/setnayan-ai.test.ts b/apps/web/lib/setnayan-ai.test.ts
+index 554aa8211..65f1c4dc0 100644
+--- a/apps/web/lib/setnayan-ai.test.ts
++++ b/apps/web/lib/setnayan-ai.test.ts
+@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
+ import {
+   isSetnayanAiActive,
+   isSetnayanAiActiveForUser,
++  setnayanAiPurchaseHref,
+   shouldOfferSetnayanAiPurchase,
+   shouldOfferSetnayanAiPurchaseForUser,
+   userAiSubscriptionActive,
+@@ -161,3 +162,18 @@ test('buy CTA per-user ON: never offered while the paywall is off', () => {
+     false,
+   );
+ });
++
++// ---- setnayanAiPurchaseHref (the SINGLE purchase path) ----------------------
++
++test('purchase href per-user OFF: per-EVENT studio buy page (byte-identical to today)', () => {
++  assert.equal(
++    setnayanAiPurchaseHref('S89E-ABC1234567', false),
++    '/dashboard/S89E-ABC1234567/studio/setnayan-ai',
++  );
++});
++
++test('purchase href per-user ON: ACCOUNT-level subscription page (eventId ignored)', () => {
++  assert.equal(setnayanAiPurchaseHref('S89E-ABC1234567', true), '/dashboard/setnayan-ai');
++  // The account page lives in the (account) route GROUP → no parentheses in the URL.
++  assert.equal(setnayanAiPurchaseHref('any-other-event', true), '/dashboard/setnayan-ai');
++});
+diff --git a/apps/web/lib/setnayan-ai.ts b/apps/web/lib/setnayan-ai.ts
+index 236d2947a..135b28e17 100644
+--- a/apps/web/lib/setnayan-ai.ts
++++ b/apps/web/lib/setnayan-ai.ts
+@@ -29,6 +29,30 @@
+ /** `events.planning_mode` value that means the couple manually turned AI OFF. */
+ export const PLANNING_MODE_MANUAL = 'manual';
+ 
++/**
++ * The SINGLE "buy Setnayan AI" destination — the one purchase path.
++ *
++ * - `perUserEnabled` OFF (default · today): the per-EVENT studio buy page
++ *   (`/dashboard/[eventId]/studio/setnayan-ai`, catalog SETNAYAN_AI one-time).
++ *   Byte-identical to the historic CTA href.
++ * - `perUserEnabled` ON: the ACCOUNT-level subscription page
++ *   (`/dashboard/setnayan-ai`, SETNAYAN_AI_SUB). When the owner flips the
++ *   per-user flag, every "Unlock Setnayan AI" CTA repoints here so a couple can
++ *   never buy on two SKUs (per-event one-time AND per-user subscription).
++ *
++ * Centralizing the decision keeps every CTA + the studio-page redirect in
++ * lockstep. The account page lives in the `(account)` route GROUP, so the
++ * parentheses are NOT part of the URL → `/dashboard/setnayan-ai`.
++ */
++export function setnayanAiPurchaseHref(
++  eventId: string,
++  perUserEnabled: boolean,
++): string {
++  return perUserEnabled
++    ? '/dashboard/setnayan-ai'
++    : `/dashboard/${eventId}/studio/setnayan-ai`;
++}
++
+ /**
+  * Is the per-event PAID paywall enforced? Default OFF. When off, Setnayan AI is
+  * the free Assisted↔Manual toggle (PR-1 behavior, unchanged). When on, AI also

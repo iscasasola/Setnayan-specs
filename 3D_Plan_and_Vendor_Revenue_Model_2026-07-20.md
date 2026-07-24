@@ -31,6 +31,22 @@
 
 > **Why this is a working doc and not decision rows:** several numbers here **supersede owner-locked, shipped prices that are days old** (the 2026-07-10 vendor pricing finalization; the ₱200 flat token confirmed 2026-07-15 / PR #3138; `SEATING_3D` ₱2,999). None of it is written to the catalog. Nothing here is live. §6 lists what needs sign-off before any of it moves.
 
+> ## 🔔 OWNER DECISIONS APPLIED 2026-07-24 — booking-fee reprice + chat/evidence/reuse model
+>
+> A later owner session moved several items. **Read these before §3.0 below.** Full detail = `DECISION_LOG.md` 2026-07-24 (3 rows).
+>
+> | Decision | State | Notes |
+> |---|---|---|
+> | **Booking fee → FLAT 5%, ₱50 floor, NO CAP** (2%→5%; ₱4,000 cap removed; floor now binds ≤₱1,000). Subscription buy-downs DROPPED — flat 5% every tier. | ✅ LOCKED · code shipping (`apps/web/lib/booking-fee.ts`) | supersedes the §3.0 schedule |
+> | **First 5 bookings FREE** per verified vendor identity + 6-month backstop — an observation window to seed the self-consistency baseline; couple-confirmation stays ON. PREREQ = the DTI/TIN/permit-NUMBER unique-index (else farmable). | ✅ LOCKED | — |
+> | **Plausibility scanner** — deterministic 3-tier (inclusion cost-floor · category×location median · self-consistency vs own history). Catches lazy under-declaration only; couple-confirmation stays load-bearing. | 🟡 design-only, NOT built | — |
+> | **Chat immutable to users** (no edit/unsend/delete); remove-vendor → ARCHIVE not hard-delete; **never scanned** reaffirmed. | ✅ LOCKED (buildable) | reconcile 3 live erase paths |
+> | **Safety banner** pinned atop each thread + **quotations bookmarked, latest floats on top** (the accepted quotation = the fee base). | ✅ LOCKED (buildable) | on `vendor_proposals` |
+> | **Reusable locked bookings** — couple initiates, vendor owns templates + sets new price; reuse+re-price+re-confirm = a NEW lock = a NEW fee (copies scope, never the fee-paid status). | ✅ LOCKED | — |
+> | **Retention two-tier** — non-transacted 12mo after last message · booked thread = financial-record life (BIR-aligned); "no message erased" = immutable-while-retained then policy-purged; RA-10173 via restrict-don't-delete. **Law-enforcement disclosure** only on valid legal process, DPO-gated. | ⚖️ structure locked, **PENDING COUNSEL** | numbers + LER SOP + Privacy-Policy update |
+>
+> ⚠ **The 5%-no-cap trade was flagged twice and accepted:** it re-opens the large-ticket under-declaration incentive the ₱4,000 cap closed (₱1M → ₱50k fee), re-adopting the §4.2b-REJECTED "5% of declared value" shape — **but it also resolves the §3.0m-d mirror risk** (a staged ₱1M booking for premium placement now costs ₱50k, not ₱4k). Enforcement rests on couple-confirmation + verified median + the (unbuilt) plausibility scanner.
+
 ---
 
 ## 0 · TL;DR

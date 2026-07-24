@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Setnayan · Avatar Maker — one chibi, transformed in place · 2026-07-21</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--ink:#241f1a;--ink60:rgba(36,31,26,.6);--ink38:rgba(36,31,26,.38);
+        --line:rgba(36,31,26,.13);--paper:#efece6;--card:#faf8f4;--gold:#b98a2f}
+  body{font-family:'Hanken Grotesk',system-ui,sans-serif;background:var(--paper);color:var(--ink);
+       height:100vh;overflow:hidden}
+  #app{display:grid;grid-template-columns:1fr 336px;height:100vh}
+  @media (max-width:860px){#app{grid-template-columns:1fr;grid-template-rows:1fr auto}}
+  #stage{position:relative;min-height:0}
+  #stage canvas{display:block;width:100%;height:100%}
+  #hud{position:absolute;left:20px;top:18px;pointer-events:none}
+  #hud h1{font-size:15px;font-weight:600;letter-spacing:.01em}
+  #hud p{font-size:12px;color:var(--ink60);margin-top:2px;max-width:34ch;line-height:1.5}
+  #turn{position:absolute;left:20px;bottom:18px;display:flex;gap:8px;align-items:center;
+        font-size:11px;color:var(--ink38);font-family:'Space Mono',monospace}
+  #panel{background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;
+         min-height:0;overflow:hidden}
+  @media (max-width:860px){#panel{border-left:0;border-top:1px solid var(--line);max-height:46vh}}
+  #tabs{display:flex;gap:2px;padding:12px 12px 0;flex-wrap:wrap}
+  .tab{flex:1 1 auto;min-width:56px;padding:8px 6px;font:inherit;font-size:12px;font-weight:500;
+       background:none;border:0;border-bottom:2px solid transparent;color:var(--ink38);cursor:pointer}
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--gold)}
+  #groups{padding:14px 16px 22px;overflow-y:auto;flex:1;min-height:0}
+  .grp{display:none}.grp.on{display:block}
+  .lbl{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+       color:var(--ink38);margin:16px 0 8px}
+  .lbl:first-child{margin-top:0}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{padding:6px 11px;font:inherit;font-size:12px;background:#fff;border:1px solid var(--line);
+        border-radius:999px;cursor:pointer;color:var(--ink60)}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#faf8f4}
+  .sw{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);cursor:pointer;padding:0}
+  .sw[aria-pressed="true"]{outline:2px solid var(--gold);outline-offset:2px}
+  .note{font-size:11px;color:var(--ink38);line-height:1.6;margin-top:14px;
+        border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <div id="hud">
+      <h1>Your avatar</h1>
+      <p>One chibi. Every choice lands on this figure — no lineup, no confirm step.</p>
+    </div>
+    <div id="turn"><span id="spin">turntable on</span> · drag to orbit</div>
+  </div>
+  <aside id="panel">
+    <div id="tabs" role="tablist"></div>
+    <div id="groups"></div>
+  </aside>
+</div>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ═════ Catalogs ═════ */
+const SKIN_TONES=['#f2d6bc','#e8c19e','#d8a982','#c08a5f','#a06c46','#7f5334'];
+const HAIR_COLORS=[
+  {hex:'#17110c',name:'Ink'},{hex:'#241a12',name:'Espresso'},{hex:'#33241a',name:'Chestnut'},
+  {hex:'#402c1e',name:'Auburn'},{hex:'#8a8a92',name:'Silver'},{hex:'#b98a2f',name:'Gold'}];
+const COLORS=[
+  {hex:'#c3cdb9',name:'Sage'},{hex:'#e8d9b8',name:'Champagne'},{hex:'#e6c9c4',name:'Blush'},
+  {hex:'#bccbd8',name:'Sky'},{hex:'#41465a',name:'Navy'},{hex:'#6e3344',name:'Wine'},
+  {hex:'#b98a2f',name:'Gold'},{hex:'#f2efe8',name:'Ivory'}];
+const PAINTS=[...COLORS,
+  {hex:'#e2725b',name:'Coral'},{hex:'#3a7d6d',name:'Teal'},{hex:'#7a4a86',name:'Plum'},{hex:'#1c1b19',name:'Black'}];
+const HAIRS=[
+  {id:'bald',name:'Bald'},{id:'crop',name:'Crop'},{id:'side',name:'Side Part'},{id:'spiky',name:'Spiky'},
+  {id:'curly',name:'Curly'},{id:'bob',name:'Bob'},{id:'buns',name:'Twin Buns'},{id:'pony',name:'Ponytail'},
+  {id:'long',name:'Long'},{id:'bangs',name:'Bangs'},{id:'knot',name:'Top Knot'}];
+const EYES=[{id:'dots',name:'Dots'},{id:'happy',name:'Happy'},{id:'sleepy',name:'Sleepy'},{id:'none',name:'None'}];
+const MOUTHS=[{id:'smile',name:'Smile'},{id:'grin',name:'Grin'},{id:'soft',name:'Soft'},{id:'none',name:'None'}];
+const MARKS=[{id:'none',name:'None'},{id:'left',name:'L Cheek'},{id:'right',name:'R Cheek'},{id:'chin',name:'Chin'}];
+/* Facial hair + brows (owner 2026-07-21). Offered on BOTH bodies — bodyType is
+   a cosmetic and gating a look by it would smuggle the privacy fence into the
+   UI. Colour follows hairColor so head and face always agree. */
+const FACIAL=[
+  {id:'none',name:'None'},{id:'stubble',name:'Stubble'},{id:'moustache',name:'Moustache'},
+  {id:'goatee',name:'Goatee'},{id:'vandyke',name:'Van Dyke'},{id:'full',name:'Full Beard'},
+  {id:'chinstrap',name:'Chinstrap'}];
+const BROWS=[{id:'none',name:'None'},{id:'soft',name:'Soft'},{id:'bold',name:'Bold'},{id:'arched',name:'Arched'}];
+const ONEPIECES=[
+  {id:'wedding',name:'Wedding Dress'},{id:'gown',name:'Ball Gown'},{id:'dress',name:'Day Dress'},
+  {id:'cocktail',name:'Cocktail'},{id:'redcarpet',name:'Red Carpet'}];
+const TOPS=[
+  {id:'tee',name:'Tee'},{id:'blouse',name:'Puff Blouse'},{id:'filipiniana',name:'Filipiniana'},
+  {id:'barong',name:'Barong'},{id:'polo',name:'Polo'},{id:'suit',name:'Suit'},
+  {id:'threepiece',name:'3-Piece'},{id:'tux',name:'Tux'},{id:'blazer',name:'Smart Casual'},{id:'hoodie',name:'Hoodie'}];
+const BOTTOMS=[
+  {id:'shorts',name:'Shorts'},{id:'trousers',name:'Trousers'},{id:'skirt',name:'Skirt'},
+  {id:'longskirt',name:'Long Skirt'},{id:'saya',name:'Saya'}];
+const ACCS=[
+  {id:'none',name:'None'},{id:'flower',name:'Flower'},{id:'bow',name:'Bow'},
+  {id:'cap',name:'Cap'},{id:'specs',name:'Specs'},{id:'band',name:'Headband'}];
+/* Auto mode: the mood-board palette proposes these */
+const AUTO={topColor:'#c3cdb9',bottomColor:'#e8d9b8',hairColor:'#241a12',shoeColor:'#f2efe8'};
+
+let paintColor='#b98a2f';
+
+function effColors(L){
+  if(L.colorMode==='auto')return {...L,topColor:AUTO.topColor,bottomColor:AUTO.bottomColor,
+    hairColor:AUTO.hairColor,shoeColor:AUTO.shoeColor};
+  return L;
+}
+
+/* ═════ Materials — DoubleSide; closed lathes only (solid law) ═════ */
+const matCache=new Map();
+function mat(color,rough=0.62){const k=color+'|'+rough;
+  if(!matCache.has(k))matCache.set(k,new THREE.MeshStandardMaterial({color,roughness:rough,side:THREE.DoubleSide}));
+  return matCache.get(k)}
+function darken(hex,k){const n=parseInt(hex.slice(1),16);const c=v=>Math.max(0,Math.min(255,Math.round(v*k)));
+  return '#'+(((c((n>>16)&255)<<16)|(c((n>>8)&255)<<8)|c(n&255)).toString(16).padStart(6,'0'))}
+function closedLathe(points,segments=30){
+  const pts=[new THREE.Vector2(0.001,points[0][1])];
+  for(const [r,y] of points)pts.push(new THREE.Vector2(Math.max(r,0.001),y));
+  pts.push(new THREE.Vector2(0.001,points[points.length-1][1]));
+  return new THREE.LatheGeometry(pts,segments);
+}
+function pk(mesh,key){mesh.userData.paintKey=key;return mesh}
+
+/* ═════ Head + FACE (V4: nose = front cue · eyes · mouth · beauty mark) ═════ */
+const HEAD_R=0.34,HEAD_Y=1.06;
+const FACE_INK='#2b211b';
+function halfTorus(r,tube){return new THREE.TorusGeometry(r,tube,8,16,Math.PI)}
+function buildFace(L){
+  const g=new THREE.Group();const R=HEAD_R;const ink=mat(FACE_INK,0.45);
+  /* nose — always on: the front-facing cue (owner 2026-07-19) */
+  const nose=new THREE.Mesh(new THREE.SphereGeometry(R*0.085,12,10),mat(darken(L.skin,0.88),0.5));
+  nose.position.set(0,-R*0.06,R*0.965);nose.scale.set(0.85,0.7,0.6);g.add(nose);
+  /* eyes */
+  if(L.eyes==='dots'){
+    for(const s of[-1,1]){const e=new THREE.Mesh(new THREE.SphereGeometry(R*0.055,10,8),ink);
+      e.position.set(s*R*0.34,R*0.08,R*0.9);e.scale.set(1,1.25,0.5);g.add(e);}}
+  else if(L.eyes==='happy'){
+    for(const s of[-1,1]){const e=new THREE.Mesh(halfTorus(R*0.075,R*0.02),ink);
+      e.position.set(s*R*0.35,R*0.07,R*0.92);e.rotation.x=-0.25;e.rotation.y=s*0.36;g.add(e);}}
+  else if(L.eyes==='sleepy'){
+    for(const s of[-1,1]){const e=new THREE.Mesh(halfTorus(R*0.075,R*0.02),ink);
+      e.position.set(s*R*0.34,R*0.1,R*0.92);e.rotation.x=Math.PI+0.25;e.rotation.y=-s*0.36;g.add(e);}}
+  /* mouth */
+  if(L.mouth==='smile'){const m=new THREE.Mesh(halfTorus(R*0.1,R*0.02),ink);
+    m.position.set(0,-R*0.2,R*0.945);m.rotation.x=Math.PI+0.23;g.add(m);}
+  else if(L.mouth==='grin'){const m=new THREE.Mesh(halfTorus(R*0.13,R*0.032),ink);
+    m.position.set(0,-R*0.19,R*0.925);m.rotation.x=Math.PI+0.23;g.add(m);}
+  else if(L.mouth==='soft'){const m=new THREE.Mesh(new THREE.CapsuleGeometry(R*0.02,R*0.09,4,6),ink);
+    m.position.set(0,-R*0.22,R*0.95);m.rotation.z=Math.PI/2;m.scale.set(1,1,0.5);g.add(m);}
+  /* beauty mark */
+  if(L.mark!=='none'){
+    const p=L.mark==='left'?[-R*0.47,-R*0.1,R*0.86]:L.mark==='right'?[R*0.47,-R*0.1,R*0.86]:[R*0.14,-R*0.34,R*0.90];
+    const b=new THREE.Mesh(new THREE.SphereGeometry(R*0.028,8,6),ink);
+    b.position.set(...p);b.scale.z=0.5;g.add(b);}
+  return g;
+}
+/* ═════ Facial hair + brows ═════
+   Placed against buildFace's own anchors: nose -0.06R, mouth -0.20R, chin
+   ~-0.34R. Jaw shells use the SAME trick as the hair nape but mirrored to the
+   FACE side (phi centred on +Z) and — critically — theta STOPS at ~0.80PI so
+   the shell follows the jaw instead of closing under the chin. */
+function buildFacial(L){
+  const g=new THREE.Group();const R=HEAD_R;
+  const m=mat(L.hairColor,0.6);
+  const shell=(t0,t1,phiC=0.5,phiW=0.64,r=1.028)=>{
+    const s=pk(new THREE.Mesh(new THREE.SphereGeometry(
+      R*r,26,18,Math.PI*(phiC-phiW/2),Math.PI*phiW,Math.PI*t0,Math.PI*(t1-t0)),m),'hair');
+    s.scale.set(1,0.93,0.97);return s;
+  };
+  const moustache=()=>{
+    const mo=pk(new THREE.Mesh(new THREE.CapsuleGeometry(R*0.035,R*0.17,4,8),m),'hair');
+    mo.rotation.z=Math.PI/2;mo.position.set(0,-R*0.16,R*0.96);mo.scale.set(1,1,0.7);return mo;
+  };
+  const chinPatch=(w=0.16,h=0.05)=>{
+    const c=pk(new THREE.Mesh(new THREE.SphereGeometry(R*0.16,14,10),m),'hair');
+    c.position.set(0,-R*0.42,R*0.86);c.scale.set(w/0.16,h/0.05*0.7,0.55);return c;
+  };
+  switch(L.facial){
+    case 'none':return null;
+    case 'stubble':  g.add(shell(0.62,0.86,0.5,0.72,1.014));break;
+    case 'moustache':g.add(moustache());break;
+    case 'goatee':   g.add(chinPatch());break;
+    case 'vandyke':  g.add(moustache());g.add(chinPatch());break;
+    case 'chinstrap':g.add(shell(0.66,0.88,0.5,0.86,1.03));break;
+    case 'full':     g.add(moustache());g.add(shell(0.63,0.88,0.5,0.80,1.032));break;
+  }
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});
+  return g;
+}
+function buildBrows(L){
+  if(L.brows==='none')return null;
+  const R=HEAD_R;const g=new THREE.Group();const m=mat(L.hairColor,0.5);
+  for(const s of[-1,1]){
+    const b=pk(new THREE.Mesh(new THREE.BoxGeometry(R*0.20,R*0.035,R*0.03),m),'hair');
+    b.position.set(s*R*0.34,R*0.235,R*0.885);b.rotation.y=s*0.35;
+    if(L.brows==='bold')b.scale.set(1.05,1.7,1);
+    if(L.brows==='arched'){b.rotation.z=s*0.30;b.position.y=R*0.25;}
+    g.add(b);
+  }
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});
+  return g;
+}
+function buildHair(L){
+  const g=new THREE.Group();const m=mat(L.hairColor,0.55);const R=HEAD_R;
+  /* TWO-PIECE CAP (fix 2026-07-21 — "long hair is bald from the back").
+     The old single-sphere cap ran theta 0..PI*spread from the north pole, so
+     spread 0.5 stopped dead at the EQUATOR: every style showed bare scalp below
+     it, and the long fall hung BEHIND that gap instead of continuing out of it.
+
+     A deeper single cap can't be the answer — it would swallow the face. So:
+       • crown  — full circumference, shallow, rim ABOVE THE BROW (the V4 bug
+                  class the spec already warns about: caps hiding eyes);
+       • nape   — REAR HALF ONLY (phi PI..2PI, which excludes +Z = the face),
+                  deep enough to pass the occiput.
+     Union = covered back and sides, open face. Rule of thumb: rim above the
+     brow at the front, below the occiput at the back. */
+  const cap=(crown,nape=0.64,lift=0)=>{
+    /* PLACEMENT INVARIANT (2026-07-21 audit). Two constraints, not eleven
+       hand-tuned triples:
+         crown <= 0.42 and lift >= 0.03 -> front rim at 0.331 R, above the
+           tallest brow (arched top 0.2963 R);
+         nape  >= 0.70 -> back hairline at -0.513 R, past the occiput and
+           still short of the 0.75 beard threshold.
+       Call sites keep their historic arguments; the clamp wins. */
+    crown=Math.min(crown,0.42);nape=Math.max(nape,0.70);lift=Math.max(lift,0.03);
+    const c=new THREE.Group();
+    /* CROWN — full circumference, SHALLOW so the rim sits high on the
+       forehead. The head's equator is roughly EYE level on a chibi, so any
+       crown at/below 0.5 cuts straight across the eyes (the V4 "caps hiding
+       eyes" bug class the spec warns about). Keep it at ~0.40-0.46. */
+    c.add(pk(new THREE.Mesh(
+      new THREE.SphereGeometry(R*1.05,28,18,0,Math.PI*2,0,Math.PI*crown),m),'hair'));
+    /* NAPE — the back, deep past the occiput. Spans phi 0.85PI..2.15PI: a
+       little MORE than the rear half, so it wraps the temples instead of
+       ending in a hard vertical seam there, while the 126-degree gap left open
+       is centred exactly on the face (+Z, phi = 0.5PI).
+       CEILING 0.74: theta is measured from the north pole and the chin is at
+       ~PI, so anything past ~0.75 curls UNDER THE JAW and reads as a BEARD
+       (owner, 2026-07-21). Length belongs to the FALL, which hangs behind the
+       head — never to the skull shell. */
+    if(nape>crown){
+      c.add(pk(new THREE.Mesh(
+        new THREE.SphereGeometry(R*1.045,28,20,Math.PI*0.85,Math.PI*1.3,0,Math.PI*nape),m),'hair'));
+    }
+    /* Match the HEAD's squash. head.scale is set on the head MESH, but hair is
+       added to the head GROUP — so an unscaled hair sphere floats ~0.05 proud
+       of a 0.93-tall skull and reads as a helmet. Scaling the cap (not the
+       falls/tails, which should hang naturally) makes it hug. */
+    c.scale.set(1,0.93,0.97);
+    c.position.y=lift;return c;
+  };
+  switch(L.hair){
+    case 'bald':break; /* the owner-requested clean dome */
+    case 'crop':g.add(cap(0.42,0.62,0.02));break;
+    case 'side':{g.add(cap(0.42,0.62,0.03));
+      const f=pk(new THREE.Mesh(new THREE.SphereGeometry(R*0.46,16,10),m),'hair');
+      f.position.set(R*0.3,R*0.5,R*0.72);f.scale.set(1.0,0.38,0.62);f.rotation.z=-0.22;g.add(f);break}
+    case 'spiky':{g.add(cap(0.42,0.62,0.02));
+      for(let i=0;i<5;i++){const a=(i-2)*0.42;
+        const s=pk(new THREE.Mesh(new THREE.ConeGeometry(R*0.16,R*0.42,8),m),'hair');
+        s.position.set(Math.sin(a)*R*0.55,R*1.00,Math.cos(a)*R*0.28-R*0.1);
+        s.rotation.z=-Math.sin(a)*0.5;s.rotation.x=0.18;g.add(s);}break}
+    case 'curly':{g.add(cap(0.44,0.70,0.02));
+      const seeds=[[0,0.95,0],[0.5,0.82,0.3],[-0.5,0.82,0.3],[0.62,0.75,-0.3],[-0.62,0.75,-0.3],[0.3,0.9,-0.5],[-0.3,0.9,-0.5],[0,0.85,0.58],[0.55,0.45,-0.55],[-0.55,0.45,-0.55]];
+      for(const [x,y,z] of seeds){const c=pk(new THREE.Mesh(new THREE.SphereGeometry(R*0.3,12,8),m),'hair');
+        c.position.set(x*R,y*R,z*R);g.add(c);}break}
+    case 'bob':{g.add(cap(0.44,0.72,0.03));
+      for(const s of[-1,1]){const fall=pk(new THREE.Mesh(new THREE.CapsuleGeometry(R*0.2,R*0.5,4,8),m),'hair');
+        fall.position.set(s*R*0.86,-R*0.26,-R*0.02);g.add(fall);}
+      const back=pk(new THREE.Mesh(new THREE.SphereGeometry(R*0.98,18,12),m),'hair');
+      back.position.set(0,-R*0.06,-R*0.28);back.scale.set(1,1.0,0.7);g.add(back);break}
+    case 'buns':{g.add(cap(0.42,0.62,0.02));
+      for(const s of[-1,1]){const b=pk(new THREE.Mesh(new THREE.SphereGeometry(R*0.32,14,10),m),'hair');
+        b.position.set(s*R*0.72,R*0.72,-R*0.15);g.add(b);}break}
+    case 'pony':{g.add(cap(0.42,0.62,0.02));
+      const tail=pk(new THREE.Mesh(new THREE.CapsuleGeometry(R*0.22,R*0.85,4,10),m),'hair');
+      tail.position.set(0,R*0.2,-R*0.8);tail.rotation.x=0.55;g.add(tail);break}
+    case 'long':{g.add(cap(0.44,0.70,0.03));
+      /* The fall now STARTS inside the nape panel (y +0.10R, z -0.16R) instead
+         of below and behind it, so there is no seam of scalp between them. */
+      const back=pk(new THREE.Mesh(closedLathe([[R*0.88,R*0.10],[R*0.92,-R*0.8],[R*0.62,-R*1.5]]),m),'hair');
+      back.position.set(0,-R*0.05,-R*0.16);back.scale.set(1,1,0.95);g.add(back);
+      for(const s of[-1,1]){const st=pk(new THREE.Mesh(new THREE.CapsuleGeometry(R*0.17,R*0.85,4,8),m),'hair');
+        st.position.set(s*R*0.74,-R*0.42,R*0.06);g.add(st);}break}
+    case 'bangs':{g.add(cap(0.44,0.70,0.03));
+      const fringe=pk(new THREE.Mesh(new THREE.SphereGeometry(R*0.62,20,10),m),'hair');
+      fringe.position.set(0,R*0.40,R*0.66);fringe.scale.set(1.08,0.34,0.5);g.add(fringe);break}
+    case 'knot':{g.add(cap(0.42,0.62,0.02));
+      const bun=pk(new THREE.Mesh(new THREE.SphereGeometry(R*0.24,12,10),m),'hair');
+      bun.position.set(0,R*0.95,-R*0.28);g.add(bun);break}
+  }
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});
+  return g;
+}
+function buildAcc(L){
+  const R=HEAD_R;
+  if(L.acc==='flower'){const g=new THREE.Group();const petal=mat('#e6c9c4',0.7);
+    for(let i=0;i<5;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(R*0.11,8,6),petal);
+      const a=i/5*Math.PI*2;p.position.set(Math.cos(a)*R*0.13,Math.sin(a)*R*0.13,0);p.scale.set(1,1,0.5);g.add(p);}
+    const h=new THREE.Mesh(new THREE.SphereGeometry(R*0.08,8,6),mat('#b98a2f',0.4));h.scale.set(1,1,0.6);g.add(h);
+    g.position.set(R*0.77,R*0.59,R*0.59);g.lookAt(g.position.clone().multiplyScalar(2));return g;}
+  if(L.acc==='bow'){const g=new THREE.Group();const m=mat('#6e3344',0.6);
+    for(const s of[-1,1]){const loop=new THREE.Mesh(new THREE.SphereGeometry(R*0.14,8,6),m);
+      loop.position.x=s*R*0.15;loop.scale.set(1.2,0.75,0.5);g.add(loop);}
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(R*0.08,8,6),m));
+    g.position.set(-R*0.67,R*0.81,R*0.51);g.lookAt(g.position.clone().multiplyScalar(2));return g;}
+  if(L.acc==='cap'){const g=new THREE.Group();const m=mat('#41465a',0.6);
+    const dome=new THREE.Mesh(new THREE.SphereGeometry(R*1.30,22,12,0,Math.PI*2,0,Math.PI*0.42),m);
+    dome.position.y=R*0.12;g.add(dome);
+    const brim=new THREE.Mesh(new THREE.CylinderGeometry(R*0.62,R*0.62,R*0.06,18),m);
+    brim.position.set(0,R*0.37,R*0.85);brim.rotation.x=-0.12;brim.scale.set(1,1,1.25);g.add(brim);
+    g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g;}
+  if(L.acc==='specs'){const g=new THREE.Group();const m=mat('#2e2c29',0.4);
+    for(const s of[-1,1]){const ring=new THREE.Mesh(new THREE.TorusGeometry(R*0.2,R*0.026,8,18),m);
+      ring.position.set(s*R*0.34,R*0.07,R*1.0);g.add(ring);}
+    const bridge=new THREE.Mesh(new THREE.CapsuleGeometry(R*0.022,R*0.18,4,6),m);
+    bridge.position.set(0,R*0.07,R*1.0);bridge.rotation.z=Math.PI/2;g.add(bridge);return g;}
+  if(L.acc==='band'){const band=new THREE.Mesh(new THREE.TorusGeometry(R*1.05,R*0.06,8,26),mat('#b98a2f',0.5));
+    band.position.y=R*0.42;band.rotation.x=Math.PI/2;return band;}
+  return null;
+}
+/* ═════ Wardrobe ═════ */
+function buildOnepiece(body,L){
+  const g=new THREE.Group();const flare=body==='female'?1.05:1.0;
+  let legLevel=0,shine=0.72,color=L.topColor;
+  let profile;
+  if(L.onepiece==='wedding'){shine=0.55;
+    profile=[[0.1,0.77],[0.2,0.6],[0.165,0.46],[0.24,0.3],[0.36*flare,0.1]];}
+  else if(L.onepiece==='gown'){shine=0.6;
+    profile=[[0.1,0.77],[0.2,0.6],[0.17,0.46],[0.25,0.28],[0.34*flare,0.1]];}
+  else if(L.onepiece==='dress'){legLevel=0.12;
+    profile=[[0.1,0.77],[0.2,0.6],[0.18,0.45],[0.27*flare,0.26]];}
+  else if(L.onepiece==='cocktail'){legLevel=0.2;
+    profile=[[0.1,0.77],[0.2,0.6],[0.17,0.48],[0.29*flare,0.33]];}
+  else {shine=0.35; /* red carpet — slim column, high sheen */
+    profile=[[0.1,0.77],[0.19,0.6],[0.155,0.46],[0.165,0.24],[0.21*flare,0.1]];}
+  const dress=pk(new THREE.Mesh(closedLathe(profile),mat(color,shine)),'top');
+  dress.castShadow=true;g.add(dress);
+  if(L.onepiece==='wedding'){
+    const belt=new THREE.Mesh(new THREE.CylinderGeometry(0.177,0.177,0.04,22),mat('#b98a2f',0.45));
+    belt.position.y=0.47;g.add(belt);}
+  g.userData.legLevel=legLevel;g.userData.sleeve=color;
+  return g;
+}
+function buildBottom(body,L){
+  const g=new THREE.Group();const c=mat(L.bottomColor,0.75);
+  const flare=body==='female'?1.06:1.0;
+  let legLevel=0.08;
+  if(L.bottom==='shorts'){legLevel=0.1;
+    g.add(pk(new THREE.Mesh(closedLathe([[0.21*flare,0.4],[0.22*flare,0.24],[0.2*flare,0.2]]),c),'bottom'));}
+  else if(L.bottom==='trousers'){legLevel=0;
+    g.add(pk(new THREE.Mesh(closedLathe([[0.21*flare,0.4],[0.19,0.16],[0.17,0.1]]),c),'bottom'));}
+  else if(L.bottom==='skirt'){legLevel=0.09;
+    g.add(pk(new THREE.Mesh(closedLathe([[0.2*flare,0.42],[0.3*flare,0.2],[0.28*flare,0.16]]),c),'bottom'));}
+  else if(L.bottom==='longskirt'){legLevel=0;
+    g.add(pk(new THREE.Mesh(closedLathe([[0.2*flare,0.42],[0.27*flare,0.24],[0.31*flare,0.1]]),c),'bottom'));}
+  else {legLevel=0;
+    g.add(pk(new THREE.Mesh(closedLathe([[0.2*flare,0.42],[0.25*flare,0.26],[0.27*flare,0.1]]),c),'bottom'));
+    const hem=new THREE.Mesh(new THREE.CylinderGeometry(0.268*flare,0.272*flare,0.045,24),mat('#b98a2f',0.5));
+    hem.position.y=0.125;g.add(hem);}
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});
+  g.userData.legLevel=legLevel;
+  return g;
+}
+function buildTop(body,L){
+  const g=new THREE.Group();
+  const width=body==='female'?0.95:1.0;
+  const c=mat(L.topColor,0.72);
+  let sleeve=L.topColor;
+  const base=(r1,r2)=>closedLathe([[0.1*width,0.77],[r1*width,0.6],[r2*width,0.38]]);
+  const jacket=(jc)=>{g.add(pk(new THREE.Mesh(closedLathe([[0.1*width,0.77],[0.215*width,0.6],[0.21*width,0.36]]),jc),'top'))};
+  if(L.top==='tee'){g.add(pk(new THREE.Mesh(base(0.2,0.2),c),'top'));}
+  else if(L.top==='blouse'){g.add(pk(new THREE.Mesh(base(0.2,0.19),c),'top'));
+    for(const s of[-1,1]){const puff=new THREE.Mesh(new THREE.SphereGeometry(0.075,12,8),c);
+      puff.position.set(s*0.21*width,0.62,0);puff.scale.set(0.8,0.8,0.7);g.add(puff);}}
+  else if(L.top==='filipiniana'){g.add(pk(new THREE.Mesh(base(0.2,0.185),c),'top'));
+    for(const s of[-1,1]){const slv=new THREE.Mesh(new THREE.SphereGeometry(0.095,14,10),c);
+      slv.position.set(s*0.235*width,0.66,0);slv.scale.set(0.6,0.9,0.5);slv.rotation.z=s*0.35;g.add(slv);}
+    const band=new THREE.Mesh(new THREE.CylinderGeometry(0.20*width,0.205*width,0.045,22),mat('#b98a2f',0.45));
+    band.position.y=0.42;g.add(band);}
+  else if(L.top==='barong'){sleeve='#f4efdf';
+    g.add(pk(new THREE.Mesh(closedLathe([[0.1*width,0.77],[0.21*width,0.6],[0.205*width,0.36]]),mat('#f4efdf',0.75)),'top'));
+    const collar=new THREE.Mesh(new THREE.TorusGeometry(0.1,0.02,8,18),mat('#e4d9b8',0.65));
+    collar.position.y=0.75;collar.rotation.x=Math.PI/2;g.add(collar);
+    const placket=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.20,0.012),mat('#e4d9b8',0.65));
+    placket.position.set(0,0.51,0.212*width);g.add(placket);}
+  else if(L.top==='polo'){g.add(pk(new THREE.Mesh(base(0.2,0.2),c),'top'));
+    const collar=new THREE.Mesh(new THREE.TorusGeometry(0.1,0.022,8,18),mat(darken(L.topColor,0.7),0.6));
+    collar.position.y=0.75;collar.rotation.x=Math.PI/2;g.add(collar);}
+  else if(L.top==='suit'){jacket(c);
+    const shirtV=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.15,3),mat('#f2efe8',0.7));
+    shirtV.position.set(0,0.545,0.155*width);shirtV.rotation.x=-3.03;g.add(shirtV);
+    const tie=new THREE.Mesh(new THREE.SphereGeometry(0.032,8,6),mat('#6e3344',0.55));
+    tie.position.set(0,0.55,0.2*width);g.add(tie);}
+  else if(L.top==='threepiece'){jacket(c);
+    /* the waistcoat V in gold-toned accent under the jacket */
+    const vest=new THREE.Mesh(new THREE.ConeGeometry(0.095,0.2,3),mat('#b98a2f',0.6));
+    vest.position.set(0,0.505,0.15*width);vest.rotation.x=-3.03;g.add(vest);
+    const shirtV=new THREE.Mesh(new THREE.ConeGeometry(0.055,0.1,3),mat('#f2efe8',0.7));
+    shirtV.position.set(0,0.56,0.185*width);shirtV.rotation.x=-3.03;g.add(shirtV);
+    const tie=new THREE.Mesh(new THREE.SphereGeometry(0.03,8,6),mat('#2e2c29',0.5));
+    tie.position.set(0,0.555,0.2*width);g.add(tie);}
+  else if(L.top==='tux'){sleeve='#1c1b19';
+    g.add(pk(new THREE.Mesh(closedLathe([[0.1*width,0.77],[0.215*width,0.6],[0.21*width,0.36]]),mat('#1c1b19',0.5)),'top'));
+    const shirtV=new THREE.Mesh(new THREE.ConeGeometry(0.09,0.17,3),mat('#ffffff',0.65));
+    shirtV.position.set(0,0.53,0.15*width);shirtV.rotation.x=-3.03;g.add(shirtV);
+    /* satin lapel hint + bow tie */
+    for(const s of[-1,1]){const lapel=new THREE.Mesh(new THREE.BoxGeometry(0.025,0.16,0.01),mat('#2e2c33',0.3));
+      lapel.position.set(s*0.055,0.62,0.195*width);lapel.rotation.x=-0.1;lapel.rotation.z=s*0.22;g.add(lapel);}
+    for(const s of[-1,1]){const wing=new THREE.Mesh(new THREE.SphereGeometry(0.028,8,6),mat('#1c1b19',0.4));
+      wing.position.set(s*0.032,0.69,0.2*width);wing.scale.set(1.25,0.7,0.5);g.add(wing);}}
+  else if(L.top==='blazer'){jacket(c);
+    const crew=new THREE.Mesh(new THREE.TorusGeometry(0.115,0.02,8,16),mat('#f2efe8',0.7));
+    crew.position.y=0.745;crew.rotation.x=Math.PI/2;g.add(crew);
+    const teeV=new THREE.Mesh(new THREE.ConeGeometry(0.075,0.13,3),mat('#f2efe8',0.75));
+    teeV.position.set(0,0.555,0.16*width);teeV.rotation.x=-3.03;g.add(teeV);}
+  else { /* hoodie */
+    g.add(pk(new THREE.Mesh(closedLathe([[0.105*width,0.77],[0.215*width,0.6],[0.21*width,0.38]]),c),'top'));
+    const hood=new THREE.Mesh(new THREE.SphereGeometry(0.135,16,12),mat(darken(L.topColor,0.85),0.75));
+    hood.position.set(0,0.7,-0.15);hood.scale.set(1.15,0.8,0.8);g.add(hood);}
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});
+  g.userData.sleeve=sleeve;
+  return g;
+}
+function buildChibi(body,rawLook){
+  const L=effColors(rawLook);
+  const g=new THREE.Group();
+  const skin=mat(L.skin,0.5);
+  let clothing;
+  if(L.onepiece){clothing=buildOnepiece(body,L);}
+  else {const bottom=buildBottom(body,L);g.add(bottom);clothing=buildTop(body,L);clothing.userData.legLevel=bottom.userData.legLevel;}
+  g.add(clothing);
+  const sleeve=clothing.userData.sleeve,legLevel=clothing.userData.legLevel??0;
+  for(const s of[-1,1]){
+    const armG=new THREE.Group();armG.position.set(s*0.265,0.56,0);
+    const upper=new THREE.Mesh(new THREE.CapsuleGeometry(0.062,0.13,6,10),mat(sleeve,0.7));
+    upper.position.y=-0.05;upper.rotation.z=s*0.62;upper.castShadow=true;armG.add(upper);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(0.072,12,8),skin);
+    hand.position.set(s*0.115,-0.15,0);hand.castShadow=true;armG.add(hand);
+    g.add(armG);}
+  for(const s of[-1,1]){
+    if(legLevel>0){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(0.07,legLevel,6,10),skin);
+      leg.position.set(s*0.1,0.1+legLevel/2,0.01);leg.castShadow=true;g.add(leg);}
+    const shoe=pk(new THREE.Mesh(new THREE.SphereGeometry(0.095,14,10),mat(L.shoeColor,0.6)),'shoes');
+    shoe.position.set(s*0.105,0.055,0.035);shoe.scale.set(0.95,0.62,1.35);shoe.castShadow=true;g.add(shoe);}
+  const headG=new THREE.Group();headG.position.y=HEAD_Y;
+  const head=pk(new THREE.Mesh(new THREE.SphereGeometry(HEAD_R,30,20),skin),'skinhead');
+  head.scale.set(1,0.93,0.97);head.castShadow=true;headG.add(head);
+  for(const s of[-1,1]){const ear=new THREE.Mesh(new THREE.SphereGeometry(0.055,12,8),skin);
+    ear.position.set(s*HEAD_R*0.96,-0.02,0);ear.scale.set(0.6,1,0.8);headG.add(ear);}
+  headG.add(buildFace(L));
+  const brows=buildBrows(L);if(brows)headG.add(brows);
+  const facial=buildFacial(L);if(facial)headG.add(facial);
+  headG.add(buildHair(L));
+  const acc=buildAcc(L);if(acc)headG.add(acc);
+  g.add(headG);
+  g.userData.headG=headG;
+  return g;
+}
+
+/* ═════ Scene — amphitheater showroom ═════ */
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ONE CHIBI — the maker. Owner directive 2026-07-21: "avatar maker should be
+   only 1 chibi. and we transform there just like in games when they create
+   their characters."
+
+   Contrast with chibi_studio_prototype.html, which is a SHOWROOM: two hero
+   figures on pedestals plus tiered shelves of variant figures you tap. That is
+   a picker. This is a creator — a single figure, transformed in place, every
+   option a panel control rather than another body in the room.
+
+   Geometry + catalogs are reused VERBATIM from the studio so this is a fair
+   comparison of the INTERACTION, not a different-looking chibi.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+const look = {skin:'#d8a982',hair:'buns',hairColor:'#241a12',eyes:'dots',mouth:'smile',mark:'left',
+  facial:'none',brows:'soft',
+  onepiece:null,top:'filipiniana',topColor:'#f6f3ee',bottom:'longskirt',bottomColor:'#e6c9c4',
+  shoeColor:'#f2efe8',acc:'flower',colorMode:'custom'};
+let body = 'female';
+
+const stageEl=document.getElementById('stage');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+stageEl.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(34,1,0.1,60);
+camera.position.set(0,1.28,3.5);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.target.set(0,0.92,0);controls.enablePan=false;
+controls.minDistance=2.1;controls.maxDistance=6;
+controls.minPolarAngle=0.5;controls.maxPolarAngle=1.62;
+controls.enableDamping=true;controls.dampingFactor=0.08;
+
+scene.add(new THREE.HemisphereLight('#fdf9ef','#b6ad9c',1.08));
+const key=new THREE.DirectionalLight('#fff2dc',1.45);
+key.position.set(4,7,4);key.castShadow=true;
+key.shadow.mapSize.set(1024,1024);key.shadow.camera.near=1;key.shadow.camera.far=20;
+key.shadow.camera.left=-3;key.shadow.camera.right=3;key.shadow.camera.top=3;key.shadow.camera.bottom=-3;
+scene.add(key);
+const rim=new THREE.DirectionalLight('#d8e2ef',0.5);rim.position.set(-5,4,-4);scene.add(rim);
+
+const floor=new THREE.Mesh(new THREE.CircleGeometry(3.2,48),mat('#e6e1d8',0.95));
+floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+const disc=new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.66,0.06,44),mat('#dcd5c8',0.85));
+disc.position.y=0.03;disc.receiveShadow=true;scene.add(disc);
+const ring=new THREE.Mesh(new THREE.TorusGeometry(0.62,0.011,8,60),mat('#b98a2f',0.35));
+ring.rotation.x=Math.PI/2;ring.position.y=0.066;scene.add(ring);
+
+/* THE one figure. Rebuilt in place on every change — the same object slot, so
+   the avatar never "reappears", it just becomes the new choice. */
+const pedestal=new THREE.Group();pedestal.position.y=0.06;scene.add(pedestal);
+let fig=null;
+function rebuild(){
+  if(fig){pedestal.remove(fig);fig.traverse(o=>{if(o.isMesh&&o.geometry)o.geometry.dispose();});}
+  fig=buildChibi(body,look);
+  pedestal.add(fig);
+}
+rebuild();
+
+/* ── Panels. Tabs are correct HERE: in a maker the avatar IS the single
+   subject, so grouping controls by subject-part is the sanctioned pattern
+   (the venue's "scene is the nav" rule governs objects in a ROOM). ── */
+const GROUPS=[
+  {id:'body',name:'Body'},{id:'face',name:'Face'},{id:'hair',name:'Hair'},
+  {id:'outfit',name:'Outfit'},{id:'colour',name:'Colour'},
+];
+const tabsEl=document.getElementById('tabs'), groupsEl=document.getElementById('groups');
+let active='body';
+
+function chips(items,get,set,{swatch=false}={}){
+  const wrap=document.createElement('div');wrap.className='chips';
+  for(const it of items){
+    const b=document.createElement('button');
+    b.className=swatch?'sw':'chip';
+    /* The catalogs are NOT uniform: SKIN_TONES is an array of hex STRINGS,
+       while HAIR_COLORS / COLORS / PAINTS are {hex,name} OBJECTS. Reading
+       `it` blindly left every object-shaped swatch with no background, so it
+       fell back to the browser's ButtonFace grey. Normalise both shapes. */
+    const val = swatch ? (typeof it==='string' ? it : it.hex) : it.id;
+    if(swatch){
+      b.style.background=val;
+      b.title = typeof it==='string' ? val : (it.name||val);
+      b.setAttribute('aria-label', b.title);
+    }else{
+      b.textContent=it.name;
+    }
+    b.setAttribute('aria-pressed',String(get()===val));
+    b.onclick=()=>{set(val);rebuild();paint();};
+    wrap.appendChild(b);
+  }
+  return wrap;
+}
+function label(t){const d=document.createElement('div');d.className='lbl';d.textContent=t;return d;}
+
+function paint(){
+  tabsEl.innerHTML='';groupsEl.innerHTML='';
+  for(const g of GROUPS){
+    const t=document.createElement('button');
+    t.className='tab';t.textContent=g.name;t.setAttribute('role','tab');
+    t.setAttribute('aria-selected',String(active===g.id));
+    t.onclick=()=>{active=g.id;paint();};
+    tabsEl.appendChild(t);
+  }
+  const box=document.createElement('div');box.className='grp on';
+
+  if(active==='body'){
+    box.appendChild(label('Body'));
+    box.appendChild(chips([{id:'female',name:'A'},{id:'male',name:'B'}],()=>body,v=>{body=v;}));
+    box.appendChild(label('Skin'));
+    box.appendChild(chips(SKIN_TONES,()=>look.skin,v=>look.skin=v,{swatch:true}));
+    const n=document.createElement('p');n.className='note';
+    n.textContent='Body is a cosmetic. It is never read from, written to, or inferred from the account’s sex field.';
+    box.appendChild(n);
+  }
+  if(active==='face'){
+    box.appendChild(label('Eyes'));box.appendChild(chips(EYES,()=>look.eyes,v=>look.eyes=v));
+    box.appendChild(label('Mouth'));box.appendChild(chips(MOUTHS,()=>look.mouth,v=>look.mouth=v));
+    box.appendChild(label('Brows'));box.appendChild(chips(BROWS,()=>look.brows,v=>look.brows=v));
+    box.appendChild(label('Facial hair'));box.appendChild(chips(FACIAL,()=>look.facial,v=>look.facial=v));
+    box.appendChild(label('Beauty mark'));box.appendChild(chips(MARKS,()=>look.mark,v=>look.mark=v));
+    const fn=document.createElement('p');fn.className='note';
+    fn.textContent='Facial hair follows your hair colour, and is offered on both bodies — it is a look, not a body type.';
+    box.appendChild(fn);
+  }
+  if(active==='hair'){
+    box.appendChild(label('Style'));box.appendChild(chips(HAIRS,()=>look.hair,v=>look.hair=v));
+    box.appendChild(label('Colour'));
+    box.appendChild(chips(HAIR_COLORS,()=>look.hairColor,v=>look.hairColor=v,{swatch:true}));
+    box.appendChild(label('Accessory'));box.appendChild(chips(ACCS,()=>look.acc,v=>look.acc=v));
+  }
+  if(active==='outfit'){
+    box.appendChild(label('One piece'));
+    box.appendChild(chips([{id:null,name:'None'},...ONEPIECES],()=>look.onepiece,v=>{look.onepiece=v;}));
+    box.appendChild(label('Top'));
+    box.appendChild(chips(TOPS,()=>look.top,v=>{look.top=v;look.onepiece=null;}));
+    box.appendChild(label('Bottom'));
+    box.appendChild(chips(BOTTOMS,()=>look.bottom,v=>{look.bottom=v;look.onepiece=null;}));
+    const n=document.createElement('p');n.className='note';
+    n.textContent='One-piece and top+bottom are mutually exclusive slots — picking one clears the other.';
+    box.appendChild(n);
+  }
+  if(active==='colour'){
+    box.appendChild(label('Mode'));
+    box.appendChild(chips([{id:'auto',name:'Auto (mood board)'},{id:'custom',name:'Custom'}],
+      ()=>look.colorMode,v=>look.colorMode=v));
+    if(look.colorMode!=='auto'){
+      box.appendChild(label('Top'));
+      box.appendChild(chips(COLORS,()=>look.topColor,v=>look.topColor=v,{swatch:true}));
+      box.appendChild(label('Bottom'));
+      box.appendChild(chips(COLORS,()=>look.bottomColor,v=>look.bottomColor=v,{swatch:true}));
+      box.appendChild(label('Shoes'));
+      box.appendChild(chips(COLORS,()=>look.shoeColor,v=>look.shoeColor=v,{swatch:true}));
+    }else{
+      const n=document.createElement('p');n.className='note';
+      n.textContent='Auto derives every colour from the couple’s mood-board palette, so the crowd stays harmonised with the room.';
+      box.appendChild(n);
+    }
+  }
+  groupsEl.appendChild(box);
+}
+paint();
+
+/* Turntable — stops the moment you grab it, so orbiting never fights the spin. */
+let spinning=true;
+controls.addEventListener('start',()=>{spinning=false;document.getElementById('spin').textContent='turntable off';});
+function resize(){
+  const w=stageEl.clientWidth,h=stageEl.clientHeight;
+  renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+}
+addEventListener('resize',resize);resize();
+const clock=new THREE.Clock();
+renderer.setAnimationLoop(()=>{
+  const t=clock.getElapsedTime();
+  if(spinning)pedestal.rotation.y=t*0.35;
+  /* the spec's idle: whole-figure bounce + head tilt, phase-stable */
+  if(fig){
+    const s=1+Math.sin(t*2.2)*0.018;
+    fig.scale.set(1/Math.sqrt(s),s,1/Math.sqrt(s));
+    fig.position.y=Math.max(0,Math.sin(t*2.2))*0.012;
+  }
+  controls.update();
+  renderer.render(scene,camera);
+});
+</script>
+</body>
+</html>

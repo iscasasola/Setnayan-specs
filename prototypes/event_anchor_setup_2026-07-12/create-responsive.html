@@ -1,0 +1,121 @@
+<meta charset="utf-8">
+<title>Setnayan — Create Event (responsive check)</title>
+<style>
+  :root{
+    --paper:#EFEAE0; --card:#FFFDF8; --ink:#1F1C17; --ink-2:rgba(31,28,23,.60); --ink-3:rgba(31,28,23,.42);
+    --gold:#A9834B; --gold-deep:#8C6A38; --gold-wash:rgba(169,131,75,.10); --gold-line:rgba(169,131,75,.32);
+    --line:rgba(31,28,23,.12); --terra:#A3641F; --terra-wash:rgba(163,100,31,.07); --mulberry:#7B3B5E;
+    --sans:'Hanken Grotesk',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:'Space Mono',ui-monospace,Menlo,monospace;
+    --serif:'Hanken Grotesk',Georgia,serif;
+  }
+  @media (prefers-color-scheme: dark){:root{--paper:#100E0B;--card:#201C15;--ink:#EAE3D6;--ink-2:rgba(234,227,214,.62);--ink-3:rgba(234,227,214,.42);--gold:#C39D64;--gold-deep:#D4B27E;--gold-wash:rgba(195,157,100,.13);--gold-line:rgba(195,157,100,.4);--line:rgba(234,227,214,.14);--terra:#D19A55;--terra-wash:rgba(209,154,85,.08);--mulberry:#B0698C;}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;font-size:15px}
+  .wrap{max-width:1152px;margin:0 auto;padding:28px 16px 60px}
+  .back{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}
+  h1{font-size:clamp(26px,5vw,34px);font-weight:700;letter-spacing:-.02em;margin:8px 0 2px}
+  .lead{color:var(--ink-2);margin:0 0 8px}
+  .statebar{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 24px}
+  .statebar button{appearance:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font:600 12.5px var(--sans);color:var(--ink-2);cursor:pointer}
+  .statebar button.on{border-color:var(--gold);background:var(--gold-wash);color:var(--gold-deep)}
+  /* type grid — mirrors grid-cols-2 sm:3 lg:4 xl:5, aspect-[4/5] */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr);gap:16px}}
+  @media(min-width:1024px){.grid{grid-template-columns:repeat(4,1fr)}}
+  @media(min-width:1280px){.grid{grid-template-columns:repeat(5,1fr)}}
+  .tc{position:relative;aspect-ratio:4/5;border-radius:16px;overflow:hidden;border:none;cursor:pointer;text-align:left;box-shadow:0 10px 30px rgba(30,34,41,.16);transition:transform .2s}
+  .tc:hover{transform:translateY(-2px)}
+  .tc.sel{outline:3px solid var(--gold);outline-offset:2px}
+  .tc .bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:52px}
+  .tc .ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(31,28,23,.85),rgba(31,28,23,.2) 55%,transparent)}
+  .tc .cap{position:absolute;left:0;right:0;bottom:0;padding:14px}
+  .tc .cap h3{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;line-height:1;color:#fff;margin:0;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+  .tc .cap p{font-size:12px;color:rgba(255,255,255,.9);margin:6px 0 0;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+  /* form — mirrors mt-10 max-w-lg space-y-6 */
+  .form{margin-top:36px;max-width:512px;display:flex;flex-direction:column;gap:22px}
+  .fld{display:flex;flex-direction:column;gap:6px}
+  .fld label{font-size:14px;font-weight:600}
+  .req{color:var(--terra)}
+  .input{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:500 15px var(--sans);color:var(--ink);width:100%}
+  .hint{font-size:12px;color:var(--ink-3);margin:0}
+  fieldset{border:1px solid var(--line);background:rgba(31,28,23,.02);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:16px;margin:0}
+  legend{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:0 4px}
+  .datefld{max-width:224px}
+  .actions{display:flex;flex-direction:column;gap:12px}
+  @media(min-width:640px){.actions{flex-direction:row}}
+  .btn{appearance:none;border:none;border-radius:10px;padding:12px 20px;font:700 15px var(--sans);cursor:pointer;text-align:center}
+  .btn.p{background:var(--gold);color:#fff}
+  @media (prefers-color-scheme: dark){.btn.p{color:#161310}}
+  .btn.g{background:none;border:1px solid var(--line);color:var(--ink-2);font-weight:500}
+  /* wedding hard block — mirrors the terracotta block card */
+  .block{margin-top:36px;max-width:512px;border:1px solid rgba(163,100,31,.3);background:var(--terra-wash);border-radius:16px;padding:22px}
+  .block h2{font-family:var(--serif);font-size:20px;margin:0 0 8px}
+  .block p{font-size:14px;line-height:1.55;color:var(--ink-2);margin:0}
+  .block .row{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+  @media(min-width:640px){.block .row{flex-direction:row}}
+  .btn.m{background:var(--mulberry);color:#fff}
+  .foot{max-width:512px;font-family:var(--mono);font-size:10px;color:var(--ink-3);line-height:1.7;margin-top:40px}
+</style>
+
+<div class="wrap">
+  <div class="back">‹ BACK TO EVENTS</div>
+  <h1>What kind of event are you planning?</h1>
+  <p class="lead">Tap a type to begin.</p>
+
+  <div class="statebar">
+    <button data-s="grid" class="on">① Type grid</button>
+    <button data-s="anniversary">② Anniversary form</button>
+    <button data-s="wedding-block">③ Wedding — one at a time</button>
+  </div>
+
+  <div id="stage"></div>
+
+  <div class="foot">RESPONSIVE CHECK · mirrors the real create-event structure + Tailwind breakpoints (grid-cols-2 → sm:3 → lg:4 → xl:5 · form max-w-lg) · resize the window or use the device toggle to see mobile/desktop.</div>
+</div>
+
+<script>
+(function(){
+  var TYPES=[
+    ['Wedding','💍','The day you say "I do."'],['Debut','✦','Her grand eighteenth.'],
+    ['Gender Reveal','🎈','Pink or blue?'],['Birthday','🎂','Another year, celebrated.'],
+    ['Celebration','🥂','Moments worth gathering for.'],['Anniversary','❤','Years together, honored.'],
+    ['Christening','🕊','A blessing to remember.'],['Travel','✈','The trip you’ll remember.'],
+    ['Corporate','🏢','Where your brand shines.'],['Reunion','🤝','Back together again.']
+  ];
+  var stage=document.getElementById('stage');
+  function grid(){
+    stage.innerHTML='<div class="grid">'+TYPES.map(function(t,i){
+      return '<button class="tc'+(t[0]==='Anniversary'?' sel':'')+'"><div class="bg" style="background:linear-gradient(135deg,'+
+        ['#6b5b4a','#4a5568','#7a6a8a','#8a6a5a','#5a6a7a','#7a5a6a','#5a7a6a','#4a6a7a','#5a5a7a','#6a6a5a'][i]+',#2a2622)">'+t[1]+'</div>'+
+        '<div class="ov"></div><div class="cap"><h3>'+t[0]+'</h3><p>'+t[2]+'</p></div></button>';
+    }).join('')+'</div>';
+  }
+  function anniversary(){
+    stage.innerHTML=
+      '<form class="form">'
+      +'<div class="fld"><label>Event name <span class="req">*</span></label><input class="input" placeholder="Our celebration" value="Our Anniversary"><p class="hint">Just the name to start — add the details below now, or anytime later.</p></div>'
+      +'<fieldset><legend>What are you celebrating?</legend>'
+        +'<div class="fld"><label>What does this celebrate?</label><select class="input"><option>Our wedding</option><option>Our relationship</option><option>A milestone we’re proud of</option><option>A date that matters to us</option></select></div>'
+        +'<div class="fld"><label>What date is it?</label><input class="input datefld" type="date"><p class="hint">We’ll bring it back every year — quietly, unless you throw a party for it.</p></div>'
+      +'</fieldset>'
+      +'<fieldset><legend>A few details — optional</legend>'
+        +'<div class="fld"><label>Guest count</label><input class="input datefld" type="number" placeholder="e.g. 120"></div>'
+        +'<div class="fld"><label>Budget feel</label><select class="input"><option>Not sure yet</option></select></div>'
+      +'</fieldset>'
+      +'<div class="actions"><button class="btn p" type="button">Create event</button><button class="btn g" type="button">Cancel</button></div>'
+      +'</form>';
+  }
+  function weddingBlock(){
+    stage.innerHTML=
+      '<div class="block"><h2>One wedding at a time</h2>'
+      +'<p>You already have a wedding in planning — you can only plan one wedding at a time. Finish or archive it first to start a new one.</p>'
+      +'<div class="row"><button class="btn m" type="button">Go to my wedding</button><button class="btn g" type="button">Pick a different type</button></div></div>';
+  }
+  var R={grid:grid,anniversary:anniversary,'wedding-block':weddingBlock};
+  document.querySelectorAll('.statebar button').forEach(function(b){b.onclick=function(){
+    document.querySelectorAll('.statebar button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');R[b.dataset.s]();
+  }});
+  grid();
+})();
+</script>

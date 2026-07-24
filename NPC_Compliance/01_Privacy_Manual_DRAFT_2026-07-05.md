@@ -200,7 +200,7 @@ Every data subject has the following rights under RA 10173. All are exercised by
 | # | Right | How to exercise / PIC response |
 |---|---|---|
 | 1 | **Right to be informed** | Via this Manual, the published privacy notice, and registration-time disclosures. |
-| 2 | **Right to access** | Request a copy of personal data held, via iscasasolaii@gmail.com. **Response: within 7 business days** for non-urgent requests. |
+| 2 | **Right to access** | Request a copy of personal data held, via iscasasolaii@gmail.com. **Response: within 15 business days** for non-urgent requests. |
 | 3 | **Right to object** | Opt out of specific data uses (e.g., marketing samples, promotional email) via settings or iscasasolaii@gmail.com. |
 | 4 | **Right to rectification** | Edit profile in-app; request corrections via iscasasolaii@gmail.com. |
 | 5 | **Right to erasure or blocking** | Delete account via the in-app "Delete my account" surface; **confirmed within 30 days**; cascade per § 5.5, with statutory-retention exceptions. |

@@ -1,0 +1,40 @@
+diff --git a/apps/web/app/dashboard/profile/page.tsx b/apps/web/app/dashboard/profile/page.tsx
+index 7caecfc45..6d50c639b 100644
+--- a/apps/web/app/dashboard/profile/page.tsx
++++ b/apps/web/app/dashboard/profile/page.tsx
+@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
+ import { ArrowLeft, Download, AlertTriangle, Compass, KeyRound } from 'lucide-react';
+ import { createClient } from '@/lib/supabase/server';
+ import { fetchUserEvents } from '@/lib/events';
++import { fetchOwnVendorProfile } from '@/lib/vendor-profile';
+ import { restartTour } from '@/lib/tour-actions';
+ import { SubmitButton } from '@/app/_components/submit-button';
+ import { makeT } from '@/lib/i18n';
+@@ -87,6 +88,15 @@ export default async function ProfilePage({ searchParams }: Props) {
+     profile?.is_team_member ||
+     profile?.account_type === 'admin';
+ 
++  // Vendor shortcut: surface a "My shop ↗" button (mirroring the Admin
++  // console button below) that deep-links to /v/{slug}. Only renders when
++  // the user is a vendor AND has already set their slug — without a slug
++  // the public route would 404.
++  const isVendor = profile?.account_type === 'vendor';
++  const vendorShopSlug = isVendor
++    ? (await fetchOwnVendorProfile(supabase, user.id))?.business_slug ?? null
++    : null;
++
+   // If the user has exactly one active event, "Back" lands on that event's
+   // home rather than the event-picker. Two+ events fall through to /dashboard.
+   const events = await fetchUserEvents(supabase, user.id, 'couple');
+@@ -510,6 +520,11 @@ export default async function ProfilePage({ searchParams }: Props) {
+             Admin console ↗
+           </Link>
+         ) : null}
++        {isVendor && vendorShopSlug ? (
++          <Link href={`/v/${vendorShopSlug}`} className="button-secondary">
++            My shop ↗
++          </Link>
++        ) : null}
+         <form action="/auth/sign-out" method="post">
+           <button className="button-secondary" type="submit">
+             {tr('cta.sign_out')}

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Setnayan · Chibi Avatar Maker — 2026-07-19</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{--obsidian:#101011;--ink:#1c1b19;--greige:#efece6;--greige-2:#e5e0d7;--paper:#f7f5f0;
+    --gold:#b98a2f;--gold-soft:#d4af5a;--line:rgba(28,27,25,.12);--glass:rgba(255,255,255,.6)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:'Hanken Grotesk',system-ui,sans-serif;background:var(--greige);color:var(--ink);overflow:hidden}
+  .mono{font-family:'Space Mono',monospace}
+  #app{display:flex;flex-direction:column;height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;padding:13px 22px;border-bottom:1px solid var(--line);background:var(--paper);z-index:5}
+  .brand{display:flex;align-items:baseline;gap:12px}
+  .brand .word{font-weight:700;letter-spacing:.22em;font-size:13px}
+  .brand .word .accent{color:var(--gold)}
+  .brand .crumb{font-family:'Space Mono',monospace;font-size:11px;color:rgba(28,27,25,.55)}
+  .proto-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--gold);border:1px solid rgba(185,138,47,.4);border-radius:999px;padding:3px 10px}
+  main{display:flex;flex:1;min-height:0}
+  #stage-wrap{position:relative;flex:1;min-width:0}
+  #stage{position:absolute;inset:0}
+  #stage canvas{display:block}
+  .stage-caption{position:absolute;left:22px;bottom:18px;pointer-events:none;max-width:46%}
+  .stage-caption h1{font-weight:300;font-size:clamp(22px,2.8vw,38px);line-height:1.08}
+  .stage-caption h1 em{font-style:italic;color:var(--gold)}
+  .stage-caption p{font-family:'Space Mono',monospace;font-size:10.5px;color:rgba(28,27,25,.5);margin-top:7px;line-height:1.5}
+  .stage-hint{position:absolute;right:22px;bottom:18px;font-family:'Space Mono',monospace;font-size:10px;color:rgba(28,27,25,.42);pointer-events:none;text-align:right}
+  aside{width:384px;flex-shrink:0;display:flex;flex-direction:column;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-left:1px solid var(--line);z-index:4}
+  .panel-head{padding:18px 20px 0}
+  .panel-head .eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .panel-head h2{font-weight:500;font-size:19px;margin-top:5px}
+  .panel-head .sub{font-size:12px;color:rgba(28,27,25,.55);margin-top:5px;line-height:1.5}
+  .body-switch{display:flex;gap:7px;margin:14px 20px 0}
+  .body-switch button{flex:1;font-family:'Hanken Grotesk',sans-serif;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.6);color:rgba(28,27,25,.6);border-radius:999px;padding:8px 0;cursor:pointer;transition:all .18s}
+  .body-switch button.active{border-color:var(--gold);color:var(--ink);background:rgba(212,175,90,.14);box-shadow:0 0 0 1px var(--gold)}
+  .body-switch .tap-note{flex-basis:100%;font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(28,27,25,.42)}
+  .tap-note-row{margin:6px 20px 0;font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(28,27,25,.42)}
+  .panel-body{flex:1;overflow-y:auto;padding:14px 20px 12px}
+  .group{margin-bottom:18px}
+  .group>label{display:block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(28,27,25,.55);margin-bottom:8px}
+  .swatches{display:flex;flex-wrap:wrap;gap:9px}
+  .swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid rgba(28,27,25,.12);transition:transform .15s,box-shadow .15s}
+  .swatch.active{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--gold);transform:scale(1.06)}
+  .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .chips.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+  .chip{text-align:center;background:rgba(255,255,255,.65);border:1px solid var(--line);border-radius:11px;padding:8px 6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .18s}
+  .chip.active{border-color:var(--gold);background:rgba(212,175,90,.12);box-shadow:0 0 0 1px var(--gold)}
+  .notes{font-family:'Space Mono',monospace;font-size:10px;line-height:1.7;color:rgba(28,27,25,.6);border-left:2px solid rgba(185,138,47,.35);padding-left:10px;margin-top:4px}
+  .panel-foot{padding:14px 20px 18px;border-top:1px solid var(--line);display:flex;gap:10px}
+  .btn-save{flex:1;font-family:'Hanken Grotesk',sans-serif;font-size:14px;font-weight:600;background:var(--obsidian);color:var(--paper);border:none;border-radius:12px;padding:12px 18px;cursor:pointer}
+  .btn-save:hover{background:#2a2a2c}
+  .btn-shuffle{font-size:17px;background:rgba(255,255,255,.65);border:1px solid var(--line);border-radius:12px;width:46px;cursor:pointer}
+  .btn-shuffle:hover{border-color:var(--gold)}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--obsidian);color:var(--paper);font-size:13px;padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:all .3s;z-index:20}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast .mono{color:var(--gold-soft)}
+  @media (max-width:900px){main{flex-direction:column}aside{width:100%;height:48vh;border-left:none;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand"><span class="word">SETNAYAN<span class="accent">.</span></span>
+      <span class="crumb">3D Plan / Chibi Avatar Maker</span></div>
+    <span class="proto-tag">CHIBI V2 · 2026-07-19</span>
+  </header>
+  <main>
+    <div id="stage-wrap">
+      <div id="stage"></div>
+      <div class="stage-caption">
+        <h1>Chibi, made <em>lovable</em>.</h1>
+        <p>Solid bodies · two builds · 8 hairstyles · Filipino wear.<br/>Faceless by design — the selfie disc stays the only face.</p>
+      </div>
+      <div class="stage-hint">tap a figure to edit them<br/>drag to orbit · scroll to zoom</div>
+    </div>
+    <aside>
+      <div class="panel-head">
+        <div class="eyebrow">Direction B · locked in the lineup</div>
+        <h2 id="panelTitle">Edit: Female</h2>
+        <p class="sub">Every piece below is a discrete part — the lego grammar, worn by a chibi.</p>
+      </div>
+      <div class="body-switch" id="bodySwitch">
+        <button data-b="female" class="active">Female</button>
+        <button data-b="male">Male</button>
+      </div>
+      <div class="tap-note-row">…or tap a figure on stage — the scene is the nav.</div>
+      <div class="panel-body" id="panelBody"></div>
+      <div class="panel-foot">
+        <button class="btn-shuffle" id="btnShuffle" title="Surprise me">⟲</button>
+        <button class="btn-save" id="btnSave">Save my chibi</button>
+      </div>
+    </aside>
+  </main>
+</div>
+<div id="toast"></div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ═════ Catalogs — skin/hair from the app's real dormant tables (figure-rig.ts) ═════ */
+const SKIN_TONES=['#f2d6bc','#e8c19e','#d8a982','#c08a5f','#a06c46','#7f5334'];
+const HAIR_COLORS=[
+  {hex:'#17110c',name:'Ink'},{hex:'#241a12',name:'Espresso'},{hex:'#33241a',name:'Chestnut'},
+  {hex:'#402c1e',name:'Auburn'},{hex:'#8a8a92',name:'Silver'},{hex:'#b98a2f',name:'Gold'},
+];
+const OUTFIT_COLORS=[
+  {hex:'#c3cdb9',name:'Sage'},{hex:'#e8d9b8',name:'Champagne'},{hex:'#e6c9c4',name:'Blush'},
+  {hex:'#bccbd8',name:'Sky'},{hex:'#41465a',name:'Navy'},{hex:'#6e3344',name:'Wine'},
+  {hex:'#b98a2f',name:'Gold'},{hex:'#f2efe8',name:'Ivory'},
+];
+const HAIR_STYLES=[
+  {id:'crop',name:'Crop'},{id:'side',name:'Side Part'},{id:'spiky',name:'Spiky'},{id:'curly',name:'Curly'},
+  {id:'bob',name:'Bob'},{id:'buns',name:'Twin Buns'},{id:'pony',name:'Ponytail'},{id:'long',name:'Long'},
+];
+const OUTFITS={
+  female:[{id:'dress',name:'Dress'},{id:'filipiniana',name:'Filipiniana'},{id:'tee_skirt',name:'Tee + Skirt'}],
+  male:[{id:'tee_shorts',name:'Tee + Shorts'},{id:'barong',name:'Barong'},{id:'suit',name:'Suit'}],
+};
+const ACCESSORIES=[{id:'none',name:'None'},{id:'flower',name:'Flower'},{id:'bow',name:'Bow'},{id:'cap',name:'Cap'}];
+
+/* Per-figure looks — both figures live on stage, edit whichever is selected */
+const looks={
+  female:{skin:'#d8a982',hair:'buns',hairColor:'#241a12',outfit:'filipiniana',color:'#e6c9c4',acc:'flower'},
+  male:{skin:'#c08a5f',hair:'side',hairColor:'#17110c',outfit:'barong',color:'#f2efe8',acc:'none'},
+};
+let editing='female';
+
+/* ═════ Materials — everything DoubleSide so no shell ever reads transparent ═════ */
+const matCache=new Map();
+function mat(color,rough=0.62){const k=color+'|'+rough;
+  if(!matCache.has(k))matCache.set(k,new THREE.MeshStandardMaterial({color,roughness:rough,side:THREE.DoubleSide}));
+  return matCache.get(k)}
+function darken(hex,k){const n=parseInt(hex.slice(1),16);const c=v=>Math.max(0,Math.min(255,Math.round(v*k)));
+  return '#'+(((c((n>>16)&255)<<16)|(c((n>>8)&255)<<8)|c(n&255)).toString(16).padStart(6,'0'))}
+/* Closed lathe: profile is forced to touch the axis at BOTH ends, so every
+   body/skirt is a sealed solid — the lineup's open-bottom transparency bug
+   cannot recur by construction. */
+function closedLathe(points,segments=36){
+  const pts=[new THREE.Vector2(0.001,points[0][1])];
+  for(const [r,y] of points)pts.push(new THREE.Vector2(Math.max(r,0.001),y));
+  pts.push(new THREE.Vector2(0.001,points[points.length-1][1]));
+  return new THREE.LatheGeometry(pts,segments);
+}
+
+/* ═════ Chibi anatomy ═════
+   ~1.9 heads tall — head is the hero. Soft shoulders, mitten hands, bean feet. */
+const HEAD_R=0.34, HEAD_Y=1.06;
+function buildHead(L,g){
+  const skin=mat(L.skin,0.5);
+  const headG=new THREE.Group();headG.position.y=HEAD_Y;
+  const head=new THREE.Mesh(new THREE.SphereGeometry(HEAD_R,32,24),skin);
+  head.scale.set(1,0.93,0.97);head.castShadow=true;headG.add(head);
+  /* soft ears */
+  for(const s of[-1,1]){
+    const ear=new THREE.Mesh(new THREE.SphereGeometry(0.055,14,10),skin);
+    ear.position.set(s*HEAD_R*0.96,-0.02,0);ear.scale.set(0.6,1,0.8);ear.castShadow=true;headG.add(ear);}
+  headG.add(buildHair(L));
+  const acc=buildAccessory(L);if(acc)headG.add(acc);
+  g.add(headG);
+  return headG;
+}
+function buildHair(L){
+  const g=new THREE.Group();const m=mat(L.hairColor,0.55);const R=HEAD_R;
+  const cap=(spread,lift=0)=>{const c=new THREE.Mesh(new THREE.SphereGeometry(R*1.07,28,18,0,Math.PI*2,0,Math.PI*spread),m);
+    c.position.y=lift;c.castShadow=true;return c};
+  switch(L.hair){
+    case 'crop':g.add(cap(0.52,0.02));break;
+    case 'side':{g.add(cap(0.5,0.03));
+      /* swoop hugs the cap's front rim — not a floating blob */
+      const fringe=new THREE.Mesh(new THREE.SphereGeometry(R*0.46,18,12),m);
+      fringe.position.set(R*0.3,R*0.5,R*0.72);fringe.scale.set(1.0,0.38,0.62);
+      fringe.rotation.z=-0.22;fringe.castShadow=true;g.add(fringe);break}
+    case 'spiky':{g.add(cap(0.5,0.02));
+      for(let i=0;i<5;i++){const a=(i-2)*0.42;
+        const spike=new THREE.Mesh(new THREE.ConeGeometry(R*0.16,R*0.42,10),m);
+        spike.position.set(Math.sin(a)*R*0.55,R*0.88,Math.cos(a)*R*0.28-R*0.1);
+        spike.rotation.z=-Math.sin(a)*0.5;spike.rotation.x=0.18;spike.castShadow=true;g.add(spike);}break}
+    case 'curly':{g.add(cap(0.55,0.02));
+      const seeds=[[0,0.95,0],[0.5,0.82,0.3],[-0.5,0.82,0.3],[0.62,0.75,-0.3],[-0.62,0.75,-0.3],[0.3,0.9,-0.5],[-0.3,0.9,-0.5],[0,0.85,0.58]];
+      for(const [x,y,z] of seeds){const c=new THREE.Mesh(new THREE.SphereGeometry(R*0.3,14,10),m);
+        c.position.set(x*R,y*R,z*R);c.castShadow=true;g.add(c);}break}
+    case 'bob':{g.add(cap(0.62,0.03));
+      for(const s of[-1,1]){const fall=new THREE.Mesh(new THREE.CapsuleGeometry(R*0.2,R*0.5,4,10),m);
+        fall.position.set(s*R*0.9,-R*0.3,-R*0.05);fall.castShadow=true;g.add(fall);}
+      const back=new THREE.Mesh(new THREE.SphereGeometry(R*0.95,20,14),m);
+      back.position.set(0,-R*0.1,-R*0.4);back.scale.set(1,0.95,0.65);back.castShadow=true;g.add(back);break}
+    case 'buns':{g.add(cap(0.55,0.02));
+      for(const s of[-1,1]){const bun=new THREE.Mesh(new THREE.SphereGeometry(R*0.32,16,12),m);
+        bun.position.set(s*R*0.72,R*0.72,-R*0.15);bun.castShadow=true;g.add(bun);}break}
+    case 'pony':{g.add(cap(0.55,0.02));
+      const tail=new THREE.Mesh(new THREE.CapsuleGeometry(R*0.22,R*0.85,4,12),m);
+      tail.position.set(0,R*0.25,-R*0.85);tail.rotation.x=0.55;tail.castShadow=true;g.add(tail);
+      const tie=new THREE.Mesh(new THREE.TorusGeometry(R*0.2,R*0.05,8,16),mat('#b98a2f',0.4));
+      tie.position.set(0,R*0.55,-R*0.62);tie.rotation.x=1.2;g.add(tie);break}
+    case 'long':{g.add(cap(0.62,0.03));
+      const back=new THREE.Mesh(closedLathe([[R*0.75,0],[R*0.85,-R*0.8],[R*0.6,-R*1.5]]),m);
+      back.position.set(0,-R*0.05,-R*0.35);back.scale.set(1,1,0.62);back.castShadow=true;g.add(back);
+      for(const s of[-1,1]){const strand=new THREE.Mesh(new THREE.CapsuleGeometry(R*0.16,R*0.7,4,10),m);
+        strand.position.set(s*R*0.85,-R*0.55,R*0.15);strand.castShadow=true;g.add(strand);}break}
+  }
+  return g;
+}
+function buildAccessory(L){
+  const R=HEAD_R;
+  if(L.acc==='flower'){
+    const g=new THREE.Group();const petal=mat('#e6c9c4',0.7);
+    for(let i=0;i<5;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(R*0.11,10,8),petal);
+      const a=i/5*Math.PI*2;p.position.set(Math.cos(a)*R*0.13,Math.sin(a)*R*0.13,0);p.scale.set(1,1,0.5);g.add(p);}
+    const heart=new THREE.Mesh(new THREE.SphereGeometry(R*0.08,10,8),mat('#b98a2f',0.4));
+    heart.scale.set(1,1,0.6);g.add(heart);
+    g.position.set(R*0.72,R*0.55,R*0.55);g.lookAt(g.position.clone().multiplyScalar(2));
+    return g;
+  }
+  if(L.acc==='bow'){
+    const g=new THREE.Group();const m=mat('#6e3344',0.6);
+    for(const s of[-1,1]){const loop=new THREE.Mesh(new THREE.SphereGeometry(R*0.14,10,8),m);
+      loop.position.x=s*R*0.15;loop.scale.set(1.2,0.75,0.5);g.add(loop);}
+    const knot=new THREE.Mesh(new THREE.SphereGeometry(R*0.08,10,8),m);g.add(knot);
+    g.position.set(-R*0.6,R*0.72,R*0.45);g.lookAt(g.position.clone().multiplyScalar(2));
+    return g;
+  }
+  if(L.acc==='cap'){
+    const g=new THREE.Group();const m=mat('#41465a',0.6);
+    const dome=new THREE.Mesh(new THREE.SphereGeometry(R*1.12,24,14,0,Math.PI*2,0,Math.PI*0.42),m);
+    dome.position.y=R*0.12;dome.castShadow=true;g.add(dome);
+    const brim=new THREE.Mesh(new THREE.CylinderGeometry(R*0.62,R*0.62,R*0.06,20),m);
+    brim.position.set(0,R*0.28,R*0.85);brim.rotation.x=-0.12;brim.scale.set(1,1,1.25);brim.castShadow=true;g.add(brim);
+    return g;
+  }
+  return null;
+}
+
+/* Arms + mitten hands + bean feet, shared by both bodies */
+function addLimbs(g,L,{sleeve=null,shortsLevel=0}={}){
+  const skin=mat(L.skin,0.5);
+  for(const s of[-1,1]){
+    const armG=new THREE.Group();armG.position.set(s*0.265,0.56,0);
+    const upper=new THREE.Mesh(new THREE.CapsuleGeometry(0.062,0.13,6,12),sleeve?mat(sleeve,0.7):skin);
+    upper.position.y=-0.05;upper.rotation.z=s*0.62;upper.castShadow=true;armG.add(upper);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(0.072,14,10),skin);
+    hand.position.set(s*0.115,-0.15,0);hand.castShadow=true;armG.add(hand);
+    g.add(armG);
+  }
+  for(const s of[-1,1]){
+    if(shortsLevel>0){ /* visible little legs under shorts/skirt */
+      const leg=new THREE.Mesh(new THREE.CapsuleGeometry(0.07,shortsLevel,6,12),skin);
+      leg.position.set(s*0.1,0.1+shortsLevel/2,0.01);leg.castShadow=true;g.add(leg);}
+    const shoe=new THREE.Mesh(new THREE.SphereGeometry(0.095,16,12),mat('#f2efe8',0.6));
+    shoe.position.set(s*0.105,0.055,0.035);shoe.scale.set(0.95,0.62,1.35);shoe.castShadow=true;g.add(shoe);
+  }
+}
+
+/* ═════ FEMALE body ═════ */
+function buildFemale(L){
+  const g=new THREE.Group();
+  const cloth=mat(L.color,0.72), accent=mat(darken(L.color,0.72),0.72);
+  if(L.outfit==='dress'){
+    const dress=new THREE.Mesh(closedLathe([[0.1,0.72],[0.2,0.6],[0.19,0.45],[0.3,0.16],[0.28,0.1]]),cloth);
+    dress.castShadow=true;g.add(dress);
+    addLimbs(g,L,{});
+  } else if(L.outfit==='filipiniana'){
+    const dress=new THREE.Mesh(closedLathe([[0.1,0.72],[0.2,0.6],[0.18,0.45],[0.27,0.2],[0.31,0.1]]),cloth);
+    dress.castShadow=true;g.add(dress);
+    /* butterfly sleeves — the Filipiniana signature: crisp, tucked at the
+       shoulder line, peaked slightly upward (not floating eggs) */
+    for(const s of[-1,1]){
+      const sleeve=new THREE.Mesh(new THREE.SphereGeometry(0.095,16,12),cloth);
+      sleeve.position.set(s*0.235,0.66,0);sleeve.scale.set(0.6,0.9,0.5);
+      sleeve.rotation.z=s*0.35;sleeve.castShadow=true;g.add(sleeve);}
+    const band=new THREE.Mesh(new THREE.CylinderGeometry(0.195,0.2,0.05,24),mat('#b98a2f',0.45));
+    band.position.y=0.47;g.add(band);
+    addLimbs(g,L,{});
+  } else { /* tee + skirt — two-tone */
+    const tee=new THREE.Mesh(closedLathe([[0.1,0.72],[0.2,0.6],[0.2,0.38]]),cloth);
+    tee.castShadow=true;g.add(tee);
+    const skirt=new THREE.Mesh(closedLathe([[0.19,0.4],[0.29,0.18],[0.27,0.14]]),accent);
+    skirt.castShadow=true;g.add(skirt);
+    addLimbs(g,L,{sleeve:L.color,shortsLevel:0.05});
+  }
+  return g;
+}
+
+/* ═════ MALE body ═════ */
+function buildMale(L){
+  const g=new THREE.Group();
+  const cloth=mat(L.color,0.72);
+  if(L.outfit==='tee_shorts'){
+    const tee=new THREE.Mesh(closedLathe([[0.11,0.74],[0.22,0.6],[0.215,0.34]]),cloth);
+    tee.castShadow=true;g.add(tee);
+    const shorts=new THREE.Mesh(closedLathe([[0.21,0.36],[0.22,0.24],[0.2,0.2]]),mat(darken(L.color,0.6),0.75));
+    shorts.castShadow=true;g.add(shorts);
+    addLimbs(g,L,{sleeve:L.color,shortsLevel:0.1});
+  } else if(L.outfit==='barong'){
+    /* Barong Tagalog — ivory shirt, gold placket + collar, dark trousers */
+    const shirt=new THREE.Mesh(closedLathe([[0.11,0.74],[0.22,0.6],[0.21,0.42],[0.225,0.3]]),mat('#f4efdf',0.75));
+    shirt.castShadow=true;g.add(shirt);
+    const collar=new THREE.Mesh(new THREE.TorusGeometry(0.105,0.022,8,20),mat('#e4d9b8',0.65));
+    collar.position.y=0.72;collar.rotation.x=Math.PI/2;g.add(collar);
+    const placket=new THREE.Mesh(new THREE.BoxGeometry(0.045,0.3,0.012),mat('#e4d9b8',0.65));
+    placket.position.set(0,0.55,0.212);placket.rotation.x=-0.08;g.add(placket);
+    const pants=new THREE.Mesh(closedLathe([[0.215,0.32],[0.2,0.22],[0.18,0.18]]),mat('#2e2c33',0.8));
+    pants.castShadow=true;g.add(pants);
+    addLimbs(g,L,{sleeve:'#f4efdf',shortsLevel:0.08});
+  } else { /* suit — jacket + ivory shirt V + trousers */
+    const jacket=new THREE.Mesh(closedLathe([[0.11,0.74],[0.225,0.6],[0.215,0.42],[0.23,0.3]]),cloth);
+    jacket.castShadow=true;g.add(jacket);
+    const shirtV=new THREE.Mesh(new THREE.ConeGeometry(0.085,0.16,3),mat('#f2efe8',0.7));
+    shirtV.position.set(0,0.62,0.195);shirtV.rotation.x=-3.03;g.add(shirtV);
+    const tie=new THREE.Mesh(new THREE.SphereGeometry(0.035,10,8),mat('#6e3344',0.55));
+    tie.position.set(0,0.63,0.21);g.add(tie);
+    const pants=new THREE.Mesh(closedLathe([[0.22,0.32],[0.2,0.22],[0.18,0.18]]),mat(darken(L.color,0.55),0.8));
+    pants.castShadow=true;g.add(pants);
+    addLimbs(g,L,{sleeve:L.color,shortsLevel:0.08});
+  }
+  return g;
+}
+
+function buildChibi(body,L){
+  const g=new THREE.Group();
+  const bodyG=body==='female'?buildFemale(L):buildMale(L);
+  g.add(bodyG);
+  const headG=buildHead(L,g);
+  g.userData.headG=headG;
+  g.userData.bodyG=bodyG;
+  return g;
+}
+
+/* ═════ Scene ═════ */
+const stageEl=document.getElementById('stage');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+stageEl.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog('#efece6',8,18);
+const camera=new THREE.PerspectiveCamera(36,1,0.1,60);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.minDistance=1.1;controls.maxDistance=9;controls.maxPolarAngle=Math.PI*0.55;
+scene.add(new THREE.HemisphereLight('#fdf9ef','#b6ad9c',1.08));
+const key=new THREE.DirectionalLight('#fff2dc',1.5);key.position.set(3,5.5,3);key.castShadow=true;
+key.shadow.mapSize.set(1024,1024);
+key.shadow.camera.left=-4;key.shadow.camera.right=4;key.shadow.camera.top=4;key.shadow.camera.bottom=-1;
+scene.add(key);
+const rim=new THREE.DirectionalLight('#d8e2ef',0.5);rim.position.set(-3,2.5,-2.5);scene.add(rim);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(7,64),mat('#e5e0d7',0.95));
+floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+
+const SPOTS={female:-0.72,male:0.72};
+const figures={};   /* body -> {group, fig} */
+const tappables=[]; /* {mesh, body} */
+const selRing=new THREE.Mesh(new THREE.RingGeometry(0.58,0.64,48),
+  new THREE.MeshBasicMaterial({color:'#b98a2f',transparent:true,opacity:0.85,side:THREE.DoubleSide}));
+selRing.rotation.x=-Math.PI/2;selRing.position.y=0.008;scene.add(selRing);
+
+function buildStage(){
+  for(const b of['female','male']){
+    if(figures[b])scene.remove(figures[b].group);
+    const g=new THREE.Group();g.position.x=SPOTS[b];
+    const ped=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.6,0.08,40),mat('#dcd5c8',0.85));
+    ped.position.y=0.04;ped.receiveShadow=true;g.add(ped);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.55,0.011,10,60),mat('#b98a2f',0.35));
+    ring.rotation.x=Math.PI/2;ring.position.y=0.085;g.add(ring);
+    const fig=buildChibi(b,looks[b]);fig.position.y=0.08;
+    fig.rotation.y=b==='female'?0.35:-0.35; /* they angle toward each other */
+    g.add(fig);scene.add(g);
+    figures[b]={group:g,fig};
+  }
+  tappables.length=0;
+  for(const b of['female','male'])
+    figures[b].fig.traverse(o=>{if(o.isMesh)tappables.push({mesh:o,body:b});});
+  selRing.position.x=SPOTS[editing];
+}
+function rebuildFigure(b){
+  const f=figures[b];
+  f.group.remove(f.fig);
+  f.fig=buildChibi(b,looks[b]);f.fig.position.y=0.08;
+  f.fig.rotation.y=b==='female'?0.35:-0.35;
+  f.group.add(f.fig);
+  tappables.length=0;
+  for(const bb of['female','male'])
+    figures[bb].fig.traverse(o=>{if(o.isMesh)tappables.push({mesh:o,body:bb});});
+}
+
+/* tap to pick who you're editing */
+const ray=new THREE.Raycaster();const ptr=new THREE.Vector2();let downAt=null;
+renderer.domElement.addEventListener('pointerdown',e=>{downAt=[e.clientX,e.clientY];});
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!downAt)return;const dx=e.clientX-downAt[0],dy=e.clientY-downAt[1];downAt=null;
+  if(dx*dx+dy*dy>36)return;
+  const r=renderer.domElement.getBoundingClientRect();
+  ptr.x=((e.clientX-r.left)/r.width)*2-1;ptr.y=-((e.clientY-r.top)/r.height)*2+1;
+  ray.setFromCamera(ptr,camera);
+  const hits=ray.intersectObjects(tappables.map(t=>t.mesh),false);
+  if(!hits.length)return;
+  const hit=tappables.find(t=>t.mesh===hits[0].object);
+  if(hit){editing=hit.body;selRing.position.x=SPOTS[editing];render();}
+});
+function resize(){const w=stageEl.clientWidth,h=stageEl.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(stageEl);resize();
+
+/* ═════ Panel ═════ */
+const $=id=>document.getElementById(id);
+function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild}
+function group(label,child){const g=el('<div class="group"></div>');
+  g.appendChild(el(`<label>${label}</label>`));g.appendChild(child);return g}
+function swatchRow(items,active,onPick){
+  const row=el('<div class="swatches"></div>');
+  for(const it of items){const hex=it.hex||it;
+    const s=el(`<button class="swatch${hex===active?' active':''}" title="${it.name||''}" style="background:${hex}"></button>`);
+    s.onclick=()=>{onPick(hex);render();rebuildFigure(editing);};row.appendChild(s);}
+  return row;
+}
+function chipRow(items,active,onPick,cols4=false){
+  const row=el(`<div class="chips${cols4?' c4':''}"></div>`);
+  for(const it of items){
+    const b=el(`<button class="chip${it.id===active?' active':''}">${it.name}</button>`);
+    b.onclick=()=>{onPick(it.id);render();rebuildFigure(editing);};row.appendChild(b);}
+  return row;
+}
+function render(){
+  $('panelTitle').textContent='Edit: '+(editing==='female'?'Female':'Male');
+  for(const b of $('bodySwitch').children)b.classList.toggle('active',b.dataset.b===editing);
+  const L=looks[editing];
+  const body=$('panelBody');body.innerHTML='';
+  body.appendChild(group('Skin',swatchRow(SKIN_TONES,L.skin,v=>L.skin=v)));
+  body.appendChild(group('Hair style',chipRow(HAIR_STYLES,L.hair,v=>L.hair=v,true)));
+  body.appendChild(group('Hair colour',swatchRow(HAIR_COLORS,L.hairColor,v=>L.hairColor=v)));
+  body.appendChild(group('Outfit',chipRow(OUTFITS[editing],L.outfit,v=>L.outfit=v)));
+  body.appendChild(group('Outfit colour',swatchRow(OUTFIT_COLORS,L.color,v=>L.color=v)));
+  body.appendChild(group('Accessory',chipRow(ACCESSORIES,L.acc,v=>L.acc=v,true)));
+  body.appendChild(el('<p class="notes"><b>Solid by construction:</b> every shell is a closed lathe + double-sided — the see-through bug can’t recur.<br/><b>Parts:</b> 6 skin × 8 hair × 6 hair colours × 3 outfits × 8 colours × 4 accessories ≈ <b>27,648 looks per body</b>.</p>'));
+}
+$('bodySwitch').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  editing=b.dataset.b;selRing.position.x=SPOTS[editing];render();
+});
+$('btnShuffle').onclick=()=>{
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  const L=looks[editing];
+  L.skin=pick(SKIN_TONES);L.hair=pick(HAIR_STYLES).id;L.hairColor=pick(HAIR_COLORS).hex;
+  L.outfit=pick(OUTFITS[editing]).id;L.color=pick(OUTFIT_COLORS).hex;L.acc=pick(ACCESSORIES).id;
+  render();rebuildFigure(editing);
+};
+$('btnSave').onclick=()=>{const t=$('toast');
+  t.innerHTML='Chibi saved — <span class="mono">prototype only, nothing persisted</span>';
+  t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600);};
+
+/* ═════ Loop — the lovable idle: soft bounce, head tilt, curious sway ═════ */
+const clock=new THREE.Clock();
+function tick(){
+  requestAnimationFrame(tick);
+  const t=clock.getElapsedTime();
+  for(const [b,f] of Object.entries(figures)){
+    const ph=b==='female'?0:1.7;
+    const fig=f.fig;
+    /* bounce: squash-and-stretch on the whole figure, weighted tiny */
+    const bounce=Math.sin(t*2.2+ph);
+    fig.scale.y=1+bounce*0.018;
+    fig.scale.x=fig.scale.z=1-bounce*0.01;
+    fig.position.y=0.08+Math.max(0,bounce)*0.012;
+    /* head: curious tilt + slow look-around */
+    const h=fig.userData.headG;
+    if(h){h.rotation.z=Math.sin(t*0.7+ph)*0.06;h.rotation.y=Math.sin(t*0.4+ph*2)*0.14;}
+    /* gentle body sway */
+    fig.rotation.z=Math.sin(t*0.9+ph)*0.012;
+  }
+  controls.update();renderer.render(scene,camera);
+}
+camera.position.set(0,1.35,3.6);controls.target.set(0,0.72,0);
+buildStage();render();tick();
+</script>
+</body>
+</html>

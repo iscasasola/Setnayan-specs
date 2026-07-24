@@ -1,0 +1,576 @@
+diff --git a/apps/web/app/admin/help/page.tsx b/apps/web/app/admin/help/page.tsx
+index 63fbe8b5f..9a15c4295 100644
+--- a/apps/web/app/admin/help/page.tsx
++++ b/apps/web/app/admin/help/page.tsx
+@@ -1,6 +1,8 @@
+-import { Mail } from 'lucide-react';
++import Link from 'next/link';
++import { Mail, ShieldAlert } from 'lucide-react';
+ import { createAdminClient } from '@/lib/supabase/admin';
+ import { SubmitButton } from '@/app/_components/submit-button';
++import { isConciergeTicketTopic } from '@/lib/help';
+ import { setHelpMessageStatus } from './actions';
+ 
+ export const metadata = { title: 'Help inbox · Admin' };
+@@ -120,6 +122,24 @@ export default async function AdminHelpPage({ searchParams }: Props) {
+                 {m.body}
+               </p>
+ 
++              {isConciergeTicketTopic(m.topic) ? (
++                <div className="flex flex-wrap items-center gap-2 rounded-md border border-amber-200/60 bg-amber-50 px-3 py-2 text-xs text-amber-900">
++                  <ShieldAlert aria-hidden className="h-3.5 w-3.5" strokeWidth={1.75} />
++                  <span>
++                    Setnayan Concierge appeal — routes to the abuse-review admin per
++                    0023 § 3.11.
++                  </span>
++                  <Link
++                    href={`/admin/concierge-abuse?tab=${
++                      m.topic === 'concierge_trial_appeal' ? 'queue' : 'enforcement'
++                    }`}
++                    className="ml-auto rounded-full bg-amber-700 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-cream hover:bg-amber-800"
++                  >
++                    Open abuse queue →
++                  </Link>
++                </div>
++              ) : null}
++
+               {m.admin_notes ? (
+                 <p className="rounded-md bg-amber-50/60 p-3 text-xs text-amber-900">
+                   <span className="font-mono text-[10px] uppercase tracking-[0.15em]">
+diff --git a/apps/web/app/admin/layout.tsx b/apps/web/app/admin/layout.tsx
+index eef0120f2..59498bae5 100644
+--- a/apps/web/app/admin/layout.tsx
++++ b/apps/web/app/admin/layout.tsx
+@@ -83,6 +83,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
+           <AdminTab href="/admin/help" label="Help inbox" />
+           <AdminTab href="/admin/funnels" label="Funnels" />
+           <AdminTab href="/admin/force-majeure" label="Force majeure" />
++          <AdminTab href="/admin/concierge-abuse" label="Concierge abuse" />
+           <AdminTab href="/admin/website" label="Website" />
+           <AdminTab href="/admin/settings" label="Settings" />
+         </nav>
+diff --git a/apps/web/app/dashboard/[eventId]/page.tsx b/apps/web/app/dashboard/[eventId]/page.tsx
+index 13397d2f8..f5df8f6dd 100644
+--- a/apps/web/app/dashboard/[eventId]/page.tsx
++++ b/apps/web/app/dashboard/[eventId]/page.tsx
+@@ -20,8 +20,15 @@ import {
+ } from 'lucide-react';
+ import { countUnread } from '@/lib/notifications';
+ import { createClient } from '@/lib/supabase/server';
++import { createAdminClient } from '@/lib/supabase/admin';
+ import { computeGuestStats, fetchGuestsByEvent, guestDisplayName } from '@/lib/guests';
+ import { formatEventDate } from '@/lib/events';
++import {
++  sweepExpiredConcierge,
++  type ConciergeEnforcementLevel,
++  type ConciergeStatus,
++} from '@/lib/concierge';
++import { ConciergeBanner } from './_components/concierge-banner';
+ import { getLocale, makeT, type TranslationKey } from '@/lib/i18n';
+ import {
+   STEPS,
+@@ -184,28 +191,39 @@ function relativeTime(iso: string, now: Date): string {
+ 
+ export default async function EventHomePage({
+   params,
++  searchParams,
+ }: {
+   params: Promise<{ eventId: string }>;
++  searchParams?: Promise<{ concierge_trial?: string }>;
+ }) {
+   const { eventId } = await params;
++  const search = searchParams ? await searchParams : {};
+   const supabase = await createClient();
+   const {
+     data: { user },
+   } = await supabase.auth.getUser();
+   if (!user) redirect('/login');
+ 
++  // Lazy expiry sweep at the top of any Concierge-surfacing page (no-cron
++  // architecture per CLAUDE.md 2026-05-14 / PR #47). Fire-and-forget; failures
++  // never block the dashboard render.
++  const adminClient = createAdminClient();
++  void sweepExpiredConcierge(adminClient);
++
+   const [eventRes, profileRes, guests, manualSteps, unreadCount, locale] =
+     await Promise.all([
+       supabase
+         .from('events')
+         .select(
+-          'event_id, display_name, event_date, slug, venue_name, monogram_text, palette_finalized_at',
++          'event_id, display_name, event_date, slug, venue_name, monogram_text, palette_finalized_at, concierge_status, concierge_tier, concierge_activated_at, concierge_expires_at, concierge_long_engagement_advised_at',
+         )
+         .eq('event_id', eventId)
+         .maybeSingle(),
+       supabase
+         .from('users')
+-        .select('display_name, planner_mode')
++        .select(
++          'display_name, planner_mode, concierge_trial_used_at, concierge_enforcement_level',
++        )
+         .eq('user_id', user.id)
+         .maybeSingle(),
+       fetchGuestsByEvent(supabase, eventId),
+@@ -281,6 +299,42 @@ export default async function EventHomePage({
+     href: `/dashboard/${eventId}/guests/${g.guest_id}`,
+   }));
+ 
++  // Concierge state for the inline banner (iteration 0021 § 2.0b).
++  const eventConciergeRow = event as typeof event & {
++    concierge_status?: ConciergeStatus | null;
++    concierge_activated_at?: string | null;
++    concierge_expires_at?: string | null;
++    concierge_long_engagement_advised_at?: string | null;
++  };
++  const conciergeStatus: ConciergeStatus = eventConciergeRow.concierge_status ?? 'diy';
++  const conciergeEnforcementLevel: ConciergeEnforcementLevel =
++    ((profile as { concierge_enforcement_level?: ConciergeEnforcementLevel } | null)
++      ?.concierge_enforcement_level ?? 'none');
++  const conciergeTrialUsedAt =
++    (profile as { concierge_trial_used_at?: string | null } | null)
++      ?.concierge_trial_used_at ?? null;
++
++  // Long-engagement advisory one-shot stamp (per HANDOFF_2026-05-17 § 3 +
++  // iteration 0016 § 0). If active Concierge AND wedding > activated + 24mo
++  // AND not yet stamped, stamp now so the advisory only fires once per event.
++  if (
++    conciergeStatus === 'active' &&
++    eventConciergeRow.concierge_activated_at &&
++    event.event_date &&
++    !eventConciergeRow.concierge_long_engagement_advised_at &&
++    isWeddingBeyondConciergeCap(
++      eventConciergeRow.concierge_activated_at,
++      event.event_date,
++    )
++  ) {
++    void adminClient
++      .from('events')
++      .update({ concierge_long_engagement_advised_at: new Date().toISOString() })
++      .eq('event_id', eventId)
++      .is('concierge_long_engagement_advised_at', null)
++      .then(() => undefined);
++  }
++
+   return (
+     <section className="space-y-8">
+       <EventDayPrepCta eventId={eventId} eventDate={event.event_date} />
+@@ -300,6 +354,18 @@ export default async function EventHomePage({
+         />
+       ) : null}
+ 
++      <ConciergeBanner
++        eventId={eventId}
++        status={conciergeStatus}
++        expiresAt={eventConciergeRow.concierge_expires_at ?? null}
++        activatedAt={eventConciergeRow.concierge_activated_at ?? null}
++        weddingDate={event.event_date}
++        longEngagementAdvisedAt={eventConciergeRow.concierge_long_engagement_advised_at ?? null}
++        enforcementLevel={conciergeEnforcementLevel}
++        trialUsedAt={conciergeTrialUsedAt}
++        trialResultStatus={search.concierge_trial ?? null}
++      />
++
+       <WelcomeHeader
+         greeting={greeting}
+         name={greetingName}
+@@ -323,6 +389,15 @@ export default async function EventHomePage({
+   );
+ }
+ 
++function isWeddingBeyondConciergeCap(activatedIso: string, weddingIso: string): boolean {
++  const activated = new Date(activatedIso);
++  const wedding = new Date(weddingIso);
++  if (Number.isNaN(activated.getTime()) || Number.isNaN(wedding.getTime())) return false;
++  const cap = new Date(activated);
++  cap.setMonth(cap.getMonth() + 24);
++  return wedding.getTime() > cap.getTime();
++}
++
+ function WelcomeHeader({
+   greeting,
+   name,
+diff --git a/apps/web/app/dashboard/create-event/_components/event-type-picker.tsx b/apps/web/app/dashboard/create-event/_components/event-type-picker.tsx
+index ddc5418a3..036412771 100644
+--- a/apps/web/app/dashboard/create-event/_components/event-type-picker.tsx
++++ b/apps/web/app/dashboard/create-event/_components/event-type-picker.tsx
+@@ -2,10 +2,45 @@
+ 
+ import { useState } from 'react';
+ import Link from 'next/link';
+-import { ChevronLeft, ChevronRight } from 'lucide-react';
++import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+ import { SubmitButton } from '@/app/_components/submit-button';
+ import { createWeddingEvent } from '../actions';
+ 
++type ConciergeChoice = 'diy' | 'trial' | 'paid';
++
++type ConciergeOption = {
++  key: ConciergeChoice;
++  badge: string;
++  title: string;
++  bullets: string[];
++  cta: string;
++};
++
++const CONCIERGE_OPTIONS: ConciergeOption[] = [
++  {
++    key: 'diy',
++    badge: 'Free',
++    title: 'DIY mode',
++    bullets: [
++      'All dashboard tools.',
++      'Plan at your own pace.',
++      'No timeline help.',
++    ],
++    cta: 'Start Free',
++  },
++  {
++    key: 'paid',
++    badge: '₱4,999',
++    title: 'Setnayan Concierge',
++    bullets: [
++      'Full 9-step roadmap.',
++      'Daily nudges + priority vendor matching.',
++      'Less than ₱25K coordinator.',
++    ],
++    cta: 'Buy ₱4,999',
++  },
++];
++
+ // V1 tile list (locked 2026-05-16). Only `wedding` is selectable per
+ // iteration 0000 § 2.5; the rest render as "Coming soon" placeholders so
+ // couples can see what is on the roadmap without being able to pick it yet.
+@@ -26,6 +61,7 @@ export function EventTypePicker() {
+   const N = EVENT_TYPES.length;
+   const [centerIdx, setCenterIdx] = useState(0);
+   const [selectedKey, setSelectedKey] = useState<EventTypeKey | null>(null);
++  const [conciergeChoice, setConciergeChoice] = useState<ConciergeChoice>('diy');
+ 
+   // Modulo helper that keeps the index positive when going backwards — this
+   // is what gives the carousel its "infinite" feel: rewinding from index 0
+@@ -108,8 +144,9 @@ export function EventTypePicker() {
+       </section>
+ 
+       {selected ? (
+-        <form action={createWeddingEvent} className="mt-10 space-y-5">
++        <form action={createWeddingEvent} className="mt-10 space-y-6">
+           <input type="hidden" name="event_type" value={selected.key} />
++          <input type="hidden" name="concierge_choice" value={conciergeChoice} />
+ 
+           <p className="rounded-md border border-ink/10 bg-cream px-4 py-2.5 text-sm text-ink/75">
+             <span aria-hidden className="mr-2 text-base">
+@@ -144,12 +181,21 @@ export function EventTypePicker() {
+             </p>
+           </div>
+ 
++          <ConciergeChoiceCard
++            selected={conciergeChoice}
++            onSelect={setConciergeChoice}
++          />
++
+           <div className="flex flex-col gap-3 sm:flex-row">
+             <SubmitButton
+               className="button-primary w-full sm:w-auto"
+               pendingLabel="Creating event…"
+             >
+-              Create {selected.label.toLowerCase()} event
++              {conciergeChoice === 'paid'
++                ? `Create event · continue to Concierge ₱4,999`
++                : conciergeChoice === 'trial'
++                  ? `Create event · start 3-day Concierge trial`
++                  : `Create ${selected.label.toLowerCase()} event (DIY)`}
+             </SubmitButton>
+             <Link className="button-secondary w-full sm:w-auto" href="/dashboard">
+               Cancel
+@@ -165,6 +211,98 @@ export function EventTypePicker() {
+   );
+ }
+ 
++function ConciergeChoiceCard({
++  selected,
++  onSelect,
++}: {
++  selected: ConciergeChoice;
++  onSelect: (choice: ConciergeChoice) => void;
++}) {
++  return (
++    <section
++      aria-labelledby="concierge-choice-heading"
++      className="space-y-3 rounded-2xl border border-ink/10 bg-cream/40 p-4 sm:p-5"
++    >
++      <header className="space-y-1">
++        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink/55">
++          Wedding coordinator ₱25,000+ · Setnayan Concierge ₱4,999
++        </p>
++        <h2
++          id="concierge-choice-heading"
++          className="text-base font-semibold tracking-tight text-ink sm:text-lg"
++        >
++          How would you like to plan?
++        </h2>
++        <p className="text-xs text-ink/55">
++          Less than your invitation suite. More than worth it.
++        </p>
++      </header>
++
++      <div className="grid gap-3 sm:grid-cols-2">
++        {CONCIERGE_OPTIONS.map((opt) => {
++          const isActive = selected === opt.key;
++          return (
++            <button
++              key={opt.key}
++              type="button"
++              onClick={() => onSelect(opt.key)}
++              aria-pressed={isActive}
++              className={`flex h-full flex-col gap-2 rounded-xl border p-4 text-left transition-all ${
++                isActive
++                  ? opt.key === 'paid'
++                    ? 'border-terracotta bg-terracotta/[0.06] ring-2 ring-terracotta/30'
++                    : 'border-ink/30 bg-cream ring-2 ring-ink/15'
++                  : 'border-ink/15 bg-cream hover:border-terracotta/40 hover:bg-terracotta/[0.04]'
++              }`}
++            >
++              <div className="flex items-center justify-between">
++                <span
++                  className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] ${
++                    opt.key === 'paid'
++                      ? 'bg-terracotta/15 text-terracotta-700'
++                      : 'bg-ink/10 text-ink/65'
++                  }`}
++                >
++                  {opt.badge}
++                </span>
++                {opt.key === 'paid' ? (
++                  <Sparkles aria-hidden className="h-4 w-4 text-terracotta" strokeWidth={1.75} />
++                ) : null}
++              </div>
++              <span className="text-base font-semibold text-ink">{opt.title}</span>
++              <ul className="space-y-1 text-xs text-ink/65">
++                {opt.bullets.map((b) => (
++                  <li key={b}>{b}</li>
++                ))}
++              </ul>
++              <span
++                className={`mt-auto inline-flex items-center gap-1.5 text-xs font-medium ${
++                  isActive ? 'text-terracotta-700' : 'text-ink/65'
++                }`}
++              >
++                {isActive ? '✓ Selected' : opt.cta}
++              </span>
++            </button>
++          );
++        })}
++      </div>
++
++      <button
++        type="button"
++        onClick={() => onSelect(selected === 'trial' ? 'diy' : 'trial')}
++        className="mx-auto block rounded-full px-3 py-1 text-xs font-medium text-terracotta hover:underline"
++      >
++        {selected === 'trial'
++          ? '✓ Try 3 days free (no card required) — tap to undo'
++          : 'Not ready to commit? Try 3 days free →'}
++      </button>
++      <p className="text-center text-[11px] text-ink/50">
++        Activate or change anytime from Settings → Setnayan Concierge.
++      </p>
++    </section>
++  );
++}
++
+ function Tile({
+   type,
+   isActive,
+diff --git a/apps/web/app/dashboard/create-event/actions.ts b/apps/web/app/dashboard/create-event/actions.ts
+index 96b11d1a2..41f62ae6a 100644
+--- a/apps/web/app/dashboard/create-event/actions.ts
++++ b/apps/web/app/dashboard/create-event/actions.ts
+@@ -5,12 +5,21 @@ import { createClient } from '@/lib/supabase/server';
+ import { createAdminClient } from '@/lib/supabase/admin';
+ import { generateUniqueSlug } from '@/lib/slugs';
+ import { captureEvent } from '@/lib/analytics';
++import { startConciergeTrial } from '@/app/dashboard/profile/concierge/actions';
+ 
+ const ALLOWED_TYPES = ['wedding'] as const; // V1: Weddings only per iteration 0000 § 2.5
+ 
++// 0000 § 2.5b — DIY · Trial · Paid choice card (locked 2026-05-17).
++// `paid` lands on the dashboard then routes to checkout; `trial` invokes
++// startConciergeTrial server-side; `diy` lands on the dashboard with no
++// upgrade.
++const ALLOWED_CONCIERGE_CHOICES = ['diy', 'trial', 'paid'] as const;
++type ConciergeChoice = (typeof ALLOWED_CONCIERGE_CHOICES)[number];
++
+ export async function createWeddingEvent(formData: FormData) {
+   const display_name = String(formData.get('display_name') ?? '').trim();
+   const event_type = String(formData.get('event_type') ?? 'wedding');
++  const concierge_choice = String(formData.get('concierge_choice') ?? 'diy') as ConciergeChoice;
+ 
+   if (!display_name) {
+     return redirect('/dashboard/create-event?error=missing_name');
+@@ -18,6 +27,9 @@ export async function createWeddingEvent(formData: FormData) {
+   if (!ALLOWED_TYPES.includes(event_type as (typeof ALLOWED_TYPES)[number])) {
+     return redirect('/dashboard/create-event?error=invalid_type');
+   }
++  const choice: ConciergeChoice = ALLOWED_CONCIERGE_CHOICES.includes(concierge_choice)
++    ? concierge_choice
++    : 'diy';
+ 
+   const supabase = await createClient();
+   const {
+@@ -28,7 +40,7 @@ export async function createWeddingEvent(formData: FormData) {
+   }
+ 
+   // Single-field event setup per iteration 0000 § 2.5 (locked 2026-05-14):
+-  // event_name only — date + venue are deferred to Guided Planner or Profile.
++  // event_name only — date + venue are deferred to Setnayan Concierge or Profile.
+   // Both writes go through the admin client because the user-scoped JWT can
+   // be stale or the role can resolve to anon at the edge — RLS would then
+   // reject the insert even though the action already authenticated the user.
+@@ -79,11 +91,36 @@ export async function createWeddingEvent(formData: FormData) {
+       properties: {
+         event_id: insertedEvent.event_id,
+         event_type,
++        concierge_choice: choice,
+       },
+     });
+   } catch {
+     // analytics never breaks the user-facing flow.
+   }
+ 
++  // 0000 § 2.5b — wire the choice card. Event is already created at this
++  // point; the trial / paid options are layered on top, never gate creation.
++  if (choice === 'trial') {
++    try {
++      const result = await startConciergeTrial({ eventId: insertedEvent.event_id });
++      // Pass the trial-attach result through the URL so the dashboard can
++      // surface the right inline status banner (started · already_used ·
++      // enforcement_blocked · under_review).
++      return redirect(
++        `/dashboard/${insertedEvent.event_id}?concierge_trial=${result.status}`,
++      );
++    } catch (e) {
++      // Trial failures shouldn't block the user — fall through to DIY landing.
++      console.error('[create-event] trial start failed:', e);
++    }
++  } else if (choice === 'paid') {
++    // Route the couple to the Concierge order checkout page. The order flow
++    // exists in iteration 0034; until that route lands the order/new route
++    // accepts ?sku=concierge_complete and surfaces payment instructions.
++    return redirect(
++      `/dashboard/${insertedEvent.event_id}/orders/new?sku=concierge_complete&intent=concierge`,
++    );
++  }
++
+   return redirect(`/dashboard/${insertedEvent.event_id}`);
+ }
+diff --git a/apps/web/app/dashboard/profile/page.tsx b/apps/web/app/dashboard/profile/page.tsx
+index a77c29d42..9eec6c3a7 100644
+--- a/apps/web/app/dashboard/profile/page.tsx
++++ b/apps/web/app/dashboard/profile/page.tsx
+@@ -1,6 +1,6 @@
+ import Link from 'next/link';
+ import { redirect } from 'next/navigation';
+-import { ArrowLeft, Download, AlertTriangle, Compass, KeyRound } from 'lucide-react';
++import { ArrowLeft, Download, AlertTriangle, Compass, KeyRound, Sparkles } from 'lucide-react';
+ import { createClient } from '@/lib/supabase/server';
+ import { fetchUserEvents } from '@/lib/events';
+ import { restartTour } from '@/lib/tour-actions';
+@@ -499,6 +499,13 @@ export default async function ProfilePage({ searchParams }: Props) {
+       </section>
+ 
+       <section className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
++        <Link
++          href="/dashboard/profile/concierge"
++          className="button-secondary inline-flex items-center gap-2"
++        >
++          <Sparkles aria-hidden className="h-4 w-4" strokeWidth={1.75} />
++          Setnayan Concierge
++        </Link>
+         <Link href="/help" className="button-secondary">
+           {tr('common.help')}
+         </Link>
+diff --git a/apps/web/app/help/page.tsx b/apps/web/app/help/page.tsx
+index e97217cdd..2f77b098e 100644
+--- a/apps/web/app/help/page.tsx
++++ b/apps/web/app/help/page.tsx
+@@ -206,6 +206,17 @@ export default async function HelpPage({ searchParams }: Props) {
+                     <option value="billing">Billing or payments</option>
+                     <option value="bug">Bug report</option>
+                     <option value="feature">Feature request</option>
++                    <optgroup label="Setnayan Concierge appeals">
++                      <option value="concierge_trial_appeal">
++                        Concierge — trial appeal (under review)
++                      </option>
++                      <option value="concierge_trial_banned_appeal">
++                        Concierge — trial-banned appeal
++                      </option>
++                      <option value="concierge_full_banned_appeal">
++                        Concierge — full-banned appeal
++                      </option>
++                    </optgroup>
+                     <option value="other">Other</option>
+                   </select>
+                 </Field>
+diff --git a/apps/web/lib/help.ts b/apps/web/lib/help.ts
+index 77d60430e..d592628b4 100644
+--- a/apps/web/lib/help.ts
++++ b/apps/web/lib/help.ts
+@@ -184,4 +184,58 @@ export const HELP_TOPICS: ReadonlyArray<HelpTopic> = [
+       },
+     ],
+   },
++  {
++    // Iteration 0029 § 6 — Setnayan Concierge ticket category + 3 appeal
++    // sub-categories. Tickets here route to the Concierge admin role via
++    // the routing matrix below.
++    key: 'concierge',
++    label: 'Setnayan Concierge',
++    articles: [
++      {
++        slug: 'concierge-overview',
++        title: 'What is Setnayan Concierge?',
++        body: "Setnayan Concierge is the optional ₱4,999 paid SKU that turns your dashboard into a guided 9-step roadmap with daily nudges, priority vendor matching, and honeymoon planning. It's wedding-anchored — your access runs from activation until 30 days after your wedding, with a 12-month floor and a 24-month cap. Every account also gets a card-less 3-day free trial (one trial per account, not per event).",
++      },
++      {
++        slug: 'concierge-trial-appeal',
++        title: 'Trial appeal — my trial says "under review"',
++        body: "When you tap \"Try 3 days free\" and see \"Your account is under review\", an automated check flagged a possible duplicate-account signal (e.g., shared phone number with another trial account). Open a ticket with this category — Concierge admin will review within 2 business days. If cleared, your trial slot is still available (we don't burn it on the flag). Include any context that explains the overlap (sibling couple, wedding-planner agency, etc.).",
++      },
++      {
++        slug: 'concierge-trial-banned-appeal',
++        title: 'Trial-banned appeal — "trial unavailable on this account"',
++        body: "If your account is at strike 2, the 3-day trial is blocked but you can still purchase Setnayan Concierge anytime. Open a ticket with this category to request a review. Provide context on why the prior flags were false positives. Concierge admin can decrement your strike count and restore trial access (one strike at a time, per appeal).",
++      },
++      {
++        slug: 'concierge-full-banned-appeal',
++        title: 'Full-banned appeal — "Concierge unavailable on this account"',
++        body: "Strike 3+ blocks both the trial AND the paid Concierge SKU. DIY mode still works (all 10 dashboard tools are unaffected) — only the Concierge layer is gated. Open a ticket with this category to appeal. Concierge admin will review the historical flags and decide whether to lift one or more strikes. Decisions are audit-logged and reversible.",
++      },
++      {
++        slug: 'concierge-cancellation',
++        title: 'How to cancel Setnayan Concierge',
++        body: 'On Settings → Setnayan Concierge → "Cancel Setnayan Concierge". Cancelling stops the renewal nudge banner but you keep your paid access until the natural expiry — you keep the runway you paid for. Pro-rated refund requests are admin-handled per § 9.1 (single-admin authority for refunds ≤ ₱25K). Contact the DPO via Profile → Privacy & data for a refund request.',
++      },
++    ],
++  },
+ ];
++
++// Iteration 0029 § 6 — ticket routing matrix. Tickets with these `topic`
++// values (set by the help form `<select name="topic">`) are routed to the
++// Concierge admin role. The admin inbox lives at /admin/help; the
++// Concierge-abuse queue at /admin/concierge-abuse handles the strike +
++// enforcement actions.
++export const CONCIERGE_TICKET_TOPICS = [
++  'concierge_trial_appeal',
++  'concierge_trial_banned_appeal',
++  'concierge_full_banned_appeal',
++] as const;
++
++export type ConciergeTicketTopic = (typeof CONCIERGE_TICKET_TOPICS)[number];
++
++export function isConciergeTicketTopic(value: unknown): value is ConciergeTicketTopic {
++  return (
++    typeof value === 'string' &&
++    (CONCIERGE_TICKET_TOPICS as readonly string[]).includes(value)
++  );
++}

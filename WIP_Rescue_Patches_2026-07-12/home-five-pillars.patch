@@ -1,0 +1,542 @@
+diff --git a/apps/web/app/_components/marketing/FeaturesNarrative.tsx b/apps/web/app/_components/marketing/FeaturesNarrative.tsx
+index 51ee2a273..ff1b16652 100644
+--- a/apps/web/app/_components/marketing/FeaturesNarrative.tsx
++++ b/apps/web/app/_components/marketing/FeaturesNarrative.tsx
+@@ -20,36 +20,80 @@
+  */
+ 
+ import Link from 'next/link';
+-import { useRef, useState, type CSSProperties } from 'react';
++import { useRef, useState } from 'react';
+ import { Blob } from './_motion';
+ import { usePanelIntro, PanelThread } from './_premium';
+ 
+-// ─── Panel 0 data ──────────────────────────────────────────────────────────
+-// Abstract preview tiles for the "16 features" overview. Each label that has a
+-// dedicated marketing page carries an `href` so the chip becomes a real link;
+-// the rest stay as plain text. (Discoverability fix 2026-06-28 — these pages
+-// were previously only reachable by typing the URL.)
+-type OverviewTile = { name: string; href?: string };
+-
+-const OVERVIEW_FREE: OverviewTile[] = [
+-  { name: 'Guest List' },
+-  { name: 'Seat Plan', href: '/pa3d' },
+-  { name: 'Budget' },
+-  { name: 'Timeline' },
+-  { name: 'Mood Board' },
+-  { name: 'Checklist' },
+-  { name: 'Save the Date' },
+-  { name: 'Website', href: '/pawebsite' },
+-];
+-const OVERVIEW_PAID: OverviewTile[] = [
+-  { name: 'Setnayan AI', href: '/setnayan-ai' },
+-  { name: 'Papic', href: '/papic' },
+-  { name: 'Monogram', href: '/palogo' },
+-  { name: 'Panood', href: '/panood' },
+-  { name: 'Pakanta' },
+-  { name: 'Contracts' },
+-  { name: 'Cinematic Reveal' },
+-  { name: 'Patiktok', href: '/patiktok' },
++// ─── Panel 0 data · the five pillars (owner repositioning 2026-06-28) ───────
++// Setnayan now presents as a Memories Hub + independent event app first. The
++// ~16 features group under FIVE product pillars instead of a flat free/paid
++// split:
++//   Memories Hub · Ala ala · Planado · Setnayan AI · Marketplace
++// Each item carries an `href` ONLY when a real doorway exists today — no dead
++// links (public-surface honesty). The rest render as plain text chips. No
++// prices, no model names (public-surface hygiene lock). Setnayan AI is the
++// cross-suite engine, framed here as the intelligence threaded through Planado
++// + Marketplace, NOT a standalone destination.
++type PillarItem = { name: string; href?: string };
++type Pillar = { key: string; label: string; line: string; items: PillarItem[] };
++
++const PILLARS: Pillar[] = [
++  {
++    key: 'memories-hub',
++    label: 'Memories Hub',
++    line: 'Every event you hold, kept for life — plus the editorials that tell their stories.',
++    items: [
++      { name: 'Memory archive', href: '/alaala' },
++      { name: 'Real Stories', href: '/realstories' },
++      { name: 'Your dashboard', href: '/dashboard' },
++    ],
++  },
++  {
++    key: 'ala-ala',
++    label: 'Ala ala',
++    line: 'Turn the day into something you can hold — capture, presence, and keepsakes.',
++    items: [
++      { name: 'Papic', href: '/papic' },
++      { name: 'Panood', href: '/panood' },
++      { name: 'Pa3D', href: '/pa3d' },
++      { name: 'Pawebsite', href: '/pawebsite' },
++      { name: 'PaLogo', href: '/palogo' },
++      { name: 'Save the Date' },
++      { name: 'Pakanta' },
++      { name: 'Patiktok', href: '/patiktok' },
++    ],
++  },
++  {
++    key: 'planado',
++    label: 'Planado',
++    line: 'Everything you need to plan — free from the day you start.',
++    items: [
++      { name: 'Guest list' },
++      { name: 'Seat plan', href: '/pa3d' },
++      { name: 'Budget' },
++      { name: 'Scheduler' },
++      { name: 'Checklist' },
++      { name: 'Mood board' },
++      { name: 'Compare' },
++      { name: 'Builder' },
++    ],
++  },
++  {
++    key: 'setnayan-ai',
++    label: 'Setnayan AI',
++    line: 'The intelligence woven through it all — it finds what fits, and shows you why.',
++    items: [
++      { name: 'Vendor matching', href: '/setnayan-ai' },
++      { name: 'Adaptive checklist' },
++      { name: 'Smart budgeting' },
++    ],
++  },
++  {
++    key: 'marketplace',
++    label: 'Marketplace',
++    line: 'Verified vendors across the Philippines — booked at 0% commission, always.',
++    items: [{ name: 'Browse vendors', href: '/explore' }],
++  },
+ ];
+ 
+ // ─── Panel 1 data ──────────────────────────────────────────────────────────
+@@ -246,92 +290,31 @@ function NextBtn({
+   );
+ }
+ 
+-// ─── Overview chip ─────────────────────────────────────────────────────────
+-// Renders a feature tile. Tiles with an `href` become real <Link>s — same
+-// visual weight as the static chips, plus a restrained hover affordance (a
+-// trailing arrow that fades in + a touch more border/colour) so they read as
+-// interactive without disrupting the premium grid. Tiles without an href stay
+-// exactly as before — plain, non-interactive text.
+-function OverviewChip({
+-  tile,
+-  variant,
+-}: {
+-  tile: OverviewTile;
+-  variant: 'free' | 'paid';
+-}) {
+-  const base: CSSProperties =
+-    variant === 'free'
+-      ? {
+-          padding: '9px 16px',
+-          borderRadius: 'var(--m-r-sm)',
+-          background: 'rgba(197,160,89,.16)',
+-          border: '1px solid rgba(197,160,89,.32)',
+-          color: 'var(--m-orange-3)',
+-          fontSize: 13,
+-          fontWeight: 500,
+-          letterSpacing: '.01em',
+-        }
+-      : {
+-          padding: '9px 16px',
+-          borderRadius: 'var(--m-r-sm)',
+-          background: 'rgba(255,255,255,.04)',
+-          border: '1px solid rgba(255,255,255,.1)',
+-          color: 'rgba(251,251,250,.48)',
+-          fontSize: 13,
+-          letterSpacing: '.01em',
+-        };
+-
+-  if (!tile.href) {
+-    return <div style={base}>{tile.name}</div>;
++// ─── Pillar chip ───────────────────────────────────────────────────────────
++// One feature within a pillar. Items with a live doorway become real links
++// (subtle hover lift + a reveal arrow); items without a doorway today render as
++// plain, non-interactive text — no dead links on a public surface.
++function PillarChip({ item }: { item: PillarItem }) {
++  if (!item.href) {
++    return (
++      <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-[7px] text-[13px] text-[rgba(251,251,250,.5)]">
++        {item.name}
++      </span>
++    );
+   }
+-
+-  // Linked chip: same footprint, a hairline-stronger border, an arrow that
+-  // reveals on hover/focus, and a subtle lift — all via inline event handlers
+-  // so we don't restyle the section or add a stylesheet rule.
+   return (
+     <Link
+-      href={tile.href}
+-      className="group"
+-      style={{
+-        ...base,
+-        display: 'inline-flex',
+-        alignItems: 'center',
+-        gap: 6,
+-        textDecoration: 'none',
+-        borderColor:
+-          variant === 'free' ? 'rgba(197,160,89,.5)' : 'rgba(255,255,255,.22)',
+-        color: variant === 'free' ? 'var(--m-orange-3)' : 'rgba(251,251,250,.78)',
+-        cursor: 'pointer',
+-        transition: 'transform .2s ease, border-color .2s ease, background .2s ease, color .2s ease',
+-        willChange: 'transform',
+-      }}
+-      onMouseEnter={(e) => {
+-        e.currentTarget.style.transform = 'translateY(-1px)';
+-        e.currentTarget.style.borderColor =
+-          variant === 'free' ? 'var(--m-orange-3)' : 'rgba(255,255,255,.4)';
+-        e.currentTarget.style.background =
+-          variant === 'free' ? 'rgba(197,160,89,.24)' : 'rgba(255,255,255,.08)';
+-        e.currentTarget.style.color =
+-          variant === 'free' ? 'var(--m-orange-3)' : '#FBFBFA';
+-      }}
+-      onMouseLeave={(e) => {
+-        e.currentTarget.style.transform = 'translateY(0)';
+-        e.currentTarget.style.borderColor =
+-          variant === 'free' ? 'rgba(197,160,89,.5)' : 'rgba(255,255,255,.22)';
+-        e.currentTarget.style.background =
+-          variant === 'free' ? 'rgba(197,160,89,.16)' : 'rgba(255,255,255,.04)';
+-        e.currentTarget.style.color =
+-          variant === 'free' ? 'var(--m-orange-3)' : 'rgba(251,251,250,.78)';
+-      }}
++      href={item.href}
++      className="group inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-3.5 py-[7px] text-[13px] text-[rgba(251,251,250,.8)] no-underline transition-colors hover:border-white/35 hover:bg-white/[0.09] hover:text-white"
+     >
+-      {tile.name}
++      {item.name}
+       <svg
+         width="11"
+         height="8"
+         viewBox="0 0 14 8"
+         fill="none"
+         aria-hidden
+-        className="opacity-50 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
++        className="opacity-50 transition-opacity duration-200 group-hover:opacity-100"
+         style={{ flexShrink: 0 }}
+       >
+         <path
+@@ -346,7 +329,7 @@ function OverviewChip({
+   );
+ }
+ 
+-// ─── Panel 0 — Overview ────────────────────────────────────────────────────
++// ─── Panel 0 — Overview · the five pillars ──────────────────────────────────
+ function PanelOverview({ onNext }: { onNext: () => void }) {
+   const scope = usePanelIntro();
+   return (
+@@ -367,7 +350,7 @@ function PanelOverview({ onNext }: { onNext: () => void }) {
+ 
+       <div
+         className="relative mx-auto w-full"
+-        style={{ maxWidth: 1100, padding: '80px 20px 80px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 1 }}
++        style={{ maxWidth: 1040, padding: '80px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 1 }}
+       >
+         <StepDots total={4} current={0} />
+ 
+@@ -376,7 +359,7 @@ function PanelOverview({ onNext }: { onNext: () => void }) {
+           className="m-mono text-center"
+           style={{ fontSize: 11, letterSpacing: '.24em', textTransform: 'uppercase', color: 'var(--m-orange-3)', marginBottom: 20 }}
+         >
+-          One platform
++          One platform · five homes
+         </div>
+ 
+         <h2
+@@ -384,40 +367,55 @@ function PanelOverview({ onNext }: { onNext: () => void }) {
+           className="m-serif italic text-center"
+           style={{ color: '#FBFBFA', fontSize: 'clamp(2.4rem, 6.5vw, 4.2rem)', lineHeight: 1.05, maxWidth: 740, marginBottom: 20 }}
+         >
+-          Sixteen features.{' '}
+-          <span style={{ color: 'var(--m-orange-3)' }}>One home.</span>
++          Everything, in{' '}
++          <span style={{ color: 'var(--m-orange-3)' }}>five homes.</span>
+         </h2>
+ 
+         <p
+           data-premium-item
+           className="text-center"
+-          style={{ color: 'rgba(251,251,250,.62)', fontSize: 'clamp(1rem, 2.4vw, 1.15rem)', lineHeight: 1.65, maxWidth: 540, marginBottom: 52 }}
++          style={{ color: 'rgba(251,251,250,.62)', fontSize: 'clamp(1rem, 2.4vw, 1.15rem)', lineHeight: 1.65, maxWidth: 580, marginBottom: 44 }}
+         >
+-          A live guest photo gallery, an AI that finds your vendors — the things other planners
+-          don&rsquo;t have. Plus everything you need to plan, free. All on one platform.
++          Keep your memories, make the day worth remembering, and plan any event — free.
++          Every feature lives in one of five simple homes.
+         </p>
+ 
+-        {/* The 14-tile preview: 6 bright (free) + 8 dimmer (paid) */}
++        {/* The five pillars — each: label + one-line promise + member chips */}
+         <div
+           data-premium-item
+-          style={{
+-            display: 'flex',
+-            flexWrap: 'wrap',
+-            gap: 8,
+-            justifyContent: 'center',
+-            maxWidth: 700,
+-            marginBottom: 52,
+-          }}
++          className="w-full"
++          style={{ maxWidth: 860, display: 'flex', flexDirection: 'column' }}
+         >
+-          {OVERVIEW_FREE.map((tile) => (
+-            <OverviewChip key={tile.name} tile={tile} variant="free" />
+-          ))}
+-          {OVERVIEW_PAID.map((tile) => (
+-            <OverviewChip key={tile.name} tile={tile} variant="paid" />
++          {PILLARS.map((pillar, i) => (
++            <div
++              key={pillar.key}
++              className="grid gap-x-8 gap-y-4 sm:grid-cols-[200px_1fr]"
++              style={{
++                padding: '26px 0',
++                borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,.08)',
++              }}
++            >
++              <div>
++                <div
++                  className="m-mono"
++                  style={{ fontSize: 13, letterSpacing: '.04em', color: '#FBFBFA', marginBottom: 6, fontWeight: 500 }}
++                >
++                  {pillar.label}
++                </div>
++                <p style={{ color: 'rgba(251,251,250,.5)', fontSize: 13, lineHeight: 1.5, margin: 0 }}>
++                  {pillar.line}
++                </p>
++              </div>
++              <div className="flex flex-wrap gap-2" style={{ alignContent: 'flex-start' }}>
++                {pillar.items.map((item) => (
++                  <PillarChip key={item.name} item={item} />
++                ))}
++              </div>
++            </div>
+           ))}
+         </div>
+ 
+-        <div data-premium-item>
++        <div data-premium-item style={{ marginTop: 48 }}>
+           <NextBtn onClick={onNext} label="See what sets us apart" dark />
+         </div>
+       </div>
+diff --git a/apps/web/app/_components/marketing/HeroVideoScrub.tsx b/apps/web/app/_components/marketing/HeroVideoScrub.tsx
+index 6d0f906d6..b5db0dc38 100644
+--- a/apps/web/app/_components/marketing/HeroVideoScrub.tsx
++++ b/apps/web/app/_components/marketing/HeroVideoScrub.tsx
+@@ -17,11 +17,18 @@
+ 
+ import Link from 'next/link';
+ import { useEffect, useRef, type CSSProperties } from 'react';
++import type { HeroVariant } from '@/lib/hero-experiment';
+ 
+ type Props = {
+   frameUrls: string[];
+   ctaText: string;
+   ctaHref: string;
++  /**
++   * Homepage hero copy A/B (2026-06-28). Only the END-overlay headline text
++   * varies by arm — the scroll-scrub mechanic, the logo video, and the
++   * admin-controlled CTA are untouched (locked signature moment).
++   */
++  variant?: HeroVariant;
+ };
+ 
+ const SCRUB_END = 0.82; // frames play over the first 82% of scroll; CTA reveals after
+@@ -66,7 +73,7 @@ const CAP_STYLE: CSSProperties = {
+   willChange: 'opacity',
+ };
+ 
+-export function HeroVideoScrub({ frameUrls, ctaText, ctaHref }: Props) {
++export function HeroVideoScrub({ frameUrls, ctaText, ctaHref, variant = 'control' }: Props) {
+   const wrapRef = useRef<HTMLDivElement>(null);
+   const imgRef = useRef<HTMLImageElement>(null);
+   const scrimRef = useRef<HTMLDivElement>(null);
+@@ -357,7 +364,11 @@ export function HeroVideoScrub({ frameUrls, ctaText, ctaHref }: Props) {
+             className="m-serif italic"
+             style={{ color: '#FBFBFA', fontSize: 'clamp(2rem, 5vw, 3.4rem)', lineHeight: 1.08, margin: '0 auto' }}
+           >
+-            Everything you need to <span style={{ color: 'var(--m-orange-3)' }}>start your wedding.</span>
++            {variant === 'memory' ? (
++              <>Keep your memories. <span style={{ color: 'var(--m-orange-3)' }}>Plan your moments.</span></>
++            ) : (
++              <>Everything you need to <span style={{ color: 'var(--m-orange-3)' }}>start your wedding.</span></>
++            )}
+           </div>
+           <div style={{ marginTop: 28 }}>
+             <Link href={ctaHref} className="m-btn m-btn-primary m-btn-lg">
+diff --git a/apps/web/app/_components/marketing/_sections.tsx b/apps/web/app/_components/marketing/_sections.tsx
+index de48189ba..b08304cb9 100644
+--- a/apps/web/app/_components/marketing/_sections.tsx
++++ b/apps/web/app/_components/marketing/_sections.tsx
+@@ -35,6 +35,7 @@ import Link from 'next/link';
+ import { Wordmark } from '@/app/_components/brand-marks';
+ import { Reveal, Blob } from './_motion';
+ import { HeroVideoScrub } from './HeroVideoScrub';
++import type { HeroVariant } from '@/lib/hero-experiment';
+ import { fetchPublishedHeroVideo } from '@/lib/hero-video';
+ import { fetchV2BundleCatalog, fetchV2CustomerCatalog, formatPeso, getCustomerSkuPrice } from '@/lib/v2-catalog';
+ import {
+@@ -55,7 +56,10 @@ import {
+ // ─────────────────────────────────────────────────────────────────────
+ // 3. Hero — "Set na 'yan." + HeroCollage dashboard mock
+ // ─────────────────────────────────────────────────────────────────────
+-export async function Hero({ forceKeynote = false }: { forceKeynote?: boolean } = {}) {
++export async function Hero({
++  forceKeynote = false,
++  variant = 'control',
++}: { forceKeynote?: boolean; variant?: HeroVariant } = {}) {
+   // Owner-uploaded scroll-scrub video (admin /admin/hero-video). When a video
+   // is published, it REPLACES the default hero; otherwise we fall back to the
+   // headline + dashboard mock below. Homepage is force-static — publishing
+@@ -71,9 +75,14 @@ export async function Hero({ forceKeynote = false }: { forceKeynote?: boolean }
+         frameUrls={heroVideo.frameUrls}
+         ctaText={heroVideo.ctaText}
+         ctaHref={heroVideo.ctaHref}
++        variant={variant}
+       />
+     );
+   }
++  // Hero copy A/B (2026-06-28): the 'memory' arm leads with the repositioned
++  // memories/event-first framing; the dominant "Start planning · free" CTA is
++  // unchanged in both arms (free-floor lock).
++  const memory = variant === 'memory';
+   return (
+     <section className="relative overflow-hidden px-5 pt-10 pb-12 sm:px-8 sm:pt-14 lg:px-14 lg:pt-20 lg:pb-14">
+       <Blob top={-80} left={-80} size={620} color="var(--m-orange)" opacity={0.06} />
+@@ -94,7 +103,7 @@ export async function Hero({ forceKeynote = false }: { forceKeynote?: boolean }
+               fontWeight: 400,
+             }}
+           >
+-            Your wedding is one day.
++            {memory ? 'Keep your memories.' : 'Your wedding is one day.'}
+           </h1>
+           <div className="mt-2 sm:mt-3.5">
+             <span
+@@ -106,7 +115,11 @@ export async function Hero({ forceKeynote = false }: { forceKeynote?: boolean }
+                 lineHeight: 1.02,
+               }}
+             >
+-              Keep it <span className="text-[var(--m-orange)]">forever.</span>
++              {memory ? (
++                <>Plan your <span className="text-[var(--m-orange)]">moments.</span></>
++              ) : (
++                <>Keep it <span className="text-[var(--m-orange)]">forever.</span></>
++              )}
+             </span>
+           </div>
+           <div className="mt-4 flex items-center gap-3.5">
+@@ -122,11 +135,23 @@ export async function Hero({ forceKeynote = false }: { forceKeynote?: boolean }
+             className="m-serif italic text-[var(--m-slate)] mt-5 sm:mt-8 max-w-[560px]"
+             style={{ fontSize: 21, lineHeight: 1.65, textWrap: 'pretty' as 'pretty' }}
+           >
+-            Keep every photo, every video, every memory — in one place, for life.{' '}
+-            <span className="not-italic font-[var(--font-sans-marketing,var(--font-sans))] text-[17px] text-[var(--m-ink)]">
+-              The planning that gets you there — guest list, verified vendors, seating, schedule — runs in one
+-              place, free from the day you start.
+-            </span>
++            {memory ? (
++              <>
++                The independent hub for every memory of your life.{' '}
++                <span className="not-italic font-[var(--font-sans-marketing,var(--font-sans))] text-[17px] text-[var(--m-ink)]">
++                  Store lifetime memories, design custom event media, and plan any occasion — with
++                  powerful free tools.
++                </span>
++              </>
++            ) : (
++              <>
++                Keep every photo, every video, every memory — in one place, for life.{' '}
++                <span className="not-italic font-[var(--font-sans-marketing,var(--font-sans))] text-[17px] text-[var(--m-ink)]">
++                  The planning that gets you there — guest list, verified vendors, seating, schedule — runs in one
++                  place, free from the day you start.
++                </span>
++              </>
++            )}
+           </p>
+           <div className="mt-4 hidden sm:inline-flex items-center gap-3 px-3.5 py-2.5 rounded-md bg-[var(--m-ivory)] border border-[var(--m-line)] max-w-[560px]">
+             <span className="w-[7px] h-[7px] rounded-full bg-[var(--m-orange)] shrink-0" />
+diff --git a/apps/web/app/_components/posthog-provider.tsx b/apps/web/app/_components/posthog-provider.tsx
+index c7d78902b..e5c31526d 100644
+--- a/apps/web/app/_components/posthog-provider.tsx
++++ b/apps/web/app/_components/posthog-provider.tsx
+@@ -26,11 +26,23 @@ import { Suspense, useEffect, useRef, useState } from 'react';
+ import { usePathname, useSearchParams } from 'next/navigation';
+ 
+ import { createClient } from '@/lib/supabase/client';
++import { HERO_VARIANT_COOKIE } from '@/lib/hero-experiment';
+ 
+ // Type-only import — erased at compile time, so no runtime cost.
+ import type posthogType from 'posthog-js';
+ type PostHog = typeof posthogType;
+ 
++// Reads a single cookie value client-side (the homepage hero A/B bucket is a
++// non-httpOnly cookie set by middleware). Returns null when absent / on server.
++function readCookie(name: string): string | null {
++  if (typeof document === 'undefined') return null;
++  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
++  const match = document.cookie.match(
++    new RegExp('(?:^|; )' + escaped + '=([^;]*)'),
++  );
++  return match ? decodeURIComponent(match[1]!) : null;
++}
++
+ type PostHogProviderProps = {
+   children: React.ReactNode;
+   /**
+diff --git a/apps/web/middleware.ts b/apps/web/middleware.ts
+index 746ed6f98..8d5471a68 100644
+--- a/apps/web/middleware.ts
++++ b/apps/web/middleware.ts
+@@ -8,6 +8,10 @@ import {
+   isAdminProfile,
+   stripDemoModeQueryParam,
+ } from '@/lib/demo-mode';
++import { HERO_VARIANT_COOKIE } from '@/lib/hero-experiment';
++
++// Sticky 1-year hero-experiment bucket (see lib/hero-experiment.ts).
++const HERO_VARIANT_MAX_AGE_S = 60 * 60 * 24 * 365;
+ 
+ // Matches a v4-style UUID exactly. Slugs are capped at 32 chars
+ // (`[a-z0-9-]+`), so a UUID — 36 chars including hyphens — cannot
+@@ -181,8 +185,40 @@ export async function middleware(request: NextRequest) {
+     }
+   }
+ 
++  // ── Homepage hero copy A/B bucket (2026-06-28) ──────────────────────────
++  // Assign a sticky 50/50 hero-variant the first time we see a visitor. Set it
++  // on the REQUEST before updateSession() so its `NextResponse.next({ request })`
++  // forwards the cookie downstream — this same render's `cookies()` then reads
++  // the freshly-assigned bucket on first paint (no flash). The value is
++  // persisted onto the response below. The free-floor CTA is identical in both
++  // arms, so this only swaps headline framing. Web Crypto is available in the
++  // Edge runtime.
++  let heroVariantToPersist: string | null = null;
++  if (!request.cookies.get(HERO_VARIANT_COOKIE)) {
++    const value =
++      (crypto.getRandomValues(new Uint8Array(1))[0]! & 1) === 0
++        ? 'memory'
++        : 'control';
++    request.cookies.set(HERO_VARIANT_COOKIE, value);
++    heroVariantToPersist = value;
++  }
++
+   const { response, user } = await updateSession(request);
+ 
++  if (heroVariantToPersist) {
++    response.cookies.set({
++      name: HERO_VARIANT_COOKIE,
++      value: heroVariantToPersist,
++      // NON-httpOnly on purpose: the PostHog browser client reads it to register
++      // the `home_hero_variant` super-property. No sensitive data — just a bucket.
++      httpOnly: false,
++      secure: process.env.NODE_ENV === 'production',
++      sameSite: 'lax',
++      path: '/',
++      maxAge: HERO_VARIANT_MAX_AGE_S,
++    });
++  }
++
+   // Demo-mode URL flag bootstrap (PR brief 2026-05-22 · CLAUDE.md row
+   // 458 follow-on). `?demo=1` from any admin page sets the cookie and
+   // redirects without the param so the URL doesn't stay noisy. `?demo=0`

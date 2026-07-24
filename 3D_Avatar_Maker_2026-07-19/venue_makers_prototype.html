@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Setnayan · Venue Makers — Prototype v2 · 2026-07-19</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* ── Atelier-glass (owner-locked 2026-07-12) ── */
+  :root {
+    --obsidian:#101011; --ink:#1c1b19; --greige:#efece6; --greige-2:#e5e0d7;
+    --paper:#f7f5f0; --gold:#b98a2f; --gold-soft:#d4af5a;
+    --line:rgba(28,27,25,.12); --glass:rgba(255,255,255,.6);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:'Hanken Grotesk',system-ui,sans-serif;background:var(--greige);color:var(--ink);overflow:hidden}
+  .mono{font-family:'Space Mono',monospace}
+
+  #app{display:flex;flex-direction:column;height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 22px;border-bottom:1px solid var(--line);background:var(--paper);z-index:5}
+  .brand{display:flex;align-items:baseline;gap:12px;white-space:nowrap}
+  .brand .word{font-weight:700;letter-spacing:.22em;font-size:13px}
+  .brand .word .accent{color:var(--gold)}
+  .brand .crumb{font-family:'Space Mono',monospace;font-size:11px;color:rgba(28,27,25,.55)}
+  .proto-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--gold);border:1px solid rgba(185,138,47,.4);border-radius:999px;padding:3px 10px;white-space:nowrap}
+
+  /* Surface picker — three SEPARATE in-app makers, not a role toggle */
+  .makers{display:flex;gap:4px;background:var(--greige-2);border-radius:14px;padding:4px}
+  .makers button{font-family:'Hanken Grotesk',sans-serif;border:none;background:transparent;cursor:pointer;border-radius:11px;padding:6px 14px;text-align:left;transition:all .22s ease}
+  .makers button .who{display:block;font-size:12.5px;font-weight:700;color:rgba(28,27,25,.6)}
+  .makers button .route{display:block;font-family:'Space Mono',monospace;font-size:9px;color:rgba(28,27,25,.42);margin-top:1px}
+  .makers button.active{background:var(--obsidian)}
+  .makers button.active .who{color:var(--paper)}
+  .makers button.active .route{color:var(--gold-soft)}
+
+  main{display:flex;flex:1;min-height:0}
+  #stage-wrap{position:relative;flex:1;min-width:0}
+  #stage{position:absolute;inset:0}
+  #stage canvas{display:block}
+  .stage-caption{position:absolute;left:22px;bottom:18px;pointer-events:none;max-width:46%}
+  .stage-caption h1{font-weight:300;font-size:clamp(22px,2.8vw,36px);line-height:1.08;letter-spacing:-.01em}
+  .stage-caption h1 em{font-style:italic;color:var(--gold)}
+  .stage-caption p{font-family:'Space Mono',monospace;font-size:10.5px;color:rgba(28,27,25,.5);margin-top:7px;line-height:1.5}
+  .stage-hint{position:absolute;right:22px;bottom:18px;font-family:'Space Mono',monospace;font-size:10px;color:rgba(28,27,25,.42);pointer-events:none;text-align:right}
+
+  aside{width:392px;flex-shrink:0;display:flex;flex-direction:column;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-left:1px solid var(--line);z-index:4}
+  .panel-head{padding:16px 20px 0}
+  .panel-head .eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .panel-head h2{font-weight:500;font-size:19px;margin-top:5px}
+  .panel-head .doorway{font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(28,27,25,.45);margin-top:5px;line-height:1.6}
+
+  /* Subject chips — "the scene is the nav"; chips mirror the tappable objects */
+  .subjects{display:flex;flex-wrap:wrap;gap:7px;margin:14px 20px 0}
+  .subjects button{font-family:'Hanken Grotesk',sans-serif;font-size:12px;font-weight:600;border:1px solid var(--line);background:rgba(255,255,255,.6);color:rgba(28,27,25,.6);border-radius:999px;padding:6px 14px;cursor:pointer;transition:all .18s}
+  .subjects button.active{border-color:var(--gold);color:var(--ink);background:rgba(212,175,90,.14);box-shadow:0 0 0 1px var(--gold)}
+  .subjects .tap-note{flex-basis:100%;font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(28,27,25,.42);margin-top:2px}
+
+  .subject-tabs{display:flex;gap:2px;margin:12px 20px 0;border-bottom:1px solid var(--line)}
+  .subject-tabs button{font-family:'Hanken Grotesk',sans-serif;font-size:12.5px;font-weight:600;background:none;border:none;cursor:pointer;color:rgba(28,27,25,.5);padding:8px 12px;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .subject-tabs button.active{color:var(--ink);border-bottom-color:var(--gold)}
+
+  .panel-body{flex:1;overflow-y:auto;padding:16px 20px 10px}
+  .group{margin-bottom:20px}
+  .group > label{display:block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(28,27,25,.55);margin-bottom:8px}
+  .chips{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .chip{display:flex;flex-direction:column;gap:2px;text-align:left;background:rgba(255,255,255,.65);border:1px solid var(--line);border-radius:13px;padding:10px 13px;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;transition:all .18s ease;position:relative}
+  .chip:hover{border-color:rgba(185,138,47,.5)}
+  .chip.active{border-color:var(--gold);background:rgba(212,175,90,.12);box-shadow:0 0 0 1px var(--gold)}
+  .chip .name{font-size:13px;font-weight:600}
+  .chip .desc{font-size:10.5px;color:rgba(28,27,25,.5);line-height:1.35}
+  .chip .pro{position:absolute;top:8px;right:10px;font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--gold);border:1px solid rgba(185,138,47,.45);border-radius:999px;padding:1px 6px}
+  .swatches{display:flex;flex-wrap:wrap;gap:9px}
+  .swatch{width:34px;height:34px;border-radius:50%;cursor:pointer;border:2px solid rgba(28,27,25,.12);transition:transform .15s,box-shadow .15s;position:relative}
+  .swatch.active{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--gold);transform:scale(1.06)}
+  .swatch-label{font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(28,27,25,.5);margin-top:8px}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.65);border:1px solid var(--line);border-radius:13px;padding:10px 13px;margin-bottom:9px}
+  .toggle-row .t-name{font-size:13px;font-weight:600}
+  .toggle-row button.t{width:40px;height:22px;border-radius:999px;border:none;cursor:pointer;background:var(--greige-2);position:relative;transition:background .2s}
+  .toggle-row button.t.on{background:var(--gold)}
+  .toggle-row button.t::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s}
+  .toggle-row button.t.on::after{left:21px}
+  .field input[type="text"]{width:100%;font-family:'Hanken Grotesk',sans-serif;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.75);color:var(--ink);outline:none}
+  .field input[type="text"]:focus{border-color:var(--gold)}
+  .note{font-size:11px;color:rgba(28,27,25,.5);line-height:1.5;border-left:2px solid rgba(185,138,47,.35);padding-left:10px;margin-top:12px}
+  .palette-strip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.55);border:1px dashed rgba(185,138,47,.4);border-radius:13px;padding:9px 12px;margin-bottom:18px}
+  .palette-strip .dots{display:flex;gap:5px}
+  .palette-strip .dot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(28,27,25,.15)}
+  .palette-strip .t{font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(28,27,25,.55);line-height:1.45}
+
+  /* Vendor pop-up preview card */
+  .popup-card{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 8px 28px rgba(28,27,25,.1)}
+  .popup-card .pc-head{padding:13px 15px 9px;border-bottom:1px solid var(--line)}
+  .popup-card .pc-kind{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .popup-card .pc-name{font-size:16px;font-weight:700;margin-top:2px}
+  .popup-card .pc-cat{font-size:11px;color:rgba(28,27,25,.55)}
+  .popup-card .pc-body{padding:11px 15px}
+  .popup-card .pc-price{font-size:13px;font-weight:600;margin-bottom:8px}
+  .popup-card .pc-price .from{font-size:10.5px;font-weight:400;color:rgba(28,27,25,.5)}
+  .popup-card .pc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .popup-card .pc-chip{font-size:10.5px;background:var(--greige);border-radius:999px;padding:3px 9px}
+  .popup-card .pc-chip.worth{color:var(--gold);background:rgba(212,175,90,.14)}
+  .popup-card .pc-photos{display:flex;gap:6px;margin-bottom:11px}
+  .popup-card .pc-photo{flex:1;aspect-ratio:4/3;background:var(--greige-2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;color:rgba(28,27,25,.35)}
+  .popup-card .pc-book{display:block;width:100%;font-family:'Hanken Grotesk',sans-serif;font-size:13px;font-weight:700;background:var(--obsidian);color:var(--paper);border:none;border-radius:10px;padding:11px;cursor:pointer}
+  .popup-card .pc-row{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;padding:7px 0;border-top:1px dashed var(--line);color:rgba(28,27,25,.65)}
+  .layer-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin:14px 0 7px;color:rgba(28,27,25,.5)}
+  .layer-label.pro{color:var(--gold)}
+
+  /* Guest photo flow */
+  .photo-flow{background:rgba(255,255,255,.65);border:1px solid var(--line);border-radius:14px;padding:13px 14px}
+  .photo-flow .pf-title{font-size:13.5px;font-weight:700}
+  .photo-flow .pf-privacy{font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(28,27,25,.55);line-height:1.6;margin:7px 0 10px}
+  .photo-flow .pf-consent{width:100%;font-family:'Hanken Grotesk',sans-serif;font-size:12.5px;font-weight:600;background:rgba(212,175,90,.16);border:1px solid var(--gold);color:var(--ink);border-radius:10px;padding:10px;cursor:pointer}
+  .photo-flow input[type="file"]{display:none}
+  .photo-flow .pf-result{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .photo-flow .pf-dot{width:34px;height:34px;border-radius:50%;border:2px solid rgba(28,27,25,.15)}
+  .photo-flow .pf-said{font-size:11.5px;line-height:1.45;color:rgba(28,27,25,.7)}
+
+  .panel-foot{padding:14px 20px 18px;border-top:1px solid var(--line);display:flex;gap:10px}
+  .btn-save{flex:1;font-family:'Hanken Grotesk',sans-serif;font-size:14px;font-weight:600;letter-spacing:.03em;background:var(--obsidian);color:var(--paper);border:none;border-radius:12px;padding:12px 18px;cursor:pointer;transition:background .2s}
+  .btn-save:hover{background:#2a2a2c}
+
+  /* Vendor chrome tint */
+  body.vendor-mode aside{background:rgba(16,16,17,.84);border-left-color:rgba(255,255,255,.08)}
+  body.vendor-mode .panel-head h2{color:var(--paper)}
+  body.vendor-mode .panel-head .doorway{color:rgba(247,245,240,.45)}
+  body.vendor-mode .subjects button{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.13);color:rgba(247,245,240,.6)}
+  body.vendor-mode .subjects button.active{color:var(--paper);background:rgba(212,175,90,.16)}
+  body.vendor-mode .subjects .tap-note{color:rgba(247,245,240,.4)}
+  body.vendor-mode .subject-tabs{border-bottom-color:rgba(255,255,255,.1)}
+  body.vendor-mode .subject-tabs button{color:rgba(247,245,240,.45)}
+  body.vendor-mode .subject-tabs button.active{color:var(--paper)}
+  body.vendor-mode .group > label{color:rgba(247,245,240,.5)}
+  body.vendor-mode .chip{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+  body.vendor-mode .chip .name{color:var(--paper)}
+  body.vendor-mode .chip .desc{color:rgba(247,245,240,.5)}
+  body.vendor-mode .chip.active{background:rgba(212,175,90,.14)}
+  body.vendor-mode .swatch-label,body.vendor-mode .note{color:rgba(247,245,240,.55)}
+  body.vendor-mode .field input[type="text"]{background:rgba(255,255,255,.08);color:var(--paper);border-color:rgba(255,255,255,.14)}
+  body.vendor-mode .toggle-row{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+  body.vendor-mode .toggle-row .t-name{color:var(--paper)}
+  body.vendor-mode .layer-label{color:rgba(247,245,240,.5)}
+  body.vendor-mode .layer-label.pro{color:var(--gold-soft)}
+  body.vendor-mode .panel-foot{border-top-color:rgba(255,255,255,.1)}
+  body.vendor-mode .btn-save{background:var(--gold);color:var(--obsidian)}
+  body.vendor-mode .palette-strip{background:rgba(255,255,255,.06)}
+  body.vendor-mode .palette-strip .t{color:rgba(247,245,240,.55)}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--obsidian);color:var(--paper);font-size:13px;padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:all .3s ease;z-index:20}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast .mono{color:var(--gold-soft)}
+  @media (max-width:900px){main{flex-direction:column}aside{width:100%;height:48vh;border-left:none;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <span class="word">SETNAYAN<span class="accent">.</span></span>
+      <span class="crumb">3D Plan / Venue Makers</span>
+    </div>
+    <div class="makers" id="makerSwitch" title="Three separate in-app surfaces — previewed here side by side">
+      <button data-maker="couple" class="active"><span class="who">Couple</span><span class="route">/seating/lab · Design panel</span></button>
+      <button data-maker="vendor"><span class="who">Vendor</span><span class="route">/vendor-dashboard · Your booth</span></button>
+      <button data-maker="guest"><span class="who">Guest</span><span class="route">/[slug]/venue · You</span></button>
+    </div>
+    <span class="proto-tag">PROTOTYPE v2 · 2026-07-19</span>
+  </header>
+  <main>
+    <div id="stage-wrap">
+      <div id="stage"></div>
+      <div class="stage-caption"><h1 id="stageTitle"></h1><p id="stageSub"></p></div>
+      <div class="stage-hint">tap an object to edit it<br/>drag to orbit · scroll to zoom</div>
+    </div>
+    <aside id="panel">
+      <div class="panel-head">
+        <div class="eyebrow" id="panelEyebrow"></div>
+        <h2 id="panelTitle"></h2>
+        <div class="doorway mono" id="panelDoorway"></div>
+      </div>
+      <div class="subjects" id="subjectChips"></div>
+      <div class="subject-tabs" id="subjectTabs" style="display:none"></div>
+      <div class="panel-body" id="panelBody"></div>
+      <div class="panel-foot"><button class="btn-save" id="btnSave"></button></div>
+    </aside>
+  </main>
+</div>
+<div id="toast"></div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ═════ RIG CONSTANTS — verbatim from lib/figure-sit-bake.ts + kit/figure.tsx ═════ */
+const PELVIS_Y=0.8,HIP_X=0.062,THIGH_LEN=0.34,SHIN_LEN=0.44,SHOULDER_X=0.175,SHOULDER_Y=0.46,
+  UPPER_ARM_LEN=0.22,FOREARM_LEN=0.2,NECK_Y=0.52,HEAD_LIFT=0.095,HEAD_R=0.16,
+  LEG_GEO_LEN=0.36,ARM_GEO_LEN=0.224,HIP_BLOCK_Y=-0.045,THIGH_SCALE_XZ=1.14,SHIN_SCALE_XZ=1.06,
+  SHOE_POS_Y=-SHIN_LEN+0.055,SHOE_POS_Z=0.015,FOREARM_SCALE_XZ=0.94,
+  THIGH_SCALE_Y=THIGH_LEN/LEG_GEO_LEN,SHIN_SCALE_Y=SHIN_LEN/LEG_GEO_LEN,
+  UPPER_ARM_SCALE_Y=UPPER_ARM_LEN/ARM_GEO_LEN,FOREARM_SCALE_Y=FOREARM_LEN/ARM_GEO_LEN,
+  KNEE_BALL_R=0.086,HIP_BALL_R=0.086,ELBOW_BALL_R=0.059,SHOULDER_BALL_R=0.068;
+const MANNEQUIN_SURFACE={roughness:0.5,metalness:0.02};
+const ARM_GEO=new THREE.CapsuleGeometry(0.058,0.108,6,14);
+const LEG_GEO=new THREE.CapsuleGeometry(0.075,0.21,6,14);
+const HEAD_GEO=new THREE.SphereGeometry(HEAD_R,28,20);
+const JOINT_GEO=new THREE.SphereGeometry(1,20,16);
+const STUMP_GEO=new THREE.SphereGeometry(0.08,16,12);
+const HIP_GEO=(()=>{const g=new THREE.CapsuleGeometry(0.115,0.08,6,14);g.scale(1.25,0.85,0.95);return g})();
+const TORSO_GEO=(()=>{const g=new THREE.CapsuleGeometry(0.16,0.24,10,24);g.scale(1,1.02,0.9);g.translate(0,0.27,0);return g})();
+
+/* ═════ THE MOOD-BOARD PALETTE (source of every default — "palette proposes") ═════ */
+const PALETTE={accent:'#b98a2f',linen:'#efe9dd',floor:'#d9d2c5',wall:'#e8e2d6',ambient:'#fdf6e8'};
+
+/* ═════ Curated option catalogs (verdict Q4: curated swatches, never colour wheels) ═════ */
+const LIGHTING=[
+  {id:'warm',name:'Warm',desc:'Golden-hour key',key:'#ffd9a8',hemi:'#fdf6e8',intensity:1.6},
+  {id:'neutral',name:'Neutral',desc:'True daylight',key:'#ffffff',hemi:'#f4f2ee',intensity:1.5},
+  {id:'candlelit',name:'Candlelit',desc:'Low amber evening',key:'#ffb46b',hemi:'#e8d9c2',intensity:1.1},
+];
+const FLOORS=[
+  {id:'marble',name:'Marble',desc:'Veined pale stone'},
+  {id:'wood',name:'Wood',desc:'Warm plank run'},
+  {id:'terrazzo',name:'Terrazzo',desc:'Speckled composite'},
+];
+const WALLS=[
+  {id:'plain',name:'Plain',desc:'Soft painted field'},
+  {id:'drape',name:'Drapes',desc:'Full-height fabric'},
+  {id:'lattice',name:'Lattice',desc:'Fine garden grid'},
+];
+const BACKDROPS=[
+  {id:'drape',name:'Drape Wall',desc:'Pleated fabric fall'},
+  {id:'shimmer',name:'Shimmer',desc:'Sequin light-catch'},
+  {id:'greenery',name:'Greenery',desc:'Foliage panel'},
+  {id:'flowers',name:'Flower Wall',desc:'Bloom-dense panel'},
+];
+const SKIRTS=[
+  {hex:'#b98a2f',name:'Gold'},{hex:'#6e3344',name:'Wine'},{hex:'#3f5445',name:'Forest'},
+  {hex:'#2e2c29',name:'Charcoal'},{hex:'#e8d9b8',name:'Champagne'},
+];
+const CLOTHS=[
+  {hex:'#efe9dd',name:'Linen'},{hex:'#ffffff',name:'White'},{hex:'#e6c9c4',name:'Blush'},
+  {hex:'#c3cdb9',name:'Sage'},{hex:'#e8d9b8',name:'Champagne'},{hex:'#bccbd8',name:'Dusty Blue'},
+];
+const RUNNERS=[{hex:'#b98a2f',name:'Gold'},{hex:'#6e3344',name:'Wine'},{hex:'#3f5445',name:'Forest'},{hex:'#2e2c29',name:'Charcoal'}];
+const CHAIRS=[{hex:'#9b8a6e',name:'Natural'},{hex:'#efe9dd',name:'Ivory'},{hex:'#4a4a4f',name:'Charcoal'},{hex:'#7a5c44',name:'Walnut'}];
+/* Vendor accent — harmonized band derived from the couple's palette (verdict Q3) */
+const VENDOR_BAND=[
+  {hex:'#a06a48',name:'Terracotta'},{hex:'#6b7a5e',name:'Olive'},{hex:'#5c6478',name:'Slate'},
+  {hex:'#7a4a56',name:'Plum'},{hex:'#b98a2f',name:'Gold'},
+];
+const CHASSIS=[
+  {id:'COUNTER',name:'Counter',desc:'Bar / café counter'},
+  {id:'STATION',name:'Station',desc:'Draped service table'},
+  {id:'VEHICLE',name:'Cart',desc:'Rolling food cart'},
+];
+const GARMENTS=[
+  {id:'chef_whites',name:'Chef Whites',desc:'Stays white',pro:true},
+  {id:'apron',name:'Apron',desc:'Bib in your colour',pro:true},
+  {id:'vest',name:'Vest',desc:'Over open shirt',pro:true},
+  {id:'uniform',name:'Uniform',desc:'Polo + badge',pro:true},
+  {id:'robe',name:'Robe',desc:'Gold stole',pro:true},
+];
+const TINTS=[
+  {hex:'#ffffff',name:'Porcelain'},{hex:'#e8d9b8',name:'Champagne'},{hex:'#e6c9c4',name:'Blush'},
+  {hex:'#c3cdb9',name:'Sage'},{hex:'#bccbd8',name:'Sky'},{hex:'#cfc2dc',name:'Lilac'},
+  {hex:'#d4af5a',name:'Gold'},{hex:'#4a4a4f',name:'Charcoal'},
+];
+const RINGS=[{hex:'#b98a2f',name:'Gold'},{hex:'#6e3344',name:'Wine'},{hex:'#3f5445',name:'Forest'},{hex:'#5c6478',name:'Slate'}];
+
+/* ═════ Procedural textures (CSP contract: no fetched assets — canvas only) ═════ */
+const texCache=new Map();
+function canvasTex(key,w,h,draw,repeat){
+  if(texCache.has(key))return texCache.get(key);
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  draw(c.getContext('2d'),w,h);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+  t.wrapS=t.wrapT=THREE.RepeatWrapping;if(repeat)t.repeat.set(repeat[0],repeat[1]);
+  texCache.set(key,t);return t;
+}
+function floorTexture(kind){
+  return canvasTex('floor|'+kind,256,256,(x,w,h)=>{
+    if(kind==='marble'){x.fillStyle='#e6e1d6';x.fillRect(0,0,w,h);
+      x.strokeStyle='rgba(160,152,138,.35)';x.lineWidth=1.4;
+      for(let i=0;i<7;i++){x.beginPath();let px=Math.sin(i*7.3)*w*.5+w*.5,py=0;x.moveTo(px,py);
+        for(let s=0;s<6;s++){px+=Math.sin(i*3.1+s*2.7)*26;py+=h/6;x.lineTo(px,py);}x.stroke();}
+      x.strokeStyle='rgba(28,27,25,.12)';x.lineWidth=2;
+      x.strokeRect(0,0,w/2,h/2);x.strokeRect(w/2,h/2,w/2,h/2);}
+    else if(kind==='wood'){x.fillStyle='#b3906a';x.fillRect(0,0,w,h);
+      for(let p=0;p<8;p++){x.fillStyle=`rgba(90,62,38,${0.10+(p%3)*0.05})`;x.fillRect(0,p*32,w,32);
+        x.fillStyle='rgba(60,40,24,.35)';x.fillRect(0,p*32,w,2);
+        x.strokeStyle='rgba(90,62,38,.25)';x.lineWidth=1;
+        x.beginPath();x.moveTo(0,p*32+16+Math.sin(p)*6);x.bezierCurveTo(w*.3,p*32+10,w*.6,p*32+24,w,p*32+14);x.stroke();}}
+    else {x.fillStyle='#ddd6c8';x.fillRect(0,0,w,h);
+      const cols=['#a06a48','#6b7a5e','#5c6478','#b98a2f','#8a8274','#fff'];
+      for(let i=0;i<220;i++){x.fillStyle=cols[i%cols.length];x.globalAlpha=.5+((i*7)%40)/100;
+        x.beginPath();x.ellipse((i*97)%w,(i*57)%h,2+(i%5),1.4+(i%4),i,0,Math.PI*2);x.fill();}
+      x.globalAlpha=1;}
+  },[4,3]);
+}
+function wallTexture(kind,base){
+  return canvasTex('wall|'+kind+'|'+base,256,256,(x,w,h)=>{
+    x.fillStyle=base;x.fillRect(0,0,w,h);
+    if(kind==='drape'){for(let i=0;i<10;i++){const g=x.createLinearGradient(i*25.6,0,(i+1)*25.6,0);
+      g.addColorStop(0,'rgba(28,27,25,.16)');g.addColorStop(.5,'rgba(255,255,255,.14)');g.addColorStop(1,'rgba(28,27,25,.16)');
+      x.fillStyle=g;x.fillRect(i*25.6,0,25.6,h);}}
+    else if(kind==='lattice'){x.strokeStyle='rgba(28,27,25,.16)';x.lineWidth=2;
+      for(let i=0;i<=8;i++){x.beginPath();x.moveTo(i*32,0);x.lineTo(i*32,h);x.stroke();
+        x.beginPath();x.moveTo(0,i*32);x.lineTo(w,i*32);x.stroke();}}
+  },[3,1.4]);
+}
+function backdropTexture(kind){
+  return canvasTex('bk|'+kind,256,256,(x,w,h)=>{
+    if(kind==='drape'){x.fillStyle='#efe9dd';x.fillRect(0,0,w,h);
+      for(let i=0;i<16;i++){const g=x.createLinearGradient(i*16,0,(i+1)*16,0);
+        g.addColorStop(0,'rgba(28,27,25,.2)');g.addColorStop(.5,'rgba(255,255,255,.16)');g.addColorStop(1,'rgba(28,27,25,.2)');
+        x.fillStyle=g;x.fillRect(i*16,0,16,h);}}
+    else if(kind==='shimmer'){x.fillStyle='#cbb27a';x.fillRect(0,0,w,h);
+      for(let i=0;i<900;i++){const b=.25+((i*13)%60)/100;x.fillStyle=`rgba(255,245,220,${b})`;
+        x.beginPath();x.arc((i*37)%w,(i*61)%h,1.6,0,Math.PI*2);x.fill();}}
+    else if(kind==='greenery'){x.fillStyle='#43573f';x.fillRect(0,0,w,h);
+      const gs=['#5c7a52','#6b8a5e','#38492f','#7a9a6a'];
+      for(let i=0;i<260;i++){x.fillStyle=gs[i%gs.length];x.globalAlpha=.8;
+        x.beginPath();x.ellipse((i*53)%w,(i*29)%h,5+(i%6),3+(i%4),i*.7,0,Math.PI*2);x.fill();}x.globalAlpha=1;}
+    else {x.fillStyle='#5e7052';x.fillRect(0,0,w,h);
+      const fs=['#e6c9c4','#f2e3da','#d98a94','#efe9dd','#e8d9b8'];
+      for(let i=0;i<300;i++){x.fillStyle=fs[i%fs.length];
+        x.beginPath();x.arc((i*41)%w,(i*67)%h,4+(i%5),0,Math.PI*2);x.fill();
+        x.fillStyle='rgba(185,138,47,.55)';x.beginPath();x.arc((i*41)%w,(i*67)%h,1.3,0,Math.PI*2);x.fill();}}
+  },[1.8,1.4]);
+}
+
+/* ═════ Materials ═════ */
+const matCache=new Map();
+function mat(color,opts={}){const k='m|'+color+'|'+JSON.stringify(opts);
+  if(!matCache.has(k))matCache.set(k,new THREE.MeshStandardMaterial({color,roughness:opts.rough??0.8,metalness:opts.metal??0}));
+  return matCache.get(k);}
+function mannequinMaterial(tint){const c=tint||'#ffffff';const k='mq|'+c;
+  if(!matCache.has(k))matCache.set(k,new THREE.MeshStandardMaterial({color:c,...MANNEQUIN_SURFACE}));
+  return matCache.get(k);}
+function staffGarmentTexture(outfit,color){
+  return canvasTex('staff|'+outfit+'|'+color,128,128,(ctx,size)=>{
+    ctx.fillStyle=outfit==='apron'?'#efe8db':color;ctx.fillRect(0,0,size,size);
+    if(outfit==='uniform'){ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(0,40,size,10);}
+    const cx=size/2;
+    if(outfit==='chef_whites'){ctx.fillStyle='#a89f90';
+      for(const s of[-1,1])for(let y=34;y<=88;y+=18){ctx.beginPath();ctx.arc(cx+s*9,y,3,0,Math.PI*2);ctx.fill();}
+      ctx.strokeStyle='rgba(120,112,98,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,26);ctx.lineTo(cx,100);ctx.stroke();}
+    else if(outfit==='apron'){ctx.fillStyle=color;ctx.fillRect(cx-17,30,34,40);ctx.fillRect(cx-26,70,52,58);
+      ctx.strokeStyle=color;ctx.lineWidth=5;
+      for(const s of[-1,1]){ctx.beginPath();ctx.moveTo(cx+s*14,32);ctx.lineTo(cx+s*24,4);ctx.stroke();}
+      ctx.strokeStyle='rgba(0,0,0,.22)';ctx.lineWidth=2;ctx.strokeRect(cx-9,46,18,14);}
+    else if(outfit==='vest'){ctx.fillStyle='#f1eee6';ctx.beginPath();ctx.moveTo(cx-13,8);ctx.lineTo(cx+13,8);ctx.lineTo(cx,62);ctx.closePath();ctx.fill();
+      ctx.fillStyle='rgba(0,0,0,.45)';for(let y=70;y<=100;y+=15){ctx.beginPath();ctx.arc(cx,y,2.5,0,Math.PI*2);ctx.fill();}}
+    else if(outfit==='uniform'){ctx.fillStyle='rgba(255,255,255,.75)';ctx.beginPath();ctx.arc(cx+18,28,4.5,0,Math.PI*2);ctx.fill();}
+    else if(outfit==='robe'){ctx.strokeStyle='#d4af5a';ctx.lineWidth=9;
+      for(const s of[-1,1]){ctx.beginPath();ctx.moveTo(cx+s*20,0);ctx.lineTo(cx+s*6,96);ctx.stroke();}}
+  });
+}
+function garmentMaterial(outfit,color){const k='g|'+outfit+'|'+color;
+  if(!matCache.has(k)){const m=new THREE.MeshStandardMaterial({color:'#fff',roughness:0.8});
+    m.map=staffGarmentTexture(outfit,outfit==='chef_whites'?'#f6f3ec':color);m.map.flipY=false;
+    matCache.set(k,m);}
+  return matCache.get(k);}
+function darken(hex,k){const n=parseInt(hex.slice(1),16);const ch=v=>Math.max(0,Math.min(255,Math.round(v*k)));
+  return '#'+(((ch((n>>16)&255)<<16)|(ch((n>>8)&255)<<8)|ch(n&255)).toString(16).padStart(6,'0'));}
+
+/* ═════ Figure builder (one-piece rig hierarchy from kit/figure.tsx) ═════ */
+function buildFigure({tint='#ffffff',ring=null,staffOutfit=null,brandColor='#a06a48'}={}){
+  const bodyMat=mannequinMaterial(tint);
+  const garmentMat=staffOutfit?garmentMaterial(staffOutfit,brandColor):bodyMat;
+  const legMat=staffOutfit?mat(staffOutfit==='chef_whites'?'#2c2f36':darken(brandColor,0.55),{rough:.85}):bodyMat;
+  const root=new THREE.Group();
+  if(ring){const r=new THREE.Mesh(new THREE.RingGeometry(0.16,0.235,24),
+    new THREE.MeshBasicMaterial({color:ring,side:THREE.DoubleSide}));
+    r.rotation.x=-Math.PI/2;r.position.y=0.012;root.add(r);}
+  const pelvis=new THREE.Group();pelvis.position.y=PELVIS_Y;root.add(pelvis);
+  const hip=new THREE.Mesh(HIP_GEO,legMat);hip.position.y=HIP_BLOCK_Y;hip.castShadow=true;pelvis.add(hip);
+  for(const side of[-1,1]){
+    const hipJ=new THREE.Group();hipJ.position.x=side*HIP_X;pelvis.add(hipJ);
+    const thigh=new THREE.Mesh(LEG_GEO,legMat);thigh.position.y=-THIGH_LEN/2;
+    thigh.scale.set(THIGH_SCALE_XZ,THIGH_SCALE_Y,THIGH_SCALE_XZ);thigh.castShadow=true;hipJ.add(thigh);
+    const hb=new THREE.Mesh(JOINT_GEO,legMat);hb.scale.setScalar(HIP_BALL_R);hipJ.add(hb);
+    const knee=new THREE.Group();knee.position.y=-THIGH_LEN;hipJ.add(knee);
+    const shin=new THREE.Mesh(LEG_GEO,legMat);shin.position.y=-SHIN_LEN/2;
+    shin.scale.set(SHIN_SCALE_XZ,SHIN_SCALE_Y,SHIN_SCALE_XZ);shin.castShadow=true;knee.add(shin);
+    const kb=new THREE.Mesh(JOINT_GEO,legMat);kb.scale.setScalar(KNEE_BALL_R);knee.add(kb);
+    const st=new THREE.Mesh(STUMP_GEO,legMat);st.position.set(0,SHOE_POS_Y,SHOE_POS_Z);
+    st.scale.set(1.05,0.85,1.1);st.castShadow=true;knee.add(st);
+  }
+  const torsoG=new THREE.Group();pelvis.add(torsoG);
+  const t=new THREE.Mesh(TORSO_GEO,garmentMat);t.castShadow=true;torsoG.add(t);
+  for(const side of[-1,1]){
+    const sh=new THREE.Group();sh.position.set(side*SHOULDER_X,SHOULDER_Y,0);sh.rotation.z=side*0.1;torsoG.add(sh);
+    const ua=new THREE.Mesh(ARM_GEO,garmentMat);ua.position.y=-UPPER_ARM_LEN/2;
+    ua.scale.set(1,UPPER_ARM_SCALE_Y,1);ua.castShadow=true;sh.add(ua);
+    const sb=new THREE.Mesh(JOINT_GEO,garmentMat);sb.scale.setScalar(SHOULDER_BALL_R);sh.add(sb);
+    const el=new THREE.Group();el.position.y=-UPPER_ARM_LEN;el.rotation.x=-0.12;sh.add(el);
+    const fa=new THREE.Mesh(ARM_GEO,garmentMat);fa.position.y=-FOREARM_LEN/2;
+    fa.scale.set(FOREARM_SCALE_XZ,FOREARM_SCALE_Y,FOREARM_SCALE_XZ);fa.castShadow=true;el.add(fa);
+    const eb=new THREE.Mesh(JOINT_GEO,garmentMat);eb.scale.setScalar(ELBOW_BALL_R);el.add(eb);
+  }
+  const headG=new THREE.Group();headG.position.y=NECK_Y;torsoG.add(headG);
+  const lift=new THREE.Group();lift.position.y=HEAD_LIFT;headG.add(lift);
+  const ball=new THREE.Mesh(HEAD_GEO,bodyMat);ball.castShadow=true;lift.add(ball);
+  root.userData.torsoG=torsoG;root.userData.headG=headG;
+  return root;
+}
+
+/* ═════ Booth builders (subset of the 10 shipped chassis kinds) ═════ */
+const WOODM=mat('#8a6f52',{rough:.75}),WOODD=mat('#6b543c',{rough:.8}),
+  CLOTHM=mat('#efe9dd',{rough:.9}),DARKM=mat('#2e2c29',{rough:.6}),
+  BRASSM=mat('#b98a2f',{rough:.35,metal:.6});
+function box(w,h,d,m){const x=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);x.castShadow=true;return x;}
+function signMesh(text,w,brand){
+  const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');
+  x.fillStyle='#1c1b19';x.fillRect(0,0,512,128);
+  x.strokeStyle=brand;x.lineWidth=6;x.strokeRect(10,10,492,108);
+  x.fillStyle='#f7f5f0';x.font='600 54px "Hanken Grotesk",sans-serif';x.textAlign='center';x.textBaseline='middle';
+  x.fillText((text||'Your Booth').slice(0,18),256,68);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+  return new THREE.Mesh(new THREE.PlaneGeometry(w,w*0.25),new THREE.MeshBasicMaterial({map:t}));
+}
+function buildBooth(kind,signText,accent){
+  const g=new THREE.Group();const accM=mat(accent,{rough:.55});
+  if(kind==='COUNTER'){
+    const body=box(1.7,0.95,0.6,WOODM);body.position.y=0.475;g.add(body);
+    const band=box(1.72,0.18,0.62,accM);band.position.y=0.62;g.add(band);
+    const top=box(1.82,0.06,0.72,WOODD);top.position.y=0.98;g.add(top);
+    for(const s of[-1,1]){const p=box(0.06,1.15,0.06,DARKM);p.position.set(s*0.82,1.58,-0.22);g.add(p);}
+    const canopy=box(1.9,0.07,0.8,BRASSM);canopy.position.set(0,2.18,-0.1);g.add(canopy);
+    const sign=signMesh(signText,1.3,accent);sign.position.set(0,1.85,-0.05);g.add(sign);
+  } else if(kind==='STATION'){
+    const cloth=box(1.5,0.72,0.8,CLOTHM);cloth.position.y=0.36;g.add(cloth);
+    const band=box(1.52,0.1,0.82,accM);band.position.y=0.66;g.add(band);
+    const top=box(1.58,0.05,0.86,WOODD);top.position.y=0.755;g.add(top);
+    const tray=box(0.5,0.08,0.34,BRASSM);tray.position.set(-0.35,0.82,0);g.add(tray);
+    const tray2=box(0.36,0.12,0.3,DARKM);tray2.position.set(0.4,0.84,0);g.add(tray2);
+    for(const s of[-1,1]){const p=box(0.045,0.75,0.045,DARKM);p.position.set(s*0.45,1.13,-0.2);g.add(p);}
+    const sign=signMesh(signText,1.0,accent);sign.position.set(0,1.5,-0.2);g.add(sign);
+  } else {
+    const body=box(1.5,0.8,0.7,accM);body.position.y=0.75;g.add(body);
+    const top=box(1.6,0.05,0.8,WOODD);top.position.y=1.18;g.add(top);
+    for(const s of[-1,1]){const w=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.08,20),DARKM);
+      w.rotation.x=Math.PI/2;w.position.set(s*0.55,0.22,0.36);w.castShadow=true;g.add(w);}
+    const awning=box(1.7,0.05,0.9,CLOTHM);awning.position.y=2.0;awning.rotation.x=0.12;g.add(awning);
+    for(const s of[-1,1]){const p=box(0.045,0.85,0.045,DARKM);p.position.set(s*0.72,1.6,-0.3);g.add(p);}
+    const sign=signMesh(signText,1.15,accent);sign.position.set(0,1.62,0.05);g.add(sign);
+  }
+  return g;
+}
+
+/* ═════ SCENE SHELL ═════ */
+const stageEl=document.getElementById('stage');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+stageEl.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog('#efece6',12,26);
+const camera=new THREE.PerspectiveCamera(38,1,0.1,60);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.minDistance=1.6;controls.maxDistance=14;controls.maxPolarAngle=Math.PI*0.55;
+const hemi=new THREE.HemisphereLight('#fdf9ef','#b6ad9c',1.05);scene.add(hemi);
+const key=new THREE.DirectionalLight('#ffd9a8',1.6);key.position.set(4,6,3.5);key.castShadow=true;
+key.shadow.mapSize.set(1024,1024);
+key.shadow.camera.left=-7;key.shadow.camera.right=7;key.shadow.camera.top=7;key.shadow.camera.bottom=-2;
+scene.add(key);
+const rim=new THREE.DirectionalLight('#d8e2ef',0.5);rim.position.set(-4,3,-3);scene.add(rim);
+const modelRoot=new THREE.Group();scene.add(modelRoot);
+/* selection highlight ring */
+const selRing=new THREE.Mesh(new THREE.RingGeometry(0.9,0.98,48),
+  new THREE.MeshBasicMaterial({color:'#b98a2f',transparent:true,opacity:0.85,side:THREE.DoubleSide}));
+selRing.rotation.x=-Math.PI/2;selRing.visible=false;scene.add(selRing);
+function resize(){const w=stageEl.clientWidth,h=stageEl.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(stageEl);resize();
+
+/* ═════ STATE ═════ */
+const state={
+  maker:'couple',
+  couple:{lighting:'warm',floor:'marble',wall:'plain',backdrop:'drape',skirt:'#b98a2f',
+    cloth:'#efe9dd',runner:true,runnerColor:'#b98a2f',chair:'#9b8a6e',subject:'room'},
+  vendor:{chassis:'COUNTER',accent:'#a06a48',garment:'apron',sign:'Kape ni Aling Nena',
+    subject:'booth',tab:'look'},
+  guest:{tint:'#ffffff',ringC:'#b98a2f',consented:false,derived:null,matched:null,subject:'you'},
+};
+
+/* ═════ SCENE BUILDERS (rebuilt on state change; caches make it cheap) ═════ */
+const tappables=[]; // {mesh, subject}
+function clearScene(){while(modelRoot.children.length)modelRoot.remove(modelRoot.children.pop());tappables.length=0;selRing.visible=false;}
+function tag(obj,subject){obj.traverse(o=>{if(o.isMesh)tappables.push({mesh:o,subject});});}
+
+function buildCoupleScene(){
+  const c=state.couple;
+  /* floor */
+  const floorM=new THREE.MeshStandardMaterial({map:floorTexture(c.floor),roughness:.92});
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(13,10),floorM);
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;modelRoot.add(floor);tag(floor,'room');
+  /* back + side wall */
+  const wallM=new THREE.MeshStandardMaterial({map:wallTexture(c.wall,PALETTE.wall),roughness:.95});
+  const bw=new THREE.Mesh(new THREE.PlaneGeometry(13,4),wallM);bw.position.set(0,2,-5);modelRoot.add(bw);tag(bw,'room');
+  const sw=new THREE.Mesh(new THREE.PlaneGeometry(10,4),wallM);sw.position.set(-6.5,2,0);sw.rotation.y=Math.PI/2;modelRoot.add(sw);tag(sw,'room');
+  /* stage: riser + skirt + backdrop */
+  const stageG=new THREE.Group();stageG.position.set(0,0,-3.9);
+  const riser=box(3.4,0.5,2.0,WOODD);riser.position.y=0.25;stageG.add(riser);
+  const skirt=box(3.44,0.42,2.04,mat(c.skirt,{rough:.8}));skirt.position.y=0.21;stageG.add(skirt);
+  const bkM=new THREE.MeshStandardMaterial({map:backdropTexture(c.backdrop),roughness:.85});
+  const bk=new THREE.Mesh(new THREE.PlaneGeometry(3.6,2.6),bkM);bk.position.set(0,2.05,-0.9);stageG.add(bk);
+  const bkFrame=box(3.72,2.72,0.05,BRASSM);bkFrame.position.set(0,2.05,-0.95);stageG.add(bkFrame);
+  modelRoot.add(stageG);tag(stageG,'stage');
+  stageG.userData.anchor={x:0,z:-3.9,r:2.3};
+  /* table + cloth + runner + chairs */
+  const tableG=new THREE.Group();tableG.position.set(1.4,0,0.4);
+  const clothTop=new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,0.06,32),mat(c.cloth,{rough:.9}));
+  clothTop.position.y=0.74;clothTop.castShadow=true;tableG.add(clothTop);
+  const clothFall=new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.72,0.72,32,1,true),mat(c.cloth,{rough:.9}));
+  clothFall.position.y=0.38;tableG.add(clothFall);
+  if(c.runner){const run=box(0.34,0.02,1.64,mat(c.runnerColor,{rough:.75}));run.position.y=0.78;tableG.add(run);}
+  const center=new THREE.Mesh(new THREE.SphereGeometry(0.09,14,10),mat('#e6c9c4',{rough:.85}));
+  center.position.y=0.86;tableG.add(center);
+  const vase=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.045,0.16,12),BRASSM);vase.position.y=0.79;tableG.add(vase);
+  for(let i=0;i<6;i++){const a=i/6*Math.PI*2;
+    const ch=new THREE.Group();ch.position.set(Math.sin(a)*1.15,0,Math.cos(a)*1.15);ch.lookAt(tableG.position.x+Math.sin(a)*99,0,tableG.position.z+Math.cos(a)*99);
+    const seat=box(0.4,0.06,0.4,mat(c.chair,{rough:.7}));seat.position.y=0.46;ch.add(seat);
+    const back=box(0.4,0.5,0.05,mat(c.chair,{rough:.7}));back.position.set(0,0.76,0.18);ch.add(back);
+    for(const [lx,lz] of[[-0.16,-0.16],[0.16,-0.16],[-0.16,0.16],[0.16,0.16]]){
+      const leg=box(0.04,0.46,0.04,mat(darken(c.chair,0.6)));leg.position.set(lx,0.23,lz);ch.add(leg);}
+    ch.rotation.y+=Math.PI;tableG.add(ch);}
+  modelRoot.add(tableG);tag(tableG,'table');
+  tableG.userData.anchor={x:1.4,z:0.4,r:1.5};
+  /* a couple of seated-ish figures for life */
+  const f1=buildFigure({tint:'#ffffff'});f1.position.set(-2.6,0,1.6);f1.rotation.y=0.7;modelRoot.add(f1);
+  const f2=buildFigure({tint:'#ffffff'});f2.position.set(-1.8,0,2.4);f2.rotation.y=-0.5;modelRoot.add(f2);
+  applyLighting(c.lighting);
+}
+function buildVendorScene(){
+  const v=state.vendor;
+  const floor=new THREE.Mesh(new THREE.CircleGeometry(5,64),mat(PALETTE.floor,{rough:.95}));
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;modelRoot.add(floor);
+  const booth=buildBooth(v.chassis,v.sign,v.accent);modelRoot.add(booth);tag(booth,'booth');
+  booth.userData.anchor={x:0,z:0,r:1.4};
+  const staffPos={COUNTER:[0,0,-0.55],STATION:[0,0,-0.65],VEHICLE:[0.95,0,0]}[v.chassis]||[0,0,-0.6];
+  const staff=buildFigure({staffOutfit:v.garment,brandColor:v.accent});
+  staff.position.set(...staffPos);modelRoot.add(staff);tag(staff,'staff');
+  staff.userData.anchor={x:staffPos[0],z:staffPos[2],r:0.55};
+  applyLighting('warm');
+}
+function buildGuestScene(){
+  const g=state.guest;
+  const floor=new THREE.Mesh(new THREE.CircleGeometry(4.6,64),mat(PALETTE.floor,{rough:.95}));
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;modelRoot.add(floor);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(1.18,1.21,72),
+    new THREE.MeshBasicMaterial({color:'#b98a2f',transparent:true,opacity:.5,side:THREE.DoubleSide}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=0.004;modelRoot.add(ring);
+  const you=buildFigure({tint:g.tint,ring:g.ringC});modelRoot.add(you);tag(you,'you');
+  you.userData.anchor={x:0,z:0,r:0.55};
+  you.userData.isYou=true;
+  /* two porcelain neighbours for contrast */
+  const n1=buildFigure({tint:'#ffffff'});n1.position.set(-1.7,0,0.9);n1.rotation.y=0.6;modelRoot.add(n1);
+  const n2=buildFigure({tint:'#ffffff'});n2.position.set(1.8,0,1.2);n2.rotation.y=-0.7;modelRoot.add(n2);
+  applyLighting('warm');
+}
+function applyLighting(id){
+  const L=LIGHTING.find(l=>l.id===id)||LIGHTING[0];
+  key.color.set(L.key);key.intensity=L.intensity;hemi.color.set(L.hemi);
+  hemi.intensity=id==='candlelit'?0.75:1.05;
+}
+function rebuild(){
+  clearScene();
+  if(state.maker==='couple')buildCoupleScene();
+  else if(state.maker==='vendor')buildVendorScene();
+  else buildGuestScene();
+  updateSelRing();
+}
+function updateSelRing(){
+  const subj=state[state.maker].subject;
+  const anchored=modelRoot.children.find(o=>o.userData.anchor&&tappables.some(t=>t.subject===subj&&(t.mesh===o||o.getObjectById(t.mesh.id))));
+  if(subj==='room'||!anchored){selRing.visible=false;return;}
+  const a=anchored.userData.anchor;
+  selRing.position.set(a.x,0.008,a.z);
+  selRing.scale.setScalar(a.r/0.94);
+  selRing.visible=true;
+}
+const CAMS={
+  couple:{pos:[5.4,3.6,7.2],tgt:[0,0.9,-0.8]},
+  vendor:{pos:[3.4,2.2,5.6],tgt:[0,1.1,0]},
+  guest:{pos:[2.1,1.7,3.3],tgt:[0,0.95,0]},
+};
+function applyCam(){const c=CAMS[state.maker];camera.position.set(...c.pos);controls.target.set(...c.tgt);}
+
+/* ═════ TAP-TO-SELECT (the scene is the nav) ═════ */
+const ray=new THREE.Raycaster();const ptr=new THREE.Vector2();let downAt=null;
+renderer.domElement.addEventListener('pointerdown',e=>{downAt=[e.clientX,e.clientY];});
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!downAt)return;const dx=e.clientX-downAt[0],dy=e.clientY-downAt[1];downAt=null;
+  if(dx*dx+dy*dy>36)return; // drag, not tap
+  const r=renderer.domElement.getBoundingClientRect();
+  ptr.x=((e.clientX-r.left)/r.width)*2-1;ptr.y=-((e.clientY-r.top)/r.height)*2+1;
+  ray.setFromCamera(ptr,camera);
+  const hits=ray.intersectObjects(tappables.map(t=>t.mesh),false);
+  if(!hits.length)return;
+  const hit=tappables.find(t=>t.mesh===hits[0].object);
+  if(hit){state[state.maker].subject=hit.subject;render();updateSelRing();}
+});
+
+/* ═════ ON-DEVICE PHOTO → TINT (the ₱0 owner-locked pipeline, working for real) ═════ */
+function extractTint(file,cb){
+  const img=new Image();
+  img.onload=()=>{
+    const c=document.createElement('canvas');c.width=64;c.height=96;
+    const x=c.getContext('2d');x.drawImage(img,0,0,64,96);
+    const d=x.getImageData(16,33,32,38).data; // central torso band
+    const buckets=new Map();
+    for(let i=0;i<d.length;i+=4){
+      const r=d[i],g=d[i+1],b=d[i+2];
+      const mx=Math.max(r,g,b),mn=Math.min(r,g,b),lum=(r+g+b)/3;
+      if(lum<22||lum>246)continue;
+      const kkey=((r>>5)<<10)|((g>>5)<<5)|(b>>5);
+      const w=1+(mx-mn)/64;
+      const e=buckets.get(kkey)||{w:0,r:0,g:0,b:0,n:0};
+      e.w+=w;e.r+=r;e.g+=g;e.b+=b;e.n++;buckets.set(kkey,e);
+    }
+    let best=null;for(const e of buckets.values())if(!best||e.w>best.w)best=e;
+    URL.revokeObjectURL(img.src);
+    if(!best){cb(null);return;}
+    const to2=v=>Math.round(v).toString(16).padStart(2,'0');
+    cb('#'+to2(best.r/best.n)+to2(best.g/best.n)+to2(best.b/best.n));
+  };
+  img.onerror=()=>cb(null);
+  img.src=URL.createObjectURL(file);
+}
+function hexToHsl(hex){
+  const n=parseInt(hex.slice(1),16);
+  const r=((n>>16)&255)/255,g=((n>>8)&255)/255,b=(n&255)/255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;
+  let h=0,s=0;
+  if(mx!==mn){const d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);
+    h=mx===r?((g-b)/d+(g<b?6:0)):mx===g?((b-r)/d+2):((r-g)/d+4);h*=60;}
+  return {h,s,l};
+}
+/* Hue-aware snap: plain RGB distance is hue-blind — a mid-tone saturated
+   colour would land on Charcoal (the only dark swatch) instead of its hue
+   neighbour. Saturated inputs match by hue first; neutrals by lightness. */
+function nearestTint(hex){
+  const c=hexToHsl(hex);
+  let best=null,bd=1e9;
+  for(const t of TINTS){
+    const s=hexToHsl(t.hex);
+    let dh=Math.abs(c.h-s.h);if(dh>180)dh=360-dh;
+    const hueW=Math.min(c.s,0.6)*Math.min(s.s+0.15,0.6);
+    const dd=(dh/180)*(dh/180)*16*hueW
+      +(c.s-s.s)*(c.s-s.s)*1.5
+      +(c.l-s.l)*(c.l-s.l)*(c.s<0.08?3:0.8);
+    if(dd<bd){bd=dd;best=t;}
+  }
+  return best;
+}
+
+/* ═════ PANEL UI ═════ */
+const $=id=>document.getElementById(id);
+function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+function chipGrid(items,activeId,onPick){
+  const grid=el('<div class="chips"></div>');
+  for(const it of items){
+    const b=el(`<button class="chip${it.id===activeId?' active':''}">${it.pro?'<span class="pro">PRO</span>':''}<span class="name">${it.name}</span><span class="desc">${it.desc}</span></button>`);
+    b.onclick=()=>{onPick(it.id);render();rebuild();};grid.appendChild(b);}
+  return grid;
+}
+function swatchRow(items,activeHex,onPick,label){
+  const wrap=document.createElement('div');
+  const row=el('<div class="swatches"></div>');let name='';
+  for(const it of items){
+    const s=el(`<button class="swatch${it.hex===activeHex?' active':''}" title="${it.name}" style="background:${it.hex}"></button>`);
+    if(it.hex===activeHex)name=it.name;
+    s.onclick=()=>{onPick(it.hex);render();rebuild();};row.appendChild(s);}
+  wrap.appendChild(row);
+  wrap.appendChild(el(`<div class="swatch-label mono">${label} — ${name||'custom'}</div>`));
+  return wrap;
+}
+function group(label,child){const g=el('<div class="group"></div>');
+  g.appendChild(el(`<label>${label}</label>`));g.appendChild(child);return g;}
+function paletteStrip(){
+  return el(`<div class="palette-strip"><span class="dots">${['accent','linen','floor','wall'].map(k=>`<span class="dot" style="background:${PALETTE[k]}"></span>`).join('')}</span><span class="t">Mood Board proposes · the lab disposes.<br/>Palette edits live in the Mood Board studio.</span></div>`);
+}
+
+const MAKER_META={
+  couple:{eyebrow:'Couple · Design panel',title:'Dress the room',
+    doorway:'/dashboard → event → Overview → Seat plan → [2D·3D·List] → 3D lab → Design',
+    caption:['This is your <em>room</em>,<br/>dressed.','Placement stays in the 2D editor. Look lives here — palette-derived, curated overrides.'],
+    save:'Save room look',
+    subjects:[{id:'room',label:'◯ Room'},{id:'stage',label:'Stage'},{id:'table',label:'Table'}]},
+  vendor:{eyebrow:'Vendor · Your booth',title:'Build your booth',
+    doorway:'/vendor-dashboard → Clients → [event] → Your booth',
+    caption:['This is your <em>booth</em><br/>on the floor.','Free structural base for every verified vendor. Identity details are the Pro layer.'],
+    save:'Save my booth',
+    subjects:[{id:'booth',label:'Booth'},{id:'staff',label:'Staff'}]},
+  guest:{eyebrow:'Guest · Venue walk',title:'That’s you',
+    doorway:'/[slug] → Visit the venue → tap your figure',
+    caption:['This is <em>you</em><br/>in the room.','Three taps. Tint + ring. Your selfie already replaces the head — that’s shipped.'],
+    save:'Save my look',
+    subjects:[{id:'you',label:'You'}]},
+};
+
+function render(){
+  const m=state.maker,meta=MAKER_META[m],s=state[m];
+  document.body.classList.toggle('vendor-mode',m==='vendor');
+  for(const b of $('makerSwitch').children)b.classList.toggle('active',b.dataset.maker===m);
+  $('stageTitle').innerHTML=meta.caption[0];$('stageSub').textContent=meta.caption[1];
+  $('panelEyebrow').textContent=meta.eyebrow;$('panelTitle').textContent=meta.title;
+  $('panelDoorway').textContent=meta.doorway;$('btnSave').textContent=meta.save;
+
+  /* subject chips */
+  const chips=$('subjectChips');chips.innerHTML='';
+  for(const sub of meta.subjects){
+    const b=el(`<button class="${s.subject===sub.id?'active':''}">${sub.label}</button>`);
+    b.onclick=()=>{s.subject=sub.id;render();updateSelRing();};chips.appendChild(b);}
+  chips.appendChild(el(`<span class="tap-note mono">…or tap the object in the scene — the scene is the nav.</span>`));
+
+  /* subject tabs (only vendor booth uses them; ≤3 per verdict) */
+  const tabs=$('subjectTabs');tabs.style.display='none';tabs.innerHTML='';
+  if(m==='vendor'&&s.subject==='booth'){
+    tabs.style.display='flex';
+    for(const t of[['look','Look'],['popup','Pop-up'],['sign','Sign']]){
+      const b=el(`<button class="${s.tab===t[0]?'active':''}">${t[1]}</button>`);
+      b.onclick=()=>{s.tab=t[0];render();};tabs.appendChild(b);}
+  }
+
+  /* body */
+  const body=$('panelBody');body.innerHTML='';
+  if(m==='couple'){
+    body.appendChild(paletteStrip());
+    if(s.subject==='room'){
+      body.appendChild(group('Lighting mood',chipGrid(LIGHTING,s.lighting,v=>s.lighting=v)));
+      body.appendChild(group('Floor material',chipGrid(FLOORS,s.floor,v=>s.floor=v)));
+      body.appendChild(group('Wall treatment',chipGrid(WALLS,s.wall,v=>s.wall=v)));
+      body.appendChild(el('<p class="note">Room-wide knobs live on this root chip. Persisted on <span class="mono">room_dressing</span> — no new schema.</p>'));
+    } else if(s.subject==='stage'){
+      body.appendChild(group('Backdrop treatment',chipGrid(BACKDROPS,s.backdrop,v=>s.backdrop=v)));
+      body.appendChild(group('Riser skirt',swatchRow(SKIRTS,s.skirt,v=>s.skirt=v,'Skirt')));
+      body.appendChild(el('<p class="note">The stage is the headline gap: <span class="mono">reception_design.stage</span> is already persisted — this panel is its missing 3D consumer.</p>'));
+    } else {
+      body.appendChild(group('Tablecloth',swatchRow(CLOTHS,s.cloth,v=>s.cloth=v,'Cloth')));
+      const tr=el('<div class="toggle-row"><span class="t-name">Table runner</span></div>');
+      const tb=el(`<button class="t${s.runner?' on':''}"></button>`);
+      tb.onclick=()=>{s.runner=!s.runner;render();rebuild();};tr.appendChild(tb);
+      body.appendChild(group('Runner',tr));
+      if(s.runner)body.appendChild(group('Runner colour',swatchRow(RUNNERS,s.runnerColor,v=>s.runnerColor=v,'Runner')));
+      body.appendChild(group('Chair colour',swatchRow(CHAIRS,s.chair,v=>s.chair=v,'Chairs')));
+      body.appendChild(el('<p class="note">One cloth colour per event — per-table colours would unbound the material caches (council: NOT a knob). Chair style is geometry — locked for instancing.</p>'));
+    }
+  }
+  else if(m==='vendor'){
+    if(s.subject==='booth'){
+      if(s.tab==='look'){
+        body.appendChild(group('Chassis — from your category set',chipGrid(CHASSIS,s.chassis,v=>s.chassis=v)));
+        body.appendChild(group('Accent — harmonized with the couple’s palette',swatchRow(VENDOR_BAND,s.accent,v=>s.accent=v,'Accent band')));
+        body.appendChild(el('<p class="note">FREE for every verified vendor. The accent band is derived from the room palette — your identity lives in the sign and the pop-up, never a clashing chassis.</p>'));
+      } else if(s.tab==='popup'){
+        const card=el(`<div class="popup-card">
+          <div class="pc-head"><div class="pc-kind">Coffee &amp; Espresso · Counter</div>
+          <div class="pc-name">${s.sign||'Your Booth'}</div><div class="pc-cat">Verified vendor · 4.9 ★ facts-only history</div></div>
+          <div class="pc-body">
+            <div class="pc-price">₱15,000 <span class="from">starting · from your live services</span></div>
+            <div class="pc-chips"><span class="pc-chip">Barista ×2</span><span class="pc-chip">200 cups</span><span class="pc-chip worth">₱2,500 grinder — free</span></div>
+            <div class="pc-photos"><div class="pc-photo">▣</div><div class="pc-photo">▣</div><div class="pc-photo">▣</div></div>
+            <button class="pc-book">Book this vendor</button>
+            <div class="pc-row"><span>Pinned promo chip</span><span class="mono" style="color:var(--gold)">PRO</span></div>
+            <div class="pc-row"><span>Media loop prominence</span><span class="mono" style="color:var(--gold)">PRO</span></div>
+            <div class="pc-row"><span>Front-desk chat</span><span class="mono" style="color:var(--gold)">SLOT RESERVED</span></div>
+          </div></div>`);
+        body.appendChild(el('<div class="layer-label">Free layer — deterministic, from your live store</div>'));
+        body.appendChild(card);
+        body.appendChild(el('<p class="note">This card already ships (BoothVendorCard). First fix is a bug: guests currently get it without the menu items. Booking stays free forever — 0% commission.</p>'));
+      } else {
+        const f=el('<div class="field group"><label>Booth sign</label></div>');
+        const inp=el(`<input type="text" maxlength="18" value="${s.sign}">`);
+        inp.oninput=()=>{s.sign=inp.value;rebuild();render();};f.appendChild(inp);
+        body.appendChild(f);
+        body.appendChild(el('<p class="note">Logo on the sign is the shipped Pro perk (<span class="mono">boothCanBrand</span>). Text sign is free.</p>'));
+      }
+    } else {
+      body.appendChild(group('Garment — Pro layer',chipGrid(GARMENTS,s.garment,v=>s.garment=v)));
+      body.appendChild(el('<p class="note">The staff figure is your own avatar wearing the garment, tinted by your accent. Garment dressing sits in the Pro layer with the logo sign.</p>'));
+    }
+  }
+  else { /* guest */
+    body.appendChild(group('Your tint',swatchRow(TINTS,s.tint,v=>{s.tint=v;s.derived=null;s.matched=null;},'Body tint')));
+    body.appendChild(group('Your ring',swatchRow(RINGS,s.ringC,v=>s.ringC=v,'Floor ring')));
+    const pf=el(`<div class="photo-flow">
+      <div class="pf-title">Start from a photo</div>
+      <div class="pf-privacy">18+ · Analyzed on THIS device only.<br/>Never uploaded · nothing stored but your tint.<br/>The figure stays faceless — your selfie disc is the only face.</div>
+    </div>`);
+    const fileInp=el('<input type="file" accept="image/*">');
+    const btn=el(`<button class="pf-consent">${s.consented?'Choose a photo — analyze on this device':'I agree — analyze on this device'}</button>`);
+    btn.onclick=()=>{if(!s.consented){s.consented=true;render();return;}fileInp.click();};
+    fileInp.onchange=()=>{
+      const f=fileInp.files&&fileInp.files[0];if(!f)return;
+      extractTint(f,hex=>{
+        if(!hex){toast('Could not read a colour — try another photo');return;}
+        const near=nearestTint(hex);
+        s.derived=hex;s.matched=near;s.tint=near.hex;
+        render();rebuild();
+        toast(`Derived on-device — matched to <span class="mono">${near.name}</span> · photo discarded`);
+      });
+      fileInp.value='';
+    };
+    pf.appendChild(btn);pf.appendChild(fileInp);
+    if(s.derived&&s.matched){
+      pf.appendChild(el(`<div class="pf-result"><span class="pf-dot" style="background:${s.derived}"></span><span class="pf-said">Extracted <span class="mono">${s.derived}</span> from the photo — snapped to the curated swatch <b>${s.matched.name}</b>. The photo is gone.</span></div>`));
+    }
+    body.appendChild(group('₱0 · on-device (owner-locked 2026-07-19)',pf));
+    body.appendChild(el('<p class="note">Three taps, free. Tint + ring are the Phase-1 knobs — instancing-safe, mannequin-lock-safe. Anything more (hair, build) waits on the owner’s identity fork.</p>'));
+  }
+  updateSelRing();
+}
+
+/* maker switch */
+$('makerSwitch').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  state.maker=b.dataset.maker;render();rebuild();applyCam();
+});
+$('btnSave').onclick=()=>toast(`${MAKER_META[state.maker].save} — <span class="mono">prototype only, nothing persisted</span>`);
+function toast(html){const t=$('toast');t.innerHTML=html;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2800);}
+
+/* ═════ LOOP ═════ */
+const clock=new THREE.Clock();
+function tick(){
+  requestAnimationFrame(tick);
+  const t=clock.getElapsedTime();
+  for(const o of modelRoot.children){
+    const tg=o.userData&&o.userData.torsoG,hg=o.userData&&o.userData.headG;
+    if(tg){tg.rotation.z=Math.sin(t*0.9+o.position.x)*0.02;}
+    if(hg){hg.rotation.y=Math.sin(t*0.45+o.position.z)*0.08;}
+  }
+  if(state.maker!=='couple')modelRoot.rotation.y=Math.sin(t*0.1)*0.22;
+  else modelRoot.rotation.y=0;
+  controls.update();renderer.render(scene,camera);
+}
+render();rebuild();applyCam();tick();
+</script>
+</body>
+</html>

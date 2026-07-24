@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kasama · Remote Guest — Setnayan prototype</title>
+<style>
+  /* ============================================================
+     KASAMA — the remote-guest / diaspora experience
+     A prototype of what an overseas relative sees when they open
+     the couple's event link from abroad.
+     Rides existing infra: Panood free single-cam · Live Wall ·
+     Papic per-guest delivery · apply-then-pay hand-off pattern.
+     ============================================================ */
+  :root{
+    --paper:#f7f1e8; --paper-2:#fbf7f0; --card:#fffdf9;
+    --ink:#241d1a; --ink-soft:#6a5f57; --ink-faint:#9a8d82;
+    --wine:#7a2e43; --wine-deep:#5c2233; --wine-soft:#a95a6e;
+    --gold:#c6a15b; --line:rgba(122,46,67,.14); --line-2:rgba(60,45,40,.10);
+    --live:#c0392b; --ok:#3f7a52;
+    --shadow:0 18px 50px -28px rgba(60,30,40,.45);
+    --serif:ui-serif,"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#171210; --paper-2:#1d1613; --card:#221a16;
+      --ink:#f3e9df; --ink-soft:#c3b3a6; --ink-faint:#8f8074;
+      --wine:#d98aa0; --wine-deep:#e7a6b8; --wine-soft:#b9718a;
+      --gold:#d8b877; --line:rgba(217,138,160,.20); --line-2:rgba(240,220,210,.10);
+      --shadow:0 20px 60px -30px rgba(0,0,0,.7);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:var(--sans); color:var(--ink);
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(198,161,91,.10), transparent 60%),
+      var(--paper);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    display:flex; justify-content:center; padding:24px 14px 60px;
+  }
+  .phone{width:100%; max-width:440px}
+
+  /* top chrome */
+  .brandbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+  .brand{font-family:var(--sans); font-size:11px; letter-spacing:.34em; color:var(--ink-faint); font-weight:600}
+  .kpill{display:inline-flex; align-items:center; gap:6px; font-size:11px; letter-spacing:.06em;
+    color:var(--wine); background:color-mix(in srgb,var(--wine) 9%, transparent);
+    border:1px solid var(--line); padding:5px 10px; border-radius:999px; font-weight:600}
+  .kpill svg{width:12px;height:12px}
+
+  /* generic card */
+  .card{background:var(--card); border:1px solid var(--line-2); border-radius:20px;
+    box-shadow:var(--shadow); overflow:hidden; margin-bottom:16px}
+  .pad{padding:20px}
+  .eyebrow{font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); font-weight:700; margin:0 0 8px}
+  .serif{font-family:var(--serif)}
+
+  /* HERO */
+  .hero{position:relative; text-align:center; padding:30px 22px 24px;
+    background:
+      radial-gradient(120% 90% at 50% 0%, color-mix(in srgb,var(--wine) 12%, transparent), transparent 62%),
+      var(--card)}
+  .mono{width:64px;height:64px;margin:0 auto 14px;display:block}
+  .hero h1{font-family:var(--serif); font-weight:500; font-size:34px; line-height:1.02; margin:0; letter-spacing:.01em}
+  .hero .amp{color:var(--wine); font-style:italic}
+  .hero .meta{font-size:12.5px; color:var(--ink-soft); margin:9px 0 0; letter-spacing:.02em}
+  .hero .youare{font-family:var(--serif); font-style:italic; font-size:19px; line-height:1.32;
+    color:var(--ink); margin:16px 8px 0}
+  .hero .youare b{font-style:normal; color:var(--wine); font-weight:600}
+  .live{display:inline-flex; align-items:center; gap:7px; margin-top:16px; font-size:11px; font-weight:700;
+    letter-spacing:.12em; color:var(--live); text-transform:uppercase}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(192,57,43,.55);
+    animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(192,57,43,.5)}70%{box-shadow:0 0 0 9px rgba(192,57,43,0)}100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}}
+
+  /* WATCH / player */
+  .player{position:relative; aspect-ratio:16/9; cursor:pointer;
+    background:linear-gradient(135deg,#3a2a2f,#241d1a 60%,#4a3540);
+    display:flex; align-items:center; justify-content:center; overflow:hidden}
+  .player::after{content:""; position:absolute; inset:0;
+    background:radial-gradient(60% 60% at 50% 42%, rgba(255,230,200,.14), transparent 70%)}
+  .player .shimmer{position:absolute; inset:0; opacity:.5;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.09) 50%,transparent 70%);
+    background-size:220% 100%; animation:sh 3.4s linear infinite}
+  @keyframes sh{0%{background-position:120% 0}100%{background-position:-120% 0}}
+  .play{position:relative; z-index:2; width:60px;height:60px;border-radius:50%;
+    background:rgba(255,253,249,.92); display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 30px -8px rgba(0,0,0,.5); transition:transform .2s}
+  .player:hover .play{transform:scale(1.06)}
+  .play svg{width:22px;height:22px;margin-left:3px;color:var(--wine-deep)}
+  .livebadge{position:absolute; top:12px; left:12px; z-index:3; display:flex; align-items:center; gap:6px;
+    background:var(--live); color:#fff; font-size:10px; font-weight:800; letter-spacing:.1em;
+    padding:4px 8px; border-radius:6px}
+  .livebadge .d{width:6px;height:6px;border-radius:50%;background:#fff}
+  .watchers{position:absolute; bottom:12px; right:12px; z-index:3; color:#fff; font-size:11px;
+    background:rgba(0,0,0,.4); padding:4px 9px; border-radius:999px; backdrop-filter:blur(4px)}
+  .watchcap{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 16px}
+  .watchcap .t{font-size:12.5px; color:var(--ink); font-weight:600}
+  .watchcap .s{font-size:10.5px; color:var(--ink-faint)}
+  .free{font-size:10px; color:var(--ok); font-weight:700; letter-spacing:.04em;
+    border:1px solid color-mix(in srgb,var(--ok) 40%, transparent); padding:3px 8px; border-radius:999px; white-space:nowrap}
+
+  /* GREETING wall */
+  .field{display:flex; gap:8px; margin-top:14px}
+  .field input, .field textarea{flex:1; font-family:var(--sans); font-size:14px; color:var(--ink);
+    background:var(--paper-2); border:1px solid var(--line-2); border-radius:12px; padding:12px 13px; resize:none}
+  .field input:focus, .field textarea:focus{outline:none; border-color:var(--wine-soft)}
+  .btn{font-family:var(--sans); font-weight:600; font-size:13.5px; letter-spacing:.01em; cursor:pointer;
+    border:none; border-radius:12px; padding:12px 16px; color:#fff; background:var(--wine);
+    transition:transform .15s, background .2s; white-space:nowrap}
+  .btn:hover{background:var(--wine-deep)} .btn:active{transform:scale(.97)}
+  .btn.ghost{background:transparent; color:var(--wine); border:1px solid var(--line)}
+  .btn.block{width:100%; justify-content:center; display:flex; align-items:center; gap:8px}
+  .wallnote{font-size:11px; color:var(--ink-faint); margin:12px 2px 4px; display:flex; align-items:center; gap:6px}
+  .wall{margin-top:8px; display:flex; flex-direction:column; gap:10px}
+  .note{display:flex; gap:11px; padding:12px 13px; background:var(--paper-2); border-radius:14px; border:1px solid var(--line-2)}
+  .note.mine{border-color:var(--wine-soft); background:color-mix(in srgb,var(--wine) 6%, var(--paper-2))}
+  .av{flex:none; width:34px;height:34px;border-radius:50%; display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif); font-size:15px; color:#fff; font-weight:600}
+  .note .body{min-width:0}
+  .note .who{font-size:12.5px; font-weight:700; color:var(--ink)}
+  .note .loc{font-size:10.5px; color:var(--wine); font-weight:600; letter-spacing:.02em}
+  .note .msg{font-size:13px; color:var(--ink-soft); line-height:1.4; margin-top:3px}
+  .flag{font-size:11px}
+
+  /* BLESSING */
+  .blessing{background:
+      radial-gradient(120% 100% at 100% 0%, color-mix(in srgb,var(--gold) 14%, transparent), transparent 55%),
+      var(--card)}
+  .bless-lead{font-family:var(--serif); font-size:15px; line-height:1.5; color:var(--ink); margin:6px 0 2px}
+  .bless-sub{font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin:8px 0 0}
+  .rails{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px; margin-top:16px}
+  .rail{cursor:pointer; text-align:center; padding:13px 6px; border-radius:14px; background:var(--paper-2);
+    border:1px solid var(--line-2); transition:transform .15s, border-color .2s}
+  .rail:hover{transform:translateY(-2px); border-color:var(--wine-soft)}
+  .rail .ic{font-size:20px; line-height:1} .rail .nm{font-size:11.5px; font-weight:700; margin-top:6px; color:var(--ink)}
+  .trust{display:flex; gap:8px; align-items:flex-start; margin-top:16px; padding:11px 12px;
+    background:color-mix(in srgb,var(--ok) 8%, transparent); border-radius:12px}
+  .trust svg{flex:none; width:15px;height:15px;color:var(--ok); margin-top:1px}
+  .trust p{margin:0; font-size:11.5px; color:var(--ink-soft); line-height:1.45}
+  .trust b{color:var(--ink)}
+  .bcount{font-size:11px; color:var(--ink-faint); text-align:center; margin-top:12px}
+
+  /* KEEPSAKE */
+  .keepsake{text-align:center; padding:26px 22px}
+  .keepsake .art{width:88px;height:88px;margin:0 auto 14px; position:relative}
+  .keepsake h3{font-family:var(--serif); font-weight:500; font-size:23px; margin:0; line-height:1.15}
+  .keepsake p{font-size:13px; color:var(--ink-soft); line-height:1.5; margin:9px 6px 0}
+  .keepsake .field{margin-top:16px}
+
+  /* CLOSE */
+  .close{text-align:center; padding:28px 20px 6px}
+  .close .sig{font-family:var(--serif); font-style:italic; font-size:20px; color:var(--wine)}
+  .close .sal{font-size:13px; color:var(--ink-soft); margin-top:4px}
+  .close .kept{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin-top:20px; font-weight:600}
+
+  /* toast + confirm */
+  .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+    background:var(--wine-deep); color:#fff; padding:13px 18px; border-radius:14px; font-size:13px; font-weight:500;
+    box-shadow:0 16px 40px -14px rgba(0,0,0,.5); opacity:0; pointer-events:none; transition:.28s; z-index:50;
+    max-width:360px; text-align:center; display:flex; align-items:center; gap:9px}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  .toast svg{width:16px;height:16px;flex:none}
+  .done{color:var(--ok)!important; font-weight:700}
+  .hidden{display:none!important}
+  .cap{font-size:10.5px; color:var(--ink-faint); text-align:center; margin:2px 4px 0; line-height:1.5}
+
+  /* the annotation ribbon for the owner viewing the proto */
+  .devnote{max-width:440px; margin:0 auto 18px; font-size:11px; color:var(--ink-faint);
+    border:1px dashed var(--line); border-radius:14px; padding:11px 14px; line-height:1.5; background:var(--paper-2)}
+  .devnote b{color:var(--wine)}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="devnote">
+    <b>Prototype · Kasama (remote-guest mode)</b> — what an overseas relative sees on the couple's event link.
+    Each block rides infra you already ship: <b>Watch</b> = Panood free single-cam · <b>Greeting</b> = Live Wall ·
+    <b>Blessing</b> = hand-off to the couple's own account (Setnayan never holds the money) · <b>Keepsake</b> = Papic per-guest delivery.
+  </div>
+
+  <div class="brandbar">
+    <span class="brand">SET NA 'YAN</span>
+    <span class="kpill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.35-9.3-8.5C.8 9.4 2.4 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.6 0 5.2 3.9 3.3 7C19 16.65 12 21 12 21z"/></svg>
+      Kasama mode
+    </span>
+  </div>
+
+  <!-- HERO -->
+  <section class="card hero">
+    <svg class="mono" viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="46" stroke="var(--gold)" stroke-width="1.2"/>
+      <circle cx="50" cy="50" r="39" stroke="var(--wine)" stroke-width=".7" opacity=".5"/>
+      <text x="50" y="62" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-size="34" fill="var(--wine)" font-style="italic">M&amp;A</text>
+    </svg>
+    <h1 class="serif">Miguel <span class="amp">&amp;</span> Andrea</h1>
+    <p class="meta">December 14, 2026 · Basilica del Santo Niño · Cebu</p>
+    <p class="youare serif">You're here, <b>Tita Cora.</b><br/>Even from Dubai.</p>
+    <span class="live"><span class="dot"></span> Ceremony is live now</span>
+  </section>
+
+  <!-- WATCH -->
+  <section class="card">
+    <div class="player" id="player">
+      <span class="livebadge"><span class="d"></span>LIVE</span>
+      <div class="shimmer"></div>
+      <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+      <span class="watchers" id="watchers">312 watching</span>
+    </div>
+    <div class="watchcap">
+      <div>
+        <div class="t">The processional · walking down the aisle</div>
+        <div class="s">On the couple's own YouTube channel</div>
+      </div>
+      <span class="free">FREE</span>
+    </div>
+  </section>
+
+  <!-- GREETING WALL -->
+  <section class="card">
+    <div class="pad">
+      <p class="eyebrow">Be in the room</p>
+      <h3 class="serif" style="margin:0;font-weight:500;font-size:21px;">Send them a note</h3>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin:8px 0 0;line-height:1.5">
+        It lights up on the <b style="color:var(--ink)">Live Wall at the venue</b> — so they feel you there, mid-celebration.
+      </p>
+      <div class="field">
+        <input id="gInput" type="text" placeholder="Write a blessing or a hello…" maxlength="140"/>
+        <button class="btn" id="gSend">Send</button>
+      </div>
+      <div class="wallnote">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Notes from afar · <span id="wallCount">4</span> already sent
+      </div>
+      <div class="wall" id="wall">
+        <div class="note"><div class="av" style="background:#8a5a6e">L</div><div class="body">
+          <span class="who">Lolo Ben</span> <span class="loc">🇺🇸 San Francisco</span>
+          <div class="msg">Anak, wish I could hug you today. So proud. Ingat kayo lagi.</div></div></div>
+        <div class="note"><div class="av" style="background:#6e7a4a">R</div><div class="body">
+          <span class="who">Ate Riza</span> <span class="loc">🇮🇹 Milan</span>
+          <div class="msg">Grabe ang ganda ng gown! Crying here in Milan. Congrats you two 🤍</div></div></div>
+        <div class="note"><div class="av" style="background:#4a6a7a">J</div><div class="body">
+          <span class="who">Kuya JR</span> <span class="loc">🇸🇦 Riyadh</span>
+          <div class="msg">Nakikinood kami buong barkada dito. Cheers from the desert!</div></div></div>
+        <div class="note"><div class="av" style="background:#7a5a4a">M</div><div class="body">
+          <span class="who">Tita Malou</span> <span class="loc">🇦🇺 Sydney</span>
+          <div class="msg">Present ako sa puso. Mwah from Sydney, mga bagong kasal!</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLESSING -->
+  <section class="card blessing">
+    <div class="pad">
+      <p class="eyebrow">The pabuya · from wherever you are</p>
+      <p class="bless-lead serif">Can't pin the cash on their sabitan? Send your blessing across the ocean instead.</p>
+      <p class="bless-sub">The money dance, made possible from Dubai. Your gift lands straight in Miguel &amp; Andrea's own account — and a little 🎁 appears on their wall so they know you were part of it.</p>
+      <div class="rails">
+        <div class="rail" data-rail="GCash"><div class="ic">📱</div><div class="nm">GCash</div></div>
+        <div class="rail" data-rail="Bank transfer"><div class="ic">🏦</div><div class="nm">Bank</div></div>
+        <div class="rail" data-rail="PayPal"><div class="ic">🌐</div><div class="nm">PayPal</div></div>
+      </div>
+      <div class="trust">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <p><b>Setnayan never touches this.</b> It goes directly to the couple's own account — we only show you where to send it. No commission, no middleman.</p>
+      </div>
+      <div class="bcount">🎁 42 blessings have reached them today</div>
+    </div>
+  </section>
+
+  <!-- KEEPSAKE -->
+  <section class="card keepsake">
+    <div class="art">
+      <svg viewBox="0 0 100 100" fill="none">
+        <rect x="18" y="24" width="46" height="46" rx="4" fill="var(--paper-2)" stroke="var(--wine)" stroke-width="1.3" transform="rotate(-8 41 47)"/>
+        <rect x="34" y="30" width="48" height="48" rx="4" fill="var(--card)" stroke="var(--gold)" stroke-width="1.3" transform="rotate(7 58 54)"/>
+        <circle cx="58" cy="50" r="9" fill="none" stroke="var(--wine)" stroke-width="1.3"/>
+        <path d="M50 66 l7-9 6 6 5-7 8 10z" fill="none" stroke="var(--wine-soft)" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <h3 class="serif">You were part of the day.<br/>Take a piece of it home.</h3>
+    <p>Every guest — in the room or across an ocean — gets their tagged photos and a personal highlight reel. Yours to keep, <i>forever.</i></p>
+    <div class="field">
+      <input id="kEmail" type="email" placeholder="you@email.com"/>
+      <button class="btn" id="kSend">Send mine</button>
+    </div>
+    <p class="cap">Delivered after the couple's review window · via Papic + Photo Delivery</p>
+  </section>
+
+  <!-- CLOSE -->
+  <section class="close">
+    <div class="sig serif">Salamat sa pagsama mo.</div>
+    <div class="sal">— Miguel &amp; Andrea</div>
+    <div class="kept">Kept forever on Setnayan</div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+  const $=s=>document.querySelector(s);
+  const toast=(html)=>{const t=$('#toast');$('#toastMsg').innerHTML=html;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3400);};
+  const check='<svg viewBox="0 0 24 24" fill="none" stroke="#8fe0a8" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>';
+
+  // WATCH — toggle a "live" feel + drift the watcher count
+  let watching=312, playing=false;
+  $('#player').addEventListener('click',()=>{
+    playing=!playing;
+    toast(playing?'▶️  You\'re watching live with them':'⏸  Paused');
+  });
+  setInterval(()=>{watching+=Math.round((Math.random()*6)-2);if(watching<250)watching=250;$('#watchers').textContent=watching+' watching';},2600);
+
+  // GREETING — prepend to the wall
+  const flags=['🇦🇪','🇺🇸','🇨🇦','🇬🇧','🇶🇦','🇸🇬','🇭🇰','🇯🇵'];
+  $('#gSend').addEventListener('click',()=>{
+    const v=$('#gInput').value.trim(); if(!v)return;
+    const n=document.createElement('div'); n.className='note mine';
+    n.innerHTML='<div class="av" style="background:var(--wine)">C</div><div class="body">'+
+      '<span class="who">You · Tita Cora</span> <span class="loc">'+flags[0]+' Dubai</span>'+
+      '<div class="msg"></div></div>';
+    n.querySelector('.msg').textContent=v;
+    $('#wall').prepend(n);
+    $('#wallCount').textContent=parseInt($('#wallCount').textContent)+1;
+    $('#gInput').value='';
+    toast(check+' Your note is glowing on their wall in Cebu');
+  });
+  $('#gInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('#gSend').click();});
+
+  // BLESSING — hand-off confirmation (no money touched)
+  document.querySelectorAll('.rail').forEach(r=>r.addEventListener('click',()=>{
+    const rail=r.dataset.rail;
+    toast('Opening <b>'+rail+'</b> · goes straight to Miguel &amp; Andrea 🎁');
+  }));
+
+  // KEEPSAKE
+  $('#kSend').addEventListener('click',()=>{
+    const v=$('#kEmail').value.trim();
+    if(!v||!v.includes('@')){toast('Add your email so we can send your photos');return;}
+    $('#kSend').textContent='Saved ✓'; $('#kSend').style.background='var(--ok)';
+    toast(check+' Your photos + reel will land here after the wedding');
+  });
+</script>
+</body>
+</html>

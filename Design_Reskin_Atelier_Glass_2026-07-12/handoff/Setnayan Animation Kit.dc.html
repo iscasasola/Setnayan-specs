@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:#F2EFE8; background-image:radial-gradient(42% 52% at 12% 8%, rgba(203,167,102,.22), transparent 62%), radial-gradient(50% 60% at 88% 28%, rgba(94,124,82,.12), transparent 62%), radial-gradient(44% 54% at 50% 95%, rgba(78,108,130,.13), transparent 62%); background-attachment:fixed; color:#1B1A17; font-family:'Hanken Grotesk',sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color:#A9834B; text-decoration:none; } a:hover { color:#8A6B39; }
+  code, .mono { font-family:'Space Mono',monospace; }
+  ::selection { background:#F3ECDF; }
+
+  /* ============ THE ANIMATION LIBRARY (this is the deliverable) ============ */
+  :root{
+    --sn-ease:cubic-bezier(.2,.7,.2,1);
+    --sn-ease-out:cubic-bezier(.16,1,.3,1);
+    --sn-dur-micro:120ms; --sn-dur-control:200ms; --sn-dur-elem:320ms; --sn-dur-enter:640ms;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+  @keyframes sn-rise { from{opacity:0; transform:translateY(22px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes sn-fade { from{opacity:0;} to{opacity:1;} }
+  @keyframes sn-scale-in { from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }
+  @keyframes sn-blur-in { from{opacity:0; filter:blur(10px);} to{opacity:1; filter:blur(0);} }
+  @keyframes sn-marquee { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  @keyframes sn-pulse { 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.4; transform:scale(.7);} }
+  @keyframes sn-grow { from{width:0;} }
+  @keyframes sn-shimmer { from{transform:translateX(-120%);} to{transform:translateX(340%);} }
+  @keyframes sn-spin { to{transform:rotate(360deg);} }
+  @keyframes sn-float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);} }
+  @keyframes sn-ring { 0%{box-shadow:0 0 0 0 rgba(169,131,75,.45);} 100%{box-shadow:0 0 0 14px rgba(169,131,75,0);} }
+  @keyframes sn-count { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes sn-draw { to{stroke-dashoffset:0;} }
+  @keyframes sn-sheen { from{background-position:-200% 0;} to{background-position:200% 0;} }
+  @keyframes sn-bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(4px);} }
+  @keyframes sn-dots { 0%,80%,100%{transform:translateY(0); opacity:.45;} 40%{transform:translateY(-7px); opacity:1;} }
+  @keyframes sn-grow-y { from{transform:scaleY(0);} }
+  @keyframes sn-donut { from{stroke-dashoffset:251.2;} }
+  @keyframes sn-indet { from{left:-35%;} to{left:105%;} }
+
+  /* replay helper: toggling .stage.off removes children anim, .stage.on restarts */
+  .demo-anim { will-change:transform,opacity; }
+</style>
+</helmet>
+
+<!-- ===================== MASTHEAD ===================== -->
+<header style="position:relative; overflow:hidden; background:rgba(255,255,255,.45); backdrop-filter:blur(26px) saturate(1.5); -webkit-backdrop-filter:blur(26px) saturate(1.5); color:#1B1A17; padding:64px 56px 56px; border-bottom:1px solid rgba(255,255,255,.65);">
+  <div style="position:absolute; inset:0; background:radial-gradient(90% 120% at 85% -20%, rgba(201,154,70,.2), transparent 60%); pointer-events:none;"></div>
+  <div style="position:relative; max-width:1080px; margin:0 auto;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:22px;">
+      <span style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:999px; border:1.5px solid #A9834B; color:#1B1A17; font-size:17px; font-weight:800;">S</span>
+      <div style="font-size:18px; font-weight:800; letter-spacing:-.01em;">Setnayan</div>
+      <span style="margin-left:8px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#A9834B; border:1px solid rgba(201,154,70,.4); padding:4px 10px; border-radius:999px;">Animation Kit</span>
+    </div>
+    <h1 style="font-size:52px; line-height:1.0; letter-spacing:-.035em; font-weight:800; margin:0 0 18px; max-width:20ch; animation:sn-rise .7s both var(--sn-ease-out);">Motion that keeps everything alive.</h1>
+    <p style="font-size:17px; line-height:1.6; color:#6E6A62; max-width:64ch; margin:0 0 26px;">The full motion system for Setnayan — tokens, keyframes, entrances, hovers, loaders, live signatures and page transitions. Every block is drop-in CSS with a live preview. Everything honors <span class="mono" style="font-size:13px; color:#1B1A17;">prefers-reduced-motion</span>. Hover the cards, watch the loops, then copy the code.</p>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <button id="replayAll" style="display:inline-flex; align-items:center; gap:8px; background:#A9834B; color:#FFFDF8; border:none; padding:12px 20px; border-radius:10px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s;" style-hover="background:#95713D; transform:translateY(-2px);" onClick="{{ replayAll }}"><i data-lucide="rotate-cw" style="width:16px;height:16px;"></i> Replay all</button>
+      <span style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.5); border:1px solid rgba(255,255,255,.7); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); color:#6E6A62; padding:12px 18px; border-radius:10px; font-size:13px;"><i data-lucide="accessibility" style="width:16px;height:16px;color:#8A6B39;"></i> Reduced-motion safe</span>
+    </div>
+  </div>
+</header>
+
+<div style="max-width:1080px; margin:0 auto; padding:0 56px 120px;">
+
+  <!-- TOKENS -->
+  <section style="padding:44px 0 8px;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="width:6px; height:6px; background:#A9834B; transform:rotate(45deg);"></span><span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8A857B; font-weight:700;">01 · Motion tokens</span></div>
+    <h2 style="font-size:30px; font-weight:800; letter-spacing:-.025em; margin:0 0 8px;">Duration &amp; easing</h2>
+    <p style="font-size:15px; line-height:1.6; color:#6E6A62; max-width:64ch; margin:0 0 22px;">Four durations, two easings. Nothing snaps; everything decelerates. The whole system uses <span class="mono" style="font-size:13px;">--sn-ease</span> for interaction and <span class="mono" style="font-size:13px;">--sn-ease-out</span> for entrances.</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start;">
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:16px 18px; display:flex; align-items:center; gap:14px;"><span class="mono" style="font-size:12px; color:#8A6B39; width:96px; flex:0 0 auto;">120ms</span><div style="flex:1;"><div style="font-size:13px; font-weight:700;">Micro</div><div style="font-size:11.5px; color:#8A857B;">taps, toggles, color</div></div><span style="font-size:11px; color:#A09A8E;" class="mono">ease-out</span></div>
+        <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:16px 18px; display:flex; align-items:center; gap:14px;"><span class="mono" style="font-size:12px; color:#8A6B39; width:96px; flex:0 0 auto;">200ms</span><div style="flex:1;"><div style="font-size:13px; font-weight:700;">Control</div><div style="font-size:11.5px; color:#8A857B;">buttons, inputs, hover</div></div><span style="font-size:11px; color:#A09A8E;" class="mono">--sn-ease</span></div>
+        <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:16px 18px; display:flex; align-items:center; gap:14px;"><span class="mono" style="font-size:12px; color:#8A6B39; width:96px; flex:0 0 auto;">320ms</span><div style="flex:1;"><div style="font-size:13px; font-weight:700;">Element</div><div style="font-size:11.5px; color:#8A857B;">cards, drawers, bars</div></div><span style="font-size:11px; color:#A09A8E;" class="mono">--sn-ease</span></div>
+        <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:16px 18px; display:flex; align-items:center; gap:14px;"><span class="mono" style="font-size:12px; color:#8A6B39; width:96px; flex:0 0 auto;">640ms</span><div style="flex:1;"><div style="font-size:13px; font-weight:700;">Entrance</div><div style="font-size:11.5px; color:#8A857B;">page &amp; modal reveal</div></div><span style="font-size:11px; color:#A09A8E;" class="mono">--sn-ease-out</span></div>
+      </div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:18px; padding:22px 24px; color:#3A382F; overflow:auto;">
+        <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8A6B39; font-weight:700; margin-bottom:14px;">tokens + a11y guard</div>
+        <pre class="mono" style="margin:0; font-size:12.5px; line-height:1.8; white-space:pre; color:#3A382F;">:root{
+  --sn-ease:     cubic-bezier(.2,.7,.2,1);
+  --sn-ease-out: cubic-bezier(.16,1,.3,1);
+  --sn-dur-micro:   120ms;
+  --sn-dur-control: 200ms;
+  --sn-dur-elem:    320ms;
+  --sn-dur-enter:   640ms;
+  <span style="color:#8A857B;">/* glass (macOS vibrancy) */</span>
+  --sn-glass-bg:   rgba(255,255,255,.55);
+  --sn-glass-line: rgba(255,255,255,.75);
+  --sn-glass-blur: blur(18px) saturate(1.4);
+}
+.glass{ background:var(--sn-glass-bg);
+  border:1px solid var(--sn-glass-line);
+  backdrop-filter:var(--sn-glass-blur);
+  -webkit-backdrop-filter:var(--sn-glass-blur); }
+<span style="color:#8A857B;">/* always ship this guard */</span>
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important;
+     transition:none !important; }
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENTRANCES -->
+  <section style="padding:44px 0; border-top:1px solid #EDE8DE;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="width:6px; height:6px; background:#A9834B; transform:rotate(45deg);"></span><span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8A857B; font-weight:700;">02 · Entrances</span></div>
+    <h2 style="font-size:30px; font-weight:800; letter-spacing:-.025em; margin:0 0 8px;">Entrances &amp; reveals</h2>
+    <p style="font-size:15px; line-height:1.6; color:#6E6A62; max-width:64ch; margin:0 0 22px;">Four entrance keyframes. Attach on mount, or gate with an IntersectionObserver for scroll-reveal (the stagger row fires as you scroll it in). Hero copy uses <span class="mono" style="font-size:13px;">sn-rise</span>; media uses <span class="mono" style="font-size:13px;">sn-blur-in</span>.</p>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:18px;">
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px; text-align:center;"><div class="demo-anim" style="animation:sn-rise .64s both var(--sn-ease-out); font-size:15px; font-weight:800;">Rise</div><div class="mono" style="font-size:10.5px; color:#A09A8E; margin-top:8px;">sn-rise</div></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px; text-align:center;"><div class="demo-anim" style="animation:sn-fade .64s both; font-size:15px; font-weight:800;">Fade</div><div class="mono" style="font-size:10.5px; color:#A09A8E; margin-top:8px;">sn-fade</div></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px; text-align:center;"><div class="demo-anim" style="animation:sn-scale-in .5s both var(--sn-ease-out); font-size:15px; font-weight:800;">Scale</div><div class="mono" style="font-size:10.5px; color:#A09A8E; margin-top:8px;">sn-scale-in</div></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px; text-align:center;"><div class="demo-anim" style="animation:sn-blur-in .7s both var(--sn-ease-out); font-size:15px; font-weight:800;">Blur</div><div class="mono" style="font-size:10.5px; color:#A09A8E; margin-top:8px;">sn-blur-in</div></div>
+    </div>
+    <div style="display:flex; gap:12px; margin-bottom:18px;" data-reveal>
+      <div class="demo-anim" style="flex:1; background:rgba(243,236,223,.55); border:1px solid rgba(255,255,255,.65); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-radius:16px; padding:18px; animation:sn-rise .6s both var(--sn-ease-out); animation-play-state:paused;"><i data-lucide="heart" style="width:20px;height:20px;color:#A9834B;"></i><div style="font-size:13px; font-weight:700; margin-top:8px;">Stagger 0ms</div></div>
+      <div class="demo-anim" style="flex:1; background:rgba(243,236,223,.55); border:1px solid rgba(255,255,255,.65); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-radius:16px; padding:18px; animation:sn-rise .6s .08s both var(--sn-ease-out); animation-play-state:paused;"><i data-lucide="calendar-days" style="width:20px;height:20px;color:#A9834B;"></i><div style="font-size:13px; font-weight:700; margin-top:8px;">80ms</div></div>
+      <div class="demo-anim" style="flex:1; background:rgba(243,236,223,.55); border:1px solid rgba(255,255,255,.65); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-radius:16px; padding:18px; animation:sn-rise .6s .16s both var(--sn-ease-out); animation-play-state:paused;"><i data-lucide="users" style="width:20px;height:20px;color:#A9834B;"></i><div style="font-size:13px; font-weight:700; margin-top:8px;">160ms</div></div>
+      <div class="demo-anim" style="flex:1; background:rgba(243,236,223,.55); border:1px solid rgba(255,255,255,.65); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-radius:16px; padding:18px; animation:sn-rise .6s .24s both var(--sn-ease-out); animation-play-state:paused;"><i data-lucide="wallet" style="width:20px;height:20px;color:#A9834B;"></i><div style="font-size:13px; font-weight:700; margin-top:8px;">240ms</div></div>
+    </div>
+    <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:18px; padding:22px 24px; color:#3A382F; overflow:auto;">
+      <pre class="mono" style="margin:0; font-size:12.5px; line-height:1.8; white-space:pre; color:#3A382F;">@keyframes sn-rise{ from{opacity:0; transform:translateY(22px)} to{opacity:1; transform:none} }
+.reveal{ animation:sn-rise var(--sn-dur-enter) both var(--sn-ease-out) }
+<span style="color:#8A857B;">/* stagger children */</span>
+.reveal:nth-child(2){ animation-delay:.08s }  .reveal:nth-child(3){ animation-delay:.16s }
+<span style="color:#8A857B;">/* scroll-gate: start paused, IO flips play-state to running in view */</span>
+[data-reveal] .reveal{ animation-play-state:paused }</pre>
+    </div>
+  </section>
+
+  <!-- HOVERS -->
+  <section style="padding:44px 0; border-top:1px solid #EDE8DE;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="width:6px; height:6px; background:#A9834B; transform:rotate(45deg);"></span><span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8A857B; font-weight:700;">03 · Hover &amp; press</span></div>
+    <h2 style="font-size:30px; font-weight:800; letter-spacing:-.025em; margin:0 0 8px;">Hover &amp; press</h2>
+    <p style="font-size:15px; line-height:1.6; color:#6E6A62; max-width:64ch; margin:0 0 22px;">Transitions, not keyframes. Cards lift + deepen shadow; buttons lift + cast a gold glow; links slide their chevron. Hover each one.</p>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px; box-shadow:0 1px 2px rgba(30,26,18,.06); transition:transform .32s var(--sn-ease), box-shadow .32s;" style-hover="transform:translateY(-4px); box-shadow:0 24px 40px -26px rgba(30,26,18,.42);"><div style="font-size:14px; font-weight:800;">Card lift</div><div style="font-size:12px; color:#8A857B; margin-top:4px;">translateY(-4px) + shadow</div></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px; display:flex; align-items:center; justify-content:center;"><button style="display:inline-flex; align-items:center; gap:8px; background:#A9834B; color:#FFFDF8; border:none; padding:12px 20px; border-radius:10px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; transition:transform .2s var(--sn-ease), box-shadow .2s, background .2s;" style-hover="transform:translateY(-2px); box-shadow:0 14px 26px -12px #A9834B; background:#95713D;">Button glow</button></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px; display:flex; align-items:center; justify-content:center;"><a href="#" style="display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:14px; transition:gap .2s var(--sn-ease);" style-hover="gap:9px;">Chevron slide <i data-lucide="arrow-right" style="width:15px;height:15px;"></i></a></div>
+    </div>
+    <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:18px; padding:22px 24px; color:#3A382F; overflow:auto; margin-top:18px;">
+      <pre class="mono" style="margin:0; font-size:12.5px; line-height:1.8; white-space:pre; color:#3A382F;">.card{ transition:transform var(--sn-dur-elem) var(--sn-ease), box-shadow var(--sn-dur-elem) }
+.card:hover{ transform:translateY(-4px); box-shadow:0 24px 40px -26px rgba(30,26,18,.42) }
+.btn:hover{ transform:translateY(-2px); box-shadow:0 14px 26px -12px #A9834B }
+.link i{ transition:transform var(--sn-dur-control) var(--sn-ease) }  .link:hover i{ transform:translateX(3px) }</pre>
+    </div>
+  </section>
+
+  <!-- LOADERS -->
+  <section style="padding:44px 0; border-top:1px solid #EDE8DE;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="width:6px; height:6px; background:#A9834B; transform:rotate(45deg);"></span><span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8A857B; font-weight:700;">04 · Loaders &amp; progress</span></div>
+    <h2 style="font-size:30px; font-weight:800; letter-spacing:-.025em; margin:0 0 8px;">Loaders &amp; progress</h2>
+    <p style="font-size:15px; line-height:1.6; color:#6E6A62; max-width:64ch; margin:0 0 22px;">Calm spinner, skeleton sheen for loading cards, and the signature progress bar that grows in with a light shimmer sweep — used across dashboard stats, budget and RSVP.</p>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:18px;">
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:24px; display:flex; flex-direction:column; align-items:center; gap:12px;"><i data-lucide="loader" class="demo-anim" style="width:30px;height:30px;color:#A9834B; animation:sn-spin 1s linear infinite;"></i><div class="mono" style="font-size:10.5px; color:#A09A8E;">sn-spin</div></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px;"><div class="demo-anim" style="height:12px; border-radius:99px; background:linear-gradient(90deg,#EDE8DE 25%,#F5F0E6 50%,#EDE8DE 75%); background-size:200% 100%; animation:sn-sheen 1.4s linear infinite; margin-bottom:9px;"></div><div class="demo-anim" style="height:12px; width:70%; border-radius:99px; background:linear-gradient(90deg,#EDE8DE 25%,#F5F0E6 50%,#EDE8DE 75%); background-size:200% 100%; animation:sn-sheen 1.4s linear infinite;"></div><div class="mono" style="font-size:10.5px; color:#A09A8E; margin-top:12px;">skeleton · sn-sheen</div></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px;"><div style="height:9px; border-radius:99px; background:#EDE8DE; overflow:hidden; position:relative;"><div class="demo-anim" style="height:100%; width:78%; background:#A9834B; border-radius:99px; animation:sn-grow 1.6s .1s both var(--sn-ease-out); position:relative; overflow:hidden;"><span style="position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent); width:40%; animation:sn-shimmer 2.6s 1s infinite;"></span></div></div><div class="mono" style="font-size:10.5px; color:#A09A8E; margin-top:12px;">sn-grow + sn-shimmer</div></div>
+    </div>
+    <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:18px; padding:22px 24px; color:#3A382F; overflow:auto;">
+      <pre class="mono" style="margin:0; font-size:12.5px; line-height:1.8; white-space:pre; color:#3A382F;">@keyframes sn-spin{ to{transform:rotate(360deg)} }
+@keyframes sn-sheen{ from{background-position:-200% 0} to{background-position:200% 0} }
+.skeleton{ background:linear-gradient(90deg,#EDE8DE 25%,#F5F0E6 50%,#EDE8DE 75%); background-size:200% 100%; animation:sn-sheen 1.4s linear infinite }
+@keyframes sn-grow{ from{width:0} }   @keyframes sn-shimmer{ from{transform:translateX(-120%)} to{transform:translateX(340%)} }
+.bar > i{ animation:sn-grow var(--sn-dur-enter) var(--sn-ease-out) both }</pre>
+    </div>
+  </section>
+
+  <!-- LOADER GALLERY -->
+  <section style="padding:44px 0; border-top:1px solid rgba(255,255,255,.6);">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="width:6px; height:6px; background:#A9834B; transform:rotate(45deg);"></span><span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8A857B; font-weight:700;">04b · Loader gallery</span></div>
+    <h2 style="font-size:30px; font-weight:800; letter-spacing:-.025em; margin:0 0 8px;">More loaders</h2>
+    <p style="font-size:15px; line-height:1.6; color:#6E6A62; max-width:64ch; margin:0 0 22px;">Pick by context: dots for inline "thinking", ring for uploads with known progress, indeterminate bar for page-level fetches, monogram pulse for a full-screen boot.</p>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:24px; display:flex; flex-direction:column; align-items:center; gap:14px;"><div style="display:flex; gap:6px; height:24px; align-items:center;"><span class="demo-anim" style="width:8px; height:8px; border-radius:99px; background:#A9834B; animation:sn-dots 1.2s infinite;"></span><span class="demo-anim" style="width:8px; height:8px; border-radius:99px; background:#A9834B; animation:sn-dots 1.2s .15s infinite;"></span><span class="demo-anim" style="width:8px; height:8px; border-radius:99px; background:#A9834B; animation:sn-dots 1.2s .3s infinite;"></span></div><div class="mono" style="font-size:10.5px; color:#A09A8E;">dots · sn-dots</div></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:24px; display:flex; flex-direction:column; align-items:center; gap:12px;"><svg width="56" height="56" viewBox="0 0 100 100" style="transform:rotate(-90deg);"><circle cx="50" cy="50" r="40" fill="none" stroke="#EDE8DE" stroke-width="10"></circle><circle class="demo-anim" cx="50" cy="50" r="40" fill="none" stroke="#A9834B" stroke-width="10" stroke-linecap="round" stroke-dasharray="163 251.2" stroke-dashoffset="0" style="animation:sn-donut 1.4s both cubic-bezier(.16,1,.3,1);"></circle></svg><div class="mono" style="font-size:10.5px; color:#A09A8E;">upload ring · 65%</div></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:24px; display:flex; flex-direction:column; justify-content:center; gap:14px;"><div style="position:relative; height:6px; border-radius:99px; background:#EDE8DE; overflow:hidden;"><span class="demo-anim" style="position:absolute; top:0; bottom:0; width:32%; border-radius:99px; background:#A9834B; animation:sn-indet 1.3s infinite cubic-bezier(.4,.2,.6,.8);"></span></div><div class="mono" style="font-size:10.5px; color:#A09A8E; text-align:center;">indeterminate · sn-indet</div></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:24px; display:flex; flex-direction:column; align-items:center; gap:12px;"><span class="demo-anim" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:999px; border:1.5px solid #A9834B; color:#1B1A17; font-size:18px; font-weight:800; animation:sn-ring 1.8s infinite;">S</span><div class="mono" style="font-size:10.5px; color:#A09A8E;">boot · monogram ping</div></div>
+    </div>
+  </section>
+
+  <!-- DATA VIZ -->
+  <section style="padding:44px 0; border-top:1px solid rgba(255,255,255,.6);">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="width:6px; height:6px; background:#A9834B; transform:rotate(45deg);"></span><span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8A857B; font-weight:700;">04c · Data viz</span></div>
+    <h2 style="font-size:30px; font-weight:800; letter-spacing:-.025em; margin:0 0 8px;">Graphs, charts &amp; percentages</h2>
+    <p style="font-size:15px; line-height:1.6; color:#6E6A62; max-width:64ch; margin:0 0 22px;">Data animates into place once, then rests. Bars scale up from the baseline with a stagger; donuts draw their arc; percentages count up with an ease-out; the budget bars keep the shimmer sweep.</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+      <!-- bar graph -->
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:22px;">
+        <div style="font-size:13px; font-weight:800; margin-bottom:4px;">RSVPs per week</div>
+        <div style="font-size:11.5px; color:#8A857B; margin-bottom:16px;">bars scale from baseline · 80ms stagger</div>
+        <div style="display:flex; align-items:flex-end; gap:12px; height:120px;">
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; height:100%; justify-content:flex-end;"><div class="demo-anim" style="height:34%; border-radius:6px 6px 3px 3px; background:#E1DCD1; transform-origin:bottom; animation:sn-grow-y .7s .0s both cubic-bezier(.16,1,.3,1);"></div><span class="mono" style="font-size:9.5px; color:#A09A8E; text-align:center;">W1</span></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; height:100%; justify-content:flex-end;"><div class="demo-anim" style="height:52%; border-radius:6px 6px 3px 3px; background:#E1DCD1; transform-origin:bottom; animation:sn-grow-y .7s .08s both cubic-bezier(.16,1,.3,1);"></div><span class="mono" style="font-size:9.5px; color:#A09A8E; text-align:center;">W2</span></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; height:100%; justify-content:flex-end;"><div class="demo-anim" style="height:44%; border-radius:6px 6px 3px 3px; background:#E1DCD1; transform-origin:bottom; animation:sn-grow-y .7s .16s both cubic-bezier(.16,1,.3,1);"></div><span class="mono" style="font-size:9.5px; color:#A09A8E; text-align:center;">W3</span></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; height:100%; justify-content:flex-end;"><div class="demo-anim" style="height:78%; border-radius:6px 6px 3px 3px; background:#CBA766; transform-origin:bottom; animation:sn-grow-y .7s .24s both cubic-bezier(.16,1,.3,1);"></div><span class="mono" style="font-size:9.5px; color:#A09A8E; text-align:center;">W4</span></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; height:100%; justify-content:flex-end;"><div class="demo-anim" style="height:96%; border-radius:6px 6px 3px 3px; background:#A9834B; transform-origin:bottom; animation:sn-grow-y .7s .32s both cubic-bezier(.16,1,.3,1);"></div><span class="mono" style="font-size:9.5px; color:#A09A8E; text-align:center;">W5</span></div>
+        </div>
+      </div>
+      <!-- donut + percentage -->
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:22px; display:flex; align-items:center; gap:22px;">
+        <div style="position:relative; width:120px; height:120px; flex:0 0 auto;">
+          <svg width="120" height="120" viewBox="0 0 100 100" style="transform:rotate(-90deg);"><circle cx="50" cy="50" r="40" fill="none" stroke="#EDE8DE" stroke-width="11"></circle><circle class="demo-anim" cx="50" cy="50" r="40" fill="none" stroke="#A9834B" stroke-width="11" stroke-linecap="round" stroke-dasharray="196 251.2" stroke-dashoffset="0" style="animation:sn-donut 1.6s both cubic-bezier(.16,1,.3,1);"></circle></svg>
+          <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-size:24px; font-weight:800; letter-spacing:-.02em;">{{ pct }}<span style="font-size:14px; color:#8A857B;">%</span></span><span style="font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#8A857B; font-weight:700;">RSVP rate</span></div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:13px; font-weight:800; margin-bottom:4px;">Donut + count-up</div>
+          <div style="font-size:11.5px; color:#8A857B; margin-bottom:14px;">arc draws via <span class="mono">sn-donut</span> · number eases with rAF cubic-out</div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:12px; color:#3A382F;">
+            <span style="display:flex; align-items:center; gap:8px;"><span style="width:9px; height:9px; border-radius:3px; background:#A9834B;"></span> Going · 166</span>
+            <span style="display:flex; align-items:center; gap:8px;"><span style="width:9px; height:9px; border-radius:3px; background:#EDE8DE;"></span> Waiting · 47</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- segmented progress + budget bars -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:22px;">
+        <div style="font-size:13px; font-weight:800; margin-bottom:14px;">Stacked allocation · one bar, many parts</div>
+        <div style="display:flex; height:14px; border-radius:99px; overflow:hidden; gap:2px;">
+          <div class="demo-anim" style="width:35%; background:#A9834B; animation:sn-grow 1s .0s both cubic-bezier(.16,1,.3,1);"></div>
+          <div class="demo-anim" style="width:30%; background:#CBA766; animation:sn-grow 1s .12s both cubic-bezier(.16,1,.3,1);"></div>
+          <div class="demo-anim" style="width:12%; background:#5E7C52; animation:sn-grow 1s .24s both cubic-bezier(.16,1,.3,1);"></div>
+          <div class="demo-anim" style="width:23%; background:#E1DCD1; animation:sn-grow 1s .36s both cubic-bezier(.16,1,.3,1);"></div>
+        </div>
+        <div style="display:flex; gap:14px; margin-top:12px; font-size:11px; color:#6E6A62; flex-wrap:wrap;">
+          <span style="display:flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:3px; background:#A9834B;"></span> Venue 35%</span>
+          <span style="display:flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:3px; background:#CBA766;"></span> Catering 30%</span>
+          <span style="display:flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:3px; background:#5E7C52;"></span> Photo 12%</span>
+          <span style="display:flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:3px; background:#E1DCD1;"></span> Else 23%</span>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:22px; display:flex; flex-direction:column; gap:13px; justify-content:center;">
+        <div><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;"><span style="font-weight:700;">Venue</span><span class="mono" style="color:#6E6A62;">80%</span></div><div style="height:8px; border-radius:99px; background:#EDE8DE; overflow:hidden;"><div class="demo-anim" style="height:100%; width:80%; background:#1B1A17; border-radius:99px; animation:sn-grow 1.2s .1s both cubic-bezier(.16,1,.3,1);"></div></div></div>
+        <div><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;"><span style="font-weight:700;">Photography</span><span class="mono" style="color:#6E6A62;">87%</span></div><div style="height:8px; border-radius:99px; background:#EDE8DE; overflow:hidden; position:relative;"><div class="demo-anim" style="height:100%; width:87%; background:#A9834B; border-radius:99px; animation:sn-grow 1.2s .25s both cubic-bezier(.16,1,.3,1); position:relative; overflow:hidden;"><span style="position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent); width:40%; animation:sn-shimmer 2.6s 1.4s infinite;"></span></div></div></div>
+        <div><div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;"><span style="font-weight:700;">Florals</span><span class="mono" style="color:#A09A8E;">0%</span></div><div style="height:8px; border-radius:99px; background:#EDE8DE;"></div></div>
+      </div>
+    </div>
+    <!-- accordion -->
+    <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:8px 22px;">
+      <div style="font-size:13px; font-weight:800; padding:14px 0 6px;">Category expand / collapse — click a row</div>
+      <div style="border-bottom:1px solid rgba(30,26,18,.08);">
+        <div onClick="{{ acc0Toggle }}" style="display:flex; align-items:center; gap:12px; padding:14px 0; cursor:pointer;"><span style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:10px; background:#F3ECDF; color:#A9834B;"><i data-lucide="wallet" style="width:16px;height:16px;"></i></span><div style="flex:1;"><div style="font-size:14px; font-weight:700;">Budget · Venue</div><div style="font-size:11.5px; color:#8A857B;">₱120,000 of ₱150,000 settled</div></div><span class="mono" style="font-size:12px; color:#6E6A62;">80%</span><span style="{{ acc0Chev }}"><i data-lucide="chevron-down" style="width:16px;height:16px;"></i></span></div>
+        <div style="{{ acc0Wrap }}"><div style="overflow:hidden; min-height:0;"><div style="padding:0 0 16px 44px; display:flex; flex-direction:column; gap:9px; font-size:12.5px; color:#3A382F;"><div style="display:flex; justify-content:space-between;"><span>Reservation deposit</span><span class="mono" style="color:#5E7C52;">paid · ₱50,000</span></div><div style="display:flex; justify-content:space-between;"><span>50% milestone</span><span class="mono" style="color:#5E7C52;">paid · ₱70,000</span></div><div style="display:flex; justify-content:space-between;"><span>Final balance</span><span class="mono" style="color:#8A6B39;">due Nov 28 · ₱30,000</span></div></div></div></div>
+      </div>
+      <div style="border-bottom:1px solid rgba(30,26,18,.08);">
+        <div onClick="{{ acc1Toggle }}" style="display:flex; align-items:center; gap:12px; padding:14px 0; cursor:pointer;"><span style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:10px; background:#F3ECDF; color:#A9834B;"><i data-lucide="users" style="width:16px;height:16px;"></i></span><div style="flex:1;"><div style="font-size:14px; font-weight:700;">Guests · Family side</div><div style="font-size:11.5px; color:#8A857B;">42 invited · 38 going</div></div><span class="mono" style="font-size:12px; color:#6E6A62;">90%</span><span style="{{ acc1Chev }}"><i data-lucide="chevron-down" style="width:16px;height:16px;"></i></span></div>
+        <div style="{{ acc1Wrap }}"><div style="overflow:hidden; min-height:0;"><div style="padding:0 0 16px 44px; display:flex; flex-direction:column; gap:9px; font-size:12.5px; color:#3A382F;"><div style="display:flex; justify-content:space-between;"><span>Nanay Rosa +1</span><span style="color:#5E7C52; font-weight:700;">Going</span></div><div style="display:flex; justify-content:space-between;"><span>Tita Let</span><span style="color:#8A857B;">No reply</span></div><div style="display:flex; justify-content:space-between;"><span>Lola Pacita</span><span style="color:#5E7C52; font-weight:700;">Going</span></div></div></div></div>
+      </div>
+      <div>
+        <div onClick="{{ acc2Toggle }}" style="display:flex; align-items:center; gap:12px; padding:14px 0; cursor:pointer;"><span style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:10px; background:#F3ECDF; color:#A9834B;"><i data-lucide="list-checks" style="width:16px;height:16px;"></i></span><div style="flex:1;"><div style="font-size:14px; font-weight:700;">Checklist · This month</div><div style="font-size:11.5px; color:#8A857B;">3 of 5 done</div></div><span class="mono" style="font-size:12px; color:#6E6A62;">60%</span><span style="{{ acc2Chev }}"><i data-lucide="chevron-down" style="width:16px;height:16px;"></i></span></div>
+        <div style="{{ acc2Wrap }}"><div style="overflow:hidden; min-height:0;"><div style="padding:0 0 16px 44px; display:flex; flex-direction:column; gap:9px; font-size:12.5px; color:#3A382F;"><div style="display:flex; align-items:center; gap:8px;"><i data-lucide="check" style="width:14px;height:14px;color:#5E7C52;"></i> Lock the caterer</div><div style="display:flex; align-items:center; gap:8px;"><i data-lucide="check" style="width:14px;height:14px;color:#5E7C52;"></i> Send save-the-dates</div><div style="display:flex; align-items:center; gap:8px;"><span style="width:14px; height:14px; border-radius:4px; border:1.5px solid #D9D2C4;"></span> Final headcount</div></div></div></div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); border-radius:16px; padding:20px 22px; color:#3A382F; overflow:auto; margin-top:16px;">
+      <pre class="mono" style="margin:0; font-size:12px; line-height:1.8; white-space:pre;">@keyframes sn-grow-y{ from{transform:scaleY(0)} }      <span style="color:#8A857B;">/* bars: transform-origin:bottom */</span>
+@keyframes sn-donut{ from{stroke-dashoffset:251.2} }   <span style="color:#8A857B;">/* r=40 circle, dasharray = pct*2.512 */</span>
+@keyframes sn-dots{ 0%,80%,100%{transform:none; opacity:.45} 40%{transform:translateY(-7px); opacity:1} }
+@keyframes sn-indet{ from{left:-35%} to{left:105%} }
+<span style="color:#8A857B;">/* expand/collapse without measuring heights: */</span>
+.acc{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .32s var(--sn-ease) }
+.acc.open{ grid-template-rows:1fr }   .acc > div{ overflow:hidden; min-height:0 }</pre>
+    </div>
+  </section>
+
+  <!-- LIVE SIGNATURES -->
+  <section style="padding:44px 0; border-top:1px solid #EDE8DE;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="width:6px; height:6px; background:#A9834B; transform:rotate(45deg);"></span><span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8A857B; font-weight:700;">05 · Live signatures</span></div>
+    <h2 style="font-size:30px; font-weight:800; letter-spacing:-.025em; margin:0 0 8px;">Live signatures</h2>
+    <p style="font-size:15px; line-height:1.6; color:#6E6A62; max-width:64ch; margin:0 0 22px;">The motifs that make Setnayan feel alive: the pulsing live/watch dot, count-up on stats, the notification ring ping, and the "kept forever" marquee. Reserve the pulse strictly for genuinely live states.</p>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:18px;">
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px; color:#1B1A17; display:flex; align-items:center; gap:10px;"><span class="demo-anim" style="width:9px; height:9px; border-radius:99px; background:#E4553F; animation:sn-pulse 1.4s infinite;"></span><span style="font-size:13px; font-weight:700;">LIVE</span><span class="mono" style="margin-left:auto; font-size:10.5px; color:#8A857B;">sn-pulse</span></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px; display:flex; align-items:center; gap:14px;"><span style="position:relative; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px;"><i data-lucide="bell" style="width:19px;height:19px;color:#3A382F;"></i><span class="demo-anim" style="position:absolute; inset:0; border-radius:99px; animation:sn-ring 1.8s infinite;"></span></span><span style="font-size:13px; font-weight:700;">Ring ping</span></div>
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:16px; padding:20px;"><div style="font-size:12px; color:#6E6A62;">Guests confirmed</div><div style="display:flex; align-items:baseline; gap:6px; margin-top:4px;"><span id="countNum" class="demo-anim" style="font-size:28px; font-weight:800; letter-spacing:-.02em; animation:sn-count .5s both var(--sn-ease-out);">166</span><span style="font-size:12px; color:#8A857B;">/ 213</span></div><div class="mono" style="font-size:10.5px; color:#A09A8E; margin-top:8px;">count-up on reveal</div></div>
+    </div>
+    <div style="overflow:hidden; background:rgba(243,236,223,.5); border:1px solid rgba(255,255,255,.65); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); padding:16px 0; border-radius:16px;">
+      <div class="demo-anim" style="display:flex; gap:30px; white-space:nowrap; width:max-content; animation:sn-marquee 24s linear infinite; font-size:15px; color:#8A857B;">
+        <span>Joy, <span style="color:#8A6B39; font-weight:700;">kept forever.</span> &nbsp; Vows, <span style="color:#8A6B39; font-weight:700;">kept forever.</span> &nbsp; The first dance, <span style="color:#8A6B39; font-weight:700;">kept forever.</span> &nbsp; Family, <span style="color:#8A6B39; font-weight:700;">kept forever.</span> &nbsp;</span>
+        <span>Joy, <span style="color:#8A6B39; font-weight:700;">kept forever.</span> &nbsp; Vows, <span style="color:#8A6B39; font-weight:700;">kept forever.</span> &nbsp; The first dance, <span style="color:#8A6B39; font-weight:700;">kept forever.</span> &nbsp; Family, <span style="color:#8A6B39; font-weight:700;">kept forever.</span> &nbsp;</span>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:18px; padding:22px 24px; color:#3A382F; overflow:auto; margin-top:18px;">
+      <pre class="mono" style="margin:0; font-size:12.5px; line-height:1.8; white-space:pre; color:#3A382F;">@keyframes sn-pulse{ 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.4; transform:scale(.7)} }
+@keyframes sn-ring{ 0%{box-shadow:0 0 0 0 rgba(169,131,75,.45)} 100%{box-shadow:0 0 0 14px rgba(169,131,75,0)} }
+@keyframes sn-marquee{ from{transform:translateX(0)} to{transform:translateX(-50%)} }  <span style="color:#8A857B;">/* duplicate the run once for a seamless loop */</span></pre>
+    </div>
+  </section>
+
+  <!-- PAGE / OVERLAY TRANSITIONS -->
+  <section style="padding:44px 0; border-top:1px solid #EDE8DE;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="width:6px; height:6px; background:#A9834B; transform:rotate(45deg);"></span><span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8A857B; font-weight:700;">06 · Transitions</span></div>
+    <h2 style="font-size:30px; font-weight:800; letter-spacing:-.025em; margin:0 0 8px;">Overlays &amp; page transitions</h2>
+    <p style="font-size:15px; line-height:1.6; color:#6E6A62; max-width:64ch; margin:0 0 22px;">Modals scale up from 94% over a fading ink scrim; toasts slide in from the bottom; route changes cross-fade the main content. Click to preview the modal.</p>
+    <div style="display:grid; grid-template-columns:1.2fr .8fr; gap:22px; align-items:start;">
+      <div style="position:relative; border-radius:18px; overflow:hidden; background:linear-gradient(135deg,#E9E2D2,#DCD4C2); min-height:280px; display:flex; align-items:center; justify-content:center; padding:24px;">
+        <div id="scrim" style="position:absolute; inset:0; background:rgba(27,26,23,.12); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); opacity:1; transition:opacity .3s;"></div>
+        <div id="modalDemo" class="demo-anim" style="position:relative; width:100%; max-width:340px; background:rgba(255,255,255,.72); border:1px solid rgba(255,255,255,.85); backdrop-filter:blur(26px) saturate(1.6); -webkit-backdrop-filter:blur(26px) saturate(1.6); border-radius:18px; padding:22px; box-shadow:0 50px 90px -40px rgba(0,0,0,.6); animation:sn-scale-in .4s both var(--sn-ease-out);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;"><span style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:11px; background:#F3ECDF; color:#A9834B;"><i data-lucide="badge-check" style="width:20px;height:20px;"></i></span><i data-lucide="x" style="width:17px;height:17px;color:#A09A8E;"></i></div>
+          <div style="font-size:17px; font-weight:800; margin:8px 0 4px;">Book Studio Sereno?</div>
+          <p style="font-size:13px; line-height:1.5; color:#6E6A62; margin:0 0 16px;">0% commission, plus a free engagement shoot — a Setnayan exclusive.</p>
+          <button style="width:100%; background:#A9834B; color:#FFFDF8; border:none; padding:11px; border-radius:10px; font-family:inherit; font-weight:700; font-size:13.5px; cursor:pointer;">Confirm booking</button>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <button style="display:inline-flex; align-items:center; justify-content:center; gap:8px; background:#FFFFFF; color:#1B1A17; border:1.5px solid #E1DCD1; padding:12px 18px; border-radius:10px; font-family:inherit; font-weight:700; font-size:13.5px; cursor:pointer;" onClick="{{ replayModal }}"><i data-lucide="play" style="width:15px;height:15px;"></i> Replay modal open</button>
+        <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:18px; padding:20px; color:#3A382F; overflow:auto;">
+          <pre class="mono" style="margin:0; font-size:12px; line-height:1.8; white-space:pre;">@keyframes sn-scale-in{
+  from{opacity:0; transform:scale(.94)}
+  to{opacity:1; transform:none}
+}
+.modal{ animation:sn-scale-in
+  var(--sn-dur-enter) var(--sn-ease-out) }
+.scrim{ animation:sn-fade .3s both }
+<span style="color:#8A857B;">/* route change */</span>
+main{ animation:sn-fade .32s both }</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USAGE / DO-DONT -->
+  <section style="padding:44px 0; border-top:1px solid #EDE8DE;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><span style="width:6px; height:6px; background:#A9834B; transform:rotate(45deg);"></span><span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#8A857B; font-weight:700;">07 · Usage</span></div>
+    <h2 style="font-size:30px; font-weight:800; letter-spacing:-.025em; margin:0 0 22px;">When to move, when to hold still</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div style="background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.75); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:0 8px 32px rgba(30,26,18,.07); border-radius:18px; padding:22px;">
+        <div style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:800; color:#5E7C52; margin-bottom:16px;"><i data-lucide="check-circle-2" style="width:17px;height:17px;"></i> Do</div>
+        <div style="display:flex; flex-direction:column; gap:11px; font-size:13.5px; color:#3A382F;">
+          <div style="display:flex; gap:9px;"><i data-lucide="check" style="width:15px;height:15px;color:#5E7C52; flex:0 0 auto; margin-top:2px;"></i> Animate on entry once, then rest</div>
+          <div style="display:flex; gap:9px;"><i data-lucide="check" style="width:15px;height:15px;color:#5E7C52; flex:0 0 auto; margin-top:2px;"></i> Grow data into place on first paint / scroll-in</div>
+          <div style="display:flex; gap:9px;"><i data-lucide="check" style="width:15px;height:15px;color:#5E7C52; flex:0 0 auto; margin-top:2px;"></i> Loop motion only for genuinely live states</div>
+          <div style="display:flex; gap:9px;"><i data-lucide="check" style="width:15px;height:15px;color:#5E7C52; flex:0 0 auto; margin-top:2px;"></i> Prefer <span class="mono" style="font-size:12px;">transform</span> &amp; <span class="mono" style="font-size:12px;">opacity</span> (GPU-cheap)</div>
+          <div style="display:flex; gap:9px;"><i data-lucide="check" style="width:15px;height:15px;color:#5E7C52; flex:0 0 auto; margin-top:2px;"></i> Always ship the reduced-motion guard</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.35); border:1px dashed rgba(120,110,95,.4); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-radius:18px; padding:22px;">
+        <div style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:800; color:#A6483B; margin-bottom:16px;"><i data-lucide="x-circle" style="width:17px;height:17px;"></i> Don't</div>
+        <div style="display:flex; flex-direction:column; gap:11px; font-size:13.5px; color:#6E6A62;">
+          <div style="display:flex; gap:9px;"><i data-lucide="x" style="width:15px;height:15px;color:#A6483B; flex:0 0 auto; margin-top:2px;"></i> Loop attention-seeking motion on idle content</div>
+          <div style="display:flex; gap:9px;"><i data-lucide="x" style="width:15px;height:15px;color:#A6483B; flex:0 0 auto; margin-top:2px;"></i> Animate <span class="mono" style="font-size:12px;">width/top/left</span> (layout thrash)</div>
+          <div style="display:flex; gap:9px;"><i data-lucide="x" style="width:15px;height:15px;color:#A6483B; flex:0 0 auto; margin-top:2px;"></i> Durations over 700ms on interaction feedback</div>
+          <div style="display:flex; gap:9px;"><i data-lucide="x" style="width:15px;height:15px;color:#A6483B; flex:0 0 auto; margin-top:2px;"></i> Bounce/overshoot easings — keep it calm</div>
+          <div style="display:flex; gap:9px;"><i data-lucide="x" style="width:15px;height:15px;color:#A6483B; flex:0 0 auto; margin-top:2px;"></i> Pulse anything that isn't actually live</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:20px; background:rgba(243,236,223,.55); border:1px solid rgba(255,255,255,.7); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border-radius:18px; padding:28px 30px; position:relative; overflow:hidden;">
+      <div style="position:absolute; inset:0; background:radial-gradient(70% 120% at 90% -20%, rgba(201,154,70,.16), transparent 60%);"></div>
+      <div style="position:relative; font-size:18px; font-weight:800; letter-spacing:-.015em; color:#1B1A17; max-width:54ch;">Alive, never restless. Motion earns its place by clarifying — an entrance, a change, a live state — then gets out of the way.</div>
+      <div style="position:relative; font-size:14px; color:#8A6B39; font-style:italic; margin-top:8px;">Set na ’yan.</div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { open: 0, pct: 0 };
+  componentDidMount() {
+    // percentage count-up
+    const t0 = performance.now(), dur = 1400, target = 78;
+    const ease = x => 1 - Math.pow(1 - x, 3);
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / dur);
+      this.setState({ pct: Math.round(ease(p) * target) });
+      if (p < 1) this._raf = requestAnimationFrame(tick);
+    };
+    this._raf = requestAnimationFrame(tick);
+    const draw = () => { try { window.lucide && window.lucide.createIcons(); } catch (e) {} };
+    draw();
+    let n = 0;
+    this._t = setInterval(() => { n++; draw(); if (window.lucide && n > 3) clearInterval(this._t); if (n > 50) clearInterval(this._t); }, 140);
+    // scroll-reveal for [data-reveal]
+    this._io = new IntersectionObserver((ents) => {
+      ents.forEach(e => { if (e.isIntersecting) { e.target.style.animationPlayState = 'running'; } });
+    }, { threshold: .2 });
+    setTimeout(() => { document.querySelectorAll('[data-reveal]').forEach(el => this._io.observe(el)); }, 300);
+  }
+  componentWillUnmount() { if (this._t) clearInterval(this._t); if (this._io) this._io.disconnect(); }
+  renderVals() {
+    const mk = (i) => {
+      const open = this.state.open === i;
+      return {
+        wrap: { display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows .32s cubic-bezier(.2,.7,.2,1)' },
+        chev: { display: 'inline-flex', width: '16px', height: '16px', color: open ? '#8A6B39' : '#A09A8E', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .32s cubic-bezier(.2,.7,.2,1), color .2s' },
+        toggle: () => this.setState({ open: open ? -1 : i })
+      };
+    };
+    const a0 = mk(0), a1 = mk(1), a2 = mk(2);
+    return {
+      pct: this.state.pct,
+      acc0Wrap: a0.wrap, acc0Chev: a0.chev, acc0Toggle: a0.toggle,
+      acc1Wrap: a1.wrap, acc1Chev: a1.chev, acc1Toggle: a1.toggle,
+      acc2Wrap: a2.wrap, acc2Chev: a2.chev, acc2Toggle: a2.toggle,
+      replayAll: () => {
+        document.querySelectorAll('.demo-anim').forEach(el => {
+          const a = el.style.animation; el.style.animation = 'none';
+          // force reflow
+          void el.offsetWidth;
+          el.style.animation = a || '';
+        });
+      },
+      replayModal: () => {
+        const m = document.getElementById('modalDemo');
+        const s = document.getElementById('scrim');
+        if (!m) return;
+        if (s) { s.style.opacity = '0'; requestAnimationFrame(() => { s.style.opacity = '1'; }); }
+        m.style.animation = 'none';
+        void m.offsetWidth;
+        m.style.animation = 'sn-scale-in .4s both var(--sn-ease-out)';
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

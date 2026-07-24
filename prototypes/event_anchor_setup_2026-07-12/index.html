@@ -1,0 +1,521 @@
+<meta charset="utf-8">
+<title>Setnayan — Event Anchors Prototype</title>
+<style>
+  :root{
+    --paper:#F6F2EA; --card:#FFFDF8; --ink:#1F1C17; --ink-2:rgba(31,28,23,.62); --ink-3:rgba(31,28,23,.42);
+    --gold:#A9834B; --gold-deep:#8C6A38; --gold-wash:rgba(169,131,75,.10); --gold-line:rgba(169,131,75,.35);
+    --line:rgba(31,28,23,.13); --ok:#5A7351; --ok-wash:rgba(90,115,81,.10);
+    --warn:#A3641F; --warn-wash:rgba(163,100,31,.10);
+    --shadow:0 1px 2px rgba(60,48,30,.06),0 8px 24px rgba(60,48,30,.07);
+    --sans:'Hanken Grotesk',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:'Space Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#161410; --card:#201C15; --ink:#EAE3D6; --ink-2:rgba(234,227,214,.64); --ink-3:rgba(234,227,214,.42);
+      --gold:#C39D64; --gold-deep:#D4B27E; --gold-wash:rgba(195,157,100,.12); --gold-line:rgba(195,157,100,.4);
+      --line:rgba(234,227,214,.14); --ok:#8FAE85; --ok-wash:rgba(143,174,133,.12);
+      --warn:#D19A55; --warn-wash:rgba(209,154,85,.12);
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#F6F2EA; --card:#FFFDF8; --ink:#1F1C17; --ink-2:rgba(31,28,23,.62); --ink-3:rgba(31,28,23,.42);
+    --gold:#A9834B; --gold-deep:#8C6A38; --gold-wash:rgba(169,131,75,.10); --gold-line:rgba(169,131,75,.35);
+    --line:rgba(31,28,23,.13); --ok:#5A7351; --ok-wash:rgba(90,115,81,.10);
+    --warn:#A3641F; --warn-wash:rgba(163,100,31,.10);
+    --shadow:0 1px 2px rgba(60,48,30,.06),0 8px 24px rgba(60,48,30,.07);
+  }
+  :root[data-theme="dark"]{
+    --paper:#161410; --card:#201C15; --ink:#EAE3D6; --ink-2:rgba(234,227,214,.64); --ink-3:rgba(234,227,214,.42);
+    --gold:#C39D64; --gold-deep:#D4B27E; --gold-wash:rgba(195,157,100,.12); --gold-line:rgba(195,157,100,.4);
+    --line:rgba(234,227,214,.14); --ok:#8FAE85; --ok-wash:rgba(143,174,133,.12);
+    --warn:#D19A55; --warn-wash:rgba(209,154,85,.12);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px 96px}
+  header{padding:34px 0 0}
+  .brand{font-family:var(--mono);font-size:11px;letter-spacing:.32em;color:var(--gold);text-transform:uppercase}
+  h1{font-size:clamp(24px,4vw,31px);font-weight:700;letter-spacing:-.015em;margin:8px 0 4px;text-wrap:balance}
+  .sub{color:var(--ink-2);max-width:60ch;margin:0 0 22px}
+  nav{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:26px;overflow-x:auto}
+  nav button{appearance:none;background:none;border:none;border-bottom:2px solid transparent;padding:10px 14px;font:600 14px var(--sans);color:var(--ink-2);cursor:pointer;white-space:nowrap}
+  nav button.on{color:var(--ink);border-bottom-color:var(--gold)}
+  nav button:focus-visible,.btn:focus-visible,.chip:focus-visible,.tcard:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  h2{font-size:19px;font-weight:700;margin:26px 0 4px}
+  .hint{color:var(--ink-2);font-size:14px;margin:0 0 14px;max-width:64ch}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:14px}
+  .rowflex{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .name{font-weight:700;font-size:16px}
+  .role{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 10px;border-radius:999px;border:1px solid var(--gold-line);color:var(--gold-deep);background:var(--gold-wash)}
+  .pill.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-wash)}
+  .pill.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-wash)}
+  .derived{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px}
+  .derived b{color:var(--gold-deep);font-weight:700}
+  .stages{display:flex;gap:0;margin:12px 0 4px;border:1px solid var(--line);border-radius:9px;overflow:hidden;width:max-content;max-width:100%}
+  .stages button{appearance:none;border:none;background:none;padding:7px 16px;font:600 13px var(--sans);color:var(--ink-2);cursor:pointer;border-right:1px solid var(--line)}
+  .stages button:last-child{border-right:none}
+  .stages button.on{background:var(--gold-wash);color:var(--gold-deep)}
+  .timeline{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);margin-top:10px;display:grid;gap:5px}
+  .timeline span{color:var(--ink)}
+  .btn{appearance:none;border:1px solid var(--gold);background:var(--gold);color:#fff;font:600 14px var(--sans);padding:9px 18px;border-radius:9px;cursor:pointer}
+  :root[data-theme="dark"] .btn, .btn{color:#fff}
+  @media (prefers-color-scheme: dark){ .btn{color:#171410} }
+  :root[data-theme="dark"] .btn{color:#171410}
+  :root[data-theme="light"] .btn{color:#fff}
+  .btn.ghost{background:none;color:var(--gold-deep)}
+  .btn.quiet{background:none;border-color:var(--line);color:var(--ink-2);font-weight:500}
+  .field{display:grid;gap:4px;margin:10px 0}
+  .field label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+  .field input,.field select{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font:500 14.5px var(--sans);color:var(--ink);max-width:280px}
+  .fence{border-left:3px solid var(--line);padding:10px 14px;margin-top:12px;font-size:14px;border-radius:0 8px 8px 0}
+  .fence.ok{border-left-color:var(--ok);background:var(--ok-wash)}
+  .fence.warn{border-left-color:var(--warn);background:var(--warn-wash)}
+  .fence .v{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px}
+  .fence.ok .v{color:var(--ok)} .fence.warn .v{color:var(--warn)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px}
+  .tcard{appearance:none;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 13px;cursor:pointer;font-family:var(--sans);color:var(--ink)}
+  .tcard:hover{border-color:var(--gold-line)}
+  .tcard.on{border-color:var(--gold);background:var(--gold-wash)}
+  .tcard .tn{font-weight:700;font-size:14.5px;display:block}
+  .tcard .ta{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);display:block;margin-top:3px}
+  .stepno{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 6px}
+  .q{font-size:17px;font-weight:700;margin:0 0 12px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{appearance:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 15px;font:600 13.5px var(--sans);color:var(--ink);cursor:pointer}
+  .chip:hover{border-color:var(--gold-line)}
+  .chip.on{border-color:var(--gold);background:var(--gold-wash);color:var(--gold-deep)}
+  .toggle{display:flex;align-items:center;gap:10px;margin-top:6px;cursor:pointer;user-select:none}
+  .tk{width:40px;height:22px;border-radius:999px;background:var(--line);position:relative;transition:background .15s}
+  .tk::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--card);transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .toggle.on .tk{background:var(--gold)}
+  .toggle.on .tk::after{left:20px}
+  .note{font-size:13.5px;color:var(--ink-2)}
+  .mono{font-family:var(--mono)}
+  .yearrow{display:grid;grid-template-columns:96px 1fr auto;gap:14px;align-items:baseline;padding:12px 4px;border-bottom:1px solid var(--line)}
+  .yearrow:last-child{border-bottom:none}
+  .yearrow .d{font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap}
+  .yearrow.milestone .d{color:var(--gold-deep);font-weight:700}
+  .yearrow .t{font-size:14.5px}
+  .yearrow.quiet .t{color:var(--ink-2)}
+  .season{background:var(--gold-wash);border:1px dashed var(--gold-line);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:13.5px;color:var(--ink-2)}
+  .season b{color:var(--gold-deep)}
+  dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);box-shadow:var(--shadow);padding:24px 26px;max-width:480px;width:calc(100vw - 48px)}
+  dialog::backdrop{background:rgba(23,20,16,.5)}
+  .prefill{display:grid;gap:7px;margin:14px 0;font-family:var(--mono);font-size:12.5px}
+  .prefill div{display:flex;justify-content:space-between;gap:14px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+  .prefill span:first-child{color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;font-size:10.5px}
+  .foot{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-3);line-height:1.7}
+  .hiddn{display:none}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">Setnayan · Prototype</div>
+    <h1>Anchors &amp; the three-question event</h1>
+    <p class="sub">How the People layer is set up, and how every event is created from at most three questions. Everything in <span class="mono" style="color:var(--gold-deep)">mono</span> is computed — never typed by the user.</p>
+    <nav>
+      <button class="on" data-tab="people">1 · People</button>
+      <button data-tab="create">2 · Create an event</button>
+      <button data-tab="year">3 · Your year</button>
+      <button data-tab="auto">4 · The engine</button>
+    </nav>
+  </header>
+
+  <!-- ============ PEOPLE ============ -->
+  <section id="tab-people">
+    <h2>The anchor store</h2>
+    <p class="hint">One small list powers every reminder and derivation. Three kinds of records — you, the two of you, and the people you care for.</p>
+
+    <div class="card">
+      <div class="rowflex">
+        <div><span class="role">You</span><div class="name">Carlo Ramos</div></div>
+        <span class="pill">self</span>
+      </div>
+      <div class="derived">birthday <b>Aug 30 1996</b> · next <b>Aug 30 · turns 30</b> · normal year — quiet reminder only</div>
+    </div>
+
+    <div class="card">
+      <div class="rowflex">
+        <div><span class="role">Us — the union anchor</span><div class="name">Carlo &amp; Bianca</div></div>
+        <span class="pill" id="stagepill">married</span>
+      </div>
+      <div class="stages" id="stages">
+        <button data-s="dating">Dating</button>
+        <button data-s="engaged">Engaged</button>
+        <button class="on" data-s="married">Married</button>
+      </div>
+      <div class="timeline" id="uniontl"></div>
+      <div class="derived" id="unionderived"></div>
+      <p class="note" style="margin:10px 0 0">Captured once, mostly by the wedding love story — never a separate form.</p>
+    </div>
+
+    <div class="card">
+      <div class="rowflex">
+        <div><span class="role">Dependent · guardian-held</span><div class="name">Amara Ramos</div></div>
+        <span class="pill ok">under 18</span>
+      </div>
+      <div class="derived">born <b>Sep 21 2019</b> · next milestone <b>7th — Sep 21 2026</b> (lucky 7) · then 18th debut <b>2037</b> · record hands over at 18</div>
+    </div>
+
+    <div class="card">
+      <div class="rowflex">
+        <div><span class="role">Dependent · elder</span><div class="name">Ernesto Ramos <span class="note">(Carlo's father)</span></div></div>
+        <span class="pill ok">over 50</span>
+      </div>
+      <div class="derived">born <b>Mar 3 1967</b> · next milestone <b>60th — Mar 3 2027</b></div>
+    </div>
+
+    <div class="card">
+      <div class="rowflex"><div class="name">+ Add a person</div><span class="pill">age fence · &lt;18 or &gt;50 only</span></div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap">
+        <div class="field"><label>Name</label><input id="fname" placeholder="Tita Rosa" /></div>
+        <div class="field"><label>Birthdate</label><input id="fdob" type="date" /></div>
+        <div class="field"><label>Sex <span style="letter-spacing:0;text-transform:none">(optional — picks 18 or 21)</span></label>
+          <select id="fsex"><option value="">Prefer not to say</option><option>Female</option><option>Male</option></select></div>
+      </div>
+      <div id="fenceout"></div>
+    </div>
+  </section>
+
+  <!-- ============ CREATE ============ -->
+  <section id="tab-create" class="hiddn">
+    <h2>Three questions, everything else derived</h2>
+    <p class="hint">Pick a type → one anchor question → yearly toggle. Tap any type below; the panel underneath is live.</p>
+
+    <p class="stepno">Step 1 — What are you planning?</p>
+    <div class="grid" id="typegrid"></div>
+
+    <div id="step2wrap" class="hiddn">
+      <div class="card" style="margin-top:18px">
+        <p class="stepno">Step 2 — <span id="s2label">the one anchor question</span></p>
+        <div id="s2body"></div>
+      </div>
+    </div>
+
+    <div id="step3wrap" class="hiddn">
+      <div class="card">
+        <p class="stepno">Step 3 — pacing</p>
+        <div class="toggle" id="recurs" role="switch" aria-checked="false" tabindex="0"><div class="tk"></div><span id="recurslabel">Is this a yearly thing?</span></div>
+        <p class="note" id="recursnote" style="margin-top:8px"></p>
+        <div style="margin-top:16px"><button class="btn" id="createbtn">Create event</button></div>
+      </div>
+    </div>
+
+    <div id="donewrap" class="hiddn">
+      <div class="card" style="border-color:var(--ok)">
+        <span class="pill ok">created</span>
+        <div class="name" style="margin-top:8px" id="donetitle"></div>
+        <div class="derived" id="donederived"></div>
+        <p class="note" style="margin-top:10px">Added to your year. The brief continues inside the event — nothing else stands at the gate.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ YEAR ============ -->
+  <section id="tab-year" class="hiddn">
+    <h2>Your year</h2>
+    <p class="hint">Every derived moment, always current — pure date math, no rows created. Only <span class="mono" style="color:var(--gold-deep)">milestones</span> nudge. A tap is the go-signal.</p>
+
+    <div class="card" style="padding:6px 20px">
+      <div class="yearrow quiet"><span class="d">AUG 30</span><span class="t">Carlo turns 30 — normal year</span><button class="chip" onclick="alert('Light flow: a Simple Event with the date pre-set. One tap, done.')">Set na ’yan?</button></div>
+      <div class="yearrow milestone"><span class="d">SEP 21</span><span class="t"><b>Amara turns 7</b> — lucky 7 · grand parties book venues 3–4 months out</span><button class="btn ghost" data-go="amara7">Start planning</button></div>
+      <div class="yearrow quiet"><span class="d">DEC 25</span><span class="t">Christmas — family gathering</span><span class="note mono" style="font-size:11px">holiday</span></div>
+      <div class="yearrow milestone"><span class="d">JAN 17</span><span class="t"><b>Your 1st wedding anniversary</b></span><button class="btn ghost" data-go="anniv1">Start planning</button></div>
+      <div class="yearrow quiet"><span class="d">FEB 14</span><span class="t">Valentine’s</span><span class="note mono" style="font-size:11px">holiday</span></div>
+      <div class="yearrow milestone"><span class="d">MAR 3</span><span class="t"><b>Ernesto turns 60</b></span><button class="btn ghost" data-go="ernesto60">Start planning</button></div>
+    </div>
+
+    <div class="season">☀ <b>Your trip season is coming up</b> — last year you went to Baguio, May 3–7, the six of you. <button class="chip" data-go="trip">Plan this year’s</button></div>
+    <div class="season">🎄 <b>Ber months</b> — Christmas-party window opens September. Company party? Family reunion?</div>
+
+    <p class="note">Ordinary birthdays and anniversaries stay quiet lines. The app is busy <i>showing</i> the whole year — and selective about <i>asking</i>.</p>
+  </section>
+
+  <!-- ============ ENGINE ============ -->
+  <section id="tab-auto" class="hiddn">
+    <h2>What runs by itself</h2>
+    <p class="hint">Store an anchor once and the engine generates the future — every year, forever, with nothing typed again. Three things are automatic: the <b>moment</b> appears, the <b>reminder</b> fires at the right lead time, the <b>draft</b> is pre-filled. One thing never is: <b>creating the event</b> — that's always your tap.</p>
+
+    <div class="chips" style="margin-bottom:14px" id="anchorpick">
+      <button class="chip on" data-a="amara">Amara · birthdate</button>
+      <button class="chip" data-a="union">Carlo &amp; Bianca · union</button>
+      <button class="chip" data-a="ernesto">Ernesto · birthdate</button>
+      <button class="chip" data-a="trip">Family trip · recurring</button>
+    </div>
+
+    <div class="card" style="padding:6px 20px">
+      <div id="enginerows"></div>
+    </div>
+
+    <div class="rowflex" style="margin:4px 0 10px">
+      <p class="note" style="margin:0">Viewing from <b class="mono" id="engineyear">Jul 2026</b> — press fast-forward and watch moments keep arriving with zero effort.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn ghost" id="ffbtn">Fast-forward 1 year ⏩</button>
+        <button class="btn quiet" id="ffreset">Reset</button>
+      </div>
+    </div>
+
+    <div class="season" style="margin-top:16px"><b>The boundary:</b> the engine proposes, you dispose. Reminders and drafts cost nothing and expire quietly if ignored — no event rows, no picker clutter, no charges. The go-signal is the only door from “tracked” to “planned.”</div>
+  </section>
+
+  <div class="foot">
+    PROTOTYPE · Event_Anchor_Minimalist_Setup_Design_2026-07-12.md · anchors are attributes, not buckets · picker stays flat · nothing auto-creates · dependent birthdates &lt;18 / &gt;50 only (PR-D counsel-gated) · 1 wedding per union · concurrent unions ≠ concurrent planning
+  </div>
+</div>
+
+<dialog id="modal">
+  <div id="modalbody"></div>
+</dialog>
+
+<script>
+(function(){
+  var $=function(s,c){return (c||document).querySelector(s)}, $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+  // ---------- tabs ----------
+  $$('nav button').forEach(function(b){b.onclick=function(){
+    $$('nav button').forEach(function(x){x.classList.remove('on')}); b.classList.add('on');
+    ['people','create','year','auto'].forEach(function(t){$('#tab-'+t).classList.toggle('hiddn',t!==b.dataset.tab)});
+  }});
+  // ---------- union stages ----------
+  var uni={met:'Feb 14 2018',prop:'Dec 24 2024',wed:'Jan 17 2026'};
+  function renderUnion(stage){
+    $('#stagepill').textContent=stage;
+    var tl='<div>MET <span>'+uni.met+'</span></div>';
+    if(stage!=='dating') tl+='<div>PROPOSED <span>'+uni.prop+'</span></div>';
+    if(stage==='married') tl+='<div>MARRIED <span>'+uni.wed+'</span></div>';
+    $('#uniontl').innerHTML=tl;
+    var d='';
+    if(stage==='dating') d='dating anniversary <b>Feb 14 · yearly</b>';
+    if(stage==='engaged') d='dating anniversary <b>Feb 14 · yearly</b> · wedding <b>in planning — date is an output, never asked up front</b>';
+    if(stage==='married') d='anniversary shifts to <b>Jan 17 · yearly</b> · 1st <b>Jan 17 2027</b> · silver <b>2051</b> · golden <b>2076</b>';
+    $('#unionderived').innerHTML=d;
+  }
+  $$('#stages button').forEach(function(b){b.onclick=function(){
+    $$('#stages button').forEach(function(x){x.classList.remove('on')}); b.classList.add('on'); renderUnion(b.dataset.s);
+  }});
+  renderUnion('married');
+  // ---------- age fence ----------
+  function fence(){
+    var v=$('#fdob').value; if(!v){$('#fenceout').innerHTML='';return}
+    var dob=new Date(v+'T00:00:00'), now=new Date(2026,6,12);
+    var age=now.getFullYear()-dob.getFullYear()-((now.getMonth()<dob.getMonth()||(now.getMonth()===dob.getMonth()&&now.getDate()<dob.getDate()))?1:0);
+    var nm=($('#fname').value||'This person'), out;
+    if(age<18){
+      var debYr=dob.getFullYear()+(($('#fsex').value==='Male')?21:18);
+      out='<div class="fence ok"><span class="v">OK — guardian-held record · age '+age+'</span>'+nm+'’s milestones: '
+        +(age<1?'<b class="mono">1st</b>, ':'')+(age<7?'<b class="mono">7th ('+(dob.getFullYear()+7)+')</b>, ':'')
+        +'<b class="mono">'+(($('#fsex').value==='Male')?'21st':'18th')+' debut ('+debYr+')</b>. Used only to compute milestones and remind you. Hands over to their own account at 18.</div>';
+    } else if(age>50){
+      out='<div class="fence ok"><span class="v">OK — elder record · age '+age+'</span>Next milestone: <b class="mono">60th ('+(dob.getFullYear()+60)+')</b>'+(age>=60?' — passed; golden years noted':'')+'.</div>';
+    } else {
+      out='<div class="fence warn"><span class="v">Not stored — age '+age+'</span>Adults own their own dates. '+nm+' can join Setnayan and share them with you. <button class="chip" style="margin-left:6px" onclick="alert(\'Invite flow — their account, their data, linked to yours by consent.\')">Send an invite</button></div>';
+    }
+    $('#fenceout').innerHTML=out;
+  }
+  ['fdob','fname','fsex'].forEach(function(id){$('#'+id).addEventListener('input',fence)});
+  // ---------- create flow ----------
+  var TYPES=[
+    {k:'wedding',n:'Wedding',a:'union · produces'},{k:'debut',n:'Debut',a:'birthdate → 18/21'},
+    {k:'birthday',n:'Birthday',a:'birthdate · yearly'},{k:'christening',n:'Christening',a:'birth window'},
+    {k:'gender',n:'Gender Reveal',a:'chosen date'},{k:'anniversary',n:'Anniversary',a:'union date · yearly'},
+    {k:'travel',n:'Travel',a:'date range'},{k:'graduation',n:'Graduation',a:'school-set'},
+    {k:'reunion',n:'Reunion',a:'batch year'},{k:'corporate',n:'Corporate',a:'chosen'},
+    {k:'tournament',n:'Tournament',a:'chosen / range'},{k:'gala',n:'Gala Night',a:'chosen'},
+    {k:'celebration',n:'Celebration',a:'chosen'},{k:'simple',n:'Simple Event',a:'chosen'}
+  ];
+  var grid=$('#typegrid');
+  TYPES.forEach(function(t){
+    var b=document.createElement('button'); b.className='tcard'; b.innerHTML='<span class="tn">'+t.n+'</span><span class="ta">'+t.a+'</span>';
+    b.onclick=function(){ $$('.tcard',grid).forEach(function(x){x.classList.remove('on')}); b.classList.add('on'); pick(t.k,t.n); };
+    grid.appendChild(b);
+  });
+  var state={type:null,label:'',recurs:false,recursVisible:true,derived:'',title:''};
+  function show(el,on){$(el).classList.toggle('hiddn',!on)}
+  function step3(recursDefault,visible,note){
+    state.recurs=recursDefault; state.recursVisible=visible!==false;
+    $('#recurs').classList.toggle('on',recursDefault);
+    $('#recurs').setAttribute('aria-checked',recursDefault);
+    $('#recursnote').textContent=note||'';
+    $('#step3wrap').classList.remove('hiddn');
+    $('#recurs').style.display=state.recursVisible?'flex':'none';
+    show('#donewrap',false);
+  }
+  $('#recurs').onclick=function(){state.recurs=!state.recurs;this.classList.toggle('on',state.recurs);this.setAttribute('aria-checked',state.recurs)};
+  $('#recurs').onkeydown=function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();this.click()}};
+  $('#createbtn').onclick=function(){
+    $('#donetitle').textContent=state.title||state.label;
+    $('#donederived').innerHTML=state.derived+(state.recursVisible?' · '+(state.recurs?'<b>yearly — next cycle will appear on your year</b>':'one-time'):'');
+    show('#donewrap',true);
+  };
+  function pick(k,label){
+    state.type=k; state.label=label; state.title=label; state.derived='';
+    show('#step2wrap',true); show('#step3wrap',false); show('#donewrap',false);
+    var B=$('#s2body'), L=$('#s2label');
+    if(k==='birthday'){
+      L.textContent='Whose birthday?';
+      B.innerHTML='<p class="q">Whose birthday is it?</p><div class="chips">'
+        +['Me','Bianca','Amara (6)','Ernesto (59)','+ Someone new'].map(function(c){return '<button class="chip" data-c="'+c+'">'+c+'</button>'}).join('')+'</div><div id="bdout"></div>';
+      $$('.chip',B).forEach(function(c){c.onclick=function(){
+        $$('.chip',B).forEach(function(x){x.classList.remove('on')}); c.classList.add('on');
+        var who=c.dataset.c, out='';
+        if(who.indexOf('Amara')===0){ out='<div class="fence ok"><span class="v">Milestone — computed</span>Amara turns <b class="mono">7 on Sep 21 2026</b> — lucky 7. Suggested weekends: <b class="mono">Sep 19–20 · Sep 26–27</b>.</div>'; state.title='Amara’s 7th Birthday'; state.derived='date <b>Sep 21 2026</b> · milestone <b>7th</b>'; }
+        else if(who.indexOf('Ernesto')===0){ out='<div class="fence ok"><span class="v">Computed</span>Ernesto turns <b class="mono">60 on Mar 3 2027</b> — a grand one. Suggested weekends: <b class="mono">Feb 27–28 · Mar 6–7</b>.</div>'; state.title='Ernesto’s 60th'; state.derived='date <b>Mar 3 2027</b> · milestone <b>60th</b>'; }
+        else if(who==='Me'){ out='<div class="fence ok"><span class="v">Computed</span>You turn <b class="mono">30 on Aug 30 2026</b> — normal year, light plan suggested.</div>'; state.title='Carlo’s 30th Birthday'; state.derived='date <b>Aug 30 2026</b>'; }
+        else if(who==='Bianca'){ out='<div class="fence ok"><span class="v">Computed</span>Bianca’s next birthday: <b class="mono">Nov 12 2026</b>.</div>'; state.title='Bianca’s Birthday'; state.derived='date <b>Nov 12 2026</b>'; }
+        else { out='<div class="fence warn"><span class="v">New person → the age fence applies</span>Under 18 or over 50 → stored as a dependent. 18–50 → invite them instead (see the People tab).</div>'; state.derived='date <b>—</b>'; }
+        $('#bdout').innerHTML=out;
+        step3(true,true,'Birthdays default to yearly — every year appears as a quiet moment; only milestones nudge.');
+      }});
+    }
+    else if(k==='debut'){
+      L.textContent='When was the debutante born?';
+      B.innerHTML='<p class="q">Who’s debuting?</p><div class="chips"><button class="chip" id="dbAmara">Amara — computes 2037, too early</button><button class="chip" id="dbNew">Enter a birthdate</button><button class="chip" id="dbSkip">I already have a date</button></div><div id="dbout"></div>';
+      $('#dbNew').onclick=function(){
+        $('#dbout').innerHTML='<div class="field" style="margin-top:12px"><label>Birthdate</label><input type="date" value="2008-11-02" id="dbdob"></div><div class="chips" style="margin-top:6px"><button class="chip on" id="dbF">18th (F)</button><button class="chip" id="dbM">21st (M)</button></div><div id="dbcalc"></div>';
+        var calc=function(add){ var d=new Date($('#dbdob').value+'T00:00:00'); var y=d.getFullYear()+add;
+          $('#dbcalc').innerHTML='<div class="fence ok"><span class="v">Computed</span>The '+(add===18?'18th':'21st')+' lands <b class="mono">'+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getDate()+' '+y+'</b>. Suggested party weekends: <b class="mono">the two nearest Saturdays</b>. Age is editable — some families debut sons at 21.</div>';
+          state.title='The Debut'; state.derived='18th/21st <b>derived</b> · date editable';
+          step3(false,false,''); };
+        $('#dbF').onclick=function(){$('#dbF').classList.add('on');$('#dbM').classList.remove('on');calc(18)};
+        $('#dbM').onclick=function(){$('#dbM').classList.add('on');$('#dbF').classList.remove('on');calc(21)};
+        $('#dbdob').oninput=function(){calc($('#dbM').classList.contains('on')?21:18)};
+        calc(18);
+      };
+      $('#dbAmara').onclick=function(){$('#dbout').innerHTML='<div class="fence warn"><span class="v">Computed — far out</span>Amara’s 18th is <b class="mono">Sep 21 2037</b>. We’ll hold it on your year view; planning usually starts 6–12 months out.</div>'};
+      $('#dbSkip').onclick=function(){$('#dbout').innerHTML='<div class="field" style="margin-top:12px"><label>Event date</label><input type="date"></div>'; state.title='The Debut'; state.derived='date <b>chosen</b>'; step3(false,false,'');};
+    }
+    else if(k==='anniversary'){
+      L.textContent='What date does this celebrate?';
+      B.innerHTML='<p class="q">What date does this celebrate?</p><div class="chips"><button class="chip" id="anOur">Our wedding — Jan 17 2026</button><button class="chip" id="anOther">Another date</button></div><div id="anout"></div>';
+      $('#anOur').onclick=function(){this.classList.add('on');
+        $('#anout').innerHTML='<div class="fence ok"><span class="v">Computed</span>Your <b class="mono">1st anniversary — Jan 17 2027</b>. Silver <b class="mono">2051</b> · golden <b class="mono">2076</b> (vow renewals run on wedding rails).</div>';
+        state.title='Our 1st Anniversary'; state.derived='union <b>Carlo & Bianca</b> · date <b>Jan 17 2027</b>';
+        step3(true,true,'Anniversaries default to yearly. Ordinary years stay quiet; the 25th and 50th get the full treatment.');};
+      $('#anOther').onclick=function(){$('#anout').innerHTML='<div class="field" style="margin-top:12px"><label>Date it commemorates</label><input type="date"></div><p class="note">Typed origins only — wedding, relationship, founding, personal milestone.</p>'; state.title='Anniversary'; state.derived='date <b>entered</b>'; step3(true,true,'');};
+    }
+    else if(k==='wedding'){
+      L.textContent='no date question — but the union already has a wedding';
+      B.innerHTML='<div class="fence warn"><span class="v">1 wedding per union</span>You and Bianca already have a wedding (Jan 17 2026). Which is this?</div>'
+        +'<div class="chips" style="margin-top:12px">'
+        +'<button class="chip" data-w="church">Church ceremony of our same marriage</button>'
+        +'<button class="chip" data-w="vow">A vow renewal</button>'
+        +'<button class="chip" data-w="new">A new marriage</button></div><div id="wout"></div>';
+      $$('.chip',B).forEach(function(c){c.onclick=function(){
+        var w=c.dataset.w, out='';
+        if(w==='church'){out='<div class="fence ok"><span class="v">Attaches to your union</span>The church ceremony joins the same marriage — same union, its own production. Planning may overlap with a same-union ceremony.</div>'; state.title='Church Wedding — Carlo & Bianca'; state.derived='union <b>existing</b> · ceremony <b>church</b>'; step3(false,false,'');}
+        if(w==='vow'){out='<div class="fence ok"><span class="v">Routed</span>Vow renewals live under <b>Anniversary</b> — silver and golden run on full wedding rails. Taking you there.</div>';}
+        if(w==='new'){out='<div class="fence warn"><span class="v">New union</span>Did the previous marriage end (annulment · widowhood · divorce under PD 1083), or is this an additional marriage under the Muslim rite? Concurrent unions are allowed (up to 4, Muslim rite) — but only <b>one wedding in planning at a time</b>. A rare legitimate overlap goes to review.</div>';}
+        $('#wout').innerHTML=out;
+      }});
+    }
+    else if(k==='christening'){
+      L.textContent='When was the baby born?';
+      B.innerHTML='<p class="q">When was the baby born?</p><div class="field"><label>Birthdate</label><input type="date" value="2026-05-20" id="chdob"></div><div id="chout"></div>';
+      var ch=function(){ $('#chout').innerHTML='<div class="fence ok"><span class="v">Window — not a date</span>Binyag usually happens within the first year. <b>The parish slot sets the date</b> — we’ll help you shortlist parishes first, then lock the date.</div>'; state.title='The Christening'; state.derived='birth <b>window</b> · date = <b>parish slot (output)</b>'; step3(false,false,''); };
+      $('#chdob').oninput=ch; ch();
+    }
+    else if(k==='travel'){
+      L.textContent='When are you going?';
+      B.innerHTML='<p class="q">When are you going?</p><div style="display:flex;gap:14px;flex-wrap:wrap"><div class="field"><label>From</label><input type="date" value="2027-05-03"></div><div class="field"><label>To</label><input type="date" value="2027-05-07"></div></div><p class="note">Per-day services (Papic, Live Studio) can run on any day inside the range.</p>';
+      state.title='Family Trip'; state.derived='range <b>May 3–7 2027</b>';
+      step3(false,true,'Yearly trips recur by season, not exact date — next year we’ll suggest the window and clone this trip’s setup.');
+    }
+    else if(k==='reunion'){
+      L.textContent='What batch?';
+      B.innerHTML='<p class="q">What batch or year?</p><div class="field"><label>Batch</label><input value="Batch 2016 — high school" ></div><div class="fence ok"><span class="v">Computed</span>Your <b class="mono">10th reunion</b>. Popular windows: <b class="mono">December · Holy Week</b>.</div>';
+      state.title='Batch 2016 — 10th Reunion'; state.derived='Nth <b>10th</b> · season-nudged';
+      step3(false,true,'');
+    }
+    else if(k==='gender'){
+      L.textContent='Pick a date';
+      B.innerHTML='<p class="q">When’s the reveal?</p><div class="field"><label>Date</label><input type="date"></div><p class="note">Timed around the 20-week scan, usually. (Due-date storage is deferred pending counsel — the date here is simply chosen.)</p>';
+      state.title='The Gender Reveal'; state.derived='date <b>chosen</b>'; step3(false,false,'');
+    }
+    else if(k==='graduation'){
+      L.textContent='When’s the ceremony?';
+      B.innerHTML='<p class="q">When’s the ceremony?</p><div class="field"><label>Date (school-set)</label><input type="date" value="2027-04-10"></div>';
+      state.title='Graduation'; state.derived='date <b>externally set</b> · Mar–Jun season'; step3(false,false,'');
+    }
+    else {
+      var org=(k==='corporate'||k==='gala'||k==='tournament');
+      L.textContent='Pick a date';
+      B.innerHTML='<p class="q">'+(org?'Planning for an organization? Pick the date.':'Pick a date.')+'</p><div class="field"><label>Date</label><input type="date"></div>';
+      state.title=label; state.derived='date <b>chosen</b>';
+      step3(false,(k!=='simple'),org?'Company parties and galas are often annual — flip this on and next year’s window appears on your year.':'');
+    }
+  }
+  // ---------- year go-signals ----------
+  var GO={
+    amara7:{t:'Amara’s 7th Birthday',rows:[['Type','Birthday — milestone 7th'],['Celebrant','Amara (from People)'],['Date','Sep 21 2026 · weekends suggested'],['Brief','seeded — family size, palette, past vendors'],['Yearly','on']]},
+    anniv1:{t:'Our 1st Anniversary',rows:[['Type','Anniversary'],['Union','Carlo & Bianca — Jan 17 2026'],['Date','Jan 17 2027'],['Brief','seeded from your wedding'],['Yearly','on']]},
+    ernesto60:{t:'Ernesto’s 60th',rows:[['Type','Birthday — milestone 60th'],['Celebrant','Ernesto (elder record)'],['Date','Mar 3 2027 · weekends suggested'],['Brief','seeded'],['Yearly','—']]},
+    trip:{t:'This Year’s Family Trip',rows:[['Type','Travel — cloned from Baguio ’26'],['Window','May 2027 (season)'],['Party','6 people — carried over'],['Services','Papic day 2 — carried over'],['Yearly','on']]}
+  };
+  // ---------- the engine (automated derivation) ----------
+  var MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var engineYear=2026, engineAnchor='amara';
+  // deterministic derivation per anchor: given a viewing year window, emit the next 6 moments
+  function derive(a,from){
+    var out=[],y;
+    if(a==='amara'){ // b. Sep 21 2019 · F → ladder 1,7,18,60
+      for(y=from;out.length<6;y++){ var age=y-2019; if(age<1) continue;
+        var mile=(age===1||age===7||age===18||age===60);
+        out.push({d:'SEP 21 '+y,t:'Amara turns '+age+(age===7?' — lucky 7':age===18?' — her debut ✦':''),mile:mile,
+          lead:mile?(age===18?'heads-up T−12mo · begin planning T−9mo':'heads-up T−5mo · begin planning T−3mo'):'quiet line · light reminder T−3wk',
+          draft:mile?'pre-drafted: type '+(age===18?'Debut':'Birthday')+' · celebrant Amara · weekends suggested':'one-tap Simple flow'});
+      }
+    }
+    if(a==='union'){ // married Jan 17 2026 → anniversary yearly; milestones 25, 50
+      for(y=Math.max(from,2027);out.length<6;y++){ var n=y-2026; var mile=(n===1||n===25||n===50);
+        out.push({d:'JAN 17 '+y,t:(n===1?'1st':n===25?'25th — kasalang pilak ✦':n===50?'50th — golden ✦':n+'th')+' wedding anniversary',mile:mile,
+          lead:mile?'heads-up '+(n===1?'T−2mo · begin T−6wk':'T−12mo · begin T−6mo')+'':'quiet line · dinner-scale',
+          draft:mile?'pre-drafted: type Anniversary · union Carlo & Bianca · brief seeded from the wedding':'one-tap Simple flow'});
+      }
+      // pull the 25th into view so the long arc is visible
+      if(from<2051) out[out.length-1]={d:'JAN 17 2051',t:'25th — kasalang pilak ✦ (vow renewal on wedding rails)',mile:true,lead:'reminder fires 6 months out',draft:'pre-drafted: Anniversary · full wedding rails'};
+    }
+    if(a==='ernesto'){ // b. Mar 3 1967 → 60th 2027, then normal; elder record
+      for(y=Math.max(from,2027);out.length<6;y++){ var ag=y-1967; var mile=(ag===60);
+        out.push({d:'MAR 3 '+y,t:'Ernesto turns '+ag+(ag===60?' — the grand 60th ✦':''),mile:mile,
+          lead:mile?'heads-up T−9mo · begin T−6mo (balikbayan flights)':'quiet line',
+          draft:mile?'pre-drafted: Birthday · celebrant Ernesto · debut-scale lead times':'one-tap Simple flow'});
+      }
+    }
+    if(a==='trip'){ // recurring travel · season window May · clone last cycle
+      for(y=Math.max(from,2027);out.length<6;y++){
+        out.push({d:'MAY '+y,t:'Family trip season — '+(y-2026)+' year'+((y-2026)>1?'s':'')+' since Baguio',mile:(y-from<2),
+          lead:'season nudge ~2mo before last cycle window (March)',draft:'pre-drafted: Travel · cloned from last cycle (party of 6 · 5 days · Papic day 2)'});
+      }
+    }
+    return out;
+  }
+  function renderEngine(){
+    $('#engineyear').textContent='Jul '+engineYear;
+    var rows=derive(engineAnchor,engineYear);
+    $('#enginerows').innerHTML=rows.map(function(r){
+      return '<div class="yearrow'+(r.mile?' milestone':' quiet')+'"><span class="d">'+r.d+'</span>'
+        +'<span class="t">'+(r.mile?'<b>':'')+r.t+(r.mile?'</b>':'')+'<br><span class="note mono" style="font-size:11px">auto: '+r.lead+' · '+r.draft+'</span></span>'
+        +'<span class="pill'+(r.mile?'':' ok')+'" style="align-self:center">'+(r.mile?'auto + nudge':'auto · quiet')+'</span></div>';
+    }).join('');
+  }
+  $$('#anchorpick .chip').forEach(function(c){c.onclick=function(){
+    $$('#anchorpick .chip').forEach(function(x){x.classList.remove('on')}); c.classList.add('on');
+    engineAnchor=c.dataset.a; renderEngine();
+  }});
+  $('#ffbtn').onclick=function(){engineYear++; renderEngine()};
+  $('#ffreset').onclick=function(){engineYear=2026; renderEngine()};
+  renderEngine();
+  $$('[data-go]').forEach(function(b){b.onclick=function(){
+    var g=GO[b.dataset.go];
+    $('#modalbody').innerHTML='<span class="pill">go signal · pre-filled</span><h2 style="margin:10px 0 2px">'+g.t+'</h2><p class="note">Nothing existed until this tap. Onboarding opens already answered:</p>'
+      +'<div class="prefill">'+g.rows.map(function(r){return '<div><span>'+r[0]+'</span><span>'+r[1]+'</span></div>'}).join('')+'</div>'
+      +'<div style="display:flex;gap:10px"><button class="btn" onclick="document.getElementById(\'modal\').close()">Create event</button><button class="btn quiet" onclick="document.getElementById(\'modal\').close()">Not now</button></div>'
+      +'<p class="note" style="margin-top:12px">“Not now” costs nothing — the moment stays on your year.</p>';
+    $('#modal').showModal();
+  }});
+})();
+</script>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setnayan · Vendor Proposal Maker (prototype)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#efeada;font-family:'Manrope',system-ui,sans-serif;padding:32px 14px;color:#20242b;}
+  .ti{font-family:'tabler-icons'!important;font-style:normal;}
+  #qp{--paper:#FCFBF8;--ink:#20242b;--soft:#6b6f77;--mut:#9a948a;--line:#ece5d6;--gold:#a8863f;--goldsoft:#f6efdd;--sage:#6f8a63;--sagesoft:#eef2e9;--mulberry:#7d3a54;--amber:#a86a3d;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:18px;overflow:hidden;max-width:520px;margin:0 auto;font-size:13px;box-shadow:0 12px 40px rgba(32,36,43,.08);}
+  #qp .serif{font-family:'Cormorant Garamond',Georgia,serif;}
+  #qp .sec{padding:16px 18px;}
+  #qp .sec+.sec{border-top:1px solid var(--line);}
+  #qp .lbl{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:500;}
+  #qp input,#qp select{font-family:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:12px;}
+  #qp input:focus,#qp select:focus{outline:none;border-color:var(--gold);}
+  #qp .li{padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;}
+  #qp .li.free{background:var(--sagesoft);border-color:#dde6d4;}
+  #qp .li.over{border-color:var(--gold);box-shadow:0 -2px 0 var(--gold) inset;}
+  #qp .li.drag{opacity:.3;}
+  #qp .li.auto{border-style:dashed;background:transparent;}
+  #qp .top{display:flex;align-items:center;gap:10px;}
+  #qp .title{flex:1;min-width:0;border:none;background:transparent;font-size:13.5px;padding:2px 0;}
+  #qp .money{font-family:'Cormorant Garamond',serif;font-size:17px;text-align:right;white-space:nowrap;letter-spacing:.01em;}
+  #qp .ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px;padding-top:9px;padding-left:26px;border-top:1px dashed var(--line);}
+  #qp .fld{width:60px;text-align:right;}
+  #qp .u{font-size:11px;color:var(--mut);}
+  #qp .grow{margin-left:auto;}
+  #qp .handle{cursor:grab;color:#cfc7b4;font-size:18px;}
+  #qp .icon{cursor:pointer;color:var(--mut);font-size:15px;background:none;border:none;padding:2px;}
+  #qp .icon:hover{color:var(--ink);}
+  #qp .chip{font-size:10.5px;font-weight:500;border-radius:20px;padding:3px 9px;white-space:nowrap;}
+  #qp .chip-sage{color:#4c6640;background:#fff;border:1px solid #dde6d4;}
+  #qp .chip-gold{color:#6b5320;background:var(--goldsoft);border:1px solid #e9d9ac;}
+  #qp .pax-req input{border-color:#dde6d4;background:var(--sagesoft);}
+  #qp .pax-edit input{border-color:#e9d9ac;background:var(--goldsoft);}
+  #qp .add{cursor:pointer;font-size:11.5px;border-radius:20px;padding:5px 12px;border:1px dashed var(--gold);color:var(--gold);background:transparent;}
+  #qp .add:disabled{opacity:.4;cursor:default;}
+  #qp .add.sage{border-color:#c3d3b8;color:var(--sage);}
+  #qp .trow{display:flex;justify-content:space-between;align-items:baseline;}
+  #qp .banner{display:flex;align-items:center;gap:8px;font-size:11.5px;color:#4c6640;background:var(--sagesoft);border:1px solid #dde6d4;border-radius:10px;padding:9px 11px;}
+  #qp .pm{cursor:pointer;font-size:12px;border-radius:20px;padding:6px 13px;border:1px solid var(--line);background:#fff;color:var(--soft);display:inline-flex;align-items:center;gap:6px;}
+  #qp .pm.on{border-color:var(--gold);background:var(--goldsoft);color:#6b5320;}
+</style>
+</head>
+<body>
+<div id="qp">
+
+  <div class="sec" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div>
+      <div class="serif" style="font-size:22px;font-weight:600;line-height:1;">Ana &amp; Marco</div>
+      <div class="u" id="qp-reqnote" style="margin-top:4px;"></div>
+    </div>
+    <div id="qp-paxbox" style="display:flex;gap:8px;">
+      <label class="u" style="display:flex;flex-direction:column;gap:3px;align-items:center;">pax<input id="qp-pax" type="number" min="1" step="10" value="120" style="width:56px;text-align:center;"></label>
+      <label class="u" style="display:flex;flex-direction:column;gap:3px;align-items:center;">hrs<input id="qp-hrs" type="number" min="1" step="1" value="8" style="width:46px;text-align:center;"></label>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div style="display:flex;align-items:center;justify-content:space-between;"><span class="lbl">Line items</span><span class="u"><i class="ti ti-grip-vertical"></i> drag to reorder</span></div>
+    <div id="qp-items" style="display:flex;flex-direction:column;gap:8px;margin-top:11px;"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button type="button" class="add" id="qp-add"><i class="ti ti-plus"></i> Feature</button>
+      <button type="button" class="add sage" id="qp-free"><i class="ti ti-gift"></i> Freebie</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="lbl">Crew meal &amp; transportation</span>
+    <div id="qp-crewbanner" style="margin-top:11px;"></div>
+    <div id="qp-extras" style="display:flex;flex-direction:column;gap:8px;margin-top:9px;"></div>
+  </div>
+
+  <div class="sec" style="background:#faf7f0;">
+    <div class="trow"><span class="u">Subtotal</span><span id="qp-sub" class="serif" style="font-size:15px;">&#8369;0</span></div>
+    <div class="trow" style="margin-top:8px;"><span class="u" style="display:flex;align-items:center;gap:6px;"><i class="ti ti-discount-2"></i> Discount</span><span style="display:flex;align-items:center;gap:4px;">&#8369;<input id="qp-disc" type="number" min="0" step="500" value="0" style="width:88px;text-align:right;"></span></div>
+    <div class="trow" style="margin-top:11px;padding-top:11px;border-top:1px solid var(--line);"><span style="font-weight:500;">Total</span><span id="qp-total" class="serif" style="font-size:24px;">&#8369;0</span></div>
+    <div id="qp-creditrow" class="trow" style="display:none;margin-top:8px;color:var(--sage);"><span style="display:flex;align-items:center;gap:6px;font-size:12px;"><i class="ti ti-arrow-down-left"></i> Crew-meal credit &rarr; final payment</span><span id="qp-credit" style="font-size:12px;">&minus;&#8369;0</span></div>
+    <div id="qp-netrow" class="trow" style="display:none;margin-top:6px;"><span style="font-weight:500;font-size:12px;">Net payable</span><span id="qp-net" class="serif" style="font-size:19px;"></span></div>
+  </div>
+
+  <div class="sec">
+    <div style="display:flex;align-items:center;justify-content:space-between;"><span class="lbl">Payment schedule</span><span id="qp-remain" class="u"></span></div>
+    <div id="qp-sched" style="display:flex;flex-direction:column;gap:8px;margin-top:11px;"></div>
+    <button type="button" class="add" id="qp-addpay" style="margin-top:11px;"><i class="ti ti-plus"></i> Add payment · splits the balance</button>
+  </div>
+
+  <div class="sec">
+    <span class="lbl">Accepted payment methods</span>
+    <div id="qp-methods" style="display:flex;gap:8px;margin-top:11px;flex-wrap:wrap;"></div>
+  </div>
+
+  <div class="sec" style="display:flex;gap:10px;align-items:center;">
+    <button type="button" id="qp-send" style="flex:1;font-size:14px;font-weight:500;color:#FCFBF8;background:var(--mulberry);border:none;border-radius:12px;padding:12px;cursor:pointer;letter-spacing:.01em;"><i class="ti ti-send"></i> Send quote</button>
+    <span id="qp-sent" style="font-size:12px;color:var(--sage);display:none;"><i class="ti ti-check"></i> Sent</span>
+  </div>
+
+</div>
+<script>
+(function(){
+  var REQ={pax:120,hrs:8,date:'Nov 8',loc:'Quezon City'};   // seeded from the couple's inquiry/brief
+  var items=[
+    {label:'Photo + video coverage',basis:'per_hour',base:30000,incl:6,extra:3000,free:false},
+    {label:'Guest 4R prints',basis:'per_pax',rate:150,minpax:100,free:false},
+    {label:'Same-day highlight reel',basis:'flat',flat:8000,free:false},
+    {label:'Engagement session',basis:'flat',flat:0,free:true}
+  ];
+  var coupleCrew={has:true,provider:"Lola's Kitchen"};
+  var crew={mode:coupleCrew.has?'offset':'fee',size:5,perHead:350};
+  var transport={mode:'flat',flat:2000};
+  var payments=[{label:'First payment',amount:20000,due:'on_book',offset:0}];
+  var balanceMeta={due:'before_event',offset:14};
+  var methods={bdo:true,gcash:true,bank:false,maya:false};
+  var METHOD_LIST=[['bdo','ti-building-bank','BDO'],['gcash','ti-device-mobile','GCash'],['bank','ti-transfer','Bank'],['maya','ti-wallet','Maya']];
+  var DUE=[['on_book','On booking'],['before_event','before event'],['on_event','Event day']];
+  var ORD=['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth'];
+  var ordLabel=function(i){return (ORD[i]||('Payment '+(i+1)))+' payment';};
+  var peso=function(n){return '₱'+Math.round(n).toLocaleString('en-PH');};
+  var $=function(id){return document.getElementById(id);};
+  var pax=function(){return Number($('qp-pax').value)||0;};
+  var hrs=function(){return Number($('qp-hrs').value)||0;};
+  var dragIndex=null,gross=0,payable=0;
+
+  function resolve(it){if(it.free)return 0;if(it.basis==='per_pax')return (Number(it.rate)||0)*Math.max(pax(),Number(it.minpax)||0);if(it.basis==='per_hour')return (Number(it.base)||0)+Math.max(0,hrs()-(Number(it.incl)||0))*(Number(it.extra)||0);return Number(it.flat)||0;}
+  var crewVal=function(){return (Number(crew.size)||0)*(Number(crew.perHead)||0);};
+  var crewCharge=function(){return crew.mode==='fee'?crewVal():0;};
+  var crewCredit=function(){return crew.mode==='offset'?crewVal():0;};
+  var transFee=function(){return transport.mode==='flat'?(Number(transport.flat)||0):0;};
+  var paySum=function(){return payments.reduce(function(s,x){return s+(Number(x.amount)||0);},0);};
+  function fld(val,cb){var e=document.createElement('input');e.type='number';e.min='0';e.value=val;e.className='fld';e.addEventListener('input',function(){cb(Number(e.value)||0);recompute();});return e;}
+  function u(t){var s=document.createElement('span');s.className='u';s.textContent=t;return s;}
+
+  function updateReqNote(){
+    var el=$('qp-reqnote');var boxc=$('qp-paxbox');if(!el)return;
+    var atReq=(pax()===REQ.pax&&hrs()===REQ.hrs);
+    if(atReq){el.innerHTML='Sized to their request · <strong>'+REQ.pax+' pax</strong> · '+REQ.hrs+'h · '+REQ.date;boxc.className='pax-req';}
+    else{el.innerHTML='Quoting <strong>'+pax()+' pax · '+hrs()+'h</strong> — request was '+REQ.pax+' pax <span id="qp-reset" style="color:var(--gold);cursor:pointer;text-decoration:underline;">reset</span>';boxc.className='pax-edit';var r=$('qp-reset');if(r)r.onclick=function(){$('qp-pax').value=REQ.pax;$('qp-hrs').value=REQ.hrs;recompute();};}
+  }
+
+  function recompute(){
+    var sub=items.reduce(function(s,it){return s+resolve(it);},0)+crewCharge()+transFee();
+    gross=Math.max(0,sub-(Number($('qp-disc').value)||0));
+    var credit=crewCredit();payable=Math.max(0,gross-credit);
+    $('qp-sub').textContent=peso(sub);$('qp-total').textContent=peso(gross);
+    if(credit>0.5){$('qp-creditrow').style.display='flex';$('qp-netrow').style.display='flex';$('qp-credit').textContent='−'+peso(credit);$('qp-net').textContent=peso(payable);}else{$('qp-creditrow').style.display='none';$('qp-netrow').style.display='none';}
+    items.forEach(function(it,i){var a=$('amt-'+i);if(a)a.textContent=it.free?'':peso(resolve(it));var c=$('cap-'+i);if(c)c.textContent=capText(it);});
+    var ca=$('crew-amt');if(ca)ca.textContent=(crew.mode==='fee'?peso(crewVal()):'');
+    var cc=$('crew-credit');if(cc)cc.textContent=peso(crewVal());
+    var ta=$('trans-amt');if(ta)ta.textContent=peso(transFee());
+    updateReqNote();updateRemain();
+  }
+  function capText(it){if(it.free)return '';if(it.basis==='per_pax')return '₱'+(Number(it.rate)||0)+' × '+Math.max(pax(),Number(it.minpax)||0)+' pax';if(it.basis==='per_hour'){var ex=Math.max(0,hrs()-(Number(it.incl)||0));return peso(it.base)+' + '+ex+'h extra';}return '';}
+  function updateRemain(){
+    var rem=payable-paySum();
+    payments.forEach(function(s,i){var c=$('inst-pct-'+i);if(c)c.textContent=payable>0?Math.round((Number(s.amount)||0)/payable*100)+'%':'';});
+    var auto=$('qp-autobal');
+    if(auto){if(rem>0.5){auto.style.display='block';$('qp-autobal-amt').textContent=peso(rem);$('qp-autobal-pct').textContent=payable>0?Math.round(rem/payable*100)+'%':'';}else{auto.style.display='none';}}
+    var b=$('qp-remain');
+    if(rem<-0.5){b.textContent='over by '+peso(-rem);b.style.color='var(--amber)';}
+    else{b.innerHTML='<i class="ti ti-circle-check"></i> balances to ₱0';b.style.color='var(--sage)';}
+    $('qp-addpay').disabled=(rem<=0.5);
+  }
+
+  function renderList(){var box=$('qp-items');box.innerHTML='';items.forEach(function(it,i){
+    var card=document.createElement('div');card.className='li'+(it.free?' free':'');
+    var top=document.createElement('div');top.className='top';
+    var grip=document.createElement('span');grip.className='handle';grip.innerHTML='<i class="ti ti-grip-vertical"></i>';grip.setAttribute('aria-label','Drag to reorder');grip.draggable=true;
+    grip.addEventListener('dragstart',function(e){dragIndex=i;card.classList.add('drag');e.dataTransfer.effectAllowed='move';});grip.addEventListener('dragend',function(){dragIndex=null;card.classList.remove('drag');});
+    var lab=document.createElement('input');lab.type='text';lab.className='title';lab.value=it.label;lab.addEventListener('input',function(){items[i].label=lab.value;});
+    top.appendChild(grip);top.appendChild(lab);
+    if(it.free){var chip=document.createElement('span');chip.className='chip chip-sage';chip.textContent='Complimentary';top.appendChild(chip);}
+    else{var money=document.createElement('span');money.className='money';money.id='amt-'+i;top.appendChild(money);}
+    var gift=document.createElement('button');gift.className='icon';gift.setAttribute('aria-label','Toggle complimentary');gift.innerHTML='<i class="ti ti-gift" style="color:'+(it.free?'var(--sage)':'inherit')+'"></i>';gift.onclick=function(){items[i].free=!items[i].free;renderList();recompute();};top.appendChild(gift);
+    var del=document.createElement('button');del.className='icon';del.setAttribute('aria-label','Remove');del.innerHTML='<i class="ti ti-x"></i>';del.onclick=function(){items.splice(i,1);renderList();recompute();};top.appendChild(del);
+    card.appendChild(top);
+    if(!it.free){
+      var ctrl=document.createElement('div');ctrl.className='ctrl';
+      var sel=document.createElement('select');[['flat','Flat'],['per_pax','Per pax'],['per_hour','Per hour']].forEach(function(o){var op=document.createElement('option');op.value=o[0];op.textContent=o[1];if(it.basis===o[0])op.selected=true;sel.appendChild(op);});
+      sel.addEventListener('change',function(){items[i].basis=sel.value;if(sel.value==='per_pax'&&it.rate==null){items[i].rate=200;items[i].minpax=100;}if(sel.value==='per_hour'&&it.base==null){items[i].base=20000;items[i].incl=6;items[i].extra=2500;}if(sel.value==='flat'&&it.flat==null)items[i].flat=5000;renderList();recompute();});ctrl.appendChild(sel);
+      if(it.basis==='flat'){ctrl.appendChild(u('₱'));ctrl.appendChild(fld(it.flat||0,function(v){items[i].flat=v;}));}
+      else if(it.basis==='per_pax'){ctrl.appendChild(u('₱'));ctrl.appendChild(fld(it.rate||0,function(v){items[i].rate=v;}));ctrl.appendChild(u('/pax · min'));ctrl.appendChild(fld(it.minpax||0,function(v){items[i].minpax=v;}));}
+      else{ctrl.appendChild(u('₱'));ctrl.appendChild(fld(it.base||0,function(v){items[i].base=v;}));ctrl.appendChild(u('incl'));ctrl.appendChild(fld(it.incl||0,function(v){items[i].incl=v;}));ctrl.appendChild(u('h · +₱'));ctrl.appendChild(fld(it.extra||0,function(v){items[i].extra=v;}));ctrl.appendChild(u('/hr'));}
+      var cap=document.createElement('span');cap.className='u grow';cap.id='cap-'+i;ctrl.appendChild(cap);
+      card.appendChild(ctrl);
+    }
+    card.addEventListener('dragover',function(e){e.preventDefault();card.classList.add('over');});card.addEventListener('dragleave',function(){card.classList.remove('over');});
+    card.addEventListener('drop',function(e){e.preventDefault();card.classList.remove('over');if(dragIndex===null||dragIndex===i)return;var m=items.splice(dragIndex,1)[0];items.splice(i,0,m);dragIndex=null;renderList();recompute();});
+    box.appendChild(card);});}
+
+  function extraRow(icon,name,ctrl){var c=document.createElement('div');c.className='li';var top=document.createElement('div');top.className='top';var t=document.createElement('span');t.style.display='flex';t.style.alignItems='center';t.style.gap='7px';t.style.fontSize='13px';t.innerHTML='<i class="ti '+icon+'" style="color:var(--mut)"></i> '+name;top.appendChild(t);ctrl.forEach(function(el){top.appendChild(el);});c.appendChild(top);return c;}
+  function renderBanner(){var b=$('qp-crewbanner');b.innerHTML='';if(coupleCrew.has){var d=document.createElement('div');d.className='banner';d.innerHTML='<i class="ti ti-circle-check"></i> <span>Couple booked <strong>'+coupleCrew.provider+'</strong> — your crew is covered.</span>';b.appendChild(d);}}
+  function renderExtras(){var box=$('qp-extras');box.innerHTML='';
+    var cSel=document.createElement('select');cSel.className='grow';cSel.style.maxWidth='150px';var opts=[['included','Included'],['fee','Charge']];if(coupleCrew.has)opts.push(['offset','Offset']);opts.forEach(function(o){var op=document.createElement('option');op.value=o[0];op.textContent=o[1];if(crew.mode===o[0])op.selected=true;cSel.appendChild(op);});cSel.addEventListener('change',function(){crew.mode=cSel.value;renderExtras();recompute();});
+    var crewCard=extraRow('ti-tools-kitchen-2','Crew meal',[cSel]);
+    var sub=document.createElement('div');sub.className='ctrl';
+    if(crew.mode==='fee'){sub.appendChild(fld(crew.size,function(v){crew.size=v;}));sub.appendChild(u('crew · ₱'));sub.appendChild(fld(crew.perHead,function(v){crew.perHead=v;}));sub.appendChild(u('/head'));var cr=document.createElement('span');cr.className='money grow';cr.id='crew-amt';sub.appendChild(cr);crewCard.appendChild(sub);}
+    else if(crew.mode==='offset'){sub.appendChild(fld(crew.size,function(v){crew.size=v;}));sub.appendChild(u('crew · ₱'));sub.appendChild(fld(crew.perHead,function(v){crew.perHead=v;}));sub.appendChild(u('/head'));var oc=document.createElement('span');oc.className='u grow';oc.style.color='var(--sage)';oc.style.textAlign='right';oc.innerHTML='credit <strong id="crew-credit"></strong> → final payment';sub.appendChild(oc);crewCard.appendChild(sub);}
+    else{var chip=document.createElement('span');chip.className='chip chip-sage grow';chip.style.textAlign='right';chip.style.marginLeft='auto';chip.textContent='In the price';crewCard.querySelector('.top').appendChild(chip);}
+    box.appendChild(crewCard);
+    var tSel=document.createElement('select');tSel.className='grow';tSel.style.maxWidth='150px';[['included','Included'],['flat','Flat fee'],['distance','By distance']].forEach(function(o){var op=document.createElement('option');op.value=o[0];op.textContent=o[1];if(transport.mode===o[0])op.selected=true;tSel.appendChild(op);});tSel.addEventListener('change',function(){transport.mode=tSel.value;renderExtras();recompute();});
+    var transCard=extraRow('ti-car','Transportation',[tSel]);
+    if(transport.mode==='flat'){var sub2=document.createElement('div');sub2.className='ctrl';sub2.appendChild(u('₱'));sub2.appendChild(fld(transport.flat,function(v){transport.flat=v;}));var tr=document.createElement('span');tr.className='money grow';tr.id='trans-amt';sub2.appendChild(tr);transCard.appendChild(sub2);}
+    else if(transport.mode==='distance'){var chip2=document.createElement('span');chip2.className='u grow';chip2.style.textAlign='right';chip2.textContent='quoted after site check';transCard.querySelector('.top').appendChild(chip2);}
+    else{var chip3=document.createElement('span');chip3.className='chip chip-sage';chip3.style.marginLeft='auto';chip3.textContent='In the price';transCard.querySelector('.top').appendChild(chip3);}
+    box.appendChild(transCard);}
+
+  function payRow(s,i){
+    var c=document.createElement('div');c.className='li';var top=document.createElement('div');top.className='top';
+    if(i===0){var tag=document.createElement('span');tag.className='chip chip-gold';tag.innerHTML='<i class="ti ti-lock"></i> locks';top.appendChild(tag);}
+    var lab=document.createElement('input');lab.type='text';lab.className='title';lab.value=s.label;lab.addEventListener('input',function(){payments[i].label=lab.value;});top.appendChild(lab);
+    var box2=document.createElement('span');box2.style.display='flex';box2.style.alignItems='center';box2.style.gap='4px';box2.appendChild(document.createTextNode('₱'));box2.appendChild(fld(s.amount,function(v){payments[i].amount=v;}));top.appendChild(box2);
+    if(payments.length>1){var del=document.createElement('button');del.className='icon';del.setAttribute('aria-label','Remove payment');del.innerHTML='<i class="ti ti-x"></i>';del.onclick=function(){payments.splice(i,1);payments.forEach(function(x,k){x.label=ordLabel(k);});renderSched();recompute();};top.appendChild(del);}
+    c.appendChild(top);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    var due=document.createElement('select');DUE.forEach(function(o){var op=document.createElement('option');op.value=o[0];op.textContent=o[1];if(s.due===o[0])op.selected=true;due.appendChild(op);});due.addEventListener('change',function(){payments[i].due=due.value;renderSched();recompute();});ctrl.appendChild(due);
+    if(s.due==='before_event'){ctrl.appendChild(fld(s.offset||0,function(v){payments[i].offset=v;}));ctrl.appendChild(u('days'));}
+    var pc=document.createElement('span');pc.className='u grow';pc.id='inst-pct-'+i;pc.style.textAlign='right';ctrl.appendChild(pc);
+    c.appendChild(ctrl);return c;
+  }
+  function renderSched(){
+    var box=$('qp-sched');box.innerHTML='';
+    payments.forEach(function(s,i){box.appendChild(payRow(s,i));});
+    var a=document.createElement('div');a.className='li auto';a.id='qp-autobal';a.style.display='none';
+    var top=document.createElement('div');top.className='top';
+    var tag=document.createElement('span');tag.className='chip chip-gold';tag.innerHTML='<i class="ti ti-wand"></i> auto';top.appendChild(tag);
+    var nm=document.createElement('span');nm.className='title';nm.style.color='var(--soft)';nm.textContent='Final balance';top.appendChild(nm);
+    var amt=document.createElement('span');amt.className='money';amt.id='qp-autobal-amt';top.appendChild(amt);
+    a.appendChild(top);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    var due=document.createElement('select');DUE.forEach(function(o){var op=document.createElement('option');op.value=o[0];op.textContent=o[1];if(balanceMeta.due===o[0])op.selected=true;due.appendChild(op);});due.addEventListener('change',function(){balanceMeta.due=due.value;renderSched();recompute();});ctrl.appendChild(due);
+    if(balanceMeta.due==='before_event'){ctrl.appendChild(fld(balanceMeta.offset||0,function(v){balanceMeta.offset=v;}));ctrl.appendChild(u('days'));}
+    var pc=document.createElement('span');pc.className='u grow';pc.id='qp-autobal-pct';pc.style.textAlign='right';ctrl.appendChild(pc);
+    a.appendChild(ctrl);box.appendChild(a);
+  }
+
+  function renderMethods(){var box=$('qp-methods');box.innerHTML='';METHOD_LIST.forEach(function(m){var b=document.createElement('button');b.type='button';b.className='pm'+(methods[m[0]]?' on':'');b.innerHTML='<i class="ti '+m[1]+'"></i> '+m[2]+(methods[m[0]]?' <i class="ti ti-check"></i>':'');b.onclick=function(){methods[m[0]]=!methods[m[0]];renderMethods();};box.appendChild(b);});}
+
+  ['qp-pax','qp-hrs','qp-disc'].forEach(function(id){$(id).addEventListener('input',recompute);});
+  $('qp-add').addEventListener('click',function(){items.push({label:'New feature',basis:'flat',flat:5000,free:false});renderList();recompute();});
+  $('qp-free').addEventListener('click',function(){items.push({label:'Freebie',basis:'flat',flat:0,free:true});renderList();recompute();});
+  $('qp-addpay').addEventListener('click',function(){var rem=Math.max(0,payable-paySum());payments.push({label:ordLabel(payments.length),amount:rem,due:balanceMeta.due,offset:balanceMeta.offset});renderSched();recompute();});
+  $('qp-send').addEventListener('click',function(){$('qp-sent').style.display='inline';setTimeout(function(){$('qp-sent').style.display='none';},2000);});
+
+  renderList();renderBanner();renderExtras();renderSched();renderMethods();recompute();
+})();
+</script>
+</body>
+</html>

@@ -20,7 +20,7 @@
 | **Legal form** | Sole proprietorship (DTI-registered 2026-06-25, national scope) |
 | **PIC under RA 10173** | The proprietor. A sole proprietorship has no legal personality separate from its proprietor, so the proprietor is the Personal Information Controller. |
 | **Data Protection Officer** | The proprietor (Indalecio S. Casasola II), serving the DPO function directly |
-| **DPO contact** | dpo@setnayan.com *(the contact published on every public surface — privacy notice, cookie policy, acceptable-use, site footer, and schema.org metadata. Older internal/corpus documents that still list `iscasasolaii@gmail.com` are to be aligned to this address — see §11.)* |
+| **DPO contact** | iscasasolaii@gmail.com *(owner-locked 2026-07-24 as the single published DPO contact — this is the address on the live `/privacy` page and the one registered with the NPC DPO system on 2026-07-07. The earlier `dpo@setnayan.com` variant is retired; all documents align to `iscasasolaii@gmail.com`.)* |
 | **Data subject response SLA** | 15 business days *(the period published in the live privacy notice. The older binding Privacy & Security Policy §9 states 7 business days and is to be reconciled up to 15 — see §11.)* |
 | **BIR registration** | Under the proprietor's existing TIN |
 | **NPC registration** | To be filed under the registered business name |
@@ -130,7 +130,7 @@ Setnayan honors the rights to be **informed, access, object, rectify/correct, er
 - **Erasure/blocking:** soft-delete → hard-delete of account data, subject only to the legal-hold carve-out (§ 3). Withdrawing religion / civil status / gender / biometric / dependent consent deletes the corresponding data.
 - **Objection/withdrawal:** analytics opt-out (cookie consent + profile toggle); face-recognition consent revocation (deletes the vector); marketing-preference controls.
 - **Correction:** profile/settings self-edit.
-- **Complaints:** routed to the DPO at dpo@setnayan.com; **15-business-day** response SLA; the data subject retains the right to complain to the NPC.
+- **Complaints:** routed to the DPO at iscasasolaii@gmail.com; **15-business-day** response SLA; the data subject retains the right to complain to the NPC.
 
 ---
 
@@ -181,7 +181,7 @@ Retention is bounded on both ends: **RA 10173 storage-limitation** as the maximu
 
 Setnayan processes personal data under RA 10173 on the bases recorded in § 3, with retention bounded on both ends (RA 10173 storage-limitation as the maximum; BIR/Civil Code statutory floors as the minimum for financial and contractual records). Data subject rights are implemented and honored; sensitive personal information (religion, civil status, gender, minors' data, health-adjacent data, biometric, and vendor government-ID) is processed only on the bases in § 5; the fraud-prevention device identifier is minimized, pseudonymized, and DPO-gated (currently dormant). The DPO is the proprietor and is the point of contact for the NPC and for data subjects.
 
-**Prepared by (DPO):** _______________________  (Indalecio S. Casasola II) — dpo@setnayan.com
+**Prepared by (DPO):** _______________________  (Indalecio S. Casasola II) — iscasasolaii@gmail.com
 
 **Date:** 2026-07-13
 
@@ -208,7 +208,7 @@ Setnayan processes personal data under RA 10173 on the bases recorded in § 3, w
 
 **Owner / DPO actions (documentation + product):**
 3. **Public privacy notice — DONE (app PR #3215, 2026-07-13):** added the **faith / family / honoree / e-gift** disclosures + Anthropic/Suno subprocessors; the opt-in **biometric** and **device-identifier** sections were already present. Remaining notice work is wording refinement by counsel, not a coverage gap.
-4. **Reconcile the older corpus documents** to the values in §1: align `iscasasolaii@gmail.com` → `dpo@setnayan.com` and the 7-business-day SLA → 15 in the binding Privacy & Security Policy; add the **10-year floor** and the **vendor-verification retention class** to that policy's §4 retention table; add **Persona, TikTok, Suno** to its §10 subprocessor table.
+4. **Reconcile the older corpus documents** to the values in §1: standardize the DPO contact to `iscasasolaii@gmail.com` (owner-locked 2026-07-24; the `dpo@setnayan.com` variant is retired) and the 7-business-day SLA → 15 in the binding Privacy & Security Policy; add the **10-year floor** and the **vendor-verification retention class** to that policy's §4 retention table; add **Persona, TikTok, Suno** to its §10 subprocessor table.
 5. **Device-fingerprint status:** correct the draft Anti-Fraud Policy amendment's "active since 2026-07-07" language to match the confirmed **flag-OFF** state, and gate the notice disclosure to activation.
 6. **Known product remediation** (tracked, not blocking this draft): account hard-delete does not yet purge chat-message PII (Retention Schedule §4); the `events.signature_details` honoree fields (christening child data, gender-reveal due-date) collect sensitive data without a per-field consent timestamp — **documented as-is per owner direction**, flagged here for a future consent-instrumentation pass; and the dashboard data-minimization tightening in §8.
 

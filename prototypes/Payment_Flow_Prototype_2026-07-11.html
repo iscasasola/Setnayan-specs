@@ -1,0 +1,679 @@
+<title>SETNAYAN · Payment Flow Prototype</title>
+<style>
+  :root{
+    --brand:#7C2338; --brand-deep:#5E1728; --brand-soft:#9A4257; --on-brand:#F8EEE9;
+    --gold:#A9762F; --gold-soft:#C79A57;
+    --paper:#F5F0EA; --card:#FFFFFF; --card-2:#FBF7F2;
+    --ink:#2E1620; --muted:#8C7178; --faint:#B4A0A5;
+    --line:#ECE2DB; --line-2:#F2EAE4;
+    --ok:#2F805D; --ok-bg:#E7F1EB; --ok-line:#C4DED0;
+    --warn:#9A6A15; --warn-bg:#F6EDD8;
+    --disabled-bg:#F0EAE5; --disabled-ink:#AF9EA1;
+    --shadow:0 1px 2px rgba(46,22,32,.04),0 10px 30px rgba(46,22,32,.06);
+    --shadow-soft:0 2px 8px rgba(46,22,32,.05),0 20px 50px rgba(46,22,32,.07);
+    --shadow-lg:0 30px 70px rgba(46,22,32,.16);
+    --r:18px; --r-sm:12px;
+    --serif:"Iowan Old Style",Georgia,"Palatino Linotype",P052,serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --calm:cubic-bezier(.22,.68,.3,1);
+    --t:.52s;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --brand:#C6516A; --brand-deep:#93304A; --brand-soft:#D9788C; --on-brand:#FBEFE9;
+      --gold:#CFA45F; --gold-soft:#B98B45;
+      --paper:#150B10; --card:#20131A; --card-2:#281822;
+      --ink:#F2E6E6; --muted:#B59199; --faint:#8A6B76;
+      --line:#382531; --line-2:#31212B;
+      --ok:#57BC8F; --ok-bg:#182920; --ok-line:#2E4D3D;
+      --warn:#D9A94E; --warn-bg:#2B2214;
+      --disabled-bg:#1D1219; --disabled-ink:#7C636D;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.46);
+      --shadow-soft:0 2px 10px rgba(0,0,0,.4),0 22px 54px rgba(0,0,0,.5);
+      --shadow-lg:0 34px 80px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="light"]{
+    --brand:#7C2338; --brand-deep:#5E1728; --brand-soft:#9A4257; --on-brand:#F8EEE9;
+    --gold:#A9762F; --gold-soft:#C79A57;
+    --paper:#F5F0EA; --card:#FFFFFF; --card-2:#FBF7F2;
+    --ink:#2E1620; --muted:#8C7178; --faint:#B4A0A5;
+    --line:#ECE2DB; --line-2:#F2EAE4;
+    --ok:#2F805D; --ok-bg:#E7F1EB; --ok-line:#C4DED0;
+    --warn:#9A6A15; --warn-bg:#F6EDD8;
+    --disabled-bg:#F0EAE5; --disabled-ink:#AF9EA1;
+    --shadow:0 1px 2px rgba(46,22,32,.04),0 10px 30px rgba(46,22,32,.06);
+    --shadow-soft:0 2px 8px rgba(46,22,32,.05),0 20px 50px rgba(46,22,32,.07);
+    --shadow-lg:0 30px 70px rgba(46,22,32,.16);
+  }
+  :root[data-theme="dark"]{
+    --brand:#C6516A; --brand-deep:#93304A; --brand-soft:#D9788C; --on-brand:#FBEFE9;
+    --gold:#CFA45F; --gold-soft:#B98B45;
+    --paper:#150B10; --card:#20131A; --card-2:#281822;
+    --ink:#F2E6E6; --muted:#B59199; --faint:#8A6B76;
+    --line:#382531; --line-2:#31212B;
+    --ok:#57BC8F; --ok-bg:#182920; --ok-line:#2E4D3D;
+    --warn:#D9A94E; --warn-bg:#2B2214;
+    --disabled-bg:#1D1219; --disabled-ink:#7C636D;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.46);
+    --shadow-soft:0 2px 10px rgba(0,0,0,.4),0 22px 54px rgba(0,0,0,.5);
+    --shadow-lg:0 34px 80px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0}
+  .wrap{
+    font-family:var(--sans); color:var(--ink);
+    background:
+      radial-gradient(130% 90% at 50% -20%, color-mix(in srgb,var(--brand) 9%, transparent), transparent 62%),
+      var(--paper);
+    min-height:100vh; padding:30px 18px 64px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- preview chrome ---------- */
+  .preview-head{max-width:880px;margin:0 auto 24px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 24px;justify-content:space-between}
+  .ph-title{display:flex;flex-direction:column;gap:7px}
+  .eyebrow{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--brand-soft);font-weight:700}
+  .ph-title h1{font-family:var(--serif);font-weight:600;font-size:24px;margin:0;letter-spacing:.01em;text-wrap:balance;line-height:1.2}
+  .ph-title p{margin:0;color:var(--muted);font-size:13.5px;max-width:58ch;line-height:1.6}
+  .ph-controls{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+  .jump{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+  .jump button{
+    font:inherit;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;
+    background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;
+    display:inline-flex;align-items:center;gap:6px;transition:.22s var(--calm);
+  }
+  .jump button .n{font-variant-numeric:tabular-nums;color:var(--faint);font-size:11px}
+  .jump button:hover{border-color:var(--brand-soft);color:var(--ink)}
+  .jump button[aria-current="true"]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+  .jump button[aria-current="true"] .n{color:color-mix(in srgb,var(--on-brand) 70%,transparent)}
+  .theme-btn{font:inherit;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 13px;transition:.22s var(--calm)}
+  .theme-btn:hover{color:var(--ink);border-color:var(--brand-soft)}
+
+  /* ---------- phone ---------- */
+  .stage{display:flex;justify-content:center}
+  .phone{
+    width:398px;max-width:100%;height:824px;background:var(--card);border-radius:44px;
+    box-shadow:var(--shadow-lg); position:relative; overflow:hidden;
+    border:1px solid var(--line-2); display:flex;flex-direction:column;
+    animation:arrive .7s var(--calm) both;
+  }
+  @keyframes arrive{from{opacity:0;transform:translateY(16px) scale(.99)}to{opacity:1;transform:none}}
+
+  .status-bar{height:32px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-size:12px;font-weight:600;color:var(--on-brand);background:var(--brand)}
+  .status-bar .dots{display:flex;gap:4px;align-items:center}
+  .status-bar .dots i{width:5px;height:5px;border-radius:50%;background:color-mix(in srgb,var(--on-brand) 58%,transparent);display:block}
+
+  .appbar{flex:0 0 auto;background:linear-gradient(178deg,var(--brand),var(--brand-deep));color:var(--on-brand);padding:8px 20px 18px}
+  .appbar-row{display:flex;align-items:center;gap:12px;min-height:32px}
+  .icon-btn{width:34px;height:34px;border-radius:11px;border:1px solid color-mix(in srgb,var(--on-brand) 24%,transparent);background:transparent;color:var(--on-brand);cursor:pointer;display:grid;place-items:center;transition:.22s var(--calm)}
+  .icon-btn:hover{background:color-mix(in srgb,var(--on-brand) 13%,transparent)}
+  .icon-btn:active{transform:scale(.94)}
+  .icon-btn[hidden]{display:none}
+  .wordmark{font-family:var(--serif);font-weight:600;font-size:16px;letter-spacing:.3em;flex:1;text-align:center;padding-right:34px}
+  .appbar-row.has-back .wordmark{padding-right:0}
+  .steps{display:flex;gap:7px;margin-top:15px}
+  .steps .seg{flex:1;height:3px;border-radius:2px;background:color-mix(in srgb,var(--on-brand) 20%,transparent);transition:background .5s var(--calm)}
+  .steps .seg.on{background:var(--on-brand)}
+  .steps .seg.done{background:color-mix(in srgb,var(--on-brand) 60%,transparent)}
+  .step-label{margin-top:9px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:color-mix(in srgb,var(--on-brand) 76%,transparent);font-weight:600}
+
+  .screenport{position:relative;flex:1;overflow:hidden}
+  .screen{position:absolute;inset:0;overflow-y:auto;padding:24px 20px 172px;display:none}
+  .screen.active{display:block}
+  .screen::-webkit-scrollbar{width:0}
+
+  /* staggered calm reveal */
+  .screen.active > *{animation:rise var(--t) var(--calm) both}
+  .screen.active > *:nth-child(1){animation-delay:.04s}
+  .screen.active > *:nth-child(2){animation-delay:.10s}
+  .screen.active > *:nth-child(3){animation-delay:.16s}
+  .screen.active > *:nth-child(4){animation-delay:.22s}
+  .screen.active > *:nth-child(5){animation-delay:.28s}
+  .screen.active > *:nth-child(6){animation-delay:.34s}
+  .screen.active > *:nth-child(7){animation-delay:.40s}
+  .screen.active > *:nth-child(8){animation-delay:.46s}
+  .screen.active > *:nth-child(n+9){animation-delay:.52s}
+  .screen[data-screen="done"].active > .done-wrap{animation:none}
+  .screen[data-screen="done"].active .done-wrap > *{animation:rise var(--t) var(--calm) both}
+  .done-wrap > *:nth-child(1){animation-delay:.06s}
+  .done-wrap > *:nth-child(2){animation-delay:.28s}
+  .done-wrap > *:nth-child(3){animation-delay:.36s}
+  .done-wrap > *:nth-child(4){animation-delay:.44s}
+  .done-wrap > *:nth-child(5){animation-delay:.52s}
+  .done-wrap > *:nth-child(6){animation-delay:.60s}
+  @keyframes rise{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
+
+  h2.sc-title{font-family:var(--serif);font-weight:600;font-size:23px;margin:2px 0 6px;letter-spacing:.01em;text-wrap:balance;line-height:1.22}
+  .sc-sub{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 22px;max-width:38ch}
+  .section-label{font-size:11px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:26px 4px 12px}
+  .section-label:first-of-type{margin-top:8px}
+
+  /* order summary */
+  .order-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow-soft)}
+  .order-top{display:flex;gap:15px;align-items:flex-start}
+  .thumb{width:56px;height:56px;border-radius:15px;flex:0 0 auto;display:grid;place-items:center;background:linear-gradient(150deg,var(--brand),var(--brand-deep));color:var(--on-brand);font-family:var(--serif);font-size:24px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 38%,transparent)}
+  .order-name{font-weight:640;font-size:16px;margin:0;line-height:1.3}
+  .order-meta{color:var(--muted);font-size:12.5px;margin:4px 0 0;line-height:1.4}
+  .tag{display:inline-block;font-size:11px;font-weight:600;color:var(--brand-soft);background:color-mix(in srgb,var(--brand) 8%,transparent);border:1px solid color-mix(in srgb,var(--brand) 18%,transparent);border-radius:999px;padding:3px 10px;margin-top:10px}
+  .rows{margin-top:20px;border-top:1px solid var(--line-2);padding-top:18px;display:flex;flex-direction:column;gap:11px}
+  .row{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px}
+  .row .k{color:var(--muted)}
+  .row .v{font-variant-numeric:tabular-nums;font-weight:600}
+  .row.total{border-top:1px solid var(--line-2);margin-top:8px;padding-top:15px}
+  .row.total .k{color:var(--ink);font-weight:640}
+  .row.total .v{font-size:24px;font-family:var(--serif);color:var(--brand)}
+  .peso{font-family:var(--sans);font-weight:600;font-size:14px;opacity:.72;margin-right:2px}
+  .assurance{display:flex;gap:10px;align-items:flex-start;margin-top:20px;padding-top:18px;border-top:1px solid var(--line-2);color:var(--muted);font-size:12px;line-height:1.55}
+  .assurance svg{flex:0 0 auto;margin-top:1px;color:var(--ok)}
+
+  /* method rows */
+  .method{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .24s var(--calm),box-shadow .24s var(--calm),border-color .24s var(--calm);font:inherit;color:var(--ink);margin-bottom:12px}
+  .method:hover{border-color:var(--brand-soft);box-shadow:var(--shadow-soft);transform:translateY(-2px)}
+  .method:active{transform:translateY(0) scale(.995)}
+  .method:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  .m-badge{width:46px;height:46px;border-radius:13px;flex:0 0 auto;display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.02em}
+  .m-badge.bdo{background:#0A2C6B;color:#fff}
+  .m-badge.gcash{background:#0A6CF1;color:#fff}
+  .m-badge.card{background:var(--disabled-bg);color:var(--disabled-ink)}
+  .m-badge.maya{background:var(--disabled-bg);color:var(--disabled-ink)}
+  .m-badge.grab{background:var(--disabled-bg);color:var(--disabled-ink)}
+  .m-body{flex:1;min-width:0}
+  .m-title{font-weight:640;font-size:14.5px;display:flex;align-items:center;gap:9px}
+  .m-desc{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4}
+  .chev{color:var(--faint);flex:0 0 auto;transition:transform .24s var(--calm)}
+  .method:hover .chev{transform:translateX(3px);color:var(--brand-soft)}
+  .m-avail{font-size:10.5px;font-weight:700;letter-spacing:.03em;color:var(--ok);background:var(--ok-bg);border:1px solid var(--ok-line);border-radius:999px;padding:2px 9px}
+
+  .paymongo-group{border:1px dashed var(--line);border-radius:var(--r);padding:14px 14px 8px;background:color-mix(in srgb,var(--card-2) 55%,transparent)}
+  .pm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 3px 12px}
+  .pm-head .lft{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:640}
+  .pm-head .lft small{color:var(--muted);font-weight:500}
+  .soon{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--warn);background:var(--warn-bg);border-radius:999px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px}
+  .method.disabled{cursor:not-allowed;opacity:.6;background:var(--disabled-bg);border-style:solid;border-color:var(--line-2)}
+  .method.disabled:hover{transform:none;box-shadow:none;border-color:var(--line-2)}
+  .method.disabled .m-title{color:var(--disabled-ink)}
+  .method.disabled .lock{margin-left:auto;color:var(--disabled-ink)}
+  .pm-note{font-size:11.5px;color:var(--muted);line-height:1.55;padding:4px 4px 10px;display:flex;gap:8px}
+  .pm-note svg{flex:0 0 auto;margin-top:1px;color:var(--warn)}
+
+  /* instruction screen — calm light amount card */
+  .amount-hero{
+    background:linear-gradient(162deg, color-mix(in srgb,var(--brand) 9%, var(--card)), var(--card) 78%);
+    border:1px solid color-mix(in srgb,var(--brand) 15%,var(--line));
+    color:var(--ink);border-radius:var(--r);padding:22px;text-align:center;box-shadow:var(--shadow)
+  }
+  .amount-hero .lab{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .amount-hero .amt{font-family:var(--serif);font-size:40px;font-variant-numeric:tabular-nums;margin-top:6px;line-height:1;color:var(--brand)}
+  .amount-hero .amt .peso{font-size:20px;opacity:.8;color:var(--brand-soft)}
+  .amount-hero .for{font-size:12px;color:var(--muted);margin-top:9px}
+  .amount-hero .secure{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:11px;font-weight:600;color:var(--ok);background:var(--ok-bg);border:1px solid var(--ok-line);border-radius:999px;padding:5px 12px}
+
+  .ref-card{margin-top:14px;background:var(--card);border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line));border-radius:var(--r);padding:16px 17px;box-shadow:var(--shadow)}
+  .ref-card .lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .ref-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+  .ref-code{font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:.09em;color:var(--ink)}
+  .ref-note{font-size:11.5px;color:var(--muted);margin-top:11px;line-height:1.5;display:flex;gap:7px}
+  .ref-note svg{flex:0 0 auto;margin-top:1px;color:var(--gold)}
+
+  .copy-btn{font:inherit;font-size:12px;font-weight:640;color:var(--brand);background:color-mix(in srgb,var(--brand) 7%,transparent);border:1px solid color-mix(in srgb,var(--brand) 24%,transparent);border-radius:9px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.2s var(--calm);white-space:nowrap}
+  .copy-btn:hover{background:color-mix(in srgb,var(--brand) 13%,transparent)}
+  .copy-btn:active{transform:scale(.96)}
+  .copy-btn.done{color:var(--ok);border-color:var(--ok-line);background:var(--ok-bg)}
+
+  .qr-card{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;text-align:center;box-shadow:var(--shadow-soft)}
+  .qr-frame{width:194px;height:194px;margin:0 auto;background:#fff;border-radius:16px;padding:13px;box-shadow:inset 0 0 0 1px var(--line);position:relative}
+  .qr-frame svg{width:100%;height:100%;display:block;animation:qrsettle .6s var(--calm) both;animation-delay:.35s}
+  @keyframes qrsettle{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+  .qr-frame .badge{position:absolute;inset:0;margin:auto;width:42px;height:42px;border-radius:11px;background:#fff;box-shadow:0 0 0 5px #fff;display:grid;place-items:center;font-family:var(--serif);color:var(--brand);font-size:16px;font-weight:700}
+  .qr-cap{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.45}
+
+  .divider-or{display:flex;align-items:center;gap:13px;margin:22px 2px;color:var(--faint);font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:600}
+  .divider-or::before,.divider-or::after{content:"";height:1px;background:var(--line);flex:1}
+
+  .detail-list{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+  .detail{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;border-bottom:1px solid var(--line-2)}
+  .detail:last-child{border-bottom:0}
+  .detail .dk{font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+  .detail .dv{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink);margin-top:4px;font-variant-numeric:tabular-nums}
+  .detail .left{min-width:0}
+  .admin-note{font-size:11px;color:var(--faint);margin:11px 4px 0;display:flex;gap:7px;line-height:1.5}
+  .admin-note svg{flex:0 0 auto;margin-top:1px}
+
+  .upload{margin-top:20px;border:1.6px dashed var(--line);border-radius:var(--r);padding:24px;text-align:center;background:var(--card-2);cursor:pointer;transition:.24s var(--calm);display:block}
+  .upload:hover{border-color:var(--brand-soft);background:color-mix(in srgb,var(--brand) 4%,transparent)}
+  .upload .up-ic{color:var(--brand-soft);margin-bottom:9px;transition:transform .3s var(--calm)}
+  .upload:hover .up-ic{transform:translateY(-2px)}
+  .upload .up-t{font-weight:640;font-size:13.5px}
+  .upload .up-d{font-size:11.5px;color:var(--muted);margin-top:4px}
+  .upload.filled{border-style:solid;border-color:var(--ok-line);background:var(--ok-bg);animation:settle .4s var(--calm)}
+  .upload.filled .up-ic{color:var(--ok)}
+  @keyframes settle{0%{transform:scale(.99)}50%{transform:scale(1.008)}100%{transform:scale(1)}}
+
+  /* confirmation */
+  .done-wrap{text-align:center;padding:26px 8px 0}
+  .seal{width:100px;height:100px;margin:10px auto 22px;border-radius:50%;background:var(--ok-bg);border:1px solid var(--ok-line);display:grid;place-items:center;color:var(--ok);position:relative;animation:sealpop .6s var(--calm) both;animation-delay:.1s}
+  @keyframes sealpop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+  .seal::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:1.5px solid var(--ok-line);opacity:0}
+  .screen[data-screen="done"].active .seal::after{animation:ripple 1.1s var(--calm) .3s}
+  @keyframes ripple{0%{transform:scale(.85);opacity:.55}100%{transform:scale(1.28);opacity:0}}
+  .seal-check{stroke-dasharray:34;stroke-dashoffset:34}
+  .screen[data-screen="done"].active .seal-check{animation:draw .55s var(--calm) .38s forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .done-wrap h2{font-family:var(--serif);font-weight:600;font-size:25px;margin:0 0 9px}
+  .done-wrap p.lead{color:var(--muted);font-size:14px;line-height:1.6;margin:0 auto 22px;max-width:32ch}
+  .status-pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:640;color:var(--warn);background:var(--warn-bg);border-radius:999px;padding:8px 15px;margin-bottom:24px}
+  .status-pill .pulse{width:7px;height:7px;border-radius:50%;background:var(--warn);animation:breathe 2.4s ease-in-out infinite}
+  @keyframes breathe{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
+  .recap{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:4px 4px;box-shadow:var(--shadow)}
+  .recap .detail:last-child{border-bottom:0}
+  .next{text-align:left;margin-top:22px;display:flex;flex-direction:column;gap:14px}
+  .next .step{display:flex;gap:13px;align-items:flex-start}
+  .next .num{width:25px;height:25px;border-radius:50%;flex:0 0 auto;background:color-mix(in srgb,var(--brand) 9%,transparent);color:var(--brand-soft);font-size:12px;font-weight:700;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+  .next .txt{font-size:13px;line-height:1.55}
+  .next .txt b{font-weight:640}
+  .next .txt small{color:var(--muted);display:block;margin-top:2px}
+
+  /* footer action */
+  .foot{position:absolute;left:0;right:0;bottom:0;padding:16px 20px calc(16px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line-2);box-shadow:0 -10px 24px color-mix(in srgb,var(--ink) 6%,transparent)}
+  .btn{width:100%;font:inherit;font-weight:640;font-size:15px;border-radius:15px;padding:16px;cursor:pointer;border:1px solid transparent;transition:transform .2s var(--calm),background .2s var(--calm),box-shadow .2s var(--calm);display:flex;align-items:center;justify-content:center;gap:9px;animation:rise .4s var(--calm) both}
+  .btn-primary{background:var(--brand);color:var(--on-brand);box-shadow:0 10px 24px color-mix(in srgb,var(--brand) 30%,transparent)}
+  .btn-primary:hover{background:var(--brand-deep);transform:translateY(-1px);box-shadow:0 14px 30px color-mix(in srgb,var(--brand) 34%,transparent)}
+  .btn-primary:active{transform:translateY(0) scale(.99)}
+  .btn-primary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .btn-ghost{background:transparent;color:var(--muted);box-shadow:none;font-size:13px;padding:11px;animation:none}
+  .btn-ghost:hover{color:var(--ink)}
+  .foot .hint{text-align:center;font-size:11px;color:var(--faint);margin-top:10px;line-height:1.45}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(22px);background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:12px 19px;border-radius:12px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:.32s var(--calm);z-index:50}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;animation-delay:0!important;transition-duration:.001ms!important}
+  }
+  @media (max-width:460px){.wrap{padding:18px 8px 40px}.phone{height:770px}}
+</style>
+
+<div class="wrap">
+  <div class="preview-head">
+    <div class="ph-title">
+      <span class="eyebrow">Prototype · Customer Checkout</span>
+      <h1>A calm way to pay</h1>
+      <p>The full pay experience a customer sees. Bank Transfer (BDO) and GCash work end-to-end today; the PayMongo online options are shown but <b>locked until merchant verification is approved</b>. Click through the phone, or jump to any screen.</p>
+    </div>
+    <div class="ph-controls">
+      <button class="theme-btn" id="themeBtn" type="button">◑ Theme</button>
+      <div class="jump" id="jump"></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="phone">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span style="font-family:var(--serif);letter-spacing:.22em;font-size:11px">SETNAYAN</span>
+        <span class="dots"><i></i><i></i><i></i></span>
+      </div>
+
+      <div class="appbar">
+        <div class="appbar-row" id="appRow">
+          <button class="icon-btn" id="backBtn" type="button" hidden aria-label="Back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span class="wordmark">SETNAYAN</span>
+        </div>
+        <div class="steps" id="steps"><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+        <div class="step-label" id="stepLabel">Step 1 of 3 · Review</div>
+      </div>
+
+      <div class="screenport">
+
+        <!-- 1 · SUMMARY -->
+        <section class="screen active" data-screen="summary">
+          <h2 class="sc-title">Review your order</h2>
+          <p class="sc-sub">One quick look before you choose how to pay. No rush.</p>
+          <div class="order-card">
+            <div class="order-top">
+              <div class="thumb">S</div>
+              <div style="flex:1">
+                <p class="order-name">Setnayan AI — Planning Assistant</p>
+                <p class="order-meta">Guided planning for your wedding · one-time unlock</p>
+                <span class="tag">One-time · full access to your date</span>
+              </div>
+            </div>
+            <div class="rows">
+              <div class="row"><span class="k">Setnayan AI</span><span class="v"><span class="peso">₱</span>499.00</span></div>
+              <div class="row"><span class="k">Platform fee</span><span class="v">₱0.00</span></div>
+              <div class="row total"><span class="k">Total due</span><span class="v"><span class="peso">₱</span>499.00</span></div>
+            </div>
+            <div class="assurance">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+              <span>You only pay once. We email your Official Receipt and activate access as soon as your payment is confirmed.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2 · METHOD -->
+        <section class="screen" data-screen="method">
+          <h2 class="sc-title">How would you like to pay?</h2>
+          <p class="sc-sub">Pay <b>₱499.00</b> for Setnayan AI. Pick whatever is easiest for you.</p>
+
+          <div class="section-label">Pay manually · available now</div>
+
+          <button class="method" type="button" data-go="bdo">
+            <span class="m-badge bdo">BDO</span>
+            <span class="m-body">
+              <span class="m-title">Bank Transfer — BDO <span class="m-avail">Ready</span></span>
+              <span class="m-desc">Scan our BDO QR, or transfer using the account details</span>
+            </span>
+            <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+
+          <button class="method" type="button" data-go="gcash">
+            <span class="m-badge gcash">G</span>
+            <span class="m-body">
+              <span class="m-title">GCash <span class="m-avail">Ready</span></span>
+              <span class="m-desc">Scan our GCash QR, or send to our GCash number</span>
+            </span>
+            <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+
+          <div class="section-label">Pay online · instant</div>
+          <div class="paymongo-group">
+            <div class="pm-head">
+              <span class="lft">Instant payment <small>· via PayMongo</small></span>
+              <span class="soon">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
+                Coming soon
+              </span>
+            </div>
+
+            <button class="method disabled" type="button" data-locked="true" aria-disabled="true">
+              <span class="m-badge card">CARD</span>
+              <span class="m-body"><span class="m-title">Credit / Debit Card</span><span class="m-desc">Visa · Mastercard</span></span>
+              <svg class="lock" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </button>
+            <button class="method disabled" type="button" data-locked="true" aria-disabled="true">
+              <span class="m-badge maya">Maya</span>
+              <span class="m-body"><span class="m-title">Maya</span><span class="m-desc">Instant e-wallet</span></span>
+              <svg class="lock" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </button>
+            <button class="method disabled" type="button" data-locked="true" aria-disabled="true">
+              <span class="m-badge grab">Grab</span>
+              <span class="m-body"><span class="m-title">GrabPay</span><span class="m-desc">Instant e-wallet</span></span>
+              <svg class="lock" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </button>
+
+            <div class="pm-note">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+              <span>Instant online payment unlocks once our PayMongo merchant verification is approved. Until then, Bank Transfer or GCash work perfectly — we confirm within 24 hours.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3 · BDO -->
+        <section class="screen" data-screen="bdo">
+          <h2 class="sc-title">Bank Transfer — BDO</h2>
+          <p class="sc-sub">Send the exact amount, then attach your screenshot. That's it.</p>
+
+          <div class="amount-hero">
+            <div class="lab">Amount to send</div>
+            <div class="amt"><span class="peso">₱</span>499.00</div>
+            <div class="for">for Setnayan AI · Planning Assistant</div>
+            <div class="secure">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              Secure · one-time payment
+            </div>
+          </div>
+
+          <div class="ref-card">
+            <div class="lab">Reference code</div>
+            <div class="ref-row">
+              <span class="ref-code" id="refBdo">SN-7QX4K2</span>
+              <button class="copy-btn" type="button" data-copy="SN-7QX4K2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy
+              </button>
+            </div>
+            <div class="ref-note">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01"/><circle cx="12" cy="12" r="9"/></svg>
+              <span>Add this to your transfer message so we can match your payment right away.</span>
+            </div>
+          </div>
+
+          <div class="qr-card">
+            <div class="qr-frame"><div class="qr" data-qr="bdo"></div><span class="badge">B</span></div>
+            <div class="qr-cap">Scan with your BDO app · <b>QRPH</b></div>
+          </div>
+
+          <div class="divider-or">or transfer manually</div>
+
+          <div class="detail-list">
+            <div class="detail"><span class="left"><span class="dk">Account name</span><span class="dv">SETNAYAN TECHNOLOGIES</span></span><button class="copy-btn" type="button" data-copy="SETNAYAN TECHNOLOGIES">Copy</button></div>
+            <div class="detail"><span class="left"><span class="dk">Account number</span><span class="dv">0012 3456 7890</span></span><button class="copy-btn" type="button" data-copy="001234567890">Copy</button></div>
+            <div class="detail"><span class="left"><span class="dk">Bank</span><span class="dv">BDO Unibank</span></span></div>
+          </div>
+          <div class="admin-note">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01"/><circle cx="12" cy="12" r="9"/></svg>
+            <span>Sample details — set in Admin › Payment Methods (changing a receiving account is owner-approval gated).</span>
+          </div>
+
+          <label class="upload" id="upBdo">
+            <div class="up-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0l-4 4m4-4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+            <div class="up-t">Upload your payment screenshot</div>
+            <div class="up-d">PNG or JPG · so we can verify your transfer</div>
+          </label>
+        </section>
+
+        <!-- 4 · GCASH -->
+        <section class="screen" data-screen="gcash">
+          <h2 class="sc-title">GCash</h2>
+          <p class="sc-sub">Send the exact amount, then attach your screenshot. That's it.</p>
+
+          <div class="amount-hero">
+            <div class="lab">Amount to send</div>
+            <div class="amt"><span class="peso">₱</span>499.00</div>
+            <div class="for">for Setnayan AI · Planning Assistant</div>
+            <div class="secure">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              Secure · one-time payment
+            </div>
+          </div>
+
+          <div class="ref-card">
+            <div class="lab">Reference code</div>
+            <div class="ref-row">
+              <span class="ref-code" id="refG">SN-7QX4K2</span>
+              <button class="copy-btn" type="button" data-copy="SN-7QX4K2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy
+              </button>
+            </div>
+            <div class="ref-note">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01"/><circle cx="12" cy="12" r="9"/></svg>
+              <span>Add this in the GCash "message" field so we can match your payment right away.</span>
+            </div>
+          </div>
+
+          <div class="qr-card">
+            <div class="qr-frame"><div class="qr" data-qr="gcash"></div><span class="badge">G</span></div>
+            <div class="qr-cap">Scan with GCash · <b>Send Money → Scan QR</b></div>
+          </div>
+
+          <div class="divider-or">or send to our number</div>
+
+          <div class="detail-list">
+            <div class="detail"><span class="left"><span class="dk">GCash name</span><span class="dv">Indalecio C. II</span></span></div>
+            <div class="detail"><span class="left"><span class="dk">GCash number</span><span class="dv">0917 123 4567</span></span><button class="copy-btn" type="button" data-copy="09171234567">Copy</button></div>
+          </div>
+          <div class="admin-note">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01"/><circle cx="12" cy="12" r="9"/></svg>
+            <span>Sample details — set in Admin › Payment Methods (changing a receiving account is owner-approval gated).</span>
+          </div>
+
+          <label class="upload" id="upG">
+            <div class="up-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0l-4 4m4-4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+            <div class="up-t">Upload your payment screenshot</div>
+            <div class="up-d">PNG or JPG · so we can verify your transfer</div>
+          </label>
+        </section>
+
+        <!-- 5 · DONE -->
+        <section class="screen" data-screen="done">
+          <div class="done-wrap">
+            <div class="seal">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="seal-check" d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <h2>Payment submitted</h2>
+            <p class="lead">Thank you! We've received your details for <b>Setnayan AI</b>. You can relax — we'll take it from here.</p>
+            <div class="status-pill"><span class="pulse"></span> Pending verification</div>
+
+            <div class="recap">
+              <div class="detail"><span class="left"><span class="dk">Reference</span><span class="dv">SN-7QX4K2</span></span></div>
+              <div class="detail"><span class="left"><span class="dk">Amount</span><span class="dv">₱499.00</span></span></div>
+              <div class="detail"><span class="left"><span class="dk">Method</span><span class="dv" id="doneMethod">Bank Transfer — BDO</span></span></div>
+            </div>
+
+            <div class="next">
+              <div class="step"><span class="num">1</span><span class="txt"><b>We confirm your payment</b><small>Usually within a few hours · always under 24 hours.</small></span></div>
+              <div class="step"><span class="num">2</span><span class="txt"><b>Your access goes live</b><small>Setnayan AI unlocks automatically the moment it's confirmed.</small></span></div>
+              <div class="step"><span class="num">3</span><span class="txt"><b>You get an email + receipt</b><small>Confirmation and your Official Receipt land in your inbox.</small></span></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="foot" id="foot"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied</div>
+
+<script>
+(function(){
+  const stepOf = {summary:0, method:1, bdo:1, gcash:1, done:2};
+  const stepName = {summary:"Review", method:"Pay", bdo:"Pay", gcash:"Pay", done:"Confirm"};
+  const jumpDefs = [
+    {id:"summary",label:"Summary"},{id:"method",label:"Methods"},
+    {id:"bdo",label:"BDO"},{id:"gcash",label:"GCash"},{id:"done",label:"Done"},
+  ];
+  let current = "summary";
+  let lastMethod = "Bank Transfer — BDO";
+
+  const screens = {};
+  document.querySelectorAll(".screen").forEach(s=>screens[s.dataset.screen]=s);
+  const backBtn = document.getElementById("backBtn");
+  const appRow = document.getElementById("appRow");
+  const steps = document.getElementById("steps").children;
+  const stepLabel = document.getElementById("stepLabel");
+  const foot = document.getElementById("foot");
+  const jump = document.getElementById("jump");
+  const toast = document.getElementById("toast");
+  const doneMethod = document.getElementById("doneMethod");
+
+  jumpDefs.forEach((d,i)=>{
+    const b=document.createElement("button");
+    b.type="button"; b.dataset.for=d.id;
+    b.innerHTML='<span class="n">'+(i+1)+'</span>'+d.label;
+    b.addEventListener("click",()=>show(d.id));
+    jump.appendChild(b);
+  });
+
+  function arrow(){return ' <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';}
+  function btn(label,to,muted){return '<button class="btn btn-primary" data-to="'+to+'">'+label+(muted?"":arrow())+'</button>';}
+  function ghost(label,to){return '<button class="btn btn-ghost" data-to="'+to+'">'+label+'</button>';}
+  function footFor(id){
+    if(id==="summary") return btn("Continue to payment","method");
+    if(id==="method")  return '<div class="hint">Bank Transfer &amp; GCash are active. Online options unlock after verification.</div>';
+    if(id==="bdo"||id==="gcash") return btn("I've paid — submit for review","done")+ghost("Choose another method","method");
+    if(id==="done") return btn("Back to my dashboard","summary",true);
+    return "";
+  }
+
+  function show(id){
+    if(!screens[id]) return;
+    if(id==="done") doneMethod.textContent = lastMethod;
+    current=id;
+    Object.values(screens).forEach(s=>s.classList.remove("active"));
+    void screens[id].offsetWidth;           // reflow so reveal animations restart
+    screens[id].classList.add("active");
+    screens[id].scrollTop=0;
+    const showBack = id!=="summary" && id!=="done";
+    backBtn.hidden = !showBack;
+    appRow.classList.toggle("has-back", showBack);
+    const st=stepOf[id];
+    for(let i=0;i<steps.length;i++){
+      steps[i].className="seg"+(i<st?" done":"")+(i===st?" on":"");
+    }
+    stepLabel.textContent="Step "+(st+1)+" of 3 · "+stepName[id];
+    foot.innerHTML=footFor(id);
+    foot.querySelectorAll("[data-to]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.to)));
+    jump.querySelectorAll("button").forEach(b=>b.setAttribute("aria-current", b.dataset.for===id?"true":"false"));
+  }
+
+  document.querySelectorAll("[data-go]").forEach(m=>{
+    m.addEventListener("click",()=>{
+      lastMethod = m.dataset.go==="bdo" ? "Bank Transfer — BDO" : "GCash";
+      show(m.dataset.go);
+    });
+  });
+  document.querySelectorAll("[data-locked]").forEach(m=>{
+    m.addEventListener("click",()=>flash("Available once PayMongo verification is approved"));
+  });
+  backBtn.addEventListener("click",()=>{
+    if(current==="bdo"||current==="gcash") show("method");
+    else if(current==="method") show("summary");
+  });
+
+  document.addEventListener("click",e=>{
+    const c=e.target.closest("[data-copy]"); if(!c) return;
+    const val=c.dataset.copy;
+    if(navigator.clipboard) navigator.clipboard.writeText(val).catch(()=>{});
+    if(c.classList.contains("copy-btn")){
+      const orig=c.innerHTML; c.classList.add("done"); c.textContent="Copied ✓";
+      setTimeout(()=>{c.classList.remove("done");c.innerHTML=orig;},1400);
+    }
+    flash("Copied “"+val+"”");
+  });
+
+  ["upBdo","upG"].forEach(id=>{
+    const el=document.getElementById(id);
+    el.addEventListener("click",e=>{
+      e.preventDefault();
+      el.classList.add("filled");
+      el.querySelector(".up-t").textContent="Screenshot attached ✓";
+      el.querySelector(".up-d").textContent="payment-proof.png · tap submit below";
+    });
+  });
+
+  function flash(msg){
+    toast.textContent=msg; toast.classList.add("show");
+    clearTimeout(flash._t); flash._t=setTimeout(()=>toast.classList.remove("show"),1600);
+  }
+
+  const themeBtn=document.getElementById("themeBtn");
+  themeBtn.addEventListener("click",()=>{
+    const root=document.documentElement;
+    const cur=root.getAttribute("data-theme");
+    const sysDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches;
+    root.setAttribute("data-theme", cur ? (cur==="dark"?"light":"dark") : (sysDark?"light":"dark"));
+  });
+
+  function seeded(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+  function drawQR(host,seed){
+    const N=25, rnd=seeded(seed), cells=[];
+    function finder(r,c){for(let i=0;i<7;i++)for(let j=0;j<7;j++){const edge=(i===0||i===6||j===0||j===6),inner=(i>=2&&i<=4&&j>=2&&j<=4);cells.push([r+i,c+j,(edge||inner)?1:0]);}}
+    const skip=(r,c)=>((r<8&&c<8)||(r<8&&c>N-9)||(r>N-9&&c<8));
+    for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(skip(r,c))continue;cells.push([r,c,rnd()>0.52?1:0]);}
+    finder(0,0);finder(0,N-7);finder(N-7,0);
+    let rects="";
+    for(const [r,c,on] of cells){if(on)rects+='<rect x="'+c+'" y="'+r+'" width="1" height="1"/>';}
+    host.innerHTML='<svg viewBox="0 0 '+N+' '+N+'" shape-rendering="crispEdges" fill="#141414" role="img" aria-label="Sample QR code">'+rects+'</svg>';
+  }
+  document.querySelectorAll("[data-qr]").forEach(el=>drawQR(el, el.dataset.qr==="bdo"?7421:9163));
+
+  show("summary");
+})();
+</script>

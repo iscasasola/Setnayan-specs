@@ -1,0 +1,600 @@
+diff --git a/apps/web/app/_components/nav/doorway-sidebar-header.tsx b/apps/web/app/_components/nav/doorway-sidebar-header.tsx
+index d1d8aafeb..ba1bd18ce 100644
+--- a/apps/web/app/_components/nav/doorway-sidebar-header.tsx
++++ b/apps/web/app/_components/nav/doorway-sidebar-header.tsx
+@@ -1,7 +1,34 @@
++import Link from 'next/link';
++import { Home, ArrowLeft } from 'lucide-react';
+ import { Wordmark } from '@/app/_components/brand-marks';
+ import { AccountSwitcherStandalone } from '@/app/_components/account-switcher/account-switcher';
+ import type { SwitcherData } from '@/app/_components/account-switcher/get-switcher-data';
+ 
++/**
++ * DoorwayContext — "where you are" for the Home-anchored sidebar header.
++ *
++ * Passed by the event / vendor / admin layouts. When present, the header
++ * renders a pinned Home button + a context chip INSTEAD of the account
++ * switcher (owner directive 2026-07-05 "Home is the anchor"). The account
++ * doorway passes no context and keeps the switcher (see below).
++ */
++export type DoorwayContext = {
++  /** Pre-rendered mark (e.g. <EventMonogram/> or a vendor logo <img>). */
++  monogram?: React.ReactNode;
++  /** Fallback text tile when no `monogram` node is given (e.g. "HQ", "M&J"). */
++  monogramText?: string;
++  /** Background color for the text tile. */
++  monogramColor?: string;
++  /** Primary line — the event / shop / console name. */
++  title: string;
++  /** Sub line — type · date, category, "Operations", … */
++  sublabel: string;
++  /** Optional demoted pill on the sub line (e.g. "PRO" / "ADMIN"). */
++  tierBadge?: string;
++  /** Optional quiet "Switch" link target (events chip → /dashboard). */
++  switchHref?: string;
++};
++
+ /**
+  * DoorwaySidebarHeader — the ONE shared sidebar header for every dashboard
+  * doorway (account-customer · event-customer · vendor · admin).
+@@ -15,6 +42,17 @@ import type { SwitcherData } from '@/app/_components/account-switcher/get-switch
+  * every doorway moves together (owner directive 2026-06-20 "universal style of
+  * side bar").
+  *
++ * HOME-ANCHORED RESPINE (owner 2026-07-05): User Home (/dashboard) is becoming
++ * a full-screen page users can always return to, so the event/account switcher
++ * that used to headline every dashboard sidebar is DEMOTED. When a doorway
++ * passes a `context`, the header renders a pinned Home button (→ homeHref) + a
++ * context chip ("where you are") instead of the switcher — for the events,
++ * vendor and admin doorways. The account doorway is being reworked separately;
++ * it passes NO context, so the `switcherData` fallback below keeps its current
++ * AccountSwitcherStandalone behavior untouched. The mobile top bar in each
++ * layout still mounts AccountSwitcher for profile access, so `switcherData`
++ * stays required upstream — but it is only READ here in the fallback branch.
++ *
+  * The `label` is the doorway eyebrow: "Account" · "Planning" · "Vendor" ·
+  * "Setnayan HQ". Reuses the existing `Wordmark`, the global `m-label-mono`
+  * class (globals.css), and the unified `AccountSwitcherStandalone`.
+@@ -22,9 +60,18 @@ import type { SwitcherData } from '@/app/_components/account-switcher/get-switch
+ export function DoorwaySidebarHeader({
+   label,
+   switcherData,
++  context,
++  homeHref = '/dashboard',
++  homeSub,
+ }: {
+   label: string;
+-  switcherData: SwitcherData;
++  /** Only read in the fallback (no-context) branch — the account doorway. */
++  switcherData?: SwitcherData;
++  context?: DoorwayContext;
++  /** Home button target (defaults to the sidebar-less User Home). */
++  homeHref?: string;
++  /** Home button sub line ("All your events" · "Your Setnayan account"). */
++  homeSub?: string;
+ }) {
+   return (
+     <>
+@@ -33,10 +80,108 @@ export function DoorwaySidebarHeader({
+         <p className="m-label-mono mt-1.5" style={{ color: 'var(--m-slate-2)' }}>
+           {label}
+         </p>
++
++        {context ? (
++          <>
++            {/* Home button — the consistent way back to the sidebar-less Home. */}
++            <Link
++              href={homeHref}
++              title="Go to your Home"
++              className="mt-3 flex w-full items-center gap-2.5 rounded-[11px] border px-3 py-2 text-left shadow-[var(--m-shadow-sm)] transition-[border-color,box-shadow] hover:shadow-[var(--m-shadow-md)]"
++              style={{
++                background: 'var(--m-paper)',
++                borderColor: 'var(--m-line)',
++                color: 'var(--m-ink)',
++              }}
++            >
++              <span
++                className="grid h-[30px] w-[30px] flex-none place-items-center rounded-lg"
++                style={{ background: 'var(--m-ink)', color: 'var(--m-paper)' }}
++              >
++                <Home aria-hidden className="h-4 w-4" strokeWidth={1.75} />
++              </span>
++              <span className="min-w-0 flex-1">
++                <span className="block text-[12.5px] font-semibold leading-tight">
++                  Back to Home
++                </span>
++                {homeSub ? (
++                  <span
++                    className="mt-px block text-[11px] leading-snug"
++                    style={{ color: 'var(--m-slate-2)' }}
++                  >
++                    {homeSub}
++                  </span>
++                ) : null}
++              </span>
++              <ArrowLeft
++                aria-hidden
++                className="h-[15px] w-[15px] flex-none"
++                strokeWidth={1.75}
++                style={{ color: 'var(--m-slate-3)' }}
++              />
++            </Link>
++
++            {/* Context chip — WHERE you are (this event · this shop · HQ). */}
++            <div
++              className="mt-2.5 flex items-center gap-2.5 rounded-[11px] border px-2.5 py-2"
++              style={{
++                background: 'var(--m-orange-4)',
++                borderColor: 'var(--m-orange-3)',
++              }}
++            >
++              {context.monogram ? (
++                context.monogram
++              ) : (
++                <span
++                  className="grid h-[30px] w-[30px] flex-none place-items-center rounded-lg text-xs font-bold tracking-wide"
++                  style={{
++                    background: context.monogramColor ?? 'var(--m-ink)',
++                    color: 'var(--m-paper)',
++                  }}
++                >
++                  {context.monogramText ?? ''}
++                </span>
++              )}
++              <span className="min-w-0 flex-1">
++                <span className="block truncate text-[12.5px] font-semibold leading-tight">
++                  {context.title}
++                </span>
++                <span
++                  className="mt-px flex items-center gap-1.5 text-[11px] leading-snug"
++                  style={{ color: 'var(--m-slate-2)' }}
++                >
++                  <span className="truncate">{context.sublabel}</span>
++                  {context.tierBadge ? (
++                    <span
++                      className="flex-none rounded-full px-1.5 font-mono text-[9px] uppercase tracking-wide"
++                      style={{ background: 'var(--m-ink)', color: 'var(--m-paper)' }}
++                    >
++                      {context.tierBadge}
++                    </span>
++                  ) : null}
++                </span>
++              </span>
++              {context.switchHref ? (
++                <Link
++                  href={context.switchHref}
++                  title="Pick a different event on Home"
++                  className="flex-none rounded-md px-1 py-0.5 text-[11px] font-semibold hover:underline"
++                  style={{ color: 'var(--m-orange-2)' }}
++                >
++                  Switch
++                </Link>
++              ) : null}
++            </div>
++          </>
++        ) : null}
+       </header>
+-      <div className="px-3 pb-3">
+-        <AccountSwitcherStandalone data={switcherData} />
+-      </div>
++
++      {/* Fallback (no context) — the account doorway keeps the switcher. */}
++      {!context && switcherData ? (
++        <div className="px-3 pb-3">
++          <AccountSwitcherStandalone data={switcherData} />
++        </div>
++      ) : null}
+     </>
+   );
+ }
+diff --git a/apps/web/app/admin/_components/admin-bottom-nav.tsx b/apps/web/app/admin/_components/admin-bottom-nav.tsx
+index bc66acafa..ca86883f5 100644
+--- a/apps/web/app/admin/_components/admin-bottom-nav.tsx
++++ b/apps/web/app/admin/_components/admin-bottom-nav.tsx
+@@ -13,40 +13,46 @@
+  * Console · App Performance · Money" — the desktop sidebar IA in
+  * ADMIN_NAV_GROUPS). Owner directive 2026-07-04: mobile menus must carry the
+  * SAME content as desktop, only the orientation differs. The COMPLETE 6-menu
+- * set now lives in the /admin/more full-menu landing (rendered straight from
+- * ADMIN_NAV_GROUPS). This bottom strip is the ≤5-tab SUBSET SHORTCUT (locked
+- * ≤5 primitive) into the daily-driver menus — it is NOT the full menu; More is.
++ * set still lives in the /admin/more full-menu landing (rendered straight from
++ * ADMIN_NAV_GROUPS · the PAGE is unchanged). This bottom strip is the ≤5-tab
++ * SUBSET SHORTCUT (locked ≤5 primitive) into the daily-driver menus.
++ *
++ * NO-MORE RESPINE 2026-07-05 (owner: Home-anchored nav) — the overflow "More"
++ * TAB is DROPPED. Following the mobile-nav prototype, Studio (a content menu)
++ * NESTS UNDER Overview and Money is promoted to its OWN tab, so the 5-tab set is:
++ *   Overview · Accounts · Ugat Console · App Performance · Money
++ * The /admin/more PAGE stays (still reachable as a bookmark landing + matched by
++ * Overview), only its bottom-nav TAB is gone. Every route that More used to
++ * light is redistributed below so nothing goes "unlit" on mobile per
++ * [[feedback_setnayan_orphan_prevention]]: the Money-config tail → the new Money
++ * tab; the Studio Content + Marketing lanes → Overview's umbrella.
+  *
+  * TAB CHOICE (≤5) — the owner's three "sure" priority menus (Overview · Ugat
+- * Console · App Performance) get their own tab, plus Accounts (record look-up)
+- * and a More tab that opens the complete 6-group menu:
+- *   Overview · Accounts · Ugat Console · App Performance · More
+- * The retired 2026-07-03 "Marketing" tab is GONE — its group folded into Studio
+- * on desktop, so its surfaces are reachable in More → Studio. Studio + Money
+- * (the two non-tab desktop menus) are always one tap away inside More.
++ * Console · App Performance) each get a tab, plus Accounts (record look-up) and
++ * Money (the payments/config menu, now first-class instead of hidden in More).
+  *
+- * Key CONTINUITY: 'home' · 'directory' · 'performance' · 'more' keep their keys
+- * (localStorage / active-state). The 'marketing' slot is REPLACED by 'ugat'
+- * (new). Overview = the merged Home+Work task inbox (the /admin pulse + every
+- * act-now queue); the old Work tab's rolled-up badge lives on Overview.
++ * Key CONTINUITY: 'home' · 'directory' · 'ugat' · 'performance' keep their keys
++ * (localStorage / active-state). The 'more' slot is REPLACED by 'money' (new).
++ * Overview = the merged Home+Work task inbox (the /admin pulse + every act-now
++ * queue) and now ALSO the umbrella for the Studio menus that lost their tab.
+  *
+- * Landings: /admin/directory (Accounts) · /admin/more (full 6-menu). Ugat +
++ * Landings: /admin/directory (Accounts) · /admin/money (Money). Ugat +
+  * Performance tabs land on real anchor pages (/admin/taxonomy = the Ugat
+  * Console's Taxonomy-Studio anchor · /admin/app-performance = the cockpit), not
+  * overflow grids. Legacy /admin/queues → /admin/work; /admin/marketing +
+- * /admin/money + /admin/insights stay as bookmark landings.
++ * /admin/more + /admin/insights stay as bookmark landings.
+  *
+  * activeMatch rules:
+  *   - Overview       — EXACT /admin (via activeMatchAlsoExact — every other
+  *                      tab's route also starts with /admin/) PLUS every act-now
+- *                      queue route as a prefix umbrella.
++ *                      queue route AND the Studio menus (Content + Marketing
++ *                      lanes) + /admin/more, which nest under Overview on mobile.
+  *   - Accounts       — /admin/directory OR any account record route
+  *   - Ugat Console   — /admin/taxonomy OR any Ugat data-structure route
+  *   - App Performance— /admin/app-performance OR any Performance route
+- *   - More           — /admin/more OR any Studio / Money route (the two
+- *                      non-tab desktop menus). /admin/settings umbrella also
+- *                      covers payment-methods; /admin/marketing kept as a
+- *                      legacy bookmark landing.
++ *   - Money          — /admin/money OR any pricing / payments-config route
++ *                      (the Money menu's config tail). /admin/settings umbrella
++ *                      also covers payment-methods.
+  *
+  * BottomNav primitive auto-hides at lg via lg:hidden, so this only renders
+  * on mobile + tablet. Desktop uses SidebarShell + AdminSidebar.
+@@ -59,7 +65,7 @@
+  * Symmetric with admin-sidebar.tsx. Caught + fixed 2026-05-29.
+  */
+ 
+-import { Home, Users, Tag, Activity, Menu } from 'lucide-react';
++import { Home, Users, Tag, Activity, Banknote } from 'lucide-react';
+ import { BottomNav } from '@/app/_components/nav/bottom-nav';
+ import { navIconComponent } from '@/app/_components/nav/nav-icon-component';
+ import type { BottomNavItem } from '@/app/_components/nav/types';
+@@ -102,6 +108,26 @@ const ADMIN_BOTTOM_NAV_ITEMS: BottomNavItem[] = [
+       '/admin/pakanta',
+       '/admin/editorial-review',
+       '/admin/help',
++      // Studio menus nest under Overview on mobile (no-More respine 2026-07-05).
++      // The /admin/more full-menu landing + the Studio Content lane + the Studio
++      // Marketing lane light Overview so none goes unlit now that More has no tab.
++      '/admin/more',
++      // Studio — Content lane
++      '/admin/website',
++      '/admin/hero-video',
++      '/admin/reveal-studio',
++      '/admin/real-stories',
++      '/admin/recaps',
++      '/admin/patiktok',
++      '/admin/songs',
++      '/admin/moodboard-library',
++      // Studio — Marketing lane (folded into Studio 2026-07-04)
++      '/admin/marketing',
++      '/admin/social-queue',
++      '/admin/spotlight-awards',
++      '/admin/journal-spotlights',
++      '/admin/discount-codes',
++      '/admin/referrals',
+     ],
+   },
+   {
+@@ -156,37 +182,19 @@ const ADMIN_BOTTOM_NAV_ITEMS: BottomNavItem[] = [
+     ],
+   },
+   {
+-    key: 'more',
+-    label: 'More',
+-    href: '/admin/more',
+-    icon: Menu,
+-    // More opens the COMPLETE 6-menu landing (rendered from ADMIN_NAV_GROUPS).
+-    // As a lit-state umbrella it claims the two desktop menus WITHOUT their own
+-    // tab — Studio (old Content + Marketing lanes) + Money — so none goes
+-    // "unlit" on mobile per [[feedback_setnayan_orphan_prevention]]. The Ugat
+-    // Console routes moved to the dedicated 'ugat' tab above. /admin/marketing
+-    // + /admin/money stay matched here as legacy bookmark landings.
++    // MONEY (no-More respine 2026-07-05 · replaces the retired 'more' slot) —
++    // the payments/pricing/config menu, promoted from inside the old More
++    // overflow to a first-class tab. Lands on /admin/money and claims the whole
++    // Money-menu config tail as its umbrella (note: /admin/settings also covers
++    // /admin/settings/demo-mode + /admin/settings/payment-methods). The Studio
++    // menus that used to share More now nest under Overview above, so nothing
++    // goes "unlit" on mobile per [[feedback_setnayan_orphan_prevention]].
++    key: 'money',
++    label: 'Money',
++    href: '/admin/money',
++    icon: Banknote,
+     activeMatch: [
+-      '/admin/more',
+-      // Studio group — Content lane
+-      '/admin/website',
+-      '/admin/hero-video',
+-      '/admin/reveal-studio',
+-      '/admin/real-stories',
+-      '/admin/recaps',
+-      '/admin/patiktok',
+-      '/admin/songs',
+-      '/admin/moodboard-library',
+-      // Studio group — Marketing lane (folded into Studio 2026-07-04; the old
+-      // standalone Marketing tab retired, its surfaces live here now)
+-      '/admin/marketing',
+-      '/admin/social-queue',
+-      '/admin/spotlight-awards',
+-      '/admin/journal-spotlights',
+-      '/admin/discount-codes',
+-      '/admin/referrals',
+-      // Money group — config + settings tail (note: /admin/settings also covers
+-      // /admin/settings/demo-mode + /admin/settings/payment-methods)
++      '/admin/money',
+       '/admin/pricing',
+       '/admin/addons',
+       '/admin/vendor-recommendations',
+@@ -194,7 +202,6 @@ const ADMIN_BOTTOM_NAV_ITEMS: BottomNavItem[] = [
+       '/admin/price-bands',
+       '/admin/budget-planner',
+       '/admin/receipts',
+-      '/admin/money',
+       '/admin/settings',
+       '/admin/notifications',
+     ],
+diff --git a/apps/web/app/admin/layout.tsx b/apps/web/app/admin/layout.tsx
+index 689faa04e..891deaa70 100644
+--- a/apps/web/app/admin/layout.tsx
++++ b/apps/web/app/admin/layout.tsx
+@@ -12,11 +12,12 @@ import { GuidedTour } from '@/app/_components/guided-tour';
+ import { completeTour } from '@/lib/tour-actions';
+ import { SidebarShell } from '@/app/_components/nav/sidebar-shell';
+ import { DoorwaySidebarHeader } from '@/app/_components/nav/doorway-sidebar-header';
++import type { DoorwayContext } from '@/app/_components/nav/doorway-sidebar-header';
+ import { AdminSidebar } from './_components/admin-sidebar';
+ import { AdminBottomNav } from './_components/admin-bottom-nav';
+ import { AdminNavFab } from './_components/admin-nav-fab';
+ import Link from 'next/link';
+-import { TriangleAlert, Clock } from 'lucide-react';
++import { TriangleAlert, Clock, ArrowLeft } from 'lucide-react';
+ import { getNavSlotMap } from '@/lib/nav-registry';
+ import {
+   getAdminQueueDigest,
+@@ -123,6 +124,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
+   );
+   const urgency = deriveQueueUrgency(digest, Date.now());
+ 
++  // Home-anchored sidebar context (owner 2026-07-05): the admin doorway's chip
++  // is the shared HQ mark — every teammate sees the same "Setnayan HQ" console,
++  // so it's static (no per-user switch). "Home" drops back to the teammate's
++  // own Setnayan account.
++  const adminContext: DoorwayContext = {
++    monogramText: 'HQ',
++    monogramColor: '#1E2229',
++    title: 'Setnayan HQ',
++    sublabel: 'Operations',
++    tierBadge: 'ADMIN',
++  };
++
+   // Top bar — right-aligned utilities cluster. AccountSwitcher pill is
+   // mobile-only (lg:hidden); desktop users open the switcher from the
+   // AccountSwitcherStandalone row in the sidebar header. The overdue/due-soon
+@@ -130,6 +143,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
+   // page, not just when the eye is on the Work nav group.
+   const topBar = (
+     <div className="flex w-full max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl items-center justify-end gap-2 px-4 py-3 sm:px-6 lg:mx-auto lg:px-8">
++      {/* Home pill — leading, mobile only (Home-anchored nav, owner 2026-07-05).
++          One tap back to the teammate's own Setnayan account (the sidebar-less
++          Home); the switcher stays reachable further along the cluster. Desktop
++          uses the sidebar Home button. `mr-auto` anchors it left. */}
++      <Link
++        href="/dashboard"
++        aria-label="Back to Home"
++        className="mr-auto inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-cream/80 px-3 py-1.5 text-xs font-semibold text-ink/80 transition-colors hover:bg-cream hover:text-ink lg:hidden"
++      >
++        <ArrowLeft aria-hidden className="h-3.5 w-3.5" strokeWidth={2} />
++        Home
++      </Link>
+       {urgency.overdue > 0 ? (
+         <Link
+           href="/admin/work"
+@@ -178,7 +203,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
+   return (
+     <div className="app-surface">
+       <SidebarShell
+-        sidebarHeader={<DoorwaySidebarHeader label="Setnayan HQ" switcherData={switcherData} />}
++        sidebarHeader={
++          <DoorwaySidebarHeader
++            label="Setnayan HQ"
++            switcherData={switcherData}
++            context={adminContext}
++            homeSub="Your Setnayan account"
++          />
++        }
+         sidebar={
+           <AdminSidebar
+             navSlots={navSlots}
+diff --git a/apps/web/app/dashboard/[eventId]/layout.tsx b/apps/web/app/dashboard/[eventId]/layout.tsx
+index cabd32041..0bd99bdd0 100644
+--- a/apps/web/app/dashboard/[eventId]/layout.tsx
++++ b/apps/web/app/dashboard/[eventId]/layout.tsx
+@@ -1,5 +1,5 @@
+ import Link from 'next/link';
+-import { ClipboardList } from 'lucide-react';
++import { ClipboardList, ArrowLeft } from 'lucide-react';
+ import { notFound, redirect } from 'next/navigation';
+ import { createClient } from '@/lib/supabase/server';
+ import { getLifecyclePhase } from '@/lib/day-of-mode';
+@@ -20,8 +20,11 @@ import { CustomerSectionSubnav } from './_components/customer-section-subnav';
+ import { getNavSlotMap } from '@/lib/nav-registry';
+ import { AccountSwitcher } from '@/app/_components/account-switcher/account-switcher';
+ import { DoorwaySidebarHeader } from '@/app/_components/nav/doorway-sidebar-header';
++import type { DoorwayContext } from '@/app/_components/nav/doorway-sidebar-header';
+ import { getSwitcherData } from '@/app/_components/account-switcher/get-switcher-data';
+ import type { SwitcherData } from '@/app/_components/account-switcher/get-switcher-data';
++import { EventMonogram } from '@/app/_components/event-monogram';
++import { formatEventDate } from '@/lib/events';
+ 
+ type Props = {
+   children: React.ReactNode;
+@@ -279,6 +282,18 @@ export default async function EventLayout({ children, params }: Props) {
+   // just inject the inner row.
+   const topBar = (
+     <div className="mx-auto flex w-full items-center justify-end gap-3 px-4 py-3 sm:px-6 lg:px-8">
++      {/* Home pill — leading, mobile only (Home-anchored nav, owner 2026-07-05).
++          One tap back to the sidebar-less User Home; the switcher (profile
++          access) stays reachable after it. Desktop uses the sidebar Home
++          button. `mr-auto` anchors it left of the right-aligned utilities. */}
++      <Link
++        href="/dashboard"
++        aria-label="Back to Home"
++        className="mr-auto inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-cream/80 px-3 py-1.5 text-xs font-semibold text-ink/80 transition-colors hover:bg-cream hover:text-ink lg:hidden"
++      >
++        <ArrowLeft aria-hidden className="h-3.5 w-3.5" strokeWidth={2} />
++        Home
++      </Link>
+       {/* Planning escape (Event Lifecycle Menu) — day-of only, mobile only.
+           Desktop uses the sidebar; bottom nav is the day-of command center. */}
+       {phase === 'dayof' ? (
+@@ -322,10 +337,42 @@ export default async function EventLayout({ children, params }: Props) {
+   // hand the slot map to the (client) bottom nav. Cached via NAV_REGISTRY_TAG.
+   const navSlots = await getNavSlotMap();
+ 
++  // Home-anchored sidebar context (owner 2026-07-05): the events doorway's chip
++  // shows THIS event. Prefer the switcher row (carries the resolved monogram
++  // design columns) and fall back to the layout's own loaded event object so
++  // the chip always renders even if the switcher fetch degraded.
++  const switcherEvent = switcherData.events.find((e) => e.event_id === eventId);
++  const chipEvent = switcherEvent ?? {
++    display_name: (event.display_name as string | null) ?? 'Your event',
++    monogram_text: (event.monogram_text as string | null) ?? null,
++    monogram_color: (event.monogram_color as string | null) ?? null,
++    monogram_frame_key: (event.monogram_frame_key as string | null) ?? null,
++    monogram_font_key: (event.monogram_font_key as string | null) ?? null,
++    monogram_style: (event.monogram_style as string | null) ?? null,
++    monogram_custom_svg: (event.monogram_custom_svg as string | null) ?? null,
++  };
++  const eventType = (event.event_type as string | null) ?? 'wedding';
++  const eventDateIso = (event.event_date as string | null) ?? null;
++  const eventDateLabel = eventDateIso ? formatEventDate(eventDateIso) : '';
++  const typeLabel = eventType.charAt(0).toUpperCase() + eventType.slice(1);
++  const eventContext: DoorwayContext = {
++    monogram: <EventMonogram event={chipEvent} size="md" />,
++    title: (event.display_name as string | null) ?? 'Your event',
++    sublabel: eventDateLabel ? `${typeLabel} · ${eventDateLabel}` : typeLabel,
++    switchHref: '/dashboard',
++  };
++
+   return (
+     <>
+       <SidebarShell
+-        sidebarHeader={<DoorwaySidebarHeader label="Planning" switcherData={switcherData} />}
++        sidebarHeader={
++          <DoorwaySidebarHeader
++            label="Planning"
++            switcherData={switcherData}
++            context={eventContext}
++            homeSub="All your events"
++          />
++        }
+         sidebar={
+           <CustomerSidebar
+             eventId={eventId}
+diff --git a/apps/web/app/vendor-dashboard/layout.tsx b/apps/web/app/vendor-dashboard/layout.tsx
+index 1eb9c9fd0..fed71100f 100644
+--- a/apps/web/app/vendor-dashboard/layout.tsx
++++ b/apps/web/app/vendor-dashboard/layout.tsx
+@@ -1,7 +1,7 @@
+ import Link from 'next/link';
+ import { redirect } from 'next/navigation';
+ import { after } from 'next/server';
+-import { Menu } from 'lucide-react';
++import { Menu, ArrowLeft } from 'lucide-react';
+ import { createClient } from '@/lib/supabase/server';
+ import { getCurrentUser, loginRedirectPath } from '@/lib/auth';
+ import { runLoginGhostingCheck } from '@/lib/ghosting';
+@@ -10,6 +10,7 @@ import { logQueryError } from '@/lib/supabase/error-detect';
+ import { UnreadBellBadge } from '@/app/_components/unread-bell-badge';
+ import { SidebarShell } from '@/app/_components/nav/sidebar-shell';
+ import { DoorwaySidebarHeader } from '@/app/_components/nav/doorway-sidebar-header';
++import type { DoorwayContext } from '@/app/_components/nav/doorway-sidebar-header';
+ import { VendorSidebar, VendorSidebarFooter } from './_components/vendor-sidebar';
+ import { fetchOwnVendorProfile } from '@/lib/vendor-profile';
+ import { displayUrlForStoredAsset } from '@/lib/uploads';
+@@ -212,11 +213,50 @@ export default async function VendorDashboardLayout({
+ 
+   const displayName = profile?.display_name ?? profile?.email ?? 'Vendor';
+ 
++  // Home-anchored sidebar context (owner 2026-07-05): the vendor doorway's chip
++  // shows THIS shop. Logo when uploaded, initials tile otherwise. Sublabel is
++  // the first service leaf (or "Vendor"); the tier pill shows only for a PAID
++  // tier (solo/pro/enterprise/custom) — free/verified carry no badge.
++  const vendorCategory = vendorProfile?.services?.[0] ?? 'Vendor';
++  const vendorTierBadge =
++    vendorTier && ['solo', 'pro', 'enterprise', 'custom'].includes(vendorTier)
++      ? vendorTier.toUpperCase()
++      : undefined;
++  const vendorContext: DoorwayContext = {
++    monogram: vendorLogoUrl ? (
++      // eslint-disable-next-line @next/next/no-img-element
++      <img
++        src={vendorLogoUrl}
++        alt=""
++        aria-hidden
++        className="h-[30px] w-[30px] flex-none rounded-lg object-cover"
++        draggable={false}
++      />
++    ) : undefined,
++    monogramText: vendorInitials,
++    monogramColor: '#4F6B4A',
++    title: vendorSidebarName,
++    sublabel: vendorCategory,
++    tierBadge: vendorTierBadge,
++  };
++
+   // Top bar — right-aligned utilities cluster. AccountSwitcher pill is
+   // mobile-only (lg:hidden); desktop users open the switcher from the
+   // AccountSwitcherStandalone row in the sidebar header.
+   const topBar = (
+     <div className="flex w-full max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl items-center justify-end gap-2 px-4 py-3 sm:px-6 lg:mx-auto lg:px-8">
++      {/* Home pill — leading, mobile only (Home-anchored nav, owner 2026-07-05).
++          One tap back to the sidebar-less User Home; the switcher (profile
++          access) stays reachable further along the cluster. Desktop uses the
++          sidebar Home button. `mr-auto` anchors it left. */}
++      <Link
++        href="/dashboard"
++        aria-label="Back to Home"
++        className="mr-auto inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-cream/80 px-3 py-1.5 text-xs font-semibold text-ink/80 transition-colors hover:bg-cream hover:text-ink lg:hidden"
++      >
++        <ArrowLeft aria-hidden className="h-3.5 w-3.5" strokeWidth={2} />
++        Home
++      </Link>
+       {/* Mobile-only "More" overflow — the 6-tab bottom bar covers the primary
+           menus; every deeper surface (profile · verify · earnings · …) stays
+           one tap away via the /more landing. Hidden on desktop, where the
+@@ -253,7 +293,14 @@ export default async function VendorDashboardLayout({
+   return (
+     <div className="app-surface">
+       <SidebarShell
+-        sidebarHeader={<DoorwaySidebarHeader label="Vendor" switcherData={switcherData} />}
++        sidebarHeader={
++          <DoorwaySidebarHeader
++            label="Vendor"
++            switcherData={switcherData}
++            context={vendorContext}
++            homeSub="Your Setnayan account"
++          />
++        }
+         sidebar={
+           <VendorSidebar
+             role={vendorRole}

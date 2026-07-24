@@ -1,0 +1,396 @@
+<meta charset="utf-8">
+<title>Setnayan — Account tiles + Setnayan AI data checklist</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --paper:#EFEAE0; --cream:#FBFAF7; --card:#FFFDF8; --card2:#F6F1E7; --ink:#231F19; --ink-2:rgba(35,31,25,.62); --ink-3:rgba(35,31,25,.42);
+  --gold:#A9834B; --gold-deep:#8A6B39; --gold-wash:rgba(169,131,75,.10); --gold-line:rgba(169,131,75,.34);
+  --line:rgba(35,31,25,.11);
+  --ok:#5A7351; --ok-wash:rgba(90,115,81,.12); --ok-line:rgba(90,115,81,.34);
+  --info:#4E6C82; --info-wash:rgba(78,108,130,.11); --info-line:rgba(78,108,130,.30);
+  --warn:#A3641F; --warn-wash:rgba(163,100,31,.11); --warn-line:rgba(163,100,31,.32);
+  --danger:#A6483B; --danger-wash:rgba(166,72,59,.10); --danger-line:rgba(166,72,59,.34);
+  --shadow:0 1px 2px rgba(60,48,30,.05),0 14px 36px rgba(60,48,30,.10);
+  --sans:'Hanken Grotesk',-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'Space Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{--paper:#100E0B;--cream:#161310;--card:#1C1811;--card2:#171410;--ink:#EAE3D6;--ink-2:rgba(234,227,214,.64);--ink-3:rgba(234,227,214,.42);
+    --gold:#C39D64;--gold-deep:#D4B27E;--gold-wash:rgba(195,157,100,.13);--gold-line:rgba(195,157,100,.42);
+    --line:rgba(234,227,214,.14);--ok:#8FAE85;--ok-wash:rgba(143,174,133,.13);--ok-line:rgba(143,174,133,.4);
+    --info:#8FB2C8;--info-wash:rgba(143,178,200,.12);--info-line:rgba(143,178,200,.36);
+    --warn:#D19A55;--warn-wash:rgba(209,154,85,.13);--warn-line:rgba(209,154,85,.4);
+    --danger:#D08579;--danger-wash:rgba(208,133,121,.13);--danger-line:rgba(208,133,121,.4);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 42px rgba(0,0,0,.5);}
+}
+:root[data-theme="light"]{--paper:#EFEAE0;--cream:#FBFAF7;--card:#FFFDF8;--card2:#F6F1E7;--ink:#231F19;--ink-2:rgba(35,31,25,.62);--ink-3:rgba(35,31,25,.42);--gold:#A9834B;--gold-deep:#8A6B39;--gold-wash:rgba(169,131,75,.10);--gold-line:rgba(169,131,75,.34);--line:rgba(35,31,25,.11);--ok:#5A7351;--ok-wash:rgba(90,115,81,.12);--ok-line:rgba(90,115,81,.34);--info:#4E6C82;--info-wash:rgba(78,108,130,.11);--info-line:rgba(78,108,130,.30);--warn:#A3641F;--warn-wash:rgba(163,100,31,.11);--warn-line:rgba(163,100,31,.32);--danger:#A6483B;--danger-wash:rgba(166,72,59,.10);--danger-line:rgba(166,72,59,.34);--shadow:0 1px 2px rgba(60,48,30,.05),0 14px 36px rgba(60,48,30,.10);}
+:root[data-theme="dark"]{--paper:#100E0B;--cream:#161310;--card:#1C1811;--card2:#171410;--ink:#EAE3D6;--ink-2:rgba(234,227,214,.64);--ink-3:rgba(234,227,214,.42);--gold:#C39D64;--gold-deep:#D4B27E;--gold-wash:rgba(195,157,100,.13);--gold-line:rgba(195,157,100,.42);--line:rgba(234,227,214,.14);--ok:#8FAE85;--ok-wash:rgba(143,174,133,.13);--ok-line:rgba(143,174,133,.4);--info:#8FB2C8;--info-wash:rgba(143,178,200,.12);--info-line:rgba(143,178,200,.36);--warn:#D19A55;--warn-wash:rgba(209,154,85,.13);--warn-line:rgba(209,154,85,.4);--danger:#D08579;--danger-wash:rgba(208,133,121,.13);--danger-line:rgba(208,133,121,.4);--shadow:0 1px 2px rgba(0,0,0,.4),0 16px 42px rgba(0,0,0,.5);}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  padding:30px 18px 90px;display:flex;flex-direction:column;align-items:center}
+.wrap{width:100%;max-width:940px}
+.lead .brand{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--gold);text-transform:uppercase}
+.lead h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:9px 0 6px}
+.lead p{color:var(--ink-2);font-size:14.5px;line-height:1.55;margin:0;max-width:70ch}
+.lead p b{color:var(--ink)}
+
+.seclbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);margin:30px 0 12px}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:820px){.tiles{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.tiles{grid-template-columns:1fr}}
+.tile{appearance:none;text-align:left;display:flex;align-items:center;gap:12px;background:var(--cream);border:1px solid var(--line);
+  border-radius:16px;padding:15px 15px;cursor:pointer;font-family:var(--sans);color:var(--ink);transition:border-color .16s,transform .16s,box-shadow .16s,background .16s}
+.tile:hover{border-color:var(--gold-line);transform:translateY(-2px);box-shadow:var(--shadow)}
+.tile.on{border-color:var(--gold);background:var(--gold-wash);box-shadow:0 0 0 3px var(--gold-wash)}
+.tile .ic{width:38px;height:38px;flex:none;border-radius:12px;background:var(--gold-wash);color:var(--gold-deep);display:flex;align-items:center;justify-content:center;font-size:18px}
+.tile .tx{min-width:0;flex:1}
+.tile .tt{display:block;font-weight:700;font-size:14.5px}
+.tile .ts{display:block;font-size:11.5px;color:var(--ink-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .cv{color:var(--ink-3);transition:transform .24s var(--sans);font-size:13px;flex:none}
+.tile.on .cv{transform:rotate(180deg);color:var(--gold-deep)}
+
+/* accordion panel */
+.panelwrap{overflow:hidden;transition:height .28s cubic-bezier(.4,0,.2,1);height:0}
+.panel{margin-top:12px;border:1px solid var(--gold-line);background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px}
+@media(max-width:480px){.panel{padding:17px 16px}}
+.panel .phead{display:flex;align-items:center;gap:11px;margin-bottom:4px}
+.panel .phead .pic{width:34px;height:34px;border-radius:10px;background:var(--gold-wash);color:var(--gold-deep);display:flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+.panel h3{font-size:17px;font-weight:800;margin:0;letter-spacing:-.01em}
+.panel .psub{color:var(--ink-2);font-size:13px;margin:2px 0 0}
+.pfoot{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+
+/* generic bits */
+.statgrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.stat{border:1px solid var(--line);background:var(--card2);border-radius:11px;padding:9px 13px;min-width:96px}
+.stat .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+.stat .v{font-weight:700;font-size:14.5px;margin-top:2px}
+.avatarrow{display:flex;align-items:center;gap:13px;margin-top:14px}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--gold-wash);border:1px solid var(--gold-line);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--gold-deep);font-size:18px;flex:none}
+.link{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--sans);color:var(--gold-deep);border:1px solid var(--gold-line);background:var(--gold-wash);border-radius:10px;padding:9px 14px;cursor:pointer;text-decoration:none}
+.link.ghost{background:transparent;border-color:var(--line);color:var(--ink-2)}
+.link.danger{color:var(--danger);border-color:var(--danger-line);background:var(--danger-wash)}
+.soon{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--warn);border:1px solid var(--warn-line);background:var(--warn-wash);border-radius:5px;padding:2px 7px}
+
+/* checklist tiers */
+.tier{border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:15px 16px;margin-top:13px}
+.tier.approve{border-color:var(--warn-line)}
+.tier .th{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tier .badge{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:6px;font-weight:700}
+.badge.std{background:var(--ok-wash);color:var(--ok);border:1px solid var(--ok-line)}
+.badge.act{background:var(--gold-wash);color:var(--gold-deep);border:1px solid var(--gold-line)}
+.badge.app{background:var(--warn-wash);color:var(--warn);border:1px solid var(--warn-line)}
+.badge.spi{background:var(--danger-wash);color:var(--danger);border:1px solid var(--danger-line)}
+.badge.cross{background:var(--info-wash);color:var(--info);border:1px solid var(--info-line)}
+.tier .tname{font-weight:800;font-size:15px}
+.tier .tdesc{color:var(--ink-2);font-size:12.5px;line-height:1.5;margin:6px 0 4px}
+.rows{display:flex;flex-direction:column;gap:2px;margin-top:8px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:11px 4px;border-top:1px solid var(--line)}
+.opt:first-child{border-top:none}
+.opt .meta{flex:1;min-width:0}
+.opt .name{font-weight:650;font-size:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.opt .desc{color:var(--ink-2);font-size:12px;line-height:1.45;margin-top:2px}
+.opt.sub{padding-left:16px;border-top:1px dashed var(--line)}
+.opt.sub .name{font-weight:600;font-size:13px}
+
+/* toggle */
+.tk{width:44px;height:25px;border-radius:999px;background:var(--line);position:relative;flex:none;cursor:pointer;transition:background .16s;margin-top:1px}
+.tk::after{content:"";position:absolute;top:2.5px;left:2.5px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .16s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.tk.on{background:var(--gold)}
+.tk.on::after{left:21.5px}
+.tk.locked{background:var(--ok);cursor:not-allowed;opacity:.85}
+.tk.locked::after{left:21.5px}
+.tk.approve.on{background:var(--warn)}
+
+.note{color:var(--ink-2);font-size:12.5px;line-height:1.55}
+.wipebar{border:1px solid var(--danger-line);background:var(--danger-wash);border-radius:14px;padding:15px 16px;margin-top:14px}
+.wipebar h4{margin:0 0 4px;font-size:14.5px;font-weight:800;color:var(--danger)}
+.wipegrid{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.wipebtn{appearance:none;font:600 12.5px var(--sans);color:var(--danger);border:1px solid var(--danger-line);background:transparent;border-radius:10px;padding:9px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.wipebtn:hover{background:var(--danger-wash)}
+.wipebtn.master{background:var(--danger);color:#fff;border-color:var(--danger)}
+.wipebtn.done{color:var(--ok);border-color:var(--ok-line);background:var(--ok-wash);pointer-events:none}
+.usebox{border:1px dashed var(--gold-line);background:var(--gold-wash);border-radius:12px;padding:13px 15px;margin-top:14px}
+.usebox .ut{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:7px}
+.usebox .flow{display:flex;flex-wrap:wrap;gap:7px;align-items:center;font-size:12.5px;color:var(--ink-2)}
+.usebox .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-weight:600;color:var(--ink)}
+.usebox .arrow{color:var(--gold-deep);font-family:var(--mono)}
+
+/* profile filter rows + people tree */
+.pill{font:600 12px var(--sans);background:var(--gold-wash);border:1px solid var(--gold-line);color:var(--gold-deep);border-radius:999px;padding:3px 11px;white-space:nowrap}
+.attrrow{display:flex;align-items:center;gap:12px;padding:12px 4px;border-top:1px solid var(--line)}
+.attrrow:first-child{border-top:none}
+.attrrow .am{flex:1;min-width:0}
+.attrrow .an{font-weight:650;font-size:13.5px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.attrrow .af{color:var(--ink-2);font-size:12px;margin-top:3px}
+.attrrow .af b{color:var(--gold-deep);font-weight:600}
+.branch{border:1px solid var(--line);background:var(--card2);border-radius:13px;padding:13px 15px;margin-top:11px}
+.branch .bh{display:flex;align-items:center;gap:10px}
+.branch .bic{width:30px;height:30px;border-radius:9px;background:var(--gold-wash);color:var(--gold-deep);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+.branch .bt{font-weight:700;font-size:14px}
+.branch .bs{color:var(--ink-2);font-size:11.5px;margin-top:1px}
+.branch .people{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.person{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px 5px 5px;font:600 12.5px var(--sans)}
+.person .pa{width:22px;height:22px;border-radius:50%;background:var(--gold-wash);color:var(--gold-deep);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex:none}
+.person .psub{font-weight:500;color:var(--ink-3);font-size:11px}
+.addp{display:inline-flex;align-items:center;gap:5px;border:1px dashed var(--gold-line);background:transparent;color:var(--gold-deep);border-radius:999px;padding:6px 13px;font:600 12.5px var(--sans);cursor:pointer}
+.addp:hover{background:var(--gold-wash)}
+.treehint{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;margin-top:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase}
+.treehint span{background:var(--gold-wash);border:1px solid var(--gold-line);color:var(--gold-deep);border-radius:999px;padding:4px 11px;letter-spacing:.04em}
+.treehint b{color:var(--ink-3)}
+.person .plink{font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:2px 8px;margin-left:2px;cursor:pointer}
+.person .plink.linked{background:var(--ok-wash);border:1px solid var(--ok-line);color:var(--ok)}
+.person .plink.name{background:transparent;border:1px dashed var(--gold-line);color:var(--gold-deep)}
+.fastlink{border:1px solid var(--gold-line);background:var(--gold-wash);border-radius:13px;padding:14px 15px;margin-top:12px}
+.fastlink .flh{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);font-weight:700}
+.fastlink p{color:var(--ink-2);font-size:12.5px;line-height:1.5;margin:6px 0 0}
+.fastlink .sugs{display:flex;flex-direction:column;gap:7px;margin-top:11px}
+.sug{appearance:none;text-align:left;display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:600 12.5px var(--sans);color:var(--ink);cursor:pointer}
+.sug:hover{border-color:var(--gold-line)}
+.sug .from{font:500 11px var(--mono);color:var(--ink-3);margin-left:auto;white-space:nowrap}
+.sug .tap{font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);border:1px solid var(--gold-line);border-radius:6px;padding:3px 7px}
+.methods{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+.method{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:600 12px var(--sans);color:var(--ink-2);cursor:pointer}
+.method:hover{border-color:var(--gold-line);color:var(--gold-deep)}
+.method .star{font-family:var(--mono);color:var(--gold-deep)}
+
+.legend{margin-top:34px;border:1px dashed var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-wrap:wrap;gap:18px}
+.legend .li{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--ink-2);max-width:230px;line-height:1.45}
+.foot{margin-top:24px;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);line-height:1.8}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="lead">
+    <div class="brand">Setnayan · Account home</div>
+    <h1>Account tiles that open in place — and a Setnayan AI you control</h1>
+    <p><b>Two things.</b> (1) The four "Your account" tiles <b>expand &amp; collapse right here</b> instead of jumping to a new page — tap one to open it, tap again to close. (2) The <b>Setnayan AI</b> tile becomes a <b>data checklist</b>: choose what it may analyze to plan for you, on top of a standard default — and <b>wipe</b> anything it's collected.</p>
+  </div>
+
+  <div class="seclbl">Your account</div>
+  <div class="tiles" id="tiles"></div>
+  <div class="panelwrap" id="panelwrap"><div id="panel"></div></div>
+
+  <div class="legend">
+    <div class="li"><span class="badge std" style="margin:0">Standard</span>the minimum to plan <b>this</b> event. On by default, purpose-limited.</div>
+    <div class="li"><span class="badge act" style="margin:0">Activate</span>opt-in depth that sharpens this event. Off until you choose.</div>
+    <div class="li"><span class="badge app" style="margin:0">Approve</span>explicit consent — sensitive info + using data <b>across</b> your events.</div>
+    <div class="li"><span class="badge spi" style="margin:0">Sensitive</span>RA 10173 §3(l): religion, civil status, a child's data.</div>
+    <div class="li"><span class="badge cross" style="margin:0">Cross-event</span>uses more than the one event in front of you.</div>
+  </div>
+
+  <div class="foot">
+    PROTOTYPE · account launcher expand/collapse + Setnayan AI data-governance checklist (Standard · Activate · Approve · Wipe) ·
+    grounded in event-brief.ts · compat-score.ts · buildPlanningSnapshot · the *_consent_at machinery · forgetMyFaceEverywhere (wipe precedent) ·
+    Setnayan AI route is today a DORMANT ₱499 paywall → checklist is the free base, sub is the paid concierge on top · Rule 1 deterministic · not owner-locked.
+  </div>
+</div>
+
+<script>
+(function(){
+  var $=function(s,c){return (c||document).querySelector(s)};
+  var TILES=[
+    {key:'profile', ic:'👤', tt:'Profile & account', ts:'Personal info · security · privacy'},
+    {key:'people',  ic:'👥', tt:'People',            ts:'Everyone across your events'},
+    {key:'memories',ic:'🖼', tt:'Memories Hub',      ts:'Photos · videos · saved vendors'},
+    {key:'ai',      ic:'✦',  tt:'Setnayan AI',       ts:'Your planning copilot'}
+  ];
+  var open=null;
+
+  // ---------- panel bodies ----------
+  function profilePanel(){
+    // ONLY the account facts that FILTER planning — the rest of settings stays on the full page.
+    return panelHead('👤','Profile &amp; account · what shapes your planning',
+      'The account facts we use to <b>filter events, vendors and rites</b> for you. Edit any here. Security, notifications and the rest live in full settings.')
+      +'<div class="avatarrow"><div class="avatar">B</div><div><div style="font-weight:700;font-size:15px">Bianca R.</div>'
+      +'<div class="note" style="font-size:12px">bianca@email.com · account secured</div></div></div>'
+      +'<div class="rows" style="margin-top:14px">'
+      + attr('Religion','Roman Catholic','church rites · Catholic vendors · binyag &amp; kumpil')
+      + attr('Civil status','Engaged','wedding planning · your union timeline &amp; anniversaries')
+      + attr('Birthdate','Aug 1996 · 29','your milestone events — 18 · 21 · 60')
+      + attr('Gender','Female','')
+      + attr('Home area','Metro Manila','local vendors &amp; travel reach')
+      + attr('Language','English','')
+      +'</div>'
+      +'<p class="note" style="margin-top:12px">These are the only settings here — the ones that filter your account. Password, sessions, notifications and more live in <a class="link ghost" style="padding:3px 9px" onclick="return false">full settings →</a>.</p>'
+      +'<div class="pfoot"><a class="link ghost">Privacy &amp; data</a></div>';
+  }
+  function attr(k,v,filters){
+    return '<div class="attrrow"><div class="am"><div class="an">'+k+' <span class="pill">'+v+'</span></div>'
+      +(filters?'<div class="af">Filters: <b>'+filters+'</b></div>':'')+'</div>'
+      +'<span class="link ghost" style="padding:6px 12px;cursor:pointer">Edit</span></div>';
+  }
+  function peoplePanel(){
+    return panelHead('👥','People · your family tree',
+      'Build the people around you — each one can <b>anchor their own events</b>. Just write a name, or <b>link</b> the real person so their own dates flow in. We keep the people that matter, never their documents.')
+      +'<div class="treehint"><span>Parents</span><b>→</b><span>You &amp; Partner</span><b>→</b><span>Siblings</span><b>·</b><span>Dependents</span></div>'
+      // fast-link: most of your people are already on Setnayan through your events
+      +'<div class="fastlink"><div class="flh">Link people fast</div>'
+      +'<p>A name takes a second. To link the <b>real</b> person (their dates &amp; details flow in, with their yes), the quickest path is people you already share events with:</p>'
+      +'<div class="sugs">'
+      + sug('R','Rosa','wedding guest list','link as Mother')
+      + sug('L','Lola Celing','christening sponsor','link as Grandmother')
+      +'</div>'
+      +'<div class="methods">'
+      +'<button class="method" onclick="return false"><span class="star">◦</span> Pick from my events</button>'
+      +'<button class="method" onclick="return false"><span class="star">◦</span> Share a link / QR</button>'
+      +'<button class="method" onclick="return false"><span class="star">◦</span> Find by @handle</button>'
+      +'</div></div>'
+      + branch('👵','Parents','Your mother &amp; father — plan their milestones (60th, golden anniversary)', [p('R','Mother','Rosa','linked'), p('E','Father','Ernesto · turns 60','name')])
+      + branch('💍','Partner / Spouse','Wife or husband — your union, anniversaries &amp; shared household', [p('C','Partner','Carlo · engaged','linked')])
+      + branch('🧑‍🤝‍🧑','Siblings','Brothers &amp; sisters', [])
+      + branch('🌱','Dependents','People you care for — <b>children OR elders</b>, not only kids. Powers their debut · christening · 60th.', [p('A','Daughter','Amara · 6','held')], 'A child has no account — you hold their name &amp; dates (guardian-held, under-18 or over-50). Adults 18–50 → link or invite them instead.')
+      +'<div class="pfoot"><a class="link">Generate / edit your tree →</a><a class="link ghost">Invite someone</a></div>';
+  }
+  // linked: 'linked' (confirmed account) · 'name' (name-only label) · 'held' (guardian-held record, no account)
+  function p(initial,role,name,linked){
+    var tag = linked==='linked' ? '<span class="plink linked">✓ linked</span>'
+            : linked==='held'   ? '<span class="plink linked" style="background:var(--gold-wash);border-color:var(--gold-line);color:var(--gold-deep)">held</span>'
+            : '<span class="plink name" onclick="return false">＋ link</span>';
+    return '<span class="person"><span class="pa">'+initial+'</span>'+name+' <span class="psub">'+role+'</span>'+tag+'</span>';
+  }
+  function sug(initial,name,from,action){
+    return '<button class="sug" onclick="return false"><span class="pa" style="width:24px;height:24px">'+initial+'</span>'
+      +'<span><b>'+name+'</b> — '+action+'</span><span class="from">'+from+'</span><span class="tap">link</span></button>';
+  }
+  function branch(icon,title,sub,people,fence){
+    var chips = people.join('') + '<button class="addp" onclick="return false">+ Add</button>';
+    return '<div class="branch"><div class="bh"><div class="bic">'+icon+'</div><div><div class="bt">'+title+'</div><div class="bs">'+sub+'</div></div></div>'
+      +'<div class="people">'+chips+'</div>'
+      +(fence?'<p class="note" style="font-size:11.5px;margin-top:9px">'+fence+'</p>':'')+'</div>';
+  }
+  function memoriesPanel(){
+    return panelHead('🖼','Memories Hub','Everything you’ve gathered, across every event.')
+      +'<div class="statgrid">'
+      + stat('Photos & videos','1,204') + stat('Saved vendors','18') + stat('Editorials','3')
+      +'</div>'
+      +'<div class="pfoot"><a class="link">Open Memories Hub →</a><a class="link ghost">Life-Flash</a></div>';
+  }
+
+  // ---------- the Setnayan AI checklist ----------
+  function aiPanel(){
+    var html = panelHead('✦','Setnayan AI · what it may analyze',
+      'Setnayan AI is <b>deterministic and free</b> — it only ever uses <b>your own</b> data, and only what you allow. Choose what it learns from, on top of the standard set.');
+
+    // value exchange
+    html += '<div class="usebox"><div class="ut">What it does with this</div><div class="flow">'
+      + '<span class="chip">your data</span><span class="arrow">→</span>'
+      + '<span class="chip">vendor matching</span><span class="chip">checklist &amp; timeline</span>'
+      + '<span class="chip">budget split</span><span class="chip">mood board</span>'
+      + '</div></div>';
+
+    // TIER A — Standard
+    html += tier('std','Standard','STANDARD','Always on','The basics we need to plan <b>this</b> event. Purpose-limited to the event in front of you — nothing here leaves it.',[
+      opt('event','Event basics','Type, date, place, guest count, budget.','std', true, true),
+      opt('taste','Your taste for this event','Style picks, mood board, refinements.','std', true, true)
+    ]) + '<p class="note" style="margin-top:8px">Prefer nothing analyzed? <a class="link ghost" style="padding:4px 10px" onclick="return false">Pause Setnayan AI entirely</a> — planning still works, just without suggestions.</p>';
+
+    // TIER B — Activate
+    html += tier('act','Activate','ACTIVATE','Opt-in',' Extra depth that sharpens this event. Off until you switch it on.',[
+      opt('signature','Signature details','Per-type specifics — the 18s, godparents, the reveal, etc.','act', false, false),
+      opt('experience','Experience quiz → your persona','A 5-question read on the feel you’re after.','act', false, false),
+      opt('story','Your story &amp; message','Love story / how-you-met / a note for the day.','act', false, false),
+      opt('vendorsave','Saved vendors &amp; mood reuse','Let it remember vendors and boards you saved.','act', false, false)
+    ]);
+
+    // TIER C — Approve (cross-event + SPI)
+    var cross = tier('app','Approve','APPROVE','Explicit consent',
+      'The sensitive part, and the part that reaches <b>across</b> your events. Explicit yes — revocable anytime.',[
+      opt('xlearn','Cross-event learning','Compare your events and reuse what worked for the next one.','app', false, false, ['cross'], true),
+      opt('x_vendors','Reuse vendors that worked','Re-suggest suppliers you booked before.','app', false, false, [], false, true),
+      opt('x_budget','Reuse your budget shape','Start the next budget from your last one.','app', false, false, [], false, true),
+      opt('x_patterns','Spot repeating patterns','Same guests, same rhythm, same choices → pre-fill ahead.','app', false, false, [], false, true),
+      opt('x_style','Reuse your style &amp; taste','Carry your look across events.','app', false, false, [], false, true),
+      opt('spi','Faith, civil status &amp; gender','Matches faith rites &amp; ceremony. Sensitive — explicit consent.','app', false, false, ['spi']),
+      opt('dependents','Family &amp; children’s milestones','Store kids’ dates to plan their events. <span class="soon">under review</span>','app', false, false, ['spi'], false, false, true)
+    ]);
+    html += cross;
+
+    // TIER D — Wipe
+    html += '<div class="wipebar"><h4>Wipe collected data</h4>'
+      + '<p class="note">Switching a toggle <b>off</b> stops <i>future</i> collection. Wiping <b>removes what’s already stored</b> — they’re separate on purpose.</p>'
+      + '<div class="wipegrid">'
+      + '<button class="wipebtn" data-wipe="act">Wipe activated data</button>'
+      + '<button class="wipebtn" data-wipe="cross">Wipe cross-event patterns</button>'
+      + '<button class="wipebtn" data-wipe="spi">Wipe sensitive info</button>'
+      + '<button class="wipebtn master" data-wipe="all">Wipe all planning data</button>'
+      + '</div>'
+      + '<div class="pfoot" style="border-top-color:var(--danger-line)"><a class="link ghost">Export my data</a><a class="link danger">Delete my account</a></div>'
+      + '</div>';
+
+    return html;
+  }
+
+  // ---------- helpers ----------
+  function panelHead(ic,title,sub){
+    return '<div class="panel"><div class="phead"><div class="pic">'+ic+'</div><div><h3>'+title+'</h3></div></div><p class="psub">'+sub+'</p>';
+  }
+  function stat(k,v){ return '<div class="stat"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; }
+  function tier(cls,name,badgeTxt,badgeCls2,desc,opts){
+    var b='<span class="badge '+cls+'">'+badgeTxt+'</span>';
+    return '<div class="tier '+(cls==='app'?'approve':'')+'"><div class="th">'+b+'<span class="tname">'+name+'</span><span class="note" style="font-size:11.5px">· '+badgeCls2+'</span></div>'
+      +'<div class="tdesc">'+desc+'</div><div class="rows">'+opts.join('')+'</div></div>';
+  }
+  // opt(id,name,desc,tone,on,locked,badges[],isMasterCross,isSubCross,disabled)
+  function opt(id,name,desc,tone,on,locked,badges,isMaster,isSub,disabled){
+    var bd=(badges||[]).map(function(b){return b==='spi'?'<span class="badge spi">Sensitive</span>':b==='cross'?'<span class="badge cross">Cross-event</span>':''}).join('');
+    var tkcls='tk'+(tone==='app'?' approve':'')+(on?' on':'')+(locked?' locked':'');
+    var toggle = disabled
+      ? '<div class="tk" style="opacity:.4;cursor:not-allowed" title="under review"></div>'
+      : '<div class="'+tkcls+'" data-toggle="'+id+'" role="switch" aria-checked="'+(on||locked)+'" tabindex="0"'+(locked?' title="Standard — always on"':'')+'></div>';
+    return '<div class="opt'+(isSub?' sub':'')+'"><div class="meta"><div class="name">'+name+' '+bd+'</div><div class="desc">'+desc+'</div></div>'+toggle+'</div>';
+  }
+
+  var BODY={profile:profilePanel,people:peoplePanel,memories:memoriesPanel,ai:aiPanel};
+
+  function renderTiles(){
+    $('#tiles').innerHTML=TILES.map(function(t){
+      return '<button class="tile'+(open===t.key?' on':'')+'" data-k="'+t.key+'"><span class="ic">'+t.ic+'</span>'
+        +'<span class="tx"><span class="tt">'+t.tt+'</span><span class="ts">'+t.ts+'</span></span><span class="cv">▾</span></button>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.tile'),function(b){
+      b.onclick=function(){ toggle(b.dataset.k); };
+    });
+  }
+
+  function toggle(key){
+    var pw=$('#panelwrap'), p=$('#panel');
+    if(open===key){ // close
+      pw.style.height=pw.scrollHeight+'px'; requestAnimationFrame(function(){pw.style.height='0px';});
+      open=null; renderTiles(); return;
+    }
+    open=key; renderTiles();
+    p.innerHTML=BODY[key]();
+    wirePanel();
+    // animate height
+    pw.style.height='auto';
+    var h=pw.scrollHeight; pw.style.height='0px'; requestAnimationFrame(function(){pw.style.height=h+'px';});
+    // settle to auto after transition so inner changes reflow
+    setTimeout(function(){ if(open===key) pw.style.height='auto'; },300);
+  }
+
+  function wirePanel(){
+    Array.prototype.forEach.call(document.querySelectorAll('[data-toggle]'),function(t){
+      if(t.classList.contains('locked')) return;
+      var flip=function(){ t.classList.toggle('on'); t.setAttribute('aria-checked', t.classList.contains('on')); reflow(); };
+      t.onclick=flip;
+      t.onkeydown=function(e){ if(e.key===' '||e.key==='Enter'){e.preventDefault();flip();} };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-wipe]'),function(w){
+      w.onclick=function(){
+        if(w.classList.contains('done')) return;
+        var label=w.textContent;
+        w.dataset.stage=w.dataset.stage||'0';
+        if(w.dataset.stage==='0'){ w.dataset.stage='1'; w.dataset.label=label; w.textContent='Tap again to confirm'; setTimeout(function(){ if(w.dataset.stage==='1'){w.dataset.stage='0';w.textContent=w.dataset.label;} },2600); }
+        else { w.classList.add('done'); w.textContent='✓ Wiped'; w.dataset.stage='0'; }
+        reflow();
+      };
+    });
+  }
+  function reflow(){ var pw=$('#panelwrap'); if(open){ pw.style.height='auto'; } }
+
+  renderTiles();
+})();
+</script>
