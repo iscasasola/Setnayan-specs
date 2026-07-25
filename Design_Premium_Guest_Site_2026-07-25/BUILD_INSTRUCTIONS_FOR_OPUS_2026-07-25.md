@@ -207,3 +207,12 @@ Restyles/recompositions of shipped things (no new product): issues-log, review-Q
 4. **Realtime pipeline chips** (uploading→screening→tagged): Supabase Realtime on the capture rows — no polling of Vercel functions.
 5. **Phase-2 (optional, biggest ceiling):** move sign+commit to a Cloudflare Worker co-located with R2 (the corpus already plans Workers for renders) — removes Vercel from the media path entirely. Not a launch blocker.
 Client-side: keep adaptive JPEG compression before PUT (spec'd) + the 10s clip clamp — bytes small at the source.
+
+## §12 · Deployment cost discipline (owner directive 2026-07-25 — minimize Vercel builds across the ~25-PR program)
+
+1. **Wave integration branches — ONE prod build per wave.** Each wave works on `wave/<letter>-<slug>` off latest `origin/main`; its PRs target the WAVE branch (small-PR review discipline unchanged); the wave merges to `main` once. Program total: ~5 prod builds, not ~25.
+2. **No Vercel previews for work branches.** Extend the existing `ignoreCommand` guard (PR #2984 lineage): skip previews for `claude/*` and wave sub-branches; previews build ONLY for `wave/*` (owner review surface). GitHub Actions CI's `production build` check remains the correctness gate — do not pay Vercel to answer it twice.
+3. **Docs-only merges don't build:** `ignoreCommand` returns skip when the diff touches only `changelog.d/`, `*.md`, or corpus paths.
+4. **One push per PR** — verify locally (tsc on touched files · lint · relevant units/goldens) BEFORE the first push; fix-up pushes are billed previews.
+5. **Stale-tree guard for wave branches** (they live longer than usual): rebase the wave branch on `origin/main` daily and before the final merge; final merge must be up-to-date (see the 2026-07-25 clobber incident — memory `feedback_stale_tree_merge_clobber`). Recommend the owner flips branch-protection "require branches to be up to date" before Wave A.
+6. **Owner backstop (pending action from the $787 incident):** set the Vercel spend cap before Wave A starts.
