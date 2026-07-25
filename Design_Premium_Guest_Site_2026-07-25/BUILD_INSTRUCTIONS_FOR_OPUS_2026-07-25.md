@@ -196,3 +196,14 @@ Restyles/recompositions of shipped things (no new product): issues-log, review-Q
 
 ### §10 addenda 7 (v14)
 - **Coordinator Biz tab = the same vendor-kit components, coordinator category** — zero new components: review-QR, live-reviews, favorites, allowance meter + load-up + upload + Bridge + booth/ads + both columns all render for the coordinator's vendor record exactly as for any vendor. Route-wise: the coordinator's on-the-day surface gains an Event segment (merged QR/guests) + a Biz segment mounting the shared vendor-kit components with her vendor_id. Capture FAB/grant: her booking fee feeds the same `fee_proportional` grant; the host's delegation console never mounts Biz or the FAB (she has no vendor record in that mode).
+
+## §11 · Upload cost architecture (owner directive 2026-07-25 — "cut the multiple uploads that increase the cost of Vercel")
+
+**RULE: media bytes must NEVER pass through a Vercel function.** This CORRECTS the §10 addenda-5 note ("existing vendor capture route accepting multipart batches") — do NOT ship multipart-through-Vercel.
+
+1. **Presigned direct-to-R2 for ALL capture/upload paths** — the pattern the website editors already use (`/api/upload` presigns; browser PUTs to R2; R2 ingress free). Convert/route the Papic guest-capture, vendor-capture, and the new phone-upload ingest through: (a) `POST /api/upload/sign-batch` → N presigned PUT URLs (tiny JSON), (b) client PUTs bytes straight to R2, (c) `POST /api/papic/commit-batch` → metadata only (keys, event, tags, points debit) which enqueues the NSFW/face pipeline asynchronously. Per-photo Vercel cost collapses from MB-transfer+duration to two sub-KB JSON calls, batched.
+2. **Batch granularity:** sign 20–50 keys per call; one commit per batch. The ₱1,000 pro pack (≈3,000 shots) ⇒ ~120 light calls, not 3,000 heavy ones.
+3. **Serving:** galleries, live wall, roll strips render pre-sized web copies from the R2/CDN domain with plain `<img>` (or a custom loader pinned to R2) — NEVER `next/image` default optimization on Vercel for event media (per-image optimization + transfer charges). The pipeline's existing web-copy keys are the source.
+4. **Realtime pipeline chips** (uploading→screening→tagged): Supabase Realtime on the capture rows — no polling of Vercel functions.
+5. **Phase-2 (optional, biggest ceiling):** move sign+commit to a Cloudflare Worker co-located with R2 (the corpus already plans Workers for renders) — removes Vercel from the media path entirely. Not a launch blocker.
+Client-side: keep adaptive JPEG compression before PUT (spec'd) + the 10s clip clamp — bytes small at the source.
