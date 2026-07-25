@@ -1,0 +1,1799 @@
+<!doctype html>
+<html lang="en"><head></head><body>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setnayan · 5-Tab Guest Site — Pahina improvement pass (v15 · one pill nav everywhere)</title>
+<style>
+  /* ─── backdrop tokens (theme-aware) — phone content commits to the brand's cream world ─── */
+  :root{
+    --bg:#efeae2; --bg2:#e6dfd4; --deck-ink:#3c352e; --deck-sub:#7a6f63; --deck-card:#faf7f2; --deck-line:#d8cfc2;
+    --cream:#fdfbf7; --cream-2:#f7f2ea; --ink:#211d1a; --ink-65:rgba(33,29,26,.65); --ink-55:rgba(33,29,26,.55); --ink-10:rgba(33,29,26,.10);
+    --terra:#b0532e; --terra-soft:#f3e3da; --mul:#7c2d4e; --mul-600:#6b2643; --mul-soft:#f0e2e8; --emerald:#047857;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#211d19; --bg2:#191612; --deck-ink:#e8e1d7; --deck-sub:#9a9083; --deck-card:#2b2621; --deck-line:#3d362e; }
+  }
+  :root[data-theme="dark"]{ --bg:#211d19; --bg2:#191612; --deck-ink:#e8e1d7; --deck-sub:#9a9083; --deck-card:#2b2621; --deck-line:#3d362e; }
+  :root[data-theme="light"]{ --bg:#efeae2; --bg2:#e6dfd4; --deck-ink:#3c352e; --deck-sub:#7a6f63; --deck-card:#faf7f2; --deck-line:#d8cfc2; }
+
+  *{box-sizing:border-box; margin:0}
+  [hidden]{ display:none !important; }
+  html,body{height:100%}
+  body{ background:radial-gradient(120% 90% at 50% 0%,var(--bg) 0%,var(--bg2) 100%); font-family:var(--sans); color:var(--deck-ink); }
+  .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; gap:34px; padding:28px 20px; flex-wrap:wrap; }
+
+  /* ─── demo deck ─── */
+  .deck{ width:270px; display:flex; flex-direction:column; gap:14px; }
+  .deck h1{ font-family:var(--serif); font-style:italic; font-weight:500; font-size:1.5rem; line-height:1.15; text-wrap:balance; }
+  .deck .kicker{ font-family:var(--mono); font-size:.6rem; letter-spacing:.22em; text-transform:uppercase; color:var(--terra); margin-bottom:6px; }
+  .deck p.note{ font-size:.78rem; line-height:1.5; color:var(--deck-sub); }
+  .ctl{ background:var(--deck-card); border:1px solid var(--deck-line); border-radius:14px; padding:12px 14px; }
+  .ctl .lbl{ font-family:var(--mono); font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--deck-sub); margin-bottom:8px; }
+  .seg{ display:flex; flex-wrap:wrap; gap:6px; }
+  .seg button{ font:inherit; font-size:.74rem; padding:6px 11px; border-radius:999px; border:1px solid var(--deck-line); background:transparent; color:var(--deck-ink); cursor:pointer; }
+  .seg button[aria-pressed="true"]{ background:var(--terra); border-color:var(--terra); color:#fdfbf7; }
+  .seg button:focus-visible{ outline:2px solid var(--terra); outline-offset:2px; }
+  .deck .status{ font-size:.74rem; color:var(--deck-sub); line-height:1.45; }
+  .deck .status b{ color:var(--deck-ink); font-weight:600; }
+
+  /* ─── phone frame ─── */
+  .frame{ width:min(430px,100%); height:min(900px,94vh); min-height:660px; background:var(--cream); color:var(--ink);
+    border-radius:44px; border:1px solid rgba(33,29,26,.18); box-shadow:0 30px 80px -30px rgba(33,29,26,.45);
+    display:flex; flex-direction:column; overflow:hidden; position:relative; }
+  @media (max-width:560px){ .wrap{padding:0} .deck{width:100%; padding:16px 16px 4px} .frame{ border-radius:0; height:auto; min-height:90vh; border:none; box-shadow:none; } }
+
+  .stage{ flex:1; overflow-y:auto; overscroll-behavior:contain; padding:64px 18px 130px; scroll-behavior:smooth; }
+  .stage.anim > *{ animation:stagein .32s ease both; }
+  @keyframes stagein{ from{ opacity:0; transform:translateY(10px);} }
+
+  /* ─── top corner chips (shipped pattern) ─── */
+  .topchips{ position:absolute; top:0; left:0; right:0; z-index:8; display:flex; justify-content:space-between; padding:14px 14px 0; pointer-events:none; }
+  .chip{ pointer-events:auto; display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 13px; border-radius:999px;
+    background:rgba(253,251,247,.82); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--ink-10);
+    box-shadow:0 4px 16px -8px rgba(33,29,26,.25); font-size:.8rem; font-weight:600; color:var(--ink); cursor:pointer; }
+  .chip svg{ width:16px; height:16px; }
+  .chip.mg{ font-family:var(--serif); font-style:italic; color:var(--mul); }
+  .chip:focus-visible{ outline:2px solid var(--terra); outline-offset:2px; }
+
+  /* ─── in-app primitives ─── */
+  .eyebrow{ display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:.62rem; letter-spacing:.18em; text-transform:uppercase; color:var(--terra); }
+  .card{ background:var(--cream); border:1px solid var(--ink-10); border-radius:22px; padding:18px; box-shadow:0 1px 0 rgba(33,29,26,.02); }
+  .card + .card, .stack > * + *{ margin-top:14px; }
+  h2.serif{ font-family:var(--serif); font-style:italic; font-weight:500; font-size:1.7rem; line-height:1.12; letter-spacing:-.01em; text-wrap:balance; }
+  h3.serif{ font-family:var(--serif); font-style:italic; font-weight:500; font-size:1.22rem; line-height:1.2; text-wrap:balance; }
+  .sub{ font-size:.85rem; color:var(--ink-65); line-height:1.55; }
+  .tiny{ font-size:.72rem; color:var(--ink-55); line-height:1.5; }
+  .btn{ font:inherit; font-size:.85rem; font-weight:600; border-radius:999px; padding:10px 18px; cursor:pointer; border:1px solid var(--ink-10); background:var(--cream); color:var(--ink); transition:transform .12s ease; }
+  .btn:active{ transform:scale(.97); }
+  .btn.primary{ background:var(--terra); border-color:var(--terra); color:#fdfbf7; }
+  .btn.mul{ background:var(--mul); border-color:var(--mul); color:#fdfbf7; }
+  .btn.ghost{ background:transparent; }
+  .btn:focus-visible{ outline:2px solid var(--terra); outline-offset:2px; }
+  .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .pill{ display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border-radius:999px; }
+  .pill.live{ background:var(--terra); color:#fdfbf7; }
+  .pill.soft{ background:var(--terra-soft); color:var(--terra); }
+  .pill.mulsoft{ background:var(--mul-soft); color:var(--mul); }
+  .pill.ok{ background:#e2efe8; color:var(--emerald); }
+  .dot{ width:6px; height:6px; border-radius:99px; background:currentColor; animation:pulse 1.6s infinite; }
+  @keyframes pulse{ 50%{opacity:.35} }
+  .divider{ height:1px; background:var(--ink-10); margin:14px 0; }
+  .teaser{ background:var(--cream-2); border:1px dashed var(--ink-10); border-radius:22px; padding:20px; text-align:center; }
+  .teaser .mark{ font-family:var(--serif); font-style:italic; font-size:1.5rem; color:var(--ink-55); }
+
+  /* hero */
+  .hero{ text-align:center; padding:4px 0; }
+  .hero .mono-top{ font-family:var(--mono); font-size:.62rem; letter-spacing:.34em; text-transform:uppercase; color:var(--ink-55); }
+  .heroband{ height:120px; border-radius:26px; margin:12px 0 -34px; background:linear-gradient(135deg,#d8c6b4 0%,#c9a9b8 55%,#b98d70 100%); opacity:.9; }
+  .hero .mgram{ width:64px; height:64px; margin:0 auto 10px; border:1px solid var(--ink-10); border-radius:999px; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-style:italic; font-size:1.3rem; color:var(--mul); background:var(--cream); box-shadow:0 6px 20px -10px rgba(33,29,26,.35); position:relative; }
+  .hero h2{ font-family:var(--serif); font-style:italic; font-weight:500; font-size:2.35rem; line-height:1.05; letter-spacing:-.015em; }
+  .hero .amp{ color:var(--terra); }
+  .hero .meta{ margin-top:8px; font-size:.85rem; color:var(--ink-65); }
+  .count{ display:flex; justify-content:center; gap:8px; margin-top:14px; }
+  .count .c{ background:var(--cream-2); border:1px solid var(--ink-10); border-radius:14px; padding:8px 0; width:64px; }
+  .count .n{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:1.15rem; font-weight:600; }
+  .count .l{ font-family:var(--mono); font-size:.55rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-55); }
+
+  .spot{ border-radius:24px; padding:20px; border:1px solid var(--ink-10); background:linear-gradient(150deg,var(--cream-2),var(--terra-soft)); margin-top:18px; }
+  .spot.dark{ background:linear-gradient(150deg,#2c2320,#4a2a20); border-color:transparent; color:#fdf6ef; }
+  .spot.dark .sub{ color:rgba(253,246,239,.75); }
+  .spot.mulb{ background:linear-gradient(150deg,var(--cream-2),var(--mul-soft)); }
+
+  /* schedule */
+  .sched{ position:relative; padding-left:18px; }
+  .sched::before{ content:""; position:absolute; left:4px; top:6px; bottom:6px; width:1px; background:var(--ink-10); }
+  .sblock{ position:relative; padding:10px 0 10px 10px; }
+  .sblock::before{ content:""; position:absolute; left:-18px; top:18px; width:9px; height:9px; border-radius:99px; background:var(--cream); border:2px solid var(--ink-10); }
+  .sblock.now::before{ background:var(--terra); border-color:var(--terra); }
+  .sblock .t{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:.72rem; color:var(--ink-55); }
+  .sblock .n{ font-weight:600; font-size:.95rem; }
+  .sblock .p{ font-size:.78rem; color:var(--ink-65); }
+
+  .dots{ display:flex; gap:8px; }
+  .dots span{ width:26px; height:26px; border-radius:99px; border:1px solid var(--ink-10); }
+  .swatches{ display:flex; gap:8px; flex-wrap:wrap; }
+  .swatches button{ width:30px; height:30px; border-radius:99px; border:2px solid transparent; cursor:pointer; padding:0; }
+  .swatches button[aria-pressed="true"]{ border-color:var(--ink); box-shadow:0 0 0 2px var(--cream) inset; }
+  .swatches button:focus-visible{ outline:2px solid var(--terra); outline-offset:2px; }
+
+  /* photo tiles */
+  .wall{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .wall .tile{ aspect-ratio:1; border-radius:12px; transition:opacity .5s; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .grid3 .ph{ aspect-ratio:1; border-radius:14px; position:relative; }
+  .ph,.tile{ background:linear-gradient(135deg,#d8c6b4,#b98d70); }
+  .ph.g2,.tile.g2{ background:linear-gradient(135deg,#c9a9b8,#8d5a74); }
+  .ph.g3,.tile.g3{ background:linear-gradient(135deg,#b9c4ae,#7d8f6d); }
+  .ph.g4,.tile.g4{ background:linear-gradient(135deg,#d9d2c2,#a89a7e); }
+  .ph .dlb{ position:absolute; right:6px; bottom:6px; width:28px; height:28px; border-radius:99px; border:none; cursor:pointer; background:rgba(33,29,26,.55); color:#fdf6ef; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+  .ph .dlb svg{ width:14px; height:14px; }
+
+  .watch{ border-radius:24px; overflow:hidden; background:#191412; color:#fdf6ef; }
+  .watch .screen{ aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; background:radial-gradient(80% 120% at 50% 20%,#3a2b24,#191412); }
+  .watch .screen .playbtn{ width:54px; height:54px; border-radius:99px; background:rgba(253,246,239,.14); border:1px solid rgba(253,246,239,.35); color:#fdf6ef; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .watch .bar{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; font-size:.78rem; }
+
+  input[type=text],textarea{ font:inherit; font-size:.88rem; width:100%; border:1px solid var(--ink-10); border-radius:14px; padding:10px 12px; background:var(--cream); color:var(--ink); }
+  textarea{ resize:vertical; min-height:88px; }
+  input:focus-visible,textarea:focus-visible{ outline:2px solid var(--terra); outline-offset:1px; }
+  .counter{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:.62rem; color:var(--ink-55); text-align:right; margin-top:4px; }
+
+  /* newspaper */
+  .paper{ background:var(--cream-2); border:1px solid var(--ink-10); border-radius:22px; padding:22px 20px; }
+  .paper .mast{ font-family:var(--serif); text-align:center; font-size:.95rem; letter-spacing:.18em; text-transform:uppercase; border-bottom:2px solid var(--ink); padding-bottom:8px; }
+  .paper .dateline{ font-family:var(--mono); font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-55); text-align:center; padding:6px 0 12px; border-bottom:1px solid var(--ink-10); margin-bottom:14px; }
+  .paper h2{ font-family:var(--serif); font-style:italic; font-weight:500; font-size:1.9rem; line-height:1.1; text-align:center; text-wrap:balance; }
+  .paper .lede{ font-size:.85rem; color:var(--ink-65); line-height:1.6; text-align:center; margin-top:10px; }
+  .colcard{ border-top:1px solid var(--ink-10); padding-top:12px; margin-top:12px; }
+  .colcard .byline{ font-family:var(--mono); font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mul); }
+  .colcard h4{ font-family:var(--serif); font-style:italic; font-weight:500; font-size:1.05rem; margin:4px 0; }
+  .colcard p{ font-size:.82rem; color:var(--ink-65); line-height:1.6; }
+
+  /* ─── floating pill nav (mirrors shipped BottomNav) ─── */
+  .navpill{ position:absolute; left:14px; right:14px; bottom:calc(env(safe-area-inset-bottom) + 12px); z-index:10; height:64px;
+    border-radius:999px; border:1px solid var(--ink-10); background:rgba(253,251,247,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    box-shadow:0 12px 34px -14px rgba(33,29,26,.4); overflow:hidden; }
+  .navpill .slider{ position:absolute; top:6px; bottom:6px; width:calc(20% - 8px); border-radius:999px; background:var(--terra-soft); transition:left .28s cubic-bezier(.5,1.4,.4,1); }
+  .navpill .items{ position:relative; z-index:1; display:grid; grid-template-columns:repeat(5,1fr); height:100%; }
+  .navpill button{ background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    color:var(--ink-55); font-size:10px; letter-spacing:.04em; font-weight:500; min-height:44px; }
+  .navpill button svg{ width:22px; height:22px; }
+  .navpill button[aria-selected="true"]{ color:var(--terra); }
+  .navpill button:focus-visible{ outline:2px solid var(--terra); outline-offset:-4px; border-radius:999px; }
+
+  /* camera FAB (mirrors shipped hub-bar center action) */
+  .camfab{ position:absolute; right:16px; bottom:calc(env(safe-area-inset-bottom) + 86px); z-index:10;
+    width:64px; height:64px; border-radius:999px; border:none; cursor:pointer; background:var(--mul); color:#fdf6ef;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    box-shadow:0 14px 30px -10px rgba(124,45,78,.55); transition:transform .15s ease; }
+  .camfab:hover{ background:var(--mul-600); }
+  .camfab:active{ transform:scale(.94); }
+  .camfab svg{ width:24px; height:24px; }
+  .camfab span{ font-size:.58rem; font-weight:600; }
+  .camfab:focus-visible{ outline:2px solid var(--terra); outline-offset:2px; }
+  .livechip{ position:absolute; left:16px; bottom:calc(env(safe-area-inset-bottom) + 92px); z-index:10; }
+  .livechip button{ font:inherit; display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:.58rem; letter-spacing:.14em; text-transform:uppercase;
+    background:rgba(33,29,26,.88); backdrop-filter:blur(10px); color:#fdf6ef; border:none; border-radius:999px; padding:9px 14px; cursor:pointer; box-shadow:0 8px 24px -8px rgba(33,29,26,.5); }
+  .livechip .dot{ background:var(--terra); }
+
+  /* ─── app-feel motion ─── */
+  .stage.anim > *:nth-child(1){ animation-delay:.03s } .stage.anim > *:nth-child(2){ animation-delay:.08s }
+  .stage.anim > *:nth-child(3){ animation-delay:.13s } .stage.anim > *:nth-child(4){ animation-delay:.18s }
+  .stage.anim > *:nth-child(5){ animation-delay:.23s } .stage.anim > *:nth-child(n+6){ animation-delay:.28s }
+  .stack > *{ animation:stagein .38s ease both; }
+  .stack > *:nth-child(1){ animation-delay:.05s } .stack > *:nth-child(2){ animation-delay:.11s }
+  .stack > *:nth-child(3){ animation-delay:.17s } .stack > *:nth-child(4){ animation-delay:.23s }
+  .stack > *:nth-child(n+5){ animation-delay:.29s }
+  @keyframes navpop{ from{ transform:scale(.7) } 60%{ transform:scale(1.18) } to{ transform:scale(1) } }
+  .navpill button[aria-selected="true"] svg{ animation:navpop .32s cubic-bezier(.34,1.56,.64,1); }
+  .camfab.breathe{ animation:breathe 2.4s ease-in-out infinite; }
+  @keyframes breathe{ 50%{ transform:scale(1.07); box-shadow:0 16px 38px -8px rgba(124,45,78,.7); } }
+  .wall .tile{ animation:tilein .5s cubic-bezier(.34,1.4,.64,1) both; }
+  .wall .tile:nth-child(odd){ animation-delay:.06s } .wall .tile:nth-child(3n){ animation-delay:.12s }
+  @keyframes tilein{ from{ transform:scale(.82); opacity:0 } }
+  .heroband{ background-size:220% 220%; animation:bandshift 10s ease-in-out infinite alternate; }
+  @keyframes bandshift{ to{ background-position:90% 70% } }
+  .hero .mgram{ animation:mfloat 4.5s ease-in-out infinite; }
+  @keyframes mfloat{ 50%{ transform:translateY(-4px) } }
+  .num-pop{ display:inline-block; animation:navpop .4s cubic-bezier(.34,1.56,.64,1); }
+  .burst{ position:absolute; z-index:45; pointer-events:none; width:0; height:0; }
+  .burst i{ position:absolute; width:7px; height:7px; border-radius:99px; animation:burst .75s cubic-bezier(.2,.8,.4,1) forwards; }
+  @keyframes burst{ from{ transform:translate(0,0) scale(1); opacity:1 } to{ transform:translate(var(--dx),var(--dy)) scale(.3); opacity:0 } }
+
+  /* ─── host Papic pool bar (the purchase moment) ─── */
+  .poolbar{ position:absolute; left:14px; right:96px; bottom:calc(env(safe-area-inset-bottom) + 88px); z-index:9;
+    background:rgba(33,29,26,.9); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); color:#fdf6ef;
+    border-radius:18px; padding:10px 14px; display:flex; align-items:center; gap:12px;
+    box-shadow:0 10px 30px -12px rgba(33,29,26,.55); animation:up .35s ease; }
+  .poolbar .pb{ flex:1; min-width:0; }
+  .poolbar .pl{ font-family:var(--mono); font-size:.56rem; letter-spacing:.14em; text-transform:uppercase; display:flex; justify-content:space-between; gap:8px; }
+  .poolbar .meter{ height:5px; border-radius:99px; background:rgba(253,246,239,.18); margin-top:6px; overflow:hidden; }
+  .poolbar .meter i{ display:block; height:100%; border-radius:99px; background:var(--terra); transition:width .7s cubic-bezier(.3,1,.4,1); }
+  .poolbar .tbtn{ font:inherit; font-size:.74rem; font-weight:700; border:none; border-radius:999px; padding:8px 14px; background:var(--terra); color:#fdf6ef; cursor:pointer; white-space:nowrap; }
+  .poolbar .tbtn:active{ transform:scale(.95); }
+  .poolopt{ display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid var(--ink-10); border-radius:18px; padding:14px; margin-top:10px; }
+  .poolopt .on{ font-weight:700; font-size:.92rem; }
+  .poolopt .od{ font-size:.74rem; color:var(--ink-55); }
+  .poolopt .op{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:600; color:var(--mul); }
+
+  /* overlays */
+  .overlay{ position:absolute; inset:0; z-index:30; display:none; }
+  .overlay.open{ display:flex; }
+  .sheet{ align-items:flex-end; background:rgba(33,29,26,.4); backdrop-filter:blur(3px); }
+  .sheet .panel{ background:var(--cream); width:100%; border-radius:28px 28px 0 0; padding:20px 20px calc(24px + env(safe-area-inset-bottom)); max-height:82%; overflow-y:auto; animation:up .3s cubic-bezier(.3,1.2,.4,1); }
+  @keyframes up{ from{transform:translateY(40px);opacity:0} }
+  .modal{ align-items:center; justify-content:center; background:rgba(33,29,26,.45); backdrop-filter:blur(3px); padding:24px; }
+  .modal .panel{ background:var(--cream); border-radius:26px; padding:22px; width:100%; max-width:330px; animation:up .26s ease; }
+  .sheet-title{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .xbtn{ background:none; border:1px solid var(--ink-10); border-radius:99px; width:34px; height:34px; cursor:pointer; color:var(--ink-55); font-size:1rem; line-height:1; }
+
+  /* ─── Papic camera (mirrors shipped bg-ink capture stage) ─── */
+  .camera{ background:var(--ink); color:#fdf6ef; flex-direction:column; }
+  .camera .ctop{ display:flex; align-items:center; justify-content:space-between; padding:calc(14px + env(safe-area-inset-top)) 16px 10px; }
+  .camera .cpill{ display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; background:rgba(253,246,239,.12); border:1px solid rgba(253,246,239,.18); color:#fdf6ef; border-radius:999px; padding:6px 12px; cursor:pointer; }
+  .camera .cx{ background:rgba(253,246,239,.12); border:none; color:#fdf6ef; width:36px; height:36px; border-radius:99px; cursor:pointer; font-size:1rem; }
+  .vf{ flex:1; margin:4px 14px; border-radius:24px; overflow:hidden; position:relative; background:linear-gradient(135deg,#3a2f28,#5a4335 45%,#2c2522); }
+  .vf .vgrid{ position:absolute; inset:0; background:linear-gradient(rgba(253,246,239,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(253,246,239,.05) 1px,transparent 1px); background-size:33.4% 33.4%; }
+  .vf .flash{ position:absolute; inset:0; background:#fdf6ef; opacity:0; pointer-events:none; }
+  .vf .flash.go{ animation:flash .35s ease; }
+  @keyframes flash{ 10%{opacity:.85} 100%{opacity:0} }
+  .vf .recdot{ position:absolute; top:12px; right:12px; display:none; align-items:center; gap:6px; font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; color:#fdf6ef; background:rgba(176,83,46,.9); border-radius:999px; padding:5px 10px; }
+  .vf.rec .recdot{ display:inline-flex; }
+  .chstrip{ margin:0 14px; border-radius:18px; background:rgba(253,246,239,.08); border:1px solid rgba(253,246,239,.14); padding:12px 14px; }
+  .chstrip .chead{ display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(253,246,239,.8); }
+  .chstrip .mission{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding-top:8px; font-size:.8rem; }
+  .chstrip .mission .done{ color:rgba(253,246,239,.45); text-decoration:line-through; }
+  .cbottom{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px calc(20px + env(safe-area-inset-bottom)); }
+  .rollthumbs{ display:flex; }
+  .rollthumbs .rt{ width:38px; height:38px; border-radius:10px; border:2px solid var(--ink); margin-left:-10px; }
+  .rollthumbs .rt:first-child{ margin-left:0; }
+  .shutter{ width:76px; height:76px; border-radius:999px; border:4px solid #fdf6ef; background:transparent; cursor:pointer; position:relative; padding:0; }
+  .shutter .core{ position:absolute; inset:6px; border-radius:999px; background:#fdf6ef; transition:transform .12s ease, background .2s; }
+  .shutter.holding .core{ background:var(--terra); transform:scale(.8); }
+  .shutter:focus-visible{ outline:2px solid #fdf6ef; outline-offset:4px; }
+  .chint{ text-align:center; font-family:var(--mono); font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(253,246,239,.55); padding-bottom:6px; }
+  .ptspill{ font-variant-numeric:tabular-nums; }
+
+  /* roll overlay */
+  .roll{ background:var(--cream); flex-direction:column; }
+  .roll .rtop{ padding:calc(16px + env(safe-area-inset-top)) 18px 8px; display:flex; justify-content:space-between; align-items:center; }
+  .rseg{ display:flex; gap:6px; margin:6px 18px 12px; background:var(--cream-2); border-radius:999px; padding:4px; }
+  .rseg button{ flex:1; font:inherit; font-size:.78rem; font-weight:600; padding:8px 0; border-radius:999px; border:none; background:transparent; color:var(--ink-55); cursor:pointer; }
+  .rseg button[aria-pressed="true"]{ background:var(--cream); color:var(--terra); box-shadow:0 2px 8px -4px rgba(33,29,26,.3); }
+  .rbody{ flex:1; overflow-y:auto; padding:0 18px 18px; }
+  .rfoot{ display:flex; gap:10px; padding:12px 18px calc(18px + env(safe-area-inset-bottom)); border-top:1px solid var(--ink-10); background:rgba(253,251,247,.9); backdrop-filter:blur(10px); }
+  .rfoot .btn{ flex:1; }
+
+  /* story maker */
+  .storyprev{ width:180px; aspect-ratio:9/16; border-radius:22px; margin:10px auto; overflow:hidden; position:relative; box-shadow:0 18px 40px -18px rgba(33,29,26,.5); }
+  .storyprev .sl{ position:absolute; inset:0; opacity:0; animation:slide 6s infinite; }
+  .storyprev .sl:nth-child(2){ animation-delay:2s; }
+  .storyprev .sl:nth-child(3){ animation-delay:4s; }
+  @keyframes slide{ 0%{opacity:0; transform:scale(1.06)} 8%{opacity:1} 33%{opacity:1; transform:scale(1)} 41%{opacity:0} 100%{opacity:0} }
+  .storyprev .watermark{ position:absolute; bottom:8px; left:0; right:0; text-align:center; font-family:var(--mono); font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(253,246,239,.85); }
+  .prog{ height:6px; border-radius:99px; background:var(--cream-2); overflow:hidden; }
+  .prog i{ display:block; height:100%; width:0%; background:var(--mul); border-radius:99px; transition:width .2s; }
+  .feels{ display:flex; gap:6px; flex-wrap:wrap; }
+  .feels button{ font:inherit; font-size:.72rem; padding:7px 12px; border-radius:999px; border:1px solid var(--ink-10); background:var(--cream); cursor:pointer; color:var(--ink); }
+  .feels button[aria-pressed="true"]{ background:var(--mul); border-color:var(--mul); color:#fdf6ef; }
+
+  /* avatar + 3d plan */
+  .avrow{ display:flex; gap:16px; align-items:center; }
+  .avstage{ width:96px; height:110px; flex:0 0 auto; border-radius:20px; background:var(--cream-2); display:flex; align-items:flex-end; justify-content:center; overflow:hidden; }
+  .plan3d{ border-radius:20px; background:linear-gradient(180deg,#efe9df,#e5dccd); padding:14px 10px 8px; position:relative; overflow:hidden; margin-top:12px; }
+  .plan3d svg{ display:block; width:100%; height:auto; }
+  .plan3d .plabel{ position:absolute; top:10px; left:12px; }
+
+  /* film */
+  .film{ background:var(--cream); flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
+  .film .veil{ position:absolute; inset:0; background:linear-gradient(160deg,var(--mul-soft),var(--terra-soft)); animation:veil 1.6s ease forwards; }
+  @keyframes veil{ to{ transform:translateY(-102%);} }
+  .film .inner{ position:relative; padding:24px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .film .fm{ width:74px; height:74px; border:1px solid var(--ink-10); border-radius:999px; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-style:italic; font-size:1.5rem; color:var(--mul); background:var(--cream-2); opacity:0; animation:fadeup .8s ease .9s forwards; }
+  .film h2{ font-family:var(--serif); font-style:italic; font-weight:500; font-size:2.4rem; line-height:1.06; opacity:0; animation:fadeup .8s ease 1.5s forwards; }
+  .film .fd{ font-family:var(--mono); font-size:.66rem; letter-spacing:.3em; text-transform:uppercase; color:var(--terra); opacity:0; animation:fadeup .8s ease 2.1s forwards; }
+  .film .fbtns{ display:flex; gap:10px; margin-top:16px; opacity:0; animation:fadeup .8s ease 2.7s forwards; }
+  @keyframes fadeup{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none} }
+  .film .skip{ position:absolute; top:18px; right:18px; }
+  @media (prefers-reduced-motion:reduce){
+    .film .veil{display:none} .film .fm,.film h2,.film .fd,.film .fbtns{ animation:none; opacity:1 }
+    .dot{animation:none} .stage.anim > *{animation:none} .storyprev .sl{animation:none; opacity:1} .navpill .slider{transition:none}
+    .stack > *,.wall .tile,.heroband,.hero .mgram,.camfab.breathe,.navpill button[aria-selected="true"] svg,.num-pop{ animation:none }
+    .burst{ display:none }
+  }
+
+  .qrbox{ display:flex; justify-content:center; padding:10px 0 6px; }
+  .qrbox svg{ border:1px solid var(--ink-10); border-radius:16px; padding:10px; background:#fff; }
+
+  .toast{ position:absolute; bottom:150px; left:50%; transform:translateX(-50%); background:rgba(33,29,26,.92); backdrop-filter:blur(8px); color:#fdf6ef; font-size:.78rem; padding:9px 16px; border-radius:999px; z-index:40; opacity:0; pointer-events:none; transition:opacity .25s; max-width:85%; text-align:center; }
+  .toast.show{ opacity:1; }
+
+  .doorway{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px 2px; border:none; background:none; width:100%; cursor:pointer; font:inherit; text-align:left; color:var(--ink); border-top:1px solid var(--ink-10); }
+  .doorway:first-of-type{ border-top:none; }
+  .doorway .dl{ font-weight:600; font-size:.9rem; }
+  .doorway .ds{ font-size:.74rem; color:var(--ink-55); }
+  .doorway .arr{ color:var(--terra); }
+  .doorway .arr svg{ width:18px; height:18px; }
+</style>
+<style id="pahina-materials">
+/* ══ PAHINA IMPROVEMENT LAYER (2026-07-25) — materials ONLY.
+   Structure, copy, tabs, interactions = the owner's 5-Tab prototype, untouched.
+   Production loads Fraunces via next/font; the stack falls back gracefully here. ══ */
+:root{
+  --gild:#b08d57;
+  --serif:"Fraunces","Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --mono:"Space Mono","DM Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root{ --gild:#c5a66a } }
+:root[data-theme="dark"]{ --gild:#c5a66a }
+/* paper grain on the phone frame (inline SVG, zero requests) */
+.frame::after{ content:""; position:absolute; inset:0; z-index:60; pointer-events:none; opacity:.045; border-radius:inherit;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:240px 240px; }
+/* type scale — a touch more display presence, same hierarchy */
+.hero h2{ font-size:2.65rem; }
+h2.serif{ font-size:1.85rem; }
+.hero .mono-top{ color:var(--gild); }
+.hero .mgram{ border-color:rgba(176,141,87,.55); }
+.eyebrow{ letter-spacing:.22em; }
+.count .n{ font-family:var(--serif); font-size:1.4rem; font-weight:500; }
+.film .fd{ color:var(--gild); }
+.film .fm{ border-color:rgba(176,141,87,.55); }
+/* letterpress on the two primary button materials */
+.btn.primary,.btn.mul{ text-shadow:0 -1px 0 rgba(0,0,0,.18); box-shadow:0 6px 16px -8px rgba(33,29,26,.45); }
+/* the newspaper gets a printed inner hairline */
+.paper{ position:relative; }
+.paper::after{ content:""; position:absolute; inset:7px; pointer-events:none; border:1px solid var(--ink-10); border-radius:16px; }
+.paper .dateline{ color:var(--gild); }
+.colcard .byline{ letter-spacing:.2em; }
+/* gild the schedule NOW dot ring + mast rule */
+.sblock.now .t b{ color:var(--terra); }
+.divider{ background:linear-gradient(90deg,transparent,var(--ink-10) 30%,var(--ink-10) 70%,transparent); }
+/* Live Studio channel rail (Unified Spec 2026-07-25) — extends the watch card */
+.chrail{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
+.chrail button{ font:inherit; background:none; border:none; padding:0; cursor:pointer; text-align:left; color:var(--ink); }
+.chrail .ct{ display:block; aspect-ratio:16/9; border-radius:12px; border:1px solid var(--ink-10);
+  background:linear-gradient(135deg,#d8c6b4,#b98d70); position:relative; }
+.chrail button:nth-child(2) .ct{ background:linear-gradient(135deg,#b9c4ae,#7d8f6d); }
+.chrail button:nth-child(3) .ct{ background:linear-gradient(135deg,#c9a9b8,#8d5a74); }
+.chrail button[aria-pressed="true"] .ct{ border-color:var(--gild); box-shadow:0 0 0 1.5px var(--gild); }
+.chrail .cn{ position:absolute; left:6px; top:5px; font-family:var(--mono); font-size:.5rem; letter-spacing:.12em;
+  background:rgba(253,251,247,.85); border-radius:6px; padding:2px 5px; }
+.chrail .cl{ display:block; margin-top:4px; font-family:var(--mono); font-size:.54rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-55); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.chrail .cl .star{ color:var(--gild); }
+/* ── coordinator / vendor DAY lanes — APP grammar (utilitarian cards),
+      Pahina materials only. Not the guest pill-nav world. ── */
+.lane-head{ display:flex; align-items:center; gap:12px; margin-bottom:4px; }
+.lane-head .who{ flex:1 }
+.lane-head .av{ width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+  font-family:var(--serif); font-style:italic; font-size:1.05rem; color:var(--mul);
+  background:var(--cream-2); border:1px solid var(--gild); }
+.rosrow{ display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--ink-10); }
+.rosrow:first-of-type{ border-top:none }
+.rosrow .rt{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:.7rem; color:var(--ink-55); width:56px; flex:none }
+.rosrow .rn{ flex:1; min-width:0 } .rosrow .rn b{ font-size:.9rem } .rosrow .rn span{ display:block; font-size:.72rem; color:var(--ink-55) }
+.rosrow.now{ background:var(--terra-soft); margin:0 -8px; padding-left:8px; padding-right:8px; border-radius:12px; border-top:none }
+.rosrow .rb{ display:flex; gap:6px; flex:none }
+.rosrow .rb button{ font:inherit; font-size:.66rem; font-weight:600; padding:6px 9px; border-radius:999px; border:1px solid var(--ink-10); background:var(--cream); cursor:pointer }
+.rosrow.done .rn{ opacity:.45; text-decoration:line-through }
+.stat3{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; text-align:center }
+.stat3 .sc{ background:var(--cream-2); border:1px solid var(--ink-10); border-radius:14px; padding:10px 4px }
+.stat3 .sn{ font-family:var(--serif); font-size:1.5rem; line-height:1.1 }
+.stat3 .sl{ font-family:var(--mono); font-size:.52rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-55) }
+.lockstub{ display:flex; gap:10px; align-items:center; background:var(--cream-2); border:1px dashed var(--ink-10); border-radius:16px; padding:12px 14px; color:var(--ink-55); font-size:.8rem }
+.vtrow{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 0; border-top:1px solid var(--ink-10); font-size:.84rem }
+.vtrow:first-of-type{ border-top:none }
+.tglrow{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px }
+.tgl2{ width:40px; height:22px; border-radius:999px; background:var(--ink-10); border:none; cursor:pointer; position:relative; flex:none }
+.tgl2::after{ content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:99px; background:#fff; transition:left .2s }
+.tgl2[aria-pressed="true"]{ background:var(--terra) } .tgl2[aria-pressed="true"]::after{ left:21px }
+/* (v15) role navs reuse the guest .navpill grammar — flat app-bar retired */
+.arrbar{ display:flex; align-items:center; justify-content:space-between; gap:8px;
+  background:var(--cream-2); border:1px solid var(--ink-10); border-bottom:none;
+  border-radius:16px 16px 0 0; padding:7px 12px; font-family:var(--mono);
+  font-size:.56rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-55) }
+.arrbar .ab{ display:flex; gap:4px }
+.arrbar button{ font:inherit; border:1px solid var(--ink-10); background:var(--cream);
+  border-radius:8px; padding:3px 8px; cursor:pointer; color:var(--ink) }
+.arr-wrap{ } .arr-wrap.hiddenc{ opacity:.45 }
+.arr-wrap.hiddenc .card,.arr-wrap.hiddenc .lockstub{ border-style:dashed }
+.pdplate{ display:flex; gap:10px; align-items:center; background:var(--ink); color:#fdf6ef; border-radius:18px; padding:13px 15px; margin-top:14px }
+.pdplate p{ flex:1; font-size:.8rem; line-height:1.5 } .pdplate b{ font-weight:700 }
+.pdplate button{ font:inherit; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; font-family:var(--mono); background:none; border:1px solid rgba(253,246,239,.4); color:#fdf6ef; border-radius:999px; padding:6px 11px; cursor:pointer }
+.annc{ border-left:3px solid var(--terra); background:var(--terra-soft); border-radius:14px; padding:11px 13px; margin-top:12px }
+.annc .at{ font-family:var(--mono); font-size:.56rem; letter-spacing:.16em; text-transform:uppercase; color:var(--terra) }
+.annc p{ font-size:.86rem; margin-top:3px }
+.reqchips{ display:flex; gap:6px; margin-top:10px }
+.reqchips button{ font:inherit; font-size:.7rem; font-weight:600; padding:6px 12px; border-radius:999px; border:1px solid var(--ink-10); background:var(--cream); cursor:pointer; color:var(--ink-55) }
+.reqchips button[aria-pressed="true"]{ background:var(--terra); border-color:var(--terra); color:#fdfbf7 }
+.bigsong{ text-align:center; padding:6px 0 2px }
+.bigsong .now{ font-family:var(--serif); font-style:italic; font-size:1.6rem; line-height:1.15 }
+.bigsong .nx{ font-family:var(--mono); font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-55); margin-top:8px }
+.meter2{ height:5px; border-radius:99px; background:var(--ink-10); overflow:hidden; margin-top:8px }
+.meter2 i{ display:block; height:100%; background:var(--gild); border-radius:99px }
+@media (prefers-reduced-motion:reduce){ .frame::after{ display:none } }
+
+/* ── viewing fix (demo chrome only): on narrow screens the frame grows to
+   content height, which pushed the absolutely-anchored chrome to the page's
+   far bottom. Pin the in-frame chrome to the VIEWPORT on mobile so the bar,
+   camera FAB, live chip and pool bar stay visible while scrolling — exactly
+   how the real site's fixed bars behave. Desktop (fixed-height frame) keeps
+   the original absolute anchoring. */
+@media (max-width: 640px){
+  .navpill, .camfab, .livechip, .poolbar { position: fixed !important; }
+}
+</style>
+
+<div class="wrap">
+  <aside class="deck">
+    <div>
+      <div class="kicker">Setnayan · Prototype v2 · 2026-07-22 · Pahina pass 2026-07-25</div>
+      <h1>The 5-tab guest site, open to browse.</h1>
+      <p class="note">Three identities, one architecture: stranger · guest · host. Phase changes what Home leads with — never what exists. Try <b>Bea (host) × Wedding day</b> for the Papic pool purchase moment. This v9 implements the owner’s day-of ROLE × FEATURE MATRIX — guest announcements + phones-down, generic vendor kit (incl. the 50-pt documentation allowance), coordinator QR kit / seat scanner / requests inbox, a band lane, and “Run the day” for the host. Lanes (their APP world, not the guest site). Otherwise the SAME prototype, improved in materials only — Fraunces display, paper grain, gild accents; structure and interactions untouched.</p>
+    </div>
+    <div class="ctl">
+      <div class="lbl">Lifecycle phase</div>
+      <div class="seg" id="phaseSeg" role="group" aria-label="Lifecycle phase"></div>
+    </div>
+    <div class="ctl">
+      <div class="lbl">Viewer identity</div>
+      <div class="seg" id="viewerSeg" role="group" aria-label="Viewer identity"></div>
+    </div>
+    <div class="deck status" id="deckStatus"></div>
+  </aside>
+
+  <main class="frame" aria-label="Phone preview">
+    <div class="topchips">
+      <button class="chip mg" data-goto="home" aria-label="Home">B&amp;M</button>
+      <span style="display:inline-flex; gap:8px; pointer-events:auto">
+        <button class="chip" id="editChip" hidden aria-label="Edit this site" style="color:var(--mul)">✎&nbsp; Edit site</button>
+        <button class="chip" id="moreChip" aria-label="More">☰&nbsp; More</button>
+      </span>
+    </div>
+    <div class="stage" id="stage" tabindex="-1"></div>
+    <div class="livechip" id="livechip" hidden><button id="hubBtn"><span class="dot"></span> Live · hub</button></div>
+    <div class="poolbar" id="poolbar" hidden></div>
+    <button class="camfab" id="camFab" hidden aria-label="Open Papic camera"></button>
+    <nav class="navpill" id="appnav" hidden aria-label="Role menu"></nav>
+    <nav class="navpill" id="navpill" aria-label="Site menu">
+      <div class="slider" id="navSlider"></div>
+      <div class="items" role="tablist" id="navItems"></div>
+    </nav>
+
+    <div class="overlay film" id="filmOv" role="dialog" aria-label="Save the Date film">
+      <div class="veil"></div>
+      <div class="inner">
+        <div class="fm">B<span style="color:var(--terra)">&</span>M</div>
+        <h2>Bea <span style="color:var(--terra)">&</span> Marco</h2>
+        <div class="fd">12 · 12 · 2026 — Tagaytay</div>
+        <div class="fbtns">
+          <button class="btn ghost" data-act="calendar">Add to calendar</button>
+          <button class="btn primary" data-act="filmDone">Explore the site</button>
+        </div>
+      </div>
+      <button class="btn ghost skip" data-act="filmDone">Skip</button>
+    </div>
+
+    <div class="overlay camera" id="camOv" role="dialog" aria-label="Papic camera"></div>
+    <div class="overlay roll" id="rollOv" role="dialog" aria-label="Your gallery"></div>
+    <div class="overlay sheet" id="sheetOv"><div class="panel" id="sheetPanel"></div></div>
+    <div class="overlay modal" id="modalOv"><div class="panel" id="modalPanel"></div></div>
+    <div class="toast" id="toast" role="status"></div>
+  </main>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  /* ───────────── state ───────────── */
+  var S = {
+    phase:'rsvp', viewer:'guest', tab:'home',
+    filmSeen:false, rsvp:null, meal:null, column:null, face:false,
+    qrSeed:7, wallCount:128,
+    pool:{granted:3050, left:320}, // ONE shared Papic pool (Free 50 + Pool 3k) · 1 pt photo · 7 pts 10s clip
+    poolGalleryOpen:false,         // couple toggle, DEFAULT OFF — guests browse the shared event gallery
+    linked:{},                     // photos the guest self-linked ("I'm in this" → manual_pick tag)
+    roll:[],                      // taken by me — [{cls}]
+    taggedN:12,
+    missions:[ {t:'Get a shot with the photographer', v:'Lumina Studios', done:false},
+               {t:'Your whole table, one frame', v:null, done:true},
+               {t:'Catch the fireworks from the ridge', v:null, done:false} ],
+    rollTab:'taken', armed:null,   // selected challenge — the next capture carries it
+    story:{ phase:'idle', feel:'Sunday Morning', prog:0 },
+    avatar:{ skin:1, hair:0, outfit:0 },
+    ros:[ {t:'3:00 PM', n:'Ceremony', p:'Chapel of the Pines', done:true},
+          {t:'4:30 PM', n:'Cocktails', p:'Garden Terrace', done:true},
+          {t:'6:30 PM', n:'Reception', p:'Grand Ballroom', done:false, now:true},
+          {t:'8:40 PM', n:'Same-day edit screening', p:'Grand Ballroom', done:false, money:true},
+          {t:'9:00 PM', n:'Fireworks', p:'The Ridge', done:false} ],
+    phonesDown:true, pdDismissed:false, bcastN:1, arrived:96, invited:142, issueSent:false,
+    lastBcast:{text:'Dinner is served \u2014 please find your table in the Grand Ballroom.', t:'7:12 PM'},
+    reqTab:'vendors', seatScan:false, hostRun:false, arrange:false,
+    appTabs:{ vendor:'today', band:'today', coord:'show', hostc:'show', mc:'show' },
+    mcDeck:{ order:['cue','script','intro','games'], hidden:{} }, mcArrange:false,
+    up:{ phase:'idle', sel:{}, items:[], role:'vendor' },
+    hostDeck:{ order:['arrivals','ros','bcast','wall','watch','gifts','qrkit','seatscan','requests','calltimes','kit','money'], hidden:{gifts:true} },
+    doc:{ vendor:{fee:2000, left:74, total:100, kind:'photos + 5s clips'}, band:{fee:800, left:41, total:60, kind:'photos only'}, coord:{fee:3000, left:118, total:133, kind:'photos + 5s clips'}, mc:{fee:3500, left:138, total:150, kind:'photos + 5s clips'} }, // pts = clamp(50, 50+(fee-500)/30, 200)
+    reqs:[ {lane:'couple', from:'Bea', text:'Hold the fireworks until Lolo Ben is seated outside.', st:'new'},
+           {lane:'hosts', from:'Marco', text:'Extra chair at Table 2 \u2014 surprise guest.', st:'ack'},
+           {lane:'vendors', from:'Fuego Pyro', text:'Wind check at 8:45 \u2014 will confirm the ridge setup.', st:'new'} ],
+    songReqs:[ {from:'Table 4', song:'Ikaw \u00b7 Yeng Constantino', st:'new'},
+               {from:'Maria S.', song:'Paubaya \u00b7 Moira', st:'new'} ],
+    setList:[ ['First set \u00b7 dinner','Fly Me to the Moon',true],['','Sunday Morning',true],['','Ikaw',false],['Second set \u00b7 dance','Uptown Funk',false],['','Perfect',false] ]
+  };
+  var PHASES=[['std','Save the Date'],['rsvp','RSVP season'],['event','Wedding day'],['editorial','After']];
+  var VIEWERS=[['public','Public (no QR)'],['guest','Maria (scanned QR)'],['host','Bea (host)'],['coord','Liza (coordinator)'],['vendor','Kusina Norte (vendor)'],['band','Manila Strings (band)'],['mc','Migs (Host/MC)']];
+  var GUEST={name:'Maria', full:'Maria Santos', table:'Table 7 · Dahlia', door:'East garden door'};
+  var SKINS=['#f6ddc2','#eec49e','#c98a5b','#8d5a3b'];
+  var HAIRS=['#2b2119','#5a3d28','#8a6f4d'];
+  var OUTFITS=['#8d9b7a','#b0532e','#7c2d4e','#5c4633'];
+  var FEELS=['Bridgerton-Feel','Taylor-Swift-Feel','Jazz','Sunday Morning','Hip Hop'];
+  var TILECLS=['','g2','g3','g4'];
+
+  var $=function(id){return document.getElementById(id)};
+  var stage=$('stage');
+
+  /* ───────────── icons ───────────── */
+  function ic(p){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>'}
+  var I={
+    home:ic('<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>'),
+    details:ic('<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9.5h18"/>'),
+    story:ic('<path d="M12 21s-7.5-4.6-9.5-9C1 8.5 3 5 6.5 5c2.2 0 3.9 1.3 5.5 3.2C13.6 6.3 15.3 5 17.5 5 21 5 23 8.5 21.5 12c-2 4.4-9.5 9-9.5 9Z"/>'),
+    photos:ic('<rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10.5" r="1.6"/><path d="m21 16-4.5-4.5L9 19"/>'),
+    me:ic('<circle cx="12" cy="8" r="3.6"/><path d="M5 20c1.4-3.6 4-5.2 7-5.2s5.6 1.6 7 5.2"/>'),
+    arrow:ic('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+    play:ic('<path d="m8 5 12 7-12 7Z"/>'),
+    cam:ic('<path d="M4 8h3l2-2.5h6L17 8h3a1.5 1.5 0 0 1 1.5 1.5V19a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 19V9.5A1.5 1.5 0 0 1 4 8Z"/><circle cx="12" cy="13.5" r="3.4"/>'),
+    dl:ic('<path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5"/><path d="M4 19.5h16"/>'),
+    film:ic('<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>'),
+    sparkle:ic('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/>'),
+    clock:ic('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
+    qr:ic('<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><path d="M15 15h2.5v2.5H15zM18.5 18.5H21V21h-2.5z"/>'),
+    star:ic('<path d="M12 3.5l2.6 5.4 6 .8-4.4 4.1 1.1 5.9L12 16.9l-5.3 2.8 1.1-5.9L3.4 9.7l6-.8Z"/>'),
+    chat:ic('<path d="M20 5H4v11h4v4l5-4h7Z"/>'),
+    music:ic('<path d="M9 18V6l11-2.5V16"/><circle cx="6.5" cy="18" r="2.6"/><circle cx="17.5" cy="16" r="2.6"/>'),
+    horn:ic('<path d="M3 10v4h3l6 5V5l-6 5H3Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/>'),
+    mic:ic('<rect x="9" y="3" width="6" height="10" rx="3"/><path d="M6.5 11a5.5 5.5 0 0 0 11 0"/><path d="M12 16.5V21"/>'),
+    users:ic('<circle cx="9" cy="8" r="3"/><path d="M3.5 20c1-3.4 3.2-5 5.5-5s4.5 1.6 5.5 5"/><circle cx="17" cy="9" r="2.3"/><path d="M15.8 15.5c2.2.4 3.7 1.9 4.4 4.5"/>')
+  };
+
+  function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show')},2200); }
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function countdown(){ var t=new Date('2026-12-12T15:00:00+08:00')-Date.now(); if(t<0)return null;
+    return {d:Math.floor(t/864e5),h:Math.floor(t%864e5/36e5),m:Math.floor(t%36e5/6e4)}; }
+  function isGuest(){ return S.viewer==='guest'; }
+  function isHost(){ return S.viewer==='host'; }
+  function camAllowed(){ return S.viewer!=='public' || S.phase==='event'; }
+  function poolPct(){ return Math.max(0,Math.min(100,Math.round(S.pool.left/S.pool.granted*100))); }
+  function poolbarHtml(){
+    return '<div class="pb"><div class="pl"><span>Papic pool</span><span class="num-pop" id="poolLeft">'+S.pool.left.toLocaleString()+' pts left</span></div>'
+      +'<div class="meter"><i style="width:'+poolPct()+'%"></i></div></div>'
+      +'<button class="tbtn" data-act="topup">Top up</button>';
+  }
+  function updatePoolUi(){
+    var pb=$('poolbar'); if(pb && !pb.hidden){ pb.innerHTML=poolbarHtml(); }
+    var cp=$('camPts'); if(cp){ cp.textContent='Papic · '+S.pool.left.toLocaleString()+' pts left'; }
+  }
+  function countUpPool(from){
+    var el=$('poolLeft'); if(!el) return;
+    var to=S.pool.left, t0=null;
+    function step(ts){ if(!t0)t0=ts; var k=Math.min(1,(ts-t0)/700);
+      el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-k,3))).toLocaleString()+' pts left';
+      if(k<1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
+  function burstAt(btn){
+    if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var fr=document.querySelector('.frame'); if(!btn||!fr) return;
+    var r=btn.getBoundingClientRect(), f=fr.getBoundingClientRect();
+    var b=document.createElement('div'); b.className='burst';
+    b.style.left=(r.left-f.left+r.width/2)+'px'; b.style.top=(r.top-f.top+r.height/2)+'px';
+    var cols=['#b0532e','#7c2d4e','#8d9b7a','#d9a05b'];
+    for(var i=0;i<10;i++){ var s=document.createElement('i'); var a=Math.PI*2*i/10;
+      s.style.setProperty('--dx',Math.cos(a)*48+'px'); s.style.setProperty('--dy',(Math.sin(a)*48-12)+'px');
+      s.style.background=cols[i%4]; b.appendChild(s); }
+    fr.appendChild(b); setTimeout(function(){ b.remove(); },850);
+  }
+
+  /* ───────────── chibi avatar (the locked character system — faces in) ───────────── */
+  function chibi(av,w){
+    var skin=SKINS[av.skin], hairC=HAIRS[av.hair%HAIRS.length], outfit=OUTFITS[av.outfit];
+    var hair = av.hair===0
+      ? '<path d="M14 22c0-10 8-15 18-15s18 5 18 15v6c0-3-4-7-8-7H22c-4 0-8 4-8 7z" fill="'+hairC+'"/>'
+      : av.hair===1
+      ? '<path d="M14 24c0-11 8-17 18-17s18 6 18 17l-2 8c0-6-3-10-7-10H23c-4 0-7 4-7 10z" fill="'+hairC+'"/><circle cx="32" cy="7" r="5" fill="'+hairC+'"/>'
+      : '<path d="M14 22c0-10 8-15 18-15s18 5 18 15v10c0 2-3 2-3-1v-6c-1-3-4-5-7-5H24c-3 0-6 2-7 5v6c0 3-3 3-3 1z" fill="'+hairC+'"/>';
+    return '<svg width="'+w+'" viewBox="0 0 64 84" aria-hidden="true">'
+      +'<ellipse cx="32" cy="80" rx="16" ry="3.5" fill="rgba(33,29,26,.12)"/>'
+      +'<rect x="20" y="46" width="24" height="26" rx="11" fill="'+outfit+'"/>'
+      +'<circle cx="15" cy="56" r="4.5" fill="'+skin+'"/><circle cx="49" cy="56" r="4.5" fill="'+skin+'"/>'
+      +'<circle cx="32" cy="27" r="19" fill="'+skin+'"/>'
+      + hair
+      +'<circle cx="25.5" cy="30" r="2" fill="#211d1a"/><circle cx="38.5" cy="30" r="2" fill="#211d1a"/>'
+      +'<path d="M27 37c2.5 2.6 7.5 2.6 10 0" stroke="#211d1a" stroke-width="1.8" stroke-linecap="round" fill="none"/>'
+      +'<circle cx="22" cy="34.5" r="2.4" fill="rgba(176,83,46,.35)"/><circle cx="42" cy="34.5" r="2.4" fill="rgba(176,83,46,.35)"/>'
+      +'<circle cx="26" cy="74" r="3.6" fill="'+skin+'"/><circle cx="38" cy="74" r="3.6" fill="'+skin+'"/>'
+      +'</svg>';
+  }
+
+  /* mini 3D-ish seat plan with your chibi at Table 7 */
+  function planScene(){
+    var tbl=function(cx,cy,r,hot){ return '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+r+'" ry="'+(r*.42)+'" fill="'+(hot?'#e9d5c6':'#e2dbcd')+'" stroke="'+(hot?'var(--terra)':'rgba(33,29,26,.14)')+'" stroke-width="'+(hot?2:1)+'"/>'; };
+    return '<svg viewBox="0 0 320 150" role="img" aria-label="Mini seat plan — your avatar at Table 7">'
+      +'<defs><linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2ecdf"/><stop offset="1" stop-color="#e7ddc9"/></linearGradient></defs>'
+      +'<path d="M30 20 L290 20 L320 150 L0 150 Z" fill="url(#fl)"/>'
+      +'<path d="M60 20 L88 150 M130 20 L140 150 M200 20 L196 150 M262 20 L250 150" stroke="rgba(33,29,26,.06)"/>'
+      +'<rect x="120" y="8" width="80" height="14" rx="4" fill="#d9c8b2"/><text x="160" y="18" text-anchor="middle" font-size="8" font-family="var(--mono)" fill="#7a6249" letter-spacing="2">STAGE</text>'
+      + tbl(70,78,26,false) + tbl(160,68,24,false) + tbl(250,80,26,false) + tbl(110,122,28,false) + tbl(216,124,28,true)
+      +'<g transform="translate(196,86) scale(.62)">'+chibi(S.avatar,64).replace(/<\/?svg[^>]*>/g,'')+'</g>'
+      +'<text x="216" y="146" text-anchor="middle" font-size="9" font-family="var(--mono)" fill="var(--terra)" letter-spacing="1.5">TABLE 7 · YOU</text>'
+      +'</svg>';
+  }
+
+  /* fake QR */
+  function qrSvg(seed,size){
+    var n=21, cell=Math.floor(size/n), rng=seed>>>0;
+    function rnd(){ rng=(rng*1103515245+12345)>>>0; return rng/4294967295; }
+    var out='<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+n*cell+' '+n*cell+'" role="img" aria-label="Personal QR code (demo)">';
+    function finder(x,y){ out+='<rect x="'+x*cell+'" y="'+y*cell+'" width="'+7*cell+'" height="'+7*cell+'" fill="#211d1a"/><rect x="'+(x+1)*cell+'" y="'+(y+1)*cell+'" width="'+5*cell+'" height="'+5*cell+'" fill="#fff"/><rect x="'+(x+2)*cell+'" y="'+(y+2)*cell+'" width="'+3*cell+'" height="'+3*cell+'" fill="#7c2d4e"/>'; }
+    for(var y=0;y<n;y++)for(var x=0;x<n;x++){
+      var inF=(x<8&&y<8)||(x>n-9&&y<8)||(x<8&&y>n-9); if(inF)continue;
+      if(rnd()>0.55) out+='<rect x="'+x*cell+'" y="'+y*cell+'" width="'+cell+'" height="'+cell+'" fill="#211d1a"/>';
+    }
+    finder(0,0);finder(n-7,0);finder(0,n-7);
+    return out+'</svg>';
+  }
+
+  /* ───────────── Home ───────────── */
+  function spotlight(){
+    if(S.phase==='std'){
+      return '<div class="spot mulb"><span class="eyebrow">The reveal</span>'
+        +'<h3 class="serif" style="margin:6px 0">'+(S.filmSeen?'Watch the reveal again':'A film, before anything else')+'</h3>'
+        +'<p class="sub">'+(S.filmSeen?'Replay Bea &amp; Marco’s save-the-date.':'Bea &amp; Marco made you a save-the-date.')+'</p>'
+        +'<div class="row" style="margin-top:12px"><button class="btn primary" data-act="film">▶ Play the film</button>'
+        +'<button class="btn ghost" data-act="calendar">Add to calendar</button></div></div>';
+    }
+    if(S.phase==='rsvp'){
+      if(isGuest()) return '<div class="spot"><span class="eyebrow">RSVP</span>'
+        +'<h3 class="serif" style="margin:6px 0">Maria, will you celebrate with us?</h3>'
+        +'<p class="sub">'+(S.rsvp==='yes'?'You said yes — salamat! Your seat is saved.':S.rsvp==='no'?'You can change your answer any time before the day.':'Bea &amp; Marco saved you a seat. Tell them you’re coming.')+'</p>'
+        +'<div class="row" style="margin-top:12px"><button class="btn primary" data-goto="me">'+(S.rsvp?'Review my RSVP':'RSVP now')+'</button></div></div>';
+      return '<div class="spot"><span class="eyebrow">Invited?</span>'
+        +'<h3 class="serif" style="margin:6px 0">Find your invite</h3>'
+        +'<p class="sub">Scan the QR on your invitation — the site becomes yours: your seat, your RSVP, your photos.</p>'
+        +'<div class="row" style="margin-top:12px"><button class="btn primary" data-goto="me">Find my invite</button></div></div>';
+    }
+    if(S.phase==='event'){
+      return '<div class="spot dark"><span class="pill live"><span class="dot"></span> Live now</span>'
+        +'<h3 class="serif" style="margin:10px 0 6px">The ceremony is streaming</h3>'
+        +'<p class="sub">Watch live — or open the camera and shoot for the couple.</p>'
+        +'<div class="row" style="margin-top:12px"><button class="btn primary" data-goto="photos">Watch live</button>'
+        +'<button class="btn ghost" style="color:#fdf6ef;border-color:rgba(253,246,239,.35)" data-act="camera">Open camera</button></div></div>';
+    }
+    return '';
+  }
+
+  function tabHome(){
+    var c=countdown(), h='';
+    if(S.phase==='editorial'){
+      h+='<div class="paper"><div class="mast">The Tagaytay Gazette</div>'
+        +'<div class="dateline">Vol. I · December 13, 2026 · Souvenir edition</div>'
+        +'<h2>Bea &amp; Marco, married.</h2>'
+        +'<p class="lede">Under pine and fog, before 142 witnesses — a ceremony four years in the writing. The full story, the numbers, and every column inside.</p>'
+        +'<div class="row" style="justify-content:center; margin-top:14px"><button class="btn primary" data-goto="story">Read the full story</button></div></div>'
+        +'<p class="tiny" style="text-align:center; margin:10px 0">The paper leads — the menu keeps the whole site browsable as the archive.</p>';
+    }
+    h+='<div class="hero">'
+      +'<div class="mono-top">Setnayan · '+(S.phase==='editorial'?'The archive':'You are invited')+'</div>'
+      +(S.phase!=='std'?'<div class="heroband"></div>':'<div style="height:14px"></div>')
+      +'<div class="mgram">B&amp;M</div>'
+      +'<h2>Bea <span class="amp">&amp;</span> Marco</h2>'
+      +'<div class="meta">December 12, 2026 · Tagaytay Highlands</div>'
+      +(S.phase==='editorial' ? '<div class="pill ok" style="margin-top:12px">Married · 12.12.2026</div>'
+        : (c?'<div class="count">'
+          +'<div class="c"><div class="n">'+c.d+'</div><div class="l">days</div></div>'
+          +'<div class="c"><div class="n">'+c.h+'</div><div class="l">hrs</div></div>'
+          +'<div class="c"><div class="n">'+c.m+'</div><div class="l">min</div></div></div>':''))
+      +'</div>';
+    h+=spotlight();
+    if(S.phase==='event'){
+      if(S.phonesDown && !S.pdDismissed){
+        h+='<div class="pdplate">\ud83d\udcf5<p><b>The couple asks: phones down for the ceremony.</b> The photographers have it \u2014 cameras open again at cocktails.</p><button data-act="pdOk">Noted</button></div>';
+      }
+      h+='<div class="annc"><span class="at">From the coordinator \u00b7 '+S.lastBcast.t+'</span><p>'+esc(S.lastBcast.text)+'</p></div>';
+    }
+    var news=[];
+    if(S.phase==='rsvp'){ news=['Schedule posted','Dress code: earth tones', isGuest()?'Your table is assigned':'Story updated']; }
+    if(S.phase==='event'){ news=['Live wall is on', S.wallCount+' photos and counting','Reception at 6:30']; }
+    if(S.phase==='std'){ news=['More details soon','Browse the story meanwhile']; }
+    if(S.phase==='editorial'){ news=['Recap film is ready','Gallery: 412 photos',(S.column&&'Your column '+(S.column.status==='approved'?'was published':'is pending'))||'Guest columns inside']; }
+    if(news.length){ h+='<div class="row" style="margin-top:14px">'+news.filter(Boolean).map(function(n){return '<span class="pill soft">'+n+'</span>'}).join('')+'</div>'; }
+    return h;
+  }
+
+  /* ───────────── Details ───────────── */
+  function tabDetails(){
+    var live=S.phase==='event';
+    var showSched = isGuest() || live || S.phase==='editorial';
+    var h='<span class="eyebrow">The details</span><h2 class="serif" style="margin:6px 0 14px">'+(S.phase==='editorial'?'How the day went':'The day, planned')+'</h2><div class="stack">';
+    h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Programme</span>'+(live?'<span class="pill live"><span class="dot"></span> Live</span>':'')+'</div>';
+    if(showSched){
+      var blocks=[['3:00 PM','Ceremony','Chapel of the Pines'],['4:30 PM','Cocktails','Garden Terrace'],['6:30 PM','Reception','Grand Ballroom'],['9:00 PM','Fireworks','The Ridge']];
+      h+='<div class="sched" style="margin-top:10px">'+blocks.map(function(b,i){
+        var now=live&&i===2;
+        return '<div class="sblock'+(now?' now':'')+'"><div class="t">'+b[0]+(now?' · <b style="color:var(--terra)">NOW</b>':'')+'</div><div class="n">'+b[1]+'</div><div class="p">'+b[2]+'</div></div>';
+      }).join('')+'</div>';
+      if(live) h+='<p class="tiny">Auto-refreshing — the programme follows the coordinator’s live edits.</p>';
+      if(S.phase==='editorial') h+='<p class="tiny">As it happened — kept for the archive.</p>';
+    } else {
+      h+='<div class="teaser" style="margin-top:10px"><div class="mark">3:00</div><p class="sub" style="margin-top:6px">The full programme is shared with invited guests.</p><p class="tiny" style="margin-top:4px">Have an invitation? Open it from Me.</p></div>';
+    }
+    h+='</div>';
+    h+='<div class="card"><span class="eyebrow">Venue</span><h3 class="serif" style="margin:6px 0">Tagaytay Highlands</h3>'
+      +'<p class="sub">Chapel of the Pines · then the Grand Ballroom</p>'
+      +'<div class="row" style="margin-top:12px"><button class="btn" data-act="maps">Google Maps</button><button class="btn" data-act="maps">Waze</button><button class="btn" data-act="maps">Apple Maps</button></div></div>';
+    h+='<div class="card"><span class="eyebrow">Dress code</span><h3 class="serif" style="margin:6px 0">Formal · earth tones</h3>'
+      +'<div class="dots" style="margin-top:8px"><span style="background:#8d9b7a"></span><span style="background:#d9cfc0"></span><span style="background:#b0532e"></span><span style="background:#5c4633"></span></div>'
+      +'<p class="tiny" style="margin-top:8px">Barong and filipiniana warmly welcome.</p></div>';
+    h+='<div class="card"><span class="eyebrow">Your seat</span>';
+    if(isGuest()){
+      h+='<h3 class="serif" style="margin:6px 0">'+GUEST.table+'</h3><p class="sub">Enter through the '+GUEST.door+'. Your name card is waiting.</p>'
+        +'<div class="plan3d">'+planScene()+'</div>'
+        +'<p class="tiny" style="margin-top:8px">That’s your avatar at your table — customize it in Me.</p>'
+        +'<div class="row" style="margin-top:10px"><button class="btn" data-act="walk3d">Walk the room in 3D</button><button class="btn ghost" data-act="seatmap">Seat map</button></div>';
+    } else {
+      h+='<p class="sub" style="margin-top:6px">Find your table by name — free for every guest.</p>'
+        +'<form class="row" style="margin-top:10px" data-form="seat"><input type="text" name="q" placeholder="Your name as invited" aria-label="Search your name" style="flex:1; min-width:0"><button class="btn primary" type="submit">Find</button></form>'
+        +'<div id="seatResult"></div><p class="tiny" style="margin-top:8px">Only your own table is shown — never the full list.</p>';
+    }
+    h+='</div></div>';
+    return h;
+  }
+
+  /* ───────────── Story ───────────── */
+  function tabStory(){
+    var h='<span class="eyebrow">The story</span><h2 class="serif" style="margin:6px 0 14px">Four years in the writing</h2><div class="stack">';
+    /* the reveal — replayable in EVERY phase, for every viewer (owner 2026-07-23) */
+    h+='<div class="card" style="background:linear-gradient(150deg,var(--cream),var(--mul-soft))"><div class="row" style="justify-content:space-between"><span class="eyebrow">Chapter one · The reveal</span><span class="pill mulsoft">Always here</span></div>'
+      +'<h3 class="serif" style="margin:8px 0 2px">'+(S.phase==='editorial'?'The film that announced it':'The Save-the-Date film')+'</h3>'
+      +'<p class="sub">'+(S.phase==='editorial'?'Where it all started — replay it any time.':'The veil, the names, the date — replay it any time.')+'</p>'
+      +'<div class="row" style="margin-top:12px"><button class="btn mul" data-act="film">▶ Watch the reveal</button>'
+      +(S.phase!=='editorial'?'<button class="btn ghost" data-act="calendar">Add to calendar</button>':'')+'</div></div>';
+    h+='<div class="card"><div class="sched">'
+      +'<div class="sblock"><div class="t">2022</div><div class="n">A borrowed umbrella in España</div><div class="p">One jeepney, two strangers, and rain that would not stop.</div></div>'
+      +'<div class="sblock"><div class="t">2025</div><div class="n">The question, at the ridge</div><div class="p">Marco asked at sunrise. Bea said yes before he finished.</div></div>'
+      +'<div class="sblock"><div class="t">2026</div><div class="n">Set na ’yan.</div><div class="p">Tagaytay, December, everyone we love.</div></div>'
+      +'</div></div>';
+    h+='<div class="card"><span class="eyebrow">Our photos</span><div class="grid3" style="margin-top:10px"><div class="ph"></div><div class="ph g2"></div><div class="ph g3"></div><div class="ph g4"></div><div class="ph g2"></div><div class="ph"></div></div></div>';
+    h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Guest columns</span><span class="pill mulsoft">1 per guest</span></div>'
+      +'<p class="tiny" style="margin:8px 0 2px">Short pieces by the people who know them best — published with Bea &amp; Marco’s approval.</p>'
+      +'<div class="colcard"><div class="byline">Guest column · Lola Nena</div><h4>The boy who never sat still</h4><p>Marco broke two vases and one promise to behave, every fiesta. Bea, he kept every promise to. That is how I knew.</p></div>'
+      +'<div class="colcard"><div class="byline">Guest column · The Barkada</div><h4>Minutes of the last single meeting</h4><p>Motion to keep Friday basketball: denied. Motion to be happy for him: unanimous.</p></div>';
+    if(S.column){
+      h+='<div class="colcard"><div class="byline">Guest column · '+GUEST.full+(S.column.status==='pending'?' · <span style="color:var(--terra)">pending approval</span>':'')+'</div>'
+        +'<h4>'+esc(S.column.title)+'</h4><p>'+esc(S.column.body)+'</p></div>';
+    }
+    if(isGuest()&&!S.column){
+      h+= S.phase==='editorial'
+        ? '<p class="tiny" style="margin-top:10px">The paper has printed — columns are closed.</p>'
+        : '<div class="row" style="margin-top:12px"><button class="btn mul" data-goto="me" data-scroll="column">Write your column</button></div>';
+    }
+    if(!isGuest()){ h+='<p class="tiny" style="margin-top:10px">'+(S.phase==='editorial'?'The paper has printed — columns are closed.':'Invited? Open your invite in Me to write yours.')+'</p>'; }
+    h+='</div>';
+    if(S.phase==='editorial'){
+      h+='<div class="paper"><div class="mast">The Tagaytay Gazette</div><div class="dateline">The morning-after edition · keeps this address forever</div>'
+        +'<h2>“Set na ’yan,” she said.</h2>'
+        +'<p class="lede">142 guests · 412 photos · 31 personal reels · one very good boy (ring bearer, 4).</p></div>';
+    }
+    h+='</div>';
+    return h;
+  }
+
+  /* ───────────── Photos ───────────── */
+  function rollTiles(list,dl){
+    return list.map(function(p,i){ return '<div class="ph '+p.cls+'">'+(dl?'<button class="dlb" data-dl="'+i+'" aria-label="Download photo">'+I.dl+'</button>':'')+'</div>'; }).join('');
+  }
+  /* the shared POOL GALLERY — couple-gated (default OFF); guests link photos they're in */
+  var POOL_SHOTS=['','g2','g3','g4','g2','g3'];
+  function poolGalleryCard(){
+    if(!S.poolGalleryOpen || !isGuest()) return '';
+    return '<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Everyone’s gallery</span><span class="pill soft">Opened by Bea &amp; Marco</span></div>'
+      +'<p class="tiny" style="margin:8px 0 2px">The whole event pool — spot yourself? Link it and it joins Your gallery.</p>'
+      +'<div class="grid3" style="margin-top:10px">'+POOL_SHOTS.map(function(cls,i){
+        return '<div class="ph '+cls+'">'+(S.linked[i]
+          ?'<button class="dlb" style="background:var(--emerald)" aria-label="Linked">✓</button>'
+          :'<button class="dlb" data-poollink="'+i+'" aria-label="Link this photo">'+I.me+'</button>')+'</div>';
+      }).join('')+'</div>'
+      +'<p class="tiny" style="margin-top:8px">Tap the face icon on any shot you’re in.</p></div>';
+  }
+  function linkModal(i){
+    openModal('<div class="sheet-title"><h3 class="serif">Are you in this?</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +'<div class="ph '+POOL_SHOTS[i]+'" style="aspect-ratio:4/3; border-radius:16px"></div>'
+      +'<p class="sub" style="margin-top:12px">Linking adds this to <b>Your gallery · Tagged of you</b> — it counts as a photo of you for downloads and your Story.</p>'
+      +'<div class="row" style="margin-top:14px"><button class="btn mul" data-poollinkgo="'+i+'">I’m in this — link it</button><button class="btn ghost" data-act="close">Not me</button></div>'
+      +'<p class="tiny" style="margin-top:10px">Each photo holds up to 20 tags — links land while there’s room.</p>');
+  }
+  function tabPhotos(){
+    var h='<span class="eyebrow">Gallery</span><h2 class="serif" style="margin:6px 0 14px">'+(S.phase==='event'?'Happening now':S.phase==='editorial'?'Everything, kept':'The day will fill this page')+'</h2><div class="stack">';
+    if(S.phase==='std'||S.phase==='rsvp'){
+      h+='<div class="teaser"><div class="mark">412</div><p class="sub" style="margin-top:6px">On the day this tab becomes the live gallery — the stream, the photo wall, and the photos you’re tagged in.</p>'
+        +(isGuest()?'<div class="row" style="justify-content:center; margin-top:10px"><button class="btn" data-act="camera">Peek at the camera</button></div>':'')+'</div>';
+      if(isGuest()){
+        h+='<div class="card"><span class="eyebrow">Get ready</span><h3 class="serif" style="margin:6px 0">Register your face</h3>'
+          +'<p class="sub">Three quick angles — your photos find you automatically on the day. Scoped to this event only; delete any time.</p>'
+          +'<div class="row" style="margin-top:12px">'+(S.face?'<span class="pill ok">Registered ✓</span><button class="btn ghost" data-act="faceOff">Remove</button>':'<button class="btn primary" data-act="faceOn">Register (3 shots)</button>')+'</div></div>';
+      }
+    }
+    if(S.phase==='event'){
+      h+='<div class="watch"><div class="screen"><button class="playbtn" data-act="playstream" aria-label="Play stream">'+I.play+'</button></div>'
+        +'<div class="bar"><span class="pill live"><span class="dot"></span> CH 1 · Controlled screen</span><span style="font-family:var(--mono); font-size:.66rem">1,204 watching</span></div></div>';
+      h+='<div class="chrail" role="group" aria-label="Camera channels — watch any on demand">'
+        +[['CH 2','Main Stage',true],['CH 3','Garden Aisle',false],['CH 4','Reception Doors',false]].map(function(ch,i){
+          return '<button data-ch="'+ch[0]+' · '+ch[1]+'" aria-pressed="'+(S.chWatch===i)+'"><span class="ct"><span class="cn">'+ch[0]+'</span></span><span class="cl">'+(ch[2]?'<span class="star">★</span> ':'')+ch[1]+'</span></button>';
+        }).join('')+'</div>'
+        +'<p class="tiny" style="margin-top:6px">Channel 1 carries the couple\u2019s program — tap any camera to watch it on demand.</p>';
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Live photo wall</span><span class="pill soft" id="wallCount">'+S.wallCount+' photos</span></div>'
+        +'<div class="wall" id="wall" style="margin-top:10px">'+[0,1,2,3,4,5,6,7].map(function(i){return '<div class="tile '+TILECLS[(i+S.qrSeed)%4]+'"></div>'}).join('')+'</div>'
+        +'<p class="tiny" style="margin-top:8px">The same wall the venue screen is playing.</p></div>';
+      if(isGuest()){
+        h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Your gallery</span><span class="pill mulsoft">'+S.roll.length+' taken · '+S.taggedN+' tagged</span></div>'
+          +'<div class="grid3" style="margin-top:10px">'+rollTiles(S.roll.slice(-2).concat([{cls:'g2'}]),false)+'</div>'
+          +'<div class="row" style="margin-top:12px"><button class="btn" data-act="roll">Open my roll</button><button class="btn mul" data-act="storyOpen">'+'Make my Story</button></div></div>';
+        h+=poolGalleryCard();
+        h+='<div class="card" style="background:linear-gradient(150deg,var(--cream),var(--terra-soft))"><div class="row" style="justify-content:space-between"><span class="eyebrow">Papic camera</span><span class="pill mulsoft">Challenges · '+S.missions.filter(function(m){return m.done}).length+'/'+S.missions.length+'</span></div>'
+          +'<p class="sub" style="margin:8px 0 2px">Shoot for Bea &amp; Marco — and clear a Papic Challenge while you’re at it. Photo or clip, both count.</p>'
+          +'<div class="row" style="margin-top:12px"><button class="btn primary" data-act="camera">Open camera</button></div></div>';
+      } else {
+        h+='<div class="card"><span class="eyebrow">Join in</span><p class="sub" style="margin-top:6px">Anyone at the venue can shoot for the couple — the candid camera needs no account.</p>'
+          +'<div class="row" style="margin-top:12px"><button class="btn" data-act="camera">Open candid camera</button></div></div>';
+      }
+    }
+    if(S.phase==='editorial'){
+      h+='<div class="card"><span class="eyebrow">The recap</span><h3 class="serif" style="margin:6px 0">Three minutes of the whole day</h3>'
+        +'<div class="watch" style="margin-top:8px"><div class="screen"><button class="playbtn" data-act="playstream" aria-label="Play recap">'+I.play+'</button></div></div></div>';
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Gallery</span><span class="pill soft">412 photos · 31 clips</span></div>'
+        +'<div class="grid3" style="margin-top:10px"><div class="ph"></div><div class="ph g3"></div><div class="ph g2"></div><div class="ph g4"></div><div class="ph"></div><div class="ph g2"></div></div>'
+        +(isGuest()?'<div class="row" style="margin-top:12px"><button class="btn" data-act="roll">My gallery ('+(S.roll.length+S.taggedN)+')</button><button class="btn mul" data-act="storyOpen">Make my Story</button><button class="btn ghost" data-act="dlall">Download all</button></div>'
+          :'<p class="tiny" style="margin-top:10px">Were you a guest? Claim your photos from Me.</p>')
+        +'</div>';
+      h+=poolGalleryCard();
+    }
+    h+='</div>';
+    return h;
+  }
+
+  /* ───────────── Me ───────────── */
+  function tabMe(){
+    if(isHost() && S.hostRun && S.phase==='event'){ return tabCoord('Bea','B','The host \u00b7 running the day'); }
+    if(isHost()){
+      var h='';
+      if(S.phase==='event'){
+        h+='<div class="card" style="background:linear-gradient(150deg,var(--cream),var(--terra-soft)); margin-bottom:14px"><div class="row" style="justify-content:space-between"><span class="eyebrow">Run the day</span><span class="pill live"><span class="dot"></span> Live</span></div>'
+          +'<p class="sub" style="margin:8px 0 2px">Everything Liza sees \u2014 run of show, broadcasts, the QR kit, the seat scanner, requests. Hosts hold the same console.</p>'
+          +'<div class="row" style="margin-top:10px"><button class="btn primary" data-act="hostRunOn">Open the day console</button></div></div>';
+      }
+      h+='<div class="row" style="gap:14px"><div class="avstage" style="width:64px;height:72px;border-radius:16px">'+chibi({skin:0,hair:2,outfit:2},44)+'</div>'
+        +'<div><span class="eyebrow">The host</span><h2 class="serif" style="margin:4px 0 2px">Hello, Bea!</h2>'
+        +'<p class="tiny">Guests see the same five tabs — you see the levers.</p></div></div><div class="stack" style="margin-top:14px">';
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Papic pool</span><span class="pill mulsoft">One pool · every camera</span></div>'
+        +'<div class="pl" style="font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-55); display:flex; justify-content:space-between; margin-top:10px"><span>Points left</span><span id="poolLeft" class="num-pop">'+S.pool.left.toLocaleString()+' / '+S.pool.granted.toLocaleString()+'</span></div>'
+        +'<div class="prog" style="margin-top:6px"><i style="width:'+poolPct()+'%; background:var(--terra)"></i></div>'
+        +'<div class="row" style="margin-top:12px"><button class="btn primary" data-act="topup">Top up · ₱2,999</button><button class="btn" data-act="addCam">Add camera · ₱100</button></div>'
+        +'<p class="tiny" style="margin-top:8px">Guests shoot free from your pool — top-ups and dedicated cameras are yours to buy, here or from Studio → Papic.</p></div>';
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Shared pool gallery</span>'
+        +(S.poolGalleryOpen?'<span class="pill ok">Open to guests</span>':'<span class="pill soft">Off</span>')+'</div>'
+        +'<p class="sub" style="margin-top:8px">Let guests browse <b>everything</b> in the event pool and link photos they’re in. Off by default — your 7-day review posture stays yours to open.</p>'
+        +'<div class="row" style="margin-top:12px"><button class="btn '+(S.poolGalleryOpen?'':'primary')+'" data-act="poolGalToggle">'+(S.poolGalleryOpen?'Close it':'Open to guests')+'</button></div></div>';
+      h+='<div class="card"><span class="eyebrow">Your site</span><h3 class="serif" style="margin:6px 0">Five sections, one board</h3>'
+        +'<p class="sub">Auto / Shown / Hidden per section, launch, privacy, appearance — all on the mirror manager.</p>'
+        +'<div class="row" style="margin-top:12px"><button class="btn mul" data-act="hostedit">Open the editor</button><button class="btn ghost" data-act="phasePeek">Preview phases</button></div></div>';
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Guest columns</span>'+(S.column&&S.column.status==='pending'?'<span class="pill soft">1 awaiting you</span>':'<span class="pill ok">All reviewed</span>')+'</div>';
+      if(S.column&&S.column.status==='pending'){
+        h+='<div class="colcard" style="border-top:none; padding-top:8px"><div class="byline">'+GUEST.full+' · submitted</div><h4>'+esc(S.column.title)+'</h4><p>'+esc(S.column.body)+'</p></div>'
+          +'<div class="row" style="margin-top:10px"><button class="btn primary" data-act="colApprove">Publish it</button><button class="btn ghost" data-act="colDecline">Not this one</button></div>';
+      } else {
+        h+='<p class="sub" style="margin-top:8px">Nothing waiting — approved columns print in the paper.</p>';
+      }
+      h+='</div>';
+      h+='<div class="card"><button class="doorway" data-act="signout"><span><span class="dl">View as a guest</span><br><span class="ds">See exactly what they see.</span></span><span class="arr">'+I.arrow+'</span></button></div>';
+      return h+'</div>';
+    }
+    if(!isGuest()){
+      return '<span class="eyebrow">Your invite</span><h2 class="serif" style="margin:6px 0 14px">Have an invitation?</h2><div class="stack">'
+        +'<div class="card"><h3 class="serif" style="margin-bottom:6px">Make this site yours</h3>'
+        +'<p class="sub">Scan the QR on your invitation — or open your invite link — and this page fills in with your seat, your RSVP, and the photos you’re in.</p>'
+        +'<div class="row" style="margin-top:12px"><button class="btn primary" data-act="scan">Scan my QR</button><button class="btn ghost" data-act="scan">I have a link</button></div></div>'
+        +'<div class="card"><span class="eyebrow">No QR handy?</span><p class="sub" style="margin-top:6px">The site still works — browse everything, and find your table by name under Details.</p></div>'
+        +(S.phase==='editorial'
+          ? '<div class="card"><span class="eyebrow">After the day</span><h3 class="serif" style="margin:6px 0">Were you a guest?</h3><p class="sub">Claim your account to keep your photos and reels forever.</p><div class="row" style="margin-top:12px"><button class="btn mul" data-act="claim">Claim my photos</button></div></div>':'')
+        +'</div>';
+    }
+    var h='<div class="row" style="gap:14px"><div class="avstage" style="width:64px;height:72px;border-radius:16px">'+chibi(S.avatar,44)+'</div>'
+      +'<div><span class="eyebrow">Your invite</span><h2 class="serif" style="margin:4px 0 2px">Magandang araw, Maria!</h2>'
+      +'<p class="tiny">Ninang · Bride\u2019s side — this page is yours; only you can see it.</p></div></div><div class="stack" style="margin-top:14px">';
+    /* RSVP */
+    h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">RSVP</span>'
+      +(S.rsvp==='yes'?'<span class="pill ok">Attending ✓</span>':S.rsvp==='no'?'<span class="pill soft">Declined</span>':'<span class="pill soft">Awaiting reply</span>')+'</div>';
+    if(S.phase==='editorial'||S.phase==='event'){
+      h+= S.rsvp==='yes' ? '<p class="sub" style="margin-top:8px">You were marked attending — '+(S.meal?S.meal+' plate':'plate chosen on the day')+'. Salamat sa pagpunta!</p>'
+        : '<p class="sub" style="margin-top:8px">RSVP closed when the day '+(S.phase==='event'?'began':'ended')+'.</p>';
+    } else {
+      h+='<div class="row" style="margin-top:10px">'
+        +'<button class="btn '+(S.rsvp==='yes'?'primary':'')+'" data-act="rsvpYes">I’ll be there</button>'
+        +'<button class="btn '+(S.rsvp==='no'?'mul':'')+'" data-act="rsvpNo">Can’t make it</button></div>';
+      if(S.rsvp==='yes'){
+        h+='<div class="divider"></div><span class="eyebrow">Your plate</span><div class="row" style="margin-top:8px">'
+          +['Beef','Fish','Vegetarian'].map(function(m){return '<button class="btn '+(S.meal===m?'primary':'')+'" data-meal="'+m+'">'+m+'</button>'}).join('')+'</div>';
+      }
+    }
+    h+='</div>';
+    /* avatar builder */
+    h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Your avatar</span><span class="pill mulsoft">Walks the 3D plan</span></div>'
+      +'<div class="avrow" style="margin-top:12px"><div class="avstage">'+chibi(S.avatar,72)+'</div>'
+      +'<div style="flex:1" class="stack">'
+      +'<div><div class="tiny" style="margin-bottom:5px">Skin</div><div class="swatches">'+SKINS.map(function(c,i){return '<button style="background:'+c+'" data-av="skin:'+i+'" aria-pressed="'+(S.avatar.skin===i)+'" aria-label="Skin tone '+(i+1)+'"></button>'}).join('')+'</div></div>'
+      +'<div><div class="tiny" style="margin-bottom:5px">Hair</div><div class="swatches">'+HAIRS.map(function(c,i){return '<button style="background:'+c+'" data-av="hair:'+i+'" aria-pressed="'+(S.avatar.hair===i)+'" aria-label="Hair style '+(i+1)+'"></button>'}).join('')+'</div></div>'
+      +'<div><div class="tiny" style="margin-bottom:5px">Outfit</div><div class="swatches">'+OUTFITS.map(function(c,i){return '<button style="background:'+c+'" data-av="outfit:'+i+'" aria-pressed="'+(S.avatar.outfit===i)+'" aria-label="Outfit color '+(i+1)+'"></button>'}).join('')+'</div></div>'
+      +'</div></div>'
+      +'<p class="tiny" style="margin-top:10px">This is you in the 3D venue walk — find yourself at '+GUEST.table+'.</p>'
+      +'<div class="row" style="margin-top:8px"><button class="btn" data-act="walk3d">See me in the room</button></div></div>';
+    /* QR */
+    h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Your personal QR</span><span class="pill mulsoft">All phases</span></div>'
+      +'<p class="sub" style="margin:8px 0 2px">Show it so the crew can tag you in photos — and scan in at the souvenir station.</p>'
+      +'<div class="row" style="margin-top:12px"><button class="btn primary" data-act="qr">Show my QR</button><button class="btn ghost" data-act="qrsave">Save</button></div></div>';
+    /* seat */
+    h+='<div class="card"><span class="eyebrow">Your seat</span><h3 class="serif" style="margin:6px 0">'+GUEST.table+'</h3><p class="sub">'+GUEST.door+'.</p></div>';
+    /* column */
+    h+='<div class="card" id="columnCard"><div class="row" style="justify-content:space-between"><span class="eyebrow">Your column</span><span class="pill mulsoft">1 per guest</span></div>';
+    if(!S.column && S.phase==='editorial'){
+      h+='<p class="sub" style="margin:8px 0 2px">The paper has gone to print — guest columns are closed. The reveal, the story, and every published column stay right here.</p>';
+    } else if(!S.column){
+      h+='<p class="sub" style="margin:8px 0 2px">Write one short column for Bea &amp; Marco’s paper — a memory, a toast, a story only you can tell. Published after their approval. Columns close when the paper prints.</p>'
+        +'<form data-form="column" class="stack" style="margin-top:12px">'
+        +'<input type="text" name="title" maxlength="60" placeholder="A title — e.g. “The jeepney story”" aria-label="Column title" required>'
+        +'<div><textarea name="body" maxlength="280" placeholder="Your column (280 characters)" aria-label="Column text" required></textarea><div class="counter"><span data-count>0</span>/280</div></div>'
+        +'<div class="row"><button class="btn mul" type="submit">Submit my column</button></div>'
+        +'<p class="tiny">One per guest · edit until it’s approved · Bea &amp; Marco review before anything is published.</p></form>';
+    } else if(S.column.status==='pending'){
+      h+='<div class="colcard" style="border-top:none; padding-top:6px"><div class="byline">'+GUEST.full+' · pending approval</div><h4>'+esc(S.column.title)+'</h4><p>'+esc(S.column.body)+'</p></div>'
+        +'<div class="row" style="margin-top:10px"><button class="btn ghost" data-act="colEdit">Edit</button><button class="btn" data-act="colApprove">(demo) approve as couple</button></div>';
+    } else {
+      h+='<div class="colcard" style="border-top:none; padding-top:6px"><div class="byline">'+GUEST.full+' · <span style="color:var(--emerald)">published ✓</span></div><h4>'+esc(S.column.title)+'</h4><p>'+esc(S.column.body)+'</p></div>'
+        +'<p class="tiny" style="margin-top:8px">Printed in the Guest Columns section of the paper.</p>';
+    }
+    h+='</div>';
+    h+='<div class="card">'
+      +'<button class="doorway" data-act="claim"><span><span class="dl">Keep this forever</span><br><span class="ds">Claim a free Setnayan account — your photos and reels, saved.</span></span><span class="arr">'+I.arrow+'</span></button>'
+      +'<button class="doorway" data-act="drive"><span><span class="dl">Auto-backup to Google Drive</span><br><span class="ds">Guest-side backup \u2014 build pending.</span></span><span class="arr">'+I.arrow+'</span></button>'
+      +'<button class="doorway" data-act="gift"><span><span class="dl">Pabuya · send a gift</span><br><span class="ds">A cash gift, gracefully.</span></span><span class="arr">'+I.arrow+'</span></button>'
+      +'<button class="doorway" data-act="signout"><span><span class="dl">Sign out</span><br><span class="ds">Back to the public site.</span></span><span class="arr">'+I.arrow+'</span></button>'
+      +'</div>';
+    h+='</div>';
+    return h;
+  }
+
+  /* ───────────── camera overlay ───────────── */
+  function renderCamera(){
+    var doneN=S.missions.filter(function(m){return m.done}).length;
+    var open=S.missions.filter(function(m){return !m.done});
+    $('camOv').innerHTML=
+      '<div class="ctop"><button class="cx" data-act="camClose" aria-label="Close camera">✕</button>'
+      +'<span class="cpill ptspill" id="camPts">Papic · '+S.pool.left.toLocaleString()+' pts left</span>'
+      +'<button class="cpill" data-act="chToggle">Challenges · '+doneN+'/'+S.missions.length+'</button></div>'
+      +'<div class="vf" id="vf"><div class="vgrid"></div><div class="flash" id="vflash"></div><span class="recdot"><span class="dot"></span> REC</span></div>'
+      +(S.chOpen?'<div class="chstrip"><div class="chead"><span>Papic Challenges</span><span>'+doneN+'/'+S.missions.length+'</span></div>'
+        +S.missions.map(function(m,i){ var armed=S.armed===i;
+          return '<div class="mission'+(armed?'" style="color:#f4b183':'')+'"><span class="'+(m.done&&!armed?'done':'')+'">'+(armed?'▶ ':'')+m.t+(m.v?' <span style="opacity:.6">· '+m.v+'</span>':'')+'</span>'
+            +'<span style="display:inline-flex; gap:6px; align-items:center">'+(m.done?'<span class="pill ok">✓</span>':'')
+            +(armed?'<span class="cpill">shooting…</span>':'<button class="cpill" data-arm="'+i+'">'+(m.done?'Retake':'Start')+'</button>')+'</span></div>'; }).join('')
+        +'<p style="font-size:.62rem; color:rgba(253,246,239,.5); padding-top:8px">Retakes welcome — every shot spends its points and stays in the couple\u2019s gallery; the newest one carries the challenge.</p></div>':'')
+      +'<div class="cbottom">'
+      +'<div class="rollthumbs">'+(S.roll.slice(-3).map(function(p){return '<div class="rt '+p.cls+' ph"></div>'}).join('')||'<span class="tiny" style="color:rgba(253,246,239,.4)">No shots yet</span>')+'</div>'
+      +'<button class="shutter" id="shutter" aria-label="Shutter — tap for photo, hold for clip"><span class="core"></span></button>'
+      +'<button class="cpill" data-act="rollFromCam">Roll ('+S.roll.length+')</button>'
+      +'</div>'
+      +'<div class="chint">'+(S.armed!=null?'Shooting for: '+S.missions[S.armed].t+' &nbsp;·&nbsp; ':'')+'Tap = photo · 1 pt &nbsp;·&nbsp; Hold = 10s clip · 7 pts</div>';
+    bindShutter();
+  }
+  function capture(kind){
+    var cost=kind==='clip'?7:1;
+    if(S.pool.left<cost){ toast(isHost()?'Pool is empty — top up to keep cameras alive':'The couple’s pool is empty — cameras paused'); if(isHost()) topupSheet(); return; }
+    S.pool.left-=cost; updatePoolUi();
+    S.roll.push({cls:TILECLS[Math.floor(Math.random()*4)]});
+    var f=$('vflash'); if(f){ f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
+    if(S.armed!=null){
+      var m=S.missions[S.armed], was=m.done;
+      m.done=true; S.armed=null; renderCamera();
+      if(was){ toast('New shot attached — your earlier one stays in the couple\u2019s gallery'); if(m.v){ setTimeout(function(){ consentSheet(m); }, 500); } }
+      else if(m.v){ setTimeout(function(){ consentSheet(m); }, 350); }
+      else toast('Challenge cleared: '+m.t);
+    } else { renderCamera(); }
+  }
+  function bindShutter(){
+    var sh=$('shutter'); if(!sh) return;
+    var holdT=null, held=false;
+    function down(e){ e.preventDefault(); held=false; sh.classList.add('holding'); $('vf').classList.add('rec');
+      holdT=setTimeout(function(){ held=true; },550); }
+    function up(){ if(holdT===null) return; clearTimeout(holdT); holdT=null; sh.classList.remove('holding'); $('vf').classList.remove('rec');
+      capture(held?'clip':'photo'); if(held) toast('10-second clip · 7 pts'); }
+    sh.addEventListener('pointerdown',down); sh.addEventListener('pointerup',up); sh.addEventListener('pointerleave',function(){ if(holdT){clearTimeout(holdT); holdT=null; sh.classList.remove('holding'); $('vf').classList.remove('rec');} });
+  }
+  function consentSheet(m){
+    openSheet('<div class="sheet-title"><h3 class="serif">Challenge cleared!</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +'<p class="sub">“'+m.t+'” — nice shot. The couple always gets it.</p>'
+      +'<div class="card" style="margin-top:12px; background:var(--cream-2)"><div class="row" style="justify-content:space-between">'
+      +'<span style="font-weight:600; font-size:.88rem">Also share with '+m.v+'?</span>'
+      +'<button class="btn ghost" data-act="consentYes" style="border-color:var(--mul); color:var(--mul)">Share</button></div>'
+      +'<p class="tiny" style="margin-top:8px">Off unless you say so — and asked fresh for every new shot. You can stop sharing any time from your roll.</p></div>'
+      +'<div class="card" style="margin-top:10px; background:linear-gradient(150deg,var(--cream),var(--mul-soft))"><div class="row" style="justify-content:space-between">'
+      +'<span style="font-weight:600; font-size:.88rem">🎁 You earned a Story</span>'
+      +'<button class="btn mul" data-act="storyOpen">✦ Make it</button></div>'
+      +'<p class="tiny" style="margin-top:6px">Pick up to 10 photos or clips — it renders on your phone, downloads free, and we store nothing.</p></div>'
+      +'<div class="row" style="margin-top:14px"><button class="btn primary" data-act="close">Keep shooting</button></div>');
+  }
+
+  /* ───────────── roll overlay ───────────── */
+  function renderRoll(){
+    var taken=S.roll, tagged=[{cls:'g2'},{cls:''},{cls:'g3'},{cls:'g4'},{cls:''},{cls:'g2'}];
+    var list=S.rollTab==='taken'?taken:tagged;
+    $('rollOv').innerHTML=
+      '<div class="rtop"><div><span class="eyebrow">Papic · photos &amp; clips</span><h2 class="serif" style="margin-top:2px">Your gallery</h2></div>'
+      +'<button class="xbtn" data-act="rollClose" aria-label="Close">✕</button></div>'
+      +'<div class="rseg"><button aria-pressed="'+(S.rollTab==='taken')+'" data-rolltab="taken">Taken by you · '+taken.length+'</button>'
+      +'<button aria-pressed="'+(S.rollTab==='tagged')+'" data-rolltab="tagged">Tagged of you · '+S.taggedN+'</button></div>'
+      +'<div class="rbody">'
+      +(list.length?'<div class="grid3">'+rollTiles(list,true)+'</div>'
+        :'<div class="teaser" style="margin-top:8px"><div class="mark">0</div><p class="sub" style="margin-top:6px">Nothing here yet — open the camera and start shooting.</p></div>')
+      +(S.rollTab==='tagged'?'<p class="tiny" style="margin-top:10px">Tagged by crew QR scans and face-match — every photo and clip of you lands here in real time.</p>':'')
+      +'</div>'
+      +'<div class="rfoot"><button class="btn" data-act="dlall">'+I.dl.replace('<svg','<svg style="width:15px;height:15px;vertical-align:-2px"')+' Download all</button>'
+      +'<button class="btn mul" data-act="storyOpen">'+'Make my Story</button></div>';
+  }
+
+  /* ───────────── story maker ───────────── */
+  function storySheet(){
+    var st=S.story, inner='';
+    if(st.phase==='idle'){
+      inner='<p class="sub">One tap builds a 30-second, 9:16 reel from your tagged photos — rendered right on your phone, cut to the beat of a Setnayan-owned track.</p>'
+        +'<div class="tiny" style="margin:12px 0 6px">Pick a feel</div>'
+        +'<div class="feels">'+FEELS.map(function(f){return '<button aria-pressed="'+(st.feel===f)+'" data-feel="'+f+'">'+f+'</button>'}).join('')+'</div>'
+        +'<div class="row" style="margin-top:16px"><button class="btn mul" data-act="storyRender">'+'✦ Make my Story</button></div>'
+        +'<p class="tiny" style="margin-top:10px">Free for every guest · nothing uploads — the render happens in your browser.</p>';
+    } else if(st.phase==='rendering'){
+      inner='<p class="sub">Rendering on your phone…</p><div class="prog" style="margin-top:12px"><i id="storyBar" style="width:'+st.prog+'%"></i></div>'
+        +'<p class="tiny" style="margin-top:8px">'+st.feel+' · cuts snapped to the beat grid</p>';
+    } else {
+      inner='<div class="storyprev"><div class="sl ph"></div><div class="sl ph g2"></div><div class="sl ph g3"></div>'
+        +'<div class="watermark">Bea &amp; Marco · 12.12.26</div></div>'
+        +'<div class="row" style="justify-content:center; margin-top:6px"><button class="btn primary" data-act="storyShare">Share</button>'
+        +'<button class="btn" data-act="storySave">Save to Photos</button><button class="btn ghost" data-act="storyAgain">↺ Again</button></div>'
+        +'<p class="tiny" style="text-align:center; margin-top:10px">30s · 1080×1920 · '+st.feel+'</p>';
+    }
+    openSheet('<div class="sheet-title"><h3 class="serif">Make my Story</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'+inner);
+  }
+  function storyTick(){
+    if(S.story.phase!=='rendering') return;
+    S.story.prog=Math.min(100,S.story.prog+9);
+    var bar=$('storyBar'); if(bar) bar.style.width=S.story.prog+'%';
+    if(S.story.prog>=100){ S.story.phase='ready'; storySheet(); }
+    else setTimeout(storyTick,160);
+  }
+
+  /* ───────────── host: the Papic purchase moment ───────────── */
+  function topupSheet(){
+    openSheet('<div class="sheet-title"><h3 class="serif">Papic pool</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +'<div class="pl" style="font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-55); display:flex; justify-content:space-between"><span>One shared pool · every camera draws it</span><span>'+S.pool.left.toLocaleString()+' / '+S.pool.granted.toLocaleString()+'</span></div>'
+      +'<div class="prog" style="margin-top:8px"><i style="width:'+poolPct()+'%; background:var(--terra)"></i></div>'
+      +'<div class="poolopt"><span><span class="on">Top up the pool</span><br><span class="od">+10,000 points onto the same pool, instantly</span></span>'
+      +'<span style="text-align:right"><span class="op">₱2,999</span><br><button class="btn primary" style="margin-top:6px" data-act="topupBuy">Top up</button></span></div>'
+      +'<div class="poolopt"><span><span class="on">Add a dedicated camera</span><br><span class="od">Its own 250-pt budget + its own QR — guests can’t drain it</span></span>'
+      +'<span style="text-align:right"><span class="op">₱100</span><br><button class="btn mul" style="margin-top:6px" data-act="addCam">Add camera</button></span></div>'
+      +'<p class="tiny" style="margin-top:12px">Photos cost 1 pt · 10-second clips cost 7. In production this activates through the payment rail — mid-reception top-ups need the instant gateway, not the 24-hour manual queue.</p>');
+  }
+
+  /* ───────────── other overlays ───────────── */
+  function openSheet(html){ $('sheetPanel').innerHTML=html; $('sheetOv').classList.add('open'); }
+  function openModal(html){ $('modalPanel').innerHTML=html; $('modalOv').classList.add('open'); }
+  function closeOverlays(all){ ['sheetOv','modalOv','filmOv'].concat(all?['camOv','rollOv']:[]).forEach(function(id){$(id).classList.remove('open')}); }
+
+  function moreSheet(){
+    openSheet('<div class="sheet-title"><h3 class="serif">More</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +'<div class="card" style="border:none; padding:0; box-shadow:none">'
+      +'<button class="doorway" data-act="walk3d"><span><span class="dl">3D venue walk</span><br><span class="ds">Walk the ballroom — your avatar included.</span></span><span class="arr">'+I.arrow+'</span></button>'
+      +'<button class="doorway" data-act="print"><span><span class="dl">Print view</span><br><span class="ds">The invitation, printable.</span></span><span class="arr">'+I.arrow+'</span></button>'
+      +'<button class="doorway" data-act="vendors"><span><span class="dl">The vendor team</span><br><span class="ds">The people who made the day.</span></span><span class="arr">'+I.arrow+'</span></button>'
+      +'<button class="doorway" data-act="hostedit"><span><span class="dl" style="color:var(--ink-55)">Edit this site</span><br><span class="ds">Hosts only — opens the dashboard mirror.</span></span><span class="arr">'+I.arrow+'</span></button>'
+      +'</div>');
+  }
+  function hubSheet(){
+    openSheet('<div class="sheet-title"><h3 class="serif">Day-of hub</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +'<p class="sub">The fullscreen no-scroll hub is its own shipped surface — the menu is its doorway during the live window.</p>'
+      +'<div class="row" style="margin-top:12px">'+['Now','Watch','Camera','Gallery','Me','Schedule','Directions'].map(function(p){return '<span class="pill soft">'+p+'</span>'}).join('')+'</div>'
+      +'<div class="row" style="margin-top:16px"><button class="btn primary" data-act="close">Got it</button></div>');
+  }
+
+  function giftSheet(){
+    openSheet('<div class="sheet-title"><h3 class="serif">Pabuya · send a gift</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +'<p class="sub">Your presence is the present — but if you\u2019d like to give more, scan or tap. A note rides along with your name.</p>'
+      +'<div class="qrbox">'+qrSvg(4242,170)+'</div>'
+      +'<p class="tiny" style="text-align:center">GCash · Maya · bank — straight to Bea &amp; Marco.</p>'
+      +'<div class="row" style="justify-content:center; margin-top:12px"><button class="btn mul" data-act="giftgo">Send a gift</button></div>');
+  }
+
+  function vendorsSheet(){
+    /* #10 — approved vendor notes render here, under name + category */
+    var V=[['Kusina Norte','Catering','\u201cSalamat sa pag-tikim \u2014 the kare-kare was our lola\u2019s recipe.\u201d','g2'],
+           ['Lumina Studios','Photography',null,null],
+           ['Manila Strings','Band',null,null],
+           ['Highlands Bloom','Florals',null,null]];
+    openSheet('<div class="sheet-title"><h3 class="serif">The people who made the day</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +V.map(function(v,i){ return '<div style="padding:11px 2px; border-top:'+(i?'1px solid var(--ink-10)':'none')+'">'
+        +'<div class="row" style="justify-content:space-between">'
+        +'<span><b style="font-size:.9rem">'+v[0]+'</b><br><span class="tiny">'+v[1]+'</span></span>'
+        +'<button class="btn ghost" data-vsave="'+i+'">\u2661 Save</button></div>'
+        +(v[2]?'<div class="row" style="align-items:flex-start; gap:10px; margin-top:8px"><span class="ph '+v[3]+' gnote-thumb"></span>'
+          +'<p style="flex:1; font-size:.82rem; color:var(--ink-65); font-family:var(--serif); font-style:italic">'+v[2]+'</p></div>':'')
+        +'</div>'; }).join('')
+      +'<p class="tiny" style="margin-top:10px">Saved vendors ride with your Setnayan account \u2014 for the day it\u2019s your turn. Vendor notes appear with the couple\u2019s approval.</p>');
+  }
+  function qrModal(){
+    openModal('<div class="sheet-title"><h3 class="serif">Your QR, Maria</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +'<div class="qrbox">'+qrSvg(S.qrSeed,190)+'</div>'
+      +'<p class="tiny" style="text-align:center">Crew scan this to tag you · souvenir station scan-in</p>'
+      +'<div class="row" style="justify-content:center; margin-top:12px"><button class="btn" data-act="qrsave">Save</button><button class="btn ghost" data-act="qrrotate">Rotate token</button></div>'
+      +'<p class="tiny" style="text-align:center; margin-top:8px">Lost your phone? Rotating makes the old QR useless — your seat and RSVP stay.</p>');
+  }
+  function scanSheet(){
+    openSheet('<div class="sheet-title"><h3 class="serif">Scan your invitation</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +'<p class="sub">Point your camera at the QR on your printed invite — it opens this site already signed in as you.</p>'
+      +'<div class="teaser" style="margin-top:12px"><div class="mark">[ ▣ ]</div><p class="tiny" style="margin-top:6px">(Prototype) — tap below to simulate scanning Maria’s QR.</p></div>'
+      +'<div class="row" style="margin-top:14px"><button class="btn primary" data-act="simulateScan">Simulate scan → become Maria</button></div>');
+  }
+  function walkSheet(){
+    openSheet('<div class="sheet-title"><h3 class="serif">The room, in 3D</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+      +'<div class="plan3d">'+planScene()+'</div>'
+      +'<p class="sub" style="margin-top:12px">The shipped 3D venue walk renders the real floor plan — every guest appears as their avatar at their table. Customize yours in Me.</p>'
+      +'<div class="row" style="margin-top:12px"><button class="btn primary" data-act="close">Close</button><button class="btn ghost" data-goto="me">Edit my avatar</button></div>');
+  }
+
+
+  /* ───────────── COORDINATOR × wedding day (Liza) — host-ACCESS with guardrails:
+     read-parity · propose-not-execute · money wall (consent-scoped since 2026-07-19,
+     default OFF → walled). Run-of-show = shipped #3412 (run_state + advance_schedule_block). */
+  function tabCoord(nm,av,subtitle){
+    nm=nm||'Liza'; av=av||'L';
+    var host = !!subtitle;
+    var h='<div class="lane-head"><div class="av">'+av+'</div><div class="who"><span class="eyebrow">'+(host?'Host \u00b7 day console':'Coordinator \u00b7 day-of')+'</span>'
+      +'<h2 class="serif" style="margin:2px 0 0">Good evening, '+nm+'</h2>'
+      +'<p class="tiny">Bea &amp; Marco \u00b7 Tagaytay Highlands \u00b7 <b>'+(subtitle||'read-parity \u00b7 propose, not execute')+'</b></p>'
+      +(host?'<p class="tiny" style="margin-top:3px; color:var(--terra)">No coordinator hired? This console is yours \u2014 vendor requests come straight to you.</p>':'')+'</div>'
+      +(host?'<button class="btn ghost" data-act="hostRunOff" style="flex:none">\u2190 My view</button>':'')
+      +'</div><div class="stack" style="margin-top:12px">';
+
+    /* the card deck — each day-of card is one placeable unit */
+    var C=[];
+    /* run of show */
+    var ros='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Run of show \u00b7 yours to run</span><span class="pill live"><span class="dot"></span> Live</span></div>'
+      +'<div style="margin-top:8px">'+S.ros.map(function(r,i){
+        return '<div class="rosrow'+(r.done?' done':'')+(r.now?' now':'')+'"><span class="rt">'+r.t+'</span>'
+          +'<span class="rn"><b>'+r.n+(r.now?' \u00b7 <span style="color:var(--terra)">NOW</span>':'')+'</b><span>'+r.p+'</span></span>'
+          +'<span class="rb">'+(r.money
+            ? '<button data-propose="'+i+'" style="color:var(--mul); border-color:var(--mul)">Propose to couple</button>'
+            : (r.done?'':'<button data-rosdone="'+i+'">\u2713 Done</button><button data-roslate="'+i+'">+15m</button>'))+'</span></div>';
+      }).join('')+'</div>'
+      +'<p class="tiny" style="margin-top:8px">Advancing a block updates every guest page at once (single-winner). Money-adjacent items go to the couple as proposals.</p>'
+      +'<div class="row" style="margin-top:8px"><button class="btn" data-act="bulkLate">Whole evening +15m</button></div></div>';
+    C.push({k:'ros', label:'Run of show', h:ros});
+    /* broadcast + phones-down control */
+    C.push({k:'bcast', label:'Announcements', h:'<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Announce to all guests</span><span class="pill soft">'+S.bcastN+' sent today</span></div>'
+      +'<form data-form="bcast" style="margin-top:10px"><textarea name="msg" maxlength="140" placeholder="e.g. Dinner is served \u2014 please find your table in the Grand Ballroom" aria-label="Broadcast message" style="min-height:64px"></textarea>'
+      +'<div class="row" style="margin-top:8px"><button class="btn primary" type="submit">Send broadcast</button>'
+      +'<button class="btn ghost" type="button" data-act="bcastQuick">Use: \u201cMove to the Ballroom\u201d</button></div></form>'
+      +'<p class="tiny" style="margin-top:6px">Lands on every guest\u2019s what\u2019s-happening card \u2014 the offline PWA catches up on reconnect.</p>'
+      +'<div class="tglrow"><span style="font-size:.85rem"><b>\ud83d\udcf5 Phones down</b><br><span class="tiny">Asks guests to witness the ceremony \u2014 shows a banner on every guest page.</span></span>'
+      +'<button class="tgl2" aria-pressed="'+S.phonesDown+'" data-act="phonesTgl" aria-label="Toggle phones-down"></button></div></div>'});
+    /* arrivals */
+    C.push({k:'arrivals', label:'Arrivals', h:'<div class="card"><span class="eyebrow">Arrivals \u00b7 at the door</span>'
+      +'<div class="stat3"><div class="sc"><div class="sn">'+S.arrived+'</div><div class="sl">arrived</div></div>'
+      +'<div class="sc"><div class="sn">'+S.invited+'</div><div class="sl">expected</div></div>'
+      +'<div class="sc"><div class="sn">3</div><div class="sl">unseated</div></div></div>'
+      +'<div class="row" style="margin-top:10px"><button class="btn" data-act="checkin">Open check-in scan</button><button class="btn ghost" data-act="seatmap">Seat map</button></div></div>'});
+    /* live wall glance */
+    C.push({k:'wall', label:'Live wall', h:'<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Live photo wall</span><span class="pill soft">'+S.wallCount+' photos</span></div>'
+      +'<p class="sub" style="margin-top:8px">The venue screen\u2019s wall \u2014 glance it, or send it a highlight.</p>'
+      +'<div class="row" style="margin-top:10px"><button class="btn" data-goto="photos">Open the wall</button></div></div>'});
+    /* watch-live glance */
+    C.push({k:'watch', label:'Watch live', h:'<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">The stream</span><span class="pill live"><span class="dot"></span> CH 1</span></div>'
+      +'<p class="sub" style="margin-top:8px">1,204 watching the controlled screen right now.</p>'
+      +'<div class="row" style="margin-top:10px"><button class="btn" data-goto="photos">Open the stream</button></div></div>'});
+    /* gifts glance */
+    C.push({k:'gifts', label:'Gifts \u0026 greetings', h:'<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Pabuya \u00b7 gifts</span><span class="pill ok">14 received</span></div>'
+      +'<p class="sub" style="margin-top:8px">E-gifts land quietly \u2014 thank-yous can wait for tomorrow.</p></div>'});
+    /* QR kit */
+    C.push({k:'qrkit', label:'QR kit', h:'<div class="card"><span class="eyebrow">QR kit \u00b7 for the event</span>'
+      +[['Event join QR','guests scan to enter the site'],['Table QRs \u00b7 12','one per table, for tagging'],['Seat QRs \u00b7 142','the print pack, re-downloadable'],['Print pack','PDF \u00b7 ready']].map(function(q){
+        return '<div class="vtrow"><span><b style="font-size:.85rem">'+q[0]+'</b><br><span class="tiny">'+q[1]+'</span></span><button class="btn ghost" style="padding:6px 10px; font-size:.7rem" data-act="qrkit">Open</button></div>'; }).join('')+'</div>'});
+    /* seat scanner */
+    var scan='<div class="card"><span class="eyebrow">Find-my-seat scanner</span>'
+      +'<p class="sub" style="margin-top:6px">Scan any guest\u2019s QR \u2014 their table lights up on the plan.</p>'
+      +'<div class="row" style="margin-top:10px"><button class="btn primary" data-act="seatscan">Scan a guest QR</button></div>';
+    if(S.seatScan){
+      scan+='<div style="margin-top:10px"><div class="row" style="justify-content:space-between"><b style="font-size:.9rem">Maria Santos \u2192 Table 7 \u00b7 Dahlia</b><span class="pill ok">Found</span></div>'
+        +'<div class="plan3d">'+planScene()+'</div>'
+        +'<div class="row" style="margin-top:8px"><button class="btn" data-act="walk3d">Show in 3D</button></div></div>';
+    }
+    C.push({k:'seatscan', label:'Seat scanner', h:scan+'</div>'});
+    /* requests inbox */
+    var chips=[['couple','Couple'],['vendors','Vendors'],['hosts','Hosts']];
+    var rows=S.reqs.filter(function(r){return r.lane===S.reqTab});
+    C.push({k:'requests', label:'Requests', h:'<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Requests</span><span class="pill soft">'+S.reqs.filter(function(r){return r.st==='new'}).length+' new</span></div>'
+      +'<div class="reqchips">'+chips.map(function(c){ var n=S.reqs.filter(function(r){return r.lane===c[0]&&r.st==='new'}).length;
+        return '<button aria-pressed="'+(S.reqTab===c[0])+'" data-reqtab="'+c[0]+'">'+c[1]+(n?' \u00b7 '+n:'')+'</button>';}).join('')+'</div>'
+      +(rows.length?rows.map(function(r){ var i=S.reqs.indexOf(r);
+        return '<div class="vtrow"><span><b style="font-size:.85rem">'+r.from+'</b><br><span class="tiny">'+esc(r.text)+'</span></span>'
+          +(r.st==='done'?'<span class="pill ok">Done \u2713</span>'
+            :'<span class="row" style="gap:6px">'+(r.st==='new'?'<button class="btn ghost" style="padding:6px 10px; font-size:.7rem" data-reqack="'+i+'">Got it</button>':'')
+            +'<button class="btn ghost" style="padding:6px 10px; font-size:.7rem" data-reqdone="'+i+'">Done</button></span>')+'</div>'; }).join('')
+        :'<p class="tiny" style="margin-top:10px">Nothing waiting in this lane.</p>')+'</div>'});
+    /* vendor call-times */
+    C.push({k:'calltimes', label:'Vendor call-times', h:'<div class="card"><span class="eyebrow">Vendor call-times</span>'
+      +[['Kusina Norte \u00b7 dinner service','6:30 PM','ok','On site'],['Lumina Studios \u00b7 SDE screening','8:40 PM','ok','On site'],['Fuego Pyro \u00b7 fireworks','9:00 PM','soft','En route'],['Tagaytay Strings \u00b7 dinner set','6:15 PM','mulsoft','No reply']].map(function(v){
+        return '<div class="vtrow"><span><b style="font-size:.85rem">'+v[0]+'</b><br><span class="tiny">Call '+v[1]+'</span></span>'
+          +'<span class="row" style="gap:6px"><span class="pill '+v[2]+'">'+v[3]+'</span>'+(v[3]==='No reply'?'<button class="btn ghost" style="padding:6px 10px; font-size:.7rem" data-act="nudge">Nudge</button>':'')+'</span></div>';
+      }).join('')+'</div>'});
+    /* vendor toolkit (coordinator = generic vendor features +) */
+    /* BIZ — Liza is a PAYING VENDOR too (coordination is a vendor category):
+       the full Generic kit for HER business, capture stack included
+       (owner: "where are the reviews for the coordinator?" + "why does the
+       coordinator not have papic camera app? and the upload?"). */
+    var KP=vendorKitParts('coord');
+    var biz='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Happy couple? Ask for a review</span><span class="pill soft">3 today</span></div>'
+      +'<div class="qrbox">'+qrSvg(5566,140)+'</div>'
+      +'<p class="tiny" style="text-align:center">They scan, they rate \u2014 it lands on your coordination profile tonight.</p></div>'
+      +'<div class="card"><span class="eyebrow">Reviews received</span>'
+      +'<div class="colcard" style="border-top:none; padding-top:6px"><div class="byline">\u2605\u2605\u2605\u2605\u2605 \u00b7 8:20 PM</div><p>\u201cLiza ran the day to the minute \u2014 we never felt a single seam.\u201d</p></div>'
+      +'<div class="colcard"><div class="byline">\u2605\u2605\u2605\u2605\u2605 \u00b7 6:05 PM</div><p>\u201cShe found my lolo\u2019s seat before I finished asking.\u201d</p></div></div>'
+      +KP.favs+KP.doc+KP.upload+KP.bridge+KP.booth+KP.ads+KP.column+KP.gcolumn;
+    C.push({k:'biz', label:'Your business', h:biz});
+    /* money */
+    C.push({k:'money', label:'Budget (locked)', h: host
+      ? '<div class="lockstub">\ud83d\udd12 <span><b>Budget \u00b7 yours alone.</b> Coordinators never see money unless you grant it in their invite.</span></div>'
+      : '<div class="lockstub">\ud83d\udd12 <span><b>Budget \u00b7 couple only.</b> Payments, ledger and checkout stay with Bea &amp; Marco \u2014 your access never includes money unless they grant it.</span></div>'});
+
+    /* order + visibility: Liza = fixed; Bea = her own arrangement (the shipped
+       sections-manager grammar: order + Auto/Shown/Hidden, per-host prefs) */
+    var TABMAP={ show:['ros','calltimes'], announce:['bcast','wall','watch','gifts'],
+      requests:['requests','money'], event:['qrkit','seatscan','arrivals'], biz:['biz'] };
+    var atab=S.appTabs[host?'hostc':'coord']||'show';
+    var tabKeys=TABMAP[atab]||[];
+    h+=tabKeys.map(function(k){ var c=C.filter(function(x){return x.k===k})[0]; return c?c.h:''; }).join('');
+    return h+'</div>';
+  }
+
+  /* ───────────── VENDOR × wedding day (Kusina Norte) — the SHIPPED on-the-day
+     launcher, improved: event-picker · access-grants · guest-review-qr ·
+     issues-log · live-reviews · prep/delivery CTA · booth mission · capture (flag-off). */
+  function tabVendor(){
+    var P=vendorKitParts('vendor'), t=S.appTabs.vendor;
+    var h='<div class="lane-head"><div class="av">KN</div><div class="who"><span class="eyebrow">Vendor \u00b7 on the day</span>'
+      +'<h2 class="serif" style="margin:2px 0 0">Kusina Norte</h2>'
+      +'<p class="tiny">Caterer \u00b7 Bea &amp; Marco \u00b7 Tagaytay Highlands</p></div>'
+      +'<span class="pill ok">Access \u00b7 10:00\u201323:00</span></div><div class="stack" style="margin-top:12px">';
+    if(t==='today'){
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Today</span><span class="pill live"><span class="dot"></span> Wedding day</span></div>'
+        +'<h3 class="serif" style="margin:6px 0">Dinner for 142, at 6:30</h3>'
+        +[['10:00 AM','Load-in \u00b7 service kitchen','done'],['5:30 PM','Cocktail support \u00b7 Garden Terrace','done'],['6:30 PM','Dinner service \u00b7 Grand Ballroom','now'],['10:30 PM','Breakdown','']].map(function(r){
+          return '<div class="rosrow'+(r[2]==='done'?' done':r[2]==='now'?' now':'')+'"><span class="rt">'+r[0]+'</span><span class="rn"><b>'+r[1]+(r[2]==='now'?' \u00b7 <span style="color:var(--terra)">NOW</span>':'')+'</b></span></div>';
+        }).join('')
+        +'<p class="tiny" style="margin-top:6px">Your slice of the master run-of-show \u2014 retimed automatically if the coordinator shifts the evening.</p></div>';
+      h+='<div class="card" style="background:linear-gradient(150deg,var(--cream),var(--terra-soft))"><div class="row" style="justify-content:space-between"><span class="eyebrow">Papic booth mission</span><span class="pill soft">Games \u00b7 live</span></div>'
+        +'<p class="sub" style="margin:8px 0 2px">\u201cGet a shot with the caterer\u201d is one of tonight\u2019s guest challenges \u2014 12 guests cleared it at your station so far.</p></div>';
+      h+='<div class="lockstub">\ud83d\udcf7 <span><b>Capture controller</b> \u2014 run your own Papic camera crew from here. <span class="pill soft" style="margin-left:4px">flag-off in prod</span></span></div>';
+    }
+    if(t==='scan'){
+      h+=P.checklist;
+      h+='<div class="card"><span class="eyebrow">Deliveries &amp; meals</span>'
+        +'<p class="sub" style="margin-top:6px">Scan a guest\u2019s QR to log their plate served \u2014 dietary flags surface as you scan.</p>'
+        +'<div class="row" style="margin-top:10px"><button class="btn primary" data-act="vscan">Open scan</button><span class="pill soft">87 of 142 served</span></div></div>';
+    }
+    if(t==='papic'){ h+=P.doc+P.upload+P.bridge+P.booth+P.ads; }
+    if(t==='reviews'){
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Happy guest? Ask for a review</span><span class="pill soft">4 today</span></div>'
+        +'<div class="qrbox">'+qrSvg(7788,140)+'</div>'
+        +'<p class="tiny" style="text-align:center">They scan, they rate \u2014 it lands on your profile tonight.</p></div>';
+      h+='<div class="card"><span class="eyebrow">Reviews received</span>'
+        +'<div class="colcard" style="border-top:none; padding-top:6px"><div class="byline">\u2605\u2605\u2605\u2605\u2605 \u00b7 7:02 PM</div><p>\u201cThe kare-kare \u2014 grabe. Best wedding dinner I\u2019ve had.\u201d</p></div>'
+        +'<div class="colcard"><div class="byline">\u2605\u2605\u2605\u2605\u2605 \u00b7 6:48 PM</div><p>\u201cService was fast even with the full ballroom.\u201d</p></div></div>';
+      h+=P.favs;
+    }
+    if(t==='requests'){ h+=P.request+P.report+P.column+P.gcolumn; }
+    return h+'</div>';
+  }
+
+
+  /* ── GENERIC VENDOR FEATURES (owner matrix 2026-07-25) — one kit, every vendor lane ── */
+  function vendorKitParts(role){
+    var P={};
+    if(role!=='coord'){
+      P.report='<div class="card"><span class="eyebrow">Report to the coordinator</span>'
+        +'<div class="row" style="margin-top:10px">'+(role==='band'
+          ?['Second set starting','On break 15m','Sound issue fixed']
+          :['Dinner service started','Dessert station live','Breakdown begun']).map(function(q){
+            return '<button class="btn ghost" style="font-size:.74rem" data-status="'+q+'">'+q+'</button>';}).join('')+'</div>'
+        +'<p class="tiny" style="margin-top:6px">One tap \u2014 lands on the coordinator\u2019s board, timestamped.</p></div>';
+    }
+    P.checklist='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Checklist \u00b7 scan to check</span><span class="pill soft">'+(role==='band'?'4 of 6':'3 of 5')+' checked</span></div>'
+      +'<p class="sub" style="margin-top:6px">'+(role==='band'?'Gear in, sound check, set lists printed \u2014 scan each item\u2019s QR as it lands.':'Every deliverable carries a QR \u2014 scan it off the truck and the couple\u2019s checklist ticks itself.')+'</p>'
+      +'<div class="row" style="margin-top:10px"><button class="btn primary" data-act="ckscan">Open scanner</button></div></div>';
+    var D=S.doc[role]||S.doc.vendor;
+    P.doc='<div class="card" style="background:linear-gradient(150deg,var(--cream),var(--mul-soft))"><div class="row" style="justify-content:space-between"><span class="eyebrow">Your documentation \u00b7 Papic</span><span class="pill mulsoft">'+D.left.toLocaleString()+' / '+D.total.toLocaleString()+' pts</span></div>'
+      +'<p class="sub" style="margin:8px 0 2px">Booking fee \u20b1'+D.fee.toLocaleString()+' \u2192 <b>'+D.total+' pts documentation allowance</b> ('+D.kind+'), separate from the couple\u2019s pool.</p>'
+      +'<div class="meter2"><i style="width:'+Math.round(D.left/D.total*100)+'%"></i></div>'
+      +'<div class="row" style="margin-top:10px"><button class="btn mul" data-act="docCam">Open vendor camera</button>'
+      +'<button class="btn" data-topup="small" data-tuprole="'+role+'">+250 pts \u00b7 \u20b1100</button>'
+      +'<button class="btn" data-topup="pro" data-tuprole="'+role+'">+3,000 pts \u00b7 \u20b11,000</button></div>'
+      +'<p class="tiny" style="margin-top:6px">Load up any time \u2014 the \u20b11,000 pack is for full-wedding real-time delivery. Points stack on top of your allowance.</p>'
+      +'<p class="tiny" style="margin-top:8px">Scales with your booking fee \u00b7 50 pt minimum. Imported (BYO) vendors \u2014 no booking fee \u2014 receive <b>10 pts as a gift from Setnayan</b> for quick documentation; their gift tops up the same way.</p></div>';
+    P.booth='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Your booth \u00b7 in the 3D venue</span><span class="pill soft">\u20b11,500 / 28d</span></div>'
+      +'<div class="avrow" style="margin-top:10px"><div class="avstage" style="width:72px;height:84px">'+chibi({skin:2,hair:1,outfit:(role==='band'?2:1)},52)+'</div>'
+      +'<p class="sub" style="flex:1">Your stand \u2014 with your avatar at it \u2014 appears in the couple\u2019s 3D Plan, so guests find you in the room. Pairs with the Ads Gallery.</p></div>'
+      +'<div class="row" style="margin-top:10px"><button class="btn" data-act="booth">Design my booth</button><span class="pill soft">in-app maker pending</span></div></div>';
+    P.ads='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Papic Ads Gallery</span>'+(role==='vendor'?'<span class="pill ok">Purchased</span>':'<span class="pill soft">If purchased</span>')+'</div>'
+      +(role==='vendor'
+        ?'<p class="sub" style="margin-top:8px">Your showcase runs on the booth screen \u2014 214 guest views tonight.</p><div class="row" style="margin-top:10px"><button class="btn" data-act="adsGal">Manage gallery</button></div>'
+        :'<p class="sub" style="margin-top:8px">A guest-facing showcase of your work at your station \u2014 unlockable per event.</p>')+'</div>';
+    P.favs='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">New favorites</span><span class="pill ok">\u2665 '+(role==='band'?5:3)+' today</span></div>'
+      +'<p class="sub" style="margin-top:8px">Guests saved you from the event website and the 3D Plan \u2014 they carry you into their own planning.</p></div>';
+    P.column='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">A note for the couple</span><span class="pill soft">new \u00b7 1 per vendor</span></div>';
+    if(S['vcol_'+role]){ P.column+='<div class="colcard" style="border-top:none; padding-top:6px"><div class="byline">'+(role==='band'?'Manila Strings':role==='coord'?'Liza':'Kusina Norte')+' \u00b7 pending approval</div><p>'+esc(S['vcol_'+role])+'</p></div>'; }
+    else { P.column+='<p class="sub" style="margin:8px 0 2px">One short keepsake note \u2014 printed in the couple\u2019s paper beside the guest columns.</p>'
+      +'<form data-form="vcol" data-role="'+role+'" style="margin-top:10px"><textarea name="body" maxlength="200" placeholder="'+(role==='band'?'e.g. You two dance like the song was written for you.':'e.g. Cooking for your family tonight was our honor.')+'" style="min-height:56px"></textarea>'
+      +'<div class="row" style="margin-top:8px"><button class="btn mul" type="submit">Send to the couple</button></div></form>'; }
+    P.column+='</div>';
+    /* #11 · FILE TRANSFER IN — phone upload NOW-path (NEW wiring) + Camera Bridge PRO-path.
+       Owner: "are we still capable of tagging the photos as they upload it? while the
+       event is running?" — YES: per-upload pipeline (NSFW screen -> face-detect vs event
+       enrollments >=0.85 auto-tag -> guest galleries + live wall, real-time). */
+    var UPSTAGES=['uploading\u2026','screening','finding faces','tagged','on the wall \u2713'];
+    P.upload='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Upload from phone</span><span class="pill soft">counts vs your allowance</span></div>'
+      +'<p class="sub" style="margin-top:8px">Move shots to your phone the way you always do \u2014 upload here, and <b>guests are tagged while the party\u2019s still going</b>.</p>';
+    if(S.up.phase==='idle'){
+      P.upload+='<div class="row" style="margin-top:10px"><button class="btn primary" data-act="upOpen">Choose from camera roll</button></div>';
+    }
+    if(S.up.phase==='pick'){
+      var selN=Object.keys(S.up.sel).length;
+      P.upload+='<div class="upgrid">'+[0,1,2,3,4,5,6,7].map(function(i){
+        return '<button type="button" class="ph '+['','g2','g3','g4'][i%4]+'" data-upsel="'+i+'" aria-pressed="'+(!!S.up.sel[i])+'" aria-label="Shot '+(i+1)+'"></button>';
+      }).join('')+'</div>'
+      +'<div class="row" style="margin-top:10px"><button class="btn mul" data-act="upGo"'+(selN?'':' disabled')+'>Upload '+(selN||'')+'</button>'
+      +'<button class="btn ghost" data-act="upClose">Cancel</button></div>';
+    }
+    if(S.up.phase==='run'){
+      P.upload+='<div style="margin-top:6px">'+S.up.items.map(function(it){
+        var st=UPSTAGES[it.stage];
+        var lbl= it.stage===3 ? 'tagged: '+it.tag : st;
+        return '<div class="uprow"><span class="ut ph '+it.cls+'"></span>'
+          +'<span class="us tiny">'+(it.kind==='clip'?'10-s clip \u00b7 7 pts':'photo \u00b7 1 pt')+'</span>'
+          +'<span class="pill '+(it.stage>=4?'ok':'soft')+'">'+lbl+'</span></div>';
+      }).join('')+'</div>'
+      +(S.up.items.every(function(it){return it.stage>=4})
+        ?'<div class="row" style="margin-top:10px"><button class="btn" data-act="upOpen">Upload more</button><span class="pill ok">All live \u2014 galleries + wall</span></div>'
+        :'<p class="tiny" style="margin-top:8px">Screening \u2192 face-match \u2192 galleries \u2014 live, per shot.</p>');
+    }
+    P.upload+='<p class="tiny" style="margin-top:8px">Phone-sized JPEGs tonight; <b>full-res to the couple\u2019s Drive later</b>. Photo = 1 pt \u00b7 10-s clip = 7.</p></div>';
+    P.bridge='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Camera Bridge</span><span class="pill soft">coming</span></div>'
+      +'<p class="sub" style="margin-top:8px">Pair your camera \u00b7 Canon R / Nikon Z / Sony \u03b1 / Fuji X \u2014 shots flow in as you shoot \u00b7 <b>\u20b1499/day</b>.</p>'
+      +'<div class="row" style="margin-top:10px"><button class="btn ghost" data-act="bridge">How pairing works</button></div></div>';
+    /* #10 · Column for the GUESTS — public note in the credits (couple-approved) */
+    S.gpick=S.gpick||{};
+    P.gcolumn='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">A note for the guests \u270e</span><span class="pill soft">new \u00b7 public</span></div>';
+    if(S['vgcol_'+role]){
+      var G=S['vgcol_'+role];
+      P.gcolumn+='<div class="colcard" style="border-top:none; padding-top:6px"><div class="byline">'+(role==='band'?'Manila Strings':role==='mc'?'Migs':role==='coord'?'Liza':'Kusina Norte')+' \u00b7 pending approval</div>'
+        +'<div class="row" style="align-items:flex-start; gap:10px">'+(G.shot!=null?'<span class="ph '+['','g2','g3'][G.shot]+' gnote-thumb"></span>':'')+'<p style="flex:1">'+esc(G.text)+'</p></div></div>'
+        +'<p class="tiny" style="margin-top:6px">Once Bea &amp; Marco approve, guests see it in \u201cThe people who made it\u201d.</p>';
+    } else {
+      P.gcolumn+='<p class="sub" style="margin:8px 0 2px">A short public note \u2014 <b>guests will see this under your name tonight</b>, in the vendor credits.</p>'
+        +'<form data-form="vgcol" data-role="'+role+'" style="margin-top:10px"><textarea name="body" maxlength="160" placeholder="'+(role==='band'?'e.g. Request a song \u2014 if we know it, it\u2019s yours.':role==='mc'?'e.g. Loudest table gets the first dessert run. You heard me.':'e.g. Salamat sa pag-tikim \u2014 the kare-kare was our lola\u2019s recipe.')+'" style="min-height:56px"></textarea>'
+        +'<p class="tiny" style="margin:8px 0 4px">Attach one shot from your documentation (optional)</p>'
+        +'<div class="row">'+[0,1,2].map(function(i){ return '<button type="button" class="pickshot ph '+['','g2','g3'][i]+'" data-gpick="'+i+'" data-gpickrole="'+role+'" aria-pressed="'+(S.gpick[role]===i)+'" aria-label="Shot '+(i+1)+'"></button>'; }).join('')+'</div>'
+        +'<div class="row" style="margin-top:10px"><button class="btn mul" type="submit">Send to the couple</button></div>'
+        +'<p class="tiny" style="margin-top:6px">The couple approves before it shows \u2014 same as guest columns.</p></form>';
+    }
+    P.gcolumn+='</div>';
+    if(role!=='coord'){
+      P.request='<div class="card"><span class="eyebrow">Request \u00b7 to the coordinator</span>'
+        +(S.issueSent?'<p class="sub" style="margin-top:8px">Sent \u2713 \u2014 Liza has it. She\u2019ll come to you.</p>'
+          :'<form data-form="issue" style="margin-top:10px"><input type="text" name="what" placeholder="'+(role==='band'?'e.g. Need one more monitor speaker on stage':'e.g. Ballroom outlet for the warmers is dead')+'" aria-label="Request"/>'
+          +'<div class="row" style="margin-top:8px"><button class="btn mul" type="submit">Send to coordinator</button></div></form>')+'</div>';
+    }
+    return P;
+  }
+  function vendorKit(role){
+    var P=vendorKitParts(role);
+    return [P.report,P.checklist,P.doc,P.booth,P.ads,P.favs,P.column,P.request].filter(Boolean).join('');
+  }
+
+
+  /* ── BAND / SINGER / ORCHESTRA × wedding day (Manila Strings) = generic kit + song family (NEW) ── */
+  function tabBand(){
+    var P=vendorKitParts('band'), t=S.appTabs.band;
+    var h='<div class="lane-head"><div class="av">MS</div><div class="who"><span class="eyebrow">Band \u00b7 on the day</span>'
+      +'<h2 class="serif" style="margin:2px 0 0">Manila Strings</h2>'
+      +'<p class="tiny">Band \u00b7 Bea &amp; Marco \u00b7 Grand Ballroom</p></div>'
+      +'<span class="pill ok">Access \u00b7 16:00\u201323:00</span></div><div class="stack" style="margin-top:12px">';
+    if(t==='today'){
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Tonight</span><span class="pill live"><span class="dot"></span> Second set</span></div>'
+        +[['4:00 PM','Load-in \u00b7 sound check','done'],['7:00 PM','First set \u00b7 dinner','done'],['9:00 PM','Second set \u00b7 dance floor','now'],['10:45 PM','Last song \u00b7 pack down','']].map(function(r){
+          return '<div class="rosrow'+(r[2]==='done'?' done':r[2]==='now'?' now':'')+'"><span class="rt">'+r[0]+'</span><span class="rn"><b>'+r[1]+(r[2]==='now'?' \u00b7 <span style="color:var(--terra)">NOW</span>':'')+'</b></span></div>';
+        }).join('')+'</div>';
+      h+=P.checklist;
+      h+='<div class="lockstub">\ud83d\udcf7 <span><b>Capture controller</b> \u2014 run your own Papic crew from here. <span class="pill soft" style="margin-left:4px">flag-off in prod</span></span></div>';
+    }
+    if(t==='songs'){
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Now playing</span><span class="pill live"><span class="dot"></span> Second set</span></div>'
+        +'<div class="bigsong"><div class="now">Ikaw \u00b7 Yeng Constantino</div><div class="nx">Up next \u00b7 Perfect \u00b7 Ed Sheeran</div></div>'
+        +'<p class="tiny" style="margin-top:8px; text-align:center">Doubles as a public card \u2014 guests can see what\u2019s playing.</p></div>';
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Song requests</span><span class="pill soft">'+S.songReqs.filter(function(r){return r.st==='new'}).length+' waiting</span></div>'
+        +S.songReqs.map(function(r,i){
+          return '<div class="vtrow"><span><b style="font-size:.86rem">'+r.song+'</b><br><span class="tiny">from '+r.from+'</span></span>'
+            +(r.st==='new'?'<span class="row" style="gap:6px"><button class="btn ghost" style="padding:6px 10px; font-size:.7rem" data-songacc="'+i+'">Accept</button><button class="btn ghost" style="padding:6px 10px; font-size:.7rem; color:var(--ink-55)" data-songskip="'+i+'">Skip</button></span>'
+              :'<span class="pill '+(r.st==='acc'?'ok':'soft')+'">'+(r.st==='acc'?'In the list \u2713':'Skipped')+'</span>')+'</div>';
+        }).join('')+'</div>';
+      h+='<div class="card"><span class="eyebrow">Tonight\u2019s set list</span>'
+        +S.setList.map(function(r){ return '<div class="vtrow"'+(r[2]?' style="opacity:.45"':'')+'><span>'+(r[0]?'<span class="tiny" style="display:block; color:var(--terra)">'+r[0]+'</span>':'')+'<b style="font-size:.86rem'+(r[2]?'; text-decoration:line-through':'')+'">'+r[1]+'</b></span>'+(r[2]?'<span class="pill soft">played</span>':'')+'</div>'; }).join('')+'</div>';
+    }
+    if(t==='papic'){ h+=P.doc+P.upload+P.bridge+P.booth+P.ads; }
+    if(t==='reviews'){
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Happy guest? Ask for a review</span><span class="pill soft">2 today</span></div>'
+        +'<div class="qrbox">'+qrSvg(3311,140)+'</div>'
+        +'<p class="tiny" style="text-align:center">They scan, they rate \u2014 it lands on your profile tonight.</p></div>';
+      h+='<div class="card"><span class="eyebrow">Reviews received</span>'
+        +'<div class="colcard" style="border-top:none; padding-top:6px"><div class="byline">\u2605\u2605\u2605\u2605\u2605 \u00b7 9:12 PM</div><p>\u201cThey played our request on the second chorus \u2014 chills.\u201d</p></div></div>';
+      h+=P.favs;
+    }
+    if(t==='requests'){ h+=P.request+P.report+P.column+P.gcolumn; }
+    return h+'</div>';
+  }
+
+
+  /* ── HOST/MC VENDOR × wedding day (Migs) — owner clarification 2026-07-25:
+     "the Host/MC vendor not the host of the event." = Generic Vendor kit +
+     coordinator-PARITY (Show console · Announce) + MC script cards + the
+     ARRANGEABLE card placement (his show flow, his order). ── */
+  function tabMC(){
+    var P=vendorKitParts('mc'), t=S.appTabs.mc;
+    var h='<div class="lane-head"><div class="av">M</div><div class="who"><span class="eyebrow">Host / MC \u00b7 on the day</span>'
+      +'<h2 class="serif" style="margin:2px 0 0">Migs</h2>'
+      +'<p class="tiny">Host &amp; MC \u00b7 Bea &amp; Marco \u00b7 Grand Ballroom \u00b7 <b>coordinator-parity</b></p></div>'
+      +(t==='script'?'<button class="btn '+(S.mcArrange?'primary':'ghost')+'" data-act="mcArrTgl" style="flex:none">'+(S.mcArrange?'Done':'Arrange your cards \u270e')+'</button>'
+        :'<span class="pill ok">Access \u00b7 15:00\u201323:00</span>')
+      +'</div><div class="stack" style="margin-top:12px">';
+    if(t==='show'){
+      /* coordinator-parity run-of-show console (same #3412 machinery) */
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Run of show \u00b7 parity with the coordinator</span><span class="pill live"><span class="dot"></span> Live</span></div>'
+        +'<div style="margin-top:8px">'+S.ros.map(function(r,i){
+          return '<div class="rosrow'+(r.done?' done':'')+(r.now?' now':'')+'"><span class="rt">'+r.t+'</span>'
+            +'<span class="rn"><b>'+r.n+(r.now?' \u00b7 <span style="color:var(--terra)">NOW</span>':'')+'</b><span>'+r.p+'</span></span>'
+            +'<span class="rb">'+(r.money?'<button data-propose="'+i+'" style="color:var(--mul); border-color:var(--mul)">Propose to couple</button>'
+              :(r.done?'':'<button data-rosdone="'+i+'">\u2713 Done</button>'))+'</span></div>';
+        }).join('')+'</div>'
+        +'<p class="tiny" style="margin-top:8px">You and Liza run the same board \u2014 advancing a block updates every guest page.</p></div>';
+    }
+    if(t==='script'){
+      /* HIS deck — arrangeable to match his show flow */
+      var MC=[];
+      MC.push({k:'cue', label:'Segment cue', h:'<div class="card" style="background:linear-gradient(150deg,var(--cream),var(--terra-soft))"><span class="eyebrow">Cue \u00b7 up next</span>'
+        +'<div class="bigsong"><div class="now">First dance</div><div class="nx">Cue in 5 \u00b7 after the toast \u00b7 lights to half</div></div></div>'});
+      MC.push({k:'script', label:'Emcee script', h:'<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Emcee script \u00b7 per block</span><span class="pill soft">from the schedule</span></div>'
+        +[['Reception','\u201cLadies and gentlemen \u2014 for the very first time\u2026 Bea and Marco!\u201d'],['First dance','\u201cGive them some room \u2014 and give them some noise.\u201d'],['Fireworks','\u201cGrab a drink and face the ridge \u2014 five minutes.\u201d']].map(function(r){
+          return '<div class="colcard"><div class="byline">'+r[0]+'</div><p>'+r[1]+'</p></div>'; }).join('')
+        +'<p class="tiny" style="margin-top:8px">Written with the couple on the schedule \u2014 each block carries its script.</p></div>'});
+      MC.push({k:'intro', label:'Couple intro', h:'<div class="card"><span class="eyebrow">The introduction</span>'
+        +'<p class="sub" style="margin-top:8px">Bea: architect, plant hoarder, the calm one. Marco: chef at home, cries at movies. Four years \u2014 a borrowed umbrella in Espa\u00f1a. Say \u201cSet na \u2019yan\u201d and the room will finish it.</p></div>'});
+      MC.push({k:'games', label:'Games \u0026 callouts', h:'<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Games \u00b7 Papic callouts</span><span class="pill soft">Games \u00b7 live</span></div>'
+        +'<p class="sub" style="margin-top:8px">\u201cYour whole table, one frame\u201d \u2014 87 cleared. Call the fireworks challenge at 8:55.</p>'
+        +'<div class="row" style="margin-top:10px"><button class="btn" data-act="mcCall">Call it on mic</button></div></div>'});
+      var order=S.mcDeck.order, hid=S.mcDeck.hidden;
+      order.forEach(function(k,pos){
+        var c=MC.filter(function(x){return x.k===k})[0]; if(!c) return;
+        var isHid=!!hid[k];
+        if(!S.mcArrange && isHid) return;
+        if(S.mcArrange){
+          h+='<div class="arr-wrap'+(isHid?' hiddenc':'')+'"><div class="arrbar"><span>'+c.label+(isHid?' \u00b7 hidden':'')+'</span><span class="ab">'
+            +(pos>0?'<button data-mv2up="'+k+'" aria-label="Move up">\u2191</button>':'')
+            +(pos<order.length-1?'<button data-mv2dn="'+k+'" aria-label="Move down">\u2193</button>':'')
+            +'<button data-hide2="'+k+'">'+(isHid?'Show':'Hide')+'</button></span></div>'+c.h+'</div>';
+        } else { h+=c.h; }
+      });
+      if(!S.mcArrange) h+='<p class="tiny" style="text-align:center">Your cards, your show flow \u2014 \u201cArrange your cards \u270e\u201d to reorder or hide.</p>';
+    }
+    if(t==='announce'){
+      h+='<div class="annc"><span class="at">From the coordinator \u00b7 '+S.lastBcast.t+'</span><p>'+esc(S.lastBcast.text)+'</p></div>';
+      h+='<div class="card"><div class="row" style="justify-content:space-between"><span class="eyebrow">Announce \u00b7 you voice it</span><span class="pill soft">'+S.bcastN+' sent today</span></div>'
+        +'<form data-form="bcast" style="margin-top:10px"><textarea name="msg" maxlength="140" placeholder="e.g. Dessert bar is open \u2014 west terrace" aria-label="Announcement" style="min-height:64px"></textarea>'
+        +'<div class="row" style="margin-top:8px"><button class="btn primary" type="submit">Send + say it</button></div></form>'
+        +'<p class="tiny" style="margin-top:6px">Feeds the same broadcast lane as the coordinator \u2014 guests\u2019 what\u2019s-happening card + your voice.</p></div>';
+    }
+    if(t==='papic'){ h+=P.doc+P.upload+P.bridge+P.booth+P.ads; }
+    if(t==='requests'){ h+=P.request+P.report+P.column+P.gcolumn; }
+    return h+'</div>';
+  }
+
+  /* ───────────── nav + render ───────────── */
+  var APPSETS={
+    vendor:[['today','Today',I.clock],['scan','Scan',I.qr],['papic','Papic',I.cam],['reviews','Reviews',I.star],['requests','Requests',I.chat]],
+    band:  [['today','Today',I.clock],['songs','Songs',I.music],['papic','Papic',I.cam],['reviews','Reviews',I.star],['requests','Requests',I.chat]],
+    mc:    [['show','Show',I.film],['script','Script',I.mic],['announce','Announce',I.horn],['papic','Papic',I.cam],['requests','Requests',I.chat]],
+    coord: [['show','Show',I.film],['announce','Announce',I.horn],['requests','Requests',I.chat],['event','Event',I.qr],['biz','Biz',I.star]],
+    hostc: [['show','Show',I.film],['announce','Announce',I.horn],['requests','Requests',I.chat],['event','Event',I.qr]]
+  };
+  var TABS=[['home','Home',I.home],['details','Details',I.details],['story','Story',I.story],['photos','Gallery',I.photos],['me','Me',I.me]];
+  function render(){
+    var appLane = (S.viewer==='coord'||S.viewer==='vendor'||S.viewer==='band'||S.viewer==='mc');
+    var consoleMode = isHost() && S.hostRun && S.phase==='event';
+    if(appLane) S.phase='event'; // their lane IS the wedding day
+    $('phaseSeg').innerHTML=PHASES.map(function(p){return '<button aria-pressed="'+(S.phase===p[0])+'" data-phase="'+p[0]+'">'+p[1]+'</button>'}).join('');
+    $('viewerSeg').innerHTML=VIEWERS.map(function(v){return '<button aria-pressed="'+(S.viewer===v[0])+'" data-viewer="'+v[0]+'">'+v[1]+'</button>'}).join('');
+    var pName={std:'Save-the-Date',rsvp:'RSVP season',event:'Wedding day (live)',editorial:'After — the archive'}[S.phase];
+    var who=isHost()?'Bea — the host (extra controls, same tabs)':isGuest()?'Maria — personal-QR guest':S.viewer==='coord'?'Liza — the coordinator (host-access, guardrailed)':S.viewer==='vendor'?'Kusina Norte — booked caterer (on-the-day app)':S.viewer==='band'?'Manila Strings — the band (on-the-day app + song desk)':S.viewer==='mc'?'Migs — the Host/MC vendor (coordinator-parity + his script deck)':'a stranger with just the link';
+    $('deckStatus').innerHTML='Viewing as <b>'+who+'</b> during <b>'+pName+'</b>. Same five tabs for everyone.';
+    $('navItems').innerHTML=TABS.map(function(t){
+      return '<button role="tab" aria-selected="'+(S.tab===t[0])+'" data-tab="'+t[0]+'">'+t[2]+'<span>'+t[1]+'</span></button>';
+    }).join('');
+    var idx=TABS.findIndex(function(t){return t[0]===S.tab});
+    $('navSlider').style.left='calc('+(idx*20)+'% + 4px)';
+    $('navpill').hidden=appLane||consoleMode;
+    var an=$('appnav');
+    if(appLane||consoleMode){
+      var setKey = consoleMode?'hostc':(S.viewer==='coord'?'coord':S.viewer);
+      var stKey = consoleMode?'hostc':(S.viewer==='coord'?'coord':S.viewer);
+      var cur=S.appTabs[stKey];
+      an.hidden=false;
+      var SET=APPSETS[setKey], N=SET.length, CI=Math.max(0,SET.findIndex(function(t){return t[0]===cur}));
+      an.innerHTML='<div class="slider" style="width:calc('+(100/N)+'% - 8px); left:calc('+(CI*100/N)+'% + 4px)"></div>'
+        +'<div class="items" role="tablist" style="grid-template-columns:repeat('+N+',1fr)">'
+        +SET.map(function(t){
+          return '<button role="tab" aria-selected="'+(cur===t[0])+'" data-apptab="'+t[0]+'" data-appkey="'+stKey+'">'+t[2]+'<span>'+t[1]+'</span></button>';
+        }).join('')+'</div>';
+    } else { an.hidden=true; }
+    $('livechip').hidden=!(S.phase==='event'&&isGuest());
+    if(appLane){ $('livechip').hidden=true; }
+    $('editChip').hidden=!isHost();
+    var pb=$('poolbar'), showPool=isHost()&&S.phase==='event';
+    pb.hidden=!showPool; if(showPool){ pb.innerHTML=poolbarHtml(); }
+    var fab=$('camFab');
+    fab.hidden=!camAllowed()||consoleMode;
+    if((S.viewer==='vendor'||S.viewer==='band'||S.viewer==='mc'||S.viewer==='coord') && !consoleMode){
+      var DD=S.doc[S.viewer]; fab.hidden=false;
+      fab.innerHTML=I.cam+'<span>'+DD.left+' pts</span>';
+    } else { fab.innerHTML=I.cam+'<span>Camera</span>'; }
+    fab.classList.toggle('breathe', S.phase==='event');
+    var view= consoleMode ? function(){ return tabCoord('Bea','B','The host \u00b7 running the day'); } : appLane ? (S.viewer==='coord'?tabCoord:S.viewer==='band'?tabBand:S.viewer==='mc'?tabMC:tabVendor) : {home:tabHome,details:tabDetails,story:tabStory,photos:tabPhotos,me:tabMe}[S.tab];
+    stage.classList.remove('anim'); void stage.offsetWidth;
+    stage.innerHTML=view?view():''; stage.classList.add('anim');
+    stage.scrollTop=0;
+  }
+
+  /* ───────────── events ───────────── */
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    if(b.dataset.phase){ var was=S.phase; S.phase=b.dataset.phase; closeOverlays(true); render(); if(S.phase==='std'&&was!=='std'&&!S.filmSeen){ $('filmOv').classList.add('open'); } return; }
+    if(b.dataset.viewer){ S.viewer=b.dataset.viewer; closeOverlays(true); render(); return; }
+    if(b.dataset.tab){ S.tab=b.dataset.tab; render(); return; }
+    if(b.dataset.goto){ closeOverlays(true); S.tab=b.dataset.goto; render();
+      if(b.dataset.scroll==='column'){ var el=$('columnCard'); if(el) el.scrollIntoView({block:'start'}); } return; }
+    if(b.dataset.meal){ S.meal=b.dataset.meal; render(); toast('Plate saved: '+S.meal); return; }
+    if(b.dataset.topup!==undefined){ S.tup={role:b.dataset.tuprole||'vendor', kind:b.dataset.topup};
+      var amt=S.tup.kind==='pro'?3000:250, php=S.tup.kind==='pro'?'\u20b11,000':'\u20b1100';
+      openSheet('<div class="sheet-title"><h3 class="serif">Load up \u00b7 Papic points</h3><button class="xbtn" data-act="close" aria-label="Close">\u00d7</button></div>'
+        +'<div class="poolopt"><span><span class="on">+'+amt.toLocaleString()+' points \u00b7 your meter</span><br><span class="od">'+(S.tup.kind==='pro'?'Full-wedding real-time delivery \u00b7 repeatable':'Same rate as Papic One \u00b7 repeatable')+'</span></span>'
+        +'<span style="text-align:right"><span class="op">'+php+'</span><br><button class="btn primary" style="margin-top:6px" data-act="vTopupBuy">Buy</button></span></div>'
+        +'<p class="tiny" style="margin-top:12px">Standard apply-then-pay \u2014 activates on payment confirmation in prod. Photo = 1 pt \u00b7 10-s clip = 7.</p>');
+      return; }
+    if(b.dataset.apptab){ S.appTabs[b.dataset.appkey]=b.dataset.apptab; render(); return; }
+    if(b.dataset.upsel!==undefined){ var ui=+b.dataset.upsel; if(S.up.sel[ui]) delete S.up.sel[ui]; else S.up.sel[ui]=1; render(); return; }
+    if(b.dataset.gpick!==undefined){ S.gpick=S.gpick||{}; var gr=b.dataset.gpickrole; S.gpick[gr]=(S.gpick[gr]===+b.dataset.gpick?null:+b.dataset.gpick); render(); return; }
+    if(b.dataset.mv2up!==undefined){ var mo=S.mcDeck.order, mi=mo.indexOf(b.dataset.mv2up); if(mi>0){ mo.splice(mi-1,0,mo.splice(mi,1)[0]); render(); } return; }
+    if(b.dataset.mv2dn!==undefined){ var mo2=S.mcDeck.order, mj=mo2.indexOf(b.dataset.mv2dn); if(mj>-1&&mj<mo2.length-1){ mo2.splice(mj+1,0,mo2.splice(mj,1)[0]); render(); } return; }
+    if(b.dataset.hide2!==undefined){ S.mcDeck.hidden[b.dataset.hide2]=!S.mcDeck.hidden[b.dataset.hide2]; render(); return; }
+    if(b.dataset.mvup!==undefined){ var o=S.hostDeck.order, i=o.indexOf(b.dataset.mvup); if(i>0){ o.splice(i-1,0,o.splice(i,1)[0]); render(); } return; }
+    if(b.dataset.mvdn!==undefined){ var o2=S.hostDeck.order, j=o2.indexOf(b.dataset.mvdn); if(j>-1&&j<o2.length-1){ o2.splice(j+1,0,o2.splice(j,1)[0]); render(); } return; }
+    if(b.dataset.hidec!==undefined){ S.hostDeck.hidden[b.dataset.hidec]=!S.hostDeck.hidden[b.dataset.hidec]; render(); return; }
+    if(b.dataset.reqtab){ S.reqTab=b.dataset.reqtab; render(); return; }
+    if(b.dataset.reqack!==undefined){ S.reqs[+b.dataset.reqack].st='ack'; render(); toast('Acknowledged \u2014 they can see you\u2019re on it.'); return; }
+    if(b.dataset.reqdone!==undefined){ S.reqs[+b.dataset.reqdone].st='done'; render(); toast('Marked done.'); return; }
+    if(b.dataset.songacc!==undefined){ S.songReqs[+b.dataset.songacc].st='acc'; render(); toast('Added to the set list.'); return; }
+    if(b.dataset.songskip!==undefined){ S.songReqs[+b.dataset.songskip].st='skip'; render(); toast('Skipped \u2014 kindly.'); return; }
+    if(b.dataset.status){ S.reqs.push({lane:'vendors', from:(S.viewer==='band'?'Manila Strings':'Kusina Norte'), text:b.dataset.status, st:'new'}); toast('Update sent \u2014 on the coordinator\u2019s board: \u201c'+b.dataset.status+'\u201d'); return; }
+    if(b.dataset.rosdone!==undefined){ S.ros[+b.dataset.rosdone].done=true; render(); toast('Marked done — every guest page advanced.'); return; }
+    if(b.dataset.roslate!==undefined){ toast('+15 minutes — retimed; guests see the new time instantly.'); return; }
+    if(b.dataset.propose!==undefined){ toast('Proposed to Bea \u0026 Marco — money-adjacent changes need their tap.'); return; }
+    if(b.dataset.vsave!==undefined){ b.textContent='\u2665 Saved'; b.disabled=true; toast('Saved for your next event.'); return; }
+    if(b.dataset.ch){ toast('Watching '+b.dataset.ch+' \u2014 tap CH 1 to return to the program'); return; }
+    if(b.dataset.rolltab){ S.rollTab=b.dataset.rolltab; renderRoll(); return; }
+    if(b.dataset.dl!==undefined && b.classList.contains('dlb')){ toast('Saved to your phone — full resolution (demo)'); return; }
+    if(b.dataset.feel){ S.story.feel=b.dataset.feel; storySheet(); return; }
+    if(b.dataset.av){ var kv=b.dataset.av.split(':'); S.avatar[kv[0]]=+kv[1]; render(); return; }
+    if(b.dataset.arm!==undefined){ S.armed=+b.dataset.arm; S.chOpen=true; renderCamera(); return; }
+    if(b.dataset.poollink!==undefined){ linkModal(+b.dataset.poollink); return; }
+    if(b.dataset.poollinkgo!==undefined){ S.linked[+b.dataset.poollinkgo]=true; S.taggedN++; closeOverlays(); render();
+      toast('Linked — it’s in Your gallery · Tagged of you now'); return; }
+    if(b.id==='moreChip'){ moreSheet(); return; }
+    if(b.id==='editChip'){ toast('Opens the mirror manager — five rows, Auto/Shown/Hidden (demo)'); return; }
+    if(b.id==='hubBtn'){ hubSheet(); return; }
+    if(b.id==='camFab'){ openCamera(); return; }
+    switch(b.dataset.act){
+      case 'film': $('filmOv').classList.add('open'); break;
+      case 'filmDone': S.filmSeen=true; closeOverlays(); render(); break;
+      case 'calendar': toast('Added to your calendar · Dec 12, 2026'); break;
+      case 'close': closeOverlays(); break;
+      case 'maps': toast('Opens turn-by-turn directions (demo)'); break;
+      case 'seatmap': toast('Opens the published seat map (demo)'); break;
+      case 'walk3d': closeOverlays(); walkSheet(); break;
+      case 'print': closeOverlays(); toast('Opens the printable invitation (demo)'); break;
+      case 'vendors': closeOverlays(); vendorsSheet(); break;
+      case 'hostedit': closeOverlays(); toast('Hosts land on the mirror manager — same five rows'); break;
+      case 'playstream': toast('The live stream plays here — YouTube embed (demo)'); break;
+      case 'camera': openCamera(); break;
+      case 'camClose': $('camOv').classList.remove('open'); render(); break;
+      case 'chToggle': S.chOpen=!S.chOpen; renderCamera(); break;
+      case 'rollFromCam': $('camOv').classList.remove('open'); $('rollOv').classList.add('open'); renderRoll(); break;
+      case 'roll': $('rollOv').classList.add('open'); renderRoll(); break;
+      case 'rollClose': $('rollOv').classList.remove('open'); render(); break;
+      case 'dlall': toast('Zipping '+(S.roll.length+S.taggedN)+' photos — full resolution (demo)'); break;
+      case 'storyOpen': S.story.phase='idle'; storySheet(); break;
+      case 'storyRender': S.story.phase='rendering'; S.story.prog=0; storySheet(); setTimeout(storyTick,200); break;
+      case 'storyShare': toast('Native share sheet (demo) — IG & TikTok need the file, and here it is'); break;
+      case 'storySave': toast('Saved to Photos (demo)'); break;
+      case 'storyAgain': S.story.phase='idle'; storySheet(); break;
+      case 'consentYes': closeOverlays(); toast('Shared with the vendor — you can stop sharing any time'); break;
+      case 'rsvpYes': burstAt(b); S.rsvp='yes'; setTimeout(render,180); toast('Salamat, Maria! See you there.'); break;
+      case 'topup': topupSheet(); break;
+      case 'topupBuy': (function(){ var from=S.pool.left; S.pool.granted+=10000; S.pool.left+=10000; closeOverlays();
+        if(S.tab==='me'&&isHost()){ render(); } updatePoolUi(); countUpPool(from);
+        burstAt(b); toast('Pool topped up — +10,000 pts · ₱2,999'); })(); break;
+      case 'addCam': closeOverlays();
+        toast('Camera added — its OWN 250-pt budget + QR. The shared pool is untouched.'); break;
+      case 'colDecline': if(S.column){ S.column=null; render(); toast('Returned to Maria to rework'); } break;
+      case 'poolGalToggle': S.poolGalleryOpen=!S.poolGalleryOpen; render();
+        toast(S.poolGalleryOpen?'Pool gallery opened — guests can now browse and link':'Pool gallery closed'); break;
+      case 'pdOk': S.pdDismissed=true; render(); break;
+      case 'qrkit': toast('Opens the QR \u2014 print pack + re-downloads (shipped print surfaces).'); break;
+      case 'seatscan': S.seatScan=true; render(); toast('Scanned \u2014 Maria Santos \u2192 Table 7 \u00b7 Dahlia'); break;
+      case 'ckscan': toast('Checklist scanner \u2014 each deliverable\u2019s QR ticks the couple\u2019s list (delivery-scan machinery).'); break;
+      case 'vTopupBuy': (function(){ var t=S.tup||{role:'vendor',kind:'small'}, amt=t.kind==='pro'?3000:250, Dt=S.doc[t.role];
+        Dt.total+=amt; Dt.left+=amt; closeOverlays(); render();
+        toast('+'+amt.toLocaleString()+' pts on your meter. (Apply-then-pay: activates on payment confirmation in prod.)'); })(); break;
+      case 'docCam': toast('Vendor camera \u2014 your fee-proportional documentation allowance (capture controller #3388, flag-off).'); break;
+      case 'booth': toast('Booth maker \u2014 avatar + stand in the 3D Plan (prototype-approved; in-app build pending).'); break;
+      case 'adsGal': toast('Papic Ads Gallery \u2014 your booth showcase (entitlement-gated).'); break;
+      case 'hostRunOn': S.hostRun=true; render(); break;
+      case 'upOpen': S.up={phase:'pick', sel:{}, items:[], role:(S.viewer==='band'||S.viewer==='mc'||S.viewer==='coord')?S.viewer:'vendor'}; render(); break;
+      case 'upClose': S.up.phase='idle'; render(); break;
+      case 'upGo': (function(){
+        var keys=Object.keys(S.up.sel); if(!keys.length) return;
+        var tags=['Maria +2','Table 4 \u00b7 6 guests','the couple','no faces \u2014 gallery'];
+        S.up.items=keys.map(function(k,idx){ var clip=(idx===keys.length-1&&keys.length>2);
+          return {cls:['','g2','g3','g4'][k%4], stage:0, kind:clip?'clip':'photo', tag:tags[idx%4]}; });
+        var cost=S.up.items.reduce(function(a,it){return a+(it.kind==='clip'?7:1)},0);
+        var Du=S.doc[S.up.role]; Du.left=Math.max(0,Du.left-cost);
+        S.up.phase='run'; render();
+        if(window._upT) clearInterval(window._upT);
+        var tick=0;
+        window._upT=setInterval(function(){
+          tick++; var busy=false;
+          S.up.items.forEach(function(it,idx){ if(tick>idx && it.stage<4){ it.stage++; busy=true; } else if(it.stage<4){ busy=true; } });
+          render();
+          if(!busy){ clearInterval(window._upT); toast('All live \u2014 tagged guests already see them.'); }
+        },900);
+      })(); break;
+      case 'bridge': toast('Camera Bridge \u2014 WiFi pairing per the compatible-cameras plan (Canon/Nikon/Sony/Fuji) \u00b7 \u20b1499/day \u00b7 planned, not built.'); break;
+      case 'mcArrTgl': S.mcArrange=!S.mcArrange; render(); if(S.mcArrange) toast('Your show, your order \u2014 move or hide the script cards.'); break;
+      case 'mcCall': toast('Called on mic \u2014 the challenge lights up on guest pages.'); break;
+      case 'arrTgl': S.arrange=!S.arrange; render(); if(S.arrange) toast('Arrange your day \u2014 move cards up, down, or hide them. It\u2019s your view.'); break;
+      case 'hostRunOff': S.hostRun=false; render(); break;
+      case 'bulkLate': toast('Whole evening shifted +15m — 3 blocks retimed, vendors notified.'); break;
+      case 'bcastQuick': (function(){ var f=document.querySelector('[data-form=bcast]'); if(f){ f.msg.value='Please move to the Grand Ballroom \u2014 dinner is served.'; } })(); break;
+      case 'phonesTgl': S.phonesDown=!S.phonesDown; render(); toast(S.phonesDown?'Phones-down is ON \u2014 a quiet banner asks guests to witness.':'Phones-down banner off.'); break;
+      case 'checkin': toast('Check-in scan \u2014 QR or name search (shipped arrival flow).'); break;
+      case 'nudge': toast('Nudge sent \u2014 call-time reminder by push + email.'); break;
+      case 'vscan': toast('Delivery scan open \u2014 guest QR logs the plate, dietary flags surface (shipped).'); break;
+      case 'phasePeek': toast('?phase= preview — see your site as any phase before the date makes it real'); break;
+      case 'rsvpNo': S.rsvp='no'; S.meal=null; render(); toast('Answer saved — you can change it any time.'); break;
+      case 'qr': qrModal(); break;
+      case 'qrsave': toast('QR saved to your photos (demo)'); break;
+      case 'qrrotate': S.qrSeed=(S.qrSeed*31+17)%99991; qrModal(); toast('Token rotated — old QR is now useless'); break;
+      case 'faceOn': S.face=true; render(); toast('3 angles captured — scoped to this event only'); break;
+      case 'faceOff': S.face=false; render(); toast('Face data deleted'); break;
+      case 'scan': scanSheet(); break;
+      case 'simulateScan': S.viewer='guest'; closeOverlays(); render(); toast('Welcome, Maria — the site is yours now'); break;
+      case 'claim': toast('Magic link → set a password → a real account. Your gallery carries over.'); break;
+      case 'gift': giftSheet(); break;
+      case 'drive': toast('Couple-side Drive delivery is shipped \u2014 guest-side backup awaits the owner\u2019s go.'); break;
+      case 'giftgo': closeOverlays(); toast('Salamat! Your gift is on its way to Bea \u0026 Marco.'); break;
+      case 'signout': if(isHost()){ S.viewer='guest'; render(); toast('Now seeing exactly what Maria sees'); } else { S.viewer='public'; render(); toast('Signed out — the site still works'); } break;
+      case 'colEdit': var c=S.column; S.column=null; render(); var f=document.querySelector('[data-form=column]');
+        if(f){ f.title.value=c.title; f.body.value=c.body; f.querySelector('[data-count]').textContent=c.body.length; $('columnCard').scrollIntoView({block:'start'}); } break;
+      case 'colApprove': if(S.column){ S.column.status='approved'; render(); toast('Approved — published to Guest Columns'); } break;
+    }
+  });
+
+  function openCamera(){
+    if(!camAllowed()){ toast('The candid camera opens on the wedding day'); return; }
+    if(S.phase!=='event' && S.viewer!=='public'){
+      openSheet('<div class="sheet-title"><h3 class="serif">Papic camera</h3><button class="xbtn" data-act="close" aria-label="Close">×</button></div>'
+        +'<p class="sub">Cameras open on the wedding day. You’ll shoot from a shared point pool — 1 point per photo, 7 per 10-second clip — and clear Papic Challenges as you go.</p>'
+        +'<div class="row" style="margin-top:14px"><button class="btn primary" data-act="camDemo">(demo) try it now</button><button class="btn ghost" data-act="close">Close</button></div>');
+      return;
+    }
+    S.chOpen=false; $('camOv').classList.add('open'); renderCamera();
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    if(b.dataset.act==='camDemo'){ closeOverlays(); S.chOpen=false; $('camOv').classList.add('open'); renderCamera(); }
+  });
+
+  document.addEventListener('submit',function(e){
+    var f=e.target; e.preventDefault();
+    if(f.dataset.form==='column'){
+      var title=f.title.value.trim(), body=f.body.value.trim();
+      if(!title||!body) return;
+      S.column={title:title, body:body, status:'pending'};
+      render(); toast('Column submitted — pending Bea & Marco’s approval');
+      var el=$('columnCard'); if(el) el.scrollIntoView({block:'start'});
+    }
+    if(f.dataset.form==='bcast'){
+      var m=(f.msg.value||'').trim(); if(!m) return;
+      S.bcastN++; render(); toast('Broadcast sent \u2014 '+S.arrived+' guest pages updated.');
+    }
+    if(f.dataset.form==='issue'){
+      var w=(f.what.value||'').trim(); if(!w) return;
+      S.issueSent=true; S.reqs.push({lane:'vendors', from:(S.viewer==='band'?'Manila Strings':'Kusina Norte'), text:w, st:'new'});
+      render(); toast('Sent to Liza \u2014 it\u2019s in her Requests inbox now.');
+    }
+    if(f.dataset.form==='vgcol'){
+      var gb=(f.body.value||'').trim(); if(!gb) return;
+      S['vgcol_'+f.dataset.role]={text:gb, shot:(S.gpick||{})[f.dataset.role]};
+      render(); toast('Sent \u2014 once the couple approves, guests see it in the credits.');
+    }
+    if(f.dataset.form==='vcol'){
+      var vb=(f.body.value||'').trim(); if(!vb) return;
+      S['vcol_'+f.dataset.role]=vb; render(); toast('Sent \u2014 the couple approves before it prints.');
+    }
+    if(f.dataset.form==='seat'){
+      var q=(f.q.value||'').trim(); var r=$('seatResult'); if(!r) return;
+      if(/maria/i.test(q)){ r.innerHTML='<div class="card" style="margin-top:10px; background:var(--cream-2)"><span class="eyebrow">Found you</span><h3 class="serif" style="margin:4px 0">'+GUEST.table+'</h3><p class="tiny">'+GUEST.door+'.</p></div>'; }
+      else if(q){ r.innerHTML='<p class="tiny" style="margin-top:8px">No seat found under that name — check the name on your invitation, or ask an usher.</p>'; }
+    }
+  });
+
+  document.addEventListener('input',function(e){
+    if(e.target.name==='body'){ var c=e.target.closest('div').querySelector('[data-count]'); if(c) c.textContent=e.target.value.length; }
+  });
+
+  ['sheetOv','modalOv'].forEach(function(id){ $(id).addEventListener('click',function(e){ if(e.target===this) closeOverlays(); }); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeOverlays(true); });
+
+  /* guests shooting: the pool drains live during the wedding day */
+  setInterval(function(){
+    if(S.phase!=='event') return;
+    if(S.pool.left>60){ S.pool.left-=3+Math.floor(Math.random()*7); updatePoolUi(); }
+  },2400);
+
+  setInterval(function(){
+    if(S.phase!=='event'||S.tab!=='photos') return;
+    var w=$('wall'); if(!w) return;
+    S.wallCount++; var wc=$('wallCount'); if(wc) wc.textContent=S.wallCount+' photos';
+    var tiles=w.children; var i=Math.floor(Math.random()*tiles.length);
+    tiles[i].style.opacity=0;
+    (function(t){ setTimeout(function(){ t.className='tile '+TILECLS[Math.floor(Math.random()*4)]; t.style.opacity=1; },420); })(tiles[i]);
+  },2600);
+
+  render();
+})();
+</script></body></html>

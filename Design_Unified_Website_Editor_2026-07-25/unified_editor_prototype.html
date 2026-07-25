@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unified Website Editor · Setnayan design prototype 2026-07-25</title>
+<style>
+  :root{
+    --cream:#f4ecdd; --cream-2:#efe5d2; --card:#fffdf8; --ink:#26221b;
+    --ink-60:rgba(38,34,27,.6); --ink-40:rgba(38,34,27,.4); --line:rgba(38,34,27,.1);
+    --terra:#a86038; --terra-soft:rgba(168,96,56,.09); --gold:#a8802f; --gold-soft:#f3e8cd;
+    --dark:#2c2721; --good:#3e6b45; --good-soft:#e7efe4; --hl:rgba(168,128,47,.16);
+  }
+  *{box-sizing:border-box;margin:0}
+  html,body{height:100%}
+  body{background:var(--cream);color:var(--ink);font:14px/1.45 "Hanken Grotesk",-apple-system,system-ui,sans-serif;overflow:hidden}
+  .mono{font-family:"Space Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.16em;font-size:10px}
+
+  /* ── App frame: topbar + two panes ─────────────────────── */
+  .top{height:52px;display:flex;align-items:center;gap:14px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--card)}
+  .top .mono{color:var(--terra)}
+  .top h1{font-size:14.5px;font-weight:650}
+  .top .spacer{flex:1}
+  .btn{border:0;cursor:pointer;border-radius:999px;padding:8px 14px;font:600 12.5px/1 inherit;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
+  .btn-gold{background:var(--gold);color:#fff}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .frame{display:flex;height:calc(100% - 52px)}
+
+  /* ── Left rail ─────────────────────────────────────────── */
+  .rail{width:390px;min-width:330px;border-right:1px solid var(--line);background:var(--cream);overflow-y:auto;padding:14px 12px 90px}
+  .group{margin-bottom:18px}
+  .group>.mono{color:var(--terra);padding:0 6px;display:flex;justify-content:space-between;align-items:center}
+  .rows{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+  .row{background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .row.active{border-color:var(--gold);box-shadow:0 0 0 2px var(--hl)}
+  .rowhead{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;user-select:none}
+  .rowhead .ic{width:24px;height:24px;border-radius:99px;background:var(--terra-soft);color:var(--terra);display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:none}
+  .rowhead b{font-size:13px;font-weight:650;flex:1}
+  .chip{font-size:10px;font-weight:700;border-radius:999px;padding:2px 8px;letter-spacing:.04em}
+  .chip.set{background:var(--good-soft);color:var(--good)}
+  .chip.off{background:rgba(38,34,27,.06);color:var(--ink-60)}
+  .chip.pro{background:var(--gold-soft);color:#7a5a20}
+  .chip.lock{background:var(--gold-soft);color:#7a5a20}
+  .caret{color:var(--ink-40);font-size:11px;transition:transform .15s}
+  .row.open .caret{transform:rotate(90deg)}
+  .panel{display:none;border-top:1px dashed var(--line);padding:12px;background:#fbf7ee}
+  .row.open .panel{display:block}
+  .panel label{display:block;font-size:11px;font-weight:650;color:var(--ink-60);margin:8px 0 4px}
+  .panel input[type=text],.panel select,.panel textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:inherit;background:#fff}
+  .panel .hint{font-size:11px;color:var(--ink-40);margin-top:6px}
+  .panel .save{margin-top:10px}
+  .swatches{display:flex;gap:8px;margin-top:4px}
+  .sw{width:26px;height:26px;border-radius:99px;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+  .locknote{display:flex;align-items:center;gap:8px;background:var(--gold-soft);border-radius:10px;padding:10px;font-size:12px;color:#7a5a20;font-weight:600}
+  .locknote .btn{margin-left:auto}
+  .drag{color:var(--ink-40);cursor:grab;font-size:13px}
+
+  /* ── Right preview ─────────────────────────────────────── */
+  .stage{flex:1;display:flex;flex-direction:column;background:var(--cream-2)}
+  .phasebar{display:flex;gap:6px;align-items:center;padding:10px 16px}
+  .ptab{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font:600 12px/1 inherit;cursor:pointer;color:var(--ink-60)}
+  .ptab.on{background:var(--dark);color:#efe7d8;border-color:var(--dark)}
+  .phasebar .mono{margin-left:auto;color:var(--ink-40)}
+  .device{flex:1;display:flex;justify-content:center;overflow:hidden;padding:0 16px 16px}
+  .site{width:min(430px,100%);background:#fff;border:1px solid var(--line);border-radius:22px 22px 0 0;overflow-y:auto;box-shadow:0 12px 40px rgba(38,34,27,.12);scroll-behavior:smooth;position:relative}
+  .sec{padding:26px 22px;border-bottom:1px solid rgba(38,34,27,.06);cursor:pointer;position:relative;transition:background .25s}
+  .sec:hover::after{content:"✎ Edit";position:absolute;top:10px;right:12px;font:700 10px/1 "Space Mono",monospace;letter-spacing:.1em;color:#7a5a20;background:var(--gold-soft);border-radius:999px;padding:4px 9px}
+  .sec.hl{background:var(--hl)}
+  .sec h3{font-family:Georgia,serif;font-style:italic;font-size:19px;margin-bottom:6px}
+  .sec p{font-size:12.5px;color:var(--ink-60)}
+  .sec .ph{margin-top:10px;height:74px;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e8d6,#f1e8d6 8px,#ece1cb 8px,#ece1cb 16px);display:flex;align-items:center;justify-content:center;color:var(--ink-40);font-size:11px}
+  .hero-sec{text-align:center;padding:44px 22px}
+  .hero-sec .mono{color:var(--gold)}
+  .hero-sec h2{font-family:Georgia,serif;font-style:italic;font-size:30px;margin:8px 0 2px}
+  .menu{position:sticky;bottom:0;background:rgba(44,39,33,.97);color:#cfc5b4;display:flex;justify-content:space-around;padding:11px 6px;font:700 10px/1 "Space Mono",monospace;letter-spacing:.14em;border-radius:0}
+  .menu span{cursor:pointer}
+  .menu .on{color:#f2e7cd}
+
+  /* ── Unlock sheet ──────────────────────────────────────── */
+  .sheet-bg{position:fixed;inset:0;background:rgba(38,34,27,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet-bg.show{display:flex}
+  .sheet{background:var(--card);border-radius:22px 22px 0 0;max-width:520px;width:100%;padding:24px 22px 30px}
+  .sheet h3{font-size:17px;font-weight:700}
+  .sheet p{font-size:13px;color:var(--ink-60);margin-top:6px}
+  .sheet ul{margin:12px 0 16px;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .sheet li{font-size:12px;color:var(--ink);display:flex;gap:7px;align-items:center}
+  .sheet li::before{content:"✦";color:var(--gold);font-size:10px}
+
+  /* demo toggle */
+  .demo{position:fixed;right:14px;bottom:14px;z-index:30;display:flex;gap:6px;background:var(--dark);border-radius:999px;padding:5px}
+  .demo button{border:0;border-radius:999px;padding:6px 12px;font:600 11.5px/1 inherit;cursor:pointer;background:transparent;color:#cfc5b4}
+  .demo button.on{background:var(--gold);color:#fff}
+
+  @media (max-width:860px){
+    .rail{position:absolute;inset:52px 0 0 0;width:100%;z-index:5}
+    body.mob-preview .rail{display:none}
+    .mobswitch{display:inline-flex}
+  }
+  .mobswitch{display:none}
+</style>
+</head>
+<body class="locked">
+
+<!-- Topbar -->
+<div class="top">
+  <span class="mono">✎ Website editor</span>
+  <h1>Cale &amp; Ice — setnayan.com/cale-and-ice</h1>
+  <div class="spacer"></div>
+  <button class="btn btn-ghost mobswitch" onclick="document.body.classList.toggle('mob-preview')">Edit ⇄ Preview</button>
+  <a class="btn btn-ghost" href="#">View live ↗</a>
+  <a class="btn btn-gold" href="#">Go live · or schedule</a>
+</div>
+
+<div class="frame">
+
+  <!-- ══ LEFT RAIL ══ -->
+  <nav class="rail" id="rail">
+
+    <!-- ① SITE -->
+    <div class="group">
+      <p class="mono">① Site</p>
+      <div class="rows">
+        <div class="row" data-target="hero"><div class="rowhead" onclick="toggle(this)"><span class="ic">✳</span><b>Wedding URL</b><span class="chip set">cale-and-ice</span><span class="caret">▸</span></div>
+          <div class="panel"><label>Your address</label><input type="text" value="cale-and-ice"><p class="hint">setnayan.com/cale-and-ice — on every QR and invite.</p><button class="btn btn-gold save">Save</button></div></div>
+        <div class="row"><div class="rowhead" onclick="toggle(this)"><span class="ic">👁</span><b>Who can view</b><span class="chip off">Private</span><span class="caret">▸</span></div>
+          <div class="panel"><label>Visibility</label><select><option>Private — only you</option><option>Unlisted — anyone with the link</option><option>Public</option></select><label style="margin-top:10px">Open browsing</label><select><option>On — guests browse all five tabs</option><option>Off — phase-gated</option></select><button class="btn btn-gold save">Save</button></div></div>
+        <div class="row"><div class="rowhead" onclick="toggle(this)"><span class="ic">🎨</span><b>Theme</b><span class="chip set">Classic</span><span class="caret">▸</span></div>
+          <div class="panel"><label>Site theme</label><select><option>Classic</option><option>Victorian</option><option>Forest</option></select><button class="btn btn-gold save">Save</button></div></div>
+        <div class="row pro-row"><div class="rowhead" onclick="proToggle(this)"><span class="ic">🖌</span><b>Colors</b><span class="chip pro">PRO</span><span class="caret">▸</span></div>
+          <div class="panel"><div class="lockonly locknote">🔒 Part of Website Pro<button class="btn btn-gold" onclick="sheet(true)">Unlock ₱3,500</button></div>
+          <div class="proonly"><label>Background</label><div class="swatches"><span class="sw" style="background:#f4ecdd"></span><span class="sw" style="background:#efe0e6"></span><span class="sw" style="background:#e3e9df"></span><span class="sw" style="background:#fff"></span></div><label>Buttons</label><div class="swatches"><span class="sw" style="background:#26221b"></span><span class="sw" style="background:#7a2d3e"></span><span class="sw" style="background:#a8802f"></span></div><button class="btn btn-gold save">Save</button></div></div></div>
+        <div class="row pro-row"><div class="rowhead" onclick="proToggle(this)"><span class="ic">🎵</span><b>Background music</b><span class="chip pro">PRO</span><span class="caret">▸</span></div>
+          <div class="panel"><div class="lockonly locknote">🔒 Part of Website Pro<button class="btn btn-gold" onclick="sheet(true)">Unlock ₱3,500</button></div>
+          <div class="proonly"><label>Track</label><input type="text" placeholder="Upload a song…"><p class="hint">Plays softly as guests browse. Tap-to-start, never autoplay.</p><button class="btn btn-gold save">Save</button></div></div></div>
+      </div>
+    </div>
+
+    <!-- ② SECTIONS (mirrors the guest site; two-way sync with preview) -->
+    <div class="group">
+      <p class="mono">② Sections <span style="letter-spacing:0;text-transform:none;font-family:inherit;font-weight:400;color:var(--ink-40)">tap = preview scrolls</span></p>
+      <div class="rows">
+        <div class="row" data-target="hero"><div class="rowhead" onclick="toggle(this)"><span class="drag">⠿</span><b>Hero</b><span class="chip set">Photo set</span><span class="caret">▸</span></div>
+          <div class="panel"><label>Hero photo</label><div class="sec ph" style="cursor:default;height:56px;border:0">tap to replace</div><button class="btn btn-gold save">Save</button></div></div>
+        <div class="row" data-target="story"><div class="rowhead" onclick="toggle(this)"><span class="drag">⠿</span><b>Our story</b><span class="chip set">Written</span><span class="caret">▸</span></div>
+          <div class="panel"><label>Your story</label><textarea rows="3">We met in a jeepney queue in 2019…</textarea><button class="btn btn-gold save">Save</button></div></div>
+        <div class="row" data-target="details"><div class="rowhead" onclick="toggle(this)"><span class="drag">⠿</span><b>Details &amp; schedule</b><span class="chip set">4 blocks</span><span class="caret">▸</span></div>
+          <div class="panel"><p class="hint">Date, venues, run-of-show — fills from your planning. Add a Waze / Google Maps link:</p><input type="text" placeholder="https://waze.com/ul/…"><button class="btn btn-gold save">Save</button></div></div>
+        <div class="row" data-target="dress"><div class="rowhead" onclick="toggle(this)"><span class="drag">⠿</span><b>Dress code</b><span class="chip off">Hidden</span><span class="caret">▸</span></div>
+          <div class="panel"><label>Show this section?</label><select><option>Auto — show when filled</option><option>Shown</option><option>Hidden</option></select><button class="btn btn-gold save">Save</button></div></div>
+        <div class="row pro-row" data-target="gallery"><div class="rowhead" onclick="proToggle(this)"><span class="drag">⠿</span><b>Photo gallery</b><span class="chip pro">PRO</span><span class="caret">▸</span></div>
+          <div class="panel"><div class="lockonly locknote">🔒 Part of Website Pro<button class="btn btn-gold" onclick="sheet(true)">Unlock ₱3,500</button></div>
+          <div class="proonly"><label>Your photos</label><div class="sec ph" style="cursor:default;height:56px;border:0">+ upload engagement shots</div><button class="btn btn-gold save">Save</button></div></div></div>
+        <div class="row" data-target="rsvp"><div class="rowhead" onclick="toggle(this)"><span class="drag">⠿</span><b>RSVP</b><span class="chip set">Always on</span><span class="caret">▸</span></div>
+          <div class="panel"><label>RSVP backdrop</label><select><option>Soft petals · medium</option><option>Plain</option><option>Confetti · light</option></select><p class="hint">Ported from the old editor — same setting, new home.</p><button class="btn btn-gold save">Save</button></div></div>
+      </div>
+    </div>
+
+    <!-- ③ CHAPTERS -->
+    <div class="group">
+      <p class="mono">③ Chapters</p>
+      <div class="rows">
+        <div class="row"><div class="rowhead" onclick="toggle(this)"><span class="ic">💌</span><b>Save-the-Date</b><span class="chip set">Film ready</span><span class="caret">▸</span></div>
+          <div class="panel"><p class="hint">The announcement film your guests see first.</p>
+            <div class="rows" style="margin-top:8px">
+              <div class="row pro-row"><div class="rowhead" onclick="proToggle(this)"><span class="ic">🎬</span><b>Cinematic opening</b><span class="chip pro">PRO</span><span class="caret">▸</span></div>
+                <div class="panel"><div class="lockonly locknote">🔒 Part of Website Pro<button class="btn btn-gold" onclick="sheet(true)">Unlock ₱3,500</button></div><div class="proonly"><label>Opening</label><select><option>Sheer veil</option><option>Church doors</option><option>Four-flap fold</option></select><button class="btn btn-gold save">Save</button></div></div></div>
+              <div class="row pro-row"><div class="rowhead" onclick="proToggle(this)"><span class="ic">📹</span><b>Your video</b><span class="chip pro">PRO</span><span class="caret">▸</span></div>
+                <div class="panel"><div class="lockonly locknote">🔒 Part of Website Pro<button class="btn btn-gold" onclick="sheet(true)">Unlock ₱3,500</button></div><div class="proonly"><label>Video in the film</label><input type="text" placeholder="Upload…"><button class="btn btn-gold save">Save</button></div></div></div>
+            </div></div></div>
+        <div class="row pro-row"><div class="rowhead" onclick="proToggle(this)"><span class="ic">✍️</span><b>After — your editorial</b><span class="chip pro">PRO</span><span class="caret">▸</span></div>
+          <div class="panel"><div class="lockonly locknote">🔒 Part of Website Pro<button class="btn btn-gold" onclick="sheet(true)">Unlock ₱3,500</button></div>
+          <div class="proonly"><p class="hint">Write and arrange the story page guests revisit after the day.</p><button class="btn btn-gold save">Open editorial desk</button></div></div></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══ RIGHT: LIVE PREVIEW ══ -->
+  <main class="stage">
+    <div class="phasebar">
+      <button class="ptab" onclick="phase(this,'std')">Save-the-Date</button>
+      <button class="ptab on" onclick="phase(this,'rsvp')">Invitation</button>
+      <button class="ptab" onclick="phase(this,'event')">Wedding day</button>
+      <button class="ptab" onclick="phase(this,'after')">After</button>
+      <span class="mono">Live preview · tap any section to edit</span>
+    </div>
+    <div class="device">
+      <div class="site" id="site">
+        <div class="sec hero-sec" id="pv-hero" onclick="openRow('hero')">
+          <p class="mono">Together with their families</p><h2>Cale &amp; Ice</h2><p>December 18, 2026 · Tagaytay</p>
+          <div class="ph">hero photo</div>
+        </div>
+        <div class="sec" id="pv-story" onclick="openRow('story')"><h3>Our story</h3><p>We met in a jeepney queue in 2019…</p></div>
+        <div class="sec" id="pv-details" onclick="openRow('details')"><h3>Details &amp; schedule</h3><p>Ceremony 3:00 PM · Reception 6:00 PM — Alta d' Tagaytay</p><div class="ph">map + run-of-show</div></div>
+        <div class="sec" id="pv-dress" onclick="openRow('dress')" style="opacity:.45"><h3>Dress code</h3><p><em>Hidden — turn it on in Sections.</em></p></div>
+        <div class="sec" id="pv-gallery" onclick="openRow('gallery')"><h3>Gallery</h3><div class="ph">✦ PRO — your engagement shots here</div></div>
+        <div class="sec" id="pv-rsvp" onclick="openRow('rsvp')"><h3>RSVP</h3><p>Tell us you're coming — respond by Oct 18.</p><div class="ph">RSVP form</div></div>
+        <div class="menu"><span class="on">HOME</span><span>DETAILS</span><span>STORY</span><span>GALLERY</span><span>ME</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Unlock sheet -->
+<div class="sheet-bg" id="sheetbg" onclick="if(event.target===this)sheet(false)">
+  <div class="sheet">
+    <h3>Website Pro — the cinematic layer</h3>
+    <p>Seven signature upgrades, one unlock. Yours for this event, forever.</p>
+    <ul><li>Cinematic Reveal</li><li>Save-the-Date video</li><li>Photo gallery</li><li>Background music</li><li>Editorial editing</li><li>Background color</li><li>Button color</li></ul>
+    <button class="btn btn-gold" style="width:100%;justify-content:center;padding:12px">Unlock Website Pro · ₱3,500</button>
+    <p style="margin-top:10px;font-size:11px">✦ Also removes the “Powered by Setnayan” footer.</p>
+  </div>
+</div>
+
+<!-- demo state toggle -->
+<div class="demo"><span style="color:#cfc5b4;font-size:11px;align-self:center;padding-left:6px">Demo:</span>
+  <button class="on" onclick="setState('locked',this)">Free couple</button>
+  <button onclick="setState('unlocked',this)">Owns Pro</button>
+</div>
+
+<script>
+  // rail row open/close + preview two-way sync
+  function toggle(head){
+    const row=head.parentElement, open=row.classList.contains('open');
+    document.querySelectorAll('.row.open,.row.active').forEach(r=>r.classList.remove('open','active'));
+    if(!open){row.classList.add('open','active');sync(row.dataset.target);}
+  }
+  function proToggle(head){
+    const row=head.parentElement;
+    if(document.body.classList.contains('locked')){ // locked: open panel to show the locknote
+      toggle(head); return;
+    }
+    toggle(head);
+  }
+  function sync(target){
+    if(!target)return;
+    document.querySelectorAll('.sec.hl').forEach(s=>s.classList.remove('hl'));
+    const el=document.getElementById('pv-'+target);
+    if(el){el.classList.add('hl');el.scrollIntoView({block:'center',behavior:'smooth'});
+      setTimeout(()=>el.classList.remove('hl'),1600);}
+  }
+  // preview → rail (tap the site to edit)
+  function openRow(target){
+    const row=document.querySelector('.row[data-target="'+target+'"]');
+    if(!row)return;
+    document.querySelectorAll('.row.open,.row.active').forEach(r=>r.classList.remove('open','active'));
+    row.classList.add('open','active');
+    row.scrollIntoView({block:'center',behavior:'smooth'});
+    document.body.classList.remove('mob-preview');
+  }
+  // phase tabs (fake: dim non-phase sections)
+  function phase(tab,key){
+    document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));tab.classList.add('on');
+    const map={std:['hero'],rsvp:['hero','story','details','dress','gallery','rsvp'],
+               event:['hero','details','gallery'],after:['hero','story','gallery']};
+    document.querySelectorAll('.site .sec').forEach(s=>{
+      const k=s.id.replace('pv-','');
+      s.style.display=(map[key]||[]).includes(k)?'':'none';});
+  }
+  // Pro lock state
+  function setState(st,btn){
+    document.body.className=st;
+    document.querySelectorAll('.demo button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+    document.querySelectorAll('.lockonly').forEach(e=>e.style.display=st==='locked'?'flex':'none');
+    document.querySelectorAll('.proonly').forEach(e=>e.style.display=st==='locked'?'none':'block');
+  }
+  setState('locked',document.querySelector('.demo button.on'));
+  function sheet(show){document.getElementById('sheetbg').classList.toggle('show',show)}
+</script>
+</body>
+</html>

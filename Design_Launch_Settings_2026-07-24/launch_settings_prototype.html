@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Launch — Settings-first · Setnayan design prototype 2026-07-24</title>
+<style>
+  :root{
+    --cream:#f4ecdd; --cream-2:#efe5d2; --card:#fffdf8; --ink:#26221b;
+    --ink-60:rgba(38,34,27,.6); --ink-40:rgba(38,34,27,.4); --line:rgba(38,34,27,.1);
+    --terra:#a86038; --terra-soft:rgba(168,96,56,.09); --gold:#a8802f;
+    --dark:#2c2721; --good:#3e6b45; --good-soft:#e7efe4;
+    --pro:#7a5a20; --pro-soft:#f3e8cd; --lock:rgba(38,34,27,.35);
+  }
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--cream);color:var(--ink);font:15px/1.5 "Hanken Grotesk",-apple-system,system-ui,sans-serif;}
+  .mono{font-family:"Space Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.18em;font-size:11px}
+  .serif{font-family:Georgia,"Times New Roman",serif;font-style:italic}
+  .wrap{max-width:880px;margin:0 auto;padding:40px 28px 96px}
+
+  /* ── Demo-only state toggle ─────────────────────────────── */
+  .demo{position:fixed;right:16px;top:16px;z-index:9;display:flex;gap:8px;background:var(--dark);border-radius:999px;padding:6px}
+  .demo button{border:0;border-radius:999px;padding:6px 14px;font:600 12px/1 inherit;cursor:pointer;background:transparent;color:#cfc5b4}
+  .demo button.on{background:var(--gold);color:#fff}
+
+  /* ── Header ─────────────────────────────────────────────── */
+  header .mono{color:var(--terra);display:flex;align-items:center;gap:8px}
+  h1{font-size:34px;line-height:1.15;font-weight:650;letter-spacing:-.01em;margin:10px 0 6px}
+  .sub{color:var(--ink-60);max-width:56ch}
+
+  /* ── Go-live hero card (always first, always free) ──────── */
+  .golive{margin-top:26px;background:var(--dark);color:#efe7d8;border-radius:20px;padding:22px 24px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+  .golive .mono{color:#c9b98c}
+  .golive h2{font-size:20px;font-weight:600;margin-top:6px}
+  .golive .url{margin-top:4px;font-family:"Space Mono",monospace;font-size:13px;color:#cfc5b4}
+  .status{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;background:rgba(255,255,255,.08)}
+  .dot{width:7px;height:7px;border-radius:99px;background:#7fa886}
+  .golive .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{border:0;cursor:pointer;border-radius:999px;padding:10px 18px;font:600 13.5px/1 inherit;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+  .btn-gold{background:var(--gold);color:#fff}
+  .btn-ghost-l{background:transparent;color:#e7ddc9;border:1px solid rgba(255,255,255,.25)}
+
+  /* ── Bands ──────────────────────────────────────────────── */
+  .band{margin-top:38px}
+  .band-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .band-head .mono{color:var(--terra)}
+  .band-head h2{font-size:22px;font-weight:650;margin-top:6px}
+  .band-head p{color:var(--ink-60);font-size:13.5px}
+  .freechip{background:var(--good-soft);color:var(--good);border-radius:999px;padding:4px 12px;font-size:11.5px;font-weight:700;letter-spacing:.06em}
+
+  .grid{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;min-height:118px;position:relative;transition:border-color .15s}
+  .card:hover{border-color:rgba(38,34,27,.28)}
+  .card h3{font-size:14.5px;font-weight:650;display:flex;align-items:center;gap:8px}
+  .card p{font-size:12.5px;color:var(--ink-60)}
+  .card .state{margin-top:auto;display:flex;align-items:center;justify-content:space-between}
+  .chip{font-size:11px;font-weight:600;border-radius:999px;padding:3px 10px}
+  .chip.set{background:var(--good-soft);color:var(--good)}
+  .chip.empty{background:rgba(38,34,27,.06);color:var(--ink-60)}
+  .edit{font-size:12.5px;font-weight:650;color:var(--terra);text-decoration:none}
+  .ic{width:26px;height:26px;border-radius:99px;background:var(--terra-soft);color:var(--terra);display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+
+  /* ── PRO band ───────────────────────────────────────────── */
+  .proband{border:1px solid rgba(122,90,32,.35);background:linear-gradient(180deg,rgba(243,232,205,.55),rgba(243,232,205,.15));border-radius:22px;padding:22px;margin-top:38px}
+  .proband .band-head .mono{color:var(--pro)}
+  .protag{background:var(--pro);color:#f7efdd;border-radius:999px;padding:4px 12px;font-size:11.5px;font-weight:700;letter-spacing:.06em}
+  .prounlock{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--dark);border-radius:16px;padding:16px 18px;margin-top:16px;color:#efe7d8}
+  .prounlock p{font-size:13px;color:#cfc5b4;max-width:52ch}
+  .prounlock strong{color:#f2e7cd}
+  body.locked .proband .card{opacity:.92}
+  body.locked .proband .card .edit{display:none}
+  body.locked .proband .card .lockrow{display:flex}
+  .lockrow{display:none;align-items:center;gap:6px;color:var(--lock);font-size:12px;font-weight:600;margin-top:auto}
+  body.locked .proband .card .state{display:none}
+  body.unlocked .prounlock{display:none}
+  .ownedchip{display:none;background:var(--pro-soft);color:var(--pro);border-radius:999px;padding:4px 12px;font-size:11.5px;font-weight:700}
+  body.unlocked .ownedchip{display:inline-flex}
+  body.unlocked .protag{display:none}
+  .watermark-note{margin-top:12px;font-size:12.5px;color:var(--ink-60);display:flex;gap:8px;align-items:flex-start}
+
+  footer{margin-top:44px;border-top:1px solid var(--line);padding-top:18px;color:var(--ink-40);font-size:12px}
+  @media (max-width:560px){ h1{font-size:27px} .wrap{padding:28px 16px 80px} }
+</style>
+</head>
+<body class="locked">
+
+<!-- Prototype-only: preview both entitlement states -->
+<div class="demo" role="tablist" aria-label="Prototype state">
+  <button class="on" onclick="document.body.className='locked';this.classList.add('on');this.nextElementSibling.classList.remove('on')">Free couple</button>
+  <button onclick="document.body.className='unlocked';this.classList.add('on');this.previousElementSibling.classList.remove('on')">Owns Website Pro</button>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <p class="mono">🚀&ensp;Go live</p>
+    <h1>Your website, ready when you are.</h1>
+    <p class="sub">Everything about your site lives here — what it says, who sees it, and the moment it goes live. Your guests only ever see one link.</p>
+  </header>
+
+  <!-- 1 · GO-LIVE HERO — always first, always free -->
+  <section class="golive" aria-label="Go live">
+    <div>
+      <p class="mono">Status</p>
+      <h2>Not live yet</h2>
+      <p class="url">setnayan.com/cale-and-ice</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+      <span class="status"><span class="dot" style="background:#c9a24a"></span>Private — only you can see it</span>
+      <div class="actions">
+        <a class="btn btn-ghost-l" href="#">View my site ↗</a>
+        <a class="btn btn-gold" href="#">Go live · or schedule</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · FREE SETTINGS -->
+  <section class="band" aria-label="Included settings">
+    <div class="band-head">
+      <div>
+        <p class="mono">Included with every event</p>
+        <h2>Set up your site</h2>
+        <p>The whole four-page site — Save-the-Date, Invitation &amp; RSVP, Wedding day, and the After — is free.</p>
+      </div>
+      <span class="freechip">FREE</span>
+    </div>
+    <div class="grid">
+      <div class="card"><h3><span class="ic">✳</span>Wedding URL</h3><p>Your one link, on every QR and invite.</p>
+        <div class="state"><span class="chip set">cale-and-ice</span><a class="edit" href="#">Change →</a></div></div>
+      <div class="card"><h3><span class="ic">👁</span>Who can view</h3><p>Public, unlisted, or private while you build.</p>
+        <div class="state"><span class="chip empty">Private</span><a class="edit" href="#">Choose →</a></div></div>
+      <div class="card"><h3><span class="ic">🧭</span>Open browsing</h3><p>Let guests browse every page from day one — the five-tab site.</p>
+        <div class="state"><span class="chip set">On</span><a class="edit" href="#">Manage →</a></div></div>
+      <div class="card"><h3><span class="ic">🧩</span>Sections</h3><p>Show, hide, and order what appears — Auto fills from your planning.</p>
+        <div class="state"><span class="chip set">12 showing</span><a class="edit" href="#">Arrange →</a></div></div>
+      <div class="card"><h3><span class="ic">🖼</span>Hero photo</h3><p>The photo at the top of your page.</p>
+        <div class="state"><span class="chip empty">Not set</span><a class="edit" href="#">Add →</a></div></div>
+      <div class="card"><h3><span class="ic">🗺</span>Map link</h3><p>Waze / Google Maps door-to-door directions.</p>
+        <div class="state"><span class="chip empty">Not set</span><a class="edit" href="#">Link →</a></div></div>
+      <div class="card"><h3><span class="ic">🎨</span>Theme</h3><p>The look of your RSVP, wedding-day, and After pages.</p>
+        <div class="state"><span class="chip set">Classic</span><a class="edit" href="#">Pick →</a></div></div>
+      <div class="card"><h3><span class="ic">📺</span>Live media for visitors</h3><p>Let people without an invite watch the livestream &amp; photo wall.</p>
+        <div class="state"><span class="chip empty">Guests only</span><a class="edit" href="#">Decide →</a></div></div>
+    </div>
+  </section>
+
+  <!-- 3 · WEBSITE PRO BAND — one umbrella, two states -->
+  <section class="proband" aria-label="Website Pro">
+    <div class="band-head">
+      <div>
+        <p class="mono">Website Pro</p>
+        <h2>The cinematic layer</h2>
+        <p>Seven signature upgrades, one unlock. Yours for this event, forever.</p>
+      </div>
+      <span class="protag">₱3,500 · one-time</span>
+      <span class="ownedchip">✓ Unlocked</span>
+    </div>
+
+    <div class="grid">
+      <div class="card"><h3><span class="ic">🎬</span>Cinematic Reveal</h3><p>The veil, the doors — a film-grade opening for your Save-the-Date.</p>
+        <div class="lockrow">🔒 Part of Website Pro</div>
+        <div class="state"><span class="chip set">Veil</span><a class="edit" href="#">Design →</a></div></div>
+      <div class="card"><h3><span class="ic">📹</span>Save-the-Date video</h3><p>Your own video inside the announcement film.</p>
+        <div class="lockrow">🔒 Part of Website Pro</div>
+        <div class="state"><span class="chip empty">Not uploaded</span><a class="edit" href="#">Upload →</a></div></div>
+      <div class="card"><h3><span class="ic">🖼</span>Photo gallery</h3><p>Your engagement and prenup shots, on the site.</p>
+        <div class="lockrow">🔒 Part of Website Pro</div>
+        <div class="state"><span class="chip empty">0 photos</span><a class="edit" href="#">Upload →</a></div></div>
+      <div class="card"><h3><span class="ic">🎵</span>Background music</h3><p>A song that plays softly as guests browse.</p>
+        <div class="lockrow">🔒 Part of Website Pro</div>
+        <div class="state"><span class="chip empty">Not set</span><a class="edit" href="#">Choose →</a></div></div>
+      <div class="card"><h3><span class="ic">✍️</span>Editorial editing</h3><p>Write and arrange your After-the-wedding story pages.</p>
+        <div class="lockrow">🔒 Part of Website Pro</div>
+        <div class="state"><span class="chip empty">Default layout</span><a class="edit" href="#">Edit →</a></div></div>
+      <div class="card"><h3><span class="ic">🎨</span>Background color</h3><p>Tint the whole site to your motif.</p>
+        <div class="lockrow">🔒 Part of Website Pro</div>
+        <div class="state"><span class="chip empty">Cream (default)</span><a class="edit" href="#">Pick →</a></div></div>
+      <div class="card"><h3><span class="ic">🔘</span>Button color</h3><p>Match every button to your palette.</p>
+        <div class="lockrow">🔒 Part of Website Pro</div>
+        <div class="state"><span class="chip empty">Ink (default)</span><a class="edit" href="#">Pick →</a></div></div>
+    </div>
+
+    <div class="prounlock">
+      <p><strong>Unlock all seven with Website Pro.</strong> One payment for this event — plus the “Powered by Setnayan” mark comes off your page.</p>
+      <a class="btn btn-gold" href="#">Unlock Website Pro · ₱3,500</a>
+    </div>
+
+    <p class="watermark-note">✦&ensp;Website Pro also removes the “Powered by Setnayan” footer from your live site.</p>
+  </section>
+
+  <footer>Setnayan design prototype · Launch settings-first · 2026-07-24 · states: Free couple / Owns Website Pro (toggle top-right)</footer>
+</div>
+</body>
+</html>

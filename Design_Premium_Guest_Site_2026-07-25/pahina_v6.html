@@ -1,0 +1,1758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cale &amp; Ice — Pahina prototype · Setnayan premium guest site</title>
+<style>
+/* ============================================================================
+   "PAHINA" — the commissioned-editorial guest site. Design pass 2026-07-25.
+   Self-contained prototype of the INVITATION (rsvp) phase, phone-first.
+   No CDN fetches: font stacks name the intended Google faces
+   (Fraunces / Manrope / Space Mono) and fall back to local serif/sans/mono.
+   In production these load through next/font exactly like today's
+   Cormorant/Manrope/DM Mono trio — same mechanism, one display-face swap.
+   ============================================================================ */
+
+/* ---- palette layer -------------------------------------------------------
+   Mirrors lib/site-palette.ts role tokens. Everything below reads ONLY these
+   vars, so a couple's role_palette re-skins the whole page — the demo
+   switcher (bottom-left) swaps them live to prove the bespoke feel.        */
+:root{
+  /* Couple A — "Cale & Ice" · Tagaytay pine + champagne (daylight art direction) */
+  --paper: 250 248 243;        /* page */
+  --paper-deep: 243 239 230;   /* recessed plates, reply card */
+  --ink: 28 31 26;             /* text */
+  --accent: 91 111 87;         /* pine — eyebrows, rules, links */
+  --accent-deep: 54 71 52;     /* CTA fill (AA vs paper-light text) */
+  --gild: 176 141 87;          /* metallic second accent — numerals, seal */
+  --veil: 240 235 224;         /* sheer tint — hero wash, chips */
+  --on-accent: 250 248 243;    /* text on CTA */
+  --grain-opacity:.05;
+}
+/* Couple B (demo) — burgundy + blush, still daylight */
+.palette-b{
+  --paper: 251 247 246; --paper-deep: 245 236 234;
+  --ink: 43 26 30;
+  --accent: 122 31 43; --accent-deep: 88 22 31;
+  --gild: 173 128 96; --veil: 246 232 229; --on-accent: 251 247 246;
+}
+/* Couple C (demo) — CANDLELIGHT art direction: auto-picked when the palette's
+   deepest swatch is very dark & the couple opted into the dark direction.
+   Same tokens, inverted duty — proof the system carries a night look too.  */
+.palette-c{
+  --paper: 24 23 20; --paper-deep: 33 31 27;
+  --ink: 243 238 228;
+  --accent: 197 166 106; --accent-deep: 216 185 121;
+  --gild: 197 166 106; --veil: 42 39 33; --on-accent: 24 23 20;
+  --grain-opacity:.09;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+
+body{
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  font-family: "Manrope","Hanken Grotesk",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size: 16px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .5s ease, color .5s ease;
+  overflow-x: hidden;
+}
+
+/* ---- type roles ---------------------------------------------------------- */
+.display{
+  font-family: "Fraunces","Cormorant Garamond","Didot","Playfair Display",Georgia,serif;
+  font-weight: 480; letter-spacing: -0.015em; line-height: .96;
+  font-variation-settings: "opsz" 144, "SOFT" 40, "WONK" 0;
+}
+.display-italic{ font-style: italic; font-weight: 400; letter-spacing: 0; }
+.eyebrow{
+  font-family: "Space Mono","DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  font-size: .66rem; letter-spacing: .28em; text-transform: uppercase;
+  color: rgb(var(--accent)); display:flex; align-items:center; gap:.75rem;
+}
+.eyebrow .no{ color: rgb(var(--gild)); letter-spacing:.12em }
+.eyebrow::after{ content:""; height:1px; flex:1 1 2rem; max-width:4rem;
+  background: rgb(var(--accent) / .35); }
+.eyebrow.center{ justify-content:center }
+.eyebrow.center::before{ content:""; height:1px; flex:1 1 2rem; max-width:4rem;
+  background: rgb(var(--accent) / .35); }
+.mono{ font-family:"Space Mono","DM Mono",ui-monospace,Menlo,monospace; }
+.small{ font-size:.85rem; color: rgb(var(--ink) / .68) }
+
+/* ---- paper grain (SVG feTurbulence, inline — zero network) --------------- */
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  opacity: var(--grain-opacity);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:240px 240px;
+}
+
+/* ---- layout rhythm -------------------------------------------------------
+   8pt base. Sections breathe: 6rem phone / 8rem desktop between numbered
+   sections — whitespace IS the luxury cue. Column: 42rem, but plates and
+   imagery deliberately break it (asymmetry, full-bleed).                   */
+main{ position:relative; z-index:1 }
+.col{ width:100%; max-width:42rem; margin-inline:auto; padding-inline:1.5rem }
+section.chapter{ padding-block: 5.5rem 0 }
+@media(min-width:720px){ section.chapter{ padding-block: 8rem 0 } }
+
+/* ---- masthead ------------------------------------------------------------ */
+.masthead{
+  position:sticky; top:0; z-index:40;
+  background: rgb(var(--paper) / .88); backdrop-filter: blur(10px);
+  border-bottom:1px solid rgb(var(--ink) / .08);
+}
+.masthead .col{ display:flex; justify-content:space-between; align-items:center;
+  padding-block:.65rem }
+.masthead .wordmark{ font-size:.6rem; letter-spacing:.32em; text-transform:uppercase;
+  color: rgb(var(--ink) / .55) }
+.masthead .mgram{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.05rem; color: rgb(var(--gild));
+}
+
+/* ---- hero ----------------------------------------------------------------
+   Typographic MASTHEAD, not a card: names as stacked display lines with an
+   italic ampersand, oversized gilded date numerals, thin rules. The photo —
+   when the couple has one — sits BELOW the masthead as a full-bleed plate
+   (editorial cover), never behind the type fighting a scrim.              */
+.hero{ padding-block: 4.5rem 0; text-align:left }
+.hero .invited{ margin-bottom:2.25rem }
+.hero h1{ font-size: clamp(3.4rem, 14vw, 6.5rem); }
+.hero h1 .amp{
+  display:block; font-style:italic; font-weight:300;
+  font-size:.42em; color: rgb(var(--gild));
+  padding-left:.35em; line-height:1.3;
+}
+.hero .rule{ height:1px; background: rgb(var(--ink) / .16); margin-block:2rem 1.25rem }
+.hero .dateblock{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap }
+.hero .bigdate{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size: clamp(2.6rem, 9vw, 4rem); font-weight:300; letter-spacing:-.01em;
+  color: rgb(var(--gild)); font-variant-numeric: lining-nums;
+}
+.hero .place{ text-align:right; font-size:.85rem; line-height:1.5; color: rgb(var(--ink)/.7) }
+.hero .place b{ display:block; font-weight:600; color: rgb(var(--ink)); font-size:.95rem }
+
+/* full-bleed cover plate under the masthead (stand-in gradient = hero photo) */
+.cover{
+  margin-top:3rem; position:relative; height:min(72vw, 30rem); overflow:hidden;
+}
+.cover .img{
+  position:absolute; inset:-12% 0; /* parallax headroom */
+  background:
+    radial-gradient(120% 90% at 70% 20%, rgb(var(--veil)) 0%, transparent 55%),
+    linear-gradient(160deg, rgb(var(--accent) / .55), rgb(var(--accent-deep)) 65%),
+    rgb(var(--accent-deep));
+  will-change: transform;
+}
+.cover figcaption{
+  position:absolute; left:1.5rem; bottom:1rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.24em; text-transform:uppercase; color: rgb(var(--on-accent) / .75);
+}
+.cover .seal{
+  position:absolute; right:1.5rem; bottom:-1.6rem; width:4.6rem; height:4.6rem;
+  border-radius:50%; display:grid; place-items:center;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / .28), transparent 42%),
+    rgb(var(--gild));
+  color: rgb(var(--paper)); font-family:"Fraunces",Georgia,serif; font-style:italic;
+  font-size:1.35rem;
+  box-shadow: 0 10px 24px rgb(0 0 0 / .22), inset 0 0 0 3px rgb(var(--paper) / .3);
+  /* wavy wax lip */
+  clip-path: polygon(50% 0%,61% 3%,72% 2%,81% 9%,91% 13%,94% 24%,100% 33%,97% 45%,100% 57%,95% 67%,95% 78%,86% 84%,80% 93%,69% 94%,59% 100%,48% 97%,37% 100%,28% 93%,18% 91%,13% 82%,4% 76%,5% 64%,0% 53%,4% 42%,2% 30%,10% 23%,13% 13%,24% 10%,31% 2%,41% 4%);
+}
+
+/* ---- countdown strip ------------------------------------------------------ */
+.count{
+  margin-top:4.5rem; border-block:1px solid rgb(var(--ink) / .12);
+  background: rgb(var(--veil) / .5);
+}
+.count .col{ display:flex; justify-content:center; gap:2.2rem; padding-block:1.1rem }
+.count .cell{ text-align:center }
+.count .n{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:1.9rem; font-weight:350; line-height:1.1; font-variant-numeric:tabular-nums;
+}
+.count .l{ font-family:"Space Mono",ui-monospace,monospace; font-size:.56rem;
+  letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--ink)/.55) }
+
+/* ---- prose + story ------------------------------------------------------- */
+h2.chap{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-weight:420;
+  font-size: clamp(2rem, 7.4vw, 2.9rem); line-height:1.05; letter-spacing:-.01em;
+  margin:.9rem 0 1.4rem;
+}
+h2.chap em{ font-weight:340 }
+.prose p{ margin-bottom:1.1em; max-width:34em }
+.prose .drop::first-letter{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:3.3em; float:left; line-height:.82; padding:.06em .12em 0 0;
+  color: rgb(var(--accent));
+}
+.pull{
+  border-left:2px solid rgb(var(--gild));
+  padding-left:1.1rem; margin:1.8rem 0 0 auto; max-width:26em;
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.25rem; line-height:1.4; color: rgb(var(--ink) / .85);
+}
+
+/* ---- details: two venue plates, asymmetric ------------------------------- */
+.venues{ display:grid; gap:1rem; margin-top:1.6rem }
+@media(min-width:720px){ .venues{ grid-template-columns: 1.15fr .85fr } }
+.plate{
+  background: rgb(var(--paper-deep));
+  border:1px solid rgb(var(--ink) / .09);
+  padding:1.6rem 1.5rem 1.5rem; position:relative;
+}
+.plate::after{ /* hairline inner frame — printed-card feel */
+  content:""; position:absolute; inset:.45rem; pointer-events:none;
+  border:1px solid rgb(var(--ink) / .07);
+}
+.plate .k{ font-family:"Space Mono",ui-monospace,monospace; font-size:.58rem;
+  letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--gild)) }
+.plate h3{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:1.55rem; font-weight:420; margin:.5rem 0 .2rem }
+.plate .addr{ font-size:.85rem; color: rgb(var(--ink)/.66); line-height:1.5 }
+.plate .t{ font-family:"Space Mono",ui-monospace,monospace; font-size:.8rem;
+  margin-top: .9rem; color: rgb(var(--ink)/.85) }
+.plate a.maplink{ display:inline-block; margin-top:.9rem; font-size:.8rem;
+  color: rgb(var(--accent)); text-decoration:none;
+  border-bottom:1px solid rgb(var(--accent)/.4); padding-bottom:1px }
+
+/* ---- schedule: mono time rail -------------------------------------------- */
+.sched{ margin-top:1.6rem; border-top:1px solid rgb(var(--ink)/.12) }
+.sched .row{
+  display:grid; grid-template-columns: 5.2rem 1fr; gap:1rem; align-items:baseline;
+  padding:1.05rem 0; border-bottom:1px solid rgb(var(--ink)/.09);
+}
+.sched .time{ font-family:"Space Mono",ui-monospace,monospace; font-size:.78rem;
+  color: rgb(var(--gild)); letter-spacing:.06em; font-variant-numeric:tabular-nums }
+.sched .what b{ display:block; font-weight:600; font-size:.98rem }
+.sched .what span{ font-size:.83rem; color: rgb(var(--ink)/.6) }
+
+/* ---- dress code: silk swatches ------------------------------------------- */
+.dress{ margin-top:1.6rem }
+.dress .swatches{ display:flex; gap:.7rem; margin:1.1rem 0 .9rem }
+.dress .sw{
+  width:3.4rem; height:4.4rem; border-radius:0 0 45% 45% / 0 0 18% 18%;
+  border:1px solid rgb(var(--ink)/.12);
+  box-shadow: inset 0 -14px 18px rgb(0 0 0 / .12), inset 0 10px 12px rgb(255 255 255 / .18);
+  position:relative;
+}
+.dress .sw::after{ content:""; position:absolute; top:-5px; left:50%; width:7px; height:7px;
+  transform:translateX(-50%) rotate(45deg); background: rgb(var(--gild));
+}
+
+/* ---- gallery: offset editorial mosaic ------------------------------------ */
+.mosaic{ display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:1.6rem }
+.mosaic .ph{ aspect-ratio:3/4; overflow:hidden; position:relative;
+  background: linear-gradient(150deg, rgb(var(--veil)), rgb(var(--accent)/.4)); }
+.mosaic .ph:nth-child(2){ margin-top:2.2rem }      /* the offset = intentional asymmetry */
+.mosaic .ph:nth-child(3){ margin-top:-1.4rem }
+.mosaic .ph.wide{ grid-column:1/-1; aspect-ratio:16/9; margin-top:.4rem;
+  background: linear-gradient(120deg, rgb(var(--accent)/.5), rgb(var(--accent-deep))); }
+.mosaic figcaption{ position:absolute; left:.7rem; bottom:.55rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.56rem;
+  letter-spacing:.22em; text-transform:uppercase; color: rgb(var(--paper) / .85) }
+
+/* ---- RSVP: the reply card -------------------------------------------------
+   Deckled edge (mask), letterpress heading, ticket-stub number. This is the
+   one section that stays a "card" — because it's literally a reply card.   */
+.reply{
+  position:relative; margin-top:1.8rem; background: rgb(var(--paper-deep));
+  padding:2.2rem 1.6rem 2rem;
+  --deckle: radial-gradient(6px 6px at 6px 6px, transparent 5.5px, rgb(0 0 0) 6px);
+  filter: drop-shadow(0 14px 28px rgb(0 0 0 / .1));
+}
+.reply::before{ content:""; position:absolute; inset:0; pointer-events:none;
+  border:1px solid rgb(var(--ink)/.1) }
+.reply .rsvp-word{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:2.2rem; font-weight:340; letter-spacing:.34em; text-indent:.34em;
+  text-align:center;
+  color: rgb(var(--ink) / .82);
+  text-shadow: 0 1px 0 rgb(255 255 255 / .5), 0 -1px 0 rgb(0 0 0 / .12); /* letterpress */
+}
+.palette-c .reply .rsvp-word{ text-shadow: 0 -1px 0 rgb(255 255 255 / .08), 0 1px 1px rgb(0 0 0 / .5) }
+.reply .kindly{ text-align:center; font-size:.85rem; color:rgb(var(--ink)/.62); margin-top:.5rem }
+.reply .opts{ display:grid; gap:.6rem; margin-top:1.5rem }
+@media(min-width:520px){ .reply .opts{ grid-template-columns:1fr 1fr 1fr } }
+.reply label.opt{
+  display:flex; align-items:center; justify-content:center; gap:.5rem;
+  min-height:3.4rem; cursor:pointer; text-align:center;
+  border:1px solid rgb(var(--ink)/.22); background:transparent;
+  font-size:.9rem; transition: all .18s ease; position:relative;
+}
+.reply label.opt input{ position:absolute; opacity:0; pointer-events:none }
+.reply label.opt:has(input:checked){
+  background: rgb(var(--accent-deep)); color: rgb(var(--on-accent));
+  border-color: rgb(var(--accent-deep));
+}
+.reply .send{
+  margin-top:1.3rem; width:100%; min-height:3.4rem; cursor:pointer;
+  background: rgb(var(--accent-deep)); color: rgb(var(--on-accent));
+  border:0; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.72rem; letter-spacing:.3em; text-transform:uppercase; text-indent:.3em;
+  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 6px 16px rgb(var(--accent-deep) / .35);
+}
+.reply .send:active{ transform: translateY(1px); box-shadow:0 3px 8px rgb(var(--accent-deep) / .3) }
+.reply .stub{
+  position:absolute; top:.9rem; right:1rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.58rem;
+  letter-spacing:.2em; color: rgb(var(--gild));
+}
+
+/* ---- footer + signature --------------------------------------------------- */
+footer.sig{ padding:5rem 1.5rem 7.5rem; text-align:center }
+footer.sig .see{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.5rem; color: rgb(var(--ink)/.85);
+}
+footer.sig .mg{ margin-top:1.2rem; color: rgb(var(--gild));
+  font-family:"Fraunces",Georgia,serif; font-style:italic; font-size:1.1rem }
+footer.sig .brand{ margin-top:1.6rem; font-size:.66rem; letter-spacing:.22em;
+  text-transform:uppercase; color: rgb(var(--ink)/.42);
+  font-family:"Space Mono",ui-monospace,monospace }
+
+/* ---- bottom menu (5 tabs, elevated) --------------------------------------- */
+nav.tabs{
+  position:fixed; inset-inline:0; bottom:0; z-index:50;
+  background: rgb(var(--paper) / .92); backdrop-filter: blur(12px);
+  border-top:1px solid rgb(var(--ink)/.1);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* CLONE of shipped SiteMenuBar (live markup, setnayan.com/maria-and-jose):
+   ul = mx-auto flex max-w-md items-stretch justify-around px-2;
+   a  = flex h-14 items-center justify-center px-1 text-center font-mono
+        text-[0.7rem] uppercase tracking-[0.12em] text-ink/70.
+   ONLY palette-variable substitution applied (cream→paper, active→gild). */
+nav.tabs ul{ display:flex; align-items:stretch; justify-content:space-around;
+  list-style:none; max-width:28rem; margin-inline:auto; padding-inline:.5rem }
+nav.tabs li{ flex:1 }
+nav.tabs a{
+  display:flex; align-items:center; justify-content:center;
+  height:3.5rem; padding-inline:.25rem; text-align:center; text-decoration:none;
+  font-family:"Space Mono","DM Mono",ui-monospace,monospace; font-size:.7rem;
+  letter-spacing:.12em; text-transform:uppercase;
+  color: rgb(var(--ink)/.7); transition: color .15s;
+}
+nav.tabs a:hover{ color: rgb(var(--accent)) }
+nav.tabs a.active{ color: rgb(var(--gild)) }
+
+/* ---- scroll reveal (JS adds .in) ------------------------------------------ */
+.rv{ opacity:0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease }
+.rv.in{ opacity:1; transform:none }
+@media (prefers-reduced-motion: reduce){
+  .rv{ opacity:1; transform:none; transition:none }
+  .cover .img{ transform:none !important }
+}
+
+/* ============================================================================
+   FIVE TIMELINES (owner model 2026-07-25): Save the Date · Invitation ·
+   RSVPed · Event Day · After Event. One DOM; `data-show` lists which
+   timelines an element belongs to (space-separated), body carries tl-*.
+   Engine note: prod has FOUR date phases; RSVPed = the rsvp phase forked on
+   the guest's confirmed reply (per-guest, never anonymous).
+   ============================================================================ */
+body.tl-std    [data-show]:not([data-show~="std"])   { display:none !important }
+body.tl-invite [data-show]:not([data-show~="invite"]){ display:none !important }
+body.tl-rsvpd  [data-show]:not([data-show~="rsvpd"]) { display:none !important }
+body.tl-day    [data-show]:not([data-show~="day"])   { display:none !important }
+body.tl-after  [data-show]:not([data-show~="after"]) { display:none !important }
+
+/* demo timeline switcher — fixed strip at the very top (demo chrome) */
+body{ padding-top:2.4rem }
+.masthead{ top:2.4rem }
+.tl-switch{
+  position:fixed; inset-inline:0; top:0; z-index:70; height:2.4rem;
+  display:flex; align-items:stretch; justify-content:center; gap:.15rem;
+  background:#141311; padding-inline:.4rem;
+}
+.tl-switch .k{ align-self:center; color:#8d8778; font:600 .5rem/1 "Space Mono",monospace;
+  letter-spacing:.14em; text-transform:uppercase; padding-inline:.3rem }
+.tl-switch button{
+  background:none; border:0; cursor:pointer; padding-inline:.45rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.55rem;
+  letter-spacing:.08em; text-transform:uppercase; color:#b5ae9d;
+  border-bottom:2px solid transparent; white-space:nowrap;
+}
+.tl-switch button.active{ color:#e8dfc9; border-bottom-color:#C5A66A }
+
+/* — Save the Date: the announce plate (tease, ask nothing) — */
+.announce{ margin-top:1.8rem; text-align:center; padding:2.4rem 1.5rem;
+  background: rgb(var(--paper-deep)); border:1px solid rgb(var(--ink)/.09); position:relative }
+.announce::after{ content:""; position:absolute; inset:.45rem; pointer-events:none;
+  border:1px solid rgb(var(--ink)/.07) }
+.announce .line{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.35rem; line-height:1.4; color: rgb(var(--ink)/.85) }
+.announce .when{ margin-top:.6rem; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.66rem; letter-spacing:.24em; text-transform:uppercase; color: rgb(var(--gild)) }
+.announce .cal{
+  display:inline-block; margin-top:1.4rem; padding:.9rem 1.6rem; cursor:pointer;
+  background: rgb(var(--accent-deep)); color: rgb(var(--on-accent)); border:0;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.66rem;
+  letter-spacing:.26em; text-indent:.26em; text-transform:uppercase;
+  box-shadow: 0 6px 16px rgb(var(--accent-deep) / .3);
+}
+
+/* — RSVPed: the stamped keepsake ticket — */
+.ticket{
+  position:relative; margin-top:1.8rem; background: rgb(var(--paper-deep));
+  border:1px solid rgb(var(--ink)/.12); padding:1.7rem 1.6rem 1.5rem;
+  filter: drop-shadow(0 12px 24px rgb(0 0 0 / .09));
+}
+.ticket .punch{ position:absolute; top:50%; width:1.35rem; height:1.35rem; border-radius:50%;
+  background: rgb(var(--paper)); border:1px solid rgb(var(--ink)/.12); transform:translateY(-50%) }
+.ticket .punch.l{ left:-.75rem } .ticket .punch.r{ right:-.75rem }
+.ticket .toprow{ display:flex; justify-content:space-between; align-items:flex-start; gap:1rem }
+.stamp{
+  display:inline-block; transform:rotate(-6deg);
+  border:2px solid rgb(var(--accent) / .7); color: rgb(var(--accent) / .85);
+  padding:.35rem .8rem; border-radius:2px;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.22em; text-transform:uppercase; white-space:nowrap;
+}
+.ticket .stubno{ font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.2em; color: rgb(var(--gild)); text-align:right; line-height:1.8;
+  white-space:nowrap }
+.ticket .guestline{
+  margin-top:1.1rem; font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:1.6rem; font-weight:400; }
+.ticket .guestline em{ font-style:italic; color: rgb(var(--gild)) }
+.ticket .perf{ margin:1.2rem 0 1rem; border:0; border-top:1px dashed rgb(var(--ink)/.3) }
+.ticket .meta{ display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.66rem;
+  letter-spacing:.12em; text-transform:uppercase; color: rgb(var(--ink)/.7) }
+.ticket .meta b{ color: rgb(var(--ink)); font-weight:700 }
+.ticket .keep{ margin-top:1rem; font-size:.8rem; color: rgb(var(--ink)/.6) }
+
+/* RSVPed: countdown becomes the emotional center */
+.tl-rsvpd .count{ padding-block:.4rem }
+.tl-rsvpd .count .col{ padding-block:1.6rem }
+.tl-rsvpd .count .n{ font-size:2.7rem }
+.count .count-k{ text-align:center; padding-top:1.2rem; margin-bottom:-.6rem;
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.05rem; color: rgb(var(--ink)/.75) }
+
+/* — Event Day: happening-now strip, NOW row, live plates — */
+.nowstrip{ margin-top:3rem; border-block:1px solid rgb(var(--accent)/.4);
+  background: rgb(var(--veil) / .55) }
+.nowstrip .col{ display:flex; align-items:center; justify-content:center; gap:.7rem;
+  padding-block:1rem }
+.livedot{ width:.5rem; height:.5rem; border-radius:50%; background: rgb(var(--accent));
+  animation: pulse 1.6s ease-in-out infinite }
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.25} }
+@media (prefers-reduced-motion: reduce){ .livedot{ animation:none } }
+.nowstrip .t{ font-family:"Space Mono",ui-monospace,monospace; font-size:.66rem;
+  letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--accent)) }
+.rownow-tag{ display:none }
+.tl-day .sched .row.now{ border-left:2px solid rgb(var(--accent));
+  padding-left:.9rem; background: rgb(var(--veil) / .45) }
+.tl-day .rownow-tag{ display:inline-flex; align-items:center; gap:.35rem;
+  margin-left:.5rem; font-size:.56rem; letter-spacing:.2em; color: rgb(var(--accent)) }
+.liveplate{ margin-top:1.6rem; background: rgb(var(--paper-deep));
+  border:1px solid rgb(var(--ink)/.09); padding:1.5rem; position:relative }
+.liveplate::after{ content:""; position:absolute; inset:.45rem; pointer-events:none;
+  border:1px solid rgb(var(--ink)/.07) }
+.liveplate .head{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem }
+.liveplate .k{ font-family:"Space Mono",ui-monospace,monospace; font-size:.58rem;
+  letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--gild)) }
+.liveplate .n{ font-family:"Space Mono",ui-monospace,monospace; font-size:.66rem;
+  color: rgb(var(--ink)/.6) }
+.wallgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:.45rem; margin-top:1rem }
+.wallgrid span{ aspect-ratio:1; background:linear-gradient(140deg, rgb(var(--veil)), rgb(var(--accent)/.45)) }
+.wallgrid span:nth-child(2n){ background:linear-gradient(200deg, rgb(var(--accent)/.35), rgb(var(--veil))) }
+.watch{ display:flex; align-items:center; gap:1.1rem; margin-top:1rem;
+  background: rgb(var(--accent-deep)); color: rgb(var(--on-accent)); padding:1.2rem 1.3rem;
+  text-decoration:none }
+.watch .play{ width:2.6rem; height:2.6rem; border-radius:50%; flex:none;
+  border:1px solid rgb(var(--on-accent)/.5); display:grid; place-items:center }
+.watch .play::after{ content:""; margin-left:3px; border-style:solid;
+  border-width:6px 0 6px 10px; border-color:transparent transparent transparent rgb(var(--on-accent)) }
+.watch b{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-weight:420;
+  font-size:1.15rem; display:block }
+.watch span{ font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.22em; text-transform:uppercase; opacity:.75 }
+
+/* — After Event: thank-you plate + memento — */
+.thanks{ margin-top:1.8rem; text-align:center; padding:2.6rem 1.5rem;
+  border-block:1px solid rgb(var(--ink)/.12); background: rgb(var(--veil)/.4) }
+.thanks .line{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.5rem; line-height:1.45; color: rgb(var(--ink)/.9); max-width:24em; margin-inline:auto }
+.thanks .from{ margin-top:1rem; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.62rem; letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--gild)) }
+
+/* ============================================================================
+   GUEST-PERSONAL LAYER (owner correction #2: "reskin, never drop").
+   The functional inventory the live site already has — guest hub (avatar ·
+   QR · connect-account), camera, your-photos, face tag, seat, e-gifts,
+   pabati, keep-your-photos (tier comparison) — in the Pahina grammar.
+   ============================================================================ */
+
+/* — the guest hub plate ("Me"): avatar · name · role/side · personal QR ·
+     connect-to-account. Present in EVERY timeline state. — */
+.hub{ display:grid; grid-template-columns: 1fr auto; gap:1.2rem; align-items:start }
+@media(max-width:519px){ .hub{ grid-template-columns:1fr } }
+.avatar{
+  width:3.6rem; height:3.6rem; border-radius:50%; display:grid; place-items:center;
+  background: rgb(var(--veil)); border:1px solid rgb(var(--gild) / .6);
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.15rem; color: rgb(var(--accent-deep));
+  box-shadow: inset 0 0 0 3px rgb(var(--paper));
+}
+.hub .who{ display:flex; gap:.9rem; align-items:center }
+.hub .who .nm{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:1.45rem; line-height:1.15 }
+.hub .who .rl{ font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.2em; text-transform:uppercase; color: rgb(var(--ink)/.55); margin-top:.3rem }
+.hub .status{ display:inline-flex; align-items:center; gap:.45rem; margin-top:.9rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.18em; text-transform:uppercase; color: rgb(var(--accent));
+  border:1px solid rgb(var(--accent)/.35); padding:.35rem .7rem; border-radius:999px }
+.hub .qrbox{ text-align:center }
+.hub .qrbox svg{ width:6.2rem; height:6.2rem; display:block; margin-inline:auto;
+  background:#fff; padding:.45rem; border:1px solid rgb(var(--ink)/.14) }
+.hub .qrbox .cap{ margin-top:.5rem; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.54rem; letter-spacing:.18em; text-transform:uppercase; color: rgb(var(--ink)/.55) }
+.hub-actions{ margin-top:1.2rem; display:flex; gap:.6rem; flex-wrap:wrap }
+.btn-quiet{ display:inline-flex; align-items:center; gap:.45rem; cursor:pointer;
+  padding:.75rem 1.1rem; background:transparent; color: rgb(var(--ink)/.8);
+  border:1px solid rgb(var(--ink)/.22); font-size:.8rem; text-decoration:none }
+.btn-ink{ display:inline-flex; align-items:center; cursor:pointer;
+  padding:.75rem 1.2rem; background: rgb(var(--accent-deep)); color: rgb(var(--on-accent));
+  border:0; font-family:"Space Mono",ui-monospace,monospace; font-size:.62rem;
+  letter-spacing:.22em; text-transform:uppercase; text-decoration:none;
+  box-shadow: 0 5px 14px rgb(var(--accent-deep)/.3) }
+.hub .connect{ margin-top:1rem; padding-top:1rem; border-top:1px dashed rgb(var(--ink)/.2);
+  font-size:.82rem; color: rgb(var(--ink)/.65) }
+.hub .connect b{ color: rgb(var(--ink)); font-weight:600 }
+
+/* — GuestHubBar, reskinned (the OWNER'S day-of chrome — council verdict §1.1:
+     "the bar keeps only My QR / Camera / Photos as high-frequency actions";
+     LIVE chip injected next to the center action, as GuestHubBar.hubHref
+     does today). Same three slots, same placement — Pahina materials only.
+     Sits ABOVE the five text tabs; the tab row itself is never touched. — */
+.hubbar{
+  position:fixed; inset-inline:0; bottom:3.5rem; z-index:45; pointer-events:none;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.hubbar .row{ max-width:28rem; margin-inline:auto; display:flex; align-items:flex-end;
+  justify-content:space-between; gap:.8rem; padding:0 1.4rem .55rem }
+.hubbar .row > *{ pointer-events:auto }
+/* CLONE of shipped guest-hub-bar.tsx (verbatim structure; palette-map only:
+   cream→paper, mulberry→accent-deep, terracotta→accent).
+   Row     = max-w-md flex items-end justify-between gap-3 px-5 pb-3 pt-2.
+   Chips   = h/w-[3.25rem] rounded-2xl border-ink/10 bg-cream/95 blur shadow-lg,
+             flex-col gap-0.5: icon (20px stroke 1.75) ABOVE text-[0.6rem] label.
+   Camera  = h-16 w-16 rounded-full bg-mulberry -translate-y-1.5 shadow-xl,
+             flex-col gap-0.5: Camera icon (24px stroke 2) ABOVE 0.6rem
+             semibold label, BOTH INSIDE the circle.
+   Badge   = absolute -right-1 -top-1 min-w-[1.1rem] rounded-full bg-terracotta
+             px-1 text-[0.6rem] font-semibold leading-[1.1rem] text-cream.
+   LIVE chip = h-10 rounded-full bg-ink px-3.5 text-sm font-semibold text-cream. */
+.hubbar .row{ max-width:28rem; margin-inline:auto; display:flex; align-items:flex-end;
+  justify-content:space-between; gap:.75rem; padding:.5rem 1.25rem .75rem }
+.hub-chip{
+  width:3.25rem; height:3.25rem; border-radius:1rem;
+  display:inline-flex; flex-direction:column; gap:.125rem;
+  align-items:center; justify-content:center; cursor:pointer; text-decoration:none;
+  background: rgb(var(--paper) / .95); color: rgb(var(--ink));
+  border:1px solid rgb(var(--ink)/.1); backdrop-filter: blur(8px);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0/.1), 0 4px 6px -4px rgb(0 0 0/.1);
+  position:relative;
+}
+.hub-chip svg{ width:1.25rem; height:1.25rem }
+.hub-chip .lb{ font-family:"Manrope","Hanken Grotesk",sans-serif; font-size:.6rem;
+  font-weight:500; line-height:1 }
+.hub-chip .badge{ position:absolute; top:-.25rem; right:-.25rem; min-width:1.1rem;
+  padding-inline:.25rem; border-radius:999px; text-align:center;
+  background: rgb(var(--accent)); color: rgb(var(--paper));
+  font-size:.6rem; font-weight:600; line-height:1.1rem }
+.hub-cam{
+  width:4rem; height:4rem; border-radius:50%; transform:translateY(-.375rem);
+  display:inline-flex; flex-direction:column; gap:.125rem;
+  align-items:center; justify-content:center; cursor:pointer; text-decoration:none; border:0;
+  background: rgb(var(--accent-deep)); color: rgb(var(--on-accent));
+  box-shadow: 0 20px 25px -5px rgb(0 0 0/.1), 0 8px 10px -6px rgb(0 0 0/.1);
+}
+.hub-cam svg{ width:1.5rem; height:1.5rem }
+.hub-cam .lb{ font-family:"Manrope","Hanken Grotesk",sans-serif; font-size:.6rem;
+  font-weight:600; line-height:1 }
+.live-chip{
+  height:2.5rem; display:inline-flex; align-items:center; gap:.375rem; align-self:center;
+  padding-inline:.875rem; border-radius:999px; text-decoration:none;
+  background: rgb(var(--ink)); color: rgb(var(--paper));
+  font-family:"Manrope","Hanken Grotesk",sans-serif; font-size:.875rem; font-weight:600;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0/.15);
+}
+.live-chip svg{ width:1rem; height:1rem }
+.tl-day main{ padding-bottom:8.5rem }
+
+/* — Papic pool bar (OnTheDay build ③): live points meter + Top up + Add-a-
+     camera, on the site during the live window. photo = 1 pt · 10-s clip = 7. — */
+.poolbar{ margin-top:1.6rem; border:1px solid rgb(var(--ink)/.12);
+  background: rgb(var(--paper-deep)); padding:1.1rem 1.2rem }
+.poolbar .top{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem }
+.poolbar .k{ font-family:"Space Mono",ui-monospace,monospace; font-size:.58rem;
+  letter-spacing:.24em; text-transform:uppercase; color: rgb(var(--gild)) }
+.poolbar .nums{ font-family:"Space Mono",ui-monospace,monospace; font-size:.66rem;
+  color: rgb(var(--ink)/.75) }
+.meter{ margin-top:.7rem; height:.45rem; background: rgb(var(--ink)/.1); position:relative }
+.meter i{ position:absolute; inset:0 37% 0 0; background: linear-gradient(90deg,
+  rgb(var(--accent)), rgb(var(--accent-deep))) }
+.poolbar .foot{ margin-top:.8rem; display:flex; justify-content:space-between;
+  align-items:center; gap:.8rem; flex-wrap:wrap }
+.poolbar .rate{ font-size:.72rem; color: rgb(var(--ink)/.55) }
+.poolbar .acts{ display:flex; gap:.5rem }
+.poolbar .acts .btn-quiet, .poolbar .acts .btn-ink{ padding:.5rem .8rem; font-size:.62rem }
+
+/* — the Papic camera + roll plate ("the papic app itself", after the owner's
+     0012 prototype: white shutter · last-5 thumb strip · tag-amber ring) — */
+.rollplate{ margin-top:1.2rem; background:#101010; color:#f4f0e8;
+  border:1px solid rgb(var(--gild)/.4); padding:1.3rem 1.2rem }
+.rollplate .head{ display:flex; justify-content:space-between; align-items:center; gap:1rem }
+.rollplate .k{ font-family:"Space Mono",ui-monospace,monospace; font-size:.58rem;
+  letter-spacing:.24em; text-transform:uppercase; color: rgb(var(--gild)) }
+.rollplate .shutter{ width:3.4rem; height:3.4rem; border-radius:50%; flex:none;
+  background:#fff; border:3px solid #0a0a0a; box-shadow: 0 0 0 1px rgb(255 255 255/.4),
+  0 6px 16px rgb(0 0 0/.5); cursor:pointer }
+.rollplate .body{ display:flex; gap:1.1rem; align-items:center; margin-top:1rem }
+.rollplate .copy{ font-size:.82rem; color:#cfc9bc; line-height:1.5 }
+.rollplate .copy b{ color:#f4f0e8 }
+.roll-thumbs{ display:flex; gap:.4rem; margin-top:1rem }
+.roll-thumbs span{ width:2.6rem; height:2.6rem; flex:none;
+  background:linear-gradient(150deg,#3a3f36,#20231e) }
+.roll-thumbs span.tagged{ box-shadow: inset 0 0 0 2px #FAC775 }
+.rollplate .cap{ margin-top:.6rem; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.54rem; letter-spacing:.14em; text-transform:uppercase; color:#8f897c }
+
+/* — Live Studio channel viewer (Unified Spec 2026-07-25): CH 1 = the
+     controlled screen (big player) + a rail of SMALLER host-named camera
+     channels; guest-pick = tap a tile to watch that channel on demand. — */
+.viewer{ margin-top:1.6rem }
+.ch1{ position:relative; aspect-ratio:16/9; background:
+  radial-gradient(90% 120% at 70% 10%, rgb(var(--accent)/.5), transparent 60%), #14140f;
+  border:1px solid rgb(var(--gild)/.5) }
+.ch1 .tag{ position:absolute; left:.8rem; top:.7rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.54rem;
+  letter-spacing:.2em; text-transform:uppercase; color:#e8dfc9 }
+.ch1 .onair{ position:absolute; right:.8rem; top:.7rem; display:inline-flex;
+  align-items:center; gap:.35rem; padding:.25rem .55rem; border-radius:2px;
+  background:#8c1f1f; color:#fff; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.52rem; letter-spacing:.18em; text-transform:uppercase }
+.ch1 .playbig{ position:absolute; inset:0; margin:auto; width:3.2rem; height:3.2rem;
+  border-radius:50%; border:1px solid rgb(255 255 255/.6); display:grid; place-items:center }
+.ch1 .playbig::after{ content:""; margin-left:3px; border-style:solid;
+  border-width:7px 0 7px 12px; border-color:transparent transparent transparent #fff }
+.chrail{ display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem; margin-top:.6rem }
+.chrail button{ text-align:left; background:none; border:0; padding:0; cursor:pointer }
+.chrail .tile{ display:block; position:relative; aspect-ratio:16/9; background:
+  linear-gradient(150deg, rgb(var(--veil)), rgb(var(--accent)/.5));
+  border:1px solid rgb(var(--ink)/.16) }
+.chrail button.active .tile{ border-color: rgb(var(--gild));
+  box-shadow: 0 0 0 1px rgb(var(--gild)) }
+.chrail .tile .chno{ position:absolute; left:.35rem; top:.3rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.5rem;
+  letter-spacing:.14em; color: rgb(var(--ink)/.8);
+  background: rgb(var(--paper)/.8); padding:.1rem .3rem }
+.chrail .nm{ display:block; margin-top:.3rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.54rem;
+  letter-spacing:.12em; text-transform:uppercase; color: rgb(var(--ink)/.7);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.chrail .nm .star{ color: rgb(var(--gild)) }
+.viewer .note{ margin-top:.7rem; font-size:.78rem; color: rgb(var(--ink)/.6) }
+
+/* — your-photos (the guest's own tagged gallery) — */
+.mygrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:.45rem; margin-top:1rem }
+.mygrid figure{ position:relative; aspect-ratio:1;
+  background:linear-gradient(160deg, rgb(var(--veil)), rgb(var(--accent)/.4)) }
+.mygrid figure:nth-child(2n){ background:linear-gradient(20deg, rgb(var(--accent)/.3), rgb(var(--veil))) }
+.mygrid .notme{ position:absolute; right:.3rem; top:.3rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.48rem; letter-spacing:.12em;
+  text-transform:uppercase; color: rgb(var(--paper)); background: rgb(var(--ink)/.6);
+  padding:.25rem .45rem; border-radius:999px }
+
+/* — face-tag enrollment (dignified, consent-forward) — */
+.faceplate .line{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.3rem; line-height:1.4; margin-top:.4rem }
+.faceplate .consent{ margin-top:.8rem; font-size:.82rem; color: rgb(var(--ink)/.62);
+  max-width:34em }
+.faceplate .acts{ margin-top:1.1rem; display:flex; gap:.6rem; flex-wrap:wrap; align-items:center }
+.faceplate .skip{ font-size:.78rem; color: rgb(var(--ink)/.5);
+  text-decoration:underline; text-underline-offset:3px; background:none; border:0; cursor:pointer }
+
+/* — e-gifts (Pabuya) + pabati greeting — */
+.giftgrid{ display:grid; gap:1rem; margin-top:1.6rem }
+@media(min-width:640px){ .giftgrid{ grid-template-columns:1fr 1fr } }
+.gift .line{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.2rem; line-height:1.45; margin-top:.4rem }
+.gift .sub{ margin-top:.6rem; font-size:.82rem; color: rgb(var(--ink)/.6) }
+.gift .btn-ink, .gift .btn-quiet{ margin-top:1rem }
+
+/* — keep-your-photos (tier comparison, reskinned) — */
+.keepcols{ display:grid; grid-template-columns:1fr 1fr; gap:0; margin-top:1.2rem;
+  border:1px solid rgb(var(--ink)/.12) }
+.keepcols > div{ padding:1.2rem 1.1rem }
+.keepcols > div + div{ border-left:1px solid rgb(var(--ink)/.12) }
+.keepcols .k{ font-family:"Space Mono",ui-monospace,monospace; font-size:.56rem;
+  letter-spacing:.22em; text-transform:uppercase; color: rgb(var(--ink)/.5) }
+.keepcols > div + div .k{ color: rgb(var(--gild)) }
+.keepcols ul{ list-style:none; margin-top:.7rem; display:grid; gap:.4rem }
+.keepcols li{ font-size:.8rem; color: rgb(var(--ink)/.72) }
+.keepcols > div + div{ background: rgb(var(--veil)/.45) }
+
+/* — greeting salutation (invite/rsvpd) — */
+.salut{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.35rem; color: rgb(var(--ink)/.85); margin-bottom:1.6rem }
+.salut b{ font-style:normal; font-weight:480; color: rgb(var(--accent-deep)) }
+
+/* ============================================================================
+   V6 — FULL INTERACTIVE LAYER. Mock sheets/modals/toasts in the Pahina
+   grammar (paper · hairlines · gild). Vanilla JS, no libraries.
+   ============================================================================ */
+.veil-ov{ position:fixed; inset:0; z-index:80; background: rgb(var(--ink)/.55);
+  backdrop-filter: blur(4px); opacity:0; pointer-events:none; transition:opacity .25s }
+.veil-ov.on{ opacity:1; pointer-events:auto }
+.sheet{ position:fixed; inset-inline:0; bottom:0; z-index:85; max-width:28rem;
+  margin-inline:auto; background: rgb(var(--paper)); color: rgb(var(--ink));
+  border:1px solid rgb(var(--ink)/.14); border-bottom:0;
+  padding:1.1rem 1.4rem calc(1.6rem + env(safe-area-inset-bottom));
+  transform:translateY(105%); transition:transform .32s cubic-bezier(.32,.72,.33,1);
+  max-height:82dvh; overflow-y:auto }
+.sheet.on{ transform:none }
+.sheet::before{ content:""; display:block; width:2.6rem; height:2px;
+  background: rgb(var(--gild)); margin:0 auto 1rem }
+.sheet .sh-k{ font-family:"Space Mono",ui-monospace,monospace; font-size:.58rem;
+  letter-spacing:.24em; text-transform:uppercase; color: rgb(var(--gild)) }
+.sheet .sh-t{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:1.5rem; font-weight:420; margin-top:.35rem }
+.sheet .sh-p{ margin-top:.6rem; font-size:.85rem; color: rgb(var(--ink)/.68); line-height:1.55 }
+.sheet .sh-x{ position:absolute; right:1rem; top:.9rem; background:none; border:0;
+  cursor:pointer; font-size:1.05rem; color: rgb(var(--ink)/.55) }
+.fsov{ position:fixed; inset:0; z-index:90; display:none; align-items:center;
+  justify-content:center; flex-direction:column; gap:1rem; text-align:center }
+.fsov.on{ display:flex }
+.fsov .x{ position:absolute; right:1rem; top:calc(1rem + env(safe-area-inset-top));
+  width:2.4rem; height:2.4rem; border-radius:50%; border:1px solid rgb(255 255 255/.5);
+  background:rgb(0 0 0/.25); color:#fff; cursor:pointer; font-size:1rem }
+#toast{ position:fixed; left:50%; bottom:8.6rem; transform:translate(-50%,1rem);
+  z-index:95; background: rgb(var(--ink)); color: rgb(var(--paper));
+  padding:.65rem 1.1rem; font-size:.8rem; border-radius:999px; opacity:0;
+  transition:all .3s; pointer-events:none; white-space:nowrap; max-width:92vw }
+#toast.on{ opacity:1; transform:translate(-50%,0) }
+/* film overlay */
+#film-ov{ background:
+  radial-gradient(120% 80% at 50% 20%, rgb(var(--veil)) 0%, transparent 55%),
+  linear-gradient(170deg, #2a2417, #14110b 70%) }
+#film-ov .mg{ font-family:"Fraunces",Georgia,serif; font-style:italic;
+  font-size:3.2rem; color:#e8dfc9 }
+#film-ov .ln{ font-family:"Space Mono",monospace; font-size:.62rem;
+  letter-spacing:.3em; text-transform:uppercase; color:#c9b98a }
+#film-ov .veilcloth{ position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background: linear-gradient(105deg, transparent 30%, rgb(232 223 201/.16) 45%,
+  transparent 60%) }
+/* QR fullscreen */
+#qr-ov{ background: rgb(var(--ink)/.92) }
+#qr-ov .qrbig{ width:14rem; height:14rem; background:#fff; padding:1rem }
+#qr-ov .nm{ color: rgb(var(--paper)); font-family:"Fraunces",Georgia,serif;
+  font-size:1.4rem; font-style:italic }
+#qr-ov .sub{ color: rgb(var(--paper)/.6); font-size:.75rem;
+  font-family:"Space Mono",monospace; letter-spacing:.14em; text-transform:uppercase }
+/* lightbox */
+#lb-ov{ background: rgb(0 0 0/.88) }
+#lb-ov .big{ width:min(88vw,26rem); aspect-ratio:3/4 }
+#lb-ov .cap{ color:#d8d2c4; font-family:"Space Mono",monospace; font-size:.6rem;
+  letter-spacing:.22em; text-transform:uppercase }
+/* small interactive bits */
+.chip-act{ display:inline-flex; align-items:center; gap:.5rem; cursor:pointer;
+  margin-top:1.2rem; padding:.6rem 1.05rem; border-radius:999px; text-decoration:none;
+  border:1px solid rgb(var(--gild)/.55); background: rgb(var(--veil)/.5);
+  color: rgb(var(--ink)/.85); font-family:"Space Mono",monospace; font-size:.62rem;
+  letter-spacing:.18em; text-transform:uppercase }
+.sync-tag{ display:inline-flex; align-items:center; gap:.35rem; margin-left:.6rem;
+  font-size:.52rem; letter-spacing:.16em; color: rgb(var(--accent)) }
+.lane-tabs{ display:flex; gap:.4rem; margin-top:.9rem }
+.lane-tabs button{ flex:1; padding:.5rem; cursor:pointer; background:transparent;
+  border:1px solid rgb(var(--ink)/.2); font-family:"Space Mono",monospace;
+  font-size:.58rem; letter-spacing:.16em; text-transform:uppercase;
+  color: rgb(var(--ink)/.6) }
+.lane-tabs button.active{ background: rgb(var(--accent-deep));
+  color: rgb(var(--on-accent)); border-color: rgb(var(--accent-deep)) }
+.tgl{ display:inline-flex; align-items:center; gap:.45rem; cursor:pointer;
+  border:0; background:none; padding:0 }
+.tgl .tr{ width:2.2rem; height:1.2rem; border-radius:999px;
+  background: rgb(var(--ink)/.2); position:relative; transition:background .2s }
+.tgl .tr::after{ content:""; position:absolute; top:.15rem; left:.15rem;
+  width:.9rem; height:.9rem; border-radius:50%; background:#fff; transition:left .2s }
+.tgl.on .tr{ background: rgb(var(--accent-deep)) }
+.tgl.on .tr::after{ left:1.15rem }
+.pend-tag{ font-family:"Space Mono",monospace; font-size:.5rem; letter-spacing:.14em;
+  text-transform:uppercase; color: rgb(var(--ink)/.45);
+  border:1px dashed rgb(var(--ink)/.3); padding:.15rem .4rem }
+.phones-down{ display:flex; align-items:center; gap:1rem; margin-top:1.6rem;
+  background: rgb(var(--ink)); color: rgb(var(--paper)); padding:1.1rem 1.2rem }
+.phones-down .em{ font-size:1.3rem }
+.phones-down p{ flex:1; font-size:.85rem; line-height:1.5 }
+.phones-down button{ background:none; border:1px solid rgb(var(--paper)/.4);
+  color: rgb(var(--paper)); padding:.45rem .8rem; cursor:pointer;
+  font-family:"Space Mono",monospace; font-size:.56rem; letter-spacing:.16em;
+  text-transform:uppercase }
+.vrow{ display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.9rem 0; border-bottom:1px solid rgb(var(--ink)/.09) }
+.vrow .vn b{ display:block; font-weight:600; font-size:.95rem }
+.vrow .vn span{ font-size:.74rem; color: rgb(var(--ink)/.55);
+  font-family:"Space Mono",monospace; letter-spacing:.1em; text-transform:uppercase }
+.vheart{ background:none; border:1px solid rgb(var(--ink)/.2); border-radius:999px;
+  padding:.45rem .8rem; cursor:pointer; font-size:.8rem; color: rgb(var(--ink)/.6) }
+.vheart.on{ color:#8c1f1f; border-color:#8c1f1f }
+.locklist{ list-style:none; margin-top:.7rem; display:grid; gap:.45rem }
+.locklist li{ font-size:.8rem; color: rgb(var(--ink)/.72); display:flex; gap:.5rem }
+.locklist .lk{ font-size:.75rem }
+.avatar-sil{ width:2.6rem; height:2.6rem; flex:none; border-radius:50%;
+  background: radial-gradient(circle at 50% 32%, rgb(var(--accent)) 26%, transparent 27%),
+  radial-gradient(circle at 50% 95%, rgb(var(--accent)) 38%, transparent 39%),
+  rgb(var(--veil)); border:1px solid rgb(var(--gild)/.5) }
+.opt-row{ display:flex; gap:.5rem; margin-top:.6rem }
+.opt-row span{ width:2rem; height:2rem; border-radius:50%; border:1px solid rgb(var(--ink)/.2);
+  cursor:pointer }
+.opt-row span.sel{ box-shadow:0 0 0 2px rgb(var(--gild)) }
+.turn{ margin-top:1rem; aspect-ratio:1; max-width:11rem; margin-inline:auto;
+  background: conic-gradient(from 20deg, rgb(var(--veil)), rgb(var(--accent)/.35), rgb(var(--veil)));
+  border-radius:50%; display:grid; place-items:center }
+.turn .avatar-sil{ width:5rem; height:5rem }
+.viewfinder{ aspect-ratio:3/4; max-height:38dvh; margin-inline:auto; background:
+  radial-gradient(90% 70% at 60% 30%, #2c2f28, #101210 75%); position:relative;
+  border:1px solid rgb(255 255 255/.15); width:100% }
+.viewfinder .pts{ position:absolute; left:.6rem; top:.6rem; background:rgb(0 0 0/.5);
+  color:#e8dfc9; font-family:"Space Mono",monospace; font-size:.54rem;
+  letter-spacing:.14em; padding:.3rem .5rem }
+.cam-row{ display:flex; align-items:center; justify-content:center; gap:2rem;
+  margin-top:1rem }
+.cam-row .shutter{ width:4rem; height:4rem; border-radius:50%; background:#fff;
+  border:3px solid #0a0a0a; box-shadow:0 0 0 1px rgb(var(--ink)/.3); cursor:pointer }
+.ring-rec{ width:5.4rem; height:5.4rem; border-radius:50%; margin:1rem auto 0;
+  background: conic-gradient(rgb(var(--accent-deep)) 270deg, rgb(var(--ink)/.12) 0);
+  display:grid; place-items:center }
+.ring-rec i{ width:4.4rem; height:4.4rem; border-radius:50%; background: rgb(var(--paper));
+  display:grid; place-items:center; font-style:normal;
+  font-family:"Fraunces",Georgia,serif; font-size:1.4rem }
+.pickrow{ display:flex; gap:.4rem; margin-top:.7rem }
+.pickrow span{ width:3rem; height:3rem; cursor:pointer;
+  background:linear-gradient(150deg, rgb(var(--veil)), rgb(var(--accent)/.4)) }
+.pickrow span.sel{ box-shadow:0 0 0 2px rgb(var(--gild)) }
+.sheet textarea{ width:100%; margin-top:.8rem; min-height:6rem; padding:.8rem;
+  border:1px solid rgb(var(--ink)/.2); background: rgb(var(--paper-deep));
+  font-family:inherit; font-size:.9rem; color:inherit; resize:vertical }
+.iso{ margin-top:1rem; height:9rem; position:relative; overflow:hidden;
+  background: rgb(var(--paper-deep)); border:1px solid rgb(var(--ink)/.12) }
+.iso i{ position:absolute; width:3.2rem; height:2rem; background: rgb(var(--veil));
+  border:1px solid rgb(var(--ink)/.25); transform:rotateX(55deg) rotateZ(45deg) }
+.iso i.hot{ background: rgb(var(--gild)/.6); border-color: rgb(var(--gild)) }
+
+/* ---- demo palette switcher (NOT part of the product page) ----------------- */
+.tl-day .demo-switch{ bottom:9.6rem }
+.demo-switch{
+  position:fixed; left:.8rem; bottom:4.6rem; z-index:60; display:flex; gap:.4rem;
+  background: rgb(var(--ink) / .82); padding:.45rem .55rem; border-radius:999px;
+  backdrop-filter: blur(8px);
+}
+.demo-switch button{
+  width:1.6rem; height:1.6rem; border-radius:50%; border:2px solid rgb(255 255 255/.65);
+  cursor:pointer; padding:0;
+}
+.demo-switch .pa{ background:#5B6F57 } .demo-switch .pb{ background:#7A1F2B }
+.demo-switch .pc{ background:#181714; border-color:#C5A66A }
+.demo-switch .tag{ align-self:center; color:#fff; font:600 .55rem/1 "Space Mono",monospace;
+  letter-spacing:.14em; padding-inline:.2rem .3rem; text-transform:uppercase; opacity:.8 }
+</style>
+</head>
+<body class="tl-invite">
+
+<!-- DEMO ONLY: the five-timeline switcher (owner model 2026-07-25).
+     Prod maps: Save the Date / Invitation / Event Day / After = the four
+     date-driven LifecyclePhases; RSVPed = the rsvp phase forked on THIS
+     guest's confirmed reply (per-guest state, never anonymous). -->
+<div class="tl-switch" role="tablist" aria-label="Demo: timeline switch">
+  <span class="k">Demo</span>
+  <button data-tl="std" onclick="setTl('std')">Save</button>
+  <button data-tl="invite" class="active" onclick="setTl('invite')">Invite</button>
+  <button data-tl="rsvpd" onclick="setTl('rsvpd')">RSVP&rsquo;d</button>
+  <button data-tl="day" onclick="setTl('day')">Day</button>
+  <button data-tl="after" onclick="setTl('after')">After</button>
+</div>
+
+<!-- Setnayan masthead — quieter than today's header: the couple leads, the
+     platform recedes to a smallcaps whisper + the couple monogram gets the
+     gild. -->
+<header class="masthead">
+  <div class="col">
+    <span class="wordmark">Setnayan · Invitation</span>
+    <span class="mgram">C&nbsp;&amp;&nbsp;I</span>
+  </div>
+</header>
+
+<main>
+  <span id="home"></span>
+
+  <!-- ── HERO — typographic masthead ─────────────────────────────────────── -->
+  <section class="hero col">
+    <p class="eyebrow invited rv"><span class="no">№ 01</span>
+      <span data-show="std">Save the date</span>
+      <span data-show="invite">You are invited</span>
+      <span data-show="rsvpd">We&rsquo;ll see you there, Maria</span>
+      <span data-show="day">Happening today</span>
+      <span data-show="after">Married · December 18, 2026</span>
+    </p>
+    <h1 class="display rv">
+      Cale
+      <span class="amp">and</span>
+      Ice
+    </h1>
+    <div class="rule rv"></div>
+    <div class="dateblock rv">
+      <span class="bigdate">12.18.26</span>
+      <p class="place"><b>Tagaytay Highlands</b>Cavite, Philippines<br/>Friday · four in the afternoon</p>
+    </div>
+    <!-- #1 — rewatch the Save-the-Date film (any state after STD) -->
+    <button class="chip-act rv" data-show="invite rsvpd day after" onclick="openOv('film-ov')">
+      Watch the film again <span aria-hidden="true">▶</span>
+    </button>
+  </section>
+
+  <!-- full-bleed cover plate (couple photo when uploaded; palette art if not) -->
+  <figure class="cover rv" aria-label="Cover photograph placeholder">
+    <div class="img" id="parallax"></div>
+    <figcaption>
+      <span data-show="std invite rsvpd day">The engagement · Tagaytay ridge</span>
+      <span data-show="after">The wedding of Cale &amp; Ice · one day, in full</span>
+    </figcaption>
+    <div class="seal" aria-hidden="true">C·I</div>
+  </figure>
+
+  <!-- RSVPed — the stamped keepsake ticket (the reply card, transformed).
+       The most-revisited, most-screenshotted object on the page. -->
+  <div class="col" data-show="rsvpd">
+    <div class="ticket rv">
+      <span class="punch l" aria-hidden="true"></span>
+      <span class="punch r" aria-hidden="true"></span>
+      <div class="toprow">
+        <span class="stamp">Joyfully accepted</span>
+        <span class="stubno">Nº 042<br/>18 · XII · 26</span>
+      </div>
+      <p class="guestline">Maria Santos <em>&amp; one seat, reserved</em></p>
+      <hr class="perf" aria-hidden="true"/>
+      <div class="meta">
+        <span>Table <b>Seven</b></span>
+        <span>The Glasshouse</span>
+        <span>4:00 PM</span>
+      </div>
+      <p class="keep">Keep this page — it&rsquo;s your place card, your table, and your QR on the day.</p>
+    </div>
+  </div>
+
+  <!-- Event Day — happening-now strip replaces the countdown -->
+  <div class="nowstrip rv" data-show="day">
+    <div class="col">
+      <span class="livedot" aria-hidden="true"></span>
+      <span class="t">Happening now · Chapel on the Ridge</span>
+    </div>
+  </div>
+
+  <!-- #16 — phones-down request (Photo Moments 'present' mode), dismissible -->
+  <div class="col" data-show="day">
+    <div class="phones-down rv" id="phones-down">
+      <span class="em" aria-hidden="true">📵</span>
+      <p>The couple asks: <b>phones down for the ceremony.</b> The photographers have it —
+        cameras open again at cocktails.</p>
+      <button type="button" onclick="document.getElementById('phones-down').style.display='none'">Noted</button>
+    </div>
+  </div>
+
+  <!-- countdown strip (STD teases it, Invitation keeps it, RSVPed makes it
+       the emotional center — bigger numerals + a salutation line) -->
+  <div class="count rv" role="timer" aria-label="Countdown to the wedding" data-show="std invite rsvpd">
+    <p class="count-k" data-show="rsvpd">Until we celebrate with you —</p>
+    <div class="col">
+      <div class="cell"><div class="n" id="cd-d">—</div><div class="l">days</div></div>
+      <div class="cell"><div class="n" id="cd-h">—</div><div class="l">hours</div></div>
+      <div class="cell"><div class="n" id="cd-m">—</div><div class="l">minutes</div></div>
+      <div class="cell"><div class="n" id="cd-s">—</div><div class="l">seconds</div></div>
+    </div>
+  </div>
+
+  <!-- Save the Date — the announce plate: tease, ask nothing -->
+  <section class="chapter col" data-show="std">
+    <p class="eyebrow center rv"><span class="no">№ 02</span> A note for your calendar</p>
+    <div class="announce rv">
+      <p class="line">The formal invitation follows<br/>in September.</p>
+      <p class="when">Until then — hold the date</p>
+      <button class="cal" type="button">Add to calendar</button>
+    </div>
+  </section>
+
+  <!-- ── STORY ────────────────────────────────────────────────────────────── -->
+  <section class="chapter col" id="story" data-show="invite rsvpd after">
+    <p class="salut rv" data-show="invite rsvpd">Hi, <b>Maria</b> — we&rsquo;d love to celebrate with you.</p>
+    <p class="eyebrow rv"><span class="no">№ 02</span> Our story</p>
+    <h2 class="chap rv">Eight years,<br/><em>one</em> ridge line.</h2>
+    <div class="prose rv">
+      <p class="drop">We met on a bus to Tagaytay in 2018 — Cale had the window seat, Ice had the itinerary. By the overlook, we had traded both. Every year since, we've gone back to the same ridge on the same weekend, through storms, through lockdowns, through one memorably burnt bulalo.</p>
+      <p>Last December, at the overlook where it began, Cale knelt. Ice said yes before the sentence finished.</p>
+    </div>
+    <p class="pull rv">"We're not starting something new — we're naming something that's been true for years."</p>
+  </section>
+
+  <!-- ── DETAILS ──────────────────────────────────────────────────────────── -->
+  <section class="chapter col" id="details" data-show="invite rsvpd day">
+    <p class="eyebrow rv"><span class="no">№ 03</span> The day</p>
+    <h2 class="chap rv">Where &amp; when</h2>
+    <div class="venues">
+      <div class="plate rv">
+        <p class="k">Ceremony</p>
+        <h3>Chapel on the Ridge</h3>
+        <p class="addr">Tagaytay Highlands, Cavite</p>
+        <p class="t">4:00 in the afternoon</p>
+        <a class="maplink" href="#details">Open in Maps →</a>
+      </div>
+      <div class="plate rv">
+        <p class="k">Reception</p>
+        <h3>The Glasshouse</h3>
+        <p class="addr">Twin Lakes, Laurel, Batangas</p>
+        <p class="t">6:30 in the evening</p>
+        <a class="maplink" href="#details">Open in Maps →</a>
+        <!-- #11 — live maps: Waze on the day -->
+        <a class="maplink" href="#details" data-show="day" style="margin-left:.9rem">Open in Waze →</a>
+      </div>
+      <!-- #2 — 3D Plan doorway -->
+      <div class="plate rv" style="grid-column:1/-1">
+        <p class="k">The venue, in 3D</p>
+        <h3><span data-show="std invite rsvpd after">Walk the venue in 3D</span><span data-show="day">Find your table in 3D</span></h3>
+        <p class="addr">The room as it will be — tables, stage, and the path to your seat.</p>
+        <a class="maplink" href="#details" onclick="openSheet('sh-3d');return false">Open the 3D plan →</a>
+      </div>
+      <!-- Your seat/table (YourSeatBlock) — from RSVPed onward -->
+      <div class="plate rv" data-show="rsvpd day" style="grid-column:1/-1">
+        <p class="k">Your table, Maria</p>
+        <h3>Table Seven <em style="font-weight:300">· by the glass wall</em></h3>
+        <p class="addr">Show this page — it&rsquo;s your place card and your QR.</p>
+        <a class="maplink" href="#details">Find my seat →</a>
+      </div>
+    </div>
+
+    <!-- schedule -->
+    <p class="eyebrow rv" style="margin-top:3.4rem"><span class="no">№ 04</span> Programme
+      <!-- #10 — live schedule sync -->
+      <span class="sync-tag" data-show="day"><span class="livedot"></span>synced live</span>
+    </p>
+    <div class="sched rv">
+      <div class="row"><span class="time">3:30 PM</span><p class="what"><b>Guests arrive</b><span>Chapel doors open · welcome drinks</span></p></div>
+      <div class="row"><span class="time">4:00 PM</span><p class="what"><b>The ceremony</b><span>Chapel on the Ridge</span></p></div>
+      <div class="row now"><span class="time">5:30 PM<span class="rownow-tag"><span class="livedot"></span>Now</span></span><p class="what"><b>Golden hour</b><span>Cocktails on the overlook · photo moments</span></p></div>
+      <div class="row"><span class="time">6:30 PM</span><p class="what"><b>Dinner &amp; toasts</b><span>The Glasshouse</span></p></div>
+      <div class="row"><span class="time">9:00 PM</span><p class="what"><b>First dance</b><span>Then everyone else's</span></p></div>
+    </div>
+
+    <!-- Event Day — the live layer, in the plate grammar (not app chrome):
+         watch-live for the ones who couldn't fly home, the live wall mirror. -->
+    <div data-show="day">
+      <!-- LIVE STUDIO — the channel viewer (Unified Spec 2026-07-25):
+           Channel 1 = the controlled screen (the directed program, big
+           player); every camera = its own numbered channel with the HOST'S
+           OWN name; guests get guest-pick — tap a smaller tile to watch that
+           channel on demand; ★ marks the host's default view. -->
+      <p class="eyebrow rv" style="margin-top:3.4rem"><span class="no">№ 05</span> Live studio</p>
+      <div class="viewer rv">
+        <div class="ch1">
+          <span class="tag">CH 1 · Controlled screen</span>
+          <span class="onair"><span class="livedot" style="background:#fff"></span> On air</span>
+          <span class="playbig" aria-hidden="true"></span>
+        </div>
+        <div class="chrail" role="group" aria-label="Camera channels — watch any on demand">
+          <button class="active" type="button">
+            <span class="tile"><span class="chno">CH 2</span></span>
+            <span class="nm"><span class="star">★</span> Main Stage</span>
+          </button>
+          <button type="button">
+            <span class="tile"><span class="chno">CH 3</span></span>
+            <span class="nm">Garden Aisle</span>
+          </button>
+          <button type="button">
+            <span class="tile"><span class="chno">CH 4</span></span>
+            <span class="nm">Reception Doors</span>
+          </button>
+        </div>
+        <p class="note">Stay with the couple&rsquo;s program on Channel&nbsp;1 — or tap any
+          camera to watch it on demand.</p>
+      </div>
+
+      <!-- PAPIC WALL — kept adjacent to the studio ("the place for the live
+           studio with papic wall"). -->
+      <div class="liveplate rv">
+        <div class="head">
+          <span class="k">The Papic wall</span>
+          <span class="n">312 photos · arriving live</span>
+        </div>
+        <!-- #12 — wall tiles open a lightbox -->
+        <div class="wallgrid">
+          <span onclick="openLB(this,'The Papic wall · 4:47 PM')"></span><span onclick="openLB(this,'The Papic wall · 4:52 PM')"></span><span onclick="openLB(this,'The Papic wall · 5:01 PM')"></span><span onclick="openLB(this,'The Papic wall · 5:08 PM')"></span><span onclick="openLB(this,'The Papic wall · 5:15 PM')"></span><span onclick="openLB(this,'The Papic wall · 5:22 PM')"></span>
+        </div>
+      </div>
+
+      <!-- PAPIC POOL BAR (OnTheDay build ③) — live points meter · Top up ·
+           Add-a-camera, on the site during the live window. -->
+      <div class="poolbar rv">
+        <div class="top">
+          <span class="k">Papic pool</span>
+          <span class="nums">6,480 of 10,250 points left</span>
+        </div>
+        <div class="meter" role="meter" aria-label="Capture points remaining"><i></i></div>
+        <div class="foot">
+          <span class="rate">photo = 1 pt · 10-s clip = 7 pts</span>
+          <span class="acts">
+            <button class="btn-quiet" type="button">Add a camera</button>
+            <button class="btn-ink" type="button">Top up</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- THE PAPIC APP — camera + roll, after the owner's 0012 prototype
+           (white shutter · last-5 strip · amber tag ring). -->
+      <div class="rollplate rv">
+        <div class="head">
+          <span class="k">Your camera · Papic</span>
+          <button class="shutter" type="button" aria-label="Open the camera" onclick="openSheet('sh-cam')"></button>
+        </div>
+        <div class="body">
+          <p class="copy"><b>Shoot the day as you see it.</b> Every shot lands in the
+            couple&rsquo;s gallery — scan a guest&rsquo;s QR after a shot to tag them.</p>
+        </div>
+        <div class="roll-thumbs" aria-hidden="true">
+          <span class="tagged"></span><span></span><span class="tagged"></span><span></span><span></span>
+        </div>
+        <p class="cap">Your roll · 12 shots · amber = tagged</p>
+      </div>
+    </div>
+
+    <!-- dress code -->
+    <div data-show="invite rsvpd">
+    <p class="eyebrow rv" style="margin-top:3.4rem"><span class="no">№ 05</span> Attire</p>
+    <div class="dress rv">
+      <h2 class="chap" style="font-size:1.7rem">Formal, in forest &amp; champagne</h2>
+      <div class="swatches" aria-label="Suggested attire palette">
+        <span class="sw" style="background:#3d4f3a" title="Deep pine"></span>
+        <span class="sw" style="background:#5B6F57" title="Sage"></span>
+        <span class="sw" style="background:#c9b58f" title="Champagne"></span>
+        <span class="sw" style="background:#efe8da" title="Ivory"></span>
+      </div>
+      <p class="small">Barong and formal suits warmly welcome. Please save white for the bride — and bring a wrap; the ridge gets cool after sunset.</p>
+    </div>
+    </div>
+  </section>
+
+  <!-- ── FACE TAG (DayOfFaceEnroll / FaceDataNotice) — consent-forward ────── -->
+  <section class="chapter col" data-show="rsvpd day">
+    <p class="eyebrow rv"><span class="no">✦</span> Face tag · optional</p>
+    <div class="plate faceplate rv">
+      <p class="k">Photos that find you</p>
+      <p class="line">Add one selfie, and every photo of you finds its way to your gallery.</p>
+      <p class="consent">Used for this celebration only — never reused across events, never shared,
+        and you can remove it anytime. Skip it, and your QR does the same job by hand.</p>
+      <div class="acts">
+        <!-- #5 — face-tag enrollment sheet -->
+        <button class="btn-ink" type="button" onclick="openSheet('sh-face')">Add my face</button>
+        <button class="skip" type="button" onclick="toast('No problem — your QR does the same job.')">No thanks — I&rsquo;ll use my QR</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── GALLERY ──────────────────────────────────────────────────────────── -->
+  <section class="chapter col" id="gallery" data-show="invite rsvpd after">
+    <p class="eyebrow rv"><span class="no">№ 06</span> Gallery</p>
+    <h2 class="chap rv"><span data-show="invite rsvpd">Before the big day</span><span data-show="after">The day, kept</span></h2>
+    <div class="mosaic rv">
+      <figure class="ph"><figcaption>2018 · The bus</figcaption></figure>
+      <figure class="ph"><figcaption>2021 · The storm year</figcaption></figure>
+      <figure class="ph"><figcaption>2024 · Same ridge</figcaption></figure>
+      <figure class="ph"><figcaption>2025 · She said yes</figcaption></figure>
+      <figure class="ph wide"><figcaption>December 2025 · The overlook</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- ── YOUR PHOTOS (your_photos — the guest's OWN tagged gallery) ───────── -->
+  <section class="chapter col" data-show="day after">
+    <p class="eyebrow rv"><span class="no">✦</span> Photos of you</p>
+    <h2 class="chap rv" style="font-size:1.7rem">
+      <span data-show="day">Arriving through the day</span>
+      <span data-show="after">Every one of you, kept</span>
+    </h2>
+    <div class="liveplate rv">
+      <div class="head">
+        <span class="k">Your gallery</span>
+        <span class="n"><span data-show="day">live</span><span data-show="after">yours to keep</span></span>
+      </div>
+      <!-- #13 — two lanes: photos OF you vs photos BY you -->
+      <div class="lane-tabs" role="group" aria-label="Gallery lanes">
+        <button class="active" id="lane-of-btn" onclick="setLane('of')">Of you (27)</button>
+        <button id="lane-by-btn" onclick="setLane('by')">By you (14)</button>
+      </div>
+      <div class="mygrid" id="lane-of">
+        <figure onclick="openLB(this,'Of you · golden hour')"><span class="notme" onclick="event.stopPropagation();toast('Removed — that one wasn\'t you.')">Not me</span></figure>
+        <figure onclick="openLB(this,'Of you · the ceremony')"></figure>
+        <figure onclick="openLB(this,'Of you · cocktails')"><span class="notme" onclick="event.stopPropagation();toast('Removed — that one wasn\'t you.')">Not me</span></figure>
+        <figure onclick="openLB(this,'Of you · dinner')"></figure>
+        <figure onclick="openLB(this,'Of you · the toast')"></figure>
+        <figure onclick="openLB(this,'Of you · first dance')"></figure>
+      </div>
+      <div class="mygrid" id="lane-by" style="display:none">
+        <figure onclick="openLB(this,'By you · shot 01')"></figure>
+        <figure onclick="openLB(this,'By you · shot 02')"></figure>
+        <figure onclick="openLB(this,'By you · shot 03')"></figure>
+        <figure onclick="openLB(this,'By you · shot 04')"></figure>
+      </div>
+      <p class="sub" style="margin-top:.9rem; font-size:.8rem; color:rgb(var(--ink)/.6)">
+        Tap any photo to open it. Tap <b>Not me</b> on a wrong guess — it disappears for good.
+      </p>
+      <!-- #14 — download all (Of-you lane) -->
+      <button class="chip-act" id="dl-chip" onclick="toast('Saving 27 photos to your phone…')">Download all ↓</button>
+    </div>
+
+    <!-- keep-your-photos (tier_comparison, reskinned): connect-to-account -->
+    <div class="rv" style="margin-top:2.2rem">
+      <p class="eyebrow"><span class="no">✦</span> Keep them</p>
+      <div class="keepcols">
+        <div>
+          <p class="k">Tonight</p>
+          <ul><li>Browse &amp; save</li><li>Open until tomorrow</li><li>No account needed</li></ul>
+        </div>
+        <div>
+          <p class="k">With a free account</p>
+          <!-- #18 — the logged-in unlock list; locks flip when linked (#6) -->
+          <ul class="locklist">
+            <li><span class="lk">🔒</span>Photos kept forever</li>
+            <li><span class="lk">🔒</span>One gallery across every event</li>
+            <li><span class="lk">🔒</span>Your 3D avatar</li>
+            <li><span class="lk">🔒</span>Google Drive backup</li>
+            <li><span class="lk">🔒</span>Saved vendors for your own event</li>
+          </ul>
+        </div>
+      </div>
+      <button class="btn-ink" style="margin-top:1rem" onclick="openSheet('sh-link')">Keep them forever — free</button>
+    </div>
+  </section>
+
+  <!-- ── E-GIFTS (Pabuya) + PABATI greeting ───────────────────────────────── -->
+  <section class="chapter col" data-show="rsvpd day after">
+    <p class="eyebrow rv"><span class="no">✦</span> Gifts &amp; greetings</p>
+    <div class="giftgrid">
+      <!-- #9 — e-gift QR (Pabuya) -->
+      <div class="plate gift rv">
+        <p class="k">E-gifts · Pabuya</p>
+        <p class="line">Your presence is the present — but if you&rsquo;d like to give more, here&rsquo;s our registry.</p>
+        <button class="btn-ink" onclick="openSheet('sh-gift')">Send an e-gift</button>
+      </div>
+      <!-- #20 — Pabati 5-second greeting -->
+      <div class="plate gift rv" data-show="day">
+        <p class="k">Pabati · 5 seconds</p>
+        <p class="line">Leave the couple a five-second greeting — it plays in their thank-you film.</p>
+        <p class="sub">212 of 300 greetings left</p>
+        <button class="btn-quiet" onclick="openSheet('sh-pabati')">● Record a pabati</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- #19 — guest column: write for the couple (Day + After) -->
+  <section class="chapter col" data-show="day after">
+    <p class="eyebrow rv"><span class="no">✦</span> Your words</p>
+    <div class="plate gift rv">
+      <p class="k">Write for Cale &amp; Ice</p>
+      <p class="line">A paragraph from you — for the couple&rsquo;s keepsake paper.</p>
+      <p class="sub">The couple reads and approves every column before it prints.</p>
+      <button class="btn-ink" onclick="openSheet('sh-column')">Write a column</button>
+    </div>
+  </section>
+
+  <!-- #17 — favorite vendors (After): the people who made it -->
+  <section class="chapter col" data-show="after">
+    <p class="eyebrow rv"><span class="no">✦</span> The people who made it</p>
+    <div class="plate rv">
+      <div class="vrow">
+        <span class="vn"><b>Highlands Bloom Studio</b><span>Florals</span></span>
+        <button class="vheart" onclick="saveVendor(this)">♡ Save</button>
+      </div>
+      <div class="vrow">
+        <span class="vn"><b>Casa Marikit Catering</b><span>Catering</span></span>
+        <button class="vheart" onclick="saveVendor(this)">♡ Save</button>
+      </div>
+      <div class="vrow" style="border-bottom:0">
+        <span class="vn"><b>Lente ni Lino</b><span>Photography</span></span>
+        <button class="vheart" onclick="saveVendor(this)">♡ Save</button>
+      </div>
+      <p class="sub" style="margin-top:.7rem; font-size:.78rem; color:rgb(var(--ink)/.55)">
+        Saved vendors carry to your own Setnayan account — for the day it&rsquo;s your turn.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── RSVP — the reply card (the ASK exists only on Invitation) ────────── -->
+  <section class="chapter col" id="rsvp" data-show="invite">
+    <p class="eyebrow center rv"><span class="no">№ 07</span> Kindly reply</p>
+    <form class="reply rv" onsubmit="event.preventDefault()">
+      <span class="stub">Nº 042 · MARIA S.</span>
+      <p class="rsvp-word">RSVP</p>
+      <p class="kindly">The favour of your reply is requested<br/>by the first of November</p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="r" checked/>Joyfully accepts</label>
+        <label class="opt"><input type="radio" name="r"/>Undecided, for now</label>
+        <label class="opt"><input type="radio" name="r"/>Regretfully declines</label>
+      </div>
+      <button class="send" type="submit">Send reply</button>
+    </form>
+  </section>
+
+  <!-- ── AFTER EVENT — thank-you sign-off + the kept memento ─────────────── -->
+  <section class="chapter col" data-show="after">
+    <p class="eyebrow center rv"><span class="no">№ 07</span> With thanks</p>
+    <div class="thanks rv">
+      <p class="line">You crossed mountains, storms, and one long December traffic jam to stand with us. We&rsquo;ll never forget it.</p>
+      <p class="from">— Cale &amp; Ice</p>
+    </div>
+    <div class="ticket rv" style="margin-top:2.4rem">
+      <span class="punch l" aria-hidden="true"></span>
+      <span class="punch r" aria-hidden="true"></span>
+      <div class="toprow">
+        <span class="stamp">You were there</span>
+        <span class="stubno">Nº 042<br/>18 · XII · 26</span>
+      </div>
+      <p class="guestline">Maria Santos <em>· Table Seven</em></p>
+      <hr class="perf" aria-hidden="true"/>
+      <p class="keep">Your photos from the day live in the gallery above — every one of you, yours to keep.</p>
+    </div>
+  </section>
+
+  <!-- ── ME — the guest hub plate (GuestHubCard/Bar): avatar · name · role/
+       side · RSVP status · personal QR ("invite") · connect-to-account.
+       Present in EVERY timeline state — the guest's constant. ─────────────── -->
+  <section class="chapter col" id="me">
+    <span id="you"></span>
+    <p class="eyebrow rv"><span class="no">✦</span> Yours, Maria</p>
+    <div class="plate rv">
+      <div class="hub">
+        <div>
+          <div class="who">
+            <span class="avatar" aria-hidden="true">MS</span>
+            <span>
+              <span class="nm">Maria Santos</span>
+              <!-- #7 — custom role, rendered as the host wrote it -->
+              <span class="rl" style="display:block">Ninang · Bride&rsquo;s side</span>
+            </span>
+          </div>
+          <p class="status">
+            <span data-show="std invite">Awaiting your reply</span>
+            <span data-show="rsvpd day">Attending · Table Seven</span>
+            <span data-show="after">You were there · Table Seven</span>
+          </p>
+          <div class="hub-actions">
+            <button class="btn-ink" onclick="openOv('qr-ov')">Show my QR</button>
+            <a class="btn-quiet" href="#gallery" data-show="day">Photos of me</a>
+          </div>
+          <!-- #4 — 3D avatar maker doorway -->
+          <div class="vrow" style="margin-top:1rem">
+            <span style="display:flex; align-items:center; gap:.7rem">
+              <span class="avatar-sil" aria-hidden="true"></span>
+              <span class="vn"><b>Make your avatar</b><span>Walks the 3D venue as you</span></span>
+            </span>
+            <button class="vheart" onclick="openSheet('sh-avatar')">Start</button>
+          </div>
+          <!-- #15 — Drive backup (guest side: honest build-pending tag) -->
+          <div class="vrow" style="border-bottom:0">
+            <span class="vn"><b>Auto-backup to Google Drive ↗</b>
+              <span class="pend-tag" style="margin-top:.3rem; display:inline-block">guest backup — build pending</span></span>
+            <button class="tgl" id="drive-tgl" onclick="toggleDrive(this)" aria-label="Toggle Drive backup">
+              <span class="tr"></span>
+            </button>
+          </div>
+          <!-- #6 — connect-to-account -->
+          <p class="connect" id="connect-blk">
+            <b>Keep this on your phone.</b> Get a sign-in link by email — your invite,
+            your table, and your photos on any device. No password.
+            <button class="btn-quiet" style="margin-top:.7rem; display:inline-flex" onclick="openSheet('sh-link')">Email me a link</button>
+          </p>
+        </div>
+        <div class="qrbox" onclick="openOv('qr-ov')" style="cursor:pointer">
+          <!-- personal invitation QR (placeholder mark — prod renders the real
+               monogrammed SVG) -->
+          <svg viewBox="0 0 29 29" role="img" aria-label="Your personal QR code">
+            <rect width="29" height="29" fill="#fff"/>
+            <g fill="#1c1f1a">
+              <path d="M2 2h7v7H2zM4 4h3v3H4zM20 2h7v7h-7zM22 4h3v3h-3zM2 20h7v7H2zM4 22h3v3H4z"/>
+              <path d="M11 2h2v2h-2zM15 3h2v2h-2zM11 6h2v3h-2zM15 7h3v2h-3zM11 11h3v2h-3zM16 11h2v3h-2zM20 11h2v2h-2zM24 12h3v2h-3zM3 11h2v3H3zM6 12h3v2H6zM2 16h3v2H2zM7 16h2v2H7zM11 15h2v3h-2zM15 16h3v2h-3zM20 15h2v3h-2zM24 16h2v2h-2zM11 20h2v2h-2zM14 21h3v2h-3zM19 20h3v2h-3zM24 20h3v3h-3zM11 24h3v3h-3zM16 24h2v2h-2zM20 24h2v3h-2zM24 25h2v2h-2z"/>
+            </g>
+            <rect x="12.2" y="12.2" width="4.6" height="4.6" fill="#fff"/>
+            <text x="14.5" y="15.9" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="3.6" fill="#B08D57">C·I</text>
+          </svg>
+          <p class="cap">Your invite · scan to open</p>
+          <!-- #8 — the same QR is the Papic tag token -->
+          <p class="cap" style="color:rgb(var(--gild))">Papic cameras tag you<br/>when this QR is seen</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="sig">
+    <p class="see"><span data-show="std invite rsvpd day">See you on the ridge.</span><span data-show="after">Thank you for being there.</span></p>
+    <p class="mg">C &amp; I</p>
+    <p class="brand">Powered by Setnayan · setnayan.com</p>
+  </footer>
+</main>
+
+<!-- GuestHubBar, reskinned — the OWNER'S existing day-of chrome (council
+     verdict §1.1 + guest-hub-bar.tsx): My QR chip (left) · prominent round
+     Camera (center) · Photos chip w/ count badge (right), floating ABOVE the
+     five text tabs; the transient LIVE hub chip injected next to the center
+     action, exactly as GuestHubBar.hubHref does today. Day (live window) only. -->
+<div class="hubbar" data-show="day" aria-label="Your event controls">
+  <div class="row">
+    <!-- left: My QR — 3.25rem rounded-2xl chip, QrCode icon (20/1.75) above label -->
+    <button class="hub-chip" type="button" aria-label="Show my QR code">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+      <span class="lb">My QR</span>
+    </button>
+    <!-- transient LIVE hub chip — h-10 rounded-full bg-ink px-3.5 (council §1.1:
+         injected next to the center action, as GuestHubBar.hubHref) -->
+    <a class="live-chip" href="#details" aria-label="Open the live event hub">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+      Live hub
+    </a>
+    <!-- center: Camera — 64px solid circle, raised, icon (24/2) + semibold label INSIDE -->
+    <a class="hub-cam" href="#gallery" aria-label="Your Papic camera" onclick="openSheet('sh-cam');return false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+      <span class="lb">Camera</span>
+    </a>
+    <!-- right: Photos — chip with Images icon + label, count badge -right-1 -top-1 -->
+    <a class="hub-chip" href="#gallery" aria-label="Photos of you">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/></svg>
+      <span class="lb">Photos</span>
+      <span class="badge">27</span>
+    </a>
+  </div>
+</div>
+
+<!-- bottom menu — same 5 anchors as production SiteMenuBar (five TEXT tabs,
+     council §1.1: Home · Details · Story · Photos · Me — nothing else in the row) -->
+<nav class="tabs" aria-label="Site sections">
+  <ul>
+    <li><a href="#home" class="active">Home</a></li>
+    <li><a href="#details">Details</a></li>
+    <li><a href="#story">Story</a></li>
+    <li><a href="#gallery">Photos</a></li>
+    <li><a href="#me">Me</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════ V6 interactive mocks: overlays · sheets · toast ══════════ -->
+<div class="veil-ov" id="veil" onclick="closeAll()"></div>
+
+<!-- #1 film overlay -->
+<div class="fsov" id="film-ov">
+  <div class="veilcloth" aria-hidden="true"></div>
+  <button class="x" onclick="closeAll()" aria-label="Close">✕</button>
+  <p class="ln">The film · Cale &amp; Ice</p>
+  <p class="mg">C &amp; I</p>
+  <p class="ln">12 · 18 · 26 — Tagaytay</p>
+  <p class="ln" style="opacity:.6">▶ playing…</p>
+</div>
+
+<!-- #8 personal QR fullscreen (mirrors the shipped setQrOpen modal) -->
+<div class="fsov" id="qr-ov">
+  <button class="x" onclick="closeAll()" aria-label="Close">✕</button>
+  <svg class="qrbig" viewBox="0 0 29 29" role="img" aria-label="Your personal QR code"><use href="#qr-mark"/></svg>
+  <p class="nm">Maria Santos</p>
+  <p class="sub">Ninang · Bride&rsquo;s side · Table Seven</p>
+  <p class="sub" style="opacity:.7">Papic cameras tag you when this QR is seen</p>
+</div>
+
+<!-- #12 lightbox -->
+<div class="fsov" id="lb-ov">
+  <button class="x" onclick="closeAll()" aria-label="Close">✕</button>
+  <div class="big" id="lb-img"></div>
+  <p class="cap" id="lb-cap"></p>
+</div>
+
+<!-- #3 Papic camera sheet -->
+<div class="sheet" id="sh-cam">
+  <button class="sh-x" onclick="closeAll()" aria-label="Close">✕</button>
+  <p class="sh-k">Papic · your camera</p>
+  <div class="viewfinder" style="margin-top:.8rem">
+    <span class="pts">6,480 pts · photo = 1 · 10-s clip = 7</span>
+  </div>
+  <div class="cam-row">
+    <button class="shutter" onclick="toast('Click. Into the couple\'s gallery it goes.')" aria-label="Shutter"></button>
+  </div>
+  <div class="roll-thumbs" style="justify-content:center">
+    <span class="tagged"></span><span></span><span class="tagged"></span><span></span><span></span>
+  </div>
+  <p class="sh-p" style="text-align:center">Your roll · 12 shots · amber = tagged.
+    Scan a guest&rsquo;s QR after a shot to tag them.</p>
+</div>
+
+<!-- #2 3D plan sheet -->
+<div class="sheet" id="sh-3d">
+  <button class="sh-x" onclick="closeAll()" aria-label="Close">✕</button>
+  <p class="sh-k">The venue · in 3D</p>
+  <p class="sh-t">The Glasshouse, as it will be</p>
+  <div class="iso" aria-hidden="true">
+    <i style="left:12%; top:22%"></i><i style="left:44%; top:14%"></i><i style="left:70%; top:26%"></i>
+    <i style="left:24%; top:55%"></i><i class="hot" style="left:52%; top:48%"></i><i style="left:76%; top:60%"></i>
+  </div>
+  <p class="sh-p"><b style="color:rgb(var(--gild))">★ Table Seven</b> — by the glass wall.
+    Walk the room, find your path from the doors to your seat.</p>
+  <button class="btn-ink" onclick="toast('Walking you to Table Seven…')">Walk to my table</button>
+</div>
+
+<!-- #4 avatar maker sheet -->
+<div class="sheet" id="sh-avatar">
+  <button class="sh-x" onclick="closeAll()" aria-label="Close">✕</button>
+  <p class="sh-k">Your avatar <span class="pend-tag" style="margin-left:.5rem">coming with 3D Plan</span></p>
+  <p class="sh-t">Three taps, and it&rsquo;s you</p>
+  <div class="turn"><span class="avatar-sil" aria-hidden="true"></span></div>
+  <p class="sh-p" style="margin-top:.9rem">Base</p>
+  <div class="opt-row"><span class="sel" style="background:#e8c39e"></span><span style="background:#c99b6d"></span><span style="background:#8c5f3f"></span></div>
+  <p class="sh-p" style="margin-top:.6rem">Hair</p>
+  <div class="opt-row"><span class="sel" style="background:#221a12"></span><span style="background:#4c3319"></span><span style="background:#7d7d7d"></span></div>
+  <p class="sh-p" style="margin-top:.6rem">Outfit</p>
+  <div class="opt-row"><span class="sel" style="background:#5B6F57"></span><span style="background:#7A1F2B"></span><span style="background:#c9b58f"></span></div>
+  <button class="btn-ink" style="margin-top:1.1rem" onclick="toast('Saved — your avatar walks the 3D venue.')">That&rsquo;s me</button>
+</div>
+
+<!-- #5 face-tag sheet -->
+<div class="sheet" id="sh-face">
+  <button class="sh-x" onclick="closeAll()" aria-label="Close">✕</button>
+  <p class="sh-k">Face tag · optional</p>
+  <p class="sh-t">One selfie, and the day finds you</p>
+  <div class="viewfinder" style="max-height:26dvh; margin-top:.8rem; border-radius:50%; aspect-ratio:1; max-width:14rem; border:1px dashed rgb(var(--gild))"></div>
+  <p class="sh-p">Used for <b>this celebration only</b> — never reused across events, never
+    shared, removable anytime from this page.</p>
+  <div style="display:flex; gap:.6rem; margin-top:1rem; align-items:center">
+    <button class="btn-ink" onclick="toast('Enrolled — your photos will find you.')">Use this selfie</button>
+    <button class="skip" onclick="closeAll()">Decline quietly</button>
+  </div>
+</div>
+
+<!-- #6 link-account sheet -->
+<div class="sheet" id="sh-link">
+  <button class="sh-x" onclick="closeAll()" aria-label="Close">✕</button>
+  <p class="sh-k">Keep this on your phone</p>
+  <p class="sh-t">A sign-in link, by email</p>
+  <p class="sh-p">Your invite, your table, and your photos — on any device, forever. No password.</p>
+  <input type="email" placeholder="you@email.com" aria-label="Your email"
+    style="width:100%; margin-top:.8rem; padding:.8rem; border:1px solid rgb(var(--ink)/.2); background:rgb(var(--paper-deep)); font:inherit; color:inherit"/>
+  <button class="btn-ink" style="margin-top:.8rem" onclick="setLinked()">Send my link</button>
+</div>
+
+<!-- #9 e-gift QR sheet -->
+<div class="sheet" id="sh-gift">
+  <button class="sh-x" onclick="closeAll()" aria-label="Close">✕</button>
+  <p class="sh-k">E-gifts · Pabuya</p>
+  <p class="sh-t">Scan to send a gift</p>
+  <svg viewBox="0 0 29 29" style="width:11rem; height:11rem; background:#fff; padding:.7rem; display:block; margin:1rem auto; border:1px solid rgb(var(--ink)/.14)" role="img" aria-label="Gift QR"><use href="#qr-mark"/></svg>
+  <p class="sh-p" style="text-align:center">GCash · Maya · bank — straight to the couple.
+    A note rides along with your name.</p>
+</div>
+
+<!-- #19 guest-column writer sheet -->
+<div class="sheet" id="sh-column">
+  <button class="sh-x" onclick="closeAll()" aria-label="Close">✕</button>
+  <p class="sh-k">Your words · for the paper</p>
+  <p class="sh-t">Dear Cale &amp; Ice,</p>
+  <textarea placeholder="Write a paragraph for the couple's keepsake paper…"></textarea>
+  <p class="sh-p">Attach one of your photos</p>
+  <div class="pickrow">
+    <span onclick="pickPhoto(this)"></span><span onclick="pickPhoto(this)"></span><span onclick="pickPhoto(this)"></span><span onclick="pickPhoto(this)"></span>
+  </div>
+  <button class="btn-ink" style="margin-top:1rem" onclick="toast('Sent — the couple reads it before it prints.')">Send to the couple</button>
+</div>
+
+<!-- #20 pabati recorder sheet -->
+<div class="sheet" id="sh-pabati">
+  <button class="sh-x" onclick="closeAll()" aria-label="Close">✕</button>
+  <p class="sh-k">Pabati · 5 seconds</p>
+  <p class="sh-t">Say it in five</p>
+  <div class="ring-rec"><i>5</i></div>
+  <p class="sh-p" style="text-align:center">Recording starts on tap — five seconds, one take,
+    straight into the couple&rsquo;s thank-you film.</p>
+  <div style="text-align:center; margin-top:.6rem">
+    <button class="btn-ink" onclick="toast('Recorded — salamat, Ninang Maria!')">● Record</button>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<!-- shared QR mark (used by hub, fullscreen, gift) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><g id="qr-mark">
+  <rect width="29" height="29" fill="#fff"/>
+  <g fill="#1c1f1a">
+    <path d="M2 2h7v7H2zM4 4h3v3H4zM20 2h7v7h-7zM22 4h3v3h-3zM2 20h7v7H2zM4 22h3v3H4z"/>
+    <path d="M11 2h2v2h-2zM15 3h2v2h-2zM11 6h2v3h-2zM15 7h3v2h-3zM11 11h3v2h-3zM16 11h2v3h-2zM20 11h2v2h-2zM24 12h3v2h-3zM3 11h2v3H3zM6 12h3v2H6zM2 16h3v2H2zM7 16h2v2H7zM11 15h2v3h-2zM15 16h3v2h-3zM20 15h2v3h-2zM24 16h2v2h-2zM11 20h2v2h-2zM14 21h3v2h-3zM19 20h3v2h-3zM24 20h3v3h-3zM11 24h3v3h-3zM16 24h2v2h-2zM20 24h2v3h-2zM24 25h2v2h-2z"/>
+  </g>
+  <rect x="12.2" y="12.2" width="4.6" height="4.6" fill="#fff"/>
+  <text x="14.5" y="15.9" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="3.6" fill="#B08D57">C·I</text>
+</g></defs></svg>
+
+<!-- DEMO ONLY: palette switcher proving the bespoke re-skin. In production this
+     is the couple's role_palette → buildSitePaletteVars, not a visible control. -->
+<div class="demo-switch" role="group" aria-label="Demo: couple palette switch">
+  <span class="tag">Demo</span>
+  <button class="pa" title="Couple A — pine &amp; champagne (Cale &amp; Ice)" onclick="setPal('')"></button>
+  <button class="pb" title="Couple B — burgundy &amp; blush" onclick="setPal('palette-b')"></button>
+  <button class="pc" title="Couple C — candlelight (dark art direction)" onclick="setPal('palette-c')"></button>
+</div>
+
+<script>
+/* ---- V6 interactive mocks --------------------------------------------------- */
+var openEl = null;
+function veil(on){ document.getElementById('veil').classList.toggle('on', on); }
+function closeAll(){
+  document.querySelectorAll('.sheet.on,.fsov.on').forEach(function(e){ e.classList.remove('on'); });
+  veil(false); openEl = null;
+}
+function openSheet(id){ closeAll(); veil(true);
+  openEl = document.getElementById(id); openEl.classList.add('on'); }
+function openOv(id){ closeAll();
+  openEl = document.getElementById(id); openEl.classList.add('on'); }
+addEventListener('keydown', function(e){ if(e.key === 'Escape') closeAll(); });
+var toastT = null;
+function toast(msg){
+  var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove('on'); }, 2400);
+}
+/* #12 lightbox — clones the tapped tile's gradient */
+function openLB(el, cap){
+  var big = document.getElementById('lb-img');
+  big.style.background = getComputedStyle(el).background;
+  document.getElementById('lb-cap').textContent = cap;
+  openOv('lb-ov');
+}
+/* #13 of-you / by-you lanes */
+function setLane(which){
+  document.getElementById('lane-of').style.display = which === 'of' ? '' : 'none';
+  document.getElementById('lane-by').style.display = which === 'by' ? '' : 'none';
+  document.getElementById('lane-of-btn').classList.toggle('active', which === 'of');
+  document.getElementById('lane-by-btn').classList.toggle('active', which === 'by');
+  document.getElementById('dl-chip').style.display = which === 'of' ? '' : 'none';
+}
+/* #15 Drive backup toggle (guest side — mock; build pending) */
+function toggleDrive(btn){
+  btn.classList.toggle('on');
+  toast(btn.classList.contains('on')
+    ? 'Backing up your photos to Google Drive…'
+    : 'Drive backup off.');
+}
+/* #17 favorite vendors */
+function saveVendor(btn){
+  btn.classList.add('on'); btn.textContent = '♥ Saved';
+  toast('Saved for your next event.');
+}
+/* #6 + #18 — linking flips the locks */
+function setLinked(){
+  closeAll(); toast('Magic link sent — check your email ✓');
+  document.querySelectorAll('.locklist .lk').forEach(function(e){ e.textContent = '✓'; });
+  var s = document.querySelector('#connect-blk b');
+  if (s) s.textContent = 'Link sent — check your email.';
+}
+/* #19 photo pick */
+function pickPhoto(el){
+  el.parentElement.querySelectorAll('span').forEach(function(s){ s.classList.remove('sel'); });
+  el.classList.add('sel');
+}
+
+/* ---- demo palette switch (palette classes only — timeline class preserved) - */
+function setPal(cls){
+  document.body.classList.remove('palette-b','palette-c');
+  if (cls) document.body.classList.add(cls);
+}
+
+/* ---- demo timeline switch ---------------------------------------------------
+   Five owner timelines → body.tl-*. On switch: skip the scroll choreography
+   (reveal everything) and return to top so each state reads as its own page. */
+function setTl(s){
+  if (typeof closeAll === 'function') closeAll();
+  ['tl-std','tl-invite','tl-rsvpd','tl-day','tl-after'].forEach(function(c){
+    document.body.classList.remove(c);
+  });
+  document.body.classList.add('tl-' + s);
+  document.querySelectorAll('.tl-switch button').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-tl') === s);
+  });
+  document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); });
+  window.scrollTo(0, 0);
+}
+
+/* ---- countdown (vanilla, no deps) ------------------------------------------ */
+(function(){
+  var t = new Date('2026-12-18T16:00:00+08:00').getTime();
+  var d=document.getElementById('cd-d'),h=document.getElementById('cd-h'),
+      m=document.getElementById('cd-m'),s=document.getElementById('cd-s');
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function tick(){
+    var r = Math.max(0, t - Date.now());
+    d.textContent = Math.floor(r/86400000);
+    h.textContent = pad(Math.floor(r/3600000)%24);
+    m.textContent = pad(Math.floor(r/60000)%60);
+    s.textContent = pad(Math.floor(r/1000)%60);
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+/* ---- scroll reveal — IntersectionObserver, honors reduced-motion ---------- */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin:'0px 0px -8% 0px', threshold: 0.08 });
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+})();
+
+/* ---- hero cover parallax whisper (±6%, rAF-throttled, reduced-motion off) -- */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var img = document.getElementById('parallax'), ticking=false;
+  function onScroll(){
+    if(ticking) return; ticking=true;
+    requestAnimationFrame(function(){
+      var rect = img.parentElement.getBoundingClientRect();
+      var p = Math.max(-1, Math.min(1, (rect.top + rect.height/2 - innerHeight/2) / innerHeight));
+      img.style.transform = 'translateY(' + (p * -6) + '%)';
+      ticking=false;
+    });
+  }
+  addEventListener('scroll', onScroll, { passive:true }); onScroll();
+})();
+
+/* ---- bottom-tab active state follows scroll -------------------------------- */
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.tabs a'));
+  var ids = ['home','details','story','gallery','me'];
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var id = e.target.id || 'home';
+      links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+    });
+  }, { rootMargin:'-30% 0px -60% 0px' });
+  ids.forEach(function(id){ var el = document.getElementById(id); if(el) io.observe(el); });
+})();
+</script>
+</body>
+</html>

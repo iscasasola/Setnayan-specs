@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cale &amp; Ice — Pahina prototype · Setnayan premium guest site</title>
+<style>
+/* ============================================================================
+   "PAHINA" — the commissioned-editorial guest site. Design pass 2026-07-25.
+   Self-contained prototype of the INVITATION (rsvp) phase, phone-first.
+   No CDN fetches: font stacks name the intended Google faces
+   (Fraunces / Manrope / Space Mono) and fall back to local serif/sans/mono.
+   In production these load through next/font exactly like today's
+   Cormorant/Manrope/DM Mono trio — same mechanism, one display-face swap.
+   ============================================================================ */
+
+/* ---- palette layer -------------------------------------------------------
+   Mirrors lib/site-palette.ts role tokens. Everything below reads ONLY these
+   vars, so a couple's role_palette re-skins the whole page — the demo
+   switcher (bottom-left) swaps them live to prove the bespoke feel.        */
+:root{
+  /* Couple A — "Cale & Ice" · Tagaytay pine + champagne (daylight art direction) */
+  --paper: 250 248 243;        /* page */
+  --paper-deep: 243 239 230;   /* recessed plates, reply card */
+  --ink: 28 31 26;             /* text */
+  --accent: 91 111 87;         /* pine — eyebrows, rules, links */
+  --accent-deep: 54 71 52;     /* CTA fill (AA vs paper-light text) */
+  --gild: 176 141 87;          /* metallic second accent — numerals, seal */
+  --veil: 240 235 224;         /* sheer tint — hero wash, chips */
+  --on-accent: 250 248 243;    /* text on CTA */
+  --grain-opacity:.05;
+}
+/* Couple B (demo) — burgundy + blush, still daylight */
+.palette-b{
+  --paper: 251 247 246; --paper-deep: 245 236 234;
+  --ink: 43 26 30;
+  --accent: 122 31 43; --accent-deep: 88 22 31;
+  --gild: 173 128 96; --veil: 246 232 229; --on-accent: 251 247 246;
+}
+/* Couple C (demo) — CANDLELIGHT art direction: auto-picked when the palette's
+   deepest swatch is very dark & the couple opted into the dark direction.
+   Same tokens, inverted duty — proof the system carries a night look too.  */
+.palette-c{
+  --paper: 24 23 20; --paper-deep: 33 31 27;
+  --ink: 243 238 228;
+  --accent: 197 166 106; --accent-deep: 216 185 121;
+  --gild: 197 166 106; --veil: 42 39 33; --on-accent: 24 23 20;
+  --grain-opacity:.09;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+
+body{
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  font-family: "Manrope","Hanken Grotesk",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size: 16px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .5s ease, color .5s ease;
+  overflow-x: hidden;
+}
+
+/* ---- type roles ---------------------------------------------------------- */
+.display{
+  font-family: "Fraunces","Cormorant Garamond","Didot","Playfair Display",Georgia,serif;
+  font-weight: 480; letter-spacing: -0.015em; line-height: .96;
+  font-variation-settings: "opsz" 144, "SOFT" 40, "WONK" 0;
+}
+.display-italic{ font-style: italic; font-weight: 400; letter-spacing: 0; }
+.eyebrow{
+  font-family: "Space Mono","DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  font-size: .66rem; letter-spacing: .28em; text-transform: uppercase;
+  color: rgb(var(--accent)); display:flex; align-items:center; gap:.75rem;
+}
+.eyebrow .no{ color: rgb(var(--gild)); letter-spacing:.12em }
+.eyebrow::after{ content:""; height:1px; flex:1 1 2rem; max-width:4rem;
+  background: rgb(var(--accent) / .35); }
+.eyebrow.center{ justify-content:center }
+.eyebrow.center::before{ content:""; height:1px; flex:1 1 2rem; max-width:4rem;
+  background: rgb(var(--accent) / .35); }
+.mono{ font-family:"Space Mono","DM Mono",ui-monospace,Menlo,monospace; }
+.small{ font-size:.85rem; color: rgb(var(--ink) / .68) }
+
+/* ---- paper grain (SVG feTurbulence, inline — zero network) --------------- */
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  opacity: var(--grain-opacity);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:240px 240px;
+}
+
+/* ---- layout rhythm -------------------------------------------------------
+   8pt base. Sections breathe: 6rem phone / 8rem desktop between numbered
+   sections — whitespace IS the luxury cue. Column: 42rem, but plates and
+   imagery deliberately break it (asymmetry, full-bleed).                   */
+main{ position:relative; z-index:1 }
+.col{ width:100%; max-width:42rem; margin-inline:auto; padding-inline:1.5rem }
+section.chapter{ padding-block: 5.5rem 0 }
+@media(min-width:720px){ section.chapter{ padding-block: 8rem 0 } }
+
+/* ---- masthead ------------------------------------------------------------ */
+.masthead{
+  position:sticky; top:0; z-index:40;
+  background: rgb(var(--paper) / .88); backdrop-filter: blur(10px);
+  border-bottom:1px solid rgb(var(--ink) / .08);
+}
+.masthead .col{ display:flex; justify-content:space-between; align-items:center;
+  padding-block:.65rem }
+.masthead .wordmark{ font-size:.6rem; letter-spacing:.32em; text-transform:uppercase;
+  color: rgb(var(--ink) / .55) }
+.masthead .mgram{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.05rem; color: rgb(var(--gild));
+}
+
+/* ---- hero ----------------------------------------------------------------
+   Typographic MASTHEAD, not a card: names as stacked display lines with an
+   italic ampersand, oversized gilded date numerals, thin rules. The photo —
+   when the couple has one — sits BELOW the masthead as a full-bleed plate
+   (editorial cover), never behind the type fighting a scrim.              */
+.hero{ padding-block: 4.5rem 0; text-align:left }
+.hero .invited{ margin-bottom:2.25rem }
+.hero h1{ font-size: clamp(3.4rem, 14vw, 6.5rem); }
+.hero h1 .amp{
+  display:block; font-style:italic; font-weight:300;
+  font-size:.42em; color: rgb(var(--gild));
+  padding-left:.35em; line-height:1.3;
+}
+.hero .rule{ height:1px; background: rgb(var(--ink) / .16); margin-block:2rem 1.25rem }
+.hero .dateblock{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap }
+.hero .bigdate{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size: clamp(2.6rem, 9vw, 4rem); font-weight:300; letter-spacing:-.01em;
+  color: rgb(var(--gild)); font-variant-numeric: lining-nums;
+}
+.hero .place{ text-align:right; font-size:.85rem; line-height:1.5; color: rgb(var(--ink)/.7) }
+.hero .place b{ display:block; font-weight:600; color: rgb(var(--ink)); font-size:.95rem }
+
+/* full-bleed cover plate under the masthead (stand-in gradient = hero photo) */
+.cover{
+  margin-top:3rem; position:relative; height:min(72vw, 30rem); overflow:hidden;
+}
+.cover .img{
+  position:absolute; inset:-12% 0; /* parallax headroom */
+  background:
+    radial-gradient(120% 90% at 70% 20%, rgb(var(--veil)) 0%, transparent 55%),
+    linear-gradient(160deg, rgb(var(--accent) / .55), rgb(var(--accent-deep)) 65%),
+    rgb(var(--accent-deep));
+  will-change: transform;
+}
+.cover figcaption{
+  position:absolute; left:1.5rem; bottom:1rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.24em; text-transform:uppercase; color: rgb(var(--on-accent) / .75);
+}
+.cover .seal{
+  position:absolute; right:1.5rem; bottom:-1.6rem; width:4.6rem; height:4.6rem;
+  border-radius:50%; display:grid; place-items:center;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / .28), transparent 42%),
+    rgb(var(--gild));
+  color: rgb(var(--paper)); font-family:"Fraunces",Georgia,serif; font-style:italic;
+  font-size:1.35rem;
+  box-shadow: 0 10px 24px rgb(0 0 0 / .22), inset 0 0 0 3px rgb(var(--paper) / .3);
+  /* wavy wax lip */
+  clip-path: polygon(50% 0%,61% 3%,72% 2%,81% 9%,91% 13%,94% 24%,100% 33%,97% 45%,100% 57%,95% 67%,95% 78%,86% 84%,80% 93%,69% 94%,59% 100%,48% 97%,37% 100%,28% 93%,18% 91%,13% 82%,4% 76%,5% 64%,0% 53%,4% 42%,2% 30%,10% 23%,13% 13%,24% 10%,31% 2%,41% 4%);
+}
+
+/* ---- countdown strip ------------------------------------------------------ */
+.count{
+  margin-top:4.5rem; border-block:1px solid rgb(var(--ink) / .12);
+  background: rgb(var(--veil) / .5);
+}
+.count .col{ display:flex; justify-content:center; gap:2.2rem; padding-block:1.1rem }
+.count .cell{ text-align:center }
+.count .n{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:1.9rem; font-weight:350; line-height:1.1; font-variant-numeric:tabular-nums;
+}
+.count .l{ font-family:"Space Mono",ui-monospace,monospace; font-size:.56rem;
+  letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--ink)/.55) }
+
+/* ---- prose + story ------------------------------------------------------- */
+h2.chap{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-weight:420;
+  font-size: clamp(2rem, 7.4vw, 2.9rem); line-height:1.05; letter-spacing:-.01em;
+  margin:.9rem 0 1.4rem;
+}
+h2.chap em{ font-weight:340 }
+.prose p{ margin-bottom:1.1em; max-width:34em }
+.prose .drop::first-letter{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:3.3em; float:left; line-height:.82; padding:.06em .12em 0 0;
+  color: rgb(var(--accent));
+}
+.pull{
+  border-left:2px solid rgb(var(--gild));
+  padding-left:1.1rem; margin:1.8rem 0 0 auto; max-width:26em;
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.25rem; line-height:1.4; color: rgb(var(--ink) / .85);
+}
+
+/* ---- details: two venue plates, asymmetric ------------------------------- */
+.venues{ display:grid; gap:1rem; margin-top:1.6rem }
+@media(min-width:720px){ .venues{ grid-template-columns: 1.15fr .85fr } }
+.plate{
+  background: rgb(var(--paper-deep));
+  border:1px solid rgb(var(--ink) / .09);
+  padding:1.6rem 1.5rem 1.5rem; position:relative;
+}
+.plate::after{ /* hairline inner frame — printed-card feel */
+  content:""; position:absolute; inset:.45rem; pointer-events:none;
+  border:1px solid rgb(var(--ink) / .07);
+}
+.plate .k{ font-family:"Space Mono",ui-monospace,monospace; font-size:.58rem;
+  letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--gild)) }
+.plate h3{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:1.55rem; font-weight:420; margin:.5rem 0 .2rem }
+.plate .addr{ font-size:.85rem; color: rgb(var(--ink)/.66); line-height:1.5 }
+.plate .t{ font-family:"Space Mono",ui-monospace,monospace; font-size:.8rem;
+  margin-top: .9rem; color: rgb(var(--ink)/.85) }
+.plate a.maplink{ display:inline-block; margin-top:.9rem; font-size:.8rem;
+  color: rgb(var(--accent)); text-decoration:none;
+  border-bottom:1px solid rgb(var(--accent)/.4); padding-bottom:1px }
+
+/* ---- schedule: mono time rail -------------------------------------------- */
+.sched{ margin-top:1.6rem; border-top:1px solid rgb(var(--ink)/.12) }
+.sched .row{
+  display:grid; grid-template-columns: 5.2rem 1fr; gap:1rem; align-items:baseline;
+  padding:1.05rem 0; border-bottom:1px solid rgb(var(--ink)/.09);
+}
+.sched .time{ font-family:"Space Mono",ui-monospace,monospace; font-size:.78rem;
+  color: rgb(var(--gild)); letter-spacing:.06em; font-variant-numeric:tabular-nums }
+.sched .what b{ display:block; font-weight:600; font-size:.98rem }
+.sched .what span{ font-size:.83rem; color: rgb(var(--ink)/.6) }
+
+/* ---- dress code: silk swatches ------------------------------------------- */
+.dress{ margin-top:1.6rem }
+.dress .swatches{ display:flex; gap:.7rem; margin:1.1rem 0 .9rem }
+.dress .sw{
+  width:3.4rem; height:4.4rem; border-radius:0 0 45% 45% / 0 0 18% 18%;
+  border:1px solid rgb(var(--ink)/.12);
+  box-shadow: inset 0 -14px 18px rgb(0 0 0 / .12), inset 0 10px 12px rgb(255 255 255 / .18);
+  position:relative;
+}
+.dress .sw::after{ content:""; position:absolute; top:-5px; left:50%; width:7px; height:7px;
+  transform:translateX(-50%) rotate(45deg); background: rgb(var(--gild));
+}
+
+/* ---- gallery: offset editorial mosaic ------------------------------------ */
+.mosaic{ display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:1.6rem }
+.mosaic .ph{ aspect-ratio:3/4; overflow:hidden; position:relative;
+  background: linear-gradient(150deg, rgb(var(--veil)), rgb(var(--accent)/.4)); }
+.mosaic .ph:nth-child(2){ margin-top:2.2rem }      /* the offset = intentional asymmetry */
+.mosaic .ph:nth-child(3){ margin-top:-1.4rem }
+.mosaic .ph.wide{ grid-column:1/-1; aspect-ratio:16/9; margin-top:.4rem;
+  background: linear-gradient(120deg, rgb(var(--accent)/.5), rgb(var(--accent-deep))); }
+.mosaic figcaption{ position:absolute; left:.7rem; bottom:.55rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.56rem;
+  letter-spacing:.22em; text-transform:uppercase; color: rgb(var(--paper) / .85) }
+
+/* ---- RSVP: the reply card -------------------------------------------------
+   Deckled edge (mask), letterpress heading, ticket-stub number. This is the
+   one section that stays a "card" — because it's literally a reply card.   */
+.reply{
+  position:relative; margin-top:1.8rem; background: rgb(var(--paper-deep));
+  padding:2.2rem 1.6rem 2rem;
+  --deckle: radial-gradient(6px 6px at 6px 6px, transparent 5.5px, rgb(0 0 0) 6px);
+  filter: drop-shadow(0 14px 28px rgb(0 0 0 / .1));
+}
+.reply::before{ content:""; position:absolute; inset:0; pointer-events:none;
+  border:1px solid rgb(var(--ink)/.1) }
+.reply .rsvp-word{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:2.2rem; font-weight:340; letter-spacing:.34em; text-indent:.34em;
+  text-align:center;
+  color: rgb(var(--ink) / .82);
+  text-shadow: 0 1px 0 rgb(255 255 255 / .5), 0 -1px 0 rgb(0 0 0 / .12); /* letterpress */
+}
+.palette-c .reply .rsvp-word{ text-shadow: 0 -1px 0 rgb(255 255 255 / .08), 0 1px 1px rgb(0 0 0 / .5) }
+.reply .kindly{ text-align:center; font-size:.85rem; color:rgb(var(--ink)/.62); margin-top:.5rem }
+.reply .opts{ display:grid; gap:.6rem; margin-top:1.5rem }
+@media(min-width:520px){ .reply .opts{ grid-template-columns:1fr 1fr 1fr } }
+.reply label.opt{
+  display:flex; align-items:center; justify-content:center; gap:.5rem;
+  min-height:3.4rem; cursor:pointer; text-align:center;
+  border:1px solid rgb(var(--ink)/.22); background:transparent;
+  font-size:.9rem; transition: all .18s ease; position:relative;
+}
+.reply label.opt input{ position:absolute; opacity:0; pointer-events:none }
+.reply label.opt:has(input:checked){
+  background: rgb(var(--accent-deep)); color: rgb(var(--on-accent));
+  border-color: rgb(var(--accent-deep));
+}
+.reply .send{
+  margin-top:1.3rem; width:100%; min-height:3.4rem; cursor:pointer;
+  background: rgb(var(--accent-deep)); color: rgb(var(--on-accent));
+  border:0; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.72rem; letter-spacing:.3em; text-transform:uppercase; text-indent:.3em;
+  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 6px 16px rgb(var(--accent-deep) / .35);
+}
+.reply .send:active{ transform: translateY(1px); box-shadow:0 3px 8px rgb(var(--accent-deep) / .3) }
+.reply .stub{
+  position:absolute; top:.9rem; right:1rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.58rem;
+  letter-spacing:.2em; color: rgb(var(--gild));
+}
+
+/* ---- footer + signature --------------------------------------------------- */
+footer.sig{ padding:5rem 1.5rem 7.5rem; text-align:center }
+footer.sig .see{
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.5rem; color: rgb(var(--ink)/.85);
+}
+footer.sig .mg{ margin-top:1.2rem; color: rgb(var(--gild));
+  font-family:"Fraunces",Georgia,serif; font-style:italic; font-size:1.1rem }
+footer.sig .brand{ margin-top:1.6rem; font-size:.66rem; letter-spacing:.22em;
+  text-transform:uppercase; color: rgb(var(--ink)/.42);
+  font-family:"Space Mono",ui-monospace,monospace }
+
+/* ---- bottom menu (5 tabs, elevated) --------------------------------------- */
+nav.tabs{
+  position:fixed; inset-inline:0; bottom:0; z-index:50;
+  background: rgb(var(--paper) / .92); backdrop-filter: blur(12px);
+  border-top:1px solid rgb(var(--ink)/.1);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+nav.tabs ul{ display:flex; gap:.35rem; list-style:none; max-width:28rem; margin-inline:auto; padding-inline:.6rem }
+nav.tabs a{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:.3rem; height:3.5rem; flex:1; min-width:0; text-decoration:none;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.52rem;
+  letter-spacing:.1em; text-indent:.1em; text-transform:uppercase;
+  color: rgb(var(--ink)/.55); white-space:nowrap; overflow:hidden;
+}
+nav.tabs a .dot{ width:4px; height:4px; border-radius:50%; background:transparent; transition:background .2s }
+nav.tabs a.active{ color: rgb(var(--accent)) }
+nav.tabs a.active .dot{ background: rgb(var(--gild)) }
+
+/* ---- scroll reveal (JS adds .in) ------------------------------------------ */
+.rv{ opacity:0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease }
+.rv.in{ opacity:1; transform:none }
+@media (prefers-reduced-motion: reduce){
+  .rv{ opacity:1; transform:none; transition:none }
+  .cover .img{ transform:none !important }
+}
+
+/* ============================================================================
+   FIVE TIMELINES (owner model 2026-07-25): Save the Date · Invitation ·
+   RSVPed · Event Day · After Event. One DOM; `data-show` lists which
+   timelines an element belongs to (space-separated), body carries tl-*.
+   Engine note: prod has FOUR date phases; RSVPed = the rsvp phase forked on
+   the guest's confirmed reply (per-guest, never anonymous).
+   ============================================================================ */
+body.tl-std    [data-show]:not([data-show~="std"])   { display:none !important }
+body.tl-invite [data-show]:not([data-show~="invite"]){ display:none !important }
+body.tl-rsvpd  [data-show]:not([data-show~="rsvpd"]) { display:none !important }
+body.tl-day    [data-show]:not([data-show~="day"])   { display:none !important }
+body.tl-after  [data-show]:not([data-show~="after"]) { display:none !important }
+
+/* demo timeline switcher — fixed strip at the very top (demo chrome) */
+body{ padding-top:2.4rem }
+.masthead{ top:2.4rem }
+.tl-switch{
+  position:fixed; inset-inline:0; top:0; z-index:70; height:2.4rem;
+  display:flex; align-items:stretch; justify-content:center; gap:.15rem;
+  background:#141311; padding-inline:.4rem;
+}
+.tl-switch .k{ align-self:center; color:#8d8778; font:600 .5rem/1 "Space Mono",monospace;
+  letter-spacing:.14em; text-transform:uppercase; padding-inline:.3rem }
+.tl-switch button{
+  background:none; border:0; cursor:pointer; padding-inline:.45rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.55rem;
+  letter-spacing:.08em; text-transform:uppercase; color:#b5ae9d;
+  border-bottom:2px solid transparent; white-space:nowrap;
+}
+.tl-switch button.active{ color:#e8dfc9; border-bottom-color:#C5A66A }
+
+/* — Save the Date: the announce plate (tease, ask nothing) — */
+.announce{ margin-top:1.8rem; text-align:center; padding:2.4rem 1.5rem;
+  background: rgb(var(--paper-deep)); border:1px solid rgb(var(--ink)/.09); position:relative }
+.announce::after{ content:""; position:absolute; inset:.45rem; pointer-events:none;
+  border:1px solid rgb(var(--ink)/.07) }
+.announce .line{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.35rem; line-height:1.4; color: rgb(var(--ink)/.85) }
+.announce .when{ margin-top:.6rem; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.66rem; letter-spacing:.24em; text-transform:uppercase; color: rgb(var(--gild)) }
+.announce .cal{
+  display:inline-block; margin-top:1.4rem; padding:.9rem 1.6rem; cursor:pointer;
+  background: rgb(var(--accent-deep)); color: rgb(var(--on-accent)); border:0;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.66rem;
+  letter-spacing:.26em; text-indent:.26em; text-transform:uppercase;
+  box-shadow: 0 6px 16px rgb(var(--accent-deep) / .3);
+}
+
+/* — RSVPed: the stamped keepsake ticket — */
+.ticket{
+  position:relative; margin-top:1.8rem; background: rgb(var(--paper-deep));
+  border:1px solid rgb(var(--ink)/.12); padding:1.7rem 1.6rem 1.5rem;
+  filter: drop-shadow(0 12px 24px rgb(0 0 0 / .09));
+}
+.ticket .punch{ position:absolute; top:50%; width:1.35rem; height:1.35rem; border-radius:50%;
+  background: rgb(var(--paper)); border:1px solid rgb(var(--ink)/.12); transform:translateY(-50%) }
+.ticket .punch.l{ left:-.75rem } .ticket .punch.r{ right:-.75rem }
+.ticket .toprow{ display:flex; justify-content:space-between; align-items:flex-start; gap:1rem }
+.stamp{
+  display:inline-block; transform:rotate(-6deg);
+  border:2px solid rgb(var(--accent) / .7); color: rgb(var(--accent) / .85);
+  padding:.35rem .8rem; border-radius:2px;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.22em; text-transform:uppercase; white-space:nowrap;
+}
+.ticket .stubno{ font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.2em; color: rgb(var(--gild)); text-align:right; line-height:1.8;
+  white-space:nowrap }
+.ticket .guestline{
+  margin-top:1.1rem; font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:1.6rem; font-weight:400; }
+.ticket .guestline em{ font-style:italic; color: rgb(var(--gild)) }
+.ticket .perf{ margin:1.2rem 0 1rem; border:0; border-top:1px dashed rgb(var(--ink)/.3) }
+.ticket .meta{ display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.66rem;
+  letter-spacing:.12em; text-transform:uppercase; color: rgb(var(--ink)/.7) }
+.ticket .meta b{ color: rgb(var(--ink)); font-weight:700 }
+.ticket .keep{ margin-top:1rem; font-size:.8rem; color: rgb(var(--ink)/.6) }
+
+/* RSVPed: countdown becomes the emotional center */
+.tl-rsvpd .count{ padding-block:.4rem }
+.tl-rsvpd .count .col{ padding-block:1.6rem }
+.tl-rsvpd .count .n{ font-size:2.7rem }
+.count .count-k{ text-align:center; padding-top:1.2rem; margin-bottom:-.6rem;
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.05rem; color: rgb(var(--ink)/.75) }
+
+/* — Event Day: happening-now strip, NOW row, live plates — */
+.nowstrip{ margin-top:3rem; border-block:1px solid rgb(var(--accent)/.4);
+  background: rgb(var(--veil) / .55) }
+.nowstrip .col{ display:flex; align-items:center; justify-content:center; gap:.7rem;
+  padding-block:1rem }
+.livedot{ width:.5rem; height:.5rem; border-radius:50%; background: rgb(var(--accent));
+  animation: pulse 1.6s ease-in-out infinite }
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.25} }
+@media (prefers-reduced-motion: reduce){ .livedot{ animation:none } }
+.nowstrip .t{ font-family:"Space Mono",ui-monospace,monospace; font-size:.66rem;
+  letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--accent)) }
+.rownow-tag{ display:none }
+.tl-day .sched .row.now{ border-left:2px solid rgb(var(--accent));
+  padding-left:.9rem; background: rgb(var(--veil) / .45) }
+.tl-day .rownow-tag{ display:inline-flex; align-items:center; gap:.35rem;
+  margin-left:.5rem; font-size:.56rem; letter-spacing:.2em; color: rgb(var(--accent)) }
+.liveplate{ margin-top:1.6rem; background: rgb(var(--paper-deep));
+  border:1px solid rgb(var(--ink)/.09); padding:1.5rem; position:relative }
+.liveplate::after{ content:""; position:absolute; inset:.45rem; pointer-events:none;
+  border:1px solid rgb(var(--ink)/.07) }
+.liveplate .head{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem }
+.liveplate .k{ font-family:"Space Mono",ui-monospace,monospace; font-size:.58rem;
+  letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--gild)) }
+.liveplate .n{ font-family:"Space Mono",ui-monospace,monospace; font-size:.66rem;
+  color: rgb(var(--ink)/.6) }
+.wallgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:.45rem; margin-top:1rem }
+.wallgrid span{ aspect-ratio:1; background:linear-gradient(140deg, rgb(var(--veil)), rgb(var(--accent)/.45)) }
+.wallgrid span:nth-child(2n){ background:linear-gradient(200deg, rgb(var(--accent)/.35), rgb(var(--veil))) }
+.watch{ display:flex; align-items:center; gap:1.1rem; margin-top:1rem;
+  background: rgb(var(--accent-deep)); color: rgb(var(--on-accent)); padding:1.2rem 1.3rem;
+  text-decoration:none }
+.watch .play{ width:2.6rem; height:2.6rem; border-radius:50%; flex:none;
+  border:1px solid rgb(var(--on-accent)/.5); display:grid; place-items:center }
+.watch .play::after{ content:""; margin-left:3px; border-style:solid;
+  border-width:6px 0 6px 10px; border-color:transparent transparent transparent rgb(var(--on-accent)) }
+.watch b{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-weight:420;
+  font-size:1.15rem; display:block }
+.watch span{ font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.22em; text-transform:uppercase; opacity:.75 }
+
+/* — After Event: thank-you plate + memento — */
+.thanks{ margin-top:1.8rem; text-align:center; padding:2.6rem 1.5rem;
+  border-block:1px solid rgb(var(--ink)/.12); background: rgb(var(--veil)/.4) }
+.thanks .line{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.5rem; line-height:1.45; color: rgb(var(--ink)/.9); max-width:24em; margin-inline:auto }
+.thanks .from{ margin-top:1rem; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.62rem; letter-spacing:.26em; text-transform:uppercase; color: rgb(var(--gild)) }
+
+/* ============================================================================
+   GUEST-PERSONAL LAYER (owner correction #2: "reskin, never drop").
+   The functional inventory the live site already has — guest hub (avatar ·
+   QR · connect-account), camera, your-photos, face tag, seat, e-gifts,
+   pabati, keep-your-photos (tier comparison) — in the Pahina grammar.
+   ============================================================================ */
+
+/* — the guest hub plate ("Me"): avatar · name · role/side · personal QR ·
+     connect-to-account. Present in EVERY timeline state. — */
+.hub{ display:grid; grid-template-columns: 1fr auto; gap:1.2rem; align-items:start }
+@media(max-width:519px){ .hub{ grid-template-columns:1fr } }
+.avatar{
+  width:3.6rem; height:3.6rem; border-radius:50%; display:grid; place-items:center;
+  background: rgb(var(--veil)); border:1px solid rgb(var(--gild) / .6);
+  font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.15rem; color: rgb(var(--accent-deep));
+  box-shadow: inset 0 0 0 3px rgb(var(--paper));
+}
+.hub .who{ display:flex; gap:.9rem; align-items:center }
+.hub .who .nm{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif;
+  font-size:1.45rem; line-height:1.15 }
+.hub .who .rl{ font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.2em; text-transform:uppercase; color: rgb(var(--ink)/.55); margin-top:.3rem }
+.hub .status{ display:inline-flex; align-items:center; gap:.45rem; margin-top:.9rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.6rem;
+  letter-spacing:.18em; text-transform:uppercase; color: rgb(var(--accent));
+  border:1px solid rgb(var(--accent)/.35); padding:.35rem .7rem; border-radius:999px }
+.hub .qrbox{ text-align:center }
+.hub .qrbox svg{ width:6.2rem; height:6.2rem; display:block; margin-inline:auto;
+  background:#fff; padding:.45rem; border:1px solid rgb(var(--ink)/.14) }
+.hub .qrbox .cap{ margin-top:.5rem; font-family:"Space Mono",ui-monospace,monospace;
+  font-size:.54rem; letter-spacing:.18em; text-transform:uppercase; color: rgb(var(--ink)/.55) }
+.hub-actions{ margin-top:1.2rem; display:flex; gap:.6rem; flex-wrap:wrap }
+.btn-quiet{ display:inline-flex; align-items:center; gap:.45rem; cursor:pointer;
+  padding:.75rem 1.1rem; background:transparent; color: rgb(var(--ink)/.8);
+  border:1px solid rgb(var(--ink)/.22); font-size:.8rem; text-decoration:none }
+.btn-ink{ display:inline-flex; align-items:center; cursor:pointer;
+  padding:.75rem 1.2rem; background: rgb(var(--accent-deep)); color: rgb(var(--on-accent));
+  border:0; font-family:"Space Mono",ui-monospace,monospace; font-size:.62rem;
+  letter-spacing:.22em; text-transform:uppercase; text-decoration:none;
+  box-shadow: 0 5px 14px rgb(var(--accent-deep)/.3) }
+.hub .connect{ margin-top:1rem; padding-top:1rem; border-top:1px dashed rgb(var(--ink)/.2);
+  font-size:.82rem; color: rgb(var(--ink)/.65) }
+.hub .connect b{ color: rgb(var(--ink)); font-weight:600 }
+
+/* — camera notch in the bottom nav (capture-live states) — */
+nav.tabs li.camli{ flex:0 0 4.4rem; position:relative }
+.camera-btn{
+  position:absolute; left:50%; top:-1.35rem; transform:translateX(-50%);
+  width:3.5rem; height:3.5rem; border-radius:50%; cursor:pointer; border:0;
+  background: rgb(var(--accent-deep));
+  box-shadow: 0 8px 20px rgb(0 0 0 / .28), 0 0 0 3px rgb(var(--paper)),
+              0 0 0 4px rgb(var(--gild) / .8);
+  display:grid; place-items:center;
+}
+.camera-btn::before{ content:""; width:1.5rem; height:1.5rem; border-radius:50%;
+  border:2px solid rgb(var(--on-accent)); }
+.camera-btn::after{ content:""; position:absolute; width:.5rem; height:.5rem;
+  border-radius:50%; background: rgb(var(--gild)) }
+nav.tabs li.camli .cl{ position:absolute; left:0; right:0; bottom:.35rem; text-align:center;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.5rem;
+  letter-spacing:.14em; text-transform:uppercase; color: rgb(var(--gild)) }
+
+/* — your-photos (the guest's own tagged gallery) — */
+.mygrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:.45rem; margin-top:1rem }
+.mygrid figure{ position:relative; aspect-ratio:1;
+  background:linear-gradient(160deg, rgb(var(--veil)), rgb(var(--accent)/.4)) }
+.mygrid figure:nth-child(2n){ background:linear-gradient(20deg, rgb(var(--accent)/.3), rgb(var(--veil))) }
+.mygrid .notme{ position:absolute; right:.3rem; top:.3rem;
+  font-family:"Space Mono",ui-monospace,monospace; font-size:.48rem; letter-spacing:.12em;
+  text-transform:uppercase; color: rgb(var(--paper)); background: rgb(var(--ink)/.6);
+  padding:.25rem .45rem; border-radius:999px }
+
+/* — face-tag enrollment (dignified, consent-forward) — */
+.faceplate .line{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.3rem; line-height:1.4; margin-top:.4rem }
+.faceplate .consent{ margin-top:.8rem; font-size:.82rem; color: rgb(var(--ink)/.62);
+  max-width:34em }
+.faceplate .acts{ margin-top:1.1rem; display:flex; gap:.6rem; flex-wrap:wrap; align-items:center }
+.faceplate .skip{ font-size:.78rem; color: rgb(var(--ink)/.5);
+  text-decoration:underline; text-underline-offset:3px; background:none; border:0; cursor:pointer }
+
+/* — e-gifts (Pabuya) + pabati greeting — */
+.giftgrid{ display:grid; gap:1rem; margin-top:1.6rem }
+@media(min-width:640px){ .giftgrid{ grid-template-columns:1fr 1fr } }
+.gift .line{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.2rem; line-height:1.45; margin-top:.4rem }
+.gift .sub{ margin-top:.6rem; font-size:.82rem; color: rgb(var(--ink)/.6) }
+.gift .btn-ink, .gift .btn-quiet{ margin-top:1rem }
+
+/* — keep-your-photos (tier comparison, reskinned) — */
+.keepcols{ display:grid; grid-template-columns:1fr 1fr; gap:0; margin-top:1.2rem;
+  border:1px solid rgb(var(--ink)/.12) }
+.keepcols > div{ padding:1.2rem 1.1rem }
+.keepcols > div + div{ border-left:1px solid rgb(var(--ink)/.12) }
+.keepcols .k{ font-family:"Space Mono",ui-monospace,monospace; font-size:.56rem;
+  letter-spacing:.22em; text-transform:uppercase; color: rgb(var(--ink)/.5) }
+.keepcols > div + div .k{ color: rgb(var(--gild)) }
+.keepcols ul{ list-style:none; margin-top:.7rem; display:grid; gap:.4rem }
+.keepcols li{ font-size:.8rem; color: rgb(var(--ink)/.72) }
+.keepcols > div + div{ background: rgb(var(--veil)/.45) }
+
+/* — greeting salutation (invite/rsvpd) — */
+.salut{ font-family:"Fraunces","Cormorant Garamond",Georgia,serif; font-style:italic;
+  font-size:1.35rem; color: rgb(var(--ink)/.85); margin-bottom:1.6rem }
+.salut b{ font-style:normal; font-weight:480; color: rgb(var(--accent-deep)) }
+
+/* ---- demo palette switcher (NOT part of the product page) ----------------- */
+.demo-switch{
+  position:fixed; left:.8rem; bottom:4.6rem; z-index:60; display:flex; gap:.4rem;
+  background: rgb(var(--ink) / .82); padding:.45rem .55rem; border-radius:999px;
+  backdrop-filter: blur(8px);
+}
+.demo-switch button{
+  width:1.6rem; height:1.6rem; border-radius:50%; border:2px solid rgb(255 255 255/.65);
+  cursor:pointer; padding:0;
+}
+.demo-switch .pa{ background:#5B6F57 } .demo-switch .pb{ background:#7A1F2B }
+.demo-switch .pc{ background:#181714; border-color:#C5A66A }
+.demo-switch .tag{ align-self:center; color:#fff; font:600 .55rem/1 "Space Mono",monospace;
+  letter-spacing:.14em; padding-inline:.2rem .3rem; text-transform:uppercase; opacity:.8 }
+</style>
+</head>
+<body class="tl-invite">
+
+<!-- DEMO ONLY: the five-timeline switcher (owner model 2026-07-25).
+     Prod maps: Save the Date / Invitation / Event Day / After = the four
+     date-driven LifecyclePhases; RSVPed = the rsvp phase forked on THIS
+     guest's confirmed reply (per-guest state, never anonymous). -->
+<div class="tl-switch" role="tablist" aria-label="Demo: timeline switch">
+  <span class="k">Demo</span>
+  <button data-tl="std" onclick="setTl('std')">Save</button>
+  <button data-tl="invite" class="active" onclick="setTl('invite')">Invite</button>
+  <button data-tl="rsvpd" onclick="setTl('rsvpd')">RSVP&rsquo;d</button>
+  <button data-tl="day" onclick="setTl('day')">Day</button>
+  <button data-tl="after" onclick="setTl('after')">After</button>
+</div>
+
+<!-- Setnayan masthead — quieter than today's header: the couple leads, the
+     platform recedes to a smallcaps whisper + the couple monogram gets the
+     gild. -->
+<header class="masthead">
+  <div class="col">
+    <span class="wordmark">Setnayan · Invitation</span>
+    <span class="mgram">C&nbsp;&amp;&nbsp;I</span>
+  </div>
+</header>
+
+<main>
+  <span id="home"></span>
+
+  <!-- ── HERO — typographic masthead ─────────────────────────────────────── -->
+  <section class="hero col">
+    <p class="eyebrow invited rv"><span class="no">№ 01</span>
+      <span data-show="std">Save the date</span>
+      <span data-show="invite">You are invited</span>
+      <span data-show="rsvpd">We&rsquo;ll see you there, Maria</span>
+      <span data-show="day">Happening today</span>
+      <span data-show="after">Married · December 18, 2026</span>
+    </p>
+    <h1 class="display rv">
+      Cale
+      <span class="amp">and</span>
+      Ice
+    </h1>
+    <div class="rule rv"></div>
+    <div class="dateblock rv">
+      <span class="bigdate">12.18.26</span>
+      <p class="place"><b>Tagaytay Highlands</b>Cavite, Philippines<br/>Friday · four in the afternoon</p>
+    </div>
+  </section>
+
+  <!-- full-bleed cover plate (couple photo when uploaded; palette art if not) -->
+  <figure class="cover rv" aria-label="Cover photograph placeholder">
+    <div class="img" id="parallax"></div>
+    <figcaption>
+      <span data-show="std invite rsvpd day">The engagement · Tagaytay ridge</span>
+      <span data-show="after">The wedding of Cale &amp; Ice · one day, in full</span>
+    </figcaption>
+    <div class="seal" aria-hidden="true">C·I</div>
+  </figure>
+
+  <!-- RSVPed — the stamped keepsake ticket (the reply card, transformed).
+       The most-revisited, most-screenshotted object on the page. -->
+  <div class="col" data-show="rsvpd">
+    <div class="ticket rv">
+      <span class="punch l" aria-hidden="true"></span>
+      <span class="punch r" aria-hidden="true"></span>
+      <div class="toprow">
+        <span class="stamp">Joyfully accepted</span>
+        <span class="stubno">Nº 042<br/>18 · XII · 26</span>
+      </div>
+      <p class="guestline">Maria Santos <em>&amp; one seat, reserved</em></p>
+      <hr class="perf" aria-hidden="true"/>
+      <div class="meta">
+        <span>Table <b>Seven</b></span>
+        <span>The Glasshouse</span>
+        <span>4:00 PM</span>
+      </div>
+      <p class="keep">Keep this page — it&rsquo;s your place card, your table, and your QR on the day.</p>
+    </div>
+  </div>
+
+  <!-- Event Day — happening-now strip replaces the countdown -->
+  <div class="nowstrip rv" data-show="day">
+    <div class="col">
+      <span class="livedot" aria-hidden="true"></span>
+      <span class="t">Happening now · Chapel on the Ridge</span>
+    </div>
+  </div>
+
+  <!-- countdown strip (STD teases it, Invitation keeps it, RSVPed makes it
+       the emotional center — bigger numerals + a salutation line) -->
+  <div class="count rv" role="timer" aria-label="Countdown to the wedding" data-show="std invite rsvpd">
+    <p class="count-k" data-show="rsvpd">Until we celebrate with you —</p>
+    <div class="col">
+      <div class="cell"><div class="n" id="cd-d">—</div><div class="l">days</div></div>
+      <div class="cell"><div class="n" id="cd-h">—</div><div class="l">hours</div></div>
+      <div class="cell"><div class="n" id="cd-m">—</div><div class="l">minutes</div></div>
+      <div class="cell"><div class="n" id="cd-s">—</div><div class="l">seconds</div></div>
+    </div>
+  </div>
+
+  <!-- Save the Date — the announce plate: tease, ask nothing -->
+  <section class="chapter col" data-show="std">
+    <p class="eyebrow center rv"><span class="no">№ 02</span> A note for your calendar</p>
+    <div class="announce rv">
+      <p class="line">The formal invitation follows<br/>in September.</p>
+      <p class="when">Until then — hold the date</p>
+      <button class="cal" type="button">Add to calendar</button>
+    </div>
+  </section>
+
+  <!-- ── STORY ────────────────────────────────────────────────────────────── -->
+  <section class="chapter col" id="story" data-show="invite rsvpd after">
+    <p class="salut rv" data-show="invite rsvpd">Hi, <b>Maria</b> — we&rsquo;d love to celebrate with you.</p>
+    <p class="eyebrow rv"><span class="no">№ 02</span> Our story</p>
+    <h2 class="chap rv">Eight years,<br/><em>one</em> ridge line.</h2>
+    <div class="prose rv">
+      <p class="drop">We met on a bus to Tagaytay in 2018 — Cale had the window seat, Ice had the itinerary. By the overlook, we had traded both. Every year since, we've gone back to the same ridge on the same weekend, through storms, through lockdowns, through one memorably burnt bulalo.</p>
+      <p>Last December, at the overlook where it began, Cale knelt. Ice said yes before the sentence finished.</p>
+    </div>
+    <p class="pull rv">"We're not starting something new — we're naming something that's been true for years."</p>
+  </section>
+
+  <!-- ── DETAILS ──────────────────────────────────────────────────────────── -->
+  <section class="chapter col" id="details" data-show="invite rsvpd day">
+    <p class="eyebrow rv"><span class="no">№ 03</span> The day</p>
+    <h2 class="chap rv">Where &amp; when</h2>
+    <div class="venues">
+      <div class="plate rv">
+        <p class="k">Ceremony</p>
+        <h3>Chapel on the Ridge</h3>
+        <p class="addr">Tagaytay Highlands, Cavite</p>
+        <p class="t">4:00 in the afternoon</p>
+        <a class="maplink" href="#details">Open in Maps →</a>
+      </div>
+      <div class="plate rv">
+        <p class="k">Reception</p>
+        <h3>The Glasshouse</h3>
+        <p class="addr">Twin Lakes, Laurel, Batangas</p>
+        <p class="t">6:30 in the evening</p>
+        <a class="maplink" href="#details">Open in Maps →</a>
+      </div>
+      <!-- Your seat/table (YourSeatBlock) — from RSVPed onward -->
+      <div class="plate rv" data-show="rsvpd day" style="grid-column:1/-1">
+        <p class="k">Your table, Maria</p>
+        <h3>Table Seven <em style="font-weight:300">· by the glass wall</em></h3>
+        <p class="addr">Show this page — it&rsquo;s your place card and your QR.</p>
+        <a class="maplink" href="#details">Find my seat →</a>
+      </div>
+    </div>
+
+    <!-- schedule -->
+    <p class="eyebrow rv" style="margin-top:3.4rem"><span class="no">№ 04</span> Programme</p>
+    <div class="sched rv">
+      <div class="row"><span class="time">3:30 PM</span><p class="what"><b>Guests arrive</b><span>Chapel doors open · welcome drinks</span></p></div>
+      <div class="row"><span class="time">4:00 PM</span><p class="what"><b>The ceremony</b><span>Chapel on the Ridge</span></p></div>
+      <div class="row now"><span class="time">5:30 PM<span class="rownow-tag"><span class="livedot"></span>Now</span></span><p class="what"><b>Golden hour</b><span>Cocktails on the overlook · photo moments</span></p></div>
+      <div class="row"><span class="time">6:30 PM</span><p class="what"><b>Dinner &amp; toasts</b><span>The Glasshouse</span></p></div>
+      <div class="row"><span class="time">9:00 PM</span><p class="what"><b>First dance</b><span>Then everyone else's</span></p></div>
+    </div>
+
+    <!-- Event Day — the live layer, in the plate grammar (not app chrome):
+         watch-live for the ones who couldn't fly home, the live wall mirror. -->
+    <div data-show="day">
+      <p class="eyebrow rv" style="margin-top:3.4rem"><span class="no">№ 05</span> Live</p>
+      <a class="watch rv" href="#details">
+        <span class="play" aria-hidden="true"></span>
+        <span><b>The ceremony, live</b><span>For everyone celebrating from afar</span></span>
+      </a>
+      <div class="liveplate rv">
+        <div class="head">
+          <span class="k">The photo wall</span>
+          <span class="n">312 photos · arriving live</span>
+        </div>
+        <div class="wallgrid" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- dress code -->
+    <div data-show="invite rsvpd">
+    <p class="eyebrow rv" style="margin-top:3.4rem"><span class="no">№ 05</span> Attire</p>
+    <div class="dress rv">
+      <h2 class="chap" style="font-size:1.7rem">Formal, in forest &amp; champagne</h2>
+      <div class="swatches" aria-label="Suggested attire palette">
+        <span class="sw" style="background:#3d4f3a" title="Deep pine"></span>
+        <span class="sw" style="background:#5B6F57" title="Sage"></span>
+        <span class="sw" style="background:#c9b58f" title="Champagne"></span>
+        <span class="sw" style="background:#efe8da" title="Ivory"></span>
+      </div>
+      <p class="small">Barong and formal suits warmly welcome. Please save white for the bride — and bring a wrap; the ridge gets cool after sunset.</p>
+    </div>
+    </div>
+  </section>
+
+  <!-- ── FACE TAG (DayOfFaceEnroll / FaceDataNotice) — consent-forward ────── -->
+  <section class="chapter col" data-show="rsvpd day">
+    <p class="eyebrow rv"><span class="no">✦</span> Face tag · optional</p>
+    <div class="plate faceplate rv">
+      <p class="k">Photos that find you</p>
+      <p class="line">Add one selfie, and every photo of you finds its way to your gallery.</p>
+      <p class="consent">Used for this celebration only — never reused across events, never shared,
+        and you can remove it anytime. Skip it, and your QR does the same job by hand.</p>
+      <div class="acts">
+        <button class="btn-ink" type="button">Add my face</button>
+        <button class="skip" type="button">No thanks — I&rsquo;ll use my QR</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── GALLERY ──────────────────────────────────────────────────────────── -->
+  <section class="chapter col" id="gallery" data-show="invite rsvpd after">
+    <p class="eyebrow rv"><span class="no">№ 06</span> Gallery</p>
+    <h2 class="chap rv"><span data-show="invite rsvpd">Before the big day</span><span data-show="after">The day, kept</span></h2>
+    <div class="mosaic rv">
+      <figure class="ph"><figcaption>2018 · The bus</figcaption></figure>
+      <figure class="ph"><figcaption>2021 · The storm year</figcaption></figure>
+      <figure class="ph"><figcaption>2024 · Same ridge</figcaption></figure>
+      <figure class="ph"><figcaption>2025 · She said yes</figcaption></figure>
+      <figure class="ph wide"><figcaption>December 2025 · The overlook</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- ── YOUR PHOTOS (your_photos — the guest's OWN tagged gallery) ───────── -->
+  <section class="chapter col" data-show="day after">
+    <p class="eyebrow rv"><span class="no">✦</span> Photos of you</p>
+    <h2 class="chap rv" style="font-size:1.7rem">
+      <span data-show="day">Arriving through the day</span>
+      <span data-show="after">Every one of you, kept</span>
+    </h2>
+    <div class="liveplate rv">
+      <div class="head">
+        <span class="k">Your gallery</span>
+        <span class="n"><span data-show="day">27 so far · live</span><span data-show="after">54 photos · yours</span></span>
+      </div>
+      <div class="mygrid">
+        <figure><span class="notme">Not me</span></figure>
+        <figure></figure>
+        <figure><span class="notme">Not me</span></figure>
+        <figure></figure><figure></figure><figure></figure>
+      </div>
+      <p class="sub" style="margin-top:.9rem; font-size:.8rem; color:rgb(var(--ink)/.6)">
+        Tap any photo to save it. Tap <b>Not me</b> on a wrong guess — it disappears for good.
+      </p>
+    </div>
+
+    <!-- keep-your-photos (tier_comparison, reskinned): connect-to-account -->
+    <div class="rv" style="margin-top:2.2rem">
+      <p class="eyebrow"><span class="no">✦</span> Keep them</p>
+      <div class="keepcols">
+        <div>
+          <p class="k">Tonight</p>
+          <ul><li>Browse &amp; save</li><li>Open until tomorrow</li><li>No account needed</li></ul>
+        </div>
+        <div>
+          <p class="k">With a free account</p>
+          <ul><li>Yours forever</li><li>Every device</li><li>Reel maker &amp; camera</li></ul>
+        </div>
+      </div>
+      <a class="btn-ink" href="#you" style="margin-top:1rem">Keep them forever — free</a>
+    </div>
+  </section>
+
+  <!-- ── E-GIFTS (Pabuya) + PABATI greeting ───────────────────────────────── -->
+  <section class="chapter col" data-show="rsvpd day after">
+    <p class="eyebrow rv"><span class="no">✦</span> Gifts &amp; greetings</p>
+    <div class="giftgrid">
+      <div class="plate gift rv">
+        <p class="k">E-gifts · Pabuya</p>
+        <p class="line">Your presence is the present — but if you&rsquo;d like to give more, here&rsquo;s our registry.</p>
+        <a class="btn-ink" href="#you">Send an e-gift</a>
+      </div>
+      <div class="plate gift rv" data-show="day">
+        <p class="k">Pabati · 5 seconds</p>
+        <p class="line">Leave the couple a five-second greeting — it plays in their thank-you film.</p>
+        <p class="sub">212 of 300 greetings left</p>
+        <a class="btn-quiet" href="#you">Record a pabati</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RSVP — the reply card (the ASK exists only on Invitation) ────────── -->
+  <section class="chapter col" id="rsvp" data-show="invite">
+    <p class="eyebrow center rv"><span class="no">№ 07</span> Kindly reply</p>
+    <form class="reply rv" onsubmit="event.preventDefault()">
+      <span class="stub">Nº 042 · MARIA S.</span>
+      <p class="rsvp-word">RSVP</p>
+      <p class="kindly">The favour of your reply is requested<br/>by the first of November</p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="r" checked/>Joyfully accepts</label>
+        <label class="opt"><input type="radio" name="r"/>Undecided, for now</label>
+        <label class="opt"><input type="radio" name="r"/>Regretfully declines</label>
+      </div>
+      <button class="send" type="submit">Send reply</button>
+    </form>
+  </section>
+
+  <!-- ── AFTER EVENT — thank-you sign-off + the kept memento ─────────────── -->
+  <section class="chapter col" data-show="after">
+    <p class="eyebrow center rv"><span class="no">№ 07</span> With thanks</p>
+    <div class="thanks rv">
+      <p class="line">You crossed mountains, storms, and one long December traffic jam to stand with us. We&rsquo;ll never forget it.</p>
+      <p class="from">— Cale &amp; Ice</p>
+    </div>
+    <div class="ticket rv" style="margin-top:2.4rem">
+      <span class="punch l" aria-hidden="true"></span>
+      <span class="punch r" aria-hidden="true"></span>
+      <div class="toprow">
+        <span class="stamp">You were there</span>
+        <span class="stubno">Nº 042<br/>18 · XII · 26</span>
+      </div>
+      <p class="guestline">Maria Santos <em>· Table Seven</em></p>
+      <hr class="perf" aria-hidden="true"/>
+      <p class="keep">Your photos from the day live in the gallery above — every one of you, yours to keep.</p>
+    </div>
+  </section>
+
+  <!-- ── ME — the guest hub plate (GuestHubCard/Bar): avatar · name · role/
+       side · RSVP status · personal QR ("invite") · connect-to-account.
+       Present in EVERY timeline state — the guest's constant. ─────────────── -->
+  <section class="chapter col" id="me">
+    <span id="you"></span>
+    <p class="eyebrow rv"><span class="no">✦</span> Yours, Maria</p>
+    <div class="plate rv">
+      <div class="hub">
+        <div>
+          <div class="who">
+            <span class="avatar" aria-hidden="true">MS</span>
+            <span>
+              <span class="nm">Maria Santos</span>
+              <span class="rl" style="display:block">Guest · Bride&rsquo;s side</span>
+            </span>
+          </div>
+          <p class="status">
+            <span data-show="std invite">Awaiting your reply</span>
+            <span data-show="rsvpd day">Attending · Table Seven</span>
+            <span data-show="after">You were there · Table Seven</span>
+          </p>
+          <div class="hub-actions">
+            <a class="btn-ink" href="#me">Show my QR</a>
+            <a class="btn-quiet" href="#me" data-show="day">Photos of me</a>
+          </div>
+          <p class="connect">
+            <b>Keep this on your phone.</b> Get a sign-in link by email — your invite,
+            your table, and your photos on any device. No password.
+          </p>
+        </div>
+        <div class="qrbox">
+          <!-- personal invitation QR (placeholder mark — prod renders the real
+               monogrammed SVG) -->
+          <svg viewBox="0 0 29 29" role="img" aria-label="Your personal QR code">
+            <rect width="29" height="29" fill="#fff"/>
+            <g fill="#1c1f1a">
+              <path d="M2 2h7v7H2zM4 4h3v3H4zM20 2h7v7h-7zM22 4h3v3h-3zM2 20h7v7H2zM4 22h3v3H4z"/>
+              <path d="M11 2h2v2h-2zM15 3h2v2h-2zM11 6h2v3h-2zM15 7h3v2h-3zM11 11h3v2h-3zM16 11h2v3h-2zM20 11h2v2h-2zM24 12h3v2h-3zM3 11h2v3H3zM6 12h3v2H6zM2 16h3v2H2zM7 16h2v2H7zM11 15h2v3h-2zM15 16h3v2h-3zM20 15h2v3h-2zM24 16h2v2h-2zM11 20h2v2h-2zM14 21h3v2h-3zM19 20h3v2h-3zM24 20h3v3h-3zM11 24h3v3h-3zM16 24h2v2h-2zM20 24h2v3h-2zM24 25h2v2h-2z"/>
+            </g>
+            <rect x="12.2" y="12.2" width="4.6" height="4.6" fill="#fff"/>
+            <text x="14.5" y="15.9" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="3.6" fill="#B08D57">C·I</text>
+          </svg>
+          <p class="cap">Your invite · scan to open</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="sig">
+    <p class="see"><span data-show="std invite rsvpd day">See you on the ridge.</span><span data-show="after">Thank you for being there.</span></p>
+    <p class="mg">C &amp; I</p>
+    <p class="brand">Powered by Setnayan · setnayan.com</p>
+  </footer>
+</main>
+
+<!-- bottom menu — same 5 anchors as production SiteMenuBar -->
+<nav class="tabs" aria-label="Site sections">
+  <ul>
+    <li><a href="#home" class="active"><span class="dot"></span>Home</a></li>
+    <li><a href="#details"><span class="dot"></span>Details</a></li>
+    <li><a href="#story"><span class="dot"></span>Story</a></li>
+    <li class="camli" data-show="day">
+      <!-- Papic capture entry — the gilded shutter notch (owner: "5 button
+           bottom nav and camera button"). Shown wherever capture is live. -->
+      <button class="camera-btn" type="button" aria-label="Open the camera"></button>
+      <span class="cl">Camera</span>
+    </li>
+    <li><a href="#gallery"><span class="dot"></span>Gallery</a></li>
+    <li><a href="#me"><span class="dot"></span>Me</a></li>
+  </ul>
+</nav>
+
+<!-- DEMO ONLY: palette switcher proving the bespoke re-skin. In production this
+     is the couple's role_palette → buildSitePaletteVars, not a visible control. -->
+<div class="demo-switch" role="group" aria-label="Demo: couple palette switch">
+  <span class="tag">Demo</span>
+  <button class="pa" title="Couple A — pine &amp; champagne (Cale &amp; Ice)" onclick="setPal('')"></button>
+  <button class="pb" title="Couple B — burgundy &amp; blush" onclick="setPal('palette-b')"></button>
+  <button class="pc" title="Couple C — candlelight (dark art direction)" onclick="setPal('palette-c')"></button>
+</div>
+
+<script>
+/* ---- demo palette switch (palette classes only — timeline class preserved) - */
+function setPal(cls){
+  document.body.classList.remove('palette-b','palette-c');
+  if (cls) document.body.classList.add(cls);
+}
+
+/* ---- demo timeline switch ---------------------------------------------------
+   Five owner timelines → body.tl-*. On switch: skip the scroll choreography
+   (reveal everything) and return to top so each state reads as its own page. */
+function setTl(s){
+  ['tl-std','tl-invite','tl-rsvpd','tl-day','tl-after'].forEach(function(c){
+    document.body.classList.remove(c);
+  });
+  document.body.classList.add('tl-' + s);
+  document.querySelectorAll('.tl-switch button').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-tl') === s);
+  });
+  document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); });
+  window.scrollTo(0, 0);
+}
+
+/* ---- countdown (vanilla, no deps) ------------------------------------------ */
+(function(){
+  var t = new Date('2026-12-18T16:00:00+08:00').getTime();
+  var d=document.getElementById('cd-d'),h=document.getElementById('cd-h'),
+      m=document.getElementById('cd-m'),s=document.getElementById('cd-s');
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function tick(){
+    var r = Math.max(0, t - Date.now());
+    d.textContent = Math.floor(r/86400000);
+    h.textContent = pad(Math.floor(r/3600000)%24);
+    m.textContent = pad(Math.floor(r/60000)%60);
+    s.textContent = pad(Math.floor(r/1000)%60);
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+/* ---- scroll reveal — IntersectionObserver, honors reduced-motion ---------- */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin:'0px 0px -8% 0px', threshold: 0.08 });
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+})();
+
+/* ---- hero cover parallax whisper (±6%, rAF-throttled, reduced-motion off) -- */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var img = document.getElementById('parallax'), ticking=false;
+  function onScroll(){
+    if(ticking) return; ticking=true;
+    requestAnimationFrame(function(){
+      var rect = img.parentElement.getBoundingClientRect();
+      var p = Math.max(-1, Math.min(1, (rect.top + rect.height/2 - innerHeight/2) / innerHeight));
+      img.style.transform = 'translateY(' + (p * -6) + '%)';
+      ticking=false;
+    });
+  }
+  addEventListener('scroll', onScroll, { passive:true }); onScroll();
+})();
+
+/* ---- bottom-tab active state follows scroll -------------------------------- */
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.tabs a'));
+  var ids = ['home','details','story','gallery','me'];
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var id = e.target.id || 'home';
+      links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+    });
+  }, { rootMargin:'-30% 0px -60% 0px' });
+  ids.forEach(function(id){ var el = document.getElementById(id); if(el) io.observe(el); });
+})();
+</script>
+</body>
+</html>
