@@ -8,16 +8,33 @@
   - PR-1 #3712 (tokens + Fraunces + gild/paper-deep/veil + `.sn-editorial` classes + vercel.json `claude/*` preview skip) — MERGED.
   - **PR-2 #3745 (masthead) — MERGED.** The blocking `tsc --noEmit` gate was run and came back CLEAN; PR opened and merged same session.
   - **PR-3 #3748 (chapter grammar) — MERGED.** See below.
-  - **PR-4 #3750 (reply card · mosaic · colour exile) — MERGED.** Wave tip `ddfa44edc`.
+  - **PR-4 #3750 (reply card · mosaic · colour exile) — MERGED.**
+  - **PR-4b #3752 (RSVPed keepsake fork) — MERGED.**
 - **Nothing is parked.** Next work starts fresh off `origin/wave/a-pahina-reskin`.
 
-### ⚠ OWNER SIGN-OFF PENDING from PR-4
+### ⚠ TWO OWNER DECISIONS PENDING (both from the RSVP surface)
 
-The RSVP option labels changed to the design spec's §7 wording: **"I'll be there / Maybe / Can't
-make it" → "Joyfully accepts / Undecided, for now / Regretfully declines."** The option `key`
-values are byte-identical so nothing downstream moved — but this is the most load-bearing
-interaction on the site. If the owner prefers the plain wording it is a three-line revert in
-`rsvp-widget.tsx`.
+1. **RSVP option labels** changed to the design spec's §7 wording: "I'll be there / Maybe / Can't
+   make it" → **"Joyfully accepts / Undecided, for now / Regretfully declines."** The option `key`
+   values are byte-identical so nothing downstream moved. Revert = three lines in `rsvp-widget.tsx`.
+2. **The ask was NOT removed after replying.** Design §11 says "Gone. The ask never reappears once
+   answered" — literally that drops the guest's only way to change their reply, meal preference or
+   dietary notes, so the form was kept, demoted into a `<details>` ("Need to change your reply?")
+   beneath the keepsake. If the owner meant it literally, delete the disclosure in `site-body.tsx`.
+
+### Deferred from PR-4b — reasons, not scope
+
+- **After-Event memento.** `PahinaKeepsake` already supports it (`variant="attended"`), but the
+  editorial takeover `phasedBody` (`site-body.tsx:387`) is SHARED by both identity tiers, so a
+  guest-only memento means branching a path that also serves anonymous visitors.
+- **Editor's 5th preview tab — OWNER-GATED, do not build blind.** The build doc §4 says to "mirror
+  how the sample event fakes guest context." **No such mechanism exists** — Maria & Jose is real
+  seeded DB rows, and there is exactly ONE `kind:'guest'` construction site in the route
+  (`app/[slug]/page.tsx` ~591), fed only by `loadGuestContext` past a verified guest cookie. A 5th
+  tab therefore needs a fabricated 15-field `GuestSiteIdentity` rendered to a viewer holding NO
+  guest cookie, behind a new public-route param (the `?phase=` allow-list at `page.tsx:365-386`
+  would reject `rsvpd`). That is a new security surface beside the `anonymous-zero-guest` firewall.
+  Gate it at least as strictly as `editorMode` (`page.tsx:396-405`) and get owner sign-off first.
 
 ### What PR-4 established
 
@@ -43,9 +60,9 @@ interaction on the site. If the owner prefers the plain wording it is a three-li
 
 ## Next actions, in order
 
-1. **PR-4b**: RSVPed keepsake fork (per-guest, inside rsvp phase — NO new LifecyclePhase) + unified-editor 5th preview tab (§4).
+1. **Visual pass on the wave branch's Vercel preview** — owed for PR-2 · 3 · 4 · 4b. 375px + desktop, palette-rich + palette-empty event, all four phases, plus an `attending` guest to see the keepsake. **This is the biggest outstanding risk in the wave** — four PRs of pure visual change and nothing has been eyeballed. Do this BEFORE PR-5 adds motion on top.
 2. **PR-5**: motion + Candlelight Pro toggle (migration!) + Cormorant drop.
-3. **Visual pass on the wave branch's Vercel preview** — owed for PR-2 + PR-3 + PR-4 (see State above). 375px + desktop, palette-rich + palette-empty event, all four phases. **This is the biggest outstanding risk in the wave** — nothing visual has been eyeballed yet.
+3. The two deferred PR-4b items above, once the owner has ruled on the editor tab.
 4. Wave A done → OWNER previews the wave branch → ONE merge to main. Then Waves B–E (§ plan).
 
 ## Standing rulings that override older lines in the build doc

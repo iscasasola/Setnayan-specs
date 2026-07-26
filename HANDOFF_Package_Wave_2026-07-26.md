@@ -50,7 +50,17 @@ Both branches are **merged or merging**; prune both after confirming §2.
 | [#3740](https://github.com/iscasasola/setnayan-platform/pull/3740) | **MERGED** | 2 live data-loss defects + fee-header fix |
 | [#3737](https://github.com/iscasasola/setnayan-platform/pull/3737) | **OPEN, auto-armed** | actions + UI + My Shop doorway (carries #3739) |
 
-### ⚠ FIRST ACTION FOR THE NEXT SESSION
+### ✅ RESOLVED 2026-07-26 — #3737 LANDED, no action needed
+
+Verified: merged 08:07 UTC, all 21 checks green, and both feature commits (`2b679dc16`,
+`869912bd9`) are ancestors of `origin/main` — file-level check, not just "the PR says merged"
+(trap #7). #3739 and #3740 are in as well. **The wave is whole.**
+
+> 🚨 But it did not *work*: see the `option_label` correction in § 6.1. The authoring surface
+> merged with a column name that does not exist, so saving a choice option 400'd. Flag-dark, so
+> no user impact and no data to repair.
+
+_Original instructions, kept in case a similar `action_required` block recurs:_
 
 **#3737 was blocked on `action_required` CI** (the merge of #3739 into its branch made the
 workflows need manual approval). The three runs were approved at handoff. **Verify it landed:**
@@ -189,20 +199,79 @@ configures against requirements the system already holds; the vendor supplies th
 
 ## 6. WHAT'S NEXT — in priority order
 
-### 6.1 🔴 Choices don't render (do this first)
-A vendor can now author a choice line, but `lock-modal.tsx` never SELECTs
-`vendor_package_item_options`, so the couple sees nothing. The first real package will have an
-invisible line.
+### 6.1 ✅ DONE 2026-07-26 — choices render and price
+
+Shipped in **[#3744](https://github.com/iscasasola/setnayan-platform/pull/3744)** (couple-side
+rendering + pricing), on top of **[#3743](https://github.com/iscasasola/setnayan-platform/pull/3743)**
+(the `option_label` fix that made authoring work at all).
+
+- A choice line renders a radio group under its inclusion — standard option preselected and
+  labelled *Included*, others showing `+₱N`, plus an *Upgrades picked* footer row.
+- Gated on `packageCreditEnabled()`. **The OFF state is correct, not degraded:** the line renders
+  as a plain line at its standard option, and the DB pins that option's delta to 0. No flag state
+  quotes below what the vendor charges.
+- Prices are re-read server-side from the DB; only IDs cross the wire, and `lockPackage` persists
+  a *sanitised* `chosen_option_ids`.
+- Also fixed: `/v/[slug]` omitted `is_required`, so required lines rendered as unticking
+  checkboxes there (server refused; the UI lied).
+- 17 new tests, falsifiable both ways. **No migration** — it rides in `customizations_json`.
+
+> ⚠ **Not verified end-to-end.** Prod holds 0 packages, so the modal has never drawn a real
+> choice line anywhere. Pricing is unit-covered; *rendering* is not. Author one throwaway package
+> once `NEXT_PUBLIC_PACKAGE_AUTHORING` flips, before turning the credit flag on.
+
+_Original problem statement:_ A vendor can now author a choice line, but `lock-modal.tsx` never
+SELECTs `vendor_package_item_options`, so the couple sees nothing. The first real package will
+have an invisible line.
 
 - SELECT the options alongside items in `lock-modal.tsx` and in
   `packages/actions.ts` (`lockPackage` — note it already SELECTs `is_required` after #3730).
 - Render a radio group per choice line; the `is_default` option is the baseline at +₱0.
 - Feed `chosenOptionIds` into `computePackageCredit`.
-- **Schema is already in prod** — `option_id, item_id, label, price_delta_centavos, is_default,
-  is_available, display_order`, with CHECKs enforcing `price_delta >= 0`, default-is-free,
-  default-is-available.
+- **Schema is already in prod** — `option_id, item_id, option_label, option_description,
+  price_delta_centavos, is_default, is_available, display_order`, with CHECKs enforcing
+  `price_delta >= 0`, default-is-free, default-is-available.
+- ⚠ **The column is `option_label`, NOT `label`** (corrected 2026-07-26 against the live schema).
+  This line previously said `label`, and that is exactly what the authoring surface shipped —
+  two SELECTs and one INSERT naming a column that does not exist, so no vendor could save or
+  reload a choice option. Fixed on branch `claude/package-option-label-fix`; the name now lives
+  once in `PACKAGE_ITEM_OPTION_SELECT` (`lib/vendor-packages.ts`) and is pinned to the migration
+  by `lib/vendor-packages.columns.test.ts`. **Use the constant, never a literal.**
+- **No migration is needed for the couple side.** `event_vendor_packages.customizations_json` is
+  `JSONB DEFAULT '{}'`, so `chosen_option_ids` rides along in the existing
+  `PackageCustomizations` payload.
 
-### 6.2 Credit wiring
+### 6.2 ✅ DONE 2026-07-26 — the credit engine is wired
+
+Shipped in **[#3746](https://github.com/iscasasola/setnayan-platform/pull/3746)**. `computePackageCredit`
+is now the authority for every number on a package booking when the flag is on.
+
+- **Parity is the safety argument:** with the DB-default `'expiring'` policy and no upgrades the
+  engine reproduces `computeCustomization` **to the centavo** — asserted by exhaustion over all
+  16 removal subsets × both package shapes. Flipping the flag on a plain package is a no-op *by
+  construction*.
+- **Fails closed, but forgives what it used to.** `allowedRemovals` narrows the removal list
+  before the engine sees it, so a stale page can't turn into a hard failure on a money action;
+  dropping a removal can only ever yield LESS credit. Everything else is surfaced, never replaced
+  by a fallback number.
+- **Fixed a defect in #3744:** the engine refuses to auto-apply the default on a REQUIRED choice
+  line (owner rule). The modal had preselected it while holding no real selection. Required
+  choices now start unselected and the button blocks; new `choice_required` result is the
+  stale-client backstop.
+- `unspent_credit_policy` is now SELECTed (without it the engine returned `invalid_package` on
+  **every** call). Package/item select lists centralised into `VENDOR_PACKAGE_SELECT` /
+  `VENDOR_PACKAGE_ITEM_SELECT`.
+
+**Two of this section's own warnings were stale and are now resolved:**
+- the `keptItemIds` "the lock wave MUST pick one" divergence — **stale**; #3730 already converged
+  `keptItems()`. Nothing to pick.
+- `'refundable'` — still owner-blocked but **verified unreachable**: nothing writes the column, so
+  every package is `'expiring'`. The adapter defaults unknown/missing to `'expiring'` and a test
+  pins it, so the unresolved semantic cannot be reached by omission.
+
+Catalogue `additions` deliberately **not** wired — no schema, no picker (§6.9).
+
+_Original problem statement:_
 `computePackageCredit` has zero callers and `NEXT_PUBLIC_PACKAGE_CREDIT` is read by nothing.
 The engine is written and tested (`lib/package-credit.test.ts`); it needs to replace/augment
 `computeCustomization` on the lock path, behind the flag. **Owner's credit rules:**
