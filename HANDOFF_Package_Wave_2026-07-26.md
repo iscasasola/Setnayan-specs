@@ -280,7 +280,24 @@ The engine is written and tested (`lib/package-credit.test.ts`); it needs to rep
 - unspent credit is per-package policy (`unspent_credit_policy`: `expiring` | `refundable`)
 - refund is capped: `min(remainingCredit, removedTotal, basePrice)`
 
-### 6.3 ⚠ Free-5 → count BOOKINGS (schema change, owner-locked)
+### 6.3 ❌ CANCELLED 2026-07-26 — free-5 is PER EVENT, and that is what already ships
+
+**Owner, 2026-07-26: *"yes. this is per event."*** This **REVERSES** the earlier same-day ruling
+recorded below (and in `DECISION_LOG.md`) that free-5 counts BOOKINGS. A vendor doing catering +
+styling + coordination at one wedding consumes **ONE** of their five, not three.
+
+⇒ **The shipped behaviour is already correct.** `booking_fee_ledger` is
+`UNIQUE (vendor_profile_id, event_id)` and the ordinal is per ledger row, i.e. per event. **No
+schema change. Do not drop the unique constraint.**
+
+> The ordinal DEFECT noted below was real and is **fixed** in
+> [#3758](https://github.com/iscasasola/setnayan-platform/pull/3758): the `ON CONFLICT DO UPDATE`
+> now sets `source = 'lock'` (it never did, so a send-created row stayed `source='send'`, the
+> ordinal counted 0, violated the `>= 1` CHECK, raised, and left the fee silently uncollected),
+> plus a `GREATEST(v_ordinal, 1)` backstop.
+
+_Superseded text:_
+### ~~6.3 ⚠ Free-5 → count BOOKINGS (schema change, owner-locked)~~
 `booking_fee_ledger` is `UNIQUE (vendor_profile_id, event_id)` and the ordinal is per ledger row,
 so today all of a vendor's services at one wedding share **one** free/paid verdict. Under the
 ruling, a vendor doing catering + styling + coordination at one wedding consumes **three** of five.
