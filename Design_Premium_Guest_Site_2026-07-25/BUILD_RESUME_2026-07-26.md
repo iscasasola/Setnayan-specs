@@ -11,6 +11,10 @@
   - **PR-4 #3750 (reply card · mosaic · colour exile) — MERGED.**
   - **PR-4b #3752 (RSVPed keepsake fork) — MERGED.**
   - **PR-5 #3754 (scroll choreography) — MERGED.**
+  - **PR-5b #3759 (Candlelight art direction) — MERGED. ⚠ CARRIES A MIGRATION** —
+    `20271003190000_events_site_art_direction.sql`. After the wave merges to `main`, CONFIRM the
+    column exists and run `gh workflow run supabase-migrations.yml --ref main` if it was skipped.
+    **🎉 WAVE A's PLANNED SCOPE IS COMPLETE.** Everything left is review, not build.
 - **Nothing is parked.** Next work starts fresh off `origin/wave/a-pahina-reskin`.
 - **Wave A's planned scope is now COMPLETE except Candlelight** (below). The wave has never been
   looked at. Do the preview pass before anything else.
@@ -82,15 +86,19 @@
 ## Next actions, in order
 
 1. **Visual pass on the wave branch's Vercel preview** — owed for PR-2 · 3 · 4 · 4b. 375px + desktop, palette-rich + palette-empty event, all four phases, plus an `attending` guest to see the keepsake. **This is the biggest outstanding risk in the wave** — four PRs of pure visual change and nothing has been eyeballed. Do this BEFORE PR-5 adds motion on top.
-2. **PR-5b — Candlelight Pro toggle** (the only planned wave-A scope left). Ships a MIGRATION
-   (`events.site_art_direction` enum `daylight|candlelight`, default `daylight`) + an editor control
-   in the unified website editor's colours panel gated on `eventCoupleWebsiteProActive` + the dark
-   var recipe on `.sn-editorial` (mirror globals' `[data-theme="dark"]` guest overrides).
-   **Give it its own PR and verify the migration after merge** — migrations here auto-apply
-   unreliably (`gh workflow run supabase-migrations.yml --ref main` if skipped), and one blocked
-   main's entire pipeline on 2026-07-26. Respect the editor's shared-fields / no-new-write-path rule.
-3. Cover parallax (deferred from PR-5) — after the preview pass.
-4. The two deferred PR-4b items, once the owner has ruled on the editor tab.
+2. **Merge the wave to `main`** (ONE production build, §12) — then immediately verify the PR-5b
+   migration applied (`gh workflow run supabase-migrations.yml --ref main` if skipped). Rebase the
+   wave on `origin/main` first: it has lived across 7 PRs and a stale-tree merge already silently
+   deleted shipped work in this repo once (`feedback_stale_tree_merge_clobber`).
+3. **Then the three-tier `/[slug]` owner gate** — see the role-surface model locked 2026-07-26
+   (memory `project_setnayan_role_surface_model`). It unblocks BOTH the owner layer and the parked
+   editor 5th preview tab; build ONE gate, not two.
+4. Cover parallax (deferred from PR-5) + the After-Event memento (deferred from PR-4b) — small,
+   both wanted the preview pass first.
+5. **Waves B–E — the role lanes.** Vendor kit restyle → coordinator → band/MC specializations.
+   ⚠ Specializations are SUBSCRIPTION-GATED (owner 2026-07-26): unsubscribed ⇒ generic vendor kit.
+   Build the gate with the tier floor as ONE constant so Solo↔Pro is a one-line change, and degrade
+   to the generic tab set — never to an empty or error state.
 4. Wave A done → OWNER previews the wave branch → ONE merge to main. Then Waves B–E (§ plan).
 
 ## Standing rulings that override older lines in the build doc
