@@ -294,7 +294,34 @@ accepted, but should see.
 > send-path ledger row either frees the vendor forever or hard-errors into no charge. Fix with the
 > same change.
 
-### 6.4 Package fee base + the bypass
+### 6.4 Package fee base + the bypass — ⏳ PREREQUISITE DONE, entry point still to build
+
+**[#3753](https://github.com/iscasasola/setnayan-platform/pull/3753) landed the prerequisite.** The fee
+base is `event_vendor_packages.total_locked_centavos`, and that number was being computed in **two
+places that had diverged**: after §6.2 `lockPackage` was credit-aware while `removeItemFromPackage`
+still priced with `computeCustomization` alone and fetched no options at all. So removing any
+unrelated line from a package carrying a paid upgrade silently dropped the upgrade from the stored
+total — and the fee would have shrunk with it. Now one shared `priceCustomizedPackage`, both callers.
+
+**What §6.4 still needs — verified against the code 2026-07-26:**
+- `collectBookingFeeAtLock(admin, { eventVendorId })` takes **only** an event-vendor id, and the RPC
+  `booking_fee_open_lock_charge` derives the base from a **single** `event_vendors.total_cost_php`
+  (`20270927120000:133-139`). Its one-live-charge unique index is keyed on **`event_vendor_id`**,
+  not `(vendor, event)` — so calling it per cascaded row would mint **one charge + one QR order per
+  package line, each with its own ₱50 floor**, not 5% of the package total.
+- ⇒ needs a **new package-aware RPC** taking an explicit base (or an `event_vendor_package_id`).
+  The `booking_fee_ledger` `UNIQUE (vendor_profile_id, event_id)` is actually convenient here: a
+  package is one vendor at one event, so it maps to exactly one ledger row.
+- ⚠ the amendment re-derive trigger watches `event_vendors.total_cost_php` only
+  (`20270930120000:415-421`), so a package whose base is `total_locked_centavos` gets **no
+  re-derive** when `removeItemFromPackage` rewrites it. Wire that too or the fee goes stale.
+- ⚠ pre-existing engine defect to fix in the same change (§6.3 note): the free-5 ordinal counts
+  `WHERE source='lock'`, but the lock path's `ON CONFLICT DO UPDATE` never sets `source`. If a
+  send-path row exists first, the ordinal computes **0**, which violates the
+  `booking_ordinal >= 1` CHECK → the RPC raises → `collectBookingFeeAtLock` returns `skipped` and
+  **the fee is silently never collected**.
+
+_Original:_
 `lockPackage` **never calls** `collectBookingFeeAtLock` (which has exactly two call sites:
 `vendors/actions.ts:2152`, `chat-lock-booking.server.ts:121`). On flag-flip, a package books for
 **₱0 in fees**.

@@ -10,7 +10,28 @@
   - **PR-3 #3748 (chapter grammar) — MERGED.** See below.
   - **PR-4 #3750 (reply card · mosaic · colour exile) — MERGED.**
   - **PR-4b #3752 (RSVPed keepsake fork) — MERGED.**
+  - **PR-5 #3754 (scroll choreography) — MERGED.**
 - **Nothing is parked.** Next work starts fresh off `origin/wave/a-pahina-reskin`.
+- **Wave A's planned scope is now COMPLETE except Candlelight** (below). The wave has never been
+  looked at. Do the preview pass before anything else.
+
+### What PR-5 settled
+
+- **Motion is fail-visible by construction.** The hidden state lives only under a root `.pahina-js`
+  class; `PahinaMotionRootFlag` withholds it (no IntersectionObserver / reduced motion), arms a 2s
+  self-heal if the observer script never runs, and the observer drops it on any failure. Never
+  reintroduce a hidden-by-default reveal.
+- **Reveal targeting is opt-in via `data-pahina-chapters`** on the ONE top-level article in
+  `site-body.tsx`. Do NOT widen this to `article > *` — `<article>` is used liberally in the tree
+  (guest columns, editorial takeover, 8× in `/[slug]/hub`) and a broad selector hides their children
+  with nothing scoped to reveal them.
+- **Cormorant CANNOT be dropped — checked, don't re-open casually.** `.sn-editorial` maps
+  `--font-display` → `--font-editorial-display` → Cormorant, so every `font-display`/`font-serif` in
+  the guest tree still resolves to it, and `global-error.tsx` names it directly. Retiring it means
+  first repointing that var at Fraunces = a guest-tree-wide visual change, not a bundle cleanup.
+  The reasoning is recorded in `app/layout.tsx` at the font declaration.
+- **Cover parallax deliberately NOT built** — it is the one effect that can visibly break a hero
+  crop, and the hero hasn't been seen since PR-2 restructured it. Add it after the preview pass.
 
 ### ⚠ TWO OWNER DECISIONS PENDING (both from the RSVP surface)
 
@@ -61,8 +82,15 @@
 ## Next actions, in order
 
 1. **Visual pass on the wave branch's Vercel preview** — owed for PR-2 · 3 · 4 · 4b. 375px + desktop, palette-rich + palette-empty event, all four phases, plus an `attending` guest to see the keepsake. **This is the biggest outstanding risk in the wave** — four PRs of pure visual change and nothing has been eyeballed. Do this BEFORE PR-5 adds motion on top.
-2. **PR-5**: motion + Candlelight Pro toggle (migration!) + Cormorant drop.
-3. The two deferred PR-4b items above, once the owner has ruled on the editor tab.
+2. **PR-5b — Candlelight Pro toggle** (the only planned wave-A scope left). Ships a MIGRATION
+   (`events.site_art_direction` enum `daylight|candlelight`, default `daylight`) + an editor control
+   in the unified website editor's colours panel gated on `eventCoupleWebsiteProActive` + the dark
+   var recipe on `.sn-editorial` (mirror globals' `[data-theme="dark"]` guest overrides).
+   **Give it its own PR and verify the migration after merge** — migrations here auto-apply
+   unreliably (`gh workflow run supabase-migrations.yml --ref main` if skipped), and one blocked
+   main's entire pipeline on 2026-07-26. Respect the editor's shared-fields / no-new-write-path rule.
+3. Cover parallax (deferred from PR-5) — after the preview pass.
+4. The two deferred PR-4b items, once the owner has ruled on the editor tab.
 4. Wave A done → OWNER previews the wave branch → ONE merge to main. Then Waves B–E (§ plan).
 
 ## Standing rulings that override older lines in the build doc
