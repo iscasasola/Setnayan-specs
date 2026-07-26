@@ -122,11 +122,15 @@ The single most urgent item. No database trickery required.
 
 ## 5 · WORK THAT WAS IN FLIGHT — it died with the session, re-run it
 
-Background workflows do **not** survive an account switch. All three below were still running. **The scripts are saved to disk and can be re-invoked directly**, which is much cheaper than re-authoring them:
+Background workflows do **not** survive an account switch. All three below were still running. **The scripts are saved and can be re-invoked directly**, which is far cheaper than re-authoring them — each embeds its full brief, every trap, and the lane rules.
+
+They have been **copied next to this document** (the original location is session-scoped and may be garbage-collected):
 
 ```
-/Users/icecasasola/.claude/projects/-Users-icecasasola-Documents-Claude-Projects-Setnayan/262b5014-50ac-4cef-9570-0722fc3c7182/workflows/scripts/
+~/Documents/Claude/Projects/Setnayan/_security_workflows_2026-07-26/
 ```
+
+That folder also contains `sec6-round1-adversary-journal.jsonl` — the full adversary report that broke SEC-6 round one. **Round two needs it**; find the SEC-6 verify agent's `{"type":"result"}` line for the exact bypass mechanics.
 
 | Script | What it was doing | Priority |
 |---|---|---|
