@@ -254,10 +254,32 @@ reasons (*not something we offer · not possible on your date · below our minim
 different package*). Needs a child table with a per-line status.
 
 ### 6.8 Card actions on the service card
-Today's card has **zero** controls. Ship the two-action model (§4a). Note the product review's
-caveat: `Lock this` may need to be **adaptive** — shown only where the vendor has a posted
-non-inquire price *and* a reservation method; elsewhere it becomes "Request this date". **Still an
-open owner question.**
+Today's card has **zero** controls. Ship the two-action model (§4a).
+
+**`Lock this` is UNIVERSAL — owner-locked 2026-07-26** ("lock it. yes direct lock"). The product
+review's adaptive alternative is rejected.
+
+> ⚠ **BUT — one thing must be settled first, and it is a money/trust issue.** The owner's stated
+> reason was *"they only show if the date is available, so there is never a question as to whether
+> it conflicts."* The availability filter is **display-time only.** The schedule-pool gate
+> (`vendors/actions.ts:246-262`, owner lock 2026-06-12) says plainly:
+> *"White (considering..contracted) is unlimited and consumes nothing; only BOOKED
+> (deposit_paid/delivered/complete) consumes pool capacity."*
+>
+> So **`contracted` — what Lock writes — reserves nothing.** `acquireSchedulePools` fires on the
+> flip to `deposit_paid`. Two couples can both Lock the same vendor for the same date and only
+> discover it when one pays. Direct Lock makes this far likelier, because today `contracted` is
+> only reached after a conversation.
+>
+> **Pick one before the button ships:**
+> **(a)** move the pool acquire to the `contracted` transition so Lock really reserves the date —
+> reverses the 2026-06-12 "white is unlimited" lock, and an unpaid lock holding a date needs an
+> expiry or tyre-kickers will block vendors; or
+> **(b)** keep white unlimited and stop promising exclusivity — Lock is a *claim*, the UI says so,
+> and the vendor confirms.
+>
+> Shipping the button while telling couples "the date is yours", without (a), is the one outcome
+> that damages trust on both sides.
 
 ### 6.9 Longer tail
 - **Adjusted prices on cards** — the engine prices correctly but only inside a quote; cards print
