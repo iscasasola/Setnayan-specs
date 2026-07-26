@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Package Credit — before / after / vendor · Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --m-paper:#FBFAF7; --m-paper-2:#F4F2EC; --m-ivory:#EDEAE0;
+  --m-line:#E1DCD1; --m-line-soft:#EDE8DE;
+  --m-ink:#1B1A17; --m-slate:#3A382F; --m-slate-2:#6E6A62; --m-slate-3:#8A857B; --m-slate-4:#B5AF9E;
+  --m-gold:#A9834B; --m-gold-2:#8A6B39; --m-gold-3:#CBA766; --m-gold-4:#F3ECDF;
+  --ok:#2F6B4F; --ok-soft:#EAF3EE;
+  --sans:'Hanken Grotesk',system-ui,sans-serif; --mono:'Space Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--m-paper-2);color:var(--m-ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 20px 72px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--m-slate-3)}
+h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:6px 0 6px}
+.sub{color:var(--m-slate-2);font-size:14px;max-width:70ch}
+.tabs{display:flex;gap:6px;margin:26px 0 22px;border-bottom:1px solid var(--m-line);flex-wrap:wrap}
+.tab{appearance:none;border:0;background:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--m-slate-2);padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected=true]{color:var(--m-ink);border-bottom-color:var(--m-gold)}
+.panel[hidden]{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.col-note{font-size:12.5px;color:var(--m-slate-2);margin-bottom:10px;min-height:34px}
+.phone{background:var(--m-paper);border:1px solid var(--m-line);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(27,26,23,.04)}
+.ph-head{padding:14px 16px;border-bottom:1px solid var(--m-line)}
+.ph-title{font-size:14.5px;font-weight:600}
+.ph-sub{font-size:11.5px;color:var(--m-slate-2);margin-top:2px}
+.ph-body{padding:14px 16px;max-height:430px;overflow-y:auto}
+.ph-foot{padding:14px 16px;border-top:1px solid var(--m-line);background:var(--m-paper-2)}
+.hint{font-size:11.5px;color:var(--m-slate-2);margin-bottom:12px}
+/* ---- BEFORE rows ---- */
+.old-row{display:flex;gap:10px;align-items:flex-start;border:1px solid rgba(47,107,79,.28);background:rgba(234,243,238,.5);border-radius:9px;padding:11px;margin-bottom:8px;cursor:pointer}
+.old-row.off{border-color:var(--m-line);background:rgba(237,234,224,.4);opacity:.6}
+.old-row p{font-size:13px;color:var(--m-slate)}
+.old-row.off p{text-decoration:line-through;color:var(--m-slate-3)}
+.val{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--m-slate-3);margin-top:3px;display:block}
+.val.back{color:var(--ok)}
+/* ---- AFTER lines ---- */
+.line{border:1px solid var(--m-line);border-radius:10px;padding:12px;margin-bottom:9px;background:var(--m-paper)}
+.line.req-fixed{background:var(--m-paper-2);border-color:var(--m-line-soft)}
+.line-top{display:flex;gap:10px;align-items:flex-start}
+.line-name{font-size:13.5px;color:var(--m-ink);font-weight:500}
+.line.req-fixed .line-name{font-weight:400}
+.tagline{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--m-slate-4);margin-top:4px}
+.tagline.gold{color:var(--m-gold-2)}
+.skip{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--m-slate-3);margin-top:4px}
+.skip.on{color:var(--ok)}
+.opts{margin-top:10px;padding-top:10px;border-top:1px dashed var(--m-line);display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:12.5px;color:var(--m-slate)}
+.opt input{accent-color:var(--m-gold-2);width:15px;height:15px}
+.opt .delta{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--m-slate-2)}
+.opt .delta.inc{color:var(--m-slate-3)}
+input[type=checkbox]{accent-color:var(--m-gold-2);width:17px;height:17px;margin-top:1px;flex:none}
+.struck{text-decoration:line-through;color:var(--m-slate-3)}
+/* ---- shelf ---- */
+.shelf{margin-top:14px;border:1px dashed var(--m-line);border-radius:10px;padding:12px;background:var(--m-paper)}
+.shelf.dormant{opacity:.55}
+.shelf h4{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--m-gold-2);font-weight:400}
+.shelf-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--m-line-soft);font-size:12.5px;color:var(--m-slate)}
+.shelf-row:last-child{border-bottom:0}
+.shelf-row .p{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--m-slate-2)}
+.add{appearance:none;border:1px solid var(--m-line);background:var(--m-paper);border-radius:7px;font-family:var(--sans);font-size:11.5px;padding:4px 10px;cursor:pointer;color:var(--m-ink)}
+.add:hover{border-color:var(--m-gold-3);background:var(--m-gold-4)}
+.add.rm{border-color:rgba(47,107,79,.3);background:var(--ok-soft);color:var(--ok)}
+/* ---- meter ---- */
+.bar{height:4px;border-radius:2px;background:rgba(27,26,23,.1);overflow:hidden;margin-bottom:11px;position:relative}
+.bar span{display:block;height:100%;background:var(--ok);width:0;transition:width .25s ease}
+.bar.over span{background:var(--m-gold)}
+.ledger{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
+.led{display:flex;justify-content:space-between;font-size:12.5px}
+.led dt{color:var(--m-slate-2)}
+.led dd{font-family:var(--mono);color:var(--m-ink)}
+.led.credit dd{color:var(--ok)}
+.led.over dd{color:var(--m-gold-2);font-weight:700}
+.policy{font-size:11.5px;color:var(--m-slate-2);margin-bottom:11px;padding:8px 10px;border-radius:8px;background:var(--m-paper);border:1px solid var(--m-line-soft)}
+.policy.warn{background:var(--m-gold-4);border-color:var(--m-gold-3);color:var(--m-gold-2)}
+.lock{width:100%;appearance:none;border:0;border-radius:9px;background:var(--m-ink);color:var(--m-paper);font-family:var(--sans);font-size:13.5px;font-weight:600;padding:12px;cursor:pointer}
+.lock .num{font-family:var(--mono)}
+.toast{font-size:11.5px;padding:8px 10px;border-radius:8px;background:var(--m-gold-4);border:1px solid var(--m-gold-3);color:var(--m-gold-2);margin-bottom:10px}
+/* ---- vendor ---- */
+.v-card{background:var(--m-paper);border:1px solid var(--m-line);border-radius:12px;padding:16px;margin-bottom:14px}
+.v-row{border:1px solid var(--m-line);border-radius:9px;padding:11px;margin-bottom:8px;background:var(--m-paper)}
+.v-name{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px}
+.chip{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:var(--m-paper-2);color:var(--m-slate-2);border:1px solid var(--m-line)}
+.q{font-size:11.5px;color:var(--m-slate-2);margin:9px 0 5px}
+.radios{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--m-slate)}
+.radios label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.money{font-family:var(--mono);font-size:11.5px;border:1px solid var(--m-line);border-radius:6px;padding:3px 7px;width:120px;background:var(--m-paper);color:var(--m-ink)}
+.check{font-size:11.5px;padding:9px 11px;border-radius:8px;background:var(--ok-soft);color:var(--ok);border:1px solid rgba(47,107,79,.25);font-family:var(--mono)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0 4px;font-size:12px;color:var(--m-slate-2)}
+.legend b{color:var(--m-ink);font-weight:600}
+table.states{width:100%;border-collapse:collapse;margin-top:14px;font-size:12.5px;background:var(--m-paper);border:1px solid var(--m-line);border-radius:10px;overflow:hidden}
+table.states th,table.states td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--m-line-soft);vertical-align:top}
+table.states th{background:var(--m-paper-2);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--m-slate-2);font-weight:600}
+table.states tr:last-child td{border-bottom:0}
+.callout{border-left:3px solid var(--m-gold);background:var(--m-gold-4);padding:12px 14px;border-radius:0 9px 9px 0;font-size:13px;color:var(--m-slate);margin:18px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Setnayan · design prototype · 2026-07-26</p>
+  <h1>Package credit — what we have, what changes</h1>
+  <p class="sub">The couple-facing screen is the existing lock modal, not a new page. Everything below reuses the shipped Atelier tokens. <b>The “after” panel is live — toggle things and watch the total on the button.</b></p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-p="p1">Couple · before vs after</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="p2">The four line states</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="p3">Vendor · building it</button>
+  </div>
+
+  <!-- ============ PANEL 1 ============ -->
+  <section class="panel" id="p1">
+    <div class="grid">
+      <div>
+        <p class="col-note"><b>TODAY.</b> A flat checkbox list. Every line looks identical, the only money shown is “value”, and nothing tells you what it’s <em>for</em>.</p>
+        <div class="phone">
+          <div class="ph-head">
+            <div class="ph-title">Customize package</div>
+            <div class="ph-sub">Platinum Wedding Package · Sofitel</div>
+          </div>
+          <div class="ph-body">
+            <p class="hint">Uncheck anything you’d like to skip. That value moves into your consumable budget — you can spend it on something else with Platinum.</p>
+            <div id="oldRows"></div>
+          </div>
+          <div class="ph-foot">
+            <div class="ledger">
+              <div class="led"><dt>Total package</dt><dd>₱1,400,000</dd></div>
+              <div class="led credit"><dt>Consumable budget</dt><dd id="oldBudget">₱200,000</dd></div>
+            </div>
+            <button class="lock">Lock this package</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="col-note"><b>PROPOSED.</b> The control tells you the rule. Money-you-pay appears in exactly two places — the meter and the button — and they always match.</p>
+        <div class="phone">
+          <div class="ph-head">
+            <div class="ph-title">Customize package</div>
+            <div class="ph-sub">Platinum Wedding Package · Sofitel</div>
+          </div>
+          <div class="ph-body">
+            <p class="hint">₱1,400,000 — credit changes <b>what you get</b>, not what you pay. Upgrades beyond your credit add to the total.</p>
+            <div id="newRows"></div>
+            <div class="shelf dormant" id="shelf">
+              <h4 id="shelfHead">Credit can be spent on anything Sofitel offers</h4>
+              <div id="shelfBody" style="display:none;margin-top:9px"></div>
+            </div>
+          </div>
+          <div class="ph-foot">
+            <div id="toast"></div>
+            <div class="bar" id="bar"><span></span></div>
+            <div class="ledger" id="ledger"></div>
+            <div class="policy" id="policy"></div>
+            <button class="lock">Lock at <span class="num" id="lockNum">₱1,400,000</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>The one moment that matters.</b> Drop the photobooth, then upgrade to the plated dinner. Watch the number on the button move the instant you cross your credit — in <b>gold, never red</b>. Spending more with your caterer is a purchase, not an error.
+    </div>
+  </section>
+
+  <!-- ============ PANEL 2 ============ -->
+  <section class="panel" id="p2" hidden>
+    <p class="sub">A vendor sets two independent switches per line. The couple never reads either word — the <b>control itself</b> is the label.</p>
+    <table class="states">
+      <thead><tr><th style="width:110px"></th><th>Fixed — one thing</th><th>Choice — pick 1 of N</th></tr></thead>
+      <tbody>
+        <tr>
+          <th>Required</th>
+          <td><b>No control at all.</b> Reads as furniture — it’s the foundation of the package.<br><span class="tagline">Part of every booking</span><br><em style="font-size:12px;color:var(--m-slate-2)">And crucially: <b>no price is shown.</b> A value on a row you can’t drop is exactly the “credit you can’t free” illusion.</em></td>
+          <td><b>Radio card, gold eyebrow.</b> The only line type that <em>demands</em> something, so it’s the only one that gets an accent.<br><span class="tagline gold">Choose one</span><br><em style="font-size:12px;color:var(--m-slate-2)">The default says <b>Included</b> — never “₱0” or “Free”, because it isn’t free, it’s already inside the price.</em></td>
+        </tr>
+        <tr>
+          <th>Optional</th>
+          <td><b>Checkbox.</b> Today’s row, kept.<br><span class="skip">Skip for ₱60,000 credit</span><br><em style="font-size:12px;color:var(--m-slate-2)">Copy changes with the vendor’s policy: “credit to spend” vs “off your price”.</em></td>
+          <td><b>Checkbox + nested radios.</b> Unchecking collapses the choices rather than deleting them — re-check and your pick is still there.<br><em style="font-size:12px;color:var(--m-slate-2)">Dropping refunds the <b>base</b> value only. The premium delta was never in the package, so it can’t come out.</em></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>Why no words.</b> Couples learn in three seconds: no box = it’s in; a box = I can drop it; circles = I must pick. Labels would just add noise to a screen that’s already doing arithmetic.</div>
+  </section>
+
+  <!-- ============ PANEL 3 ============ -->
+  <section class="panel" id="p3" hidden>
+    <p class="sub">Vendors have <b>no package builder at all today</b> — packages exist only as a database seed. This lives inside the existing shop manager, in the same repeater grammar as the add-ons editor. No new page.</p>
+    <div class="v-card" style="margin-top:16px">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="font-size:15px;font-weight:600">Platinum Wedding Package</div>
+        <span class="chip">Active</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px"><span class="eyebrow">Price</span><input class="money" value="₱1,400,000"></div>
+      </div>
+
+      <p class="q" style="margin-top:14px"><b>Lines</b> — drag to reorder. The order is the story the couple reads.</p>
+
+      <div class="v-row">
+        <div class="v-name">Sunset Pavilion — capacity 250 <span class="chip">reception venue</span></div>
+        <p class="q">If a couple doesn’t want it:</p>
+        <div class="radios">
+          <label><input type="radio" name="v1" checked> It stays — part of every booking</label>
+          <label><input type="radio" name="v1"> They can drop it — value becomes credit</label>
+        </div>
+      </div>
+
+      <div class="v-row">
+        <div class="v-name">Main course <span class="chip">catering</span></div>
+        <p class="q">If a couple doesn’t want it:</p>
+        <div class="radios">
+          <label><input type="radio" name="v2" checked> It stays — part of every booking</label>
+          <label><input type="radio" name="v2"> They can drop it — value becomes credit</label>
+        </div>
+        <p class="q" style="margin-top:10px"><b>Choices</b> — the couple picks one:</p>
+        <div class="radios">
+          <label><input type="radio" name="v2b" checked> Filipino-Mediterranean buffet <span class="chip" style="margin-left:auto">base</span></label>
+          <label><input type="radio" name="v2b"> Premium seafood buffet <span style="margin-left:auto;display:flex;gap:6px;align-items:center"><span class="eyebrow">adds</span><input class="money" value="₱80,000" style="width:96px"></span></label>
+          <label><input type="radio" name="v2b"> Plated 5-course dinner <span style="margin-left:auto;display:flex;gap:6px;align-items:center"><span class="eyebrow">adds</span><input class="money" value="₱120,000" style="width:96px"></span></label>
+        </div>
+      </div>
+
+      <p class="q" style="margin-top:16px"><b>Unspent credit</b> — if the couple doesn’t use it all:</p>
+      <div class="radios">
+        <label><input type="radio" name="pol" checked> It stays in the package — use it or lose it</label>
+        <label><input type="radio" name="pol"> It comes off their price</label>
+      </div>
+
+      <div class="check" style="margin-top:14px">Credit check · droppable ₱190,000 + pool ₱200,000 — within package price ✓</div>
+    </div>
+    <div class="callout"><b>Required is phrased as a consequence, not a flag.</b> “It stays” / “They can drop it” — vendors think in refund policy, not booleans. Same reason the unspent-credit radio says what happens rather than naming a setting.</div>
+  </section>
+</div>
+
+<script>
+const peso = n => '₱' + n.toLocaleString('en-PH');
+const PRICE = 1400000, POOL = 200000;
+
+const ITEMS = [
+  {id:'venue', name:'Sunset Pavilion — capacity 250', required:true,  value:0,     opts:null},
+  {id:'main',  name:'Main course',                    required:true,  value:0,
+    opts:[{l:'Filipino-Mediterranean buffet',d:0},{l:'Premium seafood buffet',d:80000},{l:'Plated 5-course dinner',d:120000}]},
+  {id:'cake',  name:'Three-tier wedding cake',        required:false, value:45000,  opts:null},
+  {id:'booth', name:'Classic photobooth — 4-hour run',required:false, value:60000,  opts:null},
+  {id:'dess',  name:'Dessert station',                required:false, value:40000,
+    opts:[{l:'Classic halo-halo bar',d:0},{l:'Artisan gelato cart',d:15000}]},
+  {id:'car',   name:'Bridal car — vintage Benz',      required:false, value:45000,  opts:null},
+];
+const SHELF = [
+  {l:'Junior suite, wedding night', p:25000},
+  {l:'Extra sound hour',            p:10000},
+  {l:'Welcome cocktail hour',       p:35000},
+];
+
+const state = {removed:new Set(), picks:{main:0, dess:0}, adds:new Set()};
+let lastOver = false;
+
+// ---------- BEFORE ----------
+const oldRows = document.getElementById('oldRows');
+const oldRemoved = new Set();
+function drawOld(){
+  oldRows.innerHTML = '';
+  ITEMS.forEach(it=>{
+    const off = oldRemoved.has(it.id);
+    const d = document.createElement('label');
+    d.className = 'old-row' + (off?' off':'');
+    d.innerHTML = `<input type="checkbox" ${off?'':'checked'}>
+      <div><p>${it.name}</p>${it.value>0?`<span class="val ${off?'back':''}">${off?'+'+peso(it.value)+' back to budget':peso(it.value)+' value'}</span>`:''}</div>`;
+    d.querySelector('input').onchange = ()=>{ off?oldRemoved.delete(it.id):oldRemoved.add(it.id); drawOld(); };
+    oldRows.appendChild(d);
+  });
+  let b = POOL; oldRemoved.forEach(id=>{ const i=ITEMS.find(x=>x.id===id); if(i) b+=i.value; });
+  document.getElementById('oldBudget').textContent = peso(b);
+}
+
+// ---------- AFTER ----------
+const newRows = document.getElementById('newRows');
+function calc(){
+  // credit available: pool + dropped OPTIONAL values only. Required values NEVER count.
+  let avail = POOL;
+  state.removed.forEach(id=>{ const i=ITEMS.find(x=>x.id===id); if(i && !i.required) avail += i.value; });
+  let spent = 0;
+  ITEMS.forEach(it=>{ if(it.opts && !state.removed.has(it.id)) spent += it.opts[state.picks[it.id]||0].d; });
+  state.adds.forEach(i=> spent += SHELF[i].p);
+  const over = Math.max(0, spent - avail);
+  return {avail, spent, over, remaining: Math.max(0, avail-spent), total: PRICE + over};
+}
+function drawNew(){
+  newRows.innerHTML='';
+  ITEMS.forEach(it=>{
+    const off = state.removed.has(it.id);
+    const row = document.createElement('div');
+    row.className = 'line' + (it.required && !it.opts ? ' req-fixed':'');
+    if(it.required && !it.opts){
+      row.innerHTML = `<div class="line-name">${it.name}</div><div class="tagline">Part of every booking</div>`;
+    } else if(it.required && it.opts){
+      row.innerHTML = `<div class="line-name">${it.name}</div><div class="tagline gold">Choose one</div>
+        <div class="opts">${it.opts.map((o,i)=>`<label class="opt"><input type="radio" name="r-${it.id}" ${((state.picks[it.id]||0)===i)?'checked':''} data-i="${i}"><span>${o.l}</span><span class="delta ${o.d===0?'inc':''}">${o.d===0?'Included':'+'+peso(o.d)}</span></label>`).join('')}</div>`;
+    } else {
+      const head = `<div class="line-top"><input type="checkbox" ${off?'':'checked'}>
+        <div style="flex:1"><div class="line-name ${off?'struck':''}">${it.name}</div>
+        <div class="skip ${off?'on':''}">${off?'+'+peso(it.value)+' credit to spend ✓':'Skip for '+peso(it.value)+' credit'}</div></div></div>`;
+      const opts = (it.opts && !off) ? `<div class="opts">${it.opts.map((o,i)=>`<label class="opt"><input type="radio" name="r-${it.id}" ${((state.picks[it.id]||0)===i)?'checked':''} data-i="${i}"><span>${o.l}</span><span class="delta ${o.d===0?'inc':''}">${o.d===0?'Included':'+'+peso(o.d)}</span></label>`).join('')}</div>` : '';
+      row.innerHTML = head + opts;
+    }
+    const cb = row.querySelector('input[type=checkbox]');
+    if(cb) cb.onchange = ()=>{ off?state.removed.delete(it.id):state.removed.add(it.id); render(); };
+    row.querySelectorAll('input[type=radio]').forEach(r=>{ r.onchange = ()=>{ state.picks[it.id]=+r.dataset.i; render(); }; });
+    newRows.appendChild(row);
+  });
+}
+function drawShelf(c){
+  const sh=document.getElementById('shelf'), head=document.getElementById('shelfHead'), body=document.getElementById('shelfBody');
+  if(c.remaining<=0 && state.adds.size===0){ sh.className='shelf dormant'; head.textContent='Credit can be spent on anything Sofitel offers'; body.style.display='none'; return; }
+  sh.className='shelf'; head.textContent='Spend your credit · '+peso(c.remaining)+' to use'; body.style.display='block';
+  body.innerHTML = SHELF.map((s,i)=>`<div class="shelf-row"><span>${s.l}</span><span class="p">${peso(s.p)}</span><button class="add ${state.adds.has(i)?'rm':''}" data-i="${i}">${state.adds.has(i)?'Added ✕':'Add'}</button></div>`).join('');
+  body.querySelectorAll('button').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.i; state.adds.has(i)?state.adds.delete(i):state.adds.add(i); render(); }; });
+}
+function drawMeter(c){
+  const bar=document.getElementById('bar'), led=document.getElementById('ledger'), pol=document.getElementById('policy'), toast=document.getElementById('toast');
+  const pct = c.avail>0 ? Math.min(100,(c.spent/c.avail)*100) : (c.over>0?100:0);
+  bar.className = 'bar'+(c.over>0?' over':''); bar.firstElementChild.style.width = pct+'%';
+  let rows = `<div class="led"><dt>Package price</dt><dd>${peso(PRICE)}</dd></div>`;
+  if(c.avail>0){
+    rows += `<div class="led credit"><dt>Credit to spend</dt><dd>${peso(c.avail)}</dd></div>`;
+    if(c.spent>0) rows += `<div class="led"><dt>Used so far</dt><dd>−${peso(Math.min(c.spent,c.avail))}</dd></div>`;
+    if(c.over===0) rows += `<div class="led credit"><dt>${c.remaining===0?'Fully used ✓':'Still yours to use'}</dt><dd>${c.remaining===0?'':peso(c.remaining)}</dd></div>`;
+  }
+  if(c.over>0) rows += `<div class="led over"><dt>Beyond your credit</dt><dd>+${peso(c.over)}</dd></div>
+    <div class="led"><dt><b>Your package total</b></dt><dd><b>${peso(c.total)}</b></dd></div>`;
+  led.innerHTML = rows;
+  if(c.over>0){ pol.className='policy warn'; pol.textContent='The extra '+peso(c.over)+' is added to your package and settled with Sofitel like the rest of it.'; }
+  else if(c.remaining>0){ pol.className='policy warn'; pol.textContent='Unspent credit stays with Sofitel — use it before you lock.'; }
+  else { pol.className='policy'; pol.textContent='Everything rebalanced — your price is unchanged.'; }
+  document.getElementById('lockNum').textContent = peso(c.total);
+  if(c.over>0 && !lastOver){ toast.innerHTML = '<div class="toast">That pick used the last of your credit — '+peso(c.over)+' was added to your total.</div>'; setTimeout(()=>{toast.innerHTML='';},5000); }
+  if(c.over===0 && lastOver){ toast.innerHTML = '<div class="toast">You’re back inside your credit — total returns to '+peso(PRICE)+'.</div>'; setTimeout(()=>{toast.innerHTML='';},5000); }
+  lastOver = c.over>0;
+}
+function render(){ const c=calc(); drawNew(); drawShelf(c); drawMeter(c); }
+
+document.querySelectorAll('.tab').forEach(t=>{ t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected', x===t));
+  document.querySelectorAll('.panel').forEach(p=>p.hidden = p.id!==t.dataset.p);
+};});
+
+drawOld(); render();
+</script>
+</body>
+</html>

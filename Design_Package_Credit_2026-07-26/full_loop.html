@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Service card → inquiry → proposal · Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--line:#E1DCD1;--ink3:#A09A8E;--ink4:#8A857B;--ink5:#6E6A62;--ink7:#3A382F;--ink9:#1B1A17;
+--g1:#F3ECDF;--g3:#CBA766;--g5:#A9834B;--g7:#8A6B39;--paper:#FBFAF7;--paper2:#F4F2EC;
+--r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:18px;--pill:999px;
+--sh-sm:0 1px 2px rgba(30,26,18,.06);--sh-t:0 18px 40px -26px rgba(30,26,18,.4);
+--glass:rgba(255,255,255,.5);--glassline:rgba(255,255,255,.72);--blur:blur(22px) saturate(1.5);
+--ease:cubic-bezier(.2,.7,.2,1);--ok:#2F6B4F;--ok1:#EAF3EE;--no:#8C3B36;--no1:#F7ECEA;
+--font:'Hanken Grotesk',system-ui,sans-serif;--mono:'Space Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);color:var(--ink9);line-height:1.5;-webkit-font-smoothing:antialiased;
+background:radial-gradient(1100px 620px at 8% -8%,#FFF6E6 0,transparent 58%),radial-gradient(900px 560px at 96% 4%,#F0EAF6 0,transparent 55%),linear-gradient(180deg,#FBFAF7,#F4F2EC);background-attachment:fixed;min-height:100vh}
+.wrap{max-width:1180px;margin:0 auto;padding:38px 20px 80px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--g7)}
+h1{font-size:29px;font-weight:600;letter-spacing:-.025em;margin:9px 0 6px}
+.lede{color:var(--ink5);font-size:14.5px;max-width:76ch;line-height:1.6}
+.glass{background:var(--glass);border:1px solid var(--glassline);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:var(--r-xl);box-shadow:var(--sh-t)}
+/* the plan bar — the single source of every price on the page */
+.plan{margin-top:24px;padding:16px 18px}
+.planh{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--g7);margin-bottom:11px}
+.planh em{font-style:normal;color:var(--ink4);letter-spacing:.06em}
+.planf{display:flex;gap:11px;flex-wrap:wrap}.planf>div{flex:1;min-width:126px}
+.planf label.f{margin-top:0}
+.sl{margin-top:14px;padding-top:13px;border-top:1px solid rgba(225,220,209,.7)}
+.slh{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);margin-bottom:7px}
+.slrow{display:flex;align-items:center;gap:10px;font-size:12.5px;padding:5px 0;color:var(--ink7)}
+.slrow .n2{flex:1}.slrow .n2 em{font-style:normal;display:block;font-size:11px;color:var(--ink4)}
+.slrow .a2{font-family:var(--mono);font-size:12.5px}
+.slrow.sum{border-top:1px solid var(--line);margin-top:5px;padding-top:9px;font-weight:600}
+.slrow.sum .a2{font-size:15px}
+.slrow .via{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;border-radius:var(--pill);padding:2px 7px;border:1px solid var(--line);color:var(--ink4);flex:none}
+.slrow .via.cust{border-color:var(--g3);color:var(--g7);background:var(--g1)}
+.steps{display:flex;gap:8px;margin:26px 0 22px;flex-wrap:wrap}
+.st{flex:1;min-width:180px;appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.6);backdrop-filter:blur(10px);border-radius:var(--r-lg);padding:12px 14px;cursor:pointer;text-align:left;transition:all .2s var(--ease);box-shadow:var(--sh-sm)}
+.st:hover{border-color:var(--g3);transform:translateY(-2px)}
+.st[aria-current=true]{background:var(--ink9);border-color:transparent}
+.st .n{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em}
+.st[aria-current=true] .n{color:var(--g3)}
+.st b{display:block;font-size:13px;font-weight:600;margin:3px 0 1px}
+.st[aria-current=true] b{color:var(--paper)}
+.st span{font-size:11.5px;color:var(--ink5)}
+.st[aria-current=true] span{color:rgba(251,250,247,.58)}
+/* Panels only hide once the script confirms it is running (body.js). If the
+   script is blocked or stripped by a viewer, all four steps stack instead of
+   collapsing to a blank page. */
+.panel[hidden]{display:block}  /* beats the UA default so no-JS stacks */
+body.js .panel[hidden]{display:none}
+body:not(.js) .steps{display:none}
+body:not(.js) .panel{margin-bottom:26px}
+.two{display:grid;grid-template-columns:1fr .74fr;gap:20px;align-items:start}
+@media(max-width:980px){.two{grid-template-columns:1fr}}
+.pane{background:#fff;border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-t)}
+.ph{padding:14px 17px;border-bottom:1px solid var(--line)}
+.ph .who{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--g7);display:block;margin-bottom:4px}
+.ph b{font-size:15px;font-weight:600;display:block;letter-spacing:-.01em}
+.ph span{font-size:12px;color:var(--ink5)}
+.pb{padding:15px 17px;max-height:540px;overflow-y:auto}
+.pb::-webkit-scrollbar{width:8px}.pb::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+label.f{display:block;font-size:11.5px;color:var(--ink5);margin:11px 0 4px}
+.t{font-family:var(--font);font-size:13px;border:1px solid var(--line);border-radius:var(--r-md);padding:8px 10px;background:#fff;color:var(--ink9);width:100%}
+.t:focus{outline:0;border-color:var(--g5)}
+.m{font-family:var(--mono)}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:130px}
+/* author `display:flex` beats the UA [hidden] rule, so hiding needs saying */
+.row[hidden]{display:none}
+.anch{margin-top:11px;font-family:var(--mono);font-size:11.5px;color:var(--ink4);background:var(--paper2);border-radius:var(--r-md);padding:8px 11px}
+.anch b{color:var(--ink9);font-weight:700}
+.sel{font-family:var(--font);font-size:12.5px;border:1px solid var(--line);border-radius:var(--r-md);padding:8px 10px;background:#fff;width:100%;cursor:pointer}
+.inc{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.inc .t{flex:1}.inc .t.w{max-width:110px}
+.ghost{appearance:none;border:1px dashed var(--line);background:none;font-family:var(--font);font-size:12.5px;color:var(--ink5);padding:8px 12px;border-radius:var(--r-md);cursor:pointer;margin-top:6px}
+.ghost:hover{border-color:var(--g5);color:var(--g7);background:var(--g1)}
+/* real service card */
+.svc{background:#fff;border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-t)}
+.svc .hd{height:104px;background:linear-gradient(135deg,#E8DFD0,#D8CDBA 50%,#EDE6DA);position:relative}
+.svc .hd .disc{position:absolute;top:10px;right:10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--g7);color:#fff;padding:4px 10px;border-radius:var(--pill)}
+.svc .bd{padding:14px 16px 16px}
+.svc .cat{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3)}
+.svc h3{font-size:16px;font-weight:600;letter-spacing:-.012em;margin:4px 0 3px}
+.svc .serves{font-size:11.5px;color:var(--ink5);margin-bottom:10px}
+.svc .pr{font-family:var(--mono);font-size:18px}
+.svc .prd{font-family:var(--mono);font-size:11px;color:var(--ink4);margin:2px 0 12px}
+.svc .sect{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink4);margin:11px 0 6px}
+.svc ul{list-style:none;font-size:12.5px}
+.svc li{padding:3px 0;display:flex;gap:8px;color:var(--ink7)}
+.svc li i{font-style:normal;flex:none;width:12px}
+.svc li.free i{color:var(--ok)}
+.svc li.free em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--ok);margin-left:auto;flex:none}
+.svc li.not{color:var(--ink4)}.svc li.not i{color:var(--ink3)}
+.svc .more{font-size:11.5px;color:var(--ink4);padding-top:3px}
+.cta{display:block;width:100%;appearance:none;border:0;border-radius:var(--r-md);background:var(--ink9);color:var(--paper);font-family:var(--font);font-size:13px;font-weight:600;padding:11px;cursor:pointer;margin-top:13px}
+.cta:hover{background:var(--g7)}
+.cta.g{background:none;border:1px solid var(--line);color:var(--ink7);margin-top:7px}
+.ctarow{display:flex;gap:7px;margin-top:7px}.ctarow .cta{margin-top:0;flex:1}
+.cta.lock{background:none;border:1px solid var(--g3);color:var(--g7);margin-top:7px;padding:9px 11px}
+.cta em{display:block;font-style:normal;font-size:10.5px;font-weight:400;margin-top:2px;opacity:.62}
+.cta.lock em{color:var(--ink4);opacity:1}
+.cta.heart{font-size:12.5px}
+/* customize */
+.ln{border:1px solid var(--line);border-radius:var(--r-lg);padding:12px;margin-bottom:8px}
+.ln.fix{background:var(--paper2)}
+.nm{font-size:13.5px;font-weight:500}
+.tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;margin-top:4px;color:var(--ink3)}
+.tag.gold{color:var(--g7)}.tag.ok{color:var(--ok)}
+.opts{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--ink7)}
+.opt input{accent-color:var(--g5);width:15px;height:15px;flex:none}
+.opt .d{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--ink5)}
+.opt .d.inc2{color:var(--ink3)}
+.top{display:flex;gap:10px;align-items:flex-start}
+input[type=checkbox]{accent-color:var(--g5);width:17px;height:17px;margin-top:1px;flex:none}
+.stk{text-decoration:line-through;color:var(--ink3)}
+.stp{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink7)}
+.stp .l{flex:1}.stp .u{font-family:var(--mono);font-size:10.5px;color:var(--ink4)}
+.sb{appearance:none;width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:#fff;font-size:15px;line-height:1;cursor:pointer}
+.sb:disabled{opacity:.3}.qt{font-family:var(--mono);font-size:13px;min-width:18px;text-align:center}
+.reqbox{border:1px dashed var(--g3);background:linear-gradient(160deg,var(--g1),#fff 70%);border-radius:var(--r-lg);padding:12px;margin-top:6px}
+.reqin{display:flex;gap:8px}
+.reqin input{flex:1;font-size:13px;border:1px solid var(--line);border-radius:var(--r-md);padding:8px 10px;background:#fff}
+.reqin button{border:0;background:var(--ink9);color:var(--paper);border-radius:var(--r-md);padding:0 14px;font-size:13px;font-weight:600;cursor:pointer}
+.rq{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid rgba(225,220,209,.5);font-size:12.5px;align-items:center}
+.rq:last-child{border-bottom:0}.rq i{font-style:normal;color:var(--g7)}.rq .t2{flex:1;color:var(--ink7)}
+.rq .x{border:0;background:none;color:var(--ink3);cursor:pointer;font-size:14px}
+.foot{padding:13px 17px;border-top:1px solid var(--line);background:var(--paper)}
+.led{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px}
+.led dt{color:var(--ink5)}.led dd{font-family:var(--mono)}
+.led.c dd{color:var(--ok)}.led.o dd{color:var(--g7);font-weight:700}
+/* vendor */
+.vr{border:1px solid var(--line);border-radius:var(--r-lg);padding:12px;margin-bottom:8px}
+.vr.yes{border-color:rgba(47,107,79,.35);background:var(--ok1)}
+.vr.no{border-color:rgba(140,59,54,.3);background:var(--no1)}
+.vr.priced{border-color:var(--g3);background:linear-gradient(160deg,var(--g1),#fff 70%)}
+.q2{font-size:13px;color:var(--ink7);margin-bottom:9px;display:flex;gap:8px}.q2 i{font-style:normal;color:var(--g7)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ab{border:1px solid var(--line);background:#fff;border-radius:var(--pill);padding:5px 11px;font-size:11.5px;cursor:pointer;color:var(--ink5)}
+.ab.on-y{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:600}
+.ab.on-n{background:var(--no);border-color:var(--no);color:#fff;font-weight:600}
+.ab.on-p{background:var(--g7);border-color:var(--g7);color:#fff;font-weight:600}
+.pin{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:var(--r-sm);padding:5px 8px;width:100px}
+.spec .r{display:flex;gap:9px;padding:6px 0;border-bottom:1px solid rgba(225,220,209,.5);align-items:center;font-size:12.5px}
+.spec .r:last-child{border-bottom:0}
+.spec .r i{font-style:normal;width:14px;flex:none}.spec .r .t3{flex:1;color:var(--ink7)}
+.spec .r .a{font-family:var(--mono);font-size:11.5px;color:var(--ink5)}
+.spec .r.drop .t3{text-decoration:line-through;color:var(--ink3)}
+.adj{display:flex;align-items:center;gap:9px;margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--ink5)}
+.tot{display:flex;justify-content:space-between;align-items:baseline;padding:13px;background:var(--ink9);color:var(--paper);border-radius:var(--r-lg);margin-top:9px}
+.tot span{font-size:12.5px;opacity:.75}.tot b{font-family:var(--mono);font-size:18px}
+.k{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 15px;margin-bottom:9px;box-shadow:var(--sh-sm)}
+.k b{font-size:12.5px;display:block;margin-bottom:4px}.k span{font-size:12px;color:var(--ink5);line-height:1.55}
+.k.gold{border-color:var(--g3);background:linear-gradient(160deg,var(--g1),#fff 70%)}.k.gold b{color:var(--g7)}
+.side h4{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--g7);margin-bottom:11px}
+.loop{margin-top:28px;padding:20px 24px;font-size:13.5px;color:var(--ink7);line-height:1.7}
+.loop b{color:var(--ink9)}
+.loop .chain{font-family:var(--mono);font-size:12px;color:var(--g7);margin-top:10px;line-height:2}
+table.al{width:100%;border-collapse:collapse;font-size:12.5px}
+table.al th{text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);font-weight:400;padding:0 10px 9px 0;border-bottom:1px solid var(--line)}
+table.al td{padding:9px 10px 9px 0;border-bottom:1px solid rgba(225,220,209,.55);vertical-align:top;color:var(--ink7);line-height:1.5}
+table.al td:nth-child(2){width:88px}table.al td:last-child{color:var(--ink5);font-size:12px}
+table.al code{font-family:var(--mono);font-size:11px;color:var(--g7);background:var(--paper2);border-radius:4px;padding:1px 4px}
+.tg{font-family:var(--mono);font-size:9px;letter-spacing:.11em;border-radius:var(--pill);padding:3px 8px;white-space:nowrap;border:1px solid}
+.tg.s{color:var(--ok);border-color:rgba(47,107,79,.3);background:var(--ok1)}
+.tg.p{color:var(--g7);border-color:var(--g3);background:var(--g1)}
+.tg.n{color:var(--ink5);border-color:var(--line);background:var(--paper2)}
+.tg.x{color:var(--no);border-color:rgba(140,59,54,.3);background:var(--no1)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Setnayan · the whole loop</p>
+  <h1>Service card → inquiry → proposal</h1>
+  <p class="lede">One service, followed all the way round. The card is the one that ships today — <b>from ₱X</b>, the pricing-basis line, free inclusions with their worth, and not-included flags.</p>
+
+  <!-- The plan drives every price on this page. Change anything here and the
+       card, the customization, the shortlist and the vendor's quote all move. -->
+  <div class="glass plan">
+    <div class="planh">Your wedding plan <em>— change anything; every price below follows</em></div>
+    <div class="planf">
+      <div><label class="f">Guests</label><input class="t m" id="p_pax" value="140" inputmode="numeric"></div>
+      <div><label class="f">Hours of coverage</label><input class="t m" id="p_hrs" value="6" inputmode="numeric"></div>
+      <div><label class="f">Date</label><input class="t" id="p_date" value="14 Feb 2027"></div>
+      <div><label class="f">Distance from vendor</label><input class="t m" id="p_km" value="55" inputmode="numeric"></div>
+    </div>
+    <div class="sl" id="sl"></div>
+  </div>
+
+  <div class="steps">
+    <button class="st" aria-current="true" data-p="s1"><span class="n">01</span><b>Vendor builds it</b><span>The service card fields</span></button>
+    <button class="st" aria-current="false" data-p="s2"><span class="n">02</span><b>What couples see</b><span>The live card</span></button>
+    <button class="st" aria-current="false" data-p="s3"><span class="n">03</span><b>They customize</b><span>+ special requests</span></button>
+    <button class="st" aria-current="false" data-p="s4"><span class="n">04</span><b>Vendor prices it</b><span>Adjust → proposal</span></button>
+    <button class="st" aria-current="false" data-p="s5"><span class="n">05</span><b>Alignment</b><span>What ships vs. what's new</span></button>
+  </div>
+
+  <!-- 01 -->
+  <section class="panel" id="s1">
+    <div class="two">
+      <div class="pane">
+        <div class="ph"><span class="who">Vendor · My Shop → Services</span><b>New service card</b><span>Edit anything — the card on the right follows</span></div>
+        <div class="pb">
+          <label class="f">Service title</label><input class="t" id="f_title" value="Wedding Buffet Catering">
+          <div class="row">
+            <div><label class="f">Category</label><input class="t" id="f_cat" value="Caterer"></div>
+            <div><label class="f">Serves</label><input class="t" id="f_serves" value="Weddings · Debut · Corporate"></div>
+          </div>
+          <label class="f">How is it priced?</label>
+          <select class="sel" id="f_basis"><option value="per_pax" selected>Per guest</option><option value="fixed">Flat price</option><option value="per_hour">Per hour</option></select>
+          <div class="row" data-b="per_pax">
+            <div><label class="f">Price per guest</label><input class="t m" id="f_rate" value="1200" inputmode="numeric"></div>
+            <div><label class="f">Minimum guests</label><input class="t m" id="f_min" value="100" inputmode="numeric"></div>
+          </div>
+          <div class="row" data-b="per_hour" hidden>
+            <div><label class="f">Base rate</label><input class="t m" id="f_hbase" value="20000" inputmode="numeric"></div>
+            <div><label class="f">Hours included</label><input class="t m" id="f_hmin" value="4" inputmode="numeric"></div>
+            <div><label class="f">Each extra hour</label><input class="t m" id="f_hextra" value="6000" inputmode="numeric"></div>
+          </div>
+          <div class="row" data-b="fixed" hidden>
+            <div><label class="f">Package price</label><input class="t m" id="f_flat" value="85000" inputmode="numeric"></div>
+          </div>
+          <div class="anch" id="anch"></div>
+          <div class="row">
+            <div><label class="f">Free travel within</label><input class="t m" id="f_freekm" value="30" inputmode="numeric"></div>
+            <div><label class="f">Each km beyond</label><input class="t m" id="f_perkm" value="45" inputmode="numeric"></div>
+          </div>
+          <label class="f">Discount (optional)</label><input class="t" id="f_disc" value="10% off · book by Sept">
+          <label class="f">What's free with it</label>
+          <div id="f_inc"><div class="inc"><input class="t" value="Free tasting for 4"><input class="t m w" value="8000"></div><div class="inc"><input class="t" value="Cake cutting service"><input class="t m w" value="3500"></div><div class="inc"><input class="t" value="Crew meals included"><input class="t m w" value=""></div></div>
+          <button class="ghost" id="addInc">+ Add an inclusion</button>
+          <label class="f">Not included — set expectations</label>
+          <div id="f_not"><div class="inc"><input class="t" value="Venue rental not included"></div><div class="inc"><input class="t" value="Corkage charged by venue"></div></div>
+          <button class="ghost" id="addNot">+ Add a caveat</button>
+        </div>
+      </div>
+      <div class="side">
+        <h4>Live preview</h4>
+        <div id="cardA"><div class="svc"><div class="hd"><span class="disc">10% off · book by Sept</span></div><div class="bd"><div class="cat">Caterer</div><h3>Wedding Buffet Catering</h3><div class="serves">Weddings · Debut · Corporate</div><div class="pr">from ₱120,000</div><div class="prd">₱1,200 / guest · min 100 guests</div><div class="sect">What's free with it</div><ul><li class="free"><i>✓</i><span>Free tasting for 4</span><em>₱8,000 free</em></li><li class="free"><i>✓</i><span>Cake cutting service</span><em>₱3,500 free</em></li><li class="free"><i>✓</i><span>Crew meals included</span></li></ul><div class="sect">Not included</div><ul><li class="not"><i>·</i><span>Venue rental not included</span></li><li class="not"><i>·</i><span>Corkage charged by venue</span></li></ul><button class="cta">♡ Add to shortlist<em>Then make it yours — priced for your event</em></button><button class="cta lock">Lock this · from ₱120,000<em>Book as offered — skip the shortlist</em></button></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="panel" id="s2" hidden>
+    <div class="two">
+      <div style="max-width:400px"><div id="cardB"><div class="svc"><div class="hd"><span class="disc">10% off · book by Sept</span></div><div class="bd"><div class="cat">Caterer</div><h3>Wedding Buffet Catering</h3><div class="serves">Weddings · Debut · Corporate</div><div class="pr">from ₱120,000</div><div class="prd">₱1,200 / guest · min 100 guests</div><div class="sect">What's free with it</div><ul><li class="free"><i>✓</i><span>Free tasting for 4</span><em>₱8,000 free</em></li><li class="free"><i>✓</i><span>Cake cutting service</span><em>₱3,500 free</em></li><li class="free"><i>✓</i><span>Crew meals included</span></li></ul><div class="sect">Not included</div><ul><li class="not"><i>·</i><span>Venue rental not included</span></li><li class="not"><i>·</i><span>Corkage charged by venue</span></li></ul><button class="cta">♡ Add to shortlist<em>Then make it yours — priced for your event</em></button><button class="cta lock">Lock this · from ₱120,000<em>Book as offered — skip the shortlist</em></button></div></div></div></div>
+      <div class="side">
+        <h4>This is today's card</h4>
+        <div class="k gold"><b>Everything here already ships</b><span><i>from ₱X</i> or <i>Inquire</i>, the pricing-basis line (<i>₱1,200 / guest · min 100</i>), the best discount badge, free inclusions with their worth, and not-included caveats. Nothing new was invented for this step.</span></div>
+        <div class="k gold"><b>Two actions, not four</b><span><b>Add to shortlist</b> opens the customization — there's no separate Customize button, because shortlisting something you haven't priced for your own event is half a decision. <b>Lock this</b> is the shortcut for couples who don't want to compare.</span></div>
+        <div class="k gold"><b>Messaging comes after the shortlist, not before</b><span>The couple shortlists, customizes, then sends. The vendor's first message already carries the spec, the date and the guest count — so nobody opens with <i>"hi, are you available?"</i> and nobody answers <i>"depends, how many pax?"</i></span></div>
+        <div class="k"><b>What each one writes</b><span><b>Add to shortlist</b> → an <code>event_vendors</code> row at <i>considering</i>, plus the configuration.<br><b>Send</b> → opens the thread with that configuration attached.<br><b>Lock this</b> → straight to <i>contracted</i>, inside Build.</span></div>
+        <div class="k"><b>Vendors without a package still work</b><span>No package means the shortlist just holds the card at its listed rates. Nothing looks broken, and the vendor can add a package later.</span></div>
+        <div class="k"><b>Hide-prices vendors</b><span>If the vendor hid prices, the anchor reads <i>Inquire</i> and every peso figure disappears — including inclusion worths. Customization then has to show figures, which is the open decision.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section class="panel" id="s3" hidden>
+    <div class="two">
+      <div class="pane">
+        <div class="ph"><span class="who">Couple · make it yours</span><b>Wedding Buffet Catering</b><span>Kusina Norte · priced against your wedding</span></div>
+        <div class="pb">
+          <div id="ctx" style="font-size:12px;color:var(--ink5);background:var(--paper2);border-radius:10px;padding:9px 11px;margin-bottom:12px">Your wedding · <b>14 Feb 2027</b> · <b>140 guests</b> · <b>6 hrs</b> · <b>55 km out</b></div>
+          <div id="cust"><div class="ln fix"><div class="nm">Buffet for 140 guests</div><div class="tag">₱1,200 / guest · ₱168,000</div></div><div class="ln"><div class="nm">Main course</div><div class="tag gold">Choose one</div><div class="opts"><label class="opt"><input type="radio" name="c" checked><span>Chicken teriyaki</span><span class="d inc2">Included</span></label><label class="opt"><input type="radio" name="c"><span>Beef caldereta</span><span class="d">+₱8,000</span></label><label class="opt"><input type="radio" name="c"><span>Lechon belly</span><span class="d">+₱15,000</span></label></div></div><div class="ln"><div class="top"><input type="checkbox" checked><div style="flex:1"><div class="nm">Dessert station</div><div class="tag">Skip for ₱18,000 credit</div></div></div></div><div class="ln"><div class="stp"><div class="l"><div class="nm">Extra service hour</div><div class="u">₱6,000 each</div></div><button class="sb" disabled>−</button><span class="qt">0</span><button class="sb">+</button></div></div></div>
+          <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);margin:15px 0 8px">Anything else you need?</div>
+          <div class="reqbox">
+            <div class="reqin"><input id="rin" placeholder="e.g. vegetarian meals for 8 guests"><button id="radd">Add</button></div>
+            <div id="rlist" style="margin-top:9px"><div class="rq"><i>+</i><span class="t2">Vegetarian meals for 8 guests</span><button class="x">×</button></div></div>
+          </div>
+        </div>
+        <div class="foot" id="cfoot"><div class="led"><dt>Buffet · 140 guests</dt><dd>₱168,000</dd></div><button class="cta" data-go="s4">Send to Kusina Norte · ₱168,000</button></div>
+      </div>
+      <div class="side">
+        <h4>What they're doing</h4>
+        <div class="k gold"><b>Priced against their real wedding</b><span>140 guests, so the buffet is 140 × ₱1,200 — not the ₱120,000 anchor. The card advertises; this quotes.</span></div>
+        <div class="k"><b>Requests cover what the card didn't</b><span>A configurator only knows what the vendor thought of. The request box catches the rest — and each one becomes a line the vendor answers.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section class="panel" id="s4" hidden>
+    <div class="two">
+      <div class="pane">
+        <div class="ph"><span class="who">Vendor · inquiry from Reyes–Santos</span><b>Price it up</b><span>Answer requests · adjust anything · send</span></div>
+        <div class="pb">
+          <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">What they configured</div>
+          <div class="spec" id="vspec"><div class="r"><i>✓</i><span class="t3">Buffet · 140 guests</span><span class="a">₱168,000</span></div><div class="r"><i>◉</i><span class="t3">Main course — Chicken teriyaki</span><span class="a">included</span></div><div class="r"><i>✓</i><span class="t3">Dessert station</span><span class="a">kept · worth ₱18,000</span></div></div>
+          <div class="adj"><span>Adjust the whole quote</span><input class="pin" id="adj" value="0" inputmode="numeric"><span style="font-size:11.5px">± peso</span></div>
+          <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);margin:15px 0 8px">Their requests</div>
+          <div id="vreq"><div class="vr"><div class="q2"><i>+</i><span>Vegetarian meals for 8 guests</span></div><div class="acts"><button class="ab">✓ Yes</button><button class="ab">₱ Price it</button><button class="ab">✕ Can't</button></div></div></div>
+          <div class="tot"><span id="vtl">Your proposal · 1 unanswered</span><b id="vtot">₱168,000</b></div>
+        </div>
+        <div class="foot"><button class="cta">Send proposal</button></div>
+      </div>
+      <div class="side">
+        <h4>The loop closes</h4>
+        <div class="k gold"><b>This proposal can seed the next package</b><span>Send it, and it joins the vendor's quote list — where <i>“turn a quote into a package”</i> picks it up. Every lap makes the next one easier.</span></div>
+        <div class="k"><b>One adjustment field, not a rebuild</b><span>The vendor nudges the total or prices a request. They don't re-enter the configuration — the couple already did that work.</span></div>
+        <div class="k"><b>Both sides hold the same list</b><span>Accepted, priced, or declined with a reason. Nothing evaporates into chat.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 · honest alignment ledger — every element in this prototype, tagged -->
+  <section class="panel" id="s5" hidden>
+    <div class="pane">
+      <div class="ph"><b>Every element in this prototype, against the shipped code</b><span>Verified 2026-07-26 against <code>setnayan-platform-wt-first5</code> + a live prod query. <b>NEW</b> is not a criticism — it marks a design proposal, not a defect.</span></div>
+      <div class="pb" style="max-height:none">
+        <table class="al">
+          <thead><tr><th>Element in this prototype</th><th>Status</th><th>Where it lives / what's missing</th></tr></thead>
+          <tbody>
+            <tr><td>Service card — <i>from ₱X</i>, basis line, discount badge, free inclusions with worth, not-included flags</td><td><span class="tg s">SHIPS</span></td><td><code>v/[slug]/page.tsx:2664</code> <code>toServiceCard</code></td></tr>
+            <tr><td>Pricing bases — per guest · per hour · flat</td><td><span class="tg s">SHIPS</span></td><td><code>pricing_basis</code> on <code>vendor_services</code></td></tr>
+            <tr><td>Minimum-pax floor — 80 guests still bills the 100 minimum</td><td><span class="tg s">SHIPS</span></td><td><code>lib/pax.ts</code> · <code>resolvePackageLine</code> = <code>rate × max(pax, min_pax)</code></td></tr>
+            <tr><td>Extra hours charged automatically</td><td><span class="tg p">PARTIAL</span></td><td>Engine does it; but <code>requestedHours</code> is hardcoded <code>8</code> (<code>proposal-maker.tsx:161</code>) — never read from the event</td></tr>
+            <tr><td>Couple drops an inclusion → price recomputes</td><td><span class="tg s">SHIPS</span></td><td><code>lock-modal.tsx</code> + <code>computeCustomization</code></td></tr>
+            <tr><td>Choices — pick one option, priced deltas</td><td><span class="tg p">PARTIAL</span></td><td><code>vendor_package_item_options</code> is in prod; the modal never SELECTs it, so choice lines cannot render</td></tr>
+            <tr><td>Required lines cannot be unticked</td><td><span class="tg x">BROKEN</span></td><td><code>is_required</code> exists but <code>lockPackage</code> doesn't SELECT it and <code>computeCustomization</code> ignores it</td></tr>
+            <tr><td>Credit from dropped lines offsets upgrades</td><td><span class="tg p">PARTIAL</span></td><td><code>computePackageCredit</code> is on main + prod with <b>zero</b> callers; <code>NEXT_PUBLIC_PACKAGE_CREDIT</code> default OFF, consulted by nothing</td></tr>
+            <tr><td>Extras — add quantities of an add-on</td><td><span class="tg n">NEW</span></td><td>No schema for it. Nearest is <code>CreditAddition[]</code>, with no catalogue picker to populate it</td></tr>
+            <tr><td>Vendor authoring — building the package at all</td><td><span class="tg n">NEW</span></td><td><b>Nothing inserts into <code>vendor_packages</code>.</b> Prod: 0 packages, ever</td></tr>
+            <tr><td>Shortlist holds a real per-vendor price</td><td><span class="tg s">SHIPS</span></td><td><code>VendorCard</code> prints <code>formatPhp(v.totalCostPhp)</code>; <code>BUDGET_BUILD_ENABLED</code> defaults ON</td></tr>
+            <tr><td>Explore → Shortlist · Build · Budget · Compare</td><td><span class="tg s">SHIPS</span></td><td><code>lib/budget-build.ts:37</code>, live since 2026-06-09; Lock lives inside Build</td></tr>
+            <tr><td><i>Considering</i> / <i>Contracted</i> states</td><td><span class="tg s">SHIPS</span></td><td><code>vendor_status</code> enum. ⚠ the enum also has <code>shortlisted</code>, which means something else</td></tr>
+            <tr><td>Message auto-shortlists</td><td><span class="tg s">SHIPS</span></td><td><code>startServiceInquiry</code> creates-or-merges the same row</td></tr>
+            <tr><td>Customizing is bound to <b>shortlist</b>, not to lock</td><td><span class="tg n">NEW</span></td><td>Shipped modal is <i>“Customize &amp; lock”</i> — its only submit is <code>lockPackage</code>. Splitting them is the design change</td></tr>
+            <tr><td>Special requests as separate lines, each answered</td><td><span class="tg p">PARTIAL</span></td><td><code>event_vendor_preferences.special_request</code> is ONE freeform note per category, with <i>“no reader yet”</i>. Per-line verdicts need a child table</td></tr>
+            <tr><td>Vendor answers Yes / Price it / Can't / Offer instead</td><td><span class="tg n">NEW</span></td><td>No per-request status anywhere</td></tr>
+            <tr><td>Travel priced by distance</td><td><span class="tg n">NEW</span></td><td>Distance <b>is</b> computed and live — but never reaches a pricing function. No per-km or free-radius column exists. <code>transport_mode='distance'</code> returns <b>0</b> and says <i>“Quoted after site check”</i></td></tr>
+            <tr><td>Adjusted prices shown on the card itself</td><td><span class="tg n">NEW</span></td><td>Engine prices correctly, but only inside a quote. Cards print the raw anchor</td></tr>
+            <tr><td>Any buttons on the service card</td><td><span class="tg n">NEW</span></td><td>Today's card has <b>zero</b> controls — <i>“Inquire”</i> is a price label in a <code>&lt;p&gt;</code></td></tr>
+            <tr><td>Locked price frozen while others track the plan</td><td><span class="tg n">NEW</span></td><td>Guest-list finalize freezes a count, but no per-booking price freeze</td></tr>
+            <tr><td>Quote → package conversion</td><td><span class="tg p">PARTIAL</span></td><td><code>loadPackageLinesForQuote</code> ships the reverse direction; the inverse doesn't exist</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="glass loop">
+    <b>The loop, and what already exists.</b> Three of the five links ship today — only the package and the requests are new.
+    <div class="chain">
+      service card <span style="color:var(--ok)">✓ ships</span> → package <span style="color:var(--g5)">NEW</span> → customize <span style="color:var(--g5)">NEW</span> → requests <span style="color:var(--g5)">NEW</span> → proposal <span style="color:var(--ok)">✓ ships</span> → back to package <span style="color:var(--ok)">✓ half ships</span>
+    </div>
+  </div>
+</div>
+
+<script>
+document.body.classList.add('js');
+const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH');
+let INC=[['Free tasting for 4','8000'],['Cake cutting service','3500'],['Crew meals included','']];
+let NOT=['Venue rental not included','Corkage charged by venue'];
+const $=id=>document.getElementById(id);
+const val=id=>$(id)?.value||'';
+
+function drawIncFields(){
+  $('f_inc').innerHTML=INC.map((x,i)=>`<div class="inc"><input class="t" data-i="${i}" data-k="0" value="${x[0]}"><input class="t m w" data-i="${i}" data-k="1" value="${x[1]}" placeholder="worth"><button class="ghost" style="margin:0;padding:6px 9px" data-d="${i}">×</button></div>`).join('');
+  $('f_not').innerHTML=NOT.map((x,i)=>`<div class="inc"><input class="t" data-n="${i}" value="${x}"><button class="ghost" style="margin:0;padding:6px 9px" data-dn="${i}">×</button></div>`).join('');
+  $('f_inc').querySelectorAll('input').forEach(i=>i.oninput=e=>{INC[+e.target.dataset.i][+e.target.dataset.k]=e.target.value;card();});
+  $('f_inc').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{INC.splice(+b.dataset.d,1);drawIncFields();card();});
+  $('f_not').querySelectorAll('input').forEach(i=>i.oninput=e=>{NOT[+e.target.dataset.n]=e.target.value;card();});
+  $('f_not').querySelectorAll('[data-dn]').forEach(b=>b.onclick=()=>{NOT.splice(+b.dataset.dn,1);drawIncFields();card();});
+}
+/* ---- pricing basis · the one place that knows how a service is priced ----
+   Mirrors the shipped card: per_pax → "₱X / guest · min N guests",
+   per_hour → "₱X for N hrs · +₱Y/extra hr", fixed → no detail line at all. */
+const basis=()=>val('f_basis');
+const num=id=>+val(id)||0;
+function anchor(){
+  const b=basis();
+  if(b==='fixed') return num('f_flat');
+  if(b==='per_hour') return num('f_hbase');
+  return num('f_rate')*num('f_min');            // rate × the minimum they'll take
+}
+function basisDetail(){
+  const b=basis();
+  if(b==='per_pax'){const m=num('f_min');return `${peso(num('f_rate'))} / guest${m?` · min ${m} guests`:''}`;}
+  if(b==='per_hour'){const h=num('f_hmin'),e=num('f_hextra');
+    return `${peso(num('f_hbase'))}${h?` for ${h} hr${h===1?'':'s'}`:''}${e?` · +${peso(e)}/extra hr`:''}`;}
+  return '';                                     // flat price explains itself
+}
+/* ---- the couple's plan · the only input that decides a real price ---- */
+const plan=()=>({pax:num('p_pax'),hrs:num('p_hrs'),km:num('p_km'),date:val('p_date')});
+
+/* A minimum is a FLOOR, not a suggestion: 80 guests against a 100-guest
+   minimum still bills 100. Showing 80 × rate would under-quote the vendor. */
+const billablePax=()=>Math.max(plan().pax,num('f_min'));
+/* Hours beyond what the vendor includes are charged automatically — a couple
+   asking for 6 hrs of a 4-hr package shouldn't have to know to add them. */
+const overHours=()=>Math.max(0,plan().hrs-num('f_hmin'));
+/* Travel is distance-driven, not a flat guess. */
+const travel=()=>Math.max(0,plan().km-num('f_freekm'))*num('f_perkm');
+
+function basePrice(){
+  const b=basis();
+  if(b==='fixed') return num('f_flat');
+  if(b==='per_hour') return num('f_hbase')+overHours()*num('f_hextra');
+  return num('f_rate')*billablePax();
+}
+function baseLine(){
+  const b=basis(),p=plan();
+  if(b==='fixed') return {n:val('f_title')||'Package',t:`${peso(basePrice())} · one price, whatever the headcount`};
+  if(b==='per_hour'){
+    const o=overHours();
+    return {n:`${val('f_title')||'Service'} · ${p.hrs} hr${p.hrs===1?'':'s'}`,
+            t:`${peso(num('f_hbase'))} for ${num('f_hmin')} hrs${o?` · +${o} hr${o===1?'':'s'} at ${peso(num('f_hextra'))}`:''} · ${peso(basePrice())}`};
+  }
+  const bp=billablePax(),floored=bp>p.pax;
+  return {n:`${val('f_title')||'Service'} for ${p.pax} guests`,
+          t:`${peso(num('f_rate'))} / guest${floored?` · billed at their ${bp} minimum`:''} · ${peso(basePrice())}`};
+}
+const extUnit=()=>basis()==='per_hour'?num('f_hextra'):6000;
+
+function syncBasisFields(){
+  const b=basis();
+  document.querySelectorAll('[data-b]').forEach(r=>{r.hidden=r.dataset.b!==b;});
+  const a=$('anch');
+  if(a) a.innerHTML=`Card shows <b>from ${peso(anchor())}</b>${basisDetail()?' · '+basisDetail():''}`;
+}
+/* forCouple = the signed-in view, where we know the real event (140 guests).
+   Public view can only honestly quote the anchor — "from ₱120,000" — because
+   a per-guest service has no single price until a headcount exists. */
+function cardHTML(forCouple){
+  const detail=basisDetail();
+  return `<div class="svc"><div class="hd">${val('f_disc')?`<span class="disc">${val('f_disc')}</span>`:''}</div>
+   <div class="bd">
+     <div class="cat">${val('f_cat')}</div>
+     <h3>${val('f_title')||'Untitled service'}</h3>
+     <div class="serves">${val('f_serves')}</div>
+     <div class="pr">from ${peso(anchor())}</div>
+     ${detail?`<div class="prd">${detail}</div>`:'<div style="height:10px"></div>'}
+     ${INC.length?`<div class="sect">What's free with it</div><ul>${INC.slice(0,3).map(x=>`<li class="free"><i>✓</i><span>${x[0]}</span>${x[1]?`<em>${peso(x[1])} free</em>`:''}</li>`).join('')}${INC.length>3?`<li class="more">+${INC.length-3} more</li>`:''}</ul>`:''}
+     ${NOT.length?`<div class="sect">Not included</div><ul>${NOT.map(x=>`<li class="not"><i>·</i><span>${x}</span></li>`).join('')}</ul>`:''}
+     <button class="cta">♡ Add to shortlist<em>Then make it yours — priced for your event</em></button>
+     ${forCouple
+       ? `<button class="cta lock">Lock this · ${peso(basePrice()+travel())}<em>Priced for your ${basis()==='per_pax'?plan().pax+' guests':basis()==='per_hour'?plan().hrs+' hours':'event'}${travel()?', incl. travel':''} — book as offered</em></button>`
+       : basis()==='fixed'
+         ? `<button class="cta lock">Lock this · ${peso(anchor())}<em>Book exactly as offered — no comparing</em></button>`
+         : `<button class="cta lock">Lock this · from ${peso(anchor())}<em>Final price depends on their event</em></button>`}
+   </div></div>`;
+}
+function card(){
+  if($('cardA'))$('cardA').innerHTML=cardHTML(false);   // vendor previewing the PUBLIC card
+  if($('cardB'))$('cardB').innerHTML=cardHTML(true);    // a signed-in couple with an event
+}
+
+/* ---- customize ---- */
+const LINES=[
+ {id:'buf',n:'Buffet',t:'fixed'},
+ {id:'main',n:'Main course',t:'choices',opts:[{l:'Chicken teriyaki',d:0},{l:'Beef caldereta',d:8000},{l:'Lechon belly',d:15000}]},
+ {id:'des',n:'Dessert station',t:'optional',v:18000},
+];
+const EXT=[{id:'h',n:'Extra service hour',max:4,q:0}];   // unit comes from the basis
+const st={rm:new Set(),pick:{main:0}};
+let REQS=[{id:1,t:'Vegetarian meals for 8 guests',s:null,p:0}];let rs=2;
+
+const credit=()=>{let c=0;st.rm.forEach(i=>{const l=LINES.find(x=>x.id===i);if(l?.t==='optional')c+=l.v;});return c;};
+const upg=()=>{let u=0;LINES.forEach(l=>{if(l.t==='choices'&&!st.rm.has(l.id))u+=l.opts[st.pick[l.id]||0].d;});return u;};
+const ext=()=>EXT.reduce((s,e)=>s+e.q*extUnit(),0);
+const rqc=()=>REQS.filter(r=>r.s==='priced').reduce((s,r)=>s+(+r.p||0),0);
+const adj=()=>+val('adj')||0;
+const totals=()=>{const c=credit(),u=upg(),o=Math.max(0,u-c);
+  return{c,o,e:ext(),r:rqc(),t:travel(),coupleSees:basePrice()+o+ext()+travel(),
+         total:basePrice()+o+ext()+travel()+rqc()+adj()};};
+
+function drawCust(){
+  const b=$('cust'); if(!b)return; b.innerHTML='';
+  const p=plan(), cx=$('ctx');
+  if(cx) cx.innerHTML=`Your wedding · <b>${p.date}</b> · <b>${p.pax} guests</b> · <b>${p.hrs} hrs</b> · <b>${p.km} km out</b>`;
+  LINES.forEach(l=>{
+    const off=st.rm.has(l.id);const d=document.createElement('div');d.className='ln'+(l.t==='fixed'?' fix':'');
+    if(l.t==='fixed'){const bl=baseLine();d.innerHTML=`<div class="nm">${bl.n}</div><div class="tag">${bl.t}</div>`;}
+    else if(l.t==='choices') d.innerHTML=`<div class="nm">${l.n}</div><div class="tag gold">Choose one</div><div class="opts">${l.opts.map((o,i)=>`<label class="opt"><input type="radio" name="c" ${((st.pick[l.id]||0)===i)?'checked':''} data-i="${i}"><span>${o.l}</span><span class="d ${o.d===0?'inc2':''}">${o.d===0?'Included':'+'+peso(o.d)}</span></label>`).join('')}</div>`;
+    else d.innerHTML=`<div class="top"><input type="checkbox" ${off?'':'checked'}><div style="flex:1"><div class="nm ${off?'stk':''}">${l.n}</div><div class="tag ${off?'ok':''}">${off?'+'+peso(l.v)+' credit':'Skip for '+peso(l.v)+' credit'}</div></div></div>`;
+    const cb=d.querySelector('input[type=checkbox]');if(cb)cb.onchange=()=>{off?st.rm.delete(l.id):st.rm.add(l.id);render();};
+    d.querySelectorAll('input[type=radio]').forEach(r=>r.onchange=()=>{st.pick[l.id]=+r.dataset.i;render();});
+    b.appendChild(d);
+  });
+  EXT.forEach(e=>{const d=document.createElement('div');d.className='ln';
+    d.innerHTML=`<div class="stp"><div class="l"><div class="nm">${e.n}</div><div class="u">${peso(extUnit())} each</div></div><button class="sb" ${e.q<=0?'disabled':''}>−</button><span class="qt">${e.q}</span><button class="sb" ${e.q>=e.max?'disabled':''}>+</button></div>`;
+    const[m,p]=d.querySelectorAll('.sb');m.onclick=()=>{e.q--;render();};p.onclick=()=>{e.q++;render();};b.appendChild(d);});
+  const l=$('rlist');
+  l.innerHTML=REQS.map(r=>`<div class="rq"><i>+</i><span class="t2">${r.t}</span><button class="x" data-id="${r.id}">×</button></div>`).join('');
+  l.querySelectorAll('.x').forEach(x=>x.onclick=()=>{REQS=REQS.filter(r=>r.id!=x.dataset.id);render();});
+  const t=totals();
+  $('cfoot').innerHTML=`<div class="led"><dt>${baseLine().n}</dt><dd>${peso(basePrice())}</dd></div>
+   ${t.e?`<div class="led"><dt>Add-ons</dt><dd>+${peso(t.e)}</dd></div>`:''}
+   ${t.t?`<div class="led"><dt>Travel · ${plan().km-num('f_freekm')} km beyond their free ${num('f_freekm')} km</dt><dd>+${peso(t.t)}</dd></div>`:''}
+   ${t.c?`<div class="led c"><dt>Credit to spend</dt><dd>${peso(t.c)}</dd></div>`:''}
+   ${t.o?`<div class="led o"><dt>Beyond your credit</dt><dd>+${peso(t.o)}</dd></div>`:''}
+   <button class="cta" data-go="s4">Send to Kusina Norte · ${peso(t.coupleSees)}</button>`;
+}
+function drawVendor(){
+  const sp=$('vspec'); if(!sp)return;
+  sp.innerHTML=LINES.map(l=>{
+    if(st.rm.has(l.id))return `<div class="r drop"><i>—</i><span class="t3">${l.n}</span><span class="a">dropped · +${peso(l.v)}</span></div>`;
+    if(l.t==='choices'){const o=l.opts[st.pick[l.id]||0];return `<div class="r"><i>◉</i><span class="t3">${l.n} — ${o.l}</span><span class="a">${o.d?'+'+peso(o.d):'included'}</span></div>`;}
+    if(l.t==='optional')return `<div class="r"><i>✓</i><span class="t3">${l.n}</span><span class="a">kept · worth ${peso(l.v)}</span></div>`;
+    return `<div class="r"><i>✓</i><span class="t3">${baseLine().n}</span><span class="a">${peso(basePrice())}</span></div>`;
+  }).join('')
+  +EXT.filter(e=>e.q).map(e=>`<div class="r"><i>±</i><span class="t3">${e.n} × ${e.q}</span><span class="a">+${peso(e.q*extUnit())}</span></div>`).join('')
+  +(travel()?`<div class="r"><i>⤳</i><span class="t3">Travel · ${plan().km} km</span><span class="a">+${peso(travel())}</span></div>`:'');
+  $('vreq').innerHTML=REQS.length?REQS.map(r=>`<div class="vr ${r.s||''}" data-id="${r.id}"><div class="q2"><i>+</i><span>${r.t}</span></div>
+    <div class="acts"><button class="ab ${r.s==='yes'?'on-y':''}" data-a="yes">✓ Yes</button>
+    <button class="ab ${r.s==='priced'?'on-p':''}" data-a="priced">₱ Price it</button>
+    <button class="ab ${r.s==='no'?'on-n':''}" data-a="no">✕ Can't</button>
+    ${r.s==='priced'?`<input class="pin" value="${r.p}" inputmode="numeric">`:''}</div></div>`).join('')
+    :'<div style="font-size:12.5px;color:var(--ink4)">None.</div>';
+  $('vreq').querySelectorAll('.vr').forEach(c=>{const r=REQS.find(x=>x.id==c.dataset.id);
+    c.querySelectorAll('.ab').forEach(b=>b.onclick=()=>{r.s=r.s===b.dataset.a?null:b.dataset.a;if(r.s!=='priced')r.p=0;render();});
+    const p=c.querySelector('.pin');if(p)p.oninput=e=>{r.p=+e.target.value||0;$('vtot').textContent=peso(totals().total);};});
+  const open=REQS.filter(r=>!r.s).length;
+  $('vtl').textContent=open?`Your proposal · ${open} unanswered`:'Your proposal · all answered';
+  $('vtot').textContent=peso(totals().total);
+}
+/* ---- the shortlist · a live budget, not a list of shop-window prices ----
+   Two other vendors on different bases, priced off the SAME plan. Change the
+   guest count or the venue distance and the whole budget moves. */
+const OTHERS=[
+  {n:'Anila Strings',s:'4-piece band · per hour',basis:'per_hour',hbase:18000,hmin:4,hextra:5500,freekm:25,perkm:60,via:'Considering'},
+  {n:'Casa Lumina',s:'Reception venue · flat',basis:'fixed',flat:145000,freekm:999,perkm:0,via:'Contracted'},
+];
+function priceOther(o){
+  const p=plan();
+  const base=o.basis==='fixed'?o.flat:o.hbase+Math.max(0,p.hrs-o.hmin)*o.hextra;
+  return base+Math.max(0,p.km-o.freekm)*o.perkm;
+}
+function drawShortlist(){
+  const el=$('sl'); if(!el)return;
+  const t=totals();
+  const mine={n:val('f_title')||'This service',s:val('f_cat')||'Vendor',amt:t.coupleSees,via:'Customized',cust:true,live:true};
+  const rows=[mine,...OTHERS.map(o=>({n:o.n,s:o.s,amt:priceOther(o),via:o.via,cust:false,
+    /* Contracted = a price the vendor AGREED to. It must stop tracking the plan,
+       or the platform quotes a number nobody signed off on. */
+    live:o.via!=='Contracted'}))];
+  const sum=rows.reduce((s,r)=>s+r.amt,0);
+  el.innerHTML=`<div class="slh">Explore → Shortlist · Build · Budget · Compare &nbsp;—&nbsp; priced for ${plan().pax} guests · ${plan().hrs} hrs · ${plan().km} km out</div>`
+   +rows.map(r=>`<div class="slrow"><span class="n2">${r.n}<em>${r.s}${r.live?'':' · price fixed at booking'}</em></span><span class="via ${r.cust?'cust':''}">${r.via}</span><span class="a2">${peso(r.amt)}</span></div>`).join('')
+   +`<div class="slrow sum"><span class="n2">Planned spend</span><span class="a2">${peso(sum)}</span></div>`;
+}
+function render(){syncBasisFields();card();drawCust();drawVendor();drawShortlist();}
+['f_title','f_cat','f_serves','f_disc','f_basis','adj',
+ 'f_rate','f_min','f_hbase','f_hmin','f_hextra','f_flat','f_freekm','f_perkm',
+ 'p_pax','p_hrs','p_date','p_km',            // the plan — drives everything
+].forEach(id=>{const e=$(id);if(e)e.oninput=e.onchange=render;});
+$('addInc').onclick=()=>{INC.push(['New inclusion','']);drawIncFields();card();};
+$('addNot').onclick=()=>{NOT.push('New caveat');drawIncFields();card();};
+$('radd').onclick=()=>{const i=$('rin');if(!i.value.trim())return;REQS.push({id:rs++,t:i.value.trim(),s:null,p:0});i.value='';render();};
+$('rin').addEventListener('keydown',e=>{if(e.key==='Enter')$('radd').click();});
+document.body.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(g.dataset.go);});
+document.querySelectorAll('.st').forEach(s=>s.onclick=()=>go(s.dataset.p));
+function go(id){document.querySelectorAll('.st').forEach(x=>x.setAttribute('aria-current',x.dataset.p===id));
+ document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!==id);render();}
+drawIncFields();render();
+</script>
+</body>
+</html>

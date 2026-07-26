@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>One primitive, three vendors — Setnayan package builder v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --m-paper:#FBFAF7;--m-paper-2:#F4F2EC;--m-ivory:#EDEAE0;--m-line:#E1DCD1;--m-line-soft:#EDE8DE;
+  --m-ink:#1B1A17;--m-slate:#3A382F;--m-slate-2:#6E6A62;--m-slate-3:#8A857B;--m-slate-4:#B5AF9E;
+  --m-gold:#A9834B;--m-gold-2:#8A6B39;--m-gold-3:#CBA766;--m-gold-4:#F3ECDF;
+  --ok:#2F6B4F;--ok-soft:#EAF3EE;
+  --sans:'Hanken Grotesk',system-ui,sans-serif;--mono:'Space Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--m-paper-2);color:var(--m-ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:32px 20px 72px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--m-slate-3)}
+h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:6px 0}
+.sub{color:var(--m-slate-2);font-size:14px;max-width:74ch}
+.primitive{background:var(--m-ink);color:var(--m-paper);border-radius:12px;padding:18px 20px;margin:20px 0 24px}
+.primitive h3{font-size:13px;font-weight:600;margin-bottom:10px;letter-spacing:.01em}
+.primitive code{font-family:var(--mono);font-size:11.5px;color:var(--m-gold-3);display:block;line-height:1.85;white-space:pre-wrap}
+.primitive p{font-size:12.5px;color:rgba(251,250,247,.72);margin-top:11px}
+.tabs{display:flex;gap:6px;margin:0 0 20px;border-bottom:1px solid var(--m-line);flex-wrap:wrap}
+.tab{appearance:none;border:0;background:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--m-slate-2);padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected=true]{color:var(--m-ink);border-bottom-color:var(--m-gold)}
+.panel[hidden]{display:none}
+.two{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:start}
+@media(max-width:940px){.two{grid-template-columns:1fr}}
+.phone{background:var(--m-paper);border:1px solid var(--m-line);border-radius:14px;overflow:hidden}
+.ph-head{padding:14px 16px;border-bottom:1px solid var(--m-line)}
+.ph-title{font-size:14.5px;font-weight:600}
+.ph-sub{font-size:11.5px;color:var(--m-slate-2);margin-top:2px}
+.ph-body{padding:14px 16px;max-height:520px;overflow-y:auto}
+.ph-foot{padding:14px 16px;border-top:1px solid var(--m-line);background:var(--m-paper-2)}
+.line{border:1px solid var(--m-line);border-radius:10px;padding:12px;margin-bottom:9px;background:var(--m-paper)}
+.line-name{font-size:13.5px;font-weight:500}
+.tagline{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;margin-top:4px;color:var(--m-slate-4)}
+.tagline.gold{color:var(--m-gold-2)}
+.tagline.ok{color:var(--ok)}
+.opts{margin-top:10px;padding-top:10px;border-top:1px dashed var(--m-line);display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:12.5px;color:var(--m-slate)}
+.opt input{accent-color:var(--m-gold-2);width:15px;height:15px;flex:none}
+.opt .delta{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--m-slate-2);flex:none}
+.opt .delta.inc{color:var(--m-slate-3)}
+.opt.dim{opacity:.42;cursor:not-allowed}
+/* nesting */
+.nest{margin:9px 0 2px 8px;padding:10px 0 2px 14px;border-left:2px solid var(--m-gold-3)}
+.nest .grp{margin-bottom:11px}
+.nest .grp:last-child{margin-bottom:2px}
+.grp-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--m-gold-2);margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.grp-h .count{margin-left:auto;color:var(--m-slate-3)}
+.grp-h .count.done{color:var(--ok)}
+/* stepper */
+.step{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--m-line-soft);font-size:12.5px;color:var(--m-slate)}
+.step:last-child{border-bottom:0}
+.step .unit{font-family:var(--mono);font-size:10.5px;color:var(--m-slate-3)}
+.step .ctl{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+.sbtn{appearance:none;width:26px;height:26px;border-radius:7px;border:1px solid var(--m-line);background:var(--m-paper);font-size:15px;line-height:1;cursor:pointer;color:var(--m-ink)}
+.sbtn:hover:not(:disabled){border-color:var(--m-gold-3);background:var(--m-gold-4)}
+.sbtn:disabled{opacity:.3;cursor:not-allowed}
+.qty{font-family:var(--mono);font-size:13px;min-width:20px;text-align:center}
+.bar{height:4px;border-radius:2px;background:rgba(27,26,23,.1);overflow:hidden;margin-bottom:11px}
+.bar span{display:block;height:100%;background:var(--ok);width:0;transition:width .25s}
+.bar.over span{background:var(--m-gold)}
+.led{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+.led dt{color:var(--m-slate-2)}
+.led dd{font-family:var(--mono)}
+.led.credit dd{color:var(--ok)}
+.led.over dd{color:var(--m-gold-2);font-weight:700}
+.policy{font-size:11.5px;padding:8px 10px;border-radius:8px;background:var(--m-paper);border:1px solid var(--m-line-soft);color:var(--m-slate-2);margin:6px 0 11px}
+.policy.warn{background:var(--m-gold-4);border-color:var(--m-gold-3);color:var(--m-gold-2)}
+.lock{width:100%;appearance:none;border:0;border-radius:9px;background:var(--m-ink);color:var(--m-paper);font-family:var(--sans);font-size:13.5px;font-weight:600;padding:12px;cursor:pointer}
+.lock .num{font-family:var(--mono)}
+.side h4{font-size:13px;font-weight:600;margin-bottom:8px}
+.side p{font-size:12.5px;color:var(--m-slate-2);margin-bottom:12px}
+.side .k{background:var(--m-paper);border:1px solid var(--m-line);border-radius:10px;padding:13px;margin-bottom:11px}
+.side .k b{font-size:12.5px;display:block;margin-bottom:4px}
+.side .k span{font-size:12px;color:var(--m-slate-2)}
+.callout{border-left:3px solid var(--m-gold);background:var(--m-gold-4);padding:12px 14px;border-radius:0 9px 9px 0;font-size:13px;color:var(--m-slate);margin:20px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Setnayan · prototype v2 · 2026-07-26</p>
+  <h1>One primitive, three very different vendors</h1>
+  <p class="sub">A caterer’s 5-course dinner, a coffee booth’s “pick 5”, and a band’s “add a musician” look like three features. They’re one — a <b>choice group</b> with three dials. Everything below is live.</p>
+
+  <div class="primitive">
+    <h3>The whole model</h3>
+<code>Group { pick_min, pick_max, options[] }
+Option { label, price_delta, max_qty?, nested_groups? }</code>
+    <p><b>pick 1–1</b> → radio (main course). &nbsp;<b>pick 5–5</b> → “choose 5 coffees”. &nbsp;<b>max_qty</b> → a stepper priced per unit (musicians, hours). &nbsp;<b>nested_groups</b> → picking the 5-course dinner opens its five courses. Same table, same maths, three products.</p>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-p="c1">Caterer · nested courses</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="c2">Coffee booth · pick 5</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="c3">Band · quantities</button>
+  </div>
+
+  <section class="panel" id="c1">
+    <div class="two">
+      <div class="phone">
+        <div class="ph-head"><div class="ph-title">Customize package</div><div class="ph-sub">Platinum Wedding · Sofitel · ₱1,400,000</div></div>
+        <div class="ph-body" id="b1"></div>
+        <div class="ph-foot" id="f1"></div>
+      </div>
+      <div class="side">
+        <h4>What’s happening</h4>
+        <p>Pick <b>Plated 5-course</b> and five sub-groups appear — one per course. The couple chooses each dish; most cost nothing, a few carry a delta.</p>
+        <div class="k"><b>Nesting is capped at one level</b><span>A group can open sub-groups. Those can’t open more. Beyond that the vendor is building a menu system, not a package — and the couple is filling in a form.</span></div>
+        <div class="k"><b>Free choices are still choices</b><span>Most courses cost ₱0 — they exist to capture the couple’s pick so the caterer knows what to cook. Preference capture and pricing are the same mechanism.</span></div>
+        <div class="k"><b>The button never lies</b><span>Sub-picks feed the same total. If a course upgrade tips you past your credit, the number on the button moves the instant it happens.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="c2" hidden>
+    <div class="two">
+      <div class="phone">
+        <div class="ph-head"><div class="ph-title">Customize package</div><div class="ph-sub">Coffee Cart · Kape Manila · ₱45,000</div></div>
+        <div class="ph-body" id="b2"></div>
+        <div class="ph-foot" id="f2"></div>
+      </div>
+      <div class="side">
+        <h4>What’s happening</h4>
+        <p>The booth serves five drinks on the night. The couple picks which five from twelve — and can go past five if they’ll pay for the extra.</p>
+        <div class="k"><b>pick_min = pick_max = 5</b><span>The counter reads “3 of 5 chosen” and turns green at five. Below five the couple can’t lock — it’s an unfinished order, not a cheaper one.</span></div>
+        <div class="k"><b>Going over is allowed, and priced</b><span>A sixth drink costs ₱2,500. Same overspend path as everything else — it lands on the total, in gold.</span></div>
+        <div class="k"><b>Why not just checkboxes</b><span>Checkboxes say “take what you like”. This is “choose exactly five”, which is a different promise — and the vendor priced it that way.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="c3" hidden>
+    <div class="two">
+      <div class="phone">
+        <div class="ph-head"><div class="ph-title">Customize package</div><div class="ph-sub">Reception Set · The Manila Sessions · ₱85,000</div></div>
+        <div class="ph-body" id="b3"></div>
+        <div class="ph-foot" id="f3"></div>
+      </div>
+      <div class="side">
+        <h4>What’s happening</h4>
+        <p>A band doesn’t swap inclusions — it scales them. More musicians, more hours, more songs. Each is an option with a <b>per-unit price</b> and a ceiling the vendor sets.</p>
+        <div class="k"><b>max_qty is the vendor’s real limit</b><span>“Up to 4 extra musicians” isn’t a UI nicety — it’s how many people they can actually bring. The stepper stops there.</span></div>
+        <div class="k"><b>This is the upsell, and it should feel like one</b><span>Nothing here is a swap; every tap adds money. So the meter shows overspend immediately rather than pretending credit is involved.</span></div>
+        <div class="k"><b>Same primitive</b><span>A stepper is just an option whose pick count can exceed one. No new table, no new maths.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="callout"><b>Why this matters beyond neatness.</b> Three tables would mean three vendor builders, three couple UIs and three sets of pricing bugs. One primitive means a caterer, a coffee cart and a band all learn the same screen — and every new vendor type we meet is a configuration, not a release.</div>
+</div>
+
+<script>
+const peso=n=>'₱'+n.toLocaleString('en-PH');
+
+/* ---------- one engine for all three ---------- */
+function makeCase(cfg, bodyId, footId){
+  const st={picks:{},qty:{}};
+  cfg.groups.forEach(g=>{ st.picks[g.id]=new Set(g.defaults||[]); });
+  cfg.groups.forEach(g=>g.options.forEach(o=>{ if(o.maxQty) st.qty[g.id+':'+o.id]=o.defaultQty||0; }));
+
+  function spentOf(){
+    let s=0;
+    cfg.groups.forEach(g=>{
+      g.options.forEach(o=>{
+        const key=g.id+':'+o.id;
+        if(o.maxQty){ s+=(st.qty[key]||0)*o.delta; return; }
+        if(st.picks[g.id].has(o.id)){
+          s+=o.delta;
+          if(o.nested) o.nested.forEach(ng=>ng.options.forEach(no=>{ if((st.picks[ng.id]||new Set()).has(no.id)) s+=no.delta; }));
+        }
+      });
+      // over-pick surcharge
+      if(g.pickMax && g.overUnit){
+        const extra=Math.max(0,st.picks[g.id].size-g.pickMax);
+        s+=extra*g.overUnit;
+      }
+    });
+    return s;
+  }
+  function complete(){
+    let ok=true;
+    cfg.groups.forEach(g=>{
+      if(g.pickMin && st.picks[g.id].size<g.pickMin) ok=false;
+      g.options.forEach(o=>{ if(o.nested && st.picks[g.id].has(o.id)) o.nested.forEach(ng=>{ if((st.picks[ng.id]||new Set()).size<1) ok=false; }); });
+    });
+    return ok;
+  }
+  function toggle(g,o){
+    const set=st.picks[g.id];
+    if(g.pickMax===1){ set.clear(); set.add(o.id); }
+    else { set.has(o.id)?set.delete(o.id):set.add(o.id); }
+    render();
+  }
+  function groupEl(g,nested){
+    const wrap=document.createElement('div');
+    wrap.className=nested?'grp':'line';
+    const chosen=st.picks[g.id].size;
+    const needed=g.pickMin||0;
+    const label=g.pickMax===1?'Choose one':(g.pickMax?`Choose ${g.pickMax}`:'Choose any');
+    const cnt=g.pickMax&&g.pickMax>1?`<span class="count ${chosen>=needed?'done':''}">${chosen} of ${g.pickMax} chosen${chosen>g.pickMax?' · +'+(chosen-g.pickMax):''}</span>`:'';
+    wrap.innerHTML = nested
+      ? `<div class="grp-h">${g.title}${cnt}</div>`
+      : `<div class="line-name">${g.title}</div><div class="tagline ${chosen>=needed?'gold':'gold'}">${label}</div>`;
+    const list=document.createElement('div');
+    list.className=nested?'':'opts';
+    if(nested) list.style.cssText='display:flex;flex-direction:column;gap:6px';
+    g.options.forEach(o=>{
+      if(o.maxQty){
+        const key=g.id+':'+o.id, q=st.qty[key]||0;
+        const row=document.createElement('div'); row.className='step';
+        row.innerHTML=`<div><div>${o.label}</div><div class="unit">${peso(o.delta)} each · up to ${o.maxQty}</div></div>
+          <div class="ctl"><button class="sbtn" ${q<=0?'disabled':''}>−</button><span class="qty">${q}</span><button class="sbtn" ${q>=o.maxQty?'disabled':''}>+</button></div>`;
+        const [minus,plus]=row.querySelectorAll('.sbtn');
+        minus.onclick=()=>{st.qty[key]=Math.max(0,q-1);render();};
+        plus.onclick=()=>{st.qty[key]=Math.min(o.maxQty,q+1);render();};
+        list.appendChild(row); return;
+      }
+      const on=st.picks[g.id].has(o.id);
+      const atCap=g.pickMax&&g.pickMax>1&&!on&&st.picks[g.id].size>=g.pickMax&&!g.overUnit;
+      const lab=document.createElement('label');
+      lab.className='opt'+(atCap?' dim':'');
+      lab.innerHTML=`<input type="${g.pickMax===1?'radio':'checkbox'}" ${on?'checked':''} ${atCap?'disabled':''}>
+        <span>${o.label}</span><span class="delta ${o.delta===0?'inc':''}">${o.delta===0?'Included':'+'+peso(o.delta)}</span>`;
+      lab.querySelector('input').onchange=()=>toggle(g,o);
+      list.appendChild(lab);
+      if(o.nested&&on){
+        const n=document.createElement('div'); n.className='nest';
+        o.nested.forEach(ng=>n.appendChild(groupEl(ng,true)));
+        list.appendChild(n);
+      }
+    });
+    wrap.appendChild(list);
+    return wrap;
+  }
+  function render(){
+    const body=document.getElementById(bodyId); body.innerHTML='';
+    cfg.groups.filter(g=>!g.isNested).forEach(g=>body.appendChild(groupEl(g,false)));
+    const spent=spentOf(), avail=cfg.credit||0;
+    const over=Math.max(0,spent-avail), remaining=Math.max(0,avail-spent), total=cfg.price+over;
+    const pct=avail>0?Math.min(100,(spent/avail)*100):(over>0?100:0);
+    const done=complete();
+    document.getElementById(footId).innerHTML=`
+      <div class="bar ${over>0?'over':''}"><span style="width:${pct}%"></span></div>
+      <div class="led"><dt>Package price</dt><dd>${peso(cfg.price)}</dd></div>
+      ${avail>0?`<div class="led credit"><dt>Credit to spend</dt><dd>${peso(avail)}</dd></div>`:''}
+      ${avail>0&&spent>0?`<div class="led"><dt>Used so far</dt><dd>−${peso(Math.min(spent,avail))}</dd></div>`:''}
+      ${over>0?`<div class="led over"><dt>Beyond your credit</dt><dd>+${peso(over)}</dd></div>`:''}
+      <div class="policy ${over>0?'warn':''}">${over>0?'The extra '+peso(over)+' is added to your package and settled with the vendor like the rest of it.':(remaining>0&&avail>0?'Unspent credit stays with the vendor — use it before you lock.':(done?'Everything chosen — your price is unchanged.':'Finish your choices above to lock.'))}</div>
+      <button class="lock" ${done?'':'style="opacity:.45"'}>${done?'Lock at <span class="num">'+peso(total)+'</span>':'Choose the rest to continue'}</button>`;
+  }
+  render();
+}
+
+/* ---------- caterer: nested courses ---------- */
+makeCase({price:1400000,credit:200000,groups:[
+  {id:'main',title:'Main course',pickMin:1,pickMax:1,defaults:['a'],options:[
+    {id:'a',label:'Filipino-Mediterranean buffet',delta:0},
+    {id:'b',label:'Premium seafood buffet',delta:80000},
+    {id:'c',label:'Plated 5-course dinner',delta:120000,nested:[
+      {id:'c1',title:'First course',pickMax:1,pickMin:1,isNested:true,defaults:['x'],options:[{id:'x',label:'Wild mushroom velouté',delta:0},{id:'y',label:'Seared scallop',delta:12000}]},
+      {id:'c2',title:'Second course',pickMax:1,pickMin:1,isNested:true,options:[{id:'x',label:'Caprese with burrata',delta:0},{id:'y',label:'Foie gras torchon',delta:24000}]},
+      {id:'c3',title:'Main',pickMax:1,pickMin:1,isNested:true,options:[{id:'x',label:'Herb-crusted lamb',delta:0},{id:'y',label:'Wagyu striploin',delta:38000},{id:'z',label:'Chilean sea bass',delta:18000}]},
+      {id:'c4',title:'Cheese & palate',pickMax:1,pickMin:1,isNested:true,options:[{id:'x',label:'Local cheese board',delta:0},{id:'y',label:'Imported selection',delta:9000}]},
+      {id:'c5',title:'Dessert',pickMax:1,pickMin:1,isNested:true,options:[{id:'x',label:'Calamansi tart',delta:0},{id:'y',label:'Valrhona soufflé',delta:7000}]},
+    ]},
+  ]},
+  {id:'cake',title:'Wedding cake',pickMin:1,pickMax:1,defaults:['a'],options:[
+    {id:'a',label:'Three-tier classic',delta:0},{id:'b',label:'Five-tier with sugar florals',delta:30000}]},
+],},'b1','f1');
+
+/* ---------- coffee booth: pick 5 ---------- */
+makeCase({price:45000,credit:0,groups:[
+  {id:'brew',title:'Your five coffees',pickMin:5,pickMax:5,overUnit:2500,defaults:['a','b','c'],options:[
+    {id:'a',label:'Barako black',delta:0},{id:'b',label:'Flat white',delta:0},{id:'c',label:'Spanish latte',delta:0},
+    {id:'d',label:'Salted caramel macchiato',delta:0},{id:'e',label:'Ube latte',delta:0},{id:'f',label:'Cold brew tonic',delta:0},
+    {id:'g',label:'Matcha (non-coffee)',delta:0},{id:'h',label:'Tsokolate de batirol',delta:0},
+    {id:'i',label:'Affogato station',delta:0},{id:'j',label:'Dirty horchata',delta:0},
+    {id:'k',label:'Single-origin pour-over',delta:0},{id:'l',label:'Calamansi espresso tonic',delta:0}]},
+],},'b2','f2');
+
+/* ---------- band: quantities ---------- */
+makeCase({price:85000,credit:0,groups:[
+  {id:'core',title:'Your set',pickMin:1,pickMax:1,defaults:['a'],options:[
+    {id:'a',label:'4-piece · 3 hours · 20 songs',delta:0},
+    {id:'b',label:'6-piece showband · 3 hours',delta:35000}]},
+  {id:'scale',title:'Scale it up',options:[
+    {id:'m',label:'Extra musician',delta:8000,maxQty:4},
+    {id:'h',label:'Extra hour of performance',delta:12000,maxQty:3},
+    {id:'s',label:'Extra requested song',delta:1500,maxQty:10},
+    {id:'r',label:'Additional rehearsal with couple',delta:6000,maxQty:2}]},
+],},'b3','f3');
+
+document.querySelectorAll('.tab').forEach(t=>{t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===t));
+  document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!==t.dataset.p);
+};});
+</script>
+</body>
+</html>

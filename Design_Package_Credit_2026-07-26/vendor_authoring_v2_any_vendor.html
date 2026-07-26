@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>One builder, every vendor · Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#FBFAF7;--paper2:#F4F2EC;--line:#E1DCD1;--line2:#EDE8DE;--ink:#1B1A17;--slate:#3A382F;--slate2:#6E6A62;--slate3:#8A857B;--gold:#A9834B;--gold2:#8A6B39;--gold3:#CBA766;--gold4:#F3ECDF;--ok:#2F6B4F;--ok2:#EAF3EE;--sans:'Hanken Grotesk',system-ui,sans-serif;--mono:'Space Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper2);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:30px 20px 70px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate3)}
+h1{font-size:25px;font-weight:600;letter-spacing:-.02em;margin:6px 0}
+.sub{color:var(--slate2);font-size:14px;max-width:76ch}
+/* the two-prices explainer */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0 26px}
+@media(max-width:820px){.split{grid-template-columns:1fr}}
+.hx{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px}
+.hx.a{border-left:3px solid var(--ink)}
+.hx.b{border-left:3px solid var(--gold)}
+.hx h3{font-size:13px;font-weight:600;margin-bottom:3px}
+.hx .who{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate3);margin-bottom:9px}
+.hx p{font-size:12.5px;color:var(--slate2);margin-bottom:9px}
+.hx code{font-family:var(--mono);font-size:11px;background:var(--paper2);border:1px solid var(--line2);border-radius:6px;padding:2px 6px;color:var(--ink);display:inline-block;margin:2px 3px 2px 0}
+.vtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.vt{appearance:none;border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:8px 12px;font-family:var(--sans);font-size:12.5px;cursor:pointer;color:var(--slate2);text-align:left}
+.vt[aria-selected=true]{border-color:var(--gold);background:var(--gold4);color:var(--ink);font-weight:600}
+.vt small{display:block;font-size:10.5px;font-weight:400;color:var(--slate3)}
+.vt[aria-selected=true] small{color:var(--gold2)}
+.two{display:grid;grid-template-columns:1fr .8fr;gap:20px;align-items:start}
+@media(max-width:920px){.two{grid-template-columns:1fr}}
+.dev{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.dev-h{padding:12px 15px;border-bottom:1px solid var(--line)}
+.dev-h b{font-size:13.5px}
+.dev-h span{display:block;font-size:11.5px;color:var(--slate2)}
+.dev-b{padding:14px 15px;max-height:520px;overflow-y:auto}
+.ln{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--paper);overflow:hidden}
+.ln-h{display:flex;align-items:center;gap:9px;padding:10px 11px}
+.ln-h .nm{font-size:12.5px;font-weight:500;flex:1}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.seg button{appearance:none;border:0;background:var(--paper);font-family:var(--sans);font-size:10.5px;padding:5px 8px;cursor:pointer;color:var(--slate2);border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--paper);font-weight:600}
+.ln-b{padding:0 11px 11px;border-top:1px dashed var(--line2)}
+.ln-b.none{display:none}
+.fld{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:11.5px;color:var(--slate2);flex-wrap:wrap}
+.money{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line);border-radius:6px;padding:4px 7px;width:112px;background:var(--paper);color:var(--ink)}
+.sel{font-family:var(--sans);font-size:11px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--paper);color:var(--ink)}
+.note{font-size:11px;color:var(--ok);margin-top:6px}
+.note.mute{color:var(--slate3)}
+.optrow{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11.5px}
+.optrow input{accent-color:var(--gold2)}
+.optrow .lbl{flex:1;color:var(--slate)}
+.optrow .base{font-family:var(--mono);font-size:10px;color:var(--slate3)}
+.stepline{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11.5px}
+.stepline .lbl{flex:1;color:var(--slate)}
+.side h4{font-size:12.5px;font-weight:600;margin-bottom:8px}
+.k{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:9px}
+.k b{font-size:12px;display:block;margin-bottom:3px}
+.k span{font-size:11.5px;color:var(--slate2)}
+.k.gold{border-color:var(--gold3);background:var(--gold4)}
+.k.gold b{color:var(--gold2)}
+table.m{width:100%;border-collapse:collapse;font-size:12px;background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:20px}
+table.m th,table.m td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line2);vertical-align:top}
+table.m th{background:var(--paper2);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--slate2);font-weight:600}
+table.m tr:last-child td{border-bottom:0}
+table.m code{font-family:var(--mono);font-size:10.5px;color:var(--gold2)}
+.callout{border-left:3px solid var(--gold);background:var(--gold4);padding:12px 14px;border-radius:0 9px 9px 0;font-size:13px;color:var(--slate);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Setnayan · 2026-07-26</p>
+  <h1>Two different prices — and one builder for every vendor</h1>
+  <p class="sub">The confusion is fair: there are <b>two</b> pricing ideas in play and I’ve been mixing them. They answer different questions.</p>
+
+  <div class="split">
+    <div class="hx a">
+      <h3>1 · How a LINE is calculated</h3>
+      <div class="who">vendor sets it · already shipped</div>
+      <p>How this one thing’s cost is worked out. A buffet scales with guests; a booth scales with hours; a bridal car is just a number.</p>
+      <code>Flat price</code><code>Per guest</code><code>Per hour</code>
+      <p style="margin-top:9px;margin-bottom:0">Shipped months ago as <code>pricing_basis</code>. Every vendor type already uses it.</p>
+    </div>
+    <div class="hx b">
+      <h3>2 · What the COUPLE may change</h3>
+      <div class="who">vendor sets it · this is the new part</div>
+      <p>Whether they can touch this line at all, and what happens if they do.</p>
+      <code>Always</code><code>Swap</code><code>Pick one</code>
+      <p style="margin-top:9px;margin-bottom:0">Nothing to do with arithmetic. A per-guest line can be “Always”; a flat line can be “Pick one”. They’re independent.</p>
+    </div>
+  </div>
+
+  <p class="sub" style="margin-bottom:14px"><b>And no — this isn’t a catering feature.</b> Same builder, five very different vendors. Switch between them:</p>
+
+  <div class="vtabs" id="vt"></div>
+
+  <div class="two">
+    <div class="dev">
+      <div class="dev-h"><b id="pkgName"></b><span id="pkgWho"></span></div>
+      <div class="dev-b" id="lines"></div>
+    </div>
+    <div class="side" id="side"></div>
+  </div>
+
+  <table class="m">
+    <thead><tr><th style="width:150px">Vendor</th><th>How their lines calculate</th><th>What couples change</th></tr></thead>
+    <tbody id="matrix"></tbody>
+  </table>
+
+  <div class="callout"><b>Why one builder works.</b> A photographer never sees “per guest”; a caterer never sees a musician stepper. Each vendor only meets the dials their own package needs — but it’s one screen, one data model, and one couple-facing experience. The next vendor type you sign is a configuration, not a release.</div>
+</div>
+
+<script>
+const BASIS={fixed:'Flat price',per_pax:'Per guest',per_hour:'Per hour'};
+const peso=n=>'₱'+n.toLocaleString('en-PH');
+
+const VENDORS=[
+ {k:'photo',tab:'Photographer',hint:'hours + deliverables',name:'Full-Day Wedding Coverage',who:'Lumina Studios · ₱95,000',
+  lines:[
+   {n:'Lead photographer · 8 hours',s:'always',b:'per_hour'},
+   {n:'Second shooter',s:'swap',b:'per_hour',v:18000},
+   {n:'Album',s:'pick',b:'fixed',o:[{l:'20-page classic',d:0},{l:'40-page layflat',d:12000},{l:'Fine-art linen box',d:25000}]},
+   {n:'Extra hour of coverage',s:'qty',b:'per_hour',unit:6000,max:4},
+  ],
+  notes:[['Per hour, not per guest','A photographer’s cost scales with time. Guest count never appears in their builder.'],
+         ['The album is a Pick one','Same control the caterer uses for a main course — different noun, identical mechanic.']]},
+
+ {k:'cater',tab:'Caterer',hint:'per guest + menu choices',name:'Grand Ballroom Wedding',who:'Kusina Norte · ₱250,000',
+  lines:[
+   {n:'Buffet for 100 guests',s:'always',b:'per_pax'},
+   {n:'Main course',s:'pick',b:'fixed',o:[{l:'Chicken teriyaki',d:0},{l:'Beef caldereta',d:8000},{l:'Lechon belly',d:15000}]},
+   {n:'Dessert station',s:'swap',b:'fixed',v:18000},
+   {n:'Extra guest above 100',s:'qty',b:'per_pax',unit:1200,max:80},
+  ],
+  notes:[['Per guest is the spine','The buffet recalculates the moment the couple changes their headcount — which is why a line’s value can never be stored.'],
+         ['“Extra guest” is the same stepper as a musician','One primitive: an option whose quantity can exceed one.']]},
+
+ {k:'band',tab:'Band',hint:'hours + headcount',name:'Reception Set',who:'The Manila Sessions · ₱85,000',
+  lines:[
+   {n:'4-piece band · 3 hours',s:'always',b:'per_hour'},
+   {n:'Set style',s:'pick',b:'fixed',o:[{l:'Acoustic',d:0},{l:'Full band + horns',d:22000}]},
+   {n:'Extra musician',s:'qty',b:'fixed',unit:8000,max:4},
+   {n:'Extra hour',s:'qty',b:'per_hour',unit:12000,max:3},
+  ],
+  notes:[['Nothing here is a swap','A band scales; it doesn’t substitute. Their whole package is Always + steppers.'],
+         ['So the meter shows cost immediately','No credit is involved — every tap adds. The couple sees that from the first press.']]},
+
+ {k:'venue',tab:'Hotel / Venue',hint:'the credit pool case',name:'Platinum Wedding Package',who:'Sofitel · ₱1,400,000',
+  lines:[
+   {n:'Sunset Pavilion · capacity 250',s:'always',b:'fixed'},
+   {n:'Banquet menu',s:'pick',b:'per_pax',o:[{l:'Filipino-Mediterranean',d:0},{l:'Premium seafood',d:80000},{l:'Plated 5-course',d:120000}]},
+   {n:'Photobooth · 4 hours',s:'swap',b:'per_hour',v:60000},
+   {n:'Bridal car',s:'swap',b:'fixed',v:45000},
+  ],
+  notes:[['This is where credit earns its keep','A hotel sells one big number and lets you rearrange inside it. Drop the car, put ₱45,000 toward a suite.'],
+         ['Mixed bases in one package','The venue is flat, the menu is per guest, the booth is per hour — all in the same package.']]},
+
+ {k:'hmua',tab:'HMUA',hint:'per person',name:'Bridal Party Glam',who:'Studio Anais · ₱42,000',
+  lines:[
+   {n:'Bride · hair & makeup',s:'always',b:'fixed'},
+   {n:'Trial session',s:'swap',b:'fixed',v:6000},
+   {n:'Look',s:'pick',b:'fixed',o:[{l:'Soft glam',d:0},{l:'Editorial / HD',d:4000}]},
+   {n:'Additional entourage face',s:'qty',b:'fixed',unit:3500,max:12},
+  ],
+  notes:[['Smallest package here','Four lines, two numbers typed. The builder doesn’t get heavier because the vendor is smaller.'],
+         ['“Per face” is just a stepper','No new pricing mode needed — a quantity with a unit price covers it.']]},
+];
+
+let cur=0;
+const vt=document.getElementById('vt');
+VENDORS.forEach((v,i)=>{
+  const b=document.createElement('button'); b.className='vt'; b.setAttribute('aria-selected',i===0);
+  b.innerHTML=`${v.tab}<small>${v.hint}</small>`;
+  b.onclick=()=>{cur=i;[...vt.children].forEach((c,j)=>c.setAttribute('aria-selected',j===i));draw();};
+  vt.appendChild(b);
+});
+
+function draw(){
+  const v=VENDORS[cur];
+  document.getElementById('pkgName').textContent=v.name;
+  document.getElementById('pkgWho').textContent=v.who;
+  const box=document.getElementById('lines'); box.innerHTML='';
+  v.lines.forEach(L=>{
+    const el=document.createElement('div'); el.className='ln';
+    const segs=['always','swap','pick','qty'];
+    const lab={always:'Always',swap:'Swap',pick:'Pick one',qty:'Add more'};
+    el.innerHTML=`<div class="ln-h"><span class="nm">${L.n}</span><div class="seg">
+      ${segs.map(s=>`<button class="${L.s===s?'on':''}" data-s="${s}">${lab[s]}</button>`).join('')}</div></div>`;
+    const b=document.createElement('div'); b.className='ln-b'+(L.s==='always'?' none':'');
+    const basisSel=`<span>Priced</span><select class="sel">${Object.entries(BASIS).map(([k,t])=>`<option ${L.b===k?'selected':''}>${t}</option>`).join('')}</select>`;
+    if(L.s==='swap') b.innerHTML=`<div class="fld">${basisSel}<span>Worth</span><input class="money" value="${peso(L.v||0)}"></div><div class="note">If they skip it, ${peso(L.v||0)} becomes credit.</div>`;
+    if(L.s==='pick') b.innerHTML=`<div class="fld">${basisSel}</div>`+ (L.o||[]).map((o,i)=>`<div class="optrow"><input type="radio" name="p-${L.n}" ${i===0?'checked':''}><span class="lbl">${o.l}</span>${o.d===0?'<span class="base">included</span>':`<input class="money" style="width:92px" value="+${peso(o.d)}">`}</div>`).join('')+`<div class="note mute">First option is the base — the rest only add.</div>`;
+    if(L.s==='qty') b.innerHTML=`<div class="fld">${basisSel}<span>Each</span><input class="money" style="width:96px" value="${peso(L.unit||0)}"><span>up to</span><input class="money" style="width:56px" value="${L.max||1}"></div><div class="note mute">The couple taps + and −. Your ceiling is the real limit.</div>`;
+    el.appendChild(b);
+    el.querySelectorAll('.seg button').forEach(btn=>btn.onclick=()=>{
+      L.s=btn.dataset.s;
+      if(L.s==='pick'&&!L.o) L.o=[{l:'Option A',d:0},{l:'Option B',d:5000}];
+      if(L.s==='qty'&&!L.unit){L.unit=5000;L.max=4;}
+      if(L.s==='swap'&&!L.v) L.v=10000;
+      draw();
+    });
+    box.appendChild(el);
+  });
+  document.getElementById('side').innerHTML='<h4>What’s different here</h4>'+
+    v.notes.map(([t,d],i)=>`<div class="k ${i===0?'gold':''}"><b>${t}</b><span>${d}</span></div>`).join('')+
+    `<div class="k"><b>Dials this vendor never sees</b><span>${
+      (()=>{const used=new Set(v.lines.map(l=>l.b));const un=Object.entries(BASIS).filter(([k])=>!used.has(k)).map(([,t])=>t);
+      return un.length?un.join(' · ')+' — hidden because nothing in this package uses it.':'This one happens to use all three pricing modes.';})()
+    }</span></div>`;
+  const m=document.getElementById('matrix');
+  m.innerHTML=VENDORS.map(x=>{
+    const bases=[...new Set(x.lines.map(l=>BASIS[l.b]))].join(' · ');
+    const ctrl=[...new Set(x.lines.map(l=>({always:'Always',swap:'Swap',pick:'Pick one',qty:'Add more'}[l.s])))].join(' · ');
+    return `<tr${x.k===VENDORS[cur].k?' style="background:var(--gold4)"':''}><td><b>${x.tab}</b></td><td><code>${bases}</code></td><td><code>${ctrl}</code></td></tr>`;
+  }).join('');
+}
+draw();
+</script>
+</body>
+</html>

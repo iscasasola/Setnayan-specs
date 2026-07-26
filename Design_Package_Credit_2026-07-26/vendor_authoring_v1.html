@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How a vendor designs a package · Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#FBFAF7;--paper2:#F4F2EC;--line:#E1DCD1;--line2:#EDE8DE;--ink:#1B1A17;--slate:#3A382F;--slate2:#6E6A62;--slate3:#8A857B;--slate4:#B5AF9E;--gold:#A9834B;--gold2:#8A6B39;--gold3:#CBA766;--gold4:#F3ECDF;--ok:#2F6B4F;--ok2:#EAF3EE;--sans:'Hanken Grotesk',system-ui,sans-serif;--mono:'Space Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper2);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:30px 20px 70px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate3)}
+h1{font-size:25px;font-weight:600;letter-spacing:-.02em;margin:6px 0}
+.sub{color:var(--slate2);font-size:14px;max-width:74ch}
+.steps{display:flex;gap:8px;margin:24px 0 20px;flex-wrap:wrap}
+.stp{flex:1;min-width:150px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 13px;cursor:pointer;text-align:left}
+.stp[aria-current=true]{border-color:var(--gold);background:var(--gold4)}
+.stp b{display:block;font-size:12.5px;font-weight:600}
+.stp span{font-size:11.5px;color:var(--slate2)}
+.two{display:grid;grid-template-columns:1fr .82fr;gap:22px;align-items:start}
+@media(max-width:920px){.two{grid-template-columns:1fr}}
+.dev{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.dev-h{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.dev-h b{font-size:14px;font-weight:600}
+.tabsm{margin-left:auto;display:flex;gap:3px}
+.tabsm i{font-style:normal;font-size:10.5px;color:var(--slate3);padding:3px 7px;border-radius:6px}
+.tabsm i.on{background:var(--ink);color:var(--paper)}
+.dev-b{padding:15px 16px;max-height:530px;overflow-y:auto}
+.panel[hidden]{display:none}
+/* doors */
+.door{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:11px;padding:13px;margin-bottom:9px;cursor:pointer;background:var(--paper)}
+.door:hover{border-color:var(--gold3);background:var(--gold4)}
+.door.hero{border-color:var(--gold);background:var(--gold4)}
+.door.off{opacity:.45;cursor:not-allowed}
+.door .ic{font-size:17px;line-height:1.2}
+.door b{font-size:13px;font-weight:600;display:block}
+.door span{font-size:12px;color:var(--slate2)}
+.door .badge{margin-left:auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);background:var(--paper);border:1px solid var(--gold3);border-radius:20px;padding:3px 8px;white-space:nowrap}
+/* lines */
+.ln{border:1px solid var(--line);border-radius:10px;margin-bottom:9px;background:var(--paper);overflow:hidden}
+.ln-h{display:flex;align-items:center;gap:10px;padding:11px 12px}
+.ln-h .nm{font-size:13px;font-weight:500;flex:1}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.seg button{appearance:none;border:0;background:var(--paper);font-family:var(--sans);font-size:11px;padding:5px 9px;cursor:pointer;color:var(--slate2);border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--paper);font-weight:600}
+.ln-b{padding:0 12px 12px;border-top:1px dashed var(--line2)}
+.ln-b.none{display:none}
+.fld{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:12px;color:var(--slate2);flex-wrap:wrap}
+.money{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:7px;padding:5px 8px;width:118px;background:var(--paper);color:var(--ink)}
+.sel{font-family:var(--sans);font-size:11.5px;border:1px solid var(--line);border-radius:7px;padding:5px 7px;background:var(--paper);color:var(--ink)}
+.note{font-size:11.5px;color:var(--ok);margin-top:7px}
+.note.mute{color:var(--slate3)}
+.optrow{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:12px}
+.optrow input[type=radio]{accent-color:var(--gold2)}
+.optrow .lbl{flex:1;color:var(--slate)}
+.optrow .base{font-family:var(--mono);font-size:10.5px;color:var(--slate3)}
+.addopt{appearance:none;border:1px dashed var(--line);background:none;font-family:var(--sans);font-size:11.5px;color:var(--slate2);padding:5px 9px;border-radius:7px;margin-top:8px;cursor:pointer}
+.addopt:hover{border-color:var(--gold3);color:var(--gold2)}
+.chk{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:12px;color:var(--slate2)}
+.chk input{accent-color:var(--gold2)}
+.addln{display:flex;gap:8px;margin-top:6px}
+.addln button{flex:1;appearance:none;border:1px dashed var(--line);background:none;font-family:var(--sans);font-size:12px;color:var(--slate2);padding:9px;border-radius:9px;cursor:pointer}
+.addln button:hover{border-color:var(--gold3);color:var(--gold2)}
+/* publish */
+.row{display:flex;align-items:center;gap:10px;margin-bottom:11px;font-size:12.5px}
+.row label{width:96px;color:var(--slate2);flex:none}
+.row input.t{flex:1;font-family:var(--sans);font-size:12.5px;border:1px solid var(--line);border-radius:7px;padding:7px 9px;background:var(--paper);color:var(--ink)}
+.radio{border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:8px;cursor:pointer;background:var(--paper)}
+.radio.on{border-color:var(--gold);background:var(--gold4)}
+.radio b{font-size:12.5px;display:block;margin-bottom:2px}
+.radio span{font-size:11.5px;color:var(--slate2)}
+.bar{display:flex;gap:8px;margin-top:14px}
+.bar button{flex:1;appearance:none;border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:10px;font-family:var(--sans);font-size:12.5px;cursor:pointer;color:var(--ink)}
+.bar button.pri{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:600}
+/* side */
+.side h4{font-size:13px;font-weight:600;margin-bottom:9px}
+.k{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.k b{font-size:12.5px;display:block;margin-bottom:3px}
+.k span{font-size:12px;color:var(--slate2)}
+.k.gold{border-color:var(--gold3);background:var(--gold4)}
+.k.gold b{color:var(--gold2)}
+.prev{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:13px;margin-top:6px}
+.prev .pt{font-size:13.5px;font-weight:600}
+.prev .pp{font-family:var(--mono);font-size:15px;margin:3px 0 8px}
+.prev ul{list-style:none;font-size:11.5px;color:var(--slate2)}
+.prev li{padding:3px 0;display:flex;gap:7px}
+.prev li i{font-style:normal;color:var(--gold2);flex:none}
+.ribbon{margin-top:9px;font-size:11px;background:var(--ok2);color:var(--ok);border-radius:7px;padding:7px 9px}
+.callout{border-left:3px solid var(--gold);background:var(--gold4);padding:12px 14px;border-radius:0 9px 9px 0;font-size:13px;color:var(--slate);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Setnayan · vendor authoring · 2026-07-26</p>
+  <h1>How a vendor designs a package</h1>
+  <p class="sub">Three screens, inside the existing My Shop manager — no new page. A caterer with six fixed lines and one swappable one types <b>two numbers total.</b> Click through; everything is live.</p>
+
+  <div class="steps">
+    <button class="stp" aria-current="true" data-s="s1"><b>1 · Start</b><span>Four doors, never a blank form</span></button>
+    <button class="stp" aria-current="false" data-s="s2"><b>2 · The lines</b><span>One question per line</span></button>
+    <button class="stp" aria-current="false" data-s="s3"><b>3 · Price &amp; publish</b><span>One price, one rule</span></button>
+  </div>
+
+  <div class="two">
+    <div class="dev">
+      <div class="dev-h"><b>My Shop</b>
+        <div class="tabsm"><i>Coverage</i><i>Services</i><i class="on">Packages</i><i>Tools</i></div>
+      </div>
+      <div class="dev-b">
+
+        <section class="panel" id="s1">
+          <p style="font-size:12.5px;color:var(--slate2);margin-bottom:12px"><b>You have no packages yet.</b><br>A package is one price that covers several things.</p>
+          <div class="door hero" data-go="s2"><span class="ic">⚡</span><div><b>Turn a quote into a package</b><span>Pick one you already sent and won.</span></div><span class="badge">3 quotes</span></div>
+          <div class="door" data-go="s2"><span class="ic">📋</span><div><b>Start from a Catering package</b><span>8 lines already written. Change anything.</span></div></div>
+          <div class="door off"><span class="ic">✓</span><div><b>Build from my service cards</b><span>Needs at least one service card.</span></div></div>
+          <div class="door" data-go="s2"><span class="ic">·</span><div><b>Start blank</b><span>Add every line yourself.</span></div></div>
+        </section>
+
+        <section class="panel" id="s2" hidden>
+          <p style="font-size:12px;color:var(--slate2);margin-bottom:11px">From your quote to <b>Reyes–Santos</b>, 14 Feb. Change anything.</p>
+          <div id="lines"></div>
+          <div class="addln"><button>+ Add a line</button><button>⌄ Pull from my services</button></div>
+        </section>
+
+        <section class="panel" id="s3" hidden>
+          <div class="row"><label>Name</label><input class="t" value="Grand Ballroom Wedding"></div>
+          <div class="row"><label>One price</label><input class="t money" style="width:140px" value="₱250,000"></div>
+          <p style="font-size:12.5px;color:var(--slate2);margin:14px 0 8px"><b>If they skip something…</b></p>
+          <div class="radio on" data-pol="credit"><b>It becomes credit to spend on anything else you sell</b><span>Your price stays ₱250,000. They rearrange; you keep the sale.</span></div>
+          <div class="radio" data-pol="off"><b>The value comes off their bill</b><span>They pay less. Only what they actually drop is deducted.</span></div>
+          <div class="bar"><button>Save as draft</button><button class="pri">Publish</button></div>
+        </section>
+
+      </div>
+    </div>
+
+    <div class="side">
+      <div id="sideNotes"></div>
+      <h4 style="margin-top:4px">What the couple will see</h4>
+      <div class="prev">
+        <div class="pt">Grand Ballroom Wedding</div>
+        <div class="pp">₱250,000</div>
+        <ul id="prevList"></ul>
+        <div class="ribbon" id="ribbon">₱40,000 in credit flexes across anything you offer</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout"><b>The point of door one.</b> Every competitor makes a vendor build a package from nothing. We already have code that turns a package into a quote — run it backwards and a vendor’s first bundle is a deal they already closed. Roughly 80 lines, because the hard half ships today.</div>
+</div>
+
+<script>
+const LINES=[
+  {id:'buf', name:'Buffet for 100 guests', state:'always', basis:'per_pax', rate:1200, val:0, opts:null},
+  {id:'main',name:'Main course',           state:'pick',   basis:'fixed',  rate:0,    val:0,
+   opts:[{l:'Chicken teriyaki',d:0},{l:'Beef caldereta',d:8000},{l:'Lechon belly',d:15000}], must:true},
+  {id:'booth',name:'Photobooth · 3 hours', state:'swap',   basis:'per_hour',rate:4000, val:12000, opts:null},
+  {id:'bar', name:'Mobile bar · 4 hrs',    state:'always', basis:'fixed',  rate:0,    val:0, opts:null},
+];
+const peso=n=>'₱'+n.toLocaleString('en-PH');
+const BASIS={fixed:'Flat price',per_pax:'Per guest',per_hour:'Per hour'};
+
+function draw(){
+  const box=document.getElementById('lines'); box.innerHTML='';
+  LINES.forEach(L=>{
+    const el=document.createElement('div'); el.className='ln';
+    el.innerHTML=`<div class="ln-h"><span class="nm">${L.name}</span>
+      <div class="seg">
+        <button data-s="always" class="${L.state==='always'?'on':''}">Always</button>
+        <button data-s="swap" class="${L.state==='swap'?'on':''}">Swap</button>
+        <button data-s="pick" class="${L.state==='pick'?'on':''}">Pick one</button>
+      </div></div>`;
+    const body=document.createElement('div');
+    body.className='ln-b'+(L.state==='always'?' none':'');
+    if(L.state==='swap'){
+      body.innerHTML=`<div class="fld"><span>Priced</span>
+        <select class="sel">${Object.entries(BASIS).map(([k,v])=>`<option ${L.basis===k?'selected':''}>${v}</option>`).join('')}</select>
+        <span>Worth</span><input class="money" value="${peso(L.val)}"></div>
+        <div class="note">If they skip it, ${peso(L.val)} becomes credit.</div>`;
+    }
+    if(L.state==='pick'){
+      body.innerHTML=`<div class="fld"><span>Priced</span>
+        <select class="sel">${Object.entries(BASIS).map(([k,v])=>`<option ${L.basis===k?'selected':''}>${v}</option>`).join('')}</select></div>`
+        + L.opts.map((o,i)=>`<div class="optrow"><input type="radio" name="o-${L.id}" ${i===0?'checked':''}>
+            <span class="lbl">${o.l}</span>${o.d===0?'<span class="base">included</span>':`<input class="money" style="width:96px" value="+${peso(o.d)}">`}</div>`).join('')
+        + `<button class="addopt">+ Add an option</button>
+           <div class="chk"><input type="checkbox" ${L.must?'checked':''}><span>They must pick one</span></div>
+           <div class="note mute">The first option is the base — every other one only adds.</div>`;
+    }
+    el.appendChild(body);
+    el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
+      L.state=b.dataset.s;
+      if(L.state==='pick'&&!L.opts) L.opts=[{l:'Option A',d:0},{l:'Option B',d:5000}];
+      draw();
+    });
+    box.appendChild(el);
+  });
+  side(); preview();
+}
+function side(){
+  const anyReq=LINES.some(L=>L.state==='always'), anyPick=LINES.some(L=>L.state==='pick');
+  document.getElementById('sideNotes').innerHTML=`
+    <h4>Why it looks like this</h4>
+    <div class="k gold"><b>An “Always” line has no price field at all</b><span>Your rule — a required line’s value must never become credit — stops being something we have to remember in three places. There is simply no number to leak.</span></div>
+    <div class="k"><b>One question per line</b><span>Always · Swap · Pick one. Only <i>Swap</i> asks “what’s this worth?”. Only <i>Pick one</i> opens an option list. A collapsed line is one word.</span></div>
+    <div class="k"><b>Each line keeps its own pricing</b><span>${BASIS.per_pax} for the buffet, ${BASIS.per_hour} for the booth, flat for the bar — all three in one package, using the pricing model already shipped.</span></div>
+    ${anyPick?'<div class="k"><b>The base option is the cheapest</b><span>The first choice is always “included”; every other one only adds. That’s why a swap can never hand money back.</span></div>':''}`;
+}
+function preview(){
+  const ul=document.getElementById('prevList'); ul.innerHTML='';
+  LINES.forEach(L=>{
+    let t=L.name;
+    if(L.state==='pick') t+=` — ${L.opts[0].l}`;
+    const mark=L.state==='always'?'✓':(L.state==='pick'?'◉':'☑');
+    ul.innerHTML+=`<li><i>${mark}</i><span>${t}${L.state==='pick'?' <span style="color:var(--gold2)">· choose one</span>':''}</span></li>`;
+  });
+  const credit=LINES.filter(L=>L.state==='swap').reduce((s,L)=>s+L.val,0)+28000;
+  document.getElementById('ribbon').textContent=peso(credit)+' in credit flexes across anything you offer';
+}
+document.querySelectorAll('.stp').forEach(s=>s.onclick=()=>go(s.dataset.s));
+document.body.addEventListener('click',e=>{
+  const d=e.target.closest('[data-go]'); if(d) go(d.dataset.go);
+  const r=e.target.closest('.radio'); if(r){document.querySelectorAll('.radio').forEach(x=>x.classList.toggle('on',x===r));}
+});
+function go(id){
+  document.querySelectorAll('.stp').forEach(x=>x.setAttribute('aria-current',x.dataset.s===id));
+  document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!==id);
+}
+draw();
+</script>
+</body>
+</html>

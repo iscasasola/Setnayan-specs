@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Package builder · Setnayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sn-surface:#FFFFFF; --sn-line:#E1DCD1;
+  --sn-ink-300:#A09A8E; --sn-ink-400:#8A857B; --sn-ink-500:#6E6A62; --sn-ink-700:#3A382F; --sn-ink-900:#1B1A17;
+  --sn-gold-100:#F3ECDF; --sn-gold-300:#CBA766; --sn-gold-500:#A9834B; --sn-gold-700:#8A6B39;
+  --sn-paper:#FBFAF7; --sn-paper-2:#F4F2EC;
+  --sn-r-sm:6px; --sn-r-md:10px; --sn-r-lg:14px; --sn-r-xl:18px; --sn-r-pill:999px;
+  --sn-sh-sm:0 1px 2px rgba(30,26,18,.06);
+  --sn-sh-tile:0 18px 40px -26px rgba(30,26,18,.4);
+  --sn-sh-hi:0 28px 54px -30px rgba(30,26,18,.5);
+  --sn-glass-bg:rgba(255,255,255,.5); --sn-glass-line:rgba(255,255,255,.72);
+  --sn-glass-blur:blur(22px) saturate(1.5);
+  --sn-ease:cubic-bezier(.2,.7,.2,1);
+  --sn-dur-control:200ms; --sn-dur-elem:320ms;
+  --ok:#2F6B4F; --ok-100:#EAF3EE;
+  --font:'Hanken Grotesk',system-ui,sans-serif; --mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--font); color:var(--sn-ink-900); line-height:1.5; -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(1100px 620px at 8% -8%, #FFF6E6 0%, transparent 58%),
+    radial-gradient(900px 560px at 96% 4%, #F0EAF6 0%, transparent 55%),
+    radial-gradient(800px 700px at 50% 108%, #EFEAE0 0%, transparent 60%),
+    linear-gradient(180deg,#FBFAF7 0%,#F4F2EC 100%);
+  background-attachment:fixed; min-height:100vh;
+}
+.wrap{max-width:1140px;margin:0 auto;padding:44px 22px 90px}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--sn-gold-700)}
+h1{font-size:32px;font-weight:600;letter-spacing:-.025em;margin:10px 0 8px;line-height:1.15}
+.lede{color:var(--sn-ink-500);font-size:15px;max-width:70ch;line-height:1.6}
+.glass{background:var(--sn-glass-bg);border:1px solid var(--sn-glass-line);backdrop-filter:var(--sn-glass-blur);-webkit-backdrop-filter:var(--sn-glass-blur);border-radius:var(--sn-r-xl);box-shadow:var(--sn-sh-tile)}
+/* two prices */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:34px 0 40px}
+@media(max-width:840px){.split{grid-template-columns:1fr}}
+.hx{padding:22px 24px;position:relative;overflow:hidden}
+.hx::before{content:'';position:absolute;inset:0 auto 0 0;width:3px}
+.hx.a::before{background:linear-gradient(180deg,var(--sn-ink-900),var(--sn-ink-700))}
+.hx.b::before{background:linear-gradient(180deg,var(--sn-gold-300),var(--sn-gold-700))}
+.hx .n{font-family:var(--mono);font-size:11px;color:var(--sn-ink-300);letter-spacing:.1em}
+.hx h3{font-size:16px;font-weight:600;margin:4px 0 4px;letter-spacing:-.01em}
+.hx .who{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--sn-gold-700);margin-bottom:12px}
+.hx p{font-size:13.5px;color:var(--sn-ink-500);margin-bottom:12px;line-height:1.6}
+.pill{display:inline-flex;align-items:center;font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:var(--sn-r-pill);background:var(--sn-surface);border:1px solid var(--sn-line);color:var(--sn-ink-700);margin:0 5px 5px 0}
+.hx.b .pill{border-color:var(--sn-gold-300);color:var(--sn-gold-700);background:var(--sn-gold-100)}
+.foot{font-size:12.5px;color:var(--sn-ink-400);margin-top:4px}
+/* vendor switch */
+.switch{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.vt{appearance:none;border:1px solid var(--sn-line);background:rgba(255,255,255,.6);backdrop-filter:blur(10px);border-radius:var(--sn-r-lg);padding:11px 15px;font-family:var(--font);font-size:13px;cursor:pointer;color:var(--sn-ink-500);text-align:left;transition:all var(--sn-dur-control) var(--sn-ease);box-shadow:var(--sn-sh-sm)}
+.vt:hover{border-color:var(--sn-gold-300);transform:translateY(-2px)}
+.vt[aria-selected=true]{border-color:transparent;background:var(--sn-ink-900);color:var(--sn-paper);font-weight:600;box-shadow:var(--sn-sh-hi)}
+.vt small{display:block;font-size:10.5px;font-weight:400;color:var(--sn-ink-400);margin-top:1px}
+.vt[aria-selected=true] small{color:rgba(251,250,247,.62)}
+/* layout */
+.two{display:grid;grid-template-columns:1fr .74fr;gap:22px;align-items:start}
+@media(max-width:960px){.two{grid-template-columns:1fr}}
+.dev{overflow:hidden}
+.dev-h{padding:20px 22px 17px;border-bottom:1px solid rgba(225,220,209,.6);display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.dev-h b{font-size:18px;font-weight:600;letter-spacing:-.015em;display:block}
+.dev-h .who{font-size:12.5px;color:var(--sn-ink-500);margin-top:2px}
+.dev-h .price{margin-left:auto;font-family:var(--mono);font-size:19px;color:var(--sn-ink-900)}
+.dev-b{padding:18px 22px 22px;max-height:560px;overflow-y:auto}
+.dev-b::-webkit-scrollbar{width:8px}.dev-b::-webkit-scrollbar-thumb{background:var(--sn-line);border-radius:99px}
+/* lines */
+.ln{background:var(--sn-surface);border:1px solid var(--sn-line);border-radius:var(--sn-r-lg);margin-bottom:11px;overflow:hidden;box-shadow:var(--sn-sh-sm);transition:box-shadow var(--sn-dur-elem) var(--sn-ease),border-color var(--sn-dur-control)}
+.ln:hover{box-shadow:var(--sn-sh-tile)}
+.ln.open{border-color:var(--sn-gold-300)}
+.ln-h{display:flex;align-items:center;gap:12px;padding:14px 15px}
+.ln-h .nm{font-size:14px;font-weight:500;flex:1;letter-spacing:-.005em}
+.seg{display:inline-flex;background:var(--sn-paper-2);border-radius:var(--sn-r-pill);padding:3px;flex:none;gap:2px}
+.seg button{appearance:none;border:0;background:none;font-family:var(--font);font-size:11px;font-weight:500;padding:5px 11px;border-radius:var(--sn-r-pill);cursor:pointer;color:var(--sn-ink-500);transition:all var(--sn-dur-control) var(--sn-ease);white-space:nowrap}
+.seg button:hover{color:var(--sn-ink-900)}
+.seg button.on{background:var(--sn-ink-900);color:var(--sn-paper);font-weight:600;box-shadow:var(--sn-sh-sm)}
+.ln-b{padding:0 15px 15px}
+.ln-b.none{display:none}
+.rule{height:1px;background:linear-gradient(90deg,var(--sn-gold-300),transparent);margin-bottom:13px}
+.fld{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--sn-ink-500);flex-wrap:wrap;margin-bottom:10px}
+.money{font-family:var(--mono);font-size:12.5px;border:1px solid var(--sn-line);border-radius:var(--sn-r-sm);padding:6px 10px;width:120px;background:var(--sn-paper);color:var(--sn-ink-900);transition:border-color var(--sn-dur-control)}
+.money:focus{outline:0;border-color:var(--sn-gold-500);background:#fff}
+.sel{font-family:var(--font);font-size:12px;border:1px solid var(--sn-line);border-radius:var(--sn-r-sm);padding:6px 8px;background:var(--sn-paper);color:var(--sn-ink-900);cursor:pointer}
+.note{font-size:12px;color:var(--ok);background:var(--ok-100);border-radius:var(--sn-r-sm);padding:8px 11px;display:flex;gap:7px}
+.note.mute{color:var(--sn-ink-400);background:var(--sn-paper-2)}
+.note i{font-style:normal;flex:none}
+.optrow{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;border-bottom:1px solid rgba(225,220,209,.5)}
+.optrow:last-of-type{border-bottom:0}
+.optrow input[type=radio]{accent-color:var(--sn-gold-500);width:15px;height:15px}
+.optrow .lbl{flex:1;color:var(--sn-ink-700)}
+.optrow .base{font-family:var(--mono);font-size:10.5px;color:var(--sn-ink-300);letter-spacing:.06em;text-transform:uppercase}
+.stepline{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:13px;color:var(--sn-ink-700)}
+.stepline .lbl{flex:1}
+.ghost{appearance:none;border:1px dashed var(--sn-line);background:none;font-family:var(--font);font-size:12.5px;color:var(--sn-ink-500);padding:8px 12px;border-radius:var(--sn-r-md);cursor:pointer;transition:all var(--sn-dur-control) var(--sn-ease);margin-top:6px}
+.ghost:hover{border-color:var(--sn-gold-500);color:var(--sn-gold-700);background:var(--sn-gold-100)}
+.addln{display:flex;gap:9px;margin-top:4px}
+.addln .ghost{flex:1;text-align:center;margin-top:0}
+/* side */
+.side{position:sticky;top:24px}
+.side h4{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--sn-gold-700);margin-bottom:12px}
+.k{background:var(--sn-surface);border:1px solid var(--sn-line);border-radius:var(--sn-r-lg);padding:15px 16px;margin-bottom:10px;box-shadow:var(--sn-sh-sm)}
+.k b{font-size:13px;display:block;margin-bottom:5px;letter-spacing:-.005em}
+.k span{font-size:12.5px;color:var(--sn-ink-500);line-height:1.55}
+.k.gold{border-color:var(--sn-gold-300);background:linear-gradient(160deg,var(--sn-gold-100),#fff 70%)}
+.k.gold b{color:var(--sn-gold-700)}
+/* matrix */
+.mx{margin-top:34px;overflow:hidden}
+.mx table{width:100%;border-collapse:collapse;font-size:13px}
+.mx th,.mx td{padding:13px 20px;text-align:left;border-bottom:1px solid rgba(225,220,209,.55)}
+.mx th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sn-ink-400);font-weight:400}
+.mx tr:last-child td{border-bottom:0}
+.mx tr.on{background:linear-gradient(90deg,var(--sn-gold-100),transparent)}
+.mx td b{font-weight:600}
+.mx .tag{font-family:var(--mono);font-size:11px;color:var(--sn-ink-500)}
+.mx .tag em{font-style:normal;color:var(--sn-gold-700)}
+.close{margin-top:30px;padding:22px 26px;border-left:3px solid var(--sn-gold-500);font-size:14px;color:var(--sn-ink-700);line-height:1.65}
+.close b{color:var(--sn-ink-900)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Setnayan · vendor dashboard</p>
+  <h1>The package builder</h1>
+  <p class="lede">One screen every vendor uses — a photographer, a caterer, a band, a hotel, an HMUA. Two different prices are at play, and separating them is what makes it work.</p>
+
+  <div class="split">
+    <div class="glass hx a">
+      <div class="n">01</div>
+      <h3>How a line is calculated</h3>
+      <div class="who">vendor sets · already shipped</div>
+      <p>How this one thing’s cost is worked out. A buffet scales with guests, coverage scales with hours, a bridal car is just a number.</p>
+      <span class="pill">Flat price</span><span class="pill">Per guest</span><span class="pill">Per hour</span>
+      <p class="foot">Live in the product for months. Every vendor type already uses it.</p>
+    </div>
+    <div class="glass hx b">
+      <div class="n">02</div>
+      <h3>What the couple may change</h3>
+      <div class="who">vendor sets · the new part</div>
+      <p>Whether they can touch this line at all — and what happens if they do. Nothing to do with arithmetic.</p>
+      <span class="pill">Always</span><span class="pill">Swap</span><span class="pill">Pick one</span><span class="pill">Add more</span>
+      <p class="foot">Independent of 01. A per-guest line can be “Always”; a flat line can be “Pick one”.</p>
+    </div>
+  </div>
+
+  <div class="switch" id="vt"></div>
+
+  <div class="two">
+    <div class="glass dev">
+      <div class="dev-h">
+        <div><b id="pkgName"></b><div class="who" id="pkgWho"></div></div>
+        <div class="price" id="pkgPrice"></div>
+      </div>
+      <div class="dev-b" id="lines"></div>
+    </div>
+    <div class="side" id="side"></div>
+  </div>
+
+  <div class="glass mx">
+    <table>
+      <thead><tr><th style="width:170px">Vendor</th><th>Line calculation</th><th>Couple controls</th></tr></thead>
+      <tbody id="matrix"></tbody>
+    </table>
+  </div>
+
+  <div class="glass close">
+    <b>Why one builder holds.</b> A photographer never meets “per guest”. A band never meets a swap — they scale, they don’t substitute. Each vendor only sees the dials their own package needs, yet it’s one screen, one data model, one couple-facing experience. The next vendor type you sign is a configuration, not a release.
+  </div>
+</div>
+
+<script>
+const BASIS={fixed:'Flat price',per_pax:'Per guest',per_hour:'Per hour'};
+const LAB={always:'Always',swap:'Swap',pick:'Pick one',qty:'Add more'};
+const peso=n=>'₱'+n.toLocaleString('en-PH');
+
+const VENDORS=[
+ {tab:'Photographer',hint:'hours + deliverables',name:'Full-Day Coverage',who:'Lumina Studios',price:95000,
+  lines:[{n:'Lead photographer · 8 hours',s:'always',b:'per_hour'},
+         {n:'Second shooter',s:'swap',b:'per_hour',v:18000},
+         {n:'Album',s:'pick',b:'fixed',o:[{l:'20-page classic',d:0},{l:'40-page layflat',d:12000},{l:'Fine-art linen box',d:25000}]},
+         {n:'Extra hour of coverage',s:'qty',b:'per_hour',unit:6000,max:4}],
+  notes:[['Per hour, never per guest','A photographer’s cost scales with time. Guest count never appears in their builder at all.'],
+         ['The album is a “Pick one”','Identical control to a caterer’s main course. Different noun, same mechanic.']]},
+
+ {tab:'Caterer',hint:'per guest + menu choices',name:'Grand Ballroom Wedding',who:'Kusina Norte',price:250000,
+  lines:[{n:'Buffet for 100 guests',s:'always',b:'per_pax'},
+         {n:'Main course',s:'pick',b:'fixed',o:[{l:'Chicken teriyaki',d:0},{l:'Beef caldereta',d:8000},{l:'Lechon belly',d:15000}]},
+         {n:'Dessert station',s:'swap',b:'fixed',v:18000},
+         {n:'Extra guest above 100',s:'qty',b:'per_pax',unit:1200,max:80}],
+  notes:[['Per guest is the spine','The buffet re-prices the moment the couple changes their headcount — which is exactly why a line’s value is computed, never stored.'],
+         ['“Extra guest” is the same stepper as a musician','One primitive: an option whose quantity may exceed one.']]},
+
+ {tab:'Band',hint:'hours + headcount',name:'Reception Set',who:'The Manila Sessions',price:85000,
+  lines:[{n:'4-piece band · 3 hours',s:'always',b:'per_hour'},
+         {n:'Set style',s:'pick',b:'fixed',o:[{l:'Acoustic',d:0},{l:'Full band + horns',d:22000}]},
+         {n:'Extra musician',s:'qty',b:'fixed',unit:8000,max:4},
+         {n:'Extra hour',s:'qty',b:'per_hour',unit:12000,max:3}],
+  notes:[['Nothing here is a swap','A band scales; it doesn’t substitute. Their whole package is Always plus steppers — proof this isn’t a catering feature.'],
+         ['So the couple never sees credit','Every tap adds. The meter shows cost immediately rather than pretending a pool is involved.']]},
+
+ {tab:'Hotel / Venue',hint:'the credit pool case',name:'Platinum Wedding',who:'Sofitel',price:1400000,
+  lines:[{n:'Sunset Pavilion · capacity 250',s:'always',b:'fixed'},
+         {n:'Banquet menu',s:'pick',b:'per_pax',o:[{l:'Filipino-Mediterranean',d:0},{l:'Premium seafood',d:80000},{l:'Plated 5-course',d:120000}]},
+         {n:'Photobooth · 4 hours',s:'swap',b:'per_hour',v:60000},
+         {n:'Bridal car',s:'swap',b:'fixed',v:45000}],
+  notes:[['Where credit earns its keep','A hotel sells one big number and lets you rearrange inside it. Drop the car, put ₱45,000 toward a suite.'],
+         ['All three bases in one package','Venue flat, menu per guest, booth per hour — the builder doesn’t blink.']]},
+
+ {tab:'HMUA',hint:'per person',name:'Bridal Party Glam',who:'Studio Anaïs',price:42000,
+  lines:[{n:'Bride · hair & makeup',s:'always',b:'fixed'},
+         {n:'Trial session',s:'swap',b:'fixed',v:6000},
+         {n:'Look',s:'pick',b:'fixed',o:[{l:'Soft glam',d:0},{l:'Editorial / HD',d:4000}]},
+         {n:'Additional entourage face',s:'qty',b:'fixed',unit:3500,max:12}],
+  notes:[['The smallest package here','Four lines, two numbers typed. The builder doesn’t get heavier because the vendor is smaller.'],
+         ['“Per face” needed no new mode','A quantity with a unit price already covers it.']]},
+];
+
+let cur=0;
+const vt=document.getElementById('vt');
+VENDORS.forEach((v,i)=>{
+  const b=document.createElement('button'); b.className='vt'; b.setAttribute('aria-selected',i===0);
+  b.innerHTML=`${v.tab}<small>${v.hint}</small>`;
+  b.onclick=()=>{cur=i;[...vt.children].forEach((c,j)=>c.setAttribute('aria-selected',j===i));draw();};
+  vt.appendChild(b);
+});
+
+function draw(){
+  const v=VENDORS[cur];
+  document.getElementById('pkgName').textContent=v.name;
+  document.getElementById('pkgWho').textContent=v.who;
+  document.getElementById('pkgPrice').textContent=peso(v.price);
+  const box=document.getElementById('lines'); box.innerHTML='';
+  v.lines.forEach(L=>{
+    const el=document.createElement('div'); el.className='ln'+(L.s!=='always'?' open':'');
+    el.innerHTML=`<div class="ln-h"><span class="nm">${L.n}</span><div class="seg">
+      ${Object.keys(LAB).map(s=>`<button class="${L.s===s?'on':''}" data-s="${s}">${LAB[s]}</button>`).join('')}</div></div>`;
+    const b=document.createElement('div'); b.className='ln-b'+(L.s==='always'?' none':'');
+    const basis=`<span>Priced</span><select class="sel">${Object.entries(BASIS).map(([k,t])=>`<option ${L.b===k?'selected':''}>${t}</option>`).join('')}</select>`;
+    if(L.s==='swap') b.innerHTML=`<div class="rule"></div><div class="fld">${basis}<span>Worth</span><input class="money" value="${peso(L.v||0)}"></div><div class="note"><i>↩</i><span>If they skip it, ${peso(L.v||0)} becomes credit to spend elsewhere with you.</span></div>`;
+    if(L.s==='pick') b.innerHTML=`<div class="rule"></div><div class="fld">${basis}</div>`+
+      (L.o||[]).map((o,i)=>`<div class="optrow"><input type="radio" name="p${cur}-${L.n}" ${i===0?'checked':''}><span class="lbl">${o.l}</span>${o.d===0?'<span class="base">included</span>':`<input class="money" style="width:100px" value="+${peso(o.d)}">`}</div>`).join('')+
+      `<button class="ghost">+ Add an option</button><div class="note mute" style="margin-top:10px"><i>◇</i><span>The first option is the base — every other one only ever adds.</span></div>`;
+    if(L.s==='qty') b.innerHTML=`<div class="rule"></div><div class="fld">${basis}<span>Each</span><input class="money" style="width:104px" value="${peso(L.unit||0)}"><span>up to</span><input class="money" style="width:60px" value="${L.max||1}"></div><div class="note mute"><i>±</i><span>The couple taps + and −. Your ceiling is the real-world limit.</span></div>`;
+    el.appendChild(b);
+    el.querySelectorAll('.seg button').forEach(btn=>btn.onclick=()=>{
+      L.s=btn.dataset.s;
+      if(L.s==='pick'&&!L.o) L.o=[{l:'Option A',d:0},{l:'Option B',d:5000}];
+      if(L.s==='qty'&&!L.unit){L.unit=5000;L.max=4;}
+      if(L.s==='swap'&&!L.v) L.v=10000;
+      draw();
+    });
+    box.appendChild(el);
+  });
+  const add=document.createElement('div'); add.className='addln';
+  add.innerHTML=`<button class="ghost">+ Add a line</button><button class="ghost">⌄ Pull from my services</button>`;
+  box.appendChild(add);
+
+  const used=new Set(v.lines.map(l=>l.b));
+  const unused=Object.entries(BASIS).filter(([k])=>!used.has(k)).map(([,t])=>t);
+  document.getElementById('side').innerHTML='<h4>What’s different here</h4>'+
+    v.notes.map(([t,d],i)=>`<div class="k ${i===0?'gold':''}"><b>${t}</b><span>${d}</span></div>`).join('')+
+    `<div class="k"><b>Dials this vendor never sees</b><span>${unused.length?unused.join(' · ')+' — hidden, because nothing in this package uses it.':'This one happens to use all three pricing modes at once.'}</span></div>`;
+
+  document.getElementById('matrix').innerHTML=VENDORS.map((x,i)=>{
+    const bs=[...new Set(x.lines.map(l=>BASIS[l.b]))].join(' · ');
+    const cs=[...new Set(x.lines.map(l=>LAB[l.s]))].map(s=>`<em>${s}</em>`).join(' · ');
+    return `<tr class="${i===cur?'on':''}"><td><b>${x.tab}</b></td><td class="tag">${bs}</td><td class="tag">${cs}</td></tr>`;
+  }).join('');
+}
+draw();
+</script>
+</body>
+</html>
