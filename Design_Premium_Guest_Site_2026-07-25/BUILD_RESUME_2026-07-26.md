@@ -2,28 +2,29 @@
 
 > For the next Claude Code session (any account). Read `BUILD_INSTRUCTIONS_FOR_OPUS_2026-07-25.md` in this folder first — it is the full 5-wave plan (§0–§12). This file is only WHERE WE STOPPED.
 
-## State
+## State (updated 2026-07-26, session 2)
 
-- **Wave branch:** `wave/a-pahina-reskin` on `iscasasola/setnayan-platform` — tip `e3c829a0b` = PR-1 (#3712, tokens + Fraunces + gild/paper-deep/veil + `.sn-editorial` classes + vercel.json `claude/*` preview skip) MERGED into the wave.
-- **PR-2 is COMMITTED + PUSHED but NO PR OPENED:** branch `origin/claude/pahina-pr2-masthead` @ `eefc9f12b`.
-  - Contents: NEW `apps/web/app/[slug]/_components/pahina-masthead.tsx` (shared masthead + `splitCoupleNames`) replacing ALL 4 hero call-sites in `site-body.tsx` (STRUCTURAL — photo demoted to cover plate; `SITE_MENU_ANCHORS` markers are separate nodes, editor-bridge verified safe); `invitation-shell.tsx` monogram header slot + footer sign-off (`monogramText` prop threaded from SiteBody); `countdown.tsx` + `site-menu-bar.tsx` class-only; `font-pahina` tailwind util; changelog fragment `changelog.d/pahina-pr2-masthead.md`.
-  - Verified: `next lint` clean · 27/27 unit+golden tests green (`site-body-plan*`, `anonymous-zero-guest`, `site-menu`).
-  - **⚠ NOT verified: `tsc --noEmit` never completed (machine contention killed it twice).**
+- **Wave branch:** `wave/a-pahina-reskin` on `iscasasola/setnayan-platform` — tip `f9c0c981c`.
+  - PR-1 #3712 (tokens + Fraunces + gild/paper-deep/veil + `.sn-editorial` classes + vercel.json `claude/*` preview skip) — MERGED.
+  - **PR-2 #3745 (masthead) — MERGED.** The blocking `tsc --noEmit` gate was run and came back CLEAN; PR opened and merged same session.
+  - **PR-3 #3748 (chapter grammar) — MERGED.** See below.
+- **Nothing is parked.** Next work starts fresh off `origin/wave/a-pahina-reskin`.
+
+### What PR-3 established (read before PR-4)
+
+- **Chapter numbering is now fixed:** `№ 01` hero · `№ 02` story · `№ 03` details · `№ 04` programme · `№ 05` dress code · **`№ 06` reserved for the gallery** · **`№ 07` RSVP** (spec §7). PR-4 must use 06 + 07.
+- **Duplicate-№ rule:** any component that can co-occur with a numbered chapter takes an UNNUMBERED eyebrow (`our-love-story-widget`, `venue-widget`, the two "Good to know" notes, `tea-ceremony-card`, `guest-column-card`). The guest-personal layer is STARRED (`✦`), not numbered — per spec §11a. Follow this for the qr_card/hub plates.
+- **`globals.css` Pahina block moved into `@layer components`.** It was unlayered, and unlayered CSS beats every `@layer` including utilities — a `.pahina-plate` could not be tuned with a Tailwind `bg-*`/`border-*`/`p-*` on the same element. It can now. New classes available: `.pahina-dropcap`, `.pahina-quote`, `.pahina-swatch` (plus PR-1's `.pahina-eyebrow`, `.pahina-plate`, `.pahina-rule`, `.pahina-grain`).
+- Functional-color exile is UNDERWAY, not done — PR-3 cleared the day-of schedule wrapper, the Do/Don't boxes, the venue band, and `your-seat-block`'s emerald. PR-4 owns the rest of the grep sweep.
+- **⚠ NO visual pass has been done on ANY Pahina PR yet.** A local one is not possible: the dev server falls back to the anon key (no service-role key in `apps/web/.env.local`), so `/maria-and-jose` 404s under RLS. The visual pass is owed on the **wave branch's Vercel preview** — which is also the only branch previews build for (§12 rule 2). Do this before the wave merges to main.
 
 ## Next actions, in order
 
-1. Fresh worktree off `origin/claude/pahina-pr2-masthead` → run `npx tsc --noEmit` in `apps/web`. If clean: `gh pr create --base wave/a-pahina-reskin` + `gh pr merge --auto --merge`. (PRs target the WAVE branch, never main — §12 cost rule.)
-2. **PR-3 — chapters** (touchpoints already scoped):
-   - `our-story.tsx`: chapter `№ 02` eyebrow + drop cap on first paragraph + italic pull quote with gild left rule.
-   - `dress-code-widget.tsx`: silk swatches; KEEP the INC/Muslim modesty fallbacks + genderNote verbatim; the Do/Don't `success-*`/`danger-*` boxes get palette-derived tones.
-   - `venue-widget.tsx` + `PublicEventDetails` in `empty-states.tsx`: paper-deep plates, gild mono CEREMONY/RECEPTION keys, Fraunces venue names; keep `NavLinksRow` (Maps/Waze/Apple) verbatim.
-   - `schedule-widget.tsx`: programme rail (mono gild time column, hairlines); NOW row = accent left rule.
-   - `site-body.tsx` line ~876: greeting → salutation restyle (keep personalization). Line ~907: REMOVE the `border-success-300 bg-success-50/50` promoted-schedule wrapper — the functional-color exile starts here.
-   - Also (build plan §5): `YourSeatBlock`, `TeaCeremonyCard`, `GuestColumnCard`, `special_message`/`what_to_bring` → "Good to know" plates.
-3. **PR-4**: reply card RSVP + qr_card place card + gallery mosaic + full `success-*`/`warn-*` grep sweep under `app/[slug]/` (includes `arrival-greeting.tsx` `text-emerald-700` and `guest-hub-card.tsx` badges) + **the GuestHubCard hub-plate restyle (resequenced here from PR-2)**.
-4. **PR-4b**: RSVPed keepsake fork (per-guest, inside rsvp phase — NO new LifecyclePhase) + unified-editor 5th preview tab (§4).
-5. **PR-5**: motion + Candlelight Pro toggle (migration!) + Cormorant drop.
-6. Wave A done → OWNER previews the wave branch → ONE merge to main. Then Waves B–E (§ plan).
+1. **PR-4**: reply card RSVP (wording per spec §7: "Joyfully accepts / Undecided, for now / Regretfully declines") + qr_card place card + gallery mosaic (`№ 06`) + RSVP chapter (`№ 07`) + full `success-*`/`warn-*` grep sweep under `app/[slug]/` (includes `arrival-greeting.tsx` `text-emerald-700`, `guest-hub-card.tsx` badges, and the `warn-*` blocks at `site-body.tsx` ~562/~1013/~1267) + **the GuestHubCard hub-plate restyle (resequenced here from PR-2)**.
+2. **PR-4b**: RSVPed keepsake fork (per-guest, inside rsvp phase — NO new LifecyclePhase) + unified-editor 5th preview tab (§4).
+3. **PR-5**: motion + Candlelight Pro toggle (migration!) + Cormorant drop.
+4. **Visual pass on the wave branch's Vercel preview** — still owed for PR-2 + PR-3 (see State above). 375px + desktop, palette-rich + palette-empty event, all four phases.
+5. Wave A done → OWNER previews the wave branch → ONE merge to main. Then Waves B–E (§ plan).
 
 ## Standing rulings that override older lines in the build doc
 
