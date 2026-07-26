@@ -8,7 +8,30 @@
   - PR-1 #3712 (tokens + Fraunces + gild/paper-deep/veil + `.sn-editorial` classes + vercel.json `claude/*` preview skip) — MERGED.
   - **PR-2 #3745 (masthead) — MERGED.** The blocking `tsc --noEmit` gate was run and came back CLEAN; PR opened and merged same session.
   - **PR-3 #3748 (chapter grammar) — MERGED.** See below.
+  - **PR-4 #3750 (reply card · mosaic · colour exile) — MERGED.** Wave tip `ddfa44edc`.
 - **Nothing is parked.** Next work starts fresh off `origin/wave/a-pahina-reskin`.
+
+### ⚠ OWNER SIGN-OFF PENDING from PR-4
+
+The RSVP option labels changed to the design spec's §7 wording: **"I'll be there / Maybe / Can't
+make it" → "Joyfully accepts / Undecided, for now / Regretfully declines."** The option `key`
+values are byte-identical so nothing downstream moved — but this is the most load-bearing
+interaction on the site. If the owner prefers the plain wording it is a three-line revert in
+`rsvp-widget.tsx`.
+
+### What PR-4 established
+
+- **Functional-color exile is COMPLETE.** `grep -rn "success-\|warn-\|danger-\|emerald-" apps/web/app/[slug]`
+  returns one comment line and nothing else. Keep it that way — new guest-tree code must use
+  `gild` / `veil` / `paper-deep` / `terracotta{,-600,-700}` / `ink`.
+- **Two colour traps, learned the hard way — respect these in PR-5 and Waves B–E:**
+  1. `--color-gild` and `--color-terracotta` resolve to the **same value on light surfaces**. Never
+     put a gild mark on a `bg-terracotta` fill (or vice versa) — it vanishes. Use `cream`/`ink`.
+  2. `gild` is **decor-only** and fails contrast as small body text. Below ~0.85rem use
+     `text-ink/70`. Gild is for heading-scale type, rules, dots, and numerals.
+- New CSS in the layered Pahina block: `.pahina-letterpress`, `.pahina-deckle`, `.pahina-perforation`.
+- The guest-personal layer is STARRED (`✦`), editorial chapters are NUMBERED (`№`) — `guest-hub-card`
+  and `your-seat-block` now both follow this.
 
 ### What PR-3 established (read before PR-4)
 
@@ -20,11 +43,10 @@
 
 ## Next actions, in order
 
-1. **PR-4**: reply card RSVP (wording per spec §7: "Joyfully accepts / Undecided, for now / Regretfully declines") + qr_card place card + gallery mosaic (`№ 06`) + RSVP chapter (`№ 07`) + full `success-*`/`warn-*` grep sweep under `app/[slug]/` (includes `arrival-greeting.tsx` `text-emerald-700`, `guest-hub-card.tsx` badges, and the `warn-*` blocks at `site-body.tsx` ~562/~1013/~1267) + **the GuestHubCard hub-plate restyle (resequenced here from PR-2)**.
-2. **PR-4b**: RSVPed keepsake fork (per-guest, inside rsvp phase — NO new LifecyclePhase) + unified-editor 5th preview tab (§4).
-3. **PR-5**: motion + Candlelight Pro toggle (migration!) + Cormorant drop.
-4. **Visual pass on the wave branch's Vercel preview** — still owed for PR-2 + PR-3 (see State above). 375px + desktop, palette-rich + palette-empty event, all four phases.
-5. Wave A done → OWNER previews the wave branch → ONE merge to main. Then Waves B–E (§ plan).
+1. **PR-4b**: RSVPed keepsake fork (per-guest, inside rsvp phase — NO new LifecyclePhase) + unified-editor 5th preview tab (§4).
+2. **PR-5**: motion + Candlelight Pro toggle (migration!) + Cormorant drop.
+3. **Visual pass on the wave branch's Vercel preview** — owed for PR-2 + PR-3 + PR-4 (see State above). 375px + desktop, palette-rich + palette-empty event, all four phases. **This is the biggest outstanding risk in the wave** — nothing visual has been eyeballed yet.
+4. Wave A done → OWNER previews the wave branch → ONE merge to main. Then Waves B–E (§ plan).
 
 ## Standing rulings that override older lines in the build doc
 
