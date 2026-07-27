@@ -595,3 +595,34 @@ sort by distance."*
 
 **Slice:** small, self-contained, no schema — fold into PR-B's follow-up or ship standalone as
 **PR-K**. Unit-test the comparator (null km sorts last, never first) + the anchor-absent hide rule.
+
+### 13.4 · Is "Best fit" already optimal? — audited; it is GOOD but has one real DEFECT
+`fitScore` (`lib/bench-sort.ts:31-37`) = `reach(1) + budgetFit(1) + dateFit(1)`, tie-broken
+rating → price. Honest, explainable, and a better default than most marketplaces. Three findings:
+
+**⚠ 1 · LIVE DEFECT — the badge fails OPEN, the sort fails CLOSED.** `withinRadius` is `null`
+whenever distance is unknown **or the radius is not finite/positive** (`page.tsx:451-455`), and the
+code deliberately hides the badge then ("never a false 'out of range'"). But `fitScore` scores
+`reachesVenue === true ? 1 : 0` — so that same `null` **loses a point**. Consequences, all silent:
+- **FREE tier has `serviceRadiusKm: 0`** (`vendor-tier-caps.ts:185`) ⇒ `hasFiniteRadius` false ⇒
+  `null` ⇒ **every free-tier vendor is ranked down on every bench, forever, no matter how close.**
+- Any vendor without geocoded coordinates is ranked down identically.
+The UI refuses to *say* they are far; the ranking *assumes* they are. **Fix: treat `null` reach as
+neutral, not a penalty** — either score `null` as the mid value or normalise the score by the
+number of KNOWN signals. Matches the badge's own fail-open rule. Hits hardest exactly the
+free-tier vendors a thin launch marketplace needs most.
+
+**⚠ 2 · The threshold is the VENDOR's tier, not the couple's need.** Radii: free 0 · verified 20 ·
+solo 20 · pro 50 · enterprise/custom 100. So a **Pro vendor 45 km away scores the reach point while
+a Verified vendor 25 km away does not** — the more distant vendor ranks higher because their tier
+is bigger. That is tier buying rank under a label that says "fit". Defensible as "they declared
+they travel that far", but it should be a *conscious* product position, not an accident. Owner call.
+
+**3 · Distance is binarised — 2 km and 19 km score identically.** Distance is the one axis where
+"how much" matters continuously (travel fees, crew meals, call times, day-of risk).
+**Cheapest high-value fix: use actual `distance_km` as a TIE-BREAK within equal fit scores**
+(before or after rating) — most of the benefit of a distance lens, no new chip, no new data.
+
+**Recommended order:** (1) fix the null-reach penalty [correctness] → (2) distance as fit
+tie-break [cheap, invisible, better results] → (3) the standalone "Nearest" lens + sort
+persistence [§13.1/§13.3, genuinely useful but the smallest win of the three].
