@@ -85,7 +85,23 @@ bookings it MUST bill the ANCHOR row (one-anchor-N-covered model, BUILD_SPEC §4
   covered rows (`covered_row_no_fee`) rather than freezing a free-5 ordinal on a ₱0 row —
   but the refusal is the backstop, not the design.
 - The fee call itself is unchanged: anchor's `total_cost_php` base, 5%→1% taper over
-  ₱100k, ₱50 floor, sourced-only, free-5 per event, two-key `BOOKING_FEE_RAIL_LIVE` gate.
+  ₱100k, ₱50 floor, sourced-only, free-5 per event.
+  > 🚨 **CORRECTED 2026-07-27 — "two-key `BOOKING_FEE_RAIL_LIVE` gate" was WRONG and it was
+  > my sentence. Verified on `origin/main`: the LOCK path is ONE key.**
+  > `collectBookingFeeAtLock` returns `disabled` on `!isBookingFeeEnabled()` **alone**
+  > (`lib/booking-fee-lock.server.ts:57`). `isBookingFeeEnforced()` — the genuine two-key
+  > function — is called ONLY by the dormant PayMongo send gate
+  > (`lib/booking-fee-charge.ts:99`). The two-key doc block lives in
+  > `booking-fee-gate.ts:29-38` and describes the SEND gate; the phrase "Two-key belt" also
+  > opens `collectBookingFeeAtLock`, where it is **not** true (its own next line admits the
+  > flag alone gates this path). That misleading opener is what produced this error.
+  > **CONSEQUENCE:** flipping the single env var `NEXT_PUBLIC_BOOKING_FEE_ENABLED` mints
+  > REAL money rows — an `orders` row (`status:'submitted'`, reference code, "confirmation
+  > within 24 hrs") and a `payments` row that lands in the `/admin/payments` queue
+  > (`booking-fee-lock.server.ts:129-160`) — for every subsequent lock of a sourced vendor.
+  > Nothing else stands between the flag and a vendor being billed.
+  > **⏭ FOLLOW-UP (Booking owns):** fix the "Two-key belt" comment at
+  > `booking-fee-lock.server.ts:52` so the next reader cannot repeat this.
 - Attribution is read AT acknowledge time via `booking_fee_attribution_for` (#3758) and
   **fails safe to import = FREE**. See §5.
 
