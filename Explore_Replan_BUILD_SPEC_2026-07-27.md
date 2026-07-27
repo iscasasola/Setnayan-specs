@@ -180,3 +180,15 @@ directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card vari
   found-record stamps on the FIRST open/click (per event). Attribution is judged **at import
   time** — `first_found_at` must PRECEDE the manual add; a later card-open never retroactively
   converts an already-free import (they demonstrably knew the vendor before finding them here).
+- **What IS and ISN'T recorded (owner: "this means we record their searches and views?"):**
+  Recorded: **ONE row per (event × vendor)** — the FIRST card-open or website click-through,
+  timestamp + source. That's the entire record: no search queries, no impressions, no view
+  counts, no repeat-view trail, no dwell time, no browsing history. It is the receipt that makes
+  the found rule enforceable, nothing more. NOT recorded: searches (never), rail impressions
+  (never), subsequent views (no-op — the row already exists). Backing out of the match modal
+  ("Cancel — don't add, don't notify") imports nothing and notifies no one; the found-record
+  itself stays private to the couple unless/until they import that vendor manually. Retention:
+  recommend auto-purge at event completion + the standard export/delete rights; DPO review
+  covers payload + retention. Alternative if the owner prefers ZERO view-recording: judge
+  "found" by thread-existence only (inquired = found) — weaker (card-viewed-but-never-inquired
+  imports leak free) but recording-free; owner's call at DPO review.
