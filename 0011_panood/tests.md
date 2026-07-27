@@ -60,7 +60,7 @@ Claims drawn from the spec that the implementation must satisfy. Each one needs 
 
 Every pricing path needs a test. Verify amount, currency, applied discount/comp, and that the order row matches the displayed price.
 
-| **Panood — Base** | 1 broadcaster + **3 cameras** + **3 hours of stream capacity** | **₱2,499** | 75,000 |
+| ~~**Panood — Base**~~ ⚠ RETIRED | ~~1 broadcaster + 3 cameras + 3 hours~~ | ~~₱2,499~~ | — |
 | **+1 Camera** | Adds one more camera slot to the broadcast | ₱999 | 30,000 | Multi-purchase up to **+2** (max 5 cameras total — 3 base + 2 extra) |
 | **+1 Hour** | Adds one more hour of stream capacity | ₱999 | 30,000 | Multi-purchase, **unlimited** — couples buy as many hours as they need |
 | Standard 3-cam, 3-hr stream | base | ₱2,499 |

@@ -45,7 +45,7 @@
 | Editorial PRO | ₱2,999 | Live (standalone editorial-authoring unlock) |
 | Kwento | ₱299 (whole event) | Live |
 | Live Background | ₱499 | In build |
-| Live Studio — Mobile / Desktop | **₱1,500/day · ₱2,500/day** (repriced 2026-07-20 · PR #3425 · migration `20270827190298`, was ₱1,299/₱2,499 — owner's 2026-07-17 sheet; ⏳ needs `supabase db push` to reach prod) | In build (single-cam livestream FREE · YouTube via couple's OBS · device-repackaged 2026-07-08, was ₱3,499/day multicam; see `Live_Studio_Repackaging_2026-07-08.md`) |
+| Live Studio (`LIVE_STUDIO`) | **₱2,999 / event-day** (owner-locked 2026-07-25 · unified Cast + Roam; migration `20271001110000`, `is_active=true`) | Live on `/pricing` (chip: In build). **Free = broadcast ONE camera; paid = broadcast all, ceiling 12 per event (`MAX_ROAM_ZONES`); no device split.** ⚠ Both per-day device SKUs `PANOOD_SYSTEM` ₱2,500 / `PANOOD_SYSTEM_MOBILE` ₱1,500 are RETIRED (`is_active=false`, migration `20271005180040`); zero orders ever. Canon: `Live_Studio_Unified_Spec_2026-07-25.md` § 1 |
 | Camera Bridge (DSLR · independent) | ₱500/day | Coming soon (flat, event-wide · independent `CAMERA_BRIDGE`, decoupled from Papic + Live Studio · owner 2026-07-08, rounded ₱499→₱500 2026-07-11; consolidates "Pro Camera Sync") |
 | Guest Stories | cap ₱2,000/day (₱20/cam·day) | Coming soon |
 | Live Photo Wall | ₱2,500/day | Coming soon |

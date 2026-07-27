@@ -1,7 +1,7 @@
 # Live Studio — Competitive Teardown & Pricing Decision (2026-07-20)
 
 > **Status: research + recommendation. Two items APPLIED to the corpus, three HELD for owner sign-off (§ 6).**
-> Newer sibling to [`Live_Studio_Repackaging_2026-07-08.md`](Live_Studio_Repackaging_2026-07-08.md), which remains the canonical packaging doc. This doc adds the market evidence under it and revises one price.
+> **⚠ HISTORICAL (2026-07-20). The market evidence below is still good; the PACKAGING and PRICES are not.** Live Studio unified 2026-07-25 into ONE SKU `LIVE_STUDIO` ₱2,999/event — no Mobile/Desktop tiers, no 3/8 camera cap. Current canon: [`Live_Studio_Unified_Spec_2026-07-25.md`](Live_Studio_Unified_Spec_2026-07-25.md) § 1 + `Pricing.md` § 00. The former sibling [`Live_Studio_Repackaging_2026-07-08.md`](Live_Studio_Repackaging_2026-07-08.md) is **superseded** and no longer canonical for anything.
 > Method: 5 parallel research agents, ~46 products checked against primary sources (pricing pages, developer docs, Meta/Google policy pages). Figures below are **[VERIFIED]** from a primary page unless marked **[UNVERIFIED]**.
 
 ## 1. The finding in one line

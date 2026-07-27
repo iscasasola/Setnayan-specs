@@ -1,6 +1,8 @@
 # Live Studio — Cast & Roam (two products, one umbrella) — 2026-07-23
 
-> **Status:** design + build plan. **Cast** = partly built (₱0 OBS path works, BYO channel). **Roam** = NOT built (design from the 2026-07-23 owner session). This doc is the canonical target for the build.
+> **🚫 SUPERSEDED 2026-07-25 — HISTORICAL, kept for lineage only. This doc is NOT the canonical target for the build.** Cast and Roam were merged into ONE SKU `LIVE_STUDIO` **₱2,999/event-day**; the ₱2,500 Cast and ₱3,500 Roam SKUs are both retired. Its '8 cameras' and 'Cast up to 8 → 1 / Roam ~2–4' figures are dead — the ceiling is `MAX_ROAM_ZONES` = 12 for everyone. Current canon: [`Live_Studio_Unified_Spec_2026-07-25.md`](Live_Studio_Unified_Spec_2026-07-25.md) § 1. ⚠ Its channel-model note is also stale twice over: the 2026-07-25 couple's-channel reversal was itself REVERSED 2026-07-26 back to the Setnayan-owned pool.
+>
+> _(Original 2026-07-23 status, preserved:)_ design + build plan. **Cast** = partly built (₱0 OBS path works, BYO channel). **Roam** = NOT built.
 >
 > **Origin:** owner design conversation 2026-07-23 — "can viewers pick which camera to watch, like Coachella's multi-place stream, with a switch to the directed feed?" → resolved into a second Live Studio product.
 >

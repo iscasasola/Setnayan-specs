@@ -1,4 +1,6 @@
-# ▶ Live Studio Roam — RESUME HERE (handoff 2026-07-23)
+# ▶ Live Studio Roam — RESUME HERE (handoff 2026-07-23) · 🚫 SUPERSEDED — DO NOT RESUME FROM THIS FILE
+
+> **🚫 HISTORICAL 2026-07-23. Roam no longer exists as a product.** It merged into ONE SKU `LIVE_STUDIO` ₱2,999/event-day on 2026-07-25; Cast ₱2,500 and Roam ₱3,500/day are both retired (`is_active=false`). ⚠ The inline channel-model supersession note below is ALSO stale: the 2026-07-25 couple's-channel lock it announces was REVERSED 2026-07-26 back to the **Setnayan-owned channel pool** (DECISION_LOG row 2665; PR #3720). Current canon: [`Live_Studio_Unified_Spec_2026-07-25.md`](Live_Studio_Unified_Spec_2026-07-25.md).
 
 > **Purpose:** everything a fresh session needs to continue Live Studio Roam without re-deriving. Canonical design: [`Live_Studio_Cast_and_Roam_2026-07-23.md`](Live_Studio_Cast_and_Roam_2026-07-23.md). Decisions: `DECISION_LOG.md` (2026-07-23 rows). Code repo: `~/Documents/Claude/Projects/setnayan-platform` (work off `origin/main`; local checkout runs stale).
 

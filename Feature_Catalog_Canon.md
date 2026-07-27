@@ -11,7 +11,7 @@
 > - **Commission = 0%**, every vendor booking, every tier — no 3%/5% Setnayan Pay cut.
 > - **Vendor subs:** Solo ₱999/28d (₱9,999/yr) · Pro ₱2,499/28d (₱24,999/yr) · Enterprise ₱4,999/28d (₱49,999/yr) · verification FREE · 100 free tokens on verify · flat ₱100/token packs. Old ₱6,000/₱10,000 + ₱2,499/₱5,499 + per-week vendor prices are RETIRED.
 > - **Couple website:** FREE 4-in-1 site (Save-the-Date · RSVP · Event · Editorial) + unlimited free RSVP + ONE **Couple Website PRO ₱1,999** upgrade. The separate RSVP / RSVP Pro / Event Website / Editorial Website à-la-carte SKUs are RETIRED.
-> - **Animated Monogram ₱1,999** · **Live Studio** Mobile **₱1,500**/day · Desktop **₱2,500**/day (repriced 2026-07-20 · PR #3425, was ₱1,299/₱2,499; single-cam livestream FREE; YouTube via couple's OBS; device-repackaged 2026-07-08) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
+> - **Animated Monogram ₱1,999** · **Live Studio** **₱2,999 / event-day** (ONE SKU `LIVE_STUDIO`, owner-locked 2026-07-25; free single-camera livestream stays FREE; no device split — both per-day Mobile/Desktop SKUs retired) · **Pakanta ₱2,499** (single SKU) · **Cinematic Reveal = ₱1,499** (STD Cinematic Openings) · **3D Plan ₱2,499** · **Thank You ₱2,499** · **Live Background ₱499** · **Kwento ₱299** · **Custom QR FREE**.
 > - **Couple tiers:** Free ₱0 · Setnayan AI (₱499 first 28d → ₱799/28d). **NO BUNDLES** — Essentials ₱12,999 + Complete ₱27,999 REMOVED 2026-06-29.
 
 ---
@@ -45,7 +45,7 @@
 | Guest Reels | — | Each guest gets a personal short reel | Pro (needs Papic) | ₱1,499 · $26 | $41 | ✅ |
 | Pabati | Video Wishes | Guests record short video greetings | Pro | ₱2,799 · $49 | $77 | ✅ |
 | Patiktok | Reel Booth | Booth for guest TikTok-style vertical reels | Pro | ₱1,499 · $26 | $41 | ➖ |
-| Live Studio (Panood) | Live Stream | Branded event-page livestream (YouTube, no viewer cap) + multicam control room | Pro | Mobile **₱1,500** · Desktop **₱2,500**/day (repriced 2026-07-20 · PR #3425) | $93/day | ➖ |
+| Live Studio (`LIVE_STUDIO`) | Live Stream | Branded event-page livestream (YouTube, no viewer cap) + multicam switching controller, up to 12 cameras | Pro | **₱2,999 / event-day** (unified 2026-07-25; free single-cam stays free) | $93/day | ➖ |
 | Pailaw | LED Backdrop | LED stage screen | **Basic** loop ₱2,499 / **Pro** live overlays ₱4,999 | ₱2,499–4,999 | $69 / $138 | ✅ |
 | Pakanta | Your Wedding Song | Owned custom song; becomes the soundtrack of every video | Pro | ₱5,499 · $99 | $156 | ✅ |
 | Cipher | Monogram Maker | Design your two-initial mark | **Free to design** | free | — | ✅ |

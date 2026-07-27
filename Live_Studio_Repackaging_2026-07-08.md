@@ -1,6 +1,8 @@
 # Live Studio (Panood) — Repackaging & ₱0-Cost Architecture (2026-07-08)
 
-> **Owner-locked this session (2026-07-08).** Current canonical model for Live Studio packaging, caps, device split, offline behaviour, and the save/stream architecture. **Supersedes** the single ₱3,499/day multicam tier and the "Camera Bridge included free" line, and **defers the server-mixer / LiveKit infra plan** in [`Panood_Multicam_Architecture_2026-06-26.md`](Panood_Multicam_Architecture_2026-06-26.md) out of V1. Internal SKU key `PANOOD_SYSTEM` unchanged; display name "Live Studio".
+> **🚫 SUPERSEDED 2026-07-25/26 — HISTORICAL, kept for lineage only. Do NOT quote its prices, tiers, or camera caps.** Live Studio is now ONE SKU `LIVE_STUDIO` **₱2,999/event-day**; there is **no Mobile/Desktop split** and **no 3/8 camera cap** (ceiling is `MAX_ROAM_ZONES` = 12 for everyone; the paywall is publication, not cameras). Current canon: [`Live_Studio_Unified_Spec_2026-07-25.md`](Live_Studio_Unified_Spec_2026-07-25.md) § 1 + `Pricing.md` § 00.
+>
+> _(Original 2026-07-08 header, preserved:)_ **Owner-locked this session (2026-07-08).** Canonical model **as of that date** for Live Studio packaging, caps, device split, offline behaviour, and the save/stream architecture. **Supersedes** the single ₱3,499/day multicam tier and the "Camera Bridge included free" line, and **defers the server-mixer / LiveKit infra plan** in [`Panood_Multicam_Architecture_2026-06-26.md`](Panood_Multicam_Architecture_2026-06-26.md) out of V1. Internal SKU key `PANOOD_SYSTEM` unchanged; display name "Live Studio".
 
 ## 1. Tiers (per day)
 

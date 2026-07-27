@@ -7,6 +7,8 @@
 - **Channel 1 = Main Stage** = the directed/controlled channel. It carries **the controller**, is part of the ₱2,999, and is run by the couple / a friend / a coordinator (not a paid crew). Can be activated / deactivated.
 - **Added cameras = channels.** Each joins via the **event QR (no install)** and serves double duty: (a) a source the controller can **one-tap cut onto the Main Stage** (the Broadcast/Cast behavior), and (b) an independently **guest-watchable** channel (the Roam guest-pick behavior).
 - **Free tier unchanged:** single-camera livestream stays free. Live Studio is the paid multi-cam unlock.
+- **⭐ CAMERA CEILING — 12 PER EVENT, FREE AND PAID ALIKE** (`MAX_ROAM_ZONES = 12`, `apps/web/lib/live-studio-roam-zones.ts:28`, enforced in `addRoamZone`; shown as "Camera channels · N of 12"). Adding a camera is free and ungated — **what the ₱2,999 buys is PUBLISHING more than one of them** (`FREE_PUBLISHED_CHANNEL_LIMIT = 1`), never the count. **There is no device limit:** phone vs laptop chooses a LAYOUT only (`lib/panood-console-layout.ts`). The retired 1-free / 8-desktop / 3-mobile ladder belonged to the two dead Cast SKUs and applies to nothing.
+- **Two numbers that are NOT camera limits:** `GUEST_PICK_MAX_VIEWERS_PER_CAMERA = 3` (guests peer-watching ONE side camera) and a pool channel's `concurrent_cap` (**DEFAULT 4** — YouTube broadcasts per Setnayan pool channel per event; inert while the pool is empty, live under the 2026-07-26 pool lock).
 
 ## 2. Controller — Switcher-parity on the SWITCHING half (keeps ₱0 economics)
 **Match Switcher:** multi-camera monitor, **one-tap cut** the Main Stage between cameras, add cameras via QR, mark the **default/featured view**, **guest-pick** toggle, stream to YouTube (720/1080p), live status.
