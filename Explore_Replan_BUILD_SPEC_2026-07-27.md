@@ -141,3 +141,12 @@ Live path `/dashboard/[eventId]/vendors` (BUDGET_BUILD ON in prod): single-scrol
    **locked + pending-handshake + build candidates** — everything in "Your team". Load a plan →
    the bench refilters to that team's window; clear candidates → the window reopens to
    locked-only. One team, one lens.
+
+## 9 · Add-manually (owner spotted it missing from the prototype — it's SHIPPED; keep it)
+Every rail keeps its **"✎ Add manually"** card beside Find/Add-another (and in the empty state) —
+the shipped `NewManualVendorModal` (two-step submit auto-creates the **claim-QR invite** the
+vendor scans to sync). Rules the demo + build must honor: a manual vendor is **off-platform** →
+no inquiry thread (no Check-inquiry button), **calendar unknown → NEVER greys out** (fail-open,
+"syncs when they claim"), and **skips the lock handshake** (no dashboard to accept from — the
+shipped payment-gated gate already exempts vendors without `marketplace_vendor_id`; they lock
+directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card variants).

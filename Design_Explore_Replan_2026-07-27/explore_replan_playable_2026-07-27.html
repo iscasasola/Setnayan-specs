@@ -154,6 +154,7 @@
   .addcard{min-width:110px;flex:0 0 auto;border:1.5px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--ink-soft);font-size:11px;font-weight:700;padding:10px;text-align:center}
   .addcard .plus{font-size:18px;color:var(--gold)}
   .addcard:hover{border-color:var(--gold)}
+  .addcard.manual{min-width:92px}
   .covered{border:1px solid var(--good);background:var(--goodbg);border-radius:12px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12.5px;margin:6px 2px}
   .covered b{color:var(--good)}
   .covered button{font-size:11px;font-weight:700;color:var(--ink-soft);text-decoration:underline}
@@ -619,14 +620,17 @@ function tileBody(c){
       <button onclick="reopen('${c.id}')">Reopen</button></div></div>`;
   }
   if(!vs.length){
-    return `<div class="tilebody"><div class="empty">No shortlist yet in this demo — in the app: a carousel of matches, <b>Find ${c.label} +</b> and <b>Add manually</b>.</div>
-      <div class="tile-note"><span></span>${rmv}</div></div>`;
+    return `<div class="tilebody"><div class="rail">
+      <button class="addcard" onclick="findMore()"><span class="plus">＋</span>Find ${c.label}</button>
+      <button class="addcard manual" onclick="openManual('${c.id}')"><span class="plus">✎</span>Add manually</button>
+      </div><div class="tile-note"><span>Already have someone? Add them manually — they get a claim QR to sync with you on Setnayan.</span>${rmv}</div></div>`;
   }
   const good=[], soft=[], hard=[];
   vs.forEach(v=>{ const cv=compat(v,c.id); if(cv.ok) good.push(v); else if(cv.soft) soft.push(v); else hard.push(v); });
   let h=`<div class="tilebody"><div class="tile-note"><span>${c.hardSingle?'This category holds exactly one — locking fills the slot.':'One is the floor — you can lock more than one.'}</span>${rmv}</div><div class="rail">`;
   good.forEach(v=>{ h+=card(c,v,true); });
   h+=`<button class="addcard" onclick="findMore()"><span class="plus">＋</span>${st.locked.length&&!c.hardSingle?'Add another '+c.label:'Find '+c.label}</button>`;
+  h+=`<button class="addcard manual" onclick="openManual('${c.id}')"><span class="plus">✎</span>Add manually</button>`;
   if(soft.length){
     h+=`<div class="divider-v"><span>Doesn't fit your build</span></div>`;
     soft.forEach(v=>{ h+=card(c,v,false); });
@@ -647,6 +651,7 @@ function card(c,v,ok){
   if(locked) badges+=`<span class="badge gold">🔒 Locked</span>`;
   else if(isPending) badges+=`<span class="badge soft">⏳ Lock in progress</span>`;
   else if(st.build.includes(v.id)) badges+=`<span class="badge gold">◕ In build</span>`;
+  if(!locked&&v.manual) badges+=`<span class="badge gold">✎ Yours</span>`;
   else if(!ok) badges+=`<span class="badge ${verdict.soft?'soft':'warn'}">${verdict.why}</span>`;
   else{ badges+=`<span class="badge ok">${S.anchors.date? 'Free on your date':'Fits your build'}</span>`;
         if(S.anchors.venue) badges+=`<span class="badge ok">Reaches you</span>`; }
@@ -657,16 +662,16 @@ function card(c,v,ok){
     ? `<button class="act dead">Doesn't fit the build</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`
     : `<button class="act dead">Can't book</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`;
   else if(inBuild) act=`<button class="act ghost" onclick="event.stopPropagation();unbuild('${c.id}','${v.id}')">◕ In your build · remove</button>
-    <button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>
+    ${v.manual?'':`<button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>`}
     <button class="act lock" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`;
   else act=`<button class="act dark" onclick="event.stopPropagation();addBuild('${c.id}','${v.id}')">＋ Add to build</button>
-    <button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>
+    ${v.manual?'':`<button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>`}
     <button class="act lockline" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`;
   return `<div class="vcard${locked?' locked':''}${!ok&&!locked?' dim':''}">
     <div class="ph">${locked?'<span class="corner">★ Chosen</span>':''}</div>
     <div class="nm">${v.name}</div><div class="ct">${v.city}</div>
     <div class="pr">${peso(v.price)}${v.per?' · '+v.per:''}</div>
-    <div class="freedates">Free: ${(v.dates||ALL_DATES).join(' · ')}</div>
+    <div class="freedates">${v.manual?'Calendar unknown — syncs when they claim':'Free: '+(v.dates||ALL_DATES).join(' · ')}</div>
     ${v.note?`<div style="font-size:9.5px;color:var(--gold-deep);margin-bottom:4px">${v.note}</div>`:''}
     ${badges}${act}</div>`;
 }
@@ -699,6 +704,16 @@ function tryLock(cid,vid){
 }
 function doLock(cid,vid){
   const c=cat(cid), st=S.cats[cid], v=vendorObj(cid,vid);
+  if(v.manual){
+    /* off-platform vendor: no dashboard, no handshake — the shipped Lock-Free
+       recordDeposit path. Locks directly; you settle with them yourselves. */
+    st.locked.push(vid); st.build=st.build.filter(x=>x!==vid);
+    if(c.hardSingle) st.done=true;
+    S.lastLock=null;
+    if(c.hardSingle) toast({tt:`🔒 ${v.name} locked — your own vendor`, ms:'Off-platform vendors skip the handshake (no Setnayan dashboard to accept from). Record their deposit in Budget; when they claim their QR the booking syncs.', plain:true});
+    else toast({tt:`🔒 ${v.name} locked — done with this service?`, ms:'Off-platform vendors skip the handshake. Record their deposit in Budget.', ask:true});
+    renderAll(); return;
+  }
   st.pending.push({vid,stage:1});
   st.build=st.build.filter(x=>x!==vid);
   S.lastLock={cid,vid};
@@ -750,7 +765,15 @@ function advance(){
 function toast(t){ S.toast=t; renderOverlay(); }
 function renderOverlay(){
   const o=document.getElementById('overlay'); let h='';
-  if(S.modal && S.modal.kind==='saveplan'){
+  if(S.modal && S.modal.kind==='manual'){
+    h+=`<div class="scrim" onclick="S.modal=null;renderOverlay()"><div class="modal" onclick="event.stopPropagation()">
+      <h3>Add your own ${cat(S.modal.cid).label}</h3>
+      <p>For a vendor you found outside Setnayan. They'll get a <b>claim QR</b> — once they scan it, your booking, schedule and chat sync with them here.</p>
+      <input id="mvname" class="planname" maxlength="60" placeholder="Vendor name — e.g. Tita Neneng's Kitchen" />
+      <input id="mvprice" class="planname" inputmode="numeric" placeholder="Agreed price (₱) — e.g. 45000" />
+      <div class="acts"><button class="m1" onclick="confirmManual()">✎ Add vendor</button>
+      <button class="m2" onclick="S.modal=null;renderOverlay()">Cancel</button></div></div></div>`;
+  } else if(S.modal && S.modal.kind==='saveplan'){
     h+=`<div class="scrim" onclick="S.modal=null;renderOverlay()"><div class="modal" onclick="event.stopPropagation()">
       <h3>Name this plan</h3><p>Snapshot your current candidates as a named plan you can load back or compare side by side.</p>
       <input id="plannameinput" class="planname" maxlength="60" placeholder="e.g. Garden Classic · Big Feast · Plan B" />
@@ -835,6 +858,19 @@ function confirmSavePlan(){
   S.plans.push({name:name.slice(0,60),build,total:lockedTotal()+buildTotal()});
   renderAll();
   toast({tt:`Saved as “${name.slice(0,60)}”`, ms:'Your candidates are snapshotted under that name. Swap candidates, save another, compare side by side — locked picks stay pinned in every plan.', plain:true});
+}
+function openManual(cid){ S.modal={kind:'manual',cid}; renderOverlay(); }
+function confirmManual(){
+  const cid=S.modal.cid; S.modal=null;
+  const nameEl=document.getElementById('mvname'), priceEl=document.getElementById('mvprice');
+  const name=(nameEl&&nameEl.value.trim())||'My vendor';
+  const price=parseInt(priceEl&&priceEl.value.replace(/[^0-9]/g,''),10)||0;
+  if(!VENDORS[cid]) VENDORS[cid]=[];
+  const id='mv'+Math.floor(price+VENDORS[cid].length+1)+cid.length;
+  VENDORS[cid].push({id,name:name.slice(0,60),city:'Off-platform',price,manual:true});
+  S.cats[cid].inPlan=true; S.openTile=cid;
+  renderAll();
+  toast({tt:`${name.slice(0,60)} added ✎`, ms:'They appear in this category as YOUR vendor. In the app a claim QR is generated — until they scan it, their calendar is unknown, so they never grey out (fail-open).', plain:true});
 }
 function loadPlan(i){
   const plan=S.plans[i]; if(!plan) return;
