@@ -267,3 +267,181 @@ with an (i) to hide the other information"). Rules for the build:
 3. Do not flip `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED` while the Booking session's publish-gate
    blockers stand (package editor discards `res.problems`; publish/activate never re-runs the
    gate) — ours is a separate flag but the surfaces meet.
+## 12 · Integration seams (Booking × Explore) — code-verified 2026-07-27
+
+> Every claim below was re-read against `origin/main` on 2026-07-27. Where the Integration Contract (`Integration_Contract_Booking_x_Explore_2026-07-27.md`) is wrong about shipped code, the ⚠ line says so — **fix the contract in the same commit as the slice, and log the DECISION_LOG row first** (contract §6/§7 self-rule).
+>
+> **⚠ Branch from `origin/main` @ `2ce0f7cb2` (#3794).** The local checkout at `/Users/icecasasola/Documents/Claude/Projects/setnayan-platform` is on `claude/retire-pilot-mode-dead-pricing` @ `1a12bab00` and is stale on **every** file §12.2 touches.
+
+### Fail-safe invariants — verbatim, non-negotiable, all four seams
+
+1. **Any resolution error or unknown state bills NOTHING** (fail-safe to import / free). A vendor must never be charged by a bug.
+2. **Covered rows carry no money, no fee, no request state.** The RPC refusal `covered_row_no_fee` is the **backstop, not the design** — resolve the anchor before calling.
+3. **The button contract (what it's called, when it renders, what it opens) never changes with Booking's flag — only the sheet's content does.**
+4. **A blank never blocks — auto-name it** (§7a). Nothing in this wave may refuse a save on empty text.
+
+---
+
+### 12.1 · Inquiry-button seam — **OWNER: slice D (Explore)**
+
+⚠ **Contract §2 says** the stateful Inquire button is "resolved by the shipped `InquiryComposer` existing-thread guard — that guard is the SINGLE source of truth." **Code says** `apps/web/app/v/[slug]/_components/inquiry-composer.tsx` contains **no guard at all** — it is a pure prop consumer (`existingThreadId`/`existingThreadHref`, :126/:131, branch at :546). The real guard lives in the server component at `apps/web/app/v/[slug]/page.tsx:1108-1123` and is scoped to `coupleEventId = events[0]` (:1106) — the couple's **primary** event, which the event-scoped bench cannot reuse as-is. There are four divergent "does a thread exist" implementations in the repo today.
+
+⚠ **Contract §2 line 28 ("Manual-added vendors with no thread keep 'Inquire' even on the bench") is WRONG** — `contactShortlistVendor` returns `{status:'not_marketplace'}` for a null `marketplace_vendor_id` (`_actions/contact-shortlist-vendor.ts:61-64`) and the client renders the dead end "This vendor can't be messaged here." (`_components/contact-shortlist-vendor-button.tsx:44-46`). Delete that line.
+
+**Build it exactly like this.**
+
+1. **Do NOT mount `InquiryComposer` on a bench card.** It needs `vendorProfileId` + `initialServiceId` + `linked` + `alsoOptions` + `requirementsFields` + `savedRequirements` + `aiActive` + `inquiryPax` — none of which the bench loads. Contract §1 also forbids a second composer.
+2. **Reuse the shipped primitive:** `ContactShortlistVendorButton` — `apps/web/app/dashboard/[eventId]/vendors/_components/contact-shortlist-vendor-button.tsx:20-74`, props `{ eventId: string; vendorId: string }`. `vendorId` **is** `ShortlistVendor.vendorId` (= `event_vendors.vendor_id`). Server: `contactShortlistVendor({eventId, vendorId})` (`_actions/contact-shortlist-vendor.ts:33-104`) → `startServiceInquiry(..., inquirySource:'shortlist')`. Result union: `'ok'{threadId,eventId,isExisting} | 'not_signed_in' | 'not_secured' | 'no_event' | 'not_marketplace' | 'error'`. It is currently rendered from exactly one place — the legacy kill-switch surface `plan-budget-accordion.tsx:1717` — so slice D is a **port**, not new code.
+3. **One column, zero new queries.** Extend the existing batched select at `apps/web/app/dashboard/[eventId]/vendors/page.tsx:304` to `'thread_id, vendor_profile_id, inquiry_status, created_at'` and build `threadIdByProfile` in the same loop as `inquiryByProfile` (:339-352). **No per-card `.maybeSingle()` probe** — a rail holds dozens of cards.
+4. **Thread it through the pipe that already exists:** add `thread_id?: string | null` to `VendorEnrichment` (`apps/web/lib/vendors-plan-budget.ts:244-276`) → populate at `page.tsx:464-481` beside the existing `inquiry_status` (:479) → read as `ext` in `buildShortlistFolders` (`apps/web/lib/shortlist-taxonomy.ts:313`) → project onto `ShortlistVendor` (:152-191 / :335-366):
+   ```ts
+   marketplaceVendorId: string | null;   // = v.marketplace_vendor_id ?? null  (wedding-plan-groups.ts:956, set at page.tsx:522)
+   threadId: string | null;              // = ext?.thread_id ?? null
+   inquiryStatus: 'pending' | 'accepted' | 'declined' | null;
+   ```
+5. **THE canonical predicate** — export from `lib/shortlist-taxonomy.ts`, and **refactor `/v/[slug]/page.tsx:1120` to call it** so the two surfaces are provably identical:
+   ```ts
+   export function hasLiveInquiry(v: Pick<ShortlistVendor,'threadId'|'inquiryStatus'>): boolean {
+     return v.threadId != null && v.inquiryStatus !== 'declined';
+   }
+   ```
+   ⚠ The bench's existing map at `page.tsx:302-306` does **not** exclude `declined`; `/v/[slug]` does. Ship the predicate or the same vendor reads "💬 Check inquiry" on the bench and "Inquire" on their profile.
+6. **Card render rule** (`shortlist-categories.tsx:259-305`, today a bare `<InspectorTrigger inspectId={\`v:${v.vendorId}\`} href={v.href}>` at :260):
+   - `marketplaceVendorId != null && !hasLiveInquiry(v)` → **"Inquire"** → `<ContactShortlistVendorButton eventId vendorId={v.vendorId} />`
+   - `marketplaceVendorId != null && hasLiveInquiry(v)` → **"💬 Check inquiry"** → `<Link href={\`/dashboard/${eventId}/messages/${v.threadId}\`} prefetch={false}>`. No server call, no transition. If `threadId` is null while `inquiryStatus` is set, **fall back to "Inquire"** — never link to the bare `/messages` list.
+   - `marketplaceVendorId == null` → **no inquiry button.** Fall through to `v.href` (the workspace, where the couple's own `contact_email`/`contact_phone` already render — `workspace/page.tsx:1018-1024`).
+   - **Gate on `marketplaceVendorId != null`, never on a manual/source heuristic** — `NewManualVendorModal`'s LINKED mode writes a real `marketplace_vendor_id` (`new-manual-vendor-modal.tsx:385-395`), so a linked manual add IS bookable.
+7. **Lock leg on the same card:** resolve `groupId = planGroupForCategory(categoryForTile(tile))` (`wedding-plan-groups.ts:712-719` + `shortlist-taxonomy.ts:147`). It returns `null` for unbucketable categories — **hide Lock, never pass null** into `AccordionLockButton` (`accordion-lock.tsx:135-151`) or `setBuildPick({eventId, planGroupId, vendorId})` (`build-pick-actions.ts:28-32`). That is the #3466 class of bug.
+8. **Flag:** `apps/web/lib/explore-replan-flag.ts` + `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED` **do not exist** — Explore creates them, mirroring `lib/payment-gated-lock.ts`. Flag OFF ⇒ the card renders byte-identically to today.
+9. **Do not touch** `inquiry-composer.tsx` or `inquiry-actions.ts` (Booking owns them) beyond the one-line predicate refactor in step 5 — ping Booking first.
+10. **Test:** unit test asserting `declined` ⇒ false, `pending`/`accepted` ⇒ true. Manual pass on `testnayan1..5@test.com` / `12345` — **never the owner account** (internal grants every SKU). Verify degradation: Explore-flag ON + Booking-flag OFF ⇒ Inquire lands on the thread exactly as `plan-budget-accordion.tsx:1717` does today.
+
+**Booking-side promises this relies on:** `startServiceInquiry` keeps its upsert `onConflict:'event_id,vendor_profile_id'` (`inquiry-actions.ts:276` — the real dedupe, backed by `UNIQUE(event_id, vendor_profile_id)` on `chat_threads`, migration `20260513130000:58`); the composer's existing-thread branch stays prop-driven; any change to declined/archived semantics updates `hasLiveInquiry` in ONE place plus a ping.
+
+---
+
+### 12.2 · Lock / fee / pool seam — **OWNER: PR-I (Explore)** — the one real hazard
+
+⚠ **Contract §4 says** the fee call sits behind a "two-key `BOOKING_FEE_RAIL_LIVE` gate." **Code says** `collectBookingFeeAtLock` gates on `isBookingFeeEnabled()` **alone** — `apps/web/lib/booking-fee-lock.server.ts:55-57`, with the comment "the manual QR rail is always live, so — unlike the PayMongo send-gate — it needs no RAIL_LIVE." `isBookingFeeEnforced()` gates the dormant proposal-send path only. **Do not add a second key.** One flag flip mints real vendor-payer `orders` + `payments` rows (`booking-fee-lock.server.ts:129-160`).
+
+⚠ **Contract §4 cites "BUILD_SPEC §4"** for the one-anchor-N-covered model. Correct citation: **`Vendor_Package_Credit_BUILD_SPEC_2026-07-26.md § 0`** (which is what the migration headers themselves cite).
+
+⚠ **Contract §4 says** "If an acknowledge path ever holds a covered row…" — it **does, today**. `fetchLockRequests` (`apps/web/lib/vendor-overview.ts:469-499`) queries with the **service-role** client, filtered only on `marketplace_vendor_id` + `deposit_recorded_at NOT NULL` + `deposit_acknowledged_at NULL` — **no `package_role` filter, no `archived_at` filter** — and `LockBody` posts that raw id into `vendorAcknowledgeDeposit` (`overview-sections.tsx:631`). `package_role` is read **nowhere** in `apps/web` outside `lockPackage` itself.
+
+**Facts to build against.**
+- Discriminator: `event_vendors.package_role TEXT` ∈ `NULL | 'anchor' | 'covered'` (`supabase/migrations/20271009160000_package_anchor_role_and_cascade_indexes.sql:49-60`). Anchor uniqueness: `event_vendors_one_anchor_per_booking_uniq` (:70-72) — makes a single-row anchor lookup safe. Role/price immutability is trigger-enforced (:179-237).
+- The no-money CHECK (`:64-67`) constrains **only** `total_cost_php` and `deposit_paid_php` — **not** `deposit_recorded_at` / `deposit_acknowledged_at`. Nothing at the DB layer stops a covered row entering the lock-request state.
+- `booking_fee_open_lock_charge`'s covered refusal: `20271009180000_booking_fee_refuses_covered_rows.sql:62-65` → `{'skipped':'covered_row_no_fee'}`. Asserted at `apps/web/tests/db/first-user-journey.db.test.ts:293-302`.
+- **Attribution freezes on first ledger insert** — the upsert's `ON CONFLICT (vendor_profile_id, event_id) DO UPDATE` never rewrites `attribution` (`20271009180000:83-89`). Ordering is load-bearing.
+- `event_vendor_packages` RLS is **couple-only** (`20260604110000_vendor_packages.sql:280-292`) — a vendor session cannot read it. All resolution runs on the service-role client.
+
+**Build it exactly like this.**
+
+1. **New helper**, in `apps/web/lib/booking-fee-lock.server.ts` beside the collector:
+   ```ts
+   /** Anchor for a covered row; the row itself for anchor/ordinary; NULL = BILL NOTHING. */
+   export async function resolveFeeAnchorRowId(admin: SupabaseClient, eventVendorId: string): Promise<string|null> {
+     const { data: row } = await admin.from('event_vendors')
+       .select('vendor_id, package_role, event_vendor_package_id').eq('vendor_id', eventVendorId).maybeSingle();
+     if (!row) return null;                                   // row vanished → bill nothing
+     if (row.package_role !== 'covered') return row.vendor_id; // NULL (ordinary) or 'anchor' → it IS the money row
+     if (!row.event_vendor_package_id) return null;            // orphaned (FK is ON DELETE SET NULL) → bill nothing
+     const { data: anchor } = await admin.from('event_vendors').select('vendor_id')
+       .eq('event_vendor_package_id', row.event_vendor_package_id)
+       .eq('package_role', 'anchor').is('archived_at', null).maybeSingle();
+     return anchor?.vendor_id ?? null;                         // anchor gone → bill nothing
+   }
+   ```
+   **Never** fall back to the covered row's own id. Skipping the fee is correct; billing the wrong row is not. Do **not** resolve via `event_vendor_packages.primary_event_vendor_id` — it is `ON DELETE SET NULL` (`20260604110000:241-242`) and couple-RLS'd. Second query is index-served by `event_vendors_package_idx` (:305-307).
+2. **Call site:** inside the existing `if (!error && env.status === 'ok')` branch of `vendorAcknowledgeDeposit` — `apps/web/app/vendor-dashboard/clients/[eventId]/actions.ts:122-150`. That is the single-winner edge (`acknowledge_vendor_deposit` returns `status:'already'` on re-call, `20270320429117:100-117`), so idempotency is free. Use `createAdminClient()` (already imported, :6) — the RPC is GRANTed to `service_role` only (`20271009180000:182-183`). Wrap in try/catch + `console.error`; the acknowledge already committed and must never roll back or throw before the `redirect` at :154.
+3. **⛔ HARD BLOCKER — ship a migration or the pool acquire is a guaranteed silent no-op.** `public.acquire_schedule_pools` opens with `IF p_event_id NOT IN (SELECT public.current_couple_event_ids()) THEN RETURN 'not_authorized'` (`20270403356945_vendor_calendar_day_states_6_state_taxonomy.sql:214-216`). The caller here is the **vendor**; service-role has no `auth.uid()` either — both resolve to the empty set, and both existing callers swallow `not_authorized` as degrade-open (`vendors/actions.ts:323-325`, `:3778-3780`). `CREATE OR REPLACE` the function in full, widening the refusal to `AND p_event_vendor_id NOT IN (SELECT public.current_vendor_event_vendor_ids()) AND NOT public.is_admin()`, re-issue `REVOKE ALL … FROM PUBLIC` + `GRANT EXECUTE … TO authenticated` (:318-319), then **verify the function body in prod** after dispatching `supabase-migrations.yml` (schema_migrations lies).
+4. **Do NOT delete the existing acquires** — `updateVendorStatus` (`vendors/actions.ts:277-327`, acquire at :301) and `recordDeposit` (`:3744-3782`, acquire at :3753). ⚠ The BUILD_SPEC §7 table's "pool-acquire fires at deposit_paid" is **incomplete**: `recordDeposit` already acquires one step *before* acknowledge.
+5. **Prevent the double-consume.** Occupancy counts every `pb.event_vendor_id <> p_event_vendor_id` (`20270403356945:288-292`), so an anchor-scoped acquire + an earlier covered-row acquire = **two live `vendor_schedule_pool_bookings` for one package** → the vendor's daily capacity is eaten twice and a real second couple gets "fully booked". Fix: **route ALL pool acquires through `resolveFeeAnchorRowId`** (change `recordDeposit:3753` and `updateVendorStatus:301` to acquire on the resolved anchor id). Re-acquiring the *same* row id is idempotent (`ON CONFLICT (pool_id, event_vendor_id) WHERE released_at IS NULL DO NOTHING`, :305-311).
+6. **Resolve pool ids from the ANCHOR row:** `resolvePoolIdsForService(admin, anchor.marketplace_vendor_id, anchor.service_id)` when `service_id` is set, else `resolvePoolIdsForCategory(admin, anchor.marketplace_vendor_id, anchor.category)` (`lib/schedule-pools.ts:142-151`). Package cascade rows carry a `category` and **no** `service_id`, so the category branch is the one that fires.
+7. **Close the `not_contracted` money leak.** `recordDeposit` has **no** status precondition (`vendors/actions.ts:3652-3807`), and the RPC skips any row not in `('contracted','deposit_paid','delivered','complete')` (`20271009180000:70-72`). A deposit recorded on a `considering` row ⇒ acknowledge ⇒ fee silently skipped ⇒ **that booking is free forever** (the ordinal is computed once and never recovers). Either add a status precondition to the acknowledge wrapper, or `console.error` loudly on `{status:'skipped', reason:'not_contracted'}`. Today's call site cannot hit this (`finalizeVendor:2184` fires one line after writing `contracted`).
+8. **Fix the row-picker or the slice is dead on the clients page.** `apps/web/app/vendor-dashboard/clients/[eventId]/page.tsx:455-460` uses `.maybeSingle()` on `.eq('event_id').eq('marketplace_vendor_id')` — a package is N>1 such rows ⇒ error ⇒ `eventVendorId` null (:528) ⇒ the acknowledge form at :2101-2103 **never renders**. Prefer `package_role IS NULL OR 'anchor'`, `.is('archived_at', null)`, `.limit(1)`. Same latent pattern at `clients/[eventId]/actions.ts:54-59`, `:500-506`, `:640-646` — fix the acknowledge path, spawn the rest.
+9. **Filter the lock-request feed:** add `.neq('package_role','covered')` (or `.or('package_role.is.null,package_role.eq.anchor')`) **and** `.is('archived_at', null)` to `fetchLockRequests` (`lib/vendor-overview.ts:473-481`).
+10. **Stop covered rows entering the state at source:** resolve to the anchor inside `recordDeposit` (read `:3706-3713`, write `:3788-3798`) and suppress `<DepositReservation>` on the couple workspace for covered rows (`workspace/page.tsx:1245-1252`). Consider extending the CHECK at `20271009160000:64-67` with `deposit_recorded_at IS NULL AND deposit_acknowledged_at IS NULL` in the same migration as step 3.
+11. **Tests** (extend `apps/web/tests/db/first-user-journey.db.test.ts`): (i) acknowledge on a covered row ⇒ fee lands on the **anchor**, `count(*)` of `booking_fee_charges` for the booking is still exactly **1**; (ii) acquire-then-acknowledge on one package ⇒ exactly **one** live `vendor_schedule_pool_bookings`; (iii) `acquire_schedule_pools` called as the booked vendor returns `'ok'`, not `not_authorized` — **this test fails on `origin/main` today and is the proof step 3 is required.**
+
+---
+
+### 12.3 · FOUND-YOU × fee attribution — **OWNER: PR-J (Explore)**
+
+⚠ **Contract §5 says** attribution "is read AT acknowledge time" and the resolver merely consumes found-state. **True as far as it goes — but there is NO fee call at claim time anywhere in the repo.** `applyClaimAutoLink` (`apps/web/lib/vendor-invite-actions.ts:281-458`) writes `marketplace_vendor_id` (:329-332, cascade :350-355) and never calls `collectBookingFeeAtLock`. A manual vendor's first lock returned `skipped:'not_verified_vendor'` (`20271009180000:67-69`), so **no ledger and no charge row exist**, and the only automatic re-entry — trigger `event_vendors_booking_fee_rederive` (`20270930120000:412-417`) — requires a pre-existing primary charge. **Without an explicit fee call at claim, PR-J ships and bills ₱0 forever.**
+
+**Facts.** Resolver: `public.booking_fee_attribution_for(p_vendor_profile_id UUID, p_event_id UUID) RETURNS TEXT` — `supabase/migrations/20271009140000_booking_fee_sourced_only_at_lock.sql:65-84`, `service_role` only (:265-269). Sourced surfaces: `booking_fee_is_sourced_surface` (:42-53). Fail-safe tail, verbatim: `) THEN 'sourced'` / `ELSE 'import'` / `END;` (:81-83), post-condition-asserted at :291-295. **Zero TypeScript call sites** — the only live path is `collectBookingFeeAtLock` → `.rpc('booking_fee_open_lock_charge')` (`booking-fee-lock.server.ts:59`), called from `vendors/actions.ts:2156`, `vendors/packages/actions.ts:396`, `lib/chat-lock-booking.server.ts:121`.
+
+**Build it exactly like this.**
+
+1. **Extend the SAME function, keep the SAME 2-arg signature.** A third parameter forces each caller to compute found-state — which is exactly the re-derivation §5 forbids.
+   ```sql
+   SELECT CASE
+     WHEN EXISTS (SELECT 1 FROM public.chat_threads t
+                  WHERE t.event_id = p_event_id AND t.vendor_profile_id = p_vendor_profile_id
+                    AND public.booking_fee_is_sourced_surface(t.inquiry_source))
+       THEN 'sourced'                                    -- UNCHANGED, still FIRST
+     WHEN EXISTS (SELECT 1 FROM public.vendor_found_records f
+                  WHERE f.event_id = p_event_id AND f.vendor_profile_id = p_vendor_profile_id
+                    AND f.adjudicated_attribution = 'sourced')
+       THEN 'sourced'                                    -- NEW, strict fallback
+     ELSE 'import'                                       -- UNCHANGED fail-safe
+   END;
+   ```
+   Both arms are `EXISTS(...)` (false on absence, missing row, NULL) and the `ELSE` is untouched, so **"any resolution error or unknown state bills NOTHING"** survives structurally, not by care. The found branch may only ever **widen** to sourced; it can never turn a sourced thread into an import.
+2. **The judgment lives in the WRITE path, not the resolver.** All §10 logic (`view_count > 0`, `first_found_at` precedes the manual add, claim-time identity match) runs at write time and is frozen into `adjudicated_attribution` + `adjudicated_at`. Never let the resolver evaluate live counts — a retention purge, a backfill, or a post-import card-open would flip a settled free import into a billable one at the next lock.
+3. **New table PR-J owns**, RLS at `CREATE TABLE`, `REVOKE ALL … FROM PUBLIC, anon, authenticated` (copy `20271009140000:262-269`), **no** INSERT/UPDATE policy for `authenticated` (copy `20270323312048:86-90`), writes service-role only. A forgeable found-record is a forgeable **invoice**.
+   `public.vendor_found_records(found_id UUID PK, event_id UUID NOT NULL REFERENCES events, vendor_profile_id UUID NOT NULL REFERENCES vendor_profiles, view_count INT NOT NULL DEFAULT 0, first_found_at TIMESTAMPTZ NOT NULL, last_viewed_at TIMESTAMPTZ, found_sources TEXT[] CHECK (found_sources <@ ARRAY['card_open','website_click']), adjudicated_attribution TEXT CHECK (adjudicated_attribution IN ('sourced')), adjudicated_at TIMESTAMPTZ, frozen_at TIMESTAMPTZ, UNIQUE(event_id, vendor_profile_id))`
+4. **Claim-sync order is load-bearing** — in `applyClaimAutoLink` (`vendor-invite-actions.ts:281`), between the id write (:329-355) and the thread upsert (:423-431): **(1)** link → **(2)** adjudicate the found-record for (`parent.event_id`, `args.claimedVendorProfileId`) → **(3)** *then* `collectBookingFeeAtLock`. Reversing (2) and (3) freezes `import` permanently (`20271009180000:83-89`, UNIQUE per (vendor,event) at `20270916909942:56`). No found-record ⇒ write nothing ⇒ second arm false ⇒ import ⇒ **free**, with zero new code.
+5. **Add the missing fee call at claim** (step 4.3). Gate on `event_vendors.marketplace_vendor_id IS NOT NULL` and on the row not being `package_role='covered'`.
+6. **⛔ Do NOT use `vendor_profile_views` as the resolver's input.** It exists (`20270323312048_vendor_profile_views_funnel.sql:34-55`, written by `lib/record-vendor-view.ts:45-107` from `/v/[slug]` at `page.tsx:1512-1534`) but its `event_id` is `events[0]` — the user's **first** event, not the event in context (:1106, :1526). Write found-records from the Explore route's own `[eventId]` segment, and **refuse to write when no unambiguous event is in scope.** Ship a DB test: a found-record on event A must never make event B `sourced`.
+7. **Suppress self-inflicted records:** skip when the viewer owns the vendor (`current_vendor_profile_ids()`) or the event is internal — precedents at `lib/inquiry-attribution.ts` ("guard 1") and the demo-vendor skip at `v/[slug]/page.tsx:1512`.
+8. **Own flag, default off, independent of `NEXT_PUBLIC_BOOKING_FEE_ENABLED`** — so found-records can be written and verdicts observed before a single peso can move.
+9. **Do not touch the ledger upsert's ON CONFLICT** to "refresh" attribution. Re-adjudication belongs in the dispute ladder, acting on the **ledger** after the fact (§5).
+10. **Tests** beside `apps/web/tests/db/booking-fee-lock.db.test.ts:305-347`: (a) `first_found_at` at/after `event_vendors.created_at` ⇒ NOT sourced; (b) found-record on a different event ⇒ no bill; (c) table empty ⇒ still `import`; (d) a couple-forged INSERT is denied to `authenticated`.
+11. **⚠ Known hole to design around:** `applyClaimAutoLink` upserts a `chat_threads` row with **no** `inquiry_source` (:423-431), and `startServiceInquiry` only stamps `if (!isExisting)` (`inquiry-actions.ts:302`). A couple who claims a manual vendor and *later* discovers them via Explore stays `import` forever. It fails **safe** (under-bills) — do not "fix" it by loosening the stamp guard; just never assume thread-existence implies un-stamped.
+12. **Correct BUILD_SPEC §10's privacy paragraph before DPO review** — it claims "no per-view event log", but `vendor_profile_views` logs one row per `/v/[slug]` view today.
+
+---
+
+### 12.4 · Publish-integrity / contact-detector seam — **OWNER: slice C (and D / F / PR-J: explicit no-op)**
+
+⚠ **The pointer "§4 line about no-blanks" is WRONG** — the rule is **§7** (lines 89-95, amended by **§7a** and **§7b**); §4 is the lock/fee seam and says nothing about text.
+⚠ **§7's original line "Booking enforces it in the service/package save actions" describes code that does not exist.** `apps/web/app/vendor-dashboard/services/actions.ts` has only length/blank-row validation (`:169`, `:205`, `:215`, `:249`) — no `evaluateMessage` import anywhere under `vendor-dashboard/services/`. It is a **to-BUILD obligation on Booking**, not prod. Reword to future tense.
+⚠ **§7b already retires the raw-detector rule** — this audit independently confirms it: `containsPhone` (`lib/chat-contact-filter.ts:106-132`) blocks exactly what the manual-add form's **required** `contact_number` field is for (`new-manual-vendor-modal.tsx:509-520`).
+
+**Verdict for this wave: the Explore slices carry ZERO detector obligation.** Every new write is enum-valued or couple-private:
+
+| Slice | New text? | Verdict |
+|---|---|---|
+| **C** — plan chips / "Not needed? Remove" | none — `tile` from the closed `WeddingTile` union (`lib/taxonomy.ts:143`), `decision` a CHECK enum (`20270110320013:5`) | detector **does not apply** |
+| **F** — plan names | `budget_builds.title`, couple-authored and **couple-private on all four verbs** (`20260929000000_budget_builds_rls_couple_only.sql:17-54`); no vendor/export/API reader | detector **does not apply** — gating it would false-block the couple's own notes |
+| **D** — manual-vendor name | SHIPPED, couple-authored, not new (`new-manual-vendor-modal.tsx:454-471` → `vendors/actions.ts:2520` → `event_vendors.vendor_name:2759`) | seam wording ("new **vendor-authored** field") **does not bind** |
+| **J** — found-you payload | Setnayan-authored template + `couple_display_name` (already on 4 vendor surfaces) + event type + date | detector **does not apply** |
+
+**Instructions.**
+
+1. **Do NOT add any `evaluateMessage()` call in PR-C, PR-D, PR-F or PR-J.**
+2. **PR-C:** keep the chips driven by the closed `WeddingTile` union — **never** add an "Other / type your own category" free-text input. That single addition is the first thing in this wave that could trip the seam.
+3. **PR-F:** leave plan names at `normalizeBuildTitle()` + `MAX_BUILD_TITLE_LEN = 60` (`lib/named-builds.ts:14/:36-42`). Per §7a, a blank **auto-names** (`Item N` / `Choice N` / …) shown as the placeholder before saving — it never refuses.
+4. **PR-D:** reuse `NewManualVendorModal` untouched. Do not gate its fields — `contact_number` and `contact_person` are required by design.
+5. **PR-J:** keep the payload to §10's fixed set. No free-text note, couple message, or vendor-composed field in the alert or the dispute record.
+6. **If any Explore field ever DOES need the gate**, call it through a **profile** (§7b), never raw, and add the profile beside `card` in **one** module — never a second detector. Precedent for unconditional wiring (published/served text): `lib/vendor-voice-profile.ts:106`. Precedent for flag-gated wiring (human chat): `lib/chat-send.ts:236-269`.
+7. **Hygiene, in PR-A/PR-C's path anyway:** `supabase/migrations/20270110320013_event_category_decisions.sql` shipped with **no** `REVOKE ALL … FROM anon, authenticated` — it relies on RLS alone. Add `REVOKE ALL ON public.event_category_decisions FROM anon, authenticated;` when altering the table (§6, default-ACL trap).
+8. **Tripwire (not a defect today):** couple-typed `business_name` already reaches a stranger vendor's screen with only `maxLength=128` (`vendor/claim/[token]/page.tsx:124`, `:331`). If a future PR adds a couple-authored **note** to the manual-add card, or surfaces plan names in a proposal/inquiry/export, that PR owns wiring the right profile and logs a DECISION_LOG row first.
+
+---
+
+### 12.5 · Cross-session obligations (Explore → Booking)
+
+| When | Ping / notify Booking about |
+|---|---|
+| **Before slice D opens a branch** | Card/inquiry entry point (contract §6 ping protocol) — and specifically the one-line refactor of `apps/web/app/v/[slug]/page.tsx:1120` to call the exported `hasLiveInquiry`. Booking owns that file. |
+| **With slice D's PR** | The contract corrections in §12.1: §2's "InquiryComposer guard is the single source of truth" → `hasLiveInquiry` in `lib/shortlist-taxonomy.ts`; delete §2 line 28 (manual vendors do **not** keep "Inquire"). Booking must not re-add either claim. |
+| **With slice D's PR** | Confirmation that the button contract is flag-stable: Explore-ON + Booking-OFF opens today's shipped composer; Booking-ON opens the extended sheet; name/visibility/target unchanged. Booking must not change the meaning of `existingThreadId` / `existingThreadHref` when its flag lands. |
+| **Before PR-I merges** | The §4 corrections: single-key `NEXT_PUBLIC_BOOKING_FEE_ENABLED` (not two-key), citation → `Vendor_Package_Credit_BUILD_SPEC_2026-07-26.md § 0`, and the **new fourth bullet** recording the `acquire_schedule_pools` couple-only auth blocker. Both sessions need that fact. |
+| **Before PR-I merges** | PR-I touches `lockPackage`-adjacent money machinery only at the **call site**; it also ships a `CREATE OR REPLACE` of `acquire_schedule_pools` and (optionally) an extended `event_vendors_covered_rows_carry_no_money` CHECK. Booking must know a migration lands on shared package tables — whoever merges second **rebases**, never hand-picks a stale-tree merge (#3668). |
+| **After PR-H lands** | Booking adopts request-state wording in `LockPackageModal` / `chat-lock` (contract §1). |
+| **Before PR-J's resolver migration** | Booking's fee attribution **consumes** found-state and never re-derives it — the resolver keeps its 2-arg signature and its `ELSE 'import'` tail. Notify that a second `EXISTS` arm lands and that PR-J adds the previously-missing fee call inside `applyClaimAutoLink`. |
+| **Whenever "existing thread" semantics change** (declined, archived, re-open) | Either session updates `hasLiveInquiry` in ONE place and pings the other the same day. |
+| **Explore does NOT ping about** | `vendor-dashboard/services/actions.ts` — Explore has no branch there this wave (§12.4). Booking pings Explore before touching it. |

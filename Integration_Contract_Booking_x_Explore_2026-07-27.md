@@ -143,3 +143,51 @@ reads `res.problems` → "see the notes below" with no notes, no field named).
 payment-schedule labels. Publish/activate paths also never re-run any gate, so rows authored
 while a flag was off go live unchecked. Whoever touches one of these surfaces first owns
 wiring it to the right profile.
+
+
+---
+
+## 8 · ⚠ CODE-VERIFICATION CORRECTIONS (Explore session, 2026-07-27)
+
+A 4-agent code verification (workflow `wf_1e60c4d3-9e5`, every finding file:line-backed against
+`origin/main`) found **§2 and §3 assert a guard that does not exist**, and surfaced three further
+hazards. Full build-level detail: `Explore_Replan_BUILD_SPEC_2026-07-27.md` §12.
+
+### 8a · §2/§3 inquiry guard — **WRONG as written**
+- `inquiry-composer.tsx` contains **no existing-thread guard**; it is a pure prop consumer
+  (`existingThreadId`/`existingThreadHref`, :126/:131, branch :546).
+- The real guard is in the server component `app/v/[slug]/page.tsx:1108-1123`, scoped to
+  `coupleEventId = events[0]` — the couple's **primary** event. The event-scoped bench cannot
+  reuse it as-is.
+- There are **four divergent "does a thread exist" implementations** in the repo; the actual
+  source of truth is the DB constraint `UNIQUE(event_id, vendor_profile_id)` on `chat_threads`
+  (`20260513130000:58`) + `inquiry_status NOT NULL DEFAULT 'pending'`.
+- **Correct reuse target for a dashboard card is NOT the composer** but the shipped
+  `contactShortlistVendor` / `ContactShortlistVendorButton` (`_actions/contact-shortlist-vendor.ts:33`,
+  `_components/contact-shortlist-vendor-button.tsx:20`) — currently rendered from exactly one
+  place (the legacy accordion). Slice D is a PORT, not new code. Contract intent (one composer,
+  no fork) is preserved; the named mechanism was wrong.
+- **§2's line "manual-added vendors with no thread keep 'Inquire'" is WRONG** — the shipped
+  action returns `not_marketplace` and the button dead-ends. Also: `NewManualVendorModal` has a
+  LINKED mode that DOES write `marketplace_vendor_id`, so "manual" is not a stable class —
+  gate on `marketplaceVendorId != null`, never on a manual/source heuristic.
+
+### 8b · §4 pool-acquire — a silent 100% failure if built as written
+`acquireSchedulePools` begins `IF p_event_id NOT IN (SELECT current_couple_event_ids()) THEN
+RETURN 'not_authorized'` (`20270403356945:214-216`). A VENDOR session — and a service-role
+client (no `auth.uid()`) — both resolve to an empty set, and existing callers treat
+`not_authorized` as non-fatal. PR-I calling it from `vendorAcknowledgeDeposit` would therefore
+**never reserve the schedule, silently**. PR-I must acquire via a path that runs in the couple's
+authorization context or an explicitly-authorized RPC variant. Anchor-resolution-before-fee
+(§4) is otherwise CONFIRMED.
+
+### 8c · §5 found-you × fee — the trigger does not exist yet
+Nothing calls the fee at claim time (`applyClaimAutoLink`, `lib/vendor-invite-actions.ts:281-458`),
+and the re-derive trigger (`20270930120000:412-417`) requires a primary charge a manual vendor
+never got. PR-J must add the call site; extending the resolver alone would ship a feature that
+silently does nothing. Fail-safe-to-free invariant is unchanged and preserved.
+
+### 8d · §7b confirmed with a sharper example
+Over-applying the detector is not merely noisy — `NewManualVendorModal` has a **required contact
+number field**; routing it through `containsPhone()` would make the form permanently
+unsubmittable. §7b's profile rule stands, and this wave adds NO content gate (see BUILD_SPEC §11a).
