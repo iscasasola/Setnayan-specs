@@ -245,3 +245,25 @@ with an (i) to hide the other information"). Rules for the build:
    documented copy and the live copy can't silently diverge.
 5. Accessibility: each ⓘ is a real button (aria-label, focus ring); the panel is dismissible;
    state is not persisted (always starts closed — it's help, not a setting).
+
+## 11a · ⛔ Content-gate + blank-name rules (contract §7a/§7b — binding on ALL slices)
+1. **A blank name NEVER blocks a save — auto-name it** (owner: "saving builds blank will make
+   us autocreate a name for the build"). Applies to the couple's saved **plan/build** name
+   (slice F) and the **manual-vendor name** (slice D): reuse the shipped `autoBuildTitle`
+   (`lib/named-builds.ts`) / an equivalent group+position namer, show the auto-name as the
+   field PLACEHOLDER before save, and confirm after ("we named it {X} — tap to change").
+   No required-field errors, no disabled Save.
+2. **NEVER call the #3606 contact detector RAW on non-chat text.** Measured by the Booking
+   session's 27-agent review (7 findings confirmed by executing the shipped `evaluateMessage`):
+   the chat rules refuse honest text — a date range reads as a phone number, "Coverage
+   @Tagaytay" as an @handle, "Instagram teaser reel" as an app name, and "Message me on
+   Setnayan…" as off-platform solicitation. The detector must be called through a **PROFILE**
+   (`chat` = today's rules; `card` = Booking is specifying it) in ONE module — never a second
+   detector, never a fork.
+   - **This wave's verdict:** plan names + manual-vendor names are **couple-private text →
+     NO content gate** (trim + length cap only). The found-you notification payload is
+     system-authored → no gate, but it must NOT interpolate raw vendor/plan free-text.
+     Anything that later renders couple-authored text TO A VENDOR must wait for the profile.
+3. Do not flip `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED` while the Booking session's publish-gate
+   blockers stand (package editor discards `res.problems`; publish/activate never re-runs the
+   gate) — ours is a separate flag but the surfaces meet.
