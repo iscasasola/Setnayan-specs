@@ -733,3 +733,185 @@ implementations of "this card doesn't fit your event".
 `evaluateMessage(body, 'card')` (#3800 + #3802, merged; default `'chat'` unchanged). Never fork it,
 never add a profile member — ask Booking and it lands beside `'card'` in the one module. This wave
 still adds NO content gate (§11a).
+## 15 · Ranking lenses — code-verified 2026-07-27
+
+**RULE-0 result: there is exactly one scorer and it already ships — `apps/web/lib/compat-score.ts`. §15 adds NO second scorer and NO bespoke comparator. A "lens" is a NAMED WEIGHT VECTOR passed to `computeCompatScore`.** The live bench's `fitScore` (`lib/bench-sort.ts:31-37`, 3 binary flags → 4 possible scores) is DELETED by L0 below, not extended.
+
+### 15.0 · The mechanism (build this first, it is the whole section)
+
+```ts
+// lib/compat-score.ts — CHANGE THE SIGNATURE, NOT THE MATH
+export type CompatWeights = Record<
+  'refinement'|'budgetFit'|'distance'|'reviews'|'dateHeadroom'|'faithFit'|'trust'|'freshness', number
+>;
+export function computeCompatScore(input: CompatInputs, weights: CompatWeights = COMPAT_WEIGHTS)
+```
+- `COMPAT_WEIGHTS` (`compat-score.ts:31-53`) gains `freshness: 0` and is otherwise **byte-for-byte unchanged** — every existing caller (`category-search.ts:925-939`, `build-3state-actions.ts`, `build-3state-fallback-actions.ts`, `app/tour/vendors/page.tsx`) keeps its current output.
+- New input `freshnessRatio?: number | null` → `freshness` dim; `null` → `NEUTRAL` 0.6, same admit-unknown rule as every other dim (`:57`).
+- `assertSumsToOne(weights)` in a unit test for **every** vector in the registry. A vector that doesn't sum to 1 fails CI.
+- `lib/ranking-lenses.ts` (new) exports `LENSES: Record<LensKey, {label, weights, requires, hideWhen}>`. `bench-sort.ts` keeps only the two **plain sorts** (below); it stops computing any score.
+
+**Lenses vs plain sorts.** The five lenses are recommendations — same scorer, different weights, each card carries a reason pill. `Lowest price` and `Top rated` stay in the segmented control as **plain sorts**, visually separated, no % and no reason pill, because they are a user job ("just show me the cheapest"), not a recommendation. Do not model them as weight vectors — `priceFitScore` returns a flat 1.0 for every vendor within budget (`smart-sort.ts:148`) so a "cheapest" vector is arithmetically impossible.
+
+### 15.1 · The lens set
+
+| Lens (what the bride reads) | The job it does | Status |
+|---|---|---|
+| **Best matches** (default) | "Given everything you told us — style, budget, venue, date, faith — these fit you best." | ✅ BUILDABLE TODAY |
+| **Nearest to your venue** | "Least travel, least logistics cost, lowest day-of risk." | ✅ BUILDABLE TODAY (data already on the page) |
+| **Fits your budget** | "These will not blow the budget you set for this category." | ⚠ BUILDABLE, DATA-DARK (hide until priced supply exists) |
+| **New here** | "Recently joined Setnayan and matches your brief — worth a look before they book up." | ⚠ BUILDABLE with one owner decision (anchor column) |
+| **In demand right now** | "Others are competing for your date — decide soon." | ⛔ **BLOCKED. Do not ship.** See §15.3 |
+
+**Weight vectors** (each row sums to 1.000; `freshness` is 0 everywhere except **New here**):
+
+| Lens | refinement | budgetFit | distance | reviews | dateHeadroom | faithFit | trust | freshness |
+|---|---|---|---|---|---|---|---|---|
+| Best matches *(= `COMPAT_WEIGHTS`)* | 0.22 | 0.20 | 0.18 | 0.18 | 0.08 | 0.07 | 0.07 | 0.00 |
+| Nearest to your venue | 0.15 | 0.13 | **0.45** | 0.10 | 0.06 | 0.05 | 0.06 | 0.00 |
+| Fits your budget | 0.18 | **0.40** | 0.13 | 0.12 | 0.05 | 0.06 | 0.06 | 0.00 |
+| New here | 0.22 | 0.16 | 0.14 | **0.06** | 0.05 | 0.06 | 0.06 | **0.25** |
+| *In demand (spec only, blocked)* | 0.20 | 0.15 | 0.13 | 0.12 | 0.06 | 0.06 | 0.06 | 0.00 + **demandPressure 0.22** |
+
+Notes on the non-obvious numbers:
+- **Nearest ≠ a raw km sort.** `distanceSub` (`compat-score.ts:120-127`) is a continuous half-life decay, so 2 km and 19 km differ — the §13.4 binarisation defect disappears. Keep the km on the pill ("3.2 km from your venue").
+- **New here deliberately drops `reviews` to 0.06.** At 0.18 a new vendor's Bayesian-prior 0.6 is out-ranked by every proven rival and the lens returns the same order as Best matches. Lowering reviews *is* the lens.
+- **`travelRadiusKm` must stay `undefined` at every bench call site.** Passing the tier-derived `serviceRadiusKm` (free 0 / verified 20 / pro 50 / enterprise 100, `vendor-tier-caps.ts:184,219`) makes a Pro vendor 45 km away out-rank a Verified vendor 25 km away — tier buying rank inside a lens labelled "nearest". `category-search.ts:925-937` already omits it, so `DEFAULT_RADIUS_KM = 25` applies to everyone. **Match it. Tier-blind distance is the rule.**
+
+**`freshnessRatio` definition (the only new dimension, and its data is proven):**
+```
+verifiedNewAt = the vendor's verification approval timestamp
+ageDays       = days since verifiedNewAt
+freshnessRatio = verifiedNewAt == null ? null            // → NEUTRAL 0.6, never 0
+               : ageDays > 90        ? null              // → NEUTRAL, no penalty for being established
+               : 1 - (ageDays / 90)                      // 1.0 on day 0, decaying to 0 at day 90
+```
+Anchor on **verification, not row creation** — the owner ruling (DECISION_LOG.md:414, 2026-06-01; `Vendor_Match_Personalization_2026-06-01.md` §7b.2) says "first ~30 days / first ~N leads **after verification**". `vendor_profiles.created_at` is row-insert time and for admin-seeded profiles (`20260528000000_admin_owned_unclaimed_vendor_profiles.sql:57`) it is the *admin's* date, not the vendor's. **Check `vendor_verifications.approved_at` (`20260516010000_v1_sku_lock_vendor_verifications.sql:59`) for population first** — if it is populated, use it and add no column. If not, that is the owner decision in §15.7. Never fall back to `created_at` silently; fall back to `null`.
+
+### 15.2 · Lens visibility gate (hard rule — a lens that cannot discriminate must not appear)
+
+Precedent already in this spec: §13.2 hides "Nearest" when `events.venue_latitude` is NULL. Generalise it.
+
+```
+show(lens) := candidates.length >= 3
+           && candidates.filter(c => drivingInputOf(lens, c) != null).length >= 2
+```
+- `drivingInput`: Nearest → `distanceKm`; Fits your budget → `budgetFitRatio`; New here → `freshnessRatio`; Best matches → always shown (it is the default and degrades to a defensible order at N=0 inputs).
+- Hidden ≠ removed: render the chip **disabled with an honest reason** where one exists — *"Add your venue to sort by distance."*
+- **This is not theoretical.** Prod measured 2026-07-27: 1 `vendor_profiles` row total, unverified, `coming_soon`; 0 pass the `/explore` verified gate; 0 `vendor_services`, 0 `vendor_packages`, 0 `vendor_reviews`, 0 `vendor_activity_stats`; all 44 `event_vendors` picks have `marketplace_vendor_id IS NULL`. **Today only "Best matches" would show.** That is correct behaviour, not a bug — build for it.
+
+### 15.3 · "In demand right now" — BLOCKED, and why
+
+The signal that exists (`eyeingByVendorId`, `vendors/page.tsx:588-624`) is real data measuring the **wrong act**, and shipping it as a lens breaks two locks:
+
+1. **It counts saves, not inquiries.** `explore/actions.ts:198` (`saveVendorToPicks`) and `onboarding/wedding/actions.ts:634` both write `status='considering'` with zero contact. `DECISION_LOG.md:470` + `Schedule_Matrix_and_Date_Finder_2026-06-02.md:141`: *"Starts at the inquiry (Stage 2), NEVER at search (Stage 1) … counting it as competition = manufactured scarcity (a fineable dark pattern)."* The 05-31 spec the code follows (`Vendors_Plan_Budget_Tab_Spec_2026-05-31.md:126`) was superseded two days later.
+2. **No small-N floor.** `plan-budget-accordion.tsx:1622` renders at n=1. 06-02 §8.3: *"Don't show a '1'."* n=1 on a solo vendor + an exact date in a small municipality is functionally re-identifying.
+3. **There is no capacity read.** `vendor_schedule_pools.daily_booking_capacity` is real and authoritative (`20261126000000_schedule_pools.sql:74`), but `vendor_schedule_pool_bookings` has **no cross-couple SELECT policy** (`:212-231`) — "N slots left on your date" is not client-buildable. And soft holds never consume capacity (`lib/schedule-pools.ts:11-17`), so "slots left" could only ever mean deposit-paid bookings.
+
+**What would make it honest — all four, in order:**
+1. Re-source the count to inquiry-backed rows only. `unlock-category.ts:187` is the clean pattern (inserts `considering` **and** fires an auto-inquiry) — join on thread existence to discriminate.
+2. Min-N floor. Ship at n ≥ 3; the 2026-07-02 MI split (`Setnayan_AI_Market_Intelligence_2026-07-02.md` §2/§4) puts couple-aggregates at **min-N = 25 + DPO gate** — owner call, §15.7.
+3. A `SECURITY DEFINER` RPC returning `remaining = capacity − live bookings on (vendor, date)`, feeding a new `demandPressure` dim. Note the cold-start trap: `daily_booking_capacity` DEFAULT 1 makes every brand-new vendor read "1 slot left" on every open date — manufactured scarcity by construction. Suppress the signal entirely for vendors who have never set capacity.
+4. Privacy transparency (§15.4).
+
+**Meanwhile:** the couple already gets the honest per-card version — the `dateFit === 'booked'` badge ("Booked that day", `shortlist-categories.tsx:344-357`). Keep it. Do not promote it to a lens.
+
+**Two related artifacts to put in front of the owner, not to fix silently:** `app/_components/app-store/studio-card-demo.tsx:839` renders a **hardcoded** "3 also eyeing your date" on public marketing (the exact pattern removed at DECISION_LOG.md:494 and :556), and `app/vendors/_components/vendor-grow-sections.tsx:230` **sells** the nudge to vendors — *"we tell your client that schedule is in demand — so they move"* — while the signal underneath is a save-count.
+
+### 15.4 · Honesty guardrails (hard rules — CI-checkable where possible)
+
+**What each lens MAY claim on a card**
+| Lens | May say | Must NEVER say |
+|---|---|---|
+| Best matches | "Best fit for what you told us" | "Best vendors", "top-rated", "recommended by Setnayan" |
+| Nearest | "3.2 km from your venue" (a measured number) | "Reaches your venue" as a *ranking* claim — the radius is a tier, not a promise |
+| Fits your budget | "Fits your {category} budget" · "Over budget (est.)" | **"Best value", "cheapest", "most for your money"** — `priceFitScore` ties every in-budget vendor at 1.0; the data cannot rank value |
+| New here | "New on Setnayan" · "Matches your brief" | any implication of vetting, quality, or endorsement |
+| *In demand* | — | "Only N left", "booking fast", "almost gone", "lock it in soon" — none is backed by a capacity counter that exists |
+
+**Always-on rules**
+1. **`est.` qualifier is mandatory** wherever the price is a `starts at` rather than a quote. `ShortlistVendor.budgetEstimated` (`shortlist-taxonomy.ts:179-182`) already does this — reuse it, don't reinvent.
+2. **Paid placement disclosure on EVERY ranked surface.** Today it exists on exactly one (`category-search-overlay.tsx:453-496`) and is absent from the bench, from `plan-budget-accordion`, and from `/explore` — which is the surface that actually pins commercial `vendor_partnerships` (`sponsored_included`=4 / `sponsored_discounted`=3, above `quality_score`, on **every** sort mode, `explore/page.tsx:2440-2462`, self-described in-code as "organic signals"). Copy the Journal pattern verbatim: `journal-partner-credit.tsx:75` ("Sponsored" chip) + `:105` ("Placements marked 'Sponsored' are paid partnerships."). **No lens ships on `/explore` until that pin is disclosed.**
+3. **Money must not move the number while boosts are retired.** Pass `boosted: false` at every bench call site and assert `ad_rank = 0` at the read layer. `vendor_active_ads` (`20260516220000_vendor_ad_subscriptions.sql:123`) filters only on `cancelled_at`/`expires_at` and **never joins `service_catalog.is_active`** — the 5 boost SKUs were retired 2026-06-29 but the read path never learned, so a single inserted row re-arms a top-pin *and* a +1.05-point `%` bump (`compat-score.ts:146`) against a dead SKU. Add the `is_active` join in L0.
+4. **The existing disclosure string is false as written** — "Paid placement … **Not an AI recommendation**" while `boosted` feeds `trustSub`. Either drop `boosted` from the score (recommended — let it be a labelled pin only) or change the copy. Owner call, §15.7.
+5. **`firstlook_boost_weight` must be visible.** It is an admin dial 0–0.5 (`firstlook.ts:29-34`, live default **0.10**, not 0) that at its ceiling outweighs `refinement` + `budgetFit` combined, is absent from `explainCompatScore`, and writes no audit row. Surface it in the why-panel and log changes to `admin_audit_log`.
+
+**Privacy — showing one couple's interest to another.** The aggregation is done right (count only, deduped, admin client, RA 10173 comment at `vendors/page.tsx:590-593`) but the **transparency leg is missing**: `/privacy` says nothing about shortlists, and its OAuth sections (`privacy/page.tsx:753,:843,:976`) promise data is "never shared with vendors, other couples, or third parties" — which a reasonable reader takes as a blanket denial that the eyeing chip contradicts. Before any lens or chip derived from another couple's planning behaviour ships: (a) a plain-English `/privacy` line stating that saving or inquiring about a vendor contributes to an **aggregate, de-identified** interest count visible to other couples planning the same date; (b) an opt-out; (c) the min-N floor; (d) DPO sign-off per the 2026-07-02 couple-aggregate gate. Vendor-side aggregates (calendar blocks, pool remaining) need only min-N-over-vendors and are cleared to ship sooner.
+
+### 15.5 · Cold-start fairness
+
+**Rule A — admit-unknown, everywhere.** `null` contributes `NEUTRAL` 0.6, never 0. This is already true inside `computeCompatScore` and is exactly what `bench-sort.ts:33` (`reachesVenue === true ? 1 : 0`) and `:53` (`rating ?? 0`) violate. L0 deletes both. Net effect of L0 alone: free-tier vendors (`serviceRadiusKm: 0` ⇒ `withinRadius` permanently `null`) stop losing a point on every bench forever, and unrated vendors stop sinking.
+
+**Rule B — reserved fresh-chance slot.** Owner-locked mechanism (c), DECISION_LOG.md:414. **One** slot per rail, per lens, holds a rotating fitting newcomer who did not make the merit cut. It is labelled "New here", is **never** pre-checked, **never** counted as a merit rank, and **never** eligible for a "top pick" treatment. Rotate per session seed so the same vendor does not always win it. Grep confirms zero implementation exists (`exposure_deficit|welcome_boost|fresh_chance` → 0 hits across `apps/web` + `supabase`); this is the minimum viable slice of the 7 locked fair-exposure mechanisms and it ships with the lenses.
+
+**Rule C — one tier-gating policy across all surfaces.** `reviewStarsCounted: false` for free tier (`vendor-tier-caps.ts:207`) zeroes a free vendor's genuine stars in `/explore` (`page.tsx:2477-2486`) but not on the bench or in category-search — two surfaces give different answers to "top rated" for the same vendor. Pick one and apply it in both. Owner decision, §15.7.
+
+**Per-lens cold-start outcome (state this in the PR description):**
+| Lens | Brand-new vendor | Free-tier vendor |
+|---|---|---|
+| Best matches | ~59–62/100, tier "fair"/"good"; out-ranked, never buried (`compat-score.test.ts:20-26,:46-49`) | Neutral after L0; was structurally −1 point before it |
+| Nearest | **Neutral-to-favourable** — distance is tier-blind by Rule B above | Neutral — no radius penalty |
+| Fits your budget | Neutral (no price → `null` → NEUTRAL) | Neutral |
+| New here | **The only lens that favours them.** Lead the empty-marketplace experience with it | Neutral (freshness anchors on verification, not tier) |
+| *In demand* | **Structurally buried** — a vendor nobody has inquired about can never show demand. Another reason it is blocked |
+
+### 15.6 · Explainability (mandatory — no card ships without it)
+
+- **Never render a bare score or %.** Every card in every lens carries one reason pill naming the **top contributing dimension**.
+- **Contribution formula** (do not use raw `weight × sub` — `refinement` would win almost always at 0.22 × 0.6):
+  ```
+  contribution_i = weights[i] * (sub_i - NEUTRAL)    // lift above the admit-unknown baseline
+  topDim = argmax_i contribution_i   where contribution_i > 0.01
+  ```
+  If no dimension clears the threshold, the pill reads **"Matches your basics"** — never invent a superlative.
+- `explainCompatScore` (`compat-score.ts:196-268`) already produces the honest ordered phrase list from the same inputs and the same neutral baselines. **Use it. Do not write reason copy inline.** Extend it with the `freshness` phrase ("New on Setnayan") and make it weight-aware so a lens's own driving dimension can surface.
+- A one-tap "Why this order?" panel per lens naming its inputs in plain English, including `firstlook_boost_weight` when it is non-zero.
+
+### 15.7 · Per-category weight overrides
+
+One global vector is wrong: distance dominates for anyone who physically travels with equipment and barely matters for a gown designer.
+
+**Mechanism** — additive override merged onto the lens vector, then **renormalised**, so the sum-to-1 invariant cannot be broken by an override author:
+```ts
+// lib/ranking-lenses.ts
+const PLAN_GROUP_WEIGHT_OVERRIDES: Partial<Record<PlanGroupId, Partial<CompatWeights>>> = { … };
+resolveWeights(lens, planGroupId) =
+  normalizeToOne({ ...LENSES[lens].weights, ...(PLAN_GROUP_WEIGHT_OVERRIDES[planGroupId] ?? {}) });
+```
+`normalizeToOne` divides every entry by the sum. Unit-test that every `(lens × planGroup)` product sums to 1.
+
+**Starting overrides** (owner-tunable later; these are recommendations, not locks):
+
+| Plan group | Override | Why |
+|---|---|---|
+| catering · crew meals · mobile bars / booths · transport · lights & sound · LED | `distance: 0.30` | equipment and crew physically travel; km is real money (travel fee, crew meals, call time, day-of risk) |
+| ceremony venue · reception venue | `distance: 0.02` | the venue **is** the anchor — ranking venues by distance from themselves is meaningless |
+| gown / suit designer · monogram · stationery · pakanta | `distance: 0.04`, `refinement: +` | remote-deliverable; style fit is the whole decision |
+| photo · video · coordination | *(no override — the global vector is right)* | genuinely balanced across all seven dims |
+
+Sequence this **after** the lenses ship (L5). Tuning a scorer nobody has used yet is premature, and the per-group data (`budget_leaf_benchmarks`: 27 rows, only 14 with a `benchmark_php`; the other 13 leaves are silently dropped by `budget-allocation-data.ts:283-286`) is not yet good enough to tune against.
+
+### 15.8 · Build order
+
+| # | Slice | Depends on | Notes |
+|---|---|---|---|
+| **L0** | **Adopt the scorer on the bench.** Delete `fitScore`; call `computeCompatScore` from `shortlist-categories.tsx`'s data path. Thread the inputs already resolved on `vendors/page.tsx` (budget-fit ratio `:357`, faith `:383-391`, haversine `:438-443`, rating/reviews/verified `:464-470`). Pass `boosted:false`; omit `travelRadiusKm`. Add the `service_catalog.is_active` join to `vendor_active_ads`. | — | **Prerequisite for everything.** Also fixes the §13.4 null-reach defect, de-binarises budget and distance, and un-buries free-tier + unrated vendors. Ship even if §15 stops here. |
+| **L1** | Lens registry + `weights` param + `freshness` dim (weight 0) + `normalizeToOne` + sum-to-1 tests + reason pill from `explainCompatScore`. | L0 | No user-visible lens yet beyond "Best matches". |
+| **L2** | **Nearest to your venue** + `distanceKm` on `ShortlistVendor` + anchor-absent hide (§13.2) + **sort persistence** (§13.3 — today `useState('fit')` at `shortlist-categories.tsx:426` forgets on every reload). | L1 | Smallest, highest daily value. Folds in PR-K. |
+| **L3** | **Fits your budget** + visibility gate (§15.2) + mandatory `est.` qualifier. | L1 | Will be hidden in prod until priced supply lands. Ship it anyway — it is correct and dormant. |
+| **L4** | `freshnessRatio` + **New here** + **reserved fresh-chance slot** (Rule B). | L1 + owner decision #1 | The only pro-newcomer mechanism; ship it with the lens, not after. |
+| **L5** | Per-category overrides (§15.7). | L1–L4 | |
+| **L6** | Admin weight-tuning surface + `admin_audit_log` rows + surfacing `firstlook_boost_weight`. | L5 | The module header already names this as intended. |
+| **L7** | ⛔ **In demand** — inquiry-sourced count + min-N + capacity RPC + DPO. | §15.3 all four | **Do not start without owner decisions #2 and #3.** |
+
+All slices behind `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED`, one worktree per PR, changelog fragment in ROOT `changelog.d/`, verify before arming auto-merge.
+
+### 15.9 · Owner decisions — an implementer MUST NOT choose these
+
+1. **Freshness anchor.** Is `vendor_verifications.approved_at` populated and usable, or do we add `vendor_profiles.verified_at`? The owner's own 2026-06-01 ruling anchors on verification, and `created_at` is the wrong column (row-insert time; the *admin's* date for seeded profiles). A new column contravenes the "flag-flip beats new schema" preference, so it needs sign-off. **Blocks L4.**
+2. **Scarcity min-N.** `Schedule_Matrix_and_Date_Finder_2026-06-02.md` §8.3 says "don't show a 1" (implies ≥2–3); `Setnayan_AI_Market_Intelligence_2026-07-02.md` §4 puts couple-aggregates at **min-N 25 + full DPO gate**. Which governs? **Blocks L7.**
+3. **The two live honesty exposures.** (a) `vendor-grow-sections.tsx:230` publicly sells the scarcity nudge to vendors while its basis is a save-count; (b) `studio-card-demo.tsx:839` renders a hardcoded "3 also eyeing your date" on public marketing. Re-source, rewrite, or remove — owner's call, but they should not stay as-is while §15 ships lenses next to them.
+4. **Does paid placement move the number?** Drop `boosted` from `trustSub` and let paid placement be a labelled pin only (recommended), or keep the +0.15 and rewrite the false "Not an AI recommendation" copy.
+5. **Tier-gated review stars.** Apply `reviewStarsCounted` on all surfaces or none. Two screens giving different "top rated" answers for the same vendor is indefensible under any lens copy.
+6. **Tier-derived travel radius.** §15.1 rules it out of distance scoring (tier buying rank inside "nearest"). Confirm — the alternative ("they declared they travel that far") is defensible but must be a conscious position, per §13.4 finding 2.
+7. **Scope note owed to the corpus.** §14 of this spec — the owner's own "combination sorting" brief — makes no mention of freshness or in-demand. §15 extends it; log the extension at the bottom of `DECISION_LOG.md` so the dated spec and the verbal brief reconcile.
