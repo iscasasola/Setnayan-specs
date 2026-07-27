@@ -13,7 +13,15 @@
 | **Papic** | **Switched ON, free.** Every new event finishes onboarding with its free point pool + guest QR already live. Nothing to pay, nothing to click. The card shows what's free and what the upgrade covers. |
 | **Setnayan AI** | **Introduced, never given away.** Owner: *"Setnayan AI cannot be free."* The card shows **what it provides them** and routes to the existing purchase surface. |
 | **Checkout** | **None in onboarding.** The 2026-06-21 "no paywall in onboarding" lock STANDS. Papic is switched on; AI is introduced and routed. Neither takes payment in the flow. |
-| **Scope** | **All three flows** — `/onboarding/wedding`, `/onboarding/[type]` (14 types), `/onboarding/simple`. One shared component, mounted three times. |
+| **Scope** | **Papic → ALL 16 types**, all three flows. **Setnayan AI → every type EXCEPT vendor-free ones** (owner 2026-07-27: *"setnayan AI will not be available on simple event since it does not have vendors"*). So `/onboarding/simple` gets a **one-card** step (Papic only). |
+
+### The vendor-free rule — DERIVE it, never name the type
+
+`simple_event` is already marked vendor-free by an existing column: **`SIMPLE_PROFILE.marketplaceEnabled = false`** (`lib/event-type-profile.ts` — *"a vendor-free event whose only purpose is to exercise the in-app Setnayan services"*). The codebase already has a house pattern for this exact exclusion — `lib/papic-event-access.ts:154`: *"this is how `simple_event` is excluded — **for the right reason, not by name**."* Follow it.
+
+**Gate: show the AI card only when `profile.marketplaceEnabled === true` AND the type's tier resolves to a SKU.** Both, because they fail closed on different axes — `marketplaceEnabled` catches a *future* vendor-free type, while the SKU check catches a type with no sellable row. A brand-new type defaults to tier C (which *has* a SKU), so the SKU check alone would wrongly offer it.
+
+✅ **This is already decided in shipped code.** `lib/setnayan-ai-type-pricing.ts` maps `simple_event: 'E'` with the comment *"simple_event = E (no vendors)"*, and `AI_TIER_SKU` states: **"Tier E has no SKU — Setnayan AI isn't present, so there's nothing to charge."** The owner's instruction confirms the existing lock rather than changing it. ⚠ Note the wording in `sku-activation.ts:783` ("free simple_event") is loose shorthand and reads as if tier E were a ₱0 offer — it is **not offered at all**, which is what keeps it consistent with *"Setnayan AI cannot be free."*
 
 ### The Papic pitch (owner's words, 2026-07-27)
 
@@ -127,7 +135,9 @@ The card also cannot honestly say anything today: **"50 free shots"** is a figur
 
 ## 3. THE CARDS
 
-One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all three flows. Placed **after** the persona reveal / plan and **before** `congrats`. Two cards, Papic first.
+One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all three flows. Placed **after** the persona reveal / plan and **before** `congrats`. Papic always renders; the AI card renders only when the vendor-free gate in §0 passes — so the step is **two cards** on the 15 vendor-bearing types and **one card** on `simple_event`.
+
+⚠ `/onboarding/simple` is **not** a multi-screen wizard — it's a single server-rendered name+date form (`app/onboarding/simple/page.tsx`, 112 lines). "Adding the step" there means adding the Papic card to that page, not inserting a screen. Its own copy already promises *"everything else is Setnayan's in-app services"* and then offers none — this closes that.
 
 ### Card 1 — Papic (first; it creates the memories)
 
@@ -138,8 +148,9 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 - **Who shoots:** guests. Add vendors **only** when §0's DPO gate flips.
 - **Action:** none. It is already on. The card informs.
 
-### Card 2 — Setnayan AI (second; it helps them)
+### Card 2 — Setnayan AI (second; it helps them · **hidden on vendor-free types**)
 
+- **Gate first** — `profile.marketplaceEnabled === true` AND the tier resolves to a SKU (§0). On `simple_event` this card does not render at all. Every one of its nine capabilities is about vendors (rank them, route the first inquiry, chase the quiet ones, flag their payments) — on a vendor-free event it would be a fake door, which the codebase forbids.
 - Mount `<SetnayanAiValue mode="preview" eventWord={…} />` — do not re-author (§1.4).
 - Fix the wedding-only row first (§2.3).
 - **Price:** read live. Active row = flat `SETNAYAN_AI` **₱1,499**. Per-type tiers `SETNAYAN_AI_B/C/D` (₱899 / ₱499 / ₱99) exist but are **all `is_active = false`** and ride a separate flag through `resolveSetnayanAiTypeChargeCentavos`. Never hardcode.
@@ -155,7 +166,7 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 | **2** | Remap `INAPP_TO_SERVICE_CODE` Papic keys to the live One-Pool SKUs (§2.1) so the upgrade line renders. | PR1 |
 | **3** | Make `SetnayanAiValue` type-aware — drop/branch the PH-marriage row for non-weddings (§2.3). | none (parallel) |
 | **4** | `services-step.tsx` — the two cards. Mount in `/onboarding/[type]` first (14 types, biggest gap). | PR1–3 |
-| **5** | Mount in `/onboarding/wedding` (before `congrats`; do NOT un-filter `PAYWALL_SCREENS` — the lock stands) and `/onboarding/simple`. Give `interested_services` its first reader (§1.3). | PR4 |
+| **5** | Mount in `/onboarding/wedding` (before `congrats`; do NOT un-filter `PAYWALL_SCREENS` — the lock stands) and `/onboarding/simple` (**Papic card only** — the AI gate hides card 2). Give `interested_services` its first reader (§1.3). | PR4 |
 | **—** | Amend or kill the §1.4 start-clamp in the Papic spec (§2.2). | **owner** |
 | **—** | Vendor shots in the card copy. | **DPO/NPC** |
 
