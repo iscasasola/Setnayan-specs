@@ -22,10 +22,33 @@
 Final card = **＋ Add to build · Inquire / 💬 Check inquiry (stateful) · Lock this (request)**.
 
 - **Add to build** → `event_build_picks` ◕ (soft, reversible) — Explore's two-speed model.
-- **Inquiry action is STATEFUL off thread existence, resolved by the shipped
-  `InquiryComposer` existing-thread guard — that guard is the SINGLE source of truth.**
-  No thread → "Inquire" → fresh composer. Thread exists → "💬 Check inquiry" → open the
-  EXISTING thread. Manual-added vendors with no thread keep "Inquire" even on the bench.
+- **Inquiry action is STATEFUL off thread existence.** No thread → "Inquire" → fresh
+  composer. Thread exists → "💬 Check inquiry" → open the EXISTING thread.
+  > 🔴 **CORRECTED 2026-07-27 (§8a) — the mechanism named here was WRONG, twice. Verified
+  > against `origin/main` by both sessions:**
+  > 1. `inquiry-composer.tsx` holds **no guard at all** — it is a pure prop consumer
+  >    (`existingThreadId`/`existingThreadHref` :126/:131, branch :546). There is nothing in
+  >    it a bench card can call. The real query lives in the SERVER component
+  >    `v/[slug]/page.tsx:1109-1123` and is scoped to `events[0]` — the couple's PRIMARY
+  >    event — so an event-scoped bench cannot reuse it as-is.
+  > 2. **The actual source of truth is the DB:** `chat_threads UNIQUE(event_id,
+  >    vendor_profile_id)` (`20260513130000:58`) + `inquiry_status NOT NULL`. Code-level
+  >    guards are readers of that constraint, and there are four divergent readers today.
+  > 3. The reuse target for a dashboard card is **`contactShortlistVendor` +
+  >    `ContactShortlistVendorButton`** (rendered from exactly one place today), so slice D
+  >    is a PORT. The INTENT stands unchanged: one composer, never forked.
+  > 4. ~~"Manual-added vendors with no thread keep 'Inquire'"~~ **DELETED — false.**
+  >    `contactShortlistVendor:64` returns `not_marketplace` and the button dead-ends. And
+  >    "manual" is not a stable class: `NewManualVendorModal` has a **linked mode** (:78-83,
+  >    :187, :236) that writes `marketplace_vendor_id`. **Gate on
+  >    `marketplaceVendorId != null` — never on a manual/source heuristic.**
+  > 5. **Drift to fix, Explore owns the edit:** the bench map does not exclude `declined`
+  >    while `v/[slug]` does, so one vendor would read "Check inquiry" on the bench and
+  >    "Inquire" on their profile. ONE exported predicate, both surfaces call it. ⚠ The
+  >    shared thing is the **predicate** (a thread exists AND `inquiry_status != 'declined'`)
+  >    — **not the scoping**: `/v/[slug]` must keep resolving the couple's PRIMARY event,
+  >    the bench its CURRENT event. Refactoring the predicate must not silently re-scope the
+  >    profile page.
 - **Lock** carries REQUEST wording from PR-H onward ("Lock this" → "⏳ lock in progress");
   finality language appears only at step 5 (vendor accepts payment). Until PR-H lands, the
   hardened `finalizeVendor` stays the action behind the button.
@@ -44,6 +67,10 @@ Final card = **＋ Add to build · Inquire / 💬 Check inquiry (stateful) · Lo
   SHIPPED composer exactly as today. Booking-flag ON ⇒ the same button opens the extended
   sheet. The button contract (what it's called, when it renders, what it opens) never changes
   with Booking's flag — only the sheet's content does.
+- ⚠ **Read §2's correction box first:** the bench's entry point is
+  `contactShortlistVendor` + `ContactShortlistVendorButton` (a port), not a call into
+  `inquiry-composer.tsx`. "One composer, never forked" is about the SHEET the vendor and
+  couple end up in — not about which module owns the thread lookup.
 
 ## 4 · The lock/fee seam — ⚠ the one real hazard
 
