@@ -192,6 +192,11 @@
   .pendrow .pv small{color:var(--ink-soft);font-weight:400;margin-left:4px}
   .pendrow .ps{font-size:10.5px;color:var(--ink-soft);margin:3px 0 5px}
   .padv{font-size:10.5px;font-weight:700;background:var(--champagne);color:var(--gold-deep);border:1px solid var(--gold);border-radius:8px;padding:4px 9px}
+  .planname{width:100%;font:inherit;font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin-bottom:12px}
+  .planname:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+  .pload{font-size:10px;font-weight:800;color:var(--gold-deep);border:1px solid var(--gold);border-radius:7px;padding:1.5px 8px;margin-left:6px}
+  .clearcand{display:block;font-size:10.5px;color:var(--ink-soft);text-decoration:underline;margin-top:6px}
+  .clearcand:hover{color:var(--bad)}
   .rowrm{font-size:10px;color:var(--ink-soft);margin-left:5px}
   .needrow{font-size:11.5px;color:var(--ink-soft);padding:3px 0}
   .needrow button{color:var(--gold-deep);font-weight:700;text-decoration:underline}
@@ -745,11 +750,17 @@ function advance(){
 function toast(t){ S.toast=t; renderOverlay(); }
 function renderOverlay(){
   const o=document.getElementById('overlay'); let h='';
-  if(S.modal){
+  if(S.modal && S.modal.kind==='saveplan'){
+    h+=`<div class="scrim" onclick="S.modal=null;renderOverlay()"><div class="modal" onclick="event.stopPropagation()">
+      <h3>Name this plan</h3><p>Snapshot your current candidates as a named plan you can load back or compare side by side.</p>
+      <input id="plannameinput" class="planname" maxlength="60" placeholder="e.g. Garden Classic · Big Feast · Plan B" />
+      <div class="acts"><button class="m1" onclick="confirmSavePlan()">Save plan</button>
+      <button class="m2" onclick="S.modal=null;renderOverlay()">Cancel</button></div></div></div>`;
+  } else if(S.modal){
     const m=S.modal;
     h+=`<div class="scrim" onclick="S.modal=null;renderOverlay()"><div class="modal" onclick="event.stopPropagation()">
       <h3>${m.kind==='datelock'?'This lock sets your date':'Switch vendors?'}</h3><p>${m.text}</p>
-      <div class="acts"><button class="m1" onclick="confirmModal()">${m.kind==='datelock'?'Lock it — set the date':'Switch'}</button>
+      <div class="acts"><button class="m1" onclick="confirmModal()">${m.kind==='datelock'?'Request the lock':'Switch'}</button>
       <button class="m2" onclick="S.modal=null;renderOverlay()">Cancel</button></div></div></div>`;
   }
   if(S.toast){
@@ -801,6 +812,7 @@ function renderTeam(){
     need.slice(0,4).forEach(c=>{ h+=`<div class="needrow">○ <button onclick="openCat('${c.id}')">${c.label}</button></div>`; });
     if(need.length>4) h+=`<div class="needrow">…and ${need.length-4} more</div>`;
   }
+  if(brows.length) h+=`<button class="clearcand" onclick="clearCandidates()">Clear candidates</button>`;
   h+=`<div class="tiles">
     <div class="tile"><div class="k">Date</div><div class="v">${S.anchors.dateLabel??'— not set'}</div></div>
     <div class="tile"><div class="k">Location</div><div class="v">${S.anchors.venue??'— not set'}</div></div>
@@ -813,17 +825,37 @@ function renderTeam(){
   document.getElementById('team').innerHTML=h;
 }
 function savePlan(){
+  S.modal={kind:'saveplan'}; renderOverlay();
+}
+function confirmSavePlan(){
+  const inp=document.getElementById('plannameinput');
+  const name=(inp&&inp.value.trim())||('Plan '+String.fromCharCode(65+S.plans.length));
   const build=Object.fromEntries(Object.entries(S.cats).filter(([,c])=>c.build.length).map(([cid,c])=>[cid,[...c.build]]));
-  const names=['Garden Classic','Big Feast','Plan '+String.fromCharCode(67+S.plans.length)];
-  S.plans.push({name:names[Math.min(S.plans.length,2)],build,total:lockedTotal()+buildTotal()});
+  S.modal=null;
+  S.plans.push({name:name.slice(0,60),build,total:lockedTotal()+buildTotal()});
   renderAll();
-  toast({tt:`Saved as “${S.plans[S.plans.length-1].name}”`, ms:'Your build candidates are snapshotted. Swap candidates on the bench, save again, then compare the plans side by side — locked picks stay pinned in every one.', plain:true});
+  toast({tt:`Saved as “${name.slice(0,60)}”`, ms:'Your candidates are snapshotted under that name. Swap candidates, save another, compare side by side — locked picks stay pinned in every plan.', plain:true});
+}
+function loadPlan(i){
+  const plan=S.plans[i]; if(!plan) return;
+  for(const c of Object.values(S.cats)) c.build=[];
+  for(const [cid,vids] of Object.entries(plan.build)){ if(S.cats[cid]) S.cats[cid].build=[...vids]; }
+  S.plansOpen=false; renderAll();
+  toast({tt:`“${plan.name}” loaded into your team`, ms:'Its candidates replaced your current ones (locked vendors are untouched — they are in every plan). The bench just refiltered to this team’s shared dates.', plain:true});
+}
+function clearCandidates(){
+  for(const c of Object.values(S.cats)) c.build=[];
+  renderAll();
+  toast({tt:'Candidates cleared', ms:'Your build is empty again — locked vendors and in-progress handshakes stay (cancel those individually). The bench filter just reopened to all dates.', plain:true});
 }
 function renderPlans(){
   let h=`<h3>Plans</h3>`;
-  h+= S.plans.length? `<div class="plans-list">${S.plans.map(p=>`<div class="p"><span>${p.name}</span><span class="mono" style="font-size:10.5px">${peso(p.total)}</span></div>`).join('')}
-      <div class="p"><span>Current</span><span class="mono" style="font-size:10.5px">${peso(lockedTotal())}</span></div></div>`
-    : `<div style="font-size:12px;color:var(--ink-soft)">No saved plans yet. Lock a core, save it, then try a variant and compare.</div>`;
+  h+= S.plans.length? `<div class="plans-list">${S.plans.map((p,i)=>`<div class="p"><span>${p.name}</span>
+      <span><span class="mono" style="font-size:10.5px">${peso(p.total)}</span>
+      <button class="pload" onclick="loadPlan(${i})">Load</button>
+      <button class="rowrm" onclick="S.plans.splice(${i},1);renderAll()">✕</button></span></div>`).join('')}
+      <div class="p"><span>Current team</span><span class="mono" style="font-size:10.5px">${peso(lockedTotal()+buildTotal())}</span></div></div>`
+    : `<div style="font-size:12px;color:var(--ink-soft)">No saved plans yet. Add candidates, then save the team under a name.</div>`;
   h+=`<button class="goplans" onclick="S.plansOpen=true;renderAll()">Compare side by side</button>`;
   document.getElementById('plans').innerHTML=h;
 }

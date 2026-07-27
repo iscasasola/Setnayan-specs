@@ -124,3 +124,20 @@ Live path `/dashboard/[eventId]/vendors` (BUDGET_BUILD ON in prod): single-scrol
 - The prototype's Your-team "handshake tracker" (4-step stepper) is the reference UI.
 
 **Also verified for the record (owner asked):** "bench filters as you add to build" was never shipped — but the *reverse* direction ALREADY EXISTS and the owner remembered it correctly: `getAvailableDaysForVendorSet` ("a saved build's picks — possibly not yet booked") powers the Compare availability footer ("No single date works — swap one"), and `candidate-dates.ts` is the "dates shrink as you lock" engine on `/date-selection`. §6's PR-G1 completes the loop (team → window → filter the bench), reusing exactly those engines.
+
+## 8 · Plan lifecycle Q&A (owner, same day) — all four map to shipped machinery
+1. **Saving = they NAME it.** "Save current as a plan" opens a name dialog (≤60 chars — the shipped
+   `MAX_BUILD_TITLE_LEN` in `lib/named-builds.ts`; `savePlanBuildNamed` + `planSaveAs`
+   create/overwrite already handle names + untitled fallbacks "Plan A/Build N").
+2. **Loading = the Compare column's "Modify" action, promoted.** `applyBuildToWorking`
+   (`build-pick-actions.ts:88`) already loads a saved plan's picks into the working build
+   (clears current candidates, re-inserts the snapshot's; vendors that left the shortlist
+   FK-skip). Surface it as a **Load** button on each plan row in the Plans panel — locked
+   vendors are untouched (they're pinned in every plan by §2 #10).
+3. **Clearing the team = `clearBuildPicks`** (`build-pick-actions.ts` — flagged caller-less in
+   PR #3790; this is its job). "Clear candidates" in Your team empties the BUILD only: locked
+   vendors stay (they're contracts) and in-progress handshakes stay (cancel those individually).
+4. **Yes — the TEAM is the filtering basis (ruled).** The §6 shared-date window derives from
+   **locked + pending-handshake + build candidates** — everything in "Your team". Load a plan →
+   the bench refilters to that team's window; clear candidates → the window reopens to
+   locked-only. One team, one lens.
