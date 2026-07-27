@@ -1149,3 +1149,20 @@ The recommending half lives on the buried `/budget` page; the picking happens in
 4. ⚠ **Keep the guide-never-a-rule stance** (the planner's own design doc §1): nothing blocks, clamps or disables a vendor for being over target; the couple's own number always wins. A budget tool that refuses choices is one couples stop telling the truth to.
 
 This does not change §18's build order — it is the same `resolveEventMoney` resolver feeding one more surface. It changes the FRAMING: the job is not "add a budget planner to the Marketplace", it is **"stop separating what things should cost from where you choose them."**
+
+### 18.y · OWNER-CONFIRMED: the budget planner has exactly THREE buckets (2026-07-27)
+Owner: *"budget planner shows the following: marketplace locked budgeting and their schedules, in-app services like Papic and Setnayan AI and other features of the app, and their manual costs aside from what we have here."*
+
+This is `byBucket[]` in `resolveEventMoney` (§18.1) made explicit. Sources verified against prod:
+
+| # | Bucket | Source of truth (verified) | State today |
+|---|---|---|---|
+| **1** | **Marketplace bookings + their schedules** | `event_vendors` (+ `event_vendor_line_items`, `event_vendor_payments`) — with the `buildVendorPricingLookup` precedence (package → service → manual → legacy headline) PRESERVED, not reinvented | LIVE and mature. Schedules = `event_vendor_payments` + milestones + the `.ics` export |
+| **2** | **In-app services** (Papic · Setnayan AI · other SKUs) | **`public.orders`** — `event_id`, `service_key`, `confirmed_total_php ?? requested_total_php`, `status`. There is NO separate `service_orders` table | EXISTS but lands in exactly ONE stat and is invisible everywhere else — this is the "booked with us" half the owner named |
+| **3** | **Manual costs** | — | **DOES NOT EXIST.** `event_vendor_line_items.vendor_id` is NOT NULL and the add-form is gated `priceSource === 'manual'`, so an outside cost can only be recorded by inventing a fake vendor |
+
+**⚠ BUCKET 2 CONTAMINATION HAZARD — filter by PAYER or the couple sees the vendor's bill.**
+`orders` carries **both** `user_id` (payer) **and** `vendor_profile_id`, and the **booking-fee charges live in this same table** as vendor-payer rows (`booking-fee-lock.server.ts:129-160` inserts an `orders` row + a `payments` row with a `vendor_` service key). A naive `orders WHERE event_id = …` therefore pulls the VENDOR's 5%→1% booking fee into the COUPLE's budget. This is not theoretical — PR #3659 ("hide vendor booking-fee orders from the couple's view") is open for exactly this class of leak on another surface.
+**Rule: bucket 2 selects couple-payer orders only** — filter explicitly (payer `user_id` = a couple member AND/OR `vendor_profile_id IS NULL` AND/OR the `service_key` is not a vendor SKU); pick the discriminator by reading how the fee rows are written, and **pin it with a test that a vendor-payer order never appears in a couple's total.**
+
+**Bucket 1's "schedules" are first-class**, per the owner's wording: each bucket-1 line carries its due date and paid state so the planner answers *when*, not only *how much* — the `.ics` export and the milestone machinery already exist and must feed the same resolver rather than a parallel path.
