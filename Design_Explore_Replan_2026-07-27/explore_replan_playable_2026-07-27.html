@@ -128,6 +128,19 @@
   .badge{display:inline-block;font-size:9.5px;padding:2px 7px;border-radius:999px;margin:1px 3px 3px 0}
   .badge.ok{background:var(--goodbg);color:var(--good)}
   .badge.warn{background:var(--badbg);color:var(--bad);font-weight:700}
+  .badge.soft{background:rgba(176,126,60,.16);color:#8a5a1e;font-weight:700}
+  :root[data-theme="dark"] .badge.soft{background:rgba(216,164,90,.2);color:#d8a45a}
+  .freedates{font-family:'Space Mono',ui-monospace,monospace;font-size:8.5px;color:var(--ink-soft);margin:-3px 0 5px}
+  .datewin{margin:-6px 0 14px}
+  .dw{background:var(--paper);border:1px solid var(--gold);border-radius:12px;padding:9px 14px;font-size:12.5px;color:var(--ink-soft)}
+  .dw b{color:var(--ink)}
+  .dw.one{border-width:2px;background:var(--champagne);color:var(--gold-deep)}
+  .dw.one b{color:var(--gold-deep)}
+  .dw.none{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+  .dw.none b{color:var(--bad)}
+  .dw.locked{border-color:var(--good);background:var(--goodbg);color:var(--good)}
+  .dw.locked b{color:var(--good)}
+  .divider-v.hardd span{color:var(--bad)}
   .badge.gold{background:var(--champagne);color:var(--gold-deep);font-weight:700}
   .act{display:block;width:100%;text-align:center;font-size:11px;font-weight:700;border-radius:9px;padding:6px 0;margin-top:3px}
   .act.lock{background:var(--gold);color:#fff}
@@ -136,7 +149,8 @@
   .act.dead{background:var(--line);color:var(--ink-soft);cursor:not-allowed}
   .act.ghost{background:var(--paper);border:1px solid var(--line);color:var(--ink)}
   .divider-v{flex:0 0 auto;display:flex;align-items:center}
-  .divider-v span{writing-mode:vertical-rl;font-family:'Space Mono',ui-monospace,monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--bad);border-left:2px solid var(--bad);opacity:.8;padding-left:5px}
+  .divider-v span{writing-mode:vertical-rl;font-family:'Space Mono',ui-monospace,monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#8a5a1e;border-left:2px solid #b07e3c;opacity:.85;padding-left:5px}
+  .divider-v.hardd span{color:var(--bad);border-left-color:var(--bad)}
   .addcard{min-width:110px;flex:0 0 auto;border:1.5px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--ink-soft);font-size:11px;font-weight:700;padding:10px;text-align:center}
   .addcard .plus{font-size:18px;color:var(--gold)}
   .addcard:hover{border-color:var(--gold)}
@@ -217,6 +231,8 @@
     <div class="hd"><span class="hl"><span id="covring"></span><b>Cover your event</b></span><span class="cnt" id="covcnt"></span></div>
     <div class="strip" id="strip"></div>
   </div>
+
+  <div class="datewin" id="datewin"></div>
 
   <div class="cols">
     <div>
@@ -352,55 +368,55 @@ const STARTER = new Set(['reception','ceremony_venue','coordinator','catering','
 
 const VENDORS = {
   reception: [
-    {id:'rv1',name:'Hacienda Ilog',city:'Tagaytay',price:95000,note:'Sets your date to Sat · Sep 12, 2027'},
-    {id:'rv2',name:'Villa Sinag Gardens',city:'Tagaytay',price:140000,note:'Sets your date to Sat · Oct 9, 2027'},
-    {id:'rv3',name:'The Glasshouse Alta',city:'Alfonso',price:120000,note:'Sets your date to Sat · Sep 12, 2027'},
+    {id:'rv1',name:'Hacienda Ilog',city:'Tagaytay',price:95000,dates:['Sep 12'],note:'Sets your date to Sat · Sep 12, 2027'},
+    {id:'rv2',name:'Villa Sinag Gardens',city:'Tagaytay',price:140000,dates:['Oct 9'],note:'Sets your date to Sat · Oct 9, 2027'},
+    {id:'rv3',name:'The Glasshouse Alta',city:'Alfonso',price:120000,dates:['Sep 12','Sep 26'],note:'Sets your date to Sat · Sep 12, 2027'},
   ],
   ceremony_venue: [
-    {id:'cv1',name:'Sta. Clara Parish',city:'Tagaytay',price:25000},
-    {id:'cv2',name:'Chapel on the Ridge',city:'Tagaytay',price:38000,busy:true},
+    {id:'cv1',name:'Sta. Clara Parish',city:'Tagaytay',price:25000,dates:['Sep 12','Sep 26']},
+    {id:'cv2',name:'Chapel on the Ridge',city:'Tagaytay',price:38000,dates:['Sep 26','Oct 9']},
   ],
   coordinator: [
-    {id:'co1',name:'Amihan Weddings Co.',city:'Cavite',price:65000},
-    {id:'co2',name:'Luntian Events',city:'QC',price:85000,busy:true},
+    {id:'co1',name:'Amihan Weddings Co.',city:'Cavite',price:65000,dates:['Sep 12','Oct 9']},
+    {id:'co2',name:'Luntian Events',city:'QC',price:85000,dates:['Sep 26']},
   ],
   catering: [
-    {id:'ct1',name:'Casa Amara Catering',city:'Cavite',price:187500,per:'₱750 × 250 pax'},
-    {id:'ct2',name:'Perlas Kitchen',city:'Manila',price:230000,per:'₱920 × 250 pax'},
-    {id:'ct3',name:'Mesa Buena',city:'Tagaytay',price:162500,per:'₱650 × 250 pax',busy:true},
+    {id:'ct1',name:'Casa Amara Catering',city:'Cavite',price:187500,per:'₱750 × 250 pax',dates:['Sep 12','Sep 26']},
+    {id:'ct2',name:'Perlas Kitchen',city:'Manila',price:230000,per:'₱920 × 250 pax',dates:['Sep 12','Oct 9']},
+    {id:'ct3',name:'Mesa Buena',city:'Tagaytay',price:162500,per:'₱650 × 250 pax',dates:['Sep 26','Oct 9']},
   ],
   dessert: [
-    {id:'ds1',name:'Dulce Dessert Bar',city:'Tagaytay',price:38000,per:'grazing table'},
+    {id:'ds1',name:'Dulce Dessert Bar',city:'Tagaytay',price:38000,per:'grazing table',dates:['Sep 12','Sep 26','Oct 9']},
   ],
   photo_video: [
-    {id:'pv1',name:'Hiraya Studios',city:'Makati',price:95000},
-    {id:'pv2',name:'North & Co. Films',city:'Baguio',price:110000,far:true},
-    {id:'pv3',name:'Liwanag Lens',city:'Cavite',price:78000,busy:true},
+    {id:'pv1',name:'Hiraya Studios',city:'Makati',price:95000,dates:['Sep 12','Oct 9']},
+    {id:'pv2',name:'North & Co. Films',city:'Baguio',price:110000,far:true,dates:['Sep 12','Sep 26']},
+    {id:'pv3',name:'Liwanag Lens',city:'Cavite',price:78000,dates:['Sep 26','Oct 9']},
   ],
   florist: [
-    {id:'fl1',name:'Amihan Blooms',city:'Tagaytay',price:45000},
-    {id:'fl2',name:'Petala Studio',city:'Manila',price:68000,busy:true},
+    {id:'fl1',name:'Amihan Blooms',city:'Tagaytay',price:45000,dates:['Sep 12','Sep 26']},
+    {id:'fl2',name:'Petala Studio',city:'Manila',price:68000,dates:['Sep 26','Oct 9']},
   ],
   photo_booth: [
-    {id:'pb1',name:'Snapbox MNL',city:'Manila',price:8999},
-    {id:'pb2',name:'360 Studio Norte',city:'QC',price:12499},
-    {id:'pb3',name:'Mirror Moments',city:'Pasig',price:9999,busy:true},
-    {id:'pb4',name:'Flash Habi Co.',city:'Pampanga',price:7499,far:true},
+    {id:'pb1',name:'Snapbox MNL',city:'Manila',price:8999,dates:['Sep 12','Sep 26','Oct 9']},
+    {id:'pb2',name:'360 Studio Norte',city:'QC',price:12499,dates:['Sep 12','Sep 26']},
+    {id:'pb3',name:'Mirror Moments',city:'Pasig',price:9999,dates:['Sep 26','Oct 9']},
+    {id:'pb4',name:'Flash Habi Co.',city:'Pampanga',price:7499,far:true,dates:['Sep 12']},
   ],
   mobile_bar: [
-    {id:'mb1',name:'Tagay Cocktail Co.',city:'Manila',price:28000},
-    {id:'mb2',name:'Barkada Bar Cart',city:'Cavite',price:22000,busy:true},
+    {id:'mb1',name:'Tagay Cocktail Co.',city:'Manila',price:28000,dates:['Sep 12','Oct 9']},
+    {id:'mb2',name:'Barkada Bar Cart',city:'Cavite',price:22000,dates:['Sep 26']},
   ],
   coffee_espresso: [
-    {id:'ce1',name:'Kape Kalsada Cart',city:'Tagaytay',price:15000},
+    {id:'ce1',name:'Kape Kalsada Cart',city:'Tagaytay',price:15000,dates:['Sep 12','Sep 26','Oct 9']},
   ],
   dj: [
-    {id:'mu2',name:'DJ Alon',city:'Cavite',price:25000},
-    {id:'mu3',name:'DJ Hiraya',city:'Laguna',price:32000,busy:true},
+    {id:'mu2',name:'DJ Alon',city:'Cavite',price:25000,dates:['Sep 12','Sep 26']},
+    {id:'mu3',name:'DJ Hiraya',city:'Laguna',price:32000,dates:['Sep 26','Oct 9']},
   ],
   live_band: [
-    {id:'lb1',name:'Silid Strings Quartet',city:'Manila',price:35000},
-    {id:'lb2',name:'Harana Collective',city:'Laguna',price:42000,busy:true},
+    {id:'lb1',name:'Silid Strings Quartet',city:'Manila',price:35000,dates:['Sep 12','Oct 9']},
+    {id:'lb2',name:'Harana Collective',city:'Laguna',price:42000,dates:['Sep 26']},
   ],
 };
 
@@ -438,9 +454,31 @@ const folderOf=id=>FOLDERS.find(f=>f[2].includes(id));
 const lockedTotal=()=>Object.entries(S.cats).flatMap(([cid,c])=>c.locked.map(v=>vendorObj(cid,v).price)).reduce((a,b)=>a+b,0);
 const buildTotal=()=>Object.entries(S.cats).flatMap(([cid,c])=>c.build.map(v=>vendorObj(cid,v).price)).reduce((a,b)=>a+b,0);
 function vendorObj(cid,vid){ return vendorsOf(cid).find(v=>v.id===vid); }
-function compat(v){
-  if(S.anchors.date && v.busy) return {ok:false,why:'Booked on your date'};
-  if(S.anchors.venue && v.far) return {ok:false,why:'Beyond their 50km reach'};
+const ALL_DATES=['Sep 12','Sep 26','Oct 9'];
+/* the build's shared-date window: locked date wins; else intersect every
+   locked + candidate vendor's calendar (the getCommonAvailableDays model) */
+function teamMembers(){
+  return Object.entries(S.cats).flatMap(([cid,c])=>[...c.locked,...c.build].map(vid=>({cid,v:vendorObj(cid,vid)})));
+}
+function sharedWindow(){
+  if(S.anchors.date) return {days:['Sep 12'],source:'locked'};
+  const m=teamMembers();
+  if(!m.length) return {days:ALL_DATES,source:'open'};
+  let days=ALL_DATES.filter(d=>m.every(x=>(x.v.dates||ALL_DATES).includes(d)));
+  return {days,source:'build'};
+}
+function compat(v,cid){
+  if(S.anchors.date && !(v.dates||ALL_DATES).includes('Sep 12'))
+    return {ok:false,hard:true,why:'Booked on your date'};
+  if(S.anchors.venue && v.far) return {ok:false,hard:true,why:'Beyond their 50km reach'};
+  const w=sharedWindow();
+  if(w.source==='build'){
+    const fits=(v.dates||ALL_DATES).some(d=>w.days.includes(d));
+    if(!fits){
+      const clash=teamMembers().find(x=>!(v.dates||ALL_DATES).some(d=>(x.v.dates||ALL_DATES).includes(d)));
+      return {ok:false,soft:true,why:`No shared date with ${clash?clash.v.name:'your build'}`};
+    }
+  }
   return {ok:true};
 }
 function stateOf(c){
@@ -573,30 +611,37 @@ function tileBody(c){
     return `<div class="tilebody"><div class="empty">No shortlist yet in this demo — in the app: a carousel of matches, <b>Find ${c.label} +</b> and <b>Add manually</b>.</div>
       <div class="tile-note"><span></span>${rmv}</div></div>`;
   }
-  const good=[], bad=[];
-  vs.forEach(v=>{ (compat(v).ok?good:bad).push(v); });
+  const good=[], soft=[], hard=[];
+  vs.forEach(v=>{ const cv=compat(v,c.id); if(cv.ok) good.push(v); else if(cv.soft) soft.push(v); else hard.push(v); });
   let h=`<div class="tilebody"><div class="tile-note"><span>${c.hardSingle?'This category holds exactly one — locking fills the slot.':'One is the floor — you can lock more than one.'}</span>${rmv}</div><div class="rail">`;
   good.forEach(v=>{ h+=card(c,v,true); });
   h+=`<button class="addcard" onclick="findMore()"><span class="plus">＋</span>${st.locked.length&&!c.hardSingle?'Add another '+c.label:'Find '+c.label}</button>`;
-  if(bad.length){
-    h+=`<div class="divider-v"><span>Not available</span></div>`;
-    bad.forEach(v=>{ h+=card(c,v,false); });
+  if(soft.length){
+    h+=`<div class="divider-v"><span>Doesn't fit your build</span></div>`;
+    soft.forEach(v=>{ h+=card(c,v,false); });
+  }
+  if(hard.length){
+    h+=`<div class="divider-v hardd"><span>Not available</span></div>`;
+    hard.forEach(v=>{ h+=card(c,v,false); });
   }
   h+=`</div></div>`;
   return h;
 }
 function card(c,v,ok){
-  const st=S.cats[c.id], locked=st.locked.includes(v.id), why=compat(v).why;
+  const st=S.cats[c.id], locked=st.locked.includes(v.id);
+  const verdict=compat(v,c.id);
+  const inBuild=st.build.includes(v.id);
   let badges='';
   if(locked) badges+=`<span class="badge gold">● Locked</span>`;
   else if(st.build.includes(v.id)) badges+=`<span class="badge gold">◕ In build</span>`;
-  else if(!ok) badges+=`<span class="badge warn">${why}</span>`;
-  else{ badges+=`<span class="badge ok">${S.anchors.date? 'Free on your date':'Open dates'}</span>`;
+  else if(!ok) badges+=`<span class="badge ${verdict.soft?'soft':'warn'}">${verdict.why}</span>`;
+  else{ badges+=`<span class="badge ok">${S.anchors.date? 'Free on your date':'Fits your build'}</span>`;
         if(S.anchors.venue) badges+=`<span class="badge ok">Reaches you</span>`; }
-  const inBuild=st.build.includes(v.id);
   let act;
   if(locked) act=`<button class="act dead">Locked ✓</button>`;
-  else if(!ok) act=`<button class="act dead">Can't book</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`;
+  else if(!ok) act= verdict.soft
+    ? `<button class="act dead">Doesn't fit the build</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`
+    : `<button class="act dead">Can't book</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`;
   else if(inBuild) act=`<button class="act ghost" onclick="event.stopPropagation();unbuild('${c.id}','${v.id}')">◕ In your build · remove</button>
     <button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>
     <button class="act lock" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`;
@@ -607,6 +652,7 @@ function card(c,v,ok){
     <div class="ph">${locked?'<span class="corner">★ Chosen</span>':''}</div>
     <div class="nm">${v.name}</div><div class="ct">${v.city}</div>
     <div class="pr">${peso(v.price)}${v.per?' · '+v.per:''}</div>
+    <div class="freedates">Free: ${(v.dates||ALL_DATES).join(' · ')}</div>
     ${v.note?`<div style="font-size:9.5px;color:var(--gold-deep);margin-bottom:4px">${v.note}</div>`:''}
     ${badges}${act}</div>`;
 }
@@ -615,7 +661,7 @@ function addBuild(cid,vid){
   if(c.hardSingle && (st.build.length||st.locked.length)){ st.build=[vid]; /* hard-single: one candidate at a time */ }
   else if(!st.build.includes(vid)) st.build.push(vid);
   renderAll();
-  toast({tt:`Added to your build`, ms:`${vendorObj(cid,vid).name} is now a candidate under ${cat(cid).label}. Nothing is final — compare options in Plans, then lock the one you want.`, plain:true});
+  toast({tt:`Added to your build`, ms:`${vendorObj(cid,vid).name} is now a candidate under ${cat(cid).label}. Watch the bench: vendors with no date in common with your build just moved behind the divider — every candidate narrows the field toward one day that fits everyone.`, plain:true});
 }
 function unbuild(cid,vid){ const st=S.cats[cid]; st.build=st.build.filter(x=>x!==vid); renderAll(); }
 function ask(name){ toast({tt:`Your inquiry with ${name}`, ms:'Shortlisted vendors got here BY inquiring — so this opens your existing thread: your spec, their quote, and any replies. A vendor you have never talked to shows "Inquire" instead and opens the fresh composer.', plain:true}); }
@@ -774,6 +820,15 @@ function renderPlansView(){
   document.body.appendChild(el);
 }
 
-function renderAll(){ renderStrip(); renderBench(); renderTeam(); renderPlans(); renderOverlay(); renderPlansView(); }
+function renderDateWin(){
+  const el=document.getElementById('datewin'); if(!el) return;
+  const w=sharedWindow();
+  if(w.source==='locked'){ el.innerHTML=`<div class="dw locked">📅 Your date is locked: <b>Sat · Sep 12, 2027</b> — every rail now shows only who can make it.</div>`; return; }
+  if(w.source==='open'){ el.innerHTML=''; return; }
+  if(w.days.length===0){ el.innerHTML=`<div class="dw none">⚠ <b>No single date fits everyone in your build.</b> Two candidates never share a free day — swap one (the shipped Compare rule: "No single date works — swap one").</div>`; return; }
+  if(w.days.length===1){ el.innerHTML=`<div class="dw one">🎯 <b>Your build has converged: only ${w.days[0]} works for everyone.</b> Lock the venue to make it official — the bench is now filtered to that day.</div>`; return; }
+  el.innerHTML=`<div class="dw">📅 Your build's shared dates: <b>${w.days.join(' · ')}</b> — each candidate you add narrows this until one day fits everyone.</div>`;
+}
+function renderAll(){ renderStrip(); renderBench(); renderDateWin(); renderTeam(); renderPlans(); renderOverlay(); renderPlansView(); }
 S=fresh(); renderAll();
 </script>

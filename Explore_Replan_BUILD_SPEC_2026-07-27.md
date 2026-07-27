@@ -64,3 +64,31 @@ Live path `/dashboard/[eventId]/vendors` (BUDGET_BUILD ON in prod): single-scrol
 ## 5 · Coordination + hygiene
 - Booking session (`local_46eb5ee5…`, "Booking") owns the service Details/Inquiry screens + the `package_item_id→service_id` blocker — already synced via 2 session messages + log rows. Serialize any shared-file work.
 - Corpus after each PR: changelog fragment (root `changelog.d/`), DECISION_LOG row on landings worth recording; update `[[project_setnayan_explore_ia_replan]]` memory status as slices land.
+
+## 6 · Amendment (owner, same day): BUILD-CANDIDATE SCHEDULE CONVERGENCE
+> Owner: "when they add someone to the build, the options on the bench change — some become
+> incompatible to the schedules of the service chosen. the goal is to bring everything down to
+> one choice." Confirmed NOT previously in effect; now specced + in the prototype.
+
+**Decision #12 — compatibility has TWO tiers:**
+- **SOFT (build tier, reversible):** the build's **shared-date window** = intersection of every
+  locked + candidate vendor's calendar (`getCommonAvailableDays` — the exact engine behind the
+  Compare availability footer and `VendorAvailabilityIntersection`). A bench vendor with no free
+  day inside the window gets an **amber** "No shared date with {candidate}" badge, disabled
+  Add-to-build/Lock, and sinks behind a **"Doesn't fit your build"** divider (before the red
+  "Not available" one). Removing the clashing candidate restores it instantly.
+- **HARD (anchor tier):** unchanged §1.2 — locked date/venue → red, "Booked on your date" /
+  "Beyond reach".
+- **The convergence banner** (between strip and bench + mirrored in Your team): open → hidden ·
+  narrowing → "📅 Your build's shared dates: Sep 12 · Sep 26" · one left → "🎯 Only {day} works
+  for everyone — lock the venue to make it official" · empty → "⚠ No single date fits — swap a
+  candidate" (the shipped Compare conflict copy). Cards grow a tiny "Free: {days}" mono line.
+
+**Build-order impact — PR-G SPLITS:**
+- **PR-G1 (soft tier + banner + card date-line) — UNBLOCKED:** no reservation promise is made
+  (it reasons over vendor-declared calendars, display-only), so it does NOT wait on the
+  lock-reserves-date gate. Needs the availability read path healthy — fix the `/find-date` 42703
+  dead pool first (same query family). Feeds off `getBatchVendorAvailableDays` (already batched
+  on the bench, `page.tsx:894-926`) extended from the single event-date probe to the window set.
+- **PR-G2 (hard anchor grey-out) — stays ⛔ GATED** on the 2026-07-26 lock-reserves-date owner
+  decision.
