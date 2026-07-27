@@ -145,6 +145,41 @@ COMMIT;
 
 ### M2 — `package_credit_options_and_policy`
 
+> ## 🚨 M2 CANNOT BE RUN AS WRITTEN — reconcile first (verified against prod 2026-07-26)
+>
+> M2 was drafted against `setnayan-platform-wt-first5 @ 5610d218a`, **before**
+> `20271006413374` shipped `vendor_package_item_options`. That table now exists in prod, so:
+>
+> | M2 says | Shipped reality | Consequence |
+> |---|---|---|
+> | `CREATE TABLE IF NOT EXISTS vendor_package_item_options (…)` | the table **exists** | **SILENT NO-OP.** `pricing_basis`, `per_pax_delta_centavos` and `min_pax` are never created and the migration still reports success. |
+> | `label`, `is_active` | `option_label`, `is_available` | wrong column names |
+> | `unspent_credit_policy IN ('expire','refund')`, DEFAULT `'expire'` | `IN ('expiring','refundable')`, DEFAULT `'expiring'` | the ADD CONSTRAINT fails |
+> | `price_delta_centavos` **SIGNED** | live `CHECK (price_delta_centavos >= 0)` | fails — **and see below** |
+> | `item_id ON DELETE RESTRICT` | shipped `ON DELETE CASCADE` | not changed by an `IF NOT EXISTS` |
+>
+> **Use the SHIPPED names** (`option_label` / `is_available` / `'expiring'` / `'refundable'`).
+> They are in prod, in `lib/package-credit.ts`, in `lib/vendor-packages.ts` and in the tests;
+> the spec's names are a drafting artifact from before the table existed. Anything genuinely new
+> (`pricing_basis`, `per_pax_delta_centavos`, `min_pax`, `requires_option_choice`,
+> `is_archived`, `credit_price_centavos`, the gross/payable split, the ≤50% budget ceiling) must
+> be an **`ALTER TABLE … ADD COLUMN IF NOT EXISTS`**, never a `CREATE TABLE`.
+>
+> ### ⛔ ONE OWNER DECISION IS BURIED HERE — signed deltas
+>
+> M2 marks `price_delta_centavos` and `per_pax_delta_centavos` **SIGNED**, i.e. an option may be
+> NEGATIVE. Migration `20271006413374` refused exactly that on purpose, and said why:
+>
+> > *"A negative delta would be a **downgrade credit** — a genuinely different product decision
+> > (it would let a REQUIRED line mint credit), so it is refused at the DB until an owner
+> > explicitly asks for it."*
+>
+> So M2 silently reverses a deliberate, documented refusal on a **money** rule. **Do not
+> implement signed deltas without the owner saying so in as many words.** Per-head upgrades
+> (`pricing_basis='per_pax'`) do **not** require signed deltas and can ship without touching this.
+>
+> _(Reconciliation added 2026-07-26 after M1 + §6.4 landed. M2's own body below is unchanged.)_
+
 Changes from the draft, all forced by the review:
 
 ```sql

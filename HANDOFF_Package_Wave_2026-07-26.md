@@ -311,7 +311,25 @@ accepted, but should see.
 > send-path ledger row either frees the vendor forever or hard-errors into no charge. Fix with the
 > same change.
 
-### 6.4 Package fee base + the bypass — ⏳ PREREQUISITE DONE, entry point still to build
+### 6.4 ✅ DONE 2026-07-26 — the fee fires once, on the anchor
+
+Shipped in **[#3765](https://github.com/iscasasola/setnayan-platform/pull/3765)**, on top of
+**[#3762](https://github.com/iscasasola/setnayan-platform/pull/3762)** (M1, the anchor model) and
+**[#3753](https://github.com/iscasasola/setnayan-platform/pull/3753)** (one pricer). Live in prod.
+
+- `lockPackage` now calls `collectBookingFeeAtLock` on the **anchor**, whose `total_cost_php` is
+  the whole agreed total. Verified: a ₱145,000 package bills **₱5,450** (the taper), not ₱4,500
+  off one ₱90,000 line.
+- `booking_fee_open_lock_charge` **refuses a covered row** (`covered_row_no_fee`). A DB guard, not
+  careful callers: the RPC does NOT skip a NULL total — it COALESCEs to 0, still writes a ledger
+  row and still **freezes a free-5 ordinal**, so a covered row would have consumed a free booking
+  permanently and silently.
+- `primary_event_vendor_id` was a heuristic that could land on a money-less covered row; it is now
+  the anchor by construction.
+- Exactly **one** charge per package booking, asserted.
+
+_Superseded text:_
+### ~~6.4 Package fee base + the bypass~~
 
 **[#3753](https://github.com/iscasasola/setnayan-platform/pull/3753) landed the prerequisite.** The fee
 base is `event_vendor_packages.total_locked_centavos`, and that number was being computed in **two
@@ -369,7 +387,21 @@ different package*). Needs a child table with a per-line status.
 ### 6.8 Card actions on the service card
 Today's card has **zero** controls. Ship the two-action model (§4a).
 
-**`Lock this` is UNIVERSAL — owner-locked 2026-07-26** ("lock it. yes direct lock"). The product
+**`Lock this` is UNIVERSAL — owner-locked 2026-07-26** ("lock it. yes direct lock").
+
+> ## ✅ THE CAPACITY QUESTION BELOW IS ANSWERED (owner, 2026-07-26)
+> **"Lock will only be locked when the vendor approves their payment."**
+>
+> ⇒ the couple's Lock is a **CLAIM**, not a confirmed booking. That is branch **(b)** below —
+> keep white unlimited, stop promising exclusivity — and it needs **no capacity-model change**:
+> the 2026-06-12 lock stands, the date is genuinely held only at `deposit_paid`.
+>
+> **What must change is the COPY, not the schema.** No couple-facing surface may imply the date
+> is secured at Lock. Do not ship the button saying "the date is yours".
+>
+> Nearest existing mechanism: the `vendor_locked_qr` RPC (`20270414692373:171`) — a vendor-issued
+> QR promotes the row to `deposit_paid` and freezes the payment plan. Whether vendor
+> payment-approval reuses that or gets its own action is **undecided**; the rule is not. The product
 review's adaptive alternative is rejected.
 
 > ⚠ **BUT — one thing must be settled first, and it is a money/trust issue.** The owner's stated
