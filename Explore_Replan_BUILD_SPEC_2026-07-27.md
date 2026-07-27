@@ -227,3 +227,21 @@ directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card vari
   match the *authoritative* check — a couple renaming "Casa Amara" to "CA Catering" to dodge the
   nudge changes nothing: the moment the real account claims, identity is exact and the
   found-record is consulted. No found-record on the claiming account → the sync stays free.
+
+## 11 · The ⓘ pattern — documentation contract (owner: "make sure (i) is well documented")
+The replan leans on ⓘ toggles to keep surfaces clean ("We want this out, but Explore can be kept
+with an (i) to hide the other information"). Rules for the build:
+1. **Page-level ⓘ** beside the Explore title replaces ALL explanatory chrome. Its panel must
+   cover: what this page does (browse folders → categories → vendor carousels) · the state-glyph
+   legend (○ not started · ◔ exploring · ◕ in build/pending · ● locked · ✓ covered · – skipped) ·
+   the 4-step lock handshake in one line · what the Coverage Strip and convergence banner mean.
+2. **Per-category ⓘ** → the plan-group `hint` (bridge per §5.1); tile-level overrides are
+   authored in the Taxonomy Studio, which becomes the single editing home for that copy.
+3. **Every ⓘ copy string lives in ONE module** (`lib/explore-info-copy.ts`), not scattered in
+   JSX — so copy edits are one-file PRs and the corpus can mirror it. The module header links
+   back to this spec section.
+4. **Corpus mirror:** the shipped ⓘ texts get a dated reference doc in
+   `Design_Explore_Replan_2026-07-27/` on first landing (and on any copy change), so the
+   documented copy and the live copy can't silently diverge.
+5. Accessibility: each ⓘ is a real button (aria-label, focus ring); the panel is dismissible;
+   state is not persisted (always starts closed — it's help, not a setting).
