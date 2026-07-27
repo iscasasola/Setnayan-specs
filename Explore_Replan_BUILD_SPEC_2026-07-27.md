@@ -955,3 +955,197 @@ say *"free within 15 km, chargeable beyond"* — which is how PH suppliers actua
   never a penalty for not having filled it in yet.
 - **⚠ Deliberate consequence:** once inner/outer exist, the "Nearest to your venue" lens (§15)
   should rank on **"free-transport first"**, not raw km — that is the couple-meaningful ordering.
+## 18 · The budget planner — booked + manual, one truthful total
+
+> Owner: *"how can we make this the best budget planner for them with what they booked with us and what they manually purchased?"*
+
+**Rule 0 · what exists · what's missing · the delta.**
+**Exists:** a mature, LIVE ledger — `lib/budget.ts` (788 lines: snapshot, per-vendor itemization, `.ics`), `lib/budget-allocation.ts` + `-data.ts` (the median/cushion/pin engine), `lib/checklist-budget.ts` (3-tier health), `lib/budget-overspend.ts` (absorption planner), the `/dashboard/[eventId]/budget` page (649 lines), the Merkado lens, `event_vendor_line_items` + `event_vendor_payments` (add + delete + R2 receipt + Realtime).
+**Missing:** unification. **Seven** surfaces compute "the budget" with **five incompatible formulas**; the two halves the owner names are structurally split — Setnayan-booked spend (`orders`) lands in exactly ONE stat, and "manually purchased" can only be recorded by inventing a fake vendor.
+**Delta:** one resolver + one nullable FK + one page-level "Add a cost" form. **No new engine, no new page, no new planner.** The corpus already decided all of this on 2026-07-08 (`02_Specifications/Budget_Product_Definitive_Plan_2026-07-08.md` P1–P4) and none of it shipped.
+
+---
+
+### 18.1 · Reconciliation comes first (this is worth more than any feature)
+
+Today `/budget` prints two different totals eight inches apart on the same screen. Verified on prod event `044f7e64…`: **"Total to pay ₱80,000"** directly above **"Committed ₱0"** and the empty state *"You're still choosing vendors"* — and the ₱80,000 vendor's card is not rendered, so the couple cannot find, edit, or delete the number driving their own headline. Nothing else in this section matters until that stops.
+
+**Ship one resolver: `apps/web/lib/budget-truth.ts` → `resolveEventMoney(eventId)`.** Every surface imports it; no surface does its own arithmetic ever again. It returns:
+
+```
+{ estimated, committed, paid, stillOwed, byBucket[], lines[], sources[], warnings[] }
+```
+
+**Source of truth, per part of the total** (all columns already exist unless marked NEW):
+
+| Part of the money | Source of truth | Rule |
+|---|---|---|
+| Booked with Setnayan | `orders` · `confirmed_total_php ?? requested_total_php` | `paid`/`fulfilled` → committed **and** paid. `pending_payment` → committed, unpaid. Enters the ledger as **read-only rows**, not just a stat. |
+| Marketplace package booking | `event_vendors.total_cost_php` on the row where `package_role = 'anchor'` | **Never** re-sum `vendor_package_items`. Covered rows (`package_role='covered'`) contribute **₱0**. |
+| Marketplace service booking | `event_vendors.total_cost_php` once ≥ `contracted`; the listing's `starting_price_php` **as an estimate** before that | Estimate is labelled, never committed. |
+| Off-platform vendor | `event_vendor_line_items` if any exist, else `total_cost_php` | Branch test must be `manualItemized !== 0`, **not `> 0`**. |
+| Extras, add-ons, change-order credits | `event_vendor_line_items.amount_php` (signed) | Negative = credit. Already unconstrained since `20270323841750`. |
+| Transport + crew meals | `event_vendors.transport_php` + `food_allowance_php` | **Add both to `fetchBudgetSnapshot`'s SELECT** (`lib/budget.ts:568` names only `total_cost_php`). `crew_meal_covered=true` already nulls the allowance. |
+| Money already handed over | `event_vendor_payments.amount_php` (+ backfilled `deposit_paid_php`) | ₱111,500 of recorded deposits are currently counted by nothing. |
+| Bought outside, no vendor | `event_vendor_line_items` with **NEW** nullable `vendor_id` | §18.2. |
+| Paperwork | `estimatePaperworkCentavos()` (`lib/checklist-budget.ts:95-109`) | Estimate-only, never committed. §18.3. |
+| The target | `events.estimated_budget_centavos` | Unchanged. |
+
+**Counting law:** one peso, one row, one `costKey`. The resolver excludes `archived_at IS NOT NULL`, excludes `package_role='covered'`, and never mixes a vendor's headline with their line items.
+
+**The twelve defects the resolver must close** (all code-confirmed; ranks are the audit's):
+
+| # | Defect | Fix |
+|---|---|---|
+| R1 | Strip "Committed" and card "Total to pay" are different arithmetic over different row sets — **live in prod** | Both read the resolver. |
+| R2 | Checklist buffer **skips** committed vendors with empty `covers_plan_groups` and substitutes a market guess — **₱810,000 wrong today** (12 rows) | Drop the `if (groups.length === 0) continue;` skip (`checklist-budget.ts:186`); unmapped commitments fall into an "Other" bucket, counted. |
+| R3 | Package cascade counts the price **N+1 times** (anchor + every covered row) — latent, fires on the first lock | Read `package_role` (written since `20271009160000`, read by nothing). |
+| R4 | Package price summed from `replacement_value_centavos`, not the agreed `total_price_centavos`; optional/conditional items billed in | Use the anchor total. |
+| R5 | Transport + crew meals counted by Merkado + checklist, invisible to `/budget` | Add to the SELECT. |
+| R6 | `deposit_paid_php` counted as paid by nothing | Backfill into `event_vendor_payments` (BUD-4), then stop writing it. |
+| R7 | Setnayan SKU spend in 1 of 7 surfaces | Read-only ledger rows (BUD-7). |
+| R8 | Archived (rejected) vendors still spend the couple's money on 6 surfaces | Filter `archived_at`. |
+| R11 | `paid + stillOwed ≠ total` when any vendor is overpaid (per-vendor clamp, unclamped sums) | Resolver emits an explicit `overpaidPhp` and the UI names it. |
+| R12 | A credit-only manual line is silently discarded on package vendors; credits > charges reverts a vendor to its stale headline | `!== 0`. |
+| R13 | Payments attributed to catalogue items (`vc:` → `line_item_id = NULL`) can never retire a milestone | Give catalogue items a real line row on first payment, or match on the stashed label. |
+| R14 | The green "Live" dot watches only payments + line items — goes stale on any vendor/catalog edit | Subscribe to `event_vendors` too, or downgrade the badge's promise. |
+
+Delete or redirect afterwards: `snapshot.totals.upcomingDueAmount` (a fourth "upcoming" definition, rendered only by the marketing tour), and the bespoke `remainingPhp` math inside `BudgetSummaryStrip`.
+
+---
+
+### 18.2 · The manual half — a cost that belongs to no vendor
+
+**The blocker:** `event_vendor_line_items.vendor_id UUID NOT NULL` (migration `20260513110000`). Every peso must hang off an `event_vendors` row, that row must be promoted to `contracted` before the couple can even see the add-item form, and creating it lights up a Coverage Strip tile — so "church fee ₱10,000" makes Ceremony Venue read as *covered*.
+
+**Schema delta (one migration, BUD-4):**
+
+```sql
+ALTER TABLE public.event_vendor_line_items ALTER COLUMN vendor_id DROP NOT NULL;
+ALTER TABLE public.event_vendor_line_items
+  ADD COLUMN estimated_php  numeric,                        -- the guess
+  ADD COLUMN bucket         text,                           -- plan-group id, nullable
+  ADD COLUMN source         text NOT NULL DEFAULT 'manual', -- manual | setnayan_order | paperwork | vendor_catalog
+  ADD COLUMN external_ref   text;                           -- order id / paperwork id, for read-only rows
+-- same DROP NOT NULL on event_vendor_payments.vendor_id
+-- RLS + REVOKE ALL per the default-ACL rule; policies key on event_id, which both tables already carry.
+```
+
+`amount_php` becomes nullable **only** for `estimated_php IS NOT NULL` rows (CHECK: at least one of the two is present). Keep `label` (≤64), `due_date`, `sort_order`, `proof_r2_key`, the payments FK — all reused as-is.
+
+**Estimated vs committed — the distinction the owner asked for, carried by two columns, not a new state machine:**
+
+| State | How it's stored | How it behaves |
+|---|---|---|
+| **Estimated** — a licence fee you'll owe | `estimated_php` set, `amount_php` NULL | Counts toward *Projected*. **Never** toward Committed or Still owed. Always rendered with the estimate mark (§18.5). No payment reminder. |
+| **Committed** — the price is agreed | `amount_php` set | Counts toward Committed and Still owed. Due date arms the reminder. |
+| **Paid** — money handed over | `event_vendor_payments` row(s) against the line | Reduces Still owed. Receipt image optional, already supported. |
+
+Promotion is one tap: *"Confirm the amount"* moves the number from `estimated_php` to `amount_php` and keeps both, so the couple can see "you estimated ₱10,000 · you paid ₱12,500."
+
+**What the couple types** (new page-level *"Add a cost"* on `/budget` — today the only entry is buried inside a vendor card):
+
+1. **What was it?** — free text, ≤64 (`Marriage licence`, `Church fee`, `Tips`, `Permit`)
+2. **How much?** — ₱, with a two-way toggle: **"This is an estimate"** / **"This is the agreed price"**
+3. **When is it due?** — optional date (arms reminders + `.ics`)
+4. **What's it for?** — optional bucket picker (plan-group list, defaults to *Other*) so it lands in the same category rollup as vendor spend
+5. **Already paid?** — optional amount + date + method + receipt image (reuses `logPayment` exactly)
+6. **Attach to a vendor?** — optional; blank = vendor-less, which is the whole point
+
+Everything flows into the same `resolveEventMoney` totals through the same table. No fake vendor, no status promotion, no coverage-tile pollution.
+
+**Also fix while in here:** V1 is add + delete only, so a typo means delete-and-retype — which destroys the attached receipt. Add edit-in-place for `label`, amounts and `due_date` (the corpus P1 asks for it). And the line-item FK is `ON DELETE CASCADE` — deleting a vendor hard-deletes their entire payment history with no tombstone. **Owner decision, §18.7.**
+
+---
+
+### 18.3 · Paperwork and tradition costs
+
+**Becomes money (as ESTIMATES, promotable):** the paperwork pipeline. `event_paperwork` (`20260604050000`) tracks marriage licence, PSA/CENOMAR ×2, pre-Cana, baptismal/confirmation, banns, canonical interview — and has **no cost column at all**. Meanwhile `estimatePaperworkCentavos(ceremonyType)` already exists, already reduces the checklist buffer, and is **exported for a budget-page display that never shipped** (`checklist-budget.ts:301-305`) — no importer exists outside that file.
+
+The wiring, no new numbers invented: on the budget page, each incomplete `event_paperwork` row renders as an **estimated** cost line (`source='paperwork'`, `external_ref = paperwork_id`) using the shipped ladder — ₱1,230 base (licence ₱500 + CENOMAR ₱365×2), +₱13,000 church/religious (parish ₱10,000 + pre-Cana ₱3,000), +₱2,000 civil. Every one is labelled *"Estimated — confirm when you pay."* Paying it promotes the line to committed with the real figure, and the same figure stops being guessed on the checklist card. **Do not** add a cost column to `event_paperwork`; the money lives in the ledger, keyed by `external_ref`.
+⚠ The 2026-06-17 decision says paperwork is estimated from *ceremony_type **+ region***; the shipped function ignores region entirely. Ship region-blind, label it as a national estimate, and note the gap.
+
+**Stays informational — do not monetize:**
+- **Mahr** — deliberately non-billable. `budget/page.tsx:107-115` states it: it is hers alone and is not a Setnayan or vendor charge, so it never enters the budget math. `events.mahr_description` is free TEXT with no amount field, by design. Keep the emerald card; keep it out of every total. **Do not add an amount field.**
+- **Ang pao / lauriat** — the card already refuses to print a ₱ figure because per-table rates are admin-managed and out of scope; its only derived number is `ceil(pax / 10)` tables. Leave it. If the couple books a lauriat venue it enters the ledger as a normal vendor commitment, from that vendor's price — not from a guessed per-table rate.
+- **Cash gifts / e-gift** — `event_egift_methods` says it in its own header: no amount column, no ledger, nothing moves value. The budget stays **expense-only**. Two shipped checklist tasks (`who_pays`, `cash_envelopes`) already deep-link to `/budget` where no contributions feature exists — either build P4 or retarget those hrefs. **Owner decision, §18.7.**
+
+---
+
+### 18.4 · What the couple sees — one job per surface
+
+Budget currently has **no sidebar doorway** (removed 2026-07-10 as "redundant" once it lived inside Merkado). Three live entries remain: the Merkado Budget tab link, the checklist health card, and direct links. Per the wayfinding rule a page ships with its doorway — and the moment `/budget` becomes the single truth, "redundant" stops being true.
+
+| Surface | Its ONE job | The number it may show | What it must stop doing |
+|---|---|---|---|
+| **`/budget` — the ledger** | Every peso, editable, payable, exportable | `Committed ₱X · Paid ₱Y · **Still owed ₱Z**` + `Projected (estimates) ₱E` shown separately | Stop printing a second, different total in the strip |
+| **Merkado "Your team" tiles** (Locked · In-build · Budget · **Buffer**) | Forward-looking: *what this build would cost if you lock it* | Buffer, explicitly labelled **"if you lock these"** | Stop reading as money owed; stop turning red merely because an expensive option was shortlisted (`budgetStatus` keys off `rangeHi`, the priciest shortlist end) |
+| **Merkado Budget lens** | The next 3 payments + the doorway | `Still owed` from the resolver, and nothing else | Stop computing its own total (it is byte-identical to a formula that disagrees with the strip); stop rendering raw ISO dates |
+| **Checklist budget-health card** | One health sentence + the doorway | best/worst-case buffer from resolver committed + benchmark projection, both labelled | Stop dropping unmapped commitments; stop being the only place tiers are computed and never shown |
+| **Allocation planner ("Suggested budget split")** | The **plan** — targets per category | Target vs **actual** per leaf, from the resolver | Stop calling slider-vs-suggestion "over budget" (it cannot see a single booked vendor — `pinnedAmountPhp` is hardcoded `null`) |
+
+**Doorway:** restore a sidebar item **"Budget & payments"** pointing at `/budget`, keep the Merkado tab as the in-context lens. It's a one-line change in `lib/customer-menu.ts:317-321` — but it reverses a dated owner decision, so it is **owner-gated** (§18.7).
+
+**Feed the plan the booked money.** The allocation engine already implements `fixedPhp` (Setnayan-SKU carve-out) and `pinnedAmountPhp` — the resolver at `budget-allocation-data.ts:325-327` returns `null` for both with a "wired in a follow-on" comment. Feed `fixedPhp` from resolver committed per leaf and the 2026-06-05 "fixed-then-proportion" lock finally works, with no engine change. Also persist pins: they live in React state only, so the couple's split resets on every reload even though it was written to `budget_allocation_decisions` — and if they never press *Save plan*, the `share_budget_band` vendor toggle silently shares nothing.
+
+---
+
+### 18.5 · Honesty rules (binding on every slice in this section)
+
+1. **No invented figures.** Every peso traces to a row a human entered or a vendor published. The only derived numbers permitted are: benchmark medians from real `vendor_services` prices, the paperwork ladder, and the pax scale — all three carry a source.
+2. **Estimates are marked, always.** Any figure not from `amount_php`, `event_vendor_payments`, or a paid `order` renders with the estimate mark and the words "estimate" or "typical" in the same line. Never bold, never in a headline total.
+3. **Estimates never enter Committed or Still owed.** They live in a separate `Projected` figure. A couple must never be told they owe money nobody has agreed.
+4. **"Over budget" is said once, in one place, with one meaning:** *what you have actually agreed to exceeds your target.* Only the resolver may say it. Shortlist ranges, slider deviations and benchmark projections may say "this build would run over" or "typically more than you set aside" — never "over budget".
+5. **Unknown is printed as unknown.** A category with no benchmark and no vendor median shows "no typical price yet", not ₱0. Twelve of 26 leaves are unseeded — including Ceremony Venue, a Tier-2 category — and they currently cost ₱0 in the buffer, silently.
+6. **The totals must reconcile on screen.** `Committed = Paid + Still owed + Overpaid`. If a vendor is overpaid, name it; never let three headline figures quietly stop adding up.
+7. **"Live" means live.** The badge only appears when the subscription covers every table feeding the number under it.
+8. **Nothing is deleted silently.** Removing a vendor must not vaporize their payment history without telling the couple what it is about to erase.
+
+---
+
+### 18.6 · Build order
+
+Each = one worktree, one PR, flag-dark behind `NEXT_PUBLIC_BUDGET_TRUTH_ENABLED` (new; mirror `explore-replan-flag.ts`). **BUD-1 is a hard prerequisite for everything below it.**
+
+| PR | Size | What | Depends on |
+|---|---|---|---|
+| **BUD-1 · The resolver** | **M** | `lib/budget-truth.ts` + unit tests. Read-only, no schema. Fixes R3/R4/R5/R8/R11/R12 inside it. Ships with a parity harness that prints old-vs-new per surface for a sample of prod events. | — |
+| **BUD-2 · `/budget` onto the resolver** | S | Strip + live card + per-vendor cards read one number. **Kills R1 (live prod defect).** Show all vendors with money, not just `contracted` ones. | BUD-1 |
+| **BUD-3 · Checklist health onto the resolver** | S | Remove the empty-`covers_plan_groups` skip. **Kills R2 (₱810k defect).** Surface the tiers that are already computed and thrown away. | BUD-1 |
+| **BUD-4 · Vendor-less costs (migration)** | M | Nullable `vendor_id` (line items + payments), `estimated_php`, `bucket`, `source`, `external_ref`, CHECK, RLS + `REVOKE ALL`. Backfill `deposit_paid_php` → payments (**R6**). **Verify the OBJECT, not `schema_migrations`.** | BUD-1 |
+| **BUD-5 · "Add a cost" + edit-in-place** | M | Page-level form (§18.2), estimate/agreed toggle, bucket picker, "Confirm the amount". | BUD-4 |
+| **BUD-6 · Paperwork as estimated lines** | S | Wire the already-exported `estimatePaperworkCentavos`; promote-on-pay via `external_ref`. | BUD-5 |
+| **BUD-7 · Setnayan orders as ledger rows** | S | `source='setnayan_order'`, read-only, in every total. **Kills R7** — the "booked with us" half. | BUD-4 |
+| **BUD-8 · Surface jobs** | M | Merkado lens → one number; Your team buffer relabelled "if you lock these"; planner gets plan-vs-actual + `fixedPhp` fed from committed + pin persistence; Realtime widened (**R14**); catalogue-payment milestones retire (**R13**). | BUD-2 |
+| **BUD-9 · Payment reminders** | S | Free transactional `payment_due` / `payment_overdue` types + day-before schedule. **⛔ owner-gated — reverses a shipped decision.** | BUD-4 |
+| **BUD-10 · Export** | S | CSV/print of the full ledger with the estimate column intact. Reuse the `.ics` route's row selection. | BUD-2 |
+
+**Owner decisions — implementer must not choose these:**
+
+1. **Is Committed = package + transport + crew meals?** Two shipped surfaces say yes, four say no. *(Recommend yes — it is what the couple will actually pay.)*
+2. **Payment-due reminders: free or AI-gated?** The corpus decided FREE transactional on 2026-07-08 ("the AI watch-guard adds the coaching — paid"). What shipped 2026-07-22 is the opposite: GRD-01 lives inside the paid AI sweep, gated *"No AI → no guard notifications, ever."* A couple without Setnayan AI gets **no payment reminder at all**. This is a revenue call.
+3. **Restore the Budget sidebar item?** Removed 2026-07-10 as redundant; the redesign makes it the single truth.
+4. **Contributions / who-pays / cash gifts — in or out?** Two shipped checklist tasks already point at a feature that does not exist. Either build P4 or retarget the links. Note the deliberate design lock: e-gift stores no amounts, so this is a real new model, not a wiring job.
+5. **Are the paperwork numbers publishable?** ₱500 licence · ₱365 CENOMAR · ₱10,000 parish · ₱3,000 pre-Cana are hardcoded with no cited source and no region axis. Bless them as national estimates, replace them, or show ranges.
+6. **Seed or hide.** 12 of 26 benchmark leaves are NULL and `wedding_season_factors` has shipped empty for seven weeks (reader live, factor always 1.0). Seed via `/admin/budget-planner`, or the split stays wedding-shaped and those categories stay invisible.
+7. **Vendor delete cascades away payment history.** Tombstone the ledger, or block deletion when payments exist?
+
+**Verification, every slice:** run the BUD-1 parity harness before and after; assert `Committed = Paid + Still owed + Overpaid` on every fixture; confirm the migration's **objects** exist in prod (`information_schema`), not just the ledger row; check `/budget`, the Merkado lens, the checklist card and the planner all print the same Committed figure on the same event.
+
+**Corpus grounding (dated, outranks handoffs):** `02_Specifications/Budget_Product_Definitive_Plan_2026-07-08.md` (P1–P4 — this section is P1 + the manual half) → `02_Specifications/Budget_Genericization_Design_2026-07-08.md` (per-event-type; only PR-B1 shipped, and `allocation-actions.ts:61` still hardcodes `event_type:'wedding'`) → `02_Specifications/Adaptive_Checklist_Design_2026-06-17.md` §5 (tiers · paperwork · buffer · the three over-budget options that were never built) → `03_Strategy/Budget_Planner_Allocation_Engine_2026-06-05.md` (median · cushion · fixed-then-proportion). `0007_budget_expenses/0007_budget_expenses.md` is an archive stub — do not re-expand it; its live sibling is `0007_Crew_Meal_Line_Discovery_2026-07-08.md`.
+### 18.x · OWNER AMENDMENT (2026-07-27, after the design was drafted)
+Owner, looking at the "Your team" money tiles: *"when they build their plans this also shows what the actual budget looks like with that plan. so maybe we can use budget planner somewhere here as well?"*
+
+**Adopt it — and sharpen it.** The two halves are already built and sitting on the wrong pages:
+- `lib/budget.ts` **TRACKS** what booked vendors actually cost.
+- `BudgetAllocationPlanner` / `lib/budget-allocation.ts` **RECOMMENDS** what each category *should* cost — "a ₱ target + shopping range per leaf, BEFORE the couple picks anyone" (its own header).
+
+The recommending half lives on the buried `/budget` page; the picking happens in the Marketplace. So at the moment of choosing a caterer the couple is told *"₱450,000 to spare"* but never *"catering should be about ₱180,000."* Worse: **that per-category target is ALREADY reaching the Marketplace** — it is what computes the "Fits budget" / "Over budget" badge on every vendor card (`vendor-budget-fit.ts` → `budget_fit_ratio`). The app does the maths, discards the number, and shows a tick.
+
+**Therefore:**
+1. **Re-job the Marketplace's Budget slot.** It is payments-only today (`merkado-budget-lens.tsx`), which duplicates `/budget` and is the least useful thing at the point of decision. It should hold the **allocation view**: per-category target vs what this build actually costs. Payments stay one click away.
+2. **Show the number where the choosing happens.** On the category row: "Catering · target ₱180,000". "Over budget" becomes "₱50,000 over your catering target".
+3. **The buffer becomes the roll-up** of those per-category targets rather than a bare subtraction.
+4. ⚠ **Keep the guide-never-a-rule stance** (the planner's own design doc §1): nothing blocks, clamps or disables a vendor for being over target; the couple's own number always wins. A budget tool that refuses choices is one couples stop telling the truth to.
+
+This does not change §18's build order — it is the same `resolveEventMoney` resolver feeding one more surface. It changes the FRAMING: the job is not "add a budget planner to the Marketplace", it is **"stop separating what things should cost from where you choose them."**
