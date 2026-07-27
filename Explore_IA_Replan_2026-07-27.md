@@ -232,3 +232,13 @@ foundations, so each is small:
 
 Build-order impact: folds into slices A (done/decisions) and C (Coverage Strip + folder
 summaries); the ⓘ is a one-liner in the bench row component.
+
+4. **Two-speed card actions (owner, prototype session): "Lock this means it is finalized — add
+   them to the builder so they can compare."** The vendor card's PRIMARY action is **"＋ Add to
+   build"** (the soft, reversible `event_build_picks` candidate state — ◕); **"Lock now — it's
+   final"** is the quieter secondary. Build candidates surface in "Your team" under
+   **"In your build — ready to lock"** with a per-row Lock ✓ (the shipped `BuildLocked` pattern),
+   count into the buffer as *planned* spend, and are what saved Plans snapshot — so a couple can
+   carry two caterer candidates, save "Plan A"/"Plan B" around them, compare side by side
+   (locked rows stay pinned), and lock the winner. Hard-single categories hold ONE candidate at
+   a time (adding another swaps it). Locking removes the pick from the build (candidate → final).
