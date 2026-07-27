@@ -213,3 +213,17 @@ directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card vari
   `attribution_disputes` (vendor_profile_id, booking ref, status auto_accepted → under_review →
   upheld/rejected, created_at); the auto-accept check is a simple per-vendor count. Part of
   PR-J.
+- **CLAIM-SYNC is the AUTHORITATIVE attribution checkpoint (owner).** Two outcomes when the
+  claim QR is scanned:
+  1. **Vendor has NO Setnayan account → sync is FREE, always.** They onboard through the claim
+     (acquisition funnel) — genuinely the couple's own vendor brought INTO the app; the
+     "unknown ⇒ import ⇒ free" fail-safe made flesh.
+  2. **Vendor claims with an ACTIVE EXISTING account whose profile the couple had already
+     viewed** (found-record: `view_count > 0`, `first_found_at` before the manual add — the §10
+     timing guard applies unchanged) → **they have been found**: attribution flips to
+     setnayan_sourced at claim time, the lead alert + receipts fire, the syncing fee applies at
+     handshake acceptance, and the dispute ladder is available.
+  This makes the add-time NAME match the early *nudge* (best-effort) and the claim-time ACCOUNT
+  match the *authoritative* check — a couple renaming "Casa Amara" to "CA Catering" to dodge the
+  nudge changes nothing: the moment the real account claims, identity is exact and the
+  found-record is consulted. No found-record on the claiming account → the sync stays free.

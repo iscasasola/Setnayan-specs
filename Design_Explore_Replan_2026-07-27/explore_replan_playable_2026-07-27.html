@@ -180,6 +180,10 @@
   .modal .m1{background:var(--gold);color:#fff}
   .modal .m2{border:1px solid var(--line)}
   .mcancel{display:block;width:100%;text-align:center;font-size:11px;color:var(--ink-soft);text-decoration:underline;margin-top:10px}
+  .qrmodal{text-align:center}
+  .qrwrap{display:flex;justify-content:center;margin:6px 0 10px}
+  .qr{width:168px;height:168px;fill:var(--ink);background:var(--paper);border:8px solid var(--paper);border-radius:12px;box-shadow:0 0 0 1.5px var(--gold)}
+  .claimlink{font-size:11.5px;color:var(--gold-deep);background:var(--champagne);border-radius:8px;padding:7px 10px;margin-bottom:12px;word-break:break-all}
 
   .side{display:flex;flex-direction:column;gap:14px;position:sticky;top:14px}
   .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px}
@@ -657,17 +661,18 @@ function card(c,v,ok){
   else{ badges+=`<span class="badge ok">${S.anchors.date? 'Free on your date':'Fits your build'}</span>`;
         if(S.anchors.venue) badges+=`<span class="badge ok">Reaches you</span>`; }
   let act;
-  if(locked) act=`<button class="act dead">🔒 Locked</button>`;
+  const qrBtn=v.manual?`<button class="act ghost" onclick="event.stopPropagation();showClaimQr('${c.id}','${v.id}')">▦ Claim QR</button>`:'';
+  if(locked) act=`<button class="act dead">🔒 Locked</button>`+qrBtn;
   else if(isPending) act=`<button class="act dead">⏳ Handshake in progress</button>`;
   else if(!ok) act= verdict.soft
     ? `<button class="act dead">Doesn't fit the build</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`
     : `<button class="act dead">Can't book</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`;
   else if(inBuild) act=`<button class="act ghost" onclick="event.stopPropagation();unbuild('${c.id}','${v.id}')">◕ In your build · remove</button>
     ${v.manual?'':`<button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>`}
-    <button class="act lock" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`;
+    <button class="act lock" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`+qrBtn;
   else act=`<button class="act dark" onclick="event.stopPropagation();addBuild('${c.id}','${v.id}')">＋ Add to build</button>
     ${v.manual?'':`<button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>`}
-    <button class="act lockline" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`;
+    <button class="act lockline" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`+qrBtn;
   return `<div class="vcard${locked?' locked':''}${!ok&&!locked?' dim':''}">
     <div class="ph">${locked?'<span class="corner">★ Chosen</span>':''}</div>
     <div class="nm">${v.name}</div><div class="ct">${v.city}</div>
@@ -766,7 +771,17 @@ function advance(){
 function toast(t){ S.toast=t; renderOverlay(); }
 function renderOverlay(){
   const o=document.getElementById('overlay'); let h='';
-  if(S.modal && S.modal.kind==='manualmatch'){
+  if(S.modal && S.modal.kind==='claimqr'){
+    const cv=vendorObj(S.modal.cid,S.modal.vid);
+    const code=claimCode(cv.name);
+    h+=`<div class="scrim" onclick="S.modal=null;renderOverlay()"><div class="modal qrmodal" onclick="event.stopPropagation()">
+      <h3>Claim QR for ${cv.name}</h3>
+      <p>Show this to your vendor or send them the link. When they scan it, they claim this booking — chat, schedule, and payments sync on Setnayan. <b>New to Setnayan? The sync is free</b> — welcome aboard. If they claim with an <b>existing account you'd already viewed</b>, the booking counts as found on Setnayan.</p>
+      <div class="qrwrap">${qrSvg(cv.name)}</div>
+      <div class="claimlink mono">setnayan.com/claim/${code}</div>
+      <div class="acts"><button class="m1" onclick="S.modal=null;renderOverlay();toast({tt:'Link copied',ms:'Paste it in any chat with your vendor.',plain:true})">Copy link</button>
+      <button class="m2" onclick="S.modal=null;renderOverlay()">Done</button></div></div></div>`;
+  } else if(S.modal && S.modal.kind==='manualmatch'){
     const mv=vendorObj(S.modal.cid,S.modal.vid);
     h+=`<div class="scrim"><div class="modal" onclick="event.stopPropagation()">
       <h3>“${S.modal.name}” looks like ${mv.name} — already on Setnayan</h3>
@@ -803,7 +818,7 @@ function renderOverlay(){
                <button class="a2" onclick="answerMore()">＋ Add another</button></div>`:''}
       ${t.doneOnly?`<div class="acts"><button class="a1" onclick="S.toast=null;advance();renderAll()">Next category →</button></div>`:''}
       ${t.undo?`<button class="undo" onclick="undoLock()">Undo</button>`:''}
-      ${t.plain?`<div class="acts"><button class="a2" onclick="S.toast=null;renderOverlay()">OK</button></div>`:''}
+      ${t.plain?`<div class="acts"><button class="a2" onclick="S.toast=null;if(S.claimNext){const cn=S.claimNext;S.claimNext=null;showClaimQr(cn.cid,cn.vid);}else{renderOverlay();}">OK</button></div>`:''}
     </div>`;
   }
   o.innerHTML=h;
@@ -869,6 +884,25 @@ function confirmSavePlan(){
   toast({tt:`Saved as “${name.slice(0,60)}”`, ms:'Your candidates are snapshotted under that name. Swap candidates, save another, compare side by side — locked picks stay pinned in every plan.', plain:true});
 }
 function openManual(cid){ S.modal={kind:'manual',cid}; renderOverlay(); }
+/* deterministic pseudo-QR for the prototype (the app renders a real branded QR) */
+function qrSvg(seed){
+  let h=0; for(const ch of seed) h=(h*31+ch.charCodeAt(0))>>>0;
+  const N=21, cells=[];
+  const rnd=()=>{ h^=h<<13; h^=h>>>17; h^=h<<5; h>>>=0; return h/4294967296; };
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const inFinder=(x<7&&y<7)||(x>=N-7&&y<7)||(x<7&&y>=N-7);
+    if(!inFinder&&rnd()<0.45) cells.push(`<rect x="${x}" y="${y}" width="1" height="1"/>`);
+  }
+  const finder=(fx,fy)=>`<rect x="${fx}" y="${fy}" width="7" height="7"/><rect x="${fx+1}" y="${fy+1}" width="5" height="5" fill="var(--paper)"/><rect x="${fx+2}" y="${fy+2}" width="3" height="3"/>`;
+  return `<svg viewBox="-1 -1 23 23" class="qr" aria-label="Claim QR">${finder(0,0)}${finder(14,0)}${finder(0,14)}${cells.join('')}</svg>`;
+}
+function claimCode(seed){
+  let h=0; for(const ch of seed) h=(h*33+ch.charCodeAt(0))>>>0;
+  const A='0123456789ABCDEFGHJKMNPQRSTVWXYZ'; let c='';
+  for(let i=0;i<8;i++){ c+=A[h%32]; h=(h*2654435761)>>>0; }
+  return 'S89V-'+c;
+}
+function showClaimQr(cid,vid){ S.modal={kind:'claimqr',cid,vid}; renderOverlay(); }
 function foundStamp(){
   const d=new Date();
   return d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})+' · '+d.toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit'});
@@ -891,8 +925,9 @@ function confirmManual(){
   if(match){ S.modal={kind:'manualmatch',cid,name,price,vid:match.id}; renderOverlay(); return; }
   S.modal=null;
   createManualVendor(cid,name,price);
+  const created=VENDORS[cid][VENDORS[cid].length-1];
   renderAll();
-  toast({tt:`${name.slice(0,60)} added ✎`, ms:'They appear in this category as YOUR vendor. In the app a claim QR is generated — until they scan it, their calendar is unknown, so they never grey out (fail-open).', plain:true});
+  showClaimQr(cid,created.id);
 }
 function linkInstead(){
   const {cid,vid}=S.modal; S.modal=null;
@@ -904,6 +939,8 @@ function keepManualAnyway(){
   const {cid,name,price,vid}=S.modal; S.modal=null;
   const real=vendorObj(cid,vid);
   createManualVendor(cid,name,price);
+  const created=VENDORS[cid][VENDORS[cid].length-1];
+  S.claimNext={cid,vid:created.id};
   renderAll();
   toast({tt:`Added manually — ${real.name} was still notified`, ms:`“You were found on Setnayan by a couple planning their Sep 12, 2027 wedding — they viewed your card and website 5 times between Jul 12 and ${foundStamp()}, then added you off-platform.” With that view history, this is NOT a free own-client import — the booking stays Setnayan-sourced. A vendor who only appeared in searches, card never opened, would import free with no notice.`, plain:true});
 }
