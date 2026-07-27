@@ -192,3 +192,13 @@ directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card vari
   covers payload + retention. Alternative if the owner prefers ZERO view-recording: judge
   "found" by thread-existence only (inquired = found) — weaker (card-viewed-but-never-inquired
   imports leak free) but recording-free; owner's call at DPO review.
+- **AMENDED (owner): record a VIEW COUNTER, not just the first open.** The found-record becomes
+  ONE row per (event × vendor): `view_count` (card opens + website click-throughs, incremented
+  until the vendor is added to the event — locked, imported, or shortlisted; frozen after) +
+  `first_found_at` + `last_viewed_at` + sources. Still NOT a browsing trail: no per-view event
+  log, no dwell time, no searches, no impressions. **Purpose = import adjudication:** a "free
+  import" attempt of a vendor with view history is identified on the spot — the couple-side
+  match modal and the vendor lead alert both cite the receipts ("viewed your card and website
+  5 times between {first} and {last}"), and the same row is the evidence if a vendor disputes
+  fee attribution. Zero-view match → still a clean free import. DPO review now covers the
+  counter's retention alongside the payload.
