@@ -445,3 +445,20 @@ with an (i) to hide the other information"). Rules for the build:
 | **Before PR-J's resolver migration** | Booking's fee attribution **consumes** found-state and never re-derives it — the resolver keeps its 2-arg signature and its `ELSE 'import'` tail. Notify that a second `EXISTS` arm lands and that PR-J adds the previously-missing fee call inside `applyClaimAutoLink`. |
 | **Whenever "existing thread" semantics change** (declined, archived, re-open) | Either session updates `hasLiveInquiry` in ONE place and pings the other the same day. |
 | **Explore does NOT ping about** | `vendor-dashboard/services/actions.ts` — Explore has no branch there this wave (§12.4). Booking pings Explore before touching it. |
+### 12.6 · Ownership + verification conditions agreed with the Booking session (2026-07-27)
+1. **The `/v/[slug]` declined-predicate edit is OURS to make** (one predicate, one author) under two
+   binding conditions from the surface's owner:
+   - **Share the PREDICATE, never the SCOPING.** The shared thing is exactly "a thread exists AND
+     `inquiry_status != 'declined'`". `/v/[slug]` MUST keep resolving the couple's PRIMARY event
+     (`events[0]`, `page.tsx:1106`); the bench keeps its CURRENT event. A refactor that unifies
+     event resolution would silently change which event the public profile page speaks about —
+     do not do it.
+   - **Ping the Booking session with the diff** for review of the `/v/[slug]` side (review, not a
+     merge gate).
+2. **Assert POSITIVE post-conditions, not "no error" — for both 8b and 8c.** These bugs return
+   success while doing nothing, so a test that checks "the call didn't throw" proves nothing:
+   - PR-I: assert **a schedule-pool row EXISTS for the event/vendor after acknowledge**, not that
+     `acquireSchedulePools` returned.
+   - PR-J: assert **a ledger/charge row exists with the expected attribution after claim-sync**,
+     not that the resolver returned a value.
+   Same rule for any future call whose failure mode is a silent non-fatal return.
