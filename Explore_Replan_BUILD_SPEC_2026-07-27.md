@@ -483,3 +483,42 @@ with an (i) to hide the other information"). Rules for the build:
    **Fix shape (either):** stamp provenance on the claim-created row at claim time, OR allow a
    one-time stamp when the existing row's `inquiry_source IS NULL`. PR-J may close it or leave it;
    it must not silently depend on it.
+
+### 12.8 · Exemption-scope audit of PR-J (applying the Booking session's rule to ourselves)
+> Their rule, earned the hard way: **"an exemption must be scoped to the thing that earns it — a
+> whole-body test for a phrase-level fact is a laundering vector."** Their first Setnayan-
+> solicitation exemption tested the WHOLE body, so *"Message me on Viber, not on Setnayan"* saved
+> cleanly with all 48 tests green; it was found by probing the exemption adversarially, not by
+> running the suite. PR-J has four exemptions. Audited below — **three are mis-scoped.**
+
+| # | Exemption | What EARNS it | What we'd actually TEST | Verdict |
+|---|---|---|---|---|
+| 1 | free import when no found-record | *this couple never discovered this vendor on Setnayan* | no found-record **for this event** | ⚠ **MIS-SCOPED (too narrow)** |
+| 2 | later view never converts an earlier import | *they knew the vendor before we showed them* | `first_found_at > imported_at` | ✅ correctly scoped |
+| 3 | claim-sync free when the vendor has no account | *this business was genuinely not on Setnayan* | *the claiming ACCOUNT is new* | ⚠ **MIS-SCOPED (wrong subject)** |
+| 4 | first dispute auto-accepted | *first-time grace, per business* | per `vendor_profile_id`, lifetime | ✅ correctly scoped |
+
+**⚠ 1 — event-hop laundering.** Found-records are per (event × vendor) for privacy. But the fact
+that earns the free import is about the COUPLE, not the event: view vendor X while planning event
+A, then import X into event B → no record for B → free. **Fix:** adjudicate the found-check across
+the couple's own events (same user/couple, any event) while keeping the STORED record per-event —
+i.e. widen the *query*, not the *storage*. Do not widen it beyond the couple (no cross-account
+inference, ever).
+
+**⚠ 3 — new-account laundering (the exact inverse of their bug: exemption too NARROW / wrong
+subject).** "Vendor has no Setnayan account → free forever" tests the claiming ACCOUNT, but the
+thing that earns it is whether the BUSINESS was on Setnayan. A vendor who already has a viewed
+profile can claim with a **fresh account** and convert a sourced booking into a free one. **Fix:**
+at claim time, if a found-record exists for a profile that plausibly matches the claimed business,
+do NOT auto-free — route to adjudication (the dispute ladder already exists and is grace-first, so
+the honest case still resolves in the vendor's favour on first contact). Never auto-charge on a
+fuzzy match; the fail-safe direction stays FREE, but the decision stops being automatic.
+
+**⚠ 1b — the impressions blind spot, stated honestly.** Because search impressions are deliberately
+not recorded (owner rule), a couple can read vendor NAMES off a rail without opening a card and
+import them all free. This is accepted, not fixed: a name alone is not a booking, and recording
+impressions to close it would cost more privacy than the leak is worth. **Documented so it is a
+decision, not an oversight.**
+
+**Test requirement:** each of the four exemptions gets an adversarial test that tries to LAUNDER it
+(event-hop · new-account claim · import-then-browse · second dispute), not merely a happy-path test.
