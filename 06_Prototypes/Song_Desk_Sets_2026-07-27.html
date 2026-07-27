@@ -1,0 +1,258 @@
+<title>Song desk · Sets — prototype</title>
+<style>
+  :root{
+    --ink:#211C16; --ink-70:rgba(33,28,22,.70); --ink-55:rgba(33,28,22,.55);
+    --ink-12:rgba(33,28,22,.12); --ink-08:rgba(33,28,22,.08);
+    --paper:#FAF7F1; --plate:#F1EBDF; --card:#FFFDF9;
+    --gild:#A9834B; --sage:#4C6B54; --clay:#96452E;
+    --shadow:0 1px 2px rgba(33,28,22,.05),0 12px 32px rgba(33,28,22,.07);
+    --display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --body:system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ink:#EFE7DA; --ink-70:rgba(239,231,218,.70); --ink-55:rgba(239,231,218,.55);
+      --ink-12:rgba(239,231,218,.14); --ink-08:rgba(239,231,218,.09);
+      --paper:#17140F; --plate:#201B15; --card:#241E17;
+      --gild:#C9A268; --sage:#7FA88A; --clay:#D98A6E;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#EFE7DA; --ink-70:rgba(239,231,218,.70); --ink-55:rgba(239,231,218,.55);
+    --ink-12:rgba(239,231,218,.14); --ink-08:rgba(239,231,218,.09);
+    --paper:#17140F; --plate:#201B15; --card:#241E17;
+    --gild:#C9A268; --sage:#7FA88A; --clay:#D98A6E;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);
+  }
+  :root[data-theme="light"]{
+    --ink:#211C16; --ink-70:rgba(33,28,22,.70); --ink-55:rgba(33,28,22,.55);
+    --ink-12:rgba(33,28,22,.12); --ink-08:rgba(33,28,22,.08);
+    --paper:#FAF7F1; --plate:#F1EBDF; --card:#FFFDF9;
+    --gild:#A9834B; --sage:#4C6B54; --clay:#96452E;
+    --shadow:0 1px 2px rgba(33,28,22,.05),0 12px 32px rgba(33,28,22,.07);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+       line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:32px 20px 72px}
+  .eyebrow{display:flex;align-items:center;gap:.6em;font-family:var(--mono);
+    font-size:.66rem;text-transform:uppercase;letter-spacing:.28em;color:var(--ink-70);margin:0}
+  .eyebrow::after{content:"";height:1px;flex:1;max-width:56px;background:var(--gild);opacity:.55}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(1.7rem,4vw,2.4rem);
+     line-height:1.15;letter-spacing:-.01em;margin:.5rem 0 0;text-wrap:balance}
+  .lede{max-width:64ch;color:var(--ink-70);margin:.75rem 0 0;font-size:1rem}
+  .cols{display:grid;grid-template-columns:1fr;gap:28px;margin-top:32px}
+  @media(min-width:900px){.cols{grid-template-columns:390px 1fr;align-items:start}}
+
+  /* phone */
+  .phone{background:var(--card);border:1px solid var(--ink-12);border-radius:26px;
+    padding:14px;box-shadow:var(--shadow);position:sticky;top:24px}
+  .screen{background:var(--plate);border-radius:16px;padding:16px;position:relative}
+  .screen::after{content:"";position:absolute;inset:8px;border:1px solid var(--ink-08);
+    border-radius:10px;pointer-events:none}
+  .scr-in{position:relative}
+  .bar{display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-55)}
+  .act{font-family:var(--display);font-size:1.25rem;margin:.35rem 0 .1rem}
+  .sub{font-size:.78rem;color:var(--ink-55);margin:0 0 14px}
+
+  .plate{background:var(--card);border:1px solid var(--ink-12);border-radius:10px;
+    padding:12px;margin-bottom:10px}
+  .plate h3{font-family:var(--display);font-weight:400;font-size:.98rem;margin:0 0 2px}
+  .cap{font-size:.72rem;color:var(--ink-55);margin:0}
+
+  .setrow{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--ink-08)}
+  .setrow:first-of-type{border-top:0}
+  .setno{font-family:var(--mono);font-size:.62rem;color:var(--gild);
+    border:1px solid var(--gild);border-radius:3px;padding:1px 5px;flex:none;letter-spacing:.06em}
+  .setname{font-size:.85rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .count{font-family:var(--mono);font-size:.7rem;color:var(--ink-55);
+    font-variant-numeric:tabular-nums;flex:none}
+
+  .req{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--ink-08)}
+  .req:first-of-type{border-top:0}
+  .reqtxt{flex:1;min-width:0}
+  .reqtitle{font-size:.85rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .reqfrom{font-size:.7rem;color:var(--ink-55)}
+  .btn{font-family:var(--body);font-size:.7rem;border-radius:999px;padding:4px 10px;
+    border:1px solid var(--ink-12);background:transparent;color:var(--ink-70);cursor:pointer}
+  .btn:hover{border-color:var(--gild);color:var(--ink)}
+  .btn:focus-visible{outline:2px solid var(--gild);outline-offset:2px}
+  .btn.yes{border-color:var(--sage);color:var(--sage)}
+  .pill{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+    padding:2px 7px;border-radius:999px;flex:none}
+  .pill.acc{color:var(--sage);border:1px solid var(--sage)}
+  .pill.dec{color:var(--clay);border:1px solid var(--clay)}
+
+  .modebox{background:var(--card);border:1px solid var(--ink-12);border-radius:10px;padding:12px}
+  .modes{display:flex;gap:6px;margin-top:8px}
+  .mode{flex:1;font-family:var(--body);font-size:.72rem;padding:7px 4px;border-radius:7px;
+    border:1px solid var(--ink-12);background:transparent;color:var(--ink-70);cursor:pointer;text-align:center}
+  .mode[aria-pressed="true"]{border-color:var(--gild);color:var(--ink);
+    background:color-mix(in srgb,var(--gild) 12%,transparent);font-weight:600}
+  .mode:focus-visible{outline:2px solid var(--gild);outline-offset:2px}
+  .modenote{font-size:.72rem;color:var(--ink-55);margin:9px 0 0;min-height:2.6em}
+
+  /* right column */
+  .note{background:var(--plate);border:1px solid var(--ink-12);border-radius:12px;padding:20px;margin-bottom:18px}
+  .note h2{font-family:var(--display);font-weight:400;font-size:1.2rem;margin:.4rem 0 .5rem}
+  .note p{margin:.5rem 0 0;color:var(--ink-70);font-size:.92rem;max-width:62ch}
+  .q{border-left:2px solid var(--gild);padding-left:14px;margin:14px 0 0;
+     font-family:var(--display);font-size:1.02rem;color:var(--ink)}
+  ul{margin:.6rem 0 0;padding-left:1.1rem;color:var(--ink-70);font-size:.92rem}
+  li{margin:.35rem 0}
+  li strong{color:var(--ink)}
+  .tag{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--gild);border:1px solid var(--gild);border-radius:3px;padding:1px 6px;
+    display:inline-block;margin-bottom:6px}
+  .built{display:grid;gap:0;border:1px solid var(--ink-12);border-radius:10px;overflow:hidden}
+  .built div{display:flex;gap:10px;padding:9px 12px;border-top:1px solid var(--ink-08);
+    font-size:.86rem;align-items:baseline}
+  .built div:first-child{border-top:0}
+  .built .st{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;
+    text-transform:uppercase;flex:none;width:74px}
+  .live{color:var(--sage)} .todo{color:var(--ink-55)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Song desk · prototype</p>
+  <h1>Sets, and when the room may ask</h1>
+  <p class="lede">
+    A band thinks in sets, not in a flat list — “Set 2, dinner, eight songs”, not positions 9
+    through 16. This sketches that, and puts one open question in front of you where you can
+    just tap it rather than read my description of it.
+  </p>
+
+  <div class="cols">
+    <!-- ── the phone ───────────────────────────────────────────────── -->
+    <div class="phone">
+      <div class="screen"><div class="scr-in">
+        <div class="bar"><span>Song desk</span><span>Sat · 8:14 pm</span></div>
+        <p class="act">Saysay Live Band</p>
+        <p class="sub">Nights at Kanto Bar · gala night</p>
+
+        <div class="plate">
+          <h3>Your sets</h3>
+          <p class="cap">Six at most. Name each one and fill it.</p>
+          <div style="margin-top:8px">
+            <div class="setrow"><span class="setno">1</span><span class="setname">Arrival &amp; dinner</span><span class="count">8 songs</span></div>
+            <div class="setrow"><span class="setno">2</span><span class="setname">Slow burn</span><span class="count">6 songs</span></div>
+            <div class="setrow"><span class="setno">3</span><span class="setname">Party</span><span class="count">11 songs</span></div>
+            <div class="setrow"><span class="setno">4</span><span class="setname">Last call</span><span class="count">5 songs</span></div>
+          </div>
+          <button class="btn" style="margin-top:10px">+ Add a fifth set</button>
+        </div>
+
+        <div class="modebox">
+          <h3 style="font-family:var(--display);font-weight:400;font-size:.98rem;margin:0 0 2px">Allow requests</h3>
+          <p class="cap">When the room may ask you for something.</p>
+          <div class="modes" role="group" aria-label="When requests are allowed">
+            <button class="mode" aria-pressed="true"  data-m="any">Anytime</button>
+            <button class="mode" aria-pressed="false" data-m="sets">Chosen sets</button>
+            <button class="mode" aria-pressed="false" data-m="off">Off</button>
+          </div>
+          <p class="modenote" id="note">Requests arrive whenever — during a set, between sets, all night. You accept the ones you’ll play.</p>
+        </div>
+
+        <div class="plate" style="margin-top:10px" id="inbox">
+          <h3>Requests</h3>
+          <p class="cap" id="inboxcap">3 waiting · accept the ones you’ll play</p>
+          <div style="margin-top:6px" id="reqs">
+            <div class="req">
+              <span class="reqtxt"><span class="reqtitle">Kiss the Rain</span><span class="reqfrom">Yiruma · from table 4</span></span>
+              <button class="btn yes">Accept</button><button class="btn">No</button>
+            </div>
+            <div class="req">
+              <span class="reqtxt"><span class="reqtitle">Anak</span><span class="reqfrom">Freddie Aguilar · from Maria</span></span>
+              <span class="pill acc">Accepted</span>
+            </div>
+            <div class="req">
+              <span class="reqtxt"><span class="reqtitle">Through the Years</span><span class="reqfrom">Kenny Rogers · 6 people asked</span></span>
+              <button class="btn yes">Accept</button><button class="btn">No</button>
+            </div>
+            <div class="req">
+              <span class="reqtxt"><span class="reqtitle">Wonderwall</span><span class="reqfrom">Oasis · from table 9</span></span>
+              <span class="pill dec">Declined</span>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ── the reading ─────────────────────────────────────────────── -->
+    <div>
+      <div class="note">
+        <span class="tag">The question</span>
+        <h2>What “(anytime)” means</h2>
+        <p>
+          You wrote: <em>“the band can set 1/2/3/4/5/6 sets, and name the x number of songs per
+          set. allow requests (anytime).”</em> I read that third item two ways, and they build
+          differently — so tap the three buttons and tell me which one is your app.
+        </p>
+        <p class="q">Is “anytime” a <em>mode</em> among several, or is it simply always-on?</p>
+        <ul>
+          <li><strong>A mode</strong> — “anytime” sits beside “only during the sets I choose”. That’s what the prototype shows, and it’s the richer read: a band can take requests all night, or only during Set 3.</li>
+          <li><strong>Always-on</strong> — requests are permanently open and the band never switches them off. Simpler, but it retires the open/close control you asked for one message earlier, so I didn’t assume it.</li>
+        </ul>
+      </div>
+
+      <div class="note">
+        <span class="tag">Two things the sketch decides</span>
+        <h2>Worth a look while you’re here</h2>
+        <p>
+          <strong>Accepting doesn’t file a song into a set.</strong> A request comes in mid-song;
+          making the band choose “which set?” in that moment is a decision they don’t need. Accept
+          means “we’ll play it”. If you’d rather it drop into a specific set, that’s a real change.
+        </p>
+        <p>
+          <strong>Repeats collapse.</strong> “Through the Years · 6 people asked” is one row, not
+          six — that’s already built and enforced in the database, not just in this picture.
+        </p>
+      </div>
+
+      <div class="note">
+        <span class="tag">Where this stands</span>
+        <h2>Built vs. sketched</h2>
+        <div class="built">
+          <div><span class="st live">Live</span><span>Requests from guests — wedding guests and bar walk-ins, both lanes, rate-capped</span></div>
+          <div><span class="st live">Live</span><span>Accept / decline, and accepted <em>is</em> the setlist</span></div>
+          <div><span class="st live">Live</span><span>The band opening and closing requests (off by default)</span></div>
+          <div><span class="st todo">Sketch</span><span>Sets — 1–6, named, with songs in order</span></div>
+          <div><span class="st todo">Sketch</span><span>“Chosen sets” mode for requests</span></div>
+          <div><span class="st todo">Sketch</span><span>Every screen above — no UI is built yet</span></div>
+        </div>
+        <p style="margin-top:14px">
+          Sets are the first thing here that genuinely needs a new table. Everything else fitted a
+          column or a table that already existed.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var NOTES = {
+    any:  "Requests arrive whenever — during a set, between sets, all night. You accept the ones you’ll play.",
+    sets: "Requests only open during the sets you pick. Set 3 “Party” is taking them; the rest of the night is quiet.",
+    off:  "The room can’t ask tonight. Your sets still run exactly as you built them."
+  };
+  var CAPS = {
+    any:  "3 waiting · accept the ones you’ll play",
+    sets: "Open during Set 3 · Party",
+    off:  "Closed — nothing arrives"
+  };
+  var btns = document.querySelectorAll(".mode");
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (o) { o.setAttribute("aria-pressed", String(o === b)); });
+      var m = b.dataset.m;
+      document.getElementById("note").textContent = NOTES[m];
+      document.getElementById("inboxcap").textContent = CAPS[m];
+      document.getElementById("reqs").style.opacity = m === "off" ? ".35" : "1";
+    });
+  });
+</script>

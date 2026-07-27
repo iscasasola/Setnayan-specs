@@ -1,6 +1,6 @@
 <title>The Emcee's Screen — Setnayan day-of prototype</title>
 <style>
-  :root {
+  :root, :host, body {
     --stage:      #14150F;
     --stage-2:    #1C1D16;
     --stage-line: #2E2F25;
@@ -20,7 +20,7 @@
     --page-gold:  #8C6932;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root, :host, body {
       --page-bg:   #100F0C;
       --page-card: #191813;
       --page-ink:  #EDEAE1;
@@ -29,7 +29,7 @@
       --page-gold: #CBA766;
     }
   }
-  :root[data-theme="dark"] {
+  :root[data-theme="dark"], [data-theme="dark"] {
     --page-bg:   #100F0C;
     --page-card: #191813;
     --page-ink:  #EDEAE1;
@@ -37,7 +37,7 @@
     --page-line: #2C2A23;
     --page-gold: #CBA766;
   }
-  :root[data-theme="light"] {
+  :root[data-theme="light"], [data-theme="light"] {
     --page-bg:   #EFEDE6;
     --page-card: #F8F7F3;
     --page-ink:  #1B1A17;
@@ -50,8 +50,8 @@
 
   body {
     margin: 0;
-    background: var(--page-bg);
-    color: var(--page-ink);
+    background: var(--page-bg, #EFEDE6);
+    color: var(--page-ink, #1B1A17);
     font-family: "Hanken Grotesk", "Avenir Next", "Segoe UI", system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.6;
@@ -65,17 +65,28 @@
     font-size: 0.6rem;
   }
 
-  .wrap { max-width: 1180px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 2rem) 4rem; }
+  /* The wrap repaints the ground and the text colour itself. If this page is
+     ever mounted inside a host that keeps its own <body> (a wrapper div, a
+     shadow root), the rules on `body` above may not reach it — and dark text on
+     a dark host reads as an empty screen. Painting here too makes that
+     impossible. */
+  .wrap {
+    max-width: 1180px; margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 2rem) 4rem;
+    background: var(--page-bg, #EFEDE6);
+    color: var(--page-ink, #1B1A17);
+    min-height: 100vh;
+  }
 
   header.masthead { display: flex; flex-direction: column; gap: 0.75rem; max-width: 62ch; }
-  header.masthead .eyebrow { color: var(--page-gold); }
+  header.masthead .eyebrow { color: var(--page-gold, #8C6932); }
   header.masthead h1 {
     margin: 0; font-size: clamp(1.9rem, 4.6vw, 3rem); font-weight: 300;
     letter-spacing: -0.02em; line-height: 1.08; text-wrap: balance;
   }
-  header.masthead p { margin: 0; color: var(--page-dim); max-width: 60ch; }
+  header.masthead p { margin: 0; color: var(--page-dim, #56534B); max-width: 60ch; }
 
-  .rule { height: 1px; background: var(--page-line); border: 0; margin: 2.5rem 0; }
+  .rule { height: 1px; background: var(--page-line, #D8D5CB); border: 0; margin: 2.5rem 0; }
 
   .stage-grid {
     display: grid; gap: clamp(1.5rem, 3vw, 2.5rem);
@@ -86,8 +97,8 @@
 
   /* ── the phone ─────────────────────────────────────────────── */
   .phone {
-    background: var(--stage);
-    border: 1px solid var(--stage-line);
+    background: var(--stage, #14150F);
+    border: 1px solid var(--stage-line, #2E2F25);
     border-radius: 30px;
     padding: 0.6rem;
     box-shadow: 0 24px 60px rgba(0,0,0,0.30), 0 2px 6px rgba(0,0,0,0.2);
@@ -96,160 +107,160 @@
   @media (max-width: 860px) { .phone { position: static; } }
 
   .screen {
-    background: var(--stage); border-radius: 24px; overflow: hidden;
-    color: var(--paper); display: flex; flex-direction: column;
+    background: var(--stage, #14150F); border-radius: 24px; overflow: hidden;
+    color: var(--paper, #F5F1E8); display: flex; flex-direction: column;
     height: 620px;
   }
   .screen-top {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0.85rem 1rem 0.7rem; border-bottom: 1px solid var(--stage-line);
-    color: var(--paper-faint); flex-shrink: 0;
+    padding: 0.85rem 1rem 0.7rem; border-bottom: 1px solid var(--stage-line, #2E2F25);
+    color: var(--paper-faint, rgba(245,241,232,0.38)); flex-shrink: 0;
   }
   .screen-body { overflow-y: auto; padding: 0.9rem; display: flex; flex-direction: column; gap: 0.75rem; scroll-behavior: smooth; }
 
-  .card { border: 1px solid var(--stage-line); background: var(--stage-2); padding: 0.85rem; }
+  .card { border: 1px solid var(--stage-line, #2E2F25); background: var(--stage-2, #1C1D16); padding: 0.85rem; }
   .card > h3 {
     margin: 0 0 0.7rem; display: flex; align-items: center; gap: 0.5rem;
-    color: var(--paper-dim); font-weight: 400;
+    color: var(--paper-dim, rgba(245,241,232,0.62)); font-weight: 400;
   }
-  .card > h3 .tick { width: 14px; height: 1px; background: var(--gold); flex-shrink: 0; }
+  .card > h3 .tick { width: 14px; height: 1px; background: var(--gold, #A9834B); flex-shrink: 0; }
 
   .headline { margin: 0; font-size: 1.32rem; font-weight: 300; letter-spacing: -0.015em; line-height: 1.25; text-wrap: balance; }
 
   .drift { margin: 0.4rem 0 0; letter-spacing: 0.16em; }
-  .drift.late { color: var(--late); }
-  .drift.ontime { color: var(--ontime); }
+  .drift.late { color: var(--late, #C2703D); }
+  .drift.ontime { color: var(--ontime, #7E8C77); }
 
-  .now-block { margin-top: 0.8rem; padding-left: 0.75rem; border-left: 2px solid var(--gold); display: flex; flex-direction: column; gap: 0.35rem; }
-  .time { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.72rem; color: var(--paper-faint); letter-spacing: 0.04em; }
+  .now-block { margin-top: 0.8rem; padding-left: 0.75rem; border-left: 2px solid var(--gold, #A9834B); display: flex; flex-direction: column; gap: 0.35rem; }
+  .time { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.72rem; color: var(--paper-faint, rgba(245,241,232,0.38)); letter-spacing: 0.04em; }
   .say { margin: 0; font-size: 0.94rem; line-height: 1.5; }
-  .note { margin: 0; font-size: 0.94rem; line-height: 1.5; color: var(--paper-dim); }
+  .note { margin: 0; font-size: 0.94rem; line-height: 1.5; color: var(--paper-dim, rgba(245,241,232,0.62)); }
 
-  .next { margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--stage-line); }
-  .next .label { color: var(--paper-faint); }
+  .next { margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--stage-line, #2E2F25); }
+  .next .label { color: var(--paper-faint, rgba(245,241,232,0.38)); }
   .next .who { margin: 0.3rem 0 0; font-size: 0.98rem; }
-  .next .who span { color: var(--paper-faint); font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; }
+  .next .who span { color: var(--paper-faint, rgba(245,241,232,0.38)); font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; }
 
   .badge {
     display: inline-flex; align-items: center; gap: 0.35rem;
     border: 1px solid rgba(245,241,232,0.28); background: rgba(245,241,232,0.05);
-    padding: 0.15rem 0.4rem; color: var(--paper-dim);
+    padding: 0.15rem 0.4rem; color: var(--paper-dim, rgba(245,241,232,0.62));
     font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
     letter-spacing: 0.14em; font-size: 0.55rem; white-space: nowrap;
   }
-  .badge.live { border-color: var(--gold); color: var(--gold-lit); background: rgba(169,131,75,0.12); }
+  .badge.live { border-color: var(--gold, #A9834B); color: var(--gold-lit, #CBA766); background: rgba(169,131,75,0.12); }
 
   ol.script { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
   ol.script li.done { opacity: 0.42; }
-  ol.script li.part { margin-left: 0.9rem; padding-left: 0.7rem; border-left: 1px solid var(--stage-line); }
+  ol.script li.part { margin-left: 0.9rem; padding-left: 0.7rem; border-left: 1px solid var(--stage-line, #2E2F25); }
   .line-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem; }
   .line-top .label-name { font-size: 0.94rem; }
   .line-top .label-name.top { font-weight: 600; }
-  .sub { margin: 0.15rem 0 0; font-size: 0.86rem; line-height: 1.45; color: var(--paper-dim); }
-  .loc { margin: 0.15rem 0 0; color: var(--paper-faint); }
+  .sub { margin: 0.15rem 0 0; font-size: 0.86rem; line-height: 1.45; color: var(--paper-dim, rgba(245,241,232,0.62)); }
+  .loc { margin: 0.15rem 0 0; color: var(--paper-faint, rgba(245,241,232,0.38)); }
 
   ul.anns { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
 
-  .empty { margin: 0; color: var(--paper-dim); font-size: 0.9rem; line-height: 1.5; }
+  .empty { margin: 0; color: var(--paper-dim, rgba(245,241,232,0.62)); font-size: 0.9rem; line-height: 1.5; }
 
   /* proposed-feature affordances inside the phone */
   .card.proposed { border-style: dashed; border-color: rgba(203,167,102,0.42); }
-  .card.proposed > h3 { color: var(--gold-lit); }
+  .card.proposed > h3 { color: var(--gold-lit, #CBA766); }
 
   .mini-input {
-    width: 100%; background: rgba(245,241,232,0.05); color: var(--paper);
-    border: 1px solid var(--stage-line); padding: 0.55rem 0.6rem;
+    width: 100%; background: rgba(245,241,232,0.05); color: var(--paper, #F5F1E8);
+    border: 1px solid var(--stage-line, #2E2F25); padding: 0.55rem 0.6rem;
     font-family: inherit; font-size: 0.9rem; border-radius: 0;
   }
-  .mini-input::placeholder { color: var(--paper-faint); }
-  .mini-input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .mini-input::placeholder { color: var(--paper-faint, rgba(245,241,232,0.38)); }
+  .mini-input:focus-visible { outline: 2px solid var(--gold, #A9834B); outline-offset: 1px; }
 
   .mini-btn {
-    background: var(--gold); color: #16150F; border: 0; padding: 0.5rem 0.8rem;
+    background: var(--gold, #A9834B); color: #16150F; border: 0; padding: 0.5rem 0.8rem;
     font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
     letter-spacing: 0.16em; font-size: 0.58rem; cursor: pointer;
   }
-  .mini-btn:hover { background: var(--gold-lit); }
-  .mini-btn:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+  .mini-btn:hover { background: var(--gold-lit, #CBA766); }
+  .mini-btn:focus-visible { outline: 2px solid var(--paper, #F5F1E8); outline-offset: 2px; }
 
   .row { display: flex; gap: 0.5rem; align-items: stretch; }
   .row .mini-input { flex: 1; min-width: 0; }
 
-  .my-note { border-left: 2px solid var(--gold-lit); padding-left: 0.6rem; }
-  .sent { border-left: 2px solid var(--ontime); padding-left: 0.6rem; }
+  .my-note { border-left: 2px solid var(--gold-lit, #CBA766); padding-left: 0.6rem; }
+  .sent { border-left: 2px solid var(--ontime, #7E8C77); padding-left: 0.6rem; }
 
   /* ── the cue board ─────────────────────────────────────────── */
   .board { display: flex; flex-direction: column; gap: 1.25rem; }
 
   .board-head { display: flex; flex-direction: column; gap: 0.4rem; }
   .board-head h2 { margin: 0; font-size: 1.35rem; font-weight: 400; letter-spacing: -0.01em; }
-  .board-head p { margin: 0; color: var(--page-dim); max-width: 58ch; font-size: 0.95rem; }
+  .board-head p { margin: 0; color: var(--page-dim, #56534B); max-width: 58ch; font-size: 0.95rem; }
 
-  .cues { display: flex; flex-direction: column; border: 1px solid var(--page-line); background: var(--page-card); }
+  .cues { display: flex; flex-direction: column; border: 1px solid var(--page-line, #D8D5CB); background: var(--page-card, #F8F7F3); }
   .cue {
     display: grid; grid-template-columns: auto 1fr auto; gap: 0.85rem; align-items: center;
-    padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--page-line); text-align: left;
+    padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--page-line, #D8D5CB); text-align: left;
     background: none; border-left: 0; border-right: 0; border-top: 0;
     font: inherit; color: inherit; cursor: pointer; width: 100%;
   }
   .cue:last-child { border-bottom: 0; }
   .cue:hover { background: rgba(169,131,75,0.08); }
-  .cue:focus-visible { outline: 2px solid var(--page-gold); outline-offset: -2px; }
+  .cue:focus-visible { outline: 2px solid var(--page-gold, #8C6932); outline-offset: -2px; }
   .cue[aria-current="true"] { background: rgba(169,131,75,0.14); }
   .cue .n {
     font-family: ui-monospace, Menlo, monospace; font-size: 0.68rem;
-    color: var(--page-dim); font-variant-numeric: tabular-nums;
+    color: var(--page-dim, #56534B); font-variant-numeric: tabular-nums;
   }
   .cue .what { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
   .cue .what strong { font-weight: 500; font-size: 0.95rem; }
-  .cue .what small { color: var(--page-dim); font-size: 0.82rem; }
+  .cue .what small { color: var(--page-dim, #56534B); font-size: 0.82rem; }
   .cue .state {
     font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
-    letter-spacing: 0.14em; font-size: 0.55rem; color: var(--page-dim); white-space: nowrap;
+    letter-spacing: 0.14em; font-size: 0.55rem; color: var(--page-dim, #56534B); white-space: nowrap;
   }
-  .cue .state.on { color: var(--page-gold); }
+  .cue .state.on { color: var(--page-gold, #8C6932); }
 
   .controls { display: flex; flex-wrap: wrap; gap: 0.6rem; }
   .btn {
-    border: 1px solid var(--page-line); background: var(--page-card); color: var(--page-ink);
+    border: 1px solid var(--page-line, #D8D5CB); background: var(--page-card, #F8F7F3); color: var(--page-ink, #1B1A17);
     padding: 0.6rem 1rem; cursor: pointer;
     font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
     letter-spacing: 0.16em; font-size: 0.6rem;
   }
-  .btn:hover { border-color: var(--page-gold); color: var(--page-gold); }
-  .btn:focus-visible { outline: 2px solid var(--page-gold); outline-offset: 2px; }
-  .btn.primary { background: var(--page-gold); border-color: var(--page-gold); color: var(--page-bg); }
-  .btn.primary:hover { opacity: 0.88; color: var(--page-bg); }
+  .btn:hover { border-color: var(--page-gold, #8C6932); color: var(--page-gold, #8C6932); }
+  .btn:focus-visible { outline: 2px solid var(--page-gold, #8C6932); outline-offset: 2px; }
+  .btn.primary { background: var(--page-gold, #8C6932); border-color: var(--page-gold, #8C6932); color: var(--page-bg, #EFEDE6); }
+  .btn.primary:hover { opacity: 0.88; color: var(--page-bg, #EFEDE6); }
 
   .readout {
-    border: 1px solid var(--page-line); background: var(--page-card); padding: 0.9rem 1rem;
+    border: 1px solid var(--page-line, #D8D5CB); background: var(--page-card, #F8F7F3); padding: 0.9rem 1rem;
     display: flex; flex-direction: column; gap: 0.5rem;
   }
-  .readout .k { color: var(--page-dim); }
+  .readout .k { color: var(--page-dim, #56534B); }
   .readout .v { font-family: ui-monospace, Menlo, monospace; font-size: 0.86rem; }
   .readout .order { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
   .chip {
-    border: 1px solid var(--page-line); padding: 0.15rem 0.45rem;
+    border: 1px solid var(--page-line, #D8D5CB); padding: 0.15rem 0.45rem;
     font-family: ui-monospace, Menlo, monospace; font-size: 0.6rem;
     text-transform: uppercase; letter-spacing: 0.12em;
   }
-  .chip.lead { border-color: var(--page-gold); color: var(--page-gold); }
-  .arrow { color: var(--page-dim); font-size: 0.7rem; }
+  .chip.lead { border-color: var(--page-gold, #8C6932); color: var(--page-gold, #8C6932); }
+  .arrow { color: var(--page-dim, #56534B); font-size: 0.7rem; }
 
   /* ── the ledger ────────────────────────────────────────────── */
   .ledger { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
-  .item { border: 1px solid var(--page-line); background: var(--page-card); padding: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .item { border: 1px solid var(--page-line, #D8D5CB); background: var(--page-card, #F8F7F3); padding: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; }
   .item .tag { font-family: ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: 0.18em; font-size: 0.55rem; }
-  .item.built .tag { color: var(--ontime); }
-  .item.proposed .tag { color: var(--page-gold); }
-  .item.decided .tag { color: var(--page-dim); }
+  .item.built .tag { color: var(--ontime, #7E8C77); }
+  .item.proposed .tag { color: var(--page-gold, #8C6932); }
+  .item.decided .tag { color: var(--page-dim, #56534B); }
   .item h3 { margin: 0; font-size: 1.02rem; font-weight: 500; }
-  .item p { margin: 0; color: var(--page-dim); font-size: 0.9rem; line-height: 1.55; }
+  .item p { margin: 0; color: var(--page-dim, #56534B); font-size: 0.9rem; line-height: 1.55; }
   .item.proposed { border-style: dashed; }
 
   .question {
-    border-left: 3px solid var(--page-gold); padding: 0.35rem 0 0.35rem 1rem;
-    margin: 0; color: var(--page-ink); font-size: 1rem;
+    border-left: 3px solid var(--page-gold, #8C6932); padding: 0.35rem 0 0.35rem 1rem;
+    margin: 0; color: var(--page-ink, #1B1A17); font-size: 1rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -313,7 +324,7 @@
   <hr class="rule" />
 
   <h2 style="margin:0 0 0.35rem; font-size:1.35rem; font-weight:400; letter-spacing:-0.01em;">What's real, and what isn't</h2>
-  <p style="margin:0 0 1.5rem; color:var(--page-dim); max-width:62ch;">
+  <p style="margin:0 0 1.5rem; color:var(--page-dim, #56534B); max-width:62ch;">
     Three of these shipped today. Two are proposals from your notes — they're drawn dashed and gold
     on the screen above, and nothing behind them is built yet.
   </p>
@@ -567,8 +578,8 @@
     if (myNotes.length) {
       h += '<ul class="anns" style="margin-bottom:0.7rem">';
       myNotes.forEach(function (n) {
-        h += '<li class="my-note"><div class="line-top"><span class="mono" style="color:var(--paper-faint)">' +
-             esc(n.at) + '</span></div><p class="sub" style="color:var(--paper)">' + esc(n.text) + "</p></li>";
+        h += '<li class="my-note"><div class="line-top"><span class="mono" style="color:var(--paper-faint, rgba(245,241,232,0.38))">' +
+             esc(n.at) + '</span></div><p class="sub" style="color:var(--paper, #F5F1E8)">' + esc(n.text) + "</p></li>";
       });
       h += "</ul>";
     }
@@ -582,7 +593,7 @@
   function askCard() {
     var h = '<div class="card proposed"><h3><span class="tick"></span><span class="mono">Ask the couple · proposed</span></h3>';
     if (sentQuestion) {
-      h += '<div class="sent"><p class="sub" style="color:var(--paper)">' + esc(sentQuestion) + "</p>" +
+      h += '<div class="sent"><p class="sub" style="color:var(--paper, #F5F1E8)">' + esc(sentQuestion) + "</p>" +
            '<p class="empty" style="font-size:0.8rem">Sent to your thread with Ana &amp; Miguel.</p></div>';
     }
     h += '<div class="row" style="margin-top:' + (sentQuestion ? "0.7rem" : "0") + '">' +
