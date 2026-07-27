@@ -765,7 +765,14 @@ function advance(){
 function toast(t){ S.toast=t; renderOverlay(); }
 function renderOverlay(){
   const o=document.getElementById('overlay'); let h='';
-  if(S.modal && S.modal.kind==='manual'){
+  if(S.modal && S.modal.kind==='manualmatch'){
+    const mv=vendorObj(S.modal.cid,S.modal.vid);
+    h+=`<div class="scrim"><div class="modal" onclick="event.stopPropagation()">
+      <h3>“${S.modal.name}” looks like ${mv.name} — already on Setnayan</h3>
+      <p>You <b>opened their card here</b>, so they count as <b>found on Setnayan</b> — merely appearing in your searches wouldn't. Linking their real profile gets you their live calendar, chat, and the payment handshake. Either way ${mv.name} is notified they were found — date, time, and your event — and adding them manually is <b>not a free own-client import</b>: the booking stays Setnayan-sourced.</p>
+      <div class="acts"><button class="m1" onclick="linkInstead()">🔗 Link their profile</button>
+      <button class="m2" onclick="keepManualAnyway()">Keep manual anyway</button></div></div></div>`;
+  } else if(S.modal && S.modal.kind==='manual'){
     h+=`<div class="scrim" onclick="S.modal=null;renderOverlay()"><div class="modal" onclick="event.stopPropagation()">
       <h3>Add your own ${cat(S.modal.cid).label}</h3>
       <p>For a vendor you found outside Setnayan. They'll get a <b>claim QR</b> — once they scan it, your booking, schedule and chat sync with them here.</p>
@@ -860,17 +867,43 @@ function confirmSavePlan(){
   toast({tt:`Saved as “${name.slice(0,60)}”`, ms:'Your candidates are snapshotted under that name. Swap candidates, save another, compare side by side — locked picks stay pinned in every plan.', plain:true});
 }
 function openManual(cid){ S.modal={kind:'manual',cid}; renderOverlay(); }
-function confirmManual(){
-  const cid=S.modal.cid; S.modal=null;
-  const nameEl=document.getElementById('mvname'), priceEl=document.getElementById('mvprice');
-  const name=(nameEl&&nameEl.value.trim())||'My vendor';
-  const price=parseInt(priceEl&&priceEl.value.replace(/[^0-9]/g,''),10)||0;
+function foundStamp(){
+  const d=new Date();
+  return d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})+' · '+d.toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit'});
+}
+function createManualVendor(cid,name,price){
   if(!VENDORS[cid]) VENDORS[cid]=[];
   const id='mv'+Math.floor(price+VENDORS[cid].length+1)+cid.length;
   VENDORS[cid].push({id,name:name.slice(0,60),city:'Off-platform',price,manual:true});
   S.cats[cid].inPlan=true; S.openTile=cid;
+}
+function confirmManual(){
+  const cid=S.modal.cid; 
+  const nameEl=document.getElementById('mvname'), priceEl=document.getElementById('mvprice');
+  const name=(nameEl&&nameEl.value.trim())||'My vendor';
+  const price=parseInt(priceEl&&priceEl.value.replace(/[^0-9]/g,''),10)||0;
+  /* anti-leak match: does this name belong to a business ALREADY on Setnayan? */
+  const n=name.toLowerCase();
+  const match=(VENDORS[cid]||[]).find(v=>!v.manual && n.length>=4 &&
+    (v.name.toLowerCase().includes(n)||n.includes(v.name.toLowerCase())||n.split(' ')[0].length>=4&&v.name.toLowerCase().startsWith(n.split(' ')[0])));
+  if(match){ S.modal={kind:'manualmatch',cid,name,price,vid:match.id}; renderOverlay(); return; }
+  S.modal=null;
+  createManualVendor(cid,name,price);
   renderAll();
   toast({tt:`${name.slice(0,60)} added ✎`, ms:'They appear in this category as YOUR vendor. In the app a claim QR is generated — until they scan it, their calendar is unknown, so they never grey out (fail-open).', plain:true});
+}
+function linkInstead(){
+  const {cid,vid}=S.modal; S.modal=null;
+  const v=vendorObj(cid,vid);
+  addBuild(cid,vid);
+  toast({tt:`🔗 Linked to ${v.name} on Setnayan`, ms:`Much better than a manual copy: real calendar, chat, and handshake protection. ${v.name} was notified — “You were found on Setnayan on ${foundStamp()} by a couple planning their Sep 12, 2027 wedding.”`, plain:true});
+}
+function keepManualAnyway(){
+  const {cid,name,price,vid}=S.modal; S.modal=null;
+  const real=vendorObj(cid,vid);
+  createManualVendor(cid,name,price);
+  renderAll();
+  toast({tt:`Added manually — ${real.name} was still notified`, ms:`“You were found on Setnayan on ${foundStamp()} by a couple planning their Sep 12, 2027 wedding — they added you off-platform.” Because their card was opened, this is NOT a free own-client import — the booking stays Setnayan-sourced. A vendor who only appeared in searches, card never opened, would import free with no notice.`, plain:true});
 }
 function loadPlan(i){
   const plan=S.plans[i]; if(!plan) return;

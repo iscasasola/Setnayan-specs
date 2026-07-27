@@ -150,3 +150,28 @@ no inquiry thread (no Check-inquiry button), **calendar unknown → NEVER greys 
 "syncs when they claim"), and **skips the lock handshake** (no dashboard to accept from — the
 shipped payment-gated gate already exempts vendors without `marketplace_vendor_id`; they lock
 directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card variants).
+
+## 10 · "Found-you" attribution on manual imports (owner, same day) — NEW slice PR-J
+> Owner: a couple who finds a business here, contacts them outside the app, and manually imports
+> them is NOT a free own-client import. **Threshold: "found" = the couple OPENED the vendor's card
+> or clicked through to their website/profile.** "If they were just part of the searches and the
+> card was not opened… they are still not found by the couple."
+
+- **Found-record:** minimal per-(event, vendor_profile) row — `first_found_at` + source
+  (`card_open` | `website_click`). Impressions/search results NEVER write it. ⚠ Behavioral data →
+  most-protected class: couple-scoped RLS, no cross-event reuse, retention per DPO policy.
+- **Manual-add match check (extends the shipped `NewManualVendorModal`):** name-match against
+  marketplace vendors. If matched AND found → (a) couple sees the **link-instead nudge** ("real
+  calendar · chat · handshake") with clear disclosure that the vendor is notified; (b) the vendor
+  gets the **found-you lead alert**: "You were found on Setnayan on {date · time} by {couple
+  display name} for their {event-type, event-date} event — added off-platform"; (c) attribution =
+  **setnayan_sourced** — extends `booking_fee_attribution_for`; the fee (at handshake acceptance,
+  §7) applies. If matched but NEVER found → genuine own-client import: **free**, **no
+  notification** (the existing "unknown ⇒ import ⇒ free" fail-safe stands).
+- **Privacy (standing default: document-not-block, disclose-then-enable):** notification payload
+  is data-minimal (couple display name + event type + event date — no contact details); the
+  couple-side modal discloses the notification BEFORE they proceed; flag the notification content
+  + found-record retention for DPO review on `/admin/data-privacy`. Aligns with the 2026-07-22
+  leakage strategy (dissolve with self-interest — the lead alert makes routing through Setnayan
+  the vendor's own preference) and the chat off-platform-contact filter (#3606).
+- Prototype: the manual-add match modal + both toasts are the reference copy.
