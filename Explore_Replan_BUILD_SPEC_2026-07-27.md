@@ -462,3 +462,24 @@ with an (i) to hide the other information"). Rules for the build:
    - PR-J: assert **a ledger/charge row exists with the expected attribution after claim-sync**,
      not that the resolver returned a value.
    Same rule for any future call whose failure mode is a silent non-fatal return.
+
+### 12.7 · PR-J hard requirements from the money-path verification (Booking session, agreed)
+1. **Adjudicate BEFORE the first ledger write — and pin the negative with a test.** Attribution
+   freezes on the first ledger insert (`20271009180000:83-89` sets only
+   `highest_declared_centavos, source, updated_at` — never `attribution`). So found-you is
+   strictly-before-first-write or never. **Required test (Booking's explicit ask):** insert a
+   ledger row as `import` → run the found-you path → assert attribution is **STILL `import`**.
+   The point is that a future refactor which "helpfully" updates attribution `ON CONFLICT` must
+   fail loudly rather than silently repricing history.
+2. **Assert POSITIVE post-conditions** (§12.6.2): a ledger/charge row EXISTS with the expected
+   attribution after claim-sync — never merely that a call returned without error. Both 8b and
+   8c are bugs that succeed while doing nothing.
+3. **KNOWN GAP — the un-billable-forever hole (logged so it is not rediscovered as a bug).**
+   `applyClaimAutoLink` (`lib/vendor-invite-actions.ts:423-431`) upserts a `chat_threads` row for
+   (event, claimed vendor) with **NULL `inquiry_source`**, and `startServiceInquiry` stamps
+   provenance only `if (!isExisting)` (`inquiry-actions.ts:302`). Plain terms: **a couple who adds
+   their own vendor manually and LATER genuinely discovers them through Explore is permanently
+   un-billable.** Fails safe (under-bills), not urgent — but it is a revenue hole, not a data wart.
+   **Fix shape (either):** stamp provenance on the claim-created row at claim time, OR allow a
+   one-time stamp when the existing row's `inquiry_source IS NULL`. PR-J may close it or leave it;
+   it must not silently depend on it.
