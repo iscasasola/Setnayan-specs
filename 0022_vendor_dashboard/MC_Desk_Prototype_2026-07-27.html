@@ -1,0 +1,659 @@
+<title>The Emcee's Screen — Setnayan day-of prototype</title>
+<style>
+  :root {
+    --stage:      #14150F;
+    --stage-2:    #1C1D16;
+    --stage-line: #2E2F25;
+    --gold:       #A9834B;
+    --gold-lit:   #CBA766;
+    --paper:      #F5F1E8;
+    --paper-dim:  rgba(245,241,232,0.62);
+    --paper-faint:rgba(245,241,232,0.38);
+    --late:       #C2703D;
+    --ontime:     #7E8C77;
+
+    --page-bg:    #EFEDE6;
+    --page-card:  #F8F7F3;
+    --page-ink:   #1B1A17;
+    --page-dim:   #56534B;
+    --page-line:  #D8D5CB;
+    --page-gold:  #8C6932;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page-bg:   #100F0C;
+      --page-card: #191813;
+      --page-ink:  #EDEAE1;
+      --page-dim:  #9C978A;
+      --page-line: #2C2A23;
+      --page-gold: #CBA766;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page-bg:   #100F0C;
+    --page-card: #191813;
+    --page-ink:  #EDEAE1;
+    --page-dim:  #9C978A;
+    --page-line: #2C2A23;
+    --page-gold: #CBA766;
+  }
+  :root[data-theme="light"] {
+    --page-bg:   #EFEDE6;
+    --page-card: #F8F7F3;
+    --page-ink:  #1B1A17;
+    --page-dim:  #56534B;
+    --page-line: #D8D5CB;
+    --page-gold: #8C6932;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--page-bg);
+    color: var(--page-ink);
+    font-family: "Hanken Grotesk", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Space Mono", Menlo, Consolas, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.26em;
+    font-size: 0.6rem;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 2rem) 4rem; }
+
+  header.masthead { display: flex; flex-direction: column; gap: 0.75rem; max-width: 62ch; }
+  header.masthead .eyebrow { color: var(--page-gold); }
+  header.masthead h1 {
+    margin: 0; font-size: clamp(1.9rem, 4.6vw, 3rem); font-weight: 300;
+    letter-spacing: -0.02em; line-height: 1.08; text-wrap: balance;
+  }
+  header.masthead p { margin: 0; color: var(--page-dim); max-width: 60ch; }
+
+  .rule { height: 1px; background: var(--page-line); border: 0; margin: 2.5rem 0; }
+
+  .stage-grid {
+    display: grid; gap: clamp(1.5rem, 3vw, 2.5rem);
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    align-items: start;
+  }
+  @media (max-width: 860px) { .stage-grid { grid-template-columns: minmax(0, 1fr); } }
+
+  /* ── the phone ─────────────────────────────────────────────── */
+  .phone {
+    background: var(--stage);
+    border: 1px solid var(--stage-line);
+    border-radius: 30px;
+    padding: 0.6rem;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.30), 0 2px 6px rgba(0,0,0,0.2);
+    position: sticky; top: 1.5rem;
+  }
+  @media (max-width: 860px) { .phone { position: static; } }
+
+  .screen {
+    background: var(--stage); border-radius: 24px; overflow: hidden;
+    color: var(--paper); display: flex; flex-direction: column;
+    height: 620px;
+  }
+  .screen-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.85rem 1rem 0.7rem; border-bottom: 1px solid var(--stage-line);
+    color: var(--paper-faint); flex-shrink: 0;
+  }
+  .screen-body { overflow-y: auto; padding: 0.9rem; display: flex; flex-direction: column; gap: 0.75rem; scroll-behavior: smooth; }
+
+  .card { border: 1px solid var(--stage-line); background: var(--stage-2); padding: 0.85rem; }
+  .card > h3 {
+    margin: 0 0 0.7rem; display: flex; align-items: center; gap: 0.5rem;
+    color: var(--paper-dim); font-weight: 400;
+  }
+  .card > h3 .tick { width: 14px; height: 1px; background: var(--gold); flex-shrink: 0; }
+
+  .headline { margin: 0; font-size: 1.32rem; font-weight: 300; letter-spacing: -0.015em; line-height: 1.25; text-wrap: balance; }
+
+  .drift { margin: 0.4rem 0 0; letter-spacing: 0.16em; }
+  .drift.late { color: var(--late); }
+  .drift.ontime { color: var(--ontime); }
+
+  .now-block { margin-top: 0.8rem; padding-left: 0.75rem; border-left: 2px solid var(--gold); display: flex; flex-direction: column; gap: 0.35rem; }
+  .time { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.72rem; color: var(--paper-faint); letter-spacing: 0.04em; }
+  .say { margin: 0; font-size: 0.94rem; line-height: 1.5; }
+  .note { margin: 0; font-size: 0.94rem; line-height: 1.5; color: var(--paper-dim); }
+
+  .next { margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--stage-line); }
+  .next .label { color: var(--paper-faint); }
+  .next .who { margin: 0.3rem 0 0; font-size: 0.98rem; }
+  .next .who span { color: var(--paper-faint); font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    border: 1px solid rgba(245,241,232,0.28); background: rgba(245,241,232,0.05);
+    padding: 0.15rem 0.4rem; color: var(--paper-dim);
+    font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
+    letter-spacing: 0.14em; font-size: 0.55rem; white-space: nowrap;
+  }
+  .badge.live { border-color: var(--gold); color: var(--gold-lit); background: rgba(169,131,75,0.12); }
+
+  ol.script { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+  ol.script li.done { opacity: 0.42; }
+  ol.script li.part { margin-left: 0.9rem; padding-left: 0.7rem; border-left: 1px solid var(--stage-line); }
+  .line-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem; }
+  .line-top .label-name { font-size: 0.94rem; }
+  .line-top .label-name.top { font-weight: 600; }
+  .sub { margin: 0.15rem 0 0; font-size: 0.86rem; line-height: 1.45; color: var(--paper-dim); }
+  .loc { margin: 0.15rem 0 0; color: var(--paper-faint); }
+
+  ul.anns { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+
+  .empty { margin: 0; color: var(--paper-dim); font-size: 0.9rem; line-height: 1.5; }
+
+  /* proposed-feature affordances inside the phone */
+  .card.proposed { border-style: dashed; border-color: rgba(203,167,102,0.42); }
+  .card.proposed > h3 { color: var(--gold-lit); }
+
+  .mini-input {
+    width: 100%; background: rgba(245,241,232,0.05); color: var(--paper);
+    border: 1px solid var(--stage-line); padding: 0.55rem 0.6rem;
+    font-family: inherit; font-size: 0.9rem; border-radius: 0;
+  }
+  .mini-input::placeholder { color: var(--paper-faint); }
+  .mini-input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+  .mini-btn {
+    background: var(--gold); color: #16150F; border: 0; padding: 0.5rem 0.8rem;
+    font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
+    letter-spacing: 0.16em; font-size: 0.58rem; cursor: pointer;
+  }
+  .mini-btn:hover { background: var(--gold-lit); }
+  .mini-btn:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+
+  .row { display: flex; gap: 0.5rem; align-items: stretch; }
+  .row .mini-input { flex: 1; min-width: 0; }
+
+  .my-note { border-left: 2px solid var(--gold-lit); padding-left: 0.6rem; }
+  .sent { border-left: 2px solid var(--ontime); padding-left: 0.6rem; }
+
+  /* ── the cue board ─────────────────────────────────────────── */
+  .board { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .board-head { display: flex; flex-direction: column; gap: 0.4rem; }
+  .board-head h2 { margin: 0; font-size: 1.35rem; font-weight: 400; letter-spacing: -0.01em; }
+  .board-head p { margin: 0; color: var(--page-dim); max-width: 58ch; font-size: 0.95rem; }
+
+  .cues { display: flex; flex-direction: column; border: 1px solid var(--page-line); background: var(--page-card); }
+  .cue {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 0.85rem; align-items: center;
+    padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--page-line); text-align: left;
+    background: none; border-left: 0; border-right: 0; border-top: 0;
+    font: inherit; color: inherit; cursor: pointer; width: 100%;
+  }
+  .cue:last-child { border-bottom: 0; }
+  .cue:hover { background: rgba(169,131,75,0.08); }
+  .cue:focus-visible { outline: 2px solid var(--page-gold); outline-offset: -2px; }
+  .cue[aria-current="true"] { background: rgba(169,131,75,0.14); }
+  .cue .n {
+    font-family: ui-monospace, Menlo, monospace; font-size: 0.68rem;
+    color: var(--page-dim); font-variant-numeric: tabular-nums;
+  }
+  .cue .what { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+  .cue .what strong { font-weight: 500; font-size: 0.95rem; }
+  .cue .what small { color: var(--page-dim); font-size: 0.82rem; }
+  .cue .state {
+    font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
+    letter-spacing: 0.14em; font-size: 0.55rem; color: var(--page-dim); white-space: nowrap;
+  }
+  .cue .state.on { color: var(--page-gold); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .btn {
+    border: 1px solid var(--page-line); background: var(--page-card); color: var(--page-ink);
+    padding: 0.6rem 1rem; cursor: pointer;
+    font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
+    letter-spacing: 0.16em; font-size: 0.6rem;
+  }
+  .btn:hover { border-color: var(--page-gold); color: var(--page-gold); }
+  .btn:focus-visible { outline: 2px solid var(--page-gold); outline-offset: 2px; }
+  .btn.primary { background: var(--page-gold); border-color: var(--page-gold); color: var(--page-bg); }
+  .btn.primary:hover { opacity: 0.88; color: var(--page-bg); }
+
+  .readout {
+    border: 1px solid var(--page-line); background: var(--page-card); padding: 0.9rem 1rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .readout .k { color: var(--page-dim); }
+  .readout .v { font-family: ui-monospace, Menlo, monospace; font-size: 0.86rem; }
+  .readout .order { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+  .chip {
+    border: 1px solid var(--page-line); padding: 0.15rem 0.45rem;
+    font-family: ui-monospace, Menlo, monospace; font-size: 0.6rem;
+    text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  .chip.lead { border-color: var(--page-gold); color: var(--page-gold); }
+  .arrow { color: var(--page-dim); font-size: 0.7rem; }
+
+  /* ── the ledger ────────────────────────────────────────────── */
+  .ledger { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
+  .item { border: 1px solid var(--page-line); background: var(--page-card); padding: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .item .tag { font-family: ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: 0.18em; font-size: 0.55rem; }
+  .item.built .tag { color: var(--ontime); }
+  .item.proposed .tag { color: var(--page-gold); }
+  .item.decided .tag { color: var(--page-dim); }
+  .item h3 { margin: 0; font-size: 1.02rem; font-weight: 500; }
+  .item p { margin: 0; color: var(--page-dim); font-size: 0.9rem; line-height: 1.55; }
+  .item.proposed { border-style: dashed; }
+
+  .question {
+    border-left: 3px solid var(--page-gold); padding: 0.35rem 0 0.35rem 1rem;
+    margin: 0; color: var(--page-ink); font-size: 1rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <span class="mono eyebrow">Setnayan · day-of · prototype</span>
+    <h1>The emcee's screen</h1>
+    <p>
+      What a host holds in one hand, mid-room, while the lights are down. Advance the night on the
+      cue board and watch the screen rearrange itself — that reordering is the whole idea, and a
+      static mockup can't show it.
+    </p>
+  </header>
+
+  <hr class="rule" />
+
+  <div class="stage-grid">
+
+    <div class="phone">
+      <div class="screen">
+        <div class="screen-top">
+          <span class="mono">Balingit &amp; Reyes</span>
+          <span class="mono" id="clock">6:25 PM</span>
+        </div>
+        <div class="screen-body" id="screen"></div>
+      </div>
+    </div>
+
+    <div class="board">
+
+      <div class="board-head">
+        <h2>Run the night</h2>
+        <p>
+          Tap a moment to jump there, or step through in order. The host doesn't drive this —
+          whoever is running the floor advances it, and the emcee's screen follows.
+        </p>
+      </div>
+
+      <div class="cues" id="cues"></div>
+
+      <div class="controls">
+        <button class="btn primary" id="advance" type="button">Advance →</button>
+        <button class="btn" id="lateness" type="button">Running late: 18 min</button>
+        <button class="btn" id="reset" type="button">Back to the start</button>
+      </div>
+
+      <div class="readout">
+        <div><span class="mono k">Where the night is</span> <span class="v" id="phase">—</span></div>
+        <div class="order"><span class="mono k">Card order</span> <span id="order"></span></div>
+        <div><span class="mono k">Why</span> <span class="v" id="why">—</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="rule" />
+
+  <h2 style="margin:0 0 0.35rem; font-size:1.35rem; font-weight:400; letter-spacing:-0.01em;">What's real, and what isn't</h2>
+  <p style="margin:0 0 1.5rem; color:var(--page-dim); max-width:62ch;">
+    Three of these shipped today. Two are proposals from your notes — they're drawn dashed and gold
+    on the screen above, and nothing behind them is built yet.
+  </p>
+
+  <div class="ledger">
+
+    <div class="item built">
+      <span class="tag">Built · in this PR</span>
+      <h3>On now</h3>
+      <p>
+        What you're on, the line to say, what's next and when. If the night is behind, it says so —
+        "due 15 min ago", never a blank. The couple's note for the current moment sits right here.
+      </p>
+    </div>
+
+    <div class="item built">
+      <span class="tag">Built · in this PR</span>
+      <h3>The running script</h3>
+      <p>
+        The whole evening, top to bottom. Finished moments fade back, the live one is marked, and
+        the parts inside a moment sit under their parent — same shape as the script the couple
+        downloads, because it's compiled from the same source.
+      </p>
+    </div>
+
+    <div class="item built">
+      <span class="tag">Built · in this PR</span>
+      <h3>Announcements</h3>
+      <p>
+        The couple's own notes, pulled out of the program so a long evening can't bury them. Private
+        moments show up here too — stamped <em>Don't read aloud</em>, never hidden, because a host
+        who doesn't know about the surprise is the one who ruins it.
+      </p>
+    </div>
+
+    <div class="item proposed">
+      <span class="tag">Proposed · not built</span>
+      <h3>My notes</h3>
+      <p>
+        The host's own cues, written by them, pinned to a moment. "Groom's lola is at table 3 —
+        greet her." Theirs alone; the couple never sees them. This is the one an emcee will ask
+        for first, because every one of them already does it on paper.
+      </p>
+    </div>
+
+    <div class="item proposed">
+      <span class="tag">Proposed · not built</span>
+      <h3>Ask the couple</h3>
+      <p>
+        A question from the stage, into the thread the host and couple already share — so it lands
+        where they're used to talking, and there's a record. Needs a decision: does the coordinator
+        get a copy, given they're the one relaying on the night?
+      </p>
+    </div>
+
+    <div class="item decided">
+      <span class="tag">Decided · staying human</span>
+      <h3>The coordinator relays</h3>
+      <p>
+        No inbox for the host. The coordinator hears it and tells them — which is what already
+        happens on a floor, and it's why the guest list and the coordinator's messages stay closed
+        to suppliers.
+      </p>
+    </div>
+
+  </div>
+
+  <hr class="rule" />
+
+  <p class="question">
+    One thing worth settling: should a host's own notes survive to their <em>next</em> wedding —
+    a personal library they build over a career — or start clean each time?
+  </p>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CUE = {
+    ceremony:  "All rise — the ceremony begins.",
+    cocktails: "Invite guests to enjoy cocktails and mingle.",
+    reception: "Welcome everyone into the reception hall.",
+    dinner:    "Announce that dinner is served.",
+    dancing:   "Open the floor — let the dancing begin."
+  };
+
+  function seed() {
+    return [
+      { id:"1",  label:"Ceremony",           type:"ceremony",  time:"2:00 PM", pub:true,  note:null, loc:null, depth:0 },
+      { id:"2",  label:"Cocktails",          type:"cocktails", time:"3:00 PM", pub:true,  note:null, loc:null, depth:0 },
+      { id:"3",  label:"Reception entrance", type:"reception", time:"4:00 PM", pub:true,  depth:0,
+        loc:"Grand Ballroom",
+        note:"Announce the principal sponsors by full name — list is on our card." },
+      { id:"3a", label:"Grand march",        type:null,        time:"4:10 PM", pub:true,  note:null, loc:null, depth:1 },
+      { id:"4",  label:"Surprise number",    type:null,        time:"4:40 PM", pub:false, depth:0, loc:null,
+        note:"Don't tease this. Groom's brothers only — cue the AVP first." },
+      { id:"5",  label:"Dinner",             type:"dinner",    time:"5:00 PM", pub:true,  note:null, loc:null, depth:0 },
+      { id:"6",  label:"First dance",        type:"dancing",   time:"6:00 PM", pub:true,  depth:0, loc:null,
+        note:"Say their song title before they walk on: 'Kiss Me Slowly'." }
+    ];
+  }
+
+  var blocks, liveIndex, late, myNotes, sentQuestion;
+
+  function reset() {
+    blocks = seed();
+    liveIndex = 2;          // mid-programme: reception entrance is on
+    late = true;
+    myNotes = [{ at: "Reception entrance", text: "Groom's lola is at table 3 — greet her by name." }];
+    sentQuestion = null;
+    render();
+  }
+
+  function stateOf(i) {
+    if (liveIndex === null) return i < blocks.length ? "upcoming" : "upcoming";
+    if (i < liveIndex) return "done";
+    if (i === liveIndex) return "live";
+    return "upcoming";
+  }
+
+  function phase() {
+    if (liveIndex === null) return "not started";
+    if (liveIndex >= blocks.length) return "wrapped";
+    return "running";
+  }
+
+  function nextIndex() {
+    if (liveIndex === null) return 0;
+    return liveIndex + 1 < blocks.length ? liveIndex + 1 : null;
+  }
+
+  /* The derived order — the same rule the shipped helper uses. */
+  function cardOrder() {
+    var p = phase();
+    if (p === "wrapped") return ["script", "announcements"];
+    var ni = nextIndex();
+    var nowNote = liveIndex !== null && blocks[liveIndex] && blocks[liveIndex].note;
+    var nextNote = ni !== null && blocks[ni] && blocks[ni].note;
+    return (nowNote || nextNote)
+      ? ["cue", "announcements", "script"]
+      : ["cue", "script", "announcements"];
+  }
+
+  function why() {
+    var p = phase();
+    if (p === "wrapped") return "Show's over — the cue card has nothing left to say, so it's gone.";
+    var ni = nextIndex();
+    var nowNote = liveIndex !== null && blocks[liveIndex] && blocks[liveIndex].note;
+    var nextNote = ni !== null && blocks[ni] && blocks[ni].note;
+    if (nowNote) return "This moment carries a note — it jumps above the script.";
+    if (nextNote) return "The next moment carries a note — it jumps above the script.";
+    return "Nothing to say right now beyond the run — the script leads.";
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+    });
+  }
+
+  function privateBadge() {
+    return '<span class="badge">Don\'t read aloud</span>';
+  }
+
+  function headline() {
+    var p = phase();
+    if (p === "wrapped") return "That’s a wrap — every moment is done.";
+    if (liveIndex === null) {
+      return "Standing by. Opening: " + esc(blocks[0].label) + ".";
+    }
+    return "You’re on: " + esc(blocks[liveIndex].label) + ".";
+  }
+
+  function cueCard() {
+    var b = liveIndex !== null && liveIndex < blocks.length ? blocks[liveIndex] : null;
+    var ni = nextIndex();
+    var n = ni !== null ? blocks[ni] : null;
+
+    var h = '<div class="card"><h3><span class="tick"></span><span class="mono">On now</span></h3>';
+    h += '<p class="headline">' + headline() + "</p>";
+
+    if (b) {
+      h += '<p class="mono drift ' + (late ? "late" : "ontime") + '">' +
+           (late ? "Running 18 min behind" : "Running on time") + "</p>";
+      h += '<div class="now-block"><span class="time">' + esc(b.time) + "</span>";
+      if (b.type && CUE[b.type]) h += '<p class="say">' + esc(CUE[b.type]) + "</p>";
+      if (b.note) {
+        h += "<div>";
+        if (!b.pub) h += privateBadge();
+        h += '<p class="note">' + esc(b.note) + "</p></div>";
+      }
+      h += "</div>";
+    }
+
+    if (n) {
+      h += '<div class="next"><p class="mono label">Next' +
+           (late ? " · due 15 min ago" : " · in 20 min") + "</p>";
+      h += '<p class="who">' + esc(n.label) + ' <span>' + esc(n.time) + "</span></p>";
+      if (n.note) {
+        h += "<div>";
+        if (!n.pub) h += privateBadge();
+        h += '<p class="note">' + esc(n.note) + "</p></div>";
+      }
+      h += "</div>";
+    }
+    return h + "</div>";
+  }
+
+  function scriptCard() {
+    var h = '<div class="card"><h3><span class="tick"></span><span class="mono">Running script</span></h3><ol class="script">';
+    blocks.forEach(function (b, i) {
+      var st = stateOf(i);
+      h += '<li class="' + (st === "done" ? "done " : "") + (b.depth === 1 ? "part" : "") + '">';
+      h += '<div class="line-top"><span class="time">' + esc(b.time) + "</span>";
+      h += '<span class="label-name' + (b.depth === 0 ? " top" : "") + '">' + esc(b.label) + "</span>";
+      if (st === "live") h += '<span class="badge live">On now</span>';
+      if (!b.pub) h += privateBadge();
+      h += "</div>";
+      if (b.type && CUE[b.type]) h += '<p class="sub">' + esc(CUE[b.type]) + "</p>";
+      if (b.note) h += '<p class="sub">' + esc(b.note) + "</p>";
+      if (b.loc) h += '<p class="mono loc">' + esc(b.loc) + "</p>";
+      h += "</li>";
+    });
+    return h + "</ol></div>";
+  }
+
+  function annCard() {
+    var items = blocks.filter(function (b) { return b.note; });
+    var h = '<div class="card"><h3><span class="tick"></span><span class="mono">Announcements</span></h3>';
+    if (!items.length) {
+      h += '<p class="empty">Nothing written against the program yet. Anything the couple notes shows up here, in their words.</p>';
+      return h + "</div>";
+    }
+    h += '<ul class="anns">';
+    items.forEach(function (b) {
+      var i = blocks.indexOf(b);
+      h += '<li class="' + (stateOf(i) === "done" ? "done" : "") + '">';
+      h += '<div class="line-top"><span class="time">' + esc(b.time) + "</span>";
+      h += '<span class="label-name">' + esc(b.label) + "</span>";
+      if (!b.pub) h += privateBadge();
+      h += '</div><p class="sub">' + esc(b.note) + "</p></li>";
+    });
+    return h + "</ul></div>";
+  }
+
+  function myNotesCard() {
+    var here = liveIndex !== null && liveIndex < blocks.length ? blocks[liveIndex].label : "this moment";
+    var h = '<div class="card proposed"><h3><span class="tick"></span><span class="mono">My notes · proposed</span></h3>';
+    if (myNotes.length) {
+      h += '<ul class="anns" style="margin-bottom:0.7rem">';
+      myNotes.forEach(function (n) {
+        h += '<li class="my-note"><div class="line-top"><span class="mono" style="color:var(--paper-faint)">' +
+             esc(n.at) + '</span></div><p class="sub" style="color:var(--paper)">' + esc(n.text) + "</p></li>";
+      });
+      h += "</ul>";
+    }
+    h += '<div class="row"><input class="mini-input" id="noteInput" placeholder="Your own cue for ' +
+         esc(here) + '…" aria-label="Write your own note" />' +
+         '<button class="mini-btn" id="noteAdd" type="button">Add</button></div>';
+    h += '<p class="empty" style="margin-top:0.5rem;font-size:0.8rem">Yours alone. The couple never sees these.</p>';
+    return h + "</div>";
+  }
+
+  function askCard() {
+    var h = '<div class="card proposed"><h3><span class="tick"></span><span class="mono">Ask the couple · proposed</span></h3>';
+    if (sentQuestion) {
+      h += '<div class="sent"><p class="sub" style="color:var(--paper)">' + esc(sentQuestion) + "</p>" +
+           '<p class="empty" style="font-size:0.8rem">Sent to your thread with Ana &amp; Miguel.</p></div>';
+    }
+    h += '<div class="row" style="margin-top:' + (sentQuestion ? "0.7rem" : "0") + '">' +
+         '<input class="mini-input" id="askInput" placeholder="Do we announce the ninongs by full name?" aria-label="Ask the couple a question" />' +
+         '<button class="mini-btn" id="askSend" type="button">Send</button></div>';
+    h += '<p class="empty" style="margin-top:0.5rem;font-size:0.8rem">Goes to the thread you already share — not a new inbox.</p>';
+    return h + "</div>";
+  }
+
+  function render() {
+    var order = cardOrder();
+    var map = { cue: cueCard, script: scriptCard, announcements: annCard };
+    var html = order.map(function (k) { return map[k](); }).join("");
+    html += myNotesCard() + askCard();
+    document.getElementById("screen").innerHTML = html;
+
+    // cue board
+    var cues = blocks.map(function (b, i) {
+      var st = stateOf(i);
+      return '<button class="cue" type="button" data-i="' + i + '" aria-current="' + (st === "live") + '">' +
+        '<span class="n">' + b.time + "</span>" +
+        '<span class="what"><strong>' + esc(b.label) + "</strong>" +
+        (b.pub ? "" : "<small>private — not read aloud</small>") + "</span>" +
+        '<span class="state' + (st === "live" ? " on" : "") + '">' + st + "</span></button>";
+    }).join("");
+    document.getElementById("cues").innerHTML = cues;
+
+    document.getElementById("phase").textContent = phase();
+    document.getElementById("why").textContent = why();
+    document.getElementById("order").innerHTML = order.map(function (k, i) {
+      return (i ? '<span class="arrow">→</span>' : "") +
+             '<span class="chip' + (i === 0 ? " lead" : "") + '">' + k + "</span>";
+    }).join("");
+    document.getElementById("lateness").textContent = late ? "Running late: 18 min" : "Running: on time";
+    document.getElementById("clock").textContent = late ? "6:25 PM" : "6:07 PM";
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (t.id === "advance") {
+      if (liveIndex === null) liveIndex = 0;
+      else if (liveIndex < blocks.length) liveIndex += 1;
+      render();
+    } else if (t.id === "reset") {
+      reset();
+    } else if (t.id === "lateness") {
+      late = !late; render();
+    } else if (t.id === "noteAdd") {
+      var inp = document.getElementById("noteInput");
+      if (inp && inp.value.trim()) {
+        myNotes.push({
+          at: liveIndex !== null && liveIndex < blocks.length ? blocks[liveIndex].label : "General",
+          text: inp.value.trim()
+        });
+        render();
+      }
+    } else if (t.id === "askSend") {
+      var a = document.getElementById("askInput");
+      if (a && a.value.trim()) { sentQuestion = a.value.trim(); render(); }
+    } else if (t.closest && t.closest(".cue")) {
+      liveIndex = parseInt(t.closest(".cue").getAttribute("data-i"), 10);
+      render();
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    if (e.target.id === "noteInput") { e.preventDefault(); document.getElementById("noteAdd").click(); }
+    if (e.target.id === "askInput")  { e.preventDefault(); document.getElementById("askSend").click(); }
+  });
+
+  reset();
+})();
+</script>
