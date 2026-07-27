@@ -523,7 +523,21 @@ decision, not an oversight.**
 **Test requirement:** each of the four exemptions gets an adversarial test that tries to LAUNDER it
 (event-hop · new-account claim · import-then-browse · second dispute), not merely a happy-path test.
 
-#### 12.8a · ⛔ The event-hop fix is OWNER-GATED — it is a PRICING change, not a bug fix
+#### 12.8a · ✅ RULED BY OWNER 2026-07-27: **NO — found-state stays PER EVENT.** (was owner-gated)
+> Owner's answer to *"if a couple saw a vendor on Setnayan while planning their wedding, and a
+> year later adds that vendor to their kid's christening from their own contacts — do we
+> charge?"* → **No. Keep it per event.**
+>
+> **BUILD INSTRUCTION: found-records stay scoped per (event × vendor). Do NOT widen the query
+> across the couple's events. No recency window is needed — the question it answered is closed.**
+> A vendor is "found on Setnayan" only for the event where the couple actually browsed them.
+> Rationale (owner's option): simplest to explain to a vendor, and it never charges for stale
+> history. The event-hop vector is therefore an **ACCEPTED TRADE, documented — not an oversight**
+> (same class as the impressions trade in §12.8): a couple could browse under one event and
+> import free under another. The resolver keeps ONE scope; the two-scope asymmetry warning below
+> is now moot and retained only as history.
+>
+> _Original gating note, kept for lineage:_
 The Booking session (fee-machinery owner) flagged this before it was built, correctly:
 **widening the found-check to the couple's other events converts bookings that are FREE today
 into billable ones.** It is a redefinition of "sourced", and it runs against the direction of the
