@@ -175,3 +175,8 @@ directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card vari
   leakage strategy (dissolve with self-interest — the lead alert makes routing through Setnayan
   the vendor's own preference) and the chat off-platform-contact filter (#3606).
 - Prototype: the manual-add match modal + both toasts are the reference copy.
+- **Timing (owner clarification):** yes — for as long as the card was never opened and the website
+  never clicked, the vendor is NOT found: import free, no notification, indefinitely. The
+  found-record stamps on the FIRST open/click (per event). Attribution is judged **at import
+  time** — `first_found_at` must PRECEDE the manual add; a later card-open never retroactively
+  converts an already-free import (they demonstrably knew the vendor before finding them here).
