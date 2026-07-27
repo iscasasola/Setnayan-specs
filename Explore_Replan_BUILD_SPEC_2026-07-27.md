@@ -522,3 +522,28 @@ decision, not an oversight.**
 
 **Test requirement:** each of the four exemptions gets an adversarial test that tries to LAUNDER it
 (event-hop · new-account claim · import-then-browse · second dispute), not merely a happy-path test.
+
+#### 12.8a · ⛔ The event-hop fix is OWNER-GATED — it is a PRICING change, not a bug fix
+The Booking session (fee-machinery owner) flagged this before it was built, correctly:
+**widening the found-check to the couple's other events converts bookings that are FREE today
+into billable ones.** It is a redefinition of "sourced", and it runs against the direction of the
+last two owner rulings (sourced-only lock 2026-07-25; `website` closed to import 2026-07-26 —
+both NARROWED what we charge for).
+
+- **DO NOT BUILD IT on engineering judgement.** PR-J ships with found-records scoped per
+  (event × vendor) — today's behaviour — until the owner rules.
+- **Owner question, plain terms:** *"If a couple saw a vendor on Setnayan while planning their
+  wedding, and a year later adds that same vendor to their kid's christening from their own
+  contacts — do we charge a fee?"*
+- **If the answer is yes, ask for a RECENCY WINDOW.** Unbounded, an 18-month-old view on an
+  unrelated event makes today's manual import billable — precisely the booking a vendor would
+  dispute, and they'd be right. (The grace-first ladder makes a wrong call recoverable, which
+  lowers the risk — but recoverable-after-a-dispute is worse than never-wrong.)
+- **If built, the resolver ends up with TWO scopes** — thread branch event-scoped, found branch
+  couple-scoped. That asymmetry is legitimate but is exactly what a future reader flattens "for
+  consistency", silently repricing history. Required if built: state the asymmetry in the
+  function's COMMENT **and** pin it with a test that FAILS if the thread branch is ever widened
+  to match.
+
+**The new-account fix (§12.8 ⚠3) is NOT gated** — routing a fuzzy business match to adjudication
+instead of auto-freeing charges nobody automatically; fail-safe stays FREE. Build it.
