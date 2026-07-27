@@ -561,3 +561,37 @@ both NARROWED what we charge for).
 
 **The new-account fix (§12.8 ⚠3) is NOT gated** — routing a fuzzy business match to adjudication
 instead of auto-freeing charges nobody automatically; fail-safe stays FREE. Build it.
+
+## 13 · Sort by distance + sort persistence (owner asked 2026-07-27) — READY, not yet built
+**Q: "can we also add sort by distance? and is this settable?"** Grounded answers:
+
+### 13.1 · Distance sort — YES, and the data is already on the page (zero new queries)
+`haversineKm(venueLat, venueLng, vendor.hq_latitude, vendor.hq_longitude)` is ALREADY computed on
+the vendors page (`page.tsx:438-443`) and stored in the enrichment map as `distance_km` (`:469`).
+It is simply **never projected onto the bench card** — `ShortlistVendor` carries `serviceRadiusKm`
++ `reachesVenue` (boolean) but not the km. Identical shape to the `thread_id` gap in §12.1.
+**Build:** ① project `distanceKm: ext?.distance_km ?? null` onto `ShortlistVendor`
+(`shortlist-taxonomy.ts` ~:356, beside `serviceRadiusKm`); ② add `'distance'` to `BenchSort` +
+`BENCH_SORTS` (`lib/bench-sort.ts:15-21`) with label **"Nearest"**; ③ comparator
+`(a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)` and a reason pill ("3.2 km from your
+venue"); ④ extend `fitScore`? **No** — leave the fit lens alone (reach is already a fit input;
+adding raw km would double-count).
+
+### 13.2 · ⚠ The anchor caveat — distance from WHAT
+Origin is `events.venue_latitude/longitude` (migration `20260525010000`), populated at event
+creation from onboarding capture, by `saveVendorToPicks` when the couple saves a `category='venue'`
+vendor with coordinates, or by admin override. **If it is NULL, every distance is NULL and the lens
+is meaningless.** Required: **hide (or disable with an honest reason) the "Nearest" chip when there
+is no anchor** — never show a sort that silently no-ops. Copy when disabled: *"Add your venue to
+sort by distance."*
+
+### 13.3 · "Settable?" — three different questions, three honest answers
+| Sense | Today | Recommendation |
+|---|---|---|
+| Can the couple change the sort? | **Yes** — segmented control (`shortlist-categories.tsx:659`) | unchanged |
+| Is their choice REMEMBERED? | **No** — `useState<BenchSort>('fit')` (`:426`), component state only. Tab away or reload → snaps back to "Best fit" | **Fix in the same PR** — persist per event (URL `?sort=` or localStorage keyed by event). Arguably a bigger daily annoyance than the missing lens. |
+| Is the sort LIST admin-configurable? | No — hardcoded `BENCH_SORTS` | **Leave hardcoded.** Four lenses is a considered set, not a catalog; a configurable sort list is a maintenance liability with no user demand. |
+| Is the distance ORIGIN settable (venue vs the couple's home)? | No — always the venue anchor | **Defer.** "From our home" needs a couple home address we don't collect; revisit only if asked. |
+
+**Slice:** small, self-contained, no schema — fold into PR-B's follow-up or ship standalone as
+**PR-K**. Unit-test the comparator (null km sorts last, never first) + the anchor-absent hide rule.
