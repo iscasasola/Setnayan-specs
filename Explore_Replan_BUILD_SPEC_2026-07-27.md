@@ -1166,3 +1166,16 @@ This is `byBucket[]` in `resolveEventMoney` (§18.1) made explicit. Sources veri
 **Rule: bucket 2 selects couple-payer orders only** — filter explicitly (payer `user_id` = a couple member AND/OR `vendor_profile_id IS NULL` AND/OR the `service_key` is not a vendor SKU); pick the discriminator by reading how the fee rows are written, and **pin it with a test that a vendor-payer order never appears in a couple's total.**
 
 **Bucket 1's "schedules" are first-class**, per the owner's wording: each bucket-1 line carries its due date and paid state so the planner answers *when*, not only *how much* — the `.ics` export and the milestone machinery already exist and must feed the same resolver rather than a parallel path.
+
+**Bucket 2's doorway is SUITE** (owner 2026-07-27: *"in app purchases can be found on suite"*). Verified: the Suite surface is `/dashboard/[eventId]/suite`, flag-gated on `NEXT_PUBLIC_SUITE` (nav slot key stays `studio`; it replaced the "Studio" label, owner-locked 2026-07-19 — `customer-nav-config.ts:217`, `customer-menu.ts:254`). So the model is symmetric, and the budget planner should express it that way:
+
+| Bucket | Where the couple CHOOSES | Where the money LIVES | Doorway from the budget |
+|---|---|---|---|
+| 1 · Vendors | **Marketplace** | `event_vendors` + line items + payments | → the vendor's workspace |
+| 2 · In-app services | **Suite** | `orders` (couple-payer only — §18.y hazard) | → **Suite** |
+| 3 · Manual costs | nowhere — the couple types it | (to be built) | edit in place |
+
+Consequences for the build:
+- Every bucket-2 line links back to **Suite**, exactly as bucket-1 lines link back to the vendor. A cost the couple cannot navigate to is a cost they cannot manage.
+- Apply-then-pay means a bucket-2 order sits at `pending_payment` — **committed but unpaid**. That is the `committed` / `paid` / `stillOwed` split doing real work, not an edge case: it is the normal state between buying Papic and settling the transfer.
+- The couple's own SKU purchases and the vendor's booking fee live in the SAME table; only the payer distinguishes them (§18.y).
