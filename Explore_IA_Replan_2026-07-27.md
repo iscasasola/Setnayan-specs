@@ -205,3 +205,30 @@ Keep the shipped matrix; sharpen its identity to match the owner's intent:
 3. **Lock-reserves-date (already pending from 2026-07-26):** (a) make Lock actually hold the date
    (pool-acquire at `contracted`, unpaid-lock expiry ~7 days) or (b) label Lock a claim. This
    design's grey-out assumes (a). Recommendation: (a).
+
+---
+
+## 5. Owner additions (2026-07-27, prototype session)
+
+Three refinements requested while playing the interactive prototype; all three have shipped
+foundations, so each is small:
+
+1. **ⓘ per category — "what does this cover?"** Every plan group already carries a `hint` string
+   (`wedding-plan-groups.ts` — e.g. catering: "Food + service. Tastings happen 4-6 months out;
+   book the team earlier."). Surface it behind a small ⓘ on the category row (tap → champagne
+   hint box). No new copy needed — the hints exist for all 27 groups.
+2. **Adaptive accordion — add / remove categories.** The bench shows only the couple's in-plan
+   categories (seeded from onboarding `interested_categories`); each folder ends with a
+   **"＋ Add to your plan"** chip pool of the rest, and every non-locked category has a
+   **"Not needed? Remove"** control. Removing = `event_category_decisions.decision='excluded'`
+   (already exists); adding = clearing it. Guard: a category with a locked vendor can't be
+   removed — unlock first, never silently cancel a booking. Coverage counts adjust
+   ("Covered X of {in-plan}") so 27 never *feels* like 27 unless they want it all.
+3. **Per-card lock summary.** A collapsed category row that has locks shows the locked vendor
+   names inline ("● Snapbox MNL + Dulce Dessert Bar"); the folder head shows a three-part
+   summary — **● N locked · N to decide · ＋N more** — so what's locked / what needs a decision /
+   what else can be added reads without opening anything. "Your team" adds a "Still needs your
+   decision" list (urgency-ordered doorways).
+
+Build-order impact: folds into slices A (done/decisions) and C (Coverage Strip + folder
+summaries); the ⓘ is a one-liner in the bench row component.
