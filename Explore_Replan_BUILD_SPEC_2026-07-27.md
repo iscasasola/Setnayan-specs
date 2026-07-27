@@ -686,3 +686,50 @@ distance (`:438-443`), rating + review_count + verified + is_setnayan_service (`
 6. ⚠ **Watch the `trust`/`boosted` dims** — `boosted` and `is_setnayan_service` feed rank. That is
    defensible but it is paid placement inside a "best fit" default; it must be a conscious owner
    position (same class as §13.4's tier-radius finding) and arguably disclosed.
+
+## 16 · Booking-wave handover absorbed (`SYNC_TO_EXPLORE_Booking_Wave_2026-07-27.md`)
+### 16.1 · ⚠ PR-I IS NOW LIVE MONEY — billing was ARMED in prod 2026-07-27
+The owner set `NEXT_PUBLIC_BOOKING_FEE_ENABLED`. Per contract §4's CORRECTION, that path is gated
+by **ONE flag, not two** — there is no second key. PR-I is therefore a live-money change, not a
+dark-flag rehearsal.
+
+**Blast radius VERIFIED by direct prod query (2026-07-27, read-only):**
+`booking_fee_charges = 0` · `booking_fee_ledger = 0` · fee `orders` = 0 · fee `payments` = 0 ·
+`chat_threads = 0` · `event_vendors` with a `marketplace_vendor_id` = **0** · verified vendors =
+**0** · events = 2 · locked `event_vendors` = 12 (**all manual/off-platform**).
+⇒ **Nothing can bill today.** `collectBookingFeeAtLock` is pre-gated on
+`targetVendor.marketplace_vendor_id` (`vendors/actions.ts:2155`) and there are no marketplace-linked
+rows; and with zero threads, `booking_fee_attribution_for` resolves every case to `import` = FREE.
+The 12 existing locks cannot bill retroactively (the re-derive trigger requires a pre-existing
+primary charge — there are none).
+⇒ **BUT the safety rails are consequently UNTESTED in prod.** The first real marketplace vendor +
+first real inquiry will be the first live exercise of the fee path. Treat that moment, not the
+flag flip, as go-live. **Required before it: assert POSITIVE post-conditions** (§12.6.2) — a
+ledger row EXISTS, a pool row EXISTS — never "the call returned without error".
+
+### 16.2 · Three Booking items RIDE WITH SLICE D (they land on card rails we own)
+1. **Service Details screen** — the per-service proof screen a card opens on tap (that service's
+   own photos + showcase clip + recent completed events + the vendor's other services + Inquire).
+   ⛔ Known blocker: `vendor_completed_events` (`20270321252758:160`) has **no `service_id`**, so
+   "events for THIS service" cannot be filtered, and the package cascade never stamps one.
+   **Decision: ship Details vendor-level with the limitation stated in the UI** (Booking's stated
+   preference) rather than blocking D. Do not silently present vendor-level events as
+   service-level.
+2. **Booked count** on the card.
+3. **Adaptive card** (pax/date/distance-aware pricing + hide already-locked categories).
+
+### 16.3 · Our grey-out rule and Booking's adaptive-card rule are ONE feature
+Build it once, in our slice; Booking adopts rather than writing a second. Do not ship two
+implementations of "this card doesn't fit your event".
+
+### 16.4 · Files Booking owns alone — stay off
+`service-wizard.tsx` · `services-manager.tsx` · `packages/actions.ts` · `package-editor.tsx` ·
+`lib/package-authoring.ts` · `lib/service-text-integrity.ts` · `lib/chat-contact-filter.ts`
+(+ their option-schema migration: `parent_option_id`, `pick_min`/`pick_max`, `max_extra_hours`).
+**Ordering:** their B-1 → B-2 must land before card-facing Details work is worth building (a
+"choose 3 of 5" line cannot render until the maker can author it). No race with slice D.
+
+### 16.5 · Available to import now
+`evaluateMessage(body, 'card')` (#3800 + #3802, merged; default `'chat'` unchanged). Never fork it,
+never add a profile member — ask Booking and it lands beside `'card'` in the one module. This wave
+still adds NO content gate (§11a).
