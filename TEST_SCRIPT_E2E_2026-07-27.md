@@ -452,6 +452,15 @@ Values are encrypted, so **presence is necessary but not sufficient** — a flag
 `ACCOUNT_FACE_PROFILE_ENABLED` · `NAMED_CALENDARS_ENABLED` · `PANOOD_CAM_ANON_ENABLED` ·
 `PAPIC_POOL` · `PAPIC_POOL_BAR`
 
+### Gated by SUBSCRIPTION, not by a flag — don't go looking for a switch
+
+The **vendor day-of specializations** (Song desk · Script & cues · Floor command) have **no
+feature flag at all**. They are gated by `lib/vendor-specialization-gate.ts`
+(`SPECIALIZATION_MIN_TIER = 'solo'`) × the vendor's category × booked × dated today. A
+"specialization doesn't show" report is one of those four, in that order — never a dark flag.
+See **§15**. (`floor_command` for coordinators is genuinely unbuilt: a held-but-unbuilt set
+renders a named "coming soon" plate, which is correct, not a bug.)
+
 ---
 
 ## 11 · Restrictions — the caps that actually bind
@@ -643,6 +652,123 @@ order by table_name desc limit 25;
       caller's scope. Listed as still-open in the security handoff.
 - [ ] **14.6** **Rate limits** (`lib/rate-limit.ts`, `anon-mint-throttle.ts`) — hammer the anon
       onboarding mint and confirm the throttle engages.
+
+---
+
+## 15 · The host/MC day-of desk — "Script & cues" (PR #3812, merged 2026-07-27)
+
+The first tier-gated **specialization** on the live day-of console. There is **no feature
+flag** — do not go hunting in §10 for one. Access is decided entirely by
+(paid subscription × vendor category × booked × dated today), so a "nothing shows up"
+report is almost always one of those four, in that order.
+
+Route: `/vendor-dashboard/on-the-day/live/[eventId]`. Surface:
+`…/live/[eventId]/_components/stage-script/`. Decisions:
+`lib/stage-script.ts` (pure, 30 unit tests). Gate: `lib/vendor-specialization-gate.ts`
+(`SPECIALIZATION_MIN_TIER = 'solo'`).
+
+### 15.0 Setup — four things must all be true
+
+This is the fiddliest setup in the script; get it wrong and you will "find" a bug that isn't one.
+
+- [ ] **15.0a** A vendor whose `services[]` contains **`host_mc`**. None of the five accounts is
+      one by default — add the Host / MC category to Vendor A's shop first.
+- [ ] **15.0b** That vendor on a **paid tier** (`tier_state` ≥ `solo`, `tier_expires_at` in the
+      future or NULL). Free is the *control*, not the test.
+- [ ] **15.0c** **Booked** on Couple A's event (an accepted inquiry through §6).
+- [ ] **15.0d** The event **dated today** (PH wall-clock). The console redirects out on any
+      other day — that is the gate working, not a defect.
+- [ ] **15.0e** The couple has built a **schedule** at `/dashboard/[eventId]/schedule` with:
+      at least one **public** block carrying a **note**, one **private** (`is_public = false`)
+      block carrying a note, and one **part nested inside** a parent block. Without these the
+      desk is correct but shows you nothing interesting.
+
+> ⚠ **Ground rule 1 applies double here.** On `iscasasolaii@gmail.com` every entitlement passes,
+> so the paywall below will *always* look unlocked. Test the gate on a `@test.com` vendor or you
+> will certify a paywall that isn't there.
+
+### 15.1 ★ The gate — registering a surface must grant nothing
+
+- [ ] **15.1a** **Free host/MC** → sees the **upsell** ("Built for your trade, included from
+      Solo up"), **not** the desk. Every other tool on the screen unchanged.
+- [ ] **15.1b** **Solo (or higher) host/MC** → sees the desk.
+- [ ] **15.1c** **Lapsed** (paid `tier_state`, `tier_expires_at` in the past) → upsell reads
+      **"Renew your plan"**, not "See the plans". Generic kit still intact.
+- [ ] **15.1d** **Band/DJ vendor** on the same event → gets the **Song desk**, not this one.
+      (Both shipped the same day and share one registry file — this proves they didn't cross.)
+- [ ] **15.1e** **A category with no specialization** (e.g. caterer) → no specialization section
+      at all, and no upsell. That is correct, not a gap.
+
+### 15.2 ★ The privacy invariant — the one that matters
+
+A booked vendor reads the **full** timeline, private blocks included, and this user is holding a
+live microphone.
+
+- [ ] **15.2a** The **private** block appears in the running script **with a worded
+      "Don't read aloud" badge** — not hidden, not merely a different colour.
+- [ ] **15.2b** Its note also appears under **Announcements**, badged the same way.
+- [ ] **15.2c** If the private block is the current or next one, the badge shows on the **cue
+      card** too.
+- [ ] **15.2d** ★ **No guest names anywhere on this surface.** The wedding-party roster that the
+      couple's downloadable emcee script prints is deliberately **absent** — a booked vendor
+      cannot read `guests`. If you ever see a guest name here, that is a **privacy defect**, file
+      it immediately (owner-locked 2026-07-27: "keep them private").
+- [ ] **15.2e** ★ **No coordinator broadcasts.** Same reasoning. The coordinator relays to the
+      host **in person** — there is no host inbox by design.
+
+### 15.3 Run-state drives the desk, not the clock
+
+- [ ] **15.3a** Nothing advanced yet → "Standing by. Opening: <first block>."
+- [ ] **15.3b** Advance the run of show (couple/coordinator side, or the vendor brief) → the cue
+      card follows to **"You're on: <block>"** within a refresh.
+- [ ] **15.3c** Advance past a block with nothing live → **"Between moments. Next: <block>"** —
+      it must not claim something is on.
+- [ ] **15.3d** Advance to the end → **"That's a wrap"**, and the **cue card disappears
+      entirely** (it has nothing left to say).
+- [ ] **15.3e** Leave the wall clock alone and only change `run_state`. The desk must still
+      follow — the run-state pointer is the truth, the clock is not.
+
+### 15.4 Running late — the number must not vanish
+
+- [ ] **15.4a** Start a block **later than planned** (`actual_start_at` after `start_at`) →
+      header reads **"Running N min behind"**.
+- [ ] **15.4b** With the show behind, the next block's planned time is already past → it must
+      read **"due N min ago"**, **not** a blank. (The first cut of this hid the negative; a blank
+      here is a regression.)
+- [ ] **15.4c** On-time start → no drift line, or "on time".
+
+### 15.5 Card order rearranges itself
+
+There is no setting for this and nothing stored — the order is derived every render.
+
+- [ ] **15.5a** Current or next block **has a note** → order is **cue → announcements → script**.
+- [ ] **15.5b** Neither has a note → **cue → script → announcements**.
+- [ ] **15.5c** Show wrapped → **script → announcements**, no cue card.
+
+### 15.6 Ragged data must not break it
+
+- [ ] **15.6a** **No schedule at all** → an honest sentence naming the couple, not an error, not
+      an empty panel, not a spinner.
+- [ ] **15.6b** A **part** (child block) renders indented under its parent, in reading order.
+- [ ] **15.6c** Blocks with **blank / whitespace-only notes** produce **no** announcement entry.
+- [ ] **15.6d** **Done** blocks are dimmed but still present — an emcee scrolls back.
+
+### 15.7 The grantee path
+
+- [ ] **15.7a** A teammate granted day-of access (launcher step 3) opens the same console and
+      **also** gets the desk — their entitlement resolves through the **granting vendor's**
+      subscription, not their own. A paying vendor's crew must not silently drop to the
+      generic kit.
+
+### 15.8 Not built — do not test, do not file
+
+Two features exist **only in the prototype**
+(`0022_vendor_dashboard/MC_Desk_Prototype_2026-07-27.html`), drawn dashed and gold:
+
+| Prototype-only | Open question for the owner |
+|---|---|
+| **My notes** — the host's own cues, pinned to a moment | Do they persist to the host's *next* wedding (a career library) or start clean each time? |
+| **Ask the couple** — a question into the existing thread | Is the coordinator copied, given they're the one relaying on the night? |
 
 ---
 
