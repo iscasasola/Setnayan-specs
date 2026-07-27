@@ -88,8 +88,58 @@ UPSTREAM of the fee: it decides what counts as "found". The contract:
 
 ## 7 · Publish-integrity rules (owner 2026-07-27) — apply on BOTH sides
 
-"No blanks · no contact info or app-bypass" is a PLATFORM rule, not a maker feature: Booking
-enforces it in the service/package save actions (reusing the #3606 chat-filter rules);
-Explore's card surfaces render only published (already-clean) data and add no free-text
-inputs that skip the gate. Any new vendor-authored text field anywhere routes through the
-same detector.
+**AMENDED same-day, twice — read both amendments before wiring anything to the detector.**
+
+### 7a · A blank NEVER blocks — auto-name it (owner: "saving builds blank will make us
+### autocreate a name for the build")
+
+"No blanks" is the OUTCOME; auto-naming is the MECHANISM. Refusing a save on a blank is
+RETIRED. A blank name is filled from its own group + position (`Item N` · `Choice N` ·
+`Add-on N` · `Extra N` · `Option N`), shown as the field's placeholder BEFORE saving so the
+name is never a surprise, and reported afterwards as "we named these for you — tap to
+change". Applies to anything nameable on either side, including a couple's saved **build**
+(the owner's own example). A couple/vendor must never be stuck behind a blank.
+
+### 7b · ⛔ DO NOT route non-chat text through the RAW #3606 detector — it misfires
+
+The earlier line "any new vendor-authored text field routes through the same detector" is
+**too strong and would ship defects.** A 27-agent adversarial review (workflow
+`wf_80fe5417-ec0`, 22 findings raised, **7 confirmed by running the shipped
+`evaluateMessage`**) proved the chat rules refuse honest non-chat text:
+
+| Text | Refused today as |
+|---|---|
+| `Instagram teaser reel` · `TikTok highlights` · `FB Live stream` | app name (they are DELIVERABLES on a card; Setnayan's own **Patiktok** copy is refused too) |
+| `Php 9,000 per hour, minimum 4 hours, 150 pax, 20 staff` | phone number (digits fuse into a PH-mobile shape) |
+| `Valid 2026-09-17 - 2026-12-31` | phone number (the most common discount-terms string there is) |
+| `Coverage @Tagaytay` · `Reception @Shangri-La` | @handle (the `@` means "at") |
+| **`Message me on Setnayan for the full menu`** | off-platform solicitation — for pointing AT us |
+
+_(Corrected on the record: `Photo@Manila` is NOT refused — the rule needs a non-word char
+before the `@`. Measured, not assumed.)_
+
+**The rule for both sessions:** the detector is called through a **PROFILE**, never raw.
+`chat` = today's rules, untouched. `card` (Booking is specifying it) = drop the app-name and
+coded-app rules, drop the long-digit-run rule, narrow the phone-fuse gap from 20 → 2 chars
+(verified: `(0917) 880 7163`, `+63 917 880 7163`, `0917-880-7163`, `09178807163` and the
+spelled-out "zero nine one seven…" ALL still block), and never fire solicitation when the
+destination is Setnayan itself. Phone · email · social link · @handle · solicitation still
+block.
+
+**Explore's audit (plan names, manual-vendor names, found-you payload) must use a profile.**
+A couple naming a plan after a date range, or adding a manual vendor called "IG Studio" or
+"Coverage @Tagaytay", would be refused by the raw rules. Pick the profile per FIELD by what
+the text IS, not by who typed it. If a field needs a third profile, add it beside `card` in
+ONE module — never a second detector.
+
+⛔ **The flag must not be flipped until the profile ships**, and until the package editor
+stops discarding the gate's message (`package-editor.tsx:173` sets a fixed string and never
+reads `res.problems` → "see the notes below" with no notes, no field named).
+
+### 7c · Known-unguarded couple-visible vendor text (surfaced, NOT introduced by either wave)
+
+`vendor_profiles.tagline` · review replies · proposal template body/terms · reservation
+`cancellation_terms` (renders above the couple's "I agree") · `microsite_about` ·
+payment-schedule labels. Publish/activate paths also never re-run any gate, so rows authored
+while a flag was off go live unchecked. Whoever touches one of these surfaces first owns
+wiring it to the right profile.
