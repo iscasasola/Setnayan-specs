@@ -915,3 +915,43 @@ All slices behind `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED`, one worktree per PR, cha
 5. **Tier-gated review stars.** Apply `reviewStarsCounted` on all surfaces or none. Two screens giving different "top rated" answers for the same vendor is indefensible under any lens copy.
 6. **Tier-derived travel radius.** §15.1 rules it out of distance scoring (tier buying rank inside "nearest"). Confirm — the alternative ("they declared they travel that far") is defensible but must be a conscious position, per §13.4 finding 2.
 7. **Scope note owed to the corpus.** §14 of this spec — the owner's own "combination sorting" brief — makes no mention of freshness or in-demand. §15 extends it; log the extension at the bottom of `DECISION_LOG.md` so the dated spec and the verbal brief reconcile.
+## 17 · INNER / OUTER SERVICE RADIUS (owner 2026-07-27) — new product model, not yet built
+> Owner: *"they have inner radius. this radius must comply to give free transportation fee if
+> within this radius. outer radius is the overall range."*
+
+### 17.1 · What exists today (verified) vs what the owner described
+| | Today | Owner's model |
+|---|---|---|
+| Reach | ONE number, **purely tier-derived** (`tierCaps().serviceRadiusKm`: free 0 · verified/solo 20 · pro 50 · ent/custom 100). **No vendor-declared radius column exists anywhere.** | **TWO** radii, vendor-declared: **inner** (free transport) + **outer** (overall range) |
+| Transport | **Distance-blind flags:** `vendor_services.transport_included` (bool) + `transport_flat_fee_php` (null ⇒ quote-by-distance); `vendor_package_items.transport_mode` ('included'\|'flat'\|'distance') + `transport_flat_centavos`; `event_vendors.transport_php` (the couple's recorded cost line) | Transport free **iff inside the inner radius**, chargeable between inner and outer |
+
+⇒ Today a vendor can only say "transport included" **always** or "flat fee" **always**. They cannot
+say *"free within 15 km, chargeable beyond"* — which is how PH suppliers actually price.
+
+### 17.2 · Why this is a materially better model
+1. **It makes "Service reach" honest.** The tier radius becomes the **CAP on the outer radius**, not
+   a claim about the vendor. The vendor declares within their entitlement (`inner ≤ outer ≤ tier
+   cap`), which fixes the §16-caveat that a Pro vendor serving only Metro Manila is currently
+   ranked as comfortable at 45 km with no way to say otherwise.
+2. **It turns distance into MONEY, which is what the couple actually feels.** A vendor 30 km out
+   with a ₱5,000 travel fee is genuinely more expensive than one 5 km out — today the bench treats
+   them as the same price.
+3. **It gives an honest three-state badge**, replacing today's binary: **"No travel fee"** (inside
+   inner) · **"Travel fee applies"** (inner→outer) · **"Outside their range"** (beyond outer).
+   All three are the vendor's own declaration — no inference, no tier proxy.
+
+### 17.3 · Build shape (when the owner greenlights)
+- **Schema:** `vendor_profiles` (or `vendor_services` if it varies per service — owner call)
+  gains `inner_radius_km` + `outer_radius_km`, both nullable, with a DB CHECK
+  `inner_radius_km <= outer_radius_km` and app-level enforcement of `outer_radius_km <= tier cap`
+  (re-checked on downgrade — a vendor dropping from Pro to Verified must not keep a 50 km outer).
+  RLS + explicit `REVOKE ALL` per the default-ACL rule.
+- **Vendor UI:** two fields where the service radius is presented today, with the free-transport
+  meaning stated in plain words.
+- **Ranking:** feed BOTH — `distance` dim uses the outer radius as the decay scale (replacing the
+  tier proxy), and the estimated travel fee feeds the **`budgetFit` dim** so distance shows up as
+  money, not only as proximity.
+- **Fallback:** vendors who declare neither keep today's behaviour (tier radius, neutral scoring) —
+  never a penalty for not having filled it in yet.
+- **⚠ Deliberate consequence:** once inner/outer exist, the "Nearest to your venue" lens (§15)
+  should rank on **"free-transport first"**, not raw km — that is the couple-meaningful ordering.
