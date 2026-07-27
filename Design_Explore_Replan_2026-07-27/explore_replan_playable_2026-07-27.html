@@ -1,0 +1,779 @@
+<title>Explore replan — playable (wedding)</title>
+<style>
+  :root{
+    --bg:#f4f2ec; --ink:#1b1a17; --ink-soft:#4f535b;
+    --gold:#a9834b; --gold-deep:#8c6932; --champagne:#f4ecd8;
+    --line:rgba(27,26,23,.12); --good:#41603b; --goodbg:rgba(90,122,82,.12);
+    --bad:#9c4a3a; --badbg:rgba(156,74,58,.1); --paper:#ffffff; --ph1:#e8e2d2; --ph2:#d5cdb8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#17160f; --ink:#fbfaf7; --ink-soft:#b6b9be; --gold:#cba766; --gold-deep:#e0cca0;
+      --champagne:#2a2618; --line:rgba(251,250,247,.14); --paper:#1e2229; --ph1:#2f2b1e; --ph2:#3a3627;
+      --good:#9dc292; --goodbg:rgba(122,160,112,.16); --bad:#d99a8c; --badbg:rgba(190,110,95,.14); }
+  }
+  :root[data-theme="dark"]{ --bg:#17160f; --ink:#fbfaf7; --ink-soft:#b6b9be; --gold:#cba766; --gold-deep:#e0cca0;
+    --champagne:#2a2618; --line:rgba(251,250,247,.14); --paper:#1e2229; --ph1:#2f2b1e; --ph2:#3a3627;
+    --good:#9dc292; --goodbg:rgba(122,160,112,.16); --bad:#d99a8c; --badbg:rgba(190,110,95,.14); }
+  :root[data-theme="light"]{ --bg:#f4f2ec; --ink:#1b1a17; --ink-soft:#4f535b; --gold:#a9834b; --gold-deep:#8c6932;
+    --champagne:#f4ecd8; --line:rgba(27,26,23,.12); --paper:#ffffff; --ph1:#e8e2d2; --ph2:#d5cdb8;
+    --good:#41603b; --goodbg:rgba(90,122,82,.12); --bad:#9c4a3a; --badbg:rgba(156,74,58,.1); }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Hanken Grotesk',system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45;
+    -webkit-font-smoothing:antialiased}
+  .mono{font-family:'Space Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+  button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;padding:0;text-align:left}
+  button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:26px 18px 90px}
+  header.page{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .eyebrow{font-family:'Space Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+  header.page h1{font-size:clamp(20px,3vw,28px);font-weight:800;margin:4px 0 2px;letter-spacing:-.01em}
+  header.page p{margin:0;color:var(--ink-soft);font-size:13px;max-width:64ch}
+  .reset{font-size:12px;font-weight:700;color:var(--gold-deep);border:1px solid var(--gold);border-radius:999px;padding:6px 14px;text-align:center}
+
+  .cover{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:16px}
+  .cover .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .cover .hd b{font-size:14px}
+  .cover .hd .cnt{font-family:'Space Mono',ui-monospace,monospace;font-size:11px;color:var(--gold-deep)}
+  .cover .hd .hl{display:flex;align-items:center;gap:10px}
+  .ring{width:34px;height:34px;flex:0 0 auto}
+  .ring circle{fill:none;stroke-width:3.4}
+  .ring .tr{stroke:var(--line)}
+  .ring .pr{stroke:var(--gold);stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset .4s}
+  .ring text{font-family:'Space Mono',ui-monospace,monospace;font-size:9px;fill:var(--gold-deep);font-weight:700}
+  .strip{display:flex;gap:10px;overflow-x:auto;padding:6px 2px 6px}
+  .ctile{flex:0 0 auto;width:66px;display:flex;flex-direction:column;align-items:center;gap:5px}
+  .ctile .ic{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:21px;background:var(--paper);border:1.5px dashed var(--line);position:relative;
+    transition:transform .15s,border-color .2s,background .2s}
+  .ctile:hover .ic{transform:translateY(-2px)}
+  @media (prefers-reduced-motion: reduce){.ctile:hover .ic{transform:none}}
+  .ctile .lb{font-size:9.5px;line-height:1.15;text-align:center;color:var(--ink-soft);max-width:66px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .ctile.st-explore .ic{border-style:solid;border-color:var(--gold);background:var(--champagne)}
+  .ctile.st-picked .ic{border-style:solid;border-color:var(--gold);background:var(--champagne)}
+  .ctile.st-picked .lb{color:var(--gold-deep)}
+  .ctile .mini.bd{background:var(--paper);color:var(--gold-deep);border-color:var(--gold)}
+  .ctile.st-locked .ic{border-style:solid;border-width:2.5px;border-color:var(--gold);background:var(--champagne);box-shadow:0 2px 8px rgba(169,131,75,.3)}
+  .ctile.st-locked .lb{color:var(--gold-deep);font-weight:700}
+  .ctile.st-done .ic{border-style:solid;border-width:2.5px;border-color:var(--good);background:var(--goodbg);filter:saturate(.85)}
+  .ctile.st-done .lb{color:var(--good);font-weight:700}
+  .ctile .mini{position:absolute;right:-3px;bottom:-3px;width:17px;height:17px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid var(--paper)}
+  .ctile .mini.dn{background:var(--good)}
+  .ctile .mini.lk{background:var(--gold)}
+  .ctile.next .ic{outline:2.5px solid var(--gold);outline-offset:2.5px}
+  .ctile .nx{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-family:'Space Mono',ui-monospace,monospace;
+    font-size:7.5px;letter-spacing:.12em;background:var(--gold);color:#fff;border-radius:999px;padding:1px 6px;font-weight:700}
+  .fico{margin-right:8px;font-size:15px}
+
+  .cols{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+
+  /* vertical single-open folder accordion (the shipped shape) */
+  .bench-hd{display:flex;justify-content:space-between;align-items:center;margin:2px 2px 8px}
+  .bench-hd h2{font-size:15px;margin:0;font-weight:800}
+  .bench-hd .sort{font-size:11px;color:var(--ink-soft)}
+  .bench-hd .sort b{color:var(--gold-deep)}
+  .folder{background:var(--paper);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+  .folder>.fhead{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:13px 16px}
+  .folder>.fhead .fl{font-weight:800;font-size:14.5px}
+  .folder>.fhead .fr{font-size:10.5px;color:var(--ink-soft);white-space:nowrap;text-align:right}
+  .fsum{display:inline-flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .fsum .s{border-radius:999px;padding:1.5px 8px;font-weight:700}
+  .fsum .s.lk{background:var(--champagne);color:var(--gold-deep)}
+  .fsum .s.td{background:var(--badbg);color:var(--bad)}
+  .fsum .s.ad{border:1px dashed var(--line);color:var(--ink-soft)}
+  .folder.open>.fhead{border-bottom:1px solid var(--line)}
+  .fbody{padding:4px 10px 10px}
+  .trow-cat{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 8px;border-bottom:1px dashed var(--line);font-size:13px;gap:8px}
+  .trow-cat .l{display:flex;align-items:center;gap:6px;min-width:0}
+  .trow-cat .l .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .trow-cat .l .info{flex:0 0 auto;width:17px;height:17px;border-radius:50%;border:1px solid var(--line);color:var(--ink-soft);font-size:10px;display:inline-flex;align-items:center;justify-content:center;font-style:italic;font-family:Georgia,serif}
+  .trow-cat .l .info:hover{border-color:var(--gold);color:var(--gold-deep)}
+  .trow-cat .r{font-size:11px;color:var(--ink-soft);white-space:nowrap}
+  .trow-cat .r .cnt{display:inline-block;min-width:18px;text-align:center;background:var(--champagne);color:var(--gold-deep);border-radius:999px;font-weight:700;padding:1px 6px;margin-left:6px}
+  .trow-cat.done-row .l{color:var(--good);font-weight:700}
+  .lockedline{font-size:10.5px;color:var(--gold-deep);margin:-6px 0 4px 31px}
+  .hintbox{background:var(--champagne);border-radius:10px;padding:8px 12px;font-size:11.5px;color:var(--gold-deep);margin:2px 2px 8px}
+  .catwrap{border-bottom:1px dashed var(--line)}
+  .catwrap:last-of-type{border-bottom:none}
+  .catwrap .trow-cat{border-bottom:none}
+
+  /* add-more pool + remove */
+  .addpool{padding:8px 8px 10px;border-top:1px dashed var(--line);margin-top:2px}
+  .addpool .t{font-size:10.5px;color:var(--ink-soft);margin-bottom:6px;font-family:'Space Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase}
+  .addpool .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .addchip{font-size:11px;border:1.5px dashed var(--line);border-radius:999px;padding:4px 11px;color:var(--ink-soft)}
+  .addchip:hover{border-color:var(--gold);color:var(--gold-deep)}
+  .rmv{font-size:10.5px;color:var(--ink-soft);text-decoration:underline}
+  .rmv:hover{color:var(--bad)}
+
+  .tilebody{padding:2px 8px 12px}
+  .tile-note{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;color:var(--ink-soft);margin:4px 2px 6px}
+  .hs-note{display:inline-block;font-size:10px;font-family:'Space Mono',ui-monospace,monospace;letter-spacing:.06em;color:var(--gold-deep);background:var(--champagne);border-radius:999px;padding:2px 8px;margin-left:6px}
+  .rail{display:flex;gap:10px;overflow-x:auto;padding:6px 2px 10px;scroll-snap-type:x proximity}
+  .vcard{min-width:150px;max-width:150px;flex:0 0 auto;scroll-snap-align:start;border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--paper);position:relative;transition:opacity .35s,filter .35s,transform .15s}
+  .vcard:hover{transform:translateY(-2px)}
+  @media (prefers-reduced-motion: reduce){.vcard{transition:none}.vcard:hover{transform:none}}
+  .vcard .ph{height:54px;border-radius:9px;margin-bottom:7px;background:linear-gradient(135deg,var(--ph1),var(--ph2));position:relative}
+  .vcard .nm{font-weight:700;font-size:12.5px;line-height:1.25}
+  .vcard .ct{font-size:10px;color:var(--ink-soft)}
+  .vcard .pr{font-family:'Space Mono',ui-monospace,monospace;font-size:11px;color:var(--ink-soft);margin:2px 0 6px}
+  .vcard.locked{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+  .vcard.dim{opacity:.45;filter:grayscale(.75)}
+  .corner{position:absolute;top:5px;left:5px;font-size:9px;background:var(--gold);color:#fff;border-radius:999px;padding:2px 7px;font-weight:700;z-index:1}
+  .badge{display:inline-block;font-size:9.5px;padding:2px 7px;border-radius:999px;margin:1px 3px 3px 0}
+  .badge.ok{background:var(--goodbg);color:var(--good)}
+  .badge.warn{background:var(--badbg);color:var(--bad);font-weight:700}
+  .badge.gold{background:var(--champagne);color:var(--gold-deep);font-weight:700}
+  .act{display:block;width:100%;text-align:center;font-size:11px;font-weight:700;border-radius:9px;padding:6px 0;margin-top:3px}
+  .act.lock{background:var(--gold);color:#fff}
+  .act.dark{background:var(--ink);color:var(--bg)}
+  .act.lockline{background:none;color:var(--gold-deep);text-decoration:underline;font-weight:700;padding:3px 0}
+  .act.dead{background:var(--line);color:var(--ink-soft);cursor:not-allowed}
+  .act.ghost{background:var(--paper);border:1px solid var(--line);color:var(--ink)}
+  .divider-v{flex:0 0 auto;display:flex;align-items:center}
+  .divider-v span{writing-mode:vertical-rl;font-family:'Space Mono',ui-monospace,monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--bad);border-left:2px solid var(--bad);opacity:.8;padding-left:5px}
+  .addcard{min-width:110px;flex:0 0 auto;border:1.5px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--ink-soft);font-size:11px;font-weight:700;padding:10px;text-align:center}
+  .addcard .plus{font-size:18px;color:var(--gold)}
+  .addcard:hover{border-color:var(--gold)}
+  .covered{border:1px solid var(--good);background:var(--goodbg);border-radius:12px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12.5px;margin:6px 2px}
+  .covered b{color:var(--good)}
+  .covered button{font-size:11px;font-weight:700;color:var(--ink-soft);text-decoration:underline}
+  .empty{border:1.5px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--ink-soft);font-size:12px;margin:6px 2px}
+
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:min(430px,92vw);
+    background:var(--paper);border:1.5px solid var(--gold);border-radius:14px;padding:13px 15px;
+    box-shadow:0 14px 40px rgba(27,26,23,.28);z-index:50;font-size:13px}
+  .toast .tt{font-weight:800}
+  .toast .ms{color:var(--ink-soft);font-size:12px;margin-top:2px}
+  .toast .acts{display:flex;gap:8px;margin-top:10px}
+  .toast .acts button{flex:1;text-align:center;font-size:12px;font-weight:700;border-radius:9px;padding:8px 0}
+  .toast .a1{background:var(--ink);color:var(--bg)}
+  .toast .a2{background:var(--paper);border:1px solid var(--gold);color:var(--gold-deep)}
+  .toast .undo{margin-top:8px;font-size:11px;color:var(--ink-soft);text-decoration:underline}
+
+  .scrim{position:fixed;inset:0;background:rgba(27,26,23,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:18px}
+  .modal{background:var(--paper);border-radius:16px;max-width:400px;width:100%;padding:20px;border:1px solid var(--line)}
+  .modal h3{margin:0 0 6px;font-size:16px}
+  .modal p{margin:0 0 14px;color:var(--ink-soft);font-size:13px}
+  .modal .acts{display:flex;gap:8px}
+  .modal .acts button{flex:1;font-size:13px;font-weight:700;border-radius:10px;padding:10px 0;text-align:center}
+  .modal .m1{background:var(--gold);color:#fff}
+  .modal .m2{border:1px solid var(--line)}
+
+  .side{display:flex;flex-direction:column;gap:14px;position:sticky;top:14px}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .panel h3{margin:0 0 10px;font-size:14px;font-weight:800}
+  .trow{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .trow:last-of-type{border-bottom:none}
+  .trow .who small{display:block;color:var(--ink-soft);font-size:10.5px}
+  .trow .amt{font-family:'Space Mono',ui-monospace,monospace;font-size:11.5px;white-space:nowrap;text-align:right}
+  .rowlock{font-size:10px;font-weight:800;background:var(--gold);color:#fff;border-radius:7px;padding:2px 8px;margin-top:3px}
+  .rowrm{font-size:10px;color:var(--ink-soft);margin-left:5px}
+  .needrow{font-size:11.5px;color:var(--ink-soft);padding:3px 0}
+  .needrow button{color:var(--gold-deep);font-weight:700;text-decoration:underline}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+  .tile{border:1px solid var(--line);border-radius:10px;padding:8px}
+  .tile .k{font-family:'Space Mono',ui-monospace,monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .tile .v{font-weight:800;font-size:12.5px;margin-top:2px}
+  .tile .v.gd{color:var(--good)} .tile .v.bd{color:var(--bad)}
+  .saveplan{display:block;width:100%;text-align:center;font-size:12px;font-weight:700;border:1px solid var(--gold);color:var(--gold-deep);border-radius:10px;padding:8px 0;margin-top:12px}
+  .plans-list{font-size:12px;color:var(--ink-soft)}
+  .plans-list .p{display:flex;justify-content:space-between;padding:4px 0}
+  .goplans{display:block;width:100%;text-align:center;font-size:12px;font-weight:700;background:var(--ink);color:var(--bg);border-radius:10px;padding:8px 0;margin-top:10px}
+
+  .plansview{position:fixed;inset:0;background:var(--bg);z-index:70;overflow:auto;padding:22px 18px}
+  .plansview .in{max-width:900px;margin:0 auto}
+  .plansview .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .plansview h2{margin:0;font-size:20px}
+  .plansview .close{font-size:13px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+  .tblwrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px}
+  table.cmp{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}
+  table.cmp th,table.cmp td{border:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+  table.cmp th{background:var(--bg);font-size:11px}
+  .money{font-family:'Space Mono',ui-monospace,monospace;white-space:nowrap;font-size:11px}
+  tr.pinned td{background:var(--champagne)}
+  .lockg{color:var(--gold-deep);font-weight:700}
+  .verdict.ok{color:var(--good);font-weight:700}
+  .verdict.over{color:var(--bad);font-weight:700}
+  .hint{font-size:11.5px;color:var(--ink-soft);margin-top:10px}
+</style>
+
+<div class="wrap">
+  <header class="page">
+    <div>
+      <div class="eyebrow">Setnayan · Explore replan · playable demo</div>
+      <h1>Explore — wedding, mid-browse</h1>
+      <p>Today's shape kept: vertical single-open folder accordion, category rows inside, a <b>horizontal vendor carousel</b> in each open category. New: Coverage Strip · ⓘ what-each-category-covers · <b>add / remove categories</b> so the list is only as big as their wedding · per-card lock summaries · grey-out + "done or add more?".</p>
+    </div>
+    <button class="reset" onclick="resetAll()">↺ Restart demo</button>
+  </header>
+
+  <div class="cover">
+    <div class="hd"><span class="hl"><span id="covring"></span><b>Cover your event</b></span><span class="cnt" id="covcnt"></span></div>
+    <div class="strip" id="strip"></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="bench-hd"><h2>Browse the bench</h2><span class="sort">Sort: <b>Best fit</b> · Lowest price · Top rated</span></div>
+      <div id="bench"></div>
+    </div>
+    <div class="side">
+      <div class="panel" id="team"></div>
+      <div class="panel" id="plans"></div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay"></div>
+
+<script>
+/* ── THE REAL TILE TAXONOMY (apps/web/lib/taxonomy.ts) — 60 wedding tiles, 10 folders ──
+   The bench browses TILES; planning urgency/hints ride the plan-group layer on top. */
+const HS = new Set(['reception','ceremony_venue','coordinator','host_mc','led_wall']);
+const FOLDERS = [
+  ['venue','Venue',['reception','ceremony_venue']],
+  ['planning','Planning',['coordinator','date_specialist']],
+  ['feast','Feast',['cake','catering','stations','crew_meals']],
+  ['design','Design',['stylist_decorator','florist','lights_sound','dance_floor','outdoor','fireworks','led_wall','digital_services']],
+  ['program','Program',['live_band','choir','orchestra','wedding_singer','dj','choreographer','performers','host_mc','av_production','speaker_talent','kids_entertainer']],
+  ['documentary','Documentary',['photo_video','editorial','livestream']],
+  ['look','Look',['brides_attire','grooms_attire','womens_attire','mens_attire','filipiniana_barongs','hmua','grooming','wellness_fitness','jewelleries_accessories']],
+  ['booths','Booths',['mobile_bar','coffee_espresso','mocktail','food_truck','dessert','massage_chair','food_cart','photo_booth','perfume_bar','arcade_games','henna_tattoo','mini_nail_bar','tarot_astrology_palmistry','caricature_calligraphy_painting','engraving_embroidery']],
+  ['prints','Prints',['printing','souvenir_giveaways','trophies_awards']],
+  ['transport','Transport',['bridal_car','guest_shuttle','escort']],
+];
+const LABEL = {
+  reception:'Reception',ceremony_venue:'Ceremony',coordinator:'Coordinator / Planner',
+  date_specialist:'Date & Feng-shui Specialist',cake:'Cake',catering:'Catering',stations:'Stations',
+  crew_meals:'Crew Meals',stylist_decorator:'Stylist / Decorator',florist:'Florist',
+  lights_sound:'Lights & Sound',dance_floor:'Dance Floor',outdoor:'Outdoor',fireworks:'Fireworks',
+  led_wall:'LED Wall',digital_services:'Digital Services',live_band:'Live Band',choir:'Choir',
+  orchestra:'Orchestra',wedding_singer:'Wedding Singer',dj:'DJ',choreographer:'Choreographer',
+  performers:'Performers',host_mc:'Host / MC',av_production:'AV / Production',
+  speaker_talent:'Speakers / Talent',kids_entertainer:"Kids' Entertainer",photo_video:'Photo & Video',
+  editorial:'Editorial',livestream:'Livestream',brides_attire:"Bride's Attire",
+  grooms_attire:"Groom's Attire",womens_attire:"Women's Attire",mens_attire:"Men's Attire",
+  filipiniana_barongs:'Filipiniana & Barongs',hmua:'HMUA',grooming:'Grooming',
+  wellness_fitness:'Wellness & Fitness',jewelleries_accessories:'Jewelleries & Accessories',
+  mobile_bar:'Mobile Bar',coffee_espresso:'Coffee / Espresso',mocktail:'Mocktail',
+  food_truck:'Food Truck',dessert:'Dessert',massage_chair:'Massage Chair',food_cart:'Food Cart',
+  photo_booth:'Photo Booth',perfume_bar:'Perfume Bar',arcade_games:'Arcade / Games',
+  henna_tattoo:'Henna / Tattoo',mini_nail_bar:'Mini Nail Bar',
+  tarot_astrology_palmistry:'Tarot / Astrology / Palmistry',
+  caricature_calligraphy_painting:'Caricature / Calligraphy / Painting',
+  engraving_embroidery:'Engraving / Embroidery',printing:'Printing',
+  souvenir_giveaways:'Souvenir / Giveaways',trophies_awards:'Trophies & Awards',
+  bridal_car:'Bridal Car',guest_shuttle:'Guest Shuttle',escort:'Escort',
+};
+/* ⓘ copy — plan-group hints (real, from wedding-plan-groups.ts) where the tile maps to a group;
+   short factual lines for the finer tiles (in-app these come from the Taxonomy Studio). */
+const HINT = {
+  reception:'Where you celebrate after. Same place as ceremony? Add it under both.',
+  ceremony_venue:'Where you say I do — book early, the best places fill 12 months out.',
+  coordinator:'Your day-of conductor. Top coordinators book 9-12 months out.',
+  date_specialist:'Auspicious-date + feng-shui guidance for picking the day.',
+  cake:'Tastings 3-4 months out. Order locks 1 month before.',
+  catering:'Food + service. Tastings happen 4-6 months out; book the team earlier.',
+  stations:'Live cooking + carving stations that supplement the main caterer.',
+  crew_meals:"Feed your suppliers' crews on the day — usually 15-25 people across your vendors. A kitchen near your venue caters them for far less.",
+  stylist_decorator:'Stylist umbrella — coordinates florals + decor + signage + tablescapes to your mood board.',
+  florist:'Bouquets, aisle, reception styling. Pin colors first, then book.',
+  lights_sound:'Reception PA + lights setup. Confirm the venue power supply.',
+  dance_floor:'Rented dance-floor surface + install for the reception.',
+  outdoor:'Tents, fans, heaters, outdoor comfort for garden venues.',
+  fireworks:'Send-off fireworks or cold sparks — check venue permits first.',
+  led_wall:'Brings your monogram + theme to the stage. Setnayan can render 8K loops.',
+  digital_services:'Setnayan digital add-ons — monogram, QR, guest site extras.',
+  live_band:'Sets the energy of your reception. Top bands book 6-9 months ahead.',
+  choir:'Ceremony choir — mass parts + processional music.',
+  orchestra:'Full string/orchestral ensemble for ceremony or dinner.',
+  wedding_singer:'Solo vocalist for ceremony or first-dance serenade.',
+  dj:'Reception + party DJ. Carries the dance floor after the program.',
+  choreographer:'First dance + parents-and-couple dance + entourage choreography. Lessons run 2-3 months before the day.',
+  performers:'Dancers, fire, cultural performers for the program.',
+  host_mc:'Carries the program from cocktail hour through send-off. Book 4-6 months out.',
+  av_production:'Screens, projectors, program AV direction.',
+  speaker_talent:'Guest speakers or celebrity talent appearances.',
+  kids_entertainer:'Keeps the kids table happy — games, magic, minding.',
+  photo_video:'Photo + video team for the day. Often booked together.',
+  editorial:'Editorial shoot — prenup, magazine-style coverage.',
+  livestream:'Multi-cam livestream for guests who can\'t attend. Setnayan Live Studio compatible.',
+  brides_attire:'Gown design + fittings. Designers need fitting time.',
+  grooms_attire:'Suit or barong tailoring for the groom.',
+  womens_attire:'Entourage gowns — moms, maids, flower girls.',
+  mens_attire:'Entourage suits and barongs.',
+  filipiniana_barongs:'Filipiniana + barong specialists.',
+  hmua:'Bridal + entourage glam. Trials happen 1-2 months before the day.',
+  grooming:'Groom + groomsmen grooming on the day.',
+  wellness_fitness:'Pre-wedding wellness — fitness, skin, spa runs.',
+  jewelleries_accessories:'Rings + accessories. Custom takes 6-8 weeks.',
+  mobile_bar:'Cocktail bar service — the social glue of cocktail hour.',
+  coffee_espresso:'Barista cart for coffee + espresso rounds.',
+  mocktail:'Zero-proof bar for all-ages toasts.',
+  food_truck:'A truck outside for late-night bites.',
+  dessert:'Dessert bar beyond the cake — grazing tables, sweets.',
+  massage_chair:'Massage-chair lounge — guests rest between sets.',
+  food_cart:'Classic PH party carts — ice cream, fishball, more.',
+  photo_booth:'Classic, mirror, 360, slow-mo, polaroid — pick the style that fits your vibe.',
+  perfume_bar:'Guests blend a take-home scent.',
+  arcade_games:'Arcade cabinets + lawn games corner.',
+  henna_tattoo:'Henna + temporary-tattoo station.',
+  mini_nail_bar:'Quick manicure touch-up bar.',
+  tarot_astrology_palmistry:'Card + palm readings as cocktail entertainment.',
+  caricature_calligraphy_painting:'Live artists — caricatures, calligraphy, event painting.',
+  engraving_embroidery:'On-site personalization of giveaways.',
+  printing:'Save-the-dates, invites, monogram, table cards, menus.',
+  souvenir_giveaways:'Guest giveaways + souvenir production.',
+  trophies_awards:'Recognition pieces for games + program awards.',
+  bridal_car:'Your wedding-day arrival vehicle. Vintage, luxury, or classic.',
+  guest_shuttle:'Keeps far-venue guests stress-free. Book once you have an approximate headcount.',
+  escort:'Motorcade escort for the convoy.',
+};
+const URGENCY = ['reception','ceremony_venue','coordinator','catering','photo_video','brides_attire',
+  'grooms_attire','hmua','florist','stylist_decorator','dj','live_band','host_mc','cake',
+  'photo_booth','mobile_bar','lights_sound','led_wall','choreographer','printing',
+  'jewelleries_accessories','bridal_car','guest_shuttle','stations','dessert','coffee_espresso',
+  'food_cart','food_truck','mocktail','wedding_singer','choir','orchestra','performers',
+  'av_production','speaker_talent','kids_entertainer','dance_floor','outdoor','fireworks',
+  'digital_services','editorial','livestream','womens_attire','mens_attire','filipiniana_barongs',
+  'grooming','wellness_fitness','perfume_bar','arcade_games','henna_tattoo','mini_nail_bar',
+  'tarot_astrology_palmistry','caricature_calligraphy_painting','engraving_embroidery',
+  'massage_chair','souvenir_giveaways','trophies_awards','escort','crew_meals','date_specialist'];
+const ALLCATS = URGENCY.map((id,i)=>({id,label:LABEL[id],urgency:i,hardSingle:HS.has(id)}));
+/* onboarding picks — the adaptive accordion starts with just THESE in plan (14 of 60) */
+const STARTER = new Set(['reception','ceremony_venue','coordinator','catering','photo_video',
+  'brides_attire','grooms_attire','hmua','florist','dj','host_mc','cake','photo_booth','mobile_bar']);
+
+const VENDORS = {
+  reception: [
+    {id:'rv1',name:'Hacienda Ilog',city:'Tagaytay',price:95000,note:'Sets your date to Sat · Sep 12, 2027'},
+    {id:'rv2',name:'Villa Sinag Gardens',city:'Tagaytay',price:140000,note:'Sets your date to Sat · Oct 9, 2027'},
+    {id:'rv3',name:'The Glasshouse Alta',city:'Alfonso',price:120000,note:'Sets your date to Sat · Sep 12, 2027'},
+  ],
+  ceremony_venue: [
+    {id:'cv1',name:'Sta. Clara Parish',city:'Tagaytay',price:25000},
+    {id:'cv2',name:'Chapel on the Ridge',city:'Tagaytay',price:38000,busy:true},
+  ],
+  coordinator: [
+    {id:'co1',name:'Amihan Weddings Co.',city:'Cavite',price:65000},
+    {id:'co2',name:'Luntian Events',city:'QC',price:85000,busy:true},
+  ],
+  catering: [
+    {id:'ct1',name:'Casa Amara Catering',city:'Cavite',price:187500,per:'₱750 × 250 pax'},
+    {id:'ct2',name:'Perlas Kitchen',city:'Manila',price:230000,per:'₱920 × 250 pax'},
+    {id:'ct3',name:'Mesa Buena',city:'Tagaytay',price:162500,per:'₱650 × 250 pax',busy:true},
+  ],
+  dessert: [
+    {id:'ds1',name:'Dulce Dessert Bar',city:'Tagaytay',price:38000,per:'grazing table'},
+  ],
+  photo_video: [
+    {id:'pv1',name:'Hiraya Studios',city:'Makati',price:95000},
+    {id:'pv2',name:'North & Co. Films',city:'Baguio',price:110000,far:true},
+    {id:'pv3',name:'Liwanag Lens',city:'Cavite',price:78000,busy:true},
+  ],
+  florist: [
+    {id:'fl1',name:'Amihan Blooms',city:'Tagaytay',price:45000},
+    {id:'fl2',name:'Petala Studio',city:'Manila',price:68000,busy:true},
+  ],
+  photo_booth: [
+    {id:'pb1',name:'Snapbox MNL',city:'Manila',price:8999},
+    {id:'pb2',name:'360 Studio Norte',city:'QC',price:12499},
+    {id:'pb3',name:'Mirror Moments',city:'Pasig',price:9999,busy:true},
+    {id:'pb4',name:'Flash Habi Co.',city:'Pampanga',price:7499,far:true},
+  ],
+  mobile_bar: [
+    {id:'mb1',name:'Tagay Cocktail Co.',city:'Manila',price:28000},
+    {id:'mb2',name:'Barkada Bar Cart',city:'Cavite',price:22000,busy:true},
+  ],
+  coffee_espresso: [
+    {id:'ce1',name:'Kape Kalsada Cart',city:'Tagaytay',price:15000},
+  ],
+  dj: [
+    {id:'mu2',name:'DJ Alon',city:'Cavite',price:25000},
+    {id:'mu3',name:'DJ Hiraya',city:'Laguna',price:32000,busy:true},
+  ],
+  live_band: [
+    {id:'lb1',name:'Silid Strings Quartet',city:'Manila',price:35000},
+    {id:'lb2',name:'Harana Collective',city:'Laguna',price:42000,busy:true},
+  ],
+};
+
+const ICON = {
+  reception:'🥂',ceremony_venue:'⛪',coordinator:'📋',date_specialist:'🗓️',cake:'🎂',catering:'🍽️',
+  stations:'🍳',crew_meals:'🍱',stylist_decorator:'🎀',florist:'💐',lights_sound:'🔊',dance_floor:'🪩',
+  outdoor:'⛱️',fireworks:'🎆',led_wall:'🖥️',digital_services:'✨',live_band:'🎸',choir:'🎼',
+  orchestra:'🎻',wedding_singer:'🎤',dj:'🎧',choreographer:'💃',performers:'🎭',host_mc:'🎙️',
+  av_production:'📽️',speaker_talent:'🗣️',kids_entertainer:'🎈',photo_video:'📷',editorial:'🗞️',
+  livestream:'📡',brides_attire:'👰',grooms_attire:'🤵',womens_attire:'👗',mens_attire:'👔',
+  filipiniana_barongs:'🪡',hmua:'💄',grooming:'🪒',wellness_fitness:'🧘',jewelleries_accessories:'💍',
+  mobile_bar:'🍸',coffee_espresso:'☕',mocktail:'🍹',food_truck:'🚚',dessert:'🍮',massage_chair:'💆',
+  food_cart:'🍦',photo_booth:'🤳',perfume_bar:'🌸',arcade_games:'🕹️',henna_tattoo:'🪷',
+  mini_nail_bar:'💅',tarot_astrology_palmistry:'🔮',caricature_calligraphy_painting:'🖌️',
+  engraving_embroidery:'🧵',printing:'🖨️',souvenir_giveaways:'🎁',trophies_awards:'🏆',
+  bridal_car:'🚗',guest_shuttle:'🚐',escort:'🏍️',
+};
+const FICON = {venue:'🏛️',planning:'🗓️',feast:'🍽️',design:'💐',program:'🎶',documentary:'📷',
+  look:'👗',booths:'🍸',prints:'🖨️',transport:'🚗'};
+
+const BUDGET = 450000;
+let S;
+function fresh(){ return {
+  anchors:{date:null,dateLabel:null,venue:null},
+  cats:Object.fromEntries(ALLCATS.map(c=>[c.id,{locked:[],build:[],done:false,inPlan:STARTER.has(c.id)}])),
+  openFolder:'venue', openTile:'reception_venue', hintOpen:null,
+  plans:[], toast:null, modal:null, plansOpen:false, lastLock:null,
+};}
+function resetAll(){ S=fresh(); renderAll(); }
+
+const peso=n=>'₱'+n.toLocaleString('en-PH');
+const cat=id=>ALLCATS.find(c=>c.id===id);
+const vendorsOf=id=>VENDORS[id]||[];
+const folderOf=id=>FOLDERS.find(f=>f[2].includes(id));
+const lockedTotal=()=>Object.entries(S.cats).flatMap(([cid,c])=>c.locked.map(v=>vendorObj(cid,v).price)).reduce((a,b)=>a+b,0);
+const buildTotal=()=>Object.entries(S.cats).flatMap(([cid,c])=>c.build.map(v=>vendorObj(cid,v).price)).reduce((a,b)=>a+b,0);
+function vendorObj(cid,vid){ return vendorsOf(cid).find(v=>v.id===vid); }
+function compat(v){
+  if(S.anchors.date && v.busy) return {ok:false,why:'Booked on your date'};
+  if(S.anchors.venue && v.far) return {ok:false,why:'Beyond their 50km reach'};
+  return {ok:true};
+}
+function stateOf(c){
+  const st=S.cats[c.id];
+  if(st.done) return 'done';
+  if(st.locked.length) return 'locked';
+  if(st.build.length) return 'picked';
+  if(vendorsOf(c.id).length) return 'explore';
+  return 'empty';
+}
+const GLYPH={empty:'○',explore:'◔',picked:'◕',locked:'●',done:'✓'};
+const inPlanCats=()=>ALLCATS.filter(c=>S.cats[c.id].inPlan);
+
+/* ── coverage strip (in-plan categories only) ── */
+function renderStrip(){
+  const mine=inPlanCats();
+  const order=[...mine].sort((a,b)=>{
+    const da=S.cats[a.id].done?1:0, db=S.cats[b.id].done?1:0;
+    return da-db || a.urgency-b.urgency;
+  });
+  const covered=mine.filter(c=>S.cats[c.id].done).length;
+  document.getElementById('covcnt').textContent=`Covered ${covered} of ${mine.length}`;
+  /* overall progress ring beside the heading */
+  const R=13.5, C=2*Math.PI*R, frac=mine.length?covered/mine.length:0;
+  const ringEl=document.getElementById('covring');
+  if(ringEl) ringEl.innerHTML=`<svg class="ring" viewBox="0 0 34 34" aria-hidden="true">
+    <circle class="tr" cx="17" cy="17" r="${R}"></circle>
+    <circle class="pr" cx="17" cy="17" r="${R}" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-frac)).toFixed(1)}"></circle>
+    <text x="17" y="20.5" text-anchor="middle">${covered}</text></svg>`;
+  const next=order.find(c=>!S.cats[c.id].done);
+  document.getElementById('strip').innerHTML=order.map(c=>{
+    const st=stateOf(c), stc=S.cats[c.id];
+    const isNext=next&&c.id===next.id;
+    const mini = st==='done' ? '<span class="mini dn">✓</span>'
+               : stc.locked.length ? `<span class="mini lk">${stc.locked.length}</span>`
+               : stc.build.length ? `<span class="mini bd">${stc.build.length}</span>` : '';
+    return `<button class="ctile st-${st}${isNext?' next':''}" onclick="openCat('${c.id}')" aria-label="${c.label}">
+      <span class="ic">${isNext?'<span class="nx">NEXT</span>':''}${ICON[c.id]??'✦'}${mini}</span>
+      <span class="lb">${c.label}</span></button>`;
+  }).join('');
+}
+function openCat(id){
+  const f=folderOf(id); if(!f) return;
+  S.openFolder=f[0]; S.openTile=id; S.toast=null; renderAll();
+  const el=document.getElementById('fold-'+f[0]);
+  if(el&&el.scrollIntoView) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ── adaptive add / remove ── */
+function removeCat(cid){
+  const st=S.cats[cid];
+  if(st.locked.length){ toast({tt:'This category has a locked vendor',ms:'Unlock (or undo) the booking first — removing a category never cancels a booking silently.',plain:true}); return; }
+  st.inPlan=false; if(S.openTile===cid) S.openTile=null;
+  renderAll();
+}
+function addCat(cid){ S.cats[cid].inPlan=true; openCat(cid); }
+
+/* ── the vertical accordion ── */
+function toggleFolder(fid){
+  if(S.openFolder===fid){ S.openFolder=null; S.openTile=null; }
+  else{ S.openFolder=fid; S.openTile=null; }
+  renderAll();
+}
+function toggleTile(cid){ S.openTile = S.openTile===cid ? null : cid; renderAll(); }
+function toggleHint(cid){ S.hintOpen = S.hintOpen===cid ? null : cid; renderAll(); }
+
+function renderBench(){
+  let h='';
+  for(const [fid,flabel,cats] of FOLDERS){
+    const mine=cats.filter(c=>S.cats[c].inPlan);
+    const pool=cats.filter(c=>!S.cats[c].inPlan);
+    if(!mine.length && !pool.length) continue;
+    const open=S.openFolder===fid;
+    const lockedN=mine.reduce((n,c)=>n+S.cats[c].locked.length,0);
+    const toDecide=mine.filter(c=>!S.cats[c].done).length;
+    /* folder-head summary: what's locked · what still needs a decision · what else can be added */
+    const parts=[];
+    if(lockedN) parts.push(`<span class="s lk">● ${lockedN} locked</span>`);
+    if(toDecide) parts.push(`<span class="s td">${toDecide} to decide</span>`);
+    if(pool.length) parts.push(`<span class="s ad">＋${pool.length} more</span>`);
+    if(!parts.length) parts.push(`<span class="s lk">✓ all covered</span>`);
+    h+=`<div class="folder${open?' open':''}" id="fold-${fid}">
+      <button class="fhead" aria-expanded="${open}" onclick="toggleFolder('${fid}')">
+        <span class="fl"><span class="fico">${FICON[fid]??''}</span>${flabel}</span><span class="fr"><span class="fsum">${parts.join('')}</span> ${open?'▴':'▾'}</span></button>`;
+    if(open){
+      h+=`<div class="fbody">`;
+      for(const cid of mine){ h+=catRow(cid); }
+      if(!mine.length) h+=`<div class="empty">Nothing from ${flabel} in your plan yet — add below if you need it.</div>`;
+      if(pool.length){
+        h+=`<div class="addpool"><div class="t">＋ Add to your plan</div><div class="chips">${
+          pool.map(c=>`<button class="addchip" onclick="addCat('${c}')">＋ ${ICON[c]??''} ${LABEL[c]}</button>`).join('')}</div></div>`;
+      }
+      h+=`</div>`;
+    }
+    h+=`</div>`;
+  }
+  document.getElementById('bench').innerHTML=h;
+}
+function catRow(cid){
+  const c=cat(cid), st=S.cats[cid], vs=vendorsOf(cid), open=S.openTile===cid;
+  const glyph=GLYPH[stateOf(c)];
+  let right;
+  if(st.done) right='✓ Covered';
+  else if(st.locked.length) right=`${st.locked.length} locked${st.build.length?` · ${st.build.length} in build`:''}`;
+  else if(st.build.length) right=`${st.build.length} in build · compare, then lock`;
+  else if(vs.length) right=`<span class="cnt">${vs.length}</span> considering`;
+  else right='Not started';
+  let h=`<div class="catwrap"><button class="trow-cat${st.done?' done-row':''}" aria-expanded="${open}" onclick="toggleTile('${cid}')">
+    <span class="l"><span>${glyph}</span><span class="lbl">${c.label}</span>
+      <span class="info" role="button" tabindex="0" title="What does this cover?" onclick="event.stopPropagation();toggleHint('${cid}')">i</span>
+      ${c.hardSingle&&open?'<span class="hs-note">one only</span>':''}</span>
+    <span class="r">${right} ${open?'▴':'▾'}</span></button>`;
+  /* per-card lock summary — visible even when the row is collapsed */
+  if(st.locked.length && !open){
+    h+=`<div class="lockedline">● ${st.locked.map(v=>vendorObj(cid,v).name).join(' + ')}</div>`;
+  }
+  if(S.hintOpen===cid) h+=`<div class="hintbox">ⓘ ${HINT[cid]??''}</div>`;
+  if(open) h+=tileBody(c);
+  h+=`</div>`;
+  return h;
+}
+function tileBody(c){
+  const st=S.cats[c.id], vs=vendorsOf(c.id);
+  const rmv = st.locked.length? '' : `<button class="rmv" onclick="removeCat('${c.id}')">Not needed? Remove</button>`;
+  if(st.done){
+    return `<div class="tilebody"><div class="covered"><span><b>✓ Covered</b> — ${st.locked.map(v=>vendorObj(c.id,v).name).join(' + ')||'skipped'}</span>
+      <button onclick="reopen('${c.id}')">Reopen</button></div></div>`;
+  }
+  if(!vs.length){
+    return `<div class="tilebody"><div class="empty">No shortlist yet in this demo — in the app: a carousel of matches, <b>Find ${c.label} +</b> and <b>Add manually</b>.</div>
+      <div class="tile-note"><span></span>${rmv}</div></div>`;
+  }
+  const good=[], bad=[];
+  vs.forEach(v=>{ (compat(v).ok?good:bad).push(v); });
+  let h=`<div class="tilebody"><div class="tile-note"><span>${c.hardSingle?'This category holds exactly one — locking fills the slot.':'One is the floor — you can lock more than one.'}</span>${rmv}</div><div class="rail">`;
+  good.forEach(v=>{ h+=card(c,v,true); });
+  h+=`<button class="addcard" onclick="findMore()"><span class="plus">＋</span>${st.locked.length&&!c.hardSingle?'Add another '+c.label:'Find '+c.label}</button>`;
+  if(bad.length){
+    h+=`<div class="divider-v"><span>Not available</span></div>`;
+    bad.forEach(v=>{ h+=card(c,v,false); });
+  }
+  h+=`</div></div>`;
+  return h;
+}
+function card(c,v,ok){
+  const st=S.cats[c.id], locked=st.locked.includes(v.id), why=compat(v).why;
+  let badges='';
+  if(locked) badges+=`<span class="badge gold">● Locked</span>`;
+  else if(st.build.includes(v.id)) badges+=`<span class="badge gold">◕ In build</span>`;
+  else if(!ok) badges+=`<span class="badge warn">${why}</span>`;
+  else{ badges+=`<span class="badge ok">${S.anchors.date? 'Free on your date':'Open dates'}</span>`;
+        if(S.anchors.venue) badges+=`<span class="badge ok">Reaches you</span>`; }
+  const inBuild=st.build.includes(v.id);
+  let act;
+  if(locked) act=`<button class="act dead">Locked ✓</button>`;
+  else if(!ok) act=`<button class="act dead">Can't book</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`;
+  else if(inBuild) act=`<button class="act ghost" onclick="event.stopPropagation();unbuild('${c.id}','${v.id}')">◕ In your build · remove</button>
+    <button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>
+    <button class="act lock" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`;
+  else act=`<button class="act dark" onclick="event.stopPropagation();addBuild('${c.id}','${v.id}')">＋ Add to build</button>
+    <button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>
+    <button class="act lockline" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock now — it's final</button>`;
+  return `<div class="vcard${locked?' locked':''}${!ok&&!locked?' dim':''}">
+    <div class="ph">${locked?'<span class="corner">★ Chosen</span>':''}</div>
+    <div class="nm">${v.name}</div><div class="ct">${v.city}</div>
+    <div class="pr">${peso(v.price)}${v.per?' · '+v.per:''}</div>
+    ${v.note?`<div style="font-size:9.5px;color:var(--gold-deep);margin-bottom:4px">${v.note}</div>`:''}
+    ${badges}${act}</div>`;
+}
+function addBuild(cid,vid){
+  const c=cat(cid), st=S.cats[cid];
+  if(c.hardSingle && (st.build.length||st.locked.length)){ st.build=[vid]; /* hard-single: one candidate at a time */ }
+  else if(!st.build.includes(vid)) st.build.push(vid);
+  renderAll();
+  toast({tt:`Added to your build`, ms:`${vendorObj(cid,vid).name} is now a candidate under ${cat(cid).label}. Nothing is final — compare options in Plans, then lock the one you want.`, plain:true});
+}
+function unbuild(cid,vid){ const st=S.cats[cid]; st.build=st.build.filter(x=>x!==vid); renderAll(); }
+function ask(name){ toast({tt:`Your inquiry with ${name}`, ms:'Shortlisted vendors got here BY inquiring — so this opens your existing thread: your spec, their quote, and any replies. A vendor you have never talked to shows "Inquire" instead and opens the fresh composer.', plain:true}); }
+function findMore(){ toast({tt:'Marketplace search', ms:'In the app this opens the full marketplace filtered to this category (distance · price · verified · facets).', plain:true}); }
+function reopen(id){ S.cats[id].done=false; openCat(id); }
+
+/* ── locking ── */
+function tryLock(cid,vid){
+  const c=cat(cid), st=S.cats[cid], v=vendorObj(cid,vid);
+  if(c.hardSingle && st.locked.length){
+    const cur=vendorObj(cid,st.locked[0]);
+    S.modal={kind:'switch',cid,vid,text:`${c.label} already holds ${cur.name}. Switch to ${v.name}? ${cur.name} goes back to “considering”.`};
+    renderOverlay(); return;
+  }
+  if(cid==='reception' && !S.anchors.date){
+    S.modal={kind:'datelock',cid,vid,text:`Locking ${v.name} will finally set your wedding date to ${v.note.replace('Sets your date to ','')} — continue?`};
+    renderOverlay(); return;
+  }
+  doLock(cid,vid);
+}
+function doLock(cid,vid){
+  const c=cat(cid), st=S.cats[cid], v=vendorObj(cid,vid);
+  st.locked.push(vid);
+  st.build=st.build.filter(x=>x!==vid);
+  let milestone='';
+  if(cid==='reception'){
+    S.anchors.venue=v.name+', '+v.city;
+    if(!S.anchors.date){ S.anchors.date='2027-09-12'; S.anchors.dateLabel=v.note.replace('Sets your date to ',''); }
+    milestone='Date + location set — open any other category: vendors who can’t make it just greyed out.';
+  }
+  S.lastLock={cid,vid};
+  if(c.hardSingle){
+    st.done=true;
+    toast({tt:`${c.label} locked ✓ — slot filled`, ms:milestone||'One-only category: automatically marked covered.', undo:true, doneOnly:true});
+  } else {
+    toast({tt:`${c.label} locked ✓ — done with this service?`, ms:milestone, undo:true, ask:true});
+  }
+  renderAll();
+}
+function undoLock(){
+  if(!S.lastLock) return;
+  const {cid,vid}=S.lastLock, st=S.cats[cid];
+  st.locked=st.locked.filter(x=>x!==vid); st.done=false;
+  if(cid==='reception'&&!st.locked.length){ S.anchors.date=null; S.anchors.dateLabel=null; S.anchors.venue=null; }
+  S.lastLock=null; S.toast=null; renderAll();
+}
+function answerDone(){
+  const {cid}=S.lastLock; S.cats[cid].done=true; S.toast=null;
+  advance(); renderAll();
+}
+function answerMore(){ S.toast=null; renderAll(); }
+function advance(){
+  const next=inPlanCats().sort((a,b)=>a.urgency-b.urgency).find(c=>!S.cats[c.id].done);
+  if(next){ const f=folderOf(next.id); if(f){ S.openFolder=f[0]; S.openTile=next.id; } }
+}
+
+/* ── toast + modal ── */
+function toast(t){ S.toast=t; renderOverlay(); }
+function renderOverlay(){
+  const o=document.getElementById('overlay'); let h='';
+  if(S.modal){
+    const m=S.modal;
+    h+=`<div class="scrim" onclick="S.modal=null;renderOverlay()"><div class="modal" onclick="event.stopPropagation()">
+      <h3>${m.kind==='datelock'?'This lock sets your date':'Switch vendors?'}</h3><p>${m.text}</p>
+      <div class="acts"><button class="m1" onclick="confirmModal()">${m.kind==='datelock'?'Lock it — set the date':'Switch'}</button>
+      <button class="m2" onclick="S.modal=null;renderOverlay()">Cancel</button></div></div></div>`;
+  }
+  if(S.toast){
+    const t=S.toast;
+    h+=`<div class="toast" role="status">
+      <div class="tt">${t.tt}</div>${t.ms?`<div class="ms">${t.ms}</div>`:''}
+      ${t.ask?`<div class="acts"><button class="a1" onclick="answerDone()">✓ I'm done</button>
+               <button class="a2" onclick="answerMore()">＋ Add another</button></div>`:''}
+      ${t.doneOnly?`<div class="acts"><button class="a1" onclick="S.toast=null;advance();renderAll()">Next category →</button></div>`:''}
+      ${t.undo?`<button class="undo" onclick="undoLock()">Undo</button>`:''}
+      ${t.plain?`<div class="acts"><button class="a2" onclick="S.toast=null;renderOverlay()">OK</button></div>`:''}
+    </div>`;
+  }
+  o.innerHTML=h;
+}
+function confirmModal(){
+  const m=S.modal; S.modal=null;
+  if(m.kind==='switch'){ const st=S.cats[m.cid]; st.locked=[]; st.done=false; doLock(m.cid,m.vid); }
+  else doLock(m.cid,m.vid);
+}
+
+/* ── right rail: your team (locked · to-decide · addable) + plans ── */
+function renderTeam(){
+  const rows=Object.entries(S.cats).flatMap(([cid,c])=>c.locked.map(vid=>({cid,v:vendorObj(cid,vid)})));
+  const brows=Object.entries(S.cats).flatMap(([cid,c])=>c.build.map(vid=>({cid,v:vendorObj(cid,vid)})));
+  const lt=lockedTotal(), bt=buildTotal(), buffer=BUDGET-lt-bt;
+  const mine=inPlanCats();
+  const need=mine.filter(c=>!S.cats[c.id].done).sort((a,b)=>a.urgency-b.urgency);
+  let h=`<h3>Your team</h3>`;
+  h+= rows.length? rows.map(r=>`<div class="trow"><span class="who">● ${r.v.name}<small>${cat(r.cid).label} · locked</small></span><span class="amt">${peso(r.v.price)}</span></div>`).join('')
+    : `<div style="font-size:12px;color:var(--ink-soft)">Nothing locked yet — start with the reception venue (it sets your date + location).</div>`;
+  if(brows.length){
+    h+=`<div style="margin-top:10px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)" class="mono">In your build — ready to lock</div>`;
+    brows.forEach(r=>{ h+=`<div class="trow"><span class="who">◕ ${r.v.name}<small>${cat(r.cid).label} · candidate</small></span>
+      <span class="amt">${peso(r.v.price)}<br><button class="rowlock" onclick="tryLock('${r.cid}','${r.v.id}')">Lock ✓</button>
+      <button class="rowrm" onclick="unbuild('${r.cid}','${r.v.id}')">✕</button></span></div>`; });
+  }
+  if(need.length){
+    h+=`<div style="margin-top:10px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)" class="mono">Still needs your decision</div>`;
+    need.slice(0,4).forEach(c=>{ h+=`<div class="needrow">○ <button onclick="openCat('${c.id}')">${c.label}</button></div>`; });
+    if(need.length>4) h+=`<div class="needrow">…and ${need.length-4} more</div>`;
+  }
+  h+=`<div class="tiles">
+    <div class="tile"><div class="k">Date</div><div class="v">${S.anchors.dateLabel??'— not set'}</div></div>
+    <div class="tile"><div class="k">Location</div><div class="v">${S.anchors.venue??'— not set'}</div></div>
+    <div class="tile"><div class="k">Locked</div><div class="v">${peso(lt)}</div></div>
+    <div class="tile"><div class="k">In build</div><div class="v">${peso(bt)}</div></div>
+    <div class="tile"><div class="k">Budget</div><div class="v">${peso(BUDGET)}</div></div>
+    <div class="tile"><div class="k">Buffer</div><div class="v ${buffer>=0?'gd':'bd'}">${buffer>=0?peso(buffer)+' to spare':peso(-buffer)+' over'}</div></div>
+  </div>
+  <button class="saveplan" onclick="savePlan()">Save current as a plan</button>`;
+  document.getElementById('team').innerHTML=h;
+}
+function savePlan(){
+  const build=Object.fromEntries(Object.entries(S.cats).filter(([,c])=>c.build.length).map(([cid,c])=>[cid,[...c.build]]));
+  const names=['Garden Classic','Big Feast','Plan '+String.fromCharCode(67+S.plans.length)];
+  S.plans.push({name:names[Math.min(S.plans.length,2)],build,total:lockedTotal()+buildTotal()});
+  renderAll();
+  toast({tt:`Saved as “${S.plans[S.plans.length-1].name}”`, ms:'Your build candidates are snapshotted. Swap candidates on the bench, save again, then compare the plans side by side — locked picks stay pinned in every one.', plain:true});
+}
+function renderPlans(){
+  let h=`<h3>Plans</h3>`;
+  h+= S.plans.length? `<div class="plans-list">${S.plans.map(p=>`<div class="p"><span>${p.name}</span><span class="mono" style="font-size:10.5px">${peso(p.total)}</span></div>`).join('')}
+      <div class="p"><span>Current</span><span class="mono" style="font-size:10.5px">${peso(lockedTotal())}</span></div></div>`
+    : `<div style="font-size:12px;color:var(--ink-soft)">No saved plans yet. Lock a core, save it, then try a variant and compare.</div>`;
+  h+=`<button class="goplans" onclick="S.plansOpen=true;renderAll()">Compare side by side</button>`;
+  document.getElementById('plans').innerHTML=h;
+}
+function renderPlansView(){
+  let old=document.querySelector('.plansview'); if(old) old.remove();
+  if(!S.plansOpen) return;
+  const lockedRows=Object.entries(S.cats).filter(([,c])=>c.locked.length).flatMap(([cid,c])=>c.locked.map(v=>({cid,v:vendorObj(cid,v)})));
+  const curBuild=Object.fromEntries(Object.entries(S.cats).filter(([,c])=>c.build.length).map(([cid,c])=>[cid,[...c.build]]));
+  const cols=[...S.plans,{name:'Current',build:curBuild,total:lockedTotal()+buildTotal()}];
+  /* rows = every category any column has a candidate in, plus a few open ones */
+  const candCats=[...new Set(cols.flatMap(p=>Object.keys(p.build)))];
+  const openCats=inPlanCats().filter(c=>!S.cats[c.id].locked.length && !candCats.includes(c.id) && vendorsOf(c.id).length).slice(0,2);
+  let rows='';
+  lockedRows.forEach(r=>{ rows+=`<tr class="pinned"><td><span class="lockg">●</span> ${cat(r.cid).label}</td>
+    <td colspan="${cols.length}" style="text-align:center" class="lockg">${r.v.name} · ${peso(r.v.price)} — locked, same in every plan</td></tr>`; });
+  candCats.forEach(cid=>{ rows+=`<tr><td>◕ ${cat(cid).label}</td>${cols.map(p=>{
+    const vids=p.build[cid]||[];
+    return `<td>${vids.length?vids.map(v=>{const vo=vendorObj(cid,v);return `${vo.name} <span class="money">${peso(vo.price)}</span>`;}).join('<br>'):'<span style="color:var(--ink-soft)">—</span>'}</td>`;}).join('')}</tr>`; });
+  openCats.forEach(c=>{ rows+=`<tr><td>${c.label}</td>${cols.map(()=>`<td style="color:var(--ink-soft)">○ still open</td>`).join('')}</tr>`; });
+  rows+=`<tr><td>Verdict</td>${cols.map(p=>{const b=BUDGET-p.total;return `<td class="verdict ${b>=0?'ok':'over'}">${b>=0?peso(b)+' to spare':peso(-b)+' over'}</td>`;}).join('')}</tr>`;
+  const el=document.createElement('div'); el.className='plansview';
+  el.innerHTML=`<div class="in"><div class="hd"><h2>Plans — side by side</h2>
+    <button class="close" onclick="S.plansOpen=false;renderAll()">✕ Back to Explore</button></div>
+    <div class="tblwrap"><table class="cmp"><tr><th></th>${cols.map(p=>`<th>${p.name}</th>`).join('')}</tr>${rows}</table></div>
+    <p class="hint">● Locked picks are <b>pinned identical rows</b>. ◕ rows are <b>build candidates</b> — save different candidate sets as plans and compare them here, then lock the winner from Your team. In the app each column also shows its shared-available-dates footer.</p></div>`;
+  document.body.appendChild(el);
+}
+
+function renderAll(){ renderStrip(); renderBench(); renderTeam(); renderPlans(); renderOverlay(); renderPlansView(); }
+S=fresh(); renderAll();
+</script>
