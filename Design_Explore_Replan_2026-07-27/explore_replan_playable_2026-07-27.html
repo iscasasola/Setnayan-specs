@@ -187,6 +187,11 @@
   .trow .who small{display:block;color:var(--ink-soft);font-size:10.5px}
   .trow .amt{font-family:'Space Mono',ui-monospace,monospace;font-size:11.5px;white-space:nowrap;text-align:right}
   .rowlock{font-size:10px;font-weight:800;background:var(--gold);color:#fff;border-radius:7px;padding:2px 8px;margin-top:3px}
+  .pendrow{border:1px dashed var(--gold);border-radius:10px;padding:7px 9px;margin:6px 0;font-size:12px}
+  .pendrow .pv{font-weight:700}
+  .pendrow .pv small{color:var(--ink-soft);font-weight:400;margin-left:4px}
+  .pendrow .ps{font-size:10.5px;color:var(--ink-soft);margin:3px 0 5px}
+  .padv{font-size:10.5px;font-weight:700;background:var(--champagne);color:var(--gold-deep);border:1px solid var(--gold);border-radius:8px;padding:4px 9px}
   .rowrm{font-size:10px;color:var(--ink-soft);margin-left:5px}
   .needrow{font-size:11.5px;color:var(--ink-soft);padding:3px 0}
   .needrow button{color:var(--gold-deep);font-weight:700;text-decoration:underline}
@@ -222,7 +227,7 @@
     <div>
       <div class="eyebrow">Setnayan · Explore replan · playable demo</div>
       <h1>Explore — wedding, mid-browse</h1>
-      <p>Today's shape kept: vertical single-open folder accordion, category rows inside, a <b>horizontal vendor carousel</b> in each open category. New: Coverage Strip · ⓘ what-each-category-covers · <b>add / remove categories</b> so the list is only as big as their wedding · per-card lock summaries · grey-out + "done or add more?".</p>
+      <p>Today's shape kept: vertical single-open folder accordion, category rows inside, a <b>horizontal vendor carousel</b> in each open category. New: the <b>4-step lock handshake</b> (request → vendor agrees → pay + screenshot → vendor accepts = 🔒 schedule locked) · Coverage Strip · ⓘ what-each-category-covers · <b>add / remove categories</b> so the list is only as big as their wedding · per-card lock summaries · grey-out + "done or add more?".</p>
     </div>
     <button class="reset" onclick="resetAll()">↺ Restart demo</button>
   </header>
@@ -441,7 +446,7 @@ const BUDGET = 450000;
 let S;
 function fresh(){ return {
   anchors:{date:null,dateLabel:null,venue:null},
-  cats:Object.fromEntries(ALLCATS.map(c=>[c.id,{locked:[],build:[],done:false,inPlan:STARTER.has(c.id)}])),
+  cats:Object.fromEntries(ALLCATS.map(c=>[c.id,{locked:[],build:[],pending:[],done:false,inPlan:STARTER.has(c.id)}])),
   openFolder:'venue', openTile:'reception_venue', hintOpen:null,
   plans:[], toast:null, modal:null, plansOpen:false, lastLock:null,
 };}
@@ -458,7 +463,7 @@ const ALL_DATES=['Sep 12','Sep 26','Oct 9'];
 /* the build's shared-date window: locked date wins; else intersect every
    locked + candidate vendor's calendar (the getCommonAvailableDays model) */
 function teamMembers(){
-  return Object.entries(S.cats).flatMap(([cid,c])=>[...c.locked,...c.build].map(vid=>({cid,v:vendorObj(cid,vid)})));
+  return Object.entries(S.cats).flatMap(([cid,c])=>[...c.locked,...c.build,...c.pending.map(p=>p.vid)].map(vid=>({cid,v:vendorObj(cid,vid)})));
 }
 function sharedWindow(){
   if(S.anchors.date) return {days:['Sep 12'],source:'locked'};
@@ -485,7 +490,7 @@ function stateOf(c){
   const st=S.cats[c.id];
   if(st.done) return 'done';
   if(st.locked.length) return 'locked';
-  if(st.build.length) return 'picked';
+  if(st.pending.length||st.build.length) return 'picked';
   if(vendorsOf(c.id).length) return 'explore';
   return 'empty';
 }
@@ -582,7 +587,8 @@ function catRow(cid){
   const glyph=GLYPH[stateOf(c)];
   let right;
   if(st.done) right='✓ Covered';
-  else if(st.locked.length) right=`${st.locked.length} locked${st.build.length?` · ${st.build.length} in build`:''}`;
+  else if(st.locked.length) right=`${st.locked.length} locked${st.pending.length?` · ${st.pending.length} pending`:''}${st.build.length?` · ${st.build.length} in build`:''}`;
+  else if(st.pending.length) right=`⏳ ${st.pending.length} lock pending`;
   else if(st.build.length) right=`${st.build.length} in build · compare, then lock`;
   else if(vs.length) right=`<span class="cnt">${vs.length}</span> considering`;
   else right='Not started';
@@ -631,14 +637,17 @@ function card(c,v,ok){
   const st=S.cats[c.id], locked=st.locked.includes(v.id);
   const verdict=compat(v,c.id);
   const inBuild=st.build.includes(v.id);
+  const isPending=st.pending.some(x=>x.vid===v.id);
   let badges='';
-  if(locked) badges+=`<span class="badge gold">● Locked</span>`;
+  if(locked) badges+=`<span class="badge gold">🔒 Locked</span>`;
+  else if(isPending) badges+=`<span class="badge soft">⏳ Lock in progress</span>`;
   else if(st.build.includes(v.id)) badges+=`<span class="badge gold">◕ In build</span>`;
   else if(!ok) badges+=`<span class="badge ${verdict.soft?'soft':'warn'}">${verdict.why}</span>`;
   else{ badges+=`<span class="badge ok">${S.anchors.date? 'Free on your date':'Fits your build'}</span>`;
         if(S.anchors.venue) badges+=`<span class="badge ok">Reaches you</span>`; }
   let act;
-  if(locked) act=`<button class="act dead">Locked ✓</button>`;
+  if(locked) act=`<button class="act dead">🔒 Locked</button>`;
+  else if(isPending) act=`<button class="act dead">⏳ Handshake in progress</button>`;
   else if(!ok) act= verdict.soft
     ? `<button class="act dead">Doesn't fit the build</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`
     : `<button class="act dead">Can't book</button><button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">Ask anyway</button>`;
@@ -647,7 +656,7 @@ function card(c,v,ok){
     <button class="act lock" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`;
   else act=`<button class="act dark" onclick="event.stopPropagation();addBuild('${c.id}','${v.id}')">＋ Add to build</button>
     <button class="act ghost" onclick="event.stopPropagation();ask('${v.name}')">💬 Check inquiry</button>
-    <button class="act lockline" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock now — it's final</button>`;
+    <button class="act lockline" onclick="event.stopPropagation();tryLock('${c.id}','${v.id}')">Lock this</button>`;
   return `<div class="vcard${locked?' locked':''}${!ok&&!locked?' dim':''}">
     <div class="ph">${locked?'<span class="corner">★ Chosen</span>':''}</div>
     <div class="nm">${v.name}</div><div class="ct">${v.city}</div>
@@ -671,41 +680,55 @@ function reopen(id){ S.cats[id].done=false; openCat(id); }
 /* ── locking ── */
 function tryLock(cid,vid){
   const c=cat(cid), st=S.cats[cid], v=vendorObj(cid,vid);
-  if(c.hardSingle && st.locked.length){
-    const cur=vendorObj(cid,st.locked[0]);
-    S.modal={kind:'switch',cid,vid,text:`${c.label} already holds ${cur.name}. Switch to ${v.name}? ${cur.name} goes back to “considering”.`};
+  const holder = st.locked[0] ?? st.pending[0]?.vid;
+  if(c.hardSingle && holder){
+    const cur=vendorObj(cid,holder);
+    S.modal={kind:'switch',cid,vid,text:`${c.label} already holds ${cur.name}${st.pending.length?' (lock in progress)':''}. Switch to ${v.name}?`};
     renderOverlay(); return;
   }
   if(cid==='reception' && !S.anchors.date){
-    S.modal={kind:'datelock',cid,vid,text:`Locking ${v.name} will finally set your wedding date to ${v.note.replace('Sets your date to ','')} — continue?`};
+    S.modal={kind:'datelock',cid,vid,text:`If this lock completes, your wedding date becomes ${v.note.replace('Sets your date to ','')}. The date turns official only when ${v.name} accepts your payment — continue with the request?`};
     renderOverlay(); return;
   }
   doLock(cid,vid);
 }
 function doLock(cid,vid){
   const c=cat(cid), st=S.cats[cid], v=vendorObj(cid,vid);
-  st.locked.push(vid);
+  st.pending.push({vid,stage:1});
   st.build=st.build.filter(x=>x!==vid);
+  S.lastLock={cid,vid};
+  if(c.hardSingle){
+    toast({tt:`Lock requested — waiting for ${v.name}`, ms:'Nothing is reserved yet. The schedule locks only when the vendor accepts your payment — follow the handshake in Your team.', undo:true, plain:true});
+  } else {
+    toast({tt:`Lock requested for ${v.name} — done choosing here?`, ms:'The schedule locks only when the vendor accepts your payment (track it in Your team). You can still add another candidate meanwhile.', undo:true, ask:true});
+  }
+  renderAll();
+}
+/* the 4-step handshake: 1 requested → 2 vendor agreed + ₱ request → 3 proof sent → 4 LOCKED */
+const STAGE_LABEL={1:'Waiting for the vendor to agree to the lock',2:'Vendor agreed — payment request received (50% deposit)',3:'Screenshot sent — vendor confirming your payment'};
+const STAGE_BTN={1:'▶ Vendor agrees + sends payment request',2:'▶ I paid — send the screenshot',3:'▶ Vendor accepts the payment'};
+function advancePending(cid,vid){
+  const st=S.cats[cid]; const p=st.pending.find(x=>x.vid===vid); if(!p) return;
+  if(p.stage<3){ p.stage++; renderAll(); return; }
+  /* stage 3 → 4: the vendor accepts the payment. NOW it locks. */
+  st.pending=st.pending.filter(x=>x.vid!==vid);
+  st.locked.push(vid);
+  const c=cat(cid), v=vendorObj(cid,vid);
   let milestone='';
   if(cid==='reception'){
     S.anchors.venue=v.name+', '+v.city;
     if(!S.anchors.date){ S.anchors.date='2027-09-12'; S.anchors.dateLabel=v.note.replace('Sets your date to ',''); }
-    milestone='Date + location set — open any other category: vendors who can’t make it just greyed out.';
+    milestone=' Your date + location are now official — the bench greys out anyone who can’t make it.';
   }
-  S.lastLock={cid,vid};
-  if(c.hardSingle){
-    st.done=true;
-    toast({tt:`${c.label} locked ✓ — slot filled`, ms:milestone||'One-only category: automatically marked covered.', undo:true, doneOnly:true});
-  } else {
-    toast({tt:`${c.label} locked ✓ — done with this service?`, ms:milestone, undo:true, ask:true});
-  }
+  if(c.hardSingle) st.done=true;
+  toast({tt:`🔒 ${v.name} is LOCKED — schedule reserved`, ms:`The vendor accepted your payment and was billed the syncing fee alongside accepting.${milestone}`, plain:true});
   renderAll();
 }
+function cancelPending(cid,vid){ const st=S.cats[cid]; st.pending=st.pending.filter(x=>x.vid!==vid); renderAll(); }
 function undoLock(){
   if(!S.lastLock) return;
   const {cid,vid}=S.lastLock, st=S.cats[cid];
-  st.locked=st.locked.filter(x=>x!==vid); st.done=false;
-  if(cid==='reception'&&!st.locked.length){ S.anchors.date=null; S.anchors.dateLabel=null; S.anchors.venue=null; }
+  st.pending=st.pending.filter(x=>x.vid!==vid);
   S.lastLock=null; S.toast=null; renderAll();
 }
 function answerDone(){
@@ -758,6 +781,15 @@ function renderTeam(){
   let h=`<h3>Your team</h3>`;
   h+= rows.length? rows.map(r=>`<div class="trow"><span class="who">● ${r.v.name}<small>${cat(r.cid).label} · locked</small></span><span class="amt">${peso(r.v.price)}</span></div>`).join('')
     : `<div style="font-size:12px;color:var(--ink-soft)">Nothing locked yet — start with the reception venue (it sets your date + location).</div>`;
+  const prows=Object.entries(S.cats).flatMap(([cid,c])=>c.pending.map(p=>({cid,p,v:vendorObj(cid,p.vid)})));
+  if(prows.length){
+    h+=`<div style="margin-top:10px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)" class="mono">⏳ Lock in progress — the handshake</div>`;
+    prows.forEach(r=>{ h+=`<div class="pendrow">
+      <div class="pv">⏳ ${r.v.name} <small>${cat(r.cid).label} · step ${r.p.stage} of 4</small></div>
+      <div class="ps">${STAGE_LABEL[r.p.stage]}</div>
+      <div class="pa"><button class="padv" onclick="advancePending('${r.cid}','${r.v.id}')">${STAGE_BTN[r.p.stage]}</button>
+      <button class="rowrm" onclick="cancelPending('${r.cid}','${r.v.id}')">✕</button></div></div>`; });
+  }
   if(brows.length){
     h+=`<div style="margin-top:10px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)" class="mono">In your build — ready to lock</div>`;
     brows.forEach(r=>{ h+=`<div class="trow"><span class="who">◕ ${r.v.name}<small>${cat(r.cid).label} · candidate</small></span>

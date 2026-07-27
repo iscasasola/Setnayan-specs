@@ -92,3 +92,35 @@ Live path `/dashboard/[eventId]/vendors` (BUDGET_BUILD ON in prod): single-scrol
   on the bench, `page.tsx:894-926`) extended from the single event-date probe to the window set.
 - **PR-G2 (hard anchor grey-out) — stays ⛔ GATED** on the 2026-07-26 lock-reserves-date owner
   decision.
+
+## 7 · Amendment (owner, same day): THE LOCK HANDSHAKE — mostly ALREADY BUILT; one missing step
+> Owner: "locking will only apply once vendor receives handshakes… when a customer locks, it is
+> still not yet locked until vendor agrees. vendor sends payment request, customer receives it —
+> still not locked. once customer settles the payment and sends the screenshot, vendor will be
+> billed for the syncing fee alongside accepting it. when vendor accepts the payment, the
+> schedule is now locked." Owner then (correctly) flagged this was "already done or partially
+> done — check our documents." **Verified: substantially TRUE.** The canonical lifecycle was
+> specced 2026-06-20 (DECISION_LOG:1362 — "Lock → vendor sends payment info → couple pays +
+> proof → vendor accepts transaction") and most steps are code:
+
+| Step (owner's words) | Exists? | Where |
+|---|---|---|
+| 1 Customer locks → not yet locked | ⚠ shipped lock is UNILATERAL (`contracted` immediately) — becomes a REQUEST state | `finalizeVendor` |
+| 2 **Vendor agrees to the lock** | 🚫 **MISSING — the ONLY unbuilt step** (recorded absent: DECISION_LOG:2494 + :2681 "no vendor acknowledgement in between") | new |
+| 3 Vendor sends payment request | ✅ Proposal Maker + published payment methods + payment-plan snapshot | `proposal-send.ts`, methods tables |
+| 4 Customer pays + screenshot | ✅ SHIPPED FLAG-DARK — `NEXT_PUBLIC_PAYMENT_GATED_LOCK_ENABLED` (PR #3090): required screenshot, methods-validated, atomic with the lock write, ledger row "awaiting vendor confirmation" | `vendors/actions.ts:1008-1087, 2052-2122` |
+| 5 Vendor accepts payment → LOCKED | ✅ SHIPPED LIVE — the vendor "Lock request" card → `vendorAcknowledgeDeposit` / `vendorRejectDeposit`; couple notified "Your date is locked in" | `vendor-dashboard/clients/[eventId]/actions.ts:105/167` |
+| Schedule actually reserved | ✅ pool-acquire exists — fires at `deposit_paid`; **wire it to the acknowledge step** | `acquireSchedulePools` |
+
+**Rulings this encodes (DECISION_LOG 2026-07-27 handshake row):**
+- **RESOLVES the open 2026-07-26 "does Lock reserve the date?" decision (line 2681):** neither (a) nor (b) — Lock is a REQUEST; the reservation lands at vendor payment-acceptance (step 5). PR-G2's gate is therefore **RESOLVED**: the hard grey-out tier keys off schedule-locked bookings (acknowledged + pool-consuming), and all customer-facing lock UI must say "requested / in progress" until step 5. The card label drops "— it's final".
+- **Syncing-fee trigger moves: couple-lock-time → vendor-payment-acceptance** ("billed alongside accepting"). Rate/base/sourced-only/free-5-per-event all UNCHANGED (5%→1% taper on `total_cost_php`, PR #3755 schedule). ⚠ SURFACED, not silent: this supersedes the 2026-07-24 "trigger = finalizeVendor lock" placement — 5th fee-trigger ruling in the lineage; `collectBookingFeeAtLock`'s call moves from the lock write to the acknowledge transition.
+- The vendor-side accept/reject machinery for step 2 should MIRROR the shipped step-5 pattern (single-winner RPC + Overview card + notification), and the request states live in NEW columns/rows — **never repurpose `event_vendors.status`** (the code's own rule, `actions.ts:3578`).
+
+**New slices:**
+- **PR-H — the vendor-agrees step + request-state UI (M/L):** `lock_requested_at` / `lock_agreed_at` columns (or a `vendor_lock_requests` table mirroring `vendor_lock_proposals`), vendor Overview "Lock request — agree?" card BEFORE payment, customer-side "⏳ waiting for vendor" states on card/team/strip, expiry for stale requests (recommend ~7 days), Undo = cancel request. Hard-single conflict gate counts pending requests.
+- **PR-I — fee + pool at acknowledge (S/M):** move `collectBookingFeeAtLock` call to `vendorAcknowledgeDeposit`'s transition; fire `acquireSchedulePools` there too (supersedes deposit_paid as the acquire point for handshake bookings); keep both flag-gated (`BOOKING_FEE_RAIL_LIVE` two-key unchanged).
+- **PR-G2 — now UNBLOCKED** (gate resolved above); hard tier keys off acknowledged bookings.
+- The prototype's Your-team "handshake tracker" (4-step stepper) is the reference UI.
+
+**Also verified for the record (owner asked):** "bench filters as you add to build" was never shipped — but the *reverse* direction ALREADY EXISTS and the owner remembered it correctly: `getAvailableDaysForVendorSet` ("a saved build's picks — possibly not yet booked") powers the Compare availability footer ("No single date works — swap one"), and `candidate-dates.ts` is the "dates shrink as you lock" engine on `/date-selection`. §6's PR-G1 completes the loop (team → window → filter the bench), reusing exactly those engines.
