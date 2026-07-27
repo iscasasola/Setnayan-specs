@@ -2,6 +2,32 @@
 
 > Project context for Claude Code working on the Setnayan platform. Keep this file under 200 lines — it's loaded into every Claude Code session as context, so brevity matters.
 
+## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-07-27)
+
+**The owner's #1 complaint about new sessions: they start without the plan, rebuild things that
+already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
+stream, deleted or replaced when it finishes. If you finish a stream, update this block.
+
+> ### ▶ ACTIVE: Song desk / song requests / sets
+> **THE CONTRACT — open it first, before any grep, plan or code:**
+> [`Song_Desk_BUILD_ORDER_2026-07-27.md`](Song_Desk_BUILD_ORDER_2026-07-27.md)
+>
+> It contains, already verified against live prod on 2026-07-27:
+> - a table of **what already ships** (so you do not rebuild it — this happened twice in one day),
+> - **7 PRs in dependency order**, each with its blocking owner question,
+> - the standing traps (the exposure-baseline freeze, the default-ACL REVOKE, pre-launch-empty prod).
+>
+> **Start at PR 1** — a live entitlement gap — unless the owner says otherwise.
+> Reasoning behind every line: `DECISION_LOG.md`, eight rows dated **2026-07-27**
+> (`grep -n "2026-07-27" DECISION_LOG.md`).
+
+**If you are starting a session on ANY topic, do these three things first:**
+1. Read the ACTIVE block above (even if your task seems unrelated — it may already be covered).
+2. Run RULE 0 from the repo's own `CLAUDE.md`: grep for the feature noun in `apps/web` BEFORE
+   designing anything. Two features the owner asked for on 2026-07-27 turned out to already ship.
+3. Verify claims against **live prod or shipped code**, not against specs or handoffs — the
+   iteration specs are archive stubs and `schema_migrations` can lie about what actually landed.
+
 ## 🧭 SOURCE OF TRUTH (read this FIRST — flipped 2026-06-07)
 
 **Canonical reference: [`AS_BUILT_GROUND_TRUTH_2026-06-07.md`](AS_BUILT_GROUND_TRUTH_2026-06-07.md).** Source-of-truth order: **(1) live site `www.setnayan.com` → (2) shipped code `apps/web` @ `origin/main` → (3) live prod DB → (4) the ground-truth doc → (5) iteration specs / dated handoffs = REFERENCE + HISTORY ONLY, may be stale.**
