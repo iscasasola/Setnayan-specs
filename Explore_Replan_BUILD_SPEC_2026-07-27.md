@@ -626,3 +626,63 @@ they travel that far", but it should be a *conscious* product position, not an a
 **Recommended order:** (1) fix the null-reach penalty [correctness] → (2) distance as fit
 tie-break [cheap, invisible, better results] → (3) the standalone "Nearest" lens + sort
 persistence [§13.1/§13.3, genuinely useful but the smallest win of the three].
+
+## 14 · Combination sorting (owner: *"I don't want it linear only — a combination of sorting"*)
+**RULE-0 RESULT: the combination scorer ALREADY EXISTS and is production-grade —
+`apps/web/lib/compat-score.ts`. The bench simply does not use it.**
+
+### 14.1 · What exists
+`computeCompatScore()` (`compat-score.ts:154`) — a **7-dimension weighted composite**, weights
+summing to 1 (`COMPAT_WEIGHTS`, `:31-53`), built to
+`Customer_Vendor_Marketplace_Architecture_2026-06-04.md §2` ("GATE + SCORE" — the gate decides who
+is eligible and never hides; the score only ranks + displays):
+
+| Dimension | Weight | Notes |
+|---|---|---|
+| refinement (style/preference/song overlap) | 0.22 | strongest "is this what I want" signal |
+| budgetFit | 0.20 | continuous ratio, not a yes/no |
+| distance | 0.18 | **continuous decay, scaled by the vendor's own travel radius** so wide-coverage vendors aren't punished; `DEFAULT_RADIUS_KM = 25` when absent |
+| reviews | 0.18 | **Bayesian-adjusted** — one 5★ review ≠ fifty |
+| dateHeadroom | 0.08 | free on more candidate dates = lower risk |
+| faithFit | 0.07 | lift for declared specialists, never a penalty for generalists |
+| trust | 0.07 | verified / boosted / profile completeness |
+
+**`NEUTRAL = 0.6` for any missing input (`:57`) — "never 0".** That is *exactly* the admit-unknown
+rule `fitScore` violates (§13.4 defect). The architecture already mandates it; the bench just
+doesn't follow it.
+
+### 14.2 · Who uses it — and who doesn't
+USES: `_actions/category-search.ts:925-939` (the category-search overlay, which sits on the LEGACY
+`plan-budget-accordion` path), `build-3state-actions.ts`, `build-3state-fallback-actions.ts`,
+`app/tour/vendors/page.tsx`.
+**DOES NOT USE IT: the live bench** (`shortlist-categories.tsx` → `lib/bench-sort.ts`), which ranks
+on `fitScore` — **3 binary flags, so only 4 possible scores (0–3)**. In a 6-vendor category most
+cards tie, and the real order is decided by the tie-breaks — i.e. "Best fit" degenerates into
+"sort by rating" much of the time.
+
+### 14.3 · ⚠ The inputs are ALREADY computed on the bench page
+`vendors/page.tsx` already resolves, per candidate, for the compat dims — its own comments say so:
+budget-fit ratio (`:357` *"for the per-candidate compat %"*), faith fit (`:383-391`), haversine
+distance (`:438-443`), rating + review_count + verified + is_setnayan_service (`:464-470`).
+**Everything `computeCompatScore` needs is in scope; the call is simply never made.**
+
+### 14.4 · Recommended shape (build order)
+1. **Call the existing scorer on the bench** — replace `fitScore` as the "Best fit" lens with
+   `computeCompatScore`. Do NOT write a second scorer. This single change delivers the combination
+   ranking, fixes the §13.4 null-reach defect (NEUTRAL 0.6), makes distance continuous (§13.1), and
+   de-binarises budget — all at once.
+2. **Keep the linear lenses** — "Lowest price" and "Top rated" are jobs ("just show me the
+   cheapest"), not defaults. Composite is the default; linear lenses stay as explicit overrides.
+3. **Explainability is mandatory.** A weighted score is a black box unless each card says why —
+   keep the shipped reason pill, driven by the **top-contributing dimension** ("Closest to your
+   venue" · "Best value here" · "Most reviewed"). Never show a bare %.
+4. **Per-category weights (owner's call).** One global weight vector is wrong: distance dominates
+   for catering / crew meals / booths / transport (they physically travel with equipment) and
+   barely matters for a gown designer or a monogram. Recommend a small per-plan-group weight
+   override on top of `COMPAT_WEIGHTS`, defaulting to the global vector.
+5. **Admin-tunable weights** — already named as intended in the module header ("§2 calls for these
+   to be admin-tunable; that admin surface is a later PR"). Sequence it AFTER (1)–(3); tuning a
+   scorer nobody has used yet is premature.
+6. ⚠ **Watch the `trust`/`boosted` dims** — `boosted` and `is_setnayan_service` feed rank. That is
+   defensible but it is paid placement inside a "best fit" default; it must be a conscious owner
+   position (same class as §13.4's tier-radius finding) and arguably disclosed.
