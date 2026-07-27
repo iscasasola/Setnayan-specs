@@ -106,9 +106,22 @@ The 2026-07-21 fix correctly zeroes price + label + market anchor for an inactiv
 
 `provisionFreeCamerasAdmin` fires only when someone first opens `/dashboard/[eventId]/studio/papic` (page.tsx:318). "On from onboarding" is a **real behaviour change**, not a display change. Prod `papic_event_point_grants` is **empty (0 rows)** — nothing to migrate.
 
-### 2.5 ⚠ Free-tier point count is ambiguous
+### 2.5 🚨 THE FREE POOL IS NOT WIRED — free Papic is currently UNMETERED
 
-`papic_tier_config.free` has `points_per_day = NULL`, `seats_per_event = 3`. The One-Pool spec §0 says Free = **50-pt shared pool**; a test comment references a legacy 20-pt/seat budget. **Confirm the live free number before it is printed on a card** — the card must not state a figure the meter won't honour.
+**This is the most important finding, and it gates the whole feature.** Traced through the live DB 2026-07-27:
+
+- `papic_event_pool_status(event_id)` — *"Applies when a flat pass exists (legacy) OR the event holds ANY grant (Free / One / Pool). **No grant + no pass → fence absent.**"*
+- `papic_reserve_event_points(...)` — *"Fence absent (non-pass event) → **RETURN TRUE**, ledger untouched."*
+- `provisionFreeCamerasAdmin` creates the 3 free seats (`seat_index` 100–102, `tier='free'`) **but inserts NO grant row.**
+- Prod `papic_event_point_grants` = **0 rows, all sources.**
+
+**So an event on the free tier has no fence at all: capture is UNCAPPED.** The owner's 2026-07-22 "Free = 50-pt pool" lock is **designed and half-built but never armed** — the DB branch explicitly names "Free", and nothing ever writes the row.
+
+**Why this blocks the cards:** the plan is to switch Papic on for *every* new event across *all 16 types*. Doing that while free is unmetered hands every signup **unlimited free photo + video storage** — a cost that scales directly with growth, on a product whose storage sustainability is already an open concern, and with 10s clips at ~2× the bytes and no compression or purge built.
+
+The card also cannot honestly say anything today: **"50 free shots"** is a figure the meter won't enforce, and **"unlimited"** is an accident, not an offer.
+
+**➡ Wiring the free grant is PROMOTED to PR1 and is a hard prerequisite.** Insert one `papic_event_point_grants` row (`source='free_grant'`, the locked free points) at event commit. Nothing to migrate — prod is empty. Confirm the point count against `Papic_One_Pool_Model_Spec_2026-07-22.md` §0 (50) before printing it; `papic_tier_config.free.points_per_day` is NULL and is not the source.
 
 ---
 
@@ -138,11 +151,11 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 
 | PR | What | Gates |
 |---|---|---|
-| **1** | Remap `INAPP_TO_SERVICE_CODE` Papic keys to the live One-Pool SKUs (§2.1). Confirm the free point count (§2.5). | none |
-| **2** | Make `SetnayanAiValue` type-aware — drop/branch the PH-marriage row for non-weddings (§2.3). | none |
-| **3** | `services-step.tsx` — the two cards. Mount in `/onboarding/[type]` first (14 types, most gap). | PR1 + PR2 |
-| **4** | Mount in `/onboarding/wedding` (before `congrats`; do NOT un-filter `PAYWALL_SCREENS` — the lock stands) and `/onboarding/simple`. | PR3 |
-| **5** | Provision free Papic at commit, not lazily (§2.4). Give `interested_services` its first reader (§1.3). | PR3 |
+| **1** | 🚨 **Arm the free pool** (§2.5) — write the `free_grant` row at event commit, and provision the free seats there too instead of lazily (§2.4). **Nothing else ships until free is metered.** | none |
+| **2** | Remap `INAPP_TO_SERVICE_CODE` Papic keys to the live One-Pool SKUs (§2.1) so the upgrade line renders. | PR1 |
+| **3** | Make `SetnayanAiValue` type-aware — drop/branch the PH-marriage row for non-weddings (§2.3). | none (parallel) |
+| **4** | `services-step.tsx` — the two cards. Mount in `/onboarding/[type]` first (14 types, biggest gap). | PR1–3 |
+| **5** | Mount in `/onboarding/wedding` (before `congrats`; do NOT un-filter `PAYWALL_SCREENS` — the lock stands) and `/onboarding/simple`. Give `interested_services` its first reader (§1.3). | PR4 |
 | **—** | Amend or kill the §1.4 start-clamp in the Papic spec (§2.2). | **owner** |
 | **—** | Vendor shots in the card copy. | **DPO/NPC** |
 
@@ -150,6 +163,7 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 
 ## 5. OPEN — owner / counsel
 
-1. **Kill the 120-day start-clamp?** (§2.2) — required for the promise to stay true.
-2. **The live free point number** (§2.5) — 50, or something else.
-3. **DPO gate on vendor capture** (§0) — until then, guests only.
+1. **Confirm the free point number** (§2.5) — the spec says 50; the pool has never been armed, so this number becomes real the moment PR1 ships. It is the single figure the card prints and the meter enforces.
+2. **DPO gate on vendor capture** (§0) — until it flips, the card says guests only.
+
+**Treated as already answered — not re-asked:** the §1.4 `event_date − 120` start-clamp (§2.2) is **dead**. The owner's 2026-07-27 directive — *"starting X until their event date … store all your photos as you prepare"* — supersedes an unbuilt 2026-07-22 proposal that contradicts it. PR1 must not introduce a lower bound.
