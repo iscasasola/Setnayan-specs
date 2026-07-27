@@ -428,6 +428,13 @@ Steps as drafted, with: the snapshot columns populated at step 8; the anchor's `
 
 ## 4 · MONEY CORRECTNESS
 
+> **⚠ FEE-TRIGGER AMENDMENT 2026-07-27 (🤝 LOCK HANDSHAKE, DECISION_LOG row 2730):** the fee's
+> **call site** moves from the lock write to `vendorAcknowledgeDeposit` (**PR-I**,
+> `Explore_Replan_BUILD_SPEC_2026-07-27.md` §7) — couple-lock is a request; billing and pool
+> acquisition both land at vendor payment-acceptance. Every invariant in this section (anchor-only
+> base, gross-not-payable, one charge, covered-row refusal, free-5 ordinal) is unchanged and
+> applies at the new trigger.
+
 ### 4a · One number — restated
 
 ```

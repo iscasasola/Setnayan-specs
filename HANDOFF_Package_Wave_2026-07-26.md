@@ -313,6 +313,16 @@ accepted, but should see.
 
 ### 6.4 ✅ DONE 2026-07-26 — the fee fires once, on the anchor
 
+> **⚠ AMENDED 2026-07-27 — the TRIGGER moves, the machinery stands (🤝 LOCK HANDSHAKE ruling,
+> DECISION_LOG 2026-07-27 row 2730 + `Explore_Replan_BUILD_SPEC_2026-07-27.md` §7).** Couple-lock
+> is now a **REQUEST** — nothing reserves or bills until the vendor **accepts the payment**. The
+> syncing fee therefore bills at `vendorAcknowledgeDeposit`, not at couple-lock:
+> `collectBookingFeeAtLock`'s call moves there in **PR-I** (owned by the Explore build spec;
+> `acquireSchedulePools` rewires to the same transition). Everything below survives unchanged —
+> once-per-package on the ANCHOR, the taper base `total_cost_php`, sourced-only, free-5, and the
+> covered-row DB guard. Only the WHEN moves. Both rails stay flag-gated (two-key
+> `BOOKING_FEE_RAIL_LIVE` unchanged), so nothing double-bills in the interim.
+
 Shipped in **[#3765](https://github.com/iscasasola/setnayan-platform/pull/3765)**, on top of
 **[#3762](https://github.com/iscasasola/setnayan-platform/pull/3762)** (M1, the anchor model) and
 **[#3753](https://github.com/iscasasola/setnayan-platform/pull/3753)** (one pricer). Live in prod.
