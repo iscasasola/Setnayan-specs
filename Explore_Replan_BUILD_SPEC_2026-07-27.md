@@ -202,3 +202,14 @@ directly via the Lock-Free `recordDeposit` path). Slice: part of PR-D (card vari
   5 times between {first} and {last}"), and the same row is the evidence if a vendor disputes
   fee attribution. Zero-view match → still a clean free import. DPO review now covers the
   counter's retention alongside the payload.
+- **Dispute ladder (owner):** vendors CAN dispute a found-you / syncing-fee attribution.
+  **First dispute (per vendor, lifetime): AUTO-ACCEPTED** — fee waived instantly, no admin
+  touch — paired with the positioning reminder: *"This one's on us. A note though: this couple
+  found you on Setnayan — they viewed your card and website {N} times before booking. That's
+  the power and reach of a Setnayan presence: couples find you easier and faster here. Future
+  disputes are reviewed by our team."* **Second and later disputes: ADMIN REVIEW** (reuse the
+  shipped disputes rails — the admin console disputes queue + the event `disputes` route);
+  admin sees the view-count receipts row as evidence; verdicts upheld/rejected. State:
+  `attribution_disputes` (vendor_profile_id, booking ref, status auto_accepted → under_review →
+  upheld/rejected, created_at); the auto-accept check is a simple per-vendor count. Part of
+  PR-J.
