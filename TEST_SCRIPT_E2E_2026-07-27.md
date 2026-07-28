@@ -772,87 +772,130 @@ Two features exist **only in the prototype**
 
 ---
 
-## 16 · The coordinator day-of desk — "Run the floor" (PR pending, 2026-07-27)
+## 16 · The coordinator day-of desk — "Run the floor"
 
-The third and last specialization. Same gate as §15 (no feature flag — subscription ×
-category × booked × today), but it has **one extra switch that §15 does not**, and it is the
-single most likely reason this desk looks half-built. Read §16.0b before filing anything.
+> ⚠ **Rewritten 2026-07-28.** The first version of this section described a
+> coordinator surface that was **never merged** — two sessions built one the same
+> day and the other shipped. These checks describe what is actually on `main`
+> (`46c395839`), which is broader: it gates every panel on the host having
+> **shared that area**, per the owner's 2026-07-27 access lock.
 
-Route: same live console, `/vendor-dashboard/on-the-day/live/[eventId]`. Surface:
-`…/live/[eventId]/_components/floor-command/`. Decisions: `lib/floor-command.ts` (15 tests).
+Same gate as §15 (no feature flag — subscription × category × booked × today),
+**plus** a per-area grant from the host, **plus** a Data Privacy control for the
+inbox. Three gates, so "half the panels are missing" is usually correct behaviour.
+
+Surface: `…/live/[eventId]/_components/floor-command/`. Decisions:
+`lib/floor-command.ts`.
 
 ### 16.0 Setup
 
-- [ ] **16.0a** A vendor whose `services[]` contains **`coordinator`**, on a **paid tier**,
-      **booked** on Couple A's event, event **dated today**. (Same four-part setup as §15.0 —
-      re-read the warning there about testing paywalls on the owner account.)
-- [ ] **16.0b** ★ **Approve `coordinator_requests_inbox` in `/admin/data-privacy`.** The shared
-      requests stream is behind that control and **fail-closes when it is off** — the desk then
-      shows the shipped *device-local* issues log instead of the shared inbox. That is correct
-      behaviour, not a bug. If the inbox looks empty or private-to-this-phone, check this first.
-      (`coordinator_day_of_broadcast` is a separate control and is **not** used by this desk.)
+- [ ] **16.0a** A vendor whose `services[]` contains **`coordinator`**, on a paid tier,
+      booked, event dated today. (Same four-part setup as §15.0.)
+- [ ] **16.0b** ★ **Being booked grants NOTHING.** Before the host shares anything, the
+      coordinator must see the **"ask the host"** card and **no tools**. That is the
+      feature, not a bug.
+- [ ] **16.0c** Host approves the requested areas → the matching panels appear. Revoke one
+      → that panel closes **the same minute, with no deploy**.
+- [ ] **16.0d** For the requests inbox only: approve `coordinator_requests_inbox` in
+      `/admin/data-privacy`. Without it that panel shows its closed state.
 
-### 16.1 ★ The advance control — the hole this PR exists to close
+### 16.1 ★ The schedule updater — the hole this surface exists to close
 
-Before this PR the coordinator could **not** move the show along from the floor console: the
-advance control lives on `RunOfShowHeader` behind a `canAdvance` prop the live page never
-passed.
+Before it, the live page mounted `RunOfShowHeader` **without** `canAdvance`, so the
+coordinator could watch the running order and not touch it.
 
-- [ ] **16.1a** With a block **live**, the desk shows **"Move on to <next block>"**. Tap it →
-      `run_state` advances and the console reflects it.
-- [ ] **16.1b** ★ **Cross-surface:** with the emcee's desk (§15) open on a second device for the
-      same event, advancing here must move **their** cue card to "You're on: <next>". This is the
-      whole point — the coordinator is cueing the emcee. Test it with two browsers.
-- [ ] **16.1c** Also confirm the **guest** "what's happening now" card follows.
-- [ ] **16.1d** **Nothing live** → no advance button. Not-started shows a sentence naming the
-      couple instead; wrapped shows neither.
-- [ ] **16.1e** **Double-tap / race** — tap advance twice fast, or advance from the couple's
-      screen at the same moment. The RPC is single-winner and idempotent, so this must be a
-      benign no-op, never a double-skip.
-- [ ] **16.1f** The button copy must state the blast radius ("everyone's screen follows"). If
-      that line goes missing, file it — a control whose reach is invisible is one nobody presses.
+- [ ] **16.1a** With a block live, advance it. `run_state` moves.
+- [ ] **16.1b** ★ **Cross-surface:** with the emcee's desk (§15) open on a second device
+      for the same event, advancing here must move **their** cue card to "You're on:
+      <next>". Two browsers. This is the link that makes both desks worth having.
+- [ ] **16.1c** The guest "what's happening now" card follows too.
+- [ ] **16.1d** **Retime presets** (5/10/15/30) shift the running order without
+      hand-editing each block.
+- [ ] **16.1e** **Double-tap / race** with the couple's own screen — the RPC is
+      single-winner and idempotent, so this must be a benign no-op, never a double-skip.
+- [ ] **16.1f** Without the schedule area shared, this panel must be **closed**.
 
-### 16.2 The inbox is INLINE, not a link away
+### 16.2 Seat scanner
 
-- [ ] **16.2a** The requests inbox renders **on the live console**, under "Everything coming in".
-      Before this PR it was a link back to `/vendor-dashboard/on-the-day`, which drops you out of
-      the wake-locked fullscreen console.
-- [ ] **16.2b** A **different booked supplier** files a request → it appears in the coordinator's
-      inbox. The supplier sees only their own, read-only. (Server-decided; hiding a control is
-      not a boundary.)
-- [ ] **16.2c** Coordinator can **triage** (open → acknowledged → resolved). A plain vendor
-      cannot, on any row, including their own.
+- [ ] **16.2a** Scan a guest QR → their seat resolves.
+- [ ] **16.2b** Scan something that isn't a guest code → a clear "not a guest code"
+      outcome, not a crash or a silent nothing.
+- [ ] **16.2c** Seating **not published** → the panel says so rather than showing an empty
+      scanner.
 
-### 16.3 ★ The cross — "push, or fix first?"
+### 16.3 Requests inbox
 
-The only genuinely new logic. Neither fact alone blocks; both together do.
+- [ ] **16.3a** A different booked supplier files a request → it reaches the coordinator.
+- [ ] **16.3b** The supplier sees only their own, read-only; the coordinator triages
+      (open → acknowledged → resolved). A plain vendor cannot triage any row, including
+      their own.
+- [ ] **16.3c** ⚠ **Known gap, not a bug to file:** the panel **links out** to
+      `/vendor-dashboard/on-the-day` rather than showing the inbox inline, which navigates
+      the coordinator out of the wake-locked console. A follow-up is scoped (see the closed
+      PR #3822 for the inline version).
 
-- [ ] **16.3a** **Behind ≥5 min AND ≥1 unresolved** → *"Running N min behind with N things still
-      open — clear these before you push."*
-- [ ] **16.3b** **Behind, nothing open** → "Nothing blocking." Lateness alone must **not** block.
-- [ ] **16.3c** **On time, something open** → "Nothing blocking." Open work alone must **not**
-      block.
-- [ ] **16.3d** **Status pings only** (a supplier saying "we've arrived"), however late → must
-      **not** block, and must not appear in the open count. They're counted separately as pings.
-- [ ] **16.3e** Resolve the last open item while behind → advice flips back to clear-to-advance.
+### 16.4 Nothing renders twice
 
-### 16.4 Not duplicated — check nothing renders twice
-
-This desk deliberately builds none of these; if you see two of anything, that's the bug.
-
-- [ ] **16.4a** **One** timeline (`RunOfShowHeader`), **one** countdown (`FloorClock`) — both
-      above the desk, from the generic kit.
-- [ ] **16.4b** **One** issues log / inbox on the page.
-- [ ] **16.4c** The drift figure on the desk agrees with the header's. Two clocks that disagree
-      is worse than one.
+- [ ] **16.4a** **One** timeline (`RunOfShowHeader`) and **one** countdown (`FloorClock`),
+      both above the desk from the generic kit. Seeing two of either is the bug.
 
 ### 16.5 Degradation
 
-- [ ] **16.5a** **No timeline at all** → "No timeline yet — nothing to run." No error, no
-      empty panel.
-- [ ] **16.5b** **Control off** (16.0b) → device-local log still works, and the run-of-show half
-      of the desk still renders. The desk must not go blank because the stream is off.
-- [ ] **16.5c** **Offline / venue wifi drops** → the local log keeps accepting entries.
+- [ ] **16.5a** No timeline at all → an honest empty state, never an error.
+- [ ] **16.5b** Every panel closed (nothing shared) → the desk still renders the ask-card;
+      it must not go blank.
+
+---
+
+## 17 · The emcee's activity catalogue (PR #3831)
+
+The host writes his segments down once; the couple ticks what they want; the picks
+become timeline blocks. ⚠ **Needs the migration applied** — until `supabase db push`
+runs, the tables do not exist and every screen below is correctly invisible.
+
+### 17.1 The host authors his list — `/vendor-dashboard/activities`
+
+- [ ] **17.1a** Add a segment (name · length · where in the day · blurb). It appears in
+      the menu with its duration.
+- [ ] **17.1b** Edit one in place; reorder with the arrows. Order is the host's own
+      professional judgement and drives the order picks land in.
+- [ ] **17.1c** ★ **"Stop offering" RETIRES, never deletes.** It moves to "Not offering"
+      and can be offered again. A hard delete would cascade past couples' picks away.
+- [ ] **17.1d** A retired segment **disappears from the couple's menu** but a couple who
+      already picked it keeps it.
+- [ ] **17.1e** Another vendor's `activity_id` in a forged form post changes nothing —
+      RLS is the boundary, not the form.
+
+### 17.2 The couple picks — on `/dashboard/[eventId]/schedule`
+
+- [ ] **17.2a** ★ **No booked host/MC → the section does not render at all.** Not an empty
+      panel, not an advert.
+- [ ] **17.2b** Booked host who has written **nothing** → also renders nothing.
+- [ ] **17.2c** Tick / untick segments; the "N min chosen" total tracks.
+
+### 17.3 ★ The bridge — picks become the timeline
+
+- [ ] **17.3a** Press "Add N to my timeline" → blocks appear **after everything already
+      scheduled**, back to back, in the host's order.
+- [ ] **17.3b** ★ **Nothing you already had moves or is overwritten.** Build a timeline by
+      hand first, then add picks, and confirm every original block keeps its time.
+- [ ] **17.3c** ★ **Press it twice → no duplicates.** Then tick one more and press again →
+      only the new one lands.
+- [ ] **17.3d** A placed segment shows "on your timeline" and can no longer be unticked —
+      delete the block instead.
+- [ ] **17.3e** **Empty timeline** → picks land from the event date, not from "now".
+
+### 17.4 ★ The privacy boundary a DB guard already caught once
+
+The picks policies were briefly member-wide, which would have let an **invited guest**
+read *and write* the couple's picks. Fixed to couple-scoped before merge — re-check by
+hand, because this is the class that keeps recurring:
+
+- [ ] **17.4a** Sign in as **testnayan5 (guest)** on the couple's event. They must **not**
+      see the emcee section and must **not** be able to change picks.
+- [ ] **17.4b** Sign in as **Couple B** — no access to Couple A's picks at all.
+- [ ] **17.4c** The booked host/MC **can** read what was picked from **his own** list, and
+      cannot read another vendor's picks on the same event.
 
 ---
 
