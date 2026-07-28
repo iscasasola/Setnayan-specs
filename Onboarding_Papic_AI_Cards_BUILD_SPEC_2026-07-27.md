@@ -85,6 +85,20 @@ Papic is **not** day-of capture. It is the memory vault for the **entire plannin
 
 ## 2. BLOCKERS — fix before or with the cards
 
+### 2.0 🚨 PAPIC POOL IS NOT SELLABLE — the upgrade line can only offer Papic One
+
+**Discovered 2026-07-28 while building PR2. This decides what Card 1's upgrade line may say.**
+
+All four Papic Pool rungs — `PAPIC_GUEST` (₱999 / 3,000 shots), `_6K` (₱1,999), `_10K` (₱2,999), `_TOPUP` (₱2,999) — are **`is_active = false`** in the live catalog, and `fetchV2CustomerCatalog()` filters `.eq('is_active', true)`. Worse, `fetchPapicPassTiers()` is read by **exactly one module — `lib/sku-activation.ts`** — i.e. only to convert an *already-paid* order into points. **No UI reads it.** There is no surface anywhere in the app that sells a Papic Pool.
+
+**This is deliberate, not a bug.** `Papic_One_Pool_Model_Spec_2026-07-22.md` guardrail #2: *"**Do not GA the paid rungs** on the 6-mo cost basis until the purge machinery **and** clip compression actually ship; treat current prices as **provisional**."* Residual Risk R1 is logged as *"Not resolved — resolved only when purge + clip compression ship."*
+
+**Therefore the only purchasable Papic upgrade today is `PAPIC_CAMERA_MINI_DAY` — "Papic One", ₱100 per camera, 250 dedicated points each** (owner override 2026-07-23: One's points are dedicated to that camera + its own QR, never pooled).
+
+**Card 1's upgrade line must offer Papic One and nothing else.** Naming the Pool would be a fake door — the couple cannot buy it at any price. Revisit when purge + compression land.
+
+⚠ Separately noted, **not fixed here:** `resolveRetailChargeCentavos()` selects by `service_code` **without** filtering `is_active`, so the charge path would still price a retired SKU that the display path hides. That is the known catalog-`is_active` trap; it is pre-existing and out of scope for this spec, but it means "invisible in the UI" is not the same as "cannot be ordered".
+
 ### 2.1 🚨 The onboarding Papic map points at RETIRED SKUs
 
 `INAPP_TO_SERVICE_CODE` (onboarding-pricing.ts) maps `papic_seats → PAPIC_SEATS` and `papic_guest → PAPIC_GUEST`. **Both are `is_active = false` in prod**, as are `PAPIC_GUEST_6K` / `_10K` / `_TOPUP`.
