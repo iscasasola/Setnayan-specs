@@ -125,6 +125,17 @@ For each doc + its claimed state, verify against reality and fix-or-flag:
 
 **Bottom line for the orchestrator:** build the task graph from §5's docs using §3's schema; obey §2 (worktrees/migrations) and §6 (serialize shared files); fan out only `parallel_safe: yes && safety_gate: NONE`; route every gate from §1 to the human queue; run §4 gap-checks continuously and fix-via-PR or flag.
 
+## 2026-07-29 · EXPLORE / MARKETPLACE integration wave (ACTIVE — 🔴 the flag is LIVE in prod)
+**→ [`WHATS_NEXT_Explore_Marketplace_2026-07-29.md`](WHATS_NEXT_Explore_Marketplace_2026-07-29.md)** — cold-start handover, zero context assumed. Design contract = [`Explore_Integration_BUILD_SPEC_2026-07-29.md`](Explore_Integration_BUILD_SPEC_2026-07-29.md).
+
+**⚠ `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED` is ON in production** (owner flipped 2026-07-28) — everything merged on this surface is **immediately visible**, there is no preview buffer. Changes must still ride `isExploreReplanEnabled()` so the flag stays an honest kill-switch.
+
+**8 PRs merged** (#3845 #3850 #3855 #3856 #3858 #3859 #3866 #3867): the vendor-verification P0, the swallowed `events_host` wrong-column query that left **date/budget/venue/AI dark**, bench visual parity + icons, the app ground → flat warm white with glass carrying its own edge, 64 invisible borders, and the **team merge** that deleted the 727-line Lock/Auto/Hidden grid for a quote-fill row.
+
+**Remaining:** wire the **already-built** `CategorySearchOverlay` into the bench (§4.1 — do NOT build a new inline search) · dock removal (PR-3, ⚠ shared layer) · mobile team chip (PR-4, owner-approved) · cleanup incl. deleting the dead `build-pin-mode.tsx` (PR-5). **#3870 may be in flight** — check before acting.
+
+**Carries its own traps section — read §1 first.** Two live defects are logged and unfixed (`event_date_precision` never advances, so countdown maths skips the owner's event; the flag-dark guarantee is unguarded in CI) and **5 owner decisions** are open.
+
 ## 2026-07-29 · LIVE STUDIO + GOOGLE OAUTH (ACTIVE — the newest stream, start here)
 **→ [`WHATS_NEXT_Live_Studio_2026-07-29.md`](WHATS_NEXT_Live_Studio_2026-07-29.md)** — cold-start handover for a session with ZERO context. 10 PRs merged (#3770/#3774/#3776/#3780/#3786/#3787/#3791/#3792/#3817/#3820). Live Studio's recording handoff, the paid-day anchor, the public-copy realignment (LIVE), and the **pool-only switch that removes Google OAuth verification entirely**.
 
