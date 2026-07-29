@@ -97,10 +97,29 @@ diagnosing a design problem.
 
 ## 3 · IN FLIGHT at handoff — **verify state before acting**
 
-| # | Branch | What | Action for the next session |
+| # | Branch | State at handoff | Action |
 |---|---|---|---|
-| **#3870** | `claude/decision-doorway-anchor` | "Still needs your decision" rows land on the folder header, not the category. **The bench has no leaf anchor at all** — only `slfold-<folder.slug>` (`shortlist-categories.tsx:1471`). Fix adds `sltile-<tile>`, moves the scroll into the bench (it owns the timing; the doorway's fixed 220 ms races the remount the `key` change causes), keeps folder-level scroll only for `tile === null` groups. | `gh pr view 3870` — if merged, tick it off; if open and stale, re-verify then re-arm. |
-| **(not yet opened)** | `claude/bench-category-search-overlay` | See §4.1 — was queued to the same agent and may not exist. **Check `gh pr list --head claude/bench-category-search-overlay --state all` before starting it.** |
+| **#3870** | `claude/decision-doorway-anchor` | ✅ **MERGED** 2026-07-29 | Done — see §2.1 below. |
+| **#3871** | `claude/bench-category-search-overlay` | **OPEN, auto-merge armed**, CI running | `gh pr view 3871` first. If merged, §4.1 is DONE. If it failed CI, fix forward — do not rebuild. |
+
+### 2.1 · #3870 — the doorway now lands on the exact cell *(merged)*
+Root cause was as suspected **and worse**: the leaf row had **no anchor at all**, so the cell was
+*unreachable*, not mis-aimed. Added `#sltile-<tile>`, moved the scroll into the bench on mount
+(`useLayoutEffect`), new `lib/bench-anchors.ts`. Three things the brief got wrong, now settled — **do
+not "simplify" these back**:
+- **`openPlan` deliberately keeps the FOLDER target.** It expands a *collapsed* folder; during the
+  `0fr→1fr` transition the leaf rows have no height, so a leaf target lands on a position that no
+  longer exists 240 ms later.
+- **Deleting the doorway's timeout outright creates a dead click.** Tapping the same row twice leaves
+  `?open=` unchanged → no re-key → no remount → no effect. It now derives `willRemount` from
+  `?open=` before-vs-after and scrolls directly when there will be no remount.
+- **The tile-less fallback must CARRY the current `?open=` through**, not drop it — pushing without
+  it re-keys and *collapses* the bench under the folder scroll.
+
+Scroll offset: **14 px mobile** (`ServicesTakeover` hides `.shell-topbar` below 1024 px), **96 px
+≥1024 px** (matches the clearance `ServiceSection` already uses for its `sticky top-0` topbar).
+`checklist-full.tsx` improves too — cross-route nav mounts the bench fresh, so it now lands on the
+category instead of page top. Flag OFF: the leaf `id` is `undefined` and the effect returns early.
 
 ---
 
@@ -134,8 +153,24 @@ link (~1771) both do `<Link href={t.exploreHref}>` where `exploreHref = /explore
 ⚠ **The `?tile=` param is NOT broken** — `/explore` reverse-maps the slug correctly
 (`explore/page.tsx:669`). The complaint is the full-page jump, not a broken filter. Don't hunt a
 param bug.
-⚠ **Empty state matters most**: prod has **0 `vendor_services`**, so the owner will land on the
-empty result. It must read calm and honest, not like a void.
+
+**🔴 SHIPPED AS #3871 — read this before touching it again.** Mounting the overlay "the way
+`plan-budget-accordion.tsx` does" **does not transfer**, and this is the trap:
+- The accordion is built from **plan groups**; the bench from **tiles**. Only **22 of 69 tiles map to
+  a group** — passing the tile's group would have left **47 rows still jumping away**.
+- Worse, for **13 of those 22** the group's `subcategoryHint` collapses the scope to a single
+  canonical: *Coordinator would search 1 of its 12.*
+- Fix: `searchCategoryVendors` took an **additive optional `tile`**; the **tile decides what is
+  searched**, `groupId` keeps the last-minute + budget-allocation context (both already fail open).
+  No `tile` ⇒ the group path is byte-identical and the accordion is untouched (test-asserted).
+- **Add-and-stay was broken:** `saveVendorToPicks` revalidates `/dashboard/[eventId]` — the *overview*
+  page, not this nested route — so the rail never repainted. An optional `onAdded` now triggers one
+  soft `router.refresh()` on close, only if something was added.
+- **Empty state** (prod = 0 `vendor_services`): the shipped copy told couples to *"widen your
+  filters"* they had never set. Now branches — with a query/filter it keeps the original line;
+  otherwise **"No {category} vendors here yet — we'll show them the moment they join Setnayan."**
+- Overlay is `z-120` over the bottom nav (`z-30`) and dock (`z-20`), portals to body, keeps its own
+  focus trap / scroll-lock / Escape. Flag OFF keeps both `<Link>`s.
 
 ### 4.2 · PR-3 — remove the mobile 4-chip dock  ⚠ shared layer
 Spec §5. In `lib/customer-menu.ts:229-240`, emit the explore menu's `children` (+ `sectionMatch`,
