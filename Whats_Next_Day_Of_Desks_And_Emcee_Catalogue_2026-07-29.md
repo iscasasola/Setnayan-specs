@@ -433,17 +433,21 @@ A guard nobody has broken on purpose is a guard nobody knows works.
 
 ---
 
-## 6 · Open owner questions, collected
+## 6 · Open owner questions
 
-| # | Question | Blocks |
-|---|---|---|
-| 1 | Emergency bubble: **presets or free text?** (Sender + behaviour now decided — see §3.A. Recommendation: presets. **Do not block on this**, build presets.) | nothing — A is unblocked |
-| 1b | Narrowing `advance_schedule_block` (§3.E) removes a capability booked vendors technically have today. Confirm no vendor surface relies on it before shipping. | E |
-| 2 | Should the coordinator be **copied** on the host's questions to the couple? (owner said "if… approval" — is approval per-question or once per event?) | C (partially) |
-| 3 | Which of `Known_Todos_Pre_Pilot.md` / `LIVE_QA_WALKTHROUGH_2026-06-18.md` survives the to-do compile? (Neither is a real to-do list — **0 checkboxes each**; the E2E script is the only one.) | housekeeping |
-| 4 | How do parallel sessions **claim** a piece of work before starting? (§1.2 cost a build cycle.) | process |
+**The single register lives in the build spec — §11 of
+[`Emcee_Script_System_BUILD_SPEC_2026-07-29.md`](Emcee_Script_System_BUILD_SPEC_2026-07-29.md).**
+It is graded (load-bearing · non-blocking · design · housekeeping), carries a recommendation for
+each, and records the ones already answered so they are not re-opened. **Do not keep a second
+list here** — a split register is how a settled decision gets re-asked.
 
----
+The two that touch *this* doc's items:
+
+- **Q1 — "activities which GUESTS can pick"** (asked 3×, unanswered). Everything built assumes
+  the **couple** picks. Guests picking is a separate, much larger feature. **Do not guess.**
+- **Q2 — narrow `advance_schedule_block`** (item E below). Recommendation: **yes**. Until it is
+  narrowed, **do not add an advance control to any vendor surface** — every booked supplier
+  would get the wheel.
 
 ## 7 · Housekeeping left on disk
 

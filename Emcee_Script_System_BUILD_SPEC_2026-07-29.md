@@ -4,7 +4,8 @@
 > any handoff**. Where this disagrees with a handoff or a memory, this wins.
 >
 > **Read in this order:** §0 (what already exists — do not rebuild) → §1 (traps) → §2 (the build,
-> in order) → §7 (verification). The concept and the *why* live in
+> in order) → §7 (verification) → **§11 (the open-questions register — check it before assuming
+> anything is settled).** The concept and the *why* live in
 > [`Emcee_Script_System_Concept_2026-07-29.md`](Emcee_Script_System_Concept_2026-07-29.md); this
 > file is the *how*.
 
@@ -321,13 +322,49 @@ control to any vendor surface until it is narrowed.**
 
 ---
 
-## 11 · Open — needs the owner
+## 11 · OPEN QUESTIONS — the register
 
-- ⚠ **"activities which GUESTS can pick"** — everything built assumes the **couple** picks. Asked
-  three times, unanswered. Guests choosing what happens at the reception is a separate,
-  guest-facing feature. **Do not build either reading on a guess.**
-- Emergency notice wording: presets vs free text. Recommendation on record: **presets**;
-  explicitly **non-blocking** — build presets rather than wait.
+Everything still waiting on the owner, in one place, with what it blocks and where the
+recommendation stands. **Nothing here blocks PR 1 (§2).** Two are genuinely load-bearing; the
+rest are either non-blocking or housekeeping.
+
+### 🔴 Load-bearing — a wrong guess is expensive
+
+| # | Question | Status | What it changes | Recommendation |
+|---|---|---|---|---|
+| Q1 | **"activities which GUESTS can pick"** — do **guests** pick activities, or the **couple**? | **asked 3×, unanswered** | Everything built assumes the **couple** picks (`event_activity_picks` is couple-scoped, the picker lives on their schedule page). Guests picking = a **guest-facing surface**, new RLS, new anon/guest-token path, probably a new table. **An order of magnitude more work.** | **Do not guess.** If it turns out to mean guests, treat it as a separate feature with its own spec — do not stretch the couple's picker to cover it. |
+| Q2 | **Narrow `advance_schedule_block`?** Today it admits **any booked vendor**, so a caterer or florist can advance the run of show. | **asked once, recommendation given, not answered** | Only the UI hides it. **The moment anyone adds an advance control to any vendor surface, every supplier gets the wheel.** | **Yes, narrow it** — drop the blanket booked-vendor arm, keep couple + `schedule:edit` coordinator + admin, and move the couple arm to `current_couple_event_ids()`. ⚠ Check nothing depends on it first (`git grep advanceScheduleBlock`). Item E of the day-of handoff. |
+
+### 🟡 Decided in principle, one detail open — **build anyway, do not wait**
+
+| # | Question | Status | Recommendation |
+|---|---|---|---|
+| Q3 | **Emergency notice: four presets, or a free text box?** | asked 2×; behaviour decided 2026-07-29 (push a notice, read on demand), wording not | **Presets.** A free box works on night one and is a chat by the third wedding — at which point the host stops watching the corner, which is exactly when a real emergency arrives. They are string constants; swapping them later is a one-file change. **Explicitly non-blocking.** |
+| Q4 | **Is the coordinator copied on the host's questions to the couple?** Owner said *"if the coordinators gets and approval to see it"* — is that approval **once per event**, or **per question**? | answered in principle, granularity open | **Once per event**, matching the per-feature access model already locked. Per-question approval is a consent prompt nobody will read. |
+| Q5 | **Acknowledge-back on the emergency notice** — should "Got it" tell the coordinator he has seen it? | proposed, never answered | **Yes.** On a real floor it is the difference between telling someone and knowing they heard. Small; do it with the bubble. |
+
+### 🔵 Design — an owner call, not a blocker
+
+| # | Question | Status | Recommendation |
+|---|---|---|---|
+| Q6 | **Does the rounder/glass language get adopted on the live console?** The prototype's radius pass **diverges** from the shipped console, which is square-cornered (`ConsolePlate` = border + inset hairline). | flagged, not asked directly | The **notice** being glass and round is settled (it is a different *material* on purpose). Rounding the **whole console** is a separate visual decision — **do not adopt it as a side effect of building this feature.** |
+
+### ⚪ Housekeeping — no product decision, someone just has to do it
+
+| # | Item | Why it matters |
+|---|---|---|
+| H1 | **Refresh the canonical checkout** `/Users/icecasasola` | It was 1,455 commits stale and made shipped files look absent — the single most expensive trap here. |
+| H2 | **How do parallel sessions claim work before starting?** | Two sessions built `floor_command` the same day and found out at merge; one PR was closed. Rule 0 could not catch it — the work did not exist when the search ran. **A process answer, not a code one.** |
+| H3 | **Which to-do list survives the compile?** | ⚠ Already investigated: `Known_Todos_Pre_Pilot.md` and `LIVE_QA_WALKTHROUGH_2026-06-18.md` have **0 checkboxes each** — one is an audit permission-slip, the other an unfilled template. **`TEST_SCRIPT_E2E_2026-07-27.md` is the only real list.** Probably nothing to reconcile. |
+| H4 | **Prune merged worktrees** | 1–2 GB each; ENOSPC deadlocks Bash. |
+
+### Already answered — recorded so they are not re-opened
+
+- **Do a host's notes travel between weddings?** → **No — per wedding.** His *questionnaire* travels as a template. (⚠ An earlier log entry wrongly said the questionnaire *superseded* notes; corrected 2026-07-29. They are different jobs: notes are what he says, questions are what he needs to know.)
+- **Who alters the schedule?** → Coordinator; the event owner if there is no coordinator; **the emcee never** — for the *live* pointer. Planning is separate and shared (§10).
+- **Where does his script live?** → The Customer Card, `/vendor-dashboard/clients/[eventId]/script`. **Not chat.**
+- **Where does the couple answer?** → The working folder they already share with that vendor. **No new inbox.**
+- **Guest list / coordinator broadcasts to suppliers?** → **Stay closed.** Not a gap.
 
 ---
 
