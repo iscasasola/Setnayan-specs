@@ -52,7 +52,7 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > - the standing traps (the exposure-baseline freeze, the default-ACL REVOKE, pre-launch-empty prod).
 >
 > **Start at PR 1** — a live entitlement gap — unless the owner says otherwise.
-> Reasoning behind every line: `DECISION_LOG.md`, eight rows dated **2026-07-27**
+> Reasoning behind every line: the song-desk rows in `DECISION_LOG.md` — find them with `grep -in "song desk\|song request\|playlist-slot\|song-pick system\|set composition" DECISION_LOG.md` (15 rows, 2026-07-27)
 > (`grep -n "2026-07-27" DECISION_LOG.md`).
 
 **If you are starting a session on ANY topic, do these three things first:**

@@ -2,7 +2,7 @@
 
 > **This file is the contract.** Execute top to bottom. Every item below was verified against
 > live prod or shipped code on 2026-07-27 — the "already exists" claims are checked, not assumed.
-> Full reasoning: `DECISION_LOG.md`, eight rows dated 2026-07-27.
+> Full reasoning: the song-desk rows in `DECISION_LOG.md` — find them with `grep -in "song desk\|song request\|playlist-slot\|song-pick system\|set composition" DECISION_LOG.md` (15 rows, 2026-07-27).
 >
 > 🛑 **RULE 0 still applies to every item.** Twice today a thing the owner asked for turned out
 > to already ship (the song matcher; the music-vendor read policy). Grep before you build.

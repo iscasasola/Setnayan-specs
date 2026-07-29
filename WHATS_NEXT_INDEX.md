@@ -156,7 +156,7 @@ started) · Explore replan flag gates · everything in §5's 2026-07-18 cohort s
 ## 2026-07-29 · Song desk / song requests / sets — REGISTER ENTRY (upgraded from a pointer)
 
 **Contract:** [`Song_Desk_BUILD_ORDER_2026-07-27.md`](Song_Desk_BUILD_ORDER_2026-07-27.md).
-Reasoning: `DECISION_LOG.md`, **nine rows dated 2026-07-27** (`grep -n "2026-07-27" DECISION_LOG.md`).
+Reasoning: the song-desk rows in `DECISION_LOG.md` — find them with `grep -in "song desk\|song request\|playlist-slot\|song-pick system\|set composition" DECISION_LOG.md` (15 rows, 2026-07-27).
 Prototype: [`06_Prototypes/Song_Desk_Sets_2026-07-27.html`](06_Prototypes/Song_Desk_Sets_2026-07-27.html)
 — open it in a browser; the three buttons under "Allow requests" ARE the two blocking questions.
 
