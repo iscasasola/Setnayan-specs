@@ -184,6 +184,28 @@ exists.
 
 ---
 
+## 4.5 · The three lenses — see it
+
+**[`0022_vendor_dashboard/Three_Lenses_Prototype_2026-07-29.html`](0022_vendor_dashboard/Three_Lenses_Prototype_2026-07-29.html)**
+· artifact <https://claude.ai/code/artifact/7349e085-1b79-484b-9bc5-0c95bf869b65>
+
+One wedding, one timeline, switchable between **the couple · the emcee · the coordinator** —
+with a per-role control ledger and the full capability matrix. Verified in-browser: the emcee's
+script layer renders **only** in his view (0 elsewhere), the advance control renders **only**
+for the coordinator, and "Remove" renders **only** for the couple.
+
+What the prototype makes obvious, and prose does not:
+
+- The couple's **instruction** on a block and the emcee's **script** for it are two different
+  layers sitting on the same moment. Everyone working the night reads the first; only he reads
+  the second.
+- The emcee's edit rights are **on loan** — the banner at the top of his screen says the couple
+  shared the schedule and can take it back, which is the honest way to render a grant.
+- The coordinator's screen is the only one that says **"live"**. The other two say *planning*.
+  That single word is the planning/running split made visible.
+
+---
+
 ## 5 · Open — needs the owner
 
 - ⚠ **"activities which GUESTS can pick"** — everything built assumes the **couple** picks.

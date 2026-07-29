@@ -1,0 +1,376 @@
+<title>One night, three lenses — who sees and controls what</title>
+<style>
+  :root, :host, body {
+    --paper:   #EFEDE6;  --card: #FAF9F5;  --ink: #1B1A17;
+    --dim:     #55524A;  --faint:#8A857A;  --line: #DAD6CC;
+    --gild:    #8C6932;  --gild-lit:#A9834B;
+    --terra:   #B4622F;
+    --sage:    #6E7B6A;
+    --stage:   #16150F;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root, :host, body {
+      --paper:#100F0C; --card:#1A1915; --ink:#EDEAE1; --dim:#A09A8D;
+      --faint:#77716A; --line:#2E2B24; --gild:#CBA766; --gild-lit:#DCBB80;
+      --terra:#D98553; --sage:#8FA089;
+    }
+  }
+  :root[data-theme="dark"], [data-theme="dark"] {
+    --paper:#100F0C; --card:#1A1915; --ink:#EDEAE1; --dim:#A09A8D;
+    --faint:#77716A; --line:#2E2B24; --gild:#CBA766; --gild-lit:#DCBB80;
+    --terra:#D98553; --sage:#8FA089;
+  }
+  :root[data-theme="light"], [data-theme="light"] {
+    --paper:#EFEDE6; --card:#FAF9F5; --ink:#1B1A17; --dim:#55524A;
+    --faint:#8A857A; --line:#DAD6CC; --gild:#8C6932; --gild-lit:#A9834B;
+    --terra:#B4622F; --sage:#6E7B6A;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background: var(--paper, #EFEDE6); color: var(--ink, #1B1A17);
+    font-family: "Hanken Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap {
+    max-width:1140px; margin:0 auto; min-height:100vh;
+    padding: clamp(1.5rem,4vw,3.5rem) clamp(1rem,4vw,2rem) 5rem;
+    background: var(--paper, #EFEDE6); color: var(--ink, #1B1A17);
+  }
+  .mono { font-family: ui-monospace,"SF Mono",Menlo,monospace; text-transform:uppercase; letter-spacing:.24em; font-size:.6rem; }
+
+  h1 { margin:.5rem 0 0; font-size:clamp(1.9rem,4.6vw,3rem); font-weight:300; letter-spacing:-.02em; line-height:1.08; text-wrap:balance; }
+  .lede { margin:.75rem 0 0; color:var(--dim, #55524A); max-width:62ch; }
+  .eyebrow { color: var(--gild, #8C6932); }
+  hr.rule { height:1px; border:0; background:var(--line,#DAD6CC); margin:2.25rem 0; }
+
+  /* ── role switcher ─────────────────────────────────────────── */
+  .roles { display:flex; flex-wrap:wrap; gap:.5rem; }
+  .role {
+    border:1px solid var(--line,#DAD6CC); background:transparent; color:var(--dim,#55524A);
+    border-radius:999px; padding:.55rem 1.1rem; cursor:pointer;
+    font-family:ui-monospace,Menlo,monospace; text-transform:uppercase;
+    letter-spacing:.16em; font-size:.6rem;
+    transition:background 140ms,border-color 140ms,color 140ms,transform 120ms;
+  }
+  .role:hover { border-color:var(--gild,#8C6932); color:var(--ink,#1B1A17); }
+  .role:active { transform:translateY(1px); }
+  .role[aria-pressed="true"] { background:var(--ink,#1B1A17); border-color:var(--ink,#1B1A17); color:var(--paper,#EFEDE6); }
+  .role:focus-visible { outline:2px solid var(--gild,#8C6932); outline-offset:3px; }
+
+  /* ── the screen ────────────────────────────────────────────── */
+  .stage-grid { display:grid; gap:1.5rem; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); align-items:start; margin-top:1.5rem; }
+  @media (max-width:900px){ .stage-grid{ grid-template-columns:minmax(0,1fr);} }
+
+  .screen { border:1px solid var(--line,#DAD6CC); background:var(--card,#FAF9F5); border-radius:22px; overflow:hidden; }
+  .screen-bar {
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.6rem;
+    padding:.85rem 1.1rem; border-bottom:1px solid var(--line,#DAD6CC);
+  }
+  .screen-bar .where { display:flex; flex-direction:column; gap:.15rem; min-width:0; }
+  .screen-bar .who { color:var(--gild,#8C6932); }
+  .screen-bar .path { font-family:ui-monospace,Menlo,monospace; font-size:.72rem; color:var(--faint,#8A857A); overflow-wrap:anywhere; }
+  .screen-body { padding:1.1rem; display:flex; flex-direction:column; gap:.9rem; }
+
+  .banner {
+    border-radius:14px; padding:.7rem .85rem; font-size:.86rem; line-height:1.5;
+    border:1px solid; display:flex; gap:.55rem; align-items:flex-start;
+  }
+  .banner.grant { border-color:color-mix(in srgb, var(--gild,#8C6932) 40%, transparent); background:color-mix(in srgb, var(--gild,#8C6932) 9%, transparent); color:var(--ink,#1B1A17); }
+  .banner.wheel { border-color:color-mix(in srgb, var(--terra,#B4622F) 40%, transparent); background:color-mix(in srgb, var(--terra,#B4622F) 9%, transparent); color:var(--ink,#1B1A17); }
+
+  /* timeline */
+  ol.tl { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.55rem; }
+  .blk { border:1px solid var(--line,#DAD6CC); border-radius:16px; padding:.75rem .85rem; background:var(--paper,#EFEDE6); }
+  .blk.live { border-color:var(--gild,#8C6932); background:color-mix(in srgb, var(--gild,#8C6932) 8%, transparent); }
+  .blk.done { opacity:.5; }
+  .blk-top { display:flex; flex-wrap:wrap; align-items:baseline; gap:.5rem; }
+  .t { font-family:ui-monospace,Menlo,monospace; font-size:.74rem; color:var(--faint,#8A857A); }
+  .nm { font-size:.97rem; font-weight:500; }
+  .chip {
+    border-radius:999px; padding:.12rem .5rem; border:1px solid var(--line,#DAD6CC);
+    font-family:ui-monospace,Menlo,monospace; text-transform:uppercase; letter-spacing:.13em; font-size:.53rem; color:var(--dim,#55524A);
+    white-space:nowrap;
+  }
+  .chip.on   { border-color:var(--gild,#8C6932); color:var(--gild,#8C6932); }
+  .chip.priv { border-color:var(--faint,#8A857A); }
+
+  .layer { margin-top:.45rem; padding-left:.7rem; border-left:2px solid; font-size:.87rem; line-height:1.5; }
+  .layer .lbl { display:block; font-family:ui-monospace,Menlo,monospace; text-transform:uppercase; letter-spacing:.14em; font-size:.53rem; margin-bottom:.15rem; }
+  .layer.couple { border-color:color-mix(in srgb, var(--sage,#6E7B6A) 70%, transparent); }
+  .layer.couple .lbl { color:var(--sage,#6E7B6A); }
+  .layer.script { border-color:var(--gild,#8C6932); }
+  .layer.script .lbl { color:var(--gild,#8C6932); }
+  .layer p { margin:0; color:var(--ink,#1B1A17); }
+
+  .rowacts { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.6rem; }
+  .mini {
+    border-radius:999px; border:1px solid var(--line,#DAD6CC); background:transparent; color:var(--dim,#55524A);
+    padding:.28rem .7rem; cursor:pointer; font-family:ui-monospace,Menlo,monospace;
+    text-transform:uppercase; letter-spacing:.13em; font-size:.53rem;
+  }
+  .mini:hover { border-color:var(--gild,#8C6932); color:var(--ink,#1B1A17); }
+  .mini.primary { background:var(--ink,#1B1A17); border-color:var(--ink,#1B1A17); color:var(--paper,#EFEDE6); }
+  .mini:focus-visible { outline:2px solid var(--gild,#8C6932); outline-offset:2px; }
+
+  /* ── control ledger ────────────────────────────────────────── */
+  .ledger { border:1px solid var(--line,#DAD6CC); background:var(--card,#FAF9F5); border-radius:22px; padding:1.1rem; position:sticky; top:1.5rem; }
+  @media (max-width:900px){ .ledger{ position:static; } }
+  .ledger h3 { margin:0 0 .2rem; font-size:1.05rem; font-weight:500; }
+  .ledger .sub { margin:0 0 .9rem; font-size:.85rem; color:var(--dim,#55524A); line-height:1.5; }
+  .ctl { list-style:none; margin:0 0 1rem; padding:0; display:flex; flex-direction:column; gap:.45rem; }
+  .ctl li { display:flex; gap:.55rem; align-items:flex-start; font-size:.88rem; line-height:1.45; }
+  .mk { flex-shrink:0; width:1.15rem; font-weight:600; font-family:ui-monospace,Menlo,monospace; font-size:.8rem; }
+  .yes .mk { color:var(--sage,#6E7B6A); }
+  .no  .mk { color:var(--terra,#B4622F); }
+  .no  { color:var(--dim,#55524A); }
+
+  /* ── matrix ────────────────────────────────────────────────── */
+  .mtx-scroll { overflow-x:auto; border:1px solid var(--line,#DAD6CC); border-radius:22px; background:var(--card,#FAF9F5); }
+  table.mtx { border-collapse:collapse; width:100%; min-width:640px; font-size:.88rem; }
+  table.mtx th, table.mtx td { text-align:left; padding:.7rem .9rem; border-bottom:1px solid var(--line,#DAD6CC); }
+  table.mtx thead th { font-family:ui-monospace,Menlo,monospace; text-transform:uppercase; letter-spacing:.14em; font-size:.55rem; color:var(--dim,#55524A); }
+  table.mtx tbody tr:last-child th, table.mtx tbody tr:last-child td { border-bottom:0; }
+  table.mtx tbody th { font-weight:500; }
+  .y { color:var(--sage,#6E7B6A); font-weight:600; }
+  .n { color:var(--terra,#B4622F); }
+  .g { color:var(--gild,#8C6932); }
+
+  .note { font-size:.85rem; color:var(--dim,#55524A); line-height:1.55; max-width:64ch; }
+  .kicker { border-left:3px solid var(--gild,#8C6932); padding:.3rem 0 .3rem 1rem; margin:0; font-size:1rem; }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+
+  <span class="mono eyebrow">Setnayan · the emcee script system</span>
+  <h1>One night, three lenses</h1>
+  <p class="lede">
+    The same wedding, the same timeline, seen by the three people who build it. Switch roles and
+    watch what appears, what disappears, and what each of them is allowed to touch.
+  </p>
+
+  <hr class="rule" />
+
+  <div class="roles" role="group" aria-label="Choose a role">
+    <button class="role" type="button" data-role="couple">The couple</button>
+    <button class="role" type="button" data-role="emcee">The emcee</button>
+    <button class="role" type="button" data-role="coordinator">The coordinator</button>
+  </div>
+
+  <div class="stage-grid">
+    <section class="screen" aria-live="polite">
+      <div class="screen-bar">
+        <span class="where">
+          <span class="mono who" id="whoLabel"></span>
+          <span class="path" id="pathLabel"></span>
+        </span>
+        <span class="mono" id="phaseLabel" style="color:var(--faint,#8A857A)"></span>
+      </div>
+      <div class="screen-body" id="screen"></div>
+    </section>
+
+    <aside class="ledger">
+      <h3 id="ledgerTitle"></h3>
+      <p class="sub" id="ledgerSub"></p>
+      <ul class="ctl" id="ledgerList"></ul>
+      <p class="note" id="ledgerWhy"></p>
+    </aside>
+  </div>
+
+  <hr class="rule" />
+
+  <h2 style="margin:0 0 .3rem;font-size:1.35rem;font-weight:400;letter-spacing:-.01em">Who controls what</h2>
+  <p class="note" style="margin:0 0 1.1rem">
+    Two columns of this table are the whole permission model: <strong>many may plan the night,
+    one may run it.</strong>
+  </p>
+
+  <div class="mtx-scroll">
+    <table class="mtx">
+      <thead>
+        <tr><th scope="col">Capability</th><th scope="col">Couple</th><th scope="col">Emcee</th><th scope="col">Coordinator</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Own the timeline</th><td class="y">Yes</td><td class="n">No</td><td class="n">No</td></tr>
+        <tr><th scope="row">Add / move / retime blocks <em>(planning)</em></th><td class="y">Yes</td><td class="g">If granted</td><td class="g">If granted</td></tr>
+        <tr><th scope="row">Advance the night <em>(live)</em></th><td class="g">Only if no coordinator</td><td class="n">Never</td><td class="y">Yes</td></tr>
+        <tr><th scope="row">Grant / revoke a supplier's access</th><td class="y">Yes</td><td class="n">No</td><td class="n">No</td></tr>
+        <tr><th scope="row">Write instructions on a block</th><td class="y">Yes</td><td class="n">No</td><td class="n">No</td></tr>
+        <tr><th scope="row">Write the spoken script on a block</th><td class="n">No</td><td class="y">Yes</td><td class="n">No</td></tr>
+        <tr><th scope="row">Read the emcee's script</th><td class="n">No</td><td class="y">Yes</td><td class="n">No</td></tr>
+        <tr><th scope="row">Offer an activity catalogue</th><td class="n">No</td><td class="y">Yes</td><td class="n">No</td></tr>
+        <tr><th scope="row">Pick from that catalogue</th><td class="y">Yes</td><td class="n">No</td><td class="n">No</td></tr>
+        <tr><th scope="row">Ask the couple questions</th><td class="n">—</td><td class="y">Yes</td><td class="n">—</td></tr>
+        <tr><th scope="row">See the guest list</th><td class="y">Yes</td><td class="n">Never</td><td class="g">If granted</td></tr>
+        <tr><th scope="row">Send an emergency notice</th><td class="n">No</td><td class="n">No</td><td class="y">Yes</td></tr>
+        <tr><th scope="row">Triage the requests inbox</th><td class="n">No</td><td class="n">No</td><td class="y">Yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="rule" />
+
+  <p class="kicker">
+    The couple owns the night. The emcee writes what he will say over it. The coordinator is the
+    only one who moves it while it is happening — because every screen in the building follows
+    that one pointer.
+  </p>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var BLOCKS = [
+    { t:"2:00 PM", n:"Ceremony",           st:"done", pub:true },
+    { t:"3:00 PM", n:"Cocktails",          st:"done", pub:true },
+    { t:"4:00 PM", n:"Reception entrance", st:"live", pub:true,
+      note:"Announce the principal sponsors by full name — list is on our card.",
+      script:"Slow. Full names, Atty. first. Pause after each pair for applause." },
+    { t:"4:10 PM", n:"Grand march",        st:"upcoming", pub:true, part:true,
+      script:"Cue the band before you speak. Keep it to two sentences." },
+    { t:"4:40 PM", n:"Surprise number",    st:"upcoming", pub:false,
+      note:"Don't tease this. Groom's brothers only — cue the AVP first.",
+      script:"SAY NOTHING until the AVP ends. Then: 'Please welcome…'" },
+    { t:"5:00 PM", n:"Dinner",             st:"upcoming", pub:true,
+      from:"your catalogue" },
+    { t:"6:00 PM", n:"Shoe game",          st:"upcoming", pub:true, from:"your catalogue",
+      note:"Keep it short, lola gets tired.",
+      script:"Six questions max. Land on 'who said I love you first'." }
+  ];
+
+  var VIEW = {
+    couple: {
+      who:"The couple",
+      path:"/dashboard/[eventId]/schedule",
+      title:"What the couple controls",
+      sub:"They own the night. Everything else is something they chose to share.",
+      why:"They never see the emcee's script — it is his working copy, not a deliverable. What they DO see is everything they wrote themselves.",
+      can:[
+        "Add, move, retime and delete any moment",
+        "Write the instruction on a block — the emcee reads it",
+        "Pick segments from the emcee's catalogue",
+        "Answer his questions",
+        "Grant or revoke a supplier's access, any time"
+      ],
+      cant:[
+        "See the emcee's spoken script",
+        "Advance the night — unless there is no coordinator"
+      ]
+    },
+    emcee: {
+      who:"The emcee",
+      path:"/vendor-dashboard/clients/[eventId]/script",
+      title:"What the emcee controls",
+      sub:"He does not write a document. He fills in a layer over their night.",
+      why:"His script is private to him — the couple booked a host, not a manuscript. He can place his own segments only while the couple has shared the schedule with him.",
+      can:[
+        "Write what he will SAY at each moment — private to him",
+        "Offer an activity catalogue that follows him between weddings",
+        "Ask the couple the things only they know",
+        "Place and retime his segments — while the schedule is shared with him"
+      ],
+      cant:[
+        "Advance the night — ever",
+        "See the guest list",
+        "Delete a moment the couple authored"
+      ]
+    },
+    coordinator: {
+      who:"The coordinator",
+      path:"/vendor-dashboard/on-the-day/live/[eventId]",
+      title:"What the coordinator controls",
+      sub:"The only hand on the wheel once the night starts.",
+      why:"Every screen in the building follows the live pointer — the emcee's cue card, the guest cards. Two people moving it makes the night flicker and nobody trusts what they read.",
+      can:[
+        "Advance the night — the one wheel",
+        "Retime the running order while it runs",
+        "Send an emergency notice to the emcee",
+        "Triage everything the suppliers raise"
+      ],
+      cant:[
+        "Read the emcee's script",
+        "Own the timeline — the couple does",
+        "Touch anything the host has not shared"
+      ]
+    }
+  };
+
+  var role = "couple";
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  function blockHTML(b){
+    var h = '<li class="blk ' + (b.st==="live"?"live ":"") + (b.st==="done"?"done":"") + '">';
+    h += '<div class="blk-top"><span class="t">'+b.t+'</span><span class="nm">'+esc(b.n)+'</span>';
+    if (b.st==="live") h += '<span class="chip on">On now</span>';
+    if (!b.pub)        h += '<span class="chip priv">Private</span>';
+    if (b.from && role!=="coordinator") h += '<span class="chip">From '+esc(b.from)+'</span>';
+    h += "</div>";
+
+    // The couple's instruction — everyone working the night can read it.
+    if (b.note) {
+      h += '<div class="layer couple"><span class="lbl">The couple asked</span><p>'+esc(b.note)+'</p></div>';
+    }
+    // The spoken script — the EMCEE ONLY. This is the line the whole model turns on.
+    if (b.script && role==="emcee") {
+      h += '<div class="layer script"><span class="lbl">Your script · only you see this</span><p>'+esc(b.script)+'</p></div>';
+    }
+
+    // Role-appropriate affordances.
+    h += '<div class="rowacts">';
+    if (role==="couple")      h += '<button class="mini" type="button">Retime</button><button class="mini" type="button">Edit instruction</button><button class="mini" type="button">Remove</button>';
+    if (role==="emcee")       h += '<button class="mini primary" type="button">'+(b.script?"Edit my script":"Write my script")+'</button><button class="mini" type="button">Retime</button>';
+    if (role==="coordinator" && b.st==="live") h += '<button class="mini primary" type="button">Move on to next →</button><button class="mini" type="button">Push everything 10 min</button>';
+    h += "</div></li>";
+    return h;
+  }
+
+  function render(){
+    var v = VIEW[role];
+
+    document.getElementById("whoLabel").textContent  = v.who;
+    document.getElementById("pathLabel").textContent = v.path;
+    document.getElementById("phaseLabel").textContent =
+      role==="coordinator" ? "Live · 18 min behind" : "Planning";
+
+    var h = "";
+    if (role==="emcee") {
+      h += '<div class="banner grant">✓ <span><strong>The couple shared the schedule with you.</strong> '
+        +  'You can place and retime your own segments. Ask them to revoke it and this becomes read-only again.</span></div>';
+    }
+    if (role==="coordinator") {
+      h += '<div class="banner wheel">● <span><strong>You hold the wheel tonight.</strong> '
+        +  'Advancing moves every screen — the emcee&rsquo;s cue card and the guest cards follow you.</span></div>';
+    }
+    if (role==="couple") {
+      h += '<div class="banner grant">✓ <span><strong>This is your night.</strong> '
+        +  'Two suppliers can help edit it right now. You can take that back at any time.</span></div>';
+    }
+
+    h += '<ol class="tl">' + BLOCKS.map(blockHTML).join("") + "</ol>";
+    document.getElementById("screen").innerHTML = h;
+
+    document.getElementById("ledgerTitle").textContent = v.title;
+    document.getElementById("ledgerSub").textContent   = v.sub;
+    document.getElementById("ledgerWhy").textContent    = v.why;
+    document.getElementById("ledgerList").innerHTML =
+      v.can.map(function(c){ return '<li class="yes"><span class="mk">✓</span><span>'+esc(c)+"</span></li>"; }).join("") +
+      v.cant.map(function(c){ return '<li class="no"><span class="mk">✕</span><span>'+esc(c)+"</span></li>"; }).join("");
+
+    document.querySelectorAll(".role").forEach(function(b){
+      b.setAttribute("aria-pressed", String(b.dataset.role===role));
+    });
+  }
+
+  document.addEventListener("click", function(e){
+    var b = e.target.closest ? e.target.closest(".role") : null;
+    if (b && b.dataset.role) { role = b.dataset.role; render(); }
+  });
+
+  render();
+})();
+</script>
