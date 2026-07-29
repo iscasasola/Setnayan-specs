@@ -125,6 +125,13 @@ For each doc + its claimed state, verify against reality and fix-or-flag:
 
 **Bottom line for the orchestrator:** build the task graph from §5's docs using §3's schema; obey §2 (worktrees/migrations) and §6 (serialize shared files); fan out only `parallel_safe: yes && safety_gate: NONE`; route every gate from §1 to the human queue; run §4 gap-checks continuously and fix-via-PR or flag.
 
+## 2026-07-29 · LIVE STUDIO + GOOGLE OAUTH (ACTIVE — the newest stream, start here)
+**→ [`WHATS_NEXT_Live_Studio_2026-07-29.md`](WHATS_NEXT_Live_Studio_2026-07-29.md)** — cold-start handover for a session with ZERO context. 10 PRs merged (#3770/#3774/#3776/#3780/#3786/#3787/#3791/#3792/#3817/#3820). Live Studio's recording handoff, the paid-day anchor, the public-copy realignment (LIVE), and the **pool-only switch that removes Google OAuth verification entirely**.
+
+**⛔ EVERYTHING IS BLOCKED ON ONE 15-MINUTE OWNER TEST** — Cloud Identity Free → *Admin → Apps → Additional Google services → is YouTube listed?* Full owner sequence in [`Live_Studio_Internal_Consent_Cutover_2026-07-27.md`](Live_Studio_Internal_Consent_Cutover_2026-07-27.md). ⏰ The Google Cloud **trial** also needs upgrading (free; was 6 days left on 07-27).
+
+**Work queue when unblocked:** the legacy-Cast retirement, PR-1 → PR-8, ordered, with a hard GATE before any deletion (nothing has ever broadcast). **5 known-open defects** and **5 owner decisions** are listed in the handover. Carries its own traps section — read § 0 and § 5 before touching code.
+
 ## 2026-07-23 · Open-Browse guest-site program (ACTIVE — resume here)
 **→ [`WHATS_NEXT_Open_Browse_Handoff_2026-07-23.md`](WHATS_NEXT_Open_Browse_Handoff_2026-07-23.md)** — 14 PRs merged (5-tab program PR1-3 done, page.tsx 4,351→608); PR4/PR5 possibly in flight at handoff (§ 2 = first action); PR6-11 briefs + all owner decisions + appointments + flip levers inside. Supersedes older open items where they overlap.
 
@@ -227,3 +234,39 @@ FALSE) — which is exactly why it must land **before** any song-desk UI. That i
   "proven in the field."
 - **Sets must key to the existing `PlaylistSlotType`** — never a second vocabulary, or the host's
   picks and the band's sets can never be compared, which is the whole point.
+
+---
+
+**New register entry — [`WHATS_NEXT_Pahina_and_Role_Surfaces_2026-07-29.md`](WHATS_NEXT_Pahina_and_Role_Surfaces_2026-07-29.md)**
+(the guest event website + the vendor/host/coordinator day-of surfaces). Same 2026-07-29
+cross-account continuation, same **"what's next"** trigger as the card-family entry above.
+
+**13 items DONE and verified against `origin/main` on 2026-07-29 — do NOT rebuild.** The Pahina
+guest-site reskin is **LIVE in production** (Wave A, 7 PRs, merged as #3760); the owner-tier gate
+(#3764), owner ribbon (#3766) and editor "RSVP'd" preview tab (#3773) are live; the vendor day-of
+frame (#3796) plus **all three** specialization surfaces — song desk #3803/#3813, script & cues
+#3812/#3831, floor command #3819 — are registered and live; requests inbox + vendor status #3810.
+
+**NOT built, and this is the queue:** (4A) the **coordinator → guest messaging layer** — the only
+remaining piece needing new schema, and the thing that makes the day feel connected, since the
+schedule already syncs across roles but no role can message another; (4B) the Papic **allowance
+economy** (owner-locked formula, 4 grant sources, both SKUs seeded inert); (4C) the 3D booth
+doorway; (4D) owner-layer controls beyond wayfinding; (4E) console restyle tails + the empty
+`ceremony_venue` taxonomy tile.
+
+**Human-gated, do not auto-run:** ① **nobody has ever looked at the guest site on a phone** — 7 PRs
+of visual change verified only by tsc/lint/tests/build, which already shipped a **broken hero photo
+to production for ~half a day** while every gate stayed green; ② whether to **switch the
+specialization gate ON** (#3778 ships unwired on purpose — enforcing it REMOVES tooling free vendors
+have today, and free-during-launch is active); ③ the unreviewed cover-plate aspect ratio.
+
+Already ruled, do NOT re-open: specialization tier floor = **Solo and up**; memento presence =
+**`arrived` OR `attending`**.
+
+The file carries the full done-table with PR numbers, ten repo traps that already caused real
+defects (gild≡terracotta on light surfaces · gild fails small-text contrast · `.pahina-*` are
+`.sn-editorial`-scoped and unreachable from dashboards · the colour exile · no generated Supabase
+types so `.eq()`/`.or()` column names are unchecked · new relations ship OPEN · new columns must be
+added to explicit select lists · migrations auto-apply unreliably · `git add -A` in a shared
+checkout · one session at a time in the guest tree), the specialization plug-in recipe, a
+definition-of-done checklist, and the standing verify-before-auto-merge workflow.
