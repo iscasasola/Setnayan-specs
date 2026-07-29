@@ -114,6 +114,21 @@
     display: flex; flex-direction: column; gap: 0.4rem; z-index: 5;
     pointer-events: none;
   }
+  /* The NOTICE — what arrives. Small on purpose: it must not cover the line the
+     host is reading. He opens it on a beat, not mid-sentence. */
+  .notice {
+    pointer-events: auto; align-self: flex-end;
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    border: 1px solid var(--late, #C2703D); background: #2A1B12;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+    padding: 0.5rem 0.7rem; cursor: pointer;
+    font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
+    letter-spacing: 0.14em; font-size: 0.58rem; color: var(--paper, #F5F1E8);
+    animation: bubble-in 220ms ease-out;
+  }
+  .notice:hover { background: #342115; }
+  .notice:focus-visible { outline: 2px solid var(--late, #C2703D); outline-offset: 2px; }
+
   .bubble {
     pointer-events: auto;
     border: 1px solid var(--late, #C2703D);
@@ -536,7 +551,7 @@
     ];
   }
 
-  var blocks, liveIndex, late, myNotes, sentQuestion, bubbles, bubbleSeq;
+  var blocks, liveIndex, late, myNotes, sentQuestion, bubbles, bubbleSeq, noticeOpen;
 
   function reset() {
     blocks = seed();
@@ -546,6 +561,7 @@
     sentQuestion = null;
     bubbles = [];
     bubbleSeq = 0;
+    noticeOpen = false;
     render();
   }
 
@@ -712,9 +728,32 @@
     return h + "</div>";
   }
 
+  /**
+   * Two states, because the host is holding a microphone.
+   *
+   *   COLLAPSED — a small notice arrives and sits in the corner. It says THAT
+   *     something came in, never WHAT, so it cannot cover the line he is
+   *     reading or pull his eye mid-sentence.
+   *   EXPANDED — he taps it on a beat and reads. "View by demand" (owner).
+   *
+   * Arrival is push, not poll: nothing here waits for a refresh, and the notice
+   * appears the moment the coordinator sends. Live, that is a Supabase realtime
+   * subscription; here the send button stands in for it.
+   */
   function renderBubbles() {
     var host = document.getElementById("bubbles");
-    if (!bubbles.length) { host.innerHTML = ""; return; }
+    if (!bubbles.length) { host.innerHTML = ""; noticeOpen = false; return; }
+
+    if (!noticeOpen) {
+      var n = bubbles.length;
+      host.innerHTML =
+        '<button class="notice" type="button" id="noticeOpen" ' +
+        'aria-label="' + n + ' notice' + (n === 1 ? '' : 's') + ' from your coordinator — tap to read">' +
+        '<span class="dot"></span>' + n + ' notice' + (n === 1 ? '' : 's') + ' · tap to read' +
+        "</button>";
+      return;
+    }
+
     host.innerHTML = bubbles.map(function (b) {
       return '<div class="bubble" role="alert">' +
         '<span class="who"><span class="dot"></span>From your coordinator</span>' +
@@ -727,6 +766,8 @@
   function pushBubble(text) {
     bubbleSeq += 1;
     bubbles.push({ id: "b" + bubbleSeq, text: text });
+    // A new one arriving does NOT force the panel open — he is possibly mid-
+    // sentence. It only ever raises the count on the notice.
     renderBubbles();
   }
 
@@ -781,6 +822,9 @@
     } else if (t.id === "askSend") {
       var a = document.getElementById("askInput");
       if (a && a.value.trim()) { sentQuestion = a.value.trim(); render(); }
+    } else if (t.id === "noticeOpen" || (t.closest && t.closest("#noticeOpen"))) {
+      noticeOpen = true;
+      renderBubbles();
     } else if (t.dataset && t.dataset.emg) {
       pushBubble(t.dataset.emg);
     } else if (t.id === "freeSend") {
@@ -788,6 +832,7 @@
       if (f && f.value.trim()) { pushBubble(f.value.trim()); f.value = ""; }
     } else if (t.dataset && t.dataset.ack) {
       bubbles = bubbles.filter(function (b) { return b.id !== t.dataset.ack; });
+      if (!bubbles.length) noticeOpen = false; // cleared → back to nothing
       renderBubbles();
     } else if (t.closest && t.closest(".cue")) {
       liveIndex = parseInt(t.closest(".cue").getAttribute("data-i"), 10);

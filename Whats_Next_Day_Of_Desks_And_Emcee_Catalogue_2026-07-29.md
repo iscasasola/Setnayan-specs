@@ -14,11 +14,11 @@
 Three vendor "day-of specialist desks" now ship on the live floor console, plus the data layer
 and both surfaces of the emcee's activity catalogue. **All of it is merged and in production.**
 
-What is left is **four items**, one of which is blocked on an owner decision.
+What is left is **four items**. As of 2026-07-29 **none is blocked** — the emergency bubble's behaviour was decided (§3.A); only its wording is still open, and the recommendation is to proceed without waiting.
 
 | | Item | State | Gate |
 |---|---|---|---|
-| A | **Emergency bubble** on the emcee's screen | prototyped, **not built** | `OWNER_DECISION` |
+| A | **Emergency bubble** on the emcee's screen | prototyped + **behaviour decided**, not built | AUTO-OK (see §3.A) |
 | B | **Coordinator's inbox inline** on the live console | scoped, **not built** | AUTO-OK |
 | C | **The emcee's questionnaire** (he asks, couple answers) | decided, **not built** | AUTO-OK |
 | D | **Acknowledge-back** on the bubble ("Got it" → coordinator) | proposed | depends on A |
@@ -193,7 +193,7 @@ all to do list").
 
 ## 3 · NOT STARTED — the build list
 
-### A · The emergency bubble 🔴 `OWNER_DECISION` — **do not build until answered**
+### A · The emergency bubble 🟡 **behaviour DECIDED 2026-07-29 — one small question left**
 
 **Owner asked for:** *"a place where he can also receive emergency messages that comes like a
 bubble on the bottom right."*
@@ -207,17 +207,38 @@ is the precise moment a real emergency arrives.
 `0022_vendor_dashboard/MC_Desk_Prototype_2026-07-27.html` ·
 artifact <https://claude.ai/code/artifact/c714b04e-defa-4324-8729-d468659ef48d>
 
-**The question, verbatim, to put to the owner:**
-> Who can pop the bubble, and is it a short list of pre-written emergencies or a free text box?
+**DECIDED (owner, 2026-07-29):** *"emergency bubbles need to show on screen. so they get real
+time update of a notice and view it by demand."* That settles the two things that actually
+shape the build:
 
-**Recommendation on record:** **coordinator only, four presets, no free text.** Presets used in
-the prototype — *Hold the program* · *Medical — pause everything* · *Skip the next segment* ·
-*Wrap up now*. They are just strings; the owner may replace them.
+1. **PUSH, not poll.** The notice appears the moment it is sent — no refresh, no "pull to
+   check". Live this is a **Supabase realtime subscription**; follow the shipped precedent in
+   `LiveReviews` (`_components/live-reviews.tsx`) — a `supabase.channel` on the base table plus
+   the publication `ALTER`, with a ~15s reconcile timer as the belt-and-braces. See also
+   `wall-projection.tsx` for the same idiom.
+2. **NOTICE first, content ON DEMAND.** What arrives is a small marker — *"1 notice · tap to
+   read"* — never the message body. The host is holding a live microphone; a wall of text
+   landing mid-sentence is worse than a quiet corner marker he opens on a beat. A **second**
+   arrival only raises the count; it must **never** force the panel open.
+
+**Sender:** the **coordinator** — already owner-stated 2026-07-27 (*"Coordinator's are the one
+to relay messages to host"*).
+
+**Still open, and it is small:** presets vs free text. **Recommendation on record and unchanged:
+four presets, no free text** — *Hold the program* · *Medical — pause everything* · *Skip the
+next segment* · *Wrap up now*. A free box works on night one and is a chat by the third
+wedding, at which point the host stops looking at the corner of his screen, which is the exact
+moment a real emergency arrives. **Build presets; they are string constants and swapping them
+(or adding a free box later) is a one-file change.** Do not block on this.
+
+**The interaction is fully specified in the prototype — copy it, do not redesign it.**
 
 **When answered, the build shape** (all of this is already designed in the prototype):
-- Bubble bottom-right of `…/live/[eventId]`, **burnt amber, never gold** — gold means "you're
-  on" and an interrupt must not read as a cue. Pulsing dot, sender, message, "Got it".
-- Survives a re-render; stacks if several arrive.
+- Bottom-right of `…/live/[eventId]`, **burnt amber, never gold** — gold means "you're on" and
+  an interrupt must not read as a cue. Pulsing dot.
+- **Collapsed:** `N notice(s) · tap to read`. **Expanded:** sender · message · "Got it" per
+  item. Clearing the last one returns the corner to nothing.
+- Survives a re-render (advancing the run must not drop an unread notice).
 - ⚠ **A booked vendor currently cannot read `coordinator_broadcasts`** (member/moderator/admin
   only). So this needs **either** a new narrow table **or** a deliberate new RLS lane. Either
   way it is `OWNER_DECISION` + §1.4 + §1.5 apply in full.
@@ -332,7 +353,7 @@ A guard nobody has broken on purpose is a guard nobody knows works.
 
 | # | Question | Blocks |
 |---|---|---|
-| 1 | **Who can pop the emergency bubble, and presets or free text?** | A, D |
+| 1 | Emergency bubble: **presets or free text?** (Sender + behaviour now decided — see §3.A. Recommendation: presets. **Do not block on this**, build presets.) | nothing — A is unblocked |
 | 2 | Should the coordinator be **copied** on the host's questions to the couple? (owner said "if… approval" — is approval per-question or once per event?) | C (partially) |
 | 3 | Which of `Known_Todos_Pre_Pilot.md` / `LIVE_QA_WALKTHROUGH_2026-06-18.md` survives the to-do compile? (Neither is a real to-do list — **0 checkboxes each**; the E2E script is the only one.) | housekeeping |
 | 4 | How do parallel sessions **claim** a piece of work before starting? (§1.2 cost a build cycle.) | process |
