@@ -343,6 +343,22 @@ prototype.** Each was verified in-browser.
 Verified in every state (1 collapsed · expanded · 5 expanded · cleared): the last card clears
 the notice by ~30px, and the spacer collapses to 0 when the last notice is dismissed.
 
+**4. The notice is GLASS and ROUND, and that is deliberate** (owner 2026-07-29: *"a more
+modern approach? not rectangles?"* → *"this already looks perfect"*). Collapsed = a pill
+(`--m-r-full`) with a soft halo, breathing dot-ring, and blur/saturate backdrop. Opened =
+a `--m-r-lg` glass card with a pill "Got it". The interrupt is the one element that is **not**
+part of the editorial system, so it is a different **material** — it floats above the page
+rather than sitting in it, and that contrast is the signal. It also stays the only non-gold
+thing on the screen.
+
+⚠ **Use the tokens, not px.** `var(--m-r-full)` / `var(--m-r-lg)` / `var(--m-r-md)` — the
+prototype uses px literals because it ships without the app's token CSS, and `lint-radius`
+(strict in CI) flags px radii in real code.
+
+⚠⚠ **The wider radius pass DIVERGES from the shipped console**, which is square-cornered
+(`ConsolePlate` = border + inset hairline, no radius). Rounding the *notice* is settled;
+rounding the *whole console* is an **owner call** and is not assumed here.
+
 ---
 
 ## 4 · The verification recipe that actually passes CI

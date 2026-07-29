@@ -120,55 +120,92 @@
     max-height: 55%;
     overflow-y: auto;
   }
-  /* The NOTICE — what arrives. Small on purpose: it must not cover the line the
-     host is reading. He opens it on a beat, not mid-sentence. */
+  /* ── THE NOTICE ────────────────────────────────────────────────────────
+     The one thing on this screen that is NOT the editorial system. Everything
+     else is square-cornered stock — the plate, the script, the cue card — so
+     the interrupt is deliberately a different material: a soft glass pill that
+     floats above the page rather than sitting in it. That contrast is the
+     signal. Radii map to the locked --m-r-* scale (full 999 / lg 22), so this
+     is buildable as-is rather than a prototype-only look. */
   .notice {
     pointer-events: auto; align-self: flex-end;
-    display: inline-flex; align-items: center; gap: 0.45rem;
-    border: 1px solid var(--late, #C2703D); background: #2A1B12;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.55);
-    padding: 0.5rem 0.7rem; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    border-radius: 999px;                      /* --m-r-full */
+    padding: 0.55rem 0.95rem 0.55rem 0.8rem;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(74,44,26,0.92), rgba(52,31,19,0.92));
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+    border: 1px solid rgba(224,150,96,0.42);
+    box-shadow:
+      0 10px 30px rgba(0,0,0,0.45),
+      0 0 0 5px rgba(194,112,61,0.10),          /* the soft halo */
+      inset 0 1px 0 rgba(255,255,255,0.10);     /* top-lit edge */
     font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
-    letter-spacing: 0.14em; font-size: 0.58rem; color: var(--paper, #F5F1E8);
-    animation: bubble-in 220ms ease-out;
+    letter-spacing: 0.13em; font-size: 0.58rem;
+    color: #F7E7D8;
+    animation: notice-in 260ms cubic-bezier(.2,.9,.3,1.2);
+    transition: transform 140ms ease-out, box-shadow 140ms ease-out;
   }
-  .notice:hover { background: #342115; }
-  .notice:focus-visible { outline: 2px solid var(--late, #C2703D); outline-offset: 2px; }
+  .notice:hover { transform: translateY(-1px); box-shadow: 0 14px 36px rgba(0,0,0,0.5), 0 0 0 6px rgba(194,112,61,0.14), inset 0 1px 0 rgba(255,255,255,0.12); }
+  .notice:active { transform: translateY(0); }
+  .notice:focus-visible { outline: 2px solid rgba(224,150,96,0.9); outline-offset: 3px; }
 
-  .bubble {
-    pointer-events: auto;
-    border: 1px solid var(--late, #C2703D);
-    background: #2A1B12;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.55);
-    padding: 0.7rem 0.8rem;
-    display: flex; flex-direction: column; gap: 0.35rem;
-    animation: bubble-in 220ms ease-out;
-  }
-  @keyframes bubble-in {
-    from { transform: translateY(8px); opacity: 0; }
+  @keyframes notice-in {
+    from { transform: translateY(10px) scale(0.94); opacity: 0; }
     to   { transform: none; opacity: 1; }
   }
+
+  /* The live dot, with a breathing ring — reads as "something is happening"
+     without the harshness of a red alert chip. */
+  .notice .dot, .bubble .dot {
+    width: 7px; height: 7px; border-radius: 999px; flex-shrink: 0;
+    background: #E09660;
+    box-shadow: 0 0 0 0 rgba(224,150,96,0.55);
+    animation: dot-ring 2s ease-out infinite;
+  }
+  @keyframes dot-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(224,150,96,0.5); }
+    70%  { box-shadow: 0 0 0 7px rgba(224,150,96,0); }
+    100% { box-shadow: 0 0 0 0 rgba(224,150,96,0); }
+  }
+
+  /* ── THE OPENED MESSAGE ───────────────────────────────────────────────── */
+  .bubble {
+    pointer-events: auto;
+    border-radius: 22px;                        /* --m-r-lg */
+    padding: 0.85rem 0.95rem;
+    background: linear-gradient(180deg, rgba(58,36,22,0.93), rgba(40,25,16,0.95));
+    -webkit-backdrop-filter: blur(16px) saturate(1.15);
+    backdrop-filter: blur(16px) saturate(1.15);
+    border: 1px solid rgba(224,150,96,0.30);
+    box-shadow:
+      0 18px 44px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    display: flex; flex-direction: column; gap: 0.45rem;
+    animation: notice-in 260ms cubic-bezier(.2,.9,.3,1.2);
+  }
   .bubble .who {
-    display: flex; align-items: center; gap: 0.4rem;
+    display: flex; align-items: center; gap: 0.5rem;
     font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
-    letter-spacing: 0.16em; font-size: 0.55rem; color: var(--late, #C2703D);
+    letter-spacing: 0.15em; font-size: 0.55rem; color: #E09660;
   }
-  .bubble .dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--late, #C2703D); flex-shrink: 0;
-    animation: bubble-pulse 1.6s ease-in-out infinite;
+  .bubble .msg {
+    margin: 0; font-size: 0.97rem; line-height: 1.45; color: #FBF3EA;
   }
-  @keyframes bubble-pulse { 50% { opacity: 0.25; } }
-  .bubble .msg { margin: 0; font-size: 0.95rem; line-height: 1.4; color: var(--paper, #F5F1E8); }
   .bubble .ack {
-    align-self: flex-start; margin-top: 0.15rem;
-    background: none; border: 1px solid rgba(245,241,232,0.3); color: var(--paper-dim, rgba(245,241,232,0.62));
-    padding: 0.25rem 0.6rem; cursor: pointer;
+    align-self: flex-start; margin-top: 0.1rem;
+    border-radius: 999px;                       /* --m-r-full */
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.16);
+    color: #F2E3D6;
+    padding: 0.35rem 0.85rem; cursor: pointer;
     font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
-    letter-spacing: 0.14em; font-size: 0.55rem;
+    letter-spacing: 0.13em; font-size: 0.55rem;
+    transition: background 140ms ease-out, border-color 140ms ease-out;
   }
-  .bubble .ack:hover { border-color: var(--paper, #F5F1E8); color: var(--paper, #F5F1E8); }
-  .bubble .ack:focus-visible { outline: 2px solid var(--late, #C2703D); outline-offset: 2px; }
+  .bubble .ack:hover { background: rgba(255,255,255,0.13); border-color: rgba(255,255,255,0.3); }
+  .bubble .ack:focus-visible { outline: 2px solid rgba(224,150,96,0.9); outline-offset: 2px; }
 
   /* The two sender designs, side by side on the board. */
   .senders { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
@@ -363,6 +400,54 @@
 
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+
+  /* ══ THE RADIUS + MATERIAL PASS ═══════════════════════════════════════════
+     Applied last so it reads as one system rather than a value sprinkled on
+     each rule. Everything maps to the owner-locked --m-r-* scale (2026-06-20,
+     "softer corners / Approach B"): containers 22 (lg) · controls and fields
+     14 (md) · anything pill-shaped 999 (full).
+
+     ⚠ This DIVERGES from the shipped console, which is square-cornered
+     (`ConsolePlate` = border + inset hairline, no radius). Adopting it on the
+     real console is an owner call, not a side effect of this prototype. */
+
+  /* Containers */
+  .card, .sender, .item, .readout, .cues, .free-row input, .mini-input { border-radius: 14px; }
+  .card, .sender, .item, .readout, .cues { border-radius: 22px; }
+  .cues { overflow: hidden; }                    /* so rows clip to the corner */
+  .phone { border-radius: 34px; }
+  .screen { border-radius: 26px; }
+
+  /* Controls — anything you press is a pill */
+  .btn, .mini-btn, .preset-btn, .chip, .badge { border-radius: 999px; }
+  .preset-btn { padding-left: 0.9rem; padding-right: 0.9rem; }
+  .badge { padding: 0.2rem 0.55rem; }
+
+  /* Fields */
+  .mini-input, .free-row input { border-radius: 14px; padding-left: 0.8rem; padding-right: 0.8rem; }
+
+  /* Softer edges want softer shadows — a hard stamp under a round corner reads
+     as a sticker. */
+  .phone { box-shadow: 0 30px 70px rgba(0,0,0,0.26), 0 3px 10px rgba(0,0,0,0.16); }
+  .card  { box-shadow: 0 1px 2px rgba(0,0,0,0.18); }
+  .sender, .item, .readout { box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+
+  /* The cue rows lose their hard divider at the ends so the rounded container
+     doesn't show a straight line running into a curve. */
+  .cue:first-child { border-top-left-radius: 22px; border-top-right-radius: 22px; }
+  .cue:last-child  { border-bottom-left-radius: 22px; border-bottom-right-radius: 22px; }
+
+  /* Focus rings follow the shape they sit on. */
+  .btn:focus-visible, .mini-btn:focus-visible, .preset-btn:focus-visible { border-radius: 999px; }
+
+  /* Buttons get a little lift on press, matching the notice. */
+  .btn, .mini-btn, .preset-btn { transition: transform 120ms ease-out, border-color 140ms ease-out, background 140ms ease-out; }
+  .btn:active, .mini-btn:active, .preset-btn:active { transform: translateY(1px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .notice, .bubble { animation: none !important; }
+    .notice .dot, .bubble .dot { animation: none !important; }
   }
 </style>
 
