@@ -119,6 +119,55 @@ notes are what he says; questions are what he needs to know.)
 
 ---
 
+## 3.5 · WHERE IT LIVES — the Customer Card, not chat
+
+Owner asked: *"we have a page for this? this is basically on their chat. a special function for
+the emcee?"* **Yes to the page, no to chat, and yes to a per-trade function — because that
+pattern already ships three times over.**
+
+### The Customer Card is the vendor's per-booking home
+
+`/vendor-dashboard/clients/[eventId]` already has tabs — **Overview · Quote & Payments · Files ·
+Schedule · Activity** (`customer-card-nav.tsx`) — and, crucially, **every trade already has its
+own working sub-page hanging off it:**
+
+| Trade | Their page | State |
+|---|---|---|
+| Caterer | `clients/[eventId]/production-sheet` | ✅ ships |
+| Bar | `clients/[eventId]/cocktail` | ✅ ships |
+| Photographer | `clients/[eventId]/editorial-media` | ✅ ships |
+| Seating | `clients/[eventId]/seat-plan` | ✅ ships |
+| Stylist | `clients/[eventId]/mood-board` | ✅ ships |
+| **Emcee** | **`clients/[eventId]/script`** | ⛔ **the only trade without one** |
+
+So this is not a new concept to invent — it is **the one missing instance of a pattern the
+product already commits to.** A caterer opens their client and gets portion maths; an emcee
+opens theirs and should get his script.
+
+There is even a **Schedule tab already on the card**, which is where plotting belongs once he
+holds the `schedule` grant (§2).
+
+### Why NOT chat
+
+Chat is for the conversation — asking, agreeing, chasing. It is the wrong home for a script for
+one plain reason: **you cannot read a script out of a chat log at 9pm with a microphone in your
+hand.** A script needs to be ordered by the night, not by when things were said, and it must
+still be correct after the couple moves dinner. A thread is neither.
+
+He still *asks* through the channels that exist — the shared thread and the working folder —
+but the **artefact** lives on his page.
+
+### What is already there vs what is new
+
+- `vendor_client_notes` ✅ **ships** — private, team-shared CRM notes on the card, vendor-org-only
+  RLS (off-limits to the couple **and** to Setnayan admins). This is the right shape and the
+  right privacy for "his own notes"… but it is **per-client, not per-block**, so it cannot hold
+  the script layer. Keep it for "what I know about this couple"; the script layer stays separate
+  and per-block.
+- The `script` sub-page, the per-block layer, and the questionnaire are the new parts.
+
+---
+
 ## 4 · What is actually missing
 
 Only three things. Everything else in this concept already ships.
@@ -128,6 +177,7 @@ Only three things. Everything else in this concept already ships.
 | 1 | **The script layer** — his line per block. The centre of the feature. | new table (`vendor_block_scripts`), per-event, per-block, vendor-private |
 | 2 | **The question template + answers** — his reusable set; answers per event | `vendor_questions` (travels) + answers (per-event) |
 | 3 | **Wire the emcee into the existing `schedule` ask/approve flow** | reuse `ask-access` — no new access model |
+| 4 | **The `script` sub-page** on the Customer Card | one route + a nav entry — the same shape as `production-sheet` |
 
 Then extend `buildEmceeScript` to include 1 + 2, and surface them on the desk that already
 exists.
