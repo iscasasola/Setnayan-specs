@@ -1,0 +1,1567 @@
+<title>Service flow — interactive maker, live couple preview</title>
+<style>
+  :root{
+    --cream:255 255 255; --ink:27 26 23;
+    --gold:169 131 75; --gold-deep:140 105 50;
+    --ok:47 107 79; --page:#F3F2EF;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --cream:23 22 15; --ink:251 250 247; --gold:203 167 102;
+    --gold-deep:168 131 64; --ok:111 191 149; --page:#0E0D09;}}
+  :root[data-theme="dark"]{--cream:23 22 15; --ink:251 250 247;
+    --gold:203 167 102; --gold-deep:168 131 64; --ok:111 191 149; --page:#0E0D09;}
+  :root[data-theme="light"]{--cream:255 255 255; --ink:27 26 23;
+    --gold:169 131 75; --gold-deep:140 105 50; --ok:47 107 79; --page:#F3F2EF;}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:rgb(var(--ink));
+       font-family:'Hanken Grotesk',system-ui,sans-serif;font-size:14px;
+       line-height:1.5;-webkit-font-smoothing:antialiased}
+  .mono{font-family:'Space Mono',ui-monospace,monospace}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 18px 70px}
+  h1{font-size:20px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+  .lede{color:rgb(var(--ink)/.6);font-size:13px;margin:0 0 14px;max-width:76ch}
+  .legend{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}
+  .tag{font-family:'Space Mono',ui-monospace,monospace;font-size:9px;
+       letter-spacing:.08em;text-transform:uppercase;border-radius:4px;
+       padding:2px 6px;white-space:nowrap}
+  .t-ships{background:rgb(var(--ok)/.12);color:rgb(var(--ok))}
+  .t-part{background:rgb(var(--gold)/.14);color:rgb(var(--gold-deep))}
+  .t-new{border:1px solid rgb(var(--ink)/.25);color:rgb(var(--ink)/.6)}
+
+  .flow{display:grid;grid-template-columns:1fr;gap:22px}
+  @media(min-width:1020px){.flow{grid-template-columns:1fr 1fr}}
+  .stage>header{margin:0 0 8px}
+  .stage h2{font-size:13px;font-weight:600;margin:0}
+  .stage .src{font-family:'Space Mono',ui-monospace,monospace;font-size:10px;
+              color:rgb(var(--ink)/.45);margin:2px 0 0;word-break:break-all}
+  .phone{border:1px solid rgb(var(--ink)/.12);border-radius:16px;
+         background:rgb(var(--cream));padding:16px;box-shadow:0 1px 2px rgb(0 0 0/.04)}
+
+  /* card + details (transcribed earlier, unchanged) */
+  .card{border:1px solid rgb(var(--ink)/.1);border-radius:12px;background:rgb(var(--cream));
+        padding:16px}
+  .chead{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .clabel{font-weight:500;margin:0}
+  .cprice{font-family:'Space Mono',ui-monospace,monospace;font-size:13px;color:rgb(var(--ink)/.8);margin:0}
+  .cdetail{text-align:right;font-family:'Space Mono',ui-monospace,monospace;font-size:11px;
+           color:rgb(var(--ink)/.5);margin:0}
+  .strip{margin-top:10px;display:flex;gap:6px;overflow-x:auto}
+  .ph{height:56px;width:56px;flex:none;border-radius:8px;background:rgb(var(--ink)/.06);
+      display:grid;place-items:center;font-family:'Space Mono',ui-monospace,monospace;
+      font-size:8px;color:rgb(var(--ink)/.3)}
+  .serves{margin:8px 0 0;font-size:11px;color:rgb(var(--ink)/.5)}
+  .actx{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0;font-family:'Space Mono',ui-monospace,monospace;
+        font-size:10px;color:rgb(var(--ink)/.55)}
+  .actx span:not(.tag){background:rgb(var(--ink)/.05);border-radius:999px;padding:2px 8px}
+  .booked{margin:10px 0 0;font-family:'Space Mono',ui-monospace,monospace;font-size:11px;
+          color:rgb(var(--gold-deep))}
+  .cta{margin-top:12px;width:100%;border:0;border-radius:9px;padding:11px;
+       background:rgb(var(--gold));color:rgb(var(--cream));font-weight:600;font-size:14px;
+       cursor:pointer;font-family:inherit}
+  .cta:hover{background:rgb(var(--gold-deep))}
+  .cta:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{
+    outline:2px solid rgb(var(--gold));outline-offset:1px}
+  .sec{margin-top:14px}
+  .sec>h3{font-size:11px;font-family:'Space Mono',ui-monospace,monospace;letter-spacing:.1em;
+          text-transform:uppercase;color:rgb(var(--ink)/.45);margin:0 0 8px;display:flex;
+          gap:8px;align-items:center;flex-wrap:wrap}
+  .event{border:1px solid rgb(var(--ink)/.08);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+  .event .m{display:flex;justify-content:space-between;gap:10px;font-size:12px}
+  .osvc{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;
+        border:1px solid rgb(var(--ink)/.08);border-radius:10px;margin-bottom:6px;font-size:13px}
+  .osvc span{font-family:'Space Mono',ui-monospace,monospace;font-size:12px;color:rgb(var(--ink)/.6)}
+  .fine{font-size:11px;color:rgb(var(--ink)/.5);margin:6px 0 0;line-height:1.45}
+
+  /* maker */
+  .item{border:1px solid rgb(var(--ink)/.1);border-radius:10px;padding:10px 12px;margin-bottom:8px;
+        transition:box-shadow .2s,border-color .2s}
+  .item.flash{border-color:rgb(var(--gold));box-shadow:0 0 0 3px rgb(var(--gold)/.15)}
+  .frow{display:flex;gap:6px;align-items:center;margin:5px 0}
+  .fld{border:1px solid rgb(var(--ink)/.2);border-radius:7px;padding:6px 9px;font:inherit;
+       font-size:12.5px;background:rgb(var(--cream));color:rgb(var(--ink));width:100%;min-width:0}
+  .fld.pz{font-family:'Space Mono',ui-monospace,monospace;width:88px;flex:none;text-align:right}
+  .stsel{font-family:'Space Mono',ui-monospace,monospace;font-size:10px;border:1px solid rgb(var(--ink)/.2);
+         border-radius:6px;padding:5px 6px;background:rgb(var(--cream));color:rgb(var(--ink));flex:none}
+  .ib{border:1px solid rgb(var(--ink)/.15);background:none;border-radius:6px;width:26px;height:26px;
+      color:rgb(var(--ink)/.6);cursor:pointer;font-family:'Space Mono',ui-monospace,monospace;
+      font-size:12px;flex:none;line-height:1}
+  .ib:hover{border-color:rgb(var(--gold));color:rgb(var(--gold-deep))}
+  .ib:disabled{opacity:.3;cursor:not-allowed}
+  .branch{border:1px dashed rgb(var(--gold-deep)/.5);background:rgb(var(--gold)/.08);
+          color:rgb(var(--gold-deep));border-radius:7px;padding:6px 10px;font-size:12px;
+          cursor:pointer;font-family:inherit;width:100%;margin-top:4px}
+  .addbtn{border:1px dashed rgb(var(--ink)/.3);background:none;border-radius:8px;padding:8px;
+          width:100%;font-size:12px;color:rgb(var(--ink)/.6);cursor:pointer;font-family:inherit;
+          margin-top:2px}
+  .addbtn:hover{border-color:rgb(var(--gold));color:rgb(var(--gold-deep))}
+  .pfx{display:flex;align-items:center;border:1px solid rgb(var(--ink)/.2);
+       border-radius:7px;background:rgb(var(--cream));flex:none}
+  .pfx>span{padding-left:8px;font-family:'Space Mono',ui-monospace,monospace;
+       font-size:11px;color:rgb(var(--ink)/.45)}
+  .pfx>input{border:0;background:none;padding:6px 8px 6px 3px;width:74px;
+       text-align:right;font-family:'Space Mono',ui-monospace,monospace;
+       font-size:12px;color:rgb(var(--ink))}
+  .pfx>input:disabled{color:rgb(var(--ink)/.35)}
+  .pfx>input:focus{outline:none}
+  .pfx:focus-within{outline:2px solid rgb(var(--gold));outline-offset:1px}
+  .optrow{display:flex;gap:6px;align-items:center;margin:4px 0 4px 12px}
+  .becomes{font-family:'Space Mono',ui-monospace,monospace;font-size:10px;
+           color:rgb(var(--gold-deep));margin:6px 0 0}
+
+  /* inquiry */
+  .ctx{display:flex;gap:6px;flex-wrap:wrap;font-family:'Space Mono',ui-monospace,monospace;
+       font-size:10.5px;color:rgb(var(--ink)/.55);margin:0 0 12px}
+  .ctx b{color:rgb(var(--ink)/.8);font-weight:400}
+  .block{border:1px solid rgb(var(--ink)/.1);border-radius:10px;padding:12px;margin-bottom:10px}
+  .block>h4{font-size:12.5px;font-weight:600;margin:0 0 8px;display:flex;gap:8px;
+            align-items:center;flex-wrap:wrap}
+  .opt{display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13px;cursor:pointer}
+  .opt input{accent-color:rgb(var(--gold));width:16px;height:16px;flex:none;margin:0}
+  .opt .d{margin-left:auto;font-family:'Space Mono',ui-monospace,monospace;font-size:12px;
+          color:rgb(var(--ink)/.6);white-space:nowrap}
+  .block.follow{border-left:3px solid rgb(var(--gold)/.6);margin-left:10px}
+  .grip{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
+        width:22px;flex:none;text-align:center;color:rgb(var(--ink)/.35);
+        font-size:13px;line-height:30px}
+  .grip:active{cursor:grabbing}
+  .item.dragging{opacity:.25;outline:1.5px dashed rgb(var(--gold)/.6);outline-offset:2px}
+  .ghost{position:fixed;left:0;top:0;z-index:99;pointer-events:none;margin:0;
+         background:rgb(var(--cream));box-shadow:0 14px 34px rgb(0 0 0/.2);
+         opacity:.95;will-change:transform}
+  .gz-hot{border-color:rgb(var(--gold))!important;color:rgb(var(--gold-deep))!important}
+  .mchip{border:1px solid rgb(var(--ink)/.2);background:none;border-radius:999px;
+         padding:6px 12px;font-size:12px;color:rgb(var(--ink)/.55);cursor:pointer;
+         font-family:inherit}
+  .mchip.on{border-color:rgb(var(--ok)/.5);color:rgb(var(--ok));background:rgb(var(--ok)/.07)}
+  .hrow{border:1px solid rgb(var(--ink)/.12);border-radius:8px;padding:7px 10px;
+        margin-bottom:6px;font-size:12px;color:rgb(var(--ink)/.7);line-height:1.45}
+  .hrow.ok{border-color:rgb(var(--ok)/.4);color:rgb(var(--ok))}
+  .hrow.bad{border-color:rgb(var(--gold-deep)/.6);color:rgb(var(--gold-deep));font-weight:600}
+  .hrow.wa{border-color:rgb(var(--gold)/.5);color:rgb(var(--gold-deep))}
+  .hrow.nm{border-style:dashed;border-color:rgb(var(--ink)/.25)}
+  .rr{display:grid;grid-template-columns:1fr 120px 120px;gap:8px;align-items:center;
+      padding:7px 10px;border-bottom:1px solid rgb(var(--ink)/.08);font-size:12.5px}
+  .rr.head{font-family:'Space Mono',ui-monospace,monospace;font-size:9.5px;
+           letter-spacing:.08em;text-transform:uppercase;color:rgb(var(--ink)/.45);
+           border-bottom:1px solid rgb(var(--ink)/.18)}
+  .rr .v{font-family:'Space Mono',ui-monospace,monospace;font-size:10px;text-align:right}
+  .v.no{color:rgb(var(--ok))}
+  .v.yes{color:rgb(var(--gold-deep));font-weight:600}
+  .v.fp{color:rgb(var(--gold-deep));font-weight:600}
+  .rr.flag{background:rgb(var(--gold)/.07)}
+  @media(max-width:640px){.rr{grid-template-columns:1fr 84px 84px}}
+  .steps{display:flex;gap:6px;overflow-x:auto;margin:0 0 12px;padding-bottom:2px}
+  .wchip{border:1px solid rgb(var(--ink)/.18);background:none;border-radius:999px;flex:none;
+         padding:6px 11px;font-size:11px;font-family:'Space Mono',ui-monospace,monospace;
+         color:rgb(var(--ink)/.55);cursor:pointer;letter-spacing:.02em}
+  .wchip.on{border-color:rgb(var(--gold));color:rgb(var(--gold-deep));
+            background:rgb(var(--gold)/.08);font-weight:600}
+  .cta:disabled{opacity:.45;cursor:not-allowed}
+  .ptrack{height:3px;background:rgb(var(--ink)/.08);border-radius:2px;overflow:hidden;margin:0 0 6px}
+  .pfill{height:100%;width:0;background:rgb(var(--gold));transition:width .3s ease}
+  .wchip.done{border-color:rgb(var(--ok)/.5);color:rgb(var(--ok))}
+  .wchip.warn{border-color:rgb(var(--gold-deep));color:rgb(var(--gold-deep))}
+  .wchip.on{border-color:rgb(var(--gold));background:rgb(var(--gold)/.08);font-weight:600}
+  .cnt{font-family:'Space Mono',ui-monospace,monospace;font-size:10px;border-radius:999px;
+       padding:2px 8px;background:rgb(var(--ink)/.06);color:rgb(var(--ink)/.6)}
+  .cnt.done{background:rgb(var(--ok)/.14);color:rgb(var(--ok))}
+  .inc2{margin:0;padding:0;list-style:none}
+  .inc2 li{display:flex;gap:6px;font-size:12.5px;color:rgb(var(--ink)/.75);padding:3px 0}
+  .inc2 .tick{color:rgb(var(--gold));flex:none}
+  .foot{border-top:1px solid rgb(var(--ink)/.12);margin-top:4px;padding-top:12px}
+  .est{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .est b{font-weight:600;font-size:14px}
+  .est .a{font-family:'Space Mono',ui-monospace,monospace;font-size:17px;
+          font-variant-numeric:tabular-nums}
+  /* ── motion (signals change; reduced-motion kills it all) ── */
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes bump{0%{transform:scale(1)}45%{transform:scale(1.14);color:rgb(var(--gold-deep))}100%{transform:scale(1)}}
+  .step.enter{animation:rise .28s ease}
+  .item.flash{animation:rise .3s ease}
+  .block.reveal{animation:rise .32s ease}
+  .est .a.bump,#mest.bump{animation:bump .38s ease;display:inline-block}
+  .cnt.done{animation:bump .38s ease}
+  .mchip,.wchip,.ib,.addbtn,.branch{transition:transform .12s ease,background .18s ease,border-color .18s ease,color .18s ease}
+  .mchip:active,.wchip:active,.ib:active{transform:scale(.93)}
+  .pfill{background:linear-gradient(90deg,rgb(var(--gold)),rgb(var(--gold-deep)))}
+  .stickhead{position:sticky;top:0;z-index:6;background:rgb(var(--cream)/.92);
+             backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+             margin:-16px -16px 10px;padding:12px 16px 8px;border-bottom:1px solid rgb(var(--ink)/.07)}
+  .uptile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+          width:76px;height:76px;border:1.5px dashed rgb(var(--ink)/.3);border-radius:12px;
+          font-size:10px;color:rgb(var(--ink)/.55);cursor:pointer;position:relative;
+          background:rgb(var(--ink)/.03);text-align:center;overflow:hidden;flex:none;
+          transition:border-color .18s,background .18s}
+  .uptile:hover{border-color:rgb(var(--gold));color:rgb(var(--gold-deep))}
+  .uptile.big{width:128px;height:96px}
+  .uptile.has{border-style:solid;border-color:rgb(var(--ok)/.5);color:rgb(var(--ok));animation:rise .3s ease}
+  .uptile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .upplus{font-size:20px;line-height:1;color:rgb(var(--gold-deep))}
+  .upreq{font-family:'Space Mono',ui-monospace,monospace;font-size:8px;letter-spacing:.08em;
+         text-transform:uppercase;color:rgb(var(--gold-deep))}
+  .uprm{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;
+        border:0;background:rgb(0 0 0/.55);color:#fff;font-size:12px;line-height:1;
+        cursor:pointer;z-index:2}
+  .info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
+        border-radius:50%;border:1px solid rgb(var(--ink)/.3);background:none;
+        color:rgb(var(--ink)/.55);font-family:Georgia,serif;font-style:italic;font-size:11px;
+        cursor:pointer;flex:none;transition:border-color .15s,color .15s}
+  .info:hover{border-color:rgb(var(--gold));color:rgb(var(--gold-deep))}
+  .infobx{display:block;border:1px solid rgb(var(--gold)/.35);background:rgb(var(--gold)/.06);
+          border-radius:10px;padding:9px 12px;margin:4px 0 8px;font-size:12px;
+          color:rgb(var(--ink)/.75);line-height:1.5;animation:rise .22s ease}
+  .infobx[hidden]{display:none}
+  .hmeter{height:8px;border-radius:4px;background:rgb(var(--ink)/.08);overflow:hidden;margin:2px 0 6px}
+  .hfill{height:100%;width:0;border-radius:4px;background:rgb(var(--gold));transition:width .45s ease}
+  .hfill.ok{background:rgb(var(--ok))}
+  .hfill.bad{background:rgb(var(--gold-deep))}
+  .hgrade{font-weight:700;font-size:15px;letter-spacing:-.01em}
+  .hgrade.ok{color:rgb(var(--ok))}
+  .hgrade.bad{color:rgb(var(--gold-deep))}
+  .hsub{font-size:12px;color:rgb(var(--ink)/.55);margin:1px 0 8px}
+  .hgraderow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .hdt{border:1px solid rgb(var(--ink)/.2);background:none;border-radius:999px;padding:3px 10px;
+       font-family:'Space Mono',ui-monospace,monospace;font-size:10px;color:rgb(var(--ink)/.6);
+       cursor:pointer;flex:none}
+  #health{margin-top:6px;max-height:40vh;overflow-y:auto}
+  #health[hidden]{display:none}
+  .ez{display:flex;align-items:center;gap:6px;width:100%;border:0;background:none;
+      text-align:left;font:inherit;color:rgb(var(--ink));cursor:pointer;padding:10px 14px;
+      border-top:1px solid rgb(var(--ink)/.07);position:relative;
+      transition:background .15s ease}
+  .ez:hover{background:rgb(var(--gold)/.06)}
+  .ez .pen{margin-left:auto;color:rgb(var(--ink)/.3);font-size:12px;flex:none}
+  .ez.cover{padding:0;border-top:0;aspect-ratio:1/1;max-height:280px;background:rgb(var(--ink)/.05);
+            align-items:center;justify-content:center;overflow:hidden}
+  .ez.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .ezc{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px;
+       color:rgb(var(--ink)/.55)}
+  .ezc.ok2{color:rgb(var(--ok))}
+  .galn{position:absolute;bottom:8px;right:10px;background:rgb(0 0 0/.55);color:#fff;
+        font-family:'Space Mono',ui-monospace,monospace;font-size:10px;border-radius:999px;
+        padding:3px 9px}
+  .cbody{display:flex;flex-direction:column}
+  .ctitle{border:0;background:none;font-weight:600;font-size:17px;letter-spacing:-.01em;
+          padding:12px 14px 4px;color:rgb(var(--ink));width:100%}
+  .ez.line{font-size:13.5px}
+  .ez.line.gold{color:rgb(var(--gold-deep))}
+  .okc{color:rgb(var(--ok));font-family:'Space Mono',ui-monospace,monospace;font-size:11px}
+  .ez.blockz{flex-wrap:wrap;gap:4px 10px}
+  .inc3{font-size:12.5px;color:rgb(var(--ink)/.75)}
+  .inc3.dim{color:rgb(var(--gold-deep))}
+  .dim2{color:rgb(var(--ink)/.45)}
+  .ccover{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1/1;
+          max-height:240px;border:0;border-radius:12px;overflow:hidden;position:relative;
+          background:rgb(var(--ink)/.06);cursor:pointer;margin:0 0 6px;color:rgb(var(--ink)/.4)}
+  .ccover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .cstrip{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px}
+  .cthumb{width:56px;height:56px;flex:none;border-radius:8px;border:0;overflow:hidden;
+          position:relative;background:rgb(var(--ink)/.08);cursor:pointer;
+          color:rgb(var(--ink)/.4);font-family:'Space Mono',ui-monospace,monospace;font-size:10px}
+  .cthumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .cthumb.clip{width:auto;padding:0 12px;border-radius:999px;background:rgb(var(--ink));
+               color:rgb(var(--cream));font-size:11px}
+  #lightbox{position:fixed;inset:0;z-index:50;background:rgb(0 0 0/.86);display:flex;
+            align-items:center;justify-content:center;animation:rise .2s ease}
+  #lightbox[hidden]{display:none}
+  #lightbox img{max-width:92vw;max-height:86vh;border-radius:10px;object-fit:contain}
+  .lbx{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;
+       border:0;background:rgb(255 255 255/.15);color:#fff;font-size:18px;cursor:pointer}
+  .lbclip{color:#fff;text-align:center;font-size:40px;line-height:1.4}
+  .shdone{margin-top:10px}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0 auto;max-width:560px;
+         background:rgb(var(--cream));border:1px solid rgb(var(--ink)/.12);
+         border-radius:18px 18px 0 0;padding:14px 16px calc(16px + env(safe-area-inset-bottom));
+         box-shadow:0 -12px 40px rgb(0 0 0/.18);max-height:78vh;overflow-y:auto;
+         animation:sheetup .28s ease}
+  .sheet[hidden]{display:none}
+  @keyframes sheetup{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+  .shhead{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px;
+          font-size:14px}
+  .dtrow .fld.pz{width:44px}
+  .nbabtn{display:block;width:100%;margin-top:6px;border:1px solid rgb(var(--gold)/.5);
+          background:rgb(var(--gold)/.09);color:rgb(var(--gold-deep));border-radius:10px;
+          padding:8px 12px;font:inherit;font-size:12.5px;text-align:left;cursor:pointer;
+          animation:rise .25s ease;transition:background .15s}
+  .nbabtn:hover{background:rgb(var(--gold)/.16)}
+  .nbabtn.done2{border-color:rgb(var(--ok)/.4);background:rgb(var(--ok)/.07);
+                color:rgb(var(--ok));cursor:default}
+  #mobilebar{display:none}
+
+  /* ── phone ergonomics ── */
+  @media(max-width:700px){
+    .wrap{padding:14px 10px 96px}
+    .phone{padding:12px;border-radius:14px}
+    .stickhead{margin:-12px -12px 10px;padding:10px 12px 8px}
+    /* 16px inputs stop iOS zoom-on-focus */
+    .fld,.stsel,.pfx>input{font-size:16px}
+    .fld.pz{width:96px}
+    .ib{width:34px;height:34px;font-size:14px}
+    .grip{width:28px;font-size:15px;line-height:34px}
+    .mchip{padding:9px 14px;font-size:13px}
+    .wchip{padding:9px 12px;font-size:12px}
+    .opt{padding:10px 4px}
+    .opt input{width:20px;height:20px}
+    .optrow{margin-left:6px}
+    .cta{padding:13px}
+    #mobilebar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+      position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));
+      z-index:20;background:rgb(var(--cream)/.95);backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);border:1px solid rgb(var(--ink)/.12);
+      border-radius:14px;padding:10px 12px;box-shadow:0 8px 24px rgb(0 0 0/.12)}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <h1>The maker is live — add, branch, drag, and watch the couple’s side follow</h1>
+  <p class="lede">No steps. The card IS the maker — tap any part of it to edit; a sheet opens, the card updates behind it. Right: what couples see, live.</p>
+  <div class="legend">
+    <span class="tag t-ships">ships</span>
+    <span class="tag t-part">partial</span>
+    <span class="tag t-new">new</span>
+  </div>
+
+  <div class="flow">
+    <!-- ═══ MAKER ═══ -->
+    <section class="stage">
+      <header>
+        <h2>The card is the maker</h2>
+        <p class="src">lines/options: package machinery (#3744) · display_order ships · branch + pick-N + suggest: new</p>
+      </header>
+      <div class="phone">
+        <div class="stickhead"><div id="healthtop"></div><div id="nba"></div><div id="health" hidden></div></div>
+
+        <div class="card" id="makercard" style="padding:0;overflow:hidden"></div>
+        <button class="addbtn" id="loadex" style="margin-top:8px">See a filled example</button>
+        <p class="fine" style="margin-top:6px">Tap any part of the card to edit it.
+          <button class="info" data-info="canvas" aria-label="How the maker works">i</button></p>
+        <span class="infobx" id="ib-canvas" hidden>There are no steps. Each region of the card
+          opens a small sheet — photos, price, your Exclusive, choices, audience. The health
+          score above regulates publishing, like an ad platform's quality score.</span>
+
+        <!-- ═══ SHEETS ═══ -->
+        <div class="sheet" id="sh-media" hidden>
+          <div class="shhead"><b>Photos</b><button class="ib" data-shclose aria-label="Close">×</button></div>
+          <div class="frow" id="mediastrip1" style="flex-wrap:wrap;margin:6px 0 2px"></div>
+          <p class="fine">First thing couples see. Required · 1:1 square.</p>
+          <div class="frow" id="mediastrip4" style="flex-wrap:wrap;margin:6px 0 2px"></div>
+          <p class="fine">Up to 5 photos + a 30-second clip.
+            <button class="info" data-info="gal" aria-label="About the gallery">i</button></p>
+          <span class="infobx" id="ib-gal" hidden>Optional, but cards with real shots sell
+            better. Photos downsize in the browser; the clip compresses automatically.</span>
+          <button class="cta shdone" data-shclose>Update card</button>
+        </div>
+
+        <div class="sheet" id="sh-price" hidden>
+          <div class="shhead"><b>Price</b><button class="ib" data-shclose aria-label="Close">×</button></div>
+          <div class="frow">
+            <select class="stsel" data-basis aria-label="Pricing basis" style="flex:1">
+              <option value="pax" selected>Per head (pax)</option>
+              <option value="hour">Per hour</option>
+              <option value="event">Per event (flat)</option>
+            </select>
+            <button class="info" data-info="price" aria-label="About pricing">i</button>
+          </div>
+          <span class="infobx" id="ib-price" hidden>Per head: a minimum pax to be able to
+            serve. Per hour: the base covers X hours, then +₱ per additional hour. Per event:
+            flat — regardless of hours and pax.</span>
+          <div id="basisfields"></div>
+          <div class="sec"><h3>Early-booking discounts
+            <button class="info" data-info="disc" aria-label="About discounts">i</button></h3></div>
+          <span class="infobx" id="ib-disc" hidden>The earlier a couple books, the bigger the
+            discount. Their event date picks the tier — watch it land on their card, live.
+            Automatic; never negotiated in chat.</span>
+          <div id="disctiers"></div>
+          <button class="addbtn" id="dtadd" style="margin-top:4px">+ Add tier</button>
+          <p class="fine">Their date picks the tier. Automatic.</p>
+          <button class="cta shdone" data-shclose>Update card</button>
+        </div>
+
+        <div class="sheet" id="sh-excl" hidden>
+          <div class="shhead"><b>Setnayan Exclusive</b><button class="ib" data-shclose aria-label="Close">×</button></div>
+          <div class="frow">
+            <input class="fld" id="exclfld" value="" placeholder="e.g. Free engagement mini-shoot for Setnayan couples" aria-label="Setnayan Exclusive">
+            <button class="branch" style="width:auto;flex:none;margin:0" data-sugg>✨ Suggest</button>
+          </div>
+          <p class="fine">Only on Setnayan. Required. ✨ cycles ideas — deterministic, no AI cost.
+            <button class="info" data-info="excl" aria-label="About the exclusive">i</button></p>
+          <span class="infobx" id="ib-excl" hidden>One thing couples only get by booking you
+            through Setnayan — on top of what you offer on the market.</span>
+          <button class="cta shdone" data-shclose>Update card</button>
+        </div>
+
+        <div class="sheet" id="sh-custom" hidden>
+          <div class="shhead"><b>What couples get</b><button class="ib" data-shclose aria-label="Close">×</button></div>
+          <span class="infobx" id="ib-incl" hidden>Your service's own inclusion rows. ⑂ splits
+            a “+” line into pieces; a leading count (“3 mains”) becomes a pick-3 choice.</span>
+          <p class="fine" style="margin:0 0 6px">⑂ split · ⠿ drag · branch options into
+            follow-up questions.
+            <button class="info" data-info="incl" aria-label="About inclusions">i</button>
+            <button class="info" data-info="drag" aria-label="About arranging">i</button></p>
+          <span class="infobx" id="ib-drag" hidden>Drag within a group to reorder; drag into
+            another group to change what a line is. Any option's ⑂ makes a follow-up the couple
+            only sees after picking it — and follow-ups branch again.</span>
+          <div id="mkincl"></div>
+          <div id="mk"></div>
+          <button class="addbtn" id="addline">+ Add a line</button>
+          <button class="cta shdone" data-shclose>Update card</button>
+        </div>
+
+        <div class="sheet" id="sh-aud" hidden>
+          <div class="shhead"><b>Who it's for</b><button class="ib" data-shclose aria-label="Close">×</button></div>
+          <div class="sec" style="margin-top:0"><h3>Life events
+            <button class="info" data-info="life" aria-label="About life events">i</button></h3></div>
+          <span class="infobx" id="ib-life" hidden>Milestones — weddings, debuts, christenings.
+            Already on your coverage; the maker now shows it.</span>
+          <div class="frow" id="lifechips" style="flex-wrap:wrap;margin:0 0 6px"></div>
+          <div class="sec" style="margin-top:6px"><h3>Events
+            <button class="info" data-info="evt" aria-label="About events">i</button></h3></div>
+          <span class="infobx" id="ib-evt" hidden>Organised occasions — corporate, graduations,
+            reunions, tournaments. Same coverage rows.</span>
+          <div class="frow" id="evchips" style="flex-wrap:wrap;margin:0 0 6px"></div>
+          <div class="sec" style="margin-top:6px"><h3>Faith
+            <button class="info" data-info="faith" aria-label="About faith">i</button></h3></div>
+          <span class="infobx" id="ib-faith" hidden>“Empty means all faiths welcomed.” Faith
+            UNLOCKS you for a couple's search; it never gates you out.</span>
+          <div class="frow" id="fachips" style="flex-wrap:wrap;margin:0 0 2px"></div>
+          <button class="cta shdone" data-shclose>Update card</button>
+        </div>
+
+        <div class="osvc" style="margin-top:12px">
+          <span style="font-family:inherit;font-size:12.5px;color:rgb(var(--ink)/.8)">Comes with — Event styling</span>
+          <span>from ₱25,000</span>
+        </div>
+        <p class="fine">Bundles your other cards. Shows only if you have them.</p>
+        <div id="recap"></div>
+        <button class="cta" id="pub" style="margin-top:8px">Save &amp; publish</button>
+        
+      </div>
+    </section>
+
+    <!-- ═══ COUPLE (live) ═══ -->
+    <section class="stage" id="couplecard">
+      <header>
+        <h2>The couple’s inquiry — re-rendered live</h2>
+        <p class="src">rendering: #3744 choice UI · pick-N counter: package_credit_v2 design (“3 of 5 chosen”)</p>
+      </header>
+      <div class="phone">
+        <p class="ctx"><b>Your wedding</b> · 14 Feb 2027 · <b>140 guests</b> · Tagaytay</p>
+        <div id="cmedia"></div>
+        <div id="cq"></div>
+        <div class="foot">
+          <div id="discline"></div>
+          <div class="est"><b>Estimated total</b><span class="a" id="est">₱—</span></div>
+          <p class="fine" id="basecopy"></p>
+          <button class="cta">Send inquiry</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="lightbox" hidden></div>
+  <div id="mobilebar" aria-hidden="false">
+    <span class="mono" style="font-size:11px;color:rgb(var(--ink)/.6)">Their total&nbsp;
+      <b id="mest" style="color:rgb(var(--ink));font-size:14px">₱—</b></span>
+    <button class="cta" id="seecard" style="width:auto;margin:0;padding:9px 14px;font-size:13px">Their card →</button>
+  </div>
+
+  <!-- ═══ THE RULE PROBLEM ═══ -->
+  <section class="stage" style="margin-top:26px">
+    <header>
+      <h2>The problem: chat rules on card text</h2>
+      <p class="src">rules ported verbatim from lib/chat-contact-filter.ts · verdicts computed live, not typed in</p>
+    </header>
+    <div class="phone">
+      <p class="fine" style="margin:0 0 10px">The blocker was written for <b>chat messages</b>.
+        A card is different text: it says what you sell. Below, every row is judged by the
+        REAL rules — left, the chat rules exactly as they ship today; right, a card profile
+        that drops the two rules that misfire on product words and price lists.</p>
+      <div class="frow">
+        <input class="fld" id="ruletry" value="Instagram teaser reel"
+               aria-label="Try any card text">
+      </div>
+      <div id="rulelive" style="margin:6px 0 14px"></div>
+      <div id="ruletable"></div>
+      <p class="fine">Only two rules change for cards: <b>app names</b> (Instagram · TikTok ·
+        FB) become allowed, because on a card they name a <i>deliverable</i>, not a way to
+        reach the vendor — and the “message me on Instagram” case is caught by the
+        solicitation rule regardless; and the <b>long-digit run</b> rule is dropped, because
+        a price ladder is not a phone number. Phone, email, links, @handles and solicitation
+        all still block. <span class="tag t-ships">chat rules unchanged</span>
+        <span class="tag t-new">card profile — owner’s call</span></p>
+    </div>
+  </section>
+</div>
+
+<script>
+  var peso = function(n){ return '₱' + n.toLocaleString('en-PH'); };
+  var basePhp = 0;
+  var uid = 10;
+
+  // REAL upstream: the service's own inclusion rows (Services page).
+  // BLANK BY DEFAULT (owner: "do not prefill it") — the real first-run.
+  var svcIncl = [];
+  var lines = [];
+  var sel = {}; var qty = {};
+
+  // shipped media fields (wizard step 1 cover + "Value & media" showcase) — demo toggles
+  var media = { cover: false, coverUrl: null, photos: 0, photoUrls: [], clip: false };
+  var svcTitle = '';
+  // lead-time discounts (owner: "discounts depend on how far their event is")
+  var discTiers = [];
+  var EVENT_DATE = new Date('2027-02-14T00:00:00');
+  function monthsAway(){
+    return (EVENT_DATE.getTime() - new Date().getTime()) / (1000 * 3600 * 24 * 30.44);
+  }
+  function activeTier(){
+    var ma = monthsAway(), best = null;
+    discTiers.forEach(function(tr){
+      if (ma >= tr.m && (!best || tr.m > best.m)) best = tr;
+    });
+    return best;
+  }
+  var basisV = 'pax';
+  // price is LIVE-EDIT like everything else on the canvas — no Save button.
+  // priceIn holds what the vendor types; basePhp derives what the demo couple
+  // (140 guests · 6 hours) would start at, feeding the couple-side estimate.
+  var priceIn = { base: 0, inc: 0, extra: 0 }; // ₱ · hrs-covered|min-pax · ₱/extra-hr
+  var DEMO_GUESTS = 140, DEMO_HOURS = 6;
+  function syncBase(){
+    if (!(priceIn.base > 0)){ basePhp = 0; return; }
+    if (basisV === 'pax')
+      basePhp = priceIn.base * Math.max(DEMO_GUESTS, priceIn.inc || 0);
+    else if (basisV === 'hour')
+      basePhp = priceIn.base
+        + (priceIn.inc > 0 ? Math.max(0, DEMO_HOURS - priceIn.inc) * (priceIn.extra || 0) : 0);
+    else basePhp = priceIn.base;
+  }
+  function pn(v){ return v.toLocaleString('en-PH'); }
+  function priceLabel(){
+    var b = '<b>₱' + pn(priceIn.base) + '</b>';
+    if (basisV === 'pax')
+      return b + '&nbsp;per head' + (priceIn.inc > 0 ? ' · min ' + priceIn.inc + ' pax' : '');
+    if (basisV === 'hour')
+      return b + (priceIn.inc > 0 ? '&nbsp;for ' + priceIn.inc + ' hrs' : '')
+        + (priceIn.extra > 0 ? ' · +₱' + pn(priceIn.extra) + '/hr after' : '');
+    return b + '&nbsp;flat';
+  }
+  function renderBasisFields(){
+    var el = document.getElementById('basisfields'); if (!el) return;
+    var vb = priceIn.base ? '" value="' + pn(priceIn.base) : '';
+    var vi = priceIn.inc ? '" value="' + priceIn.inc : '';
+    var vx = priceIn.extra ? '" value="' + pn(priceIn.extra) : '';
+    if (basisV === 'hour'){
+      el.innerHTML = '<div class="frow"><span class="pfx"><span>₱</span><input placeholder="25,000' + vb + '" inputmode="numeric" data-pin="base" aria-label="Base price"></span>'
+        + '<span class="fine" style="margin:0;flex:none">covers first</span>'
+        + '<input class="fld pz" style="width:44px" placeholder="4' + vi + '" data-pin="inc" aria-label="Hours included">'
+        + '<span class="fine" style="margin:0;flex:none">hrs</span></div>'
+        + '<div class="frow"><span class="pfx"><span>+₱</span><input placeholder="6,000' + vx + '" inputmode="numeric" data-pin="extra" aria-label="Per extra hour"></span>'
+        + '<span class="fine" style="margin:0;flex:none">per additional hour</span></div>';
+    } else if (basisV === 'event'){
+      el.innerHTML = '<div class="frow"><span class="pfx"><span>₱</span><input placeholder="80,000' + vb + '" inputmode="numeric" data-pin="base" aria-label="Flat price"></span>'
+        + '<span class="fine" style="margin:0;flex:none">flat — any hours, any pax</span></div>';
+    } else {
+      el.innerHTML = '<div class="frow"><span class="pfx"><span>₱</span><input placeholder="1,200' + vb + '" inputmode="numeric" data-pin="base" aria-label="Per head"></span>'
+        + '<span class="fine" style="margin:0;flex:none">per head · minimum</span>'
+        + '<input class="fld pz" style="width:52px" placeholder="50' + vi + '" data-pin="inc" aria-label="Minimum pax">'
+        + '<span class="fine" style="margin:0;flex:none">pax to serve</span></div>';
+    }
+  }
+  function renderDiscounts(){
+    var el = document.getElementById('disctiers'); if (!el) return;
+    el.innerHTML = discTiers.map(function(tr, i){
+      return '<div class="frow dtrow">'
+        + '<span class="fine" style="margin:0;flex:none">Book</span>'
+        + '<input class="fld pz" style="width:44px" value="' + tr.m + '" inputmode="numeric" data-dtm="' + i + '" aria-label="Months ahead">'
+        + '<span class="fine" style="margin:0;flex:none">+ months ahead →</span>'
+        + '<span class="pfx"><span>−</span><input inputmode="numeric" value="' + tr.p + '" data-dtp="' + i + '" style="width:40px" aria-label="Percent off"><span style="padding:0 8px 0 0">%</span></span>'
+        + '<button class="ib" data-dtrm="' + i + '" aria-label="Remove tier">×</button>'
+        + '</div>';
+    }).join('');
+  }
+  // audience — BOTH already live on vendor_coverages (event_types[] + faiths[]);
+  // the wizard never showed them. Empty faiths = "all faiths welcomed" (shipped rule).
+  var evsel = {};
+  var fasel = {};
+  var LIFE_OPTS = [['wedding','Wedding'],['debut','Debut'],['christening','Christening'],
+    ['birthday','Birthday'],['anniversary','Anniversary'],['gender_reveal','Gender reveal']];
+  var EVT_OPTS = [['corporate','Corporate'],['graduation','Graduation'],
+    ['reunion','Reunion'],['tournament','Tournament'],['travel','Travel']];
+  var FA_OPTS = [['catholic','Catholic'],['christian','Christian'],['inc','INC'],
+    ['muslim','Muslim'],['chinese','Chinese'],['civil','Civil']];
+  function chipRow(opts){
+    return opts.map(function(o){
+      return '<button class="mchip' + (evsel[o[0]] ? ' on' : '') + '" data-ev="' + o[0] + '">'
+        + (evsel[o[0]] ? '✓ ' : '＋ ') + o[1] + '</button>';
+    }).join('');
+  }
+  function renderAudience(){
+    var lf = document.getElementById('lifechips');
+    if (lf) lf.innerHTML = chipRow(LIFE_OPTS);
+    var ev = document.getElementById('evchips');
+    if (ev) ev.innerHTML = chipRow(EVT_OPTS);
+    var fa = document.getElementById('fachips');
+    if (fa){
+      var any = Object.keys(fasel).some(function(k){ return fasel[k]; });
+      fa.innerHTML = '<button class="mchip' + (!any ? ' on' : '') + '" data-fa="all">'
+        + (!any ? '✓ ' : '') + 'All faiths</button>'
+        + FA_OPTS.map(function(o){
+            return '<button class="mchip' + (fasel[o[0]] ? ' on' : '') + '" data-fa="' + o[0] + '">'
+              + (fasel[o[0]] ? '✓ ' : '＋ ') + o[1] + '</button>';
+          }).join('');
+    }
+  }
+
+  // the REAL wizard steps (service-wizard.tsx:69-77) + the merged ★ Customization step
+  // ZERO steps (owner: "can be 2 or 3 or 1… feels light and easy") — the CARD is the
+  // form. Tap a region, a sheet opens, the card updates behind it. Navigation is gone.
+  var SHEETS = ['media', 'price', 'excl', 'custom', 'aud'];
+  var exclV = '';
+  function openSheet(key){
+    SHEETS.forEach(function(k){
+      var el = document.getElementById('sh-' + k);
+      if (el) el.hidden = (k !== key);
+    });
+  }
+  function closeSheets(){ openSheet('__none__'); }
+  function loadExample(){
+    svcTitle = 'Catering — buffet & plated';
+    exclV = 'Free dessert-table upgrade for Setnayan couples';
+    media.cover = true; media.clip = true;
+    media.photoUrls = [null, null, null]; media.photos = 3;
+    evsel = { wedding: true, debut: true };
+    discTiers = [{ m: 12, p: 15 }, { m: 6, p: 10 }];
+    basisV = 'pax';
+    priceIn = { base: 1200, inc: 50, extra: 0 };
+    syncBase(); // 1,200 × max(140 demo guests, 50 min) = 168,000
+    svcIncl = ['Rice + 3 mains + 2 sides', 'Dessert + iced tea, free-flowing',
+      'Buffet setup, staff & styling', '2-hour service window'];
+    lines = [
+      { id:'buf', label:'Buffet for your guest count', state:'required' },
+      { id:'des', label:'Dessert station', state:'optional', worth:18000 },
+      { id:'bar', label:'Mobile bar · 4 hrs', state:'optional', worth:22000 },
+      { id:'hr',  label:'Extra service hour', state:'qty', unit:6000, max:4 }
+    ];
+    sel = {}; qty = {}; prevFU = {};
+    var tf = document.getElementById('cardtitle'); if (tf) tf.value = svcTitle;
+    var ef = document.getElementById('exclfld'); if (ef) ef.value = exclV;
+    render([]);
+  }
+  function exclShort(){
+    var v = (exclV || '').trim();
+    return v.length > 46 ? v.slice(0, 44) + '…' : v;
+  }
+  function renderCard(){
+    var el = document.getElementById('makercard'); if (!el) return;
+    var incl = lines.filter(function(l){ return l.state === 'required' || l.state === 'included'; })
+      .map(lineName).concat(svcIncl);
+    var shown = incl.slice(0, 3), more = incl.length - shown.length;
+    var evs = LIFE_OPTS.concat(EVT_OPTS).filter(function(o){ return evsel[o[0]]; })
+      .map(function(o){ return o[1]; });
+    var fan = Object.keys(fasel).filter(function(k){ return fasel[k]; }).length;
+    var tier = activeTier();
+    el.innerHTML =
+      '<button class="ez cover" data-sheet="media" aria-label="Edit photos">'
+        + (media.coverUrl ? '<img src="' + media.coverUrl + '" alt="">'
+           : media.cover ? '<span class="ezc ok2">✓ cover set</span>'
+           : '<span class="ezc">＋ Add cover photo<span class="upreq">required</span></span>')
+        + (media.photos ? '<span class="galn">' + media.photos + ' photo' + (media.photos > 1 ? 's' : '')
+            + (media.clip ? ' · clip' : '') + '</span>' : '')
+        + '</button>'
+      + '<div class="cbody">'
+      + '<input class="ctitle" id="cardtitle" data-svctitle value="' + svcTitle.replace(/"/g, '&quot;')
+        + '" placeholder="Name this service — e.g. \u201cComplete Wedding Catering\u201d" aria-label="Service name">'
+      + '<button class="ez line" data-sheet="price">'
+        + (priceIn.base > 0 ? priceLabel() : '<span class="dim2">Set your price</span>')
+        + (tier && priceIn.base > 0 ? ' · <span class="okc">−' + tier.p + '% early-booking</span>' : '')
+        + '<span class="pen">✎</span></button>'
+      + '<button class="ez line gold" data-sheet="excl">✦ '
+        + (exclShort() || 'Add your Setnayan Exclusive') + '<span class="pen">✎</span></button>'
+      + '<button class="ez blockz" data-sheet="custom">'
+        + shown.map(function(x){ return '<span class="inc3">✓ ' + x + '</span>'; }).join('')
+        + (more > 0 ? '<span class="inc3 dim">+' + more + ' more — customize</span>'
+                    : '<span class="inc3 dim">Customize choices</span>')
+        + '<span class="pen">✎</span></button>'
+      + '<button class="ez line" data-sheet="aud">'
+        + (evs.slice(0, 3).join(' · ') || 'Pick your events')
+        + (evs.length > 3 ? ' +' + (evs.length - 3) : '')
+        + ' · ' + (fan ? fan + ' faith' + (fan > 1 ? 's' : '') : 'All faiths')
+        + '<span class="pen">✎</span></button>'
+      + '</div>';
+  }
+  // === the SHIPPED chat rules, ported verbatim from lib/chat-contact-filter.ts ===
+  // so this page shows what the REAL detector does, not an approximation.
+  var SPELLED = { zero:'0', one:'1', two:'2', three:'3', four:'4',
+                  five:'5', six:'6', seven:'7', eight:'8', nine:'9' };
+  function toNumerals(t){
+    return t.replace(/\b(zero|one|two|three|four|five|six|seven|eight|nine)\b/gi,
+      function(m){ return SPELLED[m.toLowerCase()] || m; });
+  }
+  var PHONE_SHAPE = /(?:0|63)?9\d{9}/;
+  // gap 20 = chat (fuses digits across whole phrases) · gap 2 = card profile:
+  // "(0917) 880 7163" still fuses, but "2026-09-17 - 2026-12-31" no longer does
+  function phoneTier1(raw, gap){
+    var g = gap === undefined ? 20 : gap;
+    var t = toNumerals(raw).replace(/[^\d]+/g, function(r){ return r.length <= g ? '' : '\n'; });
+    return t.split('\n').some(function(x){ return x.length >= 10 && PHONE_SHAPE.test(x); });
+  }
+  function phoneTier2(raw){
+    var t = toNumerals(raw).replace(/[\s().+-]{1,2}/g, '');
+    return t.split(/\D+/).some(function(g){ return g.length >= 11; });
+  }
+  var EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
+  var EMAIL_OBF = /[A-Za-z0-9._%+-]+\s*(?:\(at\)|\[at\]|\bat\b)\s*[A-Za-z0-9.-]+\s*(?:\(dot\)|\[dot\]|\bdot\b)\s*[A-Za-z]{2,}/i;
+  var SOCIAL_URL = new RegExp('(?:https?:\\/\\/)?(?:www\\.)?(?:'
+    + '(?:wa\\.me|m\\.me|t\\.me|fb\\.me|instagr\\.am)(?:\\/[^\\s]*)?|'
+    + '(?:facebook|fb|messenger|instagram|whatsapp|viber|telegram|tiktok|twitter|x|linkedin|snapchat|kakao|wechat)'
+    + '\\.(?:com|net|org|me|ph|io)(?:\\/[^\\s]*)?)', 'i');
+  var HANDLE = /(?:^|[^\w@/])@[A-Za-z][A-Za-z0-9._]{1,30}\b/;
+  var APPNAME = [
+    { l:'Facebook / Messenger', re:/\bfacebook\b|\bfb\b|\bmessenger\b/i },
+    { l:'Viber', re:/\bviber\b/i },
+    { l:'WhatsApp', re:/\bwhats\s?app\b|\bwassap\b|\bwsp\b/i },
+    { l:'Telegram', re:/\btelegram\b/i },
+    { l:'Instagram', re:/\binstagram\b|\binsta\b|\big\b/i },
+    { l:'Other messaging app', re:/\bsnapchat\b|\btiktok\b|\bwechat\b|\bkakao(?:talk)?\b|\bimessage\b/i }
+  ];
+  var EUPH = { l:'Coded app name', re:/\b(?:blue|purple|green|pink)\s+app\b/i };
+  var SOLICIT = { l:'Solicitation to move off-platform',
+    re:/\b(?:(?:message|msg|add|find|reach|contact|call|text|chat|dm|pm|ping)\s+me\s+(?:on|at|via)|(?:my|here'?s\s+my|this\s+is\s+my)\s+(?:number|cell|mobile|contact|email|gcash|viber|whatsapp)|hit\s+me\s+up|let'?s\s+(?:connect|chat|talk)\s+(?:on|via|outside)|outside\s+the\s+app|off\s+(?:the\s+)?platform)\b/i };
+
+  // profile 'chat' = today's rules verbatim  ·  'card' = the proposed card profile
+  // pointing AT Setnayan is the opposite of a bypass — never block it
+  var TO_SETNAYAN = /\b(?:on|here on|through|via|in)\s+setnayan\b/i;
+  function evaluate(text, profile){
+    var t = text || '', card = profile === 'card', hits = [];
+    if (phoneTier1(t, card ? 2 : 20)) hits.push('Phone number');
+    else if (!card && phoneTier2(t)) hits.push('Phone number (long-digit run)');
+    if (EMAIL.test(t) || EMAIL_OBF.test(t)) hits.push('Email address');
+    if (SOCIAL_URL.test(t)) hits.push('Social/messaging link');
+    if (HANDLE.test(t)) hits.push('@ used as a handle');
+    if (!card){
+      APPNAME.forEach(function(r){ if (r.re.test(t)) hits.push(r.l); });
+      if (EUPH.re.test(t)) hits.push(EUPH.l);
+    }
+    if (SOLICIT.re.test(t) && !(card && TO_SETNAYAN.test(t))) hits.push(SOLICIT.l);
+    return hits;
+  }
+  // owner 2026-07-27: "@" stays blocked (we cannot tell @Tagaytay from @juanphotos)
+  // and the fix is the MESSAGE — teach "at Tagaytay". A second, more serious
+  // reason present alongside it must never be softened into a formatting tip.
+  function contactHit(t){
+    var h = evaluate(t, 'card');
+    if (!h.length) return null;
+    if (h.length === 1 && h[0] === '@ used as a handle'){
+      // quote the vendor's OWN word, not the regex's match: HANDLE stops at a
+      // hyphen, so "@Shangri-La" would otherwise be suggested as "at Shangri".
+      var m = (t || '').match(/@[A-Za-z][A-Za-z0-9._-]*/);
+      var word = m ? m[0].slice(1) : 'Tagaytay';
+      return 'the @ reads as a social handle — write \u201cat ' + word
+        + '\u201d instead of \u201c@' + word + '\u201d';
+    }
+    return h[0];
+  }
+
+  // owner 2026-07-27: "saving builds blank will make us autocreate a name for the
+  // build" - a blank NEVER blocks the save; we name it and the vendor can rename.
+  function autoLineName(l){
+    var peers = lines.filter(function(x){ return x.state === l.state; });
+    var n = peers.indexOf(l) + 1;
+    if (l.state === 'choice') return 'Choice ' + n;
+    if (l.state === 'qty') return 'Extra ' + n;
+    if (l.state === 'optional') return 'Add-on ' + n;
+    return 'Item ' + n;
+  }
+  function lineName(l){ return (l.label || '').trim() || autoLineName(l); }
+  function optName(l, oi){ return ((l.opts[oi] || {}).l || '').trim() || ('Option ' + (oi + 1)); }
+  function autoNamed(){
+    var out = [];
+    lines.forEach(function(l){
+      if (!(l.label || '').trim()) out.push(autoLineName(l));
+      if (l.state === 'choice') (l.opts || []).forEach(function(o, oi){
+        if (!(o.l || '').trim()) out.push(optName(l, oi));
+      });
+    });
+    return out;
+  }
+
+  var GROUPS = [
+    { key:'inc', label:'Included in the price', match:['required','included'],
+      hint:'a new line lands here — drag it anywhere, or flip its state' },
+    { key:'choice', label:'Choices', match:['choice'],
+      hint:'drag a line here, set one to “Choice”, or ⑂ split an inclusion in Value & media' },
+    { key:'qty', label:'Quantities', match:['qty'], hint:'drag a line here to make it a quantity' },
+    { key:'opt', label:'Optional add-ons', match:['optional'], hint:'drag a line here to make it optional' }
+  ];
+  var STATES = ['required','included','optional','choice','qty'];
+  var SLABEL = { required:'Required', included:'Included', optional:'Optional',
+                 choice:'Choice', qty:'Quantity' };
+  function groupOf(st){ return GROUPS.filter(function(g){ return g.match.indexOf(st) >= 0; })[0]; }
+  function byId(id){ return lines.filter(function(l){ return l.id === id; })[0]; }
+  var revealSet = {};
+  function fuVisible(l){
+    if (!l.parent) return true;
+    var pl = byId(l.parent.line);
+    if (!pl || !fuVisible(pl)) return false;
+    return (pl.pick || 1) === 1
+      ? sel[pl.id] === l.parent.opt
+      : (sel[pl.id] || []).indexOf(l.parent.opt) >= 0;
+  }
+
+  // example dishes a vendor would type (freely editable demo values)
+  var SEED = { mains: [
+    { l:'Kare-kare', d:0 }, { l:'Roast chicken', d:0 }, { l:'Baked fish', d:0 },
+    { l:'Lechon belly', d:4000 }, { l:'Garlic prawns', d:6000 } ] };
+
+  // split: separators become lines; a leading count becomes a pick-N choice
+  function splitIncl(ix){
+    var parts = svcIncl[ix].split(/\s*[+·]\s*/).filter(Boolean), made = [];
+    parts.forEach(function(part){
+      var m = part.match(/^(\d+)\s+(.+)$/), id = 'n' + (uid++);
+      var label = (m ? m[2] : part); label = label.charAt(0).toUpperCase() + label.slice(1);
+      if (m && +m[1] > 1){
+        var n = +m[1], key = m[2].toLowerCase();
+        var opts = SEED[key] ? SEED[key].map(function(o){ return { l:o.l, d:o.d }; })
+          : Array.apply(null, Array(n)).map(function(){ return { l:'', d:0 }; });
+        lines.push({ id:id, label:label, state:'choice', pick:n, opts:opts });
+        sel[id] = [];
+      } else {
+        lines.push({ id:id, label:label, state:'included' });
+      }
+      made.push(id);
+    });
+    svcIncl.splice(ix, 1);
+    render(made);
+  }
+
+  // the recursion: promote an OPTION into its own follow-up LINE
+  function branchOption(lineId, oi){
+    var parent = byId(lineId), o = parent.opts[oi], id = 'n' + (uid++);
+    lines.push({
+      id:id, label:(o.l || 'Option') + ' — style', state:'choice', pick:1,
+      opts:[ { l:'', d:0, std:true }, { l:'', d:0 } ],
+      parent:{ line:lineId, opt:oi }
+    });
+    render([id]);
+  }
+
+  function addLine(){
+    var id = 'n' + (uid++);
+    lines.push({ id:id, label:'', state:'included' });
+    render([id]);
+    var el = document.querySelector('#mk [data-lbl="' + id + '"]'); if (el) el.focus();
+  }
+
+  function lineRow(l){
+    var multi = (l.pick || 1) > 1;
+    var h = '<div class="item' + (l._flash ? ' flash' : '') + '" data-row="' + l.id + '">';
+    if (l.parent){
+      var pl = byId(l.parent.line);
+      h += '<p class="becomes" style="margin:0 0 4px">↳ follows “'
+        + optName(pl, l.parent.opt) + '” on ' + lineName(pl)
+        + ' <span class="tag t-new">follow-up</span></p>';
+    }
+    h += '<div class="frow">'
+      + '<span class="grip" data-grip="' + l.id + '" role="button"'
+      + ' aria-label="Drag to reorder — or into another group"'
+      + ' title="Drag to reorder — or into another group">⠿</span>'
+      + '<input class="fld" value="' + (l.label || '') + '" placeholder="' + autoLineName(l) + '"'
+      + ' data-lbl="' + l.id + '" aria-label="What this inclusion is">'
+      + '<select class="stsel" data-st="' + l.id + '" aria-label="State">'
+      + STATES.map(function(st){ return '<option value="' + st + '"'
+          + (l.state === st ? ' selected' : '') + '>' + SLABEL[st] + '</option>'; }).join('')
+      + '</select>'
+      + '<button class="ib" data-rm="' + l.id + '" aria-label="Remove this inclusion">×</button>'
+      + '</div>';
+    if (l.state === 'optional')
+      h += '<div class="frow" style="margin-left:30px"><span class="fine" style="margin:0">worth if dropped</span>'
+        + '<span class="pfx"><span>₱</span><input inputmode="numeric" value="'
+        + (l.worth ? l.worth.toLocaleString() : '') + '" data-worth="' + l.id
+        + '" placeholder="0" aria-label="Worth in pesos"></span></div>';
+    if (l.state === 'qty')
+      h += '<div class="frow" style="margin-left:30px"><span class="pfx"><span>₱</span>'
+        + '<input inputmode="numeric" value="' + (l.unit || 0).toLocaleString()
+        + '" aria-label="Price per unit"></span><span class="fine" style="margin:0">/ unit · max</span>'
+        + '<input class="fld pz" style="width:48px" value="' + (l.max || 1) + '"> '
+        + '<span class="tag t-new">max_qty — no schema</span></div>';
+    if (l.state === 'choice'){
+      (l.opts = l.opts || [{ l:'', d:0, std:true }]).forEach(function(o, oi){
+        h += '<div class="optrow">'
+          + (multi ? '' : '<input type="radio" name="std-' + l.id + '"'
+              + (o.std ? ' checked' : '') + ' data-std="' + l.id + ':' + oi
+              + '" aria-label="Make this the standard option">')
+          + '<input class="fld" value="' + o.l + '" placeholder="Option ' + (oi + 1) + '" data-ol="' + l.id + ':' + oi + '">'
+          + (!multi && o.std
+            ? '<span class="pfx"><span>+₱</span><input value="" placeholder="" disabled'
+              + ' aria-label="The standard pick — no additional cost"></span>'
+            : '<span class="pfx"><span>+₱</span><input inputmode="numeric" value="'
+              + (o.d ? o.d.toLocaleString() : '') + '" placeholder="0"'
+              + ' data-od="' + l.id + ':' + oi + '" aria-label="Extra cost in pesos"></span>')
+          + '<button class="ib" title="Branch this option into its own line" data-bo="'
+          + l.id + ':' + oi + '">⑂</button>'
+          + '</div>';
+      });
+      h += '<p class="fine" style="margin:2px 0 0 12px">Amounts only — 0 or blank shows as'
+        + ' “included”. ⑂ turns an option into its own follow-up line.</p>'
+        + '<div class="frow" style="margin-left:12px">'
+        + '<button class="addbtn" style="margin:0" data-addopt="' + l.id + '">+ Add option</button>'
+        + '<span class="fine" style="margin:0;flex:none">pick '
+        + '<input class="fld pz" style="width:40px" value="' + (l.pick || 1) + '" data-pick="' + l.id + '">'
+        + (multi ? ' <span class="tag t-part">pick-N — columns to add</span>' : '')
+        + '</span></div>';
+    }
+    return h + '</div>';
+  }
+
+  function renderMaker(flash){
+    lines.forEach(function(l){ l._flash = flash.indexOf(l.id) >= 0; });
+    var inclH = '';
+    svcIncl.forEach(function(t, ix){
+      inclH += '<div class="osvc" style="align-items:center"><span style="font-family:inherit;font-size:12.5px;color:rgb(var(--ink)/.8)">' + t + '</span>'
+        + (/[+·]/.test(t)
+          ? '<button class="branch" style="width:auto;margin:0;flex:none" data-split="' + ix + '">⑂ Split into lines</button>'
+          : '<button class="ib" style="width:auto;padding:0 8px" data-mkline="' + ix + '" title="Make this a line">⑂</button>')
+        + '</div>';
+    });
+    document.getElementById('mkincl').innerHTML =
+      inclH || '<p class="fine">Every inclusion has become a line below.</p>';
+
+    var h = '';
+    GROUPS.forEach(function(g){
+      var gLines = lines.filter(function(l){ return g.match.indexOf(l.state) >= 0; });
+      h += '<div class="sec"><h3>' + g.label + '</h3></div>';
+      if (gLines.length === 0)
+        h += '<div class="fine gz" data-gz="' + g.key + '" style="margin:0 0 8px;border:1px dashed rgb(var(--ink)/.2);border-radius:8px;padding:8px 10px">'
+          + (g.hint || 'drag a line here') + '</div>';
+      gLines.forEach(function(l){ h += lineRow(l); });
+    });
+    document.getElementById('mk').innerHTML = h;
+  }
+
+  // a choice block plus its visible follow-ups, recursively — a follow-up shows
+  // only while its parent option is picked (parent_option_id semantics)
+  function choiceBlock(l){
+    var n = l.pick || 1, h = '';
+    if (n === 1){
+      h += '<div class="block' + (l.parent ? ' follow' : '') + (revealSet[l.id] ? ' reveal' : '') + '"><h4>' + lineName(l) + ' — pick one'
+        + (l.parent ? ' <span class="tag t-new">follow-up</span>' : '') + '</h4>';
+      (l.opts || []).forEach(function(o, oi){
+        h += '<label class="opt"><input type="radio" name="cq-' + l.id + '" data-c1="' + l.id
+          + ':' + oi + '"' + (sel[l.id] === oi ? ' checked' : '') + '> ' + optName(l, oi)
+          + '<span class="d">' + (o.d ? '+' + peso(o.d) : '') + '</span></label>';
+      });
+      h += '</div>';
+    } else {
+      var picked = (sel[l.id] || []);
+      h += '<div class="block"><h4>' + lineName(l) + ' — choose ' + n
+        + ' <span class="cnt' + (picked.length === n ? ' done' : '') + '">'
+        + picked.length + ' of ' + n + ' chosen</span></h4>';
+      (l.opts || []).forEach(function(o, oi){
+        var on = picked.indexOf(oi) >= 0;
+        h += '<label class="opt"><input type="checkbox" data-cn="' + l.id + ':' + oi + '"'
+          + (on ? ' checked' : '') + (!on && picked.length >= n ? ' disabled' : '')
+          + '> ' + optName(l, oi) + '<span class="d">'
+          + (o.d ? '+' + peso(o.d) : '') + '</span></label>';
+      });
+      h += '<p class="fine">Below ' + n + ' you can’t send — it’s an unfinished order, not a'
+        + ' cheaper one. <span class="tag t-part">pick-N</span></p></div>';
+    }
+    lines.filter(function(c){ return c.parent && c.parent.line === l.id; }).forEach(function(c){
+      var pickedHere = (l.pick || 1) === 1
+        ? sel[l.id] === c.parent.opt
+        : (sel[l.id] || []).indexOf(c.parent.opt) >= 0;
+      if (pickedHere) h += choiceBlock(c);
+    });
+    return h;
+  }
+
+  function renderCoupleMedia(){
+    var el = document.getElementById('cmedia'); if (!el) return;
+    if (!media.cover && !media.photos && !media.clip){ el.innerHTML = ''; return; }
+    var h = '';
+    if (media.cover)
+      h += '<button class="ccover" data-lb="cover" aria-label="View cover">'
+        + (media.coverUrl ? '<img src="' + media.coverUrl + '" alt="">'
+                          : '<span class="mono" style="font-size:10px">cover · 4:3</span>')
+        + '</button>';
+    if (media.photos || media.clip){
+      h += '<div class="cstrip">';
+      (media.photoUrls || []).forEach(function(u, i){
+        h += '<button class="cthumb" data-lb="p' + i + '" aria-label="View photo ' + (i + 1) + '">'
+          + (u ? '<img src="' + u + '" alt="">' : '<span>' + (i + 1) + '</span>') + '</button>';
+      });
+      if (media.clip) h += '<button class="cthumb clip" data-lb="clip" aria-label="Play clip">▶ 0:30</button>';
+      h += '</div>';
+    }
+    el.innerHTML = h;
+  }
+  function openLightbox(key){
+    var lb = document.getElementById('lightbox'); if (!lb) return;
+    var src = key === 'cover' ? media.coverUrl
+      : key === 'clip' ? null
+      : (media.photoUrls || [])[+key.slice(1)];
+    lb.hidden = false;
+    lb.innerHTML = '<button class="lbx" data-lbclose aria-label="Close">×</button>'
+      + (key === 'clip'
+        ? '<div class="lbclip">▶<br><span class="mono" style="font-size:11px">the 30s clip plays inline</span></div>'
+        : src ? '<img src="' + src + '" alt="">'
+              : '<div class="lbclip mono" style="font-size:11px">photo opens full-screen</div>');
+  }
+  var prevFU = {};
+  function renderCouple(){
+    // animate ONLY newly-revealed follow-ups — a full re-render must not re-animate everything
+    var nowFU = {};
+    lines.forEach(function(l){ if (l.parent && fuVisible(l)) nowFU[l.id] = true; });
+    revealSet = {};
+    Object.keys(nowFU).forEach(function(id){ if (!prevFU[id]) revealSet[id] = true; });
+    prevFU = nowFU;
+    var inc = lines.filter(function(l){ return l.state === 'required' || l.state === 'included'; });
+    var h = '<div class="block"><h4>Included</h4><ul class="inc2">';
+    inc.forEach(function(l){ h += '<li><span class="tick">✓</span><span>' + lineName(l) + '</span></li>'; });
+    svcIncl.forEach(function(t){ h += '<li><span class="tick">✓</span><span>' + t + '</span></li>'; });
+    h += '</ul></div>';
+
+    lines.filter(function(l){ return l.state === 'choice' && !l.parent; })
+         .forEach(function(l){ h += choiceBlock(l); });
+
+    var opts = lines.filter(function(l){ return l.state === 'optional'; });
+    if (opts.length){
+      h += '<div class="block"><h4>Add on if you’d like</h4>';
+      opts.forEach(function(l){
+        h += '<label class="opt"><input type="checkbox" data-ao="' + l.id + '"'
+          + (sel[l.id] ? ' checked' : '') + '> ' + lineName(l)
+          + '<span class="d">+' + peso(l.worth || 0) + '</span></label>';
+      });
+      h += '</div>';
+    }
+    lines.filter(function(l){ return l.state === 'qty'; }).forEach(function(l){
+      var q = qty[l.id] || 0;
+      h += '<div class="block"><h4>' + lineName(l) + '</h4><div class="frow">'
+        + '<button class="ib" data-q="-1" data-id="' + l.id + '"' + (q === 0 ? ' disabled' : '') + '>−</button>'
+        + '<span class="cnt">' + q + ' / max ' + (l.max || 1) + '</span>'
+        + '<button class="ib" data-q="1" data-id="' + l.id + '"' + (q >= (l.max || 1) ? ' disabled' : '') + '>+</button>'
+        + '<span class="mono" style="margin-left:auto;font-size:12px;color:rgb(var(--ink)/.6)">'
+        + peso(l.unit || 0) + ' / unit</span></div></div>';
+    });
+    document.getElementById('cq').innerHTML = h;
+
+    function visible(l){
+      if (!l.parent) return true;
+      var pl = byId(l.parent.line);
+      if (!pl || !visible(pl)) return false;
+      return (pl.pick || 1) === 1
+        ? sel[pl.id] === l.parent.opt
+        : (sel[pl.id] || []).indexOf(l.parent.opt) >= 0;
+    }
+    var t = basePhp;
+    lines.forEach(function(l){
+      if (l.state === 'choice' && visible(l)){
+        if ((l.pick || 1) === 1 && sel[l.id] != null) t += (l.opts[sel[l.id]] || {}).d || 0;
+        if ((l.pick || 1) > 1) (sel[l.id] || []).forEach(function(oi){ t += (l.opts[oi] || {}).d || 0; });
+      }
+      if (l.state === 'optional' && sel[l.id]) t += l.worth || 0;
+      if (l.state === 'qty') t += (qty[l.id] || 0) * (l.unit || 0);
+    });
+    renderCoupleMedia();
+    var bc = document.getElementById('basecopy');
+    if (bc){
+      if (!(priceIn.base > 0)) bc.textContent = 'Set a price to see their live total.';
+      else if (basisV === 'pax'){
+        var billed = Math.max(DEMO_GUESTS, priceIn.inc || 0);
+        bc.textContent = '\u20b1' + pn(priceIn.base) + ' \u00d7 ' + billed + ' guests'
+          + (billed > DEMO_GUESTS ? ' (their ' + DEMO_GUESTS + ' billed at your ' + priceIn.inc + '-pax minimum)' : '')
+          + '. The vendor confirms in their reply.';
+      } else if (basisV === 'hour'){
+        bc.textContent = '\u20b1' + pn(priceIn.base)
+          + (priceIn.inc > 0 ? ' covers ' + priceIn.inc + ' hrs' : '')
+          + (priceIn.extra > 0 ? ' \u00b7 +\u20b1' + pn(priceIn.extra) + ' per extra hour' : '')
+          + ' \u2014 shown for their ' + DEMO_HOURS + '-hour event.';
+      } else bc.textContent = '\u20b1' + pn(priceIn.base) + ' flat \u2014 any hours, any pax.';
+    }
+    var tier = activeTier(), discAmt = 0;
+    var dl = document.getElementById('discline');
+    if (tier){
+      discAmt = Math.round(t * tier.p / 100);
+      if (dl) dl.innerHTML = '<div class="est"><b style="font-weight:500;color:rgb(var(--ok))">Booked '
+        + tier.m + '+ months ahead · −' + tier.p + '%</b>'
+        + '<span class="a" style="font-size:13px;color:rgb(var(--ok))">−' + peso(discAmt) + '</span></div>';
+    } else if (dl) dl.innerHTML = '';
+    t = t - discAmt;
+    var estEl = document.getElementById('est');
+    var prevEst = estEl.textContent;
+    estEl.textContent = peso(t);
+    if (prevEst && prevEst !== estEl.textContent && estEl.classList){
+      estEl.classList.remove('bump'); void (estEl.offsetWidth || 0); estEl.classList.add('bump');
+    }
+    var mEl = document.getElementById('mest');
+    if (mEl){
+      var prevM = mEl.textContent;
+      mEl.textContent = peso(t);
+      if (prevM && prevM !== mEl.textContent && mEl.classList){
+        mEl.classList.remove('bump'); void (mEl.offsetWidth || 0); mEl.classList.add('bump');
+      }
+    }
+    renderHealth();
+  }
+
+  function renderUploads(){
+    var s1 = document.getElementById('mediastrip1');
+    if (s1){
+      s1.innerHTML = media.cover
+        ? '<div class="uptile big has">' + (media.coverUrl
+            ? '<img src="' + media.coverUrl + '" alt="Cover preview">' : '<span>✓ cover set</span>')
+          + '<button class="uprm" data-uprm="cover" aria-label="Remove cover">×</button></div>'
+        : '<label class="uptile big"><input type="file" hidden data-up="cover" accept="image/png,image/jpeg,image/webp">'
+          + '<span class="upplus">＋</span><span>Cover photo</span><span class="upreq">required</span></label>';
+    }
+    var s4 = document.getElementById('mediastrip4');
+    if (s4){
+      var h = '';
+      (media.photoUrls || []).forEach(function(u, i){
+        h += '<div class="uptile has">' + (u ? '<img src="' + u + '" alt="Photo ' + (i + 1) + '">' : '<span>✓</span>')
+          + '<button class="uprm" data-uprm="photo:' + i + '" aria-label="Remove photo">×</button></div>';
+      });
+      if ((media.photoUrls || []).length < 5)
+        h += '<label class="uptile"><input type="file" hidden data-up="photo" accept="image/png,image/jpeg,image/webp">'
+          + '<span class="upplus">＋</span><span>Photo ' + (media.photoUrls.length + 1) + '/5</span></label>';
+      h += media.clip
+        ? '<div class="uptile has"><span>🎬 clip</span><button class="uprm" data-uprm="clip" aria-label="Remove clip">×</button></div>'
+        : '<label class="uptile"><input type="file" hidden data-up="clip" accept="video/mp4,video/quicktime,video/webm">'
+          + '<span class="upplus">＋</span><span>30s clip</span></label>';
+      s4.innerHTML = h;
+    }
+  }
+
+  // deterministic card health — plain rules over the same state, no LLM (Rule 1)
+  function cardHealth(){
+    var add = [], fix = [], warn = [], info = [];
+    if (!media.cover) fix.push('Add a cover photo — required to publish.');
+    if (!(exclV || '').trim()) fix.push('Setnayan Exclusive: required to publish.');
+    if (media.photos < 3 && !media.clip)
+      add.push('Show the real thing — a short clip and your best shots sell this card better than any description.');
+    if (!(priceIn.base > 0))
+      add.push('Set your price — couples tap cards with a number and skim past “ask for quote”.');
+    var named = autoNamed();
+    if (named.length) info.push(named.length + (named.length === 1 ? ' line was' : ' lines were')
+      + ' left blank, so we named ' + (named.length === 1 ? 'it' : 'them') + ' for you — '
+      + named.slice(0, 3).join(' · ') + (named.length > 3 ? ' …' : '')
+      + '. Tap any name to change it.');
+    var texts = [svcTitle, exclV].concat(svcIncl);
+    lines.forEach(function(l){
+      texts.push(l.label || '');
+      (l.opts || []).forEach(function(o){ texts.push(o.l || ''); });
+    });
+    var hits = 0;
+    texts.forEach(function(t){
+      if (hits >= 2 || !t.trim()) return;
+      var frag = contactHit(t);
+      if (frag){
+        hits++;
+        fix.push('“' + t + '” reads as ' + frag.toLowerCase()
+          + ' — bookings and chat stay in Setnayan.');
+      }
+    });
+    lines.forEach(function(l){
+      if (l.state !== 'choice') return;
+      var n = (l.opts || []).length;
+      if (n < 2) add.push('“' + lineName(l)
+        + '” is a choice of one — add options, or make it Included.');
+      if ((l.pick || 1) > n) fix.push('“' + lineName(l) + '” asks to pick '
+        + l.pick + ' of ' + n + ' — impossible to finish.');
+    });
+    if (!Object.keys(evsel).some(function(k){ return evsel[k]; }))
+      add.push('Pick at least one event type — couples search by event.');
+    if (lines.length === 0 && svcIncl.length === 0)
+      add.push('Add what\u2019s included — an empty card sells nothing.');
+    var q = lines.filter(function(l){
+      return !l.parent && (l.state === 'choice' || l.state === 'qty' || l.state === 'optional');
+    }).length;
+    if (q > 6) warn.push('Couples answer ' + q
+      + ' questions before the price settles — fold the rare ones into ⑂ follow-ups; they only appear when picked.');
+    return { add: add, fix: fix, warn: warn, info: info, q: q };
+  }
+  function renderHealth(){
+    var el = document.getElementById('health'); if (!el) return;
+    var h = cardHealth(), out = '';
+    var score = 100 - h.warn.length * 15 - h.add.length * 12 - h.info.length * 4;
+    if (h.warn.length) score = Math.min(score, 60);
+    if (h.add.length) score = Math.min(score, 80);
+    if (h.fix.length) score = Math.min(score, 30);
+    score = Math.max(score, 12);
+    var grade = h.fix.length ? 'Blocked'
+      : score >= 85 ? 'Excellent' : score >= 65 ? 'Good' : score >= 40 ? 'Average' : 'Poor';
+    var band = h.fix.length ? 'Fix the items below — this card can\u2019t publish yet.'
+      : score >= 85 ? 'This card sells itself.'
+      : score >= 65 ? 'Solid card — the hints below would lift it.'
+      : score >= 40 ? 'Publishable, but thin. Couples skim past thin cards.'
+      : 'Needs work before it earns inquiries.';
+    var issueN = h.fix.length + h.warn.length + h.add.length + h.info.length;
+    var mini = document.getElementById('healthtop');
+    if (mini) mini.innerHTML =
+      '<div class="hmeter"><div class="hfill' + (h.fix.length ? ' bad' : score >= 65 ? ' ok' : '')
+      + '" style="width:' + score + '%"></div></div>'
+      + '<div class="hgraderow"><span class="hgrade' + (h.fix.length ? ' bad' : score >= 65 ? ' ok' : '')
+      + '" style="font-size:13px">' + grade
+      + ' <span class="mono" style="font-size:10px;opacity:.6">' + score + '/100</span></span>'
+      + (issueN ? '<button class="hdt" data-hd aria-expanded="false">' + issueN + ' item'
+          + (issueN > 1 ? 's' : '') + ' ▾</button>' : '')
+      + '</div>';
+    out += '<p class="hsub">' + band + '</p>';
+    if (!h.fix.length && !h.add.length && !h.warn.length && !h.info.length)
+      out += '<div class="hrow ok">✔ Complete — ' + h.q
+          + ' quick question' + (h.q === 1 ? '' : 's') + ' for the couple.</div>';
+    h.fix.forEach(function(m){ out += '<div class="hrow bad">✕ ' + m + '</div>'; });
+    h.warn.forEach(function(m){ out += '<div class="hrow wa">⚠ ' + m + '</div>'; });
+    h.info.forEach(function(m){ out += '<div class="hrow nm">✎ ' + m + '</div>'; });
+    h.add.forEach(function(m){ out += '<div class="hrow">＋ ' + m + '</div>'; });
+    el.innerHTML = out;
+    var rc = document.getElementById('recap');
+    if (rc) rc.innerHTML =
+      '<div class="osvc"><span style="font-family:inherit">Cover photo</span><span>'
+        + (media.cover ? 'Added' : '— none yet (required to publish)') + '</span></div>'
+      + '<div class="osvc"><span style="font-family:inherit">Setnayan Exclusive</span><span>Set</span></div>'
+      + '<div class="osvc"><span style="font-family:inherit">★ Customization</span><span>'
+        + lines.length + ' lines</span></div>'
+      + (h.fix.length
+        ? '<p class="fine" style="color:rgb(var(--gold-deep))">Fix ' + h.fix.length
+          + ' blocker' + (h.fix.length > 1 ? 's' : '') + ' to publish.</p>'
+          + (!media.cover
+            ? '<button class="addbtn" style="margin-top:4px" data-sheet="media">→ Add the cover photo</button>'
+            : '')
+        : '<p class="fine" style="color:rgb(var(--ok))">Ready to publish.</p>');
+    var pub = document.getElementById('pub');
+    if (pub) pub.disabled = h.fix.length > 0;
+    var nba = document.getElementById('nba');
+    if (nba){
+      function sheetFor(msg){
+        if (/cover|photo|clip/i.test(msg)) return 'media';
+        if (/Exclusive/i.test(msg)) return 'excl';
+        return 'custom';
+      }
+      var next = h.fix[0] || h.warn[0] || h.add[0] || null;
+      if (next){
+        var short = next.length > 60 ? next.slice(0, 58) + '…' : next;
+        nba.innerHTML = '<button class="nbabtn" data-sheet="' + sheetFor(next) + '">'
+          + '▸ Next: ' + short + '</button>';
+      } else {
+        nba.innerHTML = '<span class="nbabtn done2">✓ Ready — publish when you are</span>';
+      }
+    }
+  }
+
+  // ═══ the rule demo — real card text, judged by the real rules ═══
+  var CORPUS = [
+    'Instagram teaser reel', 'TikTok highlights package', 'Insta-ready photo booth',
+    'FB live streaming add-on', 'Patiktok — 250 TikTok recordings',
+    'Coverage @Tagaytay', 'Reception @Shangri-La',
+    'Packages: 50000 - 80000 - 120000', '12000 15000 18000 per tier',
+    'Photo@Manila', 'Kare-kare', 'Lechon belly (5 kg)', 'Buffet for 150 pax',
+    'Same-day edit', '9x12 album', 'Call time 3PM — vendor arrival',
+    'Bridal car w/ driver', 'Full HD 1080p delivery',
+    'Message me on Setnayan for the full menu',
+    'Php 9,000 per hour, minimum 4 hours, 150 pax, 20 staff',
+    'Valid 2026-09-17 - 2026-12-31',
+    'Text us at 0917 555 1234', 'Message me on Viber', 'email us: hi@studio.com',
+    'my number is 09175551234', 'facebook.com/ourstudio', 'reach me at 0917 880 7163'
+  ];
+  function verdictCell(hits, other){
+    if (!hits.length) return '<span class="v no">allowed</span>';
+    var fp = other !== undefined && other === 0;
+    return '<span class="v ' + (fp ? 'fp' : 'yes') + '" title="' + hits.join(', ') + '">blocked</span>';
+  }
+  function renderRules(){
+    var el = document.getElementById('ruletable'); if (!el) return;
+    var h = '<div class="rr head"><span>Card text a vendor would really type</span>'
+      + '<span style="text-align:right">Chat rules today</span>'
+      + '<span style="text-align:right">Card profile</span></div>';
+    CORPUS.forEach(function(s){
+      var c = evaluate(s, 'chat'), d = evaluate(s, 'card');
+      var misfire = c.length > 0 && d.length === 0;
+      h += '<div class="rr' + (misfire ? ' flag' : '') + '"><span>' + s + '</span>'
+        + verdictCell(c, d.length) + verdictCell(d) + '</div>';
+    });
+    var n = CORPUS.filter(function(s){
+      return evaluate(s, 'chat').length > 0 && evaluate(s, 'card').length === 0;
+    }).length;
+    h += '<p class="fine"><b>' + n + ' of ' + CORPUS.length
+      + '</b> would be refused today even though they carry no way to contact the vendor'
+      + ' — highlighted rows. Hover a verdict to see which rule fired.</p>';
+    el.innerHTML = h;
+    var t = document.getElementById('ruletry'), live = document.getElementById('rulelive');
+    if (t && live){
+      var c2 = evaluate(t.value, 'chat'), d2 = evaluate(t.value, 'card');
+      live.innerHTML = '<div class="hrow' + (d2.length ? ' bad' : ' ok') + '">'
+        + (d2.length ? '✕ Card profile blocks this — ' + d2.join(', ')
+                     : '✔ Card profile allows this')
+        + '</div><div class="hrow' + (c2.length ? ' wa' : '') + '">'
+        + (c2.length ? '⚠ Chat rules today would block it — ' + c2.join(', ')
+                     : '✔ Chat rules today also allow it') + '</div>';
+    }
+  }
+
+  function render(flash){
+    renderMaker(flash || []); renderUploads(); renderAudience(); renderDiscounts(); renderBasisFields();
+    renderCard(); renderCouple(); renderRules();
+  }
+
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.split != null) splitIncl(+b.dataset.split);
+    else if (b.dataset.mkline != null){
+      var tx = svcIncl.splice(+b.dataset.mkline, 1)[0], id = 'n' + (uid++);
+      lines.push({ id:id, label:tx, state:'included' }); render([id]);
+    }
+    else if (b.dataset.bo){ var pb = b.dataset.bo.split(':'); branchOption(pb[0], +pb[1]); }
+    else if (b.dataset.rm){
+      var rid = b.dataset.rm;
+      lines = lines.filter(function(l){ return l.id !== rid
+        && !(l.parent && l.parent.line === rid); });
+      render([]);
+    }
+    else if (b.dataset.addopt){ var la = byId(b.dataset.addopt); la.opts.push({ l:'', d:0 }); render([la.id]); }
+    else if (b.dataset.dtrm != null){ discTiers.splice(+b.dataset.dtrm, 1); render([]); }
+    else if (b.id === 'dtadd'){ discTiers.push({ m: 3, p: 5 }); render([]); }
+    else if (b.id === 'loadex'){ loadExample(); }
+    else if (b.dataset.hd != null){
+      var hd = document.getElementById('health');
+      if (hd) hd.hidden = !hd.hidden;
+    }
+    else if (b.dataset.lb != null){ openLightbox(b.dataset.lb); }
+    else if (b.dataset.lbclose != null){
+      var lb2 = document.getElementById('lightbox');
+      if (lb2){ lb2.hidden = true; lb2.innerHTML = ''; }
+    }
+    else if (b.dataset.sheet != null){ openSheet(b.dataset.sheet); }
+    else if (b.dataset.shclose != null){ closeSheets(); render([]); }
+    else if (b.dataset.sugg != null){
+      var SUGGS = ['Free dessert-table upgrade for Setnayan couples',
+        'Priority date hold for Setnayan couples',
+        'Setnayan-only rate — 5% off the package',
+        'Complimentary upgrade: +1 service hour'];
+      var fld = document.getElementById('exclfld');
+      var cur = SUGGS.indexOf(exclV);
+      exclV = SUGGS[(cur + 1) % SUGGS.length];
+      if (fld) fld.value = exclV;
+      renderCard(); renderHealth();
+    }
+    else if (b.dataset.uprm != null){
+      var rm = b.dataset.uprm;
+      if (rm === 'cover'){ media.cover = false; media.coverUrl = null; }
+      else if (rm === 'clip'){ media.clip = false; }
+      else if (rm.indexOf('photo:') === 0){
+        media.photoUrls.splice(+rm.split(':')[1], 1);
+        media.photos = media.photoUrls.length;
+      }
+      render([]);
+    }
+    else if (b.dataset.info != null){
+      var ib = document.getElementById('ib-' + b.dataset.info);
+      if (ib) ib.hidden = !ib.hidden;
+    }
+    else if (b.id === 'seecard'){
+      var cc = document.getElementById('couplecard');
+      if (cc && cc.scrollIntoView) cc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    else if (b.dataset.ev){ evsel[b.dataset.ev] = !evsel[b.dataset.ev]; render([]); }
+    else if (b.dataset.fa){
+      if (b.dataset.fa === 'all') fasel = {};
+      else fasel[b.dataset.fa] = !fasel[b.dataset.fa];
+      render([]);
+    }
+    else if (b.id === 'addline') addLine();
+    else if (b.dataset.q){ var id2 = b.dataset.id, ln = byId(id2);
+      qty[id2] = Math.max(0, Math.min(ln.max || 1, (qty[id2] || 0) + (+b.dataset.q))); renderCouple(); }
+  });
+  document.addEventListener('input', function(e){
+    var t = e.target;
+    if (t.id === 'ruletry'){ renderRules(); return; }
+    if (t.dataset.svctitle != null){ svcTitle = t.value; renderHealth(); }
+    // price fields: update state + card + estimate LIVE, but never re-render the
+    // sheet itself mid-keystroke — that would steal focus from the input.
+    if (t.dataset.pin != null){
+      var pv = parseInt(String(t.value).replace(/[^0-9]/g, ''), 10) || 0;
+      priceIn[t.dataset.pin] = pv;
+      t.value = pv ? (t.dataset.pin === 'inc' ? String(pv) : pn(pv)) : '';
+      syncBase(); renderCard(); renderCouple(); renderHealth(); return;
+    }
+    if (t.dataset && t.dataset.basis != null){
+      basisV = t.value;
+      priceIn = { base: 0, inc: 0, extra: 0 }; syncBase();  // ₱/head ≠ ₱ flat — numbers don't carry
+      renderBasisFields(); renderCard(); renderCouple(); renderHealth();
+    }
+    if (t.id === 'exclfld'){ exclV = t.value; renderCard(); renderHealth(); }
+    if (t.dataset.dtm != null){ discTiers[+t.dataset.dtm].m = Math.max(1, parseInt(t.value, 10) || 1); renderCouple(); }
+    if (t.dataset.dtp != null){ discTiers[+t.dataset.dtp].p = Math.min(90, Math.max(0, parseInt(t.value, 10) || 0)); renderCouple(); }
+    if (t.dataset.lbl){ byId(t.dataset.lbl).label = t.value; renderCouple(); }
+    if (t.dataset.ol){ var p = t.dataset.ol.split(':'); byId(p[0]).opts[+p[1]].l = t.value; renderCouple(); }
+    if (t.dataset.od){ var po = t.dataset.od.split(':');
+      var d = parseInt(t.value.replace(/[^0-9]/g, ''), 10) || 0;
+      byId(po[0]).opts[+po[1]].d = d;
+      t.value = d ? d.toLocaleString('en-PH') : '';
+      renderCouple(); }
+    if (t.dataset.worth){ var w = parseInt(t.value.replace(/[^0-9]/g, ''), 10) || 0;
+      byId(t.dataset.worth).worth = w; t.value = w ? w.toLocaleString('en-PH') : '';
+      renderCouple(); }
+    if (t.dataset.pick){ var lp = byId(t.dataset.pick);
+      lp.pick = Math.max(1, parseInt(t.value, 10) || 1);
+      sel[lp.id] = lp.pick > 1 ? [] : undefined; render([lp.id]); }
+  });
+  document.addEventListener('change', function(e){
+    var t = e.target;
+    if (t.dataset && t.dataset.basis != null){
+      basisV = t.value;
+      priceIn = { base: 0, inc: 0, extra: 0 }; syncBase();
+      renderBasisFields(); renderCard(); renderCouple(); renderHealth(); return;
+    }
+    if (t.dataset && t.dataset.up){
+      var kind = t.dataset.up, f = t.files && t.files[0];
+      if (!f) return;
+      var apply = function(url){
+        if (kind === 'cover'){ media.cover = true; media.coverUrl = url; }
+        else if (kind === 'photo'){
+          if (media.photoUrls.length < 5) media.photoUrls.push(url);
+          media.photos = media.photoUrls.length;
+        }
+        else if (kind === 'clip'){ media.clip = true; }
+        render([]);
+      };
+      if (typeof FileReader !== 'undefined' && kind !== 'clip'){
+        var rd = new FileReader();
+        rd.onload = function(){ apply(rd.result); };
+        rd.readAsDataURL(f);
+      } else apply(null);
+      return;
+    }
+    if (t.dataset.st){ var l = byId(t.dataset.st);
+      l.state = t.value; if (l.state === 'choice' && !l.opts) l.opts = [{ l:'', d:0, std:true }];
+      if (l.state === 'qty'){ l.unit = l.unit || 5000; l.max = l.max || 1; } render([l.id]); }
+    if (t.dataset.std){ var ps = t.dataset.std.split(':'), l2 = byId(ps[0]);
+      l2.opts.forEach(function(o, i){ o.std = (i === +ps[1]); if (o.std) o.d = 0; });
+      render([l2.id]); }
+    if (t.dataset.c1){ var p1 = t.dataset.c1.split(':'); sel[p1[0]] = +p1[1]; renderCouple(); }
+    if (t.dataset.cn){ var p2 = t.dataset.cn.split(':'), arr = sel[p2[0]] = sel[p2[0]] || [];
+      var ix = arr.indexOf(+p2[1]); if (ix >= 0) arr.splice(ix, 1); else arr.push(+p2[1]); renderCouple(); }
+    if (t.dataset.ao){ sel[t.dataset.ao] = t.checked; renderCouple(); }
+  });
+
+  // ═══ drag & drop — grip only, pointer events so touch works too ═══
+  function adoptGroup(l, g){
+    l.state = { inc:'included', choice:'choice', qty:'qty', opt:'optional' }[g.key];
+    if (l.state === 'choice' && !l.opts) l.opts = [{ l:'', d:0, std:true }];
+    if (l.state === 'qty'){ l.unit = l.unit || 5000; l.max = l.max || 1; }
+  }
+  function reorderLine(id, targetId, before){
+    var l = byId(id), t = byId(targetId);
+    if (!l || !t || id === targetId) return;
+    if (groupOf(l.state) !== groupOf(t.state)) adoptGroup(l, groupOf(t.state));
+    lines.splice(lines.indexOf(l), 1);
+    var ti = lines.indexOf(t);
+    lines.splice(before ? ti : ti + 1, 0, l);
+    render([l.id]);
+  }
+  function dropIntoGroup(id, gkey){
+    var l = byId(id), g = GROUPS.filter(function(x){ return x.key === gkey; })[0];
+    if (!l || !g) return;
+    if (groupOf(l.state) !== g) adoptGroup(l, g);
+    render([l.id]);
+  }
+  var drag = null;
+  function clearCues(){
+    Array.prototype.forEach.call(document.querySelectorAll('.gz-hot'),
+      function(el){ el.classList.remove('gz-hot'); });
+  }
+  function endDrag(){
+    if (drag && drag.ghost && drag.ghost.parentNode)
+      drag.ghost.parentNode.removeChild(drag.ghost);
+    var row = document.querySelector('.item.dragging');
+    if (row) row.classList.remove('dragging');
+    clearCues(); drag = null;
+  }
+  function domRow(id){
+    return document.querySelector('#mk .item[data-row="' + id + '"]');
+  }
+  // live room-making: move the slot in the DOM now, FLIP-animate whatever shifted
+  function previewInsert(refEl, before){
+    var mkEl = document.getElementById('mk'), row = domRow(drag.id);
+    if (!row || !refEl || !mkEl || !mkEl.children || !row.parentNode) return;
+    var first = [];
+    Array.prototype.forEach.call(mkEl.children, function(k){
+      if (k.getBoundingClientRect) first.push({ k: k, top: k.getBoundingClientRect().top });
+    });
+    mkEl.insertBefore(row, before ? refEl : refEl.nextSibling);
+    first.forEach(function(f){
+      var d = f.top - f.k.getBoundingClientRect().top;
+      if (!d || !f.k.style) return;
+      f.k.style.transition = 'none';
+      f.k.style.transform = 'translateY(' + d + 'px)';
+    });
+    void (mkEl.offsetHeight);
+    first.forEach(function(f){
+      if (!f.k.style) return;
+      f.k.style.transition = 'transform .16s ease';
+      f.k.style.transform = '';
+    });
+    drag.moved = true;
+  }
+  document.addEventListener('pointerdown', function(e){
+    var g = e.target.closest ? e.target.closest('[data-grip]') : null; if (!g) return;
+    e.preventDefault();
+    drag = { id: g.dataset.grip, target: null, before: false, zone: null,
+             lastKey: '', moved: false, ghost: null, offX: 12, offY: 15 };
+    var row = g.closest('.item'); if (row) row.classList.add('dragging');
+    // the carried cell — a fixed clone riding under the pointer
+    if (row && row.cloneNode && row.getBoundingClientRect
+        && document.body && document.body.appendChild){
+      var r = row.getBoundingClientRect();
+      drag.offX = e.clientX - r.left; drag.offY = e.clientY - r.top;
+      var gh = row.cloneNode(true);
+      gh.classList.remove('dragging'); gh.classList.add('ghost');
+      gh.style.width = r.width + 'px';
+      gh.style.transform = 'translate(' + r.left + 'px,' + r.top + 'px)';
+      document.body.appendChild(gh);
+      drag.ghost = gh;
+    }
+  });
+  document.addEventListener('pointermove', function(e){
+    if (!drag) return;
+    e.preventDefault();
+    if (drag.ghost) drag.ghost.style.transform =
+      'translate(' + (e.clientX - drag.offX) + 'px,'
+      + (e.clientY - drag.offY) + 'px) rotate(1.5deg)';
+    clearCues();
+    var el = document.elementFromPoint(e.clientX, e.clientY);
+    var row = el && el.closest ? el.closest('#mk .item[data-row]') : null;
+    if (row && row.dataset.row !== drag.id){
+      var r = row.getBoundingClientRect();
+      drag.target = row.dataset.row;
+      drag.before = e.clientY < r.top + r.height / 2;
+      drag.zone = null;
+      var key = drag.target + ':' + drag.before;
+      if (key !== drag.lastKey){ drag.lastKey = key; previewInsert(row, drag.before); }
+      return;
+    }
+    var gz = el && el.closest ? el.closest('[data-gz]') : null;
+    if (gz){
+      drag.zone = gz.dataset.gz; drag.target = null;
+      gz.classList.add('gz-hot');
+      var zkey = 'z:' + drag.zone;
+      if (zkey !== drag.lastKey){ drag.lastKey = zkey; previewInsert(gz, false); }
+    }
+  });
+  document.addEventListener('pointerup', function(){
+    if (!drag) return;
+    var d = drag; endDrag();
+    if (d.target) reorderLine(d.id, d.target, d.before);
+    else if (d.zone) dropIntoGroup(d.id, d.zone);
+    else if (d.moved) render([]);
+  });
+  document.addEventListener('pointercancel', function(){
+    if (!drag) return;
+    var moved = drag.moved; endDrag();
+    if (moved) render([]);
+  });
+
+  render([]);
+</script>

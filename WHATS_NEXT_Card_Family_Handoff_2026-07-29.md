@@ -38,9 +38,11 @@ workflows, 20 confirmed defects fixed pre-merge). Verified against live prod, no
 `NEXT_PUBLIC_CARD_RECORD_ENABLED` = ON · **`NEXT_PUBLIC_SERVICE_DETAILS_ENABLED` = OFF —
 the owner's one pending flip** (details sheet + picks-into-inquiry both ride it).
 
-**Design references (Claude artifacts, owner-approved):** the maker prototype
-(`service-card.html`, label `blank-zero-cost-options`, 80-assertion smoke suite) and the
-veteran card (`veteran-card.html` — the Card Record's visual north star).
+**Design references (owner-approved, PRESERVED IN THIS REPO — the original Claude artifacts
+belong to the old account):** [`Design_Card_Family_2026-07/service-card-maker-prototype.html`](Design_Card_Family_2026-07/service-card-maker-prototype.html)
+(open in a browser; its 80-assertion smoke suite is beside it) and
+[`Design_Card_Family_2026-07/veteran-card-prototype.html`](Design_Card_Family_2026-07/veteran-card-prototype.html)
+— the Card Record's visual north star.
 
 ## 2 · The LOCKED principles — violating any of these is a defect
 
