@@ -145,13 +145,20 @@
 <div class="wrap">
 
   <span class="mono eyebrow">Setnayan · the emcee script system</span>
-  <h1>One night, three lenses</h1>
+  <h1>Two phases, three lenses</h1>
   <p class="lede">
-    The same wedding, the same timeline, seen by the three people who build it. Switch roles and
-    watch what appears, what disappears, and what each of them is allowed to touch.
+    The same wedding seen six ways. <strong>Planning</strong> is the weeks before — building the
+    night, writing the script, answering questions; nothing is live and nobody is &ldquo;on&rdquo;.
+    <strong>The night</strong> is the event itself, when one pointer moves and every screen
+    follows it. The roles have different powers in each, which is the whole model.
   </p>
 
   <hr class="rule" />
+
+  <div class="roles" role="group" aria-label="Choose a phase" style="margin-bottom:.7rem">
+    <button class="role phase" type="button" data-phase="planning">Planning · the weeks before</button>
+    <button class="role phase" type="button" data-phase="night">The night · live</button>
+  </div>
 
   <div class="roles" role="group" aria-label="Choose a role">
     <button class="role" type="button" data-role="couple">The couple</button>
@@ -224,151 +231,163 @@
 (function () {
   "use strict";
 
-  var BLOCKS = [
-    { t:"2:00 PM", n:"Ceremony",           st:"done", pub:true },
-    { t:"3:00 PM", n:"Cocktails",          st:"done", pub:true },
-    { t:"4:00 PM", n:"Reception entrance", st:"live", pub:true,
+  /* Planning blocks carry NO run-state — nothing is live weeks out. The night
+     is the same list with the pointer running through it. That difference is
+     the entire planning/running split, so the data models it rather than the
+     copy merely claiming it. */
+  var PLAN = [
+    { t:"2:00 PM", n:"Ceremony",           pub:true },
+    { t:"3:00 PM", n:"Cocktails",          pub:true },
+    { t:"4:00 PM", n:"Reception entrance", pub:true,
       note:"Announce the principal sponsors by full name — list is on our card.",
       script:"Slow. Full names, Atty. first. Pause after each pair for applause." },
-    { t:"4:10 PM", n:"Grand march",        st:"upcoming", pub:true, part:true,
+    { t:"4:10 PM", n:"Grand march",        pub:true,
       script:"Cue the band before you speak. Keep it to two sentences." },
-    { t:"4:40 PM", n:"Surprise number",    st:"upcoming", pub:false,
+    { t:"4:40 PM", n:"Surprise number",    pub:false,
       note:"Don't tease this. Groom's brothers only — cue the AVP first.",
       script:"SAY NOTHING until the AVP ends. Then: 'Please welcome…'" },
-    { t:"5:00 PM", n:"Dinner",             st:"upcoming", pub:true,
-      from:"your catalogue" },
-    { t:"6:00 PM", n:"Shoe game",          st:"upcoming", pub:true, from:"your catalogue",
+    { t:"5:00 PM", n:"Dinner",             pub:true, from:"your catalogue" },
+    { t:"6:00 PM", n:"Shoe game",          pub:true, from:"your catalogue",
       note:"Keep it short, lola gets tired.",
       script:"Six questions max. Land on 'who said I love you first'." }
   ];
+  var NIGHT_STATE = ["done","done","live","upcoming","upcoming","upcoming","upcoming"];
 
-  var VIEW = {
-    couple: {
-      who:"The couple",
-      path:"/dashboard/[eventId]/schedule",
-      title:"What the couple controls",
-      sub:"They own the night. Everything else is something they chose to share.",
-      why:"They never see the emcee's script — it is his working copy, not a deliverable. What they DO see is everything they wrote themselves.",
-      can:[
-        "Add, move, retime and delete any moment",
-        "Write the instruction on a block — the emcee reads it",
-        "Pick segments from the emcee's catalogue",
-        "Answer his questions",
-        "Grant or revoke a supplier's access, any time"
-      ],
-      cant:[
-        "See the emcee's spoken script",
-        "Advance the night — unless there is no coordinator"
-      ]
+  var COPY = {
+    planning: {
+      couple: {
+        who:"The couple", path:"/dashboard/[eventId]/schedule", phase:"Planning",
+        banner:{k:"grant", t:"This is your night.", b:"Two suppliers can help edit it right now. You can take that back at any time."},
+        title:"What the couple controls — planning",
+        sub:"They own the night. Everything else is something they chose to share.",
+        why:"They never see the emcee's script. What they DO see is everything they wrote themselves, and every supplier they let in.",
+        can:["Add, move, retime and delete any moment","Write the instruction on a block — the emcee reads it","Pick segments from the emcee's catalogue","Answer his questions","Grant or revoke a supplier's access, any time"],
+        cant:["See the emcee's spoken script"],
+        extra:[{h:"From your emcee's catalogue", p:"Shoe game · 8 min · Money dance · 15 min · Ninong roll call · 12 min", a:"Pick segments"},
+               {h:"Your emcee asked you 6 questions", p:"How to say the names · titles · who to acknowledge · what NOT to say · who speaks · language", a:"Answer them"}]
+      },
+      emcee: {
+        who:"The emcee", path:"/vendor-dashboard/clients/[eventId]/script", phase:"Planning",
+        banner:{k:"grant", t:"The couple shared the schedule with you.", b:"You can place and retime your own segments. Ask them to revoke it and this becomes read-only again."},
+        title:"What the emcee controls — planning",
+        sub:"He does not write a document. He fills in a layer over their night.",
+        why:"This is where the whole job happens. On the night he only reads what he wrote here.",
+        can:["Write what he will SAY at each moment — private to him","Offer an activity catalogue that follows him between weddings","Ask the couple the things only they know","Place and retime his segments — while the schedule is shared"],
+        cant:["See the guest list","Delete a moment the couple authored"],
+        extra:[{h:"Your catalogue", p:"7 segments · reused at every wedding after this one", a:"Manage catalogue"},
+               {h:"Your questions", p:"6 sent · 4 answered — pronunciations still outstanding", a:"Review answers"},
+               {h:"Your script", p:"5 of 7 moments written · print or read on your phone", a:"Print the script"}]
+      },
+      coordinator: {
+        who:"The coordinator", path:"/dashboard/[eventId]/schedule", phase:"Planning",
+        banner:{k:"grant", t:"The couple shared the schedule and the guest list.", b:"You can build the night with them. Prep stays hidden until you release it."},
+        title:"What the coordinator controls — planning",
+        sub:"They shape the night with the couple, and stage what is not ready yet.",
+        why:"Their planning power is the same delegated grant the emcee uses — the difference between them only appears on the night.",
+        can:["Add, move and retime blocks — while the schedule is shared","Stage prep the couple cannot see yet, then release it","Line up the suppliers against each moment"],
+        cant:["Read the emcee's script","Own the timeline — the couple does"],
+        extra:[{h:"Staged, not yet released", p:"2 blocks the couple has not seen — vendor ingress, buffer before the march", a:"Release to couple"}]
+      }
     },
-    emcee: {
-      who:"The emcee",
-      path:"/vendor-dashboard/clients/[eventId]/script",
-      title:"What the emcee controls",
-      sub:"He does not write a document. He fills in a layer over their night.",
-      why:"His script is private to him — the couple booked a host, not a manuscript. He can place his own segments only while the couple has shared the schedule with him.",
-      can:[
-        "Write what he will SAY at each moment — private to him",
-        "Offer an activity catalogue that follows him between weddings",
-        "Ask the couple the things only they know",
-        "Place and retime his segments — while the schedule is shared with him"
-      ],
-      cant:[
-        "Advance the night — ever",
-        "See the guest list",
-        "Delete a moment the couple authored"
-      ]
-    },
-    coordinator: {
-      who:"The coordinator",
-      path:"/vendor-dashboard/on-the-day/live/[eventId]",
-      title:"What the coordinator controls",
-      sub:"The only hand on the wheel once the night starts.",
-      why:"Every screen in the building follows the live pointer — the emcee's cue card, the guest cards. Two people moving it makes the night flicker and nobody trusts what they read.",
-      can:[
-        "Advance the night — the one wheel",
-        "Retime the running order while it runs",
-        "Send an emergency notice to the emcee",
-        "Triage everything the suppliers raise"
-      ],
-      cant:[
-        "Read the emcee's script",
-        "Own the timeline — the couple does",
-        "Touch anything the host has not shared"
-      ]
+    night: {
+      couple: {
+        who:"The couple", path:"/dashboard/[eventId] · day-of", phase:"Live · 18 min behind",
+        banner:{k:"wheel", t:"Your coordinator is running tonight.", b:"You can watch it move. If you had no coordinator, this is where you would hold the wheel yourself."},
+        title:"What the couple controls — the night",
+        sub:"Tonight they are guests at their own wedding, which is the point.",
+        why:"They kept the wheel only if nobody was hired to hold it.",
+        can:["Watch the night move, live","Take the wheel — only if there is no coordinator"],
+        cant:["Advance while a coordinator is running it","See the emcee's script"],
+        extra:[]
+      },
+      emcee: {
+        who:"The emcee", path:"/vendor-dashboard/on-the-day/live/[eventId]", phase:"Live · 18 min behind",
+        banner:{k:"wheel", t:"You are read-only tonight.", b:"Your screen follows the coordinator. You read what you wrote in planning — you do not move the night."},
+        title:"What the emcee controls — the night",
+        sub:"Nothing about the night. Everything about what he says into it.",
+        why:"He prepared for weeks so that tonight he only has to read. Moving the show is not his job and never becomes it.",
+        can:["Read his cue card — what is on, what is next, how late","Read his own script, per moment","Receive emergency notices from the coordinator"],
+        cant:["Advance the night — ever","Retime anything","Edit his script mid-show"],
+        extra:[{h:"On now · Reception entrance", p:"Slow. Full names, Atty. first. Pause after each pair for applause.", a:"Your cue card"}]
+      },
+      coordinator: {
+        who:"The coordinator", path:"/vendor-dashboard/on-the-day/live/[eventId]", phase:"Live · 18 min behind",
+        banner:{k:"wheel", t:"You hold the wheel tonight.", b:"Advancing moves every screen — the emcee's cue card and the guest cards follow you."},
+        title:"What the coordinator controls — the night",
+        sub:"The only hand on the wheel once the night starts.",
+        why:"Every screen follows the live pointer. Two people moving it makes the night flicker and nobody trusts what they read.",
+        can:["Advance the night — the one wheel","Retime the running order while it runs","Send an emergency notice to the emcee","Triage everything the suppliers raise"],
+        cant:["Read the emcee's script","Own the timeline — the couple does"],
+        extra:[{h:"Requests inbox", p:"3 open · caterer waiting on a headcount, photographer asking about the AVP", a:"Triage"}]
+      }
     }
   };
 
-  var role = "couple";
+  var phase = "planning", role = "couple";
 
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
-  function blockHTML(b){
-    var h = '<li class="blk ' + (b.st==="live"?"live ":"") + (b.st==="done"?"done":"") + '">';
+  function blockHTML(b, i){
+    var live = phase === "night";
+    var st = live ? NIGHT_STATE[i] : null;
+    var h = '<li class="blk ' + (st==="live"?"live ":"") + (st==="done"?"done":"") + '">';
     h += '<div class="blk-top"><span class="t">'+b.t+'</span><span class="nm">'+esc(b.n)+'</span>';
-    if (b.st==="live") h += '<span class="chip on">On now</span>';
-    if (!b.pub)        h += '<span class="chip priv">Private</span>';
-    if (b.from && role!=="coordinator") h += '<span class="chip">From '+esc(b.from)+'</span>';
+    if (st==="live") h += '<span class="chip on">On now</span>';
+    if (!b.pub)      h += '<span class="chip priv">Private</span>';
+    if (b.from && role!=="coordinator" && !live) h += '<span class="chip">From '+esc(b.from)+'</span>';
     h += "</div>";
 
-    // The couple's instruction — everyone working the night can read it.
-    if (b.note) {
-      h += '<div class="layer couple"><span class="lbl">The couple asked</span><p>'+esc(b.note)+'</p></div>';
-    }
-    // The spoken script — the EMCEE ONLY. This is the line the whole model turns on.
-    if (b.script && role==="emcee") {
-      h += '<div class="layer script"><span class="lbl">Your script · only you see this</span><p>'+esc(b.script)+'</p></div>';
-    }
+    if (b.note) h += '<div class="layer couple"><span class="lbl">The couple asked</span><p>'+esc(b.note)+'</p></div>';
+    if (b.script && role==="emcee") h += '<div class="layer script"><span class="lbl">Your script · only you see this</span><p>'+esc(b.script)+'</p></div>';
 
-    // Role-appropriate affordances.
     h += '<div class="rowacts">';
-    if (role==="couple")      h += '<button class="mini" type="button">Retime</button><button class="mini" type="button">Edit instruction</button><button class="mini" type="button">Remove</button>';
-    if (role==="emcee")       h += '<button class="mini primary" type="button">'+(b.script?"Edit my script":"Write my script")+'</button><button class="mini" type="button">Retime</button>';
-    if (role==="coordinator" && b.st==="live") h += '<button class="mini primary" type="button">Move on to next →</button><button class="mini" type="button">Push everything 10 min</button>';
+    if (!live) {
+      if (role==="couple")      h += '<button class="mini" type="button">Retime</button><button class="mini" type="button">Edit instruction</button><button class="mini" type="button">Remove</button>';
+      if (role==="emcee")       h += '<button class="mini primary" type="button">'+(b.script?"Edit my script":"Write my script")+'</button><button class="mini" type="button">Retime</button>';
+      if (role==="coordinator") h += '<button class="mini" type="button">Retime</button><button class="mini" type="button">Stage a block</button>';
+    } else {
+      if (role==="coordinator" && st==="live") h += '<button class="mini primary" type="button">Move on to next →</button><button class="mini" type="button">Push everything 10 min</button>';
+      if (role!=="coordinator") h += '<span class="chip">Read only tonight</span>';
+    }
     h += "</div></li>";
     return h;
   }
 
   function render(){
-    var v = VIEW[role];
+    var v = COPY[phase][role];
 
-    document.getElementById("whoLabel").textContent  = v.who;
-    document.getElementById("pathLabel").textContent = v.path;
-    document.getElementById("phaseLabel").textContent =
-      role==="coordinator" ? "Live · 18 min behind" : "Planning";
+    document.getElementById("whoLabel").textContent   = v.who;
+    document.getElementById("pathLabel").textContent  = v.path;
+    document.getElementById("phaseLabel").textContent = v.phase;
 
-    var h = "";
-    if (role==="emcee") {
-      h += '<div class="banner grant">✓ <span><strong>The couple shared the schedule with you.</strong> '
-        +  'You can place and retime your own segments. Ask them to revoke it and this becomes read-only again.</span></div>';
-    }
-    if (role==="coordinator") {
-      h += '<div class="banner wheel">● <span><strong>You hold the wheel tonight.</strong> '
-        +  'Advancing moves every screen — the emcee&rsquo;s cue card and the guest cards follow you.</span></div>';
-    }
-    if (role==="couple") {
-      h += '<div class="banner grant">✓ <span><strong>This is your night.</strong> '
-        +  'Two suppliers can help edit it right now. You can take that back at any time.</span></div>';
-    }
+    var h = '<div class="banner '+v.banner.k+'">'+(v.banner.k==="wheel"?"●":"✓")+
+            ' <span><strong>'+esc(v.banner.t)+'</strong> '+esc(v.banner.b)+'</span></div>';
 
-    h += '<ol class="tl">' + BLOCKS.map(blockHTML).join("") + "</ol>";
+    (v.extra||[]).forEach(function(x){
+      h += '<div class="blk"><div class="blk-top"><span class="nm">'+esc(x.h)+'</span></div>'
+        +  '<p class="note" style="margin:.3rem 0 0">'+esc(x.p)+'</p>'
+        +  '<div class="rowacts"><button class="mini primary" type="button">'+esc(x.a)+'</button></div></div>';
+    });
+
+    h += '<ol class="tl">' + PLAN.map(blockHTML).join("") + "</ol>";
     document.getElementById("screen").innerHTML = h;
 
     document.getElementById("ledgerTitle").textContent = v.title;
     document.getElementById("ledgerSub").textContent   = v.sub;
-    document.getElementById("ledgerWhy").textContent    = v.why;
+    document.getElementById("ledgerWhy").textContent   = v.why;
     document.getElementById("ledgerList").innerHTML =
       v.can.map(function(c){ return '<li class="yes"><span class="mk">✓</span><span>'+esc(c)+"</span></li>"; }).join("") +
       v.cant.map(function(c){ return '<li class="no"><span class="mk">✕</span><span>'+esc(c)+"</span></li>"; }).join("");
 
-    document.querySelectorAll(".role").forEach(function(b){
-      b.setAttribute("aria-pressed", String(b.dataset.role===role));
-    });
+    document.querySelectorAll(".role[data-role]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.role===role)); });
+    document.querySelectorAll(".role[data-phase]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.phase===phase)); });
   }
 
   document.addEventListener("click", function(e){
     var b = e.target.closest ? e.target.closest(".role") : null;
-    if (b && b.dataset.role) { role = b.dataset.role; render(); }
+    if (!b) return;
+    if (b.dataset.role)  { role  = b.dataset.role;  render(); }
+    if (b.dataset.phase) { phase = b.dataset.phase; render(); }
   });
 
   render();
