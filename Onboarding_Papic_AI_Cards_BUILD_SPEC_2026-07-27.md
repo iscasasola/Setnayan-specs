@@ -207,7 +207,7 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 |---|---|---|
 | **1** | Arm the free pool (§2.5) — `free_grant` row at event commit, all 5 insert paths + a self-heal on the Papic studio. | ✅ **DONE + LIVE** — PR [#3847](https://github.com/iscasasola/setnayan-platform/pull/3847), migration reissued as `20271017567807` via [#3848](https://github.com/iscasasola/setnayan-platform/pull/3848) after a twin-prefix collision. **Verified in prod:** index `papic_event_point_grants_one_free_per_event` exists · 2 events × 50 pts · `papic_event_pool_config.free_grant_points = 50`. |
 | **1b** | Grant reads the **admin-editable** allowance, not a hardcoded 50; 3 duplicate constants → 1. | ✅ **DONE** — PR [#3860](https://github.com/iscasasola/setnayan-platform/pull/3860) merged. |
-| **3** | `SetnayanAiValue` type-aware — the PH-marriage / "another couple" / "reception" wedding-isms (§2.3). | ⏳ **PR [#3865](https://github.com/iscasasola/setnayan-platform/pull/3865) OPEN**, auto-merge armed, CI running. Verify it merged before building on it. |
+| **3** | `SetnayanAiValue` type-aware — the PH-marriage / "another couple" / "reception" wedding-isms (§2.3). | ✅ **DONE** — PR [#3865](https://github.com/iscasasola/setnayan-platform/pull/3865) merged. |
 | **NEW-A** | 🔴 **Catalog migration for the 2026-07-29 model** — reactivate + reprice the Pool rungs to ₱1,000 / ₱2,000 / ₱3,000; restructure Papic One to ₱1 = 1 shot (50 pts ₱50 · 100 pts ₱100); add the **reload** path and the **1 free One camera @ 5 pts**. | ⛔ **NOT STARTED** — the new first step. Everything below depends on it. |
 | **2** | Remap `INAPP_TO_SERVICE_CODE` (§2.1) so the cards stop rendering blank. | ⛔ **NOT STARTED** — was blocked on "what is the live upgrade?", which §2.0-NEW now answers. Do it **after NEW-A**, against the reactivated codes. |
 | **NEW-B** | Clip currency **7 → 8 pts** (`PAPIC_POINTS_PER_CLIP`, `lib/papic-cameras.ts:735`). | ⛔ **NOT STARTED** — **ships ALONE**: it is a hardcoded constant on the **fail-closed capture path**. Independent of the cards; do not bundle. |
@@ -216,7 +216,7 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 | **—** | Amend or kill the §1.4 start-clamp (§2.2). | ✅ **Treated as dead** — the owner's 2026-07-27 runway directive supersedes the unbuilt 2026-07-22 proposal. Just don't build a lower bound. |
 | **—** | Vendor shots in the card copy. | ⛔ **DPO/NPC gate** — `vendor_papic_capture` control is OFF and the route 403s. Card says **guests only** until it flips. |
 
-**Order: NEW-A → 2 → 4 → 5.** NEW-B is independent and ships alone whenever. PR3 must be merged before 4.
+**Order: NEW-A → 2 → 4 → 5.** NEW-B is independent and ships alone whenever. PR3 is merged, so 4 is unblocked.
 
 ---
 

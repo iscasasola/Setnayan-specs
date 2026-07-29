@@ -292,7 +292,7 @@ never given away** (owner: *"Setnayan AI cannot be free"*). **No checkout in onb
 |---|---|
 | Free Papic pool **ARMED** (was silently UNMETERED: no grant ⇒ `applies=FALSE` ⇒ `papic_reserve_event_points` allowed every capture) | PR **#3847** + reissued migration `20271017567807` (**#3848**). Prod: index `papic_event_point_grants_one_free_per_event` present · 2 events × 50 pts · `free_grant_points = 50` |
 | Grant reads the **admin-editable** allowance; 3 duplicate "50"s → 1 | PR **#3860** merged |
-| `SetnayanAiValue` type-aware (no more Pre-Cana on a birthday) | PR **#3865** — ⏳ **was OPEN w/ auto-merge armed at handoff. CHECK IT MERGED FIRST.** |
+| `SetnayanAiValue` type-aware (no more Pre-Cana on a birthday) | PR **#3865** ✅ **MERGED** |
 
 ⚠ **Do not "fix" the free pool again.** It is armed. Re-arming would stack grants — though the
 partial unique index `(event_id) WHERE source='free_grant'` will reject the duplicate (23505),
@@ -304,7 +304,7 @@ which the code correctly reads as "already armed".
 |---|---|---|
 | **NEW-A** | Catalog migration for the **2026-07-29 two-type lock**: reactivate + reprice Pool rungs → **₱1,000 / ₱2,000 / ₱3,000**; restructure Papic One to **₱1 = 1 shot** (50 pts ₱50 · 100 pts ₱100); add the **reload** path; add **1 free One camera @ 5 pts** (new mechanic) | AUTO-OK |
 | **2** | Remap `INAPP_TO_SERVICE_CODE` (§2.1) — un-blanks the cards. **After NEW-A**, against the reactivated codes | AUTO-OK |
-| **4** | `services-step.tsx` — the two cards; mount in `/onboarding/[type]` first (14 types) | AUTO-OK · needs #3865 merged |
+| **4** | `services-step.tsx` — the two cards; mount in `/onboarding/[type]` first (14 types) | AUTO-OK |
 | **5** | Mount in `/onboarding/wedding` (before `congrats`; **never** un-filter `PAYWALL_SCREENS`) + `/onboarding/simple` (**Papic card only**). Give `interested_services` its first reader | AUTO-OK |
 | **NEW-B** | Clip currency **7 → 8 pts** (`PAPIC_POINTS_PER_CLIP`, `lib/papic-cameras.ts:735`) | AUTO-OK — **SHIPS ALONE**, fail-closed capture path, do not bundle |
 | — | Vendor shots in the card copy ("every camera at your event") | `DPO_COUNSEL` — `vendor_papic_capture` OFF, route 403s. **Guests-only copy until it flips** |
