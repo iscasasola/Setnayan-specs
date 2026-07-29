@@ -125,6 +125,17 @@ For each doc + its claimed state, verify against reality and fix-or-flag:
 
 **Bottom line for the orchestrator:** build the task graph from §5's docs using §3's schema; obey §2 (worktrees/migrations) and §6 (serialize shared files); fan out only `parallel_safe: yes && safety_gate: NONE`; route every gate from §1 to the human queue; run §4 gap-checks continuously and fix-via-PR or flag.
 
+## 2026-07-29 · EMCEE SCRIPT SYSTEM — 🔵 **BUILD SPEC, contract-grade** (start here for this stream)
+**→ [`Emcee_Script_System_BUILD_SPEC_2026-07-29.md`](Emcee_Script_System_BUILD_SPEC_2026-07-29.md)** — per `CLAUDE.md` Rule 0 §4 a dated `*_BUILD_SPEC_*` **outranks any handoff**; where it disagrees with a handoff or a memory, **it wins**. Concept + the *why*: [`Emcee_Script_System_Concept_2026-07-29.md`](Emcee_Script_System_Concept_2026-07-29.md).
+
+**The idea:** the emcee does not write a document — he fills in a **layer** over the couple's night, and the script assembles itself (printable while he prepares, live on his phone on the night). Because his line attaches to a **block**, the couple moves dinner and his script moves with it.
+
+**🟡 WORK IN PROGRESS, on a branch, NOT a PR — continue from it, do not start over:** branch **`claude/emcee-script-layer`** (`2011b6c9d`) already contains the migration (`vendor_block_scripts` — VENDOR-PRIVATE, one policy, no couple/coordinator read, `REVOKE ALL`, cascade-on-block-delete) and the pure lib (`lib/emcee-script-layer.ts` — `buildScriptWorkbook` + `compileScriptText`). **Owed:** its tests, the **script page** (`/vendor-dashboard/clients/[eventId]/script` — the Customer Card is the vendor's per-booking home and **every other trade already has a sub-page there; the emcee is the only one without**), day-of wiring, then the questionnaire and the schedule grant.
+
+**⚠ Read §1 first — 10 traps, every one of which already cost a build cycle**, incl. `test:db:ci` being a SECOND suite (skipping it pushed a broken PR), the `_host_`-named-policy trap that would have let a guest write the couple's picks, never running `supabase db push` (auto-applies; migrations apply ONCE so editing one after it lands leaves prod silently stale), and the exposure freeze failing every schema PR by design.
+
+**Open, unanswered ×3:** *"activities which **GUESTS** can pick"* — everything built assumes the **couple** picks. Do not build either reading on a guess.
+
 ## 2026-07-29 · DAY-OF SPECIALIST DESKS + the emcee's activity catalogue (ACTIVE — 3 of 4 items are AUTO-OK)
 **→ [`Whats_Next_Day_Of_Desks_And_Emcee_Catalogue_2026-07-29.md`](Whats_Next_Day_Of_Desks_And_Emcee_Catalogue_2026-07-29.md)** — cold-start handover, zero context assumed.
 
@@ -318,16 +329,24 @@ never given away** (owner: *"Setnayan AI cannot be free"*). **No checkout in onb
 partial unique index `(event_id) WHERE source='free_grant'` will reject the duplicate (23505),
 which the code correctly reads as "already armed".
 
-### NOT STARTED — the build list, in order
+### ✅ BUILT — the entire list above SHIPPED 2026-07-29 (same day as the lock). Verified on origin/main + live prod.
 
-| # | What | Gate |
+| # | What | Shipped as |
 |---|---|---|
-| **NEW-A** | Catalog migration for the **2026-07-29 two-type lock**: reactivate + reprice Pool rungs → **₱1,000 / ₱2,000 / ₱3,000**; restructure Papic One to **₱1 = 1 shot** (50 pts ₱50 · 100 pts ₱100); add the **reload** path; add **1 free One camera @ 5 pts** (new mechanic) | AUTO-OK |
-| **2** | Remap `INAPP_TO_SERVICE_CODE` (§2.1) — un-blanks the cards. **After NEW-A**, against the reactivated codes | AUTO-OK |
-| **4** | `services-step.tsx` — the two cards; mount in `/onboarding/[type]` first (14 types) | AUTO-OK |
-| **5** | Mount in `/onboarding/wedding` (before `congrats`; **never** un-filter `PAYWALL_SCREENS`) + `/onboarding/simple` (**Papic card only**). Give `interested_services` its first reader | AUTO-OK |
-| **NEW-B** | Clip currency **7 → 8 pts** (`PAPIC_POINTS_PER_CLIP`, `lib/papic-cameras.ts:735`) | AUTO-OK — **SHIPS ALONE**, fail-closed capture path, do not bundle |
-| — | Vendor shots in the card copy ("every camera at your event") | `DPO_COUNSEL` — `vendor_papic_capture` OFF, route 403s. **Guests-only copy until it flips** |
+| NEW-A | Two-type catalog + mechanics (Pool rungs ₱1,000/₱2,000/₱3,000 · One ₱1=1shot · reload · free One camera · dedicated per-seat ledger) | **#3868** + pgcrypto fix **#3869** · migration `20271019231590` OBJECT-VERIFIED in prod |
+| 2 | `INAPP_TO_SERVICE_CODE` remap + /pricing truth fixes | **#3872** |
+| 4+5 | `services-step.tsx` in ALL THREE flows + first `interested_services` reader | **#3873** · flag `NEXT_PUBLIC_ONBOARDING_SERVICES_STEP` **ON in prod** (redeploy verified) |
+| NEW-B | Clip 7 → 8 pts | shipped inside **#3868** (`PAPIC_POINTS_PER_CLIP = 8`, `lib/papic-cameras.ts:770`) — the "ships alone" note is moot |
+| + | **Guest-side purchases** (pool top-ups + own-camera reloads, anonymous, admin-approval-gated) — owner reversed "hosts only" same day | **#3874** · migration `20271019639608` verified · flag `NEXT_PUBLIC_PAPIC_GUEST_BUY` **ON in prod** |
+| + | Out-of-shots panel reachable on pack seats | **#3875** |
+
+⚠ Twin traps that fired during this build, for the next reader: the migration auto-apply
+workflow **silently skipped both merges** (dispatch `supabase-migrations.yml` manually + verify
+the OBJECT), and `gen_random_bytes` under `SET search_path = public` cannot resolve on Supabase
+(pgcrypto lives in `extensions.` — house fix per `20260513030000`).
+
+**➡ THE FOLLOW-UP WAVE IS REGISTERED BELOW:** "Papic promotion surfaces" — the stale/missing
+promo surfaces audit. Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29.md`](Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29.md).
 
 **Prototype for #4/#5:** artifact **`de2cf612`** (`papic-onboarding-prototype`) — Atelier/glass, two-card step, built to §3.
 
@@ -340,3 +359,23 @@ which the code correctly reads as "already armed".
 5. **`style_preferences.interested_services` is WRITE-ONLY** — 3 onboarding writers, zero readers, dead since #2137. PR 5 gives it its first reader.
 6. **Extend, never re-draw.** The wedding flow **already has** `plan` / `services` / `summary` screens — they are dead code, filtered out by `PAYWALL_SCREENS` whenever `EXPERIENCE_QUIZ_ENABLED` is true, **and that flag is ON in prod** (`/onboarding/birthday` → 200 vs a bogus type → 404). Do not rebuild them.
 7. **Do not re-author the AI capability copy.** `SetnayanAiValue` `mode="preview"` is the pitch, 9 wired capabilities. After #3865 the words live in `setnayan-ai-value-copy.ts` and vary by `statutoryPackKey` + `organizerNoun`.
+
+---
+
+## 2026-07-29 · PAPIC PROMOTION SURFACES — REGISTER ENTRY (queued, not started)
+
+**Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29.md`](Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29.md)** — read it whole before touching anything; it carries the canonical model table (§0), the do-not-touch list (§1), per-PR file:line targets (§2), traps (§3), verification recipes (§4), and the adjacent-items queue (§5).
+
+**Why it exists.** The two-type Papic model shipped 2026-07-29, but a full-surface audit (same day, agent-swept against origin/main) found the OLD model still advertised in high-traffic places and the new one missing where it should be promoted. Worst: the homepage pricing block claims "First 3 cameras · unlimited shots per day — Free" (three false claims), a Maya billing fallback hardcodes ₱2,999 against the ₱1,000 row (a CHARGE path), and the flagship Papic Pool card is a dead "Soon" pill in Suite + Studio whose stated blockers both shipped.
+
+| id | What | Gate | parallel_safe |
+|---|---|---|---|
+| papic-promo#A | 🔴 Maya billing fallback derives from catalog; no-active-row ⇒ REFUSE | NONE | yes |
+| papic-promo#B | 🔴 Homepage pricing block → two-type sources; retire per-day helpers + `PAPIC_SEATS_PRICE_PHP` | NONE | yes |
+| papic-promo#C | 🟠 `add-ons-catalog.ts`: Pool card live in Suite/Studio, blurbs, `papic` serviceKey repoint | NONE (owner's 07-29 lock authorizes) | yes |
+| papic-promo#D | 🟠 Retire `PAPIC_SEATS` gates (day-of launcher · galleries · face-enroll ×2); kill "seat links" copy | NONE | yes |
+| papic-promo#E | 🟡 Copy sweep: help.ts rewrite + 2 new articles · features "Native app" lie · demo overlay "unlimited" · cosmetics | NONE | yes |
+| papic-promo#F | 🟡 /papic price anchor + JSON-LD · SEO free-tier mention · realstories cross-link · guest pitch names Papic | NONE | after B |
+| papic-promo#G | ⏸ Papic on couple home/today/for-you — mockups first | **OWNER_DECISION** | after C |
+
+No migrations, no new flags. A–E parallel-safe (disjoint files). Face-tagging copy law: auto-tag is DORMANT — never promise it live (spec §3-5; /privacy biometrics fix is §5-4).

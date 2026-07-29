@@ -3,6 +3,12 @@
 > **Written 2026-07-29** at the end of the session that built them, for a **fresh Claude Code
 > account with zero context**. Registered in [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md).
 >
+> 🔵 **SUPERSEDED FOR THE SCRIPT WORK.** The emcee script system now has a contract-grade spec —
+> [`Emcee_Script_System_BUILD_SPEC_2026-07-29.md`](Emcee_Script_System_BUILD_SPEC_2026-07-29.md).
+> A dated `*_BUILD_SPEC_*` **outranks a handoff** (`CLAUDE.md` Rule 0 §4): where the two
+> disagree, the spec wins. This file remains correct for items A–F below (the emergency bubble,
+> the coordinator's inline inbox, the advance-RPC narrowing, the layout rules).
+>
 > **Read §0 and §1 before touching anything.** §1 is the list of ways this exact stream has
 > already wasted a build cycle. Every trap in it actually happened during the session that
 > wrote this file — none are hypothetical.
