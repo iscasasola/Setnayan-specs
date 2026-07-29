@@ -2,11 +2,45 @@
 
 > Project context for Claude Code working on the Setnayan platform. Keep this file under 200 lines — it's loaded into every Claude Code session as context, so brevity matters.
 
-## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-07-27)
+## 🔑 TRIGGER — the owner types **"what's next"**
+
+When the owner says **"what's next"** (or *whats next* / *what next*), that is a standing
+instruction to **pick up all unfinished work**:
+
+1. Open **[`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md)** — the master register of every active
+   handoff, its gates, and its repo/worktree rules. **Read it fully before touching anything.**
+2. Then open the contract for whichever stream you are executing (each row in the register names
+   its own contract file).
+3. Obey the register's global safety rules: build up to a gate, stop at it, list it. Never
+   auto-flip a prod flag, never `db push` a counsel-gated migration, never make an
+   `OWNER_DECISION` yourself.
+
+⚠️ **THIS MAY BE A DIFFERENT MACHINE OR CLAUDE ACCOUNT.** Assume **no memory files exist** —
+`~/.claude/.../memory/` does NOT travel. Everything you need is committed in THIS repo
+(specs/corpus, remote `Setnayan-specs.git`) and in the code repo
+(`github.com/iscasasola/setnayan-platform`). If a doc references a memory note by `[[name]]`,
+treat it as a hint about a topic, not as a file you can open — the substance was copied into the
+committed docs on purpose.
+
+## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-07-29)
 
 **The owner's #1 complaint about new sessions: they start without the plan, rebuild things that
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
+
+> ### 🔑 TRIGGER — the owner saying **"what's next"** activates ALL unfinished sessions
+> (Set 2026-07-29 for cross-account continuation — the prior account hit its usage limit; a
+> fresh account has NO conversation context, only these files.) On the trigger, open
+> [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md) — the master register + its HUMAN-GATE rules —
+> and its newest entries:
+> - [`WHATS_NEXT_Card_Family_Handoff_2026-07-29.md`](WHATS_NEXT_Card_Family_Handoff_2026-07-29.md)
+>   — maker/card/details/customization-inquiry: 11 PRs DONE (anchored `origin/main`=`441779c1f`,
+>   verify before trusting), locked principles, the unfinished build list, the trap list.
+>   ⏭ One pending owner flip: `NEXT_PUBLIC_SERVICE_DETAILS_ENABLED`.
+> - The **Papic two-type model** (locked 2026-07-29, build NOT started): DECISION_LOG row
+>   2026-07-29 + memory `project-setnayan-onboarding-papic-ai-cards`.
+> - **Song Desk** below (unchanged, still open).
+> Execute per each contract's own rules; build flag-dark; stop at every HUMAN gate.
 
 > ### ▶ ACTIVE: Song desk / song requests / sets
 > **THE CONTRACT — open it first, before any grep, plan or code:**

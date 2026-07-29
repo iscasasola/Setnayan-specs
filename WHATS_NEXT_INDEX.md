@@ -127,3 +127,103 @@ For each doc + its claimed state, verify against reality and fix-or-flag:
 
 ## 2026-07-23 · Open-Browse guest-site program (ACTIVE — resume here)
 **→ [`WHATS_NEXT_Open_Browse_Handoff_2026-07-23.md`](WHATS_NEXT_Open_Browse_Handoff_2026-07-23.md)** — 14 PRs merged (5-tab program PR1-3 done, page.tsx 4,351→608); PR4/PR5 possibly in flight at handoff (§ 2 = first action); PR6-11 briefs + all owner decisions + appointments + flip levers inside. Supersedes older open items where they overlap.
+
+---
+
+## 2026-07-29 · Card-family handoff + the "what's next" TRIGGER (cross-account continuation)
+
+**Owner directive (2026-07-29):** the session hit its usage limit; work continues on a DIFFERENT
+Claude Code account. **The trigger line is "what's next"** — when the owner says it, THIS index
+activates: read §1's gates, then execute the register's active docs per their own rules.
+
+**New register entry — [`WHATS_NEXT_Card_Family_Handoff_2026-07-29.md`](WHATS_NEXT_Card_Family_Handoff_2026-07-29.md)**
+(maker · card · details · customization/inquiry). Eleven PRs DONE and verified (#3848–#3864,
+anchored at `origin/main` = `441779c1f`); the file carries: the done-table + flag inventory
+(one pending owner flip: `NEXT_PUBLIC_SERVICE_DETAILS_ENABLED`), the LOCKED principles
+(frozen-at-lock · visibility-bounds-chargeability · shared refusals · K=3 privacy floor ·
+truthful delivery), the unfinished build list with per-item gates (card-duplicate ·
+most-picked schema `event_vendor_item_options` · reply-time/Papic badges · flywheel(BLOCKED) ·
+Explore mount handoff · epilogue items), and the 48-hour trap list (twin-prefix migrations,
+verify-the-object, byte-scan, agent-stream recovery, landed-but-timed-out pushes).
+
+**Also outstanding from other 2026-07-27/29 sessions (contracts elsewhere, pointers only):**
+Song Desk (`Song_Desk_BUILD_ORDER_2026-07-27.md`) · the Papic two-type model locked 2026-07-29
+(Pool rungs ₱1k/2k/3k + One ₱1=1shot reloadable — DECISION_LOG row 2026-07-29, build not
+started) · Explore replan flag gates · everything in §5's 2026-07-18 cohort still open.
+
+---
+
+## 2026-07-29 · Song desk / song requests / sets — REGISTER ENTRY (upgraded from a pointer)
+
+**Contract:** [`Song_Desk_BUILD_ORDER_2026-07-27.md`](Song_Desk_BUILD_ORDER_2026-07-27.md).
+Reasoning: `DECISION_LOG.md`, **nine rows dated 2026-07-27** (`grep -n "2026-07-27" DECISION_LOG.md`).
+Prototype: [`06_Prototypes/Song_Desk_Sets_2026-07-27.html`](06_Prototypes/Song_Desk_Sets_2026-07-27.html)
+— open it in a browser; the three buttons under "Allow requests" ARE the two blocking questions.
+
+### DONE — verified against LIVE PROD 2026-07-27, do NOT rebuild
+
+| Shipped | Where | Proof |
+|---|---|---|
+| Song desk (repertoire × couple's requests) | `.../on-the-day/live/[eventId]/_components/song-desk/` | PR **#3803** merged |
+| Guest song requests — 2 lanes, rate caps, block lever | `event_song_requests` + 2 service-role RPCs | PR **#3813** merged |
+| Act's open/close window | `vendor_dayof_configs.song_requests_open` (default FALSE) | PR #3813 |
+| `anon` narrowed off `vendor_dayof_configs` | pre-existing exposure, closed in #3813 | baseline diff |
+| Host playlist UI, per moment + "don't play these" | `/dashboard/[eventId]/studio/playlist/` | route + `event_playlist_picks` live |
+| **Music-vendor read on host playlist** | `event_playlist_picks_music_vendor_read` | **already exists — NO new policy needed** |
+| Song matching → "% match" on vendor cards | `songOverlapRatio`, `category-search.ts:915` | live |
+
+⚠️ Two features the owner asked for on 2026-07-27 **already shipped** (the song matcher; the
+music-vendor read policy). **Grep before building anything here.**
+
+### The 7 PRs and their gates
+
+| PR | What | Gate |
+|---|---|---|
+| **1** | 🔴 Entitlement-gate the requests toggle server-side | **AUTO-OK — do first** |
+| **2** | Band sees host's playlist (pure read, no migration, no policy) | **AUTO-OK** |
+| 3 | Join the two song-pick systems (onboarding ↔ playlist studio) | `OWNER_DECISION` — pre-fill direction |
+| 4 | Vibes per slot (artwork exists, concept does NOT) | `OWNER_DECISION` — confirm the six names before freezing an enum |
+| 5 | Sets (`vendor_event_sets`) | `OWNER_DECISION` ×2 — see prototype |
+| 6 | Extend the slot list (Entrance / Post-Ceremony missing) | `OWNER_DECISION` — confirm list |
+| 7 | Guest-facing request button + guest song search | owner-DEPRIORITISED |
+
+**Order:** 1 → 2 → (6+4 together, same file `lib/playlist.ts`) → 3 → 5. PR 5 keys to the slot
+vocabulary, so 6 must land first. **One PR per session** — the owner's stated failure mode is
+sessions that start six things and land none.
+
+### 🔴 The one live defect
+
+`song_requests_open` is **not entitlement-gated server-side**. `vendor_dayof_configs` RLS checks
+only row ownership; `resolveVendorSpecializationAccess` is imported ONLY by the render path
+(`vendor-dayof-frame.ts`, `specialization-slot.tsx`, `live/[eventId]/page.tsx`) — **no write path
+checks it**. A free-tier band can flip it via the API. Harm today is nil (no UI, window default
+FALSE) — which is exactly why it must land **before** any song-desk UI. That is PR 1.
+
+### Blocking owner questions (nothing below PR 2 can start without these)
+
+1. **"Allow requests (anytime)"** — a MODE beside "only during the sets I choose", or always-on?
+   (Always-on retires the open/close control the owner locked one message earlier — do not assume.)
+2. **An accepted request** — lands in a set the band picks, or is just accepted?
+3. **Slots to add** — Entrance/prelude? grand entrance? recessional? (`processional`, `ceremony`,
+   `cocktail_hour`, `first_dance`, `parents_dance`, `dinner`, `open_floor`, `banned_songs` exist.)
+4. **The six vibe names** — acoustic · classical · jazz · OPM · pop · showband?
+5. **Pre-fill direction** for PR 3 (recommended: onboarding → unsorted tray; matcher reads both).
+6. Should the `event_song_picks` booked-vendor read be **narrowed to music vendors**? (Deliberately
+   not narrowed — narrowing hardcodes taxonomy keys into SQL where they drift from `MUSIC_CANONICALS`.)
+
+### Traps specific to this stream
+
+- **Any new RLS read policy trips THE FREEZE.** Regenerate the baseline **in the same PR**
+  (`pnpm --filter @setnayan/web exposure:baseline`) and read your own diff. It fails inside the
+  **`typecheck + lint`** check, whose name does not sound like a security guard.
+- **The exposure baseline is a conflict magnet** (many PRs touch it). On conflict: take main's
+  version, then **REGENERATE** — never hand-merge a generated file.
+- **Every new table in `public` ships OPEN** — `REVOKE ALL … FROM PUBLIC, anon, authenticated`
+  before any GRANT.
+- **Verify the OBJECT, not `schema_migrations`.** Migrations auto-apply but the workflow can lag
+  minutes behind the merge; a "missing" table may just be timing. Check `pg_policy`/`to_regclass`.
+- **Prod is pre-launch-empty** — 1 vendor profile, 2 events, 0 playlist rows, 0 song picks.
+  Tests prove correctness; nothing here is exercisable against real data. A green suite is NOT
+  "proven in the field."
+- **Sets must key to the existing `PlaylistSlotType`** — never a second vocabulary, or the host's
+  picks and the band's sets can never be compared, which is the whole point.
