@@ -22,6 +22,7 @@ What is left is **four items**. As of 2026-07-29 **none is blocked** — the eme
 | B | **Coordinator's inbox inline** on the live console | scoped, **not built** | AUTO-OK |
 | C | **The emcee's questionnaire** (he asks, couple answers) | decided, **not built** | AUTO-OK |
 | D | **Acknowledge-back** on the bubble ("Got it" → coordinator) | proposed | depends on A |
+| E | **Narrow `advance_schedule_block`** — the DB is wider than the decision | 🔴 **defect**, not built | AUTO-OK |
 
 **Canonical checkout:** `/Users/icecasasola` (git root; `apps/web/` and `supabase/migrations/`
 are both under it). ⚠ See §1.1 — this checkout was ~1,455 commits stale during the last
@@ -295,6 +296,55 @@ knowing they heard.
 
 ---
 
+### E · 🔴 Narrow `advance_schedule_block` — the DB is wider than the decision
+
+**Owner decided 2026-07-29:** *"Only coordinator can alter (unless no coordinator, then
+owners/host of the event"*. So: **coordinator holds the wheel · with no coordinator booked it
+falls to the event owner/couple · the host/MC is READ-ONLY on every path.**
+
+The emcee's desk already is read-only, so `stage-script/` needs **no change**. The problem is
+underneath it:
+
+`advance_schedule_block` (migration `20270917100000`) currently admits
+**`host/couple ∪ delegate coordinator with schedule:edit ∪ BOOKED VENDOR ∪ admin`** — so
+**every booked supplier can advance the show today**: the caterer, the florist, the
+photographer, the emcee. Only the UI hides it. **Add a button anywhere on any vendor surface
+and they all get the wheel.**
+
+**The fix:** a narrowing migration that drops the blanket booked-vendor arm and keeps
+couple + schedule:edit coordinator + admin. While you are in there, the couple arm should be
+**`current_couple_event_ids()`**, not the member-wide `current_event_ids()` — see §1.4; it is
+the same class of bug.
+
+⚠ Check whether any *other* surface depends on the booked-vendor arm before removing it
+(`git grep advanceScheduleBlock`). The coordinator's own `ScheduleUpdater` goes through the
+`schedule:edit` grant, not the vendor arm, so it should be unaffected — **verify, don't
+assume.**
+
+**Why one wheel:** every screen in the building follows `run_state` — the emcee's cue card,
+the guest cards. Two hands on it makes the night flicker and nobody trusts what they read.
+
+### F · Three layout rules for the emcee's screen — carry these into the build
+
+Found while prototyping the notice, and **all three are properties of the layout, not of the
+prototype.** Each was verified in-browser.
+
+1. **The scroll area must actually scroll.** `.screen-body` needs `flex: 1; min-height: 0`.
+   Without `min-height: 0` a flex child refuses to shrink below its content, so the list grows
+   past the fixed-height screen and `overflow:hidden` **clips** it — everything below the fold
+   becomes *unreachable*, not merely hidden. This was live in the first prototype and invisible.
+2. **`padding-bottom` does NOT reserve space in a scrolling flex column** — end padding is
+   ignored inside the overflow region, so the last card sits under the notice however much you
+   set. Use an explicit **spacer element** sized to the notice, kept last in the list.
+3. **Cap the notice stack** (55% of the screen, internal scroll). Uncapped, four notices grow
+   taller than the screen and *no* amount of reserved space can clear them — the script becomes
+   unreachable exactly when the night is going worst.
+
+Verified in every state (1 collapsed · expanded · 5 expanded · cleared): the last card clears
+the notice by ~30px, and the spacer collapses to 0 when the last notice is dismissed.
+
+---
+
 ## 4 · The verification recipe that actually passes CI
 
 Run **all** of these in the worktree before opening a PR. This is the exact list CI enforces,
@@ -354,6 +404,7 @@ A guard nobody has broken on purpose is a guard nobody knows works.
 | # | Question | Blocks |
 |---|---|---|
 | 1 | Emergency bubble: **presets or free text?** (Sender + behaviour now decided — see §3.A. Recommendation: presets. **Do not block on this**, build presets.) | nothing — A is unblocked |
+| 1b | Narrowing `advance_schedule_block` (§3.E) removes a capability booked vendors technically have today. Confirm no vendor surface relies on it before shipping. | E |
 | 2 | Should the coordinator be **copied** on the host's questions to the couple? (owner said "if… approval" — is approval per-question or once per event?) | C (partially) |
 | 3 | Which of `Known_Todos_Pre_Pilot.md` / `LIVE_QA_WALKTHROUGH_2026-06-18.md` survives the to-do compile? (Neither is a real to-do list — **0 checkboxes each**; the E2E script is the only one.) | housekeeping |
 | 4 | How do parallel sessions **claim** a piece of work before starting? (§1.2 cost a build cycle.) | process |

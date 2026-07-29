@@ -113,6 +113,12 @@
     position: absolute; right: 10px; bottom: 10px; left: 10px;
     display: flex; flex-direction: column; gap: 0.4rem; z-index: 5;
     pointer-events: none;
+    /* CAPPED. Left uncapped, four notices grow taller than the screen itself and
+       there is no amount of reserved padding that can clear them — the script
+       becomes unreachable exactly when the night is going worst. Half the screen
+       is the ceiling; beyond that the stack scrolls inside itself. */
+    max-height: 55%;
+    overflow-y: auto;
   }
   /* The NOTICE — what arrives. Small on purpose: it must not cover the line the
      host is reading. He opens it on a beat, not mid-sentence. */
@@ -196,7 +202,19 @@
     padding: 0.85rem 1rem 0.7rem; border-bottom: 1px solid var(--stage-line, #2E2F25);
     color: var(--paper-faint, rgba(245,241,232,0.38)); flex-shrink: 0;
   }
-  .screen-body { overflow-y: auto; padding: 0.9rem; display: flex; flex-direction: column; gap: 0.75rem; scroll-behavior: smooth; }
+  .screen-body {
+    /* `flex: 1; min-height: 0` is what actually makes this scroll. Without the
+       min-height a flex child refuses to shrink below its content, so the list
+       grew past the 620px screen and `.screen`'s overflow:hidden CLIPPED it —
+       everything below the fold was unreachable, not merely hidden. */
+    flex: 1; min-height: 0;
+    overflow-y: auto; padding: 0.9rem; display: flex; flex-direction: column;
+    gap: 0.75rem; scroll-behavior: smooth;
+    /* Space for the notice is reserved by a SPACER child, not by padding-bottom
+       — a scrolling flex column does not honour end padding inside its overflow
+       region, so the last card stayed under the notice however much padding was
+       set. See reserveForNotice(). */
+  }
 
   .card { border: 1px solid var(--stage-line, #2E2F25); background: var(--stage-2, #1C1D16); padding: 0.85rem; }
   .card > h3 {
@@ -740,9 +758,37 @@
    * appears the moment the coordinator sends. Live, that is a Supabase realtime
    * subscription; here the send button stands in for it.
    */
+  /**
+   * Nothing may hide under the notice.
+   *
+   * The notice floats over the bottom of the screen, which is right — it must
+   * be reachable without scrolling. But a floating thing over a scrolling list
+   * means the LAST announcement can sit permanently underneath it, and on a
+   * venue floor the host would never know it was there. So the scroll area
+   * reserves exactly the notice's height as bottom padding: the notice still
+   * floats, and every line can still be scrolled into clear view.
+   */
+  function reserveForNotice() {
+    var wrap = document.getElementById("bubbles");
+    var body = document.querySelector(".screen-body");
+    if (!wrap || !body) return;
+    var spacer = document.getElementById("noticeSpacer");
+    if (!spacer) {
+      spacer = document.createElement("div");
+      spacer.id = "noticeSpacer";
+      spacer.setAttribute("aria-hidden", "true");
+      spacer.style.flexShrink = "0";
+      body.appendChild(spacer);
+    }
+    // Always last, even after a re-render appended new cards after it.
+    if (body.lastElementChild !== spacer) body.appendChild(spacer);
+    var h = wrap.offsetHeight;
+    spacer.style.height = h ? h + 14 + "px" : "0px";
+  }
+
   function renderBubbles() {
     var host = document.getElementById("bubbles");
-    if (!bubbles.length) { host.innerHTML = ""; noticeOpen = false; return; }
+    if (!bubbles.length) { host.innerHTML = ""; noticeOpen = false; reserveForNotice(); return; }
 
     if (!noticeOpen) {
       var n = bubbles.length;
@@ -751,6 +797,7 @@
         'aria-label="' + n + ' notice' + (n === 1 ? '' : 's') + ' from your coordinator — tap to read">' +
         '<span class="dot"></span>' + n + ' notice' + (n === 1 ? '' : 's') + ' · tap to read' +
         "</button>";
+      reserveForNotice();
       return;
     }
 
@@ -761,6 +808,7 @@
         '<button class="ack" type="button" data-ack="' + b.id + '">Got it</button>' +
         "</div>";
     }).join("");
+    reserveForNotice();
   }
 
   function pushBubble(text) {
@@ -825,6 +873,8 @@
     } else if (t.id === "noticeOpen" || (t.closest && t.closest("#noticeOpen"))) {
       noticeOpen = true;
       renderBubbles();
+      var body = document.querySelector(".screen-body");
+      if (body) body.scrollTop = body.scrollHeight;
     } else if (t.dataset && t.dataset.emg) {
       pushBubble(t.dataset.emg);
     } else if (t.id === "freeSend") {
