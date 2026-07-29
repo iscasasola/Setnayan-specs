@@ -85,9 +85,34 @@ Papic is **not** day-of capture. It is the memory vault for the **entire plannin
 
 ## 2. BLOCKERS — fix before or with the cards
 
-### 2.0 🚨 PAPIC POOL IS NOT SELLABLE — the upgrade line can only offer Papic One
+### 2.0 ⛔ SUPERSEDED 2026-07-29 — the owner put the Pool BACK ON SALE. Read §2.0-NEW first.
 
-**Discovered 2026-07-28 while building PR2. This decides what Card 1's upgrade line may say.**
+> **🔄 THIS SECTION IS HISTORY. Do NOT build from it.** On **2026-07-29** the owner locked the **Papic two-type model** in a separate prototype session (`DECISION_LOG.md` row 2026-07-29 · prototype artifact `de2cf612`), which **explicitly supersedes both** this section's "Pool is not sellable" conclusion **and** the 2026-07-22 GA guardrail #2 it rested on. The owner priced the Pool rungs for sale **knowingly**; the R1 storage risk now rides on the paid rungs. The analysis below was correct on 2026-07-28 and is kept only so nobody re-derives it.
+
+### 2.0-NEW 🔒 THE PAPIC MODEL — owner-locked 2026-07-29 (BUILD FROM THIS)
+
+Two types. Both meter the same event point pool primitives; what differs is whether the shots are **shared** or **dedicated**.
+
+| | **Papic Pool** — shared | **Papic One** — dedicated |
+|---|---|---|
+| Cameras | **unlimited**, any guest phone via the event QR | one physical camera, **its own QR** |
+| Shots | **shared** across everyone | **dedicated**, unshared |
+| Free tier | **50 pts** (already armed — PR1) | **ONE free camera with 5 pts** ⬅ *new mechanic, NOT built* |
+| Paid rungs | **+3,000 pts ₱1,000** · **+6,000 pts ₱2,000** · **+10,000 pts ₱3,000** | per camera: **50 pts ₱50** · **100 pts ₱100** |
+| Rule | volume buy | flat **₱1 = 1 shot** (~3× Pool's per-point rate — you pay for the guarantee) |
+
+- **Reload: YES.** Owner: *"yes they can reload."* The same One rungs top up an **existing** camera, including the free one. **No new QR mid-event.**
+- **No seat cap.** Owner: *"they can also buy as many seats as they want."* Unlimited One cameras per event.
+- **Point currency: 1 photo = 1 pt · 10-second clip = 8 pts.** ⚠ The shipped constant is **`PAPIC_POINTS_PER_CLIP = 7`** (`lib/papic-cameras.ts:735`) — the lock raises it **7 → 8** on the **fail-closed capture path**, so it ships as its own isolated PR (same "must ship alone" lineage as the 5s→10s change). An interim "photo = 10 pts" was floated and **withdrawn** — it made the free One camera unusable and priced video below photos.
+
+**What this supersedes:** the inactive ₱999/₱1,999/₱2,999 charm rows (→ round ₱1,000/₱2,000/₱3,000), the flat `PAPIC_CAMERA_MINI_DAY` ₱100 = 250 pts (→ ₱1 = 1 shot), the 2026-07-22 guardrail #2, and this spec's own §2.0 below.
+
+**Card 1's upgrade line may now offer the Pool** — that was the open question on 2026-07-28 and it is answered.
+
+<details>
+<summary>§2.0 (2026-07-28) — the superseded "Pool is not sellable" analysis, kept for lineage</summary>
+
+**Discovered 2026-07-28 while building PR2. This decided what Card 1's upgrade line could say — until the 2026-07-29 lock reversed it.**
 
 All four Papic Pool rungs — `PAPIC_GUEST` (₱999 / 3,000 shots), `_6K` (₱1,999), `_10K` (₱2,999), `_TOPUP` (₱2,999) — are **`is_active = false`** in the live catalog, and `fetchV2CustomerCatalog()` filters `.eq('is_active', true)`. Worse, `fetchPapicPassTiers()` is read by **exactly one module — `lib/sku-activation.ts`** — i.e. only to convert an *already-paid* order into points. **No UI reads it.** There is no surface anywhere in the app that sells a Papic Pool.
 
@@ -97,7 +122,9 @@ All four Papic Pool rungs — `PAPIC_GUEST` (₱999 / 3,000 shots), `_6K` (₱1,
 
 **Card 1's upgrade line must offer Papic One and nothing else.** Naming the Pool would be a fake door — the couple cannot buy it at any price. Revisit when purge + compression land.
 
-⚠ Separately noted, **not fixed here:** `resolveRetailChargeCentavos()` selects by `service_code` **without** filtering `is_active`, so the charge path would still price a retired SKU that the display path hides. That is the known catalog-`is_active` trap; it is pre-existing and out of scope for this spec, but it means "invisible in the UI" is not the same as "cannot be ordered".
+⚠ Separately noted, **not fixed here:** `resolveRetailChargeCentavos()` selects by `service_code` **without** filtering `is_active`, so the charge path would still price a retired SKU that the display path hides. That is the known catalog-`is_active` trap; it is pre-existing and out of scope for this spec, but it means "invisible in the UI" is not the same as "cannot be ordered". **(Still true and still unfixed after the 2026-07-29 lock.)**
+
+</details>
 
 ### 2.1 🚨 The onboarding Papic map points at RETIRED SKUs
 
@@ -174,21 +201,29 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 
 ## 4. BUILD SEQUENCE
 
-| PR | What | Gates |
+**Status verified against live prod + `origin/main` on 2026-07-29. Do not re-derive — re-verify only if the dates look stale.**
+
+| PR | What | State |
 |---|---|---|
-| **1** | 🚨 **Arm the free pool** (§2.5) — write the `free_grant` row at event commit, and provision the free seats there too instead of lazily (§2.4). **Nothing else ships until free is metered.** | none |
-| **2** | Remap `INAPP_TO_SERVICE_CODE` Papic keys to the live One-Pool SKUs (§2.1) so the upgrade line renders. | PR1 |
-| **3** | Make `SetnayanAiValue` type-aware — drop/branch the PH-marriage row for non-weddings (§2.3). | none (parallel) |
-| **4** | `services-step.tsx` — the two cards. Mount in `/onboarding/[type]` first (14 types, biggest gap). | PR1–3 |
-| **5** | Mount in `/onboarding/wedding` (before `congrats`; do NOT un-filter `PAYWALL_SCREENS` — the lock stands) and `/onboarding/simple` (**Papic card only** — the AI gate hides card 2). Give `interested_services` its first reader (§1.3). | PR4 |
-| **—** | Amend or kill the §1.4 start-clamp in the Papic spec (§2.2). | **owner** |
-| **—** | Vendor shots in the card copy. | **DPO/NPC** |
+| **1** | Arm the free pool (§2.5) — `free_grant` row at event commit, all 5 insert paths + a self-heal on the Papic studio. | ✅ **DONE + LIVE** — PR [#3847](https://github.com/iscasasola/setnayan-platform/pull/3847), migration reissued as `20271017567807` via [#3848](https://github.com/iscasasola/setnayan-platform/pull/3848) after a twin-prefix collision. **Verified in prod:** index `papic_event_point_grants_one_free_per_event` exists · 2 events × 50 pts · `papic_event_pool_config.free_grant_points = 50`. |
+| **1b** | Grant reads the **admin-editable** allowance, not a hardcoded 50; 3 duplicate constants → 1. | ✅ **DONE** — PR [#3860](https://github.com/iscasasola/setnayan-platform/pull/3860) merged. |
+| **3** | `SetnayanAiValue` type-aware — the PH-marriage / "another couple" / "reception" wedding-isms (§2.3). | ⏳ **PR [#3865](https://github.com/iscasasola/setnayan-platform/pull/3865) OPEN**, auto-merge armed, CI running. Verify it merged before building on it. |
+| **NEW-A** | 🔴 **Catalog migration for the 2026-07-29 model** — reactivate + reprice the Pool rungs to ₱1,000 / ₱2,000 / ₱3,000; restructure Papic One to ₱1 = 1 shot (50 pts ₱50 · 100 pts ₱100); add the **reload** path and the **1 free One camera @ 5 pts**. | ⛔ **NOT STARTED** — the new first step. Everything below depends on it. |
+| **2** | Remap `INAPP_TO_SERVICE_CODE` (§2.1) so the cards stop rendering blank. | ⛔ **NOT STARTED** — was blocked on "what is the live upgrade?", which §2.0-NEW now answers. Do it **after NEW-A**, against the reactivated codes. |
+| **NEW-B** | Clip currency **7 → 8 pts** (`PAPIC_POINTS_PER_CLIP`, `lib/papic-cameras.ts:735`). | ⛔ **NOT STARTED** — **ships ALONE**: it is a hardcoded constant on the **fail-closed capture path**. Independent of the cards; do not bundle. |
+| **4** | `services-step.tsx` — the two cards. Mount in `/onboarding/[type]` first (14 types, biggest gap). | ⛔ **NOT STARTED**. Prototype exists: artifact **`de2cf612`** (`papic-onboarding-prototype`, Atelier/glass, built to §3). |
+| **5** | Mount in `/onboarding/wedding` (before `congrats`; do **NOT** un-filter `PAYWALL_SCREENS` — the lock stands) and `/onboarding/simple` (**Papic card only** — the AI gate hides card 2). Give `interested_services` its first reader (§1.3). | ⛔ **NOT STARTED**. |
+| **—** | Amend or kill the §1.4 start-clamp (§2.2). | ✅ **Treated as dead** — the owner's 2026-07-27 runway directive supersedes the unbuilt 2026-07-22 proposal. Just don't build a lower bound. |
+| **—** | Vendor shots in the card copy. | ⛔ **DPO/NPC gate** — `vendor_papic_capture` control is OFF and the route 403s. Card says **guests only** until it flips. |
+
+**Order: NEW-A → 2 → 4 → 5.** NEW-B is independent and ships alone whenever. PR3 must be merged before 4.
 
 ---
 
 ## 5. OPEN — owner / counsel
 
-1. **Confirm the free point number** (§2.5) — the spec says 50; the pool has never been armed, so this number becomes real the moment PR1 ships. It is the single figure the card prints and the meter enforces.
-2. **DPO gate on vendor capture** (§0) — until it flips, the card says guests only.
+1. ~~Confirm the free point number~~ ✅ **ANSWERED 2026-07-27: 50.** Armed and live; `papic_event_pool_config.free_grant_points` is now the admin control.
+2. **DPO gate on vendor capture** (§0) — until it flips, the card says guests only. *(Still open.)*
+3. **Card 1's free line must now describe BOTH free things** (2026-07-29): the **50-pt shared Pool** *and* the **1 free dedicated One camera @ 5 pts**. The second is a new mechanic and is **not built** — do not print it until NEW-A ships it.
 
 **Treated as already answered — not re-asked:** the §1.4 `event_date − 120` start-clamp (§2.2) is **dead**. The owner's 2026-07-27 directive — *"starting X until their event date … store all your photos as you prepare"* — supersedes an unbuilt 2026-07-22 proposal that contradicts it. PR1 must not introduce a lower bound.

@@ -270,3 +270,53 @@ types so `.eq()`/`.or()` column names are unchecked · new relations ship OPEN �
 added to explicit select lists · migrations auto-apply unreliably · `git add -A` in a shared
 checkout · one session at a time in the guest tree), the specialization plug-in recipe, a
 definition-of-done checklist, and the standing verify-before-auto-merge workflow.
+
+---
+
+## 2026-07-29 · Onboarding Papic + Setnayan AI cards — REGISTER ENTRY
+
+**Contract:** [`Onboarding_Papic_AI_Cards_BUILD_SPEC_2026-07-27.md`](Onboarding_Papic_AI_Cards_BUILD_SPEC_2026-07-27.md).
+Read **§2.0-NEW** before anything — §2.0 is superseded and collapsed into a `<details>` block on purpose.
+Reasoning rows: `grep -n "2026-07-2[789]" DECISION_LOG.md | grep -i "papic\|onboarding"`.
+
+**Owner intent.** Every event gets **Papic** (it creates the memories — ranked #1) and **Setnayan AI**
+(ranked #2) offered during onboarding. Papic is **switched ON free**; Setnayan AI is **introduced,
+never given away** (owner: *"Setnayan AI cannot be free"*). **No checkout in onboarding** — the
+2026-06-21 "no paywall in onboarding" lock stands. AI is **hidden on vendor-free types**
+(`simple_event`), gated on `profile.marketplaceEnabled` **and** a resolving SKU — derived, never
+`=== 'simple_event'`.
+
+### DONE — verified against LIVE PROD 2026-07-29, do NOT rebuild
+
+| Shipped | Proof |
+|---|---|
+| Free Papic pool **ARMED** (was silently UNMETERED: no grant ⇒ `applies=FALSE` ⇒ `papic_reserve_event_points` allowed every capture) | PR **#3847** + reissued migration `20271017567807` (**#3848**). Prod: index `papic_event_point_grants_one_free_per_event` present · 2 events × 50 pts · `free_grant_points = 50` |
+| Grant reads the **admin-editable** allowance; 3 duplicate "50"s → 1 | PR **#3860** merged |
+| `SetnayanAiValue` type-aware (no more Pre-Cana on a birthday) | PR **#3865** — ⏳ **was OPEN w/ auto-merge armed at handoff. CHECK IT MERGED FIRST.** |
+
+⚠ **Do not "fix" the free pool again.** It is armed. Re-arming would stack grants — though the
+partial unique index `(event_id) WHERE source='free_grant'` will reject the duplicate (23505),
+which the code correctly reads as "already armed".
+
+### NOT STARTED — the build list, in order
+
+| # | What | Gate |
+|---|---|---|
+| **NEW-A** | Catalog migration for the **2026-07-29 two-type lock**: reactivate + reprice Pool rungs → **₱1,000 / ₱2,000 / ₱3,000**; restructure Papic One to **₱1 = 1 shot** (50 pts ₱50 · 100 pts ₱100); add the **reload** path; add **1 free One camera @ 5 pts** (new mechanic) | AUTO-OK |
+| **2** | Remap `INAPP_TO_SERVICE_CODE` (§2.1) — un-blanks the cards. **After NEW-A**, against the reactivated codes | AUTO-OK |
+| **4** | `services-step.tsx` — the two cards; mount in `/onboarding/[type]` first (14 types) | AUTO-OK · needs #3865 merged |
+| **5** | Mount in `/onboarding/wedding` (before `congrats`; **never** un-filter `PAYWALL_SCREENS`) + `/onboarding/simple` (**Papic card only**). Give `interested_services` its first reader | AUTO-OK |
+| **NEW-B** | Clip currency **7 → 8 pts** (`PAPIC_POINTS_PER_CLIP`, `lib/papic-cameras.ts:735`) | AUTO-OK — **SHIPS ALONE**, fail-closed capture path, do not bundle |
+| — | Vendor shots in the card copy ("every camera at your event") | `DPO_COUNSEL` — `vendor_papic_capture` OFF, route 403s. **Guests-only copy until it flips** |
+
+**Prototype for #4/#5:** artifact **`de2cf612`** (`papic-onboarding-prototype`) — Atelier/glass, two-card step, built to §3.
+
+### Traps specific to this wave
+
+1. **§2.0 of the spec is SUPERSEDED.** It concluded "Papic Pool is not sellable" (true on 07-28: all rungs `is_active=false`, no UI reads `papic_pass_tiers`). The **2026-07-29 owner lock reverses it** and also supersedes `Papic_One_Pool_Model_Spec_2026-07-22.md` guardrail #2 ("don't GA the paid rungs until purge + clip compression ship") — priced for sale **knowingly**; R1 storage risk now rides on the paid rungs. Build from **§2.0-NEW**.
+2. **Twin-prefix migrations.** `20271017100000` collided with a twin and **silently never applied** — `schema_migrations` is not proof. Allocate the prefix properly and **verify the OBJECT** in prod after merge.
+3. **Never `| tail` a command whose exit code you trust** — it masks failures. Capture `$?` directly. (`npm run build` also cannot run locally: ~7 GB heap.)
+4. **`resolveRetailChargeCentavos()` does NOT filter `is_active`** — the *display* path does. "Invisible in the UI" ≠ "cannot be ordered". Pre-existing; out of scope here but do not assume a deactivated SKU is unbuyable.
+5. **`style_preferences.interested_services` is WRITE-ONLY** — 3 onboarding writers, zero readers, dead since #2137. PR 5 gives it its first reader.
+6. **Extend, never re-draw.** The wedding flow **already has** `plan` / `services` / `summary` screens — they are dead code, filtered out by `PAYWALL_SCREENS` whenever `EXPERIENCE_QUIZ_ENABLED` is true, **and that flag is ON in prod** (`/onboarding/birthday` → 200 vs a bogus type → 404). Do not rebuild them.
+7. **Do not re-author the AI capability copy.** `SetnayanAiValue` `mode="preview"` is the pitch, 9 wired capabilities. After #3865 the words live in `setnayan-ai-value-copy.ts` and vary by `statutoryPackKey` + `organizerNoun`.
