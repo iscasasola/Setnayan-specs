@@ -402,6 +402,26 @@
     * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   }
 
+  /* ── BACK TO NOW ───────────────────────────────────────────────────────
+     A host reads ahead, or scrolls to check something, and then the room needs
+     him. This is the one-tap way back to the line he is actually on. Bottom
+     LEFT so it can never collide with the notice, and GOLD not amber — it is
+     navigation, not an alert. Appears only when the live line is off-screen. */
+  .back-now {
+    position: absolute; left: 12px; bottom: 12px; z-index: 6;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    border-radius: 999px; padding: 0.45rem 0.85rem; cursor: pointer;
+    background: linear-gradient(180deg, rgba(74,58,32,0.94), rgba(48,37,20,0.94));
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border: 1px solid rgba(203,167,102,0.45);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.10);
+    font-family: ui-monospace, Menlo, monospace; text-transform: uppercase;
+    letter-spacing: 0.13em; font-size: 0.56rem; color: #F0E2C8;
+    animation: notice-in 200ms ease-out;
+  }
+  .back-now:hover { border-color: rgba(203,167,102,0.75); }
+  .back-now:focus-visible { outline: 2px solid rgba(203,167,102,0.9); outline-offset: 3px; }
+
   /* ══ THE RADIUS + MATERIAL PASS ═══════════════════════════════════════════
      Applied last so it reads as one system rather than a value sprinkled on
      each rule. Everything maps to the owner-locked --m-r-* scale (2026-06-20,
@@ -475,6 +495,7 @@
         </div>
         <div class="screen-body" id="screen"></div>
         <div class="bubble-wrap" id="bubbles"></div>
+        <button class="back-now" id="backNow" type="button" hidden>↑ Back to now</button>
       </div>
     </div>
 
@@ -767,7 +788,9 @@
     var h = '<div class="card"><h3><span class="tick"></span><span class="mono">Running script</span></h3><ol class="script">';
     blocks.forEach(function (b, i) {
       var st = stateOf(i);
-      h += '<li class="' + (st === "done" ? "done " : "") + (b.depth === 1 ? "part" : "") + '">';
+      // The live line is tagged so "Back to now" has something to return to.
+      h += '<li' + (st === "live" ? ' id="liveLine"' : "") + ' class="' +
+           (st === "done" ? "done " : "") + (b.depth === 1 ? "part" : "") + '">';
       h += '<div class="line-top"><span class="time">' + esc(b.time) + "</span>";
       h += '<span class="label-name' + (b.depth === 0 ? " top" : "") + '">' + esc(b.label) + "</span>";
       if (st === "live") h += '<span class="badge live">On now</span>';
@@ -904,6 +927,25 @@
     renderBubbles();
   }
 
+  /**
+   * "Back to now" — shown ONLY when the live line is off-screen.
+   *
+   * A host reads ahead, or scrolls to check a name, and then the room needs
+   * him. Without this he is hunting through a long programme for the line he is
+   * actually on. Reading a notice must never cost him his place either, which
+   * is why opening one no longer scrolls the script at all.
+   */
+  function syncBackNow() {
+    var btn = document.getElementById("backNow");
+    var body = document.querySelector(".screen-body");
+    var live = document.getElementById("liveLine");
+    if (!btn || !body) return;
+    if (!live) { btn.hidden = true; return; }
+    var l = live.getBoundingClientRect();
+    var b = body.getBoundingClientRect();
+    btn.hidden = l.bottom > b.top && l.top < b.bottom;   // visible → hide it
+  }
+
   function render() {
     var order = cardOrder();
     var map = { cue: cueCard, script: scriptCard, announcements: annCard };
@@ -931,7 +973,12 @@
     document.getElementById("lateness").textContent = late ? "Running late: 18 min" : "Running: on time";
     document.getElementById("clock").textContent = late ? "6:25 PM" : "6:07 PM";
     renderBubbles();
+    syncBackNow();
   }
+
+  document.addEventListener("scroll", function (e) {
+    if (e.target && e.target.classList && e.target.classList.contains("screen-body")) syncBackNow();
+  }, true);
 
   document.addEventListener("click", function (e) {
     var t = e.target;
@@ -955,11 +1002,15 @@
     } else if (t.id === "askSend") {
       var a = document.getElementById("askInput");
       if (a && a.value.trim()) { sentQuestion = a.value.trim(); render(); }
+    } else if (t.id === "backNow" || (t.closest && t.closest("#backNow"))) {
+      var live = document.getElementById("liveLine");
+      if (live) live.scrollIntoView({ block: "center", behavior: "smooth" });
     } else if (t.id === "noticeOpen" || (t.closest && t.closest("#noticeOpen"))) {
+      // Opening a notice must NOT move the script. The notice floats in its own
+      // layer, so scrolling never helped read it — it only cost the host his
+      // place, which is the one thing he cannot afford to lose mid-sentence.
       noticeOpen = true;
       renderBubbles();
-      var body = document.querySelector(".screen-body");
-      if (body) body.scrollTop = body.scrollHeight;
     } else if (t.dataset && t.dataset.emg) {
       pushBubble(t.dataset.emg);
     } else if (t.id === "freeSend") {

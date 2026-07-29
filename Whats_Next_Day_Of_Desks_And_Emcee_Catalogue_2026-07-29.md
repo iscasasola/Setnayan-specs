@@ -355,6 +355,18 @@ thing on the screen.
 prototype uses px literals because it ships without the app's token CSS, and `lint-radius`
 (strict in CI) flags px radii in real code.
 
+**5. Reading a notice must NEVER move the script** (owner 2026-07-29: *"it slide to the bottom
+of the screen and the emcee might be lost when they read the notifications"*). An early cut
+scrolled the list to the end when a notice was opened — the notice floats in its own layer, so
+that never helped read it and only cost the host his place mid-sentence. **Opening a notice now
+changes nothing about the script's position.**
+
+**6. Give him a way back — "↑ Back to now".** A host reads ahead or scrolls to check a name,
+and then the room needs him. A gold pill appears **bottom-LEFT** (never colliding with the
+amber notice bottom-right) whenever the live line is off-screen, and one tap returns him to it.
+Gold not amber on purpose: it is navigation, not an alert. It hides itself the moment the live
+line is back in view.
+
 ⚠⚠ **The wider radius pass DIVERGES from the shipped console**, which is square-cornered
 (`ConsolePlate` = border + inset hairline, no radius). Rounding the *notice* is settled;
 rounding the *whole console* is an **owner call** and is not assumed here.
