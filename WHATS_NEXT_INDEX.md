@@ -125,6 +125,15 @@ For each doc + its claimed state, verify against reality and fix-or-flag:
 
 **Bottom line for the orchestrator:** build the task graph from §5's docs using §3's schema; obey §2 (worktrees/migrations) and §6 (serialize shared files); fan out only `parallel_safe: yes && safety_gate: NONE`; route every gate from §1 to the human queue; run §4 gap-checks continuously and fix-via-PR or flag.
 
+## 2026-07-29 · DAY-OF SPECIALIST DESKS + the emcee's activity catalogue (ACTIVE — 3 of 4 items are AUTO-OK)
+**→ [`Whats_Next_Day_Of_Desks_And_Emcee_Catalogue_2026-07-29.md`](Whats_Next_Day_Of_Desks_And_Emcee_Catalogue_2026-07-29.md)** — cold-start handover, zero context assumed.
+
+**SHIPPED + VERIFIED IN PROD 2026-07-29 — do NOT rebuild:** all three vendor day-of specializations (`song_desk` · `stage_script` · `floor_command`, all three registry lines live) · the host/MC "Script & cues" desk (PR **#3812**) · the emcee **activity catalogue** end to end — migration `20271015817050` **applied and object-verified in prod**, authoring screen, couple's picker, and the picks→timeline bridge (PR **#3831**). Testing already written as `TEST_SCRIPT_E2E_2026-07-27.md` **§15/§16/§17** (180 checks total) — **append there, do not start a new list.**
+
+**Remaining: 4 items.** 🔴 **Emergency bubble** (`OWNER_DECISION` — who can send, presets or free text; **prototyped both ways**, artifact + `0022_vendor_dashboard/MC_Desk_Prototype_2026-07-27.html`) · 🟢 coordinator's **inbox inline** on the live console (spec = closed PR **#3822**) · 🟢 the emcee's **questionnaire** (model already owner-decided) · acknowledge-back on the bubble.
+
+**⚠ Carries the heaviest traps section in the register — read §1 before any code.** Four cost real time last session: the canonical checkout was **1,455 commits stale** and made shipped files look absent · **two sessions built `floor_command` in parallel** and only found out at merge (one PR closed) · **`test:db:ci` is a SEPARATE suite from `test:unit`** and skipping it pushed a broken PR · a policy named `_host_` wired to the member-wide `current_event_ids()` would have let **an invited guest write the couple's picks** (caught by a DB guard, fixed before merge). Also: **never run `supabase db push`** — it auto-applies on merge, and migrations apply ONCE so editing one after it lands leaves prod on the old version silently.
+
 ## 2026-07-29 · EXPLORE / MARKETPLACE integration wave (ACTIVE — 🔴 the flag is LIVE in prod)
 **→ [`WHATS_NEXT_Explore_Marketplace_2026-07-29.md`](WHATS_NEXT_Explore_Marketplace_2026-07-29.md)** — cold-start handover, zero context assumed. Design contract = [`Explore_Integration_BUILD_SPEC_2026-07-29.md`](Explore_Integration_BUILD_SPEC_2026-07-29.md).
 
