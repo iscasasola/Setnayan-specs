@@ -494,6 +494,13 @@
   .gbtn{border:none;border-radius:999px;background:var(--gold-500);color:#FFFDF8;padding:11px 16px;min-height:44px;font-size:12.5px;font-weight:800;cursor:pointer}
   .gsec{border:1px solid var(--glass-brd);background:var(--glass);border-radius:999px;padding:11px 16px;min-height:44px;font-size:12.5px;font-weight:700;color:var(--ink-700);cursor:pointer}
   .guard .gn{margin:11px 0 0;font-size:11px;color:var(--ink-300);line-height:1.55}
+  /* the organiser off-ramp — a block that sells the right account shape */
+  .proup{margin-top:11px;border-radius:16px;padding:15px;border:1px solid rgba(203,167,102,.4);
+    background:linear-gradient(150deg,rgba(243,236,223,.9),rgba(255,255,255,.6))}
+  .proup .ph2{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+  .proup .ph2 .ic{width:15px;height:15px;color:var(--gold-700)}
+  .proup .pb2{margin:7px 0 0;font-size:12px;line-height:1.6;color:var(--ink-500)}
+  .proup .pb2 b{color:var(--ink-900)}
 
   .note{font-size:12.5px;color:var(--ink-500);line-height:1.65;padding:0 4px;max-width:100ch}
   .note b{color:var(--ink-900)}
@@ -1062,23 +1069,29 @@
      event-types.ts are EVENT_TYPES_FALLBACK — a frozen pre-cutover safety net
      ("Do NOT add new types here"). Since the 2026-06-13 cutover the picker
      reads public.event_type_vocab at runtime, admin-editable, no deploy. */
+  /* cap: 'honoree' = one in planning PER PERSON (a different celebrant is a
+             different event — the shipped life-event guard)
+     cap: 'account' = one in planning PER ACCOUNT, honoree irrelevant. This is
+             the ORGANISER DETECTOR: keep hitting it and you want a shop.
+     cap: null      = unlimited. At least one uncapped type must always exist,
+             or users work around the caps by mislabelling. */
   var ETYPES=[
-    {k:'wedding',     l:'Wedding',       e:'💍', d:'The day you say “I do.”',         g:'linear-gradient(145deg,#D8BC8B,#8E7A52 55%,#3D3A2E)', life:true, own:true},
-    {k:'debut',       l:'Debut',         e:'👑', d:'Her grand eighteenth.',           g:'linear-gradient(145deg,#E0C7CE,#A6737F 55%,#3A2A2E)', life:true},
-    {k:'gender_reveal',l:'Gender Reveal',e:'🎈', d:'Pink or blue?',                   g:'linear-gradient(145deg,#DCC3D2,#8C7E9E 55%,#332C3A)', life:true},
-    {k:'birthday',    l:'Birthday',      e:'🎂', d:'Another year, celebrated.',       g:'linear-gradient(145deg,#E5CFA6,#B08A4E 55%,#3C3325)', life:true},
-    {k:'celebration', l:'Celebration',   e:'🥂', d:'Moments worth gathering for.',    g:'linear-gradient(145deg,#D9CDBA,#93826A 55%,#38322A)'},
-    {k:'travel',      l:'Travel',        e:'✈️', d:'The trip you’ll always remember.', g:'linear-gradient(145deg,#A9BECB,#5E7E95 52%,#2C3640)'},
-    {k:'corporate',   l:'Corporate',     e:'🏢', d:'Where your brand shines.',        g:'linear-gradient(145deg,#BFC4C9,#6E767E 55%,#2E3235)'},
-    {k:'tournament',  l:'Tournament',    e:'🏆', d:'Game day, elevated.',             g:'linear-gradient(145deg,#DBC79A,#9A7F45 55%,#372F1F)'},
-    {k:'christening', l:'Christening',   e:'🕯️', d:'A blessing to remember.',         g:'linear-gradient(145deg,#B4C3A4,#6E8B60 52%,#333A2C)', life:true},
-    {k:'anniversary', l:'Anniversary',   e:'💞', d:'Another year, together.',         g:'linear-gradient(145deg,#E3C6C0,#A87A70 55%,#382925)'},
-    {k:'graduation',  l:'Graduation',    e:'🎓', d:'The years, finished.',            g:'linear-gradient(145deg,#C9CBB4,#7E8463 55%,#2F3227)', life:true},
-    {k:'reunion',     l:'Reunion',       e:'🤝', d:'Together again.',                 g:'linear-gradient(145deg,#CDBFA6,#877A5F 55%,#332E24)'},
-    {k:'gala_night',  l:'Gala Night',    e:'🌟', d:'A night with a dress code.',      g:'linear-gradient(145deg,#C3B7CE,#6E6386 55%,#2B2734)', nop:true},
-    {k:'simple_event',l:'Simple Event',  e:'📅', d:'Just get it on the calendar.',    g:'linear-gradient(145deg,#CFCBC2,#807C73 55%,#2F2E2A)'},
-    {k:'date',        l:'Date',          e:'💕', d:'Dinner, lunch, or a movie — just the two of you.', g:'linear-gradient(145deg,#E8C4C4,#B0707A 55%,#3A262A)', nop:true, isnew:true},
-    {k:'hangout',     l:'Hangout',       e:'🍿', d:'Barkada time — a meal, coffee, a movie night.',    g:'linear-gradient(145deg,#D9C9A8,#96814F 55%,#342E22)', nop:true, isnew:true}
+    {k:'wedding',     l:'Wedding',       e:'💍', d:'The day you say “I do.”',         g:'linear-gradient(145deg,#D8BC8B,#8E7A52 55%,#3D3A2E)', life:true, cap:'honoree', own:true},
+    {k:'debut',       l:'Debut',         e:'👑', d:'Her grand eighteenth.',           g:'linear-gradient(145deg,#E0C7CE,#A6737F 55%,#3A2A2E)', life:true, cap:'honoree'},
+    {k:'gender_reveal',l:'Gender Reveal',e:'🎈', d:'Pink or blue?',                   g:'linear-gradient(145deg,#DCC3D2,#8C7E9E 55%,#332C3A)', life:true, cap:'honoree'},
+    {k:'birthday',    l:'Birthday',      e:'🎂', d:'Another year, celebrated.',       g:'linear-gradient(145deg,#E5CFA6,#B08A4E 55%,#3C3325)', life:true, cap:'honoree'},
+    {k:'celebration', l:'Celebration',   e:'🥂', d:'Moments worth gathering for.',    g:'linear-gradient(145deg,#D9CDBA,#93826A 55%,#38322A)', cap:null},
+    {k:'travel',      l:'Travel',        e:'✈️', d:'The trip you’ll always remember.', g:'linear-gradient(145deg,#A9BECB,#5E7E95 52%,#2C3640)', cap:null},
+    {k:'corporate',   l:'Corporate',     e:'🏢', d:'Where your brand shines.',        g:'linear-gradient(145deg,#BFC4C9,#6E767E 55%,#2E3235)', cap:'account', pro:true, own:true},
+    {k:'tournament',  l:'Tournament',    e:'🏆', d:'Game day, elevated.',             g:'linear-gradient(145deg,#DBC79A,#9A7F45 55%,#372F1F)', cap:'account', pro:true},
+    {k:'christening', l:'Christening',   e:'🕯️', d:'A blessing to remember.',         g:'linear-gradient(145deg,#B4C3A4,#6E8B60 52%,#333A2C)', life:true, cap:'honoree'},
+    {k:'anniversary', l:'Anniversary',   e:'💞', d:'Another year, together.',         g:'linear-gradient(145deg,#E3C6C0,#A87A70 55%,#382925)', cap:null},
+    {k:'graduation',  l:'Graduation',    e:'🎓', d:'The years, finished.',            g:'linear-gradient(145deg,#C9CBB4,#7E8463 55%,#2F3227)', life:true, cap:'honoree'},
+    {k:'reunion',     l:'Reunion',       e:'🤝', d:'Together again.',                 g:'linear-gradient(145deg,#CDBFA6,#877A5F 55%,#332E24)', cap:null},
+    {k:'gala_night',  l:'Gala Night',    e:'🌟', d:'A night with a dress code.',      g:'linear-gradient(145deg,#C3B7CE,#6E6386 55%,#2B2734)', cap:'account', pro:true, nop:true},
+    {k:'simple_event',l:'Simple Event',  e:'📅', d:'Just get it on the calendar.',    g:'linear-gradient(145deg,#CFCBC2,#807C73 55%,#2F2E2A)', cap:null},
+    {k:'date',        l:'Date',          e:'💕', d:'Dinner, lunch, or a movie — just the two of you.', g:'linear-gradient(145deg,#E8C4C4,#B0707A 55%,#3A262A)', cap:null, nop:true, isnew:true},
+    {k:'hangout',     l:'Hangout',       e:'🍿', d:'Barkada time — a meal, coffee, a movie night.',    g:'linear-gradient(145deg,#D9C9A8,#96814F 55%,#342E22)', cap:null, nop:true, isnew:true}
   ];
   /* ── WHO FIRST. Sixteen tiles is a wall; the same sixteen filtered to one
      person is a short, obvious list. Eligibility comes from data we hold:
@@ -1159,6 +1172,27 @@
      (account × type × honoree). Lifestyle types are unlimited. Blocked is an
      INVITATION, not a wall — three live doors. */
   function guardCard(t){
+    /* Two shapes of block. A LIFE event collides per celebrant — you probably
+       meant a different person. A PROFESSIONAL type collides per account — and
+       if you keep hitting it you are an organiser, which is the vendor side. */
+    if(t.pro){
+      return '<div class="grab"></div>'+
+        '<div class="guard" role="alert">'+
+          '<p class="gh">You already have one '+t.l.toLowerCase()+' event in planning</p>'+
+          '<p class="gb"><b>Q4 Townhall</b> is still open. A personal account holds <b>one at a time</b> — finish it, or archive it, and the slot frees.</p>'+
+          '<div class="gdoors">'+
+            '<button class="gbtn" data-j="Q4 Townhall">Open Q4 Townhall</button>'+
+          '</div>'+
+        '</div>'+
+        '<div class="proup">'+
+          '<div class="ph2">'+ic('i-store')+'Running events for other people?</div>'+
+          '<p class="pb2">Then this is the wrong account shape. A <b>shop</b> holds unlimited events, takes bookings, and keeps each client separate — a personal account is for <b>your own</b> celebrations.</p>'+
+          '<div class="gdoors">'+
+            '<button class="gbtn" data-j="Open a shop">Open a shop instead</button>'+
+            '<button class="gsec" data-back="who">Not an organiser</button>'+
+          '</div>'+
+        '</div>';
+    }
     return '<div class="grab"></div>'+
       '<div class="guard" role="alert">'+
         '<p class="gh">Tuloy pa rin ang planning na ito</p>'+
@@ -1330,7 +1364,10 @@
       var tc=t.closest('.tcard');
       if(tc){
         var ty=ETYPES.filter(function(x){return x.k===tc.dataset.type;})[0];
-        var collides = ty.own && subject && subject.id==='me';
+        /* A LIFE type collides per CELEBRANT (so only when it's for you).
+           A CAPPED PROFESSIONAL type collides per ACCOUNT — the honoree is
+           irrelevant, which is exactly what makes it an organiser signal. */
+        var collides = ty.own && (ty.pro || (subject && subject.id==='me'));
         openSheet(f, collides ? guardCard(ty) : formSheet(ty));
         return;
       }
