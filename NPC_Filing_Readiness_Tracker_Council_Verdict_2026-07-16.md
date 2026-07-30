@@ -106,6 +106,25 @@ If we cannot guarantee the surface structurally refuses to imply readiness, we s
 
 ## 6. Owner sign-offs (yes/no)
 
+> ### ✅ RESOLVED 2026-07-30 — DO NOT RE-ASK THESE. THE BOARD SHIPPED AND HONOURS ALL SIX.
+>
+> **These prompts were never struck through, so a later session read them as open and nearly rebuilt a shipped feature.** The build landed the same week this verdict was written — table migration `20270818084314_npc_filing_tasks.sql` (2026-07-16), then merged into the Data Privacy hub on 2026-07-22. Verified against `origin/main` on 2026-07-30:
+>
+> | # | Sign-off | Shipped state |
+> |---|---|---|
+> | 1 | 15-item Tier 0–3 spine | ✅ `NPC_FILING_TASKS` holds exactly **15** defs |
+> | 2 | New table, never extend `data_privacy_controls` | ✅ `public.npc_filing_tasks`, its own migration |
+> | 3 | No-readiness guard | ✅ headline reads *"N of 15 worked down · external counsel review outstanding — **NOT cleared to file**"*, plus a standing **NOT FILED** banner; even the post-counsel string stays hedged (*"still verify every blocker before lodging"*) |
+> | 4 | Counsel-gated rows need a written reference to resolve | ✅ `admin/npc-readiness/actions.ts` — refuses `resolved` on a `counselGated` def with an empty note |
+> | 5 | Catalog committed to the repo | ✅ `apps/web/lib/npc-filing-tasks.ts` |
+> | 6 | Phase-1 cuts (no assignees/dates/upload/doc-generation/download panel) | ⚠ **PARTIALLY SUPERSEDED** — a real document surface ships (`lib/npc-documents.ts`, 14 PDFs under `apps/web/assets/npc-docs/`, `documents/[doc]/route.ts`, a coverage panel). The §6.6 concern was *fake-dooring* a download panel; what shipped is a working one, so this is scope growth, not a defect. |
+>
+> Also shipped and worth knowing: **`t3-13` (FILE the DPS) is structurally fenced behind `t0-1`** in the action, and `/admin/npc-readiness` now **redirects** to `/admin/data-privacy?tab=checklist`.
+>
+> ⏭ **What is actually open is the WORK, not the build** — the 15 items themselves, gated on **t0-1: route the packet to external PH counsel.** No code change substitutes for it.
+
+_(Original prompts kept below for lineage — all answered by the shipped build.)_
+
 1. **Dedup to the 15-item Tier 0–3 spine?** (Missing docs fold into `detail` + `source_refs`; B/W issues become a `severity` flag + pinned blocker strip — not 40 verbatim rows.) **Y / N**
 2. **New table `npc_filing_tasks`, cloned from the Data Privacy board — never extend `data_privacy_controls`?** **Y / N**
 3. **Confirm the no-readiness guard:** even at 15/15 resolved, the header reads "counsel review outstanding" until `t0-1` is resolved-with-reference, and `t3-13` (FILE) is fenced behind `t0-1`? **Y / N**
