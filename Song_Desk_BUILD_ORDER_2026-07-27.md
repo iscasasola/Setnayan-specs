@@ -16,7 +16,9 @@
 >
 > ⚠ **The last two created a required PR that did not exist this morning — [PR 1b](#pr-1b--always-on-requests--the-paid-gate-moves-to-the-inbox).
 > It must land BEFORE any requests UI and before the always-on flip.** Build order is now
-> **2 → 1b → (6+4) → 3 → 5**.
+> **2 ✅ → 1b → (6+4) → 3 → 5**.
+>
+> **Progress: PR 1 ✅ #3876 · PR 2 ✅ #3885 (both 2026-07-30). Next: PR 1b.**
 >
 > **This file is the contract.** Execute top to bottom. Every item below was verified against
 > live prod or shipped code on 2026-07-27 — the "already exists" claims are checked, not assumed.
@@ -126,15 +128,44 @@ the inbox. Append to `tests/db/song-requests.db.test.ts` (§7 exists from PR 1).
 
 ---
 
-## PR 2 · 🟢 Band sees the host's playlist  ← *the next real feature*
+## PR 2 · ✅ DONE 2026-07-30 — Band sees the host's playlist
 
-The smallest possible answer to the owner's *"make this helpful for the host and the band first."*
-**Pure read. No migration. No new policy** (the music-vendor read already exists).
+> **SHIPPED as PR [#3885](https://github.com/iscasasola/setnayan-platform/pull/3885)** (branch
+> `claude/song-desk-pr2-host-playlist`). **Pure read — no migration, no new policy**, exactly as
+> scoped: `event_playlist_picks_music_vendor_read` (`20260622000000`) was confirmed present before
+> a line was written. `buildHostPlaylist()` in `lib/song-desk.ts` + the render in
+> `song-desk/song-desk.tsx`; 19 new tests (33 in file, 5403 suite, green).
+>
+> **What it renders:** the night in wedding-day order with **empty moments dropped** (the couple's
+> studio shows all slots because it is an authoring surface; a band on a venue floor does not need
+> eight headings to learn six are blank) · each song carrying **the couple's note** · a flag on what
+> they don't play · and **"Don't play these" crossed the OTHER way up** — the hazard there is a
+> banned song the act DOES play.
+>
+> **The join is fuzzy and that is the substance.** `event_playlist_picks` is free text
+> (`song_label` + nullable `artist`) that never resolved to a `songs` row. Rule: normalised title,
+> artists must agree when both sides name one, **blank on either side lets the title decide**, and
+> the matched artist is displayed so a wrong "Perfect" is spottable. Buckets sorted by artist so a
+> same-title ambiguity resolves identically every render.
+>
+> **⚠⚠ THE TRAP THIS FOUND, AND PR 6 MUST NOT WALK INTO IT.** `groupPicksBySlot` indexes a
+> **hardcoded Record literal** of all 8 slots. A row whose `slot_type` is outside that Record hits
+> `out[row.slot_type].push(row)` on `undefined` → **TypeError**. So adding `prelude` /
+> `grand_entrance` / `recessional` to the enum + the DB CHECK **without** adding them to that Record
+> crashes BOTH the couple's playlist studio and the band's desk the first time a couple uses a new
+> moment. `buildHostPlaylist` defends itself (unknown slots are dropped by `isPick`) — the couple's
+> studio does NOT. **This is the concrete meaning of PR 6's "verify every downstream reader".**
+>
+> **Two edges left visible on purpose:** a song chosen in BOTH places renders twice (PR 3 owns the
+> merge rule; papering over it now would pre-empt the owner's answered design), and the playlist read
+> is scoped by `eventId` only because that table has no vendor column and its policy keys on
+> `auth.uid()` rather than the handed-in `vendorProfileId` — documented at the call site.
+>
+> ⏭ **Next is [PR 1b](#pr-1b--always-on-requests--the-paid-gate-moves-to-the-inbox).**
 
-Inside the song desk, render per moment: what the host asked for, and `banned_songs`
-("Don't play these"). Reuse `PLAYLIST_SLOT_TYPES` / `PLAYLIST_SLOT_LABELS` /
-`groupPicksBySlot` from `lib/playlist.ts` — do not restate the slot list.
-
+**As originally scoped (kept for lineage):** the smallest possible answer to the owner's *"make this
+helpful for the host and the band first."* Pure read; reuse `PLAYLIST_SLOT_TYPES` /
+`PLAYLIST_SLOT_LABELS` / `groupPicksBySlot` from `lib/playlist.ts` — do not restate the slot list.
 ⚠ Scope reads to the handed-in `eventId` + `vendorProfileId`; the frame mounting you is not
 authorisation.
 
@@ -249,10 +280,23 @@ parents_dance · dinner · open_floor · banned_songs`.
 in `lib/playlist.ts` except the last): `PlaylistSlotType` union · `PLAYLIST_SLOT_TYPES` ·
 `PLAYLIST_SLOT_LABELS` · `PLAYLIST_SLOT_HINTS` (write real per-moment helper copy in the shipped
 editorial voice — no engineering jargon) · `groupPicksBySlot` · any DB `CHECK` constraint on
-`event_playlist_picks.slot_type`. ⚠ **Grep every reader before the migration**
-(`git grep -n "PLAYLIST_SLOT\|slot_type" origin/main`) — a reader with an exhaustive `switch` or a
-`Record<PlaylistSlotType, …>` fails to compile, which is the good case; one with a lookup that
-silently returns `undefined` is the bad case.
+`event_playlist_picks.slot_type`.
+
+🚨 **THE ONE THAT BITES — found while building PR 2, verified in the shipped code.**
+`groupPicksBySlot` builds a **hardcoded Record literal of all 8 slots** and then does
+`out[row.slot_type].push(row)`. A row carrying a slot the Record does not name dereferences
+`undefined` → **TypeError, not a missing section.** Add the three values to the enum and the DB CHECK
+but forget that Record, and **the couple's playlist studio crashes the first time anyone picks a song
+for the grand entrance** — the band's desk survives only because `buildHostPlaylist` filters unknown
+slots itself. The `Record<PlaylistSlotType, …>` types (`LABELS`, `HINTS`, and the literal inside
+`groupPicksBySlot`) DO fail to compile when the union grows, which is the good case — but only if the
+union is extended in the same commit rather than the DB alone. **Extend the union FIRST and let tsc
+walk you to every site.**
+
+⚠ **The full reader list, as of 2026-07-30** (`git grep -n "PLAYLIST_SLOT\|groupPicksBySlot\|slot_type" origin/main`):
+`app/dashboard/[eventId]/studio/playlist/page.tsx` (renders all slots + hints) ·
+`app/dashboard/[eventId]/studio/playlist/actions.ts` (`VALID_SLOTS` — the write validator) ·
+`lib/song-desk.ts` (`buildHostPlaylist`, PR 2). Three files, one of which is a write gate.
 
 ⚠ PR 4 (vibes) touches the same file — **land 6 and 4 together in one PR** as the register's order
 says, or the second one rebases onto a conflict.
