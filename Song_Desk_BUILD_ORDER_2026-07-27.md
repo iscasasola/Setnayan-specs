@@ -18,9 +18,9 @@
 > It must land BEFORE any requests UI and before the always-on flip.** Build order is now
 > **2 ✅ → 1b → (6+4) → 3 → 5**.
 >
-> **Progress (all 2026-07-30): PR 1 ✅ #3876 · PR 2 ✅ #3885 · PR 1b ✅ #3891.
-> Next: PR 1c** — three read-audience/exposure gaps found by the post-PR-2 audit, all latent.
-> Order: 1c → (6+4) → 3 → 5.
+> **Progress (all 2026-07-30): PR 1 ✅ #3876 · PR 2 ✅ #3885 · PR 1b ✅ #3891 · PR 1c ✅ #3893.**
+> **Every security/gap item in this stream is CLOSED. Everything left is ungated feature work:**
+> **(6+4) → 3 → 5.**
 >
 > ⚠ **Standing correction for every policy edit in this stream:** the exposure freeze fails on ANY
 > policy-predicate change, narrowing included. Regenerate the baseline in the same PR and read the
@@ -88,13 +88,31 @@ Harm today is nil (no UI, flag off) — which is exactly why it must land BEFORE
 
 ---
 
-## PR 1c · 🔴 The song-desk READ AUDIENCE is wrong — crew and grantees read zero
+## PR 1c · ✅ DONE 2026-07-30 — the READ AUDIENCE fixed (crew + grantees read zero)
 
+> **SHIPPED as PR [#3893](https://github.com/iscasasola/setnayan-platform/pull/3893)** (branch
+> `claude/song-desk-pr1c-read-audience`, migration `20271020710612`). **Do not rebuild.**
+> All three fixed + the swallowed-error amplifier. 11 new DB tests in
+> `tests/db/song-desk-read-audience.db.test.ts`; remove the migration and **6 of 11 fail**.
+> Baseline 6217 → 6215 (`anon` loses both tables; two predicates widened, in the diff).
+>
+> **How ② was fixed, and how it was NOT:** in **SQL**, via a grantee leg on both policies —
+> **not** by passing the page's admin client through `SpecializationSurfaceProps`. A service_role
+> client in props is inherited by every future specialization surface, which makes the registry's
+> "scope every read yourself" warning the only thing between a careless query and the whole table.
+> ⚠ For the playlist the leg is an explicit `EXISTS` against `vendor_event_access_grants`, NOT
+> `current_vendor_dayof_grant_event_ids()` — that helper returns event_ids and **drops the vendor
+> binding**, which would let the florist's crew read the band's playlist.
+> ⚠ `current_vendor_booked_event_ids()` was **not** widened (one line, but it is shared by
+> `event_schedule_blocks` and others — blast radius). A test is the tripwire on that.
+> ⚠ `fetchPlaylistPicks` now returns `{ rows, failed }` so a denied read stops rendering as a claim
+> about the couple. One function, two call sites — no twin helper.
+>
 > **Found by the 2026-07-30 gap + security audit, after PR 2 shipped. All three items
-> below are LATENT, not live** — verified against prod the same day: the only two booked
-> music rows are host-manual (`marketplace_vendor_id IS NULL`), there are 0 live day-of
-> grants, 0 requests, 0 playlist picks and 0 `vendor_dayof_configs` rows, so **no vendor can
-> reach the desk in prod yet.** Pre-launch is exactly when to close them.
+> below were LATENT, not live** — verified against prod the same day: the only two booked
+> music rows are host-manual (`marketplace_vendor_id IS NULL`), there were 0 live day-of
+> grants, 0 requests, 0 playlist picks and 0 `vendor_dayof_configs` rows, so **no vendor could
+> reach the desk in prod yet.** Pre-launch was exactly the moment to close them.
 
 **① A vendor TEAM MEMBER cannot read the host's playlist.** `event_playlist_picks_music_vendor_read`
 (`20260622000000`) hand-rolls its own audience:

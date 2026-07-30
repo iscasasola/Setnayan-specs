@@ -224,15 +224,15 @@ music-vendor read policy). **Grep before building anything here.**
 | ~~**1**~~ | ✅ **DONE 2026-07-30 — PR [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876)**, migration `20271020159662`. Column privilege withdrawn from `authenticated`; sole write path is `setSongRequestsOpen` (entitlement-checked, service_role). **Do not rebuild.** | — |
 | ~~**2**~~ | ✅ **DONE 2026-07-30 — PR [#3885](https://github.com/iscasasola/setnayan-platform/pull/3885).** Band reads the host's playlist per moment, notes included, `banned_songs` crossed the other way up (hazard = a banned song they DO play). Pure read, no migration. **Do not rebuild.** ⚠ It surfaced PR 6's real trap: `groupPicksBySlot` indexes a hardcoded 8-slot Record and **throws** on an unknown slot. | — |
 | ~~**1b**~~ | ✅ **DONE 2026-07-30 — PR [#3891](https://github.com/iscasasola/setnayan-platform/pull/3891)**, migration `20271020224218`. Always-on (gate function inverted, not just the DEFAULT — the table is sparse) + the booked-vendor leg removed from both request policies; the act reads via entitlement-checked service_role. **Do not rebuild.** | — |
-| **1c** | **NEW 2026-07-30 (gap audit)** — the song-desk READ AUDIENCE: ① crew (team members) read 0 playlist rows ② day-of grantees read 0 from BOTH song tables ⇒ the desk states a falsehood ③ `event_playlist_picks` + `event_song_picks` never got their `REVOKE ALL` | **AUTO-OK · NEXT** · all three LATENT (prod unreachable today) |
+| ~~**1c**~~ | ✅ **DONE 2026-07-30 — PR [#3893](https://github.com/iscasasola/setnayan-platform/pull/3893)**, migration `20271020710612`. Crew + day-of grantees now read both song tables (grantee leg in SQL, NOT an admin client in props; playlist leg keeps the vendor binding); `anon` revoked off both tables; `fetchPlaylistPicks` returns `{rows, failed}` so a denied read stops rendering as a claim about the couple. **Do not rebuild.** | — |
 | 3 | Join the two song-pick systems (onboarding ↔ playlist studio) | ✅ **ANSWERED** — onboarding feeds the studio ("Unsorted" tray); matcher reads both |
 | 4 | Vibes per slot (artwork exists, concept does NOT) | ✅ **ANSWERED** — six names FROZEN as drawn (acoustic·classical·jazz·opm·pop·showband) |
 | 5 | Sets (`vendor_event_sets`) | ✅ **ANSWERED ×2** — requests always-on (no "chosen sets" mode) · Accept ≠ filed into a set |
 | 6 | Extend the slot list (Entrance / Post-Ceremony missing) | ✅ **ANSWERED** — add all three: `prelude` · `grand_entrance` · `recessional` (11 slots) |
 | 7 | Guest-facing request button + guest song search | owner-DEPRIORITISED |
 
-**Order (revised 2026-07-30):** 1 ✅ → 2 ✅ → 1b ✅ → **1c** → (6+4 together, same file
-`lib/playlist.ts`) → 3 → 5. PR 5 keys to the slot vocabulary, so 6 must land first.
+**Order (revised 2026-07-30):** 1 ✅ → 2 ✅ → 1b ✅ → 1c ✅ → **(6+4 together, same file
+`lib/playlist.ts`)** → 3 → 5. **Every security/gap item is CLOSED; all that remains is ungated feature work.** PR 5 keys to the slot vocabulary, so 6 must land first.
 
 ⚠ **Standing correction for every policy edit here:** the exposure freeze fails on **any**
 policy-predicate change, narrowing included — it fingerprints predicates and will not guess.
