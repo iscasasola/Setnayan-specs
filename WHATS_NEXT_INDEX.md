@@ -218,8 +218,8 @@ music-vendor read policy). **Grep before building anything here.**
 | PR | What | Gate |
 |---|---|---|
 | ~~**1**~~ | ✅ **DONE 2026-07-30 — PR [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876)**, migration `20271020159662`. Column privilege withdrawn from `authenticated`; sole write path is `setSongRequestsOpen` (entitlement-checked, service_role). **Do not rebuild.** | — |
-| **2** | Band sees host's playlist (pure read, no migration, no policy) | **AUTO-OK — do first now** |
-| **1b** | **NEW 2026-07-30** — always-on requests + move the paid gate to the inbox read | **AUTO-OK now** (was the owner call) · 🔴 security-shaped |
+| ~~**2**~~ | ✅ **DONE 2026-07-30 — PR [#3885](https://github.com/iscasasola/setnayan-platform/pull/3885).** Band reads the host's playlist per moment, notes included, `banned_songs` crossed the other way up (hazard = a banned song they DO play). Pure read, no migration. **Do not rebuild.** ⚠ It surfaced PR 6's real trap: `groupPicksBySlot` indexes a hardcoded 8-slot Record and **throws** on an unknown slot. | — |
+| **1b** | **NEW 2026-07-30** — always-on requests + move the paid gate to the inbox read | **AUTO-OK now** (was the owner call) · 🔴 security-shaped · **NEXT** |
 | 3 | Join the two song-pick systems (onboarding ↔ playlist studio) | ✅ **ANSWERED** — onboarding feeds the studio ("Unsorted" tray); matcher reads both |
 | 4 | Vibes per slot (artwork exists, concept does NOT) | ✅ **ANSWERED** — six names FROZEN as drawn (acoustic·classical·jazz·opm·pop·showband) |
 | 5 | Sets (`vendor_event_sets`) | ✅ **ANSWERED ×2** — requests always-on (no "chosen sets" mode) · Accept ≠ filed into a set |
@@ -390,7 +390,7 @@ promo surfaces audit. Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29
 |---|---|---|---|
 | ~~papic-promo#A~~ | ✅ **FALSE ALARM, closed 2026-07-30 no code.** `readSkuPrice` (`initialize-maya/route.ts:355`) returns `PRICING_BOOK` **only** under `DEMO_MODE`; otherwise it reads the admin catalog honoring `is_active` and fails closed. The ₱2,999 literals are a demo-only book, documented as such at line 42. Nothing to fix. | — | — |
 | ~~papic-promo#B~~ | ✅ **DONE 2026-07-30, PR [#3880](https://github.com/iscasasola/setnayan-platform/pull/3880)** — but NOT as specced: `PricingData.groups`/`freeChips` are **rendered nowhere** (2026-07-04 overlay redesign → summary + link to `/pricing`; only `aiPrice`/`aiIntroPhp`/`vendor` are read), so the false rows were built every request and published by `/api/home-pricing` while invisible — *which is why they survived the two-type lock.* Fix = **delete the dead payload**, not port it. Also retired the 4 per-day display helpers (`publicPapicLadder`, `papicCapacityShort`, `papicCapLadderPhrase`, `papicTierSummary`) + `PAPIC_SEATS_PRICE_PHP`. Both CI guards strengthened. 5,380/5,380 unit tests. | — | — |
-| papic-promo#C | 🟠 `add-ons-catalog.ts`: Pool card live in Suite/Studio, blurbs, `papic` serviceKey repoint | NONE (owner's 07-29 lock authorizes) | yes |
+| ~~papic-promo#C~~ | ✅ **DONE 2026-07-30, PR [#3884](https://github.com/iscasasola/setnayan-platform/pull/3884)** — Pool card `coming_soon`→live with pax-pass blurb replaced; `papic`'s dead `PAPIC_SEATS` serviceKey **removed** (not repointed — it made the card coordinator-recommendable for an unbuyable SKU); `papicGuestPassAccess()` **kept** (event-type eligibility, not a darkness switch); detail + moderation + editorial-label copy fixed under the owner's naming lock. Prod-verified first. 5,385/5,385 tests. ⚠ **gates 0d/0e still open → spec §5 item 11.** | — | — |
 | papic-promo#D | 🟠 Retire `PAPIC_SEATS` gates (day-of launcher · galleries · face-enroll ×2); kill "seat links" copy | NONE | yes |
 | papic-promo#E | 🟡 Copy sweep: help.ts rewrite + 2 new articles · features "Native app" lie · demo overlay "unlimited" · cosmetics | NONE | yes |
 | papic-promo#F | 🟡 /papic price anchor + JSON-LD · SEO free-tier mention · realstories cross-link · guest pitch names Papic | NONE | after B |
@@ -398,9 +398,13 @@ promo surfaces audit. Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29
 
 No migrations, no new flags. A–E parallel-safe (disjoint files). Face-tagging copy law: auto-tag is DORMANT — never promise it live (spec §3-5; /privacy biometrics fix is §5-4).
 
-**➡ NEXT UP: papic-promo#C** (the flagship Pool card is a fake door in Suite + Studio — one file, `add-ons-catalog.ts`, plus the studio dark-gate). Then D → E → F (F needs nothing from B any more: B deleted the plumbing instead of porting it, so **F is now unblocked and parallel-safe with C/D/E**). G stays owner-gated on the home-surface shape.
+**➡ NEXT UP: papic-promo#D** (four surfaces gate on the unbuyable `PAPIC_SEATS` and so stay permanently dark for every new couple — day-of launcher · galleries card · face-enroll ×2 — plus the "share these 5 seat links" copy). **D · E · F are all open and parallel-safe**; F needs nothing from B any more. G stays owner-gated on the home-surface shape.
 
-**Lesson from B, worth carrying into C–F:** *verify the surface actually renders before designing its fix.* One `grep` for the consumer (`PriceRow`/`freeChips`) turned a port into a deletion — and explained the drift. The spec's file:line targets are sound; its claims about which surface **shows** them are audit-time inferences. Check the consumer first.
+**🔒 Read §0's NAMES row before writing any Papic copy in D/E/F.** Owner naming lock 2026-07-30: **"we do not have papic guests — we only have Papic Pool and Papic One."** Technical ids (`PAPIC_GUEST`, `papic-guest`, `papicGuestPassAccess`) are frozen and stay; no *display* surface may print "Papic Guest", "Guest Pass" or "Guest Camera Pack". PR-C fixed the two it could reach; **PR-F still owns `app/page.tsx:127` + `layout.tsx` ("Papic guest photo-and-video capture")**.
+
+**Two lessons from B and C, worth carrying into D–F:**
+1. *Verify the surface actually renders before designing its fix.* One grep for the consumer (`PriceRow`/`freeChips`) turned a port into a deletion — and explained the drift. The spec's file:line targets are sound; its claims about which surface **shows** them are audit-time inferences.
+2. *Read the blocker comment in full, then check prod.* PR-C's card named **four** gates; the spec listed two. Two were genuinely closed (prod query, not inference), and the other two were **DPO** items that the 2026-07-29 sale had already overtaken. Neither "the spec says NONE" nor "the comment says blocked" was the answer — the database was.
 
 ---
 

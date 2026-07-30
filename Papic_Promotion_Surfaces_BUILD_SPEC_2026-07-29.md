@@ -21,7 +21,8 @@
 | Free tier | 50-pt shared pool + 1 free One camera, auto-armed on EVERY event | `ensureFreePapicPoolGrantAdmin` / `ensureFreePapicOneCameraAdmin` |
 | Guest buy | pool top-ups + own-camera One reloads, anonymous, admin-approval-gated | PR #3874 · flag `NEXT_PUBLIC_PAPIC_GUEST_BUY` (ON in prod since 2026-07-29) |
 | Copy helpers | `papicPoolRungPhrase` / `papicOneRungPhrase` / `papicBucketPhrase` / `papicPointCurrencyTerms` | `apps/web/lib/papic-tier-copy.ts` — **the ONE place claims derive from** |
-| RETIRED (never print) | "Papic 5 Seats ₱2,999" · pax-priced "from ₱2,999" · 250 pts/camera · clip = 7 pts · "first 3 cameras free" · "unlimited shots per day" · per-guest-per-day rates · "seat links" vocabulary · "Native iOS/Android app" | — |
+| **NAMES — there are exactly TWO** | **Papic Pool** · **Papic One**. Nothing else is a Papic product. 🔒 **Owner naming lock 2026-07-30: _"we do not have papic guests — we only have Papic Pool and Papic One."_** `PAPIC_GUEST` / `papic-guest` / `papicGuestPassAccess` / `PapicGuestCapture` are FROZEN TECHNICAL IDS predating the naming and must not be renamed — but no display surface may print "Papic Guest", "Guest Pass", "Guest Camera Pack" or any other invented product name. A guest's phone shooting from the pool may be *described* as a camera; it is not a product. | owner, 2026-07-30 |
+| RETIRED (never print) | "Papic 5 Seats ₱2,999" · pax-priced "from ₱2,999" · 250 pts/camera · clip = 7 pts · "first 3 cameras free" · "unlimited shots per day" · per-guest-per-day rates · "seat links" vocabulary · "Native iOS/Android app" · **"Papic Guest" / "Premium Guest Camera Pack" as PRODUCT NAMES** (added 2026-07-30 — the second one never existed under any pricing model) | — |
 
 **The iron rule of this wave: DERIVE, never hardcode.** Every price/points figure renders through
 the helpers above or a live catalog read. The onboarding guardrail test blocks peso literals —
@@ -113,7 +114,49 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
 - Verify: guardrail-style test that the block contains no "per day", no "unlimited", no peso
   literal; visual check of homepage pricing section.
 
-### PR-C 🟠 Suite + Studio — the flagship Pool card is a fake door
+### ~~PR-C 🟠 Suite + Studio — the flagship Pool card is a fake door~~ → ✅ DONE 2026-07-30 · PR #3884
+- **Shipped as specced on the flip; two details differed, both verified against prod first**
+  (`PAPIC_GUEST` ₱1,000 · `_6K` ₱2,000 · `_10K` ₱3,000 all `is_active`; the pax-priced ₱2,999 row
+  is the *superseded* `PAPIC_GUEST_TOPUP`; `PAPIC_SEATS` inactive; **zero `PAPIC_*` orders ever**;
+  both prod events hold a `free_grant` row):
+  - **`papic`'s `serviceKey` was REMOVED, not repointed.** The predicted "price pill degrades to a
+    bare View" does not happen — `freeTrial` short-circuits `pillFor()` first. The actual defect was
+    `isRecommendable()`, which needs only `Boolean(serviceKey)`: a coordinator could **recommend a
+    SKU nobody can buy**. Papic has no single representative SKU (two products, five active rows) —
+    `variablePricing` already declares that. Repointing at a Pool or One row would name one rung as
+    "the" Papic price.
+  - **`papicGuestPassAccess()` was KEPT.** It is event-type **eligibility** (permanent travel deny ·
+    anniversary controller split · phase ladder), not a darkness switch; it fails closed for a new
+    type, and widening it is an owner/DPO call by the module's own rule. Only the stale ⚠ comment
+    ("does NOT make anything purchasable… all four rows are `is_active = false`" — false in both
+    halves) was rewritten.
+- Also: Pool card `coming_soon` → `web_v1` · `Soon` tag → `Shared` · `freeTrial: 'Free to start'`
+  (honest: the ₱1,000 cheapest top-up as a headline misprices a product whose entry cost is zero) ·
+  blurb off the pax pass ("every guest on the list gets a camera, all day") onto the shot pool ·
+  `add-ons-detail` "Try it free before you commit" → "Your first shots are already free — no card" ·
+  `papic-guest` added to `STUDIO_RECOMMEND_EXCLUDED` (a rung must not be auto-pushed beside its own
+  umbrella; still browsable + coordinator-recommendable).
+- **Owner naming lock applied here too** (see §0): the guest-site label map's `'Papic Guest'` →
+  `'Papic Pool'`, and the moderation empty state stopped telling couples to add *"the Premium Guest
+  Camera Pack"* — a product that has never existed. ⏭ Remaining display strings: `app/page.tsx:127`
+  + `layout.tsx` SEO copy → **PR-F**; `initialize-maya` `TITLE_BOOK` → demo-only, never bills.
+- Three guards moved in the same PR: the catalog gate test flipped **as its own comment instructed**
+  and now also forbids pax language + literals in the blurb; the free-or-paid invariant accepts
+  `freeTrial` (it guards `pillFor()`, which resolves a trial chip before the bare "View"); the Studio
+  drift guard satisfied explicitly.
+- ⚠ **The side effect verified, and it predates this PR:** `[slug]/_components/site-body.tsx` mounts
+  the inline guest camera on an active approved `PAPIC_GUEST` pack — already reachable from the
+  studio + guest-buy surfaces, so the card flip adds a doorway, not a capability.
+- ⚠⚠ **GATES 0d/0e WERE NOT CLOSED BY THIS PR — see §5 item 11.** The card's comment named FOUR
+  blockers, not the two the spec listed. 0b/0c are closed; **0d (guest-media ROPA row) and 0e (DPO
+  sign-off that the RSVP consent text names guest-phone capture + face-sorted delivery) are still
+  `[PENDING DPO]` from 2026-07-20.** They were correctly *not* treated as blockers — the sale they
+  gate went live 2026-07-29 through the studio and the guest buy sheet — but that means the gate was
+  crossed by the sale, not by the card. Escalated as its own owner item so a "Soon"-pill deletion
+  cannot launder a compliance decision.
+- ~~`id: papic-promo#C`~~
+
+### ~~PR-C (original text, for the record)~~
 - `id: papic-promo#C` · `type: code` · `gate: NONE` (the owner's 2026-07-29 lock *is* the
   authorization — pool is deliberately on sale; the card's own comment names blockers "0b
   repricing / 0c points pool", BOTH shipped in `20271019231590` + #3847/#3848)
@@ -199,7 +242,8 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
 |---|---|---|
 | A | ✅ **FALSE ALARM** — already fails closed, no code | 2026-07-30 |
 | B | ✅ **DONE by deletion** — the payload rendered nowhere | 2026-07-30 · [#3880](https://github.com/iscasasola/setnayan-platform/pull/3880) |
-| C · D · E · F | ⏭ open · all four now parallel-safe (F unblocked by B) | — |
+| C | ✅ **DONE** — Pool card live; umbrella card's dead SKU removed; owner naming lock applied | 2026-07-30 · [#3884](https://github.com/iscasasola/setnayan-platform/pull/3884) |
+| D · E · F | ⏭ open · all three parallel-safe (F unblocked by B) | — |
 | G | ⏸ OWNER_DECISION — home-surface shape, mockups first | — |
 
 ## §3 · Traps (each has burned a session — treat as law)
@@ -257,3 +301,4 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
 | 8 | **BIR: "Guest of <event>" receipts** — accountant sign-off | OWNER (document-not-block) |
 | 9 | **Vendor capture in card copy** ("every camera at your event") | DPO_COUNSEL (`vendor_papic_capture` OFF, route 403s) |
 | 10 | **4 dirty `panood-*` worktrees (~19.6 GB)** — merged branches, uncommitted local edits; owner reviews keep-or-kill | OWNER |
+| 11 | 🔴 **Verdict gates 0d/0e are OPEN while the product SELLS** (surfaced 2026-07-30 building PR-C). `Papic_Access_Scope_Council_Verdict_2026-07-20.md` §0.5 + `Papic_Compliance_Delta_2026-07-20.md` §2.2: **0d** = a ROPA row covering guest-phone captured MEDIA (the 20 filed rows cover RSVP *preferences*, biometric vectors, and generic "event data" — **none names photographs**), **0e** = DPO confirmation that the RSVP consent text names guest-phone capture AND face-sorted delivery. Both `[PENDING DPO]` since 2026-07-20. **The sale they were written to gate went live 2026-07-29** (3 Pool rows active + anonymous guest buy, flag ON) — so this is no longer "before we launch", it is "while we bill". Not a blocker on any build (owner's standing *document-not-block* default), but it is the one item in this wave that gets WORSE with every surface we promote, and PR-F promotes it publicly. Two paragraphs of drafting + a DPO yes/no. | **DPO_COUNSEL** (drafts exist · owner decides when to file) |
