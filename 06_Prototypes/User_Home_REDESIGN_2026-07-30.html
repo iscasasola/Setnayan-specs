@@ -841,6 +841,12 @@
       if(c.extra)h+='<button class="nchip mute">All '+c.extra+'</button>';
       h+='</div>';
     }
+    /* PUBLISHING lives with the chapters, not with the shop — a Storyteller
+       chapter IS an Alaala chapter with status='published'
+       (creator_chapters.event_id → events). The story page is the output. */
+    h+='<button class="pubrow">'+ic('i-globe')+
+       '<span class="pt"><span class="p1">2 of 12 chapters are public</span>'+
+       '<span class="p2">setnayan.com/u/ice · your story page</span></span>'+ic('i-arrow','ar')+'</button>';
     return h+'</div>';
   }
 
@@ -865,8 +871,19 @@
           '</div>'+
           '<div class="dquiet"><span class="dot"></span>Disputes &amp; support — clear</div></button>'+
       '</div>'+
-      '<div class="sp-lab">Your story page</div>'+
-      '<button class="sp-row"><span class="sic">'+ic('i-globe')+'</span><span class="stx"><span class="sn">2 of 12 chapters are public</span><span class="srr">setnayan.com/u/ice · published from Alaala</span></span>'+ic('i-arrow','ar')+'</button>'+
+      /* The COMMERCIAL half of being a storyteller — vendor collabs, the offer
+         inbox, the accepts-offers switch, reach. This is genuinely work, so it
+         belongs here. The PUBLISHING half lives in Alaala, where the chapters
+         are. Shipped gate: renders only once you hold ≥1 accepted collab. */
+      '<div class="sp-lab">Creator collabs</div>'+
+      '<button class="dcard" style="margin-top:6px"><div class="dhead"><span class="dlogo">BF</span>'+
+        '<span><span class="dname">Bloom &amp; Fern</span><span class="drole">Active collab · florist</span></span>'+
+        '<span class="dgo">Inbox '+ic('i-arrow')+'</span></div>'+
+        '<div class="dlines">'+
+          '<span class="dl act"><span class="dot"></span><span class="n">1</span> new offer waiting<span class="qz">2d</span></span>'+
+          '<span class="dl"><span class="dot"></span>1,240 followers · 18 inquiries driven</span>'+
+          '<span class="dl"><span class="dot"></span>Open to offers<span class="qz">on</span></span>'+
+        '</div></button>'+
     '</div>';
   }
 
@@ -1116,8 +1133,45 @@
     var b=ov(f,'shback'), s=ov(f,'sh');
     if(b) b.addEventListener('click',function(){closeSheet(f);});
     if(s) s.addEventListener('click',function(e){
-      var r=e.target.closest('.jrow');
-      if(r){ closeSheet(f); toast(f,'&rarr; '+r.dataset.j); }
+      var t=e.target;
+      var r=t.closest('.jrow');
+      if(r){ closeSheet(f); toast(f,'&rarr; '+r.dataset.j); return; }
+
+      /* type tile → the guard runs FIRST, exactly as the server action does */
+      var tc=t.closest('.tcard');
+      if(tc){
+        var ty=ETYPES.filter(function(x){return x.k===tc.dataset.type;})[0];
+        openSheet(f, (ty.life && ty.own) ? guardCard(ty) : formSheet(ty));
+        return;
+      }
+      if(t.closest('[data-back="types"]')){ openSheet(f,createSheet()); return; }
+      var nh=t.closest('[data-newhonoree]');
+      if(nh){
+        var ty2=ETYPES.filter(function(x){return x.k===nh.dataset.newhonoree;})[0];
+        openSheet(f,formSheet(ty2));
+        var hn=ov(f,'sh').querySelector('#hn'); if(hn) setTimeout(function(){hn.focus();},80);
+        return;
+      }
+      var seg=t.closest('.fsb');
+      if(seg){
+        seg.parentNode.querySelectorAll('.fsb').forEach(function(b){b.classList.toggle('on',b===seg);});
+        var w=ov(f,'sh').querySelector('#dwrap');
+        w.innerHTML = seg.dataset.dm==='exact'
+          ? '<input id="dt" type="date">'
+          : '<input id="dt" type="text" placeholder="Any month — e.g. December 2026, or “summer”">';
+        return;
+      }
+      var bd=t.closest('.fband');
+      if(bd){ bd.parentNode.querySelectorAll('.fband').forEach(function(b){b.classList.toggle('on',b===bd);}); return; }
+      var go2=t.closest('[data-create]');
+      if(go2){
+        var sh=ov(f,'sh');
+        var nm=(sh.querySelector('#dn')||{}).value||'';
+        var who=(sh.querySelector('#hn')||{}).value||'';
+        closeSheet(f);
+        toast(f,'Created '+(nm.trim()||'your event')+(who.trim()?' · para kay '+who.trim():'')+' &rarr;');
+        return;
+      }
     });
   });
   document.addEventListener('keydown',function(e){
