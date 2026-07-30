@@ -71,10 +71,20 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > run its real reads **as the end user's identity** (`set local role authenticated` + jwt claims) and
 > diff against the same reads as service-role — **where they differ, the UI is lying.**
 >
+> ✅ Fix **#3942 is LIVE in prod** (`version: 58c8a30`, deployed hands-free by the finished cutover).
+>
 > ⏭ What remains is NOT code: (a) keep or reverse the widened playlist read, (b) should the HOST see
-> a band's finished setlist, (c) **nobody has opened it on a phone.** Fixture: vendor `testnayan2`,
-> event `0ccc7aa3-3a81-43ee-b170-afb194e0b259`, `booked_date = 2026-07-30` — **reseed the date to
-> view it after that.**
+> a band's finished setlist, (c) **nobody has opened it on a phone.**
+> **Fixture** — vendor `testnayan2@test.com`, event `0ccc7aa3-3a81-43ee-b170-afb194e0b259`,
+> 3 pending song requests, at `/vendor-dashboard/on-the-day/live/0ccc7aa3-3a81-43ee-b170-afb194e0b259`.
+> ⚠ **The desk opens ONLY on its `booked_date` (currently `2026-07-31`).** To view it on any other
+> day, move the date first — one statement, safe to repeat:
+> ```sql
+> update public.vendor_schedule_pool_bookings set booked_date = current_date
+>  where pool_booking_id = 'cb39ef7c-40cd-41ac-9177-367067573b8c';
+> update public.events set event_date = current_date
+>  where event_id = '0ccc7aa3-3a81-43ee-b170-afb194e0b259';
+> ```
 > Reasoning behind every line: the song-desk rows in `DECISION_LOG.md` — find them with `grep -in "song desk\|song request\|playlist-slot\|song-pick system\|set composition" DECISION_LOG.md` (15 rows, 2026-07-27)
 > (`grep -n "2026-07-27" DECISION_LOG.md`), plus the two 2026-07-30 rows at the bottom.
 
