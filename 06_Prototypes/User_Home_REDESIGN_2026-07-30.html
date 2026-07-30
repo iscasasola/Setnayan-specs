@@ -1469,12 +1469,13 @@
         ? '<div class="fquick">'+
             '<button class="fq" data-qd="'+anchor.whenISO+'">On the day · '+anchor.when+'</button>'+
             '<button class="fq on" data-qd="'+anchor.nearISO+'">The Saturday after · '+anchor.near+'</button>'+
-            '<button class="fq" data-qd="">Another day</button>'+
+            '<button class="fq" data-qd="'+anchor.whenISO+'" data-open="1">Another day</button>'+
           '</div>'
         : '')+
       '<div class="fseg" role="group"><button class="fsb on" data-dm="exact">I know the date</button>'+
         '<button class="fsb" data-dm="window">Still deciding</button></div>'+
-      '<div class="fin" id="dwrap"><input id="dt" type="date"'+(anchor?' value="'+anchor.nearISO+'"':'')+'></div>'+
+      '<div class="fin" id="dwrap"'+(anchor?' data-anchor="'+anchor.whenISO+'"':'')+'>'+
+        '<input id="dt" type="date"'+(anchor?' value="'+anchor.nearISO+'"':'')+'></div>'+
       '<label class="flab" for="pl">Where?</label>'+
       '<div class="fin"><input id="pl" type="text" placeholder="Venue or city — you can change this later"></div>'+
       '<label class="flab">Roughly how big?</label>'+
@@ -1617,10 +1618,27 @@
       if(t.closest('.collapsed .go')){ openSheet(f,createSheet()); return; }
     });
   }
+  /* The chips are a VIEW of the date field, not a parallel state. Whatever the
+     calendar lands on re-lights the matching chip — so "Another day" stops
+     claiming a day that is in fact the anchor day, and a round-trip through
+     "Still deciding" comes back with the chips telling the truth. */
+  function syncChips(sh){
+    var qs=sh.querySelectorAll('.fq'), i=sh.querySelector('#dt');
+    if(!qs.length||!i) return;
+    var v=i.value, hit=null;
+    qs.forEach(function(x){ if(!hit && !x.dataset.open && x.dataset.qd===v) hit=x; });
+    qs.forEach(function(x){ x.classList.toggle('on', hit ? x===hit : (!!v && !!x.dataset.open)); });
+  }
   /* the overlays are static — bind their handlers ONCE, not on every rebuild */
   ['deskbody','phonebody'].forEach(function(f){
     var b=ov(f,'shback'), s=ov(f,'sh');
     if(b) b.addEventListener('click',function(){closeSheet(f);});
+    /* The chips are a VIEW of the date field, not a parallel state. Whatever the
+       calendar lands on re-lights the matching chip — so "Another day" stops
+       claiming a day that is in fact the anchor day. */
+    if(s) s.addEventListener('change',function(e){
+      if(e.target.id==='dt') syncChips(s);
+    });
     if(s) s.addEventListener('click',function(e){
       var t=e.target;
       var r=t.closest('.jrow');
@@ -1696,7 +1714,11 @@
            back restores whichever chip is still lit rather than blanking it. */
         var lit=sh2.querySelector('.fq.on');
         if(seg.dataset.dm==='exact'){
-          w.innerHTML='<input id="dt" type="date"'+(lit&&lit.dataset.qd?' value="'+lit.dataset.qd+'"':'')+'>';
+          /* Fall back to the anchor day, not to blank — a blank date input opens
+             on TODAY, which is the one month this event has nothing to do with. */
+          var start=(lit&&lit.dataset.qd)||w.dataset.anchor||'';
+          w.innerHTML='<input id="dt" type="date"'+(start?' value="'+start+'"':'')+'>';
+          syncChips(sh2);
         }else{
           sh2.querySelectorAll('.fq').forEach(function(x){x.classList.remove('on');});
           w.innerHTML='<input id="dt" type="text" placeholder="Any month — e.g. December 2026, or “summer”">';
@@ -1715,7 +1737,12 @@
           sh3.querySelector('#dwrap').innerHTML='<input id="dt" type="date">';
         }
         var di=sh3.querySelector('#dt');
-        if(di){ di.value=q.dataset.qd||''; if(!q.dataset.qd) di.focus(); }
+        if(di){
+          di.value=q.dataset.qd||'';
+          /* "Another day" = open the calendar ON the event's own day so they
+             scroll out from it, rather than landing on today and hunting. */
+          if(q.dataset.open){ di.focus(); if(di.showPicker) try{di.showPicker();}catch(e){} }
+        }
         return;
       }
       var bd=t.closest('.fband');
