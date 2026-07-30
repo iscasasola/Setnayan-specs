@@ -59,3 +59,35 @@ prune — together ~3.7 GB:
 
 Once items 1–3 are on main, both are safe to `git worktree remove … --force`, freeing
 that space.
+
+---
+
+## 4. `seating-geometry-uncommitted-2026-07-30.patch` — archived before deleting a worktree
+
+The uncommitted contents of the `claude/public-walk-entrance-kind` worktree
+(`…/setnayan-platform-wt/seating-geometry`), frozen at its HEAD `466ea334d`
+(**2026-07-11**). 109 files, ~9,500 added lines, 468 KB.
+
+**Why it was almost certainly debris** — checked before deleting, on a 40-file sample:
+
+- **21 of 40 byte-identical** to what is already on `origin/main`
+- **9 differ**, but the worktree is frozen at 2026-07-11 and main has moved 200+
+  commits since, so those are older drafts, not newer work
+- **10 absent from main** — and every one is a `changelog.d/` fragment filed in the
+  wrong directory (`apps/web/changelog.d/` instead of the repo root), for features
+  that have already shipped (booth ads, ghost booths, living roster)
+
+Its branch's PR (**#3069**) is MERGED and every commit is an ancestor of `origin/main`,
+so nothing *committed* was at risk either.
+
+⚠ **This patch will NOT apply to current main** — it is a 2026-07-11 snapshot, kept as a
+readable record rather than a replayable change. To read a file from it:
+`grep -A 200 'diff --git a/<path>' <this patch>`.
+
+`claude/login-audit-cleanup` was deleted with **no** archive: all 1,290 of its changes
+were *deletions* of files that exist on main — an emptied checkout, with nothing written.
+
+**Reclaimed ~3 GB.** The rule this follows: archiving costs seconds and megabytes, and
+converts an irreversible delete into a reversible one. Earlier the same day, a worktree
+holding the only copy of an unmerged security commit was removed by another session
+mid-task — that was survivable only because the commit had been rescued first.
