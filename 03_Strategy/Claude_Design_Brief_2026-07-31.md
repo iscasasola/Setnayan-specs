@@ -37,28 +37,57 @@
 
 ## 1 · The hard constraints — do NOT change these
 
-Claude Design must treat these as fixed. They are owner-locked (`Atelier + glass = FINAL`).
+**⚠ PALETTE SUPERSEDED 2026-07-31 (owner):** *"background color like facebook which is white, then mandarin
+orange and gold buttons/highlights."* This **breaks the `Atelier + glass = FINAL` lock** (gold-only accent,
+warm alabaster) and reverses the "stay inside the lock" answer given earlier the same day. Recorded as a
+deliberate supersede. **Typography is untouched and remains locked.**
 
 ```
-FONTS      Hanken Grotesk   (the UI family — all weights)
+FONTS      Hanken Grotesk   (the UI family — all weights)          ← UNCHANGED, still locked
            Space Mono       (kickers, labels, numerals, .14em uppercase tracking)
            ⚠ No other family. Four were deliberately REMOVED to cut font payload.
            Do not introduce Instrument Serif, Cormorant, Manrope, Saira, Geist, JetBrains.
 
-ACCENT     --accent        #c5a059     (gold — supersedes the old wine)
-           --accent-deep   #a88340
-           --accent-soft   #f4ecd8     light   /   #22262c   dark
+CTA        mandarin  #F37A1F   button fills, primary actions        (slot: `mulberry`)
+           hover     #D9600A
+           label     #1B1A17   ← INK, NOT WHITE. White on mandarin = 2.76:1, FAILS AA.
+                                 Ink on mandarin = 6.31:1, passes.
+           deep      #B44F06   orange TEXT on white = 5.17:1 ✓ · links, small elements
+           dark mode #FF8A3D   (7.73:1 on #17160F) · hover #FFA05C
 
-SURFACE    light   --surface #ffffff   --surface-soft #f4f2ec   (warm alabaster)
-           dark    --surface #1e2229   --surface-soft #2a2e36   (obsidian)
+HIGHLIGHT  gold      #A9834B   selected states, active tabs, borders, rules, pills   (slot: `terracotta`)
+           soft      #F3ECDF   light  /  #2A2E36  dark
+           dark mode #CBA766   (7.99:1)
+           ⚠ 3.48:1 on white — LARGE TEXT AND UI ONLY. Never gold body text.
 
-INK        light   --ink-soft  79 83 91        dark   --ink-soft  182 185 190
+SURFACE    light   page #F0F2F5   card #FFFFFF     ← the Facebook two-tone
+           dark    page #17160F   card #1E2229
+           ⚠ Today the app is the INVERSE: page is already pure #FFFFFF with warm
+             #f4f2ec cards. Facebook's page is GREY and its cards are white.
+
+INK        light  #1B1A17 (17.4:1 on white · 15.5:1 on #F0F2F5)   soft  #4F535B
+           dark   #FBFAF7                                          soft  #B6B9BE
 ```
 
 **Both themes are mandatory.** Every archetype must be designed light *and* dark — the app ships a
 runtime theme picker and the Alaala surfaces are obsidian by design.
 
 **Brand:** SETNAYAN, spelled in full, never STNYN. Kicker phrase: *Set na 'yan.*
+
+### 1a · Why this is two jobs, not one
+
+- **Cheap (2 token values, ~0 component churn).** `terracotta` (accent) and `mulberry` (CTA) are already
+  two distinct semantic slots that today hold the **same** gold value `169 131 75`. Point `mulberry` at
+  mandarin and leave `terracotta` gold: **239 CTA files** turn orange and **410 / 570 / 358** highlight
+  files stay gold, automatically. No component edits.
+- **Expensive (a sweep, not a swap).** `paper` is aliased to `cream` in `tailwind.config.ts`, so **page
+  background and card surface are one token**. The Facebook two-tone requires splitting them, which means
+  auditing **396 `bg-cream` uses** to classify each as page-or-card — plus **337 files that hardcode
+  `bg-white`** and will not follow a token change.
+
+**History the owner should know:** a Facebook palette already shipped **2026-05-22** (light `#FFFFFF` +
+blue `#1877F2`) and was **retired 2026-05-30** — recorded in `globals.css` lines 110–114. This is not a
+straight revert (orange + gold ≠ Facebook blue), but the territory has been visited.
 
 ---
 
