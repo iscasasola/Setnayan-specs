@@ -1,8 +1,20 @@
 # WHATS_NEXT — Explore / Marketplace integration wave · 2026-07-29
 
+> # ✅ THE BUILD LIST IS EMPTY (2026-07-30)
+> **There is no code left to write in this wave. Do not rebuild any of it.** §4.1 · §4.2 · §4.3 ·
+> §4.4 · §4.5 shipped, and the two fixable live defects (§5.1 · §5.3) shipped too — see the status
+> board in §4. **What remains is owner decisions only:** §5.4's two unbacked scarcity claims, the
+> five in §6, and one prod data correction (§5.1, SQL provided, deliberately not run — it turns on
+> countdown behaviour that has been dark since 2026-06-18).
+>
+> If you are here because the owner said *"what's next"*, the honest answer for this stream is
+> **nothing to build — go to the next row of [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md)**. Keep
+> §1's five traps: they are about the surface, not the backlog, and they are all still true.
+
 > **Cold-start handover.** Written for a session (or a different Claude Code account) with **zero
 > context**. Read this file top to bottom before touching anything. Everything below was verified
-> against `origin/main` and live prod on 2026-07-29 unless explicitly marked otherwise.
+> against `origin/main` and live prod on 2026-07-29 unless explicitly marked otherwise; the
+> 2026-07-30 status board in §4 is verified against `origin/main` that day.
 >
 > **The contract for the remaining work is** [`Explore_Integration_BUILD_SPEC_2026-07-29.md`](Explore_Integration_BUILD_SPEC_2026-07-29.md).
 > This file is the *state + traps*; that file is the *design*. Both are owner-approved.
@@ -100,7 +112,7 @@ diagnosing a design problem.
 | # | Branch | State at handoff | Action |
 |---|---|---|---|
 | **#3870** | `claude/decision-doorway-anchor` | ✅ **MERGED** 2026-07-29 | Done — see §2.1 below. |
-| **#3871** | `claude/bench-category-search-overlay` | **OPEN, auto-merge armed**, CI running | `gh pr view 3871` first. If merged, §4.1 is DONE. If it failed CI, fix forward — do not rebuild. |
+| **#3871** | `claude/bench-category-search-overlay` | ✅ **MERGED** 2026-07-29 03:08Z | Done — **§4.1 is DONE.** Nothing here to build. |
 
 ### 2.1 · #3870 — the doorway now lands on the exact cell *(merged)*
 Root cause was as suspected **and worse**: the leaf row had **no anchor at all**, so the cell was
@@ -123,9 +135,30 @@ category instead of page top. Flag OFF: the leaf `id` is `undefined` and the eff
 
 ---
 
-## 4 · THE REMAINING BUILD LIST
+## 4 · THE REMAINING BUILD LIST — ✅ **EMPTY as of 2026-07-30. Do not rebuild any of it.**
 
-### 4.1 · Wire the category-search overlay into the bench 🔴 highest value
+> **STATUS BOARD (2026-07-30).** Every item in §4 and every fixable item in §5 has shipped.
+> What is left in this file is §5.4 + §6 — **owner decisions only, no code.**
+>
+> | item | state | PR |
+> |---|---|---|
+> | §4.1 category-search overlay in the bench | ✅ merged | #3871 |
+> | §4.2 PR-3 remove the mobile 4-chip dock | ✅ merged | #3877 |
+> | §4.3 PR-4 the mobile team summary chip | ✅ merged | #3879 |
+> | §4.4 PR-5 cleanup | ✅ merged + armed | #3878 (dead modules · copy · docblocks) + #3882 (orphan nav slots · the aria-labels #3878 missed) |
+> | §4.5 admin white borders | ✅ merged earlier | #3859 |
+> | §5.1 `event_date_precision` never advances | ✅ **code fixed**, armed · ⏭ 2 prod rows owner-gated | #3883 |
+> | §5.3 flag-dark guarantee unguarded in CI | ✅ armed | #3886 |
+> | §5.2 Build anchors were UI theatre | ✅ history only, deleted in #3867 | — |
+> | §5.4 two unbacked scarcity claims | ⏭ **OWNER** (§6 decision 4) | — |
+> | §6 decisions 1–5 | ⏭ **OWNER** | — |
+>
+> **Two inaccuracies in this file, found while executing §4.4** — corrected in place below:
+> `build-pin-mode` had **two** importers, not one (`team-controls.tsx` as well as
+> `build-compare.tsx`); and the §4.4 pointer `lib/explore-info-copy.ts:46` is the **Coverage
+> Strip explainer**, not the chip-pool heading (which is line 139).
+
+### 4.1 · Wire the category-search overlay into the bench ✅ **DONE — #3871**
 
 **Owner:** *"clicking find more doesn't search specifically for that category. and it jumps to a new
 page, it needs to stay on that page. this means, we need the best approach to show the best searches
@@ -172,7 +205,7 @@ param bug.
 - Overlay is `z-120` over the bottom nav (`z-30`) and dock (`z-20`), portals to body, keeps its own
   focus trap / scroll-lock / Escape. Flag OFF keeps both `<Link>`s.
 
-### 4.2 · PR-3 — remove the mobile 4-chip dock  ⚠ shared layer
+### 4.2 · PR-3 — remove the mobile 4-chip dock  ✅ **DONE — #3877**
 Spec §5. In `lib/customer-menu.ts:229-240`, emit the explore menu's `children` (+ `sectionMatch`,
 `sectionMatchExact`, `subnavLabel`) **only when `!isExploreReplanEnabled()`** so
 `customer-section-subnav.tsx` returns null on `/vendors` while **Studio's dock stays intact**.
@@ -181,13 +214,44 @@ SubNav is docked) → mobile drops from two stacked bars to one.
 Verify: Studio's anchor dock, Guests, and `/admin/menus` all unaffected. `?tab=` deep links and the
 `BB_TAB_EVENT` bus must keep working.
 
-### 4.3 · PR-4 — the mobile team summary chip  *(owner-approved 2026-07-29)*
+**Shipped exactly as specified.** Four new cases in `lib/customer-menu.test.ts` pin the flag-OFF
+shape (4 tab children + their `customer.budget-subnav.*` slots), the flag-ON absence, that the
+bottom-nav TAB still lights on `/vendors`, and that Studio + Guests are unaffected in **both**
+states. The `?tab=`/bus contract was never at risk: `services-takeover.tsx` imports nothing from
+`customer-menu` and owns both itself.
+
+### 4.3 · PR-4 — the mobile team summary chip  ✅ **DONE — #3879**
 One floating chip, mobile only, docked above the bottom nav:
 *"● 2 locked · ◕ 3 in build · ₱82,000 buffer"* → tap = `goToBuildTab('build')`. Uses `teamMoney`
 (`lib/your-team.ts`) and the existing bus + scroll anchors. Kept **separate from PR-3** so the
 removal stays cleanly revertible.
 
-### 4.4 · PR-5 — cleanup
+**Three decisions the shipped chip made that this brief didn't cover — don't "simplify" them back:**
+- It is **not** a `<SubNav>`. `<SubNav>` increments a docked-count store and the bottom nav
+  collapses to icons-only while that count is > 0 — which would restore the very two-stacked-bars
+  crowding PR-3 removed. The chip borrows SubNav's *geometry* and none of its coordination; a test
+  forbids the import.
+- It **portals to `<body>`**. `position: fixed` resolves against the nearest transformed/filtered
+  ancestor and the takeover's glass carries `backdrop-filter` — the same reason
+  `category-search-overlay.tsx` portals.
+- **Copy comes from the shipped tiles, not this brief.** "₱82,000 buffer" is not what the app says:
+  `bufferTile()` says "₱82,000 to spare" / "₱1,500 over" / "No budget set", with its own tone
+  classes. The chip reuses it, so one number can't be worded *or coloured* two ways on one screen.
+  Lucide icons, never the ●/◕ glyphs. Suppressed entirely at 0 locked + 0 candidates.
+- Clearance rides the existing `.subnav-docked` rule in `globals.css` under its **own**
+  `html.teamchip-docked` class — two components sharing one class means whichever unmounts first
+  strips the clearance the other still needs.
+
+### 4.4 · PR-5 — cleanup  ✅ **DONE — #3878 + #3882**
+
+> ⚠ **Two sessions did this concurrently.** #3878 shipped the dead modules + copy + docblocks (and
+> additionally deleted `build-anchors-actions.ts`, a zero-caller `'use server'` action that patched
+> `events.event_date`). #3882 shipped the two halves #3878 left out of scope — the orphan nav slots
+> — **plus a defect #3878 introduced**: it moved `ADD_TO_PLAN_HEADING` + `EXPLORE_INFO_STRIP` to
+> "event" but left `addToPlanChipLabel`, `removeFromPlanButtonLabel` and `folderEmptyInPlan` on
+> "plan", so a screen reader announced *"Add Catering to your plan"* over a pool the eye read as
+> "＋ Add to your event", and the empty-folder line — visible copy — still said "plan".
+> **`nav_slot_override` was queried before deleting the slots: ZERO rows.**
 - Delete **`build-pin-mode.tsx`** — `BuildPinModeControl` ("What's fixed?") is rendered by
   **nothing**; its only importer is `build-compare.tsx:47` taking `readPinMode`, which can only ever
   return the `'budget'` default (stamped onto snapshots at line 224). **Keep** the optional
@@ -200,14 +264,21 @@ removal stays cleanly revertible.
 - Update stale `runBuild3State` references in `build-requote-nudge.test.ts` comments and
   `budget-build.ts:36`.
 
+⚠ Corrections to the four bullets above, found while doing them:
+- `build-pin-mode.tsx` had **two** importers of `readPinMode` — `team-controls.tsx` as well as
+  `build-compare.tsx`. `storePinMode` had **none**, which is *why* the value could only ever be the
+  `'budget'` default, and **nothing read `snapshot.pinMode` back**: it was write-only data.
+- `lib/explore-info-copy.ts:46` is the **Coverage Strip explainer**, not the chip-pool heading
+  (line 139). Five strings carried "your plan", not one.
+
 ### 4.5 · The ~60 admin components with hand-rolled white borders — **DONE** (#3859)
 Listed here only so nobody re-opens it.
 
 ---
 
-## 5 · LIVE DEFECTS found but NOT fixed
+## 5 · LIVE DEFECTS — 5.1 and 5.3 FIXED 2026-07-30; 5.4 is an owner call
 
-### 5.1 · 🔴 `event_date_precision` never advances past its creation default
+### 5.1 · ✅ **FIXED — #3883** · `event_date_precision` never advanced past its creation default
 Prod event `044f7e64…` has `event_date = 2026-12-18` and `date_mode = 'specific'` but
 **`event_date_precision = 'year'`**. Precision defaults to `'year'` at creation
 (`create-event/actions.ts:397`) and is meant to advance when a real date is chosen
@@ -217,8 +288,30 @@ the precision update.
 **Impact:** anything gated on precision treats the wedding as undated. Countdown maths only runs at
 `'day'` (`lib/progress-stages.ts:53`), so it currently **skips this event entirely**.
 
-**To fix:** find the write path that sets a date without advancing precision, close it, then correct
-the row. **Do NOT bundle this with a UI PR** — it turns on behaviour that has been dark.
+**THE WRITE PATH, found (#3883):** the **Save-the-Date builder**. It backfills the canonical
+`event_date` from the film's date when the event has none — and it was the **one `events.event_date`
+writer of five** that didn't set precision alongside it (`[eventId]/actions.ts`,
+`date-selection/actions.ts`, `wizard-actions.ts` and `onboarding/simple/actions.ts` all do).
+**Both** prod events carry the signature: `event_date = std_film_date`, precision `'year'` —
+`044f7e64…` (2026-12-18) and `947e7bab…` (2026-12-12). The backfill now writes
+`event_date_precision: 'day'` in the same update (`std_film_date` is a specific day, and year → day
+is a *narrowing*, which the refine-only ratchet permits). `date_status` deliberately untouched —
+committing to a date is `date-selection/actions.ts`'s job, not a film's.
+
+Guard: `lib/event-date-precision-scan.test.ts` pins the **class** — any `.update({…})` on `events`
+naming `event_date` must also name `event_date_precision`. INSERTs excluded (creation legitimately
+starts at the `'year'` default); non-literal payloads are named in the failure message rather than
+passing as a false green; and it asserts it still matches ≥3 real call sites so it can't pass
+vacuously. Mutation-checked.
+
+⏭ **OWNER — the two prod rows are NOT corrected.** The code fix stops the leak for every future
+event; flipping the existing rows turns on countdown behaviour that has been dark since 2026-06-18,
+on events whose `date_status` is still `'undecided'`. That is a product-state call. When wanted:
+
+```sql
+update public.events set event_date_precision = 'day'
+ where event_date is not null and event_date_precision = 'year' and event_date = std_film_date;
+```
 
 ### 5.2 · The Build "anchors" were UI theatre *(now deleted, recorded for history)*
 The three anchor rows (Wedding date · Total budget · Location) were **wired to nothing**:
@@ -228,12 +321,22 @@ tri-state came from `event_category_build_state` (default `'excluded'`) while th
 `events`, two independent stores, and the value only displayed when the tri-state was `locked`. That
 is why a couple **with a set date** saw *"Setnayan suggests this."* Deleted in #3867.
 
-### 5.3 · The flag-dark guarantee is unguarded in CI
+### 5.3 · ✅ **FIXED — #3886** · The flag-dark guarantee was unguarded in CI
 Hardcoding `const replan = true` in `shortlist-categories.tsx` (bypassing
-`isExploreReplanEnabled()`) breaks **no test** — the full suite stays green. **No CI job has ever
-built with `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED=true`.** Worth a guard script alongside
-`select-column-scan.ts`. (Lower priority now the flag is ON, but it will matter for the next
-flag-dark feature.)
+`isExploreReplanEnabled()`) broke **no test** — the full suite stayed green. **No CI job had ever
+built with `NEXT_PUBLIC_EXPLORE_REPLAN_ENABLED=true`.**
+
+**Shipped as `lib/flag-chokepoint-scan.test.ts`** — registry-driven, four properties per flag:
+(1) `process.env.<FLAG>` is read in exactly ONE module, its helper — a second reader is a second
+default; (2) the six load-bearing gates still *call* the helper, named one by one so the failure says
+which went dark (comments stripped, so a docblock doesn't count); (3) the four pure cores
+(`bench-sort` · `bench-card-actions` · `your-team` · `plans-panel`) still take it as a **parameter** —
+a core that reads the env can no longer be driven in both states in one process; (4) no file that
+should consult the flag pins `replan` to a literal. Mutation-checked against the exact reported bug:
+it turns (2) and (4) red and names the file.
+
+It does NOT claim a flag-OFF *render* is byte-identical — that needs a build with the flag on, which
+stays CI's job. **The next flag-dark feature is one registry entry** and inherits all four checks.
 
 ### 5.4 · Undisclosed / unbacked claims still live *(owner decisions, §6)*
 `studio-card-demo.tsx:839` hardcodes "3 also eyeing your date" on public marketing;
