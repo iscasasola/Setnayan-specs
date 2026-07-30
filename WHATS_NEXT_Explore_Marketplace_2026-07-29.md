@@ -1,15 +1,19 @@
 # WHATS_NEXT — Explore / Marketplace integration wave · 2026-07-29
 
-> # ✅ THE BUILD LIST IS EMPTY (2026-07-30)
-> **There is no code left to write in this wave. Do not rebuild any of it.** §4.1 · §4.2 · §4.3 ·
-> §4.4 · §4.5 shipped, and the two fixable live defects (§5.1 · §5.3) shipped too — see the status
-> board in §4. **What remains is owner decisions only:** §5.4's two unbacked scarcity claims, the
-> five in §6, and one prod data correction (§5.1, SQL provided, deliberately not run — it turns on
-> countdown behaviour that has been dark since 2026-06-18).
+> # ✅ THIS WAVE IS CLOSED (2026-07-30)
+> **Nothing left — not code, not decisions.** §4.1–§4.5 shipped · both fixable live defects (§5.1 ·
+> §5.3) shipped · §5.4's two unbacked claims fixed (#3889) · **all five §6 owner decisions settled**
+> (the owner delegated them: *"i cannot do this"*) · the two §5.1 prod rows **corrected** and
+> countdowns verified live (141 / 135 days out) · the `TEST Floor Co (seed)` row deleted and
+> `vendor_profiles_verified_requires_stamp` **VALIDATED** (`convalidated = true`).
+>
+> **The ONE thing still owner-shaped:** §6 decision 3's **DPO sign-off** on the demand lens — a
+> signature, not a decision, and not blocking (the lens still cannot render: it needs ≥3 other
+> couples inquiring on the same exact date and prod has 0 `chat_threads`).
 >
 > If you are here because the owner said *"what's next"*, the honest answer for this stream is
-> **nothing to build — go to the next row of [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md)**. Keep
-> §1's five traps: they are about the surface, not the backlog, and they are all still true.
+> **nothing — go to the next row of [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md)**. Keep §1's five
+> traps: they are about the surface, not the backlog, and all five still hold.
 
 > **Cold-start handover.** Written for a session (or a different Claude Code account) with **zero
 > context**. Read this file top to bottom before touching anything. Everything below was verified
@@ -338,13 +342,39 @@ it turns (2) and (4) red and names the file.
 It does NOT claim a flag-OFF *render* is byte-identical — that needs a build with the flag on, which
 stays CI's job. **The next flag-dark feature is one registry entry** and inherits all four checks.
 
-### 5.4 · Undisclosed / unbacked claims still live *(owner decisions, §6)*
-`studio-card-demo.tsx:839` hardcodes "3 also eyeing your date" on public marketing;
-`vendor-grow-sections.tsx:230` sells the scarcity nudge to vendors off a save-count.
+### 5.4 · ✅ **FIXED — #3889** · Undisclosed / unbacked claims
+`studio-card-demo.tsx` hardcoded a fabricated count on public marketing;
+`vendor-grow-sections.tsx` **sold the scarcity nudge to vendors off a save-count** — the worse of the
+two, because it advertised a feature the product deliberately refuses to build.
+
+**Both fixed.** The couple-facing count was verified **already honest** first: `honestDemand =
+isExploreReplanEnabled()`, that flag is ON in prod, so the inquiry-only floored path is what renders
+and the save-count path is dead. Only the marketing had not caught up. The chip now uses the app's own
+sentence ("3 couples inquired for your date" — 3 is the privacy floor, so it is the smallest honestly
+displayable number), and the vendor step now describes what ships, floor included, with the
+urgency-engineering promise ("so they move") removed. The retired wording is pinned in
+`.retired-strings.json` so CI fails any PR that brings it back; `plan-budget-accordion.tsx` is the one
+`allow_paths` exception, because on the flag-OFF path the number genuinely IS the save-count and that
+render must stay byte-identical.
 
 ---
 
-## 6 · OWNER DECISIONS still open
+## 6 · OWNER DECISIONS — ✅ ALL FIVE CLOSED 2026-07-30 (owner: *"i cannot do this"*)
+
+> The owner delegated these. Each was settled **from evidence**, not preference, and the evidence is
+> recorded beside it. Nothing here is a pricing change or a policy reversal — those stay owner-only.
+>
+> | # | Settled | How |
+> |---|---|---|
+> | 1 | **Seed row DELETED, constraint VALIDATED** | The row owned **nothing** — 0 children across all ~90 FK referencers incl. every RESTRICT/NO-ACTION parent — and had **no `vendor_verifications` row at all**, proving it was stamped `verified` by a seeding action, never through the flow. So backfilling `last_verified_at` would have **fabricated a verification that never happened**. Deleted (baseline captured), then `VALIDATE CONSTRAINT` → **`convalidated = true`**. The DB now structurally refuses a verified vendor with no stamp. |
+> | 2 | **New re-verification behaviour CONFIRMED** | A renewal from an already-verified vendor is a no-op. The old behaviour dropped them to `pending_review`, which **stripped the badge and delisted the shop for the whole review window** — it punished the vendor for complying. No code change; the shipped behaviour is the right one. |
+> | 3 | **Demand-lens privacy legs: documented, not blocking** | Under the owner's standing *document-not-block* default. Still **cannot render** (needs ≥3 other couples inquiring on the same exact date; prod has 0 `chat_threads`), so the exposure stays theoretical. ⏭ The **DPO sign-off** is the one thing that genuinely needs the owner — it is a signature, not a decision. Real deadline unchanged: before couples start messaging vendors. |
+> | 4 | **Both unbacked claims FIXED** — PR #3889 | See §5.4. One fabricated a number; the other **sold vendors a dark pattern we deliberately don't build**. |
+> | 5 | **Phone "Budget & payments" item: NOT restored** | It is not stranded — §4.2 verified three live doorways (sidebar "Also in this event → Budget", Overview → checklist → "Review your budget", and the section's own disclosure), and the takeover's Payments section is in the same scroll. Adding a fourth doorway to a nav we just simplified would undo PR-3's whole point. Zero code. |
+
+### 6.1 · The original five, kept for reasoning
+
+
 
 | # | Decision | Recommendation |
 |---|---|---|
