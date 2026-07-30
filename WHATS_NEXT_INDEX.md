@@ -78,7 +78,7 @@ For each doc + its claimed state, verify against reality and fix-or-flag:
 | Doc | Scope | Flag / branch / PRs | State | Top gates |
 |---|---|---|---|---|
 | [`Whats_Next_Suite_AI_Pricing_2026-07-18.md`](Whats_Next_Suite_AI_Pricing_2026-07-18.md) | Suite (guided services surface) · Setnayan AI · pricing § 00 · personalization | ✅ **shipped code = "Suite"** — the Silid→Suite rename MERGED (`/dashboard/[eventId]/suite` · `SUITE_NAME` · `NEXT_PUBLIC_SUITE`); `NEXT_PUBLIC_SUITE="true"` LIVE in prod (verified 2026-07-22). Suite PR-1 + PR-2 (vignette cards #3413) shipped; compare-doorway fix #3482. **Pricing § 00 all shipped 2026-07-22** (PRs #3559 + #3564, migrations pushed to prod). | Suite is LIVE; nav replaces Studio (flag-gated). Remaining = the AI-per-type build + personalization (DPO/counsel/NPC), tracked separately. | ✅ all Suite/pricing `OWNER_DECISION`s RESOLVED; `FLAG_FLIP_PROD` done. |
-| [`0012_papic/Papic_v3_Whats_Next_2026-07-18.md`](0012_papic/Papic_v3_Whats_Next_2026-07-18.md) | Papic v3 pricing recut (capture-points, caps, Papic Lite, quality tiers) | branch `claude/papic-v3-pr3` @ `cd4d89bc2` (12/12 tests, unpushed) | PR-1/PR-2 migrations shipped to prod; caps-consumption code PAUSED; enforcement/Lite not started. **2026-07-19 owner decision: PR-3 (caps consumption) + free-tier/points enforcement land as ONE atomic PR — land-together in flight** (collapses the § 00.0 dual states: 5-free vs 3-free · legacy ₱9k/₱15k caps vs v3 ₱6k/₱10k/₱15k) | shares **papic tables/tier + Pricing.md** with vendor-Papic work → serialize |
+| [`0012_papic/Papic_v3_Whats_Next_2026-07-18.md`](0012_papic/Papic_v3_Whats_Next_2026-07-18.md) | ⚠ **LARGELY SUPERSEDED 2026-07-29 by the two-type lock** (Pool ₱1k/2k/3k + One ₱1=1shot, SHIPPED #3868-#3875 — see the Papic register entry below). The v3 caps/Lite/quality-tier recut predates it; the unpushed branch `claude/papic-v3-pr3` must NOT land without reconciling against the shipped two-type mechanics (dedicated ledger, `papic_one_tiers`, clip=8). Treat as REFERENCE until reconciled. | branch `claude/papic-v3-pr3` @ `cd4d89bc2` (12/12 tests, unpushed — now stale vs main) | PR-1/PR-2 migrations shipped to prod; caps-consumption code PAUSED; enforcement/Lite not started. **2026-07-19 owner decision: PR-3 (caps consumption) + free-tier/points enforcement land as ONE atomic PR — land-together in flight** (collapses the § 00.0 dual states: 5-free vs 3-free · legacy ₱9k/₱15k caps vs v3 ₱6k/₱10k/₱15k) | shares **papic tables/tier + Pricing.md** with vendor-Papic work → serialize |
 | [`Vendor_Front_Desk_Chatbot_Whats_Next_2026-07-18.md`](Vendor_Front_Desk_Chatbot_Whats_Next_2026-07-18.md) | Vendor AI auto-reply assistant | `NEXT_PUBLIC_VENDOR_AUTOREPLY_V1` (OFF); PR #3397 merged, #3399 open | Phase 1 merged, 2/3a in #3399; 3b+ not built | mostly `AUTO-OK` (flag-dark); `FLAG_FLIP_PROD` to go live |
 | [`Vendor_Featured_Weddings_Whats_Next_2026-07-18.md`](Vendor_Featured_Weddings_Whats_Next_2026-07-18.md) | Vendor on-the-day Papic capture (done) + past-events gallery safe layer (done) + **rich layer** (planned) | `vendor_papic_capture` control (OFF); PRs #3388/#3396/#3400 merged | safe layer LIVE; rich layer planned, gated | `DPO_COUNSEL` (rich layer, capture go-live), `COUNSEL_GATED_MIGRATION` | 
 | [`Coordinator_Whats_Next_2026-07-18.md`](Coordinator_Whats_Next_2026-07-18.md) | Coordinator role — consent gate on invite (done) + propose-a-lock (done) + prep-then-release / filtered run-of-show / day-of broadcast / vendor folder (planned) + follow-ups | `NEXT_PUBLIC_COORDINATOR_CONSENT_GATE_ENABLED` + `NEXT_PUBLIC_COORDINATOR_PROPOSE_LOCK_ENABLED` (both OFF); PRs #3390 + #3401 merged; consent follow-ups #3402 (export) + #3403 (revoked_at) merged | consent + propose-lock flag-off; **P2/P3/P4 SHIPPED flag-dark 2026-07-20** (verified on `main`), only **P1 (DPO-gated)** + follow-ups remain; **§8 carries conforming execution metadata**. **2026-07-19 owner decision: the blanket money wall is SUPERSEDED → CONSENT-SCOPED — lock + checkout allowed when the couple/host has approved that scope in the access limitations** (✅ approver CONFIRMED = couple/host 2026-07-21; DPO sub-decisions ✅ **TEMP-APPROVED 2026-07-21**, provisional). Propose-lock flag **permanent-OFF (dormant)** | `DPO_COUNSEL` (consent flip · P1 parity · autoinvite basis), `OWNER_DECISION` (~~propose-lock flip~~ dormant per 2026-07-19 · checkout audit re-scoped to consent-scoped model · 5 sign-offs), `FLAG_FLIP_PROD` (consent flag) |
@@ -217,8 +217,8 @@ music-vendor read policy). **Grep before building anything here.**
 
 | PR | What | Gate |
 |---|---|---|
-| **1** | 🔴 Entitlement-gate the requests toggle server-side | **AUTO-OK — do first** |
-| **2** | Band sees host's playlist (pure read, no migration, no policy) | **AUTO-OK** |
+| ~~**1**~~ | ✅ **DONE 2026-07-30 — PR [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876)**, migration `20271020159662`. Column privilege withdrawn from `authenticated`; sole write path is `setSongRequestsOpen` (entitlement-checked, service_role). **Do not rebuild.** | — |
+| **2** | Band sees host's playlist (pure read, no migration, no policy) | **AUTO-OK — do first now** |
 | 3 | Join the two song-pick systems (onboarding ↔ playlist studio) | `OWNER_DECISION` — pre-fill direction |
 | 4 | Vibes per slot (artwork exists, concept does NOT) | `OWNER_DECISION` — confirm the six names before freezing an enum |
 | 5 | Sets (`vendor_event_sets`) | `OWNER_DECISION` ×2 — see prototype |
@@ -229,13 +229,20 @@ music-vendor read policy). **Grep before building anything here.**
 vocabulary, so 6 must land first. **One PR per session** — the owner's stated failure mode is
 sessions that start six things and land none.
 
-### 🔴 The one live defect
+### ✅ The one live defect — CLOSED 2026-07-30
 
-`song_requests_open` is **not entitlement-gated server-side**. `vendor_dayof_configs` RLS checks
-only row ownership; `resolveVendorSpecializationAccess` is imported ONLY by the render path
-(`vendor-dayof-frame.ts`, `specialization-slot.tsx`, `live/[eventId]/page.tsx`) — **no write path
-checks it**. A free-tier band can flip it via the API. Harm today is nil (no UI, window default
-FALSE) — which is exactly why it must land **before** any song-desk UI. That is PR 1.
+`song_requests_open` was **not entitlement-gated server-side**: `vendor_dayof_configs` RLS checked
+only row ownership, and `resolveVendorSpecializationAccess` was imported ONLY by the render path,
+so a free-tier band could flip it via the API. **Fixed in PR
+[#3876](https://github.com/iscasasola/setnayan-platform/pull/3876)** (migration `20271020159662`):
+`authenticated` holds no INSERT/UPDATE column privilege on that column, and the only write path is
+`setSongRequestsOpen`, which checks `holdsSpecialization(access, 'song_desk')` before writing as
+service_role.
+
+⚠ **Trap it surfaced, for anyone touching `vendor_dayof_configs` next:** a fresh row defaults
+`enabled_modules` to `'[]'`, which `resolveModules` reads as an authoritative **"every module
+off"** — so a naive upsert of a new column silently darkens the vendor's entire day-of console.
+Update-if-exists, seed-defaults-if-not.
 
 ### Blocking owner questions (nothing below PR 2 can start without these)
 
@@ -379,3 +386,49 @@ promo surfaces audit. Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29
 | papic-promo#G | ⏸ Papic on couple home/today/for-you — mockups first | **OWNER_DECISION** | after C |
 
 No migrations, no new flags. A–E parallel-safe (disjoint files). Face-tagging copy law: auto-tag is DORMANT — never promise it live (spec §3-5; /privacy biometrics fix is §5-4).
+
+---
+
+## 2026-07-29 · BOARD SYNTHESIS — the prioritized read across ALL register entries
+
+> Compiled at the end of the 2026-07-29 Papic session, owner-directed ("add all of that to our
+> what's next"). Visual board: [`06_Prototypes/Whats_Next_Board_2026-07-29.html`](06_Prototypes/Whats_Next_Board_2026-07-29.html)
+> (also artifact `f62f7d86`). This section is the board's content in text — a snapshot; the
+> register entries above stay canonical per stream.
+
+### The single highest-leverage owner action (15 minutes)
+**Live Studio Cloud Identity test** — Admin → Apps → Additional Google services → *is YouTube
+listed?* (+ upgrade the free Cloud trial). Unblocks the fully-built 8-PR Live Studio queue.
+Sequence: `Live_Studio_Internal_Consent_Cutover_2026-07-27.md`.
+
+### 🔴 Red items — no gate, start cold, in this order
+1. ~~**Song Desk PR 1**~~ — ✅ **CLOSED 2026-07-30, PR [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876).** The next Song Desk item is **PR 2** (band sees the host's playlist — pure read, still AUTO-OK).
+2. **papic-promo#A** — Maya billing fallback can charge ₱2,999 against the ₱1,000 catalog row — a CHARGE path (`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29.md` §2-A).
+3. **papic-promo#B** — homepage pricing block states three false Papic claims ("first 3 cameras · unlimited shots/day · ₱50/guest·day").
+4. **Admin "Delete user" broken** — throws for any user with activity (41 NO-ACTION FKs).
+5. **Ceremony Venue taxonomy tile EMPTY** — 0 canonicals, live defect on Explore.
+
+### ⛔ The owner decision queue (one question each — see the board / each contract)
+Live Studio test (above) · Song Desk's 6 questions · emergency-bubble sender+format ·
+Explore wave's 5 decisions · flip `NEXT_PUBLIC_SERVICE_DETAILS_ENABLED` · **look at the live
+guest site on a phone** (never done; 7 visual PRs shipped sight-unseen) · papic-promo#G
+home-surface shape (mockups first) · Kuha's 6 answers · 3D-Plan LOD + shared-room flip ·
+the small pile: AI-card CTA · Papic compare-at anchors · One-roster go · PayMongo priority ·
+accountant on "Guest of <event>" receipts · 4 dirty panood worktrees (~19.6 GB) keep-or-kill.
+
+### 🟣 ONE counsel/DPO packet (batch, don't drip)
+Vendor Papic capture go-live · featured-weddings rich layer · coordinator consent-flip
+permanence + P1 · personalization · faith graph · face-model hosting. Six items, one gate,
+one sitting.
+
+### 🟢 Ready-to-build backlog (no gate; each names its contract)
+Explore tails (dock PR-3 · team chip PR-4 · cleanup PR-5 · 2 logged live defects) · day-of
+tails (coordinator inbox inline · emcee questionnaire) · card-family tails (card-duplicate ·
+most-picked schema) · Pahina 4A messaging schema / 4C booth doorway / 4D owner controls / 4E
+tails · Open-Browse PR 4–11 (check in-flight first) · Papic follow-ups (One roster ·
+`/privacy` biometrics disclosure · clip compression + purge) · vendor chatbot 3b+ ·
+papic-promo C–F.
+
+### ⚠ Reconcile-before-building
+Papic v3 recut (flagged SUPERSEDED in §5 above — branch `claude/papic-v3-pr3` must not land
+as-is) · the 29-open-PR repo backlog (re-verify via `gh pr list`; doc PR numbers drift).

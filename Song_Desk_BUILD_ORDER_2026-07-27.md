@@ -21,9 +21,29 @@
 
 ---
 
-## PR 1 · 🔴 SECURITY — gate the requests toggle server-side
+## PR 1 · ✅ DONE 2026-07-30 — SECURITY, gate the requests toggle server-side
 
-**The defect.** `song_requests_open` lives on `vendor_dayof_configs`, whose RLS asks only
+> **SHIPPED as PR [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876)** (branch
+> `claude/song-desk-pr1-requests-gate`, migration `20271020159662`). **Do not rebuild.**
+> `authenticated` now holds **no INSERT/UPDATE column privilege** on `song_requests_open`
+> (table-level INSERT/UPDATE revoked, computed all-minus-one allow-list granted back — the
+> `20271005100000` events pattern, with catalog post-conditions). SELECT is untouched. The only
+> write path is **`setSongRequestsOpen`** in `app/vendor-dashboard/on-the-day/actions.ts`:
+> auth → booking → `holdsSpecialization(access, 'song_desk')` → service_role write.
+> 5 new DB tests in §7 of `tests/db/song-requests.db.test.ts`.
+>
+> **⚠ TRAP for anyone touching this table next.** A fresh `vendor_dayof_configs` row defaults
+> `enabled_modules` to `'[]'`, and `resolveModules` treats a PRESENT override as authoritative —
+> so an empty array means **every day-of module OFF**. A naive upsert of any new column would
+> silently darken the vendor's whole console. `setSongRequestsOpen` therefore UPDATEs when the
+> row exists and seeds the vendor's current defaults when it does not. Copy that shape.
+>
+> **Scope boundary (deliberate):** owner path only — a crew member on a day-of access grant
+> cannot flip the window. Extending it to grantees is a product call for the UI PR.
+>
+> ⏭ **Next is PR 2** (band sees the host's playlist) — still AUTO-OK, still no owner answer needed.
+
+**The defect (as found).** `song_requests_open` lives on `vendor_dayof_configs`, whose RLS asks only
 "is this your row" (`vendor_dayof_configs_vendor_update` → `current_vendor_profile_ids()`).
 It never checks the specialization entitlement. **A free-tier band can flip it via the API and
 collect requests they have not paid for.**
