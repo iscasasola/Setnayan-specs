@@ -416,6 +416,17 @@
   .ymo .yt{display:flex;flex-direction:column;gap:2px;min-width:0}
   .ymo b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ymo span{color:var(--ink-300);font-family:var(--mono);font-size:9.5px;line-height:1.45}
+  /* the chip stops being a fact and becomes a door */
+  .planbtn{margin-left:auto;flex:none;align-self:center;display:inline-flex;align-items:center;gap:4px;
+    min-height:30px;padding:0 10px;border-radius:999px;cursor:pointer;white-space:nowrap;
+    border:1px solid rgba(203,167,102,.45);background:var(--gold-100);color:var(--gold-700);
+    font-size:11px;font-weight:800;opacity:0;transition:opacity .2s var(--ease),transform .2s var(--ease)}
+  .planbtn .ic{width:11px;height:11px}
+  .ymo:hover .planbtn,.planbtn:focus-visible{opacity:1}
+  .planbtn:hover{background:var(--gold-500);color:#FFFDF8;border-color:transparent}
+  /* touch has no hover — always visible on phone, where it also has room */
+  @media(hover:none){.planbtn{opacity:1}}
+  .phone .planbtn{opacity:1}
   .exp{display:flex;align-items:center;gap:11px;padding:14px 15px;min-height:44px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);cursor:pointer}
   .exp .ic{width:16px;height:16px;color:var(--ink-500)}
   .et{font-size:13px;font-weight:700}
@@ -503,6 +514,14 @@
   .fin{display:flex;align-items:center;padding:0 13px;height:46px;border-radius:12px;background:#fff;border:1px solid var(--hairline)}
   .fin:focus-within{border-color:var(--gold-300);box-shadow:0 0 0 3px rgba(203,167,102,.18)}
   .fin input{flex:1;border:none;outline:none;font-family:inherit;font-size:13.5px;color:var(--ink-900);background:transparent;min-width:0}
+  .anchorln{display:flex;align-items:flex-start;gap:8px;margin:12px 0 2px;padding:10px 12px;border-radius:11px;
+    background:var(--gold-100);border:1px solid rgba(203,167,102,.32);font-size:11.5px;line-height:1.55;color:var(--ink-700)}
+  .anchorln .ic{width:13px;height:13px;color:var(--gold-700);margin-top:1px;flex:none}
+  .anchorln b{color:var(--ink-900)}
+  .fquick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+  .fq{min-height:40px;padding:0 12px;border-radius:11px;border:1px solid var(--hairline);
+    background:rgba(255,255,255,.6);font-size:11.5px;font-weight:700;color:var(--ink-500);cursor:pointer}
+  .fq.on{background:var(--gold-100);border-color:var(--gold-300);color:var(--ink-900)}
   .fhint{font-size:11px;color:var(--ink-300);line-height:1.5;margin:6px 2px 0}
   .fseg{display:flex;gap:5px;margin-bottom:7px}
   .fsb{flex:1;min-height:42px;border-radius:11px;border:1px solid var(--hairline);background:rgba(255,255,255,.6);
@@ -916,11 +935,23 @@
        behind it; a chip will simply arrive. Same section, two weights. */
     h+='<div class="alsorow"><span class="alsolab">Also coming</span>'+
       '<span class="alsosub">dates nobody had to add</span></div>'+
+      /* Each derived date is a moment that COULD become an event — so each one
+         carries "Start planning". The create flow is who-first, and a derived
+         date already knows the who, the what and the when, so all three arrive
+         pre-answered: it opens straight on the form, not on the type grid. */
       '<div class="yrow">'+
-        '<span class="ymo"><span class="dot"></span><span class="yt"><b>Your 1st anniversary</b><span>Mar 2027 · from your wedding</span></span></span>'+
-        '<span class="ymo"><span class="dot"></span><span class="yt"><b>Nina turns 7</b><span>Jun 9 · from her birthday</span></span></span>'+
-        '<span class="ymo"><span class="dot"></span><span class="yt"><b>Bantay, 3 years</b><span>Mar 3 · since you adopted him</span></span></span>'+
-        '<span class="ymo"><span class="dot"></span><span class="yt"><b>Aling Nena&rsquo;s, 12 years</b><span>Nov · since it opened</span></span></span>'+
+      [['Your 1st anniversary','Mar 2027 · from your wedding','anniversary','me','Mar 3','2027-03-03','Sat Mar 6','2027-03-06'],
+       ['Nina turns 7','Jun 9 · from her birthday','birthday','nina','Jun 9','2027-06-09','Sat Jun 12','2027-06-12'],
+       ['Bantay, 3 years','Mar 3 · since you adopted him','celebration','pet','Mar 3','2027-03-03','Sat Mar 6','2027-03-06'],
+       ['Aling Nena&rsquo;s, 12 years','Nov · since it opened','celebration','biz','Nov 10','2026-11-10','Sat Nov 14','2026-11-14']]
+      .map(function(m){
+        return '<span class="ymo"><span class="dot"></span>'+
+          '<span class="yt"><b>'+m[0]+'</b><span>'+m[1]+'</span></span>'+
+          '<button class="planbtn" data-plan="'+m[2]+'" data-plansub="'+m[3]+'" '+
+          'data-planwhen="'+m[4]+'" data-planwheniso="'+m[5]+'" '+
+          'data-plannear="'+m[6]+'" data-planneariso="'+m[7]+'" '+
+            'aria-label="Start planning '+m[0].replace(/&[a-z]+;/g,'')+'">Plan '+ic('i-arrow')+'</button></span>';
+      }).join('')+
       '</div>';
     return h+'</div>';
   }
@@ -1406,7 +1437,7 @@
       '<button class="fgo" data-agepass="'+t.k+'">Continue</button>';
   }
 
-  function formSheet(t){
+  function formSheet(t, anchor){
     var life=t.life;
     return '<div class="grab"></div>'+
       '<div class="fhead"><span class="femo" style="background:'+t.g+'">'+t.e+'</span>'+
@@ -1425,10 +1456,25 @@
           '<input id="hn" type="hidden" value="'+(subject.id==='me'?'':subject.n)+'">'+
           '<p class="fhint">Linked to their record, so it lands on <b>their</b> timeline — and one in planning per person, per kind.</p>'
         : '')+
-      '<label class="flab">When?</label>'+
+      /* ANCHOR ≠ EVENT DATE. anchor_date is what the event commemorates; the
+         celebration happens whenever you hold it. Two columns on purpose, and
+         in PH a 7th birthday on a Tuesday is very often a Saturday party. So
+         the anchor is shown as CONTEXT and the date is asked, never assumed. */
+      (anchor
+        ? '<div class="anchorln">'+ic('i-cal')+'<span><b>'+anchor.what+'</b> falls on <b>'+anchor.when+'</b>'+
+          ' — you can celebrate any day.</span></div>'
+        : '')+
+      '<label class="flab">When are you celebrating?</label>'+
+      (anchor
+        ? '<div class="fquick">'+
+            '<button class="fq" data-qd="'+anchor.whenISO+'">On the day · '+anchor.when+'</button>'+
+            '<button class="fq on" data-qd="'+anchor.nearISO+'">The Saturday after · '+anchor.near+'</button>'+
+            '<button class="fq" data-qd="">Another day</button>'+
+          '</div>'
+        : '')+
       '<div class="fseg" role="group"><button class="fsb on" data-dm="exact">I know the date</button>'+
         '<button class="fsb" data-dm="window">Still deciding</button></div>'+
-      '<div class="fin" id="dwrap"><input id="dt" type="date"></div>'+
+      '<div class="fin" id="dwrap"><input id="dt" type="date"'+(anchor?' value="'+anchor.nearISO+'"':'')+'></div>'+
       '<label class="flab" for="pl">Where?</label>'+
       '<div class="fin"><input id="pl" type="text" placeholder="Venue or city — you can change this later"></div>'+
       '<label class="flab">Roughly how big?</label>'+
@@ -1501,6 +1547,31 @@
         if(b.dataset.lens){ view[f].lens=b.dataset.lens; build(f); toast(f,'Lens · '+b.textContent.trim()); return; }
         // the zoom-out pill is a DOOR to /dashboard/life-flash, not a mode here
         toast(f,'\u2192 Life-Flash \u00b7 chapters \u00b7 year \u00b7 lifetime');
+      });
+    });
+    /* Bound directly rather than via the delegated handler — same pattern as
+       .cpill/.spill below. Who / what / when are all already known from the
+       chip, so this skips both create steps and opens the form pre-answered. */
+    el.querySelectorAll('[data-plan]').forEach(function(b){
+      b.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        subject = SUBJECTS.filter(function(x){return x.id===b.dataset.plansub;})[0] || SUBJECTS[0];
+        var ty4 = ETYPES.filter(function(x){return x.k===b.dataset.plan;})[0];
+        var v4 = (subject.kind==='person') ? ageVerdict(subject,ty4) : {ok:true};
+        if(v4.block){ openSheet(f,ageBlockSheet(ty4,v4,subject)); return; }
+        if(v4.ask){   openSheet(f,ageAskSheet(ty4,v4,subject));   return; }
+        if(v4.fork){  openSheet(f,priorWeddingSheet(ty4,v4));     return; }
+        openSheet(f,formSheet(ty4,{
+          what:    b.closest('.ymo').querySelector('b').textContent,
+          when:    b.dataset.planwhen,
+          whenISO: b.dataset.planwheniso,
+          near:    b.dataset.plannear    || b.dataset.planwhen,
+          nearISO: b.dataset.planneariso || b.dataset.planwheniso
+        }));
+        var sh4=ov(f,'sh');
+        var dn4=sh4.querySelector('#dn');
+        if(dn4) dn4.value=b.closest('.ymo').querySelector('b').textContent;
+        toast(f,'The date it marks is filled in \u2014 pick when you\u2019ll celebrate');
       });
     });
     el.querySelectorAll('.cpill[data-i]').forEach(function(b){
@@ -1619,10 +1690,32 @@
       var seg=t.closest('.fsb');
       if(seg){
         seg.parentNode.querySelectorAll('.fsb').forEach(function(b){b.classList.toggle('on',b===seg);});
-        var w=ov(f,'sh').querySelector('#dwrap');
-        w.innerHTML = seg.dataset.dm==='exact'
-          ? '<input id="dt" type="date">'
-          : '<input id="dt" type="text" placeholder="Any month — e.g. December 2026, or “summer”">';
+        var sh2=ov(f,'sh'), w=sh2.querySelector('#dwrap');
+        /* The chips and this control are one question at two granularities. A
+           month window is not a day, so switching to it drops the chip; coming
+           back restores whichever chip is still lit rather than blanking it. */
+        var lit=sh2.querySelector('.fq.on');
+        if(seg.dataset.dm==='exact'){
+          w.innerHTML='<input id="dt" type="date"'+(lit&&lit.dataset.qd?' value="'+lit.dataset.qd+'"':'')+'>';
+        }else{
+          sh2.querySelectorAll('.fq').forEach(function(x){x.classList.remove('on');});
+          w.innerHTML='<input id="dt" type="text" placeholder="Any month — e.g. December 2026, or “summer”">';
+        }
+        return;
+      }
+      var q=t.closest('.fq');
+      if(q){
+        q.parentNode.querySelectorAll('.fq').forEach(function(x){x.classList.toggle('on',x===q);});
+        var sh3=ov(f,'sh');
+        /* Picking a day answers "still deciding" — flip the segment back so the
+           field is a date picker, not a free-text month. */
+        var ex=sh3.querySelector('.fsb[data-dm="exact"]');
+        if(ex && !ex.classList.contains('on')){
+          ex.parentNode.querySelectorAll('.fsb').forEach(function(b){b.classList.toggle('on',b===ex);});
+          sh3.querySelector('#dwrap').innerHTML='<input id="dt" type="date">';
+        }
+        var di=sh3.querySelector('#dt');
+        if(di){ di.value=q.dataset.qd||''; if(!q.dataset.qd) di.focus(); }
         return;
       }
       var bd=t.closest('.fband');
