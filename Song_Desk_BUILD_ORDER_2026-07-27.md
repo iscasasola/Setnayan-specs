@@ -1,5 +1,34 @@
 # Song desk — BUILD ORDER (owner said "fix all", 2026-07-27)
 
+> # 🏁 2026-07-30 — THIS BUILD ORDER IS COMPLETE. Every PR is shipped.
+>
+> | PR | What | Shipped |
+> |---|---|---|
+> | 1 | requests window is a paid switch (column privilege) | [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876) |
+> | 2 | band reads the host's playlist | [#3885](https://github.com/iscasasola/setnayan-platform/pull/3885) |
+> | 1b | requests always-on + paywall moves to the inbox | [#3891](https://github.com/iscasasola/setnayan-platform/pull/3891) |
+> | 1c | read audience — crew + day-of grantees; `anon` revoked | [#3893](https://github.com/iscasasola/setnayan-platform/pull/3893) |
+> | — | the requests INBOX UI + the mount-vs-read vocabulary fix | [#3896](https://github.com/iscasasola/setnayan-platform/pull/3896) |
+> | 6+4 | eleven moments + six frozen vibes | [#3899](https://github.com/iscasasola/setnayan-platform/pull/3899) |
+> | 3 | onboarding feeds the studio (Unsorted tray) + resolved `song_id` | [#3903](https://github.com/iscasasola/setnayan-platform/pull/3903) |
+> | 5 | sets (1–6, anchored to the host's vocabulary) | [#3908](https://github.com/iscasasola/setnayan-platform/pull/3908) |
+> | 7 | guest-facing request button + guest song search | owner-DEPRIORITISED, still not built |
+>
+> **⏭ WHAT IS LEFT IS NOT CODE.** Three owner decisions and one visual check:
+> 1. **The playlist read is now open to ANY booked vendor**, not only music acts (#3896).
+>    Reversible; the honest narrow route is a `category_key` gate once that column is populated.
+> 2. **Should the HOST see a band's finished setlist?** PR 5 scoped sets to the vendor org
+>    deliberately (a set is a working document) — widening it is a product call.
+> 3. **PR 7** stays deprioritised until sets prove useful.
+> 4. **Nobody has LOOKED at any of it.** A prod test fixture exists (see `DECISION_LOG.md`
+>    2026-07-30 🧪 row) — vendor `testnayan2`, event `0ccc7aa3-3a81-43ee-b170-afb194e0b259`,
+>    booked TODAY. ⚠ The console only opens on `booked_date`; bump that one row to reopen it.
+>
+> ⚠⚠ **THE APPLY PIPELINE SKIPPED ALL FOUR MIGRATIONS TODAY.** Every one needed
+> `gh workflow run supabase-migrations.yml --ref main`, and `deploy-prod`'s apply job
+> **reports success while applying nothing** (`VERCEL_DEPLOY_HOOK_URL` unset ⇒ dormant gate).
+> Never read "merged" as "live" here — verify the OBJECT.
+>
 > ## ✅ 2026-07-30 — ALL SIX OWNER GATES ARE ANSWERED. Nothing here is blocked.
 >
 > The owner tapped all six in one sitting. Recorded in `DECISION_LOG.md` 2026-07-30 (🎼 row) and
