@@ -181,7 +181,7 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 
 - **Native apps:** iOS 16+ (SwiftUI + AVFoundation), Android 11+ (Compose + CameraX)
 - **Backend:** existing Setnayan backend (extend it, don't fork it)
-- **Storage:** Cloudflare R2 (PH-region buckets) — hot 90 days, IA cold 5 years
+- **Storage:** Cloudflare R2 (**APAC region** — ⚠ corrected 2026-07-31, was "PH-region buckets"; **R2 has no Philippines region**, and this line is where that false claim propagated from — it reached the live public `/privacy` notice. Owner to confirm the actual bucket location hint in the Cloudflare dashboard) — hot 90 days, IA cold 5 years
 - **Render pipeline:** FFmpeg on Cloudflare Workers + R2 (or Hetzner VM pool fallback)
 - **Auth for paparazzi seats:** wedding-scoped ephemeral session tokens via QR-code claim flow (not username/password)
 - **QR scanning:** AVFoundation metadata output (iOS) / ML Kit Barcode Scanning (Android)
@@ -291,8 +291,8 @@ These are tracked in spec Part 6. Each is a future spec.
 - PH Data Privacy Act (RA 10173) — guest consent at RSVP, opt-out flow, face-blur for opt-outs, 5-year retention
 - Couple has 7-day review window (configurable) before public unlock
 - NSFW filter is on by default and CANNOT be disabled
-- DPO is the existing Setnayan DPO (registered with NPC)
-- Data residency: Cloudflare R2 PH-region buckets
+- DPO is the **proprietor, Indalecio Sacdalan Casasola II** (registered on the NPC DPO system 2026-07-07). ⚠ Not Claire E. Buanhog — she is VP / co-founder and DBRT support. See [[dpo-designation-owner]].
+- **Data residency: NOTHING is hosted in the Philippines.** Database = **Supabase, Singapore** (this is also where the biometric face vectors live — `guest_face_enrollments.face_vector`, `user_face_profiles`). Object storage = **Cloudflare R2, APAC region** (media + the source selfie images, *not* the vectors). ⚠ Corrected 2026-07-31 — the old "Cloudflare R2 PH-region buckets" was false in two ways (no PH region exists; and it implied PH residency we do not have) and had propagated into the live public `/privacy` notice. Owner to confirm the bucket location hint in the Cloudflare dashboard.
 
 ## Common pitfalls / gotchas for engineers
 
