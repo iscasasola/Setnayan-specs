@@ -53,6 +53,23 @@ Three contradictory models used to ship at once. This is the one that is true:
 
 Full detail: [`Live_Studio_Internal_Consent_Cutover_2026-07-27.md`](Live_Studio_Internal_Consent_Cutover_2026-07-27.md). Summary:
 
+> ### 🔴 STATUS 2026-07-30 — B IS ATTEMPTED AND BLOCKED BY A GOOGLE SUSPENSION. B'S ANSWER IS STILL UNKNOWN.
+>
+> The Cloud Identity **Free** org for `setnayan.com` **was created** (domain claimed by DNS TXT, `live@setnayan.com` created) — then **Google suspended the account before the admin console was ever reached.** So B's question ("is YouTube listed?") is **unanswered**, not answered NO. Do not log Internal as failed.
+>
+> **Appeal in flight — case `73857927`** via `toolbox.googleapps.com/apps/recovery/form` (the **domain-ownership** form; `accounts.google.com/signin/recovery` is identity-based and only ever offers a phone challenge). Submitted as domain `setnayan.com` · contact `iscasasolaii@gmail.com` · issue **"related to an account suspension"** (never "compromised"). A CNAME `73857927.setnayan.com → google.com.` is live at GoDaddy and **must stay until reinstatement** — the label IS the case number.
+>
+> **🪤 Traps this cost hours to learn:**
+> 1. **A suspension presents as an identity challenge.** Every screen asks for a phone code, so you will burn time on network/phone-cap theories that cannot work. Check for suspension first.
+> 2. **`live@setnayan.com` was made BOTH super-admin and the channel identity, so one suspension locked out the whole org.** On the next attempt make the super-admin a **separate** address (e.g. `admin@setnayan.com`) and **create a second super-admin immediately** — a super admin can reset a locked one from the console.
+> 3. **`setnayan.com` mail is iCloud custom-domain** (`MX mx01/mx02.mail.icloud.com` · `SPF include:icloud.com` · `apple-domain` TXT · catch-all ON). This is why "never MX" is not theoretical, and why every Google DNS record must be **ADDED** beside the existing records, never editing them.
+>
+> ✅ **Cost settled:** Cloud Identity Free = 50 licenses · ₱0 · no credit card (we need 1). Premium and Workspace are the paid tiers. Check **Billing → Subscriptions** on first sign-in for a signup-upsell trial.
+>
+> ⏭ **Action A (Cloud billing upgrade) is UNAFFECTED by the suspension and still time-boxed** — the trial read "6 days left" on 2026-07-27. Do it independently of this appeal.
+>
+> ⏭ **If reinstatement drags past a few days, reopen External deliberately** — not by drift. ⚠ External may be unsatisfiable under the pool model (its demo video must show a user OAuth grant that never happens).
+
 | # | Action | Note |
 |---|---|---|
 | **A** | **Upgrade the Google Cloud billing account** | ⏰ Trial was "6 days left" on 2026-07-27. Upgrading is **free** (pay-as-you-go, keeps unused credit, usage is $0.00). If it lapses, resources stop with a 30-day recovery window. Set a budget alert immediately after. |
