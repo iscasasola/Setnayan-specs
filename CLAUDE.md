@@ -39,7 +39,8 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   ⏭ One pending owner flip: `NEXT_PUBLIC_SERVICE_DETAILS_ENABLED`.
 > - The **Papic two-type model** (locked 2026-07-29, build NOT started): DECISION_LOG row
 >   2026-07-29 + memory `project-setnayan-onboarding-papic-ai-cards`.
-> - **Song Desk** below (unchanged, still open).
+> - **Song Desk** below — ✅ **PR 1 shipped + ALL SIX owner gates answered 2026-07-30.** Fully
+>   cold-startable: build **PR 2**, then the new **PR 1b**.
 > Execute per each contract's own rules; build flag-dark; stop at every HUMAN gate.
 
 > ### ▶ ACTIVE: Song desk / song requests / sets
@@ -48,10 +49,13 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >
 > It contains, already verified against live prod on 2026-07-27:
 > - a table of **what already ships** (so you do not rebuild it — this happened twice in one day),
-> - **7 PRs in dependency order**, each with its blocking owner question,
+> - **8 PRs in dependency order** (7 + the new 1b), **every owner gate now ANSWERED**,
 > - the standing traps (the exposure-baseline freeze, the default-ACL REVOKE, pre-launch-empty prod).
 >
-> **Start at PR 1** — a live entitlement gap — unless the owner says otherwise.
+> ✅ **PR 1 is CLOSED** (#3876, 2026-07-30) and **all six owner questions were answered the same
+> day** — slots · vibe names · pre-fill direction · accept-vs-set · **requests always-on** ·
+> **the paywall moves to the inbox**. **Start at PR 2**, then **PR 1b** (always-on + gate the inbox
+> read — 🔴 must precede any requests UI). Order: 2 → 1b → (6+4) → 3 → 5.
 > Reasoning behind every line: the song-desk rows in `DECISION_LOG.md` — find them with `grep -in "song desk\|song request\|playlist-slot\|song-pick system\|set composition" DECISION_LOG.md` (15 rows, 2026-07-27)
 > (`grep -n "2026-07-27" DECISION_LOG.md`).
 

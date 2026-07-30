@@ -219,15 +219,26 @@ music-vendor read policy). **Grep before building anything here.**
 |---|---|---|
 | ~~**1**~~ | ✅ **DONE 2026-07-30 — PR [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876)**, migration `20271020159662`. Column privilege withdrawn from `authenticated`; sole write path is `setSongRequestsOpen` (entitlement-checked, service_role). **Do not rebuild.** | — |
 | **2** | Band sees host's playlist (pure read, no migration, no policy) | **AUTO-OK — do first now** |
-| 3 | Join the two song-pick systems (onboarding ↔ playlist studio) | `OWNER_DECISION` — pre-fill direction |
-| 4 | Vibes per slot (artwork exists, concept does NOT) | `OWNER_DECISION` — confirm the six names before freezing an enum |
-| 5 | Sets (`vendor_event_sets`) | `OWNER_DECISION` ×2 — see prototype |
-| 6 | Extend the slot list (Entrance / Post-Ceremony missing) | `OWNER_DECISION` — confirm list |
+| **1b** | **NEW 2026-07-30** — always-on requests + move the paid gate to the inbox read | **AUTO-OK now** (was the owner call) · 🔴 security-shaped |
+| 3 | Join the two song-pick systems (onboarding ↔ playlist studio) | ✅ **ANSWERED** — onboarding feeds the studio ("Unsorted" tray); matcher reads both |
+| 4 | Vibes per slot (artwork exists, concept does NOT) | ✅ **ANSWERED** — six names FROZEN as drawn (acoustic·classical·jazz·opm·pop·showband) |
+| 5 | Sets (`vendor_event_sets`) | ✅ **ANSWERED ×2** — requests always-on (no "chosen sets" mode) · Accept ≠ filed into a set |
+| 6 | Extend the slot list (Entrance / Post-Ceremony missing) | ✅ **ANSWERED** — add all three: `prelude` · `grand_entrance` · `recessional` (11 slots) |
 | 7 | Guest-facing request button + guest song search | owner-DEPRIORITISED |
 
-**Order:** 1 → 2 → (6+4 together, same file `lib/playlist.ts`) → 3 → 5. PR 5 keys to the slot
-vocabulary, so 6 must land first. **One PR per session** — the owner's stated failure mode is
-sessions that start six things and land none.
+**Order (revised 2026-07-30):** 1 ✅ → 2 → **1b** → (6+4 together, same file `lib/playlist.ts`) → 3
+→ 5. PR 5 keys to the slot vocabulary, so 6 must land first; **1b must land before any requests UI**
+(always-on without the inbox gate hands every free-tier band the thing we just decided to sell).
+**One PR per session** — the owner's stated failure mode is sessions that start six things and land
+none.
+
+> ### ✅ 2026-07-30 — the six owner gates are CLOSED. Nothing in this stream is blocked.
+> All six answered in one sitting. Full reasoning + the trap each answer creates:
+> `DECISION_LOG.md` 2026-07-30 (🎼 row) and the per-PR bodies in the contract.
+> ⚠ Two answers **reversed a lock from 2026-07-27** (the band's open/close window) and **changed
+> what PR 1 shipped hours earlier** — hence the new **PR 1b**. Do not read PR 1's migration comments
+> as current on the *default*; its column-privilege gate is still correct and still load-bearing
+> (the pause is a paid control).
 
 ### ✅ The one live defect — CLOSED 2026-07-30
 
@@ -402,14 +413,15 @@ listed?* (+ upgrade the free Cloud trial). Unblocks the fully-built 8-PR Live St
 Sequence: `Live_Studio_Internal_Consent_Cutover_2026-07-27.md`.
 
 ### 🔴 Red items — no gate, start cold, in this order
-1. ~~**Song Desk PR 1**~~ — ✅ **CLOSED 2026-07-30, PR [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876).** The next Song Desk item is **PR 2** (band sees the host's playlist — pure read, still AUTO-OK).
+1. ~~**Song Desk PR 1**~~ — ✅ **CLOSED 2026-07-30, PR [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876).** ✅ **And all six owner gates answered the same day — the whole stream is now cold-startable.** Next: **PR 2** (band sees the host's playlist, pure read) then **PR 1b** (always-on requests + the paid gate moves to the inbox read — 🔴 security-shaped, must precede any requests UI).
 2. **papic-promo#A** — Maya billing fallback can charge ₱2,999 against the ₱1,000 catalog row — a CHARGE path (`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29.md` §2-A).
 3. **papic-promo#B** — homepage pricing block states three false Papic claims ("first 3 cameras · unlimited shots/day · ₱50/guest·day").
 4. **Admin "Delete user" broken** — throws for any user with activity (41 NO-ACTION FKs).
 5. **Ceremony Venue taxonomy tile EMPTY** — 0 canonicals, live defect on Explore.
 
 ### ⛔ The owner decision queue (one question each — see the board / each contract)
-Live Studio test (above) · Song Desk's 6 questions · emergency-bubble sender+format ·
+Live Studio test (above) · ~~Song Desk's 6 questions~~ ✅ **ALL SIX ANSWERED 2026-07-30** ·
+emergency-bubble sender+format ·
 Explore wave's 5 decisions · flip `NEXT_PUBLIC_SERVICE_DETAILS_ENABLED` · **look at the live
 guest site on a phone** (never done; 7 visual PRs shipped sight-unseen) · papic-promo#G
 home-surface shape (mockups first) · Kuha's 6 answers · 3D-Plan LOD + shared-room flip ·

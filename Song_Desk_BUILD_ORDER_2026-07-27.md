@@ -1,5 +1,23 @@
 # Song desk — BUILD ORDER (owner said "fix all", 2026-07-27)
 
+> ## ✅ 2026-07-30 — ALL SIX OWNER GATES ARE ANSWERED. Nothing here is blocked.
+>
+> The owner tapped all six in one sitting. Recorded in `DECISION_LOG.md` 2026-07-30 (🎼 row) and
+> folded into each PR below — **read the PR, not this summary**, then build.
+>
+> | # | Question | Answer |
+> |---|---|---|
+> | PR 6 | missing moments | **add all three** — `prelude` · `grand_entrance` · `recessional` (11 slots) |
+> | PR 4 | the six vibe names | **frozen as drawn** — Acoustic · Classical · Jazz · OPM · Pop · Showband |
+> | PR 3 | double-picking | **onboarding feeds the studio** as an "Unsorted" tray; matcher reads BOTH |
+> | PR 5 | accepted request → a set? | **no** — Accept means "we'll play it" |
+> | PR 5 | the requests window | **always on** ⚠ reverses the 2026-07-27 open/close lock |
+> | new | so where is the paywall? | **seeing the requests** is the paid part — plus a band-controlled PAUSE |
+>
+> ⚠ **The last two created a required PR that did not exist this morning — [PR 1b](#pr-1b--always-on-requests--the-paid-gate-moves-to-the-inbox).
+> It must land BEFORE any requests UI and before the always-on flip.** Build order is now
+> **2 → 1b → (6+4) → 3 → 5**.
+>
 > **This file is the contract.** Execute top to bottom. Every item below was verified against
 > live prod or shipped code on 2026-07-27 — the "already exists" claims are checked, not assumed.
 > Full reasoning: the song-desk rows in `DECISION_LOG.md` — find them with `grep -in "song desk\|song request\|playlist-slot\|song-pick system\|set composition" DECISION_LOG.md` (15 rows, 2026-07-27).
@@ -62,6 +80,52 @@ Harm today is nil (no UI, flag off) — which is exactly why it must land BEFORE
 
 ---
 
+## PR 1b · 🔴 Always-on requests + the paid gate moves to the inbox
+
+> **Created by the owner's 2026-07-30 answers. Did not exist on 2026-07-27.**
+> **Land this BEFORE any requests UI and before the always-on flip. One PR, both halves —
+> shipping either alone opens a hole or breaks the promise.**
+
+**Half 1 — always on.** `song_requests_open` flips `DEFAULT FALSE` → `DEFAULT TRUE` and its
+meaning **inverts to "not paused"**. Guests may always ask; the band never has to open anything.
+The column is NOT dropped — the owner kept a **pause** (for the night or a stretch), because real
+bands get flooded and the only alternative is ignoring the screen. That keeps PR 1's
+column-privilege withdrawal load-bearing rather than wasted: the pause is still a paid control, so
+`setSongRequestsOpen` stays the sole write path, entitlement check unchanged.
+⚠ Rename the *concept* in UI copy ("Pause requests"), not the column — a rename is a migration
+across every reader for no user-visible gain. Say so in the migration comment so the next session
+doesn't "fix" the name.
+
+**Half 2 — the read becomes the paywall.** `event_song_requests_read` today gates on **booked**,
+not on **specialization**:
+
+```sql
+USING ( event_id IN (SELECT public.current_vendor_booked_event_ids())
+        OR event_id IN (SELECT public.current_event_ids())
+        OR public.is_admin() )
+```
+
+That is **the same class of hole PR 1 just closed, one table over.** It is inert *today* only
+because the window defaults FALSE so no request can exist. **Flip the default without re-gating
+this read and every free-tier booked band gets a full inbox — the thing we just decided to sell.**
+
+The host (`current_event_ids()`) and `is_admin()` legs stay. The vendor leg must additionally
+require the `song_desk` specialization. ⚠ **Entitlement lives in TypeScript on purpose** (PR 1's
+finding: `resolveVendorSpecializationAccessForVendor` folds in the admin free-window promotion and
+the mid-event lapse; a SQL copy would drift) — so prefer the PR 1 shape: keep RLS as the coarse
+booked-or-host fence, and make the inbox reader a **service-role action that checks
+`holdsSpecialization(access, 'song_desk')`**, with the vendor's direct SELECT narrowed or removed.
+Decide it explicitly and write down which you chose; do not leave both paths open.
+
+**Tests:** a free-tier booked music vendor reads **zero** rows by any path · a `song_desk` holder
+reads all of them · the host still reads their own room · a lapsed specialization mid-event loses
+the inbox. Append to `tests/db/song-requests.db.test.ts` (§7 exists from PR 1).
+
+🚨 **Any change to a read policy trips THE FREEZE** — regenerate
+`supabase/security/exposure-surface.baseline.txt` in the same PR and read your own diff.
+
+---
+
 ## PR 2 · 🟢 Band sees the host's playlist  ← *the next real feature*
 
 The smallest possible answer to the owner's *"make this helpful for the host and the band first."*
@@ -76,22 +140,26 @@ authorisation.
 
 ---
 
-## PR 3 · 🟡 Join the two song-pick systems
+## PR 3 · 🟢 Join the two song-pick systems — ANSWERED 2026-07-30
 
 **A couple can pick songs in two places that do not talk.** `event_song_picks` (flat,
 onboarding, feeds the match score) vs `event_playlist_picks` (per-moment, playlist studio).
 Consequence: pick songs at onboarding → open the playlist studio → **it is empty** → pick again.
 And songs assigned to `first_dance` never improve the vendor match.
 
-**Recommended:** pre-fill one way (onboarding → an "unsorted" tray in the studio) and let the
-matcher read BOTH. ⚠ Do NOT merge the tables — different shapes (flat vs slotted), different
-RLS audiences.
+**✅ OWNER CHOSE (2026-07-30): onboarding feeds the studio.** Pre-fill one way — onboarding picks
+appear in the studio as an **"Unsorted" tray** the couple drags into moments — and the matcher
+reads **BOTH** tables, so a song assigned to `first_dance` finally counts toward the "% match".
+⚠ Do NOT merge the tables — different shapes (flat vs slotted), different RLS audiences.
 
-⏭ Owner sign-off needed on the pre-fill direction before building.
+Direction is one-way: **onboarding → studio.** Nothing writes back to `event_song_picks` from the
+studio, so the matcher's existing source keeps its shape and the tray can never fight the picker.
+⚠ The tray is a **view over unslotted picks, not a 9th slot** — do not add an `unsorted` value to
+`PlaylistSlotType`, or every downstream reader inherits a pseudo-moment that isn't part of the day.
 
 ---
 
-## PR 4 · Vibes — pick songs **or** set a vibe per slot
+## PR 4 · Vibes — pick songs **or** set a vibe per slot — ANSWERED 2026-07-30
 
 ⚠ **The artwork ships; the concept does not.** Six tiles exist only as images
 (`public/onboarding/prefs/music_{acoustic,classical,jazz,opm,pop,showband}.webp`). A grep across
@@ -100,12 +168,25 @@ RLS audiences.
 Model as a **nullable vibe alongside the existing picks, not two competing tables** — a slot must
 be able to carry both ("jazz for dinner, but you must play Through the Years" is normal).
 
-⏭ **Owner must confirm the six names before they are frozen into an enum** (changing them later
-is a migration).
+**✅ THE SIX NAMES ARE FROZEN (owner, 2026-07-30) — exactly as the artwork already reads:**
+
+| value | label | asset that already ships |
+|---|---|---|
+| `acoustic` | Acoustic | `public/onboarding/prefs/music_acoustic.webp` |
+| `classical` | Classical | `music_classical.webp` |
+| `jazz` | Jazz | `music_jazz.webp` |
+| `opm` | OPM | `music_opm.webp` |
+| `pop` | Pop | `music_pop.webp` |
+| `showband` | Showband | `music_showband.webp` |
+
+Owner declined both alternatives offered: **no seventh "Band's call" option** (absence of a vibe
+already means that — keep it NULL, don't spend an enum value on it) and **"Showband" keeps its
+name** (not "Party band"). Six values, no more — a later addition is a migration, so anything that
+looks like a seventh is a question, not a commit.
 
 ---
 
-## PR 5 · Sets
+## PR 5 · Sets — ANSWERED 2026-07-30 (both gates)
 
 `vendor_event_sets` (event × vendor × position 1–6 × name) + a join carrying (set, song,
 position). Songs are **placed manually by the band** from their repertoire — no auto-fill, no
@@ -113,17 +194,29 @@ recommender (owner: *"they can place songs per set. they can choose."*).
 
 🚨 **Sets MUST key to the existing `PlaylistSlotType` values — never a second vocabulary.**
 If the band's sets say "After Party" while the host's picks say `open_floor`, the two lists can
-never be compared, which destroys the entire point.
+never be compared, which destroys the entire point. **As of PR 6 that vocabulary is 11 values** —
+key to the extended enum, and take `grand_entrance` seriously: a PH band's Set 1 usually *is* the
+entrance.
 
-⏭ **Blocked on two owner answers** (both tappable in
-`06_Prototypes/Song_Desk_Sets_2026-07-27.html`):
-1. "Allow requests **(anytime)**" — a MODE beside "only during the sets I choose", or always-on?
-   (Always-on would retire the open/close control the owner locked earlier — do not assume it.)
-2. Does an ACCEPTED request land in a set the band picks, or just get accepted?
+**✅ BOTH ANSWERS IN (owner, 2026-07-30):**
+
+1. **Requests are ALWAYS ON.** Not a mode, not a picker — no "Anytime / Chosen sets / Off". The
+   owner picked always-on over the prototype's three-mode recommendation. ⚠ This **reverses the
+   2026-07-27 "the band will open or close accepting requests" lock**, and it retires the setup
+   step — but **not** the control: the band keeps a **pause** (for the night or a stretch). The
+   default flips and the paid gate moves to the inbox → **that is [PR 1b](#pr-1b--always-on-requests--the-paid-gate-moves-to-the-inbox),
+   which must land first.** There is no "chosen sets" mode to build, so **`vendor_event_sets` no
+   longer needs any request-window relationship at all** — sets are purely the band's setlist.
+2. **An accepted request does NOT land in a set.** Accept means "we'll play it", full stop, into
+   one list the band works from. A request arrives mid-song; making a musician answer "which set?"
+   in that moment is a decision they don't need. ⚠ So do **not** build a set-picker into the accept
+   flow, and do not auto-file into the set that happens to be playing (a request accepted during
+   Set 2 is usually meant for later — it would file things wrong). The prototype's
+   "from a request" chips are a **display** affordance on the accepted list, not membership in a set.
 
 ---
 
-## PR 6 · Extend the slot list
+## PR 6 · Extend the slot list — ANSWERED 2026-07-30 (all three, confirmed)
 
 Owner named *Entrance · Bridal Walk · Post Ceremony · Cocktail Hour · Dinner · After Party*,
 plus *first dance and other parts*. Mapped against the shipped enum:
@@ -139,11 +232,30 @@ plus *first dance and other parts*. Mapped against the shipped enum:
 | **Entrance** | **missing** |
 | **Post Ceremony** | **missing / partial** |
 
-Proposed additions: `prelude` (guest arrival), `grand_entrance` (couple into reception — a major
-PH moment, distinct from guest arrival), `recessional` (post-ceremony walk out).
+**✅ OWNER CONFIRMED ALL THREE (2026-07-30)** — the full proposal, no trims:
 
-⏭ Owner confirms the list. **Extend the enum, never fork it.** Verify every downstream reader
-handles new slots gracefully before adding.
+| new value | label | where it sits in the day |
+|---|---|---|
+| `prelude` | Guest arrival | **first** — before `processional` |
+| `grand_entrance` | Grand entrance | couple into the reception — after `recessional`, before `cocktail_hour` |
+| `recessional` | Recessional | the walk out — straight after `ceremony` |
+
+**11 slots. Chronological order is the contract** (`PLAYLIST_SLOT_TYPES` renders the day in order,
+`banned_songs` stays last):
+`prelude · processional · ceremony · recessional · grand_entrance · cocktail_hour · first_dance ·
+parents_dance · dinner · open_floor · banned_songs`.
+
+**Extend the enum, never fork it.** Every one of these needs handling in the same PR (they all live
+in `lib/playlist.ts` except the last): `PlaylistSlotType` union · `PLAYLIST_SLOT_TYPES` ·
+`PLAYLIST_SLOT_LABELS` · `PLAYLIST_SLOT_HINTS` (write real per-moment helper copy in the shipped
+editorial voice — no engineering jargon) · `groupPicksBySlot` · any DB `CHECK` constraint on
+`event_playlist_picks.slot_type`. ⚠ **Grep every reader before the migration**
+(`git grep -n "PLAYLIST_SLOT\|slot_type" origin/main`) — a reader with an exhaustive `switch` or a
+`Record<PlaylistSlotType, …>` fails to compile, which is the good case; one with a lookup that
+silently returns `undefined` is the bad case.
+
+⚠ PR 4 (vibes) touches the same file — **land 6 and 4 together in one PR** as the register's order
+says, or the second one rebases onto a conflict.
 
 ---
 
@@ -166,6 +278,8 @@ The request button on `/[slug]`, and a guest-facing "who plays this song?" searc
   check, which does not sound like a security guard.
 - **Every new table in `public` ships OPEN.** Emit `REVOKE ALL … FROM PUBLIC, anon, authenticated`
   before any GRANT.
-- **Pricing untouched** — owner: "free for now, decide later." Sets living inside the song desk
-  makes them Solo-tier-and-up **by construction**; flag that as a pricing consequence rather than
-  letting it land silently.
+- **Pricing: one decision, otherwise untouched.** Owner 2026-07-30: **seeing the guest requests is
+  the paid part** — that re-sites the existing `song_desk` paywall (it used to be "may you open the
+  window"), it does **not** widen what we bill. Everything else stays "free for now, decide later."
+  Sets living inside the song desk makes them Solo-tier-and-up **by construction**; keep flagging
+  that as a pricing consequence rather than letting it land silently.
