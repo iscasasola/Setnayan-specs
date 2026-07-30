@@ -18,7 +18,13 @@
 > It must land BEFORE any requests UI and before the always-on flip.** Build order is now
 > **2 ✅ → 1b → (6+4) → 3 → 5**.
 >
-> **Progress: PR 1 ✅ #3876 · PR 2 ✅ #3885 (both 2026-07-30). Next: PR 1b.**
+> **Progress (all 2026-07-30): PR 1 ✅ #3876 · PR 2 ✅ #3885 · PR 1b ✅ #3891.
+> Next: PR 1c** — three read-audience/exposure gaps found by the post-PR-2 audit, all latent.
+> Order: 1c → (6+4) → 3 → 5.
+>
+> ⚠ **Standing correction for every policy edit in this stream:** the exposure freeze fails on ANY
+> policy-predicate change, narrowing included. Regenerate the baseline in the same PR and read the
+> diff. The old "removals never fail that guard" line was wrong.
 >
 > **This file is the contract.** Execute top to bottom. Every item below was verified against
 > live prod or shipped code on 2026-07-27 — the "already exists" claims are checked, not assumed.
@@ -82,7 +88,87 @@ Harm today is nil (no UI, flag off) — which is exactly why it must land BEFORE
 
 ---
 
-## PR 1b · 🔴 Always-on requests + the paid gate moves to the inbox
+## PR 1c · 🔴 The song-desk READ AUDIENCE is wrong — crew and grantees read zero
+
+> **Found by the 2026-07-30 gap + security audit, after PR 2 shipped. All three items
+> below are LATENT, not live** — verified against prod the same day: the only two booked
+> music rows are host-manual (`marketplace_vendor_id IS NULL`), there are 0 live day-of
+> grants, 0 requests, 0 playlist picks and 0 `vendor_dayof_configs` rows, so **no vendor can
+> reach the desk in prod yet.** Pre-launch is exactly when to close them.
+
+**① A vendor TEAM MEMBER cannot read the host's playlist.** `event_playlist_picks_music_vendor_read`
+(`20260622000000`) hand-rolls its own audience:
+
+```sql
+JOIN public.vendor_profiles vp ON vp.vendor_profile_id = ev.marketplace_vendor_id
+WHERE vp.user_id = auth.uid()          -- ← owner ONLY
+```
+
+while `current_vendor_booked_event_ids()` — the **one** definition of booked, used by
+`event_song_picks` and `event_song_requests` — includes `vendor_team_members`. So a crew
+member gets the flat requests but **zero playlist rows**, and PR 2's desk tells them
+*"they haven't set out the night moment by moment yet."* **That is a false statement, not an
+empty state.** Fix: align the audience with the shared helper. ⚠ Keep the category gate —
+`band_dj` / `host_emcee` / `choir` / `string_quartet` are the **legacy `vendor_category` enum**,
+which is the correct vocabulary for `event_vendors.category` and does match real bookings
+(checked in prod). Do **not** "fix" it to `MUSIC_CANONICALS` keys — those belong to
+`vendor_profiles.services[]` and to the dual-written `category_key` column that **nothing reads
+yet**.
+
+**② A day-of GRANTEE reads zero from BOTH song tables — the whole desk lies to crew.**
+`live/[eventId]/page.tsx` resolves a grantee's vendor profile through the **admin client**
+("the grant is the authorization"), but `SongDesk` reads with `createClient()` under the
+grantee's own RLS. A grantee is neither `vp.user_id = auth.uid()` nor a `vendor_team_members`
+row, and `current_vendor_booked_event_ids()` does not include grantees either — so **the song
+desk has rendered "they haven't picked any songs yet" for every grantee since PR #3803**, and
+PR 2 extended the same falsehood to the playlist. ⚠ Do **NOT** fix this by widening
+`current_vendor_booked_event_ids()` — that helper is shared by schedule blocks, song picks and
+requests, so widening it is a blast-radius decision, not a bug fix. Fix: `SpecializationSurfaceProps`
+is documented **additive-only**, so pass the client the page already authorised (or an explicit
+`isGrantee`) and read with it.
+
+**③ `event_playlist_picks` and `event_song_picks` still ship OPEN.** Neither migration ever
+emitted the `REVOKE ALL` every relation in `public` needs — the baseline shows
+`tpriv public.event_playlist_picks|anon SIUD` and `event_song_picks|anon SIUD`, with every column
+at `anon=SIU`. Not exploitable today (all policies are `TO authenticated`, so anon holds the grant
+but no policy admits a row) — it is the shape that becomes a hole the day someone adds a
+permissive policy, exactly as `vendor_dayof_configs` was before #3813. Fix: `REVOKE ALL … FROM
+PUBLIC, anon, authenticated` then grant back only what the surfaces use.
+
+**Also worth knowing (a swallowed error is what turns ① and ② into lies):** `fetchPlaylistPicks`
+returns `[]` on RLS denial, by design, so a denied read is indistinguishable from an empty
+playlist at the call site. That is why both defects render as confident false statements rather
+than as errors. Any surface that asserts *"they haven't done X"* from an empty read needs the read
+to be provably authorised — or needs to say less.
+
+---
+
+## PR 1b · ✅ DONE 2026-07-30 — Always-on requests + the paid gate moves to the inbox
+
+> **SHIPPED as PR [#3891](https://github.com/iscasasola/setnayan-platform/pull/3891)** (branch
+> `claude/song-desk-pr1b-requests-alwayson`, migration `20271020224218`). Both halves in one PR,
+> because always-on removes the accidental safety that made the ungated read harmless.
+>
+> - **Always-on is not a DEFAULT flip.** `vendor_dayof_configs` is sparse, so most bookings have
+>   no row for a default to apply to; `song_requests_open_for_event()` was inverted to *open unless
+>   something says paused*. No backfill — 0 rows in prod, checked live.
+> - **The paid gate moved.** Both request policies lost the `current_vendor_booked_event_ids()` leg
+>   (host + admin remain); the act reads through `fetchActSongRequests` / `decideActSongRequest`,
+>   entitlement-checked, service_role. **One path, no second door.**
+> - **PR 1's column gate survives and still matters** — the pause is a paid control. Asserted by test.
+> - **The two-act rule, decided:** a pause from ANY act pauses the room (over-pausing beats flooding
+>   a band that asked for silence). A per-act pause needs the inbox split per-act first.
+> - **The gate is one function now** (`requireSongDeskAct`) — three copies of a paywall is three
+>   chances for one to drift open.
+>
+> **⚠ CORRECTION TO CARRY FORWARD — the exposure freeze does NOT pass on narrowings.** This file
+> and the migration's first draft both said removals never fail that guard. Wrong: it fingerprints
+> **policy predicates** and refuses to mechanically classify any predicate change as a narrowing, so
+> dropping a leg from a `USING` clause fails it until a human reads the diff and regenerates the
+> baseline **in the same PR**. Budget for that on every policy edit.
+>
+> Tests: §8, 10 new (33 in file · 627 db · 5428 unit, green). **Load-bearing, verified:** delete the
+> migration and 6 fail. Two existing tests were rewritten because this reverses their premise.
 
 > **Created by the owner's 2026-07-30 answers. Did not exist on 2026-07-27.**
 > **Land this BEFORE any requests UI and before the always-on flip. One PR, both halves —
