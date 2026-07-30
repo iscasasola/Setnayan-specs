@@ -400,14 +400,25 @@ promo surfaces audit. Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29
 | ~~papic-promo#A~~ | ✅ **FALSE ALARM, closed 2026-07-30 no code.** `readSkuPrice` (`initialize-maya/route.ts:355`) returns `PRICING_BOOK` **only** under `DEMO_MODE`; otherwise it reads the admin catalog honoring `is_active` and fails closed. The ₱2,999 literals are a demo-only book, documented as such at line 42. Nothing to fix. | — | — |
 | ~~papic-promo#B~~ | ✅ **DONE 2026-07-30, PR [#3880](https://github.com/iscasasola/setnayan-platform/pull/3880)** — but NOT as specced: `PricingData.groups`/`freeChips` are **rendered nowhere** (2026-07-04 overlay redesign → summary + link to `/pricing`; only `aiPrice`/`aiIntroPhp`/`vendor` are read), so the false rows were built every request and published by `/api/home-pricing` while invisible — *which is why they survived the two-type lock.* Fix = **delete the dead payload**, not port it. Also retired the 4 per-day display helpers (`publicPapicLadder`, `papicCapacityShort`, `papicCapLadderPhrase`, `papicTierSummary`) + `PAPIC_SEATS_PRICE_PHP`. Both CI guards strengthened. 5,380/5,380 unit tests. | — | — |
 | ~~papic-promo#C~~ | ✅ **DONE 2026-07-30, PR [#3884](https://github.com/iscasasola/setnayan-platform/pull/3884)** — Pool card `coming_soon`→live with pax-pass blurb replaced; `papic`'s dead `PAPIC_SEATS` serviceKey **removed** (not repointed — it made the card coordinator-recommendable for an unbuyable SKU); `papicGuestPassAccess()` **kept** (event-type eligibility, not a darkness switch); detail + moderation + editorial-label copy fixed under the owner's naming lock. Prod-verified first. 5,385/5,385 tests. ⚠ **gates 0d/0e still open → spec §5 item 11.** | — | — |
-| papic-promo#D | 🟠 Retire `PAPIC_SEATS` gates (day-of launcher · galleries · face-enroll ×2); kill "seat links" copy | NONE | yes |
-| papic-promo#E | 🟡 Copy sweep: help.ts rewrite + 2 new articles · features "Native app" lie · demo overlay "unlimited" · cosmetics | NONE | yes |
-| papic-promo#F | 🟡 /papic price anchor + JSON-LD · SEO free-tier mention · realstories cross-link · guest pitch names Papic | NONE | after B |
+| ~~papic-promo#D~~ | ✅ **DONE 2026-07-30, PR [#3887](https://github.com/iscasasola/setnayan-platform/pull/3887)** — launcher + galleries repointed at the EXISTING `eventPapicActive()`; "5 seat links" copy gone; crew page's "five seats" derived from the roster. ⚠ face-enroll dead operand removed but **NOT widened** — it collects a selfie while the matcher is dormant, `/privacy` denies biometrics, and 0d/0e are open (§5-11). One line to widen when they close. | — | — |
+| ~~papic-promo#E~~ | ✅ **DONE 2026-07-30, PR [#3890](https://github.com/iscasasola/setnayan-platform/pull/3890)** — help center rewritten + the 2 new articles (shot weights DERIVED via `papicPointCurrencyTerms()`, so the 7→8 clip move can't strand prose again); "Native iOS/Android app" killed in EN **and** Taglish; the demo tile's invented `3 / 8` cap gone. | — | — |
+| ~~papic-promo#F~~ | ✅ **DONE 2026-07-30, PR [#3892](https://github.com/iscasasola/setnayan-platform/pull/3892)** — derived price anchor + Pool/One in the JSON-LD + SEO free-tier + the guest pitch finally says "Papic". 🔴 **Also caught `/papic` promising LIVE auto face-matching in 3 places, one inside the FAQPage JSON-LD.** ⛔ realstories cross-link NOT done (badges sit inside the card's own `<Link>` — invalid nested anchor). | — | — |
 | papic-promo#G | ⏸ Papic on couple home/today/for-you — mockups first | **OWNER_DECISION** | after C |
 
 No migrations, no new flags. A–E parallel-safe (disjoint files). Face-tagging copy law: auto-tag is DORMANT — never promise it live (spec §3-5; /privacy biometrics fix is §5-4).
 
-**➡ NEXT UP: papic-promo#D** (four surfaces gate on the unbuyable `PAPIC_SEATS` and so stay permanently dark for every new couple — day-of launcher · galleries card · face-enroll ×2 — plus the "share these 5 seat links" copy). **D · E · F are all open and parallel-safe**; F needs nothing from B any more. G stays owner-gated on the home-surface shape.
+**✅ THE WAVE IS CLOSED EXCEPT G — 6 of 7 done 2026-07-30** (A needed no code). The one item left is
+**papic-promo#G**, and it is an `OWNER_DECISION`: what shape should Papic take on the couple's home
+surfaces (`dashboard/[eventId]/page.tsx`, `today`, `for-you`), which have zero Papic presence today —
+a needs-decision card? a launcher tile? a one-time "your free camera is ready" nudge? Show 2–3 mockups
+before building; home real estate is contested. See spec §2-G.
+
+**⚠ THE ONE THING THAT GOT LOUDER, NOT QUIETER, AS THE WAVE PROGRESSED: §5 item 11 (gates 0d/0e).**
+PR-F just promoted Papic publicly (derived price anchor + JSON-LD + SEO), which is exactly the
+condition under which an undisclosed guest-media processing activity matters most. Two paragraphs of
+drafting already exist at `Papic_Compliance_Delta_2026-07-20.md` §2.2 + a DPO yes/no.
+
+_(superseded next-up pointer:)_ ~~papic-promo#D~~ (four surfaces gate on the unbuyable `PAPIC_SEATS` and so stay permanently dark for every new couple — day-of launcher · galleries card · face-enroll ×2 — plus the "share these 5 seat links" copy). **D · E · F are all open and parallel-safe**; F needs nothing from B any more. G stays owner-gated on the home-surface shape.
 
 **🔒 Read §0's NAMES row before writing any Papic copy in D/E/F.** Owner naming lock 2026-07-30: **"we do not have papic guests — we only have Papic Pool and Papic One."** Technical ids (`PAPIC_GUEST`, `papic-guest`, `papicGuestPassAccess`) are frozen and stay; no *display* surface may print "Papic Guest", "Guest Pass" or "Guest Camera Pack". PR-C fixed the two it could reach; **PR-F still owns `app/page.tsx:127` + `layout.tsx` ("Papic guest photo-and-video capture")**.
 

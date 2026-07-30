@@ -175,7 +175,37 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
 - Verify: Suite + Studio render live cards with derived prices; `add-ons-detail.ts` copy still
   truthful ("Try it free before you commit" → state the real free tier).
 
-### PR-D 🟠 Retire the PAPIC_SEATS gates — four surfaces permanently dark for every new couple
+### ~~PR-D 🟠 Retire the PAPIC_SEATS gates~~ → ✅ DONE 2026-07-30 · PR #3887 · **3 of 4 surfaces; the 4th deliberately not widened**
+- Prod-verified premise: `PAPIC_SEATS` `is_active=false`, **zero `PAPIC_*` orders ever**, and both prod
+  events carry live `paparazzi_seats` rows + `free_grant:50` + `camera_grant:5`.
+- **Day-of launcher + galleries hub** → both repointed at **`eventPapicActive()`** (RULE 0: the
+  canonical predicate already existed — any live seat row OR an active Papic-inclusive SKU — so no new
+  predicate was invented, and it reads true from real rows rather than a hardcoded `true`, because both
+  free allowances arm at event creation and the free camera IS a seat row).
+  ⚠ The galleries case was worse than a missing upsell: photos **already in** `papic_photos` /
+  `papic_guest_captures` had **no card on the couple's own gallery hub** — real captured media
+  unreachable from the surface built to reach it.
+- **Copy:** "share these 5 seat links" · "Share the 5 links" · "shooter seats" all deleted — they state
+  a count the app cannot honour (One has no seat cap, Pool cameras are unbounded). Also fixed the
+  **crew page the new CTA lands on** ("Your five seats are ready" → derived from the roster,
+  singular-aware; "seat link"/"seats claimed"/"Seat reissued" → cameras), because fixing a doorway
+  whose destination still says "five seats" is half a fix.
+- **⚠ FACE-ENROLL (`[slug]/_lib/loaders.ts` + `hub/page.tsx`): dead operand REMOVED, gate NOT widened.**
+  `eventOwnsPapicSeats` could never be true, so every guest page-load bought an extra `orders` read for
+  a guaranteed `false` on a PUBLIC route — deleted (behaviour-identical, one less round-trip). But the
+  spec's "make it always-on" was **declined**: this prompt collects a **selfie** (RA 10173 §13(b)
+  sensitive PI) while (1) auto face-matching is DORMANT so an enrollment gains the guest nothing today,
+  (2) the live `/privacy` page still DENIES biometrics, and (3) **gates 0d/0e — including DPO sign-off
+  that the RSVP consent text names face-sorted delivery, i.e. precisely this prompt — are open**
+  (§5-11). Document-not-block with a **disclose-then-enable** guardrail argues against collecting more
+  biometrics from more people for a dormant feature. **One line to widen the day 0d/0e close**; both
+  files carry a twin comment saying so.
+- **Left alone deliberately:** `papic/actions.ts:280` + `api/upload/route.ts:297` call
+  `eventOwnsPapicSeats` to **authorize a seat upload**. Widening those would be a security change
+  wearing a copy change's clothes.
+- ~~`id: papic-promo#D`~~
+
+### ~~PR-D (original text)~~
 - `id: papic-promo#D` · `type: code` · `gate: NONE` · `depends_on: []`
 - All gate on a SKU nobody can buy, so they never light up — while every event already holds a
   free pool grant + free One camera:
@@ -192,7 +222,27 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
 - Verify: create-event smoke — new event shows the day-of Papic card, gallery card, and enroll
   prompt without any purchase.
 
-### PR-E 🟡 Copy sweep — stale strings, one PR
+### ~~PR-E 🟡 Copy sweep~~ → ✅ DONE 2026-07-30 · PR #3890
+- **help.ts** — `turn-on-papic` rewritten (it was the wave's worst sentence: no 5-camera free tier, no
+  seat count to pick, no seat) · `what-is-papic` names the two products for the first time and drops
+  "if you add it, every guest can snap photos too" (guest capture is not an add-on purchase now) ·
+  `papic-crew-how-to-shoot` de-seated + answers the crew member's likeliest question (own balance,
+  top-ups). **TWO NEW ARTICLES** as specced: `papic-pool-vs-papic-one` ("the Pool covers the room but
+  everyone draws from one purse; a One covers a person whose balance is safe regardless") and
+  `how-papic-shots-work` (one purse for photos AND clips — which is *why* we never promise an exact
+  "N photos + M clips" — and top-ups STACK, never replace).
+  🔑 **The shot weights are DERIVED** via `papicPointCurrencyTerms()`: the clip weight moved 7 → 8 on
+  2026-07-29, and typed prose would have gone quietly wrong that day on the one surface a confused
+  couple reads.
+- **features `_DayOfApparatus`** — "Native iOS/Android app" killed in **both** the EN and Taglish twins
+  (they drift independently) · **demo overlay** — "unlimited, every guest, all day" was three retired
+  claims in six words · **`studio-card-demo`** — `PAPIC · SEAT 2` + a `3 / 8` counter: no seats, and no
+  per-camera cap of 8 anything has ever existed (a demo tile must not invent a limit the product lacks)
+  · **`photo-moments-widget`** — "Our paparazzo" singular · **`editorial/data.ts`** — six "5-second
+  clip" comments → 10-second, sitting next to the clip-selection code.
+- ~~`id: papic-promo#E`~~
+
+### ~~PR-E (original text)~~
 - `id: papic-promo#E` · `type: code` · `gate: NONE` · `depends_on: []`
 - **`apps/web/lib/help.ts`**: rewrite `turn-on-papic` (line ~471 — "first 5 guest cameras free…
   crew seats" is the most wrong sentence in the help center) + soften `what-is-papic` (papic
@@ -210,7 +260,34 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
   `PAPIC_SEATS: 'Papic'` label-map key.
 - Verify: repo lint guards (retired-strings) + grep for the §0 RETIRED list over touched files.
 
-### PR-F 🟡 Promote where it's missing — public side
+### ~~PR-F 🟡 Promote where it's missing — public side~~ → ✅ DONE 2026-07-30 · PR #3892
+- 🔴 **THE FINDING, not in this spec: `/papic` promised LIVE auto face-matching in three places** — a
+  FAQ answer ("Papic recognises faces… automatically"), step 02 ("automatically, in real time") and the
+  comparison table ("sorted by face"). The first was **inside the `FAQPage` JSON-LD**, i.e. served to
+  answer engines as a quotable fact about a capability that does not exist. All three now lead with the
+  mechanic that IS instant — hold a place-card QR, or a table sign for the whole table, in frame.
+  Enrollment appears once as "ready to be matched", never as a promise a guest WILL be found. **This is
+  §3-5 enforced on the surface most likely to be cited.**
+- **Derived price anchor** — the page quoted no price at all ("prices are admin-managed + provisional"):
+  right about hardcoding, wrong about silence, because the highest-intent Papic page never told a couple
+  Papic starts FREE. `resolvePapicAnchor()` reads `papic_pass_tiers` / `papic_one_tiers` /
+  `papic_event_pool_config` + the active catalog and renders through the `papic-tier-copy` helpers.
+  **Zero literals.** Fails quiet: an unpriceable rung is DROPPED (₱0 on a price list reads as "free"),
+  and if nothing resolves the block is omitted and the page is byte-identical to before. Stays
+  `force-static` + `revalidate 3600`.
+- **JSON-LD featureList** leads with Pool + One, adds the free tier + the QR-tag line, drops "every
+  photo automatically finds the people in it" · **SEO**: `app/page.tsx` called Papic a "(paid add-on)"
+  full stop and its meta description carried the retired name **"Papic guest photo-and-video capture"**
+  (the string PR-C logged for here) — both fixed, plus `layout.tsx`'s Organization description ·
+  **guest pitch**: `tier-comparison-widget` sold capture as "Shutter" and never said "Papic" — the
+  flagship product pitched anonymously to the exact person who uses it.
+- ⛔ **NOT DONE — the `/realstories` service-badge cross-link.** Those badges sit **inside** the story
+  card's own `<Link>` (`gallery.tsx:192-316`); nesting an anchor is invalid HTML and would break the
+  card's click target. That is a gallery-interaction restructure, not a copy change. Badges remain
+  accurate, just inert. Whoever owns that component should decide.
+- ~~`id: papic-promo#F`~~
+
+### ~~PR-F (original text)~~
 - `id: papic-promo#F` · `type: code` · `gate: NONE` · ~~`depends_on: [B]`~~ → **`depends_on: []`
   as of 2026-07-30**: B deleted the homepage pricing plumbing instead of porting it, so there is
   nothing to reuse. Derive the anchor here from `papic-tier-copy.ts`'s rung phrasers + the live
@@ -243,7 +320,12 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
 | A | ✅ **FALSE ALARM** — already fails closed, no code | 2026-07-30 |
 | B | ✅ **DONE by deletion** — the payload rendered nowhere | 2026-07-30 · [#3880](https://github.com/iscasasola/setnayan-platform/pull/3880) |
 | C | ✅ **DONE** — Pool card live; umbrella card's dead SKU removed; owner naming lock applied | 2026-07-30 · [#3884](https://github.com/iscasasola/setnayan-platform/pull/3884) |
-| D · E · F | ⏭ open · all three parallel-safe (F unblocked by B) | — |
+| D | ✅ **DONE** — seat gates retired on 3 of 4 surfaces; face-enroll gate de-deadened but **NOT widened** (biometrics · §5-11) | 2026-07-30 · [#3887](https://github.com/iscasasola/setnayan-platform/pull/3887) |
+| E | ✅ **DONE** — help center rewritten + 2 new articles (shot weights DERIVED); "Native app" and the demo's fake cap killed | 2026-07-30 · [#3890](https://github.com/iscasasola/setnayan-platform/pull/3890) |
+| F | ✅ **DONE** — derived price anchor + JSON-LD on /papic; **and it stopped promising live auto face-matching in 3 places** | 2026-07-30 · [#3892](https://github.com/iscasasola/setnayan-platform/pull/3892) |
+| G | ⏸ the ONLY item left — OWNER_DECISION on the home-surface shape | — |
+
+**The wave is CLOSED except G.** 6 of 7 done in one day (A needed no code); one item, one owner decision.
 | G | ⏸ OWNER_DECISION — home-surface shape, mockups first | — |
 
 ## §3 · Traps (each has burned a session — treat as law)
