@@ -421,6 +421,10 @@
   .jrow .jn{font-size:13px;font-weight:700}
   .jrow .jm{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-300);flex:none}
   .jlab{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-300);margin:12px 0 3px}
+  .jhint{margin:13px 2px 0;padding:10px 12px;border-radius:11px;background:var(--gold-100);border:1px solid rgba(203,167,102,.3);
+    font-size:11px;line-height:1.65;color:var(--ink-700)}
+  .jhint b{color:var(--ink-900);font-family:var(--mono);font-size:10.5px;background:rgba(255,255,255,.7);
+    border-radius:4px;padding:1px 5px}
   .toast{position:absolute;left:50%;bottom:96px;z-index:50;transform:translate(-50%,14px);opacity:0;pointer-events:none;
     background:var(--dark);color:var(--gold-100);border:1px solid var(--dark-brd);border-radius:999px;padding:11px 18px;
     font-size:12.5px;font-weight:700;white-space:nowrap;max-width:88%;overflow:hidden;text-overflow:ellipsis;
@@ -682,6 +686,10 @@
         </div>
         <div class="sw" role="group" aria-label="Today">
           <button class="swb" id="t-today" aria-pressed="false">An event is today<span class="m">shows the handoff</span></button>
+        </div>
+        <div class="sw" role="group" aria-label="Wedding history">
+          <button class="swb" id="w-prior" aria-pressed="false">Married before<span class="m">+ → wedding forks</span></button>
+          <button class="swb" id="w-rate" aria-pressed="false">2 already this year<span class="m">+ → wedding capped</span></button>
         </div>
       </div>
       <div class="ctrls" style="font-size:11.5px;color:var(--ink-500)">
@@ -1044,14 +1052,35 @@
   function surfShop(){    return '<div class="fullsurf">'+shopDeck()+'</div>'; }
 
   function jumpSheet(){
+    /* PAST events are the point of search. With 3 in motion you can just look;
+       with 12 celebrated behind them, search is the only way back. Ordered
+       in-motion → celebrated so recency wins, but nothing is hidden. */
+    /* WHAT BELONGS IN THE INDEX — three classes, and the split matters:
+       PRELOADED (small, bounded): events, people, spaces. Serialized with the
+         page, filters instantly, works with no signal.
+       QUERIED (high-cardinality): guests (200+/event), tasks (62), payments.
+         Never preloaded — that is PII in the page payload and a heavy download
+         on a PH connection. Server lookup at ≥2 characters.
+       DERIVED (not rows at all): type · venue · year · status. They are
+         ATTRIBUTES that resolve to the rows above, so "binyag", "Tagaytay",
+         "2020" and "overdue" must all hit without existing as entries. */
     var rows=[
-      ['Events','i-cal',[['Cale &amp; Ice','Dec 18'],['Maria &amp; Jose','Dec 12'],['Nina&rsquo;s Binyag','Aug 9']]],
-      ['People','i-tree',[['Rosa Casasola','Magulang'],['Cale','Asawa'],['Lola Rosa','derived']]],
-      ['Chapters','i-flash',[['Nina turns 7','214 moments'],['Barkada Palawan','public']]],
-      ['Spaces','i-store',[['SetnaProd','2 waiting'],['Admin HQ','5 to review']]]
+      ['In motion','i-cal',[['Cale &amp; Ice','kasal · Tagaytay · Dec 18'],['Maria &amp; Jose','kasal · Intramuros · Dec 12'],['Nina&rsquo;s Binyag','binyag · Quezon City · Aug 9']]],
+      ['Celebrated','i-flash',[
+        ['Nina turns 7','kaarawan · Jun 2026 · 214 moments'],['Ate Liza Despedida','despedida · Mar 2026'],
+        ['Barkada Palawan','travel · Sep 2025 · public'],['Reunion &rsquo;25','reunion · Apr 2025'],
+        ['Miguel&rsquo;s Binyag','binyag · Feb 2021'],['Nina&rsquo;s Binyag','binyag · Jun 2020']]],
+      ['People','i-tree',[['Rosa Casasola','magulang · family'],['Cale','asawa · family'],
+        ['Lola Rosa','lola · derived · alaga'],['Ate Bea','alaga · 17 · debut soon'],['Ninong Ben','ninong · ritual']]],
+      ['Vendors','i-store',[['Bloom &amp; Fern','florist · booked · Cale &amp; Ice'],
+        ['Kusina Manila','caterer · ₱18,000 due · unpaid'],['Studio Nara','photo &amp; video · saved']]],
+      ['Needs you','i-alert',[['Confirm caterer final count','overdue 4d · Cale &amp; Ice'],
+        ['Pay ₱18,000 balance','due Fri · Kusina Manila'],['Approve seat plan','waiting · Maria &amp; Jose']]],
+      ['Guests','i-users',[['Type 2+ letters to search 214 guests','served from the server, never preloaded']]],
+      ['Spaces','i-store',[['SetnaProd','vendor shop · 2 waiting'],['Admin HQ','console · 5 to review'],['Barkada &rsquo;19','samahan · 12 members']]]
     ];
     var h='<div class="grab"></div><div class="shinput">'+ic('i-search')+
-      '<input type="text" id="jq" placeholder="Jump to an event, a person, a vendor…" autocomplete="off"></div><div id="jres">';
+      '<input type="text" id="jq" placeholder="Search everything — including years back" autocomplete="off"></div><div id="jres">';
     rows.forEach(function(g){
       h+='<div class="jlab">'+g[0]+'</div>';
       g[2].forEach(function(r){
@@ -1059,7 +1088,10 @@
            '<span class="jn">'+r[0]+'</span><span class="jm">'+r[1]+'</span></button>';
       });
     });
-    return h+'</div><p class="lb" style="margin:14px 2px 0">Deterministic — it filters what you already have. No LLM, no chat.</p>';
+    return h+'</div>'+
+      '<p class="jhint">Try <b>binyag</b> · <b>Tagaytay</b> · <b>2020</b> · <b>unpaid</b> · <b>overdue</b> · <b>florist</b> — '+
+      'type, place, year and status all hit without being entries of their own.</p>'+
+      '<p class="lb" style="margin:8px 2px 0">Deterministic — it filters what you already have. No LLM, no chat.</p>';
   }
   /* ── CREATE. This mirrors the SHIPPED /dashboard/create-event exactly:
      a grid of feel-photo tiles → an inline form (never a second page).
@@ -1098,14 +1130,20 @@
      ageBand (child <18 / elder >50), sex (the 18F/21M debut ladder),
      dependent_kind, and which events that honoree already has. ── */
   var SUBJECTS=[
-    {id:'me',   n:'You',            s:'Ice · your own celebrations', av:'I',  kind:'person', band:'adult',
+    /* age: null = we don't hold a birthdate (the common case — users.birth_date
+       is optional). Never fail open on a legal gate and never fail closed on the
+       whole list: ASK for the birthday at the point of need instead. */
+    {id:'me',   n:'You',            s:'Ice · your own celebrations', av:'I',  kind:'person', band:'adult', age:null, sex:null,
      ok:['wedding','anniversary','graduation','birthday','gender_reveal'], why:{}},
-    {id:'nina', n:'Nina',           s:'Alaga · person · 6',          av:'N',  kind:'person', band:'child',
+    {id:'nina', n:'Nina',           s:'Alaga · person · 6',          av:'N',  kind:'person', band:'child', age:6, sex:'F',
      ok:['birthday','graduation'], done:['christening'], later:{debut:'at 18 — in 12 years'},
      why:{wedding:'she’s 6',gender_reveal:'not for a child',anniversary:'no union to mark'}},
-    {id:'lola', n:'Lola Rosa',      s:'Alaga · person · 79',         av:'L',  kind:'person', band:'elder',
-     ok:['birthday','anniversary'],
-     why:{debut:'debut is 18',christening:'already a lifetime ago',graduation:'—',gender_reveal:'—',wedding:'—'}},
+    {id:'bea',  n:'Ate Bea',        s:'Alaga · person · 17',         av:'B',  kind:'person', band:'child', age:17, sex:'F',
+     ok:['debut','birthday','graduation'],
+     why:{wedding:'she’s 17 — 18 is the legal floor',gender_reveal:'not for a minor'}},
+    {id:'lola', n:'Lola Rosa',      s:'Alaga · person · 79',         av:'L',  kind:'person', band:'elder', age:79, sex:'F',
+     ok:['birthday','anniversary','wedding'],
+     why:{debut:'debut is 18',christening:'already a lifetime ago',graduation:'—',gender_reveal:'—'}},
     {id:'pet',  n:'Bantay',         s:'Alaga · pet',                 av:'🐕', kind:'pet',    band:'-',
      ok:[], why:{}},
     {id:'biz',  n:'Aling Nena’s',   s:'Alaga · business',            av:'🏪', kind:'other',  band:'-',
@@ -1127,6 +1165,51 @@
           '<span class="stx2"><span class="sn2">'+s.n+'</span><span class="ss2">'+s.s+'</span></span>'+
           ic('i-arrow','ar')+'</button>';
       }).join('')+'</div>';
+  }
+
+  /* ── AGE GATES ──
+     WEDDING: 18 is the legal floor in PH (Family Code Art. 5 — under 18 is void),
+       so this is a legal gate, not a preference. Account holders are adults by
+       construction (a minor is an alaga and hands over at 18, RA 6809), so the
+       only real case is an alaga honoree in the CHILD band.
+     DEBUT: the shipped ladder is 18 for female, 21 for male. A daughter's debut
+       is created by her guardian while she is still an alaga; a son hands over at
+       18 but debuts at 21 — so HIS debut is created from HIS OWN account. That is
+       not two rules, it is one ladder meeting one hand-over age.
+     UNKNOWN AGE: never guess. Ask for the birthday at the point of need. */
+  var DEBUT_AGE={F:18,M:21}, DEBUT_WINDOW=24; // months ahead you may start planning
+  /* WEDDING RATE CAP — max 2 in a rolling 12 months. Two is deliberate, not
+     arbitrary: civil + church is an ordinary Filipino pattern, often months
+     apart. Rolling 12mo, not calendar year, so a December/January pair isn't
+     a free reset. Demo state: 1 used (Cale & Ice), 1 left. */
+  var WEDDINGS_12MO=1, WEDDING_RATE=2;
+  /* PRIOR WEDDING on Setnayan — OUR OWN record, not declared marital status.
+     ⚠ users.civil_status is sensitive PI (RA 10173 §3(l)) and its column
+     comment forbids exactly this use: "never used to verify/gate/share".
+     So it is a FORK, not a wall — widowhood, annulment (PH has no divorce)
+     and vow renewals are all ordinary, and none of them may be blocked. */
+  var PRIOR_WEDDING=null; // e.g. {name:'Cale & Ice', when:'Dec 2026'}
+  function ageVerdict(sb,t){
+    if(!t) return {ok:true};
+    if(t.k==='wedding'){
+      // 1 · legal floor — the only HARD block, and the only one we don't soften
+      if(sb.age===null) return {ask:'To plan a wedding we need your birthday once — 18 is the legal minimum in the Philippines.'};
+      if(sb.age<18) return {block:'legal', msg:'A wedding can’t be planned for someone under 18. In the Philippines 18 is the legal floor — a marriage below it is void, not just discouraged.'};
+      // 2 · rate — two a year covers civil + church; a third in 12 months is not a pattern we serve
+      if(WEDDINGS_12MO>=WEDDING_RATE) return {block:'rate', msg:'That would be your third wedding in twelve months. Two covers a civil and a church ceremony — beyond that, something else is going on, and we’d rather ask than guess.'};
+      // 3 · a prior wedding is a QUESTION, never a wall
+      if(PRIOR_WEDDING) return {fork:PRIOR_WEDDING};
+      return {ok:true};
+    }
+    if(t.k==='debut'){
+      var need=DEBUT_AGE[sb.sex]||18;
+      if(sb.age===null) return {ask:'A debut is 18 for a daughter and 21 for a son, so we need the birthday to know which.'};
+      var months=(need-sb.age)*12;
+      if(months>DEBUT_WINDOW) return {block:'early', msg:sb.n+' turns '+need+' in '+Math.round(months/12)+' years. A debut opens '+DEBUT_WINDOW+' months before — we’ll surface it then, you won’t have to remember.'};
+      if(sb.age>need+2) return {block:'past', msg:'A debut is the '+need+'th. For a birthday at any age, use Birthday instead.'};
+      return {ok:true};
+    }
+    return {ok:true};
   }
 
   function typesFor(sb){
@@ -1204,6 +1287,53 @@
         '<p class="gn">Pick a different person and the slot is free — the guard is per celebrant, not per account. Tapos na ang luma? Archive it from its dashboard.</p>'+
       '</div>';
   }
+  function ageBlockSheet(t,v,sb){
+    return '<div class="grab"></div>'+
+      '<div class="guard" role="alert">'+
+        '<p class="gh">'+(v.block==='legal'?'Not yet — and not by our choice'
+                        :v.block==='rate'?'That’s three in a year'
+                        :v.block==='early'?'Too early to open this one'
+                        :'A debut is a specific birthday')+'</p>'+
+        '<p class="gb">'+v.msg+'</p>'+
+        '<div class="gdoors">'+
+          (v.block==='legal'
+            ? '<button class="gsec" data-back="who">Pick someone else</button>'
+            : v.block==='rate'
+            ? '<button class="gbtn" data-j="Talk to us">Get in touch</button>'+
+              '<button class="gsec" data-back="types">Back</button>'
+            : '<button class="gbtn" data-type="birthday">Plan a birthday instead</button>'+
+              '<button class="gsec" data-back="types">Back</button>')+
+        '</div>'+
+        (v.block==='rate'?'<p class="gn">Planning weddings for other people? That’s a shop account — unlimited events, each client kept separate.</p>':'')+
+      '</div>';
+  }
+  /* A prior wedding on Setnayan is OUR record, so using it is in-purpose.
+     It offers three honest doors — because remarriage after widowhood or
+     annulment is ordinary, and a vow renewal isn't a wedding at all. */
+  function priorWeddingSheet(t,v){
+    return '<div class="grab"></div>'+
+      '<div class="fhead"><span class="femo" style="background:'+t.g+'">💍</span>'+
+        '<span><span class="fl">You’ve celebrated one before</span>'+
+        '<span class="fd">'+v.fork.name+' · '+v.fork.when+'</span></span>'+
+        '<button class="fchg" data-back="types">Back</button></div>'+
+      '<p class="lb" style="margin:0 0 12px">Which of these is it? We ask because they’re genuinely different events — and because we won’t assume anything about your marriage.</p>'+
+      '<button class="jrow" data-type="anniversary"><span class="jic">💞</span><span class="jn">A vow renewal</span><span class="jm">→ Anniversary</span></button>'+
+      '<button class="jrow" data-wedgo="1"><span class="jic">💍</span><span class="jn">A new marriage</span><span class="jm">carry on</span></button>'+
+      '<button class="jrow" data-j="Cale &amp; Ice"><span class="jic">↩</span><span class="jn">I meant the existing one</span><span class="jm">open it</span></button>'+
+      '<p class="fhint">We never read your civil status to decide this — that’s sensitive information you gave us for tailoring, not for gatekeeping.</p>';
+  }
+  function ageAskSheet(t,v,sb){
+    return '<div class="grab"></div>'+
+      '<div class="fhead"><span class="femo" style="background:'+t.g+'">'+t.e+'</span>'+
+        '<span><span class="fl">'+t.l+'</span><span class="fd">One thing first</span></span>'+
+        '<button class="fchg" data-back="types">Back</button></div>'+
+      '<p class="lb" style="margin:0 0 12px">'+(v.ask||v.msg)+'</p>'+
+      '<label class="flab" for="bd">'+(sb.id==='me'?'Your birthday':sb.n+'’s birthday')+'</label>'+
+      '<div class="fin"><input id="bd" type="date"></div>'+
+      '<p class="fhint">We ask only when a date actually decides something — never at sign-up. It is stored once and not shown to anyone else.</p>'+
+      '<button class="fgo" data-agepass="'+t.k+'">Continue</button>';
+  }
+
   function formSheet(t){
     var life=t.life;
     return '<div class="grab"></div>'+
@@ -1364,11 +1494,42 @@
       var tc=t.closest('.tcard');
       if(tc){
         var ty=ETYPES.filter(function(x){return x.k===tc.dataset.type;})[0];
+        /* ORDER MATTERS: the AGE gate runs first. A legal floor outranks a
+           duplicate — telling someone "you already have one" when the real
+           answer is "not at 17" would be both wrong and misleading. */
+        if(subject && subject.kind==='person'){
+          var v=ageVerdict(subject,ty);
+          if(v.block){ openSheet(f,ageBlockSheet(ty,v,subject)); return; }
+          if(v.ask){   openSheet(f,ageAskSheet(ty,v,subject));   return; }
+          if(v.fork){  openSheet(f,priorWeddingSheet(ty,v));     return; }
+        }
         /* A LIFE type collides per CELEBRANT (so only when it's for you).
            A CAPPED PROFESSIONAL type collides per ACCOUNT — the honoree is
            irrelevant, which is exactly what makes it an organiser signal. */
         var collides = ty.own && (ty.pro || (subject && subject.id==='me'));
         openSheet(f, collides ? guardCard(ty) : formSheet(ty));
+        return;
+      }
+      /* "a new marriage" — the fork's own answer clears it for this attempt */
+      var wg=t.closest('[data-wedgo]');
+      if(wg){
+        var tw=ETYPES.filter(function(x){return x.k==='wedding';})[0];
+        openSheet(f, tw.own && subject && subject.id==='me' ? guardCard(tw) : formSheet(tw));
+        return;
+      }
+      /* birthday supplied → re-run the gate with it, then continue */
+      var ap=t.closest('[data-agepass]');
+      if(ap){
+        var ty3=ETYPES.filter(function(x){return x.k===ap.dataset.agepass;})[0];
+        var bd=ov(f,'sh').querySelector('#bd');
+        if(!bd||!bd.value){ toast(f,'Add the birthday to continue'); return; }
+        var yrs=Math.floor((Date.parse('2026-07-30')-Date.parse(bd.value))/31557600000);
+        subject=Object.assign({},subject,{age:yrs});
+        var v2=ageVerdict(subject,ty3);
+        if(v2.block){ openSheet(f,ageBlockSheet(ty3,v2,subject)); return; }
+        if(v2.fork){  openSheet(f,priorWeddingSheet(ty3,v2));     return; }
+        var col2=ty3.own && (ty3.pro || subject.id==='me');
+        openSheet(f, col2 ? guardCard(ty3) : formSheet(ty3));
         return;
       }
       if(t.closest('[data-back="types"]')){ openSheet(f, subject?typeSheet(subject):createSheet()); return; }
@@ -1422,6 +1583,16 @@
   });
   document.getElementById('t-today').addEventListener('click',function(){
     state.today=!state.today; this.setAttribute('aria-pressed',String(state.today)); all();
+  });
+  document.getElementById('w-prior').addEventListener('click',function(){
+    var on=this.getAttribute('aria-pressed')==='true';
+    PRIOR_WEDDING = on ? null : {name:'Cale &amp; Ice', when:'Dec 2026'};
+    this.setAttribute('aria-pressed',String(!on));
+  });
+  document.getElementById('w-rate').addEventListener('click',function(){
+    var on=this.getAttribute('aria-pressed')==='true';
+    WEDDINGS_12MO = on ? 1 : 2;
+    this.setAttribute('aria-pressed',String(!on));
   });
   all();
 })();
