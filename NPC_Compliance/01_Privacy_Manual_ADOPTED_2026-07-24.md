@@ -123,7 +123,7 @@ The PIC maintains organizational, physical, and technical security measures prop
 |---|---|
 | **Access control (deny-by-default)** | Row-Level Security (RLS) on the Postgres database — every query is gated so no client can read another user's row. Deny-by-default is the baseline; access is granted only by explicit policy. |
 | **Encryption in transit** | TLS 1.3 on all external connections and WebSocket channels; HSTS enabled in production; mixed content blocked. |
-| **Encryption at rest** | AES-256 on the database and object storage; keys managed by the cloud providers' key-management services. Face vectors stored in a per-event encrypted vector index. |
+| **Encryption at rest** | AES-256 on the database and object storage; keys managed by the cloud providers' key-management services. Face vectors are stored as event-scoped rows in the encrypted Postgres database (`guest_face_enrollments.face_vector`), under the same RLS deny-by-default gate as all other personal data — *not* in a separate object-storage index (corrected 2026-07-31; see § 5.3). |
 | **Authentication** | Email + password (bcrypt-hashed, never plaintext), or mobile + OTP, or Google/Apple SSO; TOTP two-factor available for customers/vendors and **mandatory for all admin roles**. |
 | **Session management** | 30-day inactivity expiry; refresh tokens stored httpOnly; single sign-out across all devices. |
 | **Short-lived media access** | Object storage is private; access is via short-lived signed URLs (5 minutes for sensitive media). No public reads. |
@@ -185,8 +185,10 @@ Primary uses: providing contracted services, vendor matching, payment processing
 
 | System | Location | Content |
 |---|---|---|
-| Database (Postgres) | **Supabase — Singapore** | PII + transactional data, RLS-gated, AES-256 at rest |
-| Object storage | **Cloudflare R2 — APAC region** | Photos/videos, per-event encrypted face-vector index, vendor verification documents; private + signed-URL access |
+| Database (Postgres) | **Supabase — Singapore** | PII + transactional data, RLS-gated, AES-256 at rest. **Includes the biometric face vectors** — `guest_face_enrollments.face_vector` (JSONB) and `user_face_profiles` (corrected 2026-07-31, see note) |
+| Object storage | **Cloudflare R2 — APAC region** | Photos/videos, the **source selfie images** for face enrolment, vendor verification documents; private + signed-URL access |
+
+> **📍 Corrected 2026-07-31 — where the biometric data actually sits.** This table previously placed a *"per-event encrypted face-vector index"* on Cloudflare R2. **Verified against shipped code, that is not how it was built.** The face vectors are `JSONB` columns in **Supabase Postgres (Singapore)** — `guest_face_enrollments.face_vector` (migration `20260901000000`) and the account-level descriptor in `user_face_profiles` (migration `20270306508746`). R2 holds the **source selfie image** (`guest_face_enrollments.asset_url` = `r2://…`), not the vector. **No R2 vector index exists.** Both locations are outside the Philippines, so § 10's cross-border conclusion is unchanged — but the NPC registration sheet asks *where sensitive personal information resides*, and biometric data is the most scrutinised category, so the location must be stated accurately. Same correction applied to `02_Records_of_Processing_Activities` DPS-04 and `03_DPO_Designation_and_NPCRS` § sub-processors.
 | Email | **Resend** | Transactional/notification email delivery |
 
 Representative retention windows (full table in the Privacy & Security Policy § 4):
@@ -252,8 +254,8 @@ The PIC's primary infrastructure is hosted **outside the Philippines**: the data
 
 | Sub-processor | Jurisdiction | Data shared | Purpose |
 |---|---|---|---|
-| **Supabase** | Singapore | PII + transactional data | Managed database hosting |
-| **Cloudflare (R2)** | APAC region | Media, face-vector index, vendor documents | Object storage / CDN |
+| **Supabase** | Singapore | PII + transactional data, **including the biometric face vectors** (corrected 2026-07-31 — see § 5.3) | Managed database hosting |
+| **Cloudflare (R2)** | APAC region | Media, the **source selfie images** for face enrolment, vendor documents. *(Not the face vectors — corrected 2026-07-31, see § 5.3.)* | Object storage / CDN |
 | **Resend** | United States | Recipient email + message content | Transactional email delivery |
 | **Persona / Veriff / Onfido** | US | Vendor government-ID image + selfie + liveness | Vendor identity verification. ⚠ STATUS TO CONFIRM — the live /privacy notice states third-party identity-verification providers are not currently active (integration is a stub, no personal data flowing); DPO to confirm live status before filing. |
 | **AMLC API / ComplyAdvantage** | PH / UK | Vendor business + owner name | Sanctions / PEP screening (PH AMLA compliance). ⚠ STATUS TO CONFIRM — the live /privacy notice states third-party identity-verification providers are not currently active (integration is a stub, no personal data flowing); DPO to confirm live status before filing. |

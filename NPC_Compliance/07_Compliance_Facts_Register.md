@@ -26,14 +26,21 @@
 | Total headcount | **2** — Indalecio S. Casasola II (proprietor + DPO) + Claire E. Buanhog (VP, co-founder) |
 | Staff with personal-data access | Both (2 of 2) |
 
-## 3. Scale — ✅ read from live DB (2026-07-05, early/pre-launch — will grow)
-| Data subjects | Count |
-|---|---|
-| Customer accounts (`users`) | 19 |
-| Vendors (`vendor_profiles`) | 50 |
-| Guests (`guests`) | 332 |
-| Events | 61 |
-| **Active biometric face vectors** (sensitive) | **0** |
+## 3. Scale — ⚠ RE-READ FROM LIVE DB 2026-07-31 · the 2026-07-05 figures below are STALE AND HIGH
+
+| Data subjects | 2026-07-05 (stale) | **2026-07-31 (live)** |
+|---|---|---|
+| Customer accounts (`users`) | 19 | **6** |
+| Vendors (`vendor_profiles`) | 50 | **2** |
+| Guests (`guests`) | 332 | **39** |
+| Events | 61 | **3** |
+| **Active biometric face vectors** (sensitive) | **0** | **0** — `guest_face_enrollments` is empty (0 rows), `user_face_profiles` 0 |
+
+> **⚠ The counts went DOWN by roughly 10×, which means test data was purged at some point between 2026-07-05 and 2026-07-31.** Total data subjects today = **45** (6 accounts + 39 guests), **not the "~401" quoted in `00_ADOPTION_COVER_SHEET`** and echoed through docs 01/03. Those prose figures are labelled as a *2026-07-05 pre-launch snapshot*, which keeps them defensible as history — but **do not type them into an NPC form.**
+>
+> ✅ **The filing itself is safe:** `/admin/compliance/data-sheet` computes every scale count **live** at render time (`data-sheet/page.tsx` → `countOf()`), so the exported sheet reports whatever is true on the day it is generated. The risk is only that a human reads the prose instead of the export. **Re-read the counts on the day you file** — do not trust any number written in this pack.
+>
+> The registration-threshold analysis is **unaffected**: 45 subjects and 0 biometric vectors are further below the ≥1,000-SPI trigger than the stale figures were, and the recommendation to register still rests on the **risk-to-rights + not-occasional** grounds, which are volume-independent (doc 03 § B.4).
 
 - **Sensitive-data holders today:** 0 biometric (no active face vectors); vendors submit government IDs during verification (a subset of the 50); guest `dietary_restrictions` may reveal health/religion (special category). Counts are small + pre-launch — but per the RoPA, **NPC registration is still advised** on the *risk-to-rights + not-occasional* grounds, independent of volume.
 

@@ -241,8 +241,8 @@ Indicative data processing systems (to be reconciled with the RoPA):
 
 | Recipient / sub-processor | Jurisdiction | Data shared | Purpose | Lawful basis (per Policy) | DPA on file? |
 |---|---|---|---|---|---|
-| **Supabase** (database) | **Singapore** | PII + transactional records | Application database (encrypted at rest) | Performance of contract | **‹OWNER TO SUPPLY: signed DPA on file?›** |
-| **Cloudflare R2** (object storage) | **APAC / PH region** | Media originals, face-vector index, documents | Media & document storage | Performance of contract | **‹OWNER TO SUPPLY: signed DPA on file?›** |
+| **Supabase** (database) | **Singapore** | PII + transactional records, **including the biometric face vectors** (`guest_face_enrollments.face_vector`, `user_face_profiles`) — corrected 2026-07-31 | Application database (encrypted at rest) | Performance of contract | **‹OWNER TO SUPPLY: signed DPA on file?›** |
+| **Cloudflare R2** (object storage) | **APAC region** ⚠ *(was "APAC / PH region" — R2 offers no Philippines region; corrected 2026-07-31 to match the ADOPTED Privacy Manual § 5.3. **Owner/DPO to confirm the actual bucket location hint** in the Cloudflare dashboard before filing.)* | Media originals, the **source selfie images** for face enrolment, documents — **not the face vectors** (corrected 2026-07-31) | Media & document storage | Performance of contract | **‹OWNER TO SUPPLY: signed DPA on file?›** |
 | **Vercel** (application hosting) | **United States** | Application traffic / runtime | Web application hosting | Performance of contract | **‹OWNER TO SUPPLY: signed DPA on file?›** |
 | **Resend** (email) | **United States** | Recipient email + notification content | Transactional / notification email delivery | Performance of contract / legitimate interest | **‹OWNER TO SUPPLY: signed DPA on file?›** |
 | **PostHog** (product analytics) | **‹OWNER TO SUPPLY: US or EU instance›** | Product-analytics events (no PII per Policy) | Product analytics | Legitimate interest | **‹OWNER TO SUPPLY: signed DPA on file?›** |

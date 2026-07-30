@@ -27,8 +27,8 @@ The accountability record RA 10173 (Data Privacy Act of 2012) and its IRR requir
 | Layer | Provider | Location | Role |
 |---|---|---|---|
 | Web / application hosting | Vercel | `[TO CONFIRM]` (edge) | Processor |
-| Primary database (PII + transactional) | Supabase / Postgres | **Singapore** | Processor · AES-256 at rest · RLS |
-| Media (photos / video / face vectors) | Cloudflare R2 | **APAC / PH region** | Processor · signed-URL access only |
+| Primary database (PII + transactional **+ biometric face vectors**) | Supabase / Postgres | **Singapore** | Processor · AES-256 at rest · RLS. **Face vectors live HERE**, as JSONB columns (`guest_face_enrollments.face_vector`, `user_face_profiles`) — corrected 2026-07-31 |
+| Media (photos / video / **source selfie images**) | Cloudflare R2 | **APAC region** ⚠ *(was "APAC / PH region"; owner/DPO to confirm the bucket location hint)* | Processor · signed-URL access only. **Does NOT hold face vectors** — corrected 2026-07-31 |
 | Transactional email | Resend | `[TO CONFIRM]` (US-based likely) | Processor |
 | Vendor ID verification | Persona / Veriff / Onfido | **US** | Processor (batch-call, no ongoing storage) |
 | AI text/contract analysis | Anthropic (Claude) · OpenAI (V1.5 fallback) | **US** | Processor · zero-retention API mode (Anthropic) |
@@ -96,8 +96,8 @@ Legend — Legal basis per RA 10173 §12 (personal info) / §13 (sensitive perso
 | **Data subjects** | Guests |
 | **Personal data categories** | 128-dimension **face vectors** derived from RSVP photo + optional portal upload + on-the-day check-in kiosk |
 | **SPI?** | **Y — BIOMETRIC** data (RA 10173 §3(l)). Highest-sensitivity category in the platform |
-| **Recipients / sub-processors** | Cloudflare R2 per-event encrypted vector index; Supabase (linkage). No cross-border AI sub-processor for the vectors themselves `[TO CONFIRM]` (matching engine location) |
-| **Cross-border transfer** | APAC/PH (R2 vector index) |
+| **Recipients / sub-processors** | **Supabase (Singapore) — the vectors themselves**, as JSONB in `guest_face_enrollments.face_vector` + `user_face_profiles`; Cloudflare R2 (APAC) holds only the **source selfie image** (`asset_url`). ✅ **`[TO CONFIRM]` RESOLVED 2026-07-31 from shipped code: there is NO third-party matching engine.** Embedding runs **on-device / in-browser** (face-api.js / MediaPipe, `lib/face-embed.ts`) and matching runs against our own Postgres rows — **no face data is sent to any AI sub-processor.** *(Prior text placed a "per-event encrypted vector index" on R2; no such index was ever built.)* |
+| **Cross-border transfer** | **Singapore** (Supabase — the vectors) + **APAC** (R2 — the source selfie images). Corrected 2026-07-31; both outside PH, so the § cross-border conclusion is unchanged, but the *location of the biometric SPI* is now stated accurately. |
 | **Retention** | Per-event lifetime + 5 years; auto-purge with event data. Guest revocation propagates within the next 5-minute refresh cycle (policy §1.4, §4) |
 | **Security measures** | **Per-event scoped — vectors never reused across events**; encrypted at rest; no cross-event face recognition (design lock, Person Graph DPIA #6); confidence-gated auto-tag |
 | **Risk level** | **High** (biometric SPI) |
