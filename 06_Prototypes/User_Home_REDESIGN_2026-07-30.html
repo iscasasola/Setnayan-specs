@@ -397,13 +397,23 @@
   .alsorow{display:flex;align-items:baseline;gap:8px;margin:16px 0 9px}
   .alsolab{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-500);font-weight:700}
   .alsosub{font-size:11.5px;color:var(--ink-300)}
-  .yrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:1px}
-  .yrow::-webkit-scrollbar{display:none}
-  .phone .yrow,.yearsec .yrow.scrollable{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-  @media(max-width:560px){.yrow{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}}
-  .ymo{flex:none;display:flex;align-items:center;gap:8px;padding:11px 13px;min-height:44px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);font-size:12px}
-  .ymo .dot{width:6px;height:6px;border-radius:99px;background:var(--gold-500);flex:none}
-  .ymo b{font-weight:700}.ymo span{color:var(--ink-300);font-family:var(--mono);font-size:10px}
+  /* SAME GRID AS THE EVENT CARDS — one chip per column, so the two rows read as
+     one block. Was flex-wrap: widths came out 341/273/317/309 against a strict
+     222px card grid, which is exactly what looked misaligned. */
+  /* padding:0 — a 1px pad shifted every chip off the card grid above by 1px */
+  .yrow{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;padding:0}
+  @media(max-width:1180px){.yrow{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:720px){.yrow{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.yrow{grid-template-columns:1fr}}
+  .phone .yrow{grid-template-columns:1fr}
+  /* two lines, not one — at 222px a single line truncates the "why" */
+  .ymo{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;min-height:52px;border-radius:12px;
+    background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);
+    -webkit-backdrop-filter:var(--blur);font-size:12px;text-align:left}
+  .ymo .dot{width:6px;height:6px;border-radius:99px;background:var(--gold-500);flex:none;margin-top:5px}
+  .ymo .yt{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .ymo b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ymo span{color:var(--ink-300);font-family:var(--mono);font-size:9.5px;line-height:1.45}
   .exp{display:flex;align-items:center;gap:11px;padding:14px 15px;min-height:44px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);cursor:pointer}
   .exp .ic{width:16px;height:16px;color:var(--ink-500)}
   .et{font-size:13px;font-weight:700}
@@ -699,6 +709,9 @@
         <div class="sw" role="group" aria-label="Today">
           <button class="swb" id="t-today" aria-pressed="false">An event is today<span class="m">shows the handoff</span></button>
         </div>
+        <div class="sw" role="group" aria-label="Doorways">
+          <button class="swb" id="s-plain" aria-pressed="false">Plain couple<span class="m">no shop · no hq · spaces gone</span></button>
+        </div>
         <div class="sw" role="group" aria-label="Wedding history">
           <button class="swb" id="w-prior" aria-pressed="false">Married before<span class="m">+ → wedding forks</span></button>
           <button class="swb" id="w-rate" aria-pressed="false">2 already this year<span class="m">+ → wedding capped</span></button>
@@ -777,7 +790,7 @@
     life:{hero:{n:'Your life so far',d:'12 chapters · 1,284 moments · 34 people',s:'SINCE JUNE 2020',live:false,g:'g4',play:'Play Life-Flash'},keys:null}
   };
   var TL=['t1','t2','t3','t4','t5','t6','t7','t8'];
-  var state={mode:'plan',today:false,tab:'home'};
+  var state={mode:'plan',today:false,tab:'home',hasSpaces:true};
   var view={}; // per-frame {scope, idx}
 
   function ic(id,cls){return '<svg class="ic'+(cls?' '+cls:'')+'" aria-hidden="true"><use href="#'+id+'"/></svg>';}
@@ -802,7 +815,11 @@
       '<button class="pb">'+ic('i-flash')+'<span>Alaala</span></button>'+
       '<button class="pb create" aria-label="Create an event"><span class="knob">'+ic('i-plus')+'</span></button>'+
       '<button class="pb">'+ic('i-tree')+'<span>People</span>'+(n?'':'<span class="bdg">1</span>')+'</button>'+
-      '<button class="pb">'+ic('i-store')+'<span>Shop</span>'+(n?'':'<span class="bdg">2</span>')+'</button>'+
+      /* the 5th target is the capability-gated one: a plain couple gets four,
+         and four is a better pill than five with a dead slot */
+      (state.hasSpaces
+        ? '<button class="pb">'+ic('i-store')+'<span>Spaces</span>'+(n?'':'<span class="bdg">2</span>')+'</button>'
+        : '<button class="pb">'+ic('i-flash')+'<span>You</span></button>')+
     '</div></nav>';
   }
 
@@ -831,10 +848,13 @@
     }
     t.push('<button class="bt dark"><span class="bl">'+ic('i-flash')+'Alaala</span>'+
       '<span class="bn">1,284<s>moments</s></span><span class="bs">12 chapters · 2 public</span></button>');
-    t.push('<button class="bt needs"><span class="bl">'+ic('i-store')+'Your shop</span>'+
-      '<span class="bn">2<s>need a reply</s></span><span class="bs">SetnaProd · oldest waiting 2 days</span></button>');
-    t.push('<button class="bt"><span class="bl">'+ic('i-shield')+'Admin HQ</span>'+
-      '<span class="bn">5<s>to review</s></span><span class="bs">3 payments · 2 verifications</span></button>');
+    // capability-gated exactly like the Spaces tile — no doors to nothing
+    if(state.hasSpaces){
+      t.push('<button class="bt needs"><span class="bl">'+ic('i-store')+'Your shop</span>'+
+        '<span class="bn">2<s>need a reply</s></span><span class="bs">SetnaProd · oldest waiting 2 days</span></button>');
+      t.push('<button class="bt"><span class="bl">'+ic('i-shield')+'Admin HQ</span>'+
+        '<span class="bn">5<s>to review</s></span><span class="bs">3 payments · 2 verifications</span></button>');
+    }
     // Phone orders URGENCY-FIRST so an off-canvas tile that needs you is never
     // hidden behind one that doesn't. Desktop keeps canonical order (all visible).
     var phone=t.filter(function(x){return x.indexOf('bt needs')>-1;}).concat(t.filter(function(x){return x.indexOf('bt needs')===-1;}));
@@ -895,10 +915,10 @@
     h+='<div class="alsorow"><span class="alsolab">Also coming</span>'+
       '<span class="alsosub">dates nobody had to add</span></div>'+
       '<div class="yrow">'+
-        '<span class="ymo"><span class="dot"></span><b>Your 1st anniversary</b><span>Mar 2027 · from your wedding</span></span>'+
-        '<span class="ymo"><span class="dot"></span><b>Nina turns 7</b><span>Jun 9 · from her birthday</span></span>'+
-        '<span class="ymo"><span class="dot"></span><b>Bantay, 3 years</b><span>Mar 3 · since you adopted him</span></span>'+
-        '<span class="ymo"><span class="dot"></span><b>Aling Nena&rsquo;s, 12 years</b><span>Nov · since it opened</span></span>'+
+        '<span class="ymo"><span class="dot"></span><span class="yt"><b>Your 1st anniversary</b><span>Mar 2027 · from your wedding</span></span></span>'+
+        '<span class="ymo"><span class="dot"></span><span class="yt"><b>Nina turns 7</b><span>Jun 9 · from her birthday</span></span></span>'+
+        '<span class="ymo"><span class="dot"></span><span class="yt"><b>Bantay, 3 years</b><span>Mar 3 · since you adopted him</span></span></span>'+
+        '<span class="ymo"><span class="dot"></span><span class="yt"><b>Aling Nena&rsquo;s, 12 years</b><span>Nov · since it opened</span></span></span>'+
       '</div>';
     return h+'</div>';
   }
@@ -961,7 +981,14 @@
 
   function shopDeck(){
     if(state.mode==='new')return '';
-    return '<div class="tile glass worktile"><div class="te">'+ic('i-store')+'Where you work<span class="shp" style="margin-left:auto">shipped</span><span class="prp">detail proposed</span></div>'+
+    /* SPACES — the council's own name, and now literally true: every row is a
+       surface with its own dashboard. Favourite vendors LEFT (a shortlist is
+       not a space, and it is already event-scoped — it lives on the event).
+       CAPABILITY-GATED: a plain couple has no shop, no HQ, no collabs, so this
+       tile does not render at all. It must never appear as an empty shell. */
+    if(!state.hasSpaces) return '';
+    return '<div class="tile glass worktile"><div class="te">'+ic('i-store')+'Spaces<span class="shp" style="margin-left:auto">shipped</span><span class="prp">regrouped</span></div>'+
+      '<p class="lb" style="margin:7px 0 0">Surfaces with their own dashboard.</p>'+
       '<div class="deck" style="margin-top:11px">'+
         '<button class="dcard"><div class="dhead"><span class="dlogo">SP</span>'+
           '<span><span class="dname">SetnaProd</span><span class="drole">Vendor shop · Pro</span></span>'+
@@ -993,14 +1020,6 @@
           '<span class="dl"><span class="dot"></span>1,240 followers · 18 inquiries driven</span>'+
           '<span class="dl"><span class="dot"></span>Open to offers<span class="qz">on</span></span>'+
         '</div></button>'+
-      /* SAVED VENDORS — the fourth relationship you can have with a vendor.
-         You RUN one, you ADMIN the platform, you PARTNER with one, and you
-         SHORTLIST others. Same domain, four stances — so one tile, not a
-         separate "library". This is also what empties Library completely. */
-      '<div class="sp-lab">Saved for later</div>'+
-      '<button class="sp-row"><span class="sic">'+ic('i-heart')+'</span><span class="stx">'+
-        '<span class="sn">6 vendors shortlisted</span>'+
-        '<span class="srr">3 for Cale &amp; Ice · 2 replied · 1 price dropped</span></span>'+ic('i-arrow','ar')+'</button>'+
     '</div>';
   }
 
@@ -1623,6 +1642,10 @@
   });
   document.getElementById('t-today').addEventListener('click',function(){
     state.today=!state.today; this.setAttribute('aria-pressed',String(state.today)); all();
+  });
+  document.getElementById('s-plain').addEventListener('click',function(){
+    var on=this.getAttribute('aria-pressed')==='true';
+    state.hasSpaces=on; this.setAttribute('aria-pressed',String(!on)); all();
   });
   document.getElementById('w-prior').addEventListener('click',function(){
     var on=this.getAttribute('aria-pressed')==='true';
