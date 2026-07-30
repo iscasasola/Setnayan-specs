@@ -302,7 +302,36 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
   celebrate" card pitches capture without ever saying "Papic"; name the product, link the camera.
 - Verify: JSON-LD validates; no hardcoded pesos.
 
-### PR-G ⏸ OWNER_DECISION — Papic presence on the couple's home surfaces
+### PR-G ⏸ OWNER_DECISION — **MOCKUPS DELIVERED 2026-07-30, awaiting the owner's pick**
+- **Prototype: [`06_Prototypes/Papic_Home_Presence_2026-07-30.html`](06_Prototypes/Papic_Home_Presence_2026-07-30.html)** ·
+  artifact `50889ae8`. Three placements drawn IN their real insertion slots using the shipped
+  `--sn-*` tokens, the real `.sn-tile` / `.sn-eye` / `.sn-row` styles and the real `SetDateNudge`
+  structure — verified in-browser (no overlap · no collapsed elements · no horizontal scroll).
+- ⚠ **SCOPE CORRECTION — this is ONE surface, not three.** `today/page.tsx` was RETIRED 2026-06-03
+  (a 36-line redirect to event-home) and `for-you/page.tsx` RETIRED 2026-06-04 (redirects to
+  `/vendors`). Both are bookmark-keeping stubs. Only `dashboard/[eventId]/page.tsx` exists — the
+  same class of stale premise as PR-A and PR-B in this wave.
+- **A · a bento mini-tile** (`event-dashboard.tsx` → the `miniTiles` array) — permanent status,
+  beside Guests / Budget / Team. Passes the bento's own "real-data-or-nothing" law because every
+  event holds a live pool grant. Cost: one grid cell, forever.
+- **B · a `slotAfterBento` nudge** (`page.tsx` → the existing slot that already carries
+  `SetDateNudge` + `NikahEssentialsCard`) — "Your free camera is ready", dismissible, remembered
+  per event in `localStorage`. Cost: one band, once.
+- **C · a decisions-board row** — ⛔ recommended AGAINST. Papic is a **capability the couple already
+  owns**, not a decision awaiting them; the row's own subtitle has to admit "nothing is waiting on
+  you" while sitting in a list titled *Needs your call*. A board that cries wolf about a free camera
+  teaches couples to skim the board the photographer deadline lives on. It becomes right the day
+  Papic gains a real deadline (pool expiring · shots projected to run out mid-reception).
+- **RECOMMENDATION: ship A + B, skip C.** They answer different questions — the nudge says *you
+  already have this* and leaves; the tile says *where it stands* and stays. Smallest footprint that
+  closes the gap.
+- ⏭ **Three questions for the owner** (in the prototype's closing section): ① A, B, both or C?
+  ② what should the tile count before anyone shoots — shots-ready or cameras-out? ③ does the Papic
+  nudge queue behind the set-date nudge on a date-less event?
+- Every figure in the built version derives (`papic_event_pool_config` readers +
+  `papicPointCurrencyTerms()`); no shot or peso literal.
+
+### ~~PR-G (original text)~~
 - `id: papic-promo#G` · `type: decision → code` · `gate: OWNER_DECISION` · `depends_on: [C]`
 - `dashboard/[eventId]/page.tsx` (overview), `today/page.tsx`, `for-you/page.tsx` have **zero**
   Papic presence — a couple whose event already holds a free camera is never told from home.
