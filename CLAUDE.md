@@ -52,12 +52,31 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > - **8 PRs in dependency order** (7 + the new 1b), **every owner gate now ANSWERED**,
 > - the standing traps (the exposure-baseline freeze, the default-ACL REVOKE, pre-launch-empty prod).
 >
-> ✅ **PR 1 is CLOSED** (#3876, 2026-07-30) and **all six owner questions were answered the same
-> day** — slots · vibe names · pre-fill direction · accept-vs-set · **requests always-on** ·
-> **the paywall moves to the inbox**. **Start at PR 2**, then **PR 1b** (always-on + gate the inbox
-> read — 🔴 must precede any requests UI). Order: 2 → 1b → (6+4) → 3 → 5.
+> 🏁 **THE BUILD ORDER IS COMPLETE — all 8 PRs shipped 2026-07-30**, every owner gate answered the
+> same day (slots · vibe names · pre-fill direction · accept-vs-set · **requests always-on** ·
+> **the paywall moved to the inbox**). PR 7 was deprioritised. **Do not rebuild any of it.**
+>
+> 🪤 **BUT THE DESK WAS UNREACHABLE THE WHOLE TIME** — and this is the lesson to carry, not the
+> footnote. The day-of surfaces narrow a vendor's tiles by intersecting **two vocabularies that
+> never match**: `vendor_profiles.services` speaks TILES (`live_band`·`coordinator`·`host_mc`),
+> `get_vendor_event_brief().booked_categories` speaks CATEGORIES (`band_dj`·`planner_coordinator`·
+> `host_emcee`). Result: **all three specialization desks denied for every booked vendor**, and the
+> requests inbox printed *"no requests yet"* over **3 real pending rows**. Fixed in **#3942** via the
+> bridge that already existed (`lib/vendor-category-taxonomy.ts`), plus the second half of the bug —
+> `eventTiles ? new Set(…) : null` treats an **empty array as a real narrowing**, because `[]` is
+> truthy.
+>
+> 🏁 **8 PRs, every DB object verified, and none of it caught this.** Verifying the parts cannot find
+> a defect that lives in the JOIN between two correct parts. Before calling ANY gated surface done,
+> run its real reads **as the end user's identity** (`set local role authenticated` + jwt claims) and
+> diff against the same reads as service-role — **where they differ, the UI is lying.**
+>
+> ⏭ What remains is NOT code: (a) keep or reverse the widened playlist read, (b) should the HOST see
+> a band's finished setlist, (c) **nobody has opened it on a phone.** Fixture: vendor `testnayan2`,
+> event `0ccc7aa3-3a81-43ee-b170-afb194e0b259`, `booked_date = 2026-07-30` — **reseed the date to
+> view it after that.**
 > Reasoning behind every line: the song-desk rows in `DECISION_LOG.md` — find them with `grep -in "song desk\|song request\|playlist-slot\|song-pick system\|set composition" DECISION_LOG.md` (15 rows, 2026-07-27)
-> (`grep -n "2026-07-27" DECISION_LOG.md`).
+> (`grep -n "2026-07-27" DECISION_LOG.md`), plus the two 2026-07-30 rows at the bottom.
 
 **If you are starting a session on ANY topic, do these three things first:**
 1. Read the ACTIVE block above (even if your task seems unrelated — it may already be covered).
