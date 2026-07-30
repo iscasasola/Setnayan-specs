@@ -7,9 +7,10 @@
 > countdowns verified live (141 / 135 days out) · the `TEST Floor Co (seed)` row deleted and
 > `vendor_profiles_verified_requires_stamp` **VALIDATED** (`convalidated = true`).
 >
-> **The ONE thing still owner-shaped:** §6 decision 3's **DPO sign-off** on the demand lens — a
-> signature, not a decision, and not blocking (the lens still cannot render: it needs ≥3 other
-> couples inquiring on the same exact date and prod has 0 `chat_threads`).
+> **The ONE thing still owner-shaped:** approve (or block) **`same_date_demand`** at
+> `/admin/data-privacy` — it ships seeded **inactive**. Not blocking: the lens cannot render anyway
+> (needs ≥3 other couples inquiring on the same exact date; prod has 0 `chat_threads`). It is one
+> click with an audit trail, not a decision to research.
 >
 > If you are here because the owner said *"what's next"*, the honest answer for this stream is
 > **nothing — go to the next row of [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md)**. Keep §1's five
@@ -368,7 +369,7 @@ render must stay byte-identical.
 > |---|---|---|
 > | 1 | **Seed row DELETED, constraint VALIDATED** | The row owned **nothing** — 0 children across all ~90 FK referencers incl. every RESTRICT/NO-ACTION parent — and had **no `vendor_verifications` row at all**, proving it was stamped `verified` by a seeding action, never through the flow. So backfilling `last_verified_at` would have **fabricated a verification that never happened**. Deleted (baseline captured), then `VALIDATE CONSTRAINT` → **`convalidated = true`**. The DB now structurally refuses a verified vendor with no stamp. |
 > | 2 | **New re-verification behaviour CONFIRMED** | A renewal from an already-verified vendor is a no-op. The old behaviour dropped them to `pending_review`, which **stripped the badge and delisted the shop for the whole review window** — it punished the vendor for complying. No code change; the shipped behaviour is the right one. |
-> | 3 | **Demand-lens privacy legs: documented, not blocking** | Under the owner's standing *document-not-block* default. Still **cannot render** (needs ≥3 other couples inquiring on the same exact date; prod has 0 `chat_threads`), so the exposure stays theoretical. ⏭ The **DPO sign-off** is the one thing that genuinely needs the owner — it is a signature, not a decision. Real deadline unchanged: before couples start messaging vendors. |
+> | 3 | **Demand lens is now a CONTROL ON THE BOARD** — PR #3894 | ⚠ First closed by *documenting* the gate, which was wrong: the owner went to `/admin/data-privacy` for the sign-off and found nothing (*"do not see the new dpo?"*) — all 19 controls were approved and this signal was not one of them. **A privacy gate that exists only in prose is not a gate.** Now `same_date_demand`, seeded **inactive** (fail-closed), with its coverage declared as honest drift (`declaredIn: []` — `/privacy` + ROPA don't cover cross-couple aggregation yet). ⏭ The sign-off is now an **in-app action with an `approved_by/at` audit trail**. Still not blocking: the lens cannot render (needs ≥3 same-date inquirers; prod has 0 `chat_threads`). ⚠⚠ **The gate wraps the WHOLE block, never `honestDemand`** — that variable's `false` branch is the raw save-count, so folding the control into it would have made withholding approval switch the **dark pattern ON**. Pinned by `same-date-demand-dpo-gate.test.ts`. |
 > | 4 | **Both unbacked claims FIXED** — PR #3889 | See §5.4. One fabricated a number; the other **sold vendors a dark pattern we deliberately don't build**. |
 > | 5 | **Phone "Budget & payments" item: NOT restored** | It is not stranded — §4.2 verified three live doorways (sidebar "Also in this event → Budget", Overview → checklist → "Review your budget", and the section's own disclosure), and the takeover's Payments section is in the same scroll. Adding a fourth doorway to a nav we just simplified would undo PR-3's whole point. Zero code. |
 
