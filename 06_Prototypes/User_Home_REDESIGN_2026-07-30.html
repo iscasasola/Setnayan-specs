@@ -231,6 +231,8 @@
   .spill{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:rgba(243,236,223,.78);border-radius:999px;padding:8px 12px;min-height:36px;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .22s var(--ease)}
   .spill:hover{border-color:var(--gold-300);color:var(--gold-300)}
   .spill[aria-pressed="true"]{background:var(--gold-100);color:var(--ink-900);border-color:transparent}
+  .spill.zoomout{margin-left:auto;border-style:dashed;display:inline-flex;align-items:center;gap:5px}
+  .spill.zoomout .ic{width:11px;height:11px}
   .spill .c{font-family:var(--mono);font-size:9px;opacity:.6;margin-left:4px}
   .sghost{display:inline-flex;align-items:center;font-size:10px;color:rgba(243,236,223,.42);border:1px dashed rgba(255,255,255,.16);border-radius:999px;padding:7px 11px;font-style:italic}
   .strip{position:relative;z-index:2;display:flex;align-items:center;gap:2px;margin-top:3px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;scroll-padding-left:4px}
@@ -929,11 +931,17 @@
     var zoomed=!!sc, c=zoomed?sc.hero:(list[v.idx]||CH[0]);
     var h='<div class="alaala"><span class="capiz"></span>'+
       '<div class="te">'+ic('i-flash')+'Alaala · Life-Flash<span class="shp" style="margin-left:auto">tile shipped</span><span class="prp">strip relocated</span></div>'+
-      '<div class="scoperow"><span class="zl">Zoom</span>'+
-        '<button class="spill" data-sc="chapters" aria-pressed="'+(v.scope==='chapters')+'">Chapters<span class="c">12</span></button>'+
-        '<button class="spill" data-sc="y2026" aria-pressed="'+(v.scope==='y2026')+'">2026<span class="c">214</span></button>'+
-        '<span class="sghost">2024 — 4 moments</span>'+
-        '<button class="spill" data-sc="life" aria-pressed="'+(v.scope==='life')+'">Lifetime<span class="c">1,284</span></button>'+
+      /* OWNER 2026-07-30: "keep 5 photo filters". The five shipped LENSES stay —
+         they answer "whose photos?", which is the question this tile is for.
+         The zoom ladder answers a different question ("how far back?") and
+         already ships on /dashboard/life-flash, so it becomes a LINK rather
+         than taking the lenses' slot. Nothing is lost and nothing is rebuilt. */
+      '<div class="scoperow"><span class="zl">Lenses</span>'+
+        ['recent','owned','attended','people','with_me'].map(function(k,i){
+          var lbl=['Recent','Owned','Attended','People','With me'][i];
+          return '<button class="spill" data-lens="'+k+'" aria-pressed="'+(v.lens===k)+'">'+lbl+'</button>';
+        }).join('')+
+        '<button class="spill zoomout" data-sc="life">Zoom '+ic('i-arrow')+'</button>'+
       '</div>';
     if(v.scope!=='life'){
       h+='<div class="strip">';
@@ -1173,13 +1181,18 @@
     {k:'birthday',    l:'Birthday',      e:'🎂', d:'Another year, celebrated.',       g:'linear-gradient(145deg,#E5CFA6,#B08A4E 55%,#3C3325)', life:true, cap:'honoree'},
     {k:'celebration', l:'Celebration',   e:'🥂', d:'Moments worth gathering for.',    g:'linear-gradient(145deg,#D9CDBA,#93826A 55%,#38322A)', cap:null},
     {k:'travel',      l:'Travel',        e:'✈️', d:'The trip you’ll always remember.', g:'linear-gradient(145deg,#A9BECB,#5E7E95 52%,#2C3640)', cap:null},
-    {k:'corporate',   l:'Corporate',     e:'🏢', d:'Where your brand shines.',        g:'linear-gradient(145deg,#BFC4C9,#6E767E 55%,#2E3235)', cap:'account', pro:true, own:true},
-    {k:'tournament',  l:'Tournament',    e:'🏆', d:'Game day, elevated.',             g:'linear-gradient(145deg,#DBC79A,#9A7F45 55%,#372F1F)', cap:'account', pro:true},
+    /* OWNER 2026-07-30: "wedding only" — corporate, tournament and gala night
+       are NOT capped. They stay lifestyle/unlimited exactly as they ship today,
+       so no DECISION_LOG reversal is needed and no legitimate company running
+       three events in a quarter gets blocked. The organiser off-ramp is kept
+       as an OFFER, not a wall — see guardCard(). */
+    {k:'corporate',   l:'Corporate',     e:'🏢', d:'Where your brand shines.',        g:'linear-gradient(145deg,#BFC4C9,#6E767E 55%,#2E3235)', cap:null},
+    {k:'tournament',  l:'Tournament',    e:'🏆', d:'Game day, elevated.',             g:'linear-gradient(145deg,#DBC79A,#9A7F45 55%,#372F1F)', cap:null},
     {k:'christening', l:'Christening',   e:'🕯️', d:'A blessing to remember.',         g:'linear-gradient(145deg,#B4C3A4,#6E8B60 52%,#333A2C)', life:true, cap:'honoree'},
     {k:'anniversary', l:'Anniversary',   e:'💞', d:'Another year, together.',         g:'linear-gradient(145deg,#E3C6C0,#A87A70 55%,#382925)', cap:null},
     {k:'graduation',  l:'Graduation',    e:'🎓', d:'The years, finished.',            g:'linear-gradient(145deg,#C9CBB4,#7E8463 55%,#2F3227)', life:true, cap:'honoree'},
     {k:'reunion',     l:'Reunion',       e:'🤝', d:'Together again.',                 g:'linear-gradient(145deg,#CDBFA6,#877A5F 55%,#332E24)', cap:null},
-    {k:'gala_night',  l:'Gala Night',    e:'🌟', d:'A night with a dress code.',      g:'linear-gradient(145deg,#C3B7CE,#6E6386 55%,#2B2734)', cap:'account', pro:true, nop:true},
+    {k:'gala_night',  l:'Gala Night',    e:'🌟', d:'A night with a dress code.',      g:'linear-gradient(145deg,#C3B7CE,#6E6386 55%,#2B2734)', cap:null, nop:true},
     {k:'simple_event',l:'Simple Event',  e:'📅', d:'Just get it on the calendar.',    g:'linear-gradient(145deg,#CFCBC2,#807C73 55%,#2F2E2A)', cap:null},
     {k:'date',        l:'Date',          e:'💕', d:'Dinner, lunch, or a movie — just the two of you.', g:'linear-gradient(145deg,#E8C4C4,#B0707A 55%,#3A262A)', cap:null, nop:true, isnew:true},
     {k:'hangout',     l:'Hangout',       e:'🍿', d:'Barkada time — a meal, coffee, a movie night.',    g:'linear-gradient(145deg,#D9C9A8,#96814F 55%,#342E22)', cap:null, nop:true, isnew:true}
@@ -1426,7 +1439,7 @@
   }
 
   function build(f){
-    if(!view[f])view[f]={scope:'chapters',idx:0};
+    if(!view[f])view[f]={scope:'chapters',idx:0,lens:'recent'};
     if(state.mode==='quiet'&&view[f].scope==='chapters')view[f].scope='life';
     if(state.mode!=='quiet'&&view[f].scope==='life')view[f].scope='chapters';
     var el=document.getElementById(f);
@@ -1484,7 +1497,11 @@
 
   function wire(f,el){
     el.querySelectorAll('.spill').forEach(function(b){
-      b.addEventListener('click',function(){view[f].scope=b.dataset.sc;view[f].idx=0;build(f);});
+      b.addEventListener('click',function(){
+        if(b.dataset.lens){ view[f].lens=b.dataset.lens; build(f); toast(f,'Lens · '+b.textContent.trim()); return; }
+        // the zoom-out pill is a DOOR to /dashboard/life-flash, not a mode here
+        toast(f,'\u2192 Life-Flash \u00b7 chapters \u00b7 year \u00b7 lifetime');
+      });
     });
     el.querySelectorAll('.cpill[data-i]').forEach(function(b){
       b.addEventListener('click',function(){view[f].idx=+b.dataset.i;build(f);});

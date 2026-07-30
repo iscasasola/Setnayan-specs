@@ -8,6 +8,24 @@
 
 > Companion to `Phase2_Counsel_Review_Brief_2026-07-05.md` (adults connections/life-stories). Full design: `03_Strategy/Stewarded_Branch_Accounts_Phase3_Design_2026-07-05.md`. Read time: ~10 minutes.
 
+> ## 🔴 CORRECTION — 2026-07-30 · THE COMMERCIAL MODEL CHANGED. RE-ISSUE BEFORE COUNSEL ANSWERS.
+>
+> **This brief as originally written told you that preservation would be free.** That is no longer
+> our model, and we are correcting it rather than letting you answer against a design we no longer
+> intend to build. Two changes:
+>
+> 1. **Preservation is now a PAID, RECURRING service (reversing § 3.4 and § 5).** Each account that
+>    holds a deceased relative's memories pays to keep them. If payment lapses, that account's
+>    access to those memories ends. We are **no longer** promising free-forever preservation.
+> 2. **One deceased person's memories may be held by SEVERAL descendants at once** — a canonical
+>    memorial page under the deceased's own name, **plus** a separately-billed personal copy in each
+>    direct-line child's account.
+>
+> Both changes create legal questions the original brief did not ask. **They are added as § 4
+> questions 8 and 9 and are, in our view, now the most important questions in this brief.**
+> Please answer against this corrected version. Sections § 3.4 and § 5 are struck through below;
+> the rest of the brief is unchanged and still accurate.
+
 ---
 
 ## 1. What Phase 3 does (one paragraph)
@@ -29,7 +47,10 @@ No biometric data is used (same as Phase 2 — association is by manual tag / QR
 1. **Ownership transfers at age of majority (18).** The guardian is the lawful decision-maker for the child's data until 18; at 18 ownership + consent authority transfer to the person. We are **not** promising any sub-18 ownership transfer. *(We considered an optional teen "assisted access" — view-only use under guardian oversight, guardian keeps ownership/consent — see Q2.)*
 2. **Guardian is steward until majority.** Memories accrue on the child's node throughout 0–18, managed by the guardian.
 3. **Legacy passes down the DIRECT LINE only** — child → grandchild → … — never sideways (no siblings/cousins), using confirmed parent/child relationships.
-4. **Preservation is free; we only charge for enhancement.** We will **not** charge a fee to prevent loss of a deceased person's memories. (A premium "vault" of *extra* features may be paid — not relevant to this review.)
+4. 🔴 **CORRECTED 2026-07-30 — PRESERVATION IS PAID.** ~~*Preservation is free; we only charge for enhancement. We will not charge a fee to prevent loss of a deceased person's memories. (A premium "vault" of extra features may be paid — not relevant to this review.)*~~
+   **The current model:** keeping a deceased relative's memories is a **recurring paid service**, charged to **each** account that holds them. Where several descendants each hold a copy, each pays separately. **If a payer lapses, that account's copy of the memories is discontinued.** We have not yet fixed the price, the billing period, the grace period, or whether a lapse deletes the data outright or degrades it to a lower-quality retained copy — **your answer to § 4 Q8 will shape that choice**, which is why we are asking before we build.
+
+5. 🆕 **ADDED 2026-07-30 — one deceased person, several holders.** On death the person's page becomes a **memorial that remains under their own name and identity** (it is not renamed or absorbed into a survivor's account), with a direct-line relative as its *keeper*. **In addition**, each direct-line child may hold a personally-curated copy of the ancestral memories inside their own account. Copies pass **down the direct line only** — never to siblings of the deceased, cousins, or in-laws.
 
 ## 4. The specific questions we need answered
 
@@ -46,11 +67,16 @@ No biometric data is used (same as Phase 2 — association is by manual tag / QR
 **Cross-cutting**
 7. **Verification + reversal** — What identity-verification bar should gate *any* ownership transfer, and what is the compliant path to reverse a wrongful transfer?
 
+**🆕 Added 2026-07-30 — the paid-preservation model (please treat these as the priority questions)**
+
+8. **Deletion for non-payment.** Where a living survivor pays a recurring fee to preserve a **deceased** relative's memories, **may we lawfully delete that data when the payment lapses?** Specifically: (a) does the deceased, their estate, or a direct-line heir hold any interest in that data that *survives* the lapse and constrains our ability to delete it; (b) what notice and grace period should precede deletion; (c) is there any exposure in *charging* for the continued existence of a deceased person's data at all; and (d) would you advise a different lapse behaviour — for example degrading to a lower-resolution retained copy rather than deleting — to reduce that exposure?
+9. **Several holders of one deceased person's data.** Where the same deceased person's memories exist as a canonical memorial **and** as personal copies in several descendants' accounts: (a) what must we do so that an erasure, takedown, or objection reaches **every** copy; (b) does one holder's lapse or deletion affect the others; and (c) does holding multiple copies change our obligations compared with a single memorial record? *(Our engineering intent is to implement "copies" as per-person views over one underlying record rather than duplicated data, precisely so an erasure is enforceable — we would welcome your view on whether that is sufficient.)*
+
 ## 5. What is explicitly NOT in this review
 
 - **No biometric / facial recognition** (as in Phase 2; any future on-device face feature gets its own DPIA).
-- **No pricing/payment** decision (preservation is free; a premium vault is a separate commercial matter).
-- **Nothing is built** — we will scaffold only empty, inert structures until you clear the model.
+- 🔴 **CORRECTED 2026-07-30.** ~~*No pricing/payment decision (preservation is free; a premium vault is a separate commercial matter).*~~ **Payment is now squarely in scope**, because the commercial model reversed: preservation of a deceased person's memories is a **paid recurring service** and lapse ends it (§ 3.4 as corrected). We are **not** asking you to price it — we are asking, in **§ 4 Q8**, whether the model is lawful and what it obliges us to do. The specific price and billing period remain a commercial matter outside this review.
+- **Nothing is built** — we will scaffold only empty, inert structures until you clear the model. *(Status 2026-07-30: this remains true. The only thing that has shipped is an empty, deny-by-default database table holding no data and creating no behaviour.)*
 
 ## 6. What we're asking for
 

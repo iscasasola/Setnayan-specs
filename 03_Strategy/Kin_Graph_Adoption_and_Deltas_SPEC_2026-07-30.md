@@ -1,6 +1,6 @@
 # Kin Graph — Adoption & Deltas
 
-**Status:** DECISION DOCUMENT · awaiting owner + DPO + PH counsel sign-off
+**Status:** OD1-OD7 ANSWERED by owner 2026-07-30 · 2 follow-ups + counsel/DPO gate open
 **Date:** 2026-07-30
 **Author:** Claude Code session (Ugat map work)
 **Nature:** No code. Nothing here has been built. This exists to be argued with.
@@ -105,95 +105,133 @@ it is already built.
 but a different concern; not part of the kin graph proper.
 
 ---
+## 2. The decisions — ANSWERED by the owner 2026-07-30
 
-## 2. The decisions
+All seven were put to the owner and answered the same day. Two follow-ups remain
+open and are marked as such at the end.
 
-Each of these is genuinely the owner's (some the DPO's, some counsel's). None can
-be inferred from the code.
+### ✅ OD1 · ADOPTED — and it is a CONNECTION tree, not a family tree
 
-### OD1 · Adopt this as THE family tree
+Confirmed: `people` + `person_connections` are the graph. No second person model
+gets built.
 
-Confirm `people` + `person_connections` are the family tree, and that no parallel
-schema gets built. Recommend **yes** — it is better than a redesign would be, and
-a second person model would be worse than either.
+**The owner renamed it.** Not a family tree — a **connection tree**, carrying
+three layers: **family**, **ritual** (ninong/ninang), and **friends**. That maps
+exactly onto the `layer` CHECK already in the schema, which is a good sign the
+original design was thinking the same way.
 
-*Needs: owner. Output: a `DECISION_LOG.md` row.*
+> ⚠ **This CORRECTS an earlier recommendation in this document.** §6 originally
+> said "friends never on the tree." That was wrong, and OD3's answer explains
+> why — see below. Friends are not decoration on a kinship graph; in the
+> Philippine model they are an INPUT to it.
 
-### OD2 · How to hold relationships before counsel signs off
+### ✅ OD2 · YES — draft rows before counsel
 
-People will want to build their tree before the flag flips. Options:
+`status='draft'` proceeds: invisible to the counterparty, one tap to `pending`
+once counsel clears the flag. Requires widening the `status` CHECK by one value.
 
-1. **`status='draft'` rows** — invisible to the other party, one tap to convert to
-   `pending` when the flag flips. *Recommended.* Requires widening the `status`
-   CHECK by one value.
-2. A separate drafts table, discarded on adoption. More code, no reuse.
-3. Nothing — no tree-building until counsel clears it.
+### ⚠ OD3 · ANSWERED A DIFFERENT QUESTION — and the answer is the best thing here
 
-Note (1) means storing relationship data about third parties before sign-off, even
-if nobody but the author can see it. **That is a real question, not a technicality**,
-and it is precisely the sort of thing to put to counsel rather than decide here.
+The question asked about RETENTION windows. The owner answered about
+**DERIVATION**, and the answer reshapes the calculator:
 
-*Needs: owner + counsel.*
+> *"they will only become an aunt if they are the brothers/sisters of their
+> parents… and if they are parents of their friends. these are aunts as well"*
 
-### OD3 · Retention lines
+So a **tita** arises two ways:
 
-Two windows have no answer today:
+| | Rule | Class |
+|---|---|---|
+| 1 | sibling of a parent | **blood-derived** |
+| 2 | parent of a friend | **courtesy-derived** |
 
-- **Never-confirmed `pending` proposals** — recommend expiry at **12 months**.
-  A relationship claim nobody ever answered should not sit forever.
-- **`declined` rows** — recommend purge at **30 days**. Long enough to prevent
-  immediate re-spam, short enough not to be a record of a refusal.
+Rule 2 is the Philippine courtesy-kinship model, and no generic family-tree
+design accounts for it. Two consequences:
 
-Both need a matching line in `/privacy`, which currently discloses neither.
+- **The friend layer feeds the family labels.** A courtesy tita is only derivable
+  BECAUSE a friend edge exists. This is why friends belong on the tree, and why
+  §6's original "friends never on the tree" line was wrong.
+- **Derived relations need a CLASS, not just a label.** "My mother's sister" and
+  "my mother's best friend" are both tita and are not the same fact. The tree
+  should render them distinguishably — same word, different provenance.
 
-*Needs: DPO (which is the owner). See `project_setnayan_data_retention`.*
+The owner also floated, with a question mark, *"year mates of the parents?"* —
+i.e. whether a parent's contemporaries are titas by generation alone. Left
+**unresolved**; it is a wider rule than rule 2 and would pull in people with no
+edge to the person at all.
 
-### OD4 · The minors bridge — recommend NOT NOW
+🔴 **RETENTION REMAINS OPEN.** Recommended and still unanswered: expire
+never-confirmed `pending` proposals at **12 months**; purge `declined` rows at
+**30 days**; disclose both in `/privacy`, which currently mentions neither.
+Owner-as-DPO decision.
 
-Connecting `dependents` into the tree as `people` nodes via `person_stewardships`
-means building a kin graph that includes **children**. That deserves its own data
-protection impact assessment and its own counsel conversation.
+### ✅ OD4 · DEFERRED — minors stay with dependants
 
-Recommend: explicitly out of scope. Nothing in this spec should touch it.
+> *"not now for minors. this will be covered by dependents temporarily."*
 
-*Needs: owner, to agree it is deferred.*
+Recorded as a decision rather than a silence, which matters: later, "we did not
+discuss it" and "we decided not to" look identical. `dependents` holds minors
+for now; bridging them into `people` via `person_stewardships` needs its own
+DPIA and its own counsel conversation.
 
-### OD5 · Build the derivation engine now, flag-dark?
+### ✅ OD5 · BUILD THE DERIVATION ENGINE — following the tree
 
-Extended kin (lolo, lola, tito, tita, pinsan, bilas, balae) is **derived** from the
-stored primitives, not stored. That engine does not exist.
+> *"follow the family tree"*
 
-Recommend **build it now**, flag-dark: it is pure code, provably inert against zero
-edges, and it closes a real gap — the shipped preview copy already describes
-behaviour the code does not have. Building it exposes no data.
+Extended kin (lolo, lola, tito, tita, pinsan, pamangkin, bilas, balae) is
+DERIVED from the stored primitives, never stored. Build flag-dark: pure code,
+provably inert at zero edges, and it closes the gap where shipped preview copy
+already promises behaviour the code lacks.
 
-*Needs: owner.*
+Must implement BOTH derivation classes from OD3.
 
-### OD6 · Gendered labels — the one with a hidden cost
+### ✅ OD6 · SEX DATA EXISTS — the owner was right, with one boundary
 
-*Lolo* versus *lola* requires knowing sex. **`people` does not hold it.**
-`dependents` does, but that is a different table for a different purpose.
+> *"we do have a sex."*
 
-Recommend **gender-neutral paired labels** for V1 — render "Lolo/Lola" rather than
-guessing. Adding a sex or gender column to `people` is sensitive-personal-information
-territory under the Data Privacy Act; it is a counsel matter, not an engineering
-preference, and it should not be smuggled in as a display improvement.
+Verified against the schema — and this **corrects §2's original claim** that the
+data was absent:
 
-*Needs: owner + counsel if the answer is anything other than neutral labels.*
+| Table | Sex? |
+|---|---|
+| `users` | ✅ `sex` **+ `sex_consent_at`** |
+| `dependents` | ✅ `sex` |
+| `people` | ❌ **no sex column** |
 
-### OD7 · Freeze the vocabulary for V1
+`users.sex_consent_at` matters: a per-field consent stamp already exists, so the
+privacy model for this field is built rather than needing invention.
 
-Confirm **no new storable relations**: no `partner`, no step/half qualifiers, no
-in-law primitives. Everything beyond the seven locked relations stays derived or
-absent.
+The boundary: `people` is the tree's node table and can hold someone with **no
+account** (`claimed_by_user_id` is nullable). So gendered labels resolve for
+claimed people and dependants, and must fall back to neutral pairs
+("Lolo/Lola") for unclaimed nodes. That is a rendering rule, not a blocker — and
+notably it means the tree will show a MIX of specific and neutral labels, which
+should look deliberate rather than broken.
 
-The reason to freeze: each new stored relation multiplies the derivation surface and
-the consent questions. Widening later is a fresh decision; widening quietly is how a
-vocabulary becomes unmaintainable.
+Adding `sex` to `people` directly remains a counsel matter and is NOT proposed.
 
-*Needs: owner.*
+### ✅ OD7 · VOCABULARY FROZEN at seven stored relations
+
+Confirmed. `spouse · parent · child · sibling · godparent · godchild · friend`
+stay the complete stored set. No `partner`, no step/half qualifiers, no in-law
+primitives.
+
+This is coherent with OD5 rather than in tension with it: **if the calculator
+derives tita, lolo and pamangkin, none of them need storing.** Every widening of
+the stored set multiplies both the derivation surface and the consent questions,
+so widening later is a fresh owner + counsel decision.
 
 ---
+
+### 🔴 Still open — two items
+
+1. **Retention windows (from OD3).** 12 months for unanswered, 30 days for
+   declined, plus the `/privacy` lines. Owner-as-DPO.
+2. **The courtesy-tita boundary.** "Parent of your friend" is unbounded — with
+   enough friends the tree fills with titas. Does it apply to ALL friend edges
+   or only confirmed/close ones? And is it symmetric, making your friends'
+   children your pamangkin? A working default is proposed in §7 so the
+   calculator can be built; it is a default, not a decision.
 
 ## 3. 🔴 A security finding to fix before the flag flips
 
@@ -262,8 +300,10 @@ Only after the above. Sketched so the decisions have something concrete attached
   us she is my aunt" and "we worked out she is probably my aunt" is visible.
 - **The ritual layer rendered as its own ring** — ninong/ninang shown with the
   ceremony they came from, which `created_by_event_id` already records.
-- **Friends never on the tree.** The `friend` layer exists in the data; it is not
-  kinship and should not be drawn as such.
+- **Friends ARE on the tree** (owner, OD1 — this REVERSES an earlier line here).
+  The friend layer is not decoration: a courtesy tita is only derivable because a
+  friend edge exists, so removing friends would silently remove half the kinship
+  labels. Render them as their own layer, visibly distinct from blood.
 - **Names only where permitted** — an unconfirmed or unconsented node shows as a
   placeholder, never a name.
 
