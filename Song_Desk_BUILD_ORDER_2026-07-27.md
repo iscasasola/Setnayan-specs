@@ -18,7 +18,25 @@
 > It must land BEFORE any requests UI and before the always-on flip.** Build order is now
 > **2 ✅ → 1b → (6+4) → 3 → 5**.
 >
-> **Progress (all 2026-07-30): PR 1 ✅ #3876 · PR 2 ✅ #3885 · PR 1b ✅ #3891 · PR 1c ✅ #3893.**
+> **Progress (all 2026-07-30): PR 1 ✅ #3876 · PR 2 ✅ #3885 · PR 1b ✅ #3891 · PR 1c ✅ #3893 ·
+> the REQUESTS INBOX UI ✅ #3896** (owner: "fix the song desk" + "create the UI"), which also closed
+> the **third** mount-vs-read defect: the playlist read gated on legacy `vendor_category` enum values
+> while the desk mounts on canonical `MUSIC_CANONICALS` tiles, and nothing maps to `orchestra` or
+> `wedding_singer` — so a booked orchestra mounted the desk and read zero. The list was **dropped**,
+> not extended (a taxonomy in SQL drifts; this policy proved it). ⚠⚠ **That WIDENED the playlist read
+> to ANY booked vendor** — owner-reversible; the honest narrow route is a `category_key` gate once
+> that column is populated, never another hand-kept enum list.
+>
+> ⛔ **THE DESK IS STILL UNREACHABLE IN PROD — data, not code.** The only vendor profile is
+> `SetnaProd` (`services:['pabati']`, free tier, unverified, **0 marketplace-linked bookings**). The
+> desk needs a **music-tile vendor on Solo-or-up with a MARKETPLACE-LINKED booking dated TODAY**. Any
+> "look at it on a phone" step needs that seeded first.
+>
+> ⚠ **OPEN, deliberately unfixed:** `vendor_services.category` is consumed as a **legacy enum** value
+> in `unlock-category.ts` but as a **canonical key** in `inquiry-actions.ts`, where the same value is
+> written into the **enum** column inside a `catch {}` that would swallow the violation. One column,
+> two contradictory assumptions. `vendor_services` has **0 rows in prod**, so fixing it would be
+> fixing a guess — needs one real vendor service row to settle.
 > **Every security/gap item in this stream is CLOSED. Everything left is ungated feature work:**
 > **(6+4) → 3 → 5.**
 >
