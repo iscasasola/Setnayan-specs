@@ -1,6 +1,6 @@
 # Kin Graph — Adoption & Deltas
 
-**Status:** OD1-OD7 + both follow-ups ANSWERED · DPO approved 2026-07-31 · PH COUNSEL GATE OPEN
+**Status:** ALL DECISIONS ANSWERED · DPO approved 2026-07-31 · PH counsel WAIVED until Jan 2027 · flag flip remains an OWNER action
 **Date:** 2026-07-30
 **Author:** Claude Code session (Ugat map work)
 **Nature:** No code. Nothing here has been built. This exists to be argued with.
@@ -302,15 +302,50 @@ surface a control, and do not ship silently. See
 
 ---
 
-## 5. The standing gate, stated plainly
+## 5. The gate — WAIVED UNTIL JANUARY 2027 (owner, 2026-07-31)
 
-**PH counsel + DPO sign-off is required before `NEXT_PUBLIC_PEOPLE_CONNECTIONS`
-flips and before any real relationship row is stored.**
+**Previous standing rule:** PH counsel + DPO sign-off required before
+`NEXT_PUBLIC_PEOPLE_CONNECTIONS` flips or any real relationship row is stored.
 
-Every buildable item above can ship flag-dark until then. Nothing in this document
-authorises the flip, and no engineering session should perform it.
+**Now:** the owner, who is the DPO, has **approved their half and waived the PH
+counsel requirement until January 2027**, to be revisited then.
 
----
+That is the owner's decision to make — it is their company and their risk. What
+it changes in practice, stated once so it is on the record rather than assumed:
+
+- **The privacy posture now rests on the DPO decision alone.** No external legal
+  review stands behind it until the January revisit.
+- **That makes the DISCLOSURES the load-bearing control.** `/privacy` currently
+  says nothing about the connection tree, third-party person records, or the
+  30-day retention. Shipping real data before those lines exist would leave the
+  product storing information about people with no notice anywhere — which is
+  the failure mode counsel would most likely have caught. **The disclosure
+  should land before the flag flips, not after.**
+- **The 30-day retention is now the whole retention story**, with nothing else
+  behind it.
+
+**The flag flip itself remains an OWNER action.** No engineering session should
+perform it — that was true under the counsel gate and stays true under the
+waiver, because the flip is the moment third-party data starts existing and it
+should be a deliberate human act with a date attached.
+
+### For the January revisit
+
+Bring counsel these, which the waiver defers rather than removes:
+
+1. Whether a person node may hold a **named third party with no account** — the
+   sharpest question, and the one least answerable from engineering.
+2. Whether **unconfirmed (`pending`) claims** may be stored at all, given they
+   are assertions about someone who has not replied.
+3. Whether **30 days** is defensible for both windows.
+4. The **courtesy layer** — deriving kinship from friendship means inferring a
+   relationship neither party declared.
+5. Whether **`draft` rows** (private, pre-counsel tree building) were acceptable
+   in the interim.
+
+The forgery and self-confirmation holes were found and closed BEFORE any data
+existed (PR #3944). That is worth presenting: it is a materially stronger
+position than a design awaiting permission.
 
 ## 6. What the tree would look like, once cleared
 
