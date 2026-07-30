@@ -310,6 +310,24 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
   `preCapture` is the single switch dividing the two jobs.
 - **A · the tile** — pre-capture "shots ready · N cameras out", flipping to "photos gathered ·
   N shots left" on the first capture (owner default, question 2).
+  🔒 **AMENDED 2026-07-30, PR [#3897](https://github.com/iscasasola/setnayan-platform/pull/3897) —
+  THE TILE ALWAYS HOLDS A SLOT** (owner, verbatim: *"always hold a slot. since that is the
+  foundation of the app."*). The first cut gave Papic a slot only when one was FREE, so on a
+  **mature** event (all four minis populated) a couple who had not shot yet saw the nudge and then,
+  once they dismissed it, **no Papic on their home at all** — the wrong default for the product's
+  foundation. Now the push is unconditional and sits **before** the Messages block, making the
+  priority **structural** rather than index arithmetic:
+  **Guests → Budget → Schedule → PAPIC → Messages.** Papic is never dropped; Guests/Budget/Schedule
+  are never displaced; **Messages yields** on a full dashboard (transient, carries its own nav badge,
+  and its open count also renders in the digest directly above the grid).
+  ⚠ **The cap stayed at 4 on purpose** — "always hold a slot" is about PRIORITY, not a licence to put
+  a ninth `backdrop-filter` layer on the couple's first screen. Raising `MAX_MINIS` remains a
+  one-line, deliberate owner call with the trade-off written beside it.
+  🪤 A near-miss worth keeping: an interim version used `splice(3, 0, papicMini)`, which assumed
+  Messages sits at index 3 — so whenever **Schedule** had nothing to show it silently placed Papic
+  *after* Messages. Push order has no such failure mode.
+  ✅ Guarded by three source-scan tests **that were mutation-tested, not assumed**: reintroducing the
+  free-slot condition fails 2 tests; moving the push below Messages fails the ordering test by name.
   ⚠⚠ **THE MOCKUP MISSED A DOCUMENTED BUDGET AND THE BUILD HAD TO FIX IT:** the mockup drew a
   3-across bento, but the real block is a **capped 2×2** whose own comment budgets *"focal(1) +
   digest(1) + ≤4 minis + chrome(2) ≤ 8 above fold"* (`backdrop-filter` is the expensive part) — and
