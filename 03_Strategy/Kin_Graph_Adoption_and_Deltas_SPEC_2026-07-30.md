@@ -1,6 +1,6 @@
 # Kin Graph — Adoption & Deltas
 
-**Status:** OD1-OD7 ANSWERED by owner 2026-07-30 · 2 follow-ups + counsel/DPO gate open
+**Status:** OD1-OD7 + both follow-ups ANSWERED · DPO approved 2026-07-31 · PH COUNSEL GATE OPEN
 **Date:** 2026-07-30
 **Author:** Claude Code session (Ugat map work)
 **Nature:** No code. Nothing here has been built. This exists to be argued with.
@@ -223,15 +223,36 @@ so widening later is a fresh owner + counsel decision.
 
 ---
 
-### 🔴 Still open — two items
+### ✅ Both follow-ups ANSWERED 2026-07-31
 
-1. **Retention windows (from OD3).** 12 months for unanswered, 30 days for
-   declined, plus the `/privacy` lines. Owner-as-DPO.
-2. **The courtesy-tita boundary.** "Parent of your friend" is unbounded — with
-   enough friends the tree fills with titas. Does it apply to ALL friend edges
-   or only confirmed/close ones? And is it symmetric, making your friends'
-   children your pamangkin? A working default is proposed in §7 so the
-   calculator can be built; it is a default, not a decision.
+**Retention — 30 days.** Owner-as-DPO. Applied to BOTH windows: never-confirmed
+`pending` proposals and `declined` rows both purge at 30 days.
+
+> ⚠ Consequence, stated rather than buried: 30 days is far shorter than the 12
+> months originally proposed for UNANSWERED claims. Someone who does not open
+> the app for a month loses an incoming connection request silently. That is the
+> most privacy-protective reading and it is a legitimate choice — but it is a
+> PRODUCT effect, not only a privacy one, and it is a one-line change if the
+> lived behaviour turns out wrong.
+
+Both windows need a `/privacy` line; it currently discloses neither.
+
+**The courtesy tito/tita boundary — none. Unbounded is correct.**
+
+> *"yes tita can be most."*
+
+Every friend’s parent is a tito or tita — BOTH, gendered by the person, not just aunts (owner, 2026-07-31). Transitive and without a closeness filter.
+This is simply true to Philippine life, and constraining it would make the model
+less accurate rather than more manageable.
+
+It therefore becomes a RENDERING problem, not a rule problem: a tree where
+courtesy titas outnumber blood relations must not let them crowd the blood
+layer out. Volume is expected and correct; the visual hierarchy is what carries
+the distinction.
+
+The owner's own *"year mates of the parents?"* remains UNADOPTED — generation
+alone is not an edge, and adopting it would derive kin for people with no
+connection to the person at all.
 
 ## 3. 🔴 A security finding to fix before the flag flips
 
