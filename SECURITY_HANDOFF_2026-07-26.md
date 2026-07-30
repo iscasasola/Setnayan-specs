@@ -101,11 +101,25 @@ The single most urgent item. No database trickery required.
 2. **`vendors/page.tsx:181` filters the wrong primary key** — `.eq('id', eventId)`, a UUID against a `BIGSERIAL`. The query permanently `22P02`s, so the budget-fit block silently degrades to neutral. Masked by null-guards. Deliberately not fixed.
 3. **`wizard_state` duplicates data the erase/export routines target by column name** — see §5 (erasure).
 
+### ✅ Deferred presign lanes — **ALL FIVE CLOSED 2026-07-30**
+
+| lane | state |
+|---|---|
+| #1 `/api/upload` generic branch | private-bucket root binding — [#3905](https://github.com/iscasasola/setnayan-platform/pull/3905) |
+| #2 five stored-ref write paths | all five — [#3902](https://github.com/iscasasola/setnayan-platform/pull/3902) · [#3909](https://github.com/iscasasola/setnayan-platform/pull/3909) · [#3911](https://github.com/iscasasola/setnayan-platform/pull/3911) · [#3912](https://github.com/iscasasola/setnayan-platform/pull/3912) |
+| #3 `editorial-vendor/` untenanted | [#3918](https://github.com/iscasasola/setnayan-platform/pull/3918) |
+| #4 `/papic/media/` rate limit | [#3914](https://github.com/iscasasola/setnayan-platform/pull/3914) |
+| #5 7-day admin TTLs | **won't-fix** — the TTL is load-bearing; pinned as an invariant instead ([#3914](https://github.com/iscasasola/setnayan-platform/pull/3914)) |
+
+🔑 **The finding that outlived the lanes: every stored-ref oracle was a policy that EXISTED but was not applied at every WRITER of the column — never a missing policy.** Five for five (paperwork · budget-proof · vendor portfolio · RSVP selfie · site-chrome), two of them exposing a private bucket to the OPEN INTERNET. So the sweep question is not *"is there a policy for this flow?"* but ***"is it applied at every writer?"*** — one `git grep` of the policy name against that column's writers. ⏭ Remaining beyond the lanes: per-flow tenancy binding for the ~40 public-media call sites (hardening now), CSP `script-src`, RoPA for WebRTC/TURN.
+
+_(original list, for lineage:)_
+
 ### 🟡 Deferred presign lanes (from #3729, prioritised in its PR body)
 
 1. `/api/upload` generic branch — any user can presign a `PUT` under any prefix/bucket. **Write pollution, not disclosure** (server-side `randomUUID()` prevents overwrite). ~40 call sites → own PR.
 2. Five more stored-ref **write** paths reaching private buckets, same pattern, ~one guard line each: `paperwork`, `budget` proof, `invite` proofs, `site-chrome`, `portfolio_r2_keys[]`.
-3. `editorial-vendor/` is a **flat untenanted prefix** → containment only, not ownership. Needs a tenant segment in the key layout.
+3. ~~`editorial-vendor/` is a **flat untenanted prefix** → containment only.~~ ✅ **CLOSED 2026-07-30, PR [#3918](https://github.com/iscasasola/setnayan-platform/pull/3918).** The uploader now writes `editorial-vendor/{vendorProfileId}/{eventId}/` and the policy requires it, so **two** things became impossible: another vendor's media on this event, AND *your own* media from a different couple's event — the second is what a flat prefix could never catch, and the one that puts one wedding's photos on another's public page. 🪤 **The pinning had to MOVE**: it ran before `fetchOwnVendorProfile`, and a tenanted policy cannot be built before the vendor is known — passing a placeholder to keep the early call is how a tenanted policy silently degrades to a flat one (guarded). 🔑 **Migration-free only by luck of timing** — `editorial_vendor_media` had 0 rows; a test now asserts the old flat layout is REFUSED, which is exactly why a populated table would need backfilling first.
 4. `/papic/media/[...key]` is unauthenticated. Media bucket is public by design so no confidentiality delta — wants a rate limit.
 5. Admin surfaces still issue **7-day** TTLs. `assertAdmin`-gated, so not urgent.
 
