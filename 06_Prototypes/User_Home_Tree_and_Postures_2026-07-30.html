@@ -1,0 +1,577 @@
+<style>
+  :root{
+    --paper:#FBFAF7; --surface:#FFFFFF; --hairline:#EDE8DE; --line:#E1DCD1;
+    --ink-300:#8A857B; --ink-500:#6E6A62; --ink-700:#57544D; --ink-900:#1B1A17;
+    --gold-100:#F3ECDF; --gold-300:#CBA766; --gold-500:#A9834B; --gold-600:#95713D; --gold-700:#8A6B39;
+    --success:#5E7C52; --success-soft:#E9EEE3; --warning:#B77E2E; --warn-soft:#F6EAD2;
+    --danger:#A6483B; --info:#4E6C82; --info-soft:#E2EAEF;
+    --font:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"Space Mono",ui-monospace,"SF Mono",Menlo,monospace;
+    --glass:rgba(255,255,255,.5); --glass-2:rgba(255,255,255,.62); --glass-brd:rgba(255,255,255,.72);
+    --blur:blur(22px) saturate(1.5);
+    --dark:rgba(23,22,15,.82); --dark-brd:rgba(255,255,255,.18);
+    --sh-tile:0 18px 40px -26px rgba(30,26,18,.4);
+    --sh-hi:0 28px 54px -30px rgba(30,26,18,.5);
+    --sh-win:0 60px 100px -60px rgba(30,26,18,.6);
+    --ease:cubic-bezier(.2,.7,.2,1); --ease-out:cubic-bezier(.16,1,.3,1);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  button{font-family:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--gold-500);outline-offset:2px;border-radius:6px}
+  .ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  @keyframes winIn{from{opacity:0;transform:translateY(30px) scale(.985);filter:blur(12px)}to{opacity:1;transform:none;filter:blur(0)}}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+  @keyframes ringGold{0%{box-shadow:0 0 0 0 rgba(169,131,75,.45)}100%{box-shadow:0 0 0 11px rgba(169,131,75,0)}}
+  @keyframes shim{from{transform:translateX(-130%)}to{transform:translateX(360%)}}
+  @keyframes modeIn{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+  @keyframes drift1{from{transform:translate(0,0) scale(1)}to{transform:translate(70px,44px) scale(1.1)}}
+  @keyframes drift2{from{transform:translate(0,0) scale(1.06)}to{transform:translate(-80px,30px) scale(1)}}
+  @keyframes drift3{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,-50px) scale(1.12)}}
+  @keyframes growLine{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+  .stage{position:relative;overflow:hidden;font-family:var(--font);color:var(--ink-900);min-height:100%;padding:26px 20px 46px;
+    background:#E8E4DA;
+    background-image:radial-gradient(50% 60% at 15% 4%,rgba(203,167,102,.30),transparent 62%),radial-gradient(55% 65% at 90% 22%,rgba(94,124,82,.15),transparent 62%),radial-gradient(50% 62% at 45% 100%,rgba(78,108,130,.17),transparent 62%);
+    -webkit-font-smoothing:antialiased}
+  .blob{position:absolute;border-radius:999px;filter:blur(72px);pointer-events:none;z-index:0}
+  .b1{width:620px;height:500px;left:-6%;top:-14%;background:radial-gradient(closest-side,rgba(203,167,102,.38),transparent 72%);animation:drift1 46s ease-in-out infinite alternate}
+  .b2{width:720px;height:560px;right:-12%;top:6%;background:radial-gradient(closest-side,rgba(94,124,82,.24),transparent 72%);animation:drift2 58s ease-in-out infinite alternate}
+  .b3{width:700px;height:540px;left:30%;bottom:-26%;background:radial-gradient(closest-side,rgba(78,108,130,.26),transparent 72%);animation:drift3 66s ease-in-out infinite alternate}
+  .wrap{position:relative;z-index:1;max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+  .cap{display:flex;flex-direction:column;gap:10px;padding:2px 6px;animation:rise .7s both var(--ease-out)}
+  .cap .eye{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--ink-500)}
+  .cap .eye .dia{width:7px;height:7px;background:var(--gold-500);transform:rotate(45deg);flex:none}
+  .cap h1{margin:0;font-size:23px;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
+  .cap p.lede{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-700);max-width:88ch}
+  .legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-500)}
+
+  .modesw{display:inline-flex;gap:3px;background:rgba(255,255,255,.45);border:1px solid var(--glass-brd);border-radius:999px;padding:3px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-tile);flex-wrap:wrap}
+  .msw{border:none;background:transparent;border-radius:999px;padding:7px 15px;font-size:12px;font-weight:700;color:var(--ink-500);cursor:pointer;display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;transition:background .3s var(--ease),color .2s,box-shadow .3s}
+  .msw .mswm{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-300)}
+  .msw.on{background:rgba(255,255,255,.94);color:var(--ink-900);box-shadow:0 5px 16px -7px rgba(30,26,18,.4)}
+  .msw.on .mswm{color:var(--gold-700)}
+
+  .smp{font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-500);background:rgba(30,26,18,.07);border:1px solid rgba(30,26,18,.05);padding:2px 6px;border-radius:999px;flex:none;font-weight:400}
+  .smp.dk{color:rgba(243,236,223,.65);background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.12)}
+  .prp{font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-700);background:var(--gold-100);padding:2px 6px;border-radius:999px;flex:none;font-weight:400}
+  .shp{font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--success);background:var(--success-soft);padding:2px 6px;border-radius:999px;flex:none;font-weight:400}
+
+  .winwrap{overflow-x:auto;padding-bottom:8px}
+  .frame-label{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-500);padding:0 6px 8px}
+  .frame-label::after{content:"";flex:1;height:1px;background:rgba(30,26,18,.1)}
+
+  .win{position:relative;min-width:1180px;max-width:1400px;border-radius:22px;overflow:hidden;box-shadow:var(--sh-win);border:1px solid rgba(255,255,255,.6);background:linear-gradient(135deg,#EFEAE0,#E3DDCF 55%,#DDD6C6);animation:winIn 1s both var(--ease-out)}
+  .winwash{position:absolute;inset:-12%;background:radial-gradient(45% 55% at 18% 6%,rgba(203,167,102,.32),transparent 60%),radial-gradient(45% 60% at 86% 92%,rgba(78,108,130,.2),transparent 60%);pointer-events:none;animation:drift2 40s ease-in-out infinite alternate}
+  .titlebar{position:relative;display:flex;align-items:center;gap:8px;padding:12px 18px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.5)}
+  .tl{width:11px;height:11px;border-radius:99px;flex:none}
+  .tl.r{background:#E6655C}.tl.y{background:#E9AC44}.tl.g{background:#67AD5B}
+  .urlpill{flex:1;display:flex;justify-content:center}
+  .urlpill span{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.65);border-radius:999px;padding:5px 18px;font-size:11.5px;color:var(--ink-500)}
+  .urlpill .ic{width:11px;height:11px}
+  .canvas{position:relative;padding:22px 28px 30px;display:flex;flex-direction:column;gap:22px}
+
+  .chl-head{display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .mk{width:30px;height:30px;border-radius:999px;border:1.5px solid var(--gold-500);display:grid;place-items:center;font-weight:800;font-size:13px}
+  .brand .wm{font-weight:800;font-size:15px;letter-spacing:-.01em}
+  .utilpill{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:999px;padding:4px;box-shadow:0 12px 30px -22px rgba(30,26,18,.45)}
+  .ub{position:relative;width:38px;height:38px;border:none;background:transparent;color:var(--ink-700);display:grid;place-items:center;border-radius:999px;cursor:pointer}
+  .ub .ic{width:18px;height:18px}
+  .ub .pd{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:99px;background:var(--gold-500);animation:pulse 1.7s infinite,ringGold 2.6s infinite}
+  .uav{width:34px;height:34px;border-radius:999px;background:var(--gold-500);color:#FFFDF8;display:grid;place-items:center;font-weight:800;font-size:13px;cursor:pointer;border:none}
+
+  .hero .greet{font-size:13px;color:var(--ink-500)}
+  .hero h2{margin:5px 0 0;font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.04}
+  .hero h2 .soft{color:var(--ink-300);font-weight:700}
+  .hero .stat{font-size:12.5px;color:var(--ink-500);margin-top:9px}
+  .hero .stat b{color:var(--gold-700);font-weight:700;font-family:var(--mono)}
+  .cmd{display:flex;align-items:center;gap:12px;max-width:720px;padding:12px 15px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-tile);margin-top:14px}
+  .cmd .ph{flex:1;font-size:13px;color:var(--ink-300)}
+  .cmd .kbd{font-family:var(--mono);font-size:10px;color:var(--ink-500);border:1px solid var(--line);border-radius:6px;padding:3px 7px;background:rgba(255,255,255,.6)}
+
+  .sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:13px}
+  .sec-h .l{display:flex;align-items:baseline;gap:9px}
+  .sec-h .lab{font-size:16px;font-weight:800;letter-spacing:-.015em}
+  .sec-h .sub{font-size:12px;color:var(--ink-300)}
+
+  .evrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .ev{text-align:left;border-radius:18px;padding:0;overflow:hidden;border:1px solid var(--glass-brd);background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-tile);cursor:pointer;transition:transform .3s var(--ease),box-shadow .3s}
+  .ev:hover{transform:translateY(-3px);box-shadow:var(--sh-hi)}
+  .ev .top{position:relative;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 13px;background:repeating-linear-gradient(100deg,rgba(203,167,102,.20) 0 12px,rgba(255,255,255,.34) 12px 26px)}
+  .ev .badge{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;font-weight:700;color:var(--gold-700);background:rgba(255,255,255,.8);border-radius:999px;padding:3px 8px}
+  .ev .mg{width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.9);border:1px solid var(--gold-300);display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--gold-700)}
+  .ev .body{padding:12px 13px 14px}
+  .ev .name{display:flex;align-items:center;gap:6px;font-size:14.5px;font-weight:800;letter-spacing:-.015em}
+  .ev .date{font-size:11.5px;color:var(--ink-500);margin-top:2px}
+  .ev .foot{margin-top:11px;display:flex;flex-direction:column;gap:8px}
+  .ev .status{display:flex;align-items:center;gap:10px}
+  .ev .ring{width:38px;height:38px;border-radius:999px;display:grid;place-items:center;flex:none;font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--gold-700);background:conic-gradient(var(--gold-500) calc(var(--p) * 1%),rgba(30,26,18,.09) 0)}
+  .ev .ring .in{width:29px;height:29px;border-radius:999px;background:rgba(255,255,255,.92);display:grid;place-items:center}
+  .ev .s1{font-size:12px;font-weight:700}.ev .s2{font-size:10.5px;color:var(--ink-300)}
+  .pill-over{display:inline-flex;align-items:center;gap:5px;align-self:flex-start;font-size:10.5px;font-weight:700;color:var(--warning);background:var(--warn-soft);border-radius:999px;padding:4px 9px}
+  .pill-over .ic{width:12px;height:12px}
+  .evghost{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border-radius:18px;border:1.5px dashed rgba(30,26,18,.2);background:rgba(255,255,255,.24);color:var(--ink-500);font-size:12.5px;font-weight:700;cursor:pointer;min-height:150px}
+  .evghost:hover{color:var(--gold-700);border-color:var(--gold-300)}
+
+  .bento{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start}
+  .bento.quiet-grid{grid-template-columns:1fr 1fr}
+  .tile{border-radius:20px;padding:18px;box-shadow:var(--sh-tile);transition:transform .32s var(--ease),box-shadow .32s}
+  .tile.glass{background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+  .tile.glass:hover{transform:translateY(-3px);box-shadow:var(--sh-hi)}
+  .tile.dark{position:relative;overflow:hidden;background:var(--dark);border:1px solid var(--dark-brd);color:var(--gold-100);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);box-shadow:0 26px 50px -28px rgba(23,22,15,.7)}
+  .tile-eye{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+  .tile.glass .tile-eye{color:var(--gold-700)} .tile.dark .tile-eye{color:var(--gold-300)}
+  .tile-eye .ic{width:14px;height:14px}
+  .tile.dark h3{margin:11px 0 0;font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+  .capiz{position:absolute;top:0;left:0;width:36%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.14),transparent);transform:translateX(-130%);animation:shim 6.5s 1.2s infinite}
+  .who{display:flex;align-items:center;gap:9px;margin-top:13px;position:relative;z-index:2}
+  .who .av{width:27px;height:27px;border-radius:999px;background:var(--gold-500);color:#FFFDF8;display:grid;place-items:center;font-size:11px;font-weight:800}
+  .who .meta{font-size:11.5px;color:rgba(243,236,223,.62)}
+  .lf-play{margin-top:14px;display:inline-flex;align-items:center;gap:8px;background:var(--gold-100);color:var(--ink-900);border:none;border-radius:999px;padding:9px 17px;font-size:12.5px;font-weight:800;cursor:pointer;position:relative;z-index:2}
+  .divider{height:1px;background:rgba(255,255,255,.13);margin:15px 0 13px}
+  .lens-lab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,236,223,.5);margin-bottom:9px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:rgba(243,236,223,.75);border-radius:999px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer}
+  .chip.on{background:var(--gold-100);color:var(--ink-900);border-color:transparent}
+
+  .big{font-family:var(--mono);font-size:26px;font-weight:700;margin-top:9px;letter-spacing:-.01em}
+  .big .u{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink-500)}
+  .watchrow{display:flex;align-items:center;gap:9px;font-size:12.5px;margin-top:11px}
+  .watchrow .d{width:6px;height:6px;border-radius:99px;flex:none}
+  .watchrow .amt{margin-left:auto;font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--warning)}
+  .quiet{display:flex;align-items:center;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid rgba(30,26,18,.08);font-size:11.5px;color:var(--ink-300)}
+  .quiet .d{width:7px;height:7px;border-radius:99px;background:var(--success);animation:pulse 1.9s infinite}
+
+  .sp-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:none;background:transparent;padding:10px 2px;border-bottom:1px solid rgba(30,26,18,.07);cursor:pointer}
+  .sp-row:last-child{border-bottom:none}
+  .sp-row .sic{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.7);border:1px solid var(--hairline);display:grid;place-items:center;color:var(--ink-500);flex:none}
+  .sp-row .sic .ic{width:15px;height:15px}
+  .sp-row .stx{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .sp-row .sn{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .sp-row .sr{font-size:11px;color:var(--ink-300)}
+  .sp-row .ar{width:14px;height:14px;margin-left:auto;color:var(--ink-300)}
+  .sp-lab{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-300);margin:14px 0 2px}
+
+  /* ===== THE FAMILY TILE (the delta) ===== */
+  .fam{position:relative}
+  .fam .slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+  .slot{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.62);border:1px solid var(--glass-brd)}
+  .slot .av{width:28px;height:28px;border-radius:999px;display:grid;place-items:center;font-size:10.5px;font-weight:800;flex:none;background:var(--gold-500);color:#FFFDF8}
+  .slot.pend .av{background:rgba(30,26,18,.1);color:var(--ink-300);border:1px dashed var(--ink-300)}
+  .slot.empty{background:rgba(255,255,255,.3);border-style:dashed;border-color:rgba(30,26,18,.18)}
+  .slot.empty .av{background:transparent;color:var(--ink-300);border:1px dashed rgba(30,26,18,.25)}
+  .slot .tx{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .slot .role{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-700)}
+  .slot .nm{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .slot.empty .nm,.slot.pend .nm{color:var(--ink-300);font-weight:600}
+  .slot .st{margin-left:auto;flex:none}
+  .tick{width:16px;height:16px;border-radius:999px;background:var(--success-soft);color:var(--success);display:grid;place-items:center}
+  .tick .ic{width:10px;height:10px;stroke-width:2.5}
+  .waiting{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--warning);background:var(--warn-soft);border-radius:999px;padding:2px 6px}
+
+  .derived{margin-top:14px;padding:12px 13px;border-radius:14px;background:linear-gradient(135deg,rgba(203,167,102,.16),rgba(255,255,255,.5));border:1px solid rgba(203,167,102,.3);position:relative;overflow:hidden}
+  .derived .dh{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold-700);font-weight:700}
+  .derived .dh .ic{width:12px;height:12px}
+  .kin{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .kin .k{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.82);border:1px solid var(--glass-brd);border-radius:999px;padding:4px 10px 4px 4px;font-size:11.5px;font-weight:700;box-shadow:0 6px 14px -12px rgba(30,26,18,.5)}
+  .kin .k i{width:20px;height:20px;border-radius:999px;background:var(--gold-100);color:var(--gold-700);display:grid;place-items:center;font-style:normal;font-size:9px;font-weight:800;flex:none}
+  .kin .k s{text-decoration:none;font-weight:500;color:var(--ink-300);font-size:10.5px}
+  .derived .hop{margin-top:9px;font-size:11px;color:var(--ink-500);line-height:1.5}
+  .derived .hop b{color:var(--ink-900);font-weight:700}
+
+  .layer{margin-top:13px;padding-top:12px;border-top:1px solid rgba(30,26,18,.08)}
+  .layer .lh{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-300);font-weight:700}
+  .layer .lb{font-size:11.5px;color:var(--ink-500);line-height:1.55;margin-top:6px}
+  .layer .lb b{color:var(--ink-900);font-weight:700}
+  .ritual-note{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;font-weight:700;color:var(--info);background:var(--info-soft);border-radius:999px;padding:4px 10px}
+  .ritual-note .ic{width:12px;height:12px}
+
+  .consent{margin-top:13px;display:flex;align-items:flex-start;gap:8px;padding:10px 11px;border-radius:12px;background:rgba(255,255,255,.45);border:1px dashed rgba(30,26,18,.18);font-size:11.5px;color:var(--ink-500);line-height:1.5}
+  .consent .ic{width:14px;height:14px;color:var(--ink-300);margin-top:1px}
+  .consent b{color:var(--ink-900)}
+
+  /* ribbon (planning posture) */
+  .ribbon{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:16px;background:var(--dark);border:1px solid var(--dark-brd);color:var(--gold-100);box-shadow:0 20px 44px -30px rgba(23,22,15,.8);position:relative;overflow:hidden}
+  .ribbon .ic{width:16px;height:16px;color:var(--gold-300)}
+  .ribbon .t{font-size:13px;font-weight:700}
+  .ribbon .s{font-size:11.5px;color:rgba(243,236,223,.6)}
+  .ribbon .go{margin-left:auto;font-size:11.5px;font-weight:800;color:var(--gold-300);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 13px;cursor:pointer}
+
+  /* the today HANDOFF — the home points at the event dashboard, it never becomes it */
+  .todaysw{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.45);border:1px solid var(--glass-brd);border-radius:999px;padding:9px 16px;font-size:12px;font-weight:700;color:var(--ink-500);cursor:pointer;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-tile)}
+  .todaysw .dot{width:8px;height:8px;border-radius:99px;background:rgba(30,26,18,.2);flex:none}
+  .todaysw[aria-pressed="true"]{color:var(--ink-900);background:rgba(255,255,255,.94)}
+  .todaysw[aria-pressed="true"] .dot{background:var(--danger);animation:pulse 1.4s infinite}
+
+  .handoff{display:none;align-items:center;gap:15px;padding:15px 19px;border-radius:18px;background:var(--dark);border:1px solid var(--dark-brd);color:var(--gold-100);position:relative;overflow:hidden;box-shadow:0 26px 54px -32px rgba(23,22,15,.85)}
+  #home[data-today="1"] .handoff{display:flex}
+  .handoff .lv{width:8px;height:8px;border-radius:99px;background:var(--danger);animation:pulse 1.4s infinite;flex:none;position:relative;z-index:2}
+  .handoff .htx{position:relative;z-index:2;min-width:0}
+  .handoff .h1x{font-size:16px;font-weight:800;letter-spacing:-.02em}
+  .handoff .h2x{font-size:12px;color:rgba(243,236,223,.6);margin-top:3px}
+  .handoff .goev{margin-left:auto;position:relative;z-index:2;display:inline-flex;align-items:center;gap:8px;background:var(--gold-100);color:var(--ink-900);border:none;border-radius:999px;padding:10px 17px;font-size:12.5px;font-weight:800;cursor:pointer;flex:none}
+  .handoff .goev .ic{width:14px;height:14px}
+  .handoff-note{display:none;gap:10px;align-items:flex-start;margin-top:10px;padding:12px 15px;border-radius:14px;background:rgba(255,255,255,.42);border:1px solid var(--glass-brd);font-size:12.5px;line-height:1.6;color:var(--ink-700)}
+  #home[data-today="1"] .handoff-note{display:flex}
+  .handoff-note .ic{width:15px;height:15px;color:var(--gold-700);margin-top:2px;flex:none}
+  .handoff-note b{color:var(--ink-900)}
+  .collapsed{display:flex;align-items:center;gap:10px;padding:12px 15px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);font-size:12.5px;color:var(--ink-500)}
+  .collapsed .ic{width:15px;height:15px;color:var(--ink-300)}
+  .collapsed b{color:var(--ink-900);font-weight:700}
+  .collapsed .go{margin-left:auto;font-size:11.5px;font-weight:800;color:var(--gold-700);cursor:pointer}
+
+  /* quiet posture hero */
+  .flashhero{position:relative;overflow:hidden;border-radius:22px;min-height:270px;padding:26px;background:var(--dark);border:1px solid var(--dark-brd);color:var(--gold-100);display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 36px 70px -36px rgba(23,22,15,.9)}
+  .flashhero .grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,1fr);opacity:.34}
+  .flashhero .grid i{background:linear-gradient(135deg,rgba(203,167,102,.5),rgba(78,108,130,.4));border:1px solid rgba(255,255,255,.06)}
+  .flashhero .grid i:nth-child(2n){background:linear-gradient(135deg,rgba(94,124,82,.42),rgba(203,167,102,.34))}
+  .flashhero .grid i:nth-child(3n){background:linear-gradient(160deg,rgba(78,108,130,.44),rgba(30,26,18,.5))}
+  .flashhero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,22,15,.25),rgba(23,22,15,.9))}
+  .flashhero .fc{position:relative;z-index:2}
+  .flashhero .ann{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:5px 12px}
+  .flashhero h2{margin:14px 0 0;font-size:31px;font-weight:800;letter-spacing:-.025em;line-height:1.1;max-width:22ch}
+  .flashhero .sub{font-size:12.5px;color:rgba(243,236,223,.62);margin-top:8px}
+
+  .note{font-size:12px;color:var(--ink-500);line-height:1.6;padding:0 6px;max-width:96ch}
+  .note b{color:var(--ink-900)}
+  .postnote{display:flex;gap:10px;align-items:flex-start;padding:13px 15px;border-radius:14px;background:rgba(255,255,255,.42);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);font-size:12.5px;line-height:1.6;color:var(--ink-700)}
+  .postnote .ic{width:15px;height:15px;color:var(--gold-700);margin-top:2px;flex:none}
+  .postnote b{color:var(--ink-900)}
+
+  .modeblk{animation:modeIn .5s both var(--ease-out)}
+  [data-when]{display:none}
+  #home[data-mode="plan"] [data-when~="plan"],
+  #home[data-mode="quiet"] [data-when~="quiet"]{display:block}
+  #home[data-mode="plan"] [data-when~="plan"].fx,
+  #home[data-mode="quiet"] [data-when~="quiet"].fx{display:flex}
+  #home[data-mode="plan"] [data-when~="plan"].gx,
+  #home[data-mode="quiet"] [data-when~="quiet"].gx{display:grid}
+  #home[data-mode="plan"] [data-when~="plan"].ix,
+  #home[data-mode="quiet"] [data-when~="quiet"].ix{display:inline}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6.5a4 4 0 0 0-4 4V20"/><circle cx="9.25" cy="7" r="3.5"/><path d="M21.5 20v-1.5a4 4 0 0 0-3-3.87"/><path d="M15.5 3.63a4 4 0 0 1 0 7.5"/></symbol>
+  <symbol id="i-flash" viewBox="0 0 24 24"><path d="m12 3 1.6 5 5 1.6-5 1.6L12 16l-1.6-4.8-5-1.6 5-1.6z"/><path d="m19 15 .7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-3.6-3.6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 6-2.5 7.5-2.5 7.5h17S18 14.5 18 8.5"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></symbol>
+  <symbol id="i-store" viewBox="0 0 24 24"><path d="M3.5 9.5V20h17V9.5"/><path d="M2.5 9.5 4 4h16l1.5 5.5a3 3 0 0 1-5.7 1.3 3 3 0 0 1-5.6 0 3 3 0 0 1-5.7-1.3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v6c0 5 3.2 8 7.5 9.5 4.3-1.5 7.5-4.5 7.5-9.5V6z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5 19 12 7 19.5z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16.2v.1"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-tree" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2.4"/><circle cx="5.5" cy="19.5" r="2.4"/><circle cx="18.5" cy="19.5" r="2.4"/><path d="M12 6.9v4.6M5.5 17.1v-2.4a3 3 0 0 1 3-3h7a3 3 0 0 1 3 3v2.4"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.4-7.5-9.4A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7.5 2.6C19.5 15.6 12 20 12 20"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.1"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+</defs></svg>
+
+<div class="stage">
+  <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+
+  <div class="wrap">
+
+    <div class="cap">
+      <div class="eye"><span class="dia"></span>Setnayan · user home · the delta</div>
+      <h1>Two things the home is missing: the family tree, and a sense of whether anything is in motion.</h1>
+      <p class="lede">
+        This is <b>the same shipped home</b> — same glass, same Events row, same Alaala tile, same Spaces rows.
+        Only two things are new. <b>A Family tile</b> joins the bento (the four slots you declare, and the lola ·
+        tita · pinsan · bilas that appear without anyone typing them). And the home knows
+        <b>whether you have anything in motion</b> — an account-level fact, so the same components re-rank.
+      </p>
+      <p class="lede" style="color:var(--ink-500)">
+        <b style="color:var(--ink-900)">The home never becomes an event.</b> Day-of already ships on the
+        <b style="color:var(--ink-900)">event dashboard</b> — banner, live schedule, photo wall, your-table,
+        broadcast. So on the day, the home does one thing: <b style="color:var(--ink-900)">it points.</b>
+        Toggle "an event is today" to see the handoff.
+      </p>
+      <div class="legend">
+        <span class="shp">shipped</span> already live in prod ·
+        <span class="prp">proposed</span> the delta ·
+        <span class="smp">sample</span> placeholder data
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="modesw" id="modesw" role="tablist" aria-label="Account posture">
+          <button class="msw on" data-mode="plan" role="tab" aria-selected="true">In motion<span class="mswm">3 events · logistics leads</span></button>
+          <button class="msw" data-mode="quiet" role="tab" aria-selected="false">Quiet<span class="mswm">nothing due · Alaala sings</span></button>
+        </div>
+        <button class="todaysw" id="todaysw" aria-pressed="false"><span class="dot"></span>An event is today</button>
+      </div>
+    </div>
+
+    <div class="winwrap">
+      <div class="frame-label">Desktop · chrome-less launcher · the live composition</div>
+
+      <div class="win">
+        <span class="winwash"></span>
+        <div class="titlebar">
+          <span class="tl r"></span><span class="tl y"></span><span class="tl g"></span>
+          <div class="urlpill"><span><svg class="ic"><use href="#i-lock"/></svg>setnayan.com/dashboard</span></div>
+        </div>
+
+        <div class="canvas" id="home" data-mode="plan">
+
+          <div class="chl-head">
+            <div class="brand"><span class="mk">S</span><span class="wm">SETNAYAN</span></div>
+            <div class="utilpill">
+              <button class="ub" aria-label="Alerts"><svg class="ic"><use href="#i-bell"/></svg><span class="pd"></span></button>
+              <button class="uav" aria-label="You">I</button>
+            </div>
+          </div>
+
+          <!-- ══════════ THE HANDOFF — the ONLY thing the home does on the day ══════════ -->
+          <div class="handoff">
+            <span class="capiz"></span>
+            <span class="lv"></span>
+            <span class="htx">
+              <span class="h1x">Today is the day — Cale &amp; Ice.</span>
+              <span class="h2x">Ceremony in 42 minutes · Taal Vista, Tagaytay</span>
+            </span>
+            <button class="goev">Open the day-of board <svg class="ic"><use href="#i-arrow"/></svg></button>
+          </div>
+          <div class="handoff-note">
+            <svg class="ic"><use href="#i-info"/></svg>
+            <div><b>That strip is the whole day-of change to the home.</b> It does not become the event.
+              Day-of is an <b>event</b> state, not an account state — and it already ships on the event dashboard
+              (<b>banner · live schedule · photo wall · your table · broadcast · get help</b>). The home's one job
+              today is to hand you over. <span class="prp">proposed</span></div>
+          </div>
+
+          <!-- ══════════ HERO — same block, two registers ══════════ -->
+          <div class="hero">
+            <div class="greet">Kumusta, Ice · welcome back</div>
+
+            <div data-when="plan" class="modeblk">
+              <h2>Where to? <span class="soft">Pick up where you left off.</span></h2>
+              <div class="stat">3 weddings in motion · <b>62</b> things need you</div>
+            </div>
+            <div data-when="quiet" class="modeblk">
+              <h2>Nothing needs you. <span class="soft">So — look back.</span></h2>
+              <div class="stat"><b>1,284</b> moments · <b>34</b> people · across <b>6</b> celebrations</div>
+            </div>
+
+            <div class="cmd"><svg class="ic"><use href="#i-search"/></svg><div class="ph">Search events, people, vendors — or jump to a task</div><span class="shp">shipped</span><span class="kbd">⌘K</span></div>
+          </div>
+
+          <!-- ══════════ QUIET: Alaala takes the hero ══════════ -->
+          <div data-when="quiet" class="modeblk">
+            <div class="flashhero">
+              <div class="grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="scrim"></div>
+              <div class="fc">
+                <span class="ann"><svg class="ic" style="width:12px;height:12px"><use href="#i-flash"/></svg>One year ago today</span>
+                <h2>Cale &amp; Ice — Tagaytay, in the rain.</h2>
+                <div class="sub">Your Life-Flash re-cut itself this morning. 90 seconds. <span class="smp dk">sample</span></div>
+                <button class="lf-play"><svg class="ic"><use href="#i-play"/></svg>Play Life-Flash</button>
+              </div>
+            </div>
+            <div class="postnote" style="margin-top:14px">
+              <svg class="ic"><use href="#i-info"/></svg>
+              <div><b>This is the inversion.</b> Same tile, same data as the small obsidian card in Planning — it just earns the hero when nothing is due. The anniversary line and the auto-recut are the <b>trigger</b> Life-Flash ships without today: it's built and live, but nothing ever brings it to you. <span class="prp">proposed</span></div>
+            </div>
+          </div>
+
+          <!-- ══════════ EVENTS — shipped, unchanged in Planning ══════════ -->
+          <div data-when="plan" class="modeblk">
+            <div class="sec-h"><div class="l"><span class="lab">Events</span><span class="sub">ongoing &amp; upcoming</span><span class="shp">shipped</span></div></div>
+            <div class="evrow">
+              <button class="ev">
+                <div class="top"><span class="badge">KASAL</span><span class="mg">C&amp;I</span></div>
+                <div class="body"><div class="name">Cale &amp; Ice</div><div class="date">Dec 18</div>
+                  <div class="foot"><div class="status"><div class="ring" style="--p:6"><div class="in">6%</div></div><div><div class="s1">157 days to go</div><div class="s2">6% planned</div></div></div>
+                    <span class="pill-over"><svg class="ic"><use href="#i-alert"/></svg><b>37</b>&nbsp;tasks overdue</span></div></div>
+              </button>
+              <button class="ev">
+                <div class="top"><span class="badge">KASAL</span><span class="mg">M&amp;J</span></div>
+                <div class="body"><div class="name">Maria &amp; Jose</div><div class="date">Dec 12</div>
+                  <div class="foot"><div class="status"><div class="ring" style="--p:18"><div class="in">18%</div></div><div><div class="s1">151 days to go</div><div class="s2">18% planned</div></div></div>
+                    <span class="pill-over"><svg class="ic"><use href="#i-alert"/></svg><b>25</b>&nbsp;tasks overdue</span></div></div>
+              </button>
+              <button class="ev">
+                <div class="top"><span class="badge">BINYAG</span><span class="mg">N</span></div>
+                <div class="body"><div class="name">Nina&rsquo;s Binyag <span class="smp">sample</span></div><div class="date">Aug 9</div>
+                  <div class="foot"><div class="status"><div class="ring" style="--p:64"><div class="in">64%</div></div><div><div class="s1">25 days to go</div><div class="s2">64% ready</div></div></div></div></div>
+              </button>
+              <button class="evghost"><svg class="ic"><use href="#i-plus"/></svg><span>New event</span></button>
+            </div>
+          </div>
+
+          <!-- Quiet: events collapse to one honest line -->
+          <div data-when="quiet" class="collapsed fx modeblk">
+            <svg class="ic"><use href="#i-cal"/></svg>
+            <span><b>No events in motion.</b> Six celebrated.</span>
+            <span class="go">Plan something new →</span>
+          </div>
+
+          <!-- ══════════ PLANNING: Alaala is a thin warm ribbon, not a hero ══════════ -->
+          <div data-when="plan" class="ribbon fx modeblk">
+            <svg class="ic"><use href="#i-flash"/></svg>
+            <div><div class="t">12 moments gathered so far</div><div class="s">Today's chaos is already becoming next year's film.</div></div>
+            <span class="prp" style="background:rgba(255,255,255,.12);color:var(--gold-300)">proposed</span>
+            <button class="go">Alaala →</button>
+          </div>
+
+          <!-- ══════════ THE BENTO ══════════ -->
+          <div class="bento gx" data-when="plan quiet">
+
+            <!-- ░░░ THE FAMILY TILE — THE DELTA ░░░ -->
+            <div class="tile glass fam">
+              <div class="tile-eye"><svg class="ic"><use href="#i-tree"/></svg>Family<span class="prp" style="margin-left:auto">proposed</span></div>
+
+              <div class="slots">
+                <div class="slot">
+                  <span class="av">R</span>
+                  <span class="tx"><span class="role">Magulang</span><span class="nm">Rosa Casasola</span></span>
+                  <span class="st"><span class="tick"><svg class="ic"><use href="#i-check"/></svg></span></span>
+                </div>
+                <div class="slot">
+                  <span class="av">C</span>
+                  <span class="tx"><span class="role">Asawa</span><span class="nm">Cale</span></span>
+                  <span class="st"><span class="tick"><svg class="ic"><use href="#i-check"/></svg></span></span>
+                </div>
+                <div class="slot pend">
+                  <span class="av">B</span>
+                  <span class="tx"><span class="role">Kapatid</span><span class="nm">Ate Baby</span></span>
+                  <span class="st"><span class="waiting">waiting</span></span>
+                </div>
+                <div class="slot empty">
+                  <span class="av"><svg class="ic" style="width:12px;height:12px"><use href="#i-plus"/></svg></span>
+                  <span class="tx"><span class="role">Anak</span><span class="nm">Add</span></span>
+                </div>
+              </div>
+
+              <div class="derived">
+                <div class="dh"><svg class="ic"><use href="#i-users"/></svg>Nobody typed these</div>
+                <div class="kin">
+                  <span class="k"><i>LR</i>Lola Rosa <s>2 hops</s></span>
+                  <span class="k"><i>TB</i>Tita Baby <s>2</s></span>
+                  <span class="k"><i>MK</i>Pinsan Mikko <s>3</s></span>
+                  <span class="k"><i>AR</i>Bilas Ariel <s>3</s></span>
+                  <span class="k"><i>+9</i><s>more</s></span>
+                </div>
+                <div class="hop">
+                  Your <b>Mama</b> filled her own four slots. Her mother became <b>your lola</b>; her sibling became
+                  <b>your tita</b>; that tita's child became <b>your pinsan</b>. Extended kin is never stored —
+                  it's worked out when you look, then let go.
+                </div>
+              </div>
+
+              <div class="layer">
+                <div class="lh"><svg class="ic"><use href="#i-heart"/></svg>Ninong &amp; Ninang · ritual</div>
+                <div class="lb">Not a form. <b>The ceremony makes the link</b> — binyag, kasal, kumpil. Kumpare and kumare form on their own.</div>
+                <span class="ritual-note"><svg class="ic"><use href="#i-info"/></svg>Created by the event, never typed in</span>
+              </div>
+
+              <div class="layer">
+                <div class="lh"><svg class="ic"><use href="#i-users"/></svg>Friends · separate</div>
+                <div class="lb">A lighter connection, <b>kept out of the tree</b>. Friend links never carry through to anyone else — they stop at the two of you.</div>
+              </div>
+
+              <div class="consent">
+                <svg class="ic"><use href="#i-lock"/></svg>
+                <div><b>Ate Baby hasn't confirmed yet</b> — so nothing shows anywhere, not even her name to anyone but you. You can't add someone to your family. You can only ask.</div>
+              </div>
+            </div>
+
+            <!-- right column -->
+            <div style="display:flex;flex-direction:column;gap:16px">
+
+              <!-- Alaala tile — shipped, but demoted in Planning, absent in Quiet (it took the hero) -->
+              <div class="tile dark" data-when="plan">
+                <span class="capiz"></span>
+                <div class="tile-eye"><svg class="ic"><use href="#i-flash"/></svg>Alaala · Life-Flash<span class="shp" style="margin-left:auto">shipped</span></div>
+                <h3>See your whole life — while you&rsquo;re still in it.</h3>
+                <div class="who"><span class="av">I</span><span class="meta">12 moments · 1 person who made them</span></div>
+                <button class="lf-play"><svg class="ic"><use href="#i-play"/></svg>Play Life-Flash</button>
+                <div class="divider"></div>
+                <div class="lens-lab">Lenses</div>
+                <div class="chips">
+                  <button class="chip on">Recent</button><button class="chip">Owned</button>
+                  <button class="chip">Attended</button><button class="chip">People</button><button class="chip">With me</button>
+                </div>
+              </div>
+
+              <div class="tile glass" data-when="plan">
+                <div class="tile-eye"><svg class="ic"><use href="#i-flash"/></svg>Setnayan AI · The Watch<span class="shp" style="margin-left:auto">shipped</span></div>
+                <div class="big">62 <span class="u">things need you</span></div>
+                <div class="watchrow"><span class="d" style="background:var(--warning)"></span>Cale &amp; Ice<span class="amt">37 overdue</span></div>
+                <div class="watchrow"><span class="d" style="background:var(--warning)"></span>Maria &amp; Jose<span class="amt">25 overdue</span></div>
+                <div class="quiet"><span class="d"></span>Everything else — quiet</div>
+              </div>
+
+              <div class="tile glass">
+                <div class="tile-eye"><svg class="ic"><use href="#i-store"/></svg>Spaces<span class="shp" style="margin-left:auto">shipped</span></div>
+                <div style="margin-top:6px">
+                  <button class="sp-row"><span class="sic"><svg class="ic"><use href="#i-store"/></svg></span><span class="stx"><span class="sn">SetnaProd</span><span class="sr">Vendor shop · 2 need a reply</span></span><svg class="ic ar"><use href="#i-arrow"/></svg></button>
+                  <button class="sp-row"><span class="sic"><svg class="ic"><use href="#i-shield"/></svg></span><span class="stx"><span class="sn">HQ</span><span class="sr">Admin console · 5 awaiting review</span></span><svg class="ic ar"><use href="#i-arrow"/></svg></button>
+                </div>
+                <div class="sp-lab">Samahan · communities</div>
+                <button class="sp-row"><span class="sic"><svg class="ic"><use href="#i-users"/></svg></span><span class="stx"><span class="sn">Sto. Niño Parish <span class="smp">sample</span></span><span class="sr">Community · 48 members</span></span><svg class="ic ar"><use href="#i-arrow"/></svg></button>
+                <button class="sp-row"><span class="sic"><svg class="ic"><use href="#i-plus"/></svg></span><span class="stx"><span class="sn">Create a Samahan</span><span class="sr">your barkada, parish, or clan</span></span></button>
+              </div>
+
+              <div class="postnote fx" data-when="quiet">
+                <svg class="ic"><use href="#i-info"/></svg>
+                <div><b>Quiet is where the tree matters most.</b> No wedding to run, no vendor to pay — but a graph that's been quietly filling itself from every binyag, debut and kasal you've been to. This is the only screen in the product that gets <b>better</b> the longer you do nothing.</div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <p class="note" style="padding-top:6px">
+      <b>What is actually new here:</b> one tile and one behaviour. Everything else on this screen is the shipped
+      home reproduced as-is. The Family tile shows the model exactly as it's locked in
+      <b>person_connections</b> — four declarable slots, mutual confirm, derived kin, ritual layer created by
+      ceremonies, friends kept out of the tree. The two postures re-rank the same components by one
+      account-level fact: is anything in motion?
+      <b>The derivation engine behind the gold panel is not built yet</b> — that panel is the specification for it.
+      <br><br>
+      <b>The boundary this prototype keeps:</b> the home is the switchboard <i>above</i> every event; the event
+      dashboard is the workspace <i>inside</i> one. Day-of is an event fact, so it stays on the event dashboard
+      where its nine components already ship. The home only ever points at it.
+    </p>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var home=document.getElementById('home');
+  var sw=document.getElementById('modesw');
+  var today=document.getElementById('todaysw');
+  if(!home||!sw)return;
+  if(today){
+    today.addEventListener('click',function(){
+      var on=today.getAttribute('aria-pressed')==='true';
+      today.setAttribute('aria-pressed',on?'false':'true');
+      home.setAttribute('data-today',on?'0':'1');
+    });
+  }
+  sw.addEventListener('click',function(e){
+    var b=e.target.closest('.msw'); if(!b)return;
+    sw.querySelectorAll('.msw').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-selected',x===b?'true':'false');});
+    home.setAttribute('data-mode',b.dataset.mode);
+    home.querySelectorAll('.modeblk').forEach(function(el){
+      el.style.animation='none'; void el.offsetWidth; el.style.animation='';
+    });
+  });
+  document.querySelectorAll('.chip').forEach(function(c){
+    c.addEventListener('click',function(){
+      c.parentNode.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('on',x===c);});
+    });
+  });
+})();
+</script>

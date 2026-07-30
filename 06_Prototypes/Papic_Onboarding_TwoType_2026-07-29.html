@@ -1,0 +1,374 @@
+<title>Papic onboarding — two-type prototype</title>
+<style>
+  :root{
+    --ground:#F7F5F0;
+    --ink:#211E19;
+    --ink-soft:rgba(33,30,25,.66);
+    --ink-faint:rgba(33,30,25,.45);
+    --line:rgba(33,30,25,.15);
+    --line-soft:rgba(33,30,25,.09);
+    --glass:rgba(255,255,255,.72);
+    --glass-deep:rgba(255,255,255,.9);
+    --gold:#A9884B;
+    --gold-soft:rgba(169,136,75,.12);
+    --terra:#BF6749;
+    --terra-soft:rgba(191,103,73,.10);
+    --ok:#3E7D4E;
+    --ok-soft:rgba(62,125,78,.12);
+    --note-ground:rgba(33,30,25,.035);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ground:#1B1813;
+      --ink:#ECE6DA;
+      --ink-soft:rgba(236,230,218,.68);
+      --ink-faint:rgba(236,230,218,.45);
+      --line:rgba(236,230,218,.18);
+      --line-soft:rgba(236,230,218,.10);
+      --glass:rgba(255,255,255,.055);
+      --glass-deep:rgba(255,255,255,.09);
+      --gold:#C9A45C;
+      --gold-soft:rgba(201,164,92,.14);
+      --terra:#D07E5E;
+      --terra-soft:rgba(208,126,94,.13);
+      --ok:#6FAF7D;
+      --ok-soft:rgba(111,175,125,.14);
+      --note-ground:rgba(255,255,255,.04);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#1B1813; --ink:#ECE6DA; --ink-soft:rgba(236,230,218,.68);
+    --ink-faint:rgba(236,230,218,.45); --line:rgba(236,230,218,.18);
+    --line-soft:rgba(236,230,218,.10); --glass:rgba(255,255,255,.055);
+    --glass-deep:rgba(255,255,255,.09); --gold:#C9A45C; --gold-soft:rgba(201,164,92,.14);
+    --terra:#D07E5E; --terra-soft:rgba(208,126,94,.13); --ok:#6FAF7D;
+    --ok-soft:rgba(111,175,125,.14); --note-ground:rgba(255,255,255,.04);
+  }
+  :root[data-theme="light"]{
+    --ground:#F7F5F0; --ink:#211E19; --ink-soft:rgba(33,30,25,.66);
+    --ink-faint:rgba(33,30,25,.45); --line:rgba(33,30,25,.15);
+    --line-soft:rgba(33,30,25,.09); --glass:rgba(255,255,255,.72);
+    --glass-deep:rgba(255,255,255,.9); --gold:#A9884B; --gold-soft:rgba(169,136,75,.12);
+    --terra:#BF6749; --terra-soft:rgba(191,103,73,.10); --ok:#3E7D4E;
+    --ok-soft:rgba(62,125,78,.12); --note-ground:rgba(33,30,25,.035);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Hanken Grotesk","Avenir Next","Segoe UI",system-ui,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:2.5rem 1.25rem 4rem;
+  }
+  .mono{font-family:"Space Mono",ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+
+  .wrap{max-width:1060px;margin:0 auto}
+  .masthead{max-width:640px;margin-bottom:2.25rem}
+  .eye{
+    font-family:"Space Mono",ui-monospace,Menlo,monospace;
+    font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:.5rem;
+  }
+  h1{font-size:1.55rem;font-weight:700;letter-spacing:-.01em;text-wrap:balance;line-height:1.25}
+  .masthead p{color:var(--ink-soft);margin-top:.5rem;font-size:.95rem;max-width:56ch}
+
+  .cols{display:grid;grid-template-columns:minmax(320px,430px) minmax(280px,1fr);gap:2.5rem;align-items:start}
+  @media (max-width:820px){.cols{grid-template-columns:1fr}}
+
+  /* ── the onboarding column, as the couple sees it ─────────────── */
+  .flow{display:flex;flex-direction:column;gap:1rem}
+  .step-chrome{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:0 .25rem;color:var(--ink-faint);
+    font-family:"Space Mono",ui-monospace,Menlo,monospace;font-size:.68rem;
+    letter-spacing:.1em;text-transform:uppercase;
+  }
+  .card{
+    background:var(--glass);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:1.4rem 1.35rem 1.5rem;
+    backdrop-filter:blur(6px);
+  }
+  .card-eye{display:flex;align-items:center;gap:.55rem;margin-bottom:.7rem}
+  .card-eye .tag{
+    font-family:"Space Mono",ui-monospace,Menlo,monospace;
+    font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;
+  }
+  .tag-on{color:var(--ok);background:var(--ok-soft);border:1px solid transparent;border-radius:99px;padding:.18rem .6rem}
+  .tag-paid{color:var(--gold);background:var(--gold-soft);border-radius:99px;padding:.18rem .6rem}
+  .card h2{font-size:1.18rem;font-weight:700;line-height:1.3;text-wrap:balance}
+  .card .sub{color:var(--ink-soft);font-size:.9rem;margin-top:.4rem}
+
+  .live-strip{
+    display:flex;align-items:center;gap:.6rem;
+    margin-top:1rem;padding:.65rem .8rem;
+    background:var(--ok-soft);border-radius:12px;
+    font-size:.85rem;color:var(--ink);
+  }
+  .dot{width:.5rem;height:.5rem;border-radius:99px;background:var(--ok);flex:none}
+
+  /* two-type panels */
+  .types{display:flex;flex-direction:column;gap:.9rem;margin-top:1.1rem}
+  .type{
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    background:var(--glass-deep);
+  }
+  .type-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:.75rem;
+    padding:.85rem 1rem .15rem;
+  }
+  .type-head h3{font-size:1rem;font-weight:700}
+  .type-head .kind{
+    font-family:"Space Mono",ui-monospace,Menlo,monospace;
+    font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);
+    white-space:nowrap;
+  }
+  .type-desc{padding:0 1rem;color:var(--ink-soft);font-size:.84rem}
+  .ladder{list-style:none;margin:.8rem .6rem .7rem;display:flex;flex-direction:column}
+  .ladder li{
+    display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+    padding:.5rem .5rem;border-top:1px solid var(--line-soft);
+    font-size:.88rem;
+  }
+  .ladder li:first-child{border-top:none}
+  .ladder .pts{font-weight:600}
+  .ladder .php{color:var(--ink-soft)}
+  .ladder li.free{
+    background:var(--terra-soft);border-radius:9px;border-top:none;
+  }
+  .ladder li.free .php{color:var(--terra);font-weight:700}
+  .ladder li.free + li{border-top:none}
+  .per-cam{color:var(--ink-faint);font-size:.72rem;padding:0 1rem .8rem;font-style:italic}
+
+  .currency{
+    margin-top:1rem;padding:.6rem .8rem;border:1px dashed var(--line);
+    border-radius:10px;color:var(--ink-soft);font-size:.8rem;
+    display:flex;gap:1.2rem;justify-content:center;
+  }
+  .runway{margin-top:.9rem;color:var(--ink-soft);font-size:.84rem}
+  .runway strong{color:var(--ink)}
+  .fineprint{margin-top:.7rem;color:var(--ink-faint);font-size:.74rem}
+
+  /* AI card */
+  .price-line{display:flex;align-items:baseline;gap:.5rem;margin-top:.2rem}
+  .price-line .php{font-size:1.05rem;font-weight:700}
+  .price-line .per{color:var(--ink-faint);font-size:.78rem}
+  .groups{display:flex;flex-direction:column;gap:.85rem;margin-top:1rem}
+  .group h4{font-size:.86rem;font-weight:700;margin-bottom:.3rem}
+  .group ul{list-style:none}
+  .group li{
+    color:var(--ink-soft);font-size:.84rem;padding:.18rem 0 .18rem 1.1rem;position:relative;
+  }
+  .group li::before{content:"";position:absolute;left:.15rem;top:.72em;width:.32rem;height:.32rem;border-radius:99px;background:var(--gold)}
+  .route-btn{
+    display:block;width:100%;margin-top:1.15rem;padding:.8rem;
+    border:1px solid var(--gold);border-radius:12px;background:transparent;
+    color:var(--gold);font-family:inherit;font-size:.92rem;font-weight:700;cursor:pointer;
+    text-align:center;
+  }
+  .route-btn:focus-visible,.continue:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .continue{
+    display:block;width:100%;padding:.95rem;margin-top:.25rem;
+    background:var(--ink);color:var(--ground);border:none;border-radius:14px;
+    font-family:inherit;font-size:.98rem;font-weight:700;cursor:pointer;
+  }
+  .skip-note{text-align:center;color:var(--ink-faint);font-size:.76rem;margin-top:.55rem}
+
+  /* ── build-notes rail ─────────────────────────────────────────── */
+  .notes{position:sticky;top:1.5rem;display:flex;flex-direction:column;gap:1rem}
+  @media (max-width:820px){.notes{position:static;margin-top:2.5rem}}
+  .note{
+    background:var(--note-ground);border:1px solid var(--line-soft);
+    border-radius:14px;padding:1rem 1.1rem;
+  }
+  .note h5{
+    font-family:"Space Mono",ui-monospace,Menlo,monospace;
+    font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--ink-faint);margin-bottom:.5rem;
+  }
+  .note p,.note li{font-size:.84rem;color:var(--ink-soft)}
+  .note ul{list-style:none;display:flex;flex-direction:column;gap:.45rem}
+  .note li{padding-left:1rem;position:relative}
+  .note li::before{content:"—";position:absolute;left:0;color:var(--ink-faint)}
+  .note .flag::before{content:"⚠";color:var(--terra)}
+  .note table{border-collapse:collapse;width:100%;font-size:.8rem}
+  .note th{text-align:left;font-weight:600;color:var(--ink-faint);padding:.3rem .4rem;border-bottom:1px solid var(--line-soft);font-size:.72rem}
+  .note td{padding:.3rem .4rem;border-bottom:1px solid var(--line-soft);color:var(--ink-soft)}
+  .note td:last-child,.note th:last-child{text-align:right}
+  .scrollx{overflow-x:auto}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eye">Prototype · onboarding services step · 2026-07-29</div>
+    <h1>Papic in onboarding — two types, one card</h1>
+    <p>The step every flow gets after the persona reveal, before congrats. Papic is already
+    switched on when the couple reaches it — the card informs, it never asks for payment.
+    Left: what the couple sees. Right: what this changes vs. what ships today.</p>
+  </header>
+
+  <div class="cols">
+    <!-- ═══════════ the couple's screen ═══════════ -->
+    <div class="flow">
+      <div class="step-chrome"><span>Step 5 · Your services</span><span>●●●●○</span></div>
+
+      <!-- CARD 1 — PAPIC -->
+      <article class="card">
+        <div class="card-eye">
+          <span class="tag tag-on">Included · already on</span>
+        </div>
+        <h2>Store every photo as you prepare — right through to your wedding day.</h2>
+        <p class="sub">Every guest's phone becomes a camera. Photos and 10-second clips land
+        in your gallery, tagged, in real time — starting today, not on the day itself.</p>
+
+        <div class="live-strip">
+          <span class="dot" aria-hidden="true"></span>
+          <span><strong>Papic is live on this event.</strong> Your free shots and guest QR are ready.</span>
+        </div>
+
+        <div class="types">
+          <!-- PAPIC POOL -->
+          <section class="type">
+            <div class="type-head">
+              <h3>Papic Pool</h3>
+              <span class="kind">Unlimited cameras · shared shots</span>
+            </div>
+            <p class="type-desc">One shared pot for the whole event — every guest who scans
+            your QR shoots from it. Add shots any time; they never expire before your day.</p>
+            <ul class="ladder mono">
+              <li class="free"><span class="pts">50 pts</span><span class="php">Free — yours now</span></li>
+              <li><span class="pts">+3,000 pts</span><span class="php">₱1,000</span></li>
+              <li><span class="pts">+6,000 pts</span><span class="php">₱2,000</span></li>
+              <li><span class="pts">+10,000 pts</span><span class="php">₱3,000</span></li>
+            </ul>
+          </section>
+
+          <!-- PAPIC ONE -->
+          <section class="type">
+            <div class="type-head">
+              <h3>Papic One</h3>
+              <span class="kind">Dedicated camera · its own shots</span>
+            </div>
+            <p class="type-desc">A named camera with its own QR and its own shots — for your
+            best friend, your ninang, the one person you trust to catch everything. Their
+            shots never draw from the shared pool.</p>
+            <ul class="ladder mono">
+              <li class="free"><span class="pts">5 pts</span><span class="php">Free — 1 camera</span></li>
+              <li><span class="pts">50 pts</span><span class="php">₱50</span></li>
+              <li><span class="pts">100 pts</span><span class="php">₱100</span></li>
+            </ul>
+            <p class="per-cam">One free camera to try it — then buy as many dedicated cameras as
+            you want, and reload any of them with the same rungs when they run low. No new QR needed.</p>
+          </section>
+        </div>
+
+        <div class="currency mono">
+          <span>1 photo = 1 pt</span>
+          <span>10-sec clip = 8 pts</span>
+        </div>
+
+        <p class="runway"><strong>Covered from today until your event date.</strong>
+        A 14-month engagement means 14 months of storage — the window is free, however long it is.</p>
+        <p class="fineprint">Guests shoot with any phone — nothing to install. Top up any time
+        from your Papic studio.</p>
+      </article>
+
+      <!-- CARD 2 — SETNAYAN AI -->
+      <article class="card">
+        <div class="card-eye">
+          <span class="tag tag-paid">Setnayan AI</span>
+        </div>
+        <h2>A planner that already knows every vendor in the room.</h2>
+        <div class="price-line">
+          <span class="php mono">₱1,499</span>
+          <span class="per">one-time · yours through your wedding</span>
+        </div>
+
+        <div class="groups">
+          <section class="group">
+            <h4>Finds the right people</h4>
+            <ul>
+              <li>Ranks every vendor by how well they fit</li>
+              <li>Sorts by distance to your reception</li>
+              <li>Sends your first inquiry to the best fit</li>
+            </ul>
+          </section>
+          <section class="group">
+            <h4>The quiet secretary that never loses the thread</h4>
+            <ul>
+              <li>Tracks every deadline for you</li>
+              <li>Chases the vendors who go quiet</li>
+              <li>Tells you the one thing to do next</li>
+            </ul>
+          </section>
+          <section class="group">
+            <h4>Practically impossible to keep by hand</h4>
+            <ul>
+              <li>Flags a payment before it's due</li>
+              <li>Warns you before you go over budget</li>
+              <li>Notices when someone eyes your date</li>
+            </ul>
+          </section>
+        </div>
+
+        <button class="route-btn" type="button">See Setnayan AI in your studio →</button>
+      </article>
+
+      <button class="continue" type="button">Continue — Papic is on</button>
+      <p class="skip-note">No payment in this step. Upgrades live in your studio, whenever you want them.</p>
+    </div>
+
+    <!-- ═══════════ build notes ═══════════ -->
+    <aside class="notes">
+      <div class="note">
+        <h5>What this changes vs. shipped</h5>
+        <ul>
+          <li class="flag"><strong>Pool rungs come back on sale.</strong> All four Pool SKUs are
+          <span class="mono">is_active=false</span> today, deliberately — the 2026-07-22 guardrail said
+          don't GA them until purge + clip compression ship. This prototype supersedes that: needs your
+          explicit "go" to reactivate.</li>
+          <li><strong>New Pool prices.</strong> Catalog rows say ₱999 / ₱1,999 / ₱2,999 — this says
+          ₱1,000 / ₱2,000 / ₱3,000. Round numbers replace charm pricing.</li>
+          <li><strong>Papic One becomes a ladder.</strong> Today One is flat ₱100 = 250 pts.
+          New: ONE free camera with 5 pts, then per-camera rungs 50 pts ₱50 · 100 pts ₱100 —
+          a clean ₱1 = 1 shot rule.</li>
+          <li><strong>Onboarding card un-blanks.</strong> The card maps to the two live models instead
+          of the retired <span class="mono">PAPIC_SEATS</span>/<span class="mono">PAPIC_GUEST</span> codes.</li>
+        </ul>
+      </div>
+
+      <div class="note">
+        <h5>Per-photo math @ 1 pt/photo · 8 pts/clip</h5>
+        <div class="scrollx">
+          <table class="mono">
+            <tr><th>Rung</th><th>Photos</th><th>₱ / photo</th></tr>
+            <tr><td>Pool free · 50 pts</td><td>50</td><td>—</td></tr>
+            <tr><td>Pool +3,000 · ₱1,000</td><td>3,000</td><td>₱0.33</td></tr>
+            <tr><td>Pool +6,000 · ₱2,000</td><td>6,000</td><td>₱0.33</td></tr>
+            <tr><td>Pool +10,000 · ₱3,000</td><td>10,000</td><td>₱0.30</td></tr>
+            <tr><td>One free · 5 pts</td><td>5</td><td>—</td></tr>
+            <tr><td>One 50 · ₱50</td><td>50</td><td>₱1.00</td></tr>
+            <tr><td>One 100 · ₱100</td><td>100</td><td>₱1.00</td></tr>
+          </table>
+        </div>
+        <p style="margin-top:.6rem">Coherent everywhere: free pool = 50 photos, free One camera =
+        5 photos, One = a clean <strong>₱1 = 1 photo</strong>, and video (8 pts) prices above photos —
+        matching what clips actually cost to store. Clip constant changes 7 → 8 in the capture path.</p>
+      </div>
+
+      <div class="note">
+        <h5>What stays locked</h5>
+        <ul>
+          <li>No checkout in onboarding — the card informs, upgrades live in the studio.</li>
+          <li>Papic ON free for all 16 types; free pool metered (armed in prod 2026-07-28).</li>
+          <li>Setnayan AI introduced, never free; hidden on vendor-free simple events.</li>
+          <li>Card says guests only until the DPO gate opens vendor capture.</li>
+          <li>Runway promise: window pinned to event date, start unbounded, never a price input.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>

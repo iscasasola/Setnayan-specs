@@ -1,0 +1,485 @@
+<style>
+  :root{
+    --paper:#FBFAF7; --surface:#FFFFFF; --hairline:#EDE8DE; --line:#E1DCD1;
+    --ink-300:#8A857B; --ink-500:#6E6A62; --ink-700:#57544D; --ink-900:#1B1A17;
+    --gold-100:#F3ECDF; --gold-300:#CBA766; --gold-500:#A9834B; --gold-600:#95713D; --gold-700:#8A6B39;
+    --success:#5E7C52; --success-soft:#E9EEE3; --warning:#B77E2E; --warn-soft:#F6EAD2;
+    --danger:#A6483B; --info:#4E6C82; --info-soft:#E2EAEF;
+    --font:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"Space Mono",ui-monospace,"SF Mono",Menlo,monospace;
+    --glass:rgba(255,255,255,.5); --glass-2:rgba(255,255,255,.62); --glass-brd:rgba(255,255,255,.72);
+    --blur:blur(22px) saturate(1.5);
+    --dark:rgba(23,22,15,.86); --dark-brd:rgba(255,255,255,.18);
+    --sh-tile:0 18px 40px -26px rgba(30,26,18,.4);
+    --sh-hi:0 28px 54px -30px rgba(30,26,18,.5);
+    --sh-win:0 60px 100px -60px rgba(30,26,18,.6);
+    --ease:cubic-bezier(.2,.7,.2,1); --ease-out:cubic-bezier(.16,1,.3,1);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  button{font-family:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--gold-500);outline-offset:2px;border-radius:6px}
+  .ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  @keyframes winIn{from{opacity:0;transform:translateY(30px) scale(.985);filter:blur(12px)}to{opacity:1;transform:none;filter:blur(0)}}
+  @keyframes shim{from{transform:translateX(-130%)}to{transform:translateX(360%)}}
+  @keyframes lensIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+  @keyframes drift1{from{transform:translate(0,0) scale(1)}to{transform:translate(70px,44px) scale(1.1)}}
+  @keyframes drift2{from{transform:translate(0,0) scale(1.06)}to{transform:translate(-80px,30px) scale(1)}}
+  @keyframes up{from{transform:translateY(102%);opacity:.4}to{transform:none;opacity:1}}
+
+  .stage{position:relative;overflow:hidden;font-family:var(--font);color:var(--ink-900);min-height:100%;padding:26px 20px 46px;
+    background:#E8E4DA;
+    background-image:radial-gradient(50% 60% at 15% 4%,rgba(203,167,102,.30),transparent 62%),radial-gradient(55% 65% at 90% 22%,rgba(94,124,82,.15),transparent 62%),radial-gradient(50% 62% at 45% 100%,rgba(78,108,130,.17),transparent 62%);
+    -webkit-font-smoothing:antialiased}
+  .blob{position:absolute;border-radius:999px;filter:blur(72px);pointer-events:none;z-index:0}
+  .b1{width:620px;height:500px;left:-6%;top:-14%;background:radial-gradient(closest-side,rgba(203,167,102,.38),transparent 72%);animation:drift1 46s ease-in-out infinite alternate}
+  .b2{width:720px;height:560px;right:-12%;top:6%;background:radial-gradient(closest-side,rgba(94,124,82,.24),transparent 72%);animation:drift2 58s ease-in-out infinite alternate}
+  .wrap{position:relative;z-index:1;max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+  .cap{display:flex;flex-direction:column;gap:10px;padding:2px 6px;animation:rise .7s both var(--ease-out)}
+  .cap .eye{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--ink-500)}
+  .cap .eye .dia{width:7px;height:7px;background:var(--gold-500);transform:rotate(45deg);flex:none}
+  .cap h1{margin:0;font-size:23px;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
+  .cap p.lede{margin:0;font-size:13.5px;line-height:1.62;color:var(--ink-700);max-width:92ch}
+  .cap p.lede b{color:var(--ink-900)}
+
+  .stsw{display:inline-flex;gap:3px;background:rgba(255,255,255,.45);border:1px solid var(--glass-brd);border-radius:999px;padding:3px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-tile);flex-wrap:wrap}
+  .stb{border:none;background:transparent;border-radius:999px;padding:8px 15px;font-size:12px;font-weight:700;color:var(--ink-500);cursor:pointer;display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px}
+  .stb .m{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-300)}
+  .stb.on{background:rgba(255,255,255,.94);color:var(--ink-900);box-shadow:0 5px 16px -7px rgba(30,26,18,.4)}
+  .stb.on .m{color:var(--gold-700)}
+
+  .prp{font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-700);background:var(--gold-100);padding:2px 6px;border-radius:999px;flex:none;font-weight:400}
+  .smp{font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-500);background:rgba(30,26,18,.07);padding:2px 6px;border-radius:999px;flex:none;font-weight:400}
+  .smp.dk{color:rgba(243,236,223,.6);background:rgba(255,255,255,.1)}
+
+  .frame-label{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-500);padding:0 6px 8px}
+  .frame-label::after{content:"";flex:1;height:1px;background:rgba(30,26,18,.1)}
+
+  .win{position:relative;border-radius:22px;overflow:hidden;box-shadow:var(--sh-win);border:1px solid rgba(255,255,255,.6);background:linear-gradient(135deg,#EFEAE0,#E3DDCF 55%,#DDD6C6);animation:winIn 1s both var(--ease-out)}
+  .titlebar{position:relative;display:flex;align-items:center;gap:8px;padding:12px 18px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.5)}
+  .tl{width:11px;height:11px;border-radius:99px;flex:none}
+  .tl.r{background:#E6655C}.tl.y{background:#E9AC44}.tl.g{background:#67AD5B}
+  .urlpill{flex:1;display:flex;justify-content:center}
+  .urlpill span{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.65);border-radius:999px;padding:5px 18px;font-size:11.5px;color:var(--ink-500)}
+  .urlpill .ic{width:11px;height:11px}
+  .canvas{position:relative;padding:22px 26px 26px;display:flex;flex-direction:column;gap:16px}
+  .ctx{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-300)}
+  .ctx .l{font-size:15px;font-weight:800;color:var(--ink-900);letter-spacing:-.015em}
+  .ctx::after{content:"";flex:1;height:1px;background:rgba(30,26,18,.09)}
+
+  /* ═══ THE ALAALA TILE — the chapter strip lives INSIDE it ═══ */
+  .alaala{position:relative;overflow:hidden;border-radius:20px;padding:18px;background:var(--dark);border:1px solid var(--dark-brd);color:var(--gold-100);
+    backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);box-shadow:0 26px 50px -28px rgba(23,22,15,.7)}
+  .capiz{position:absolute;top:0;left:0;width:36%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.13),transparent);transform:translateX(-130%);animation:shim 7s 1.2s infinite;pointer-events:none}
+  .tile-eye{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold-300);position:relative;z-index:2}
+  .tile-eye .ic{width:14px;height:14px}
+
+  /* ── the SCOPE LADDER (zoom) — the rung ABOVE the chapter strip ── */
+  .scoperow{position:relative;z-index:2;display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:13px;
+    padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .scoperow.hidden{display:none}
+  .scoperow .zl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(243,236,223,.4);margin-right:4px}
+  .spill{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:rgba(243,236,223,.72);
+    border-radius:999px;padding:6px 13px;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .22s var(--ease)}
+  .spill:hover{border-color:var(--gold-300);color:var(--gold-300)}
+  .spill.on{background:var(--gold-100);color:var(--ink-900);border-color:transparent}
+  .spill .c{font-family:var(--mono);font-size:9.5px;opacity:.6;margin-left:6px}
+  .sghost{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:rgba(243,236,223,.34);
+    border:1px dashed rgba(255,255,255,.14);border-radius:999px;padding:6px 12px;font-style:italic}
+  .zoomnote{position:relative;z-index:2;font-size:11.5px;color:rgba(243,236,223,.45);line-height:1.55;margin-top:9px}
+  .zoomnote b{color:rgba(243,236,223,.8);font-weight:700}
+  .zoomnote.hidden{display:none}
+
+  /* ── the STRIP ── */
+  .strip{position:relative;z-index:2;display:flex;align-items:center;gap:2px;height:44px;margin-top:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .strip::-webkit-scrollbar{display:none}
+  .strip.hidden{display:none}
+  .cpill{scroll-snap-align:start;flex:none;height:32px;display:inline-flex;align-items:center;padding:0 13px;border:none;background:transparent;border-bottom:2px solid transparent;
+    font-size:13px;font-weight:600;color:rgba(243,236,223,.52);cursor:pointer;white-space:nowrap;transition:color .22s var(--ease),border-color .22s}
+  .cpill:hover{color:rgba(243,236,223,.85)}
+  .cpill.on{color:var(--gold-300);font-weight:700;border-bottom-color:var(--gold-300)}
+  .cpill.all{color:rgba(243,236,223,.55);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(255,255,255,.16);border-radius:999px;height:28px;margin-left:6px}
+  .cpill.all:hover{border-color:var(--gold-300);color:var(--gold-300)}
+  .cpill[hidden]{display:none}
+  .fchip{flex:none;display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 6px 0 11px;margin-right:8px;border-radius:999px;background:var(--gold-100);color:var(--ink-900);
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+  .fchip button{border:none;background:rgba(30,26,18,.12);width:17px;height:17px;border-radius:999px;display:grid;place-items:center;cursor:pointer;color:var(--ink-900)}
+  .fchip button .ic{width:9px;height:9px;stroke-width:2.6}
+  .fchip.hidden{display:none}
+
+  /* ── the CARD ── */
+  .cardwrap{position:relative;z-index:2;margin-top:13px;animation:lensIn .4s both var(--ease-out)}
+  .chapcard{position:relative;width:100%;height:clamp(190px,24vw,300px);border-radius:20px;overflow:hidden;box-shadow:0 22px 44px -26px rgba(23,22,15,.8);border:1px solid rgba(255,255,255,.1)}
+  .hero{position:absolute;inset:0}
+  .hero.g1{background:linear-gradient(148deg,#C7A268 0%,#8E7A52 45%,#3D3A2E 100%)}
+  .hero.g2{background:linear-gradient(148deg,#9DAE8E 0%,#5E7C52 42%,#2E3328 100%)}
+  .hero.g3{background:linear-gradient(148deg,#8FA6B6 0%,#4E6C82 44%,#28313A 100%)}
+  .hero.g4{background:linear-gradient(148deg,#D2B48C 0%,#A6483B 55%,#33231F 100%)}
+  .hero::after{content:"";position:absolute;inset:0;background:
+    radial-gradient(38% 46% at 72% 22%,rgba(255,255,255,.20),transparent 70%),
+    repeating-linear-gradient(102deg,rgba(255,255,255,.045) 0 16px,transparent 16px 34px)}
+  .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,22,15,.5) 0%,rgba(23,22,15,.05) 42%,rgba(23,22,15,.82) 100%)}
+  .clabel{position:absolute;left:20px;top:18px;z-index:2}
+  .clabel .nm{font-size:28px;font-weight:300;letter-spacing:-.01em;color:#FFFDF8;line-height:1.1}
+  .clabel .dt{font-family:var(--mono);font-size:12px;color:rgba(255,253,248,.68);margin-top:5px;letter-spacing:.04em}
+  /* the ELAPSED STAMP — the exact slot FamilyAlbum puts the child's age */
+  .stamp{position:absolute;left:20px;bottom:17px;z-index:2;display:flex;align-items:center;gap:9px;
+    font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#FFFDF8}
+  .stamp .liv{width:6px;height:6px;border-radius:99px;background:var(--gold-300);flex:none;box-shadow:0 0 0 3px rgba(203,167,102,.3)}
+  .playc{position:absolute;right:20px;bottom:16px;z-index:2;display:inline-flex;align-items:center;gap:8px;background:rgba(255,253,248,.92);color:var(--ink-900);
+    border:none;border-radius:999px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer}
+  .playc .ic{width:13px;height:13px}
+
+  /* ── the MOSAIC ── */
+  .mos{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:9px}
+  @media(max-width:760px){.mos{grid-template-columns:repeat(4,1fr)}}
+  .mos.hidden{display:none}
+  .mtile{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:transform .25s var(--ease)}
+  .mtile:hover{transform:scale(1.03)}
+  .mtile i{position:absolute;inset:0;display:block}
+  .mtile .vid{position:absolute;inset:0;display:grid;place-items:center;color:#fff}
+  .mtile .vid span{width:24px;height:24px;border-radius:999px;background:rgba(255,255,255,.28);backdrop-filter:blur(4px);display:grid;place-items:center}
+  .mtile .vid .ic{width:11px;height:11px;stroke-width:2;fill:#fff}
+  .mtile.more{display:grid;place-items:center;background:rgba(255,255,255,.07);border-style:dashed;border-color:rgba(255,255,255,.16);
+    font-family:var(--mono);font-size:13px;font-weight:700;color:rgba(243,236,223,.7)}
+  .t1{background:linear-gradient(140deg,#C7A268,#6E5C3C)}.t2{background:linear-gradient(140deg,#9DAE8E,#4C6342)}
+  .t3{background:linear-gradient(140deg,#8FA6B6,#3F5768)}.t4{background:linear-gradient(140deg,#D9C6A8,#8A6B39)}
+  .t5{background:linear-gradient(140deg,#B9A88C,#4A4438)}.t6{background:linear-gradient(140deg,#CBB79B,#7A6448)}
+  .t7{background:linear-gradient(140deg,#A8B49C,#586B4C)}.t8{background:linear-gradient(140deg,#C2A98A,#5E5140)}
+
+  /* ── who's in it: NAME CHIPS, never faces ── */
+  .whorow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px;position:relative;z-index:2}
+  .whorow.hidden{display:none}
+  .whorow .wl{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,236,223,.42);margin-right:3px}
+  .nchip{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:rgba(243,236,223,.82);border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer}
+  .nchip:hover{border-color:var(--gold-300);color:var(--gold-300)}
+  .nchip.mute{color:rgba(243,236,223,.5);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em}
+
+  /* ── EMPTY chapter card ── */
+  .emptycard{position:relative;width:100%;height:clamp(180px,20vw,230px);border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.12);
+    background:repeating-linear-gradient(100deg,rgba(203,167,102,.24) 0 14px,rgba(255,255,255,.07) 14px 30px)}
+  .emptycard .mgm{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:76px;height:76px;border-radius:999px;border:1.5px solid var(--gold-300);
+    background:rgba(23,22,15,.55);display:grid;place-items:center;font-size:23px;font-weight:800;color:var(--gold-300);letter-spacing:-.02em}
+  .emptycard .etx{position:absolute;left:118px;top:50%;transform:translateY(-50%)}
+  .emptycard .etx .nm{font-size:26px;font-weight:300;color:#FFFDF8}
+  .emptycard .etx .sb{font-size:12.5px;color:rgba(255,253,248,.62);margin-top:5px;max-width:44ch;line-height:1.5}
+  .emptycard .stamp{left:auto;right:20px;bottom:17px}
+
+  /* ── the ALL-N SHEET ── */
+  .sheetback{position:absolute;inset:0;z-index:9;background:rgba(23,22,15,.45);backdrop-filter:blur(3px);display:none;border-radius:22px}
+  .sheetback.open{display:block}
+  .sheet{position:absolute;left:0;right:0;bottom:0;z-index:10;background:var(--paper);border-radius:22px 22px 0 0;padding:16px 20px 22px;
+    box-shadow:0 -30px 60px -30px rgba(23,22,15,.6);max-height:78%;overflow-y:auto;animation:up .34s both var(--ease-out)}
+  .sheet .grab{width:38px;height:4px;border-radius:99px;background:rgba(30,26,18,.16);margin:0 auto 14px}
+  .sheet .sh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .sheet .sh h4{margin:0;font-size:16px;font-weight:800;letter-spacing:-.015em}
+  .sheet .sh button{margin-left:auto;border:none;background:rgba(30,26,18,.07);width:28px;height:28px;border-radius:999px;display:grid;place-items:center;cursor:pointer;color:var(--ink-500)}
+  .sheet .sh button .ic{width:14px;height:14px}
+  .srch{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;background:#fff;border:1px solid var(--hairline);margin-bottom:14px}
+  .srch .ic{width:16px;height:16px;color:var(--ink-300)}
+  .srch span{font-size:13px;color:var(--ink-300)}
+  .plab{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-300);margin:4px 0 6px}
+  .prow{display:flex;align-items:center;gap:11px;width:100%;height:44px;padding:0 8px;border:none;background:transparent;border-radius:10px;cursor:pointer;text-align:left}
+  .prow:hover{background:rgba(30,26,18,.045)}
+  .prow .pmg{width:26px;height:26px;border-radius:999px;background:var(--gold-100);color:var(--gold-700);display:grid;place-items:center;font-size:10px;font-weight:800;flex:none}
+  .prow .pn{font-size:13.5px;font-weight:600}
+  .prow .pd{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-300)}
+  .prow.person .pmg{background:var(--info-soft);color:var(--info)}
+
+  .note{font-size:12.5px;color:var(--ink-500);line-height:1.65;padding:0 6px;max-width:98ch}
+  .note b{color:var(--ink-900)}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 6px}
+  @media(max-width:900px){.cmp{grid-template-columns:1fr}}
+  .cmpc{padding:15px 17px;border-radius:16px;background:rgba(255,255,255,.44);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+  .cmpc h5{margin:0 0 8px;font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-700)}
+  .cmpc ul{margin:0;padding-left:17px;font-size:12.5px;line-height:1.7;color:var(--ink-700)}
+  .cmpc ul b{color:var(--ink-900)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-flash" viewBox="0 0 24 24"><path d="m12 3 1.6 5 5 1.6-5 1.6L12 16l-1.6-4.8-5-1.6 5-1.6z"/><path d="m19 15 .7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5 19 12 7 19.5z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-3.6-3.6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.1"/></symbol>
+</defs></svg>
+
+<div class="stage">
+  <span class="blob b1"></span><span class="blob b2"></span>
+
+  <div class="wrap">
+
+    <div class="cap">
+      <div class="eye"><span class="dia"></span>Setnayan · Alaala · the Chapter Strip</div>
+      <h1>FamilyAlbum writes the age on the photograph. We write the chapter.</h1>
+      <p class="lede">
+        Their strip moves you sideways through <b>months</b>, with a child's age stamped on the hero picture.
+        Ours moves you sideways through <b>chapters</b> — the events themselves — with the elapsed time stamped
+        in the same place. <b>Newest on the left. Tapping a pill and swiping the card do the same thing.</b>
+        A person's storyline is simply <b>their chapters</b>: the events where they're the honoree.
+      </p>
+      <p class="lede" style="color:var(--ink-500)">
+        <b style="color:var(--ink-900)">No face rail.</b> FamilyAlbum hasn't got one either — all their children
+        share one undivided timeline, and per-child views are a paid face-recognition feature. Ours uses
+        <b style="color:var(--ink-900)">name chips</b>, because names are what we have consent to show across people.
+      </p>
+      <div class="stsw" id="stsw" role="tablist" aria-label="State">
+        <button class="stb on" data-st="three" role="tab">3 chapters<span class="m">no scroll needed</span></button>
+        <button class="stb" data-st="twelve" role="tab">12 chapters<span class="m">scroll · peek · all-n</span></button>
+        <button class="stb" data-st="filtered" role="tab">Filtered to Nina<span class="m">a person's storyline</span></button>
+        <button class="stb" data-st="one" role="tab">1 chapter<span class="m">no strip at all</span></button>
+        <button class="stb" data-st="empty" role="tab">Brand new<span class="m">zero photos · day one</span></button>
+      </div>
+    </div>
+
+    <div>
+      <div class="frame-label">Inside the Alaala tile · not on the page ground</div>
+      <div class="win">
+        <div class="titlebar">
+          <span class="tl r"></span><span class="tl y"></span><span class="tl g"></span>
+          <div class="urlpill"><span><svg class="ic"><use href="#i-lock"/></svg>setnayan.com/dashboard</span></div>
+        </div>
+
+        <div class="canvas" id="canvas" data-st="three">
+          <div class="ctx"><span class="l">Alaala</span><span>your memories, by chapter</span></div>
+
+          <div class="alaala">
+            <span class="capiz"></span>
+            <div class="tile-eye"><svg class="ic"><use href="#i-flash"/></svg>Alaala · Life-Flash<span class="prp" style="margin-left:auto">proposed</span></div>
+
+            <!-- the SCOPE LADDER — event · month · year · lifetime, already locked in code -->
+            <div class="scoperow hidden" id="scoperow">
+              <span class="zl">Zoom</span>
+              <button class="spill on" data-sc="chapters">Chapters<span class="c">12</span></button>
+              <button class="spill" data-sc="y2026">2026<span class="c">214</span></button>
+              <button class="spill" data-sc="y2025">2025<span class="c">156</span></button>
+              <span class="sghost" title="Below the threshold">2024 — 4 moments</span>
+              <button class="spill" data-sc="life">Lifetime<span class="c">1,284</span></button>
+            </div>
+            <p class="zoomnote hidden" id="zoomnote">
+              <b>2024 isn&rsquo;t offered</b> — only 4 moments, below the year threshold of 5.
+              A scope appears once it has enough to be worth watching. That rule already ships:
+              <code>SCOPE_MIN_MOMENTS = &#123; year: 5, month: 5, event: 3 &#125;</code>.
+            </p>
+
+            <!-- the person filter chip + the strip -->
+            <div class="strip" id="strip">
+              <span class="fchip hidden" id="fchip">Nina · 3 chapters <button id="fclear" aria-label="Clear filter"><svg class="ic"><use href="#i-x"/></svg></button></span>
+              <span id="pills"></span>
+              <button class="cpill all" id="allpill" hidden>All 12</button>
+            </div>
+
+            <div class="cardwrap" id="cardwrap"></div>
+
+            <div class="mos" id="mos"></div>
+
+            <div class="whorow" id="whorow"></div>
+          </div>
+        </div>
+
+        <!-- the ALL-N sheet -->
+        <div class="sheetback" id="sheetback"></div>
+        <div class="sheet" id="sheet" hidden>
+          <div class="grab"></div>
+          <div class="sh"><h4>All chapters</h4><button id="sheetclose" aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button></div>
+          <div class="srch"><svg class="ic"><use href="#i-search"/></svg><span>Search chapters or a person…</span></div>
+          <div class="plab">By person · their storyline</div>
+          <button class="prow person" data-person="Nina"><span class="pmg">N</span><span class="pn">Nina</span><span class="pd">3 chapters</span></button>
+          <button class="prow person" data-person="Miguel"><span class="pmg">M</span><span class="pn">Miguel</span><span class="pd">2 chapters</span></button>
+          <div class="plab" style="margin-top:12px">All chapters · A–Z</div>
+          <button class="prow"><span class="pmg">AL</span><span class="pn">Ate Liza's Despedida</span><span class="pd">Mar 2026</span></button>
+          <button class="prow"><span class="pmg">BP</span><span class="pn">Barkada Palawan</span><span class="pd">Sep 2025</span></button>
+          <button class="prow"><span class="pmg">CI</span><span class="pn">Cale &amp; Ice</span><span class="pd">Dec 2026</span></button>
+          <button class="prow"><span class="pmg">L8</span><span class="pn">Lola's 80th</span><span class="pd">Aug 2026</span></button>
+          <button class="prow"><span class="pmg">MB</span><span class="pn">Miguel's Binyag</span><span class="pd">Feb 2021</span></button>
+          <button class="prow"><span class="pmg">NB</span><span class="pn">Nina's Binyag</span><span class="pd">Jun 2020</span></button>
+          <button class="prow"><span class="pmg">N7</span><span class="pn">Nina turns 7</span><span class="pd">Jun 2026</span></button>
+          <button class="prow"><span class="pmg">R2</span><span class="pn">Reunion '25</span><span class="pd">Apr 2025</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmp">
+      <div class="cmpc">
+        <h5>Taken from FamilyAlbum</h5>
+        <ul>
+          <li><b>Hero + stamp composition</b> — name upper-left, elapsed time on the bottom-left of the picture, exactly where they put the child's age.</li>
+          <li><b>The arithmetic</b> — the current chapter ticks live; past chapters freeze. At zero it prints a word, never "0 days".</li>
+          <li><b>Newest on the left</b>, tap-and-swipe parity, one you-are-here colour with an underline.</li>
+          <li><b>Mosaic with hairline gutters</b>, play circle on video.</li>
+          <li><b>Two-colour discipline</b> — one action colour and nothing else.</li>
+        </ul>
+      </div>
+      <div class="cmpc">
+        <h5>Inverted or refused</h5>
+        <ul>
+          <li>Their white photo-first ground → <b>warm paper + glass</b>; their azure → <b>gold #A9834B</b>, the only action colour.</li>
+          <li>Their axis is the <b>month</b> — their loudest complaint. Ours is the <b>chapter</b>, the only unit our data can fill and the only one carrying the permission rules.</li>
+          <li>Their stamp comes from a <b>child's birthdate</b>. Ours comes from the <b>event date</b> — birthdates are fenced and counsel-gated; event dates are not.</li>
+          <li><b>No face rail, no avatars.</b> Name chips only.</li>
+          <li>No paywalled per-person view, no emoji reactions, no auto-playing "On this day".</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="note">
+      <b>The empty state is the make-or-break.</b> FamilyAlbum's real trick is that it registers a child's name and
+      birthdate <i>before a single photo exists</i>, so the home can always draw a name and an age. We do the same
+      with a different noun — we already capture an event name and date at signup. <b>On day one the countdown is
+      the content.</b> Try "Brand new" above: one card, no strip, no grid, no avatars — never an empty shelf
+      labelled "Memories".
+      <br><br>
+      <b>The storyline join is real:</b> <code>events.honoree_dependent_id</code> + its index, migration
+      <code>20270821100000_life_event_gate_honoree.sql</code>. No new table, no face matching. That column's own
+      header marks it counsel-gated — so the strip, the card and the stamp ship first; the person filter waits.
+    </p>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var CH = {
+    three: [
+      {k:'ci', n:'Cale &amp; Ice',      d:'18 December 2026', s:'CALE &amp; ICE · IN 141 DAYS', live:true,  g:'g1', tiles:0,  who:null},
+      {k:'n7', n:'Nina turns 7',        d:'9 June 2026',      s:'NINA · 1 MONTH AGO',        live:false, g:'g2', tiles:8,  more:'+40', who:['Nina','Lola Rosa','Tita Baby','Kuya Miguel','Ninang Che'], extra:12},
+      {k:'r2', n:'Reunion &rsquo;25',   d:'April 2025',       s:'REUNION · 1 YEAR AGO',      live:false, g:'g3', tiles:6,  who:['Lola Rosa','Tita Baby','Pinsan Mikko']}
+    ],
+    twelve: [
+      {k:'ci', n:'Cale &amp; Ice',      d:'18 December 2026', s:'CALE &amp; ICE · IN 141 DAYS', live:true,  g:'g1', tiles:0,  who:null},
+      {k:'l8', n:'Lola&rsquo;s 80th',   d:'9 August 2026',    s:'LOLA ROSA · IN 10 DAYS',    live:true,  g:'g4', tiles:3,  who:['Lola Rosa','Tita Baby']},
+      {k:'n7', n:'Nina turns 7',        d:'9 June 2026',      s:'NINA · 1 MONTH AGO',        live:false, g:'g2', tiles:8,  more:'+40', who:['Nina','Lola Rosa','Tita Baby','Kuya Miguel','Ninang Che'], extra:12},
+      {k:'al', n:'Ate Liza Despedida',  d:'March 2026',       s:'DESPEDIDA · 4 MONTHS AGO',  live:false, g:'g3', tiles:5,  who:['Ate Liza','Pinsan Mikko']},
+      {k:'bp', n:'Barkada Palawan',     d:'September 2025',   s:'PALAWAN · 10 MONTHS AGO',   live:false, g:'g2', tiles:8,  more:'+62', who:['Pinsan Mikko','Ate Liza']},
+      {k:'r2', n:'Reunion &rsquo;25',   d:'April 2025',       s:'REUNION · 1 YEAR AGO',      live:false, g:'g3', tiles:6,  who:['Lola Rosa','Tita Baby','Pinsan Mikko']},
+      {k:'mb', n:'Miguel&rsquo;s Binyag',d:'February 2021',   s:'MIGUEL · 5 YEARS AGO',      live:false, g:'g4', tiles:8,  more:'+18', who:['Miguel','Ninong Ben','Ninang Che']},
+      {k:'nb', n:'Nina&rsquo;s Binyag', d:'June 2020',        s:'NINA · 6 YEARS AGO',        live:false, g:'g1', tiles:8,  more:'+31', who:['Nina','Ninong Ben','Ninang Che','Lola Rosa']}
+    ],
+    filtered: [
+      {k:'n7', n:'Nina turns 7',        d:'9 June 2026',      s:'NINA · 1 MONTH AGO',        live:false, g:'g2', tiles:8, more:'+40', who:['Nina','Lola Rosa','Tita Baby','Kuya Miguel','Ninang Che'], extra:12},
+      {k:'n6', n:'Nina turns 6',        d:'9 June 2025',      s:'NINA · 1 YEAR AGO',         live:false, g:'g4', tiles:6,  who:['Nina','Lola Rosa']},
+      {k:'nb', n:'Nina&rsquo;s Binyag', d:'June 2020',        s:'NINA · 6 YEARS AGO',        live:false, g:'g1', tiles:8, more:'+31', who:['Nina','Ninong Ben','Ninang Che','Lola Rosa']}
+    ],
+    one: [
+      {k:'ci', n:'Cale &amp; Ice',      d:'18 December 2026', s:'CALE &amp; ICE · IN 141 DAYS', live:true, g:'g1', tiles:0, who:null}
+    ],
+    empty: []
+  };
+  var TL=['t1','t2','t3','t4','t5','t6','t7','t8'];
+  // ── the SCOPE LADDER. Mirrors the shipped FlashScope union:
+  //    { kind:'life' } | { kind:'year' } | { kind:'month' } | { kind:'event' }
+  //    with SCOPE_MIN_MOMENTS = { year:5, month:5, event:3 }.
+  var SCOPE = {
+    y2026: { hero:{n:'2026', d:'4 chapters · 214 moments', s:'THIS YEAR · STILL FILLING', live:true, g:'g1', play:'Play 2026'},
+             keys:['ci','l8','n7','al'] },
+    y2025: { hero:{n:'2025', d:'3 chapters · 156 moments', s:'2025 · COMPLETE', live:false, g:'g3', play:'Play 2025'},
+             keys:['bp','r2'] },
+    life:  { hero:{n:'Your life so far', d:'12 chapters · 1,284 moments · 34 people', s:'SINCE JUNE 2020', live:false, g:'g4', play:'Play Life-Flash'},
+             keys:null }
+  };
+  var scope='chapters';
+
+  var canvas=document.getElementById('canvas'), pills=document.getElementById('pills'),
+      strip=document.getElementById('strip'), allp=document.getElementById('allpill'),
+      cw=document.getElementById('cardwrap'), mos=document.getElementById('mos'),
+      who=document.getElementById('whorow'), fchip=document.getElementById('fchip'),
+      sheet=document.getElementById('sheet'), sback=document.getElementById('sheetback');
+  var st='three', idx=0;
+
+  function card(c){
+    if(!c) return ''+
+      '<div class="emptycard">'+
+        '<div class="mgm">C&amp;I</div>'+
+        '<div class="etx"><div class="nm">Cale &amp; Ice</div>'+
+        '<div class="sb">Your first chapter. Every photo from the day lands here on its own — you never file anything.</div></div>'+
+        '<div class="stamp"><span class="liv"></span>IN 214 DAYS</div>'+
+      '</div>';
+    return ''+
+      '<div class="chapcard">'+
+        '<div class="hero '+c.g+'"></div><div class="scrim"></div>'+
+        '<div class="clabel"><div class="nm">'+c.n+'</div><div class="dt">'+c.d+'</div></div>'+
+        '<div class="stamp">'+(c.live?'<span class="liv"></span>':'')+c.s+'</div>'+
+        ((c.tiles||c.play)?'<button class="playc"><svg class="ic"><use href="#i-play"/></svg>'+(c.play||'Play chapter')+'</button>':'')+
+      '</div>';
+  }
+  function tiles(c){
+    if(!c||!c.tiles) return '';
+    var h='',n=c.more?c.tiles-1:c.tiles;
+    for(var i=0;i<n;i++){
+      h+='<button class="mtile"><i class="'+TL[i%8]+'"></i>'+(i===1?'<span class="vid"><span><svg class="ic"><use href="#i-play"/></svg></span></span>':'')+'</button>';
+    }
+    if(c.more) h+='<button class="mtile more">'+c.more+'</button>';
+    return h;
+  }
+  function whoHtml(c){
+    if(!c||!c.who) return '';
+    var h='<span class="wl">Who&rsquo;s in it</span>';
+    c.who.forEach(function(n){h+='<button class="nchip">'+n+'</button>';});
+    if(c.extra) h+='<button class="nchip mute">All '+c.extra+'</button>';
+    return h;
+  }
+  var srow=document.getElementById('scoperow'), znote=document.getElementById('zoomnote');
+
+  function render(){
+    // The scope ladder only makes sense once there are chapters across years.
+    var ladderOn = (st==='twelve');
+    srow.classList.toggle('hidden', !ladderOn);
+    znote.classList.toggle('hidden', !ladderOn);
+    if(!ladderOn) scope='chapters';
+    srow.querySelectorAll('.spill').forEach(function(b){ b.classList.toggle('on', b.dataset.sc===scope); });
+
+    var base=CH[st]||[];
+    var sc=SCOPE[scope];
+    // A year scope narrows the strip to that year's chapters; lifetime has no strip.
+    var list = (!sc) ? base : (sc.keys ? base.filter(function(x){return sc.keys.indexOf(x.k)>-1;}) : []);
+    var zoomed = !!sc;
+    var c = zoomed ? sc.hero : (list[idx]||null);
+
+    if(st==='one'||st==='empty'||scope==='life'){ strip.classList.add('hidden'); }
+    else { strip.classList.remove('hidden'); }
+    fchip.classList.toggle('hidden', st!=='filtered');
+    pills.innerHTML=list.map(function(x,i){
+      return '<button class="cpill'+(!zoomed&&i===idx?' on':'')+'" data-i="'+i+'">'+x.n+'</button>';
+    }).join('');
+    allp.hidden = !(st==='twelve' && scope==='chapters');
+
+    cw.innerHTML=card(c);
+    var showTiles = !zoomed && c && c.tiles;
+    mos.innerHTML=showTiles?tiles(c):''; mos.classList.toggle('hidden', !showTiles);
+    var showWho = !zoomed && c && c.who;
+    who.innerHTML=showWho?whoHtml(c):''; who.classList.toggle('hidden', !showWho);
+    canvas.setAttribute('data-st',st);
+  }
+  srow.addEventListener('click',function(e){
+    var b=e.target.closest('.spill'); if(!b)return;
+    scope=b.dataset.sc; idx=0; render();
+  });
+  document.getElementById('stsw').addEventListener('click',function(e){
+    var b=e.target.closest('.stb'); if(!b)return;
+    this.querySelectorAll('.stb').forEach(function(x){x.classList.toggle('on',x===b);});
+    st=b.dataset.st; idx=0; render();
+  });
+  pills.addEventListener('click',function(e){
+    var b=e.target.closest('.cpill'); if(!b)return; idx=+b.dataset.i; render();
+  });
+  allp.addEventListener('click',function(){ sheet.hidden=false; sback.classList.add('open'); });
+  function close(){ sheet.hidden=true; sback.classList.remove('open'); }
+  document.getElementById('sheetclose').addEventListener('click',close);
+  sback.addEventListener('click',close);
+  sheet.addEventListener('click',function(e){
+    var p=e.target.closest('.prow.person'); if(!p)return;
+    close();
+    document.querySelectorAll('.stb').forEach(function(x){x.classList.toggle('on',x.dataset.st==='filtered');});
+    st='filtered'; idx=0; render();
+  });
+  document.getElementById('fclear').addEventListener('click',function(){
+    document.querySelectorAll('.stb').forEach(function(x){x.classList.toggle('on',x.dataset.st==='twelve');});
+    st='twelve'; idx=0; render();
+  });
+  render();
+})();
+</script>

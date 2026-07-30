@@ -61,7 +61,7 @@ Papic is **not** day-of capture. It is the memory vault for the **entire plannin
 
 `lib/onboarding/persona-packs.ts` authors `servicesByPersona` per event type with `papic_seats` / `papic_guest` across birthday, debut, gender_reveal, christening and more. `generic-onboarding.tsx` computes `planServices` and passes it to commit — **it is never rendered.** The couple never sees the word Papic.
 
-🚨 **`style_preferences.interested_services` is WRITE-ONLY.** Written by 3 onboarding files, **read by zero**. Dead data since PR #2137 (2026-06-25).
+~~🚨 **`style_preferences.interested_services` is WRITE-ONLY.**~~ ✅ **CLOSED 2026-07-29 (#3873).** Written by 3 onboarding files and read by zero since PR #2137 — it now has one reader: the services step ORDERS the two Papic products by the persona's derived list (`papic_guest` → Pool, `papic_seats` → One). Presentation only, deliberately: both products always render at their real prices, because a derived guess may change what a couple reads first but must not change what they are offered.
 
 ### 1.4 The Setnayan AI benefit list is already written — REUSE IT
 
@@ -211,12 +211,18 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 | **NEW-A** | 🔴 **Catalog migration for the 2026-07-29 model** — reactivate + reprice the Pool rungs to ₱1,000 / ₱2,000 / ₱3,000; restructure Papic One to ₱1 = 1 shot (50 pts ₱50 · 100 pts ₱100); add the **reload** path and the **1 free One camera @ 5 pts**. | ⛔ **NOT STARTED** — the new first step. Everything below depends on it. |
 | **2** | Remap `INAPP_TO_SERVICE_CODE` (§2.1) so the cards stop rendering blank. | ⛔ **NOT STARTED** — was blocked on "what is the live upgrade?", which §2.0-NEW now answers. Do it **after NEW-A**, against the reactivated codes. |
 | **NEW-B** | Clip currency **7 → 8 pts** (`PAPIC_POINTS_PER_CLIP`, `lib/papic-cameras.ts:735`). | ⛔ **NOT STARTED** — **ships ALONE**: it is a hardcoded constant on the **fail-closed capture path**. Independent of the cards; do not bundle. |
-| **4** | `services-step.tsx` — the two cards. Mount in `/onboarding/[type]` first (14 types, biggest gap). | ⛔ **NOT STARTED**. Prototype exists: artifact **`de2cf612`** (`papic-onboarding-prototype`, Atelier/glass, built to §3). |
-| **5** | Mount in `/onboarding/wedding` (before `congrats`; do **NOT** un-filter `PAYWALL_SCREENS` — the lock stands) and `/onboarding/simple` (**Papic card only** — the AI gate hides card 2). Give `interested_services` its first reader (§1.3). | ⛔ **NOT STARTED**. |
+| **4** | `services-step.tsx` — the two cards. Mount in `/onboarding/[type]` first (14 types, biggest gap). | ✅ **DONE** — PR [#3873](https://github.com/iscasasola/setnayan-platform/pull/3873), shipped **flag-dark** behind `NEXT_PUBLIC_ONBOARDING_SERVICES_STEP`. Built to the prototype (artifact `de2cf612`), restyled in the app's own design system. |
+| **5** | Mount in `/onboarding/wedding` (before `congrats`; do **NOT** un-filter `PAYWALL_SCREENS` — the lock stands) and `/onboarding/simple` (**Papic card only** — the AI gate hides card 2). Give `interested_services` its first reader (§1.3). | ✅ **DONE** — same PR [#3873](https://github.com/iscasasola/setnayan-platform/pull/3873). `PAYWALL_SCREENS` untouched. `interested_services` now ORDERS the two Papic products (presentation only — both always render). |
 | **—** | Amend or kill the §1.4 start-clamp (§2.2). | ✅ **Treated as dead** — the owner's 2026-07-27 runway directive supersedes the unbuilt 2026-07-22 proposal. Just don't build a lower bound. |
 | **—** | Vendor shots in the card copy. | ⛔ **DPO/NPC gate** — `vendor_papic_capture` control is OFF and the route 403s. Card says **guests only** until it flips. |
 
-**Order: NEW-A → 2 → 4 → 5.** NEW-B is independent and ships alone whenever. PR3 is merged, so 4 is unblocked.
+**Order: NEW-A → 2 → 4 → 5.** ✅ All four landed (NEW-A = #3868/#3869 · 2 = #3872 · 4 + 5 = #3873).
+**NEW-B (clip 7 → 8) is the only card-adjacent row left** — independent, ships alone.
+
+⚠ **The owner's remaining action is a FLAG FLIP**, not a build: set
+`NEXT_PUBLIC_ONBOARDING_SERVICES_STEP=true` in Vercel **and redeploy** (NEXT_PUBLIC_ vars are
+build-time inlined, so a bare env change does nothing). Until then all three flows render
+exactly as they did before #3873.
 
 ---
 
@@ -224,6 +230,6 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 
 1. ~~Confirm the free point number~~ ✅ **ANSWERED 2026-07-27: 50.** Armed and live; `papic_event_pool_config.free_grant_points` is now the admin control.
 2. **DPO gate on vendor capture** (§0) — until it flips, the card says guests only. *(Still open.)*
-3. **Card 1's free line must now describe BOTH free things** (2026-07-29): the **50-pt shared Pool** *and* the **1 free dedicated One camera @ 5 pts**. The second is a new mechanic and is **not built** — do not print it until NEW-A ships it.
+3. ~~Card 1's free line must describe BOTH free things~~ ✅ **ANSWERED + SHIPPED** (#3873). Both rungs render, each read from its own admin column — `free_grant_points` for the shared Pool, `free_one_camera_points` for the dedicated camera. A zeroed column removes its rung rather than promising a camera the meter never mints. The free-camera COUNT is structural (one per event, `papic_ensure_free_one_camera` + two unique constraints) and lives in ONE place: `PAPIC_FREE_ONE_CAMERA_COUNT`.
 
 **Treated as already answered — not re-asked:** the §1.4 `event_date − 120` start-clamp (§2.2) is **dead**. The owner's 2026-07-27 directive — *"starting X until their event date … store all your photos as you prepare"* — supersedes an unbuilt 2026-07-22 proposal that contradicts it. PR1 must not introduce a lower bound.
