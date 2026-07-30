@@ -328,6 +328,20 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
   *after* Messages. Push order has no such failure mode.
   ✅ Guarded by three source-scan tests **that were mutation-tested, not assumed**: reintroducing the
   free-slot condition fails 2 tests; moving the push below Messages fails the ordering test by name.
+  🔴 **AND A DEFECT OF MINE, FOUND + FIXED THE SAME DAY — PR [#3898](https://github.com/iscasasola/setnayan-platform/pull/3898).**
+  The resolver counted captures through the VIEWER's session client. All three capture tables are
+  **couple-only** in RLS (`papic_photos_couple_full` · `papic_guest_captures_couple_read` ·
+  `paparazzi_seats_couple_full`), but event-home also renders for **coordinators and multi-host
+  moderators** (`events` carries `events_moderator_read` + `community_member_can_read_events`) — and
+  **an RLS denial returns `count: 0` with NO error.** A coordinator therefore resolved
+  `photosGathered = 0` ⇒ `preCapture = true` and was shown *"N shots ready · 0 cameras out"* plus the
+  free-camera nudge on a wedding mid-shoot. Latent in prod (every `event_members` row is `couple`),
+  live on the first coordinator. **No leak — RLS worked; the DISPLAY trusted a zero it had no right
+  to trust.** Fix: counts read via the service-role client **and** the caller passes `isCoupleMember`
+  (defaulting FALSE), so a non-couple viewer gets `null` — nothing, rather than a lie.
+  ⏭ **OWNER QUESTION, flagged not decided: should coordinators see Papic counts on home?** Today they
+  see nothing. Yes means either extending those three RLS policies or accepting a service-role read of
+  couple-only capture data for them — a privacy call, deliberately not slipped in behind a display fix.
   ⚠⚠ **THE MOCKUP MISSED A DOCUMENTED BUDGET AND THE BUILD HAD TO FIX IT:** the mockup drew a
   3-across bento, but the real block is a **capped 2×2** whose own comment budgets *"focal(1) +
   digest(1) + ≤4 minis + chrome(2) ≤ 8 above fold"* (`backdrop-filter` is the expensive part) — and
