@@ -193,6 +193,28 @@ Content-addressing (identify the served object *by* its digest) is usually the h
 
 ---
 
+## 5b · SEC-1 · the LAST stored-ref oracle (closed 2026-07-30, #3925)
+
+**Six of these have now been found; every one was a policy that already existed but was not
+applied at some writer.** The final one was the worst-positioned: three payment paths accepted a
+`screenshot_ref` **form field** on `startsWith('r2://')` alone, and the ref is rendered on
+`/admin/payments` — so the read oracle's output device was **an admin's browser**. A buyer could
+pin another vendor's DTI permit onto their own order.
+
+Closed with `orderPaymentProofPolicy` / `inlineCheckoutProofPolicy` + 15 tests incl. wiring
+guards. Full reasoning in `DECISION_LOG.md` 2026-07-30.
+
+**⚠ STILL OPEN, deliberately** — the legacy `name="screenshot"` fallback in
+`dashboard/[eventId]/orders/actions.ts` and `checkout/actions.ts` pipes payment proofs through
+`uploadPublicAsset`, i.e. the **PUBLIC** bucket, three lines below a comment promising it never
+does. **Unreachable from any shipped page today**, so it is a loaded gun and not a live leak —
+but the next page that renders `<input type="file" name="screenshot">` publishes payment proofs
+to the open internet with no code change. Delete it in its own PR.
+
+**The method that found it:** the register claimed "~40 unbound call sites". Measuring instead
+of trusting gave 10 candidates — 6 were `*_key` settings-key false positives, 3 were this
+oracle, 1 was already clean. **The count in the handoff was the least useful part of it.**
+
 ## 6 · TRAPS — every one of these has already bitten, most of them twice
 
 1. **Vacuous DB tests.** A psql connection that **owns** the table **skips RLS entirely**, so an RLS test run as the owner passes no matter what the policy says. This repo has shipped it twice. Every DB test needs a meta-test asserting the role is `authenticated`, is **not** the table owner, and lacks `BYPASSRLS` — plus a **neutralisation proof** (remove the fix, tests must fail, report the count).
