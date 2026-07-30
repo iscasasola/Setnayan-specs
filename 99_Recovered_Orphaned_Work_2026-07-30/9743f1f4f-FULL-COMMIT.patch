@@ -1,0 +1,2260 @@
+commit 9743f1f4f84bfa082bf166b98bffb948c3eee70d
+Author: Ice Casasola <iscasasolaii@gmail.com>
+Date:   Sun Jul 26 16:25:01 2026 +0800
+
+    fix(security): SEC-4b repair — close the DELETE lane, un-vacuum the guards
+    
+    Repairs the adversarial findings against #3738. Three of them were the same
+    class of defect the PR exists to prevent: a control that reads as rigorous and
+    enforces nothing.
+    
+    THE GUARDS WERE VACUOUS (proven by mutation, both before and after):
+    
+      • lib/order-price-authority.test.ts leaked a /g regex lastIndex, dropping the
+        FIRST orders-insert in every file — i.e. every insert in the nine
+        single-mint files. It then sliced the first `{` after `.insert(`, which the
+        orderRowFor(identity, fields) refactor had turned into the IDENTITY object.
+        Real coverage: 2 payloads in 1 file the PR never touched, out of 16 insert
+        sites. Reintroducing the literal SEC-4 bug (a browser-supplied
+        requested_total_php) plus a formData-supplied user_id left the suite green.
+        Now both mutations go red.
+      • The same scan only covered app/ + lib/, missing apps/web/scripts/ — which
+        already contains an orders+payments minter. Widened to apps/web + packages/
+        + scripts/; the hidden minter is now on the reviewed roster explicitly.
+      • Added an ANTI-VACUITY test that asserts the DENOMINATOR: every orders
+        insert must resolve to readable source and name its amount column. A source
+        scanner that stops matching does not go red, it goes quiet — this makes it
+        go red. (It immediately caught a multi-line type annotation in checkout
+        blinding the resolver.)
+    
+      • tests/db/orders-payments-insert-revoke.db.test.ts re-executed the migration
+        file after the replay, which also re-created whatever a LATER migration had
+        dropped. A regression migration that re-granted INSERT and dropped both
+        guard triggers left it 13/13 green. replay-migrations.ts now takes
+        `preserveRevoked`: it seeds the CREATE-TABLE-time default ACL when the table
+        first appears, lets migrations run against it, and undoes only the harness's
+        own blanket grant. A re-grant survives into the test. 11/18 now fail against
+        that regression migration, and three REGRESSION tests name the cause.
+    
+        (My first attempt at this snapshotted post-replay state, which cannot tell
+        "a migration revoked it" from "PGlite never granted it" — it reported the
+        table as locked down with the fix NEUTRALISED. Caught by running the
+        neutralisation experiment rather than trusting the design.)
+    
+    THE DELETE LANE WAS LEFT OPEN. orders_owner_write is FOR ALL with no restrictive
+    DELETE counterpart, so a buyer could DELETE their own PAID order: payments,
+    receipts, order_ledger and vendor_payouts CASCADE, while the entitlement tables
+    are SET NULL. They keep the SKU and erase the payment record, the BIR receipt
+    and the audit trail. Revoked, and the caller guard now fires BEFORE INSERT OR
+    DELETE. Safe because every app-side rollback DELETE moved to service_role.
+    
+    THE GUARD HAD AN is_admin() ESCAPE, in the one scenario it exists for. is_admin()
+    is satisfied by a session-role admin JWT, not only by service_role — so after a
+    stray re-GRANT any admin account regained ₱1 minting. Removed; the deny-list on
+    ('authenticated','anon') is what keeps migrations and psql working. Tested.
+    
+    CROSS-TENANT HOLE (the headline exploit's remaining route). The four
+    vendor_*__<id> families encode a vendor-owned target in the service_key and
+    their activation hooks provision straight off that string. None has a catalog
+    row, so resolveServiceSellability returns 'unknown' → ALLOW → couple checkout
+    kept the browser's price: vendor_additional_branch__<a stranger's branch_id> for
+    ₱1, paid for real, activating someone else's subscription on approval. Rejected
+    at checkout (gate 1) and re-checked at activation against the order's own
+    vendor_profile_id (gate 2, load-bearing — holds for any origin). A drift test
+    re-derives the prefix list from the hooks so a fifth family cannot be added
+    without one.
+    
+    THE RETIRED STATUS POLICIES. orders_insert_status_guard and
+    payments_insert_status_guard both short-circuit on auth.role()='service_role',
+    so they stopped constraining anything at the exact moment user_id stopped being
+    constrained. Re-imposed in order-mint-identity: payments pin status:'pending'
+    and forbid the caller setting it; orders enforce the mintable allow-list with a
+    requested_total_php===0 escape for the free-cycle audit rows. A PRICED order can
+    no longer be minted already-'paid'.
+    
+    Also: branches/actions.ts moved off the global-highest resolveVendorRole (the
+    one converted money site still using it, which its own new comment claimed was
+    adequate); createMoneyWriterClient() so money writes name the missing
+    SUPABASE_SERVICE_ROLE_KEY instead of silently degrading to the anon key in dev
+    and failing as an opaque 42501; and the migration header no longer implies SEC-4
+    is fully closed — SEC-7 (catalog-less SKUs keep the browser's price through the
+    sanctioned action) is called out explicitly.
+    
+    tsc clean · unit 3880/3880 · db 279/279 · lint clean (warnings pre-existing).
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+diff --git a/apps/web/app/dashboard/[eventId]/checkout/actions.ts b/apps/web/app/dashboard/[eventId]/checkout/actions.ts
+index d0cfc9e7d..de4bd67b9 100644
+--- a/apps/web/app/dashboard/[eventId]/checkout/actions.ts
++++ b/apps/web/app/dashboard/[eventId]/checkout/actions.ts
+@@ -44,7 +44,7 @@
+ import { revalidatePath } from 'next/cache';
+ import { insertFaultLog } from '@/lib/telemetry/fault-log';
+ import { createClient } from '@/lib/supabase/server';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createAdminClient, createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { sendEmail } from '@/lib/email';
+ import { fetchPlatformSettings } from '@/lib/platform-settings';
+ import { uploadPublicAsset } from '@/lib/storage';
+@@ -65,6 +65,7 @@ import { computeVatFromBase } from '@/lib/receipts';
+ import { getEffectiveVatRatePct } from '@/lib/platform-settings';
+ import { coordinatorMoneyScopeAllowed } from '@/lib/coordinator-money-scope';
+ import { orderRowFor, paymentRowFor } from '@/lib/order-mint-identity';
++import { isVendorSurfaceServiceKey } from '@/lib/vendor-surface-service-keys';
+ import { getRequestPlatform, isRequestPlatform } from '@/lib/request-platform';
+ import { notifyAdminsOrderAwaitingReconciliation } from '@/lib/order-admin-notify';
+ 
+@@ -366,13 +367,32 @@ export async function submitOrderAction(
+   // "charged its real price" into "charged whatever the browser sent".
+   //
+   // 'unknown' (in neither catalog) deliberately ALLOWS: PAPIC_CAMERAS,
+-  // SETNAYAN_AI_SUB, 'save-the-date:<slug>' and 'vendor_additional_branch__<uuid>'
+-  // are all legitimate keys with no catalog row. A "must map to an active row"
+-  // rule would break every one of them.
++  // SETNAYAN_AI_SUB and 'save-the-date:<slug>' are all legitimate keys with no
++  // catalog row. A "must map to an active row" rule would break every one of
++  // them. ⚠ Note what 'unknown' also means: the charge below falls back to the
++  // BROWSER'S price for these. That is SEC-7 (task #50), still open.
+   //
+   // Fails CLOSED on a read error. This knowingly reverses the older "a transient
+   // read failure NEVER blocks an order" stance for THIS check only: a checkout
+   // blocked for thirty seconds beats an order created at a client-supplied price.
++  // ── SEC-4b · vendor-surface keys are not sellable here ────────────────────
++  // Runs BEFORE the sellability gate because it is not a pricing question. The
++  // four `vendor_*__<id>` families encode a VENDOR-OWNED TARGET in the key, and
++  // activateOrderSku's PREFIX_HOOKS provision straight off that string. Since
++  // none of them has a catalog row, sellability returns 'unknown' → ALLOW → the
++  // browser's price stands: a couple could have checked out
++  // `vendor_additional_branch__<a stranger's branch_id>` for ₱1 against their
++  // own event and activated someone else's subscription on approval. Each
++  // family is minted by its own vendor-dashboard action, so nothing legitimate
++  // reaches this action. lib/sku-activation.ts re-checks target ownership at
++  // activation for any row that arrives by another route.
++  if (isVendorSurfaceServiceKey(serviceKey)) {
++    return {
++      ok: false,
++      reason: 'That service is not available from this checkout.',
++    };
++  }
++
+   const sellability = await resolveServiceSellability(serviceKey);
+   if (sellability === 'retired') {
+     return {
+@@ -604,7 +624,18 @@ export async function submitOrderAction(
+   // design (see the comment at the top of this function), so it is pinned to
+   // null: an event id is now only ever written when a membership check covered
+   // it.
+-  const insertPayload: Record<string, unknown> = orderRowFor(
++  // Typed from orderRowFor's return rather than as a bare
++  // `Record<string, unknown>`, so the two columns this block actually adds are
++  // declared instead of hidden behind an index signature. Be clear about what
++  // this does NOT buy: the identity columns are still assignable here, because
++  // TypeScript has no exact-object check. What guarantees them is the RUNTIME
++  // stamp — orderRowFor spreads `fields` first and writes user_id / event_id /
++  // vendor_profile_id last, so a smuggled value is overwritten. See the
++  // "THE TYPE IS A GUARDRAIL" note in lib/order-mint-identity.ts.
++  const insertPayload: ReturnType<typeof orderRowFor> & {
++    voucher_code_applied?: string;
++    voucher_discount_centavos?: number;
++  } = orderRowFor(
+     {
+       userId: user.id,
+       eventId: isAiSub ? null : eventIdClean,
+@@ -633,7 +664,7 @@ export async function submitOrderAction(
+     insertPayload.voucher_discount_centavos = Number(voucherDiscountCentavos);
+   }
+ 
+-  const moneyWriter = createAdminClient();
++  const moneyWriter = createMoneyWriterClient();
+ 
+   const { data: orderRow, error: orderErr } = await moneyWriter
+     .from('orders')
+diff --git a/apps/web/app/dashboard/[eventId]/orders/actions.ts b/apps/web/app/dashboard/[eventId]/orders/actions.ts
+index 4294bb879..e49d79a23 100644
+--- a/apps/web/app/dashboard/[eventId]/orders/actions.ts
++++ b/apps/web/app/dashboard/[eventId]/orders/actions.ts
+@@ -3,7 +3,7 @@
+ import { revalidatePath } from 'next/cache';
+ import { redirect } from 'next/navigation';
+ import { createClient } from '@/lib/supabase/server';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createAdminClient, createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { uploadPublicAsset } from '@/lib/storage';
+ import { insertFaultLog } from '@/lib/telemetry/fault-log';
+ import { coordinatorMoneyScopeAllowed } from '@/lib/coordinator-money-scope';
+@@ -138,7 +138,7 @@ export async function logPayment(formData: FormData) {
+   // a payment only when the couple granted the 'checkout' scope at invite
+   // time (coordinator_access_consents.scopes). Flag OFF = exact current
+   // behavior (helper returns true without reading).
+-  const moneyWriter = createAdminClient();
++  const moneyWriter = createMoneyWriterClient();
+   const checkoutAllowed = await coordinatorMoneyScopeAllowed(
+     moneyWriter,
+     eventId,
+diff --git a/apps/web/app/vendor-dashboard/booking-fees/actions.ts b/apps/web/app/vendor-dashboard/booking-fees/actions.ts
+index 0225a162a..2f02baad0 100644
+--- a/apps/web/app/vendor-dashboard/booking-fees/actions.ts
++++ b/apps/web/app/vendor-dashboard/booking-fees/actions.ts
+@@ -3,7 +3,7 @@
+ import { revalidatePath } from 'next/cache';
+ import { redirect } from 'next/navigation';
+ import { createClient } from '@/lib/supabase/server';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { paymentRowFor } from '@/lib/order-mint-identity';
+ import { insertFaultLog } from '@/lib/telemetry/fault-log';
+ import { isVendorBookingFeeServiceKey, vendorBookingFeePayPath } from '@/lib/vendor-booking-fees';
+@@ -107,7 +107,7 @@ export async function logBookingFeePayment(formData: FormData) {
+   //
+   // Promotion to paid is untouched: it stays the admin-only /admin/payments
+   // approve path (approvePaymentCore → activateOrderSku → the settle bridge).
+-  const { error } = await createAdminClient().from('payments').insert(
++  const { error } = await createMoneyWriterClient().from('payments').insert(
+     paymentRowFor(
+       { userId: user.id, verifiedOrderId: orderId },
+       {
+diff --git a/apps/web/app/vendor-dashboard/branches/actions.ts b/apps/web/app/vendor-dashboard/branches/actions.ts
+index 544c5fd92..f29f38965 100644
+--- a/apps/web/app/vendor-dashboard/branches/actions.ts
++++ b/apps/web/app/vendor-dashboard/branches/actions.ts
+@@ -3,10 +3,10 @@
+ import { redirect } from 'next/navigation';
+ import { revalidatePath } from 'next/cache';
+ import { createClient } from '@/lib/supabase/server';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createAdminClient, createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { orderRowFor, paymentRowFor } from '@/lib/order-mint-identity';
+ import { fetchOwnVendorProfile } from '@/lib/vendor-profile';
+-import { resolveVendorRole, canManageVendor } from '@/lib/vendor-role';
++import { resolveVendorRoleForProfile, canManageVendor } from '@/lib/vendor-role';
+ import {
+   BRANCH_LABEL_MAX,
+   BRANCH_CITY_MAX,
+@@ -62,7 +62,13 @@ async function requireBranchManager(): Promise<
+   const profile = await fetchOwnVendorProfile(supabase, user.id);
+   if (!profile) return { error: err('No vendor profile found.') };
+ 
+-  const role = await resolveVendorRole(supabase, user.id);
++  // PROFILE-SCOPED, not global-highest. `resolveVendorRole(user.id)` returns the
++  // user's highest role across EVERY vendor they sit on, so an agent/viewer on
++  // THIS shop who happens to be owner/admin on some OTHER shop would pass it
++  // (lib/vendor-role.ts documents this as money-integrity fix S1). With the
++  // order row now minted through service_role, this is the only role gate in
++  // the file — every sibling add-on action already uses the scoped form.
++  const role = await resolveVendorRoleForProfile(supabase, user.id, profile.vendor_profile_id);
+   if (!canManageVendor(role)) {
+     return { error: err('Only the owner or an admin can manage branches.') };
+   }
+@@ -126,7 +132,7 @@ async function startBranchPayment(
+   // fetchBranchFeePhp, the vendor_branches rows) deliberately keeps the SESSION
+   // client so RLS keeps scoping it. Removing the parameter makes it impossible
+   // for a later edit to reach for "the client that's already in scope" here.
+-  const moneyWriter = createAdminClient();
++  const moneyWriter = createMoneyWriterClient();
+   const identity = { userId, eventId: null, vendorProfileId };
+ 
+   const { data: orderRow, error: oErr } = await moneyWriter
+diff --git a/apps/web/app/vendor-dashboard/clients/[eventId]/photo-challenge-actions.ts b/apps/web/app/vendor-dashboard/clients/[eventId]/photo-challenge-actions.ts
+index cc89d380e..e440bdf6f 100644
+--- a/apps/web/app/vendor-dashboard/clients/[eventId]/photo-challenge-actions.ts
++++ b/apps/web/app/vendor-dashboard/clients/[eventId]/photo-challenge-actions.ts
+@@ -3,7 +3,7 @@
+ import { redirect } from 'next/navigation';
+ import { revalidatePath } from 'next/cache';
+ import { createClient } from '@/lib/supabase/server';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createAdminClient, createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { orderRowFor, paymentRowFor } from '@/lib/order-mint-identity';
+ import { isVendorAddonTieredPricingEnabled } from '@/lib/vendor-addon-tiered-pricing-flag';
+ import { resolveVendorAddonPricePhp } from '@/lib/vendor-addon-tier-pricing';
+@@ -319,7 +319,11 @@ export async function sponsorPhotoChallenge(
+   // → the sponsored dedupe → the pending-order double-charge guard → the SKU
+   // is_active reject. Every gate stays BEFORE pricing, as the file header
+   // requires. Reuses the `admin` client created above.
+-  const { data: orderRow, error: oErr } = await admin
++  // SEC-4b: money writes take the STRICT service-role client — it refuses the
++  // dev anon-key fallback in createAdminClient(), which cannot write these
++  // tables any more and would fail as an opaque 42501. Reads keep `admin`.
++  const moneyWriter = createMoneyWriterClient();
++  const { data: orderRow, error: oErr } = await moneyWriter
+     .from('orders')
+     .insert(
+       orderRowFor(
+@@ -340,7 +344,7 @@ export async function sponsorPhotoChallenge(
+   }
+   const orderId = (orderRow as { order_id: string }).order_id;
+ 
+-  const { error: pErr } = await admin.from('payments').insert(
++  const { error: pErr } = await moneyWriter.from('payments').insert(
+     paymentRowFor(
+       { userId: user.id, verifiedOrderId: orderId },
+       {
+diff --git a/apps/web/app/vendor-dashboard/deep-search/actions.ts b/apps/web/app/vendor-dashboard/deep-search/actions.ts
+index 9a73d31e5..7e67db412 100644
+--- a/apps/web/app/vendor-dashboard/deep-search/actions.ts
++++ b/apps/web/app/vendor-dashboard/deep-search/actions.ts
+@@ -3,7 +3,7 @@
+ import { redirect } from 'next/navigation';
+ import { revalidatePath } from 'next/cache';
+ import { createClient } from '@/lib/supabase/server';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createAdminClient, createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { orderRowFor, paymentRowFor } from '@/lib/order-mint-identity';
+ import { isVendorAddonTieredPricingEnabled } from '@/lib/vendor-addon-tiered-pricing-flag';
+ import { resolveVendorAddonPricePhp } from '@/lib/vendor-addon-tier-pricing';
+@@ -258,7 +258,11 @@ export async function runVendorDeepSearch(
+   // tier/verification read → the SKU is_active reject → `deepSearchAiConfigured`.
+   // Reuses the `admin` client already created above for the allowance count —
+   // one service-role client per request, not two.
+-  const { data: orderRow, error: oErr } = await admin
++  // SEC-4b: money writes take the STRICT service-role client — it refuses the
++  // dev anon-key fallback in createAdminClient(), which cannot write these
++  // tables any more and would fail as an opaque 42501. Reads keep `admin`.
++  const moneyWriter = createMoneyWriterClient();
++  const { data: orderRow, error: oErr } = await moneyWriter
+     .from('orders')
+     .insert(
+       orderRowFor(
+@@ -279,7 +283,7 @@ export async function runVendorDeepSearch(
+   }
+   const orderId = (orderRow as { order_id: string }).order_id;
+ 
+-  const { error: pErr } = await admin.from('payments').insert(
++  const { error: pErr } = await moneyWriter.from('payments').insert(
+     paymentRowFor(
+       { userId: user.id, verifiedOrderId: orderId },
+       {
+diff --git a/apps/web/app/vendor-dashboard/subscription/ai-addon-actions.ts b/apps/web/app/vendor-dashboard/subscription/ai-addon-actions.ts
+index 1f3003928..b936432f7 100644
+--- a/apps/web/app/vendor-dashboard/subscription/ai-addon-actions.ts
++++ b/apps/web/app/vendor-dashboard/subscription/ai-addon-actions.ts
+@@ -3,7 +3,7 @@
+ import { redirect } from 'next/navigation';
+ import { revalidatePath } from 'next/cache';
+ import { createClient } from '@/lib/supabase/server';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createAdminClient, createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { orderRowFor, paymentRowFor } from '@/lib/order-mint-identity';
+ import { fetchOwnVendorProfile } from '@/lib/vendor-profile';
+ import { resolveVendorRoleForProfile, canManageVendor } from '@/lib/vendor-role';
+@@ -256,7 +256,7 @@ export async function activateVendorAiAddon(
+   // backstop → `isTierAtLeast(tier,'solo')` → `verification_state === 'verified'`
+   // → the SKU is_active reject. The free-first-cycle branch above keeps its own
+   // admin client and its atomic is-null-guarded trial claim, untouched.
+-  const moneyWriter = createAdminClient();
++  const moneyWriter = createMoneyWriterClient();
+ 
+   const { data: orderRow, error: oErr } = await moneyWriter
+     .from('orders')
+diff --git a/apps/web/app/vendor-dashboard/subscription/booth-addon-actions.ts b/apps/web/app/vendor-dashboard/subscription/booth-addon-actions.ts
+index f4f25947c..0fce0a33d 100644
+--- a/apps/web/app/vendor-dashboard/subscription/booth-addon-actions.ts
++++ b/apps/web/app/vendor-dashboard/subscription/booth-addon-actions.ts
+@@ -3,7 +3,7 @@
+ import { redirect } from 'next/navigation';
+ import { revalidatePath } from 'next/cache';
+ import { createClient } from '@/lib/supabase/server';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createAdminClient, createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { orderRowFor, paymentRowFor } from '@/lib/order-mint-identity';
+ import { fetchOwnVendorProfile } from '@/lib/vendor-profile';
+ import { resolveVendorRoleForProfile, canManageVendor } from '@/lib/vendor-role';
+@@ -338,7 +338,7 @@ export async function activateVendor3dBooth(
+   // the Pro+ tier gate when tiered pricing is off → `verification_state ===
+   // 'verified'` → the SKU is_active reject → the first-5-free evaluation, which
+   // fails CLOSED to charging. Nothing is reordered around the price resolvers.
+-  const moneyWriter = createAdminClient();
++  const moneyWriter = createMoneyWriterClient();
+ 
+   const { data: orderRow, error: oErr } = await moneyWriter
+     .from('orders')
+diff --git a/apps/web/app/vendor-dashboard/subscription/custom/actions.ts b/apps/web/app/vendor-dashboard/subscription/custom/actions.ts
+index 08ce9cd82..62d005c5c 100644
+--- a/apps/web/app/vendor-dashboard/subscription/custom/actions.ts
++++ b/apps/web/app/vendor-dashboard/subscription/custom/actions.ts
+@@ -3,7 +3,7 @@
+ import { redirect } from 'next/navigation';
+ import { revalidatePath } from 'next/cache';
+ import { createClient } from '@/lib/supabase/server';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createAdminClient, createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { orderRowFor, paymentRowFor } from '@/lib/order-mint-identity';
+ import { fetchOwnVendorProfile } from '@/lib/vendor-profile';
+ import { resolveVendorRoleForProfile, canManageVendor } from '@/lib/vendor-role';
+@@ -216,7 +216,7 @@ export async function requestCustomPlan(formData: FormData) {
+   // clamps every knob, so the form carries the COMPOSITION and never a peso
+   // figure. The `vendor_custom_plans` write above stays on the SESSION client so
+   // RLS keeps scoping it — only the money rows are elevated.
+-  const moneyWriter = createAdminClient();
++  const moneyWriter = createMoneyWriterClient();
+ 
+   const { data: orderRow, error: oErr } = await moneyWriter
+     .from('orders')
+diff --git a/apps/web/app/vendor-dashboard/team/actions.ts b/apps/web/app/vendor-dashboard/team/actions.ts
+index 80da2c8e3..c7cd56825 100644
+--- a/apps/web/app/vendor-dashboard/team/actions.ts
++++ b/apps/web/app/vendor-dashboard/team/actions.ts
+@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
+ import { after } from 'next/server';
+ import { createClient } from '@/lib/supabase/server';
+ import { revokeAllSessions } from '@/lib/force-logout';
+-import { createAdminClient } from '@/lib/supabase/admin';
++import { createAdminClient, createMoneyWriterClient } from '@/lib/supabase/admin';
+ import { orderRowFor, paymentRowFor } from '@/lib/order-mint-identity';
+ import {
+   VENDOR_TEAM_ROLES,
+@@ -374,7 +374,7 @@ export async function buyExtraSeat(formData: FormData) {
+   // resolved, never client-supplied — and `canBuyExtraSeats(ctx.tierState)` is
+   // the Enterprise/Custom gate. Both ids handed to `orderRowFor` come from
+   // there, so a form field can never reach an identity column.
+-  const moneyWriter = createAdminClient();
++  const moneyWriter = createMoneyWriterClient();
+ 
+   const { data: orderRow, error: oErr } = await moneyWriter
+     .from('orders')
+diff --git a/apps/web/lib/order-mint-identity.test.ts b/apps/web/lib/order-mint-identity.test.ts
+index 3266572be..e02046c4c 100644
+--- a/apps/web/lib/order-mint-identity.test.ts
++++ b/apps/web/lib/order-mint-identity.test.ts
+@@ -200,3 +200,121 @@ test('the compile-time forbid is in force on every identity column', () => {
+     [false, false, false, false, false],
+   );
+ });
++
++const _paymentRejectsStatus: Accepts<PaymentFields['status'], string> = false;
++
++test('payments: status is forbidden to the caller and pinned to pending', () => {
++  // `payments_insert_status_guard` forced a non-admin insert to 'pending'. Every
++  // payment write is service_role now, so that RESTRICTIVE policy short-circuits
++  // on its own `auth.role() = 'service_role'` disjunct and constrains nothing.
++  assert.equal(_paymentRejectsStatus, false, 'status must be a compile error on paymentRowFor');
++  const row = paymentRowFor(
++    { userId: 'u1', verifiedOrderId: 'o1' },
++    { amount_php: 2999, channel: 'gcash' },
++  );
++  assert.equal(row.status, 'pending', 'a minted payment must start as an unreconciled claim');
++});
++
++/* ── THE RUNTIME STAMP IS THE REAL GUARANTEE ───────────────────────────────── */
++
++/**
++ * The `Forbid<>` types above only bind a call site that passes a precisely-typed
++ * object. `orderRowFor(id, someRecordOfStringUnknown)` — or a spread of one —
++ * compiles fine, because TypeScript has no exact-object check. So the property
++ * that must hold unconditionally is the ORDER OF ASSIGNMENT: `...fields` is
++ * spread first, the identity columns are written last, and the server-derived
++ * value therefore always wins.
++ *
++ * These two tests are what stop someone "tidying" that spread into
++ * `{ user_id, ...fields }` and silently letting a caller-supplied id through.
++ */
++test('a smuggled identity column is OVERWRITTEN, not honoured (orders)', () => {
++  const smuggled: Record<string, unknown> = {
++    user_id: 'attacker-supplied',
++    event_id: 'someone-elses-event',
++    vendor_profile_id: 'someone-elses-vendor',
++    service_key: 'PAPIC_GUEST',
++    requested_total_php: 1,
++  };
++  const row = orderRowFor(
++    { userId: 'real-server-user', eventId: null, vendorProfileId: null },
++    smuggled,
++  ) as Record<string, unknown>;
++
++  assert.equal(row.user_id, 'real-server-user', 'the caller-supplied user_id survived the stamp');
++  assert.equal(row.event_id, null, 'the caller-supplied event_id survived the stamp');
++  assert.equal(row.vendor_profile_id, null, 'the caller-supplied vendor_profile_id survived the stamp');
++});
++
++test('a smuggled identity column is OVERWRITTEN, not honoured (payments)', () => {
++  const smuggled: Record<string, unknown> = {
++    user_id: 'attacker-supplied',
++    order_id: 'someone-elses-order',
++    status: 'paid',
++    amount_php: 1,
++  };
++  const row = paymentRowFor(
++    { userId: 'real-server-user', verifiedOrderId: 'my-verified-order' },
++    smuggled,
++  ) as Record<string, unknown>;
++
++  assert.equal(row.user_id, 'real-server-user', 'the caller-supplied user_id survived the stamp');
++  assert.equal(row.order_id, 'my-verified-order', 'the caller-supplied order_id survived the stamp');
++  assert.equal(row.status, 'pending', 'a caller-supplied status survived — self-approval is back');
++});
++
++/* ── THE STATUS ALLOW-LIST orders_insert_status_guard NO LONGER ENFORCES ───── */
++
++test('orders: a PRICED order cannot be minted already-settled', () => {
++  for (const status of ['paid', 'fulfilled']) {
++    assert.throws(
++      () =>
++        orderRowFor(
++          { userId: 'u1', eventId: null, vendorProfileId: 'v1' },
++          { service_key: 'X', requested_total_php: 2999, status },
++        ),
++      (e: unknown) => e instanceof MintIdentityRefused && e.fault === 'status-not-mintable',
++      `minting a ₱2999 order directly at '${status}' skips the payment queue entirely`,
++    );
++  }
++});
++
++test('orders: a ₱0 audit row MAY be minted settled — the free-cycle path', () => {
++  // The three vendor add-on actions write status:'paid', requested_total_php:0
++  // for a free cycle. No money is owed, so there is nothing to reconcile.
++  for (const status of ['paid', 'fulfilled']) {
++    const row = orderRowFor(
++      { userId: 'u1', eventId: null, vendorProfileId: 'v1' },
++      { service_key: 'X', requested_total_php: 0, status },
++    );
++    assert.equal(row.status, status);
++  }
++});
++
++test('orders: the mintable statuses still pass, and an unknown one fails closed', () => {
++  for (const status of ['draft', 'submitted', 'awaiting_payment', 'cancelled']) {
++    const row = orderRowFor(
++      { userId: 'u1', eventId: null, vendorProfileId: null },
++      { service_key: 'X', requested_total_php: 2999, status },
++    );
++    assert.equal(row.status, status);
++  }
++  assert.throws(
++    () =>
++      orderRowFor(
++        { userId: 'u1', eventId: null, vendorProfileId: null },
++        { service_key: 'X', requested_total_php: 2999, status: 'refunded' },
++      ),
++    (e: unknown) => e instanceof MintIdentityRefused,
++    'an unrecognised status must be REFUSED, not waved through — a future enum value ' +
++      'has to be classified deliberately',
++  );
++});
++
++test('orders: omitting status is allowed (the DB default applies)', () => {
++  const row = orderRowFor(
++    { userId: 'u1', eventId: null, vendorProfileId: null },
++    { service_key: 'X', requested_total_php: 2999 },
++  );
++  assert.equal((row as Record<string, unknown>).status, undefined);
++});
+diff --git a/apps/web/lib/order-mint-identity.ts b/apps/web/lib/order-mint-identity.ts
+index abdd4cb20..9ce418dc9 100644
+--- a/apps/web/lib/order-mint-identity.ts
++++ b/apps/web/lib/order-mint-identity.ts
+@@ -31,12 +31,33 @@
+  * `user_id` therefore cannot come from `formData` by construction — not by
+  * review, not by convention. That is the property RLS used to provide.
+  *
++ * ⚠ THE TYPE IS A GUARDRAIL; THE RUNTIME STAMP IS THE GUARANTEE. `Forbid<K>`
++ * only binds a call site that passes an object literal (or a precisely-typed
++ * value). It does NOT fire for `orderRowFor(id, someRecordOfStringUnknown)` or
++ * for a spread of a loosely-typed object — TypeScript has no exact-type check
++ * to lean on. What holds unconditionally is the ORDER OF ASSIGNMENT below:
++ * `...fields` is spread FIRST and the identity columns are written LAST, so a
++ * smuggled `user_id` is always overwritten by the server-derived one. Tests in
++ * `order-mint-identity.test.ts` pin both halves — the type error AND the
++ * runtime override through a `Record<string, unknown>` — so neither can regress
++ * silently. Do not reorder the spread.
++ *
+  * It does NOT authorize. Deciding that this caller may buy for this event /
+  * this vendor is the CALL SITE's job and must happen BEFORE the stamp — the
+  * membership lookup, the coordinator money scope, `fetchOwnVendorProfile` +
+  * `resolveVendorRoleForProfile`, the booked-on-this-event read. Each converted
+  * site names the gate it relies on in a comment directly above its call.
+  *
++ * # It also re-implements the two RESTRICTIVE status policies
++ *
++ * `orders_insert_status_guard` and `payments_insert_status_guard` both read
++ * `auth.role() = 'service_role' OR is_admin() OR status = <allowed>`. Every
++ * converted site now writes as service_role, so the FIRST disjunct
++ * short-circuits and neither policy constrains anything any more. `status` was
++ * therefore silently unguarded at exactly the moment `user_id` stopped being
++ * guarded. `assertMintableOrderStatus` / the pinned `status: 'pending'` on
++ * payments put that check back in code — see each function.
++ *
+  * # Fail closed
+  *
+  * A missing or blank `userId` (or `verifiedOrderId`) means the caller could not
+@@ -68,7 +89,36 @@ export class MintIdentityRefused extends Error {
+ 
+ export type MintIdentityFault =
+   | 'no-server-user'
+-  | 'no-verified-order';
++  | 'no-verified-order'
++  | 'status-not-mintable';
++
++/**
++ * The statuses `orders_insert_status_guard` allowed a non-service_role caller to
++ * INSERT (migration 20270920010000). Every mint now writes as service_role, so
++ * that RESTRICTIVE policy short-circuits on its own `auth.role() =
++ * 'service_role'` disjunct and no longer constrains anything — this list is the
++ * code-side replacement.
++ */
++const MINTABLE_ORDER_STATUSES = Object.freeze([
++  'draft',
++  'submitted',
++  'awaiting_payment',
++  'cancelled',
++] as const);
++
++/**
++ * A ₱0 row may ALSO be minted already-settled. The three vendor add-on actions
++ * write an audit-only `status: 'paid', requested_total_php: 0` row for a free
++ * cycle (first-5-free / trial), and that is legitimate: no money is owed, so
++ * there is nothing for the payment queue to reconcile.
++ *
++ * Pinning the escape to `requested_total_php === 0` is what makes this SAFER
++ * than the policy it replaces. The policy let service_role write ANY status at
++ * ANY amount; this refuses to mint a PRICED order that is already 'paid' —
++ * i.e. it closes "mint it settled and skip the payment queue entirely", which
++ * is the same shape as SEC-4 with the status column instead of the amount.
++ */
++const SETTLED_AT_ZERO_STATUSES = Object.freeze(['paid', 'fulfilled'] as const);
+ 
+ /**
+  * Who the server decided this row belongs to. Every field must come from a
+@@ -93,9 +143,18 @@ export type MintIdentity = {
+   vendorProfileId: string | null;
+ };
+ 
+-/** Columns this module owns. A call site may not set them. */
++/**
++ * Columns this module owns. A call site may not set them.
++ *
++ * `status` is on the PAYMENT list because `payments_insert_status_guard` used to
++ * force a non-admin insert to 'pending' and no longer does (service_role
++ * short-circuits it). Nothing legitimately mints a payment at any other status —
++ * approval/rejection are UPDATEs from /admin/payments — so it is pinned here
++ * rather than merely validated. Orders cannot do the same: they legitimately
++ * mint at several statuses, so they get `assertMintableOrderStatus` instead.
++ */
+ type OrderIdentityColumn = 'user_id' | 'event_id' | 'vendor_profile_id';
+-type PaymentIdentityColumn = 'user_id' | 'order_id';
++type PaymentIdentityColumn = 'user_id' | 'order_id' | 'status';
+ 
+ /** `Partial<Record<K, never>>` makes supplying any of those keys a type error. */
+ type Forbid<K extends string> = Partial<Record<K, never>>;
+@@ -107,6 +166,30 @@ function requireNonBlank(value: string | null | undefined, fault: MintIdentityFa
+   return value;
+ }
+ 
++/**
++ * Re-impose `orders_insert_status_guard` in code. Reads `status` and
++ * `requested_total_php` off the payload as `unknown`, because the payload is
++ * generic and a call site may legitimately omit either (the DB defaults apply).
++ *
++ * Fail closed: an UNRECOGNISED status is refused, not waved through. A future
++ * enum value has to be classified here deliberately.
++ */
++function assertMintableOrderStatus(fields: Record<string, unknown>): void {
++  const status = fields.status;
++  if (status === undefined || status === null) return; // DB default ('draft') applies.
++  if ((MINTABLE_ORDER_STATUSES as readonly unknown[]).includes(status)) return;
++
++  const amount = Number(fields.requested_total_php ?? 0);
++  if (
++    (SETTLED_AT_ZERO_STATUSES as readonly unknown[]).includes(status) &&
++    Number.isFinite(amount) &&
++    amount === 0
++  ) {
++    return; // audit-only free-cycle row — see SETTLED_AT_ZERO_STATUSES.
++  }
++  throw new MintIdentityRefused('status-not-mintable');
++}
++
+ /**
+  * Build an `orders` INSERT payload with its identity columns stamped from the
+  * server-derived identity.
+@@ -125,13 +208,18 @@ function requireNonBlank(value: string | null | undefined, fault: MintIdentityFa
+  * source-scanning for a PostgREST insert chain on the orders table, and this
+  * module builds payloads — it is not itself a minter.)
+  *
+- * @throws {MintIdentityRefused} when no server user could be resolved.
++ * @throws {MintIdentityRefused} when no server user could be resolved, or when
++ *   `status` is not one a mint may write (see `assertMintableOrderStatus`).
+  */
+ export function orderRowFor<T extends Record<string, unknown>>(
+   identity: MintIdentity,
+   fields: T & Forbid<OrderIdentityColumn>,
+ ): T & { user_id: string; event_id: string | null; vendor_profile_id: string | null } {
+   const userId = requireNonBlank(identity.userId, 'no-server-user');
++  assertMintableOrderStatus(fields as Record<string, unknown>);
++  // ⚠ `...fields` MUST stay FIRST — the identity columns are written last so a
++  // smuggled user_id / event_id / vendor_profile_id is overwritten rather than
++  // honoured. See "THE TYPE IS A GUARDRAIL" in the header.
+   return {
+     ...(fields as T),
+     user_id: userId,
+@@ -160,8 +248,12 @@ export function orderRowFor<T extends Record<string, unknown>>(
+ export function paymentRowFor<T extends Record<string, unknown>>(
+   identity: { userId: string; verifiedOrderId: string },
+   fields: T & Forbid<PaymentIdentityColumn>,
+-): T & { user_id: string; order_id: string } {
++): T & { user_id: string; order_id: string; status: 'pending' } {
+   const userId = requireNonBlank(identity.userId, 'no-server-user');
+   const orderId = requireNonBlank(identity.verifiedOrderId, 'no-verified-order');
+-  return { ...(fields as T), user_id: userId, order_id: orderId };
++  // ⚠ `...fields` first — see orderRowFor. `status` is PINNED, not defaulted:
++  // a payment is a CLAIM until an admin reconciles it at /admin/payments, and
++  // `payments_insert_status_guard` (which used to force exactly this) stopped
++  // applying the moment these writes became service_role.
++  return { ...(fields as T), user_id: userId, order_id: orderId, status: 'pending' as const };
+ }
+diff --git a/apps/web/lib/order-price-authority.test.ts b/apps/web/lib/order-price-authority.test.ts
+index d8e306ac6..0af0977b1 100644
+--- a/apps/web/lib/order-price-authority.test.ts
++++ b/apps/web/lib/order-price-authority.test.ts
+@@ -90,6 +90,7 @@ const read = (rel: string) => readFileSync(resolve(WEB, rel), 'utf8');
+ const ORDERS_ACTIONS = 'app/dashboard/[eventId]/orders/actions.ts';
+ const CHECKOUT_ACTIONS = 'app/dashboard/[eventId]/checkout/actions.ts';
+ const ADMIN_CUSTOM_PLANS = 'app/admin/custom-plans/actions.ts';
++const STRESS_TEST_SCRIPT = 'scripts/stress-test-lock-unlock.ts';
+ 
+ /* ── 1 · THE ACTION IS GONE ─────────────────────────────────────────────────── */
+ 
+@@ -190,6 +191,12 @@ const ORDER_MINTERS: Record<string, string> = {
+   [ADMIN_CUSTOM_PLANS]:
+     'ADMIN-MINTED BESPOKE AMOUNT — legitimate and intentional. assertAdmin()-gated, service-role ' +
+     'write, per-quote unit-price overrides are an admin negotiation tool. Exempt from test 3.',
++  [STRESS_TEST_SCRIPT]:
++    'NOT AN APPLICATION PATH — a hand-run CLI stress harness (500 lock/unlock iterations) that ' +
++    'refuses to start without SUPABASE_TEST_URL + SUPABASE_TEST_SERVICE_ROLE_KEY and is pointed ' +
++    'at a NON-PROD database. Amounts are synthetic fixtures. It builds its own service-role ' +
++    'client via createClient(url, key), so it is unaffected by the SEC-4b revoke. Rostered ' +
++    'because the scan now covers apps/web/scripts — it was invisible to the app+lib scan before.',
+ };
+ 
+ /** Recursively collect .ts files, skipping tests and build output. */
+@@ -205,10 +212,24 @@ function collectTs(dir: string, out: string[] = []): string[] {
+ 
+ const MINT_RE = /\.from\(\s*['"]orders['"]\s*\)[\s\S]{0,80}?\.insert\b/;
+ 
++/**
++ * EVERY directory a mint could hide in — not just `app` + `lib`.
++ *
++ * The original pair was a real blind spot: `apps/web/scripts/` already contains
++ * an orders+payments minter (`stress-test-lock-unlock.ts`), and a session-role
++ * insert dropped into `scripts/` or `packages/` would have passed this suite
++ * green while 42501-ing at runtime. Scanning the whole of apps/web plus the
++ * monorepo's shared code closes it; `collectTs` already skips node_modules,
++ * `.next` and `*.test.*`.
++ */
++function scanRoots(): string[] {
++  const repo = resolve(WEB, '..', '..');
++  return [WEB, join(repo, 'packages'), join(repo, 'scripts')].filter((d) => existsSync(d));
++}
++
+ function findOrderMinters(): string[] {
+-  const roots = ['app', 'lib'].map((d) => join(WEB, d)).filter((d) => existsSync(d));
+   const hits: string[] = [];
+-  for (const root of roots) {
++  for (const root of scanRoots()) {
+     for (const file of collectTs(root)) {
+       if (MINT_RE.test(readFileSync(file, 'utf8'))) {
+         hits.push(relative(WEB, file));
+@@ -235,24 +256,85 @@ test('every module that mints an order is on the reviewed roster', () => {
+ 
+ const MONEY_KEY = /price|amount|total|centavos|php|fee|cost/i;
+ 
+-/** Slice the balanced `{…}` payload passed to the first `.insert(` after `from('orders')`. */
+-function orderInsertPayloads(src: string): string[] {
+-  const out: string[] = [];
+-  const re = /\.from\(\s*['"]orders['"]\s*\)[\s\S]{0,80}?\.insert\(/g;
+-  for (const m of re.exec(src) ? [...src.matchAll(re)] : []) {
+-    let i = src.indexOf('{', m.index + m[0].length - 1);
+-    if (i < 0) continue;
+-    let depth = 0;
+-    for (let j = i; j < src.length; j++) {
+-      if (src[j] === '{') depth++;
+-      else if (src[j] === '}') {
+-        depth--;
+-        if (depth === 0) {
+-          out.push(src.slice(i, j + 1));
+-          break;
+-        }
+-      }
++const INSERT_CALL_RE = /\.from\(\s*['"]orders['"]\s*\)[\s\S]{0,80}?\.insert\(/g;
++
++/** How many `from('orders') … .insert(` chains exist — the denominator for coverage. */
++function countOrderInserts(src: string): number {
++  return [...src.matchAll(INSERT_CALL_RE)].length;
++}
++
++/**
++ * The initializer text of `const <id> … = <rhs>;` in this file, or null.
++ *
++ * The type annotation is matched as `[^=]+` rather than `[^=\n]+` so a
++ * MULTI-LINE annotation still resolves — `const insertPayload: Foo & {\n … \n} =
++ * orderRowFor(…)` in checkout is exactly that shape, and the single-line version
++ * of this regex silently stopped resolving it (caught by the anti-vacuity test).
++ * `[^=]+` is safe because a type annotation cannot contain `=` before the
++ * initializer's own `=`.
++ */
++function constBinding(src: string, id: string): string | null {
++  if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(id)) return null;
++  const m = new RegExp(`\\bconst\\s+${id}\\s*(?::[^=]+)?=\\s*([\\s\\S]*?);`).exec(src);
++  return m ? m[1]! : null;
++}
++
++/** Balanced slice from `open` (an index pointing AT the opener) to its partner. */
++function balancedSlice(src: string, open: number, opener: '(' | '{'): string | null {
++  const closer = opener === '(' ? ')' : '}';
++  let depth = 0;
++  for (let j = open; j < src.length; j++) {
++    if (src[j] === opener) depth++;
++    else if (src[j] === closer) {
++      depth--;
++      if (depth === 0) return src.slice(open, j + 1);
++    }
++  }
++  return null;
++}
++
++/**
++ * The FULL argument text of every `.insert(…)` that follows `from('orders')`.
++ *
++ * ── WHY THIS IS NOT THE OBVIOUS ONE-LINER ────────────────────────────────────
++ * The previous implementation had two defects that between them reduced this
++ * suite's real coverage to 2 payloads in a single file nobody had touched:
++ *
++ *  1. `for (const m of re.exec(src) ? [...src.matchAll(re)] : [])` — `re` is
++ *     /g, so `re.exec()` advances `lastIndex` and `matchAll` seeds its clone
++ *     from there. The FIRST insert in every file was silently dropped, which is
++ *     every insert in the nine single-mint files.
++ *  2. It sliced the first `{` after `.insert(`. Once SEC-4b wrapped payloads as
++ *     `orderRowFor(identity, fields)` that `{` became the IDENTITY object, and
++ *     for `.insert(insertPayload)` it was some unrelated brace further down the
++ *     file.
++ *
++ * So: take the whole balanced argument list, and resolve a bare identifier
++ * (`.insert(insertPayload)`) through its `const` binding. Returning the full
++ * argument text — rather than trying to guess which brace is "the payload" —
++ * is deliberate: the callers below search it for `requested_total_php:` /
++ * `user_id:` / `orderRowFor(`, and those read correctly whether the fields sit
++ * in the first argument, the second, or behind a binding.
++ *
++ * Returns null entries for arguments that could NOT be resolved, so the
++ * anti-vacuity test can fail on them instead of quietly scanning nothing.
++ */
++function orderInsertPayloads(src: string): Array<string | null> {
++  const out: Array<string | null> = [];
++  for (const m of src.matchAll(INSERT_CALL_RE)) {
++    const openParen = m.index + m[0].length - 1; // the '(' of `.insert(`
++    const arg = balancedSlice(src, openParen, '(');
++    if (arg === null) {
++      out.push(null);
++      continue;
++    }
++    const inner = arg.slice(1, -1).trim();
++    if (inner.includes('{') || inner.includes('(')) {
++      out.push(inner);
++      continue;
+     }
++    // A bare identifier — `.insert(insertPayload)`. Resolve its binding.
++    out.push(constBinding(src, inner));
+   }
+   return out;
+ }
+@@ -267,12 +349,59 @@ function tracesToClientPrice(src: string, expr: string, depth = 0): boolean {
+     return true;
+   }
+   for (const id of new Set([...expr.matchAll(/\b([A-Za-z_$][A-Za-z0-9_$]*)\b/g)].map((m) => m[1]!))) {
+-    const bind = new RegExp(`\\bconst\\s+${id}\\s*(?::[^=\\n]+)?=\\s*([\\s\\S]*?);`).exec(src);
+-    if (bind && tracesToClientPrice(src, bind[1]!, depth + 1)) return true;
++    const bind = constBinding(src, id);
++    if (bind && tracesToClientPrice(src, bind, depth + 1)) return true;
+   }
+   return false;
+ }
+ 
++/**
++ * ⭐ ANTI-VACUITY. This suite is a SOURCE SCANNER, and a source scanner that
++ * stops matching does not go red — it goes quiet. That is precisely how tests 3
++ * and 11 came to cover 2 payloads in one untouched file while reading as
++ * comprehensive coverage of the whole money path.
++ *
++ * So: assert the DENOMINATOR. Every `.insert(` on orders must resolve to text
++ * we can actually read, and every resolved payload must name the amount column
++ * we claim to be policing. A refactor that moves payloads out of the scanner's
++ * reach now fails HERE, loudly, instead of silently disarming tests 3 and 11.
++ */
++test('ANTI-VACUITY: the scanner resolves every orders insert, and each names its amount', () => {
++  const unresolved: string[] = [];
++  const amountless: string[] = [];
++  let resolved = 0;
++  let raw = 0;
++
++  for (const rel of findOrderMinters()) {
++    const src = read(rel);
++    raw += countOrderInserts(src);
++    for (const payload of orderInsertPayloads(src)) {
++      if (payload === null) {
++        unresolved.push(rel);
++        continue;
++      }
++      resolved++;
++      if (!/requested_total_php\s*:/.test(payload)) amountless.push(rel);
++    }
++  }
++
++  assert.deepEqual(
++    unresolved,
++    [],
++    'an orders `.insert(…)` argument could not be resolved to source text, so tests 3 and 11 ' +
++      'are not reading it. Extend orderInsertPayloads — do NOT leave it unread.',
++  );
++  assert.deepEqual(
++    amountless,
++    [],
++    'an orders insert payload does not mention requested_total_php where the scanner can see it. ' +
++      'Test 3 skips exactly these, so the price guard would be silently off for this module.',
++  );
++  assert.equal(resolved, raw, 'resolved payload count must equal the number of orders inserts');
++  // A hard floor, so "found nothing" can never read as "found nothing wrong".
++  assert.ok(raw >= 12, `expected the money path to have >= 12 order mints, scanned ${raw}`);
++});
++
+ test('no order-minting module takes its price from the browser', () => {
+   const offenders: string[] = [];
+   for (const rel of findOrderMinters()) {
+@@ -280,6 +409,7 @@ test('no order-minting module takes its price from the browser', () => {
+     // Admin-gated bespoke pricing is the product working, not the bug (see note d).
+     if (/\bassertAdmin\s*\(/.test(src)) continue;
+     for (const payload of orderInsertPayloads(src)) {
++      if (payload === null) continue; // reported by the anti-vacuity test above
+       const field = /requested_total_php\s*:\s*([^,\n]+)/.exec(payload);
+       if (!field) continue;
+       if (tracesToClientPrice(src, field[1]!)) {
+@@ -367,13 +497,16 @@ test('the bespoke-amount admin path stays admin-gated and service-role', () => {
+  * `admin` in `await admin\n  .from('orders').insert(…)`, or the literal
+  * `createAdminClient()` when the client is constructed inline.
+  */
++const SERVICE_ROLE_FACTORIES = ['createAdminClient', 'createMoneyWriterClient'] as const;
++
+ function mintClients(src: string, table: 'orders' | 'payments'): string[] {
+   const re = new RegExp(`\\.from\\(\\s*['"]${table}['"]\\s*\\)[\\s\\S]{0,80}?\\.insert\\b`, 'g');
+   const out: string[] = [];
+   for (const m of [...src.matchAll(re)]) {
+     const before = src.slice(0, m.index).trimEnd();
+-    if (before.endsWith('createAdminClient()')) {
+-      out.push('createAdminClient()');
++    const inline = SERVICE_ROLE_FACTORIES.find((fn) => before.endsWith(`${fn}()`));
++    if (inline) {
++      out.push(`${inline}()`);
+       continue;
+     }
+     const id = /([A-Za-z_$][A-Za-z0-9_$]*)$/.exec(before);
+@@ -384,9 +517,17 @@ function mintClients(src: string, table: 'orders' | 'payments'): string[] {
+ 
+ /** Is `id` bound in this file to a service-role client? */
+ function isServiceRoleClient(src: string, id: string): boolean {
+-  if (id === 'createAdminClient()') return true;
++  if (SERVICE_ROLE_FACTORIES.some((fn) => id === `${fn}()`)) return true;
++  // A PARAMETER of the same name defeats the binding lookup: a helper taking
++  // `admin: SupabaseClient` inside a file that also has a module-level
++  // `const admin = createAdminClient()` would resolve to the wrong one and pass.
++  // Whose client a parameter carries is not decidable here, so refuse to guess —
++  // the file must earn a MINT_CLIENT_REVIEWED entry instead.
++  if (new RegExp(`\\b${id}\\s*:\\s*SupabaseClient\\b`).test(src)) return false;
+   const bind = new RegExp(`\\bconst\\s+${id}\\s*=\\s*(await\\s+)?([A-Za-z_$][A-Za-z0-9_$]*)\\s*\\(`).exec(src);
+-  return bind?.[2] === 'createAdminClient';
++  return SERVICE_ROLE_FACTORIES.includes(
++    bind?.[2] as (typeof SERVICE_ROLE_FACTORIES)[number],
++  );
+ }
+ 
+ /**
+@@ -399,6 +540,10 @@ const MINT_CLIENT_REVIEWED: Record<string, string> = {
+     '`admin: SupabaseClient` is a parameter, not a local binding. The module header states "MUST ' +
+     'be called with the SERVICE-ROLE admin client (the RPC is service_role-only)", and its only ' +
+     'caller passes createAdminClient(). Verified by hand 2026-07-26.',
++  [STRESS_TEST_SCRIPT]:
++    'Builds its client with createClient(SUPABASE_TEST_URL, SUPABASE_TEST_SERVICE_ROLE_KEY) — ' +
++    'service-role, but not via createAdminClient(), which the scan cannot recognise. Hand-run ' +
++    'against a non-prod database and it exits if those two env vars are unset. Reviewed 2026-07-26.',
+ };
+ 
+ /**
+@@ -416,6 +561,9 @@ const IDENTITY_STAMP_REVIEWED: Record<string, string> = {
+     'The vendor booking fee is minted BY A LOCK, not by a session. There is no auth.uid() in scope: ' +
+     'the payer is resolved from the charge’s vendor profile (and the order stays payer-less when the ' +
+     'profile is unclaimed), so a "stamp the caller’s id" helper does not apply.',
++  [STRESS_TEST_SCRIPT]:
++    'Synthetic fixtures against a non-prod database, with no auth.uid() and no request in scope — ' +
++    'the ids ARE the test setup. Nothing to bind a row to.',
+ };
+ 
+ test('every order mint writes through a service-role client, never the session', () => {
+@@ -449,8 +597,7 @@ test('every payments insert writes through a service-role client too', () => {
+   // Scanned repo-wide, not just the orders roster — logPayment and the vendor
+   // booking-fee action insert payments without ever minting an order.
+   const offenders: string[] = [];
+-  const roots = ['app', 'lib'].map((d) => join(WEB, d)).filter((d) => existsSync(d));
+-  for (const root of roots) {
++  for (const root of scanRoots()) {
+     for (const file of collectTs(root)) {
+       const rel = relative(WEB, file);
+       if (rel in MINT_CLIENT_REVIEWED) continue;
+@@ -485,16 +632,24 @@ test('every converted mint stamps its identity columns through order-mint-identi
+     // working; there is no "the caller's own id" to stamp (see note d).
+     if (/\bassertAdmin\s*\(/.test(src)) continue;
+     for (const payload of orderInsertPayloads(src)) {
++      if (payload === null) continue; // reported by the anti-vacuity test
+       if (/\borderRowFor\s*\(/.test(payload)) continue;
+-      if (!/\buser_id\s*:/.test(payload)) continue;
+-      offenders.push(`${rel} → orders insert sets user_id by hand`);
++      // Inverted from "flag a literal user_id" to "require the helper". The old
++      // shape only fired when it recognised a hand-written `user_id:` key, so a
++      // payload that spread an object, renamed the key, or built the row through
++      // a local helper opted out of the guarantee in silence. Requiring
++      // orderRowFor() means the DEFAULT is red and an exemption has to be
++      // written into IDENTITY_STAMP_REVIEWED with a reason.
++      offenders.push(`${rel} → orders insert does not go through orderRowFor()`);
+     }
+   }
+   assert.deepEqual(
+     offenders,
+     [],
+-    'an order payload sets its identity columns literally instead of via orderRowFor(). Under ' +
+-      'service_role nothing checks them any more — orderRowFor stamps them from the id ' +
+-      'supabase.auth.getUser() returned and makes the hand-written form a compile error.',
++    'an order payload does not stamp its identity columns via orderRowFor(). Under service_role ' +
++      'nothing checks them any more — orderRowFor stamps user_id / event_id / vendor_profile_id ' +
++      'from server-derived values, enforces the mintable-status list that ' +
++      'orders_insert_status_guard no longer enforces, and makes the hand-written form a compile ' +
++      'error. If a mint genuinely cannot use it, add it to IDENTITY_STAMP_REVIEWED with a reason.',
+   );
+ });
+diff --git a/apps/web/lib/sku-activation.ts b/apps/web/lib/sku-activation.ts
+index 2801cd237..900ca7084 100644
+--- a/apps/web/lib/sku-activation.ts
++++ b/apps/web/lib/sku-activation.ts
+@@ -1089,6 +1089,73 @@ async function recomputeVendorExtraSeats(
+   return paidSeats;
+ }
+ 
++/**
++ * SEC-4b · THE ORDER MUST OWN WHAT IT PROVISIONS.
++ *
++ * The four `vendor_*__<id>` hooks below read their TARGET out of the
++ * service_key string and act on it. Nothing downstream ever asked whether the
++ * ORDER belongs to the vendor that owns that target — so an order minted from
++ * any other surface (couple checkout, a comp grant, a hand-inserted row) could
++ * settle a stranger's booking fee, activate a stranger's branch, or promote a
++ * stranger's Custom plan.
++ *
++ * This resolves the OWNING vendor of the target and compares it with the
++ * order's own `vendor_profile_id`. Couple-side checkout pins that column to
++ * NULL, so a couple-minted row can never match and is refused here regardless
++ * of how it got created.
++ *
++ * THROWS rather than returning false. The dispatcher's catch logs + Sentry-
++ * reports it and leaves the order recoverable (admin can refund) — which is the
++ * right outcome: money may have moved, but the wrong tenant is not provisioned.
++ * Failing OPEN here would defeat the whole check.
++ */
++async function assertOrderOwnsVendorTarget(
++  ctx: ActivationContext,
++  targetVendorProfileId: string | null,
++): Promise<void> {
++  const { data: order } = await ctx.admin
++    .from('orders')
++    .select('vendor_profile_id')
++    .eq('order_id', ctx.orderId)
++    .maybeSingle();
++  const orderVendorId =
++    (order as { vendor_profile_id?: string | null } | null)?.vendor_profile_id ?? null;
++
++  if (!orderVendorId || !targetVendorProfileId || orderVendorId !== targetVendorProfileId) {
++    throw new Error(
++      `SEC-4b: order ${ctx.orderId} (vendor_profile_id=${orderVendorId ?? 'null'}) may not ` +
++        `provision ${ctx.serviceKey}, which belongs to vendor ` +
++        `${targetVendorProfileId ?? 'unknown'}. Refusing to activate.`,
++    );
++  }
++}
++
++/** The vendor that owns a branch, or null when the branch is unknown. */
++async function branchOwnerVendorId(
++  ctx: ActivationContext,
++  branchId: string,
++): Promise<string | null> {
++  const { data } = await ctx.admin
++    .from('vendor_branches')
++    .select('parent_vendor_profile_id')
++    .eq('branch_id', branchId)
++    .maybeSingle();
++  return (data as { parent_vendor_profile_id?: string | null } | null)?.parent_vendor_profile_id ?? null;
++}
++
++/** The vendor that owns a booking-fee charge, or null when unknown. */
++async function chargeOwnerVendorId(
++  ctx: ActivationContext,
++  chargeId: string,
++): Promise<string | null> {
++  const { data } = await ctx.admin
++    .from('booking_fee_charges')
++    .select('vendor_profile_id')
++    .eq('charge_id', chargeId)
++    .maybeSingle();
++  return (data as { vendor_profile_id?: string | null } | null)?.vendor_profile_id ?? null;
++}
++
+ // Prefix/predicate hooks for dynamic-suffix service_keys (e.g. branch ids).
+ const PREFIX_HOOKS: ReadonlyArray<{
+   match: (serviceKey: string) => boolean;
+@@ -1106,6 +1173,8 @@ const PREFIX_HOOKS: ReadonlyArray<{
+     run: async (ctx) => {
+       const chargeId = chargeIdFromBookingFeeLockServiceKey(ctx.serviceKey);
+       if (!chargeId) return;
++      // SEC-4b: the paying order must belong to the charge's own vendor.
++      await assertOrderOwnsVendorTarget(ctx, await chargeOwnerVendorId(ctx, chargeId));
+       const settled = await settleBookingFeeCharge(ctx.admin, chargeId, 'manual', ctx.orderId);
+       await appendLedger(ctx.admin, {
+         order_id: ctx.orderId,
+@@ -1122,6 +1191,8 @@ const PREFIX_HOOKS: ReadonlyArray<{
+     run: async (ctx) => {
+       const branchId = branchIdFromServiceKey(ctx.serviceKey);
+       if (!branchId) return;
++      // SEC-4b: the paying order must belong to the branch's parent vendor.
++      await assertOrderOwnsVendorTarget(ctx, await branchOwnerVendorId(ctx, branchId));
+       const expiresAt = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString();
+       await ctx.admin
+         .from('vendor_branches')
+@@ -1153,6 +1224,8 @@ const PREFIX_HOOKS: ReadonlyArray<{
+     run: async (ctx) => {
+       const vendorProfileId = vendorProfileIdFromSeatServiceKey(ctx.serviceKey);
+       if (!vendorProfileId) return;
++      // SEC-4b: the key names the vendor directly — the order must be theirs.
++      await assertOrderOwnsVendorTarget(ctx, vendorProfileId);
+       const paidSeats = await recomputeVendorExtraSeats(ctx.admin, vendorProfileId);
+       await appendLedger(ctx.admin, {
+         order_id: ctx.orderId,
+@@ -1192,6 +1265,8 @@ const PREFIX_HOOKS: ReadonlyArray<{
+     run: async (ctx) => {
+       const vendorProfileId = vendorProfileIdFromCustomPlanServiceKey(ctx.serviceKey);
+       if (!vendorProfileId) return;
++      // SEC-4b: the key names the vendor directly — the order must be theirs.
++      await assertOrderOwnsVendorTarget(ctx, vendorProfileId);
+ 
+       // (0) Idempotency — already activated this order? (Lets us exclude 'active'
+       //     from the candidate set below without turning a re-approval into a
+diff --git a/apps/web/lib/supabase/admin.ts b/apps/web/lib/supabase/admin.ts
+index 1674acead..ccd2f2c46 100644
+--- a/apps/web/lib/supabase/admin.ts
++++ b/apps/web/lib/supabase/admin.ts
+@@ -47,3 +47,30 @@ export function createAdminClient() {
+     auth: { autoRefreshToken: false, persistSession: false },
+   });
+ }
++
++/**
++ * The service-role client for MONEY WRITES (public.orders / public.payments).
++ *
++ * Identical to createAdminClient() except that it REFUSES the dev anon-key
++ * fallback above. Since SEC-4b (migration 20271008178212) INSERT and DELETE on
++ * both tables are revoked from `authenticated` and `anon`, so an anon-key client
++ * does not degrade gracefully here — every mint becomes a bare 42501 surfaced
++ * through each action's generic "please try again", which is a genuinely
++ * baffling afternoon for whoever is running `next dev` without the sensitive
++ * key. Fail loudly and name the missing variable instead.
++ *
++ * Read paths keep using createAdminClient(): degraded-but-rendering is the right
++ * trade for a dashboard, and wrong for a payment.
++ */
++export function createMoneyWriterClient() {
++  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
++    throw new Error(
++      'SUPABASE_SERVICE_ROLE_KEY is required to write orders/payments. Since SEC-4b those ' +
++        'tables reject the anon key (INSERT + DELETE revoked from authenticated/anon), so the ' +
++        'dev fallback in createAdminClient() cannot be used for money writes. Set it in ' +
++        'apps/web/.env.local — it is marked Sensitive on Vercel, so `vercel env pull` returns ' +
++        'it empty and you must copy it from the Supabase dashboard.',
++    );
++  }
++  return createAdminClient();
++}
+diff --git a/apps/web/lib/vendor-surface-service-keys.test.ts b/apps/web/lib/vendor-surface-service-keys.test.ts
+new file mode 100644
+index 000000000..4c45af648
+--- /dev/null
++++ b/apps/web/lib/vendor-surface-service-keys.test.ts
+@@ -0,0 +1,113 @@
++/**
++ * SEC-4b · vendor-surface service keys — the guard, and the thing that keeps it
++ * complete.
++ *
++ * The risk this file manages is DRIFT, not logic. `isVendorSurfaceServiceKey`
++ * is four `startsWith` calls; the way it fails is by someone adding a FIFTH
++ * `vendor_*__<id>` PREFIX_HOOK to lib/sku-activation.ts and not adding it here.
++ * The new family would then be sellable from couple checkout at the browser's
++ * price, and would provision a vendor-owned object on approval — silently, with
++ * every test green.
++ *
++ * So the load-bearing test is the last one: it re-derives the prefix list from
++ * the ACTIVATION HOOKS themselves and fails when the two disagree.
++ */
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
++import { dirname, resolve } from 'node:path';
++import { fileURLToPath } from 'node:url';
++
++import {
++  VENDOR_SURFACE_SERVICE_KEY_PREFIXES,
++  isVendorSurfaceServiceKey,
++  assertVendorSurfaceKeyNotSoldToCouple,
++  VendorSurfaceKeyRefused,
++} from './vendor-surface-service-keys';
++
++const HERE = dirname(fileURLToPath(import.meta.url));
++
++test('every vendor-surface family is recognised', () => {
++  for (const prefix of VENDOR_SURFACE_SERVICE_KEY_PREFIXES) {
++    assert.ok(
++      isVendorSurfaceServiceKey(`${prefix}b3f1c0de-0000-4000-8000-000000000000`),
++      `${prefix} is not recognised as a vendor-surface key`,
++    );
++  }
++});
++
++test('ordinary couple SKUs are untouched', () => {
++  // A false positive here would BLOCK a real purchase, so name the live ones.
++  for (const key of [
++    'PAPIC_GUEST',
++    'PAPIC_CAMERAS',
++    'SETNAYAN_AI',
++    'SETNAYAN_AI_SUB',
++    'SETNAYAN_AI_RENEW',
++    'save-the-date:veil',
++    'GUIDED_PACK',
++    'MEDIA_PACK',
++  ]) {
++    assert.equal(isVendorSurfaceServiceKey(key), false, `${key} must stay sellable`);
++  }
++});
++
++test('the bare prefix with no id is still refused', () => {
++  // Fail closed: `vendor_extra_seat__` with an empty suffix parses to null in
++  // the hook (so it would no-op) but there is no reason to let it be SOLD.
++  for (const prefix of VENDOR_SURFACE_SERVICE_KEY_PREFIXES) {
++    assert.equal(isVendorSurfaceServiceKey(prefix), true, `${prefix} (bare) must be refused`);
++  }
++});
++
++test('assertVendorSurfaceKeyNotSoldToCouple throws only for vendor keys', () => {
++  assert.throws(
++    () => assertVendorSurfaceKeyNotSoldToCouple('vendor_extra_seat__abc'),
++    (e: unknown) => e instanceof VendorSurfaceKeyRefused,
++  );
++  assert.doesNotThrow(() => assertVendorSurfaceKeyNotSoldToCouple('PAPIC_GUEST'));
++});
++
++test('the refusal message does not leak whether the target exists', () => {
++  const a = new VendorSurfaceKeyRefused().message;
++  assert.ok(!/vendor|branch|charge|seat|plan|[0-9a-f]{8}-/i.test(a), `leaky message: ${a}`);
++});
++
++/* ── THE ONE THAT MATTERS — no drift against the activation hooks ──────────── */
++
++test('the prefix list covers every vendor_*__ PREFIX_HOOK in sku-activation', () => {
++  const activation = readFileSync(resolve(HERE, 'sku-activation.ts'), 'utf8');
++
++  // Each vendor family is identified by its `<name>FromServiceKey`-style parser
++  // inside a `match:` line. Collect the prefixes those parsers are built from by
++  // reading the constants out of their own modules, then compare as sets.
++  const matchLines = [...activation.matchAll(/match:\s*\(serviceKey\)\s*=>\s*([^\n]+)/g)].map(
++    (m) => m[1]!,
++  );
++  assert.ok(matchLines.length >= 4, 'the PREFIX_HOOKS block moved — this test is not reading it');
++
++  // `<something>From<Family>ServiceKey(` — covers branchIdFromServiceKey,
++  // chargeIdFromBookingFeeLockServiceKey, vendorProfileIdFromSeatServiceKey and
++  // vendorProfileIdFromCustomPlanServiceKey without naming any of them.
++  // `<something>From<Family>ServiceKey(` — no leading \b, because these names
++  // are mid-identifier (`chargeIdFrom…`) where \b does not match.
++  const vendorParsers = matchLines.filter((l) => /From[A-Za-z]*ServiceKey\s*\(/.test(l));
++  assert.equal(
++    vendorParsers.length,
++    VENDOR_SURFACE_SERVICE_KEY_PREFIXES.length,
++    'the number of key-parsing PREFIX_HOOKS no longer matches ' +
++      'VENDOR_SURFACE_SERVICE_KEY_PREFIXES. A new vendor_*__<id> family must be added to ' +
++      'lib/vendor-surface-service-keys.ts — otherwise it is sellable from couple checkout at ' +
++      'the browser’s price and provisions a vendor-owned object on approval.',
++  );
++
++  // …and every hook that parses a key must also assert target ownership.
++  // `await …(` so the function's own declaration is not counted as a call site.
++  const guarded = [...activation.matchAll(/await\s+assertOrderOwnsVendorTarget\(/g)].length;
++  assert.equal(
++    guarded,
++    VENDOR_SURFACE_SERVICE_KEY_PREFIXES.length,
++    'a vendor_*__<id> activation hook provisions without assertOrderOwnsVendorTarget(). ' +
++      'The order that paid must own the branch / charge / profile it is activating.',
++  );
++});
+diff --git a/apps/web/lib/vendor-surface-service-keys.ts b/apps/web/lib/vendor-surface-service-keys.ts
+new file mode 100644
+index 000000000..4de7fee2c
+--- /dev/null
++++ b/apps/web/lib/vendor-surface-service-keys.ts
+@@ -0,0 +1,88 @@
++/**
++ * SEC-4b · VENDOR-SURFACE SERVICE KEYS ARE NOT SELLABLE FROM COUPLE CHECKOUT.
++ *
++ * # The hole this closes
++ *
++ * Four SKU families encode their TARGET OBJECT in the service_key itself:
++ *
++ *     vendor_booking_fee__<charge_id>        → settles a booking-fee charge
++ *     vendor_additional_branch__<branch_id>  → flips a branch subscription live
++ *     vendor_extra_seat__<vendor_profile_id> → recomputes paid team seats
++ *     vendor_custom_plan__<vendor_profile_id>→ promotes a negotiated Custom plan
++ *
++ * `activateOrderSku`'s PREFIX_HOOKS provision straight off that string on admin
++ * approval. Meanwhile `submitOrderAction` (the COUPLE checkout drawer) accepts
++ * any service_key, and — because none of these four has a row in
++ * platform_retail_catalog_v2 or platform_package_catalog — `resolveServiceSellability`
++ * returns 'unknown' and ALLOWS, and the charge falls back to the browser's
++ * `original_centavos`.
++ *
++ * Composed, that is a cross-TENANT hole, not merely a cross-price one: any
++ * authenticated user could check out `vendor_additional_branch__<a stranger's
++ * branch_id>` for ₱1 against their OWN event (so the membership check passes),
++ * pay ₱1 for real, and on approval activate a branch subscription — or settle a
++ * booking fee, or promote a Custom plan — belonging to a vendor they have
++ * nothing to do with.
++ *
++ * # Two independent gates, both fail-closed
++ *
++ *  1. `assertVendorSurfaceKeyNotSoldToCouple` — the front door. Couple checkout
++ *     refuses these prefixes outright. Nothing legitimate is lost: each family
++ *     is minted by its OWN vendor-dashboard action (branches / team / custom /
++ *     the booking-fee lock), never by the couple drawer.
++ *  2. `assertOrderOwnsVendorTarget` (lib/sku-activation.ts) — the back door.
++ *     At activation, the ORDER's `vendor_profile_id` must own the object being
++ *     provisioned. Couple checkout pins `vendor_profile_id` to NULL, so even a
++ *     row minted some other way cannot provision a vendor's object.
++ *
++ * Gate 2 is the load-bearing one — it holds for any origin, including a comp
++ * grant or a hand-inserted row. Gate 1 exists so the failure is a clean
++ * "can't buy that here" at checkout rather than money taken and provisioning
++ * refused later.
++ *
++ * Pure and dependency-light on purpose so it is unit-testable and safe to import
++ * from both a server action and the activation library.
++ */
++
++import { BOOKING_FEE_LOCK_SERVICE_PREFIX } from './booking-fee-lock';
++import { BRANCH_SERVICE_KEY_PREFIX } from './vendor-branches';
++import { SEAT_SERVICE_KEY_PREFIX } from './vendor-seats';
++import { CUSTOM_PLAN_SERVICE_KEY_PREFIX } from './vendor-custom-catalog';
++
++/**
++ * Every service-key prefix whose suffix names an object owned by a vendor.
++ *
++ * Imported from each feature module rather than re-typed, so renaming a prefix
++ * cannot silently drop it out of this guard. `lib/vendor-surface-service-keys.test.ts`
++ * additionally pins this list against the PREFIX_HOOKS in lib/sku-activation.ts.
++ */
++export const VENDOR_SURFACE_SERVICE_KEY_PREFIXES: readonly string[] = Object.freeze([
++  BOOKING_FEE_LOCK_SERVICE_PREFIX,
++  BRANCH_SERVICE_KEY_PREFIX,
++  SEAT_SERVICE_KEY_PREFIX,
++  CUSTOM_PLAN_SERVICE_KEY_PREFIX,
++]);
++
++/** Does this key target a vendor-owned object (and therefore need an owner)? */
++export function isVendorSurfaceServiceKey(serviceKey: string): boolean {
++  return VENDOR_SURFACE_SERVICE_KEY_PREFIXES.some((p) => serviceKey.startsWith(p));
++}
++
++/**
++ * Gate 1. Throw when a couple-side checkout is handed a vendor-surface key.
++ *
++ * The message is deliberately generic — it must not confirm whether the
++ * referenced charge / branch / profile exists.
++ */
++export class VendorSurfaceKeyRefused extends Error {
++  constructor() {
++    super('That service is not available from this checkout.');
++    this.name = 'VendorSurfaceKeyRefused';
++  }
++}
++
++export function assertVendorSurfaceKeyNotSoldToCouple(serviceKey: string): void {
++  if (isVendorSurfaceServiceKey(serviceKey)) {
++    throw new VendorSurfaceKeyRefused();
++  }
++}
+diff --git a/apps/web/tests/db/orders-payments-insert-revoke.db.test.ts b/apps/web/tests/db/orders-payments-insert-revoke.db.test.ts
+index ea23bd247..c7eeaf34e 100644
+--- a/apps/web/tests/db/orders-payments-insert-revoke.db.test.ts
++++ b/apps/web/tests/db/orders-payments-insert-revoke.db.test.ts
+@@ -48,7 +48,7 @@
+  */
+ import { test, before, after } from 'node:test';
+ import assert from 'node:assert/strict';
+-import { readFileSync } from 'node:fs';
++import { readFileSync, readdirSync } from 'node:fs';
+ import { join } from 'node:path';
+ import type { PGlite } from '@electric-sql/pglite';
+ 
+@@ -136,28 +136,31 @@ const attackPaymentSql = `
+   VALUES ($1, $2, 1, 'gcash', CURRENT_DATE)`;
+ 
+ before(async () => {
+-  replay = await createReplayedDb();
+-  db = replay.db;
+-  await reset();
+-
+-  // ── HARNESS ARTIFACT, not a prod behaviour ────────────────────────────────
++  // ── HARNESS ARTIFACT, and how we stopped it from hiding a regression ──────
+   // replay-migrations.ts runs `GRANT ALL ON ALL TABLES IN SCHEMA public TO
+   // anon, authenticated, service_role` AFTER the replay loop, to emulate the
+-  // Supabase platform default-privileges that normally fire at CREATE TABLE
+-  // time. That blanket grant re-adds the very INSERT this migration revokes, so
+-  // without re-applying we would be testing the PRE-FIX schema and every
+-  // denial below would be a false negative.
++  // Supabase platform default-privileges that fire at CREATE TABLE time in prod
++  // but not in PGlite. That blanket grant re-adds the very privileges this
++  // migration revokes.
+   //
+-  // Nothing does this in prod: Supabase default privileges attach when a table
+-  // is created (orders/payments were created in 20260513150000 and got their
+-  // grant then) and `supabase db push` issues no post-hoc GRANT.
++  // ⚠ The first version of this file worked around that by re-executing the
++  // migration FILE afterwards. That was a false comfort: it also re-created
++  // anything a LATER migration had dropped, so a regression migration that
++  // re-granted INSERT and dropped both guard triggers left this suite at
++  // 13/13 green. (Measured, not assumed — that is why it changed.)
+   //
+-  // We re-execute the REAL migration file, never a reconstruction of it, so
+-  // what is proven below is the shipped SQL applied to the fully-replayed
+-  // production schema. The migration is idempotent (REVOKE + CREATE OR REPLACE
+-  // + DROP TRIGGER IF EXISTS), and its own post-conditions run again here — so
+-  // this line alone would fail if the revoke did not take.
+-  await db.exec(readFileSync(join(MIGRATIONS_DIR, MIGRATION_FILE), 'utf8'));
++  // `preserveRevoked` instead snapshots the privilege state the REPLAY ALONE
++  // produced and re-revokes only what the migrations had already removed. A
++  // later re-GRANT now survives into the test, the assertions below fail, and
++  // the REPLAY-STATE test makes the reason explicit rather than cryptic.
++  replay = await createReplayedDb({
++    preserveRevoked: [
++      { table: 'public.orders', roles: ['authenticated', 'anon'], privileges: ['INSERT', 'DELETE'] },
++      { table: 'public.payments', roles: ['authenticated', 'anon'], privileges: ['INSERT', 'DELETE'] },
++    ],
++  });
++  db = replay.db;
++  await reset();
+ 
+   const u = await db.query<{ id: string }>(
+     `INSERT INTO auth.users (email) VALUES ('sec4b-attacker@example.com') RETURNING id`,
+@@ -258,6 +261,72 @@ test('META: the catalog agrees — INSERT is gone for both session roles, kept f
+   }
+ });
+ 
++/* ── 0b · REGRESSION DETECTION — can this suite see the fix being undone? ──── */
++
++/**
++ * ⭐ The assertion the earlier draft of this file could not make.
++ *
++ * `replay.privilegeAfterReplay` is the privilege state produced by applying
++ * EVERY migration in order and nothing else — no harness grant, no re-execution
++ * of the SEC-4b file. If a later migration re-GRANTs INSERT or DELETE on these
++ * tables, it shows up HERE as `true`, and this test names the file to look for
++ * instead of leaving a confusing wall of denial failures.
++ */
++test('REGRESSION: no later migration re-granted INSERT/DELETE (replay state, not harness state)', () => {
++  const reopened = Object.entries(replay.privilegeAfterReplay)
++    .filter(([, held]) => held)
++    .map(([key]) => key);
++  assert.deepEqual(
++    reopened,
++    [],
++    'a migration applied AFTER 20271008178212 re-granted a privilege that SEC-4b revoked. ' +
++      'That silently re-opens the ₱1-order hole (INSERT) or the erase-your-paid-order hole ' +
++      '(DELETE). Find the GRANT and remove it — do not "fix" this test.',
++  );
++});
++
++/** Both guard triggers must survive the full replay, not just the shipped file. */
++test('REGRESSION: no later migration dropped either caller guard', async () => {
++  const r = await db.query<{ tgname: string; ins: boolean; del: boolean }>(
++    `SELECT tgname,
++            (tgtype & 4) <> 0 AS ins,
++            (tgtype & 8) <> 0 AS del
++       FROM pg_trigger
++      WHERE NOT tgisinternal
++        AND tgname IN ('trg_guard_orders_insert_caller', 'trg_guard_payments_insert_caller')`,
++  );
++  assert.equal(r.rows.length, 2, 'a guard trigger is missing after the replay — was it dropped by a later migration?');
++  for (const row of r.rows) {
++    assert.ok(row.ins, `${row.tgname} no longer fires on INSERT`);
++    assert.ok(row.del, `${row.tgname} no longer fires on DELETE`);
++  }
++});
++
++/**
++ * Belt to the above brace: a SOURCE scan of the migration corpus. The replay
++ * assertions catch a regression that actually lands; this catches one that is
++ * written but skipped by the replay's allow-list, and it points at the file.
++ */
++test('REGRESSION: the migration corpus contains no later GRANT / DROP TRIGGER on these tables', () => {
++  const offenders: string[] = [];
++  const reGrant =
++    /\bGRANT\b[^;]*\b(INSERT|DELETE|ALL)\b[^;]*\bON\b[^;]*\b(orders|payments)\b[^;]*\bTO\b[^;]*\b(authenticated|anon|public)\b/is;
++  const reDrop = /\bDROP\s+TRIGGER\b[^;]*trg_guard_(orders|payments)_insert_caller/is;
++
++  for (const file of readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith('.sql')).sort()) {
++    if (file <= MIGRATION_FILE) continue; // the fix itself, and everything before it
++    const sql = readFileSync(join(MIGRATIONS_DIR, file), 'utf8');
++    if (reGrant.test(sql)) offenders.push(`${file} — re-GRANTs on orders/payments`);
++    if (reDrop.test(sql)) offenders.push(`${file} — DROPs a SEC-4b guard trigger`);
++  }
++  assert.deepEqual(
++    offenders,
++    [],
++    'a migration newer than SEC-4b re-opens the money tables. See the ⛔ header of ' +
++      `${MIGRATION_FILE}.`,
++  );
++});
++
+ /* ── 1 · POSITIVE CONTROL — the session works, so denials mean something ───── */
+ 
+ test('positive control: the same session CAN read and cancel its own order', async () => {
+@@ -269,9 +338,11 @@ test('positive control: the same session CAN read and cancel its own order', asy
+   );
+   assert.equal(seen.rows[0]!.n, '1', 'the user cannot even SELECT their own order — the session wiring is broken');
+ 
+-  // SELECT/UPDATE/DELETE are deliberately NOT revoked. Self-cancel must survive
++  // SELECT and UPDATE are deliberately NOT revoked. Self-cancel must survive
+   // (app/dashboard/[eventId]/orders/actions.ts cancelOrder is a session-role
+-  // UPDATE); a revoke that overreached would break it silently.
++  // UPDATE); a revoke that overreached would break it silently. DELETE **is**
++  // revoked — cancelling is the supported way to withdraw an order, and the
++  // DELETE-lane tests below prove the difference.
+   const err = await tryQuery(
+     `UPDATE public.orders SET status = 'cancelled' WHERE order_id = $1`,
+     [legitOrderId],
+@@ -398,6 +469,75 @@ test('DIFFERENTIAL: the identical payment INSERT succeeds as service_role', asyn
+   await reset();
+ });
+ 
++/* ── 3b · THE DELETE LANE — minting is not the only way to move money ──────── */
++
++/**
++ * `orders_owner_write` is `FOR ALL … USING (user_id = auth.uid())` with no
++ * restrictive DELETE counterpart, so before this migration a buyer could
++ * `DELETE /rest/v1/orders?order_id=eq.<own PAID order>`. payments / receipts /
++ * order_ledger / vendor_payouts are ON DELETE CASCADE while the ENTITLEMENT
++ * tables are ON DELETE SET NULL — so the buyer kept the SKU and destroyed the
++ * payment record, the BIR receipt and the audit trail. "Server-minted only" is
++ * hollow if the buyer can still erase the row.
++ */
++test('THE ATTACK: an authenticated user cannot DELETE their own PAID order', async () => {
++  await asService();
++  const ref = nextRef();
++  const o = await db.query<{ order_id: string }>(
++    `INSERT INTO public.orders
++       (event_id, user_id, service_key, description, requested_total_php, status, reference_code)
++     VALUES ($1, $2, $3, 'Papic Guest — fully paid', 2999, 'paid', $4)
++     RETURNING order_id`,
++    [eventId, attackerUid, REAL_SKU, ref],
++  );
++  const paidOrderId = o.rows[0]!.order_id;
++  await db.query(
++    `INSERT INTO public.payments (order_id, user_id, amount_php, channel, paid_at)
++     VALUES ($1, $2, 2999, 'gcash', CURRENT_DATE)`,
++    [paidOrderId, attackerUid],
++  );
++
++  await asAttacker();
++  const err = await tryQuery(`DELETE FROM public.orders WHERE order_id = $1`, [paidOrderId]);
++  assert.ok(err, 'THE PAID ORDER WAS DELETED — payments/receipts/ledger cascade with it');
++  assert.match(err as string, /permission denied|server only/i, `rejected, but not by the fix: ${err}`);
++
++  // …and the payment row cannot be erased on its own either.
++  const perr = await tryQuery(`DELETE FROM public.payments WHERE order_id = $1`, [paidOrderId]);
++  assert.ok(perr, 'the payment record was deleted by its own payer');
++  assert.match(perr as string, /permission denied|server only/i, `rejected, but not by the fix: ${perr}`);
++
++  // Both rows still there.
++  const left = await db.query<{ o: string; p: string }>(
++    `SELECT (SELECT count(*)::text FROM public.orders   WHERE order_id = $1) AS o,
++            (SELECT count(*)::text FROM public.payments WHERE order_id = $1) AS p`,
++    [paidOrderId],
++  );
++  assert.equal(left.rows[0]!.o, '1', 'the order vanished anyway');
++  assert.equal(left.rows[0]!.p, '1', 'the payment vanished anyway');
++
++  await asService();
++  await db.query(`DELETE FROM public.orders WHERE order_id = $1`, [paidOrderId]);
++  await reset();
++});
++
++test('DIFFERENTIAL: the identical DELETE succeeds as service_role', async () => {
++  // Attributes the refusal above to the revoke, not to a FK or a missing row —
++  // and proves the app-side rollback DELETEs (all service-role now) still work.
++  await asService();
++  const ref = nextRef();
++  const o = await db.query<{ order_id: string }>(
++    `INSERT INTO public.orders
++       (event_id, user_id, service_key, description, requested_total_php, status, reference_code)
++     VALUES ($1, $2, $3, 'rollback target', 2999, 'submitted', $4)
++     RETURNING order_id`,
++    [eventId, attackerUid, REAL_SKU, ref],
++  );
++  const err = await tryQuery(`DELETE FROM public.orders WHERE order_id = $1`, [o.rows[0]!.order_id]);
++  assert.equal(err, null, `service_role cannot roll back its own mint: ${err}`);
++  await reset();
++});
++
+ /* ── 4 · THE LEGITIMATE FLOW still works end to end ────────────────────────── */
+ 
+ test('the sanctioned server path still mints order + payment and the buyer can see them', async () => {
+@@ -446,7 +586,9 @@ test('defence in depth: re-granting INSERT alone does NOT re-open the hole', asy
+   await reset();
+   await db.exec('BEGIN');
+   try {
+-    await db.exec(`GRANT INSERT ON public.orders, public.payments TO authenticated, anon;`);
++    await db.exec(
++      `GRANT INSERT, DELETE ON public.orders, public.payments TO authenticated, anon;`,
++    );
+ 
+     await asAttacker();
+     const err = await tryQueryTx(attackOrderSql, [eventId, attackerUid, REAL_SKU, nextRef()]);
+@@ -456,6 +598,34 @@ test('defence in depth: re-granting INSERT alone does NOT re-open the hole', asy
+     const perr = await tryQueryTx(attackPaymentSql, [legitOrderId, attackerUid]);
+     assert.ok(perr, 'the grant came back and the ₱1 payment went through');
+     assert.match(perr as string, /server only/i, `expected the SEC-4b guard, got: ${perr}`);
++
++    // The DELETE half of the guard, same scenario.
++    const derr = await tryQueryTx(`DELETE FROM public.orders WHERE order_id = $1`, [legitOrderId]);
++    assert.ok(derr, 'the grant came back and the order was deleted — the DELETE guard is not firing');
++    assert.match(derr as string, /server only/i, `expected the SEC-4b guard, got: ${derr}`);
++
++    // ⭐ AND NO is_admin() ESCAPE. `is_admin()` is satisfied by a SESSION-role
++    // JWT whose users row is account_type='admin' — not only by service_role.
++    // An escape here would hand the re-grant scenario straight back to any
++    // admin account, which is the one caller this guard exists to stop.
++    // Escalating to admin must itself be done as service_role:
++    // guard_users_privilege_columns (20270814328403) silently NEUTRALISES an
++    // account_type escalation for any caller whose auth.role() is not
++    // service_role / NULL / admin — and the harness's auth.role() defaults to
++    // 'anon'. Doing this under `reset()` looked like it worked and left
++    // account_type='customer', which is why the explicit is_admin() check below
++    // exists rather than a bare "assume the update took".
++    await asService();
++    await db.query(`UPDATE public.users SET account_type = 'admin' WHERE user_id = $1`, [attackerUid]);
++    await asAttacker();
++    // …and prove the escape is genuinely being exercised. If is_admin() were
++    // false here (no users row, say), the assertion below would pass for the
++    // wrong reason — the exact failure mode this file exists to prevent.
++    const isAdmin = await db.query<{ ok: boolean }>(`SELECT public.is_admin() AS ok`);
++    assert.equal(isAdmin.rows[0]!.ok, true, 'is_admin() is false — the admin-escape check would be vacuous');
++    const adminErr = await tryQueryTx(attackOrderSql, [eventId, attackerUid, REAL_SKU, nextRef()]);
++    assert.ok(adminErr, 'an ADMIN session minted a ₱1 order after a re-grant — the guard has an escape');
++    assert.match(adminErr as string, /server only/i, `expected the SEC-4b guard, got: ${adminErr}`);
+   } finally {
+     await db.exec(`RESET ROLE`).catch(() => {});
+     await db.exec('ROLLBACK');
+@@ -483,7 +653,7 @@ test('NEUTRALISATION: with the fix fully removed, the ₱1 attack SUCCEEDS', asy
+   let mintedRef: string | null = null;
+   try {
+     await db.exec(`
+-      GRANT INSERT ON public.orders, public.payments TO authenticated, anon;
++      GRANT INSERT, DELETE ON public.orders, public.payments TO authenticated, anon;
+       DROP TRIGGER IF EXISTS trg_guard_orders_insert_caller ON public.orders;
+       DROP TRIGGER IF EXISTS trg_guard_payments_insert_caller ON public.payments;
+     `);
+@@ -508,6 +678,15 @@ test('NEUTRALISATION: with the fix fully removed, the ₱1 attack SUCCEEDS', asy
+ 
+     const perr = await tryQuery(attackPaymentSql, [legitOrderId, attackerUid]);
+     assert.equal(perr, null, `the payments attack FAILED with the fix neutralised (${perr}) — same warning as above`);
++
++    // The DELETE lane too: neutralised, the buyer can erase their own order.
++    const derr = await tryQuery(`DELETE FROM public.orders WHERE reference_code = $1`, [mintedRef]);
++    assert.equal(derr, null, `the DELETE attack FAILED with the fix neutralised (${derr}) — same warning as above`);
++    const afterDel = await db.query<{ n: string }>(
++      `SELECT count(*)::text AS n FROM public.orders WHERE reference_code = $1`,
++      [mintedRef],
++    );
++    assert.equal(afterDel.rows[0]!.n, '0', 'neutralised DELETE reported success but the row survived');
+   } finally {
+     await db.exec(`RESET ROLE`).catch(() => {});
+     await db.exec('ROLLBACK');
+diff --git a/apps/web/tests/db/replay-migrations.ts b/apps/web/tests/db/replay-migrations.ts
+index 3f61a5bb6..87bebc796 100644
+--- a/apps/web/tests/db/replay-migrations.ts
++++ b/apps/web/tests/db/replay-migrations.ts
+@@ -199,15 +199,78 @@ function preprocess(sql: string): string {
+   return sql;
+ }
+ 
++/**
++ * A privilege a migration deliberately REVOKED, which the blanket
++ * platform-default GRANT emulation below must not hand back.
++ *
++ * ── WHY THIS EXISTS ─────────────────────────────────────────────────────────
++ * After the replay loop we `GRANT ALL ON ALL TABLES … TO anon, authenticated`
++ * to emulate the Supabase platform default privileges that fire at CREATE TABLE
++ * time in prod but not in PGlite. That blanket grant also silently UNDOES any
++ * REVOKE a migration performed — so a suite testing a revoke was testing the
++ * pre-fix schema, and the only way round it was to re-execute the migration
++ * file afterwards. Re-executing is worse than useless: it also re-creates
++ * anything a LATER migration dropped, so a regression that re-granted the
++ * privilege and dropped its guard trigger left the suite green (proven, SEC-4b).
++ *
++ * With `preserveRevoked`, the caller names the (table, role, privilege) triples
++ * it cares about, and those get a FAITHFUL emulation instead of the blanket one:
++ *
++ *   1. the privilege is GRANTED the moment its table first exists, which is what
++ *      Supabase's CREATE-TABLE-time default ACL does in prod;
++ *   2. every later migration then runs against that, so a REVOKE actually takes
++ *      and a re-GRANT actually takes;
++ *   3. the end-of-replay blanket GRANT is undone for these triples, restoring
++ *      whatever step 2 left behind.
++ *
++ * Step 1 is what makes this honest. A naive "snapshot after the replay and
++ * re-revoke whatever is missing" cannot tell "a migration revoked it" from
++ * "PGlite never granted it in the first place" — so it would report the table
++ * as locked down even with the migration NEUTRALISED, which is a vacuous test
++ * dressed up as a rigorous one. (Caught by running exactly that experiment.)
++ */
++export type PreservedRevoke = {
++  table: string;
++  roles: string[];
++  privileges: string[];
++};
++
++/** `"<table>.<role>.<PRIVILEGE>"` → did the REPLAY leave the privilege in place? */
++export type PrivilegeSnapshot = Record<string, boolean>;
++
++const SAFE_IDENT = /^[A-Za-z_][A-Za-z0-9_.]*$/;
++
++/** Guard the identifiers we interpolate. Test constants only — keep them so. */
++function assertSafeIdent(...idents: string[]): void {
++  for (const ident of idents) {
++    if (!SAFE_IDENT.test(ident)) {
++      throw new Error(`preserveRevoked: unsafe identifier ${JSON.stringify(ident)}`);
++    }
++  }
++}
++
+ export type ReplayResult = {
+   db: PGlite;
+   applied: number;
+   total: number;
+   skipped: Array<{ file: string; reason: string }>;
++  /**
++   * Privilege state as the migrations left it, BEFORE the blanket grant.
++   * Populated only for the triples named in `preserveRevoked`. Assert on this
++   * to catch a migration that re-opened something an earlier one closed.
++   */
++  privilegeAfterReplay: PrivilegeSnapshot;
+ };
+ 
++export type ReplayOptions = {
++  preserveRevoked?: PreservedRevoke[];
++};
++
++export const privilegeKey = (table: string, role: string, privilege: string): string =>
++  `${table}.${role}.${privilege.toUpperCase()}`;
++
+ /** Replay every migration into a fresh in-memory PGlite. ~10 s on a laptop. */
+-export async function createReplayedDb(): Promise<ReplayResult> {
++export async function createReplayedDb(options: ReplayOptions = {}): Promise<ReplayResult> {
+   const db = await PGlite.create({ extensions: { pgcrypto } });
+   await db.exec(`CREATE SCHEMA IF NOT EXISTS extensions;`);
+   await db.exec(`CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;`);
+@@ -218,6 +281,26 @@ export async function createReplayedDb(): Promise<ReplayResult> {
+     .filter((f) => f.endsWith('.sql'))
+     .sort();
+ 
++  // Emulate the Supabase CREATE-TABLE-time default ACL for the watched tables:
++  // grant as soon as the table exists, exactly once, so that any later REVOKE in
++  // a migration is a REVOKE OF SOMETHING REAL. See PreservedRevoke step 1.
++  const seeded = new Set<string>();
++  async function seedDefaultAcl(): Promise<void> {
++    for (const spec of options.preserveRevoked ?? []) {
++      if (seeded.has(spec.table)) continue;
++      const exists = await db.query<{ oid: string | null }>(
++        `SELECT to_regclass($1)::text AS oid`,
++        [spec.table],
++      );
++      if (!exists.rows[0]?.oid) continue;
++      assertSafeIdent(spec.table, ...spec.roles, ...spec.privileges);
++      await db.exec(
++        `GRANT ${spec.privileges.join(', ')} ON ${spec.table} TO ${spec.roles.join(', ')}`,
++      );
++      seeded.add(spec.table);
++    }
++  }
++
+   async function applyOne(f: string): Promise<void> {
+     const sql = preprocess(fs.readFileSync(path.join(MIGRATIONS_DIR, f), 'utf8'));
+     if (f === '20260705000000_provision_owner_vendor_and_remove_prefilled.sql') {
+@@ -233,6 +316,7 @@ export async function createReplayedDb(): Promise<ReplayResult> {
+       'INSERT INTO public._replay_migrations (fname) VALUES ($1) ON CONFLICT DO NOTHING',
+       [f],
+     );
++    await seedDefaultAcl();
+   }
+ 
+   const deferred = new Map<string, string>();
+@@ -279,6 +363,21 @@ export async function createReplayedDb(): Promise<ReplayResult> {
+     throw new Error(`migration replay failed — unapplied files:\n${detail}`);
+   }
+ 
++  // Snapshot the privileges the caller asked us to preserve BEFORE the blanket
++  // grant paves over them. See PreservedRevoke.
++  const privilegeAfterReplay: PrivilegeSnapshot = {};
++  for (const spec of options.preserveRevoked ?? []) {
++    for (const role of spec.roles) {
++      for (const privilege of spec.privileges) {
++        const r = await db.query<{ held: boolean }>(
++          `SELECT has_table_privilege($1, $2, $3) AS held`,
++          [role, spec.table, privilege],
++        );
++        privilegeAfterReplay[privilegeKey(spec.table, role, privilege)] = r.rows[0]!.held;
++      }
++    }
++  }
++
+   // Supabase grants table/sequence privileges to the API roles via platform
+   // default-privileges; mirror that so RLS (not a missing GRANT) is the gate,
+   // exactly as in prod.
+@@ -287,7 +386,27 @@ export async function createReplayedDb(): Promise<ReplayResult> {
+     GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
+   `);
+ 
+-  return { db, applied: applied + skipped.length, total: files.length, skipped };
++  // …then undo the blanket grant for the watched triples, restoring exactly
++  // what the migrations left. A privilege the migrations REVOKED goes back to
++  // revoked; one a later migration RE-GRANTED stays granted, so the regression
++  // is visible to the test instead of being masked here.
++  for (const spec of options.preserveRevoked ?? []) {
++    for (const role of spec.roles) {
++      for (const privilege of spec.privileges) {
++        if (privilegeAfterReplay[privilegeKey(spec.table, role, privilege)]) continue;
++        assertSafeIdent(spec.table, role, privilege);
++        await db.exec(`REVOKE ${privilege} ON ${spec.table} FROM ${role}`);
++      }
++    }
++  }
++
++  return {
++    db,
++    applied: applied + skipped.length,
++    total: files.length,
++    skipped,
++    privilegeAfterReplay,
++  };
+ }
+ 
+ /** Impersonate a user for auth.uid()-gated RPCs (NULL uuid = anonymous). */
+diff --git a/changelog.d/sec4b-revoke-orders-payments-insert.md b/changelog.d/sec4b-revoke-orders-payments-insert.md
+index 44f27d032..65aec65f6 100644
+--- a/changelog.d/sec4b-revoke-orders-payments-insert.md
++++ b/changelog.d/sec4b-revoke-orders-payments-insert.md
+@@ -21,11 +21,20 @@ re-derivation, which would be a second source of truth (the authoritative charge
+ spans two catalogs, a pax curve, per-event-type AI pricing and cycle
+ multiplication) and would trip over the overloaded `is_active` flag.
+ 
+-- Migration `20271008178212` — `REVOKE INSERT ON public.orders, public.payments
+-  FROM authenticated, anon`, plus a BEFORE INSERT deny-list caller guard
+-  (`guard_money_row_insert_caller`) so a stray re-GRANT becomes a loud 42501
+-  instead of a silent re-opening. Before/after privilege snapshot in the
+-  migration asserts INSERT went and nothing else moved.
++- Migration `20271008178212` — `REVOKE INSERT, DELETE ON public.orders,
++  public.payments FROM authenticated, anon`, plus a BEFORE INSERT OR DELETE
++  deny-list caller guard (`guard_money_row_insert_caller`) so a stray re-GRANT
++  becomes a loud 42501 instead of a silent re-opening. Before/after privilege
++  snapshot in the migration asserts INSERT + DELETE went and nothing else moved.
++  The guard has **no `is_admin()` escape**: `is_admin()` is satisfied by a
++  session-role admin JWT, i.e. exactly the caller the guard exists to stop once
++  someone has re-granted.
++- **DELETE goes with INSERT.** `orders_owner_write` is FOR ALL with no
++  restrictive DELETE counterpart, so a buyer could delete their own PAID order —
++  payments / receipts / order_ledger / vendor_payouts all CASCADE, while the
++  entitlement tables are SET NULL. They kept the SKU and erased the payment
++  record, the BIR receipt and the audit trail. Safe to revoke because every
++  app-side rollback DELETE moved to service_role in this PR.
+ - 10 session-role write sites moved to `createAdminClient()` — 8 order minters
+   plus **2 payments-only sites the triage missed** (`logPayment`,
+   `logBookingFeePayment`). Rollback DELETEs moved with their inserts.
+@@ -33,7 +42,28 @@ multiplication) and would trip over the overloaded `is_active` flag.
+   `user_id` / `event_id` / `vendor_profile_id` / `order_id` from server-derived
+   values and make supplying them a **type error**. service_role bypasses every
+   policy, so this is what replaces the `WITH CHECK (user_id = auth.uid())` the
+-  revoke removes.
++  revoke removes. The type is a guardrail; the guarantee is the runtime stamp
++  (`...fields` spread first, identity written last), now pinned by tests that
++  smuggle values through a `Record<string, unknown>`.
++- The same module re-imposes the two **RESTRICTIVE status policies** that
++  silently stopped applying the moment these writes became service_role (both
++  short-circuit on their own `auth.role() = 'service_role'` disjunct): payments
++  pin `status: 'pending'` and forbid the caller setting it; orders enforce the
++  `draft | submitted | awaiting_payment | cancelled` allow-list, with a
++  `requested_total_php === 0` escape for the ₱0 free-cycle audit rows. A PRICED
++  order can no longer be minted already-`paid`.
++- New `lib/vendor-surface-service-keys.ts` + `assertOrderOwnsVendorTarget()` —
++  **cross-tenant fix.** The four `vendor_*__<id>` families encode a vendor-owned
++  target in the service_key and their activation hooks provisioned straight off
++  that string. Since none has a catalog row, couple checkout allowed them at the
++  browser's price: `vendor_additional_branch__<a stranger's branch_id>` for ₱1,
++  paid for real, activated someone else's subscription on approval. Now rejected
++  at checkout AND re-checked at activation against the order's own
++  `vendor_profile_id`. A drift test re-derives the prefix list from the hooks.
++- `createMoneyWriterClient()` — `createAdminClient()` silently falls back to the
++  ANON key in `next dev`, which since this migration cannot write these tables
++  at all. Money writes now use a strict variant that names the missing env var
++  instead of failing as an opaque 42501.
+ - Two authorization gaps closed while converting: checkout pinned `event_id` to
+   NULL on the eventless AI-subscription branch (it carried a caller-supplied,
+   never-verified event id), and the Custom-plan action moved from the
+@@ -42,17 +72,36 @@ multiplication) and would trip over the overloaded `is_active` flag.
+ - Bug fixed in passing: checkout's voucher-race rollback deleted the payments
+   row with the session client, and `public.payments` has no DELETE policy for
+   `authenticated` — so it silently rolled back nothing.
+-- Tests: `tests/db/orders-payments-insert-revoke.db.test.ts` (13, with the
+-  mandatory role/owner/BYPASSRLS meta-test and a neutralisation proof — 8 of 13
+-  fail when the fix is removed), `lib/order-mint-identity.test.ts` (9, incl. a
+-  compile-time assertion proven non-vacuous), and 3 new structural tests in
+-  `lib/order-price-authority.test.ts`.
++**The test harness could not see the fix being undone — fixed.** The DB suite
++used to re-execute the migration file after the replay, which also re-created
++anything a LATER migration had dropped. A regression migration that re-granted
++INSERT and dropped both guard triggers therefore left it fully green (measured).
++`tests/db/replay-migrations.ts` now takes `preserveRevoked`: it seeds the
++CREATE-TABLE-time default ACL when the table first appears, lets the migrations
++run against it, and undoes only the harness's own blanket grant afterwards. A
++re-grant now survives into the test. Three dedicated REGRESSION tests name the
++cause, including a source scan of every migration newer than SEC-4b.
++
++- Tests: `tests/db/orders-payments-insert-revoke.db.test.ts` (18, with the
++  mandatory role/owner/BYPASSRLS/SUPERUSER meta-test — **11 of 18 fail when the
++  fix is removed**, and 11 of 18 fail against a regression migration that
++  re-opens the grant), `lib/order-mint-identity.test.ts` (16),
++  `lib/vendor-surface-service-keys.test.ts` (6), and
++  `lib/order-price-authority.test.ts` (12).
++- **The app-layer guard was vacuous and is now mutation-proven.** Its payload
++  scanner leaked a `/g` regex `lastIndex` (dropping the first insert in every
++  file) and, after the `orderRowFor(identity, fields)` refactor, sliced the
++  IDENTITY object instead of the money fields — real coverage was 2 payloads in
++  1 untouched file out of 16 insert sites. It also only scanned `app/` + `lib/`,
++  missing `apps/web/scripts/`, which already contains a minter. Both fixed, plus
++  a new ANTI-VACUITY test that asserts the DENOMINATOR (every insert resolves,
++  every payload names its amount) so a refactor cannot silently disarm it again.
+ 
+ SPEC IMPACT: None. No pricing, SKU, or product-surface change — this is an
+ enforcement-layer fix that makes the already-documented "the server resolves the
+-price" rule true at the database. Reported but NOT fixed (follow-ups): an
+-authenticated user can still DELETE their own paid orders (`orders_owner_write`
+-is FOR ALL with no restrictive DELETE counterpart — now a safe one-line revoke,
+-since every app-side rollback DELETE moved to service_role), and
+-`event_vendor_payments` / `event_vendor_payment_plan` / `vendor_reviews` share
+-the BEFORE-UPDATE-only guard shape that left this hole open.
++price" rule true at the database. Reported but NOT fixed (follow-ups): SEC-7
++(task #50) — catalog-less SKUs still keep the browser's price through
++`submitOrderAction`, which the migration header now states explicitly instead of
++implying the class is closed; and `event_vendor_payments` /
++`event_vendor_payment_plan` / `vendor_reviews` share the BEFORE-UPDATE-only
++guard shape that left this hole open.
+diff --git a/supabase/migrations/20271008178212_revoke_orders_payments_insert_from_session_roles.sql b/supabase/migrations/20271008178212_revoke_orders_payments_insert_from_session_roles.sql
+index 686bee455..9597e2805 100644
+--- a/supabase/migrations/20271008178212_revoke_orders_payments_insert_from_session_roles.sql
++++ b/supabase/migrations/20271008178212_revoke_orders_payments_insert_from_session_roles.sql
+@@ -2,9 +2,12 @@
+ -- ============================================================================
+ -- SEC-4b — THE SERVER IS THE ONLY MINTER OF MONEY ROWS.
+ --
+--- ⛔ DO NOT `GRANT INSERT ON public.orders` (or public.payments) TO
+---    authenticated / anon. Read this header first. Re-granting it re-opens a
+---    live "pay ₱1 for a ₱2,999 SKU" hole that no application code can see.
++-- ⛔ DO NOT `GRANT INSERT` or `GRANT DELETE` ON public.orders (or
++--    public.payments) TO authenticated / anon. Read this header first.
++--    Re-granting INSERT re-opens a live "pay ₱1 for a ₱2,999 SKU" hole, and
++--    re-granting DELETE lets a buyer erase the paid order — with payments,
++--    receipts and the ledger cascading behind it. Neither is visible to any
++--    application code.
+ --
+ -- ── THE ATTACK (verified against prod before writing this file) ─────────────
+ -- The anon publishable key is public by design and PostgREST is reachable
+@@ -55,8 +58,28 @@
+ -- SKUs" rule in SQL would break every AI renewal.
+ --
+ -- So the fix is a PRIVILEGE fix, not a validation fix: remove the ability to
+--- write these tables from a session role at all, and let the code paths that
+--- already re-resolve the price server-side do it through service_role.
++-- write these tables from a session role at all, and mint through service_role
++-- on the code paths that resolve the price server-side.
++--
++-- ⚠ WHAT THIS DOES **NOT** CLOSE — SEC-7, tracked separately as task #50.
++-- This migration closes the DIRECT-POST route. It does not make every price
++-- authoritative. `submitOrderAction` re-resolves from platform_retail_catalog_v2
++-- and platform_package_catalog, but a `service_key` present in NEITHER catalog
++-- keeps the browser's `original_centavos` (checkout/actions.ts, the `else`
++-- after resolveBundleChargeCentavos), and resolveServiceSellability returns
++-- 'unknown' for those and ALLOWS. So ₱0.01 still buys a catalog-less SKU
++-- THROUGH THE SANCTIONED SERVER ACTION. Do not read this file as "SEC-4 is
++-- fully closed" — read it as "the PostgREST bypass is closed and the remaining
++-- exposure is one code path, not the whole table".
++--
++-- The one part of that family fixed here, because it is cross-TENANT rather
++-- than merely cross-price: couple checkout used to accept vendor-surface
++-- service keys (`vendor_booking_fee__…`, `vendor_additional_branch__…`,
++-- `vendor_extra_seat__…`, `vendor_custom_plan__…`), whose activation hooks
++-- provision straight off the key string. `assertVendorSurfaceKeyNotSoldToCouple`
++-- rejects them at checkout and `assertOrderOwnsVendorTarget`
++-- (lib/sku-activation.ts) re-checks at activation that the ORDER's
++-- vendor_profile_id owns the object being provisioned.
+ --
+ -- ── WHAT MOVES, AND THE AUTHORIZATION THAT REPLACES RLS ─────────────────────
+ -- Every session-role insert site in apps/web is converted to
+@@ -83,9 +106,28 @@
+ --     inserts into orders. SECURITY DEFINER, owner postgres, EXECUTE granted to
+ --     postgres + service_role only. A DEFINER function runs as its owner, so it
+ --     is not affected by a revoke on authenticated/anon.
+---   • SELECT / UPDATE / DELETE on both tables — NOT touched here. cancelOrder
+---     (a session-role UPDATE to status='cancelled') and every RLS-scoped read
+---     keep working exactly as today.
++--   • SELECT / UPDATE on both tables — NOT touched here. cancelOrder (a
++--     session-role UPDATE to status='cancelled') and every RLS-scoped read keep
++--     working exactly as today.
++--
++-- ── DELETE IS REVOKED TOO (the other half of the same lane) ─────────────────
++-- `orders_owner_write` is FOR ALL with no restrictive DELETE counterpart and no
++-- BEFORE DELETE trigger, so an authenticated user could
++-- `DELETE /rest/v1/orders?order_id=eq.<own PAID order>` — and payments,
++-- receipts, order_ledger and vendor_payouts are all ON DELETE CASCADE, while the
++-- ENTITLEMENT tables (paparazzi_seats.paid_order_id, user_ai_subscription,
++-- papic_event_point_grants, vendor_deep_search_uses) are ON DELETE SET NULL.
++-- Net: the buyer keeps the SKU and erases the payment record, the BIR receipt
++-- and the audit ledger. "Server-minted only" is worth little if the buyer can
++-- still destroy the row, so DELETE goes with INSERT.
++--
++-- Safe because every compensating rollback DELETE in apps/web moved to
++-- service_role in this same PR (checkout:700/738, branches:161, team:415,
++-- custom:257, ai-addon:297, booth-addon:379, photo-challenge:270/358,
++-- deep-search:297, booking-fee-lock:166, admin/custom-plans:249). There is no
++-- remaining session-role deleter — verified by grep over apps/web before
++-- writing this. Cancelling an order is an UPDATE to status='cancelled', which
++-- is untouched.
+ --   • Edge Functions (none exist) and pg_cron (cron.job is empty — this repo is
+ --     deliberately cron-free).
+ --
+@@ -97,15 +139,28 @@
+ -- only at CREATE TABLE time, so they will NOT silently undo this REVOKE on the
+ -- existing tables — but they WOULD re-grant it if either table were ever
+ -- dropped and recreated (a `db reset`, a squashed baseline). That is precisely
+--- why the belt-and-braces trigger below does not depend on the ACL at all, and
+--- why the DB test asserts the LIVE privilege state rather than the presence of
+--- this file.
++-- why the belt-and-braces trigger below does not depend on the ACL at all.
++--
++-- HOW A REGRESSION IS ACTUALLY CAUGHT (the earlier draft of this header
++-- overclaimed here, so be precise). The DB test used to re-execute THIS FILE
++-- after the replay, which meant a later migration that re-granted INSERT and
++-- dropped the triggers was silently undone and the suite stayed green. It no
++-- longer does. Instead:
++--   • tests/db/replay-migrations.ts takes `preserveRevoked`, snapshots the
++--     privilege state produced by the REPLAY ALONE, and only re-applies its
++--     platform-default GRANT emulation where the replay had not revoked. A
++--     later re-GRANT therefore SURVIVES into the test and the denial tests go
++--     red.
++--   • the same suite source-scans supabase/migrations for any later file that
++--     GRANTs INSERT/DELETE on these tables or drops either guard trigger.
++-- Both were proven by adding exactly such a migration and watching the suite
++-- fail. See the header of orders-payments-insert-revoke.db.test.ts.
+ --
+ -- Data state at time of writing: public.orders holds 0 rows. There is no
+ -- evidence of exploitation and this carries zero data-migration risk.
+ --
+--- REVERSIBLE (do not): `GRANT INSERT ON public.orders, public.payments TO
+--- authenticated, anon;` + `DROP TRIGGER trg_guard_orders_insert_caller …`.
++-- REVERSIBLE (do not): `GRANT INSERT, DELETE ON public.orders, public.payments
++-- TO authenticated, anon;` + `DROP TRIGGER trg_guard_orders_insert_caller …`.
+ -- ============================================================================
+ 
+ BEGIN;
+@@ -128,29 +183,32 @@ DECLARE
+   bad        TEXT[] := ARRAY[]::TEXT[];
+   t          TEXT;
+   r          TEXT;
++  c          TEXT;
+   before_sel BOOLEAN;
+   before_upd BOOLEAN;
+-  before_del BOOLEAN;
+ BEGIN
+   FOREACH t IN ARRAY ARRAY['public.orders', 'public.payments'] LOOP
+     FOREACH r IN ARRAY ARRAY['authenticated', 'anon'] LOOP
+       before_sel := has_table_privilege(r, t, 'SELECT');
+       before_upd := has_table_privilege(r, t, 'UPDATE');
+-      before_del := has_table_privilege(r, t, 'DELETE');
+ 
+-      EXECUTE format('REVOKE INSERT ON %s FROM %I', t, r);
++      EXECUTE format('REVOKE INSERT, DELETE ON %s FROM %I', t, r);
+ 
+-      -- (a) INSERT must be gone at BOTH table and column level. Postgres checks
+-      --     the table privilege first, but a stray column grant would still let
+-      --     a narrow INSERT through.
+-      IF has_table_privilege(r, t, 'INSERT') THEN
+-        bad := array_append(bad, format('%s still holds table INSERT on %s', r, t));
+-      END IF;
++      -- (a) INSERT and DELETE must be gone at BOTH table and column level.
++      --     Postgres checks the table privilege first, but a stray column grant
++      --     would still let a narrow INSERT through. (DELETE is table-only in
++      --     Postgres — there is no column-level DELETE — so only INSERT needs
++      --     the per-column sweep.)
++      FOREACH c IN ARRAY ARRAY['INSERT', 'DELETE'] LOOP
++        IF has_table_privilege(r, t, c) THEN
++          bad := array_append(bad, format('%s still holds table %s on %s', r, c, t));
++        END IF;
++      END LOOP;
+       IF EXISTS (
+-        SELECT 1 FROM information_schema.columns c
+-        WHERE c.table_schema = split_part(t, '.', 1)
+-          AND c.table_name   = split_part(t, '.', 2)
+-          AND has_column_privilege(r, t, c.column_name, 'INSERT')
++        SELECT 1 FROM information_schema.columns ic
++        WHERE ic.table_schema = split_part(t, '.', 1)
++          AND ic.table_name   = split_part(t, '.', 2)
++          AND has_column_privilege(r, t, ic.column_name, 'INSERT')
+       ) THEN
+         bad := array_append(bad, format('%s still holds a column INSERT on %s', r, t));
+       END IF;
+@@ -164,21 +222,20 @@ BEGIN
+       IF has_table_privilege(r, t, 'UPDATE') <> before_upd THEN
+         bad := array_append(bad, format('OVERREACH: %s UPDATE on %s changed', r, t));
+       END IF;
+-      IF has_table_privilege(r, t, 'DELETE') <> before_del THEN
+-        bad := array_append(bad, format('OVERREACH: %s DELETE on %s changed', r, t));
+-      END IF;
+     END LOOP;
+   END LOOP;
+ 
+   -- Restate service_role explicitly. It already holds this in prod, so this is
+   -- a no-op there — but it stops the migration from ASSUMING how service_role
+   -- acquired its grant, and makes it self-sufficient on a fresh database.
+-  EXECUTE 'GRANT INSERT ON public.orders, public.payments TO service_role';
++  EXECUTE 'GRANT INSERT, DELETE ON public.orders, public.payments TO service_role';
+ 
+   FOREACH t IN ARRAY ARRAY['public.orders', 'public.payments'] LOOP
+-    IF NOT has_table_privilege('service_role', t, 'INSERT') THEN
+-      bad := array_append(bad, format('service_role LOST INSERT on %s', t));
+-    END IF;
++    FOREACH c IN ARRAY ARRAY['INSERT', 'DELETE'] LOOP
++      IF NOT has_table_privilege('service_role', t, c) THEN
++        bad := array_append(bad, format('service_role LOST %s on %s', c, t));
++      END IF;
++    END LOOP;
+   END LOOP;
+ 
+   IF array_length(bad, 1) IS NOT NULL THEN
+@@ -204,33 +261,56 @@ END $$;
+ -- SECURITY INVOKER so current_user is the TRUE executing role. It asserts
+ -- CALLER IDENTITY ONLY — it does not look at requested_total_php, service_key,
+ -- or is_active, and it must never start to (see "WHY A REVOKE" above).
++--
++-- ⚠ NO `AND NOT public.is_admin()` ESCAPE — deliberately unlike the sibling
++-- guards. `is_admin()` is satisfied by a SESSION-role JWT whose user row has
++-- account_type='admin', not only by service_role. Since the trigger's entire
++-- purpose is to survive a stray re-GRANT, an is_admin() escape would hand
++-- exactly that scenario back to any admin account: ₱1 orders straight over
++-- PostgREST. The escape also protects nothing — the one admin-side minter
++-- (app/admin/custom-plans/actions.ts) already writes through
++-- createAdminClient(), so its current_user is 'service_role' and it never
++-- enters the branch at all. The deny-list on ('authenticated','anon') is what
++-- keeps migrations, seeds, the SQL editor and psql (all `postgres`) working.
+ CREATE OR REPLACE FUNCTION public.guard_money_row_insert_caller()
+ RETURNS trigger LANGUAGE plpgsql AS $$
+ BEGIN
+-  IF current_user IN ('authenticated', 'anon') AND NOT public.is_admin() THEN
++  IF current_user IN ('authenticated', 'anon') THEN
+     RAISE EXCEPTION
+-      '%: rows are minted by the server only — the price is resolved server-side (SEC-4b)',
+-      TG_TABLE_NAME
++      '%: money rows are minted and removed by the server only (SEC-4b) — %',
++      TG_TABLE_NAME,
++      CASE TG_OP
++        WHEN 'DELETE' THEN 'cancel the order instead of deleting it'
++        ELSE 'the price is resolved server-side'
++      END
+       USING errcode = '42501';
+   END IF;
++  -- BEFORE DELETE must return OLD; NEW is unassigned for a DELETE.
++  IF TG_OP = 'DELETE' THEN
++    RETURN OLD;
++  END IF;
+   RETURN NEW;
+ END $$;
+ 
+ COMMENT ON FUNCTION public.guard_money_row_insert_caller() IS
+-  'SEC-4b. Belt over REVOKE INSERT ON orders/payments FROM authenticated, anon: '
++  'SEC-4b. Belt over REVOKE INSERT, DELETE ON orders/payments FROM authenticated, anon: '
+   'a session-role INSERT could set requested_total_php / amount_php to 1 peso for '
+   'any SKU (orders_owner_write checks only user_id; the money-column guard is '
+-  'BEFORE UPDATE and never sees an INSERT). Caller-identity assertion only - '
+-  'it must never re-derive a price, which would be a second source of truth.';
++  'BEFORE UPDATE and never sees an INSERT), and the same FOR ALL policy allowed a '
++  'session-role DELETE of a PAID order, cascading away payments/receipts/ledger while '
++  'SET NULL entitlements survived. Caller-identity assertion only - it must never '
++  're-derive a price, which would be a second source of truth. No is_admin() escape: '
++  'is_admin() is true for a session-role admin JWT, which is exactly the caller this '
++  'guard exists to stop after a stray re-GRANT.';
+ 
+ DROP TRIGGER IF EXISTS trg_guard_orders_insert_caller ON public.orders;
+ CREATE TRIGGER trg_guard_orders_insert_caller
+-  BEFORE INSERT ON public.orders FOR EACH ROW
++  BEFORE INSERT OR DELETE ON public.orders FOR EACH ROW
+   EXECUTE FUNCTION public.guard_money_row_insert_caller();
+ 
+ DROP TRIGGER IF EXISTS trg_guard_payments_insert_caller ON public.payments;
+ CREATE TRIGGER trg_guard_payments_insert_caller
+-  BEFORE INSERT ON public.payments FOR EACH ROW
++  BEFORE INSERT OR DELETE ON public.payments FOR EACH ROW
+   EXECUTE FUNCTION public.guard_money_row_insert_caller();
+ 
+ COMMIT;
+@@ -244,15 +324,16 @@ DECLARE
+   bad TEXT[] := ARRAY[]::TEXT[];
+   t   TEXT;
+ BEGIN
+-  -- The guard must be attached to BOTH tables, on INSERT, per row.
++  -- The guard must be attached to BOTH tables, on INSERT *and* DELETE, per row.
+   FOREACH t IN ARRAY ARRAY['trg_guard_orders_insert_caller', 'trg_guard_payments_insert_caller'] LOOP
+     IF NOT EXISTS (
+       SELECT 1 FROM pg_trigger g
+       WHERE g.tgname = t AND NOT g.tgisinternal
+         AND (g.tgtype & 4) <> 0   -- INSERT
++        AND (g.tgtype & 8) <> 0   -- DELETE
+         AND (g.tgtype & 2) <> 0   -- BEFORE
+     ) THEN
+-      bad := array_append(bad, format('trigger %s is missing or not BEFORE INSERT', t));
++      bad := array_append(bad, format('trigger %s is missing or not BEFORE INSERT OR DELETE', t));
+     END IF;
+   END LOOP;
+ 
+@@ -274,13 +355,13 @@ END $$;
+ -- a module mints orders without a review note naming its client + price source.
+ --
+ -- KNOWN, NOT FIXED HERE (reported in the PR body, same family, out of lane):
+---   • orders_owner_write is FOR ALL with no restrictive DELETE counterpart, so
+---     an authenticated user can DELETE their own orders at any status. Every
+---     app-side rollback DELETE moved to service_role in this PR, so
+---     `REVOKE DELETE ON public.orders FROM authenticated, anon` is now a safe
+---     one-liner follow-up.
++--   • SEC-7 / task #50 — catalog-less SKUs keep the browser's price through
++--     submitOrderAction. See "WHAT THIS DOES NOT CLOSE" above.
+ --   • event_vendor_payments / event_vendor_payment_plan / vendor_reviews carry
+ --     the same BEFORE-UPDATE-only guard shape: their forge-able columns
+ --     (vendor_confirmed_at, cleared_at, vendor_reply) are unconstrained at
+ --     INSERT time.
++--   • public.papic_record_guest_capture exists in prod as TWO overloads with
++--     different bodies — SECURITY DEFINER with EXECUTE granted to anon.
++--     Overload drift on a definer function is its own hazard; unrelated lane.
+ -- ============================================================================

@@ -292,6 +292,8 @@
   .pubrow .p1{font-size:12.5px;font-weight:700}
   .pubrow .p2{font-size:10.5px;color:rgba(243,236,223,.58);font-family:var(--mono)}
   .pubrow .ar{margin-left:auto;color:rgba(243,236,223,.5)}
+  .pubrow.kept{margin-top:6px;border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+  .pubrow.kept>.ic{color:rgba(243,236,223,.6)}
   #home[data-today="1"] .alaala .pubrow{color:var(--ink-900);background:rgba(203,167,102,.14)}
   #home[data-today="1"] .alaala .pubrow .p2,#home[data-today="1"] .alaala .pubrow .ar{color:var(--ink-500)}
 
@@ -389,8 +391,16 @@
   .consent .ic{width:12px;height:12px;color:var(--ink-300);margin-top:1px}
   .consent b{color:var(--ink-900)}
 
-  .yrow{display:flex;align-items:center;gap:9px;overflow-x:auto;scrollbar-width:none;padding:1px}
+  /* WRAPS on desktop — a horizontal scroller can load already-scrolled and hide
+     its own first item (observed: scrollLeft 348 on load). There is room here,
+     so nothing needs to hide. The phone keeps the scroller, where space is real. */
+  .alsorow{display:flex;align-items:baseline;gap:8px;margin:16px 0 9px}
+  .alsolab{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-500);font-weight:700}
+  .alsosub{font-size:11.5px;color:var(--ink-300)}
+  .yrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:1px}
   .yrow::-webkit-scrollbar{display:none}
+  .phone .yrow,.yearsec .yrow.scrollable{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  @media(max-width:560px){.yrow{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}}
   .ymo{flex:none;display:flex;align-items:center;gap:8px;padding:11px 13px;min-height:44px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);font-size:12px}
   .ymo .dot{width:6px;height:6px;border-radius:99px;background:var(--gold-500);flex:none}
   .ymo b{font-weight:700}.ymo span{color:var(--ink-300);font-family:var(--mono);font-size:10px}
@@ -435,19 +445,21 @@
 
   /* ══ CREATE FLOW — mirrors the shipped /dashboard/create-event ══ */
   /* who-first step */
+  /* NB: named .subj, not .sub — `.sec .sub` is the section subtitle, and the
+     collision turned every section header into a 56px bordered box. */
   .subs{display:flex;flex-direction:column;gap:6px}
-  .sub{display:flex;align-items:center;gap:10px;width:100%;text-align:left;min-height:56px;padding:9px 12px;cursor:pointer;
+  .subj{display:flex;align-items:center;gap:10px;width:100%;text-align:left;min-height:56px;padding:9px 12px;cursor:pointer;
     border-radius:13px;border:1px solid var(--glass-brd);background:rgba(255,255,255,.62);transition:transform .2s var(--ease),border-color .2s}
-  .sub:hover{transform:translateY(-1px);border-color:var(--gold-300)}
-  .sub.gen{border-style:dashed;background:rgba(255,255,255,.32);margin-top:4px}
+  .subj:hover{transform:translateY(-1px);border-color:var(--gold-300)}
+  .subj.gen{border-style:dashed;background:rgba(255,255,255,.32);margin-top:4px}
   .sav{width:34px;height:34px;border-radius:999px;flex:none;display:grid;place-items:center;font-size:13px;font-weight:800;
     background:var(--gold-500);color:#FFFDF8}
   .sav.alt{background:var(--info-soft);color:var(--info);font-size:15px}
-  .sub.gen .sav{background:transparent;color:var(--ink-300);border:1px dashed rgba(30,26,18,.25)}
+  .subj.gen .sav{background:transparent;color:var(--ink-300);border:1px dashed rgba(30,26,18,.25)}
   .stx2{display:flex;flex-direction:column;gap:1px;min-width:0}
   .sn2{font-size:13.5px;font-weight:700}
   .ss2{font-size:10.5px;color:var(--ink-300)}
-  .sub .ar{margin-left:auto;color:var(--ink-300);flex:none}
+  .subj .ar{margin-left:auto;color:var(--ink-300);flex:none}
   .glab{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-300);margin:14px 2px 7px}
   .notyet{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
   .ny{display:inline-flex;align-items:center;font-size:10.5px;color:var(--ink-300);border:1px dashed rgba(30,26,18,.18);
@@ -875,8 +887,20 @@
           '<div><div class="s1">'+e.s1+'</div><div class="s2">'+e.d+'</div></div></div>'+
         '</div></div></button>';
     });
-    h+='<button class="evghost">'+ic('i-plus')+'<span>New event</span></button></div></div>';
-    return h;
+    h+='<button class="evghost">'+ic('i-plus')+'<span>New event</span></button></div>';
+    /* DERIVED dates sit WITH the events, because they answer the same question
+       — "what's coming". They are chips, not cards, because the difference that
+       matters is actionable vs inevitable: a card has tasks, vendors and money
+       behind it; a chip will simply arrive. Same section, two weights. */
+    h+='<div class="alsorow"><span class="alsolab">Also coming</span>'+
+      '<span class="alsosub">dates nobody had to add</span></div>'+
+      '<div class="yrow">'+
+        '<span class="ymo"><span class="dot"></span><b>Your 1st anniversary</b><span>Mar 2027 · from your wedding</span></span>'+
+        '<span class="ymo"><span class="dot"></span><b>Nina turns 7</b><span>Jun 9 · from her birthday</span></span>'+
+        '<span class="ymo"><span class="dot"></span><b>Bantay, 3 years</b><span>Mar 3 · since you adopted him</span></span>'+
+        '<span class="ymo"><span class="dot"></span><b>Aling Nena&rsquo;s, 12 years</b><span>Nov · since it opened</span></span>'+
+      '</div>';
+    return h+'</div>';
   }
 
   function alaala(f){
@@ -925,6 +949,13 @@
     h+='<button class="pubrow">'+ic('i-globe')+
        '<span class="pt"><span class="p1">2 of 12 chapters are public</span>'+
        '<span class="p2">setnayan.com/u/ice · your story page</span></span>'+ic('i-arrow','ar')+'</button>';
+    /* KEPT — other people's published chapters. A Storyteller chapter IS an
+       Alaala chapter (creator_chapters.event_id → events), so an editorial you
+       saved is somebody's chapter you kept. Same material, so it belongs here
+       and not in a separate "library". Yours above, theirs below. */
+    h+='<button class="pubrow kept">'+ic('i-flash')+
+       '<span class="pt"><span class="p1">4 chapters you kept</span>'+
+       '<span class="p2">stories from other people · editorials</span></span>'+ic('i-arrow','ar')+'</button>';
     return h+'</div>';
   }
 
@@ -962,6 +993,14 @@
           '<span class="dl"><span class="dot"></span>1,240 followers · 18 inquiries driven</span>'+
           '<span class="dl"><span class="dot"></span>Open to offers<span class="qz">on</span></span>'+
         '</div></button>'+
+      /* SAVED VENDORS — the fourth relationship you can have with a vendor.
+         You RUN one, you ADMIN the platform, you PARTNER with one, and you
+         SHORTLIST others. Same domain, four stances — so one tile, not a
+         separate "library". This is also what empties Library completely. */
+      '<div class="sp-lab">Saved for later</div>'+
+      '<button class="sp-row"><span class="sic">'+ic('i-heart')+'</span><span class="stx">'+
+        '<span class="sn">6 vendors shortlisted</span>'+
+        '<span class="srr">3 for Cale &amp; Ice · 2 replied · 1 price dropped</span></span>'+ic('i-arrow','ar')+'</button>'+
     '</div>';
   }
 
@@ -1032,14 +1071,15 @@
 
   function tail(){
     if(state.mode==='new')return '';
-    return '<div class="yearsec"><div class="sec"><span class="lab">This year</span><span class="sub">your derived moments</span><span class="shp">shipped</span></div>'+
-      '<div class="yrow">'+
-        '<span class="ymo"><span class="dot"></span><b>Nina&rsquo;s Binyag</b><span>in 25 days</span></span>'+
-        '<span class="ymo"><span class="dot"></span><b>Lola&rsquo;s 80th</b><span>in 10 days</span></span>'+
-        '<span class="ymo"><span class="dot"></span><b>Cale &amp; Ice</b><span>in 141 days</span></span>'+
-      '</div></div>'+
-      '<div class="exp">'+ic('i-grid')+'<div><div class="et">Memories Hub</div><div class="es">Photos · videos · saved vendors</div></div>'+
-      '<span class="shp">shipped</span>'+ic('i-chev','ch')+'</div>';
+    /* "This year" is GONE as a section — its derived dates moved up beside the
+       events they belong with (see events()). One question, one place. */
+    return ''+
+      /* LIBRARY IS GONE. It held three things and every one now has a truer home:
+           photos     → Alaala (it was a second door to memories)
+           editorials → Alaala "chapters you kept" — they ARE other people's chapters
+           vendors    → the vendor tile, as the fourth stance alongside run/admin/partner
+         Nothing was deleted; the container was the only thing that was redundant. */
+      '';
   }
 
   /* ── the surfaces the phone's pill routes to. This is where the content the
@@ -1160,7 +1200,7 @@
     return '<div class="grab"></div><h4>Para kanino ito?</h4>'+
       '<p class="lb" style="margin:-6px 2px 12px">Pick who it’s for and we’ll only show what fits them. Or skip it and go generic.</p>'+
       '<div class="subs">'+SUBJECTS.map(function(s){
-        return '<button class="sub'+(s.id==='none'?' gen':'')+'" data-sub="'+s.id+'">'+
+        return '<button class="subj'+(s.id==='none'?' gen':'')+'" data-sub="'+s.id+'">'+
           '<span class="sav'+(s.kind!=='person'?' alt':'')+'">'+s.av+'</span>'+
           '<span class="stx2"><span class="sn2">'+s.n+'</span><span class="ss2">'+s.s+'</span></span>'+
           ic('i-arrow','ar')+'</button>';
