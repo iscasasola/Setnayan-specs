@@ -380,7 +380,7 @@ promo surfaces audit. Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29
 
 ---
 
-## 2026-07-29 · PAPIC PROMOTION SURFACES — REGISTER ENTRY (queued, not started)
+## 2026-07-29 · PAPIC PROMOTION SURFACES — REGISTER ENTRY (2 of 7 closed 2026-07-30)
 
 **Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29.md`](Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29.md)** — read it whole before touching anything; it carries the canonical model table (§0), the do-not-touch list (§1), per-PR file:line targets (§2), traps (§3), verification recipes (§4), and the adjacent-items queue (§5).
 
@@ -388,8 +388,8 @@ promo surfaces audit. Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29
 
 | id | What | Gate | parallel_safe |
 |---|---|---|---|
-| papic-promo#A | 🔴 Maya billing fallback derives from catalog; no-active-row ⇒ REFUSE | NONE | yes |
-| papic-promo#B | 🔴 Homepage pricing block → two-type sources; retire per-day helpers + `PAPIC_SEATS_PRICE_PHP` | NONE | yes |
+| ~~papic-promo#A~~ | ✅ **FALSE ALARM, closed 2026-07-30 no code.** `readSkuPrice` (`initialize-maya/route.ts:355`) returns `PRICING_BOOK` **only** under `DEMO_MODE`; otherwise it reads the admin catalog honoring `is_active` and fails closed. The ₱2,999 literals are a demo-only book, documented as such at line 42. Nothing to fix. | — | — |
+| ~~papic-promo#B~~ | ✅ **DONE 2026-07-30, PR [#3880](https://github.com/iscasasola/setnayan-platform/pull/3880)** — but NOT as specced: `PricingData.groups`/`freeChips` are **rendered nowhere** (2026-07-04 overlay redesign → summary + link to `/pricing`; only `aiPrice`/`aiIntroPhp`/`vendor` are read), so the false rows were built every request and published by `/api/home-pricing` while invisible — *which is why they survived the two-type lock.* Fix = **delete the dead payload**, not port it. Also retired the 4 per-day display helpers (`publicPapicLadder`, `papicCapacityShort`, `papicCapLadderPhrase`, `papicTierSummary`) + `PAPIC_SEATS_PRICE_PHP`. Both CI guards strengthened. 5,380/5,380 unit tests. | — | — |
 | papic-promo#C | 🟠 `add-ons-catalog.ts`: Pool card live in Suite/Studio, blurbs, `papic` serviceKey repoint | NONE (owner's 07-29 lock authorizes) | yes |
 | papic-promo#D | 🟠 Retire `PAPIC_SEATS` gates (day-of launcher · galleries · face-enroll ×2); kill "seat links" copy | NONE | yes |
 | papic-promo#E | 🟡 Copy sweep: help.ts rewrite + 2 new articles · features "Native app" lie · demo overlay "unlimited" · cosmetics | NONE | yes |
@@ -397,6 +397,10 @@ promo surfaces audit. Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29
 | papic-promo#G | ⏸ Papic on couple home/today/for-you — mockups first | **OWNER_DECISION** | after C |
 
 No migrations, no new flags. A–E parallel-safe (disjoint files). Face-tagging copy law: auto-tag is DORMANT — never promise it live (spec §3-5; /privacy biometrics fix is §5-4).
+
+**➡ NEXT UP: papic-promo#C** (the flagship Pool card is a fake door in Suite + Studio — one file, `add-ons-catalog.ts`, plus the studio dark-gate). Then D → E → F (F needs nothing from B any more: B deleted the plumbing instead of porting it, so **F is now unblocked and parallel-safe with C/D/E**). G stays owner-gated on the home-surface shape.
+
+**Lesson from B, worth carrying into C–F:** *verify the surface actually renders before designing its fix.* One `grep` for the consumer (`PriceRow`/`freeChips`) turned a port into a deletion — and explained the drift. The spec's file:line targets are sound; its claims about which surface **shows** them are audit-time inferences. Check the consumer first.
 
 ---
 
@@ -414,8 +418,8 @@ Sequence: `Live_Studio_Internal_Consent_Cutover_2026-07-27.md`.
 
 ### 🔴 Red items — no gate, start cold, in this order
 1. ~~**Song Desk PR 1**~~ — ✅ **CLOSED 2026-07-30, PR [#3876](https://github.com/iscasasola/setnayan-platform/pull/3876).** ✅ **And all six owner gates answered the same day — the whole stream is now cold-startable.** Next: **PR 2** (band sees the host's playlist, pure read) then **PR 1b** (always-on requests + the paid gate moves to the inbox read — 🔴 security-shaped, must precede any requests UI).
-2. **papic-promo#A** — Maya billing fallback can charge ₱2,999 against the ₱1,000 catalog row — a CHARGE path (`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29.md` §2-A).
-3. **papic-promo#B** — homepage pricing block states three false Papic claims ("first 3 cameras · unlimited shots/day · ₱50/guest·day").
+2. ~~**papic-promo#A**~~ — ✅ **FALSE ALARM 2026-07-30, no code.** The Maya `PRICING_BOOK` is demo-only; `readSkuPrice` honors `is_active` and fails closed for real charges.
+3. ~~**papic-promo#B**~~ — ✅ **CLOSED 2026-07-30, PR [#3880](https://github.com/iscasasola/setnayan-platform/pull/3880).** The three false claims were real but invisible (payload rendered nowhere since 2026-07-04) — deleted rather than ported. **Next red-item Papic work: papic-promo#C** (Pool card fake door in Suite + Studio).
 4. **Admin "Delete user" broken** — throws for any user with activity (41 NO-ACTION FKs).
 5. **Ceremony Venue taxonomy tile EMPTY** — 0 canonicals, live defect on Explore.
 
