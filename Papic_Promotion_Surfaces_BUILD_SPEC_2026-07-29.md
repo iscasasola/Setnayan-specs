@@ -302,7 +302,39 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
   celebrate" card pitches capture without ever saying "Papic"; name the product, link the camera.
 - Verify: JSON-LD validates; no hardcoded pesos.
 
-### PR-G ⏸ OWNER_DECISION — **MOCKUPS DELIVERED 2026-07-30, awaiting the owner's pick**
+### ~~PR-G ⏸ OWNER_DECISION~~ → ✅ **DONE 2026-07-30 · PR #3895 · owner picked A + B**
+- **Shipped:** `lib/papic-home-tile.ts` — ONE resolver behind both surfaces (shots from
+  `papic_event_pool_status`, the same RPC the capture path meters against, so tile and fence cannot
+  disagree; cameras from live `paparazzi_seats`; photos from both capture tables). Rides
+  `<EventDashboard>`'s existing `Promise.all`; returns `null` ⇒ **neither** surface renders.
+  `preCapture` is the single switch dividing the two jobs.
+- **A · the tile** — pre-capture "shots ready · N cameras out", flipping to "photos gathered ·
+  N shots left" on the first capture (owner default, question 2).
+  ⚠⚠ **THE MOCKUP MISSED A DOCUMENTED BUDGET AND THE BUILD HAD TO FIX IT:** the mockup drew a
+  3-across bento, but the real block is a **capped 2×2** whose own comment budgets *"focal(1) +
+  digest(1) + ≤4 minis + chrome(2) ≤ 8 above fold"* (`backdrop-filter` is the expensive part) — and
+  four minis already exist. An unconditional fifth would have quietly broken a performance budget.
+  So `MAX_MINIS = 4` is now explicit, push order is priority, and the ONE deliberate re-order is
+  that **once photos are landing** Papic outranks unread threads (which keep their own nav badge).
+  Before the first photo it stays last and appears only if a slot is free — the nudge introduces it
+  instead, which is why A **and** B were both worth shipping.
+- **B · the nudge** (`_components/papic-ready-nudge.tsx`) — a deliberate SIBLING of `SetDateNudge`
+  (same geometry/hairline/shape/`localStorage`), because a second nudge style in one slot reads as
+  a second kind of message. Retires three ways: dismissed · first photo · the tile taking over.
+  **Waits its turn behind the set-date nudge** (owner default, question 3) and costs a date-less
+  event **zero** queries. No number in its copy.
+- **Tests:** `lib/papic-home-tile.test.ts`, 9 cases. ⚠ First run failed 5/9 and **the STUB was
+  wrong, not the code** — the resolver reads in parallel, so one shared query builder had every
+  `then()` read whichever table `from()` was called with LAST. Fresh chain per `from()`, reason
+  commented. Any future stub for a parallel reader needs that shape.
+- ⏭ **Noted, not touched:** `ADD_ON_SKU_MAP.papic` is still `[]` though five Papic rows are active.
+  **Dormant, not live** (nothing calls `resolveAddOnState('papic')` — grep-verified), but it is the
+  identical shape of the `panood` bug that map's own comment records fixing on 2026-07-21, where a
+  stale entry locked a paying couple out. Close it before anything routes Papic through
+  `resolveAddOnState`.
+- ~~`id: papic-promo#G`~~
+
+### ~~PR-G (mockup stage, for the record)~~
 - **Prototype: [`06_Prototypes/Papic_Home_Presence_2026-07-30.html`](06_Prototypes/Papic_Home_Presence_2026-07-30.html)** ·
   artifact `50889ae8`. Three placements drawn IN their real insertion slots using the shipped
   `--sn-*` tokens, the real `.sn-tile` / `.sn-eye` / `.sn-row` styles and the real `SetDateNudge`
@@ -352,9 +384,17 @@ copy** (two-type section is right; only economics/JSON-LD missing, → PR-F) · 
 | D | ✅ **DONE** — seat gates retired on 3 of 4 surfaces; face-enroll gate de-deadened but **NOT widened** (biometrics · §5-11) | 2026-07-30 · [#3887](https://github.com/iscasasola/setnayan-platform/pull/3887) |
 | E | ✅ **DONE** — help center rewritten + 2 new articles (shot weights DERIVED); "Native app" and the demo's fake cap killed | 2026-07-30 · [#3890](https://github.com/iscasasola/setnayan-platform/pull/3890) |
 | F | ✅ **DONE** — derived price anchor + JSON-LD on /papic; **and it stopped promising live auto face-matching in 3 places** | 2026-07-30 · [#3892](https://github.com/iscasasola/setnayan-platform/pull/3892) |
-| G | ⏸ the ONLY item left — OWNER_DECISION on the home-surface shape | — |
+| G | ✅ **DONE** — owner picked A + B; bento tile + one-time nudge, one shared resolver | 2026-07-30 · [#3895](https://github.com/iscasasola/setnayan-platform/pull/3895) |
 
-**The wave is CLOSED except G.** 6 of 7 done in one day (A needed no code); one item, one owner decision.
+## ✅ THE WAVE IS COMPLETE — all 7 closed on 2026-07-30 (A needed no code).
+
+**Three of the seven premises were stale**, all found by checking the consumer / the database / the
+component rather than the spec: A (demo-only price book, already fails closed) · B (the payload
+renders nowhere) · G (two of its three named surfaces are retired redirect stubs). That is the
+§3-0 trap earning its place.
+
+**What outlived the wave** — the one open item is **§5-11: DPO gates 0d/0e**, and PR-F made it
+louder by promoting Papic publicly.
 | G | ⏸ OWNER_DECISION — home-surface shape, mockups first | — |
 
 ## §3 · Traps (each has burned a session — treat as law)
