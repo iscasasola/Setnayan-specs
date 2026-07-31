@@ -61,11 +61,26 @@
 > desk needs a **music-tile vendor on Solo-or-up with a MARKETPLACE-LINKED booking dated TODAY**. Any
 > "look at it on a phone" step needs that seeded first.
 >
-> ⚠ **OPEN, deliberately unfixed:** `vendor_services.category` is consumed as a **legacy enum** value
-> in `unlock-category.ts` but as a **canonical key** in `inquiry-actions.ts`, where the same value is
-> written into the **enum** column inside a `catch {}` that would swallow the violation. One column,
-> two contradictory assumptions. `vendor_services` has **0 rows in prod**, so fixing it would be
-> fixing a guess — needs one real vendor service row to settle.
+> ⚠ **OPEN — the VOCABULARY question, still deliberately unfixed. The SILENCE around it is now
+> FIXED (2026-07-31, PR [#3959](https://github.com/iscasasola/setnayan-platform/pull/3959)).**
+> `vendor_services.category` is consumed as a **legacy enum** value in `unlock-category.ts` but as a
+> **canonical key** in `inquiry-actions.ts`, where the same value is written into the **enum**
+> column. One column, two contradictory assumptions. `vendor_services` has **0 rows in prod**, so
+> fixing the *mapping* would still be fixing a guess — that half stays deferred, and the honest
+> route is a `category_key` gate once the column is populated, never another hand-kept enum list.
+>
+> 🔍 **Correction to this note's own diagnosis:** it said a `catch {}` would swallow the violation.
+> **It would never reach the catch.** `supabase.from(…).insert()`/`.update()` do **NOT throw** on a
+> DB error — they **return `{ error }`**, and neither return value was read (`throwOnError` appears
+> **0** times in that file). The failure mode was an **unchecked error return**, quieter than a
+> swallowing catch: the couple's `event_vendors` row would simply never appear, with no error
+> anywhere. Confirmed in prod — `event_vendors.category` is the 51-value enum `vendor_category`,
+> `vendor_services.category` is plain **TEXT**, and `live_band` ∉ the enum, so a real tile-vocabulary
+> row fails exactly like the 2026-05-22 `guest_role: "bride"` incident.
+> **#3959 checks both errors and reports to Sentry with the attempted `category` tagged** (non-fatal
+> — thread/message/interests already landed). **That makes the deferred decision evidence-based:
+> the first real occurrence tells us which vocabulary actually lands.** Watch Sentry for
+> `feature: 'inquiry-event-vendor-write'`.
 > **Every security/gap item in this stream is CLOSED. Everything left is ungated feature work:**
 > **(6+4) → 3 → 5.**
 >
