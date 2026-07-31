@@ -148,6 +148,48 @@ Each step flag-gated, counsel-cleared, DPIA where required (minors + post-mortem
 
 **The recommended shape if it is ever un-parked:** build the **living-elder** version first — a 50+ elder (already the shipped `'elder'` fence band) records messages released on future dates *while alive and consenting*. That carries **no post-mortem law and no minor's data**, so it clears the R-05 gate entirely. The death-triggered variant is the same table with one extra release condition, added after counsel answers. It is also the strongest paid-vault candidate found to date — it monetizes **enhancement**, which is the side of the line the whole Legacy Vault idea sits on.
 
+### 7.1 · The 50-year variant — asked 2026-07-31, NOT VIABLE AS ASKED
+
+Owner: *"a Time Capsule video… sent after 50 years to all in my line. is that possible?"*
+
+**Storage is not the problem** — a ~20 MB video costs roughly **₱10 to hold for 50 years** on R2. Everything else is:
+
+1. **Nothing in the app fires on its own.** The architecture is deliberately **cron-free** (periodic work = compare-and-swap inside `after()`), so work happens only when someone opens the app. In 2076, if nobody opens it, nothing sends. No scheduler, queue or email provider anywhere holds a job for 50 years — this is not a Setnayan limitation.
+2. **"My line" does not exist yet.** Great-grandchildren are unborn; the family tree is counsel-gated and unbuilt (`NEXT_PUBLIC_PEOPLE_CONNECTIONS`). Delivery would require live Setnayan accounts in 2076 with a confirmed chain back through 2–3 generations of handoffs — every one a breakpoint.
+3. **Email addresses die.** Email is the worst possible 50-year channel.
+4. **🔴 It collides with the 2026-07-30 paid-preservation reversal (#4).** Lapse ends that account's copy. *"Opens in 50 years"* and *"deleted if someone misses a payment"* cannot both be true — **capsules would need an explicit carve-out from the lapse rule**, or some capsules die before they open.
+5. **We cannot underwrite the promise.** Setnayan is ~2 years old and pre-launch. Any feature promising 50 years makes a commitment the company cannot back.
+
+**The honest shape, if ever built: a RELAY, not a timer.** The capsule passes down the line like an heirloom — each keeper sees it exists and its open date, and hands it on; it unlocks when someone in the line opens the app after that date. Real time capsules work this way (the one in the wall doesn't mail itself). **And the family should also hold their own downloaded copy** — one company must never be the only thing between a grandfather and his great-grandchildren.
+
+### 7.2 · ⭐ "A message to your future self, up to 5 years" — THE VIABLE VARIANT
+
+> ## ⚠ THIS VARIANT IS **NOT** PHASE 3 AND IS **NOT COUNSEL-GATED.**
+> It is filed in this document only because it is the same idea family. It touches **no** minor's data, **no** post-mortem data, and **no** third party — it is a user's own message, to themselves, about themselves. **The R-05 gate at the top of this document does not apply to it.** Do not inherit that gate by association.
+
+**Status: FILED — DO NOT BUILD** (owner 2026-07-31: *"just file the idea. do not create for now."*)
+
+Owner proposed it the same day, after the 50-year version was talked through. Changing the recipient from *descendants in 50 years* to *yourself in 5* dissolves nearly every blocker above: the recipient is **known**, **5 years matches the already-filed retention period** (no filing change), and the account already exists so there are no dead addresses to chase.
+
+**RULE 0 — what already ships (verified on `origin/main` 2026-07-31; do NOT rebuild these):**
+
+| Piece | Where it already lives |
+|---|---|
+| Anniversary date computation | `apps/web/lib/anniversary-dates.ts` (+ `.test.ts`) |
+| **The delivery rail — anniversary emails already send** | `apps/web/lib/anniversary-emails.ts`, via the existing daily email job |
+| Video message capture | **Pabati** (live, paid) |
+| "Hold until a date, release when the app runs" | `apps/web/lib/social/flush.ts` — `scheduled_for` / `publish_after` / `hold_until` forward queue |
+
+**The genuinely new part is small:** one table (message · unlock date · owner) plus hanging *"you have a message waiting"* onto an email already being sent.
+
+**Three things to decide before it is built:**
+
+1. **Word the promise as "waiting for you," never "arrives at."** With no timer it appears when they return — and the anniversary email is what brings them back. Phrased that way the promise is true.
+2. **Decide the lapse rule.** Does a person's own message to themselves survive a payment lapse? **Recommended: yes** — it is a few kilobytes and the goodwill vastly outweighs the storage.
+3. **🔑 Do NOT auto-play it.** A message from a past self can land on a divorce, a death, a failure. Show *"You left yourself a message on your wedding day. Open it?"* and let them pick the moment. Same content, completely different experience.
+
+**Why it fits the business:** a couple writing to themselves on the wedding day and opening it on their 5th anniversary returns them to Setnayan **on a date already computed**, five years after they would otherwise have gone quiet — for ~₱1 of storage. One of the strongest retention mechanics available, and it needs no new gate.
+
 ---
 
 *Design only. The primitive is already in the shipped spine; Phase 3 is the governance + legal clearance around transferring ownership of a stewarded node. Paired deliverable: a minors-and-legacy counsel brief (same format as `Phase2_Counsel_Review_Brief_2026-07-05.md`).*
