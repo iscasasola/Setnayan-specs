@@ -36,7 +36,6 @@ contained no DDL, and the total table count.
    alongside 0003 token wallet). The migration's references to retired-0003
    `wallet_spend(...)` and `token_transactions` were preserved with
    `-- ⚠ RETIRED-REF` callouts.
-5. `0003_token_wallet/*` is RETIRED per `RETIRED_ITEMS.md` and `CLAUDE.md`
    decision log; no DDL from that folder is included.
 6. Folders under `02_Specifications/` (e.g., `07_V1_Developer_Specification.md`)
    are NOT extracted — they live outside the `0000_*…0035_*` range per task
@@ -100,7 +99,7 @@ These folders were scanned and confirmed to contain no `CREATE TABLE`,
 - **0024** — Save-the-Date — UI-only spec; reuses `service_catalog.save_the_date_render`
 - **0035** — Observability — covers tracing, logs, metrics; no Postgres schema
 
-(0003 — token wallet — is **retired** per `RETIRED_ITEMS.md`; excluded from
+(0003 — token wallet — is **retired**; excluded from
 extraction entirely.)
 
 ## Schemas not fully specified by 0000–0035

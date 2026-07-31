@@ -76,7 +76,7 @@ So the honest line: **creators make videos on Setnayan the way everyone does —
 
 ## 6. Connect-accounts → **sequenced by review-gate, review-free first**
 
-The original question ("which capability leads?") is resolved by splitting on the **Meta/Google app-review gate** — the same gate already holding Panood, Patiktok's booth, and Photo-Delivery (`Feature_Flow_Registry.md`). Reconciles Growth ("publish is the viral loop, ship it first") with Infra ("publish is review-gated"): the *loop* ships first via the **review-free manual path**; API auto-publish is the deferred tail.
+The original question ("which capability leads?") is resolved by splitting on the **Meta/Google app-review gate** — the same gate already holding Panood, Patiktok's booth, and Photo-Delivery . Reconciles Growth ("publish is the viral loop, ship it first") with Infra ("publish is review-gated"): the *loop* ships first via the **review-free manual path**; API auto-publish is the deferred tail.
 
 | # | Capability | Review gate | Ship |
 |---|---|---|---|

@@ -820,7 +820,6 @@ Items unlocking iteration [0038 Editorial & Affiliates](0038_editorial_and_affil
 
 This section removed when 0039 retired. AdSense is not in V1.1 scope. Tombstone reference for future agents:
 
-- 0039 spec retained at `0039_display_ads/0039_display_ads.md` with RETIRED top banner
 - Future-revisit gate: if Setnayan incorporates as a registered corporation (separate corporate TIN + Google account) AND editorial + Boosted Ads revenue prove insufficient post-V1.1, a NEW iteration (not 0039 revival) can re-spec display ads from clean state with a different ad-network choice
 
 ### 9.2 Involve Asia affiliate-network signup
