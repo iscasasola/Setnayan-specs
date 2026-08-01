@@ -109,7 +109,9 @@ Legend — Legal basis per RA 10173 §12 (personal info) / §13 (sensitive perso
 | **Purpose** | Capture, store, tag, and deliver event photos/clips to couples and guests; Personal Reel rendering |
 | **Legal basis** | Contract (§12(b)) — paid capture/delivery service; Consent (§6.1) for likeness/photo participation; opt-out → face-blur |
 | **Data subjects** | Guests, customers (couples); incidental non-account attendees appearing in media |
+| **Capture sources** *(added 2026-08-02 — closes DPO gate 0d)* | Three, and the RoPA previously named none of them explicitly: (1) **designated paparazzi seats** (a friend/family member claims a seat and shoots); (2) **the guests' OWN PHONES** — a guest buying or being granted Papic captures on their personal device, which is the dominant source now that Papic Pool sells as a shared-shot pool; (3) a **paired DSLR** bridged through a paired phone. Source (2) is the one this amendment exists to state: the media in this system is largely captured by ordinary attendees on their own handsets, not by an operator Setnayan or the couple controls |
 | **Personal data categories** | Photos and video clips; likeness; capture metadata (`captured_at`, geo when available, device model, paired camera brand/model); tag associations |
+| **Delivery mechanism** *(added 2026-08-02 — closes DPO gate 0d)* | Media is **sorted to a guest by face matching** where that guest consented to it (DPS-04), and delivered to their personal gallery. So a guest's likeness, captured on a *stranger's* phone, reaches them through an automated biometric match. The untagged-still-delivered rule means the couple receives everything regardless |
 | **SPI?** | **N** in the general case (images of persons are personal info, not per-se SPI), but images can incidentally reveal SPI (health, religion). Treat as elevated |
 | **Recipients / sub-processors** | Cloudflare R2 (originals, signed-URL only); Supabase (tags/metadata); hierarchical read: organizer / coordinator / guest (tagged + global) / vendor (booking-relevant) |
 | **Cross-border transfer** | APAC/PH (R2) |
@@ -251,6 +253,67 @@ Legend — Legal basis per RA 10173 §12 (personal info) / §13 (sensitive perso
 | **Retention** | Follows the parent event data (DPS-01 / DPS-03 / DPS-07) — 5 years post-event. Coordinator access is **revocable by the couple** at any time; revocation removes access prospectively |
 | **Security measures** | RLS event/thread scoping; consent captured at invite (durable proof); money scopes opt-in **and** separately gated; face/biometric excluded; staged prep-release hidden until released; controls **fail-closed** until DPO-activated; TLS 1.3; AES-256 |
 | **Risk level** | **Medium** — widens a coordinator's access over guest PII and, if the couple grants it, money-adjacent actions. Public Privacy Policy §"Coordinators you invite" disclosure **LIVE**; confirm the DPO ruling before activating the `coordinator_consent_money` control |
+
+### DPS-15 · Guest-Written Columns — guest-authored text published to the open web (2026-08-02)
+
+| Field | Detail |
+|---|---|
+| **Purpose** | Let a guest write one short column (title + body) for the couple's event page. After the couple approves it, the column is **published on the open web** on the public event page and may carry into the post-event editorial, under a byline drawn from the guest-list name |
+| **Legal basis** | **Consent (§12(a))** — captured at submit time and stored as a durable timestamp (`consent_captured_at`, NOT NULL backstop); publication additionally requires the couple's approval. Withdrawal is self-serve and immediate |
+| **Data subjects** | Guests (authors); persons named inside a guest's free text (incidental) |
+| **Personal data categories** | Guest-authored free text (title ≤60 chars, body ≤280 chars) + the author's **byline** (their name as it appears on the event's guest list). No contact details are published |
+| **SPI?** | **N by design, but elevated** — free text is unbounded in content and a guest may volunteer health, religious or political statements about themselves or others. Tier-1 automatic screening runs on every submit; treat as elevated |
+| **Recipients / sub-processors** | **The open web** (public event page; post-event editorial). Supabase (Postgres, SG) for storage. **No new sub-processor** |
+| **Cross-border transfer** | SG (Supabase); the published page is world-readable by nature |
+| **Retention** | Lives with the guest record and the event. **Withdrawal by the author removes it from the page immediately**; deleting the guest record or the event removes it with them |
+| **Security measures** | Two independent gates before any publication (automatic screening **and** couple approval — nothing auto-publishes); consent timestamp captured at submit so consent is never assumed; self-serve takedown (RA 10173 right to erasure/blocking); capability held **fail-closed** by the `/admin/data-privacy` control `guest_columns` |
+| **Risk level** | **Medium** — publication of a named individual's words to the open web. Public Privacy Policy §"Guest-written columns on an event page" disclosure **LIVE** (scope, approval gate, byline, withdrawal, consent capture all stated) |
+
+### DPS-16 · Papic Shared Pool — event-wide guest media visibility + self-linking (2026-08-02)
+
+| Field | Detail |
+|---|---|
+| **Purpose** | When the host opens the shared pool for their event, let **every signed-in guest of that same event** browse the event's whole capture pool, and let a guest **self-link** to a photo they appear in ("I'm in this"), which joins that photo to their personal gallery, ZIP download and Story reel |
+| **Legal basis** | **Contract (§12(b))** — the capture/delivery service the couple bought; **Consent (§12(a))** — the guest's capture-time opt-in and the per-photo consent state; the host's per-event toggle (`events.pool_gallery_open`, default FALSE) is the additional gate |
+| **Data subjects** | Guests whose likeness appears in the media; guests as viewers; incidental non-account attendees appearing in media |
+| **Personal data categories** | **Compressed web copies only** of photos and short clips (never the geo-bearing original); `manual_pick` photo tags created by a guest self-linking |
+| **SPI?** | **N** in the general case (images of persons are personal info, not per-se SPI), but images can incidentally reveal SPI. Treat as elevated — see DPS-05 |
+| **Recipients / sub-processors** | **Other signed-in guests of the SAME event only** — never the public, never anyone outside that event, never across events. Cloudflare R2 (web copies, signed-URL), Supabase (tags). **No new sub-processor** |
+| **Cross-border transfer** | APAC (R2) + SG (Supabase) — unchanged from DPS-05 |
+| **Retention** | Follows DPS-05 (90 days hot + 5 years IA cold). **The host's toggle closes the pool retroactively** — turning it off withdraws event-wide visibility from media already captured |
+| **Security measures** | The pool read is a single RPC that bakes in **all three** protections: the FaceBlock blur rule, the `photo_consent` veto, and **web-copy-only keys** so a geo-bearing original can never be served here; automatic screening must have passed; scoping is per-event and cannot drift; capability held **fail-closed** by the `/admin/data-privacy` control `papic_pool_gallery` |
+| **Risk level** | **Medium–High** — this is the widening from *per-guest tagged delivery* to *event-wide visibility*: a guest's shots become visible to every other guest at that celebration. Public Privacy Policy §"Photos and videos — location data and guest capture" discloses the shared pool explicitly (scope, web-copies-only, screening, event-scoping, self-linking, and how to avoid it) — **LIVE** |
+
+### DPS-17 · Same-Date Demand Signal — cross-couple aggregate (2026-08-02)
+
+| Field | Detail |
+|---|---|
+| **Purpose** | Tell a couple how many **other couples have inquired** with the same vendor for the **same exact date**, and feed that number to the "In demand right now" ranking lens as a sub-score |
+| **Legal basis** | **Legitimate interest (§12(f))** — marketplace transparency so a couple can judge urgency on real activity rather than on a scarcity claim. Balancing test rests on the three minimisations below |
+| **Data subjects** | Customers (couples) — both the couple who sees the number and the couples counted in it |
+| **Personal data categories** | **An aggregate count only.** No identity, no event id, no vendor-couple pairing and no date of any other couple leaves the server — the recipient receives an integer |
+| **SPI?** | **N** |
+| **Recipients / sub-processors** | The inquiring couple, in-app only. **No new sub-processor**; the aggregation is a Postgres read |
+| **Cross-border transfer** | SG (Supabase) |
+| **Retention** | **None** — the count is computed per request and never stored |
+| **Security measures** | Three minimisations, all server-side: (1) **inquiry-only** — the count discriminates on `chat_threads` existence, so a vendor a couple merely *saved* contributes zero (a save is not competition — owner ruling 2026-06-02); (2) **min-3 floor** — nothing below `MIN_DEMAND_COUPLE_COUNT = 3` is returned at all, because n=1 on a solo vendor for an exact date in a small municipality is functionally re-identifying; (3) **exact-date only**, with no month/year fallback, so a couple without a fixed date generates and receives nothing. Capability held **fail-closed** by the `/admin/data-privacy` control `same_date_demand` (seeded **inactive**) |
+| **Residual concern for the DPO** | **There is no per-couple opt-out.** A couple cannot exclude their own inquiry from the counts other couples see. The mitigation is that what is disclosed is an aggregate at or above 3, never an identity — but the absence of an opt-out is the point on which a ruling is asked |
+| **Risk level** | **Low–Medium** — the only cross-couple disclosure on the marketplace, but bounded to an integer ≥ 3. Public Privacy Policy §"Vendor interest counts (what other couples can see)" disclosure **LIVE** |
+
+### DPS-18 · Live Video Connections — WebRTC signalling + TURN relay (2026-08-02)
+
+| Field | Detail |
+|---|---|
+| **Purpose** | Carry live audio/video **directly between two devices** for: voice/video calls inside a vendor conversation; a camera operator's phone feeding the couple's Live Studio control room; a guest tapping a side camera on an event page; and the homepage live demo. Relay the media through a TURN server **only** when a direct path is impossible |
+| **Legal basis** | **Contract (§12(b))** — delivery of the calling / Live Studio features the user initiated |
+| **Data subjects** | Couples, vendors, coordinators, guests, camera operators — anyone who joins a live connection |
+| **Personal data categories** | **IP addresses**, as ICE candidates. A direct connection is only possible if each device learns the other's address; this is inherent to WebRTC everywhere, not something Setnayan adds. Plus a per-connection technical record of **whether the path was direct or relayed and the general network type** |
+| **SPI?** | **N** |
+| **Recipients / sub-processors** | The **other participant's device** (inherently receives the IP). **STUN** address discovery: Google or Cloudflare public servers. **TURN relay** (relayed sessions only). Setnayan's own infrastructure carries the setup messages **in transit** |
+| **Cross-border transfer** | Yes — STUN/TURN endpoints are outside PH |
+| **Retention** | **Addresses are not retained.** The candidate addresses pass through the signalling path in transit and are **not written to the database, not logged, and not used for anything else**. What is kept per connection is direct-vs-relayed + general network path type, for sizing relay cost — that record contains **no IP address and no audio or video** |
+| **Security measures** | **Calls are never recorded** (platform lock). Media is end-to-end between the two devices on a direct path; on a relayed path the TURN server forwards encrypted media it cannot read. No content of any call is stored |
+| **Risk level** | **Medium** — IP exposure between participants is unavoidable for the feature to exist and is disclosed in plain language rather than buried. Public Privacy Policy §"Live video connections (calls and event cameras)" explains the IP exchange, the STUN contact, the in-transit-only signalling, and exactly what is kept — **LIVE**. *(This entry closes the RoPA item owed for WebRTC/TURN — security handoff task #42.)* |
 
 ---
 
