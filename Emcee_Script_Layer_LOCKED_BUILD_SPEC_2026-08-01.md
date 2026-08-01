@@ -98,10 +98,19 @@ future matches from rung 2 to rung 1.
 | 2 | ~~**Materialize-on-open**~~ → **BUILT DIFFERENTLY (2026-08-01) — read the note below** | ~~Pre-fill is a one-time materialization when the Script tab first opens — the `precompute.ts` "once per edit, never per read" shape.~~ **Shipped as render-time matching instead.** ⚠ A deviation from this locked spec; owner may overrule. |
 | 3 | **Generalize the workbook** | `written / blank / unanswered` → **`needsAttention[]`** (asks incl. those on library-filled lines · unfilled ask-slots · unmatched moments). The counter fields become internal. Extend `emcee-script-layer.test.ts`. |
 | 4 | **Prep surface** | New **Script** tab inside the shipped `/vendor-dashboard/clients/[eventId]` Customer Card. Not a new route. |
-| 5 | 🔴 **My Lines surface — THE ONLY ITEM NOT BUILT** | His library — browse, edit, delete, promote a named moment to a segment. **Everything it needs already ships** (see the pick-up note below). |
+| 5 | ✅ **My Lines surface** — PR [#3994](https://github.com/iscasasola/setnayan-platform/pull/3994) | `/vendor-dashboard/lines`, sibling of the activities screen. Shows the **template with slots visible** (never a filled preview) · private notes separated and labelled *never reused* · **editing never touches `vendor_block_scripts`** (the library is upstream, never retroactive) · **soft delete**, which frees the partial-unique key immediately · rung-2→rung-1 promotion by attaching a line to one of his segments, validated as his first. |
 | 6 | ✅ **Day-of delta** — PR [#3996](https://github.com/iscasasola/setnayan-platform/pull/3996), MERGED | His line on the shipped `stage-script.tsx`, under now / next / each running-script row. `StageCueBlock` gained `blockId` so the join is by identity, not label — two moments in one wedding can both be "Toasts". |
 
-### ▶ PICK-UP NOTE for item 5 (the only thing left — written so it needs no re-derivation)
+> ## ✅ 2026-08-01 — ALL SIX ITEMS ARE BUILT. Nothing in this spec is outstanding.
+>
+> PRs: **#3977** (the layer) · **#3996** (day-of desk, merged) · **#3994** (library + Script tab +
+> My Lines). One disclosed deviation on item 2 — see the build note above; owner may overrule.
+>
+> What is left is **not code**: nobody has opened it on a phone, and the Papic/Song-Desk lesson
+> applies — verify the surface **as the vendor's own identity**, not as service-role, because a
+> gate that returns nothing looks identical to a feature with no data.
+
+### ▶ PICK-UP NOTE (kept — it is the map of what the surface does and why)
 
 **Route:** a new page under `/vendor-dashboard/` (sibling of the other vendor surfaces), reachable
 from the Script tab. Gate it on the same `holdsSpecialization(access, 'stage_script')` the Script
