@@ -1230,8 +1230,860 @@ td.flash{animation:goldflash 600ms var(--ease)}
   </aside>
 </section>
 
-<!--MORE-->
+<!-- ======================= 03 · ADMIN CONSOLE TABLE ======================= -->
+<section class="arch" id="admin">
+  <div class="arch-head">
+    <span class="kicker"><span class="krule"></span>Archetype 03 · Admin console table</span>
+    <h2>The one place tabular density wins</h2>
+    <div>
+      <span class="routes mono">Governs · /admin/* — ~108 internal routes · replaces 33 raw &lt;table&gt; elements · Setnayan staff only</span>
+    </div>
+    <p class="lede">Internal tool, optimised for speed over beauty: sticky header, zebra-free rows,
+    hover-revealed actions, inline edit, full keyboard navigation, column sort, bulk select, filter bar.
+    Motion budget here is near zero — a 120ms opacity fade on row actions and nothing else.
+    Shown on the payments reconciliation queue, the busiest of the 108.</p>
+  </div>
+
+  <div class="frames">
+    <!-- ============ DESKTOP 1280 — interactive console ============ -->
+    <figure class="frame">
+      <figcaption>Desktop · 1280 · <i>Payments reconciliation — live demo, click into the table and use the keys</i></figcaption>
+      <div class="frame-scroll">
+      <div class="desk" style="height:660px">
+        <div class="console" id="console">
+          <div class="con-toolbar">
+            <div>
+              <h3>Payments · Reconciliation queue</h3>
+              <div class="con-sub">Admin console · /admin/payments/queue · BDO + GCash inbox matcher</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center" id="conDefaultActions">
+              <button class="btn btn-sec btn-sm">Export CSV</button>
+              <button class="btn btn-cta btn-sm">Run matcher</button>
+            </div>
+            <div class="bulkbar" id="bulkBar">
+              <span class="bcount" id="bulkCount">0 SELECTED</span>
+              <button class="btn btn-cta btn-sm" id="bulkApprove">Approve selected</button>
+              <button class="btn btn-neg btn-sm" id="bulkReject">Reject</button>
+              <button class="btn btn-ghost btn-sm" id="bulkClear">Clear</button>
+            </div>
+          </div>
+          <div class="filters">
+            <div class="f-search">
+              <svg class="ic sm"><use href="#i-search"/></svg>
+              <input type="search" id="conSearch" placeholder="Search payer or ref &mdash; press /">
+            </div>
+            <select id="conStatus">
+              <option value="">All statuses</option><option value="pending">Pending</option>
+              <option value="verified">Verified</option><option value="rejected">Rejected</option>
+            </select>
+            <select id="conMethod">
+              <option value="">All methods</option><option value="GCASH">GCash</option><option value="BDO">BDO</option>
+            </select>
+            <select>
+              <option>Last 7 days</option><option>Last 30 days</option><option>All time</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" id="conClearFilters">Clear</button>
+            <button class="btn btn-sec btn-sm" id="legendToggle"><svg class="ic sm"><use href="#i-keyboard"/></svg>Shortcuts</button>
+            <span class="f-meta" id="conMeta">108 ROWS · 42MS</span>
+          </div>
+          <div class="legend" id="conLegend">
+            <span class="lg-item"><kbd>&uarr;</kbd><kbd>&darr;</kbd> or <kbd>J</kbd><kbd>K</kbd> rows</span>
+            <span class="lg-item"><kbd>SPACE</kbd> select</span>
+            <span class="lg-item"><kbd>&#8679;A</kbd> select all</span>
+            <span class="lg-item"><kbd>E</kbd> edit amount</span>
+            <span class="lg-item"><kbd>A</kbd> approve</span>
+            <span class="lg-item"><kbd>X</kbd> reject</span>
+            <span class="lg-item"><kbd>ENTER</kbd> open order</span>
+            <span class="lg-item"><kbd>/</kbd> search</span>
+            <span class="lg-item"><kbd>ESC</kbd> clear</span>
+            <span class="lg-item"><kbd>?</kbd> this legend</span>
+          </div>
+          <div class="tbl-wrap" id="tblWrap" tabindex="0" aria-label="Reconciliation queue — keyboard navigable">
+            <table class="con-tbl">
+              <thead>
+                <tr>
+                  <th style="width:34px"><input type="checkbox" id="selAll" aria-label="Select all"></th>
+                  <th>Ref</th>
+                  <th class="sortable" data-sort="payer">Payer<svg class="ic sm sort-ic"><use href="#i-sort"/></svg></th>
+                  <th>Method</th>
+                  <th class="sortable num" data-sort="amount" style="text-align:right">Amount<svg class="ic sm sort-ic"><use href="#i-sort"/></svg></th>
+                  <th>Matched order</th>
+                  <th>Status</th>
+                  <th class="sortable" data-sort="received">Received<svg class="ic sm sort-ic"><use href="#i-sort"/></svg></th>
+                  <th style="width:190px"></th>
+                </tr>
+              </thead>
+              <tbody id="conBody">
+                <tr data-payer="Maria Santos" data-amount="18450" data-received="07-31 14:22" data-status="pending" data-method="GCASH">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">9XK2-4MQD</td><td>Maria Santos</td>
+                  <td><span class="pill pill-link">GCASH</span></td>
+                  <td class="num amt-cell">&#8369;18,450</td>
+                  <td class="idc">S89O-7Q4WM2KA</td>
+                  <td class="st-cell"><span class="pill pill-warn">Pending</span></td>
+                  <td class="dt">07-31 14:22</td>
+                  <td><div class="row-actions"><button class="ra-btn pos" data-act="approve">Approve</button><button class="ra-btn neg" data-act="reject">Reject</button><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+                <tr data-payer="Jomar Reyes" data-amount="52300" data-received="07-31 11:05" data-status="pending" data-method="BDO">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">3FHT-8ZWP</td><td>Jomar Reyes</td>
+                  <td><span class="pill pill-gold">BDO</span></td>
+                  <td class="num amt-cell">&#8369;52,300</td>
+                  <td class="idc">S89O-2NB4XT9E</td>
+                  <td class="st-cell"><span class="pill pill-warn">Pending</span></td>
+                  <td class="dt">07-31 11:05</td>
+                  <td><div class="row-actions"><button class="ra-btn pos" data-act="approve">Approve</button><button class="ra-btn neg" data-act="reject">Reject</button><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+                <tr data-payer="Bea Villanueva" data-amount="7980" data-received="07-31 09:48" data-status="verified" data-method="GCASH">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">QW7N-2JKD</td><td>Bea Villanueva</td>
+                  <td><span class="pill pill-link">GCASH</span></td>
+                  <td class="num amt-cell">&#8369;7,980</td>
+                  <td class="idc">S89O-8KDQ4MHZ</td>
+                  <td class="st-cell"><span class="pill pill-pos">Verified</span></td>
+                  <td class="dt">07-31 09:48</td>
+                  <td><div class="row-actions"><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+                <tr data-payer="Carlo Dizon" data-amount="23940" data-received="07-30 19:31" data-status="pending" data-method="GCASH" data-fail="1">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">5RZM-K3TA</td><td>Carlo Dizon</td>
+                  <td><span class="pill pill-link">GCASH</span></td>
+                  <td class="num amt-cell">&#8369;23,940</td>
+                  <td><span class="unmatched">&mdash; UNMATCHED</span></td>
+                  <td class="st-cell"><span class="pill pill-warn">Pending</span></td>
+                  <td class="dt">07-30 19:31</td>
+                  <td><div class="row-actions"><button class="ra-btn pos" data-act="approve">Approve</button><button class="ra-btn neg" data-act="reject">Reject</button><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+                <tr data-payer="Liza Mercado" data-amount="60000" data-received="07-30 16:12" data-status="verified" data-method="BDO">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">H8PD-6WXN</td><td>Liza Mercado</td>
+                  <td><span class="pill pill-gold">BDO</span></td>
+                  <td class="num amt-cell">&#8369;60,000</td>
+                  <td class="idc">S89O-5TWX8RZJ</td>
+                  <td class="st-cell"><span class="pill pill-pos">Verified</span></td>
+                  <td class="dt">07-30 16:12</td>
+                  <td><div class="row-actions"><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+                <tr data-payer="Paolo Garcia" data-amount="12600" data-received="07-30 13:57" data-status="pending" data-method="GCASH">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">2KQV-9YRB</td><td>Paolo Garcia</td>
+                  <td><span class="pill pill-link">GCASH</span></td>
+                  <td class="num amt-cell">&#8369;12,600</td>
+                  <td class="idc">S89O-3MHK7Q2D</td>
+                  <td class="st-cell"><span class="pill pill-warn">Pending</span></td>
+                  <td class="dt">07-30 13:57</td>
+                  <td><div class="row-actions"><button class="ra-btn pos" data-act="approve">Approve</button><button class="ra-btn neg" data-act="reject">Reject</button><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+                <tr data-payer="Grace Uy" data-amount="5450" data-received="07-30 10:24" data-status="rejected" data-method="GCASH">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">7TXJ-4NHZ</td><td>Grace Uy</td>
+                  <td><span class="pill pill-link">GCASH</span></td>
+                  <td class="num amt-cell">&#8369;5,450</td>
+                  <td class="idc">S89O-9RZT2XWM</td>
+                  <td class="st-cell"><span class="pill pill-neg">Rejected</span></td>
+                  <td class="dt">07-30 10:24</td>
+                  <td><div class="row-actions"><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+                <tr data-payer="Ramon Bautista" data-amount="31200" data-received="07-29 17:46" data-status="pending" data-method="BDO">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">VJ4K-8QDM</td><td>Ramon Bautista</td>
+                  <td><span class="pill pill-gold">BDO</span></td>
+                  <td class="num amt-cell">&#8369;31,200</td>
+                  <td class="idc">S89O-6QDX3KTH</td>
+                  <td class="st-cell"><span class="pill pill-warn">Pending</span></td>
+                  <td class="dt">07-29 17:46</td>
+                  <td><div class="row-actions"><button class="ra-btn pos" data-act="approve">Approve</button><button class="ra-btn neg" data-act="reject">Reject</button><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+                <tr data-payer="Katrina Lim" data-amount="9870" data-received="07-29 15:09" data-status="verified" data-method="GCASH">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">8ZWN-3RQT</td><td>Katrina Lim</td>
+                  <td><span class="pill pill-link">GCASH</span></td>
+                  <td class="num amt-cell">&#8369;9,870</td>
+                  <td class="idc">S89O-4XWJ9NHB</td>
+                  <td class="st-cell"><span class="pill pill-pos">Verified</span></td>
+                  <td class="dt">07-29 15:09</td>
+                  <td><div class="row-actions"><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+                <tr data-payer="Miko Fernandez" data-amount="15300" data-received="07-29 08:52" data-status="pending" data-method="GCASH">
+                  <td><input type="checkbox" class="rowSel"></td>
+                  <td class="idc">D6MH-7KXW</td><td>Miko Fernandez</td>
+                  <td><span class="pill pill-link">GCASH</span></td>
+                  <td class="num amt-cell">&#8369;15,300</td>
+                  <td class="idc">S89O-7NHB2QKX</td>
+                  <td class="st-cell"><span class="pill pill-warn">Pending</span></td>
+                  <td class="dt">07-29 08:52</td>
+                  <td><div class="row-actions"><button class="ra-btn pos" data-act="approve">Approve</button><button class="ra-btn neg" data-act="reject">Reject</button><button class="ra-btn" data-act="more"><svg class="ic sm"><use href="#i-more"/></svg></button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="con-foot">
+            <span>10 OF 108 SHOWN · VIRTUALIZED PAST 200 ROWS</span>
+            <span>LAST INBOX SYNC 14:31 · MATCHER v4 · 24-HR SLA</span>
+          </div>
+        </div>
+      </div>
+      </div>
+      <p class="frame-note" style="max-width:760px"><b>Drive it:</b> click into the table, then
+      <span class="mono" style="font-size:12px">&uarr;&darr;</span> rows (blue focus ring),
+      <span class="mono" style="font-size:12px">SPACE</span> select,
+      <span class="mono" style="font-size:12px">E</span> inline-edit the amount,
+      <span class="mono" style="font-size:12px">A</span> approve. Hover any row to reveal its actions.
+      The unmatched row <b class="mono" style="font-size:12px">5RZM-K3TA</b> always fails its approve —
+      the pill flips to Verified, then <b>reverts to Pending</b> with a toast naming the ref. Sort Payer,
+      Amount or Received from the header.</p>
+    </figure>
+
+    <!-- ============ MOBILE 390 — the honest fallback ============ -->
+    <figure class="frame">
+      <figcaption>Mobile · 390 · <i>Honest fallback — read-only queue</i></figcaption>
+      <div class="phone" style="height:700px">
+        <div class="screen">
+          <div class="statusbar"><span>9:41</span><span>SETNAYAN ADMIN</span></div>
+          <div class="app-head">
+            <h3>Reconciliation</h3>
+            <div class="sub">Read-only queue · The console is a desktop tool</div>
+          </div>
+          <div class="app-body">
+            <div style="border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:12px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:var(--ink-soft)">
+              No inline edit, no bulk, no sort here — approve / reject only. This screen exists for the
+              2 a.m. GCash check, not for real reconciliation work.
+            </div>
+            <div class="mq-card">
+              <div class="mq-top"><span class="mq-ref">9XK2-4MQD</span><span class="pill pill-warn">Pending</span></div>
+              <div class="mq-mid"><span class="mq-payer">Maria Santos · GCash</span><span class="mq-amt">&#8369;18,450</span></div>
+              <div class="mq-actions">
+                <button class="btn btn-sec btn-sm" style="color:var(--pos);border-color:rgba(79,107,74,.45)">Approve</button>
+                <button class="btn btn-neg btn-sm">Reject</button>
+              </div>
+            </div>
+            <div class="mq-card">
+              <div class="mq-top"><span class="mq-ref">5RZM-K3TA</span><span class="pill pill-warn">Pending</span></div>
+              <div class="mq-mid"><span class="mq-payer">Carlo Dizon · GCash</span><span class="mq-amt">&#8369;23,940</span></div>
+              <div style="margin:-4px 0 10px"><span class="unmatched">&mdash; UNMATCHED · OPEN ON DESKTOP TO PAIR</span></div>
+              <div class="mq-actions">
+                <button class="btn btn-neg btn-sm">Reject</button>
+              </div>
+            </div>
+            <div class="mq-card">
+              <div class="mq-top"><span class="mq-ref">2KQV-9YRB</span><span class="pill pill-warn">Pending</span></div>
+              <div class="mq-mid"><span class="mq-payer">Paolo Garcia · GCash</span><span class="mq-amt">&#8369;12,600</span></div>
+              <div class="mq-actions">
+                <button class="btn btn-sec btn-sm" style="color:var(--pos);border-color:rgba(79,107,74,.45)">Approve</button>
+                <button class="btn btn-neg btn-sm">Reject</button>
+              </div>
+            </div>
+          </div>
+          <div class="app-cta-dock"><button class="btn btn-cta btn-block">Copy the desktop link</button></div>
+        </div>
+      </div>
+      <p class="frame-note"><b>Honesty over parity:</b> an unmatched payment cannot be approved on mobile
+      at all — pairing needs the matcher UI, so the card says "open on desktop" instead of pretending.</p>
+    </figure>
+  </div>
+
+  <!-- ---------- ADMIN · six states ---------- -->
+  <div class="states">
+    <h3>The six states — reconciliation queue</h3>
+    <p class="s-sub">Skeleton mirrors the real column widths. Denied carries the failing role and the ask;
+    it can never be mistaken for a clear queue.</p>
+    <div class="state-row">
+      <div class="state-card ideal">
+        <div class="state-tag"><span class="dot"></span>Ideal</div>
+        <div class="state-body" style="font-family:'Space Mono',monospace;font-size:9.5px;gap:0">
+          <div style="display:flex;gap:8px;padding:5px 2px;border-bottom:1px solid rgba(44,42,41,.2);color:var(--ink-soft);letter-spacing:.1em">REF&emsp;PAYER&emsp;&emsp;AMOUNT</div>
+          <div style="display:flex;gap:8px;justify-content:space-between;padding:7px 2px;border-bottom:1px solid var(--border)"><span>9XK2</span><span>M. SANTOS</span><span>18,450</span></div>
+          <div style="display:flex;gap:8px;justify-content:space-between;padding:7px 2px;border-bottom:1px solid var(--border);background:rgba(169,131,75,.07)"><span>3FHT</span><span>J. REYES</span><span>52,300</span></div>
+          <div style="display:flex;gap:8px;justify-content:space-between;padding:7px 2px;border-bottom:1px solid var(--border)"><span>QW7N</span><span>B. VILLANUEVA</span><span>7,980</span></div>
+          <div style="display:flex;gap:8px;justify-content:space-between;padding:7px 2px"><span>5RZM</span><span>C. DIZON</span><span>23,940</span></div>
+        </div>
+      </div>
+      <div class="state-card load">
+        <div class="state-tag"><span class="dot"></span>Loading</div>
+        <div class="state-body" style="gap:0">
+          <div class="sk-row"><div class="sk" style="width:13px;height:13px"></div><div class="sk" style="width:52px;height:10px"></div><div class="sk" style="flex:1;height:10px"></div><div class="sk" style="width:40px;height:10px"></div></div>
+          <div class="sk-row"><div class="sk" style="width:13px;height:13px"></div><div class="sk" style="width:52px;height:10px"></div><div class="sk" style="flex:1;height:10px"></div><div class="sk" style="width:40px;height:10px"></div></div>
+          <div class="sk-row"><div class="sk" style="width:13px;height:13px"></div><div class="sk" style="width:52px;height:10px"></div><div class="sk" style="flex:1;height:10px"></div><div class="sk" style="width:40px;height:10px"></div></div>
+          <div class="sk-row"><div class="sk" style="width:13px;height:13px"></div><div class="sk" style="width:52px;height:10px"></div><div class="sk" style="flex:1;height:10px"></div><div class="sk" style="width:40px;height:10px"></div></div>
+          <div class="sk-row"><div class="sk" style="width:13px;height:13px"></div><div class="sk" style="width:52px;height:10px"></div><div class="sk" style="flex:1;height:10px"></div><div class="sk" style="width:40px;height:10px"></div></div>
+        </div>
+      </div>
+      <div class="state-card empty">
+        <div class="state-tag"><span class="dot"></span>Empty</div>
+        <div class="state-center">
+          <div class="s-ic"><svg class="ic"><use href="#i-inbox"/></svg></div>
+          <h5>Queue is clear</h5>
+          <p>New BDO / GCash inbox mail lands here within a minute of the forward.</p>
+          <button class="btn btn-cta btn-sm">Check inbox rules</button>
+        </div>
+      </div>
+      <div class="state-card locked">
+        <div class="state-tag"><span class="dot"></span>Locked</div>
+        <div class="state-center">
+          <div class="s-ic"><svg class="ic"><use href="#i-lock"/></svg></div>
+          <h5>Recon v2 ships dark</h5>
+          <p>Behind <span class="mono" style="font-size:10px">ADMIN_RECON_V2</span> until the owner flips it.</p>
+          <button class="btn btn-sec btn-sm">View the flag</button>
+        </div>
+      </div>
+      <div class="state-card denied">
+        <div class="state-tag"><span class="dot"></span>Denied</div>
+        <div class="state-center">
+          <div class="s-ic"><svg class="ic"><use href="#i-shield-x"/></svg></div>
+          <h5>Finance role required</h5>
+          <p>You're signed in as Support — reconciliation writes money state.</p>
+          <span class="pill pill-link">Role: Support</span>
+          <a href="#admin" onclick="return false">Request Finance from the owner</a>
+        </div>
+      </div>
+      <div class="state-card error">
+        <div class="state-tag"><span class="dot"></span>Error</div>
+        <div class="state-center">
+          <div class="s-ic"><svg class="ic"><use href="#i-alert"/></svg></div>
+          <h5>Matcher query failed</h5>
+          <p class="mono" style="font-size:10px">ERR 42P01 · RELATION MISSING</p>
+          <button class="btn btn-sec btn-sm"><svg class="ic sm"><use href="#i-retry"/></svg>Retry</button>
+        </div>
+      </div>
+    </div>
+    <p class="state-cap"><b>The Empty/Denied split is a shipped bug fix, not theory:</b> an RLS denial and an
+    empty read both return <span class="mono" style="font-size:12px">count:0</span> with no error. A surface
+    once printed "no requests yet" over three real pending rows. Denied here renders only when a permission
+    probe says the reader was blocked — never inferred from a zero count.</p>
+  </div>
+
+  <aside class="dnote">
+    <h4>Designer's note — Admin console</h4>
+    <ul>
+      <li><b>Zebra is gone on purpose.</b> Hairline borders + hover tint carry the row; zebra stripes fight
+      the two tints that actually mean something — selection (blue) and hover (gold).</li>
+      <li><b>Density is the feature:</b> 38px rows, mono right-aligned numerals, 9 columns without wrapping.
+      This surface is staffed, trained, and used eight hours a day — Shopee-seller-center density, not marketing airiness.</li>
+      <li><b>Keyboard first, mouse optional.</b> Every mouse action has a key, the focus ring is always
+      visible (link blue, 2px), and the legend is one keypress away. Approving 30 payments should be
+      <span class="mono" style="font-size:12px">&darr; A &darr; A &darr; A</span>.</li>
+      <li><b>Optimistic with a named revert.</b> Approve flips the pill instantly; a failed write flips it
+      back and the toast says which ref reverted. Silent success, loud undo — same ladder as the customer side.</li>
+      <li><b>Minimal motion is a speed budget:</b> one 120ms opacity fade on row actions. No slides, no
+      springs — anything slower than the operator's hands is friction.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ======================= FOOT ======================= -->
+<footer class="foot-band">
+  <div>
+    <span class="kicker"><span class="krule"></span>SETNAYAN · Archetype sheet 02</span>
+    <p style="margin-top:8px;max-width:560px">Sheet · Wizard · Admin console. Light-locked, token-locked.
+    Self-contained — no external JS, no CDN, no remote images. Built to be ported into the Next.js app
+    as three shared components, not copied per-route.</p>
+  </div>
+  <div class="mono" style="font-size:11px;letter-spacing:.1em;line-height:2">
+    CREAM #FDFBF7 · INK #2C2A29 · CTA #C24E25<br>
+    GOLD #A9834B (ACCENT ONLY) · LINK #3B4E67<br>
+    MOTION &le;240MS · CUBIC-BEZIER(.22,.61,.36,1)
+  </div>
+</footer>
+
 </div>
 <div id="toast-root"></div>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+const fmt=n=>n.toLocaleString('en-PH');
+const PESO='₱';
+
+/* ---------- toast (ladder beat 03 lives here) ---------- */
+function toast(msg, ok){
+  const root=$('#toast-root');
+  const t=document.createElement('div');
+  t.className='toast'+(ok?' ok':'');
+  t.innerHTML='<svg class="ic"><use href="'+(ok?'#i-check':'#i-undo')+'"/></svg><span>'+msg+'</span>';
+  root.appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),260);},4200);
+}
+
+/* ---------- generic single-select chips ---------- */
+document.addEventListener('click',e=>{
+  const c=e.target.closest('.chip'); if(!c)return;
+  const row=c.closest('.chip-row'); if(!row)return;
+  $$('.chip',row).forEach(x=>x.classList.remove('sel'));
+  c.classList.add('sel');
+});
+
+/* ============================================================
+   01 · SHEET — snap points, drag, stacking, ladder
+   ============================================================ */
+const phone=$('#sheetPhone');
+if(phone){
+  const screenEl=$('.screen',phone), scrim=$('#phScrim');
+  const stack=[];
+  const H=()=>screenEl.clientHeight;
+  const SH=()=>H()*0.94;                 // sheet height
+  const tyFor=snap=>{
+    const sh=SH();
+    if(snap==='full') return 0;
+    if(snap==='half') return sh - H()*0.56;
+    return sh - 170;                     // peek
+  };
+  function openSheet(id,snap){
+    const sh=document.getElementById(id); if(!sh)return;
+    const top=stack[stack.length-1];
+    if(top) top.classList.add('behind');
+    stack.push(sh);
+    sh.style.setProperty('--ty', tyFor(snap||'full')+'px');
+    scrim.classList.add('on');
+  }
+  function closeSheet(){
+    const sh=stack.pop(); if(!sh)return;
+    sh.style.setProperty('--ty','105%');
+    const top=stack[stack.length-1];
+    if(top) top.classList.remove('behind');
+    else scrim.classList.remove('on');
+  }
+  phone.addEventListener('click',e=>{
+    const op=e.target.closest('[data-open]');
+    if(op){ openSheet(op.dataset.open,'full'); return; }
+    if(e.target.closest('[data-close]')){ closeSheet(); return; }
+    const sn=e.target.closest('[data-snap]');
+    if(sn){ const sh=sn.closest('.sheet'); sh.style.setProperty('--ty', tyFor(sn.dataset.snap)+'px'); }
+  });
+  scrim.addEventListener('click',closeSheet);
+
+  /* drag the handle between snaps; fling down dismisses */
+  $$('.sheet-grab',phone).forEach(grab=>{
+    grab.addEventListener('pointerdown',e=>{
+      if(e.target.closest('[data-snap]'))return;
+      const sh=grab.closest('.sheet');
+      const cur=sh.style.getPropertyValue('--ty');
+      if(!cur||cur.includes('%'))return;       // closed — nothing to drag
+      const startTy=parseFloat(cur), startY=e.clientY;
+      let lastY=e.clientY, lastT=performance.now(), vel=0;
+      sh.classList.add('dragging');
+      grab.setPointerCapture(e.pointerId);
+      const move=ev=>{
+        const now=performance.now();
+        vel=(ev.clientY-lastY)/Math.max(1,now-lastT);
+        lastY=ev.clientY; lastT=now;
+        const ty=Math.min(Math.max(startTy+(ev.clientY-startY),0),SH()+30);
+        sh.style.setProperty('--ty',ty+'px');
+      };
+      const up=()=>{
+        grab.removeEventListener('pointermove',move);
+        grab.removeEventListener('pointerup',up);
+        sh.classList.remove('dragging');
+        const ty=parseFloat(sh.style.getPropertyValue('--ty'));
+        if(vel>0.55 || ty>SH()-150){ closeSheet(); return; }
+        const snaps=['full','half','peek'].map(s=>tyFor(s));
+        const nearest=snaps.reduce((a,b)=>Math.abs(b-ty)<Math.abs(a-ty)?b:a);
+        sh.style.setProperty('--ty',nearest+'px');
+      };
+      grab.addEventListener('pointermove',move);
+      grab.addEventListener('pointerup',up);
+    });
+  });
+
+  /* ---- SHEET A · assign table — the full response ladder ---- */
+  const failToggle=$('#failToggle');
+  const assignLine=$('#assignLine'), assignCta=$('#assignCta'), seatReveal=$('#seatReveal');
+  let picked=null;
+  const resetAssign=()=>{
+    if(picked)picked.classList.remove('sel');
+    picked=null;
+    seatReveal.classList.remove('on');
+    assignLine.textContent='TABLE — · PICK ONE';
+    assignCta.disabled=true; assignCta.textContent='Assign a table';
+  };
+  $$('#shAssign .pick-row[data-table]').forEach(row=>{
+    row.addEventListener('click',()=>{
+      if(picked===row){ resetAssign(); return; }
+      if(picked)picked.classList.remove('sel');
+      picked=row;
+      row.classList.add('sel');                                   // beat 1 · <=100ms
+      const t=row.dataset.table,[used,cap]=row.dataset.seats.split('/').map(Number);
+      assignLine.textContent=t.toUpperCase()+' · '+(used+1)+'/'+cap+' AFTER SEATING';  // beat 2 · optimistic
+      assignCta.disabled=false; assignCta.textContent='Seat Aling Nena at '+t;
+      seatReveal.classList.add('on');                             // beat 4 · consequence
+      if(failToggle.checked){                                     // beat 3 · reconcile fails -> revert
+        setTimeout(()=>{
+          if(picked!==row)return;
+          resetAssign();
+          toast('Undone — '+t+' didn’t save. Aling Nena is back to unseated.');
+        },900);
+      }
+    });
+  });
+  assignCta.addEventListener('click',()=>{
+    if(!picked)return;
+    const t=picked.dataset.table;
+    const meta=$('#nenaMeta');
+    meta.textContent=t+' · Seated'; meta.classList.add('assigned');
+    const gr=$('#rowNena'); gr.classList.add('flash'); setTimeout(()=>gr.classList.remove('flash'),750);
+    resetAssign(); closeSheet();
+  });
+
+  /* ---- SHEET B · log payment ---- */
+  let paid=34000;
+  const payAmt=$('#payAmt'), payCta=$('#payCta'), balAfter=$('#balAfter');
+  const parseAmt=v=>parseInt((v||'').replace(/[^\d]/g,''),10)||0;
+  payAmt.addEventListener('input',()=>{
+    const n=parseAmt(payAmt.value);
+    payCta.textContent=n?('Log '+PESO+fmt(n)+' payment'):'Log payment';
+    balAfter.textContent=PESO+fmt(120000-paid-n);
+  });
+  payCta.addEventListener('click',()=>{
+    const n=parseAmt(payAmt.value);
+    if(!n){ closeSheet(); return; }
+    const prev=paid; paid+=n;                                     // optimistic commit
+    $('#paidFig').textContent=PESO+fmt(paid);
+    $('#balFig').textContent=PESO+fmt(120000-paid);
+    const card=$('#nenaVendorCard'); card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'),750);
+    if(failToggle.checked){
+      setTimeout(()=>{
+        paid=prev;
+        $('#paidFig').textContent=PESO+fmt(paid);
+        $('#balFig').textContent=PESO+fmt(120000-paid);
+        card.classList.add('flash'); setTimeout(()=>card.classList.remove('flash'),750);
+        toast('Undone — the '+PESO+fmt(n)+' payment to Aling Nena’s Catering didn’t reach the server.');
+      },900);
+    }
+    payAmt.value=''; payCta.textContent='Log payment'; balAfter.textContent=PESO+fmt(120000-paid);
+    closeSheet();
+  });
+
+  /* ---- SHEET C · edit detail + armed destructive ---- */
+  const venueMeta=$('#venueMeta'), venueName=$('#venueName');
+  const origVenue=venueMeta.textContent;
+  $('#venueSave').addEventListener('click',()=>{
+    const val=venueName.value.trim()||'Manila Cathedral';
+    venueMeta.textContent=val+' · 3:00 PM';
+    const vr=$('#venueRow'); vr.classList.add('flash'); setTimeout(()=>vr.classList.remove('flash'),750);
+    if(failToggle.checked){
+      setTimeout(()=>{
+        venueMeta.textContent=origVenue;
+        toast('Undone — the venue edit didn’t save. Still “Manila Cathedral”.');
+      },900);
+    }
+    closeSheet();
+  });
+  const vRemove=$('#venueRemove'); let armTimer=null;
+  vRemove.addEventListener('click',()=>{
+    if(!vRemove.classList.contains('armed')){
+      vRemove.classList.add('armed');
+      vRemove.textContent='Tap again — removes it from the invite';
+      armTimer=setTimeout(()=>{
+        vRemove.classList.remove('armed');
+        vRemove.textContent='Remove venue from the invite';
+      },2600);
+      return;
+    }
+    clearTimeout(armTimer);
+    vRemove.classList.remove('armed');
+    vRemove.textContent='Remove venue from the invite';
+    venueMeta.textContent='Walang venue pa · Add one anytime'; venueMeta.classList.remove('assigned');
+    closeSheet();
+    toast('Venue removed from the invite.',true);
+  });
+}
+
+/* ---------- desktop drawer ---------- */
+const drawer=$('#deskDrawer');
+if(drawer){
+  const dScrim=$('#deskScrim');
+  $('#deskPayOpen').addEventListener('click',()=>{drawer.classList.add('on');dScrim.classList.add('on');});
+  const closeDrawer=()=>{drawer.classList.remove('on');dScrim.classList.remove('on');};
+  $$('#sheetDesk [data-close-drawer]').forEach(b=>b.addEventListener('click',closeDrawer));
+  dScrim.addEventListener('click',closeDrawer);
+  const dAmt=$('#dPayAmt');
+  dAmt.addEventListener('input',()=>{
+    const n=parseInt((dAmt.value||'').replace(/[^\d]/g,''),10)||0;
+    $('#dPayCta').textContent=n?('Log '+PESO+fmt(n)+' payment'):'Log payment';
+    $('#dBalAfter').textContent=PESO+fmt(86000-n);
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&drawer.classList.contains('on'))closeDrawer();
+  });
+}
+
+/* ============================================================
+   02 · WIZARD — one decision per screen, lossless back
+   ============================================================ */
+const wiz=$('#wiz');
+if(wiz){
+  const wz={type:null,date:null,city:null,venue:null};
+  const track=$('#wizTrack'), cta=$('#wizCta'), backBtn=$('#wizBack'), backLabel=$('#wizBackLabel');
+  const count=$('#wizCount');
+  const beadWraps=$$('#wizRail .bead-wrap'), lines=$$('#wizRail .rail-line');
+  const DOW=['LINGGO','LUNES','MARTES','MIYERKULES','HUWEBES','BIYERNES','SABADO'];
+  let step=0;
+
+  /* calendar — Hunyo 2027 (June 1 is a Tuesday) */
+  const calGrid=$('#calGrid');
+  for(let i=0;i<2;i++){const b=document.createElement('div');calGrid.appendChild(b);}
+  for(let d=1;d<=30;d++){
+    const el=document.createElement('div');
+    el.className='cal-d'; el.textContent=d;
+    el.addEventListener('click',()=>{
+      $$('.cal-d.sel',calGrid).forEach(x=>x.classList.remove('sel'));
+      el.classList.add('sel');                                    // beat 1
+      wz.date=d;
+      const dow=DOW[(d+1)%7];
+      $('#dateRevealText').textContent=dow+' · '+d+' HUN 2027 — '+(dow==='SABADO'?'PEAK DAY, VENDORS BOOK FAST':'OFF-PEAK — MAS MADALING MAG-BOOK');
+      $('#dateReveal').classList.add('on');                       // beat 4
+      updateCta();
+    });
+    calGrid.appendChild(el);
+  }
+
+  /* type cards */
+  $$('#typeGrid .type-card').forEach(card=>{
+    card.addEventListener('click',()=>{
+      $$('#typeGrid .type-card.sel').forEach(x=>x.classList.remove('sel'));
+      card.classList.add('sel');
+      wz.type=card.dataset.type;
+      updateCta();
+    });
+  });
+
+  /* city + venues */
+  const venueReveal=$('#venueReveal');
+  const hideVenues=()=>{venueReveal.style.maxHeight='0';venueReveal.style.opacity='0';venueReveal.style.overflow='hidden';};
+  const showVenues=()=>{venueReveal.style.maxHeight='360px';venueReveal.style.opacity='1';};
+  venueReveal.style.transition='max-height 240ms cubic-bezier(.22,.61,.36,1),opacity 240ms cubic-bezier(.22,.61,.36,1)';
+  hideVenues();
+  $$('#cityChips [data-city]').forEach(ch=>{
+    ch.addEventListener('click',()=>{
+      wz.city=ch.dataset.city;
+      if(wz.city==='Metro Manila')showVenues();
+      else {hideVenues(); wz.venue=null; $$('#venueReveal .pick-row.sel').forEach(x=>x.classList.remove('sel'));}
+      updateCta();
+    });
+  });
+  $$('#venueReveal .pick-row[data-venue]').forEach(row=>{
+    row.addEventListener('click',()=>{
+      const was=row.classList.contains('sel');
+      $$('#venueReveal .pick-row.sel').forEach(x=>x.classList.remove('sel'));
+      if(!was){row.classList.add('sel');wz.venue=row.dataset.venue;}
+      else wz.venue=null;
+      updateCta();
+    });
+  });
+
+  function firstName(sel){const v=($(sel).value||'').trim();return v?v.split(/\s+/)[0]:'';}
+  function updateCta(){
+    let label='Continue', on=true;
+    if(step===0){ on=!!wz.type; label=on?('Continue — '+wz.type):'Continue — pick an occasion'; }
+    if(step===1){ on=!!wz.date; label=on?('Continue — '+wz.date+' Hun 2027'):'Continue — pick a date'; }
+    if(step===2){ on=!!wz.city; label=on?('Continue — '+(wz.venue||wz.city)):'Continue — pick a city'; }
+    if(step===3){ const a=firstName('#wizName1'),b=firstName('#wizName2');
+      label='Continue — sina '+(a||'?')+' & '+(b||'?'); on=!!(a&&b); }
+    if(step===4){ label='Open your dashboard'; on=true; }
+    cta.disabled=!on; cta.textContent=label;
+  }
+  ['#wizName1','#wizName2'].forEach(s=>$(s).addEventListener('input',updateCta));
+
+  function goto(n){
+    step=n;
+    track.style.transform='translateX(-'+(n*100)+'%)';
+    count.textContent='HAKBANG '+(n+1)+'/5';
+    beadWraps.forEach((w,i)=>{
+      w.classList.toggle('done',i<n);
+      w.classList.toggle('now',i===n);
+    });
+    lines.forEach((l,i)=>l.classList.toggle('fill',i<n));
+    backLabel.textContent=n===0?'Exit — draft stays saved':'Back';
+    if(n===4){
+      $('#wizDonePanel').classList.add('on');
+      $('#sumType').textContent=(wz.type||'KASAL').toUpperCase();
+      const dow=wz.date?DOW[(wz.date+1)%7].slice(0,3):'—';
+      $('#sumDate').textContent=wz.date?(wz.date+' HUN 2027 · '+dow):'—';
+      $('#sumCity').textContent=((wz.venue?wz.venue+' · ':'')+(wz.city||'—')).toUpperCase();
+      const a=firstName('#wizName1'),b=firstName('#wizName2');
+      $('#sumWho').textContent=((a||'MARIA')+' & '+(b||'JOMAR')).toUpperCase();
+    }
+    updateCta();
+  }
+  cta.addEventListener('click',()=>{
+    if(step<4){ goto(step+1); }
+    else toast('Handing off to /dashboard/[event]/overview — the prototype ends here.',true);
+  });
+  backBtn.addEventListener('click',()=>{
+    if(step===0){ toast('Draft saved on this device — balik ka lang anytime.',true); return; }
+    goto(step-1);                       /* lossless: panels persist, selections persist */
+  });
+  goto(0);
+}
+
+/* ============================================================
+   03 · ADMIN CONSOLE — keyboard-first density
+   ============================================================ */
+const wrap=$('#tblWrap');
+if(wrap){
+  const body=$('#conBody');
+  const allRows=()=>$$('tr',body);
+  const visRows=()=>allRows().filter(r=>!r.hidden);
+  let focusIdx=-1;
+
+  function refFor(row){return row.cells[1].textContent.trim();}
+  function setFocus(i){
+    const rows=visRows(); if(!rows.length)return;
+    focusIdx=Math.max(0,Math.min(i,rows.length-1));
+    allRows().forEach(r=>r.classList.remove('kfocus'));
+    rows[focusIdx].classList.add('kfocus');
+    rows[focusIdx].scrollIntoView({block:'nearest'});
+  }
+  const focused=()=>visRows()[focusIdx]||null;
+
+  /* selection + bulk bar (the toolbar CTA swaps out so exactly one terracotta stays visible) */
+  const bulkBar=$('#bulkBar'), defActions=$('#conDefaultActions');
+  function updateBulk(){
+    const sel=allRows().filter(r=>$('.rowSel',r).checked);
+    allRows().forEach(r=>r.classList.toggle('rsel',$('.rowSel',r).checked));
+    const on=sel.length>0;
+    bulkBar.classList.toggle('on',on);
+    defActions.style.display=on?'none':'flex';
+    $('#bulkCount').textContent=sel.length+' SELECTED';
+  }
+  body.addEventListener('change',e=>{if(e.target.classList.contains('rowSel'))updateBulk();});
+  $('#selAll').addEventListener('change',e=>{
+    visRows().forEach(r=>{$('.rowSel',r).checked=e.target.checked;});
+    updateBulk();
+  });
+  $('#bulkClear').addEventListener('click',()=>{
+    allRows().forEach(r=>{$('.rowSel',r).checked=false;});
+    $('#selAll').checked=false; updateBulk();
+  });
+
+  /* approve / reject — optimistic, named revert on the poisoned row */
+  function approve(row){
+    if(!row||row.dataset.status!=='pending')return;
+    const st=$('.st-cell',row), prev=st.innerHTML;
+    st.innerHTML='<span class="pill pill-pos">Verified</span>';   // optimistic
+    row.dataset.status='verified';
+    if(row.dataset.fail){
+      setTimeout(()=>{
+        st.innerHTML=prev; row.dataset.status='pending';
+        toast(refFor(row)+' reverted to Pending — matcher rejected the write (order still unmatched).');
+      },900);
+    }
+  }
+  function reject(row){
+    if(!row||row.dataset.status!=='pending')return;
+    $('.st-cell',row).innerHTML='<span class="pill pill-neg">Rejected</span>';
+    row.dataset.status='rejected';
+  }
+  $('#bulkApprove').addEventListener('click',()=>{
+    allRows().filter(r=>$('.rowSel',r).checked).forEach(r=>{approve(r);$('.rowSel',r).checked=false;});
+    $('#selAll').checked=false; updateBulk();
+  });
+  $('#bulkReject').addEventListener('click',()=>{
+    allRows().filter(r=>$('.rowSel',r).checked).forEach(r=>{reject(r);$('.rowSel',r).checked=false;});
+    $('#selAll').checked=false; updateBulk();
+  });
+  body.addEventListener('click',e=>{
+    const btn=e.target.closest('.ra-btn');
+    const row=e.target.closest('tr');
+    if(btn&&row){
+      if(btn.dataset.act==='approve')approve(row);
+      else if(btn.dataset.act==='reject')reject(row);
+      else toast('Row actions: view inbox mail · reassign order · audit trail (prototype).',true);
+      return;
+    }
+    if(row&&!e.target.closest('input')){const i=visRows().indexOf(row);if(i>-1)setFocus(i);}
+  });
+
+  /* inline edit — E or double-click the amount */
+  let editing=null;
+  function startEdit(row){
+    if(!row||editing)return;
+    const cell=$('.amt-cell',row); if(!cell)return;
+    const prevTxt=cell.textContent, raw=row.dataset.amount;
+    editing=cell;
+    cell.innerHTML='<input class="amt-edit" value="'+raw+'" aria-label="Edit amount">';
+    const inp=$('input',cell); inp.focus(); inp.select();
+    const finish=(commit)=>{
+      if(!editing)return;
+      editing=null;
+      if(commit){
+        const n=parseInt((inp.value||'').replace(/[^\d]/g,''),10);
+        if(n){row.dataset.amount=n;cell.textContent=PESO+fmt(n);
+          cell.classList.add('flash');setTimeout(()=>cell.classList.remove('flash'),650);}
+        else cell.textContent=prevTxt;
+      } else cell.textContent=prevTxt;
+      wrap.focus();
+    };
+    inp.addEventListener('keydown',ev=>{
+      if(ev.key==='Enter')finish(true);
+      if(ev.key==='Escape')finish(false);
+      ev.stopPropagation();
+    });
+    inp.addEventListener('blur',()=>finish(false));
+  }
+  body.addEventListener('dblclick',e=>{
+    const cell=e.target.closest('.amt-cell');
+    if(cell)startEdit(cell.closest('tr'));
+  });
+
+  /* keyboard map */
+  wrap.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT')return;
+    const k=e.key;
+    if(k==='ArrowDown'||k==='j'){e.preventDefault();setFocus(focusIdx+1);}
+    else if(k==='ArrowUp'||k==='k'){e.preventDefault();setFocus(focusIdx-1);}
+    else if(k===' '){e.preventDefault();const r=focused();if(r){const c=$('.rowSel',r);c.checked=!c.checked;updateBulk();}}
+    else if(k==='e'){e.preventDefault();startEdit(focused());}
+    else if(k==='a'&&!e.shiftKey){approve(focused());}
+    else if(k==='x'){reject(focused());}
+    else if(k==='A'&&e.shiftKey){e.preventDefault();visRows().forEach(r=>{$('.rowSel',r).checked=true;});updateBulk();}
+    else if(k==='Enter'){const r=focused();if(r)toast('Opening order for '+refFor(r)+'… (prototype)',true);}
+    else if(k==='/'){e.preventDefault();$('#conSearch').focus();}
+    else if(k==='?'){$('#conLegend').classList.toggle('on');}
+    else if(k==='Escape'){
+      allRows().forEach(r=>{$('.rowSel',r).checked=false;r.classList.remove('kfocus');});
+      $('#selAll').checked=false;focusIdx=-1;updateBulk();
+    }
+  });
+
+  /* sort */
+  $$('.con-tbl th.sortable').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const key=th.dataset.sort;
+      const dir=th.dataset.dir==='asc'?'desc':'asc'; th.dataset.dir=dir;
+      $$('.con-tbl th.sortable').forEach(x=>x.classList.remove('sorted'));
+      th.classList.add('sorted');
+      const rows=allRows();
+      rows.sort((a,b)=>{
+        let va=a.dataset[key],vb=b.dataset[key];
+        if(key==='amount'){va=+va;vb=+vb;}
+        return (va<vb?-1:va>vb?1:0)*(dir==='asc'?1:-1);
+      });
+      rows.forEach(r=>body.appendChild(r));
+      focusIdx=-1;allRows().forEach(r=>r.classList.remove('kfocus'));
+    });
+  });
+
+  /* filter bar */
+  const q=$('#conSearch'), fs=$('#conStatus'), fm=$('#conMethod');
+  function applyFilter(){
+    const qq=(q.value||'').toLowerCase(), s=fs.value, m=fm.value;
+    allRows().forEach(r=>{
+      const hay=(r.cells[1].textContent+' '+r.cells[2].textContent).toLowerCase();
+      r.hidden=!((!qq||hay.includes(qq))&&(!s||r.dataset.status===s)&&(!m||r.dataset.method===m));
+    });
+    $('#conMeta').textContent=visRows().length+' OF 108 · 42MS';
+    focusIdx=-1;allRows().forEach(r=>r.classList.remove('kfocus'));
+  }
+  q.addEventListener('input',applyFilter);
+  fs.addEventListener('change',applyFilter);
+  fm.addEventListener('change',applyFilter);
+  q.addEventListener('keydown',e=>{if(e.key==='Escape'){q.value='';applyFilter();wrap.focus();}});
+  $('#conClearFilters').addEventListener('click',()=>{q.value='';fs.value='';fm.value='';applyFilter();});
+  $('#legendToggle').addEventListener('click',()=>$('#conLegend').classList.toggle('on'));
+}
+})();
+</script>
 </body>
 </html>
