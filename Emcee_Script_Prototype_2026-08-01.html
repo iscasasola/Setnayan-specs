@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SETNAYAN · Emcee Script Layer — Prep &amp; Day-of Prototype · 2026-08-01</title>
+<style>
+/* ==========================================================================
+   SETNAYAN · Emcee Script Layer prototype — 2026-08-01
+   Design artifact only. Tokens are copied VERBATIM from the shipped
+   apps/web/app/globals.css "Atelier + macOS glass" block (owner-locked
+   2026-07-12) + the 2026-07-31 mandarin-CTA supersede from
+   Claude_Design_Brief_2026-07-31.md. Fonts approximate Hanken Grotesk
+   (UI grotesque) and Space Mono (labels/numerals) with system stacks;
+   the read-aloud serif approximates --font-pahina-display via Georgia,
+   exactly as the shipped fallback chain does.
+   ========================================================================== */
+:root {
+  /* paper & ink — real --sn-* values */
+  --sn-paper:      #FBFAF7;
+  --sn-surface:    #FFFFFF;
+  --sn-hairline:   #EDE8DE;
+  --sn-line:       #E1DCD1;
+  --sn-ink-300:    #A09A8E;
+  --sn-ink-400:    #8A857B;
+  --sn-ink-500:    #6E6A62;
+  --sn-ink-700:    #3A382F;
+  --sn-ink-900:    #1B1A17;
+  --sn-ink-black:  #17160F;
+  /* gold accent — the only decorative color of the Atelier kit */
+  --sn-gold-100:   #F3ECDF;
+  --sn-gold-300:   #CBA766;
+  --sn-gold-500:   #A9834B;
+  --sn-gold-600:   #95713D;
+  --sn-gold-700:   #8A6B39;
+  /* 2026-07-31 owner supersede — mandarin CTA, ink label (6.31:1 AA) */
+  --sn-cta:        #F37A1F;
+  --sn-cta-hover:  #D9600A;
+  /* semantic (warm-tuned, never neon) */
+  --sn-success:    #5E7C52;  --sn-success-soft: #E9EEE3;
+  --sn-warning:    #B77E2E;  --sn-warning-soft: #F6EAD2;
+  --sn-danger:     #A6483B;  --sn-danger-soft:  #F3E1DC;
+  /* type — system approximations of the locked families */
+  --sn-font: "Hanken Grotesk", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --sn-mono: "Space Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sn-serif: Georgia, "Times New Roman", serif; /* --font-pahina-display fallback chain */
+  /* radius */
+  --sn-r-sm: 6px;  --sn-r-md: 10px;  --sn-r-lg: 14px;
+  --sn-r-xl: 18px; --sn-r-pill: 999px;
+  /* elevation (warm, never grey) */
+  --sn-sh-sm: 0 1px 2px rgba(30,26,18,.06);
+  --sn-sh-md: 0 20px 34px -22px rgba(30,26,18,.40);
+  --sn-sh-tile: 0 1px 2px rgba(40,34,24,.05), 0 18px 40px -26px rgba(30,26,18,.4);
+  /* glass */
+  --sn-glass-bg:   rgba(255,255,255,.5);
+  --sn-glass-line: rgba(40,34,24,.16);
+  --sn-glass-blur: blur(22px) saturate(1.5);
+  --sn-glass-dark-bg:   rgba(23,22,15,.82);
+  --sn-glass-dark-line: rgba(255,255,255,.18);
+  /* motion */
+  --sn-ease:     cubic-bezier(.2,.7,.2,1);
+  --sn-dur-control: 200ms;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--sn-font);
+  background: var(--sn-paper);
+  color: var(--sn-ink-900);
+  line-height: 1.5;
+  font-size: 15px;
+}
+a { color: var(--sn-gold-700); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 96px; }
+
+/* ── doc chrome (the prototype's own framing, not product UI) ─────────── */
+.kick {
+  font-family: var(--sn-mono);
+  font-size: 10.5px; letter-spacing: .28em; text-transform: uppercase;
+  color: var(--sn-ink-500);
+}
+.doc-head { padding: 18px 0 10px; border-bottom: 1px solid var(--sn-line); }
+.doc-head h1 { font-size: 27px; font-weight: 650; letter-spacing: -.015em; margin-top: 6px; }
+.doc-head .sub { color: var(--sn-ink-500); margin-top: 6px; max-width: 62ch; }
+.wordmark { font-family: var(--sn-mono); font-weight: 700; letter-spacing: .34em; font-size: 12px; color: var(--sn-ink-900); }
+.wordmark .dot { color: var(--sn-gold-500); }
+
+.rationale {
+  margin-top: 20px; background: var(--sn-surface);
+  border: 1px solid var(--sn-hairline); border-radius: var(--sn-r-xl);
+  box-shadow: var(--sn-sh-tile); padding: 20px 22px;
+}
+.rationale h2 { font-size: 15px; font-weight: 650; margin-bottom: 10px; }
+.rationale ol { margin-left: 18px; display: grid; gap: 9px; color: var(--sn-ink-700); font-size: 13.5px; }
+.rationale li strong { color: var(--sn-ink-900); }
+
+.section { margin-top: 52px; }
+.section > .kick { color: var(--sn-gold-700); }
+.section > h2 { font-size: 21px; font-weight: 650; letter-spacing: -.01em; margin-top: 6px; }
+.section > .sub { color: var(--sn-ink-500); margin-top: 4px; max-width: 68ch; font-size: 13.5px; }
+
+.stage {
+  margin-top: 22px; display: grid; gap: 28px;
+  grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
+  align-items: start;
+}
+@media (max-width: 880px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+
+/* annotation rail */
+.annos { display: grid; gap: 14px; position: sticky; top: 18px; }
+@media (max-width: 880px) { .annos { position: static; } }
+.anno {
+  /* glass fill without live backdrop blur: over the flat paper ground the blur
+     is invisible and pure GPU cost — the token stays for the port. */
+  background: rgba(255,255,255,.62);
+  border: 1px solid var(--sn-glass-line); border-radius: var(--sn-r-lg);
+  padding: 13px 15px; font-size: 13px; color: var(--sn-ink-700);
+}
+.anno b { color: var(--sn-ink-900); }
+.anno .tag { margin-bottom: 5px; }
+
+/* delta legend + tags */
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--sn-mono); font-size: 9.5px; letter-spacing: .16em;
+  text-transform: uppercase; border-radius: var(--sn-r-sm);
+  padding: 2px 7px; line-height: 1.6;
+}
+.tag-new { background: var(--sn-gold-500); color: #fff; }
+.tag-ship { background: transparent; color: var(--sn-ink-500); border: 1px solid var(--sn-line); }
+.delta { outline: 1.5px dashed rgba(169,131,75,.85); outline-offset: 3px; border-radius: var(--sn-r-md); position: relative; }
+.delta::after {
+  content: "NEW"; position: absolute; top: -9px; right: 8px;
+  font-family: var(--sn-mono); font-size: 8.5px; letter-spacing: .18em;
+  background: var(--sn-gold-500); color: #fff; padding: 1px 6px; border-radius: 4px;
+}
+
+/* ── the phone frame ──────────────────────────────────────────────────── */
+.phone {
+  width: 100%; max-width: 402px; margin: 0 auto;
+  background: var(--sn-ink-black); border-radius: 40px; padding: 10px;
+  box-shadow: var(--sn-sh-md);
+}
+.screen {
+  background: var(--sn-paper); border-radius: 32px; overflow: hidden;
+  min-height: 200px;
+}
+.statusbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 22px 4px; font-family: var(--sn-mono); font-size: 10.5px;
+  color: var(--sn-ink-500);
+}
+.appbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px 10px; border-bottom: 1px solid var(--sn-hairline);
+  background: rgba(255,255,255,.62);
+}
+.appbar .back { font-size: 17px; color: var(--sn-ink-500); text-decoration: none; }
+.appbar .crumb { font-family: var(--sn-mono); font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--sn-ink-400); }
+.appbar .who { font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+.body { padding: 14px 14px 18px; }
+
+/* customer-card header echo (shipped) */
+.stagepill {
+  display: inline-block; font-size: 10.5px; font-weight: 650;
+  background: var(--sn-success-soft); color: #2F4527;
+  border-radius: var(--sn-r-pill); padding: 2px 9px;
+}
+.pipeline {
+  display: flex; gap: 0; align-items: center; overflow-x: auto;
+  padding: 10px 0 4px; scrollbar-width: none;
+}
+.pipeline::-webkit-scrollbar { display: none; }
+.pstep { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.pdot {
+  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; border: 2px solid var(--sn-line); color: var(--sn-ink-300); background: #fff;
+}
+.pdot.done { background: var(--sn-success); border-color: var(--sn-success); color: #fff; }
+.pdot.cur  { background: var(--sn-ink-900); border-color: var(--sn-ink-900); color: var(--sn-paper); box-shadow: 0 0 0 4px rgba(27,26,23,.1); }
+.plabel { font-size: 10.5px; font-weight: 600; color: var(--sn-ink-500); white-space: nowrap; }
+.plabel.cur { color: var(--sn-ink-900); }
+.pline { width: 18px; height: 2px; background: var(--sn-line); margin: 0 7px; flex-shrink: 0; }
+.pline.done { background: var(--sn-success); }
+
+/* tab rail (shipped pattern: scrollable pill row on mobile) */
+.tabs { display: flex; gap: 7px; overflow-x: auto; padding: 10px 0 4px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0; white-space: nowrap; font-size: 12.5px; font-weight: 550;
+  border: 1px solid var(--sn-line); border-radius: var(--sn-r-pill);
+  padding: 5px 13px; color: var(--sn-ink-500); background: #fff; text-decoration: none;
+}
+.tab.on { background: var(--sn-ink-900); color: var(--sn-paper); border-color: var(--sn-ink-900); }
+.tab .mini { font-family: var(--sn-mono); font-size: 8px; letter-spacing: .14em; color: var(--sn-gold-300); margin-left: 4px; vertical-align: 2px; }
+
+/* privacy line (mirrors shipped ClientNotes lock copy) */
+.lockline {
+  display: flex; gap: 7px; align-items: flex-start;
+  font-size: 11.5px; color: var(--sn-ink-500); margin-top: 12px;
+  background: var(--sn-gold-100); border: 1px solid var(--sn-hairline);
+  border-radius: var(--sn-r-md); padding: 8px 11px;
+}
+.lockline svg { flex-shrink: 0; margin-top: 1px; }
+
+/* progress */
+.progress { margin-top: 14px; }
+.progress .nums { display: flex; justify-content: space-between; align-items: baseline; }
+.progress .big { font-family: var(--sn-mono); font-size: 13px; font-weight: 700; }
+.progress .big b { font-size: 19px; }
+.progress .rest { font-size: 11.5px; color: var(--sn-ink-500); }
+.bar { height: 6px; border-radius: var(--sn-r-pill); background: var(--sn-gold-100); margin-top: 7px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 66.6%; background: var(--sn-gold-500); border-radius: var(--sn-r-pill); }
+
+/* the "what next" card — unanswered asks */
+.asks {
+  margin-top: 12px; background: var(--sn-surface);
+  border: 1px solid var(--sn-gold-300); border-left: 3px solid var(--sn-gold-500);
+  border-radius: var(--sn-r-lg); padding: 12px 13px; box-shadow: var(--sn-sh-sm);
+}
+.asks .kick { color: var(--sn-gold-700); font-size: 9.5px; }
+.asks p { font-size: 13px; margin-top: 4px; }
+.askchips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.askchip {
+  display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+  font-size: 12px; font-weight: 600; color: var(--sn-ink-900);
+  background: var(--sn-gold-100); border: 1px solid var(--sn-gold-300);
+  border-radius: var(--sn-r-pill); padding: 4px 11px;
+}
+.askchip .t { font-family: var(--sn-mono); font-size: 10px; color: var(--sn-gold-700); }
+
+/* ── moment cards ─────────────────────────────────────────────────────── */
+.moments { margin-top: 16px; display: grid; gap: 10px; }
+.datechip {
+  font-family: var(--sn-mono); font-size: 9.5px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--sn-ink-400); padding: 6px 2px 0;
+}
+.m {
+  background: var(--sn-surface); border: 1px solid var(--sn-hairline);
+  border-radius: var(--sn-r-lg); padding: 12px 13px; box-shadow: var(--sn-sh-sm);
+}
+.m.depth1 { margin-left: 20px; position: relative; }
+.m.depth1::before {
+  content: ""; position: absolute; left: -13px; top: -12px; bottom: 40%;
+  width: 12px; border-left: 1px solid var(--sn-line); border-bottom: 1px solid var(--sn-line);
+  border-bottom-left-radius: 8px;
+}
+.m .row1 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.m .time { font-family: var(--sn-mono); font-size: 10.5px; color: var(--sn-ink-500); }
+.m .label { font-size: 14px; font-weight: 650; letter-spacing: -.005em; }
+.m.depth1 .label { font-weight: 550; font-size: 13.5px; }
+.chip {
+  font-family: var(--sn-mono); font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase;
+  border-radius: var(--sn-r-sm); padding: 2px 7px; margin-left: auto;
+}
+.chip-done { background: var(--sn-success-soft); color: #2F4527; }
+.chip-ask  { background: var(--sn-gold-500); color: #fff; }
+
+/* couple's ask */
+.they {
+  margin-top: 9px; background: var(--sn-gold-100);
+  border-radius: var(--sn-r-md); padding: 8px 11px;
+}
+.they .k { font-family: var(--sn-mono); font-size: 8.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--sn-gold-700); }
+.they p { font-size: 13px; color: var(--sn-ink-700); margin-top: 2px; }
+/* shared cue */
+.cue { margin-top: 8px; font-size: 12px; font-style: italic; color: var(--sn-ink-400); }
+.cue b { font-style: normal; font-family: var(--sn-mono); font-size: 8.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--sn-ink-300); font-weight: 400; }
+
+/* HIS line — the one thing he reads aloud gets the reading serif */
+.yours { margin-top: 10px; border-top: 1px solid var(--sn-hairline); padding-top: 9px; }
+.yours .k { display: flex; align-items: center; gap: 6px; font-family: var(--sn-mono); font-size: 8.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--sn-ink-500); }
+.yours .line { font-family: var(--sn-serif); font-size: 15.5px; line-height: 1.45; color: var(--sn-ink-900); margin-top: 5px; }
+.yours .edit { font-size: 11.5px; font-weight: 600; color: var(--sn-gold-700); text-decoration: none; margin-top: 5px; display: inline-block; }
+/* blank state */
+.write {
+  margin-top: 10px; width: 100%; text-align: left; cursor: pointer;
+  border: 1.5px dashed var(--sn-line); background: transparent;
+  border-radius: var(--sn-r-md); padding: 10px 12px;
+  font-family: var(--sn-serif); font-size: 14px; color: var(--sn-ink-300); font-style: italic;
+  transition: border-color var(--sn-dur-control) var(--sn-ease);
+}
+.write:hover { border-color: var(--sn-gold-500); color: var(--sn-ink-500); }
+/* unanswered emphasis */
+.m.unanswered { border-color: var(--sn-gold-300); border-left: 3px solid var(--sn-gold-500); }
+.m.unanswered .write { border-color: var(--sn-gold-300); background: #FDFBF6; }
+/* expanded composer (demo) */
+.composer { margin-top: 10px; }
+.composer textarea {
+  width: 100%; min-height: 76px; resize: vertical;
+  border: 1px solid var(--sn-gold-300); border-radius: var(--sn-r-md);
+  padding: 10px 12px; font-family: var(--sn-serif); font-size: 15px; line-height: 1.45;
+  color: var(--sn-ink-900); background: #fff; outline: none;
+}
+.composer textarea:focus { border-color: var(--sn-gold-500); box-shadow: 0 0 0 3px rgba(169,131,75,.14); }
+.composer .actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+.btn-ink {
+  border: 0; cursor: pointer; background: var(--sn-ink-900); color: var(--sn-paper);
+  font-family: var(--sn-font); font-size: 12.5px; font-weight: 600;
+  border-radius: var(--sn-r-md); padding: 7px 14px;
+}
+.btn-ghost {
+  border: 1px solid var(--sn-line); cursor: pointer; background: #fff; color: var(--sn-ink-500);
+  font-family: var(--sn-font); font-size: 12.5px; font-weight: 600;
+  border-radius: var(--sn-r-md); padding: 6px 13px;
+}
+.hint { font-size: 11px; color: var(--sn-ink-400); margin-left: auto; }
+
+/* ── PRIVATE — the highest-stakes treatment ───────────────────────────── */
+.m.private { background: #F5F3EE; border-color: var(--sn-ink-300); overflow: hidden; padding-top: 0; }
+.m.private { border-left: 6px solid transparent; border-image: repeating-linear-gradient(135deg, var(--sn-ink-900) 0 6px, var(--sn-gold-300) 6px 12px) 1; }
+.noread {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 -13px 10px; padding: 8px 13px;
+  background: var(--sn-ink-black); color: var(--sn-paper);
+}
+.noread svg { flex-shrink: 0; }
+.noread b {
+  font-family: var(--sn-mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; font-weight: 700;
+}
+.noread span { font-size: 10.5px; color: rgba(251,250,247,.66); margin-left: auto; text-align: right; line-height: 1.3; }
+.m.private .they .k { color: var(--sn-ink-500); }
+.m.private .they { background: rgba(27,26,23,.05); }
+.m.private .yours .k { color: var(--sn-ink-700); }
+.m.private .yours .k b { background: var(--sn-ink-900); color: var(--sn-paper); border-radius: 4px; padding: 1px 6px; font-weight: 700; }
+.m.private .yours .line { font-family: var(--sn-font); font-size: 13.5px; font-style: normal; color: var(--sn-ink-700); }
+
+/* shipped inline private badge (verbatim from stage-script.tsx PrivateBadge) */
+.pbadge {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 1px solid rgba(27,26,23,.2); background: rgba(27,26,23,.04);
+  font-family: var(--sn-mono); font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--sn-ink-700); padding: 2px 6px;
+}
+
+/* sticky compile CTA in frame */
+.framecta {
+  position: sticky; bottom: 0; margin: 16px -14px -18px; padding: 10px 14px 14px;
+  background: linear-gradient(to top, var(--sn-paper) 65%, rgba(251,250,247,0));
+}
+.btn-cta {
+  display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px;
+  border: 0; cursor: pointer; background: var(--sn-cta); color: var(--sn-ink-black);
+  font-family: var(--sn-font); font-size: 14px; font-weight: 700;
+  border-radius: var(--sn-r-lg); padding: 12px 16px; box-shadow: var(--sn-sh-sm);
+  transition: background var(--sn-dur-control) var(--sn-ease);
+}
+.btn-cta:hover { background: var(--sn-cta-hover); }
+
+/* ── empty state + compile demos ──────────────────────────────────────── */
+.demo-duo { margin-top: 26px; display: grid; gap: 22px; grid-template-columns: minmax(0,402px) minmax(0,1fr); align-items: start; }
+@media (max-width: 880px) { .demo-duo { grid-template-columns: minmax(0,1fr); } }
+.empty {
+  background: var(--sn-surface); border: 1px solid var(--sn-hairline); border-radius: var(--sn-r-lg);
+  padding: 26px 18px; text-align: center; box-shadow: var(--sn-sh-sm);
+}
+.empty .art { font-family: var(--sn-serif); font-size: 30px; color: var(--sn-gold-300); }
+.empty p { font-size: 13px; color: var(--sn-ink-500); max-width: 34ch; margin: 8px auto 0; }
+.compilecard {
+  background: var(--sn-surface); border: 1px solid var(--sn-hairline); border-radius: var(--sn-r-xl);
+  box-shadow: var(--sn-sh-tile); overflow: hidden;
+}
+.compilecard header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--sn-hairline); }
+.compilecard header .k { font-family: var(--sn-mono); font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--sn-ink-500); }
+.compilecard header .btns { margin-left: auto; display: flex; gap: 8px; }
+pre.script {
+  font-family: var(--sn-mono); font-size: 11.5px; line-height: 1.62;
+  color: var(--sn-ink-700); padding: 16px 18px; overflow-x: auto;
+  background: #FDFCF9; white-space: pre;
+}
+pre.script .hd { color: var(--sn-ink-900); font-weight: 700; }
+pre.script .pv { color: var(--sn-paper); background: var(--sn-ink-black); padding: 0 4px; }
+pre.script .yy { color: var(--sn-ink-900); }
+pre.script .dim { color: var(--sn-ink-300); }
+
+/* ── day-of desk (shipped, reproduced) ────────────────────────────────── */
+.desk { border: 1px solid rgba(27,26,23,.1); background: var(--sn-paper); padding: 15px; }
+.desk h4 { display: flex; align-items: center; gap: 7px; font-family: var(--sn-mono); font-size: 10px; letter-spacing: .28em; text-transform: uppercase; color: var(--sn-ink-500); font-weight: 400; }
+.desk h4 svg { color: var(--sn-gold-500); }
+.desk .headline { font-family: var(--sn-serif); font-size: 24px; font-weight: 300; line-height: 1.25; letter-spacing: -.01em; margin-top: 11px; }
+.desk .drift { font-family: var(--sn-mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--sn-ink-500); margin-top: 4px; }
+.desk .nowblock { margin-top: 12px; border-left: 2px solid rgba(169,131,75,.6); padding-left: 12px; display: grid; gap: 6px; }
+.desk .t { font-family: var(--sn-mono); font-size: 11px; color: var(--sn-ink-500); }
+.desk .cueline { font-size: 13.5px; }
+.desk .noteline { font-size: 13.5px; color: var(--sn-ink-700); }
+.desk .nextsec { margin-top: 13px; border-top: 1px solid rgba(27,26,23,.1); padding-top: 12px; }
+.desk .nextk { font-family: var(--sn-mono); font-size: 10px; letter-spacing: .28em; text-transform: uppercase; color: var(--sn-ink-400); }
+.desk .nextlabel { font-size: 13.5px; font-weight: 550; margin-top: 4px; }
+.desk .nextlabel .t { font-weight: 400; margin-left: 4px; }
+/* the DELTA — your line on the desk */
+.deskline {
+  margin-top: 9px; background: var(--sn-gold-100);
+  border-left: 3px solid var(--sn-gold-500); padding: 9px 11px;
+}
+.deskline .k { display: flex; align-items: center; gap: 6px; font-family: var(--sn-mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--sn-gold-700); }
+.deskline .line { font-family: var(--sn-serif); font-size: 16.5px; line-height: 1.42; margin-top: 4px; }
+.deskline.private-line { background: rgba(27,26,23,.05); border-left-color: var(--sn-ink-900); }
+.deskline.private-line .k { color: var(--sn-ink-700); }
+.deskline.private-line .k b { background: var(--sn-ink-900); color: var(--sn-paper); border-radius: 4px; padding: 1px 6px; }
+.deskline.private-line .line { font-family: var(--sn-font); font-size: 13.5px; color: var(--sn-ink-700); }
+/* running-script excerpt */
+.runrow { padding: 9px 0; border-top: 1px solid rgba(27,26,23,.07); }
+.runrow:first-of-type { border-top: 0; }
+.runrow .r1 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.runrow .lb { font-size: 13.5px; font-weight: 650; }
+.runrow .onnow { font-family: var(--sn-mono); font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--sn-danger); }
+.runrow .cu { font-size: 12.5px; color: var(--sn-ink-500); margin-top: 2px; }
+.runrow.done { opacity: .55; }
+.runsay { font-family: var(--sn-serif); font-size: 13.5px; color: var(--sn-ink-900); margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--sn-gold-300); }
+.runsay .yk { font-family: var(--sn-mono); font-size: 8px; letter-spacing: .18em; color: var(--sn-gold-700); text-transform: uppercase; display: block; }
+
+/* dim-room companion */
+.dim { background: #17160F; border-radius: 32px; }
+.dim .statusbar, .dim .appbar { display: none; }
+.dim .body { padding: 16px 16px 20px; }
+.dim .desk { background: var(--sn-glass-dark-bg); border-color: var(--sn-glass-dark-line); }
+.dim .desk h4 { color: #B6B9BE; }
+.dim .desk h4 svg { color: var(--sn-gold-300); }
+.dim .desk .headline { color: #FBFAF7; }
+.dim .desk .drift { color: #B6B9BE; }
+.dim .desk .t { color: #B6B9BE; }
+.dim .desk .cueline, .dim .desk .noteline { color: #E8E6E1; }
+.dim .desk .nextsec { border-top-color: var(--sn-glass-dark-line); }
+.dim .desk .nextk { color: #8A857B; }
+.dim .desk .nextlabel { color: #FBFAF7; }
+.dim .deskline { background: rgba(203,167,102,.14); border-left-color: var(--sn-gold-300); }
+.dim .deskline .k { color: var(--sn-gold-300); }
+.dim .deskline .line { color: #FBFAF7; }
+.dim .pbadge { border-color: rgba(251,250,247,.5); background: rgba(251,250,247,.08); color: #FBFAF7; }
+.dim .deskline.private-line { background: rgba(251,250,247,.06); border-left-color: #FBFAF7; }
+.dim .deskline.private-line .k { color: #E8E6E1; }
+.dim .deskline.private-line .k b { background: #FBFAF7; color: var(--sn-ink-black); }
+.dim .deskline.private-line .line { color: #E8E6E1; }
+
+/* mapping table */
+table.map { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 14px; background: var(--sn-surface); border: 1px solid var(--sn-hairline); border-radius: var(--sn-r-lg); overflow: hidden; }
+table.map th { font-family: var(--sn-mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--sn-ink-500); text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--sn-line); font-weight: 400; }
+table.map td { padding: 8px 12px; border-bottom: 1px solid var(--sn-hairline); color: var(--sn-ink-700); vertical-align: top; }
+table.map tr:last-child td { border-bottom: 0; }
+table.map code { font-family: var(--sn-mono); font-size: 11px; color: var(--sn-ink-900); background: var(--sn-gold-100); padding: 1px 5px; border-radius: 4px; }
+.tablewrap { overflow-x: auto; }
+
+.foot { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--sn-line); font-size: 12px; color: var(--sn-ink-400); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ══════════════ DOC HEADER + RATIONALE ══════════════ -->
+  <header class="doc-head">
+    <div class="wordmark">SETNAYAN<span class="dot">.</span></div>
+    <div class="kick" style="margin-top:14px">Design prototype · 2026-08-01 · vendor surface — host / emcee</div>
+    <h1>The Emcee&rsquo;s Script Layer — prep &amp; day-of</h1>
+    <p class="sub">He does not write a document. He fills in a layer over the couple&rsquo;s night, and the script
+    assembles itself. Two surfaces, one data model (<code style="font-family:var(--sn-mono);font-size:12px">buildScriptWorkbook()</code>):
+    &#9312; a new <b>Script</b> section on the shipped Customer Card, where he writes before the day ·
+    &#9313; his saved line added to the shipped day-of Stage-Script desk. Everything else on both pages already ships and is reproduced, not redesigned.</p>
+  </header>
+
+  <div class="rationale">
+    <h2>Design rationale — why it looks like this</h2>
+    <ol>
+      <li><strong>The private treatment is a worded banner, not a shade.</strong> The shipped desk already locked this
+      philosophy (&ldquo;a worded badge, not a colour&rdquo;). The prep surface escalates it because he is composing here:
+      a private block opens with a full-width ink-black bar reading <b>DON&rsquo;T READ ALOUD — context only</b>, carries a
+      hazard-striped edge (shape, not hue — survives dim light and colour-blindness), and its write field is relabeled
+      <b>YOUR NOTE — NOT FOR THE MIC</b> so even the thing he types there is framed as staging, never copy. The block is
+      never hidden: a host told nothing is worse off than one told to keep quiet.</li>
+      <li><strong>&ldquo;They asked&rdquo; outranks &ldquo;blank.&rdquo;</strong> The workbook&rsquo;s <code>unanswered[]</code> —
+      moments where the couple wrote an instruction and he has not written his line — is the page&rsquo;s
+      &ldquo;what next.&rdquo; It gets a gold-railed summons at the top with jump chips, and those cards carry a gold left rail.
+      A merely blank moment is quiet; an unanswered request is loud.</li>
+      <li><strong>Only his read-aloud line gets the reading serif.</strong> Labels, cues and chrome stay in the grotesque +
+      mono system; the words he will actually speak are set in the pahina display serif at reading size — on the prep card,
+      in the compiled text&rsquo;s visual weight, and on the day-of desk. The eye learns: serif = say this.</li>
+      <li><strong>Delta, not redesign.</strong> Section &#9312; adds one tab to the shipped Customer Card (pipeline strip and
+      pill rail reproduced from <span style="font-family:var(--sn-mono);font-size:11px">customer-card-nav.tsx</span>).
+      Section &#9313; reproduces the shipped Stage-Script desk and adds exactly one block type — his line. Every addition is
+      marked <span class="tag tag-new">NEW</span>; unmarked UI ships today.</li>
+      <li><strong>Vendor-private by construction.</strong> The lock line mirrors the shipped CRM-notes copy
+      (&ldquo;Only your team sees this&rdquo;). There is no share-with-couple affordance anywhere, deliberately — these lines
+      are his craft. And no guest names appear on either surface: the vendor compiler
+      (<span style="font-family:var(--sn-mono);font-size:11px">compileScriptText</span>) deliberately omits the roster the
+      couple&rsquo;s own export prints.</li>
+      <li><strong>Tokens are the shipped Atelier set</strong> (paper/ink/gold, warm shadows, glass) with the single primary
+      CTA in the 2026-07-31 mandarin supersede — ink label on mandarin per the AA note in the brief. Gold stays jewelry:
+      asks, progress, and his-line accents only.</li>
+    </ol>
+  </div>
+
+  <!-- ══════════════ SECTION ① — PREP ══════════════ -->
+  <section class="section" id="prep">
+    <div class="kick">&#9312; Prep — before the day</div>
+    <h2>The Script section on the Customer Card</h2>
+    <p class="sub">Lives at <span style="font-family:var(--sn-mono);font-size:12px">/vendor-dashboard/clients/[eventId]</span> as a new
+    tab beside Overview · Quote &amp; Payments · Files · Schedule · Activity. One card per moment of the couple&rsquo;s
+    timeline, in the order he will read. <span class="tag tag-ship">shipped — as-is</span> <span class="tag tag-new">new</span></p>
+
+    <div class="stage">
+      <div class="phone"><div class="screen">
+        <div class="statusbar"><span>9:41</span><span>SETNAYAN</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="appbar">
+          <a class="back" href="#" aria-label="Back">&#8249;</a>
+          <div>
+            <div class="crumb">Clients</div>
+            <div class="who">Bea &amp; Marco <span class="stagepill">Booked</span></div>
+          </div>
+        </div>
+        <div class="body">
+
+          <!-- shipped: pipeline strip -->
+          <div class="pipeline" aria-label="Booking pipeline">
+            <span class="pstep"><span class="pdot done">&#10003;</span><span class="plabel">Inquiry</span></span><span class="pline done"></span>
+            <span class="pstep"><span class="pdot done">&#10003;</span><span class="plabel">Quoted</span></span><span class="pline done"></span>
+            <span class="pstep"><span class="pdot cur">3</span><span class="plabel cur">Booked</span></span><span class="pline"></span>
+            <span class="pstep"><span class="pdot">4</span><span class="plabel">Delivered</span></span><span class="pline"></span>
+            <span class="pstep"><span class="pdot">5</span><span class="plabel">Reviewed</span></span>
+          </div>
+
+          <!-- shipped: tab rail · delta: the Script tab -->
+          <nav class="tabs" aria-label="Customer card sections">
+            <a class="tab" href="#">Overview</a>
+            <a class="tab" href="#">Quote &amp; Payments</a>
+            <a class="tab" href="#">Files</a>
+            <a class="tab" href="#">Schedule</a>
+            <a class="tab on delta" href="#" aria-current="page">Script</a>
+            <a class="tab" href="#">Activity</a>
+          </nav>
+
+          <!-- delta: everything below is the new section -->
+          <div class="lockline">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--sn-gold-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span><b>Only your team sees these lines.</b> Never Bea &amp; Marco, never their coordinator, never other suppliers. Their timeline and notes come from them — your script stays yours.</span>
+          </div>
+
+          <div class="progress">
+            <div class="nums">
+              <span class="big"><b>12</b> of 18 written</span>
+              <span class="rest">6 to go</span>
+            </div>
+            <div class="bar"><i style="width:66.6%"></i></div>
+          </div>
+
+          <div class="asks">
+            <div class="kick">They asked — you haven&rsquo;t answered</div>
+            <p>Bea &amp; Marco wrote a request on <b>2 moments</b> that don&rsquo;t have your line yet. Answer these first.</p>
+            <div class="askchips">
+              <a class="askchip" href="#m-grand"><span class="t">6:25&nbsp;PM</span> Couple&rsquo;s grand entrance</a>
+              <a class="askchip" href="#m-last"><span class="t">9:45&nbsp;PM</span> Last song &amp; send-off</a>
+            </div>
+          </div>
+
+          <div class="moments">
+            <div class="datechip">Saturday · December 12, 2026 · Reception</div>
+
+            <!-- STATE: written, with a couple note (answered) -->
+            <article class="m">
+              <div class="row1"><span class="time">5:00 PM</span><span class="label">Cocktails</span><span class="chip chip-done">Written</span></div>
+              <div class="they"><div class="k">They asked</div><p>No announcements yet please — the acoustic set is playing. Just be around and welcome people.</p></div>
+              <p class="cue"><b>Cue</b> &nbsp;Invite guests to enjoy cocktails and mingle.</p>
+              <div class="yours">
+                <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+                <p class="line">Good evening po! Welcome sa kasal nina Bea at Marco. Cocktails muna tayo — enjoy the drinks, dumaan na rin kayo sa photo wall. Chill lang muna; the party starts soon.</p>
+                <a class="edit" href="#">Edit</a>
+              </div>
+            </article>
+
+            <!-- STATE: written, no note -->
+            <article class="m">
+              <div class="row1"><span class="time">6:00 PM</span><span class="label">Doors open — find your seats</span><span class="chip chip-done">Written</span></div>
+              <p class="cue"><b>Cue</b> &nbsp;Welcome everyone into the reception hall.</p>
+              <div class="yours">
+                <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+                <p class="line">Ladies and gentlemen, please find your seats — nasa QR niyo po ang table number. The celebration is about to begin!</p>
+                <a class="edit" href="#">Edit</a>
+              </div>
+            </article>
+
+            <!-- STATE: written parent with nested children -->
+            <article class="m">
+              <div class="row1"><span class="time">6:15 PM</span><span class="label">Grand Entrance</span><span class="chip chip-done">Written</span></div>
+              <p class="cue"><b>Cue</b> &nbsp;Kick off the program.</p>
+              <div class="yours">
+                <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+                <p class="line">Alright, ready na ba kayo? Pakilakas ang palakpak — here comes the entourage!</p>
+                <a class="edit" href="#">Edit</a>
+              </div>
+            </article>
+
+            <!-- STATE: depth-1, written -->
+            <article class="m depth1">
+              <div class="row1"><span class="time">6:15 PM</span><span class="label">Entourage entrance</span><span class="chip chip-done">Written</span></div>
+              <div class="yours">
+                <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+                <p class="line">Presenting our principal sponsors — ang ating mga ninong at ninang!</p>
+                <a class="edit" href="#">Edit</a>
+              </div>
+            </article>
+
+            <!-- STATE: depth-1, UNANSWERED — the hero state -->
+            <article class="m depth1 unanswered" id="m-grand">
+              <div class="row1"><span class="time">6:25 PM</span><span class="label">Couple&rsquo;s grand entrance</span><span class="chip chip-ask">They asked</span></div>
+              <div class="they"><div class="k">They asked</div><p>Please introduce us for the very first time as <b>MR. &amp; MRS. VILLANUEVA</b> — all-caps energy! This is the moment we&rsquo;ve been waiting for. Make it big.</p></div>
+              <div class="composer">
+                <textarea aria-label="Your line for Couple’s grand entrance" placeholder="Write the line you’ll actually say… e.g. “Mga kaibigan, all on your feet! For the FIRST time ever —”"></textarea>
+                <div class="actions">
+                  <button class="btn-ink" type="button">Save line</button>
+                  <button class="btn-ghost" type="button">Later</button>
+                  <span class="hint">Saves to this moment — moves if they move it</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- STATE: written -->
+            <article class="m">
+              <div class="row1"><span class="time">6:45 PM</span><span class="label">Dinner</span><span class="chip chip-done">Written</span></div>
+              <p class="cue"><b>Cue</b> &nbsp;Announce that dinner is served.</p>
+              <div class="yours">
+                <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+                <p class="line">Dinner is served! Buffet opens from Table 1 — hindi po ito karera, may pagkain para sa lahat. Kain tayo!</p>
+                <a class="edit" href="#">Edit</a>
+              </div>
+            </article>
+
+            <!-- ══ STATE: PRIVATE — the highest-stakes card ══ -->
+            <article class="m private">
+              <div class="noread">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                <b>Don&rsquo;t read aloud</b>
+                <span>Private moment —<br>context for you only</span>
+              </div>
+              <div class="row1"><span class="time">7:10 PM</span><span class="label">Stage reset &amp; caterer swap</span><span class="chip chip-done">Noted</span></div>
+              <div class="they"><div class="k">They told you</div><p>Caterer flips the buffet line here and the lights team resets for the first dance. If they&rsquo;re not done, stretch dinner — do <b>not</b> announce the dance yet. Grace, our coordinator, will signal from the sound booth.</p></div>
+              <div class="yours">
+                <div class="k"><b>Not for the mic</b> Your note to self</div>
+                <p class="line">Watch for Grace by the sound booth. Kapag thumbs-up na, start the first-dance VTR.</p>
+                <a class="edit" href="#">Edit</a>
+              </div>
+            </article>
+
+            <!-- STATE: written parent, blank children -->
+            <article class="m">
+              <div class="row1"><span class="time">7:30 PM</span><span class="label">Toasts</span><span class="chip chip-done">Written</span></div>
+              <div class="yours">
+                <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+                <p class="line">May we have your attention — raise your glasses, it&rsquo;s time for the toasts.</p>
+                <a class="edit" href="#">Edit</a>
+              </div>
+            </article>
+
+            <!-- STATE: depth-1, blank -->
+            <article class="m depth1">
+              <div class="row1"><span class="time">7:35 PM</span><span class="label">Best man&rsquo;s toast</span></div>
+              <button class="write" type="button">Write your line…</button>
+            </article>
+            <article class="m depth1">
+              <div class="row1"><span class="time">7:42 PM</span><span class="label">Maid of honor&rsquo;s toast</span></div>
+              <button class="write" type="button">Write your line…</button>
+            </article>
+
+            <!-- STATE: written -->
+            <article class="m">
+              <div class="row1"><span class="time">7:50 PM</span><span class="label">First Dance</span><span class="chip chip-done">Written</span></div>
+              <div class="they"><div class="k">They asked</div><p>Song is &ldquo;Mundo&rdquo; — live band version.</p></div>
+              <p class="cue"><b>Cue</b> &nbsp;Open the floor — let the dancing begin.</p>
+              <div class="yours">
+                <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+                <p class="line">Ladies and gentlemen… for the very first time sa dance floor, ang ating bagong kasal. Bea and Marco — the floor is yours.</p>
+                <a class="edit" href="#">Edit</a>
+              </div>
+            </article>
+
+            <!-- STATE: written -->
+            <article class="m">
+              <div class="row1"><span class="time">8:05 PM</span><span class="label">Money Dance</span><span class="chip chip-done">Written</span></div>
+              <p class="cue"><b>Cue</b> &nbsp;Open the floor — let the dancing begin.</p>
+              <div class="yours">
+                <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+                <p class="line">Ilabas na ang mga sobre — it&rsquo;s money dance time! Pila lang po dito sa harap, may mga pin tayo. Lahat ng gustong sumayaw kina Bea at Marco, halina kayo!</p>
+                <a class="edit" href="#">Edit</a>
+              </div>
+            </article>
+
+            <!-- STATE: UNANSWERED (top-level) -->
+            <article class="m unanswered" id="m-last">
+              <div class="row1"><span class="time">9:45 PM</span><span class="label">Last Song &amp; Send-off</span><span class="chip chip-ask">They asked</span></div>
+              <div class="they"><div class="k">They asked</div><p>Our last song is &ldquo;Sana.&rdquo; Please ask everyone to form one big circle around us, phones up with flashlights on.</p></div>
+              <p class="cue"><b>Cue</b> &nbsp;Gather everyone for the send-off.</p>
+              <button class="write" type="button">Write your line…</button>
+            </article>
+
+            <!-- STATE: blank (last) -->
+            <article class="m">
+              <div class="row1"><span class="time">10:00 PM</span><span class="label">After-party shuttle</span></div>
+              <p class="cue"><b>Cue</b> &nbsp;The party continues — keep the energy up.</p>
+              <button class="write" type="button">Write your line…</button>
+            </article>
+          </div>
+
+          <div class="framecta">
+            <button class="btn-cta" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Compile my script — print or copy
+            </button>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="annos">
+        <div class="anno"><span class="tag tag-ship">shipped — as-is</span><br><b>Header, pipeline strip, tab rail</b> are the live Customer Card (<span style="font-family:var(--sn-mono);font-size:11px">customer-card-nav.tsx</span>). The only chrome delta is the <b>Script</b> tab.</div>
+        <div class="anno"><span class="tag tag-new">new</span><br><b>The lock line</b> reuses the shipped CRM-note phrasing (&ldquo;Only your team sees this&rdquo;). No share affordance exists — by design, not omission.</div>
+        <div class="anno"><span class="tag tag-new">new</span><br><b>Progress counts down</b> — <span style="font-family:var(--sn-mono);font-size:11px">written / blank</span> straight from the workbook. The gold card below it is <span style="font-family:var(--sn-mono);font-size:11px">unanswered[]</span>: the couple asked, he hasn&rsquo;t answered. Jump chips scroll to the card.</div>
+        <div class="anno"><span class="tag tag-new">new</span><br><b>One card per <span style="font-family:var(--sn-mono);font-size:11px">ScriptEntry</span></b> — mono time, label, the couple&rsquo;s ask (gold plate, &ldquo;They asked&rdquo;), the shared cue (italic, quiet), and HIS line in the reading serif. Depth-1 parts indent under their moment with an elbow rail. Blank = a dashed &ldquo;Write your line…&rdquo; invitation; unanswered adds the gold rail + open composer.</div>
+        <div class="anno"><span class="tag tag-new">new</span><br><b>The private card</b>: ink-black <b>DON&rsquo;T READ ALOUD</b> banner + hazard-striped edge + muted ground, and the write slot relabeled <b>NOT FOR THE MIC — your note to self</b> (set in the UI grotesque, never the read-aloud serif). Present in flow, never hidden. Kicker flips from &ldquo;They asked&rdquo; to &ldquo;They told you&rdquo; — information, not a request for the mic.</div>
+        <div class="anno"><span class="tag tag-new">new</span><br><b>One primary CTA per view</b> — Compile, in the 2026-07-31 mandarin with ink label. Everything else stays ink/ghost.</div>
+      </div>
+    </div>
+
+    <!-- empty state + compile output -->
+    <div class="demo-duo">
+      <div>
+        <div class="kick" style="margin-bottom:8px">State — no timeline yet</div>
+        <div class="empty delta">
+          <div class="art">&#10047;</div>
+          <p><b>Bea &amp; Marco haven&rsquo;t built their timeline yet.</b><br>The moment they add their program, every moment of the night appears here ready to script — nothing for you to set up.</p>
+        </div>
+      </div>
+      <div>
+        <div class="kick" style="margin-bottom:8px">Output — compile to plain text <span class="tag tag-new">new</span></div>
+        <div class="compilecard">
+          <header>
+            <span class="k">Host script · plain text</span>
+            <span class="btns">
+              <button class="btn-ink" type="button" onclick="copyScript(this)">Copy</button>
+              <button class="btn-ghost" type="button">Print</button>
+            </span>
+          </header>
+<pre class="script" id="compiled"><span class="hd">═══════════════════════════════════════════
+  HOST SCRIPT — Bea &amp; Marco
+  Saturday · December 12, 2026
+═══════════════════════════════════════════</span>
+
+  5:00 PM — COCKTAILS
+    They asked: No announcements yet please — the acoustic set is playing.
+    Cue: Invite guests to enjoy cocktails and mingle.
+    <span class="yy">YOU SAY: Good evening po! Welcome sa kasal nina Bea at Marco…</span>
+
+    6:25 PM — Couple’s grand entrance
+      They asked: Please introduce us for the very first time as MR. &amp; MRS. VILLANUEVA…
+      Cue: Kick off the program.
+      YOU SAY: ______________________
+
+  7:10 PM — STAGE RESET &amp; CATERER SWAP
+    <span class="pv">[PRIVATE — DO NOT READ ALOUD]</span>
+    They asked: Caterer flips the buffet line here… Grace will signal from the sound booth.
+    <span class="yy">YOU SAY: Watch for Grace by the sound booth. Kapag thumbs-up na, start the VTR.</span>
+
+  7:50 PM — FIRST DANCE
+    They asked: Song is “Mundo” — live band version.
+    Cue: Open the floor — let the dancing begin.
+    <span class="yy">YOU SAY: Ladies and gentlemen… for the very first time sa dance floor…</span>
+
+<span class="dim">  ⋮  (13 more moments — trimmed for this prototype)</span>
+
+<span class="hd">— 12 of 18 written —</span></pre>
+        </div>
+        <p style="font-size:12px;color:var(--sn-ink-400);margin-top:8px">Byte-format of <span style="font-family:var(--sn-mono);font-size:11px">compileScriptText()</span> as shipped: uppercase top-level labels, 4-space indent for parts, <span style="font-family:var(--sn-mono);font-size:11px">[PRIVATE — DO NOT READ ALOUD]</span> before any private content, blanks print as a fill-in rule so the paper copy shows him what&rsquo;s missing too.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ SECTION ② — DAY-OF ══════════════ -->
+  <section class="section" id="dayof">
+    <div class="kick">&#9313; Day-of — on the night</div>
+    <h2>His line, on the shipped Stage-Script desk</h2>
+    <p class="sub">The desk at <span style="font-family:var(--sn-mono);font-size:12px">/vendor-dashboard/on-the-day/live/[eventId]</span>
+    already ships: <b>On now</b> cue card, <b>Running script</b>, <b>Announcements</b>. The delta is one block type —
+    <b>YOUR LINE</b>, gold-plated, serif — inserted wherever the block it belongs to appears. Nothing else on the desk moves.
+    Scenario: 7:03&nbsp;PM, dinner running long, and the <em>next</em> block is private.</p>
+
+    <div class="stage">
+      <div class="phone"><div class="screen">
+        <div class="statusbar"><span>7:03 PM</span><span>SETNAYAN · LIVE</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="display:grid;gap:14px">
+
+          <!-- shipped CueCard, with the delta inside -->
+          <section class="desk">
+            <h4><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg> On now</h4>
+            <p class="headline">Dinner</p>
+            <p class="drift">Running 8 min behind</p>
+            <div class="nowblock">
+              <span class="t">6:45 PM – 7:10 PM</span>
+              <p class="cueline">Announce that dinner is served.</p>
+            </div>
+
+            <!-- THE DELTA -->
+            <div class="deskline delta">
+              <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+              <p class="line">Dinner is served! Buffet opens from Table 1 — hindi po ito karera, may pagkain para sa lahat. Kain tayo!</p>
+            </div>
+
+            <div class="nextsec">
+              <p class="nextk">Next · in about 7 min</p>
+              <p class="nextlabel">Stage reset &amp; caterer swap <span class="t">7:10 PM</span></p>
+              <div style="margin-top:6px;display:grid;gap:4px">
+                <span class="pbadge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> Don&rsquo;t read aloud</span>
+                <p class="noteline">Caterer flips the buffet line; lights reset for the first dance. If they&rsquo;re not done, stretch dinner. Grace signals from the sound booth.</p>
+              </div>
+
+              <!-- THE DELTA, private flavor -->
+              <div class="deskline private-line delta">
+                <div class="k"><b>Not for the mic</b> Your note</div>
+                <p class="line">Watch for Grace by the sound booth. Kapag thumbs-up na, start the first-dance VTR.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- shipped Running script (excerpt), with the delta threaded in -->
+          <section class="desk">
+            <h4><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/></svg> Running script <span style="letter-spacing:.1em;color:var(--sn-ink-300)">· excerpt</span></h4>
+            <div style="margin-top:10px">
+              <div class="runrow done">
+                <div class="r1"><span class="t">6:15 PM</span><span class="lb">Grand Entrance</span></div>
+              </div>
+              <div class="runrow">
+                <div class="r1"><span class="t">6:45 PM</span><span class="lb">Dinner</span><span class="onnow">On now</span></div>
+                <p class="cu">Announce that dinner is served.</p>
+                <!-- delta -->
+                <p class="runsay delta"><span class="yk">You say</span>Dinner is served! Buffet opens from Table 1 — hindi po ito karera…</p>
+              </div>
+              <div class="runrow">
+                <div class="r1"><span class="t">7:10 PM</span><span class="lb">Stage reset &amp; caterer swap</span>
+                  <span class="pbadge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> Don&rsquo;t read aloud</span>
+                </div>
+                <p class="cu">Grace signals from the sound booth before the dance.</p>
+              </div>
+              <div class="runrow">
+                <div class="r1"><span class="t">7:30 PM</span><span class="lb">Toasts</span></div>
+                <!-- delta -->
+                <p class="runsay delta"><span class="yk">You say</span>May we have your attention — raise your glasses, it&rsquo;s time for the toasts.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div></div>
+
+      <div class="annos">
+        <div class="anno"><span class="tag tag-ship">shipped — as-is</span><br><b>The desk itself.</b> Kicker + gold Lucide icon, serif headline, drift line, gold-railed now-block, NEXT divider, and the bordered <b>Don&rsquo;t read aloud</b> badge are reproduced from <span style="font-family:var(--sn-mono);font-size:11px">stage-script.tsx</span> verbatim — including the badge&rsquo;s placement on the private next block.</div>
+        <div class="anno"><span class="tag tag-new">new</span><br><b>YOUR LINE</b> — one gold-plated, gold-railed block per moment, in the reading serif a step larger than the couple&rsquo;s note. On the glance card it sits directly under the now-block (his words are what he needs fastest) and again under NEXT, so he can pre-read while the current moment runs.</div>
+        <div class="anno"><span class="tag tag-new">new</span><br><b>On a private block his saved text changes clothes:</b> ink plate instead of gold, <b>NOT FOR THE MIC</b> chip, and the UI grotesque instead of the serif — the read-aloud typography is deliberately withheld so a glance can never mistake staging notes for copy. This works with, not instead of, the shipped badge above it.</div>
+        <div class="anno"><span class="tag tag-new">new</span><br><b>Running script</b> gains one <span style="font-family:var(--sn-mono);font-size:11px">You say</span> line per written block, gold-railed. Blank blocks show nothing extra — the desk never nags during the show; prep is where counting happens.</div>
+      </div>
+    </div>
+
+    <!-- dim-room companion -->
+    <div class="demo-duo" style="margin-top:30px">
+      <div class="phone" style="max-width:402px"><div class="screen dim">
+        <div class="body">
+          <div class="kick" style="color:#8A857B;padding:2px 2px 10px">Same card · dim-room theme</div>
+          <section class="desk">
+            <h4><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg> On now</h4>
+            <p class="headline">Dinner</p>
+            <p class="drift">Running 8 min behind</p>
+            <div class="deskline">
+              <div class="k"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Your line</div>
+              <p class="line">Dinner is served! Buffet opens from Table 1 — hindi po ito karera, may pagkain para sa lahat. Kain tayo!</p>
+            </div>
+            <div class="nextsec">
+              <p class="nextk">Next · in about 7 min</p>
+              <p class="nextlabel">Stage reset &amp; caterer swap <span class="t">7:10 PM</span></p>
+              <div style="margin-top:6px">
+                <span class="pbadge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> Don&rsquo;t read aloud</span>
+              </div>
+              <div class="deskline private-line">
+                <div class="k"><b>Not for the mic</b> Your note</div>
+                <p class="line">Watch for Grace by the sound booth. Kapag thumbs-up na, start the VTR.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div></div>
+      <div class="annos" style="position:static">
+        <div class="anno"><b>The dim-room proof.</b> The venue at 7 PM is dark; the app&rsquo;s theme picker already ships an obsidian register (glass-dark tokens). The private treatment must survive it — and it does the same way it survives light: <b>words and shape, not hue</b>. The badge stays a worded chip; the not-for-the-mic plate stays a plate with an inverted chip; his read-aloud line stays the only serif on screen. If every colour on this card were stripped to grey, the &ldquo;say / don&rsquo;t say&rdquo; boundary would still be legible — that is the acceptance test for this design.</div>
+        <div class="anno"><b>Type scale is night-tuned.</b> His line renders at 16.5px serif minimum on the desk — larger than every other text — because it is the one thing read at arm&rsquo;s length under stage lighting.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ PORT MAP ══════════════ -->
+  <section class="section">
+    <div class="kick">For the port</div>
+    <h2>Field map — <span style="font-family:var(--sn-mono);font-size:17px">ScriptEntry</span> → the three renderings</h2>
+    <div class="tablewrap">
+    <table class="map">
+      <tr><th>Model field</th><th>Prep card (&#9312;)</th><th>Compiled text</th><th>Day-of desk (&#9313;)</th></tr>
+      <tr><td><code>time</code> · <code>label</code> · <code>depth</code></td><td>Mono time + bold label; depth-1 indents with the elbow rail</td><td>Uppercase at depth 0; 4-space indent at depth 1</td><td>Already rendered by the shipped desk</td></tr>
+      <tr><td><code>note</code> (couple&rsquo;s)</td><td>Gold &ldquo;They asked&rdquo; plate (&ldquo;They told you&rdquo; on private)</td><td><code>They asked:</code> line</td><td>Already rendered (Announcements + cue card)</td></tr>
+      <tr><td><code>cue</code> (shared)</td><td>Quiet italic line</td><td><code>Cue:</code> line</td><td>Already rendered</td></tr>
+      <tr><td><code>script</code> (his)</td><td>Serif read-aloud block; <code>null</code> → dashed &ldquo;Write your line…&rdquo;</td><td><code>YOU SAY:</code> or the blank rule</td><td><b>THE DELTA</b> — gold plate under now/next + <code>You say</code> rows</td></tr>
+      <tr><td><code>publicFacing: false</code></td><td>Ink banner + hazard rail + &ldquo;NOT FOR THE MIC&rdquo; relabel; never hidden</td><td><code>[PRIVATE — DO NOT READ ALOUD]</code></td><td>Shipped badge + the ink not-for-the-mic plate</td></tr>
+      <tr><td><code>written / blank / unanswered[]</code></td><td>Progress bar + gold &ldquo;They asked&rdquo; summons with jump chips</td><td>Footer tally line</td><td>Not shown — the desk never nags mid-show</td></tr>
+      <tr><td><code>empty</code></td><td>&ldquo;No timeline yet&rdquo; card (copy mirrors the shipped desk&rsquo;s empty state)</td><td>&ldquo;(No timeline yet — nothing to script.)&rdquo;</td><td>Shipped empty state unchanged</td></tr>
+    </table>
+    </div>
+  </section>
+
+  <footer class="foot">
+    SETNAYAN · design prototype only — no application code was modified. Extends: <span style="font-family:var(--sn-mono)">apps/web/lib/emcee-script-layer.ts</span> (model, merged to main) ·
+    <span style="font-family:var(--sn-mono)">stage-script.tsx</span> (day-of desk, shipped) · <span style="font-family:var(--sn-mono)">customer-card-nav.tsx</span> (Customer Card chrome, shipped).
+    Tokens: Atelier + glass (owner-locked 2026-07-12) with the 2026-07-31 mandarin-CTA supersede. Fonts approximated with system stacks in this file only.
+  </footer>
+</div>
+
+<script>
+// Prototype niceties only — no product logic.
+// 1) Blank "Write your line…" expands into the composer, in place.
+document.querySelectorAll('button.write').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var wrap = document.createElement('div');
+    wrap.className = 'composer';
+    wrap.innerHTML =
+      '<textarea placeholder="Write the line you’ll actually say…"></textarea>' +
+      '<div class="actions"><button class="btn-ink" type="button">Save line</button>' +
+      '<button class="btn-ghost" type="button">Cancel</button>' +
+      '<span class="hint">Saves to this moment</span></div>';
+    btn.replaceWith(wrap);
+    wrap.querySelector('textarea').focus();
+    wrap.querySelector('.btn-ghost').addEventListener('click', function () {
+      wrap.replaceWith(btn);
+    });
+  });
+});
+// 2) Copy the compiled text.
+function copyScript(el) {
+  var text = document.getElementById('compiled').innerText;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function () {
+      var old = el.textContent; el.textContent = 'Copied';
+      setTimeout(function () { el.textContent = old; }, 1400);
+    });
+  }
+}
+</script>
+</body>
+</html>
