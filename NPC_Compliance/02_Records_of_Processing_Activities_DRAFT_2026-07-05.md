@@ -28,7 +28,7 @@ The accountability record RA 10173 (Data Privacy Act of 2012) and its IRR requir
 |---|---|---|---|
 | Web / application hosting | Vercel | `[TO CONFIRM]` (edge) | Processor |
 | Primary database (PII + transactional **+ biometric face vectors**) | Supabase / Postgres | **Singapore** | Processor · AES-256 at rest · RLS. **Face vectors live HERE**, as JSONB columns (`guest_face_enrollments.face_vector`, `user_face_profiles`) — corrected 2026-07-31 |
-| Media (photos / video / **source selfie images**) | Cloudflare R2 | **APAC region** ⚠ *(was "APAC / PH region"; owner/DPO to confirm the bucket location hint)* | Processor · signed-URL access only. **Does NOT hold face vectors** — corrected 2026-07-31 |
+| Media (photos / video / **source selfie images**) | Cloudflare R2 | **Asia-Pacific (APAC)** ✅ *confirmed in the Cloudflare dashboard 2026-08-01* | Processor · signed-URL access only. **Does NOT hold face vectors** — corrected 2026-07-31 |
 | Transactional email | Resend | `[TO CONFIRM]` (US-based likely) | Processor |
 | Vendor ID verification | Persona / Veriff / Onfido | **US** | Processor (batch-call, no ongoing storage) |
 | AI text/contract analysis | Anthropic (Claude) · OpenAI (V1.5 fallback) | **US** | Processor · zero-retention API mode (Anthropic) |

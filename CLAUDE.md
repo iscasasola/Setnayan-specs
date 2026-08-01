@@ -22,7 +22,7 @@ instruction to **pick up all unfinished work**:
 treat it as a hint about a topic, not as a file you can open — the substance was copied into the
 committed docs on purpose.
 
-## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-07-29)
+## 🚦 ACTIVE WORK — READ THIS BEFORE ANYTHING ELSE (updated 2026-08-01)
 
 **The owner's #1 complaint about new sessions: they start without the plan, rebuild things that
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
@@ -39,54 +39,54 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   ⏭ One pending owner flip: `NEXT_PUBLIC_SERVICE_DETAILS_ENABLED`.
 > - The **Papic two-type model** (locked 2026-07-29, build NOT started): DECISION_LOG row
 >   2026-07-29 + memory `project-setnayan-onboarding-papic-ai-cards`.
-> - **Song Desk** below — ✅ **PR 1 shipped + ALL SIX owner gates answered 2026-07-30.** Fully
->   cold-startable: build **PR 2**, then the new **PR 1b**.
+> - **Song Desk is DONE** (8 PRs, all merged 2026-07-30). Superseded by the INTERCONNECTION
+>   LAYER block below — read that instead.
 > Execute per each contract's own rules; build flag-dark; stop at every HUMAN gate.
 
-> ### ▶ ACTIVE: Song desk / song requests / sets
-> **THE CONTRACT — open it first, before any grep, plan or code:**
-> [`Song_Desk_BUILD_ORDER_2026-07-27.md`](Song_Desk_BUILD_ORDER_2026-07-27.md)
+> ### ▶ ACTIVE: the INTERCONNECTION LAYER — probes · the Ugat map · the anon-RPC surface
+> **Set 2026-08-01. This replaced the Song Desk block, which is DONE (8 PRs, all merged).**
 >
-> It contains, already verified against live prod on 2026-07-27:
-> - a table of **what already ships** (so you do not rebuild it — this happened twice in one day),
-> - **8 PRs in dependency order** (7 + the new 1b), **every owner gate now ANSWERED**,
-> - the standing traps (the exposure-baseline freeze, the default-ACL REVOKE, pre-launch-empty prod).
+> The owner asked: *"our interconnections are mostly not tested… can we have a checklist?"*
+> The answer built over 2026-08-01, in 14 merged PRs:
 >
-> 🏁 **THE BUILD ORDER IS COMPLETE — all 8 PRs shipped 2026-07-30**, every owner gate answered the
-> same day (slots · vibe names · pre-fill direction · accept-vs-set · **requests always-on** ·
-> **the paywall moved to the inbox**). PR 7 was deprioritised. **Do not rebuild any of it.**
+> **1 · Six live interconnection probes** — `apps/web/lib/interconnect/`, surfaced at
+> `/admin/app-performance?tab=interconnections`, cron-free off `after()`.
+> 🔑 **A destination is not a row — it is A READER SEEING THE ROW.** Each probe runs the
+> surface's own reader and diffs it against service_role. Verdict `lying` = permitted + saw
+> nothing + service_role sees rows. That is the shape that hid the song desk for 8 PRs.
+> 🪤 **AN EMPTY LEDGER READS AS GREEN** — no traffic, no ticks. Prod is pre-launch-empty.
+> 🔑 **Arrival checks are DERIVED, never declared** — no write-site instrumentation; state the
+> pair of facts once (*"a paid order should have its SKU active"*) and let a query find the gap.
 >
-> 🪤 **BUT THE DESK WAS UNREACHABLE THE WHOLE TIME** — and this is the lesson to carry, not the
-> footnote. The day-of surfaces narrow a vendor's tiles by intersecting **two vocabularies that
-> never match**: `vendor_profiles.services` speaks TILES (`live_band`·`coordinator`·`host_mc`),
-> `get_vendor_event_brief().booked_categories` speaks CATEGORIES (`band_dj`·`planner_coordinator`·
-> `host_emcee`). Result: **all three specialization desks denied for every booked vendor**, and the
-> requests inbox printed *"no requests yet"* over **3 real pending rows**. Fixed in **#3942** via the
-> bridge that already existed (`lib/vendor-category-taxonomy.ts`), plus the second half of the bug —
-> `eventTiles ? new Set(…) : null` treats an **empty array as a real narrowing**, because `[]` is
-> truthy.
+> **2 · The Ugat map: 11 → 19 nodes, 35 joints, backlog 44 → 27.** Promoted: Person ·
+> Package/Proposal/Contract · Availability · Geography · Seat Plan · Run of Show. Defects are
+> recorded as MACHINE-CHECKED CLAIMS (`no_column` on `vendor_contracts.proposal_id`), so the
+> guard reddens the day one is fixed and forces the note to be rewritten.
 >
-> 🏁 **8 PRs, every DB object verified, and none of it caught this.** Verifying the parts cannot find
-> a defect that lives in the JOIN between two correct parts. Before calling ANY gated surface done,
-> run its real reads **as the end user's identity** (`set local role authenticated` + jwt claims) and
-> diff against the same reads as service-role — **where they differ, the UI is lying.**
+> **3 · 🔴 SECURITY — the RLS audits were looking at the wrong half.** Guests read their seat
+> through SECURITY DEFINER functions while the tables grant anon NOTHING. A policy audit
+> concludes *"anon cannot read this"* — true of the table, false of the product. **211 functions
+> were anon-callable; 7 closed in #4000**, including one that DELETED chat threads and one that
+> MINTED vendor tokens, both callable with only the publishable key.
+> ⏭ **190 of 195 remain UNREVIEWED** — see `tests/db/anon-rpc-surface.baseline.txt`, a debt
+> figure like `map-backlog`. New guard fails on any new anon-callable SECDEF without a reason.
 >
-> ✅ Fix **#3942 is LIVE in prod** (`version: 58c8a30`, deployed hands-free by the finished cutover).
+> **4 · Fixed and live:** a deactivated booking pool still took bookings (the validation loop
+> filtered `is_active`, the INSERT did not) · 3 stale OAuth rows blocked account deletion.
+> **Dropped:** `event_floor_areas`, `event_floor_objects`, `households`.
 >
-> ⏭ What remains is NOT code: (a) keep or reverse the widened playlist read, (b) should the HOST see
-> a band's finished setlist, (c) **nobody has opened it on a phone.**
-> **Fixture** — vendor `testnayan2@test.com`, event `0ccc7aa3-3a81-43ee-b170-afb194e0b259`,
-> 3 pending song requests, at `/vendor-dashboard/on-the-day/live/0ccc7aa3-3a81-43ee-b170-afb194e0b259`.
-> ⚠ **The desk opens ONLY on its `booked_date` (currently `2026-07-31`).** To view it on any other
-> day, move the date first — one statement, safe to repeat:
-> ```sql
-> update public.vendor_schedule_pool_bookings set booked_date = current_date
->  where pool_booking_id = 'cb39ef7c-40cd-41ac-9177-367067573b8c';
-> update public.events set event_date = current_date
->  where event_id = '0ccc7aa3-3a81-43ee-b170-afb194e0b259';
-> ```
-> Reasoning behind every line: the song-desk rows in `DECISION_LOG.md` — find them with `grep -in "song desk\|song request\|playlist-slot\|song-pick system\|set composition" DECISION_LOG.md` (15 rows, 2026-07-27)
-> (`grep -n "2026-07-27" DECISION_LOG.md`), plus the two 2026-07-30 rows at the bottom.
+> ⏭ **OPEN, needing the owner:** (a) the **80-table export/erasure backlog** —
+> `UNDECIDED_BACKLOG` in `lib/erasure/coverage-guardrail.test.ts`, whose own header says *"NOT A
+> CLEAN BILL OF HEALTH"*; (b) a store whose only admin leaves cannot have that account deleted
+> (`VENDOR_LAST_ADMIN`) — a product question blocking a deletion duty; (c) the retired
+> `token_burn_bands` table still in prod with 10 of 20 rows mis-keyed (inert — nothing reads it).
+>
+> 🪤 **THE LESSON OF THE DAY, measured:** 79 claims attacked across three adversarial sweeps,
+> 22 refuted. **Facts survive ~93%, judgements ~50%.** Nobody invents facts; people invent
+> CONSEQUENCES. Never state an impact without naming the file or function that would suffer.
+> An absence proved inside a fence you drew (`schema='public'`, a grep excluding `*.test.*`) is
+> NOT an absence. And the scarier a finding sounds, the LESS it got checked before being passed
+> on — five false alarms reached the owner that way.
 
 **If you are starting a session on ANY topic, do these three things first:**
 1. Read the ACTIVE block above (even if your task seems unrelated — it may already be covered).
@@ -146,7 +146,7 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 
 - **Native apps:** iOS 16+ (SwiftUI + AVFoundation), Android 11+ (Compose + CameraX)
 - **Backend:** existing Setnayan backend (extend it, don't fork it)
-- **Storage:** Cloudflare R2 (**APAC region** — ⚠ corrected 2026-07-31, was "PH-region buckets"; **R2 has no Philippines region**, and this line is where that false claim propagated from — it reached the live public `/privacy` notice. Owner to confirm the actual bucket location hint in the Cloudflare dashboard) — hot 90 days, IA cold 5 years
+- **Storage:** Cloudflare R2 — **Asia-Pacific (APAC) · ✅ CONFIRMED IN THE CLOUDFLARE DASHBOARD 2026-08-01** (owner read `setnayan-media` → Location: *Asia-Pacific (APAC)*; bucket created 2026-05-13). The old "PH-region buckets" was false in two ways — **R2 has no Philippines region**, and it implied PH residency we do not have — and this line is where that claim propagated from into the live public `/privacy` notice. — hot 90 days, IA cold 5 years
 - **Render pipeline:** FFmpeg on Cloudflare Workers + R2 (or Hetzner VM pool fallback)
 - **Auth for paparazzi seats:** wedding-scoped ephemeral session tokens via QR-code claim flow (not username/password)
 - **QR scanning:** AVFoundation metadata output (iOS) / ML Kit Barcode Scanning (Android)
@@ -235,7 +235,7 @@ These are tracked in spec Part 6. Each is a future spec.
 - Couple has 7-day review window (configurable) before public unlock
 - NSFW filter is on by default and CANNOT be disabled
 - DPO is the **proprietor, Indalecio Sacdalan Casasola II** (registered on the NPC DPO system 2026-07-07). ⚠ Not Claire E. Buanhog — she is VP / co-founder and DBRT support. See [[dpo-designation-owner]].
-- **Data residency: NOTHING is hosted in the Philippines.** Database = **Supabase, Singapore** (this is also where the biometric face vectors live — `guest_face_enrollments.face_vector`, `user_face_profiles`). Object storage = **Cloudflare R2, APAC region** (media + the source selfie images, *not* the vectors). ⚠ Corrected 2026-07-31 — the old "Cloudflare R2 PH-region buckets" was false in two ways (no PH region exists; and it implied PH residency we do not have) and had propagated into the live public `/privacy` notice. Owner to confirm the bucket location hint in the Cloudflare dashboard.
+- **Data residency: NOTHING is hosted in the Philippines.** Database = **Supabase, Singapore** (this is also where the biometric face vectors live — `guest_face_enrollments.face_vector`, `user_face_profiles`). Object storage = **Cloudflare R2, Asia-Pacific (APAC)** (media + the source selfie images, *not* the vectors) — **✅ CONFIRMED IN THE DASHBOARD 2026-08-01**, no longer an assumption. Corrected 2026-07-31 from "PH-region buckets", which was false in two ways (no PH region exists; and it implied PH residency we do not have) and had propagated into the live public `/privacy` notice. ⚠ **Five buckets, not four** (`media` · `thread-files` · `vendor-contracts` · `samples` · **`vendor-verification`** — the last holds vendor government IDs); the code's `R2_BUCKETS` is canonical.
 
 ## Common pitfalls / gotchas for engineers
 
