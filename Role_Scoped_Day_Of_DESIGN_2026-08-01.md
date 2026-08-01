@@ -112,6 +112,53 @@ Biggest new object here — hold it until 1–3 prove out, because Phases 1–2 
 
 ---
 
+## 5a · 🔴 THE REAL BLOCKER, found 2026-08-01 AFTER phases 1–2 shipped
+
+**The booking model cannot express "one supplier, two roles, one wedding" — so the picker can never
+appear in production.** This is not a data-seeding problem; the database refuses it.
+
+`event_vendors` carries **one `category` per row**, and this partial unique index allows **one row per
+(event, marketplace vendor)**:
+
+```
+event_vendors_unique_marketplace_pick_per_event
+  UNIQUE (event_id, marketplace_vendor_id)
+  WHERE marketplace_vendor_id IS NOT NULL
+    AND archived_at IS NULL
+    AND package_role IS DISTINCT FROM 'covered'
+```
+
+**Verified by rehearsal, rolled back:** inserting a second row for the same supplier on the same
+event with `category = 'host_emcee'` raises `23505`.
+
+And `get_vendor_event_brief()` builds `booked_categories` as
+`ARRAY_AGG(DISTINCT ev.category)` over exactly those rows — plural-capable in shape, but it can only
+ever return **one** value for a marketplace vendor.
+
+**The consequence, traced end to end:** one booked category → `tilesForVendorCategories` → one tile
+set → `specializationSetsForServices` returns ONE set → `roleChoices` is empty → **no picker, ever.**
+The narrowing is doing exactly what it was designed to do; there is simply nothing to narrow.
+
+**Why the narrowing must NOT just be removed.** Dropping the event narrowing would hand a supplier
+every desk their `services[]` touch, on a wedding where the couple booked them for one job. A band
+booked purely as the band would get the emcee desk. The narrowing is correct — the booking model is
+what is missing a concept.
+
+**So the prerequisite for the owner's whole concept is a BOOKING decision, not a QR decision:** can a
+couple book one supplier for two roles on one wedding? Until that is answered, phases 1–2 are correct
+but dormant, and Phase 3's QR would let someone scan into a role the booking cannot record.
+
+Three ways out, for the owner to choose (§ 7 Q5):
+1. **Allow multiple booking rows** per (event, supplier), one per role — most faithful to reality
+   (they are two line items, likely two prices), and the largest change: that unique index exists to
+   stop a couple double-adding one vendor.
+2. **A secondary-roles array** on the existing booking row — smallest change, but roles stop being
+   first-class line items and money cannot attach to the second one.
+3. **Leave it** — accept that one supplier = one role per wedding, and a company covering two trades
+   books twice under two profiles. Costs nothing to build; costs the supplier a second account.
+
+---
+
 ## 6 · The asymmetry to know before promising it
 
 **A stylist has no desk today.** `stylist_decorator` is in no specialization set, so a Stylist QR
@@ -138,3 +185,8 @@ so a role without a bespoke desk is still worth scanning into.
    couple?
 4. **Does a role picker replace the priority order, or only override it?** *(Recommendation: replace
    for display, keep the priority as the DEFAULT so a single-role vendor never sees a picker.)*
+5. 🔴 **THE ONE THAT NOW BLOCKS EVERYTHING (see § 5a): can a couple book ONE supplier for TWO roles
+   on one wedding?** Until this is answered the picker cannot appear, and the QR would let someone
+   scan into a role the booking has no way to record. My recommendation: **option 1, multiple booking
+   rows** — two roles genuinely are two line items with two prices, and anything less makes the
+   second role invisible to money, contracts and the couple's own vendor list.
