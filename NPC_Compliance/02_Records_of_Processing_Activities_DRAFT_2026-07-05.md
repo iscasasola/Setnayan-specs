@@ -315,6 +315,22 @@ Legend — Legal basis per RA 10173 §12 (personal info) / §13 (sensitive perso
 | **Security measures** | **Calls are never recorded** (platform lock). Media is end-to-end between the two devices on a direct path; on a relayed path the TURN server forwards encrypted media it cannot read. No content of any call is stored |
 | **Risk level** | **Medium** — IP exposure between participants is unavoidable for the feature to exist and is disclosed in plain language rather than buried. Public Privacy Policy §"Live video connections (calls and event cameras)" explains the IP exchange, the STUN contact, the in-transit-only signalling, and exactly what is kept — **LIVE**. *(This entry closes the RoPA item owed for WebRTC/TURN — security handoff task #42.)* |
 
+### DPS-19 · Coordinator Day-of Operations — filtered run-of-show · announcements · requests desk (2026-08-02)
+
+| Field | Detail |
+|---|---|
+| **Purpose** | The three surfaces a coordinator *acts* from on the event day, as distinct from the planning-phase delegation in DPS-14: (1) the **filtered run-of-show** — one master timeline auto-filtered per audience; (2) **day-of announcements** — a short broadcast to the event; (3) the **requests desk** — a single inbox of things raised on the floor |
+| **Why a separate entry** | DPS-14 declares the coordinator's *consent scopes* and *prep-then-release*, i.e. what a coordinator may **see** and stage. It never named these three, and all three are **active in production**. Two of them are outward actions rather than reads — one of which reaches the couple's **guests** — so they belong on the register in their own right |
+| **Legal basis** | **Contract (§12(b))** — running the event the couple engaged the platform for; **Consent (§12(a))** — the coordinator's own access consent captured at invite (DPS-14) |
+| **Data subjects** | Couples; guests (as announcement recipients and as the subject of floor requests); vendors (as filtered-timeline recipients and requesters); coordinators |
+| **Personal data categories** | **Run-of-show:** schedule blocks + responsible-party tags. **Announcements:** free text ≤500 chars + the sender's identity and timestamp; immutable once posted. **Requests desk:** the request's free text + who raised it + its lane/status |
+| **SPI?** | **N** — no new sensitive category. Free text in an announcement or a request is unbounded in principle; both are event-scoped and short-lived |
+| **Recipients / sub-processors** | **Announcements are read by everyone on the event** — couple, guests and vendors alike (RLS Pattern B member read + delegate read + admin observability). Run-of-show is *narrowed* per audience: a vendor sees only blocks they are tagged responsible on, a guest sees only public rows, the couple sees the master. Requests stay between the raiser and the coordinator/couple. Supabase (Postgres, SG). **No new sub-processor** |
+| **Cross-border transfer** | SG (Supabase) |
+| **Retention** | Follows the parent event — deleted with it (`ON DELETE CASCADE`), inside the 5-year event-data window |
+| **Security measures** | All three held **fail-closed** by their own `/admin/data-privacy` controls (`coordinator_run_of_show`, `coordinator_day_of_broadcast`, `coordinator_requests_inbox`); event-scoped RLS with **canonical patterns only**; announcements are **immutable and attributed** — no silent edit or anonymous post; the run-of-show filter is a genuine **minimisation** (a vendor cannot read the parts of the day that are not theirs); **no acknowledgment tracking** was built, so reading an announcement is not recorded against a guest |
+| **Risk level** | **Low–Medium** — the outward reach to guests is the notable part, and it is bounded to a short, attributed, event-scoped message. Public Privacy Policy §"Coordinators you invite (delegated access)" gained both missing paragraphs on 2026-08-02 (announcements + requests desk) — **LIVE** |
+
 ---
 
 ## 2. Threshold analysis — mandatory NPC registration
