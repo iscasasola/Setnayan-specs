@@ -95,11 +95,60 @@ future matches from rung 2 to rung 1.
 | # | Item | Notes |
 |---|---|---|
 | 1 | **`vendor_lines` table** | Keyed to `vendor_profile_id`; **no `event_id` by schema** (that is what makes it travel). Sibling RLS of `vendor_songs` — `current_vendor_ids()` to author. ⚠ `REVOKE ALL … FROM anon, authenticated` + RLS at `CREATE TABLE` time. ⚠ Allocate the prefix ABOVE the applied head; regenerate the exposure baseline in the SAME PR. |
-| 2 | **Materialize-on-open** | Pre-fill is a **one-time materialization when the Script tab first opens** — the `precompute.ts` "once per edit, never per read" shape — so `buildScriptWorkbook`, `compileScriptText` and the day-of desk run **unmodified**. |
+| 2 | ~~**Materialize-on-open**~~ → **BUILT DIFFERENTLY (2026-08-01) — read the note below** | ~~Pre-fill is a one-time materialization when the Script tab first opens — the `precompute.ts` "once per edit, never per read" shape.~~ **Shipped as render-time matching instead.** ⚠ A deviation from this locked spec; owner may overrule. |
 | 3 | **Generalize the workbook** | `written / blank / unanswered` → **`needsAttention[]`** (asks incl. those on library-filled lines · unfilled ask-slots · unmatched moments). The counter fields become internal. Extend `emcee-script-layer.test.ts`. |
 | 4 | **Prep surface** | New **Script** tab inside the shipped `/vendor-dashboard/clients/[eventId]` Customer Card. Not a new route. |
-| 5 | **My Lines surface** | His library — browse, edit, promote a named moment to a segment. |
-| 6 | **Day-of delta** | His line added to the shipped `stage-script.tsx`. One block type. Nothing else on that desk moves. |
+| 5 | 🔴 **My Lines surface — THE ONLY ITEM NOT BUILT** | His library — browse, edit, delete, promote a named moment to a segment. **Everything it needs already ships** (see the pick-up note below). |
+| 6 | ✅ **Day-of delta** — PR [#3996](https://github.com/iscasasola/setnayan-platform/pull/3996), MERGED | His line on the shipped `stage-script.tsx`, under now / next / each running-script row. `StageCueBlock` gained `blockId` so the join is by identity, not label — two moments in one wedding can both be "Toasts". |
+
+### ▶ PICK-UP NOTE for item 5 (the only thing left — written so it needs no re-derivation)
+
+**Route:** a new page under `/vendor-dashboard/` (sibling of the other vendor surfaces), reachable
+from the Script tab. Gate it on the same `holdsSpecialization(access, 'stage_script')` the Script
+tab uses — a florist has no lines.
+
+**Everything it needs is already built and tested:**
+
+| need | where it already is |
+|---|---|
+| read his lines | `vendor_lines`, RLS `vendor_lines_owner_all` — `select … eq('vendor_profile_id', …).is('deleted_at', null)` |
+| show what a line matches | `matchLines` rung + `trusted` flag (`lib/emcee-lines.ts`) |
+| show/edit slots | `slotsIn`, `fillSlots` |
+| delete | set `deleted_at` — the partial uniques already exclude soft-deleted rows, so deleting frees the key |
+| promote to a segment | write `vendor_activities`, then set `activity_id` on the line → upgrades it from rung 2 to rung 1 |
+
+**Three things not to get wrong:**
+1. **Show the TEMPLATE with its slots visible** (`⟨the couple⟩`), not a filled preview — the whole
+   point is that the stored line carries no real name, and he should see that.
+2. **Private lines (`is_private_note = true`) must be visibly separated** and labelled as never
+   reused. They are in the library so he can find them, not so they get used.
+3. **Editing a line must not touch any event copy.** `vendor_block_scripts` rows are what he already
+   said yes to for a specific wedding; the library is upstream of them, never retroactive.
+
+### ⚠ Build note 2026-08-01 — item 2 was built DIFFERENTLY. Owner may overrule.
+
+The spec called for a **one-time materialization** when the Script tab first opens. It shipped as
+**render-time matching**: nothing is written to `vendor_block_scripts` until he actually keeps a
+line. The suggestion is computed on each render by `matchLines` + `fillSlots` — a Map join over a
+few dozen rows.
+
+**Why the deviation, stated so it can be judged rather than discovered:**
+
+- **A page load should not write.** Materializing on open makes opening the tab a mutation, so a
+  glance from a phone in a car creates rows he never asked for — and a couple's retime would then
+  need reconciling against them.
+- **His library stays live.** If he improves a line in My Lines, every wedding that has not been
+  written yet reflects it immediately. A materialized copy would silently go stale.
+- **The spec's stated *reason* is still satisfied** — `buildScriptWorkbook`, `compileScriptText`
+  and the day-of desk all run **unmodified**, because a suggestion is never persisted and the desk
+  reads only `vendor_block_scripts`.
+
+**What is genuinely lost:** the pre-fill is recomputed per render rather than cached, and there is
+no stored record of "this line came from the library" once he keeps it. If either matters, the
+materialization is a small change on top of what shipped — the matcher is already pure and tested.
+
+🔴 **Owner call. If you want the locked version, say so and it gets built; nothing here depends on
+the choice.**
 
 ---
 
