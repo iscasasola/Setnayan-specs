@@ -240,8 +240,28 @@ INK        light  #1B1A17 (17.4:1 on white · 15.5:1 on #F0F2F5)   soft #4F535B
            dark   #FBFAF7                                          soft #B6B9BE
 ```
 
-**Both themes are mandatory** — the app ships a runtime theme picker and the Alaala surfaces are obsidian
-by design.
+> ### ⚠️ CORRECTION 2026-08-01 — the app is LIGHT-ONLY. Do not design a dark theme.
+> The parent brief §1 says *"Both themes are mandatory… the app ships a runtime theme picker."*
+> **That is not true of shipped code and has not been since 2026-06-04.** Owner directive, quoted in
+> `apps/web/app/_components/theme-provider.tsx:11` — *"the app used to adjust automatic to light and dark
+> theme. disable this and just always keep it light theme."*
+>
+> The provider is hard-locked: `mode` and `resolvedTheme` are always `'light'`, `setMode` is a **no-op**,
+> and the `.dark` class is stripped on mount. `globals.css` carries **no** `prefers-color-scheme: dark`
+> rule, so with `darkMode: 'class'` every `dark:` variant and every `html.dark` token block is **inert**.
+> `users.theme_preference` and `updateThemePreference` are dormant and unread. The dark values remain in
+> `globals.css:136-143` only so a future revert is a small one.
+>
+> **Consequences:**
+> - **Design ONE theme per file, not two.** This roughly halves the drawing work (§9).
+> - Obsidian surfaces (Alaala, the gallery archetype, the `/` hero) stay obsidian — that is a **per-surface
+>   design choice**, not a theme mode. Draw them dark because they *are* dark, not because a toggle exists.
+> - The dark-mode hex values in §3.1 are retained for reference only. **Nothing consumes them today.**
+> - Re-enabling light/dark/auto is a small revert of `theme-provider.tsx` + the bootstrap script in
+>   `layout.tsx` — an **owner decision**, not something a redesign should assume.
+>
+> The couple's guest landing page (`app/[slug]`) is driven by the couple's own mood-board palette and was
+> never under this provider — unchanged, and still out of scope (§9.4).
 
 **Implementation reality (brief §1a) — this is two jobs, not one:**
 - **Cheap:** `mulberry` (CTA) and `terracotta` (accent) are already distinct semantic slots that today both
@@ -524,12 +544,16 @@ Per-part verification cannot catch it. **This test is the gate.**
 ### 9.1 Design **files** to produce (the Claude Design deliverable)
 
 Per brief §6, the output contract is **one self-contained HTML file per archetype**, all CSS/fonts/images
-inlined, both themes togglable in-page, real copy, real token values. Each file carries its states and
-both breakpoints **inline** — that is what makes the count tractable.
+inlined, real copy, real token values. Each file carries its states and both breakpoints **inline** — that
+is what makes the count tractable.
+
+⚠️ **Amended from brief §6: ONE theme per file, not two.** The app is light-only (§3.1 correction). Ask for
+a light rendering of every archetype; draw the obsidian surfaces (Alaala, gallery) dark **because those
+surfaces are dark**, not because a toggle exists. This roughly halves the work inside each file.
 
 | Layer | Files | What each contains |
 |---|---|---|
-| **A · Screen archetypes** | **12** | Mobile + desktop + all 6 states (§7.3) + both themes, in one file |
+| **A · Screen archetypes** | **12** | Mobile + desktop + all 6 states (§7.3), one theme, in one file |
 | **B · Overlay archetypes** | **7** | B1 ships inside archetype 10; B2-B8 are 7 additional files |
 | **Foundations** | **3** | Token sheet · motion sheet (the 8 breaks of §5.2) · icon + service-grid sheet |
 | **D · Flow storyboards** | **10** | F1-F10 as frame strips + the response rules between them |
@@ -549,9 +573,10 @@ tractable job, and it is why **the unit of work is the archetype, never the scre
 ### 9.3 Frame count, for scheduling only
 
 If every state × breakpoint were counted as a distinct frame: `12 archetypes × 6 states × 2 breakpoints =
-144`, plus `7 overlays × 2 = 14`, plus ~40 storyboard frames ≈ **~198 frames**. **Do not commission 198
-frames.** Commission **32 files**; the frames live inside them. The number is here only so the owner can
-size the effort honestly.
+144`, plus `7 overlays × 2 = 14`, plus ~40 storyboard frames ≈ **~198 frames** — **one theme only**, per
+the §3.1 correction. *(The brief's dual-theme assumption would have doubled this to ~396. It is wrong; the
+app is light-locked.)* **Do not commission 198 frames.** Commission **32 files**; the frames live inside
+them. The number is here only so the owner can size the effort honestly.
 
 ### 9.4 Explicitly out of scope
 
@@ -590,11 +615,28 @@ Claude Code ports each archetype into `apps/web` **behind a flag** → surfaces 
 
 Decisions this document surfaces but does **not** make.
 
-1. **The expensive surface split — pay for it or not?** Grey page + white cards is PH pattern #1 (§2.3) and
-   the owner's stated Facebook reference. It costs an audit of **396 + 337 files**. The cheap alternative:
-   white page + white cards separated by a hairline border. *Recommendation: defer to Phase ⏸; the CTA
-   colour carries most of the perceived change on its own.*
-2. **`/` stays excluded?** This document assumes yes (brief §8). Including it means discarding the ELN
+1. **Grey page, or stay white?** *(Merged 2026-08-01 — this was written as two flags. It is one question,
+   and the second half was a false alarm. Corrected below.)*
+
+   Grey page + white cards is PH pattern #1 (§2.3) and the surface half of the owner's Facebook reference.
+   It costs an audit of **396 `bg-cream` + 337 hardcoded `bg-white`** files, because `paper` is aliased to
+   `cream` in `tailwind.config.ts` — page and card are one token. The cheap alternative: keep the white
+   page and separate cards with a hairline border.
+
+   ⚠️ **The "a Facebook palette already shipped and was retired" caution was overstated — disregard it.**
+   `globals.css:110-114` records that the **2026-05-22** palette was `light=#FFFFFF` + **blue `#1877F2`**,
+   retired 2026-05-30. **What died was the blue.** The white page survived and is still what ships today
+   (`--color-cream: 255 255 255`). Since the current direction is **mandarin, not blue**, that history
+   warns against nothing here.
+
+   *Recommendation: defer the grey to Phase ⏸ and ship the CTA colour first — the orange carries most of
+   the perceived change on its own, at zero component cost.*
+
+2. **Light-only is now assumed (§3.1 correction).** Re-enabling light/dark/auto is a small revert of
+   `theme-provider.tsx` + the `layout.tsx` bootstrap — but it is an **owner decision**, and the redesign
+   does not assume it. Say so if dark should come back; it roughly doubles the drawing work.
+
+3. **`/` stays excluded?** This document assumes yes (brief §8). Including it means discarding the ELN
    reskin approved 2026-06-29.
 3. **Live Studio pillar (04)** promises broadcast while the Google Cloud Identity account is suspended
    (appeal `73857927`). A pillar-dock redesign is the natural moment to demote it. **Still undecided.**
