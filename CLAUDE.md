@@ -41,6 +41,13 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   2026-07-29 + memory `project-setnayan-onboarding-papic-ai-cards`.
 > - **Song Desk is DONE** (8 PRs, all merged 2026-07-30). Superseded by the INTERCONNECTION
 >   LAYER block below — read that instead.
+> - 🎨 **[`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md)**
+>   — **the newest stream. Read it before ANY design/UI/page work.** Palette ✅ shipped on all
+>   401 routes (PR #3988, locked by a derived-contrast guard); 12 archetypes + 7 overlay types
+>   ✅ drafted to `prototypes/archetype_*_2026-08-01.html`; **the port has NOT started.**
+>   🔴 Owner has **not seen the prototypes** — that gate blocks every aesthetic item, but NOT
+>   the two functional ones. **Start at `design#1` (six-state system) + `design#2` (overlay
+>   grammar)** — parallel-safe, no gate, both close live defects.
 > Execute per each contract's own rules; build flag-dark; stop at every HUMAN gate.
 
 > ### ▶ ACTIVE: the INTERCONNECTION LAYER — probes · the Ugat map · the anon-RPC surface

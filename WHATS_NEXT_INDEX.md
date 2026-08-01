@@ -126,6 +126,25 @@ For each doc + its claimed state, verify against reality and fix-or-flag:
 
 **Bottom line for the orchestrator:** build the task graph from §5's docs using §3's schema; obey §2 (worktrees/migrations) and §6 (serialize shared files); fan out only `parallel_safe: yes && safety_gate: NONE`; route every gate from §1 to the human queue; run §4 gap-checks continuously and fix-via-PR or flag.
 
+## 2026-08-01 · DESIGN PROGRAMME — palette SHIPPED, archetypes DRAFTED, ~40 units to port (ACTIVE — newest stream)
+
+**CONTRACT:** [`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md) — read it before any design/UI work.
+Supporting: [`03_Strategy/Design_Gap_Pass_2026-08-01.md`](03_Strategy/Design_Gap_Pass_2026-08-01.md) (the ~40-unit list) · [`03_Strategy/Public_Website_Design_Foundation_2026-08-01.md`](03_Strategy/Public_Website_Design_Foundation_2026-08-01.md) (why + frame inventory).
+
+| | |
+|---|---|
+| ✅ DONE | **Colour on all 401 routes** (PR #3988) — resolves from CSS vars ⇒ 1,263 call sites, zero component edits. Locked by `apps/web/lib/palette-lock.test.ts`. |
+| ✅ DONE | **12 archetypes + 7 overlay types** drafted → `prototypes/archetype_*_2026-08-01.html` (5 files, ~8,900 lines). |
+| ⏸ NOT STARTED | **The port.** Nothing from the archetypes has entered `apps/web`. |
+| 🔴 GATE | **`design#0-GATE` — owner has NOT seen the prototypes.** Blocks every aesthetic item (#4 #5 #6 #8 #9). Does NOT block #1/#2 (functional). |
+
+**Start with `design#1` (six-state system) + `design#2` (overlay grammar) — parallel-safe, disjoint files, no owner gate, both close live defects.**
+
+🔑 **401 routes ≠ 401 designs.** 190 are dynamic; the big groups repeat one shape (`studio`'s 35 = ~20 instances of one SKU page). **Design the ARCHETYPE, never the screen.**
+🪤 Stream traps: Empty ≠ Locked ≠ **Denied** (an RLS denial and an empty read are the same `count: 0`) · size the CTA against **CREAM not white** · **no "tech blue" exists** · the app is **LIGHT-ONLY** · marketing=top nav / app=bottom nav, never crossed · never write a literal SETNAYAN price · **the 28 existing per-surface prototypes are right about COMPOSITION but carry the OLD palette — reconcile, never redraw.**
+⛔ Excluded, not gaps: `/` (owner-approved ELN reskin) · guest sites `/[slug]` · seat plan 2D/3D · the four-surface home (#3240) · typography.
+
+---
 ## 2026-07-29 · EMCEE SCRIPT SYSTEM — 🔵 **BUILD SPEC, contract-grade** (start here for this stream)
 **→ [`Emcee_Script_System_BUILD_SPEC_2026-07-29.md`](Emcee_Script_System_BUILD_SPEC_2026-07-29.md)** — per `CLAUDE.md` Rule 0 §4 a dated `*_BUILD_SPEC_*` **outranks any handoff**; where it disagrees with a handoff or a memory, **it wins**. Concept + the *why*: [`Emcee_Script_System_Concept_2026-07-29.md`](Emcee_Script_System_Concept_2026-07-29.md).
 
