@@ -1,6 +1,6 @@
 # Role-scoped day-of — one vendor, several roles, one focused run of day
 
-**Date:** 2026-08-01 · **Status:** DESIGN — owner concept, not yet locked, nothing built.
+**Date:** 2026-08-01 · **Status:** ✅ **PHASES 1 + 2 BUILT** — PR [#4001](https://github.com/iscasasola/setnayan-platform/pull/4001) (merged) + PR [#4002](https://github.com/iscasasola/setnayan-platform/pull/4002). Phases 3–4 not started; the § 7 questions are all still open and none of them blocked the work so far.
 **Origin:** owner, 2026-08-01: *"there is a stylist and an emcee both in 1 service… they have a run
 of show for stylist and run of show for emcee"* → *"they can scan the QR code for each task.
 Stylist QR · Emcee QR — so an emcee run of day and stylist can focus on their specific tasks."*
@@ -70,7 +70,7 @@ rejected model returning, and needs a fresh ruling.
 Ordered so the **focus** benefit lands before any new schema. Each phase is independently useful; you
 can stop after any of them.
 
-### Phase 1 · Stop collapsing the set *(no migration · no QR · fixes the collision)*
+### ✅ Phase 1 · Stop collapsing the set — BUILT (#4001 plural · #4002 picker) *(no migration · no QR · fixes the collision)*
 
 Add the plural alongside the singular — `familiesForEvent()` and `specializationSetsForServices()` —
 and let the console offer a **role picker** when a vendor holds more than one. One vendor, several
@@ -81,7 +81,7 @@ desks, one active at a time.
   scan to change hats is friction.
 - Pure logic + UI. Fully testable. **Start here.**
 
-### Phase 2 · The role-scoped run of day *(the actual product)*
+### ✅ Phase 2 · The role-scoped run of day — BUILT (#4002)
 
 "My run of day" = the couple's timeline **filtered by `blockRelevance` for that ONE role**, plus its
 setup-lead suggestion, framed as **her tasks** rather than the wedding's programme.
@@ -90,7 +90,7 @@ setup-lead suggestion, framed as **her tasks** rather than the wedding's program
 - Mostly a filter over shipped data; no new object.
 - ⚠ **This is also what makes a stylist QR mean anything** — see § 6.
 
-### Phase 3 · The role QR *(for people without a login)*
+### ⏭ Phase 3 · The role QR *(for people without a login)* — NOT STARTED · blocked on § 7 Q1
 
 Mint a per-(vendor, event, role) claim token on the shipped `papic_claim_seat` shape: single-use,
 race-safe, atomic. Extends `vendor_event_access_grants` with a role column.
