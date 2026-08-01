@@ -16,7 +16,8 @@
 
 | | |
 |---|---|
-| ✅ **DONE — colour, on all 401 routes** | PR #3988 merged. Terracotta palette resolves from CSS vars ⇒ **1,263 `bg-cream` call sites** turned over with **zero component edits**. Locked by `apps/web/lib/palette-lock.test.ts` (8 tests, derives contrast from live tokens). |
+| ✅ **DONE — colour, on all 401 routes** | PR #3988 merged. Terracotta palette resolves from CSS vars ⇒ **1,263 `bg-cream` call sites** turned over with **zero component edits**. |
+| ⏳ **IN FLIGHT — the guard that LOCKS it** | **PR [#4030](https://github.com/iscasasola/setnayan-platform/pull/4030), auto-merge armed.** ⚠ **FIRST ACTION FOR THE NEXT SESSION: confirm it landed.** `git merge-base --is-ancestor <sha> origin/main` — **not** the PR status. If it did not merge, re-open it: the guard is `apps/web/lib/palette-lock.test.ts`, 8 tests, and it was verified 8/8 against main's live tokens. **Until it lands, terracotta is live on `main` with NOTHING enforcing it.** |
 | ✅ **DONE — the design language** | 12 screen archetypes + 7 overlay types, drafted by Fable, verified, committed to `prototypes/archetype_*_2026-08-01.html` (5 files, ~8,900 lines). |
 | ⏸ **NOT STARTED — the port** | ~40 design units. **Nothing from the archetypes has entered `apps/web`.** |
 | 🔴 **BLOCKING — nobody has looked at the prototypes** | All verification was DOM-level + static analysis; the shared browser pane blanked while backgrounded. Static checks prove tokens and motion budgets. They cannot tell you whether it is *good*. **Owner review is the gate before porting anything aesthetic.** |
