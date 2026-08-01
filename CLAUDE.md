@@ -82,11 +82,39 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > filtered `is_active`, the INSERT did not) · 3 stale OAuth rows blocked account deletion.
 > **Dropped:** `event_floor_areas`, `event_floor_objects`, `households`.
 >
-> ⏭ **OPEN, needing the owner:** (a) the **80-table export/erasure backlog** —
+> **5 · 2026-08-02 — CLAIM TOKENS, AND WHY THE MIGRATION TEXT CANNOT BE TRUSTED.**
+> 🔴 **The DATABASE unclaims a Papic seat by itself.** `paparazzi_seats.claimer_user_id` is
+> `ON DELETE SET NULL` and `claim_qr_token` is NOT in that clause, so any hard-delete of the auth
+> row unclaims the seat and leaves the printed QR live — `seatClaimability()` flips back to
+> `claimable`. `runAnonDraftSweep()` hard-deletes login-free claimers at 30 days and its only guard
+> looks for a `couple` membership `papic_claim_seat` never creates. Flag on 2026-08-01 + 30d TTL ⇒
+> earliest fire ~2026-08-31; **closed in #4032 before it could** (rotate first, fail closed).
+> 🔑 **NEVER SEPARATE THE UNCLAIM FROM THE ROTATION** — rotation is the PRECONDITION, not the fix;
+> nulling the claimer alone hands the seat back to the QR they still hold. One statement PER ROW,
+> the token columns are UNIQUE.
+>
+> 🔑 **THE MIGRATION TEXT NO LONGER SAYS WHAT THE SCHEMA DOES** (#4038). `20271032282809` rewrites
+> **30 FKs inside a `DO $$` block** via `EXECUTE format(...)` — grep `CREATE TABLE` and you get the
+> pre-2026-08-02 clause. **Read `tests/db/user-fk-behaviour.generated.txt`** (generated from
+> `pg_constraint` after a PGlite replay, CI-enforced): 205 FKs · CASCADE 59 · RESTRICT 3 ·
+> SET NULL 143. ⚠ **`SET NULL` ≠ "erasure handled it"** — erasure anonymizes in place and issues no
+> DELETE, so it never fires on that path.
+>
+> 🧪 **BULK CLASSIFICATION DOES NOT CLEAR THE ERASURE BACKLOG — tested.** All 78 tables classified
+> in one pass, each verdict attacked: **41 of 78 overturned** (23 evidence-only, **17 decisions
+> wrong**), and **11 of the 17 moved `EXCLUDE`→`PURGE`** — personal data left alive after an
+> erasure request, with confident reasons attached. The error is **directional, toward
+> under-erasure**. None applied; the figure is now in the guardrail docblock. **Do not retry it.**
+> Clear a few tables at a time, reading the generated FK file first.
+>
+> ⏭ **OPEN, needing the owner:** (a) the **78-table export/erasure backlog** —
 > `UNDECIDED_BACKLOG` in `lib/erasure/coverage-guardrail.test.ts`, whose own header says *"NOT A
 > CLEAN BILL OF HEALTH"*; (b) a store whose only admin leaves cannot have that account deleted
 > (`VENDOR_LAST_ADMIN`) — a product question blocking a deletion duty; (c) the retired
-> `token_burn_bands` table still in prod with 10 of 20 rows mis-keyed (inert — nothing reads it).
+> `token_burn_bands` table still in prod with 10 of 20 rows mis-keyed (inert — nothing reads it);
+> (d) **`vendor_invites` — a claimed invite token is NOT dead**: `resolveClaimContextForService`
+> takes one as its intended input and returns the couple's display name via the admin client.
+> Rotating it changes the guided first-service flow — a product call, tracked not settled.
 >
 > 🪤 **THE LESSON OF THE DAY, measured:** 79 claims attacked across three adversarial sweeps,
 > 22 refuted. **Facts survive ~93%, judgements ~50%.** Nobody invents facts; people invent
