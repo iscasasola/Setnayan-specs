@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SETNAYAN — Data Archetypes · Roster · Ledger · Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   SETNAYAN · Data archetypes prototype · 2026-08-01
+   ROSTER · LEDGER · COMPARISON — the three patterns that retire
+   the 45 raw <table> elements in the app.
+   Light-locked. Tokens are contractual — do not restyle.
+   ============================================================ */
+:root{
+  --cream:#FDFBF7;
+  --ink:#2C2A29;
+  --soft:#4F535B;
+  --cta:#C24E25; --cta-h:#B04722; --cta-a:#9D3F1E;
+  --gold:#A9834B; --gold-text:#8A6B39;
+  --link:#3B4E67; --link-h:#304055;
+  --pos:#4F6B4A; --warn:#8A6B39; --neg:#B65A3A;
+  --border:rgba(44,42,41,0.12);
+  --border-soft:rgba(44,42,41,0.07);
+  --shadow:rgba(30,26,18,0.08);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --dur:200ms;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:'Hanken Grotesk',sans-serif;
+  font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input{font:inherit;color:inherit}
+a{color:var(--link);text-decoration:none}
+a:hover{color:var(--link-h)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+.ic{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ---------- type ---------- */
+.mono{font-family:'Space Mono',monospace}
+.kicker{
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.14em;color:var(--gold-text);
+}
+.kicker.plain{color:var(--soft)}
+
+/* ---------- page scaffold ---------- */
+.wrap{max-width:1400px;margin:0 auto;padding:0 32px}
+@media(max-width:760px){.wrap{padding:0 16px}}
+
+.masthead{padding:64px 0 36px;border-bottom:1px solid var(--border)}
+.masthead .brandline{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.masthead .wordmark{font-weight:800;letter-spacing:.22em;font-size:14px}
+.masthead h1{font-size:clamp(30px,4.6vw,46px);font-weight:800;letter-spacing:-.015em;line-height:1.08;margin:18px 0 14px;max-width:21ch}
+.masthead p.lede{color:var(--soft);max-width:62ch;font-size:16px}
+.masthead p.lede strong{color:var(--ink)}
+
+/* ---------- anchor nav ---------- */
+.anchornav{
+  position:sticky;top:0;z-index:60;background:var(--cream);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 4px 14px var(--shadow);
+}
+.anchornav .in{display:flex;gap:4px;align-items:center;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+.anchornav .in::-webkit-scrollbar{display:none}
+.anchornav a{
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.14em;color:var(--soft);
+  padding:8px 14px;border-radius:999px;white-space:nowrap;
+  border:1px solid transparent;
+  transition:color var(--dur) var(--ease),background var(--dur) var(--ease),border-color var(--dur) var(--ease);
+}
+.anchornav a:hover{color:var(--ink)}
+.anchornav a.active{color:var(--gold-text);background:rgba(169,131,75,.12);border-color:rgba(169,131,75,.35)}
+.anchornav .spacer{flex:1}
+.anchornav .tally{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);white-space:nowrap;padding-right:4px}
+
+/* ---------- section chrome ---------- */
+section.arch{padding:72px 0 24px;scroll-margin-top:64px}
+section.arch + section.arch{border-top:1px solid var(--border)}
+.arch-head{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:32px;margin-bottom:34px}
+@media(max-width:980px){.arch-head{grid-template-columns:1fr}}
+.arch-head h2{font-size:clamp(24px,3vw,34px);font-weight:800;letter-spacing:-.01em;margin:10px 0 10px}
+.arch-head .desc{color:var(--soft);max-width:58ch}
+.routes{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.routes .r{
+  font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.06em;
+  color:var(--link);background:rgba(59,78,103,.07);
+  border:1px solid rgba(59,78,103,.22);border-radius:999px;padding:5px 11px;white-space:nowrap;
+}
+.note{
+  border:1px solid var(--border);border-radius:14px;padding:18px 20px;
+  box-shadow:0 10px 26px var(--shadow);align-self:start;background:var(--cream);
+}
+.note .kicker{display:block;margin-bottom:10px}
+.note ol{margin:0;padding-left:18px;color:var(--soft);font-size:13.5px;display:grid;gap:8px}
+.note ol strong{color:var(--ink);font-weight:700}
+
+/* ---------- frames ---------- */
+.frame-row{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;margin-bottom:34px}
+.frame-block{min-width:0}
+.frame-label{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.frame-label .tag{
+  font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--soft);
+  border:1px solid var(--border);border-radius:6px;padding:4px 9px;background:var(--cream);
+}
+.frame-label .tag.state{color:var(--gold-text);border-color:rgba(169,131,75,.4)}
+.frame-label .hint{font-size:12px;color:var(--soft)}
+.frame{
+  background:var(--cream);border:1px solid var(--border);border-radius:18px;
+  box-shadow:0 18px 44px var(--shadow);overflow:hidden;position:relative;
+}
+.frame.mobile{width:390px;max-width:100%}
+.frame-scroll{overflow-x:auto;max-width:100%;padding-bottom:6px}
+.frame.desktop{width:1280px;flex:none}
+
+/* ---------- shared bits ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;border-radius:10px;
+  font-weight:700;font-size:13.5px;padding:9px 15px;line-height:1;
+  transition:background var(--dur) var(--ease),color var(--dur) var(--ease),
+             border-color var(--dur) var(--ease),transform var(--dur) var(--ease),
+             box-shadow var(--dur) var(--ease);
+}
+.btn-cta{background:var(--cta);color:var(--cream);box-shadow:0 6px 16px rgba(194,78,37,.28)}
+.btn-cta:hover{background:var(--cta-h)}
+.btn-cta:active{background:var(--cta-a);transform:translateY(1px)}
+.btn-ghost{border:1px solid rgba(59,78,103,.4);color:var(--link);background:var(--cream)}
+.btn-ghost:hover{border-color:var(--link);color:var(--link-h);background:rgba(59,78,103,.05)}
+.btn-sm{font-size:12.5px;padding:7px 12px;border-radius:8px}
+
+.pill{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:'Space Mono',monospace;font-size:9.5px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  border-radius:999px;padding:3px 9px;border:1px solid;white-space:nowrap;line-height:1.5;
+}
+.p-going,.p-paid{color:var(--pos);background:rgba(79,107,74,.09);border-color:rgba(79,107,74,.3)}
+.p-pending,.p-partial{color:var(--warn);background:rgba(169,131,75,.1);border-color:rgba(169,131,75,.35)}
+.p-declined{color:var(--neg);background:rgba(182,90,58,.08);border-color:rgba(182,90,58,.3)}
+.p-unpaid{color:var(--soft);background:rgba(44,42,41,.04);border-color:var(--border)}
+
+.avatar{
+  width:34px;height:34px;border-radius:50%;flex:none;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+  cursor:pointer;border:1px solid transparent;
+  transition:box-shadow var(--dur) var(--ease),border-color var(--dur) var(--ease);
+}
+.av0{background:rgba(169,131,75,.16);color:var(--gold-text)}
+.av1{background:rgba(59,78,103,.13);color:var(--link)}
+.av2{background:rgba(79,107,74,.13);color:var(--pos)}
+.av3{background:rgba(44,42,41,.09);color:var(--ink)}
+.avatar .chk{
+  position:absolute;inset:0;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:var(--gold);color:var(--cream);opacity:0;transform:scale(.6);
+  transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease);
+}
+.row.sel .avatar .chk{opacity:1;transform:scale(1)}
+.row.sel .avatar{border-color:var(--gold);box-shadow:0 0 0 3px rgba(169,131,75,.22)}
+.avatar:hover{box-shadow:0 0 0 3px rgba(169,131,75,.18)}
+
+/* ---------- ROSTER · mobile ---------- */
+.m-head{padding:16px 16px 0}
+.m-head .toprow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.m-head h3{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.m-head .count{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-top:3px}
+.search{
+  display:flex;align-items:center;gap:9px;margin-top:13px;
+  border:1px solid var(--border);border-radius:11px;padding:9px 12px;background:var(--cream);
+  transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease);
+}
+.search:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(169,131,75,.15)}
+.search input{border:none;outline:none;background:none;flex:1;font-size:14px;min-width:0}
+.search input::placeholder{color:var(--soft);opacity:.75}
+.search .ic{color:var(--soft)}
+.chips{display:flex;gap:7px;overflow-x:auto;padding:12px 16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--soft);white-space:nowrap;
+  border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--cream);
+  transition:all var(--dur) var(--ease);
+}
+.chip .n{color:var(--gold-text);margin-left:4px}
+.chip:hover{border-color:rgba(169,131,75,.5)}
+.chip.on{color:var(--gold-text);background:rgba(169,131,75,.13);border-color:var(--gold)}
+.m-list{height:472px;overflow-y:auto;border-top:1px solid var(--border)}
+.m-swipe{position:relative;overflow:hidden;border-bottom:1px solid var(--border-soft)}
+.m-actions{position:absolute;top:0;bottom:0;right:0;width:136px;display:flex}
+.m-actions button{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);
+}
+.m-actions .a-table{background:var(--link)}
+.m-actions .a-remove{background:var(--neg)}
+.m-rowc{
+  position:relative;z-index:1;background:var(--cream);
+  display:flex;align-items:center;gap:11px;padding:9px 14px;
+  transition:transform 220ms var(--ease);touch-action:pan-y;
+}
+.m-swipe.dragging .m-rowc{transition:none}
+.m-swipe.open .m-rowc{transform:translateX(-136px)}
+.m-swipe.sel .m-rowc{background:rgba(169,131,75,.07)}
+.m-info{flex:1;min-width:0;line-height:1.3}
+.m-info .nm{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-info .mt{font-size:11.5px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-info .mt .tb{font-family:'Space Mono',monospace;font-size:10.5px}
+
+/* bulk bar */
+.bulkbar{
+  position:absolute;left:12px;right:12px;bottom:12px;z-index:20;
+  background:var(--ink);color:var(--cream);border-radius:14px;
+  display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;
+  box-shadow:0 14px 34px rgba(30,26,18,.3);
+  transform:translateY(calc(100% + 24px));
+  transition:transform 240ms var(--ease);
+}
+.bulkbar.on{transform:translateY(0)}
+.bulkbar .cnt{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.bulkbar .grow{flex:1}
+.bulkbar .bb{
+  border:1px solid rgba(253,251,247,.4);border-radius:9px;color:var(--cream);
+  font-size:12.5px;font-weight:700;padding:7px 12px;white-space:nowrap;
+  transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease);
+}
+.bulkbar .bb:hover{background:rgba(253,251,247,.12);border-color:rgba(253,251,247,.7)}
+.bulkbar .bb.link{border:none;text-decoration:underline;text-underline-offset:3px;font-weight:600;padding:7px 4px}
+.bulkbar .x{display:flex;padding:6px;border-radius:8px;color:rgba(253,251,247,.75)}
+.bulkbar .x:hover{color:var(--cream);background:rgba(253,251,247,.12)}
+
+/* ---------- ROSTER · desktop ---------- */
+.d-toolbar{display:flex;align-items:center;gap:14px;padding:18px 22px 14px}
+.d-toolbar h3{font-size:20px;font-weight:800;letter-spacing:-.01em;margin-right:2px}
+.d-toolbar .count{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.d-toolbar .search{margin-top:0;flex:1;max-width:330px}
+.d-toolbar .grow{flex:1}
+.d-chiprow{padding:0 22px 12px;display:flex;gap:7px;flex-wrap:wrap}
+.d-listwrap{height:512px;overflow-y:auto;border-top:1px solid var(--border);position:relative}
+.d-cols{
+  position:sticky;top:0;z-index:5;background:var(--cream);
+  display:grid;grid-template-columns:52px minmax(0,1fr) 130px 96px 210px;
+  align-items:center;padding:8px 22px;border-bottom:1px solid var(--border);
+  font-family:'Space Mono',monospace;font-size:9.5px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--soft);
+}
+.d-row{
+  display:grid;grid-template-columns:52px minmax(0,1fr) 130px 96px 210px;
+  align-items:center;padding:5px 22px;min-height:44px;
+  border-bottom:1px solid var(--border-soft);position:relative;
+  transition:background var(--dur) var(--ease),transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease);
+}
+.d-row:hover{background:rgba(169,131,75,.05);transform:translateY(-1px);box-shadow:0 6px 16px var(--shadow);z-index:2}
+.d-row.sel{background:rgba(169,131,75,.09)}
+.d-row .nmwrap{min-width:0;line-height:1.25}
+.d-row .nm{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-row .nm .side{font-weight:400;color:var(--soft);font-size:12px}
+.d-row .tb{font-family:'Space Mono',monospace;font-size:12px;color:var(--soft)}
+.d-acts{display:flex;gap:4px;justify-content:flex-end;opacity:0;transform:translateX(6px);
+  transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.d-row:hover .d-acts,.d-row:focus-within .d-acts{opacity:1;transform:none}
+.d-acts button{
+  font-size:12px;font-weight:600;color:var(--link);border-radius:7px;padding:5px 9px;
+  transition:background var(--dur) var(--ease),color var(--dur) var(--ease);
+}
+.d-acts button:hover{background:rgba(59,78,103,.09);color:var(--link-h)}
+.d-acts button.danger{color:var(--neg)}
+.d-acts button.danger:hover{background:rgba(182,90,58,.09)}
+.d-bulk{left:22px;right:22px;bottom:16px}
+
+/* ---------- state cards ---------- */
+.stategrid{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:14px}
+.stategrid .frame.mobile{width:302px}
+.statebody{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 26px;gap:6px}
+.statebody .bigic{
+  width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  margin-bottom:10px;background:rgba(169,131,75,.12);color:var(--gold-text);
+}
+.statebody h4{font-size:16.5px;font-weight:800;letter-spacing:-.01em}
+.statebody p{font-size:13px;color:var(--soft);max-width:32ch}
+.statebody .btn{margin-top:14px}
+.statebody a.qlink{font-size:13px;font-weight:600;margin-top:14px;text-decoration:underline;text-underline-offset:3px}
+/* denied — deliberately NOT empty's clothes */
+.statebody.denied{background:rgba(44,42,41,.045)}
+.statebody.denied .bigic{background:var(--ink);color:var(--cream)}
+.statebody.denied .permtag{
+  font-family:'Space Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--cream);background:var(--ink);
+  border-radius:5px;padding:3px 8px;margin-bottom:12px;
+}
+.frame .toprule-denied{height:3px;background:var(--ink)}
+.frame .toprule-error{height:3px;background:var(--neg)}
+.frame .toprule-locked{height:3px;background:var(--gold)}
+.statebody.errorst .bigic{background:rgba(182,90,58,.1);color:var(--neg)}
+.statebody .refcode{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--soft);margin-top:12px}
+/* locked ghost preview */
+.ghost{width:100%;padding:14px 16px 4px;filter:saturate(.6);opacity:.55;pointer-events:none;user-select:none}
+.ghost .grow-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-soft)}
+.ghost .gav{width:28px;height:28px;border-radius:50%;background:rgba(44,42,41,.12)}
+.ghost .gl{height:9px;border-radius:5px;background:rgba(44,42,41,.13)}
+.ghost .gl.w1{width:44%}.ghost .gl.w2{width:26%;margin-left:auto}
+.lockcap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 26px 30px;gap:6px}
+.lockcap .lk{width:40px;height:40px;border-radius:50%;background:rgba(169,131,75,.16);color:var(--gold-text);display:flex;align-items:center;justify-content:center;margin:-34px 0 8px;border:1px solid rgba(169,131,75,.4);backdrop-filter:blur(3px);background-color:var(--cream)}
+.lockcap h4{font-size:15.5px;font-weight:800}
+.lockcap p{font-size:12.5px;color:var(--soft);max-width:30ch}
+.lockcap .btn{margin-top:12px}
+/* skeleton */
+@keyframes shimmer{0%{background-position:-360px 0}100%{background-position:360px 0}}
+.sk{
+  background:linear-gradient(90deg,rgba(44,42,41,.07) 25%,rgba(44,42,41,.13) 50%,rgba(44,42,41,.07) 75%);
+  background-size:360px 100%;animation:shimmer 1.3s linear infinite;border-radius:6px;
+}
+.skrow{display:flex;align-items:center;gap:11px;padding:11px 16px;border-bottom:1px solid var(--border-soft)}
+.skrow .skav{width:34px;height:34px;border-radius:50%;flex:none}
+.skrow .skcol{flex:1;display:grid;gap:7px}
+.skrow .skl1{height:11px;width:62%}
+.skrow .skl2{height:9px;width:40%}
+.skrow .skpill{height:18px;width:58px;border-radius:999px}
+.skrow .sknum{height:12px;width:74px;margin-left:auto}
+.statefoot{
+  border:1px solid var(--border);border-left:3px solid var(--gold);
+  border-radius:12px;padding:14px 18px;margin:6px 0 10px;
+  font-size:13px;color:var(--soft);max-width:860px;
+}
+.statefoot strong{color:var(--ink)}
+.statefoot .mono{font-size:11.5px}
+
+/* ---------- LEDGER ---------- */
+.l-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 16px 12px}
+.l-head h3{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.l-head .sub{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-top:3px}
+.l-scroll{height:472px;overflow-y:auto;border-top:1px solid var(--border);position:relative}
+.l-scroll.tall{height:496px}
+.l-cat{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:13px 16px 6px;
+}
+.l-cat .cn{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text)}
+.l-cat .cs{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--soft)}
+.l-row{border-bottom:1px solid var(--border-soft)}
+.l-line{
+  display:flex;align-items:center;gap:10px;padding:9px 16px;width:100%;text-align:left;
+  transition:background var(--dur) var(--ease);
+}
+.l-line:hover{background:rgba(169,131,75,.05)}
+.l-chev{color:var(--soft);transition:transform var(--dur) var(--ease)}
+.l-row.x .l-chev{transform:rotate(180deg)}
+.l-nm{flex:1;min-width:0;line-height:1.28}
+.l-nm .n{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l-nm .m{font-size:11.5px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l-amt{text-align:right;line-height:1.3;flex:none}
+.l-amt .a{font-family:'Space Mono',monospace;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.l-amt .togo{font-family:'Space Mono',monospace;font-size:10px;color:var(--warn)}
+.l-amt .pill{margin-top:2px}
+/* expand */
+.l-hist{display:grid;grid-template-rows:0fr;transition:grid-template-rows 240ms var(--ease)}
+.l-row.x .l-hist{grid-template-rows:1fr}
+.l-hist>div{overflow:hidden}
+.l-histin{padding:2px 16px 13px 42px;display:grid;gap:6px}
+.l-pay{display:flex;align-items:baseline;gap:10px;font-size:12.5px}
+.l-pay .d{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--soft);width:86px;flex:none}
+.l-pay .w{color:var(--soft)}
+.l-pay .amt{margin-left:auto;font-family:'Space Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums}
+.l-pay .rcpt{font-size:11.5px;font-weight:600}
+.l-none{font-size:12.5px;color:var(--soft);font-style:italic}
+.l-demo{
+  justify-self:start;font-size:12px;font-weight:700;color:var(--link);
+  border:1px dashed rgba(59,78,103,.45);border-radius:8px;padding:6px 11px;margin-top:4px;
+  transition:background var(--dur) var(--ease);
+}
+.l-demo:hover{background:rgba(59,78,103,.07)}
+/* pinned totals */
+.l-total{
+  position:sticky;bottom:0;z-index:6;background:var(--cream);
+  border-top:1px solid var(--border);box-shadow:0 -8px 22px var(--shadow);
+  display:flex;align-items:center;gap:22px;padding:12px 16px;
+}
+.l-total .cell{line-height:1.2}
+.l-total .lab{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.l-total .val{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;display:inline-block;
+  transition:transform var(--dur) var(--ease),color var(--dur) var(--ease)}
+.l-total .val.paidc{color:var(--pos)}
+.l-total .val.tick{transform:translateY(-3px);color:var(--gold-text)}
+.l-total .grow{flex:1}
+.l-total .of{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--soft)}
+/* ledger desktop */
+.ld-line{display:grid;grid-template-columns:28px minmax(0,1fr) 110px 190px;align-items:center;gap:10px;padding:7px 22px;min-height:44px}
+.ld-cat{padding:14px 22px 6px}
+.ld-histin{padding-left:60px;padding-right:22px}
+
+/* ---------- COMPARISON ---------- */
+.c-top{display:flex;flex-direction:column;align-items:center;text-align:center;padding:26px 18px 6px;gap:10px}
+.c-top h3{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.c-top .sub{font-size:13px;color:var(--soft);max-width:44ch}
+.seg{
+  display:inline-flex;border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px;background:var(--cream);
+  margin-top:4px;
+}
+.seg button{
+  font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--soft);border-radius:999px;padding:7px 16px;
+  transition:all var(--dur) var(--ease);
+}
+.seg button.on{color:var(--gold-text);background:rgba(169,131,75,.14);box-shadow:inset 0 0 0 1px var(--gold)}
+.snap{
+  display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding:18px 40px 8px;scrollbar-width:none;
+}
+.snap::-webkit-scrollbar{display:none}
+.snap .tiercard{min-width:296px;max-width:296px;scroll-snap-align:center}
+.dots{display:flex;gap:7px;justify-content:center;padding:10px 0 18px}
+.dots i{width:7px;height:7px;border-radius:50%;background:rgba(44,42,41,.18);transition:background var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.dots i.on{background:var(--gold);transform:scale(1.25)}
+.gridcols{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:20px 26px 28px;align-items:start}
+.tiercard{
+  border:1px solid var(--border);border-radius:16px;background:var(--cream);
+  box-shadow:0 12px 30px var(--shadow);padding:22px 20px;display:flex;flex-direction:column;gap:0;
+  position:relative;
+}
+.tiercard .eyebrow{
+  font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:9px;min-height:14px;
+}
+.tiercard h4{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.tiercard .tag{font-size:12.5px;color:var(--soft);margin-top:2px;min-height:38px}
+.tiercard .price{margin:12px 0 4px;display:flex;align-items:baseline;gap:8px}
+.tiercard .price .amt{font-family:'Space Mono',monospace;font-size:27px;font-weight:700}
+.tiercard .price .unit{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+.tiercard .seep{font-size:12.5px;font-weight:600;margin-bottom:12px;text-decoration:underline;text-underline-offset:3px}
+.tiercard .btn{justify-content:center;margin-bottom:16px}
+.tiercard .pivot{
+  font-size:13px;font-weight:700;color:var(--ink);
+  padding:10px 0 2px;border-top:1px solid var(--border);
+}
+.tiercard .grp{margin-top:11px}
+.tiercard .grp .gh{
+  font-family:'Space Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-bottom:5px;
+}
+.tiercard ul{list-style:none;display:grid;gap:5px}
+.tiercard li{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.35}
+.tiercard li .ic{color:var(--gold);margin-top:2px;width:14px;height:14px}
+/* the answer card */
+.tiercard.hot{
+  background:var(--ink);color:var(--cream);border-color:var(--ink);
+  box-shadow:0 20px 46px rgba(30,26,18,.28);
+}
+.tiercard.hot .tag{color:rgba(253,251,247,.68)}
+.tiercard.hot .price .unit{color:rgba(253,251,247,.6)}
+.tiercard.hot .pivot{border-top-color:rgba(253,251,247,.18);color:var(--cream)}
+.tiercard.hot .grp .gh{color:rgba(253,251,247,.55)}
+.tiercard.hot .seep{color:rgba(253,251,247,.85)}
+.tiercard.hot .seep:hover{color:var(--cream)}
+/* delta cascade */
+.delta li{opacity:0;transform:translateY(7px);
+  transition:opacity 180ms var(--ease),transform 180ms var(--ease)}
+.delta.play li{opacity:1;transform:none}
+/* comparison state ghosts */
+.cghost{display:flex;gap:10px;padding:16px 16px 4px;filter:saturate(.6);opacity:.5;pointer-events:none}
+.cghost .col{flex:1;border:1px solid var(--border);border-radius:12px;padding:12px 10px;display:grid;gap:8px}
+.cghost .gl{height:9px;border-radius:5px;background:rgba(44,42,41,.13)}
+.cghost .gl.t{height:13px;width:60%}
+/* comparison loading skeleton */
+.skcards{display:flex;gap:10px;padding:18px 16px}
+.skcards .skc{flex:1;border:1px solid var(--border-soft);border-radius:12px;padding:12px 10px;display:grid;gap:9px}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--border);margin-top:56px;padding:34px 0 60px;color:var(--soft);font-size:13px}
+footer .wordmark{font-weight:800;letter-spacing:.22em;font-size:12px;color:var(--ink)}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms !important;animation:none !important}
+  .delta li{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= icon symbols ======================= -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-chevdown" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-shieldx" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.6 3 8.4 7 10 4-1.6 7-5.4 7-10V6z"/><path d="m9.6 9.6 4.8 4.8M14.4 9.6l-4.8 4.8"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4.5M12 15.8v.2"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 4v5h-5"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.8 20c.7-3.2 3.2-5 6.2-5s5.5 1.8 6.2 5"/><circle cx="17" cy="9" r="2.6"/><path d="M17.6 14.6c2.1.4 3.4 1.9 3.8 4.4"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-2.4-1.6L13.2 21l-2.4-1.6L8.4 21 6 19.4z"/><path d="M9.5 8h5M9.5 12h5"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V5h5v2M6.5 7l1 13h9l1-13"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M7 20h10"/><path d="m7 7-3.2 6a3.4 3.4 0 0 0 6.4 0L7 7l-3.5.9M17 7l-3.2 6a3.4 3.4 0 0 0 6.4 0L17 7H7"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13h4l2 3h4l2-3h4"/><path d="M5.2 5.6 4 13v5h16v-5l-1.2-7.4a1.6 1.6 0 0 0-1.6-1.3H6.8a1.6 1.6 0 0 0-1.6 1.3z"/></symbol>
+</svg>
+
+<!-- ======================= masthead ======================= -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="brandline">
+      <span class="wordmark">SETNAYAN</span>
+      <span class="kicker">Set na 'yan.</span>
+    </div>
+    <h1>The three data archetypes.</h1>
+    <p class="lede">
+      <strong>Roster · Ledger · Comparison</strong> — one pattern each for people, money, and choices.
+      Together they retire the <strong>45 raw <span class="mono" style="font-size:13px">&lt;table&gt;</span> elements</strong>
+      currently in the app: the literal "Google-sheet experience" being replaced. Every archetype ships with
+      all six states — Ideal, Loading, Empty, Locked, Denied, Error — because a surface once printed
+      <em>"no requests yet"</em> over three real pending rows.
+    </p>
+  </div>
+</header>
+
+<nav class="anchornav" aria-label="Archetype navigation">
+  <div class="wrap in">
+    <a href="#roster" data-spy="roster">01 · Roster</a>
+    <a href="#ledger" data-spy="ledger">02 · Ledger</a>
+    <a href="#comparison" data-spy="comparison">03 · Comparison</a>
+    <span class="spacer"></span>
+    <span class="tally">3 archetypes · 45 tables retired</span>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================================================
+     01 · ROSTER
+     ============================================================ -->
+<section class="arch" id="roster">
+  <div class="wrap">
+    <div class="arch-head">
+      <div>
+        <span class="kicker">Archetype 01 · People</span>
+        <h2>Roster</h2>
+        <p class="desc">
+          A dense list of people — avatar, name, one meta line, a status pill. Selection lives on the
+          <strong>avatar itself</strong>: press it and the face becomes the checkmark. No checkbox column,
+          no horizontal budget spent. Swipe a row on mobile; hover a row on desktop.
+        </p>
+        <div class="routes">
+          <span class="r">/dashboard/[event]/guests</span>
+          <span class="r">/vendor-dashboard/clients</span>
+          <span class="r">/vendor-dashboard/team</span>
+          <span class="r">/admin/accounts</span>
+        </div>
+      </div>
+      <aside class="note">
+        <span class="kicker plain">Designer's note</span>
+        <ol>
+          <li><strong>The avatar is the checkbox.</strong> Tapping the identity token toggles selection — the roster never grows a selection column, so density survives select mode.</li>
+          <li><strong>Density reads as trustworthy.</strong> 44px desktop rows, one 11.5px meta line, tabular counts in Space Mono. Shopee-dense, not SaaS-airy.</li>
+          <li><strong>Actions are peripheral.</strong> Swipe-left (mobile) and hover-reveal (desktop) keep the resting state pure reading. Every control is labelled — never icon-only.</li>
+        </ol>
+      </aside>
+    </div>
+
+    <!-- ideal state -->
+    <div class="frame-row">
+      <div class="frame-block">
+        <div class="frame-label">
+          <span class="tag">Mobile · 390</span><span class="tag state">Ideal</span>
+          <span class="hint">Swipe a row left · tap an avatar to select</span>
+        </div>
+        <div class="frame mobile">
+          <div class="m-head">
+            <div class="toprow">
+              <div>
+                <h3>Guest list</h3>
+                <div class="count" id="rm-count">— guests</div>
+              </div>
+              <button class="btn btn-cta btn-sm"><svg class="ic" width="14" height="14"><use href="#i-plus"/></svg>Add</button>
+            </div>
+            <label class="search">
+              <svg class="ic" width="15" height="15"><use href="#i-search"/></svg>
+              <input id="rm-search" type="search" placeholder="Search 208 guests…" aria-label="Search guests">
+            </label>
+          </div>
+          <div class="chips" id="rm-chips" role="tablist" aria-label="Filter guests"></div>
+          <div class="m-list" id="rm-list" aria-label="Guest rows"></div>
+          <div class="bulkbar" id="rm-bulk" aria-live="polite">
+            <span class="cnt" id="rm-bulkcnt">0 selected</span>
+            <span class="grow"></span>
+            <button class="bb">Assign table</button>
+            <button class="bb">Message</button>
+            <button class="x" data-clear aria-label="Clear selection"><svg class="ic" width="15" height="15"><use href="#i-x"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block frame-scroll">
+        <div class="frame-label">
+          <span class="tag">Desktop · 1280</span><span class="tag state">Ideal</span>
+          <span class="hint">Hover a row for actions · click an avatar to select</span>
+        </div>
+        <div class="frame desktop">
+          <div class="d-toolbar">
+            <h3>Guest list</h3>
+            <span class="count" id="rd-count">—</span>
+            <label class="search">
+              <svg class="ic" width="15" height="15"><use href="#i-search"/></svg>
+              <input id="rd-search" type="search" placeholder="Search by name…" aria-label="Search guests">
+            </label>
+            <span class="grow"></span>
+            <button class="btn btn-cta"><svg class="ic" width="15" height="15"><use href="#i-plus"/></svg>Add guest</button>
+          </div>
+          <div class="d-chiprow" id="rd-chips" role="tablist" aria-label="Filter guests"></div>
+          <div class="d-listwrap">
+            <div class="d-cols"><span></span><span>Name</span><span>Status</span><span>Table</span><span style="text-align:right">Actions</span></div>
+            <div id="rd-list"></div>
+          </div>
+          <div class="bulkbar d-bulk" id="rd-bulk" aria-live="polite">
+            <span class="cnt" id="rd-bulkcnt">0 selected</span>
+            <button class="bb link" data-selall>Select all shown</button>
+            <span class="grow"></span>
+            <button class="bb">Assign table</button>
+            <button class="bb">Message</button>
+            <button class="bb">Export</button>
+            <button class="x" data-clear aria-label="Clear selection"><svg class="ic" width="15" height="15"><use href="#i-x"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- five remaining states -->
+    <div class="frame-label" style="margin-bottom:14px"><span class="tag">The other five states · mobile 390-class frames</span></div>
+    <div class="stategrid">
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Loading</span></div>
+        <div class="frame mobile">
+          <div class="m-head" style="padding-bottom:14px">
+            <div class="toprow"><div><h3>Guest list</h3><div class="count">Loading…</div></div></div>
+          </div>
+          <div style="border-top:1px solid var(--border)">
+            <div class="skrow"><div class="sk skav"></div><div class="skcol"><div class="sk skl1"></div><div class="sk skl2"></div></div><div class="sk skpill"></div></div>
+            <div class="skrow"><div class="sk skav"></div><div class="skcol"><div class="sk skl1" style="width:48%"></div><div class="sk skl2" style="width:33%"></div></div><div class="sk skpill"></div></div>
+            <div class="skrow"><div class="sk skav"></div><div class="skcol"><div class="sk skl1" style="width:70%"></div><div class="sk skl2" style="width:45%"></div></div><div class="sk skpill"></div></div>
+            <div class="skrow"><div class="sk skav"></div><div class="skcol"><div class="sk skl1" style="width:55%"></div><div class="sk skl2" style="width:38%"></div></div><div class="sk skpill"></div></div>
+            <div class="skrow"><div class="sk skav"></div><div class="skcol"><div class="sk skl1" style="width:64%"></div><div class="sk skl2" style="width:41%"></div></div><div class="sk skpill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Empty</span></div>
+        <div class="frame mobile">
+          <div class="statebody">
+            <div class="bigic"><svg class="ic" width="24" height="24"><use href="#i-users"/></svg></div>
+            <h4>No guests yet</h4>
+            <p>Your list starts with one name. Add your ninongs and ninangs first — tables come later.</p>
+            <button class="btn btn-cta"><svg class="ic" width="15" height="15"><use href="#i-plus"/></svg>Add your first guest</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Locked</span></div>
+        <div class="frame mobile">
+          <div class="toprule-locked"></div>
+          <div class="ghost" aria-hidden="true">
+            <div class="grow-row"><div class="gav"></div><div class="gl w1"></div><div class="gl w2"></div></div>
+            <div class="grow-row"><div class="gav"></div><div class="gl w1" style="width:52%"></div><div class="gl w2"></div></div>
+            <div class="grow-row"><div class="gav"></div><div class="gl w1" style="width:38%"></div><div class="gl w2"></div></div>
+          </div>
+          <div class="lockcap">
+            <div class="lk"><svg class="ic" width="18" height="18"><use href="#i-lock"/></svg></div>
+            <h4>Your crew, on one roster</h4>
+            <p>Team seats come with Pro Vendor — assignments, day-of roles, and one tap to message everyone.</p>
+            <button class="btn btn-cta">See pricing</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Denied</span></div>
+        <div class="frame mobile">
+          <div class="toprule-denied"></div>
+          <div class="statebody denied">
+            <span class="permtag">No access</span>
+            <div class="bigic"><svg class="ic" width="24" height="24"><use href="#i-shieldx"/></svg></div>
+            <h4>This list isn't yours to open</h4>
+            <p>You're signed in as a coordinator without guest-list permission. Ask Maria Santos, the event owner, to grant it.</p>
+            <a class="qlink" href="#roster" onclick="return false">Request access</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Error</span></div>
+        <div class="frame mobile">
+          <div class="toprule-error"></div>
+          <div class="statebody errorst">
+            <div class="bigic"><svg class="ic" width="24" height="24"><use href="#i-alert"/></svg></div>
+            <h4>The list didn't load</h4>
+            <p>Nothing is wrong with your guest list — the request failed on the way. Try again.</p>
+            <button class="btn btn-ghost"><svg class="ic" width="15" height="15"><use href="#i-retry"/></svg>Retry</button>
+            <span class="refcode">REF · S89E-7Q2MKD</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="statefoot">
+      <strong>Empty ≠ Denied — this distinction is a shipped bug fix.</strong> Both arrive as
+      <span class="mono">count: 0</span> with no error; RLS denials and genuinely empty reads are the same value.
+      Denied therefore wears a different uniform — ink top rule, ink badge, tinted body, names who can grant access,
+      and never a create-CTA. If a surface can't prove the reader was <em>permitted</em>, it must not claim the data doesn't exist.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     02 · LEDGER
+     ============================================================ -->
+<section class="arch" id="ledger">
+  <div class="wrap">
+    <div class="arch-head">
+      <div>
+        <span class="kicker">Archetype 02 · Money</span>
+        <h2>Ledger</h2>
+        <p class="desc">
+          Money rows, grouped by category, every numeral right-aligned in Space Mono like a bank book.
+          The running total is <strong>furniture</strong> — pinned so it never scrolls away, and it rolls
+          when a row changes. Payment history hides inside the row until asked for.
+        </p>
+        <div class="routes">
+          <span class="r">/dashboard/[event]/budget</span>
+          <span class="r">/vendor-dashboard/earnings</span>
+          <span class="r">/admin/reconciliation</span>
+          <span class="r">/dashboard/[event]/payments</span>
+        </div>
+      </div>
+      <aside class="note">
+        <span class="kicker plain">Designer's note</span>
+        <ol>
+          <li><strong>Magnitude scans down one edge.</strong> All numerals right-aligned, tabular Space Mono — the eye reads the column of amounts the way a cashier reads a tape.</li>
+          <li><strong>The total is pinned, and it rolls.</strong> Log a payment and PAID/REMAINING count to their new values in ≤240ms — the ledger visibly absorbs the change instead of silently rewriting itself.</li>
+          <li><strong>Summary first, history on demand.</strong> Each row expands to its dated payments and receipts; collapsed, the ledger stays one screen of truth.</li>
+        </ol>
+      </aside>
+    </div>
+
+    <div class="frame-row">
+      <div class="frame-block">
+        <div class="frame-label">
+          <span class="tag">Mobile · 390</span><span class="tag state">Ideal</span>
+          <span class="hint">Tap a row for its payment history</span>
+        </div>
+        <div class="frame mobile">
+          <div class="l-head">
+            <div><h3>Budget</h3><div class="sub">Santos ✕ Reyes · Dec 2026 · Tagaytay</div></div>
+            <button class="btn btn-cta btn-sm"><svg class="ic" width="14" height="14"><use href="#i-plus"/></svg>Record payment</button>
+          </div>
+          <div class="l-scroll" id="lm-scroll">
+            <div id="lm-body"></div>
+            <div class="l-total">
+              <div class="cell"><div class="lab">Paid so far</div><span class="val paidc" data-roll="paid">₱0</span></div>
+              <div class="cell"><div class="lab">Remaining</div><span class="val" data-roll="rem">₱0</span></div>
+              <span class="grow"></span>
+              <span class="of" data-roll="of">of ₱0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block frame-scroll">
+        <div class="frame-label">
+          <span class="tag">Desktop · 1280</span><span class="tag state">Ideal</span>
+          <span class="hint">Expand a partial row and log the balance — watch the total roll</span>
+        </div>
+        <div class="frame desktop">
+          <div class="l-head" style="padding:18px 22px 12px">
+            <div><h3>Budget &amp; payments</h3><div class="sub">Santos ✕ Reyes · Dec 2026 · Villa Ardin, Tagaytay · 10 line items</div></div>
+            <button class="btn btn-cta"><svg class="ic" width="15" height="15"><use href="#i-plus"/></svg>Record payment</button>
+          </div>
+          <div class="l-scroll tall" id="ld-scroll">
+            <div id="ld-body"></div>
+            <div class="l-total" style="padding:12px 22px">
+              <div class="cell"><div class="lab">Paid so far</div><span class="val paidc" data-roll="paid">₱0</span></div>
+              <div class="cell"><div class="lab">Remaining</div><span class="val" data-roll="rem">₱0</span></div>
+              <span class="grow"></span>
+              <span class="of" data-roll="of">of ₱0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- five remaining states -->
+    <div class="frame-label" style="margin-bottom:14px"><span class="tag">The other five states</span></div>
+    <div class="stategrid">
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Loading</span></div>
+        <div class="frame mobile">
+          <div class="l-head" style="padding-bottom:14px"><div><h3>Budget</h3><div class="sub">Loading…</div></div></div>
+          <div style="border-top:1px solid var(--border)">
+            <div style="padding:13px 16px 4px"><div class="sk" style="height:9px;width:110px"></div></div>
+            <div class="skrow"><div class="skcol"><div class="sk skl1"></div><div class="sk skl2"></div></div><div class="sk sknum"></div></div>
+            <div class="skrow"><div class="skcol"><div class="sk skl1" style="width:50%"></div><div class="sk skl2" style="width:34%"></div></div><div class="sk sknum"></div></div>
+            <div class="skrow"><div class="skcol"><div class="sk skl1" style="width:66%"></div><div class="sk skl2" style="width:42%"></div></div><div class="sk sknum"></div></div>
+            <div style="padding:13px 16px 4px"><div class="sk" style="height:9px;width:88px"></div></div>
+            <div class="skrow"><div class="skcol"><div class="sk skl1" style="width:58%"></div><div class="sk skl2" style="width:36%"></div></div><div class="sk sknum"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Empty</span></div>
+        <div class="frame mobile">
+          <div class="statebody">
+            <div class="bigic"><svg class="ic" width="24" height="24"><use href="#i-receipt"/></svg></div>
+            <h4>No expenses yet</h4>
+            <p>Book a vendor and their package lands here as a line item — or add your first expense by hand.</p>
+            <button class="btn btn-cta"><svg class="ic" width="15" height="15"><use href="#i-plus"/></svg>Add an expense</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Locked</span></div>
+        <div class="frame mobile">
+          <div class="toprule-locked"></div>
+          <div class="ghost" aria-hidden="true">
+            <div class="grow-row"><div class="gl w1" style="width:50%"></div><div class="gl w2" style="width:22%"></div></div>
+            <div class="grow-row"><div class="gl w1" style="width:38%"></div><div class="gl w2" style="width:26%"></div></div>
+            <div class="grow-row"><div class="gl w1" style="width:56%"></div><div class="gl w2" style="width:20%"></div></div>
+          </div>
+          <div class="lockcap">
+            <div class="lk"><svg class="ic" width="18" height="18"><use href="#i-lock"/></svg></div>
+            <h4>Earnings, itemised</h4>
+            <p>Your per-booking earnings ledger comes with a vendor subscription — every peso in, dated and receipted.</p>
+            <button class="btn btn-cta">See pricing</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Denied</span></div>
+        <div class="frame mobile">
+          <div class="toprule-denied"></div>
+          <div class="statebody denied">
+            <span class="permtag">No access</span>
+            <div class="bigic"><svg class="ic" width="24" height="24"><use href="#i-shieldx"/></svg></div>
+            <h4>The money stays with the couple</h4>
+            <p>You hold a collaborator seat without budget permission. Ask Maria Santos to open the ledger to you — coordinators see it read-only.</p>
+            <a class="qlink" href="#ledger" onclick="return false">Request access</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Error</span></div>
+        <div class="frame mobile">
+          <div class="toprule-error"></div>
+          <div class="statebody errorst">
+            <div class="bigic"><svg class="ic" width="24" height="24"><use href="#i-alert"/></svg></div>
+            <h4>The ledger didn't load</h4>
+            <p>Your entries are safe — this screen just couldn't fetch them. Try again.</p>
+            <button class="btn btn-ghost"><svg class="ic" width="15" height="15"><use href="#i-retry"/></svg>Retry</button>
+            <span class="refcode">REF · S89E-4KDT2N</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="statefoot">
+      <strong>Amounts here are illustrative.</strong> The ledger shows a user's own figures, so demo pesos are fine —
+      but platform SKU prices never appear hardcoded anywhere; they resolve from the live catalog.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     03 · COMPARISON
+     ============================================================ -->
+<section class="arch" id="comparison">
+  <div class="wrap">
+    <div class="arch-head">
+      <div>
+        <span class="kicker">Archetype 03 · Choices</span>
+        <h2>Comparison</h2>
+        <p class="desc">
+          Two to four things side by side. Working memory holds 3–4 items, so a tier list that repeats every
+          feature for every tier is unreadable. This archetype shows the <strong>delta, never the repetition</strong>:
+          the higher tier says <em>"Everything in Solo, plus:"</em> and lists only what it adds — under 3–4 named
+          category groups. One card is visually the answer; the reference stays neutral. Nobody is greyed out.
+        </p>
+        <div class="routes">
+          <span class="r">/pricing</span>
+          <span class="r">/vendor-dashboard/subscription</span>
+          <span class="r">/explore/compare (vendor vs vendor)</span>
+          <span class="r">tier matrix (admin catalog)</span>
+        </div>
+      </div>
+      <aside class="note">
+        <span class="kicker plain">Designer's note</span>
+        <ol>
+          <li><strong>Delta, not repetition.</strong> Pro restates nothing from Solo; Enterprise restates nothing from Pro. The eye compares additions, so the cheapest and the dearest are legible at a glance.</li>
+          <li><strong>One answer, one axis, one CTA.</strong> The recommended card is ink-filled and carries the view's single terracotta CTA. The billing toggle sits above both cards — the axis that applies to everything lives above everything.</li>
+          <li><strong>Checkmarks are mute.</strong> Every tick is identical (gold, 1.75px). Presence of a row is the differentiator — a tick that carries meaning is a tick nobody reads.</li>
+        </ol>
+      </aside>
+    </div>
+
+    <div class="frame-row">
+      <div class="frame-block">
+        <div class="frame-label">
+          <span class="tag">Mobile · 390</span><span class="tag state">Ideal</span>
+          <span class="hint">Swipe between plans · snaps card by card</span>
+        </div>
+        <div class="frame mobile">
+          <div class="c-top">
+            <h3>Vendor plans</h3>
+            <p class="sub">0% commission on every booking, every tier. Pay for reach, never for the deal.</p>
+            <div class="seg" role="tablist" aria-label="Billing period" data-seg>
+              <button class="on" data-billing="28">28-day</button>
+              <button data-billing="annual">Annual</button>
+            </div>
+          </div>
+          <div class="snap" id="cm-snap"></div>
+          <div class="dots" id="cm-dots" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="frame-block frame-scroll">
+        <div class="frame-label">
+          <span class="tag">Desktop · 1280</span><span class="tag state">Ideal</span>
+          <span class="hint">Flip the billing toggle — the delta rows cascade back in</span>
+        </div>
+        <div class="frame desktop">
+          <div class="c-top" style="padding-top:32px">
+            <h3>Vendor plans</h3>
+            <p class="sub">0% commission on every booking, every tier. Pay for reach, never for the deal.</p>
+            <div class="seg" role="tablist" aria-label="Billing period" data-seg>
+              <button class="on" data-billing="28">28-day</button>
+              <button data-billing="annual">Annual</button>
+            </div>
+          </div>
+          <div class="gridcols" id="cd-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- five remaining states -->
+    <div class="frame-label" style="margin-bottom:14px"><span class="tag">The other five states</span></div>
+    <div class="stategrid">
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Loading</span></div>
+        <div class="frame mobile">
+          <div class="c-top" style="padding-bottom:0"><h3>Vendor plans</h3></div>
+          <div class="skcards">
+            <div class="skc"><div class="sk gl t" style="height:13px;width:60%"></div><div class="sk" style="height:20px;width:45%"></div><div class="sk" style="height:9px"></div><div class="sk" style="height:9px;width:80%"></div><div class="sk" style="height:9px;width:70%"></div></div>
+            <div class="skc"><div class="sk" style="height:13px;width:60%"></div><div class="sk" style="height:20px;width:45%"></div><div class="sk" style="height:9px"></div><div class="sk" style="height:9px;width:75%"></div><div class="sk" style="height:9px;width:85%"></div></div>
+          </div>
+          <div style="height:22px"></div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Empty</span></div>
+        <div class="frame mobile">
+          <div class="statebody">
+            <div class="bigic"><svg class="ic" width="24" height="24"><use href="#i-scale"/></svg></div>
+            <h4>Nothing to compare yet</h4>
+            <p>Tap <strong>Compare</strong> on any vendor card while you browse — pick two, and they line up here side by side.</p>
+            <button class="btn btn-cta">Browse vendors</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Locked</span></div>
+        <div class="frame mobile">
+          <div class="toprule-locked"></div>
+          <div class="cghost" aria-hidden="true">
+            <div class="col"><div class="sk gl t" style="animation:none"></div><div class="gl"></div><div class="gl" style="width:80%"></div><div class="gl" style="width:65%"></div></div>
+            <div class="col"><div class="sk gl t" style="animation:none"></div><div class="gl"></div><div class="gl" style="width:70%"></div><div class="gl" style="width:85%"></div></div>
+          </div>
+          <div class="lockcap">
+            <div class="lk"><svg class="ic" width="18" height="18"><use href="#i-lock"/></svg></div>
+            <h4>Price-Position compare</h4>
+            <p>See where your packages sit against your market band. Market Intel is Pro-and-up.</p>
+            <button class="btn btn-cta">See pricing</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Denied</span></div>
+        <div class="frame mobile">
+          <div class="toprule-denied"></div>
+          <div class="statebody denied">
+            <span class="permtag">No access</span>
+            <div class="bigic"><svg class="ic" width="24" height="24"><use href="#i-shieldx"/></svg></div>
+            <h4>Plan changes are owner-only</h4>
+            <p>You hold a team seat on Studio Habi. Only the account owner can switch tiers — ask Bea Villanueva to make the change.</p>
+            <a class="qlink" href="#comparison" onclick="return false">Request access</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame-block">
+        <div class="frame-label"><span class="tag state">Error</span></div>
+        <div class="frame mobile">
+          <div class="toprule-error"></div>
+          <div class="statebody errorst">
+            <div class="bigic"><svg class="ic" width="24" height="24"><use href="#i-alert"/></svg></div>
+            <h4>Plans didn't load</h4>
+            <p>The live catalog couldn't be reached — prices are never hardcoded, so there's nothing stale to show. Try again.</p>
+            <button class="btn btn-ghost"><svg class="ic" width="15" height="15"><use href="#i-retry"/></svg>Retry</button>
+            <span class="refcode">REF · S89E-9WMX4B</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="statefoot">
+      <strong>No SETNAYAN price appears in this file.</strong> Tier amounts render as
+      <span class="mono">₱—</span> and resolve from the live catalog at runtime. A hardcoded peso figure on a
+      platform SKU is a defect, not a placeholder.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex;gap:16px;align-items:baseline;flex-wrap:wrap">
+    <span class="wordmark">SETNAYAN</span>
+    <span class="kicker">Set na 'yan.</span>
+    <span>Data archetypes prototype · 2026-08-01 · Roster / Ledger / Comparison · light-locked · six states each</span>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   Shared
+   ============================================================ */
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const peso = n => '₱' + n.toLocaleString('en-PH');
+const svg = (id, s) => '<svg class="ic" width="'+s+'" height="'+s+'"><use href="#'+id+'"/></svg>';
+
+/* ============================================================
+   01 · ROSTER
+   ============================================================ */
+const FIRST = ['Maria','Jomar','Althea','Paolo','Bea','Carlo','Diwata','Ramon','Luningning','Andres',
+  'Teresita','Nico','Amihan','Gabriel','Corazon','Miguel','Rosario','Dante','Ligaya','Emman',
+  'Jasmine','Bayani','Pilar','Marco','Imelda','Rafael','Celia','Dodong','Nena','Isko',
+  'Marites','Jun','Lorna','Boyet','Vilma','Tonyo','Ineng','Popoy','Sining','Lito'];
+const LAST = ['Santos','Reyes','dela Cruz','Bautista','Ocampo','Villanueva','Mercado','Aquino','Ramos','Garcia',
+  'Torres','Domingo','Salvador','Navarro','Castillo','Aguilar','Panganiban','Lim','Tan','Dizon',
+  'Soriano','Pascual','Valdez','Corpuz','Buenaventura','Macaraeg'];
+const ROLES = ['Guest','Ninong','Ninang','Bridesmaid','Groomsman','Guest','Guest','Flower girl','Ring bearer','Guest'];
+
+const GUESTS = (() => {
+  const curated = [
+    {n:'Maria Santos', role:'Ninang', side:"Bride's side", st:'going',    tb:'T-01'},
+    {n:'Jomar Reyes',  role:'Ninong', side:"Groom's side", st:'going',    tb:'T-01'},
+    {n:'Kuya Ben Domingo', role:'Guest', side:"Groom's side", st:'going', tb:'T-02'},
+    {n:'Althea Ocampo', role:'Bridesmaid', side:"Bride's side", st:'pending', tb:'—'},
+    {n:'Paolo Bautista', role:'Groomsman', side:"Groom's side", st:'going', tb:'T-03'},
+    {n:'Lola Nena dela Cruz', role:'Guest', side:"Bride's side", st:'going', tb:'T-01'},
+    {n:'Bea Villanueva', role:'Guest', side:"Bride's side", st:'declined', tb:'—'},
+    {n:'Carlo Mercado', role:'Ninong', side:"Groom's side", st:'pending', tb:'T-04'},
+  ];
+  const out = curated.map((g,i)=>({id:'g'+i, av:i%4, ...g}));
+  let i = curated.length;
+  while (out.length < 208) {
+    const f = FIRST[(i*7)%FIRST.length], l = LAST[(i*11)%LAST.length];
+    const st = (i%17===5) ? 'declined' : ((i%5===2 || i%9===4) ? 'pending' : 'going');
+    const tb = (i%7===3 || st==='declined') ? '—' : 'T-' + String(1+(i%24)).padStart(2,'0');
+    out.push({id:'g'+i, av:i%4,
+      n: f+' '+l,
+      role: ROLES[i%ROLES.length],
+      side: (i%2 ? "Groom's side" : "Bride's side"),
+      st, tb});
+    i++;
+  }
+  return out;
+})();
+
+const STLABEL = {going:'Going', pending:'Pending', declined:'Declined'};
+const initials = n => n.replace(/^(Kuya|Lola|Lolo|Ate)\s+/,'').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const counts = {
+  all: GUESTS.length,
+  going: GUESTS.filter(g=>g.st==='going').length,
+  pending: GUESTS.filter(g=>g.st==='pending').length,
+  declined: GUESTS.filter(g=>g.st==='declined').length,
+  unassigned: GUESTS.filter(g=>g.tb==='—').length,
+};
+
+function rosterFrame(cfg){
+  const state = {q:'', chip:'all', sel:new Set()};
+  const list = document.getElementById(cfg.list);
+  const chipsEl = document.getElementById(cfg.chips);
+  const bulk = document.getElementById(cfg.bulk);
+  const bulkCnt = document.getElementById(cfg.bulkCnt);
+
+  const CHIPS = [
+    ['all','All'],['going','Going'],['pending','Pending'],['declined','Declined'],['unassigned','No table']
+  ];
+  chipsEl.innerHTML = CHIPS.map(([k,lab]) =>
+    '<button class="chip'+(k==='all'?' on':'')+'" data-chip="'+k+'" role="tab">'+lab+'<span class="n">'+counts[k]+'</span></button>'
+  ).join('');
+  chipsEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-chip]'); if(!b) return;
+    state.chip = b.dataset.chip;
+    chipsEl.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', c===b));
+    render();
+  });
+
+  document.getElementById(cfg.search).addEventListener('input', e => {
+    state.q = e.target.value.trim().toLowerCase(); render();
+  });
+
+  function filtered(){
+    return GUESTS.filter(g => {
+      if (state.chip==='unassigned' ? g.tb!=='—' : (state.chip!=='all' && g.st!==state.chip)) return false;
+      return !state.q || g.n.toLowerCase().includes(state.q);
+    });
+  }
+
+  function render(){
+    const rows = filtered();
+    document.getElementById(cfg.count).textContent =
+      cfg.mode==='mobile'
+        ? counts.all+' guests · '+counts.going+' going'
+        : rows.length+' shown · '+counts.going+' going of '+counts.all;
+    list.innerHTML = rows.map(g => cfg.mode==='mobile' ? mRow(g) : dRow(g)).join('');
+    syncSel();
+  }
+
+  const pillOf = g => '<span class="pill p-'+g.st+'">'+STLABEL[g.st]+'</span>';
+  const avOf = g => '<button class="avatar av'+g.av+'" data-av="'+g.id+'" aria-label="Select '+g.n+'">'+initials(g.n)+
+      '<span class="chk">'+svg('i-check',15)+'</span></button>';
+
+  function mRow(g){
+    return '<div class="m-swipe row" data-id="'+g.id+'">' +
+      '<div class="m-actions">'+
+        '<button class="a-table">'+svg('i-table',16)+'Table</button>'+
+        '<button class="a-remove">'+svg('i-trash',16)+'Remove</button>'+
+      '</div>'+
+      '<div class="m-rowc">'+ avOf(g) +
+        '<div class="m-info"><div class="nm">'+g.n+'</div>'+
+        '<div class="mt">'+g.role+' · '+g.side+' · <span class="tb">'+(g.tb==='—'?'No table':g.tb)+'</span></div></div>'+
+        pillOf(g) +
+      '</div></div>';
+  }
+  function dRow(g){
+    return '<div class="d-row row" data-id="'+g.id+'">'+ avOf(g) +
+      '<div class="nmwrap"><span class="nm">'+g.n+' <span class="side">· '+g.role+' · '+g.side+'</span></span></div>'+
+      '<div>'+pillOf(g)+'</div>'+
+      '<div class="tb">'+g.tb+'</div>'+
+      '<div class="d-acts"><button>Edit</button><button>Assign table</button><button class="danger">Remove</button></div>'+
+    '</div>';
+  }
+
+  function syncSel(){
+    list.querySelectorAll('.row').forEach(r => {
+      const on = state.sel.has(r.dataset.id);
+      r.classList.toggle('sel', on);
+    });
+    const n = state.sel.size;
+    bulkCnt.textContent = n + ' selected';
+    bulk.classList.toggle('on', n>0);
+  }
+
+  list.addEventListener('click', e => {
+    const av = e.target.closest('[data-av]');
+    if (av){
+      const id = av.dataset.av;
+      state.sel.has(id) ? state.sel.delete(id) : state.sel.add(id);
+      syncSel();
+      return;
+    }
+    // tapping an open swiped row closes it
+    const open = e.target.closest('.m-swipe.open');
+    if (open && !e.target.closest('.m-actions')) open.classList.remove('open');
+  });
+
+  bulk.querySelector('[data-clear]').addEventListener('click', () => { state.sel.clear(); syncSel(); });
+  const selAll = bulk.querySelector('[data-selall]');
+  if (selAll) selAll.addEventListener('click', () => {
+    filtered().forEach(g => state.sel.add(g.id)); syncSel();
+  });
+
+  /* swipe (mobile frame only) */
+  if (cfg.mode==='mobile'){
+    let cur=null, sx=0, sy=0, dx=0, dragging=false;
+    list.addEventListener('pointerdown', e => {
+      const r = e.target.closest('.m-swipe'); if(!r) return;
+      cur=r; sx=e.clientX; sy=e.clientY; dx=0; dragging=false;
+    });
+    list.addEventListener('pointermove', e => {
+      if(!cur) return;
+      dx = e.clientX - sx;
+      const dy = Math.abs(e.clientY - sy);
+      if(!dragging && Math.abs(dx) > 8 && Math.abs(dx) > dy){
+        dragging = true; cur.classList.add('dragging');
+      }
+      if(dragging){
+        const base = cur.classList.contains('open') ? -136 : 0;
+        const t = Math.min(0, Math.max(-152, base + dx));
+        cur.querySelector('.m-rowc').style.transform = 'translateX('+t+'px)';
+        e.preventDefault();
+      }
+    });
+    const end = () => {
+      if(!cur) return;
+      if(dragging){
+        const base = cur.classList.contains('open') ? -136 : 0;
+        const t = base + dx;
+        list.querySelectorAll('.m-swipe.open').forEach(r => { if(r!==cur) r.classList.remove('open'); });
+        cur.classList.toggle('open', t < -64);
+        cur.querySelector('.m-rowc').style.transform = '';
+        cur.classList.remove('dragging');
+      }
+      cur = null; dragging = false;
+    };
+    list.addEventListener('pointerup', end);
+    list.addEventListener('pointercancel', end);
+  }
+
+  render();
+}
+
+rosterFrame({mode:'mobile',  list:'rm-list', chips:'rm-chips', search:'rm-search', count:'rm-count', bulk:'rm-bulk', bulkCnt:'rm-bulkcnt'});
+rosterFrame({mode:'desktop', list:'rd-list', chips:'rd-chips', search:'rd-search', count:'rd-count', bulk:'rd-bulk', bulkCnt:'rd-bulkcnt'});
+
+/* ============================================================
+   02 · LEDGER
+   ============================================================ */
+const LEDGER = [
+  {cat:'Venue & Catering', items:[
+    {id:'v1', n:'Villa Ardin — garden venue', m:'Tagaytay · booked Feb 02', total:180000, hist:[
+      {d:'Mar 14', w:'BDO transfer', a:90000},{d:'May 02', w:'BDO transfer', a:90000}]},
+    {id:'v2', n:'Kusina ni Aling Nena — catering', m:'150 pax · buffet + grazing table', total:225000, hist:[
+      {d:'Apr 10', w:'GCash', a:75000},{d:'Jun 21', w:'GCash', a:50000}]},
+    {id:'v3', n:'Cebu lechon — 3 belly', m:'Delivery to venue, day-of', total:18500, hist:[]},
+  ]},
+  {cat:'Photography & Video', items:[
+    {id:'p1', n:'Studio Habi — photo + video + SDE', m:'2 shooters · same-day edit', total:95000, hist:[
+      {d:'Mar 30', w:'BDO transfer', a:40000}]},
+    {id:'p2', n:'Hiraya Films — drone coverage', m:'Ceremony + reception flyovers', total:12000, hist:[]},
+  ]},
+  {cat:'Attire & Beauty', items:[
+    {id:'a1', n:"Tesoro's — barong + gown", m:'Fitted May 25 · pickup Nov 20', total:64000, hist:[
+      {d:'Feb 18', w:'BDO transfer', a:32000},{d:'May 25', w:'GCash', a:32000}]},
+    {id:'a2', n:'Marikina shoes — bridal party', m:'7 pairs, made to measure', total:21500, hist:[
+      {d:'Apr 02', w:'GCash', a:21500}]},
+  ]},
+  {cat:'Coordination', items:[
+    {id:'c1', n:'Kasama Events — full coordination', m:'Ate Lorna + 3 day-of staff', total:55000, hist:[
+      {d:'Mar 05', w:'GCash', a:30000}]},
+  ]},
+  {cat:'Music & Entertainment', items:[
+    {id:'m1', n:'Harana Strings — live band', m:'2 sets · ceremony + reception', total:40000, hist:[]},
+    {id:'m2', n:'Jomar Reyes — host / emcee', m:'Reception program, 4 hrs', total:15000, hist:[
+      {d:'Jun 30', w:'GCash', a:15000}]},
+  ]},
+];
+const paidOf = it => it.hist.reduce((s,h)=>s+h.a,0);
+const stOf = it => { const p = paidOf(it); return p>=it.total ? 'paid' : (p>0 ? 'partial' : 'unpaid'); };
+const LSTLAB = {paid:'Paid', partial:'Partial', unpaid:'Unpaid'};
+
+function ledgerTotals(){
+  let paid=0, total=0;
+  LEDGER.forEach(g=>g.items.forEach(it=>{ paid+=Math.min(paidOf(it),it.total); total+=it.total; }));
+  return {paid, total, rem: total-paid};
+}
+
+function rollNumber(el, from, to, prefix){
+  prefix = prefix || '₱';
+  if (REDUCED || from===to){ el.textContent = prefix + to.toLocaleString('en-PH'); return; }
+  const t0 = performance.now(), DUR = 240;
+  el.classList.add('tick');
+  function step(t){
+    const p = Math.min(1,(t-t0)/DUR);
+    const e = 1 - Math.pow(1-p,3); // ease-out, ~ the house curve
+    el.textContent = prefix + Math.round(from+(to-from)*e).toLocaleString('en-PH');
+    if(p<1) requestAnimationFrame(step);
+    else setTimeout(()=>el.classList.remove('tick'),60);
+  }
+  requestAnimationFrame(step);
+}
+
+const ledgerFrames = [];
+function ledgerFrame(cfg){
+  const body = document.getElementById(cfg.body);
+  const scroll = document.getElementById(cfg.scroll);
+  const open = new Set();
+  let lastTotals = {paid:0, rem:0};
+
+  function amtBlock(it){
+    const p = paidOf(it), st = stOf(it);
+    let sub = '';
+    if (st==='partial') sub = '<div class="togo">'+peso(it.total-p)+' to go</div>';
+    return '<div class="l-amt"><div class="a">'+peso(it.total)+'</div>'+sub+
+      '<div><span class="pill p-'+st+'">'+LSTLAB[st]+'</span></div></div>';
+  }
+  function histBlock(it, desktop){
+    const p = paidOf(it);
+    const pays = it.hist.length
+      ? it.hist.map(h=>'<div class="l-pay"><span class="d">'+h.d+'</span><span class="w">'+h.w+'</span>'+
+          '<a class="rcpt" href="#ledger" onclick="return false">Receipt</a><span class="amt">'+peso(h.a)+'</span></div>').join('')
+      : '<div class="l-none">No payments logged yet.</div>';
+    const demo = p < it.total
+      ? '<button class="l-demo" data-demo="'+it.id+'">Log remaining '+peso(it.total-p)+' — demo</button>' : '';
+    return '<div class="l-hist"><div><div class="l-histin'+(desktop?' ld-histin':'')+'">'+pays+demo+'</div></div></div>';
+  }
+
+  function render(){
+    body.innerHTML = LEDGER.map(g => {
+      const sub = g.items.reduce((s,it)=>s+it.total,0);
+      const head = '<div class="l-cat'+(cfg.desktop?' ld-cat':'')+'"><span class="cn">'+g.cat+'</span><span class="cs">'+peso(sub)+'</span></div>';
+      const rows = g.items.map(it => {
+        const x = open.has(it.id) ? ' x' : '';
+        const line = cfg.desktop
+          ? '<button class="l-line ld-line" data-x="'+it.id+'"><span class="l-chev">'+svg('i-chevdown',15)+'</span>'+
+            '<span class="l-nm"><span class="n">'+it.n+'</span><span class="m" style="display:block">'+it.m+'</span></span>'+
+            '<span><span class="pill p-'+stOf(it)+'">'+LSTLAB[stOf(it)]+'</span></span>'+
+            '<span class="l-amt"><span class="a">'+peso(it.total)+'</span>'+
+              (stOf(it)==='partial' ? '<span class="togo" style="display:block">'+peso(it.total-paidOf(it))+' to go</span>' : '')+
+            '</span></button>'
+          : '<button class="l-line" data-x="'+it.id+'"><span class="l-chev">'+svg('i-chevdown',15)+'</span>'+
+            '<span class="l-nm"><span class="n">'+it.n+'</span><span class="m" style="display:block">'+it.m+'</span></span>'+
+            amtBlock(it)+'</button>';
+        return '<div class="l-row'+x+'" data-row="'+it.id+'">'+line+histBlock(it, cfg.desktop)+'</div>';
+      }).join('');
+      return head + rows;
+    }).join('');
+    syncTotals(false);
+  }
+
+  function syncTotals(animate){
+    const t = ledgerTotals();
+    const paidEl = scroll.querySelector('[data-roll="paid"]');
+    const remEl  = scroll.querySelector('[data-roll="rem"]');
+    scroll.querySelector('[data-roll="of"]').textContent = 'of ' + peso(t.total);
+    if (animate){
+      rollNumber(paidEl, lastTotals.paid, t.paid);
+      rollNumber(remEl,  lastTotals.rem,  t.rem);
+    } else {
+      paidEl.textContent = peso(t.paid);
+      remEl.textContent  = peso(t.rem);
+    }
+    lastTotals = {paid:t.paid, rem:t.rem};
+  }
+
+  body.addEventListener('click', e => {
+    const demo = e.target.closest('[data-demo]');
+    if (demo){
+      const id = demo.dataset.demo;
+      LEDGER.forEach(g=>g.items.forEach(it=>{
+        if(it.id===id){ it.hist.push({d:'Today', w:'GCash', a: it.total - paidOf(it)}); }
+      }));
+      ledgerFrames.forEach(f => f.refresh(id));
+      return;
+    }
+    const line = e.target.closest('[data-x]');
+    if (line){
+      const id = line.dataset.x;
+      open.has(id) ? open.delete(id) : open.add(id);
+      line.closest('.l-row').classList.toggle('x', open.has(id));
+    }
+  });
+
+  const api = {
+    refresh(keepOpenId){
+      if (keepOpenId) open.add(keepOpenId);
+      const prev = {...lastTotals};
+      render();
+      lastTotals = prev;      // restore so the roll animates from the pre-change value
+      syncTotals(true);
+    }
+  };
+  ledgerFrames.push(api);
+  render();
+}
+
+ledgerFrame({body:'lm-body', scroll:'lm-scroll', desktop:false});
+ledgerFrame({body:'ld-body', scroll:'ld-scroll', desktop:true});
+
+/* ============================================================
+   03 · COMPARISON
+   ============================================================ */
+const TIERS = [
+  {key:'solo', name:'Solo', tag:'For the one-person studio finding its footing.', base:null, cta:'Choose Solo', groups:[
+    {h:'Your storefront', rows:['Public vendor page + booking inquiries','One service category','Gallery — 12 photos']},
+    {h:'Your team', rows:['One seat — just you']},
+    {h:'Included', rows:['Chat with couples','Calendar + client list','0% commission on every booking']},
+  ]},
+  {key:'pro', name:'Pro Vendor', tag:'For the studio that books every weekend.', base:'Solo', hot:true,
+   eyebrow:'Most vendors choose this', cta:'Choose Pro Vendor', groups:[
+    {h:'Reach & insight', rows:['Market Intel — Demand Radar','Market Intel — Price-Position','Priority placement in Explore']},
+    {h:'Your storefront', rows:['Up to five service categories','Unlimited gallery']},
+    {h:'Your team', rows:['Three team seats']},
+  ]},
+  {key:'ent', name:'Enterprise', tag:'For crews that run three events a day.', base:'Pro Vendor', cta:'Talk to us', groups:[
+    {h:'Your team', rows:['Up to ten team seats']},
+    {h:'Reach & insight', rows:['100 km service reach']},
+    {h:'Your storefront', rows:['Unlimited service categories']},
+    {h:'Included', rows:['Priority support']},
+  ]},
+];
+
+function tierCard(t){
+  const rows = gs => gs.map(g =>
+    '<div class="grp"><div class="gh">'+g.h+'</div><ul class="'+(t.base?'delta':'')+'">'+
+    g.rows.map((r,i)=>'<li style="transition-delay:'+(i*30)+'ms">'+svg('i-check',14)+'<span>'+r+'</span></li>').join('')+
+    '</ul></div>').join('');
+  return '<div class="tiercard'+(t.hot?' hot':'')+'" data-tier="'+t.key+'">'+
+    '<div class="eyebrow">'+(t.eyebrow||'')+'</div>'+
+    '<h4>'+t.name+'</h4><div class="tag">'+t.tag+'</div>'+
+    '<div class="price"><span class="amt">₱—</span><span class="unit" data-unit>/ 28 days</span></div>'+
+    '<a class="seep" href="#comparison" onclick="return false">See pricing</a>'+
+    (t.hot
+      ? '<button class="btn btn-cta">'+t.cta+'</button>'
+      : '<button class="btn btn-ghost" style="justify-content:center">'+t.cta+'</button>')+
+    (t.base ? '<div class="pivot">Everything in '+t.base+', plus:</div>' : '<div class="pivot" style="border-top-color:transparent;padding-top:4px"></div>')+
+    rows(t.groups)+
+  '</div>';
+}
+
+const cardsHTML = TIERS.map(tierCard).join('');
+document.getElementById('cm-snap').innerHTML = cardsHTML;
+document.getElementById('cd-grid').innerHTML = cardsHTML;
+
+/* delta cascade — on scroll into view, and replayed on billing flip */
+const deltas = document.querySelectorAll('.delta');
+if (!REDUCED){
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting){ e.target.classList.add('play'); io.unobserve(e.target); }
+  }), {threshold:.35});
+  deltas.forEach(d => io.observe(d));
+} else {
+  deltas.forEach(d => d.classList.add('play'));
+}
+function replayDeltas(){
+  if (REDUCED) return;
+  deltas.forEach(d => d.classList.remove('play'));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>deltas.forEach(d => d.classList.add('play'))));
+}
+
+/* billing toggle — the axis above both cards; both frames stay in sync */
+document.querySelectorAll('[data-seg]').forEach(seg => {
+  seg.addEventListener('click', e => {
+    const b = e.target.closest('[data-billing]'); if(!b) return;
+    const mode = b.dataset.billing;
+    document.querySelectorAll('[data-seg] button').forEach(x =>
+      x.classList.toggle('on', x.dataset.billing===mode));
+    document.querySelectorAll('[data-unit]').forEach(u =>
+      u.textContent = mode==='28' ? '/ 28 days' : '/ year');
+    replayDeltas();
+  });
+});
+
+/* mobile snap dots + start on the answer card */
+const snap = document.getElementById('cm-snap');
+const dotsEl = document.getElementById('cm-dots');
+dotsEl.innerHTML = TIERS.map((_,i)=>'<i'+(i===1?' class="on"':'')+'></i>').join('');
+const dots = [...dotsEl.children];
+snap.addEventListener('scroll', () => {
+  const cards = [...snap.children];
+  const mid = snap.scrollLeft + snap.clientWidth/2;
+  let best=0, bd=1e9;
+  cards.forEach((c,i)=>{ const d=Math.abs(c.offsetLeft+c.offsetWidth/2-mid); if(d<bd){bd=d;best=i;} });
+  dots.forEach((d,i)=>d.classList.toggle('on', i===best));
+}, {passive:true});
+requestAnimationFrame(()=>{
+  const pro = snap.children[1];
+  if (pro) snap.scrollLeft = pro.offsetLeft - (snap.clientWidth - pro.offsetWidth)/2;
+});
+
+/* ============================================================
+   Anchor-nav scrollspy
+   ============================================================ */
+const spyLinks = document.querySelectorAll('[data-spy]');
+const spy = new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting)
+    spyLinks.forEach(a => a.classList.toggle('active', a.dataset.spy===e.target.id));
+  });
+}, {rootMargin:'-20% 0px -70% 0px'});
+['roster','ledger','comparison'].forEach(id => spy.observe(document.getElementById(id)));
+</script>
+</body>
+</html>

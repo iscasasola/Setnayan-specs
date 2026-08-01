@@ -37,10 +37,48 @@
 
 ## 1 · The hard constraints — do NOT change these
 
-**⚠ PALETTE SUPERSEDED 2026-07-31 (owner):** *"background color like facebook which is white, then mandarin
-orange and gold buttons/highlights."* This **breaks the `Atelier + glass = FINAL` lock** (gold-only accent,
-warm alabaster) and reverses the "stay inside the lock" answer given earlier the same day. Recorded as a
-deliberate supersede. **Typography is untouched and remains locked.**
+> # 🛑 STOP — §1 IS OUT OF DATE. READ THIS BEFORE USING ANY VALUE BELOW.
+>
+> **Corrected 2026-08-01.** Two claims in this section are no longer true, and both were acted on by a
+> design agent before being caught. The block below is kept only so the history reads straight — **do not
+> take a colour or a theme instruction from it.**
+>
+> ### ① The palette is NOT mandarin. It is TERRACOTTA, and it is LOCKED.
+> Owner locked *Warm Editorial Archive* on **2026-08-01** (*"no stay with terracotta"* → *"lock it"*),
+> superseding the mandarin/Facebook-grey direction recorded below **and** the gold-CTA half of the
+> 2026-07-12 Atelier lock. Shipped in PR #3988.
+>
+> ```
+> page + card   #FDFBF7   soft cream   (page and card are the SAME value — separate with border + shadow)
+> body text     #2C2A29   espresso     13.82:1 AAA
+> CTA fill      #C24E25   terracotta   hover #B04722 · active #9D3F1E
+> CTA label     #FDFBF7   ← CREAM, NOT WHITE. This exact pairing is 4.61:1 AA.
+> highlight     #A9834B   gold — UI + large text ONLY (3.37:1). Text escalation: #8A6B39 (4.79:1).
+> links + 2nd   #3B4E67   slate indigo 8.22:1 AAA
+> ```
+> 🪤 **Size the CTA against CREAM, never white.** `#C75026` passes on white (4.56:1) and **fails** on the
+> cream the app actually renders (4.41:1). A white-background contrast check waves that failure through.
+> 🪤 **There is no "tech blue" in this codebase.** Every blue is Meta's sanctioned Facebook mark on the
+> OAuth/import controls or a `paperwork` status chip. Do not go hunting for one to replace.
+> 🛡 Enforced by `apps/web/lib/palette-lock.test.ts`, which derives contrast from the live tokens.
+>
+> ### ② "Both themes are mandatory" is FALSE and has been since 2026-06-04.
+> §1 below says the app *"ships a runtime theme picker."* It does not. Owner directive, quoted verbatim in
+> `apps/web/app/_components/theme-provider.tsx:11` — *"disable this and just always keep it light theme."*
+> `setMode` is a no-op, the bootstrap strips `.dark` before first paint, and `globals.css` carries no
+> `prefers-color-scheme` rule, so **every `dark:` variant is inert.**
+> ⇒ **Design ONE theme per file, not two.** Obsidian surfaces (Alaala, gallery, lightbox) are dark because
+> *those surfaces* are dark — not because a mode exists. Re-enabling light/dark/auto is a small revert but
+> an **owner decision**, not something a redesign may assume.
+>
+> Full reasoning: [`Public_Website_Design_Foundation_2026-08-01.md`](Public_Website_Design_Foundation_2026-08-01.md)
+> §3.1 and the two `DECISION_LOG.md` rows dated 2026-08-01.
+
+**⚠ SUPERSEDED — HISTORY ONLY, DO NOT USE.** *(2026-07-31, owner):* *"background color like facebook which
+is white, then mandarin orange and gold buttons/highlights."* This broke the `Atelier + glass = FINAL` lock
+(gold-only accent, warm alabaster) and reversed the "stay inside the lock" answer given earlier the same
+day. It was itself superseded the next day — see the correction above. **Typography was untouched by both
+turns and remains locked.**
 
 ```
 FONTS      Hanken Grotesk   (the UI family — all weights)          ← UNCHANGED, still locked
@@ -69,8 +107,12 @@ INK        light  #1B1A17 (17.4:1 on white · 15.5:1 on #F0F2F5)   soft  #4F535B
            dark   #FBFAF7                                          soft  #B6B9BE
 ```
 
-**Both themes are mandatory.** Every archetype must be designed light *and* dark — the app ships a
-runtime theme picker and the Alaala surfaces are obsidian by design.
+~~**Both themes are mandatory.** Every archetype must be designed light *and* dark — the app ships a
+runtime theme picker and the Alaala surfaces are obsidian by design.~~
+**❌ FALSE — corrected 2026-08-01. See the STOP block at the top of §1.** The app has been **light-locked
+since 2026-06-04**; the theme picker described here was removed two months before this brief was written.
+**Design ONE theme.** Obsidian surfaces (Alaala, gallery, lightbox) are dark because those surfaces are
+dark, not because a mode exists.
 
 **Brand:** SETNAYAN, spelled in full, never STNYN. Kicker phrase: *Set na 'yan.*
 
