@@ -17,9 +17,9 @@
 | | |
 |---|---|
 | ✅ **DONE — colour, on all 401 routes** | PR #3988 merged. Terracotta palette resolves from CSS vars ⇒ **1,263 `bg-cream` call sites** turned over with **zero component edits**. |
-| ⏳ **IN FLIGHT — the guard that LOCKS it** | **PR [#4030](https://github.com/iscasasola/setnayan-platform/pull/4030), auto-merge armed.** ⚠ **FIRST ACTION FOR THE NEXT SESSION: confirm it landed.** `git merge-base --is-ancestor <sha> origin/main` — **not** the PR status. If it did not merge, re-open it: the guard is `apps/web/lib/palette-lock.test.ts`, 8 tests, and it was verified 8/8 against main's live tokens. **Until it lands, terracotta is live on `main` with NOTHING enforcing it.** |
+| ✅ **DONE — the guard that LOCKS it** | **PR [#4030](https://github.com/iscasasola/setnayan-platform/pull/4030) MERGED 2026-08-02**, confirmed by ancestry (`git merge-base --is-ancestor 99fd30e79 origin/main`), not PR status. ⚠ **It sat OPEN for a day because auto-merge does not report a red check as a blocker in the PR state** — `mergeStateStatus` read `BLOCKED`/`UNKNOWN` while `typecheck + lint` had genuinely FAILED: CI rejected the guard on `noUncheckedIndexedAccess` grounds (regex capture groups and array destructures are "possibly undefined"), which cannot reproduce under `tsx --test`. Fixed by narrowing the hex capture through `assert.ok` and computing luminance per-channel instead of destructuring. 🔑 **"Auto-merge armed" is not "will merge" — read `gh pr checks`, not the PR status.** |
 | ✅ **DONE — the design language** | 12 screen archetypes + 7 overlay types, drafted by Fable, verified, committed to `prototypes/archetype_*_2026-08-01.html` (5 files, ~8,900 lines). |
-| ⏸ **NOT STARTED — the port** | ~40 design units. **Nothing from the archetypes has entered `apps/web`.** |
+| ▶ **STARTED — the port** | ~40 design units. **`design#1` and `design#2` are DONE (2026-08-02, PRs [#4064](https://github.com/iscasasola/setnayan-platform/pull/4064) + [#4065](https://github.com/iscasasola/setnayan-platform/pull/4065)) — do NOT rebuild them.** Everything else is untouched; `design#3` (the shell) is next and is the architectural one. |
 | 🔴 **BLOCKING — nobody has looked at the prototypes** | All verification was DOM-level + static analysis; the shared browser pane blanked while backgrounded. Static checks prove tokens and motion budgets. They cannot tell you whether it is *good*. **Owner review is the gate before porting anything aesthetic.** |
 
 **The locked palette — do not re-derive, do not re-litigate:**
@@ -56,30 +56,45 @@ and "none" is a finding to report, not a licence to draw.
 ## 2 · Execution items (register schema §3)
 
 ```
-- id:            design#1
+- id:            design#1                                    ✅ DONE 2026-08-02 · PR #4064
   title:         Port the six-state system (empty · loading · locked · denied · error)
-  type:          code
-  depends_on:    []
-  parallel_safe: yes
-  safety_gate:   NONE
-  touches:       apps/web/app/_components/states/* (new) · no existing file rewritten
-  verify:        tsx --test + next lint; CI production build is the ONLY RSC detector
-  why_first:     Prod is PRE-LAUNCH-EMPTY — states 2-5 are what every user meets before
-                 they ever see a populated screen. Empty and Denied are currently
-                 indistinguishable, which is a LIVE defect (see §4). Correctness here is
-                 FUNCTIONAL, not aesthetic ⇒ it does NOT need the owner-review gate.
+  shipped:       apps/web/app/_components/states/ — surface-state.ts (the resolver),
+                 empty-state.tsx · denied-state.tsx · locked-state.tsx · error-state.tsx ·
+                 loading-skeleton.tsx, + surface-state.test.ts.
+                 ⚠ ADDITIVE ONLY — nothing is MOUNTED on a route yet. Adopting these
+                 surface-by-surface is the follow-up, and it is where the live defect
+                 actually gets closed.
+  the_rule:      resolveSurfaceState() denies unless readPermitted === true. undefined,
+                 null and false ALL resolve to 'denied' — because an RLS denial and an
+                 empty read are the same value (count: 0, no error). EmptyState's
+                 readPermitted prop is typed as the LITERAL true, so false is not
+                 expressible. Precedence: loading → error → locked → permission → count,
+                 with locked ABOVE permission (a free-tier reader meets the upgrade gate,
+                 not a slate denial).
+  verified:      216-combination sweep, mutation-tested (loosening to === false fails 2 of
+                 4). 6,269/6,269 unit tests, tsc + lint clean.
 
-- id:            design#2
+- id:            design#2                                    ✅ DONE 2026-08-02 · PR #4065
   title:         Port the overlay grammar (sheet · confirm · toast) as shared primitives
-  type:          code
-  depends_on:    []
-  parallel_safe: yes            # disjoint files from #1
-  safety_gate:   NONE
-  touches:       apps/web/app/_components/sheet.tsx · confirm-dialog.tsx · toast/*
-  verify:        tsx --test + next lint + a11y (focus trap, aria-modal, focus return)
-  note:          Replaces ~55 ad-hoc dialog call sites. Prototype
-                 prototypes/archetype_overlays_2026-08-01.html has a working engine +
-                 25 behavioural assertions already written against it.
+  ⚠ THE PREMISE BELOW WAS WRONG — this is the finding, not a footnote:
+                 "Replaces ~55 ad-hoc dialog call sites" does not survive measurement.
+                 53 files render a dialog and **43 ALREADY route through the shipped
+                 primitives** (Sheet · ConfirmDialog · useModalA11y, all from the
+                 2026-06-25 checkout audit). The grammar was never missing. Writing
+                 "shared primitives" would have duplicated three working files.
+  what_shipped:  ADOPTION, ~50 lines. Four overlays claimed aria-modal="true" with no
+                 Escape, no Tab trap, no focus restore — papic-buy-shell (GUEST-FACING,
+                 opens by itself over the viewfinder at the out-of-shots moment, no
+                 Escape at all) · report-page-button (public pages, signed-out visitors) ·
+                 wipe-ban-dialog (destructive) · guest-review-qr (had Escape, lacked the
+                 trap + restore). All four now call the existing useModalA11y.
+  the_guard:     apps/web/lib/modal-a11y-adoption.test.ts — fails on any aria-modal
+                 without shared focus management. Pins a 20-file floor so a mis-pointed
+                 walk cannot pass silently; exemptions are EXACT PATHS with a written
+                 reason, re-validated by a second test. One exemption: life-flash/flash.tsx
+                 hand-rolls the complete contract correctly and predates the hook.
+  verified:      mutation-tested TWICE (watched failing on the 2 it found, and again
+                 after stripping the Papic fix). 6,267/6,267, tsc + lint clean.
 
 - id:            design#3
   title:         Persistent app shell + route transitions, behind a flag
@@ -176,9 +191,9 @@ and "none" is a finding to report, not a licence to draw.
 
 | Phase | Items | Note |
 |---|---|---|
-| ✅ 0 | Palette | Done |
-| **1** | `#1` + `#2` in parallel | **Start here.** No owner gate, disjoint files, both fix live defects. |
-| 2 | `#3` shell | The architectural one. Flag-dark. |
+| ✅ 0 | Palette | Done — and the guard that locks it merged 2026-08-02 (#4030). |
+| ✅ 1 | `#1` + `#2` | Done 2026-08-02 (#4064 + #4065). ⏭ The states primitives are built but **not mounted anywhere** — adopting them per surface is open follow-up work. |
+| **2** | `#3` shell | **Start here now.** The architectural one. Flag-dark. |
 | 3 | `#0-GATE` owner review | Unblocks everything aesthetic. |
 | 4 | `#4` reconcile · `#6` public | Cheapest real progress. |
 | 5 | `#5` couple → `#7` gaps → `#8` vendor → `#9` admin | Admin last. |
@@ -204,7 +219,21 @@ and "none" is a finding to report, not a licence to draw.
   component is a defect. (A customer's own budget amount is data, not our pricing — that's fine.)
 - 🪤 **A test that cannot fail is worse than none.** Found twice on 2026-08-01: a palette guard comparing
   hand-typed hexes would drift green, and an overlay smoke test "passed" because the overlay never opened.
-  Prove the assertion fails before trusting it.
+  Prove the assertion fails before trusting it. **A file-walking guard has a third version of this failure:
+  point it at the wrong root and it scans zero files and passes forever** — `modal-a11y-adoption.test.ts`
+  pins a minimum scanned-file count for exactly that reason.
+- 🪤 **"Auto-merge armed" is not "will merge."** PR #4030 sat OPEN for a day with auto-merge on and a
+  genuinely FAILED `typecheck + lint`; the PR's own `mergeStateStatus` said `BLOCKED`/`UNKNOWN` and named
+  nothing. **Read `gh pr checks <#>`, never the PR state**, and confirm a landing with
+  `git merge-base --is-ancestor`.
+- 🪤 **CI's typechecker is stricter than `tsx --test` — `noUncheckedIndexedAccess` is the usual culprit.**
+  A regex capture group (`m[1]`) and an array destructure (`const [r,g,b] = …`) are "possibly undefined"
+  to `tsc` and completely fine at runtime, so a test file can pass locally 8/8 and fail the build. Narrow
+  through `assert.ok`, or index inside a helper.
+- 🔑 **VERIFY A CONTRACT ITEM'S PREMISE BEFORE BUILDING IT.** design#2 said "~55 ad-hoc dialog call
+  sites"; the real number was **10, of which 43 already used the shipped primitives**. Building what it
+  asked for would have duplicated three working files. The contract's file:line targets are sound; its
+  claims about how much is MISSING are audit-time inferences. Count first.
 
 ---
 

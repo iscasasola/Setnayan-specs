@@ -277,9 +277,9 @@ Supporting: [`03_Strategy/Design_Gap_Pass_2026-08-01.md`](03_Strategy/Design_Gap
 
 | | |
 |---|---|
-| ✅ DONE | **Colour on all 401 routes** (PR #3988) — resolves from CSS vars ⇒ 1,263 call sites, zero component edits. Locked by `apps/web/lib/palette-lock.test.ts`. |
+| ✅ DONE | **Colour on all 401 routes** (PR #3988) — resolves from CSS vars ⇒ 1,263 call sites, zero component edits. Locked by `apps/web/lib/palette-lock.test.ts`, **merged 2026-08-02 (PR #4030)** after a day stuck on a CI-only `noUncheckedIndexedAccess` failure. 🪤 **"auto-merge armed" ≠ "will merge" — read `gh pr checks`, not the PR state.** |
 | ✅ DONE | **12 archetypes + 7 overlay types** drafted → `prototypes/archetype_*_2026-08-01.html` (5 files, ~8,900 lines). |
-| ⏸ NOT STARTED | **The port.** Nothing from the archetypes has entered `apps/web`. |
+| ▶ STARTED | **The port — `design#1` + `design#2` DONE 2026-08-02 (PRs #4064 + #4065), do NOT rebuild.** Six-state primitives live at `apps/web/app/_components/states/` (⚠ built but **not mounted on any route yet**). 🔑 **`design#2`'s premise was WRONG**: it claimed ~55 ad-hoc dialogs; **43 of 53 already used the shipped primitives**, so the work was adoption + a guard, not new primitives. **▶ NEXT: `design#3`, the shell.** |
 | 🔴 GATE | **`design#0-GATE` — owner has NOT seen the prototypes.** Blocks every aesthetic item (#4 #5 #6 #8 #9). Does NOT block #1/#2 (functional). |
 
 **Start with `design#1` (six-state system) + `design#2` (overlay grammar) — parallel-safe, disjoint files, no owner gate, both close live defects.**
