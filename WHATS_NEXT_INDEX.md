@@ -6,6 +6,63 @@
 
 ---
 
+## 0 · THE OWNER'S QUEUE — everything waiting on you, in one place (compiled 2026-08-02)
+
+> Written in plain English on purpose. Each row says **what changes for a real person** if you do it.
+> Claude cannot do any of these: they need your accounts, your judgement, or your signature.
+> When one is done, tick it here — this is the only page that lists them all.
+
+### 🔴 Do these first — money, law, or something already live
+
+| # | What to do | What happens if you do it | What happens if you don't |
+|---|---|---|---|
+| 1 | **Look at the new design prototypes.** | Unlocks all the visual redesign work — it is fully drawn and waiting on your eyes. | Nothing visual can start. This blocks the biggest stream we have. |
+| 2 | **Delete 2 government-ID files** left over in vendor verification storage. | Removes real people's ID documents we no longer need. | We are holding identity documents with no reason to. That is the kind of thing a privacy regulator asks about. |
+| 3 | **Re-send the legacy-preservation brief to the lawyer.** | The lawyer sees the corrected version. | The lawyer has it **in writing** that preserving a family's memories is free forever — and you changed that to paid. |
+| 4 | **Decide the privacy page's country answer** (open your Cloudflare dashboard and see where files actually sit). | The public privacy page stops contradicting itself. | It currently says photos are stored in the United States **and** the Philippines at the same time. Both cannot be true. |
+| 5 | **The booking fee is switched ON in the live site.** Confirm that is intended. | You know real couples are being charged what you meant. | A real couple could be charged something you did not intend to launch yet. |
+
+### 🟠 Decisions only you can make
+
+| # | Decision | The real-world choice |
+|---|---|---|
+| 6 | **The Filipino-memory wording on the front page.** | You approved it, it was written, it never went live. The front page still describes us in a way any foreign app could copy. Decide: ship the new wording, or drop it. |
+| 7 | **What Papic looks like on a couple's home screen.** | Whether guests-as-photographers is the first thing a couple sees, or something they find later. |
+| 8 | **Who can send the emergency message on the day** — a fixed list of messages, or anything they want to type. | Both versions are built and ready to look at. Free typing is more useful and riskier. |
+| 9 | **Two open calls on the band/singer request desk.** | Whether the couple sees the band's finished song list, and one leftover question about how requests reach them. |
+| 10 | **A leftover table sits in the live database, unused.** | Dropping it is tidy but permanent. Nothing reads it today. |
+
+### 🟡 Switches that are built and waiting
+
+> All of these are finished and hidden. Turning one on makes it real for customers **immediately**.
+
+| # | Switch | What customers get |
+|---|---|---|
+| 11 | **Service details pages** | Couples can open a full page about each service instead of a short card. |
+| 12 | **The new monogram maker** | The improved version of the couple's monogram designer replaces the old one. |
+| 13 | **Vendor auto-reply assistant** | Vendors get automatic first replies to couples. |
+| 14 | **Coordinator consent gate** | Coordinators must be granted permission before they can act on money. |
+| 15 | **Shared 3D room** | Couples and vendors can walk the same 3D reception together. |
+
+### 🟢 Small, safe, ~10 minutes each
+
+| # | Task | Why bother |
+|---|---|---|
+| 16 | **Prove to Google and Bing that you own setnayan.com** (copy a code from each into the hosting settings, then redeploy). | Starts collecting search data. It never fills in the past — every day you wait is a day of data you can never get back. |
+| 17 | **Clear two abandoned video folders** in storage. | Biggest single space saving available. They belong to a screen that was deleted. |
+| 18 | *(optional)* **Make a LinkedIn company page.** | One more place search engines can confirm Setnayan is a real company. Your Facebook page already does this — a second one is a bonus, not a fix. |
+
+### ⛔ Blocked — not your fault, nothing to do yet
+
+| # | Item | Blocked by |
+|---|---|---|
+| 19 | **Search traffic numbers** (how many people find you on Google). | Google suspended the company account. Appeal `73857927` is open. Item 16 still works and is still worth doing. |
+| 20 | **Live streaming through YouTube.** | Same suspension. |
+| 21 | **Five privacy rulings for the NPC filing.** | Waiting on the lawyer. Two features are already running live without their filing paperwork. |
+| 22 | **Known-illegal-image matching for uploads.** | Never checked whether the free tool from our storage provider covers this. Someone has to look. Adult-content blocking IS already live — this is the separate, worse category. |
+
+---
+
 ## 1 · Global safety rules — DO NOT auto-execute these
 
 An item is **HUMAN-GATED** and must be surfaced for owner/DPO, never done autonomously, if it is any of:
