@@ -143,9 +143,19 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > under-erasure**. None applied; the figure is now in the guardrail docblock. **Do not retry it.**
 > Clear a few tables at a time, reading the generated FK file first.
 >
-> ⏭ **OPEN, needing the owner:** (a) the **78-table export/erasure backlog** —
-> `UNDECIDED_BACKLOG` in `lib/erasure/coverage-guardrail.test.ts`, whose own header says *"NOT A
-> CLEAN BILL OF HEALTH"*; (b) a store whose only admin leaves cannot have that account deleted
+> **6 · 2026-08-02 — THE ERASURE BACKLOG IS BEING CLEARED IN TENS: 78 → 37.**
+> Four batches merged (#4047 · #4051 · #4053 · #4056). Recipe: one agent per table settling against
+> `tests/db/user-fk-behaviour.generated.txt`, each settlement then attacked. **41/42 survived** —
+> versus **41 of 78 WRONG** when the same question was asked in one bulk pass. The recipe is the
+> difference, not the model. 🔑 **THE SCHEMA SORTS ACTOR FROM SUBJECT:** `CASCADE`+`NOT NULL` ⇒ the
+> row is ABOUT them (delete); `SET NULL` ⇒ an actor stamp (null, row stays). Enforced as **G6**.
+> 🪤 **A MUTATION TEST THAT PASSES MAY MEAN SOMETHING ELSE MASKS THE BUG** — the over-deletion guard
+> only held because the null loop runs before the delete loop; swap them and it returns, all green.
+> ⏭ Two real people-facing finds: a waitlist that would have **emailed an erased person**, and a
+> retired table still granting `anon` full read/write (dropped, #4041).
+>
+> ⏭ **OPEN, needing the owner:** (a) the **37-table export/erasure backlog** —
+> `UNDECIDED_BACKLOG` in `lib/erasure/coverage-guardrail.test.ts` — down from 78, clearing in tens; (b) a store whose only admin leaves cannot have that account deleted
 > (`VENDOR_LAST_ADMIN`) — a product question blocking a deletion duty; (c) the retired
 > `token_burn_bands` table still in prod with 10 of 20 rows mis-keyed (inert — nothing reads it);
 > (d) **`vendor_invites` — a claimed invite token is NOT dead**: `resolveClaimContextForService`
