@@ -77,6 +77,17 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   2026-07-29 + memory `project-setnayan-onboarding-papic-ai-cards`.
 > - **Song Desk is DONE** (8 PRs, all merged 2026-07-30). Superseded by the INTERCONNECTION
 >   LAYER block below — read that instead.
+> - 🗄 **STORAGE HYGIENE — DONE 2026-08-02, do NOT rebuild.** `/admin/website-media` ships
+>   (PR #4050): lists what is actually in the media bucket, marks each file *In use* /
+>   *Left over* / *Not sure*, Download + single-file Delete, **no bulk delete**. The two
+>   upload paths now sweep what they replaced. Download forces a real save (#4052). The
+>   **sign-in hero is RETIRED** (#4055) — deleted, `/admin/hero-video` → 404 — it sliced
+>   every clip into 73–361 stills for a screen nothing rendered. See the newest section of
+>   [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md) for the owner actions + 7 traps.
+>   🔑 **Prefixes come from the UPLOAD CALL SITES, never a module name** (rev 1's allowlist
+>   matched ZERO objects). 🔑 **Prose is not a safety mechanism** — a live audio file sat
+>   under "probably left over" with Delete ON. 🚨 **The main checkout was switched to `main`
+>   under this session 3×** — branch, then `git worktree add` immediately.
 > - 🎨 **[`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md)**
 >   — **the newest stream. Read it before ANY design/UI/page work.** Palette ✅ shipped on all
 >   401 routes (PR #3988, locked by a derived-contrast guard); 12 archetypes + 7 overlay types

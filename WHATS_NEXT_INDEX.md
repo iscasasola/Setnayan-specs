@@ -126,7 +126,62 @@ For each doc + its claimed state, verify against reality and fix-or-flag:
 
 **Bottom line for the orchestrator:** build the task graph from §5's docs using §3's schema; obey §2 (worktrees/migrations) and §6 (serialize shared files); fan out only `parallel_safe: yes && safety_gate: NONE`; route every gate from §1 to the human queue; run §4 gap-checks continuously and fix-via-PR or flag.
 
-## 2026-08-01 · DESIGN PROGRAMME — palette SHIPPED, archetypes DRAFTED, ~40 units to port (ACTIVE — newest stream)
+## 2026-08-02 · STORAGE HYGIENE — `/admin/website-media` SHIPPED · sign-in hero RETIRED (newest stream · build list EMPTY)
+
+**All three PRs MERGED and verified on prod 2026-08-02** — `origin/main` at the time `58a16af21`.
+Nothing here needs building. What remains is **owner actions + traps that must not be relearned.**
+No separate contract file: this section IS the record.
+
+| | |
+|---|---|
+| ✅ DONE | **`/admin/website-media`** (PR [#4050](https://github.com/iscasasola/setnayan-platform/pull/4050)) — the READ side of the media bucket. Lists site furniture, marks each object `In use` / `Left over` / `Not sure`, Download + single-file Delete. **Verified live:** `/admin/website-media` → 307 to login. |
+| ✅ DONE | **The replace-sweep** (same PR) — `saveBackgroundVideo` / `saveHeroVideo` now delete what they replaced. Before this, every replace stranded its predecessor forever. |
+| ✅ DONE | **Download actually downloads** (PR [#4052](https://github.com/iscasasola/setnayan-platform/pull/4052)) — the presigned GET had no `Content-Disposition`, so it *played the clip in a tab* and saved nothing. |
+| ✅ DONE | **Sign-in hero RETIRED** (PR [#4055](https://github.com/iscasasola/setnayan-platform/pull/4055)) — deleted, not flagged off. **Verified live:** `/admin/hero-video` → 404. |
+| ⏭ OWNER | **Clear the two `(retired)` folders** on the page — `hero-videos/` + `hero-frames/`. Every upload wrote a new `hero-frames/<sessionId>/` folder of **73–361 stills** for a screen that never rendered. **Biggest single reclaim available.** |
+| ⏭ OWNER | **2 orphaned government-ID files** in `setnayan-vendor-verification` — personal data; owner downloads + deletes from the Cloudflare dashboard. Claude does not touch these. |
+| 🔴 `OWNER_DECISION` | **`homepage_hero_config` is still in prod, inert and unread** (same posture as retired `token_burn_bands`). Dropping a production table is owner-gated, not a side effect of deleting a screen — and it would need the CI-enforced **exposure baseline + prod-schema snapshot** regenerated in the same PR. |
+
+### 🪤 Traps this stream paid for — do NOT relearn them
+
+- 🔑 **PREFIXES COME FROM THE UPLOAD CALL SITES, NEVER A MODULE NAME.** Revision 1 guessed
+  `homepage-background-videos/` from `lib/background-videos.ts`; the uploader writes
+  `homepage-bg/slot-N/`. `brand/` is not an R2 prefix at all. **The allowlist matched ZERO
+  objects** and the page would have rendered "nothing stored" over a full bucket. Grep the
+  `presignAndPut` / `pathPrefix` argument. Real set: `homepage-bg/` · `hero-videos/` ·
+  `hero-frames/` · `onboarding/` · `brand-icon/` · `nav-icons/`.
+- 🔑 **PROSE IS NOT A SAFETY MECHANISM.** Revision 1 put the **live** onboarding background
+  music under a blurb reading *"probably left over"* with **Delete enabled**. Fixed twice
+  over: the folder got a resolver, and `unknown` is now undeletable under any wording.
+- 🔑 **AFTER FIXING A MISSING RESOLVER, ASK IF THE ONE YOU WROTE IS COMPLETE.** The music is
+  recorded in **two** columns — `onboarding_bg_music_r2_key` *and*
+  `onboarding_bg_music_r2_keys` (TEXT[], migration `20271011873973`). Reading one made a
+  track referenced only by the other deletable. Same defect class, one column over.
+- 🪤 **A PRESIGNED LINK WITHOUT `Content-Disposition` DOES NOT DOWNLOAD** — R2 serves the real
+  media type, so `.mp4`/`.jpg` renders inline and nothing hits disk. `lib/content-disposition.ts`
+  lives in its own module because `lib/r2.ts` imports `server-only`, which **cannot resolve
+  under `tsx --test`** — a pure helper parked there is untestable.
+- 🚨 **`~/Documents/Claude/Projects/setnayan-platform` IS HOSTILE TO IN-PLACE WORK.** It was
+  switched to `main` under this session **three times** (twice by Bash-enabled review agents,
+  once with no workflow running ⇒ another session shares it). Commits landed on `main` instead
+  of the feature branch; recovered each time via `git reflog` + `git branch -f`.
+  **Branch, then `git worktree add` immediately, and verify branch tips after every workflow.**
+- 🪤 **RUN THE WHOLE SUITE, NOT YOUR FILES.** Deleting `lib/hero-video.ts` broke
+  `presign-ttl-vs-resign.test.ts` — a table-driven test that read the file off disk. Three test
+  files said "29 pass"; CI runs `lib/**/*.test.ts` + `app/**/*.test.ts` = **6195 tests**.
+  A deletion's breakage is never in the files you edited.
+- ⚠ **`readHeroRefs()` returns a HARD-CODED EMPTY SET** — the only hand-asserted "nothing
+  references this" in the module, and the exact shape that deletes live files once the world
+  changes. It is **machine-checked** by `apps/web/lib/website-media-retired-hero.test.ts`
+  (verified to actually fail by reintroducing the module). **Restore the hero ⇒ write a real
+  resolver first.**
+
+**Measured:** 3 adversarial reviews, **82 findings attacked, 46 confirmed**. Revision 1 passed
+typecheck, lint and 11 unit tests and was substantially wrong — including a `lucideName` absent
+from `NAV_ICON_NAMES` that would have failed a required CI check. **Every serious defect was in
+code that passed its own tests.**
+
+## 2026-08-01 · DESIGN PROGRAMME — palette SHIPPED, archetypes DRAFTED, ~40 units to port (ACTIVE)
 
 **CONTRACT:** [`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md) — read it before any design/UI work.
 Supporting: [`03_Strategy/Design_Gap_Pass_2026-08-01.md`](03_Strategy/Design_Gap_Pass_2026-08-01.md) (the ~40-unit list) · [`03_Strategy/Public_Website_Design_Foundation_2026-08-01.md`](03_Strategy/Public_Website_Design_Foundation_2026-08-01.md) (why + frame inventory).
