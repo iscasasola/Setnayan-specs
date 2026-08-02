@@ -181,6 +181,38 @@ typecheck, lint and 11 unit tests and was substantially wrong — including a `l
 from `NAV_ICON_NAMES` that would have failed a required CI check. **Every serious defect was in
 code that passed its own tests.**
 
+## 2026-08-02 · SEO / GEO — code side DONE (4 PRs) · 2 owner actions · 1 approved-but-unshipped copy change
+
+**No separate contract file: this section IS the record.** Triggered by the owner 2026-07-31:
+*"our data is still old and the old ones never retired and it feels like my app never got SEO and GEO optimization."*
+
+**The reframe that matters:** it *was* optimized — 6 sitemaps, `robots.ts`, **29 JSON-LD emitters**, GEO phases
+G2–G5, a vendor AEO offer graph on `/v/[slug]`, a help sitemap. It was **un-maintained and un-measured**.
+
+| | |
+|---|---|
+| ✅ DONE | **`llms.txt` is GENERATED** (PR [#3952](https://github.com/iscasasola/setnayan-platform/pull/3952)) — `app/llms.txt/route.ts` renders from `platform_retail_catalog_v2` + `vendor_billing_catalog`; `public/llms.txt` DELETED (`public/` shadows route handlers). Audit went **`fail 2 → 0`, `ok 0 → 2`**. Verified live. |
+| ✅ DONE | **"Re-run audit now" button** + **price-literal guard** (PR [#3960](https://github.com/iscasasola/setnayan-platform/pull/3960)) — `/admin/app-performance?tab=seo` had **no control at all**; the audit only fired from `after()` in the admin layout, claim-gated ~daily, and `after()` runs post-response so the page always showed the PREVIOUS snapshot. Also fixed 2 genuinely stale customer-facing prices (monogram **₱2,499→₱1,000**, Pakanta **₱3,499→₱2,500**). |
+| ✅ DONE | **The audit was grading two sources nothing else read** (PR [#3973](https://github.com/iscasasola/setnayan-platform/pull/3973)) — see traps. `lib/seo/org-same-as.ts` is now the single source. All 7 SEO env vars documented in `.env.example`; none were. |
+| ✅ RESOLVED | **`Organization.sameAs` — the nag was FALSE.** The Facebook Page has shipped in the JSON-LD since 2026-07-10. **Do not create one.** Optional only: a LinkedIn Company Page (one line in `lib/seo/org-same-as.ts`, or additive env `SETNAYAN_ORG_SAMEAS`). |
+| ⏭ OWNER | **Verification meta tags — ~10 min, nothing blocking.** Search Console + Bing → *URL prefix* `https://www.setnayan.com` → **HTML tag** method → copy the `content` value only. Set in Vercel Production: `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` + `NEXT_PUBLIC_BING_SITE_VERIFICATION`. ⚠ **`NEXT_PUBLIC_*` is inlined at BUILD time — redeploy, or nothing changes.** Then click Verify, then hit the re-run button. |
+| 🔴 BLOCKED | **The Search Console DATA pull** — needs `GSC_CLIENT_ID` / `GSC_CLIENT_SECRET` / `GSC_REFRESH_TOKEN` / `GSC_SITE_URL` (OAuth, scope `webmasters.readonly`, obtainable via the OAuth Playground). Requires a **Google Cloud project** — and that account is **SUSPENDED**, appeal `73857927`. Until all four are set, `runSeoGscPull()` no-ops and **`seo_metrics` stays at 0 rows.** ⚠ Search Console **does not backfill** — it collects only from the verification date forward, so the meta-tag half is worth doing even while this half is blocked. |
+| ⏸ NOT SHIPPED | **The Filipino-memory USP copy.** Owner approved BOTH scope questions 2026-07-31 — *full front repositioning* + *non-sectarian at the top, faith rites only on deeper pages* — and the copy was drafted, but **it never entered code.** The hero sub on `main` is still the culturally neutral `'The independent hub to keep a lifetime of memories, and plan any event, free.'` Approved copy is **§5 of [`03_Strategy/Claude_Design_Brief_2026-07-31.md`](03_Strategy/Claude_Design_Brief_2026-07-31.md)** — ⚠ that brief's **§1 palette is SUPERSEDED** (terracotta lock, 2026-08-01) but **§5 COPY is still valid**. |
+| 🔴 `OWNER_DECISION` | **Seam:** the USP copy targets `/` (hero · manifesto · pillars) — and the Design Programme **explicitly excludes `/`** as the owner-approved ELN reskin. So the copy change is currently in nobody's scope. Decide: fold it into the design programme, ship it as its own copy-only PR, or drop it. |
+
+### 🪤 Traps this stream paid for — do NOT relearn them
+
+- **🔑 A guard comparing TWO HAND-TYPED things is not a guard.** `llms-price-drift.test.ts` asserted a hand-typed `llms.txt` matched a hand-typed fixture. Neither side ever touched the DB, so both drifted together and **CI stayed green for three weeks** while the live audit screamed `2 FAIL` daily into a surface with no button on it. **Prefer GENERATION over checking.**
+- **🔑 A set-membership check cannot catch a price on the WRONG product.** "Does ₱2,499 exist anywhere in the catalog?" passed while Live Studio was sold as a **retired** Mobile/Desktop device split and Camera Bridge was advertised at `is_active=false`. Guard the **structure** (product names, tier shape), not just numbers.
+- **🔑 `is_active=false` ≠ retired.** Setnayan AI tiers B/C/D are deliberately inactive **price-source** rows (`setnayan-ai-type-pricing.ts`). Filtering them out flattens the ladder to one price — the exact bug — and makes the audit report ₱899/₱499/₱99 as orphans.
+- **🔑 A check pointed at a different source than the thing it describes MANUFACTURES WORK.** The audit read env `SETNAYAN_ORG_SAMEAS` (consumed by nothing) while the JSON-LD shipped a hardcoded FB Page ⇒ a daily "create FB Page" nag for a Page that already existed. And it read `GOOGLE_SITE_VERIFICATION` while `layout.tsx` renders from `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` ⇒ **no value of those vars produced both a verified domain and a green check.**
+- **🔑 The verification META TAG and the Search Console DATA PULL are DIFFERENT credentials.** Verifying ownership does not grant API access. This is why `seo_metrics` can stay empty after a successful verification.
+- **🪤 Split a guard across CI and runtime by what each can SEE.** CI has no prod credentials ⇒ it can only catch *new hardcoding* (`lib/public-price-literals.test.ts`); only the runtime audit sees the catalog ⇒ it catches *drift* (`runSeoHealthChecks` Check 5). Never let one pretend to do the other's job.
+- **🪤 Watch a new check FAIL before trusting it.** Check 5 was verified failing (`studio-card-demo.tsx says ₱1,000 but ANIMATED_MONOGRAM is ₱1,750`) before it was believed.
+- **⚠ Two scoping claims I made were WRONG and got corrected:** "19 of ~40 llms.txt figures are stale" counted the **changelog footer** (legitimately historical) — body-only it was **1**; and "~60 public files hardcode a price" counted **comments** — stripped, it is **10**, most legitimate (pillar mocks are an illustrative budget; `₱100,000` is the commission threshold; `onboarding-pricing.ts` is already fully catalog-driven). **Strip comments before counting.**
+- **📈 Reference:** the acronym in this codebase is **AEO**, not APO. Its ladder ships (`lib/vendor-seo-tier.ts`) but `NEXT_PUBLIC_VENDOR_SEO_TIER_GATE` stays **OFF on purpose** — every vendor is free-tier during launch, so flipping it strips the offer graph from the whole marketplace and takes weeks to re-enrich.
+
+---
 ## 2026-08-01 · DESIGN PROGRAMME — palette SHIPPED, archetypes DRAFTED, ~40 units to port (ACTIVE)
 
 **CONTRACT:** [`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md) — read it before any design/UI work.

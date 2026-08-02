@@ -95,6 +95,19 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   🔴 Owner has **not seen the prototypes** — that gate blocks every aesthetic item, but NOT
 >   the two functional ones. **Start at `design#1` (six-state system) + `design#2` (overlay
 >   grammar)** — parallel-safe, no gate, both close live defects.
+> - 📈 **SEO / GEO — code side DONE 2026-08-02, do NOT rebuild.** `llms.txt` is now GENERATED
+>   from the catalog (#3952), the SEO surface has a **"Re-run audit now"** button (#3960), and
+>   the audit stopped grading two sources nothing else read (#3973). Audit `fail 2 → 0`.
+>   ⏭ **2 owner actions:** paste `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` + `NEXT_PUBLIC_BING_…`
+>   into Vercel **then redeploy** (they inline at build time); the Search Console DATA pull is
+>   **BLOCKED** on the suspended Google Cloud account (appeal `73857927`) ⇒ `seo_metrics` = 0
+>   rows. ✅ **The `sameAs` nag was FALSE — the FB Page already ships. Do not create one.**
+>   ⏸ **The Filipino-USP hero/manifesto copy was owner-APPROVED but never entered code** —
+>   copy is §5 of `03_Strategy/Claude_Design_Brief_2026-07-31.md` (⚠ that brief's §1 palette is
+>   superseded by the terracotta lock; §5 copy is still valid), and it targets `/`, which the
+>   Design Programme **excludes** ⇒ `OWNER_DECISION` on whose scope it lands in.
+>   🔑 **A guard comparing two HAND-TYPED things is not a guard** — that is how `llms.txt`
+>   drifted for 3 weeks with green CI. See the newest `WHATS_NEXT_INDEX.md` section for 8 traps.
 > Execute per each contract's own rules; build flag-dark; stop at every HUMAN gate.
 
 > ### ▶ ACTIVE: the INTERCONNECTION LAYER — probes · the Ugat map · the anon-RPC surface
