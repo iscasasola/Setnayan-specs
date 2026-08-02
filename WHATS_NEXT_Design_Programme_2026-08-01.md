@@ -96,18 +96,34 @@ and "none" is a finding to report, not a licence to draw.
   verified:      mutation-tested TWICE (watched failing on the 2 it found, and again
                  after stripping the Papic fix). 6,267/6,267, tsc + lint clean.
 
-- id:            design#3
+- id:            design#3        🔴 PREMISE FALSIFIED 2026-08-02 — DO NOT BUILD THIS
   title:         Persistent app shell + route transitions, behind a flag
   type:          code
-  depends_on:    [design#2]
+  depends_on:    [design#2]  ✅ done
   parallel_safe: no
   safety_gate:   NONE   (the FLAG FLIP to prod is FLAG_FLIP_PROD)
-  touches:       apps/web/app/dashboard/**/layout.tsx · template.tsx · nav/*
-  verify:        CI production build (cannot run locally — see §5)
-  ⚠ THE ONE ARCHITECTURAL CHANGE in the whole programme. Changes how 297 logged-in
-    routes render. Primitives already ship UNUSED: _components/sheet.tsx,
-    nav/bottom-nav.tsx, nav/sub-nav.tsx, nav/nav-slide-controller.tsx,
-    app-init-splash.tsx. Do NOT write new ones without reading those first.
+  🔴 **IT ALREADY SHIPS, AND IT IS MOUNTED.** Verified against origin/main 2026-08-02
+     by reading the layouts, not the spec:
+       · THE SHELL — `app/_components/nav/sidebar-shell.tsx` (`SidebarShell`): desktop
+         sidebar with persisted collapse state, sticky top-bar slot, main content
+         column. **20 consumers**, mounted in `admin/layout.tsx` AND
+         `dashboard/[eventId]/layout.tsx`. The contract never names this file.
+       · THE TRANSITIONS — a `template.tsx` in **all four** dashboard trees (`admin`,
+         `dashboard/(account)`, `dashboard/[eventId]`, `vendor-dashboard`), each
+         wrapping children in `.sn-page-enter` (soft rise, 400 ms, pathname-scoped so
+         `?show=all` correctly does NOT replay, with a reduced-motion freeze).
+       · MOBILE BOTTOM NAV — `CustomerBottomNav` / `AdminBottomNav` mounted in those
+         same layouts.
+     In App Router, layout + template IS "navigation repaints the region, never the
+     room". The archetype's swap boundary is the app's existing structure.
+  ⚠ **AND THE "PRIMITIVES SHIP UNUSED" CLAIM IS WRONG ON ALL FIVE.** `sheet.tsx` has 5
+     consumer imports · `bottom-nav.tsx` 32 refs · `sub-nav.tsx` 22 · and
+     `nav-slide-controller.tsx` + `app-init-splash.tsx` are both imported by the ROOT
+     `app/layout.tsx`, i.e. mounted on every route in the app.
+  ⇒ WHAT IS ACTUALLY LEFT: nothing architectural. Any delta between the archetype and
+     the shipped shell is styling — duration, spacing, the top-bar's event chip — which
+     is **design#4 reconcile work behind the owner-review gate**, not a rewrite.
+     Rebuilding this is the paid-twice mistake at its largest scale.
 
 - id:            design#4
   title:         Reconcile the ~10 existing per-surface prototypes to terracotta + shell
@@ -193,10 +209,15 @@ and "none" is a finding to report, not a licence to draw.
 |---|---|---|
 | ✅ 0 | Palette | Done — and the guard that locks it merged 2026-08-02 (#4030). |
 | ✅ 1 | `#1` + `#2` | Done 2026-08-02 (#4064 + #4065). ⏭ The states primitives are built but **not mounted anywhere** — adopting them per surface is open follow-up work. |
-| **2** | `#3` shell | **Start here now.** The architectural one. Flag-dark. |
-| 3 | `#0-GATE` owner review | Unblocks everything aesthetic. |
+| ✅ 2 | `#3` shell | **Already shipped and mounted — premise falsified 2026-08-02. Do not build.** See the item above. |
+| **3** | `#0-GATE` owner review | 🔴 **THE ONLY THING BLOCKING THE PROGRAMME NOW.** Every remaining item (#4 #5 #6 #8 #9) is aesthetic and waits on it. |
 | 4 | `#4` reconcile · `#6` public | Cheapest real progress. |
 | 5 | `#5` couple → `#7` gaps → `#8` vendor → `#9` admin | Admin last. |
+
+> **Where the programme actually stands after 2026-08-02:** the two ungated build items
+> are done, the third turned out to be already shipped, and **everything that remains is
+> behind the owner-review gate.** The next unit of progress is the owner opening the five
+> `prototypes/archetype_*_2026-08-01.html` files — not more code.
 
 ---
 
