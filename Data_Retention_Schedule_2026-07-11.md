@@ -24,7 +24,16 @@ Retention is bounded on **both** ends, and the two bounds come from different la
 | # | Data class | Iteration(s) | Retention anchor | **Keep for** | Legal basis | Disposal |
 |---|---|---|---|---|---|---|
 | 1 | **Vendor↔couple chat** (`chat_threads`, `chat_messages`) | 0019 | `event_date` | **5 years** | RA 10173 necessity + normal dispute window | Hard-delete thread + messages |
-| 2 | **Media** — Papic photos/video, gallery, reels (R2) | 0012, 0009, 0024 | `event_date` | **5 years** (hot 90 d → cold → purge) | RA 10173; PH photographer norm | R2 lifecycle expiry |
+| 2 | **Media** — Papic photos/video, gallery, reels (R2) | 0012, 0009, 0024 | `event_date` | **Full-res 6 months, then ONE compression to the ~8% web copy — retained INDEFINITELY, never purged** (owner-locked 2026-07-10 "free forever, never deleted"; window 3 mo → 6 mo owner 2026-08-02). ⚠ **CORRECTED 2026-08-02** — this row previously read *"5 years (hot 90 d → cold → purge)"*, which described a deletion the product does not perform. A schedule promising a purge that never happens is the more dangerous direction of drift: it is a commitment to the regulator broken every day. The couple's own Google Drive full-res is separate and permanent (2026-07-11 invariant) — we never downgrade or delete THEIR copy. | RA 10173 — see ⚠ below; PH photographer norm | R2 lifecycle: compression at 6 mo; **no expiry rule on the web copy** |
+
+> ⚠ **INDEFINITE RETENTION IS A LAWFUL-BASIS QUESTION, NOT A STORAGE SETTING (flagged 2026-08-02).**
+> Row 2 now states that the compressed web copy is kept forever. That is the shipped product and the
+> owner's lock — but RA 10173 asks that personal data be kept no longer than the purpose requires, and
+> these are photographs of identifiable people, including guests who are not our customers. The basis is
+> the couple's own request to preserve their memories, plus guest consent captured at RSVP/tag time, plus
+> the standing opt-out and face-blur path. **That reasoning must be written down and reviewed by counsel
+> before this schedule is lodged** — 'the owner decided' is not a lawful basis. Until then this row is
+> accurate about what we DO, and unproven about whether we MAY.
 | 3 | **Payments / receipts / Official Receipts** | 0026, 0034 | payment date | **10 years** — *legal floor, cannot delete early* | BIR RR 17-2013 | Purge at 10 y |
 | 4 | **Contracts + e-signatures** | 0032 | contract execution date | **10 years** | Civil Code Art. 1144 prescription | Purge at 10 y |
 | 5 | **Account / profile PII** (`users`, settings) | 0025 | account close / deletion request | **Life of account + 30–90 day tail**, then purge | RA 10173 storage limitation | Soft-delete → hard-delete after tail |

@@ -124,7 +124,7 @@ Reframe of the whole app: planning tools are what get people *in*; **the memory 
 
 **Don't be the vault — be the delivery + the gallery.** Full-res-forever is an unbounded liability (~$1.43M/yr at 1M couples); the display tier kept forever is a **flat ~₱7/couple/yr** (~11× cheaper, free egress on R2).
 
-1. **Hot originals** (~90 days) — pristine, downloadable.
+1. **Hot originals** (~6 months — owner 2026-08-02, was ~90 days) — pristine, downloadable.
 2. **Deliver originals to the user** — Google-Drive copy (already built) + a 7-day download link. *Their* originals live with *them*. (Connecting Drive is also the conversion event that makes the gallery permanent.)
 3. **Auto-downgrade forever** — keep only display-res (~16MP photo / 1080p clip) + rendered reels/films/editorials, warned (T-30/T-7/T-1), never silent. Originals age to cold or expire (the couple has them).
 
