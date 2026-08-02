@@ -2,6 +2,42 @@
 
 > Project context for Claude Code working on the Setnayan platform. Keep this file under 200 lines — it's loaded into every Claude Code session as context, so brevity matters.
 
+## 🗣 HOW TO TALK TO THE OWNER — owner-locked 2026-08-02
+
+**Owner, verbatim:** *"the last part of your reviews are questions and
+recommendations of what to do next and always in simple english and simplest
+answers needed."*
+
+**Every substantive reply ENDS with a short closing block:**
+
+1. **What I recommend doing next** — one line. A call already made, not a menu.
+2. **Anything I need from the owner** — only when genuinely blocked. One question,
+   not two.
+
+Nothing after it. No summary, no caveats, no "let me know if…".
+
+**And the whole reply is in simple English, not just that block.** The owner
+steers product, pricing, scope and risk — they are *not reading the code*.
+
+- Say what a PERSON EXPERIENCES, not what the code does.
+  ✅ *"Your cousin scans the poster, shoots 20 photos, they reach you — but she
+  can't get photos of herself."*
+  ❌ *"The self-link is keyed on `guest_id`, so a seat-holder without a session
+  cookie can't reach the pool gallery."*
+- **No file paths, function names, table names, SQL or flag names** in the
+  answer. They belong in the PR body, not in the reply.
+- Shortest version that is still true.
+
+⚠ The owner said **"english"** three times in one session (2026-08-01/02), each
+time after a reply that was correct and unreadable. Every one cost a round-trip.
+**A correct answer the owner cannot act on is worth the same as a wrong one.**
+The failure is always the same shape: explaining the plumbing instead of the
+point, because the plumbing is where the last hour went.
+
+Make routine calls yourself and say so — pre-launch, reversible work needs no
+sign-off. Escalate only real owner territory: locked prices/SKUs, scope, risk
+trade-offs, or reversing an owner lock.
+
 ## 🔑 TRIGGER — the owner types **"what's next"**
 
 When the owner says **"what's next"** (or *whats next* / *what next*), that is a standing
