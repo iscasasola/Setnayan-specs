@@ -40,7 +40,7 @@
 | **S5** | **3D room: every guest shows as "Guest"** | the shared-room presence path | no | *(unclaimed)* |
 | **S6** | **Vendor verification uploads don't sweep what they replace** | the vendor verification upload call site | no | *(unclaimed)* |
 | **S7** | **PR-H — the vendor-agrees step** | `event_vendors` migration, both dashboards, 3 lock sites | ✅ **all 4 answered** | **REASSIGNED by the owner 2026-08-04** (*"PR-H was not done there. can we do it here instead?"*) — moved OFF the `Explore_Replan_BUILD_SPEC_2026-07-27.md` session. Spec now carries the answers; **build still not started** (14 HIGH plan defects open — see §9). |
-| **S8a** | **design#6 — public doorway + `/pricing` framing** | the public marketing routes | no | **CLAIMED 2026-08-04 · `claude/design6-public-doorway`** — the Explore-spec session |
+| **S8a** | ~~design#6 — public doorway~~ ✅ **5 of 8 PORTED, remaining 3 deliberately OUT** (#4090 · #4091 · #4094) | `_doorway.tsx` + the ported routes | no | *(complete — see the DO-NOT-BUILD note)* |
 | **S8b** | **design#5 — couple dashboard** (Roster · Ledger · Comparison · Gallery) | `dashboard/[eventId]/*` | no | *(unclaimed)* |
 | **S8c** | **design#9 — admin console table** (~95 of 107 routes → ONE archetype) | `app/admin/*` | no | *(unclaimed)* |
 | **S8d** | **design#8 — vendor dashboard** (EXTEND the 4 existing prototypes) | `vendor-dashboard/*` | no | *(unclaimed)* |
@@ -61,6 +61,7 @@
 - **Converting the other four empty-state surfaces.** The resolver has no partial-permission concept
   and `denied` outranks `count`, so on a multi-arm policy it would **hide rows the reader is entitled
   to see** — worse than the bug being fixed.
+- **Porting `/alaala`, `/papic` or `/setnayan-ai` onto the doorway kit.** They diverge STRUCTURALLY, not cosmetically: alaala's "how it works" is five linked pillar cards rather than three steps; papic is the only doorway showing money and reads the live catalog; setnayan-ai already solved the shape with a deliberate signature hero. Porting them means adding layout props — which is exactly how eight pages drift apart again. **The kit's two escape slots (`children`, `epilogue`) are the ceiling.**
 - **Redrawing any archetype.** All 19 are APPROVED and the five prototypes are BINDING — port them. A delta between a ported screen and its archetype is a defect in the port, not a new decision to make on the spot.
 - **Anything under `/budget`.** Mid-flight in the flag-dark BUD stream; it shipped twice today.
 
