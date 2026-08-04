@@ -638,3 +638,87 @@ papic-promo C–F.
 ### ⚠ Reconcile-before-building
 Papic v3 recut (flagged SUPERSEDED in §5 above — branch `claude/papic-v3-pr3` must not land
 as-is) · the 29-open-PR repo backlog (re-verify via `gh pr list`; doc PR numbers drift).
+
+---
+
+## 2026-08-04 · THE OPEN-PR BACKLOG — 7 stuck PRs triaged, 5 unstuck, 2 merged
+
+**Trigger:** owner — *"the what's next session was overlapped with another task… complete the
+pending sessions."* Nothing here was a new feature. Every item was **work already written that
+could not land**, and the reason it could not land was the same shape in four of five cases.
+
+### 🔑 THE FINDING THAT MATTERS: a long-open PR's migration ROTS INTO A NO-OP
+
+**4 of the 5 PRs carrying a migration had a prefix BELOW prod's applied head** (`20271102113000`).
+Migrations apply **once, in prefix order**. Prefixes were unique and non-round, so
+`check-migration-timestamps.mjs` passed and **every check went green**. They would have merged and
+the DDL would never have run — a failure that looks *more* successful than a red build.
+
+| PR | old prefix | would have created |
+|---|---|---|
+| #3659 | `20270930140000` | nothing — the privacy leak stays open |
+| #3994 | `20271029051678` | no `vendor_lines`; every screen reads a missing relation |
+| #3651 | `20270929330649` | no table — while its own flag comment said *"flip on AFTER pushing this migration"* |
+| #3653 | `20270929824517` | (already caught on-branch 08-03) |
+
+**Rule:** before merging any PR more than a few days old, compare its migration prefix to
+`ls supabase/migrations/*.sql | sort | tail -1`. Re-allocate if below. **The guard cannot catch
+this** — it enforces UNIQUE + not-hand-typed-round; ordering-vs-head is a different property and
+nothing checks it. Always verify the OBJECT after merge, never `schema_migrations`.
+
+### 🔴 Three real defects found, none of which was the reported problem
+
+1. **#3659 would have WIDENED the policy it was fixing.** Written in July against
+   `current_event_ids()`; prod had since narrowed that arm to
+   `current_couple_or_coordinator_event_ids()`. A `DROP POLICY / CREATE POLICY` pair is a **full
+   overwrite, not a patch** — replaying it verbatim would have handed **every guest** the couple's
+   whole order history (amounts, reference codes) *while* fixing the vendor leak. Caught by reading
+   `pg_policy` in live prod, not the migration text. Its 9 tests all passed: they seeded only
+   `couple` and `coordinator`, the two member types **both** helpers admit.
+2. **#3651's new table shipped OPEN TO `anon`** — RLS on, three policies all `TO authenticated`,
+   but no `REVOKE`. Anon held table-level `SIUD` on vendors' quoted prices. Only the regenerated
+   exposure baseline showed it (`anon=SIU`). Confirms: **`REVOKE ALL` in every migration.**
+3. **#3651's `requested_by_user_id` had no foreign key at all** — `NOT NULL`, no `REFERENCES`.
+   Dangling uuid on deletion, no verdict for G6 to read, table unclassifiable. It is an **actor
+   stamp** → nullable + `ON DELETE SET NULL`, covered as de-identify-in-place, and now exported
+   author-scoped (RA 10173 T1). It also closed a latent defect: both consumers used it only to
+   address a notification, so an erased person could have been emailed.
+
+### ✅ Landed
+
+- **#3946 MERGED — the public `/privacy` page no longer contradicts itself.** It claimed the US
+  **and** the Philippines at once; now Singapore (Supabase) + **APAC** (R2), and *"none of them is
+  in the Philippines"*. **Closes owner-queue item #4.** Also fixed the propagation source: two code
+  comments said *"the four PH-region buckets"* — wrong twice (there are **five**, none in PH).
+  ⚠ It auto-merged: auto-merge had been armed on it by the owner's own account on 08-01, and the
+  CI fix turned it green before it could be disarmed. Outcome is a live page going false → true.
+- **#3659 MERGED — the couple can no longer see the vendor's booking-fee order.** Confirmed live
+  in prod first; the fee is armed, so this was a live leak.
+
+### ⏭ Left for the owner
+
+- **#3653 open-browse LAUNCH — green, mergeable, auto-merge deliberately OFF.** Merging turns the
+  guest website on for every newly-created event. Added the missing **no-backfill** test (an
+  in-flight wedding must not reshape overnight) — nothing had asserted the council rule.
+  After merge: verify `column_default` reads `true`, and set `NEXT_PUBLIC_WEBSITE_MENU_ENABLED`.
+- **#1180 onboarding music playlist — NOT revived. 5,382 commits behind**, 4 content conflicts in
+  live files. Reviving it is a real merge job with regression risk, not a rebase. Owner call:
+  redo or close.
+- **#4004 CSAM hook — still a draft, all checks green.** Parked pending the owner checking whether
+  Cloudflare's own tool covers known-hash matching.
+
+### 🪤 Traps
+
+- 🔑 **A guard you have not watched fail is not a guard.** Every new test here was verified red
+  before being trusted — re-widening the helper turns the new guest test red, restoring it green.
+- 🪤 **Your own suite passing means you seeded the cases you were already thinking about.** The
+  first version of #3659's narrowing keyed purely on membership and passed 10/10 — while breaking
+  host visibility of **account-less guest purchases** (`user_id IS NULL`). CI's
+  `papic-guest-orders.db.test.ts` caught it, a test written precisely to catch a future narrowing
+  of that arm. It worked.
+- 🪤 **The exposure baseline is a conflict magnet and re-conflicts every time a sibling merges.**
+  Take main's version, then **REGENERATE**. Never hand-merge a generated file.
+- 🪤 **Local `tsc` OOMs (~7 GB) — CI is the only typecheck.** Do not read a crashed run as clean.
+- 🪤 **A fresh worktree with no `node_modules` silently resolves to the home-dir checkout** and
+  fails with `MODULE_NOT_FOUND`. `pnpm install` first.
+- **Housekeeping:** 11 merged worktrees pruned, **13.7 GB** reclaimed.
