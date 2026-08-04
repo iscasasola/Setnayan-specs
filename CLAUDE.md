@@ -115,88 +115,80 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   drifted for 3 weeks with green CI. See the newest `WHATS_NEXT_INDEX.md` section for 8 traps.
 > Execute per each contract's own rules; build flag-dark; stop at every HUMAN gate.
 
-> ### ▶ ACTIVE: the INTERCONNECTION LAYER — probes · the Ugat map · the anon-RPC surface
-> **Set 2026-08-01. This replaced the Song Desk block, which is DONE (8 PRs, all merged).**
+> ### ▶ ACTIVE: TIME — and the class of bug behind it
+> **Set 2026-08-04. This replaced the INTERCONNECTION LAYER block, which is DONE (14 PRs,
+> all merged; its findings live in `DECISION_LOG.md` 2026-08-01/02 and the memory notes).**
 >
-> The owner asked: *"our interconnections are mostly not tested… can we have a checklist?"*
-> The answer built over 2026-08-01, in 14 merged PRs:
+> **17 live defects in one day, all one disease: two values that LOOK alike and MEAN
+> different things, compared directly.** Nothing errored, nothing logged, CI was green
+> throughout. Shipped in PRs #4095 · #4098 · #4101 · #4105.
 >
-> **1 · Six live interconnection probes** — `apps/web/lib/interconnect/`, surfaced at
-> `/admin/app-performance?tab=interconnections`, cron-free off `after()`.
-> 🔑 **A destination is not a row — it is A READER SEEING THE ROW.** Each probe runs the
-> surface's own reader and diffs it against service_role. Verdict `lying` = permitted + saw
-> nothing + service_role sees rows. That is the shape that hid the song desk for 8 PRs.
-> 🪤 **AN EMPTY LEDGER READS AS GREEN** — no traffic, no ticks. Prod is pre-launch-empty.
-> 🔑 **Arrival checks are DERIVED, never declared** — no write-site instrumentation; state the
-> pair of facts once (*"a paid order should have its SKU active"*) and let a query find the gap.
+> **1 · A WALL CLOCK IS NOT AN INSTANT.** `event_schedule_blocks.start_at` stores the
+> VENUE'S wall clock in a UTC column (prod: `Ceremony 14:00+00`). Nine surfaces compared it
+> against a real instant ⇒ **out by exactly 480 minutes** in Manila. An on-time start
+> announced as *480 min behind* · the host's desk counting 8 min away as *"in 488 min"* · at
+> 2 PM the couple's dashboard reading the day as 6 AM · a guest at the reception told the
+> ceremony was still coming · a 2 PM ceremony in the photographer's phone at 10 PM · a 2 PM
+> appointment shown to both parties as 10 PM · **a call-time EMAIL with 10:00 PM in the
+> subject line**, one press from sending.
+> 🔑 **TWO FIXES, PICK BY WHAT YOU COMPARE:** `plannedInstant(iso, tz)` lifts a stored time
+> UP (use against `actual_start_at`); **`venueNowMs(tz, now)` brings `now` DOWN** (use to
+> locate a position — far smaller, every existing sort/countdown keeps working).
+> `datetimeLocalToIso(raw)` for anything posted from a form.
+> 🔑 **NO TIMEZONE ⇒ REPORT NOTHING.** A false *"20 min behind"* tells a coordinator to rush
+> a wedding that is on time.
 >
-> **2 · The Ugat map: 11 → 19 nodes, 35 joints, backlog 44 → 27.** Promoted: Person ·
-> Package/Proposal/Contract · Availability · Geography · Seat Plan · Run of Show. Defects are
-> recorded as MACHINE-CHECKED CLAIMS (`no_column` on `vendor_contracts.proposal_id`), so the
-> guard reddens the day one is fixed and forces the note to be rewritten.
+> **2 · A DATE IS NOT AN INSTANT.** `events.event_date` is a DATE. `new Date('2026-12-12')`
+> is midnight UTC = the **11th** west of Greenwich ⇒ a 12 Dec wedding read **11 Dec** on the
+> save-the-date, the invitation and 41 screens. The relatives reading on a foreign phone are
+> the ones booking flights. Fixed at `formatEventDate` · `shortDate` · both `anchorIso`s ·
+> `calendarDayEpoch`.
 >
-> **3 · 🔴 SECURITY — the RLS audits were looking at the wrong half.** Guests read their seat
-> through SECURITY DEFINER functions while the tables grant anon NOTHING. A policy audit
-> concludes *"anon cannot read this"* — true of the table, false of the product. **211 functions
-> were anon-callable; 7 closed in #4000**, including one that DELETED chat threads and one that
-> MINTED vendor tokens, both callable with only the publishable key.
-> ⏭ **190 of 195 remain UNREVIEWED** — see `tests/db/anon-rpc-surface.baseline.txt`, a debt
-> figure like `map-backlog`. New guard fails on any new anon-callable SECDEF without a reason.
+> 🪤 **WHY IT ALL SURVIVED — READ THIS BEFORE WRITING A TEST.**
+> **CI RUNS IN UTC, THE ONE CLOCK WHERE BOTH MISTAKES CANCEL OUT.** So does every server
+> action. **Run the suite under `Asia/Manila`, `America/New_York`, `Pacific/Kiritimati`** —
+> 6483 tests are green in all four as of 2026-08-04, the first time that has ever been true.
+> 🔑 **THE TESTS ASSERTED THE BUGS.** Fixtures wrote `06:00Z` commented *"2 PM Manila"*; the
+> seed test's `localDate` used local **getters** matching an `anchorIso` that used local
+> **setters**. **Two halves wrong in the same direction agree with each other perfectly.**
+> A previous session even recorded one failure in a docblock as *"known, out of scope"* —
+> **a documented failure is still a failure.**
+> See [[project_setnayan_wall_clock_vs_instant]] · [[project_setnayan_date_is_not_an_instant]].
 >
-> **4 · Fixed and live:** a deactivated booking pool still took bookings (the validation loop
-> filtered `is_active`, the INSERT did not) · 3 stale OAuth rows blocked account deletion.
-> **Dropped:** `event_floor_areas`, `event_floor_objects`, `households`.
+> **3 · 🔑 A GATE WITH NO HANDLE.** Face auto-tagging was built, **paid for and activated
+> 2026-06-19**, every flag green — and stored **nothing for 7 weeks**. `papic_face_mode` had
+> **ZERO writers anywhere**; all 5 prod events sat in the mode that hard-nulls the vector.
+> ✅ Switch built (`setEventFaceMode`, admin-only, DPO presses it per event); **owner decided
+> "on" 2026-08-04.** 🚨 **The stale comment is what kept it shut** — it claimed mode_a
+> fingerprints *"EVERY guest with no per-guest opt-in roster"*; false, both writers require
+> `biometric_consent` + `age_affirmation` server-side. **Trace to the WRITE, not the flag:
+> grep the column and ask whether every hit is a READ.**
+> 🚨 **THE DB IS THE AUTHORITY, NEVER THE MIGRATION SEED.** Five agent verdicts of "built but
+> switched off" were wrong on that basis — **all 20 privacy controls in prod are `active`.**
+> See [[project_setnayan_gate_with_no_handle]].
 >
-> **5 · 2026-08-02 — CLAIM TOKENS, AND WHY THE MIGRATION TEXT CANNOT BE TRUSTED.**
-> 🔴 **The DATABASE unclaims a Papic seat by itself.** `paparazzi_seats.claimer_user_id` is
-> `ON DELETE SET NULL` and `claim_qr_token` is NOT in that clause, so any hard-delete of the auth
-> row unclaims the seat and leaves the printed QR live — `seatClaimability()` flips back to
-> `claimable`. `runAnonDraftSweep()` hard-deletes login-free claimers at 30 days and its only guard
-> looks for a `couple` membership `papic_claim_seat` never creates. Flag on 2026-08-01 + 30d TTL ⇒
-> earliest fire ~2026-08-31; **closed in #4032 before it could** (rotate first, fail closed).
-> 🔑 **NEVER SEPARATE THE UNCLAIM FROM THE ROTATION** — rotation is the PRECONDITION, not the fix;
-> nulling the claimer alone hands the seat back to the QR they still hold. One statement PER ROW,
-> the token columns are UNIQUE.
+> **4 · 🎬 A FIX NOBODY CAN REACH IS NO FIX.** Three PRs retired the save-the-date veil
+> correctly and the owner's complaint repeated **verbatim for three days** — because the only
+> "See our page" button sat on the film's LAST beat, so the website was reachable only by
+> watching the whole film. ✅ A persistent exit now ships. 🔑 **`aria-hidden` +
+> `pointer-events-none` do NOT remove an element from the tab order** — gate such a control
+> on a real MOUNT condition (`started`), never a style.
+> See [[feedback_a_fix_nobody_can_reach_is_no_fix]].
 >
-> 🔑 **THE MIGRATION TEXT NO LONGER SAYS WHAT THE SCHEMA DOES** (#4038). `20271032282809` rewrites
-> **30 FKs inside a `DO $$` block** via `EXECUTE format(...)` — grep `CREATE TABLE` and you get the
-> pre-2026-08-02 clause. **Read `tests/db/user-fk-behaviour.generated.txt`** (generated from
-> `pg_constraint` after a PGlite replay, CI-enforced): 205 FKs · CASCADE 59 · RESTRICT 3 ·
-> SET NULL 143. ⚠ **`SET NULL` ≠ "erasure handled it"** — erasure anonymizes in place and issues no
-> DELETE, so it never fires on that path.
+> **5 · RULE 0 PAID OFF FOUR TIMES IN ONE DAY — nothing was rebuilt.** The photographer
+> hand-over (`booking_handovers` `kind='gallery_link'`, copy already says *"Big galleries stay
+> on your link"*), the **editorial vendor spotlight** (`journal_vendor_spotlights`, authored in
+> admin, rendered in `/blog/[slug]`, free + four-eyes-gated sponsored), **vendor partnerships**
+> (complete both sides, two-admin gate), and **all eleven** vendor "special services" the owner
+> listed — **zero genuinely missing.** ⏭ Real gaps found: no vendor→emcee channel · a vendor
+> cannot see their own captures · no avatar maker exists for anyone.
 >
-> 🧪 **BULK CLASSIFICATION DOES NOT CLEAR THE ERASURE BACKLOG — tested.** All 78 tables classified
-> in one pass, each verdict attacked: **41 of 78 overturned** (23 evidence-only, **17 decisions
-> wrong**), and **11 of the 17 moved `EXCLUDE`→`PURGE`** — personal data left alive after an
-> erasure request, with confident reasons attached. The error is **directional, toward
-> under-erasure**. None applied; the figure is now in the guardrail docblock. **Do not retry it.**
-> Clear a few tables at a time, reading the generated FK file first.
->
-> **6 · 2026-08-02 — THE ERASURE BACKLOG IS BEING CLEARED IN TENS: 78 → 37.**
-> Four batches merged (#4047 · #4051 · #4053 · #4056). Recipe: one agent per table settling against
-> `tests/db/user-fk-behaviour.generated.txt`, each settlement then attacked. **41/42 survived** —
-> versus **41 of 78 WRONG** when the same question was asked in one bulk pass. The recipe is the
-> difference, not the model. 🔑 **THE SCHEMA SORTS ACTOR FROM SUBJECT:** `CASCADE`+`NOT NULL` ⇒ the
-> row is ABOUT them (delete); `SET NULL` ⇒ an actor stamp (null, row stays). Enforced as **G6**.
-> 🪤 **A MUTATION TEST THAT PASSES MAY MEAN SOMETHING ELSE MASKS THE BUG** — the over-deletion guard
-> only held because the null loop runs before the delete loop; swap them and it returns, all green.
-> ⏭ Two real people-facing finds: a waitlist that would have **emailed an erased person**, and a
-> retired table still granting `anon` full read/write (dropped, #4041).
->
-> ⏭ **OPEN, needing the owner:** (a) the **37-table export/erasure backlog** —
-> `UNDECIDED_BACKLOG` in `lib/erasure/coverage-guardrail.test.ts` — down from 78, clearing in tens; (b) a store whose only admin leaves cannot have that account deleted
-> (`VENDOR_LAST_ADMIN`) — a product question blocking a deletion duty; (c) the retired
-> `token_burn_bands` table still in prod with 10 of 20 rows mis-keyed (inert — nothing reads it);
-> (d) **`vendor_invites` — a claimed invite token is NOT dead**: `resolveClaimContextForService`
-> takes one as its intended input and returns the couple's display name via the admin client.
-> Rotating it changes the guided first-service flow — a product call, tracked not settled.
->
-> 🪤 **THE LESSON OF THE DAY, measured:** 79 claims attacked across three adversarial sweeps,
-> 22 refuted. **Facts survive ~93%, judgements ~50%.** Nobody invents facts; people invent
-> CONSEQUENCES. Never state an impact without naming the file or function that would suffer.
-> An absence proved inside a fence you drew (`schema='public'`, a grep excluding `*.test.*`) is
-> NOT an absence. And the scarier a finding sounds, the LESS it got checked before being passed
-> on — five false alarms reached the owner that way.
+> ⏭ **OPEN, needing the owner:** (a) a control to delete orphaned files in the
+> **vendor-verification** bucket — `/admin/website-media` covers only `media`, and two
+> government IDs sit there unreferenced; (b) whether the corrected legacy-preservation counsel
+> brief was ever re-sent; (c) whether Partnerships should be *pushed* (nothing invites a vendor
+> into it) or merely kept.
+
 
 **If you are starting a session on ANY topic, do these three things first:**
 1. Read the ACTIVE block above (even if your task seems unrelated — it may already be covered).
