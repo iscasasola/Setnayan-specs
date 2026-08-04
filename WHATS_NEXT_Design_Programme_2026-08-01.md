@@ -205,8 +205,15 @@ and "none" is a finding to report, not a licence to draw.
   note:          ~95 of 107 admin routes collapse into ONE archetype. 33 of the app's 45
                  raw <table> files live here. Internal-only, zero customer impact ⇒ SHIPS LAST.
 
-- id:            design#0-GATE
+- id:            design#0-GATE                              ✅ CLOSED 2026-08-04 — ALL 19 SHIP IT
   title:         OWNER REVIEWS THE 5 PROTOTYPES
+  outcome:       Owner reviewed the 12 screen shapes + 7 overlay types via the verdict
+                 sheet and approved EVERY ONE. No changes, nothing held. design#4 · #5 ·
+                 #6 · #7 · #8 · #9 are therefore ALL UNBLOCKED — and note design#3 was
+                 falsified (the shell already ships and is mounted), so nothing that
+                 "depends_on: [design#3]" is actually waiting on anything.
+                 ⚠ The SHAPE was approved, not any screen's pixels. A delta between a
+                 ported screen and its archetype is a DEFECT IN THE PORT.
   type:          decision
   depends_on:    []
   safety_gate:   OWNER_DECISION

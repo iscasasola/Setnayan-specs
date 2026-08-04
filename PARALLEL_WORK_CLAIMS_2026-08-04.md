@@ -40,7 +40,12 @@
 | **S5** | **3D room: every guest shows as "Guest"** | the shared-room presence path | no | *(unclaimed)* |
 | **S6** | **Vendor verification uploads don't sweep what they replace** | the vendor verification upload call site | no | *(unclaimed)* |
 | **S7** | **PR-H — the vendor-agrees step** | `event_vendors` migration, both dashboards, 3 lock sites | ✅ **all 4 answered** | **REASSIGNED by the owner 2026-08-04** (*"PR-H was not done there. can we do it here instead?"*) — moved OFF the `Explore_Replan_BUILD_SPEC_2026-07-27.md` session. Spec now carries the answers; **build still not started** (14 HIGH plan defects open — see §9). |
-| **S8** | **Design port** — 12 archetypes + 7 overlays across ~40 screen families | app-wide UI | ✅ **APPROVED 2026-08-04 — all 19, no changes** | *(unclaimed — the biggest stream on the board)* |
+| **S8a** | **design#6 — public doorway + `/pricing` framing** | the public marketing routes | no | *(unclaimed — **start here**, it never depended on anything)* |
+| **S8b** | **design#5 — couple dashboard** (Roster · Ledger · Comparison · Gallery) | `dashboard/[eventId]/*` | no | *(unclaimed)* |
+| **S8c** | **design#9 — admin console table** (~95 of 107 routes → ONE archetype) | `app/admin/*` | no | *(unclaimed)* |
+| **S8d** | **design#8 — vendor dashboard** (EXTEND the 4 existing prototypes) | `vendor-dashboard/*` | no | *(unclaimed)* |
+| **S8e** | **design#4 — reconcile the ~10 older per-surface prototypes** | `prototypes/` + the surfaces they name | no | *(unclaimed)* |
+| **S8f** | **design#7 — the five genuine gaps** | per the contract | no | *(unclaimed)* |
 
 ---
 
@@ -56,6 +61,7 @@
 - **Converting the other four empty-state surfaces.** The resolver has no partial-permission concept
   and `denied` outranks `count`, so on a multi-arm policy it would **hide rows the reader is entitled
   to see** — worse than the bug being fixed.
+- **Redrawing any archetype.** All 19 are APPROVED and the five prototypes are BINDING — port them. A delta between a ported screen and its archetype is a defect in the port, not a new decision to make on the spot.
 - **Anything under `/budget`.** Mid-flight in the flag-dark BUD stream; it shipped twice today.
 
 ## 🪤 Traps that cost time today
