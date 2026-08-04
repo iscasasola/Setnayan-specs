@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendor answers a lock request · Setnayan · 2026-08-04</title>
+<style>
+  :root{
+    --cream:#FDFBF7; --ink:#2C2A29; --ink-soft:#6E6A62; --ink-mute:#8A857B;
+    --terracotta:#C24E25; --terracotta-hi:#A8401D;
+    --gold:#A9834B; --gold-text:#8A6B39; --gold-soft:#F5EEE1;
+    --slate:#3B4E67; --line:#E6E0D6; --line-soft:#F1ECE3;
+    --danger:#A6483B; --danger-soft:#F7E9E6;
+    --warn:#B77E2E;  --warn-soft:#FAF0DE;
+    --ok:#5E7C52;    --ok-soft:#EDF1E8;
+    --sh:0 1px 2px rgba(44,42,41,.04), 0 8px 24px -18px rgba(44,42,41,.32);
+    --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;max-width:100%;overflow-x:hidden;background:#F4F1EA}
+  body{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+  button{font:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--slate);outline-offset:2px;border-radius:6px}
+  .ic{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .page{max-width:1180px;margin:0 auto;padding:26px 20px 60px}
+  .eye{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.19em;
+    text-transform:uppercase;font-weight:700;color:var(--ink-mute);margin-bottom:10px}
+  .eye .d{width:6px;height:6px;background:var(--gold);transform:rotate(45deg)}
+  h1{margin:0 0 10px;font-size:clamp(21px,3vw,27px);font-weight:800;letter-spacing:-.022em;text-wrap:balance}
+  .lede{margin:0;max-width:72ch;font-size:14.5px;color:var(--ink-soft);text-wrap:pretty}
+  .lede b{color:var(--ink);font-weight:650}
+
+  /* the 5-step handshake tracker */
+  .track{display:flex;gap:0;margin:22px 0 6px;flex-wrap:wrap}
+  .step{flex:1;min-width:118px;padding:9px 10px;border-top:3px solid var(--line);position:relative}
+  .step.done{border-top-color:var(--ok)}
+  .step.now{border-top-color:var(--terracotta)}
+  .step .n{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    font-weight:700;color:var(--ink-mute)}
+  .step .t{font-size:12.5px;font-weight:650;margin-top:2px}
+  .step.now .t{color:var(--terracotta)}
+  .step.done .t{color:var(--ink-soft)}
+  .step.now .n{color:var(--terracotta)}
+  .hint{font-size:12px;color:var(--ink-mute);margin:0 0 18px}
+
+  .seg{display:inline-flex;background:var(--cream);border:1px solid var(--line);border-radius:999px;padding:3px;box-shadow:var(--sh);margin-bottom:18px;flex-wrap:wrap}
+  .seg button{border:0;background:transparent;border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:650;color:var(--ink-soft)}
+  .seg button[aria-pressed="true"]{background:var(--gold-soft);color:var(--gold-text);box-shadow:inset 0 0 0 1px rgba(169,131,75,.3)}
+
+  .two{display:grid;gap:18px;grid-template-columns:1fr;align-items:start}
+  @media(min-width:940px){.two{grid-template-columns:1fr 1fr}}
+
+  .phone{background:var(--cream);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh);overflow:hidden;animation:rise .45s both}
+  .ph-top{display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid var(--line-soft)}
+  .mark{width:24px;height:24px;border-radius:6px;background:var(--ink);color:var(--cream);display:grid;place-items:center;
+    font-family:var(--mono);font-size:11px;font-weight:700}
+  .who{font-size:12.5px;font-weight:750}
+  .role{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-text);font-weight:700}
+  .ph-body{padding:16px;min-height:330px}
+
+  .card{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--cream);box-shadow:var(--sh);animation:fade .3s both}
+  .card + .card{margin-top:11px}
+  .card.hot{border-left:3px solid var(--terracotta)}
+  .card.warn{border-left:3px solid var(--warn)}
+  .card.ok{border-left:3px solid var(--ok)}
+  .card.dead{border-left:3px solid var(--ink-mute);opacity:.75}
+  .ctitle{font-size:14.5px;font-weight:750;letter-spacing:-.01em}
+  .cmeta{font-size:11.5px;color:var(--ink-mute);margin-top:2px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .pill{font-family:var(--mono);font-size:10px;font-weight:700;border-radius:999px;padding:2px 8px}
+  .pill.red{background:var(--danger-soft);color:var(--danger)}
+  .pill.amber{background:var(--warn-soft);color:var(--warn)}
+  .pill.green{background:var(--ok-soft);color:var(--ok)}
+  .pill.grey{background:var(--line-soft);color:var(--ink-mute)}
+  .cbody{font-size:13px;color:var(--ink-soft);margin-top:9px}
+  .cbody b{color:var(--ink);font-weight:650}
+  .acts{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
+  .b{border-radius:8px;padding:9px 15px;font-size:13px;font-weight:680;border:1px solid transparent}
+  .b-go{background:var(--terracotta);color:var(--cream)}
+  .b-go:hover{background:var(--terracotta-hi)}
+  .b-alt{background:transparent;border-color:var(--line);color:var(--slate)}
+  .b-alt:hover{border-color:var(--slate)}
+  .b-quiet{background:transparent;color:var(--ink-mute);padding:9px 8px}
+  .b-quiet:hover{color:var(--ink)}
+  textarea{width:100%;margin-top:10px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+    font:inherit;font-size:13px;resize:vertical;min-height:64px;background:var(--cream);color:var(--ink)}
+  textarea:focus{outline:none;border-color:var(--gold)}
+  .none{border:1px dashed var(--line);border-radius:12px;padding:26px 16px;text-align:center;color:var(--ink-mute);font-size:13px}
+  .why{border-left:2px solid var(--gold);padding:2px 0 2px 12px;font-size:12.5px;color:var(--gold-text);margin-top:12px}
+
+  .notes{max-width:80ch;margin:26px auto 0;font-size:12.5px;color:var(--ink-mute);line-height:1.65}
+  .notes hr{border:0;border-top:1px solid var(--line);margin:0 0 16px}
+  .notes b{color:var(--ink-soft)}
+  .samp{font-size:11.5px;color:var(--ink-mute);display:inline-flex;align-items:center;gap:6px;margin-left:4px}
+  .samp .dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="eye"><span class="d"></span><span>Setnayan · the lock handshake · step 2 · sample</span></div>
+  <h1>The vendor has to say yes before anyone pays.</h1>
+  <p class="lede">
+    Today a couple presses <b>Lock</b> and the vendor is never asked — the booking simply appears.
+    This is the missing step: the couple <b>requests</b>, the vendor <b>agrees or declines</b>, and only
+    then does anyone talk about money. The vendor answers on <b>their own dashboard</b>, beside the
+    card they already use to confirm a deposit. Seven days to answer, a nudge on day five.
+    <span class="samp"><span class="dot"></span>Sample names and amounts.</span>
+  </p>
+
+  <div class="track" id="track"></div>
+  <p class="hint" id="hint"></p>
+
+  <div class="seg" role="group" aria-label="Which moment to show">
+    <button data-s="asked"   aria-pressed="true">Just asked</button>
+    <button data-s="day5"    aria-pressed="false">Day 5 · nudge</button>
+    <button data-s="agreed"  aria-pressed="false">Vendor agrees</button>
+    <button data-s="declined"aria-pressed="false">Vendor declines</button>
+    <button data-s="expired" aria-pressed="false">Nobody answered</button>
+  </div>
+
+  <div class="two">
+    <div class="phone">
+      <div class="ph-top"><div class="mark">GF</div>
+        <div><div class="who">Golden Frame Studios</div><div class="role">Vendor · dashboard</div></div></div>
+      <div class="ph-body" id="vendor"></div>
+    </div>
+    <div class="phone">
+      <div class="ph-top"><div class="mark">R</div>
+        <div><div class="who">Reyes–Santos</div><div class="role">Couple · their vendors</div></div></div>
+      <div class="ph-body" id="couple"></div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <hr>
+    <p><b>Why the vendor answers here.</b> Their dashboard already carries the card where they confirm
+    a deposit — the last step of this same handshake. The obvious alternative, the couple's page, turns
+    a vendor away until the booking is already confirmed, which is exactly the situation this step
+    exists to resolve. So step 2 sits beside step 5, on a screen the vendor opens anyway.</p>
+    <p><b>What the couple never sees.</b> No "it's final" language until the vendor answers. The card
+    says <i>waiting</i>, and their date is not fixed by asking — an event narrows from several possible
+    dates to one, and only then is it final. Asking a vendor is not choosing a day.</p>
+    <p><b>Declining is not a dead end.</b> The couple can ask again, and a second ask gets a fresh seven
+    days rather than inheriting the first one's deadline. A vendor's reason is passed on in their own
+    words, because "unavailable" and "we don't shoot church weddings" send the couple to very different
+    next steps.</p>
+    <p><b>Not shown, deliberately:</b> what happens after <i>Agree</i> — that is step 3, the vendor
+    sending payment options, which already ships.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var STEPS=[['1','Couple asks'],['2','Vendor agrees'],['3','Payment options'],['4','Couple pays'],['5','Vendor confirms']];
+  var S={
+    asked:{at:1,hint:'Day 0 — the request has just landed on the vendor’s dashboard. Nothing is booked and no date is fixed.'},
+    day5:{at:1,hint:'Day 5 — the vendor has not opened it. A nudge goes out; two days left before it closes itself.'},
+    agreed:{at:2,hint:'The vendor agreed. Only now does the conversation move to money — step 3 already ships.'},
+    declined:{at:1,hint:'The vendor declined, in their own words. The couple can ask again and gets a fresh seven days.'},
+    expired:{at:1,hint:'Seven days passed with no answer. The request closes itself and the couple is told plainly.'}
+  };
+  var st='asked';
+  function $(i){return document.getElementById(i);}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+  function track(){
+    var at=S[st].at;
+    $('track').innerHTML=STEPS.map(function(s,i){
+      var k=i+1<at?'done':(i+1===at?'now':'');
+      return '<div class="step '+k+'"><div class="n">Step '+s[0]+'</div><div class="t">'+s[1]+'</div></div>';
+    }).join('');
+    $('hint').textContent=S[st].hint;
+  }
+
+  var V={
+    asked:'<div class="card hot"><div class="ctitle">Lock request — agree?</div>'+
+      '<div class="cmeta"><span class="pill amber">7 days to answer</span><span>Reyes–Santos · 14 Feb 2027</span></div>'+
+      '<div class="cbody">They want to hold <b>14 February 2027</b> with you, at the price you agreed: <b>₱85,000</b>.<br>'+
+      'Agreeing does not take payment — you send payment options next.</div>'+
+      '<div class="acts"><button class="b b-go" data-go="agreed">Yes, hold the date</button>'+
+      '<button class="b b-alt" data-go="declineform">Can’t take it</button>'+
+      '<button class="b b-quiet" data-go="open">See the details</button></div></div>',
+    day5:'<div class="card warn"><div class="ctitle">Lock request — agree?</div>'+
+      '<div class="cmeta"><span class="pill red">2 days left</span><span>Reyes–Santos · 14 Feb 2027</span></div>'+
+      '<div class="cbody">They want to hold <b>14 February 2027</b> with you — <b>₱85,000</b>.<br>'+
+      '<b>We emailed you a reminder today.</b> If nobody answers by Thursday this closes and they are told you did not reply.</div>'+
+      '<div class="acts"><button class="b b-go" data-go="agreed">Yes, hold the date</button>'+
+      '<button class="b b-alt" data-go="declineform">Can’t take it</button></div></div>',
+    declineform:'<div class="card warn"><div class="ctitle">Why can’t you take it?</div>'+
+      '<div class="cbody">They see this in your words. “Unavailable” and “we don’t shoot church weddings” send them somewhere very different.</div>'+
+      '<textarea placeholder="Already booked that weekend — happy to look at the 21st?"></textarea>'+
+      '<div class="acts"><button class="b b-go" data-go="declined">Send</button>'+
+      '<button class="b b-quiet" data-go="asked">Back</button></div></div>',
+    agreed:'<div class="card ok"><div class="ctitle">You’re holding 14 February</div>'+
+      '<div class="cmeta"><span class="pill green">Agreed</span><span>Reyes–Santos · ₱85,000</span></div>'+
+      '<div class="cbody">Next: send them your payment options. Nothing is booked until they pay and you confirm it.</div>'+
+      '<div class="acts"><button class="b b-go" data-go="open">Send payment options</button>'+
+      '<button class="b b-quiet" data-go="asked">Undo</button></div>'+
+      '<div class="why">Step 3 onwards already ships — this sample stops here.</div></div>',
+    declined:'<div class="card dead"><div class="ctitle">You declined this request</div>'+
+      '<div class="cmeta"><span class="pill grey">Declined</span><span>Reyes–Santos · 14 Feb 2027</span></div>'+
+      '<div class="cbody">They were told: <b>“Already booked that weekend — happy to look at the 21st?”</b><br>'+
+      'They can ask you again for a different date.</div>'+
+      '<div class="acts"><button class="b b-quiet" data-go="asked">Start over</button></div></div>',
+    expired:'<div class="card dead"><div class="ctitle">A lock request closed unanswered</div>'+
+      '<div class="cmeta"><span class="pill grey">No answer · 7 days</span><span>Reyes–Santos</span></div>'+
+      '<div class="cbody">You did not answer in time, so it closed itself. They have been told nobody replied and may have booked someone else.</div>'+
+      '<div class="acts"><button class="b b-quiet" data-go="asked">Start over</button></div></div>'
+  };
+
+  var C={
+    asked:'<div class="card"><div class="ctitle">Golden Frame Studios</div>'+
+      '<div class="cmeta"><span class="pill amber">Waiting for them</span><span>Photography · ₱85,000</span></div>'+
+      '<div class="cbody">You asked them to hold <b>14 February 2027</b>. They have <b>7 days</b> to answer.<br>'+
+      'Nothing is booked and your date is not fixed yet.</div>'+
+      '<div class="acts"><button class="b b-alt" data-go="asked">Cancel the request</button></div>'+
+      '<div class="why">No “it’s final” language until they say yes.</div></div>',
+    day5:'<div class="card"><div class="ctitle">Golden Frame Studios</div>'+
+      '<div class="cmeta"><span class="pill amber">Waiting · 2 days left</span><span>Photography · ₱85,000</span></div>'+
+      '<div class="cbody">Still waiting. We reminded them today. If they do not answer by Thursday you can ask someone else.</div>'+
+      '<div class="acts"><button class="b b-alt" data-go="asked">Cancel the request</button></div></div>',
+    agreed:'<div class="card ok"><div class="ctitle">Golden Frame Studios said yes</div>'+
+      '<div class="cmeta"><span class="pill green">Holding your date</span><span>14 Feb 2027 · ₱85,000</span></div>'+
+      '<div class="cbody">They are holding <b>14 February</b>. They will send you payment options next.</div>'+
+      '<div class="why">Your wedding date still is not final — that happens when your possible dates narrow to one.</div></div>',
+    declined:'<div class="card warn"><div class="ctitle">Golden Frame Studios can’t take it</div>'+
+      '<div class="cmeta"><span class="pill grey">Declined</span><span>14 Feb 2027</span></div>'+
+      '<div class="cbody">They said: <b>“Already booked that weekend — happy to look at the 21st?”</b></div>'+
+      '<div class="acts"><button class="b b-go" data-go="asked">Ask for the 21st</button>'+
+      '<button class="b b-alt" data-go="asked">Find someone else</button></div></div>',
+    expired:'<div class="card warn"><div class="ctitle">Golden Frame Studios did not reply</div>'+
+      '<div class="cmeta"><span class="pill grey">No answer in 7 days</span></div>'+
+      '<div class="cbody">Nobody answered, so the request closed. Your date is untouched and they never held it.</div>'+
+      '<div class="acts"><button class="b b-go" data-go="asked">Ask again</button>'+
+      '<button class="b b-alt" data-go="asked">Find someone else</button></div></div>'
+  };
+
+  function render(){
+    track();
+    $('vendor').innerHTML = V[st] || V.asked;
+    $('couple').innerHTML = C[st] || C.asked;
+    [].forEach.call(document.querySelectorAll('.seg button'),function(b){
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-s')===st));
+    });
+  }
+  document.addEventListener('click',function(e){
+    var s=e.target.closest('[data-s]'); if(s){ st=s.getAttribute('data-s'); render(); return; }
+    var g=e.target.closest('[data-go]');
+    if(g){ var v=g.getAttribute('data-go');
+      if(v==='open') return;
+      if(v==='declineform'){ $('vendor').innerHTML=V.declineform; return; }
+      st=v; render(); }
+  });
+  render();
+})();
+</script>
+</body>
+</html>
