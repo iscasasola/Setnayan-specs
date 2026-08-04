@@ -36,7 +36,7 @@
 | **S1** | **Empty / not-allowed screens — the SAFE four + guest list** | the 4 single-arm surfaces, the guests read helper, a new per-table permission map | no | *(unclaimed)* |
 | **S2** | ~~Two small security holes~~ ✅ **DONE — PR #4087** | — | no | *(complete)* |
 | **S3** | **"Download my data" gap — 90 tables** | `lib/export-*`, the export guardrail | no | *(unclaimed)* |
-| **S4** | **Rebase + land the guest-site nav PR (#4086)** | `app/[slug]/_components/*`, `_lib/site-nav.ts` | no | *(unclaimed)* |
+| **S4** | ~~Land the guest-site nav work~~ ✅ **DONE — #4088 + #4089** (#4086 closed: its component edits targeted the pre-redesign bar; its resolver work was salvaged) | — | no | *(complete)* |
 | **S5** | **3D room: every guest shows as "Guest"** | the shared-room presence path | no | *(unclaimed)* |
 | **S6** | **Vendor verification uploads don't sweep what they replace** | the vendor verification upload call site | no | *(unclaimed)* |
 | **S7** | **PR-H — the vendor-agrees step** | `event_vendors` migration, both dashboards, 3 lock sites | ✅ **all 4 answered** | **REASSIGNED by the owner 2026-08-04** (*"PR-H was not done there. can we do it here instead?"*) — moved OFF the `Explore_Replan_BUILD_SPEC_2026-07-27.md` session. Spec now carries the answers; **build still not started** (14 HIGH plan defects open — see §9). |
