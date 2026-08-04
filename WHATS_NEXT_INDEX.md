@@ -645,26 +645,50 @@ as-is) · the 29-open-PR repo backlog (re-verify via `gh pr list`; doc PR number
 
 **Trigger:** owner — *"the what's next session was overlapped with another task… complete the
 pending sessions."* Nothing here was a new feature. Every item was **work already written that
-could not land**, and the reason it could not land was the same shape in four of five cases.
+could not land**. ⚠ The first write-up of this session blamed rotted migration prefixes; that
+diagnosis was wrong and is corrected immediately below. The REAL blockers were stale merge
+conflicts, a guard asserting the very hold the PR releases, and three genuine defects.
 
-### 🔑 THE FINDING THAT MATTERS: a long-open PR's migration ROTS INTO A NO-OP
+### ⚠ CORRECTED 2026-08-04 — the "rotted migration" finding was WRONG
 
-**4 of the 5 PRs carrying a migration had a prefix BELOW prod's applied head** (`20271102113000`).
-Migrations apply **once, in prefix order**. Prefixes were unique and non-round, so
-`check-migration-timestamps.mjs` passed and **every check went green**. They would have merged and
-the DDL would never have run — a failure that looks *more* successful than a red build.
+**What this section first claimed:** that 4 of 5 PRs carried a migration whose prefix had fallen
+below prod's applied head, and would therefore *"merge with green CI and create nothing."*
+**That is false, and it was corrected the same day, before it could mislead anyone.**
 
-| PR | old prefix | would have created |
-|---|---|---|
-| #3659 | `20270930140000` | nothing — the privacy leak stays open |
-| #3994 | `20271029051678` | no `vendor_lines`; every screen reads a missing relation |
-| #3651 | `20270929330649` | no table — while its own flag comment said *"flip on AFTER pushing this migration"* |
-| #3653 | `20270929824517` | (already caught on-branch 08-03) |
+**Why:** `deploy-prod.yml:184` and `supabase-migrations.yml:203` both run
+`supabase db push --include-all --yes`. `--include-all` exists precisely to apply migrations dated
+before the remote head.
 
-**Rule:** before merging any PR more than a few days old, compare its migration prefix to
-`ls supabase/migrations/*.sql | sort | tail -1`. Re-allocate if below. **The guard cannot catch
-this** — it enforces UNIQUE + not-hand-typed-round; ordering-vs-head is a different property and
-nothing checks it. Always verify the OBJECT after merge, never `schema_migrations`.
+**Evidence — 13 data points, not inference:**
+- 12 migrations were historically added out of order (each file's first-commit date diffed against
+  the max prefix existing at that moment; e.g. `20271032407062` added 2026-08-02 when the head was
+  already `20271033104200`). **All 12 are applied in prod.**
+- The open-browse launch migration `20271102765509` was merged on 08-04 while the head was
+  `20271103100614` — **two above it** — and it applied. `column_default` reads `true` in prod.
+
+🔑 **How the error was made:** a `count(*) WHERE version = <prefix>` on an OPEN PR's migration
+returned **0**, read as *"it will be skipped."* Zero was because the PR had not merged yet. The
+fact was right; the consequence was invented. The claim was also inherited from a prior session's
+migration header (`20271102765509`, written 08-03) and from the emcee stream's trap list — **both
+of those are wrong too and should be disregarded.**
+
+### What IS true about a low prefix
+
+**The PGlite replay harness applies migrations in FILENAME order** —
+`apps/web/tests/db/replay-migrations.ts:268-271` is `readdirSync(...).filter('.sql').sort()`. A
+low-prefixed migration that DEPENDS on an object created by a higher-prefixed, already-merged one
+will fail **every** `*.db.test.ts` while prod is perfectly fine. Prod applies in merge order; the
+tests apply in prefix order, and only one of those is the filename.
+
+So allocating forward with `node scripts/new-migration.mjs` stays the right habit — for
+**replay-order correctness and the UNIQUE guard**, not for "it won't apply." The prefix
+re-allocations done in this session were harmless and mildly beneficial, but **not** the safety
+fix they were first described as.
+
+`check-migration-timestamps.mjs` enforces exactly two rules, neither of which is ordering: UNIQUE
+prefixes, and no hand-typed `YYYYMMDD000000`. **Do not describe it as an ordering guard.**
+Verifying the OBJECT after merge (`to_regclass`, `column_default`) remains correct advice — just
+not for the reason first given.
 
 ### 🔴 Three real defects found, none of which was the reported problem
 
@@ -722,3 +746,22 @@ nothing checks it. Always verify the OBJECT after merge, never `schema_migration
 - 🪤 **A fresh worktree with no `node_modules` silently resolves to the home-dir checkout** and
   fails with `MODULE_NOT_FOUND`. `pnpm install` first.
 - **Housekeeping:** 11 merged worktrees pruned, **13.7 GB** reclaimed.
+
+### ✅ 2026-08-04 — OPEN-BROWSE IS LAUNCHED (owner merged #3653)
+
+Verified in prod after `deploy-prod` went green:
+
+| check | result |
+|---|---|
+| `events.website_open_browse` `column_default` | **`true`** ✅ |
+| launch migration `20271102765509` applied | yes ✅ (and it applied **out of order**, two prefixes below the head — the direct disproof of the claim above) |
+| existing events backfilled? | **NO** ✅ — 4 of 5 still `false`; only the sample (`maria-and-jose`) is `true`, and it opted in earlier |
+| live sample guest site | HTTP 200, browse menu renders |
+
+⏭ **THE ONE REMAINING OWNER ACTION: `NEXT_PUBLIC_WEBSITE_MENU_ENABLED`.**
+`siteMenuEnabled()` returns `opts.isSample || opts.flag === 'true'`. The sample event forces the
+menu ON, which is why the live check above looks right — **it proves nothing about real events.**
+`site-body.tsx` is a SERVER component, so the value never reaches the browser bundle and **cannot
+be read from outside**; it has to be checked in the Vercel dashboard. If it is not `'true'`, every
+newly-created event now ships the open-browse site **with no menu to browse it**.
+⚠ `NEXT_PUBLIC_*` inlines at BUILD time — set it, then **redeploy**.
