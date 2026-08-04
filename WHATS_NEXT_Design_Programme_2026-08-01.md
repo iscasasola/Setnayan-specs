@@ -1,4 +1,18 @@
 # WHATS_NEXT — Design Programme: palette shipped, archetypes drafted, ~40 units to port
+
+> ## ✅ THE GATE IS OPEN — ALL 19 APPROVED, 2026-08-04
+>
+> The owner reviewed the twelve screen shapes and seven pop-up types and returned
+> **SHIP IT on every one.** No changes requested, nothing held for discussion.
+>
+> **What that means for anyone picking this up:**
+> - The port is **unblocked**. This was the largest blocked stream in the project.
+> - `prototypes/archetype_*_2026-08-01.html` are now **BINDING**. Port them; do not redraw them.
+> - The admin collapse is blessed: ~95 of 107 admin routes become ONE archetype.
+> - The 28 older prototypes are to be **reconciled** against these, never treated as a rival source.
+>
+> ⚠ **What was approved is the SHAPE, not any screen's pixels.** If a ported screen differs from
+> its archetype, that is a defect in the port — not a new design decision to make on the spot.
 ### 2026-08-01 · owner: *"we want to fix all pages"* → *"i don't think we can finish this now"*
 
 > **Cold-start contract.** Assume no memory files and no conversation context. Everything needed is in

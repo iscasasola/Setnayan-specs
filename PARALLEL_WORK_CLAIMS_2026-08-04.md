@@ -40,7 +40,7 @@
 | **S5** | **3D room: every guest shows as "Guest"** | the shared-room presence path | no | *(unclaimed)* |
 | **S6** | **Vendor verification uploads don't sweep what they replace** | the vendor verification upload call site | no | *(unclaimed)* |
 | **S7** | **PR-H — the vendor-agrees step** | `event_vendors` migration, both dashboards, 3 lock sites | ✅ **all 4 answered** | **REASSIGNED by the owner 2026-08-04** (*"PR-H was not done there. can we do it here instead?"*) — moved OFF the `Explore_Replan_BUILD_SPEC_2026-07-27.md` session. Spec now carries the answers; **build still not started** (14 HIGH plan defects open — see §9). |
-| **S8** | **Design port** — 12 archetypes across ~40 screen families | app-wide UI | ⛔ **owner must look** | *(blocked)* |
+| **S8** | **Design port** — 12 archetypes + 7 overlays across ~40 screen families | app-wide UI | ✅ **APPROVED 2026-08-04 — all 19, no changes** | *(unclaimed — the biggest stream on the board)* |
 
 ---
 
