@@ -34,12 +34,12 @@
 | # | Stream | Owns these files | Needs owner? | Claimed by |
 |---|---|---|---|---|
 | **S1** | **Empty / not-allowed screens — the SAFE four + guest list** | the 4 single-arm surfaces, the guests read helper, a new per-table permission map | no | *(unclaimed)* |
-| **S2** | **Two small security holes** — the anon-callable slot RPC, and the couple forging "delivered" | one migration, `vendor/lock` path, completion columns | no | **claimed 2026-08-04 · `claude/close-two-forgery-lanes`** |
+| **S2** | ~~Two small security holes~~ ✅ **DONE — PR #4087** | — | no | *(complete)* |
 | **S3** | **"Download my data" gap — 90 tables** | `lib/export-*`, the export guardrail | no | *(unclaimed)* |
 | **S4** | **Rebase + land the guest-site nav PR (#4086)** | `app/[slug]/_components/*`, `_lib/site-nav.ts` | no | *(unclaimed)* |
 | **S5** | **3D room: every guest shows as "Guest"** | the shared-room presence path | no | *(unclaimed)* |
 | **S6** | **Vendor verification uploads don't sweep what they replace** | the vendor verification upload call site | no | *(unclaimed)* |
-| **S7** | **PR-H — the vendor-agrees step** | `event_vendors` migration, both dashboards, 3 lock sites | ⛔ **4 answers** | *(blocked)* |
+| **S7** | **PR-H — the vendor-agrees step** | `event_vendors` migration, both dashboards, 3 lock sites | ⛔ **4 answers** | **CLAIMED — the session that owns `Explore_Replan_BUILD_SPEC_2026-07-27.md`** (built BUD-2 · BUD-3 · PR-I from it, and authored the PR-H design). Owner-assigned 2026-08-04. |
 | **S8** | **Design port** — 12 archetypes across ~40 screen families | app-wide UI | ⛔ **owner must look** | *(blocked)* |
 
 ---
@@ -71,3 +71,16 @@
 - **Facts survive, consequences get invented.** A billing claim built on three individually-true
   facts was wrong because the guard sat one layer below where the trace stopped. **Trace to the
   bottom layer that could refuse before naming a consequence.**
+
+---
+
+## Who owns `Explore_Replan_BUILD_SPEC_2026-07-27.md`
+
+**One session owns that whole spec** and has shipped from it today: **BUD-2** (#4079), **BUD-3** (#4080)
+and **PR-I** (#4083), plus the **PR-H design + adversarial review**. PR-H stays with it — assigned by
+the owner 2026-08-04 on the reasoning that it is the session already holding the context.
+
+⚠ **PR-H is NOT the last unbuilt slice in that file.** Also still open there: **PR-G2** (the hard
+grey-out tier), **PR-J** (found-you attribution + the dispute ladder), and **BUD-4 … BUD-10** of the
+budget programme (§18.6 — BUD-1/2/3 are done, 4 onward are not). Worth knowing before anyone treats
+the spec as finished when PR-H lands.
