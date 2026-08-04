@@ -1,0 +1,1603 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setnayan Admin — designed · 2026-08-03</title>
+<style>
+  :root{
+    /* ── OWNER-LOCKED PALETTE 2026-08-01 · Warm Editorial Archive ────────── */
+    --cream:#FDFBF7;        /* page AND card — same fill on purpose          */
+    --ink:#2C2A29;          /* 13.82:1 on cream                              */
+    --ink-soft:#6E6A62;
+    --ink-mute:#8A857B;
+    --terracotta:#C24E25;   /* PRIMARY CTA — the only "act" colour           */
+    --terracotta-hi:#A8401D;
+    --gold:#A9834B;         /* highlight ONLY — never a button               */
+    --gold-text:#8A6B39;    /* gold's text escalation, 4.79:1                */
+    --gold-soft:#F5EEE1;
+    --slate:#3B4E67;        /* links + secondary buttons, 8.22:1             */
+    --slate-soft:#ECEFF4;
+    --line:#E6E0D6;
+    --line-soft:#F1ECE3;
+
+    /* ── the urgency language — warm semantics, text-safe escalations ───── */
+    --late:#A6483B;         /* past promise · 5.6:1 on cream                 */
+    --late-soft:#F7E9E6;
+    --soon:#B77E2E;         /* due soon · dots + bars only (3.4:1)           */
+    --soon-text:#8A5E20;    /* due soon when it must carry text · 5.4:1      */
+    --soon-soft:#FAF0DE;
+    --ok:#5E7C52;           /* graphics                                      */
+    --ok-text:#4E6844;      /* text · 5.9:1                                  */
+    --ok-soft:#EDF1E8;
+
+    --sh-card:0 1px 2px rgba(44,42,41,.05), 0 10px 28px -22px rgba(44,42,41,.38);
+    --sh-frame:0 1px 2px rgba(44,42,41,.05), 0 30px 70px -42px rgba(44,42,41,.45);
+    --sh-pop:0 24px 60px -28px rgba(44,42,41,.42), 0 2px 8px rgba(44,42,41,.07);
+    --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --ease:cubic-bezier(.2,.7,.2,1);
+    --ease-out:cubic-bezier(.16,1,.3,1);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+  body{
+    font-family:var(--font); color:var(--ink); background:var(--cream);
+    -webkit-font-smoothing:antialiased; line-height:1.45;
+  }
+  button,input{font:inherit;color:inherit}
+  button{cursor:pointer}
+  :focus-visible{outline:2px solid var(--slate);outline-offset:2px;border-radius:6px}
+  .ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;
+      stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .ic-sm{width:15px;height:15px}
+  ul{list-style:none;margin:0;padding:0}
+  .num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+  @keyframes itemOut{to{opacity:0;transform:translateX(16px)}}
+  @keyframes tick{0%{transform:scale(1.3)}100%{transform:scale(1)}}
+  @keyframes skpulse{0%,100%{opacity:.55}50%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ══ presentation page (around the device frames) ═════════════════════ */
+  .page{max-width:1460px;margin:0 auto;padding:30px 20px 60px}
+
+  .cap{animation:rise .5s both var(--ease-out);margin-bottom:22px}
+  .eye{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;
+       letter-spacing:.19em;text-transform:uppercase;font-weight:700;color:var(--gold-text);margin-bottom:11px}
+  .eye .dia{width:7px;height:7px;background:var(--gold);transform:rotate(45deg);border-radius:1px;flex:none}
+  .cap h1{margin:0 0 10px;font-size:clamp(22px,3.2vw,29px);font-weight:800;letter-spacing:-.025em;text-wrap:balance}
+  .cap .lede{margin:0;max-width:72ch;font-size:14.5px;color:var(--ink-soft);text-wrap:pretty}
+  .cap .lede b{color:var(--ink);font-weight:650}
+  .cap .lede .num{font-weight:700;color:var(--gold-text);font-size:13.5px}
+
+  .capbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .seg{display:inline-flex;align-items:center;background:var(--cream);border:1px solid var(--line);
+       border-radius:999px;padding:3px;box-shadow:var(--sh-card)}
+  .seg button{border:0;background:transparent;border-radius:999px;padding:6px 14px;
+      font-size:12.5px;font-weight:650;color:var(--ink-soft);transition:color .18s,background .22s var(--ease)}
+  .seg button[aria-pressed="true"]{background:var(--gold-soft);color:var(--gold-text);
+      box-shadow:inset 0 0 0 1px rgba(169,131,75,.32)}
+  .seglab{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+      font-weight:700;color:var(--ink-mute);margin-right:-2px}
+  .kbd{display:inline-flex;align-items:center;gap:7px;background:var(--cream);
+       border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12.5px;
+       font-weight:600;color:var(--ink-soft);box-shadow:var(--sh-card);transition:transform .2s var(--ease)}
+  .kbd:hover{transform:translateY(-1px)}
+  .kbd kbd{font-family:var(--mono);font-size:11px;font-weight:700;background:var(--line-soft);
+      border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--ink)}
+  .samp{font-size:11.5px;color:var(--ink-mute);display:inline-flex;align-items:center;gap:6px}
+  .samp .dot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex:none}
+
+  /* ══ device frame ═════════════════════════════════════════════════════ */
+  .frame{background:var(--cream);border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--sh-frame);overflow:hidden;animation:rise .55s .06s both var(--ease-out);
+    transition:max-width .5s var(--ease-out);margin:0 auto}
+  .frame.desktop{max-width:100%}
+  .frame.mobile{max-width:406px;border-radius:28px}
+
+  .app{display:flex;min-height:680px}
+  .frame.mobile .app{flex-direction:column;min-height:730px}
+
+  /* ══ sidebar (desktop) ════════════════════════════════════════════════ */
+  .side{width:236px;flex:none;border-right:1px solid var(--line);
+        display:flex;flex-direction:column;background:var(--cream)}
+  .frame.mobile .side{display:none}
+
+  .brand{display:flex;align-items:center;gap:10px;padding:15px 16px 13px;border-bottom:1px solid var(--line-soft)}
+  .brand .mark{width:27px;height:27px;border-radius:8px;background:var(--ink);color:var(--cream);
+    display:grid;place-items:center;font-family:var(--mono);font-size:12.5px;font-weight:700;flex:none}
+  .brand .nm{font-size:13px;font-weight:750;letter-spacing:.01em;line-height:1.15}
+  .brand .role{font-family:var(--mono);font-size:9px;letter-spacing:.17em;text-transform:uppercase;
+    color:var(--gold-text);font-weight:700}
+
+  .sbsearch{margin:12px 12px 8px;display:flex;align-items:center;gap:8px;width:calc(100% - 24px);
+    background:transparent;border:1px solid var(--line);border-radius:9px;padding:7px 10px;
+    font-size:12.5px;color:var(--ink-mute);text-align:left;transition:border-color .2s,background .2s,color .2s}
+  .sbsearch:hover{border-color:var(--gold);background:var(--gold-soft);color:var(--gold-text)}
+  .sbsearch .sp{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700}
+
+  .navsec{padding:6px 10px 4px}
+  .navsec .hd{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+    font-weight:700;color:var(--ink-mute);padding:8px 8px 6px}
+  .navsec.quiet{margin-top:auto;border-top:1px solid var(--line-soft);padding-bottom:12px}
+
+  .nav li + li{margin-top:1px}
+  .navbtn{width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border:0;
+    background:transparent;border-radius:9px;text-align:left;font-size:13px;font-weight:620;
+    color:var(--ink-soft);position:relative;transition:background .18s,color .18s}
+  .navbtn:hover{background:var(--line-soft);color:var(--ink)}
+  .navbtn[aria-current="page"]{background:var(--gold-soft);color:var(--ink);font-weight:720}
+  .navbtn[aria-current="page"]::before{content:"";position:absolute;left:-10px;top:50%;
+    transform:translateY(-50%);width:3px;height:18px;border-radius:0 3px 3px 0;background:var(--gold)}
+  .navbtn .lb{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .navsec.quiet .navbtn{font-size:12px;font-weight:550;color:var(--ink-mute);padding:6px 10px}
+  .navsec.quiet .navbtn .ic{width:15px;height:15px}
+  .navsec.quiet .navbtn:hover{color:var(--ink)}
+  .navsec.quiet .navbtn[aria-current="page"]{color:var(--ink);font-weight:650}
+
+  .pill{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:10.5px;font-weight:700;
+    border-radius:999px;padding:1.5px 7px;flex:none;letter-spacing:.02em}
+  .pill.red{background:var(--late-soft);color:var(--late)}
+  .pill.amber{background:var(--soon-soft);color:var(--soon-text)}
+  .pill.grey{background:var(--line-soft);color:var(--ink-mute)}
+
+  /* ══ main ═════════════════════════════════════════════════════════════ */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--cream);position:relative}
+  .topbar{display:flex;align-items:center;gap:12px;padding:12px 22px;border-bottom:1px solid var(--line-soft);
+    min-height:50px}
+  .crumb{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-mute);min-width:0}
+  .crumb .sep{color:var(--line);flex:none}
+  .crumb .cur{color:var(--ink);font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .crumb button{border:0;background:transparent;padding:0;color:var(--slate);font-size:12.5px;
+    font-weight:600;text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(59,78,103,.3)}
+  .crumb button:hover{text-decoration-color:var(--slate)}
+  .cta{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:var(--terracotta);
+    color:var(--cream);border:0;border-radius:8px;padding:7px 14px;font-size:12.5px;font-weight:680;
+    box-shadow:0 1px 2px rgba(44,42,41,.12);transition:background .18s,transform .18s var(--ease)}
+  .cta:hover{background:var(--terracotta-hi);transform:translateY(-1px)}
+
+  .body{padding:20px 22px 26px;flex:1;overflow:auto;animation:fade .3s both;scrollbar-width:thin}
+  .col{max-width:64rem;margin:0 auto}
+
+  .h2row{display:flex;align-items:baseline;gap:10px;margin:0 0 3px}
+  .h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em}
+  .h2date{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-mute)}
+  .sub{margin:0 0 16px;font-size:13px;color:var(--ink-soft);max-width:64ch}
+
+  /* ══ the triage strip — the morning read ══════════════════════════════ */
+  .triage{border:1px solid var(--line);border-radius:11px;box-shadow:var(--sh-card);
+    padding:11px 14px 12px;margin:0 0 14px;background:var(--cream)}
+  .tfigs{display:flex;gap:22px;flex-wrap:wrap;row-gap:8px}
+  .tfig{display:flex;align-items:baseline;gap:8px;min-width:0}
+  .tfig .tv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:20px;
+    font-weight:750;letter-spacing:-.02em;line-height:1}
+  .tfig .tl{font-size:11px;font-weight:620;color:var(--ink-mute);white-space:nowrap}
+  .tfig.late .tv{color:var(--late)}
+  .tfig.soon .tv{color:var(--soon-text)}
+  .tfig.pace .tv{color:var(--ink-soft)}
+  .tmeter{display:flex;height:4px;border-radius:99px;overflow:hidden;background:var(--line-soft);
+    margin-top:10px}
+  .tmeter i{display:block;height:100%}
+  .tmeter .m1{background:var(--late)} .tmeter .m2{background:var(--soon)} .tmeter .m3{background:var(--line)}
+
+  /* ══ filter chips ═════════════════════════════════════════════════════ */
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
+  .chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4.5px 12px;
+    font-size:12px;font-weight:620;color:var(--ink-soft);white-space:nowrap;transition:all .18s var(--ease)}
+  .chip:hover{border-color:var(--gold);color:var(--gold-text)}
+  .chip[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold-text)}
+  .chip .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:10.5px;opacity:.75;margin-left:5px}
+  .chip.hot .n{color:var(--late);opacity:1;font-weight:700}
+
+  /* ══ the worklist ledger ══════════════════════════════════════════════ */
+  .work{border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh-card);
+    animation:fade .3s both}
+  .whead{display:flex;align-items:center;gap:12px;padding:7px 15px;border-bottom:1px solid var(--line);
+    background:var(--cream);font-family:var(--mono);font-size:9px;font-weight:700;
+    letter-spacing:.15em;text-transform:uppercase;color:var(--ink-mute)}
+  .whead .c-dot{width:8px;flex:none}
+  .whead .c-q{flex:1;min-width:0}
+  .whead .c-lane{width:112px;flex:none}
+  .whead .c-age{width:118px;flex:none;text-align:right}
+  .whead .c-cnt{width:38px;flex:none;text-align:right}
+  .whead .c-ch{width:16px;flex:none}
+
+  .wrow{display:flex;align-items:center;gap:12px;width:100%;padding:9px 15px;border:0;
+    background:var(--cream);text-align:left;border-bottom:1px solid var(--line-soft);
+    position:relative;transition:background .16s;animation:fade .25s both;min-height:44px}
+  .wrow:last-child{border-bottom:0}
+  .wrow:hover{background:var(--line-soft)}
+  /* past-promise rows carry the only loud mark on the page: a terracotta-dark edge */
+  .wrow.late::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--late)}
+  .state{width:8px;height:8px;border-radius:50%;flex:none}
+  .state.overdue{background:var(--late);box-shadow:0 0 0 3px var(--late-soft)}
+  .state.soon{background:var(--soon);box-shadow:0 0 0 3px var(--soon-soft)}
+  .state.ok{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}  /* calm = quiet */
+  .wname{flex:1;min-width:0;font-size:13px;font-weight:650;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .wtag{width:112px;flex:none;font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+    text-transform:uppercase;font-weight:700;color:var(--ink-mute);overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .wage{width:118px;flex:none;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
+    font-size:10.5px;font-weight:600;color:var(--ink-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wrow.late .wage{color:var(--late);font-weight:700}
+  .wrow.soonr .wage{color:var(--soon-text)}
+  .cnt{width:38px;flex:none;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
+    font-size:14.5px;font-weight:700;color:var(--ink-mute)}
+  .cnt.overdue{color:var(--late);font-weight:800}
+  .cnt.soon{color:var(--soon-text)}
+  .cnt.tick{animation:tick .3s var(--ease-out)}
+  .wrow .chev{width:16px;color:var(--ink-mute);display:flex;justify-content:flex-end;
+    transition:transform .22s var(--ease);flex:none}
+  .wrow.open{background:var(--gold-soft);border-bottom-color:transparent}
+  .wrow.open .chev{transform:rotate(180deg)}
+  .wmeta{display:none}
+
+  /* ══ act-from-the-list — the in-place drawer (desktop) ════════════════ */
+  .qdraw{border-bottom:1px solid var(--line-soft);background:var(--cream);
+    padding:0 15px 12px 35px;animation:fade .2s both}
+  .qitem{display:flex;align-items:center;gap:12px;padding:9px 0;flex-wrap:wrap;
+    border-top:1px solid var(--line-soft)}
+  .qitem:first-child{border-top:0}
+  .qitem.out{animation:itemOut .2s both var(--ease);pointer-events:none}
+  .qtx{flex:1;min-width:190px;display:flex;flex-direction:column;gap:1px}
+  .qtx b{font-size:12.5px;font-weight:660}
+  .qsub{font-size:11px;color:var(--ink-mute);font-variant-numeric:tabular-nums}
+  .qacts{display:flex;gap:6px;flex-wrap:wrap;flex:none}
+  .qb{border-radius:7px;padding:5px 11px;font-size:11.5px;font-weight:680;border:1px solid transparent;
+    transition:background .16s,border-color .16s,transform .16s var(--ease)}
+  .qb:hover{transform:translateY(-1px)}
+  .qb-go{background:var(--terracotta);color:var(--cream)}
+  .qb-go:hover{background:var(--terracotta-hi)}
+  .qb-alt{background:transparent;border-color:var(--line);color:var(--slate)}
+  .qb-alt:hover{border-color:var(--slate)}
+  .qb-open{background:transparent;color:var(--ink-mute);padding:5px 8px}
+  .qb-open:hover{color:var(--ink)}
+  .qmore{font-size:11.5px;color:var(--ink-mute);padding-top:9px;
+    border-top:1px solid var(--line-soft);margin-top:2px}
+  .qwhy{display:flex;gap:9px;align-items:flex-start;font-size:11.5px;color:var(--gold-text);
+    padding-top:10px;border-top:1px solid var(--line-soft);margin-top:2px;max-width:56ch}
+  .qwhy .ic{width:14px;height:14px;margin-top:1px;color:var(--gold)}
+  .qlink{border:0;background:transparent;padding:0;color:var(--slate);font-size:11.5px;
+    font-weight:650;text-decoration:underline;text-underline-offset:2px}
+  .qnone{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ok-text);padding:12px 0 4px}
+  .qnone .ic{width:15px;height:15px;color:var(--ok)}
+
+  /* ══ states: skeleton · lane-clear · all-clear ════════════════════════ */
+  .skel .b{background:var(--line-soft);border-radius:6px;animation:skpulse 1.4s ease-in-out infinite}
+  .sk-tri{height:64px;border:1px solid var(--line);border-radius:11px;box-shadow:var(--sh-card);
+    margin-bottom:14px;padding:12px 14px;display:flex;gap:22px;align-items:center}
+  .sk-tri .b{height:20px;width:120px}
+  .sk-chips{display:flex;gap:7px;margin-bottom:12px}
+  .sk-chips .b{height:26px;width:74px;border-radius:999px}
+  .skrow{display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid var(--line-soft)}
+  .skrow:last-child{border-bottom:0}
+  .skrow .d{width:8px;height:8px;border-radius:50%}
+  .skrow .nm{height:11px;flex:none}
+  .skrow .sp{flex:1}
+  .skrow .ct{height:13px;width:26px;margin-left:auto}
+  .skhint{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
+    font-weight:700;color:var(--ink-mute);text-align:center;padding:14px 0 2px}
+
+  .laneclear{padding:34px 18px;text-align:center;color:var(--ink-mute);font-size:13px;
+    display:flex;flex-direction:column;align-items:center;gap:8px}
+  .laneclear .ic{width:20px;height:20px;color:var(--ok)}
+  .laneclear b{color:var(--ok-text);font-weight:700}
+
+  .allclear{padding:64px 20px 58px;text-align:center;animation:rise .5s both var(--ease-out)}
+  .allclear .dia{width:12px;height:12px;background:var(--gold);transform:rotate(45deg);
+    border-radius:2px;margin:0 auto 18px}
+  .allclear h3{margin:0 0 8px;font-size:21px;font-weight:800;letter-spacing:-.02em}
+  .allclear p{margin:0 auto;font-size:13.5px;color:var(--ink-soft);max-width:44ch}
+  .allclear .meta{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--gold-text);margin-top:18px}
+
+  /* ══ toast ════════════════════════════════════════════════════════════ */
+  .toast{position:absolute;left:50%;bottom:16px;transform:translate(-50%,10px);z-index:45;
+    display:flex;align-items:center;gap:12px;background:var(--ink);color:var(--cream);
+    border-radius:999px;padding:8px 8px 8px 16px;font-size:12.5px;font-weight:600;
+    box-shadow:var(--sh-pop);opacity:0;pointer-events:none;max-width:calc(100% - 32px);
+    transition:opacity .22s,transform .22s var(--ease-out);white-space:nowrap}
+  .toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  .toast .tmsg{overflow:hidden;text-overflow:ellipsis}
+  .tundo{border:0;background:rgba(253,251,247,.16);color:var(--cream);border-radius:999px;
+    padding:4px 12px;font-size:12px;font-weight:700;flex:none}
+  .tundo:hover{background:rgba(253,251,247,.28)}
+  .frame.mobile .toast{bottom:78px}
+
+  /* ══ all-surfaces map ═════════════════════════════════════════════════ */
+  .afilter{display:flex;align-items:center;gap:10px;border:1px solid var(--line);
+    border-radius:10px;padding:8px 13px;margin:0 0 18px;background:var(--cream);
+    box-shadow:var(--sh-card);transition:border-color .2s}
+  .afilter:focus-within{border-color:var(--gold)}
+  .afilter input{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:13.5px;font-weight:550}
+  .afilter input::placeholder{color:var(--ink-mute);font-weight:450}
+  .acount{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:10.5px;
+    font-weight:700;color:var(--ink-mute);flex:none}
+
+  .agrp{margin-bottom:18px;animation:fade .25s both}
+  .ahd{display:flex;align-items:baseline;gap:9px;font-family:var(--mono);font-size:9.5px;
+    letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--gold-text);
+    padding:0 2px 7px;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .ahn{margin-left:auto;letter-spacing:.08em;color:var(--ink-mute);font-weight:600}
+  .alist{display:grid;gap:1px;grid-template-columns:repeat(auto-fill,minmax(266px,1fr))}
+  .aitem{display:flex;align-items:center;gap:9px;width:100%;padding:7px 9px;border:0;
+    background:transparent;border-radius:8px;text-align:left;transition:background .16s;min-height:36px}
+  .aitem:hover{background:var(--line-soft)}
+  .aitem .state{width:7px;height:7px}
+  .aitem .state.overdue,.aitem .state.soon{box-shadow:none}
+  .aitem .state.none{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
+  .aitem .alb{font-size:12.5px;font-weight:640;flex:none;max-width:54%;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .aitem .amt{font-size:11px;color:var(--ink-mute);flex:1;min-width:0;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+  .aitem .amt.hot{color:var(--late);font-weight:650}
+  .aitem .ic{width:13px;height:13px;color:var(--ink-mute);opacity:0;transform:translateX(-3px);
+    transition:opacity .16s,transform .16s var(--ease)}
+  .aitem:hover .ic{opacity:1;transform:none}
+
+  /* ══ hub pages: tabs + stat cards ═════════════════════════════════════ */
+  .tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);
+    margin:0 0 16px;scrollbar-width:thin}
+  .tabs button{border:0;background:transparent;padding:7px 11px 9px;font-size:12px;font-weight:640;
+    color:var(--ink-soft);white-space:nowrap;border-bottom:2px solid transparent;
+    margin-bottom:-1px;transition:color .18s,border-color .18s}
+  .tabs button:hover{color:var(--ink)}
+  .tabs button[aria-selected="true"]{color:var(--gold-text);border-bottom-color:var(--gold)}
+
+  .grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(196px,1fr))}
+  .card{border:1px solid var(--line);border-radius:11px;padding:13px 14px;background:var(--cream);
+    box-shadow:var(--sh-card);animation:fade .3s both;min-width:0}
+  .card .k{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--ink-mute);font-weight:700}
+  .card .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:21px;
+    font-weight:750;letter-spacing:-.02em;margin-top:6px}
+  .card .d{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+  .rule{height:1px;background:var(--line);margin:20px 0}
+  .note{border-left:2px solid var(--gold);padding:2px 0 2px 13px;font-size:12.5px;color:var(--ink-soft);
+    max-width:66ch}
+  .note b{color:var(--ink)}
+  .h3{margin:0 0 3px;font-size:15px;font-weight:750;letter-spacing:-.01em}
+
+  /* ══ mobile chrome ════════════════════════════════════════════════════ */
+  .mtop{display:none;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line-soft)}
+  .frame.mobile .mtop{display:flex}
+  .frame.mobile .topbar{padding:10px 16px;min-height:44px}
+  .frame.mobile .body{padding:16px 16px 22px}
+  .frame.mobile .cta{padding:6px 11px;font-size:12px}
+  .msearch{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);
+    background:transparent;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:620;color:var(--ink-soft)}
+
+  /* phone worklist: two-line rows, thumb-sized */
+  .frame.mobile .whead{display:none}
+  .frame.mobile .wrow{min-height:56px;padding:10px 14px;gap:11px}
+  .frame.mobile .wname{white-space:normal;font-size:13.5px;line-height:1.25}
+  .frame.mobile .wtag,.frame.mobile .wage{display:none}
+  .frame.mobile .wmeta{display:flex;align-items:center;gap:7px;font-size:10.5px;
+    color:var(--ink-mute);margin-top:2px;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+  .frame.mobile .wmeta .mtag{letter-spacing:.09em;text-transform:uppercase;font-size:8.5px;font-weight:700}
+  .frame.mobile .wmeta .sep{color:var(--line)}
+  .frame.mobile .wrow.late .wmeta .mage{color:var(--late);font-weight:700}
+  .frame.mobile .wrow.soonr .wmeta .mage{color:var(--soon-text)}
+  .frame.mobile .wmain{flex:1;min-width:0}
+  .frame.mobile .cnt{font-size:16px;width:auto;min-width:30px}
+  .frame.mobile .chips{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px 12px;padding:0 16px 4px;
+    scrollbar-width:none}
+  .frame.mobile .chips::-webkit-scrollbar{display:none}
+  .frame.mobile .tfigs{gap:16px}
+  .frame.mobile .tfig .tv{font-size:18px}
+  .wmain{flex:1;min-width:0;display:flex;flex-direction:column}
+  .frame.desktop .wmain{flex-direction:row;align-items:center;gap:12px;flex:1;min-width:0}
+  .frame.desktop .wmeta{display:none}
+
+  /* ══ the phone action sheet — act-in-place, in thumb reach ════════════ */
+  .shscrim{position:absolute;inset:0;background:rgba(44,42,41,.32);z-index:30;opacity:0;
+    pointer-events:none;transition:opacity .22s}
+  .shscrim.on{opacity:1;pointer-events:auto}
+  .sheet{position:absolute;left:0;right:0;bottom:0;z-index:35;background:var(--cream);
+    border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;
+    box-shadow:var(--sh-pop);transform:translateY(104%);transition:transform .28s var(--ease-out);
+    max-height:76%;display:flex;flex-direction:column;visibility:hidden}
+  .sheet.on{transform:none;visibility:visible}
+  .shhandle{width:36px;height:4px;border-radius:99px;background:var(--line);margin:8px auto 2px;flex:none}
+  .shhead{display:flex;align-items:center;gap:10px;padding:8px 16px 11px;
+    border-bottom:1px solid var(--line-soft);flex:none}
+  .shhead .state{width:9px;height:9px}
+  .shname{flex:1;min-width:0;font-size:14.5px;font-weight:750;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .shcnt{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;font-weight:700;
+    border-radius:999px;padding:2px 9px;background:var(--line-soft);color:var(--ink-soft)}
+  .shcnt.overdue{background:var(--late-soft);color:var(--late)}
+  .shcnt.soon{background:var(--soon-soft);color:var(--soon-text)}
+  .shx{border:0;background:transparent;color:var(--ink-mute);padding:6px;border-radius:8px;flex:none}
+  .shx:hover{background:var(--line-soft);color:var(--ink)}
+  .shbody{overflow-y:auto;padding:4px 16px 6px;flex:1;scrollbar-width:thin}
+  .shitem{padding:12px 0;border-top:1px solid var(--line-soft)}
+  .shitem:first-child{border-top:0}
+  .shitem.out{animation:itemOut .2s both var(--ease);pointer-events:none}
+  .shitem b{display:block;font-size:13.5px;font-weight:660}
+  .shitem .qsub{display:block;margin-top:1px}
+  .shbtns{display:flex;gap:8px;margin-top:10px}
+  .shbtns .qb{flex:1;padding:10px 8px;font-size:13px;text-align:center;border-radius:9px}
+  .shbtns .qb-open{flex:0 0 auto;padding:10px 12px}
+  .shfoot{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));flex:none;
+    border-top:1px solid var(--line-soft)}
+  .shfoot .qwhy,.shfoot .qmore{border-top:0;padding-top:0;margin-top:0}
+  .shfoot .qnone{padding:2px 0}
+
+  /* ══ bottom bar (phone) ═══════════════════════════════════════════════ */
+  .bnav{display:none;border-top:1px solid var(--line);background:var(--cream);
+    padding:6px 6px calc(7px + env(safe-area-inset-bottom,0px))}
+  .frame.mobile .bnav{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+  .bbtn{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;
+    padding:6px 2px 5px;border-radius:10px;font-size:9.5px;font-weight:660;color:var(--ink-mute);
+    position:relative;transition:color .18s,background .18s;min-height:48px}
+  .bbtn .ic{width:20px;height:20px}
+  .bbtn[aria-current="page"]{color:var(--gold-text);background:var(--gold-soft)}
+  .bbtn .bdg{position:absolute;top:1px;right:calc(50% - 22px);font-family:var(--mono);
+    font-variant-numeric:tabular-nums;font-size:9px;font-weight:700;border-radius:999px;
+    padding:0 4px;min-width:15px;text-align:center;border:1.5px solid var(--cream)}
+  .bbtn .bdg.red{background:var(--late);color:var(--cream)}
+  .bbtn .bdg.amber{background:var(--soon);color:var(--cream)}
+  .bbtn .bdg.grey{background:var(--line);color:var(--ink-soft)}
+
+  /* ══ command palette ══════════════════════════════════════════════════ */
+  .scrim{position:fixed;inset:0;background:rgba(44,42,41,.34);backdrop-filter:blur(2px);
+    display:none;z-index:60;animation:fade .18s both}
+  .scrim.on{display:block}
+  .pal{position:fixed;z-index:61;left:50%;top:11vh;transform:translateX(-50%);width:min(640px,calc(100vw - 32px));
+    background:var(--cream);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-pop);
+    overflow:hidden;display:none;animation:pop .22s both var(--ease-out)}
+  .pal.on{display:block}
+  .palin{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--line-soft)}
+  .palin input{flex:1;border:0;background:transparent;outline:none;font-size:15.5px;font-weight:550}
+  .palin input::placeholder{color:var(--ink-mute);font-weight:450}
+  .palesc{font-family:var(--mono);font-size:10px;font-weight:700;background:var(--line-soft);
+    border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--ink-mute)}
+  .palres{max-height:min(58vh,430px);overflow:auto;padding:6px;scrollbar-width:thin}
+  .pgrp{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+    font-weight:700;color:var(--gold-text);padding:10px 11px 5px}
+  .pitem{display:flex;align-items:center;gap:11px;width:100%;padding:8px 11px;border:0;background:transparent;
+    border-radius:8px;text-align:left;font-size:13.5px;font-weight:600;color:var(--ink);position:relative}
+  .pitem .pth{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:44%;flex:none}
+  .pitem.sel{background:var(--gold-soft)}
+  .pitem.sel::before{content:"";position:absolute;left:0;top:20%;bottom:20%;width:3px;
+    border-radius:0 3px 3px 0;background:var(--gold)}
+  .pitem.sel .pth{color:var(--gold-text)}
+  .pitem mark{background:transparent;color:var(--terracotta);font-weight:750}
+  .palfoot{border-top:1px solid var(--line-soft);padding:8px 15px;display:flex;gap:15px;
+    font-size:11px;color:var(--ink-mute)}
+  .palfoot b{font-family:var(--mono);font-weight:700;color:var(--ink-soft)}
+  .palnone{padding:30px 16px;text-align:center;color:var(--ink-mute);font-size:13px}
+
+  /* ══ footnote ═════════════════════════════════════════════════════════ */
+  .foot{max-width:78ch;margin:26px auto 0;font-size:12.5px;color:var(--ink-mute);line-height:1.62}
+  .foot b{color:var(--ink-soft)}
+  .foot .hr{height:1px;background:var(--line);margin:0 0 16px}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:0 0 14px;font-size:11.5px}
+  .legend .li{display:inline-flex;align-items:center;gap:7px;color:var(--ink-soft)}
+  .legend .sw{width:9px;height:9px;border-radius:50%;flex:none}
+  .legend .sw.l1{background:var(--late)}
+  .legend .sw.l2{background:var(--soon)}
+  .legend .sw.l3{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
+  .legend .sw.l4{background:var(--gold);border-radius:2px;transform:rotate(45deg)}
+
+  /* narrow browser window: the desktop frame degrades to the phone chrome */
+  @media (max-width:900px){
+    .side{display:none}
+    .frame.desktop .bnav{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+    .frame.desktop .mtop{display:flex}
+    .frame.desktop .whead{display:none}
+    .frame.desktop .wtag,.frame.desktop .wage{display:none}
+    .frame.desktop .wmain{flex-direction:column;align-items:flex-start;gap:0}
+    .frame.desktop .wmeta{display:flex;align-items:center;gap:7px;font-size:10.5px;
+      color:var(--ink-mute);margin-top:2px;font-family:var(--mono)}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ CAPTION ══════════════════════════════════════════════════════ -->
+  <div class="cap">
+    <div class="eye"><span class="dia"></span><span>Setnayan · Admin console · designed pass · 2026-08-03</span></div>
+    <h1>Nothing is removed. It is ordered — by how often you actually go there.</h1>
+    <p class="lede">
+      The admin has <span class="num">108</span> pages — <span class="num">96</span> with a fixed
+      address plus <span class="num">12</span> you open by clicking a record — behind a menu meant to
+      show <span class="num">79</span> links, and one bucket holds <span class="num">27</span> of them.
+      So this design stops sorting pages by <b>topic</b> and sorts them by <b>how often you go there</b>.
+      Everything urgent collapses into one ranked worklist called <b>Today</b> — and you
+      <b>decide right in the list</b>, without loading a page: open a row, confirm the payment,
+      undo if you slipped. The four things you open every week get a menu row; the rest sit inside
+      those rows as tabs.
+      <b>Every page stays reachable on both desktop and phone</b> — the <b>All surfaces</b> screen is
+      the full map, identical in each, and search is only a shortcut to it. On a phone the bottom bar
+      leads with the must-do work, and the <b>Menu</b> tab opens that same complete map.
+    </p>
+    <div class="capbar">
+      <div class="seg" role="group" aria-label="Preview size">
+        <button id="vDesk" aria-pressed="true">Desktop</button>
+        <button id="vMob" aria-pressed="false">Phone</button>
+      </div>
+      <div class="seg" role="group" aria-label="Preview a state">
+        <span class="seglab" style="padding-left:11px">State</span>
+        <button id="dSample" aria-pressed="true">Sample day</button>
+        <button id="dClear" aria-pressed="false">All clear</button>
+        <button id="dLoad" aria-pressed="false">Loading</button>
+      </div>
+      <button class="kbd" id="openPal">
+        <svg class="ic ic-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        Search anything <kbd id="kHint">⌘K</kbd>
+      </button>
+      <span class="samp"><span class="dot"></span>All counts and rows below are sample data.</span>
+    </div>
+  </div>
+
+  <!-- ══ APP ══════════════════════════════════════════════════════════ -->
+  <div class="frame desktop" id="frame">
+    <div class="app">
+
+      <!-- sidebar -->
+      <nav class="side" aria-label="Admin menu">
+        <div class="brand">
+          <div class="mark">S</div>
+          <div>
+            <div class="nm">Setnayan</div>
+            <div class="role">Admin</div>
+          </div>
+        </div>
+
+        <button class="sbsearch" id="sbSearch">
+          <svg class="ic ic-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span>Search…</span><span class="sp" id="spHint">⌘K</span>
+        </button>
+
+        <div class="navsec">
+          <div class="hd">Every day</div>
+          <ul class="nav" id="navPrimary"></ul>
+        </div>
+
+        <div class="navsec quiet">
+          <div class="hd">Now and then</div>
+          <ul class="nav" id="navQuiet"></ul>
+        </div>
+      </nav>
+
+      <!-- main -->
+      <div class="main">
+        <div class="mtop">
+          <div class="brand" style="padding:0;border:0">
+            <div class="mark">S</div>
+            <div><div class="nm">Setnayan</div><div class="role">Admin</div></div>
+          </div>
+          <button class="msearch" id="mSearch">
+            <svg class="ic ic-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            Search
+          </button>
+        </div>
+
+        <div class="topbar">
+          <div class="crumb" id="crumb"></div>
+          <button class="cta" id="ctaBtn">Action</button>
+        </div>
+
+        <div class="body"><div class="col" id="pane"></div></div>
+
+        <!-- the phone action sheet + its scrim live inside the frame -->
+        <div class="shscrim" id="shScrim"></div>
+        <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Queue actions"></div>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+        <nav class="bnav" id="bnav" aria-label="Admin tabs"></nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="hr"></div>
+    <div class="legend" aria-label="How to read the colour">
+      <span class="li"><span class="sw l1"></span>Past its promise — the only loud mark</span>
+      <span class="li"><span class="sw l2"></span>Due soon</span>
+      <span class="li"><span class="sw l3"></span>On pace — no colour on purpose</span>
+      <span class="li"><span class="sw l4"></span>Gold means deliberate care, never urgency</span>
+    </div>
+    <p><b>What changed, in one line each.</b>
+    The 27-link “Overview” bucket became one ranked worklist you filter, so urgency lives in a single
+    place instead of being spread across 27 menu rows.
+    <b>Money</b> earns its own row because it is the only thing opened daily.
+    <b>Records</b>, <b>Studio</b> and <b>Platform</b> keep one row each, with their contents as tabs inside —
+    one door per destination, not four.
+    <b>Ugat Console</b> and <b>Setup</b> drop to the quiet drawer — still one click, just not shouting.
+    <b>All surfaces</b> is the full map, and it is the same screen on desktop and phone, which is the
+    parity you locked on 4 July: same menu content, different orientation.</p>
+    <p><b>Nothing is dropped — checked page by page.</b> All 108 admin pages stay reachable:
+    <b>79</b> sit on the All surfaces map directly (shown as 76 rows, because Payments, Payouts and the
+    other queues appear once each rather than twice);
+    <b>9</b> are old addresses that redirect onto it;
+    <b>17</b> are pages you open by clicking something on a map page — a particular vendor, “new venue”,
+    the compliance data sheet, the demo-vendor inquiries, the per-event-type screens inside Taxonomy;
+    and <b>3</b> are the old menu-container pages this design replaces.
+    The only thing gone is the sign-in hero video you retired yesterday.</p>
+    <p><b>Deliberately left out:</b> the duplicate tiles on the admin home page (the worklist replaces
+    them), and any second or third door to a page that already has a tab. Those are removed doors,
+    not removed pages.</p>
+  </div>
+</div>
+
+<!-- ══ COMMAND PALETTE ═══════════════════════════════════════════════ -->
+<div class="scrim" id="scrim"></div>
+<div class="pal" id="pal" role="dialog" aria-modal="true" aria-label="Search every admin surface">
+  <div class="palin">
+    <svg class="ic" viewBox="0 0 24 24" style="color:var(--ink-mute)"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="palQ" type="text" placeholder="Go to… payouts, taxonomy, secrets, venues" autocomplete="off" spellcheck="false">
+    <span class="palesc">esc</span>
+  </div>
+  <div class="palres" id="palRes"></div>
+  <div class="palfoot">
+    <span><b>↑↓</b> move</span><span><b>↵</b> open</span><span><b>esc</b> close</span>
+    <span style="margin-left:auto" id="palCount"></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var REDUCED = false;
+  try { REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+
+  /* ── icons ───────────────────────────────────────────────────────── */
+  var I = {
+    today:'<path d="M4 5h16M4 12h16M4 19h9"/><circle cx="19.5" cy="19" r="2.2"/>',
+    money:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/>',
+    records:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16.5 5.6a3.2 3.2 0 0 1 0 6M18 20a6 6 0 0 0-2.2-4.6"/>',
+    studio:'<path d="M3 8.5 20.2 5l.8 3.6L3.8 12z"/><rect x="3" y="12" width="18" height="8" rx="2"/><path d="M7.4 5.9 9 9.1M12.4 4.9 14 8.1"/>',
+    perf:'<path d="M3 13h3.5l2.2-6 3.4 12 2.6-8 1.8 4H21"/>',
+    ugat:'<circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M12 7.4v4.2M10.4 13.3 6.6 16M13.6 13.3 17.4 16"/>',
+    setup:'<circle cx="12" cy="12" r="3"/><path d="M19.4 14.6a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-3-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-3l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.9-1.2V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1.1z"/>',
+    more:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+    arrow:'<path d="M5 12h13M13 6l6 6-6 6"/>',
+    check:'<path d="M20 6 9 17l-5-5"/>',
+    shield:'<path d="M12 3l7 2.6v5.2c0 4.8-3.2 7.8-7 10.2-3.8-2.4-7-5.4-7-10.2V5.6z"/>',
+    x:'<path d="M6 6l12 12M18 6 6 18"/>',
+    chev:'<path d="m6 9 6 6 6-6"/>'
+  };
+  function svg(n,c){return '<svg class="ic'+(c||'')+'" viewBox="0 0 24 24" aria-hidden="true">'+I[n]+'</svg>';}
+
+  /* ── THE WORKLIST — the 25 act-now queues that used to be menu rows ── */
+  var WORK = [
+    {n:'Payments',                   lane:'Money',          c:12, s:'overdue', age:'oldest 2d'},
+    {n:'Verify',                     lane:'Vendors',        c:6,  s:'overdue', age:'oldest 3d'},
+    {n:'Disputes',                   lane:'Money',          c:3,  s:'overdue', age:'oldest 5d'},
+    {n:'Payouts',                    lane:'Money',          c:8,  s:'soon',    age:'due today'},
+    {n:'Fraud queue',                lane:'Trust & safety', c:2,  s:'soon',    age:'due today'},
+    {n:'Account deletions',          lane:'Trust & safety', c:4,  s:'soon',    age:'due in 1d'},
+    {n:'User reports',               lane:'Trust & safety', c:5,  s:'soon',    age:'due in 1d'},
+    {n:'Approvals',                  lane:'Vendors',        c:2,  s:'soon',    age:'2 admins needed'},
+    {n:'Token sales',                lane:'Money',          c:7,  s:'ok',      age:'within SLA'},
+    {n:'Subscriptions',              lane:'Money',          c:3,  s:'ok',      age:'within SLA'},
+    {n:'Payment options',            lane:'Money',          c:1,  s:'ok',      age:'within SLA'},
+    {n:'Partnerships',               lane:'Vendors',        c:4,  s:'ok',      age:'within SLA'},
+    {n:'Completions',                lane:'Vendors',        c:9,  s:'ok',      age:'within SLA'},
+    {n:'Reviews',                    lane:'Vendors',        c:6,  s:'ok',      age:'within SLA'},
+    {n:'Profile corrections',        lane:'Vendors',        c:2,  s:'ok',      age:'within SLA'},
+    {n:'Pax changes',                lane:'Events',         c:3,  s:'ok',      age:'within SLA'},
+    {n:'Force majeure',              lane:'Events',         c:0,  s:'ok',      age:'clear'},
+    {n:'Chat contact flags',         lane:'Trust & safety', c:1,  s:'ok',      age:'within SLA'},
+    {n:'Repost watch',               lane:'Trust & safety', c:0,  s:'ok',      age:'clear'},
+    {n:'Integrity watch',            lane:'Trust & safety', c:2,  s:'ok',      age:'within SLA'},
+    {n:'Setnayan AI abuse',          lane:'Trust & safety', c:0,  s:'ok',      age:'clear'},
+    {n:'Data Privacy & NPC Filing',  lane:'Trust & safety', c:1,  s:'ok',      age:'quarterly'},
+    {n:'Editorial review',           lane:'Content',        c:3,  s:'ok',      age:'within SLA'},
+    {n:'Pakanta queue',              lane:'Content',        c:2,  s:'ok',      age:'within SLA'},
+    {n:'Help',                       lane:'Support',        c:4,  s:'soon',    age:'24-hr promise'}
+  ];
+  var LANES = ['Money','Trust & safety','Vendors','Events','Content','Support'];
+
+  /* ── ACT FROM THE LIST ────────────────────────────────────────────────
+     Owner, 2026-08-03: "i was hoping a faster way to respond to quick actions
+     needed instead of them making jump to a new page."
+
+     A queue row opens IN PLACE and its items carry their own buttons.
+     `act` is the pair of one-click decisions; `act: null` means this queue has
+     NO safe one-click answer and the row offers only the case file. That
+     distinction is the honest part of the design: a payment is one fact
+     (did the money arrive), so it can be decided from a list. A dispute is a
+     judgement that requires reading a thread — a one-click button there is a
+     fake door that invites a wrong call at speed. */
+  var ACT = {
+    'Payments':              ['Confirm payment', 'Ask for proof'],
+    'Payouts':               ['Release payout',  'Hold'],
+    'Token sales':           ['Confirm',         'Ask for proof'],
+    'Subscriptions':         ['Activate',        'Hold'],
+    'Payment options':       ['Approve',         'Decline'],
+    'Verify':                ['Verify shop',     'Send back'],
+    'Approvals':             ['Approve',         'Decline'],
+    'Partnerships':          ['Approve',         'Decline'],
+    'Completions':           ['Mark complete',   'Query'],
+    'Reviews':               ['Publish',         'Hide'],
+    'Profile corrections':   ['Apply',           'Decline'],
+    'Pax changes':           ['Accept change',   'Query'],
+    'Editorial review':      ['Publish',         'Send back'],
+    'Pakanta queue':         ['Approve lyrics',  'Send back'],
+    'Chat contact flags':    ['Dismiss',         'Warn'],
+    'Repost watch':          ['Dismiss',         'Take down'],
+    'Help':                  ['Reply',           'Close'],
+    // No one-click answer — these need the case file.
+    'Disputes':                    null,
+    'Fraud queue':                 null,
+    'Account deletions':           null,
+    'User reports':                null,
+    'Integrity watch':             null,
+    'Setnayan AI abuse':           null,
+    'Data Privacy & NPC Filing':   null,
+    'Force majeure':               null
+  };
+
+  /* Two sample items per queue — enough to show the interaction. */
+  var ITEMS = {
+    'Payments':            [['Reyes–Santos · ₱4,999','GCash · ref K7QM2XPA · 2d'],
+                            ['Cruz–Lim · ₱1,499','BDO · ref 3PTR9WQZ · 1d']],
+    'Payouts':             [['Golden Frame Studios · ₱22,400','8 bookings · cleared'],
+                            ['Casa Verde Catering · ₱15,750','3 bookings · cleared']],
+    'Verify':              [['Bloom & Vine Florals','DTI + valid ID · Quezon City'],
+                            ['Northlight Films','SEC + valid ID · Cebu']],
+    'Approvals':           [['Raise Enterprise reach to 150 km','needs a second admin'],
+                            ['Comp grant · Papic for 1 event','needs a second admin']],
+    'Disputes':            [['Casa Verde vs Reyes–Santos','₱18,000 held · 5d open'],
+                            ['Northlight vs Cruz–Lim','₱6,200 held · 3d open']],
+    'Fraud queue':         [['3 orders, one card, three accounts','flagged 2h ago'],
+                            ['Vendor payout to a new account','flagged 6h ago']],
+    'Account deletions':   [['maria.s@…  · requested erasure','RA 10173 · 30d clock'],
+                            ['j.delacruz@… · requested erasure','RA 10173 · 30d clock']],
+    'User reports':        [['Guest reported a photo','Reyes–Santos gallery'],
+                            ['Couple reported a vendor message','thread #2841']],
+    'Help':                [['“Payment not showing after 2 days”','24-hr promise · 19h left'],
+                            ['“How do I change my event date?”','24-hr promise · 22h left']]
+  };
+  var doneIdx = {};   // queue -> array of acted-away sample indexes
+  function rawItems(q){
+    return ITEMS[q] || [[q + ' · first item', 'sample'], [q + ' · second item', 'sample']];
+  }
+  function itemsFor(q){
+    var done = doneIdx[q] || [];
+    var out = [];
+    rawItems(q).forEach(function(it,i){
+      if(done.indexOf(i)<0) out.push({t:it[0], s:it[1], i:i});
+    });
+    return out;
+  }
+
+  /* ── THE MENU — 4 daily rows + Today, then a quiet drawer ─────────── */
+  var HUBS = {
+    today:{
+      label:'Today', icon:'today', tier:1, kind:'work',
+      blurb:'Everything waiting on you, ranked by how late it is. Filter by lane instead of hunting through menus.',
+      cta:'Take next item'
+    },
+    money:{
+      label:'Money', icon:'money', tier:1, kind:'tabs', cta:'Record a payment',
+      blurb:'The only surface opened every day — reconciliation, then the catalog that prices it.',
+      tabs:[
+        {t:'Receipts',              d:'Official receipts issued per paid order.'},
+        {t:'Payment methods',       d:'The BDO and GCash accounts customers pay into.'},
+        {t:'Pricing',               d:'The retail catalog — every SKU and its live price.'},
+        {t:'Custom plans',          d:'Negotiated vendor tiers, quoted for approval.'},
+        {t:'Price bands',           d:'Market price ranges used for positioning.'},
+        {t:'Token bands',           d:'Vendor token redemption rates.'},
+        {t:'Vendor recommendations',d:'Which SKUs a vendor may recommend to couples.'},
+        {t:'Budget Planner',        d:'The planner defaults couples start from.'},
+        {t:'Papic storage',         d:'Measured storage per event against the ceiling.'}
+      ]
+    },
+    records:{
+      label:'Records', icon:'records', tier:1, kind:'tabs', cta:'New record',
+      blurb:'Pure look-up. Find a person, a shop, an event, a venue — nothing here is a decision.',
+      tabs:[
+        {t:'Users',        d:'Every account on the platform.'},
+        {t:'Vendors',      d:'Vendor shops and their verification state.'},
+        {t:'Events',       d:'Every event, its type and its owner.'},
+        {t:'Venues',       d:'The venue directory.'},
+        {t:'Demo vendors', d:'Seeded shops used for demos.'},
+        {t:'Founder seats',d:'Founder-tier grants.'}
+      ]
+    },
+    studio:{
+      label:'Studio', icon:'studio', tier:1, kind:'tabs', cta:'Publish',
+      blurb:'Everything you curate or publish — the public site, the media it serves, and the marketing levers.',
+      tabs:[
+        {t:'Website',           d:'The public marketing site editor.'},
+        {t:'Website media',     d:'What is actually in the media bucket, and what nothing points at.'},
+        {t:'Background videos', d:'The homepage hero and pillar loops.'},
+        {t:'Real Stories',      d:'Consented wedding editorials, pinned and ordered.'},
+        {t:'Recaps',            d:'Couple-published living recaps, with the takedown lever.'},
+        {t:'Reveal Studio',     d:'Save-the-Date cinematic openings.'},
+        {t:'Patiktok',          d:'Short-form template library and render jobs.'},
+        {t:'Songs',             d:'The owned music catalogue.'},
+        {t:'Moodboard library', d:'Palettes and pre-made themes.'},
+        {t:'Social queue',      d:'Scheduled social posts.'},
+        {t:'Spotlight Awards',  d:'Award featuring.'},
+        {t:'Journal Spotlights',d:'Journal featuring.'},
+        {t:'Discount codes',    d:'Promo codes and their redemption caps.'},
+        {t:'Referrals',         d:'The referral incentive programme.'}
+      ]
+    },
+    perf:{
+      label:'Performance', icon:'perf', tier:1, kind:'tabs', cta:'Re-run audit',
+      blurb:'How the product is doing and where to look next.',
+      tabs:[
+        {t:'App Performance',    d:'The cockpit — health at a glance.'},
+        {t:'Growth',             d:'Sign-ups, activation, retention.'},
+        {t:'Funnels',            d:'Where people drop off.'},
+        {t:'Intelligence',       d:'Cross-surface signals worth acting on.'},
+        {t:'Demand Radar',       d:'Month heat, top regions, hot looks.'},
+        {t:'SEO & GEO',          d:'Search and AI-answer-engine coverage.'},
+        {t:'Operations & Hiring',d:'When the workload needs another pair of hands.'},
+        {t:'Connection logs',    d:'Interconnection probes and what they saw.'},
+        {t:'Offline daemon',     d:'Background job health.'}
+      ]
+    },
+    ugat:{
+      label:'Ugat Console', icon:'ugat', tier:2, kind:'tabs', cta:'Add entry',
+      blurb:'The wiring underneath — the vocabularies and structures every other surface reads.',
+      tabs:[
+        {t:'Taxonomy',           d:'Categories, services and how they scope by event type.'},
+        {t:'Menus & icons',      d:'The name and icon of every menu, for every account type.'},
+        {t:'Onboarding',         d:'Per-event-type onboarding flow config.'},
+        {t:'Wedding traditions', d:'Faith and tradition vocabularies.'},
+        {t:'Setnayan AI brain',  d:'The deterministic planner rules.'},
+        {t:'Entity map',         d:'Every entity and joint, with its health findings.'}
+      ]
+    },
+    setup:{
+      label:'Setup', icon:'setup', tier:2, kind:'tabs', cta:'Save',
+      blurb:'Set once, checked rarely. Kept out of the way on purpose.',
+      tabs:[
+        {t:'Settings',          d:'Platform-wide switches.'},
+        {t:'Integrations',      d:'Turn each external service on or off.'},
+        {t:'Secrets & Rotation',d:'Every key, its age, and its rotation runbook.'},
+        {t:'Compliance',        d:'RA 10173 and NPC registration facts.'},
+        {t:'Notifications',     d:'Which emails go out, and to whom.'},
+        {t:'Demo mode',         d:'Seeded-data presentation mode.'},
+        {t:'My account',        d:'Your own password and sessions.'}
+      ]
+    },
+    /* The complete menu. Owner-locked 2026-07-04: desktop and phone carry the
+       SAME menu content, only the orientation differs. So this is one screen
+       used by both — the phone's "Menu" tab and the desktop's quiet-drawer row.
+       Nothing in the admin is reachable ONLY by search. */
+    all:{
+      label:'All surfaces', icon:'more', tier:2, kind:'all', cta:'',
+      blurb:'Every admin page there is, grouped and searchable. Same list on desktop and phone.'
+    }
+  };
+  var PRIMARY = ['today','money','records','studio','perf'];
+  var QUIET   = ['ugat','setup','all'];
+  var BOTTOM  = ['today','money','records','studio','all'];
+
+  /* ── searchable index: every destination, real labels ─────────────── */
+  var INDEX = [];
+  WORK.forEach(function(w){
+    INDEX.push({label:w.n, group:'Today · '+w.lane, hub:'today', tab:null, q:w.n, path:'Today › '+w.lane});
+  });
+  Object.keys(HUBS).forEach(function(k){
+    var h = HUBS[k];
+    if(h.kind!=='tabs') return;
+    h.tabs.forEach(function(t,i){
+      INDEX.push({label:t.t, group:h.label, hub:k, tab:i, q:null, path:h.label+' › '+t.t});
+    });
+  });
+
+  /* ── state ────────────────────────────────────────────────────────── */
+  var st = {hub:'today', tab:0, filter:'All', mobile:false, open:null, allQ:'',
+            loading:true, recents:[]};
+  var MODE = 'sample';      // sample | clear  (caption preview)
+  var BACKUP = null;        // counts snapshot for the all-clear preview
+
+  var $ = function(id){return document.getElementById(id);};
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+  function urgency(){
+    var o=0,s=0;
+    WORK.forEach(function(w){ if(w.c<=0) return;
+      if(w.s==='overdue') o+=w.c; else if(w.s==='soon') s+=w.c; });
+    return {overdue:o, soon:s, total:WORK.reduce(function(a,w){return a+w.c;},0)};
+  }
+
+  /* ── sidebar + bottom bar ─────────────────────────────────────────── */
+  function navRow(k){
+    var h = HUBS[k], u = urgency(), badge='';
+    if(k==='today' && u.total>0){
+      var tone = u.overdue>0 ? 'red' : (u.soon>0 ? 'amber' : 'grey');
+      badge = '<span class="pill '+tone+'">'+u.total+'</span>';
+    }
+    return '<li><button class="navbtn" data-hub="'+k+'"'+
+      (st.hub===k?' aria-current="page"':'')+'>'+
+      svg(h.icon)+'<span class="lb">'+esc(h.label)+'</span>'+badge+'</button></li>';
+  }
+  function renderNav(){
+    $('navPrimary').innerHTML = PRIMARY.map(navRow).join('');
+    $('navQuiet').innerHTML   = QUIET.map(navRow).join('');
+
+    var u = urgency();
+    $('bnav').innerHTML = BOTTOM.map(function(k){
+      if(k==='all'){
+        // Lights for itself AND for the two quiet hubs reached through it, so
+        // no surface is ever "unlit" on the phone.
+        var on = st.hub==='all' || QUIET.indexOf(st.hub)>=0;
+        return '<button class="bbtn" data-hub="all"'+(on?' aria-current="page"':'')+'>'+
+          svg('more')+'<span>Menu</span></button>';
+      }
+      var h=HUBS[k], b='';
+      if(k==='today' && u.total>0){
+        var tone = u.overdue>0 ? 'red' : (u.soon>0 ? 'amber' : 'grey');
+        b='<span class="bdg '+tone+'">'+u.total+'</span>';
+      }
+      return '<button class="bbtn" data-hub="'+k+'"'+(st.hub===k?' aria-current="page"':'')+'>'+
+        svg(h.icon)+'<span>'+esc(h.label)+'</span>'+b+'</button>';
+    }).join('');
+  }
+
+  /* ── breadcrumb ───────────────────────────────────────────────────── */
+  function renderCrumb(){
+    var h = HUBS[st.hub];
+    var out = '<button data-hub="today">Admin</button>';
+    out += '<span class="sep">›</span>';
+    // A menu screen has nothing to act on, so it shows no action button.
+    $('ctaBtn').style.display = h.cta ? '' : 'none';
+    if(h.kind==='tabs' && h.tabs[st.tab]){
+      out += '<button data-hub="'+st.hub+'" data-tab="0">'+esc(h.label)+'</button>';
+      out += '<span class="sep">›</span><span class="cur">'+esc(h.tabs[st.tab].t)+'</span>';
+    } else {
+      out += '<span class="cur">'+esc(h.label)+'</span>';
+    }
+    $('crumb').innerHTML = out;
+    $('ctaBtn').textContent = h.cta;
+  }
+
+  /* ── the ranked worklist ──────────────────────────────────────────── */
+  var ORDER = {overdue:0, soon:1, ok:2};
+  function sortedRows(){
+    return WORK.filter(function(w){
+      if(st.filter==='All') return true;
+      if(st.filter==='Overdue') return w.s==='overdue';
+      return w.lane===st.filter;
+    }).sort(function(a,b){
+      return (ORDER[a.s]-ORDER[b.s]) || (b.c-a.c) || a.n.localeCompare(b.n);
+    });
+  }
+
+  function skeleton(){
+    var rows='';
+    var widths=[42,34,46,30,38,44,28];
+    for(var i=0;i<7;i++){
+      rows += '<div class="skrow"><span class="b d"></span>'+
+        '<span class="b nm" style="width:'+widths[i]+'%"></span>'+
+        '<span class="sp"></span><span class="b ct"></span></div>';
+    }
+    return '<div class="skel" aria-hidden="true">'+
+      '<div class="sk-tri"><span class="b"></span><span class="b" style="width:96px"></span>'+
+      '<span class="b" style="width:110px"></span></div>'+
+      '<div class="sk-chips"><span class="b"></span><span class="b"></span><span class="b"></span>'+
+      '<span class="b" style="width:96px"></span></div>'+
+      '<div class="work">'+rows+'</div>'+
+      '<div class="skhint">Loading the worklist</div></div>';
+  }
+
+  function todayDate(){
+    try {
+      return new Date().toLocaleDateString(undefined,
+        {weekday:'long', day:'numeric', month:'long'});
+    } catch(e){ return ''; }
+  }
+
+  function renderWork(){
+    var u = urgency();
+    var head = '<div class="h2row"><h2 class="h2">Today</h2>'+
+      '<span class="h2date">'+esc(todayDate())+'</span></div>'+
+      '<p class="sub">'+HUBS.today.blurb+'</p>';
+
+    if(st.loading) return head + skeleton();
+
+    /* THE GOOD DAY — pre-launch, this is the state seen most. It should feel
+       like success, not a broken page. */
+    if(u.total===0){
+      return head +
+        '<div class="work"><div class="allclear">'+
+        '<div class="dia"></div>'+
+        '<h3>All clear.</h3>'+
+        '<p>Nothing is waiting on you. New items land here the moment they arrive — '+
+        'this page stays the morning read.</p>'+
+        '<div class="meta">'+WORK.length+' queues · 0 waiting</div>'+
+        '</div></div>'+
+        '<div class="rule"></div>'+ notes();
+    }
+
+    // Chips count ITEMS waiting, not rows — the same unit as the menu badge
+    // and the triage strip, so no two numbers on this screen mean different things.
+    var counts = {All:0, Overdue:0};
+    LANES.forEach(function(l){counts[l]=0;});
+    WORK.forEach(function(w){
+      counts.All += w.c;
+      counts[w.lane] += w.c;
+      if(w.s==='overdue') counts.Overdue += w.c;
+    });
+
+    var pace = u.total - u.overdue - u.soon;
+    var triage = '<div class="triage" aria-label="The shape of the day">'+
+      '<div class="tfigs">'+
+      '<span class="tfig late"><span class="tv">'+u.overdue+'</span><span class="tl">past promise</span></span>'+
+      '<span class="tfig soon"><span class="tv">'+u.soon+'</span><span class="tl">due soon</span></span>'+
+      '<span class="tfig pace"><span class="tv">'+pace+'</span><span class="tl">on pace</span></span>'+
+      '</div>'+
+      '<div class="tmeter" aria-hidden="true">'+
+        '<i class="m1" style="flex:'+u.overdue+'"></i>'+
+        '<i class="m2" style="flex:'+u.soon+'"></i>'+
+        '<i class="m3" style="flex:'+pace+'"></i>'+
+      '</div></div>';
+
+    var chips = ['All','Overdue'].concat(LANES).map(function(f){
+      var hot = f==='Overdue' && counts[f]>0;
+      return '<button class="chip'+(hot?' hot':'')+'" data-filter="'+esc(f)+'"'+
+        (st.filter===f?' aria-pressed="true"':' aria-pressed="false"')+'>'+
+        esc(f)+'<span class="n">'+counts[f]+'</span></button>';
+    }).join('');
+
+    var rows = sortedRows();
+    var whead = '<div class="whead" aria-hidden="true">'+
+      '<span class="c-dot"></span><span class="c-q">Queue</span>'+
+      '<span class="c-lane">Lane</span><span class="c-age">Oldest / due</span>'+
+      '<span class="c-cnt">Waiting</span><span class="c-ch"></span></div>';
+
+    var list = rows.length ? rows.map(function(w){
+      var open = st.open === w.n && !st.mobile;
+      var rowCls = 'wrow' + (w.s==='overdue'?' late':'') + (w.s==='soon'?' soonr':'') + (open?' open':'');
+      var head2 = '<button class="'+rowCls+'" data-queue="'+esc(w.n)+'" aria-expanded="'+open+'">'+
+        '<span class="state '+w.s+'" aria-hidden="true"></span>'+
+        '<span class="wmain">'+
+          '<span class="wname">'+esc(w.n)+'</span>'+
+          '<span class="wtag">'+esc(w.lane)+'</span>'+
+          '<span class="wage">'+esc(w.age)+'</span>'+
+          '<span class="wmeta"><span class="mtag">'+esc(w.lane)+'</span>'+
+            '<span class="sep">·</span><span class="mage">'+esc(w.age)+'</span></span>'+
+        '</span>'+
+        '<span class="cnt '+w.s+'" data-cnt="'+esc(w.n)+'">'+w.c+'</span>'+
+        '<span class="chev" aria-hidden="true">'+svg('chev',' ic-sm')+'</span>'+
+        '</button>';
+      return head2 + (open ? drawer(w) : '');
+    }).join('') :
+      '<div class="laneclear">'+svg('check')+
+      '<span>Nothing in this lane. <b>Clear.</b></span></div>';
+
+    return head + triage +
+      '<div class="chips" role="group" aria-label="Filter the worklist">'+chips+'</div>'+
+      '<div class="work">'+whead+list+'</div>'+
+      '<div class="rule"></div>'+ notes();
+  }
+
+  function notes(){
+    return '<p class="note"><b>Open a row and decide right there</b> — confirm a payment, verify a shop, '+
+      'release a payout — without loading a page. Every action can be undone. '+
+      'The queues that are a judgement rather than a fact (disputes, fraud, erasure requests) '+
+      'deliberately offer no one-click button; they open the case file instead.</p>'+
+      '<p class="note" style="margin-top:10px">These '+WORK.length+' rows were '+(WORK.length+2)+
+      ' separate links in the old left menu — plus two that just pointed back at this page. '+
+      'Nothing was removed: they were ranked instead of listed.</p>';
+  }
+
+  /* ── the in-place drawer (desktop): decide without leaving the list ── */
+  function drawerItems(w, forSheet){
+    var acts = ACT[w.n];
+    var vis = itemsFor(w.n);
+    var out = '';
+    vis.forEach(function(it){
+      var buttons = acts
+        ? '<button class="qb qb-go"  data-act="'+esc(acts[0])+'" data-q="'+esc(w.n)+'" data-i="'+it.i+'">'+esc(acts[0])+'</button>'+
+          '<button class="qb qb-alt" data-act="'+esc(acts[1])+'" data-q="'+esc(w.n)+'" data-i="'+it.i+'">'+esc(acts[1])+'</button>'+
+          '<button class="qb qb-open" data-open="1">Open</button>'
+        : '<button class="qb qb-alt" data-open="1">Open the case file</button>';
+      if(forSheet){
+        out += '<div class="shitem"><b>'+esc(it.t)+'</b>'+
+               '<span class="qsub">'+esc(it.s)+'</span>'+
+               '<div class="shbtns">'+buttons+'</div></div>';
+      } else {
+        out += '<div class="qitem"><span class="qtx"><b>'+esc(it.t)+'</b>'+
+               '<span class="qsub">'+esc(it.s)+'</span></span>'+
+               '<span class="qacts">'+buttons+'</span></div>';
+      }
+    });
+    return {html:out, visible:vis.length, acts:acts};
+  }
+  function drawerFoot(w, d){
+    if(w.c<=0) return '';
+    if(!d.acts){
+      return '<div class="qwhy">'+svg('shield')+'<span>No one-click answer here on purpose — '+
+        'this one is a judgement, not a fact, so it opens the full case file.</span></div>';
+    }
+    var rest = w.c - d.visible;
+    if(d.visible===0){
+      return '<div class="qmore">Sample items cleared here — '+w.c+' more wait in the real queue · '+
+        '<button class="qlink" data-open="1">open it</button></div>';
+    }
+    if(rest>0){
+      return '<div class="qmore">'+rest+' more in this queue · '+
+        '<button class="qlink" data-open="1">see all '+w.c+'</button></div>';
+    }
+    return '';
+  }
+  function drawer(w){
+    if(w.c <= 0){
+      return '<div class="qdraw"><div class="qnone">'+svg('check')+
+        '<span>Nothing waiting. Clear.</span></div></div>';
+    }
+    var d = drawerItems(w,false);
+    return '<div class="qdraw">'+d.html+drawerFoot(w,d)+'</div>';
+  }
+
+  /* ── the phone action sheet: same decisions, in thumb reach ───────── */
+  function renderSheet(){
+    var sh = $('sheet'), sc = $('shScrim');
+    var w = st.open && st.mobile
+      ? WORK.filter(function(x){return x.n===st.open;})[0] : null;
+    if(!w){ sh.classList.remove('on'); sc.classList.remove('on'); return; }
+
+    var inner = '<div class="shhandle" aria-hidden="true"></div>'+
+      '<div class="shhead">'+
+        '<span class="state '+w.s+'" aria-hidden="true"></span>'+
+        '<span class="shname">'+esc(w.n)+'</span>'+
+        '<span class="shcnt '+w.s+'" data-cnt="sheet">'+w.c+' waiting</span>'+
+        '<button class="shx" data-sheetclose="1" aria-label="Close">'+svg('x',' ic-sm')+'</button>'+
+      '</div>';
+    if(w.c<=0){
+      inner += '<div class="shfoot"><div class="qnone">'+svg('check')+
+        '<span>Nothing waiting. Clear.</span></div></div>';
+    } else {
+      var d = drawerItems(w,true);
+      inner += '<div class="shbody">'+d.html+'</div>';
+      var foot = drawerFoot(w,d);
+      if(foot) inner += '<div class="shfoot">'+foot+'</div>';
+      else inner += '<div class="shfoot" style="padding-top:2px"></div>';
+    }
+    sh.innerHTML = inner;
+    sh.classList.add('on'); sc.classList.add('on');
+  }
+
+  /** Act on an item: drop it, decrement the queue, offer an undo. */
+  var undo = null;
+  function act(queue, label, idx){
+    var w = WORK.filter(function(x){return x.n===queue;})[0];
+    if(!w || w.c<=0) return;
+    undo = {queue:queue, prev:w.c, prevState:w.s, idx:idx};
+    w.c -= 1;
+    if(w.c === 0) w.s = 'ok';
+    if(typeof idx==='number'){
+      if(!doneIdx[queue]) doneIdx[queue]=[];
+      doneIdx[queue].push(idx);
+    }
+    render();
+    tickCount(queue);
+    toast(label + ' · ' + queue, true);
+  }
+  function undoLast(){
+    if(!undo) return;
+    var w = WORK.filter(function(x){return x.n===undo.queue;})[0];
+    if(w){ w.c = undo.prev; w.s = undo.prevState; }
+    if(typeof undo.idx==='number' && doneIdx[undo.queue]){
+      var p = doneIdx[undo.queue].indexOf(undo.idx);
+      if(p>=0) doneIdx[undo.queue].splice(p,1);
+    }
+    var q = undo.queue; undo = null;
+    render(); tickCount(q); toast('Put back', false);
+  }
+  function tickCount(queue){
+    var el = document.querySelector('[data-cnt="'+(CSS && CSS.escape ? CSS.escape(queue) : queue)+'"]');
+    if(el){ el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); }
+    var sh = document.querySelector('[data-cnt="sheet"]');
+    if(sh){ sh.classList.remove('tick'); void sh.offsetWidth; sh.classList.add('tick'); }
+  }
+  var toastTimer = null;
+  function toast(msg, withUndo){
+    var el = $('toast'); if(!el) return;
+    el.innerHTML = '<span class="tmsg">'+esc(msg)+'</span>'+
+      (withUndo ? '<button class="tundo" data-undo="1">Undo</button>' : '');
+    el.classList.add('on');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove('on'); }, 4200);
+  }
+
+  /* ── tabbed hub pane ──────────────────────────────────────────────── */
+  function renderTabs(){
+    var h = HUBS[st.hub];
+    var tabs = h.tabs.map(function(t,i){
+      return '<button role="tab" data-tab="'+i+'" aria-selected="'+(i===st.tab)+'">'+esc(t.t)+'</button>';
+    }).join('');
+    var cur = h.tabs[st.tab];
+
+    var stats = '';
+    if(st.hub==='money'){
+      stats = '<div class="grid">'+
+        card('Awaiting confirm','12','payments pending review')+
+        card('Cleared this week','₱184,200','across 31 orders')+
+        card('Payouts due','8','next batch today')+
+        card('Live SKUs','47','in the retail catalog')+'</div>';
+    } else if(st.hub==='records'){
+      stats = '<div class="grid">'+
+        card('All users','1,284','')+
+        card('Couples','612','')+
+        card('Vendor shops','203','')+
+        card('Events','488','')+'</div>';
+    } else if(st.hub==='perf'){
+      stats = '<div class="grid">'+
+        card('Sign-ups · 7d','96','+14% on prior week')+
+        card('Activation','38%','reached first save')+
+        card('Probes green','6 / 6','interconnection checks')+
+        card('Audit failures','0','down from 2')+'</div>';
+    } else {
+      stats = '<div class="grid">'+
+        card('Entries','—','sample surface')+
+        card('Last edited','2d ago','')+
+        card('Status','Live','')+'</div>';
+    }
+
+    return '<div class="h2row"><h2 class="h2">'+esc(h.label)+'</h2></div>'+
+      '<p class="sub">'+esc(h.blurb)+'</p>'+
+      '<div class="tabs" role="tablist" aria-label="'+esc(h.label)+' sections">'+tabs+'</div>'+
+      '<h3 class="h3">'+esc(cur.t)+'</h3>'+
+      '<p class="sub" style="margin-bottom:14px">'+esc(cur.d)+'</p>'+
+      stats+
+      '<div class="rule"></div>'+
+      '<p class="note">One door in. This page used to also have a tile on the admin home, '+
+      'a row in the left menu, and an old address that redirected here.</p>';
+  }
+  function card(k,v,d){
+    return '<div class="card"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+'</div>'+
+      (d?'<div class="d">'+esc(d)+'</div>':'')+'</div>';
+  }
+
+  /* ── ALL SURFACES — the complete menu, identical on desktop and phone ── */
+  function allGroups(){
+    var g = [];
+    LANES.forEach(function(l){
+      g.push({name:'Today · '+l, hint:'act-now queues', items:
+        WORK.filter(function(w){return w.lane===l;}).map(function(w){
+          return {label:w.n, hub:'today', tab:null, q:w.n,
+                  meta:(w.c>0 ? w.c+' waiting' : 'clear'), urgent:w.s};
+        })});
+    });
+    ['money','records','studio','perf','ugat','setup'].forEach(function(k){
+      var h = HUBS[k];
+      g.push({name:h.label, hint:h.tabs.length+' pages', items:
+        h.tabs.map(function(t,i){
+          return {label:t.t, hub:k, tab:i, q:null, meta:t.d, urgent:null};
+        })});
+    });
+    return g;
+  }
+  var ALL_N = 0;
+  (function(){ allGroups().forEach(function(g){ ALL_N += g.items.length; }); })();
+
+  function paintAllList(){
+    var q = (st.allQ||'').trim().toLowerCase();
+    var shown = 0, out = '';
+    allGroups().forEach(function(g){
+      var items = q ? g.items.filter(function(it){
+        return it.label.toLowerCase().indexOf(q)>=0 || g.name.toLowerCase().indexOf(q)>=0;
+      }) : g.items;
+      if(!items.length) return;
+      shown += items.length;
+      out += '<div class="agrp"><div class="ahd">'+esc(g.name)+
+             '<span class="ahn">'+esc(g.hint)+'</span></div><div class="alist">';
+      items.forEach(function(it){
+        var hot = it.urgent==='overdue';
+        out += '<button class="aitem" data-hub="'+it.hub+'"'+
+               (it.tab===null?'':' data-tab="'+it.tab+'"')+
+               (it.q?' data-q="'+esc(it.q)+'"':'')+'>'+
+               (it.urgent && it.urgent!=='ok'
+                  ? '<span class="state '+it.urgent+'" aria-hidden="true"></span>'
+                  : '<span class="state none" aria-hidden="true"></span>')+
+               '<span class="alb">'+esc(it.label)+'</span>'+
+               '<span class="amt'+(hot?' hot':'')+'">'+esc(it.meta)+'</span>'+
+               svg('arrow',' ic-sm')+'</button>';
+      });
+      out += '</div></div>';
+    });
+    var host = $('allList');
+    if(!host) return;
+    host.innerHTML = out || '<div class="laneclear"><span>Nothing called “'+esc(st.allQ)+'”.</span></div>';
+    var c = $('allCount');
+    if(c) c.textContent = q ? shown+' of '+ALL_N : ALL_N+' pages';
+  }
+
+  function renderAll(){
+    return '<div class="h2row"><h2 class="h2">All surfaces</h2></div>'+
+      '<p class="sub">'+esc(HUBS.all.blurb)+'</p>'+
+      '<div class="afilter">'+
+        '<svg class="ic ic-sm" viewBox="0 0 24 24" style="color:var(--ink-mute)">'+
+          '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'+
+        '<input id="allQ" type="text" placeholder="Filter by name…" autocomplete="off" '+
+          'spellcheck="false" value="'+esc(st.allQ||'')+'">'+
+        '<span class="acount" id="allCount"></span>'+
+      '</div>'+
+      '<div id="allList"></div>'+
+      '<div class="rule"></div>'+
+      '<p class="note">This is the whole admin — nothing is reachable only by typing. '+
+      'Search is the shortcut; this page is the map.</p>';
+  }
+
+  /* ── render ───────────────────────────────────────────────────────── */
+  function render(){
+    renderNav(); renderCrumb();
+    var h = HUBS[st.hub];
+    $('pane').innerHTML = h.kind==='work' ? renderWork()
+      : h.kind==='all'  ? renderAll()
+      : renderTabs();
+    if(h.kind==='all') paintAllList();
+    renderSheet();
+  }
+
+  function remember(hub, tab){
+    if(hub==='all') return;
+    var h = HUBS[hub];
+    var label, path;
+    if(h.kind==='tabs' && typeof tab==='number' && h.tabs[tab]){
+      label = h.tabs[tab].t; path = h.label+' › '+label;
+    } else if(hub!=='today'){
+      label = h.label; path = h.label;
+    } else return;
+    st.recents = st.recents.filter(function(r){
+      return !(r.hub===hub && r.tab===(typeof tab==='number'?tab:null));
+    });
+    st.recents.unshift({label:label, group:'Recent', hub:hub,
+      tab:(typeof tab==='number'?tab:null), q:null, path:path});
+    if(st.recents.length>5) st.recents.length = 5;
+  }
+
+  function go(hub,tab){
+    if(!HUBS[hub]) return;
+    // The map always opens showing everything. Without this, filtering for one
+    // page, jumping to it, then coming back leaves the old filter applied — and
+    // the complete menu looks like a one-row menu.
+    if(hub==='all') st.allQ = '';
+    if(hub!=='today') st.open = null;
+    st.hub = hub;
+    st.tab = typeof tab==='number' ? tab : 0;
+    remember(hub,tab);
+    render();
+    var b=document.querySelector('.body'); if(b) b.scrollTop=0;
+  }
+
+  /* ── events (delegated) ───────────────────────────────────────────── */
+  document.addEventListener('click', function(e){
+    // Worklist interactions first — these live inside rows that also carry
+    // other handlers, so they must claim the click before anything else.
+    var u = e.target.closest('[data-undo]');
+    if(u){ undoLast(); return; }
+
+    var a = e.target.closest('[data-act]');
+    if(a){
+      var q0 = a.getAttribute('data-q'), lb = a.getAttribute('data-act'),
+          ix = +a.getAttribute('data-i');
+      var item = a.closest('.qitem') || a.closest('.shitem');
+      if(item && !REDUCED){
+        item.classList.add('out');
+        setTimeout(function(){ act(q0, lb, ix); }, 200);
+      } else {
+        act(q0, lb, ix);
+      }
+      return;
+    }
+
+    var o = e.target.closest('[data-open]');
+    if(o){ toast('Opening the full page — the escape hatch is still there', false); return; }
+
+    var sx = e.target.closest('[data-sheetclose]');
+    if(sx){ st.open = null; render(); return; }
+
+    var qr = e.target.closest('[data-queue]');
+    if(qr){
+      var q = qr.getAttribute('data-queue');
+      // Phone: the row opens the action sheet. Desktop: accordion in place.
+      st.open = (st.open === q && !st.mobile) ? null : q;
+      render();
+      return;
+    }
+
+    var t = e.target.closest('[data-hub]');
+    if(t){
+      var hub = t.getAttribute('data-hub');
+      var tab = t.hasAttribute('data-tab') ? +t.getAttribute('data-tab') : undefined;
+      var qq  = t.getAttribute('data-q');
+      go(hub, tab);
+      if(qq){ st.filter='All'; st.open = qq; render(); }
+      return;
+    }
+    var tb = e.target.closest('[role="tab"]');
+    if(tb){ st.tab = +tb.getAttribute('data-tab'); render(); return; }
+    var ch = e.target.closest('[data-filter]');
+    if(ch){ st.filter = ch.getAttribute('data-filter'); render(); return; }
+  });
+
+  $('shScrim').addEventListener('click', function(){ st.open=null; render(); });
+
+  // The Today CTA takes the top of the ranked list — the next thing to do.
+  $('ctaBtn').addEventListener('click', function(){
+    var h = HUBS[st.hub];
+    if(st.hub==='today'){
+      var rows = sortedRows().filter(function(w){return w.c>0;});
+      if(!rows.length){ toast('Nothing to take — all clear', false); return; }
+      st.open = rows[0].n; render();
+      var el = document.querySelector('[data-queue="'+(CSS && CSS.escape ? CSS.escape(rows[0].n) : rows[0].n)+'"]');
+      if(el && el.scrollIntoView) el.scrollIntoView({block:'nearest'});
+    } else if(h.cta){
+      toast('Sample action · '+h.cta, false);
+    }
+  });
+
+  // Filter the All-surfaces map in place — repaint only the list, so the
+  // input keeps focus and the caret between keystrokes.
+  document.addEventListener('input', function(e){
+    if(e.target && e.target.id==='allQ'){ st.allQ = e.target.value; paintAllList(); }
+  });
+
+  /* ── desktop / phone toggle ───────────────────────────────────────── */
+  function setView(mob){
+    st.mobile = mob;
+    $('frame').className = 'frame ' + (mob?'mobile':'desktop');
+    $('vDesk').setAttribute('aria-pressed', String(!mob));
+    $('vMob').setAttribute('aria-pressed', String(mob));
+    render();
+  }
+  $('vDesk').addEventListener('click',function(){setView(false);});
+  $('vMob').addEventListener('click',function(){setView(true);});
+
+  /* ── caption state previews: sample day · all clear · loading ─────── */
+  function setDemoSeg(id){
+    ['dSample','dClear','dLoad'].forEach(function(k){
+      $(k).setAttribute('aria-pressed', String(k===id));
+    });
+  }
+  function snapshot(){
+    return WORK.map(function(w){ return {c:w.c, s:w.s}; });
+  }
+  function restore(snap){
+    WORK.forEach(function(w,i){ w.c = snap[i].c; w.s = snap[i].s; });
+  }
+  $('dClear').addEventListener('click', function(){
+    if(MODE!=='clear'){ BACKUP = snapshot(); }
+    WORK.forEach(function(w){ w.c=0; w.s='ok'; });
+    doneIdx = {}; st.open=null; undo=null; MODE='clear'; st.loading=false;
+    setDemoSeg('dClear'); go('today');
+  });
+  $('dSample').addEventListener('click', function(){
+    if(BACKUP) restore(BACKUP);
+    doneIdx = {}; st.open=null; undo=null; MODE='sample'; st.loading=false;
+    setDemoSeg('dSample'); go('today');
+  });
+  $('dLoad').addEventListener('click', function(){
+    st.open=null; st.loading=true; setDemoSeg('dLoad'); go('today');
+    setTimeout(function(){
+      st.loading=false; setDemoSeg(MODE==='clear'?'dClear':'dSample'); render();
+    }, REDUCED ? 350 : 1200);
+  });
+
+  /* ══ COMMAND PALETTE ══════════════════════════════════════════════ */
+  var pal=$('pal'), scrim=$('scrim'), q=$('palQ'), res=$('palRes'), sel=0, hits=[];
+
+  var isMac = /Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent);
+  if(!isMac){ $('kHint').textContent='Ctrl K'; $('spHint').textContent='Ctrl K'; }
+
+  function score(item, needle){
+    var l = item.label.toLowerCase();
+    if(!needle) return 1;
+    var i = l.indexOf(needle);
+    if(i===0) return 100;
+    if(i>0)   return 60 - i;
+    if(item.group.toLowerCase().indexOf(needle)>=0) return 20;
+    // loose subsequence
+    var p=0; for(var c=0;c<l.length && p<needle.length;c++) if(l[c]===needle[p]) p++;
+    return p===needle.length ? 8 : 0;
+  }
+  function hi(label, needle){
+    if(!needle) return esc(label);
+    var i = label.toLowerCase().indexOf(needle);
+    if(i<0) return esc(label);
+    return esc(label.slice(0,i))+'<mark>'+esc(label.slice(i,i+needle.length))+'</mark>'+
+           esc(label.slice(i+needle.length));
+  }
+  function paint(){
+    var needle = q.value.trim().toLowerCase();
+    // The empty-query state is never blank: recents first, then the map order.
+    if(!needle && st.recents.length){
+      var seen = {};
+      hits = [];
+      st.recents.forEach(function(r){
+        hits.push(r); seen[r.hub+'/'+r.tab+'/'+r.label] = 1;
+      });
+      INDEX.forEach(function(it){
+        if(hits.length>=40) return;
+        if(seen[it.hub+'/'+it.tab+'/'+it.label]) return;
+        hits.push(it);
+      });
+    } else {
+      hits = INDEX.map(function(it){return {it:it, s:score(it,needle)};})
+                  .filter(function(x){return x.s>0;})
+                  .sort(function(a,b){return b.s-a.s || a.it.label.localeCompare(b.it.label);})
+                  .slice(0,40).map(function(x){return x.it;});
+    }
+    if(sel>=hits.length) sel = Math.max(0,hits.length-1);
+
+    if(!hits.length){
+      res.innerHTML = '<div class="palnone">Nothing called “'+esc(q.value)+'”.</div>';
+      $('palCount').textContent='';
+      return;
+    }
+    var out='', lastG=null;
+    hits.forEach(function(it,i){
+      if(it.group!==lastG){ out += '<div class="pgrp">'+esc(it.group)+'</div>'; lastG=it.group; }
+      out += '<button class="pitem'+(i===sel?' sel':'')+'" data-i="'+i+'">'+
+             '<span>'+hi(it.label,needle)+'</span>'+
+             '<span class="pth">'+esc(it.path)+'</span></button>';
+    });
+    res.innerHTML = out;
+    $('palCount').textContent = hits.length + ' of ' + INDEX.length;
+    var s = res.querySelector('.pitem.sel'); if(s) s.scrollIntoView({block:'nearest'});
+  }
+  function openPal(){
+    pal.classList.add('on'); scrim.classList.add('on');
+    q.value=''; sel=0; paint(); q.focus();
+  }
+  function closePal(){ pal.classList.remove('on'); scrim.classList.remove('on'); }
+  function choose(i){
+    var it = hits[i]; if(!it) return;
+    closePal();
+    go(it.hub, it.tab===null?undefined:it.tab);
+    // A queue picked by name lands with its row already open — the palette
+    // takes you to the thing, not merely to the page it lives on.
+    if(it.q){ st.filter='All'; st.open = it.q; render(); }
+  }
+
+  $('openPal').addEventListener('click',openPal);
+  $('sbSearch').addEventListener('click',openPal);
+  $('mSearch').addEventListener('click',openPal);
+  scrim.addEventListener('click',closePal);
+  q.addEventListener('input',function(){sel=0;paint();});
+  res.addEventListener('click',function(e){
+    var b=e.target.closest('[data-i]'); if(b) choose(+b.getAttribute('data-i'));
+  });
+  res.addEventListener('mousemove',function(e){
+    var b=e.target.closest('[data-i]'); if(!b) return;
+    var i=+b.getAttribute('data-i'); if(i!==sel){sel=i;paint();}
+  });
+
+  document.addEventListener('keydown',function(e){
+    if((e.metaKey||e.ctrlKey) && (e.key==='k'||e.key==='K')){
+      e.preventDefault(); pal.classList.contains('on') ? closePal() : openPal(); return;
+    }
+    if(pal.classList.contains('on')){
+      if(e.key==='Escape'){ e.preventDefault(); closePal(); }
+      else if(e.key==='ArrowDown'){ e.preventDefault(); if(hits.length){sel=(sel+1)%hits.length;paint();} }
+      else if(e.key==='ArrowUp'){   e.preventDefault(); if(hits.length){sel=(sel-1+hits.length)%hits.length;paint();} }
+      else if(e.key==='Enter'){     e.preventDefault(); choose(sel); }
+      return;
+    }
+    // Esc also closes the phone action sheet.
+    if(e.key==='Escape' && st.open && st.mobile){ st.open=null; render(); }
+  });
+
+  /* ── first paint: the skeleton resolves into the worklist ─────────── */
+  render();
+  setTimeout(function(){ st.loading=false; render(); }, REDUCED ? 250 : 750);
+})();
+</script>
+</body>
+</html>

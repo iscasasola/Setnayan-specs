@@ -39,7 +39,7 @@
 | **S4** | **Rebase + land the guest-site nav PR (#4086)** | `app/[slug]/_components/*`, `_lib/site-nav.ts` | no | *(unclaimed)* |
 | **S5** | **3D room: every guest shows as "Guest"** | the shared-room presence path | no | *(unclaimed)* |
 | **S6** | **Vendor verification uploads don't sweep what they replace** | the vendor verification upload call site | no | *(unclaimed)* |
-| **S7** | **PR-H — the vendor-agrees step** | `event_vendors` migration, both dashboards, 3 lock sites | ⛔ **4 answers** | **CLAIMED — the session that owns `Explore_Replan_BUILD_SPEC_2026-07-27.md`** (built BUD-2 · BUD-3 · PR-I from it, and authored the PR-H design). Owner-assigned 2026-08-04. |
+| **S7** | **PR-H — the vendor-agrees step** | `event_vendors` migration, both dashboards, 3 lock sites | ✅ **all 4 answered** | **REASSIGNED by the owner 2026-08-04** (*"PR-H was not done there. can we do it here instead?"*) — moved OFF the `Explore_Replan_BUILD_SPEC_2026-07-27.md` session. Spec now carries the answers; **build still not started** (14 HIGH plan defects open — see §9). |
 | **S8** | **Design port** — 12 archetypes across ~40 screen families | app-wide UI | ⛔ **owner must look** | *(blocked)* |
 
 ---
@@ -79,6 +79,9 @@
 **One session owns that whole spec** and has shipped from it today: **BUD-2** (#4079), **BUD-3** (#4080)
 and **PR-I** (#4083), plus the **PR-H design + adversarial review**. PR-H stays with it — assigned by
 the owner 2026-08-04 on the reasoning that it is the session already holding the context.
+
+⚠ **PR-H HAS SINCE BEEN MOVED OFF THAT SESSION** by the owner (2026-08-04) — see the S7 row. The rest
+of this section still stands.
 
 ⚠ **PR-H is NOT the last unbuilt slice in that file.** Also still open there: **PR-G2** (the hard
 grey-out tier), **PR-J** (found-you attribution + the dispute ladder), and **BUD-4 … BUD-10** of the

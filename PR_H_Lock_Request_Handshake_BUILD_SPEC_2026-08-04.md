@@ -1,6 +1,21 @@
 # PR-H — the vendor-agrees step · BUILD SPEC
-**Date:** 2026-08-04 · **Status:** DESIGNED, adversarially reviewed, BUILD NOT STARTED
+**Date:** 2026-08-04 · **Status:** DESIGNED, adversarially reviewed, **4 owner answers RECEIVED 2026-08-04**, BUILD NOT STARTED
 **Parent:** `Explore_Replan_BUILD_SPEC_2026-07-27.md` §7 (PR-H). **Depends on:** PR-I (#4083) for `lib/lock-handshake-flag.ts`.
+
+> ## 🔒 THE OWNER HAS ANSWERED — §6 IS NO LONGER A QUESTION LIST
+>
+> All four blocking decisions were answered on 2026-08-04. **§6 now records the answers, and one of
+> them CHANGES THE DESIGN in a way that is easy to miss.**
+>
+> **⚠ THE WEDDING DATE ANSWER MATCHES NEITHER OPTION THIS SPEC OFFERED.** §6 asked "does the date fix
+> when the couple ASKS, or when the vendor AGREES?" The owner's answer is a third thing — the date is
+> a property of the EVENT narrowing to one candidate, not of any vendor's answer. **An implementer who
+> reads only the old §6 will pick one of the two offered options and be wrong.** Read §6 in full.
+>
+> **The owner's answers do NOT clear the build.** §9's adversarial review found 14 HIGH problems in
+> the PLAN — those are engineering defects, not owner calls, and they are still open. The clearest:
+> **the vendor cannot open the page the agree card is specified to live on.** Fix the plan before
+> writing the screen.
 
 > Produced by a 12-agent mapping + design + adversarial workflow on 2026-08-04. Every claim below is file:line-backed against `origin/main`. This is the cold-start contract for the build — read it fully before writing code.
 
@@ -21,7 +36,13 @@
 A couple pressing **Lock** books the vendor outright. The vendor is never asked. The owner ruled 2026-07-27 that a lock is a **REQUEST** and the vendor must agree — steps 1, 3, 4 and 5 of the handshake all ship today; **step 2 does not exist.**
 
 ## 1 · Schema decision
-**NEW COLUMNS on event_vendors — five nullable, orthogonal markers (lock_requested_at, lock_agreed_at, lock_request_closed_at, lock_request_closed_reason, lock_request_note) plus two new partial indexes and four new SECURITY DEFINER RPCs. NO new table. NO new *_user_id column anywhere.**
+**NEW COLUMNS on event_vendors — ~~five~~ SIX nullable, orthogonal markers (lock_requested_at, lock_agreed_at, lock_request_closed_at, lock_request_closed_reason, lock_request_note, **lock_request_nudged_at**) plus two new partial indexes and ~~four~~ FIVE new SECURITY DEFINER RPCs. NO new table. NO new *_user_id column anywhere.**
+
+> ⚠ **Updated by owner answer 6.3.** The sixth column (`lock_request_nudged_at`) and the fifth RPC
+> (`nudge_stale_lock_requests`) come from the day-5 nudge the owner ordered on 2026-08-04. They are
+> the same *class* of change — nullable marker, no actor column, no new FK — so every guardrail
+> argument below (erasure, export, the hard_single_group reuse, the single `.maybeSingle()` read)
+> holds unchanged. The migration in §7 predates this and is missing both.
 
 ### Why (verbatim from the design)
 1) It is literally what shipped step-5 does, and the spec says mirror it: 20270320429117_deposit_lockfree.sql:37-49 adds three nullable marker columns to event_vendors and drives them from one DEFINER RPC, and its own header (:15-18) states the 'orthogonal to the status ladder, never repurpose status' rule the PR-H spec quotes. Copying the pattern is a one-file change; inventing a table is a new shape.  2) hard_single_group is a GENERATED ALWAYS STORED column ON event_vendors (20261210000000_hard_single_lock_guard.sql:78-91). Keeping the request on the same row lets the new pending-request unique index reuse it verbatim; a separate table would force the 7-category CASE into a THIRD copy.  3) The vendor client page resolves its whole booking state from ONE .maybeSingle() read of event_vendors (vendor-dashboard/clients/[eventId]/page.tsx:458-465). Columns keep that read working; a second row per booking would blank the entire deposit + completion section.  4) DECISIVE: a new table carrying any actor column fails TWO guardrails whose escape hatches are BOTH closed — erasure's UNDECIDED_BACKLOG is empty with BACKLOG_HIGH_WATER = 0 (lib/erasure/coverage-guardrail.test.ts:349-354,434-451) and export's KNOWN_GAPS sits at exactly 90/90 against KNOWN_GAP_CEILING = 90 with a shrink-only ratchet (lib/export-coverage-guardrail.test.ts:443,494-500). Marker columns on an already-classified table add zero erasure/export surface. Step 5 has no actor column either (deposit_acknowledged_at records WHEN, not WHO) — we match that deliberately; 'who clicked agree' is already recoverable from the action's fault/console log path.  5) vendor_lock_proposals is the WRONG thing to mirror despite being named in the spec: it shipped with no REVOKE at all (exposure-surface.baseline.txt:572-573 records 'tpriv public.vendor_lock_proposals|anon SIUD' and all 9 columns anon=SIU), its three RLS policies have never been exercised (all four call sites use createAdminClient()), it has no expiry machinery, and its RLS direction is inverted from what PR-H needs (couple resolves, vendor cannot even read). We take exactly ONE idea from it: the partial-unique-index-on-the-live-state idiom (20270729130000:45-47).
@@ -53,28 +74,42 @@ NOTIFICATION — one `lock_request_expired` per couple member per expired row, e
 
 TESTING THE THROTTLE — never call `maybeRunLockRequestExpiry()` twice in a test or from a manual 'Run now' control: claimPeriodicJob has a 5-minute per-key in-memory pre-throttle that returns false BEFORE it ever reaches the DB, so the second call silently does nothing and looks broken. Manual triggers call the exported BODY directly, exactly as the SEO surface does.
 
-NOT BUILT ON PURPOSE — no reminder-before-expiry nudge (a second scheduled signal to design and throttle), and no per-vendor configurable window. 7 days is hardcoded as the RPC's default, changeable by argument without a migration.
+~~NOT BUILT ON PURPOSE — no reminder-before-expiry nudge (a second scheduled signal to design and throttle)~~, and no per-vendor configurable window. 7 days is hardcoded as the RPC's default, changeable by argument without a migration.
+
+> 🔒 **OVERTURNED BY THE OWNER 2026-08-04 — THE DAY-5 NUDGE IS ORDERED.** See §6.3. The reasoning that
+> justified skipping it ("a second scheduled signal to design and throttle") is answered by NOT making
+> it a second signal: `nudge_stale_lock_requests(p_days DEFAULT 5, p_limit DEFAULT 200)` ships in the
+> same migration and runs in the SAME daily sweep pass as the expiry, guarded by a new
+> `lock_request_nudged_at` stamp so it fires once, not every day from 5 to 7.
+> 🪤 **NUDGE BEFORE EXPIRE, IN ONE PASS.** If the expiry runs first, a request that crossed both
+> thresholds since the last sweep is closed having never warned the vendor — the exact outcome the
+> owner added the nudge to prevent. The 20h `DAILY_GAP_MS` makes that a real window, not a theoretical
+> one: prod is pre-launch-empty, so sweeps fire only when someone visits.
+> ⚠ **Do not "fix" a missed nudge by nudging on expiry.** A message saying "2 days left" delivered in
+> the same pass that closes the request is worse than silence.
 
 ## 3 · Call sites — the complete build list
 **40 sites.** Order as listed.
 
 ### 1 · `supabase/migrations/<allocated>_notification_type_lock_request.sql`
-NEW FILE 1. Bare `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS` x4 — lock_request_received, lock_request_agreed, lock_request_declined, lock_request_expired. NO BEGIN/COMMIT, nothing else in the file (Postgres forbids USING a value in the txn that adds it). Allocate the prefix with `pnpm migration:new` AFTER `git fetch origin` — origin/main's head is 20271103100614 and this worktree's newest local file (20271103100000) already sorts below it.
+NEW FILE 1. Bare `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS` **x5** — lock_request_received, lock_request_agreed, lock_request_declined, lock_request_expired, **lock_request_nudge** (⚠ the fifth is new, from owner answer 6.3; every "x4"/"four types" count in §3 sites 3-4 and §5 is now five). NO BEGIN/COMMIT, nothing else in the file (Postgres forbids USING a value in the txn that adds it). Allocate the prefix with `pnpm migration:new` AFTER `git fetch origin` — origin/main's head is 20271103100614 and this worktree's newest local file (20271103100000) already sorts below it.
 
 ### 2 · `supabase/migrations/<allocated>_lock_request_handshake.sql`
 NEW FILE 2 — the migration in `migrationSql`. Five columns, the coherence CHECK, two indexes, the guard trigger, four user RPCs + the sweep RPC, the DO $$ post-condition.
 
 ### 3 · `apps/web/lib/notifications.ts`
-Add the four literals to the NotificationType union (:8-255) AND a key for each in BOTH exhaustive maps — NOTIFICATION_TYPE_LABEL (:256) and NOTIFICATION_TYPE_TONE (:329). Missing either is a typecheck failure and `next build` cannot run locally (7 GB heap), so CI is the only detector. Labels: 'Lock request' (received) · 'Lock agreed' (agreed) · 'Lock declined' (declined) · 'Lock request expired' (expired). Tones: warn · success · warn · warn.
+Add the four literals to the NotificationType union (:8-255) AND a key for each in BOTH exhaustive maps — NOTIFICATION_TYPE_LABEL (:256) and NOTIFICATION_TYPE_TONE (:329). Missing either is a typecheck failure and `next build` cannot run locally (7 GB heap), so CI is the only detector. Labels: 'Lock request' (received) · 'Lock agreed' (agreed) · 'Lock declined' (declined) · 'Lock request expired' (expired) · **'Lock request — 2 days left' (nudge)**. Tones: warn · success · warn · warn · **warn**.
 
 ### 4 · `apps/web/lib/notification-emit.ts`
-Add all four to EMAIL_ENABLED_TYPES (:62-129). Deliberate: a request carries a 7-day fuse, so a vendor who is not in the app must still hear it, and a couple must hear the answer. Do NOT add to PUSH_ENABLED_TYPES (:21-35) — that list is 4 types and this is not that urgent.
+Add all **five** to EMAIL_ENABLED_TYPES (:62-129). Deliberate: a request carries a 7-day fuse, so a vendor who is not in the app must still hear it, and a couple must hear the answer. **`lock_request_nudge` is email-enabled for the strongest version of that reason — the owner ordered it specifically for the vendor who never logs in, so an in-app-only nudge would reach exactly the vendors who do not need it.** Do NOT add to PUSH_ENABLED_TYPES (:21-35) — that list is 4 types and this is not that urgent.
 
 ### 5 · `apps/web/lib/lock-request-state.ts`
 NEW PURE CORE — the ONE place the request state is derived, so the four couple surfaces cannot drift. `export type LockRequestState = 'none'|'requested'|'agreed'|'declined'|'expired'|'cancelled'|'superseded'|'locked'` and `export function lockRequestStateOf(row: {status; lock_requested_at; lock_agreed_at; lock_request_closed_at; lock_request_closed_reason}, enabled: boolean): LockRequestState`. Takes the flag as a PARAMETER and must never call isLockHandshakeEnabled() itself. RULES: enabled=false ⇒ always 'locked' when status ∈ the four confirmed, else 'none' (byte-identical to today). enabled=true ⇒ status ∈ confirmed ⇒ 'locked' (this is also what makes a legacy pre-flag lock and a Locked-QR claim, both of which have lock_requested_at NULL, read as locked and NOT as a phantom 'waiting' — derive, never backfill). Then requested & !agreed & !closed ⇒ 'requested'; closed ⇒ the reason verbatim. Also export `export function lockRequestExpiresAt(requestedAt: string): Date` (+7d) and `export function lockRequestDaysLeft(requestedAt, now): number`.
 
 ### 6 · `apps/web/app/dashboard/[eventId]/vendors/actions.ts`
 SITE 1 + 2 — the canonical lock. (a) Extend FinalizeVendorResult (:510-604) with `| { status: 'lock_requested'; vendorId; vendorName; expiresAt: string }` and `| { status: 'lock_request_conflict'; groupId; groupLabel; existingVendorId; existingVendorName }`. (b) Widen isHardSingleUniqueViolation (:611-618) to match EITHER index name — the detector is a SUBSTRING match, so a second index with a different name is invisible to it; add 'event_vendors_hard_single_request_uniq' to the test and keep both names in one exported const so the db-test can assert against it. (c) The pre-emptive gate (:823-831) keeps its CONFIRMED-status read UNCHANGED, and when isLockHandshakeEnabled() ALSO runs a second read for a live PENDING sibling in groupCategories (lock_requested_at NOT NULL, lock_agreed_at IS NULL, lock_request_closed_at IS NULL, archived_at IS NULL, vendor_id <> this) → returns lock_request_conflict unless override_existing. (d) The Switch branch (:866-875) learns a second arm: when the displaced sibling is PENDING (not confirmed), call cancel_lock_request on it instead of demoting it to 'considering'. (e) SLOT PATH (:1163-1166): when the flag is ON, do NOT call acquire_service_time_slot — the slot_required gate still runs, and chosenSlotId is passed into request_vendor_lock as p_slot_id; capacity is consumed at agree. (f) GENERIC WRITE (:1409-1418): when the flag is ON, replace the status UPDATE with `supabase.rpc('request_vendor_lock', { p_event_id, p_event_vendor_id: vendorId, p_slot_id: chosenSlotId ?? null })`, map the envelope — ok ⇒ continue to the request return, already ⇒ same, already_locked ⇒ {status:'already_locked'}, group_taken ⇒ buildLockRequestConflict(...) — then emit the vendor notification and `return { status:'lock_requested', … }` BEFORE the post-lock side effects. (g) THE SIDE EFFECTS MOVE: with the flag ON, the archive-others sweep (:1730-1755), the inquiry-displacement + refund block (:1779-1900), the event_category_decisions auto-complete (:2140-2152) and the vendor_lock_proposals auto-resolve (:2155-2172) must NOT run at request time — extract them into an exported `applyPostLockEffects(admin, {eventId, vendorId, targetCategory, groupCategories, isHardSingle})` called from the request path only when the flag is OFF, and from vendorAgreeToLock when it is ON. Firing them at request time kills rival conversations before anyone agreed. (h) The booking-fee block (:2196) is UNCHANGED — it already reads `!isLockHandshakeEnabled()`. (i) NEW exported action `cancelLockRequest(formData)` → rpc('cancel_lock_request'), returns a typed Result, revalidates the vendors path and the workspace path.
+
+**(j) 🔴 THE DATE GATE — ADDED BY OWNER ANSWER 6.1, AND IT IS NOT A NO-OP.** `finalizeVendor` carries the candidate-date narrowing gate (grep `forcedDateKey`, `intersectViableCandidates`, `date_will_lock`) and the post-lock date write (grep `event_date_precision: 'day'`, guarded by `.is('event_date', null)`). **When `isLockHandshakeEnabled()`, SKIP BOTH.** This is a live defect if left alone, not tidiness: the gate builds its constraining set as *the already-confirmed marketplace vendors **plus this target***, adding the target **explicitly** — so under the flag, merely ASKING a vendor would narrow the candidates against a vendor who has not agreed and can still decline, return `date_will_lock`, and on confirmation write the couple's **final wedding date** at request time. The date then survives a decline, because the post-lock write is `.is('event_date', null)`-guarded and nothing clears it. Instead: carry the couple's confirmed date key into `request_vendor_lock` as the value item 3 of §3 site 13 compares against, and let the AGREE path re-run the narrowing for real.
 
 ### 7 · `apps/web/app/dashboard/[eventId]/vendors/packages/actions.ts`
 SITE 3 — lockPackage (:110). When isLockHandshakeEnabled(), build `baseRow.status` as `'considering'` instead of `'contracted'` (:476) and, immediately after the cascade insert returns `insertedRows`, call `request_vendor_lock` for the ANCHOR row only (never a covered row — they carry ₱0 and are excluded from the request index by `package_role IS DISTINCT FROM 'covered'`). One package = ONE request. The covered rows are promoted by the agree RPC's cascade. The fee block (:554) is UNCHANGED. Return a new `{status:'lock_requested'}` outcome so the /v/[slug] lock modal stops saying 'Booked'.
@@ -95,7 +130,7 @@ SITE 8 — the generic backdoor. isValidStatus (:81) accepts the whole 6-value u
 SITE 9 — EXPLICITLY EXEMPT, and say so in a comment at :79. The vendor issued the Locked QR, so the vendor has already agreed; the RPC inserts straight at 'deposit_paid' and never passes through 'contracted'. NO code change and NO backfill — lockRequestStateOf returns 'locked' for any confirmed row with lock_requested_at NULL, so these bookings never render a phantom 'waiting'. Write the exemption down; an unstated exemption reads as a missed site.
 
 ### 13 · `apps/web/app/vendor-dashboard/clients/[eventId]/actions.ts`
-NEW ACTIONS `vendorAgreeToLock(formData)` and `vendorDeclineLock(formData)`, placed beside vendorAcknowledgeDeposit (:108-217) and copying it EXACTLY: read only `event_id` + `vendor_id` from FormData, throw 'Invalid input' if either is not a string; `getUser()` → redirect('/login') and NO TypeScript authorization re-check (the DEFINER RPC owns the gate); forward under the vendor's OWN RLS client; fire side effects ONLY on `!error && env.status === 'ok'`; every side effect in its own try/catch with a console.error; finish with revalidatePath + redirect(`?lock_agree=${flag}` / `?lock_decline=${flag}`) where flag = error ? 'error' : env.status ?? 'ok'. vendorDeclineLock trims + .slice(0,500) the `reason`. ON AGREE ONLY: (1) emitNotification('lock_request_agreed') to every event_members row with member_type='couple'; (2) call the extracted applyPostLockEffects(...) — the archive sweep, the inquiry displacement/refund, the category auto-complete, the proposal auto-resolve; (3) if the couple's date-narrowing gate had deferred the wedding-date finalize, apply it now. DO NOT bill and DO NOT acquire schedule pools here — both stay at step 5. ON DECLINE: emitNotification('lock_request_declined') with the reason in the body.
+NEW ACTIONS `vendorAgreeToLock(formData)` and `vendorDeclineLock(formData)`, placed beside vendorAcknowledgeDeposit (:108-217) and copying it EXACTLY: read only `event_id` + `vendor_id` from FormData, throw 'Invalid input' if either is not a string; `getUser()` → redirect('/login') and NO TypeScript authorization re-check (the DEFINER RPC owns the gate); forward under the vendor's OWN RLS client; fire side effects ONLY on `!error && env.status === 'ok'`; every side effect in its own try/catch with a console.error; finish with revalidatePath + redirect(`?lock_agree=${flag}` / `?lock_decline=${flag}`) where flag = error ? 'error' : env.status ?? 'ok'. vendorDeclineLock trims + .slice(0,500) the `reason`. ON AGREE ONLY: (1) emitNotification('lock_request_agreed') to every event_members row with member_type='couple'; (2) call the extracted applyPostLockEffects(...) — the archive sweep, the inquiry displacement/refund, the category auto-complete, the proposal auto-resolve; (3) ⚠ **REWRITTEN BY OWNER ANSWER 6.1 — was "if the couple's date-narrowing gate had deferred the wedding-date finalize, apply it now."** Do NOT replay a deferred decision. **RE-RUN the narrowing from scratch** now that this row is confirmed: read `events.event_date` + `date_candidates`, recompute `intersectViableCandidates` over the confirmed marketplace vendors, and finalize ONLY if (a) it collapses to exactly one, (b) `event_date IS NULL`, and (c) **the collapsed key is byte-identical to the date the couple confirmed at request time** (persist that key with the request). If it collapsed to a DIFFERENT date, write nothing and notify the couple to re-confirm — a consent captured up to 7 days earlier is not consent to today's answer. See §6.1's NEW HIGH. DO NOT bill and DO NOT acquire schedule pools here — both stay at step 5. ON DECLINE: emitNotification('lock_request_declined') with the reason in the body.
 
 ### 14 · `apps/web/lib/vendor-overview.ts`
 Add `| { kind: 'lock_request'; id; eventId; eventVendorId; coupleName: string|null; eventDate: string|null; requestedAt: string; expiresAt: string; totalPhp: number|null }` to the WhatsNewCard union (:55-85). Add `fetchLockAgreementRequests(admin, vendorProfileId)` beside fetchLockRequests (:461-510), reading event_vendors via createAdminClient (event_vendors carries couple-only RLS) with `.eq('marketplace_vendor_id', …).not('lock_requested_at','is',null).is('lock_agreed_at',null).is('lock_request_closed_at',null)` PLUS THE TWO MANDATORY FILTERS `.or('package_role.is.null,package_role.eq.anchor')` and `.is('archived_at', null)` — a covered cascade row or an archived booking must never be offered for agreement. Add it to the existing Promise.all beside fetchEventMeta, and push the matching `ongoing` task (mirroring :273-281) with `awaitingChip(lr.requestedAt)` so it also appears in the open-task list with an 'Awaiting you N days' chip.
@@ -110,7 +145,7 @@ Import vendorAgreeToLock + vendorDeclineLock from './clients/[eventId]/actions' 
 Extend the single `.maybeSingle()` admin read (:458-465) to also select lock_requested_at / lock_agreed_at / lock_request_closed_at / lock_request_closed_reason, and derive the state via lockRequestStateOf. Render a NEW 'Lock request — agree?' card ABOVE the deposit card (:2064-2164 is the literal template) with the same agree + decline forms. Add `lock_agree` / `lock_decline` to the page's searchParams type (:395-396, :1717) and render their outcome banners OUTSIDE the card (:2067-2086) — a successful agree or decline erases the card that hosted the button, exactly as a successful reject does today. While state === 'requested', suppress the deposit card entirely: there is nothing to pay yet, step 3 (the vendor's payment request) has not happened.
 
 ### 18 · `apps/web/lib/lock-request-expiry.ts`
-NEW. `export async function runLockRequestExpirySweep(): Promise<{expired:number}>` — createAdminClient().rpc('expire_stale_lock_requests', {p_days:7, p_limit:200}), then for each returned row emit 'lock_request_expired' to every couple member of that event. `export async function maybeRunLockRequestExpiry(): Promise<void>` — `if (!isLockHandshakeEnabled()) return;` then `if (await claimPeriodicJob('lock-request-expiry', DAILY_GAP_MS)) await runLockRequestExpirySweep();` wrapped in try/catch, never throws. Copy the shape of lib/retention-sweep.ts:17-40 exactly. Register this file in the flag registry's `gates`.
+NEW. `export async function runLockRequestExpirySweep(): Promise<{nudged:number; expired:number}>` — **two RPCs in ONE pass, NUDGE FIRST** (owner answer 6.3): (1) createAdminClient().rpc('nudge_stale_lock_requests', {p_days:5, p_limit:200}), emitting 'lock_request_nudge' to the VENDOR for each returned row; then (2) .rpc('expire_stale_lock_requests', {p_days:7, p_limit:200}), emitting 'lock_request_expired' to every couple member of that event. **The order is load-bearing** — expire-first closes a request that crossed both thresholds since the last sweep without ever warning the vendor, which is the exact failure the owner added the nudge to prevent. Keep the function name (the flag registry and both layout mounts reference it) even though it now does two jobs; say so in its docblock. `export async function maybeRunLockRequestExpiry(): Promise<void>` — `if (!isLockHandshakeEnabled()) return;` then `if (await claimPeriodicJob('lock-request-expiry', DAILY_GAP_MS)) await runLockRequestExpirySweep();` wrapped in try/catch, never throws. Copy the shape of lib/retention-sweep.ts:17-40 exactly. Register this file in the flag registry's `gates`.
 
 ### 19 · `apps/web/app/admin/layout.tsx`
 Add `after(() => maybeRunLockRequestExpiry().catch(() => {}))` to the existing twelve-strong after() block (:107-157).
@@ -152,7 +187,13 @@ Report three counts — '{N} locked · {N} waiting · {N} in build' — in the v
 (a) Add `| { kind: 'requested'; vendorName: string; expiresAt: string }` and `| { kind: 'request_conflict'; … }` to the LockState union (:69-124). (b) The success handler (:282-315) currently jumps straight to the congratulations toast — branch on result.status==='lock_requested' to show a REQUEST toast instead, and do NOT set askDone (:296-299), which pins the toast open asking the couple to declare a category finished before anyone agreed. (c) performUndo (:422-433) calls cancelLockRequest instead of revertVendorToConsidering when the state is 'requested'. (d) The ConflictSheet (:873-932) gets the request wording: today it says '{X} is already locked for {group}' / 'Switch to {Y}' — for a pending rival it must read 'You've already asked {X} for {group}. Cancel that request and ask {Y} instead?'. (e) The inline waiting note copies the SHIPPED 'proposed' arm at :124/:413-417/:471-478 verbatim in shape — a terracotta role="status" paragraph — rather than inventing a sixth waiting visual.
 
 ### 32 · `apps/web/app/dashboard/[eventId]/vendors/_components/lock-milestone.tsx`
-Both post-lock experiences promise finality the handshake does not deliver. Under the flag: the toast (:154-156, :158) becomes 'Sent! {vendor} has 7 days to answer.' with no 🎉 and no 'Your wedding date is now locked in'; LockDateConfirmModal (:31, :74-82) becomes 'You're asking {vendor} to hold {date}. Your date is set only once they agree.' and the actual events.event_date_precision write is DEFERRED to vendorAgreeToLock. Flag OFF: both strings unchanged.
+Both post-lock experiences promise finality the handshake does not deliver. Under the flag: the toast (:154-156, :158) becomes 'Sent! {vendor} has 7 days to answer.' with no 🎉 and no 'Your wedding date is now locked in'.
+
+⚠ **THE MODAL COPY IS REWRITTEN BY OWNER ANSWER 6.1.** The previously-specified string — *"You're asking {vendor} to hold {date}. Your date is set only once they agree."* — **must NOT be used.** It states the model the owner did not pick: it makes one vendor's answer the thing that sets the date. The owner's model is that the date becomes final when the candidate set collapses to one. Say that instead:
+
+> **'{date} is the only date left that works for everyone you've booked. If {vendor} takes it, that date is final.'**
+
+The `events.event_date` / `event_date_precision` write still moves off the request path, but it is **not** "deferred to vendorAgreeToLock" — the narrowing is **re-evaluated** there (§3 site 13 item 3), and it may legitimately produce nothing. Flag OFF: both strings unchanged.
 
 ### 33 · `apps/web/app/dashboard/[eventId]/vendors/[vendorId]/workspace/page.tsx`
 (a) The hero pill (:1061-1064) renders an UNCONDITIONAL green 'Locked' — there is no status branch at that element at all. Add one: state==='requested' ⇒ warn pill 'Waiting for {vendor}'. (b) inferStage (:182-226) returns null for anything outside the four confirmed statuses, so a requested booking shows the payment blocks with NO progress context — add a pre-stage 'Requested' and render it. Do NOT reach for workspace_status; its docblock (:185-197) says the column is never written in V1. (c) The action row (:1111-1140) gains a 'Cancel request' arm for state==='requested'. (d) SUPPRESS the payment stack (:1393-1450 — PaymentPlanStepper, ReservationTermsAck, DepositReservation) while a request is pending; step 3 has not happened. (e) canOfferInvite (:441-451) gates on the four confirmed statuses — leave it, a requested row correctly does not offer the claim invite yet.
@@ -184,7 +225,8 @@ NEW fragment file (never edit CHANGELOG.md or STATUS.md in a feature PR). Dated 
 - VENDOR · Client detail page. The same agree/decline pair rendered ABOVE the deposit card, with the deposit card SUPPRESSED while the request is pending (nothing to pay yet). The `?lock_agree=` / `?lock_decline=` outcome banners render OUTSIDE the card, because a successful agree or decline erases the card that hosted the button.
 - VENDOR · loser outcomes, never a raw Postgres string and never a control that demotes a rival. group_taken ⇒ 'The couple has already booked another {category}. This request is closed.' not_verified ⇒ 'Finish your verification to accept bookings.' slot_full ⇒ 'That window filled up — ask the couple to pick another time.' closed ⇒ 'This request was withdrawn.' All read-only.
 - COUPLE · the moment they press Lock. The button's pending label is ALREADY 'Requesting…'. On success: NOT the congratulations toast. A request toast — 'Sent! {vendor} has 7 days to answer.' — with an Undo that cancels the request, no 🎉, no 'Your wedding date is now locked in', and no 'done or add another?' question (that pins the toast open asking the couple to close a category before anyone agreed).
-- COUPLE · the date modal. 'This locks your wedding date… the date becomes official' becomes 'You're asking {vendor} to hold {date}. Your date is set only once they agree.' The actual date-precision write moves to the agree step.
+- COUPLE · the date modal. ⚠ **REWRITTEN BY OWNER ANSWER 6.1 — the string previously specified here ("Your date is set only once they agree") must NOT be used.** The date is not set by a vendor's answer; it is final when the candidate set collapses to one. 'This locks your wedding date… the date becomes official' becomes **'{date} is the only date left that works for everyone you've booked. If {vendor} takes it, that date is final.'** The write moves off the request path, and the narrowing is RE-EVALUATED at agree (it may produce nothing, or a different date — in which case the couple is asked again, never silently given a date they did not confirm).
+- VENDOR · the day-5 nudge (owner answer 6.3). No new surface — it reuses the SAME 'Lock request — agree?' Overview card and the same email lane; only the notification and its subject line are new ('{Couple} is still waiting. You have 2 days left to answer.'). Fires once per request, never daily, because `lock_request_nudged_at` is stamped.
 - COUPLE · bench card. Third state between plain and ★ Chosen: a '◷ Asked' corner mark, a warn note 'Waiting for {vendor} — 5 days left', and a 'Cancel request' action. Card actions must NOT all disappear (the shipped locked branch returns NO_ACTIONS), or the Undo the spec requires has nowhere to live.
 - COUPLE · 'Your team'. The reserved slot in build-locked.tsx becomes a 'Waiting for the vendor' section between 'Locked in' and 'In your build', one row per request with a Clock pill and Cancel. A requested vendor leaves 'ready to lock' (it must not offer 'Lock to confirm' again) and leaves 'Still needs your decision' (it is decided, just unanswered).
 - COUPLE · the three money tiles. A third bucket. Buffer = budget − locked − REQUESTED − candidates. Counting a request as Locked claims money no vendor accepted; counting it as a candidate claims it is still optional.
@@ -214,17 +256,121 @@ NEW fragment file (never edit CHANGELOG.md or STATUS.md in a feature PR). Dated 
 - UNIT · the money never lies. teamMoney with one locked + one requested + one candidate returns three distinct buckets and Buffer = budget − locked − requested − candidates.
 - UNIT · every hard-single group behaves the same. Extend the existing loop at apps/web/lib/bench-card-actions.test.ts:193 over HARD_SINGLE_PICK_GROUPS: a 'requested' vendor returns lockGroupId === null AND cancelRequest !== null in every group. Extend, do not write a new file.
 - UNIT · the flag registry. flag-chokepoint-scan.test.ts must stay green with the six new gate paths and lib/lock-request-state.ts in pureCores. It asserts exactly one env reader (adding a second flag or a second reader fails), that every gate still CALLS isLockHandshakeEnabled(), and that the pure core does not.
-- UNIT · notifications are wired end to end. Assert all four new types are keys in NOTIFICATION_TYPE_LABEL and NOTIFICATION_TYPE_TONE (typecheck already forces this, but assert at runtime so the failure names the type) and all four are members of EMAIL_ENABLED_TYPES — a new type is in-app-only by default, which for a 7-day fuse is a silent product bug.
+- UNIT · notifications are wired end to end. Assert all **five** new types are keys in NOTIFICATION_TYPE_LABEL and NOTIFICATION_TYPE_TONE (typecheck already forces this, but assert at runtime so the failure names the type) and all **five** are members of EMAIL_ENABLED_TYPES — a new type is in-app-only by default, which for a 7-day fuse is a silent product bug, and for the nudge defeats its entire purpose.
+- DB · THE DATE IS NOT SET BY A REQUEST (owner answer 6.1). Seed an event with `event_date IS NULL` and TWO candidate dates where the target vendor's calendar rules one out — i.e. the set would collapse to one. Press Lock under the flag. Assert `events.event_date IS STILL NULL` and no `date_status='locked'` write happened. This is the positive proof that asking a vendor cannot finalize a wedding date; without it the shipped gate silently does exactly that (it adds the un-agreed target to the constraining set explicitly).
+- DB · the date IS set when the set collapses at AGREE. Same fixture; the vendor agrees. Assert `events.event_date` now equals the single viable candidate and precision is 'day'. Then re-run agree ⇒ 'already' and assert the date is BYTE-IDENTICAL (not merely non-null).
+- DB · a STALE date confirmation is refused. Seed the request with confirmed key X; before agreeing, mutate the candidate set so the collapse now yields Y. Agree. Assert `events.event_date IS STILL NULL` (the couple is asked again) and specifically that it is NOT Y — a couple must never be handed a date they did not confirm.
+- DB · the nudge fires once, at day 5, and never after an answer. Seed requests aged 6, 4 and 6-but-already-agreed. `nudge_stale_lock_requests(5)` ⇒ exactly ONE row returned (the live 6-day one); assert `lock_request_nudged_at` is now set on it and NULL on the other two. Call it again ⇒ ZERO rows and the stamp is byte-identical — the daily sweep must not re-nudge from day 5 to day 7.
+- DB · nudge-before-expire in one pass. Seed a single request aged 8 days that has never been nudged, then run the sweep body once. Assert the vendor received a nudge AND the row then expired — proving the ordering, since an expire-first implementation returns zero nudges here and the vendor is never warned.
 - INTEGRATION · flag OFF is byte-identical. With NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED unset, run finalizeVendor, lockPackage and bookVendorAtChatLock against fixtures and assert each produces `status='contracted'` AND `lock_requested_at IS NULL` AND the booking fee call site fired exactly where it fires today. Then flip the env and assert each produces `status='considering'` AND `lock_requested_at IS NOT NULL` AND no fee call.
 - CI HOUSEKEEPING · exposure-freeze.db.test.ts green after regenerating the baseline ON TOP OF a fresh origin/main (this worktree is 21 facts behind), with the new function lines reading anon=- . user-fk-behaviour.generated.txt unchanged (no new FKs, by design — if it moves, an actor column crept in). erasure coverage-guardrail G3 and export-coverage-guardrail T1/T4 unchanged (no new subject-bearing table). Both ugat db-tests green. check-migration-timestamps.mjs green with prefixes allocated by `pnpm migration:new` above origin/main's 20271103100614.
 
-## 6 · ⛔ OWNER DECISIONS — an implementer MUST NOT choose these
-- THE WEDDING DATE. Today, pressing Lock can finalise the couple's wedding date on the spot ('the date becomes official'). Under the handshake I have moved that to the moment the vendor agrees, and the modal now says 'you're asking them to hold this date'. That is the honest reading of the ruling, but it means a couple who books a venue and then waits five days does not have a fixed date on their dashboard in the meantime. Confirm that is what you want, or say the date should still be set the moment they ask.
-- SEVEN DAYS. I set the vendor's answer window to 7 days, after which the request closes itself and the couple is told nobody answered. Is 7 the number you want? It is one argument to change, no rebuild.
-- VENDORS WHO NEVER LOG IN. Right now the vendor finds out about a request by email and by a card on their dashboard. There is no text message (no SMS in V1) and no reminder before the 7 days run out. If a vendor misses it, the couple simply gets 'no answer'. Say the word and I will add a nudge at day 5.
-- THE LOCKED QR STAYS A ONE-STEP BOOKING. When a vendor hands a couple their own printed Locked QR, scanning it books them instantly with no agree step — the vendor already agreed by printing it. I have written that exemption down rather than routing it through the handshake. Confirm.
+## 6 · 🔒 OWNER DECISIONS — ANSWERED 2026-08-04
+
+All four were answered. Three confirm the design. **One replaces it.**
+
+### 6.1 · THE WEDDING DATE — ⚠ THE ANSWER IS NEITHER OPTION THAT WAS OFFERED
+
+**Owner, verbatim:** *"upon finalization of date. the event can starts with multiple dates until it becomes one date. then that date becomes final."*
+
+The question asked whether the date fixes when the couple **asks** or when the vendor **agrees**. The
+owner answered with a third model: **an event holds MULTIPLE candidate dates and NARROWS. The date
+becomes final when the set collapses to ONE.** That is a property of the **event**, not of any one
+vendor's answer.
+
+**🔑 THIS ALREADY SHIPS — DO NOT BUILD IT.** `lib/candidate-dates.ts`'s own docblock states the model
+verbatim: the couple commits candidates at onboarding, locking vendors narrows the set to the days
+every locked vendor is free on, *"When exactly one candidate survives, the next vendor lock can
+finalize the wedding date."* The gate is `intersectViableCandidates(...)` → `viable.length === 1` in
+`finalizeVendor`, which returns `date_will_lock` for confirmation and then writes the date in the
+post-lock block. **The narrowing engine is the mechanism. PR-H consumes it; PR-H does not replace it.**
+
+**What this OVERTURNS in this spec.** The design moved the date write to `vendorAgreeToLock` (§3
+site 13 item 3) and rewrote the modal to *"your date is set only once they agree"* (§3 site 32).
+**Both are now wrong** — they make the date a function of one vendor's answer, which is precisely the
+model the owner did not pick. Corrected build rules:
+
+1. **At REQUEST time — do NOT run the date gate and do NOT write a date.** A request does not change
+   the confirmed set, so nothing has narrowed. ⚠ **This is a real defect in the shipped code path, not
+   a no-op:** the gate adds `targetVendor.marketplace_vendor_id` to `profileIds` **explicitly**, so it
+   constrains on a vendor who has not agreed. Left alone under the flag, pressing Lock would finalise
+   the wedding date off the availability of a vendor who may decline. Skip the whole gate when
+   `isLockHandshakeEnabled()`.
+2. **At AGREE time — RE-RUN the narrowing, do not replay a stored decision.** Once the row is
+   confirmed the vendor is legitimately in the locked set. Recompute `intersectViableCandidates`; if
+   it collapses to exactly one **and** `events.event_date IS NULL`, finalize. Frame it correctly in
+   your head: the set collapsed, and the agreement is what collapsed it — the vendor did not "set the
+   date".
+3. **Keep the existing `.is('event_date', null)` guard.** The shipped write never clobbers an existing
+   date, and it must keep not clobbering one.
+4. **The couple's date copy must describe narrowing, not agreement.** Not *"your date is set once they
+   agree"*. Closer: *"You have one date left that works for everyone you've booked. Booking {vendor}
+   would make {date} final."*
+
+> #### 🔴 NEW HIGH — the owner's answer CREATES a defect the review could not have found
+> **The couple's date consent is captured up to 7 days before the date is computed.** Today
+> `confirm_date_lock` is collected in the same request that writes the date, so what the couple
+> confirmed and what got written are the same thing. Under the handshake the couple confirms at ASK
+> time and the collapse is evaluated at AGREE time — **days later, against a viable set that can have
+> changed** (another vendor's calendar moves, another lock lands, a candidate passes). The couple can
+> confirm date X and be given date Y, silently.
+> **Rule: a stale confirmation is not a confirmation.** At agree time, only auto-finalize if the
+> collapsed date is **byte-identical to the one the couple confirmed** (persist the confirmed key with
+> the request). If it differs, write nothing and notify the couple to re-confirm. Never widen the
+> `.is('event_date', null)` guard to cover this — that guard answers a different question.
+
+### 6.2 · SEVEN DAYS — ✅ CONFIRMED
+**Owner: 7 days MAX.** No change; `p_days DEFAULT 7` stands as the RPC's default.
+
+### 6.3 · A DAY-5 NUDGE — ✅ ORDERED (this ADDS scope)
+**Owner: nudge on day 5.** Without it a vendor who never logs in simply times out and the couple is
+told "no answer" — and there is no SMS in V1, so email plus one in-app card is the whole channel.
+
+**This overturns §2's "NOT BUILT ON PURPOSE — no reminder-before-expiry nudge."** Build it, and build
+it on the sweep that already exists rather than a second scheduled signal:
+
+- **A SIXTH COLUMN — `event_vendors.lock_request_nudged_at TIMESTAMPTZ`.** Without it the daily sweep
+  re-nudges every day from day 5 to day 7. Trigger-guarded with the other vendor-set markers.
+  ⚠ §1 says "five nullable markers" — **it is six.** Same class, no actor column, no new FK, so the
+  erasure/export guardrail reasoning in §1 is unchanged.
+- **One sweep, two actions.** `expire_stale_lock_requests` already scans live requests daily. Add
+  `nudge_stale_lock_requests(p_days DEFAULT 5, p_limit DEFAULT 200)` in the same file and call both
+  from `runLockRequestExpirySweep`. **Nudge BEFORE expire in the same pass**, or a request that
+  crosses both thresholds between two sweeps expires having never nudged.
+- **A fifth notification type** `lock_request_nudge` (vendor). Label 'Lock request — 2 days left',
+  tone warn, **in `EMAIL_ENABLED_TYPES`** — the entire point is reaching a vendor who is not in the
+  app. Body: '{Couple} is still waiting. You have 2 days left to answer.'
+- **Do not send a nudge for a request that is already answered or closed** — the same
+  `lock_agreed_at IS NULL AND lock_request_closed_at IS NULL` predicate as the expiry scan.
+
+### 6.4 · THE PRINTED LOCKED QR STAYS A ONE-STEP BOOKING — ✅ CONFIRMED
+**Owner: confirmed.** Scanning a vendor's own printed Locked QR books instantly with no agree step —
+the vendor already agreed by printing it. §3 site 12's exemption stands exactly as written, including
+the requirement to write the exemption down in a comment.
 
 ## 7 · The migration
+
+> ## ⚠ THIS SQL PREDATES THE OWNER'S ANSWERS — DO NOT PASTE IT AS-IS
+>
+> The block below was written before 2026-08-04's four answers. It is still the right SHAPE, but it
+> is **incomplete in three specific ways**, all from owner answer 6.3 (the day-5 nudge):
+>
+> 1. **Missing the sixth column** `lock_request_nudged_at TIMESTAMPTZ`. Add it beside the other five
+>    and include it in the guard trigger's vendor/service_role-only column list — a couple must not be
+>    able to stamp "already nudged" and mute the reminder.
+> 2. **Missing the fifth RPC** `nudge_stale_lock_requests(p_days DEFAULT 5, p_limit DEFAULT 200)`.
+>    Clone `expire_stale_lock_requests` exactly — same `FOR UPDATE SKIP LOCKED`, same 200 bound, same
+>    `lock_agreed_at IS NULL AND lock_request_closed_at IS NULL` predicate — but stamp
+>    `lock_request_nudged_at` instead of closing, and add `AND lock_request_nudged_at IS NULL` so it
+>    fires once per request rather than every day from 5 to 7.
+> 3. **The ENUM file needs a fifth value** — `lock_request_nudge`. Still its own migration file, still
+>    no BEGIN/COMMIT.
+>
+> Neither addition changes the §1 guardrail reasoning (no actor column, no new FK, no new table), and
+> the `DO $$` post-condition should be extended to assert the sixth column and fifth function exist.
+> **Also re-read the §9 review before building any of this** — 14 HIGH plan defects are still open and
+> several of them change this SQL.
+
 ```sql
 -- ============================================================================
 -- FILE 1 OF 2 — save as:
