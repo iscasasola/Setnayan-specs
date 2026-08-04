@@ -40,7 +40,7 @@
 | **S5** | **3D room: every guest shows as "Guest"** | the shared-room presence path | no | *(unclaimed)* |
 | **S6** | **Vendor verification uploads don't sweep what they replace** | the vendor verification upload call site | no | *(unclaimed)* |
 | **S7** | **PR-H — the vendor-agrees step** | `event_vendors` migration, both dashboards, 3 lock sites | ✅ **all 4 answered** | **REASSIGNED by the owner 2026-08-04** (*"PR-H was not done there. can we do it here instead?"*) — moved OFF the `Explore_Replan_BUILD_SPEC_2026-07-27.md` session. Spec now carries the answers; **build still not started** (14 HIGH plan defects open — see §9). |
-| **S8a** | **design#6 — public doorway + `/pricing` framing** | the public marketing routes | no | *(unclaimed — **start here**, it never depended on anything)* |
+| **S8a** | **design#6 — public doorway + `/pricing` framing** | the public marketing routes | no | **CLAIMED 2026-08-04 · `claude/design6-public-doorway`** — the Explore-spec session |
 | **S8b** | **design#5 — couple dashboard** (Roster · Ledger · Comparison · Gallery) | `dashboard/[eventId]/*` | no | *(unclaimed)* |
 | **S8c** | **design#9 — admin console table** (~95 of 107 routes → ONE archetype) | `app/admin/*` | no | *(unclaimed)* |
 | **S8d** | **design#8 — vendor dashboard** (EXTEND the 4 existing prototypes) | `vendor-dashboard/*` | no | *(unclaimed)* |
