@@ -8,7 +8,12 @@
 recommendations of what to do next and always in simple english and simplest
 answers needed."*
 
-**Every substantive reply ENDS with a short closing block:**
+⚠ **AMENDED 2026-08-04 — the closing block is RETIRED.** Owner: *"can you keep
+going instead of telling me what you recommend doing next. can you do it. and
+decide"*. **Decide and act.** Ask only when proceeding either way would be unsafe
+or would waste real work. The plain-English rule below still stands in full.
+
+~~**Every substantive reply ENDS with a short closing block:**~~
 
 1. **What I recommend doing next** — one line. A call already made, not a menu.
 2. **Anything I need from the owner** — only when genuinely blocked. One question,
