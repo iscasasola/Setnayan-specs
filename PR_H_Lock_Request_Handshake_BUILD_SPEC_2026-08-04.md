@@ -4,6 +4,19 @@
 
 > Produced by a 12-agent mapping + design + adversarial workflow on 2026-08-04. Every claim below is file:line-backed against `origin/main`. This is the cold-start contract for the build — read it fully before writing code.
 
+
+> ## 🚨 READ BEFORE USING ANY LINE NUMBER IN THIS DOCUMENT
+>
+> **The `file:line` citations throughout drift by up to ~85 lines.** They were gathered from a
+> working copy that was **99 commits behind `origin/main`** at the time. The FINDINGS check out —
+> independently re-verified on 2026-08-04 — but the LINE NUMBERS do not. Grep for the symbol, never
+> jump to the line.
+>
+> This is the same stale-checkout trap that has already cost this project real money: a search of an
+> out-of-date copy reports that shipped features "do not exist". Before building from this spec,
+> `git fetch && git merge --ff-only origin/main` and re-locate every anchor.
+
+
 ## 0 · The one-line problem
 A couple pressing **Lock** books the vendor outright. The vendor is never asked. The owner ruled 2026-07-27 that a lock is a **REQUEST** and the vendor must agree — steps 1, 3, 4 and 5 of the handshake all ship today; **step 2 does not exist.**
 
