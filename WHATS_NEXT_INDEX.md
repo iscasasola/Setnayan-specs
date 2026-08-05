@@ -675,8 +675,12 @@ fact was right; the consequence was invented.
 🦠 **HOW FAR IT SPREAD — SIX merged migration headers, not two (counted 2026-08-04).** The false
 claim is written into `20271102603681` · `20271102765509` · `20271102810371` · `20271103100614` ·
 `20271104090000` · `20271106090000`, plus the emcee stream's trap list, the explore/marketplace
-trap list, and `DECISION_LOG.md`'s 08-02 / 08-03 rows. **The last two — `20271104090000` and
-`20271106090000` — were written by OTHER sessions AFTER the first correction landed**, which is the
+trap list, and `DECISION_LOG.md`'s 08-02 / 08-03 rows. **Both `20271104090000` and `20271106090000` were written by
+OTHER sessions, and `20271106090000` landed AFTER the correction did** (#4084 merged 05:03 UTC;
+that migration was committed 10:48 UTC. ⚠ `20271104090000` was committed 03:16 UTC — BEFORE it, by
+under two hours. An earlier draft of this line claimed both postdated the fix; that was an
+overstatement, caught by an adversarial check, and it is the same correct-fact/invented-consequence
+shape this whole section is about), which is the
 whole point: a corrected doc does not reach a session that never opened it, and a migration comment
 is the one place nobody re-reads. Those migrations are APPLIED, so they are **not** edited —
 **disregard every one of those headers.** The auto-loaded corpus `CLAUDE.md` is the correction.
@@ -736,8 +740,13 @@ not for the reason first given.
 - **#3651 MERGED — reusable bookings.** Carried the two real defects listed above (anon-open table,
   missing FK on `requested_by_user_id`), both fixed before it landed. Also recorded nowhere until
   this correction.
-- **#4084 MERGED — the correction PR itself**, which is what put the `--include-all` truth into the
-  auto-loaded instruction file. Absent from every earlier version of this list.
+- **#4084 MERGED — the correction PR itself.** ⚠ It touched exactly TWO files —
+  `scripts/check-migration-timestamps.mjs` and `changelog.d/prefix-guard-ordering-note.md`. It did
+  **NOT** edit any auto-loaded instruction file, and it is in a different repo from the corpus
+  `CLAUDE.md` besides. Putting the correction only in a script docblock is precisely **why the
+  belief kept spreading** — two more sessions wrote it into fresh migrations afterwards. The
+  auto-loaded corpus `CLAUDE.md` block was added separately on 2026-08-04. Absent from every
+  earlier version of this list.
 
 ### ⏭ Left for the owner
 
