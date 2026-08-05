@@ -63,7 +63,7 @@ file:line evidence. This was the first time anyone walked the whole guest journe
 | **5b · The coordinator's announcement needs a refresh** | ✅ built, in CI | #4136 |
 | **6b · The seat pass still refuses non-weddings** | ✅ built, in CI | #4139 |
 | **6c · "Photos of you" vanishes silently** (+ the live wall) | ✅ built, in CI | #4137 |
-| 7 · The rest, and the honest close | ⏭ **all that remains** — LOW findings + the 3D venue RPC's wedding-only predicate | — |
+| **7 · The honest close** | ✅ walked on `/cale-ice` — see below | #4140 · #4141 |
 
 ### What step 1 turned out to be — read this before step 6
 
@@ -102,6 +102,36 @@ flipped, a column never written — both look completely finished from the insid
 Before treating any finding as "X is broken", check whether X runs for a real
 event at all.
 
+
+
+### The honest close — what walking `/cale-ice` actually showed
+
+Not a merged-PR list. The real wedding, in a browser, at phone width:
+
+- **One** fixed bottom bar (was three stacked), z-30, 65px — the two legacy bars
+  are gone.
+- The bar **reserves its own space**, so the foot of the page is reachable.
+- Every tab resolves: Home → a real anchor, Camera → `/papic/guest`, Join →
+  `/cale-ice/invite`. No dead anchors.
+- The date reads **December 18, 2026** — correct, from a non-Manila browser.
+- `#site-me` exists and is a real section.
+- A bogus `/venue` URL now returns a real **404**.
+
+**And it found one more defect nothing else had.** `/nonexistent/invite` answered
+**HTTP 200** with "your link may be stale, ask for a fresh one" — sending someone
+who mistyped an address back to whoever sent it to re-request a link that was
+never broken, plus an indexable 200 on every junk URL. Fixed in #4141.
+
+🔑 **That is the whole argument for this step.** Eight sweeps, two adversarial
+passes and ~6000 tests did not find it. Ten minutes of opening the actual site
+did. Same lesson as the owner finding three real defects in ten minutes on
+2026-08-04.
+
+⚠ **A suspicion this ALSO disproved:** the opening veil is a pointer-only WebGL
+canvas with no keyboard handler, no `role` and no `tabIndex` — which looks like a
+lockout. It is not. Focus is not trapped: all eight controls (Share, Report, Find
+your seat, Mute, Add to calendar, Home, Camera, Join) are reachable by Tab. A
+true fact with a false consequence, caught by checking instead of reporting.
 
 ### Wave 2 — a second sweep, adversarially checked
 
