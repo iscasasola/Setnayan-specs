@@ -190,6 +190,38 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > into it) or merely kept.
 
 
+> ### ✅ DONE 2026-08-05: THE ADMIN WORK LIST — do NOT rebuild it
+> Owner, 2026-08-03: *"there are so many buttons and menus. we want this simplified and easier to
+> manage."* Then the decisive follow-up: *"a faster way to respond to quick actions needed instead
+> of them making jump to a new page."*
+>
+> 🔴 **START BY READING WHAT SHIPS.** `/admin/work` was ALREADY the ranked work list and
+> `/admin/more` was ALREADY the all-surfaces map — I nearly rebuilt both. Five merged PRs, all
+> delta: a triage strip (past promise · due soon · on pace) + lane chips; `?open=<queue>` expands
+> a drawer with the top 3 real items; **payments · verify · approvals settle on ONE CLICK**;
+> **reviews · payouts settle on a FORM**; clear queues collapse behind one line.
+>
+> 🔑 **THE ACTION SHAPE IS DECIDED BY WHAT THE CODE REFUSES TO RUN WITHOUT — not by taste.** This
+> corrected my own call mid-build: reviews looked like a one-click queue until
+> `overridePublishReview` turned out to throw *"Override reason is required"*. Same for payouts,
+> which needs the method AND the reference of a hand-made transfer. Read the action first. That is
+> now the test for the fact / judgement / needs-details split (`DECISION_LOG` 2026-08-04).
+>
+> 🔒 **JUDGEMENT QUEUES GET NO BUTTON AT ALL** — disputes, fraud, user reports, erasure requests,
+> integrity watch, concierge abuse, force majeure. Each shows a SENTENCE where the buttons would
+> be. A fast button invites a wrong call at speed on exactly the queues where being wrong costs
+> most; silence would read as an unfinished feature, so the sentence teaches the rule.
+>
+> 🪤 **`count === null` MEANS "NOT MEASURED", NOT "ZERO".** Filing an unmeasured queue under *"N
+> queues are clear"* puts it in the one place a reader has been told they need not look — and it
+> looks completely fine. Guarded and mutation-checked.
+>
+> 🪤 **FOUR PAYOUT COLUMN NAMES WERE WRONG ON THE FIRST PASS**, as three payment ones were the week
+> before. A Supabase select naming a phantom column returns an ERROR, NOT A CRASH ⇒ it ships as a
+> **silently empty drawer**. The column scan caught both; run it after any new query.
+>
+> ⏭ **The one thing left is the owner LOOKING** — nothing here has been seen on a real phone.
+
 > ### ▶ ALSO ACTIVE: PARTNERSHIPS + CONSENT — shipped 2026-08-05, read before touching either
 > **Owner ruling: partnerships are FREE on both sides, forever.** *"no payment for any. but we
 > have to build it properly."*
