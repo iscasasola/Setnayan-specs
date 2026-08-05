@@ -47,6 +47,47 @@ file:line evidence. This was the first time anyone walked the whole guest journe
 
 ---
 
+## PROGRESS — 2026-08-05
+
+| Step | State | PR |
+|---|---|---|
+| **1 · The phone bottom edge** | ✅ **MERGED** | #4120 |
+| **2 · Guests who cannot get in** | ✅ built, in CI | #4121 |
+| **3 · A QR-scanner treated as a host** | ✅ built, in CI (shipped with step 2) | #4121 |
+| **4 · Couple told their site is live when it isn't** | ✅ built, in CI | #4123 |
+| **5a · "Watch live" implying a running stream** | ✅ built, in CI (copy only) | #4125 |
+| 5b · The coordinator's announcement needs a refresh | ⏭ open | — |
+| 5c · A host switch for the broadcast | ⏭ open — **decided, not built** | — |
+| 4b · Previewing the site AS AN INVITED GUEST | ⏭ open — a change to a security-reviewed gate | — |
+| 6 · The wrong answer to the right question | ⏭ open | — |
+| 7 · The rest, and the honest close | ⏭ open | — |
+
+### What step 1 turned out to be — read this before step 6
+
+The stacking bug was the small half. **The five-tab menu was gated on
+`isSample || flag === 'true'`, the flag was never set, and `is_sample` is TRUE
+on exactly one row.** A month of navigation work rendered on the demo wedding
+and nowhere else — and the demo is the event every verification pass runs
+against. Real couples' guests got the legacy bar the whole time, which is also
+why nobody ever saw the two bars stack.
+
+The flag is now an opt-OUT. **Assume the same shape is hiding elsewhere:** when
+a finding says "X is broken", check first whether X renders for a real event at
+all.
+
+### Decisions made while building, not asked
+
+- **The broadcast needs a HOST SWITCH, not detection.** Nothing can know whether
+  a YouTube stream is running — the Google account is suspended (appeal
+  `73857927`), so there is no API to ask. The switch mirrors the host's Papic
+  switch, which the owner already ruled on (2026-08-03). Column + control.
+- **The editor preview got honest captions, not the guest view.** Every tab now
+  says whose view it is. Extending `?as=` to the Invitation and day-of phases is
+  a change to a gate that was security-reviewed and deliberately narrowed to one
+  phase — worth doing properly rather than widening in passing.
+- **A failed read now THROWS rather than 404s.** `app/[slug]/error.tsx` is the
+  guest half: *"Your link is fine — something on our end is having trouble."*
+
 ## THE PLAN — in build order
 
 Ordered by what a guest hits first and hardest. Each step is one PR, one worktree, branched
