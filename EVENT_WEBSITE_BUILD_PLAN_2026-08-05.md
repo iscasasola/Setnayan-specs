@@ -57,7 +57,7 @@ file:line evidence. This was the first time anyone walked the whole guest journe
 | **4 · Couple told their site is live when it isn't** | ✅ built, in CI | #4123 |
 | **5a · "Watch live" implying a running stream** | ✅ built, in CI (copy only) | #4125 |
 | 5b · The coordinator's announcement needs a refresh | ⏭ open | — |
-| 5c · A host switch for the broadcast | ⏭ open — **decided, not built** | — |
+| **5c · A host switch for the broadcast** | ✅ built, in CI | #4127 |
 | 4b · Previewing the site AS AN INVITED GUEST | ⏭ open — a change to a security-reviewed gate | — |
 | 6 · The wrong answer to the right question | ⏭ open | — |
 | 7 · The rest, and the honest close | ⏭ open | — |
@@ -74,6 +74,30 @@ why nobody ever saw the two bars stack.
 The flag is now an opt-OUT. **Assume the same shape is hiding elsewhere:** when
 a finding says "X is broken", check first whether X renders for a real event at
 all.
+
+
+### 🔴 What 5c turned out to be — the same disease as step 1
+
+The switch did not need building. **`events.live_media_public` already existed**
+— shipped 2026-09-20 as *"the couple's opt-in for anonymous live media"*, `NOT
+NULL DEFAULT FALSE`, read on every render of the guest site — **and nothing
+anywhere wrote it.** All five production events sit at `FALSE`, sample included.
+
+The guest site computes `liveMediaVisible = viewer is a guest OR
+live_media_public`, so **a visitor with no invitation never saw the livestream or
+the live photo wall on any event.** That is the relative overseas who opened a
+forwarded link — the person a wedding livestream exists for — looking at a page
+with no broadcast on it, on the day, while it was running.
+
+**This is the SECOND time.** `papic_face_mode` stored nothing for seven weeks the
+same way, with every flag green. `apps/web/lib/gates-have-handles.test.ts` now
+guards it — detecting an actual WRITE, not a mention, and self-checking that its
+own detector still works.
+
+🔑 **The through-line of steps 1 and 5c: BUILT IS NOT SHIPPED.** A flag never
+flipped, a column never written — both look completely finished from the inside.
+Before treating any finding as "X is broken", check whether X runs for a real
+event at all.
 
 ### Decisions made while building, not asked
 
