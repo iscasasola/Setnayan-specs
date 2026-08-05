@@ -59,7 +59,10 @@ file:line evidence. This was the first time anyone walked the whole guest journe
 | 5b · The coordinator's announcement needs a refresh | ⏭ open | — |
 | **5c · A host switch for the broadcast** | ✅ built, in CI | #4127 |
 | 4b · Previewing the site AS AN INVITED GUEST | ⏭ open — a change to a security-reviewed gate | — |
-| 6 · The wrong answer to the right question | ⏭ open | — |
+| **6 · The wrong answer to the right question** | ✅ built, in CI | #4128 · #4130 · #4131 · #4134 |
+| 5b · The coordinator's announcement needs a refresh | ⏭ open | — |
+| 6b · The seat pass still refuses non-weddings | ⏭ open | — |
+| 6c · "Photos of you" vanishes silently on a failed read | ⏭ open | — |
 | 7 · The rest, and the honest close | ⏭ open | — |
 
 ### What step 1 turned out to be — read this before step 6
@@ -98,6 +101,31 @@ own detector still works.
 flipped, a column never written — both look completely finished from the inside.
 Before treating any finding as "X is broken", check whether X runs for a real
 event at all.
+
+
+### Wave 2 — a second sweep, adversarially checked
+
+29 remaining findings were re-verified against `origin/main` after the first
+wave landed, then attacked by three skeptics told to REFUTE. Result: **6 already
+closed** by wave 1, **7 refuted** (true facts with untraced consequences), **13
+confirmed**. Ten of the thirteen are now shipped.
+
+Refuted claims worth remembering, so nobody re-opens them:
+- *"There is no `loading.tsx`, add one"* — its ABSENCE is a deliberate fix
+  (`04c03063d`). A route-level loading file commits HTTP 200 before the body,
+  turning every junk URL into an indexable soft-404. The blank-screen fix is a
+  `Suspense` **inside** `page.tsx`, after the routing decisions.
+- *"The live wall's silent catch means there is no way to watch"* — a second,
+  independent render site exists.
+- *"The photo essay has no menu entry"* — it is the first section on the page.
+- *"The guest session is unsigned"* — deliberate and self-documented.
+
+🔑 **The one that mattered most was not in the findings at all.** Verifying on
+`/cale-ice` rather than the sample proved the new navigation renders on a real
+wedding, every tab resolves, and the date reads correctly — and disproved a
+suspicion that the opening veil locks out keyboard users. It does not: all eight
+controls are reachable by Tab. **A true fact (the veil is pointer-only) with a
+false consequence, caught by checking instead of reporting.**
 
 ### Decisions made while building, not asked
 
