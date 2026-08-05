@@ -378,9 +378,13 @@ the requirement to write the exemption down in a comment.
 --
 -- ⚠ ALLOCATE THE REAL PREFIX WITH `pnpm migration:new` AFTER `git fetch origin`.
 --   origin/main's head is 20271103100614_vendor_reuse_requests.sql; this
---   worktree's newest local file (20271103100000) already sorts BELOW it, so a
---   hand-picked low prefix merges GREEN and creates NOTHING. The values here
---   are a floor, not a blessing.
+--   worktree's newest local file (20271103100000) already sorts BELOW it.
+--   ⛔ CORRECTED 2026-08-04: a low prefix does NOT "merge green and create
+--   nothing" — deploy runs `db push --include-all`, which applies out-of-order
+--   migrations (verified 13x). What a low prefix DOES break is the PGlite
+--   replay, which sorts by FILENAME, so `*.db.test.ts` fails while prod is
+--   fine. Allocate forward for THAT reason. The values here are a floor, not a
+--   blessing.
 --
 -- WHY ITS OWN FILE: notification_type is a Postgres ENUM, not a text CHECK
 -- (20260513160000_iteration_0028_notifications.sql:25-31). Postgres forbids
@@ -1075,7 +1079,7 @@ COMMIT;
 ### hard-single-gate
 - ⚠ THE OBVIOUS TRAP: adding lock_requested_at to event_vendors and assuming the existing index now protects requests. It does not. The index predicate is `status IN ('contracted','deposit_paid','delivered','complete')` (20271009160000:92) — a timestamp column changes nothing. PR-H must ship a SECOND partial-unique index whose predicate keys on the request state, e.g. ON (event_id, hard_single_group) WHERE hard_single_group IS NOT NULL AND archived_at IS NULL AND package_role IS DISTINCT FROM 'covered' AND lock_requested_at IS NOT NULL AND lock_agreed_at IS NULL AND status NOT IN (the four confirmed).
 - ⚠ Widening the EXISTING index to also cover pending rows instead of adding a second one would forbid the legitimate sequence 'request pending on vendor A' → 'A agrees' → 'A becomes contracted', because both states would collide on the same key during the flip. Two indexes with disjoint predicates, or one index over a coalesced state expression that treats requested and contracted as the same slot only when they belong to DIFFERENT vendors — decide this before writing the migration.
-- ⚠ A new migration numbered below prefix 20271103100000 merges green and creates NOTHING. This has bitten 4 of 5 PRs in one session per the project memory. Check the head before choosing a prefix.
+- ⚠ Allocate the migration prefix with `pnpm migration:new` rather than hand-picking one. ⛔ **CORRECTED 2026-08-04:** the previous wording here said a prefix below the head "merges green and creates NOTHING" — that is **FALSE** and the "4 of 5 PRs" figure came from the same error (a `count(*)=0` on an *unmerged* PR read as "it will be skipped"). Deploy runs `supabase db push --include-all --yes`, which applies out-of-order migrations; verified 13 ways. The real cost of a low prefix is the **PGlite replay**, which applies in FILENAME order — so a migration depending on a higher-prefixed, already-merged one fails every `*.db.test.ts` while prod is perfectly fine. See corpus `CLAUDE.md`.
 - ⚠ The `archived_at IS NULL` clause is load-bearing and finalizeVendor ARCHIVES the losing shortlist rows at lock time (actions.ts:1730-1755). If PR-H stores the request on the event_vendors row, an archive sweep silently un-registers a pending request from any new index. If it stores requests in a separate table, that table needs its own archive/withdraw semantics — a soft-deleted event_vendors row must not leave an orphan pending request holding the slot forever.
 - ⚠ Both existing 23505 handlers live in the COUPLE's finalizeVendor. A vendor-side agree that flips status will raise 23505 with nobody listening — the vendor sees a raw Postgres string. And the existing recovery payload (buildHardSingleConflict) offers 'Switch to {vendor}', a control that demotes a rival booking; handing that to a vendor is a permissions defect, not a copy defect. The vendor-side loser needs its OWN outcome ('the couple booked someone else') that writes nothing.
 - ⚠ The 23505 detector is a SUBSTRING MATCH on the index name inside err.message/err.details (actions.ts:614-617). A second index with a different name will NOT be recognised — every new write path must have its own detector arm, and the name must be added deliberately. Silently, the request collision would fall through to `{status:'error', message: rawPostgresText}`.
@@ -1106,7 +1110,7 @@ COMMIT;
 
 ### expiry-notify-flag — the three shipped mechanisms PR-H must reuse (cron-free expiry sweeps, the notification enum, the lock-handshake flag guard)
 - ⚠ ADDING A NOTIFICATION TYPE INSIDE A FEATURE MIGRATION BREAKS THE DEPLOY. Postgres refuses to USE an enum value in the transaction that added it. The type must go in its own migration file containing nothing but `ALTER TYPE … ADD VALUE IF NOT EXISTS`, with no BEGIN/COMMIT (supabase/migrations/20270904548818:9-15). Any DML in that same file that references the value will fail at push time.
-- ⚠ A HAND-TYPED MIGRATION PREFIX FAILS CI, AND A LOW ONE FAILS SILENTLY. `scripts/check-migration-timestamps.mjs` rejects any new `YYYYMMDD000000` prefix outright; worse, a prefix below the current head (20271103100000 on this branch) merges green and creates nothing. Always allocate with `pnpm migration:new`.
+- ⚠ A HAND-TYPED MIGRATION PREFIX FAILS CI. `scripts/check-migration-timestamps.mjs` rejects any new `YYYYMMDD000000` prefix outright. ⛔ **CORRECTED 2026-08-04:** the rest of this line used to claim a prefix below the head "merges green and creates nothing" — **false**; deploy uses `db push --include-all`. That script enforces UNIQUE + not-hand-typed-round and **does not check ordering**. A low prefix breaks the PGlite replay (filename order), not prod. Always allocate with `pnpm migration:new`.
 - ⚠ ADDING THE UNION MEMBER WITHOUT BOTH RECORD MAPS IS A TYPECHECK FAILURE — and the local build cannot run (7 GB heap), so CI is the only detector. lib/notifications.ts has TWO exhaustive `Record<NotificationType, string>` maps (:256, :329), not one.
 - ⚠ A NEW TYPE IS IN-APP ONLY UNLESS YOU SAY OTHERWISE. If the product intent is 'the couple must hear that the vendor hasn't agreed even when they're not in the app', the type must be added to EMAIL_ENABLED_TYPES (notification-emit.ts:62-129). Emitting alone sends nothing but a tray row.
 - ⚠ REUSING AN EXISTING TYPE MAY BEAT ADDING ONE. The booking-fee sweep does exactly this on purpose and says so. A wrong-tone reuse is visible though — the type drives both the tray LABEL and the badge COLOUR, which is why `order_awaiting_reconciliation` had to be split out after a couple's PHP order rendered as 'TOKEN PURCHASE AWAITING PAYMENT' (lib/notifications.ts:179-186).

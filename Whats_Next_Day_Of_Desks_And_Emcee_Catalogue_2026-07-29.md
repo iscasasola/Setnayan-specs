@@ -125,9 +125,19 @@ HAND-EDIT. Resolve by `git checkout --theirs` + **regenerate**, never by hand-me
 `.github/workflows/supabase-migrations.yml` fires on any merge to `main` touching
 `supabase/migrations/**`. Our migration was already applied by the time we looked.
 
-Auto-apply is documented as **unreliable** (bursty merges can skip; a migration numbered below
-the applied HEAD never runs), so **verify the OBJECT, never the ledger** — `schema_migrations`
+Auto-apply is documented as **unreliable** (bursty merges can skip; ~~a migration numbered below
+the applied HEAD never runs~~), so **verify the OBJECT, never the ledger** — `schema_migrations`
 can record APPLIED while nothing landed:
+
+> ⛔ **CORRECTED 2026-08-04 — "a migration numbered below the applied HEAD never runs" is FALSE.**
+> Both `deploy-prod.yml` and `supabase-migrations.yml` run `supabase db push --include-all --yes`,
+> and `--include-all` exists precisely to apply migrations dated before the remote head (verified
+> 13 ways: 12 historical out-of-order migrations are all applied, and `20271102765509` applied
+> while sitting two prefixes below the head). What a low prefix ACTUALLY costs is the **PGlite
+> replay** (`apps/web/tests/db/replay-migrations.ts` sorts by FILENAME) — it breaks `*.db.test.ts`,
+> not prod. `check-migration-timestamps.mjs` enforces UNIQUE + not-hand-typed-round; it does **not**
+> check ordering. The rest of this trap (verify the OBJECT, not the ledger) still stands. See
+> corpus `CLAUDE.md`.
 
 ```sql
 SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename IN (...);

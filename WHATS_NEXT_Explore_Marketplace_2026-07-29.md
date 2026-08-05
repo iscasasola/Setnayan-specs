@@ -63,10 +63,20 @@ get**, and **never pipe a command whose exit code you trust** (`| tail` fakes a 
 "production build" check is the only valid source for that claim.
 
 ### Trap 3 — migrations auto-apply UNRELIABLY, and `schema_migrations` LIES
-A migration numbered **below the applied head never runs**, silently. A row can say APPLIED while
+~~A migration numbered **below the applied head never runs**, silently.~~ A row can say APPLIED while
 its columns never landed. Always allocate with `pnpm migration:new`, and **verify the OBJECT**
 (`information_schema` / `pg_catalog`), never the ledger. This bit twice in 48h (#3845 renumbered
 pre-merge; #3848 reissued a never-applied prefix).
+
+> ⛔ **CORRECTED 2026-08-04 — the struck first sentence is FALSE.** `deploy-prod.yml` and
+> `supabase-migrations.yml` both run `supabase db push --include-all --yes`; `--include-all`
+> applies out-of-order migrations. Verified 13 ways — 12 historical out-of-order migrations are
+> all applied, and `20271102765509` applied while two prefixes below the head. The two incidents
+> cited (#3845 / #3848) were **DUPLICATE prefixes**, a different failure entirely, and that one is
+> real. A low prefix's actual cost is the **PGlite replay** (`apps/web/tests/db/replay-migrations.ts`
+> sorts by FILENAME), which breaks `*.db.test.ts`, not prod; `check-migration-timestamps.mjs`
+> enforces UNIQUE + not-hand-typed-round and does **not** check ordering. Everything else in this
+> trap — the ledger lies, verify the OBJECT — stands. See corpus `CLAUDE.md`.
 
 ### Trap 4 — PROD IS PRE-LAUNCH-EMPTY, and the owner account is a FALSE GREEN
 Live counts (2026-07-29): **6 users · 2 events (both the owner's) · 43 active `event_vendors`

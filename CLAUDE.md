@@ -69,6 +69,34 @@ committed docs on purpose.
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
+> ### ⛔ FALSE BELIEF IN CIRCULATION — kill it on sight (corrected 2026-08-04)
+> **"A migration whose prefix sits below prod's applied head merges green and creates NOTHING."**
+> **THIS IS FALSE.** `deploy-prod.yml` and `supabase-migrations.yml` both run
+> `supabase db push --include-all --yes`, and `--include-all` exists precisely to apply
+> migrations dated before the remote head.
+>
+> **Measured 13 ways:** 12 migrations were historically added out of order and **all 12 are
+> applied in prod**; and the open-browse launch migration `20271102765509` applied on 2026-08-04
+> while sitting **two prefixes below the head**.
+>
+> 🦠 **It spreads, which is why it is in the auto-loaded file.** It began in one migration header,
+> was repeated in **six** migrations (`20271102603681` · `20271102765509` · `20271102810371` ·
+> `20271103100614` · `20271104090000` · `20271106090000`) — **two of them written by other
+> sessions AFTER the correction landed** — plus `DECISION_LOG.md` rows 2026-08-02/08-03 and
+> `PR_H_Lock_Request_Handshake_BUILD_SPEC_2026-08-04.md`. Those migrations are APPLIED, so they
+> are **not edited**; this block is the correction. Do not treat a migration comment as evidence.
+>
+> 🔑 **Where it came from:** a `count(*) WHERE version = <prefix>` on an **unmerged** PR returned
+> `0`, read as *"it will be skipped."* Zero was because the PR had not merged. Correct fact,
+> invented consequence.
+>
+> ✅ **What IS true:** the PGlite replay (`apps/web/tests/db/replay-migrations.ts`) applies in
+> **filename order**, so a low prefix that depends on a higher-prefixed, already-merged migration
+> fails every `*.db.test.ts` while prod is fine. Allocate forward with `pnpm migration:new` for
+> **that** reason and for the UNIQUE rule — never because "it won't apply."
+> `check-migration-timestamps.mjs` enforces UNIQUE + not-hand-typed-round. **It does not check
+> ordering and never did.**
+
 > ### 🔑 TRIGGER — the owner saying **"what's next"** activates ALL unfinished sessions
 > (Set 2026-07-29 for cross-account continuation — the prior account hit its usage limit; a
 > fresh account has NO conversation context, only these files.) On the trigger, open

@@ -21,6 +21,7 @@
 | 3 | **Re-send the legacy-preservation brief to the lawyer.** | The lawyer sees the corrected version. | The lawyer has it **in writing** that preserving a family's memories is free forever — and you changed that to paid. |
 | 4 | **Decide the privacy page's country answer** (open your Cloudflare dashboard and see where files actually sit). | The public privacy page stops contradicting itself. | It currently says photos are stored in the United States **and** the Philippines at the same time. Both cannot be true. |
 | 5 | **The booking fee is switched ON in the live site.** Confirm that is intended. | You know real couples are being charged what you meant. | A real couple could be charged something you did not intend to launch yet. |
+| 23 | **Set `NEXT_PUBLIC_WEBSITE_MENU_ENABLED` to `true` in Vercel Production — then redeploy.** (Added 2026-08-04; it was buried in a changelog note and listed nowhere the owner reads.) | Every couple's guest website gets its navigation menu, so guests can actually move around it. | **Every event created from now on ships a guest website with NO menu.** Open-browse went live on 2026-08-04, so this is happening now. 🪤 The demo wedding forces its menu on regardless, so looking at the sample proves nothing. ⚠ This kind of setting is baked in when the site is built — setting it without redeploying changes nothing. |
 
 ### 🟠 Decisions only you can make
 
@@ -544,7 +545,7 @@ promo surfaces audit. Contract: [`Papic_Promotion_Surfaces_BUILD_SPEC_2026-07-29
 ### Traps specific to this wave
 
 1. **§2.0 of the spec is SUPERSEDED.** It concluded "Papic Pool is not sellable" (true on 07-28: all rungs `is_active=false`, no UI reads `papic_pass_tiers`). The **2026-07-29 owner lock reverses it** and also supersedes `Papic_One_Pool_Model_Spec_2026-07-22.md` guardrail #2 ("don't GA the paid rungs until purge + clip compression ship") — priced for sale **knowingly**; R1 storage risk now rides on the paid rungs. Build from **§2.0-NEW**.
-2. **Twin-prefix migrations.** `20271017100000` collided with a twin and **silently never applied** — `schema_migrations` is not proof. Allocate the prefix properly and **verify the OBJECT** in prod after merge.
+2. **Twin-prefix migrations.** `20271017100000` collided with a twin and **silently never applied** — `schema_migrations` is not proof. Allocate the prefix properly and **verify the OBJECT** in prod after merge. ⚠ This is a **DUPLICATE** prefix, which is real and CI-guarded. Do **not** generalize it into "a LOW prefix never applies" — that claim is FALSE (corrected 2026-08-04; `db push --include-all` applies out-of-order migrations). See the 2026-08-04 open-PR section below.
 3. **Never `| tail` a command whose exit code you trust** — it masks failures. Capture `$?` directly. (`npm run build` also cannot run locally: ~7 GB heap.)
 4. **`resolveRetailChargeCentavos()` does NOT filter `is_active`** — the *display* path does. "Invisible in the UI" ≠ "cannot be ordered". Pre-existing; out of scope here but do not assume a deactivated SKU is unbuyable.
 5. **`style_preferences.interested_services` is WRITE-ONLY** — 3 onboarding writers, zero readers, dead since #2137. PR 5 gives it its first reader.
@@ -641,7 +642,7 @@ as-is) · the 29-open-PR repo backlog (re-verify via `gh pr list`; doc PR number
 
 ---
 
-## 2026-08-04 · THE OPEN-PR BACKLOG — 7 stuck PRs triaged, 5 unstuck, 2 merged
+## 2026-08-04 · THE OPEN-PR BACKLOG — 7 stuck PRs triaged, 5 unstuck, **6 MERGED**
 
 **Trigger:** owner — *"the what's next session was overlapped with another task… complete the
 pending sessions."* Nothing here was a new feature. Every item was **work already written that
@@ -668,9 +669,16 @@ before the remote head.
 
 🔑 **How the error was made:** a `count(*) WHERE version = <prefix>` on an OPEN PR's migration
 returned **0**, read as *"it will be skipped."* Zero was because the PR had not merged yet. The
-fact was right; the consequence was invented. The claim was also inherited from a prior session's
-migration header (`20271102765509`, written 08-03) and from the emcee stream's trap list — **both
-of those are wrong too and should be disregarded.**
+fact was right; the consequence was invented.
+
+🦠 **HOW FAR IT SPREAD — SIX merged migration headers, not two (counted 2026-08-04).** The false
+claim is written into `20271102603681` · `20271102765509` · `20271102810371` · `20271103100614` ·
+`20271104090000` · `20271106090000`, plus the emcee stream's trap list, the explore/marketplace
+trap list, and `DECISION_LOG.md`'s 08-02 / 08-03 rows. **The last two — `20271104090000` and
+`20271106090000` — were written by OTHER sessions AFTER the first correction landed**, which is the
+whole point: a corrected doc does not reach a session that never opened it, and a migration comment
+is the one place nobody re-reads. Those migrations are APPLIED, so they are **not** edited —
+**disregard every one of those headers.** The auto-loaded corpus `CLAUDE.md` is the correction.
 
 ### What IS true about a low prefix
 
@@ -718,13 +726,23 @@ not for the reason first given.
   CI fix turned it green before it could be disarmed. Outcome is a live page going false → true.
 - **#3659 MERGED — the couple can no longer see the vendor's booking-fee order.** Confirmed live
   in prod first; the fee is armed, so this was a live leak.
+- **#3653 MERGED — open-browse LAUNCHED** (owner merged it the same day; see the verification table
+  at the end of this section). Every newly-created event now ships with the guest website on.
+  Carried the missing **no-backfill** test — an in-flight wedding must not reshape overnight;
+  nothing had asserted the council rule before. ⏭ leaves ONE owner action:
+  `NEXT_PUBLIC_WEBSITE_MENU_ENABLED`.
+- **#3994 MERGED — the emcee's "My Lines".** Recorded nowhere as merged until this correction.
+- **#3651 MERGED — reusable bookings.** Carried the two real defects listed above (anon-open table,
+  missing FK on `requested_by_user_id`), both fixed before it landed. Also recorded nowhere until
+  this correction.
+- **#4084 MERGED — the correction PR itself**, which is what put the `--include-all` truth into the
+  auto-loaded instruction file. Absent from every earlier version of this list.
 
 ### ⏭ Left for the owner
 
-- **#3653 open-browse LAUNCH — green, mergeable, auto-merge deliberately OFF.** Merging turns the
-  guest website on for every newly-created event. Added the missing **no-backfill** test (an
-  in-flight wedding must not reshape overnight) — nothing had asserted the council rule.
-  After merge: verify `column_default` reads `true`, and set `NEXT_PUBLIC_WEBSITE_MENU_ENABLED`.
+- ~~#3653 open-browse LAUNCH — green, mergeable, auto-merge deliberately OFF.~~ ⛔ **CORRECTED
+  2026-08-04: #3653 IS MERGED AND LAUNCHED** — the owner merged it. It is listed under ✅ Landed
+  above; this row contradicted the verification table ~30 lines below it and is retired.
 - **#1180 onboarding music playlist — NOT revived. 5,382 commits behind**, 4 content conflicts in
   live files. Reviving it is a real merge job with regression risk, not a rebase. Owner call:
   redo or close.
