@@ -190,6 +190,56 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > into it) or merely kept.
 
 
+> ### ▶ ALSO ACTIVE: PARTNERSHIPS + CONSENT — shipped 2026-08-05, read before touching either
+> **Owner ruling: partnerships are FREE on both sides, forever.** *"no payment for any. but we
+> have to build it properly."*
+>
+> 🚨 **`sponsored_included` / `sponsored_discounted` NEVER MEANT PAID PLACEMENT** — the vendor
+> sponsors their PARTNER'S SERVICE FOR THE COUPLE (in their package free / discounted alongside).
+> The word sent **two independent readers** to the same wrong conclusion: the 2026-07-27
+> ranking-honesty finding *"paid placement is reordering the marketplace"* (**now corrected in
+> `DECISION_LOG.md` — do not act on it**) and a 2026-08-05 pricing recommendation argued to the
+> owner twice. ✅ **Renamed at the source** (migration `20271108090000`): `included_in_package` ·
+> `discounted_together`. 🔑 **DOCUMENTATION WAS TRIED FIRST AND WAS NOT ENOUGH — a comment does
+> not travel with the value** into a query result, a log line or an audit. When a stored value's
+> NAME is what misleads, rename the value.
+> ⚠ I also mis-stated that partnerships carry a **two-admin gate — they do NOT**; that gate is on
+> **journal spotlights**. On partnerships it was RETIRED (it only ever flipped `admin_verified`,
+> which stopped gating visibility under the mutual-accept model).
+>
+> **Also fixed (PRs #4113 · #4116):** two files ranked the same four kinds in OPPOSITE orders
+> (the profile page picked alphabetically, Explore by `PARTNERSHIP_RANK`) — now one shared order,
+> **by what the COUPLE gets** · both bundle kinds rendered as the meaningless *"Preferred
+> partner"* · a partnership could never CHANGE kind (🔑 **moving INTO a pricing claim re-asks the
+> partner AND drops `accepted_at`, so the badge comes down while they decide** — it is a claim
+> about someone else's money) · partnerships had **nothing inviting a vendor in** (owner:
+> "promote") → a `build_partnerships` growth rec that **stops at 3 partnerships** and **hides on a
+> read error**, because a failed count returns 0 and 0 looks exactly like "you have none".
+>
+> **🪪 CONSENT — the words now follow the event's mode.** Because `papic_face_mode` had no writer
+> for 7 weeks, EVERY event is `mode_b` — yet the RSVP box said *"I consent to facial-recognition
+> photo matching for this event"* on all of them. Guests consented to a technique that never ran
+> and expected photos to find them. mode_a copy unchanged; mode_b now says **no facial
+> recognition runs**. 🔒 The 18+ box stays required in BOTH modes. ⛔ **The consent GATE on the
+> write path was deliberately NOT touched** — loosening it is an owner/DPO call.
+>
+> **🖼 A partially-denied gallery no longer reads as the whole album.** A coordinator could read
+> only vendor documentation shots (the couple-only sources refuse silently) and the card said
+> *"Your gallery"*. Now asks the permission question SEPARATELY and **fails toward the caveat**.
+> ⛔ Nothing widened — `COORDINATOR_AREAS` has **no photo area at all**; whether it should is an
+> OPEN product call.
+>
+> 🪤 **THREE SELF-CAUGHT FALSE ALARMS IN ONE STRETCH, all from one query each:** "`papic_photos`
+> has ZERO read policies ⇒ nobody can see their own gallery" (it has two `FOR ALL` policies —
+> my filter was `cmd='SELECT'`) · "`schema_migrations` lies, the rename never applied" (my read
+> raced the deploy; re-query showed the new CHECK) · and a mutation test that **silently did not
+> apply**, so its green meant nothing. 🔑 **VERIFY THE SABOTAGE LANDED BEFORE TRUSTING THE GREEN**,
+> and re-query before reporting anything scary.
+>
+> ⏭ **OPEN, owner-only:** coordinator→emcee (the emcee cannot read coordinator messages at all;
+> opening it means granting member-level access to the couple's private notes) · whether a
+> coordinator should ever see couple Papic photos · a per-vendor visibility switch for the couple.
+
 **If you are starting a session on ANY topic, do these three things first:**
 1. Read the ACTIVE block above (even if your task seems unrelated — it may already be covered).
 2. Run RULE 0 from the repo's own `CLAUDE.md`: grep for the feature noun in `apps/web` BEFORE
