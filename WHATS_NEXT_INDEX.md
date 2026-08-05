@@ -32,6 +32,7 @@
 | 8 | **Who can send the emergency message on the day** — a fixed list of messages, or anything they want to type. | Both versions are built and ready to look at. Free typing is more useful and riskier. |
 | 9 | **Two open calls on the band/singer request desk.** | Whether the couple sees the band's finished song list, and one leftover question about how requests reach them. |
 | 10 | **A leftover table sits in the live database, unused.** | Dropping it is tidy but permanent. Nothing reads it today. |
+| 24 | **Our public privacy page names two outside companies our own compliance record does not.** (Added 2026-08-04; it was buried in a changelog note.) | The `/privacy` page tells the world that Sentry and PostHog handle data for us. The internal list we would hand a regulator has **9 companies on it and neither of those two.** So what we published is broader than what we filed. Decide which one is right: add them to the filing record, or take them off the page. As the data-protection officer, this is your call — nobody else can make it. |
 
 ### 🟡 Switches that are built and waiting
 
