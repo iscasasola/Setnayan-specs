@@ -56,14 +56,14 @@ file:line evidence. This was the first time anyone walked the whole guest journe
 | **3 · A QR-scanner treated as a host** | ✅ built, in CI (shipped with step 2) | #4121 |
 | **4 · Couple told their site is live when it isn't** | ✅ built, in CI | #4123 |
 | **5a · "Watch live" implying a running stream** | ✅ built, in CI (copy only) | #4125 |
-| 5b · The coordinator's announcement needs a refresh | ⏭ open | — |
+| **5b · The coordinator's announcement needs a refresh** | ✅ built, in CI | #4136 |
 | **5c · A host switch for the broadcast** | ✅ built, in CI | #4127 |
 | 4b · Previewing the site AS AN INVITED GUEST | ⏭ open — a change to a security-reviewed gate | — |
 | **6 · The wrong answer to the right question** | ✅ built, in CI | #4128 · #4130 · #4131 · #4134 |
-| 5b · The coordinator's announcement needs a refresh | ⏭ open | — |
-| 6b · The seat pass still refuses non-weddings | ⏭ open | — |
-| 6c · "Photos of you" vanishes silently on a failed read | ⏭ open | — |
-| 7 · The rest, and the honest close | ⏭ open | — |
+| **5b · The coordinator's announcement needs a refresh** | ✅ built, in CI | #4136 |
+| **6b · The seat pass still refuses non-weddings** | ✅ built, in CI | #4139 |
+| **6c · "Photos of you" vanishes silently** (+ the live wall) | ✅ built, in CI | #4137 |
+| 7 · The rest, and the honest close | ⏭ **all that remains** — LOW findings + the 3D venue RPC's wedding-only predicate | — |
 
 ### What step 1 turned out to be — read this before step 6
 
