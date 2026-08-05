@@ -221,6 +221,45 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > **silently empty drawer**. The column scan caught both; run it after any new query.
 >
 > ⏭ **The one thing left is the owner LOOKING** — nothing here has been seen on a real phone.
+>
+> **THEN A VERIFICATION PASS FOUND THREE MORE, ALL MINE, ALL GREEN IN CI — one disease:
+> A MECHANISM BUILT AND NEVER PROVEN REACHABLE.** Fixed in #4148.
+> 1. 🚨 **The duplicate-reference guard was INERT from the hour it merged.** It queried
+>    `status IN ('matched','paid')` — **there is no `'paid'`**; the enum is
+>    pending/matched/rejected. Postgres rejected the WHOLE query, `data` came back null, and
+>    it concluded *"no duplicates"* on every payment. Its seven tests passed because they read
+>    SOURCE and exercised the PURE comparison; **neither runs the query.** 🔑 **THE HOUSE RULE
+>    APPLIED ONE LEVEL TOO SHALLOW** — I knew "a phantom COLUMN returns an error, not a crash"
+>    and missed that **ENUM VALUES fail identically.**
+> 2. **`unreadable` could never be set** — it lived in a `catch`, but **Supabase does not
+>    throw**, it resolves with `{ error }`. A failed read still said *"Nothing waiting here"*
+>    with a green tick.
+> 3. **Every refusal was invisible** — the actions wrote `settle=`/`why=` into the URL and
+>    nothing read them. Worse, the payment flips to `matched` BEFORE the shortfall check, so
+>    the row vanished and the count dropped while the order stayed unpaid. A docblock I wrote
+>    asserted the opposite. 🔑 **A GUARD THAT REFUSES IN SILENCE IS INDISTINGUISHABLE FROM ONE
+>    THAT PASSED.**
+> 🛡 `lib/guards-can-actually-fire.test.ts` now enforces the class: statuses checked against
+> the migration enum, every peek read must check its error, every `settle=` outcome must have
+> somewhere to be shown. ⚠ Its status scan is scoped to the QUERY CHAIN — a first cut flagged
+> ten ORDER statuses and **a guard that cries wolf teaches you to skim past the one time it is
+> right.**
+>
+> **PAYMENTS — the owner's five asks (2026-08-05). THREE ALREADY WORKED.** Short payments +
+> the paste-the-bank-alert matcher + the request-better-proof button all ship. Built this
+> session: **duplicate detection** (#4146 · same order = REFUSED, no override; different order
+> = warn + typed acknowledgement; **NOT a UNIQUE constraint** — the corrected re-send, one
+> lump sum over two orders, and the BDO rail where our code WRAPS theirs are all honest
+> repeats) and **the photo upload that was refused outright** on the couple's order page and
+> the vendor's fee page (#4145 — `payments/<orderId>` was read as an EVENT id). 🔑 **What broke
+> was the SECOND chance**: the first screenshot arrives via a different screen, so
+> *"send a clearer picture"* was addressed to someone who could not.
+> 🚨 **`/admin/booking-fees` ("Fees owed") is NEW** (#4138) — no buttons by design; money is
+> confirmed where the PROOF is.
+> ⚠ **The "four-tier automatic bank-inbox matcher" in our own notes DOES NOT EXIST IN CODE.**
+> What ships is the admin pasting an alert into a box that highlights the likely row.
+> ⏭ Owner call: whether a reference should be REQUIRED on the four pay-Setnayan forms (cash is
+> only ever a couple→VENDOR thing, a different form Setnayan does not reconcile).
 
 > ### ▶ ALSO ACTIVE: PARTNERSHIPS + CONSENT — shipped 2026-08-05, read before touching either
 > **Owner ruling: partnerships are FREE on both sides, forever.** *"no payment for any. but we
