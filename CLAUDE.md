@@ -124,10 +124,20 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > - 🎨 **[`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md)**
 >   — **the newest stream. Read it before ANY design/UI/page work.** Palette ✅ shipped on all
 >   401 routes (PR #3988, locked by a derived-contrast guard); 12 archetypes + 7 overlay types
->   ✅ drafted to `prototypes/archetype_*_2026-08-01.html`; **the port has NOT started.**
->   🔴 Owner has **not seen the prototypes** — that gate blocks every aesthetic item, but NOT
->   the two functional ones. **Start at `design#1` (six-state system) + `design#2` (overlay
->   grammar)** — parallel-safe, no gate, both close live defects.
+>   ✅ drafted to `prototypes/archetype_*_2026-08-01.html`.
+>   ✅ **THE OWNER GATE IS CLOSED — ALL 19 APPROVED 2026-08-04, no changes requested**
+>   (`DECISION_LOG.md` 2026-08-04 · commit `02d995c` · verdict-sheet artifact `36f20665` ·
+>   `PARALLEL_WORK_CLAIMS_2026-08-04.md` S8 flipped in the same commit). The prototypes are
+>   **BINDING** — port them, never redraw them; a delta between a ported screen and its
+>   archetype is a defect in the port, not a fresh design decision.
+>   ⚠ **This line said "owner has not seen the prototypes" for two days AFTER the approval**,
+>   and a session acting on it told the owner his top priority was to go look at something he
+>   had already signed off. The programme doc's own state table (line 37) and item #3 (line 234)
+>   carried the same stale claim while an approval banner sat at the top of the SAME file.
+>   🔑 **A doc that records a decision at the top and contradicts it in the middle will be read
+>   from the middle** — grep the file for the old state before declaring a gate closed.
+>   ⏭ `design#1` + `design#2` are DONE (#4064/#4065). **`design#3` (the shell) is next** and is
+>   the architectural one. The remaining ~40 port units are now ALL unblocked.
 > - 📈 **SEO / GEO — code side DONE 2026-08-02, do NOT rebuild.** `llms.txt` is now GENERATED
 >   from the catalog (#3952), the SEO surface has a **"Re-run audit now"** button (#3960), and
 >   the audit stopped grading two sources nothing else read (#3973). Audit `fail 2 → 0`.

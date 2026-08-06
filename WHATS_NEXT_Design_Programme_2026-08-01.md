@@ -34,7 +34,7 @@
 | ✅ **DONE — the guard that LOCKS it** | **PR [#4030](https://github.com/iscasasola/setnayan-platform/pull/4030) MERGED 2026-08-02**, confirmed by ancestry (`git merge-base --is-ancestor 99fd30e79 origin/main`), not PR status. ⚠ **It sat OPEN for a day because auto-merge does not report a red check as a blocker in the PR state** — `mergeStateStatus` read `BLOCKED`/`UNKNOWN` while `typecheck + lint` had genuinely FAILED: CI rejected the guard on `noUncheckedIndexedAccess` grounds (regex capture groups and array destructures are "possibly undefined"), which cannot reproduce under `tsx --test`. Fixed by narrowing the hex capture through `assert.ok` and computing luminance per-channel instead of destructuring. 🔑 **"Auto-merge armed" is not "will merge" — read `gh pr checks`, not the PR status.** |
 | ✅ **DONE — the design language** | 12 screen archetypes + 7 overlay types, drafted by Fable, verified, committed to `prototypes/archetype_*_2026-08-01.html` (5 files, ~8,900 lines). |
 | ▶ **STARTED — the port** | ~40 design units. **`design#1` and `design#2` are DONE (2026-08-02, PRs [#4064](https://github.com/iscasasola/setnayan-platform/pull/4064) + [#4065](https://github.com/iscasasola/setnayan-platform/pull/4065)) — do NOT rebuild them.** Everything else is untouched; `design#3` (the shell) is next and is the architectural one. |
-| 🔴 **BLOCKING — nobody has looked at the prototypes** | All verification was DOM-level + static analysis; the shared browser pane blanked while backgrounded. Static checks prove tokens and motion budgets. They cannot tell you whether it is *good*. **Owner review is the gate before porting anything aesthetic.** |
+| ✅ **CLOSED — the owner looked, and approved all 19 (2026-08-04)** | Reviewed via the verdict sheet (artifact `36f20665`); **ship-it on every one, no changes, nothing held.** ⚠ **This row said "🔴 BLOCKING — nobody has looked at the prototypes" until 2026-08-06**, while the approval banner sat at the top of this same file — so a session reading the state table got the opposite of a decision recorded two days earlier, and told the owner to go review work he had already signed off. 🔑 **The state table is what gets read, not the banner.** When a gate closes, edit every row that asserts it is open, in the same commit. |
 
 **The locked palette — do not re-derive, do not re-litigate:**
 ```
@@ -231,7 +231,7 @@ and "none" is a finding to report, not a licence to draw.
 | ✅ 0 | Palette | Done — and the guard that locks it merged 2026-08-02 (#4030). |
 | ✅ 1 | `#1` + `#2` | Done 2026-08-02 (#4064 + #4065). ⏭ The states primitives are built but **not mounted anywhere** — adopting them per surface is open follow-up work. |
 | ✅ 2 | `#3` shell | **Already shipped and mounted — premise falsified 2026-08-02. Do not build.** See the item above. |
-| **3** | `#0-GATE` owner review | 🔴 **THE ONLY THING BLOCKING THE PROGRAMME NOW.** Every remaining item (#4 #5 #6 #8 #9) is aesthetic and waits on it. |
+| ✅ 3 | `#0-GATE` owner review | ✅ **CLOSED 2026-08-04 — all 19 approved, no changes.** Nothing is gated on the owner any more; #4 #5 #6 #8 #9 are all open work. ⚠ This row read "🔴 THE ONLY THING BLOCKING THE PROGRAMME NOW" until 2026-08-06 — two days after the gate closed, and with the approval banner sitting at the top of this same file. |
 | 4 | `#4` reconcile · `#6` public | Cheapest real progress. |
 | 5 | `#5` couple → `#7` gaps → `#8` vendor → `#9` admin | Admin last. |
 
