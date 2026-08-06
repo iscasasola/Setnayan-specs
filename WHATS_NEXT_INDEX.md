@@ -16,7 +16,7 @@
 
 | # | What to do | What happens if you do it | What happens if you don't |
 |---|---|---|---|
-| 1 | **Look at the new design prototypes.** | Unlocks all the visual redesign work — it is fully drawn and waiting on your eyes. | Nothing visual can start. This blocks the biggest stream we have. |
+| 1 | ~~Look at the new design prototypes.~~ **✅ DONE 2026-08-04 — you reviewed all 19 and approved every one, no changes.** Nothing here is waiting on you. | — | — ⚠ **This row asked the owner to do a thing he had already done, for two days.** It is the owner-facing list, so the staleness wasted his time directly: a session read it on 2026-08-06 and told him this was his #1 priority. When a gate closes, clear it HERE first. |
 | 2 | **Delete 2 government-ID files** left over in vendor verification storage. | Removes real people's ID documents we no longer need. | We are holding identity documents with no reason to. That is the kind of thing a privacy regulator asks about. |
 | 3 | **Re-send the legacy-preservation brief to the lawyer.** | The lawyer sees the corrected version. | The lawyer has it **in writing** that preserving a family's memories is free forever — and you changed that to paid. |
 | 4 | **Decide the privacy page's country answer** (open your Cloudflare dashboard and see where files actually sit). | The public privacy page stops contradicting itself. | It currently says photos are stored in the United States **and** the Philippines at the same time. Both cannot be true. |
@@ -282,7 +282,7 @@ Supporting: [`03_Strategy/Design_Gap_Pass_2026-08-01.md`](03_Strategy/Design_Gap
 | ✅ DONE | **Colour on all 401 routes** (PR #3988) — resolves from CSS vars ⇒ 1,263 call sites, zero component edits. Locked by `apps/web/lib/palette-lock.test.ts`, **merged 2026-08-02 (PR #4030)** after a day stuck on a CI-only `noUncheckedIndexedAccess` failure. 🪤 **"auto-merge armed" ≠ "will merge" — read `gh pr checks`, not the PR state.** |
 | ✅ DONE | **12 archetypes + 7 overlay types** drafted → `prototypes/archetype_*_2026-08-01.html` (5 files, ~8,900 lines). |
 | ▶ STARTED | **The port — `design#1` + `design#2` DONE 2026-08-02 (PRs #4064 + #4065), do NOT rebuild.** Six-state primitives live at `apps/web/app/_components/states/` (⚠ built but **not mounted on any route yet**). 🔑 **`design#2`'s premise was WRONG**: it claimed ~55 ad-hoc dialogs; **43 of 53 already used the shipped primitives**, so the work was adoption + a guard, not new primitives. **▶ NEXT: `design#3`, the shell.** |
-| 🔴 GATE | **`design#0-GATE` — owner has NOT seen the prototypes.** Blocks every aesthetic item (#4 #5 #6 #8 #9). Does NOT block #1/#2 (functional). |
+| ✅ GATE | **`design#0-GATE` — CLOSED 2026-08-04. The owner reviewed all 19 and approved every one, no changes.** Nothing in the programme is owner-gated any more; #4 #5 #6 #8 #9 are all open work, and #1/#2 already shipped (#4064/#4065). |
 
 **Start with `design#1` (six-state system) + `design#2` (overlay grammar) — parallel-safe, disjoint files, no owner gate, both close live defects.**
 
