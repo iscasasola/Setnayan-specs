@@ -9,6 +9,22 @@
 ## 0 · THE OWNER'S QUEUE — everything waiting on you, in one place (compiled 2026-08-02)
 
 > Written in plain English on purpose. Each row says **what changes for a real person** if you do it.
+> 🛑 **VERIFY EVERY ROW AGAINST LIVE REALITY BEFORE YOU READ THIS LIST TO THE OWNER.** Owner,
+> 2026-08-06: *"before i address the other 5. check it first. this has been repetitive."*
+>
+> By that date he had been handed **three** tasks he had already completed: reviewing design prototypes
+> he approved on 2026-08-04, deleting ID files he had already deleted, and deciding a privacy-page
+> question the live page had already stopped asking. Each cost him a round-trip and some trust.
+>
+> **A row in this file is a CLAIM, not a fact.** It records what was true when someone typed it. Before
+> surfacing any row: check the live site, the shipped code, or the production database — in that order.
+> A `NEXT_PUBLIC_*` flag is readable from the live bundle without dashboard access, because it is
+> inlined at build time. A row you cannot verify from here (his own dashboards, a lawyer's inbox,
+> Google's account state) must SAY SO on its face, so the next session does not re-list it as though
+> somebody merely forgot to look.
+>
+> **Tick a row the moment it is done** — including on the owner's own word, noting that is what closed it.
+
 > Claude cannot do any of these: they need your accounts, your judgement, or your signature.
 > When one is done, tick it here — this is the only page that lists them all.
 
@@ -17,9 +33,9 @@
 | # | What to do | What happens if you do it | What happens if you don't |
 |---|---|---|---|
 | 1 | ~~Look at the new design prototypes.~~ **✅ DONE 2026-08-04 — you reviewed all 19 and approved every one, no changes.** Nothing here is waiting on you. | — | — ⚠ **This row asked the owner to do a thing he had already done, for two days.** It is the owner-facing list, so the staleness wasted his time directly: a session read it on 2026-08-06 and told him this was his #1 priority. When a gate closes, clear it HERE first. |
-| 2 | **Delete 2 government-ID files** left over in vendor verification storage. | Removes real people's ID documents we no longer need. | We are holding identity documents with no reason to. That is the kind of thing a privacy regulator asks about. |
+| 2 | ~~Delete 2 government-ID files left over in vendor verification storage.~~ **✅ DONE — owner confirmed 2026-08-06.** Closed on his word: the object-storage buckets are not reachable from a session, so nobody here can verify it either way, and that is exactly why it must be ticked here the moment he says so. | — | — |
 | 3 | **Re-send the legacy-preservation brief to the lawyer.** | The lawyer sees the corrected version. | The lawyer has it **in writing** that preserving a family's memories is free forever — and you changed that to paid. |
-| 4 | **Decide the privacy page's country answer** (open your Cloudflare dashboard and see where files actually sit). | The public privacy page stops contradicting itself. | It currently says photos are stored in the United States **and** the Philippines at the same time. Both cannot be true. |
+| 4 | ~~Decide the privacy page's country answer.~~ **✅ DONE — VERIFIED ON THE LIVE PAGE 2026-08-06.** `/privacy` no longer contradicts itself: it names Singapore for the database (including biometric vectors), APAC for media, the United States for the AI and Google integrations, and states outright *"none of them is in the Philippines — no Setnayan data is stored on Philippine soil"*. Nothing to decide. | — | — |
 | 5 | **The booking fee is switched ON in the live site.** Confirm that is intended. | You know real couples are being charged what you meant. | A real couple could be charged something you did not intend to launch yet. |
 | 23 | **Set `NEXT_PUBLIC_WEBSITE_MENU_ENABLED` to `true` in Vercel Production — then redeploy.** (Added 2026-08-04; it was buried in a changelog note and listed nowhere the owner reads.) | Every couple's guest website gets its navigation menu, so guests can actually move around it. | **Every event created from now on ships a guest website with NO menu.** Open-browse went live on 2026-08-04, so this is happening now. 🪤 The demo wedding forces its menu on regardless, so looking at the sample proves nothing. ⚠ This kind of setting is baked in when the site is built — setting it without redeploying changes nothing. |
 
