@@ -6,80 +6,71 @@
 
 ---
 
-## 0 · THE OWNER'S QUEUE — everything waiting on you, in one place (compiled 2026-08-02)
+## 0 · THE OWNER'S QUEUE — VERIFIED AGAINST LIVE REALITY 2026-08-06
 
-> Written in plain English on purpose. Each row says **what changes for a real person** if you do it.
-> 🛑 **VERIFY EVERY ROW AGAINST LIVE REALITY BEFORE YOU READ THIS LIST TO THE OWNER.** Owner,
-> 2026-08-06: *"before i address the other 5. check it first. this has been repetitive."*
+> 🛑 **VERIFY EVERY ROW BEFORE YOU READ THIS LIST TO THE OWNER.** Owner, 2026-08-06:
+> *"before i address the other 5. check it first. this has been repetitive."*
 >
-> By that date he had been handed **three** tasks he had already completed: reviewing design prototypes
-> he approved on 2026-08-04, deleting ID files he had already deleted, and deciding a privacy-page
-> question the live page had already stopped asking. Each cost him a round-trip and some trust.
+> By that date he had been handed **three** tasks he had already completed — reviewing prototypes he
+> approved on 08-04, deleting ID files already deleted, and deciding a privacy-page question the live
+> page had already stopped asking. **A row here is a CLAIM about the past, not a fact about now.**
+> Check the live site → the shipped code → the production DB, in that order. The corpus is history.
 >
-> **A row in this file is a CLAIM, not a fact.** It records what was true when someone typed it. Before
-> surfacing any row: check the live site, the shipped code, or the production database — in that order.
-> A `NEXT_PUBLIC_*` flag is readable from the live bundle without dashboard access, because it is
-> inlined at build time. A row you cannot verify from here (his own dashboards, a lawyer's inbox,
-> Google's account state) must SAY SO on its face, so the next session does not re-list it as though
-> somebody merely forgot to look.
+> 🔑 **`NEXT_PUBLIC_*` flags are readable WITHOUT dashboard access** — inlined into the client bundle at
+> build time, so fetch the live page's JS chunks and grep. "I can't check that" is usually false.
+> 🔑 A row that genuinely **cannot** be checked from here must SAY SO on its face, or the next session
+> re-lists it as though somebody forgot to look.
+> 🔑 **Tick a row the moment it is done — including on the owner's word**, saying that is what closed it.
 >
-> **Tick a row the moment it is done** — including on the owner's own word, noting that is what closed it.
+> **2026-08-06 full re-verification (13 agents, every verdict independently attacked):
+> of 22 rows, 6 were ALREADY DONE, 4 are UNVERIFIABLE from here, 1 was never his decision.
+> 11 genuinely need him.** Several rows were not just stale but WRONG about the reason — recorded below.
 
-> Claude cannot do any of these: they need your accounts, your judgement, or your signature.
-> When one is done, tick it here — this is the only page that lists them all.
+### ✅ CLOSED 2026-08-06 — do not re-ask
 
-### 🔴 Do these first — money, law, or something already live
+| # | Item | What closed it |
+|---|---|---|
+| 1 | ~~Look at the design prototypes~~ | **Approved all 19 on 2026-08-04**, no changes. |
+| 2 | ~~Delete 2 government-ID files~~ | **Owner's own word, 2026-08-06.** Object storage is unreachable from a session, so nobody here can verify either way — recorded as his account, not our verification. The admin screen that lists and deletes those files is live, and **no vendor record points at an identity file**. |
+| 4 | ~~Decide the privacy page's country answer~~ | **Verified on the live page.** It now names Singapore (database + biometric vectors), APAC (media), the US (AI + Google integrations), and says outright *"none of them is in the Philippines"*. Nothing to decide. |
+| 7 | ~~What Papic looks like on a couple's home screen~~ | **Decided 2026-07-30 and built** — both the tile and the one-time "your free camera is ready" note are on the home screen, ungated. |
+| 8 | ~~Who sends the emergency day-of message~~ | **Settled and live 2026-08-05**: the coordinator sends it and types freely. The fixed-phrase version was only ever a drawing — there were never two built things to compare. |
+| 12 | ~~The new monogram maker~~ | **Read off the live site: visitors already get the new version.** |
+| 14 | ~~Coordinator consent gate~~ | **Switched on by the owner 2026-07-22** from the privacy screen; six surfaces genuinely ask for it. Never a hosting-settings flag. |
+| 23 | ~~Guest website navigation menu~~ | **A real couple's guest site is serving the menu now**, and since 2026-08-05 it renders regardless of the switch. |
 
-| # | What to do | What happens if you do it | What happens if you don't |
+### 🔴 GENUINELY OPEN — and three of these had the WRONG REASON on file
+
+| # | What to do | If it waits | ⚠ correction to the old row |
 |---|---|---|---|
-| 1 | ~~Look at the new design prototypes.~~ **✅ DONE 2026-08-04 — you reviewed all 19 and approved every one, no changes.** Nothing here is waiting on you. | — | — ⚠ **This row asked the owner to do a thing he had already done, for two days.** It is the owner-facing list, so the staleness wasted his time directly: a session read it on 2026-08-06 and told him this was his #1 priority. When a gate closes, clear it HERE first. |
-| 2 | ~~Delete 2 government-ID files left over in vendor verification storage.~~ **✅ DONE — owner confirmed 2026-08-06.** Closed on his word: the object-storage buckets are not reachable from a session, so nobody here can verify it either way, and that is exactly why it must be ticked here the moment he says so. | — | — |
-| 3 | **Re-send the legacy-preservation brief to the lawyer.** | The lawyer sees the corrected version. | The lawyer has it **in writing** that preserving a family's memories is free forever — and you changed that to paid. |
-| 4 | ~~Decide the privacy page's country answer.~~ **✅ DONE — VERIFIED ON THE LIVE PAGE 2026-08-06.** `/privacy` no longer contradicts itself: it names Singapore for the database (including biometric vectors), APAC for media, the United States for the AI and Google integrations, and states outright *"none of them is in the Philippines — no Setnayan data is stored on Philippine soil"*. Nothing to decide. | — | — |
-| 5 | **The booking fee is switched ON in the live site.** Confirm that is intended. | You know real couples are being charged what you meant. | A real couple could be charged something you did not intend to launch yet. |
-| 23 | **Set `NEXT_PUBLIC_WEBSITE_MENU_ENABLED` to `true` in Vercel Production — then redeploy.** (Added 2026-08-04; it was buried in a changelog note and listed nowhere the owner reads.) | Every couple's guest website gets its navigation menu, so guests can actually move around it. | **Every event created from now on ships a guest website with NO menu.** Open-browse went live on 2026-08-04, so this is happening now. 🪤 The demo wedding forces its menu on regardless, so looking at the sample proves nothing. ⚠ This kind of setting is baked in when the site is built — setting it without redeploying changes nothing. |
+| 5 | **Confirm the vendor booking fee should stay ON, or say turn it off.** | The charging path stays armed having never once run. | **Nobody has been charged a peso — zero fee charges exist in prod.** Far less urgent than "real couples are being charged". |
+| 22 | **Sign up with a child-safety image-matching service.** | Uploads go live with no check for known illegal images. | 🚫 **Do NOT re-check the storage provider — that was already investigated and the answer is no**, their scanner needs traffic proxied through them and ours is not. The adult-content filter IS on but has never had a real photo to judge. |
+| 20 | **Decide: take live streaming off sale, or create a Setnayan channel.** | A couple can buy a broadcast we cannot deliver. | **The Google suspension is NOT the blocker — nobody ever created a channel.** Two separate problems, and only one is Google's. |
+| 21 | **Five privacy rulings — these are YOURS, not a lawyer's.** Your own compliance record names you as DPO. Sharpest: **a guest's real name currently publishes with their written message BY DEFAULT.** | Nothing is exposed today, but the riskier default is already coded in with no ruling on record. | **"Blocked on the lawyer" was false**, and so was "three features running live without paperwork" — the shared pool 404s, and there are **zero** guest columns, guest photos or chat threads in prod. |
+| 24 | **Say which processor list is right** so the public page and the compliance file agree. | The two drift further apart; a regulator gets the older one. | **PostHog is ALREADY on the internal list — the old row was wrong.** Real omissions: **Sentry, Google, TikTok**, and that our storage provider also relays live call video. ⚠ **The gap runs BOTH ways** — the internal manual names two services the public page never mentions. |
+| 9 | **Two calls on the band/song desk**: should the couple see the band's finished song list, and should every booked supplier be able to read the couple's song picks? | Nothing breaks today — only the band has a linked account. | — |
+| 15 | **Shared 3D room — say whether to switch it on.** | Two guests walking the same 3D venue stay invisible to each other. | — |
+| 19 | **Search-traffic numbers.** | You keep planning blind to what people search. | **Probably NOT the suspension.** The locked account is a brand-new one from late July; the older Google login you already use for photo storage and video works today. Likely unfinished setup. |
+| 16 | **Bing — sign in to their webmaster tools and IMPORT from Google.** | Bing never reports your traffic. | Do not paste a code — Google was verified via DNS, not the site. |
+| 10 | **Say yes to permanently deleting one leftover database record.** The tidying is ours. | Nothing. Unread, marketing settings only. | — |
+| 18 | **LinkedIn company page** *(optional)*. | Nothing — genuinely fine to skip. | — |
 
-### 🟠 Decisions only you can make
+### ❓ CANNOT BE CHECKED FROM HERE — say so, don't re-list as forgotten
 
-| # | Decision | The real-world choice |
+| # | Item | Why it is unverifiable |
 |---|---|---|
-| 6 | **The Filipino-memory wording on the front page.** | You approved it, it was written, it never went live. The front page still describes us in a way any foreign app could copy. Decide: ship the new wording, or drop it. |
-| 7 | **What Papic looks like on a couple's home screen.** | Whether guests-as-photographers is the first thing a couple sees, or something they find later. |
-| 8 | **Who can send the emergency message on the day** — a fixed list of messages, or anything they want to type. | Both versions are built and ready to look at. Free typing is more useful and riskier. |
-| 9 | **Two open calls on the band/singer request desk.** | Whether the couple sees the band's finished song list, and one leftover question about how requests reach them. |
-| 10 | **A leftover table sits in the live database, unused.** | Dropping it is tidy but permanent. Nothing reads it today. |
-| 24 | **Our public privacy page names two outside companies our own compliance record does not.** (Added 2026-08-04; it was buried in a changelog note.) | The `/privacy` page tells the world that Sentry and PostHog handle data for us. The internal list we would hand a regulator has **9 companies on it and neither of those two.** So what we published is broader than what we filed. Decide which one is right: add them to the filing record, or take them off the page. As the data-protection officer, this is your call — nobody else can make it. |
+| 3 | Re-send the legacy-preservation brief to counsel | **The rewrite and export both really happened 2026-07-30** — nothing left to write. Whether it was *emailed* leaves no trace in code, corpus or DB. ⚠ The old "no lawyer is engaged" claim came from a **seeded checklist nobody has ever ticked** (all 15 rows share one microsecond timestamp) — that is not evidence in either direction. |
+| 11 | Service details pages | Server-only switch; never reaches a browser. Moot regardless — **no vendor shop is viewable by anyone today**, not even its owner. |
+| 13 | Vendor auto-reply assistant | Server-only switch. And there is **not one message in the system** for it to reply to. |
+| 17 | Clear two abandoned video folders | No storage credentials, and the service answers identically for a real and a fake key, so existence cannot be probed. Only the owner's dashboard or the media screen can say. The one-press clear button does cover exactly those two folders. |
 
-### 🟡 Switches that are built and waiting
+### 🔧 NOT THE OWNER'S JOB — was wrongly on his list
 
-> All of these are finished and hidden. Turning one on makes it real for customers **immediately**.
-
-| # | Switch | What customers get |
+| # | Item | Why |
 |---|---|---|
-| 11 | **Service details pages** | Couples can open a full page about each service instead of a short card. |
-| 12 | **The new monogram maker** | The improved version of the couple's monogram designer replaces the old one. |
-| 13 | **Vendor auto-reply assistant** | Vendors get automatic first replies to couples. |
-| 14 | **Coordinator consent gate** | Coordinators must be granted permission before they can act on money. |
-| 15 | **Shared 3D room** | Couples and vendors can walk the same 3D reception together. |
-
-### 🟢 Small, safe, ~10 minutes each
-
-| # | Task | Why bother |
-|---|---|---|
-| 16 | ~~Prove to Google you own setnayan.com~~ **— ✅ ALREADY DONE, VERIFIED 2026-08-03.** Google Search Console renders a live property with **32 clicks charted from 05-13** and 133 indexed pages, so ownership was proven long ago (almost certainly via DNS). **`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` is redundant — do not set it.** ⏭ **BING only** still open (~5 min). | Bing adds a second search engine. Google needs nothing. 🪤 This row was wrong for weeks because `seo_metrics` was empty — **an empty local table is not evidence about Google's side.** |
-| 17 | **Clear two abandoned video folders** in storage. | Biggest single space saving available. They belong to a screen that was deleted. |
-| 18 | *(optional)* **Make a LinkedIn company page.** | One more place search engines can confirm Setnayan is a real company. Your Facebook page already does this — a second one is a bonus, not a fix. |
-
-### ⛔ Blocked — not your fault, nothing to do yet
-
-| # | Item | Blocked by |
-|---|---|---|
-| 19 | **Search traffic numbers** (how many people find you on Google). | Google suspended the company account. Appeal `73857927` is open. Item 16 still works and is still worth doing. |
-| 20 | **Live streaming through YouTube.** | Same suspension. |
-| 21 | **Five privacy rulings for the NPC filing.** | Waiting on the lawyer. Two features are already running live without their filing paperwork. |
-| 22 | **Known-illegal-image matching for uploads.** | Never checked whether the free tool from our storage provider covers this. Someone has to look. Adult-content blocking IS already live — this is the separate, worse category. |
-
----
+| 6 | The Filipino-memory wording on the front page | **He approved the words and named the pages on 2026-07-31.** It is not live because nobody typed it in. The "decide again" note was a later misreading of his own ruling. ⏭ Engineering work. |
+| — | Media screen's homepage-videos section looks in the wrong place and will always read empty | Engineering. |
+| — | The daily site check keeps demanding Google verification that is already done via DNS | Engineering. |
 
 ## 1 · Global safety rules — DO NOT auto-execute these
 
