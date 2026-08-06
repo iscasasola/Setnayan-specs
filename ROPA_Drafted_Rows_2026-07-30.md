@@ -119,7 +119,7 @@ storage but silent about the transit hop.
 
 | # | Action | Whose call |
 |---|---|---|
-| 1 | Rule on the **five open lawful-basis / retention questions** flagged above (§ 1 legs, § 2 ×2, § 3 ×1) | **DPO = owner** |
+| 1 | ~~Rule on the five open lawful-basis / retention questions~~ **✅ ALL FIVE RULED 2026-08-06 — approved as recommended.** §1 pool = **consent** (host's per-event switch) · §1 guest-buy = **contract**, screenshot on the payment clock · §2 byline = **hidden by DEFAULT**, naming is the opt-in · §2 minors = **refuse a known child**, via the existing stewardship signal, NOT by collecting birthdays · §3 calls = **"never recorded" may not stand alone**; the relay-hop phrasing is required and already live on `/privacy`. ⚠ These were mis-filed as *"blocked on the lawyer"* for weeks — they never were. Shipped in PR #4180. | **DPO = owner** ✅ |
 | 2 | Paste rows 21-refreshed, 22, 23 into the dossier § 3 and strike the 2026-07-20 row-21 text | DPO, after #1 |
 | 3 | Add the two owed **public `/privacy` sections** — guest-authored publication; shared-pool visibility | build task, once #1 lands |
 | 4 | Name **Cloudflare (TURN)** in the subprocessor list | DPO |
