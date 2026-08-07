@@ -96,7 +96,7 @@ The 12-doc checklist is presented to the vendor at registration with explicit co
 |---|---|---|---|
 | Customer account profile | Active | — | User deletes account; 30-day grace then purge |
 | Customer event data | 5 years post-event | — | Auto-purge T+5 years; user can request earlier deletion |
-| Photo/video originals | 90 days hot R2 | 5 years IA R2 | Per the 30-day-post-download compression rule + 5-year hard limit |
+| Photo/video originals | Full-resolution ORIGINAL: the later of 6 months from the event's first capture and 3 months after the event date, then **replaced by** a compressed web copy. **Compressed web copy: retained INDEFINITELY** as the serving copy — no scheduled deletion. **No photo is ever deleted on a schedule.** Disposal occurs only on organizer removal, a validated erasure request, or account deletion. Originals synced to the couple's own Google Drive are theirs permanently and are never touched. | | ⚠ **CORRECTED 2026-08-07.** This row previously declared a **5-year hard limit** with 90-day-hot/5-year-cold tiering. That tiering was never built, no R2 lifecycle rule exists, and the compressed copy is kept indefinitely — so the row committed us, in a filing, to destroying photos we in fact keep. Declaring a purge that never happens is the more dangerous direction of drift: a commitment to the regulator broken every day. |
 | Face vectors | Per-event lifetime + 5 years | — | Auto-purge with event data |
 | Vendor account profile | Active | — | Vendor deletes; 30-day grace then purge |
 | Vendor verification raw uploads (ID, selfie+liveness, bank micro-deposit, portfolio) | 90 days hot | — | Auto-purge after admin approve/reject unless audit hold |

@@ -60,13 +60,46 @@ Retention is bounded on **both** ends, and the two bounds come from different la
 | | value | where it is enforced |
 |---|---|---|
 | Cameras may start shooting | **6 months** before the event | `PAPIC_CAPTURE_MONTHS_BEFORE` |
-| Full-res originals kept | **6 months** from the event's **first capture** | `DEFAULT_FULL_RES_RETENTION_DAYS = 183` |
+| Full-res ORIGINAL held at full resolution | **6 months** from the event's **first capture** | `DEFAULT_FULL_RES_RETENTION_DAYS = 183` |
 | …but never less than | **3 months after the event date** | `FULL_RES_POST_EVENT_GRACE_DAYS = 92` |
-| Compressed web copy | **indefinitely — never purged** | no expiry rule |
+| The photo itself (compressed copy) | **kept indefinitely — never removed** | no expiry rule |
 
 The eligibility rule is `GREATEST(first_capture + 183d, event_date + 92d)` in
 migration `20271102113000` — the **later** of the two, so the floor can only ever
-keep files longer.
+hold the original at full resolution for longer.
+
+## 🗣 NO PHOTO IS EVER DELETED — SAY "COMPRESSED", NOT "DELETED"
+
+**Owner-corrected twice, most recently 2026-08-07: *"again. not delete. just
+compress."*** This is the single most-repeated wording error on this product, so it
+is stated here rather than assumed.
+
+**Nothing disappears from a customer's gallery, ever.** A compressed copy of every
+photo is derived at capture time and kept **forever**. What the window above governs
+is **resolution**: at the end of it, the full-resolution *original file* is replaced
+by that compressed copy.
+
+✅ **The code enforces this and cannot do otherwise.** `isEligibleForDrop`
+(`lib/papic-fullres-drop-core.ts`) returns `false` when no compressed copy exists —
+its own comment reads *"dropping would LOSE the photo"* — and the clip path
+additionally requires the web copy to be a **distinct object** from the poster
+still. There is no code path that removes an original before its replacement exists.
+
+**House wording, lifted verbatim from the warning email (copy this, do not invent
+new phrasing):**
+
+> *"Your gallery stays online forever, free. We'll switch the full-resolution copies
+> we host to a lighter, compressed version — that compressed gallery stays online for
+> you forever. Your gallery keeps every photo; we just won't be holding the
+> full-resolution originals after that."*
+
+⛔ Never write, in any customer-facing surface: *deleted · we delete your photos ·
+purged · removed · gone · lost · expires · auto-delete*. ✅ Write: *compressed ·
+replaced by a compressed copy · we keep a compressed copy forever*.
+
+⚠ This carve-out does **not** apply to features that genuinely delete — a host
+removing a photo, an RA 10173 erasure request, account deletion, the 5-year chat
+sweep. Those really do delete and must keep saying so.
 
 🔑 **The third number is the promise, not the second.** Because shooting may open
 six months before the event, a photo taken at the earliest permitted moment has
@@ -75,13 +108,14 @@ keeps their originals *after* their own wedding is bought by the 3-month floor.
 The 5-month capture cap and 30-day floor that appear in older documents were
 superseded on 2026-08-07 — **do not reason from that pair.**
 
-⚠ **Never state this as a flat "we delete at 6 months."** It over-commits four
-ways: clips/video are not deleted at all today (`PAPIC_CLIP_DROP_ENABLED` is
-opt-in and off); events with no Google Drive connected **hold indefinitely** until
-a warning is provably sent plus a 7-day grace; Drive-connected events **defer**
-until the copy is confirmed; and the window is env-overridable. Honest phrasing:
-originals become **eligible** at that point and are deleted by a weekly sweep
-unless one of those holds applies.
+⚠ **Never state this as a flat "we compress everything at 6 months"** either — even
+about the original file, that over-commits four ways: clips/video are not compressed
+or replaced at all today (`PAPIC_CLIP_DROP_ENABLED` is opt-in and off); events with
+no Google Drive connected **hold the originals indefinitely** until a warning is
+provably sent plus a 7-day grace; Drive-connected events **defer** until the copy is
+confirmed; and the window is env-overridable. Honest phrasing: originals become
+**eligible for replacement** at that point, and a weekly sweep swaps them for the
+compressed copy unless one of those holds applies.
 
 ---
 
@@ -105,7 +139,8 @@ Audited against shipped code — **the retention plumbing is greenfield**; almos
 ### Build order to enforce this schedule
 1. **Archive (UX, zero deletion)** — add `archived_at` to `chat_thread_reads` (per-user); inbox filter `archived_at IS NULL OR chat_threads.updated_at > archived_at` (Viber-style: a new message un-archives). Ships safely on its own.
 2. **R2 lifecycle** — actually configure bucket rules for class 2 (the gigabyte win).
-3. **Retention sweep** — weekly Vercel cron `/api/cron/retention-sweep`: hard-delete class 1/2 at anchor + 5 y; **skip** any thread/record tied to an active legal hold (class 3/4). Fix the account-deletion residue in the same job.
+3. **Retention sweep** — weekly Vercel cron `/api/cron/retention-sweep`: hard-delete **class 1 (chat) only** at anchor + 5 y; **skip** any thread/record tied to an active legal hold (class 3/4). Fix the account-deletion residue in the same job.
+   ⚠ **CLASS 2 (MEDIA) IS NOT ON THIS SWEEP AND MUST NOT BE ADDED TO IT** (corrected 2026-08-07). Media is handled by `lib/papic-fullres-drop.ts`, which **replaces a file** — it swaps the full-resolution original for its compressed copy and refuses to act when that copy is missing. It does not delete a record, and no photo is ever deleted on a schedule. Wiring class 2 into a hard-delete sweep would destroy galleries we promise to keep for good.
 
 ---
 

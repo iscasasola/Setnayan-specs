@@ -302,7 +302,7 @@ a CSAM matcher, a bystander-consent gate and a net-new ROPA class we do not have
 | **90** | **full-res dropped from our storage** (`DEFAULT_FULL_RES_RETENTION_DAYS = 90`) |
 | 90–180 | compressed gallery only |
 | **~150** | we ask: *which photos should we keep?* (§ 5) |
-| **180** | gallery expires unless preserved |
+| **180** | ⚠ **CORRECTED 2026-08-07 — NOTHING EXPIRES.** The compressed gallery stays on the couple's page **indefinitely**, free. By this point the full-resolution originals have already been replaced by it. |
 
 > 🔴 **CORRECTION (2026-07-20, same day).** An earlier draft of this document put the Drive handover
 > at **month 6**. That is impossible — the originals are **already dropped at day 90**, so there would
@@ -389,7 +389,7 @@ and it is also the DPO's stated fallback if paid retention is refused.
 
 **Publish the rate upfront in bands** so the total is predictable before the count is known:
 
-| Photos collected | Keep the gallery, 5 yr | Cost | Margin |
+| Photos collected | Keep the full-res ORIGINALS on Setnayan, 5 yr | Cost | Margin |
 |---|---|---|---|
 | up to 3,000 | ₱499 | ₱54 | 89% |
 | up to 10,000 | ₱999 | ₱180 | 82% |

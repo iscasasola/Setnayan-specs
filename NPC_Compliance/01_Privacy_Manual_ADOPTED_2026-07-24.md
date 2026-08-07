@@ -197,7 +197,7 @@ Representative retention windows (full table in the Privacy & Security Policy §
 |---|---|---|
 | Customer/vendor account profile | Active | Account deletion + 30-day grace then purge |
 | Customer event data | 5 years post-event | Auto-purge at T+5 years (or earlier on request) |
-| Photo/video originals | 90 days hot → 5 years cold | 5-year hard limit |
+| Photo/video originals | Full-resolution ORIGINAL: the later of 6 months from the event's first capture and 3 months after the event date, then **replaced by** a compressed web copy. **Compressed web copy: retained INDEFINITELY** as the serving copy — no scheduled deletion. **No photo is ever deleted on a schedule.** Disposal occurs only on organizer removal, a validated erasure request, or account deletion. Originals synced to the couple's own Google Drive are theirs permanently and are never touched. | ⚠ **CORRECTED 2026-08-07.** This row previously declared a **5-year hard limit** with 90-day-hot/5-year-cold tiering. That tiering was never built, no R2 lifecycle rule exists, and the compressed copy is kept indefinitely — so the row committed us, in a filing, to destroying photos we in fact keep. Declaring a purge that never happens is the more dangerous direction of drift: a commitment to the regulator broken every day. |
 | Face vectors | Per-event lifetime + 5 years | Auto-purge with event data; guest "delete my face data" revokes within the refresh cycle |
 | Vendor verification audit trail / permits | 90 days hot → 7 years cold | BIR § 235 + AMLC AML/CTF retention |
 | Chat messages / audit logs | 5 years | Aligned with event / tax-legal retention |

@@ -167,15 +167,39 @@ Cross-border destinations disclosed: Singapore (Supabase), United States (Vercel
 - **Data minimization:** analytics carry no personal identifiers; error logs exclude message bodies, payment details, and guest data; IP truncated to 3 octets for QR-scan events. *(Minimization item: some aggregate dashboard views load fuller records than they display — a tightening pass is tracked in §11.)*
 - **Content safety:** an NSFW filter is on by default and cannot be disabled.
 - **Confidentiality by design:** vendor identity masking (a vendor sees only the couple's event display name + date, never their email or personal name unless shared).
-- **Residency:** database in Singapore; media in PH-region object-storage buckets.
+- **Residency:** database in Singapore; media in Cloudflare R2 **Asia-Pacific (APAC)**. ⚠ **CORRECTED — there is no PH region in R2**, and the old wording implied a Philippine residency we do not have.
 - **Breach response:** the DPO coordinates assessment and any NPC + data-subject notification within the periods required by the NPC's breach rules.
 
 ### 8a. Retention governance
 Retention is bounded on both ends: **RA 10173 storage-limitation** as the maximum, and **statutory floors** as the minimum for financial and contractual records (BIR RR 17-2013 = 10 years for payments/Official Receipts; Civil Code Art. 1144 for contracts). Per-class periods are maintained in the **Data Retention Schedule (2026-07-11)**; periods marked *(counsel)* await external ratification.
 
-> 🔴 **CORRECTION PENDING (2026-07-20) — do not lodge this paragraph as written.** Two of its numbers are contradicted by the shipped system: the **6 months** below is **90 days** in code (`DEFAULT_FULL_RES_RETENTION_DAYS = 90`, `apps/web/lib/papic-fullres-drop-core.ts:10` @ `origin/main` `5b72d625d`, and the drop sweep is **ON by default**), and **"indefinitely"** for the compressed copy contradicts the **5-year** media period in `Data_Retention_Schedule_2026-07-11.md` row 2 and the storage-limitation principle at that file's `:15`. Operationally "indefinitely" is currently accurate only because **no media purge exists** (R2 lifecycle NOT configured). Two clean resolutions with their consequences — and the note that `PAPIC_FULLRES_RETENTION_DAYS=180` fixes it without a code change — are in **[`Papic_Compliance_Delta_2026-07-20.md`](Papic_Compliance_Delta_2026-07-20.md) §1**. **This paragraph blocks all retention marketing copy until resolved.**
+> ✅ **RESOLVED 2026-08-07 — and read this before "fixing" the paragraph below.**
+> The superseded note here told the reader that the paragraph beneath it — *"a
+> compressed web copy is retained indefinitely"* — had to be reconciled DOWN to a
+> 5-year purge, and declared itself blocking on "all retention marketing copy".
+> **That is exactly backwards, and it is the single most likely cause of this error
+> recurring a fourth time.**
+>
+> **What is true:** *"indefinitely"* for the compressed copy is **correct and stays**.
+> It is the owner's lock ("free forever, never deleted"), it is what the code does,
+> and the 5-year media period it was measured against has itself been retracted in
+> `Data_Retention_Schedule_2026-07-11.md` row 2. Only the day numbers moved: the
+> full-resolution window is **6 months from the event's first capture, floored at 3
+> months after the event date** (`DEFAULT_FULL_RES_RETENTION_DAYS = 183`,
+> `FULL_RES_POST_EVENT_GRACE_DAYS = 92`), not the 90 days this note cited.
+>
+> 🗣 **AND NOTHING IS DELETED.** The full-resolution original is **replaced by** the
+> compressed copy, which the gallery keeps for good; `isEligibleForDrop` refuses to
+> act at all when that copy is missing. Owner, twice: *"again. not delete. just
+> compress."* **Do not re-introduce a 5-year media purge into any copy, filing or
+> marketing sentence.**
+>
+> ⏭ **What genuinely remains open** is narrower: the lawful **BASIS** for indefinite
+> retention of photographs of identifiable people (including guests who are not our
+> customers), not the period. That reasoning must be written down and reviewed by
+> counsel before lodging — "the owner decided" is not a lawful basis.
 
-**Papic media lifecycle (2026-07-17).** Captured photos and 5-second clips are kept at full resolution for **6 months** (for the couple to download or sync to their own Google Drive). After the window the full-res original is **dropped from Setnayan storage** unless the couple has synced it to their Drive; a **compressed web copy** (photos + compressed clip copies) is retained on the couple's gallery indefinitely as the serving copy — so no media type carries an unbounded full-resolution tail. Optional facial-geometry vectors (ROPA 11) auto-expire per event at ~5 years; the account-level face profile is governed by account deletion, not this per-event clock. Papic Lite (ROPA 20) is photos-only and biometric-free.
+**Papic media lifecycle (2026-07-17).** Captured photos and 5-second clips are kept at full resolution for **6 months** (for the couple to download or sync to their own Google Drive). After the window the full-res original is **replaced by the compressed web copy** in Setnayan storage (the photo itself remains in the gallery), unless the couple has synced the original to their Drive; a **compressed web copy** (photos + compressed clip copies) is retained on the couple's gallery indefinitely as the serving copy — so no media type carries an unbounded full-resolution tail. Optional facial-geometry vectors (ROPA 11) auto-expire per event at ~5 years; the account-level face profile is governed by account deletion, not this per-event clock. Papic Lite (ROPA 20) is photos-only and biometric-free.
 
 ---
 
