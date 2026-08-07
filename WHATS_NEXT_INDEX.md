@@ -6,6 +6,36 @@
 
 ---
 
+## 🔴 2026-08-07 · COLD START ON A NEW CLAUDE ACCOUNT — START HERE, BEFORE ANYTHING ELSE
+
+**[`HANDOFF_PROMPT_Clean_Monorepo_2026-08-07.md`](HANDOFF_PROMPT_Clean_Monorepo_2026-08-07.md)**
+
+The owner is continuing on a **different Claude Code account**, where
+`~/.claude/.../memory/` does **not** travel. That file is the transfer set: § 2 is
+a single block the owner pastes into the fresh account, and § 5 lists every
+document the new session needs (all committed, nothing session-local).
+
+⛔ **It exists mainly to stop a rebuild.** An earlier plan — from another AI —
+called for consolidating this repo clean-slate into a fresh `clean-project/`
+directory. It was tested and **disproven on 2026-08-06/07**: the monorepo was
+already clean (`git status` 212 entries → 0 once the root `.gitignore` became an
+allowlist — the repo root *is* the home directory), unfinished work is already
+flag-dark per feature, and the two largest deletion recommendations were **both
+wrong** (the "retired" ~4,100-line Concierge wizard is LIVE via the mood-board
+page). **Do not run that plan.**
+
+🔑 **The real defect class is one fact stored in two places, with the copies
+drifting** — the tag limit reached the database and not the screen; the WebRTC
+fix reached two transports of five; the ceremony list reached the database and
+not the schedule; the challenge library added a fourth mission source and the
+couple's screen still knew three, so Setnayan's own recommendations were labelled
+"Vendor". **A rebuild duplicates that class rather than fixing it.**
+
+⚠ Its § 3 summarises the sibling sessions but is **not authoritative for their
+findings** — open their own handoffs, listed in its § 5.
+
+---
+
 
 ## 2026-08-07 · Build-integrity sweep — READ FIRST if you touch CI guards, migrations, or an open PR
 

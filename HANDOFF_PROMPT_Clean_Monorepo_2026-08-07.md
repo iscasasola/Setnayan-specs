@@ -1,8 +1,9 @@
 # HANDOFF PROMPT — continue Setnayan on a fresh Claude Code account
 
-> **Status: DRAFT — awaiting reports from 3 sibling sessions** (owner asked them to
-> report in so this can be compiled once). Sections marked ⏳ are placeholders.
-> Everything outside them is verified and ready.
+> **Status: READY TO TRANSFER.** Compiled 2026-08-07 from this session plus the
+> sibling sessions' committed work. No placeholders remain.
+>
+> **The owner pastes § 2. Everything else is for whoever picks the work up.**
 >
 > 🚨 **A SECOND HANDOFF IS BEING WRITTEN IN PARALLEL — MERGE, DO NOT PICK ONE.**
 > As of 2026-08-07 07:4x a sibling session has an **uncommitted** edit to the
@@ -205,8 +206,37 @@ what a person experiences:
   armed at open, labelled 16h/14m later, wore the label for eleven minutes and
   merged anyway. Applying it now genuinely disarms.
 
-⏳ **Sessions 2/3/4 — your merged work and its one-line "what a person
-experiences" summary goes here.**
+### The sibling sessions' work — read their own handoff, do not trust this summary alone
+
+**[`WHATS_NEXT_Session_Handoff_2026-08-07.md`](WHATS_NEXT_Session_Handoff_2026-08-07.md)**
+(committed, 244 lines) is the build-integrity sweep from a concurrent session.
+It is **authoritative for its own findings**; the lines below exist only so you
+know whether you need to open it.
+
+- **#4207 — every guest message save had been failing.** Its § 1 calls this the
+  one that mattered most: a migration was placed in an orphan
+  `apps/supabase/migrations/` directory that `supabase db push` never reads, so
+  the app half shipped and the schema half went nowhere. **Both halves looked
+  done.** A guard now catches the orphan directory.
+- **#1180 was CLOSED** — read its § 1 before anyone reopens it.
+- **Three new CI guards** (its § 2) — do not weaken, delete or "simplify" them.
+- **`NEXT_PUBLIC_PLAN3D_SHARED_ROOM` is ON in prod** — verified by reading the
+  compiled constant out of the live bundle (`!0`), not inferred.
+- **`NEXT_PUBLIC_BOOKING_FEE_ENABLED` cannot be verified from a session** — it is
+  server-only behind a vendor login. It needs **two** switches; the one that
+  actually bills (`..._RAIL_LIVE`) is off. Prod: **0 fee charges, 13 booked
+  vendors.**
+- **#4004 (CSAM known-hash) merged despite a DECISION_LOG entry saying it must
+  stay a draft.** Verified inert — `CSAM_HASH_MATCH_ENABLED` defaults off — but
+  **the gate moved from "a draft PR" to "an environment variable."** The original
+  condition is unchanged: enrol with a hash provider *and* sign the NPC Circular
+  16-02 processor agreement **before** setting it. ⏭ Confirm that variable is not
+  set in hosting.
+
+⚠ **A third document is still being authored:** `HANDOFF_RESUME_2026-08-07.md` in
+the **code** repo (vendor bare-root URLs, the 16-surface logo debt, a shared name
+registry, rename-forwarding expiry). It was **not on `origin/main`** at the time
+of writing. Check for it; if it exists, it is part of this set.
 
 ---
 
@@ -252,15 +282,53 @@ outcome was clean but the process was not.
 - The vendor-verification bucket has no cleanup control; two government IDs sit
   there unreferenced.
 
-⏳ **Sessions 2/3/4 — your open items and owner decisions go here.**
+### 4d · The owner's queue lives in ONE place — do not re-derive it
+
+**[`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md) § 0** is the authority. It was
+verified against live reality on 2026-08-06 and carries four buckets that matter
+more than any list reconstructed later:
+
+- **✅ CLOSED — do not re-ask.** The owner has been handed an already-finished
+  task three times. His words: *"check it first. this has been repetitive."*
+- **🔴 GENUINELY OPEN** — and three of these had the **wrong reason** on file.
+- **❓ CANNOT BE CHECKED FROM HERE** — say so; do not re-list as forgotten.
+- **🔧 NOT THE OWNER'S JOB** — was wrongly on his list.
+
+🔑 **Before telling the owner to do anything, verify it is still undone** against
+live site → code → prod DB. A written row is a claim, not a fact.
+
+### 4e · Open PRs at handoff time
+
+| PR | What it is |
+|---|---|
+| [#4212](https://github.com/iscasasola/setnayan-platform/pull/4212) | A venue states its own size, so the couple stops guessing |
+
+(#4216, the vendor token copy, merged during this session.) Re-run
+`gh pr list --state open` before acting — this line ages badly.
 
 ---
 
-## 5 · Assembly instructions for whoever compiles the final copy
+## 5 · The complete transfer set — everything the new account needs
 
-1. Fill the three ⏳ slots from the sibling sessions' reports.
-2. Re-verify every claim that names a file, flag or route — this document will be
-   read by an account that cannot check your memory, and a stale line here is
-   exactly the failure mode it exists to prevent.
-3. Commit it to the corpus and add a row to `WHATS_NEXT_INDEX.md`.
-4. Give the owner **§ 2 only** to paste. The rest is for the assembler.
+All of it is **committed and pushed**. Nothing depends on a running session, a
+local file, or anyone's memory.
+
+| Where | What it is |
+|---|---|
+| **corpus** `WHATS_NEXT_INDEX.md` | **The master register.** § 0 is the owner's queue; the dated sections at the top are the newest streams. The `"what's next"` trigger starts here. |
+| **corpus** `HANDOFF_PROMPT_Clean_Monorepo_2026-08-07.md` | **This file.** § 2 is the paste-in prompt. |
+| **corpus** `WHATS_NEXT_Session_Handoff_2026-08-07.md` | The sibling build-integrity sweep — new CI guards, the orphan-migration class, flag states. |
+| **corpus** `WHATS_NEXT_Cleanliness_Findings_2026-08-06.md` | The cleanliness work register — what was fixed, what is open, and the 18 files that are parked **on purpose**. |
+| **corpus** `CLAUDE.md` | Auto-loaded context: locked decisions, the ACTIVE block, reply style. |
+| **corpus** `DECISION_LOG.md` | Append-only, ~3,000 rows. Not auto-loaded — grep it. |
+| **code repo** `HANDOFF_RESUME_2026-08-07.md` | ⚠ Was still being authored. Check whether it landed; if so it belongs in this set. |
+
+**Two repos, both on GitHub:** the corpus is `iscasasola/Setnayan-specs`; the code
+is `iscasasola/setnayan-platform`. Clone both.
+
+### The one instruction that matters most
+
+**Do not rebuild.** The single most expensive failure available here is
+recreating something that already ships — it has happened, and the owner has paid
+for it more than once. § 0 explains why the rebuild plan was wrong; RULE 0 in
+§ 2 is how you avoid repeating it.
