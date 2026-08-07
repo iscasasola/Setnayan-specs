@@ -268,6 +268,31 @@ a CSAM matcher, a bystander-consent gate and a net-new ROPA class we do not have
 
 ## § 4 — Retention: SIX MONTHS
 
+> 🔴 **SUPERSEDED IN PART — 2026-08-07. READ THIS BEFORE THE TABLE BELOW.**
+> The **90-day full-res drop** documented in § 4.1 is **no longer the model** and
+> has not been since 2026-08-02. The enforced rule is now:
+>
+> | | value | constant |
+> |---|---|---|
+> | cameras may start shooting | **6 months** before the event | `PAPIC_CAPTURE_MONTHS_BEFORE = 6` |
+> | full-res kept | **6 months from the event's FIRST capture** | `DEFAULT_FULL_RES_RETENTION_DAYS = 183` |
+> | …but never less than | **3 months after the event date** | `FULL_RES_POST_EVENT_GRACE_DAYS = 92` |
+> | compressed gallery | **indefinitely** | no expiry rule |
+>
+> Eligibility is `GREATEST(first_capture + 183d, event_date + 92d)` — migration
+> `20271102113000`. **The Drive-handover reasoning in § 4.1 still holds** (hand
+> over BEFORE the originals go, not after); only the day numbers moved.
+>
+> 🔑 **The 3-month floor is the promise, not the 6-month clock.** Because shooting
+> opens six months out, the earliest permitted photo's own clock expires **on the
+> wedding day**. Everything the couple keeps afterwards comes from the floor.
+> Owner, verbatim: *"still preserve 3 months all their photos in high res before we
+> compress it."*
+>
+> The drift-audit table in § 4 further down is a **historical record of a
+> disagreement**, not current values — do not read numbers out of it.
+
+
 ### 4.1 The layers
 
 | Day | What happens |

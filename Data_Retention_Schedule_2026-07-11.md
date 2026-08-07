@@ -24,7 +24,7 @@ Retention is bounded on **both** ends, and the two bounds come from different la
 | # | Data class | Iteration(s) | Retention anchor | **Keep for** | Legal basis | Disposal |
 |---|---|---|---|---|---|---|
 | 1 | **Vendor↔couple chat** (`chat_threads`, `chat_messages`) | 0019 | `event_date` | **5 years** | RA 10173 necessity + normal dispute window | Hard-delete thread + messages |
-| 2 | **Media** — Papic photos/video, gallery, reels (R2) | 0012, 0009, 0024 | `event_date` | **Full-res 6 months, then ONE compression to the ~8% web copy — retained INDEFINITELY, never purged** (owner-locked 2026-07-10 "free forever, never deleted"; window 3 mo → 6 mo owner 2026-08-02). ⚠ **CORRECTED 2026-08-02** — this row previously read *"5 years (hot 90 d → cold → purge)"*, which described a deletion the product does not perform. A schedule promising a purge that never happens is the more dangerous direction of drift: it is a commitment to the regulator broken every day. The couple's own Google Drive full-res is separate and permanent (2026-07-11 invariant) — we never downgrade or delete THEIR copy. | RA 10173 — see ⚠ below; PH photographer norm | R2 lifecycle: compression at 6 mo; **no expiry rule on the web copy** |
+| 2 | **Media** — Papic photos/video, gallery, reels (R2) | 0012, 0009, 0024 | **first capture** (NOT `event_date`), floored at `event_date` + 3 months | **Full-res 6 months from the event's FIRST capture and never less than 3 months after the event date, then ONE compression to the ~8% web copy — retained INDEFINITELY, never purged** (owner-locked 2026-07-10 "free forever, never deleted"; window 3 mo → 6 mo owner 2026-08-02; post-event floor 30 d → 3 mo and capture opening 5 mo → 6 mo owner 2026-08-07). ⚠ **CORRECTED 2026-08-02** — this row previously read *"5 years (hot 90 d → cold → purge)"*, which described a deletion the product does not perform. ⚠ **ANCHOR CORRECTED 2026-08-07** — it said `event_date`; the clock actually starts at the **first capture**, which can be six months earlier, so an `event_date` anchor overstates how long we hold an engagement-shoot original. A schedule promising a purge that never happens is the more dangerous direction of drift: it is a commitment to the regulator broken every day. The couple's own Google Drive full-res is separate and permanent (2026-07-11 invariant) — we never downgrade or delete THEIR copy. | RA 10173 — see ⚠ below; PH photographer norm | R2 lifecycle: compression at 6 mo; **no expiry rule on the web copy** |
 
 > ⚠ **INDEFINITE RETENTION IS A LAWFUL-BASIS QUESTION, NOT A STORAGE SETTING (flagged 2026-08-02).**
 > Row 2 now states that the compressed web copy is kept forever. That is the shipped product and the
@@ -43,9 +43,45 @@ Retention is bounded on **both** ends, and the two bounds come from different la
 | 9 | **Observability / logs** (Sentry, PostHog) | 0035 | event timestamp | Provider default (**≤90 days**); **no PII in logs** | RA 10173 data-minimization | Provider TTL |
 | 10 | **Device-fingerprint hashes** (`user_devices.device_hash`) — fraud prevention | Fake-Inquiry Protection (Phase E) | `last_seen_at` | **Life of account**; rolling-prune device rows unused **> 24 mo** (proposed) | RA 10173 §12(f) legitimate interest (fraud prevention); pseudonymous, non-sensitive | Purge with account (class 5 tail) or on rolling prune |
 
-### The two clocks, stated plainly
-- **Default = 5 years** for the *experience* data (chat + media), anchored to `event_date` so a wedding's whole record ages together.
-- **Legal-hold floor = 10 years** for anything touching **money or a contract** — flagged and **exempt** from the 5-year sweep.
+### The clocks, stated plainly
+- **Chat = 5 years**, anchored to `event_date`.
+- **Media has its OWN clock and it is not five years** (see row 2, and § "Papic
+  media" below). ⚠ **CORRECTED 2026-08-07** — this line previously read *"Default
+  = 5 years for the experience data (chat + media)"*, which **contradicted row 2
+  of this same document** and restated the very claim row 2 exists to retract.
+  🔑 *A schedule that records the decision in one row and contradicts it three
+  lines later will be read from whichever line the reader hits first* — and this
+  is the summary, so it is the line most people hit.
+- **Legal-hold floor = 10 years** for anything touching **money or a contract** —
+  flagged and **exempt** from the sweep.
+
+### Papic media — the three numbers, and how they interlock (owner-locked 2026-08-07)
+
+| | value | where it is enforced |
+|---|---|---|
+| Cameras may start shooting | **6 months** before the event | `PAPIC_CAPTURE_MONTHS_BEFORE` |
+| Full-res originals kept | **6 months** from the event's **first capture** | `DEFAULT_FULL_RES_RETENTION_DAYS = 183` |
+| …but never less than | **3 months after the event date** | `FULL_RES_POST_EVENT_GRACE_DAYS = 92` |
+| Compressed web copy | **indefinitely — never purged** | no expiry rule |
+
+The eligibility rule is `GREATEST(first_capture + 183d, event_date + 92d)` in
+migration `20271102113000` — the **later** of the two, so the floor can only ever
+keep files longer.
+
+🔑 **The third number is the promise, not the second.** Because shooting may open
+six months before the event, a photo taken at the earliest permitted moment has
+its own six-month clock expire **on the wedding day itself**. Every day a couple
+keeps their originals *after* their own wedding is bought by the 3-month floor.
+The 5-month capture cap and 30-day floor that appear in older documents were
+superseded on 2026-08-07 — **do not reason from that pair.**
+
+⚠ **Never state this as a flat "we delete at 6 months."** It over-commits four
+ways: clips/video are not deleted at all today (`PAPIC_CLIP_DROP_ENABLED` is
+opt-in and off); events with no Google Drive connected **hold indefinitely** until
+a warning is provably sent plus a 7-day grace; Drive-connected events **defer**
+until the copy is confirmed; and the window is env-overridable. Honest phrasing:
+originals become **eligible** at that point and are deleted by a weekly sweep
+unless one of those holds applies.
 
 ---
 
@@ -77,7 +113,10 @@ Audited against shipped code — **the retention plumbing is greenfield**; almos
 
 1. Confirm **BIR retention = 10 years** for in-app SKU payments + Official Receipts (RR 17-2013) and the exact record scope.
 2. Confirm **contract retention** period + whether e-signature audit trails (RA 8792) extend it beyond 10 years.
-3. Ratify the **5-year default** for chat + media as "necessary" under RA 10173 §11(e).
+3. Ratify the **5-year period for CHAT** as "necessary" under RA 10173 §11(e).
+   ⚠ **Media is NOT on the 5-year clock** — see the Papic media table above. This
+   item said "chat + media" until 2026-08-07, which would have put the wrong
+   number in front of the DPO.
 4. Approve the **erasure carve-out** wording (§3) for the privacy policy.
 5. Confirm **face-vector** treatment as sensitive personal information and the per-event purge rule.
 6. Sign off on **device-fingerprint hashes** (class 10) — legal basis (legitimate interest vs consent), notice wording, and the 24-month rolling-prune period. See the dedicated one-pager `Device_Fingerprint_Data_Use_DPO_Review_2026-07-12.md`.
