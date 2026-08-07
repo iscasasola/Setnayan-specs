@@ -165,7 +165,7 @@ Prod never saw one bought or spent — 0 purchases, 0 redemptions. Five pilot ve
 
 **Answering a matched couple is FREE** on every tier, and has been since PR #3531 neutralised the burn. The vendor booking fee — 5% on the first ₱100,000 · 1% above · floor ₱50 · sourced clients only · first 5 free — is the vendor-side money, and it is still flag-dark. Derive the rate from `lib/booking-fee.ts`; never re-type it.
 
-⚠ **One token row is still ACTIVE and is an OPEN OWNER DECISION:** `vendor_custom_included_token` — the Custom plan builder's "Included Token (per cycle)" line at ₱100. Locked-SKU territory, deliberately untouched. `/vendor-dashboard/creators` is the other open one: its whole meter is tokens, so retiring the currency leaves it with none.
+✅ **BOTH remaining token items CLOSED 2026-08-07** by the owner's ruling *"tokens are already retired"* (PR #4223). The Custom plan's "Included Token (per cycle)" axis is **gone from the code** — note that deactivating its catalog row would have changed NOTHING, because a hardcoded ₱100 fallback took over; the retirement had to happen at the source. Creator outreach is now **FREE** (it debited a reach token, and with packs retired the first Pro vendor to send would have been told to top up at a page that no longer exists). The catalog row is deliberately left as-is: with the code gone it prices nothing, and flipping a live SKU is owner territory.
 
 ### 0.D How money flows (per `/pricing`)
 
