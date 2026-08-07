@@ -153,6 +153,62 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   drifted for 3 weeks with green CI. See the newest `WHATS_NEXT_INDEX.md` section for 8 traps.
 > Execute per each contract's own rules; build flag-dark; stop at every HUMAN gate.
 
+> ### ▶ ACTIVE 2026-08-07: A REJECTED QUERY IS NOT A THROWN ERROR — and TWO operational warnings
+> **Full handoff: [`WHATS_NEXT_Session_Handoff_2026-08-07.md`](WHATS_NEXT_Session_Handoff_2026-08-07.md).**
+> 6 PRs merged, 1 closed as superseded.
+>
+> 🔴 **A LIVE USER-FACING BUG RAN FOR WEEKS WITH GREEN CI.** Every guest who wrote a
+> message on a Papic photo got `save_failed`. The route posted EIGHT named arguments to
+> `submit_photo_message`; prod's function took SEVEN. **PostgREST resolves an RPC by its
+> exact set of NAMED arguments** — one unknown name means NO candidate matches and the
+> call fails before the body runs. Nothing threw; CI never calls the live database.
+> 🔑 **THIS IS THE THIRD COSTUME OF ONE RULE.** A phantom **column** in a select, a
+> phantom **enum value** in a filter, and now a phantom **argument** in an `.rpc()` all
+> get the query **REJECTED, NOT THROWN**. Silence every time. Assume a fourth exists.
+>
+> 🔑 **WHY THE SCHEMA WAS MISSING — the orphan directory.** The feature's migration was
+> written into `apps/supabase/migrations/`; `supabase db push` reads
+> `<repoRoot>/supabase/migrations` ONLY. The app half shipped and went live, the schema
+> half went nowhere, and **both halves looked done**. Same shape as the orphan
+> `changelog.d` dirs that stranded 172 fragments.
+>
+> 🛡 **THREE NEW GUARDS, ALL MUTATION-TESTED — do not weaken or delete:**
+> `lint-server-only-boundary.mjs` · `lint-migrations-dir.mjs` ·
+> `rpc-argument-names.db.test.ts` (197 `.rpc()` sites checked, 8 skipped AND reported).
+> 🔑 **Wiring a guard into `ci.yml` takes THREE edits** — the step (`id:` +
+> `continue-on-error`), the **env binding**, and the `check '...' "$VAR"` line. Miss any
+> one and the guard runs but can never fail the job. It is decorative.
+>
+> 🚨 **A "VERIFIED" TASK BRIEF CAN STILL BE WRONG.** The orphan-dir brief said all three
+> findings were checked and said *delete both files*. **Finding 3 was false** — its check
+> matched `column_name ILIKE '%kwento%'`, which proves *some* column exists, not that
+> *this file's* objects do. Obeying it would have **destroyed the only remaining record
+> of schema a live feature needed.** Re-verify before running a brief's destructive step.
+>
+> ⚠️ **1 · ANOTHER SESSION WORKS THIS REPO CONCURRENTLY.** A force-push was rejected, and
+> that rejection is the ONLY reason I noticed it had pushed the same fix minutes earlier;
+> forcing would have silently erased its work. Before any force: the remote tip must
+> equal your own `ORIG_HEAD`. A naive "does the remote have commits I lack?" **cries wolf
+> after your own rebase.** And **verify the push landed** — a `&& echo "pushed"` chain
+> prints success after a failed push.
+>
+> ⚠️ **2 · THE SHARED MAIN CHECKOUT HOLDS 96 UNCOMMITTED FILES** (29 A, 67 M) from that
+> session and is 122+ commits behind, so `git pull` aborts. **Do NOT stash or discard —
+> they are not yours.** Read current main with
+> `git worktree add --detach /tmp/wt-read origin/main`.
+> 🔴 **OWNER DECISION: keep or discard that work.**
+>
+> ⚠️ **#4004 (CSAM known-hash hook) MERGED** despite `DECISION_LOG.md` 2026-08-04 saying
+> it must not. **Verified INERT** (`CSAM_HASH_MATCH_ENABLED`, default off) — merging
+> activated nothing. 🔑 **But the gate moved from a draft PR to an env var.** Condition
+> unchanged: enrol with a known-hash provider AND sign the NPC Circular 16-02 agreement
+> BEFORE setting it. Both are contracts, not code.
+>
+> ✅ `NEXT_PUBLIC_PLAN3D_SHARED_ROOM` is **ON** — read out of the live production bundle
+> (compiled constant `!0`), not inferred. ⚠ The booking-fee flag is **unverifiable from a
+> session** (server-only, page behind a vendor login); it needs TWO switches and the
+> billing one is off, so nothing is charged. Prod: 0 fee charges, 13 booked vendors.
+
 > ### ▶ ACTIVE: TIME — and the class of bug behind it
 > **Set 2026-08-04. This replaced the INTERCONNECTION LAYER block, which is DONE (14 PRs,
 > all merged; its findings live in `DECISION_LOG.md` 2026-08-01/02 and the memory notes).**

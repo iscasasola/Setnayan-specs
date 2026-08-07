@@ -7,6 +7,44 @@
 ---
 
 
+## 2026-08-07 · Build-integrity sweep — READ FIRST if you touch CI guards, migrations, or an open PR
+
+**[`WHATS_NEXT_Session_Handoff_2026-08-07.md`](WHATS_NEXT_Session_Handoff_2026-08-07.md)**
+
+6 PRs merged, 1 closed as superseded. **One was a live user-facing bug: every guest
+who wrote a message on a Papic photo got `save_failed`, for weeks, with green CI** —
+the route sent an RPC argument the production function did not accept, and a rejected
+query is not a thrown error. Its migration had been written into an **orphan
+`apps/supabase/migrations/` directory that `supabase db push` never reads**, so the
+app half went live and the schema half went nowhere. Both halves looked done.
+
+**Three new CI guards, all mutation-tested — do not weaken or delete:**
+`lint-server-only-boundary.mjs` · `lint-migrations-dir.mjs` ·
+`rpc-argument-names.db.test.ts`. 🔑 Wiring a guard into `ci.yml` takes **three** edits
+(step + env binding + `check` line); missing any one makes it decorative.
+
+⚠️ **TWO OPERATIONAL WARNINGS FOR A COLD START:**
+1. **Another session works this repo concurrently.** A force-push of mine was rejected,
+   and that rejection is the *only* reason I noticed it had pushed the same fix minutes
+   earlier — forcing would have erased its work. Check `origin/<branch>` vs `ORIG_HEAD`
+   before any force, and verify the push actually landed afterwards.
+2. **The shared main checkout holds 96 uncommitted files** (29 added, 67 modified) from
+   that session and is 122+ commits behind. **Do not stash or discard them.** Read
+   current main via `git worktree add --detach /tmp/wt-read origin/main`.
+   🔴 **OWNER DECISION: keep or discard that uncommitted work.**
+
+🚨 **A "verified" task brief can still be wrong.** The orphan-directory brief said all
+three findings were checked and instructed *delete both files*; **finding 3 was false**,
+and obeying it would have destroyed the only remaining record of schema a live feature
+needed. Re-verify a brief's claims before running its destructive step.
+
+⚠️ **#4004 (CSAM known-hash hook) MERGED** despite `DECISION_LOG.md` 2026-08-04 saying it
+must not. **Verified inert** — it needs `CSAM_HASH_MATCH_ENABLED`, default off — but
+**the gate moved from a draft PR to an environment variable.** The condition is
+unchanged: enrol with a provider and sign the NPC Circular 16-02 agreement first.
+
+---
+
 ## 2026-08-06 · Cleanliness findings — the work register
 
 **[`WHATS_NEXT_Cleanliness_Findings_2026-08-06.md`](WHATS_NEXT_Cleanliness_Findings_2026-08-06.md)**
