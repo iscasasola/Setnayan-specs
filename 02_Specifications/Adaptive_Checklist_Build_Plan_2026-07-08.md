@@ -83,7 +83,10 @@ Every PR is flag-gated and default-OFF; the wedding checklist output must stay b
 These modules exist with **zero callers**; nothing here is a rewrite, it's connecting dead code to the render path.
 - **Budget health-check:** call `computeBudgetHealth()` (`lib/checklist-budget.ts:120`) from the checklist/budget surface; render the best/worst-case buffer + over/under health states (design doc § 5). *Market: WeddingWire live budget + Bridebook benchmark allocation.*
 - **State machine:** call `resolveCategoryState` (`lib/checklist-state.ts`) from the render path so each category shows `not_started → searching → in_progress → done` and each task **deep-links into `/vendors`** and writes back on lock. *Market: The Knot "task = decision," +16% conversion; the shortlisted→reached-out→booked board.*
-- **Replace `checklist-taxonomy.ts`:** real reader that (a) reads `style_preferences.interested_categories` (JSONB), (b) walks `getCoverageTaxonomy()`, (c) gates by event-type/faith via `passesEventTypeFilter`/`passesFaithFilter` (`lib/taxonomy-filters.ts`).
+- **Replace `checklist-taxonomy.ts`:** ⚠ **The stub was DELETED from the repo on
+  2026-08-06** (verified 0 importers; the 2026-07-26 phantom-column fix inside it
+  therefore changed nothing anyone could see). This PR now CREATES the file, it
+  does not edit one — same destination, no existing body to preserve. Real reader that (a) reads `style_preferences.interested_categories` (JSONB), (b) walks `getCoverageTaxonomy()`, (c) gates by event-type/faith via `passesEventTypeFilter`/`passesFaithFilter` (`lib/taxonomy-filters.ts`).
 - **Guardrail:** state-aware — a `done` task never re-prompts (avoid The Knot's #1 complaint).
 - **Done when:** locking a vendor in `/vendors` flips its checklist task to `done` and moves the budget buffer, live.
 

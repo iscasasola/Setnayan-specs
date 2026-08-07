@@ -6,6 +6,28 @@
 
 ---
 
+
+## 2026-08-06 · Cleanliness findings — the work register
+
+**[`WHATS_NEXT_Cleanliness_Findings_2026-08-06.md`](WHATS_NEXT_Cleanliness_Findings_2026-08-06.md)**
+
+11 PRs shipped that day; **14 findings remain, priced by who they hurt.** Every
+finding survived a skeptic agent instructed to refute it.
+
+⚠ **P1 is three items:** six shipped features with no doorway · the app
+disagreeing with itself about when the wedding day is (12h out at the start, 36h
+at the end, both definitions consumed in the SAME component) · the admin Samahan
+tab throwing because one allow-list has 8 of 9 members.
+
+🔑 **The shape of nearly every one: two places holding the same fact, and one
+never got the update.** Ask "does this fact live in more than one place, and do
+the copies agree?" — not "is this correct?".
+
+⛔ **A NOT-WORK list is included and is load-bearing** — 18 files parked on
+purpose, 3 reached by CI rather than imports, and a 4,100-line "dead" wizard that
+is LIVE. An audit recommended deleting it; that would have broken a working
+screen for couples.
+
 ## 0 · THE OWNER'S QUEUE — VERIFIED AGAINST LIVE REALITY 2026-08-06
 
 > 🛑 **VERIFY EVERY ROW BEFORE YOU READ THIS LIST TO THE OWNER.** Owner, 2026-08-06:
