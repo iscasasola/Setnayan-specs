@@ -53,11 +53,23 @@ before trusting any audit.
 
 ## 1 · Ground rules for the new account (read before § 2)
 
-- **No memory files travel.** `~/.claude/.../memory/` does not move between
-  accounts or machines. Everything needed is committed: this corpus
-  (`~/Documents/Claude/Projects/Setnayan/`) and the code repo
-  (`github.com/iscasasola/setnayan-platform`). A `[[double-bracket]]` reference
-  in any doc is a topic hint, not a file you can open.
+- **Which case are you? It changes what you inherit.**
+  - **SAME machine, different Claude account** (the 2026-08-07 transfer): you
+    inherit **everything** — no cloning, no setup. Verified: nothing under
+    `~/.claude/` is scoped to a Claude account; the path
+    `~/.claude/projects/-Users-icecasasola-Documents-Claude-Projects-Setnayan/memory/`
+    is derived from the **project folder and the OS user**, so all ~212 memory
+    notes, both repos, and the auto-loaded `CLAUDE.md` files are already in
+    place. Confirm in one line before relying on it:
+    `ls ~/.claude/projects/-Users-icecasasola-Documents-Claude-Projects-Setnayan/memory/ | wc -l`
+    — a number near 212 means the notes came across; **0 or "No such file"
+    means treat it as the case below.**
+  - **DIFFERENT machine:** assume **no** memory. Clone both repos —
+    `iscasasola/Setnayan-specs` (this corpus) and
+    `iscasasola/setnayan-platform` (the code). Everything essential was copied
+    into committed docs on purpose.
+- A `[[double-bracket]]` reference in any doc is a topic hint, **not** a file you
+  can open unless the memory directory above is present.
 - **Start at [`WHATS_NEXT_INDEX.md`](WHATS_NEXT_INDEX.md)** — the master register
   of active streams and their gates. Then the corpus `CLAUDE.md` ACTIVE block.
 - **RULE 0 — find it before you build it.** ~2 years of design and code exist.
