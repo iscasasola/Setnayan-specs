@@ -209,6 +209,41 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > session** (server-only, page behind a vendor login); it needs TWO switches and the
 > billing one is off, so nothing is charged. Prod: 0 fee charges, 13 booked vendors.
 
+> ### 🔴 COLD START? READ THE CODE REPO'S `HANDOFF_RESUME_2026-08-07.md` FIRST.
+> Set 2026-08-07 because the owner is continuing **on a new Claude account**, and
+> `~/.claude/.../memory/` does **NOT** travel. That file is self-contained: verified
+> prod state, the open URL decision, the 16-surface logo debt, the retention model,
+> and every trap inlined rather than linked. **This block is a summary of it, not a
+> replacement.**
+>
+> **Verified prod, 2026-08-07:** 5 events · 2 vendors, **both hidden** · **0** photos ·
+> **0** fee charges · **0** livestream channels. **Nothing is live to a stranger.**
+>
+> 🔗 **VENDOR BARE-ROOT URLs ARE ALREADY BUILT — DO NOT "MOVE" ANYTHING.**
+> `app/[slug]/page.tsx:219` already dispatches to `renderVendorBySlug`, and the vendor
+> sitemap already emits `${baseUrl}/${business_slug}`. `/v/[slug]` is LEGACY.
+> `setnayan.com/setnaprod` 404s only because that shop is unverified + hidden.
+> ⚠ I reported this backwards **twice** — once calling the shop page's correct address
+> a defect, once calling a **200 that was the not-found body** a working page.
+> 🔑 **A STATUS CODE IS NOT A PAGE. READ THE BODY.**
+> ⏭ Real work (40 traps, 24 severe): one shared name registry (**zero collisions today,
+> 7 names — free now, a migration later**) · 14 unprotected route words incl. `creators`
+> + `open-shop`, both LIVE and sitemapped · rename-forwarding **has never run in prod and
+> expires at 90 days** while save-the-dates go out 6–12 months ahead · a retired slug is
+> **re-claimable** (one is free right now) · shops have **no** rename forwarding.
+> 🔴 **OWNER-ONLY, blocks event nesting only:** what a person's tag looks like. Nobody has
+> one; the one account that does reads `s89u-kemmf2adck`, so flipping today prints a
+> machine code on invitations forever.
+>
+> 🖼 **`logo_url` HOLDS `r2://`, NOT A URL** — a raw value in an `<img>` fails SILENTLY.
+> Launcher fixed (#4215); **16 surfaces baselined**, including the public shop page.
+> 🔎 **The vendor route SOFT-404s** — its `loading.tsx` forces streaming, so `notFound()`
+> can no longer set the status and every bad shop URL tells Google "success".
+> 🗄 **Retention:** originals **6 months from FIRST capture** (drop is DEFAULT-ON),
+> compressed gallery **forever**, Drive is the only way to keep originals. Copy corrected
+> (#4208 · #4209). 🔴 **Paid preservation ALREADY EXISTS switched off** (₱999/yr) — owner
+> 2026-08-07: **not selling yet**; do not re-ask its four numbers.
+
 > ### ▶ ACTIVE: TIME — and the class of bug behind it
 > **Set 2026-08-04. This replaced the INTERCONNECTION LAYER block, which is DONE (14 PRs,
 > all merged; its findings live in `DECISION_LOG.md` 2026-08-01/02 and the memory notes).**
