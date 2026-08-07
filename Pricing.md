@@ -121,7 +121,7 @@ Each answer ships as a catalog migration (or route/PR) FIRST; § 00 then mirrors
 
 ## 0. LIVE SITE CATALOG — authoritative as of 2026-06-04 (⚠ SUPERSEDED by § 00 above · 2026-06-07)
 
-> Mirrors setnayan.com/pricing exactly. Each customer SKU carries a build state the site shows: **Live**, **In build**, or **Coming soon**. `[Token]` = "Token Worthy" — redeemable with vendor tokens at a rate the vendor sets in their dashboard. This section supersedes §§ 2–8 wherever they disagree.
+> Mirrors setnayan.com/pricing exactly. Each customer SKU carries a build state the site shows: **Live**, **In build**, or **Coming soon**. This section supersedes §§ 2–8 wherever they disagree.
 
 ### 0.A Couple-side software SKUs
 
@@ -140,7 +140,7 @@ Each answer ships as a catalog migration (or route/PR) FIRST; § 00 then mirrors
 | Guest Stories (Papic Add-on) | ₱1,999 | Coming soon | 30-second story maker for guests |
 | Live Venue Photo Wall (`LIVE_WALL`) | ₱2,500 / day | **Live** | Live photo collage with live count (round-up 2026-07-11, was ₱2,499; repriced 2026-06-29 per audit) |
 | Pabati | ₱1,299 / day | Coming soon | Up to 300 × 5-second videos (repriced 2026-06-29) |
-| Pakanta `[Token]` | ₱2,499 | Coming soon | Create a special song for the couple (single SKU — was 3 tiers) |
+| Pakanta | ₱2,499 | Coming soon | Create a special song for the couple (single SKU — was 3 tiers) |
 | Pakulay | ₱0 | Coming soon | Free mood board · palette + visual identity for every account |
 | Thank You (Papic Add-on) | **₱2,499** | **Live** (KEPT — owner ruling 2026-07-13, reverses the 07-08 retire) | Live on `/pricing` at ₱2,499; the 07-08 retire is superseded by the 07-13 keep-live-and-paid ruling. |
 
@@ -155,31 +155,23 @@ Each answer ships as a catalog migration (or route/PR) FIRST; § 00 then mirrors
 | SKU | Price | Annual | Notes |
 |---|---|---|---|
 | **Solo Vendor** | **₱999 / 28 days** | **₱9,999 / yr** (~23%) | 1 category · 0 sub-seats · free vendor site · NEW canonical 2026-06-29 |
-| Pro Vendor (28-day prepaid block) | **₱2,499 / 28 days** | **₱24,999 / yr** (~23%) | 3 categories · 3 sub-seats · free vendor site · 100 complimentary tokens once verified |
+| Pro Vendor (28-day prepaid block) | **₱2,499 / 28 days** | **₱24,999 / yr** (~23%) | 3 categories · 3 sub-seats · free vendor site |
 | Enterprise Vendor (28-day prepaid block) | **₱7,999 / 28 days** (2026-07-10 finalization · was ₱4,999) | ~~annual TBD~~ **₱79,999 / yr** (shipped `20270712300000` · code-sync 2026-07-19) | all categories · **BOUNDED: up to 10 team seats · 100 km reach** · ~~100 tokens~~ (free-token grant retired 2026-06-17) (Custom ₱8,999+ is the truly-unlimited tier above it) |
 | Additional Branch (per branch) | ₱999 / 28 days | — | Enterprise only · apply-then-pay (0034) · BUILT 2026-06-05 (price ₱999 charm + Enterprise gate owner-locked 2026-06-05; supersedes the prior "Pro+ only") |
 
-**Token packs** (vendors top up; redeem against any `[Token]` couple SKU at the vendor's dashboard rate):
+**Token packs — RETIRED 2026-08-07.** The vendor token currency is gone: no packs on sale, no bundle granted with a plan, no admin grant surface, no voucher that mints one. Owner lock 2026-07-21: *"token can retire, there should be nothing that needs token anymore."*
 
-| Pack | Price |
-|---|---|
-| 5 tokens | ₱1,000 |
-| 10 tokens | ₱2,000 |
-| 25 tokens | ₱5,000 |
-| 50 tokens | ₱10,000 |
-| 100 tokens | ₱20,000 |
+Prod never saw one bought or spent — 0 purchases, 0 redemptions. Five pilot vendors hold 500 granted tokens between them; those balances and their audit rows are **kept as history** and buy nothing.
 
-> **Flat ₱200/token, anchored at ₱1,000 = 5 tokens — owner-CONFIRMED 2026-07-15 ("Restructure the token catalog: ₱200/token, ₱1,000 = 5 tokens (I confirm this)"); SHIPPED via PR #3138** (migration `20270728100000` — retires `vendor_token_pack_4`, inserts `vendor_token_pack_5` @ ₱1,000, reprices 10/25/50/100 to a flat ₱200/token). Purchase price = a token's burn value (1 token = ₱200), no volume premium or discount, so a token is always worth exactly what you pay for it. Supersedes the ₱800 4-token bottom pack drafted 2026-07-12 and the flat-₱100 ladder locked 2026-07-10. (Note: the old 100-free-on-verification grant was RETIRED 2026-06-17 · migration `20270110320020` — tokens now come only from admin grants, subscription bundles, or paid packs.)
+**Answering a matched couple is FREE** on every tier, and has been since PR #3531 neutralised the burn. The vendor booking fee — 5% on the first ₱100,000 · 1% above · floor ₱50 · sourced clients only · first 5 free — is the vendor-side money, and it is still flag-dark. Derive the rate from `lib/booking-fee.ts`; never re-type it.
 
-~~Verified vendors receive **100 complimentary tokens** once verification is approved.~~ **RETIRED 2026-06-17** (migration `20270110320020`) — tokens now come only from admin grants · subscription bundles · paid packs. *(code-sync 2026-07-19)*
-
-**Vendor token sinks (what a token buys) — corrected 2026-07-11:** (1) **answer a matched inquiry** — **a flat 1 token (₱200 — owner-locked 2026-07-12, raised from ₱100)** to unlock a couple, **uniform across ALL locations** (supersedes the 2026-06-05 region-banded 1–3 tokens; the lead fee self-tiers by deal size — ~2.5% on an ₱8k booking down to ≤0.13% on ₱150k — so no geo-banding is needed, geo-banding was regressive; ⚠ at ₱200 watch the small-vendor pinch on low-end weddings — value-indexing ₱200-big-category / ₱100-small removes it if it bites), idempotent per (vendor·event), covers ALL the vendor's services — **this is the ONLY wired token sink**; (2) **redeem** against any `[Token]` couple SKU at the vendor's dashboard rate. ~~(3) feature boost~~ **❌ STRUCK — never built (see Feature-boost row above).** ~~(4) sync an outside event = 1 token~~ **❌ STRUCK 2026-07-10 — import is FREE.** The 1-token sync fee was dropped by the 2026-06-24 owner decision and shipped free end-to-end 2026-06-30 (PR #2448) — importing/syncing an off-platform event, its stats, portfolio, calendar-block AND the 1 couple-authenticated review are **all free**; the integrity gate is the **couple-claim double-opt-in handshake, not a fee** (owner confirmed "outside booking is free import"). *(Do not confuse with the separate burn-to-answer-an-inquiry sink #1, which is unchanged.)*
+⚠ **One token row is still ACTIVE and is an OPEN OWNER DECISION:** `vendor_custom_included_token` — the Custom plan builder's "Included Token (per cycle)" line at ₱100. Locked-SKU territory, deliberately untouched. `/vendor-dashboard/creators` is the other open one: its whole meter is tokens, so retiring the currency leaves it with none.
 
 ### 0.D How money flows (per `/pricing`)
 
 - **You → Setnayan:** software SKUs above, paid at 100% retail. PHP only · BIR receipts on every transaction.
 - **You → Vendor (off-platform):** vendor packages settle directly with the vendor (bank / GCash / in person). Setnayan takes **0% commission**.
-- **Vendor → Setnayan:** 28-day prepaid subscription for marketplace presence + token top-ups to redeem software for their own events.
+- **Vendor → Setnayan:** 28-day prepaid subscription for marketplace presence, plus the booking fee on sourced clients (flag-dark). Token top-ups are RETIRED 2026-08-07.
 
 ---
 
@@ -191,7 +183,7 @@ The live site disagreed with itself (snapshot 2026-06-04). `/pricing` was treate
 
 1. **Vendor Pro price appears four different ways.** `/pricing` ₱2,499 / 28 days · homepage ₱1,999 / 28 days · `/for-vendors` ₱4,999 / **week** (founder ₱3,999/wk) · `/how-it-works` ₱499 / **week**. These are different *models*, not typos.
 2. **Commission.** Homepage + `/pricing` say **0% commission**; `/for-vendors` says Setnayan Pay is a **flat 5.0%** on every booking. Mutually exclusive.
-3. **Verification badge.** Homepage charges **₱1,499 lifetime + ₱499 refresh**; `/pricing` and `/for-vendors` say listing/verification is free with **100 complimentary tokens** on approval.
+3. **Verification badge.** Homepage charges **₱1,499 lifetime + ₱499 refresh**; `/pricing` and `/for-vendors` say listing/verification is free. (The 100-token grant on approval was retired 2026-06-17; the whole currency followed 2026-08-07.)
 4. **"Setnayan AI" vs "Setnayan Concierge."** The AI planner SKU is **Setnayan AI ₱1,499** (homepage, `/pricing`). But `/for-vendors` still advertises a free **"Setnayan Concierge"** worth **₱2,499** per booked couple. Same product two names + two prices, or two different things? Decide and unify.
 5. **Enterprise** (₱5,499 / 28 days) and **Setnayan AI** (₱1,499) are consistent across pages — no action.
 
@@ -204,7 +196,7 @@ The live site disagreed with itself (snapshot 2026-06-04). `/pricing` was treate
 - **Display format:** ₱ with comma separators (₱4,999 not ₱4999).
 - **Charm pricing ladder** (locked 2026-05-08, refined 2026-05-12, B2B tiers charm-corrected 2026-05-17): ₱49, ₱99, ₱199, ₱499, ₱999, ₱1,499, ₱1,999, ₱2,499, ₱2,999, ₱4,999, ₱9,999, ₱19,999, ₱24,999. Higher tiers follow the same -1 pattern (₱49,999, ₱99,999, ₱249,999, ₱799,999 for B2B).
 - **Apparatus pricing principle:** every SKU prices the tool / service / capability — never raw hardware, labor, or hours (except per-day / per-hour capacity units for time-bounded services like Panood).
-- **Payment model (reconciled 2026-06-04):** customers pay **apply-then-pay direct in PHP** with manual admin reconciliation (BIR receipt on every software purchase). The iteration 0003 *customer* token wallet stays retired — couples never see a token balance. **However, a vendor-side token economy is now LIVE on the site:** vendors buy token packs (5–100 tokens, ₱1,000–₱20,000 at a flat ₱200/token — owner-confirmed 2026-07-15, anchored at ₱1,000 = 5 tokens; shipped PR #3138), and redeem them against any "Token Worthy" couple SKU (marked `[Token]` in § 0) at a rate they set in their dashboard. (The old 100-free-on-verification grant was RETIRED 2026-06-17 · migration `20270110320020`.) This reverses the blanket "no tokens UI anywhere" memory rule — tokens exist on the **vendor** side only. See § 0.C.
+- **Payment model (reconciled 2026-06-04):** customers pay **apply-then-pay direct in PHP** with manual admin reconciliation (BIR receipt on every software purchase). The iteration 0003 *customer* token wallet stays retired — couples never see a token balance. **The vendor-side token economy is RETIRED as of 2026-08-07** (owner lock 2026-07-21) — no packs, no bundles, no grant surface, nothing that spends one. There is no token anywhere in the product now, on either side. See § 0.C.
 - **No-refund SKUs** are marked explicitly; refundable SKUs default to 14-day refund window unless otherwise stated.
 - **2D billing model** (locked 2026-05-17): every `service_catalog` row carries `time_recurrence ∈ (one_time, weekly, quarterly, annual, lifetime)` × `event_scope ∈ (per_event, all_events)`. Lets per-event couple SKUs and annual-all-events vendor / organizer subscriptions live in the same table without enum collision. See [0034 Payments & Cart](0034_payments_and_cart/0034_payments_and_cart.md) service_catalog seed sections (h)–(p).
 - **Cost Watch primitive** (locked 2026-05-17): every paid SKU consumption logs actual Setnayan-incurred cost + `cost_breakdown JSONB` to `service_render_costs`. Materialized view `service_catalog_cost_watch` exposes highest-render / avg / p95 / cost-to-price ratio + 🟢/🟡/🔴 health flag inline in the [0023 admin console § 3.5](0023_admin_console/0023_admin_console.md). Pricing decisions use "highest single render" as the floor.
