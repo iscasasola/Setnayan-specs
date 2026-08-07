@@ -209,6 +209,46 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > session** (server-only, page behind a vendor login); it needs TWO switches and the
 > billing one is off, so nothing is charged. Prod: 0 fee charges, 13 booked vendors.
 
+> ### ▶ ACTIVE 2026-08-07: PAPIC TIMING — three numbers, locked together
+> **Owner set all three in one sitting. They interlock; do not move one alone.**
+>
+> | | value |
+> |---|---|
+> | cameras may start shooting | **6 months** before the event |
+> | full-res kept | **6 months from the event's FIRST capture** |
+> | …but never less than | **3 months after the event date** (was 30 days) |
+> | compressed gallery | **indefinitely** |
+> | guests may shoot | **the event day only**, unless the host presses a button |
+>
+> 🔑 **THE FLOOR IS THE PROMISE — NEVER DERIVE THE CAPTURE CAP FROM RETENTION.** My
+> first draft computed `5 = 6 months − 1 month`. The owner then set capture to six
+> months, at which point that same subtraction yields **ZERO** — the earliest
+> permitted photo's own clock expires ON the wedding day. What actually preserves
+> anything afterwards is `GREATEST(first_capture + 183d, event_date + 92d)` in
+> migration `20271102113000`. **92, not 90:** three calendar months is 89–92 days.
+>
+> 🚨 **Neither rule was in the code.** The no-window default was a **SINGLE DAY** —
+> mislabelled "legacy" while applying to every event whose couple never opened the
+> picker — which is what wrote `valid_from = valid_until` onto 6 of 13 prod seats.
+> And **guests had NO time gate at all**: `eventPapicGuestActive()` asks WHETHER
+> the event has a pass, never WHEN. Seats refused everything; guests were open
+> forever. The same feature, wrong in opposite directions.
+>
+> 🪤 **A SABOTAGE RUN PROVES NOTHING UNLESS THE BASELINE WAS GREEN AND THE
+> SABOTAGE APPLIED.** I ran a 4-way matrix against an already-red suite (two
+> results meaningless), and a `perl s///` without `/g` hit a line 50 above the one
+> I meant. Also: a guard matching `NOW() >= (f.event_date` **still matched
+> `f.event_dateX`** on the prefix, and `OR TRUE` neutered the clause while leaving
+> every searched string intact. Match the arithmetic, add `\b`, ban the tautology.
+> ⚠ `timeout` **does not exist on macOS** — `timeout 900 npx tsx …` printed
+> `exit=0` and ran nothing.
+>
+> ⏭ **PR #4235 is deliberately NOT auto-merging** (label `do-not-auto-merge`): it
+> also corrects the public `/privacy` notice, which now understated retention —
+> RA 10173 binds us to the period we DECLARE. A new guard **derives** the month
+> figure from `FULL_RES_POST_EVENT_GRACE_DAYS`, so copy and code cannot drift.
+> **Owner look needed before merge.** #4236 (guest host switch) is armed.
+
 > ### 🔴 COLD START? READ THE CODE REPO'S `HANDOFF_RESUME_2026-08-07.md` FIRST.
 > Set 2026-08-07 because the owner is continuing **on a new Claude account**, and
 > `~/.claude/.../memory/` does **NOT** travel. That file is self-contained: verified
