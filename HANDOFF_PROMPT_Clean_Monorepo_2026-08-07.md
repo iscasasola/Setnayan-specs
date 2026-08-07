@@ -84,10 +84,28 @@ platform (weddings first), Next.js 15.5 App Router + React 19 + TypeScript,
 shipping to Vercel, a Tauri desktop build, and an installable PWA. Supabase
 (Singapore) for data, Cloudflare R2 (APAC) for media.
 
-DO NOT REBUILD ANYTHING. An earlier plan to consolidate this repo clean-slate
-into a fresh directory was tested and disproven — the monorepo is already clean,
-and the real defect class is one fact stored in two places with the copies
-drifting. Your job is to find, verify, and close those gaps.
+THE MONOREPO IS ALREADY CLEAN — THIS IS NOT A CONSOLIDATION JOB.
+An earlier plan (from another AI) called for rebuilding this repo clean-slate
+into a fresh `clean-project/` directory. It was tested and DISPROVEN on
+2026-08-06/07, and that folder was never created. Measured, not assumed:
+  · `git status` went 212 entries -> 0 once the root .gitignore became an
+    allowlist (the repo root IS the home directory — that was the whole "mess")
+  · unfinished features are already flag-dark individually; a blanket
+    experimental flag would have added a second, competing gate
+  · the two LARGEST "safe to delete" recommendations were both WRONG — the
+    "retired" ~4,100-line Concierge wizard is LIVE via the mood-board page
+  · 13 provably-dead files were deleted; 18 more are parked ON PURPOSE and each
+    says so in its own docblock. Deleting those is what would break things.
+DO NOT REBUILD ANYTHING. DO NOT CREATE A SECOND WORKSPACE.
+
+THE REAL DEFECT CLASS IS: one fact stored in two places, with the copies
+drifting. Every significant find on 2026-08-06/07 was that shape — the photo tag
+limit reached the database and not the screen; a security fix reached two
+transports out of five; the ceremony list reached the database and not the
+schedule; a mission library added a fourth source and the couple's screen still
+knew three, so Setnayan's own recommendations were labelled "Vendor". Nothing
+errored, nothing logged, CI was green throughout. A rebuild DUPLICATES that class
+rather than fixing it. Your job is to find, verify, and close those gaps.
 
 START HERE, IN THIS ORDER:
 1. ~/Documents/Claude/Projects/Setnayan/WHATS_NEXT_INDEX.md — the master register
@@ -157,6 +175,33 @@ Reply in simple English describing what a PERSON experiences. No file paths,
 function names, table names or flag names in the answer — those belong in the PR
 body. The owner steers product, pricing, scope and risk; they are not reading
 the code.
+
+YOUR FIRST TASK — finish the token retirement (it is half done).
+Owner lock 2026-07-21, verbatim: "token can retire, there should be nothing that
+needs token anymore." Prod has NEVER seen a token bought or spent. A verified
+sweep found 42 user-visible token texts; the vendor-facing ones shipped in
+PR #4216. Still standing, in order:
+  1. /admin/token-purchases and /admin/vendors/<id>/tokens — two whole admin
+     pages (confirm token-pack payments; grant tokens to a vendor).
+  2. "Token sales" + "Token bands" in the admin sidebar on EVERY admin page,
+     plus a "Token sales" row in the admin work list.
+     WARNING: admin nav shape is guarded (a cleanup once silently deleted two
+     nav groups) — removing entries must regenerate that guard IN THE SAME PR.
+  3. Public copy — /features (EN + TL) and the generated llms.txt.
+  4. Corpus — Pricing.md § 0.C still narrates a live token economy.
+Two of these need the OWNER, not you:
+  · /vendor-dashboard/creators is an entire feature whose currency is tokens.
+    Retiring the currency leaves it with no meter. Free, or something else?
+  · The Custom plan builder sells PHP 100 per 25 tokens/cycle, and
+    vendor_billing_catalog carries an ACTIVE "Custom — Included Token (per
+    cycle)" row at PHP 100. Locked-SKU territory — ask before touching.
+
+AFTER THAT: Papic Challenges PR-D/E/F (Pabati doorway · couple library picker ·
+vendor lane gate + a hard 5-paid-slot sell cap). PR-A/B/C are live and verified
+in prod. Read 0012_papic/Papic_Challenges_Resume_Handoff_2026-07-23.md § 5 FIRST
+— it carries an owner lock: do not push, PR or auto-merge until the migration is
+verified on a real database. That lock was violated on 2026-08-07; the outcome
+was clean but the process was not.
 ```
 
 ---
