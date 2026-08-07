@@ -479,7 +479,7 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 
 **There is no price table in this file, on purpose.** Prices moved often enough that every copy of them became a way to quote a dead number. The only sources are, in order: the **live site** → the **live DB** (`platform_retail_catalog_v2`, `vendor_billing_catalog`) → **`Pricing.md § 00`**. Read one of those; never a table in a primer.
 
-**Vendor-side shape** (amounts live in `vendor_billing_catalog`): Solo · Pro Vendor · Enterprise · Custom, each 28-day with an annual, plus à-la-carte add-ons and token packs. ⚠ **THERE IS A BOOKING FEE — the old "commission is 0% on every vendor booking" line was true until 2026-07-25 and is now FALSE.** Owner-locked taper (`Vendor_Monetization_Model_LOCKED_2026-07-25.md` § 3, coded in `lib/booking-fee.ts` — **derive the rate, never re-type it**): **5% on the first ₱100,000 · 1% above · floor ₱50 · NO cap.** Scope: **SOURCED clients only** (BYO / vendor-invited / returning are free forever), and a verified vendor's **first 5 sourced bookings are free**. Currently **flag-dark** (`NEXT_PUBLIC_BOOKING_FEE_ENABLED`, default off) — nothing is charged until the owner flips it. Enterprise is a BOUNDED tier (up to 10 team seats · 100 km reach · unlimited categories); Custom is the truly-unlimited tier above it. Market Intel (Demand Radar + Price-Position) is **Pro-and-up**.
+**Vendor-side shape** (amounts live in `vendor_billing_catalog`): Solo · Pro Vendor · Enterprise · Custom, each 28-day with an annual, plus à-la-carte add-ons and token packs. ⚠ **THERE IS A BOOKING FEE — but ⚠ CORRECTED 2026-08-06: the "0% commission on vendor bookings" line is *CORRECT AND STAYS*.** Owner, verbatim: *"this is not commission. it is a syncing fee/booking fee."* The couple pays the vendor directly and Setnayan never touches that money; the fee is charged to the VENDOR for the introduction + in-app sync. 🔑 **NEVER call it commission anywhere — product, copy, logs or admin.** (This sentence previously read "…is now FALSE", contradicting the correct statement 80 lines below it in this same file.) Owner-locked taper (`Vendor_Monetization_Model_LOCKED_2026-07-25.md` § 3, coded in `lib/booking-fee.ts` — **derive the rate, never re-type it**): **5% on the first ₱100,000 · 1% above · floor ₱50 · NO cap.** Scope: **SOURCED clients only** (BYO / vendor-invited / returning are free forever), and a verified vendor's **first 5 sourced bookings are free**. Currently **flag-dark** (`NEXT_PUBLIC_BOOKING_FEE_ENABLED`, default off) — nothing is charged until the owner flips it. Enterprise is a BOUNDED tier (up to 10 team seats · 100 km reach · unlimited categories); Custom is the truly-unlimited tier above it. Market Intel (Demand Radar + Price-Position) is **Pro-and-up**.
 
 ### Hard product constraints
 
@@ -531,7 +531,7 @@ FaceEnrollment(enrollment_id, event_id, guest_id, source{rsvp_profile|guest_port
 2. Background uploader (BGTaskScheduler/WorkManager) PUTs to R2 via signed URL
 3. Tag scanner sheet → scan guest QR (`setnayan:guest:{id}`) or table QR (`setnayan:table:{id}`)
 4. Tag intents flush to backend with the upload payload
-5. Backend fans out table-tag to all guests assigned to that table (capped at 10 total tags)
+5. Backend fans out table-tag to all guests assigned to that table (⚠ **NO CAP** — the 10/20 ceilings were retired by the owner 2026-08-06, *"no tag limit. we can tag as many"*)
 
 **Personal Reel / Story render (⚠ CLIENT-SIDE, download-only — reversed 2026-07-23, owner):**
 The reel maker is **free** and renders **entirely in the guest's browser**; the output is **downloaded to their phone and Setnayan stores nothing** (no R2 write, no DB row, no shared feed). This matches the BYO-music not-distributor posture (`14_...Playbook.md §16.7`). See `DECISION_LOG.md` 2026-07-23.
@@ -583,7 +583,7 @@ These are tracked in spec Part 6. Each is a future spec.
 
 ## Privacy & compliance
 
-- PH Data Privacy Act (RA 10173) — guest consent at RSVP, opt-out flow, face-blur for opt-outs, 5-year retention
+- PH Data Privacy Act (RA 10173) — guest consent at RSVP, opt-out flow, face-blur for opt-outs. ⚠ **Retention is NOT 5 years for photos** — full-res originals drop at **6 months from first capture** (default-ON), the compressed gallery is kept indefinitely; 5 years applies to MESSAGES.
 - Couple has 7-day review window (configurable) before public unlock
 - NSFW filter is on by default and CANNOT be disabled
 - DPO is the **proprietor, Indalecio Sacdalan Casasola II** (registered on the NPC DPO system 2026-07-07). ⚠ Not Claire E. Buanhog — she is VP / co-founder and DBRT support. See [[dpo-designation-owner]].
@@ -592,8 +592,8 @@ These are tracked in spec Part 6. Each is a future spec.
 ## Common pitfalls / gotchas for engineers
 
 1. **Don't render reels server-side with major-label music.** Even with TOS click-through, server-side rendering makes Setnayan the direct infringer. Catalogue is owned-AI-generated only.
-2. **Don't auto-delete photos within 5 years.** PH wedding photographers keep originals 5+ years; we match.
-3. **Tag fan-out from table QR.** When a table has 12 guests but cap is 10, alphabetize by RSVP'd name and truncate. Surface the warning to the paparazzo.
+2. ⚠ **CORRECTED 2026-08-07 — this said "don't auto-delete photos within 5 years… we match" and it is FALSE.** Full-resolution originals are **deleted 6 months from the event's FIRST capture** (an engagement shoot starts the clock), floored at 30 days after the event, and the sweep is **DEFAULT-ON** (`papic-fullres-drop.ts` — `!== 'false'`). The **compressed gallery is kept indefinitely** — that is the part that is forever. Google Drive is the only way a couple keeps originals. The live `/privacy` page now says exactly this; this file said 5 years for five days after the code said six months.
+3. **Tag fan-out from table QR.** ⚠ **No truncation — there is NO tag cap** (owner 2026-08-06). The old "alphabetize and truncate at 10" rule is retired; a 100,000 backstop remains in the trigger purely to stop a retry storm and is **not** a product rule.
 4. **Untagged photos still go to the couple.** Don't filter the couple's gallery view by tag presence.
 5. **Personal Reel duration is flexible (1–30s) but template slot durations don't all need to scale linearly.** Some templates have minimum slot durations; if guest picks 1s reel from a template with 4s minimum slots, swap to a shorter-template variant or surface an error.
 6. **Wedding-scoped session tokens.** A paparazzi seat token only works for its bound event. Don't allow cross-event reuse.
