@@ -24,7 +24,7 @@ Retention is bounded on **both** ends, and the two bounds come from different la
 | # | Data class | Iteration(s) | Retention anchor | **Keep for** | Legal basis | Disposal |
 |---|---|---|---|---|---|---|
 | 1 | **Vendor↔couple chat** (`chat_threads`, `chat_messages`) | 0019 | `event_date` | **5 years** | RA 10173 necessity + normal dispute window | Hard-delete thread + messages |
-| 2 | **Media** — Papic photos/video, gallery, reels (R2) | 0012, 0009, 0024 | **first capture** (NOT `event_date`), floored at `event_date` + 3 months | **Full-res 6 months from the event's FIRST capture and never less than 3 months after the event date, then ONE compression to the ~8% web copy — retained INDEFINITELY, never purged** (owner-locked 2026-07-10 "free forever, never deleted"; window 3 mo → 6 mo owner 2026-08-02; post-event floor 30 d → 3 mo and capture opening 5 mo → 6 mo owner 2026-08-07). ⚠ **CORRECTED 2026-08-02** — this row previously read *"5 years (hot 90 d → cold → purge)"*, which described a deletion the product does not perform. ⚠ **ANCHOR CORRECTED 2026-08-07** — it said `event_date`; the clock actually starts at the **first capture**, which can be six months earlier, so an `event_date` anchor overstates how long we hold an engagement-shoot original. A schedule promising a purge that never happens is the more dangerous direction of drift: it is a commitment to the regulator broken every day. The couple's own Google Drive full-res is separate and permanent (2026-07-11 invariant) — we never downgrade or delete THEIR copy. | RA 10173 — see ⚠ below; PH photographer norm | R2 lifecycle: compression at 6 mo; **no expiry rule on the web copy** |
+| 2 | **Media** — Papic photos/video, gallery, reels (R2) | 0012, 0009, 0024 | **first capture** (NOT `event_date`), floored at `event_date` + 3 months | **Full-res 6 months from the event's FIRST capture and never less than 3 months after the event date, then ONE compression to the ~8% web copy — free for **5 years**; past 5 years, continuing to store it becomes a **paid option** whose price is not yet set (owner 2026-08-07, superseding the 2026-07-10 "free forever" lock). ⛔ **Nothing is deleted at 5 years** — the owner set a price REVIEW, not a deletion, and the consequence of declining to pay is NOT decided. Do not build or document a 5-year purge.** (owner-locked 2026-07-10 "free forever, never deleted"; window 3 mo → 6 mo owner 2026-08-02; post-event floor 30 d → 3 mo and capture opening 5 mo → 6 mo owner 2026-08-07). ⚠ **CORRECTED 2026-08-02** — this row previously read *"5 years (hot 90 d → cold → purge)"*, which described a deletion the product does not perform. ⚠ **ANCHOR CORRECTED 2026-08-07** — it said `event_date`; the clock actually starts at the **first capture**, which can be six months earlier, so an `event_date` anchor overstates how long we hold an engagement-shoot original. A schedule promising a purge that never happens is the more dangerous direction of drift: it is a commitment to the regulator broken every day. The couple's own Google Drive full-res is separate and permanent (2026-07-11 invariant) — we never downgrade or delete THEIR copy. | RA 10173 — see ⚠ below; PH photographer norm | R2 lifecycle: compression at 6 mo; **no expiry rule on the web copy** |
 
 > ⚠ **INDEFINITE RETENTION IS A LAWFUL-BASIS QUESTION, NOT A STORAGE SETTING (flagged 2026-08-02).**
 > Row 2 now states that the compressed web copy is kept forever. That is the shipped product and the
@@ -62,7 +62,7 @@ Retention is bounded on **both** ends, and the two bounds come from different la
 | Cameras may start shooting | **6 months** before the event | `PAPIC_CAPTURE_MONTHS_BEFORE` |
 | Full-res ORIGINAL held at full resolution | **6 months** from the event's **first capture** | `DEFAULT_FULL_RES_RETENTION_DAYS = 183` |
 | …but never less than | **3 months after the event date** | `FULL_RES_POST_EVENT_GRACE_DAYS = 92` |
-| The photo itself (compressed copy) | **kept indefinitely — never removed** | no expiry rule |
+| The photo itself (compressed copy) | **free for **5 years**; past 5 years, continuing to store it becomes a **paid option** whose price is not yet set (owner 2026-08-07, superseding the 2026-07-10 "free forever" lock). ⛔ **Nothing is deleted at 5 years** — the owner set a price REVIEW, not a deletion, and the consequence of declining to pay is NOT decided. Do not build or document a 5-year purge.** | no expiry rule in code |
 
 The eligibility rule is `GREATEST(first_capture + 183d, event_date + 92d)` in
 migration `20271102113000` — the **later** of the two, so the floor can only ever
@@ -75,7 +75,9 @@ compress."*** This is the single most-repeated wording error on this product, so
 is stated here rather than assumed.
 
 **Nothing disappears from a customer's gallery, ever.** A compressed copy of every
-photo is derived at capture time and kept **forever**. What the window above governs
+photo is derived at capture time and kept **free for 5 years** (owner
+2026-08-07; past 5 years it becomes a paid option, price not yet set — and
+**nothing is deleted at 5 years**). What the window above governs
 is **resolution**: at the end of it, the full-resolution *original file* is replaced
 by that compressed copy.
 
