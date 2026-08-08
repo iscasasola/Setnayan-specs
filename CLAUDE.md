@@ -283,13 +283,29 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > machine code on invitations forever.
 >
 > 🖼 **`logo_url` HOLDS `r2://`, NOT A URL** — a raw value in an `<img>` fails SILENTLY.
-> Launcher fixed (#4215). ✅ **The PUBLIC SHOP PAGE is now fixed too (2026-08-08) —
-> debt 16 → 15.** It sat on the baseline list under the label *"the highest-value one
-> still owed"* until the owner approved his own shop, opened the address and saw a broken
-> glyph where his logo goes. The resolver was **already imported in that file** and already
-> used for portfolio photos ~1200 lines above the header.
-> 🔑 **A BASELINE IS A BILL, NOT A DECISION** — every remaining line is a surface showing
-> no logo to a real person right now. Work the publicly-reachable ones first.
+> ✅ **DEBT IS ZERO (2026-08-08).** All 16 surfaces resolve; both debt lists — the lint
+> BASELINE and the test's KNOWN_UNRESOLVED — are empty. The public shop page sat there
+> labelled *"the highest-value one still owed"* until the owner approved his own shop,
+> opened the address and saw a broken glyph; the other 15 were swept the same day.
+> 🚨 **AND THE FIRST FIX STILL DID NOT SHOW THE PICTURE.** Measured live: the presigned
+> URL answered `200 image/png 34478 bytes`, and `/_next/image?url=…` answered **400**.
+> `lib/r2.ts` signs **virtual-host** URLs (bucket as a SUBDOMAIN) while `next.config.ts`
+> allowed only the account host — so **the remotePattern that existed to allow R2 images
+> had never matched a real R2 URL**, app-wide. Unseen only because prod has no portfolios
+> and no photos; the shop logo was the first R2 image the optimizer was ever asked for.
+> 🔑 **RESOLVING A REFERENCE IS NOT THE PICTURE ARRIVING — FETCH THE FINAL URL.** A
+> well-formed URL is not a working image, exactly as a 200 is not a page.
+> 🔑 **A BASELINE IS A BILL, NOT A DECISION.** Adding a line is deciding somebody sees a
+> broken picture until further notice.
+> 🪤 Also found by the adversarial pass: `/open-shop` could **500 outright** for a vendor
+> who already had a logo (an unguarded presign at top level in the page body) · a presigned
+> URL **baked into a prerendered blog page expires** 24h later with nothing to blame · one
+> "surface" was never broken and its field is now **renamed `logo_display_url`**, because a
+> resolved value living under a raw column's name misled two separate scans.
+> 💰 **FLAGGED, NOT FIXED:** presigned URLs are never stable, so `next/image` re-transforms
+> on every render and Vercel bills per transformation. ~Zero today, scales with real
+> galleries. Fixing it is a cost/design call (stable public-bucket URLs, or a rounded
+> signature window), not a bug fix.
 > 🗺 **AND OUR OWN CSP BLOCKED OUR OWN MAP.** The vendor location map embeds
 > openstreetmap.org; the enforced `frame-src` listed YouTube/Vimeo/Instagram/TikTok and
 > **not OSM**, so the map has been an empty grey panel on every shop page with coordinates
