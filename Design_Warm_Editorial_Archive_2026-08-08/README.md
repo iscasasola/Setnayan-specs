@@ -1,5 +1,10 @@
 # Handoff: Setnayan — full surface redesign (Warm Editorial Archive)
 
+> ⛔ **SUPERSEDED ON THE ACTION COLOUR — owner ruling 2026-08-08: GOLD is the action
+> colour, not terracotta.** Wherever this document says *"terracotta is the only
+> action colour"* or *"gold is never a button"*, read the opposite. Everything else
+> in this document still stands. See **`ACTION_COLOUR_OVERRIDE_2026-08-08.md`**.
+
 ## Overview
 A full redesign pass over Setnayan's four doorways — signed-in home, event dashboard, vendor dashboard, admin console — plus the guest surfaces (invitation, wedding website, Papic), the public pair (storyteller pages / vendor shop pages / Stories / Journal), the marketplace, and the inquiry→lock flow. Everything is reconciled against the **live codebase** (`iscasasola/setnayan-platform`, main @ af8c84e, 2026-08-08) — this is a restyle-and-extend of what ships, not a from-scratch product.
 

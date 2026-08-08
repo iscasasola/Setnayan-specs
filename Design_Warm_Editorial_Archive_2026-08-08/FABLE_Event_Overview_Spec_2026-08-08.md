@@ -1,5 +1,10 @@
 # FABLE build spec — Event Overview `/dashboard/[eventId]` · Warm Editorial Archive
 
+> ⛔ **SUPERSEDED ON THE ACTION COLOUR — owner ruling 2026-08-08: GOLD is the action
+> colour, not terracotta.** Wherever this document says *"terracotta is the only
+> action colour"* or *"gold is never a button"*, read the opposite. Everything else
+> in this document still stands. See **`ACTION_COLOUR_OVERRIDE_2026-08-08.md`**.
+
 > **Date:** 2026-08-08 · **Author:** Fable (design pass; Opus implements)
 > **Binding rule (owner, verbatim):** *"do not just replace it. integrate it well."*
 > **Sources read in full:** this bundle's `README.md`, `INTEGRATION_RULES.md`,

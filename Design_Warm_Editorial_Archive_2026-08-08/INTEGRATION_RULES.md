@@ -1,5 +1,10 @@
 # How this design gets built: INTEGRATE, never replace
 
+> ⛔ **SUPERSEDED ON THE ACTION COLOUR — owner ruling 2026-08-08: GOLD is the action
+> colour, not terracotta.** Wherever this document says *"terracotta is the only
+> action colour"* or *"gold is never a button"*, read the opposite. Everything else
+> in this document still stands. See **`ACTION_COLOUR_OVERRIDE_2026-08-08.md`**.
+
 > 🗣 **Owner, 2026-08-08, verbatim: *"do not just replace it. integrate it well."***
 >
 > This binds every frame in the Warm Editorial Archive handoff. The handoff's own

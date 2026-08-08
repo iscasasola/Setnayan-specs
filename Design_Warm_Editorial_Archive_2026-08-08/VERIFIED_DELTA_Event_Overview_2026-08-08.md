@@ -1,5 +1,10 @@
 # Event Overview — the VERIFIED delta against shipped code
 
+> ⛔ **SUPERSEDED ON THE ACTION COLOUR — owner ruling 2026-08-08: GOLD is the action
+> colour, not terracotta.** Wherever this document says *"terracotta is the only
+> action colour"* or *"gold is never a button"*, read the opposite. Everything else
+> in this document still stands. See **`ACTION_COLOUR_OVERRIDE_2026-08-08.md`**.
+
 > Produced 2026-08-08 by READING THE SHIPPED PAGE, not the spec. The handoff is a
 > restyle-and-extend; this file records which blocks are which, so nobody rebuilds
 > something that already works.

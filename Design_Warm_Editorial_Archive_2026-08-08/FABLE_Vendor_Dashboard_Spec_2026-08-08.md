@@ -1,5 +1,10 @@
 # FABLE build spec — Vendor Dashboard `/vendor-dashboard` · Warm Editorial Archive (frames 7a–7d)
 
+> ⛔ **SUPERSEDED ON THE ACTION COLOUR — owner ruling 2026-08-08: GOLD is the action
+> colour, not terracotta.** Wherever this document says *"terracotta is the only
+> action colour"* or *"gold is never a button"*, read the opposite. Everything else
+> in this document still stands. See **`ACTION_COLOUR_OVERRIDE_2026-08-08.md`**.
+
 > **Date:** 2026-08-08 · **Author:** Fable (design pass; Opus implements)
 > **Binding rule (owner, verbatim):** *"do not just replace it. integrate it well."*
 > **Sources read in full:** this bundle's `README.md`, `INTEGRATION_RULES.md`,
@@ -205,10 +210,20 @@ All tiles: § 2.1 card, padding 14–16px, eyebrow per recipe, numerals Space Mo
 ### 2.4 `WhatsNewFeed` → "Needs you today"
 
 **Header:** section title becomes the eyebrow `NEEDS YOU TODAY` + kept count chip
-(neutral, § 1.1 row 10). **The "Mark all seen" `<span>` is deleted** — it has no
-handler, no action, no mechanism anywhere (`overview-sections.tsx:489`); a control
-that cannot do anything is not rendered (no-fake-doors). This is the one sanctioned
-element REMOVAL in this spec — cite this line in the PR.
+(neutral, § 1.1 row 10).
+
+> ### ✅ ALREADY DONE 2026-08-08 — do NOT build, do NOT claim it
+> **The "Mark all seen" `<span>` is already gone.** It was removed by commit
+> `f9f727c8a` (*"a control that did nothing, and a link that went nowhere"*),
+> which landed on `main` the same morning this spec was written. The file now
+> carries a tombstone comment at `overview-sections.tsx:487` explaining why.
+> This paragraph used to say *"this is the one sanctioned element REMOVAL in this
+> spec — cite this line in the PR"*; citing it now would claim someone else's
+> already-merged work.
+>
+> 🔑 **A spec written the same day as a fix is not newer than the fix.** Verified
+> against the shipped file, not against this document. **Unit A therefore contains
+> zero deletions** — every remaining item is a restyle.
 
 **Card recipe (all four kinds):** § 2.1 card; the 4px left accent bar is replaced by
 an **8px dot** before the eyebrow, per the vocabulary — one palette entry per kind
