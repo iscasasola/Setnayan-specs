@@ -263,6 +263,13 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > `app/[slug]/page.tsx:219` already dispatches to `renderVendorBySlug`, and the vendor
 > sitemap already emits `${baseUrl}/${business_slug}`. `/v/[slug]` is LEGACY.
 > `setnayan.com/setnaprod` 404s only because that shop is unverified + hidden.
+> ✅ **CONFIRMED AGAINST PROD 2026-08-08, no longer inferred:** that row is
+> `public_visibility='hidden'` · `verification_state='unverified'` · `is_published=false`,
+> and `hidden` is the resting state of every unapproved shop (owner ruling 2026-07-27).
+> The address is permanent and correct; only an admin can publish it, from `/admin/verify`
+> → Visibility → **Hidden** tab (the vendor cannot — deliberately). My Shop already says so
+> in the dashboard: *"This is your address for good — it goes live to couples once Setnayan
+> approves your shop."*
 > ⚠ I reported this backwards **twice** — once calling the shop page's correct address
 > a defect, once calling a **200 that was the not-found body** a working page.
 > 🔑 **A STATUS CODE IS NOT A PAGE. READ THE BODY.**
@@ -277,11 +284,31 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >
 > 🖼 **`logo_url` HOLDS `r2://`, NOT A URL** — a raw value in an `<img>` fails SILENTLY.
 > Launcher fixed (#4215); **16 surfaces baselined**, including the public shop page.
-> 🔎 **The vendor route SOFT-404s** — its `loading.tsx` forces streaming, so `notFound()`
-> can no longer set the status and every bad shop URL tells Google "success".
-> 🗄 **Retention — NOTHING IS DELETED, IT IS COMPRESSED:** the full-res ORIGINAL is held **6 months from FIRST capture**, never less than **3 months after the event**, then replaced by the compressed copy (sweep is DEFAULT-ON); the PHOTO stays in the gallery
-> compressed gallery **forever**, Drive is the only way to keep originals. Copy corrected
-> (#4208 · #4209). 🔴 **Paid preservation ALREADY EXISTS switched off** (₱999/yr) — owner
+> ✅ **The vendor route SOFT-404 is FIXED (2026-08-08).** `app/v/[slug]/loading.tsx` forced
+> streaming, so the shell committed **HTTP 200** before `notFound()` ran — measured live:
+> `/v/definitely-not-a-real-shop-xyz` answered **200**, i.e. every junk or unapproved shop
+> URL told Google it had found a page. Deleted; no skeleton lost, because the canonical
+> bare-root path returns `renderVendorBySlug` *before* its `<Suspense>` and already blocks.
+> 🔑 **It was the SAME bug `04c03063d` fixed on the bare-root twin, and `first-byte.test.ts`
+> was written to hold it — the guard just never covered the sibling route serving the same
+> shop.** When you fix a route-shaped bug, sweep every route with that shape.
+> Also fixed: the bare-root 404 said *"This invitation link can't be found… check with the
+> host"* to someone opening a **shop** address. Correct 404, wrong audience — it reads as a
+> broken product. Both now guarded, all three assertions mutation-tested.
+> 🪤 `npx tsx --test "app/[slug]/_lib/first-byte.test.ts"` prints **"# tests 0 … # fail 0"** —
+> the `[slug]` brackets are a glob character class, so it runs NOTHING and exits green.
+> 🗄 **Retention — NOTHING IS DELETED, IT IS COMPRESSED:** the full-res ORIGINAL is held
+> **6 months from FIRST capture**, never less than **3 months after the event**, then
+> replaced by its compressed copy (sweep is DEFAULT-ON). **The photo itself is never
+> deleted** — only its resolution changes — and the compressed gallery is **free for 5
+> years** (owner 2026-08-07, superseding "free forever"; past 5 years it becomes a paid
+> option at a price not yet set, and **still nothing is deleted**). Drive is the only way a
+> couple keeps originals. Copy corrected (#4208 · #4209).
+> ⚠ **This line read "compressed gallery FOREVER" for a day after the owner corrected it**,
+> while the storage bullet lower in this same file already said 5 years — the exact
+> read-from-the-middle failure this file warns about two blocks up. Grep the whole file for
+> the old wording when a number changes; a correction at one site is not a correction.
+> 🔴 **Paid preservation ALREADY EXISTS switched off** (₱999/yr) — owner
 > 2026-08-07: **not selling yet**; do not re-ask its four numbers.
 
 > ### ▶ ACTIVE: TIME — and the class of bug behind it
