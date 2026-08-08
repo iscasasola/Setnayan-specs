@@ -283,7 +283,22 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > machine code on invitations forever.
 >
 > 🖼 **`logo_url` HOLDS `r2://`, NOT A URL** — a raw value in an `<img>` fails SILENTLY.
-> Launcher fixed (#4215); **16 surfaces baselined**, including the public shop page.
+> Launcher fixed (#4215). ✅ **The PUBLIC SHOP PAGE is now fixed too (2026-08-08) —
+> debt 16 → 15.** It sat on the baseline list under the label *"the highest-value one
+> still owed"* until the owner approved his own shop, opened the address and saw a broken
+> glyph where his logo goes. The resolver was **already imported in that file** and already
+> used for portfolio photos ~1200 lines above the header.
+> 🔑 **A BASELINE IS A BILL, NOT A DECISION** — every remaining line is a surface showing
+> no logo to a real person right now. Work the publicly-reachable ones first.
+> 🗺 **AND OUR OWN CSP BLOCKED OUR OWN MAP.** The vendor location map embeds
+> openstreetmap.org; the enforced `frame-src` listed YouTube/Vimeo/Instagram/TikTok and
+> **not OSM**, so the map has been an empty grey panel on every shop page with coordinates
+> since it shipped. OSM answers 200 — the browser refused the frame. `next.config.ts`
+> already said *"New embed origins later extend this one list"*; **a sentence is not a
+> mechanism**, and there is now a test that fails when an iframe host is missing.
+> 🔑 **SAME DISEASE AS THE PHANTOM COLUMN / ENUM / RPC ARG: the browser or the database
+> DECLINES, and the only symptom is an absence.** Add "blocked iframe" and "unresolved
+> `r2://`" to that family.
 > ✅ **The vendor route SOFT-404 is FIXED (2026-08-08).** `app/v/[slug]/loading.tsx` forced
 > streaming, so the shell committed **HTTP 200** before `notFound()` ran — measured live:
 > `/v/definitely-not-a-real-shop-xyz` answered **200**, i.e. every junk or unapproved shop
