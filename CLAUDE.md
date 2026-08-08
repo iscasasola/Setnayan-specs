@@ -136,8 +136,24 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   carried the same stale claim while an approval banner sat at the top of the SAME file.
 >   🔑 **A doc that records a decision at the top and contradicts it in the middle will be read
 >   from the middle** — grep the file for the old state before declaring a gate closed.
->   ⏭ `design#1` + `design#2` are DONE (#4064/#4065). **`design#3` (the shell) is next** and is
->   the architectural one. The remaining ~40 port units are now ALL unblocked.
+>   ⏭ `design#1` + `design#2` are DONE (#4064/#4065). The remaining ~40 port units are ALL
+>   unblocked.
+>   🔴 **`design#3` IS "PREMISE FALSIFIED — DO NOT BUILD THIS" (2026-08-02).** This line said
+>   *"`design#3` (the shell) is next and is the architectural one"* for six days while the
+>   programme doc's own entry for it (line 113) carried a red DO-NOT-BUILD banner. **The
+>   persistent app shell ALREADY SHIPS AND IS MOUNTED** — `SidebarShell` has 20 consumers and
+>   is mounted in both `admin/layout.tsx` and `dashboard/[eventId]/layout.tsx`; a
+>   `template.tsx` provides route transitions in **all four** dashboard trees; the mobile
+>   bottom navs are mounted in the same layouts. The "five primitives ship unused" claim is
+>   **wrong on all five** (`sheet.tsx` 5 imports · `bottom-nav.tsx` 32 refs · `sub-nav.tsx` 22
+>   · `nav-slide-controller.tsx` + `app-init-splash.tsx` both mounted by the ROOT layout).
+>   The doc calls rebuilding it *"the paid-twice mistake at its largest scale."*
+>   ⏭ **WHAT IS ACTUALLY NEXT: `design#4`** — RECONCILE the ~28 existing per-surface
+>   prototypes to the terracotta palette + the shipped shell. They are **still correct about
+>   composition** and carry only the old palette. **RECONCILE, NEVER REDRAW.**
+>   🔑 This is the exact failure the two lines above warn about, in the auto-loaded file
+>   itself: a decision recorded in one place and contradicted in another, with the contradiction
+>   sitting in the file every new session reads first.
 > - 📈 **SEO / GEO — code side DONE 2026-08-02, do NOT rebuild.** `llms.txt` is now GENERATED
 >   from the catalog (#3952), the SEO surface has a **"Re-run audit now"** button (#3960), and
 >   the audit stopped grading two sources nothing else read (#3973). Audit `fail 2 → 0`.
