@@ -1,5 +1,17 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> 📋 **START HERE (2026-08-08): [`BUILDS_REMAINING_VERIFIED_2026-08-08.md`](BUILDS_REMAINING_VERIFIED_2026-08-08.md)**
+> — the owner asked *"what are all the builds to be done? enumerate all"*. Six independent
+> passes harvested every claimed-open item from this register, the handoffs, the decision log,
+> the repo status docs, the dated build plans and the code's own debt lists — **441 candidates**
+> — then **verified each one against the live site, shipped code and the production database**
+> before it was allowed to count. Result: **~150 open** · **74 were ALREADY BUILT** and are
+> listed there under "do NOT rebuild" · 57 built-but-switched-off · **62 could not be verified
+> from a session** and say so. **19 can hurt a real customer on day one.**
+> ⚠ It supersedes the per-doc status claims below wherever they disagree — those were the
+> INPUT to it. It also ends with an explicit "what I could not check" section; read that before
+> treating it as complete.
+
 > **Purpose.** A future session will pick this up to execute the outstanding work across ALL "What's Next" docs — **in parallel where safe, sequential where dependent, and never auto-running anything gated** — then **check gaps and fix them**. This index is the operating manual + the register of every active handoff. **Read this whole file before touching any task.**
 >
 > Owner intent (2026-07-18): *"one session do all what's next in parallel and sequential safely, and check gaps and fix them."*
