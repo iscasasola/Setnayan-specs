@@ -252,8 +252,44 @@ cards append to the mono meta line: `· waiting 2 h` (hours < 48, else `· waiti
 fragment `#C24E25` once waiting ≥ 24 h. Never shown on other kinds (their
 timestamps are not SLAs).
 
-**EXTEND 2 — the date-status chip (frame 7d: "your date is open").** One chip on
-`inquiry` cards answering the vendor's first question — *am I free that day?*
+> ### ⛔ EXTEND 2 IS CANCELLED — OWNER, 2026-08-08. DO NOT BUILD IT.
+> **Owner, verbatim:** *"was this already discussed before? we always check their
+> schedule before they show. it needs to be available on their schedules."*
+>
+> **He is right, and it was verified in code.** `getBatchVendorAvailableDays`
+> (`lib/vendor-availability.ts`) is the ONE shared availability path, consumed by
+> **nine** surfaces — Explore, the couple's vendor list, date selection, the plan
+> builder, `compat-score`, `candidate-dates`, `build-date-window`,
+> `schedule-matrix`, `wizard-recommendations`. A couple never sees a vendor
+> without that vendor's schedule being consulted, and the shipped stance already
+> fails the safe way: *"a calendar flake reads free, never a false booked."*
+>
+> 🔑 **A SECOND ANSWER TO A SETTLED QUESTION IS A DEFECT, NOT A FEATURE.** The
+> chip below would have re-derived availability per enquiry card from
+> `poolBookings` + `fetchVendorBlocks`. Two derivations of one fact can disagree,
+> and the one on the enquiry card would have been the newer, less-tested of the
+> two — while the couple sees the other.
+>
+> ✅ **WHAT SHIPPED INSTEAD** (the owner's second clause): the enquiry now appears
+> **on the vendor's own calendar**, on the date being asked about. The vendor's
+> six-state calendar described what a day *is* — blocked, held, approve-first,
+> full, booked, waitlisted — and **none of them said "a couple is asking about
+> this date."** Enquiries lived only in a list, so the answer sat one screen away
+> from the question. `inquiryCount` rides ALONGSIDE the six states and never
+> becomes one: an enquiry on an open day must not make it look taken, and an
+> enquiry on a booked day must not hide that it is booked.
+>
+> ⚠ **COUNT ONLY, NEVER IDENTITY** — a pending enquiry is pre-accept, so the
+> calendar shows *"2 asking"* and nothing else. `pendingInquiryDates` accepts only
+> a status and a date, so identity cannot reach it by construction, matching
+> `buildInquiryCard`'s posture.
+>
+> EXTENDS **1** (waiting age) and **3** (oldest-waiting first) are unaffected and
+> shipped — neither re-derives anything.
+
+**~~EXTEND 2 — the date-status chip (frame 7d: "your date is open").~~ CANCELLED —
+see the box above.** One chip on `inquiry` cards answering the vendor's first
+question — *am I free that day?*
 
 - Data: `fetchVendorOverviewData` already loads `poolBookings`; add
   `fetchVendorBlocks` (same lib, same fail-soft `.catch(() => [])`) to its existing
