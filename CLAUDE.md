@@ -225,6 +225,54 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > session** (server-only, page behind a vendor login); it needs TWO switches and the
 > billing one is off, so nothing is charged. Prod: 0 fee charges, 13 booked vendors.
 
+> ### ✅ DONE 2026-08-09: VENDOR SCHEDULING — do NOT rebuild any of it
+> **RULE 0 paid off again: everything the owner described already shipped.** Per-service
+> schedules ("Named Calendars", live-by-default since 2026-06-21) · manual blocks + the
+> 6-state day taxonomy incl. `locked` and `whitelist` · auto-close at `deposit_paid` ·
+> the Booked-Out Waitlist with vendor-picked acceptances. Nothing was redrawn.
+> 3 PRs merged (#4262 · #4263 · #4264), all verified applied in prod **by the object**.
+>
+> 🚨 **A FORWARD PRIMITIVE WITH NO INVERSE.** The auto-block that closes a booked date
+> had **no counterpart** — nothing anywhere deleted it, the vendor's own remove-block
+> path filters it out, and all six pool-release sites left it standing. A couple backing
+> out left that vendor reading BUSY to everyone else **permanently**, and the waitlist
+> built for that exact moment could only send couples to a date they still could not
+> book. Fixed as a trigger mirroring the auto-block. 🔑 **Ask "what un-does this?" at
+> write time** — see [[feedback_a_forward_primitive_with_no_inverse]].
+>
+> 🪤 **AND THE FIX SHIPPED INERT ON THE FIRST PUSH.** `blocked_at::date` on a block
+> written at PH midnight reads the **previous day** under prod's UTC session — so the
+> DELETE matched nothing. Green on a +08 laptop, red in CI. **The shipped forward twin
+> has the same flaw** (its documented idempotency never held; a second call writes a
+> duplicate) — both corrected to `AT TIME ZONE 'Asia/Manila'`. 🔑 **Matching a twin means
+> matching what it MEANS, not its characters** — the migration's own comment had praised
+> the byte-for-byte copy as the thing keeping the pair honest, and that is what carried
+> the bug across. Suites now `SET TIME ZONE 'UTC'` so the trap can't hide locally again.
+>
+> 🚨 **A FREE VENDOR COULD NOT BE PUT ON SOLO.** `vendor_tier_rank()` listed only
+> free·verified·pro·enterprise and sent the rest to `ELSE 0`, so **solo ranked BELOW
+> free** and the no-silent-downgrade guard refused the first paid upgrade anyone would
+> buy. Latent (no subscriptions sold yet), would have bitten on the first Solo purchase
+> with green CI. Fixed; prod now reads free=1, solo=3. ⚠ **NOT the 2026-07-01 "Solo <
+> Free" item marked "do not re-report"** — that was the TypeScript benefit table and is
+> genuinely fixed; this was a different function in SQL.
+>
+> ⏭ **OWNER DECISION, the only thing open:** the per-tier limits ship **SWITCHED OFF**
+> (`platform_settings.vendor_tier_pipeline_caps_enabled`). Owner grid: live clients per
+> date **1·3·5·10**, waitlist **0·1·3·5**. Off because every prod vendor is `free`, so
+> flipping it caps his own test shops — and at FREE=1 a second couple on the SAME date
+> must wait, which bends the 2026-07-24 *"inbox is never locked"* lock. Flip is one
+> UPDATE; **it has no admin button — named debt, not an oversight.**
+>
+> 📄 **Where the tiers are documented:** `apps/web/VENDOR_TIERS_AND_BENEFITS.md` (IN the
+> code repo — the owner-signed rate card, § 2 per tier) **and** the corpus
+> `Vendor_Monetization_Model_LOCKED_2026-07-25.md` § 1. Both now carry the new rows.
+> ⚠ That doc's token claims were **stale and self-contradicting** and are corrected:
+> answering is FREE on every tier (0 tokens ever redeemed in prod).
+> 🔑 **"whitelist" means TWO things here** — the § T1.1 *accepted-but-not-yet-locked*
+> client list (what the new cap counts) vs the calendar's approve-first DAY STATE
+> (uncapped). See [[project_setnayan_vendor_schedules_waitlist_blocking]].
+
 > ### ▶ ACTIVE 2026-08-07: PAPIC TIMING — three numbers, locked together
 > **Owner set all three in one sitting. They interlock; do not move one alone.**
 >
