@@ -19,9 +19,11 @@ Prices billed per 28-day cycle (platform standard; ⚠ confirm 28d vs calendar m
 |---|:---:|:---:|:---:|:---:|
 | **— RUN —** | | | | |
 | Verified badge · BYO/returning clients | ✓ | ✓ | ✓ | ✓ |
-| Budget · guest list · schedule · **inbox & chat** (never gated) | ✓ | ✓ | ✓ | ✓ |
+| Budget · guest list · schedule · **inbox & chat** (never gated¹) | ✓ | ✓ | ✓ | ✓ |
 | Reviews + stats | ✓ | ✓ | ✓ | ✓ |
 | Concurrent active bookings | **3** | unlimited | unlimited | unlimited |
+| Live candidates you may pursue **per date** (whitelist — accepted, not yet locked) | **1** | **3** | **5** | **10** |
+| Couples you may hold on a **waitlist** for a date you're booked out on | **—** | **1** | **3** | **5** |
 | **— GROW —** | | | | |
 | Organic rank (by merit) | ✓ | ✓ | ✓ | ✓ |
 | Search boost + Featured slots | — | small | bigger | **top** |
@@ -35,6 +37,17 @@ Prices billed per 28-day cycle (platform standard; ⚠ confirm 28d vs calendar m
 | Service categories | 1 | 1 | 3 | **unlimited** |
 | Reach — Ring 2 outer cap | ~30 km | ~30 km | ~60 km | **100 km** |
 | API access | — | — | — | ✓ |
+
+> ¹ **The inbox stays ungated (2026-07-24) — the per-date whitelist is a different limit.**
+> Any vendor on any plan can receive and answer inquiries, with no weekly cap. What the
+> whitelist row bounds is how many *accepted-but-not-yet-locked* clients they may be
+> pursuing **for one date at a time**; they answer freely on every other date, and free a
+> slot by locking someone in or declining them (§ T1.4 decline-the-others-first).
+> ⚠ At Free = 1 this does mean the *second* couple asking about the *same* date cannot be
+> accepted until one is dropped. Owner-set 2026-08-09; shipped SWITCHED OFF
+> (`platform_settings.vendor_tier_pipeline_caps_enabled`) because every prod vendor is on
+> Free today. Numbers live in `lib/vendor-tier-caps.ts` + `vendor_tier_limit()`, held in
+> step by a test — never re-typed from this table.
 
 ## 2. Add-on pricing (subscribers pay less)
 
