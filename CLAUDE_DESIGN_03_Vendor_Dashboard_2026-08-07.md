@@ -56,7 +56,9 @@ state, verification state.
 **My Shop** — services and what is included, packages and pricing, the public shop page,
 photos and portfolio, calendar and availability, branches, team, repertoire, mood-board
 library, the subscription and what tier unlocks, verification documents, the shop's web
-address.
+address, the one line couples read under the shop name and the vendor's own website, and
+where else Setnayan may surface the shop — the couple's day-of "get help" shortlist, and
+whether to be featured on Setnayan's social pages when the shop is verified.
 
 **My Customers** — inquiries coming in, message threads, proposals sent, contracts, confirmed
 bookings, past clients, requests to lock a date, partnerships with other vendors, referrals.
