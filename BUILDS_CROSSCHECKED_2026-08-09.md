@@ -1,5 +1,48 @@
 # The 96 builds, cross-referenced — 53 of them were overstated
 
+> ## 📌 SECOND CORRECTION PASS — 2026-08-11 · the owner asked again, and was right again
+>
+> ~20 of the 79 "genuinely open" were re-opened against `origin/main` (not against this
+> document). **One is DONE, five are materially smaller than their entry says.** Corrections
+> are written into the entries themselves below as well as listed here, so a half-read page
+> cannot resurrect a fixed claim.
+>
+> **DONE — delete it from the list**
+> - **#92 · Doorways for six product pages** — **SHIPPED.** Six of the seven product pages are
+>   now linked from the shared front-door menu. ⏭ Only the **greeting-video page (`/pabati`)**
+>   has no way in — from any public page or the search-engine list. **One page, not six.**
+>
+> **WRONG — the entry states the opposite of what ships**
+> - **#96 · "The app is not translated … there is no translation machinery at all"** —
+>   **FALSE.** A translation system ships: English + Tagalog dictionaries of **59 phrases**,
+>   wired into **three** dashboard screens, plus a separate marketing-page translator serving
+>   a live Taglish site. Finishing Tagalog is **extending what exists**, not building it. The
+>   size claim (thousands of hardcoded English lines) is still true.
+>
+> **OVERSTATED — real, but far smaller**
+> - **#6 · "Six 'we couldn't load this' screens built and used nowhere"** — there is **ONE**
+>   such component, and it genuinely has **zero** consumers. The count is wrong; the substance
+>   is right and cheaper than billed.
+> - **#5 · Supplies shop** — the product schema **and** the area-based pricing resolver shipped
+>   in **May**; the shop reads a mock list on purpose, with the swap documented in the file. So
+>   this is *swap the mock for the query already in the database + a checkout*, and it is
+>   **gated on the owner signing supplier agreements**, not on engineering.
+> - **#83 · "A two-person gate on the most dangerous actions"** — the gate itself **works and is
+>   already in use** on other actions. Left: point it at a large refund, a large free grant and
+>   a change of receiving bank account.
+> - **#61 · Supplier looks back at their own captures** — the strip that shows them **exists and
+>   is mounted**; it only opens on the event day. Left: a door on any other day. *(The original
+>   entry said this correctly — repeated here because it keeps being summarised as "not built".)*
+>
+> **RE-CONFIRMED STILL OPEN** (opened and checked, entries stand): #1 Thank-You Video (sold,
+> nothing produces it) · #2 LED backdrop (the design saves as a draft; no file is ever made) ·
+> #14 the supplier-agrees step (**the database half shipped and has ZERO app consumers** — screens
+> only) · #28 splitting one payment · #82 admin job titles and spending limits · #29 asking key
+> people which dates they can make · #41 copying a service card · #52 the emcee's questionnaire ·
+> #21 gallery chapters (nothing anywhere stores that a chapter is held back).
+>
+> ⚠ **~45 of the 79 were NOT re-opened in this pass.** At a 6-in-20 correction rate, expect more.
+
 You asked whether some of the 96 were already done or already integrated. **Yes — a lot of them.**
 
 Every one of the 132 numbered items was checked twice: once by an agent hunting for evidence it already exists, then again by a second agent whose only job was to argue the opposite of whatever the first one concluded. Verdicts moved in both directions.
