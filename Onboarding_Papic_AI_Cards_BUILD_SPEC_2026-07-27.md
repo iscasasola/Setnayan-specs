@@ -187,7 +187,18 @@ One shared component, `app/onboarding/_shared/services-step.tsx`, mounted by all
 - **What the upgrade covers:** more points, dedicated cameras (Papic One ₱100/camera). Frame as *more of the same thing*, never as a locked door.
 - **The window:** from today → their event date. True per §1.5, free per §1.5.
 - **Who shoots:** guests. Add vendors **only** when §0's DPO gate flips.
-- **Action:** none. It is already on. The card informs.
+- ~~**Action:** none. It is already on. The card informs.~~
+  ⛔ **SUPERSEDED 2026-08-11 — THE CARD NOW ASKS.** Owner: *"how many shots do you want for
+  this event? 50 - Free … then they can press + and minus. which will set how much they will
+  pay. Or papic one (pick how many papic one) they want to add. so this can be their paywall
+  for the onboarding. can add more later."* This also reverses the 2026-06-21 *"no paywall in
+  onboarding"* lock quoted throughout this spec. **What still holds:** the free floor is armed
+  at commit whatever they pick, `PAYWALL_SCREENS` in the wedding shell stays filtered out, and
+  the retired bundle / à-la-carte tail stays gone — what returns is ONE product's ladder on
+  this same screen. **It ASKS, it does not BLOCK:** payment is a bank transfer reconciled by
+  hand within 24h, so the step can never gate finishing. **+ / − walk the RUNGS**, not single
+  shots — there is no SKU for an arbitrary count. See `DECISION_LOG.md` 2026-08-11 for the
+  build, the guards, and the two corrections recorded against it.
 
 ### Card 2 — Setnayan AI (second; it helps them · **hidden on vendor-free types**)
 
