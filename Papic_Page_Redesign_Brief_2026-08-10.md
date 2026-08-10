@@ -171,3 +171,90 @@ Grouped by the job they serve (the page itself does **not** group them):
 - Do not replace the plain-English copy with marketing copy.
 - Do not solve it with tabs alone if tabs just hide the same 20-item pile.
 - Do not assume a big screen.
+
+---
+
+# ⛔ CORRECTIONS TO THE RETURNED DESIGN (owner, 10 Aug 2026)
+
+The handoff bundle (`design_handoff_papic_redesign/`) is **accepted on structure**
+— three rooms, date-aware landing tab, money beside the cameras that spend it,
+the unset-window attention row, the de-duplicated QR entry, and a complete 20/20
+mapping table. Build that.
+
+**Four things in it are wrong and must NOT be built as written.**
+
+## 1 · An invented price rung — corrected
+
+The handoff's money model lists `₱2,500 → 8,000 shots`. **No such rung exists.**
+The live pool ladder is:
+
+| price | shots |
+|---|---|
+| ₱1,000 | 3,000 |
+| ₱2,000 | 6,000 |
+| ₱3,000 | 10,000 |
+
+Only the first was right. Read the ladder from the catalogue at build time —
+never from a design file, and never re-typed.
+
+## 2 · Preservation is PAID, and nothing is "forever"
+
+Handoff §6.3 says *"Preserved photos keep full resolution forever."* **Rejected.**
+Owner, verbatim: *"no. not free. their purchase will initially keep 3 months
+after the event ends. preservation will prevent those chosen photos and videos to
+compress."*
+
+The true model:
+
+- **Included with a Papic purchase:** the full-resolution original is kept until
+  **3 months after the event ends** (and 6 months from the event's first capture,
+  whichever is later — the floor is the promise).
+- **After that** the original is replaced by its compressed copy. **The photo is
+  never deleted** — only its resolution changes. The compressed gallery is free
+  for 5 years.
+- **Paid preservation** exempts the couple's **chosen photos and videos** from
+  that compression. It is a product with a price, not a free tap.
+
+So the gallery's preserve flow keeps its shape — Choose → tap → an action bar —
+but it is a **purchase**, and the count card must not promise perpetuity. Write
+what is true: these stay at their original quality; the rest become a smaller
+copy after the window.
+
+⚠ "Forever" was retired by the owner on 2026-08-07. Do not reintroduce it in any
+copy, anywhere.
+
+## 3 · Photo quality is NOT removed — its default moves
+
+Handoff §6.1 says quality is removed, always Optimal, no UI. **Overridden.**
+Owner: *"photo quality starts at optimal and not full resolution."*
+
+All three choices stay — **Optimal · Full resolution · High efficiency**. Only
+the starting point changes: new events begin on **Optimal** instead of Full
+resolution. Set up therefore keeps **6** choices, not 5, and the checklist counts
+accordingly.
+
+🔑 Keeping the choice is also what keeps §2 honest: preservation talks about
+"original quality", so a couple must still be able to *choose* full resolution.
+Deleting the setting while selling preservation was the contradiction in the
+returned design.
+
+Existing events are **not** migrated — all five in production sit on Full
+resolution and stay there.
+
+## 4 · The three-month floor must count from when the event ENDS
+
+The owner said "3 months after the event **ends**." The shipped clock reads the
+event's **start** date only, so a multi-day event — travel is the multi-day type
+— would give its final day less than the promised three months. Use the end date
+when there is one, falling back to the start date.
+
+Latent today: no production event currently has a differing end date.
+
+## Also carried forward
+
+- Papic Challenges sits in **Set up**, but every mission spends shots from the
+  shared pool while the balance lives in **Cameras**. Show the running cost on
+  the board itself so nobody spends on a screen with no balance in sight.
+- The handoff's three §5 recommendations (two-way cross-links · retire "Papic
+  One" in couple-facing copy · low-pool tint) remain owner-optional and are not
+  in scope.
