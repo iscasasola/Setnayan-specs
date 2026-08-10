@@ -511,6 +511,40 @@ otherwise any string could be stamped with a library id and inherit its dedup id
 question the couple hid is still theirs, and re-offering it would say "add this" while their own
 list below says "Hidden from guests". Un-hiding is the Show button, not a second Add.
 
+### 9.3c The couple's LIST of the board (rebuilt 2026-08-10)
+
+> 🚨 **AND THE BOARD ITSELF HAD NEVER BEEN BUILT.** Found while checking this list.
+> The guest route calls `ensure_papic_board` via the **service-role** client (a Papic guest is
+> zero-account — no `auth.uid()`), and the board's first act was `PERFORM
+> ensure_papic_auto_missions`, hardened **2026-08-01** with *"a missing session is now a REFUSAL,
+> not a bypass."* Every call raised; the route's `.catch(() => 0)` swallowed it; the reader
+> **fail-softed** to *"no board → show everything by created_at"* — a list that looks fine. So the
+> whole library, the § 3 booth-mission core, the § 9.4 ranking and the 20-slot cap were **all
+> inert**, and a guest saw only what the couple typed by hand. Reproduced against the replayed
+> prod schema, not inferred. Prod was pre-launch (0 missions), so nothing was harmed.
+> 🔑 **The defect was WHERE THE CHECK LIVED.** A function that is both a public RPC and an
+> internal step re-litigates its caller's already-passed gate under rules written for a different
+> caller. **An entry point authorizes; a step does the work.** Split accordingly; the 2026-08-01
+> hardening was **not** reversed.
+> 🪤 **A comment asserting how a callee's callee behaves cannot notice when that callee is
+> hardened** — the route's comment named neither the changed function nor its migration.
+
+The couple's list was **one flat list in creation order** — the order vendors happened to get
+booked, which matches no other screen — and since the board caps at 20, a couple could read a list
+of 24 with **no hint that four of them reach nobody**.
+
+It now:
+- **resolves the board on load** (the resolver's guard names the couple/coordinator, so this is the
+  caller it was written for; idempotent, advisory-locked, materialize-once) — otherwise every slot
+  is NULL for the whole planning period, exactly when the couple is curating;
+- lists **in the guest's order, with the position shown**, so this screen and their phone agree;
+- splits **"What your guests see"** from **"Not showing"**, the latter saying whether each is
+  *waiting for a free spot* or *hidden by you*;
+- labels what the guest is asked to DO — **Photo · On camera · Video greeting** — because
+  *"Brag about the bride for ten seconds"* and *"Catch the cake"* otherwise read as the same item;
+- **suppresses itself on a failed read** rather than rendering *"No challenges yet"*, a confident
+  lie about an event that may have twenty.
+
 ### 9.4 ⚠ PROVISIONAL Top-10 Must-Capture ranking — OWNER SIGN-OFF PENDING
 
 > **⚠ UPDATED 2026-08-10 — the ladder is 1..20, not 1..10.** `priority_rank` widened (still UNIQUE —
