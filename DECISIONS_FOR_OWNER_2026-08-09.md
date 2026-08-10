@@ -1,5 +1,13 @@
 # The 38 decisions only you can make
 
+> ### 📌 STATUS REFRESH — 2026-08-11
+> **13 of the 38 are now answered** (marked ✅ below, with what you said). **2 more were
+> already answered before this list was written and should never have been on it**
+> (marked ⚠️). **23 are still open.**
+> Nothing below has been re-numbered — an answered item keeps its number and is struck
+> through, so a half-read page cannot re-ask a settled question.
+> Answered items were read out of `DECISION_LOG.md` rows dated 2026-08-09 → 2026-08-11.
+
 Each one is a question, the realistic answers, and **my lean** so you can just say "yours" and move on. Answer by number — `1: A, 2: yours, 3: B` is enough.
 
 Nothing here is a build. Every one of these is blocking work, or would waste work if guessed.
@@ -8,33 +16,17 @@ Nothing here is a build. Every one of these is blocking work, or would waste wor
 
 ## 🔴 Answer these six first — they block the most
 
-**1 · The booking fee: does the vendor get money back if the couple walks away?**
-A. No refund — the fee bought the introduction and the sync, which happened.
-B. Refund if the couple cancels before the event.
-C. Refund only if the couple cancels within some window you name.
-→ *My lean: A.* You've been clear it isn't a cut of their deal, it's a fee for the introduction. Refunding it re-frames it as commission.
+**✅ 1 · The booking fee: does the vendor get money back if the couple walks away?** — **ANSWERED 2026-08-09: NO REFUND.** The fee bought the introduction and the sync, both of which happened. Recorded only; no code changed.
 
-**2 · Does the published booking fee include tax, or add it on top?**
-A. Tax-inclusive — the number a vendor sees is the number they pay.
-B. Plus tax on top.
-→ *My lean: A.* Filipino vendors expect the quoted number to be the real number. B generates a support conversation on every single charge.
+**✅ 2 · Does the published booking fee include tax, or add it on top?** — **ANSWERED 2026-08-10: TAX-INCLUSIVE.** The number a vendor sees is the number they pay.
 
-**3 · Are reviews ever ranked or unlocked by what a vendor pays?**
-A. Never — merit only, as you locked.
-B. Paid vendors get review features free vendors don't.
-→ *My lean: A, and fix the shop page wording that currently implies B.* **Zero reviews exist today, so this is free to settle now and expensive after the first one.**
+**✅ 3 · Are reviews ever ranked or unlocked by what a vendor pays?** — **ANSWERED 2026-08-09: NEVER.** ⚠ The code was doing the opposite and is now fixed — a free shop's real reviews were hidden and its rating zeroed in browse and sorting. Settled while production held 0 reviews.
 
-**4 · What should "delete a photo" mean?**
-A. Keep today's behaviour — hidden everywhere, file survives until the six-month sweep.
-B. Genuine erasure on request — the one exception to "compress, never delete".
-→ *My lean: B, but only when a person explicitly asks to erase.* A guest asking for their photo to be gone and it not being gone is the kind of thing a privacy regulator asks about.
+**✅ 4 · What should "delete a photo" mean?** — **ANSWERED 2026-08-10: DELETE EVERYWHERE.** Genuine erasure, the one exception to compress-never-delete. ⏭ **The build is still open** — today it hides the photo and the file survives to the six-month sweep.
 
-**5 · Can guests pick day-of activities, or only the couple?**
-A. Couple only — what's built assumes this.
-B. Guests can pick too.
-→ *No lean — you asked for "activities which guests can pick" three times, but everything built assumes the couple picks.* One of those two records is wrong and I can't tell which. Building either on a guess wastes the work.
+**✅ 5 · Can guests pick day-of activities, or only the couple?** — **ANSWERED 2026-08-09: COUPLE ONLY.** Nothing is rebuilt; the contradiction that blocked this is closed.
 
-**6 · What does a person's public handle look like?**
+**6 · What does a person's public handle look like?** — **STILL OPEN.**
 A. A name they choose (`setnayan.com/maria-santos`).
 B. Leave it off entirely for now.
 → *My lean: A, decided now, switched on later.* The one account that has one today reads like a machine code — switch it on as-is and that code is printed on invitations forever. Free to settle before anyone has one.
@@ -43,11 +35,11 @@ B. Leave it off entirely for now.
 
 ## 💍 Couple side
 
-**7 · Storage plan pro-rating.** Someone buying in November pays the same ₱500 as someone buying in January. Charge the full year regardless, or pro-rate to the January renewal? → *Lean: full year. Simpler, and the difference is small.*
+**✅ 7 · Storage plan pro-rating.** — **ANSWERED 2026-08-10 by the reprice: the year runs from the day they buy, not a common 1 January.** Pro-rating no longer arises.
 
-**8 · Storage plan non-renewal.** If a couple stops paying, nothing is deleted — but does their full-resolution copy shrink early, and how much warning do they get? → *Lean: shrink at the normal six-month point, never earlier, with two emails.*
+**✅ 8 · Storage plan non-renewal.** — **ANSWERED by the same reprice + the 2026-08-10 opt-in rule.** Nothing is deleted; originals hold to the locked floor either way, then compress; the compressed gallery is free for 5 years. A couple who never pays is never worse off than a couple who never opened the picker.
 
-**9 · The in-event bottom bar.** The new design draws a fixed five-tab strip. What ships is six menus that change with the phase of the wedding. Adopting the drawing reverses a decision you locked twice. → *Lean: keep what ships, correct the drawing.*
+**9 · The in-event bottom bar.** — **STILL OPEN, but narrowed.** The drawing's fixed five-tab strip is NOT being adopted; the phone's phase-swapping bar stays and the phone/laptop names get reconciled. ⏭ **The one thing left for you: six tabs in the planning phase, or five (folding Design into Studio)?**
 
 **10 · Contracts.** Advertised as a premium couple feature, with no price anywhere and nothing purchasable. Is it free now? → *Lean: yes, it's free — fix the wording, not the price.*
 
@@ -67,15 +59,15 @@ B. Leave it off entirely for now.
 
 **16 · The booking fee receipt shape** — one receipt per charge, or a monthly summary? Needs your accountant, not you alone.
 
-**17 · Merge the two overlapping ways a coordinator gets access.** A coordinator can end up holding both, or the wrong one. Nothing can be built until you pick the target shape. → *Lean: one path — the couple invites them; retire the other.*
+**✅ 17 · Merge the two overlapping ways a coordinator gets access.** — **ANSWERED 2026-08-10: THE HOST OF THE EVENT APPROVES.** That is the target shape; the other path retires. ⏭ **The build is still open.**
 
 **18 · May a coordinator recommend vendors to guests?** They earn nothing from it, and the labelling machinery already ships. → *Lean: yes, clearly labelled.*
 
-**19 · Switch on the coordinator consent screen** before they see the guest list? → *Lean: yes. They're seeing real people's contact details.*
+**⚠️ 19 · Switch on the coordinator consent screen** — **THIS WAS ALREADY DONE. Do not re-ask.** You switched it on 2026-07-22 from the privacy screen, and the consent-gated invite step ships. This row was a duplicate of a closed item.
 
 **20 · Retire "coordinator proposes, couple confirms"** rather than flip it on? Later notes expect it off permanently. → *Lean: retire it.*
 
-**21 · Switch on the per-service detail sheet?** Finished on both sides. Tapping a service card currently opens nothing. → *Lean: yes — this is the one with the best ratio of value to risk on the whole list.*
+**✅ 21 · Switch on the per-service detail sheet?** — **ANSWERED 2026-08-09: YES, SWITCH IT ON.** ⏭ **Still needs YOUR hand:** it must be set in the hosting dashboard **and redeployed** — it is baked in at build time, so setting it alone changes nothing.
 
 **22 · Lock specialist day-of tools behind a paid plan?** Free to everyone today; switching it on takes tools away from vendors who have them during a free launch. → *Lean: not yet.*
 
@@ -87,9 +79,9 @@ B. Leave it off entirely for now.
 
 **26 · Hold a stranger's email before they finish signing up?** Today an abandoned enquiry vanishes and the supplier never learns anyone was interested.
 
-**27 · Which paid features lose their free ride** when the tier gates go on — market intelligence, saving favourites? ⚠ One must **never** be switched on: search placement by tier buries free vendors and contradicts merit-first ranking.
+**✅ 27 · Which paid features lose their free ride** when the tier gates go on — **ANSWERED 2026-08-10: market intelligence and saved favourites.** ⚠ Search placement by tier must **never** be switched on — it buries free vendors and contradicts merit-first ranking.
 
-**28 · Which features does the launch free-window apply to?** The mechanism exists and points at nothing.
+**28 · Which features does the launch free-window apply to?** The mechanism exists and points at nothing. *(Same mechanism as 13.)*
 
 **29 · The yearly "all tools" bundle** has a database table and not one line of code. Dead, or pending? → *Lean: confirm it's dead.*
 
@@ -101,7 +93,7 @@ B. Leave it off entirely for now.
 
 ## 🎉 Guest side
 
-**32 · Four photo-service switches are built and dark.** Which do you want on? The shared gallery where any guest browses and links themselves to their own shots · the shots-remaining meter for the host · photo missions and challenges · buying more shots without an account. → *Lean: the meter and the shared gallery on; missions and no-account buying later.*
+**32 · Four photo-service switches are built and dark.** Which do you want on? The shared gallery where any guest browses and links themselves to their own shots · the shots-remaining meter for the host · photo missions and challenges · buying more shots without an account. → *Lean: the meter and the shared gallery on; missions and no-account buying later.* **STILL OPEN — you asked what they were on 10 Aug and were told; you have not yet said which to turn on.**
 
 **33 · May a camera helper start shooting without signing in?** Built and off. You set this once before and it didn't take, because the value's spelling wasn't recognised — that's since been fixed. → *Lean: yes, it removes real friction at a venue.*
 
@@ -111,7 +103,7 @@ B. Leave it off entirely for now.
 
 **34 · Require a payment reference** on the four forms where someone pays Setnayan? Cash only ever flows couple→vendor, which we don't reconcile, so the usual objection doesn't apply. → *Lean: yes, required.*
 
-**35 · Delete the leftover supplier identity documents.** Government IDs sit in storage with nothing pointing at them. The screen exists and was deliberately left for you to press. → *Lean: delete them. Holding IDs we can't tie to anyone is the worst of both worlds.*
+**⚠️ 35 · Delete the leftover supplier identity documents.** — **YOU ALREADY ANSWERED THIS on 2026-08-06 (your own word: delete them).** Object storage cannot be read from a session, so nobody here can confirm the files are gone — but this is not an open decision. Only re-open it if you never pressed the button.
 
 ---
 
@@ -125,7 +117,21 @@ B. Leave it off entirely for now.
 
 ---
 
+## Answered since this list was written, that were NOT on it
+
+- **Thank-You Video ₱2,499 — BUILD IT.** Live in the catalog with nothing producing it. *(Build still open.)*
+- **Custom Subdomain ₱999/yr — TAKE IT OFF SALE.** No address resolves.
+- **Live Studio — RECONNECT THE CHANNEL AND REHEARSE** before a paying couple.
+- **Facebook sign-in — REMOVE THE BUTTON** for now. ✅ Done; it answered an error at the first screen.
+- **The supplies shop — WIRE A REAL CHECKOUT.** *(Build still open.)*
+- **Philippines only.** Vendor signup stays PH-only; confirmed, do not re-ask.
+- **Preservation:** priced in Papic credits (₱500/year per 5,000), **opt-in — the default is nothing**, the picker is open to every couple, paying auto-selects the most recent 5,000 points, scoped per wedding, and the year runs from the day of purchase.
+- **The 3-month full-resolution floor counts from the event's END**, not its first day.
+- **A closed shop keeps its address for one year** and **keeps its trading name through erasure** (owner + DPO).
+- **The map pin is required** before a shop can open.
+- **Stay on the Supabase free plan for now** — accepting no automated database backups and no leaked-password blocking.
+
 ## Not asked, on purpose
 
-- **Paid preservation pricing** — you parked it on 7 August. Not re-asking.
+- **Paid preservation pricing** — parked 7 August, then **settled 10 August**. Closed.
 - **Looking at the app on a real phone** — not a decision, just the highest-value hour you could spend. Last time, three real defects surfaced in ten minutes.
