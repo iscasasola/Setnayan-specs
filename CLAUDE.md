@@ -280,7 +280,7 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > |---|---|
 > | cameras may start shooting | **6 months** before the event |
 > | full-res ORIGINAL held at full resolution | **6 months from the event's FIRST capture** |
-> | …but never less than | **3 months after the event date** (was 30 days) |
+> | …but never less than | **3 months after the event ENDS** (was 30 days; and until 2026-08-10 it counted from the event's FIRST day) |
 > | compressed gallery | **indefinitely** |
 > | guests may shoot | **the event day only**, unless the host presses a button |
 >
@@ -393,7 +393,7 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > 🪤 `npx tsx --test "app/[slug]/_lib/first-byte.test.ts"` prints **"# tests 0 … # fail 0"** —
 > the `[slug]` brackets are a glob character class, so it runs NOTHING and exits green.
 > 🗄 **Retention — NOTHING IS DELETED, IT IS COMPRESSED:** the full-res ORIGINAL is held
-> **6 months from FIRST capture**, never less than **3 months after the event**, then
+> **6 months from FIRST capture**, never less than **3 months after the event ENDS**, then
 > replaced by its compressed copy (sweep is DEFAULT-ON). **The photo itself is never
 > deleted** — only its resolution changes — and the compressed gallery is **free for 5
 > years** (owner 2026-08-07, superseding "free forever"; past 5 years it becomes a paid
@@ -660,7 +660,7 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 
 - **Native apps:** iOS 16+ (SwiftUI + AVFoundation), Android 11+ (Compose + CameraX)
 - **Backend:** existing Setnayan backend (extend it, don't fork it)
-- **Storage:** Cloudflare R2 — **Asia-Pacific (APAC) · ✅ CONFIRMED IN THE CLOUDFLARE DASHBOARD 2026-08-01** (owner read `setnayan-media` → Location: *Asia-Pacific (APAC)*; bucket created 2026-05-13). The old "PH-region buckets" was false in two ways — **R2 has no Philippines region**, and it implied PH residency we do not have — and this line is where that claim propagated from into the live public `/privacy` notice. — ⚠ **NOT hot-90-days/cold-5-years.** That tiering was never built and no R2 lifecycle rule exists. The real model, enforced in application code (`lib/papic-fullres-drop.ts`, default-ON): the full-res **original is replaced by its compressed copy** ~183 days from the event's FIRST capture, floored at **3 months** after the event date (owner 2026-08-07, raised from 30 days); the **compressed web copy is kept free for 5 years** (owner 2026-08-07, superseding "free forever"; past 5 years it becomes a paid option, price TBD — **nothing is deleted at 5 years**), so **NO PHOTO IS EVER DELETED** — only its resolution changes (owner, twice: *"again. not delete. just compress"*). 5 years applies to CHAT only.
+- **Storage:** Cloudflare R2 — **Asia-Pacific (APAC) · ✅ CONFIRMED IN THE CLOUDFLARE DASHBOARD 2026-08-01** (owner read `setnayan-media` → Location: *Asia-Pacific (APAC)*; bucket created 2026-05-13). The old "PH-region buckets" was false in two ways — **R2 has no Philippines region**, and it implied PH residency we do not have — and this line is where that claim propagated from into the live public `/privacy` notice. — ⚠ **NOT hot-90-days/cold-5-years.** That tiering was never built and no R2 lifecycle rule exists. The real model, enforced in application code (`lib/papic-fullres-drop.ts`, default-ON): the full-res **original is replaced by its compressed copy** ~183 days from the event's FIRST capture, floored at **3 months** after the event **ENDS** — `events.event_end_date` where the celebration spans several days, else `events.event_date` (owner 2026-08-07 raised the floor from 30 days; owner 2026-08-10 moved it off the event's first day, migration `20271126998711`); the **compressed web copy is kept free for 5 years** (owner 2026-08-07, superseding "free forever"; past 5 years it becomes a paid option, price TBD — **nothing is deleted at 5 years**), so **NO PHOTO IS EVER DELETED** — only its resolution changes (owner, twice: *"again. not delete. just compress"*). 5 years applies to CHAT only.
 - **Render pipeline:** FFmpeg on Cloudflare Workers + R2 (or Hetzner VM pool fallback)
 - **Auth for paparazzi seats:** wedding-scoped ephemeral session tokens via QR-code claim flow (not username/password)
 - **QR scanning:** AVFoundation metadata output (iOS) / ML Kit Barcode Scanning (Android)
@@ -745,7 +745,7 @@ These are tracked in spec Part 6. Each is a future spec.
 
 ## Privacy & compliance
 
-- PH Data Privacy Act (RA 10173) — guest consent at RSVP, opt-out flow, face-blur for opt-outs. ⚠ **Retention is NOT 5 years for photos, and photos are NOT deleted at all** — the full-res original is **replaced by a compressed copy** at **6 months from first capture**, floored at **3 months after the event** (default-ON); the compressed gallery is kept free for 5 years (then a paid option, price TBD), so the photo itself is never deleted. 5 years applies to MESSAGES. Cameras may start shooting **6 months before** the event — which is exactly why the floor, not the 6-month clock, is what preserves the photos after the day.
+- PH Data Privacy Act (RA 10173) — guest consent at RSVP, opt-out flow, face-blur for opt-outs. ⚠ **Retention is NOT 5 years for photos, and photos are NOT deleted at all** — the full-res original is **replaced by a compressed copy** at **6 months from first capture**, floored at **3 months after the event ENDS** (default-ON); the compressed gallery is kept free for 5 years (then a paid option, price TBD), so the photo itself is never deleted. 5 years applies to MESSAGES. Cameras may start shooting **6 months before** the event — which is exactly why the floor, not the 6-month clock, is what preserves the photos after the day.
 - Couple has 7-day review window (configurable) before public unlock
 - NSFW filter is on by default and CANNOT be disabled
 - DPO is the **proprietor, Indalecio Sacdalan Casasola II** (registered on the NPC DPO system 2026-07-07). ⚠ Not Claire E. Buanhog — she is VP / co-founder and DBRT support. See [[dpo-designation-owner]].
@@ -754,7 +754,7 @@ These are tracked in spec Part 6. Each is a future spec.
 ## Common pitfalls / gotchas for engineers
 
 1. **Don't render reels server-side with major-label music.** Even with TOS click-through, server-side rendering makes Setnayan the direct infringer. Catalogue is owned-AI-generated only.
-2. ⚠ **CORRECTED 2026-08-07 — this said "don't auto-delete photos within 5 years… we match" and it is FALSE.** Full-resolution originals are **replaced by their compressed copy 6 months from the event's FIRST capture** (an engagement shoot starts the clock), floored at **3 months** after the event (owner 2026-08-07 — *"still preserve 3 months all their photos in high res before we compress it"*; was 30 days), and the sweep is **DEFAULT-ON** (`papic-fullres-drop.ts` — `!== 'false'`). The **compressed gallery is kept free for 5 years** (owner 2026-08-07, superseding "free forever"); past that it becomes a paid option whose price is not set, and **nothing is deleted at 5 years**. Google Drive is the only way a couple keeps originals. The live `/privacy` page now says exactly this; this file said 5 years for five days after the code said six months.
+2. ⚠ **CORRECTED 2026-08-07 — this said "don't auto-delete photos within 5 years… we match" and it is FALSE.** Full-resolution originals are **replaced by their compressed copy 6 months from the event's FIRST capture** (an engagement shoot starts the clock), floored at **3 months** after the event **ENDS** (owner 2026-08-07 — *"still preserve 3 months all their photos in high res before we compress it"*; was 30 days · owner 2026-08-10 — *"3 months after the event ends"*, so the floor counts from `event_end_date` where there is one, else `event_date`), and the sweep is **DEFAULT-ON** (`papic-fullres-drop.ts` — `!== 'false'`). The **compressed gallery is kept free for 5 years** (owner 2026-08-07, superseding "free forever"); past that it becomes a paid option whose price is not set, and **nothing is deleted at 5 years**. Google Drive is the only way a couple keeps originals. The live `/privacy` page now says exactly this; this file said 5 years for five days after the code said six months.
 3. **Tag fan-out from table QR.** ⚠ **No truncation — there is NO tag cap** (owner 2026-08-06). The old "alphabetize and truncate at 10" rule is retired; a 100,000 backstop remains in the trigger purely to stop a retry storm and is **not** a product rule.
 4. **Untagged photos still go to the couple.** Don't filter the couple's gallery view by tag presence.
 5. **Personal Reel duration is flexible (1–30s) but template slot durations don't all need to scale linearly.** Some templates have minimum slot durations; if guest picks 1s reel from a template with 4s minimum slots, swap to a shorter-template variant or surface an error.
