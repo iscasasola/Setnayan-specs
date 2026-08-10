@@ -358,7 +358,12 @@ already activates — so **the library IS the spend-maximizer, and a vendor simp
 category the library already lights up.** The owner's stated goal: *"make the guests maximize the
 expenses the couple spent for the event."*
 
-### 9.2 The library (40 · Setnayan-supplied · generic) — 📷 photo · 🎥 clip
+### 9.2 The library (44 · Setnayan-supplied · generic) — 📷 photo · 🎥 clip
+
+> **⚠ UPDATED 2026-08-10 — the library is 44, not 40.** Four **STORY** challenges were added
+> (ids 41–44, category `stories`, all 🎥 clip), owner-worded. Every one of the original 40 is an
+> ERRAND — *go photograph this* — and none asked a guest to say anything about the couple.
+> See **§ 9.2b** below. Shipped in migration `20271125220401`.
 
 Every challenge lands a guest at a paid line item. `PB` = the Pabati rail (own quota, see § 9.5).
 
@@ -414,7 +419,51 @@ the couple picks **< 10**, Setnayan backfills toward 20. Setnayan therefore alwa
 vendor slots revert to Setnayan.* **Edge:** couple picks 0 + no vendor → board = Setnayan's Top-10 +
 next 10 by library order. Board size ranges 10–20 depending on how many couple + vendor slots fill.
 
+### 9.2b The STORY challenges (41–44 · added 2026-08-10 · owner-worded) — 🎥 clip
+
+Owner 2026-08-10, on seeing the "confession booth" idea (couples DIY-ing prompt cards on top of a
+shared-album app): *"we just want to add those new challenges"* + *"We want a 10 second story."*
+
+**📖 Stories** — 41 Most Memorable 🎥 · 42 The First Time 🎥 · 43 When It Mattered 🎥 ·
+44 Always Remember 🎥
+
+| id | prompt (stored) |
+|---|---|
+| 41 | Share a story about your most memorable experience with `{who}`. Ten seconds. |
+| 42 | Share a story about the first time you met `{who}`. Ten seconds. |
+| 43 | Share a story of an experience where `{who}` played a crucial part in your life. Ten seconds. |
+| 44 | Share a story of how you will always remember `{who}`. Ten seconds. |
+
+**`{who}` — the side token.** Owner: *"Or dedicate it to whether they are team groom/bride/both. so
+it adjusts."* `guests.side` is a NOT NULL enum already, so nothing needs authoring or backfilling.
+`papic_guest_missions` (v5) substitutes **per guest**: bride → *the bride*, groom → *the groom*,
+anything else → *the couple*. 🔑 **Substitution belongs in the per-guest reader and nowhere else** —
+the board is materialized per EVENT, one row serving every guest, so baking it at materialization
+would show one side's wording to the entire wedding. Every non-guest screen (couple manager, vendor
+approval, vendor panel, vendor photo delivery) reads `papic_missions.prompt` **straight from the
+table** and renders the neutral wording via `displayChallengePrompt()` — a raw `{who}` must never
+reach a human.
+
+**⚠ TEN SECONDS IS THE ANSWER, AND THE PROMPT SAYS SO.** A challenge is completed by the guest's
+next capture, and a Papic clip is hard-capped at 10 s (owner lock 2026-07-22 · § 0). There is **no
+text-answer completion path** and none was invented. A story prompt that does not name the ten
+seconds gets the guest cut off mid-sentence *and told they succeeded* — do not add one.
+
+**🚨 A STORY WITHOUT A RANK IS UNREACHABLE.** See § 9.4: the board is 20 slots and the Setnayan lane
+backfills by `priority_rank NULLS LAST, library_id` over 44 rows, so an unranked row at 41+ sorts
+dead last and is never placed — and **nothing else surfaces the library** (no app code reads
+`papic_challenge_library`; the couple's manager has **no library picker**, only free-text authoring
+and hide/show). The rows would exist and no guest would ever be asked one.
+
 ### 9.4 ⚠ PROVISIONAL Top-10 Must-Capture ranking — OWNER SIGN-OFF PENDING
+
+> **⚠ UPDATED 2026-08-10 — the ladder is 1..20, not 1..10.** `priority_rank` widened (still UNIQUE —
+> a rank is a board POSITION, and two rows claiming one turns a guarantee into a coin flip).
+> **11–14 = the four § 9.2b story challenges**, ranked directly below the Top-10 heroes.
+> **What it costs:** the 20-slot board was already full, so on an event with no couple picks and no
+> booked vendors the four stories DISPLACE the four lowest-ordered unranked errands — the board
+> becomes **10 heroes + 4 stories + 6 errands**. Nothing is deleted; displaced rows return the moment
+> a couple pick or vendor mission takes a slot. Reordering is an UPDATE of four ranks.
 
 Setnayan's fill order. The **Top 5 are guaranteed** every event; **6–10** are the backfill. This
 ranking is a curatorial call the owner has **not yet locked** — proposed here so the build has a seed,
