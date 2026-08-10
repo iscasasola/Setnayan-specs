@@ -16,7 +16,7 @@
 | Fact | Value | Source of truth |
 |---|---|---|
 | Papic Pool | unlimited cameras, SHARED shots · 50 pts free · top-ups **+3,000 ₱1,000 · +6,000 ₱2,000 · +10,000 ₱3,000**, repeatable | catalog rows `PAPIC_GUEST` / `_6K` / `_10K` (active) · `papic_pass_tiers` |
-| Papic One | dedicated camera + own QR + unshared balance · **1 free camera @ 5 pts** · per camera **50 pts ₱50 · 100 pts ₱100** · reloadable · **no seat cap** · ₱1 = 1 shot | `PAPIC_CAMERA_MINI_DAY` / `PAPIC_ONE_100` (active) · `papic_one_tiers` |
+| Papic One | dedicated camera + own QR + unshared balance · **1 free camera @ 5 credits** · ⛔ **SUPERSEDED 2026-08-11: ONE price — 150 credits ₱50 per camera**, reload identical · **no seat cap** · ₱0.333/credit (the ₱1 = 1 shot rule and the ₱100 rung are retired) | `PAPIC_ONE_150` (active) · `PAPIC_ONE_100` (retired) · `PAPIC_CAMERA_MINI_DAY` (**retired as a rung, still stamped as a seat sku_code and still read by the legacy grant — do not delete**) · `papic_one_tiers` |
 | Currency | **1 photo = 1 pt · 10-sec clip = 8 pts** | `PAPIC_POINTS_PER_CLIP` in `apps/web/lib/papic-cameras.ts` |
 | Free tier | 50-pt shared pool + 1 free One camera, auto-armed on EVERY event | `ensureFreePapicPoolGrantAdmin` / `ensureFreePapicOneCameraAdmin` |
 | Guest buy | pool top-ups + own-camera One reloads, anonymous, admin-approval-gated | PR #3874 · flag `NEXT_PUBLIC_PAPIC_GUEST_BUY` (ON in prod since 2026-07-29) |

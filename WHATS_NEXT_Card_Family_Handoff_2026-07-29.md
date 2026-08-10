@@ -135,7 +135,7 @@ touch their tree from a card-family session.
 - **Song Desk** — the OTHER active stream: contract `Song_Desk_BUILD_ORDER_2026-07-27.md`
   (7 PRs in dependency order; PR1 = a live entitlement gap).
 - **Papic two-type model (locked 2026-07-29, build NOT started, different session):** Pool rungs
-  back on sale (₱1,000/2,000/3,000) + Papic One at ₱1 = 1 shot, reloadable cameras. Contract =
+  back on sale (₱1,000/2,000/3,000 — ⛔ **the Pool ladder now runs to 30,000 / ₱9,000, and Papic One is ONE price, 150 credits ₱50; see DECISION_LOG 2026-08-11**) + Papic One, reloadable cameras. Contract =
   memory `project-setnayan-onboarding-papic-ai-cards` (🔒 2026-07-29 block) + the DECISION_LOG
   row 2026-07-29 + artifact `de2cf612`. Build order there: catalog migration → SKU remap → services-step.
 - **Everything older** — `WHATS_NEXT_INDEX.md` is the master register (Open-Browse, Google

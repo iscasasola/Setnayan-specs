@@ -98,8 +98,8 @@ Two types. Both meter the same event point pool primitives; what differs is whet
 | Cameras | **unlimited**, any guest phone via the event QR | one physical camera, **its own QR** |
 | Shots | **shared** across everyone | **dedicated**, unshared |
 | Free tier | **50 pts** (already armed — PR1) | **ONE free camera with 5 pts** ⬅ *new mechanic, NOT built* |
-| Paid rungs | **+3,000 pts ₱1,000** · **+6,000 pts ₱2,000** · **+10,000 pts ₱3,000** | per camera: **50 pts ₱50** · **100 pts ₱100** |
-| Rule | volume buy | flat **₱1 = 1 shot** (~3× Pool's per-point rate — you pay for the guarantee) |
+| Paid rungs | ⛔ **EXTENDED 2026-08-11** → **3,000 · 6,000 · 10,000 · 13,000 · 16,000 · 20,000 · 23,000 · 26,000 · 30,000 credits**, **₱1,000 per step** (₱1,000 → ₱9,000). The three original rungs are unchanged. | ⛔ **SUPERSEDED 2026-08-11** → **ONE price: 150 credits ₱50 per camera** (code `PAPIC_ONE_150`). Both old rungs are retired. |
+| Rule | volume buy · ₱3,000 per 10,000 credits at every step | ⛔ the flat **₱1 = 1 shot** rule is **RETIRED**. One price, **₱0.333/credit** (within ~11% of Pool, was 3×) — small enough that a couple can say yes to both at onboarding. **A reload is the same rung at the same price**; there is no separate reload SKU. |
 
 - **Reload: YES.** Owner: *"yes they can reload."* The same One rungs top up an **existing** camera, including the free one. **No new QR mid-event.**
 - **No seat cap.** Owner: *"they can also buy as many seats as they want."* Unlimited One cameras per event.
