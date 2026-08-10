@@ -424,8 +424,43 @@ next 10 by library order. Board size ranges 10–20 depending on how many couple
 Owner 2026-08-10, on seeing the "confession booth" idea (couples DIY-ing prompt cards on top of a
 shared-album app): *"we just want to add those new challenges"* + *"We want a 10 second story."*
 
-**📖 Stories** — 41 Most Memorable 🎥 · 42 The First Time 🎥 · 43 When It Mattered 🎥 ·
-44 Always Remember 🎥
+> **⚠ EXPANDED 2026-08-10 — the set is 20, in TWO kinds.** Owner: *"make more. something to
+> uplift the groom, bride, and as a couple. questions that are fun to share but still memorable
+> and safe enough to share."* Migration `20271125890940`.
+
+**📖 Stories — `{who}` side-token (uplift the one they came for)** — 41 Most Memorable 🎥 ·
+42 The First Time 🎥 · 43 When It Mattered 🎥 · 44 Always Remember 🎥 · 45 Brag For Them 🎥 ·
+46 Three Words 🎥 · 47 The Best At 🎥 · 48 The Kindest Thing 🎥 · 49 Set It Straight 🎥 ·
+50 First Impression 🎥 · 51 Made You Laugh 🎥 · 52 Proud Of Them 🎥
+
+**💞 Stories — couple (uplift them as a pair, no token)** — 53 When You Knew 🎥`R15` ·
+54 Better Together 🎥`R16` · 55 Advice For The Years 🎥 · 56 Different Together 🎥 ·
+57 Ten Years From Now 🎥 · 58 The Best Day 🎥 · 59 Their Song 🎥 · 60 One Day, Their Kids 🎥
+
+🔑 **The two kinds are how all three of the owner's asks are met.** The side-token set *is*
+"uplift the groom" and "uplift the bride" — each guest is asked about the half they actually
+know. A fixed *"praise the bride"* handed to the groom's college roommate produces a polite
+non-answer, the opposite of memorable. **Targeting by side beats targeting by name.** And
+"as a couple" can only come from the untokenised set: a both-side guest resolving `{who}` to
+"the couple" happens by accident of their side, not by design.
+
+🔒 **"SAFE ENOUGH TO SHARE" IS A CONSTRAINT ON THE WORDING, NOT A DISCLAIMER.** The § 2.2
+blocklist stops **dares**; it does not stop tactlessness, and a question whose honest answer
+embarrasses someone in front of both families is unsafe even though every word passes the
+filter. Rules these 20 keep, and any new one must:
+- Point at something **good** — proud of · kindest · best at · made you laugh · what people get
+  wrong. **Never** the wildest, the most embarrassing, the secret, or the story they have never
+  told. Those read as fun on a planning screen and land as a problem on a projector, in front of
+  both families, permanently.
+- Anything that could tip carries its steer **IN the prompt where the guest reads it**
+  ("keep it kind" · "Be nice") — not in a policy nobody sees.
+- Never ask a guest to compare the two of them, rank anyone, or speak about an ex, money, or
+  family friction.
+
+📌 **Only SIX are on every board** (ranks 11–16: 41–44 + 53 + 54) → 10 heroes + 6 stories +
+4 errands. Ranking all 20 would leave **zero errands**, and the errands are what walk a guest to
+the paid line items (§ 9: *the library IS the spend-maximizer*). **The other 14 are reached by
+the couple's picker** — see § 9.3b.
 
 | id | prompt (stored) |
 |---|---|
@@ -454,6 +489,27 @@ backfills by `priority_rank NULLS LAST, library_id` over 44 rows, so an unranked
 dead last and is never placed — and **nothing else surfaces the library** (no app code reads
 `papic_challenge_library`; the couple's manager has **no library picker**, only free-text authoring
 and hide/show). The rows would exist and no guest would ever be asked one.
+
+### 9.3b The couple's STORY PICKER (built 2026-08-10)
+
+**The first thing anywhere that lets a couple choose a LIBRARY challenge.** Before this the couple
+manager could only (a) author free text and (b) hide/show what was already on their board — so an
+unranked library row was **unreachable by any human**, which is why 14 of the 20 stories would
+otherwise have been dead rows.
+
+The picker lists the two story groups with copy naming which is which (*"Share a story about the
+couple"* and *"…about the bride"* look like the same question on that screen and are not), hides
+what the event already carries, and warns at 10 picks that the couple lane caps there.
+
+⚠ **A pick MUST carry its `library_id`.** The board resolver dedupes the Setnayan auto-fill against
+*couple picks WHERE library_id = …*, so a prompt copied as free text is invisible to that check and
+**the same question lands on the board twice** — once as theirs, once as ours. Identical on screen,
+wrong underneath. The prompt is also read from the library row, **never from the posted form** —
+otherwise any string could be stamped with a library id and inherit its dedup identity.
+
+⚠ **Hidden counts as TAKEN.** The taken-set is read without an `is_active` filter on purpose: a
+question the couple hid is still theirs, and re-offering it would say "add this" while their own
+list below says "Hidden from guests". Un-hiding is the Show button, not a second Add.
 
 ### 9.4 ⚠ PROVISIONAL Top-10 Must-Capture ranking — OWNER SIGN-OFF PENDING
 
