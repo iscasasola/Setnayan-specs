@@ -222,6 +222,14 @@ Free-cap fake door (**brief PR-3 must land WITH the 3-seat display change** — 
   touches: events.papic_quality_tier, setup UI, ingest; new type PapicFidelityTier
   verify: single column written by UI and read by ingest (net-new — see §3 PR-4 correction 2026-07-19); wedding=Optimal12MPrecommended, Lite=High-Efficiency
   gap: none live — NET-NEW work (2026-07-19 grep: neither papic_quality nor papic_quality_tier exists in code; earlier "fake door" framing was wrong)
+  # ⚠ SUPERSEDED 2026-08-10 — THE DEFAULT IS NOW 'optimal'. Owner: "photo quality starts at
+  #   optimal and not full resolution." Migration 20271127772092 does ALTER COLUMN … SET DEFAULT
+  #   'optimal'; the CHECK is untouched and all three tiers stay selectable. The column is NOT NULL,
+  #   so no existing row moves — the five prod events keep full_res. The migration is therefore no
+  #   longer INERT for NEW events. 🔑 The TS constant was SPLIT, not flipped: the ingest's error
+  #   path (papic-ingest-fidelity.ts) keeps FIDELITY_READ_FAILSAFE='full_res' because a failed READ
+  #   must never downscale someone's originals, while NEW_EVENT_PAPIC_FIDELITY='optimal' mirrors the
+  #   DB default. The two lines below are the 2026-07-20 history, not current truth.
   # Shipped shape (2026-07-20): migration 20270825539466 = events.papic_quality_tier TEXT NOT NULL
   #   DEFAULT 'full_res' CHECK (full_res|optimal|high_efficiency) — INERT on apply (default = the
   #   pre-PR-4 behavior: originals stored 1:1). WRITE seam = "Photo quality" QualityPicker on
