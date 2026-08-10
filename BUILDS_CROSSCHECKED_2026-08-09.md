@@ -42,6 +42,71 @@
 > #21 gallery chapters (nothing anywhere stores that a chapter is held back).
 >
 > ⚠ **~45 of the 79 were NOT re-opened in this pass.** At a 6-in-20 correction rate, expect more.
+>
+> ---
+>
+> ## 🔗 WHAT BUNDLES — 2026-08-11 · eight groups, each ONE job not several
+>
+> Verified against `origin/main`, not inferred from the wording of the entries.
+>
+> **A · The render-and-hand-over spine — and it CORRECTS two launch blockers.**
+> #1 Thank-You Video · #2 LED backdrop file · #35 LED animated previews.
+> 🚨 **`render_jobs` already exists, is keyed on SKU with a free-form spec, and its own
+> comment names `THANK_YOU_VIDEO` as one of the SKUs it was built for.** Patiktok and
+> Auto-Recap both ride it today, and Auto-Recap is a working ≤30s 1080×1920 montage of an
+> event's best captures with a music bed, an FFmpeg argv builder, completion emails, a
+> couple-facing screen and a public page. **`led_background_renders` also exists — with
+> ZERO writers** (a gate with no handle). So #1 is *a second template on a running queue*,
+> not "everything that makes the video"; #2 is *the worker + writing to a table that is
+> already there*. Both entries below overstate the work.
+>
+> **B · One pass over the screens — the largest saving on the list.**
+> #25 couple daily screens · #63 vendor dashboard · #88 admin console · #26 the 112
+> hand-drawn headings · #6 the unused error screen · #27 the 115 duplicated rules.
+> **Measured: the 112-entry heading baseline is 76 couple screens, 27 admin, 9 vendor** —
+> the exact files each redesign already opens. Done separately, every one of those files is
+> opened three times.
+>
+> **C · Who says yes before a supplier is booked.**
+> #14 the supplier-agrees step (**database half shipped, ZERO app consumers**) · decision 17
+> merge the two coordinator access paths (ruled: the host approves) · decision 20 retire
+> "coordinator proposes, couple confirms" · decision 14 payment-before-lock.
+> `vendor_lock_proposals` is what "coordinator proposes" runs on and what the handshake
+> replaces — retiring it while building the handshake is one change, not two.
+>
+> **D · Live Studio — ORDERED, and the order is load-bearing.**
+> #123 port the printable camera hand-out → THEN #121 delete the retired broadcast tree ·
+> #125 camera-seat dates stored as whole days · owner action: reconnect + rehearse.
+> **The old tree holds the retired broadcast room AND the only print sheet AND the camera
+> pages; the new control screen has neither.** Deleting first destroys the hand-out.
+>
+> **E · One database-permission sweep.**
+> #103 the 314 stranger-readable tables · #104 four internal summary views · #105 two views
+> ignoring the per-row rules. All three rewrite the **same single exposure record**, which
+> must be regenerated in the same change — three passes means three regenerations and three
+> chances to clobber.
+>
+> **F · One address pass.**
+> #99 the shared name registry · #100 the ~28 in-app links on old supplier addresses · #101
+> capitalisation/underscore opening the same page · the unlinked greeting-video page.
+> ⛔ #58 (shop rename forwarding) is **moot** — the shop address is now permanent by ruling.
+>
+> **G · One compliance-document pass.**
+> #127 the 88 further record kinds in "download my data" · #131 four outside services missing
+> from the public privacy page · decision 4 delete-means-delete · decision 36 an end date on
+> face measurements · decision 37 whether the hidden-name rule covers captions. Same two
+> documents, same export-coverage guard, same sweep machinery.
+>
+> **H · One redeploy for the switches.** Per-service detail sheet (ruled yes) · vendors
+> listing packages · whichever photo switches the owner picks · bot protection.
+> ⚠ **Bot protection has a mandatory ORDER**: key + redeploy FIRST, widget second, enforce
+> last. In any other order the photo screens start rejecting real people. Everything else can
+> ride the same redeploy.
+>
+> **⛔ TWO PAIRS THAT MUST NOT BOTH BE BUILT**
+> - #86 the automatic bank-inbox matcher **vs** #69 automatic subscription billing — a real
+>   payment gateway makes the matcher unnecessary. Decide the gateway first.
+> - #58 shop rename forwarding is already answered by the permanent-address ruling.
 
 You asked whether some of the 96 were already done or already integrated. **Yes — a lot of them.**
 
