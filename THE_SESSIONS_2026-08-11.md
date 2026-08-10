@@ -51,11 +51,35 @@ a booking need a payment before it locks · six tabs or five in the planning pha
 person's public handle looks like · do wedding addresses become permanent the way shop addresses
 did · which photo switches go on.
 
-**Start these clocks the same week — they run while we build:** the payment-gateway application ·
+**Start these clocks the same week — they run while we build:**
 the Google sign-in resubmission (**the two pages it was waiting on have both shipped**) · counsel
 for the fifteen filings and twelve unsigned data agreements · the child-safety provider and its
-regulator agreement · the Meta business setup (~30 min) · register `setnayan.ph` · the paid-hosting
+regulator agreement · the Meta business setup (~30 min) · the paid-hosting
 decision (**there are no automated database backups on the free plan**).
+
+> ### ✅ ANSWERED 2026-08-11 — three fewer things to decide, and one earlier call flipped
+> - **PayMongo is next year; the manual rail with per-order QR is V1's model.** The
+>   payment-gateway application is **struck from the list above** — there is no clock to
+>   start. ⚠ **This FLIPS an earlier call:** the bank-inbox matcher (#86) was deferred
+>   *because a gateway might make it unnecessary*. It will not land for a year, so its
+>   deferral now rests on **order volume** instead — an admin pasting a bank alert into a
+>   box is fine at zero orders and becomes the bottleneck at real ones. Automatic
+>   subscription billing (#69) is deferred a year for the same reason.
+> - **We do NOT own `setnayan.ph`** — struck from the list above too. It was never ours to
+>   confirm; the code repo's auto-loaded instructions claimed it for months. Unregistered
+>   means anyone can take it, so *buying* it is an open call, not an errand.
+> - **The phone bar may hold six, and six is the ceiling.** The phase-swapping bar stays;
+>   the handoff's fixed five-tab strip is not adopted. ⏭ The work is the instruction
+>   attached to the number: **every tab must justify its slot**, and phone and laptop must
+>   stop calling the same thing by two names (phone *Explore* = laptop *Marketplace*).
+>
+> ### ▶ S2 IS BUILT — PR #4340, auto-merge armed
+> One definition of "this shop is live". The invite QR, its claim action, the couple's
+> add-a-vendor-by-name search, ghost-listing detection, fraud detection, the admin
+> population count and the admin Published tab all asked a **dead column** that the
+> approval flow never sets. Nothing was loosened — an unapproved shop still 404s.
+> Guarded by `one-definition-of-live.test.ts`, three mutations each verified applied
+> before the red was trusted.
 
 ---
 
