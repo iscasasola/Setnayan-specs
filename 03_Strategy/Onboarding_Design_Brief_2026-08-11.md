@@ -1,0 +1,444 @@
+# Setnayan — Onboarding Design Brief
+
+**Date:** 11 August 2026 · **For:** design partner working on the look and feel of onboarding
+**Prepared by:** engineering, from the live site, the live database and the shipped code — not from older documents.
+
+---
+
+## 0 · What we want from you
+
+Our onboarding **works** but it does not **feel** enticing. People answer questions; they do not feel
+courted. We want the look and feel lifted — not the flow re-planned.
+
+**The wedding onboarding is the most complex one and the one to design first. Everything else is
+simpler and should feel like the same product, smaller.**
+
+Two things to hold onto:
+
+1. **Do not redraw what already ships.** Every screen listed here exists and is live today. Show us
+   the delta — new styling, new rhythm, new imagery — against the real screens, not a fresh concept.
+2. **The palette is locked** (below). The typography and layout are open.
+
+### The locked palette
+
+| Role | Value | Note |
+|---|---|---|
+| Page | `#FDFBF7` cream | the only mode — there is no dark mode |
+| Text | `#2C2A29` ink | 13.8:1 on cream |
+| Primary button | `#C24E25` terracotta | cream label on it |
+| Gold accent | `#A9834B` | UI accents and the wordmark only — never body text |
+| Link | `#3B4E67` | 8.2:1 |
+
+Type today: a serif italic (Cormorant) for the question, a small mono kicker above it, sans for
+options and helper text.
+
+---
+
+## 1 · What we saw when we walked it (the actual problem)
+
+Walk these two yourself — they are public, no account needed:
+
+- Wedding: `https://www.setnayan.com/onboarding/wedding`
+- Birthday: `https://www.setnayan.com/onboarding/birthday`
+
+**They are two different products.**
+
+**The wedding flow is the good one.** Rounded card floating on a warm ground, a small gold kicker
+("ABOUT YOU") above a serif-italic question, a real photograph of a Filipino wedding on the left, the
+answers on the right, one wide button along the bottom. It reads as a premium product.
+
+**Everything else is a plain form.** Same brand colours, none of the craft:
+
+| | Wedding | Every other event |
+|---|---|---|
+| Frame | a card on a warm ground | nothing — text on a flat page |
+| Kicker above the question | present, gold | **missing on every screen** |
+| Imagery | real photography, per screen | **one emoji, only on screen 1** |
+| Answer options | styled rows with a selector | plain white boxes |
+| Layout | two columns, balanced | one column, left of centre, **half the screen empty** |
+| Bottom bar | full-width primary action | small pill, floating right |
+
+The missing kicker is not a copy gap. The words exist for every screen ("The basics", "The fun",
+"The look", "The keepsake") — the element that shows them renders nothing. So screens that were
+designed as *kicker → question → helper* arrive as a bare question.
+
+**Other things worth your eye:**
+
+- On a laptop the wedding photograph is cut off by the bottom action bar.
+- The primary button sits grey/disabled until an answer is picked, on a screen where nothing signals
+  that. It reads as broken rather than as waiting.
+- Progress is a hairline at the very top. In the wedding flow it advances **1/26th at a time** — a
+  person cannot feel movement.
+- There is no moment of delight anywhere in the non-wedding flows. The wedding flow has a persona
+  reveal near the end; the others have the same reveal with none of the staging.
+
+---
+
+## 2 · The events we have — 16, all live
+
+All sixteen are switched on and can be planned today.
+
+| # | Event | Vendors? | Runs over several days? |
+|---|---|---|---|
+| 1 | 💍 Wedding | yes | yes |
+| 2 | 👑 Debut | yes | no |
+| 3 | 🎈 Gender Reveal | yes | no |
+| 4 | 🎂 Birthday | yes | no |
+| 5 | 🥂 Celebration | yes | no |
+| 6 | ✈️ Travel | yes | yes |
+| 7 | 🏢 Corporate | yes | yes |
+| 8 | 🏆 Tournament | yes | no |
+| 9 | 🕯️ Christening | yes | no |
+| 10 | 💞 Anniversary | yes | no |
+| 11 | 🎓 Graduation | yes | no |
+| 12 | 🤝 Reunion | yes | yes |
+| 13 | 🌟 Gala Night | yes | no |
+| 14 | 📅 Simple Event | **no — deliberately vendor-free** | no |
+| 15 | 💕 Date | yes (6 categories) | no |
+| 16 | 🍿 Hangout | yes (4 categories) | no |
+
+Wedding has its own dedicated wizard. The other fifteen share one flow whose questions change by
+type.
+
+---
+
+## 3 · The complete question list
+
+### 3A · Wedding — 26 screens (measured on the live site)
+
+In order. Two forks shorten it: choosing a **civil** ceremony removes the tradition screen, and
+choosing **"add it later"** on the love story removes six screens (a 19-screen minimum).
+
+| # | Screen | The question |
+|---|---|---|
+| 1 | Role | **Who are you in this wedding?** — Bride · Groom · Someone helping |
+| 2 | Kind | Which kind of wedding (church / civil / mixed traditions) |
+| 3 | Tradition | **Your ceremony tradition** — Catholic, Christian, Muslim, Hindu, Sikh, Buddhist, Orthodox *(skipped for civil)* |
+| 4 | Names | Both first and last names — this is also where the monogram is previewed |
+| 5 | Date | A specific date, or a window if undecided |
+| 6 | Love story — intro | The fork: tell it now, or add it later |
+| 7 | Love story — the spark | How you met |
+| 8 | Love story — almost | The near-misses |
+| 9 | Love story — the proposal | How it happened |
+| 10 | Love story — milestones | First date, engagement, etc. |
+| 11 | Love story — tone | How the story should be told |
+| 12 | Love story — preview | "This is us" — the story played back |
+| 13 | Region | Where in the Philippines |
+| 14 | Guests | Roughly how many |
+| 15 | Budget | Which band |
+| 16 | Experience 1 | **What would make the day unforgettable?** — Our private memory · Our guests' experience · Both, equally |
+| 17 | Experience 2 | **How big does it feel?** — Intimate & personal · Mid-size & warm · Grand & full-house |
+| 18 | Experience 3 | **What's the energy of the day?** — Calm & romantic · Joyful & lively · Elegant & refined |
+| 19 | Experience 4 | **Where does your wedding lean?** — Rooted in tradition · Modern & fresh · A blend of both |
+| 20 | Experience 5 | **How much do you want to do?** — Keep it simple · A balanced plan · Go all out |
+| 21 | How we'll help | **How much do you want us to do?** — Build it all for me · Give me options · I'll look myself |
+| 22 | Your vendors | **Where should your vendors come from?** — Find them on Setnayan · I'm bringing my own · Both |
+| 23 | Reception | **What setting do you love?** |
+| 24 | Find | Venue search near the chosen region |
+| 25 | Account | Create an account |
+| 26 | Congrats | The plan reveal → into the dashboard |
+
+**Two facts that matter to the design:**
+
+- Screens 16–20 resolve to a **named persona** — The Keepsake · The Grand Celebration · The Best of
+  Both · Intimate & Personal · The Modern Statement · Rooted in Tradition — each with its own line
+  ("A wedding built to be relived — your film, your song, your forever keepsakes"). **That reveal is
+  the emotional peak of the whole flow and it is currently under-designed. This is the single biggest
+  opportunity in this brief.**
+- **There is no paywall in onboarding.** It ends free. Nothing is sold until the dashboard. Design
+  accordingly — this is courtship, not checkout.
+
+### 3B · Every other event — the shared shape
+
+Same skeleton every time, roughly 18 screens:
+
+| Screens | What |
+|---|---|
+| 1 | Welcome — "A few quick questions and we'll shape a plan made for your celebration." |
+| 2 | **What should we call your [event]?** |
+| 3 | **Who are we celebrating?** *(birthday · debut · christening · graduation · gender reveal)* |
+| 3 | **What date are you marking?** *(anniversary only — the day it commemorates)* |
+| 4 | **When is it?** / **When are you celebrating?** |
+| 5 | **Is this a yearly thing?** *(travel · celebration · corporate · gala night · reunion · tournament)* |
+| 6 | **About how many guests?** |
+| 7 | **Where is it happening?** |
+| 8–11 | 3–4 **signature questions** unique to the event type (§ 3C) |
+| 12 | **A few details that make it yours** — one optional screen holding the type's detail fields (§ 3D) |
+| 13–17 | The same five experience questions as the wedding, in neutral wording |
+| 18 | The persona reveal |
+| 19 | Congrats → dashboard |
+
+The five shared experience questions, non-wedding wording:
+
+1. **What would make the day unforgettable?** — Our private memory · Our guests' experience · Both, equally
+2. **How big does it feel?** — Intimate & personal · Mid-size & warm · Grand & full-house
+3. **What's the energy of the day?** — Calm & relaxed · Joyful & lively · Elegant & refined
+4. **Where does your celebration lean?** — Rooted in tradition · Modern & fresh · A blend of both
+5. **How much do you want to do?** — Keep it simple · A balanced plan · Go all out
+
+### 3C · The signature questions, by event
+
+Every option quietly adds the right vendor categories to the plan, so these are not decoration.
+**Four events have none at all and go straight from "where" to the generic quiz — they feel the
+thinnest: Gala Night, Simple Event, Date, Hangout.**
+
+<details open>
+<summary><b>Birthday</b> — 4 questions</summary>
+
+- **The fun · Any special touch?** — Photo booth · Games corner · Mobile bar · Dessert spread · Just the essentials
+- **The celebrant · Who's the birthday for?** — A kids' party · A milestone (18 / 21) · An adult birthday · A golden one (50+)
+- **The look · What's the vibe?** — Themed & playful · Elegant & polished · Casual & chill
+- **The food · How do you want to feed everyone?** — Full catering · Food carts & stations · Dessert-forward · A drinks bar
+</details>
+
+<details open>
+<summary><b>Debut</b> — 4 questions</summary>
+
+- **The moment · Your debut's centerpiece?** — Cotillion dance · Production number · 18 roses & candles · Keep it elegant
+- **The court · Who stands with you?** — Classic 18s · A cotillion court · A small, close court
+- **The look · How polished is the styling?** — Full glam · Styled & decorated · Keep it simple
+- **The party · How do you keep the energy up?** — A live band · DJ & dance floor · Special performers · Keep it mellow
+</details>
+
+<details open>
+<summary><b>Gender Reveal</b> — 4 questions</summary>
+
+- **The reveal · How will you reveal?** — Smoke or pyro · Cake cut · Balloon & confetti · On camera
+- **The guest list · How big is the gathering?** — Family only · A full party
+- **The keepsake · How do you want to remember it?** — Photo & video · An editorial feature · Snaps are enough
+- **The treats · Anything sweet or special?** — Cake & dessert · A mocktail bar · Balloon styling · Nothing extra
+</details>
+
+<details open>
+<summary><b>Christening</b> — 4 questions</summary>
+
+- **After the rite · What follows the ceremony?** — Garden reception · Intimate lunch · Full party · Just the blessing
+- **The gathering · How big is the celebration?** — Close family · A full celebration
+- **The keepsakes · How do you mark the day?** — Photo & video · Souvenirs (for ninongs & ninangs) · An editorial story · Nothing extra
+- **The little ones · Anything for the kids?** — A play area · A host & program · A dessert table · Not needed
+</details>
+
+<details open>
+<summary><b>Corporate</b> — 4 questions</summary>
+
+- **The format · What kind of corporate event?** — Awards night · Conference · Product launch · Team celebration
+- **The headcount · About how many attendees?** — Under 50 · 50–200 · 200+
+- **The production · How produced should it feel?** — Full AV & staging · Livestream / hybrid · A host / emcee · Keep it lean
+- **The catering · How are you feeding the room?** — Plated meal · Food stations · Cocktails & canapés · A coffee cart
+</details>
+
+<details open>
+<summary><b>Tournament</b> — 4 questions</summary>
+
+- **The priority · What matters most?** — Awards & medals · Livestream coverage · Food for players · Hype & emcee
+- **The scale · How big is the meet?** — Local / small · Regional · Major
+- **The coverage · How do you capture it?** — Photo & video · Livestream · Scoreboard / LED wall · Not a priority
+- **On-site · Anything for players & crowd?** — Food trucks · Food carts · Wellness & recovery · Nothing extra
+</details>
+
+<details open>
+<summary><b>Travel</b> — 3 questions</summary>
+
+- **The trip · What do you need most?** — Documented · Group logistics · A keepsake site
+- **The group · Who's travelling?** — Just us · A family group · A big group
+- **The memories · How do you capture the trip?** — A photo & video team · A content creator · We'll shoot our own
+</details>
+
+<details open>
+<summary><b>Celebration</b> — 4 questions</summary>
+
+- **The fun · Any special touch?** — Photo booth · Live music · Mobile bar · Dessert spread · Just the essentials
+- **The gathering · How big is it?** — An intimate dinner · A big party
+- **The energy · How do you set the mood?** — A live band · DJ & dancing · Performers · Keep it mellow
+- **The keepsake · How do you remember it?** — Photo & video · A photo booth · An editorial page · Nothing extra
+</details>
+
+<details open>
+<summary><b>Anniversary</b> — 4 questions</summary>
+
+- **The moment · How will you mark the years?** — Thanksgiving Mass + renewal · A renewal of vows · Just a grand reception · Keep it intimate
+- **The tribute · The "then & now" moment?** — A tribute video · A live performance · Messages from the family · Keep it simple
+- **The look · How styled is the celebration?** — Grand & formal · Warm & intimate · Recreate our wedding · Effortless
+- **The food · How do you want to feed everyone?** — Full catering · A family feast · Dessert & coffee · A toast bar
+</details>
+
+<details open>
+<summary><b>Graduation</b> — 4 questions</summary>
+
+- **The milestone · How will you give thanks?** — A thanksgiving Mass · A program with messages · Just a family feast · Keep it simple
+- **The feast · How do you want to feed everyone?** — Lechon & full spread · Food carts & stations · Buffet catering · Dessert & drinks
+- **The memories · How do you want to remember it?** — Photo & video · A photo booth · A tribute AVP · Keep it candid
+- **The look · What is the vibe?** — Celebratory & lively · Warm & family · Casual & chill
+</details>
+
+<details open>
+<summary><b>Reunion</b> — 4 questions</summary>
+
+- **The gathering · Who is coming together?** — The whole family / clan · A school batch / alumni · Friends / barkada · Colleagues
+- **The program · What is on the program?** — Games & Larong Pinoy · Awards & recognitions · A talent show · Just food & catching up
+- **The feast · How do you want to feed everyone?** — Lechon & boodle fight · Food carts & stations · Full buffet catering · Keep it simple
+- **The extras · Any special touch?** — Matching shirts & souvenirs · A photo booth · Live music / karaoke · Just the essentials
+</details>
+
+### 3D · "A few details that make it yours" — one optional screen per event
+
+All optional, all skippable. This screen is currently a stack of plain form fields and is the
+**second biggest design opportunity** — it is where the product proves it understands a Filipino
+celebration, and right now it looks like a tax form.
+
+| Event | Fields | The detail that shows we understand |
+|---|---|---|
+| **Wedding** | 15 | An **uncapped** Ninong & Ninang roster — plus secondary sponsors, abay, bearers & flower children, the 13 arrhae, the yugal, the rite, the motif |
+| **Debut** | 11 | 18 Roses · 18 Candles · 18 Treasures, each a named list; the father-daughter waltz partner, with room for a father figure |
+| **Christening** | 9 | Principal and secondary godparents, both uncapped — a Filipino baptism has dozens |
+| **Birthday** | 8 | Turning what · the milestone ladder (1 · 7 · 18 · 21 · 60) · **palabunutan** raffle and its prizes · the food centrepiece |
+| **Anniversary** | 8 | The original wedding date, renewal of vows, the tribute programme |
+| **Reunion** | 8 | The **balikbayan** flying home · the matching reunion shirt · in-memoriam · patriarch/matriarch honoured |
+| **Gender Reveal** | 7 | The **secret-keeper** · Team Boy vs Team Girl · whether it doubles as a baby shower |
+| **Graduation** | 7 | Honours and distinction · **"para kay…"** the dedication |
+| **Gala Night** | 7 | Filipiniana dress code (barong / terno) · table sponsors · the beneficiary |
+| **Tournament** | 7 | Divisions, teams, the opening parade, the awards |
+| **Travel** | 7 | The shared **ambag** kitty per head · the **pasalubong** list |
+| **Corporate** | 6 | Christmas-party raffle · department production numbers · the blessing and ribbon cutting |
+| **Celebration** | 4 | **Pasasalamat** and **despedida** as first-class occasions |
+| **Simple Event** | 4 | Deliberately light — a genuinely one-tap path |
+| **Date · Hangout** | none | Nothing is asked. |
+
+---
+
+## 4 · What vendors can be included
+
+**15 folders · 70 vendor categories.** A couple never sees all 70 — the list narrows to the event.
+
+| Folder | Categories |
+|---|---|
+| **Venue** | Reception · Ceremony · Accommodation |
+| **Planning** | Coordinator / Planner · Date & Feng-shui Specialist |
+| **Feast** | Cake · Catering · Stations · Crew Meals |
+| **Design** | Stylist / Decorator · Florist · Lights & Sound · Dance Floor · Outdoor · Fireworks · LED Wall · Digital Services |
+| **Program** | Live Band · Choir · Orchestra · Wedding Singer · DJ · Choreographer · Performers · Host / MC · AV / Production · Speakers / Talent · Kids' Entertainer |
+| **Documentary** | Photo & Video · Editorial |
+| **Look** | Bride's Attire · Groom's Attire · Women's Attire · Men's Attire · Filipiniana & Barongs · HMUA · Grooming · Wellness & Fitness · Jewelleries & Accessories |
+| **Booths** | Mobile Bar · Coffee / Espresso · Mocktail · Food Truck · Dessert · Massage Chair · Food Cart · Photo Booth · Perfume Bar · Arcade / Games · Henna / Tattoo · Mini Nail Bar · Tarot / Astrology / Palmistry · Caricature / Calligraphy / Painting · Engraving / Embroidery |
+| **Prints** | Printing · Souvenir / Giveaways · Trophies & Awards |
+| **Transport** | Bridal Car · Guest Shuttle · Escort · Transfers & Rentals |
+| **Experience** | Tours & Activities · Tour Guide |
+| **Dining** | Restaurant (Reservation) |
+| **Logistics & Safety** | Referees / Officials · Medic / First-aid |
+| **Insurance & Protection** | Event Insurance · Personal Accident · Travel Insurance |
+| **Specialty** | Reveal Element |
+
+### How many each event can draw on
+
+| Event | Categories | Character |
+|---|---|---|
+| Wedding | **59** | the widest — everything except tournament and travel specifics |
+| Gala Night | 52 | a full production event |
+| Debut | 51 | a wedding minus the bridal specifics |
+| Corporate | 47 | staging, AV, speakers, awards |
+| Anniversary | 42 | |
+| Birthday · Celebration | 41 | |
+| Graduation | 40 | |
+| Reunion | 39 | |
+| Christening | 36 | |
+| Gender Reveal | 27 | plus the only **Reveal Element** category |
+| Tournament | 15 | referees, medics, trophies, food trucks |
+| Travel | 10 | tours, guides, transfers, accommodation, travel insurance |
+| Date | 6 | restaurant, florist, cake, performers, photo & video, souvenirs |
+| Hangout | 4 | restaurant, cake, photo & video, souvenirs |
+| **Simple Event** | **0** | vendor-free by design — never show a marketplace here |
+
+**For design:** the Date and Hangout flows offer four to six vendors and ask no signature questions.
+They should not look like a shrunken wedding — they need their own, lighter treatment.
+
+---
+
+## 5 · What it costs
+
+Onboarding **sells nothing**. These prices appear later, in the dashboard. They are here so the copy
+and any preview cards you design quote the right numbers.
+
+### Setnayan AI — one-time, per event
+
+Not a subscription. Bought once, runs until the event, then stops.
+
+| Tier | Events | Price |
+|---|---|---|
+| A | Wedding | **₱1,499** |
+| B | Debut · Corporate · Gala Night | ₱899 |
+| C | Christening · Birthday · Celebration · Travel · Anniversary · Graduation · Reunion | ₱499 |
+| D | Tournament · Gender Reveal · Date · Hangout | ₱99 |
+| E | Simple Event | not offered |
+
+⚠️ **Only the wedding price is switched on today.** The other three tiers exist but are inactive, so
+on a non-wedding event the assistant is offered at no price or not at all. **This is an owner
+decision, not a design one — flagging it because a design that assumes "₱499 for a birthday" would
+be designing a door that does not open yet.**
+
+### Papic — two ways to buy, both one-time
+
+**Papic Pool** — one shared pool of shots the whole event spends from. No seat limit, no per-camera
+maths.
+
+| | |
+|---|---|
+| Free with every event | **50 shots** |
+| ₱1,000 | +3,000 shots |
+| ₱2,000 | +6,000 shots |
+| ₱3,000 | +10,000 shots |
+
+**Papic One** — a camera of its own for one trusted person, with its own QR and shots nobody else
+can spend.
+
+| | |
+|---|---|
+| First camera free | ~5 shots |
+| ₱50 | 50 shots, that camera's own |
+| ₱100 | 100 shots, that camera's own |
+
+One 10-second clip counts as 8 shots. Every top-up stacks.
+
+**Papic add-ons:** Kwento (words on a photo) ₱299 · Pabati ₱1,299 · Stories ₱2,000 · Thank You ₱2,499.
+
+*(Neighbours, for context: Couple Website PRO ₱3,500 · Live Studio ₱2,999 · Pakanta ₱2,500 · Live
+Photo Wall ₱2,500 · Patiktok ₱1,500/day · 3D Plan ₱1,500 · Animated Monogram ₱1,000 · Custom
+Subdomain ₱999/yr.)*
+
+---
+
+## 6 · What we are asking for, ranked
+
+1. **Bring the fifteen non-wedding flows up to the wedding flow's craft.** One system, not two. The
+   frame, the kicker, the imagery slot, the option rows, the bottom bar.
+2. **Design the persona reveal.** Six named outcomes, each with a line of copy, arriving after five
+   questions. Today it is a heading. It should be the moment someone screenshots.
+3. **Solve imagery for fifteen event types.** The wedding flow uses real photography. The others use
+   one emoji. Whatever you propose has to be producible for sixteen events without a photo shoot per
+   type — illustration, pattern, colour field, type-led. Your call.
+4. **Redesign the "details that make it yours" screen.** Uncapped ninong/ninang lists, 18 Roses,
+   the palabunutan, the balikbayan roster. This is where the product is most Filipino and least
+   designed.
+5. **Make progress feel like progress** across 26 wedding screens and ~18 elsewhere — chapters,
+   named sections, something better than a hairline moving 4% at a time.
+6. **Give Date, Hangout and Simple Event their own light treatment.** Four to six vendors, no
+   signature questions. They should feel deliberately small, not unfinished.
+
+**Mobile first.** Most of our couples are on a phone.
+
+---
+
+## Appendix · Walk it yourself
+
+Public, no account needed. Substitute any type name from § 2.
+
+- `https://www.setnayan.com/onboarding/wedding` — the good one, 26 screens
+- `https://www.setnayan.com/onboarding/birthday` — the generic one, with the most questions
+- `https://www.setnayan.com/onboarding/travel` — a narrow one, 10 vendor categories
+- `https://www.setnayan.com/onboarding/hangout` — the thinnest, no signature questions
+- `https://www.setnayan.com/onboarding/simple_event` — vendor-free
+- `https://www.setnayan.com/pricing` — where the numbers in § 5 are shown to customers
+
+*Verified 11 August 2026 against the live site, the live production database, and shipped code at
+`origin/main`. Wedding's 26-screen count was measured on the live page. Non-wedding screen counts are
+computed from the shipped flow; the live birthday page currently runs one step longer than the list
+in § 3B, which is worth confirming as you walk it.*
