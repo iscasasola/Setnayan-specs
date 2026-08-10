@@ -308,48 +308,118 @@ celebration, and right now it looks like a tax form.
 
 ## 4 · What vendors can be included
 
-**15 folders · 70 vendor categories.** A couple never sees all 70 — the list narrows to the event.
+**The taxonomy is three levels deep, and the depth is the point.**
 
-| Folder | Categories |
-|---|---|
-| **Venue** | Reception · Ceremony · Accommodation |
-| **Planning** | Coordinator / Planner · Date & Feng-shui Specialist |
-| **Feast** | Cake · Catering · Stations · Crew Meals |
-| **Design** | Stylist / Decorator · Florist · Lights & Sound · Dance Floor · Outdoor · Fireworks · LED Wall · Digital Services |
-| **Program** | Live Band · Choir · Orchestra · Wedding Singer · DJ · Choreographer · Performers · Host / MC · AV / Production · Speakers / Talent · Kids' Entertainer |
-| **Documentary** | Photo & Video · Editorial |
-| **Look** | Bride's Attire · Groom's Attire · Women's Attire · Men's Attire · Filipiniana & Barongs · HMUA · Grooming · Wellness & Fitness · Jewelleries & Accessories |
-| **Booths** | Mobile Bar · Coffee / Espresso · Mocktail · Food Truck · Dessert · Massage Chair · Food Cart · Photo Booth · Perfume Bar · Arcade / Games · Henna / Tattoo · Mini Nail Bar · Tarot / Astrology / Palmistry · Caricature / Calligraphy / Painting · Engraving / Embroidery |
-| **Prints** | Printing · Souvenir / Giveaways · Trophies & Awards |
-| **Transport** | Bridal Car · Guest Shuttle · Escort · Transfers & Rentals |
-| **Experience** | Tours & Activities · Tour Guide |
-| **Dining** | Restaurant (Reservation) |
-| **Logistics & Safety** | Referees / Officials · Medic / First-aid |
-| **Insurance & Protection** | Event Insurance · Personal Accident · Travel Insurance |
-| **Specialty** | Reveal Element |
+```
+15 folders   →   69 tiles   →   276 kinds of vendor   (246 shown to customers, 30 held back)
+  "Look"          "Bride's Attire"    Terno · Maria Clara · Balintawak · Maranao ·
+                                      Tausug · Yakan · Qipao · Sari/Lehenga ·
+                                      modest Muslim bridal · modest INC bridal ·
+                                      custom gown · gown rental
+```
 
-### How many each event can draw on
+A folder is a shelf. A tile is what a couple taps. **A kind is what a vendor actually is** — and
+that bottom level is where the whole product's Filipino fluency lives. Any design that shows only
+the 69 tiles throws away the thing that makes us different.
 
-| Event | Categories | Character |
+**The kinds, cut a different way:**
+
+| | Count | Examples |
 |---|---|---|
-| Wedding | **59** | the widest — everything except tournament and travel specifics |
-| Gala Night | 52 | a full production event |
-| Debut | 51 | a wedding minus the bridal specifics |
-| Corporate | 47 | staging, AV, speakers, awards |
-| Anniversary | 42 | |
-| Birthday · Celebration | 41 | |
-| Graduation | 40 | |
-| Reunion | 39 | |
-| Christening | 36 | |
-| Gender Reveal | 27 | plus the only **Reveal Element** category |
-| Tournament | 15 | referees, medics, trophies, food trucks |
-| Travel | 10 | tours, guides, transfers, accommodation, travel insurance |
-| Date | 6 | restaurant, florist, cake, performers, photo & video, souvenirs |
-| Hangout | 4 | restaurant, cake, photo & video, souvenirs |
-| **Simple Event** | **0** | vendor-free by design — never show a marketplace here |
+| Faith-specific | **43** across **17 faiths** | Catholic · Christian · Born Again · Aglipayan · INC · SDA · JW · LDS · Orthodox · Muslim · Hindu · Sikh · Buddhist · Jewish · Chinese · Cultural · Civil |
+| Cultural / traditional | **30** | mandap décor · tea-set styling · double-happiness décor · Maranao okir · chuppah · lion dance · kulintang ensemble · rondalla |
+| Distinctly Filipino | **46** | lechonero · sorbetes cart · halo-halo station · mini-lechon station · pamamanhikan coordinator · pasalubong box · ninong & ninang attire · sponsor corsage · capiz native décor |
+| Rentals rather than services | 15 | gown rental · barong rental · bridal jewellery rental · tent · generator · mobile restroom |
+| Dietary | 4 | halal catering · Chinese lauriat · mocktail-only caterer |
+| Setnayan's own products, listed alongside vendors | 10 | Papic · Pakanta · Patiktok · Pabati · Panood · Custom Monogram · Pailaw · AI-edited highlight · Save-the-Date film · Concierge |
 
-**For design:** the Date and Hangout flows offer four to six vendors and ask no signature questions.
-They should not look like a shrunken wedding — they need their own, lighter treatment.
+### The full taxonomy
+
+| Folder · tile | The kinds beneath it |
+|---|---|
+| **VENUE** | |
+| Reception · 6 | Reception venue · Function hall · Hotel ballroom · Garden reception · Resort reception · Events place |
+| Ceremony · 17 | Catholic church · Christian church · Born Again church · Aglipayan church · INC kapilya · SDA church · Kingdom Hall · LDS temple · Orthodox church · Mosque · Hindu temple · Gurdwara · Buddhist temple · Synagogue · Cultural ceremony site · Civil ceremony venue · Ceremony venue booking |
+| Accommodation · 5 | Hotel stay · Resort stay · Guesthouse / homestay · Vacation rental · Accommodation |
+| **PLANNING** | |
+| Coordinator / Planner · 12 | Wedding planner (partial) · Wedding coordination · Day-of coordinator · Destination specialist · Religious-venue coordinator · INC wedding coordinator · Gender-separated reception coordinator · Mahr coordination · Pamamanhikan coordinator · Sponsor coordinator · Despedida planner · Setnayan Concierge |
+| Date & Feng-shui · 1 | Date & feng-shui consultant |
+| **FEAST** | |
+| Catering · 4 | Catering · Lechonero · Halal catering · Chinese lauriat caterer |
+| Cake · 1 · Stations · 1 · Crew Meals · 1 | Wedding cake · Live cooking station · Crew meal supply |
+| **DESIGN** | |
+| Stylist / Decorator · 9 | Stylist / decorator · Decorator (general) · Capiz native décor · Hacienda heritage décor · Maranao okir décor · Double-happiness décor · Tea-set styling · Mandap décor · Chuppah rental |
+| Florist · 4 | Florals · Bridal bouquet specialist · Garden-wedding florist · Beach-wedding florist |
+| Outdoor · 9 | Tent rental · Generator rental · Mobile restroom · Outdoor lighting · Outdoor sound · Cooling fans & misters · Bug-repellent station · Parasol & hat rental · Wedding-day weather forecaster |
+| Digital Services · 3 | Setnayan Custom Monogram · Setnayan Pailaw · Setnayan Pakanta |
+| Lights & Sound · 1 · Dance Floor · 1 · Fireworks · 1 · LED Wall · 1 | Lights & sound · LED dance floor · Fireworks & pyro · LED video wall |
+| **PROGRAM** | |
+| Performers · 6 | Wedding entertainment · Acoustic performer · Folk performer · Rondalla ensemble · Kulintang ensemble · Lion dance troupe |
+| Choreographer · 3 | First-dance choreographer · Entourage choreographer · Pre-Cana dance trainer |
+| Live Band · 2 · Host / MC · 2 | Live band · Band / live music · Host & emcee · Tea-ceremony master |
+| Choir · 1 · Orchestra · 1 · Wedding Singer · 1 · DJ · 1 · AV/Production · 1 · Speakers · 1 · Kids' Entertainer · 1 | Choir & string quartet · Orchestra · Wedding singer · DJ · AV / production · Speaker / talent · Kids' entertainer |
+| **DOCUMENTARY** | |
+| Photo & Video · 15 | Photography · Videography · Drone · Drone videographer · Pre-nup photographer · Pre-nup shoot locations · Engagement photographer · Boudoir photographer · Studio portrait · Family day-2 photographer · Same-day edit · Highlight-reel specialist · Setnayan Papic · Setnayan AI-edited highlight · Setnayan Save-the-Date film |
+| Livestream · 1 | Setnayan Panood |
+| **LOOK** | |
+| Bride's Attire · 12 | Custom bridal gown · Gown rental · Terno · Maria Clara · Balintawak · Maranao · Tausug · Yakan · Qipao / cheongsam · Sari / lehenga · Modest Muslim bridal · Modest INC bridal |
+| Groom's Attire · 9 | Custom barong · Barong rental · Custom suit · Suit rental · Sherwani · Maranao · Tausug · Yakan · Muslim groom attire |
+| Jewelleries & Accessories · 10 | Engagement ring · Wedding ring · Bridal jewellery · Jewellery rental · Floral jewellery · Bridal headpiece · Wedding veil · Wedding garter · Flower-girl tiara · Sponsor corsage |
+| Women's Attire · 6 | Bridesmaid dress · Junior bridesmaid · Flower-girl dress · Debutante gown · Mother-of-the-bride gown · **Ninang attire** |
+| HMUA · 6 | Bridal HMUA · Bridal hair stylist · Touch-up MUA · Family MUA · Maternity-bride MUA · Mature-bride MUA |
+| Men's Attire · 5 | Groomsman set · Junior groomsman · Ring-bearer suit · **Ninong attire** · 18-Roses attire |
+| Wellness & Fitness · 5 | Bridal fitness · Bridal spa · Bridal derm · Bridal dental · Bridal nutritionist |
+| Grooming · 1 | Groom grooming |
+| **BOOTHS** | |
+| Food Cart · 8 | **Sorbetes cart** · **Halo-halo station** · **Mini-lechon station** · Ice-cream cart · Cotton-candy cart · Crepe & pancake station · Charcuterie board · Food cart (general) |
+| Photo Booth · 7 | Photo booth · 360 booth · GIF booth · Polaroid booth · Selfie magic mirror · Pabati · Setnayan Patiktok |
+| Caricature / Calligraphy / Painting · 5 | Caricature artist · Live calligraphy · Silhouette artist · Wedding portrait painter · Poetry typewriter |
+| Mocktail · 3 · Massage Chair · 3 · Henna · 3 | Mocktail bar · Mini mocktail booth · Mocktail-only caterer · Massage chair · Aromatherapy station · Hair touch-up station · Henna & tattoo booth · Mehndi artist · Muslim henna artist |
+| Mobile Bar · 2 · Coffee · 2 · Dessert · 2 · Arcade · 2 · Tarot · 2 · Engraving · 2 | Mobile bar · Whiskey & cigar bar · Coffee booth · Tea bar · Dessert station · Donut wall · Retro arcade · VR / AR station · Tarot & astrology · Palmistry · Keychain engraving · Live embroidery |
+| Food Truck · 1 · Perfume Bar · 1 · Mini Nail Bar · 1 | Food truck · Perfume bar · Mini nail bar |
+| **PRINTS** | |
+| Printing · 8 | Invitation (print) · Invitation (digital) · Save-the-date (digital) · Ceremony programme · Menu card · Place card · Stationery & signage · Wedding-cards designer |
+| Souvenir / Giveaways · 5 | Souvenirs & giveaways · **Pasalubong box** · **Sponsor token** · **Godchild token** · **Angpao & betrothal supplier** |
+| Trophies & Awards · 2 | Trophy supplier · Medals & plaques |
+| **TRANSPORT** | |
+| Transfers & Rentals · 5 | Airport transfer · Private car charter · Van rental · Boat / ferry charter · Motorcycle & scooter rental |
+| Bridal Car · 4 | Bridal car · Vintage / classic vehicle · Horse-drawn carriage · Bridal boat / yacht |
+| Guest Shuttle · 1 · Escort · 1 | Guest shuttle · Motorcycle escort |
+| **EXPERIENCE · DINING · SAFETY · INSURANCE · SPECIALTY** | |
+| 8 tiles, 1 kind each | Tours & activities · Tour guide · Restaurant reservation · Referees / officials · Event medic · Event insurance · Personal accident · Travel insurance · Reveal element |
+
+### How much each event can draw on
+
+Counting real kinds, not tiles.
+
+| Event | Kinds | Tiles | Character |
+|---|---|---|---|
+| Wedding | **223** | 57 | the widest by far — every faith, every regional attire, every tradition |
+| Debut | 179 | 49 | a wedding minus the bridal and ceremony specifics |
+| Anniversary | 167 | 41 | wide, because a renewal is a wedding again |
+| Graduation | 162 | 39 | |
+| Gala Night | 159 | 45 | a full production event |
+| Birthday | 154 | 41 | |
+| Celebration | 153 | 40 | |
+| Reunion | 151 | 38 | |
+| Christening | 149 | 34 | |
+| Corporate | 148 | 46 | staging, AV, speakers, awards |
+| Gender Reveal | 103 | 27 | plus the only **Reveal Element** |
+| Tournament | 56 | 15 | referees, medics, trophies, food trucks |
+| Travel | 34 | 10 | tours, guides, transfers, stays, travel insurance |
+| Date | 32 | 6 | restaurant, florist, cake, performers, photo & video, souvenirs |
+| Hangout | 22 | 4 | restaurant, cake, photo & video, souvenirs |
+| **Simple Event** | **0** | 0 | vendor-free by design — never show a marketplace here |
+
+**Three things for design to solve here:**
+
+1. **223 kinds cannot be a flat list.** A couple picks vendors from a tree three levels deep. The
+   drill from shelf → tile → kind is unsolved and it is the busiest surface in the product.
+2. **The bottom level is the selling point.** "Bride's Attire" says nothing; "Terno · Maria Clara ·
+   Maranao · Tausug · Yakan · modest Muslim bridal" says we know this country. Surface it, don't
+   bury it.
+3. **Date and Hangout offer 22–32 kinds and ask no signature questions.** They should feel
+   deliberately small and calm — not like a wedding with most of it missing.
 
 ---
 
@@ -420,7 +490,9 @@ Subdomain ₱999/yr.)*
    designed.
 5. **Make progress feel like progress** across 26 wedding screens and ~18 elsewhere — chapters,
    named sections, something better than a hairline moving 4% at a time.
-6. **Give Date, Hangout and Simple Event their own light treatment.** Four to six vendors, no
+6. **Design the drill into the vendor tree** — 15 shelves, 69 tiles, 223 kinds for a wedding. Three
+   levels, on a phone, without it feeling like a filing cabinet. See § 4.
+7. **Give Date, Hangout and Simple Event their own light treatment.** A couple dozen vendor kinds, no
    signature questions. They should feel deliberately small, not unfinished.
 
 **Mobile first.** Most of our couples are on a phone.
