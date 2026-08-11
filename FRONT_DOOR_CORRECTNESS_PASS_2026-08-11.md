@@ -161,10 +161,15 @@ not just in the feed.
 > stranger and the way home for a member; draw both. No fake doors: an area with nothing in
 > it gets a written invitation, not a disabled row.
 >
-> **Unchanged and locked:** cream `#FDFBF7` page and cards separated by border and shadow
-> (never a second surface) · ink `#2C2A29` · counts in monospace · no fake doors · zero is
-> never shown where a count failed to load · every empty state is a written invitation ·
-> 44×44 minimum tap targets · light mode only.
+> **Unchanged and locked — do not "correct" these toward the app's rules:**
+> The owner has RULED that this page keeps its own look. **Gold `#8C6932` stays as the
+> action colour** with cream labels (measured at 4.86:1 — it passes, and it beats the app's
+> own terracotta), and **the system typeface stays**. Both deliberately differ from the app,
+> on this page only. Do not swap in terracotta buttons or the app's fonts.
+> Also locked: cream `#FDFBF7` page and cards separated by border and shadow (never a second
+> surface) · ink `#2C2A29` · counts in monospace · no fake doors · zero is never shown where
+> a count failed to load · every empty state is a written invitation · 44×44 minimum tap
+> targets · light mode only.
 >
 > Deliver as a downloadable bundle.
 
