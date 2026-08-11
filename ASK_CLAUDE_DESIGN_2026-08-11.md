@@ -5,6 +5,18 @@
 
 ---
 
+## 📍 LOCATION: SETTLED — the control room does NOT move (Fable, 2026-08-11)
+
+Before drawing anything: the page is **in the right place** and stays at
+`/dashboard/[eventId]/studio/papic`. The distributed option (Photos → galleries/Alaala ·
+Cameras → orders · Set up → Studio) was argued and **rejected** — the doorways into Papic
+from the Galleries hub, the day-of Launch hub and the event Overview already ship and all
+point IN, so distributing would turn four good doorways into four half-pages. **The door is
+fixed; the room behind it already moves with the phase.** This is an IA answer, not a
+drawing instruction — do not ask Claude Design to relocate anything.
+
+---
+
 ## 🥇 THE ONE ASK THAT MATTERS — the Papic control room
 
 **Why:** it is the only one of your six complaints with no drawing anywhere. The design
@@ -102,7 +114,7 @@ Asking again is how a page gets paid for three times.
 | Vendor dashboard | frames 7a · 7c · 7d |
 | App shell, bottom bar, desktop rail | frames 1a–1d |
 | Marketplace, compare, inquiry→lock, admin | frames 5a–5c · 6a–6d · 8a–8c |
-| The front door | `prototypes/home_facebook_shaped_2026-08-07.html` |
+| The front door | `design_handoff_frontdoor/` (11 Aug, YouTube-shaped — **supersedes** the 7 Aug `home_facebook_shaped` drawing). Its finalization ask is a SEPARATE paste: `FRONT_DOOR_CORRECTNESS_PASS_2026-08-11.md` |
 | 12 archetypes + 7 overlay types | approved by you 2026-08-04, no changes |
 
 **None of these needs a designer. They need porting.** What shipped from the last round
