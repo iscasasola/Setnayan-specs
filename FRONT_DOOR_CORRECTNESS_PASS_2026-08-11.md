@@ -72,9 +72,9 @@ confirmed one at a time.**
    proposed gold is legible — this is purely whether the front door is allowed its own
    action colour. **Say yes or no; do not leave it to the drawing.**
 2. **System font on this page** instead of the app's typefaces. Same shape of question.
-3. **"My Home" in the public sidebar.** This is the whole "user home integrated" idea and
-   it is the one genuinely new structural claim. Signed-out, what does that row do —
-   disappear, or become the sign-in?
+3. ~~**"My Home" signed-out**~~ — ✅ **ANSWERED 2026-08-11: it TURNS INTO THE SIGN-IN.**
+   It does not disappear. That makes the row the page's single front-and-centre doorway in
+   both states: the way in for a stranger, and the way home for a member.
 
 ---
 
@@ -154,9 +154,10 @@ not just in the feed.
 > Alaala are live · People is deliberately dormant** (its connections layer is on hold
 > pending legal review, and the page currently says "coming soon") · **Spaces only exists
 > for accounts that actually run something**, like a shop, and is hidden otherwise. Show
-> the signed-in expansion with those real states, and show the **signed-out** version —
-> whether the row disappears, or becomes the sign-in. No fake doors: an area with nothing
-> in it gets a written invitation, not a disabled row.
+> the signed-in expansion with those real states. **Signed out, the row does NOT disappear
+> — it becomes the SIGN-IN** (owner-ruled 2026-08-11), so the same slot is the way in for a
+> stranger and the way home for a member; draw both. No fake doors: an area with nothing in
+> it gets a written invitation, not a disabled row.
 >
 > **Unchanged and locked:** cream `#FDFBF7` page and cards separated by border and shadow
 > (never a second surface) · ink `#2C2A29` · counts in monospace · no fake doors · zero is
