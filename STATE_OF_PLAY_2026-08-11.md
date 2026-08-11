@@ -119,8 +119,31 @@ amendment sit behind this).
 
 ### 🚩 LAUNCH AFTER STEP 6
 
-**Also pull above the line — four small REVOKEs:** four internal summary views and two
-database views are readable by anyone. Six small changes, not a project.
+~~**Also pull above the line — four small REVOKEs:** four internal summary views and two
+database views are readable by anyone. Six small changes, not a project.~~
+
+✅ **DONE 2026-08-11 — and the count above was wrong in both directions.** Checked against
+the live database instead of this file. **The tool used for the first check could not see
+half of what it was checking** — one kind of database view is invisible to it — so it
+reported four things when there were eight. What was genuinely wrong was smaller and more
+specific than "six views are readable":
+
+- **One number a stranger should never have seen.** Each shop has two versions of its
+  "weddings completed" figure: the public one, and an internal one that still counts
+  bookings we filtered out as self-dealt or fraudulent. **Both were public.** Subtract one
+  from the other and a stranger reads our own fraud findings about that shop. Now private.
+  Nothing on any screen changes — the internal figure had no reader at all.
+- **A shop banned for fraud kept its list of past jobs on show.** Voiding those jobs
+  correctly removed them from the *count*, but not from the dated *list* sitting right
+  beside it on the same page. Not reachable today (a banned shop is hidden in the same
+  step), so this was fixed as a latent fault, not a live one.
+
+🛑 **Two things that LOOK like serious leaks and must NOT be "fixed".** One view exposes
+every private field of every event — birth dates, budgets, addresses, love stories — and is
+**correct**: it does its own permission check internally. Changing it breaks every couple's
+dashboard. The other must keep its current setting or the public shop page goes blank.
+🔑 **Reading how each one actually works, before reporting it, is the only reason the first
+was not raised as an emergency.**
 
 ---
 
@@ -152,12 +175,19 @@ a line**) · bridal-fair pages, public supplies browse, text messages.
 | **#4340** ✅ | **One definition of "this shop is live."** A vendor's invite QR **404'd for every vendor** — including the owner's approved shop — because seven code paths gated on a column the approval flow never sets. Fraud detection and ghost-listing detection were scanning an **empty set** and reporting "nothing found" |
 | **#4341** ✅ | **Stop selling what we cannot deliver.** Subdomain off sale; the monogram stopped promising an LED file that cannot be made; the supplies page stopped telling couples to tap a checkout that does not exist. ⚠ **Deactivating a SKU alone would have been a no-op** — the machine-readable file AI assistants read would have kept advertising it |
 | **#4347** ✅ | **The People page stopped hiding samahan** behind a coming-soon preview. It told users with samahans "there's nothing to do on this page yet" |
-| **#4342** ⏳ | **The Thank-You Video is real** — ₱2,499 with nothing producing it. Renders in the couple's browser |
-| **#4348** ⏳ | **The home board is reachable.** A couple with one event was bounced out of it and Home bounced them back — **permanently, including after the wedding.** So Alaala, People, Samahan and the Creator's Lab did not exist for the core persona |
+| **#4342** ✅ | **The Thank-You Video is real** — ₱2,499 with nothing producing it. Renders in the couple's browser. *Merged 2026-08-11 after a second font flake was re-run* |
+| **#4348** ✅ | **The home board is reachable.** A couple with one event was bounced out of it and Home bounced them back — **permanently, including after the wedding.** So Alaala, People, Samahan and the Creator's Lab did not exist for the core persona |
+| **#4343–#4346** ✅ | **Papic became ONE product** — one credit ladder, dedicated shots are a floor not a ceiling, a clip costs what its length costs, and the retired product left the building |
+| **#4349** ⏳ | **A number no stranger should have seen** — see the corrected launch-line note in §2 |
 
-⚠ **Both pending PRs failed CI once and the causes were different:** #4342 was a **real**
-miss (a new Studio card with no peak-month classification — the drift guard caught it, fixed);
-#4348 was a **font-download flake**, re-run. **Read the failure before fixing anything.**
+⚠ **Three CI failures today, three different causes — two flakes and one real.** #4342 first
+failed on a **real** miss (a new Studio card with no peak-month classification — the drift
+guard caught it), then failed again on a **font download**, which is an outage on Google's
+side and not a defect. #4348 was the same font flake. **Read the failure before fixing
+anything — two of these three needed no fix at all.**
+🔑 **The font flake is worth watching, not yet worth fixing:** the build fetches its typeface
+from Google at build time, so an outage there fails our build. It has now cost three runs in
+one day. It would also fail a **production deploy** the same way.
 
 ---
 
