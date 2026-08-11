@@ -66,12 +66,14 @@ confirmed one at a time.**
 
 ## ⚠️ Owner rulings needed — these are not design questions
 
-1. **Gold as the action colour on this page.** The concept says it *"deliberately breaks
-   the terracotta rule."* The app-wide lock is: terracotta `#C24E25` is the ONLY action
-   colour and **gold is never a button**, and there is a CI guard enforcing contrast. The
-   proposed gold is legible — this is purely whether the front door is allowed its own
-   action colour. **Say yes or no; do not leave it to the drawing.**
-2. **System font on this page** instead of the app's typefaces. Same shape of question.
+1. ~~**Gold as the action colour**~~ · 2. ~~**System font**~~ — ✅ **BOTH ANSWERED
+   2026-08-11: THE FRONT DOOR GETS ITS OWN LOOK.** Gold `#8C6932` buttons and its own
+   typeface, on this page only. The app-wide terracotta rule is untouched everywhere else.
+   🔑 **This creates NO CI conflict, checked:** the only mechanical enforcement is
+   `lint-label-on-fill-contrast.mjs`, which tests **legibility, not brand** — and the gold
+   measures **4.86:1, which passes**. ⚠ Worth knowing: *"gold is never a button"* turned
+   out to be **prose, not a mechanism** — no guard ever enforced it. So this ruling costs
+   nothing to make and nothing to enforce, and **nobody needs to weaken a guard to ship it.**
 3. ~~**"My Home" signed-out**~~ — ✅ **ANSWERED 2026-08-11: it TURNS INTO THE SIGN-IN.**
    It does not disappear. That makes the row the page's single front-and-centre doorway in
    both states: the way in for a stranger, and the way home for a member.
