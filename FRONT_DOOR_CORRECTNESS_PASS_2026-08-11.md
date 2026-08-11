@@ -11,6 +11,11 @@ the shipped code and the production database** — not against documents.
 
 > 🔒 **This 11 Aug concept SUPERSEDES `prototypes/home_facebook_shaped_2026-08-07.html`**,
 > which the owner chose earlier the same day before this one existed. One front door.
+>
+> ⚠ **AND THE SIDEBAR IS NOW ON THE LEFT** (owner, 2026-08-11), which **overrides the bundle's
+> own README** — that file still reads *"Right sidebar (never left)"* and is kept unedited as a
+> received artifact. The reference is YouTube; YouTube's rail is on the left. **Read this line,
+> not the bundle's.**
 
 ---
 
@@ -119,10 +124,16 @@ not just in the feed.
 ## 📋 Paste this to Claude Design to finalize
 
 > This is the correctness pass on the YouTube-shaped front-door concept. The structure is
-> agreed and should not change: centred search, right sidebar, feed order Trending
-> storyteller → Editorials shorts row → More stories → Trending vendors, mobile as a
-> single column with a hamburger index. Finalize the desktop and mobile layout, with these
-> corrections — every one measured against the live product, not assumed:
+> agreed: centred search, feed order Trending storyteller → Editorials shorts row → More
+> stories → Trending vendors, mobile as a single column with a hamburger index. Finalize the
+> desktop and mobile layout, with these corrections — every one measured against the live
+> product, not assumed:
+>
+> **0. THE SIDEBAR MOVES TO THE LEFT.** ⚠ This overrides the concept's own README, which
+> says *"Right sidebar (never left)"*. The owner ruled LEFT on 2026-08-11 — the reference is
+> YouTube, and YouTube's rail is on the left. Everything in it keeps its order and grouping;
+> only the side changes. Say what that costs the feed's width and the Editorials shorts row
+> at desktop breakpoints, and show the scroll-spy behaviour on the left.
 >
 > **1. Replace the EXPLORE category list.** The five names drawn are not real. The live
 > top-level folders, largest first, are: **look (54 services) · booths (42) · venue (28) ·
