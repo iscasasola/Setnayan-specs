@@ -643,9 +643,27 @@ When code lands ahead of a spec update, the repo appends a `[PENDING]` line to `
 
 **Vendor-side shape** (amounts live in `vendor_billing_catalog`): Solo · Pro Vendor · Enterprise · Custom, each 28-day with an annual, plus à-la-carte add-ons. **Token packs are RETIRED (2026-08-07)** — the vendor token currency is gone entirely. ⚠ **THERE IS A BOOKING FEE — but ⚠ CORRECTED 2026-08-06: the "0% commission on vendor bookings" line is *CORRECT AND STAYS*.** Owner, verbatim: *"this is not commission. it is a syncing fee/booking fee."* The couple pays the vendor directly and Setnayan never touches that money; the fee is charged to the VENDOR for the introduction + in-app sync. 🔑 **NEVER call it commission anywhere — product, copy, logs or admin.** (This sentence previously read "…is now FALSE", contradicting the correct statement 80 lines below it in this same file.) Owner-locked taper (`Vendor_Monetization_Model_LOCKED_2026-07-25.md` § 3, coded in `lib/booking-fee.ts` — **derive the rate, never re-type it**): **5% on the first ₱100,000 · 1% above · floor ₱50 · NO cap.** Scope: **SOURCED clients only** (BYO / vendor-invited / returning are free forever), and a verified vendor's **first 5 sourced bookings are free**. Currently **flag-dark** (`NEXT_PUBLIC_BOOKING_FEE_ENABLED`, default off) — nothing is charged until the owner flips it. Enterprise is a BOUNDED tier (up to 10 team seats · 100 km reach · unlimited categories); Custom is the truly-unlimited tier above it. Market Intel (Demand Radar + Price-Position) is **Pro-and-up**.
 
+### Papic — ONE product (owner-locked 2026-08-11)
+
+**There is no "Papic Pool" and no "Papic One".** There is **Papic**. A couple buys credits into
+one shared pot; the host can set some aside for a single camera's QR, where nobody else can spend
+them, and take unspent ones back. **Ladder:** 50 free · 100 ₱50 · 3,000 ₱1,000 · 10,000 ₱3,000 ·
+20,000 ₱5,000 — free added on top, every rung repeatable. **Cameras are free and unlimited.**
+
+🔑 **DEDICATED CREDITS ARE A FLOOR, NOT A CEILING.** A capture spends the camera's own credits
+first and the pot pays the remainder ("spend 2 and take 6"); a camera never stops while the event
+has credits anywhere. This was shipped wrong once — the pool stood down for any camera that had
+*ever* held dedicated credits — and the owner caught it. One atomic gate decides both halves now
+(`papic_reserve_capture_split`); do NOT reintroduce a two-call sequence, because the first call
+mutates and the second then cannot tell "spent its last credit" from "never had any".
+
+⚠ Prices live in the catalog, never here. `PAPIC_CAMERA_MINI_DAY` is retired as a rung but is
+**still load-bearing** (the `sku_code` of every 'mini' seat + the legacy grant path) — deactivate,
+never drop.
+
 ### Hard product constraints
 
-- **10-second hard cap on video clips.** Capped client-side. UI must enforce. Clip currency is **10s = 7 points** (photo = 1 pt). Ships as an isolated post-metering PR (clip-point value is a hardcoded constant on the fail-closed capture path). See `0012_papic/Papic_One_Pool_Model_Spec_2026-07-22.md § 0`. ⚠ 10s clips are ~2× the bytes and clips don't compress yet → coupled to the clip-web-copy storage PR.
+- **10-second hard cap on video clips.** Capped client-side. UI must enforce. ⚠ **CLIP CURRENCY IS NO LONGER FLAT — CORRECTED 2026-08-11.** This line said "10s = 7 points" and was wrong twice over: the flat weight had been **8** since 2026-07-29, and a clip is now priced **BY LENGTH** (owner): **1–2s = 2 · 3s = 3 · 4–6s = 5 · 7–10s = 8**; a photo stays 1. Ten seconds still costs 8, so nothing got more expensive — only short clips got cheaper. Derive from `PAPIC_CLIP_COST_BANDS` / `papicClipCost` in `apps/web/lib/papic-cameras.ts`, **never re-type a number**. 🔑 **AN UNMEASURED CLIP COSTS THE MOST**: the duration is stamped by the BROWSER, so an absent or nonsense length bills the top band — the only direction a tampered client cannot profit from. 🔒 **Storage is billed FLAT** (`PAPIC_PRESERVATION_UNITS_PER_CLIP`) because a stored row carries `is_clip` and no duration. ⚠ 10s clips are ~2× the bytes and clips don't compress yet → coupled to the clip-web-copy storage PR.
 - **NO per-photo tag limit (owner 2026-08-06: "no tag limit. we can tag as many").** Supersedes the 20-tag lock of 2026-07-23, which superseded a 10-tag lock of 2026-06-17. Combined individual + table + face + self-link — none of it is counted against a ceiling any more. Migration `20271117449785`. ⚠ **The 20-cap was never the real bug:** the two capture screens hardcoded **10** while the DB had allowed 20 since 2026-07-23, so a paparazzo was cut off at half the real limit and told "that's the max" — the owner's decision reached the database and never reached the screen. 🔑 A 100,000 ceiling remains in `enforce_photo_tag_cap()` purely as a runaway-write backstop (retry storm / loop bug), **not** a product rule; no real photo approaches it.
 - **Untagged-still-delivered guarantee.** Every uploaded photo lands in the couple's gallery regardless of tagging status.
 - **Personal Reels:** vertical 9:16 only (1080×1920), 1–30 seconds duration, max 5 guest picks + max 5 couple memorable clips, template-driven render (no per-render AI).
