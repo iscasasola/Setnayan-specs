@@ -78,6 +78,42 @@ confirmed one at a time.**
 
 ---
 
+## 🏠 "My Home" expands into FOUR AREAS — and they already exist
+
+**The owner asked whether there was a plan. There is, and it is exact.** Found in two
+independent places that agree:
+
+- The committed 8 Aug bundle, in its own words: *"the four home areas mount here —
+  **Events · Alaala · Spaces · People**"* (frames 3a–3f).
+- The **shipped code**: `app/dashboard/(launcher)/_components/home-pill-nav.tsx`, whose
+  docblock reads *"four honest targets beat five with a dead one."*
+
+| Area | Route | State today |
+|---|---|---|
+| **Events** | `/dashboard` | ✅ live — the home board |
+| **Alaala** (your memories) | `/dashboard/library` | ✅ live |
+| **People** | `/dashboard/people` | ⚠️ **live but deliberately dormant** — see below |
+| **Spaces** | capability-gated `spacesHref` | ⚠️ **conditional** — only renders when the account actually runs something (a shop, a console). The nav takes `hasSpaces` and hides the slot otherwise |
+
+### 🚨 Two things that make this NOT a simple four-item list
+
+1. **People is intentionally "coming soon" as of today.** Its connections layer is
+   counsel-gated and was **switched off in production on 2026-08-11** — the live page now
+   reads *"Connections are coming soon… There's nothing to do on this page yet."* That is
+   correct and must stay until counsel clears it. So the front door would be expanding
+   into an area that deliberately has nothing in it.
+2. **Spaces is not everyone's.** It appears only for accounts that run something. A design
+   that draws four fixed rows will show a dead one to every ordinary couple — which is
+   precisely what that docblock's *"four honest targets beat five with a dead one"* exists
+   to prevent.
+
+⇒ **The expansion is "two always, one dormant, one conditional" — not four.** The design
+has to say what each of those looks like, and the empty-state rule already on this page
+("every empty state is a written invitation; no fake doors") applies inside the sidebar,
+not just in the feed.
+
+---
+
 ## 📋 Paste this to Claude Design to finalize
 
 > This is the correctness pass on the YouTube-shaped front-door concept. The structure is
@@ -111,6 +147,16 @@ confirmed one at a time.**
 >
 > **5. Do not paint the "usable without an account" dots yet** — that claim is per-tool
 > and unverified. Draw the dot grammar, leave which tools carry it to us.
+>
+> **6. "My Home" expands into the four home areas that already exist: Events · Alaala
+> (their memories) · People · Spaces.** But do NOT draw four equal rows — the shipped nav's
+> own rule is *"four honest targets beat five with a dead one"*, and today: **Events and
+> Alaala are live · People is deliberately dormant** (its connections layer is on hold
+> pending legal review, and the page currently says "coming soon") · **Spaces only exists
+> for accounts that actually run something**, like a shop, and is hidden otherwise. Show
+> the signed-in expansion with those real states, and show the **signed-out** version —
+> whether the row disappears, or becomes the sign-in. No fake doors: an area with nothing
+> in it gets a written invitation, not a disabled row.
 >
 > **Unchanged and locked:** cream `#FDFBF7` page and cards separated by border and shadow
 > (never a second surface) · ink `#2C2A29` · counts in monospace · no fake doors · zero is
