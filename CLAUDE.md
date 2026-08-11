@@ -273,6 +273,61 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > client list (what the new cap counts) vs the calendar's approve-first DAY STATE
 > (uncapped). See [[project_setnayan_vendor_schedules_waitlist_blocking]].
 
+> ### ✅ DONE 2026-08-11: PUBLIC WEB ADDRESSES — forwarding, minting, correcting
+> **3 PRs (#4350 · #4351 · #4355). Do NOT rebuild any of it.** Full row in
+> `DECISION_LOG.md` 2026-08-11.
+>
+> 🚨 **FORWARDING HAD NEVER ONCE WORKED.** Two screens promise a renamed address
+> keeps its old link alive. Both writers wrote the ledger row. **Nothing read
+> it** — the only reader returned null on its first line unless the `/u/` cutover
+> flag was on, and that flag has never been on in prod. **Person handles had no
+> reader at any flag setting.** 🔑 **Forwarding was never part of that cutover;
+> tying it to that flag is what killed it.** Now ungated, covering weddings ·
+> shops · people, resolving to the CURRENT address so chained renames land live.
+> ⏱ **Window 90 days → 24 MONTHS.** Save-the-dates go out 6–12 months ahead, so
+> 90 days could not cover the printed QR it exists to protect. **One number, one
+> line, owner-changeable.** 🔒 The owner-locked **1-year closed-shop hold is
+> untouched** — verified: those rows set their own expiry and never read the
+> default.
+> ⚠ **A BRIEF CLAIM CORRECTED:** prod's one forwarding row points at an event
+> **since deleted**, so nobody is stranded today. The mechanism was dead anyway.
+>
+> 🚨 **THE WIZARD PREVIEWED A SAFE ADDRESS WHILE THE DATABASE MINTED A COLLIDING
+> ONE.** Two answers to one question. The app asks all five sources and fails
+> closed; the auto-mint asked three. **The word list was the SMALLEST of the
+> three holes** — it had drifted **15 words** behind, including `/creators` and
+> `/open-shop`, both live and sitemapped, so a business named "Creators" would
+> have been minted our own page **permanently** (shop addresses are immutable).
+> ✅ **`KNOWN_DB_MINT_GAP` is now EMPTY. A BASELINE IS A BILL, NOT A DECISION** —
+> every line was a decision that a shop may take one of our pages forever.
+>
+> 🔓 **NOBODY COULD CORRECT A SHOP ADDRESS, INCLUDING US.** The immutability
+> trigger is correct and is **NOT weakened**; its own migration named the escape
+> hatch and **nothing was ever built that uses it** (zero callers). There is now
+> one deliberate admin door that also **writes the forwarding row** — a
+> correction without forwarding is the exact harm the trigger prevents, moved to
+> a different culprit.
+> 🔑 **The hatch is opened by a FUNCTION-LEVEL `SET`, not `SET LOCAL`** —
+> `SET LOCAL` in a function body lasts to the end of the **transaction**, so a
+> caller doing more work still holds the door open. Mutation-proved: the leak
+> test goes red *and contaminates every later test in the file*.
+> ⚠ **The admin form is DIRECT, not a queue item, because NOTHING CAN FILE A
+> REQUEST** — `requestProfileCorrection` has **zero callers**, no screen renders
+> it, prod holds **zero rows**. A remedy behind an intake-less queue is a fix
+> nobody can reach.
+>
+> 🚨 **A FOURTH, FOUND WHILE VERIFYING — AND LIVE.** `location_city` went into
+> the locked-field list on 2026-08-10 and into the admin apply path, but **never
+> into the CHECK constraint** whose own comment says *"never widen one without
+> the other."* Prod listed eight fields ⇒ a city correction was **REJECTED BY
+> THE DATABASE** and shown to the vendor as *"please try again shortly"* —
+> forever. 🔑 **Same family as the phantom column · enum value · RPC argument ·
+> blocked iframe · wrong catalog: rejected, not thrown; the only symptom is an
+> absence.** Assume a sixth exists.
+>
+> ⏭ **NAMED, NOT BUILT:** the correction queue still has **no vendor-side
+> intake**. That is a separate build, not an oversight of this one.
+
 > ### ▶ ACTIVE 2026-08-07: PAPIC TIMING — three numbers, locked together
 > **Owner set all three in one sitting. They interlock; do not move one alone.**
 >
