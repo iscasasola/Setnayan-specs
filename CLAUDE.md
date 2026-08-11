@@ -328,6 +328,69 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > ⏭ **NAMED, NOT BUILT:** the correction queue still has **no vendor-side
 > intake**. That is a separate build, not an oversight of this one.
 
+> ### ✅ DONE 2026-08-12: THE PHOTO WALL WAS ON EVERY GUEST'S PHONE, UNCONTROLLED
+> **PR #4360 · migration `20271133739556`. Do NOT rebuild it.** Full row in
+> `DECISION_LOG.md` 2026-08-12.
+>
+> 🚨 **THE ₱2,500 SKU IS TITLED "LIVE *VENUE* PHOTO WALL" AND ALSO RAN ON EVERY
+> INVITED GUEST'S PHONE.** The couple's card described a venue projection and
+> screen codes; the same feed mirrored onto every guest's phone for the whole
+> live window. **A couple who revoked every venue screen code — the only "off"
+> the product offered — would reasonably believe the wall was off. It was still
+> in a hundred hands.** The one honest sentence lived on the **website privacy
+> page**, where nobody managing the wall would meet it.
+>
+> 🔑 **THE THIRD "GATE WITH NO HANDLE."** `events.live_photo_wall_visibility`
+> shipped 2026-11-04 **for exactly this choice** and had **ZERO readers, ZERO
+> writers**. All 5 prod events sat on the untouched default. ⚠ A second,
+> **applied** migration misdescribed it as *"(venue wall)"* — that misreading is
+> what let it live. Applied migrations are not edited; the new `COMMENT ON
+> COLUMN` replaces what a reader actually queries.
+>
+> 🔑 **THE FIX IS ONE GATE, NOT THREE CHECKS.** **Three** guest surfaces each
+> asked SKU-ownership and nothing else — the slug page, the guest hub, and a
+> JSON feed re-serving 24 tiles every 25s. Checking a column in three places is
+> three chances to forget and the next surface makes four, so ownership and the
+> couple's choice are **fused into `guestWallMirrorActive()`**. **The feed route
+> is the one that mattered** — hiding the block while leaving it open keeps the
+> wall one URL away from anyone holding the slug, and the block repopulates
+> itself. **Closing the mirror closes the DATA, not the component.**
+> 🔒 **THE VENUE PROJECTION IS UNTOUCHED** (owner-locked 2026-06-11) and a test
+> asserts the boundary **in both directions**.
+>
+> 🚨 **A 404 IS A REFUSAL, NOT AN OUTAGE.** Closing now reaches phones that
+> already have the wall open, instead of only those that reload. A 5xx or
+> dropped fetch still runs the miss counter — a network blip that wiped the
+> celebration off every phone would be its own bug.
+>
+> 🔑 **`'tagged_only'` PROMISED A FILTER THAT EXISTS NOWHERE.** Default + the 5
+> prod rows move to `'all_with_consent'`, recording behaviour they already had
+> (0 events own the wall, so nothing visible changed). Same disease as
+> `sponsored_included`: **a stored value whose NAME misleads.** It stays legal
+> for the future build; the app can never write it.
+>
+> ⚖ **TWO DIRECTIONS OF FAILURE, BOTH DELIBERATE:** the value narrowing **fails
+> OPEN** (an unrecognised value must not silently delete a ₱2,500 feature — only
+> the couple, saying off, turns it off); the server gate **fails CLOSED** on a
+> read *error*.
+>
+> 🛡 **18 sabotages, all verified to have APPLIED. One stayed GREEN and was
+> decorative** — it matched the column name anywhere in the body, which the
+> **type cast** satisfied with the query gutted. Re-anchored to the `.select(…)`.
+> 🔬 Migration **dry-run against prod in a rolled-back transaction** first, per
+> the 2026-08-12 lesson that the PGlite replay runs as superuser.
+>
+> 🪤 **SEPARATE, FLAGGED NOT FIXED: `test:unit`'s `app/**/*.test.ts` glob NEVER
+> MATCHES `app/[slug]/`** — the brackets are a character class. **27 files / 188
+> tests have never run in CI**, including `first-byte.test.ts`, the guard written
+> to hold the soft-404 regression. All 188 pass. Needs its own PR.
+>
+> ⏭ **OWNER, TWO THINGS:** the mirror **defaults ON** (removing a bought feature
+> by default was not mine to decide — disclosure + a one-tap switch was the
+> call); and **`'tagged_only'` — showing a guest only the photos they are in — is
+> NAMED, NOT BUILT.** ⚠ Still unresolved from 2026-08-11: `Pricing.md` says HIDE
+> Live Photo Wall while the SKU is active and publicly listed.
+
 > ### ▶ ACTIVE 2026-08-07: PAPIC TIMING — three numbers, locked together
 > **Owner set all three in one sitting. They interlock; do not move one alone.**
 >
