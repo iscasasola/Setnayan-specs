@@ -41,8 +41,15 @@ summary survived — which is exactly why that page shipped **menus and no layou
 > over 6–18 months. **They open it on a phone far more than a laptop.**
 >
 > **They arrive in one of three moods:** setting up (months before, long considered
-> choices) · buying (cameras and shots, money decisions) · looking at photos (during and
-> after the day).
+> choices) · buying (shots, money decisions) · looking at photos (during and after the day).
+>
+> **What this page IS, in one line:** Papic is the couple's **collection of memories** and
+> the **main source** that fills it. The Photos room is not a gallery bolted onto a
+> settings page — it is the mouth of a collection the couple keeps for life. Their
+> account-level memories shelf reads directly from what this page produces, including
+> weddings they only attended. **Design the Photos room as the front of something
+> permanent, and Set up / Cameras as what feeds it** — that hierarchy is the point, and the
+> current page loses it by treating all twenty cards as peers.
 >
 > **The structure is already agreed and must be kept:** three rooms — *Set up*,
 > *Cameras & shots*, *Photos* — with a tab strip; the room a couple lands on depends on
