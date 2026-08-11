@@ -51,8 +51,13 @@ summary survived — which is exactly why that page shipped **menus and no layou
 > assume a big screen.
 >
 > **Four facts the previous version got wrong — these are binding:**
-> - **The shot ladder is ₱1,000 → 3,000 shots · ₱2,000 → 6,000 · ₱3,000 → 10,000.**
->   There is no ₱2,500 rung. Do not invent one.
+> - **Papic is now ONE product** — "Papic One" was retired as a separate purchase on
+>   2026-08-11; the host buys shots into one pool and dedicates them to a camera's QR.
+>   **The live ladder, read out of the catalogue today: 100 shots ₱50 · 3,000 ₱1,000 ·
+>   10,000 ₱3,000 · 20,000 ₱5,000** (plus a free starter allowance). There is no ₱2,500
+>   rung and **no ₱2,000 / 6,000 rung — that one was retired.** Draw the ladder as four
+>   rungs, and never re-type prices from a design file: they are read from the catalogue
+>   at build time so an admin price edit propagates without a redeploy.
 > - **Preservation is a PAID product and nothing is "forever."** A purchase keeps the
 >   full-resolution original until 3 months after the event ends (or 6 months from the
 >   first photo, whichever is later). After that the original is replaced by a smaller
