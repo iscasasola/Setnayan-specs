@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin:0; background:#F6F2EA; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color:#2C2A29; -webkit-font-smoothing:antialiased; }
+  a { color:#3B4E67; text-decoration:none; } a:hover { color:#C24E25; }
+  ::-webkit-scrollbar { width:0; height:0; }
+  @keyframes omFade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  @keyframes omDrop { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+  @keyframes omSheet { from { transform:translateY(-100%); } to { transform:none; } }
+</style>
+</helmet>
+
+<div style="max-width:1400px; margin:0 auto; padding:36px 24px 70px; display:flex; gap:44px; align-items:flex-start; flex-wrap:wrap; justify-content:center;">
+
+  <!-- left rail -->
+  <div style="width:330px; padding-top:8px; flex-shrink:0;">
+    <div style="font-family:ui-monospace, 'SF Mono', Menlo, monospace; font-size:11.5px; letter-spacing:0.14em; color:#8C6932; text-transform:uppercase;">Setnayan · public front door · working prototype</div>
+    <h1 style="font-family:inherit; font-weight:800; font-size:30px; line-height:1.15; margin:8px 0 10px; letter-spacing:-0.01em;">The front door, running</h1>
+    <p style="font-size:14px; line-height:1.65; color:#6E6A62; margin:0;">The concept from the static spec, live: one search over everything, a menu that follows your scroll, and a familiar video-feed home.</p>
+    <div style="margin-top:18px;">
+      <div style="font-family:ui-monospace, 'SF Mono', Menlo, monospace; font-size:10px; font-weight:700; letter-spacing:0.16em; color:#8A857B; text-transform:uppercase; margin-bottom:8px;">Screen</div>
+      <div style="display:flex; gap:8px;">
+        <sc-for list="{{ devices }}" as="d" hint-placeholder-count="2">
+          <button onClick="{{ d.onPick }}" style="flex:1; min-height:44px; border-radius:12px; cursor:pointer; font-family:inherit; font-size:13px; font-weight:700; transition:all .15s ease; border:{{ d.border }}; background:{{ d.bg }}; color:#2C2A29;" style-active="transform:scale(0.97)">{{ d.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="margin-top:14px;">
+      <div style="font-family:ui-monospace, 'SF Mono', Menlo, monospace; font-size:10px; font-weight:700; letter-spacing:0.16em; color:#8A857B; text-transform:uppercase; margin-bottom:8px;">The catalogue</div>
+      <div style="display:flex; gap:8px;">
+        <sc-for list="{{ worlds }}" as="w" hint-placeholder-count="2">
+          <button onClick="{{ w.onPick }}" style="flex:1; min-height:44px; border-radius:12px; cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:700; transition:all .15s ease; border:{{ w.border }}; background:{{ w.bg }}; color:#2C2A29; line-height:1.3;" style-active="transform:scale(0.97)">{{ w.label }}</button>
+        </sc-for>
+      </div>
+      <div style="font-size:12px; color:#6E6A62; line-height:1.55; margin-top:8px;">{{ worldNote }}</div>
+    </div>
+    <div style="margin-top:20px; border:1.5px dashed #C9BFA9; border-radius:14px; padding:14px 16px; font-size:13px; line-height:1.8; color:#3A382F;">
+      <strong style="font-family:ui-monospace, 'SF Mono', Menlo, monospace; font-size:10px; letter-spacing:0.14em; color:#8C6932;">TRY —</strong><br>
+      · type <strong>azul</strong> in the search<br>
+      · scroll — the menu follows you<br>
+      · <strong>Phone</strong> → the hamburger index<br>
+      · flip the catalogue — honest empty states
+    </div>
+    <a href="Homepage v2.dc.html" style="display:inline-block; margin-top:14px; font-size:13px; font-weight:600;">Static spec lives in Homepage v2 →</a>
+  </div>
+
+  <!-- the framed page -->
+  <div style="width:{{ frameW }}; max-width:100%; height:{{ frameH }}; background:#FDFBF7; border:1px solid #E1DCD1; border-radius:{{ frameR }}; box-shadow:0 4px 22px rgba(30,26,18,0.10); overflow:hidden; display:flex; flex-direction:column; position:relative;">
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid #E1DCD1; background:#F6F2EA; flex-shrink:0;">
+        <span style="display:flex; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:#D8CFC2;"></span><span style="width:9px; height:9px; border-radius:50%; background:#D8CFC2;"></span><span style="width:9px; height:9px; border-radius:50%; background:#D8CFC2;"></span></span>
+        <div style="flex:1; display:flex; justify-content:center;"><span style="font-family:ui-monospace, 'SF Mono', Menlo, monospace; font-size:11px; color:#6E6A62; background:#FDFBF7; border:1px solid #E1DCD1; border-radius:999px; padding:5px 18px;">setnayan.com</span></div>
+        <span style="width:22px;"></span>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; align-items:center; gap:18px; padding:0 20px; min-height:60px; border-bottom:1px solid #E1DCD1; background:#FDFBF7; flex-shrink:0; position:relative; z-index:40;">
+        <div style="font-weight:800; font-size:15px; letter-spacing:0.16em;">SETNAYAN</div>
+        <div style="flex:1; max-width:460px; margin:0 auto; position:relative;">
+          <div style="display:flex; align-items:center; gap:10px; border:1.5px solid #E1DCD1; border-radius:999px; padding:0 16px; min-height:42px; background:#FDFBF7;">
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;"><circle cx="9" cy="9" r="6.2" stroke="#6E6A62" stroke-width="1.6"></circle><path d="M13.8 13.8 L18 18" stroke="#6E6A62" stroke-width="1.6" stroke-linecap="round"></path></svg>
+            <input value="{{ query }}" onChange="{{ onQuery }}" onKeyDown="{{ onKey }}" placeholder="Search — a tool, a vendor, a story…" style="flex:1; border:none; outline:none; background:transparent; font-size:13.5px; color:#2C2A29; font-family:inherit; padding:10px 0; min-width:0;">
+          </div>
+          <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; top:calc(100% + 8px); left:0; right:0; border:1px solid #E1DCD1; border-radius:14px; background:#FDFBF7; box-shadow:0 10px 26px rgba(30,26,18,0.10); overflow:hidden; z-index:50; animation:omDrop .18s ease;">
+              <sc-for list="{{ groups }}" as="g" hint-placeholder-count="0">
+                <div style="border-top:{{ g.borderTop }};">
+                  <div style="padding:10px 20px 3px; font-family:ui-monospace, Menlo, monospace; font-size:9.5px; font-weight:700; letter-spacing:0.16em; color:#8C6932;">{{ g.label }}</div>
+                  <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="0">
+                    <button onClick="{{ it.onGo }}" style="display:flex; align-items:center; gap:12px; padding:10px 20px; min-height:44px; width:100%; background:none; border:none; cursor:pointer; font-family:inherit; text-align:left; color:#2C2A29;" style-hover="background:#F4F2EC;">
+                      <sc-if value="{{ it.hasAv }}" hint-placeholder-val="{{ false }}">
+                        <span style="width:34px; height:34px; border-radius:{{ it.radius }}; background:{{ it.avBg }}; color:#FDFBF7; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">{{ it.av }}</span>
+                      </sc-if>
+                      <span style="flex:1; min-width:0;">
+                        <span style="font-size:14px; font-weight:700; display:block;"><sc-for list="{{ it.segs }}" as="s" hint-placeholder-count="0"><span style="background:{{ s.bg }}; color:{{ s.color }}; border-radius:3px;">{{ s.t }}</span></sc-for></span>
+                        <span style="font-size:12px; color:#6E6A62;">{{ it.sub }}</span>
+                      </span>
+                      <span style="color:#8A857B;">→</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noHits }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 20px; font-size:13.5px; color:#6E6A62; line-height:1.6;">Nothing matches "{{ query }}" yet — try a tool (Papic), a craft (photographer), a place (Tagaytay), or a tradition (pamamanhikan).</div>
+              </sc-if>
+              <sc-if value="{{ hasHits }}" hint-placeholder-val="{{ false }}">
+                <div style="border-top:1px solid #EDE8DE; padding:10px 20px; font-size:12px; color:#6E6A62;">{{ footerLine }}</div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <button onClick="{{ goTop }}" style="font-size:13px; font-weight:600; color:#3B4E67; background:none; border:none; cursor:pointer; font-family:inherit; min-height:44px;">Sign in</button>
+        <button onClick="{{ goTop }}" style="background:#8C6932; color:#FDFBF7; font-size:13px; font-weight:700; padding:0 20px; min-height:42px; border:none; border-radius:999px; cursor:pointer; font-family:inherit;" style-active="transform:scale(0.97)">Start planning — free</button>
+      </div>
+    </sc-if>
+
+    <div style="flex:1; min-height:0; display:flex;">
+    <div ref="{{ setView }}" onScroll="{{ onScroll }}" style="flex:1; overflow-y:auto; min-height:0; position:relative;">
+      <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+        <div style="position:sticky; top:0; z-index:30; background:#FDFBF7; border-bottom:1px solid #E1DCD1; box-shadow:{{ hdrShadow }}; transition:box-shadow .2s ease; display:flex; align-items:center; justify-content:space-between; padding:8px 16px; min-height:56px;">
+          <span style="font-weight:800; font-size:14px; letter-spacing:0.16em;">SETNAYAN</span>
+          <button onClick="{{ toggleMenu }}" style="width:44px; height:44px; display:flex; flex-direction:column; gap:5px; align-items:center; justify-content:center; border:1px solid #E1DCD1; border-radius:999px; background:none; cursor:pointer;">
+            <span style="width:16px; height:1.5px; background:#2C2A29;"></span>
+            <span style="width:16px; height:1.5px; background:#2C2A29;"></span>
+          </button>
+        </div>
+      </sc-if>
+
+      <!-- the desk (phone keeps its search here) -->
+      <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:24px 22px 8px; text-align:center;">
+        <h2 style="font-size:21px; font-weight:800; line-height:1.25; letter-spacing:-0.01em; margin:0 auto; max-width:32ch;">Keep your memories. Plan your moments.</h2>
+        <div style="max-width:620px; margin:16px auto 0; text-align:left; position:relative;">
+          <div style="display:flex; align-items:center; gap:12px; border:1.5px solid #E1DCD1; border-radius:999px; padding:0 20px; min-height:52px; box-shadow:0 1px 3px rgba(30,26,18,0.06); background:#FDFBF7;">
+            <svg width="17" height="17" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;"><circle cx="9" cy="9" r="6.2" stroke="#6E6A62" stroke-width="1.6"></circle><path d="M13.8 13.8 L18 18" stroke="#6E6A62" stroke-width="1.6" stroke-linecap="round"></path></svg>
+            <input value="{{ query }}" onChange="{{ onQuery }}" onKeyDown="{{ onKey }}" placeholder="Search — a tool, a vendor, a story, a tradition…" style="flex:1; border:none; outline:none; background:transparent; font-size:15px; color:#2C2A29; font-family:inherit; padding:14px 0; min-width:0;">
+          </div>
+          <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; top:calc(100% + 8px); left:0; right:0; border:1px solid #E1DCD1; border-radius:14px; background:#FDFBF7; box-shadow:0 10px 26px rgba(30,26,18,0.10); overflow:hidden; z-index:20; animation:omDrop .18s ease;">
+              <sc-for list="{{ groups }}" as="g" hint-placeholder-count="0">
+                <div style="border-top:{{ g.borderTop }};">
+                  <div style="padding:10px 20px 3px; font-family:ui-monospace, Menlo, monospace; font-size:9.5px; font-weight:700; letter-spacing:0.16em; color:#8C6932;">{{ g.label }}</div>
+                  <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="0">
+                    <button onClick="{{ it.onGo }}" style="display:flex; align-items:center; gap:12px; padding:10px 20px; min-height:44px; width:100%; background:none; border:none; cursor:pointer; font-family:inherit; text-align:left; color:#2C2A29;" style-hover="background:#F4F2EC;">
+                      <sc-if value="{{ it.hasAv }}" hint-placeholder-val="{{ false }}">
+                        <span style="width:34px; height:34px; border-radius:{{ it.radius }}; background:{{ it.avBg }}; color:#FDFBF7; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">{{ it.av }}</span>
+                      </sc-if>
+                      <span style="flex:1; min-width:0;">
+                        <span style="font-size:14px; font-weight:700; display:block;"><sc-for list="{{ it.segs }}" as="s" hint-placeholder-count="0"><span style="background:{{ s.bg }}; color:{{ s.color }}; border-radius:3px;">{{ s.t }}</span></sc-for></span>
+                        <span style="font-size:12px; color:#6E6A62;">{{ it.sub }}</span>
+                      </span>
+                      <span style="color:#8A857B;">→</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noHits }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 20px; font-size:13.5px; color:#6E6A62; line-height:1.6;">Nothing matches "{{ query }}" yet — try a tool (Papic), a craft (photographer), a place (Tagaytay), or a tradition (pamamanhikan). The menu above always works.</div>
+              </sc-if>
+              <sc-if value="{{ hasHits }}" hint-placeholder-val="{{ false }}">
+                <div style="border-top:1px solid #EDE8DE; padding:10px 20px; font-size:12px; color:#6E6A62;">{{ footerLine }}</div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </section>
+      </sc-if>
+
+      <!-- door 01 · tools as a chip row -->
+      <div ref="{{ setSec1 }}" style="display:flex; gap:8px; padding:14px 22px 6px; overflow-x:auto; align-items:center;">
+        <sc-for list="{{ tools }}" as="t" hint-placeholder-count="6">
+          <button style="display:flex; align-items:center; gap:7px; min-height:40px; border-radius:999px; border:1px solid #E1DCD1; background:#FDFBF7; padding:0 16px; font-size:13px; font-weight:700; color:#2C2A29; cursor:pointer; font-family:inherit; white-space:nowrap; flex-shrink:0;" style-hover="background:#F4F2EC;">
+            <sc-if value="{{ t.tryNow }}" hint-placeholder-val="{{ true }}"><span style="width:6px; height:6px; border-radius:50%; background:#8C6932; flex-shrink:0;"></span></sc-if>
+            {{ t.name }}
+          </button>
+        </sc-for>
+        <span style="font-size:11px; color:#8A857B; white-space:nowrap; padding-left:4px;">• = try it, no account</span>
+      </div>
+
+      <!-- trending rails · YouTube-shaped · doors 03 / 04 / 02 -->
+      <section ref="{{ setSec3 }}" style="padding:0 22px 6px; border-top:1px solid #E1DCD1;">
+        <div style="display:flex; align-items:baseline; gap:12px; padding-top:30px; flex-wrap:wrap;">
+          <h3 style="font-size:24px; font-weight:800; letter-spacing:-0.01em; margin:0;">Trending storyteller</h3>
+          <span style="font-size:13.5px; font-weight:700; color:#3B4E67; margin-left:auto;">All stories →</span>
+        </div>
+        <sc-if value="{{ worldBusy }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:16px;">
+            <div style="aspect-ratio:16/9; border-radius:14px; border:1px solid #E1DCD1; background:{{ hero.thumb }}; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+              <span style="font-family:ui-monospace, Menlo, monospace; font-size:11px; color:#6E6A62;">video cover — autoplays muted</span>
+              <span style="position:absolute; bottom:10px; right:10px; font-family:ui-monospace, Menlo, monospace; font-size:11px; font-weight:700; background:#2C2A29; color:#FDFBF7; padding:3px 8px; border-radius:6px;">▶ {{ hero.badge }}</span>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:12px; align-items:flex-start;">
+              <span style="width:40px; height:40px; border-radius:50%; background:{{ hero.avBg }}; color:#FDFBF7; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0;">{{ hero.av }}</span>
+              <span style="min-width:0;">
+                <span style="font-size:17px; font-weight:800; display:block; line-height:1.3;">{{ hero.title }}</span>
+                <span style="font-size:12.5px; color:#6E6A62; display:block; margin-top:3px; line-height:1.5;">{{ hero.m1 }}<span style="font-family:ui-monospace, Menlo, monospace; font-weight:700; color:#2C2A29;">{{ hero.num }}</span>{{ hero.m2 }}</span>
+              </span>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ worldEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E1DCD1; border-radius:14px; padding:16px 20px; margin-top:16px;">
+            <p style="font-size:13.5px; line-height:1.65; color:#6E6A62; margin:0;">The most-played stories of the week live here — earned by real plays, never seeded. The first storytellers are recording now; walk the sample wedding while they do.</p>
+            <div style="display:flex; gap:16px; margin-top:12px; padding-top:12px; border-top:1px solid #EDE8DE;">
+              <span style="font-size:13.5px; font-weight:700; color:#3B4E67;">See the sample wedding →</span>
+              <span style="font-size:13.5px; font-weight:600; color:#3B4E67;">All stories →</span>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+
+      <section ref="{{ setSec4 }}" style="padding:0 22px 6px;">
+        <div style="display:flex; align-items:baseline; gap:12px; padding-top:30px; flex-wrap:wrap;">
+          <span style="width:26px; height:26px; border-radius:8px; background:#8C6932; color:#FDFBF7; display:flex; align-items:center; justify-content:center; font-size:11px; align-self:center;">▶</span>
+          <h3 style="font-size:24px; font-weight:800; letter-spacing:-0.01em; margin:0;">Editorials</h3>
+          <span style="font-size:13.5px; font-weight:700; color:#3B4E67; margin-left:auto;">The Journal →</span>
+        </div>
+        <div style="display:grid; grid-template-columns:{{ colsShorts }}; gap:12px; margin-top:16px;">
+          <sc-for list="{{ edCards }}" as="c" hint-placeholder-count="4">
+            <div style="aspect-ratio:9/14; border-radius:14px; border:1px solid #E1DCD1; background:{{ c.thumb }}; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+              <span style="font-family:ui-monospace, Menlo, monospace; font-size:10.5px; color:#6E6A62;">article cover</span>
+              <span style="position:absolute; top:10px; right:10px; font-family:ui-monospace, Menlo, monospace; font-size:10px; font-weight:700; background:#2C2A29; color:#FDFBF7; padding:2px 7px; border-radius:6px;">{{ c.badge }}</span>
+              <span style="position:absolute; left:0; right:0; bottom:0; padding:40px 12px 12px; background:linear-gradient(to top, rgba(44,42,41,0.62), transparent);">
+                <span style="font-size:14.5px; font-weight:800; display:block; line-height:1.3; color:#FDFBF7;">{{ c.title }}</span>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section ref="{{ setSec5 }}" style="padding:0 22px 6px;">
+        <div style="display:flex; align-items:baseline; gap:12px; padding-top:30px; flex-wrap:wrap;">
+          <h3 style="font-size:24px; font-weight:800; letter-spacing:-0.01em; margin:0;">More stories</h3>
+          <span style="font-size:13.5px; font-weight:700; color:#3B4E67; margin-left:auto;">All stories →</span>
+        </div>
+        <sc-if value="{{ worldBusy }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:{{ colsRest }}; gap:16px; margin-top:16px;">
+            <sc-for list="{{ restStories }}" as="c" hint-placeholder-count="3">
+              <div>
+                <div style="aspect-ratio:16/9; border-radius:12px; border:1px solid #E1DCD1; background:{{ c.thumb }}; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                  <span style="font-family:ui-monospace, Menlo, monospace; font-size:10.5px; color:#6E6A62;">video cover</span>
+                  <span style="position:absolute; bottom:8px; right:8px; font-family:ui-monospace, Menlo, monospace; font-size:10.5px; font-weight:700; background:#2C2A29; color:#FDFBF7; padding:2px 7px; border-radius:6px;">▶ {{ c.badge }}</span>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px; align-items:flex-start;">
+                  <span style="width:34px; height:34px; border-radius:50%; background:{{ c.avBg }}; color:#FDFBF7; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">{{ c.av }}</span>
+                  <span style="min-width:0;">
+                    <span style="font-size:14px; font-weight:700; display:block; line-height:1.35;">{{ c.title }}</span>
+                    <span style="font-size:12px; color:#6E6A62; display:block; margin-top:3px; line-height:1.5;">{{ c.m1 }}<span style="font-family:ui-monospace, Menlo, monospace; font-weight:700; color:#2C2A29;">{{ c.num }}</span>{{ c.m2 }}</span>
+                  </span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ worldEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E1DCD1; border-radius:14px; padding:16px 20px; margin-top:16px;">
+            <p style="font-size:13.5px; line-height:1.65; color:#6E6A62; margin:0;">More stories appear as storytellers publish them — nothing here is ever seeded.</p>
+          </div>
+        </sc-if>
+      </section>
+
+      <section ref="{{ setSec2 }}" style="padding:0 22px 8px;">
+        <div style="display:flex; align-items:baseline; gap:12px; padding-top:30px; flex-wrap:wrap;">
+          <h3 style="font-size:24px; font-weight:800; letter-spacing:-0.01em; margin:0;">Trending vendors</h3>
+          <span style="font-size:13.5px; font-weight:700; color:#3B4E67; margin-left:auto;">All vendors →</span>
+        </div>
+        <sc-if value="{{ worldBusy }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:{{ colsRail }}; gap:16px; margin-top:16px;">
+            <sc-for list="{{ vendorCards }}" as="c" hint-placeholder-count="4">
+              <div>
+                <div style="aspect-ratio:16/9; border-radius:12px; border:1px solid #E1DCD1; background:{{ c.thumb }}; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                  <span style="width:44px; height:44px; border-radius:10px; background:{{ c.avBg }}; color:#FDFBF7; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px;">{{ c.av }}</span>
+                  <sc-if value="{{ c.verified }}" hint-placeholder-val="{{ false }}">
+                    <span style="position:absolute; bottom:8px; right:8px; font-family:ui-monospace, Menlo, monospace; font-size:10px; font-weight:700; background:#FDFBF7; color:#5C4726; border:1px solid #D9C9A8; padding:2px 7px; border-radius:6px;">✓ VERIFIED</span>
+                  </sc-if>
+                </div>
+                <div style="margin-top:10px;">
+                  <span style="font-size:14px; font-weight:700; display:block; line-height:1.35;">{{ c.title }}</span>
+                  <span style="font-size:12px; color:#6E6A62; display:block; margin-top:3px; line-height:1.5;">{{ c.m1 }}<span style="font-family:ui-monospace, Menlo, monospace; font-weight:700; color:#2C2A29;">{{ c.num }}</span>{{ c.m2 }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ worldEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E1DCD1; border-radius:14px; padding:16px 20px; margin-top:16px;">
+            <p style="font-size:13.5px; line-height:1.65; color:#6E6A62; margin:0;">These slots are earned, never sold — the shops couples save most each week appear here. The first shops are being verified now.</p>
+            <div style="display:flex; gap:16px; margin-top:12px; padding-top:12px; border-top:1px solid #EDE8DE;">
+              <span style="font-size:13.5px; font-weight:700; color:#3B4E67;">Browse vendors →</span>
+              <span style="font-size:13.5px; font-weight:600; color:#3B4E67;">Open your shop →</span>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+
+      <!-- footer -->
+      <footer style="margin-top:40px; border-top:1px solid #E1DCD1; padding:28px 22px 36px; display:flex; align-items:baseline; gap:22px; flex-wrap:wrap;">
+        <div style="font-weight:800; font-size:14px; letter-spacing:0.16em;">SETNAYAN</div>
+        <span style="font-size:13.5px; font-weight:600; color:#3B4E67;">Tools</span>
+        <span style="font-size:13.5px; font-weight:600; color:#3B4E67;">Find vendors</span>
+        <span style="font-size:13.5px; font-weight:600; color:#3B4E67;">Real stories</span>
+        <span style="font-size:13.5px; font-weight:600; color:#3B4E67;">Journal</span>
+        <span style="font-size:13.5px; font-weight:600; color:#3B4E67;">Privacy</span>
+        <span style="margin-left:auto; font-family:ui-monospace, Menlo, monospace; font-size:11px; color:#6E6A62;">Set na 'yan — that's all set.</span>
+      </footer>
+    </div>
+
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+      <div style="width:212px; flex-shrink:0; border-left:1px solid #E1DCD1; overflow-y:auto; padding:12px 12px 18px; display:flex; flex-direction:column; gap:2px;">
+        <sc-for list="{{ sideTop }}" as="n" hint-placeholder-count="2">
+          <button onClick="{{ n.onPick }}" style="display:flex; align-items:center; min-height:42px; border-radius:10px; border:none; cursor:pointer; font-family:inherit; text-align:left; padding:0 12px; font-size:13.5px; background:{{ n.bg }}; font-weight:{{ n.weight }}; color:#2C2A29;" style-hover="background:#F4F2EC;">{{ n.label }}</button>
+        </sc-for>
+        <div style="height:1px; background:#EDE8DE; margin:10px 4px;"></div>
+        <div style="font-family:ui-monospace, Menlo, monospace; font-size:9.5px; font-weight:700; letter-spacing:0.16em; color:#8C6932; padding:2px 12px 6px;">EXPLORE</div>
+        <sc-for list="{{ exploreCats }}" as="c" hint-placeholder-count="5">
+          <button onClick="{{ c.onPick }}" style="display:flex; align-items:center; min-height:38px; border-radius:10px; border:none; background:none; cursor:pointer; font-family:inherit; text-align:left; padding:0 12px; font-size:13px; font-weight:600; color:#2C2A29;" style-hover="background:#F4F2EC;">{{ c.label }}</button>
+        </sc-for>
+        <button style="display:flex; align-items:center; min-height:38px; border-radius:10px; border:none; background:none; cursor:pointer; font-family:inherit; text-align:left; padding:0 12px; font-size:13px; font-weight:600; color:#6E6A62;">Show more ›</button>
+        <div style="height:1px; background:#EDE8DE; margin:10px 4px;"></div>
+        <button onClick="{{ goHome }}" style="display:flex; align-items:center; min-height:42px; border-radius:10px; border:none; cursor:pointer; font-family:inherit; text-align:left; padding:0 12px; font-size:13.5px; background:{{ homeBg }}; font-weight:{{ homeWeight }}; color:#2C2A29;" style-hover="background:#F4F2EC;">My Home</button>
+        <div style="height:1px; background:#EDE8DE; margin:10px 4px;"></div>
+        <div style="font-family:ui-monospace, Menlo, monospace; font-size:9.5px; font-weight:700; letter-spacing:0.16em; color:#8C6932; padding:2px 12px 6px;">TOOLS</div>
+        <sc-for list="{{ tools }}" as="t" hint-placeholder-count="6">
+          <button style="display:flex; align-items:center; gap:8px; min-height:38px; border-radius:10px; border:none; background:none; cursor:pointer; font-family:inherit; text-align:left; padding:0 12px; font-size:13px; font-weight:600; color:#2C2A29;" style-hover="background:#F4F2EC;">
+            <sc-if value="{{ t.tryNow }}" hint-placeholder-val="{{ true }}"><span style="width:5px; height:5px; border-radius:50%; background:#8C6932; flex-shrink:0;"></span></sc-if>
+            {{ t.name }}
+          </button>
+        </sc-for>
+        <div style="height:1px; background:#EDE8DE; margin:10px 4px;"></div>
+        <div style="padding:2px 12px; font-size:12px; color:#6E6A62; line-height:2.1;">About · Pricing<br>Privacy · Terms<br>Contact us · Open your shop</div>
+        <div style="padding:10px 12px 0; font-size:11px; color:#A09A8E; line-height:1.6;">Set na 'yan — that's all set.</div>
+      </div>
+    </sc-if>
+    </div>
+
+    <!-- phone full-sheet index -->
+    <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; z-index:40; background:#FDFBF7; display:flex; flex-direction:column; animation:omSheet .26s cubic-bezier(0.32,0.72,0,1);">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 16px; min-height:56px; border-bottom:1px solid #EDE8DE; flex-shrink:0;">
+          <span style="font-weight:800; font-size:14px; letter-spacing:0.16em;">SETNAYAN</span>
+          <button onClick="{{ toggleMenu }}" style="width:44px; height:44px; display:flex; align-items:center; justify-content:center; border:1px solid #E1DCD1; border-radius:999px; background:none; cursor:pointer; font-size:15px; color:#2C2A29;">✕</button>
+        </div>
+        <div style="padding:8px 0 4px; overflow-y:auto;">
+          <sc-for list="{{ sheetRows }}" as="r" hint-placeholder-count="4">
+            <button onClick="{{ r.onPick }}" style="display:flex; align-items:center; gap:14px; padding:13px 18px 13px {{ r.padL }}; min-height:44px; width:100%; background:{{ r.bg }}; border:none; border-bottom:1px solid #EDE8DE; border-left:{{ r.bar }}; cursor:pointer; font-family:inherit; text-align:left;">
+              <span style="font-family:ui-monospace, Menlo, monospace; font-size:12px; font-weight:700; color:#8C6932;">{{ r.num }}</span>
+              <span><span style="font-size:16px; font-weight:{{ r.weight }}; display:block; color:#2C2A29;">{{ r.label }}</span><span style="font-size:12px; color:#6E6A62;">{{ r.sub }}</span></span>
+            </button>
+          </sc-for>
+          <div style="padding:14px 18px 18px;">
+            <button onClick="{{ toggleMenu }}" style="width:100%; display:flex; align-items:center; justify-content:center; background:#8C6932; color:#FDFBF7; font-size:14px; font-weight:700; min-height:48px; border-radius:999px; border:none; cursor:pointer; font-family:inherit;">Start planning — free</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:860}}">
+class Component extends DCLogic {
+  state = { device:'desktop', world:'busy', q:'', menuOpen:false, active:0, scrolled:false };
+  glide(v, to) {
+    cancelAnimationFrame(this._raf);
+    const from = v.scrollTop, dist = to - from, t0 = performance.now(), dur = 380;
+    const step = now => {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      v.scrollTop = from + dist * e;
+      if (p < 1) this._raf = requestAnimationFrame(step);
+    };
+    this._raf = requestAnimationFrame(step);
+  }
+  goDoor(i) {
+    const el = this._secs && this._secs[i], v = this._view;
+    if (el && v) this.glide(v, Math.max(0, el.offsetTop - 70));
+    this.setState({ active:i, menuOpen:false });
+  }
+  renderVals() {
+    const s = this.state, set = p => this.setState(p);
+    if (!this._secs) this._secs = {};
+    const chosenB = '1.5px solid #A9834B', chosenBg = 'rgba(169,131,75,0.07)', plainB = '1px solid #E1DCD1';
+    const isDesktop = s.device === 'desktop', empty = s.world === 'empty';
+    const devices = [ {k:'desktop', label:'Desktop'}, {k:'phone', label:'Phone'} ].map(d => ({
+      label:d.label, border: s.device===d.k ? chosenB : plainB, bg: s.device===d.k ? chosenBg : '#FDFBF7',
+      onPick: () => set({device:d.k, menuOpen:false}) }));
+    const worlds = [ {k:'busy', label:'A busy week'}, {k:'empty', label:'Today — nearly empty'} ].map(w => ({
+      label:w.label, border: s.world===w.k ? chosenB : plainB, bg: s.world===w.k ? chosenBg : '#FDFBF7',
+      onPick: () => set({world:w.k}) }));
+    const doors = [
+      {label:'Tools', sub:'Six tools — four open right here, no account'},
+      {label:'Find vendors', sub:'Twelve categories, from photographer to mobile bar'},
+      {label:'Real stories', sub:'Celebrations, told by everyone who came'},
+      {label:'Journal', sub:'Planning, traditions, and the people behind the day'} ];
+    const navItems = doors.map((d, i) => ({ num:'0'+(i+1), label:d.label,
+      weight: s.active===i+1 ? 800 : 600, rule: s.active===i+1 ? '#A9834B' : 'transparent',
+      onPick: () => this.goDoor(i+1) }));
+    const sheetRows = doors.map((d, i) => { const on = s.active===i+1; return {
+      num:'0'+(i+1), label:d.label, sub: on ? d.sub + ' — you are here' : d.sub,
+      weight: on ? 800 : 700, bg: on ? '#F4F2EC' : '#FDFBF7',
+      bar: on ? '3px solid #A9834B' : '3px solid transparent', padL:'15px',
+      onPick: () => this.goDoor(i+1) }; });
+    const tools = [
+      {name:'Papic', blurb:"Every guest's phone becomes a camera for your day. Their shots land in one shared album.", tryNow:true},
+      {name:'Live Studio', blurb:"Broadcast the ceremony to everyone who couldn't fly home — on your own channel.", tryNow:true},
+      {name:'3D floor plan', blurb:"Walk your reception before the day — tables, stage, and every tita's seat.", tryNow:true},
+      {name:'Alaala', blurb:'The shared memory album — everyone who came goes home with their own copy.', tryNow:true},
+      {name:'Setnayan AI', blurb:'A planner that already knows the Filipino playbook — from first guest list to run-of-show.', tryNow:false},
+      {name:'Pakanta', blurb:'A custom song for your celebration — your story, sung.', tryNow:false}
+    ].map(t => ({ name:t.name, blurb:t.blurb, tryNow:t.tryNow,
+      bg: t.tryNow ? '#FDFBF7' : '#F4F2EC', cta: t.tryNow ? 'Open the demo →' : 'With a free account →' }));
+    const th0 = '#EFE9DD', th1 = 'repeating-linear-gradient(-45deg, #F4F2EC, #F4F2EC 16px, rgba(169,131,75,0.08) 16px, rgba(169,131,75,0.08) 32px)';
+    const storyCards = [
+      {title:'Our Tagaytay wedding — the whole day in four minutes', av:'MP', avBg:'#6E6A62', m1:'the Poblete series · Chapter 3 · ', num:'2,140', m2:' plays this week', badge:'4:12'},
+      {title:'Lolo\u2019s toast — the speech nobody expected', av:'PR', avBg:'#8C6932', m1:'the Ramos series · Chapter 5 · ', num:'1,873', m2:' plays this week', badge:'2:58'},
+      {title:'A Cebu beach kasal at sunrise', av:'AV', avBg:'#3B4E67', m1:'the Villanueva series · Chapter 2 · ', num:'1,204', m2:' plays this week', badge:'6:40'},
+      {title:'The pamamanhikan, before everything', av:'MP', avBg:'#6E6A62', m1:'the Poblete series · Chapter 1 · ', num:'986', m2:' plays this week', badge:'3:21'}
+    ].map((c, i) => Object.assign({thumb: i % 2 ? th1 : th0}, c));
+    const edCards = [
+      {title:'Who pays for what? The honest map of Filipino wedding money', m1:'Planning · 7 min read · ', num:'4,908', m2:' reads this week', badge:'7 MIN'},
+      {title:'The pamamanhikan, explained for the couple who\u2019s never done one', m1:'Traditions · 8 min read · ', num:'3,112', m2:' reads this week', badge:'8 MIN'},
+      {title:'Six questions to ask a caterer before you taste anything', m1:'Vendors · 5 min read · ', num:'2,447', m2:' reads this week', badge:'5 MIN'},
+      {title:'Behind the lens: how Studio Azul shoots a kasal', m1:'Vendors · 6 min read · ', num:'1,980', m2:' reads this week', badge:'6 MIN'}
+    ].map((c, i) => Object.assign({thumb: i % 2 ? th0 : th1}, c));
+    const vendorCards = [
+      {title:'Studio Azul Photography', av:'SA', avBg:'#3B4E67', verified:true, m1:'Photography · Tagaytay & Manila · saved by ', num:'31', m2:' couples this week'},
+      {title:'Casa Azul Events Place', av:'CA', avBg:'#8C6932', verified:false, m1:'Venue · Silang, Cavite · saved by ', num:'24', m2:' couples this week'},
+      {title:'Lola Remedios Catering', av:'LR', avBg:'#6E6A62', verified:false, m1:'Catering · Quezon City · saved by ', num:'19', m2:' couples this week'},
+      {title:'Hiraya Films', av:'HF', avBg:'#3B4E67', verified:true, m1:'Videography · Cebu · saved by ', num:'17', m2:' couples this week'}
+    ].map((c, i) => Object.assign({thumb: i % 2 ? th1 : th0}, c));
+    const raw = s.q, q = raw.trim().toLowerCase();
+    const data = [
+      {g:0, title:'Papic', sub:"Tool · every guest's phone becomes a camera — try it now, no account", tags:'tool feature app photos camera guest shared album try demo', av:'◉', bg:'#8C6932', r:'9px'},
+      {g:0, title:'Live Studio', sub:'Tool · broadcast the ceremony on your own channel — try it now', tags:'tool feature app live stream broadcast video ceremony channel try demo', av:'◉', bg:'#8C6932', r:'9px'},
+      {g:0, title:'3D floor plan', sub:'Tool · walk your reception before the day — try it now', tags:'tool feature app 3d floor plan tables seating layout venue try demo', av:'◉', bg:'#8C6932', r:'9px'},
+      {g:0, title:'Alaala', sub:'Tool · the shared memory album everyone takes home — try it now', tags:'tool feature app alaala memory album photos guests keepsake try demo', av:'◉', bg:'#8C6932', r:'9px'},
+      {g:0, title:'Setnayan AI', sub:'Tool · a planner that knows the Filipino playbook — with a free account', tags:'tool feature app ai planner assistant guest list run of show checklist', av:'◉', bg:'#8C6932', r:'9px'},
+      {g:0, title:'Pakanta', sub:'Tool · a custom song for your celebration — with a free account', tags:'tool feature app pakanta song music custom kanta', av:'◉', bg:'#8C6932', r:'9px'},
+      {g:1, title:'Studio Azul Photography', sub:'Photography · Tagaytay & Manila · ✓ Verified', tags:'photographer photo kasal wedding tagaytay manila verified', av:'SA', bg:'#3B4E67', r:'9px'},
+      {g:1, title:'Casa Azul Events Place', sub:'Venue · Silang, Cavite', tags:'venue reception events place silang cavite', av:'CA', bg:'#8C6932', r:'9px'},
+      {g:1, title:'Lola Remedios Catering', sub:'Catering · Quezon City', tags:'catering caterer food kainan quezon city', av:'LR', bg:'#6E6A62', r:'9px'},
+      {g:1, title:'Hiraya Films', sub:'Videography · Cebu', tags:'videographer video film sde same day edit cebu', av:'HF', bg:'#3B4E67', r:'9px'},
+      {g:1, title:'Bulaklak at Bigay Florals', sub:'Florist · Manila', tags:'florist flowers bouquet arrangements manila', av:'BB', bg:'#8C6932', r:'9px'},
+      {g:1, title:"Kape't Bisig Mobile Bar", sub:'Mobile bar · Laguna', tags:'mobile bar coffee drinks laguna', av:'KB', bg:'#6E6A62', r:'9px'},
+      {g:2, title:'Our Tagaytay wedding — the whole day in four minutes', sub:'Chapter 3 · the Poblete series · told by Maria and 48 guests', tags:'storyteller maria poblete tagaytay kasal wedding studio azul', av:'MP', bg:'#6E6A62', r:'50%'},
+      {g:2, title:'The pamamanhikan, before everything', sub:'Chapter 1 · the Poblete series · told by Maria', tags:'storyteller maria poblete pamamanhikan tradition', av:'MP', bg:'#6E6A62', r:'50%'},
+      {g:2, title:'A Cebu beach kasal at sunrise', sub:'Chapter 2 · the Villanueva series · told by Andrea and 31 guests', tags:'storyteller andrea villanueva cebu beach sunrise wedding', av:'AV', bg:'#3B4E67', r:'50%'},
+      {g:2, title:"Lolo's toast — the speech nobody expected", sub:'Chapter 5 · the Ramos series · told by Paolo and 62 guests', tags:'storyteller paolo ramos lolo toast speech reception', av:'PR', bg:'#8C6932', r:'50%'},
+      {g:3, title:"The pamamanhikan, explained for the couple who's never done one", sub:'Traditions · 8 min read', tags:'editorial journal traditions pamamanhikan', av:'', bg:'', r:''},
+      {g:3, title:'Who pays for what? The honest map of Filipino wedding money', sub:'Planning · 7 min read', tags:'editorial journal planning budget money pesos', av:'', bg:'', r:''},
+      {g:3, title:'Six questions to ask a caterer before you taste anything', sub:'Vendors · 5 min read', tags:'editorial journal caterer catering food tasting', av:'', bg:'', r:''},
+      {g:3, title:'Behind the lens: how Studio Azul shoots a kasal', sub:'Vendors · 6 min read', tags:'editorial journal photographer studio azul kasal wedding', av:'', bg:'', r:''}
+    ].filter(d => !(empty && d.g === 1));
+    const mkSegs = t => {
+      const out = []; const lower = t.toLowerCase(); let i = 0;
+      if (q) { let idx = lower.indexOf(q);
+        while (idx >= 0) {
+          if (idx > i) out.push({t: t.slice(i, idx), bg:'transparent', color:'inherit'});
+          out.push({t: t.slice(idx, idx + q.length), bg:'#F3ECDF', color:'#5C4726'});
+          i = idx + q.length; idx = lower.indexOf(q, i);
+        } }
+      if (i < t.length) out.push({t: t.slice(i), bg:'transparent', color:'inherit'});
+      return out;
+    };
+    const labels = ['01 · TOOLS', '02 · VENDORS', '03 · REAL STORIES', '04 · JOURNAL'];
+    const groups = [];
+    if (q) labels.forEach((label, gi) => {
+      const items = data.filter(d => d.g === gi && (d.title + ' ' + d.sub + ' ' + d.tags).toLowerCase().includes(q)).slice(0, 3)
+        .map(d => ({ segs: mkSegs(d.title), sub:d.sub, av:d.av, hasAv: !!d.av, avBg:d.bg, radius:d.r,
+          onGo: () => { set({q:''}); this.goDoor(gi + 1); } }));
+      if (items.length) groups.push({label, items, borderTop: groups.length ? '1px solid #EDE8DE' : 'none'});
+    });
+    const count = groups.reduce((n, g) => n + g.items.length, 0);
+    return {
+      devices, worlds, isDesktop, isPhone: !isDesktop,
+      worldNote: empty ? 'Production today: no visible shops, no storytellers yet. Trending renders each door\u2019s invitation instead of a fake trend, and vendors leave the search — real answers, not apologies.' : 'A made-up healthy week: every trending slot has earned its place from real saves, plays and reads.',
+      worldBusy: !empty, worldEmpty: empty,
+      frameW: isDesktop ? '1020px' : '375px', frameH: isDesktop ? '700px' : '760px', frameR: isDesktop ? '16px' : '28px',
+      cols3: isDesktop ? 'repeat(3, 1fr)' : '1fr', h1Size: isDesktop ? '40px' : '30px',
+      hdrShadow: s.scrolled ? '0 4px 14px rgba(30,26,18,0.08)' : 'none',
+      navItems, sheetRows, tools, edCards, vendorCards,
+      sideTop: [{label:'Stories', door:3}, {label:'Editorials', door:4}].map(it => {
+        const on = s.active === it.door;
+        return { label: it.label, bg: on ? '#F4F2EC' : 'transparent', weight: on ? 800 : 600,
+          onPick: () => this.goDoor(it.door) };
+      }),
+      exploreCats: ['Photographers', 'Venues', 'Catering', 'Videographers', 'Hosts & bands'].map(label => ({ label, onPick: () => this.goDoor(2) })),
+      homeBg: s.active <= 1 ? '#F4F2EC' : 'transparent', homeWeight: s.active <= 1 ? 800 : 600,
+      goHome: () => { if (this._view) this.glide(this._view, 0); set({active:0, menuOpen:false}); },
+      hero: storyCards[0], restStories: storyCards.slice(1),
+      colsRail: isDesktop ? 'repeat(4, 1fr)' : '1fr',
+      colsShorts: isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
+      colsRest: isDesktop ? 'repeat(3, 1fr)' : '1fr',
+      menuOpen: s.menuOpen, toggleMenu: () => set({menuOpen: !s.menuOpen}),
+      goTop: () => { if (this._view) this.glide(this._view, 0); set({active:0}); },
+      setView: el => { this._view = el; },
+      setSec1: el => { this._secs[1] = el; }, setSec2: el => { this._secs[2] = el; },
+      setSec3: el => { this._secs[3] = el; }, setSec4: el => { this._secs[4] = el; },
+      setSec5: el => { this._secs[5] = el; },
+      onScroll: e => {
+        const st = e.target.scrollTop, scrolled = st > 8;
+        let best = 0, bestTop = -1;
+        const doorMap = {1:1, 2:2, 3:3, 4:4, 5:3};
+        for (let i = 1; i <= 5; i++) { const el = this._secs[i]; if (!el) continue;
+          const t = el.offsetTop; if (t - 140 <= st && t > bestTop) { best = doorMap[i]; bestTop = t; } }
+        if (st < 60) best = 0;
+        if (best !== s.active || scrolled !== s.scrolled) set({active:best, scrolled});
+      },
+      query: raw, panelOpen: q.length > 0, groups,
+      noHits: q.length > 0 && count === 0, hasHits: count > 0,
+      footerLine: count + (count === 1 ? ' result for "' : ' results for "') + raw.trim() + '" · Esc clears',
+      onQuery: e => set({q: e.target.value}),
+      onKey: e => { if (e.key === 'Escape') set({q:''}); }
+    };
+  }
+}
+</script>
+</body>
+</html>
