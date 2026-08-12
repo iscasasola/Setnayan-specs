@@ -321,7 +321,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-a
 .appmain .sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .tile{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--cream)}
-.tile b{display:block;font-size:14.5px;margin-bottom:3px}
+/* Scoped to the tile's OWN heading — an unscoped `.tile b` also caught every
+   bold word inside a paragraph and threw it onto its own line. */
+.tile>b{display:block;font-size:14.5px;margin-bottom:3px}
+.tile p b{font-weight:650}
 .tile p{margin:0;font-size:12.5px;color:var(--m2);line-height:1.45}
 .tile .n{font-family:var(--mono);font-size:24px;color:var(--terra);display:block;margin-bottom:2px}
 .btn-terra-sm{min-height:40px;padding:0 15px;border-radius:999px;background:var(--terra);color:var(--cream);
@@ -359,6 +362,16 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-a
 .typecard .te{font-size:22px;line-height:1.1}
 .typecard b{font-size:14.5px}
 .typecard span:last-child{font-size:12px;color:var(--m2);line-height:1.4}
+.mut{font-size:11px;font-weight:700;color:var(--terra);border:1px solid rgba(194,78,37,.3);
+  background:rgba(194,78,37,.07);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.resume{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin:14px 0 4px}
+.rz{border:1px solid var(--line);border-radius:12px;background:#FCF8F1;padding:13px 15px;
+  display:flex;align-items:center;gap:12px}
+.rz b{display:block;font-size:14px}
+.rz span:not(.rzk){font-size:12.5px;color:var(--m2);line-height:1.4}
+.rzk{font-size:24px;color:var(--gold);font-weight:700;line-height:1}
+.rz .btn-gold{margin-left:auto;white-space:nowrap}
+@media(max-width:1240px){.resume{grid-template-columns:1fr}}
 .guided{position:absolute;top:10px;right:10px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
   color:var(--terra);border:1px solid rgba(194,78,37,.3);border-radius:999px;padding:2px 6px;font-weight:700}
 
@@ -724,6 +737,22 @@ const STORIES_LATER=[
   body:['Nobody writes about the small ones, so we did.',
         'City hall, eleven people, lunch afterwards. The clip below is three minutes our cousin shot on a phone.']}];
 
+/* ══ PEOPLE — and MUTUAL STORIES (owner 2026-08-12) ══════════════════════
+   Not invented: the shipped Alaala lenses are already Recent · Owned ·
+   ATTENDED · People · WITH ME (owner-approved 2026-07-15), and
+   `person_story_items` already carries person_id · event_id · consented_at ·
+   hidden_at · removed_at. Mutual stories is what those two make together.
+   ⚠ It inherits the counsel gate: the connections layer is switched OFF in
+   production, and this is the payoff that gate is protecting. */
+const PEOPLE=[
+ {id:'p1',name:'Rina Poblete',mono:'RP',rel:'Maid of honour',since:'Friends since 2014',
+  stories:['v1'],mutual:[{ev:'Ana & Miguel',what:'You were both guests',shots:38,when:'Jun 2026'},
+                          {ev:'Baby Mateo',what:'You organised · she was ninang',shots:12,when:'Mar 2026'}]},
+ {id:'p2',name:'Miguel Santos',mono:'MS',rel:'Cousin',since:'Family',
+  stories:['v2'],mutual:[{ev:'Ana & Miguel',what:'His wedding · you were a guest',shots:64,when:'Jun 2026'}]},
+ {id:'p3',name:'Joy Bautista',mono:'JB',rel:'Workmate',since:'Met at Tita Baby’s',
+  stories:['v3'],mutual:[]}];
+
 const CHIPS=['All','Articles','Their stories','With video','Venues','Catering','Photo & video','Attire','Budget',
              'Church papers','Seating','Ninong & ninang','Province weddings','Papic'];
 const CHIP_CAT={'Venues':'Venue','Catering':'Feast','Photo & video':'Suppliers','Attire':'Suppliers',
@@ -733,7 +762,7 @@ const CHIP_CAT={'Venues':'Venue','Catering':'Feast','Photo & video':'Suppliers',
 /* ══ STATE ════════════════════════════════════════════════════════════════ */
 const S={screen:'desk',day:'launch',who:'out',view:'feed',ctx:null,chip:'All',folder:null,
   moreOpen:false,menu:false,sheet:false,q:'',saved:{},pending:null,toast:null,appTab:'board',
-  event:null,create:null,showAll:false};
+  event:null,create:null,showAll:false,person:null};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inn=()=>S.who!=='out';
 const shops=()=>S.day==='launch'?SHOPS_LAUNCH:SHOPS_LATER;
@@ -874,7 +903,22 @@ function feed(){
   let list=shops();
   if(S.folder) list=list.filter(s=>s.fold===S.folder);
 
-  let h='<div class="chipbar"><div class="chips">';
+  let h='';
+  /* ⚠ SIGNED IN, THE FEED IS THE SAME FEED — only a resume strip is added.
+     The reference does exactly this: your account changes the rail and adds a
+     "pick up where you left off" row; it does not rebuild the page. */
+  if(inn()&&!S.folder&&S.chip==='All'){
+    h+=`<div class="resume">
+      <div class="rz"><span class="rzk mono">128</span><div><b>Cale &amp; Ice</b>
+        <span>days away · 2 suppliers waiting on you</span></div>
+        <button class="btn-gold" data-act="app" data-id="board">Open your event</button></div>
+      <div class="rz"><span class="rzk mono">11</span><div><b>Saved suppliers</b>
+        <span>shortlisted while you decide</span></div></div>
+      <div class="rz"><span class="rzk mono">148</span><div><b>Your photos</b>
+        <span>Alaala, across every event</span></div></div>
+    </div>`;
+  }
+  h+='<div class="chipbar"><div class="chips">';
   CHIPS.forEach(c=>{h+=`<button class="chip" data-act="chip" data-id="${esc(c)}" data-on="${S.chip===c}">${esc(c)}</button>`;});
   h+='</div><span class="chipnext">›</span></div>';
 
@@ -1165,12 +1209,66 @@ function appMain(){
   return appBoard();
 }
 function appPeople(){
+  if(S.person)return personView();
   return `<h1>People</h1>
-    <p class="sub">Family, godparents and friends — and the circles they belong to.</p>
-    <div class="tile"><b>Coming soon, and switched off on purpose.</b>
+    <p class="sub">Family, godparents and friends — and the days you shared with them.</p>
+    <div class="tile" style="margin-bottom:18px"><b>Switched off in production today, on purpose.</b>
       <p style="margin-top:6px">The part that connects one person to another is waiting on a legal
-      review, so the page says so instead of showing an empty list. It is a notice, not a broken
-      screen — and the row is deliberately still here so you know it is coming.</p></div>`;
+      review, so the live page says so instead of showing a list. What follows is <b>what it becomes
+      the day that clears</b> — drawn, not shipped.</p></div>
+    <div class="evgrid">${PEOPLE.map(p=>`<button class="evcard" data-act="person" data-id="${p.id}">
+      <div class="evtop"><span class="evmono">${esc(p.mono)}</span>
+        <div class="evname"><b>${esc(p.name)}</b><span class="evrole">${esc(p.rel)} · ${esc(p.since)}</span></div>
+        ${p.mutual.length?`<span class="mut mono">${p.mutual.length}</span>`:''}</div>
+      <div class="evneed">${p.mutual.length
+        ? esc(p.mutual.length===1?'1 day you shared':p.mutual.length+' days you shared')
+        : 'Nothing shared yet — you have not been at the same event'}</div></button>`).join('')}</div>`;
+}
+
+/* ══ SOMEONE'S PAGE — with MUTUAL STORIES ════════════════════════════════
+   THE PRIVACY RULE, and it is the whole design: a day only appears here when
+   BOTH of you are ALREADY VISIBLE IN IT. Never derived from private attendance,
+   never "you were both at X" pulled out of a guest list. Visiting somebody's
+   page can therefore reveal nothing that was not already published. */
+function personView(){
+  const p=PEOPLE.find(x=>x.id===S.person)||PEOPLE[0];
+  const theirs=STORIES_LATER.filter(v=>p.stories.includes(v.id));
+  return `<button class="back" data-act="people">← All people</button>
+    <div class="byline" style="margin-top:14px"><span class="ava">${esc(p.mono)}</span>
+      <div><b>${esc(p.name)}</b><span>${esc(p.rel)} · ${esc(p.since)}</span></div>
+      <button class="btn-out" style="margin-left:auto" data-act="noop">＋ Follow</button></div>
+
+    <div class="sechead"><h3 style="font-size:17px">Days you both were there</h3>
+      <span class="meta mono">${p.mutual.length}</span>
+      <span class="rule">only days you are both already visible in</span></div>
+    ${p.mutual.length?`<div class="evgrid">${p.mutual.map(m=>`
+      <div class="evcard" data-act="noop"><div class="evtop">
+        <span class="evmono">✧</span><div class="evname"><b>${esc(m.ev)}</b>
+        <span class="evrole">${esc(m.what)}</span></div>
+        <span class="mono" style="font-size:11px;color:var(--m3)">${esc(m.when)}</span></div>
+        <div class="shots" style="grid-template-columns:repeat(8,1fr)">
+          ${Array.from({length:8}).map(()=>'<span></span>').join('')}</div>
+        <div class="evneed"><span class="mono">${m.shots}</span> photos with both of you in them</div>
+      </div>`).join('')}</div>`
+    :`<div class="invite"><h4>Nothing shared yet.</h4>
+        <p>You have not been at the same event — or if you have, one of you has not made it public.
+        This fills in on its own the next time you are both somewhere.</p></div>`}
+
+    <div class="sechead" style="margin-top:28px"><h3 style="font-size:17px">Their stories</h3>
+      <span class="meta mono">${theirs.length}</span></div>
+    ${theirs.length?`<div class="evgrid">${theirs.map(v=>`
+      <button class="evcard" data-act="story" data-id="${v.id}"><div class="evtop">
+        <span class="evmono">${esc(v.mono)}</span><div class="evname"><b>${esc(v.t)}</b>
+        <span class="evrole">${v.read} min${v.video?' · with video':''}</span></div></div>
+        <div class="evneed"><span class="mono">${v.plays}</span> reads</div></button>`).join('')}</div>`
+    :`<div class="invite"><h4>They have not written one yet.</h4>
+        <p>Their page stays private until they do — nobody gets a profile they did not ask for.</p></div>`}
+
+    <div class="tile" style="margin-top:22px"><b>How a shared day gets here.</b>
+      <p style="margin-top:6px">It has to be a day you were <b>both</b> at, where <b>both</b> of you
+      are already visible — the photos consented, the event public. It is never worked out from a
+      private guest list, so opening someone's page can only ever show you what was already shown.
+      If one of you hides, the day quietly leaves both pages.</p></div>`;
 }
 /* The four sections that live INSIDE an event, drawn as themselves so the level
    is obvious — they were wrongly at account level until 2026-08-12. */
@@ -1556,6 +1654,8 @@ document.addEventListener('click',e=>{
     case 'article': go('article',id); break;
     case 'shop': S.srcNote=el.dataset.src==='editorial'; go('shop',id); break;
     case 'story': go('storyread',id); break;
+    case 'person': S.view='app';S.appTab='people';S.person=id; break;
+    case 'people': S.view='app';S.appTab='people';S.person=null; break;
     case 'compose': go('compose',null); break;
     case 'published': S.view='feed';S.day='later';
       document.getElementById('segDay').querySelectorAll('button').forEach(b=>
@@ -1591,7 +1691,8 @@ document.addEventListener('click',e=>{
     // two-level split exposed: pressing Guests wiped which wedding you were in.
     case 'apptab':
       if(id==='board'){S.event=null;S.appTab='board';}
-      else{S.appTab=id; if(!S.event&&['guests','studio','market','schedule','seat','budget'].includes(id))S.appTab='board';}
+      else{S.appTab=id; if(id==='people')S.person=null;
+        if(!S.event&&['guests','studio','market','schedule','seat','budget'].includes(id))S.appTab='board';}
       S.create=null; break;
     case 'board': S.view='app';S.appTab='board';S.event=null;S.create=null; break;
     case 'openev': S.view='app';S.appTab='home';S.create=null;S.event=id;S.menu=false; break;
