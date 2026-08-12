@@ -120,9 +120,17 @@ Four smaller ones, none of which blocks a build for long:
 
 ---
 
-## Session 3 · Say the words people actually type — ✅ **DONE 2026-08-12**
+## Session 3 · Say the words people actually type — 🟡 **BUILT, MERGE-PENDING (PR #4388)**
 ~~**Copy only. No migration, no schema, no SEO cost.**~~ **Copy — plus a data migration, because
 this doc was wrong about where the words live.**
+
+> 🛑 **I MARKED THIS "DONE" WHILE ITS PR WAS STILL OPEN, and another session caught it.** The work
+> is written, reviewed by CI and green on typecheck · production build · playwright · bundle · all
+> 21 lint guards · 7,721 unit tests · 1,190 db tests — but **written is not merged, and merged is
+> not in production.** The label rename only reaches a customer once the migration has actually
+> run against prod, which is a third event again. **Do not mark this ✅ until the words have been
+> read back out of the live database.** Same disease as everything else in this file: a state line
+> written from intention rather than measurement.
 
 > ✅ **SHIPPED** (PR #4388). All fifteen labels owner-approved unchanged.
 >
