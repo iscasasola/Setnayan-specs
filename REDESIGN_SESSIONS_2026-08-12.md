@@ -35,7 +35,40 @@ on the one owner sentence in the gate below, and **6** follows 4.
 
 ---
 
-## 📡 MEASURED STATE · 2026-08-13, read from GitHub + Vercel, not from this file
+## 📡 MEASURED STATE · re-read 2026-08-13 after the block below went stale in ~20 minutes
+
+✅ **SESSIONS 1 · 2 · 3 ARE ALL LANDED.** #4388 merged 16:38Z, #4390 (the story-page 404) 16:45Z.
+
+🎉 **AND SESSION 2 IS PROVEN BY THE OBJECT, not by its PR:** prod now holds
+**1 published chapter with `embed_url IS NULL`** and **1 `public_profile_enabled` account** —
+both were **0** yesterday. A story that could not have existed before now exists.
+
+**Still open — but none of them has a session actively building, all three are auto-armed and
+merely waiting on CI:**
+
+| PR | What | Note |
+|---|---|---|
+| #4391 | finish the Stories rename across 16 more customer-facing screens | ⚠ touches the **nav registry** |
+| #4392 | the admin *Feature* button never rendered for a written chapter | small |
+| #4385 | the stray shopping-links stream | ✅ **now cleanly MERGEABLE** |
+
+✅ **THE COLLISION RESOLVED ITSELF IN THE RIGHT ORDER.** #4388 landed first, so #4385 rebased
+clean — which is exactly the "land one, rebase the other" call, arrived at without anyone
+forcing it.
+
+⏭ **A NEW SESSION MAY START NOW: 8 (Alaala).** Measured: **none of the three open PRs touches
+`dashboard/(launcher)/page.tsx`.**
+🚫 **NOT 7** — #4391 edits `lib/nav-registry-defaults.ts`, which Session 7 would change.
+🚫 **NOT 5 YET** — it needs the article page, which #4385 still has open.
+🔴 **4 still needs the one owner sentence.**
+📛 **Name it "Redesign 8"** — sessions literally titled *Session 4 · SESSION 5 · SESSION 6*
+already exist from the 11 Aug list and are unrelated work.
+
+🔑 **THE BLOCK BELOW WAS TRUE FOR ABOUT TWENTY MINUTES.** It is kept, struck through, as the
+evidence for the rule: **a state table in a document is a claim with a timestamp, not a fact.**
+Re-read GitHub before acting on any line of it.
+
+## ~~📡 MEASURED STATE · 2026-08-13, read from GitHub + Vercel, not from this file~~ (SUPERSEDED)
 
 **THREE PRs are open, not two — and two of them collide on the same file.**
 
