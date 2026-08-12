@@ -528,7 +528,7 @@ td.n{font-family:var(--mono);color:var(--m1);white-space:nowrap}
     <tr><th>Shelf</th><th>Today</th><th>Launch-day shape</th><th>Normal at</th></tr>
     <tr><td>Stories — the watching half</td><td class="n">0</td><td>no separate shelf; joins the same one when it exists</td><td class="n">1</td></tr>
     <tr><td>Stories — the reading half</td><td class="n">33 of 91</td><td>carries the combined shelf on its own</td><td>—</td></tr>
-    <tr><td>Real weddings</td><td class="n">0</td><td>one written invitation across the row</td><td class="n">2</td></tr>
+    <tr><td>Their stories — no video</td><td class="n">0</td><td>joins the same shelf; reads like ours, by them</td><td class="n">1</td></tr>
     <tr><td>Suppliers</td><td class="n">1</td><td>“The first shops” — one real card, one invitation</td><td class="n">12</td></tr>
   </table>
   <div class="note"><b>“Trending” over a field of one is a lie.</b> Below twelve live shops the
@@ -724,7 +724,7 @@ const STORIES_LATER=[
   body:['Nobody writes about the small ones, so we did.',
         'City hall, eleven people, lunch afterwards. The clip below is three minutes our cousin shot on a phone.']}];
 
-const CHIPS=['All','Articles','Real weddings','Venues','Catering','Photo & video','Attire','Budget',
+const CHIPS=['All','Articles','Their stories','With video','Venues','Catering','Photo & video','Attire','Budget',
              'Church papers','Seating','Ninong & ninang','Province weddings','Papic'];
 const CHIP_CAT={'Venues':'Venue','Catering':'Feast','Photo & video':'Suppliers','Attire':'Suppliers',
   'Budget':'Money','Church papers':'Planning','Seating':'Guests','Ninong & ninang':'Guests',
@@ -899,9 +899,9 @@ function feed(){
      that apologises. Combined, it is FULL from day one and simply gets richer
      as real weddings arrive, instead of a second empty row appearing broken.
      The KIND lives on the card, not on the shelf. */
-  const kind=S.chip==='Articles'?'a':S.chip==='Real weddings'?'w':null;
-  const vids=kind==='a'?[]:stories();
-  const reads=kind==='w'?[]:arts;
+  const kind=S.chip==='Articles'?'a':S.chip==='Their stories'?'w':S.chip==='With video'?'v':null;
+  const vids=kind==='a'?[]:kind==='v'?stories().filter(v=>v.video):stories();
+  const reads=(kind==='w'||kind==='v')?[]:arts;
 
   if(S.day==='launch'){
     if(!reads.length&&!vids.length){
@@ -910,7 +910,7 @@ function feed(){
       return h;}
     h+='<div class="grid">'+reads.slice(0,4).map(artCard).join('')+'</div>';
     h+=`<div id="stories"></div><div class="sechead"><span class="badge">◎</span><h3>Stories</h3>
-      <span class="meta"><span class="mono">33</span> to read · <span class="mono">0</span> to watch, yet</span>
+      <span class="meta"><span class="mono">33</span> ours · <span class="mono">0</span> theirs, yet — some with video, some without</span>
       <span class="rule">one shelf — the card says which kind it is</span></div>`;
     h+='<div class="storyrow">'+reads.slice(0,6).map(a=>`<div class="story" data-act="article" data-id="${a.id}">
       <div class="sthumb"><span class="min">${a.min} MIN</span></div>
@@ -930,7 +930,7 @@ function feed(){
     h+='<div class="grid">'+reads.slice(4,8).map(artCard).join('')+'</div>';
   }else{
     h+=`<div id="stories"></div><div class="sechead"><span class="badge">◎</span><h3>Stories</h3>
-      <span class="meta"><span class="mono">96</span> to read · <span class="mono">3</span> to watch</span>
+      <span class="meta"><span class="mono">96</span> ours · <span class="mono">3</span> theirs — two with video, one without</span>
       <span class="rule">mixed by what is worth seeing, not by which kind it is</span></div>`;
     h+='<div class="grid">'+
       vids.slice(0,2).map(storyCard).join('')+reads.slice(0,2).map(artCard).join('')+'</div>';
