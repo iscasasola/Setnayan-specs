@@ -33,7 +33,7 @@
 | ✅ **DONE — colour, on all 401 routes** | PR #3988 merged. Terracotta palette resolves from CSS vars ⇒ **1,263 `bg-cream` call sites** turned over with **zero component edits**. |
 | ✅ **DONE — the guard that LOCKS it** | **PR [#4030](https://github.com/iscasasola/setnayan-platform/pull/4030) MERGED 2026-08-02**, confirmed by ancestry (`git merge-base --is-ancestor 99fd30e79 origin/main`), not PR status. ⚠ **It sat OPEN for a day because auto-merge does not report a red check as a blocker in the PR state** — `mergeStateStatus` read `BLOCKED`/`UNKNOWN` while `typecheck + lint` had genuinely FAILED: CI rejected the guard on `noUncheckedIndexedAccess` grounds (regex capture groups and array destructures are "possibly undefined"), which cannot reproduce under `tsx --test`. Fixed by narrowing the hex capture through `assert.ok` and computing luminance per-channel instead of destructuring. 🔑 **"Auto-merge armed" is not "will merge" — read `gh pr checks`, not the PR status.** |
 | ✅ **DONE — the design language** | 12 screen archetypes + 7 overlay types, drafted by Fable, verified, committed to `prototypes/archetype_*_2026-08-01.html` (5 files, ~8,900 lines). |
-| ▶ **STARTED — the port** | ~40 design units. **`design#1` and `design#2` are DONE (2026-08-02, PRs [#4064](https://github.com/iscasasola/setnayan-platform/pull/4064) + [#4065](https://github.com/iscasasola/setnayan-platform/pull/4065)) — do NOT rebuild them.** Everything else is untouched; `design#3` (the shell) is next and is the architectural one. |
+| ▶ **STARTED — the port** | ~40 design units. **`design#1` and `design#2` are DONE (2026-08-02, PRs [#4064](https://github.com/iscasasola/setnayan-platform/pull/4064) + [#4065](https://github.com/iscasasola/setnayan-platform/pull/4065)) — do NOT rebuild them.** Everything else is untouched. 🔴 **`design#3` IS NOT NEXT — it is PREMISE FALSIFIED, DO NOT BUILD IT** (see its entry below): the persistent app shell **already ships and is mounted**, and rebuilding it is called *"the paid-twice mistake at its largest scale"* in this same file. ⏭ **WHAT IS ACTUALLY NEXT: `design#4`** — RECONCILE the ~28 existing per-surface prototypes to the terracotta palette + the shipped shell. They are still CORRECT about composition and carry only the old palette. **RECONCILE, NEVER REDRAW.** ⚠ **This row said "`design#3` is next" for ten days while the entry below carried a red DO-NOT-BUILD banner** — the exact read-from-the-middle failure the row above this one warns about, in the same file, about the same gate. Corrected 2026-08-12. |
 | ✅ **CLOSED — the owner looked, and approved all 19 (2026-08-04)** | Reviewed via the verdict sheet (artifact `36f20665`); **ship-it on every one, no changes, nothing held.** ⚠ **This row said "🔴 BLOCKING — nobody has looked at the prototypes" until 2026-08-06**, while the approval banner sat at the top of this same file — so a session reading the state table got the opposite of a decision recorded two days earlier, and told the owner to go review work he had already signed off. 🔑 **The state table is what gets read, not the banner.** When a gate closes, edit every row that asserts it is open, in the same commit. |
 
 **The locked palette — do not re-derive, do not re-litigate:**
@@ -139,10 +139,10 @@ and "none" is a finding to report, not a licence to draw.
      is **design#4 reconcile work behind the owner-review gate**, not a rewrite.
      Rebuilding this is the paid-twice mistake at its largest scale.
 
-- id:            design#4
-  title:         Reconcile the ~10 existing per-surface prototypes to terracotta + shell
+- id:            design#4        ⏭ THIS IS WHAT IS NEXT (design#3 is falsified, not a blocker)
+  title:         Reconcile the ~28 existing per-surface prototypes to terracotta + shell
   type:          spec
-  depends_on:    [design#3]
+  depends_on:    []   # was [design#3]; that unit is FALSIFIED, so it blocks nothing
   parallel_safe: yes
   safety_gate:   NONE
   touches:       prototypes/{event_dashboard,vendor_dashboard,admin_hq}_v2_2026-07-15.html + 7 more

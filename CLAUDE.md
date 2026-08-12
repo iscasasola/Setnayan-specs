@@ -515,6 +515,38 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > a decision down. ⚠ Still unresolved from 2026-08-11: `Pricing.md` says HIDE
 > Live Photo Wall while the SKU is active and publicly listed.
 
+> ### 🎨 STARTING A REDESIGN SESSION? READ THIS ROW FIRST (set 2026-08-12)
+> The owner asked to take the redesign into its own session. Two documents, in
+> this order, and **nothing else first**:
+> 1. **[`MASTER_DESIGN_PROMPT_2026-08-11.md`](MASTER_DESIGN_PROMPT_2026-08-11.md)**
+>    — the public site AND the signed-in app together. **The SEAM between them
+>    has never been designed by anyone**: the 8 Aug bundle drew the signed-in app,
+>    the 11 Aug pass drew the front door, and neither contains the other's
+>    surfaces. That seam is the actual deliverable.
+> 2. **[`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md)**
+>    — the ~40-unit port list and its gates.
+>
+> ✅ **THE OWNER GATE IS CLOSED — all 19 archetypes/overlays APPROVED 2026-08-04,
+> no changes requested.** The prototypes are **BINDING**: port them, never redraw
+> them. A delta between a ported screen and its archetype is a defect in the
+> PORT, not a fresh design decision. **Do not ask him to review them again.**
+>
+> 🔴 **`design#3` IS NOT NEXT AND MUST NOT BE BUILT.** The persistent app shell
+> ALREADY SHIPS AND IS MOUNTED. ⏭ **`design#4` is what is next** — RECONCILE the
+> ~28 per-surface prototypes to the terracotta palette + the shipped shell. They
+> are still correct about COMPOSITION and carry only the old palette.
+> **RECONCILE, NEVER REDRAW.**
+> ⚠ The programme's own state table said *"design#3 is next"* for TEN DAYS while
+> that unit's entry carried a red DO-NOT-BUILD banner — corrected 2026-08-12.
+> 🔑 **The state table is what gets read, not the banner.** When a gate closes,
+> edit every row that asserts it is open, in the same commit.
+>
+> ⛔ **`/` (the public homepage) is EXCLUDED from the programme** — and the
+> owner-APPROVED Filipino-USP hero/manifesto copy targets exactly that page, so
+> whose scope it lands in is an **OWNER_DECISION**, not an engineering call.
+> ⏭ The six-state primitives from `design#1`/`#2` are **built but not mounted** —
+> adopting them per surface is open follow-up work, not a rebuild.
+
 > ### 🔬 AND A THIRD PASS FOUND 7 MORE — TWO INTRODUCED THE DAY BEFORE
 > (PR #4381. 26 candidates, 18 survived refutation, all re-verified by hand.)
 >
