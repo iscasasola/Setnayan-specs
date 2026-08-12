@@ -4,6 +4,35 @@
 # SESSION 4-RECONCILE · Bring the older prototypes onto the new palette
 **Added 2026-08-13. CORPUS-ONLY — touches no app code, so it is safe beside sessions 4 and 8.**
 
+> ## ✅ DONE 2026-08-13 — DO NOT RE-RUN. Commits `be31e2a` · `21db1ec` · `fe49438`.
+> **23 prototypes reconciled** (1,092 colour literals, **696 rewritten**, zero structural drift —
+> brace/tag/line counts identical in every file). **5 retired outright**: `admin_hq_v2_2026-07-15`,
+> both `Payment_Flow_*_2026-07-11`, `for_vendors_keep_100_2026-07-10`, `home_facebook_shaped_2026-08-07`.
+> The 5 binding archetypes and the front door were **not touched** — verified by diff across all
+> three commits. Full record: `DECISION_LOG.md` 2026-08-13 (two rows).
+>
+> **Three corrections to the brief below — read them before trusting it again:**
+> 1. 🚨 **The gold leak it names is not a button.** `#8C6932` in `floor_plan_tables_vendors` and
+>    `guests_living_roster` is bound to `--gold-deep`, an accent token; the CTA in both is
+>    near-black `#1E2229`. **The real "gold is never a button" violation was 5 OTHER files** —
+>    the three in `event_anchor_setup/` plus **`for_vendors_2026-07-24` and `payment_flow_2026-07-24`,
+>    two of the newer siblings this very brief says to keep.** None defined a `--cta` token at all.
+> 2. ⚠ **"29 .html files + 2 directories" undercounts the work.** Those two directories hold
+>    **5 more prototypes**, all on the dead palette. Real surface was 23, not ~22.
+> 3. ⚠ **The two 2026-08-03 admin files were NOT already converted** — drifted hover `#A8401D`,
+>    destructive `#A6483B`, success `#5E7C52`. The brief's own *"a single mention is not a
+>    converted file"* warning, landing on the two files most likely to be trusted.
+>
+> **The target was taken from the ARCHETYPES, not from the palette block below** — they carry the
+> three values the prose lock never names (secondary `#4F535B`, success `#4F6B4A`, **warning =
+> `#8A6B39` gold-text, not amber**) plus a full obsidian scale.
+>
+> ⏭ **Two things deliberately LEFT, both owner calls rather than repaints:** 192 decorative colour
+> literals (recolouring illustration is the redraw this job forbids), and **every dark block —
+> nothing was deleted.** Several prototypes still carry an OS dark mode the app has not had since
+> 2026-06-04, and `guests_living_roster` ships a **visible light/dark toggle button**; removing a
+> control is a composition change. Each dark half was reconciled to the obsidian scale instead.
+
 ```
 GOAL: the ~22 older screen prototypes stop carrying a dead palette, so the sessions that port
 from them later are copying something correct.
