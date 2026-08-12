@@ -74,9 +74,13 @@ THE SWITCH:
 
 WHAT TO DO:
 1. Run it in preview with ?fixtures=1 first (fixture mode skips signing entirely).
-2. Then QA on a REAL account with real photos — prod has 5 events and 0 Papic photos, so
-   seed or use a test account (testnayan1..5@test.com / 12345) and say plainly in your
-   report what you were actually able to see.
+2. Then QA on a REAL account with real photos. ⚠ CORRECTED 2026-08-12 after this prompt was
+   written: prod has 5 events and **14 clean Papic photos (13 photos + 1 clip)**, not 0 —
+   all of them on the OWNER'S own "Movie Night" event, so his account is the only one with
+   a non-empty Life-Flash. The test accounts (testnayan1..5@test.com / 12345) own events
+   with 0 photos. Say plainly in your report what you were actually able to see.
+   🔑 The flag value must be exactly `1` — `lifeStoryEnabled()` compares `=== '1'`, so
+   `true` reads as OFF and the flip looks like it did nothing.
 3. Report to the owner what a person experiences, with a screenshot.
 4. Flip NEXT_PUBLIC_LIFE_STORY in Vercel ONLY after he says yes. It is NEXT_PUBLIC_*, so it
    inlines at BUILD time — the flag alone changes nothing until a redeploy.
