@@ -663,7 +663,7 @@ const CHIP_CAT={'Venues':'Venue','Catering':'Feast','Photo & video':'Suppliers',
 
 /* ══ STATE ════════════════════════════════════════════════════════════════ */
 const S={screen:'desk',day:'launch',who:'out',view:'feed',ctx:null,chip:'All',folder:null,
-  moreOpen:false,menu:false,sheet:false,q:'',saved:{},pending:null,toast:null,appTab:'home',
+  moreOpen:false,menu:false,sheet:false,q:'',saved:{},pending:null,toast:null,appTab:'board',
   event:null,create:null,showAll:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inn=()=>S.who!=='out';
@@ -940,29 +940,96 @@ function doorway(){
 
 /* ══ THE APP (terracotta) ════════════════════════════════════════════════ */
 function appView(){
-  /* ⚠ MARKETPLACE BELONGS IN HERE TOO (owner 2026-08-12: "vendor/explore should
-     show upon login as well"). It already ships in the customer nav — key
-     'explore', label "Marketplace", landing on the event's own vendors page —
-     and leaving it off this drawing implied a couple has to go back out to the
-     public site to find a supplier. They do not, and they should not. */
-  const tabs=[['home','▦','Events'],['market','⌕','Marketplace'],['guests','◍','Guests'],
-    ['studio','✦','Studio'],['alaala','✧','Alaala'],['shop','▣','My Shop'],
-    ['account','◍','Your account']];
+  /* ⚠ TWO LEVELS, NOT ONE (owner 2026-08-12: "guests, studio, marketplace are
+     inside an event"). Reproduced from the shipped nav:
+       ACCOUNT level — Events · Alaala · People · your shop · your account
+       INSIDE AN EVENT — Overview · Guests · Marketplace · Studio, then
+       "Also in this event": Schedule · Seat plan · Budget
+     Budget deliberately has no top-level row (owner 2026-07-10 — it lives
+     inside Marketplace beside Build and Compare) and is reachable here. */
+  const inEvent=!!S.event;
+  const tabs=inEvent
+    ? [['home','▦','Overview'],['guests','◍','Guests'],['market','⌕','Marketplace'],
+       ['studio','✦','Studio']]
+    : [['board','▦','Events'],['alaala','✧','Alaala'],['people','◍','People'],
+       ['shop','▣','My Shop'],['account','◍','Your account']];
+  const alsoTabs=[['schedule','◷','Schedule'],['seat','▢','Seat plan'],['budget','₱','Budget']];
+  const ev=inEvent?EVENTS.find(x=>x.id===S.event):null;
   let h=`<div class="appbar"><span class="iconbtn" data-act="exit">☰</span>
     <span class="wordmark" data-act="exit" title="Back to the public site">SETNAYAN<sup>PH</sup></span>
-    <div class="ev"><span class="evchip">Cale &amp; Ice · 18 Dec 2026</span>
+    <div class="ev">${ev?`<span class="evchip">${ev.emoji} ${esc(ev.name)} · ${esc(ev.date)}</span>`
+      :`<span class="evchip" style="color:var(--m2)">All your events</span>`}
       <span class="avatar" data-act="menu">${initials()}</span></div></div>
     ${S.menu?acctMenu(true):''}
     <div class="appbody"><nav class="apprail">`;
+  /* Inside an event the rail opens with the way OUT of it — the level above is
+     never a guess. */
+  if(inEvent)h+=`<button class="row" data-act="board"><span class="gi">←</span> All your events</button>
+    <div class="rdiv"></div>`;
   tabs.forEach(([id,ic,label])=>{
     if(id==='shop'&&S.who!=='vendor')return;
     h+=`<button class="row" data-act="apptab" data-id="${id}" data-on="${S.appTab===id}">
       <span class="gi">${ic}</span> ${label}</button>`;});
+  if(inEvent){
+    h+=`<div class="rdiv"></div><div class="rlabel" style="font-size:12px;color:var(--m2);
+      letter-spacing:.06em;text-transform:uppercase">Also in this event</div>`;
+    alsoTabs.forEach(([id,ic,label])=>{
+      h+=`<button class="row" data-act="apptab" data-id="${id}" data-on="${S.appTab===id}">
+        <span class="gi">${ic}</span> ${label}</button>`;});
+  }
   h+=`<div class="rdiv"></div>
     <button class="row" data-act="exit"><span class="gi">↩</span> Back to Setnayan</button>
-    </nav><div class="appmain">${S.appTab==='market'?appMarket():S.appTab==='account'?appAccount()
-      :S.appTab==='shop'?appShop():appHome()}</div></div>`;
+    </nav><div class="appmain">${appMain()}</div></div>`;
   return h;
+}
+/* One place decides what the main column shows, so a tab can never be lit while
+   something else is rendered. */
+function appMain(){
+  if(S.create)return appCreate();
+  if(S.event){
+    if(S.appTab==='market')return appMarket();
+    if(['guests','studio','schedule','seat','budget'].includes(S.appTab))return eventSection();
+    return eventDash();
+  }
+  if(S.appTab==='account')return appAccount();
+  if(S.appTab==='shop')return appShop();
+  if(S.appTab==='alaala')return appHome();
+  if(S.appTab==='people')return appPeople();
+  return appBoard();
+}
+function appPeople(){
+  return `<h1>People</h1>
+    <p class="sub">Family, godparents and friends — and the circles they belong to.</p>
+    <div class="tile"><b>Coming soon, and switched off on purpose.</b>
+      <p style="margin-top:6px">The part that connects one person to another is waiting on a legal
+      review, so the page says so instead of showing an empty list. It is a notice, not a broken
+      screen — and the row is deliberately still here so you know it is coming.</p></div>`;
+}
+/* The four sections that live INSIDE an event, drawn as themselves so the level
+   is obvious — they were wrongly at account level until 2026-08-12. */
+function eventSection(){
+  const e=EVENTS.find(x=>x.id===S.event)||EVENTS[0];
+  const M={guests:['Guests','Who is coming, where they sit, and what they said.',
+      [['86','Invited','Across 14 households.'],['52','Said yes','8 still deciding.'],['12','Tables','Two seats spare.']]],
+    studio:['Studio','The things you make for this event — website, photos, monogram, song.',
+      [['4','In use','Papic · Website · Monogram · Live Studio.'],['3','Not started','Free to try.'],['1','Waiting','Your song is being written.']]],
+    schedule:['Schedule','The order of the day, and who needs to know it.',
+      [['9','Moments','Ceremony to last dance.'],['4','Suppliers','Have the call times.'],['0','Clashes','Nothing overlaps.']]],
+    seat:['Seat plan','Tables, the stage, and who sits where.',
+      [['12','Tables','Round, long and the sweetheart.'],['52','Seated','Of 52 who said yes.'],['0','Unseated','Everyone has a chair.']]],
+    budget:['Budget','What you agreed, what you have paid, what is left.',
+      [['₱','Agreed','Across four suppliers.'],['3','Paid','One deposit outstanding.'],['2','Due soon','Both within a month.']]]};
+  const [title,sub,tiles]=M[S.appTab]||M.guests;
+  return `<h1>${esc(title)}</h1>
+    <p class="sub">${esc(sub)} · <b>${esc(e.name)}</b></p>
+    <div class="tiles">${tiles.map(([n,b,p])=>`<div class="tile"><span class="n">${esc(n)}</span>
+      <b>${esc(b)}</b><p>${esc(p)}</p></div>`).join('')}</div>
+    <div class="tile" style="margin-top:16px"><b>This lives inside the event, not beside it.</b>
+      <p style="margin-top:6px">Guests, Studio, Marketplace, Schedule, Seat plan and Budget all belong
+      to <b>${esc(e.name)}</b> and change the moment you open a different one. Only Events, Alaala,
+      People, your shop and your account sit at the level above.</p>
+      <div style="margin-top:12px"><button class="btn-out" data-act="board">← All your events</button></div>
+    </div>`;
 }
 /* YOUR ACCOUNT — reachable from the picture, top right, on both sides of the
    seam (owner 2026-08-12: "wanna see when logged in, to see their account"). */
@@ -1020,15 +1087,15 @@ function appShop(){
       <div class="kv"><span>Booking fee</span><span>not charged yet</span></div></div>`;
 }
 function appHome(){
-  if(S.appTab==='alaala')return `<h1>Alaala</h1>
+  return `<h1>Alaala</h1>
     <p class="sub">Everything from every event you have been part of — including the ones you only attended.</p>
     <div class="tiles">
       <div class="tile"><span class="n">148</span><b>Your wedding</b><p>Cale &amp; Ice · still filling.</p></div>
       <div class="tile"><span class="n">412</span><b>Ana &amp; Miguel</b><p>You were a guest. They are yours too.</p></div>
-      <div class="tile"><span class="n">6</span><b>Events</b><p>Across four years.</p></div></div>`;
-  if(S.create)return appCreate();
-  if(S.event)return eventDash();
-  return appBoard();
+      <div class="tile"><span class="n">6</span><b>Events</b><p>Across four years.</p></div></div>
+    <div class="tile" style="margin-top:16px"><b>Alaala sits ABOVE your events, not inside one.</b>
+      <p style="margin-top:6px">It reaches across all of them, including weddings you only attended —
+      which is exactly why it cannot live inside any single event.</p></div>`;
 }
 
 /* ══ THE BOARD — every event this person has, in one place ═══════════════ */
@@ -1048,21 +1115,38 @@ function evCard(e){
       <span class="evplace">${esc(e.place)}</span></div>
     <div class="evneed">${esc(e.need)}</div></button>`;
 }
+/* TWO SECTIONS, BOTH ALWAYS PRESENT (owner 2026-08-12: "separate upcoming and
+   finished events"). Finished is no longer hidden behind a filter button — a
+   thing you have to switch on reads as a thing that might not be there, and
+   these are somebody's memories. Undated events sit at the tail of Upcoming,
+   because "no date yet" is still ahead of you. */
 function appBoard(){
-  const live=EVENTS.filter(e=>!e.done), done=EVENTS.filter(e=>e.done);
+  const dated=EVENTS.filter(e=>!e.done&&e.days!==null);
+  const undated=EVENTS.filter(e=>!e.done&&e.days===null);
+  const live=dated.concat(undated), done=EVENTS.filter(e=>e.done);
+  const shownDone=S.showAll?done:done.slice(0,2);
   return `<h1>Your events</h1>
-    <p class="sub"><span class="mono">${live.length}</span> in motion · <span class="mono">${done.length}</span> celebrated ·
-      newest first, the way a timeline reads</p>
+    <p class="sub"><span class="mono">${live.length}</span> coming up ·
+      <span class="mono">${done.length}</span> finished</p>
+
+    <div class="sechead" style="margin-top:20px"><h3 style="font-size:17px">Coming up</h3>
+      <span class="meta"><span class="mono">${live.length}</span></span>
+      <span class="rule">soonest first · undated ones sit at the end</span></div>
     <div class="evgrid">
       ${live.map(evCard).join('')}
       <button class="evcard evnew" data-act="create"><span class="plus">＋</span>
         <b>New event</b><span>A wedding, a debut, a trip — anything worth gathering for.</span></button>
     </div>
-    ${S.showAll?`<div class="sechead" style="margin-top:26px"><h3 style="font-size:17px">Celebrated</h3>
-        <span class="rule">nothing is deleted — the photos stay</span></div>
-      <div class="evgrid">${done.map(evCard).join('')}</div>
-      <button class="btn-out" style="margin-top:14px" data-act="showall">Hide finished</button>`
-     :`<button class="btn-out" style="margin-top:18px" data-act="showall">Show all — ${done.length} celebrated</button>`}
+
+    <div class="sechead" style="margin-top:30px"><h3 style="font-size:17px">Finished</h3>
+      <span class="meta"><span class="mono">${done.length}</span></span>
+      <span class="rule">nothing is deleted — the photos stay</span></div>
+    ${done.length?`<div class="evgrid">${shownDone.map(evCard).join('')}</div>
+      ${done.length>2?`<button class="btn-out" style="margin-top:14px" data-act="showall">
+        ${S.showAll?'Show fewer':'See all '+done.length}</button>`:''}`
+     :`<div class="invite"><h4>Nothing finished yet.</h4>
+        <p>The day after your first event, it moves down here — with everything from it kept.</p></div>`}
+
     <div class="tile" style="margin-top:22px"><b>Two of these are not yours to run.</b>
       <p style="margin-top:6px">You were a guest at Ana &amp; Miguel and at Tita Baby's. They still
       sit here, and their photos are still yours — that is the whole idea behind Alaala. A card
@@ -1259,11 +1343,11 @@ function phoneShell(){
       ${S.menu?acctMenu(false):''}</div></div>
     <div class="ph-main" style="${inn()?'height:600px':''}">${main}</div>
     ${inn()?`<div class="pillnav">
-      <button data-on="true">▦<span>Home</span></button>
-      <button data-act="app" data-id="market">⌕<span>Marketplace</span></button>
-      <span class="knob">＋</span>
+      <button data-act="app" data-id="board" data-on="true">▦<span>Events</span></button>
       <button data-act="app" data-id="alaala">✧<span>Alaala</span></button>
-      <button>◍<span>People</span></button></div>`:''}
+      <span class="knob" data-act="create">＋</span>
+      <button data-act="app" data-id="people">◍<span>People</span></button>
+      <button data-act="sheet">☰<span>More</span></button></div>`:''}
     ${S.sheet?`<div class="sheet"><div class="sheet-hd"><b>Index</b>
       <button class="iconbtn" data-act="sheet">✕</button></div>${rail()}</div>`:''}
     ${S.pending?signinModal():''}${S.toast?`<div class="toast">${S.toast}</div>`:''}`;
@@ -1325,13 +1409,18 @@ document.addEventListener('click',e=>{
     case 'menu': S.menu=!S.menu; break;
     case 'signout': S.who='out';S.menu=false;S.view='feed';S.folder=null;
       toast('Signed out — and only because you asked. Reading the public site never does this.'); break;
-    case 'app': S.view='app';S.appTab=['alaala','shop','market','account','guests','studio'].includes(id)?id:'home';
+    case 'app': S.view='app';S.event=null;S.appTab=['alaala','shop','account','people'].includes(id)?id:'board';
       S.menu=false;S.sheet=false; break;
-    case 'apptab': S.appTab=id;S.event=null;S.create=null; break;
-    case 'board': S.view='app';S.appTab='home';S.event=null;S.create=null; break;
+    // Inside an event a tab must NOT drop the event — that was the bug the
+    // two-level split exposed: pressing Guests wiped which wedding you were in.
+    case 'apptab':
+      if(id==='board'){S.event=null;S.appTab='board';}
+      else{S.appTab=id; if(!S.event&&['guests','studio','market','schedule','seat','budget'].includes(id))S.appTab='board';}
+      S.create=null; break;
+    case 'board': S.view='app';S.appTab='board';S.event=null;S.create=null; break;
     case 'openev': S.view='app';S.appTab='home';S.create=null;S.event=id;S.menu=false; break;
     case 'showall': S.showAll=!S.showAll; break;
-    case 'create': S.view='app';S.appTab='home';S.event=null;S.create={step:1}; break;
+    case 'create': S.view='app';S.appTab='board';S.event=null;S.create={step:1}; break;
     case 'allkinds': S.allKinds=!S.allKinds; break;
     case 'forother': step2(id,'someone else'); break;
     case 'pick': {
@@ -1353,7 +1442,7 @@ document.addEventListener('click',e=>{
       toast(dated?'Created. It is on your board and open in front of you.'
         :'Created without a date — it sits at the end of your list until you pick one.');
       break;}
-    case 'exit': S.view='feed';S.folder=null;S.chip='All';S.menu=false;
+    case 'exit': S.view='feed';S.folder=null;S.chip='All';S.menu=false;S.create=null;
       toast('Back on the public site — <b>still signed in</b>. Your home is at the top of the menu.'); break;
     case 'sheet': S.sheet=!S.sheet; break;
     case 'noop': S.menu=false; break;
