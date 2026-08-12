@@ -509,15 +509,32 @@ const FOLDERS=[
  {id:'dining',was:'Dining',label:'Dining extras',n:1,icon:'✦',svc:['dining extras']},
  {id:'specialty',was:'Specialty',label:'Specialty',n:1,icon:'★',svc:['specialty']}];
 
+/* STUDIO — the things you MAKE with Setnayan. The customer-facing name for this
+   set is locked: "Studio" today, "Suite" the day NEXT_PUBLIC_SUITE is switched
+   on (owner 2026-07-19). The front door must say whatever the app says.
+   ⚠ ALAALA IS NOT IN HERE. It is not a thing you make — it is where your
+   memories live, and it is one of the four home areas. It sits with "yours",
+   in both signed-out and signed-in states. */
 const TOOLS=[
+ {id:'setnayan-ai',name:'Setnayan AI',line:'A planner that drafts your timeline and matches verified suppliers.'},
+ {id:'pawebsite',name:'Pawebsite',line:'Your wedding website and invitation, at your own address.'},
  {id:'papic',name:'Papic',line:'Everyone’s phones become one photo crew, and every guest gets their own shots.'},
  {id:'panood',name:'Live Studio',line:'Stream the day to family who could not fly home, on your own event page.'},
- {id:'pawebsite',name:'Pawebsite',line:'Your wedding website and invitation, at your own address.'},
- {id:'pa3d',name:'Pa3D',line:'Walk your reception in 3D before the day, table by table.'},
- {id:'palogo',name:'Palogo',line:'An animated monogram, on your invites, your site and your signage.'},
- {id:'alaala',name:'Alaala',line:'Every photo and milestone gathered into one place you keep, for life.'},
  {id:'patiktok',name:'Patiktok',line:'Short vertical highlight reels from your day.'},
- {id:'setnayan-ai',name:'Setnayan AI',line:'A planner that drafts your timeline and matches verified suppliers.'}];
+ {id:'pa3d',name:'Pa3D',line:'Walk your reception in 3D before the day, table by table.'},
+ {id:'palogo',name:'Palogo',line:'An animated monogram, on your invites, your site and your signage.'}];
+
+/* What is ACTUALLY inside Studio, read from the shipped routes. Seven of these
+   have a public page a stranger can open; the rest only exist once you are in.
+   Saying so is the honest version of a rail that shows seven. */
+const STUDIO_ALL=[
+ {n:'Setnayan AI',pub:'setnayan-ai'},{n:'Pawebsite (your website)',pub:'pawebsite'},
+ {n:'Papic',pub:'papic'},{n:'Live Studio',pub:'panood'},{n:'Patiktok',pub:'patiktok'},
+ {n:'Pa3D floor plan',pub:'pa3d'},{n:'Animated Monogram',pub:'palogo'},
+ {n:'Save-the-Date'},{n:'Mood board'},{n:'Pakanta — your own song'},{n:'Thank-you video'},
+ {n:'Photo delivery'},{n:'Guest columns'},{n:'Custom guest QR'},{n:'Playlist'},
+ {n:'Editorial Pro'},{n:'Live Wall'},{n:'E-Gifts'},{n:'Supplies'}];
+const ALAALA={id:'alaala',name:'Alaala',line:'Every photo and milestone gathered into one place you keep, for life — across every event, including ones you only attended.'};
 
 const ARTICLES=[
  {id:'a1',t:'What a Filipino wedding actually costs in 2026',min:9,cat:'Money',age:'2 days ago',
@@ -589,7 +606,7 @@ function search(q){
   const seen=new Set(); const vendors=vend.filter(v=>{const k=v.fold.id+'|'+v.term;
     if(seen.has(k))return false; seen.add(k); return true;}).slice(0,5);
   const shopHits=shops().filter(s=>s.name.toLowerCase().includes(t)).slice(0,3);
-  const tools=TOOLS.filter(x=>x.name.toLowerCase().includes(t)||x.line.toLowerCase().includes(t)).slice(0,3);
+  const tools=TOOLS.concat([ALAALA]).filter(x=>x.name.toLowerCase().includes(t)||x.line.toLowerCase().includes(t)).slice(0,3);
   const arts=ARTICLES.filter(a=>a.t.toLowerCase().includes(t)||a.cat.toLowerCase().includes(t)).slice(0,4);
   return {vendors,shopHits,tools,arts,q:t,empty:!vendors.length&&!shopHits.length&&!tools.length&&!arts.length};
 }
@@ -609,7 +626,7 @@ function searchPanel(){
       h+=`<div class="snone">No shops in ${esc(f.label)} yet.
         <u data-act="notify" data-id="${f.id}">Tell me when one opens →</u></div>`;}
   }
-  if(r.tools.length){h+='<div class="sgrouphd">02 · Tools</div>';
+  if(r.tools.length){h+='<div class="sgrouphd">02 · Studio</div>';
     r.tools.forEach(t=>{h+=`<button class="sres" data-act="tool" data-id="${t.id}">
       <span>${mark(t.name,r.q)}</span><span class="in">${esc(t.line.slice(0,52))}…</span></button>`;});}
   if(r.arts.length){h+='<div class="sgrouphd">03 · The Journal</div>';
@@ -629,7 +646,9 @@ function rail(){
     <div class="rdiv"></div>`;
   if(!inn()){
     h+=`<div class="signin-prompt"><p>Sign in to save suppliers, plan your event, and keep your photos.</p>
-      <button class="btn-signin-lg" data-act="signin">◍ Sign in</button></div>`;
+      <button class="btn-signin-lg" data-act="signin">◍ Sign in</button></div>
+      <button class="row" data-act="tool" data-id="alaala" style="margin-top:6px">
+        <span class="gi">✧</span> What is Alaala? <span class="ct">→</span></button>`;
   }else{
     h+=`<div class="rlabel">My Home <small>›</small></div>
       <button class="row" data-act="app" data-id="home"><span class="gi">▦</span> Events <span class="ct mono">2</span></button>
@@ -645,9 +664,11 @@ function rail(){
     h+=`<button class="row" data-act="folder" data-id="${f.id}" data-on="${S.folder===f.id}">
       <span class="gi">${f.icon}</span> ${esc(f.label)} <span class="ct mono">${f.n}</span></button>`;});
   h+=`<button class="more row" data-act="more"><span class="gi">${S.moreOpen?'⌃':'⌄'}</span> ${S.moreOpen?'Show fewer':'Show more — '+rest.length+' more'}</button>
-    <div class="rdiv"></div><div class="rlabel">More from Setnayan</div>`;
+    <div class="rdiv"></div><div class="rlabel">Studio <small>the things you make</small></div>`;
   TOOLS.forEach(t=>{h+=`<button class="row" data-act="tool" data-id="${t.id}"
     data-on="${S.view==='doorway'&&S.ctx===t.id}"><span class="dot"></span> ${esc(t.name)}</button>`;});
+  h+=`<button class="more row" data-act="studio" data-on="${S.view==='studio'}">
+    <span class="gi">⌄</span> Everything in Studio</button>`;
   h+=`<div class="rdiv"></div><div class="smallprint">
     <span>About</span><span>Pricing</span><span>Help</span><span>Open your shop</span><br>
     <span>Terms</span><span>Privacy</span><span>Policy &amp; Safety</span><span>How Setnayan works</span>
@@ -802,8 +823,26 @@ function shopPage(){
   return h;
 }
 
+function studioView(){
+  const pub=STUDIO_ALL.filter(x=>x.pub), rest=STUDIO_ALL.filter(x=>!x.pub);
+  return `<button class="back" data-act="home">← Back</button><div class="doorway" style="max-width:760px">
+    <h1>Studio</h1>
+    <p>The things you make with Setnayan — your website, your photos, your song, your monogram.
+    Seven of them have a page you can read right now. The rest live inside your event, which is
+    why the menu shows seven and not nineteen.</p>
+    <div class="panel"><h4>You can read about these now</h4>
+      ${pub.map(x=>`<div class="kv"><span data-act="tool" data-id="${x.pub}"
+        style="cursor:pointer;font-weight:600;color:var(--link)">${esc(x.n)} →</span>
+        <span>has a public page</span></div>`).join('')}</div>
+    <div class="panel" style="margin-top:14px"><h4>These open once your event exists</h4>
+      ${rest.map(x=>`<div class="kv"><span>${esc(x.n)}</span><span>inside Studio</span></div>`).join('')}</div>
+    <p style="font-size:12px;color:var(--m3);margin-top:18px">⚠ The name of this set is locked and
+    may change: it reads <b>Studio</b> today and becomes <b>Suite</b> the day that switch is turned
+    on. The front door must say whatever the app says — never one word outside and another inside.</p>
+    </div>`;
+}
 function doorway(){
-  const t=TOOLS.find(x=>x.id===S.ctx); if(!t)return '';
+  const t=S.ctx==='alaala'?ALAALA:TOOLS.find(x=>x.id===S.ctx); if(!t)return '';
   return `<button class="back" data-act="home">← Back</button><div class="doorway">
     <div class="kick" style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:8px">In your wedding</div>
     <h1>${esc(t.name)}</h1><p>${esc(t.line)}</p>
@@ -862,6 +901,7 @@ function deskShell(){
   if(S.view==='article')main=reader();
   else if(S.view==='shop')main=shopPage();
   else if(S.view==='doorway')main=doorway();
+  else if(S.view==='studio')main=studioView();
   else main=feed();
   return `<div class="topbar">
     <div class="tb-l"><span class="iconbtn">☰</span>
@@ -897,6 +937,7 @@ function phoneShell(){
   if(S.view==='article')main=reader();
   else if(S.view==='shop')main=shopPage();
   else if(S.view==='doorway')main=doorway();
+  else if(S.view==='studio')main=studioView();
   else{
     main='<div class="chipbar" style="padding:8px 0"><div class="chips">'+
       CHIPS.slice(0,5).map(c=>`<button class="chip" data-act="chip" data-id="${esc(c)}" data-on="${S.chip===c}">${esc(c)}</button>`).join('')+
@@ -956,6 +997,7 @@ document.addEventListener('click',e=>{
     case 'shop': S.srcNote=el.dataset.src==='editorial'; go('shop',id); break;
     case 'story': toast('Storyteller pages are drawn elsewhere — <b>0 exist in production today</b>.'); break;
     case 'tool': go('doorway',id); break;
+    case 'studio': go('studio',null); break;
     case 'notify': toast('We will tell you when the first shop opens in <b>'+esc(foldOf(id).label)+'</b>.'); break;
     case 'save':
       if(!inn()){S.pending={kind:'save',id,why:'Save '+ (shops().find(s=>s.id===id)||{}).name+' to your list and pick it up later — you will come straight back to this page.'};}
