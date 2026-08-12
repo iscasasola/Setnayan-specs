@@ -515,6 +515,46 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > a decision down. ⚠ Still unresolved from 2026-08-11: `Pricing.md` says HIDE
 > Live Photo Wall while the SKU is active and publicly listed.
 
+> ### 🔬 AND A THIRD PASS FOUND 7 MORE — TWO INTRODUCED THE DAY BEFORE
+> (PR #4381. 26 candidates, 18 survived refutation, all re-verified by hand.)
+>
+> 🔴 **THE ADDRESS HOLD COVERED ONE DELETE PATH; THE DATABASE PERMITS ANOTHER.**
+> It was written in the ADMIN action — while prod carries a live RLS policy
+> `couple_can_delete_event`, so a couple can delete their own wedding straight
+> through PostgREST with **no server action and no hold written**, freeing the
+> word the same second. 🔑 **A PROMISE THE DATABASE DOES NOT KEEP IS NOT A
+> PROMISE — removing the button closes the BUTTON, not the DOOR**, the identical
+> lesson the shop-address trigger already cost. Now a BEFORE DELETE **trigger**;
+> the app-side write is deleted, not duplicated. ⚠ No couple-facing delete exists
+> in the product *today* — which is exactly the state the shop-address guard was
+> in when it was written.
+>
+> 🔴 **MY SHOP READ EVERY OTHER SHOP'S CORRECTION REQUESTS.** The read leaned on
+> RLS — but the policy is `owns the profile **OR is_admin()**`, deliberately wide
+> so the same helper backs `/admin/corrections`. **Prod has a vendor who IS an
+> admin** (the owner's own shop), so another shop's request rendered as his own
+> and removed that field from the ones he could ask about; enough of them and the
+> ask button disappears — **restoring the exact defect the card was built to
+> fix.** 🔑 **RLS IS A FLOOR, NOT A SCOPE. Read the policy before relying on it;
+> if it has a second disjunct it does not scope the narrower caller.** The
+> comment claiming *"RLS-scoped to this vendor"* was the false premise.
+>
+> ⏭ Also: a **verified shop could not change its LOGO anywhere** (the editor
+> refuses it and named a remedy the card did not offer) · a deleted wedding's
+> held address was refused with the **FORWARDING** wording, untrue by
+> construction · `slug-forwarding-window.ts` — the file whose whole purpose is
+> *the one number* — made **three false claims in one paragraph**, including a
+> constant that no longer exists.
+>
+> 🛡 **AND THREE GUARDS WERE DECORATION:** one proved the card was IMPORTED not
+> MOUNTED · one matched a FILE-LEVEL SUBSTRING so an import or a comment exempted
+> the file · one **could not fail at all** (a leak check on a transaction-local
+> setting, run as two statements — it dies at COMMIT).
+> 🔑 **FIVE guards written in two days passed while the thing they guard was
+> gone.** A mutation must look like the REGRESSION (delete the JSX, not rename
+> the symbol) and its landing must be MEASURED by occurrence count. Assume a
+> sixth.
+
 > ### ▶ ACTIVE 2026-08-07: PAPIC TIMING — three numbers, locked together
 > **Owner set all three in one sitting. They interlock; do not move one alone.**
 >
