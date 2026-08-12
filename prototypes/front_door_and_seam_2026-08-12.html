@@ -476,8 +476,8 @@ td.n{font-family:var(--mono);color:var(--m1);white-space:nowrap}
   <h3 style="font-size:15px;margin:26px 0 0">When each shelf earns its normal shape back</h3>
   <table>
     <tr><th>Shelf</th><th>Today</th><th>Launch-day shape</th><th>Normal at</th></tr>
-    <tr><td>Storyteller</td><td class="n">0</td><td>absent — the grid carries Journal cards</td><td class="n">1</td></tr>
-    <tr><td>The Journal</td><td class="n">33 of 91</td><td>fills the grid and takes the tall-card row</td><td>—</td></tr>
+    <tr><td>Stories — the watching half</td><td class="n">0</td><td>no separate shelf; joins the same one when it exists</td><td class="n">1</td></tr>
+    <tr><td>Stories — the reading half</td><td class="n">33 of 91</td><td>carries the combined shelf on its own</td><td>—</td></tr>
     <tr><td>Real weddings</td><td class="n">0</td><td>one written invitation across the row</td><td class="n">2</td></tr>
     <tr><td>Suppliers</td><td class="n">1</td><td>“The first shops” — one real card, one invitation</td><td class="n">12</td></tr>
   </table>
@@ -655,8 +655,8 @@ const STORIES_LATER=[
  {id:'v2',t:'Ana & Miguel · a garden wedding in Tagaytay',by:'Real weddings',plays:'4.1K',dur:'6:20'},
  {id:'v3',t:'A civil wedding in Cebu, start to finish',by:'Real weddings',plays:'1.2K',dur:'8:41'}];
 
-const CHIPS=['All','Venues','Catering','Photo & video','Attire','Budget','Church papers','Seating',
-             'Ninong & ninang','Province weddings','Papic'];
+const CHIPS=['All','Articles','Real weddings','Venues','Catering','Photo & video','Attire','Budget',
+             'Church papers','Seating','Ninong & ninang','Province weddings','Papic'];
 const CHIP_CAT={'Venues':'Venue','Catering':'Feast','Photo & video':'Suppliers','Attire':'Suppliers',
   'Budget':'Money','Church papers':'Planning','Seating':'Guests','Ninong & ninang':'Guests',
   'Province weddings':'Planning'};
@@ -711,7 +711,7 @@ function searchPanel(){
   if(r.tools.length){h+='<div class="sgrouphd">02 · Studio</div>';
     r.tools.forEach(t=>{h+=`<button class="sres" data-act="tool" data-id="${t.id}">
       <span>${mark(t.name,r.q)}</span><span class="in">${esc(t.line.slice(0,52))}…</span></button>`;});}
-  if(r.arts.length){h+='<div class="sgrouphd">03 · The Journal</div>';
+  if(r.arts.length){h+='<div class="sgrouphd">03 · Articles</div>';
     r.arts.forEach(a=>{h+=`<button class="sres" data-act="article" data-id="${a.id}">
       <span>${mark(a.t,r.q)}</span><span class="rt">${a.min} min</span></button>`;});}
   if(r.empty)h='<div class="snone" style="padding:18px 16px">Nothing matches that yet — the archive is small on purpose. Try <b>photographer</b>, <b>caterer</b>, <b>emcee</b> or <b>budget</b>.</div>';
@@ -723,7 +723,6 @@ function rail(){
   const on=(k)=>S.view==='feed'&&!S.folder&&S.chip==='All'&&k==='home'?'true':'false';
   let h=`<button class="row" data-act="home" data-on="${on('home')}"><span class="gi">⌂</span> Home</button>
     <button class="row" data-act="scroll" data-id="stories"><span class="gi">◎</span> Stories</button>
-    <button class="row" data-act="scroll" data-id="journal"><span class="gi">▤</span> Journal</button>
     <button class="row" data-act="scroll" data-id="shops"><span class="gi">⌕</span> Find a supplier</button>
     <div class="rdiv"></div>`;
   if(!inn()){
@@ -763,10 +762,13 @@ function rail(){
 }
 
 /* ══ CARDS ═══════════════════════════════════════════════════════════════ */
+/* ⚠ "Journal" is retired (owner 2026-08-12). Our writing is ARTICLES.
+   And Stories + Editorials are now ONE shelf — the card says which kind it is,
+   so the shelf does not have to. */
 function artCard(a){return `<div class="item" data-act="article" data-id="${a.id}">
-  <div class="thumb">JOURNAL<span class="dur">${a.min} min</span></div>
-  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-    <p class="ttl">${esc(a.t)}</p><p class="by">The Journal ✓</p>
+  <div class="thumb">ARTICLE<span class="dur">${a.min} min</span></div>
+  <div class="imeta"><span class="ava">SN</span><div class="itxt">
+    <p class="ttl">${esc(a.t)}</p><p class="by"><span class="kindtag">Article</span> Setnayan ✓</p>
     <p class="by">${esc(a.cat)} · ${esc(a.age)}</p></div><span class="kebab">⋮</span></div></div>`;}
 function shopCard(s){const f=foldOf(s.fold);
   return `<div class="item" data-act="shop" data-id="${s.id}">
@@ -776,9 +778,10 @@ function shopCard(s){const f=foldOf(s.fold);
   <p class="by">${esc(s.city)} · ${s.saved==='new'?'new':'<span class="mono">'+s.saved+'</span> saved'}</p>
   </div><span class="kebab">⋮</span></div></div>`;}
 function storyCard(v){return `<div class="item" data-act="story" data-id="${v.id}">
-  <div class="thumb">STORYTELLER<span class="dur">${v.dur}</span></div>
+  <div class="thumb">REAL WEDDING<span class="dur">${v.dur}</span></div>
   <div class="imeta"><span class="ava">${esc(v.by.slice(0,2).toUpperCase())}</span><div class="itxt">
-  <p class="ttl">${esc(v.t)}</p><p class="by">${esc(v.by)} ✓</p>
+  <p class="ttl">${esc(v.t)}</p>
+  <p class="by"><span class="kindtag kindtag-w">Real wedding</span> ${esc(v.by)} ✓</p>
   <p class="by"><span class="mono">${v.plays}</span> plays</p></div><span class="kebab">⋮</span></div></div>`;}
 
 /* ══ FEED ════════════════════════════════════════════════════════════════ */
@@ -808,40 +811,51 @@ function feed(){
     return h;
   }
 
+  /* ONE SHELF (owner 2026-08-12: "Stories and Editorials can be combined as
+     one?"). Yes — because two shelves where one is permanently empty is a page
+     that apologises. Combined, it is FULL from day one and simply gets richer
+     as real weddings arrive, instead of a second empty row appearing broken.
+     The KIND lives on the card, not on the shelf. */
+  const kind=S.chip==='Articles'?'a':S.chip==='Real weddings'?'w':null;
+  const vids=kind==='a'?[]:stories();
+  const reads=kind==='w'?[]:arts;
+
   if(S.day==='launch'){
-    if(S.chip!=='All'&&!arts.length){
+    if(!reads.length&&!vids.length){
       h+=`<div class="emptyq"><b>Nothing under “${esc(S.chip)}” yet.</b>
-        The archive is 33 pieces deep and growing most weeks — try another chip, or clear the filter.</div>`;
+        There are 33 pieces and growing most weeks — try another chip, or clear the filter.</div>`;
       return h;}
-    h+='<div class="grid">'+arts.slice(0,4).map(artCard).join('')+'</div>';
-    h+=`<div id="journal"></div><div class="sechead"><span class="badge">▤</span><h3>The Journal</h3>
-      <span class="meta"><span class="mono">33</span> live · a new one most weeks</span>
-      <span class="rule">the only shelf with content today — so it gets the page</span></div>`;
-    h+='<div class="storyrow">'+ARTICLES.slice(0,6).map(a=>`<div class="story" data-act="article" data-id="${a.id}">
+    h+='<div class="grid">'+reads.slice(0,4).map(artCard).join('')+'</div>';
+    h+=`<div id="stories"></div><div class="sechead"><span class="badge">◎</span><h3>Stories</h3>
+      <span class="meta"><span class="mono">33</span> to read · <span class="mono">0</span> to watch, yet</span>
+      <span class="rule">one shelf — the card says which kind it is</span></div>`;
+    h+='<div class="storyrow">'+reads.slice(0,6).map(a=>`<div class="story" data-act="article" data-id="${a.id}">
       <div class="sthumb"><span class="min">${a.min} MIN</span></div>
-      <p class="sttl">${esc(a.t)}</p><p class="sby">${esc(a.cat)}</p></div>`).join('')+'</div>';
-    h+=`<div id="stories"></div><div class="sechead"><h3>Real weddings</h3>
-      <span class="rule">nothing published yet — an invitation, never a placeholder</span></div>
-      <div class="grid"><div class="invite full">
-      <h4>The first weddings are being planned right now.</h4>
-      <p>When a couple decides to share their day it appears here — their photos, their suppliers,
-      their timeline, in their own words. Nothing is staged, and nothing appears without them
-      saying yes.</p><span class="go">See how sharing works →</span></div></div>`;
+      <p class="sttl">${esc(a.t)}</p><p class="sby">Article · ${esc(a.cat)}</p></div>`).join('')+'</div>';
+    h+=`<div class="grid"><div class="invite full">
+      <h4>The first real weddings will land right here, beside the reading.</h4>
+      <p>When a couple decides to share their day it joins this same shelf — their photos, their
+      suppliers, their timeline, in their own words. Nothing is staged, and nothing appears without
+      them saying yes. Until then the shelf is not empty; it is simply all reading.</p>
+      <span class="go">See how sharing works →</span></div></div>`;
     h+=`<div id="shops"></div><div class="sechead"><h3>The first shops</h3>
       <span class="rule">not “trending” — one shop cannot trend</span></div><div class="grid">`;
     h+=shops().map(shopCard).join('');
     h+=`<div class="invite wide"><h4>Open your shop — free while we're new.</h4>
       <p>No commission on your bookings, ever. Your own web address, a calendar couples can see,
       and enquiries that arrive as real messages.</p><span class="go">Open your shop →</span></div></div>`;
-    h+='<div class="grid">'+arts.slice(4,8).map(artCard).join('')+'</div>';
+    h+='<div class="grid">'+reads.slice(4,8).map(artCard).join('')+'</div>';
   }else{
-    h+='<div id="stories"></div><div class="grid">'+
-      stories().slice(0,2).map(storyCard).join('')+shops().slice(0,2).map(shopCard).join('')+'</div>';
-    h+=`<div id="journal"></div><div class="sechead"><span class="badge">▤</span><h3>The Journal</h3>
-      <span class="meta"><span class="mono">96</span> pieces</span></div>`;
-    h+='<div class="storyrow">'+ARTICLES.slice(0,6).map(a=>`<div class="story" data-act="article" data-id="${a.id}">
+    h+=`<div id="stories"></div><div class="sechead"><span class="badge">◎</span><h3>Stories</h3>
+      <span class="meta"><span class="mono">96</span> to read · <span class="mono">3</span> to watch</span>
+      <span class="rule">mixed by what is worth seeing, not by which kind it is</span></div>`;
+    h+='<div class="grid">'+
+      vids.slice(0,2).map(storyCard).join('')+reads.slice(0,2).map(artCard).join('')+'</div>';
+    h+='<div class="storyrow">'+reads.slice(0,6).map(a=>`<div class="story" data-act="article" data-id="${a.id}">
       <div class="sthumb"><span class="min">${a.min} MIN</span></div>
-      <p class="sttl">${esc(a.t)}</p><p class="sby">${esc(a.cat)}</p></div>`).join('')+'</div>';
+      <p class="sttl">${esc(a.t)}</p><p class="sby">Article · ${esc(a.cat)}</p></div>`).join('')+'</div>';
+    if(vids.length>2)h+='<div class="grid">'+vids.slice(2).map(storyCard).join('')+
+      reads.slice(2,5).map(artCard).join('')+'</div>';
     h+=`<div id="shops"></div><div class="sechead"><h3>Trending suppliers</h3>
       <span class="meta">saved most in the last 7 days — earned, never sold</span></div>`;
     h+='<div class="grid">'+shops().slice(0,4).map(shopCard).join('')+'</div>';
@@ -853,7 +867,7 @@ function feed(){
 function reader(){
   const a=ARTICLES.find(x=>x.id===S.ctx); if(!a)return '';
   let h=`<button class="back" data-act="home">← Back</button><div class="reader">
-    <div class="kick">The Journal · ${esc(a.cat)}</div><h1>${esc(a.t)}</h1>
+    <div class="kick">Article · ${esc(a.cat)}</div><h1>${esc(a.t)}</h1>
     <p class="sub"><span class="mono">${a.min} min</span> read · ${esc(a.age)} · by the Setnayan editorial team</p>
     <div class="hero">ARTICLE</div>`;
   a.body.forEach(p=>{h+=`<p>${esc(p)}</p>`;});
@@ -1325,7 +1339,7 @@ function phoneShell(){
       '</div><span class="chipnext">›</span></div><div class="ph-grid">';
     main+=ARTICLES.slice(0,2).map(artCard).join('');
     main+=`<div><div class="sechead" style="margin-bottom:10px"><span class="badge">▤</span>
-      <h3 style="font-size:16px">The Journal</h3></div><div class="ph-stories">`+
+      <h3 style="font-size:16px">Stories</h3></div><div class="ph-stories">`+
       ARTICLES.slice(2,6).map(a=>`<div class="story" data-act="article" data-id="${a.id}">
         <div class="sthumb"><span class="min">${a.min} MIN</span></div>
         <p class="sttl">${esc(a.t)}</p></div>`).join('')+'</div></div>';
