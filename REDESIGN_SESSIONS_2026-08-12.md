@@ -28,10 +28,13 @@ a big build:
 - ~~**Session 3 is copy.** It is why nobody can find a photographer.~~ ✅ **DONE 2026-08-12 — and it
   was NOT "one map": the words also live in the DATABASE and in the wizard. See the entry below.**
 
-✅ **1 AND 2 ARE SHIPPED. 3 IS MERGE-PENDING** — its PR **#4388 was still OPEN at 15:58Z**, measured,
-after this line first claimed all three were shipped. See the measured state table further down and
-check the PR yourself. The next unblocked work is **Session 5 · 7 · 8**; **Session 4** still waits
-on the one owner sentence in the gate below, and **6** follows 4.
+✅ **1, 2 AND 3 ARE ALL SHIPPED AND VERIFIED LIVE.** #4388 merged 16:38Z and #4391 (the rename's
+16 missed surfaces) 17:06Z; both read back off `www.setnayan.com` — 15/15 labels, 0 retired words,
+all 15 `?folder=` URLs resolving. ⚠ This line twice claimed a state it had not measured (first
+"all three shipped" while #4388 was open, then "merge-pending" after it had merged). **Re-read
+GitHub, not this line.** ✅ **Session 4's owner gate CLOSED 2026-08-13** — the new front door
+becomes `/` and the June cinematic homepage is retired completely. **Session 4 is UNBLOCKED and is
+the next major build**; **6** follows 4 and shares the rail, so never both at once.
 
 ---
 
@@ -60,7 +63,7 @@ forcing it.
 `dashboard/(launcher)/page.tsx`.**
 🚫 **NOT 7** — #4391 edits `lib/nav-registry-defaults.ts`, which Session 7 would change.
 🚫 **NOT 5 YET** — it needs the article page, which #4385 still has open.
-🔴 **4 still needs the one owner sentence.**
+✅ **4's owner sentence ARRIVED 2026-08-13 — it is unblocked.**
 📛 **Name it "Redesign 8"** — sessions literally titled *Session 4 · SESSION 5 · SESSION 6*
 already exist from the 11 Aug list and are unrelated work.
 
@@ -98,20 +101,31 @@ value is not readable from the Vercel MCP tools, nor from any anonymous request,
 caller of `lifeStoryEnabled()` is a **server** component so it never reaches the browser bundle.
 **The only proof is a signed-in eye on the home screen.**
 
-⏭ **NEXT SESSION TO OPEN: 8 (Alaala).** 4 is still owner-gated, 6 follows 4, and 5 needs 3
+⏭ **NEXT SESSION TO OPEN: 4 (the front door) — its gate closed 2026-08-13.** 6 follows 4, and 5 needs 3
 merged. 🪤 **7 and 8 may NEVER run together** — the events board and Alaala are both sections of
 the same 2,136-line `dashboard/(launcher)/page.tsx`.
 
 ---
 
-# 🔴 OWNER GATE — do this before Session 4, it blocks the most
+# ✅ OWNER GATE — CLOSED 2026-08-13. Session 4 is UNBLOCKED.
 
 **The YouTube-shaped front door and the ELN cinematic homepage cannot both be `/`.**
 
-You chose a front door on 7 August, then chose a different one on 11 August whose own notes say
+✅ **ANSWERED.** Owner: *"yes we want the new website"* — and, asked directly what becomes of the
+cinematic opening, **"Retire it completely."** So the new front door becomes `/` and the June
+cinematic homepage (`HomeReskin` — the no-scroll gate + 5-pillar dock, owner-approved 2026-06-29)
+is **deleted, not parked.** He was told in the question itself that this option discards finished
+approved work while the alternative kept it reachable and reversible; he chose to discard it.
+Full row: `DECISION_LOG.md` 2026-08-13.
+
+🔑 **The surface was named back before the answer was filed.** *"Yes"* to a gate is not proof the
+gate is what was answered — the 2026-08-12 lesson cost a build spec written from a misfiled
+ruling. The homepage, the June design and the word *deleted* were all put in the question.
+
+~~You chose a front door on 7 August, then chose a different one on 11 August whose own notes say
 *"one front door."* The 12 August pass drew it in full. **Nobody has said out loud that shipping
 it retires the homepage you approved on 29 June.** Drawing it was right either way; landing it
-reverses an owner lock, so it needs one sentence from you.
+reverses an owner lock, so it needs one sentence from you.~~
 
 Four smaller ones, none of which blocks a build for long:
 
@@ -374,7 +388,7 @@ large.~~ ✅ **1, 2 and 3 are ALL DONE (2026-08-12). Do not start them again —
 above for what shipped and what is deliberately still open.**
 
 ⏭ **What is actually next:** **Session 5 · 7 · 8** are unblocked today. **Session 4** is still held
-by the one owner sentence in the gate at the top of this file, and **6** follows 4 (they share the
+✅ (gate CLOSED 2026-08-13 — unblocked), and **6** follows 4 (they share the
 rail, so never run them together). **9** waits on counsel. **10** is the long tail.
 
 🔑 **This line said "1 → 2 → 3 first" while all three were finished.** A state line outlives the
