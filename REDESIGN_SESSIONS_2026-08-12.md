@@ -28,8 +28,10 @@ a big build:
 - ~~**Session 3 is copy.** It is why nobody can find a photographer.~~ ✅ **DONE 2026-08-12 — and it
   was NOT "one map": the words also live in the DATABASE and in the wizard. See the entry below.**
 
-✅ **ALL THREE ARE SHIPPED.** The next unblocked work is **Session 5 · 7 · 8**; **Session 4** still
-waits on the one owner sentence in the gate below, and **6** follows 4.
+✅ **1 AND 2 ARE SHIPPED. 3 IS MERGE-PENDING** — its PR **#4388 was still OPEN at 15:58Z**, measured,
+after this line first claimed all three were shipped. See the measured state table further down and
+check the PR yourself. The next unblocked work is **Session 5 · 7 · 8**; **Session 4** still waits
+on the one owner sentence in the gate below, and **6** follows 4.
 
 ---
 
@@ -294,10 +296,20 @@ state it describes, and it is the line a new session reads first — the exact f
 session tell the owner to go review prototypes he had already approved. **When a session closes,
 edit every row that asserts it is open, in the same commit.**
 
-**State, 2026-08-12:** **1 ✅ DONE** (switched on in prod). **2 is IN FLIGHT — PR #4387 is OPEN,
-not merged** (its `DECISION_LOG` row was written ahead of the merge; verify the PR before
-treating it as shipped). **3 is in flight** on branch `claude/session3-friendly-labels`.
-⚠ Re-verify every line here against the PR list before acting — this file rots.
+**State — MEASURED against the PR list at 2026-08-12 15:58Z, not asserted:**
+
+| session | PR | measured state |
+|---|---|---|
+| 1 · Life-Flash | — (a switch, no PR) + **#4389** | ✅ **switch ON in prod**; #4389 **MERGED** 15:53Z |
+| 2 · storyteller editorial | **#4387** | ✅ **MERGED** 15:47Z |
+| 3 · friendly labels | **#4388** | ⏳ **OPEN at 15:58Z** — *not* merged yet |
+
+⚠ **This block has been wrong in BOTH directions within one hour.** At 15:40Z I wrote that #4387
+was open — it merged seven minutes later. By 15:58Z the entry above for Session 3 had been marked
+✅ DONE while **#4388 was still open**. Neither writer was careless; the file simply rots faster
+than it is edited. 🔑 **Run `gh pr view <#> --json state,mergedAt` before you trust any row here —
+including this one.** A merged PR is also not a shipped one: confirm with
+`git merge-base --is-ancestor` and then that the production deployment carrying it is READY.
 
 ## Traps that apply to every session
 
