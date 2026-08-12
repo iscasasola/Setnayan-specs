@@ -362,6 +362,30 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-a
 .typecard .te{font-size:22px;line-height:1.1}
 .typecard b{font-size:14.5px}
 .typecard span:last-child{font-size:12px;color:var(--m2);line-height:1.4}
+/* ── Alaala: Life-Flash, the lenses, the photo wall ────────────────────── */
+.flash{display:flex;gap:20px;align-items:center;background:#211F1D;border-radius:16px;
+  padding:22px 24px;margin:6px 0 22px;color:#F1ECE2;flex-wrap:wrap}
+.flashtxt{flex:1;min-width:260px}
+.flashkick{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#E4C98F;font-weight:700}
+.flashtxt b{display:block;font-size:22px;letter-spacing:-.015em;margin:6px 0 7px;color:#FBF7EF}
+.flashtxt p{margin:0 0 14px;font-size:13.5px;line-height:1.55;color:#B9B1A5;max-width:52ch}
+.flashacts{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.flashplay{min-height:44px;padding:0 20px;border-radius:999px;background:#E4C98F;color:#221F1B;
+  font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+.flagoff{font-size:11.5px;color:#8E877C}
+.faces{display:flex;gap:-8px}
+.faces span{width:46px;height:46px;border-radius:50%;background:linear-gradient(140deg,#4A443C,#332F2A);
+  border:2px solid #211F1D;margin-left:-12px}
+.faces span:first-child{margin-left:0}
+.lensrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.lensline{font-size:13px;color:var(--m2);margin:0 0 14px}
+.photogrid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.photogrid span{aspect-ratio:1;border-radius:8px;background:linear-gradient(140deg,#E5DBC8,#D3C7B1)}
+.yearstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.ym span{display:block;aspect-ratio:4/3;border-radius:10px;
+  background:linear-gradient(140deg,#E5DBC8,#D3C7B1);margin-bottom:6px}
+.ym b{font-size:12px;color:var(--m2);font-weight:650}
+@media(max-width:1240px){.photogrid{grid-template-columns:repeat(6,1fr)}}
 .mut{font-size:11px;font-weight:700;color:var(--terra);border:1px solid rgba(194,78,37,.3);
   background:rgba(194,78,37,.07);border-radius:999px;padding:3px 9px;white-space:nowrap}
 .resume{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin:14px 0 4px}
@@ -762,7 +786,7 @@ const CHIP_CAT={'Venues':'Venue','Catering':'Feast','Photo & video':'Suppliers',
 /* ══ STATE ════════════════════════════════════════════════════════════════ */
 const S={screen:'desk',day:'launch',who:'out',view:'feed',ctx:null,chip:'All',folder:null,
   moreOpen:false,menu:false,sheet:false,q:'',saved:{},pending:null,toast:null,appTab:'board',
-  event:null,create:null,showAll:false,person:null};
+  event:null,create:null,showAll:false,person:null,lens:'recent'};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inn=()=>S.who!=='out';
 const shops=()=>S.day==='launch'?SHOPS_LAUNCH:SHOPS_LATER;
@@ -1351,16 +1375,62 @@ function appShop(){
       <div class="kv"><span>Web address</span><span>permanent — ask us to correct it</span></div>
       <div class="kv"><span>Booking fee</span><span>not charged yet</span></div></div>`;
 }
+/* ⚠ REDRAWN 2026-08-12. The owner asked *"remove alaala menu because that is
+   events?"* — and against my first drawing he was RIGHT: I had drawn Alaala as
+   three tiles that were a list of events, which is the board. That is my error,
+   not a redundant product.
+   What Alaala actually is: the MEMORIES, cut by the five shipped lenses
+   (Recent · Owned · ATTENDED · People · WITH ME, owner-approved 2026-07-15) —
+   photos, not occasions. Events is for DOING; Alaala is for KEEPING. And
+   LIFE-FLASH lives in here: "the living memorial of your celebrations",
+   owner-locked name 2026-07-08, pointed forward, never a death surface. */
+const LENSES=[['recent','Recent'],['owned','Owned'],['attended','Attended'],
+  ['people','People'],['with_me','With me']];
+const LENS_LINE={recent:'Everything, newest first — across every event.',
+  owned:'From the events you ran yourself.',
+  attended:'From days that were somebody else’s — and are still yours.',
+  people:'Grouped by who is in the photo.',
+  with_me:'Only the ones you are in.'};
+const LENS_N={recent:560,owned:148,attended:412,people:23,with_me:96};
 function appHome(){
+  const L=S.lens||'recent';
   return `<h1>Alaala</h1>
-    <p class="sub">Everything from every event you have been part of — including the ones you only attended.</p>
-    <div class="tiles">
-      <div class="tile"><span class="n">148</span><b>Your wedding</b><p>Cale &amp; Ice · still filling.</p></div>
-      <div class="tile"><span class="n">412</span><b>Ana &amp; Miguel</b><p>You were a guest. They are yours too.</p></div>
-      <div class="tile"><span class="n">6</span><b>Events</b><p>Across four years.</p></div></div>
-    <div class="tile" style="margin-top:16px"><b>Alaala sits ABOVE your events, not inside one.</b>
-      <p style="margin-top:6px">It reaches across all of them, including weddings you only attended —
-      which is exactly why it cannot live inside any single event.</p></div>`;
+    <p class="sub">Your memories, not your calendar — cut whichever way you want to look at them.</p>
+
+    <div class="flash">
+      <div class="flashtxt"><span class="flashkick">Life-Flash</span>
+        <b>Six years, in ninety seconds.</b>
+        <p>The one that plays it back — whole life, a year, a month, or a single day.
+        Pointed forward, made to be watched while you are here to watch it.</p>
+        <div class="flashacts"><button class="flashplay" data-act="noop">▶ Play</button>
+          <span class="flagoff">off in production · one switch, no legal gate</span></div></div>
+      <div class="faces">${Array.from({length:7}).map(()=>'<span></span>').join('')}</div>
+    </div>
+
+    <div class="lensrow">${LENSES.map(([k,l])=>`<button class="chip" data-act="lens" data-id="${k}"
+      data-on="${L===k}">${esc(l)}</button>`).join('')}</div>
+    <p class="lensline">${esc(LENS_LINE[L])} · <span class="mono">${LENS_N[L]}</span>
+      ${L==='people'?'people':'photos'}</p>
+
+    ${L==='people'
+      ? `<div class="evgrid">${PEOPLE.map(p=>`<button class="evcard" data-act="person" data-id="${p.id}">
+          <div class="evtop"><span class="evmono">${esc(p.mono)}</span>
+            <div class="evname"><b>${esc(p.name)}</b><span class="evrole">${esc(p.rel)}</span></div></div>
+          <div class="shots">${Array.from({length:6}).map(()=>'<span></span>').join('')}</div>
+          <div class="evneed">Photos you are both in</div></button>`).join('')}</div>`
+      : `<div class="photogrid">${Array.from({length:24}).map(()=>'<span></span>').join('')}</div>`}
+
+    <div class="sechead" style="margin-top:26px"><h3 style="font-size:17px">This year</h3>
+      <span class="rule">the strip that already ships on the home board</span></div>
+    <div class="yearstrip">${['Jan','Mar','Mar','Jun','Jun','Aug','Dec'].map(m=>
+      `<div class="ym"><span></span><b>${m}</b></div>`).join('')}</div>
+
+    <div class="tile" style="margin-top:22px"><b>Why this is not the Events menu.</b>
+      <p style="margin-top:6px"><b>Events</b> is occasions — one card per celebration, for planning
+      and running it. <b>Alaala</b> is the photos themselves, cut by lens, across every event
+      including days that were somebody else's. A finished event on the board is one wedding;
+      <b>With me</b> here is every photo of you from six years, and it belongs to no single event —
+      which is why it cannot live inside one.</p></div>`;
 }
 
 /* ══ THE BOARD — every event this person has, in one place ═══════════════ */
@@ -1654,6 +1724,7 @@ document.addEventListener('click',e=>{
     case 'article': go('article',id); break;
     case 'shop': S.srcNote=el.dataset.src==='editorial'; go('shop',id); break;
     case 'story': go('storyread',id); break;
+    case 'lens': S.lens=id; break;
     case 'person': S.view='app';S.appTab='people';S.person=id; break;
     case 'people': S.view='app';S.appTab='people';S.person=null; break;
     case 'compose': go('compose',null); break;
