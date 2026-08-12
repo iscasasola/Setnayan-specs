@@ -532,7 +532,23 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > **41 open: 14 need the OWNER (a signature, a price, a ruling — no engineering
 > left), 24 need engineering, 3 are blocked on an outside party.**
 
-> ### 🎨 STARTING A REDESIGN SESSION? READ THIS ROW FIRST (updated 2026-08-12)
+> ### ▶▶▶ THE REDESIGN IS RUNNING AS TEN SESSIONS — START HERE (set 2026-08-12)
+> **[`REDESIGN_SESSIONS_2026-08-12.md`](REDESIGN_SESSIONS_2026-08-12.md)** is the register.
+> Owner: *"let's start the redesign. we will also start redesign with multiple sessions
+> like what we did today."* Each session names what a person gets, what ALREADY SHIPS
+> (RULE 0 pre-answered — do not re-run it), its gate, and its own traps.
+> ⏭ **Order: 1 → 2 → 3 first.** A switch, a wall, and some copy — the three highest-value
+> and none of them large. **Life-Flash is finished and off; the storyteller wall is why the
+> shelf is empty; the category labels are why nobody can find a photographer.**
+> 🔴 **ONE OWNER SENTENCE BLOCKS SESSION 4:** the new front door and the ELN cinematic
+> homepage **cannot both be `/`**. Shipping it retires a design approved 2026-06-29.
+> 🔒 Session 9 (mutual stories) shares the counsel gate with
+> `NEXT_PUBLIC_PERSON_LIFE_STORIES` — build behind it, do not flip it.
+> ⚠ **Do not confuse the two Life-Flash flags.** `NEXT_PUBLIC_LIFE_STORY` is a ROLLOUT
+> switch with no counsel dependency (own events only). The other one publishes other
+> people's media.
+>
+> ### 🎨 STARTING A REDESIGN SESSION? READ THIS ROW NEXT (updated 2026-08-12)
 > ✅ **THE SEAM IS NOW DRAWN — that master-prompt deliverable is DONE, do not
 > re-commission it.** [`FRONT_DOOR_AND_SEAM_FINAL_2026-08-12.md`](FRONT_DOOR_AND_SEAM_FINAL_2026-08-12.md)
 > + [`prototypes/front_door_and_seam_2026-08-12.html`](prototypes/front_door_and_seam_2026-08-12.html):
