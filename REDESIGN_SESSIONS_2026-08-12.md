@@ -118,6 +118,18 @@ is **deleted, not parked.** He was told in the question itself that this option 
 approved work while the alternative kept it reachable and reversible; he chose to discard it.
 Full row: `DECISION_LOG.md` 2026-08-13.
 
+🚨 **THE PAGE BEING DELETED IS NOT ONLY PIXELS — added 2026-08-13 and NOT in the ruling above.**
+`app/page.tsx` runs three **cron-free** jobs on the back of the homepage's guaranteed public
+traffic, via `after()`: **`runAdminDigestFlush`** · **`runDailyEmailJobs`** (anniversary digests ·
+renewal reminders · the Papic full-res drop warning) · **`maybeRunInterconnectionProbes`**.
+**These REPLACED retired crons — there is no scheduler behind them.** The page also carries
+`revalidate = 300`, the WebSite + SoftwareApplication JSON-LD graph, and the GEO
+title/description answer engines ground on.
+**Delete the page without carrying those forward and the daily emails and the probes simply stop,
+with no error anywhere** — the silent-absence failure this project keeps paying for.
+Measured: `/explore` is the only other host of the probe pair; **the digest flush lives on `/`
+alone.** Carry them onto the replacement and PROVE it by the object, not by the diff.
+
 🔑 **The surface was named back before the answer was filed.** *"Yes"* to a gate is not proof the
 gate is what was answered — the 2026-08-12 lesson cost a build spec written from a misfiled
 ruling. The homepage, the June design and the word *deleted* were all put in the question.

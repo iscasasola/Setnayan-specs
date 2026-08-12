@@ -10,8 +10,9 @@
 >
 > ⚠ **Order: 1 → 2 → 3, owner gate, then 4 → 6 → 5, then 7 → 8, then 9, then 10.**
 >
-> 🔴 **SESSION 4 IS BLOCKED until the owner answers one question:** the YouTube-shaped front door
-> and the ELN cinematic homepage cannot both be `/`. Do not start it on an assumption.
+> ✅ **SESSION 4 IS UNBLOCKED — owner ruled 2026-08-13: the new front door REPLACES `/` and the
+> cinematic page is RETIRED COMPLETELY.** ⚠ See its block for the three cron-free jobs that page
+> carries, which must not be deleted with it.
 
 ---
 
@@ -200,9 +201,21 @@ DONE = /explore, the wizard and the front-door rail all read the friendly labels
 # SESSION 4 · The front door, ported  🔴 OWNER-GATED
 
 ```
-🔴 DO NOT START until the owner has answered: does the new front door REPLACE `/`, the ELN
-cinematic homepage he approved 2026-06-29? They cannot both be `/`. If he has not answered,
-stop and ask — do not assume.
+✅ ANSWERED 2026-08-13 — the new front door REPLACES /. Owner, asked directly what becomes of
+the cinematic opening: "Retire it completely." Deleted, not parked. Proceed.
+
+🚨 THE PAGE YOU ARE DELETING IS NOT ONLY PIXELS. app/page.tsx runs three CRON-FREE jobs on the
+back of the homepage's guaranteed traffic, via after(): runAdminDigestFlush · runDailyEmailJobs
+(anniversary digests, renewal reminders, the Papic full-res drop warning) ·
+maybeRunInterconnectionProbes. THESE REPLACED RETIRED CRONS — there is no scheduler behind
+them. It also carries revalidate=300, the WebSite + SoftwareApplication JSON-LD graph and the
+GEO title/description. Carry every one onto the replacement and PROVE IT BY THE OBJECT: a page
+that omits them stops the daily emails and the probes with NO ERROR ANYWHERE. Measured:
+/explore is the only other host of the probe pair; the digest flush lives on / alone.
+
+⭐ ALSO NOW UNBLOCKED: the owner-APPROVED Filipino-USP hero/manifesto copy (§5 of
+03_Strategy/Claude_Design_Brief_2026-07-31.md) targeted / and had nowhere to land while / was
+excluded from the programme. Land it with this port.
 
 GOAL: a front page that looks full on launch day.
 
