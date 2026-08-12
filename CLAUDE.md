@@ -499,10 +499,16 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > tests have never run in CI**, including `first-byte.test.ts`, the guard written
 > to hold the soft-404 regression. All 188 pass. Needs its own PR.
 >
-> ⏭ **OWNER, TWO THINGS:** the mirror **defaults ON** (removing a bought feature
-> by default was not mine to decide — disclosure + a one-tap switch was the
-> call); and **`'tagged_only'` — showing a guest only the photos they are in — is
-> NAMED, NOT BUILT.** ⚠ Still unresolved from 2026-08-11: `Pricing.md` says HIDE
+> ✅ **OWNER CLOSED THIS 2026-08-12: the wall on a phone shows the WHOLE
+> EVENT** — *"a preview of what and how many photos and videos are taken"*. So
+> on/off is the whole choice and `'tagged_only'` is **RETIRED as an option, not
+> a future build**; filtering the wall per guest would destroy the only thing it
+> is for. The mirror **defaults ON**, preserving the owner's own 2026-06-12
+> directive.
+> 🔑 I first filed his answer about a guest's OWN photos as a WALL decision and
+> wrote a build spec from it. **An answer that fits the question you asked is not
+> proof it was about the thing you asked** — name the surface back before writing
+> a decision down. ⚠ Still unresolved from 2026-08-11: `Pricing.md` says HIDE
 > Live Photo Wall while the SKU is active and publicly listed.
 
 > ### ▶ ACTIVE 2026-08-07: PAPIC TIMING — three numbers, locked together
