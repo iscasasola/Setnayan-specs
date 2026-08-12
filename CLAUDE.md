@@ -532,16 +532,32 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > **41 open: 14 need the OWNER (a signature, a price, a ruling — no engineering
 > left), 24 need engineering, 3 are blocked on an outside party.**
 
-> ### 🎨 STARTING A REDESIGN SESSION? READ THIS ROW FIRST (set 2026-08-12)
-> The owner asked to take the redesign into its own session. Two documents, in
-> this order, and **nothing else first**:
-> 1. **[`MASTER_DESIGN_PROMPT_2026-08-11.md`](MASTER_DESIGN_PROMPT_2026-08-11.md)**
->    — the public site AND the signed-in app together. **The SEAM between them
->    has never been designed by anyone**: the 8 Aug bundle drew the signed-in app,
->    the 11 Aug pass drew the front door, and neither contains the other's
->    surfaces. That seam is the actual deliverable.
-> 2. **[`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md)**
->    — the ~40-unit port list and its gates.
+> ### 🎨 STARTING A REDESIGN SESSION? READ THIS ROW FIRST (updated 2026-08-12)
+> ✅ **THE SEAM IS NOW DRAWN — that master-prompt deliverable is DONE, do not
+> re-commission it.** [`FRONT_DOOR_AND_SEAM_FINAL_2026-08-12.md`](FRONT_DOOR_AND_SEAM_FINAL_2026-08-12.md)
+> + [`prototypes/front_door_and_seam_2026-08-12.html`](prototypes/front_door_and_seam_2026-08-12.html):
+> the finalized front door (desktop + phone × launch-day-empty + busy), the My Home
+> expansion in its real states, and the sign-in↔public **round trip**, which is the
+> thing that had never existed. [`MASTER_DESIGN_PROMPT_2026-08-11.md`](MASTER_DESIGN_PROMPT_2026-08-11.md)
+> is now HISTORY — read the answer, not the ask.
+> ⏭ Still read **[`WHATS_NEXT_Design_Programme_2026-08-01.md`](WHATS_NEXT_Design_Programme_2026-08-01.md)**
+> — the ~40-unit port list and its gates.
+>
+> 🚨 **A BRIEF THAT SAID IT WAS MEASURED WAS WRONG FOUR TIMES.** Re-measuring
+> against prod + `origin/main` before drawing found: **Real Stories is empty too**
+> (0 published — so FOUR rails are bare on launch day, not three, and the Journal
+> alone carries the page) · there are **8** public tool doorways, not the 6 drawn,
+> and a guard enforces the set · **Pakanta is sold and has NO public page at all**,
+> so drawing it would have been a fake door · the taxonomy has **15** folders, not
+> 14. 🔑 **The category labels a customer reads today are the INTERNAL words** —
+> the live marketplace says *Look · Feast · Documentary · Booths*, which nobody
+> types. Renaming them is copy-only (addresses and anchors unchanged) and is an
+> **OWNER_DECISION** with a proposed list in the final doc.
+>
+> 🔴 **AND THE ONE NOBODY HAD ASKED:** the YouTube-shaped front door and the
+> owner-approved ELN cinematic homepage **cannot both be `/`**. Shipping the front
+> door RETIRES an owner-approved design. Drawing it was right either way;
+> **landing it needs the owner to say so.** See the programme's §6.
 >
 > ✅ **THE OWNER GATE IS CLOSED — all 19 archetypes/overlays APPROVED 2026-08-04,
 > no changes requested.** The prototypes are **BINDING**: port them, never redraw
@@ -558,9 +574,10 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > 🔑 **The state table is what gets read, not the banner.** When a gate closes,
 > edit every row that asserts it is open, in the same commit.
 >
-> ⛔ **`/` (the public homepage) is EXCLUDED from the programme** — and the
-> owner-APPROVED Filipino-USP hero/manifesto copy targets exactly that page, so
-> whose scope it lands in is an **OWNER_DECISION**, not an engineering call.
+> ⚠️ **`/` (the public homepage) WAS excluded from the programme — that exclusion
+> is now IN QUESTION, see the front-door row above and the programme's §6.** The
+> owner-APPROVED Filipino-USP hero/manifesto copy also targets exactly that page,
+> so whose scope it lands in is an **OWNER_DECISION**, not an engineering call.
 > ⏭ The six-state primitives from `design#1`/`#2` are **built but not mounted** —
 > adopting them per surface is open follow-up work, not a rebuild.
 
