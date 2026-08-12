@@ -440,6 +440,21 @@ td.n{font-family:var(--mono);color:var(--m1);white-space:nowrap}
     <b>photobooth</b> — none of those is a category name, and the panel shows your word with our
     folder beside it as a place. That is the real problem this page had to solve.
   </div>
+  <div class="note">
+    <b>The Marketplace is signed-in only.</b> Switch <b>You</b> above and watch the whole group
+    appear and disappear — a stranger gets stories and the tools; browsing suppliers starts once
+    there is an event to browse against. <b>"Find a supplier" goes with it</b>, because it is the
+    same destination under another word and leaving it would defeat the rule with a label.<br><br>
+    <b>Two things deliberately stay.</b> <b>Search still answers</b> a signed-out person who types
+    "photographer" — finding one supplier you already need is not browsing a directory, and cutting
+    it would remove the one thing this page exists to solve. And <b>"The first shops"</b> stays on
+    the feed, because it is recruitment, not a catalogue — and a shop's own page is public and in
+    our sitemap either way, so hiding it here would not make it private.<br><br>
+    ⚠ <b>One real cost, worth knowing:</b> a search engine is always signed out. Those category rows
+    were internal links to each category page, and removing them signed-out removes them for Google
+    too. The category pages stay in the sitemap and keep working — the front page just stops
+    pointing at them.
+  </div>
 
   <div class="stage" data-screen="desk">
     <div style="flex:1;min-width:0">
@@ -775,9 +790,12 @@ function searchPanel(){
 /* ══ RAIL ════════════════════════════════════════════════════════════════ */
 function rail(){
   const on=(k)=>S.view==='feed'&&!S.folder&&S.chip==='All'&&k==='home'?'true':'false';
+  /* ⚠ "Find a supplier" is the SAME destination as the Marketplace group under
+     another word — so it follows the same rule. Hiding a group and leaving its
+     synonym in the list would defeat the instruction with a label. */
   let h=`<button class="row" data-act="home" data-on="${on('home')}"><span class="gi">⌂</span> Home</button>
     <button class="row" data-act="scroll" data-id="stories"><span class="gi">◎</span> Stories</button>
-    <button class="row" data-act="scroll" data-id="shops"><span class="gi">⌕</span> Find a supplier</button>
+    ${inn()?`<button class="row" data-act="scroll" data-id="shops"><span class="gi">⌕</span> Find a supplier</button>`:''}
     <div class="rdiv"></div>`;
   if(!inn()){
     h+=`<div class="signin-prompt"><p>Sign in to save suppliers, plan your event, and keep your photos.</p>
@@ -797,14 +815,19 @@ function rail(){
      understand" than Explore). The front door says what the app says, and it
      stays visible signed IN as well as out — a couple browses suppliers all the
      way through planning, not only before they join. */
-  h+='<div class="rdiv"></div><div class="rlabel">Marketplace</div>';
-  const vis=FOLDERS.filter(f=>f.slot).sort((a,b)=>a.slot-b.slot);
-  const rest=FOLDERS.filter(f=>!f.slot);
-  (S.moreOpen?vis.concat(rest):vis).forEach(f=>{
-    h+=`<button class="row" data-act="folder" data-id="${f.id}" data-on="${S.folder===f.id}">
-      <span class="gi">${f.icon}</span> ${esc(f.label)} <span class="ct mono">${f.n}</span></button>`;});
-  h+=`<button class="more row" data-act="more"><span class="gi">${S.moreOpen?'⌃':'⌄'}</span> ${S.moreOpen?'Show fewer':'Show more — '+rest.length+' more'}</button>
-    <div class="rdiv"></div><div class="rlabel">Studio <small>the things you make</small></div>`;
+  /* ⚠ MARKETPLACE IS SIGNED-IN ONLY (owner 2026-08-12: "marketplace shouldnot
+     show when not signed in"). A stranger gets stories and the tools; browsing
+     suppliers is something you do once you have an event to browse against. */
+  if(inn()){
+    h+='<div class="rdiv"></div><div class="rlabel">Marketplace</div>';
+    const vis=FOLDERS.filter(f=>f.slot).sort((a,b)=>a.slot-b.slot);
+    const rest=FOLDERS.filter(f=>!f.slot);
+    (S.moreOpen?vis.concat(rest):vis).forEach(f=>{
+      h+=`<button class="row" data-act="folder" data-id="${f.id}" data-on="${S.folder===f.id}">
+        <span class="gi">${f.icon}</span> ${esc(f.label)} <span class="ct mono">${f.n}</span></button>`;});
+    h+=`<button class="more row" data-act="more"><span class="gi">${S.moreOpen?'⌃':'⌄'}</span> ${S.moreOpen?'Show fewer':'Show more — '+rest.length+' more'}</button>`;
+  }
+  h+=`<div class="rdiv"></div><div class="rlabel">Studio <small>the things you make</small></div>`;
   TOOLS.forEach(t=>{h+=`<button class="row" data-act="tool" data-id="${t.id}"
     data-on="${S.view==='doorway'&&S.ctx===t.id}"><span class="dot"></span> ${esc(t.name)}</button>`;});
   h+=`<button class="more row" data-act="studio" data-on="${S.view==='studio'}">
