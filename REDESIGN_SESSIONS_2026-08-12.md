@@ -264,7 +264,51 @@ this doc was wrong about where the words live.**
 
 ---
 
-## Session 4 · The front door, ported
+## Session 4 · The front door, ported — ✅ **GATE CLOSED 2026-08-13 · IN BUILD**
+
+> ### 📐 RE-MEASURED 2026-08-13 AGAINST PROD — one rail's shape has ALREADY changed
+> The launch-day table further down was measured 2026-08-12. **Session 2 shipped since**, and it
+> moved one of the four numbers:
+>
+> | Rail | Doc said (12 Aug) | **Measured 13 Aug** | Threshold | Shape NOW |
+> |---|---|---|---|---|
+> | Trending storyteller | 0 → *absent* | **1 published chapter** | returns at 1 | ⚠ **IT RETURNS — do not build the "absent" case as the primary state** |
+> | Articles | 33 of 91 | **33** ✓ | — | fills the grid |
+> | Real weddings / Stories | 0 | **0** ✓ (5 editorials, all `draft`, 0 `published_at`) | 2 | one written invitation |
+> | Vendors | 1 live shop | **1** ✓ | 12 | "The first shops" |
+>
+> 🪤 **THE LIVE-SHOP PREDICATE IS NOT `is_published`.** That column is **legacy and no longer
+> queried** — `explore/page.tsx` says so outright (*"the legacy `is_published` boolean is no longer
+> queried here"*). The gate is `public_visibility = 'verified' AND verification_state = 'verified'`.
+> Counting with `is_published` returns **0** and would have made the page apologise when it should
+> say *"The first shops"*. Prod holds 2 shops: one `is_published=true` but **hidden**, one
+> `public_visibility='verified'` but `is_published=false`. **Use the real predicate.**
+>
+> ### ⚠ TWO PLACES THE WRITTEN DOC DISAGREES WITH THE BINDING PROTOTYPE — prototype wins
+> 1. **Rail width.** `FRONT_DOOR_AND_SEAM_FINAL` §1 prose says *"248 px on either side"*; the
+>    prototype's own token is **`--rail:240px`**, and this register says 240. **Port 240.**
+> 2. **Rail group 1.** The doc lists *Home · Stories · Journal · Find a supplier*. The prototype
+>    renders **Home · Stories**, plus *Find a supplier* **only when signed in** — and no Journal
+>    row at all, because Stories + Editorials are now ONE shelf. **Port the prototype.**
+>    ✅ The prototype already carries the Session 3 vocabulary in its own comments (*"Journal is
+>    retired (owner 2026-08-12). Our writing is ARTICLES"*), so the rename and the port agree.
+>
+> ### 🪤 A GUARD'S RATIONALE GOES STALE THE MOMENT THIS SHIPS
+> `app/_components/marketing/doorway-invariants.test.ts` asserts `/` is **excluded** from the eight
+> tool doorways, and its stated reason is *"`/` is the ELN cinematic reskin, owner-approved
+> 2026-06-29 and explicitly excluded from this work."* **The assertion stays correct** (`/` is the
+> front door, not a tool doorway) — **the reason becomes false.** Update the comment in the same PR
+> or it joins the pile of comments arguing for a retired decision.
+> ✅ The eight doorways, read from the guard: `papic · panood · pawebsite · pa3d · palogo · alaala ·
+> patiktok · setnayan-ai`. (Live Studio's route is **`panood`**.) 🪤 **Pakanta is NOT among them and
+> must not go in the rail** — sold, but reachable only inside the app.
+>
+> ### 🔒 HOW IT SHIPS
+> **Flag-dark first (`NEXT_PUBLIC_NEW_FRONT_DOOR`), and `HomeReskin` is NOT deleted until the owner
+> has seen the replacement live.** The owner approved retiring the June design — that approval is
+> real and recorded — but *"the owner LOOKING beats every automated check"*, and deleting an
+> approved page before its replacement has been looked at is the one ordering that cannot be undone.
+> Retire it in the flip, not in the build.
 **Gated on the owner question above. The largest visible change.**
 
 **What a person gets:** a front page that looks full on launch day.
