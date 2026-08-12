@@ -534,6 +534,10 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 
 > ### ▶▶▶ THE REDESIGN IS RUNNING AS TEN SESSIONS — START HERE (set 2026-08-12)
 > **[`REDESIGN_SESSIONS_2026-08-12.md`](REDESIGN_SESSIONS_2026-08-12.md)** is the register.
+> 📋 **Ready-to-paste prompts, one per session:**
+> **[`REDESIGN_SESSION_PROMPTS_2026-08-12.md`](REDESIGN_SESSION_PROMPTS_2026-08-12.md)** —
+> self-contained, with a shared header. 🛑 **Never more than two at once** (10 parallel
+> builds once shipped 44 defects); **4 and 6 share the rail — never together.**
 > Owner: *"let's start the redesign. we will also start redesign with multiple sessions
 > like what we did today."* Each session names what a person gets, what ALREADY SHIPS
 > (RULE 0 pre-answered — do not re-run it), its gate, and its own traps.
