@@ -23,8 +23,13 @@ Three of the ten sessions are worth more than the other seven combined, and none
 a big build:
 
 - ~~**Session 1 is one switch.** Life-Flash is finished and off.~~ ✅ **DONE 2026-08-12 — it is ON.**
-- **Session 2 removes a wall.** It is why the storyteller shelf is empty.
-- **Session 3 is copy.** It is why nobody can find a photographer.
+- ~~**Session 2 removes a wall.** It is why the storyteller shelf is empty.~~ ✅ **DONE 2026-08-12 —
+  a chapter needs a title and a body; the video is optional.**
+- ~~**Session 3 is copy.** It is why nobody can find a photographer.~~ ✅ **DONE 2026-08-12 — and it
+  was NOT "one map": the words also live in the DATABASE and in the wizard. See the entry below.**
+
+✅ **ALL THREE ARE SHIPPED.** The next unblocked work is **Session 5 · 7 · 8**; **Session 4** still
+waits on the one owner sentence in the gate below, and **6** follows 4.
 
 ---
 
@@ -77,8 +82,14 @@ Four smaller ones, none of which blocks a build for long:
 
 ---
 
-## Session 2 · A storyteller's piece becomes an editorial
+## Session 2 · A storyteller's piece becomes an editorial — ✅ **DONE 2026-08-12**
 **The highest-value build on the list. It is why the shelf is empty.**
+
+> ✅ **SHIPPED.** Publishing needs a title and a body; the video is optional. The brief named ONE
+> wall and there were **six** — three more `embed_url` tests in the READ path (a published story
+> vanished from its own author's profile, the page 404'd, the share card returned null), a
+> YouTube-derived-thumbnail rule, and the address+switch pair. The body was promoted off
+> `substrate.itinerary` to a first-class `creator_chapters.body`. **Do not rebuild any of it.**
 
 **What a person gets:** a couple with 400 photos and no TikTok can finally publish their story.
 
@@ -107,8 +118,32 @@ Four smaller ones, none of which blocks a build for long:
 
 ---
 
-## Session 3 · Say the words people actually type
-**Copy only. No migration, no schema, no SEO cost.**
+## Session 3 · Say the words people actually type — ✅ **DONE 2026-08-12**
+~~**Copy only. No migration, no schema, no SEO cost.**~~ **Copy — plus a data migration, because
+this doc was wrong about where the words live.**
+
+> ✅ **SHIPPED** (PR #4388). All fifteen labels owner-approved unchanged.
+>
+> 🚨 **THIS ENTRY SAID "the blast radius is exactly one map." IT WAS WRONG, and the version it
+> described half-lands in total silence.** The words render from **THREE** sources: `lib/taxonomy.ts`
+> (read directly by the icon-tile strip + the search autocomplete), **`service_categories.label_en` /
+> `label_short` IN THE DATABASE** (read by the live catalog SECTION HEADINGS — `explore/page.tsx`
+> shadows the imported constants with the `getTaxonomy()` snapshot for all of `CatalogView`, and prod
+> held the old internal words in all 15 tier-1 rows), and **a third hand-typed copy in the couple's
+> setup wizard** whose own comment admitted it *"mirrors WEDDING_FOLDER_LABEL"*. Editing only the
+> code would have shipped chips reading *Photo & video* directly above headings reading
+> *Documentary*. 🔑 **`WEDDING_FOLDER_SLUG` being a separate map was true and held** — no address or
+> SEO cost — but "separate slug map" never meant "single source for the labels."
+>
+> 🛡 There was **no guard** that the DB and the code agreed. There is now, mutation-tested both ways.
+>
+> 🔴 **"photobooth" returned ZERO results** before this session — `photo_booth` is two words, so
+> every match tier was blind to the single word Filipinos actually write. Fixed, and the search
+> ranker moved out of a `'use client'` `useMemo` where no test could reach it.
+>
+> ⏭ **NAMED, NOT BUILT:** the *"no live shops here yet — tell me when one opens"* half needs a live
+> per-folder count **and** an intake keyed on folder (the only one that exists is keyed on event
+> type) ⇒ new schema, which this session's own constraint excluded. A separate build.
 
 **What a person gets:** they type "photographer" and find one.
 
@@ -246,9 +281,18 @@ doorways → `design#5` couple dashboard → `design#7` the five gaps → `desig
 
 ## Order
 
-**1 → 2 → 3** first: a switch, a wall, and some copy — the three highest-value and none of them
-large. **Owner gate** any time before **4**. Then **4 → 6 → 5**, then **7 → 8**, then **9** when
-counsel clears, and **10** as the long tail.
+~~**1 → 2 → 3** first: a switch, a wall, and some copy — the three highest-value and none of them
+large.~~ ✅ **1, 2 and 3 are ALL DONE (2026-08-12). Do not start them again — read their entries
+above for what shipped and what is deliberately still open.**
+
+⏭ **What is actually next:** **Session 5 · 7 · 8** are unblocked today. **Session 4** is still held
+by the one owner sentence in the gate at the top of this file, and **6** follows 4 (they share the
+rail, so never run them together). **9** waits on counsel. **10** is the long tail.
+
+🔑 **This line said "1 → 2 → 3 first" while all three were finished.** A state line outlives the
+state it describes, and it is the line a new session reads first — the exact failure that made a
+session tell the owner to go review prototypes he had already approved. **When a session closes,
+edit every row that asserts it is open, in the same commit.**
 
 **State, 2026-08-12:** **1 ✅ DONE** (switched on in prod). **2 is IN FLIGHT — PR #4387 is OPEN,
 not merged** (its `DECISION_LOG` row was written ahead of the merge; verify the PR before
