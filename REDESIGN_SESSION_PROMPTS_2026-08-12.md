@@ -48,7 +48,13 @@ RULES THAT OVERRIDE YOUR DEFAULTS:
 
 ---
 
-# SESSION 1 · Turn Life-Flash on
+# SESSION 1 · Turn Life-Flash on — ✅ DONE 2026-08-12 · DO NOT RE-RUN
+
+> The switch is **ON in production** (cache-free rebuild `dpl_3ypALX…`, alias `www.setnayan.com`).
+> Nothing was built. Full row in `DECISION_LOG.md` 2026-08-12.
+> ⚠ **The switch is invisible from an anonymous request** — the sign-in gate runs before the
+> page's own check, so the route `307`s to `/login` identically on and off. Do not read that as
+> a failed flip.
 
 ```
 GOAL: a person can watch their own celebrations played back. One switch, after a real look.

@@ -22,7 +22,7 @@ name outlived its decision, or **flips a switch on something already built.**
 Three of the ten sessions are worth more than the other seven combined, and none of the three is
 a big build:
 
-- **Session 1 is one switch.** Life-Flash is finished and off.
+- ~~**Session 1 is one switch.** Life-Flash is finished and off.~~ ✅ **DONE 2026-08-12 — it is ON.**
 - **Session 2 removes a wall.** It is why the storyteller shelf is empty.
 - **Session 3 is copy.** It is why nobody can find a photographer.
 
@@ -50,8 +50,17 @@ Four smaller ones, none of which blocks a build for long:
 
 # THE SESSIONS
 
-## Session 1 · Turn Life-Flash on
-**One switch, a look, and a decision. Not a build.**
+## Session 1 · Turn Life-Flash on — ✅ **DONE 2026-08-12. The switch is ON in production.**
+**One switch, a look, and a decision. Not a build.** Nothing was built. Full row in
+`DECISION_LOG.md` 2026-08-12.
+> ⚠ **The switch is INVISIBLE from outside.** The dashboard's sign-in redirect runs before the
+> page's own check, so `/dashboard/life-flash` returns the same `307 → /login?next=%2Fdashboard`
+> whether it is on or off — measured before AND after the flip. **Do not read that 307 as a
+> failed flip.** The only proof is a signed-in eye on the *Play Life-Flash* button.
+> 🔑 The value is the digit **`1`**; `true` reads as OFF. The rebuild must run **without build
+> cache** or the old value stays compiled in.
+> ⏭ **One copy defect left open for the owner:** with no tagged people the home card reads
+> *"14 moments · 0 people who made them."*
 
 **What a person gets:** six years in ninety seconds — their own celebrations, played back.
 
@@ -240,6 +249,11 @@ doorways → `design#5` couple dashboard → `design#7` the five gaps → `desig
 **1 → 2 → 3** first: a switch, a wall, and some copy — the three highest-value and none of them
 large. **Owner gate** any time before **4**. Then **4 → 6 → 5**, then **7 → 8**, then **9** when
 counsel clears, and **10** as the long tail.
+
+**State, 2026-08-12:** **1 ✅ DONE** (switched on in prod). **2 is IN FLIGHT — PR #4387 is OPEN,
+not merged** (its `DECISION_LOG` row was written ahead of the merge; verify the PR before
+treating it as shipped). **3 is in flight** on branch `claude/session3-friendly-labels`.
+⚠ Re-verify every line here against the PR list before acting — this file rots.
 
 ## Traps that apply to every session
 
