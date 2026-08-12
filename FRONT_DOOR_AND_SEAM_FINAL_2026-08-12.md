@@ -1,5 +1,27 @@
 # The front door and the seam — finalized 2026-08-12
 
+> ## rev 3 — IT IS NOW WALKABLE (owner: *"make it interactive"*, 2026-08-12)
+>
+> The prototype is no longer a drawing. **Search really searches, the categories and chips really
+> filter, cards really open, and the round trip is a thing you press.**
+>
+> **The seam, in four presses:** signed out → open **Studio Azul** → press **Save this shop** →
+> sign in → the left menu swaps *while you stay on the shop, with it saved*. Then **Events** takes
+> you inside the app (terracotta), the **SETNAYAN** wordmark brings you back out still signed in,
+> and **Sign out only ever appears under your picture**. Verified by driving it: after Continue the
+> shop page is still mounted, the button reads *Saved*, the sign-in prompt is gone and *My Home* has
+> replaced it — no navigation happened.
+>
+> **The word bridge is real, not illustrated.** Typing *photographer* → **Photo & video**,
+> *caterer* → **Catering & cake**, *emcee* → **Hosts, music & program**, *photobooth* → **Booths,
+> carts & bars**. Every one of those is a word nobody's folder is called. Clicking a result filters
+> the feed and prints the honest footnote: *"shown as 'Documentary' on the live site today."*
+>
+> Also live: an empty category says so and offers to notify rather than showing nothing; the article
+> reader carries the **Sponsored** credit block; and the shop page reached *from an article* shows a
+> panel naming the tracking gap found on 2026-08-12 — that a Journal click currently loses its
+> origin, so a booking it produces is not counted as one we brought.
+>
 > ## rev 2 — rebuilt against YouTube's real desktop view (owner, 2026-08-12)
 >
 > The owner sent the actual YouTube desktop, signed in and signed out, and said

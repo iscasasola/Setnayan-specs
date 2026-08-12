@@ -3,23 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Setnayan — the front door and the seam · rev 2 · 2026-08-12</title>
+<title>Setnayan — the front door and the seam · rev 3 (interactive) · 2026-08-12</title>
 <style>
 /* ─────────────────────────────────────────────────────────────────────────
-   REV 2 — rebuilt against YouTube's real desktop anatomy (owner, 2026-08-12).
-   What changed from rev 1: a uniform grid instead of a magazine hero; the
-   YouTube card shape (thumbnail, avatar, two-line title, channel line, ⋮);
-   the rail regrouped the way YouTube groups it, which moves the personal
-   region ABOVE Explore; the signed-out sign-in prompt sits exactly where
-   YouTube puts it; small-print footer inside the rail.
+   REV 3 — INTERACTIVE. Everything below is clickable: search really searches,
+   the categories and chips really filter, cards really open, and THE SEAM IS
+   WALKABLE — press Save on a shop, sign in, and watch the rail swap in place
+   while you stay exactly where you were.
 
-   LOCKED TOKENS. The front door keeps its OWN look (owner 2026-08-11):
-   gold #8C6932 actions with cream labels, system typeface.
+   Palette is locked. The FRONT DOOR keeps its own look (owner 2026-08-11):
+   gold #8C6932 actions, system typeface. The APP wears terracotta #C24E25.
+   That difference is deliberate and you can cross it below.
    ───────────────────────────────────────────────────────────────────────── */
 :root{
   --cream:#FDFBF7; --ink:#2C2A29; --gold:#8C6932; --hi:#A9834B; --link:#3B4E67;
-  --m1:#6E6A62; --m2:#8A857B; --m3:#A09A8E; --line:#E1DCD1; --wash:#F3ECDF;
-  --hover:#F4EEE3;
+  --terra:#C24E25; --terra-h:#B04722;
+  --m1:#6E6A62; --m2:#8A857B; --m3:#A09A8E; --line:#E1DCD1; --wash:#F3ECDF; --hover:#F4EEE3;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sys: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --rail:240px;
@@ -29,12 +28,12 @@ html,body{margin:0;background:#EFEAE0;color:var(--ink);font-family:var(--sys);
   -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.5}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-align:left}
+[data-act]{cursor:pointer}
 
-/* ── scaffolding (NOT page content) ─────────────────────────────────────── */
-.scaffold{position:sticky;top:0;z-index:90;background:#211F1D;color:#EFE9DD;
-  padding:10px 16px;display:flex;gap:22px;align-items:center;flex-wrap:wrap;
-  box-shadow:0 10px 30px -18px rgba(0,0,0,.8)}
+/* ── scaffolding ────────────────────────────────────────────────────────── */
+.scaffold{position:sticky;top:0;z-index:90;background:#211F1D;color:#EFE9DD;padding:10px 16px;
+  display:flex;gap:20px;align-items:center;flex-wrap:wrap;box-shadow:0 10px 30px -18px rgba(0,0,0,.8)}
 .scaffold .tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9A9186;
   border:1px solid #4A443C;border-radius:4px;padding:3px 7px}
 .sgroup{display:flex;align-items:center;gap:8px}
@@ -45,967 +44,971 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .jump{margin-left:auto;display:flex;gap:6px}
 .jump a{font-size:12px;padding:6px 10px;border:1px solid #4A443C;border-radius:8px;color:#C9C1B5}
 
-.wrap{max-width:1512px;margin:0 auto;padding:28px 22px 96px}
-.chapter{margin:52px 0 18px}
+.wrap{max-width:1512px;margin:0 auto;padding:26px 22px 96px}
+.chapter{margin:48px 0 16px}
 .chapter h2{font-size:24px;margin:0 0 6px;letter-spacing:-.015em}
 .chapter p{margin:0;color:var(--m1);max-width:80ch;font-size:14px}
 .note{border-left:2px solid var(--hi);padding:2px 0 2px 12px;margin:14px 0;color:var(--m1);
   font-size:13px;max-width:82ch}
 .note b{color:var(--ink)}
-.caption{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--m2);
-  margin:0 0 8px;font-weight:650}
+.try{border-left-color:var(--terra);background:#FDF7F3;border-radius:0 8px 8px 0;padding:10px 14px}
+.try b{color:var(--terra)}
+.caption{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--m2);margin:0 0 8px;
+  font-weight:650}
 .device{background:var(--cream);border:1px solid var(--line);border-radius:14px;
-  box-shadow:0 1px 2px rgba(44,42,41,.05),0 20px 50px -34px rgba(44,42,41,.4);overflow:hidden}
+  box-shadow:0 1px 2px rgba(44,42,41,.05),0 20px 50px -34px rgba(44,42,41,.4);overflow:hidden;
+  position:relative}
 .device.desk{width:100%;max-width:1400px}
-.device.phone{width:390px;flex:0 0 390px;position:relative}
+.device.phone{width:390px;flex:0 0 390px}
 .stage{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;margin-top:18px}
 
-/* ══ TOP BAR — hamburger · wordmark · centred search · right cluster ═════ */
-.topbar{display:grid;grid-template-columns:1fr minmax(0,660px) 1fr;align-items:center;
-  gap:16px;padding:8px 16px;background:var(--cream);position:relative;z-index:12}
-.tb-l{display:flex;align-items:center;gap:14px}
-.iconbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:17px;
-  color:var(--ink)}
+/* ── top bar ────────────────────────────────────────────────────────────── */
+.topbar{display:grid;grid-template-columns:1fr minmax(0,640px) 1fr;align-items:center;gap:16px;
+  padding:8px 16px;background:var(--cream);position:relative;z-index:12}
+.tb-l{display:flex;align-items:center;gap:12px}
+.iconbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:16px}
 .iconbtn:hover{background:var(--hover)}
-.wordmark{font-weight:800;letter-spacing:.15em;font-size:15px;position:relative}
+.wordmark{font-weight:800;letter-spacing:.15em;font-size:15px;position:relative;padding-right:14px}
 .wordmark sup{font-size:8px;font-weight:600;letter-spacing:.06em;color:var(--m2);
-  position:absolute;top:-2px;right:-16px}
+  position:absolute;top:-2px;right:0}
 .searchwrap{display:flex;align-items:center;gap:8px}
 .searchbox{flex:1;display:flex;align-items:center;border:1px solid var(--line);border-radius:999px;
   overflow:hidden;background:#fff;height:40px}
-.searchbox input{border:0;outline:0;flex:1;background:transparent;font:inherit;font-size:14px;
-  padding:0 16px}
-.searchgo{width:60px;height:100%;display:grid;place-items:center;background:#F6F1E7;
-  border-left:1px solid var(--line);color:var(--m1);font-size:15px}
+.searchbox input{border:0;outline:0;flex:1;background:transparent;font:inherit;font-size:14px;padding:0 16px}
+.searchgo{width:58px;align-self:stretch;display:grid;place-items:center;background:#F6F1E7;
+  border-left:1px solid var(--line);color:var(--m1)}
 .micbtn{width:40px;height:40px;border-radius:50%;background:#F6F1E7;display:grid;place-items:center;
   color:var(--m1);flex:0 0 40px}
-.tb-r{display:flex;align-items:center;justify-content:flex-end;gap:8px}
-.btn-pill{min-height:36px;padding:0 14px;border-radius:999px;background:#F6F1E7;
-  display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600}
+.tb-r{display:flex;align-items:center;justify-content:flex-end;gap:8px;position:relative}
+.btn-pill{min-height:36px;padding:0 14px;border-radius:999px;background:#F6F1E7;display:inline-flex;
+  align-items:center;gap:7px;font-size:13.5px;font-weight:600}
 .btn-signin{min-height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--line);
   display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:650;color:var(--link)}
 .btn-gold{min-height:36px;padding:0 15px;border-radius:999px;background:var(--gold);color:var(--cream);
   display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:650}
+.btn-gold:hover{background:#7A5B2B}
 .avatar{width:32px;height:32px;border-radius:50%;background:var(--wash);border:1px solid var(--line);
-  display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--gold)}
+  display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--gold);font-family:var(--mono)}
 .bell{position:relative}
-.bell .dot{position:absolute;top:4px;right:4px;background:var(--gold);color:var(--cream);
-  font-size:9px;font-weight:700;border-radius:999px;padding:0 4px;line-height:14px}
+.bell b{position:absolute;top:3px;right:3px;background:var(--gold);color:var(--cream);font-size:9px;
+  font-weight:700;border-radius:999px;padding:0 4px;line-height:14px}
+.acctmenu{position:absolute;top:46px;right:0;width:230px;background:var(--cream);border:1px solid var(--line);
+  border-radius:12px;box-shadow:0 24px 50px -26px rgba(44,42,41,.45);padding:6px;z-index:30}
+.acctmenu button{display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:0 12px;
+  border-radius:9px;font-size:13.5px}
+.acctmenu button:hover{background:var(--hover)}
+.acctmenu .hdr{padding:8px 12px 6px;font-size:12px;color:var(--m2);border-bottom:1px solid var(--line);
+  margin-bottom:4px}
 
-/* ══ LAYOUT ═════════════════════════════════════════════════════════════ */
+/* ── layout ─────────────────────────────────────────────────────────────── */
 .body{display:grid;grid-template-columns:var(--rail) 1fr}
 .rail{padding:10px 8px 26px;height:760px;overflow:auto}
 .rail::-webkit-scrollbar{width:8px}.rail::-webkit-scrollbar-thumb{background:#E6DFD2;border-radius:8px}
-.feed{height:760px;overflow:auto;padding:0 24px 40px}
-.feed::-webkit-scrollbar{width:10px}.feed::-webkit-scrollbar-thumb{background:#E6DFD2;border-radius:8px}
+.main{height:760px;overflow:auto;padding:0 24px 40px;position:relative}
+.main::-webkit-scrollbar{width:10px}.main::-webkit-scrollbar-thumb{background:#E6DFD2;border-radius:8px}
 
-/* rail rows — YouTube's flat, borderless, 40px rows */
 .row{display:flex;align-items:center;gap:14px;min-height:44px;padding:0 12px;border-radius:10px;
-  font-size:14px;position:relative}
+  font-size:14px;position:relative;width:100%}
 .row:hover{background:var(--hover)}
 .row .ct{margin-left:auto;font-size:11.5px;color:var(--m3)}
-.row[data-active=true]{background:var(--wash);font-weight:650}
-.row[data-active=true]::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;
+.row[data-on=true]{background:var(--wash);font-weight:650}
+.row[data-on=true]::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;
   border-radius:0 3px 3px 0;background:var(--gold)}
 .gi{width:20px;flex:0 0 20px;text-align:center;color:var(--m1);font-size:15px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--hi);flex:0 0 6px;margin:0 7px}
-.rdiv{height:1px;background:var(--line);margin:12px 12px}
+.rdiv{height:1px;background:var(--line);margin:12px}
 .rlabel{font-size:15px;font-weight:650;padding:8px 12px 4px;display:flex;align-items:center;gap:6px}
-.rlabel small{font-size:11px;color:var(--m3);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
-.more{font-size:14px;color:var(--m1);padding:0 12px;min-height:44px;display:flex;align-items:center;gap:14px}
-.more:hover{background:var(--hover);border-radius:10px}
-
-/* the personal region — where YouTube puts Subscriptions + You */
+.rlabel small{font-size:11px;color:var(--m3);font-weight:500}
 .signin-prompt{padding:12px 12px 4px}
 .signin-prompt p{margin:0 0 12px;font-size:13.5px;color:var(--m1);line-height:1.45}
 .btn-signin-lg{min-height:40px;padding:0 15px;border-radius:999px;border:1px solid var(--line);
   display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:650;color:var(--link)}
-.area{display:flex;align-items:center;gap:14px;min-height:44px;padding:0 12px;font-size:14px;
-  border-radius:10px}
-.area:hover{background:var(--hover)}
-.area .ct{margin-left:auto;font-size:11.5px;color:var(--m3)}
+.btn-signin-lg:hover{background:var(--hover)}
 .notice{padding:8px 12px 10px;font-size:12.5px;color:var(--m1);line-height:1.45}
-.notice b{display:flex;align-items:center;gap:7px;color:var(--ink);font-size:14px;font-weight:500;
-  margin-bottom:3px}
-.soon{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);
-  border:1px solid #E3D6BE;background:#FBF5E9;border-radius:4px;padding:2px 5px;font-weight:700}
+.notice b{display:flex;align-items:center;gap:7px;color:var(--ink);font-size:14px;font-weight:500;margin-bottom:3px}
+.soon{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid #E3D6BE;
+  background:#FBF5E9;border-radius:4px;padding:2px 5px;font-weight:700}
 .smallprint{padding:14px 12px 0;font-size:12px;color:var(--m2);line-height:1.75}
-.smallprint a{margin-right:9px;display:inline-block}
-.smallprint a:hover{color:var(--ink)}
+.smallprint span{margin-right:9px;display:inline-block;cursor:pointer}
+.smallprint span:hover{color:var(--ink)}
 .smallprint .copy{color:var(--m3);margin-top:12px;font-size:11.5px}
 .smallprint .tag2{color:var(--m3);font-style:italic;margin-top:4px;font-size:11.5px}
 
-/* ══ CHIP ROW ═══════════════════════════════════════════════════════════ */
-.chipbar{position:sticky;top:0;background:var(--cream);z-index:8;display:flex;align-items:center;
-  gap:8px;padding:12px 0 12px}
-.chips{display:flex;gap:8px;overflow:hidden;flex:1}
+/* ── chips ──────────────────────────────────────────────────────────────── */
+.chipbar{position:sticky;top:0;background:var(--cream);z-index:8;display:flex;align-items:center;gap:8px;
+  padding:12px 0}
+.chips{display:flex;gap:8px;flex:1;overflow:hidden}
 .chip{flex:0 0 auto;min-height:32px;padding:0 12px;border-radius:8px;background:#F2ECE0;
   display:inline-flex;align-items:center;font-size:13.5px;white-space:nowrap}
+.chip:hover{background:#E9E1D2}
 .chip[data-on=true]{background:var(--ink);color:var(--cream)}
 .chipnext{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#F2ECE0;
   flex:0 0 32px;color:var(--m1)}
 
-/* ══ CARD — YouTube anatomy: thumbnail is the object, text sits on the page ═ */
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 16px;margin-bottom:26px}
+/* ── cards ──────────────────────────────────────────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
 .item{min-width:0}
 .thumb{aspect-ratio:16/9;border-radius:12px;position:relative;overflow:hidden;
-  background:linear-gradient(135deg,#E7DECD,#D8CDB9);display:grid;place-items:center;
-  color:#B0A48A;font-size:10.5px;letter-spacing:.14em}
+  background:linear-gradient(135deg,#E7DECD,#D8CDB9);display:grid;place-items:center;color:#B0A48A;
+  font-size:10.5px;letter-spacing:.14em}
+.item:hover .thumb{filter:brightness(.97)}
 .thumb .dur{position:absolute;right:6px;bottom:6px;background:rgba(30,28,26,.85);color:#F5F1E8;
   border-radius:4px;padding:1px 5px;font-size:11.5px;font-family:var(--mono)}
-.thumb .livetag{position:absolute;left:6px;bottom:6px;background:#B03A2A;color:#fff;
-  border-radius:4px;padding:1px 6px;font-size:10.5px;font-weight:700;letter-spacing:.06em}
 .imeta{display:flex;gap:12px;padding-top:11px}
-.ava{width:36px;height:36px;border-radius:50%;flex:0 0 36px;background:var(--wash);
-  border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:700;
-  color:var(--gold);font-family:var(--mono)}
+.ava{width:36px;height:36px;border-radius:50%;flex:0 0 36px;background:var(--wash);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--gold);font-family:var(--mono)}
 .itxt{flex:1;min-width:0}
-.ttl{font-size:15px;font-weight:600;line-height:1.35;margin:0 0 4px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.by{font-size:13px;color:var(--m2);line-height:1.45}
-.by .vf{color:var(--m3)}
-.kebab{flex:0 0 24px;color:var(--m2);text-align:center;font-size:16px;line-height:1}
-
-/* section header, like "Breaking news" */
+.ttl{font-size:15px;font-weight:600;line-height:1.35;margin:0 0 4px;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.by{font-size:13px;color:var(--m2);line-height:1.45;margin:0}
+.kebab{flex:0 0 20px;color:var(--m2);text-align:center}
 .sechead{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
 .sechead h3{font-size:19px;margin:0;letter-spacing:-.01em}
 .sechead .meta{font-size:13px;color:var(--m2)}
 .sechead .rule{margin-left:auto;font-size:11.5px;color:var(--m3)}
 .sechead .badge{width:22px;height:22px;border-radius:6px;background:var(--gold);color:var(--cream);
   display:grid;place-items:center;font-size:12px}
-
-/* stories row (the Shorts equivalent) */
 .storyrow{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:26px}
-.story .sthumb{aspect-ratio:9/16;border-radius:12px;position:relative;overflow:hidden;
+.sthumb{aspect-ratio:9/16;border-radius:12px;position:relative;overflow:hidden;
   background:linear-gradient(160deg,#E5DBC8,#D3C7B1);border:1px solid var(--line)}
-.story .sthumb .min{position:absolute;top:8px;left:8px;background:rgba(30,28,26,.8);color:#F3EEE4;
-  border-radius:4px;padding:2px 5px;font-size:10px;font-family:var(--mono)}
-.story .sttl{font-size:13.5px;font-weight:600;line-height:1.35;margin:9px 0 3px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.story .sby{font-size:12.5px;color:var(--m2)}
-
-/* written invitation — occupies a row slot, never a fake door */
+.story:hover .sthumb{filter:brightness(.97)}
+.sthumb .min{position:absolute;top:8px;left:8px;background:rgba(30,28,26,.8);color:#F3EEE4;border-radius:4px;
+  padding:2px 5px;font-size:10px;font-family:var(--mono)}
+.sttl{font-size:13.5px;font-weight:600;line-height:1.35;margin:9px 0 3px;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sby{font-size:12.5px;color:var(--m2);margin:0}
 .invite{border:1px dashed #DCD3C2;border-radius:12px;padding:20px 22px;background:#FCF8F1;
   display:flex;flex-direction:column;justify-content:center}
-.invite h4{margin:0 0 7px;font-size:16px;letter-spacing:-.01em}
+.invite h4{margin:0 0 7px;font-size:16px}
 .invite p{margin:0 0 13px;color:var(--m1);font-size:13.5px;line-height:1.55}
 .invite .go{font-size:13.5px;color:var(--link);font-weight:650}
-.invite.wide{grid-column:span 2}
-.invite.full{grid-column:1/-1}
+.invite.wide{grid-column:span 2}.invite.full{grid-column:1/-1}
+.emptyq{padding:36px 8px;color:var(--m1);font-size:14px}
+.emptyq b{display:block;color:var(--ink);font-size:16px;margin-bottom:6px}
 
-/* search panel */
+/* ── search panel ───────────────────────────────────────────────────────── */
 .searchpanel{position:absolute;left:50%;transform:translateX(-50%);top:52px;width:640px;max-width:92%;
   background:var(--cream);border:1px solid var(--line);border-radius:14px;
-  box-shadow:0 30px 60px -30px rgba(44,42,41,.45);z-index:20;overflow:hidden}
-.sgrouphd{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--m3);
-  padding:12px 16px 6px;font-weight:700;border-top:1px solid var(--line)}
+  box-shadow:0 30px 60px -30px rgba(44,42,41,.45);z-index:25;overflow:hidden;max-height:420px;overflow-y:auto}
+.sgrouphd{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--m3);padding:12px 16px 6px;
+  font-weight:700;border-top:1px solid var(--line)}
 .sgrouphd:first-child{border-top:0}
-.sres{display:flex;align-items:center;gap:11px;min-height:44px;padding:0 16px;font-size:14px}
+.sres{display:flex;align-items:center;gap:11px;min-height:44px;padding:6px 16px;font-size:14px;width:100%}
 .sres:hover{background:var(--hover)}
 .sres .in{color:var(--m2);font-size:12.5px}
-.sres .fold{color:var(--ink);font-weight:650;font-size:12.5px;background:var(--wash);border-radius:5px;
-  padding:2px 7px}
+.fold{color:var(--ink);font-weight:650;font-size:12.5px;background:var(--wash);border-radius:5px;
+  padding:2px 7px;white-space:nowrap}
 .hlt{background:var(--wash);color:#5C4726;border-radius:3px;padding:0 2px;font-weight:650}
-.sres .rt{margin-left:auto;font-size:11.5px;color:var(--m3);font-family:var(--mono)}
-.snone{padding:10px 16px 14px;font-size:12.5px;color:var(--m1);line-height:1.5}
+.sres .rt{margin-left:auto;font-size:11.5px;color:var(--m3);font-family:var(--mono);white-space:nowrap}
+.snone{padding:8px 16px 14px;font-size:12.5px;color:var(--m1);line-height:1.5}
+.snone u{cursor:pointer;color:var(--link);font-weight:650;text-decoration:none}
 
-/* ══ PHONE ══════════════════════════════════════════════════════════════ */
+/* ── reader / shop / doorway ────────────────────────────────────────────── */
+.back{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border-radius:999px;
+  font-size:13.5px;font-weight:600;margin:14px 0 4px;border:1px solid var(--line)}
+.back:hover{background:var(--hover)}
+.reader{max-width:720px;padding-bottom:30px}
+.reader .kick{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  font-weight:700;margin:10px 0 8px}
+.reader h1{font-size:34px;line-height:1.15;letter-spacing:-.02em;margin:0 0 10px}
+.reader .sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
+.reader .hero{aspect-ratio:16/8;border-radius:12px;background:linear-gradient(135deg,#E7DECD,#D8CDB9);
+  display:grid;place-items:center;color:#B0A48A;font-size:11px;letter-spacing:.14em;margin-bottom:22px}
+.reader p{font-size:16px;line-height:1.65;color:#3B3835;margin:0 0 16px}
+.credit{border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:26px;background:#FAF6EE}
+.credit h4{margin:0 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--m2)}
+.creditrow{display:flex;align-items:center;gap:12px;padding:12px 0 4px}
+.creditrow .ava{width:44px;height:44px;flex:0 0 44px;font-size:13px}
+.sponsored{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;background:rgba(44,42,41,.07);
+  color:#57534E;border-radius:999px;padding:2px 7px;font-weight:700;font-family:var(--mono)}
+.viewprof{margin-left:auto;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);
+  display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:650;color:var(--link)}
+.viewprof:hover{background:var(--hover)}
+.credit .fine{font-size:12px;color:var(--m3);margin:10px 0 0}
+
+.shop{max-width:840px;padding-bottom:30px}
+.shophero{aspect-ratio:16/6;border-radius:12px;background:linear-gradient(135deg,#E4DAC6,#D3C7B1);
+  display:grid;place-items:center;color:#A99C82;font-size:11px;letter-spacing:.14em;margin-bottom:0}
+.shophd{display:flex;align-items:flex-end;gap:16px;margin-top:-28px;padding:0 6px 0 18px;position:relative}
+.shopava{width:76px;height:76px;border-radius:18px;background:var(--wash);border:2px solid var(--cream);
+  display:grid;place-items:center;font-size:22px;font-weight:700;color:var(--gold);font-family:var(--mono);
+  box-shadow:0 8px 20px -12px rgba(44,42,41,.5)}
+.shophd h1{font-size:26px;margin:0 0 2px;letter-spacing:-.02em}
+.shophd .sub{color:var(--m2);font-size:13.5px;margin:0}
+.shopacts{margin-left:auto;display:flex;gap:8px;align-items:center;padding-bottom:4px}
+.btn-out{min-height:40px;padding:0 15px;border-radius:999px;border:1px solid var(--line);
+  display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:650}
+.btn-out:hover{background:var(--hover)}
+.btn-out[data-saved=true]{background:var(--wash);border-color:#DBCEB4;color:var(--gold)}
+.shopbody{display:grid;grid-template-columns:1fr 300px;gap:24px;margin-top:22px}
+.panel{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--cream)}
+.panel h4{margin:0 0 10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--m2)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:13.5px;
+  border-bottom:1px solid var(--line)}
+.kv:last-child{border-bottom:0}
+.kv span:last-child{color:var(--m1);font-family:var(--mono);font-size:12.5px}
+.promo{border:1px solid #E3D6BE;background:#FBF5E9;border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.promo b{display:block;font-size:13.5px;margin-bottom:4px}
+.promo p{margin:0;font-size:12.5px;color:var(--m1);line-height:1.5}
+.doorway{max-width:620px;padding:34px 0}
+.doorway h1{font-size:32px;margin:0 0 10px;letter-spacing:-.02em}
+.doorway p{color:var(--m1);font-size:15px;line-height:1.6;margin:0 0 20px}
+
+/* ── overlays ───────────────────────────────────────────────────────────── */
+.scrim{position:absolute;inset:0;background:rgba(38,35,32,.42);z-index:40;display:grid;place-items:center;
+  padding:20px}
+.modal{width:400px;max-width:100%;background:var(--cream);border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 40px 80px -30px rgba(30,26,22,.6);padding:24px;position:relative}
+.modal h3{margin:0 0 6px;font-size:20px;letter-spacing:-.01em}
+.modal p{margin:0 0 18px;color:var(--m1);font-size:13.5px;line-height:1.5}
+.field{border:1px solid var(--line);border-radius:10px;background:#fff;padding:11px 13px;font-size:13.5px;
+  color:var(--m2);margin-bottom:9px}
+.btn-terra{min-height:46px;border-radius:10px;background:var(--terra);color:var(--cream);width:100%;
+  display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:650}
+.btn-terra:hover{background:var(--terra-h)}
+.modal .why{font-size:11.5px;color:var(--m3);margin:12px 0 0;line-height:1.5}
+.modal .x{position:absolute;top:10px;right:10px}
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;background:#211F1D;color:#F3EEE4;
+  padding:11px 16px;border-radius:999px;font-size:13px;z-index:45;box-shadow:0 20px 40px -20px rgba(0,0,0,.7);
+  display:flex;align-items:center;gap:9px;max-width:90%}
+.toast b{color:#E4C98F}
+
+/* ── the APP view (terracotta) ──────────────────────────────────────────── */
+.appbar{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.appbar .ev{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--m1)}
+.evchip{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600}
+.appbody{display:grid;grid-template-columns:216px 1fr;height:719px}
+.apprail{border-right:1px solid var(--line);padding:12px 8px;overflow:auto}
+.apprail .row[data-on=true]{background:rgba(194,78,37,.10);font-weight:650}
+.apprail .row[data-on=true]::before{background:var(--terra)}
+.appmain{padding:22px 26px;overflow:auto}
+.appmain h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
+.appmain .sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--cream)}
+.tile b{display:block;font-size:14.5px;margin-bottom:3px}
+.tile p{margin:0;font-size:12.5px;color:var(--m2);line-height:1.45}
+.tile .n{font-family:var(--mono);font-size:24px;color:var(--terra);display:block;margin-bottom:2px}
+.btn-terra-sm{min-height:40px;padding:0 15px;border-radius:999px;background:var(--terra);color:var(--cream);
+  display:inline-flex;align-items:center;font-size:13.5px;font-weight:650}
+
+/* ── phone ──────────────────────────────────────────────────────────────── */
 .ph-top{display:flex;align-items:center;justify-content:space-between;padding:10px 12px}
-.ph-body{height:720px;overflow:auto;padding:0 12px 30px}
-.ph-body::-webkit-scrollbar{width:0}
+.ph-main{height:660px;overflow:auto;padding:0 12px 30px}
+.ph-main::-webkit-scrollbar{width:0}
 .ph-grid{display:grid;grid-template-columns:1fr;gap:20px}
-.ph-grid .thumb{border-radius:0;margin:0 -12px;width:calc(100% + 24px)}
 .ph-stories{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.sheet{position:absolute;inset:0;background:var(--cream);z-index:30;padding:10px 8px 24px;overflow:auto}
+.sheet{position:absolute;inset:0;background:var(--cream);z-index:35;padding:10px 8px 24px;overflow:auto}
 .sheet-hd{display:flex;align-items:center;justify-content:space-between;padding:2px 8px 8px}
 .pillnav{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:5px;align-items:center;
-  border:1px solid rgba(44,42,41,.14);border-radius:16px;background:rgba(255,255,255,.9);
+  border:1px solid rgba(44,42,41,.14);border-radius:16px;background:rgba(255,255,255,.92);
   backdrop-filter:blur(20px);padding:6px;box-shadow:0 24px 50px -24px rgba(30,26,18,.55);z-index:20}
-.pillnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;
+.pillnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;
   font-weight:650;color:var(--m1);padding:6px 0;border-radius:11px;min-height:44px;justify-content:center}
-.pillnav a[data-on=true]{color:var(--ink)}
-.pillnav .knob{flex:0 0 auto;background:var(--ink);color:#fff;border-radius:11px;padding:10px 15px;min-height:44px}
+.pillnav button[data-on=true]{color:var(--ink)}
+.pillnav .knob{flex:0 0 auto;background:var(--ink);color:#fff;border-radius:11px;padding:10px 16px;min-height:44px}
 
-/* ══ SEAM STORYBOARD ════════════════════════════════════════════════════ */
+/* ── static sections ────────────────────────────────────────────────────── */
 .board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px}
 .frame{background:var(--cream);border:1px solid var(--line);border-radius:12px;overflow:hidden;
-  display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(44,42,41,.04)}
+  display:flex;flex-direction:column}
 .frame .fh{padding:9px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
-.frame .fh .n{font-family:var(--mono);font-size:11px;color:var(--cream);background:var(--ink);
-  width:20px;height:20px;border-radius:50%;display:grid;place-items:center}
+.frame .fh .n{font-family:var(--mono);font-size:11px;color:var(--cream);background:var(--ink);width:20px;
+  height:20px;border-radius:50%;display:grid;place-items:center}
 .frame .fh b{font-size:12.5px}
-.mini{padding:12px;flex:1;display:flex;gap:9px}
-.mrail{width:60px;flex:0 0 60px;border:1px solid var(--line);border-radius:8px;padding:6px 5px;
-  display:flex;flex-direction:column;gap:4px;background:#fff}
-.mrow{height:8px;border-radius:3px;background:#EDE6D9}
-.mrow.gold{background:#E3D2AE}
-.mrow.tall{height:30px;background:#F1E7D2;border:1px solid #E3D6BE}
-.mrow.ink{background:#D9D3C8}
-.mmain{flex:1;border:1px solid var(--line);border-radius:8px;background:#fff;padding:7px;
-  display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start}
-.mblk{height:26px;border-radius:5px;background:#F2EBDD}
-.mblk.warm{background:#F6EEDC}
-.mblk.span{grid-column:1/-1}
-.fnote{padding:10px 12px 13px;font-size:12px;color:var(--m1);line-height:1.5;border-top:1px solid var(--line)}
+.fnote{padding:11px 12px 13px;font-size:12px;color:var(--m1);line-height:1.5}
 .fnote b{color:var(--ink)}
-.arrowline{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--m2);
-  letter-spacing:.1em;text-transform:uppercase;margin:24px 0 0}
-.arrowline i{flex:1;height:1px;background:var(--line);font-style:normal}
-
 table{width:100%;border-collapse:collapse;background:var(--cream);border:1px solid var(--line);
   border-radius:12px;overflow:hidden;font-size:13.5px;margin-top:14px}
 th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--m2);font-weight:700;
-  background:#FAF6EE}
+th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--m2);font-weight:700;background:#FAF6EE}
 tr:last-child td{border-bottom:0}
 td.n{font-family:var(--mono);color:var(--m1);white-space:nowrap}
-.was{color:var(--m3);text-decoration:line-through}
-.now{font-weight:650}
+.was{color:var(--m3);text-decoration:line-through}.now{font-weight:650}
 .hidden{display:none !important}
-@media (max-width:1240px){ .grid{grid-template-columns:repeat(3,1fr)} .storyrow{grid-template-columns:repeat(4,1fr)}
-  .board{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:1240px){.grid{grid-template-columns:repeat(3,1fr)}.storyrow{grid-template-columns:repeat(4,1fr)}
+  .board{grid-template-columns:repeat(2,1fr)}.shopbody{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
 <div class="scaffold">
   <span class="tag">scaffolding · not page content</span>
-  <div class="sgroup"><span>Screen</span>
-    <div class="seg" id="segScreen">
-      <button data-v="desk" aria-pressed="true">Desktop</button>
-      <button data-v="phone" aria-pressed="false">Phone</button>
-    </div></div>
-  <div class="sgroup"><span>Catalogue</span>
-    <div class="seg" id="segDay">
-      <button data-v="launch" aria-pressed="true">Launch day (real)</button>
-      <button data-v="later" aria-pressed="false">Later</button>
-    </div></div>
-  <div class="sgroup"><span>You</span>
-    <div class="seg" id="segWho">
-      <button data-v="out" aria-pressed="true">Signed out</button>
-      <button data-v="couple" aria-pressed="false">Couple</button>
-      <button data-v="vendor" aria-pressed="false">Vendor</button>
-    </div></div>
-  <div class="jump">
-    <a href="#doorSec">Front door</a><a href="#homeSec">My Home</a>
-    <a href="#seamSec">The seam</a><a href="#decisions">Decisions</a>
-  </div>
+  <div class="sgroup"><span>Screen</span><div class="seg" id="segScreen">
+    <button data-v="desk" aria-pressed="true">Desktop</button>
+    <button data-v="phone" aria-pressed="false">Phone</button></div></div>
+  <div class="sgroup"><span>Catalogue</span><div class="seg" id="segDay">
+    <button data-v="launch" aria-pressed="true">Launch day (real)</button>
+    <button data-v="later" aria-pressed="false">Later</button></div></div>
+  <div class="sgroup"><span>You</span><div class="seg" id="segWho">
+    <button data-v="out" aria-pressed="true">Signed out</button>
+    <button data-v="couple" aria-pressed="false">Couple</button>
+    <button data-v="vendor" aria-pressed="false">Vendor</button></div></div>
+  <div class="jump"><a href="#doorSec">Front door</a><a href="#seamSec">The seam</a>
+    <a href="#decisions">Decisions</a></div>
 </div>
 
 <div class="wrap">
 
-<!-- ══ 1 · FRONT DOOR ═════════════════════════════════════════════════════ -->
 <section id="doorSec">
   <div class="chapter">
-    <h2>1 · The front door — YouTube's desktop anatomy</h2>
-    <p>Rebuilt against the real thing: hamburger and wordmark left, search centred with its own
-    button and a mic beside it, the account cluster right. A filter chip row that scrolls. Then a
-    <b>uniform four-across grid</b> — no hero, no magazine layout — broken only by a tall-card row
-    and the occasional section heading.</p>
+    <h2>1 · The front door — live</h2>
+    <p>Everything here works. Search really searches, the categories and chips really filter, cards
+    really open, and you can walk the whole round trip from a stranger reading an article to a
+    member inside the app and back out again.</p>
   </div>
 
+  <div class="note try">
+    <b>Walk the seam in four presses.</b> Signed out → open <b>Studio Azul</b> (bottom of the feed)
+    → press <b>Save this shop</b> → sign in → watch the left menu swap while you stay on the shop,
+    with it saved. Then <b>Events</b> in the menu takes you inside the app, and the
+    <b>SETNAYAN</b> wordmark brings you back out still signed in. Signing out only ever happens
+    under your picture, top right.
+  </div>
   <div class="note">
-    <b>Three things the reference settled that I had drawn differently.</b>
-    ① <b>The grid replaced my hero card.</b> A uniform grid is what makes a page look full — and on
-    launch day it is what lets 33 articles fill a front page that would otherwise read as four
-    apologies. ② <b>A card has no border and no shadow.</b> The thumbnail is the object; the text
-    sits directly on the page. That honours the "never a second surface" lock more strictly than a
-    bordered card did. ③ <b>The personal block moved above Explore</b> — the reference puts the
-    account region second, right under the destinations, and that is the answer to the open
-    question of whether My Home should be pinned higher. It should.
+    <b>Try search too.</b> Type <b>photographer</b>, <b>caterer</b>, <b>emcee</b> or
+    <b>photobooth</b> — none of those is a category name, and the panel shows your word with our
+    folder beside it as a place. That is the real problem this page had to solve.
   </div>
 
   <div class="stage" data-screen="desk">
     <div style="flex:1;min-width:0">
-      <p class="caption">Desktop · <span data-daylabel>launch day</span></p>
-      <div class="device desk">
-
-        <!-- top bar -->
-        <div class="topbar">
-          <div class="tb-l">
-            <span class="iconbtn">☰</span>
-            <span class="wordmark">SETNAYAN<sup>PH</sup></span>
-          </div>
-          <div class="searchwrap">
-            <div class="searchbox">
-              <input id="q" placeholder="Search" autocomplete="off">
-              <span class="searchgo">⌕</span>
-            </div>
-            <span class="micbtn">🎙</span>
-          </div>
-          <div class="tb-r" data-when="out">
-            <span class="iconbtn">⋮</span>
-            <span class="btn-gold">Start planning — free</span>
-            <span class="btn-signin">◍ Sign in</span>
-          </div>
-          <div class="tb-r hidden" data-when="in">
-            <span class="btn-pill">＋ Create</span>
-            <span class="iconbtn bell">🔔<span class="dot">3</span></span>
-            <span class="avatar" data-initials>CI</span>
-          </div>
-
-          <div class="searchpanel hidden" id="panel">
-            <div class="sgrouphd">01 · Vendors</div>
-            <div class="sres"><span class="fold">Photo &amp; video</span>
-              <span><span class="hlt">photograph</span>y</span><span class="in">in Photo &amp; video</span>
-              <span class="rt">12 services</span></div>
-            <div class="sres"><span class="fold">Photo &amp; video</span>
-              <span>pre-nup <span class="hlt">photograph</span>er</span><span class="in">in Photo &amp; video</span></div>
-            <div class="sres"><span class="fold">Photo &amp; video</span>
-              <span>studio portrait <span class="hlt">photograph</span>er</span><span class="in">in Photo &amp; video</span></div>
-            <div class="snone">No shops in Photo &amp; video yet.
-              <a href="#" style="color:var(--link);font-weight:650">Tell me when one opens →</a></div>
-            <div class="sgrouphd">02 · Tools</div>
-            <div class="sres">Papic <span class="in">— everyone's photos, in one gallery</span></div>
-            <div class="sgrouphd">03 · The Journal</div>
-            <div class="sres">What a wedding <span class="hlt">photograph</span>er actually costs in Metro Manila
-              <span class="rt">7 min</span></div>
-            <div class="sres">Pre-nup or no pre-nup <span class="rt">5 min</span></div>
-          </div>
-        </div>
-
-        <div class="body">
-          <!-- ══ RAIL — grouped the way the reference groups it ══ -->
-          <nav class="rail" aria-label="Sections">
-            <!-- group 1 · destinations -->
-            <a class="row" data-active="true"><span class="gi">⌂</span> Home</a>
-            <a class="row" data-spy="stories"><span class="gi">◎</span> Stories</a>
-            <a class="row" data-spy="journal"><span class="gi">▤</span> Journal</a>
-            <a class="row" data-spy="vendors"><span class="gi">⌕</span> Find a supplier</a>
-            <div class="rdiv"></div>
-
-            <!-- group 2 · the personal region — where the reference puts it -->
-            <div data-when="out">
-              <div class="signin-prompt">
-                <p>Sign in to save suppliers, plan your event, and keep your photos.</p>
-                <span class="btn-signin-lg">◍ Sign in</span>
-              </div>
-            </div>
-            <div class="hidden" data-when="in">
-              <div class="rlabel">My Home <small>›</small></div>
-              <a class="area"><span class="gi">▦</span> Events <span class="ct mono">2</span></a>
-              <a class="area"><span class="gi">✧</span> Alaala <span class="ct mono">148</span></a>
-              <div class="notice"><b>People <span class="soon">coming soon</span></b>
-                Family, godparents and friends together. Waiting on a legal review.</div>
-              <a class="area hidden" data-when="vendor"><span class="gi">▣</span> Studio Azul
-                <span class="ct">your shop</span></a>
-            </div>
-            <div class="rdiv"></div>
-
-            <!-- group 3 · explore -->
-            <div class="rlabel">Explore</div>
-            <a class="row"><span class="gi">⛪</span> Venues &amp; churches <span class="ct mono">28</span></a>
-            <a class="row"><span class="gi">✦</span> Catering &amp; cake <span class="ct mono">7</span></a>
-            <a class="row"><span class="gi">◉</span> Photo &amp; video <span class="ct mono">12</span></a>
-            <a class="row"><span class="gi">❉</span> Attire, hair &amp; make-up <span class="ct mono">54</span></a>
-            <a class="row"><span class="gi">♪</span> Hosts, music &amp; program <span class="ct mono">20</span></a>
-            <a class="more"><span class="gi">⌄</span> Show more</a>
-            <div class="rdiv"></div>
-
-            <!-- group 4 · tools -->
-            <div class="rlabel">More from Setnayan</div>
-            <a class="row"><span class="dot"></span> Papic</a>
-            <a class="row"><span class="dot"></span> Live Studio</a>
-            <a class="row"><span class="dot"></span> Pawebsite</a>
-            <a class="row"><span class="dot"></span> Pa3D</a>
-            <a class="row"><span class="dot"></span> Palogo</a>
-            <a class="row"><span class="dot"></span> Alaala</a>
-            <a class="row"><span class="dot"></span> Patiktok</a>
-            <a class="row"><span class="dot"></span> Setnayan AI</a>
-            <div class="rdiv"></div>
-
-            <!-- group 5 · small print, as the reference does it -->
-            <div class="smallprint">
-              <a>About</a><a>Pricing</a><a>Help</a><a>Open your shop</a><br>
-              <a>Terms</a><a>Privacy</a><a>Policy &amp; Safety</a><a>How Setnayan works</a>
-              <div class="copy">© 2026 Setnayan</div>
-              <div class="tag2">Set na 'yan — that's all set.</div>
-            </div>
-          </nav>
-
-          <!-- ══ FEED ══ -->
-          <div class="feed" id="feed">
-            <div class="chipbar">
-              <div class="chips">
-                <span class="chip" data-on="true">All</span>
-                <span class="chip">Venues</span><span class="chip">Catering</span>
-                <span class="chip">Photo &amp; video</span><span class="chip">Attire</span>
-                <span class="chip">Budget</span><span class="chip">Church papers</span>
-                <span class="chip">Seating</span><span class="chip">Ninong &amp; ninang</span>
-                <span class="chip">Province weddings</span><span class="chip">Papic</span>
-              </div>
-              <span class="chipnext">›</span>
-            </div>
-
-            <!-- ═══ LAUNCH DAY ═══ -->
-            <div data-day="launch">
-              <div class="grid">
-                <div class="item"><div class="thumb">JOURNAL<span class="dur">9 min</span></div>
-                  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                    <p class="ttl">What a Filipino wedding actually costs in 2026 — every line, with real numbers</p>
-                    <p class="by">The Journal <span class="vf">✓</span></p>
-                    <p class="by">Money · 2 days ago</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">JOURNAL<span class="dur">7 min</span></div>
-                  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                    <p class="ttl">What a wedding photographer actually costs in Metro Manila</p>
-                    <p class="by">The Journal <span class="vf">✓</span></p>
-                    <p class="by">Suppliers · 5 days ago</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">JOURNAL<span class="dur">8 min</span></div>
-                  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                    <p class="ttl">Church papers, in the order you actually need them</p>
-                    <p class="by">The Journal <span class="vf">✓</span></p>
-                    <p class="by">Planning · 1 week ago</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">JOURNAL<span class="dur">6 min</span></div>
-                  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                    <p class="ttl">How to seat 200 people without starting a family war</p>
-                    <p class="by">The Journal <span class="vf">✓</span></p>
-                    <p class="by">Guests · 1 week ago</p></div><span class="kebab">⋮</span></div></div>
-              </div>
-
-              <div class="sechead"><span class="badge">▤</span><h3>The Journal</h3>
-                <span class="meta"><span class="mono">33</span> live · a new one most weeks</span>
-                <span class="rule">the only shelf with content today — so it gets the page</span></div>
-              <div class="storyrow">
-                <div class="story"><div class="sthumb"><span class="min">7 MIN</span></div>
-                  <p class="sttl">What a photographer actually costs</p><p class="sby">Suppliers</p></div>
-                <div class="story"><div class="sthumb"><span class="min">5 MIN</span></div>
-                  <p class="sttl">Pre-nup or no pre-nup</p><p class="sby">Suppliers</p></div>
-                <div class="story"><div class="sthumb"><span class="min">4 MIN</span></div>
-                  <p class="sttl">The ninong and ninang question</p><p class="sby">Guests</p></div>
-                <div class="story"><div class="sthumb"><span class="min">6 MIN</span></div>
-                  <p class="sttl">A budget that survives the lola</p><p class="sby">Money</p></div>
-                <div class="story"><div class="sthumb"><span class="min">5 MIN</span></div>
-                  <p class="sttl">Rain plans that actually work</p><p class="sby">Planning</p></div>
-                <div class="story"><div class="sthumb"><span class="min">7 MIN</span></div>
-                  <p class="sttl">Getting married in the province</p><p class="sby">Planning</p></div>
-              </div>
-
-              <div class="sechead"><h3>Real weddings</h3>
-                <span class="rule">nothing published yet — an invitation, never a placeholder</span></div>
-              <div class="grid" data-spy-target="stories">
-                <div class="invite full">
-                  <h4>The first weddings are being planned right now.</h4>
-                  <p>When a couple decides to share their day it appears here — their photos, their
-                  suppliers, their timeline, in their own words. Nothing is staged, and nothing
-                  appears without them saying yes.</p>
-                  <span class="go">See how sharing works →</span>
-                </div>
-              </div>
-
-              <div class="sechead"><h3>The first shops</h3>
-                <span class="rule">not "trending" — one shop cannot trend</span></div>
-              <div class="grid" data-spy-target="vendors">
-                <div class="item"><div class="thumb">SHOP</div>
-                  <div class="imeta"><span class="ava">SA</span><div class="itxt">
-                    <p class="ttl">Studio Azul</p>
-                    <p class="by">Photo &amp; video <span class="vf">✓ verified</span></p>
-                    <p class="by">Quezon City · new</p></div><span class="kebab">⋮</span></div></div>
-                <div class="invite wide">
-                  <h4>Open your shop — free while we're new.</h4>
-                  <p>No commission on your bookings, ever. Your own web address, a calendar couples
-                  can see, and enquiries that arrive as real messages.</p>
-                  <span class="go">Open your shop →</span>
-                </div>
-              </div>
-
-              <div class="grid" data-spy-target="journal">
-                <div class="item"><div class="thumb">JOURNAL<span class="dur">5 min</span></div>
-                  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                    <p class="ttl">Twelve questions to ask any caterer before you pay</p>
-                    <p class="by">The Journal <span class="vf">✓</span></p>
-                    <p class="by">Feast · 2 weeks ago</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">JOURNAL<span class="dur">6 min</span></div>
-                  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                    <p class="ttl">The eleven kinds of ceremony venue, and which papers each needs</p>
-                    <p class="by">The Journal <span class="vf">✓</span></p>
-                    <p class="by">Venue · 2 weeks ago</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">JOURNAL<span class="dur">4 min</span></div>
-                  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                    <p class="ttl">What guests actually remember afterwards</p>
-                    <p class="by">The Journal <span class="vf">✓</span></p>
-                    <p class="by">Guests · 3 weeks ago</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">JOURNAL<span class="dur">7 min</span></div>
-                  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                    <p class="ttl">Deposits, balances and the contract line nobody reads</p>
-                    <p class="by">The Journal <span class="vf">✓</span></p>
-                    <p class="by">Money · 3 weeks ago</p></div><span class="kebab">⋮</span></div></div>
-              </div>
-            </div>
-
-            <!-- ═══ LATER ═══ -->
-            <div data-day="later" class="hidden">
-              <div class="grid" data-spy-target="stories">
-                <div class="item"><div class="thumb">STORYTELLER<span class="dur">12:04</span></div>
-                  <div class="imeta"><span class="ava">PB</span><div class="itxt">
-                    <p class="ttl">We got married in a typhoon and it was perfect</p>
-                    <p class="by">The Poblete series <span class="vf">✓</span></p>
-                    <p class="by"><span class="mono">18K</span> plays · 3 days ago</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">SHOP</div>
-                  <div class="imeta"><span class="ava">MB</span><div class="itxt">
-                    <p class="ttl">Mesa Blanca Catering</p>
-                    <p class="by">Catering &amp; cake <span class="vf">✓ verified</span></p>
-                    <p class="by">Makati · <span class="mono">388</span> saved</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">REAL WEDDING<span class="dur">6:20</span></div>
-                  <div class="imeta"><span class="ava">AM</span><div class="itxt">
-                    <p class="ttl">Ana &amp; Miguel · a garden wedding in Tagaytay</p>
-                    <p class="by">Real weddings <span class="vf">✓</span></p>
-                    <p class="by"><span class="mono">4.1K</span> plays · 1 week ago</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">JOURNAL<span class="dur">9 min</span></div>
-                  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                    <p class="ttl">What a Filipino wedding actually costs in 2026</p>
-                    <p class="by">The Journal <span class="vf">✓</span></p>
-                    <p class="by">Money · 2 days ago</p></div><span class="kebab">⋮</span></div></div>
-              </div>
-
-              <div class="sechead"><span class="badge">▤</span><h3>The Journal</h3>
-                <span class="meta"><span class="mono">96</span> pieces</span></div>
-              <div class="storyrow" data-spy-target="journal">
-                <div class="story"><div class="sthumb"><span class="min">7 MIN</span></div>
-                  <p class="sttl">What a photographer actually costs</p><p class="sby">Suppliers</p></div>
-                <div class="story"><div class="sthumb"><span class="min">5 MIN</span></div>
-                  <p class="sttl">Pre-nup or no pre-nup</p><p class="sby">Suppliers</p></div>
-                <div class="story"><div class="sthumb"><span class="min">4 MIN</span></div>
-                  <p class="sttl">The ninong question</p><p class="sby">Guests</p></div>
-                <div class="story"><div class="sthumb"><span class="min">6 MIN</span></div>
-                  <p class="sttl">A budget that survives the lola</p><p class="sby">Money</p></div>
-                <div class="story"><div class="sthumb"><span class="min">5 MIN</span></div>
-                  <p class="sttl">Rain plans that work</p><p class="sby">Planning</p></div>
-                <div class="story"><div class="sthumb"><span class="min">8 MIN</span></div>
-                  <p class="sttl">Church papers, in order</p><p class="sby">Planning</p></div>
-              </div>
-
-              <div class="sechead"><h3>Trending suppliers</h3>
-                <span class="meta">saved most in the last 7 days — earned, never sold</span></div>
-              <div class="grid" data-spy-target="vendors">
-                <div class="item"><div class="thumb">SHOP</div><div class="imeta"><span class="ava">SA</span>
-                  <div class="itxt"><p class="ttl">Studio Azul</p>
-                  <p class="by">Photo &amp; video <span class="vf">✓ verified</span></p>
-                  <p class="by">Quezon City · <span class="mono">412</span> saved</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">SHOP</div><div class="imeta"><span class="ava">HR</span>
-                  <div class="itxt"><p class="ttl">Hacienda Rosario</p>
-                  <p class="by">Venues &amp; churches <span class="vf">✓ verified</span></p>
-                  <p class="by">Batangas · <span class="mono">301</span> saved</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">SHOP</div><div class="imeta"><span class="ava">LM</span>
-                  <div class="itxt"><p class="ttl">Luz &amp; Mano Florals</p>
-                  <p class="by">Styling, flowers &amp; lights</p>
-                  <p class="by">Manila · new</p></div><span class="kebab">⋮</span></div></div>
-                <div class="item"><div class="thumb">SHOP</div><div class="imeta"><span class="ava">KT</span>
-                  <div class="itxt"><p class="ttl">Kanta Trio</p>
-                  <p class="by">Hosts, music &amp; program <span class="vf">✓ verified</span></p>
-                  <p class="by">Cebu · <span class="mono">188</span> saved</p></div><span class="kebab">⋮</span></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <p class="caption">Desktop · <span id="dayLabel">launch day</span></p>
+      <div class="device desk" id="desk"></div>
     </div>
   </div>
 
-  <!-- PHONE -->
   <div class="stage hidden" data-screen="phone">
     <div>
-      <p class="caption">Phone · <span data-daylabel>launch day</span></p>
-      <div class="device phone">
-        <div class="ph-top">
-          <span class="wordmark">SETNAYAN<sup>PH</sup></span>
-          <div style="display:flex;gap:2px">
-            <span class="iconbtn">⌕</span><span class="iconbtn" id="burger">☰</span>
-          </div>
-        </div>
-        <div class="chipbar" style="padding:6px 12px 10px">
-          <div class="chips"><span class="chip" data-on="true">All</span><span class="chip">Venues</span>
-            <span class="chip">Catering</span><span class="chip">Photo</span></div>
-          <span class="chipnext">›</span>
-        </div>
-        <div class="ph-body">
-          <div class="ph-grid" data-day="launch">
-            <div class="item"><div class="thumb">JOURNAL<span class="dur">9 min</span></div>
-              <div class="imeta"><span class="ava">SJ</span><div class="itxt">
-                <p class="ttl">What a Filipino wedding actually costs in 2026</p>
-                <p class="by">The Journal ✓ · Money · 2 days ago</p></div><span class="kebab">⋮</span></div></div>
-            <div>
-              <div class="sechead" style="margin-bottom:10px"><span class="badge">▤</span><h3 style="font-size:16px">The Journal</h3></div>
-              <div class="ph-stories">
-                <div class="story"><div class="sthumb"><span class="min">7 MIN</span></div>
-                  <p class="sttl">What a photographer actually costs</p></div>
-                <div class="story"><div class="sthumb"><span class="min">5 MIN</span></div>
-                  <p class="sttl">Pre-nup or no pre-nup</p></div>
-              </div>
-            </div>
-            <div class="invite" style="padding:16px 18px"><h4 style="font-size:15px">The first weddings are being planned now.</h4>
-              <p style="font-size:13px">When a couple decides to share their day, it appears here.</p>
-              <span class="go">How sharing works →</span></div>
-            <div class="item"><div class="thumb">SHOP</div>
-              <div class="imeta"><span class="ava">SA</span><div class="itxt">
-                <p class="ttl">Studio Azul</p><p class="by">Photo &amp; video ✓ verified · Quezon City</p>
-              </div><span class="kebab">⋮</span></div></div>
-          </div>
-          <div class="ph-grid hidden" data-day="later">
-            <div class="item"><div class="thumb">STORYTELLER<span class="dur">12:04</span></div>
-              <div class="imeta"><span class="ava">PB</span><div class="itxt">
-                <p class="ttl">We got married in a typhoon and it was perfect</p>
-                <p class="by">The Poblete series ✓ · 18K plays</p></div><span class="kebab">⋮</span></div></div>
-            <div class="item"><div class="thumb">SHOP</div>
-              <div class="imeta"><span class="ava">MB</span><div class="itxt">
-                <p class="ttl">Mesa Blanca Catering</p><p class="by">Catering &amp; cake ✓ · 388 saved</p>
-              </div><span class="kebab">⋮</span></div></div>
-          </div>
-        </div>
-
-        <div class="pillnav hidden" data-when="in">
-          <a data-on="true">▦<span>Home</span></a><a>✧<span>Alaala</span></a>
-          <span class="knob">＋</span><a>◍<span>People</span></a><a>⌕<span>Explore</span></a>
-        </div>
-
-        <div class="sheet hidden" id="sheet">
-          <div class="sheet-hd"><b>Index</b><span class="iconbtn" id="closeSheet">✕</span></div>
-          <a class="row">⌂ Home</a><a class="row">◎ Stories</a><a class="row">▤ Journal</a>
-          <a class="row">⌕ Find a supplier</a>
-          <div class="rdiv"></div>
-          <div data-when="out"><div class="signin-prompt">
-            <p>Sign in to save suppliers, plan your event, and keep your photos.</p>
-            <span class="btn-signin-lg">◍ Sign in</span></div></div>
-          <div class="hidden" data-when="in">
-            <div class="rlabel">My Home</div>
-            <a class="area"><span class="gi">▦</span> Events <span class="ct mono">2</span></a>
-            <a class="area"><span class="gi">✧</span> Alaala <span class="ct mono">148</span></a>
-            <div class="notice"><b>People <span class="soon">coming soon</span></b>Family, godparents and friends together.</div>
-            <a class="area hidden" data-when="vendor"><span class="gi">▣</span> Studio Azul <span class="ct">your shop</span></a>
-          </div>
-          <div class="rdiv"></div><div class="rlabel">Explore</div>
-          <a class="row">Venues &amp; churches <span class="ct mono">28</span></a>
-          <a class="row">Catering &amp; cake <span class="ct mono">7</span></a>
-          <a class="row">Photo &amp; video <span class="ct mono">12</span></a>
-          <a class="row">Attire, hair &amp; make-up <span class="ct mono">54</span></a>
-          <a class="row">Hosts, music &amp; program <span class="ct mono">20</span></a>
-          <a class="more"><span class="gi">⌄</span> Show more</a>
-          <div class="rdiv"></div><div class="rlabel">More from Setnayan</div>
-          <a class="row"><span class="dot"></span> Papic</a><a class="row"><span class="dot"></span> Live Studio</a>
-          <a class="row"><span class="dot"></span> Pawebsite</a><a class="row"><span class="dot"></span> Pa3D</a>
-          <a class="row"><span class="dot"></span> Palogo</a><a class="row"><span class="dot"></span> Alaala</a>
-          <a class="row"><span class="dot"></span> Patiktok</a><a class="row"><span class="dot"></span> Setnayan AI</a>
-          <div class="smallprint"><a>About</a><a>Pricing</a><a>Help</a><a>Open your shop</a><br>
-            <a>Terms</a><a>Privacy</a><a>Policy &amp; Safety</a>
-            <div class="copy">© 2026 Setnayan</div>
-            <div class="tag2">Set na 'yan — that's all set.</div></div>
-        </div>
-      </div>
-      <div class="note" style="max-width:390px">
-        <b>The phone keeps the top bar.</b> Public site = top bar; the signed-in app = bottom bar.
-        Switch <em>You</em> above to see the pill arrive — that is the one signal that needs no words.
-      </div>
+      <p class="caption">Phone · <span class="mono">390px</span></p>
+      <div class="device phone" id="phone"></div>
+      <div class="note" style="max-width:390px"><b>The phone keeps the top bar.</b> Public site =
+      top bar; the signed-in app = bottom bar. Sign in and watch the pill arrive — that is the one
+      signal that needs no words, and the two bars never appear together.</div>
     </div>
   </div>
 </section>
 
-<!-- ══ 2 · MY HOME ════════════════════════════════════════════════════════ -->
-<section id="homeSec">
-  <div class="chapter">
-    <h2>2 · The personal region — three states, not four rows</h2>
-    <p>The reference keeps a permanent slot for the account: a sign-in prompt when you are out, the
-    account's own destinations when you are in. Ours holds the same slot. Events and Alaala are live,
-    People is deliberately off pending legal review, and Spaces only exists for an account that runs
-    something — so an ordinary couple sees <b>two doors and one notice</b>.</p>
-  </div>
-
-  <div class="stage">
-    <div style="width:264px">
-      <p class="caption">Signed out</p>
-      <div style="border:1px solid var(--line);border-radius:12px;padding:6px;background:var(--cream)">
-        <div class="signin-prompt">
-          <p>Sign in to save suppliers, plan your event, and keep your photos.</p>
-          <span class="btn-signin-lg">◍ Sign in</span>
-        </div>
-      </div>
-      <div class="note">The slot never disappears and never greys out. One place, two states.</div>
-    </div>
-
-    <div style="width:264px">
-      <p class="caption">Signed in · an ordinary couple</p>
-      <div style="border:1px solid var(--line);border-radius:12px;padding:6px;background:var(--cream)">
-        <div class="rlabel">My Home <small>›</small></div>
-        <a class="area"><span class="gi">▦</span> Events <span class="ct mono">2</span></a>
-        <a class="area"><span class="gi">✧</span> Alaala <span class="ct mono">148</span></a>
-        <div class="notice"><b>People <span class="soon">coming soon</span></b>
-          Family, godparents and friends together. Waiting on a legal review.</div>
-      </div>
-      <div class="note">People is a <b>notice, not a door</b> — nothing to press. A greyed row invites
-      a press that fails; a sentence tells the truth.</div>
-    </div>
-
-    <div style="width:264px">
-      <p class="caption">Signed in · runs a shop</p>
-      <div style="border:1px solid var(--line);border-radius:12px;padding:6px;background:var(--cream)">
-        <div class="rlabel">My Home <small>›</small></div>
-        <a class="area"><span class="gi">▦</span> Events <span class="ct mono">1</span></a>
-        <a class="area"><span class="gi">✧</span> Alaala <span class="ct mono">—</span></a>
-        <div class="notice"><b>People <span class="soon">coming soon</span></b>
-          Family, godparents and friends together.</div>
-        <a class="area"><span class="gi">▣</span> Studio Azul <span class="ct">your shop</span></a>
-      </div>
-      <div class="note"><b>It names the thing you run</b>, never the word "Spaces". An admin reads
-      "Setnayan console". Someone who runs nothing does not see the row at all.</div>
-    </div>
-
-    <div style="width:264px">
-      <p class="caption">A count that failed to load</p>
-      <div style="border:1px solid var(--line);border-radius:12px;padding:6px;background:var(--cream)">
-        <div class="rlabel">My Home <small>›</small></div>
-        <a class="area"><span class="gi">▦</span> Events <span class="ct mono">2</span></a>
-        <a class="area"><span class="gi">✧</span> Alaala <span class="ct" style="color:var(--m3)">couldn't load</span></a>
-        <div class="notice"><b>People <span class="soon">coming soon</span></b>
-          Family, godparents and friends together.</div>
-      </div>
-      <div class="note"><b>Zero is never printed where a count failed.</b> "0 photos" shown to someone
-      with 148 is how a person stops trusting a product.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ 3 · THE SEAM ═══════════════════════════════════════════════════════ -->
 <section id="seamSec">
   <div class="chapter">
-    <h2>3 · The seam — the round trip</h2>
-    <p>The rule that makes it one product: <b>the rail never leaves.</b> Same width, same side —
-    the sign-in prompt is simply replaced by the account's own destinations, exactly the swap the
-    reference makes. Signing in is the furniture rearranging, not a page you are thrown to.</p>
+    <h2>2 · The seam, as a diagram</h2>
+    <p>The same round trip you just walked, in one picture. The rule that makes it one product:
+    <b>the rail never leaves.</b> Same width, same side — the sign-in prompt is replaced in place by
+    the account's own destinations.</p>
   </div>
-
-  <div class="arrowline"><span>Going in</span><i></i></div>
   <div class="board">
-    <div class="frame">
-      <div class="fh"><span class="n">1</span><b>On the public site</b></div>
-      <div class="mini">
-        <div class="mrail"><div class="mrow"></div><div class="mrow"></div><div class="mrow"></div>
-          <div class="mrow tall"></div><div class="mrow"></div><div class="mrow"></div><div class="mrow"></div></div>
-        <div class="mmain"><div class="mblk"></div><div class="mblk"></div><div class="mblk"></div>
-          <div class="mblk"></div><div class="mblk"></div><div class="mblk"></div></div>
-      </div>
+    <div class="frame"><div class="fh"><span class="n">1</span><b>On the public site</b></div>
       <div class="fnote">Reading a shop page or an article. The rail's second group is the
-      <b>sign-in prompt</b>. Nothing nags.</div>
-    </div>
-    <div class="frame">
-      <div class="fh"><span class="n">2</span><b>They press Sign in</b></div>
-      <div class="mini">
-        <div class="mrail"><div class="mrow"></div><div class="mrow"></div><div class="mrow"></div>
-          <div class="mrow tall" style="background:#E9DCC0"></div><div class="mrow"></div>
-          <div class="mrow"></div><div class="mrow"></div></div>
-        <div class="mmain" style="background:#FBF6EC"><div class="mblk warm span"></div>
-          <div class="mblk warm span"></div><div class="mblk warm span"></div></div>
-      </div>
-      <div class="fnote">Sign-in opens <b>over</b> the page, not instead of it — what is behind stays
-      visible, so it is obvious nobody is being taken anywhere.</div>
-    </div>
-    <div class="frame">
-      <div class="fh"><span class="n">3</span><b>The prompt becomes the account</b></div>
-      <div class="mini">
-        <div class="mrail"><div class="mrow"></div><div class="mrow"></div><div class="mrow"></div>
-          <div class="mrow gold"></div><div class="mrow gold"></div><div class="mrow"></div><div class="mrow"></div></div>
-        <div class="mmain"><div class="mblk"></div><div class="mblk"></div><div class="mblk"></div>
-          <div class="mblk"></div><div class="mblk"></div><div class="mblk"></div></div>
-      </div>
-      <div class="fnote">The same slot now holds <b>Events · Alaala · People</b>. Everything else in
-      the rail is untouched. <b>Same rail, same width, same side</b> — that is the whole trick, and
-      it is exactly what the reference does with Subscriptions.</div>
-    </div>
-    <div class="frame">
-      <div class="fh"><span class="n">4</span><b>They land where they were going</b></div>
-      <div class="mini">
-        <div class="mrail"><div class="mrow"></div><div class="mrow"></div><div class="mrow"></div>
-          <div class="mrow gold"></div><div class="mrow gold"></div><div class="mrow"></div><div class="mrow"></div></div>
-        <div class="mmain"><div class="mblk"></div><div class="mblk"></div><div class="mblk"></div>
-          <div class="mblk"></div><div class="mblk"></div><div class="mblk"></div></div>
-      </div>
-      <div class="fnote"><b>Back to the page they were on</b>, with the half-written enquiry intact.
-      Only someone who signed in from the rail with nowhere to go lands on their board.</div>
-    </div>
-  </div>
-
-  <div class="arrowline"><span>Coming back out</span><i></i></div>
-  <div class="board">
-    <div class="frame">
-      <div class="fh"><span class="n">5</span><b>Inside the app</b></div>
-      <div class="mini">
-        <div class="mrail" style="background:#FAF6EE"><div class="mrow ink"></div><div class="mrow ink"></div>
-          <div class="mrow ink"></div><div class="mrow"></div><div class="mrow"></div><div class="mrow"></div></div>
-        <div class="mmain"><div class="mblk span" style="height:46px"></div><div class="mblk"></div><div class="mblk"></div></div>
-      </div>
-      <div class="fnote">The app is the app — already drawn and approved, nothing redrawn. The only
-      thing that matters at this seam is the <b>wordmark, top-left</b>.</div>
-    </div>
-    <div class="frame">
-      <div class="fh"><span class="n">6</span><b>They press SETNAYAN</b></div>
-      <div class="mini">
-        <div class="mrail"><div class="mrow"></div><div class="mrow"></div><div class="mrow"></div>
-          <div class="mrow gold"></div><div class="mrow gold"></div><div class="mrow"></div><div class="mrow"></div></div>
-        <div class="mmain"><div class="mblk"></div><div class="mblk"></div><div class="mblk"></div>
-          <div class="mblk"></div><div class="mblk"></div><div class="mblk"></div></div>
-      </div>
-      <div class="fnote">Back to the front door, <b>still signed in</b>, with the account group open
-      and a first row reading <b>"Back to your events."</b> You are a visitor to the public site, not
-      an ex-member.</div>
-    </div>
-    <div class="frame">
-      <div class="fh"><span class="n">7</span><b>Signing out is its own act</b></div>
-      <div class="mini">
-        <div class="mrail"><div class="mrow"></div><div class="mrow"></div><div class="mrow"></div>
-          <div class="mrow"></div><div class="mrow"></div><div class="mrow tall"></div></div>
-        <div class="mmain"><div class="mblk"></div><div class="mblk"></div><div class="mblk"></div>
-          <div class="mblk"></div></div>
-      </div>
-      <div class="fnote">It lives under the avatar and <b>nowhere else</b>. Visiting the public site
-      never signs anyone out — the fear that it might is what stops members going back to read the
-      Journal that is carrying the front page.</div>
-    </div>
-    <div class="frame">
-      <div class="fh"><span class="n">8</span><b>On a phone</b></div>
-      <div class="mini">
-        <div class="mmain" style="grid-template-columns:1fr"><div class="mblk" style="height:14px"></div>
-          <div class="mblk" style="height:44px"></div><div class="mblk"></div>
-          <div class="mblk" style="height:16px;background:#EAE2D2;border-radius:9px"></div></div>
-      </div>
-      <div class="fnote">The index sheet closes and <b>the bottom pill rises</b>. Public site = top
-      bar; app = bottom bar; the two never appear together.</div>
-    </div>
+      <b>sign-in prompt</b>. Nothing nags.</div></div>
+    <div class="frame"><div class="fh"><span class="n">2</span><b>They press Sign in</b></div>
+      <div class="fnote">It opens <b>over</b> the page, not instead of it — what is behind stays
+      visible, so it is obvious nobody is being taken anywhere.</div></div>
+    <div class="frame"><div class="fh"><span class="n">3</span><b>The prompt becomes the account</b></div>
+      <div class="fnote">The same slot now holds <b>Events · Alaala · People</b>, and Spaces if they
+      run something. Everything else in the rail is untouched.</div></div>
+    <div class="frame"><div class="fh"><span class="n">4</span><b>They land where they were</b></div>
+      <div class="fnote"><b>Back on the same page</b>, with the thing they were doing done — the shop
+      saved, the enquiry intact. Only a rail sign-in with nowhere to go lands on the board.</div></div>
+    <div class="frame"><div class="fh"><span class="n">5</span><b>Inside the app</b></div>
+      <div class="fnote">Already drawn and approved — nothing redrawn. It wears <b>terracotta</b>,
+      the front door wears gold, and that difference is deliberate.</div></div>
+    <div class="frame"><div class="fh"><span class="n">6</span><b>The wordmark is the way out</b></div>
+      <div class="fnote">Back to the front door <b>still signed in</b>, account group open, first row
+      reading <b>"Back to your events."</b> A visitor, not an ex-member.</div></div>
+    <div class="frame"><div class="fh"><span class="n">7</span><b>Signing out is its own act</b></div>
+      <div class="fnote">Under the picture, top right, and <b>nowhere else</b>. Visiting the public
+      site never signs anyone out.</div></div>
+    <div class="frame"><div class="fh"><span class="n">8</span><b>On a phone</b></div>
+      <div class="fnote">The index sheet closes and <b>the bottom pill rises</b>. That is how a phone
+      says you are inside.</div></div>
   </div>
 </section>
 
-<!-- ══ 4 · DECISIONS ══════════════════════════════════════════════════════ -->
 <section id="decisions">
-  <div class="chapter">
-    <h2>4 · The decisions behind the drawing</h2>
-    <p>Every number was read from the live database or the shipped code on 2026-08-12 — not from a
-    document.</p>
-  </div>
+  <div class="chapter"><h2>3 · The decisions behind it</h2>
+    <p>Every number was read from the live database or the shipped code on 2026-08-12.</p></div>
 
   <h3 style="font-size:15px;margin:26px 0 0">The categories are real — and they need renaming</h3>
-  <div class="note">The five names in the concept are not folders. The deeper problem: the labels a
-  customer reads today are the <b>internal words</b> — the live marketplace says <b>Look</b>,
-  <b>Feast</b>, <b>Documentary</b>, <b>Booths</b>. The proposal below is a <b>copy change only</b>;
-  addresses and anchors are untouched.</div>
-  <table>
-    <tr><th>Shows today</th><th>Proposed</th><th>Services</th><th>Slot</th></tr>
-    <tr><td class="was">Venue</td><td class="now">Venues &amp; churches</td><td class="n">28</td><td>visible 1</td></tr>
-    <tr><td class="was">Feast</td><td class="now">Catering &amp; cake</td><td class="n">7</td><td>visible 2</td></tr>
-    <tr><td class="was">Documentary</td><td class="now">Photo &amp; video</td><td class="n">12</td><td>visible 3</td></tr>
-    <tr><td class="was">Look</td><td class="now">Attire, hair &amp; make-up</td><td class="n">54</td><td>visible 4</td></tr>
-    <tr><td class="was">Program</td><td class="now">Hosts, music &amp; program</td><td class="n">20</td><td>visible 5</td></tr>
-    <tr><td class="was">Booths</td><td class="now">Booths, carts &amp; bars</td><td class="n">42</td><td>show more</td></tr>
-    <tr><td class="was">Design</td><td class="now">Styling, flowers &amp; lights</td><td class="n">26</td><td>show more</td></tr>
-    <tr><td class="was">Prints</td><td class="now">Invites, prints &amp; souvenirs</td><td class="n">15</td><td>show more</td></tr>
-    <tr><td class="was">Planning</td><td class="now">Coordinators &amp; planners</td><td class="n">12</td><td>show more</td></tr>
-    <tr><td class="was">Transport</td><td class="now">Cars &amp; transport</td><td class="n">11</td><td>show more</td></tr>
-    <tr><td class="was">Insurance &amp; Protection</td><td class="now">Insurance &amp; protection</td><td class="n">3</td><td>show more</td></tr>
-    <tr><td class="was">Experience</td><td class="now">Guest experiences</td><td class="n">2</td><td>show more</td></tr>
-    <tr><td class="was">Logistics &amp; Safety</td><td class="now">Logistics &amp; safety</td><td class="n">2</td><td>show more</td></tr>
-    <tr><td class="was">Dining</td><td class="now">Dining extras</td><td class="n">1</td><td>show more</td></tr>
-    <tr><td class="was">Specialty</td><td class="now">Specialty</td><td class="n">1</td><td>show more</td></tr>
-  </table>
+  <div class="note">The labels a customer reads today are the <b>internal words</b> — the live
+  marketplace says <b>Look</b>, <b>Feast</b>, <b>Documentary</b>, <b>Booths</b>. Below is a
+  <b>copy change only</b>; addresses and anchors are untouched.</div>
+  <table id="folderTable"></table>
   <div class="note"><b>Why those five, when they are not the five biggest.</b> The service count says
   how finely we chopped a folder up, not how much anyone wants it. Booths has 42 because there are 42
-  kinds of cart; catering has 7 because catering is one thing and everybody buys it. So the visible
-  five are ranked by <b>what a couple books first and spends most on</b>. Booths sitting just under
-  "Show more" is right — it is the fun, late, optional spend.</div>
-
-  <h3 style="font-size:15px;margin:26px 0 0">How search bridges the words</h3>
-  <div class="note">Somebody types <b>photographer</b>. There is no folder by that name. The first
-  result is not a shop and not a correction — it is <b>their word with our folder beside it as a
-  place</b>: “photography — <em>in Photo &amp; video</em> — 12 services”. And where no shop exists in
-  that folder yet, it says so plainly and offers to tell them when one opens: <b>a real answer, not
-  an apology</b>.</div>
+  kinds of cart; catering has 7 because catering is one thing and everybody buys it. The visible five
+  are ranked by <b>what a couple books first and spends most on</b>.</div>
 
   <h3 style="font-size:15px;margin:26px 0 0">When each shelf earns its normal shape back</h3>
   <table>
     <tr><th>Shelf</th><th>Today</th><th>Launch-day shape</th><th>Normal at</th></tr>
-    <tr><td>Storyteller</td><td class="n">0</td><td>absent — the grid simply carries Journal cards</td><td class="n">1 chapter</td></tr>
+    <tr><td>Storyteller</td><td class="n">0</td><td>absent — the grid carries Journal cards</td><td class="n">1</td></tr>
     <tr><td>The Journal</td><td class="n">33 of 91</td><td>fills the grid and takes the tall-card row</td><td>—</td></tr>
-    <tr><td>Real weddings</td><td class="n">0</td><td>one written invitation across the row</td><td class="n">2 published</td></tr>
-    <tr><td>Suppliers</td><td class="n">1</td><td>“The first shops” — one real card beside an invitation</td><td class="n">12 live shops</td></tr>
+    <tr><td>Real weddings</td><td class="n">0</td><td>one written invitation across the row</td><td class="n">2</td></tr>
+    <tr><td>Suppliers</td><td class="n">1</td><td>“The first shops” — one real card, one invitation</td><td class="n">12</td></tr>
   </table>
-  <div class="note"><b>“Trending” over a field of one is a lie</b>, and this page's own rule is that
-  trending is earned, never sold. Two of those thresholds already match what the homepage ships
-  today; <b>twelve is the one new number and it is yours to move.</b></div>
+  <div class="note"><b>“Trending” over a field of one is a lie.</b> Below twelve live shops the
+  heading is honest instead. Two of those thresholds already match what the homepage ships;
+  <b>twelve is the one new number and it is yours to move.</b></div>
 
   <h3 style="font-size:15px;margin:26px 0 0">Three things found while drawing</h3>
-  <div class="note">
-  <b>1 · “Contact us” has no page.</b> Drawn as <b>Help</b>, which exists and has search.<br><br>
+  <div class="note"><b>1 · “Contact us” has no page.</b> Drawn as <b>Help</b>, which exists.<br><br>
   <b>2 · Pakanta has no front door.</b> Sold, on the price list, reachable only from inside the app.
   Not drawn in the rail — a row that goes nowhere is the one thing this page forbids.<br><br>
   <b>3 · The tools list was short, not long.</b> The concept drew six; <b>eight</b> public doorways
-  ship and a guard enforces the set. Pawebsite, Palogo and Patiktok were missing.</div>
+  ship. Pawebsite, Palogo and Patiktok were missing.</div>
 
   <h3 style="font-size:15px;margin:26px 0 0">Recommendations — not redraws</h3>
-  <div class="note">
-  <b>a · Match the furniture across the seam.</b> The app's rail and this rail should share width and
-  side, even carrying different content and a different button colour. The seam only reads as one
-  product if nothing jumps.<br><br>
-  <b>b · Let the sign-in panel wear the app's terracotta, not the front door's gold.</b> It is the
-  first room inside, not the last step outside — a threshold you cross once, on purpose.<br><br>
-  <b>c · The "usable without an account" dots are drawn but unpainted.</b> Which of the eight tools
-  earns one is a per-tool answer nobody has checked.<br><br>
-  <b>d · Reading time is real data</b> — already computed, so every minute badge is honest.<br><br>
-  <b>e · The publishing schedule is now a front-page dependency.</b> The launch-day grid leans on the
-  Journal completely. It can carry that — but if the schedule stalls, the front page stalls visibly.</div>
+  <div class="note"><b>a ·</b> Match the furniture across the seam — same rail width and side, even
+  carrying different content and a different button colour.<br><br>
+  <b>b ·</b> The sign-in panel wears the app's <b>terracotta</b>, not the front door's gold — it is
+  the first room inside, not the last step outside. That is drawn here; press Sign in to see it.<br><br>
+  <b>c ·</b> The “usable without an account” dots are drawn but unpainted — a per-tool answer nobody
+  has checked.<br><br>
+  <b>d ·</b> Reading time is real data, already computed.<br><br>
+  <b>e ·</b> The publishing schedule is now a front-page dependency.</div>
 </section>
-
 </div>
 
 <script>
 (function(){
-  var state = { screen:'desk', day:'launch', who:'out' };
-  function seg(id,key,after){
-    var el=document.getElementById(id);
-    el.addEventListener('click',function(e){
-      var b=e.target.closest('button'); if(!b) return;
-      [].forEach.call(el.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',String(x===b));});
-      state[key]=b.dataset.v; after();
-    });
-  }
-  function apply(){
-    document.querySelectorAll('[data-screen]').forEach(function(n){
-      n.classList.toggle('hidden', n.dataset.screen!==state.screen);});
-    document.querySelectorAll('[data-day]').forEach(function(n){
-      n.classList.toggle('hidden', n.dataset.day!==state.day);});
-    document.querySelectorAll('[data-daylabel]').forEach(function(n){
-      n.textContent = state.day==='launch' ? 'launch day' : 'later, once it fills';});
-    var inn = state.who!=='out';
-    document.querySelectorAll('[data-when="out"]').forEach(function(n){n.classList.toggle('hidden',inn);});
-    document.querySelectorAll('[data-when="in"]').forEach(function(n){n.classList.toggle('hidden',!inn);});
-    document.querySelectorAll('[data-when="vendor"]').forEach(function(n){
-      n.classList.toggle('hidden', state.who!=='vendor');});
-    document.querySelectorAll('[data-initials]').forEach(function(n){
-      n.textContent = state.who==='vendor' ? 'SA' : 'CI';});
-  }
-  seg('segScreen','screen',apply); seg('segDay','day',apply); seg('segWho','who',apply);
+/* ══ DATA — folders and service names are the REAL ones, read from prod ════ */
+const FOLDERS=[
+ {id:'venue',was:'Venue',label:'Venues & churches',n:28,slot:1,icon:'⛪',
+  svc:['catholic church','INC kapilya','mosque','hindu temple','gurdwara','synagogue','hotel ballroom',
+       'garden reception venue','resort reception','function hall','events place','civil ceremony venue']},
+ {id:'feast',was:'Feast',label:'Catering & cake',n:7,slot:2,icon:'✦',
+  svc:['catering','caterer','wedding cake','lechonero','lechon','halal catering','chinese lauriat caterer',
+       'live cooking station']},
+ {id:'documentary',was:'Documentary',label:'Photo & video',n:12,slot:3,icon:'◉',
+  svc:['photography','photographer','videography','videographer','drone','pre-nup photographer',
+       'same-day edit','engagement photographer','studio portrait photographer','highlight reel']},
+ {id:'look',was:'Look',label:'Attire, hair & make-up',n:54,slot:4,icon:'❉',
+  svc:['bridal hair and make-up','HMUA','make-up artist','bridal gown rental','barong tagalog',
+       'groom suit rental','wedding ring','filipiniana terno','bridesmaid dress','ninang attire']},
+ {id:'program',was:'Program',label:'Hosts, music & program',n:20,slot:5,icon:'♪',
+  svc:['host','emcee','MC','live band','DJ','choir','string quartet','acoustic performer','wedding singer',
+       'orchestra','lion dance troupe','kulintang ensemble','rondalla','choreographer']},
+ {id:'booths',was:'Booths',label:'Booths, carts & bars',n:42,icon:'◈',
+  svc:['photo booth','photobooth','360 booth','mobile bar','ice cream cart','cotton candy cart',
+       'halo-halo station','sorbetes cart','henna artist','caricature artist','food truck','dessert station']},
+ {id:'design',was:'Design',label:'Styling, flowers & lights',n:26,icon:'✿',
+  svc:['florals','florist','stylist','decorator','lights and sound','LED video wall','tent rental',
+       'dance floor','fireworks','outdoor lighting']},
+ {id:'prints',was:'Prints',label:'Invites, prints & souvenirs',n:15,icon:'✉',
+  svc:['invitation printing','digital invitation','souvenirs','giveaways','ceremony program','menu card',
+       'place card','signage','pasalubong box']},
+ {id:'planning',was:'Planning',label:'Coordinators & planners',n:12,icon:'✓',
+  svc:['wedding coordinator','day-of coordinator','wedding planner','pamamanhikan coordinator',
+       'destination wedding specialist','feng shui date consultant']},
+ {id:'transport',was:'Transport',label:'Cars & transport',n:11,icon:'⛟',
+  svc:['bridal car','guest shuttle','van rental','vintage classic vehicle','horse-drawn carriage',
+       'airport transfer','boat charter']},
+ {id:'insurance',was:'Insurance & Protection',label:'Insurance & protection',n:3,icon:'⛨',svc:['event insurance']},
+ {id:'experience',was:'Experience',label:'Guest experiences',n:2,icon:'✧',svc:['guest experience']},
+ {id:'logistics_safety',was:'Logistics & Safety',label:'Logistics & safety',n:2,icon:'⚑',svc:['security','first aid']},
+ {id:'dining',was:'Dining',label:'Dining extras',n:1,icon:'✦',svc:['dining extras']},
+ {id:'specialty',was:'Specialty',label:'Specialty',n:1,icon:'★',svc:['specialty']}];
 
-  var q=document.getElementById('q'), panel=document.getElementById('panel');
-  q.addEventListener('input',function(){panel.classList.toggle('hidden', q.value.trim().length<2);});
-  q.addEventListener('keydown',function(e){if(e.key==='Escape'){q.value='';panel.classList.add('hidden');q.blur();}});
-  document.addEventListener('click',function(e){
-    if(!panel.contains(e.target)&&e.target!==q) panel.classList.add('hidden');});
+const TOOLS=[
+ {id:'papic',name:'Papic',line:'Everyone’s phones become one photo crew, and every guest gets their own shots.'},
+ {id:'panood',name:'Live Studio',line:'Stream the day to family who could not fly home, on your own event page.'},
+ {id:'pawebsite',name:'Pawebsite',line:'Your wedding website and invitation, at your own address.'},
+ {id:'pa3d',name:'Pa3D',line:'Walk your reception in 3D before the day, table by table.'},
+ {id:'palogo',name:'Palogo',line:'An animated monogram, on your invites, your site and your signage.'},
+ {id:'alaala',name:'Alaala',line:'Every photo and milestone gathered into one place you keep, for life.'},
+ {id:'patiktok',name:'Patiktok',line:'Short vertical highlight reels from your day.'},
+ {id:'setnayan-ai',name:'Setnayan AI',line:'A planner that drafts your timeline and matches verified suppliers.'}];
 
-  var sheet=document.getElementById('sheet');
-  document.getElementById('burger').addEventListener('click',function(){sheet.classList.remove('hidden');});
-  document.getElementById('closeSheet').addEventListener('click',function(){sheet.classList.add('hidden');});
+const ARTICLES=[
+ {id:'a1',t:'What a Filipino wedding actually costs in 2026',min:9,cat:'Money',age:'2 days ago',
+  body:['Nobody publishes real numbers, so here are ours — gathered from suppliers who agreed to be quoted, in Metro Manila, this year.',
+        'The church and the caterer will take more than half of whatever you have. Everything after that is a choice, and most of it is a choice you can make late.',
+        'Below, every line, in the order you will actually pay it.'],credit:true},
+ {id:'a2',t:'What a wedding photographer actually costs in Metro Manila',min:7,cat:'Suppliers',age:'5 days ago',
+  body:['A photographer’s price is mostly hours and people, not equipment.','Ask what happens to the files afterwards. That is the question almost nobody asks and the one that matters in ten years.'],credit:true},
+ {id:'a3',t:'Church papers, in the order you actually need them',min:8,cat:'Planning',age:'1 week ago',
+  body:['Every parish is slightly different, and the order matters more than the list.','Start with the baptismal certificate annotated for marriage. Everything else waits on it.']},
+ {id:'a4',t:'How to seat 200 people without starting a family war',min:6,cat:'Guests',age:'1 week ago',
+  body:['Seat by who they will be glad to sit beside, not by who they are related to.','The head table is a decision about your parents, not about you.']},
+ {id:'a5',t:'Twelve questions to ask any caterer before you pay',min:5,cat:'Feast',age:'2 weeks ago',
+  body:['Ask about the crew meal before you ask about the menu. It tells you how they treat people.']},
+ {id:'a6',t:'The eleven kinds of ceremony venue, and which papers each needs',min:6,cat:'Venue',age:'2 weeks ago',
+  body:['Catholic, INC, Aglipayan, Born-again, SDA, LDS, Orthodox, mosque, temple, gurdwara, synagogue — each with its own paperwork and its own timing.']},
+ {id:'a7',t:'What guests actually remember afterwards',min:4,cat:'Guests',age:'3 weeks ago',
+  body:['Food, chairs, and whether they could hear. In that order, every time.']},
+ {id:'a8',t:'Deposits, balances and the contract line nobody reads',min:7,cat:'Money',age:'3 weeks ago',
+  body:['The line about postponement is the one that will matter. Read it before the one about the price.']},
+ {id:'a9',t:'A budget that survives the lola',min:6,cat:'Money',age:'1 month ago',body:['Give every contributor a line they own. It ends most of the arguments before they start.']},
+ {id:'a10',t:'Getting married in the province',min:7,cat:'Planning',age:'1 month ago',body:['Book the transport before the venue. The venue will still be there; the vans will not.']},
+ {id:'a11',t:'Rain plans that actually work',min:5,cat:'Planning',age:'1 month ago',body:['A tent is not a rain plan. A rain plan is a decision, made by one named person, at a named hour.']},
+ {id:'a12',t:'The ninong and ninang question',min:4,cat:'Guests',age:'1 month ago',body:['Choose the ones who will still be in your life in twenty years. That is the whole rule.']}];
 
-  var feed=document.getElementById('feed');
-  var rows=[].slice.call(document.querySelectorAll('.rail .row[data-spy]'));
-  function spy(){
-    // The active row is the LAST section whose top has passed the reading line.
-    // Nothing has passed it at the top of the feed ⇒ Home stays active, which is
-    // what the reference does. (Nearest-section-by-distance lit up a section that
-    // was still far below the fold.)
-    var best=null, f=feed.getBoundingClientRect(), line=f.top+120;
-    document.querySelectorAll('.feed [data-spy-target]').forEach(function(t){
-      if(t.closest('.hidden')) return;
-      if(t.getBoundingClientRect().top<=line) best=t.dataset.spyTarget;
-    });
-    rows.forEach(function(r){r.setAttribute('data-active',String(r.dataset.spy===best));});
-    var home=document.querySelector('.rail .row:not([data-spy])');
-    if(home) home.setAttribute('data-active', String(!best));
+const SHOPS_LAUNCH=[{id:'s1',name:'Studio Azul',fold:'documentary',city:'Quezon City',verified:true,saved:'new',
+  since:'2026',reply:'within a day',promo:'10% off any package for readers of this story'}];
+const SHOPS_LATER=[
+ {id:'s1',name:'Studio Azul',fold:'documentary',city:'Quezon City',verified:true,saved:'412',since:'2026',reply:'within a day',promo:'10% off any package'},
+ {id:'s2',name:'Mesa Blanca Catering',fold:'feast',city:'Makati',verified:true,saved:'388',since:'2025',reply:'same day'},
+ {id:'s3',name:'Hacienda Rosario',fold:'venue',city:'Batangas',verified:true,saved:'301',since:'2024',reply:'2 days'},
+ {id:'s4',name:'Luz & Mano Florals',fold:'design',city:'Manila',verified:false,saved:'new',since:'2026',reply:'—'},
+ {id:'s5',name:'Kanta Trio',fold:'program',city:'Cebu',verified:true,saved:'188',since:'2025',reply:'same day'},
+ {id:'s6',name:'Pili & Thread',fold:'look',city:'Manila',verified:true,saved:'140',since:'2025',reply:'within a day'}];
+const STORIES_LATER=[
+ {id:'v1',t:'We got married in a typhoon and it was perfect',by:'The Poblete series',plays:'18K',dur:'12:04'},
+ {id:'v2',t:'Ana & Miguel · a garden wedding in Tagaytay',by:'Real weddings',plays:'4.1K',dur:'6:20'},
+ {id:'v3',t:'A civil wedding in Cebu, start to finish',by:'Real weddings',plays:'1.2K',dur:'8:41'}];
+
+const CHIPS=['All','Venues','Catering','Photo & video','Attire','Budget','Church papers','Seating',
+             'Ninong & ninang','Province weddings','Papic'];
+const CHIP_CAT={'Venues':'Venue','Catering':'Feast','Photo & video':'Suppliers','Attire':'Suppliers',
+  'Budget':'Money','Church papers':'Planning','Seating':'Guests','Ninong & ninang':'Guests',
+  'Province weddings':'Planning'};
+
+/* ══ STATE ════════════════════════════════════════════════════════════════ */
+const S={screen:'desk',day:'launch',who:'out',view:'feed',ctx:null,chip:'All',folder:null,
+  moreOpen:false,menu:false,sheet:false,q:'',saved:{},pending:null,toast:null,appTab:'home'};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const inn=()=>S.who!=='out';
+const shops=()=>S.day==='launch'?SHOPS_LAUNCH:SHOPS_LATER;
+const stories=()=>S.day==='launch'?[]:STORIES_LATER;
+const foldOf=id=>FOLDERS.find(f=>f.id===id);
+const initials=()=>S.who==='vendor'?'SA':'CI';
+let toastTimer=null;
+function toast(html){S.toast=html;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{S.toast=null;render();},4200);}
+
+/* ══ SEARCH — the friendly word → folder bridge ═══════════════════════════ */
+function mark(text,q){const i=text.toLowerCase().indexOf(q.toLowerCase());
+  if(i<0)return esc(text);
+  return esc(text.slice(0,i))+'<span class="hlt">'+esc(text.slice(i,i+q.length))+'</span>'+esc(text.slice(i+q.length));}
+function search(q){
+  const t=q.trim().toLowerCase(); if(t.length<2)return null;
+  const vend=[];
+  FOLDERS.forEach(f=>{
+    if(f.label.toLowerCase().includes(t)) vend.push({fold:f,term:f.label,isFolder:true});
+    f.svc.forEach(s=>{ if(s.toLowerCase().includes(t)) vend.push({fold:f,term:s}); });
+  });
+  const seen=new Set(); const vendors=vend.filter(v=>{const k=v.fold.id+'|'+v.term;
+    if(seen.has(k))return false; seen.add(k); return true;}).slice(0,5);
+  const shopHits=shops().filter(s=>s.name.toLowerCase().includes(t)).slice(0,3);
+  const tools=TOOLS.filter(x=>x.name.toLowerCase().includes(t)||x.line.toLowerCase().includes(t)).slice(0,3);
+  const arts=ARTICLES.filter(a=>a.t.toLowerCase().includes(t)||a.cat.toLowerCase().includes(t)).slice(0,4);
+  return {vendors,shopHits,tools,arts,q:t,empty:!vendors.length&&!shopHits.length&&!tools.length&&!arts.length};
+}
+function searchPanel(){
+  const r=search(S.q); if(!r)return '';
+  let h='';
+  if(r.vendors.length||r.shopHits.length){
+    h+='<div class="sgrouphd">01 · Suppliers</div>';
+    r.vendors.forEach(v=>{h+=`<button class="sres" data-act="folder" data-id="${v.fold.id}">
+      <span class="fold">${esc(v.fold.label)}</span><span>${mark(v.term,r.q)}</span>
+      <span class="in">in ${esc(v.fold.label)}</span><span class="rt">${v.fold.n} services</span></button>`;});
+    r.shopHits.forEach(s=>{h+=`<button class="sres" data-act="shop" data-id="${s.id}">
+      <span class="fold">Shop</span><span>${mark(s.name,r.q)}</span>
+      <span class="in">${esc(s.city)}</span></button>`;});
+    if(r.vendors.length&&!r.shopHits.length){
+      const f=r.vendors[0].fold;
+      h+=`<div class="snone">No shops in ${esc(f.label)} yet.
+        <u data-act="notify" data-id="${f.id}">Tell me when one opens →</u></div>`;}
   }
-  feed.addEventListener('scroll',spy); spy();
-  apply();
+  if(r.tools.length){h+='<div class="sgrouphd">02 · Tools</div>';
+    r.tools.forEach(t=>{h+=`<button class="sres" data-act="tool" data-id="${t.id}">
+      <span>${mark(t.name,r.q)}</span><span class="in">${esc(t.line.slice(0,52))}…</span></button>`;});}
+  if(r.arts.length){h+='<div class="sgrouphd">03 · The Journal</div>';
+    r.arts.forEach(a=>{h+=`<button class="sres" data-act="article" data-id="${a.id}">
+      <span>${mark(a.t,r.q)}</span><span class="rt">${a.min} min</span></button>`;});}
+  if(r.empty)h='<div class="snone" style="padding:18px 16px">Nothing matches that yet — the archive is small on purpose. Try <b>photographer</b>, <b>caterer</b>, <b>emcee</b> or <b>budget</b>.</div>';
+  return `<div class="searchpanel">${h}</div>`;
+}
+
+/* ══ RAIL ════════════════════════════════════════════════════════════════ */
+function rail(){
+  const on=(k)=>S.view==='feed'&&!S.folder&&S.chip==='All'&&k==='home'?'true':'false';
+  let h=`<button class="row" data-act="home" data-on="${on('home')}"><span class="gi">⌂</span> Home</button>
+    <button class="row" data-act="scroll" data-id="stories"><span class="gi">◎</span> Stories</button>
+    <button class="row" data-act="scroll" data-id="journal"><span class="gi">▤</span> Journal</button>
+    <button class="row" data-act="scroll" data-id="shops"><span class="gi">⌕</span> Find a supplier</button>
+    <div class="rdiv"></div>`;
+  if(!inn()){
+    h+=`<div class="signin-prompt"><p>Sign in to save suppliers, plan your event, and keep your photos.</p>
+      <button class="btn-signin-lg" data-act="signin">◍ Sign in</button></div>`;
+  }else{
+    h+=`<div class="rlabel">My Home <small>›</small></div>
+      <button class="row" data-act="app" data-id="home"><span class="gi">▦</span> Events <span class="ct mono">2</span></button>
+      <button class="row" data-act="app" data-id="alaala"><span class="gi">✧</span> Alaala <span class="ct mono">148</span></button>
+      <div class="notice"><b>People <span class="soon">coming soon</span></b>
+        Family, godparents and friends together. Waiting on a legal review.</div>`;
+    if(S.who==='vendor') h+=`<button class="row" data-act="app" data-id="shop"><span class="gi">▣</span> Studio Azul <span class="ct">your shop</span></button>`;
+  }
+  h+='<div class="rdiv"></div><div class="rlabel">Explore</div>';
+  const vis=FOLDERS.filter(f=>f.slot).sort((a,b)=>a.slot-b.slot);
+  const rest=FOLDERS.filter(f=>!f.slot);
+  (S.moreOpen?vis.concat(rest):vis).forEach(f=>{
+    h+=`<button class="row" data-act="folder" data-id="${f.id}" data-on="${S.folder===f.id}">
+      <span class="gi">${f.icon}</span> ${esc(f.label)} <span class="ct mono">${f.n}</span></button>`;});
+  h+=`<button class="more row" data-act="more"><span class="gi">${S.moreOpen?'⌃':'⌄'}</span> ${S.moreOpen?'Show fewer':'Show more — '+rest.length+' more'}</button>
+    <div class="rdiv"></div><div class="rlabel">More from Setnayan</div>`;
+  TOOLS.forEach(t=>{h+=`<button class="row" data-act="tool" data-id="${t.id}"
+    data-on="${S.view==='doorway'&&S.ctx===t.id}"><span class="dot"></span> ${esc(t.name)}</button>`;});
+  h+=`<div class="rdiv"></div><div class="smallprint">
+    <span>About</span><span>Pricing</span><span>Help</span><span>Open your shop</span><br>
+    <span>Terms</span><span>Privacy</span><span>Policy &amp; Safety</span><span>How Setnayan works</span>
+    <div class="copy">© 2026 Setnayan</div><div class="tag2">Set na 'yan — that's all set.</div></div>`;
+  return h;
+}
+
+/* ══ CARDS ═══════════════════════════════════════════════════════════════ */
+function artCard(a){return `<div class="item" data-act="article" data-id="${a.id}">
+  <div class="thumb">JOURNAL<span class="dur">${a.min} min</span></div>
+  <div class="imeta"><span class="ava">SJ</span><div class="itxt">
+    <p class="ttl">${esc(a.t)}</p><p class="by">The Journal ✓</p>
+    <p class="by">${esc(a.cat)} · ${esc(a.age)}</p></div><span class="kebab">⋮</span></div></div>`;}
+function shopCard(s){const f=foldOf(s.fold);
+  return `<div class="item" data-act="shop" data-id="${s.id}">
+  <div class="thumb">SHOP</div><div class="imeta"><span class="ava">${esc(s.name.split(' ').map(w=>w[0]).join('').slice(0,2))}</span>
+  <div class="itxt"><p class="ttl">${esc(s.name)}</p>
+  <p class="by">${esc(f.label)} ${s.verified?'<span style="color:var(--m3)">✓ verified</span>':''}</p>
+  <p class="by">${esc(s.city)} · ${s.saved==='new'?'new':'<span class="mono">'+s.saved+'</span> saved'}</p>
+  </div><span class="kebab">⋮</span></div></div>`;}
+function storyCard(v){return `<div class="item" data-act="story" data-id="${v.id}">
+  <div class="thumb">STORYTELLER<span class="dur">${v.dur}</span></div>
+  <div class="imeta"><span class="ava">${esc(v.by.slice(0,2).toUpperCase())}</span><div class="itxt">
+  <p class="ttl">${esc(v.t)}</p><p class="by">${esc(v.by)} ✓</p>
+  <p class="by"><span class="mono">${v.plays}</span> plays</p></div><span class="kebab">⋮</span></div></div>`;}
+
+/* ══ FEED ════════════════════════════════════════════════════════════════ */
+function feed(){
+  let arts=ARTICLES.slice();
+  if(S.chip!=='All'&&CHIP_CAT[S.chip]) arts=arts.filter(a=>a.cat===CHIP_CAT[S.chip]);
+  let list=shops();
+  if(S.folder) list=list.filter(s=>s.fold===S.folder);
+
+  let h='<div class="chipbar"><div class="chips">';
+  CHIPS.forEach(c=>{h+=`<button class="chip" data-act="chip" data-id="${esc(c)}" data-on="${S.chip===c}">${esc(c)}</button>`;});
+  h+='</div><span class="chipnext">›</span></div>';
+
+  /* a category was picked from the rail */
+  if(S.folder){
+    const f=foldOf(S.folder);
+    h+=`<button class="back" data-act="home">← All of Setnayan</button>
+      <div class="sechead"><h3>${esc(f.label)}</h3>
+      <span class="meta"><span class="mono">${f.n}</span> kinds of service</span>
+      <span class="rule">shown as “${esc(f.was)}” on the live site today</span></div>`;
+    if(list.length){h+='<div class="grid">'+list.map(shopCard).join('')+'</div>';}
+    else{h+=`<div class="grid"><div class="invite full">
+      <h4>No shops in ${esc(f.label)} yet — and we will not pretend otherwise.</h4>
+      <p>There are ${f.n} kinds of service in here waiting for their first shop. If you run one,
+      this is the emptiest and best moment to open.</p>
+      <span class="go" data-act="notify" data-id="${f.id}">Tell me when one opens →</span></div></div>`;}
+    return h;
+  }
+
+  if(S.day==='launch'){
+    if(S.chip!=='All'&&!arts.length){
+      h+=`<div class="emptyq"><b>Nothing under “${esc(S.chip)}” yet.</b>
+        The archive is 33 pieces deep and growing most weeks — try another chip, or clear the filter.</div>`;
+      return h;}
+    h+='<div class="grid">'+arts.slice(0,4).map(artCard).join('')+'</div>';
+    h+=`<div id="journal"></div><div class="sechead"><span class="badge">▤</span><h3>The Journal</h3>
+      <span class="meta"><span class="mono">33</span> live · a new one most weeks</span>
+      <span class="rule">the only shelf with content today — so it gets the page</span></div>`;
+    h+='<div class="storyrow">'+ARTICLES.slice(0,6).map(a=>`<div class="story" data-act="article" data-id="${a.id}">
+      <div class="sthumb"><span class="min">${a.min} MIN</span></div>
+      <p class="sttl">${esc(a.t)}</p><p class="sby">${esc(a.cat)}</p></div>`).join('')+'</div>';
+    h+=`<div id="stories"></div><div class="sechead"><h3>Real weddings</h3>
+      <span class="rule">nothing published yet — an invitation, never a placeholder</span></div>
+      <div class="grid"><div class="invite full">
+      <h4>The first weddings are being planned right now.</h4>
+      <p>When a couple decides to share their day it appears here — their photos, their suppliers,
+      their timeline, in their own words. Nothing is staged, and nothing appears without them
+      saying yes.</p><span class="go">See how sharing works →</span></div></div>`;
+    h+=`<div id="shops"></div><div class="sechead"><h3>The first shops</h3>
+      <span class="rule">not “trending” — one shop cannot trend</span></div><div class="grid">`;
+    h+=shops().map(shopCard).join('');
+    h+=`<div class="invite wide"><h4>Open your shop — free while we're new.</h4>
+      <p>No commission on your bookings, ever. Your own web address, a calendar couples can see,
+      and enquiries that arrive as real messages.</p><span class="go">Open your shop →</span></div></div>`;
+    h+='<div class="grid">'+arts.slice(4,8).map(artCard).join('')+'</div>';
+  }else{
+    h+='<div id="stories"></div><div class="grid">'+
+      stories().slice(0,2).map(storyCard).join('')+shops().slice(0,2).map(shopCard).join('')+'</div>';
+    h+=`<div id="journal"></div><div class="sechead"><span class="badge">▤</span><h3>The Journal</h3>
+      <span class="meta"><span class="mono">96</span> pieces</span></div>`;
+    h+='<div class="storyrow">'+ARTICLES.slice(0,6).map(a=>`<div class="story" data-act="article" data-id="${a.id}">
+      <div class="sthumb"><span class="min">${a.min} MIN</span></div>
+      <p class="sttl">${esc(a.t)}</p><p class="sby">${esc(a.cat)}</p></div>`).join('')+'</div>';
+    h+=`<div id="shops"></div><div class="sechead"><h3>Trending suppliers</h3>
+      <span class="meta">saved most in the last 7 days — earned, never sold</span></div>`;
+    h+='<div class="grid">'+shops().slice(0,4).map(shopCard).join('')+'</div>';
+  }
+  return h;
+}
+
+/* ══ ARTICLE READER — with the credit block and the tracked link ══════════ */
+function reader(){
+  const a=ARTICLES.find(x=>x.id===S.ctx); if(!a)return '';
+  let h=`<button class="back" data-act="home">← Back</button><div class="reader">
+    <div class="kick">The Journal · ${esc(a.cat)}</div><h1>${esc(a.t)}</h1>
+    <p class="sub"><span class="mono">${a.min} min</span> read · ${esc(a.age)} · by the Setnayan editorial team</p>
+    <div class="hero">ARTICLE</div>`;
+  a.body.forEach(p=>{h+=`<p>${esc(p)}</p>`;});
+  if(a.credit){
+    const s=SHOPS_LAUNCH[0];
+    h+=`<div class="credit"><h4>Suppliers credited in this piece</h4>
+      <div class="creditrow"><span class="ava">SA</span>
+      <div><div style="display:flex;gap:8px;align-items:center">
+        <span style="font-weight:650">${esc(s.name)}</span><span class="sponsored">Sponsored</span></div>
+        <div style="font-size:12.5px;color:var(--m2)">Photo &amp; video · Quezon City</div></div>
+      <button class="viewprof" data-act="shop" data-id="${s.id}" data-src="editorial">View profile ↗</button></div>
+      <p class="fine">Vendors are credited by the Setnayan editorial team. Placements marked
+      “Sponsored” are paid partnerships.</p></div>`;
+  }
+  h+='</div>';
+  return h;
+}
+
+/* ══ SHOP PAGE — where the seam gets pressed ═════════════════════════════ */
+function shopPage(){
+  const s=shops().find(x=>x.id===S.ctx)||SHOPS_LAUNCH[0]; const f=foldOf(s.fold);
+  const saved=!!S.saved[s.id];
+  let h=`<button class="back" data-act="home">← Back</button><div class="shop">
+    <div class="shophero">SHOP COVER</div>
+    <div class="shophd"><span class="shopava">${esc(s.name.split(' ').map(w=>w[0]).join('').slice(0,2))}</span>
+      <div><h1>${esc(s.name)}</h1>
+      <p class="sub">${esc(f.label)} · ${esc(s.city)} ${s.verified?'· <span style="color:var(--gold);font-weight:650">✓ Verified by Setnayan</span>':''}</p></div>
+      <div class="shopacts">
+        <button class="btn-out" data-act="save" data-id="${s.id}" data-saved="${saved}">
+          ${saved?'✓ Saved':'♡ Save this shop'}</button>
+        <button class="btn-gold" data-act="enquire">Ask about your date</button></div></div>
+    <div class="shopbody"><div>`;
+  if(S.srcNote){h+=`<div class="promo"><b>You came here from our Journal.</b>
+    <p>This visit is recorded as an introduction Setnayan made — which is what the booking fee is
+    for. On the live site today that tag is missing, so this booking would be counted as one the
+    shop found on its own.</p></div>`;}
+  if(s.promo){h+=`<div class="promo"><b>Viewer promo · ${esc(s.promo)}</b>
+    <p>This storyteller partnered with ${esc(s.name)}. Book through this chapter and ${esc(s.name)}
+    honours the promo shown — the discount is offered and settled by the vendor directly.</p></div>`;}
+  h+=`<p style="font-size:15px;line-height:1.65;color:#3B3835">A small documentary team working
+    across Metro Manila and Rizal. Two shooters, unhurried, and everything handed over on your own
+    drive within six weeks.</p>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:18px">
+      <div class="thumb">WORK</div><div class="thumb">WORK</div><div class="thumb">WORK</div></div>
+    </div><div><div class="panel"><h4>At a glance</h4>
+      <div class="kv"><span>On Setnayan since</span><span>${esc(s.since)}</span></div>
+      <div class="kv"><span>Usually replies</span><span>${esc(s.reply)}</span></div>
+      <div class="kv"><span>Saved by</span><span>${s.saved==='new'?'new':s.saved}</span></div>
+      <div class="kv"><span>Prices</span><span>on request</span></div></div>
+    <div class="panel" style="margin-top:14px"><h4>Their calendar</h4>
+      <p style="margin:0;font-size:13px;color:var(--m1);line-height:1.5">Ask about your date and
+      they answer from their own calendar — no prices are shown on a card, ever.</p></div></div></div></div>`;
+  return h;
+}
+
+function doorway(){
+  const t=TOOLS.find(x=>x.id===S.ctx); if(!t)return '';
+  return `<button class="back" data-act="home">← Back</button><div class="doorway">
+    <div class="kick" style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:8px">In your wedding</div>
+    <h1>${esc(t.name)}</h1><p>${esc(t.line)}</p>
+    <button class="btn-gold" data-act="signin">Start planning — free</button>
+    <p style="font-size:12px;color:var(--m3);margin-top:22px">A gold dot in the menu would mean
+    “works without an account”. None are painted yet — that is a per-tool answer nobody has
+    checked, so the grammar is drawn and left blank.</p></div>`;
+}
+
+/* ══ THE APP (terracotta) ════════════════════════════════════════════════ */
+function appView(){
+  const tabs=[['home','▦','Events'],['alaala','✧','Alaala'],['guests','◍','Guests'],
+    ['studio','✦','Studio'],['shop','▣','My Shop']];
+  let h=`<div class="appbar"><span class="iconbtn" data-act="exit">☰</span>
+    <span class="wordmark" data-act="exit" title="Back to the public site">SETNAYAN<sup>PH</sup></span>
+    <div class="ev"><span class="evchip">Cale &amp; Ice · 18 Dec 2026</span>
+      <span class="avatar" data-act="menu">${initials()}</span></div></div>
+    ${S.menu?acctMenu(true):''}
+    <div class="appbody"><nav class="apprail">`;
+  tabs.forEach(([id,ic,label])=>{
+    if(id==='shop'&&S.who!=='vendor')return;
+    h+=`<button class="row" data-act="apptab" data-id="${id}" data-on="${S.appTab===id}">
+      <span class="gi">${ic}</span> ${label}</button>`;});
+  h+=`<div class="rdiv"></div>
+    <button class="row" data-act="exit"><span class="gi">↩</span> Back to Setnayan</button>
+    </nav><div class="appmain">
+    <h1>${S.appTab==='alaala'?'Alaala':S.appTab==='shop'?'Studio Azul':'Your wedding'}</h1>
+    <p class="sub">${S.appTab==='alaala'?'Everything from every event you have been part of.':
+      S.appTab==='shop'?'Your shop, your calendar, your enquiries.':'18 December 2026 · 128 days away'}</p>
+    <div class="tiles">
+      <div class="tile"><span class="n">148</span><b>Photos</b><p>From Papic and everyone who shot.</p></div>
+      <div class="tile"><span class="n">86</span><b>Guests</b><p>52 have said yes so far.</p></div>
+      <div class="tile"><span class="n">4</span><b>Suppliers</b><p>One still waiting on a reply.</p></div>
+    </div>
+    <div class="tile" style="margin-top:16px"><b>This is the app — already drawn and approved.</b>
+      <p style="margin-top:6px">Nothing here is redrawn. It is here so the round trip has somewhere to
+      go. Note the colour: the app wears terracotta, the front door wears gold, and crossing between
+      them is the seam.</p>
+      <div style="margin-top:12px"><button class="btn-terra-sm" data-act="exit">Take me back out ↩</button></div>
+    </div></div></div>`;
+  return h;
+}
+function acctMenu(app){
+  return `<div class="acctmenu" style="${app?'top:52px;right:16px;':''}">
+    <div class="hdr">${S.who==='vendor'?'Studio Azul':'Cale &amp; Ice'}</div>
+    ${app?'':'<button data-act="app" data-id="home">▦ Your events</button>'}
+    <button data-act="noop">◍ Your profile</button>
+    <button data-act="noop">⚙ Settings</button>
+    <button data-act="signout">↪ Sign out</button></div>`;
+}
+
+/* ══ DESKTOP SHELL ═══════════════════════════════════════════════════════ */
+function deskShell(){
+  if(S.view==='app')return appView()+(S.toast?`<div class="toast">${S.toast}</div>`:'');
+  let main='';
+  if(S.view==='article')main=reader();
+  else if(S.view==='shop')main=shopPage();
+  else if(S.view==='doorway')main=doorway();
+  else main=feed();
+  return `<div class="topbar">
+    <div class="tb-l"><span class="iconbtn">☰</span>
+      <span class="wordmark" data-act="home">SETNAYAN<sup>PH</sup></span></div>
+    <div class="searchwrap"><div class="searchbox">
+      <input id="q" placeholder="Search" autocomplete="off" value="${esc(S.q)}">
+      <span class="searchgo">⌕</span></div><span class="micbtn">🎙</span></div>
+    <div class="tb-r">${inn()
+      ? `<span class="btn-pill">＋ Create</span>
+         <span class="iconbtn bell">🔔<b>3</b></span>
+         <span class="avatar" data-act="menu">${initials()}</span>${S.menu?acctMenu(false):''}`
+      : `<span class="iconbtn">⋮</span>
+         <button class="btn-gold" data-act="signin">Start planning — free</button>
+         <button class="btn-signin" data-act="signin">◍ Sign in</button>`}</div>
+    ${searchPanel()}</div>
+    <div class="body"><nav class="rail">${rail()}</nav><div class="main" id="main">${main}</div></div>
+    ${S.pending?signinModal():''}${S.toast?`<div class="toast">${S.toast}</div>`:''}`;
+}
+function signinModal(){
+  return `<div class="scrim" data-act="dismiss"><div class="modal">
+    <button class="iconbtn x" data-act="dismiss">✕</button>
+    <h3>Sign in</h3><p>${esc(S.pending.why)}</p>
+    <div class="field">you@example.com</div><div class="field">••••••••</div>
+    <button class="btn-terra" data-act="dosignin">Continue</button>
+    <p class="why">This panel wears the app's terracotta, not the front door's gold — it is the
+    first room inside, not the last step outside. Everything behind it stays visible on purpose:
+    you are not being taken anywhere.</p></div></div>`;
+}
+
+/* ══ PHONE SHELL ═════════════════════════════════════════════════════════ */
+function phoneShell(){
+  let main='';
+  if(S.view==='article')main=reader();
+  else if(S.view==='shop')main=shopPage();
+  else if(S.view==='doorway')main=doorway();
+  else{
+    main='<div class="chipbar" style="padding:8px 0"><div class="chips">'+
+      CHIPS.slice(0,5).map(c=>`<button class="chip" data-act="chip" data-id="${esc(c)}" data-on="${S.chip===c}">${esc(c)}</button>`).join('')+
+      '</div><span class="chipnext">›</span></div><div class="ph-grid">';
+    main+=ARTICLES.slice(0,2).map(artCard).join('');
+    main+=`<div><div class="sechead" style="margin-bottom:10px"><span class="badge">▤</span>
+      <h3 style="font-size:16px">The Journal</h3></div><div class="ph-stories">`+
+      ARTICLES.slice(2,6).map(a=>`<div class="story" data-act="article" data-id="${a.id}">
+        <div class="sthumb"><span class="min">${a.min} MIN</span></div>
+        <p class="sttl">${esc(a.t)}</p></div>`).join('')+'</div></div>';
+    if(S.day==='launch'){main+=`<div class="invite" style="padding:16px 18px">
+      <h4 style="font-size:15px">The first weddings are being planned now.</h4>
+      <p style="font-size:13px">When a couple decides to share their day, it appears here.</p>
+      <span class="go">How sharing works →</span></div>`;}
+    main+=shops().slice(0,2).map(shopCard).join('')+'</div>';
+  }
+  return `<div class="ph-top"><span class="wordmark" data-act="home">SETNAYAN<sup>PH</sup></span>
+    <div style="display:flex;gap:2px"><span class="iconbtn">⌕</span>
+    <span class="iconbtn" data-act="sheet">☰</span></div></div>
+    <div class="ph-main" style="${inn()?'height:600px':''}">${main}</div>
+    ${inn()?`<div class="pillnav">
+      <button data-on="true">▦<span>Home</span></button>
+      <button data-act="app" data-id="alaala">✧<span>Alaala</span></button>
+      <span class="knob">＋</span>
+      <button>◍<span>People</span></button>
+      <button data-act="sheet">⌕<span>Explore</span></button></div>`:''}
+    ${S.sheet?`<div class="sheet"><div class="sheet-hd"><b>Index</b>
+      <button class="iconbtn" data-act="sheet">✕</button></div>${rail()}</div>`:''}
+    ${S.pending?signinModal():''}${S.toast?`<div class="toast">${S.toast}</div>`:''}`;
+}
+
+/* ══ RENDER + ACTIONS ════════════════════════════════════════════════════ */
+function render(){
+  document.getElementById('desk').innerHTML=deskShell();
+  document.getElementById('phone').innerHTML=phoneShell();
+  document.getElementById('dayLabel').textContent=S.day==='launch'?'launch day':'later, once it fills';
+  document.querySelectorAll('[data-screen]').forEach(n=>n.classList.toggle('hidden',n.dataset.screen!==S.screen));
+  const q=document.getElementById('q');
+  if(q&&S.focusQ){q.focus();q.setSelectionRange(q.value.length,q.value.length);}
+}
+function go(view,ctx){S.view=view;S.ctx=ctx;S.q='';S.menu=false;
+  const m=document.getElementById('main'); if(m)m.scrollTop=0;}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]'); if(!el)return;
+  const a=el.dataset.act,id=el.dataset.id;
+  if(a!=='menu')S.focusQ=false;
+  switch(a){
+    case 'home': S.view='feed';S.folder=null;S.chip='All';S.ctx=null;S.q='';S.menu=false;S.srcNote=false;
+      {const m=document.getElementById('main');if(m)m.scrollTop=0;} break;
+    case 'scroll': S.view='feed';S.folder=null;render();
+      {const t=document.getElementById(id);if(t)t.scrollIntoView({block:'start'});} return;
+    case 'folder': S.view='feed';S.folder=id;S.chip='All';S.q='';S.srcNote=false; break;
+    case 'chip': S.chip=id;S.folder=null;S.view='feed'; break;
+    case 'more': S.moreOpen=!S.moreOpen; break;
+    case 'article': go('article',id); break;
+    case 'shop': S.srcNote=el.dataset.src==='editorial'; go('shop',id); break;
+    case 'story': toast('Storyteller pages are drawn elsewhere — <b>0 exist in production today</b>.'); break;
+    case 'tool': go('doorway',id); break;
+    case 'notify': toast('We will tell you when the first shop opens in <b>'+esc(foldOf(id).label)+'</b>.'); break;
+    case 'save':
+      if(!inn()){S.pending={kind:'save',id,why:'Save '+ (shops().find(s=>s.id===id)||{}).name+' to your list and pick it up later — you will come straight back to this page.'};}
+      else{S.saved[id]=!S.saved[id];toast(S.saved[id]?'Saved to your list.':'Removed from your list.');}
+      break;
+    case 'enquire':
+      if(!inn()){S.pending={kind:'enquire',id:S.ctx,why:'Ask this shop about your date. Your message is kept while you sign in — you will land back here with it intact.'};}
+      else toast('Your message went to the shop. It lands in their desk, not an inbox they ignore.');
+      break;
+    case 'signin': S.pending={kind:'plain',why:'Your events, your photos and your people, all in one place.'}; break;
+    case 'dosignin': {
+      const p=S.pending; S.pending=null; S.who='couple';
+      if(p&&p.kind==='save'){S.saved[p.id]=true;
+        toast('Signed in — and you never left <b>'+esc((shops().find(s=>s.id===p.id)||{}).name||'this page')+'</b>. It is saved.');}
+      else if(p&&p.kind==='enquire'){toast('Signed in — your message was still here, and it has gone.');}
+      else{toast('Signed in. Look at the left menu: the same slot is now <b>your home</b>.');}
+      break;}
+    case 'dismiss': if(e.target.closest('.modal')&&!e.target.closest('[data-act="dismiss"]'))return;
+      S.pending=null; break;
+    case 'menu': S.menu=!S.menu; break;
+    case 'signout': S.who='out';S.menu=false;S.view='feed';S.folder=null;
+      toast('Signed out — and only because you asked. Reading the public site never does this.'); break;
+    case 'app': S.view='app';S.appTab=id==='alaala'?'alaala':id==='shop'?'shop':'home';S.menu=false;S.sheet=false; break;
+    case 'apptab': S.appTab=id; break;
+    case 'exit': S.view='feed';S.folder=null;S.chip='All';S.menu=false;
+      toast('Back on the public site — <b>still signed in</b>. Your home is at the top of the menu.'); break;
+    case 'sheet': S.sheet=!S.sheet; break;
+    case 'noop': S.menu=false; break;
+  }
+  render();
+});
+document.addEventListener('input',e=>{ if(e.target.id!=='q')return; S.q=e.target.value; S.focusQ=true; render(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(S.pending){S.pending=null;render();return;}
+  if(S.q){S.q='';S.focusQ=false;render();} } });
+
+/* segmented controls */
+[['segScreen','screen'],['segDay','day'],['segWho','who']].forEach(([id,key])=>{
+  document.getElementById(id).addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    S[key]=b.dataset.v;
+    if(key==='who'){S.menu=false;S.pending=null;}
+    if(key==='day'){S.folder=null;S.view=S.view==='shop'?'feed':S.view;}
+    render();});
+});
+
+/* folder table */
+document.getElementById('folderTable').innerHTML=
+  '<tr><th>Shows today</th><th>Proposed</th><th>Services</th><th>Slot</th></tr>'+
+  FOLDERS.map(f=>`<tr><td class="was">${esc(f.was)}</td><td class="now">${esc(f.label)}</td>
+    <td class="n">${f.n}</td><td>${f.slot?'visible '+f.slot:'show more'}</td></tr>`).join('');
+
+render();
 })();
 </script>
 </body>
