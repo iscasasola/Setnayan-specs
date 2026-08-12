@@ -657,7 +657,11 @@ function rail(){
         Family, godparents and friends together. Waiting on a legal review.</div>`;
     if(S.who==='vendor') h+=`<button class="row" data-act="app" data-id="shop"><span class="gi">▣</span> Studio Azul <span class="ct">your shop</span></button>`;
   }
-  h+='<div class="rdiv"></div><div class="rlabel">Explore</div>';
+  /* MARKETPLACE — the app's own label since 2026-07-27 (owner: "easier to
+     understand" than Explore). The front door says what the app says, and it
+     stays visible signed IN as well as out — a couple browses suppliers all the
+     way through planning, not only before they join. */
+  h+='<div class="rdiv"></div><div class="rlabel">Marketplace</div>';
   const vis=FOLDERS.filter(f=>f.slot).sort((a,b)=>a.slot-b.slot);
   const rest=FOLDERS.filter(f=>!f.slot);
   (S.moreOpen?vis.concat(rest):vis).forEach(f=>{
@@ -854,8 +858,14 @@ function doorway(){
 
 /* ══ THE APP (terracotta) ════════════════════════════════════════════════ */
 function appView(){
-  const tabs=[['home','▦','Events'],['alaala','✧','Alaala'],['guests','◍','Guests'],
-    ['studio','✦','Studio'],['shop','▣','My Shop']];
+  /* ⚠ MARKETPLACE BELONGS IN HERE TOO (owner 2026-08-12: "vendor/explore should
+     show upon login as well"). It already ships in the customer nav — key
+     'explore', label "Marketplace", landing on the event's own vendors page —
+     and leaving it off this drawing implied a couple has to go back out to the
+     public site to find a supplier. They do not, and they should not. */
+  const tabs=[['home','▦','Events'],['market','⌕','Marketplace'],['guests','◍','Guests'],
+    ['studio','✦','Studio'],['alaala','✧','Alaala'],['shop','▣','My Shop'],
+    ['account','◍','Your account']];
   let h=`<div class="appbar"><span class="iconbtn" data-act="exit">☰</span>
     <span class="wordmark" data-act="exit" title="Back to the public site">SETNAYAN<sup>PH</sup></span>
     <div class="ev"><span class="evchip">Cale &amp; Ice · 18 Dec 2026</span>
@@ -868,8 +878,67 @@ function appView(){
       <span class="gi">${ic}</span> ${label}</button>`;});
   h+=`<div class="rdiv"></div>
     <button class="row" data-act="exit"><span class="gi">↩</span> Back to Setnayan</button>
-    </nav><div class="appmain">
-    <h1>${S.appTab==='alaala'?'Alaala':S.appTab==='shop'?'Studio Azul':'Your wedding'}</h1>
+    </nav><div class="appmain">${S.appTab==='market'?appMarket():S.appTab==='account'?appAccount()
+      :S.appTab==='shop'?appShop():appHome()}</div></div>`;
+  return h;
+}
+/* YOUR ACCOUNT — reachable from the picture, top right, on both sides of the
+   seam (owner 2026-08-12: "wanna see when logged in, to see their account"). */
+function appAccount(){
+  return `<h1>Your account</h1>
+    <p class="sub">${S.who==='vendor'?'Studio Azul':'Cale &amp; Ice'} · joined May 2026</p>
+    <div class="panel"><h4>Your public address</h4>
+      <div class="kv"><span>People find you at</span><span>setnayan.com/s89u-kemmf2adck</span></div>
+      <p style="font-size:12.5px;color:var(--m1);margin:10px 0 0;line-height:1.5">
+      ⚠ That is a machine code, and it is what a real person's address looks like today. What a
+      person's address <b>should</b> look like has never been decided — and once invitations are
+      printed with it, it is permanent. <b>This one is yours to settle.</b></p></div>
+    <div class="panel" style="margin-top:14px"><h4>Your public page</h4>
+      <div class="kv"><span>Anyone with the link can see your celebrations</span>
+        <span style="color:var(--gold);font-weight:650">Off</span></div>
+      <p style="font-size:12.5px;color:var(--m1);margin:10px 0 0;line-height:1.5">Off is the
+      default and nobody has ever turned it on — <b>0 of 9 accounts in production</b>. This is the
+      switch that would make somebody a storyteller.</p></div>
+    <div class="panel" style="margin-top:14px"><h4>Everything else</h4>
+      <div class="kv"><span>Your details</span><span>name · photo · birthday</span></div>
+      <div class="kv"><span>Notifications</span><span>email only</span></div>
+      <div class="kv"><span>Privacy &amp; data</span><span>export · delete · face data</span></div>
+      <div class="kv"><span>Payment methods</span><span>none saved</span></div></div>
+    <div style="margin-top:16px;display:flex;gap:10px">
+      <button class="btn-terra-sm" data-act="exit">Back to the public site ↩</button>
+      <button class="btn-out" data-act="signout">Sign out</button></div>`;
+}
+/* YOUR SHOP — the vendor side, and the one place the seam is crossed on
+   purpose: "View your public page" leaves the app for the page couples see. */
+function appShop(){
+  if(S.who!=='vendor')return `<h1>My Shop</h1>
+    <p class="sub">You do not run a shop, so this does not exist for you.</p>
+    <div class="tile"><b>No fake doors.</b><p style="margin-top:6px">Switch <b>You</b> at the top of
+    this page to <b>Vendor</b> and it appears — for everyone else the row is simply absent, never
+    greyed out.</p></div>`;
+  return `<h1>Studio Azul</h1>
+    <p class="sub">Your shop · <span style="color:var(--gold);font-weight:650">✓ Verified</span> ·
+      setnayan.com/studio-azul</p>
+    <div class="tiles">
+      <div class="tile"><span class="n">3</span><b>New enquiries</b><p>Two are about the same date.</p></div>
+      <div class="tile"><span class="n">4</span><b>Booked</b><p>Next one is 18 Dec.</p></div>
+      <div class="tile"><span class="n">412</span><b>Saved by couples</b><p>Up 38 this week.</p></div>
+    </div>
+    <div class="tile" style="margin-top:16px"><b>Your page as a couple sees it.</b>
+      <p style="margin-top:6px">This is the other direction across the seam — from inside your shop,
+      straight out to the public page couples actually land on. Same address, signed in the whole
+      time.</p>
+      <div style="margin-top:12px;display:flex;gap:10px">
+        <button class="btn-terra-sm" data-act="shop" data-id="s1">View your public page ↗</button>
+        <button class="btn-out" data-act="apptab" data-id="market">Your calendar</button></div></div>
+    <div class="panel" style="margin-top:14px"><h4>Your shop details</h4>
+      <div class="kv"><span>Category</span><span>Photo &amp; video</span></div>
+      <div class="kv"><span>Where</span><span>Quezon City</span></div>
+      <div class="kv"><span>Web address</span><span>permanent — ask us to correct it</span></div>
+      <div class="kv"><span>Booking fee</span><span>not charged yet</span></div></div>`;
+}
+function appHome(){
+  return `<h1>${S.appTab==='alaala'?'Alaala':S.appTab==='shop'?'Studio Azul':'Your wedding'}</h1>
     <p class="sub">${S.appTab==='alaala'?'Everything from every event you have been part of.':
       S.appTab==='shop'?'Your shop, your calendar, your enquiries.':'18 December 2026 · 128 days away'}</p>
     <div class="tiles">
@@ -882,15 +951,42 @@ function appView(){
       go. Note the colour: the app wears terracotta, the front door wears gold, and crossing between
       them is the seam.</p>
       <div style="margin-top:12px"><button class="btn-terra-sm" data-act="exit">Take me back out ↩</button></div>
-    </div></div></div>`;
-  return h;
+    </div>`;
+}
+/* The SAME marketplace, but it knows your date — that is the whole difference,
+   and it is why it belongs inside as well as outside. */
+function appMarket(){
+  return `<h1>Marketplace</h1>
+    <p class="sub">The same suppliers as the public site — but this one knows your date,
+    so it can tell you who is free on <b>18 December 2026</b>.</p>
+    <div class="tiles">
+      <div class="tile"><span class="n">4</span><b>Booked</b><p>Locked in for your date.</p></div>
+      <div class="tile"><span class="n">11</span><b>Shortlisted</b><p>Saved while you decide.</p></div>
+      <div class="tile"><span class="n">2</span><b>Waiting on you</b><p>They replied. You have not.</p></div>
+    </div>
+    <div class="sechead" style="margin-top:24px"><h3 style="font-size:17px">Free on your date</h3>
+      <span class="rule">the public site cannot say this — it does not know your date</span></div>
+    <div class="tiles">
+      ${SHOPS_LATER.slice(0,3).map(s=>`<div class="tile"><b>${esc(s.name)}</b>
+        <p>${esc(foldOf(s.fold).label)} · ${esc(s.city)}</p>
+        <div style="margin-top:10px"><button class="btn-terra-sm" data-act="apptab" data-id="market">Ask about 18 Dec</button></div>
+      </div>`).join('')}
+    </div>
+    <div class="tile" style="margin-top:16px"><b>Why this is in both places.</b>
+      <p style="margin-top:6px">A couple does not stop looking for suppliers the day they sign up —
+      most of the looking happens after. Sending them back out to the public site to browse would be
+      the one place the seam tore. Signed out it is called Marketplace on the front door; signed in
+      it is called Marketplace here. Same word, both sides.</p></div>`;
 }
 function acctMenu(app){
   return `<div class="acctmenu" style="${app?'top:52px;right:16px;':''}">
-    <div class="hdr">${S.who==='vendor'?'Studio Azul':'Cale &amp; Ice'}</div>
-    ${app?'':'<button data-act="app" data-id="home">▦ Your events</button>'}
-    <button data-act="noop">◍ Your profile</button>
-    <button data-act="noop">⚙ Settings</button>
+    <div class="hdr">Signed in as <b>${S.who==='vendor'?'Studio Azul':'Cale &amp; Ice'}</b><br>
+      <span class="mono" style="font-size:11px">setnayan.com/s89u-kemmf2adck</span></div>
+    <button data-act="app" data-id="home">▦ Your events</button>
+    <button data-act="app" data-id="account">◍ Your account</button>
+    ${S.who==='vendor'?'<button data-act="app" data-id="shop">▣ Your shop</button>':''}
+    <button data-act="app" data-id="alaala">✧ Your photos</button>
+    <div class="rdiv" style="margin:6px 10px"></div>
     <button data-act="signout">↪ Sign out</button></div>`;
 }
 
@@ -955,15 +1051,18 @@ function phoneShell(){
     main+=shops().slice(0,2).map(shopCard).join('')+'</div>';
   }
   return `<div class="ph-top"><span class="wordmark" data-act="home">SETNAYAN<sup>PH</sup></span>
-    <div style="display:flex;gap:2px"><span class="iconbtn">⌕</span>
-    <span class="iconbtn" data-act="sheet">☰</span></div></div>
+    <div style="display:flex;gap:2px;align-items:center;position:relative">
+      <span class="iconbtn">⌕</span>
+      ${inn()?`<span class="avatar" data-act="menu">${initials()}</span>`:''}
+      <span class="iconbtn" data-act="sheet">☰</span>
+      ${S.menu?acctMenu(false):''}</div></div>
     <div class="ph-main" style="${inn()?'height:600px':''}">${main}</div>
     ${inn()?`<div class="pillnav">
       <button data-on="true">▦<span>Home</span></button>
-      <button data-act="app" data-id="alaala">✧<span>Alaala</span></button>
+      <button data-act="app" data-id="market">⌕<span>Marketplace</span></button>
       <span class="knob">＋</span>
-      <button>◍<span>People</span></button>
-      <button data-act="sheet">⌕<span>Explore</span></button></div>`:''}
+      <button data-act="app" data-id="alaala">✧<span>Alaala</span></button>
+      <button>◍<span>People</span></button></div>`:''}
     ${S.sheet?`<div class="sheet"><div class="sheet-hd"><b>Index</b>
       <button class="iconbtn" data-act="sheet">✕</button></div>${rail()}</div>`:''}
     ${S.pending?signinModal():''}${S.toast?`<div class="toast">${S.toast}</div>`:''}`;
@@ -1020,7 +1119,8 @@ document.addEventListener('click',e=>{
     case 'menu': S.menu=!S.menu; break;
     case 'signout': S.who='out';S.menu=false;S.view='feed';S.folder=null;
       toast('Signed out — and only because you asked. Reading the public site never does this.'); break;
-    case 'app': S.view='app';S.appTab=id==='alaala'?'alaala':id==='shop'?'shop':'home';S.menu=false;S.sheet=false; break;
+    case 'app': S.view='app';S.appTab=['alaala','shop','market','account','guests','studio'].includes(id)?id:'home';
+      S.menu=false;S.sheet=false; break;
     case 'apptab': S.appTab=id; break;
     case 'exit': S.view='feed';S.folder=null;S.chip='All';S.menu=false;
       toast('Back on the public site — <b>still signed in</b>. Your home is at the top of the menu.'); break;
