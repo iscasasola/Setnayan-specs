@@ -1,5 +1,33 @@
 # The front door and the seam — finalized 2026-08-12
 
+> ## rev 2 — rebuilt against YouTube's real desktop view (owner, 2026-08-12)
+>
+> The owner sent the actual YouTube desktop, signed in and signed out, and said
+> *"we want to follow the same inspiration."* Rev 1 had read the reference as a magazine.
+> It is not. **Three things changed, and one of them answered an open question.**
+>
+> **① The grid replaced the hero.** The reference is a **uniform four-across grid** of equal cards,
+> broken only by a tall-card row and the occasional section heading — no lead story, no feature
+> block. This matters most on launch day: a uniform grid is what makes a page look *full*, and it
+> is what lets 33 articles fill a front page that would otherwise read as four apologies.
+>
+> **② A card has no border and no shadow.** The thumbnail *is* the object; the title, the avatar and
+> the channel line sit directly on the page. That reads as more faithful to the "cream page and
+> cards, never a second surface" lock than the bordered card in rev 1, not less.
+>
+> **③ The personal block moved ABOVE Explore — and that settles it.** The reference keeps a
+> permanent account slot as the **second** group, right under the destinations: a sign-in prompt
+> when you are out, the account's own destinations when you are in. Rev 1 left My Home third and
+> asked the owner whether to pin it higher. **The reference answers it: higher.** Done, not asked.
+>
+> Also adopted: hamburger + wordmark left, search centred **with its own button** and a mic beside
+> it, the account cluster right (`+ Create` · bell · avatar signed in; `⋮` + Sign in signed out), a
+> scrolling filter-chip row, and the small-print link block with a copyright line inside the rail.
+>
+> 🔑 **The seam got *simpler*, not more complex.** Signing in is now literally the swap the
+> reference makes — the sign-in prompt is replaced in place by the account's destinations. Same
+> rail, same width, same side, one group's contents changed.
+
 > **This is the answer to [`MASTER_DESIGN_PROMPT_2026-08-11.md`](MASTER_DESIGN_PROMPT_2026-08-11.md).**
 > The drawing is [`prototypes/front_door_and_seam_2026-08-12.html`](prototypes/front_door_and_seam_2026-08-12.html)
 > — one self-contained file, toggles for Desktop/Phone × Launch-day/Later × Signed-out/Couple/Vendor.
@@ -49,11 +77,19 @@ Feed column and the Editorials shorts row:
 Scroll-spy sits on the left edge of the active row: a 3 px gold bar plus a warm fill. It is drawn on
 the left because a right-edge marker on a left rail points away from the content it describes.
 
-**Order and grouping are unchanged, as instructed. One form change:** My Home holds its position in
-the list but is drawn as a **block, not a row** — bordered, with its own actions. It was "one plain
-row among twenty and easy to miss"; keeping the order and changing the form fixes that without
-re-shuffling anything else. If you would rather it were pinned to the very top of the rail, that is a
-one-line change and it is your call, not a design one.
+**The rail is grouped the way the reference groups it** — five groups, dividers between:
+
+1. **Destinations** — Home · Stories · Journal · Find a supplier
+2. **The account slot** — the sign-in prompt when out, My Home's areas when in
+3. **Explore** — the five visible categories + Show more
+4. **More from Setnayan** — the eight tools
+5. **Small print** — About · Pricing · Help · Open your shop / Terms · Privacy · Policy & Safety,
+   then the copyright line and the tagline
+
+That moves the account slot **above Explore**, where rev 1 had it third per the brief's order. The
+reference put the question beyond argument. It is no longer a bordered block either — the reference
+uses a plain prompt and plain rows, and a bordered block inside a borderless rail was rev 1 trying
+to solve visibility with decoration when **position** was the real answer.
 
 ### The categories are real now — and the bigger problem is the labels
 
@@ -121,8 +157,8 @@ So the page re-composes rather than apologising four times:
 
 | Rail | Today | Launch-day shape | Returns to its normal shape at |
 |---|---|---|---|
-| Trending storyteller | 0 | the slot is given to **the Journal's lead piece**, as a wide editorial card | 1 chapter |
-| Editorials / Journal | 33 of 91 | **carries the page** — lead + 6 shorts + 3 cards | — |
+| Trending storyteller | 0 | **absent** — no empty shelf, the grid simply carries Journal cards | 1 chapter |
+| Editorials / Journal | 33 of 91 | **fills the grid** (8 cards over two rows) and takes the tall-card row | — |
 | Real weddings | 0 | one written invitation | 2 published |
 | Vendors | 1 | **"The first shops"** — the one real card beside an invitation to open one | 12 live shops |
 
@@ -228,6 +264,7 @@ schedule stalls, the front page visibly stalls with it. That is a business fact,
 2. **Twelve live shops before the word "Trending" comes back.** Move the number if you disagree.
 3. **Does Pakanta get a public page?** It is sold and has no front door. Building one is a job; not
    building one means it stays invisible to strangers.
-4. **My Home stays in its list position, or gets pinned to the top of the rail?** Drawn in position.
+4. ~~**My Home's position in the rail?**~~ ✅ **Settled by the reference, 2026-08-12** — the account
+   slot is the second group, above Explore. Drawn that way; nothing to decide.
 
 Everything else in this pass is settled and drawn.
