@@ -494,10 +494,14 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > 🔬 Migration **dry-run against prod in a rolled-back transaction** first, per
 > the 2026-08-12 lesson that the PGlite replay runs as superuser.
 >
-> 🪤 **SEPARATE, FLAGGED NOT FIXED: `test:unit`'s `app/**/*.test.ts` glob NEVER
-> MATCHES `app/[slug]/`** — the brackets are a character class. **27 files / 188
-> tests have never run in CI**, including `first-byte.test.ts`, the guard written
-> to hold the soft-404 regression. All 188 pass. Needs its own PR.
+> 🛑 **A CLAIM I MADE HERE WAS FALSE, RETRACTED THE SAME DAY.** I reported that
+> `test:unit`'s glob never matches `app/[slug]/` and that 188 tests had never run
+> in CI. **Measured: 308 app tests = 188 bracket + 120 non-bracket. They always
+> ran.** Brackets are a character class **in a pattern**, ordinary characters in a
+> matched **path**; the real trap only bites an EXPLICIT bracket path given to
+> `--test`. 🔑 **A SEARCH THAT CANNOT MATCH IS NOT A NEGATIVE RESULT** — I grepped
+> the log for a FILENAME where TAP prints test NAMES, so it could only return 0,
+> and it agreed with a trap already written down, which felt like confirmation.
 >
 > ✅ **OWNER CLOSED THIS 2026-08-12: the wall on a phone shows the WHOLE
 > EVENT** — *"a preview of what and how many photos and videos are taken"*. So
