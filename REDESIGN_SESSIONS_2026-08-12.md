@@ -28,6 +28,29 @@ a big build:
 - ~~**Session 3 is copy.** It is why nobody can find a photographer.~~ ✅ **DONE 2026-08-12 — and it
   was NOT "one map": the words also live in the DATABASE and in the wizard. See the entry below.**
 
+✅ **SESSION 4 IS MERGED — PR #4396, commit `7b0aee558`, 2026-08-13.** Verified an
+ancestor of `origin/main`, not inferred. It ships **behind `NEXT_PUBLIC_NEW_FRONT_DOOR`,
+which is OFF**, so `/` still renders the June cinematic page and **nothing a visitor sees has
+changed**. 🔴 **SESSION 4 IS NOT DONE UNTIL THE OWNER LOOKS AND THE FLAG FLIPS** — and the
+flip is the commit that deletes `HomeReskin`, because deleting an approved page before its
+replacement has been seen is the one irreversible step in this change.
+⚠ `NEXT_PUBLIC_*` inlines at BUILD time: flipping it needs a rebuild **without build cache**,
+and the value must be exactly `'1'` (`true` reads as OFF).
+🔀 **PR #4394 (the same session's groundwork) was CLOSED as superseded** — it was stuck red on
+*"every feature-flag module has at least one non-test importer"* because it built a flag
+nothing consumed, and #4396 is its only consumer. Two sessions had started Session 4; they were
+rebased into one branch rather than left as two PRs each needing the other to go green.
+🔬 **An adversarial pass over the port found 13 real defects BEFORE merge** (73 agents, 34
+candidates, 21 refuted), including that the page's own *"never show 0 for a failed read"*
+promise was **dead code** — the shared shelf loaders collapse a rejected query to `[]`, so a
+broken read would have printed "0 theirs" with nothing reporting it. Fixed at the source
+(`loadFeaturedChaptersResult`); `/realstories` is untouched. **Four of the 13 were guards of
+mine that could not fail.**
+⏭ **STILL OPEN, owner-only:** whether the approved Filipino-USP hero/manifesto copy lands here.
+**Recommendation: NO.** The approved rev-2 design *replaced the hero with the grid* — there is
+no hero on this page — so landing manifesto copy here contradicts the drawing. It remains
+approved and homeless; that is a scope decision, not an engineering one.
+
 ✅ **1, 2 AND 3 ARE ALL SHIPPED AND VERIFIED LIVE.** #4388 merged 16:38Z and #4391 (the rename's
 16 missed surfaces) 17:06Z; both read back off `www.setnayan.com` — 15/15 labels, 0 retired words,
 all 15 `?folder=` URLs resolving. ⚠ This line twice claimed a state it had not measured (first
