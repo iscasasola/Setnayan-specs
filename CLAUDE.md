@@ -515,6 +515,23 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > a decision down. ⚠ Still unresolved from 2026-08-11: `Pricing.md` says HIDE
 > Live Photo Wall while the SKU is active and publicly listed.
 
+> ### 📋 WHAT IS ACTUALLY LEFT — re-verified 2026-08-12, READ THIS BEFORE THE REGISTER
+> **[`WHAT_IS_ACTUALLY_LEFT_2026-08-12.md`](WHAT_IS_ACTUALLY_LEFT_2026-08-12.md)**
+> supersedes the counts in the code repo's `WHAT_IS_LEFT.md` (2026-08-07).
+>
+> All **58** claims re-checked against shipped code and the live prod DB by six
+> independent readers, each group then attacked by a skeptic told to hunt BOTH
+> failure modes — shipped work reported as open, and broken work reported as
+> done. One verdict was overturned.
+>
+> **17 of 58 were ALREADY DONE.** Nearly a third. Five days of work closed them
+> and nothing in the register knew. 🔑 **That is the drift the register warned
+> about, now measured — assume this file rots at the same rate and re-verify
+> before acting on any line.**
+>
+> **41 open: 14 need the OWNER (a signature, a price, a ruling — no engineering
+> left), 24 need engineering, 3 are blocked on an outside party.**
+
 > ### 🎨 STARTING A REDESIGN SESSION? READ THIS ROW FIRST (set 2026-08-12)
 > The owner asked to take the redesign into its own session. Two documents, in
 > this order, and **nothing else first**:
