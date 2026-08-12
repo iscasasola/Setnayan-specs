@@ -189,17 +189,26 @@ Four smaller ones, none of which blocks a build for long:
 
 ---
 
-## Session 3 · Say the words people actually type — 🟡 **BUILT, MERGE-PENDING (PR #4388)**
+## Session 3 · Say the words people actually type — ✅ **DONE & VERIFIED IN PRODUCTION**
 ~~**Copy only. No migration, no schema, no SEO cost.**~~ **Copy — plus a data migration, because
 this doc was wrong about where the words live.**
 
-> 🛑 **I MARKED THIS "DONE" WHILE ITS PR WAS STILL OPEN, and another session caught it.** The work
-> is written, reviewed by CI and green on typecheck · production build · playwright · bundle · all
-> 21 lint guards · 7,721 unit tests · 1,190 db tests — but **written is not merged, and merged is
-> not in production.** The label rename only reaches a customer once the migration has actually
-> run against prod, which is a third event again. **Do not mark this ✅ until the words have been
-> read back out of the live database.** Same disease as everything else in this file: a state line
-> written from intention rather than measurement.
+> ✅ **VERIFIED ON THE LIVE SITE, not inferred** (PRs **#4388** + **#4391**, both merged
+> 2026-08-12). Read back from `www.setnayan.com` after deploy: **15/15** new labels render ·
+> **0** retired words in any reader-visible position · **all 15** `?folder=` URLs return 200 **and
+> their bodies render the renamed folder** · the live search payload carries **276** options and
+> *"Photographer → in Photo & video · 12 services"*, with **zero** retired words used as the place ·
+> `/blog` says *Setnayan Articles* (0 × Journal) · `/realstories` says *Stories* (0 × Real stories) ·
+> the public footer says *Their stories* · `llms.txt` says *[Stories]* and *[Articles]*.
+>
+> 🛑 **I MARKED THIS "DONE" ONCE WHILE ITS PR WAS STILL OPEN, and another session caught it.** The
+> heading above is the *third* state this line has held — merge-pending, then corrected, then this.
+> **Written is not merged, merged is not deployed, and deployed is not verified.** Those are three
+> separate events and this change proved it: the migration reached prod **before** the site build,
+> so for several minutes the page read NEW words from the database and OLD words from the
+> not-yet-replaced bundle — one page, two vocabularies, exactly the defect the work existed to
+> prevent. Nothing was wrong; the halves land at different times. **Never mark a state line from
+> intention. Read it back out of the thing itself.**
 
 > ✅ **SHIPPED** (PR #4388). All fifteen labels owner-approved unchanged.
 >
