@@ -59,9 +59,12 @@ merely waiting on CI:**
 clean — which is exactly the "land one, rebase the other" call, arrived at without anyone
 forcing it.
 
-⏭ **A NEW SESSION MAY START NOW: 8 (Alaala).** Measured: **none of the three open PRs touches
-`dashboard/(launcher)/page.tsx`.**
-🚫 **NOT 7** — #4391 edits `lib/nav-registry-defaults.ts`, which Session 7 would change.
+✅ **8 (Alaala) IS DONE — PR #4395 MERGED 18:10Z 2026-08-12, and production self-reports the
+commit** (`/api/health` → `"version":"5893891"`, the merge SHA `589389162`; the deployment
+aliased to `setnayan.com` is READY). Do NOT start it again.
+🚫 **NOT 7** — #4391 edits `lib/nav-registry-defaults.ts`, which Session 7 would change; and 7
+touches `dashboard/(launcher)/page.tsx`, the file 8 has just rewritten a section of. Rebase on
+`origin/main` before starting it.
 🚫 **NOT 5 YET** — it needs the article page, which #4385 still has open.
 ✅ **4's owner sentence ARRIVED 2026-08-13 — it is unblocked.**
 📛 **Name it "Redesign 8"** — sessions literally titled *Session 4 · SESSION 5 · SESSION 6*
@@ -401,8 +404,65 @@ this doc was wrong about where the words live.**
 
 ---
 
-## Session 8 · Alaala, drawn as memories
-**Follows Session 1.**
+## Session 8 · Alaala, drawn as memories — ✅ **DONE 2026-08-12 (PR #4395)**
+
+> ✅ **MERGED 18:10Z and DEPLOYED.** `589389162` is an ancestor of `origin/main`; the production
+> deployment carrying it is READY and aliased to `setnayan.com`; and `/api/health` self-reports
+> `"version":"5893891"` — the merge SHA, read out of the running app rather than inferred.
+> **Do NOT rebuild any of it.**
+>
+> 🔴 **ALL FIVE LENSES ANSWERED WITH EVENTS, AND IT RENDERED BEAUTIFULLY.** The home's Alaala
+> panel rendered `PhotosTab` — **one card per event with a photo count**; the obsidian tile's
+> *Owned* lens rendered a **bulleted list of event names with dates**; *Attended* rendered a
+> **count of events**; and `/dashboard/library` answered three of the five with the same album
+> grid and the other two with prose, because People and With me are not albums. **Five words,
+> two answers, and one of them is the board's job.**
+>
+> ✅ **Now:** a wall of real photographs, cut five ways from ONE read — Recent (newest first,
+> event boundaries erased) · Owned · Attended · **People (not a wall — faces, with how many
+> events each kept showing up in)** · With me. Life-Flash keeps the tile; "This year" keeps its
+> strip. The per-event album grid is **not deleted** — it is *"Albums by event"* under **Also
+> kept**, where downloading one whole celebration is a real job.
+>
+> 📱 **THE LENSES DID NOT EXIST ON A PHONE.** They were a `sm:`-and-up affordance inside a 64px
+> caption slot — which is *why* every body was a sentence: a wall does not fit in a caption. They
+> now own the full width on every screen size.
+>
+> 🔑 **`unreadable` IS NOT `length === 0`.** A rejected query and an empty table are the same
+> value out of PostgREST. Every read checks `.error`; `lensCounts` answers **`null` — NOT
+> MEASURED, never `0`** — and the UI says *"could not be loaded — this is not an empty album"*.
+> **"No photos yet" printed over a refused read is a lie told about somebody's memories.**
+>
+> 🔒 **Strict `moderation_state = 'clean'`**, not the couple's `!= 'nsfw_blocked'` manage-gallery
+> filter — this wall AUTO-RENDERS on the home, so it takes the allowlist every other
+> auto-rendering surface takes. Stricter than the grid it replaced. **No gate was widened:** every
+> frame shown was already visible to that viewer through a shipped surface.
+>
+> 🚪 **FOUND, NOT INTRODUCED:** an *Attended* album card has always linked into
+> `dashboard/[eventId]`, which admits `member_type='couple'` ONLY — so it was a **404 for the
+> guest it was shown to**. Unreachable in prod today (0 guest memberships) and deliberately not
+> propagated: owned frames open the album, attended frames open the picture.
+>
+> 🛡 **`lint-port-no-lost-controls.mjs` EARNED ITS KEEP.** The People lens's *"Open People"* door
+> hung off the prose placeholder — so replacing that placeholder with real faces **silently
+> deleted the only route from Alaala to `/dashboard/people`**. 🔑 **A control that disappears the
+> moment the feature starts WORKING is the worst kind to lose.**
+>
+> 🪤 **AND THE MUTATION RUN CAUGHT A HOLE IN MY OWN GUARD.** The "With me is offered at the
+> account level" check matched `/'with_me'/` **anywhere in the file**, and the page names it
+> twice — deleting it from the key list left the chip label, and the guard still passed. **A guard
+> matching a STRING instead of the ACT**, found only because the sabotage was actually run.
+> Re-anchored to the `LENS_KEYS` declaration. 12 sabotages, each occurrence-counted before → after,
+> all 12 now caught.
+>
+> ⏭ **OPEN, and honest rather than faked:** on the owner's own account **Recent and Owned show the
+> same 14 frames** (all his media sits in one owned event) and **Attended · People · With me are
+> empty** — he has never been a guest anywhere, and prod holds **0 guest rows linked to a person**,
+> so nothing can be tagged as him yet. Five different QUESTIONS; three have no answer on his data.
+> Each says so in a plain sentence rather than showing a broken-looking grid. **Nothing was seeded
+> to make it look fuller.**
+
+**What a person gets:** their photographs, not a second list of their events.
 
 - **Not a second list of events.** The five owner-approved lenses — Recent · Owned · Attended ·
   People · With me — over **photos, not occasions**. The People lens swaps the wall for faces.
@@ -446,7 +506,9 @@ doorways → `design#5` couple dashboard → `design#7` the five gaps → `desig
 large.~~ ✅ **1, 2 and 3 are ALL DONE (2026-08-12). Do not start them again — read their entries
 above for what shipped and what is deliberately still open.**
 
-⏭ **What is actually next:** **Session 5 · 7 · 8** are unblocked today. **Session 4** is still held
+⏭ **What is actually next:** **Session 5 · 7** are unblocked today — **8 is DONE (#4395, merged
+and deployed 2026-08-12)**. ⚠ **7 must rebase first:** it edits `dashboard/(launcher)/page.tsx`,
+whose Alaala section 8 has just rewritten. **Session 4** is still held
 ✅ (gate CLOSED 2026-08-13 — unblocked), and **6** follows 4 (they share the
 rail, so never run them together). **9** waits on counsel. **10** is the long tail.
 
@@ -461,7 +523,8 @@ edit every row that asserts it is open, in the same commit.**
 |---|---|---|
 | 1 · Life-Flash | — (a switch, no PR) + **#4389** | ✅ **switch ON in prod**; #4389 **MERGED** 15:53Z |
 | 2 · storyteller editorial | **#4387** | ✅ **MERGED** 15:47Z |
-| 3 · friendly labels | **#4388** | ⏳ **OPEN at 15:58Z** — *not* merged yet |
+| 3 · friendly labels | **#4388** (+ **#4391**) | ✅ **MERGED** — and verified on the live site |
+| 8 · Alaala as memories | **#4395** | ✅ **MERGED** 18:10Z · deployment READY · `/api/health` reports the merge SHA |
 
 ⚠ **This block has been wrong in BOTH directions within one hour.** At 15:40Z I wrote that #4387
 was open — it merged seven minutes later. By 15:58Z the entry above for Session 3 had been marked
