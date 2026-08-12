@@ -35,6 +35,42 @@ on the one owner sentence in the gate below, and **6** follows 4.
 
 ---
 
+## 📡 MEASURED STATE · 2026-08-13, read from GitHub + Vercel, not from this file
+
+**THREE PRs are open, not two — and two of them collide on the same file.**
+
+| PR | Stream | State | Touches |
+|---|---|---|---|
+| **#4390** | Session 2 **follow-up** | OPEN | `middleware.ts` · `lib/u-nesting.ts` |
+| **#4388** | Session 3 | OPEN | `blog/[slug]/page.tsx` + 7 more |
+| **#4385** | *journal affiliate links* — **not on this list** | OPEN | `blog/[slug]/page.tsx` + 4 |
+
+🚨 **#4385 and #4388 both edit `apps/web/app/blog/[slug]/page.tsx`.** Whichever merges second
+rebases or conflicts — and this project has a recorded case of a **stale-tree merge deleting**
+another branch's work. **Land one, rebase the other, then merge.** Do not arm both.
+
+🔴 **SESSION 2 IS SHIPPED WITH A LIVE DEFECT, and #4390 is the fix.** A published, video-less
+chapter renders a real share card while **its own page returns 404** — the middleware rewrote
+`/u/{slug}/c/{id}` on segment count alone and ate it. So the very thing Session 2 unblocked
+cannot be opened by anyone. **#4390 is the priority over #4388.**
+
+✅ **SESSION 1 IS DONE, and the strongest proof is not a probe.** PR **#4389 exists because the
+owner saw it** — its commit message records the Alaala tile reading *"14 moments · 0 people who
+made them"* on his home screen, which is unreachable unless the flag is on. That copy defect is
+now fixed and deployed. A cache-free production redeploy (`dpl_3ypALX…`, `action: redeploy`,
+READY, production) is in Vercel's history at the claimed time.
+⚠ **Two production deploys have landed SINCE** (#4387, #4389). They inherit the flag **only if
+it was set as a project Production env var** rather than a one-off redeploy override — and the
+value is not readable from the Vercel MCP tools, nor from any anonymous request, because every
+caller of `lifeStoryEnabled()` is a **server** component so it never reaches the browser bundle.
+**The only proof is a signed-in eye on the home screen.**
+
+⏭ **NEXT SESSION TO OPEN: 8 (Alaala).** 4 is still owner-gated, 6 follows 4, and 5 needs 3
+merged. 🪤 **7 and 8 may NEVER run together** — the events board and Alaala are both sections of
+the same 2,136-line `dashboard/(launcher)/page.tsx`.
+
+---
+
 # 🔴 OWNER GATE — do this before Session 4, it blocks the most
 
 **The YouTube-shaped front door and the ELN cinematic homepage cannot both be `/`.**
