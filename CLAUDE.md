@@ -169,6 +169,78 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >   drifted for 3 weeks with green CI. See the newest `WHATS_NEXT_INDEX.md` section for 8 traps.
 > Execute per each contract's own rules; build flag-dark; stop at every HUMAN gate.
 
+> ### ✅ DONE 2026-08-12: THE ROW IS YOURS — THE FIELD IS NOT (8 fixes, all live)
+> **One defect shape, eight times, across five years of migrations by different
+> hands.** A policy that says *"this row is yours"* — PERMISSIVE `FOR ALL` on
+> `user_id = auth.uid()` or equivalent — **never had an opinion about what is IN
+> it**, so a field recording somebody ELSE'S decision stayed forgeable.
+> Every one was proven broken in the PGlite replay BEFORE the fix and refused
+> after, and every one is verified applied in prod **by the object**.
+>
+> | PR | what a person could do |
+> |---|---|
+> | #4353 | couple posts in their supplier's voice / Setnayan's / a coordinator's — and it unmasked the supplier's real name |
+> | #4358 | couple signs a guest announcement as the coordinator, and vice versa |
+> | #4361 | 🚨 **any signup could make themselves a Setnayan admin** |
+> | #4364 | supplier awards itself the public "Setnayan checked your years in business" badge |
+> | #4365 | supplier marks its own payout destination "checked", bypassing the review queue |
+> | #4366 | uploader pre-marks a photo `clean` → **the NSFW screen never runs on it** |
+> | #4367 | supplier creates a verification application already `approved`, with a decision naming an admin |
+> | #4368 | couple plants a `service_activated` ledger row → what they paid for silently never activates |
+>
+> 🔑 **THE APP LAYER IS NEVER THE CONTROL.** `lib/supabase/client.ts` ships a
+> browser client, the anon key is public by construction, PostgREST serves every
+> `public` table at `/rest/v1/<table>`. "Our server action always sets it
+> correctly" is not a defence. **The GRANT and the POLICY are the only controls.**
+>
+> 🚨 **A GUARD IS ONLY AS WIDE AS THE VERBS IT FIRES ON.** #4361 was a *correct*
+> guard attached `BEFORE UPDATE` only: updating yourself to admin was reverted,
+> **delete-your-own-row-then-re-insert-as-admin was accepted**, and `is_admin()`
+> — trusted by ~298 policies and the `/admin` gate — returned true. #4367 is the
+> same fault in RLS (UPDATE policy constrained the state machine, INSERT policy
+> did not). ⚠ A PERMISSIVE `FOR ALL` policy admits **INSERT and DELETE**, not
+> just UPDATE. And #4364 is the counter-example: the verbs were right, the
+> **deny-list** was stale — *a deny-list is a bill you have to keep paying.*
+>
+> 🪤 **READ THE COLUMN DEFAULT BEFORE YOU REVOKE.**
+> `vendor_payment_methods.moderation_status` defaulted to **`'approved'`**, so
+> the obvious revoke would have shipped **silent universal auto-approval** — every
+> payout destination in front of couples, never queued, no error. *Worse than the
+> bug.* Caught by the Fable planning pass, not by the sweep. Consequence for
+> tests: on such a table **"the forgery is refused" proves nothing** — assert that
+> an insert naming nothing reads back the SAFE value.
+>
+> 🔑 **PICK THE TOOL BY WHAT THE LEGITIMATE CODE MUST NAME.** Revoke the column
+> when no RLS client writes it (#4366). Trigger when the value must exist but the
+> browser must not choose it (#4353/#4358). Tighten the policy when the caller
+> legitimately names it with *some* legal values (#4367 `status`, #4368
+> `event_type` — a revoke would break checkout loudly). **Trigger and NOT revoke**
+> when the app names the column to write a specific safe value (#4364: the
+> vendor's year-change clears the badge to NULL through their own session, and
+> Postgres checks privileges against columns NAMED, not values).
+>
+> 🪤 **`auth.role()` CAN NEVER BE NULL IN THE PGlite REPLAY** — the shim returns
+> `'anon'` where prod returns NULL, so every `auth.role() IS NULL` privileged
+> branch is **dead code in every db test in this repo**. The first cut of #4361
+> relied on it and silently stripped the § 10a owner `is_internal` flag at signup,
+> green everywhere else. Derive from `current_user NOT IN ('authenticated','anon')`
+> — true in both. The shim is left alone (1000+ tests) but is now ASSERTED, so
+> whoever fixes it is told.
+>
+> 🪤 **THE SWEEP THAT FOUND THESE WAS BROKEN ON ITS FIRST RUN** and reported three
+> unverified claims as findings: its target list reached the workflow as a
+> JSON *string*, an `Array.isArray` guard degraded it to `[]`, and only the final
+> synthesis agent ran — which improvised its own audit with nothing checking it.
+> Re-run with the list embedded in the script and a hard throw on an empty list:
+> 36 targets, 33 agents, two adversarial lenses per claim, either able to kill it.
+> 🔑 **A fan-out that silently sweeps nothing looks exactly like a clean result.**
+>
+> ⏭ **OPEN, none of it security:** withdrawing a verification application is
+> **broken in prod today** (the UPDATE policy admits only draft/pending_review,
+> the action writes `'withdrawn'`) — deliberately not fixed, widening a policy is
+> a product call; a supplier can likely add editorial photos past the
+> recommended-pick gate and the 3+3 cap (**unverified**); and the replay shim above.
+
 > ### ▶ ACTIVE 2026-08-07: A REJECTED QUERY IS NOT A THROWN ERROR — and TWO operational warnings
 > **Full handoff: [`WHATS_NEXT_Session_Handoff_2026-08-07.md`](WHATS_NEXT_Session_Handoff_2026-08-07.md).**
 > 6 PRs merged, 1 closed as superseded.
