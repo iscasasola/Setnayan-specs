@@ -399,6 +399,48 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 >
 > ⏭ **NAMED, NOT BUILT:** the correction queue still has **no vendor-side
 > intake**. That is a separate build, not an oversight of this one.
+>
+> ### 🔬 THEN AN ADVERSARIAL PASS OVER THAT WORK FOUND 10 MORE — 2 USER-FACING
+> (PRs #4363 · #4369. 13 candidates, 10 survived refutation, all re-verified by
+> hand against `origin/main` and prod before acting.)
+>
+> 🎟 **THE ONE URL ACTUALLY PRINTED ON AN INVITATION NEVER REACHED FORWARDING.**
+> A personal QR encodes `/{slug}?invite={token}`, and the page short-circuits
+> every TOKENED url to `/{slug}/redeem` **before** the forward runs — that route
+> then dropped the token, so the guest reached the right wedding **AS A COMPLETE
+> STRANGER**: no seat, no RSVP, a lock screen saying *"scan your invitation QR"*,
+> which is what they had just done. **Worse than the 404 it replaced** — it reads
+> as the couple shutting them out. ✅ Proven fixed **on the live site**: a
+> simulated printed QR for a renamed event now issues a guest session and renders
+> *"Welcome back"*.
+> 🔑 **A resolver wired into the obvious routes is not wired in.** Four routes
+> carry a public address; the two that carry the PRINTED artefacts were missed.
+>
+> 🔒 **A FORWARD MUST NOT OUT-DISCLOSE THE GATE IT LANDS ON — this bit twice.** A
+> `307` discloses in its `Location` header whatever the target then returns, so
+> forwarding a **hidden profile's** old handle published both that the word was
+> somebody's and what their handle is now. **The SHOP branch had the identical
+> hole** (#4369) while `app/v/[slug]/page.tsx` already stated the rule it broke:
+> *"don't leak the existence of suspended / closed profiles."*
+> ⚠ **NOT applied to events, deliberately** — a private event renders a lock
+> screen, not a 404 (measured: anonymous request returns **200**), so forwarding
+> discloses nothing a direct visit would not.
+>
+> 🚨 **The admin correction matched the shop with an unvalidated LIKE pattern** —
+> only the DESTINATION was format-checked, so `banawe%` could permanently move a
+> **different** shop's address while the operator read a success message echoing
+> what they typed.
+>
+> 🛡 **TWO GUARDS THAT COULD NOT FIRE, BOTH MINE:** the closed-shop mint test
+> seeded `hiraya-events` but the mint is **hyphen-free** and produces
+> `hirayaevents` — it compared against a word the mint can never hand out; and
+> the new lint knew **one** spelling, so `ALTER FUNCTION … SET setnayan.x` sailed
+> past.
+> 🪤 **AND THE NEW GUARDS WERE THEMSELVES DECORATIVE ON THEIR FIRST RUN** — the
+> mutation reported ZERO failures because the regexes matched the **sabotaged**
+> names as substrings (`DISABLED_foo` still contains `foo`). Same prefix trap as
+> `f.event_dateX`. **Anchor with `\b`, and PRINT THE OCCURRENCE COUNT before →
+> after; an unmeasured mutation proves nothing.**
 
 > ### ✅ DONE 2026-08-12: THE PHOTO WALL WAS ON EVERY GUEST'S PHONE, UNCONTROLLED
 > **PR #4360 · migration `20271133739556`. Do NOT rebuild it.** Full row in
