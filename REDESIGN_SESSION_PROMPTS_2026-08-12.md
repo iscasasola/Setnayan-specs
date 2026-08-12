@@ -211,7 +211,9 @@ maybeRunInterconnectionProbes. THESE REPLACED RETIRED CRONS — there is no sche
 them. It also carries revalidate=300, the WebSite + SoftwareApplication JSON-LD graph and the
 GEO title/description. Carry every one onto the replacement and PROVE IT BY THE OBJECT: a page
 that omits them stops the daily emails and the probes with NO ERROR ANYWHERE. Measured:
-/explore is the only other host of the probe pair; the digest flush lives on / alone.
+/explore is the only other host of the probe pair — that holds. CORRECTED 2026-08-13: "the
+digest flush lives on / alone" was FALSE — runAdminDigestFlush is scheduled in three places
+(/, /explore, and the admin layout). All of it is carried and verified on the port branch.
 
 ⭐ ALSO NOW UNBLOCKED: the owner-APPROVED Filipino-USP hero/manifesto copy (§5 of
 03_Strategy/Claude_Design_Brief_2026-07-31.md) targeted / and had nowhere to land while / was

@@ -127,8 +127,11 @@ renewal reminders · the Papic full-res drop warning) · **`maybeRunInterconnect
 title/description answer engines ground on.
 **Delete the page without carrying those forward and the daily emails and the probes simply stop,
 with no error anywhere** — the silent-absence failure this project keeps paying for.
-Measured: `/explore` is the only other host of the probe pair; **the digest flush lives on `/`
-alone.** Carry them onto the replacement and PROVE it by the object, not by the diff.
+Measured: `/explore` is the only other host of the probe pair — that holds.
+⚠ **CORRECTED 2026-08-13 — "the digest flush lives on `/` alone" was FALSE.** `runAdminDigestFlush` is scheduled in **three** places (`/`, `/explore`, and the admin
+layout), as `DECISION_LOG.md` 2026-06-28 already stated. Carry them onto the replacement and
+PROVE it by the object, not by the diff. ✅ Done on `claude/front-door-session4`: all three
+jobs, both JSON-LD nodes, `revalidate = 300` and the GEO metadata verified present.
 
 🔑 **The surface was named back before the answer was filed.** *"Yes"* to a gate is not proof the
 gate is what was answered — the 2026-08-12 lesson cost a build spec written from a misfiled
