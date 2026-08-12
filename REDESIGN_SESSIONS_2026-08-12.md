@@ -455,6 +455,57 @@ this doc was wrong about where the words live.**
 > Re-anchored to the `LENS_KEYS` declaration. 12 sabotages, each occurrence-counted before → after,
 > all 12 now caught.
 >
+> ### 🔬 THEN AN ADVERSARIAL PASS OVER IT FOUND FIVE MORE — one of them the SAME HARM
+> **PR #4397, merged 18:59Z the same day.** Six review lenses over my own just-merged
+> diff, two skeptics per finding each told to refute it. Five survived; **one had
+> reintroduced, through a display cap, the exact defect #4395 existed to end.**
+>
+> 🚨 **A GLOBAL CAP OVER A FILTERED VIEW IS A SILENT FILTER OF ITS OWN.** The wall took
+> the **48 newest of the MERGED list** and only then split it into lenses. Measured
+> against the shipped core — 60 frames from the viewer's own wedding last month, 24 they
+> are tagged in from a friend's wedding two years ago:
+>
+>     recent 48   owned 48   attended 0   with_me 0        (truth 84 / 60 / 24 / 24)
+>
+> **Attended and With me rendered EMPTY over twenty-four photographs that had been
+> fetched successfully and thrown away** — and the page then printed *"No events attended
+> yet"* with a **measured `0`** on the chip, defeating its own "null = not measured"
+> contract. 🔑 **Raising 48 does not fix it; it only moves the wedding size at which it
+> bites** — and it bites hardest on the busiest, most real accounts, the ones you never
+> have while building. Each lens now has its OWN budget; totals come from the **uncapped**
+> read; a saturated source renders **`N+`**, never a ceiling printed as a total.
+>
+> 🗣 **AND THE EMPTY SENTENCE WAS A CLAIM ABOUT THE WRONG THING.** *"No events attended
+> yet"* is a statement about MEMBERSHIPS made from an absence of PHOTOS — the normal state
+> of every guest until the photographers finish tagging. Somebody who joined a friend's
+> wedding by QR yesterday was told they had attended nothing. Now branches on a measured
+> `hasAttendedEvents`, and **moved into the pure core** so it can be asserted at all: a
+> sentence inside an async JSX file cannot be imported by the unit runner, so it cannot be
+> checked. (Same reason `lifeFlashSummaryLine` lives in `lib/`.)
+>
+> 🪤 **THE HAND-TYPED LENS MAP WAS DECORATION, AND THE MUTATION PROVED IT.** Rewriting one
+> entry to `owned: <AlaalaLensBody lens="recent" …>` left **17/17 tests green** — the
+> guard matched the record KEY, which that mutation preserves, and `Record<K, ReactNode>`
+> gives no key↔prop link. The Owned chip would have shown the Recent wall. The map is now
+> **DERIVED** from the one declared list, which makes the bug **unexpressible** — strictly
+> better than any guard over hand-typed pairs.
+>
+> 🪤 **AND ONE SABOTAGE ESCAPED THE FIRST RE-RUN.** Swapping `surfaceBudget(ordered, …)`
+> for `ordered.slice(0, …)` **in the data layer** left everything green: the new tests
+> exercise the pure core directly, and **nothing watched the file where the bug actually
+> lived.** 🔑 **TESTING THE PRIMITIVE IS NOT TESTING THE CALLER** — when you extract a
+> helper to make it testable, assert the CALL SITE in the same commit and mutate THAT.
+> ⚠ Two further mutations had gone stale against a refactor and reported **ANCHOR NOT
+> FOUND**, which is neither a pass nor a fail: **an unrun mutation proves nothing either.**
+> Repaired: **16 sabotages, occurrence-counted before → after, all 16 caught.**
+>
+> ⏭ **NAMED, NOT BUILT (deliberately):** `getGuestLiveGallery` returns `null` for a FAILED
+> read **and** for the ordinary "no tags yet", while its own docblock claims *"null means,
+> and only means, that the read failed."* **That comment is false — verified in the
+> source.** Mapping it to `unreadable` would raise *"could not be loaded"* at the entire
+> guest population, so the wall deliberately does not. Fixing it means changing that
+> function's return contract and checking every caller. **A separate build.**
+>
 > ⏭ **OPEN, and honest rather than faked:** on the owner's own account **Recent and Owned show the
 > same 14 frames** (all his media sits in one owned event) and **Attended · People · With me are
 > empty** — he has never been a guest anywhere, and prod holds **0 guest rows linked to a person**,
@@ -524,7 +575,7 @@ edit every row that asserts it is open, in the same commit.**
 | 1 · Life-Flash | — (a switch, no PR) + **#4389** | ✅ **switch ON in prod**; #4389 **MERGED** 15:53Z |
 | 2 · storyteller editorial | **#4387** | ✅ **MERGED** 15:47Z |
 | 3 · friendly labels | **#4388** (+ **#4391**) | ✅ **MERGED** — and verified on the live site |
-| 8 · Alaala as memories | **#4395** | ✅ **MERGED** 18:10Z · deployment READY · `/api/health` reports the merge SHA |
+| 8 · Alaala as memories | **#4395** + **#4397** | ✅ both **MERGED** (18:10Z · 18:59Z) · `/api/health` reports the merge SHA |
 
 ⚠ **This block has been wrong in BOTH directions within one hour.** At 15:40Z I wrote that #4387
 was open — it merged seven minutes later. By 15:58Z the entry above for Session 3 had been marked
