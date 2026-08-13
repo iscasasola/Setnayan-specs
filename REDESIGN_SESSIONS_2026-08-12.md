@@ -844,8 +844,20 @@ branched cleanly off `origin/main` (`096461db7`) and collided with nothing.
 that phrase stood here for hours **after** the ruling, in the file that warns about exactly this.
 🔴 Only the **production flag** is still the owner's, and a session must never set it.
 **10 is PART DONE: `design#4` reconcile is FINISHED** (23 reconciled · 5 retired, in the specs
-repo — which opens **no PRs**, so do not judge it by PR count). ⏭ Left in 10: `design#6` public
-doorways · `design#5` couple dashboard · `design#7` the five gaps · `design#8` vendor ·
+repo — which opens **no PRs**, so do not judge it by PR count).
+✅ **`design#6` IS DONE 2026-08-13 — PRs [#4417](https://github.com/iscasasola/setnayan-platform/pull/4417)
+(the eight public doorways) + [#4419](https://github.com/iscasasola/setnayan-platform/pull/4419)
+(the price pages). Do NOT rebuild either half.** #4417 is merged and VERIFIED LIVE by the object,
+not by the note: `/api/health` reports the merge commit, and the four doorways fetched from
+`www.setnayan.com` carry **zero** occurrences of the failing `#9A8F86` and of `bg-white/60`,
+30–44 of `--m-slate-2`, and exactly one `<h1>` each.
+🔑 **THE SHELL HALF OF THAT BRIEF WAS ALREADY DONE** — all eight doorways were already in
+`NAV_ROUTES`. What was wrong was the palette, and it was a **real AA failure** (3.06:1 on cream)
+sitting where two contrast guards could each honestly say it was not their half.
+⚠ **AND THE BRIEF'S CUSTOMER-SIDE CLAIM WAS WRONG.** It said "Free → Setnayan AI is not framed
+as a delta"; `/pricing` had led that card with *"Everything in Free"* since it was built. The real
+gap was a PRICE: Setnayan AI has had **two** since 2026-08-12 and the public page showed one.
+⏭ Left in 10: `design#5` couple dashboard · `design#7` the five gaps · `design#8` vendor ·
 `design#9` admin last.
 
 🚨 **THE FRONT DOOR IS LIVE, AND FOR A DAY EVERY RECORD SAID IT WAS DARK.** The flag defaults

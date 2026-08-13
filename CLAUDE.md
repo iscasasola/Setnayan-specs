@@ -542,6 +542,28 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > like what we did today."* Each session names what a person gets, what ALREADY SHIPS
 > (RULE 0 pre-answered — do not re-run it), its gate, and its own traps.
 > ⏭ **Order — CORRECTED 2026-08-13.** ~~1 → 2 → 3 first~~ **1 · 2 · 3 · 4 · 6 · 7 · 8 are DONE.**
+> ✅ **`design#6` (the public doorways + the price pages) IS DONE 2026-08-13 — PRs
+> [#4417](https://github.com/iscasasola/setnayan-platform/pull/4417) +
+> [#4419](https://github.com/iscasasola/setnayan-platform/pull/4419). Do NOT rebuild it.**
+> #4417 is merged and **verified live by the object**: `/api/health` reports its merge commit, and
+> the four doorways fetched from `www.setnayan.com` carry **zero** occurrences of the failing
+> `#9A8F86` and of `bg-white/60`, and exactly one `<h1>` each.
+> 🔑 **RULE 0 PAID AGAIN: the "shipped shell" half was already done** — all eight doorways were
+> already in `NAV_ROUTES`, so nothing was rebuilt. The defect was COLOUR, and it was a **real AA
+> failure**: a hand-typed `#9A8F86` put the struck-through half of every differentiator at
+> **3.06:1 on cream** on all eight public product pages. **Two contrast guards missed it and
+> neither was broken** — one checks token DEFINITIONS, the other only judges pairings where BOTH
+> sides are opaque, and the card fill was an alpha. **A defect can live in the seam between two
+> correct guards.**
+> 🔴 **AND THE BRIEF FOR IT WAS WRONG ABOUT THE CUSTOMER-SIDE GAP.** It said *"Free → Setnayan AI
+> is not framed as a delta"*; `/pricing` had led that card with "Everything in Free" since it was
+> built. The real gap was a PRICE: **Setnayan AI has had two since 2026-08-12** (sign-up ₱1,499 ·
+> regular ₱2,499, the sign-up one already being CHARGED) and the public page showed one, because
+> the catalog read never SELECTED the column. 🔑 **A brief can be right about the surface and
+> wrong about the defect — re-measure before building what it describes.**
+> ⚖ **ONE OWNER CALL LEFT OPEN:** the ~450-cell vendor tier matrix is KEPT behind a disclosure
+> (he asked for a matrix on 2026-07-04) while `/vendors` now leads with per-plan deltas. If he
+> wants the grid gone entirely, that is one line.
 > ⏭ **5 IS MERGED** — #4402 (05:08Z) + #4406 (04:48Z), both verified on GitHub 2026-08-13, not
 > "in review" as this line read for hours after they landed. ~~**Left: 9 · 10.**~~
 > ⏭ **9 IS BUILT 2026-08-13 (PR #4418, auto-merge armed) — see the Session 9 row below.

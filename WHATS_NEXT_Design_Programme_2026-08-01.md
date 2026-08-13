@@ -166,16 +166,48 @@ and "none" is a finding to report, not a licence to draw.
 - id:            design#6
   title:         Public doorway pattern + the /pricing delta framing
   type:          code
+  status:        ✅ DONE 2026-08-13 — PRs #4417 (doorways) + #4419 (price pages).
+                 DO NOT REBUILD EITHER HALF.
   depends_on:    []
   parallel_safe: yes
   safety_gate:   NONE
   touches:       app/{papic,panood,pawebsite,pa3d,palogo,alaala,pricing,features}/*
-  ⛔ `/` IS EXCLUDED — ELN cinematic reskin, owner-approved 2026-06-29.
-  🔑 THE PRICING FINDING: the delta pattern ALREADY SHIPS in
-     _components/home/vendor-benefits.ts (grouped + "Everything in Solo, plus:").
-     The job is PRESENTATION, not modelling. The offender is vendor-tier-matrix.tsx —
-     a matrix restates every row per tier, which is the haystack the pattern kills.
-     The genuine gap is CUSTOMER-side: Free → Setnayan AI is not framed as a delta.
+  ⚠ `/` IS NO LONGER EXCLUDED — the front door replaced the ELN cinematic
+     homepage on 2026-08-13 and is LIVE. The exclusion line above it is dead.
+  ✅ WHAT WAS ACTUALLY WRONG WITH THE DOORWAYS: not the shell — all eight are
+     registered in NAV_ROUTES and already carried SiteChrome + the footer, so
+     that half was already done and nothing was rebuilt. It was the COLOUR, and
+     because the pages were copy-pasted, every wrong colour was eight pages wide:
+     the struck-through half of every differentiator measured **3.06:1 on cream**
+     (below the 4.5:1 AA floor) from a hand-typed #9A8F86, and the cards were
+     `bg-white/60` — white in all but name — on a cream page.
+     🔑 TWO EXISTING CONTRAST GUARDS BOTH MISSED IT AND NEITHER WAS BROKEN:
+     `palette-lock.test.ts` checks TOKEN DEFINITIONS (all fine in isolation) and
+     `lint-label-on-fill-contrast.mjs` judges only pairings where BOTH sides are
+     opaque — the fill was an alpha. The defect lived in the seam.
+     `doorway-palette.test.ts` closes it, with NO baseline.
+  ✅ /papic + /setnayan-ai joined the shared kit (7 of 8 now mount it); two
+     private forks of the archetype are deleted. `/alaala` deliberately did NOT
+     — it is the umbrella page, so forcing it through would mean inventing a
+     how-it-works panel and a differentiator lede it has never had and deleting
+     one of its two CTAs. It takes the archetype's COLOURS from `DOORWAY_TONE`.
+  ⚠ THE PRICING FINDING AS WRITTEN HERE WAS HALF WRONG, MEASURED 2026-08-13.
+     "The delta pattern ALREADY SHIPS in vendor-benefits.ts" — TRUE, and the
+     offender named was the right one. But "the genuine gap is CUSTOMER-side:
+     Free → Setnayan AI is not framed as a delta" was NOT the gap: `/pricing`
+     had already led that card with "Everything in Free" since it was built.
+     🔴 THE REAL CUSTOMER-SIDE GAP WAS A PRICE. Setnayan AI has had TWO prices
+     since 2026-08-12 (sign-up ₱1,499 · regular ₱2,499, both live in the catalog,
+     the sign-up one already being CHARGED) and no public surface showed the
+     second, because `fetchV2CustomerCatalog` never SELECTED the column. And the
+     '₱499' fallback behind it was FIVE TIMES off, hidden in the `sku: null`
+     category that the runtime drift audit deliberately skips.
+     🔑 A BRIEF THAT NAMES A GAP CAN BE RIGHT ABOUT THE SURFACE AND WRONG ABOUT
+     THE DEFECT. Re-measure before building what it describes.
+  ⚖ THE MATRIX IS KEPT, BEHIND A DISCLOSURE, and this is an OWNER CALL left open:
+     a matrix is what he asked for on 2026-07-04, so `/vendors` now LEADS with
+     per-plan deltas and the ~450-cell grid sits behind "Compare every tier side
+     by side". If he wants the grid gone entirely, that is one line.
 
 - id:            design#7
   title:         The five genuine gaps
