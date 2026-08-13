@@ -561,6 +561,26 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > regular ₱2,499, the sign-up one already being CHARGED) and the public page showed one, because
 > the catalog read never SELECTED the column. 🔑 **A brief can be right about the surface and
 > wrong about the defect — re-measure before building what it describes.**
+> 🔬 **THEN AN ADVERSARIAL PASS OVER design#6's OWN TWO PRs FOUND FOUR REGRESSIONS, ALL MINE**
+> (PR [#4423](https://github.com/iscasasola/setnayan-platform/pull/4423) · 20 candidates, 5 lenses,
+> 2 skeptics each, 4 survived).
+> 🚨 **`/alaala` BROKE THE RULE THE SAME COMMIT WROTE DOWN** — a hover tint put gold at **4.42:1**
+> on a live public page, and `_doorway.tsx`'s docblock states that exact number as the reason its
+> own cards avoid that surface. 🔑 **Gold has 0.29 of headroom on cream, so ANY tint under it
+> fails — including the kit's own `ink/0.04` at 4.47:1.** Hover must move the border or shadow.
+> 🚨 **A DOCBLOCK DESCRIBED A MECHANISM THAT DID NOT EXIST** — `/alaala` claimed it shared the
+> kit's colours; **there was no import.** *A sentence is not a mechanism*, written while writing
+> about it.
+> 🚨 **`/vendors` PRINTED `Infinity`** to the public. `String(Infinity)` is a valid string, so
+> nothing threw. **The rows that handled it hid how easy the others were to miss.**
+> 🔴 **`aiHasSignupPrice` HAD ZERO READERS** ⇒ two surfaces quoted different prices for one
+> product. **Fifth gate-with-no-handle.**
+> 🪤 **THE NEW GUARD REPRODUCED THE BLIND SPOT IT EXISTED TO CLOSE** (skipped alpha fills — the
+> very reason the older lint missed the original bug; mutation landed 2→3 and stayed GREEN), then
+> **cried wolf** on a file-level match. Both corrected.
+> 🔑 **A guard derived from a shared constant is strictly stronger for the pages that USE it and
+> BLIND to the one that does not — and the hand-ported page is exactly where the defect goes.**
+>
 > ⚖ **ONE OWNER CALL LEFT OPEN:** the ~450-cell vendor tier matrix is KEPT behind a disclosure
 > (he asked for a matrix on 2026-07-04) while `/vendors` now leads with per-plan deltas. If he
 > wants the grid gone entirely, that is one line.
