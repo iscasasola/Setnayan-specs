@@ -222,6 +222,21 @@ and "none" is a finding to report, not a licence to draw.
      ₱50 floor. The prototype is the simplification; `bookingFeeScheduleSummary()`
      (now used by the shipped component) is the accurate one.
 
+🔬 **AND AN ADVERSARIAL PASS OVER design#6's OWN TWO PRs FOUND FOUR REGRESSIONS, ALL
+INTRODUCED BY IT** — PR [#4423](https://github.com/iscasasola/setnayan-platform/pull/4423),
+merged 2026-08-13. 20 candidates, five lenses, two independent skeptics each; four survived.
+`/alaala`'s card hover put gold at **4.42:1 live** (the exact number `_doorway.tsx`'s docblock
+states as the reason its own cards avoid that surface) · its docblock claimed it shared the kit's
+colours and **there was no import** · `/vendors` printed the word **`Infinity`** to the public ·
+and `aiHasSignupPrice` had **zero readers**, so the price page and the price popup quoted
+different figures for one product.
+🔑 **The guard could not see `/alaala` at all** — it derived its expectations from the shared
+constant, which made it strictly stronger for the seven pages that use it and blind to the one
+that does not. **That is where the defect went.** Widening it then reproduced the alpha-fill
+blind spot it existed to close, and the next cut cried wolf on a file-level match.
+⚠ **So "design#6 DONE + verified live" above is true and was not the end of it.** Do not read a
+DONE row as evidence that the work was defect-free — read the PR list.
+
 - id:            design#6b
   title:         The SAME 3.06:1 text colour is live on /why-setnayan and the /tour tree
   type:          code
