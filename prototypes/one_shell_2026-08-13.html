@@ -191,6 +191,11 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 .crumb{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-radius:999px;
   border:1px solid var(--line);font-size:13px;font-weight:600;margin-bottom:14px}
 .crumb:hover{background:var(--hover)}
+.askrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:13px;padding:12px 14px;
+  border:1px solid var(--line);border-radius:10px;background:#fff}
+.asklab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--m2);font-weight:700}
+.askq{font-size:15.5px;font-weight:650;color:var(--terra)}
+.askin{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--m3);letter-spacing:.06em}
 .kinrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .kw{border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;
   background:#fff}
@@ -248,7 +253,8 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
   genuinely still to come is the <b>Connections</b> half — which the code already calls by that
   name. <b>Family, godparent and friend are one list with the relationship written on each
   person</b>, not three menus; lola, pinsan and kumpare are worked out from those and nobody types
-  them.</div>
+  them. And <b>Alaga is not only a child</b> — a pet, a business and something you own are all real
+  kinds, and the single question it asks changes its own name for each.</div>
   <div class="note"><b>Two things this proves that the shipped code cannot do yet.</b>
   ① <b>The active row follows you</b> — today "Home" is nailed on, so all 296 pages would light Home.
   ② <b>The chrome never changes</b>: one rail, one top bar, one gold <b>+ Create</b> — while every
@@ -261,7 +267,7 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 <script>
 (function(){
 const S={w:'desk',u:'all',view:'front',ev:null,evTab:'home',shopTab:'overview',hqTab:'overview',
-  peopleTab:'family',lens:'recent',toast:null,menu:false};
+  peopleTab:'connections',samId:null,samTab:'overview',alagaKind:'person',lens:'recent',toast:null,menu:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inn=()=>S.u!=='out';
 const isAll=()=>S.u==='all';
@@ -448,13 +454,31 @@ const SHOPBODY={
 const PEOPLEBODY={
  connections:['Connections','Everyone you are linked to — the link says how.',
    [['23','Connected','Both of you agreed'],['4','Waiting','They have not answered yet'],
-    ['11','Suggested','From days you were both at']]],
- samahan:['Samahan','A group of people — the barkada, the choir, the office.',
-   [['3','Groups','You started one'],['24','People','Across the three'],
-    ['1','Invite open','Anyone with the link can join']]],
- alaga:['Alaga · the ones you look after','A child or an elder whose day you run for them.',
-   [['2','Alaga','A child and a lola'],['1','Hands over at 18','In four years'],
-    ['0','Public','Nothing about a child is ever public']]]};
+    ['11','Suggested','From days you were both at']]]};
+
+/* SAMAHAN — a list, then ONE samahan with three tabs. The tabs live IN the page,
+   not in the rail: "solid menu with no submenus" applies here too, and a rail
+   three levels deep stops telling you where you are. */
+const SAMAHAN=[
+ {id:'s1',n:'Ka-Barkada',you:'Organizer',m:9,e:4,note:'You started this one'},
+ {id:'s2',n:'Choir ng San Roque',you:'Member',m:12,e:2,note:'Tita Baby invited you'},
+ {id:'s3',n:'The office',you:'Member',m:3,e:0,note:'Nothing planned yet'}];
+const SAMTABS=['overview','members','events'];
+
+/* ALAGA — five kinds, and only ONE of them is a person. Owner 2026-07-13/30:
+   it is NOT defined as a child — "children, business, items, pets". The anchor
+   date changes its NAME per kind, which is the whole trick. */
+const ALAGAKINDS=[
+ ['person','A person','Birthday',true],
+ ['pet','A pet','Birthday',false],
+ ['business','A business','Founding date',false],
+ ['item','Something I own','The day it became yours',false],
+ ['other','Something else','The date that matters',false]];
+const ALAGAROWS=[
+ {n:'Sofia',k:'person',sub:'My child · turns 15 in March',fence:'child',hand:'Hands over to her at 18'},
+ {n:'Lola Pacing',k:'person',sub:'My grandparent · 78',fence:'elder',hand:'Never hands over'},
+ {n:'Bantay',k:'pet',sub:'A pet · birthday 4 June',fence:null,hand:'Can be rehomed to someone else'},
+ {n:'Casasola Motors',k:'business',sub:'A business · founded 1998',fence:null,hand:'Can be transferred'}];
 /* The words that ride ON a connection — this is what replaces three menus. */
 const KINWORDS=[['Asawa','spouse'],['Nanay','parent'],['Tatay','parent'],['Kapatid','sibling'],
  ['Anak','child'],['Ninong','godparent'],['Ninang','godparent'],['Inaanak','godchild'],
@@ -530,13 +554,85 @@ function content(){
           it, which is why the row is always in the rail even at zero.</p>
           <div style="margin-top:12px"><button class="btn-terra" data-a="noop">Write a new story</button></div></div>`;
     case 'people':{
-      const [t,sub,tiles]=PEOPLEBODY[S.peopleTab]||PEOPLEBODY.connections;
+      /* ── SAMAHAN — the list, then one samahan with its three tabs ── */
+      if(S.peopleTab==='samahan'){
+        if(!S.samId){
+          return `<h1 class="pg">Samahan</h1><p class="sub">A group of people — the barkada, the
+            choir, the office. <b>This half works today.</b></p>
+            <div class="evgrid">${SAMAHAN.map(g=>`<button class="evcard" data-a="opensam" data-v="${g.id}">
+              <div class="evtop"><span class="evmono">⛬</span><div class="evn"><b>${esc(g.n)}</b>
+                <span>${g.you} · ${g.m} members</span></div>
+                ${g.you==='Organizer'?'<span class="kind">yours</span>':''}</div>
+              <div class="evneed">${esc(g.note)}</div></button>`).join('')}
+              <button class="evcard evnew" data-a="noop"><span class="plus">＋</span><b>New samahan</b>
+              <span style="font-size:12.5px;color:var(--m1)">Invite by link.</span></button></div>
+            <div class="tile" style="margin-top:16px"><b>You are either the organiser or a member.</b>
+              <p style="margin-top:6px">Nothing in between, and the difference is only about who can
+              change things — a member sees everything a samahan does.</p></div>`;}
+        const g=SAMAHAN.find(x=>x.id===S.samId);
+        const body={
+          overview:`<div class="tiles"><div class="tile"><span class="n">${g.m}</span><b>Members</b>
+              <p>${g.you==='Organizer'?'You can add and remove':'The organiser manages these'}</p></div>
+            <div class="tile"><span class="n">${g.e}</span><b>Events</b><p>${g.e?'Together, so far':'Nothing planned yet'}</p></div>
+            <div class="tile"><span class="n">${g.you==='Organizer'?'You':'—'}</span><b>Organiser</b>
+              <p>${g.you==='Organizer'?'You started this one':'Tita Baby runs it'}</p></div></div>`,
+          members:`<div class="tiles">${['Ice Casasola · Organizer · joined Jan 2026',
+              'Tita Baby · Member · joined Feb 2026','Miguel · Member · joined Feb 2026'].map(m=>{
+              const [n,r,j]=m.split(' · ');return `<div class="tile"><b>${n}</b><p>${r} · ${j}</p></div>`;}).join('')}</div>
+            <div class="tile" style="margin-top:14px"><b>A roster shows a name, a role and a join date.</b>
+              <p style="margin-top:6px">Nothing else. It is a list of who is here, not a file on them.</p></div>`,
+          events:g.e?`<div class="evgrid">${EVENTS.slice(0,2).map(evCard).join('')}</div>`
+            :`<div class="tile"><b>Nothing planned yet.</b><p style="margin-top:6px">When somebody in
+              this samahan makes an event, it shows up here.</p></div>`};
+        return `<button class="crumb" data-a="backsam">← All your samahan</button>
+          <h1 class="pg">${esc(g.n)}</h1><p class="sub">${g.you} · ${g.m} members · ${g.e} events</p>
+          <div class="lens">${SAMTABS.map(t=>`<button class="chip" data-a="samtab" data-v="${t}"
+            data-on="${S.samTab===t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>
+          ${body[S.samTab]||body.overview}
+          <div class="tile" style="margin-top:16px"><b>These three sit in the page, not the sidebar.</b>
+            <p style="margin-top:6px">A sidebar three levels deep stops telling you where you are —
+            and it is the same "no menus inside menus" rule you set everywhere else.</p></div>`;}
+
+      /* ── ALAGA — five kinds, and only one of them is a person ── */
+      if(S.peopleTab==='alaga'){
+        const [,kl,dl,isP]=ALAGAKINDS.find(k=>k[0]===S.alagaKind)||ALAGAKINDS[0];
+        return `<h1 class="pg">Alaga · the ones you look after</h1>
+          <p class="sub">Someone — or something — whose day you keep for them.</p>
+          <div class="tile"><b>It is not only a child. That is the part that surprises people.</b>
+            <p style="margin-top:6px">Pick what you are adding and watch the one question change:</p>
+            <div class="lens" style="margin-top:11px">${ALAGAKINDS.map(([k,l])=>
+              `<button class="chip" data-a="alagakind" data-v="${k}" data-on="${S.alagaKind===k}">${esc(l)}</button>`).join('')}</div>
+            <div class="askrow"><span class="asklab">${esc(kl)}</span><span class="askq">${esc(dl)}</span>
+              <span class="askin">— — / — — / — — — —</span></div>
+            <p style="margin-top:11px;font-size:12.5px;color:var(--m2)">${isP
+              ? 'A person is the only kind that carries a birthday, a religion and the age rule below.'
+              : 'No age rule, no milestones, no religion — a name and one date. A company’s founding date is not a child’s birthday and is not treated like one.'}</p></div>
+          <div class="sech" style="margin-top:22px"><h3>Yours</h3><span class="rule">4 alaga</span></div>
+          <div class="tiles">${ALAGAROWS.map(r=>`<div class="tile"><b>${esc(r.n)}</b>
+            <p>${esc(r.sub)}</p><p style="margin-top:7px;color:var(--gold);font-weight:600">${esc(r.hand)}</p>
+            </div>`).join('')}</div>
+          <div class="tile" style="margin-top:16px"><b>The age rule — the one thing to keep.</b>
+            <p style="margin-top:6px">You may hold a <b>person's</b> birthday only if they are
+            <b>under 18</b> — a child you plan for — or <b>over 50</b>, an elder you honour.
+            <b>Anyone between is refused</b>: they own their own dates, so you invite them instead of
+            registering them. It is the whole reason nobody can quietly build a file on an adult
+            here.</p>
+            <p style="margin-top:10px">A child's record <b>hands itself over at 18</b> and becomes
+            their own account. An elder's never does.</p>
+            <p style="margin-top:10px">You can also name a <b>ninong or ninang</b> for an alaga —
+            which is where this meets Connections, without being the same thing.</p></div>
+          <div class="tile" style="margin-top:14px"><b>Alaga is not a connection. It is a responsibility.</b>
+            <p style="margin-top:6px">A connection says how you know somebody. Alaga says you run
+            their day <em>for</em> them. Separate menu, because it is a separate power — and it is
+            the only half of this page where a child's details live, so it is the careful one.</p></div>`;}
+
+      /* ── CONNECTIONS ── */
+      const [t,sub,tiles]=PEOPLEBODY.connections;
       return `<h1 class="pg">${esc(t)}</h1><p class="sub">${esc(sub)}</p>
         <div class="tiles">${tiles.map(([n,b,p])=>`<div class="tile"><span class="n">${esc(n)}</span>
           <b>${esc(b)}</b><p>${esc(p)}</p></div>`).join('')}</div>
-        ${S.peopleTab==='connections'?`
         <div class="tile" style="margin-top:16px"><b>One list. The relationship is the label on the person.</b>
-          <p style="margin-top:6px">This is the change you just called — and the product already
+          <p style="margin-top:6px">This is the change you called — and the product already
           half-agrees with you, because this page's own words say <b>Connections</b>. Family,
           godparent and friend were never three lists; they are three words that sit on a person.
           Keeping them as separate menus forces a question with no right answer: a cousin who is
@@ -546,15 +642,7 @@ function content(){
           <b>lola, pinsan, kumpare</b> work themselves out from the rest.</p>
           <p style="margin-top:10px"><b>Not "followers".</b> That is one-way and public. This is
           <b>agreed by both of you and private</b>, which is a different thing wearing a similar
-          shape — and the reason a wrong link can never quietly appear on somebody's page.</p></div>`
-        :S.peopleTab==='samahan'?`
-        <div class="tile" style="margin-top:16px"><b>Samahan is the only one that is a GROUP.</b>
-          <p style="margin-top:6px">Which is exactly why it sits beside Connections rather than
-          inside it — and why it is the half of this page that <b>works today</b>.</p></div>`:`
-        <div class="tile" style="margin-top:16px"><b>Alaga is not a connection — it is a responsibility.</b>
-          <p style="margin-top:6px">A connection says how you know somebody. Alaga says you run
-          their day <em>for</em> them, and it ends on its own when a child turns 18. Separate menu,
-          because it is a separate power.</p></div>`}`;}
+          shape — and the reason a wrong link can never quietly appear on somebody's page.</p></div>`;}
     case 'shop':{
       const [t,sub,tiles]=SHOPBODY[S.shopTab]||SHOPBODY.overview;
       return `<h1 class="pg">${esc(t)}</h1><p class="sub">${esc(sub)} · <b>Studio Azul</b>
@@ -648,12 +736,16 @@ document.addEventListener('click',e=>{
   const el=e.target.closest('[data-a]'); if(!el)return;
   const a=el.dataset.a,v=el.dataset.v;
   if(a==='go'){S.view=v;S.ev=null;if(v==='shop')S.shopTab='overview';if(v==='hq')S.hqTab='overview';
-    if(v==='people')S.peopleTab='connections';}
+    if(v==='people'){S.peopleTab='connections';S.samId=null;}}
   else if(a==='openev'){S.ev=v;S.evTab='home';}
   else if(a==='evtab'){S.evTab=v;}
   else if(a==='shoptab'){S.shopTab=v;}
   else if(a==='hqtab'){S.hqTab=v;}
-  else if(a==='peopletab'){S.peopleTab=v;}
+  else if(a==='peopletab'){S.peopleTab=v;S.samId=null;}
+  else if(a==='opensam'){S.samId=v;S.samTab='overview';}
+  else if(a==='backsam'){S.samId=null;}
+  else if(a==='samtab'){S.samTab=v;}
+  else if(a==='alagakind'){S.alagaKind=v;}
   else if(a==='lens'){S.lens=v;}
   else if(a==='folder'){S.view='find';S.ev=null;toast('Filtered to that category — <b>the rail did not move</b>.');}
   else if(a==='tool'){S.view='stories';S.ev=null;toast('A tool doorway opens in the same column.');}
