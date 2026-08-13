@@ -208,6 +208,19 @@ and "none" is a finding to report, not a licence to draw.
      a matrix is what he asked for on 2026-07-04, so `/vendors` now LEADS with
      per-plan deltas and the ~450-cell grid sits behind "Compare every tier side
      by side". If he wants the grid gone entirely, that is one line.
+     📄 EVIDENCE FOR THAT CALL, checked after the build: the RECONCILED prototype
+     `prototypes/for_vendors_2026-07-24.html` — the binding one for this page —
+     draws the pricing section as FOUR CARDS, each with a single line naming what
+     that tier adds ("Your branded 3D booth and one team seat" · "Market Intel,
+     performance insight, and three team seats"). It contains **no matrix at
+     all**, and closes on *"Start on Free. Upgrade only for the tools you want."*
+     So the shipped result is a SUPERSET of the approved design, and the honest
+     reading is that the prototype implies deleting the grid. Deliberately not
+     done unilaterally — it reverses a dated owner instruction.
+     ⚠ Also noticed, NOT acted on: that prototype's copy says *"a flat 5% on a
+     closed booking"*, while the locked taper is 5% → 1% beyond ₱100,000 with a
+     ₱50 floor. The prototype is the simplification; `bookingFeeScheduleSummary()`
+     (now used by the shipped component) is the accurate one.
 
 - id:            design#7
   title:         The five genuine gaps
