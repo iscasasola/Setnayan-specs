@@ -474,8 +474,11 @@ not by the PR status. ⚠ Re-verify before trusting this row: `gh pr view 4402 4
 
 ## Session 6 · The seam — ✅ **DONE 2026-08-13**
 
-> ✅ **MERGED — PR #4404, merge commit `3d0dd3db6`, verified an ancestor of
-> `origin/main`, not inferred. Do NOT rebuild any of it.** Full row in
+> ✅ **LIVE IN PRODUCTION — PR #4404, merge commit `3d0dd3db6`.** Not inferred:
+> the commit is a verified ancestor of `origin/main`, the served HTML of
+> `www.setnayan.com` carries both sign-in controls with `aria-haspopup="dialog"`
+> (0 before the deploy), and **`/api/health` self-reports `"version":"3d0dd3d"`**
+> — the running app naming its own build. **Do NOT rebuild any of it.** Full row in
 > `DECISION_LOG.md` 2026-08-13.
 > One panel opens over the page from every public surface and closes onto it; the app rail
 > wordmark is the way out to the front door, which answers with **"Back to your events"**;
