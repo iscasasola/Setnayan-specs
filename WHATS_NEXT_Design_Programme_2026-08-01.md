@@ -253,6 +253,60 @@ and "none" is a finding to report, not a licence to draw.
   🛡 `doorway-palette.test.ts` deliberately scans ONLY the eight doorways plus the
      shared kit. It will NOT catch these. Widening its route list is the cheapest way
      to make this stay fixed once it is fixed.
+  ✅ DONE 2026-08-13 · PR #4422. 13 source sites across 9 files → `--m-slate-2`.
+     Verified in the served HTML after deploy: all five routes 200 with ZERO
+     occurrences, and the `--m-slate-2` counts land exactly on the old defect counts
+     (6 · 0 · 14 · 7 · 5). Computed style read in a real browser on production:
+     the `text-lg` <h3>s are `rgb(110,106,98)` at 5.38:1, 18px/weight 400; the
+     /tour/seating placeholder and its search glyph likewise 5.38:1.
+     🔑 THE PORT WAS NOT NEEDED. The deciding fact was in the markup, not the palette:
+        NO tour route sets a page background at all — every `<main>` is bare and
+        inherits `bg-cream` from the root layout. The tour was already on cream, so
+        `--m-slate-2` was correct rather than merely available. The `bg-white/50` card
+        fills were deliberately LEFT ALONE: the terracotta lock does not cover /tour,
+        replacing them is a redesign not an a11y fix, and the token clears AA on them
+        anyway (5.30:1).
+     📏 The colour was WORSE than this entry said, on surfaces nobody had listed:
+        2.98:1 on `#FBF8F1` and 2.93:1 on `#FBF6EA` — below even the 3:1 non-text floor.
+     🛡 Widening `doorway-palette.test.ts` was NOT the cheapest way after all, and the
+        suggestion above is withdrawn. That guard bans the ACT (any raw literal, no
+        baseline), which is affordable only because the doorways were ported in the same
+        unit; /tour carries ~290 hand-typed hexes, so widening it would fail on its first
+        run and force a ~290-line baseline — "a bill, not a decision". New
+        `lib/public-page-text-contrast.test.ts` checks the OUTCOME instead (whatever a
+        page names for text must come out readable), still with no baseline, and scans
+        RECURSIVELY — 9 of the 13 occurrences were in `_components/` subfolders that the
+        doorway guard's flat `readdirSync` never opens.
+
+- id:            design#6c
+  title:         The SHARED FOOTER measures 2.21:1 — worse than design#6b, on every page
+  type:          code
+  status:        🔴 FOUND 2026-08-13 while verifying design#6b in a real browser. NOT
+                 FIXED — different colour, different component, and it is SHARED CHROME,
+                 so it is named rather than silently widened into that PR.
+  depends_on:    []
+  parallel_safe: yes
+  safety_gate:   OWNER — this is the home-reskin design system, not one page.
+  📏 MEASURED by computed style on `www.setnayan.com/tour/seating` after the design#6b
+     deploy, then confirmed against source:
+       `--hr-grey-2: #a8a4a0` (apps/web/app/_components/home/home-reskin.css:25)
+       on the `.hr-footer` surface `#F2F2F0` = **2.21:1**, at 12px weight 400.
+     For scale, the colour design#6b was raised to fix measured 3.06:1. This is worse.
+  🩸 BLAST RADIUS IS EVERY PUBLIC PAGE, not a route list. `.hr-foot-base` lives in
+     `_components/marketing/reskin-footer.tsx`, reached through `site-chrome.tsx`,
+     `site-footer-chrome.tsx` and `legal-chrome.tsx` — marketing AND legal. The two
+     strings are the copyright line and the **Data Protection Officer contact**, which
+     is the one line on the site a regulator would look for.
+  ⚠ NOT A ONE-LINE SWAP EITHER. `#a8a4a0` is also hand-typed in ~10 other places
+     (`HomeOverlays.tsx`, `alaala-editorial-overlay.tsx`, `panood-demo-overlay.tsx`,
+     `plan3d-guest-view.tsx`), and `--hr-grey-2` is redefined a second time at
+     home-reskin.css:1930. Decide whether the TOKEN moves or only the footer's use of
+     it — moving the token changes the home reskin everywhere it is read.
+  ✅ `--m-slate-2` (#6E6A62) clears it at 4.80:1 on that footer surface.
+  🛡 `lib/public-page-text-contrast.test.ts` (new in PR #4422) does NOT catch this:
+     it scans `app/why-setnayan` and `app/tour` only, and this lives in
+     `_components/`. Adding the shared chrome to its route list is the natural
+     follow-on once the colour is decided.
 
 - id:            design#7
   title:         The five genuine gaps
