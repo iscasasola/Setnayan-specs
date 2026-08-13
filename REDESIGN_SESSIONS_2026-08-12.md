@@ -98,9 +98,15 @@ forcing it.
 ✅ **8 (Alaala) IS DONE — PR #4395 MERGED 18:10Z 2026-08-12, and production self-reports the
 commit** (`/api/health` → `"version":"5893891"`, the merge SHA `589389162`; the deployment
 aliased to `setnayan.com` is READY). Do NOT start it again.
-🚫 **NOT 7** — #4391 edits `lib/nav-registry-defaults.ts`, which Session 7 would change; and 7
+~~🚫 **NOT 7** — #4391 edits `lib/nav-registry-defaults.ts`, which Session 7 would change; and 7
 touches `dashboard/(launcher)/page.tsx`, the file 8 has just rewritten a section of. Rebase on
-`origin/main` before starting it.
+`origin/main` before starting it.~~
+✅ **SUPERSEDED — 7 IS DONE.** #4391 merged, so the nav-registry collision resolved itself, and
+7 branched off `origin/main` (`096461db7`) with no overlap against any of the three PRs that
+were open. **PR [#4415](https://github.com/iscasasola/setnayan-platform/pull/4415) merged
+2026-08-13, merge `e77566b48`, verified an ancestor of `origin/main`, and production
+self-reports it** (`/api/health` → `"version":"e77566b"`). In the end it did **not** need to
+touch `nav-registry-defaults.ts` at all — the whole two-levels half was already correct.
 🚫 **NOT 5 YET** — it needs the article page, which #4385 still has open.
 ✅ **4's owner sentence ARRIVED 2026-08-13 — it is unblocked.**
 📛 **Name it "Redesign 8"** — sessions literally titled *Session 4 · SESSION 5 · SESSION 6*
@@ -508,7 +514,60 @@ not by the PR status. ⚠ Re-verify before trusting this row: `gh pr view 4402 4
 
 ---
 
-## Session 7 · Two levels, and the events board
+## Session 7 · Two levels, and the events board — ✅ **DONE 2026-08-13 (PR #4415)**
+
+> ✅ **MERGED and DEPLOYED.** Merge `e77566b48` is an ancestor of `origin/main`, and
+> `/api/health` self-reports `"version":"e77566b"` — read out of the running app, not inferred.
+> **Do NOT rebuild any of it.**
+>
+> ✅ **THE RECONCILE HELD: five of the six "already correct" claims were true, and one more that
+> the brief listed as UNBUILT was already shipped too.** The account level, the event level,
+> Budget's deliberate absence from the top-level rows, Studio→**Suite** in all three naming
+> sites — and **the create grid's hide-debut-and-christening already ships**, computed from the
+> account's dependents and folded behind a permanent *"show all event types"* expander. It is a
+> no-op in prod only because `NEXT_PUBLIC_DEPENDENT_PEOPLE` is off, which is that module's
+> documented fail-open direction. **Nothing was redrawn; two regression guards were added.**
+>
+> ✅ **THE BOARD IS TWO ALWAYS-PRESENT SHELVES.** *Coming up* + *Finished*. Ordering unchanged;
+> undated still sits at the tail of *Coming up* reading "Date to be set". Measured before
+> building: prod holds **one** finished event — a wedding whose day has passed — so exactly one
+> real person's memories had been sitting behind that toggle.
+> 🔑 **The empty Finished shelf makes NO ZERO-CLAIM.** `fetchUserEvents` graceful-degrades to
+> `[]` on *every* error including an RLS denial, so an empty shelf cannot be told apart from a
+> refused read. The line says what the shelf is FOR; the old *"N finished events hidden"* count
+> is gone.
+>
+> 🚨 **AN EVENT SOMEBODY JOINED BY SCANNING AN INVITATION QR WAS INVISIBLE ON THEIR OWN BOARD.**
+> The board asked for `'couple'` memberships alone, and the only surface that read guest rows is
+> behind an off-by-default flag. Invited events now appear, every card reads *"You organise
+> this"* / *"You're invited"*, and an invited card opens **the event's own public page** — where
+> their photos, their table and their RSVP already live and the money + plan surfaces are
+> **ABSENT, not present-and-refused**. Nothing new was built for the invited case; the card just
+> stopped pointing at a door that slams. **Two live 404 traps closed on the way** — ⌘K and the
+> auto-surfaced *"you were added"* row both hardcoded the organiser dashboard for what are
+> **all** guest memberships, the same harm Session 8 found on an Alaala card and deliberately
+> did not propagate.
+> 🪤 **One prod event has a NULL slug — and it is the finished one** — so an invited card with no
+> public page gets **no link at all** rather than `/null`.
+> ⚠ **`vendor` + `coordinator` rows are deliberately NOT on this board** (own doorways; a
+> coordinator reaches the shell through an accepted moderator row, not `member_type`), and **the
+> landing auto-jump still reads organiser events only** — folding invited rows in would have
+> silently reversed the owner's single-event jump the moment anyone scanned an invitation.
+>
+> 🛡 **20 sabotages, all occurrence-counted before → after, all 20 caught, baseline green before
+> and after — and the counting caught TWO OF MY OWN GUARDS.** One was **decoration**: a
+> file-level `count(stanceLabel) >= 2` when there are **three** call sites, because the badge
+> component uses the helper too, so deleting one card's stance left two and the suite stayed
+> GREEN. The other **sabotage did not land** and would have read as a pass — flipping one
+> undated sort branch changes no observable order, since the descending compare already sorts an
+> empty date key last. 🔑 **A FILE-LEVEL COUNT CANNOT SAY WHICH COMPONENT STILL RENDERS A
+> THING**, and an unmeasured mutation proves nothing.
+>
+> ✅ Also guarded, both previously unguarded and both already correct: every event-rail
+> destination stays under `/dashboard/<eventId>` (**a tab press cannot drop which event you are
+> in**), and **creating a trip is never refused** — with the counterpart that a second debut for
+> the same honoree still IS, so the first assertion cannot pass by gutting the gate.
+
 **Mostly a reconcile — most of this already ships.**
 
 - ✅ **Already correct in code:** the account level (Events · Alaala · People · Spaces) and the
@@ -518,9 +577,13 @@ not by the PR status. ⚠ Re-verify before trusting this row: `gh pr view 4402 4
 - **The delta:** split the board into **Coming up** and **Finished** as two always-present
   sections. Today completed events hide behind `?show=all`. **A thing you have to switch on reads
   as a thing that might not be there**, and these are somebody's memories.
-- **Also drawn and not built:** the create grid **hides debut and christening** unless the
+- ~~**Also drawn and not built:** the create grid **hides debut and christening** unless the
   account's People data says they concern it — hidden, never locked, with a permanent "show all
-  kinds" doorway.
+  kinds" doorway.~~ ✅ **WRONG — IT WAS ALREADY BUILT** (`create-event/page.tsx` computes it from
+  the account's dependents; `event-type-picker.tsx` folds the grid and carries the permanent
+  *"show all event types"* expander). Verified 2026-08-13; a regression guard was added and no
+  feature was written. **The brief calling this "not built" is the RULE 0 lesson repeating: a
+  drawing is not evidence about the code.**
 - 🪤 **The life-event guard is narrower than it looks.** Gated: wedding (own guard) · debut ·
   christening · birthday · gender_reveal · graduation, **one in planning per person per kind**.
   **Unlimited:** travel · corporate · tournament · celebration · anniversary, and an unknown type
@@ -709,9 +772,11 @@ above for what shipped and what is deliberately still open.**
 ⏭ **What is actually next — rewritten 2026-08-13.** **DONE: 1 · 2 · 3 · 4 · 6 · 8.**
 **Session 4 is MERGED and its flag is ON** — `/` is the new front door on the live site; the
 words *"is still held"* stood in this very sentence next to the ✅ that contradicted them.
-**Session 5 is DONE (#4402 + #4406, both in `origin/main`).** ⏭ **Left: 7 · 9 · 10.**
-⚠ **7 must rebase first** — it edits `dashboard/(launcher)/page.tsx`, which 8 rewrote.
-**9** waits on counsel. **10** is the long tail.
+**Session 5 is DONE (#4402 + #4406, both in `origin/main`).**
+**Session 7 is DONE (#4415, merge `e77566b48`, live — prod self-reports `"version":"e77566b"`).**
+~~⚠ **7 must rebase first** — it edits `dashboard/(launcher)/page.tsx`, which 8 rewrote.~~ It
+branched cleanly off `origin/main` (`096461db7`) and collided with nothing.
+⏭ **Left: 9 · 10.** **9** waits on counsel. **10** is the long tail.
 
 🚨 **THE FRONT DOOR IS LIVE, AND FOR A DAY EVERY RECORD SAID IT WAS DARK.** The flag defaults
 to off in code and the handoff note said off, so two "sources" agreed — but they shared an

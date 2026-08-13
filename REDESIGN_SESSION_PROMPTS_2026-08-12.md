@@ -333,7 +333,16 @@ reachable from exactly one place.
 
 ---
 
-# SESSION 7 · Two levels, and the events board
+# SESSION 7 · Two levels, and the events board — ✅ DONE 2026-08-13, DO NOT RUN THIS
+
+> **PR [#4415](https://github.com/iscasasola/setnayan-platform/pull/4415) merged, merge
+> `e77566b48` an ancestor of `origin/main`, production self-reports `"version":"e77566b"`.**
+> Full account in `REDESIGN_SESSIONS_2026-08-12.md` § Session 7.
+>
+> ⚠ **ONE CLAIM IN THE PROMPT BELOW WAS WRONG, AND IT IS THE KIND THAT COSTS A REBUILD:**
+> item 3 (the create grid hiding debut + christening behind a "show all kinds" doorway) was
+> listed as a delta and **already shipped in full**. The prompt is kept verbatim as the ask;
+> read the § Session 7 entry for what was actually true.
 
 ```
 GOAL: the menu says which level you are on, and finished events have their own place.
