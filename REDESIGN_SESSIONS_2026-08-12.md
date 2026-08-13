@@ -857,6 +857,24 @@ sitting where two contrast guards could each honestly say it was not their half.
 ⚠ **AND THE BRIEF'S CUSTOMER-SIDE CLAIM WAS WRONG.** It said "Free → Setnayan AI is not framed
 as a delta"; `/pricing` had led that card with *"Everything in Free"* since it was built. The real
 gap was a PRICE: Setnayan AI has had **two** since 2026-08-12 and the public page showed one.
+📏 **BOTH HALVES ARE NOW VERIFIED LIVE BY THE OBJECT, with a before/after measured on
+`www.setnayan.com` itself** (deploy `1ba7d54` → `5f3b922`), not read from a note:
+| | before | after |
+|---|---|---|
+| `/pricing` sign-up price ₱1,499 | **0** | **2** |
+| `/pricing` regular price ₱2,499 | 4 | 4 |
+| `/pricing` stale ₱499 fallback | — | **0** |
+| `/vendors` "Each plan says what it adds" | 0 | **1** |
+| `/vendors` "Compare every tier side by side" | 0 | **1** |
+| `/vendors` "minimum ₱50" (derived taper) | 0 | **1** |
+| 8 doorways · failing `#9A8F86` | 8 pages | **0 on all 8** |
+🔑 **The before-state is itself the proof of the two findings.** `/pricing` really did serve
+₱2,499 four times and ₱1,499 **zero** times — the sign-up price was invisible. And
+*"Everything in Free"* already appeared **three** times, which is how we know the brief's
+claim that the customer-side delta framing was missing was **wrong**.
+📈 **No SEO loss from collapsing the grid:** the matrix only ever rendered short labels
+(2,069 chars); the delta cards render label **and** description (7,939 chars), and the
+descriptions are confirmed present in the initial HTML.
 ⏭ Left in 10: `design#5` couple dashboard · `design#7` the five gaps · `design#8` vendor ·
 `design#9` admin last.
 
