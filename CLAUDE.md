@@ -542,8 +542,13 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > like what we did today."* Each session names what a person gets, what ALREADY SHIPS
 > (RULE 0 pre-answered — do not re-run it), its gate, and its own traps.
 > ⏭ **Order — CORRECTED 2026-08-13.** ~~1 → 2 → 3 first~~ **1 · 2 · 3 · 4 · 6 · 7 · 8 are DONE.**
-> ⏭ **5 is in review (PR #4402) — its merge already shipped with 4; it is four defects in that
-> shelf plus the article→shop tracking fix. Left after it: 9 · 10.**
+> ⏭ **5 IS MERGED** — #4402 (05:08Z) + #4406 (04:48Z), both verified on GitHub 2026-08-13, not
+> "in review" as this line read for hours after they landed. **Left: 9 · 10.**
+> ⏸ **#4413 (retire the ELN homepage) is still OPEN and CONFLICTING — leave it.** It is the
+> PARKED task of `DECISION_LOG.md` 2026-08-13: authorised by the owner, started, then stopped
+> on his own instruction. That row says the branch was deleted and nothing is half-landed —
+> **the PR itself was never closed**, so the open+conflicting state is expected, not a defect.
+> Do not re-open, rebase or re-ask it.
 > ✅ **7 (two levels + the events board) MERGED 2026-08-13 — PR
 > [#4415](https://github.com/iscasasola/setnayan-platform/pull/4415), merge `e77566b48`,
 > verified an ancestor of `origin/main`, and production self-reports it
