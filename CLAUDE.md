@@ -543,7 +543,9 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > (RULE 0 pre-answered — do not re-run it), its gate, and its own traps.
 > ⏭ **Order — CORRECTED 2026-08-13.** ~~1 → 2 → 3 first~~ **1 · 2 · 3 · 4 · 6 · 7 · 8 are DONE.**
 > ⏭ **5 IS MERGED** — #4402 (05:08Z) + #4406 (04:48Z), both verified on GitHub 2026-08-13, not
-> "in review" as this line read for hours after they landed. **Left: 9 · 10.**
+> "in review" as this line read for hours after they landed. ~~**Left: 9 · 10.**~~
+> ⏭ **9 IS BUILT 2026-08-13 (PR #4418, auto-merge armed) — see the Session 9 row below.
+> LEFT: 10.**
 > ⏸ **#4413 (retire the ELN homepage) is still OPEN and CONFLICTING — leave it.** It is the
 > PARKED task of `DECISION_LOG.md` 2026-08-13: authorised by the owner, started, then stopped
 > on his own instruction. That row says the branch was deleted and nothing is half-landed —
@@ -584,8 +586,27 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > the file every session reads first. It is the third time this exact failure is recorded
 > in this file. **When a gate closes, edit every row that asserts it is open, in the same
 > commit — and a flag's default in code is not its value in production.**
-> 🔒 Session 9 (mutual stories) shares the counsel gate with
-> `NEXT_PUBLIC_PERSON_LIFE_STORIES` — build behind it, do not flip it.
+> ✅ **SESSION 9 (mutual stories) IS BUILT AND MERGING — PR
+> [#4418](https://github.com/iscasasola/setnayan-platform/pull/4418). Do NOT start it again.**
+> Opening somebody's page shows the days you were both there. ⚠ **THE FLAG IS NO LONGER A
+> GATE: the owner set `NEXT_PUBLIC_PERSON_LIFE_STORIES=1` in Vercel on 2026-08-13**, so this
+> ships LIVE on merge, not dark. Safe today by arithmetic, not optimism — prod holds **0**
+> story items and **0** consented rows, so the intersection is empty for every pair of
+> accounts that exists; a visitor sees a written invitation and nothing else.
+> ⚖ **AND THE "COUNSEL GATE" WORDING WAS WRONG AND IS RETIRED.** Four sites said the flow was
+> inert until *"PH counsel signs off AND the owner sets the flag"* — two conditions. The first
+> was discharged by the **owner's own ruling as the NPC-registered DPO**, not by outside
+> counsel. **No external PH counsel opinion exists for Phase 2. Never write "counsel cleared"
+> for it** — a future reader acts on the stronger claim. Minors stay Phase 3 and are
+> genuinely counsel-gated.
+> 🔒 The privacy rule is the design: a day appears only when BOTH people are already visible
+> in it (consented · not hidden · public event), so it can only ever show what was already
+> shown, and it is a set INTERSECTION — symmetric by construction — so if either person
+> hides, the day leaves BOTH pages in the same instant. **Never derived from a guest list.**
+> 🔑 **The fifth GATE WITH NO HANDLE, found and fixed here:** `person_story_items.consented_at`
+> had **no writer for photo/clip rows, ever**, so this feature would have shipped correct and
+> permanently empty. It is now stamped only when the tagged guest's `photo_consent` is
+> exactly true.
 > ⚠ **Do not confuse the two Life-Flash flags.** `NEXT_PUBLIC_LIFE_STORY` is a ROLLOUT
 > switch with no counsel dependency (own events only). The other one publishes other
 > people's media.

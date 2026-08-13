@@ -735,7 +735,44 @@ not by the PR status. ⚠ Re-verify before trusting this row: `gh pr view 4402 4
 
 ---
 
-## Session 9 · Mutual stories — ▶ **BUILD UNBLOCKED 2026-08-13. THE FLAG IS STILL THE OWNER'S TO SET.**
+## Session 9 · Mutual stories — ✅ **BUILT 2026-08-13 · PR #4418 · DO NOT START IT AGAIN**
+
+> ✅ **SHIPPED.** Opening somebody's page shows the days you were both there.
+> `lib/person-life-stories.ts` was EXTENDED (not duplicated); the
+> would-`/[slug]`-render-this gate was lifted out of `resolvePublicProfile` into one shared
+> `filterPubliclyVisibleEvents`; the section is a per-viewer CLIENT ISLAND because that page
+> is ISR-cached at `revalidate = 60` and a per-viewer answer in the cached body would be
+> served to a different visitor.
+>
+> ⚠ **THE FLAG IS NO LONGER A GATE — THE OWNER SET IT.** `NEXT_PUBLIC_PERSON_LIFE_STORIES=1`
+> in Vercel, 2026-08-13, by him; no session touched it. So this ships **live on merge**.
+> Safe today by arithmetic: prod holds **0** story items and **0** consented rows ⇒ the
+> intersection is empty for every pair of accounts that exists.
+>
+> ⚖ **THE ANSWER TO THE HONESTY QUESTION BELOW: it was the OWNER'S OWN RULING as registered
+> DPO. NO external PH counsel opinion exists for Phase 2, and nothing in the code claims one
+> now.** All four sites that said "PH counsel signs off AND …" were corrected in the same
+> commit, and because the original migration is applied and never edited, a new migration
+> (`20271141323376`) replaces the `COMMENT ON TABLE` a reader actually queries.
+>
+> 🔑 **THE FIFTH GATE WITH NO HANDLE.** `person_story_items.consented_at` had **no writer for
+> photo/clip rows, ever** — the public read requires it, so the feature would have been
+> correct and permanently empty, indistinguishable from a broken query. Now stamped only when
+> the tagged guest's `photo_consent` is exactly `true`; the row is still written when consent
+> is false, so the person keeps it in their OWN story and it simply cannot surface.
+>
+> ⚠ **RLS IS A FLOOR, NOT A SCOPE** — the only policy is `is_admin() OR claimed by auth.uid()`
+> and **prod has an account that IS an admin**, so a read leaning on it would be correctly
+> scoped for everyone except the owner. Every scope is applied by hand through the admin
+> client; a test asserts the filters exist; all reads fail closed.
+>
+> 🛡 **A REAL FINDING LEFT FOR ITS OWN PR:** declaring `lib/supabase/admin.ts` a client
+> boundary reports **23 pre-existing** client→…→service-role chains. Latent (the bundler drops
+> the edge), but 23 findings as a baseline is a bill nobody pays.
+
+_The original brief follows, kept because its constraint list is still binding:_
+
+### ~~▶ BUILD UNBLOCKED 2026-08-13. THE FLAG IS STILL THE OWNER'S TO SET.~~
 
 **Owner: _"allow it. unblock it."_** So **build it now, fully, behind the flag.** What was holding
 the build was the gate; that hold is lifted.
@@ -802,7 +839,7 @@ words *"is still held"* stood in this very sentence next to the ✅ that contrad
 **Session 7 is DONE (#4415, merge `e77566b48`, live — prod self-reports `"version":"e77566b"`).**
 ~~⚠ **7 must rebase first** — it edits `dashboard/(launcher)/page.tsx`, which 8 rewrote.~~ It
 branched cleanly off `origin/main` (`096461db7`) and collided with nothing.
-⏭ **Left: 9 · 10 — and both are partly moved already.**
+⏭ ~~**Left: 9 · 10**~~ → **9 is BUILT 2026-08-13 (PR #4418). LEFT: 10** — partly moved already.
 **9's BUILD IS UNBLOCKED** (owner 2026-08-13: *"allow it. unblock it."*). ~~waits on counsel~~ —
 that phrase stood here for hours **after** the ruling, in the file that warns about exactly this.
 🔴 Only the **production flag** is still the owner's, and a session must never set it.
