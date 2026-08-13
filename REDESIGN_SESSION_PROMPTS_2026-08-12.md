@@ -486,8 +486,21 @@ is treated as a DEFECT IN THE PORT, not a new design decision.
 
 ---
 
-# SESSION 4-RECONCILE · Bring the older prototypes onto the new palette
-**Added 2026-08-13. CORPUS-ONLY — touches no app code, so it is safe beside sessions 4 and 8.**
+# SESSION 4-RECONCILE · ✅ **DONE 2026-08-13 — DO NOT RE-RUN**
+**23 prototypes reconciled · 5 retired · 5 gold buttons removed · a second pass de-themed 11 more
+and fixed invisible secondary text.** Commits `be31e2a` · `21db1ec` · `e0d7ec0` · `cbf157e` ·
+`c72caab` in the SPECS repo. It also left an owner decision sheet:
+`prototypes/stories_page_one_shelf_or_two_2026-08-13.html`.
+
+🪤 **AND HERE IS WHY THIS BANNER EXISTS.** I twice reported this session as having "done nothing",
+because I checked for a **pull request** — and the specs repo commits **straight to main and opens
+no PRs**. The absence of a PR was never evidence of absent work. **A search that cannot match is
+not a negative result**, and I reported it about somebody's finished work. Verify in the repo the
+work actually lives in.
+
+<details><summary>The original brief, kept for reference — do not execute it</summary>
+
+**CORPUS-ONLY — touches no app code.**
 
 ```
 GOAL: the ~22 older screen prototypes stop carrying a dead palette, so the sessions that port
@@ -564,3 +577,4 @@ DONE = every surviving prototype renders in the locked palette against cream; th
 retired with one line each saying what supersedes them; no composition changed anywhere; and
 your report lists, per file, WHAT YOU CHANGED and WHAT YOU DELIBERATELY LEFT.
 ```
+</details>

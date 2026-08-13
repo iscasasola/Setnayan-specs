@@ -802,7 +802,14 @@ words *"is still held"* stood in this very sentence next to the ✅ that contrad
 **Session 7 is DONE (#4415, merge `e77566b48`, live — prod self-reports `"version":"e77566b"`).**
 ~~⚠ **7 must rebase first** — it edits `dashboard/(launcher)/page.tsx`, which 8 rewrote.~~ It
 branched cleanly off `origin/main` (`096461db7`) and collided with nothing.
-⏭ **Left: 9 · 10.** **9** waits on counsel. **10** is the long tail.
+⏭ **Left: 9 · 10 — and both are partly moved already.**
+**9's BUILD IS UNBLOCKED** (owner 2026-08-13: *"allow it. unblock it."*). ~~waits on counsel~~ —
+that phrase stood here for hours **after** the ruling, in the file that warns about exactly this.
+🔴 Only the **production flag** is still the owner's, and a session must never set it.
+**10 is PART DONE: `design#4` reconcile is FINISHED** (23 reconciled · 5 retired, in the specs
+repo — which opens **no PRs**, so do not judge it by PR count). ⏭ Left in 10: `design#6` public
+doorways · `design#5` couple dashboard · `design#7` the five gaps · `design#8` vendor ·
+`design#9` admin last.
 
 🚨 **THE FRONT DOOR IS LIVE, AND FOR A DAY EVERY RECORD SAID IT WAS DARK.** The flag defaults
 to off in code and the handoff note said off, so two "sources" agreed — but they shared an
