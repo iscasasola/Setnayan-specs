@@ -732,7 +732,7 @@ edit every row that asserts it is open, in the same commit.**
 | 2 · storyteller editorial | **#4387** | ✅ **MERGED** 15:47Z |
 | 3 · friendly labels | **#4388** (+ **#4391**) | ✅ **MERGED** — and verified on the live site |
 | 8 · Alaala as memories | **#4395** + **#4397** | ✅ both **MERGED** (18:10Z · 18:59Z) · `/api/health` reports the merge SHA |
-| 4 · the front door | **#4396** (#4394 CLOSED, superseded) | ✅ **MERGED** 19:16Z — **and the flag is ON: `/` is the new front door**, measured on the deployed page (`fd-chipbar` · `fd-storyrow` · 24× `fd-kindtag`, zero `HomeReskin` markers). ⚠ `HomeReskin` is still IMPORTED as the dark branch, so *"retired completely"* is not yet true in code. |
+| 4 · the front door | **#4396** (#4394 CLOSED, superseded) | ✅ **MERGED** 19:16Z — **and the flag is ON: `/` is the new front door**, measured on the deployed page (`fd-chipbar` · `fd-storyrow` · 24× `fd-kindtag`, zero `HomeReskin` markers). 🔒 `HomeReskin` **STAYS** as the dark branch — owner 2026-08-13, asked directly: *"do not delete yet"*, which **sequences** *"Retire it completely"* rather than reversing it. **A decision, not debt — do not file it as an unfinished retirement and do not re-ask.** |
 | 6 · the seam | — | ✅ **DONE 2026-08-13** (see its entry) |
 | 5 · one shelf | **#4402** + **#4406** | ✅ both **MERGED** (04:48Z into the base, 05:08Z to main) — the merge itself already shipped in #4396; these are 4 defects in it, the tracking fix, and the story-card sweep. **Verified IN `origin/main` by the ref, not the PR status.** |
 

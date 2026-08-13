@@ -550,8 +550,13 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > The owner ruled the new front door replaces `/` and the ELN cinematic homepage is
 > *"retired completely"*. **Measured on `https://www.setnayan.com/`, not read:**
 > `fd-chipbar` · `fd-storyrow` · 24× `fd-kindtag`, **zero** `HomeReskin` markers, all four
-> chips live. ⚠ `HomeReskin` is still IMPORTED as the flag's dark branch, so "retired
-> completely" is not yet true in the code — that deletion is still owed.
+> chips live. 🔒 **`HomeReskin` STAYS as the flag's dark branch — owner 2026-08-13, asked
+> directly: "do not delete yet."** That keeps the flip reversible (set the value to `0` +
+> a cache-free rebuild). It does NOT reverse *"Retire it completely"* — it **sequences**
+> it. **Its continued import is a DECISION, not debt: do not clean it up, do not file it
+> as an unfinished retirement, do not re-ask.**
+> ⚠ This line previously called that deletion "still owed" and a session then asked the
+> owner a question he had already answered.
 > 🔑 **This line said an owner sentence BLOCKED Session 4 for a day after the gate closed,
 > the PR merged AND the flag was flipped** — three separate events, none of which reached
 > the file every session reads first. It is the third time this exact failure is recorded
