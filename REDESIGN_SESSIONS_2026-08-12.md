@@ -522,12 +522,36 @@ this doc was wrong about where the words live.**
 > FOUND**, which is neither a pass nor a fail: **an unrun mutation proves nothing either.**
 > Repaired: **16 sabotages, occurrence-counted before → after, all 16 caught.**
 >
-> ⏭ **NAMED, NOT BUILT (deliberately):** `getGuestLiveGallery` returns `null` for a FAILED
-> read **and** for the ordinary "no tags yet", while its own docblock claims *"null means,
-> and only means, that the read failed."* **That comment is false — verified in the
-> source.** Mapping it to `unreadable` would raise *"could not be loaded"* at the entire
-> guest population, so the wall deliberately does not. Fixing it means changing that
-> function's return contract and checking every caller. **A separate build.**
+> ✅ **THAT DEFERRAL IS NOW CLOSED — PR #4398, merged 02:34Z 2026-08-13 — and the thing
+> behind it was a LIVE BUG ON THE WEDDING-DAY PAGE, not just a false comment.**
+> `getGuestLiveGallery` returned `null` for a failed read, a thrown error **and** the
+> ordinary "nobody has tagged this guest yet". The invitation already renders three
+> correct states — *"We couldn't load your photos just now"* · *"No one has tagged you
+> yet"* · the grid — so **every guest who had not been tagged yet, which is everyone
+> before the photographers work through the album, was shown the FAILURE message.** The
+> reassurance branch written for her was unreachable by the dominant path. A wedding page
+> accusing itself of an error that never happened, at the moment she most needs
+> reassurance.
+>
+> 🪤 **AND A GUARD EXISTED FOR EXACTLY THIS AND PASSED OVER IT.**
+> `three-states.test.ts` asserted the absence of `if (photos.length === 0) return null` —
+> **the one spelling a July fix had deleted** — while `if (!tags || tags.length === 0)
+> return null` sat **118 lines above it**, untouched, doing the identical harm to the
+> commoner case. 🔑 **AN ABSENCE ASSERTION MUST NAME THE CLASS, NOT THE INSTANCE YOU JUST
+> DELETED.** Re-anchored to any early return of the failure value on an empty set, plus a
+> POSITIVE assertion that the empty path returns a real result — *"does not return null"*
+> is not *"returns the right thing"*.
+>
+> Three reads also had to start checking `.error` (the tag read and BOTH media reads
+> discarded it), so a refused query rendered as *"you have no photos"* over rows that
+> exist. The wall's `unreadable` mapping is closed with it. **8 sabotages, all caught.**
+>
+> 🪤 **THE BRACKET-GLOB TRAP BIT AGAIN, SECOND CONFIRMED HIT.**
+> `npx tsx --test "app/[slug]/_lib/three-states.test.ts"` prints **`# tests 0 … # fail 0`**
+> and exits **green** — while running the guard for a live bug. Use `app/*/_lib/…`.
+> 🔑 **Any harness that runs a suite must ASSERT A NON-ZERO TEST COUNT before believing a
+> pass**; the mutation harness now refuses a zero-test baseline, which is the only reason
+> its 8/8 meant anything.
 >
 > ⏭ **OPEN, and honest rather than faked:** on the owner's own account **Recent and Owned show the
 > same 14 frames** (all his media sits in one owned event) and **Attended · People · With me are
