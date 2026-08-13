@@ -29,13 +29,26 @@ a big build:
   was NOT "one map": the words also live in the DATABASE and in the wizard. See the entry below.**
 
 ✅ **SESSION 4 IS MERGED — PR #4396, commit `7b0aee558`, 2026-08-13.** Verified an
-ancestor of `origin/main`, not inferred. It ships **behind `NEXT_PUBLIC_NEW_FRONT_DOOR`,
-which is OFF**, so `/` still renders the June cinematic page and **nothing a visitor sees has
-changed**. 🔴 **SESSION 4 IS NOT DONE UNTIL THE OWNER LOOKS AND THE FLAG FLIPS** — and the
-flip is the commit that deletes `HomeReskin`, because deleting an approved page before its
-replacement has been seen is the one irreversible step in this change.
+ancestor of `origin/main`, not inferred.
+
+🔴 **AND IT IS LIVE. THE FLAG IS ON.** Measured 2026-08-13 by fetching
+`https://www.setnayan.com/` and reading the SERVED HTML: it returns `class="fd-topbar"`,
+`class="fd-rail"` and the signed-out `fd-signin-prompt`, and **zero** occurrences of
+`home-reskin`. The new front door is what a stranger sees right now.
+
+⚠ **THE THREE LINES BELOW SAID THE OPPOSITE FOR MOST OF A DAY** — *"behind
+`NEXT_PUBLIC_NEW_FRONT_DOOR`, which is OFF, so `/` still renders the June cinematic page and
+nothing a visitor sees has changed"*, and *"NOT DONE UNTIL THE OWNER LOOKS AND THE FLAG
+FLIPS"*. Both were true when written and false within hours, and a session acting on them
+would have built the next unit believing its work was invisible to customers. 🔑 **A FLAG
+STATE IS THE FASTEST-ROTTING CLAIM IN ANY OF THESE FILES — READ IT OFF THE LIVE SITE, NEVER
+OFF A DOC.** `NEXT_PUBLIC_*` inlines at build time, so it changes with a deploy, not with a
+commit anybody can see.
+
+⏭ `HomeReskin` is still in the tree (the flip did not delete it). Retiring it is a separate,
+now-safe commit — the replacement HAS been seen.
 ⚠ `NEXT_PUBLIC_*` inlines at BUILD time: flipping it needs a rebuild **without build cache**,
-and the value must be exactly `'1'` (`true` reads as OFF).
+and the value must be exactly `'1'` (`true` reads as OFF). It has been flipped — see above.
 🔀 **PR #4394 (the same session's groundwork) was CLOSED as superseded** — it was stuck red on
 *"every feature-flag module has at least one non-test importer"* because it built a flag
 nothing consumed, and #4396 is its only consumer. Two sessions had started Session 4; they were
@@ -344,7 +357,9 @@ this doc was wrong about where the words live.**
 > patiktok · setnayan-ai`. (Live Studio's route is **`panood`**.) 🪤 **Pakanta is NOT among them and
 > must not go in the rail** — sold, but reachable only inside the app.
 >
-> ### 🔒 HOW IT SHIPS
+> ### 🔒 HOW IT SHIPS — ⚠ THIS IS NOW HISTORY: THE FLAG IS ON AND `/` IS THE NEW FRONT DOOR
+> (Measured off the live site 2026-08-13 — see the top of this file. `HomeReskin` is still in
+> the tree; retiring it is a separate commit and is now the safe ordering, not the risky one.)
 > **Flag-dark first (`NEXT_PUBLIC_NEW_FRONT_DOOR`), and `HomeReskin` is NOT deleted until the owner
 > has seen the replacement live.** The owner approved retiring the June design — that approval is
 > real and recorded — but *"the owner LOOKING beats every automated check"*, and deleting an
@@ -389,7 +404,21 @@ this doc was wrong about where the words live.**
 
 ---
 
-## Session 6 · The seam
+## Session 6 · The seam — ✅ **DONE 2026-08-13**
+
+> ✅ **BUILT AND MERGED. Do NOT rebuild any of it.** Full row in `DECISION_LOG.md` 2026-08-13.
+> One panel opens over the page from every public surface and closes onto it; the app rail
+> wordmark is the way out to the front door, which answers with **"Back to your events"**;
+> sign out went from FIVE places to the account menu alone; the panel wears terracotta.
+> 🔒 **It partially REVERSES the 2026-07-16 council verdict "Wordmark-as-Home"**, on the
+> owner's newer sentence — and preserves that verdict's real concern by giving the in-event
+> rail a **"← All your events"** row, exactly as the prototype draws it.
+> 🛡 `apps/web/app/_components/auth/seam-invariants.test.ts` — 15 assertions, all
+> mutation-tested by occurrence count.
+> ⏭ **NAMED, NOT BUILT:** a signed-out visitor sees no Save button on a marketplace card, so
+> the prototype's four-press demo is **not reachable in the shipped product**. Showing Save to
+> strangers is an owner call, not a defect of this build.
+
 **Follows Session 4. Shares the rail, so not parallel-safe with it.**
 
 **What a person gets:** signing in never feels like leaving.
@@ -607,8 +636,8 @@ above for what shipped and what is deliberately still open.**
 ⏭ **What is actually next:** **Session 5 · 7** are unblocked today — **8 is DONE (#4395, merged
 and deployed 2026-08-12)**. ⚠ **7 must rebase first:** it edits `dashboard/(launcher)/page.tsx`,
 whose Alaala section 8 has just rewritten. **Session 4** is still held
-✅ (gate CLOSED 2026-08-13 — unblocked), and **6** follows 4 (they share the
-rail, so never run them together). **9** waits on counsel. **10** is the long tail.
+✅ (gate CLOSED 2026-08-13 — unblocked, MERGED, and the flag is ON: `/` is
+the new front door on the live site). **6 is DONE 2026-08-13** — the rail is free again. **9** waits on counsel. **10** is the long tail.
 
 🔑 **This line said "1 → 2 → 3 first" while all three were finished.** A state line outlives the
 state it describes, and it is the line a new session reads first — the exact failure that made a
