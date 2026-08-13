@@ -222,6 +222,38 @@ and "none" is a finding to report, not a licence to draw.
      ₱50 floor. The prototype is the simplification; `bookingFeeScheduleSummary()`
      (now used by the shipped component) is the accurate one.
 
+- id:            design#6b
+  title:         The SAME 3.06:1 text colour is live on /why-setnayan and the /tour tree
+  type:          code
+  status:        🔴 FOUND 2026-08-13 while sweeping after design#6. NOT FIXED — out of
+                 that unit's scope (8 doorways + price pages), named rather than
+                 silently widened or silently dropped.
+  depends_on:    []
+  parallel_safe: yes
+  safety_gate:   NONE
+  🔑 WHY IT EXISTS: design#6 removed the hand-typed `#9A8F86` from the eight
+     doorways because it measures **3.06:1 on cream — below the 4.5:1 AA floor for
+     normal text**. The repo's own rule is "when you fix a route-shaped bug, sweep
+     every route with that shape". The sweep found the identical colour still live.
+  📏 MEASURED, NOT INFERRED — counted in the HTML actually served by
+     `www.setnayan.com` on 2026-08-13:
+       /why-setnayan   200 · 6 occurrences   (an `<h3>` SECTION HEADING at text-lg)
+       /tour/vendors   200 · 14 occurrences  (labels + body on bg-white/50 cards)
+       /tour/gallery   200 · 7 occurrences   (captions at text-xs)
+       /tour/seating   200 · 5 occurrences   (an input PLACEHOLDER + captions)
+       /tour           200 · 0 in initial HTML — the source has one ("soon" pill) but
+                       it did not appear in the served markup; treat as UNCONFIRMED.
+     Contrast: 3.06:1 on cream · 3.11:1 on the bg-white/50 cards. All need 4.5:1.
+  ⚠ THE `text-lg` HEADING IS NOT EXEMPT. WCAG's large-text allowance needs ≥24px, or
+     ≥18.66px BOLD. `text-lg` is 18px at normal weight, so it takes the 4.5:1 floor.
+  ⚠ `/tour` HAS ITS OWN PALETTE that predates the terracotta lock (its own files name
+     `#1B1A17` ink and `#5F5E5A` body), so this is a PORT UNIT, not a one-line swap —
+     do not just find-and-replace the hex without deciding what the tour's surfaces
+     are. `--m-slate-2` is the token that clears AA (5.21:1) if the surface is cream.
+  🛡 `doorway-palette.test.ts` deliberately scans ONLY the eight doorways plus the
+     shared kit. It will NOT catch these. Widening its route list is the cheapest way
+     to make this stay fixed once it is fixed.
+
 - id:            design#7
   title:         The five genuine gaps
   type:          code
