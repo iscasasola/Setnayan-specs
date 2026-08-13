@@ -541,8 +541,11 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > Owner: *"let's start the redesign. we will also start redesign with multiple sessions
 > like what we did today."* Each session names what a person gets, what ALREADY SHIPS
 > (RULE 0 pre-answered — do not re-run it), its gate, and its own traps.
-> ⏭ **Order — CORRECTED 2026-08-13.** ~~1 → 2 → 3 first~~ **1 · 2 · 3 · 4 · 8 are DONE.**
-> ⏭ **Next: 5 (PR #4402, open) · 6 · 7 · 9 · 10.**
+> ⏭ **Order — CORRECTED 2026-08-13.** ~~1 → 2 → 3 first~~ **1 · 2 · 3 · 4 · 6 · 8 are DONE.**
+> ⏭ **5 is in review (PR #4402) — its merge already shipped with 4; it is four defects in that
+> shelf plus the article→shop tracking fix. Left after it: 7 · 9 · 10.**
+> ⚠ **Verify any row here with `gh pr view <#> --json state,mergedAt` before trusting it** —
+> this block was wrong about Session 4 in three different ways at once.
 > ✅ **SESSION 4 IS NOT BLOCKED — THE GATE CLOSED 2026-08-13, IT MERGED, AND IT IS LIVE.**
 > The owner ruled the new front door replaces `/` and the ELN cinematic homepage is
 > *"retired completely"*. **Measured on `https://www.setnayan.com/`, not read:**
