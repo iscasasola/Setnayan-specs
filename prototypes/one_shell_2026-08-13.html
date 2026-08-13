@@ -99,6 +99,11 @@ h2.ch{font-size:23px;margin:34px 0 6px;letter-spacing:-.015em}
 .rlab{font-size:14.5px;font-weight:650;padding:8px 12px 4px;display:flex;align-items:center;gap:6px}
 .rlab small{font-size:11px;color:var(--m3);font-weight:500;letter-spacing:.05em;text-transform:uppercase}
 .rlab.ctx{color:var(--terra)}
+/* The place you are in, then ITS OWN section headings underneath. */
+.rctx{font-size:13px;font-weight:700;color:var(--terra);padding:9px 12px 2px;letter-spacing:-.005em}
+.rlab.sub{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--m2);
+  font-weight:700;padding:10px 12px 3px}
+.device.narrow .rctx{display:none}
 .notice{padding:8px 12px 10px;font-size:12.5px;color:var(--m1);line-height:1.45}
 .notice b{display:flex;align-items:center;gap:7px;color:var(--ink);font-size:14px;font-weight:500;margin-bottom:3px}
 .soon{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid #E3D6BE;
@@ -186,6 +191,10 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 .crumb{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-radius:999px;
   border:1px solid var(--line);font-size:13px;font-weight:600;margin-bottom:14px}
 .crumb:hover{background:var(--hover)}
+.kinrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.kw{border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;
+  background:#fff}
+.kw[data-src=derived]{background:transparent;border-style:dashed;color:var(--m3);font-weight:500}
 .reader{max-width:680px}
 .reader h1{font-size:30px;line-height:1.2;letter-spacing:-.02em;margin:6px 0 8px}
 .reader p{font-size:15.5px;line-height:1.65;color:#3B3835;margin:0 0 14px}
@@ -226,12 +235,20 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
   <b>pushes</b> an "In this event" group and your own rows <b>stay</b>. Then <b>Guests</b>,
   <b>Marketplace</b>, <b>Studio</b>, <b>Budget</b> — the rail never moves and the active row follows
   you. Press <b>Home</b> to land back on the public front door, still signed in.</div>
-  <div class="note try"><b>Three places have their own menu, and all three behave the same way.</b>
-  An <b>event</b> pushes in Overview · Guests · Marketplace · Studio · Launch, then Schedule · Seat
-  plan · Budget. <b>Studio Azul</b> — your shop, under <em>What you run</em> — pushes in its five:
-  Overview · My Shop · My Customers · My Performance · On the Day. <b>Setnayan HQ</b> pushes in its
-  six, flat, with <em>All surfaces</em> as a link at the bottom.
-  <b>Those eleven are the menus you already locked</b> — nothing was invented for this drawing.</div>
+  <div class="note try"><b>Four places have their own menu, and all four behave the same way</b> —
+  the rail names where you are, then pushes that place's menu in under it, and your own rows stay
+  above. An <b>event</b> pushes in three named sections: <em>Plan</em> · <em>Go live</em> ·
+  <em>Also in this event</em>. <b>People</b> pushes in Connections · Samahan · Alaga.
+  <b>Studio Azul</b> pushes in its five. <b>Setnayan HQ</b> pushes in its six, flat, with
+  <em>All surfaces</em> as a link. <b>Every one of these was read out of the live code</b> — none
+  of it was invented for the drawing.</div>
+  <div class="note"><b>Two corrections in this pass.</b> The event's menu is <b>three named
+  sections, not one list</b> — that is how it is built today and the drawing had flattened it. And
+  <b>People is not "coming soon"</b>: the page exists, and Samahan works on it right now. What is
+  genuinely still to come is the <b>Connections</b> half — which the code already calls by that
+  name. <b>Family, godparent and friend are one list with the relationship written on each
+  person</b>, not three menus; lola, pinsan and kumpare are worked out from those and nobody types
+  them.</div>
   <div class="note"><b>Two things this proves that the shipped code cannot do yet.</b>
   ① <b>The active row follows you</b> — today "Home" is nailed on, so all 296 pages would light Home.
   ② <b>The chrome never changes</b>: one rail, one top bar, one gold <b>+ Create</b> — while every
@@ -244,7 +261,7 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 <script>
 (function(){
 const S={w:'desk',u:'all',view:'front',ev:null,evTab:'home',shopTab:'overview',hqTab:'overview',
-  lens:'recent',toast:null,menu:false};
+  peopleTab:'family',lens:'recent',toast:null,menu:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inn=()=>S.u!=='out';
 const isAll=()=>S.u==='all';
@@ -268,9 +285,25 @@ const FOLDERS=[['venue','⛪','Venues & churches',28],['feast','✦','Catering &
  ['program','♪','Hosts, music & program',20]];
 const TOOLS=[['setnayan-ai','Setnayan AI'],['pawebsite','Pawebsite'],['papic','Papic'],
  ['panood','Live Studio'],['patiktok','Patiktok'],['pa3d','Pa3D'],['palogo','Palogo']];
-const EVTABS=[['home','▦','Overview'],['guests','◍','Guests'],['market','⌕','Marketplace'],
- ['studio','✦','Studio'],['launch','◉','Launch']];
-const ALSO=[['schedule','◷','Schedule'],['seat','▢','Seat plan'],['budget','₱','Budget']];
+/* THE EVENT'S OWN MENU — THREE named sections, not one list. Owner-locked:
+   every row is a plain leaf, "solid menu with no submenus" (2026-07-15).
+   Budget is NOT a top-level menu (owner removed it 2026-07-10); it comes back
+   as a quiet link under "Also in this event", which is where it lives today. */
+const EVSECTIONS=[
+ ['Plan',[['home','▦','Overview'],['guests','◍','Guests'],['market','⌕','Marketplace'],
+          ['studio','✦','Studio']]],
+ ['Go live',[['launch','◉','Launch']]],
+ ['Also in this event',[['schedule','◷','Schedule'],['seat','▢','Seat plan'],['budget','₱','Budget']]]];
+/* PEOPLE'S OWN MENU — THREE, not five. The owner is right and the code already
+   agrees with him: family / godparent / friend are the WORD ON A PERSON, not
+   three menus. One stored list carries spouse · parent · child · sibling ·
+   godparent · godchild · friend, and everything else (lola, pinsan, kumpare)
+   is DERIVED from those. So one row: Connections. Samahan is a group of people.
+   Alaga is a different right entirely — you run somebody's day for them.
+   NOT "followers": Instagram's is one-way and public; this one is confirmed by
+   BOTH sides and private. */
+const PEOPLETABS=[['connections','◍','Connections',23],['samahan','⛬','Samahan',3],
+ ['alaga','♡','Alaga · the ones you look after',2]];
 /* THE SHOP'S OWN MENU — the five destinations, owner-locked 2026-07-12:
    "overview, my shop, my customers, my performance, BEO are all 1-page each". */
 const SHOPTABS=[['overview','▦','Overview'],['shop','▣','My Shop'],['customers','◍','My Customers'],
@@ -306,8 +339,8 @@ function rail(){
         <span class="lb">Alaala</span><span class="cap72">Alaala</span><span class="ct mono">560</span></button>
       <button class="row" data-a="go" data-v="story" data-on="${on('story')}"><span class="gi">✎</span>
         <span class="lb">Your Story</span><span class="cap72">Story</span><span class="ct mono">1</span></button>
-      <div class="notice"><b>People <span class="soon">coming soon</span></b>Family, godparents and
-        friends together. Waiting on a legal review.</div>`;
+      <button class="row" data-a="go" data-v="people" data-on="${on('people')}"><span class="gi">◍</span>
+        <span class="lb">People</span><span class="cap72">People</span><span class="ct mono">23</span></button>`;
     if(isAll()){
       h+=`<div class="rdiv"></div><div class="rlab">What you run</div>
         <button class="row" data-a="go" data-v="shop" data-on="${on('shop')}"><span class="gi">▣</span>
@@ -320,25 +353,30 @@ function rail(){
   /* ── the context group. It PUSHES; nothing above it is removed. ── */
   if(S.ev){
     const e=EVENTS.find(x=>x.id===S.ev);
-    h+=`<div class="rdiv"></div><div class="rlab ctx">In this event <small>${esc(e.n)}</small></div>`;
-    EVTABS.forEach(([k,ic,l])=>{
-      h+=`<button class="row" data-a="evtab" data-v="${k}" data-on="${S.evTab===k}">
-        <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l}</span>
-        ${k==='guests'?'<span class="ct mono">86</span>':''}</button>`;});
-    h+='<div class="rlab" style="font-size:11.5px;color:var(--m2);text-transform:uppercase;letter-spacing:.07em">Also in this event</div>';
-    ALSO.forEach(([k,ic,l])=>{
-      h+=`<button class="row" data-a="evtab" data-v="${k}" data-on="${S.evTab===k}">
-        <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l}</span></button>`;});
+    h+=`<div class="rdiv"></div><div class="rctx">${e.e} ${esc(e.n)}</div>`;
+    EVSECTIONS.forEach(([sec,rows])=>{
+      h+=`<div class="rlab sub">${sec}</div>`;
+      rows.forEach(([k,ic,l])=>{
+        h+=`<button class="row" data-a="evtab" data-v="${k}" data-on="${S.evTab===k}">
+          <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l}</span>
+          ${k==='guests'?'<span class="ct mono">86</span>':''}</button>`;});});
+  }else if(S.view==='people'){
+    /* People is NOT coming soon — the page ships with all five of these. */
+    h+=`<div class="rdiv"></div><div class="rctx">Your people</div>`;
+    PEOPLETABS.forEach(([k,ic,l,n])=>{
+      h+=`<button class="row" data-a="peopletab" data-v="${k}" data-on="${S.peopleTab===k}">
+        <span class="gi">${ic}</span><span class="lb">${esc(l)}</span><span class="cap72">${esc(l.split(/[ ·]/)[0])}</span>
+        ${n?`<span class="ct mono">${n}</span>`:''}</button>`;});
   }else if(S.view==='shop'){
     /* Same rule, second place: the shop's own five PUSH IN. Your own rows stay above. */
-    h+=`<div class="rdiv"></div><div class="rlab ctx">In your shop <small>Studio Azul</small></div>`;
+    h+=`<div class="rdiv"></div><div class="rctx">▣ Studio Azul</div><div class="rlab sub">Menu</div>`;
     SHOPTABS.forEach(([k,ic,l])=>{
       h+=`<button class="row" data-a="shoptab" data-v="${k}" data-on="${S.shopTab===k}">
         <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l.replace('My ','').split(' ')[0]}</span>
         ${k==='customers'?'<span class="ct mono">3</span>':''}</button>`;});
   }else if(S.view==='hq'){
     /* Same rule, third place. Flat by owner lock — no submenus anywhere in here. */
-    h+=`<div class="rdiv"></div><div class="rlab ctx">In Setnayan HQ <small>admin</small></div>`;
+    h+=`<div class="rdiv"></div><div class="rctx">⛨ Setnayan HQ</div><div class="rlab sub">Menu</div>`;
     HQTABS.forEach(([k,ic,l])=>{
       h+=`<button class="row" data-a="hqtab" data-v="${k}" data-on="${S.hqTab===k}">
         <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l.split(/[ &]/)[0]}</span></button>`;});
@@ -406,6 +444,21 @@ const SHOPBODY={
  onday:['On the Day (BEO)','Your console for the wedding itself.',
    [['1','Next event','18 December, Tagaytay'],['14:00','Call time','Confirmed with the couple'],
     ['9','Shot list','Agreed with the couple']]]};
+
+const PEOPLEBODY={
+ connections:['Connections','Everyone you are linked to — the link says how.',
+   [['23','Connected','Both of you agreed'],['4','Waiting','They have not answered yet'],
+    ['11','Suggested','From days you were both at']]],
+ samahan:['Samahan','A group of people — the barkada, the choir, the office.',
+   [['3','Groups','You started one'],['24','People','Across the three'],
+    ['1','Invite open','Anyone with the link can join']]],
+ alaga:['Alaga · the ones you look after','A child or an elder whose day you run for them.',
+   [['2','Alaga','A child and a lola'],['1','Hands over at 18','In four years'],
+    ['0','Public','Nothing about a child is ever public']]]};
+/* The words that ride ON a connection — this is what replaces three menus. */
+const KINWORDS=[['Asawa','spouse'],['Nanay','parent'],['Tatay','parent'],['Kapatid','sibling'],
+ ['Anak','child'],['Ninong','godparent'],['Ninang','godparent'],['Inaanak','godchild'],
+ ['Kaibigan','friend'],['Lola','derived'],['Pinsan','derived'],['Kumpare','derived']];
 
 const HQBODY={
  overview:['Overview','Everything that needs an admin right now.',[['0','Need you','All actionable queues clear'],
@@ -476,6 +529,32 @@ function content(){
           <p style="margin-top:6px">This desk is not a permission you earn — every signed-in person has
           it, which is why the row is always in the rail even at zero.</p>
           <div style="margin-top:12px"><button class="btn-terra" data-a="noop">Write a new story</button></div></div>`;
+    case 'people':{
+      const [t,sub,tiles]=PEOPLEBODY[S.peopleTab]||PEOPLEBODY.connections;
+      return `<h1 class="pg">${esc(t)}</h1><p class="sub">${esc(sub)}</p>
+        <div class="tiles">${tiles.map(([n,b,p])=>`<div class="tile"><span class="n">${esc(n)}</span>
+          <b>${esc(b)}</b><p>${esc(p)}</p></div>`).join('')}</div>
+        ${S.peopleTab==='connections'?`
+        <div class="tile" style="margin-top:16px"><b>One list. The relationship is the label on the person.</b>
+          <p style="margin-top:6px">This is the change you just called — and the product already
+          half-agrees with you, because this page's own words say <b>Connections</b>. Family,
+          godparent and friend were never three lists; they are three words that sit on a person.
+          Keeping them as separate menus forces a question with no right answer: a cousin who is
+          also your best friend goes where?</p>
+          <div class="kinrow">${KINWORDS.map(([w,src])=>`<span class="kw" data-src="${src}">${w}</span>`).join('')}</div>
+          <p style="margin-top:10px;font-size:12.5px;color:var(--m2)">The pale ones nobody types —
+          <b>lola, pinsan, kumpare</b> work themselves out from the rest.</p>
+          <p style="margin-top:10px"><b>Not "followers".</b> That is one-way and public. This is
+          <b>agreed by both of you and private</b>, which is a different thing wearing a similar
+          shape — and the reason a wrong link can never quietly appear on somebody's page.</p></div>`
+        :S.peopleTab==='samahan'?`
+        <div class="tile" style="margin-top:16px"><b>Samahan is the only one that is a GROUP.</b>
+          <p style="margin-top:6px">Which is exactly why it sits beside Connections rather than
+          inside it — and why it is the half of this page that <b>works today</b>.</p></div>`:`
+        <div class="tile" style="margin-top:16px"><b>Alaga is not a connection — it is a responsibility.</b>
+          <p style="margin-top:6px">A connection says how you know somebody. Alaga says you run
+          their day <em>for</em> them, and it ends on its own when a child turns 18. Separate menu,
+          because it is a separate power.</p></div>`}`;}
     case 'shop':{
       const [t,sub,tiles]=SHOPBODY[S.shopTab]||SHOPBODY.overview;
       return `<h1 class="pg">${esc(t)}</h1><p class="sub">${esc(sub)} · <b>Studio Azul</b>
@@ -568,11 +647,13 @@ function render(){
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-a]'); if(!el)return;
   const a=el.dataset.a,v=el.dataset.v;
-  if(a==='go'){S.view=v;S.ev=null;if(v==='shop')S.shopTab='overview';if(v==='hq')S.hqTab='overview';}
+  if(a==='go'){S.view=v;S.ev=null;if(v==='shop')S.shopTab='overview';if(v==='hq')S.hqTab='overview';
+    if(v==='people')S.peopleTab='connections';}
   else if(a==='openev'){S.ev=v;S.evTab='home';}
   else if(a==='evtab'){S.evTab=v;}
   else if(a==='shoptab'){S.shopTab=v;}
   else if(a==='hqtab'){S.hqTab=v;}
+  else if(a==='peopletab'){S.peopleTab=v;}
   else if(a==='lens'){S.lens=v;}
   else if(a==='folder'){S.view='find';S.ev=null;toast('Filtered to that category — <b>the rail did not move</b>.');}
   else if(a==='tool'){S.view='stories';S.ev=null;toast('A tool doorway opens in the same column.');}
