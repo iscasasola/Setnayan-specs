@@ -566,7 +566,7 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > wants the grid gone entirely, that is one line.
 > ⏭ **5 IS MERGED** — #4402 (05:08Z) + #4406 (04:48Z), both verified on GitHub 2026-08-13, not
 > "in review" as this line read for hours after they landed. ~~**Left: 9 · 10.**~~
-> ⏭ **9 IS BUILT 2026-08-13 (PR #4418, auto-merge armed) — see the Session 9 row below.
+> ⏭ **9 IS MERGED 2026-08-13 (PR #4418, merge `a20a48b2a`) — see the Session 9 row below.
 > LEFT: 10.**
 > ⏸ **#4413 (retire the ELN homepage) is still OPEN and CONFLICTING — leave it.** It is the
 > PARKED task of `DECISION_LOG.md` 2026-08-13: authorised by the owner, started, then stopped
@@ -608,8 +608,12 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > the file every session reads first. It is the third time this exact failure is recorded
 > in this file. **When a gate closes, edit every row that asserts it is open, in the same
 > commit — and a flag's default in code is not its value in production.**
-> ✅ **SESSION 9 (mutual stories) IS BUILT AND MERGING — PR
-> [#4418](https://github.com/iscasasola/setnayan-platform/pull/4418). Do NOT start it again.**
+> ✅ **SESSION 9 (mutual stories) IS MERGED AND LIVE — PR
+> [#4418](https://github.com/iscasasola/setnayan-platform/pull/4418), merge `a20a48b2a`,
+> verified an ancestor of `origin/main` 2026-08-13. Do NOT start it again.**
+> ✅ **The migration is verified applied IN PROD BY THE OBJECT** — `person_story_items`'
+> table comment no longer says "counsel-gated" and carries the correction; `consented_at`'s
+> comment records its second job.
 > Opening somebody's page shows the days you were both there. ⚠ **THE FLAG IS NO LONGER A
 > GATE: the owner set `NEXT_PUBLIC_PERSON_LIFE_STORIES=1` in Vercel on 2026-08-13**, so this
 > ships LIVE on merge, not dark. Safe today by arithmetic, not optimism — prod holds **0**

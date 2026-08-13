@@ -735,7 +735,7 @@ not by the PR status. ⚠ Re-verify before trusting this row: `gh pr view 4402 4
 
 ---
 
-## Session 9 · Mutual stories — ✅ **BUILT 2026-08-13 · PR #4418 · DO NOT START IT AGAIN**
+## Session 9 · Mutual stories — ✅ **MERGED 2026-08-13 · PR #4418 · merge `a20a48b2a` · DO NOT START IT AGAIN**
 
 > ✅ **SHIPPED.** Opening somebody's page shows the days you were both there.
 > `lib/person-life-stories.ts` was EXTENDED (not duplicated); the
@@ -839,7 +839,7 @@ words *"is still held"* stood in this very sentence next to the ✅ that contrad
 **Session 7 is DONE (#4415, merge `e77566b48`, live — prod self-reports `"version":"e77566b"`).**
 ~~⚠ **7 must rebase first** — it edits `dashboard/(launcher)/page.tsx`, which 8 rewrote.~~ It
 branched cleanly off `origin/main` (`096461db7`) and collided with nothing.
-⏭ ~~**Left: 9 · 10**~~ → **9 is BUILT 2026-08-13 (PR #4418). LEFT: 10** — partly moved already.
+⏭ ~~**Left: 9 · 10**~~ → **9 is MERGED 2026-08-13 (PR #4418, merge `a20a48b2a`). LEFT: 10** — partly moved already.
 **9's BUILD IS UNBLOCKED** (owner 2026-08-13: *"allow it. unblock it."*). ~~waits on counsel~~ —
 that phrase stood here for hours **after** the ruling, in the file that warns about exactly this.
 🔴 Only the **production flag** is still the owner's, and a session must never set it.
