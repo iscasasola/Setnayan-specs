@@ -215,17 +215,23 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
     <button data-v="phone" aria-pressed="false">Phone</button></div></div>
   <div class="sg"><span>You</span><div class="seg" id="segU">
     <button data-v="out" aria-pressed="false">Signed out</button>
-    <button data-v="couple" aria-pressed="true">Couple</button>
-    <button data-v="all" aria-pressed="false">Couple + shop + admin</button></div></div>
+    <button data-v="couple" aria-pressed="false">Couple</button>
+    <button data-v="all" aria-pressed="true">Couple + shop + admin</button></div></div>
   <span class="hint">The rail never leaves. Click anything.</span>
 </div>
 
 <div class="wrap">
   <h2 class="ch">One shell — the whole product beside one rail</h2>
-  <div class="note try"><b>Walk it.</b> Press <b>Events</b> → open <b>Cale &amp; Ice</b> → the rail
+  <div class="note try"><b>Walk it.</b> Press <b>Your events</b> → open <b>Cale &amp; Ice</b> → the rail
   <b>pushes</b> an "In this event" group and your own rows <b>stay</b>. Then <b>Guests</b>,
   <b>Marketplace</b>, <b>Studio</b>, <b>Budget</b> — the rail never moves and the active row follows
   you. Press <b>Home</b> to land back on the public front door, still signed in.</div>
+  <div class="note try"><b>Three places have their own menu, and all three behave the same way.</b>
+  An <b>event</b> pushes in Overview · Guests · Marketplace · Studio · Launch, then Schedule · Seat
+  plan · Budget. <b>Studio Azul</b> — your shop, under <em>What you run</em> — pushes in its five:
+  Overview · My Shop · My Customers · My Performance · On the Day. <b>Setnayan HQ</b> pushes in its
+  six, flat, with <em>All surfaces</em> as a link at the bottom.
+  <b>Those eleven are the menus you already locked</b> — nothing was invented for this drawing.</div>
   <div class="note"><b>Two things this proves that the shipped code cannot do yet.</b>
   ① <b>The active row follows you</b> — today "Home" is nailed on, so all 296 pages would light Home.
   ② <b>The chrome never changes</b>: one rail, one top bar, one gold <b>+ Create</b> — while every
@@ -237,7 +243,8 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 
 <script>
 (function(){
-const S={w:'desk',u:'couple',view:'front',ev:null,evTab:'home',lens:'recent',toast:null,menu:false};
+const S={w:'desk',u:'all',view:'front',ev:null,evTab:'home',shopTab:'overview',hqTab:'overview',
+  lens:'recent',toast:null,menu:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inn=()=>S.u!=='out';
 const isAll=()=>S.u==='all';
@@ -264,6 +271,14 @@ const TOOLS=[['setnayan-ai','Setnayan AI'],['pawebsite','Pawebsite'],['papic','P
 const EVTABS=[['home','▦','Overview'],['guests','◍','Guests'],['market','⌕','Marketplace'],
  ['studio','✦','Studio'],['launch','◉','Launch']];
 const ALSO=[['schedule','◷','Schedule'],['seat','▢','Seat plan'],['budget','₱','Budget']];
+/* THE SHOP'S OWN MENU — the five destinations, owner-locked 2026-07-12:
+   "overview, my shop, my customers, my performance, BEO are all 1-page each". */
+const SHOPTABS=[['overview','▦','Overview'],['shop','▣','My Shop'],['customers','◍','My Customers'],
+ ['performance','◔','My Performance'],['onday','◷','On the Day (BEO)']];
+/* THE CONSOLE'S OWN MENU — the six, flat, owner-locked 2026-07-15:
+   "solid menu with no submenus". "All surfaces" is a link, not a seventh menu. */
+const HQTABS=[['overview','▦','Overview'],['accounts','◍','Accounts'],['studio','✦','Studio'],
+ ['ugat','◉','Ugat Console'],['perf','◔','App Performance'],['money','₱','Money & Settings']];
 
 /* ══ RAIL — one rail. It PUSHES a group inside an event; account rows stay. ══ */
 function rail(){
@@ -314,6 +329,21 @@ function rail(){
     ALSO.forEach(([k,ic,l])=>{
       h+=`<button class="row" data-a="evtab" data-v="${k}" data-on="${S.evTab===k}">
         <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l}</span></button>`;});
+  }else if(S.view==='shop'){
+    /* Same rule, second place: the shop's own five PUSH IN. Your own rows stay above. */
+    h+=`<div class="rdiv"></div><div class="rlab ctx">In your shop <small>Studio Azul</small></div>`;
+    SHOPTABS.forEach(([k,ic,l])=>{
+      h+=`<button class="row" data-a="shoptab" data-v="${k}" data-on="${S.shopTab===k}">
+        <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l.replace('My ','').split(' ')[0]}</span>
+        ${k==='customers'?'<span class="ct mono">3</span>':''}</button>`;});
+  }else if(S.view==='hq'){
+    /* Same rule, third place. Flat by owner lock — no submenus anywhere in here. */
+    h+=`<div class="rdiv"></div><div class="rlab ctx">In Setnayan HQ <small>admin</small></div>`;
+    HQTABS.forEach(([k,ic,l])=>{
+      h+=`<button class="row" data-a="hqtab" data-v="${k}" data-on="${S.hqTab===k}">
+        <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l.split(/[ &]/)[0]}</span></button>`;});
+    h+=`<button class="row" data-a="noop" style="color:var(--link)"><span class="gi">⋯</span>
+      <span class="lb">All surfaces</span><span class="cap72">All</span></button>`;
   }else if(inn()){
     /* Marketplace + Studio are FRONT-PAGE furniture — they collapse away inside an event. */
     h+='<div class="rdiv"></div><div class="rlab">Marketplace</div>';
@@ -362,6 +392,35 @@ const EVBODY={
    [['12','Tables','Round, long and the sweetheart'],['52','Seated','Of 52 who said yes'],['0','Unseated','Everyone has a chair']]],
  budget:['Budget','What you agreed, what you have paid, what is left.',
    [['4','Agreed','Across four suppliers'],['3','Paid','One deposit outstanding'],['2','Due soon','Both within a month']]]};
+
+const SHOPBODY={
+ overview:['Overview','Studio Azul at a glance.',[['3','New enquiries','Two are about the same date'],
+   ['4','Booked','Next one is 18 December'],['412','Saved by couples','Up 38 this week']]],
+ shop:['My Shop','Your page, your services, your proof.',
+   [['✓','Verified','Your badge is live'],['9','Services','Three are your recommended picks'],
+    ['18','Photos','Your work, in front of couples']]],
+ customers:['My Customers','Everyone talking to you, and everything they owe.',
+   [['3','Waiting on you','The oldest is 2 days'],['4','Booked','All deposits in'],['1','Payday','Ready to withdraw']]],
+ performance:['My Performance','How you are doing, and where the work is.',
+   [['62','Views this week','Up from 41'],['11','Saved you','Have not written yet'],['—','Demand Radar','Included from Pro up']]],
+ onday:['On the Day (BEO)','Your console for the wedding itself.',
+   [['1','Next event','18 December, Tagaytay'],['14:00','Call time','Confirmed with the couple'],
+    ['9','Shot list','Agreed with the couple']]]};
+
+const HQBODY={
+ overview:['Overview','Everything that needs an admin right now.',[['0','Need you','All actionable queues clear'],
+   ['0','Past SLA','Nothing overdue'],['2','Shops','One live, one hidden']]],
+ accounts:['Accounts','Every person and shop on Setnayan.',[['7','People','Five are test accounts'],
+   ['2','Shops','One awaiting approval'],['5','Events','None public yet']]],
+ studio:['Studio','The pages, media and words the public sees.',[['33','Stories','Ours'],
+   ['1','Story','Theirs'],['0','Left over','The media bucket is clean']]],
+ ugat:['Ugat Console','The map of how the product fits together.',[['0','Untrue claims','The map matches the schema'],
+   ['0','Homeless','Every subsystem has a place'],['✓','Green','Both guards passing']]],
+ perf:['App Performance','Where people arrive, and where they stop.',[['0','Search data','Blocked on the Google appeal'],
+   ['0','Failing audits','Was two'],['8','Doorways','All live']]],
+ money:['Money & Settings','Rails, prices and the switches that change them.',
+   [['0','Charges','Nothing has been charged yet'],['0','Payouts','Legacy path, not the live model'],
+    ['1','Switch off','Per-shop limits, waiting on you']]]};
 
 function content(){
   if(S.ev){
@@ -417,22 +476,30 @@ function content(){
           <p style="margin-top:6px">This desk is not a permission you earn — every signed-in person has
           it, which is why the row is always in the rail even at zero.</p>
           <div style="margin-top:12px"><button class="btn-terra" data-a="noop">Write a new story</button></div></div>`;
-    case 'shop':
-      return `<h1 class="pg">Studio Azul</h1><p class="sub">Your shop · <span style="color:var(--gold);font-weight:650">✓ Verified</span> · setnayan.com/studio-azul</p>
-        <div class="tiles"><div class="tile"><span class="n">3</span><b>New enquiries</b><p>Two are about the same date.</p></div>
-          <div class="tile"><span class="n">4</span><b>Booked</b><p>Next one is 18 Dec.</p></div>
-          <div class="tile"><span class="n">412</span><b>Saved by couples</b><p>Up 38 this week.</p></div></div>
+    case 'shop':{
+      const [t,sub,tiles]=SHOPBODY[S.shopTab]||SHOPBODY.overview;
+      return `<h1 class="pg">${esc(t)}</h1><p class="sub">${esc(sub)} · <b>Studio Azul</b>
+        <span style="color:var(--gold);font-weight:650"> ✓ Verified</span> · setnayan.com/studio-azul</p>
+        <div class="tiles">${tiles.map(([n,b,p])=>`<div class="tile"><span class="n">${esc(n)}</span>
+          <b>${esc(b)}</b><p>${esc(p)}</p></div>`).join('')}</div>
         <div class="tile" style="margin-top:16px"><b>Same rail, different desk.</b>
-          <p style="margin-top:6px">You did not change product to get here. Your events and photos are
-          still one press away, above.</p></div>`;
-    case 'hq':
-      return `<h1 class="pg">Setnayan HQ</h1><p class="sub">Everything that needs admin action right now.</p>
-        <div class="tiles"><div class="tile"><span class="n">0</span><b>Need you</b><p>All actionable queues are clear.</p></div>
-          <div class="tile"><span class="n">0</span><b>Past SLA</b><p>Nothing overdue.</p></div>
-          <div class="tile"><span class="n">2</span><b>Shops</b><p>One live, one hidden.</p></div></div>
+          <p style="margin-top:6px">Your shop's own five are pushed in below your own rows — exactly
+          how an event behaves. You did not change product to get here, and your events and photos
+          are still one press away, above. <b>These five are the ones you already locked</b>; nothing
+          new was invented for this drawing.</p>
+          <div style="margin-top:12px;display:flex;gap:10px">
+            <button class="btn-terra" data-a="noop">Answer the oldest enquiry</button>
+            <button class="btn-out" data-a="go" data-v="front">Out to the public site</button></div></div>`;}
+    case 'hq':{
+      const [t,sub,tiles]=HQBODY[S.hqTab]||HQBODY.overview;
+      return `<h1 class="pg">${esc(t)}</h1><p class="sub">${esc(sub)} · <b>Setnayan HQ</b></p>
+        <div class="tiles">${tiles.map(([n,b,p])=>`<div class="tile"><span class="n">${esc(n)}</span>
+          <b>${esc(b)}</b><p>${esc(p)}</p></div>`).join('')}</div>
         <div class="tile" style="margin-top:16px"><b>The console is a room in the same house.</b>
-          <p style="margin-top:6px">It ships last in the conversion — internal only, zero customer
-          impact — but it wears the same rail when it lands.</p></div>`;
+          <p style="margin-top:6px">Six menus, flat, no menus inside menus — the shape you locked.
+          <b>All surfaces</b> at the bottom stays a link rather than a seventh menu, which is also how
+          it works today. This one ships <b>last</b> in the conversion: nobody outside the team sees
+          it, so it carries no customer risk and can wait.</p></div>`;}
     case 'article':
       return `<button class="crumb" data-a="go" data-v="front">← Back</button>
         <div class="reader"><span class="kind">Article</span>
@@ -501,9 +568,11 @@ function render(){
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-a]'); if(!el)return;
   const a=el.dataset.a,v=el.dataset.v;
-  if(a==='go'){S.view=v;S.ev=null;}
+  if(a==='go'){S.view=v;S.ev=null;if(v==='shop')S.shopTab='overview';if(v==='hq')S.hqTab='overview';}
   else if(a==='openev'){S.ev=v;S.evTab='home';}
   else if(a==='evtab'){S.evTab=v;}
+  else if(a==='shoptab'){S.shopTab=v;}
+  else if(a==='hqtab'){S.hqTab=v;}
   else if(a==='lens'){S.lens=v;}
   else if(a==='folder'){S.view='find';S.ev=null;toast('Filtered to that category — <b>the rail did not move</b>.');}
   else if(a==='tool'){S.view='stories';S.ev=null;toast('A tool doorway opens in the same column.');}
