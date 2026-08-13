@@ -614,6 +614,15 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > ✅ **The migration is verified applied IN PROD BY THE OBJECT** — `person_story_items`'
 > table comment no longer says "counsel-gated" and carries the correction; `consented_at`'s
 > comment records its second job.
+> ✅ **AND PRODUCTION IS SERVING IT** — `/api/health` reports `"version":"a20a48b"`, measured,
+> not inferred from the merge. Fetched `https://www.setnayan.com/u/ana-at-marco` signed-out
+> and READ THE BODY: **no `<section class="uprof-md">` and no heading render** — the block is
+> correctly invisible to a stranger. (The two string matches in that HTML are my own CSS
+> comment + selector, which Next inlines twice; a naive grep reads them as a leak.)
+> ⚠ **THE SIGNED-IN PATH IS NOT SESSION-VERIFIABLE BY ME** — it needs authenticating as a
+> test account, which I do not do. It is covered by the tests (21 unit + 5 seeded db,
+> mutation-proved in both directions), NOT by a live observation. Do not upgrade that to
+> "verified on the live site".
 > Opening somebody's page shows the days you were both there. ⚠ **THE FLAG IS NO LONGER A
 > GATE: the owner set `NEXT_PUBLIC_PERSON_LIFE_STORIES=1` in Vercel on 2026-08-13**, so this
 > ships LIVE on merge, not dark. Safe today by arithmetic, not optimism — prod holds **0**
