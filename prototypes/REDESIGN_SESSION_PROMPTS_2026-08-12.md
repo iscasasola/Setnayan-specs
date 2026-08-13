@@ -27,11 +27,34 @@
 > three values the prose lock never names (secondary `#4F535B`, success `#4F6B4A`, **warning =
 > `#8A6B39` gold-text, not amber**) plus a full obsidian scale.
 >
-> ⏭ **Two things deliberately LEFT, both owner calls rather than repaints:** 192 decorative colour
-> literals (recolouring illustration is the redraw this job forbids), and **every dark block —
-> nothing was deleted.** Several prototypes still carry an OS dark mode the app has not had since
-> 2026-06-04, and `guests_living_roster` ships a **visible light/dark toggle button**; removing a
-> control is a composition change. Each dark half was reconciled to the obsidian scale instead.
+> ### ✅ PASS 2 — 2026-08-13, commit `e0d7ec0`. The dark-mode question is CLOSED, not deferred.
+> 🛑 **DO NOT "JUST RE-RUN" THE MIGRATION SCRIPT. It is NOT idempotent and a second run CORRUPTS
+> the result — measured: 67 slots, including 5 terracotta buttons flipped back to near-black.**
+> Its light/dark choice reads the *current value*, and after run 1 the values have changed, so
+> run 2 classifies them differently. **A transform that decides from data it just rewrote cannot
+> be run twice.**
+>
+> 🚨 **PASS 1 SHIPPED A REGRESSION AND REPORTED ITSELF COMPLETE.** The muted-text rule consulted
+> the token's own value and **never the surface it sits on**, so any mid-tone secondary-text token
+> (e.g. `--ink-faint:#948B78`) was given the OBSIDIAN grey `#B6B9BE` — **1.90:1 on cream,
+> effectively invisible — across 14 files.** Corrected to `#4F535B` (7.47:1) in 36 places.
+> 🔑 **CONTEXT DECIDES A TEXT COLOUR, NEVER THE COLOUR ITSELF.** The mirror case (near-white ink
+> on a light page) was audited too: **none**.
+>
+> **Dark machinery, all 15 files, resolved by kind:** 2 are genuinely dark **SURFACES** (Live
+> Studio, `--void`, no mode) — untouched · 2 draw a **VISIBLE light/dark switch**
+> (`floor_plan_tables_vendors`, `guests_living_roster`) — a drawn control is composition, so both
+> the switch and its dark theme **stay** · **11 flipped to dark purely off the viewer's OS setting
+> with no control at all** — those failed this brief's own done-condition and the light-only lock
+> of 2026-06-04, so **15 `prefers-color-scheme` blocks + 16 `[data-theme="dark"]` rules were
+> removed.**
+> ⚠ **Pass 2 deliberately changed STRUCTURE** (rules deleted), unlike pass 1, so it is guarded
+> differently: every file still **brace-balanced**, **tag counts unchanged everywhere** (no markup
+> touched), light palette intact in each.
+>
+> ⏭ **STILL LEFT, deliberately: 168 decorative colour literals** — the Kasama wine/floral accents,
+> category tints, the control room's deep blacks. **Recolouring illustration is the redraw this
+> job forbids.**
 
 ```
 GOAL: the ~22 older screen prototypes stop carrying a dead palette, so the sessions that port
