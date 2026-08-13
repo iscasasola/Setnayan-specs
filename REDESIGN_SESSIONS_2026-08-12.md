@@ -387,9 +387,10 @@ this doc was wrong about where the words live.**
 
 ---
 
-## Session 5 · One shelf, two authors — ▶ **PR #4402 · run 2026-08-13**
+## Session 5 · One shelf, two authors — ✅ **DONE 2026-08-13 · #4402 + #4406**
 **Followed Session 2 and Session 3.**
-⚠ **Verify before trusting this row:** `gh pr view 4402 --json state,mergedAt`.
+✅ **Both MERGED and verified IN `origin/main` by the ref** (`git merge-base --is-ancestor`),
+not by the PR status. ⚠ Re-verify before trusting this row: `gh pr view 4402 4406`.
 
 **What a person gets:** one place to read, whoever wrote it.
 
@@ -435,10 +436,39 @@ this doc was wrong about where the words live.**
   carries a council verdict (2026-07-16) that the two voices stay in two labelled sections —
   *"the non-negotiable lock"*. Reversing it is owner/council territory, not a build call. The
   hub already carries both kinds via its articles rail; only the FRONT DOOR is one shelf.
-- ⏭ **FLAGGED, NOT BUILT:** the story card renders the literal words `THEIR STORY` as its
-  thumbnail — the same placeholder-word defect #4400 just fixed for SHOP cards, on the
-  sibling card, while the chapter's poster exists and is simply not carried through.
-  **When you fix a card-shaped bug, sweep every card on that shelf.**
+- ✅ **AND THE SWEEP IS DONE TOO — #4406, merged.** ~~Flagged, not built:~~ the story card
+  rendered the literal words `THEIR STORY` as its thumbnail — the same placeholder-word defect
+  #4400 had just fixed for SHOP cards, **on the sibling card on the same shelf** — and the 9:16
+  card in the story row rendered an empty gradient box beside article cards that all carry a
+  cover, which reads as an image that failed to load rather than a story told in writing.
+  🔑 **WHEN YOU FIX A CARD-SHAPED BUG, SWEEP EVERY CARD ON THAT SHELF.** #4400's guard asserted
+  the absent word **inside `ShopCard` only**. Same shape as the soft-404 fixed on the bare-root
+  vendor route and left on its `/v/` twin.
+  **The data was already there** — the loader has always had the poster and the opening line;
+  the front door never carried them. **Ported the two grammars from the shipped
+  `StorytellerTile`**, not invented: poster when there is one, opening line as a typographic
+  hero when there is not, chapter kind as the terminal fallback.
+  📐 **The binding spec settles it as a PORT, not a design call:** `FRONT_DOOR_AND_SEAM_FINAL`
+  §② — *"A card has no border and no shadow. **The thumbnail IS the object.**"* A card whose
+  thumbnail is a word has no object.
+  🪤 **A PLAIN `<img>`, NEVER `next/image` — and the reason is load-bearing.** The poster is an
+  `i.ytimg.com` URL and **that host is NOT in `remoteImagePatterns`**, so the optimizer answers
+  **400** and the picture silently never appears — exactly how the R2 remotePattern shipped
+  broken app-wide. **Three gates, measured, and they disagree:** the ENFORCED CSP carries **no
+  `img-src` at all** (read off the live headers), the report-only policy already lists the host,
+  and the optimizer allowlist does not. Guarded in both directions.
+  ⚠ **A scoped grep nearly produced a false claim** — I was about to write *"ytimg is absent
+  from the config"* from a range-limited search; `grep -c` over the whole file returned **1**
+  and sent me to the CSP line. **A scoped search that misses a hit is not a negative result.**
+  🛡 6 sabotages, 6 caught, probe counts printed before → after.
+- 🪤 **THE STACKED-PR RULE WAS FOLLOWED AND IT WORKED — record what actually happened.** #4406
+  was stacked on #4402's branch (all three files overlap) with **auto-merge armed on the BASE
+  ONLY**, per the standing rule. The child merged INTO the base at 04:48Z, the base merged to
+  main at 05:08Z, and **#4402's final green CI ran on a head containing both** (verified:
+  `1f1bfffe9` has the child's commit as an ancestor). ⚠ **GitHub auto-CLOSED #4406 the moment
+  its base branch went away**, and `gh pr edit --base main` then refuses with *"Cannot change
+  the base branch of a closed pull request"* — that error is alarming and is **not** a problem:
+  check whether the commits are ancestors of `origin/main` before reacting to it. Both were.
 
 ---
 
@@ -674,7 +704,7 @@ above for what shipped and what is deliberately still open.**
 ⏭ **What is actually next — rewritten 2026-08-13.** **DONE: 1 · 2 · 3 · 4 · 6 · 8.**
 **Session 4 is MERGED and its flag is ON** — `/` is the new front door on the live site; the
 words *"is still held"* stood in this very sentence next to the ✅ that contradicted them.
-**Session 5 is in review (#4402).** ⏭ **Left: 7 · 9 · 10.**
+**Session 5 is DONE (#4402 + #4406, both in `origin/main`).** ⏭ **Left: 7 · 9 · 10.**
 ⚠ **7 must rebase first** — it edits `dashboard/(launcher)/page.tsx`, which 8 rewrote.
 **9** waits on counsel. **10** is the long tail.
 
@@ -699,7 +729,7 @@ edit every row that asserts it is open, in the same commit.**
 | 8 · Alaala as memories | **#4395** + **#4397** | ✅ both **MERGED** (18:10Z · 18:59Z) · `/api/health` reports the merge SHA |
 | 4 · the front door | **#4396** (#4394 CLOSED, superseded) | ✅ **MERGED** 19:16Z — **and the flag is ON: `/` is the new front door**, measured on the deployed page (`fd-chipbar` · `fd-storyrow` · 24× `fd-kindtag`, zero `HomeReskin` markers). ⚠ `HomeReskin` is still IMPORTED as the dark branch, so *"retired completely"* is not yet true in code. |
 | 6 · the seam | — | ✅ **DONE 2026-08-13** (see its entry) |
-| 5 · one shelf | **#4402** | ▶ **OPEN at 2026-08-13 04:2xZ** — the merge itself already shipped in #4396; this is 4 defects in it + the tracking fix. **Re-check with `gh pr view 4402`.** |
+| 5 · one shelf | **#4402** + **#4406** | ✅ both **MERGED** (04:48Z into the base, 05:08Z to main) — the merge itself already shipped in #4396; these are 4 defects in it, the tracking fix, and the story-card sweep. **Verified IN `origin/main` by the ref, not the PR status.** |
 
 ⚠ **This block has been wrong in BOTH directions within one hour.** At 15:40Z I wrote that #4387
 was open — it merged seven minutes later. By 15:58Z the entry above for Session 3 had been marked
