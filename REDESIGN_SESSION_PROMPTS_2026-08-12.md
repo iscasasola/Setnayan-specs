@@ -415,7 +415,16 @@ a list of events.
 # SESSION 9 · Mutual stories  🔒 COUNSEL-GATED
 
 ```
-🔒 BUILD BEHIND THE FLAG. DO NOT FLIP IT. Same gate as
+▶ BUILD UNBLOCKED 2026-08-13 — owner: "allow it. unblock it." Build it FULLY, now.
+🔴 STILL DO NOT FLIP THE PROD FLAG. That is the owner's to set in Vercel, and it inlines at
+build time so it needs a cache-free rebuild. Note the module's own wording: inert until PH
+counsel signs off AND the owner sets it — TWO conditions. The owner is also the DPO, so he
+may rule himself; record which of those actually happened, never "counsel cleared" if it was
+the DPO's own call.
+📉 Flipping today would expose NOTHING: 0 person_story_items, 0 consented, 0 guest rows
+linked to a person, 14 Papic photos all on the owner's own event. Cheapest moment to watch
+it — and proof of nothing about real-guest behaviour.
+🔒 Same gate as
 NEXT_PUBLIC_PERSON_LIFE_STORIES (cross-event participant media). The People connections layer
 is deliberately switched OFF in production and the live page says "coming soon" — that is
 correct and must stay until counsel clears.

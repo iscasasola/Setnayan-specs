@@ -735,8 +735,34 @@ not by the PR status. ⚠ Re-verify before trusting this row: `gh pr view 4402 4
 
 ---
 
-## Session 9 · Mutual stories
-**🔒 Counsel-gated. Build behind the flag; do not flip it.**
+## Session 9 · Mutual stories — ▶ **BUILD UNBLOCKED 2026-08-13. THE FLAG IS STILL THE OWNER'S TO SET.**
+
+**Owner: _"allow it. unblock it."_** So **build it now, fully, behind the flag.** What was holding
+the build was the gate; that hold is lifted.
+
+🔴 **THE PRODUCTION FLIP IS NOT DONE AND MUST NOT BE DONE BY A SESSION.** Standing rule: never
+auto-flip a prod flag. `NEXT_PUBLIC_PERSON_LIFE_STORIES=1` is set by the owner in Vercel, and it
+inlines at BUILD time — it changes nothing until a cache-free rebuild.
+
+⚖ **ONE DISTINCTION THAT MUST BE RECORDED HONESTLY.** The module's own docblock says the flow stays
+inert *"until PH counsel signs off **and** the owner sets `NEXT_PUBLIC_PERSON_LIFE_STORIES=1`"* —
+**two conditions, not one.** The owner is also the registered DPO, so he can rule on this himself;
+but a DPO's own decision and **external PH counsel having reviewed it** are different facts, and a
+future reader will treat "counsel cleared" as something it was not. **Record whichever actually
+happened.**
+
+📉 **WHAT FLIPPING IT WOULD EXPOSE TODAY: nothing.** Measured 2026-08-13 — `person_story_items`
+**0 rows**, consented items **0**, guest rows linked to a person **0**, Papic photos **14** (all on
+the owner's own event), public profiles **1**. There is no cross-event participant media in
+existence yet. **That makes now the cheapest possible moment to turn it on and watch it** — and it
+also means turning it on proves nothing about how it behaves with real guests.
+
+🔒 **THE CONSTRAINTS THE MODULE ALREADY ENCODES — do not relax any of them without the owner:**
+assembled from **tags + QR + confirmed identity ONLY, never cross-event face recognition** (the
+origin type has no face value by construction) · **references, not copies** · a participant can
+**hide** any item from their own story without touching the host's gallery · opt-out / face-blur
+**removes** them via a tombstone · editorials propagate only on host publish **and** the
+consented-guest gate · **adults-first**.
 
 **What a person gets:** opening a friend's page shows the days you were both there.
 
