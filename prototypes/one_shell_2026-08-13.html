@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setnayan — one shell · 13 August 2026</title>
+<style>
+/* ─────────────────────────────────────────────────────────────────────────
+   ONE SHELL. The rail never leaves. Every destination — the board, an event,
+   Guests, Marketplace, Studio, Alaala, Your Story, the shop desk, HQ, an
+   article, a supplier — renders in the content column beside it.
+
+   Chrome = the front door's look (cream, ink, gold accents, system face).
+   Content = the app's rule (terracotta is the only action colour, gold is
+   never a button). The boundary is the content column, not a route.
+   ───────────────────────────────────────────────────────────────────────── */
+:root{
+  --cream:#FDFBF7; --ink:#2C2A29; --gold:#8C6932; --acc:#8A6B39; --terra:#C24E25;
+  --terra-h:#B04722; --link:#3B4E67; --m1:#6E6A62; --m2:#8A857B; --m3:#A09A8E;
+  --line:#E1DCD1; --wash:#F3ECDF; --hover:#F4EEE3;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sys: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --rail:240px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#EFEAE0;color:var(--ink);font-family:var(--sys);
+  -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.5}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-align:left}
+a{color:inherit;text-decoration:none}
+
+/* ── scaffolding ────────────────────────────────────────────────────────── */
+.scaffold{position:sticky;top:0;z-index:90;background:#211F1D;color:#EFE9DD;padding:10px 16px;
+  display:flex;gap:20px;align-items:center;flex-wrap:wrap;box-shadow:0 10px 30px -18px rgba(0,0,0,.8)}
+.scaffold .tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9A9186;
+  border:1px solid #4A443C;border-radius:4px;padding:3px 7px}
+.sg{display:flex;align-items:center;gap:8px}
+.sg>span{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#9A9186}
+.seg{display:flex;border:1px solid #4A443C;border-radius:8px;overflow:hidden}
+.seg button{padding:6px 11px;font-size:12px;color:#C9C1B5;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--acc);color:#221F1B;font-weight:650}
+.hint{margin-left:auto;font-size:12px;color:#9A9186}
+
+.wrap{max-width:1500px;margin:0 auto;padding:24px 20px 80px}
+.note{border-left:2px solid var(--acc);padding:2px 0 2px 12px;margin:14px 0;color:var(--m1);
+  font-size:13px;max-width:84ch}
+.note b{color:var(--ink)}
+.note.try{border-left-color:var(--terra);background:#FDF7F3;border-radius:0 8px 8px 0;padding:11px 14px}
+h2.ch{font-size:23px;margin:34px 0 6px;letter-spacing:-.015em}
+.cap{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--m2);margin:0 0 8px;font-weight:650}
+
+/* ── the shell ──────────────────────────────────────────────────────────── */
+.device{background:var(--cream);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(44,42,41,.05),0 20px 50px -34px rgba(44,42,41,.4)}
+.device.desk{max-width:1420px}
+.device.narrow{max-width:1100px}
+.device.phone{width:390px;position:relative}
+
+.topbar{display:grid;grid-template-columns:1fr minmax(0,600px) 1fr;align-items:center;gap:16px;
+  padding:8px 16px;border-bottom:1px solid var(--line);background:var(--cream);position:relative;z-index:12}
+.tb-l{display:flex;align-items:center;gap:12px}
+.ibtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:16px}
+.ibtn:hover{background:var(--hover)}
+.wm{font-weight:800;letter-spacing:.15em;font-size:15px;position:relative;padding-right:14px}
+.wm sup{font-size:8px;font-weight:600;color:var(--m2);position:absolute;top:-2px;right:0}
+.sbox{display:flex;align-items:center;border:1px solid var(--line);border-radius:999px;overflow:hidden;
+  background:#fff;height:40px}
+.sbox input{border:0;outline:0;flex:1;background:transparent;font:inherit;font-size:14px;padding:0 16px}
+.sgo{width:56px;align-self:stretch;display:grid;place-items:center;background:#F6F1E7;
+  border-left:1px solid var(--line);color:var(--m1)}
+.tb-r{display:flex;align-items:center;justify-content:flex-end;gap:8px;position:relative}
+/* THE ONE GOLD BUTTON IN THE CHROME — the owner call, drawn as recommended */
+.btn-gold{min-height:36px;padding:0 14px;border-radius:999px;background:var(--gold);color:var(--cream);
+  display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:650}
+.btn-quiet{min-height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--line);
+  display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:650;color:var(--link)}
+.ava{width:32px;height:32px;border-radius:50%;background:var(--wash);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--gold);font-family:var(--mono)}
+.evchip{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;
+  white-space:nowrap}
+
+.body{display:grid;grid-template-columns:var(--rail) 1fr}
+.rail{border-right:1px solid var(--line);padding:10px 8px 26px;height:700px;overflow:auto}
+.rail::-webkit-scrollbar{width:8px}.rail::-webkit-scrollbar-thumb{background:#E6DFD2;border-radius:8px}
+.main{height:700px;overflow:auto;padding:22px 26px 40px}
+.main::-webkit-scrollbar{width:10px}.main::-webkit-scrollbar-thumb{background:#E6DFD2;border-radius:8px}
+
+.row{display:flex;align-items:center;gap:14px;min-height:42px;padding:0 12px;border-radius:10px;
+  font-size:14px;position:relative;width:100%}
+.row:hover{background:var(--hover)}
+.row .ct{margin-left:auto;font-size:11.5px;color:var(--m3)}
+/* ACTIVE ROW — the thing the shipped rail cannot do: Home is hardcoded on. */
+.row[data-on=true]{background:var(--wash);font-weight:650}
+.row[data-on=true]::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;
+  border-radius:0 3px 3px 0;background:var(--acc)}
+.gi{width:20px;flex:0 0 20px;text-align:center;color:var(--m1);font-size:15px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--acc);flex:0 0 6px;margin:0 7px}
+.rdiv{height:1px;background:var(--line);margin:11px 12px}
+.rlab{font-size:14.5px;font-weight:650;padding:8px 12px 4px;display:flex;align-items:center;gap:6px}
+.rlab small{font-size:11px;color:var(--m3);font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.rlab.ctx{color:var(--terra)}
+.notice{padding:8px 12px 10px;font-size:12.5px;color:var(--m1);line-height:1.45}
+.notice b{display:flex;align-items:center;gap:7px;color:var(--ink);font-size:14px;font-weight:500;margin-bottom:3px}
+.soon{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid #E3D6BE;
+  background:#FBF5E9;border-radius:4px;padding:2px 5px;font-weight:700}
+.signin{padding:12px 12px 4px}
+.signin p{margin:0 0 12px;font-size:13.5px;color:var(--m1);line-height:1.45}
+.small{padding:14px 12px 0;font-size:12px;color:var(--m2);line-height:1.75}
+.small span{margin-right:9px;display:inline-block;cursor:pointer}
+.small .cp{color:var(--m3);margin-top:12px;font-size:11.5px}
+
+/* 72px icon strip */
+.device.narrow{--rail:72px}
+.device.narrow .rail .row{flex-direction:column;gap:2px;min-height:52px;padding:6px 0}
+.device.narrow .rail .row .gi{font-size:17px}
+.device.narrow .rail .ct,.device.narrow .rlab,.device.narrow .notice,
+.device.narrow .signin p,.device.narrow .small{display:none}
+.device.narrow .cap72{display:block;font-size:9.5px;color:var(--m2);line-height:1.1;text-align:center;
+  max-width:64px;overflow:hidden}
+.cap72{display:none}
+.device.narrow .signin{padding:8px 6px}
+.device.narrow .grid{grid-template-columns:repeat(3,1fr)}
+
+/* ── content ────────────────────────────────────────────────────────────── */
+h1.pg{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
+p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--cream)}
+.tile>b{display:block;font-size:14.5px;margin-bottom:3px}
+.tile p{margin:0;font-size:12.5px;color:var(--m2);line-height:1.45}
+.tile p b{font-weight:650;color:var(--ink)}
+.tile .n{font-family:var(--mono);font-size:24px;color:var(--terra);display:block;margin-bottom:2px}
+/* CONTENT ACTIONS ARE TERRACOTTA — never gold. The chrome above is gold. */
+.btn-terra{min-height:40px;padding:0 15px;border-radius:999px;background:var(--terra);color:var(--cream);
+  display:inline-flex;align-items:center;font-size:13.5px;font-weight:650}
+.btn-terra:hover{background:var(--terra-h)}
+.btn-out{min-height:40px;padding:0 15px;border-radius:999px;border:1px solid var(--line);
+  display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:650}
+.btn-out:hover{background:var(--hover)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.item{min-width:0}
+.thumb{aspect-ratio:16/9;border-radius:12px;background:linear-gradient(135deg,#E7DECD,#D8CDB9);
+  display:grid;place-items:center;color:#B0A48A;font-size:10.5px;letter-spacing:.14em;position:relative}
+.thumb .dur{position:absolute;right:6px;bottom:6px;background:rgba(30,28,26,.85);color:#F5F1E8;
+  border-radius:4px;padding:1px 5px;font-size:11.5px;font-family:var(--mono)}
+.imeta{display:flex;gap:12px;padding-top:11px}
+.iav{width:36px;height:36px;border-radius:50%;flex:0 0 36px;background:var(--wash);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--gold);font-family:var(--mono)}
+.ttl{font-size:14px;font-weight:500;line-height:1.4;margin:0 0 4px;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.by{font-size:12px;color:var(--m2);margin:0;line-height:1.45}
+.kind{display:inline-block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+  color:var(--gold);border:1px solid #E3D6BE;background:#FBF5E9;border-radius:4px;padding:1px 5px;margin-right:5px}
+.sech{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
+.sech h3{font-size:18px;margin:0;letter-spacing:-.01em}
+.sech .meta{font-size:13px;color:var(--m2)}
+.sech .rule{margin-left:auto;font-size:11.5px;color:var(--m3)}
+.evgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.evcard{border:1px solid var(--line);border-radius:14px;background:var(--cream);padding:16px;
+  display:flex;flex-direction:column;gap:10px;width:100%}
+.evcard:hover{border-color:var(--terra);box-shadow:0 10px 26px -18px rgba(194,78,37,.5)}
+.evtop{display:flex;align-items:center;gap:12px}
+.evmono{width:44px;height:44px;flex:0 0 44px;border-radius:12px;background:var(--wash);
+  border:1px solid var(--line);display:grid;place-items:center;font-family:var(--mono);font-size:13px;
+  font-weight:700;color:var(--gold)}
+.evn{flex:1;min-width:0}.evn b{display:block;font-size:16px;letter-spacing:-.01em}
+.evn span{font-size:12.5px;color:var(--m2)}
+.evwhen{display:flex;gap:10px;font-size:13px;color:var(--m1);flex-wrap:wrap}
+.evdays{color:var(--terra);font-weight:650;font-size:12px}
+.evneed{font-size:12.5px;color:var(--m1);border-top:1px solid var(--line);padding-top:9px}
+.evnew{border-style:dashed;background:#FCF8F1;justify-content:center;gap:4px}
+.evnew .plus{font-size:24px;color:var(--terra);line-height:1}
+.photos{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.photos span{aspect-ratio:1;border-radius:8px;background:linear-gradient(140deg,#E5DBC8,#D3C7B1)}
+.lens{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.chip{min-height:32px;padding:0 12px;border-radius:8px;background:#F2ECE0;display:inline-flex;
+  align-items:center;font-size:13.5px}
+.chip[data-on=true]{background:var(--ink);color:var(--cream)}
+.flash{display:flex;gap:20px;align-items:center;background:#211F1D;border-radius:16px;padding:20px 22px;
+  margin:0 0 20px;color:#F1ECE2;flex-wrap:wrap}
+.flash b{display:block;font-size:21px;margin:6px 0 7px;color:#FBF7EF;letter-spacing:-.015em}
+.flash p{margin:0 0 13px;font-size:13.5px;color:#B9B1A5;max-width:52ch;line-height:1.55}
+.flash .kick{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#E4C98F;font-weight:700}
+.play{min-height:42px;padding:0 18px;border-radius:999px;background:#E4C98F;color:#221F1B;font-size:14px;
+  font-weight:700;display:inline-flex;align-items:center;gap:8px}
+.crumb{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-radius:999px;
+  border:1px solid var(--line);font-size:13px;font-weight:600;margin-bottom:14px}
+.crumb:hover{background:var(--hover)}
+.reader{max-width:680px}
+.reader h1{font-size:30px;line-height:1.2;letter-spacing:-.02em;margin:6px 0 8px}
+.reader p{font-size:15.5px;line-height:1.65;color:#3B3835;margin:0 0 14px}
+.hero{aspect-ratio:16/8;border-radius:12px;background:linear-gradient(135deg,#E7DECD,#D8CDB9);
+  display:grid;place-items:center;color:#B0A48A;font-size:11px;letter-spacing:.14em;margin:14px 0 20px}
+.pillnav{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:5px;align-items:center;
+  border:1px solid rgba(44,42,41,.14);border-radius:16px;background:rgba(255,255,255,.92);
+  backdrop-filter:blur(20px);padding:6px;box-shadow:0 24px 50px -24px rgba(30,26,18,.55);z-index:20}
+.pillnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;
+  font-weight:650;color:var(--m1);padding:6px 0;border-radius:11px;min-height:44px;justify-content:center}
+.pillnav button[data-on=true]{color:var(--ink)}
+.pillnav .knob{flex:0 0 auto;background:var(--ink);color:#fff;border-radius:11px;padding:10px 16px;min-height:44px}
+.ph-main{height:640px;overflow:auto;padding:16px 14px 80px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#211F1D;color:#F3EEE4;
+  padding:11px 17px;border-radius:999px;font-size:13px;z-index:80;box-shadow:0 20px 40px -20px rgba(0,0,0,.7)}
+.toast b{color:#E4C98F}
+@media(max-width:1240px){.grid{grid-template-columns:repeat(3,1fr)}.tiles{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="scaffold">
+  <span class="tag">prototype · one shell</span>
+  <div class="sg"><span>Width</span><div class="seg" id="segW">
+    <button data-v="desk" aria-pressed="true">Desktop</button>
+    <button data-v="narrow" aria-pressed="false">Narrow (72px rail)</button>
+    <button data-v="phone" aria-pressed="false">Phone</button></div></div>
+  <div class="sg"><span>You</span><div class="seg" id="segU">
+    <button data-v="out" aria-pressed="false">Signed out</button>
+    <button data-v="couple" aria-pressed="true">Couple</button>
+    <button data-v="all" aria-pressed="false">Couple + shop + admin</button></div></div>
+  <span class="hint">The rail never leaves. Click anything.</span>
+</div>
+
+<div class="wrap">
+  <h2 class="ch">One shell — the whole product beside one rail</h2>
+  <div class="note try"><b>Walk it.</b> Press <b>Events</b> → open <b>Cale &amp; Ice</b> → the rail
+  <b>pushes</b> an "In this event" group and your own rows <b>stay</b>. Then <b>Guests</b>,
+  <b>Marketplace</b>, <b>Studio</b>, <b>Budget</b> — the rail never moves and the active row follows
+  you. Press <b>Home</b> to land back on the public front door, still signed in.</div>
+  <div class="note"><b>Two things this proves that the shipped code cannot do yet.</b>
+  ① <b>The active row follows you</b> — today "Home" is nailed on, so all 296 pages would light Home.
+  ② <b>The chrome never changes</b>: one rail, one top bar, one gold <b>+ Create</b> — while every
+  action <em>inside</em> the content stays terracotta. That boundary is the content column, not a route.</div>
+
+  <p class="cap" id="cap">Desktop · signed in</p>
+  <div id="stage"></div>
+</div>
+
+<script>
+(function(){
+const S={w:'desk',u:'couple',view:'front',ev:null,evTab:'home',lens:'recent',toast:null,menu:false};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const inn=()=>S.u!=='out';
+const isAll=()=>S.u==='all';
+let tt;
+function toast(h){S.toast=h;clearTimeout(tt);tt=setTimeout(()=>{S.toast=null;render();},3800);}
+
+const EVENTS=[
+ {id:'e1',n:'Cale & Ice',m:'C&I',e:'💍',d:'18 Dec 2026',days:128,pl:'Tagaytay',role:'You organise',
+  pc:62,need:'2 suppliers are waiting on you'},
+ {id:'e2',n:'Tita Baby turns 60',m:'TB',e:'🥂',d:'2 Feb 2027',days:174,pl:'Cavite',role:'You were invited',
+  pc:null,need:'RSVP still open'},
+ {id:'e3',n:'Baguio, sometime',m:'BG',e:'✈️',d:'Date to be set',days:null,pl:'Baguio',role:'You organise',
+  pc:5,need:'Pick a date and the countdown starts'}];
+const ARTS=[
+ {id:'a1',t:'What a Filipino wedding actually costs in 2026',min:9,cat:'Money'},
+ {id:'a2',t:'What a wedding photographer actually costs in Metro Manila',min:7,cat:'Suppliers'},
+ {id:'a3',t:'Church papers, in the order you actually need them',min:8,cat:'Planning'},
+ {id:'a4',t:'How to seat 200 people without starting a family war',min:6,cat:'Guests'}];
+const FOLDERS=[['venue','⛪','Venues & churches',28],['feast','✦','Catering & cake',7],
+ ['documentary','◉','Photo & video',12],['look','❉','Attire, hair & make-up',54],
+ ['program','♪','Hosts, music & program',20]];
+const TOOLS=[['setnayan-ai','Setnayan AI'],['pawebsite','Pawebsite'],['papic','Papic'],
+ ['panood','Live Studio'],['patiktok','Patiktok'],['pa3d','Pa3D'],['palogo','Palogo']];
+const EVTABS=[['home','▦','Overview'],['guests','◍','Guests'],['market','⌕','Marketplace'],
+ ['studio','✦','Studio'],['launch','◉','Launch']];
+const ALSO=[['schedule','◷','Schedule'],['seat','▢','Seat plan'],['budget','₱','Budget']];
+
+/* ══ RAIL — one rail. It PUSHES a group inside an event; account rows stay. ══ */
+function rail(){
+  const on=v=>S.view===v&&!S.ev?'true':'false';
+  let h='';
+  h+=`<button class="row" data-a="go" data-v="front" data-on="${on('front')}"><span class="gi">⌂</span>
+    <span class="lb">Home</span><span class="cap72">Home</span></button>`;
+  h+=`<button class="row" data-a="go" data-v="stories" data-on="${on('stories')}"><span class="gi">◎</span>
+    <span class="lb">Stories</span><span class="cap72">Stories</span></button>`;
+  if(inn())h+=`<button class="row" data-a="go" data-v="find" data-on="${on('find')}"><span class="gi">⌕</span>
+    <span class="lb">Find a supplier</span><span class="cap72">Find</span></button>`;
+  h+='<div class="rdiv"></div>';
+
+  if(!inn()){
+    h+=`<div class="signin"><p>Sign in to save suppliers, plan your event, and keep your photos.</p>
+      <button class="btn-quiet" data-a="signin">◍ Sign in</button></div>
+      <button class="row" data-a="go" data-v="alaala-intro"><span class="gi">✧</span>
+      <span class="lb">What is Alaala?</span><span class="cap72">Alaala</span></button>`;
+  }else{
+    h+=`<div class="rlab">My Home</div>
+      <button class="row" data-a="go" data-v="board" data-on="${on('board')}"><span class="gi">▦</span>
+        <span class="lb">${S.ev?'All your events':'Your events'}</span><span class="cap72">Events</span>
+        <span class="ct mono">3</span></button>
+      <button class="row" data-a="go" data-v="alaala" data-on="${on('alaala')}"><span class="gi">✧</span>
+        <span class="lb">Alaala</span><span class="cap72">Alaala</span><span class="ct mono">560</span></button>
+      <button class="row" data-a="go" data-v="story" data-on="${on('story')}"><span class="gi">✎</span>
+        <span class="lb">Your Story</span><span class="cap72">Story</span><span class="ct mono">1</span></button>
+      <div class="notice"><b>People <span class="soon">coming soon</span></b>Family, godparents and
+        friends together. Waiting on a legal review.</div>`;
+    if(isAll()){
+      h+=`<div class="rdiv"></div><div class="rlab">What you run</div>
+        <button class="row" data-a="go" data-v="shop" data-on="${on('shop')}"><span class="gi">▣</span>
+          <span class="lb">Studio Azul</span><span class="cap72">Shop</span><span class="ct">your shop</span></button>
+        <button class="row" data-a="go" data-v="hq" data-on="${on('hq')}"><span class="gi">⛨</span>
+          <span class="lb">Setnayan HQ</span><span class="cap72">HQ</span><span class="ct">admin</span></button>`;
+    }
+  }
+
+  /* ── the context group. It PUSHES; nothing above it is removed. ── */
+  if(S.ev){
+    const e=EVENTS.find(x=>x.id===S.ev);
+    h+=`<div class="rdiv"></div><div class="rlab ctx">In this event <small>${esc(e.n)}</small></div>`;
+    EVTABS.forEach(([k,ic,l])=>{
+      h+=`<button class="row" data-a="evtab" data-v="${k}" data-on="${S.evTab===k}">
+        <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l}</span>
+        ${k==='guests'?'<span class="ct mono">86</span>':''}</button>`;});
+    h+='<div class="rlab" style="font-size:11.5px;color:var(--m2);text-transform:uppercase;letter-spacing:.07em">Also in this event</div>';
+    ALSO.forEach(([k,ic,l])=>{
+      h+=`<button class="row" data-a="evtab" data-v="${k}" data-on="${S.evTab===k}">
+        <span class="gi">${ic}</span><span class="lb">${l}</span><span class="cap72">${l}</span></button>`;});
+  }else if(inn()){
+    /* Marketplace + Studio are FRONT-PAGE furniture — they collapse away inside an event. */
+    h+='<div class="rdiv"></div><div class="rlab">Marketplace</div>';
+    FOLDERS.forEach(([k,ic,l,n])=>{h+=`<button class="row" data-a="folder" data-v="${k}">
+      <span class="gi">${ic}</span><span class="lb">${esc(l)}</span><span class="cap72">${esc(l.split(/[ ,&]/)[0])}</span>
+      <span class="ct mono">${n}</span></button>`;});
+    h+='<div class="rdiv"></div><div class="rlab">Studio <small>the things you make</small></div>';
+    TOOLS.forEach(([k,l])=>{h+=`<button class="row" data-a="tool" data-v="${k}"><span class="dot"></span>
+      <span class="lb">${l}</span><span class="cap72">${l.split(' ')[0]}</span></button>`;});
+  }
+  h+=`<div class="rdiv"></div><div class="small"><span>About</span><span>Pricing</span><span>Help</span>
+    <span>Open your shop</span><br><span>Terms</span><span>Privacy</span>
+    <div class="cp">© 2026 Setnayan</div></div>`;
+  return h;
+}
+
+/* ══ CONTENT ════════════════════════════════════════════════════════════ */
+function artCard(a){return `<div class="item" data-a="go" data-v="article">
+  <div class="thumb">ARTICLE<span class="dur">${a.min} min</span></div>
+  <div class="imeta"><span class="iav">SN</span><div><p class="ttl">${esc(a.t)}</p>
+  <p class="by"><span class="kind">Article</span>Setnayan ✓</p>
+  <p class="by">${esc(a.cat)}</p></div></div></div>`;}
+
+function evCard(e){return `<button class="evcard" data-a="openev" data-v="${e.id}">
+  <div class="evtop"><span class="evmono">${esc(e.m)}</span><div class="evn"><b>${esc(e.n)}</b>
+    <span>${e.e} ${esc(e.role)}</span></div>
+    ${e.pc!==null?`<span class="mono" style="font-size:12px;color:var(--gold)">${e.pc}%</span>`:''}</div>
+  <div class="evwhen"><span>${esc(e.d)}</span>${e.days!==null?`<span class="mono evdays">${e.days} days away</span>`:''}
+    <span style="color:var(--m3)">${esc(e.pl)}</span></div>
+  <div class="evneed">${esc(e.need)}</div></button>`;}
+
+const EVBODY={
+ home:['Overview','Where this event stands.',[['62%','Ready','2 suppliers waiting on you'],
+   ['86','Guests','52 have said yes'],['128','Days','until 18 December']]],
+ guests:['Guests','Who is coming, where they sit, what they said.',
+   [['86','Invited','Across 14 households'],['52','Said yes','8 still deciding'],['12','Tables','Two seats spare']]],
+ market:['Marketplace','The same suppliers as the public site — but this one knows your date.',
+   [['4','Booked','Locked in for 18 Dec'],['11','Shortlisted','Saved while you decide'],['2','Waiting on you','They replied']]],
+ studio:['Studio','The things you make for this event.',
+   [['4','In use','Papic · Website · Monogram · Live Studio'],['3','Not started','Free to try'],['1','Waiting','Your song is being written']]],
+ launch:['Launch','Going live on the day.',[['—','Not yet','The day-of screen opens on 18 Dec'],
+   ['1','Camera','Ready to stream'],['0','Rehearsals','Try one first']]],
+ schedule:['Schedule','The order of the day, and who needs to know it.',
+   [['9','Moments','Ceremony to last dance'],['4','Suppliers','Have the call times'],['0','Clashes','Nothing overlaps']]],
+ seat:['Seat plan','Tables, the stage, and who sits where.',
+   [['12','Tables','Round, long and the sweetheart'],['52','Seated','Of 52 who said yes'],['0','Unseated','Everyone has a chair']]],
+ budget:['Budget','What you agreed, what you have paid, what is left.',
+   [['4','Agreed','Across four suppliers'],['3','Paid','One deposit outstanding'],['2','Due soon','Both within a month']]]};
+
+function content(){
+  if(S.ev){
+    const e=EVENTS.find(x=>x.id===S.ev);
+    const [t,sub,tiles]=EVBODY[S.evTab]||EVBODY.home;
+    return `<button class="crumb" data-a="go" data-v="board">← All your events</button>
+      <h1 class="pg">${esc(t)}</h1><p class="sub">${esc(sub)} · <b>${esc(e.n)}</b></p>
+      <div class="tiles">${tiles.map(([n,b,p])=>`<div class="tile"><span class="n">${esc(n)}</span>
+        <b>${esc(b)}</b><p>${esc(p)}</p></div>`).join('')}</div>
+      <div class="tile" style="margin-top:16px"><b>The rail did not move.</b>
+        <p style="margin-top:6px">Your own rows are still above — <b>Your events</b>, <b>Alaala</b>,
+        <b>Your Story</b>. The event's own list was <b>pushed in below them</b>, so "which event am I
+        in" and "how do I get out" are both answered without leaving the page.</p>
+        <div style="margin-top:12px;display:flex;gap:10px"><button class="btn-terra" data-a="go" data-v="board">Back to your events</button>
+        <button class="btn-out" data-a="go" data-v="front">Out to the public site</button></div></div>`;
+  }
+  switch(S.view){
+    case 'board':{
+      const live=EVENTS,done=2;
+      return `<h1 class="pg">Your events</h1><p class="sub"><span class="mono">${live.length}</span> coming up ·
+        <span class="mono">${done}</span> finished</p>
+        <div class="sech"><h3>Coming up</h3><span class="rule">soonest first · undated at the end</span></div>
+        <div class="evgrid">${live.map(evCard).join('')}
+          <button class="evcard evnew" data-a="noop"><span class="plus">＋</span><b>New event</b>
+          <span style="font-size:12.5px;color:var(--m1)">A wedding, a debut, a trip.</span></button></div>
+        <div class="sech" style="margin-top:26px"><h3>Finished</h3><span class="rule">nothing is deleted</span></div>
+        <div class="evgrid"><button class="evcard" data-a="noop"><div class="evtop"><span class="evmono">A&M</span>
+          <div class="evn"><b>Ana &amp; Miguel</b><span>💍 You were invited</span></div></div>
+          <div class="evneed">412 photos of you</div></button>
+          <button class="evcard" data-a="noop"><div class="evtop"><span class="evmono">BM</span>
+          <div class="evn"><b>Baby Mateo</b><span>🕯️ You organised</span></div></div>
+          <div class="evneed">Kept for life</div></button></div>`;}
+    case 'alaala':
+      return `<h1 class="pg">Alaala</h1><p class="sub">Your memories, not your calendar.</p>
+        <div class="flash"><div style="flex:1;min-width:250px"><span class="kick">Life-Flash</span>
+          <b>Six years, in ninety seconds.</b><p>The one that plays it back — whole life, a year, a
+          month, or a single day.</p><button class="play" data-a="noop">▶ Play</button></div></div>
+        <div class="lens">${[['recent','Recent'],['owned','Owned'],['attended','Attended'],
+          ['people','People'],['with_me','With me']].map(([k,l])=>
+          `<button class="chip" data-a="lens" data-v="${k}" data-on="${S.lens===k}">${l}</button>`).join('')}</div>
+        <p class="sub">${S.lens==='with_me'?'Only the ones you are in. <span class="mono">96</span> photos'
+          :S.lens==='attended'?'From days that were somebody else’s — and are still yours. <span class="mono">412</span>'
+          :S.lens==='people'?'Grouped by who is in the photo. <span class="mono">23</span> people'
+          :S.lens==='owned'?'From the events you ran yourself. <span class="mono">148</span>'
+          :'Everything, newest first. <span class="mono">560</span> photos'}</p>
+        <div class="photos">${Array.from({length:24}).map(()=>'<span></span>').join('')}</div>`;
+    case 'story':
+      return `<h1 class="pg">Your Story</h1><p class="sub">Written by you. A video is optional.</p>
+        <div class="tiles"><div class="tile"><span class="n">1</span><b>Published</b><p>No video — just words and your own photos.</p></div>
+          <div class="tile"><span class="n">0</span><b>Drafts</b><p>Nothing waiting.</p></div>
+          <div class="tile"><span class="n">18K</span><b>Reads</b><p>Since you published.</p></div></div>
+        <div class="tile" style="margin-top:16px"><b>Writing is open to everyone.</b>
+          <p style="margin-top:6px">This desk is not a permission you earn — every signed-in person has
+          it, which is why the row is always in the rail even at zero.</p>
+          <div style="margin-top:12px"><button class="btn-terra" data-a="noop">Write a new story</button></div></div>`;
+    case 'shop':
+      return `<h1 class="pg">Studio Azul</h1><p class="sub">Your shop · <span style="color:var(--gold);font-weight:650">✓ Verified</span> · setnayan.com/studio-azul</p>
+        <div class="tiles"><div class="tile"><span class="n">3</span><b>New enquiries</b><p>Two are about the same date.</p></div>
+          <div class="tile"><span class="n">4</span><b>Booked</b><p>Next one is 18 Dec.</p></div>
+          <div class="tile"><span class="n">412</span><b>Saved by couples</b><p>Up 38 this week.</p></div></div>
+        <div class="tile" style="margin-top:16px"><b>Same rail, different desk.</b>
+          <p style="margin-top:6px">You did not change product to get here. Your events and photos are
+          still one press away, above.</p></div>`;
+    case 'hq':
+      return `<h1 class="pg">Setnayan HQ</h1><p class="sub">Everything that needs admin action right now.</p>
+        <div class="tiles"><div class="tile"><span class="n">0</span><b>Need you</b><p>All actionable queues are clear.</p></div>
+          <div class="tile"><span class="n">0</span><b>Past SLA</b><p>Nothing overdue.</p></div>
+          <div class="tile"><span class="n">2</span><b>Shops</b><p>One live, one hidden.</p></div></div>
+        <div class="tile" style="margin-top:16px"><b>The console is a room in the same house.</b>
+          <p style="margin-top:6px">It ships last in the conversion — internal only, zero customer
+          impact — but it wears the same rail when it lands.</p></div>`;
+    case 'article':
+      return `<button class="crumb" data-a="go" data-v="front">← Back</button>
+        <div class="reader"><span class="kind">Article</span>
+          <h1>What a Filipino wedding actually costs in 2026</h1>
+          <p class="sub"><span class="mono">9 min</span> · by the Setnayan editorial team</p>
+          <div class="hero">ARTICLE</div>
+          <p>Nobody publishes real numbers, so here are ours — gathered from suppliers who agreed to
+          be quoted, in Metro Manila, this year.</p>
+          <p>The church and the caterer will take more than half of whatever you have. Everything
+          after that is a choice, and most of it is a choice you can make late.</p></div>`;
+    case 'stories': case 'find': case 'alaala-intro': default:
+      return `${S.view==='find'?'<h1 class="pg">Find a supplier</h1><p class="sub">Pick a category in the rail, or search above.</p>':''}
+        ${S.view==='stories'?'<h1 class="pg">Stories</h1><p class="sub">33 ours · 1 theirs — some with video, some without.</p>':''}
+        ${S.view==='alaala-intro'?'<h1 class="pg">Alaala</h1><p class="sub">Every photo and clip you keep, for life.</p>':''}
+        <div class="grid">${ARTS.map(artCard).join('')}</div>
+        ${inn()?'':`<div class="tile"><b>Signed out, the rail is shorter.</b><p style="margin-top:6px">
+          No Marketplace, no home. Switch <b>You</b> above and watch it fill in — <b>the page does not
+          reload and nothing moves</b>.</p></div>`}`;
+  }
+}
+
+/* ══ SHELL ══════════════════════════════════════════════════════════════ */
+function shell(){
+  const ev=S.ev?EVENTS.find(x=>x.id===S.ev):null;
+  if(S.w==='phone'){
+    return `<div class="device phone">
+      <div class="topbar" style="grid-template-columns:1fr auto;padding:10px 12px">
+        <span class="wm" data-a="go" data-v="front">SETNAYAN<sup>PH</sup></span>
+        <div style="display:flex;gap:2px;align-items:center">${inn()?`<span class="ava">CI</span>`:''}
+          <span class="ibtn">☰</span></div></div>
+      <div class="ph-main">${content()}</div>
+      ${inn()?`<div class="pillnav">
+        <button data-a="go" data-v="board" data-on="${S.view==='board'&&!S.ev}">▦<span>Events</span></button>
+        <button data-a="go" data-v="alaala" data-on="${S.view==='alaala'}">✧<span>Alaala</span></button>
+        <span class="knob">＋</span>
+        <button data-a="noop">◍<span>People</span></button>
+        <button data-a="go" data-v="front" data-on="${S.view==='front'}">⌂<span>Home</span></button></div>`:''}
+    </div>
+    <div class="note" style="max-width:390px"><b>Phone is out of scope, and stays that way.</b>
+      The bottom bar is the locked signed-in grammar. The rail is a desktop idea — converting the
+      phone would break the blueprint, so the conversion is <b>desktop only</b>.</div>`;
+  }
+  return `<div class="device ${S.w}">
+    <div class="topbar">
+      <div class="tb-l"><span class="ibtn">☰</span>
+        <span class="wm" data-a="go" data-v="front">SETNAYAN<sup>PH</sup></span></div>
+      <div class="sbox"><input placeholder="${inn()?'Search events, people, suppliers':'Search suppliers, stories and guides'}"><span class="sgo">⌕</span></div>
+      <div class="tb-r">${inn()
+        ? `${ev?`<span class="evchip">${ev.e} ${esc(ev.n)}</span>`:''}
+           <button class="btn-gold" data-a="noop">＋ Create</button>
+           <span class="ibtn">🔔</span><span class="ava">${isAll()?'SA':'CI'}</span>`
+        : `<button class="btn-gold" data-a="noop">Start planning — free</button>
+           <button class="btn-quiet" data-a="signin">◍ Sign in</button>`}</div>
+    </div>
+    <div class="body"><nav class="rail">${rail()}</nav><div class="main">${content()}</div></div>
+  </div>`;
+}
+
+function render(){
+  document.getElementById('stage').innerHTML=shell()+(S.toast?`<div class="toast">${S.toast}</div>`:'');
+  document.getElementById('cap').textContent=
+    (S.w==='desk'?'Desktop':S.w==='narrow'?'Narrow — the 72px icon strip':'Phone')+' · '+
+    (S.u==='out'?'signed out':S.u==='couple'?'signed in':'signed in · runs a shop and the console');
+}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]'); if(!el)return;
+  const a=el.dataset.a,v=el.dataset.v;
+  if(a==='go'){S.view=v;S.ev=null;}
+  else if(a==='openev'){S.ev=v;S.evTab='home';}
+  else if(a==='evtab'){S.evTab=v;}
+  else if(a==='lens'){S.lens=v;}
+  else if(a==='folder'){S.view='find';S.ev=null;toast('Filtered to that category — <b>the rail did not move</b>.');}
+  else if(a==='tool'){S.view='stories';S.ev=null;toast('A tool doorway opens in the same column.');}
+  else if(a==='signin'){S.u='couple';document.querySelectorAll('#segU button').forEach(b=>
+      b.setAttribute('aria-pressed',String(b.dataset.v==='couple')));
+    toast('Signed in — <b>you never left the page</b>. The rail filled in.');}
+  else if(a==='noop'){}
+  render();
+});
+[['segW','w'],['segU','u']].forEach(([id,k])=>{
+  document.getElementById(id).addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    S[k]=b.dataset.v; if(k==='u'&&b.dataset.v==='out'){S.ev=null;S.view='front';}
+    render();});
+});
+render();
+})();
+</script>
+</body>
+</html>
