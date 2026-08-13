@@ -541,11 +541,19 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > Owner: *"let's start the redesign. we will also start redesign with multiple sessions
 > like what we did today."* Each session names what a person gets, what ALREADY SHIPS
 > (RULE 0 pre-answered — do not re-run it), its gate, and its own traps.
-> ⏭ **Order: 1 → 2 → 3 first.** A switch, a wall, and some copy — the three highest-value
-> and none of them large. **Life-Flash is finished and off; the storyteller wall is why the
-> shelf is empty; the category labels are why nobody can find a photographer.**
-> 🔴 **ONE OWNER SENTENCE BLOCKS SESSION 4:** the new front door and the ELN cinematic
-> homepage **cannot both be `/`**. Shipping it retires a design approved 2026-06-29.
+> ⏭ **Order — CORRECTED 2026-08-13.** ~~1 → 2 → 3 first~~ **1 · 2 · 3 · 4 · 8 are DONE.**
+> ⏭ **Next: 5 (PR #4402, open) · 6 · 7 · 9 · 10.**
+> ✅ **SESSION 4 IS NOT BLOCKED — THE GATE CLOSED 2026-08-13, IT MERGED, AND IT IS LIVE.**
+> The owner ruled the new front door replaces `/` and the ELN cinematic homepage is
+> *"retired completely"*. **Measured on `https://www.setnayan.com/`, not read:**
+> `fd-chipbar` · `fd-storyrow` · 24× `fd-kindtag`, **zero** `HomeReskin` markers, all four
+> chips live. ⚠ `HomeReskin` is still IMPORTED as the flag's dark branch, so "retired
+> completely" is not yet true in the code — that deletion is still owed.
+> 🔑 **This line said an owner sentence BLOCKED Session 4 for a day after the gate closed,
+> the PR merged AND the flag was flipped** — three separate events, none of which reached
+> the file every session reads first. It is the third time this exact failure is recorded
+> in this file. **When a gate closes, edit every row that asserts it is open, in the same
+> commit — and a flag's default in code is not its value in production.**
 > 🔒 Session 9 (mutual stories) shares the counsel gate with
 > `NEXT_PUBLIC_PERSON_LIFE_STORIES` — build behind it, do not flip it.
 > ⚠ **Do not confuse the two Life-Flash flags.** `NEXT_PUBLIC_LIFE_STORY` is a ROLLOUT

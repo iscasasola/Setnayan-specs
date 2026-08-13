@@ -387,20 +387,58 @@ this doc was wrong about where the words live.**
 
 ---
 
-## Session 5 · One shelf, two authors
-**Follows Session 2 and Session 3.**
+## Session 5 · One shelf, two authors — ▶ **PR #4402 · run 2026-08-13**
+**Followed Session 2 and Session 3.**
+⚠ **Verify before trusting this row:** `gh pr view 4402 --json state,mergedAt`.
 
 **What a person gets:** one place to read, whoever wrote it.
 
-- Merge Stories + Editorials into **one shelf**; the **kind lives on the card** (*Article* /
-  *Their story*), never on the shelf. Chips: All · Articles · Their stories · With video.
-- **Why:** separately, one shelf holds 0 and the other 33 — a permanently empty shelf reads as
-  broken, not young. Combined it is full from day one.
-- 🔑 **Thresholds:** the homepage already swaps a grid for a written invitation below **2**.
-  The one new number is **12 live shops before the word "Trending" returns** — owner's to move.
-- ⏭ **Carries the tracking fix I owe:** a click from one of our articles to a shop **loses its
-  origin**, so a booking it produces is not counted as one Setnayan brought — even though
-  `'editorial'` is already in the billable list. The link just needs to carry where it came from.
+> ### 🛑 THE MERGE ITSELF ALREADY SHIPPED — with Session 4. Do NOT build it again.
+> RULE 0 changed the shape of this session. `app/_components/frontdoor/front-door-feed.tsx`
+> (**#4396**) already renders both kinds on ONE shelf with the kind on the CARD
+> (`fd-kindtag` → *Article* / *Their story*), already has exactly the four chips as REAL
+> LINKS (they filter with JavaScript off), and `lib/front-door-composition.ts` already
+> holds both thresholds — `STORIES_MIN_PUBLISHED = 2` (carried from `HomeReskin`, not a new
+> rule) and `TRENDING_MIN_LIVE_SHOPS = 12`. **Nothing was redrawn.** The session's real
+> content was four defects in that shipped shelf.
+
+- 🚨 **THE "WITH VIDEO" CHIP COULD NOT FIND A VIDEO.** `data.ts` built the flag as
+  `Boolean(s.thumbUrl)` — and `thumbUrl` is a **YouTube-only** derived poster. An Instagram
+  or TikTok chapter has a video and **no thumb**, so it answered NO for a piece that is
+  entirely video: dropped from the one chip built to find it, ▶ gone from its card.
+  🔑 **`StorytellerTileItem` says this IN THE TYPE and records the same substitution being
+  made once before** (*"Deciding the Watch/Read label from the thumbnail labelled those
+  'Read'"*). It was made again one file from the warning. **A warning inside a type is only
+  read by whoever opens that type.**
+- 🚨 **TWO ARTICLES WOULD RENDER NOWHERE** once a chapter is featured. The lead grid fills
+  with STORIES first, so the articles it consumes is `4 − stories` — not a constant — while
+  the trailing row was hard-coded `slice(4, 12)`. 🔑 **A boundary between two rows is a
+  computed value the moment either row is variable.**
+- **Both rules lived inside JSX**, which `front-door-composition.ts`'s own docblock one
+  screen away already forbids (*"thresholds buried in JSX … cannot be tested"*). Now
+  `selectShelf()` + `splitShelfRows()` beside `composeFrontDoor`.
+- 🎟 **THE TRACKING FIX IS DONE.** `journal-partner-credit.tsx` linked a bare **legacy**
+  `/v/{slug}` with no origin, so a reader leaving an article for a credited shop arrived as
+  a walk-in and the booking could never count as Setnayan-sourced — although `'editorial'`
+  was **already** in the billable list. Now the **canonical bare-root** address carrying the
+  tag, typed so a typo is a build failure (**an unrecognised `?src` is inert by design —
+  dropped, never rejected**, so a typo would silently restore the bug).
+  ✅ Proven on the live site: the tagged address returns the real shop and self-canonicalises
+  to the clean URL, so the credited vendor loses no link equity.
+  ⚠ **0 spotlight rows in prod** — closed before the first credit publishes, not after.
+- 🛡 **11 sabotages, all caught — and the harness caught two faults in the guards first.**
+  An ADDITIVE mutation is not proven by "the anchor count dropped"; and **one guard was
+  satisfied by ONE of TWO call sites** (the bare root falls through to the shop twice), so it
+  would have sat green while the other path dropped the tag — **the same shape as the
+  printed-QR forward missed on this exact route.** It now COUNTS call sites.
+- ⛔ **`/realstories` IS DELIBERATELY NOT MERGED INTO ONE SHELF.** `stories-search.tsx`
+  carries a council verdict (2026-07-16) that the two voices stay in two labelled sections —
+  *"the non-negotiable lock"*. Reversing it is owner/council territory, not a build call. The
+  hub already carries both kinds via its articles rail; only the FRONT DOOR is one shelf.
+- ⏭ **FLAGGED, NOT BUILT:** the story card renders the literal words `THEIR STORY` as its
+  thumbnail — the same placeholder-word defect #4400 just fixed for SHOP cards, on the
+  sibling card, while the chapter's poster exists and is simply not carried through.
+  **When you fix a card-shaped bug, sweep every card on that shelf.**
 
 ---
 
@@ -633,11 +671,18 @@ doorways → `design#5` couple dashboard → `design#7` the five gaps → `desig
 large.~~ ✅ **1, 2 and 3 are ALL DONE (2026-08-12). Do not start them again — read their entries
 above for what shipped and what is deliberately still open.**
 
-⏭ **What is actually next:** **Session 5 · 7** are unblocked today — **8 is DONE (#4395, merged
-and deployed 2026-08-12)**. ⚠ **7 must rebase first:** it edits `dashboard/(launcher)/page.tsx`,
-whose Alaala section 8 has just rewritten. **Session 4** is still held
-✅ (gate CLOSED 2026-08-13 — unblocked, MERGED, and the flag is ON: `/` is
-the new front door on the live site). **6 is DONE 2026-08-13** — the rail is free again. **9** waits on counsel. **10** is the long tail.
+⏭ **What is actually next — rewritten 2026-08-13.** **DONE: 1 · 2 · 3 · 4 · 6 · 8.**
+**Session 4 is MERGED and its flag is ON** — `/` is the new front door on the live site; the
+words *"is still held"* stood in this very sentence next to the ✅ that contradicted them.
+**Session 5 is in review (#4402).** ⏭ **Left: 7 · 9 · 10.**
+⚠ **7 must rebase first** — it edits `dashboard/(launcher)/page.tsx`, which 8 rewrote.
+**9** waits on counsel. **10** is the long tail.
+
+🚨 **THE FRONT DOOR IS LIVE, AND FOR A DAY EVERY RECORD SAID IT WAS DARK.** The flag defaults
+to off in code and the handoff note said off, so two "sources" agreed — but they shared an
+ancestor, so they were **one source, not two**. One `curl` of the homepage settled it.
+🔑 **A flag's default in code is not its value in production.** The cost was severity: front-door
+defects were being filed as latent when they were public.
 
 🔑 **This line said "1 → 2 → 3 first" while all three were finished.** A state line outlives the
 state it describes, and it is the line a new session reads first — the exact failure that made a
@@ -652,6 +697,9 @@ edit every row that asserts it is open, in the same commit.**
 | 2 · storyteller editorial | **#4387** | ✅ **MERGED** 15:47Z |
 | 3 · friendly labels | **#4388** (+ **#4391**) | ✅ **MERGED** — and verified on the live site |
 | 8 · Alaala as memories | **#4395** + **#4397** | ✅ both **MERGED** (18:10Z · 18:59Z) · `/api/health` reports the merge SHA |
+| 4 · the front door | **#4396** (#4394 CLOSED, superseded) | ✅ **MERGED** 19:16Z — **and the flag is ON: `/` is the new front door**, measured on the deployed page (`fd-chipbar` · `fd-storyrow` · 24× `fd-kindtag`, zero `HomeReskin` markers). ⚠ `HomeReskin` is still IMPORTED as the dark branch, so *"retired completely"* is not yet true in code. |
+| 6 · the seam | — | ✅ **DONE 2026-08-13** (see its entry) |
+| 5 · one shelf | **#4402** | ▶ **OPEN at 2026-08-13 04:2xZ** — the merge itself already shipped in #4396; this is 4 defects in it + the tracking fix. **Re-check with `gh pr view 4402`.** |
 
 ⚠ **This block has been wrong in BOTH directions within one hour.** At 15:40Z I wrote that #4387
 was open — it merged seven minutes later. By 15:58Z the entry above for Session 3 had been marked
