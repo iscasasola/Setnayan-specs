@@ -267,7 +267,7 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 <script>
 (function(){
 const S={w:'desk',u:'all',view:'front',ev:null,evTab:'home',shopTab:'overview',hqTab:'overview',
-  peopleTab:'connections',samId:null,samTab:'overview',alagaKind:'person',lens:'recent',toast:null,menu:false};
+  mktTab:'shortlist',replan:false,peopleTab:'connections',samId:null,samTab:'overview',alagaKind:'person',lens:'recent',toast:null,menu:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inn=()=>S.u!=='out';
 const isAll=()=>S.u==='all';
@@ -456,6 +456,29 @@ const PEOPLEBODY={
    [['23','Connected','Both of you agreed'],['4','Waiting','They have not answered yet'],
     ['11','Suggested','From days you were both at']]]};
 
+/* THE EVENT MARKETPLACE — FOUR tabs, read from lib/budget-build.ts. Default is
+   Shortlist. Two of the four have a SECOND name waiting behind a switch, with
+   the reasoning already written down: "Compare" named the VIEW, not the thing
+   the couple saves; and on THIS page "Budget" is really the payments lens,
+   while the money TARGET lives in the Budget link under "Also in this event".
+   Both are label-only — every link and deep link stays exactly as it is. */
+const MKTTABS=[
+ ['shortlist','Shortlist',null,'The bench — every service you are considering.',null],
+ ['build','Build',null,'Assemble a plan that fits your budget, date and guest count.',null],
+ ['budget','Budget','Payments','Your budget, allotments and every vendor payment — in one place.',
+  'What is paid and what is due.'],
+ ['compare','Compare','Plans','Put your saved builds side by side — and see which dates work.',
+  'The plans you saved, side by side — and which dates work.']];
+const MKTBODY={
+ shortlist:[['11','Saved','Across 5 categories'],['4','New replies','Two are about your date'],
+   ['2','Unavailable','Your date closed on them']],
+ build:[['4','In this plan','Venue · Catering · Photo · Host'],['₱312k','Planned','Of your ₱350k'],
+   ['3','Gaps','Nothing chosen yet for these']],
+ budget:[['₱96k','Paid','Three deposits'],['₱48k','Due soon','Both within a month'],
+   ['₱216k','Not yet due','On the agreed dates']],
+ compare:[['3','Saved plans','You named them'],['₱312k','Cheapest','"The careful one"'],
+   ['2','Dates that work','For every supplier in it']]};
+
 /* SAMAHAN — a list, then ONE samahan with three tabs. The tabs live IN the page,
    not in the rail: "solid menu with no submenus" applies here too, and a rail
    three levels deep stops telling you where you are. */
@@ -502,6 +525,34 @@ const HQBODY={
 function content(){
   if(S.ev){
     const e=EVENTS.find(x=>x.id===S.ev);
+    if(S.evTab==='market'){
+      const [,base,alt,blurb,altBlurb]=MKTTABS.find(x=>x[0]===S.mktTab)||MKTTABS[0];
+      const nm=k=>{const r=MKTTABS.find(x=>x[0]===k); return S.replan&&r[2]?r[2]:r[1];};
+      return `<button class="crumb" data-a="go" data-v="board">← All your events</button>
+        <h1 class="pg">Marketplace</h1><p class="sub">The same suppliers as the public site — but
+          this one knows your date, your budget and your headcount. · <b>${esc(e.n)}</b></p>
+        <div class="lens">${MKTTABS.map(([k])=>`<button class="chip" data-a="mkttab" data-v="${k}"
+          data-on="${S.mktTab===k}">${esc(nm(k))}</button>`).join('')}</div>
+        <p class="sub" style="margin:2px 0 16px">${esc(S.replan&&altBlurb?altBlurb:blurb)}</p>
+        <div class="tiles">${MKTBODY[S.mktTab].map(([n,b,p])=>`<div class="tile">
+          <span class="n">${esc(n)}</span><b>${esc(b)}</b><p>${esc(p)}</p></div>`).join('')}</div>
+        <div class="tile" style="margin-top:16px"><b>Two of these four have a second name waiting.
+          Your call — press it and see.</b>
+          <div style="margin-top:11px;display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+            <button class="chip" data-a="replan" data-on="${!S.replan}">Compare · Budget</button>
+            <button class="chip" data-a="replan" data-on="${S.replan}">Plans · Payments</button>
+            <span style="font-size:12.5px;color:var(--m2)">the words change, nothing else does</span></div>
+          <p style="margin-top:11px"><b>Plans</b> instead of Compare, because what a couple keeps is a
+          <em>named plan</em> — "the careful one", "the one with the band" — and they load one back.
+          Compare was the name of the looking, not of the thing.</p>
+          <p style="margin-top:8px"><b>Payments</b> instead of Budget, because on this page it is
+          what is paid and what is due. <b>The budget itself — the number you are aiming at — is the
+          Budget link further down the rail.</b> Two different jobs, so two different words.</p>
+          <p style="margin-top:8px;font-size:12.5px;color:var(--m2)">Either way every link keeps
+          working: this only changes what a person reads.</p></div>
+        <div class="tile" style="margin-top:14px"><b>These four sit in the page, not the rail.</b>
+          <p style="margin-top:6px">Same rule as a samahan's three: the rail names where you are,
+          the page carries its own tabs.</p></div>`;}
     const [t,sub,tiles]=EVBODY[S.evTab]||EVBODY.home;
     return `<button class="crumb" data-a="go" data-v="board">← All your events</button>
       <h1 class="pg">${esc(t)}</h1><p class="sub">${esc(sub)} · <b>${esc(e.n)}</b></p>
@@ -738,7 +789,9 @@ document.addEventListener('click',e=>{
   if(a==='go'){S.view=v;S.ev=null;if(v==='shop')S.shopTab='overview';if(v==='hq')S.hqTab='overview';
     if(v==='people'){S.peopleTab='connections';S.samId=null;}}
   else if(a==='openev'){S.ev=v;S.evTab='home';}
-  else if(a==='evtab'){S.evTab=v;}
+  else if(a==='evtab'){S.evTab=v;if(v==='market')S.mktTab='shortlist';}
+  else if(a==='mkttab'){S.mktTab=v;}
+  else if(a==='replan'){S.replan=!S.replan;}
   else if(a==='shoptab'){S.shopTab=v;}
   else if(a==='hqtab'){S.hqTab=v;}
   else if(a==='peopletab'){S.peopleTab=v;S.samId=null;}
