@@ -44,5 +44,32 @@ TRAPS:
 - Do not make the demo a second row. One row, two behaviours, decided by who is looking —
   the same shape the shop and HQ rows already use.
 
+AND THE ROWS SHOULD SAY WHAT EACH APP IS — owner: "that is where we can talk about the
+different apps." Signed out, seven bare names in a list teach a stranger nothing. Each row
+gets a short line under it saying what the thing does.
+
+🔑 RULE 0 — THE SEVEN SENTENCES ARE ALREADY WRITTEN. Every product page carries a
+`PAGE_DESCRIPTION` const — e.g. /papic: "Papic turns your guests into your photo crew.
+Everyone shoots, every photo finds the people in it, and each guest goes home with their own
+gallery." These are the PUBLIC, SEO-indexed descriptions. DO NOT WRITE A SECOND SET.
+
+⚠ BUT THEY LIVE AS SEVEN LOCAL CONSTS, one per page file, and they are written for a search
+result — longer than a rail row wants. So:
+  · Lift them to ONE shared source that both the page metadata and the rail read.
+  · If the rail needs a shorter form, DERIVE it (first sentence) or store both fields in that
+    one source. NEVER hand-type a second short version beside the long one — two hand-typed
+    strings that must agree is not a mechanism, it is a future drift, and this repo has paid
+    for that exact shape more than once (llms.txt drifted three weeks with green CI).
+  · A guard: every RAIL_TOOLS entry resolves to a description from that source, and the
+    source is the same one the page's metadata uses. Mutation-test it — break the link and
+    the guard must go red, with the occurrence count printed before and after.
+
+SIGNED IN, the line changes job: it stops selling and starts reporting. Say what THEY have —
+"50 shots ready", "4 cameras out", "not set up yet" — or show nothing rather than sell a
+person something they already bought. Only use counts you can resolve honestly; a count you
+cannot read must render as nothing, never as 0. `count === null` means NOT MEASURED, and
+filing an unmeasured thing under "you have none" puts it in the one place a person has been
+told they need not look.
+
 STOP AT: the Studio rows. Everything else in #4438 stands.
 ```
