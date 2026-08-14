@@ -588,11 +588,15 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > "in review" as this line read for hours after they landed. ~~**Left: 9 · 10.**~~
 > ⏭ **9 IS MERGED 2026-08-13 (PR #4418, merge `a20a48b2a`) — see the Session 9 row below.
 > LEFT: 10.**
-> ⏸ **#4413 (retire the ELN homepage) is still OPEN and CONFLICTING — leave it.** It is the
-> PARKED task of `DECISION_LOG.md` 2026-08-13: authorised by the owner, started, then stopped
-> on his own instruction. That row says the branch was deleted and nothing is half-landed —
-> **the PR itself was never closed**, so the open+conflicting state is expected, not a defect.
-> Do not re-open, rebase or re-ask it.
+> ⏸ **#4413 (retire the ELN homepage) is CLOSED, unmerged, since 2026-08-13T12:11Z — leave it.**
+> It is the PARKED task of `DECISION_LOG.md` 2026-08-13: authorised by the owner, started, then
+> stopped on his own instruction. The branch was deleted and nothing is half-landed.
+> **Do not re-open, rebase or re-ask it.**
+> ⚠ This block said the PR was *"still OPEN and CONFLICTING… the PR itself was never closed"*
+> for two days after it was closed — so a session looking for an open PR would have found
+> nothing and had to work out why. Corrected 2026-08-15 by `gh pr view`, not by reading.
+> **Verify any PR state here with `gh pr view <#> --json state,mergedAt,closedAt` before acting
+> on it; this file has now been wrong about a PR's state three separate times.**
 > ✅ **7 (two levels + the events board) MERGED 2026-08-13 — PR
 > [#4415](https://github.com/iscasasola/setnayan-platform/pull/4415), merge `e77566b48`,
 > verified an ancestor of `origin/main`, and production self-reports it
