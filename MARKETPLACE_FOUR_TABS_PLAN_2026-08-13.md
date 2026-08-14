@@ -208,7 +208,11 @@ unbuilt (live check: `event_vendor_line_items.vendor_id` is still NOT NULL — n
 (b) No per-vendor drill, no overdue tone beyond sort order.
 **Delta:** slice 4 (§7). Everything else belongs to `/budget`, not here.
 
-> ✅ **BUD-8 IS BUILT — PR [#4435](https://github.com/iscasasola/setnayan-platform/pull/4435), opened 2026-08-14, auto-merge armed. Do NOT build it again.** The lens now reads
+> ✅ **BUD-8 IS MERGED AND LIVE — PR [#4435](https://github.com/iscasasola/setnayan-platform/pull/4435), merge `5c8be2832`, merged 2026-08-14 10:49Z. Do NOT build it again.**
+> Verified an **ancestor of `origin/main`** (not taken from the merge report), and **production is
+> serving it by measurement** — `/api/health` returned `"version":"5c8be28"` 260s after the merge,
+> polled until it changed rather than inferred from the merge. Nothing a person sees changed on
+> deploy: this ships behind the switch, which is still off. The lens now reads
 > `resolveEventMoney` behind `NEXT_PUBLIC_BUDGET_TRUTH_ENABLED` through the SAME pure core
 > `/budget` uses (`budgetLiveSummaryMoney`), with the same degrade-to-legacy rule.
 > 🔴 **It had to land before the flag flips, and the reason is now MEASURED, not argued:** on
