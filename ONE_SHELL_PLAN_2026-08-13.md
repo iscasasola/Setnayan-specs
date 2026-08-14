@@ -56,7 +56,7 @@ Mobile already has its locked bottom-nav grammar; converting it would be a bluep
 
 | Slice | Scope | Why this order |
 |---|---|---|
-| **0 · the proof** | **~15 pages** — the events board + the account spokes | **Exactly what he pressed when he complained.** These layouts mount **no chrome today**, so nothing is displaced — no collapse state, no bottom nav, no transition contract in play. Exercises the full round trip inside one unchanged chrome. **Ships alone and can be judged.** |
+| **0 · the proof** ✅ **DONE 2026-08-14** | **~15 pages** — the events board + the account spokes | **SHIPPED — PR [#4429](https://github.com/iscasasola/setnayan-platform/pull/4429), merge `2c607805e`, verified an ancestor of `origin/main`.** Do NOT rebuild it. `DECISION_LOG.md` 2026-08-14. **Exactly what he pressed when he complained.** ⚠ One correction to this row's own premise: these layouts mount no RAIL chrome, but `(account)` does render a slim top bar and the launcher page renders its own one-line rail — both were **kept**, and the rail was added beside them, because that launcher rail carries the ⌘K command bar and the only sign-out on the surface. The app variant therefore ships **rail-only, no top bar**. |
 | 1 | event tree, ~110 pages | Carries the two-level owner look |
 | 2 | vendor-dashboard, 63 | Mechanical repeat |
 | 3 | admin, 108 | Internal-only, ships last — and must move ~10 `after()` sweep jobs verbatim |
@@ -96,6 +96,15 @@ Mobile already has its locked bottom-nav grammar; converting it would be a bluep
 ---
 
 ## 5 · OWNER DECISIONS — four, none blocking slice 0
+
+> **STATUS after slice 0 shipped (2026-08-14).** #1 is **CLOSED** — the
+> supersession is logged (`DECISION_LOG.md` 2026-08-13/14) and both layouts now
+> cite it inline. #2 and #3 are **STILL OPEN and were deliberately NOT decided
+> in code**: the app variant renders no top bar, so there is no "+ Create"
+> button in the shared chrome yet, and `[data-chrome='app']` **unsets** the
+> inherited typeface so the rail keeps the front-door face while content columns
+> keep Hanken — the plan's own recommendation, confined to chrome, and reversible
+> in one CSS block. #4 (the two-level model) arrives with slice 1.
 
 1. **Log the supersession.** The rail returns to the user home and account spokes, reversing the
    2026-07-09/13 no-sidebar rulings. His 2026-08-13 sentences already say it; record it so no
