@@ -17,6 +17,18 @@ All four council members independently rejected price-tier sorting, and all four
 
 ## 2 · Dupes found in the shipped catalog (5)
 
+> ✅ **DEFECT 1 SHIPPED 2026-08-14 (PR #4428) — with one line of it corrected.** The chip
+> targets below were written while each website part had its own `/site-editor/[eventId]/<phase>`
+> page. Those pages became **retired redirects into the ONE unified editor on 2026-07-25**, so
+> pointing both chips at the parts' own hrefs would have produced **two chips going to the same
+> URL** — a distinction a couple can see is fake. As shipped: the card opens the `/website` hub,
+> **Event page** opens the unified editor, **Editorial** opens `/website/editorial`. Three
+> distinct destinations. Everything else in this row shipped exactly as written, including
+> Save-the-Date + RSVP keeping standalone rows.
+> ⚠ Note also: the count is **six** website entries, not five — this row omits `event`. Six is
+> what makes "5 cards → 3" add up (1 umbrella + 1 paid upgrade + 4 parts; the paid Website PRO
+> card is not one of the five free doorways).
+
 | # | Defect | Resolution |
 |---|---|---|
 | 1 | **"Whole website" duplicates the 4 part-cards** (`landing-page` + save-the-date/rsvp/event/editorial = 5 doorways, 1 product) | One free **"Your Website"** card (retitled landing-page) with exactly two always-visible deep-link chips: **Event page · Editorial**. Save-the-Date and RSVP keep standalone rows (own SKU / own guest-tool job — NOT chipped, avoiding a miniaturized re-dupe). Event + Editorial standalone cards retire; the Set up & manage strip becomes the Event page's primary doorway. 5 cards → 3. |
@@ -71,9 +83,14 @@ Price is a **pill, never the sort key**. One pill per card, precedence **Active 
 
 ## 7 · Ship order
 
-1. **Lock-free, immediate:** dupe fixes 2–4 (Editorial twins, superset-sibling, Music Creator deletion) + pill grammar.
-2. **After sign-off 2:** Website consolidation (Your Website card + chips + 301s).
-3. **After sign-off 1 (or its fallback):** the Tab-1 refile.
+1. **Lock-free, immediate:** dupe fixes 2–4 (Editorial twins, superset-sibling, Music Creator deletion) + pill grammar. — ✅ **SHIPPED 2026-07-22** (PRs #3559 · #3564).
+2. **After sign-off 2:** Website consolidation (Your Website card + chips + 301s). — ✅ **SHIPPED 2026-08-14, PR [#4428](https://github.com/iscasasola/setnayan-platform/pull/4428).**
+3. **After sign-off 1 (or its fallback):** the Tab-1 refile. — ✅ **SHIPPED 2026-08-14 in the same PR.** Sign-off #1 was given on the day this verdict was written and the refile then waited 28 days on #2.
+
+> ✅ **THIS VERDICT IS FULLY DISCHARGED (2026-08-14). Nothing here is still to build.**
+> ⚠ **But two of its instructions had gone STALE and were deliberately NOT executed —
+> see the banners on §2 defect 1 and §9 below.** A design doc rots exactly like a status
+> line: check every instruction in it against shipped code before acting on it.
 
 ## 8 · Presentation treatment v2 — "Sell the memory, not the module" (owner follow-up, same day)
 
@@ -105,7 +122,15 @@ The figures in §§ 2–4 and the first prototype versions came from the stale C
 | LED/Live Background | ₱2,499 | **₱499** (self-serve reposition 2026-06-29) |
 | Pakanta | ₱1,999 | **₱2,499** |
 
-**Defect 6 (NEW, found via the price sweep):** the shipped `add-ons-catalog.ts` still merchandises **Indoor Blueprint** — a SKU tombstoned 2026-06-07 (`INDOOR_BLUEPRINT` inactive in DB, § 00.C) — and presents the now-FREE Custom QR through the paid-SKU pattern (serviceKey pill path), while the "LED Background" card copy predates the ₱499 "Live Background" reposition. **Fix rides ship-order step 1 (lock-free):** delete the indoor-blueprint entry (301 its route to the seat plan), set `tier:'free'` on custom-qr-guest, rename/reprice copy on led. Standing rule: **prototype and marketing figures are drawn from Pricing.md § 00 or the live catalog — never from the CLAUDE.md SKU tables** (both files self-declare as stale lineage).
+> 🛑 **"DELETE THE INDOOR-BLUEPRINT ENTRY" IS SUPERSEDED — DO NOT DO IT (owner 2026-07-23,
+> six days after this verdict).** *Indoor Blueprint is **NOT removed, it is FREE***: the paid
+> ₱1,499 SKU is retired, but the feature survives as a free capability delivered by the
+> already-free 2D Plan (PR #3593, shipped). The row below is kept for lineage only. A session
+> executing it literally on 2026-08-14 would have deleted a live free tool; it was checked
+> against shipped code first and **not executed**. The paid increment is the **3D Plan**
+> (`SEATING_3D` ₱1,500, live since 2026-08-02) — see `Pricing.md` § 00.C.
+
+**Defect 6 (NEW, found via the price sweep):** the shipped `add-ons-catalog.ts` still merchandises **Indoor Blueprint** — a SKU tombstoned 2026-06-07 (`INDOOR_BLUEPRINT` inactive in DB, § 00.C) — and presents the now-FREE Custom QR through the paid-SKU pattern (serviceKey pill path), while the "LED Background" card copy predates the ₱499 "Live Background" reposition. **Fix rides ship-order step 1 (lock-free):** ~~delete the indoor-blueprint entry (301 its route to the seat plan)~~ **← superseded, see banner**, set `tier:'free'` on custom-qr-guest, rename/reprice copy on led. Standing rule: **prototype and marketing figures are drawn from Pricing.md § 00 or the live catalog — never from the CLAUDE.md SKU tables** (both files self-declare as stale lineage).
 
 ## 10 · Setnayan AI framing correction (owner, same day)
 
