@@ -196,6 +196,24 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 .asklab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--m2);font-weight:700}
 .askq{font-size:15.5px;font-weight:650;color:var(--terra)}
 .askin{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--m3);letter-spacing:.06em}
+.pgh{font-size:20px;margin:20px 0 2px;letter-spacing:-.015em}
+.jrny{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;margin:4px 0 6px}
+.jst{flex:1;min-width:112px;border:1px solid var(--line);border-radius:11px;padding:11px 12px;
+  display:flex;flex-direction:column;gap:4px;background:var(--cream);position:relative}
+.jst[data-on=true]{border-color:var(--terra);background:#FDF6F2;
+  box-shadow:0 8px 22px -16px rgba(194,78,37,.55)}
+.jst[data-muted=true]{background:#F6F2EA;border-style:dashed;color:var(--m3)}
+.jst[data-muted=true][data-on=true]{background:#FDF6F2;border-style:solid;color:var(--ink)}
+.jn{font-family:var(--mono);font-size:11px;color:var(--m3)}
+.jst[data-on=true] .jn{color:var(--terra)}
+.jl{font-size:14px;font-weight:650}
+.jm{font-size:10.5px;color:var(--m3)}
+.onething{border:1px solid var(--line);border-left:3px solid var(--terra);border-radius:12px;
+  padding:18px 20px;background:#FDF7F3}
+.onething .eye{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--terra);
+  font-weight:700;margin:0}
+.onething b{display:block;font-size:22px;letter-spacing:-.02em;margin:7px 0 8px}
+.onething p{margin:0;font-size:14px;color:var(--m1);line-height:1.55;max-width:60ch}
 .kinrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .kw{border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;
   background:#fff}
@@ -267,7 +285,7 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 <script>
 (function(){
 const S={w:'desk',u:'all',view:'front',ev:null,evTab:'home',shopTab:'overview',hqTab:'overview',
-  mktTab:'shortlist',replan:false,peopleTab:'connections',samId:null,samTab:'overview',alagaKind:'person',lens:'recent',toast:null,menu:false};
+  mktTab:'shortlist',replan:false,gstStage:'build',peopleTab:'connections',samId:null,samTab:'overview',alagaKind:'person',lens:'recent',toast:null,menu:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inn=()=>S.u!=='out';
 const isAll=()=>S.u==='all';
@@ -456,6 +474,37 @@ const PEOPLEBODY={
    [['23','Connected','Both of you agreed'],['4','Waiting','They have not answered yet'],
     ['11','Suggested','From days you were both at']]]};
 
+/* GUESTS IS A JOURNEY, NOT A PILE OF TOOLS — owner 2026-06-16.
+   Build -> Invite -> Confirm -> Seat -> Day-of. Every stage stays VISIBLE
+   always (guest work is non-linear: late adds, re-seats) — what changes is
+   its STATE, not whether you can see it. Day-of is the one gated by TIME,
+   muted until the window opens and live through the day after. */
+const GUESTSTAGES=[
+ ['build','Build','Make the list, and group it the way your family actually works.',
+  [['86','On the list','Across 14 households'],['14','Groups','Ninong side, work, school'],
+   ['3','Added late','Nothing is locked — add whenever']]],
+ ['invite','Invite','ONE link. They fill in their own details and match themselves to the list.',
+  [['1','Link','The same one for everybody'],['61','Opened it','Of 86 invited'],
+   ['9','Matched themselves','No typing on your side']]],
+ ['confirm','Confirm','You approve a request — and that person gets their QR.',
+  [['4','Waiting on you','The oldest is 2 days'],['52','Approved','They have their QR'],
+   ['1','Not sure','A name nobody recognises']]],
+ ['seat','Seat','Seated automatically first, then drag anyone who should move.',
+  [['12','Tables','Round, long, and the sweetheart'],['52','Seated','Everyone who said yes'],
+   ['0','Unseated','Nobody is standing']]],
+ ['dayof','Day-of','The live desk: who has arrived, who has not, on the day itself.',
+  [['—','Opens 17 Dec','Twelve hours before'],['0','Arrived','Nothing to count yet'],
+   ['52','Expected','With a QR in hand']]]];
+
+/* OVERVIEW — the real section stack, in order. The hero is ONE thing on
+   purpose: owner 2026-05-22, the five-card carousel was correctly sorted and
+   the host still froze in front of five buttons. */
+const OVERVIEW_AROUND=[['Hosts','◍','Who is running the day with you'],
+ ['Your team','✦','Coordinator, emcee, and anyone you let in'],
+ ['Your services','▣','What you have bought from Setnayan'],
+ ['Schedule','◷','The order of the day']];
+const OVERVIEW_STAGES=['Dreaming','Booking','Inviting','Finalising','Wedding day','After'];
+
 /* THE EVENT MARKETPLACE — FOUR tabs, read from lib/budget-build.ts. Default is
    Shortlist. Two of the four have a SECOND name waiting behind a switch, with
    the reasoning already written down: "Compare" named the VIEW, not the thing
@@ -553,6 +602,70 @@ function content(){
         <div class="tile" style="margin-top:14px"><b>These four sit in the page, not the rail.</b>
           <p style="margin-top:6px">Same rule as a samahan's three: the rail names where you are,
           the page carries its own tabs.</p></div>`;}
+    if(S.evTab==='guests'){
+      const i=GUESTSTAGES.findIndex(x=>x[0]===S.gstStage), st=GUESTSTAGES[i<0?0:i];
+      const [,lbl,blurb,tiles]=st;
+      return `<button class="crumb" data-a="go" data-v="board">← All your events</button>
+        <h1 class="pg">Guests</h1><p class="sub">Not a pile of tools — one journey. · <b>${esc(e.n)}</b></p>
+        <div class="jrny">${GUESTSTAGES.map(([k,l],n)=>`<button class="jst" data-a="gstage" data-v="${k}"
+          data-on="${S.gstStage===k}" data-muted="${k==='dayof'}">
+          <span class="jn">${n+1}</span><span class="jl">${l}</span>
+          ${k==='dayof'?'<span class="jm">opens on the day</span>':''}</button>`).join('')}</div>
+        <h2 class="pgh">${esc(lbl)}</h2><p class="sub">${esc(blurb)}</p>
+        <div class="tiles">${tiles.map(([n,b,pp])=>`<div class="tile"><span class="n">${esc(n)}</span>
+          <b>${esc(b)}</b><p>${esc(pp)}</p></div>`).join('')}</div>
+        <div class="tile" style="margin-top:16px"><b>Every stage stays open. Always.</b>
+          <p style="margin-top:6px">Guest work is never tidy — somebody is added the week of, an
+          aunt swaps tables the morning of. So no stage ever locks or disappears; what changes is
+          how it looks, not whether you can reach it.</p>
+          <p style="margin-top:8px"><b>Day-of is the one exception, and only because of the clock.</b>
+          It stays greyed until twelve hours before, then becomes the live desk, and stays open
+          through the day after — because late check-ins are exactly when people arrive.</p></div>
+        <div class="tile" style="margin-top:14px"><b>One thing to decide: Seat appears twice.</b>
+          <p style="margin-top:6px">Stage 4 here and <b>Seat plan</b> further down the sidebar are the
+          same room. That is the same double-naming as Budget on the shopping side. Worth one
+          ruling for both.</p></div>`;}
+
+    if(S.evTab==='home'){
+      return `<button class="crumb" data-a="go" data-v="board">← All your events</button>
+        <h1 class="pg">${esc(e.n)}</h1><p class="sub">${esc(e.d)} · ${esc(e.pl)} ·
+          <span class="mono" style="color:var(--terra);font-weight:650">${e.days} days away</span></p>
+        <div class="onething"><p class="eye">Today's one thing</p>
+          <b>Lock your caterer.</b>
+          <p>You said you would decide by the end of last month, and three of the four you saved
+          are still holding your date. This is the one that blocks the most other choices.</p>
+          <div style="margin-top:13px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-terra" data-a="evtab" data-v="market">Open the four you saved</button>
+            <button class="btn-out" data-a="noop">Not today</button></div></div>
+        <div class="tile" style="margin:14px 0"><b>One card, on purpose.</b>
+          <p style="margin-top:6px">This used to be five, correctly sorted by urgency — and people
+          froze in front of five buttons. It answers the only question somebody opens this page
+          with: <em>what should I do today?</em></p></div>
+        <div class="sech"><h3>Decisions waiting on you</h3><span class="rule">2</span></div>
+        <div class="tiles"><div class="tile"><b>Your photographer sent a quote</b>
+            <p>₱78,000 — 2 days ago</p></div>
+          <div class="tile"><b>The venue changed a term</b><p>Corkage. Needs your yes.</p></div></div>
+        <div class="sech" style="margin-top:22px"><h3>What's next</h3><span class="rule">by date</span></div>
+        <div class="tiles"><div class="tile"><span class="n">14 Sep</span><b>Balance to the venue</b>
+            <p>₱48,000</p></div>
+          <div class="tile"><span class="n">1 Oct</span><b>Send the invitations</b>
+            <p>So replies land before you order food</p></div>
+          <div class="tile"><span class="n">18 Dec</span><b>The day</b><p>Ceremony 2:00 PM</p></div></div>
+        <div class="sech" style="margin-top:22px"><h3>Meanwhile</h3><span class="rule">quiet</span></div>
+        <div class="tile"><b>Your photographer left files in their working folder.</b>
+          <p style="margin-top:6px">Nothing to do — it is there when you want it.</p></div>
+        <div class="sech" style="margin-top:22px"><h3>Around your event</h3></div>
+        <div class="tiles">${OVERVIEW_AROUND.map(([t2,ic,d])=>`<div class="tile">
+          <b>${ic} ${esc(t2)}</b><p>${esc(d)}</p></div>`).join('')}</div>
+        <div class="sech" style="margin-top:22px"><h3>Read your progress</h3>
+          <span class="rule">where you are</span></div>
+        <div class="jrny">${OVERVIEW_STAGES.map((l,n)=>`<span class="jst" data-on="${n===1}"
+          data-muted="${n>2}"><span class="jn">${n+1}</span><span class="jl">${esc(l)}</span></span>`).join('')}</div>
+        <div class="tile" style="margin-top:16px"><b>The rail did not move.</b>
+          <p style="margin-top:6px">Your own rows are still above — your events, Alaala, your story.
+          The event's three sections were pushed in below them, so "which event am I in" and "how do
+          I get out" are both answered without leaving the page.</p></div>`;}
+
     const [t,sub,tiles]=EVBODY[S.evTab]||EVBODY.home;
     return `<button class="crumb" data-a="go" data-v="board">← All your events</button>
       <h1 class="pg">${esc(t)}</h1><p class="sub">${esc(sub)} · <b>${esc(e.n)}</b></p>
@@ -789,7 +902,8 @@ document.addEventListener('click',e=>{
   if(a==='go'){S.view=v;S.ev=null;if(v==='shop')S.shopTab='overview';if(v==='hq')S.hqTab='overview';
     if(v==='people'){S.peopleTab='connections';S.samId=null;}}
   else if(a==='openev'){S.ev=v;S.evTab='home';}
-  else if(a==='evtab'){S.evTab=v;if(v==='market')S.mktTab='shortlist';}
+  else if(a==='evtab'){S.evTab=v;if(v==='market')S.mktTab='shortlist';if(v==='guests')S.gstStage='build';}
+  else if(a==='gstage'){S.gstStage=v;}
   else if(a==='mkttab'){S.mktTab=v;}
   else if(a==='replan'){S.replan=!S.replan;}
   else if(a==='shoptab'){S.shopTab=v;}
