@@ -207,6 +207,29 @@ unbuilt (live check: `event_vendor_line_items.vendor_id` is still NOT NULL — n
 (b) No per-vendor drill, no overdue tone beyond sort order.
 **Delta:** slice 4 (§7). Everything else belongs to `/budget`, not here.
 
+> ✅ **BUD-8 IS BUILT — PR [#4435](https://github.com/iscasasola/setnayan-platform/pull/4435), opened 2026-08-14, auto-merge armed. Do NOT build it again.** The lens now reads
+> `resolveEventMoney` behind `NEXT_PUBLIC_BUDGET_TRUTH_ENABLED` through the SAME pure core
+> `/budget` uses (`budgetLiveSummaryMoney`), with the same degrade-to-legacy rule.
+> 🔴 **It had to land before the flag flips, and the reason is now MEASURED, not argued:** on
+> live prod event `044f7e64…` (re-verified against the database 2026-08-14, not just the July
+> capture — the ₱80,000 `considering` vendor is still there, unarchived, with 0 line items and
+> 0 payments) the lens prints **₱80,000 to go** where `/budget` reports **committed ₱0** with
+> ₱80,000 labelled an estimate. Flipping the flag without this slice put two screens
+> **₱80,000 apart on the same wedding**.
+> 🔑 **RULE 0 paid: no arithmetic was written.** `budgetLiveSummaryMoney` already existed from
+> BUD-2 and already did exactly this job — the slice was WIRING, not maths.
+> 🪤 **`scripts/budget-parity.ts` prints IDENTICAL output before and after, and that is
+> correct** — it transcribes the legacy arithmetic verbatim and deliberately does not import
+> the surfaces, so it cannot observe the change. Its rows for wired surfaces are now labelled
+> as *the jump that happens when the flag is switched on*, not as unfixed surfaces. **No figure
+> in it was edited** — changing the measuring stick to agree with the code would have destroyed
+> the only reason to run it.
+> ⏭ **ONE THING TO DECIDE BEFORE THE FLIP, named not built:** with the flag ON that same event
+> has `committed = 0`, so the lens falls to its existing empty state — *"Set your budget and
+> itemize vendor costs to start tracking payments"* — addressed to a couple who HAS set
+> ₱2,250,000 and simply committed none of it. Numbers right, sentence slightly wrong. Left
+> alone deliberately: session 7 owns this component's look.
+
 ### 3.4 · Compare — "Your plans"
 **A person is trying to:** keep more than one named version of the team and see them side by side —
 including which dates survive each version.
@@ -298,7 +321,7 @@ any flag-adjacent slice.
 | 1 | S | ~3 | **Masthead + section chips, in page**: crumb · H1 "Marketplace" · sub-line · four chips reading `tabLabel()`, wired to the EXISTING bus/anchors (scroll, never swap). Desktop above the two columns; mobile above the bench (team chip stays). Closes S1 | the wayfinding row, on desktop and phone |
 | 2 | M–L | ~6 | **Warm-editorial re-skin** (class-level, no logic): `shortlist-categories` · `build-locked` · `build-compare` · `merkado-budget-lens` · `quote-fill` · `team-controls` to the flat-cream grammar Overview got 2026-08-08; + the crest honesty string | the look, side by side with Overview |
 | 3 | M | ~3 | **Plans out of the rail (desktop)** — THE ONE OWNER LOOK: `compareSlot` renders full-width under the bench column at lg+ (rail keeps team + payments), or expands-in-place to full width. Anchors/bus/keys unchanged (they resolve by id, not DOM position) | a side-by-side that actually fits |
-| 4 | S | ~3 | **Payments onto the resolver**: `MerkadoBudgetLens` reads `resolveEventMoney` behind `NEXT_PUBLIC_BUDGET_TRUTH_ENABLED` with the same degrade-to-legacy rule `budget/page.tsx` uses; run `scripts/budget-parity.ts` before/after. MUST precede any flip of that flag | same numbers on both money surfaces (flag preview) |
+| 4 | S | ~3 | ✅ **DONE 2026-08-14 · PR [#4435](https://github.com/iscasasola/setnayan-platform/pull/4435) — do NOT rebuild.** **Payments onto the resolver**: `MerkadoBudgetLens` reads `resolveEventMoney` behind `NEXT_PUBLIC_BUDGET_TRUTH_ENABLED` through the same pure core + degrade-to-legacy rule `budget/page.tsx` uses. Gap it closed, measured live: **₱80,000** on prod event `044f7e64…`. See §3.3 for the parity-harness caveat and the one copy call left open | same numbers on both money surfaces (flag preview) |
 | 5 | S | ~2 | **Anchored-date line for Plans**: per-column verdict for day-precision events ("free on your date" / names the booked vendor), reusing `getBatchVendorAvailableDays` | the sentence appears on his real event |
 | 6 | L | own spec | **PR-H vendor-agrees** — build ONLY from `PR_H_Lock_Request_Handshake_BUILD_SPEC_2026-08-04.md` after its 14 HIGH plan defects are re-planned; lands in the team's reserved slot. Separate wave; named here because the Build section's honesty depends on it | a lock that asks the vendor |
 
