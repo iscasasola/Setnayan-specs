@@ -196,6 +196,14 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 .asklab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--m2);font-weight:700}
 .askq{font-size:15.5px;font-weight:650;color:var(--terra)}
 .askin{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--m3);letter-spacing:.06em}
+.mchips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 16px;padding-bottom:14px;
+  border-bottom:1px solid var(--line)}
+.mnote{font-size:11.5px;color:var(--m3);font-style:italic}
+.mcols{display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start}
+.mleft>*+*,.mright>*+*{margin-top:18px}
+.mright{border-left:1px solid var(--line);padding-left:20px}
+@media(max-width:1180px){.mcols{grid-template-columns:1fr}
+  .mright{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:18px}}
 .pgh{font-size:20px;margin:20px 0 2px;letter-spacing:-.015em}
 .jrny{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;margin:4px 0 6px}
 .jst{flex:1;min-width:112px;border:1px solid var(--line);border-radius:11px;padding:11px 12px;
@@ -285,7 +293,7 @@ p.sub{color:var(--m2);font-size:13.5px;margin:0 0 20px}
 <script>
 (function(){
 const S={w:'desk',u:'all',view:'front',ev:null,evTab:'home',shopTab:'overview',hqTab:'overview',
-  mktTab:'shortlist',replan:false,gstStage:'build',peopleTab:'connections',samId:null,samTab:'overview',alagaKind:'person',lens:'recent',toast:null,menu:false};
+  mktAt:'shortlist',gstStage:'build',peopleTab:'connections',samId:null,samTab:'overview',alagaKind:'person',lens:'recent',toast:null,menu:false};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const inn=()=>S.u!=='out';
 const isAll=()=>S.u==='all';
@@ -505,28 +513,28 @@ const OVERVIEW_AROUND=[['Hosts','◍','Who is running the day with you'],
  ['Schedule','◷','The order of the day']];
 const OVERVIEW_STAGES=['Dreaming','Booking','Inviting','Finalising','Wedding day','After'];
 
-/* THE EVENT MARKETPLACE — FOUR tabs, read from lib/budget-build.ts. Default is
-   Shortlist. Two of the four have a SECOND name waiting behind a switch, with
-   the reasoning already written down: "Compare" named the VIEW, not the thing
-   the couple saves; and on THIS page "Budget" is really the payments lens,
-   while the money TARGET lives in the Budget link under "Also in this event".
-   Both are label-only — every link and deep link stays exactly as it is. */
-const MKTTABS=[
- ['shortlist','Shortlist',null,'The bench — every service you are considering.',null],
- ['build','Build',null,'Assemble a plan that fits your budget, date and guest count.',null],
- ['budget','Budget','Payments','Your budget, allotments and every vendor payment — in one place.',
-  'What is paid and what is due.'],
- ['compare','Compare','Plans','Put your saved builds side by side — and see which dates work.',
-  'The plans you saved, side by side — and which dates work.']];
-const MKTBODY={
- shortlist:[['11','Saved','Across 5 categories'],['4','New replies','Two are about your date'],
-   ['2','Unavailable','Your date closed on them']],
- build:[['4','In this plan','Venue · Catering · Photo · Host'],['₱312k','Planned','Of your ₱350k'],
-   ['3','Gaps','Nothing chosen yet for these']],
- budget:[['₱96k','Paid','Three deposits'],['₱48k','Due soon','Both within a month'],
-   ['₱216k','Not yet due','On the agreed dates']],
- compare:[['3','Saved plans','You named them'],['₱312k','Cheapest','"The careful one"'],
-   ['2','Dates that work','For every supplier in it']]};
+/* THE EVENT MARKETPLACE — NOT TABS. Since 2026-07-09 it is ONE SCROLL of four
+   stacked sections; the desktop tab strip was REMOVED 2026-07-15 ("it duplicated
+   what the eye can see") and the phone's four-chip dock went with it. Desktop is
+   TWO COLUMNS: the bench on the left, a sticky right rail carrying your team,
+   your plans and your payments.
+   🔴 AND THE NAMES ARE ALREADY DECIDED — the owner turned them on 2026-07-28.
+   "Plans" and "Payments" are what couples read today. The earlier drawing showed
+   them as an open question with a toggle; that was behind production, not ahead
+   of it. Corrected. */
+const MKTSECTIONS=[
+ ['shortlist','Browse the bench','Every service your day could need, and who is still free.',
+  [['~53','Kinds of service','Across 10 folders'],['11','Saved','You are considering these'],
+   ['5','Ways to sort','Nearest, cheapest, best reviewed…']]],
+ ['build','Your team','Locked, still deciding, and what the set does to your money.',
+  [['4','Locked','Venue · Catering · Photo · Host'],['3','Ready to lock','Waiting on you'],
+   ['₱312k','Of ₱350k','₱38k of room left']]],
+ ['compare','Your plans','More than one version of the team, side by side.',
+  [['3','Saved plans','You named them yourself'],['₱312k','Cheapest','"The careful one"'],
+   ['0','Ever used','By a real person, so far']]],
+ ['budget','Payments','What is paid, what is due — and the door to the full budget.',
+  [['₱96k','Paid','Three deposits'],['₱48k','Due soon','Both within a month'],
+   ['₱216k','Not yet due','On the agreed dates']]]];
 
 /* SAMAHAN — a list, then ONE samahan with three tabs. The tabs live IN the page,
    not in the rail: "solid menu with no submenus" applies here too, and a rail
@@ -575,33 +583,34 @@ function content(){
   if(S.ev){
     const e=EVENTS.find(x=>x.id===S.ev);
     if(S.evTab==='market'){
-      const [,base,alt,blurb,altBlurb]=MKTTABS.find(x=>x[0]===S.mktTab)||MKTTABS[0];
-      const nm=k=>{const r=MKTTABS.find(x=>x[0]===k); return S.replan&&r[2]?r[2]:r[1];};
+      const sec=k=>{const r=MKTSECTIONS.find(x=>x[0]===k);
+        return `<div class="msec"><div class="sech"><h3>${esc(r[1])}</h3></div>
+          <p class="sub" style="margin:0 0 12px">${esc(r[2])}</p>
+          <div class="tiles">${r[3].map(([n,b,pp])=>`<div class="tile"><span class="n">${esc(n)}</span>
+            <b>${esc(b)}</b><p>${esc(pp)}</p></div>`).join('')}</div></div>`;};
       return `<button class="crumb" data-a="go" data-v="board">← All your events</button>
         <h1 class="pg">Marketplace</h1><p class="sub">The same suppliers as the public site — but
           this one knows your date, your budget and your headcount. · <b>${esc(e.n)}</b></p>
-        <div class="lens">${MKTTABS.map(([k])=>`<button class="chip" data-a="mkttab" data-v="${k}"
-          data-on="${S.mktTab===k}">${esc(nm(k))}</button>`).join('')}</div>
-        <p class="sub" style="margin:2px 0 16px">${esc(S.replan&&altBlurb?altBlurb:blurb)}</p>
-        <div class="tiles">${MKTBODY[S.mktTab].map(([n,b,p])=>`<div class="tile">
-          <span class="n">${esc(n)}</span><b>${esc(b)}</b><p>${esc(p)}</p></div>`).join('')}</div>
-        <div class="tile" style="margin-top:16px"><b>Two of these four have a second name waiting.
-          Your call — press it and see.</b>
-          <div style="margin-top:11px;display:flex;gap:9px;flex-wrap:wrap;align-items:center">
-            <button class="chip" data-a="replan" data-on="${!S.replan}">Compare · Budget</button>
-            <button class="chip" data-a="replan" data-on="${S.replan}">Plans · Payments</button>
-            <span style="font-size:12.5px;color:var(--m2)">the words change, nothing else does</span></div>
-          <p style="margin-top:11px"><b>Plans</b> instead of Compare, because what a couple keeps is a
-          <em>named plan</em> — "the careful one", "the one with the band" — and they load one back.
-          Compare was the name of the looking, not of the thing.</p>
-          <p style="margin-top:8px"><b>Payments</b> instead of Budget, because on this page it is
-          what is paid and what is due. <b>The budget itself — the number you are aiming at — is the
-          Budget link further down the rail.</b> Two different jobs, so two different words.</p>
-          <p style="margin-top:8px;font-size:12.5px;color:var(--m2)">Either way every link keeps
-          working: this only changes what a person reads.</p></div>
-        <div class="tile" style="margin-top:14px"><b>These four sit in the page, not the rail.</b>
-          <p style="margin-top:6px">Same rule as a samahan's three: the rail names where you are,
-          the page carries its own tabs.</p></div>`;}
+        <div class="mchips">${MKTSECTIONS.map(([k,l])=>`<button class="chip" data-a="mkgo"
+          data-v="${k}" data-on="${S.mktAt===k}">${esc(l)}</button>`).join('')}
+          <span class="mnote">proposed — jumps you there, never swaps the page</span></div>
+        <div class="mcols"><div class="mleft">${sec('shortlist')}
+            <div class="tile"><b>The bench is the long half — it scrolls.</b>
+              <p style="margin-top:6px">Ten folders, about fifty kinds of service. That is why the
+              other three sit beside it rather than under it.</p></div></div>
+          <div class="mright">${sec('build')}${sec('compare')}${sec('budget')}
+            <div class="tile"><b>This column is narrow, and one thing does not fit in it.</b>
+              <p style="margin-top:6px"><b>Your plans</b> is a side-by-side table, and side-by-side
+              needs width. Today it is squeezed in here. Moving it under the bench, full width, is
+              the one change worth your eye.</p></div></div></div>
+        <div class="tile" style="margin-top:16px"><b>I drew this wrong the first time, and the
+          correction matters.</b>
+          <p style="margin-top:6px">I showed four tabs you press between, and offered you a choice
+          of names as if it were still open. Neither is true: the tabs became one page last month,
+          and <b>you turned on "Plans" and "Payments" on 28 July</b> — they are what couples have
+          been reading ever since. Building from my old drawing would have undone your own
+          decision.</p></div>`;}
+
     if(S.evTab==='guests'){
       const i=GUESTSTAGES.findIndex(x=>x[0]===S.gstStage), st=GUESTSTAGES[i<0?0:i];
       const [,lbl,blurb,tiles]=st;
@@ -902,10 +911,9 @@ document.addEventListener('click',e=>{
   if(a==='go'){S.view=v;S.ev=null;if(v==='shop')S.shopTab='overview';if(v==='hq')S.hqTab='overview';
     if(v==='people'){S.peopleTab='connections';S.samId=null;}}
   else if(a==='openev'){S.ev=v;S.evTab='home';}
-  else if(a==='evtab'){S.evTab=v;if(v==='market')S.mktTab='shortlist';if(v==='guests')S.gstStage='build';}
+  else if(a==='evtab'){S.evTab=v;if(v==='market')S.mktAt='shortlist';if(v==='guests')S.gstStage='build';}
   else if(a==='gstage'){S.gstStage=v;}
-  else if(a==='mkttab'){S.mktTab=v;}
-  else if(a==='replan'){S.replan=!S.replan;}
+  else if(a==='mkgo'){S.mktAt=v;}
   else if(a==='shoptab'){S.shopTab=v;}
   else if(a==='hqtab'){S.hqTab=v;}
   else if(a==='peopletab'){S.peopleTab=v;S.samId=null;}
