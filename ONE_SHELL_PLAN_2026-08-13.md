@@ -57,7 +57,7 @@ Mobile already has its locked bottom-nav grammar; converting it would be a bluep
 | Slice | Scope | Why this order |
 |---|---|---|
 | **0 · the proof** ✅ **DONE 2026-08-14** | **~15 pages** — the events board + the account spokes | **SHIPPED — PR [#4429](https://github.com/iscasasola/setnayan-platform/pull/4429), merge `2c607805e`, verified an ancestor of `origin/main`.** Do NOT rebuild it. `DECISION_LOG.md` 2026-08-14. **Exactly what he pressed when he complained.** ⚠ One correction to this row's own premise: these layouts mount no RAIL chrome, but `(account)` does render a slim top bar and the launcher page renders its own one-line rail — both were **kept**, and the rail was added beside them, because that launcher rail carries the ⌘K command bar and the only sign-out on the surface. The app variant therefore ships **rail-only, no top bar**. |
-| 1 | event tree, ~110 pages | Carries the two-level owner look |
+| **1 · the event tree** ✅ **DONE 2026-08-14** | **~110 pages** | **SHIPPED — PR [#4430](https://github.com/iscasasola/setnayan-platform/pull/4430), merge `89951f746`, verified an ancestor of `origin/main`, and production self-reports it (`/api/health` → `89951f7`). Do NOT rebuild it.** The event's menu was NOT redrawn: `customer-nav-config.ts` already gave the three named sections and the rail was pointed at them. ⚠ Two corrections to this row's own premise: (a) `SidebarShell` is **not** removed from the event tree and must not be — it wraps content at ALL widths and carries the app's only `.sn-vt-page` plus `[data-shell-main]`, so dropping it breaks the PHONE at widths where the rail never paints; a new `desktopRailExternal` prop hands over the desktop column instead. (b) Removing the desktop sidebar header takes the **only sign-out on the couple's desktop** with it (the plaque), so the top-bar `AccountSwitcher` lost its `lg:hidden`. |
 | 2 | vendor-dashboard, 63 | Mechanical repeat |
 | **3 · admin, 108** 🔶 **BUILT 2026-08-14 · IN REVIEW, NOT MERGED** | admin, 108 pages | **PR [#4431](https://github.com/iscasasola/setnayan-platform/pull/4431) — open, auto-merge deliberately NOT armed** (round 2 of the ten-session plan runs 3·4·5·6 in parallel; a human looks before any of them merges). ⚠ **Do not read this row as shipped until `git merge-base --is-ancestor` says so** — a status line in this corpus was wrong in BOTH directions this week. ✅ Corrections to this row's own premise: the sweep jobs are **12, not ~10** (measured), and they are now held by a counting guard rather than by memory. Three things `SidebarShell` silently owned had to be re-homed, not just the sweeps: the **sticky top bar + the owner-locked hide-on-scroll rule** (the `topBar` SLOT owned them, not the bar), **`.sn-vt-page`** (the mobile page-slide names exactly one element — losing it leaves the tap animating nothing), and **the desktop account menu** (it opened from the retired HQ plaque, and the pill was `lg:hidden` — it is the only sign-out on that doorway, now shown at every width). Nothing about the six-menu structure was redrawn. |
 | 4 | retirement | Delete `sidebar-shell.tsx`, the collapse key, the Atelier glass with no consumers |
@@ -90,7 +90,11 @@ Mobile already has its locked bottom-nav grammar; converting it would be a bluep
   the shell would de-cache.
 - **Full-bleed working surfaces stay full-bleed inside the content column**: the website editor,
   seat-plan 2D/3D (locked coordinate contract — verify the canvas math is container-relative
-  before slice 1), Live Studio control, day-of mode. Plus `/login` and `/onboarding` — the seam's
+  before slice 1 — ✅ **VERIFIED 2026-08-14, it is**: canvas width comes from a `ResizeObserver`
+  on the canvas element itself and `SeatingFrame` re-measures its own top offset on resize, so a
+  narrower content column re-derives metres-per-pixel rather than drifting. Do not re-check),
+  Live Studio control (a top-level `/panood` route — it never saw the dashboard layout at all),
+  day-of mode. Plus `/login` and `/onboarding` — the seam's
   whole point is that sign-in happens **over** pages, not inside a chrome.
 
 ---
@@ -104,7 +108,17 @@ Mobile already has its locked bottom-nav grammar; converting it would be a bluep
 > button in the shared chrome yet, and `[data-chrome='app']` **unsets** the
 > inherited typeface so the rail keeps the front-door face while content columns
 > keep Hanken — the plan's own recommendation, confined to chrome, and reversible
-> in one CSS block. #4 (the two-level model) arrives with slice 1.
+> in one CSS block. ~~#4 (the two-level model) arrives with slice 1.~~
+>
+> **STATUS after slice 1 shipped (2026-08-14).** **#4 is BUILT AND LIVE, AND
+> AWAITS THE OWNER'S EYE — it is not closed.** The rail PUSHES the event group
+> with the account rows still visible, which is what the owner asked for and is
+> the one place this diverges from the approved seam prototype (that prototype
+> draws a wholesale swap). Shipped in PR
+> [#4430](https://github.com/iscasasola/setnayan-platform/pull/4430) and flagged
+> in its body. **Reversing it to the swap is one line** — the `railContext`
+> branch in `front-door-shell.tsx`. #2 and #3 remain open and remain undecided
+> in code.
 
 1. **Log the supersession.** The rail returns to the user home and account spokes, reversing the
    2026-07-09/13 no-sidebar rulings. His 2026-08-13 sentences already say it; record it so no
