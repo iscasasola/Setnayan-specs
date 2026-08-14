@@ -1,6 +1,6 @@
 # Event Overview — Model Council Verdict & Redesign
 
-**Date:** 2026-07-12 · **Surface:** couple Event Overview / Home (`/dashboard/[eventId]`) · **Status:** Phase-1 redesign SHIPPED (PR on `feat/overview-council-redesign`); Phases 4–7 are staged follow-ups.
+**Date:** 2026-07-12 · **Surface:** couple Event Overview / Home (`/dashboard/[eventId]`) · **Status:** ✅ **ALL BUILD PHASES SHIPPED.** Phases 1 · 2 · 3 · 7 in July; Phases 4 · 5 · 6 and the "What's next" fold on **2026-08-14** — see the build notes under § Build phases before acting on anything below, which records two claims in this document that were wrong by then.
 
 > Owner prompt: pointing at the "Around your event" band — *"does not expand and collapse. Let us start with event overview. Use the council to strategically design this page."* Then: *"fix everything."*
 
@@ -42,7 +42,7 @@ Desktop: Hosts + a 2×2 grid of fixed-slot doorway tiles (Team · Conversations 
 1. **Reorder** Decisions above / Journey below the band — *shipped* (hero greeting preserves pacing).
 2. **Event-type scoping** with an **event-word fallback** (no wedding "of 21" for other types; per-type maps staged) — fallback *shipped*.
 3. **NO inline checkout / Setnayan-AI paywall teaser on the free Overview** (Setnayan AI = ₱1,499 one-time per event, owner-locked 2026-07-12) — the doorstep routes into the Studio; Free stays complete. *Honored (nothing funnel-like added).* ⚠️ load-bearing monetization call — flagged for explicit confirmation.
-4. **Day-of takeover** may recede the planning stack when `getLifecyclePhase==='dayof'` — *deferred* (Phase 6, touches `page.tsx` + `/live`).
+4. **Day-of takeover** may recede the planning stack on the day — ✅ *shipped 2026-08-14* (Phase 6). ⚠ The resolver is `getMenuLifecyclePhase`, **not** `getLifecyclePhase` as originally written here: that name now belongs to a different function driving the public website.
 5. **Reserve a non-gold urgency hue** — using the existing `warn` (amber) scale for urgency/unread so it survives wine→gold. *Honored.*
 6. **Event-scoped unread** for Conversations (real vendor threads, not account-wide) — *shipped*.
 7. **Hosts** presence — kept as the owner's recently-shipped card (not demoted to a thin bar), with auto-density + stretched link. *Shipped as card.*
@@ -54,16 +54,47 @@ Desktop: Hosts + a 2×2 grid of fixed-slot doorway tiles (Team · Conversations 
 | 1 De-dup + one action list + reorder | Decisions above Journey; bento Decisions → jump-anchor; inbox≠decision | **Shipped** |
 | 2 Endowed honest empty states | hopeful one-liners on every band tile; event-word fallbacks | **Shipped (band)** |
 | 3 Band auto-density + navigate-out + masking footnote | stretched links, urgent-float, global masking note | **Shipped** |
-| 4 Shape-honest widgets + reskin token | Budget mini-donut, Guests segmented RSVP bar; reserved `--urgent` | Deferred |
-| 5 Event-type breadth | per-type plan-group/role maps behind the event-word fallback | Deferred (fallback shipped) |
-| 6 Day-of true takeover | recede planning `EventDashboard` on the day; lead with the live grid + jump to `/live` | Deferred |
+| 4 Shape-honest widgets + reskin token | Budget mini-donut, Guests segmented RSVP bar; urgency hue | **Shipped 2026-08-14** |
+| 5 Event-type breadth | per-type plan-group/role maps behind the event-word fallback | **Shipped 2026-08-14** (plan-group half had already shipped — see below) |
+| 6 Day-of true takeover | recede planning `EventDashboard` on the day; lead with the live grid + jump to `/live` | **Shipped 2026-08-14** |
 | 7 Conversations honesty (rode Phase 3) | vendor-thread-scoped unread | **Shipped** |
-| — | Fold AI "What's next" rail into the Decisions board | Deferred |
+| — | Fold AI "What's next" rail into the Decisions board | **Shipped 2026-08-14** |
+
+### Phase 4–6 build notes (2026-08-14)
+
+⚠ **Phase 5 was half-built when it was written down as unbuilt.** The per-type
+**plan-group** map ships, is wired into the Overview and is unit-tested
+(`lib/plan-groups-by-event-type.ts`), backed by 74 of 75 tier-2
+`service_categories` rows carrying an `applicable_event_types` allow-list in
+production. Only the **role** map was missing. A later brief restated the whole
+row as never built; RULE 0 caught it. **Nothing was rebuilt.**
+
+⚠ **`--urgent` was never a token.** Sign-off #5 reserved the *existing* amber
+`warn` scale, and that is what shipped (`--sn-warning`). A grep for `--urgent`
+across `apps/web` returns zero. Do not add one — a test now asserts the RSVP
+segments never reach for a gold token, which is what the sign-off was protecting.
+
+⚠ **This document names `getLifecyclePhase` for Phase 6 (sign-off #4). That
+function was renamed** to `getMenuLifecyclePhase`, because a *different*
+function of the old name lives in `lib/invitation-widgets.ts` and drives the
+public website. Following this doc literally imports the wrong one.
+
+🔑 **The shapes were backwards, which is the whole point of "shape-honest".**
+Guests (a four-state split) had the ring; Budget (a genuine part-of-whole) had
+the flat bar. They swapped. `ProgressRing` was already an inline-SVG donut, so
+Phase 4 added no new primitive.
+
+🔑 **Host roles are constrained in the DATABASE, not the dropdown.**
+`event_moderators.role_subtype` carries a CHECK constraint; widening the
+TypeScript list alone produces an invite the database rejects and the host reads
+as "please try again". The two are now pinned to each other by a db-test that
+fails in both directions.
 
 ## Open risks
 
 - Reorder changes the emotional pacing established by the endowed-progress work — mitigated by keeping the hero greeting; owner can veto.
 - The whole-card stretched link makes row text non-selectable on the band tiles (acceptable for doorway tiles).
-- Per-type category maps not yet built — the event-word fallback prevents the breadth bug in the interim but non-weddings get a plainer count.
+- ~~Per-type category maps not yet built~~ ✅ **CLOSED.** The category map shipped earlier than this line ever admitted (`lib/plan-groups-by-event-type.ts`, sourced from `service_categories.applicable_event_types`); the per-type **host role** map shipped 2026-08-14. Non-weddings no longer get a wedding-shaped count *or* a wedding-shaped role picker.
+- ⏭ **Open, named not built:** promoting a booked coordinator to a host still assigns the `wedding_planner_external` role on every event type. It is a vendor-promotion path rather than the host picker, and giving it a generic role is its own product decision.
 
 *Full council material (all 5 designs + 3 critiques + synthesis) archived in the session workflow transcript `wf_3bbfe7e9-f9a`.*
