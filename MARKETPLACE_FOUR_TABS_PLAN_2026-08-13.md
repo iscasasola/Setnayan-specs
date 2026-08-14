@@ -10,6 +10,36 @@ Surface: `/dashboard/[eventId]/vendors` — the couple Marketplace takeover. She
 
 ---
 
+> ## 🛑 0 · RULE 0 FAILED ON THE PLAN ITSELF — owner, 2026-08-14
+>
+> *"we already had plans for the guests, overview, marketplace and studio."* **Correct, and this
+> document should not have been commissioned without reading them first.** RULE 0 says assume the
+> thing already exists — that applies to a PLAN as much as to a component.
+>
+> **[`Explore_IA_Replan_2026-07-27.md`](Explore_IA_Replan_2026-07-27.md) § 0 already stated, on
+> 27 July, the exact ground truth Fable spent this session re-deriving from code:** *"a
+> **single-scroll takeover**, not tab-switching — four stacked sections … Desktop: bench left, the
+> other three in a sticky 380px right rail."* One grep of the corpus would have produced it.
+>
+> **What this document is still worth:** it is a *verification* pass, not a design. It caught two
+> live errors in MY prototype (a tab strip that no longer exists; the Plans/Payments rename drawn
+> as an open question two weeks after the owner decided it), measured the surface against prod, and
+> produced the slice order. The DESIGN was already settled in July. Read this as "what is true now
+> and what is left", and read the July docs for "what it should be".
+>
+> ### The four plans, and their real state (checked 2026-08-14)
+>
+> | Surface | The plan that already existed | State |
+> |---|---|---|
+> | **Overview** | [`Event_Overview_Council_Verdict_2026-07-12.md`](Event_Overview_Council_Verdict_2026-07-12.md) · prototype `prototypes/event_dashboard_v2_2026-07-15.html` | Phase 1 **SHIPPED**. **Phases 4–7 are staged follow-ups, not done.** |
+> | **Guests** | [`Guests_Search_Consolidation_Council_Verdict_2026-07-13.md`](Guests_Search_Consolidation_Council_Verdict_2026-07-13.md) · prototype `prototypes/guests_living_roster_2026-07-10.html` | 🔴 **NOT BUILT. Three owner sign-offs open since 13 July** — one of them supersedes a lock that was two days old at the time. |
+> | **Studio** | [`Event_Studio_Replot_Council_Verdict_2026-07-17.md`](Event_Studio_Replot_Council_Verdict_2026-07-17.md) | 5 duplicate cards found. **Sign-off #1 approved** (tab composition). **Sign-off #2 — the website consolidation, 5 doorways for 1 product — never answered**, and the Tab-1 refile it gates never shipped. |
+> | **Marketplace** | [`Explore_IA_Replan_2026-07-27.md`](Explore_IA_Replan_2026-07-27.md) → `Explore_Replan_BUILD_SPEC_2026-07-27.md` → `Explore_Integration_BUILD_SPEC_2026-07-29.md` | **Designed, built, wave CLOSED 2026-07-30.** The only one of the four that finished. |
+>
+> 🔑 **The bottleneck on three of these four is not design and not engineering — it is unanswered
+> owner questions.** Guests has three, a month old. Studio has one. Nothing was blocked on more
+> planning.
+
 ## 1 · What the brief (and the prototype) got wrong
 
 **1.1 · The four "tabs" are not tabs.** Since 2026-07-09 the surface is ONE SCROLL of four stacked
