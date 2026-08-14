@@ -53,6 +53,12 @@ Price is a **pill, never the sort key**. One pill per card, precedence **Active 
 
 **Respected:** App Store metaphor (2026-06-19) · four-tab sub-nav labels + count (2026-06-17) · first-section-only tall hero · coming-soon sink · pill vocabulary (extended, not replaced) · top-of-page stack (one additive Alaala deep-link only) · wayfinding rule (every deletion ships with 301 + in-card doorway + re-plumbed strips, same PR).
 
+> ✅ **BOTH SIGN-OFFS ARE NOW CLOSED (2026-08-14).** #1 approved 2026-07-17. **#2 — the website
+> consolidation — APPROVED 2026-08-14**, owner: *"yes. same as the menu on admin and shop."* The
+> "Whole website" card + the four part-cards are five doorways for one product; they become ONE
+> free **"Your Website"** card with chips + 301s, and the Tab-1 refile it gated is unblocked.
+> **Nothing below is still waiting on the owner.** See `DECISION_LOG.md` 2026-08-14.
+
 **⚠ Challenged — owner sign-off required before build:**
 1. **Section COMPOSITION of the 2026-06-17 lock** (not labels, not count): Mood Board / Seat Plan / Indoor Blueprint move Branding → Setnayan AI tab. Fallback specified (§2.5) so the arrangement isn't hostage to the sign-off.
 2. **Card deletions within locked sections**: Whole-website consolidation; Event, Editorial, Editorial PRO, Music Creator cards retire.

@@ -4,7 +4,12 @@
 **Trigger:** Owner spotted two identical search boxes on the desktop Guests (Living Roster) page — "guests already has find on top and there is search on the center?"
 **Owner leaning going in:** Option 1 — delete the Toolbar's duplicate search; keep Sort + Apply + List/Mind-map; search lives only in the CaptureBar's Find mode + ⌘K.
 **Council:** 4 lenses (IA/interaction · front-end/risk · a11y/discoverability skeptic · product/consistency) → chair synthesis.
-**Status:** Recommendation. Not built. 3 owner sign-offs open (§ Owner sign-offs). One supersedes a 2-day-old lock.
+**Status:** ✅ **ALL THREE SIGN-OFFS APPROVED 2026-08-14** — owner: *"yes. same as the menu on
+admin and shop."* Search is always visible, the `Add|Find` toggle dissolves (CaptureBar goes
+Add-only, search moves to the facet-bar query row — **this supersedes the 2026-07-11 lock**), and
+Apply + full-reload Sort are retired for instant URL-driven controls. **BUILD IS UNBLOCKED.**
+⚠ The sign-offs sat open for a MONTH because nobody put them in front of the owner — not because
+anything was undecided. See `DECISION_LOG.md` 2026-08-14.
 
 ---
 
