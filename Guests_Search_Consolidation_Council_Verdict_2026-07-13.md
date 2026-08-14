@@ -4,12 +4,21 @@
 **Trigger:** Owner spotted two identical search boxes on the desktop Guests (Living Roster) page — "guests already has find on top and there is search on the center?"
 **Owner leaning going in:** Option 1 — delete the Toolbar's duplicate search; keep Sort + Apply + List/Mind-map; search lives only in the CaptureBar's Find mode + ⌘K.
 **Council:** 4 lenses (IA/interaction · front-end/risk · a11y/discoverability skeptic · product/consistency) → chair synthesis.
-**Status:** ✅ **ALL THREE SIGN-OFFS APPROVED 2026-08-14** — owner: *"yes. same as the menu on
-admin and shop."* Search is always visible, the `Add|Find` toggle dissolves (CaptureBar goes
-Add-only, search moves to the facet-bar query row — **this supersedes the 2026-07-11 lock**), and
-Apply + full-reload Sort are retired for instant URL-driven controls. **BUILD IS UNBLOCKED.**
-⚠ The sign-offs sat open for a MONTH because nobody put them in front of the owner — not because
-anything was undecided. See `DECISION_LOG.md` 2026-08-14.
+**Status:** ✅ **APPROVED 2026-08-14 — AND ALREADY BUILT, ON 2026-07-13, THE DAY THIS WAS
+WRITTEN.** Commit `d8b42c890` *"refactor(guests): one always-visible search — retire duplicate +
+Add|Find toggle"*. Verified in code at `origin/main` `3ca1af296`: `guests-search.tsx` exists with
+a `role="search"` landmark and the ⌘K listener; `sort-select.tsx` writes `?sort=` via
+`router.replace`; the `Toolbar` function, its second `<LiveSearch>`, the `<form method="get">` and
+the **Apply** button are all gone; `capture-bar.tsx` retains only two *comments* naming the
+retired `[Add | Find]` toggle.
+🛑 **THIS HEADER SAID "Recommendation. Not built. 3 owner sign-offs open" FOR A MONTH WHILE THE
+CODE HAD SHIPPED IT** — and on 2026-08-14 a session (mine) read that line, told the owner three
+decisions were blocking work, took his approval, and wrote it into `DECISION_LOG.md` as an
+unblocking. **All three were already true in production.** The approval is still worth recording —
+it ratifies the supersession of the 2026-07-11 lock — but it unblocked nothing.
+🔑 **A DOC'S OWN STATUS LINE IS NOT EVIDENCE. Check the code before reporting a gate as open** —
+the same failure shape as a closed gate still reading open, which this corpus already records
+three times.
 
 ---
 
