@@ -96,7 +96,8 @@ A *documented, deliberate* dead table, not a new gate-with-no-handle.
 #3877 · #3878 · #3879 · #3882 · #3883 · #3886 · #3889 · #3894 all landed; the five owner decisions
 of that wave are settled. This is a fresh redesign pass over a finished surface, not a resumption.
 
-**1.9 · Compare's "dates that work" footer is unreachable on current prod data.** It renders only
+**1.9 · Compare's "dates that work" footer is unreachable on current prod data.** ✅ **ANSWERED 2026-08-14 (slice 5, PR [#4436](https://github.com/iscasasola/setnayan-platform/pull/4436)):** the window row is left exactly as-is and a SECOND row now covers day-precision — *"Everyone here is free" / "{who} booked that day"* — so a committed date finally gets an answer. The two are mutually exclusive by precision.
+ It renders only
 for `event_date_precision` = year/month; both real wedding events are now `'day'` (verified live).
 Dormant, not broken. See §3.4 / §7 slice 5.
 
@@ -246,6 +247,20 @@ for an anchored date the useful sentence is different — "everyone in this plan
 nothing to migrate.
 **Delta:** slices 3 + 5 (§7). Mechanics unchanged.
 
+> ⚖ **AMENDED 2026-08-14 — slice 3 shipped, and it MOVED PLANS AFTER PAYMENTS AT EVERY WIDTH.**
+> `Explore_Integration_BUILD_SPEC_2026-07-29.md` §3 ordered the sections Bench → Your team →
+> Your plans → Payments, reasoning that Plans "sits next to the team it branches from" and that
+> Payments "closes the journey rather than interrupting it". Moving Plans full-width under both
+> columns necessarily reorders it on **desktop** — that is the requested change. Leaving **mobile**
+> on the old order would have required rendering Plans in two places, and `lg:hidden` +
+> `hidden lg:block` is `display`, not conditional rendering: **both copies stay in the DOM**,
+> giving duplicate `#svc-compare` ids and two mounts of the panel's client state. So mobile
+> follows desktop rather than the two disagreeing.
+> 🔑 The §3 order is superseded for Plans only, and deliberately: a side-by-side table that does
+> not fit its column is worse than a table in the "wrong" position. **The owner is judging exactly
+> this.** If he wants the old order back, the honest options are (a) accept Plans in the rail, or
+> (b) split Payments out of the rail — not a second mount.
+
 ---
 
 ## 4 · The seams between the sections
@@ -318,11 +333,11 @@ any flag-adjacent slice.
 | # | Size | Files (≈) | What ships | Owner judges |
 |---|---|---|---|---|
 | 0 | XS | 2 + log | **Truth alignment**: fix the prototype's Marketplace (one scroll, two columns, Plans/Payments canon, no toggle); fix the stale nav-slot claim in `lib/budget-build.ts:92`; `DECISION_LOG` row for label canon | nothing visible — but the next session builds the right world |
-| 1 | S | ~3 | **Masthead + section chips, in page**: crumb · H1 "Marketplace" · sub-line · four chips reading `tabLabel()`, wired to the EXISTING bus/anchors (scroll, never swap). Desktop above the two columns; mobile above the bench (team chip stays). Closes S1 | the wayfinding row, on desktop and phone |
-| 2 | M–L | ~6 | **Warm-editorial re-skin** (class-level, no logic): `shortlist-categories` · `build-locked` · `build-compare` · `merkado-budget-lens` · `quote-fill` · `team-controls` to the flat-cream grammar Overview got 2026-08-08; + the crest honesty string | the look, side by side with Overview |
-| 3 | M | ~3 | **Plans out of the rail (desktop)** — THE ONE OWNER LOOK: `compareSlot` renders full-width under the bench column at lg+ (rail keeps team + payments), or expands-in-place to full width. Anchors/bus/keys unchanged (they resolve by id, not DOM position) | a side-by-side that actually fits |
+| 1 | S | ~3 | ✅ **DONE 2026-08-14 · PR [#4436](https://github.com/iscasasola/setnayan-platform/pull/4436).** The page mounted **no `<h1>` at all** (the only h1s under `vendors/` are its SUB-routes) — so this landed the shipped `<PageMasthead>` plus four chips driving the EXISTING bus. Original scope: **Masthead + section chips, in page**: crumb · H1 "Marketplace" · sub-line · four chips reading `tabLabel()`, wired to the EXISTING bus/anchors (scroll, never swap). Desktop above the two columns; mobile above the bench (team chip stays). Closes S1 | the wayfinding row, on desktop and phone |
+| 2 | M–L | ~6 | ✅ **DONE 2026-08-14 · PR [#4436](https://github.com/iscasasola/setnayan-platform/pull/4436).** Root cause found: the 2026-08-08 pass was ONE edit to `.sn-tile`/`.sn-card`, and this surface carried **zero** of those classes, so it was never reached. Original scope: **Warm-editorial re-skin** (class-level, no logic): `shortlist-categories` · `build-locked` · `build-compare` · `merkado-budget-lens` · `quote-fill` · `team-controls` to the flat-cream grammar Overview got 2026-08-08; + the crest honesty string | the look, side by side with Overview |
+| 3 | M | ~3 | ✅ **DONE 2026-08-14 · PR [#4436](https://github.com/iscasasola/setnayan-platform/pull/4436) — ⚖ STILL THE OWNER LOOK.** Original scope: **Plans out of the rail (desktop)** — THE ONE OWNER LOOK: `compareSlot` renders full-width under the bench column at lg+ (rail keeps team + payments), or expands-in-place to full width. Anchors/bus/keys unchanged (they resolve by id, not DOM position) | a side-by-side that actually fits |
 | 4 | S | ~3 | ✅ **DONE 2026-08-14 · PR [#4435](https://github.com/iscasasola/setnayan-platform/pull/4435) — do NOT rebuild.** **Payments onto the resolver**: `MerkadoBudgetLens` reads `resolveEventMoney` behind `NEXT_PUBLIC_BUDGET_TRUTH_ENABLED` through the same pure core + degrade-to-legacy rule `budget/page.tsx` uses. Gap it closed, measured live: **₱80,000** on prod event `044f7e64…`. See §3.3 for the parity-harness caveat and the one copy call left open | same numbers on both money surfaces (flag preview) |
-| 5 | S | ~2 | **Anchored-date line for Plans**: per-column verdict for day-precision events ("free on your date" / names the booked vendor), reusing `getBatchVendorAvailableDays` | the sentence appears on his real event |
+| 5 | S | ~2 | ✅ **DONE 2026-08-14 · PR [#4436](https://github.com/iscasasola/setnayan-platform/pull/4436).** Pure core `lib/compare-anchored-date.ts`, reusing `dateFitByVendorId` — no new query. Original scope: **Anchored-date line for Plans**: per-column verdict for day-precision events ("free on your date" / names the booked vendor), reusing `getBatchVendorAvailableDays` | the sentence appears on his real event |
 | 6 | L | own spec | **PR-H vendor-agrees** — build ONLY from `PR_H_Lock_Request_Handshake_BUILD_SPEC_2026-08-04.md` after its 14 HIGH plan defects are re-planned; lands in the team's reserved slot. Separate wave; named here because the Build section's honesty depends on it | a lock that asks the vendor |
 
 **Deliberately NOT sliced:** retiring the kill-switch/legacy accordion; folding the replan flag; any
