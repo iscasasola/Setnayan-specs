@@ -1,5 +1,23 @@
 # What is left on setnayan.com — verified 15 August 2026
 
+> # ⚠ CORRECTION, SAME DAY — read before acting on any line
+>
+> Every measurement below was taken against `784c41139`, the commit production served at **07:54Z**,
+> and is correct **for that commit**. **20+ PRs merged between the snapshot and delivery.** Prod is
+> now `ce5ee9b`. Confirmed changes to this register:
+>
+> | Item | Correction |
+> |---|---|
+> | **§2 item 21 — retire the old sidebar** | ✅ **DONE.** PR #4451 merged 2026-08-15T10:08:18Z. `apps/web/app/_components/nav/sidebar-shell.tsx` **does not exist at `origin/main`**. Do not run it. |
+> | **§1 item 01 / §2 item 19 — the supplier handshake** | **Started, not "not started".** PR #4470 (PR-H slice A, **flag-dark**) merged 16:00:32Z; #4459 fixed the promise copy. Re-measured: `vendor_agree_to_lock` **3** callers, `vendor_decline_lock` **2**, `lock_request_state` **4** — **the gate-with-no-handle is CLOSED**. Still open: `cancel_vendor_lock_request` **0** callers, and `LOCKED_STATUS = 'contracted'` still stands (`vendors/actions.ts:638`) because the flag is off — **so the live harm is unchanged today**. |
+> | Everything else | **NOT re-checked at the new head.** Assume more has moved. |
+>
+> 🔑 **The failure was structural, and it is the one this file is about.** A worktree was pinned for
+> the whole audit, so it could only ever describe 07:54Z — and **the memory index already said
+> "`SidebarShell` IS DELETED — PR #4451"** and was not reconciled against.
+> ⇒ **Pin a checkout to READ CODE. Never pin one to ASSERT CURRENT STATE.** Re-fetch and re-check
+> every "still open" claim in the minutes before delivering, not at the start.
+
 > Owner: *"we have unfinished tasks that did not complete on the website of setnayan.com"*
 >
 > **Supersedes the status lines in [`WEBSITE_ADJUSTMENTS_2026-08-14.md`](WEBSITE_ADJUSTMENTS_2026-08-14.md)**

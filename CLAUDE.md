@@ -532,6 +532,47 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > **41 open: 14 need the OWNER (a signature, a price, a ruling — no engineering
 > left), 24 need engineering, 3 are blocked on an outside party.**
 
+> ### ⏸ 2026-08-16: PR-H IS BUILT AND WAITING ON ONE OWNER PRESS — do NOT rebuild it
+> **Slice A [#4470](https://github.com/iscasasola/setnayan-platform/pull/4470) (merged) +
+> slice B [#4479](https://github.com/iscasasola/setnayan-platform/pull/4479). BOTH FLAG-DARK.**
+> A couple pressing **Lock** now ASKS the supplier, and the supplier's yes is what
+> makes the booking. Full row: `DECISION_LOG.md` 2026-08-16.
+>
+> ⚖ **THE ONLY THING LEFT IS THE OWNER LOOKING AND FLIPPING
+> `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED` IN VERCEL.** Nothing changes for anybody
+> until he does — flag-off is *asserted* byte-identical to today, not assumed.
+> ⚠ **Its production value is NOT readable from a session** (it inlines at build
+> time, and the surfaces sit behind logins). **Do not report it as off because the
+> code default is off** — read it in the hosting settings and say which you did.
+>
+> 🔴 **`cancel_vendor_lock_request` HAD ZERO CALLERS FOR ITS WHOLE LIFE** — granted,
+> commented, db-tested, and unreachable, so a couple could not un-ask. **A forward
+> primitive with no inverse.** 🔑 A granted RPC nothing calls is **a gate with no
+> handle in a different costume**: it typechecks *because it is SQL*, and its db
+> tests pass *because a db test calls it directly*. New guard
+> `lib/rpcs-have-callers.test.ts` asks the only question that finds it — **does any
+> application code call this?** Register a row there when you add one.
+>
+> 🚨 **THE LOCK PATHS WERE FIVE, NOT TWO, AND THE LIST CAME FROM A COLUMN.**
+> Grepping every writer of `status='contracted'` found two the briefs never
+> mentioned (the wizard's *Lock this vendor* and its booth lock). **Never work from
+> a remembered list of paths; grep the column.** Assume a sixth.
+>
+> 🔒 **AN ASKED SUPPLIER MUST NOT GET THE VENUE ADDRESS OR THE RUN-OF-SHOW.** The
+> two-word "obvious repair" (adding `'pending'` to the BOOKED predicate in
+> `get_vendor_event_brief`) hands both to somebody who can still decline. The new
+> `'requested'` rung deliberately has **NO PAYLOAD OF ITS OWN** — one shared
+> pre-agreement build object, so the ceiling is structural. **Do not give it one.**
+> 🔑 **A test that only checks the happy stage passes while leaking** — assert what
+> the payload does NOT contain, on an event seeded WITH the secrets.
+>
+> ⛔ **NOT in scope and not oversights:** deposit-at-lock · `max_soft_holds_per_date`
+> (zero writers, and the vendor-settings route its own comment names does not
+> exist) · a supplier cancelling their own verification application. And the
+> `status` forgery bypass is **ASSERTED IN A PASSING TEST ON PURPOSE** — it closes
+> when the flag-off path is retired. **If that test ever FAILS, forgery was closed
+> and the test should be DELETED, not repaired.**
+
 > ### ▶▶▶ THE REDESIGN IS RUNNING AS TEN SESSIONS — START HERE (set 2026-08-12)
 > **[`REDESIGN_SESSIONS_2026-08-12.md`](REDESIGN_SESSIONS_2026-08-12.md)** is the register.
 > 📋 **Ready-to-paste prompts, one per session:**
