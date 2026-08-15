@@ -532,9 +532,20 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > **41 open: 14 need the OWNER (a signature, a price, a ruling — no engineering
 > left), 24 need engineering, 3 are blocked on an outside party.**
 
-> ### ⏸ 2026-08-16: PR-H IS BUILT AND WAITING ON ONE OWNER PRESS — do NOT rebuild it
-> **Slice A [#4470](https://github.com/iscasasola/setnayan-platform/pull/4470) (merged) +
-> slice B [#4479](https://github.com/iscasasola/setnayan-platform/pull/4479). BOTH FLAG-DARK.**
+> ### ⏸ 2026-08-16: PR-H IS BUILT, MERGED, AND WAITING ON ONE OWNER PRESS — do NOT rebuild it
+> **Slice A [#4470](https://github.com/iscasasola/setnayan-platform/pull/4470) +
+> slice B [#4479](https://github.com/iscasasola/setnayan-platform/pull/4479), merged
+> 2026-08-15T18:21Z. BOTH FLAG-DARK.**
+> ✅ **Both slice-B migrations VERIFIED APPLIED IN PROD BY THE OBJECT**, not by
+> `schema_migrations`: the `lock_request_withdrawn` enum LABEL exists, the live
+> `get_vendor_event_brief` body carries the `'requested'` rung AND still routes it
+> through the shared `IN ('inquiry','requested')` payload, `vendor_agree_to_lock`
+> returns `package_lines_booked`, and the function COMMENT a reader queries says
+> "THREE-rung disclosure ladder".
+> 🔢 **Prod at the flip: 45 event-vendor rows · ONE with a supplier who could
+> answer · ZERO carrying any request marker · ZERO asks in flight · 13 real
+> bookings.** So flipping changes nothing retroactively — there is no in-flight
+> request to strand and no existing booking to re-open. Safe by arithmetic.
 > A couple pressing **Lock** now ASKS the supplier, and the supplier's yes is what
 > makes the booking. Full row: `DECISION_LOG.md` 2026-08-16.
 >
