@@ -1,5 +1,40 @@
 # PR-H — the vendor-agrees step · BUILD SPEC
-**Date:** 2026-08-04 · **Status:** DESIGNED, adversarially reviewed, **4 owner answers RECEIVED 2026-08-04**, BUILD NOT STARTED
+
+> # 🛑 SUPERSEDED IN PART — 2026-08-15. READ THIS BEFORE ANY SECTION BELOW.
+>
+> **§1 and §7 of this document are DEAD.** A DIFFERENT schema shipped and is **applied in
+> production**: `supabase/migrations/20271107090000_vendor_agrees_to_lock.sql` — **nine** columns
+> driven by a `lock_request_state` TEXT machine (`pending·agreed·declined·cancelled·expired`), not
+> the six timestamp markers designed here; it ships the **actor columns §1 argued against**, a
+> **materialized** expiry (§1 said derived), four CHECKs, two indexes (neither is the
+> `event_vendors_hard_single_request_uniq` designed here), a forgery trigger covering **INSERT and
+> UPDATE**, and three SECDEF RPCs — `vendor_agree_to_lock` · `vendor_decline_lock` ·
+> `cancel_vendor_lock_request`. **Do not paste §7's SQL. Do not build §1's columns.**
+>
+> **⚠ IT HAS ZERO APP CALLERS** (verified by repo-wide grep; `lock_request_state` is NULL on all 45
+> prod rows) — the sixth *gate with no handle*. **You are WIRING, not authoring.**
+>
+> **🔴 `lib/lock-handshake-flag.ts` DOES NOT EXIST.** `isLockHandshakeEnabled` has **zero** hits
+> repo-wide. "Depends on PR-I (#4083)" never landed — **building the flag is step 0.**
+>
+> **🔴 THE OWNER-LOCKED HANDSHAKE THIS SPEC NEVER CITES:**
+> [`03_Strategy/Service_Schedule_and_Quotation_Flow_2026-06-02.md`](03_Strategy/Service_Schedule_and_Quotation_Flow_2026-06-02.md),
+> seven owner decisions. Its **decision 3** — *a vendor cannot approve a lock while competing
+> requests are pending; they must explicitly DECLINE the others first, so no customer ever loses
+> silently* — is **absent from this spec and from §9's review**. Most of its funnel already ships
+> (inquiry accept/decline, the whitelist with per-tier caps). **Read it before building.**
+>
+> **✅ §9's 14 HIGH findings were re-adjudicated 2026-08-15** — some already answered by the shipped
+> schema, some falsified, most changed shape. **§6's four owner answers remain BINDING.**
+> ⚖ Timing settled: **7 days** (§6.2), which does not fight June's *"no forced expiry"* — a couple
+> may withdraw at any time and the 7 days automate that for one who does not.
+>
+> Ground truth + the revised plan (16 amendments from an 11-agent adversarial pass over the plan
+> itself) are recorded in `DECISION_LOG.md` 2026-08-15. **Verify anything here against live prod and
+> `origin/main` before acting — this file has now been wrong about scope, about a schema, and about a
+> retraction.**
+
+**Date:** 2026-08-04 · **Status:** ⚠ PARTLY SUPERSEDED 2026-08-15 (see banner) · adversarially reviewed, **4 owner answers RECEIVED 2026-08-04**, BUILD NOT STARTED
 **Parent:** `Explore_Replan_BUILD_SPEC_2026-07-27.md` §7 (PR-H). **Depends on:** PR-I (#4083) for `lib/lock-handshake-flag.ts`.
 
 > ## 🔒 THE OWNER HAS ANSWERED — §6 IS NO LONGER A QUESTION LIST
@@ -35,7 +70,17 @@
 ## 0 · The one-line problem
 A couple pressing **Lock** books the vendor outright. The vendor is never asked. The owner ruled 2026-07-27 that a lock is a **REQUEST** and the vendor must agree — steps 1, 3, 4 and 5 of the handshake all ship today; **step 2 does not exist.**
 
-## 1 · Schema decision
+## 1 · Schema decision — 🛑 DEAD (2026-08-15)
+
+> **Everything in §1 was superseded by what actually shipped.** `20271107090000_vendor_agrees_to_lock.sql`
+> is applied in prod with **nine** columns on a `lock_request_state` machine, **including the two actor
+> columns this section argues against** (they are already erasure/export-classified, so §1's decisive
+> guardrail argument is moot), a **materialized** `lock_request_expires_at`, and an index keyed on
+> `(event_id, marketplace_vendor_id)` — **not** `hard_single_group`, so nothing here stops a couple
+> opening pending requests to two different venues. Read the migration, not this section.
+
+<details><summary>Original §1 (historical — do not build)</summary>
+
 **NEW COLUMNS on event_vendors — ~~five~~ SIX nullable, orthogonal markers (lock_requested_at, lock_agreed_at, lock_request_closed_at, lock_request_closed_reason, lock_request_note, **lock_request_nudged_at**) plus two new partial indexes and ~~four~~ FIVE new SECURITY DEFINER RPCs. NO new table. NO new *_user_id column anywhere.**
 
 > ⚠ **Updated by owner answer 6.3.** The sixth column (`lock_request_nudged_at`) and the fifth RPC
@@ -58,6 +103,8 @@ A couple pressing **Lock** books the vendor outright. The vendor is never asked.
 - NEW INDEX event_vendors_hard_single_request_uniq — one PENDING request per (event_id, hard_single_group).
 - NEW INDEX event_vendors_pending_lock_request_idx — the vendor Overview feed's read path.
 - notification_type ENUM += lock_request_received (vendor), lock_request_agreed, lock_request_declined, lock_request_expired (couple).
+
+</details>
 
 ## 2 · Expiry
 SHAPE — the deadline is DERIVED (lock_requested_at + 7 days, exactly as lib/completion-handshake.ts derives its M=7d / N=30d auto-resolve from timestamps), but the expiry itself is a WRITE. That distinction is load-bearing: event_vendors_hard_single_request_uniq is a partial index and cannot see a computed deadline, so a purely-derived expiry would leave a 7-day-dead request holding the venue slot forever.
@@ -348,7 +395,19 @@ it on the sweep that already exists rather than a second scheduled signal:
 the vendor already agreed by printing it. §3 site 12's exemption stands exactly as written, including
 the requirement to write the exemption down in a comment.
 
-## 7 · The migration
+## 7 · The migration — 🛑 DEAD (2026-08-15). DO NOT PASTE THIS SQL.
+
+> **A different migration shipped and is applied in production.** Every object below either does not
+> exist under this name or exists in a different shape: there is no `request_vendor_lock`, no
+> `lock_request_closed_at` / `_reason` / `_note`, no `event_vendors_hard_single_request_uniq`, and the
+> live trigger is `event_vendors_guard_lock_handshake` (INSERT **and** UPDATE), not
+> `event_vendors_guard_lock_agreement`. Pasting this SQL would create a **second, conflicting** state
+> machine beside the live one. **Start from `20271107090000_vendor_agrees_to_lock.sql` and use
+> `CREATE OR REPLACE`.** Allocate any new prefix with `pnpm migration:new` — the head is far above the
+> `20271103100614` assumed below.
+
+<details><summary>Original §7 (historical — do not build)</summary>
+
 
 > ## ⚠ THIS SQL PREDATES THE OWNER'S ANSWERS — DO NOT PASTE IT AS-IS
 >
@@ -1074,6 +1133,8 @@ $postcond$;
 
 COMMIT;
 ```
+
+</details>
 
 ## 8 · Mapping evidence — hazards found per subsystem
 ### hard-single-gate

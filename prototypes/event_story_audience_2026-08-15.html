@@ -1,0 +1,302 @@
+<!-- Who can see your story — the four audiences. Setnayan, 2026-08-15.
+     Locked palette. Self-contained: no external requests. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who can see your story · prototype 2026-08-15</title>
+<style>
+  :root{
+    --cream:#FDFBF7;
+    --ink:#2C2A29;
+    --terra:#C24E25;
+    --gold:#A9834B;      /* DECORATION ONLY — 3.37:1 on cream. Never carries text. */
+    --gold-text:#8A6B39; /* the escalation: 4.79:1. Any gold WORD uses this. */
+    --link:#3B4E67;
+    --ink85:rgba(44,42,41,.85);
+    --ink74:rgba(44,42,41,.74);  /* 6.03:1 */
+    --ink66:rgba(44,42,41,.66);  /* 4.70:1 */
+    --ink12:rgba(44,42,41,.12);
+    --ink08:rgba(44,42,41,.08);
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--cream);color:var(--ink);font-family:var(--sans);line-height:1.5;overflow-x:hidden}
+  .wrap{max-width:64rem;margin:0 auto;padding:0 1rem}
+
+  .head{padding:2.25rem 0 1.25rem;border-bottom:1px solid var(--ink08)}
+  .kick{font-family:var(--mono);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-text);font-weight:600}
+  h1{font-family:var(--serif);font-style:italic;font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.15;margin:.4rem 0 .5rem}
+  .sub{font-size:.9rem;color:var(--ink74);max-width:44rem}
+  .tagrow{margin-top:.9rem;display:flex;flex-wrap:wrap;gap:.5rem .9rem;align-items:center;font-size:.72rem;color:var(--ink74)}
+  .tag{display:inline-block;font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:.1rem .45rem}
+  .tag-new{color:var(--terra);border:1px solid var(--terra)}
+  .tag-ships{color:var(--ink66);border:1px solid var(--ink12)}
+
+  section{padding:2.25rem 0 .5rem}
+  h2{font-family:var(--serif);font-style:italic;font-size:1.35rem;margin-bottom:.3rem}
+  .lede{font-size:.85rem;color:var(--ink74);max-width:46rem;margin-bottom:1.1rem}
+  .lede b{color:var(--ink)}
+
+  /* device frame */
+  .frame{background:#fff;border:1px solid var(--ink08);border-radius:14px;overflow:hidden;margin:1rem 0 .4rem}
+  .bar{display:flex;align-items:center;gap:.6rem;background:#F6F2EA;border-bottom:1px solid var(--ink08);padding:.5rem .8rem}
+  .dots{display:flex;gap:.28rem}.dots i{width:.55rem;height:.55rem;border-radius:50%;background:var(--ink12)}
+  .url{flex:1;min-width:0;font-family:var(--mono);font-size:.65rem;color:var(--ink74);background:#fff;border:1px solid var(--ink08);border-radius:999px;padding:.25rem .7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .who{font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink74);white-space:nowrap}
+  .body{padding:clamp(1rem,3vw,1.6rem);background:var(--cream)}
+
+  .cap{display:flex;gap:.65rem;margin:.35rem 0 1.9rem}
+  .cap i{flex:none;width:3px;border-radius:2px;background:var(--terra)}
+  .cap p{font-size:.78rem;color:var(--ink74);max-width:46rem}
+  .cap b{color:var(--ink)}
+
+  /* the chooser */
+  .opt{display:flex;gap:.85rem;border:1px solid var(--ink12);border-radius:14px;padding:.85rem .95rem;margin-top:.6rem;background:#fff;cursor:pointer}
+  .opt.on{border-color:var(--terra);box-shadow:inset 0 0 0 1px var(--terra)}
+  .radio{flex:none;margin-top:.15rem;width:1rem;height:1rem;border-radius:50%;border:2px solid var(--ink12)}
+  .opt.on .radio{border-color:var(--terra);background:radial-gradient(circle at center,var(--terra) 0 40%,transparent 45%)}
+  .opt h3{font-size:.9rem;font-weight:650;line-height:1.25}
+  .opt p{margin-top:.2rem;font-size:.76rem;color:var(--ink74)}
+  .opt .note{margin-top:.35rem;font-size:.7rem;color:var(--ink66)}
+  .opt .note b{color:var(--gold-text)}
+
+  /* audience grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.8rem;margin-top:.4rem}
+  .card{background:#fff;border:1px solid var(--ink12);border-radius:14px;padding:.95rem}
+  .card h4{font-size:.85rem;font-weight:650}
+  .card .role{font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink66);margin-bottom:.3rem}
+  .card p{margin-top:.35rem;font-size:.76rem;color:var(--ink74)}
+  .verdict{margin-top:.6rem;display:inline-block;font-size:.72rem;font-weight:650;border-radius:999px;padding:.2rem .6rem}
+  .yes{background:rgba(102,116,80,.14);color:#3F4A30}
+  .no{background:rgba(194,78,37,.12);color:#8C3413}
+
+  /* what a stranger actually lands on */
+  .locked{border:1px solid var(--ink12);border-radius:14px;background:#fff;padding:1.6rem 1.2rem;text-align:center}
+  .locked .seal{width:2.4rem;height:2.4rem;border-radius:50%;border:1px solid var(--gold);margin:0 auto .6rem;display:flex;align-items:center;justify-content:center;color:var(--gold-text);font-family:var(--serif);font-style:italic}
+  .locked h3{font-family:var(--serif);font-style:italic;font-size:1.15rem}
+  .locked p{margin-top:.35rem;font-size:.8rem;color:var(--ink74)}
+
+  .story h3{font-family:var(--serif);font-style:italic;font-size:1.4rem}
+  .story .meta{margin-top:.25rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink74)}
+  .hero{margin-top:.7rem;aspect-ratio:16/9;border-radius:12px;background:
+    linear-gradient(160deg,rgba(20,16,14,.18) 0%,rgba(20,16,14,.72) 74%),
+    radial-gradient(120% 90% at 72% 14%,#8A5A3B 0%,#5C3A2A 44%,#2E2019 100%)}
+  .story p{margin-top:.6rem;font-size:.82rem;color:var(--ink74)}
+
+  table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:34rem}
+  .scroll{overflow-x:auto;border:1px solid var(--ink08);border-radius:12px;background:#fff}
+  th,td{text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--ink08);vertical-align:top}
+  th{font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink74);background:#F6F2EA}
+  tr:last-child td{border-bottom:0}
+  td b{font-weight:650}
+  .mut{color:var(--ink66)}
+
+  .flag{margin-top:1rem;border-left:2px solid var(--terra);padding:.15rem 0 .15rem .75rem}
+  .flag h4{font-size:.82rem;font-weight:650}
+  .flag p{margin-top:.2rem;font-size:.78rem;color:var(--ink74)}
+  footer{padding:1.75rem 0 3rem;margin-top:2rem;border-top:1px solid var(--ink08);font-size:.72rem;color:var(--ink66)}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="kick">Setnayan · Prototype · 2026-08-15</div>
+    <h1>Who can see your story</h1>
+    <p class="sub">Every celebration gets a story. The people whose celebration it is
+      decide who may read it — and the setting has to mean the same thing everywhere:
+      on the page, on the stories shelf, and in Google.</p>
+    <div class="tagrow">
+      <span><span class="tag tag-ships">Ships</span> already built — drawn for context, never rebuilt</span>
+      <span><span class="tag tag-new">New</span> the delta</span>
+    </div>
+  </header>
+
+  <!-- 1 · THE CHOICE -->
+  <section>
+    <h2>1 · The choice</h2>
+    <p class="lede">This screen already exists with the first three options.
+      <b>The fourth is the new one.</b> Wording is what a person reads — not the words
+      the database uses.</p>
+
+    <div class="frame">
+      <div class="bar"><div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">setnayan.com/dashboard/…/website/privacy</div>
+        <div class="who">The host</div>
+      </div>
+      <div class="body">
+        <h3 style="font-size:1rem;font-weight:650">Who can see this celebration?</h3>
+        <p style="font-size:.78rem;color:var(--ink74);margin-top:.2rem">
+          You can change this at any time. Changing it takes effect straight away.</p>
+
+        <label class="opt"><span class="radio"></span><span>
+          <h3>Anyone <span class="tag tag-ships">Ships</span></h3>
+          <p>Anybody can find it, and it can appear on Setnayan's stories page and in search results.</p>
+        </span></label>
+
+        <label class="opt on"><span class="radio"></span><span>
+          <h3>Anyone with the link <span class="tag tag-ships">Ships</span></h3>
+          <p>Only people you send the link to. It is never listed on the stories page and never given to Google.</p>
+          <span class="note"><b>This is the one that was leaking.</b> Until today a link-only
+            celebration could still be listed publicly and handed to search engines. Fixed.</span>
+        </span></label>
+
+        <label class="opt"><span class="radio"></span><span>
+          <h3>Only people I invited who have an account <span class="tag tag-new">New</span></h3>
+          <p>People on your guest list who are signed in to Setnayan. Everyone else sees a locked page,
+            even with the link.</p>
+          <span class="note">Nobody on your list has an account yet — right now this means
+            <b>only you can see it</b>.</span>
+        </span></label>
+
+        <label class="opt"><span class="radio"></span><span>
+          <h3>Only me <span class="tag tag-ships">Ships</span></h3>
+          <p>Nobody but you and anyone you've given a role on the celebration.</p>
+        </span></label>
+      </div>
+    </div>
+    <div class="cap"><i></i><p><b>Four options, not three.</b> The new one sits between
+      “anyone with the link” and “only me”, because that is exactly where it falls: narrower
+      than a link, wider than yourself. <b>Its own description states the honest consequence</b>
+      rather than leaving the host to discover it — a setting that quietly shows the story to
+      nobody would read as broken.</p></div>
+  </section>
+
+  <!-- 2 · WHAT EACH ONE MEANS -->
+  <section>
+    <h2>2 · What each choice actually does</h2>
+    <p class="lede">The same setting has to govern three different places. Before today it
+      governed one of them properly.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th>Choice</th><th>A stranger</th><th>Someone with the link</th>
+          <th>On the stories page</th><th>In Google</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><b>Anyone</b></td><td>Reads it</td><td>Reads it</td>
+            <td class="mut">Can be listed</td><td class="mut">Yes</td></tr>
+          <tr><td><b>Anyone with the link</b></td><td>Locked page</td><td>Reads it</td>
+            <td><b>Never</b> <span class="tag tag-new">New</span></td>
+            <td><b>Never</b> <span class="tag tag-new">New</span></td></tr>
+          <tr><td><b>Only people I invited<br>who have an account</b> <span class="tag tag-new">New</span></td>
+            <td>Locked page</td><td>Locked page unless they're on your list</td>
+            <td><b>Never</b></td><td><b>Never</b></td></tr>
+          <tr><td><b>Only me</b></td><td>Locked page</td><td>Locked page</td>
+            <td><b>Never</b></td><td><b>Never</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cap"><i></i><p><b>Read the second row.</b> “Anyone with the link” now means what it
+      says. Until today those two <b>Never</b>s were <b>Yes</b> — a celebration the couple had
+      deliberately unlisted could be published on the stories page and handed to search engines,
+      because the code asked “is it not private?” rather than “is it public?”.</p></div>
+  </section>
+
+  <!-- 3 · FOUR PEOPLE, FOUR SCREENS -->
+  <section>
+    <h2>3 · The same address, four people</h2>
+    <p class="lede">Set to <b>only people I invited who have an account</b>. Everyone below opens
+      the identical link.</p>
+
+    <div class="frame">
+      <div class="bar"><div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">setnayan.com/ana-at-marco</div><div class="who">A stranger</div></div>
+      <div class="body"><div class="locked">
+        <div class="seal">S</div>
+        <h3>This celebration is private</h3>
+        <p>Ask the people hosting it for an invitation.</p>
+      </div></div>
+    </div>
+    <div class="cap"><i></i><p>A stranger is told <b>nothing</b> — not the date, not the place, not
+      who is getting married. The page exists and says only that it is not for them.</p></div>
+
+    <div class="frame">
+      <div class="bar"><div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">setnayan.com/ana-at-marco</div><div class="who">Sent the link · no account</div></div>
+      <div class="body"><div class="locked">
+        <div class="seal">S</div>
+        <h3>This celebration is private</h3>
+        <p>Ask the people hosting it for an invitation.</p>
+      </div></div>
+    </div>
+    <div class="cap"><i></i><p><b>The link stops working, and that is the point.</b> This is the
+      difference between this setting and “anyone with the link” — a forwarded message no longer
+      opens the door. Same words as the stranger sees, deliberately: a different message would
+      confirm the link was real.</p></div>
+
+    <div class="frame">
+      <div class="bar"><div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">setnayan.com/ana-at-marco</div><div class="who">On the guest list · signed in</div></div>
+      <div class="body"><div class="story">
+        <h3>Ana &amp; Marco</h3>
+        <div class="meta">12 December 2026 · Santuario de San Antonio, Makati</div>
+        <div class="hero"></div>
+        <p>The whole celebration — the story, the photographs, the day itself.</p>
+      </div></div>
+    </div>
+    <div class="cap"><i></i><p>She was invited, and she is signed in, so the page simply opens.
+      <b>No extra step, nothing to accept</b> — being on the list is the permission.</p></div>
+
+    <div class="frame">
+      <div class="bar"><div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">setnayan.com/ana-at-marco</div><div class="who">The host</div></div>
+      <div class="body"><div class="story">
+        <h3>Ana &amp; Marco</h3>
+        <div class="meta">12 December 2026 · Santuario de San Antonio, Makati</div>
+        <div class="hero"></div>
+        <p style="color:var(--gold-text);font-weight:600">Only you can see this right now —
+          nobody on your guest list has a Setnayan account yet.</p>
+      </div></div>
+    </div>
+    <div class="cap"><i></i><p><b>The host is told the truth on the page itself.</b> The setting is
+      working exactly as chosen; it just has nobody to admit yet. Saying so here is what stops it
+      being reported as a fault.</p></div>
+  </section>
+
+  <!-- 4 · WHO COUNTS -->
+  <section>
+    <h2>4 · Who counts as “invited”</h2>
+    <p class="lede">A guest becomes recognisable once the host has written down their email
+      <b>and</b> that person has a Setnayan account. Both halves, or they see the locked page.</p>
+    <div class="grid">
+      <div class="card"><div class="role">Counts</div>
+        <h4>On the list, has an account</h4>
+        <p>The host typed her email; she has signed up. She is matched automatically — nobody has to
+          tag her by hand.</p>
+        <span class="verdict yes">Can read it</span></div>
+      <div class="card"><div class="role">Does not count</div>
+        <h4>On the list, name only</h4>
+        <p>Invited, but no email was ever written down. Setnayan has no way to know which account is
+          hers, so it does not guess.</p>
+        <span class="verdict no">Locked page</span></div>
+      <div class="card"><div class="role">Does not count</div>
+        <h4>On the list, no account</h4>
+        <p>Her email is on the list but she has never signed up. Nothing to sign in as.</p>
+        <span class="verdict no">Locked page</span></div>
+      <div class="card"><div class="role">Always counts</div>
+        <h4>You, and anyone you gave a role</h4>
+        <p>The hosts and anyone helping run the celebration always keep access.</p>
+        <span class="verdict yes">Can read it</span></div>
+    </div>
+
+    <div class="flag">
+      <h4>Today this admits nobody — and that is the rule working, not failing.</h4>
+      <p>Across every celebration in Setnayan right now, <b>no guest has an email written down</b>.
+        So this setting currently means “only me”, exactly as you put it: no tagged account means it
+        is private for them. It fills in on its own as hosts add emails and guests sign up —
+        there is no switch to remember to flip.</p>
+    </div>
+
+    <div class="flag">
+      <h4>One thing worth deciding later.</h4>
+      <p>Guests are matched by email. If a host writes down the wrong email, the story opens for
+        whoever owns that address. Names and phone numbers have the same weakness in reverse. It is
+        the same trust the invitation itself already relies on — but it is the seam to watch.</p>
+    </div>
+  </section>
+
+  <footer class="wrap" style="padding-left:0;padding-right:0">
+    Setnayan · Who can see your story · 2026-08-15 · locked palette, cream and terracotta.
+  </footer>
+</div>
