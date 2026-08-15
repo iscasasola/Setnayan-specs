@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stories × Editorial — one day, two tellings · prototype 2026-08-15</title>
+<style>
+  :root{
+    --cream:#FDFBF7;
+    --ink:#2C2A29;
+    --terra:#C24E25;
+    --gold:#A9834B;        /* DECORATION ONLY — 3.37:1 on cream. Never text. */
+    /* Gold that may carry TEXT. The shipped stylesheet states the rule and the
+       escalation: gold #A9834B is "UI + large text ONLY — never body copy
+       (escalate to terracotta-700 #8A6B39, 4.79:1 AA, when gold must carry
+       real text)". Small gold labels here were measured at 3.37:1 and moved. */
+    --gold-text:#8A6B39;
+    --link:#3B4E67;
+    --ink85:rgba(44,42,41,.85);
+    --ink70:rgba(44,42,41,.70);
+    /* Measured on cream: .74 → 6.03:1 · .66 → 4.70:1. These were .55 (3.42:1)
+       and .45 (2.62:1) — both below the 4.5:1 AA floor at the small sizes they
+       are used at. Hierarchy now comes from size and weight, not from fading
+       past the floor. */
+    --ink55:rgba(44,42,41,.74);
+    --ink45:rgba(44,42,41,.66);
+    --ink12:rgba(44,42,41,.12);
+    --ink08:rgba(44,42,41,.08);
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  a{color:var(--link)}
+  .wrap{max-width:64rem;margin:0 auto;padding:0 1rem}
+
+  /* ── Prototype masthead ─────────────────────────────────────────────── */
+  .proto-head{padding:2.25rem 0 1rem;border-bottom:1px solid var(--ink08)}
+  .proto-kicker{font-family:var(--mono);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-text);font-weight:600}
+  .proto-title{font-family:var(--serif);font-style:italic;font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.15;margin:.4rem 0 .5rem}
+  .proto-sub{font-size:.85rem;color:var(--ink70);max-width:44rem}
+  .proto-note{margin-top:.75rem;font-size:.75rem;color:var(--ink55);border-left:2px solid var(--gold);padding-left:.6rem;max-width:44rem}
+  .legend{margin-top:.9rem;display:flex;flex-wrap:wrap;gap:.5rem .9rem;align-items:center;font-size:.72rem;color:var(--ink55)}
+
+  /* ── NEW / SHIPS tags ───────────────────────────────────────────────── */
+  .tag-new,.tag-ships{
+    display:inline-block;font-family:var(--mono);font-size:.55rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;border-radius:999px;
+    padding:.1rem .45rem;vertical-align:.15em;
+  }
+  .tag-new{color:var(--terra);border:1px solid var(--terra)}
+  .tag-ships{color:var(--ink45);border:1px solid var(--ink12)}
+
+  /* ── Tabs ───────────────────────────────────────────────────────────── */
+  .tabs-outer{position:sticky;top:0;z-index:20;background:var(--cream);border-bottom:1px solid var(--ink08)}
+  .tabs{display:flex;gap:.25rem;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:.5rem 0}
+  .tab-btn{
+    appearance:none;border:0;background:transparent;cursor:pointer;white-space:nowrap;
+    font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink55);padding:.5rem .8rem;border-radius:999px;
+  }
+  .tab-btn[aria-selected="true"]{color:#fff;background:var(--terra)}
+  .tab-btn:not([aria-selected="true"]):hover{color:var(--ink)}
+  .panel{display:none;padding:1.5rem 0 3rem}
+  .panel.active{display:block}
+  .panel-intro{margin:.25rem 0 1.25rem;font-size:.85rem;color:var(--ink70);max-width:44rem}
+  .panel-intro strong{color:var(--ink)}
+
+  /* ── Browser frame ──────────────────────────────────────────────────── */
+  .frame{background:#fff;border:1px solid var(--ink08);border-radius:14px;overflow:hidden;margin:1rem 0 .25rem}
+  .frame-bar{display:flex;align-items:center;gap:.6rem;background:#F6F2EA;border-bottom:1px solid var(--ink08);padding:.5rem .8rem}
+  .frame-dots{display:flex;gap:.28rem}
+  .frame-dots i{width:.55rem;height:.55rem;border-radius:50%;background:var(--ink12)}
+  .frame-url{flex:1;min-width:0;font-family:var(--mono);font-size:.65rem;color:var(--ink55);background:#fff;border:1px solid var(--ink08);border-radius:999px;padding:.25rem .7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .frame-body{padding:clamp(1rem,3vw,1.75rem);background:var(--cream)}
+
+  /* ── Caption strip ──────────────────────────────────────────────────── */
+  .cap{display:flex;gap:.65rem;margin:.5rem 0 2.25rem;padding-left:.15rem}
+  .cap-rule{flex:none;width:3px;border-radius:2px;background:var(--terra)}
+  .cap-body{font-size:.78rem;color:var(--ink70);max-width:46rem;padding:.1rem 0}
+  .cap-body b{color:var(--ink)}
+  .cap-label{display:block;font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--terra);margin-bottom:.15rem}
+
+  /* ── Shelf grammar (mirrors shipped) ────────────────────────────────── */
+  .shelf-head h1{font-family:var(--serif);font-style:italic;font-size:clamp(1.4rem,3.5vw,1.9rem)}
+  .shelf-head p{font-size:.8rem;color:var(--ink55);margin-top:.15rem}
+  .shelf-search{margin:.9rem 0 .6rem;display:flex;align-items:center;gap:.5rem;background:#fff;border:1px solid var(--ink12);border-radius:999px;padding:.45rem .9rem;max-width:26rem}
+  .shelf-search svg{flex:none;opacity:.45}
+  .shelf-search span{font-size:.8rem;color:var(--ink45)}
+  .chip-row{display:flex;gap:.4rem;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:.2rem 0 .6rem}
+  .fchip{flex:none;font-size:.72rem;font-weight:600;color:var(--ink70);border:1px solid var(--ink12);background:#fff;border-radius:999px;padding:.3rem .8rem;text-decoration:none}
+  .fchip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:.75rem;margin:1.9rem 0 .7rem}
+  .sec-head h2{font-size:.95rem;font-weight:650;letter-spacing:-.01em}
+  .sec-head span{font-size:.68rem;color:var(--ink45)}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr));gap:1rem}
+
+  /* Editorial "Chronicle" card — dark photo IS the object, no border/shadow */
+  .chron{position:relative;display:block;border-radius:16px;overflow:hidden;color:#fff;text-decoration:none;background:
+    linear-gradient(160deg,rgba(20,16,14,.20) 0%,rgba(20,16,14,.78) 72%),
+    radial-gradient(120% 90% at 78% 12%,#8A5A3B 0%,#5C3A2A 42%,#2E2019 100%)}
+  .chron.cover{min-height:20rem;padding:2rem 1.6rem}
+  .chron.small{min-height:14.5rem;padding:1.25rem 1.1rem}
+  .chron .kind{position:absolute;top:.8rem;left:.8rem;background:rgba(255,255,255,.92);color:var(--ink);font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;border-radius:999px;padding:.18rem .55rem}
+  .chron .body{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-height:inherit}
+  .chron h3{font-family:var(--serif);font-style:italic;font-weight:400;line-height:1.1;letter-spacing:-.01em}
+  .chron.cover h3{font-size:clamp(1.5rem,4vw,2.4rem)}
+  .chron.small h3{font-size:1.12rem}
+  .chron .dateline{margin-top:.4rem;font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+  .chron .rule{margin-top:.9rem;height:1px;background:rgba(255,255,255,.2)}
+  .chron blockquote{margin-top:.9rem;border-left:1px solid rgba(255,255,255,.3);padding-left:.7rem}
+  .chron blockquote p{font-family:var(--serif);font-style:italic;font-size:.9rem;line-height:1.35;color:rgba(255,255,255,.88)}
+  .chron blockquote footer{margin-top:.3rem;font-family:var(--mono);font-size:.55rem;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+  .chron .svc{margin-top:.9rem;display:flex;flex-wrap:wrap;gap:.3rem}
+  .chron .svc span{background:rgba(255,255,255,.15);border-radius:999px;padding:.14rem .5rem;font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+  .chron .read{margin-top:1.1rem;font-size:.85rem;font-weight:600;color:#fff}
+  .chron.v2{background:
+    linear-gradient(160deg,rgba(18,20,16,.22) 0%,rgba(18,20,16,.80) 72%),
+    radial-gradient(120% 90% at 30% 10%,#6E7A55 0%,#44503A 45%,#232A1E 100%)}
+  .chron.v3{background:
+    linear-gradient(160deg,rgba(16,18,22,.22) 0%,rgba(16,18,22,.80) 72%),
+    radial-gradient(120% 90% at 70% 15%,#5B6B85 0%,#3B4E67 48%,#1F2836 100%)}
+
+  /* under-card sibling row — Team chips + cross-rail chips */
+  .under{margin-top:.55rem;display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;padding:0 .15rem}
+  .under .lbl{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink45)}
+  .xchip{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--ink12);background:rgba(255,255,255,.85);border-radius:999px;padding:.24rem .6rem;font-size:.7rem;font-weight:550;color:var(--ink85);text-decoration:none}
+  .xchip:hover{border-color:rgba(194,78,37,.4)}
+  .xchip svg{flex:none}
+  .vchip{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--ink12);background:#fff;border-radius:999px;padding:.22rem .6rem .22rem .28rem;font-size:.7rem;font-weight:550;color:var(--ink85);text-decoration:none}
+  /* Fill is the deep gold, not the decorative one, and the .85 opacity is gone:
+     a white letter on #A9834B measured 3.48:1. On #8A6B39 it is 4.95:1. */
+  .vchip i{width:1rem;height:1rem;border-radius:50%;background:var(--gold-text);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-family:var(--mono);font-size:.5rem;font-weight:700}
+
+  /* Storyteller tile — its OWN grammar (hairline border, white body) */
+  .tile{display:flex;flex-direction:column}
+  .tile-card{display:block;background:#fff;border:1px solid rgba(44,42,41,.1);border-radius:18px;overflow:hidden;text-decoration:none;color:var(--ink)}
+  .tile-thumb{position:relative;aspect-ratio:16/9;background:
+    linear-gradient(150deg,rgba(15,14,13,.05),rgba(15,14,13,.4)),
+    radial-gradient(130% 100% at 25% 20%,#C08A6B 0%,#8A5744 45%,#3D2A22 100%)}
+  .tile-thumb.t2{background:linear-gradient(150deg,rgba(15,14,13,.05),rgba(15,14,13,.4)),radial-gradient(130% 100% at 70% 25%,#9AA57E 0%,#5D6B4B 48%,#2A3222 100%)}
+  .tile-thumb.t3{background:linear-gradient(150deg,rgba(15,14,13,.05),rgba(15,14,13,.4)),radial-gradient(130% 100% at 50% 15%,#7E93B5 0%,#4A5E7D 48%,#212B3A 100%)}
+  .tile-thumb .watch{position:absolute;right:.6rem;bottom:.6rem;display:inline-flex;align-items:center;gap:.3rem;background:rgba(0,0,0,.6);color:#fff;border-radius:999px;padding:.2rem .6rem;font-family:var(--mono);font-size:.55rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+  .tile-thumb .kindlbl{position:absolute;left:.6rem;top:.6rem;background:rgba(255,255,255,.9);color:var(--ink);border-radius:999px;padding:.18rem .55rem;font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+  .tile-body{display:flex;flex-direction:column;gap:.4rem;padding:.9rem 1rem 1rem}
+  .byline{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}
+  /* Border may stay decorative gold (3.48:1 clears the 3:1 floor for a UI
+     boundary); the WORD inside it may not. */
+  .st-badge{display:inline-flex;align-items:center;gap:.28rem;border:1px solid var(--gold);color:var(--gold-text);border-radius:999px;padding:.12rem .5rem;font-family:var(--mono);font-size:.52rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+  .byline span{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink55)}
+  .tile-title{font-family:var(--serif);font-style:italic;font-size:1.1rem;line-height:1.3}
+  .tile-views{margin-top:.2rem;font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink45)}
+
+  /* Journal card — thumbnail-led, no border/shadow */
+  .jcard{display:block;text-decoration:none;color:var(--ink)}
+  .jthumb{aspect-ratio:16/10;border-radius:14px;background:
+    linear-gradient(140deg,rgba(169,131,75,.16),rgba(194,78,37,.10)),
+    radial-gradient(120% 100% at 30% 20%,#EFE3CF 0%,#E2CDAE 55%,#CBAE87 100%)}
+  .jthumb.j2{background:linear-gradient(140deg,rgba(59,78,103,.12),rgba(44,42,41,.06)),radial-gradient(120% 100% at 70% 20%,#E7E9E2 0%,#CBD2C2 55%,#A7B29A 100%)}
+  .jthumb.j3{background:linear-gradient(140deg,rgba(194,78,37,.12),rgba(169,131,75,.08)),radial-gradient(120% 100% at 45% 25%,#F3E4DC 0%,#E4C6B7 55%,#C79B87 100%)}
+  .jkick{margin-top:.55rem;font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-text)}
+  .jtitle{margin-top:.2rem;font-weight:650;font-size:.92rem;line-height:1.3;letter-spacing:-.01em}
+  .jdek{margin-top:.2rem;font-size:.75rem;color:var(--ink55)}
+
+  .invite{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--ink08);font-size:.8rem;color:var(--ink70)}
+  .invite a{font-weight:600}
+
+  .state-toggle{display:flex;gap:.4rem;margin:.75rem 0 0}
+  .state-btn{appearance:none;cursor:pointer;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:.4rem .85rem;border:1px solid var(--ink12);background:#fff;color:var(--ink55)}
+  .state-btn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+  /* ── Chapter page grammar ───────────────────────────────────────────── */
+  .uchap-back{font-size:.75rem;font-weight:600;text-decoration:none}
+  .uchap-kicker{margin-top:.9rem;display:flex;flex-wrap:wrap;gap:.35rem .8rem;font-family:var(--mono);font-size:.58rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink45)}
+  .uchap-kicker .kd{color:var(--terra)}
+  .uchap-title{margin-top:.45rem;font-family:var(--serif);font-style:italic;font-size:clamp(1.35rem,3.5vw,1.9rem);line-height:1.2}
+  .embed{position:relative;margin-top:1rem;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:
+    linear-gradient(160deg,rgba(10,9,8,.15),rgba(10,9,8,.55)),
+    radial-gradient(130% 100% at 30% 20%,#B57F5E 0%,#6E4433 48%,#241813 100%)}
+  .embed .play{position:absolute;inset:0;margin:auto;width:3.6rem;height:3.6rem;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center}
+  .embed .host{position:absolute;left:.7rem;bottom:.7rem;background:rgba(0,0,0,.6);color:#fff;border-radius:999px;padding:.2rem .6rem;font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase}
+  .day-band{margin-top:1.5rem;border-top:1px solid var(--ink08);padding-top:1.25rem}
+  .band-head{display:flex;align-items:center;gap:.5rem}
+  .band-head h2{font-family:var(--serif);font-style:italic;font-size:1.15rem}
+  .day-meta{margin-top:.35rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink55)}
+  .gal-strip{margin-top:.8rem;display:flex;gap:.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:.25rem}
+  .gal-strip a.more{flex:none;align-self:center;font-size:.72rem;font-weight:600;white-space:nowrap}
+  .gtile{flex:none;width:5.2rem;height:5.2rem;border-radius:10px}
+  .g1{background:radial-gradient(120% 100% at 30% 25%,#D9A886 0%,#9C6448 60%,#4A2F22 100%)}
+  .g2{background:radial-gradient(120% 100% at 60% 25%,#B9C29B 0%,#77855C 60%,#333D26 100%)}
+  .g3{background:radial-gradient(120% 100% at 40% 30%,#A9B6CC 0%,#5F7391 60%,#28344A 100%)}
+  .g4{background:radial-gradient(120% 100% at 55% 20%,#E3C9A6 0%,#B08D5C 60%,#54401F 100%)}
+  .g5{background:radial-gradient(120% 100% at 35% 30%,#D6B4AE 0%,#96605A 60%,#40241F 100%)}
+  .gal-note{margin-top:.35rem;font-size:.68rem;color:var(--ink45)}
+  .twoline{margin-top:1rem}
+  .shop-head{margin-top:1.5rem;font-size:.9rem;font-weight:650}
+  .vcards{margin-top:.7rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.75rem}
+  .vcard{display:flex;flex-direction:column;gap:.45rem;background:#fff;border:1px solid rgba(44,42,41,.1);border-radius:14px;padding:.9rem}
+  .vcard-top{display:flex;align-items:center;gap:.6rem}
+  .vlogo{flex:none;width:2.2rem;height:2.2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--mono);font-size:.7rem;font-weight:700}
+  /* Sage darkened from #77855C: a white initial on it measured 3.97:1. #667450
+     is 5.03:1. (#3B4E67 is the shipped link colour — white on it is 8.50:1.) */
+  .vl1{background:#667450}.vl2{background:#3B4E67}
+  .vname{font-weight:650;font-size:.85rem;line-height:1.2}
+  .vcity{font-size:.68rem;color:var(--ink45)}
+  .vpromo{font-size:.72rem;color:var(--ink70)}
+  .vpromo b{color:var(--terra)}
+  .vbook{align-self:flex-start;background:var(--terra);color:#fff;border:0;border-radius:999px;padding:.35rem .95rem;font-size:.75rem;font-weight:650;cursor:pointer}
+  .vplain{margin-top:.8rem;font-size:.8rem;color:var(--ink70)}
+  .vplain small{display:block;margin-top:.15rem;font-size:.66rem;color:var(--ink45)}
+  .aud{margin-top:1.6rem;border-top:1px solid var(--ink08);padding-top:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .8rem}
+  .aud .followers{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink55)}
+  .aud .spacer{flex:1}
+  .ghostb{border:1px solid var(--ink12);background:#fff;color:var(--ink85);border-radius:999px;padding:.3rem .8rem;font-size:.72rem;font-weight:600;cursor:pointer}
+  .report{font-size:.68rem;color:var(--ink45);text-decoration:underline;cursor:pointer}
+
+  /* ── Attach flow ────────────────────────────────────────────────────── */
+  .step{margin:1.25rem 0 0;border:1px solid var(--ink08);border-radius:16px;background:#fff;padding:1.1rem 1.2rem}
+  .step-n{display:inline-flex;width:1.4rem;height:1.4rem;border-radius:50%;background:var(--ink);color:#fff;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;font-weight:700;margin-right:.5rem}
+  .step h3{display:inline;font-size:.95rem;font-weight:650}
+  .step .sub{margin-top:.35rem;font-size:.75rem;color:var(--ink55)}
+  .grp{margin-top:.9rem;font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink45)}
+  .evopt{margin-top:.5rem;display:flex;align-items:center;gap:.8rem;border:1px solid var(--ink12);border-radius:14px;padding:.7rem .8rem;cursor:pointer}
+  .evopt.sel{border-color:var(--terra);box-shadow:inset 0 0 0 1px var(--terra)}
+  .evthumb{flex:none;width:3.2rem;height:3.2rem;border-radius:10px}
+  .evbody{flex:1;min-width:0}
+  .evname{font-weight:650;font-size:.88rem}
+  .evmeta{font-size:.7rem;color:var(--ink55)}
+  .evrole{margin-top:.2rem;font-size:.66rem;color:var(--ink70)}
+  .evrole.host{color:var(--terra);font-weight:600}
+  .radio{flex:none;width:1rem;height:1rem;border-radius:50%;border:2px solid var(--ink12)}
+  .evopt.sel .radio{border-color:var(--terra);background:radial-gradient(circle at center,var(--terra) 0 40%,transparent 45%)}
+  .flow-note{margin-top:.8rem;font-size:.7rem;color:var(--ink45)}
+  .approval{border:1px solid var(--ink12);border-radius:14px;padding:.9rem 1rem;background:var(--cream)}
+  .appr-top{display:flex;align-items:center;gap:.6rem}
+  .appr-ava{flex:none;width:2.2rem;height:2.2rem;border-radius:50%;background:#8A5744;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+  .appr-title{font-weight:650;font-size:.85rem;line-height:1.25}
+  .appr-what{margin-top:.6rem;font-size:.75rem;color:var(--ink70)}
+  .appr-what b{color:var(--ink)}
+  .appr-actions{margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.5rem}
+  .btn-primary{background:var(--terra);color:#fff;border:0;border-radius:999px;padding:.42rem 1.1rem;font-size:.78rem;font-weight:650;cursor:pointer}
+  .pending{margin-top:.9rem;display:inline-flex;align-items:center;gap:.45rem;border:1px dashed var(--ink12);border-radius:999px;padding:.35rem .85rem;font-size:.72rem;color:var(--ink70)}
+  .pending i{width:.5rem;height:.5rem;border-radius:50%;background:var(--gold);font-style:normal}
+  .vtoggle{margin-top:.55rem;display:flex;align-items:center;gap:.7rem;border:1px solid var(--ink08);border-radius:12px;padding:.6rem .75rem}
+  .vtoggle .nm{flex:1;min-width:0;font-size:.82rem;font-weight:600}
+  .vtoggle .nm small{display:block;font-weight:400;font-size:.66rem;color:var(--ink45)}
+  .sw{flex:none;width:2.1rem;height:1.2rem;border-radius:999px;background:var(--ink12);position:relative}
+  .sw::after{content:'';position:absolute;top:.15rem;left:.15rem;width:.9rem;height:.9rem;border-radius:50%;background:#fff}
+  .sw.on{background:var(--terra)}
+  .sw.on::after{left:auto;right:.15rem}
+  .was{margin-top:.9rem;font-size:.68rem;color:var(--ink45)}
+  .was s{color:var(--ink45)}
+
+  /* ── The pair ───────────────────────────────────────────────────────── */
+  .pair{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center}
+  @media (max-width:640px){.pair{grid-template-columns:1fr}.pair-mid{transform:rotate(90deg);justify-self:center}}
+  .pair-mid{display:flex;flex-direction:column;align-items:center;gap:.3rem;color:var(--ink45)}
+  .pair-mid span{font-family:var(--mono);font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;text-align:center}
+  .ed-band{margin-top:1.25rem;border:1px solid var(--ink08);border-radius:14px;background:#fff;padding:.9rem 1rem}
+  .ed-band .ctx{font-family:var(--mono);font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink45)}
+  .ed-band p{margin-top:.4rem;font-size:.85rem}
+  .quiet{margin-top:2rem}
+  .quiet h4{font-size:.85rem;font-weight:650;margin-bottom:.6rem}
+
+  /* ── Days like yours (tab 5) ────────────────────────────────────────── */
+  .like-sub{font-size:.75rem;color:var(--ink70);margin:-.3rem 0 .9rem}
+  .cont-line{margin:1.6rem 0 .2rem;text-align:center;font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink45)}
+  .frame-ctx{font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink55);white-space:nowrap}
+  @media (max-width:560px){.frame-ctx{white-space:normal;max-width:9.5rem;line-height:1.35;text-align:right}}
+
+  .sec-divider{margin:2.5rem 0 0;border-top:1px solid var(--ink08);padding-top:1.5rem}
+  footer.proto-foot{padding:1.5rem 0 3rem;font-size:.7rem;color:var(--ink45);border-top:1px solid var(--ink08)}
+</style>
+</head>
+<body>
+
+<header class="proto-head">
+  <div class="wrap">
+    <p class="proto-kicker">Setnayan · Design prototype · 2026-08-15</p>
+    <h1 class="proto-title">Stories &times; Editorial — one day, two tellings</h1>
+    <p class="proto-sub">Setnayan's editorial and the host's own chapter about the same celebration —
+      a wedding, a debut, a graduation — each pointing at the other, both standing on the same real day
+      underneath: its date, its venue, its team, its gallery. The browse shelves already ship; every
+      screen here shows only the delta.</p>
+    <p class="proto-note">The reference mockup shared for this work is a dark pitch-deck aesthetic;
+      the product palette is locked terracotta-on-cream, so everything below is drawn in cream.</p>
+    <div class="legend">
+      <span><span class="tag-new">New</span>&nbsp; the delta this design adds</span>
+      <span><span class="tag-ships">Ships</span>&nbsp; already live — drawn only for context, never rebuilt</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs-outer"><div class="wrap"><div class="tabs" role="tablist">
+  <button class="tab-btn" role="tab" aria-selected="true" data-panel="p-shelf">1 · The shelf</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-chapter">2 · The chapter page</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-attach">3 · Attaching your day</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-pair">4 · The pair</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-similar">5 · Days like yours</button>
+</div></div></nav>
+
+<main class="wrap">
+
+<!-- ═══════════════════════ 1 · THE SHELF ═══════════════════════ -->
+<section class="panel active" id="p-shelf" role="tabpanel">
+  <p class="panel-intro"><strong>The shelf is done and is not redrawn.</strong> Three voices, three
+    card grammars, one search, one chip row. This design changes two things on it: the two
+    cross-link chips — already built and tested — can finally appear, because days can finally be linked;
+    and a signed-in person with a day coming up gets one labelled lead row (tab 5).
+    Launch day is the home state; the busy shelf is the upgrade.</p>
+
+  <div class="state-toggle">
+    <button class="state-btn on" data-shelf="empty">Launch day — today's real numbers</button>
+    <button class="state-btn" data-shelf="busy">A year in</button>
+  </div>
+
+  <!-- ── Launch-day shelf ── -->
+  <div id="shelf-empty">
+    <div class="frame">
+      <div class="frame-bar"><div class="frame-dots"><i></i><i></i><i></i></div><span class="frame-url">setnayan.com/realstories</span></div>
+      <div class="frame-body">
+        <div class="shelf-head">
+          <h1>Real Stories</h1>
+          <p>Real days, told by the people who lived them — and by us.</p>
+        </div>
+        <div class="shelf-search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span>Search stories, places, vendors&hellip;</span>
+        </div>
+        <div class="chip-row">
+          <a class="fchip on" href="#">All</a>
+          <a class="fchip" href="#">Articles</a>
+          <a class="fchip" href="#">Their stories</a>
+          <a class="fchip" href="#">With video</a>
+        </div>
+
+        <div class="sec-head"><h2>From the Journal</h2><span>guides &amp; long reads</span></div>
+        <div class="grid3">
+          <a class="jcard" href="#"><div class="jthumb"></div>
+            <p class="jkick">From the Journal</p>
+            <p class="jtitle">What a Manila wedding really costs in 2026</p>
+            <p class="jdek">Every line of a real budget, explained.</p></a>
+          <a class="jcard" href="#"><div class="jthumb j2"></div>
+            <p class="jkick">From the Journal</p>
+            <p class="jtitle">The church-and-garden checklist</p>
+            <p class="jdek">Two venues, one day — how couples make it flow.</p></a>
+          <a class="jcard" href="#"><div class="jthumb j3"></div>
+            <p class="jkick">From the Journal</p>
+            <p class="jtitle">Choosing your Papic crew</p>
+            <p class="jdek">Who shoots best? Usually the cousin you least expect.</p></a>
+        </div>
+
+        <div class="sec-head"><h2>Their stories</h2><span>in their own voice</span></div>
+        <div class="grid3">
+          <div class="tile">
+            <a class="tile-card" href="#">
+              <div class="tile-thumb"><span class="kindlbl">Film</span><span class="watch">&#9654; Watch</span></div>
+              <div class="tile-body">
+                <div class="byline"><span class="st-badge">&#10022; Storyteller</span><span>A chapter by @ana-at-marco</span></div>
+                <p class="tile-title">Our own cut — the day we set</p>
+                <p class="tile-views">212 views</p>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <p class="invite">The first chronicles are being written — your day could be one of them.
+          <a href="#">Write your chapter &rarr;</a></p>
+      </div>
+    </div>
+    <div class="cap"><div class="cap-rule"></div><div class="cap-body">
+      <span class="cap-label">What changed &middot; why</span>
+      Nothing structural — this is the shipped shelf with today's real inventory: the Journal carries the
+      page, one storyteller tile appears <b>the moment the owner features the one published chapter</b>
+      (publishing and being listed stay two different things), and there is no editorial section and no
+      placeholder for one. No cross-link chips anywhere, because no day has two tellings yet — <b>the page
+      must look finished exactly like this.</b> The one small invitation is honest: the composer it points
+      to really ships.
+    </div></div>
+  </div>
+
+  <!-- ── Busy shelf ── -->
+  <div id="shelf-busy" hidden>
+    <div class="frame">
+      <div class="frame-bar"><div class="frame-dots"><i></i><i></i><i></i></div><span class="frame-url">setnayan.com/realstories</span></div>
+      <div class="frame-body">
+        <div class="shelf-head">
+          <h1>Real Stories</h1>
+          <p>Real days, told by the people who lived them — and by us.</p>
+        </div>
+        <div class="shelf-search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span>Search stories, places, vendors&hellip;</span>
+        </div>
+        <div class="chip-row">
+          <a class="fchip on" href="#">All</a>
+          <a class="fchip" href="#">Articles</a>
+          <a class="fchip" href="#">Their stories</a>
+          <a class="fchip" href="#">With video</a>
+        </div>
+
+        <div class="sec-head"><h2>The Cover</h2></div>
+        <a class="chron cover" href="#">
+          <span class="kind">Editorial &middot; Wedding</span>
+          <div class="body">
+            <h3>The Ana &amp; Marco Chronicle</h3>
+            <p class="dateline">Vol.&nbsp;I &middot; No.&nbsp;4 &middot; Makati</p>
+            <div class="rule"></div>
+            <blockquote>
+              <p>&ldquo;When the veil lifted, the whole row of titas stood up at once.&rdquo;</p>
+              <footer>— A cousin, third pew</footer>
+            </blockquote>
+            <div class="svc"><span>Papic</span><span>Live Studio</span></div>
+            <span class="read">Read the story &rarr;</span>
+          </div>
+        </a>
+        <div class="under">
+          <span class="lbl">Team</span>
+          <a class="vchip" href="#"><i>H</i>Hiraya Blooms</a>
+          <a class="vchip" href="#"><i>C</i>Casa Verde Catering</a>
+          <a class="xchip" href="#"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch the storyteller&rsquo;s cut</a>
+          <span class="tag-new">New</span>
+        </div>
+
+        <div class="sec-head"><h2>Most loved</h2></div>
+        <div class="grid3">
+          <a class="chron small v2" href="#">
+            <span class="kind">Editorial &middot; Debut</span>
+            <div class="body">
+              <h3>The Beatriz Chronicle</h3>
+              <p class="dateline">Vol.&nbsp;I &middot; No.&nbsp;3 &middot; Quezon City</p>
+              <blockquote><p>&ldquo;Eighteen roses, and not one of them her dad's idea.&rdquo;</p></blockquote>
+            </div>
+          </a>
+          <a class="chron small v3" href="#">
+            <span class="kind">Editorial &middot; Wedding</span>
+            <div class="body">
+              <h3>The Reyes-Lim Chronicle</h3>
+              <p class="dateline">Vol.&nbsp;I &middot; No.&nbsp;2 &middot; Tagaytay</p>
+              <blockquote><p>&ldquo;It rained, and somehow that was the best part.&rdquo;</p></blockquote>
+            </div>
+          </a>
+        </div>
+
+        <div class="sec-head"><h2>Their stories</h2><span>in their own voice</span></div>
+        <div class="grid3">
+          <div class="tile">
+            <a class="tile-card" href="#">
+              <div class="tile-thumb"><span class="kindlbl">Film</span><span class="watch">&#9654; Watch</span></div>
+              <div class="tile-body">
+                <div class="byline"><span class="st-badge">&#10022; Storyteller</span><span>A chapter by @ana-at-marco</span></div>
+                <p class="tile-title">Our own cut — the day we set</p>
+                <p class="tile-views">4.1k views</p>
+              </div>
+            </a>
+            <div class="under">
+              <a class="xchip" href="#"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z"/></svg>Read the editorial</a>
+              <span class="tag-new">New</span>
+            </div>
+          </div>
+          <div class="tile">
+            <a class="tile-card" href="#">
+              <div class="tile-thumb t2"><span class="kindlbl">Vlog</span><span class="watch">&#9654; Watch</span></div>
+              <div class="tile-body">
+                <div class="byline"><span class="st-badge">&#10022; Storyteller</span><span>A chapter by @jomarfilms</span></div>
+                <p class="tile-title">Shooting my best friend's debut</p>
+                <p class="tile-views">1.9k views</p>
+              </div>
+            </a>
+          </div>
+          <div class="tile">
+            <a class="tile-card" href="#">
+              <div class="tile-thumb t3"><span class="kindlbl">Film</span><span class="watch">&#9654; Watch</span></div>
+              <div class="tile-body">
+                <div class="byline"><span class="st-badge">&#10022; Storyteller</span><span>A chapter by @liwanagph</span></div>
+                <p class="tile-title">A Tagaytay morning, start to finish</p>
+                <p class="tile-views">986 views</p>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="sec-head"><h2>From the Journal</h2><span>guides &amp; long reads</span></div>
+        <div class="grid3">
+          <a class="jcard" href="#"><div class="jthumb"></div>
+            <p class="jkick">From the Journal</p>
+            <p class="jtitle">What a Manila wedding really costs in 2026</p></a>
+          <a class="jcard" href="#"><div class="jthumb j2"></div>
+            <p class="jkick">From the Journal</p>
+            <p class="jtitle">The church-and-garden checklist</p></a>
+          <a class="jcard" href="#"><div class="jthumb j3"></div>
+            <p class="jkick">From the Journal</p>
+            <p class="jtitle">Choosing your Papic crew</p></a>
+        </div>
+      </div>
+    </div>
+    <div class="cap"><div class="cap-rule"></div><div class="cap-body">
+      <span class="cap-label">What changed &middot; why</span>
+      The three voices keep their three grammars — the newspaper cover, the byline tile, the article card —
+      exactly per the standing council rule; no uniform card is proposed. The <b>only delta</b> is that the
+      two already-built chips finally appear: Ana &amp; Marco's day has both tellings, so its editorial carries
+      <b>&ldquo;Watch the storyteller's cut&rdquo;</b> and its chapter carries <b>&ldquo;Read the editorial&rdquo;</b>.
+      The other cards carry nothing — a day with one telling never advertises the missing one. And the
+      shelf is <b>mixed by design</b>: the debut chronicle beside the weddings is not a sample — every
+      kind of celebration can now be written up, exactly as a wedding is.
+    </div></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ 2 · THE CHAPTER PAGE ═══════════════════════ -->
+<section class="panel" id="p-chapter" role="tabpanel">
+  <p class="panel-intro"><strong>This is the owner's picture, in the real palette.</strong> The film on
+    top and the audience layer already ship. The delta is the middle: when a chapter is linked to its
+    day, the page grows <strong>&ldquo;The day beneath&rdquo;</strong> — date, venue, the public gallery,
+    the day's own team as shoppable cards — with no codes typed by anyone.</p>
+
+  <div class="frame">
+    <div class="frame-bar"><div class="frame-dots"><i></i><i></i><i></i></div><span class="frame-url">setnayan.com/u/ana-at-marco/c/our-own-cut</span></div>
+    <div class="frame-body">
+      <a class="uchap-back" href="#">&larr; @ana-at-marco</a>
+      <div class="uchap-kicker">
+        <span class="kd">Film</span><span>YouTube</span><span>Dec 2026</span><span>1.2k views</span>
+      </div>
+      <h1 class="uchap-title">Our own cut — the day we set</h1>
+
+      <div class="embed">
+        <span class="play"><svg width="20" height="20" viewBox="0 0 24 24" fill="#2C2A29"><path d="M8 5v14l11-7z"/></svg></span>
+        <span class="host">Plays on the creator's own channel</span>
+      </div>
+
+      <div class="day-band">
+        <div class="band-head"><h2>The day beneath</h2><span class="tag-new">New</span></div>
+        <p class="day-meta">Dec 12, 2026 &middot; Santuario de San Antonio &middot; Makati</p>
+        <div class="gal-strip">
+          <span class="gtile g1"></span><span class="gtile g2"></span><span class="gtile g3"></span>
+          <span class="gtile g4"></span><span class="gtile g5"></span>
+          <a class="more" href="#">See the public gallery &rarr;</a>
+        </div>
+        <p class="gal-note">Only photos the couple's own gallery already shows.</p>
+        <p class="twoline">
+          <a class="xchip" href="#"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z"/></svg>Setnayan also told this day — read the editorial</a>
+          <span class="tag-new">New</span>
+        </p>
+
+        <p class="shop-head">Shop this event</p>
+        <div class="vcards">
+          <div class="vcard">
+            <div class="vcard-top">
+              <span class="vlogo vl1">H</span>
+              <span><span class="vname">Hiraya Blooms</span><br><span class="vcity">Florals &middot; Makati</span></span>
+            </div>
+            <p class="vpromo"><b>Viewer promo:</b> 5% off for this chapter's viewers</p>
+            <button class="vbook">Book</button>
+          </div>
+          <div class="vcard">
+            <div class="vcard-top">
+              <span class="vlogo vl2">C</span>
+              <span><span class="vname">Casa Verde Catering</span><br><span class="vcity">Feast &middot; Quezon City</span></span>
+            </div>
+            <p class="vpromo"><b>Viewer promo:</b> free tasting for two</p>
+            <button class="vbook">Book</button>
+          </div>
+        </div>
+        <p class="vplain">Also thanked by the author: <b>Tita Beng's lechon</b>
+          <small>Not part of this day's booked team — shown as words only, no link, no booking.</small></p>
+      </div>
+
+      <div class="aud">
+        <span class="st-badge">&#10022; Storyteller</span>
+        <span class="followers">84 followers</span>
+        <span class="spacer"></span>
+        <button class="ghostb">Share</button>
+        <button class="ghostb">Copy link</button>
+        <span class="report">Report</span>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><div class="cap-rule"></div><div class="cap-body">
+    <span class="cap-label">What changed &middot; why</span>
+    The film stays on the creator's own channel — their views, their earnings — untouched.
+    <b>&ldquo;The day beneath&rdquo; is the new section</b>, and everything in it arrives from the linked day,
+    not from typed codes: the date and venue, a photo strip that mirrors only the couple's public gallery,
+    and the day's booked team as tappable cards with their viewer promos. The shipped honesty rule is
+    unchanged and shown: a shop that wasn't part of the day stays plain words. The one-line cross-link
+    appears only because this day has both tellings. If no day is linked, none of this renders and the
+    page looks exactly as it does today.
+  </div></div>
+</section>
+
+<!-- ═══════════════════════ 3 · ATTACHING YOUR DAY ═══════════════════════ -->
+<section class="panel" id="p-attach" role="tabpanel">
+  <p class="panel-intro"><strong>Nobody types a code, ever.</strong> Today the composer asks for a raw
+    machine ID and a comma-separated list of more IDs — and the one real published chapter proves nobody
+    will (both boxes empty). These three steps replace those two boxes.</p>
+
+  <div class="frame">
+    <div class="frame-bar"><div class="frame-dots"><i></i><i></i><i></i></div><span class="frame-url">setnayan.com/dashboard &middot; write a chapter</span></div>
+    <div class="frame-body">
+
+      <div class="step">
+        <span class="step-n">1</span><h3>Which celebration is this about?</h3> <span class="tag-new">New</span>
+        <p class="sub">Only days you were actually part of appear here. Nothing to paste, nothing to remember.</p>
+        <p class="grp">Your celebrations</p>
+        <div class="evopt sel">
+          <span class="evthumb g1"></span>
+          <span class="evbody">
+            <span class="evname">Ana &amp; Marco</span><br>
+            <span class="evmeta">Dec 12, 2026 &middot; Santuario de San Antonio &middot; Makati</span>
+            <span class="evrole host">You host this day — it links immediately</span>
+          </span>
+          <span class="radio"></span>
+        </div>
+        <p class="grp">Days you were part of</p>
+        <div class="evopt">
+          <span class="evthumb g3"></span>
+          <span class="evbody">
+            <span class="evname">Beatriz's Debut</span><br>
+            <span class="evmeta">Mar 2027 &middot; Quezon City</span>
+            <span class="evrole">You were a guest — Beatriz will be asked first</span>
+          </span>
+          <span class="radio"></span>
+        </div>
+        <p class="was">Replaces: <s>&ldquo;Papic gallery id — paste the event id&rdquo;</s> and
+          <s>&ldquo;Vendor ids — comma-separated&rdquo;</s></p>
+      </div>
+
+      <div class="step">
+        <span class="step-n">2</span><h3>If it isn't your day, the host gets one tap</h3> <span class="tag-new">New</span>
+        <p class="sub">A guest's or vendor's chapter can publish right away — plain. The day appears on it
+          only after the host says yes. The ask names exactly what saying yes will show.</p>
+        <div class="approval" style="margin-top:.9rem">
+          <div class="appr-top">
+            <span class="appr-ava">J</span>
+            <span class="appr-title">Jomar wants to link his film to your debut, Beatriz</span>
+          </div>
+          <p class="appr-what">Linking shows on his chapter: <b>the date &middot; the venue &middot; your booked
+            team &middot; your public gallery</b> — nothing your own page doesn't already show.</p>
+          <div class="appr-actions">
+            <button class="btn-primary">Show our day</button>
+            <button class="ghostb">Not this one</button>
+          </div>
+        </div>
+        <span class="pending"><i></i>Author's view meanwhile: waiting for Beatriz — your chapter can publish now, plain</span>
+      </div>
+
+      <div class="step">
+        <span class="step-n">3</span><h3>The day brings its own team</h3> <span class="tag-new">New</span>
+        <p class="sub">The linked day's booked vendors appear ready-made, all on. Switch any off of your page.
+          You can't hand-add a shop that wasn't part of the day — names in your prose stay plain words.</p>
+        <div class="vtoggle"><span class="nm">Hiraya Blooms<small>Florals &middot; booked on this day</small></span><span class="sw on"></span></div>
+        <div class="vtoggle"><span class="nm">Casa Verde Catering<small>Feast &middot; booked on this day</small></span><span class="sw on"></span></div>
+        <div class="vtoggle"><span class="nm">Lente Studio<small>Documentary &middot; booked on this day</small></span><span class="sw"></span></div>
+      </div>
+
+    </div>
+  </div>
+  <div class="cap"><div class="cap-rule"></div><div class="cap-body">
+    <span class="cap-label">What changed &middot; why</span>
+    The two code boxes are gone. <b>The list is the permission model:</b> a host links instantly; a guest
+    or booked vendor asks with one tap and the host answers with one tap; a stranger's list is simply
+    empty — there is nothing to request and nothing to type. The host can also unlink later at any time:
+    the day leaves the chapter that moment, and the film and the author's own words stay. One choice feeds
+    everything — the gallery strip, the vendor cards, the date and venue, and the cross-links — so the same
+    fact never lives in two places again.
+  </div></div>
+</section>
+
+<!-- ═══════════════════════ 4 · THE PAIR ═══════════════════════ -->
+<section class="panel" id="p-pair" role="tabpanel">
+  <p class="panel-intro"><strong>One day, two tellings — each pointing at the other.</strong> The chips
+    below are already built and tested; this design is what finally lets them appear. And when a day has
+    only one telling, absence stays silent.</p>
+
+  <div class="frame">
+    <div class="frame-bar"><div class="frame-dots"><i></i><i></i><i></i></div><span class="frame-url">the same day, on any shelf</span></div>
+    <div class="frame-body">
+      <div class="pair">
+        <div>
+          <a class="chron small" href="#">
+            <span class="kind">Editorial &middot; Wedding</span>
+            <div class="body">
+              <h3>The Ana &amp; Marco Chronicle</h3>
+              <p class="dateline">Vol.&nbsp;I &middot; No.&nbsp;4 &middot; Makati</p>
+              <blockquote><p>&ldquo;When the veil lifted, the whole row of titas stood up at once.&rdquo;</p></blockquote>
+            </div>
+          </a>
+          <div class="under">
+            <a class="xchip" href="#"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch the storyteller&rsquo;s cut</a>
+            <span class="tag-new">New</span>
+          </div>
+        </div>
+        <div class="pair-mid">
+          <svg width="34" height="16" viewBox="0 0 34 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 5h24M29 5l-4-4M29 5l-4 4" opacity=".8"/><path d="M29 12H5m0 0 4-4M5 12l4 4" opacity=".8"/></svg>
+          <span>one day<br>two tellings</span>
+        </div>
+        <div>
+          <div class="tile">
+            <a class="tile-card" href="#">
+              <div class="tile-thumb"><span class="kindlbl">Film</span><span class="watch">&#9654; Watch</span></div>
+              <div class="tile-body">
+                <div class="byline"><span class="st-badge">&#10022; Storyteller</span><span>A chapter by @ana-at-marco</span></div>
+                <p class="tile-title">Our own cut — the day we set</p>
+                <p class="tile-views">4.1k views</p>
+              </div>
+            </a>
+            <div class="under">
+              <a class="xchip" href="#"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z"/></svg>Read the editorial</a>
+              <span class="tag-new">New</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ed-band">
+        <p class="ctx">On the editorial page, near the credits <span class="tag-new">New</span></p>
+        <p>Ana &amp; Marco tell this day in their own words —
+          <a href="#"><b>Watch their chapter &rarr;</b></a></p>
+      </div>
+
+      <div class="quiet">
+        <h4>And when a day has only one telling — silence, on purpose</h4>
+        <div class="pair">
+          <div>
+            <a class="chron small v3" href="#">
+              <span class="kind">Editorial &middot; Wedding</span>
+              <div class="body">
+                <h3>The Reyes-Lim Chronicle</h3>
+                <p class="dateline">Vol.&nbsp;I &middot; No.&nbsp;2 &middot; Tagaytay</p>
+                <blockquote><p>&ldquo;It rained, and somehow that was the best part.&rdquo;</p></blockquote>
+              </div>
+            </a>
+          </div>
+          <div class="pair-mid"><span>no pair<br>no chip</span></div>
+          <div>
+            <div class="tile">
+              <a class="tile-card" href="#">
+                <div class="tile-thumb t2"><span class="kindlbl">Vlog</span><span class="watch">&#9654; Watch</span></div>
+                <div class="tile-body">
+                  <div class="byline"><span class="st-badge">&#10022; Storyteller</span><span>A chapter by @jomarfilms</span></div>
+                  <p class="tile-title">Shooting my best friend's debut</p>
+                  <p class="tile-views">1.9k views</p>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><div class="cap-rule"></div><div class="cap-body">
+    <span class="cap-label">What changed &middot; why</span>
+    The chips are the entire visible integration on cards — small, sibling links under each card, never a
+    merged card (the three-voices rule stands). The editorial page gets one mirror line near its credits.
+    <b>Absence is silent:</b> an unpaired card carries no empty slot and no &ldquo;no editorial yet&rdquo; —
+    a missing thing is never advertised. And every consent unwinds the pair by itself: if the couple takes
+    back their showcase approval the editorial and both chips go together; if they unlink a chapter the day
+    leaves it that instant; if a guest withdraws photo consent their photos leave every surface at once.
+  </div></div>
+</section>
+
+<!-- ═══════════════════════ 5 · DAYS LIKE YOURS ═══════════════════════ -->
+<section class="panel" id="p-similar" role="tabpanel">
+  <p class="panel-intro"><strong>The owner's addition:</strong> <em>"if they have on going events, we
+    will prioritize showing similar stories as well"</em> — and his correction: <em>"not all stories
+    will be wedding… each event can create a similar editorial."</em> So the shelf is a mixed shelf of
+    every kind of celebration, and while your own is still coming up it opens with days like yours —
+    one labelled row whose heading always states the real basis of what fills it, the shared shelf
+    untouched beneath it, never a heading it can't fill. The screens below are excerpts of the shelf's
+    top; the planner shown is planning a <strong>debut</strong>, so the design is provably not
+    wedding-only.</p>
+
+  <!-- ── A · signed out / shared link ── -->
+  <div class="frame">
+    <div class="frame-bar"><div class="frame-dots"><i></i><i></i><i></i></div><span class="frame-url">setnayan.com/realstories</span><span class="frame-ctx">Signed out · any shared link</span></div>
+    <div class="frame-body">
+      <div class="shelf-head">
+        <h1>Real Stories</h1>
+        <p>Real days, told by the people who lived them — and by us.</p>
+      </div>
+      <div class="chip-row">
+        <a class="fchip on" href="#">All</a>
+        <a class="fchip" href="#">Articles</a>
+        <a class="fchip" href="#">Their stories</a>
+        <a class="fchip" href="#">With video</a>
+      </div>
+      <div class="sec-head"><h2>The Cover</h2></div>
+      <a class="chron small" href="#">
+        <span class="kind">Editorial &middot; Wedding</span>
+        <div class="body">
+          <h3>The Ana &amp; Marco Chronicle</h3>
+          <p class="dateline">Vol.&nbsp;I &middot; No.&nbsp;4 &middot; Makati</p>
+          <blockquote><p>&ldquo;When the veil lifted, the whole row of titas stood up at once.&rdquo;</p></blockquote>
+        </div>
+      </a>
+      <p class="cont-line">— today's shelf, the same for everyone —</p>
+    </div>
+  </div>
+  <div class="cap"><div class="cap-rule"></div><div class="cap-body">
+    <span class="cap-label">What changed &middot; why</span>
+    <b>Nothing — that is the point.</b> The page is public, and signed out it is identical for every
+    person and every shared link: the lead row is additive, so its absence leaves no hole, and an
+    address someone shares never carries the sharer's personal order. Nobody can tell from this page
+    what anyone else is planning.
+  </div></div>
+
+  <!-- ── B · signed in, debut coming up ── -->
+  <div class="frame">
+    <div class="frame-bar"><div class="frame-dots"><i></i><i></i><i></i></div><span class="frame-url">setnayan.com/realstories</span><span class="frame-ctx">Signed in · your debut is coming up</span></div>
+    <div class="frame-body">
+      <div class="shelf-head">
+        <h1>Real Stories</h1>
+        <p>Real days, told by the people who lived them — and by us.</p>
+      </div>
+      <div class="chip-row">
+        <a class="fchip on" href="#">All</a>
+        <a class="fchip" href="#">Articles</a>
+        <a class="fchip" href="#">Their stories</a>
+        <a class="fchip" href="#">With video</a>
+      </div>
+
+      <div class="sec-head"><h2>Debuts like yours <span class="tag-new">New</span></h2><span><a href="#">See everything &darr;</a></span></div>
+      <p class="like-sub">Because Amara's debut is coming up on Mar&nbsp;21 &middot; near Quezon City</p>
+      <div class="grid3">
+        <div>
+          <a class="chron small v2" href="#">
+            <span class="kind">Editorial &middot; Debut</span>
+            <div class="body">
+              <h3>The Beatriz Chronicle</h3>
+              <p class="dateline">Vol.&nbsp;I &middot; No.&nbsp;3 &middot; Quezon City</p>
+              <blockquote><p>&ldquo;Eighteen roses, and not one of them her dad's idea.&rdquo;</p></blockquote>
+            </div>
+          </a>
+        </div>
+        <div class="tile">
+          <a class="tile-card" href="#">
+            <div class="tile-thumb t2"><span class="kindlbl">Vlog</span><span class="watch">&#9654; Watch</span></div>
+            <div class="tile-body">
+              <div class="byline"><span class="st-badge">&#10022; Storyteller</span><span>A chapter by @jomarfilms</span></div>
+              <p class="tile-title">Shooting my best friend's debut</p>
+              <p class="tile-views">1.9k views</p>
+            </div>
+          </a>
+        </div>
+        <div>
+          <a class="chron small v3" href="#">
+            <span class="kind">Editorial &middot; Debut</span>
+            <div class="body">
+              <h3>The Amihan Chronicle</h3>
+              <p class="dateline">Vol.&nbsp;I &middot; No.&nbsp;6 &middot; Pasig</p>
+              <blockquote><p>&ldquo;She rehearsed the waltz for weeks; her lolo still led.&rdquo;</p></blockquote>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="ed-band">
+        <p class="ctx">If three debuts don't exist yet — the heading follows the contents <span class="tag-new">New</span></p>
+        <p>&ldquo;<b>Celebrations near Quezon City</b>&rdquo; — the place fallback. A heading never
+          implies a likeness the cards don't have; if neither basis can fill three, there is no row.</p>
+      </div>
+
+      <p class="cont-line">— the shared shelf continues below, unmoved —</p>
+      <div class="sec-head"><h2>The Cover</h2></div>
+      <a class="chron small" href="#">
+        <span class="kind">Editorial &middot; Wedding</span>
+        <div class="body">
+          <h3>The Ana &amp; Marco Chronicle</h3>
+          <p class="dateline">Vol.&nbsp;I &middot; No.&nbsp;4 &middot; Makati</p>
+          <blockquote><p>&ldquo;When the veil lifted, the whole row of titas stood up at once.&rdquo;</p></blockquote>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="cap"><div class="cap-rule"></div><div class="cap-body">
+    <span class="cap-label">What changed &middot; why</span>
+    <b>One labelled lead row, nothing else — and its heading states the real basis of what fills it.</b>
+    On a mixed shelf the <b>kind of celebration is the strongest signal</b>: a debut planner leads with
+    debuts, never weddings under a heading that implies likeness. After kind: <b>near Quezon City</b>,
+    the season, the services used. (The ceremony-shape signals only weddings carry are silent for a
+    debut and cost it nothing — a missing signal is neutral, never a penalty.) The subtitle is the
+    person's own facts — never "people like you," never anything inferred from clicks. The cards keep
+    their own grammars — no fourth card — and the editors' shelf below is identical for everyone:
+    <b>the way back is the page itself</b>, plus "See everything."
+  </div></div>
+
+  <!-- ── C · signed in, day one ── -->
+  <div class="frame">
+    <div class="frame-bar"><div class="frame-dots"><i></i><i></i><i></i></div><span class="frame-url">setnayan.com/realstories</span><span class="frame-ctx">Signed in · launch day</span></div>
+    <div class="frame-body">
+      <div class="shelf-head">
+        <h1>Real Stories</h1>
+        <p>Real days, told by the people who lived them — and by us.</p>
+      </div>
+      <div class="chip-row">
+        <a class="fchip on" href="#">All</a>
+        <a class="fchip" href="#">Articles</a>
+        <a class="fchip" href="#">Their stories</a>
+        <a class="fchip" href="#">With video</a>
+      </div>
+      <div class="sec-head"><h2>From the Journal</h2><span>guides &amp; long reads</span></div>
+      <div class="grid3">
+        <a class="jcard" href="#"><div class="jthumb"></div>
+          <p class="jkick">From the Journal</p>
+          <p class="jtitle">What a Manila wedding really costs in 2026</p></a>
+        <a class="jcard" href="#"><div class="jthumb j2"></div>
+          <p class="jkick">From the Journal</p>
+          <p class="jtitle">The church-and-garden checklist</p></a>
+      </div>
+      <div class="sec-head"><h2>Their stories</h2><span>in their own voice</span></div>
+      <div class="grid3">
+        <div class="tile">
+          <a class="tile-card" href="#">
+            <div class="tile-thumb"><span class="kindlbl">Film</span><span class="watch">&#9654; Watch</span></div>
+            <div class="tile-body">
+              <div class="byline"><span class="st-badge">&#10022; Storyteller</span><span>A chapter by @ana-at-marco</span></div>
+              <p class="tile-title">Our own cut — the day we set</p>
+              <p class="tile-views">212 views</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><div class="cap-rule"></div><div class="cap-body">
+    <span class="cap-label">What changed &middot; why</span>
+    <b>The same signed-in planner, on launch day — and the row is not there.</b> It renders only when at
+    least <b>three</b> stories genuinely match — on their kind, or failing that on place: one tile under
+    a heading about <i>your</i> day is a fake door, two reads as an error, three reads as a shelf. Below
+    three on either basis there is no row,
+    no heading, no apology — the same house rule that already keeps other thin shelves from promising
+    over nothing. So this is honest with today's one story and gets better as stories arrive — never
+    the reverse. And whichever of their celebrations drives it, it is the nearest day still ahead —
+    finished days never trigger it, and a day with no date yet isn't treated as far away.
+  </div></div>
+</section>
+
+</main>
+
+<footer class="proto-foot"><div class="wrap">
+  Setnayan &middot; Stories &times; Editorial integration prototype &middot; 2026-08-15 &middot;
+  companion decisions in STORIES_AND_EDITORIAL_INTEGRATION_2026-08-15.md &middot;
+  palette: cream #FDFBF7 &middot; ink #2C2A29 &middot; terracotta #C24E25 &middot; gold #A9834B (accents only) &middot; link #3B4E67
+</div></footer>
+
+<script>
+(function(){
+  var btns=document.querySelectorAll('.tab-btn');
+  var panels=document.querySelectorAll('.panel');
+  function show(id){
+    panels.forEach(function(p){p.classList.toggle('active',p.id===id);});
+    btns.forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.panel===id));});
+    if(history.replaceState){history.replaceState(null,'','#'+id);}
+  }
+  btns.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.panel);window.scrollTo({top:0});});});
+  if(location.hash){
+    var id=location.hash.slice(1);
+    if(document.getElementById(id)&&id.indexOf('p-')===0){show(id);}
+  }
+  var sbtns=document.querySelectorAll('.state-btn');
+  sbtns.forEach(function(b){b.addEventListener('click',function(){
+    sbtns.forEach(function(x){x.classList.toggle('on',x===b);});
+    document.getElementById('shelf-empty').hidden=b.dataset.shelf!=='empty';
+    document.getElementById('shelf-busy').hidden=b.dataset.shelf!=='busy';
+  });});
+})();
+</script>
+</body>
+</html>
