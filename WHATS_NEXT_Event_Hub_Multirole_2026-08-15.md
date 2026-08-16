@@ -103,10 +103,20 @@ not a new surface.** The owner ribbon is the proof the pattern works. **A plan t
 
 ## 🪤 TRAPS
 
-- **"Event Hub" now names THREE things** — the page product (renamed 2026-08-15), the guest's
-  day-of screen (`/{slug}/hub`, which has carried the title `Event Hub · Setnayan` since before
-  the rename), and the paid SKU. **Widening it to mean the role-shared space needs one meaning
-  to win, out loud, BEFORE the build.**
+- ~~**"Event Hub" now names THREE things** … needs one meaning to win BEFORE the build.~~
+  ✅ **CLOSED 2026-08-15 — PR [#4480](https://github.com/iscasasola/setnayan-platform/pull/4480).
+  I OVERSTATED THIS AND IT WAS NOT AN OWNER DECISION.** Measured: the paid SKU is unambiguous
+  (*Event Hub PRO* reads clearly against *Event Hub*), and `/{slug}/hub` said "Event Hub" only
+  in a **fallback** state — in every state a guest meets it (*Almost here* · *Happening now* ·
+  *Just wrapped*) it said something else. Two strings and four aria-labels, not a competing
+  product name. 🔑 **And that screen already had its own visible name — the chip says
+  "Live hub"** and always did; only the tab title and the accessible labels had drifted, so the
+  fix APPLIED the visible name rather than inventing one.
+  **Settled vocabulary: Event Hub = the event's space · Event Hub PRO = the paid upgrade ·
+  Live hub = the fullscreen day-of view inside it.**
+  ⚠ **The lesson is the flag, not the fix:** I raised a "decide this before building" trap
+  without first measuring how wide it was, which would have cost the owner a decision he never
+  needed to make. **Measure the collision before escalating it.**
 - **A demo will look fine and prove nothing** — exactly one supplier account is linked to
   exactly one event.
 - **Nothing here has ever met a real person.** No guest, vendor or coordinator is an event
