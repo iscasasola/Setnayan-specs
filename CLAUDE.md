@@ -553,9 +553,24 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > a decision down. ⚠ Still unresolved from 2026-08-11: `Pricing.md` says HIDE
 > Live Photo Wall while the SKU is active and publicly listed.
 
-> ### 📋 WHAT IS ACTUALLY LEFT — re-verified 2026-08-12, READ THIS BEFORE THE REGISTER
-> **[`WHAT_IS_ACTUALLY_LEFT_2026-08-12.md`](WHAT_IS_ACTUALLY_LEFT_2026-08-12.md)**
-> supersedes the counts in the code repo's `WHAT_IS_LEFT.md` (2026-08-07).
+> ### 📋 WHAT IS LEFT — re-verified 2026-08-17, READ THIS BEFORE THE REGISTER
+> **[`WHAT_IS_LEFT_2026-08-17.md`](WHAT_IS_LEFT_2026-08-17.md) is the CURRENT one.**
+> It supersedes `WHAT_IS_ACTUALLY_LEFT_2026-08-12.md`, which in turn superseded the
+> code repo's `WHAT_IS_LEFT.md` (2026-08-07). **288 commits landed in the five days
+> between the last two**, which is the whole reason it needed doing again.
+> ⏭ **What the 08-17 pass changed:** exactly **one** of the 41 closed — the six service
+> pages (3D plan · event website · Patiktok · Live Studio · animated monogram · memories)
+> are each linked from the live homepage now, verified by fetching it. Everything else
+> spot-checked is unchanged, and prod is unchanged in substance (6 events · 39 guests ·
+> 2 shops, 1 published · **0 orders ever** · 0 of 45 booked suppliers is an account).
+> 🚨 **AND IT FOUND ONE THE 08-12 PASS MISSED:** the homepage still promises
+> *"keep it forever"* / *"for life"* in the **page title, the meta description and every
+> social card**, while the ruling is free-for-5-years-then-paid. The 08-12 pass checked
+> the product pages, found them clean, and closed it. **A correction at one site is not
+> a correction — grep the title and the share cards too.** The wording is an OWNER call
+> ("for life" is positioning), so it is flagged, not changed.
+>
+> **The counts below are the 2026-08-12 pass and are kept for the shape, not the total.**
 >
 > All **58** claims re-checked against shipped code and the live prod DB by six
 > independent readers, each group then attacked by a skeptic told to hunt BOTH
