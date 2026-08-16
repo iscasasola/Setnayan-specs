@@ -9,6 +9,39 @@
 
 ---
 
+## 📖 SETTLED VOCABULARY (owner-locked 2026-08-16) — do NOT reopen
+
+| Word | What it is |
+|---|---|
+| **Event Hub** | The event's ONE public address, **for the whole life of the event** (`/{slug}`). Four stages: save-the-date → invitation + RSVP → **the day itself** → the story and album after. |
+| **Live hub** | A **fullscreen page INSIDE the Event Hub** (`/{slug}/hub`). Its entry chip exists **only** while `dayOfPhase` is `live` or `post`. A separate route you open from the page and close back out of — never a second product, never a "mode" of the website. |
+| **Event Hub Pro** | The paid upgrade (`COUPLE_WEBSITE_PRO`, ₱3,500) — premium touches on the Event Hub. |
+
+🔑 **WHAT IT IS FOR — owner, verbatim (2026-08-16):** *"where the event proper runs. not the
+preparation. this is where we share information to the guests, vendors, etc. where we collect
+photos, and use different services, this is where we have the papic and live studio."*
+
+**Measured against shipped code: 3 of those 4 are already true.** Guests ✅ · photo collection
+via Papic ✅ (capture + the guest's own photos render on `/{slug}` itself) · Live Studio ✅
+(`WatchLiveBlock` on `site-body.tsx`) · **vendors ❌.** The one vendor element on `/{slug}` is a
+*"you are booked here"* strip that links them **away** to `/vendor-dashboard`, and it reads
+`linked_vendor_profile_id` — **0 of 45 prod rows** — so it has never rendered for anybody.
+**That gap is this document.**
+
+⛔ **CONSIDERED AND REJECTED: "Event Hub = only the day."** It matches the owner's *"not the
+preparation"* instinct, and was still rejected: **the guest keeps ONE link across all four
+stages** — it arrives on the save-the-date, takes their RSVP, opens at the venue, and holds the
+photos afterwards. Splitting the name at the day turns one link into two products in the
+guest's head and leaves save-the-date + RSVP unnamed. **"Where the event proper runs" is the
+Event Hub's most important STAGE, not a separate thing.**
+
+⚠ **"Controller" is wrong TODAY, right for the FUTURE.** The Event Hub is a **place people
+visit**, not a control panel — the host's presence on it is a **read-only** ribbon, and every
+real control lives in `/dashboard/[eventId]`. It only becomes controller-shaped after the
+slices below.
+
+---
+
 ## 🔴 THE MEASUREMENT THAT REORDERS THE WHOLE BUILD
 
 Read from **live prod** on 2026-08-15 (not from a doc, not from a migration):

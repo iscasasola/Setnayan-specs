@@ -69,6 +69,44 @@ committed docs on purpose.
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
+> ### 📖 SETTLED VOCABULARY — "EVENT HUB" (owner-locked 2026-08-16). Do NOT reopen.
+> Three words, three things. They were argued out in full; the reasoning is below so a new
+> session does not re-litigate it.
+>
+> | Word | What it is |
+> |---|---|
+> | **Event Hub** | The event's ONE public address, **for the whole life of the event** — `/{slug}`. Four stages: save-the-date → invitation + RSVP → **the day itself** → the story and album after. |
+> | **Live hub** | A **fullscreen page INSIDE the Event Hub**, whose entry chip exists **only** while `dayOfPhase` is `live` or `post`. Not a second product, not a mode of the website — a separate route you open from it and close back out of. |
+> | **Event Hub Pro** | The paid upgrade (`COUPLE_WEBSITE_PRO`, ₱3,500) — premium touches on the Event Hub. |
+>
+> 🔑 **WHAT THE OWNER SAYS IT IS FOR, verbatim (2026-08-16):** *"where the event proper runs.
+> not the preparation. this is where we share information to the guests, vendors, etc. where we
+> collect photos, and use different services, this is where we have the papic and live studio."*
+> **Verified: 3 of those 4 are true today** — guests ✅ · photos/Papic ✅ · Live Studio ✅ ·
+> **vendors ❌.** The only vendor thing on `/{slug}` is a "you are booked here" strip that links
+> them AWAY to their own dashboard, and it reads `linked_vendor_profile_id`, **empty on all 45
+> prod rows — so it has never rendered for anybody.** That gap IS the build:
+> [`WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md`](WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md).
+>
+> ⛔ **THE READING THAT WAS CONSIDERED AND REJECTED: "Event Hub = only the day."** It matches the
+> owner's *"not the preparation"* instinct, but it was rejected because **the guest keeps ONE
+> link across all four stages** — it arrives on the save-the-date, takes their RSVP, opens at the
+> venue, and holds the photos afterwards. Renaming at the day turns one link into two products in
+> the guest's head and leaves save-the-date + RSVP with no name at all. **"Where the event proper
+> runs" is the Event Hub's most important STAGE, not a separate thing.**
+>
+> ⚠ **"Controller" is the wrong mental model TODAY and the right one for the FUTURE.** The Event
+> Hub is a PLACE people visit, not a control panel: the host gets a **read-only** ribbon on it and
+> every real control (guest list · seating · budget · schedule · vendors) lives in
+> `/dashboard/[eventId]`. It only becomes controller-shaped after the multi-role build.
+>
+> 🪤 **I OVERSTATED A COLLISION HERE AND NEARLY COST THE OWNER A DECISION HE DID NOT NEED.** I
+> flagged *"Event Hub means three things — you must rule on it"*; measured, the SKU was
+> unambiguous and `/{slug}/hub` said "Event Hub" only in a **fallback** state guests rarely meet,
+> while its visible chip had always said **"Live hub"**. Two strings + four aria-labels
+> (PR [#4480](https://github.com/iscasasola/setnayan-platform/pull/4480)).
+> **Measure a collision before escalating it.**
+
 > ### ⛔ FALSE BELIEF IN CIRCULATION — kill it on sight (corrected 2026-08-04)
 > **"A migration whose prefix sits below prod's applied head merges green and creates NOTHING."**
 > **THIS IS FALSE.** `deploy-prod.yml` and `supabase-migrations.yml` both run
