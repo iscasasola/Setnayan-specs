@@ -1,5 +1,7 @@
 # WHAT IS LEFT — re-verified 2026-08-17
 
+> Read-only page for the owner: <https://claude.ai/code/artifact/95ce3296-bdb9-419b-9bc3-75145296cf14>
+
 > Supersedes [`WHAT_IS_ACTUALLY_LEFT_2026-08-12.md`](WHAT_IS_ACTUALLY_LEFT_2026-08-12.md).
 > That file said of itself: *"it will rot at the same rate — re-verify before acting on any line."*
 > **288 commits landed in the five days since it was written.** This is that re-verification.
