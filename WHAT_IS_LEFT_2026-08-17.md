@@ -200,6 +200,23 @@ the suspended Google account is still sitting there.
 
 ---
 
+## The build plan
+
+**TEN sessions, run TWO at a time — five waves.** Ready-to-paste prompts, one per session, each
+self-contained: [`WHATS_NEXT_SESSION_PROMPTS_2026-08-17.md`](WHATS_NEXT_SESSION_PROMPTS_2026-08-17.md).
+
+| Wave | Together | |
+|---|---|---|
+| 1 | **S1** the supplier gets through the door · **S2** the first screens anyone sees | the two highest-value |
+| 2 | **S4** six small things · **S9** under the floor | |
+| 3 | **S3** "we couldn't load it" | 🛑 **alone** — touches screens app-wide |
+| 4 | **S5** the couple's four screens · **S7** the five undrawn surfaces | |
+| 5 | **S6** the supplier's screens · **S10** the compliance pack | S10 opens no PR |
+| last | **S8** your own admin screens | internal-only, ships last |
+
+⚠ **S6 must never run beside S4** — both touch the supplier's screens. The one pairing that looks
+safe and is not.
+
 ## How to use this
 
 Source-of-truth order is unchanged: **live site → shipped code → live database → this file →
