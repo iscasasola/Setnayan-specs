@@ -361,9 +361,21 @@ something a KPI tile cannot.
 
 - **`ugat/_components/ugat-console.tsx`** — own stylesheet, own design system, a graph console
   rather than a records list. On the bill so the shape stays visible; **not owed.**
-- **The 236 `text-terracotta` occurrences across 89 admin files.** A shop-wide colour sweep is its
-  own bounded job with its own guard. Each lane fixes only what it touches, so the number can only
-  fall. **Do not turn a lane into the sweep.**
+- **The gold-as-text occurrences across the admin tree.** A colour sweep is its own bounded job.
+  Each lane fixes only what it touches, so the number can only fall. **Do not turn a lane into the
+  sweep.**
+
+  🛑 **I PUBLISHED "236 across 89 files" AND IT WAS AN OVERCOUNT — the real figure is 126 across 58
+  files**, measured 2026-08-17 with node, the same engine the guard uses. In POSIX ERE — which is
+  what `grep -E` gives you — `\b` matches before a hyphen, so `text-terracotta\b` happily counts
+  `text-terracotta-700`, `-800`, `-50`. The numbered ladder is deliberately NOT a violation. My
+  number was therefore ~1.8× the truth, in the direction that makes a problem look bigger than it
+  is. Caught by the lane-A session, which hit the same trap in both directions in one sitting: a
+  `grep -v 'text-terracotta-'` filter DROPS a whole line that holds both spellings (undercount),
+  and `grep -oE` counts the numbered ones (overcount).
+  🔑 **DO NOT COUNT THIS IN THE SHELL. Only the guard's own regex, run in node, gives the real
+  number** — `(?!-)` is a lookahead and ERE has no lookahead at all, so the shell cannot express
+  the rule even in principle.
 - **`/admin/work` · `/admin/more` · `/admin/website-media`'s page · `/admin/booking-fees` ·
   `/admin/corrections`** — all already ship and a previous session nearly rebuilt them. `/admin/work`
   IS the ranked work list with a triage strip, lane chips, and drawers that settle payments, verify
