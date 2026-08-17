@@ -100,11 +100,24 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > doc's framing, and reported a shipped product as unbuilt **in the register whose entire job is
 > to stop that**. **RULE 0 applies hardest to the section you did not think needed it.**
 >
-> ⏭ **What is actually left there: ONE ordering fix.** On a **private** event the page refuses a
-> booked supplier **before it ever checks whether they are booked** — the lock screen admits a
-> redeemed guest · a host · a seat-holder · an invited account, and a supplier is none of them;
-> `resolveVendorCapability` runs ~200 lines later and is never reached. **4 of 6 prod events are
-> private.** Everything else in
+> ✅ **THAT ONE ORDERING FIX IS DONE — PR
+> [#4483](https://github.com/iscasasola/setnayan-platform/pull/4483), 2026-08-17. Do NOT start it
+> again.** On a **private** event the page refused a booked supplier **before it ever checked
+> whether they were booked** — the lock screen admits a redeemed guest · a host · a seat-holder ·
+> an invited account, and a supplier is none of them; `resolveVendorCapability` ran ~200 lines
+> later and was never reached. **4 of 6 prod events are private.** Path E was ADDED alongside the
+> other four; `'invited_accounts'` was not folded into any `!== 'public'` test. Nothing was
+> redrawn.
+> 🔑 **A LINK IS NOT A BOOKING.** Grepping the COLUMN found **three** writers of
+> `linked_vendor_profile_id`, not one, and `lib/reusable-bookings.server.ts` mints a LINKED row at
+> **`'shortlisted'`** the couple has yet to lock — so the gate asks the row's STATUS, never the
+> link's presence, and unknown values fail closed. Same boundary PR-H draws refusing an ASKED
+> supplier the venue address.
+> ⚠ **Test-proved, NOT observed** — prod has no linked supplier, so this cannot be shown on the
+> live site. 9 unit + 5 db tests, 7 measured mutations. Do not upgrade that to "verified live".
+> ⏭ Also shipped there: the **host's own page** no longer serves the couple the stranger's body
+> telling them to scan an invitation link they are the ones who send (copy-only; read-only stays
+> read-only). Everything else in
 > [`WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md`](WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md)
 > is smaller than that doc claims — **read its corrected header first; slices 1 and 2 are struck.**
 > Current register: [`WHAT_IS_LEFT_2026-08-17.md`](WHAT_IS_LEFT_2026-08-17.md) § 4.
@@ -623,7 +636,30 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > A couple pressing **Lock** now ASKS the supplier, and the supplier's yes is what
 > makes the booking. Full row: `DECISION_LOG.md` 2026-08-16.
 >
-> ⚖ **THE ONLY THING LEFT IS THE OWNER LOOKING AND FLIPPING
+> 🔴 **CORRECTION 2026-08-17 — THE FLIP IS NOT THE ONLY THING LEFT. FIX THIS
+> FIRST.** Read out of production **by the object** (`pg_get_functiondef`, not a
+> migration, not a comment): `vendor_agree_to_lock`'s single agree UPDATE sets
+> `lock_request_state='agreed'` · `lock_agreed_at` · `lock_answered_by_user_id` ·
+> `lock_declined_at=NULL` · `lock_decline_reason=NULL` · `status → 'contracted'`
+> (monotone) · `updated_at` — and **NEITHER `linked_vendor_profile_id` NOR
+> `selection_match_rank`.**
+> `app/dashboard/[eventId]/vendors/actions.ts` (~1503) states the opposite:
+> *"The agree RPC stamps both alongside 'contracted', exactly as
+> `acquire_service_time_slot` already does."* Half true — `acquire_service_time_slot`
+> **does** stamp both (verified); the agree RPC does not.
+> ⇒ **The moment the flag goes on, the handshake becomes the main booking path and
+> every booking it makes is a `contracted` row with a NULL link**, so everything
+> keyed on that column silently loses handshake bookings: the supplier doorway on
+> `/{slug}` · editorial first-pick credit · Real Stories vendor credit · Papic
+> vendor attribution · stage-note recipients · showcase credits · the verified
+> median · fraud detection · the plausibility scanner · venue-room-size.
+> Inert today (0 linked rows · 0 asks in flight · flag off) — **which is exactly
+> the window in which to fix it.** Not fixed in PR #4483 on purpose: changing an
+> owner-gated PR-H function is its own change, not a side effect of an ordering
+> fix. 🔑 **A sentence is not a mechanism — read the function body out of prod
+> before trusting a comment that says another object does something.**
+>
+> ⚖ **THEN THE OWNER LOOKS AND FLIPS
 > `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED` IN VERCEL.** Nothing changes for anybody
 > until he does — flag-off is *asserted* byte-identical to today, not assumed.
 > ⚠ **Its production value is NOT readable from a session** (it inlines at build
