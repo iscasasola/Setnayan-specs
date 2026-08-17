@@ -195,6 +195,11 @@ auto-merge ARMED and a required check FAILING**, so they will never merge and no
 | [#4471](https://github.com/iscasasola/setnayan-platform/pull/4471) | suppliers may write about a day they worked | a new exposed column + a new anon-callable function, neither registered with a written reason |
 | [#4472](https://github.com/iscasasola/setnayan-platform/pull/4472) | opening a shop no longer takes away your events | two access-check tests failing |
 | ~~[#4475](https://github.com/iscasasola/setnayan-platform/pull/4475)~~ | a put-away celebration still counts on the supplier record | ✅ **FIXED — superseded by [#4492](https://github.com/iscasasola/setnayan-platform/pull/4492).** It was NOT staleness: it re-opened a leak. See below. |
+
+✅ **SEPARATELY, S9's GRANT SWEEP LANDED AND IS VERIFIED IN PROD BY THE OBJECT** (#4489):
+anonymous read access **306 → 290 tables of 384**. The two tables it nearly closed by mistake —
+the ones feeding the public supplier listing — are **confirmed still open**, so the marketplace is
+intact. Its near-miss is the argument for small batches: a wrong one gets caught while it is cheap.
 | [#4478](https://github.com/iscasasola/setnayan-platform/pull/4478) | a put-away celebration stops taking new photos | its own fail-closed gate test |
 
 ⚠ A fifth, [#4473](https://github.com/iscasasola/setnayan-platform/pull/4473) (*a celebration can
@@ -225,6 +230,27 @@ and one of the four was hiding a disclosure. The remaining three still need doin
 newly exposing this — say why."* Silencing it would be **adding a line to a bill, not making a
 decision**, on somebody else's work whose intent I do not hold. Each needs the session that wrote
 it, or a fresh one told what it was for.
+
+---
+
+## 6c · ✅ DECIDED 2026-08-17 — the nine refusal screens, and the doubled tab title
+
+**DO ALL NINE.** S2 asked, having first summarised them as *"camera screens where the card is only
+an error state"* and then corrected itself after reading them properly. Measured, the card on all
+nine says exactly one of two things — **"you can't come in, go and get your link"** or **"this
+link is dead"**. That is a doorway by definition. The camera is a separate part of each page and
+the card never appears there, **so porting them cannot change how a camera looks.**
+🔑 **The reason to say yes is the reason the work exists:** a guest turned away from the photo page
+and a guest turned away from an invitation currently meet two different products at the same
+moment — the moment they have just been refused.
+
+**THE DOUBLED TAB TITLE IS REAL — measured, not taken on trust.** The site template appends
+` · Setnayan` to every page title, and **147 page titles under `app/` already contain the word**
+(S2 counted 87 reaching the actual tab; the rest are social-card titles, which the template does
+not touch). So a tab can read *"Setnayan · … · Setnayan"*.
+⏭ **Mechanical, and its own small job — do it separately.** ⚠ **It lands in the same files as the
+`"keep it forever"` wording in §7, which is an OWNER call.** Whoever takes the doubling should
+carry the wording fix in the same pass rather than editing those titles twice.
 
 ---
 
