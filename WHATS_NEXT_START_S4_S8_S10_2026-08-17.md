@@ -115,6 +115,24 @@ database on the EVENING of 2026-08-17, after today's twenty merges. Do them in o
 # S8 · Your own admin screens
 **pairs with S4 · internal-only, so a mistake reaches your team, not a customer**
 
+> ## ✅ STARTED AND PARTLY LANDED 2026-08-17 — PR [#4506](https://github.com/iscasasola/setnayan-platform/pull/4506), merged, and **production self-reports the merge commit** (`/api/health` → `2c1e230`). **DO NOT RE-RUN THIS PROMPT FROM THE TOP.**
+>
+> **The archetype is BUILT and must not be rebuilt:** `apps/web/app/admin/_components/console-table.tsx`. RULE 0 paid — three of the four pieces already shipped and were reused, not redrawn: `PageMasthead` · `KpiStatCard` · the six-state primitives in `app/_components/states/` (which had **zero** consumers). Only the table itself was new.
+>
+> **Converted: 3 of 34** — `/admin/pax-changes` · `/admin/receipts` · the price-bands surface. **31 remain**, pinned as an exact-match bill in `admin-console-is-one-table.test.ts`: a 32nd raw table fails the build, and converting one fails until you delete its line. **Never add a line to go green.**
+>
+> 🔑 **THE DEFECT WORTH KNOWING BEFORE YOU CONTINUE, and the reason the archetype exists:** Supabase **resolves with `{ error }` instead of throwing**, so `(data ?? [])` turns a REFUSED read into an empty array and the page prints a calm sentence. **14 of the 34** do this. `/admin/approvals` says *"No approvals pending. Set na 'yan."* on the four-eyes queue whose only job is that a second admin looks; `/admin/fraud` says *"No open fraud signals."* **11 of those 14 are still open — do `/admin/approvals` and `/admin/fraud` FIRST; they are the queues where a false all-clear costs most.**
+>
+> 🛑 **THIS PROMPT'S OWN NUMBERS WERE CLOSE BUT NOT RIGHT, AND SO WERE MINE.** It said "33 of the app's 47 raw-table files" in one place and "34" in another; measured, it is **34**. And I reported the failed-read defect as **16** before correcting it to **14** the same hour: 16 files coerce `null` to `[]`, but **2 return on the error first** (`settings/payment-methods` · `browser-blocks-surface`), so the coercion is unreachable. **Counting the coercion is not counting the defect.** My bad number came from a script that **filtered on RAW source and judged on COMMENT-STRIPPED source**, so a file whose only match was a docblock *describing* the defect counted as having it — the exact trap the guard's own comment warns about. **Re-measure; do not inherit either count.**
+>
+> ⚠ **ONE CLAIM BELOW IS LOOSE:** *"admin has NO `<main>` element"* is true of the **shell** (`app/admin/layout.tsx` renders none) but not of the tree — 4 admin pages open their own. The instruction still stands: do not copy another tree's shell placement in.
+>
+> 🎨 **A MEASURED AA FAILURE IS NOW FIXED IN THE ARCHETYPE AND MUST NOT BE "RESTORED":** the shipped header label `text-ink/55` on its own `bg-ink/[0.03]` fill is **3.24:1** in the light theme — under the 4.5:1 floor at 11px, on ~12 admin tables today. The archetype uses `text-ink/70` (**5.02 light / 8.32 dark**). Consistency with a measured failure is not a reason.
+>
+> ⏭ **ALSO OPEN, recorded not dropped:** `offline-diagnostic.tsx` renders `className="m-table"` and **there is no `.m-table` anywhere in the repo**; and **`text-terracotta` appears 236 times across 89 files under `app/admin`** — a separate bounded job. `ugat-console.tsx` is on the bill but **is not owed** (own stylesheet, graph console, not a records list).
+>
+> ⚠ **NOTHING HERE HAS BEEN SEEN.** Admin sits behind a login, so it is test-proved and measured, never observed in a browser. **The owner looking is still owed.**
+
 ```
 WHAT A PERSON GETS: the Setnayan team stops working in ninety-odd hand-built tables.
 
