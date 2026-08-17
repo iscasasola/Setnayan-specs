@@ -17,7 +17,73 @@
 > graph console, not a records list. **Leave its line in the bill. Do not convert it.** So the real
 > work is **30 files**.
 
-## Why these four lanes can run two-at-a-time without colliding
+> # 🛑 CORRECTION — 2026-08-17, after four lanes were started at once. READ THIS FIRST.
+>
+> **I wrote below that the lanes "cannot touch the same files". THAT IS WRONG and the section is
+> struck.** Every lane edits ONE shared file, and I claimed a directory partition kept their edits
+> far apart. Printed in sorted order, it does not:
+>
+> ```
+>   A  accounts/_surfaces/venues-surface.tsx      ← A's last line
+>   B  app-performance/_components/expenses.tsx   ← B's first line, ONE line below
+>   …
+>   B  app-performance/_surfaces/seo-surface.tsx
+>   L1 approvals/page.tsx                         ← adjacent again
+>   L1 budget-planner/page.tsx
+>   D  completions/page.tsx                       ← and again
+> ```
+>
+> **Lane D is not a directory at all** — it is "everything else", so its ten lines are scattered
+> through the whole array, adjacent to A, to B, to C and to L1. And A↔B, B↔L1, L1↔D and D↔C are each
+> one line apart. Git conflicts on hunks within ~3 lines of each other. **Expect conflicts in
+> `admin-console-is-one-table.test.ts` on most pushes.** 🔑 *A partition by directory is only a
+> partition if every lane IS a directory.*
+>
+> ## The good news, and it is real: THIS conflict cannot go wrong silently
+>
+> The guard asserts the bill **equals** the measured set of files that still hand-roll a table. So
+> both bad resolutions fail loudly:
+> - dropped a line for a file you did NOT convert → that file still has a raw table, appears in the
+>   measured set, is missing from the bill → **deepEqual fails**;
+> - kept a line for a file you DID convert → it no longer matches, is absent from the measured set,
+>   still in the bill → **deepEqual fails**.
+>
+> **So never hand-pick lines out of a conflict. Re-derive, then let the guard prove it:**
+>
+> ```bash
+> # from apps/web — regenerate the bill from measurement, then paste it in sorted order
+> for f in $(grep -rl "<table" app/admin --include="*.tsx" | sort); do
+>   [ "$f" = "app/admin/_components/console-table.tsx" ] && continue
+>   perl -0pe 's{/\*.*?\*/}{}gs; s{^\s*//.*$}{}gm' "$f" | grep -q "<table" \
+>     && echo "  '${f#app/admin/}',"
+> done
+> npx tsx --test "app/admin/_components/admin-console-is-one-table.test.ts"
+> ```
+>
+> Take **both** sides' additions to `CONVERTED` — it is a union, never a choice.
+>
+> ## ⚠ THE FILE THAT *CAN* GO WRONG SILENTLY: `scripts/port-control-baseline.json`
+>
+> **Only ONE lane per wave may regenerate it, and only after rebasing onto current `origin/main`.**
+> Generated from a stale tip it silently drops whatever routes landed meanwhile, and a route present
+> in the tree but absent from the baseline is simply **unguarded** — no error, no failure, nothing to
+> notice. That nearly shipped on PR #4506 and was caught only by regenerating a second time after a
+> rebase (401 routes → 402; the extra one was another session's page). **Do not regenerate it
+> speculatively.** Only if the port lint actually fails on your PR: rebase first, regenerate, then
+> check absorption **per route** — destinations lost, actions lost, routes gone — not by totals.
+>
+> ## ⚠ AND WITH FOUR RUNNING AT ONCE
+>
+> - **DO NOT `gh pr merge --auto`.** Four in flight is a fan-out; the standing auto-merge default
+>   does not apply. Push, then say the PR is ready and stop.
+> - **Never work in the shared main checkout** (`Documents/Claude/Projects/setnayan-platform`). It
+>   has been switched to `main` under a running session three times. Branch, then `git worktree add`,
+>   immediately.
+> - `git fetch` and read `origin/main`'s tip before you branch — it moves every few minutes today.
+>
+> ## ~~Why these four lanes can run two-at-a-time without colliding~~ — struck, see above
+
+## ~~Why these four lanes can run two-at-a-time without colliding~~
 
 Every conversion edits **one** shared file — `apps/web/app/admin/_components/admin-console-is-one-table.test.ts` — deleting its own lines from `RAW_TABLE_BILL` and adding them to `CONVERTED`.
 
@@ -33,7 +99,7 @@ standing default for a lone PR, never for a fan-out.
 
 | lane | files | lines | render "nothing here" over a REFUSED read |
 |---|---|---|---|
-| **L1** · the queues that lie | 4 | 1,557 | **4 of 4** ← being done in the session that built the archetype |
+| **L1** · the queues that lie | 4 | 1,557 | **4 of 4** ← ⏸ **HELD.** Four lanes were started at once, so L1 stands down rather than be a fifth writer on the shared guard file. It is the highest-value lane and must be picked up once A–D land. Its four files stay on the bill until then. |
 | **A** · account surfaces | 5 | 2,587 | 4 of 5 |
 | **B** · insights surfaces | 6 | 2,077 | 2 of 6 |
 | **C** · studio surfaces | 5 | 1,829 | 1 of 5 |
