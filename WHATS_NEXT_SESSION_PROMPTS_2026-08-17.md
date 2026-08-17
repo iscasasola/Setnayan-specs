@@ -132,7 +132,7 @@ path passes while leaking.
 
 ALSO IN SCOPE — the host's own page:
 A signed-in host with no guest cookie hits `if (!session) return renderAnonymous(...)` at
-~line 777, so the couple opening their OWN event page gets the stranger's body with a
+~line 778, so the couple opening their OWN event page gets the stranger's body with a
 read-only ribbon on top — it can tell them to scan their own invitation QR. Give the owner
 capability a body variant. Read-only stays read-only: every real control lives in
 /dashboard/[eventId] and this is NOT the session that changes that.
@@ -194,11 +194,12 @@ WHAT A PERSON GETS: when something fails to load, the screen says so. Today a gu
 an invitation that failed to load sees an abandoned-looking empty page, and a couple with
 three real pending requests can be told they have none.
 
-THE FINDING, VERIFIED 2026-08-17: app/_components/states/ exists on origin/main with
-denied-state.tsx, empty-state.tsx, error-state.tsx, loading-skeleton.tsx, locked-state.tsx
-and surface-state.ts — and has ZERO consumers. I grepped the whole of apps/web for the
-folder path and for each exported name: no importer outside the folder itself. It was
-created 2026-08-02 and has never been used.
+THE FINDING, VERIFIED 2026-08-17: app/_components/states/ exists on origin/main with SEVEN files —
+denied-state.tsx, empty-state.tsx, error-state.tsx, loading-skeleton.tsx, locked-state.tsx,
+surface-state.ts and its test — and has ZERO consumers. I grepped the whole of apps/web for the
+folder path and for each exported name: no importer outside the folder itself. Created 2026-08-02 (commit e43651b40, "the six-state system as
+shared primitives"); its only touch since is the blanket contrast sweep of 2026-08-08. Fifteen
+days, no adopter.
 
 DO NOT REBUILD THE KIT. It is written. This session ADOPTS it.
 
@@ -250,8 +251,13 @@ Six unrelated small fixes, all verified still open on origin/main and in the liv
    start · Packed up · Running late · Need help. They cannot type "the cake is melting near
    the lights".
    ALREADY SHIPS — DO NOT REBUILD: the free-text server action submitDayRequest EXISTS at
-   app/vendor-dashboard/on-the-day/actions.ts (~line 470) and files correctly on the vendor
-   lane. Its only caller is requests-inbox.tsx, which is mounted behind `kind === 'coordinator'`.
+   app/vendor-dashboard/on-the-day/actions.ts (line 470) and files correctly on the vendor lane.
+   TRACE THE MOUNT BEFORE YOU TOUCH IT — it is indirect and easy to get wrong:
+     page.tsx:1081  <IssuesLog> rendered only when `kind === 'coordinator'`
+       └─ issues-log.tsx:71  is the SWITCH — it renders <RequestsInbox>
+            └─ requests-inbox.tsx:88  calls submitDayRequest
+   A plain supplier instead gets <VendorStatusUpdates> at page.tsx:534, whose own docblock says
+   "nothing here can post arbitrary text".
    THE WORK IS WIRING, NOT AUTHORING: give a plain supplier a free-text box that calls the
    action that already exists.
 
@@ -265,8 +271,8 @@ Six unrelated small fixes, all verified still open on origin/main and in the liv
    and eventTilesForBooking already unions both sources. ONLY THE FETCHER IS SHORT.
 
 4. SUPPLIERS ARE TOLD THEY CAN SET THEIR DATE-HOLD LIMIT, AND CANNOT.
-   The limit is read and enforced in app/dashboard/[eventId]/vendors/actions.ts (~1325-1337),
-   the comment says "vendors can configure max_soft_holds_per_date (default 3, range 1-20)",
+   The limit is READ at app/dashboard/[eventId]/vendors/actions.ts:1394 and applied at :1406;
+   the comment at :1155 says "vendors can configure max_soft_holds_per_date (default 3, 1-20)",
    and the column's own comment in production names a settings route that DOES NOT EXIST.
    Zero writers app-wide; both live shops sit on the default 3.
    EITHER build the control OR correct both comments to say it is fixed at 3. Do not leave
@@ -311,7 +317,11 @@ edges and readable text from the app-wide sweep and NOTHING ELSE. That is this s
 
 VERIFIED 2026-08-17: commits on these four trees since 2026-08-12 are the shell mount, the
 booking handshake, a coverage fix and a payments-lens fix — all functional. No design commit.
-The named offenders build-compare.tsx and plan-budget-accordion.tsx are untouched since July.
+⚠ CORRECTED — the 2026-08-12 register said the two named offenders were "untouched since July".
+THAT IS NO LONGER TRUE and I nearly pasted it here: build-compare.tsx moved 2026-08-14 and
+plan-budget-accordion.tsx 2026-08-15, via the SidebarShell retirement and a marketplace design
+unit (2688ce737, "a table that fits"). READ WHAT THAT UNIT ALREADY DID TO THE COMPARISON TABLE
+BEFORE REDRAWING IT — some of your scope may already be done.
 
 BINDING: the 19 approved archetypes in prototypes/archetype_*.html. PORT, never redraw — a
 difference between your screen and its archetype is a defect in your port.
@@ -337,9 +347,9 @@ VERIFIED 2026-08-17: the flat cream card treatment DID reach vendor-dashboard in
 sweep, and two real design units landed on 2026-08-08 — the calendar now says where each
 booking came from, and there is one line under Publish. Everything else since is functional
 (shop address, publish guards, tier caps, payouts). There are 63 vendor routes, 3 files with
-raw tables, and vendor-dashboard/_components holds only 20 one-off files — no shared kit.
+raw tables, and vendor-dashboard/_components holds 23 one-off files — no shared kit.
 
-BUILD THE SHARED KIT FIRST, then adopt it. Twenty one-off components across 63 routes is the
+BUILD THE SHARED KIT FIRST, then adopt it. 23 one-off components across 63 routes is the
 actual problem; restyling them individually just makes 63 one-offs that look nicer.
 
 ALREADY SHIPS — DO NOT REBUILD:
@@ -362,8 +372,9 @@ Four places are built but were never drawn, and one of them is where people SHOP
 
 SCOPE, route counts verified at origin/main:
 - /explore — the supplier marketplace (3 page files). THE MOST IMPORTANT ONE.
-- /tour — the product walkthrough (5 page files). ZERO commits of any kind since 2026-08-07.
-- /papic — the deeper photo-service pages (11 page files).
+- /tour — the product walkthrough (5 page files). Its ONLY commit since 2026-08-07 is an
+  accessibility contrast fix — no design work has ever touched it.
+- /papic — the deeper photo-service pages (10 page files).
 - /onboarding — the persona quiz questions, their order and the reveal.
 
 ALREADY DONE ON /explore — DO NOT REDO: one design unit landed 2026-08-13, "sorting you can
@@ -392,10 +403,10 @@ WHAT A PERSON GETS: the Setnayan team stops working in ninety-odd hand-built tab
 
 WHY LAST: only your own team sees these. Every other session is customer-facing.
 
-VERIFIED 2026-08-17: 33 files under app/admin still contain a raw table. app/admin/_components
-holds the same 12 files it did five days ago — no shared console table exists anywhere.
+VERIFIED 2026-08-17: 108 admin routes; 33 of the app's 47 raw-table files are under app/admin.
+app/admin/_components holds 13 files and none of them is a shared console table.
 Commits since 2026-08-12 are all functional (address correction, queue ordering, compliance
-sheet, verification screen). ~95 of 107 admin routes collapse to ONE archetype.
+sheet, verification screen). ~95 of the 108 admin routes collapse to ONE archetype.
 
 BUILD THE ONE ARCHETYPE, then convert. Do not restyle 33 tables individually.
 
@@ -491,7 +502,7 @@ FOUR THINGS, all verified still wrong 2026-08-17:
    four wrong rows is the wedding-photos row itself. Our own filing would contradict our own
    public notice.
 
-4. FIFTEEN FILING TASKS ARE ALL STILL "not started" IN PRODUCTION. Verified today.
+4. ALL FIFTEEN FILING TASKS ARE STILL "not started" IN PRODUCTION — 15 of 15, read today.
 
 🔴 THREE THINGS ONLY THE OWNER CAN CLOSE — SURFACE THEM, DO NOT ANSWER THEM. He is the
 registered data protection officer.
