@@ -360,6 +360,52 @@ that raised these**, and it is now the first step, not the last.
 
 ---
 
+## 6f · 🛑 STOP — MAIN'S CI IS RED. START NOTHING NEW UNTIL IT IS GREEN.
+
+Checked 2026-08-17 after the three finishers landed. **`ci` on `main` is `completed/failure`.**
+Production is fine (`deploy-prod` succeeded and the site serves), but **every new branch starts
+from a red main, inherits the failure, and cannot merge.** That is precisely how four changes from
+2026-08-15 ended up armed for auto-merge and stuck for two days.
+
+**Order, and nothing jumps it:**
+1. [#4499](https://github.com/iscasasola/setnayan-platform/pull/4499) — *"my host-page guard cried
+   wolf on a clean refactor"*. Open, 0 failing checks, just waiting. **This is what turns main
+   green.**
+2. [#4492](https://github.com/iscasasola/setnayan-platform/pull/4492) — the leak fix. Was blocked by
+   a real typecheck error inherited from #4475 (`replay?.close?.()` — optional-chaining a method
+   that does not exist, silent until the wrapper gained a real type). Fixed and pushed.
+3. **Then** start new sessions.
+
+🔑 **A GUARD THAT CRIES WOLF COSTS MORE THAN THE BUG IT WATCHES FOR** — it is holding the whole
+board, and it was added by the session that proved the host page was already correct.
+
+### ✅ And the three finishers are DONE — with one correction that is MINE
+
+- **S1-FINISH was NOT NEEDED AND I WAS WRONG TO WRITE IT.** [#4496](https://github.com/iscasasola/setnayan-platform/pull/4496)
+  is titled *"The host's own page already speaks to them — this is the test that says so"* and
+  contains **a test file and a changelog — zero production code.** The host variant shipped in
+  **#4483 all along**: its own changelog says *"the body now has a host variant (copy only) keyed
+  on the same server-verified capability the ribbon already uses"*, and `site-body.tsx` carries
+  `viewerIsHost`. I read the page's branch structure, saw `if (!session)` unchanged, and concluded
+  the half had not shipped — **but the fix lives in the body component, keyed on the capability,
+  not in a new branch.**
+  🔑 **THE FOURTH TIME TODAY SOMETHING SHIPPED WAS REPORTED AS MISSING, AND THE SECOND BY ME.**
+  The session did exactly the right thing: ran RULE 0, found it built, and shipped proof instead
+  of a rebuild.
+- **S2-FINISH landed both halves** ([#4498](https://github.com/iscasasola/setnayan-platform/pull/4498)) —
+  sign-up and the tab titles.
+  ⚠ **AND IT CHOSE THE WORDING THE OWNER WAS ASKED TO CHOOSE.** The homepage title now reads
+  *"Setnayan · Plan your Filipino wedding free — and never lose a photo"*. **The new sentence is
+  TRUE** — nothing is ever deleted, only compressed — so this is an improvement, not a defect.
+  But the prompt said *do not invent the replacement wording, ask*. **It is live on the front door
+  and in every share card. The owner should accept it or replace it.**
+- **S9-FINISH corrected its own two overstated findings**
+  ([#4497](https://github.com/iscasasola/setnayan-platform/pull/4497)).
+  ⏭ **The camera-seat consent gate is NOT closed** — still no writer, still 14 of 14 photos behind
+  it. It needs the owner's ruling first, exactly as scoped.
+
+---
+
 ## 7 · 🆕 FOUND TODAY
 
 🚨 **Your homepage still promises "forever" — in the browser tab, the Google result, and every
