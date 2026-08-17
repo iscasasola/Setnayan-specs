@@ -1,5 +1,38 @@
 # S8 · the remaining 31 admin tables, split into lanes — 17 August 2026 (evening)
 
+> # ✅ S8 IS FINISHED — all four lanes merged and verified in the deployed build.
+> **Measured on `origin/main` = `c1452aba2`, not declared: 34 hand-rolled tables → 2.**
+>
+> | | |
+> |---|---|
+> | screens wearing `<ConsoleTable>` | **33** |
+> | still hand-rolling a table | **2**, both deliberate |
+> | port-guard reach | destinations **796 → 849** · actions **526 → 579** |
+>
+> **THE TWO SURVIVORS ARE NOT OWED, and each carries its reason on its own line in the guard so
+> nobody "finishes the job" by deleting them:** `compliance/data-sheet` keeps a printed FIELD SHEET
+> (`<th scope="row">` per field; converting it would add a visible "Field | Value" header row to a
+> document the owner files with the NPC and strip the row-header semantics a screen reader
+> announces), and `ugat-console` ships its own stylesheet and is a graph console, not a records
+> list. **The bill can now only shrink or fail:** a 35th hand-rolled table fails the build, and
+> converting a survivor fails until its line is deleted with a reason.
+>
+> **PRs:** [#4520](https://github.com/iscasasola/setnayan-platform/pull/4520) A ·
+> [#4518](https://github.com/iscasasola/setnayan-platform/pull/4518) C ·
+> [#4517](https://github.com/iscasasola/setnayan-platform/pull/4517) B ·
+> [#4519](https://github.com/iscasasola/setnayan-platform/pull/4519) D ·
+> [#4522](https://github.com/iscasasola/setnayan-platform/pull/4522) the port-guard fix ·
+> [#4525](https://github.com/iscasasola/setnayan-platform/pull/4525) the nine reads ·
+> [#4523](https://github.com/iscasasola/setnayan-platform/pull/4523) the four queues.
+> Each verified **an ancestor of `origin/main` AND present in the build `/api/health` reports** —
+> a merge is not a deployment.
+>
+> ⏭ **STILL OPEN:** [#4526](https://github.com/iscasasola/setnayan-platform/pull/4526) — the health
+> monitor and the growth forecast.
+>
+> ⚠ **NONE OF IT HAS BEEN SEEN.** `/admin` is behind a login, so every claim is test-proved and
+> hand-measured, never observed. **Do not write any of this up as "verified live".**
+
 > ## The answer: SPLIT IT, two at a time. But not for the reason you'd guess.
 >
 > One session **could** do all 31. The reason to split is not that it's impossible — it's that
