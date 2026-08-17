@@ -77,9 +77,11 @@ local.**
 
 ## 4 · ⚠ THE STRUCTURE IS BETTER THAN IT FEELS — do not rebuild it
 
-**There IS a shared shell** (`app/[slug]/layout.tsx`). The Hub is not 13 unrelated pages bolted
-together, and **a session that "unifies the Event Hub" by building a new shell would be rebuilding
-something that ships.**
+🛑 **RETRACTED 2026-08-17 (evening) — I WROTE "THERE IS A SHARED SHELL" AND IT IS FALSE.**
+`app/[slug]/layout.tsx` is `display: contents` and its own docblock says *"purely a CSS-variable
+scope — zero behavior"*. **There is no shared shell.** Do not repeat the claim, and do not scope a
+rebuild off that file either — the rules engine (`_lib/site-nav.ts`, 540 lines, its comments are
+owner rulings) is what the bar and the index must both resolve through.
 
 🔑 **What is actually missing is not a shell — it is a WAY BETWEEN THE ROOMS.** A guest who lands
 on the seat screen has no listed way to reach the venue directions, the gift page or the recap.
@@ -110,7 +112,7 @@ correct, narrow fix landing on one room of a house nobody has looked at end to e
 
 | session | how it connects |
 |---|---|
-| **S11 · who is in this event** | ⚠ **Shares the Hub's body file.** Must never run beside a Hub design session. |
+| **S11 · who is in this event** | ⚠ **CORRECTED — it does NOT share the Hub's body file.** Measured: S11 lives in the organiser's tree; its only Hub footprint is the ribbon's coordinator dead-end, which it can close without opening the body at all. *Coordinate on one file*, not *never together*. |
 | **S5 · the couple's four screens** | The *organiser's* side of the same event. The Hub is what guests see; these are what the host controls. They should not be redesigned to two different registers. |
 | **S4 · eight small things** | Three of its items are day-of surfaces that face the same guests. |
 | **S2 · the doors** ✅ done | Already set the register the Hub should extend — paper card, one action, the wordmark as the way out. **The Hub should inherit that, not invent a second look.** |
@@ -129,9 +131,9 @@ correct, narrow fix landing on one room of a house nobody has looked at end to e
 3. **Inherit the door register.** Do not invent a second look for the Hub.
 
 **MUST NOT:**
-- ⛔ Rebuild the shell. It ships.
+- ⛔ ~~Rebuild the shell. It ships.~~ **THERE IS NO SHELL — see the retraction above.**
 - ⛔ Rebuild any of the 13 screens. Every one works.
-- ⛔ Run beside S11 — they share the body file.
+- ⛔ ~~Run beside S11 — they share the body file.~~ **They do not. Corrected above.**
 - ⛔ Turn the Hub into a control panel. The host's ribbon is **read-only** by owner ruling; every
   real control lives in the organiser's dashboard.
 
@@ -160,8 +162,9 @@ looks like? i have a session that talks about this"*
 
 ### 📋 HAND THE DESIGN SESSION THESE FIVE THINGS — it will otherwise redraw what ships
 
-1. **This listing.** 13 rooms, 103 wedding-specific words, and the fact that a shared shell
-   ALREADY EXISTS.
+1. **This listing.** 13 rooms and the wedding-word count — ⚠ **but NOT the shell claim, which is
+   retracted above, nor the 103 figure, which is a crude count including comments and is superseded
+   by the careful measurement in the builds doc.**
 2. ⛔ **The door register is already decided and BINDING** — paper card, terracotta top edge, one
    terracotta action, the wordmark as the way out. 22 screens wear it as of today. **The Hub
    inherits it. It does not get a second look.**
