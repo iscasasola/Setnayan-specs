@@ -452,3 +452,51 @@ anything off.**
 ⚖ And the corollary the lanes found independently: **`cap` is only honest when the number it names
 is the number of rows the table RENDERS.** A cap over a `<select>`, or over rows SCANNED to build
 aggregated batches, is decoration passed to satisfy a guard.
+
+
+---
+
+## ⏭ TWO DEFECTS FOUND NEXT DOOR TO A LANE, VERIFIED BY ME, NOT YET FIXED
+
+Both surfaced by the lane-B session, which correctly refused to widen a frozen branch to reach
+them. I verified each by reading the code rather than accepting the report. **Neither is on any
+bill and no guard reaches either**, because neither file hand-rolls a `<table>`.
+
+### 1 · `app-performance/_surfaces/interconnections-surface.tsx:61` — THE SHARPEST OF THE DAY
+
+`const { data } = await createAdminClient()…limit(400)` — the error is destructured away
+entirely, then `(data ?? [])`, then the latest-run map is built from that.
+
+🚨 **AND THE LIST IS DRIVEN BY THE PROBE REGISTRY, NOT BY THE LEDGER — so a refused read does NOT
+render empty. It renders EVERY PROBE AS "never run".** A health monitor stating, at full
+confidence, that nothing on the platform has ever been checked.
+
+⚖ **THE DESIGN DECISION THAT CAUSES THIS IS CORRECT, AND THAT IS THE LESSON.** Its own docblock
+says why the list is registry-driven: *"A probe that has never run must appear as 'never run' — if
+the page listed only what the ledger contains, adding a probe and forgetting to deploy it would
+leave the page looking complete."* Exactly right. And the same mechanism that prevents one
+false-clean converts a read failure into a maximally loud false alarm.
+
+🔑 **A REGISTRY-DRIVEN LIST MAKES A REFUSED READ LOUDER, NOT QUIETER.** Every other instance today
+was an absence that looked like *nothing*; this is an absence that looks like a *catastrophe*. Both
+are lies. This one either sends somebody chasing an outage that does not exist, or gets dismissed
+as obviously-broken — and either way the real signal is gone. **When a surface joins rows to a
+fixed registry, ask what the registry says when the rows are missing.**
+
+### 2 · `lib/hiring-guide/queries.ts:142` — A GROWTH CLAIM FROM AN UNCHECKED QUERY
+
+`const { data: weeklySignups } = await supabase` — unbound, then `?? []` at three sites (147,
+152, 155). A refused read makes `weeklyCount`, `recentCount` and `priorCount` all zero; the
+`weeklyCount <= 0` branch then returns a milestone with no forecast, and
+`operations-surface.tsx:150` renders **"Insufficient signup data"** — a statement about how the
+business is growing, produced by a query nobody checked.
+
+### Why neither was fixed here
+
+A CI freeze was in force (four lanes had rate-limited our own action downloads to 429s), and both
+sit outside the lane that found them. **Fixing them under the freeze would have made the freeze
+advisory, which is how a control becomes a convention.** They are named, verified and dated
+instead. Both are the exact class the read-binding rule was re-measured to catch, and **both are
+invisible to a scan for the literal `data ?? []` spelling in the file that renders** — the registry
+one because the coercion is a call frame away from the render, the growth one because the swallow
+is in a lib.
