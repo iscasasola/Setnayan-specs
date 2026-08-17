@@ -254,6 +254,27 @@ carry the wording fix in the same pass rather than editing those titles twice.
 
 ---
 
+## 6d · 🚨 TWO SESSIONS WERE EACH RIGHT AND STILL COLLIDED — caught before it merged
+
+While verifying S9's finish I read the live grants and found **my own open fix would have undone
+their work in the same hour they did it.**
+
+S9's sweep revoked the last remaining access to the supplier written-off count. My fix — written
+hours earlier against the state at the time — **re-granted it**, correctly mirroring the migration
+that was current when I wrote it. Its file sorts *below* theirs, which reads as "harmless", but
+the deploy applies everything regardless of order and on production mine would have run **after**.
+
+**Both changes were correct in isolation. Together they re-opened a disclosure.**
+
+🔑 **A MIGRATION IS JUDGED AGAINST THE STATE IT WILL LAND IN, NOT THE STATE IT WAS WRITTEN
+AGAINST.** Re-read the live permissions immediately before merging, never only when you start.
+✅ Corrected: it now takes the access away and grants nothing. Checked against production first —
+the supplier's *advertised* number is untouched, only the unredacted twin is closed.
+⚠ **This is the cost of running sessions in parallel, and it is not theoretical.** Nothing in
+either pull request could have shown it; only reading the live database did.
+
+---
+
 ## 7 · 🆕 FOUND TODAY
 
 🚨 **Your homepage still promises "forever" — in the browser tab, the Google result, and every
