@@ -759,13 +759,13 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > `/{slug}` · editorial first-pick credit · Real Stories vendor credit · Papic
 > vendor attribution · stage-note recipients · showcase credits · the verified
 > median · fraud detection · the plausibility scanner · venue-room-size.
-> Inert today (0 linked rows · 0 asks in flight · flag off) — **which is exactly
-> the window in which to fix it.** Not fixed in PR #4483 on purpose: changing an
-> owner-gated PR-H function is its own change, not a side effect of an ordering
-> fix. 🔑 **A sentence is not a mechanism — read the function body out of prod
-> before trusting a comment that says another object does something.**
+> It was inert throughout (0 linked rows · 0 asks in flight · flag off) — **which
+> is exactly the window in which it got fixed.** Deliberately NOT bundled into PR
+> #4483, the ordering fix that found it: changing an owner-gated PR-H function is
+> its own change. 🔑 **A sentence is not a mechanism — read the function body out
+> of prod before trusting a comment that says another object does something.**
 >
-> ⚖ **THEN THE OWNER LOOKS AND FLIPS
+> ⚖ **SO THE OWNER LOOKS AND FLIPS
 > `NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED` IN VERCEL.** Nothing changes for anybody
 > until he does — flag-off is *asserted* byte-identical to today, not assumed.
 > ⚠ **Its production value is NOT readable from a session** (it inlines at build
