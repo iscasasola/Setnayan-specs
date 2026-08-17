@@ -185,6 +185,32 @@ rows still quote the retired 90-day rule).
 
 ---
 
+## 6b · 🔴 FOUR FINISHED-LOOKING PRs HAVE BEEN RED FOR TWO DAYS
+
+Found 2026-08-17 while checking something else. **Four pull requests from 2026-08-15 sit open with
+auto-merge ARMED and a required check FAILING**, so they will never merge and nothing says so:
+
+| PR | what it was for | why it is red |
+|---|---|---|
+| [#4471](https://github.com/iscasasola/setnayan-platform/pull/4471) | suppliers may write about a day they worked | a new exposed column + a new anon-callable function, neither registered with a written reason |
+| [#4472](https://github.com/iscasasola/setnayan-platform/pull/4472) | opening a shop no longer takes away your events | two access-check tests failing |
+| [#4475](https://github.com/iscasasola/setnayan-platform/pull/4475) | a put-away celebration still counts on the supplier record | the exposure-baseline guard |
+| [#4478](https://github.com/iscasasola/setnayan-platform/pull/4478) | a put-away celebration stops taking new photos | its own fail-closed gate test |
+
+⚠ A fifth, [#4473](https://github.com/iscasasola/setnayan-platform/pull/4473) (*a celebration can
+finally be put away*), is **CONFLICTING** — and its checks are from a stale run, so it is not being
+tested at all.
+
+🔑 **"AUTO-MERGE ARMED" IS NOT "WILL MERGE."** Four sessions armed it, reported success and left.
+The failures are all REAL and all DIFFERENT — this is not one shared cause anybody can sweep.
+
+🛑 **I DELIBERATELY DID NOT MAKE THESE GREEN.** #4471 and #4475 fail the guard that asks *"you are
+newly exposing this — say why."* Silencing it would be **adding a line to a bill, not making a
+decision**, on somebody else's work whose intent I do not hold. Each needs the session that wrote
+it, or a fresh one told what it was for.
+
+---
+
 ## 7 · 🆕 FOUND TODAY
 
 🚨 **Your homepage still promises "forever" — in the browser tab, the Google result, and every
