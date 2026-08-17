@@ -19,9 +19,14 @@ did not measure something directly, this file says so.
 
 | | |
 |---|---|
-| **The big unbuilt thing** | The Event Hub for suppliers, hosts and coordinators. **6 steps, none started.** |
+| ~~The big unbuilt thing~~ | 🛑 **RETRACTED 2026-08-17 — the Event Hub IS BUILT.** See §4. What is left there is **one ordering fix**, not six steps. |
 | **The finishing work** | ~40 items from the last register, almost all still open. Mostly small. |
 | **Waiting on you** | 15 things no engineer can close — a signature, a price, a ruling, a switch. |
+
+🔑 **THE RETRACTION IS THE MOST IMPORTANT LINE IN THIS FILE.** I reported an existing, shipped
+product as unbuilt because I took a scope document's framing instead of grepping for the thing —
+which is the one failure this project has paid for more than any other. **A scope document is not
+evidence. Neither is this file.**
 
 ---
 
@@ -53,30 +58,62 @@ is a claim about code, not about something that has happened.
 
 ---
 
-## 4 · 🔴 THE BIG ONE — the Event Hub for all four roles. NOTHING IS BUILT.
+## 4 · 🛑 THE EVENT HUB IS BUILT — I GOT THIS WRONG, CORRECTED 2026-08-17
 
-Full scope: [`WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md`](WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md).
+> **Owner, on reading the first version of this file:** *"we already have an event website before.
+> that is the event hub. it was already built."* **He is right. I called it "the big unbuilt
+> thing" and it is not.** RULE 0 exists to stop exactly this and I did not run it on the one
+> section that most needed it — I inherited the framing from a scope document instead of grepping.
 
-You said every event should have one hub where the host, guests, suppliers and coordinator each
-get their own things. **Three of the four already work. Suppliers do not.**
+**Re-measured against shipped code, not the scope doc:**
 
-The reason is one number and it has not moved: **not one of your 45 booked suppliers is a
-Setnayan account.** They are names a couple typed into a list. You cannot give features to
-somebody who is not there.
+| | |
+|---|---|
+| The event website (`/{slug}`) | **BUILT** — 15 routes: RSVP · seat · find-my-table · venue · welcome · print · redeem · invite · live wall · Live hub · recap · rewards |
+| The supplier strip *"You are booked here"* | **BUILT** — component, gate and link-read all ship; last touched 2026-08-03 |
+| The link that powers it | **WRITTEN AUTOMATICALLY** when a couple locks a marketplace supplier — the lock payload stamps it, and its own comment records that gap being closed on **2026-06-19** |
+| The host ribbon on their own page | **BUILT** (read-only) |
 
-**The order is not negotiable — each step needs the one before it:**
+🔑 **SO WHY HAS THE SUPPLIER STRIP NEVER APPEARED? NOT A MISSING BUILD — A MISSING BOOKING.**
+44 of the 45 booked suppliers are **names a couple typed into a list**; they were never Setnayan
+businesses, so there is no account to link and nothing is broken. The 45th is a marketplace
+business — and it is a **test row seeded straight into the database** (its own name ends
+*"(SONGDESK TEST)"*), never booked through the screen that does the stamping. **The feature works
+the first time a real couple locks a real marketplace supplier.**
 
-1. **A booked supplier becomes a real account, not a typed name.** ← everything else is empty until this
-2. **"You are booked here" appears on the event page and opens their tools.** That strip exists and has never once appeared for anybody.
-3. **The host can see their own event page as themselves.** Today it tells them to scan their own invitation QR.
-4. **One "who is in this event" list.** Today that is five separate screens.
-5. **The coordinator stops being two different products.**
-6. **A supplier-shaped view of the event.** ← needs your ruling first (see §6)
+⚠ **My step 1 — "a booked supplier becomes a real account" — was a proposal to build something
+that already exists.** That is the paid-twice mistake, in the register whose job is to prevent it.
 
-**Fix regardless of all six — these are wrong today:**
+### What is genuinely left — one defect and one gap, not six steps
+
+- 🚨 **On a private event the page refuses a booked supplier before it ever asks whether they are
+  booked.** The lock screen admits four kinds of person — a guest with a redeemed invitation, a
+  host, someone bound to a seat, and an invited account — and a supplier is none of them. The
+  supplier check runs 200-odd lines later and never gets reached. **4 of your 6 events are
+  private**, so even after a real booking the strip would appear on 2 of 6. **This is an ordering
+  fix, not a build.**
+- **There is no way to invite an off-platform supplier onto Setnayan** — which is how 44 of the 45
+  would ever become accounts. That is **your call (§6), not an engineering task.**
+
+### Still true, and smaller than I said
+
+- **The host opening their own event page gets the visitor's version of the body** with a
+  read-only ribbon on top — so the page can still say "scan your invitation QR" to the couple who
+  own it. Real, worth fixing, **not architectural.**
+- **"Who is in this event" is five separate screens.** A convenience, not a gap.
+- **The coordinator is two products** depending on which identity they hold.
+- **A supplier-shaped view of the event** — still needs your ruling first (§6). This is the only
+  genuinely large one, and it is the *last* thing, not the first.
+
+**Wrong today regardless — unchanged, and these are the real day-of risks:**
 - On the day, every supplier sees a "start the next item" button. Only a coordinator is allowed to press it, **and the refusal is silent.** Embarrassing at a live wedding.
 - The shot list says it syncs to the couple. **It never leaves the phone it was typed on** — and neither does the coordinator's issues log.
 - The day-of console opens only on the exact booked date. No rehearsal, no morning-after.
+
+⚠ **The scope document
+[`WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md`](WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md)
+carries the six-slice framing and its slices 1 and 2 are the wrong shape.** Corrected in place on
+2026-08-17 — read it after this section, never instead of it.
 
 ---
 

@@ -83,10 +83,31 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > not the preparation. this is where we share information to the guests, vendors, etc. where we
 > collect photos, and use different services, this is where we have the papic and live studio."*
 > **Verified: 3 of those 4 are true today** — guests ✅ · photos/Papic ✅ · Live Studio ✅ ·
-> **vendors ❌.** The only vendor thing on `/{slug}` is a "you are booked here" strip that links
-> them AWAY to their own dashboard, and it reads `linked_vendor_profile_id`, **empty on all 45
-> prod rows — so it has never rendered for anybody.** That gap IS the build:
-> [`WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md`](WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md).
+> vendors ⚠. The vendor element on `/{slug}` is a "you are booked here" strip that links them
+> AWAY to their own dashboard, and it reads `linked_vendor_profile_id`, **empty on all 45 prod
+> rows — so it has never rendered for anybody.**
+>
+> 🛑 ~~That gap IS the build.~~ **RETRACTED 2026-08-17 BY THE OWNER: *"we already have an event
+> website before. that is the event hub. it was already built."* HE IS RIGHT.** The strip
+> **SHIPS** (`app/[slug]/_components/vendor-doorway.tsx`, last touched 2026-08-03) and the link it
+> reads is **stamped automatically by the lock payload** in
+> `app/dashboard/[eventId]/vendors/actions.ts` — whose own comment records that gap being closed
+> on **2026-06-19**. It has never rendered because **nobody has booked a marketplace supplier**:
+> 44 of 45 rows are names a couple typed into a list, and the 45th is a **test row seeded straight
+> into the DB** (`"(SONGDESK TEST)"`), never booked through the screen that stamps.
+> 🔑 **AN EMPTY COLUMN IS NOT A MISSING MECHANISM. Zero rows means nobody has done it yet — grep
+> for the WRITER before scoping a build around the absence.** I read the count, inherited a scope
+> doc's framing, and reported a shipped product as unbuilt **in the register whose entire job is
+> to stop that**. **RULE 0 applies hardest to the section you did not think needed it.**
+>
+> ⏭ **What is actually left there: ONE ordering fix.** On a **private** event the page refuses a
+> booked supplier **before it ever checks whether they are booked** — the lock screen admits a
+> redeemed guest · a host · a seat-holder · an invited account, and a supplier is none of them;
+> `resolveVendorCapability` runs ~200 lines later and is never reached. **4 of 6 prod events are
+> private.** Everything else in
+> [`WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md`](WHATS_NEXT_Event_Hub_Multirole_2026-08-15.md)
+> is smaller than that doc claims — **read its corrected header first; slices 1 and 2 are struck.**
+> Current register: [`WHAT_IS_LEFT_2026-08-17.md`](WHAT_IS_LEFT_2026-08-17.md) § 4.
 >
 > ⛔ **THE READING THAT WAS CONSIDERED AND REJECTED: "Event Hub = only the day."** It matches the
 > owner's *"not the preparation"* instinct, but it was rejected because **the guest keeps ONE

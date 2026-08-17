@@ -5,7 +5,23 @@
 > Read-only page for the owner: <https://claude.ai/code/artifact/1409a5d0-c9d2-4bf0-9df7-2159080bb054>
 > Naming context: [`DECISION_LOG.md`](DECISION_LOG.md) 2026-08-15 (PR #4444, the rename).
 
-⚠ **NOTHING HERE IS BUILT.** This is a scope, not a handoff of work in progress.
+🛑 **"NOTHING HERE IS BUILT" WAS WRONG — CORRECTED 2026-08-17 BY THE OWNER.**
+He read a register built on this document and said: *"we already have an event website before.
+that is the event hub. it was already built."* **He is right.** Re-measured against shipped code:
+the event website is **15 routes**, the *"You are booked here"* strip **ships** (last touched
+2026-08-03), and the link it reads is **stamped automatically at lock** — the lock payload writes
+it and its own comment records that gap being closed on **2026-06-19**.
+
+🔑 **THE STRIP HAS NEVER RENDERED BECAUSE NOBODY HAS BOOKED A MARKETPLACE SUPPLIER — NOT BECAUSE
+A WRITER IS MISSING.** 44 of 45 rows are names typed into a list; the 45th is a **test row seeded
+straight into the database** (*"(SONGDESK TEST)"*), never booked through the screen that stamps.
+**Slices 1 and 2 below are therefore the wrong shape and must not be built as written.**
+
+⚠ **This is the trap this file already warned about, one level up.** It closes with *"a demo will
+look fine and prove nothing"* and *"every behavioural claim is a claim about code" — then made a
+claim about code it had not checked.* An empty column was read as a missing mechanism.
+**ZERO ROWS MEANS NOBODY HAS DONE IT YET; IT NEVER MEANS THE CODE IS ABSENT.** Grep for the
+writer before scoping a build around its absence.
 
 ---
 
@@ -92,13 +108,17 @@ not a new surface.** The owner ribbon is the proof the pattern works. **A plan t
 
 ## THE SLICES (order is real — each needs the one before)
 
-1. **A booked supplier becomes a linked account, not a name in a list.** Populate the vendor
-   link on booking + a couple-side invite for off-platform suppliers.
-   **FIRST — everything else has nobody to serve.** medium · no owner ruling needed.
-2. **"You are booked here" appears and opens their tools.** The strip already exists and has
-   **never once rendered** (reads the empty link). Must also work on a PRIVATE event — most
-   prod events are private, where a booked supplier currently hits the lock screen.
-   small · needs 1.
+1. ~~**A booked supplier becomes a linked account, not a name in a list.** Populate the vendor
+   link on booking…~~ 🛑 **STRUCK 2026-08-17 — HALF OF THIS ALREADY SHIPS. DO NOT BUILD IT.**
+   Locking a **marketplace** supplier already stamps the link (fixed 2026-06-19). Nothing to
+   populate. The only real half left is **inviting an OFF-PLATFORM supplier onto Setnayan**,
+   which is **OWNER_DECISION 4 below, not an engineering task.**
+2. 🚨 **THE ONE REAL DEFECT, AND IT IS AN ORDERING FIX, NOT A SLICE.** On a private event the
+   page refuses a booked supplier **before it ever asks whether they are booked** — the lock
+   screen admits a redeemed guest, a host, a seat-holder and an invited account, and a supplier
+   is none of the four; the supplier check runs ~200 lines later and is never reached.
+   **4 of 6 prod events are private.** small · **needs nothing before it.**
+   ⚠ The strip itself is BUILT and correct — do not redraw it.
 3. **The host sees their own event page as themselves.** Add an owner body variant; today they
    fall through to `renderAnonymous()`. medium.
 4. **One "who is in this event" view.** Today guests · hosts · access-requests · vendors ·
