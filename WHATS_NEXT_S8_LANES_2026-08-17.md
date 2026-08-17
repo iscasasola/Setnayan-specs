@@ -384,7 +384,71 @@ something a KPI tile cannot.
 
 ## When all four lanes land
 
-`RAW_TABLE_BILL` holds exactly one line: the ugat console. At that point the guard stops being a
-ratchet and becomes a wall, and the `CONVERTED` list is the whole admin console. **Whoever lands
-the last lane should say so in their PR** — and should NOT delete the guard, because its job then
-becomes refusing the 32nd hand-rolled table forever.
+🛑 **I SAID THE BILL WOULD END AT ONE LINE. IT ENDS AT TWO** — corrected by the lane-D session.
+`ugat/_components/ugat-console.tsx` (own stylesheet, graph console) **and**
+`compliance/data-sheet/page.tsx`, whose remaining table is a printed FIELD SHEET using
+`<th scope="row">` for each field name, not a records list. Converting it would add a visible
+"Field | Value" header row to a document the owner prints and files with the NPC, and would strip
+the row-header semantics a screen reader uses. **Both are permanent residents on the same footing
+and neither is owed.** Each carries its reason on its line in the guard; do not delete either line
+to "finish", and do not force either conversion.
+
+At that point the guard stops being a ratchet and becomes a wall. **Do NOT delete it** — its job
+then becomes refusing the next hand-rolled table forever.
+
+---
+
+## 🛑 FIVE THINGS THE WAVE TAUGHT THAT OUTLIVE IT
+
+**1 · "DO NOT AUTO-MERGE" IS NOT A CONTROL — THE LABEL IS.** `.github/workflows/auto-merge.yml`
+arms auto-merge on EVERY non-draft PR about 30 seconds after it opens. So an instruction to a
+session cannot hold a PR: all four lanes did exactly as told, opened with a plain `gh pr create`,
+and all four were armed anyway. `gh pr merge --disable-auto` is NOT a hold either — any later
+`pull_request` event re-fires the arming job, and one PR re-armed within minutes (mine re-armed
+too). **The only durable hold is the `do-not-auto-merge` LABEL**, which fires a `disarm-on-hold-label`
+job at any time. Apply it as the first action after `gh pr create`, then VERIFY.
+🔑 From the lane-C session, and it is the right framing: *a convention that lives in a session's
+head is not a control.* From lane D: *"I did not arm it" and "it is not armed" looked like the same
+statement from inside the session. They were not.*
+
+**2 · FOUR AT ONCE RATE-LIMITS YOUR OWN CI.** Six branches pushed into one window, each firing
+~16 jobs that each download actions from codeload, produced `429 Too Many Requests` aborts in
+**Set up job** — before a line of code ran. Seen on production build, lighthouse, playwright AND
+the secret scan (which failed downloading gitleaks itself). **That is an infrastructure reason for
+the two-at-a-time rule, separate from the file-conflict reason.** Do not re-run into it: every
+re-run starves the PR ahead of you.
+⚖ **AND A SECRET SCAN THAT NEVER RAN IS NOT A PASSING SECRET SCAN.** Do not merge on "the reds are
+only the rate limit" — the scan must actually execute. Merging the fix for green-by-absence on
+exactly that basis would be absurd.
+
+**3 · A GUARD'S REACH IS SET BY ITS LIST, NOT BY ITS RULES — three instances in one day.** The
+hand-enumerated door list that missed three doors; the `CONVERTED` list that could be silently
+shortened one line at a time while every rule kept passing; and `PRIVATE_SUBDIRS`, which named two
+private-folder conventions where the repo uses nine and therefore never read **41 files**. Every
+rule was correct each time. **A list that decides WHAT gets checked must be pinned to something
+measured**, or it narrows without a word. Both fixes now derive membership from the disk.
+
+**4 · THE EMPTY-READ FAMILY, and it caught four of us.** An operation that could not run returns
+the same value as one that found nothing:
+- `gh pr checks` returned ZERO rows during the API's bad window; a poll loop read that as
+  "pending=0" and printed ALL SETTLED while five checks ran. **My own monitor then labelled a
+  MERGED pr as READY** from an empty state read.
+- `sort -u "$f" -o "$f"` TRUNCATES under macOS BSD sort, so a lane's before/after control diff
+  compared two EMPTY files and reported "nothing lost" — twice, reading as a clean pass.
+  **A comparison of two empty sets always agrees.**
+- `grep -oE 'text-terracotta\b'` counts `text-terracotta-700`, because POSIX ERE's `\b` matches
+  before a hyphen and **ERE has no lookahead at all** — so my published "236 across 89 files" was
+  ~1.8× the truth (126 across 58). A `grep -v` filter version drops whole lines and undercounts.
+- A perl counter whose needle contained `/` closed the `m//` delimiter and printed empty rather
+  than erroring.
+🔑 **Print the count and assert it non-zero. An empty extraction poses as a result.**
+
+**5 · CONVERTING A FILE'S TABLE IS NOT THE SAME AS MAKING THAT FILE HONEST.** On `/admin/fraud`
+and `/admin/approvals` the `<table>` is the audit trail at the bottom; the queue itself is a `<ul>`
+of cards. A lane following the brief literally would have converted the trail, ticked the file off
+the bill, and left the green tick over *"No open fraud signals."* exactly where it was.
+`ErrorState` is not table-specific. **Check which branch renders the sentence before ticking
+anything off.**
+⚖ And the corollary the lanes found independently: **`cap` is only honest when the number it names
+is the number of rows the table RENDERS.** A cap over a `<select>`, or over rows SCANNED to build
+aggregated batches, is decoration passed to satisfy a guard.
