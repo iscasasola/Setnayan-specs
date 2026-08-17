@@ -1,6 +1,9 @@
 # Ready-to-paste session prompts · 17 August 2026
 
-> **TEN sessions. Run TWO at a time — five waves.** Register:
+> 📄 **COPY-PASTE PAGE (one button per prompt):**
+> <https://claude.ai/code/artifact/7a64f1e9-44a7-4d4d-bb4c-ed974da9259b>
+>
+> **ELEVEN sessions. Run TWO at a time — five waves.** Register:
 > [`WHAT_IS_LEFT_2026-08-17.md`](WHAT_IS_LEFT_2026-08-17.md).
 >
 > 🛑 **NEVER MORE THAN TWO AT ONCE.** Ten parallel builds once shipped **44 defects** and the
@@ -15,9 +18,9 @@
 | Wave | Run together | Why they are safe together |
 |---|---|---|
 | **1** | **S1** supplier gets through the door · **S2** the first screens anyone sees | the event website vs the sign-in screens — no shared file |
-| **2** | **S4** six small things · **S9** under the floor | product screens vs database grants and headers |
+| **2** | **S4** eight small things · **S9** under the floor | product screens vs database grants and headers |
 | **3** | **S3** "we couldn't load it" — **RUN THIS ONE ALONE** | it touches screens app-wide and will collide with anything |
-| **4** | **S5** the couple's four screens · **S7** the five undrawn surfaces | different trees |
+| **4** | **S5** the couple's four screens · **S7** the five undrawn surfaces · then **S11** who is in this event | different trees · S11 needs S1 merged |
 | **5** | **S6** the supplier's screens · **S10** the compliance pack | code vs documents — S10 opens no PR |
 | **last** | **S8** your own admin screens | internal-only, so it ships last on purpose |
 
@@ -229,12 +232,11 @@ thing — anchor on the call site.
 
 ---
 
-# SESSION 4 · Six small things a person would notice
+# SESSION 4 · Eight small things a person would notice
 **Wave 2 · pairs with S9 · ⚠ must NOT run beside S6**
 
 ```
-Six unrelated small fixes, all verified still open on origin/main and in the live database on
-2026-08-17. Do them in one PR or six — your call — but verify each one before you touch it.
+Eight small fixes, all verified against origin/main and the live database on 2026-08-17. Do them in one PR or eight — your call — but verify each one before you touch it.
 
 1. THE HOST CANNOT SEE WHO IS HOLDING WHICH CAMERA.
    app/dashboard/[eventId]/studio/papic/crew/page.tsx renders only
@@ -298,6 +300,28 @@ Six unrelated small fixes, all verified still open on origin/main and in the liv
    is still NOWHERE for a business to say what KIND of venue it is — every writer of that
    field belongs to the separate admin venue directory, and the only reader is the onboarding
    fit check. That half is a real build; scope it or say plainly that you did not.
+
+7. A PHOTOGRAPHER CAN ONLY SEE THEIR OWN SHOTS DURING THE WEDDING DAY ITSELF.
+   app/vendor-dashboard/on-the-day/live/[eventId]/papic/page.tsx mounts the "what you shot"
+   strip at ~line 87 — and the SAME page redirects away at line 50 with
+   `if (!booking || booking.bookedDate !== phToday()) redirect(back)`. The parent console
+   carries the identical gate. So at midnight the door shuts, and the next morning — when the
+   shooter actually wants to confirm a shot landed — it is closed.
+   THIS IS PURELY A SCREEN LIMIT, NOT A PERMISSION ONE. Verified in production: the row policy
+   on those captures is "the vendor owns this profile OR is an admin" with NO date condition
+   at all. The photos are already theirs on any day.
+   ⚠ The whole route also sits behind a separate feature flag. Do not confuse the two gates,
+   and do not flip the flag.
+
+8. UNVERIFIED — MEASURE BEFORE YOU BUILD: an older scope document claims every booked supplier
+   sees a "start the next item" control that only a coordinator may press, with the refusal
+   swallowed silently. I could NOT confirm it: app/_components/run-of-show-header.tsx says in
+   its own docblock that `canAdvance` gates the control to the host/coordinator "(and the
+   booked vendor, who is also allowed by the RPC)". So the control may be correct as shipped.
+   FIND OUT WHICH IS TRUE — read what actually passes canAdvance at every call site, and read
+   the RPC. If a refusal path exists at all, it must SAY something; a guard that refuses in
+   silence is indistinguishable from one that passed. If the claim is false, say so plainly and
+   close it — do not build a fix for a bug that is not there.
 ```
 
 ---
@@ -467,9 +491,29 @@ Nothing a person sees. Two things that make one future mistake a near-miss inste
    DO NOT ENFORCE THE WIDE POLICY IN THIS SESSION. Enforcing a policy learned from nothing
    breaks live pages. Our own frame policy already blocked our own map for weeks.
 
-3. WHILE YOU ARE HERE — UNVERIFIED, CHECK FIRST: the security scanner flags two views as
-   running with elevated rights (events_host, vendor_completed_events). This may be entirely
-   deliberate. Establish which before touching either.
+3. THE SAFETY NET THAT CATCHES SETTINGS WITH NO SCREEN BEHIND THEM IS A HAND-TYPED LIST.
+   lib/gates-have-handles.test.ts exists to stop a setting shipping with nothing that can
+   change it — five have shipped that way already. Its SWITCHES array is FIVE hand-typed
+   entries (live_media_public · papic_face_mode · author_named_publicly · is_founder ·
+   live_photo_wall_visibility). It enumerates nothing from the schema, so a NEW setting is
+   covered only if whoever added it remembered to register it — which is exactly the memory
+   the guard exists to replace.
+   MAKE IT ENUMERATE. Derive the candidate list from the schema, then allow a REASONED
+   exclusion line per column. A baseline is a bill, not a decision — every line you add is
+   somebody deciding a switch may ship with no handle.
+   ⚠ Known blind spot to fix while you are in there: it cannot see a write that is assembled
+   into a variable first, so it reports a working screen as missing.
+
+4. A SIGNED-IN STRANGER CAN STILL WORK OUT A SUPPLIER'S WRITTEN-OFF JOB COUNT by subtracting
+   the public number from the unfiltered one. Harmless today because nothing has been written
+   off. The two worse leaks beside it are already SHUT (verified at the API layer with the live
+   anonymous key: both now refuse). The residual is stated verbatim in the migration that
+   closed the others — a summary table cannot carry row rules. Low priority; fix it or record
+   why not.
+
+5. UNVERIFIED — CHECK FIRST: the security scanner flags two views as running with elevated
+   rights (events_host, vendor_completed_events). This may be entirely deliberate. Establish
+   which before touching either.
 ```
 
 ---
@@ -524,7 +568,90 @@ session and not a chore.
 
 ---
 
-## What is deliberately NOT in these ten
+# SESSION 11 · One place that says who is in this event
+**Wave 4 · pairs with S5 or S7 · medium · needs S1 merged first**
+
+```
+WHAT A PERSON GETS: a couple opens one screen and sees everybody involved in their event —
+the guests, the other hosts, the suppliers, the crew, and anyone waiting to be let in.
+Today that is FIVE separate screens and they have to remember all five exist.
+
+VERIFIED ON origin/main 2026-08-17 — the five, all real, all separate:
+  /dashboard/[eventId]/guests           the guest list
+  /dashboard/[eventId]/hosts            the other hosts and moderators
+  /dashboard/[eventId]/vendors          the booked suppliers
+  /dashboard/[eventId]/manpower         the crew
+  /dashboard/[eventId]/access-requests  people asking to be let in
+
+DO NOT REBUILD ANY OF THE FIVE. Each is a working screen with its own real work in it —
+inviting, seating, comparing, locking, approving. This session adds ONE view ABOVE them that
+answers "who is in this event and what are they to us", and sends you to the right screen to
+act. It is a summary and a router, not a replacement.
+
+⚠ FIVE LISTS OF PEOPLE IS FIVE DIFFERENT IDEAS OF "PERSON". A guest is a row on a list who may
+or may not have an account. A host is an account. A supplier is usually a NAME SOMEBODY TYPED
+— 44 of the 45 in production are not accounts at all. Crew are neither. An access request is a
+person who is not in yet. DO NOT invent a unified person record to make the screen tidy; read
+each source as what it is and label the difference honestly on screen. A screen that implies
+a typed supplier name is an account would be lying.
+
+ALSO IN SCOPE — THE COORDINATOR IS TWO DIFFERENT PRODUCTS:
+A coordinator who was PROMOTED (an accepted moderator) gets the couple's whole planning shell.
+A coordinator who was BOOKED as a supplier gets the vendor console. The two halves do not
+connect, and which one a person gets depends on which of two unrelated identities they hold.
+There is also a dead end to close: the ribbon's "Edit this site" lights up for a coordinator
+and a moderator, while the editor itself admits only the couple — so it is a button that
+cannot work.
+FIX THE DEAD END. Do NOT merge the two coordinator identities in this session.
+
+⚖ ONE OWNER DECISION SITS HERE — SURFACE IT, DO NOT DECIDE IT: may a coordinator who was
+booked but never promoted send announcements to guests? Build around it either way.
+```
+
+---
+
+## Coverage — every open item, and where it went
+
+**Nothing on the register is unassigned.** If a line below is parked, the reason is stated.
+
+| Open item | Session |
+|---|---|
+| Supplier refused by a private event | **S1** |
+| Host sees the stranger's version of their own page | **S1** |
+| Sign-in / sign-up / reset / claim / join undesigned | **S2** |
+| "Nothing here" when a read actually failed | **S3** |
+| Host cannot see who holds which camera | **S4** |
+| Supplier limited to six canned messages | **S4** |
+| Emcee vanishes when booked in a bundle | **S4** |
+| Date-hold limit promised, not settable | **S4** |
+| "3 cameras free" above eight slots | **S4** |
+| Every new shop born narrowed to three venue kinds | **S4** |
+| Nowhere to say what KIND of venue a business is | **S4** |
+| Photographer's shots lock at midnight | **S4** |
+| "Start next item" refusal — claim unconfirmed | **S4** (measure first) |
+| Couple's four daily screens undesigned | **S5** |
+| Supplier's 63 screens undesigned | **S6** |
+| Marketplace · tour · deep photo pages · quiz undrawn | **S7** |
+| Phone hides the search shortcut on doorways | **S7** |
+| Real-stories search covers 6 of 34 | **S7** (verify first) |
+| Supplier tier matrix — keep or drop | **S7** (owner) |
+| Admin's 33 hand-built table files | **S8** |
+| 306 of 383 tables grant an unused read | **S9** |
+| Browser protection watches, reports go nowhere | **S9** |
+| Settings-with-no-screen guard is hand-typed | **S9** |
+| Written-off job count derivable by subtraction | **S9** |
+| Two views running with elevated rights | **S9** (verify first) |
+| Compliance pack 3 weeks stale, 14 activities vs 19 | **S10** |
+| Pack says photos are destroyed at 5 years | **S10** |
+| Four rows place the photos in the Philippines | **S10** |
+| Two rows still quote the retired 90-day rule | **S10** |
+| 15 of 15 filing tasks not started | **S10** |
+| Five separate lists of who is in an event | **S11** |
+| Coordinator is two products; "Edit this site" dead end | **S11** |
+
+---
+
+## What is deliberately NOT in these eleven
 
 - **The avatar maker** (nobody in the 3D room can look like themselves). A real feature build,
   not a fix — it deserves its own scoping pass, not a slot in a cleanup wave.
