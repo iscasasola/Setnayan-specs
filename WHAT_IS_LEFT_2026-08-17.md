@@ -302,9 +302,28 @@ host.** And every link of that chain exists in shipped code — traced end to en
 | the couple approves it | the couple's approve action writes the second column |
 | only then is it eligible | the public reader filters on that second column |
 
-🔑 **BOTH GATES HAVE WRITERS AND A CONTROL. Nothing here is an owner decision and nothing is
-missing.** The claim was the sixth *gate-with-no-handle* in reverse: **a working mechanism
-reported as absent.**
+🔑 **BOTH GATES HAVE WRITERS AND A CONTROL — ON THE GUEST PATH.** Nothing there is an owner
+decision, and the published promise (*"if you take photos as a guest…"*) describes exactly that
+path.
+
+🛑 **BUT I OVERSTATED IT, AND S9 WAS RIGHT ABOUT THE OTHER HALF. RETRACTED 2026-08-17.**
+I said *"nothing is missing"*. There are **TWO capture paths**, and I checked the one with the
+writer:
+
+| path | consent writer | rows in prod |
+|---|---|---|
+| a **guest** shooting on their own phone | ✅ the capture screen's checkbox | **0** |
+| a **camera seat** given to a friend | ❌ **nothing writes it** | **14 — every real photo** |
+
+The consent column on the seat-photo table has **no writer anywhere** — no function, no route —
+so a seat photo can never become eligible for the public showcase. **All fourteen photos in
+production are on that path.** S9's guard flagged exactly this column and I dismissed it because I
+verified the neighbouring table.
+🔑 **TWO TABLES, ONE COLUMN NAME. Checking the one that works is not checking the feature** — the
+same shape as reading a count instead of grepping the writer, one day later, by me.
+⏭ **Whether the seat path SHOULD have a consent control is a real product question** — the website
+promises the guest path only, so this is not a broken promise, but 14 of 14 photos sit behind a
+gate nobody can open.
 
 ⚠ **AND THE OWNER FOUND IT WITH ONE SENTENCE, NOT A GREP.** When a question is about a PROMISE —
 who consents, how long we keep something, what we charge — **the published site is a source of
