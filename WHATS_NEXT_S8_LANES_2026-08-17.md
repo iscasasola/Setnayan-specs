@@ -403,10 +403,25 @@ then becomes refusing the next hand-rolled table forever.
 **1 · "DO NOT AUTO-MERGE" IS NOT A CONTROL — THE LABEL IS.** `.github/workflows/auto-merge.yml`
 arms auto-merge on EVERY non-draft PR about 30 seconds after it opens. So an instruction to a
 session cannot hold a PR: all four lanes did exactly as told, opened with a plain `gh pr create`,
-and all four were armed anyway. `gh pr merge --disable-auto` is NOT a hold either — any later
-`pull_request` event re-fires the arming job, and one PR re-armed within minutes (mine re-armed
-too). **The only durable hold is the `do-not-auto-merge` LABEL**, which fires a `disarm-on-hold-label`
-job at any time. Apply it as the first action after `gh pr create`, then VERIFY.
+and all four were armed anyway. **The durable hold is the `do-not-auto-merge` LABEL**, which fires a
+`disarm-on-hold-label` job at ANY time. Apply it after `gh pr create`, then VERIFY.
+
+🛑 **A CORRECTION TO MY OWN FIRST VERSION OF THIS LESSON, which said `--disable-auto` is not a hold
+because "any later `pull_request` event re-fires the arming job". THAT IS WRONG.** Read from the
+workflow on `origin/main`: `types: [opened, reopened, ready_for_review, labeled]`, and `labeled`
+reaches only the DISARM job, never the arming one. **A PUSH DOES NOT RE-ARM.** What I actually saw
+was a RACE with the `opened` trigger — I ran `--disable-auto` seconds after `gh pr create`, the
+arming job ran ~30s later on that same event, and the PR came back armed. One event, not two.
+⇒ The practical difference matters: `--disable-auto` DOES hold, provided it is applied AFTER the
+arming job has run and then verified, and a later force-push will not undo it. I reported a race as
+a re-arm — a correct observation with an invented mechanism, which is the same error I have now made
+five times in a day. 🔑 **READ THE TRIGGER LIST BEFORE DESCRIBING WHAT RE-FIRES.**
+
+🪤 **AND I HID A FAILURE FROM MYSELF WHILE APPLYING THAT LABEL.** `gh pr edit --add-label` was run
+as `>/dev/null 2>&1`; GitHub was returning **503** and every attempt failed silently while the
+read-back came back empty — indistinguishable from any other answer. **Run the command with its
+output VISIBLE, and treat an empty read-back as unknown rather than as a state.** Same family as
+`&& echo "pushed"` printing success after a failed push.
 🔑 From the lane-C session, and it is the right framing: *a convention that lives in a session's
 head is not a control.* From lane D: *"I did not arm it" and "it is not armed" looked like the same
 statement from inside the session. They were not.*
