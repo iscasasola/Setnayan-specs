@@ -1,0 +1,646 @@
+<title>Event Hub at Three Widths</title>
+<style>
+  /* Register shared with event_hub_universal_2026-08-17.html — same tokens, same voice. */
+  :root{
+    --ground:#FDFBF7; --paper:#FFFFFF; --panel:#F5F0E8; --edge:#E4DBCC;
+    --ink:#2C2A29; --ink-soft:#5C554E; --ink-faint:#8A8078;
+    --action:#C24E25;      /* the CTA terracotta — the ONLY action colour */
+    --gold:#A9834B;        /* hairlines, icons, heading-scale numerals. Never body text. */
+    --link:#3B4E67;
+    --mute:#6E6862;
+    --display:"Iowan Old Style",Georgia,"Palatino Linotype",Palatino,serif;
+    --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#1B1917; --paper:#232020; --panel:#26221F; --edge:#3B3630;
+      --ink:#EFE9E0; --ink-soft:#B6ADA2; --ink-faint:#8A8078;
+      --action:#E8794C; --gold:#C9A472; --link:#9DB4D2; --mute:#9A928A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#1B1917; --paper:#232020; --panel:#26221F; --edge:#3B3630;
+    --ink:#EFE9E0; --ink-soft:#B6ADA2; --ink-faint:#8A8078;
+    --action:#E8794C; --gold:#C9A472; --link:#9DB4D2; --mute:#9A928A;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--body);
+       font-size:16px;line-height:1.6;margin:0;padding:0 1.25rem 6rem;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:78rem;margin:0 auto}
+
+  .top{border-bottom:2px solid var(--ink);padding:3rem 0 1.2rem;display:flex;
+       flex-wrap:wrap;gap:1.5rem;align-items:flex-end;justify-content:space-between}
+  .top h1{font-family:var(--display);font-size:clamp(2rem,5vw,3rem);font-weight:400;
+          margin:0;line-height:1.05;letter-spacing:-.015em;text-wrap:balance}
+  .kicker{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;
+          color:var(--action);margin:0 0 .55rem}
+  .stampbox{font-family:var(--mono);font-size:.72rem;line-height:1.7;color:var(--ink-faint);text-align:right}
+  .stampbox b{color:var(--ink-soft)}
+  .lede{font-family:var(--display);font-size:1.18rem;line-height:1.55;color:var(--ink-soft);
+        max-width:46rem;margin:1.4rem 0 0;text-wrap:pretty}
+  .lede b{color:var(--ink);font-weight:600}
+
+  section.blk{margin:4rem 0 0}
+  .blk-head{display:flex;align-items:baseline;gap:.9rem;border-bottom:1px solid var(--ink);
+            padding-bottom:.5rem;margin-bottom:1.1rem}
+  .blk-head h2{font-family:var(--display);font-size:clamp(1.35rem,2.7vw,1.8rem);
+               font-weight:400;margin:0;flex:1;line-height:1.2}
+  .num{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;color:var(--gold);
+       border:1px solid var(--edge);padding:.2rem .45rem;border-radius:2px}
+  .blk > .say{font-size:.95rem;color:var(--ink-soft);max-width:47rem;margin:0 0 1.6rem}
+  .blk > .say b{color:var(--ink)}
+
+  .facts{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));margin:1.4rem 0 0}
+  .fact{border:1px solid var(--edge);background:var(--paper);padding:.9rem 1rem;border-radius:.35rem}
+  .fact .fk{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 .3rem}
+  .fact .fv{font-family:var(--display);font-size:1.35rem;margin:0;line-height:1.15}
+  .fact .fs{font-size:.8rem;color:var(--ink-soft);margin:.3rem 0 0}
+
+  .decide{border-left:3px solid var(--action);background:var(--paper);padding:.85rem 1.1rem;
+          margin:1.4rem 0 0;max-width:47rem;border-radius:0 .35rem .35rem 0}
+  .decide .dk{font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
+              color:var(--action);margin:0 0 .3rem}
+  .decide p{margin:0;font-size:.92rem;color:var(--ink-soft)}
+  .decide b{color:var(--ink)}
+
+  /* ── device frames ── */
+  .fleet{display:flex;flex-wrap:wrap;gap:1.6rem;align-items:flex-start}
+  .unit{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+  .unit > .cap{font-family:var(--mono);font-size:.68rem;letter-spacing:.09em;
+               text-transform:uppercase;color:var(--ink-faint)}
+  .unit > .cap b{color:var(--ink-soft)}
+  .delta{font-size:.84rem;color:var(--ink-soft);border-left:2px solid var(--gold);
+         padding-left:.75rem;margin:0;max-width:24rem}
+  .delta b{color:var(--ink);font-weight:600}
+
+  .dev{background:var(--paper);border:1px solid var(--edge);overflow:hidden;
+       display:flex;flex-direction:column;position:relative;
+       box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05)}
+  .dev.phone{width:390px;max-width:100%;border-radius:1.4rem;min-height:36rem}
+  .dev.tab{width:500px;max-width:100%;border-radius:1rem;min-height:32rem;font-size:.82rem}
+  .dev.desk{width:100%;max-width:720px;border-radius:.6rem;min-height:26rem;font-size:.72rem}
+
+  /* shared screen grammar inside frames */
+  .scr{flex:1;display:flex;flex-direction:column;min-width:0}
+  .pad{padding:1.4rem 1.2rem 1.2rem;flex:1}
+  .eyebrow{font-family:var(--mono);font-size:.6em;letter-spacing:.18em;font-size-adjust:none;
+           text-transform:uppercase;color:var(--action);margin:0 0 1.1em;text-align:center}
+  .mono-mark{width:2.6em;height:2.6em;border:1.5px solid var(--gold);border-radius:50%;
+             margin:0 auto .8em;display:flex;align-items:center;justify-content:center;
+             font-family:var(--display);font-style:italic;font-size:.9em;color:var(--ink-soft)}
+  .mono-mark.none{border-style:none;height:.4em;margin-bottom:.2em}
+  .nm{font-family:var(--display);font-weight:400;line-height:1.02;letter-spacing:-.02em;
+      text-align:center;margin:0;color:var(--ink)}
+  .amp{font-family:var(--display);font-style:italic;color:var(--gold);text-align:center;
+       margin:.08em 0;line-height:1}
+  .occasion{font-family:var(--display);font-style:italic;color:var(--ink-soft);
+            text-align:center;margin:.35em 0 0;line-height:1.25}
+  .rule{height:1px;background:var(--gold);opacity:.5;margin:1.1em auto .9em;width:5.5em;border:0}
+  .dateline{font-family:var(--display);text-align:center;color:var(--gold);
+            letter-spacing:.02em;margin:0;font-weight:400}
+  .venue{font-family:var(--body);text-align:center;color:var(--ink-soft);margin:.35em 0 0;font-size:.85em}
+  .plate{margin:1em auto 0;border:1px solid var(--edge);background:var(--panel);
+         display:flex;align-items:center;justify-content:center;width:100%;
+         font-family:var(--mono);letter-spacing:.14em;font-size:.58em;
+         text-transform:uppercase;color:var(--ink-faint)}
+  .platecap{font-family:var(--mono);font-size:.55em;letter-spacing:.24em;text-transform:uppercase;
+            color:var(--ink-faint);margin:.6em 0 0;text-align:left}
+
+  /* contents index */
+  .contents{margin-top:1.2em;border-top:1px solid var(--edge);padding-top:.8em}
+  .contents .ct{font-family:var(--mono);font-size:.56em;letter-spacing:.2em;
+                text-transform:uppercase;color:var(--ink-faint);margin:0 0 .6em}
+  .contents ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.34em}
+  .contents.cols ol{display:grid;grid-template-columns:1fr 1fr;column-gap:1.6em;row-gap:.34em}
+  .contents li{display:flex;align-items:baseline;gap:.5em;font-size:.8em;color:var(--ink-soft)}
+  .contents li .n{font-family:var(--mono);font-size:.78em;color:var(--gold);min-width:1.2em}
+  .contents li .dots{flex:1;border-bottom:1px dotted var(--edge);transform:translateY(-.2em)}
+  .contents li .st{font-family:var(--mono);font-size:.68em;letter-spacing:.08em;
+                   text-transform:uppercase;color:var(--ink-faint)}
+  .contents li.lock .st::before{content:"🔒 ";font-size:.9em}
+  .grp{font-family:var(--mono);font-size:.52em;letter-spacing:.22em;text-transform:uppercase;
+       color:var(--ink-faint);margin:.9em 0 .1em}
+
+  /* body chapter stubs */
+  .chap{border-top:1px solid var(--edge);margin-top:1.2em;padding-top:.9em}
+  .chap .ce{font-family:var(--mono);font-size:.54em;letter-spacing:.2em;text-transform:uppercase;
+            color:var(--gold);margin:0 0 .35em}
+  .chap .cb{height:2.2em;background:var(--panel);border:1px solid var(--edge);opacity:.7}
+  .chap p{margin:.4em 0 0;font-size:.78em;color:var(--ink-faint)}
+
+  /* the fixed bottom bar (phone/tablet) */
+  .bar{border-top:1px solid var(--edge);background:var(--panel);display:flex;
+       padding:.55em .3em .8em;justify-content:center}
+  .bar .cluster{display:flex;flex:1;max-width:24em}
+  .bar .slot{flex:1;text-align:center;font-size:.56em;font-family:var(--mono);
+             letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);
+             display:flex;flex-direction:column;align-items:center;gap:.32em}
+  .bar .slot.mid{color:var(--action)}
+  .glyph{width:1.15em;height:1.15em;border:1.5px solid currentColor;border-radius:3px;opacity:.85}
+  .slot.mid .glyph{border-radius:50%;border-width:2px;width:1.3em;height:1.3em}
+
+  /* desktop shell: rail + column */
+  .deskshell{display:flex;flex:1;min-height:0}
+  .drail{width:11.5em;flex-shrink:0;border-right:1px solid var(--edge);background:var(--panel);
+         padding:1em .9em;display:flex;flex-direction:column;gap:.3em}
+  .drail .rw{font-family:var(--mono);font-size:.6em;letter-spacing:.22em;text-transform:uppercase;
+             color:var(--ink-faint);margin:0 0 .8em}
+  .drail .door{display:flex;align-items:center;gap:.55em;font-size:.72em;color:var(--ink);
+               padding:.28em .3em;border-radius:.25em}
+  .drail .door .glyph{width:1em;height:1em}
+  .drail .door.cam{color:var(--action);font-weight:600}
+  .drail hr{border:0;border-top:1px solid var(--edge);margin:.7em 0}
+  .drail .idx{display:flex;align-items:baseline;gap:.45em;font-size:.68em;color:var(--ink-soft);padding:.16em .3em}
+  .drail .idx .dot{width:.32em;height:.32em;border-radius:50%;background:transparent;flex-shrink:0}
+  .drail .idx.on .dot{background:var(--gold)}
+  .drail .idx.on{color:var(--ink)}
+  .drail .gh{font-family:var(--mono);font-size:.5em;letter-spacing:.22em;text-transform:uppercase;
+             color:var(--ink-faint);margin:.6em 0 .15em}
+  .dcol{flex:1;padding:1.4em 2.2em;min-width:0}
+  .dhead{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--edge);
+         padding:.5em 1.4em;font-family:var(--mono);font-size:.58em;letter-spacing:.22em;
+         text-transform:uppercase;color:var(--ink-faint)}
+  .dhead .wm{color:var(--ink-soft)}
+  .measure{max-width:30em;margin:0 auto}
+
+  /* live hub frames */
+  .hubhead{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--edge);
+           padding:.7em 1.1em;font-family:var(--mono);font-size:.58em;letter-spacing:.18em;
+           text-transform:uppercase;color:var(--ink-soft)}
+  .livechip{color:var(--action);display:flex;align-items:center;gap:.4em}
+  .livechip::before{content:"";width:.5em;height:.5em;border-radius:50%;background:var(--action)}
+  .stage{flex:1;padding:1em 1.1em;display:flex;flex-direction:column;gap:.7em}
+  .panelcard{border:1px solid var(--edge);background:var(--panel);padding:.8em .9em;border-radius:.4em}
+  .panelcard .pk{font-family:var(--mono);font-size:.56em;letter-spacing:.18em;text-transform:uppercase;
+                 color:var(--gold);margin:0 0 .35em}
+  .panelcard .pv{font-family:var(--display);font-size:1.05em;margin:0;color:var(--ink)}
+  .panelcard .ps{font-size:.72em;color:var(--ink-soft);margin:.25em 0 0}
+  .walls{display:grid;gap:.45em}
+  .walls div{aspect-ratio:1;background:var(--edge);opacity:.55;border-radius:.2em}
+  .pills{border-top:1px solid var(--edge);background:var(--panel);display:flex;gap:.35em;
+         padding:.6em .8em .9em;justify-content:center}
+  .pill{font-family:var(--mono);font-size:.56em;letter-spacing:.06em;text-transform:uppercase;
+        padding:.55em .95em;border-radius:99em;color:var(--ink-faint);display:flex;align-items:center;gap:.4em}
+  .pill.on{background:var(--ink);color:var(--ground)}
+  .pills.toprow{border-top:0;border-bottom:1px solid var(--edge);justify-content:flex-start;padding-left:1.4em}
+
+  .note{font-size:.8rem;color:var(--ink-faint);max-width:47rem;margin:1.2rem 0 0}
+  .note b{color:var(--ink-soft)}
+  .twoup{display:flex;gap:.8em}
+  .twoup .plate{margin-top:0}
+  ul.plain{margin:.8rem 0 0;padding-left:1.1rem;font-size:.92rem;color:var(--ink-soft);max-width:47rem}
+  ul.plain li{margin:.35rem 0}
+  ul.plain b{color:var(--ink)}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <p class="kicker">Event Hub · responsive study · pairs with “Event Hub for Every Event”</p>
+    <h1>The same page, held three ways</h1>
+  </div>
+  <div class="stampbox">
+    drawn 2026-08-17 · fable<br>
+    phone <b>390</b> · tablet <b>834</b> · desktop <b>1440</b><br>
+    measured, not assumed: <b>sm:124 · md:0 · lg:23</b>
+  </div>
+</header>
+
+<p class="lede">The honest headline first: <b>the tablet is the one width this product has never designed for.</b>
+The Event Hub adapts 124 times at the small step and 23 times at the desktop step — and <b>zero</b> times at the
+tablet step. Today a tablet gets the phone column stretched wide. The good news is also honest: the fix costs
+<b>no new breakpoint</b>. The tablet does not need new machinery — it needs the column to stop stretching, and the
+two steps that already exist to do their jobs.</p>
+
+<!-- ═══════════════ 01 · THE MEASURED GROUND ═══════════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">№ 01</span><h2>What is true today — measured, not assumed</h2></div>
+  <p class="say">Four facts shape everything drawn below. Each was counted in the shipped code this session.</p>
+  <div class="facts">
+    <div class="fact"><p class="fk">The two real steps</p><p class="fv">640 &amp; 1024</p>
+      <p class="fs">The page reflows at 640 (124 uses) and switches to desktop at 1024 (23 uses). These carry the whole product.</p></div>
+    <div class="fact"><p class="fk">The tablet step</p><p class="fv">0 uses</p>
+      <p class="fs">The 768 step is an orphan — unused in the Hub, near-unused app-wide (65 of ~3,000). A tablet today = a stretched phone.</p></div>
+    <div class="fact"><p class="fk">Content widths in one page family</p><p class="fv">8 different</p>
+      <p class="fs">Eight competing column widths is why nothing feels like one product at any size. The cure is a measure, not a breakpoint.</p></div>
+    <div class="fact"><p class="fk">The bottom bar</p><p class="fv">pinned everywhere</p>
+      <p class="fs">Confirmed: the bar is fixed at every width with no exception — on a 1440 screen it stripes the full width with five phone tabs clustered in the middle. The ugliest failure here, and it is real.</p></div>
+  </div>
+</section>
+
+<!-- ═══════════════ 02 · THE MEASURE ═══════════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">№ 02</span><h2>One measure instead of eight</h2></div>
+  <p class="say">Everything below obeys <b>three sanctioned widths</b>, replacing today's eight:
+  the <b>reading measure</b> (about 65 characters — every sentence a guest reads), the <b>plate measure</b>
+  (photos, venue plates, galleries — a half again wider than reading), and the <b>stage</b> (the widest anything
+  may ever be — the Live hub's wall, the desktop shell). Nothing on any screen is wider than the stage;
+  no prose is wider than reading. This one rule is what makes the three widths feel like one product —
+  and it is why the tablet needs no new breakpoint: <b>a column that knows its measure cannot be stretched.</b></p>
+  <div class="decide"><p class="dk">Owner decision</p>
+    <p><b>Adopt the three measures and retire the other five.</b> Recommended yes — it is the cheapest
+    change in this study and does the most. The drawings below all assume it.</p></div>
+</section>
+
+<!-- ═══════════════ 03 · THE EVENT PAGE — WEDDING ═══════════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">№ 03</span><h2>The event page — a wedding, three ways</h2></div>
+  <p class="say">The phone reproduces what ships — nothing redrawn. The tablet and desktop are the new work.</p>
+
+  <div class="fleet">
+    <!-- PHONE -->
+    <div class="unit">
+      <p class="cap"><b>Phone · 390</b> — as shipped</p>
+      <div class="dev phone"><div class="scr"><div class="pad">
+        <p class="eyebrow">№ 01 · You are invited</p>
+        <div class="mono-mark">M·J</div>
+        <p class="nm" style="font-size:2.5em">Maria</p>
+        <p class="amp" style="font-size:1.1em">&amp;</p>
+        <p class="nm" style="font-size:2.5em">Jose</p>
+        <hr class="rule">
+        <p class="dateline" style="font-size:1.5em">January 12, 2027</p>
+        <p class="venue">Santuario de San Antonio</p>
+        <div class="plate" style="aspect-ratio:4/5">Cover plate · 4:5</div>
+        <p class="platecap">Santuario de San Antonio</p>
+        <div class="contents">
+          <p class="ct">In this celebration</p>
+          <ol>
+            <li><span class="n">·</span> Details <span class="dots"></span></li>
+            <li><span class="n">·</span> Our story <span class="dots"></span></li>
+            <li><span class="n">·</span> Reply <span class="dots"></span><span class="st">sent ✓</span></li>
+            <li class="lock"><span class="n">·</span> Camera <span class="dots"></span><span class="st">opens on the day</span></li>
+            <li><span class="n">·</span> My QR <span class="dots"></span></li>
+          </ol>
+        </div>
+        <div class="chap"><p class="ce">✦ Yours</p><div class="cb"></div><p>Hi, Ana — greeting, seat, keepsake…</p></div>
+      </div>
+      <div class="bar"><div class="cluster">
+        <div class="slot"><span class="glyph"></span>Home</div>
+        <div class="slot"><span class="glyph"></span>Details</div>
+        <div class="slot mid"><span class="glyph"></span>Camera</div>
+        <div class="slot"><span class="glyph"></span>Story</div>
+        <div class="slot"><span class="glyph"></span>Me</div>
+      </div></div>
+      </div></div>
+      <p class="delta"><b>Unchanged.</b> This is the shipped page: typographic masthead, photo demoted to the
+      plate, five-slot bar, camera in the middle in the action colour. Locked camera shows a padlock and speaks
+      its reason when tapped.</p>
+    </div>
+
+    <!-- TABLET -->
+    <div class="unit">
+      <p class="cap"><b>Tablet · 834 portrait</b> — drawn at 60%</p>
+      <div class="dev tab"><div class="scr"><div class="pad"><div class="measure">
+        <p class="eyebrow">№ 01 · You are invited</p>
+        <div class="mono-mark">M·J</div>
+        <p class="nm" style="font-size:2.9em">Maria</p>
+        <p class="amp" style="font-size:1.2em">&amp;</p>
+        <p class="nm" style="font-size:2.9em">Jose</p>
+        <hr class="rule">
+        <p class="dateline" style="font-size:1.7em">January 12, 2027</p>
+        <p class="venue">Santuario de San Antonio</p>
+        <div class="plate" style="aspect-ratio:3/2">Cover plate · 3:2</div>
+        <p class="platecap">Santuario de San Antonio</p>
+        <div class="contents cols">
+          <p class="ct">In this celebration</p>
+          <ol>
+            <li><span class="n">·</span> Details <span class="dots"></span></li>
+            <li><span class="n">·</span> Reply <span class="dots"></span><span class="st">sent ✓</span></li>
+            <li><span class="n">·</span> Our story <span class="dots"></span></li>
+            <li class="lock"><span class="n">·</span> Camera <span class="dots"></span><span class="st">day</span></li>
+            <li><span class="n">·</span> 3D room <span class="dots"></span></li>
+            <li><span class="n">·</span> My QR <span class="dots"></span></li>
+          </ol>
+        </div>
+        <div class="chap"><p class="ce">№ 03 · The details</p>
+          <div class="twoup"><div class="plate" style="height:3.4em">Ceremony</div>
+          <div class="plate" style="height:3.4em">Reception</div></div>
+          <p>Paired plates sit side by side — the reflow the 640 step already does.</p></div>
+      </div></div>
+      <div class="bar"><div class="cluster">
+        <div class="slot"><span class="glyph"></span>Home</div>
+        <div class="slot"><span class="glyph"></span>Details</div>
+        <div class="slot mid"><span class="glyph"></span>Camera</div>
+        <div class="slot"><span class="glyph"></span>Story</div>
+        <div class="slot"><span class="glyph"></span>Me</div>
+      </div></div>
+      </div></div>
+      <p class="delta"><b>One column, held.</b> The magazine in two hands: the reading measure centers with real
+      margins, the cover goes 3:2, paired plates sit two-up, the contents takes two columns. The bar stays —
+      a tablet is a touch object held upright. <b>No new breakpoint bought this</b> — it is the 640 form plus the
+      measure discipline. Landscape (1112 wide) crosses the 1024 switch and correctly becomes the desktop at right.</p>
+    </div>
+
+    <!-- DESKTOP -->
+    <div class="unit" style="flex-basis:100%">
+      <p class="cap"><b>Desktop · 1440</b> — drawn at 50%</p>
+      <div class="dev desk"><div class="scr">
+        <div class="dhead"><span class="wm">Setnayan</span><span style="color:var(--gold)">M · J</span></div>
+        <div class="deskshell">
+          <div class="drail">
+            <p class="rw">Maria &amp; Jose</p>
+            <div class="door"><span class="glyph"></span>Home</div>
+            <div class="door"><span class="glyph"></span>Details</div>
+            <div class="door cam"><span class="glyph" style="border-radius:50%"></span>Camera</div>
+            <div class="door"><span class="glyph"></span>Story</div>
+            <div class="door"><span class="glyph"></span>Me</div>
+            <hr>
+            <p class="gh">In this celebration</p>
+            <div class="idx on"><span class="dot"></span>The invitation</div>
+            <div class="idx"><span class="dot"></span>Our story</div>
+            <div class="idx"><span class="dot"></span>The details</div>
+            <div class="idx"><span class="dot"></span>Programme</div>
+            <div class="idx"><span class="dot"></span>Reply — sent ✓</div>
+            <p class="gh">Getting there</p>
+            <div class="idx"><span class="dot"></span>Venue &amp; map</div>
+            <div class="idx"><span class="dot"></span>3D room</div>
+            <div class="idx"><span class="dot"></span>Find your seat</div>
+            <p class="gh">Yours</p>
+            <div class="idx"><span class="dot"></span>My QR</div>
+            <div class="idx"><span class="dot"></span>Keep this page</div>
+          </div>
+          <div class="dcol"><div class="measure">
+            <p class="eyebrow">№ 01 · You are invited</p>
+            <div class="mono-mark">M·J</div>
+            <p class="nm" style="font-size:3.2em">Maria</p>
+            <p class="amp" style="font-size:1.3em">&amp;</p>
+            <p class="nm" style="font-size:3.2em">Jose</p>
+            <hr class="rule">
+            <p class="dateline" style="font-size:1.8em">January 12, 2027</p>
+            <p class="venue">Santuario de San Antonio</p>
+            <div class="plate" style="aspect-ratio:3/2;max-width:36em">Cover plate · 3:2 · plate measure — never full-bleed</div>
+            <div class="chap"><p class="ce">№ 02 · Our story</p><div class="cb"></div>
+              <p>Prose holds the reading measure. Whitespace grows; the type does not.</p></div>
+          </div></div>
+        </div>
+      </div></div>
+      <p class="delta" style="max-width:44rem"><b>The bar dissolves into a standing rail.</b> Its five doors —
+      same five, same order, camera keeping the action colour — become the head of the rail; the contents page
+      stands beneath them with a gold dot tracking where you are. The page itself is the same centered column,
+      one measure wide. No third pane, no dashboard grid: the Hub is a place to read, not a control panel, and
+      the host's view stays read-only at every width.</p>
+    </div>
+  </div>
+
+  <div class="decide"><p class="dk">Owner decision — the bar's fate on desktop</p>
+    <p><b>Recommended: at the desktop step the five slots become the head of the standing rail, and the pinned
+    bottom bar does not render.</b> The five doors survive exactly — count, order, colour, the locked camera and its
+    spoken reason — so nothing is added and nothing is lost; only where they stand changes. The alternative
+    (keeping the phone bar pinned across a 1440 screen) is drawn in every current session by accident, and it is
+    the single ugliest thing the Hub does today.</p></div>
+</section>
+
+<!-- ═══════════════ 04 · THE EVENT PAGE — BIRTHDAY ═══════════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">№ 04</span><h2>The same page — an 80th birthday</h2></div>
+  <p class="say">The universal design carried to a non-wedding, at the same three widths. Same spine — eyebrow, name,
+  rule, gold date, plate, contents, five slots. What differs is the sort: the ampersand block, the monogram, the
+  love-story chapter are wedding-dedicated and are simply <b>absent</b> — not greyed, not empty-looking. The
+  <b>occasion line</b> plays the ampersand's structural role.</p>
+
+  <div class="fleet">
+    <div class="unit">
+      <p class="cap"><b>Phone · 390</b></p>
+      <div class="dev phone"><div class="scr"><div class="pad">
+        <p class="eyebrow">№ 01 · You are invited</p>
+        <div class="mono-mark none"></div>
+        <p class="nm" style="font-size:2.15em">Remedios Cruz</p>
+        <p class="occasion" style="font-size:1.05em">eighty years</p>
+        <hr class="rule">
+        <p class="dateline" style="font-size:1.5em">March 3, 2027</p>
+        <p class="venue">Casa Milagros, Tagaytay</p>
+        <div class="plate" style="aspect-ratio:4/5">Cover plate · 4:5</div>
+        <p class="platecap">Casa Milagros, Tagaytay</p>
+        <div class="contents">
+          <p class="ct">In this celebration</p>
+          <ol>
+            <li><span class="n">·</span> Details <span class="dots"></span></li>
+            <li><span class="n">·</span> Reply <span class="dots"></span></li>
+            <li class="lock"><span class="n">·</span> Camera <span class="dots"></span><span class="st">opens on the day</span></li>
+            <li><span class="n">·</span> My QR <span class="dots"></span></li>
+          </ol>
+        </div>
+        <div class="chap"><p class="ce">✦ Yours</p><div class="cb"></div><p>Hi, Tonio — greeting, seat, keepsake…</p></div>
+      </div>
+      <div class="bar"><div class="cluster">
+        <div class="slot"><span class="glyph"></span>Home</div>
+        <div class="slot"><span class="glyph"></span>Details</div>
+        <div class="slot mid"><span class="glyph"></span>Camera</div>
+        <div class="slot"><span class="glyph"></span>Me</div>
+      </div></div>
+      </div></div>
+      <p class="delta"><b>No story chapter, no monogram — and no hole where they were.</b> The bar has four live
+      slots here (no story section exists), and the others widen: a slot with nothing behind it is not drawn.
+      That is the shipped rule doing its job.</p>
+    </div>
+
+    <div class="unit">
+      <p class="cap"><b>Tablet · 834</b> — drawn at 60%</p>
+      <div class="dev tab"><div class="scr"><div class="pad"><div class="measure">
+        <p class="eyebrow">№ 01 · You are invited</p>
+        <p class="nm" style="font-size:2.5em">Remedios Cruz</p>
+        <p class="occasion" style="font-size:1.15em">eighty years</p>
+        <hr class="rule">
+        <p class="dateline" style="font-size:1.7em">March 3, 2027</p>
+        <p class="venue">Casa Milagros, Tagaytay</p>
+        <div class="plate" style="aspect-ratio:3/2">Cover plate · 3:2</div>
+        <div class="contents cols">
+          <p class="ct">In this celebration</p>
+          <ol>
+            <li><span class="n">·</span> Details <span class="dots"></span></li>
+            <li class="lock"><span class="n">·</span> Camera <span class="dots"></span><span class="st">day</span></li>
+            <li><span class="n">·</span> Reply <span class="dots"></span></li>
+            <li><span class="n">·</span> My QR <span class="dots"></span></li>
+          </ol>
+        </div>
+      </div></div>
+      <div class="bar"><div class="cluster">
+        <div class="slot"><span class="glyph"></span>Home</div>
+        <div class="slot"><span class="glyph"></span>Details</div>
+        <div class="slot mid"><span class="glyph"></span>Camera</div>
+        <div class="slot"><span class="glyph"></span>Me</div>
+      </div></div>
+      </div></div>
+      <p class="delta">Identical treatment to the wedding tablet — same measure, same 3:2 plate, same held column.
+      The birthday is not a lesser issue of the magazine.</p>
+    </div>
+
+    <div class="unit" style="flex-basis:100%">
+      <p class="cap"><b>Desktop · 1440</b> — drawn at 50%</p>
+      <div class="dev desk"><div class="scr">
+        <div class="dhead"><span class="wm">Setnayan</span><span></span></div>
+        <div class="deskshell">
+          <div class="drail">
+            <p class="rw">Remedios at 80</p>
+            <div class="door"><span class="glyph"></span>Home</div>
+            <div class="door"><span class="glyph"></span>Details</div>
+            <div class="door cam"><span class="glyph" style="border-radius:50%"></span>Camera</div>
+            <div class="door"><span class="glyph"></span>Me</div>
+            <hr>
+            <p class="gh">In this celebration</p>
+            <div class="idx on"><span class="dot"></span>The invitation</div>
+            <div class="idx"><span class="dot"></span>The details</div>
+            <div class="idx"><span class="dot"></span>Programme</div>
+            <div class="idx"><span class="dot"></span>Reply</div>
+            <p class="gh">Yours</p>
+            <div class="idx"><span class="dot"></span>My QR</div>
+            <div class="idx"><span class="dot"></span>Keep this page</div>
+          </div>
+          <div class="dcol"><div class="measure">
+            <p class="eyebrow">№ 01 · You are invited</p>
+            <p class="nm" style="font-size:2.8em">Remedios Cruz</p>
+            <p class="occasion" style="font-size:1.25em">eighty years</p>
+            <hr class="rule">
+            <p class="dateline" style="font-size:1.8em">March 3, 2027</p>
+            <p class="venue">Casa Milagros, Tagaytay</p>
+            <div class="plate" style="aspect-ratio:3/2;max-width:36em">Cover plate · 3:2</div>
+          </div></div>
+        </div>
+      </div></div>
+      <p class="delta" style="max-width:44rem">The rail head carries four doors, the index carries no story row and
+      no wedding-only entries — <b>the sort and the widths are independent axes</b>, which is the proof the two
+      documents ask for: one design, sixteen kinds of event, three sizes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 05 · THE CONTENTS AT THREE WIDTHS ═══════════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">№ 05</span><h2>“In this celebration” — proven at every width</h2></div>
+  <p class="say">On the <b>phone</b> it is what it was designed as: a printed index under the cover, one tap from
+  anywhere via Home. On the <b>tablet</b> it takes two columns and stays in the page. On the <b>desktop</b> it
+  stops being a place you scroll to and becomes <b>the standing rail</b> — always visible, tracking your place with
+  a small gold dot, the five doors as its head. Same list, resolved by the same rules, three postures. Every rule
+  survives every width: a row is drawn only if the page behind it would let this viewer in; features may be listed
+  locked with a spoken reason; content a host kept private is <b>not drawn at all</b> — no greyed gallery, ever,
+  on any screen size.</p>
+  <div class="decide"><p class="dk">Owner decision</p>
+    <p><b>Recommended: the desktop rail replaces both the pinned bar and the in-page index above 1024.</b>
+    One directory in one posture per width — two visible at once would compete. The phone and tablet keep the
+    printed index and the bar exactly as drawn.</p></div>
+</section>
+
+<!-- ═══════════════ 06 · THE LIVE HUB ═══════════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">№ 06</span><h2>The Live hub — the screen people use standing up</h2></div>
+  <p class="say">The one full-screen room. The phone reproduces what ships: header, one panel on stage, up to five
+  pills and a More sheet. The tablet is a real venue object — propped on a registration desk or passed around a
+  table — so targets grow and grids widen, but the shell does not change shape. Above the desktop switch the pills
+  move under the header; nothing is added or removed.</p>
+
+  <div class="fleet">
+    <div class="unit">
+      <p class="cap"><b>Phone · 390</b> — as shipped</p>
+      <div class="dev phone" style="min-height:30rem"><div class="scr">
+        <div class="hubhead"><span>M &amp; J</span><span class="livechip">Live</span></div>
+        <div class="stage">
+          <div class="panelcard"><p class="pk">Now</p><p class="pv">Dinner is served</p>
+            <p class="ps">Find your table — the programme continues 7:45</p></div>
+          <div class="panelcard"><p class="pk">The wall</p>
+            <div class="walls" style="grid-template-columns:repeat(3,1fr)"><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            <p class="ps">214 photos · arriving live</p></div>
+        </div>
+        <div class="pills">
+          <span class="pill on">Now</span><span class="pill">Watch</span><span class="pill">Camera</span>
+          <span class="pill">Photos</span><span class="pill">Me</span><span class="pill">More</span>
+        </div>
+      </div></div>
+      <p class="delta"><b>Unchanged.</b> One panel at a time, the only scroll inside the stage, More holds the rest.</p>
+    </div>
+
+    <div class="unit">
+      <p class="cap"><b>Tablet · 834 portrait</b> — drawn at 60%</p>
+      <div class="dev tab" style="min-height:28rem"><div class="scr">
+        <div class="hubhead"><span>M &amp; J</span><span class="livechip">Live</span></div>
+        <div class="stage">
+          <div class="panelcard"><p class="pk">Now</p><p class="pv" style="font-size:1.3em">Dinner is served</p>
+            <p class="ps">Find your table — the programme continues 7:45</p></div>
+          <div class="panelcard"><p class="pk">The wall</p>
+            <div class="walls" style="grid-template-columns:repeat(5,1fr)"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            <p class="ps">214 photos · arriving live</p></div>
+        </div>
+        <div class="pills">
+          <span class="pill on" style="padding:.7em 1.2em">Now</span><span class="pill" style="padding:.7em 1.2em">Watch</span>
+          <span class="pill" style="padding:.7em 1.2em">Camera</span><span class="pill" style="padding:.7em 1.2em">Photos</span>
+          <span class="pill" style="padding:.7em 1.2em">Me</span><span class="pill" style="padding:.7em 1.2em">More</span>
+        </div>
+      </div></div>
+      <p class="delta"><b>Same shell, bigger hands.</b> Targets grow, the wall runs five across, type steps up one
+      size. A tablet on the registration desk is this exact screen. Portrait keeps the bottom pills — thumbs are at
+      the bottom of a held tablet too.</p>
+    </div>
+
+    <div class="unit" style="flex-basis:100%">
+      <p class="cap"><b>Desktop · 1440 — and tablet landscape</b> — drawn at 50%</p>
+      <div class="dev desk" style="min-height:22rem"><div class="scr">
+        <div class="hubhead"><span>M &amp; J — Live hub</span><span class="livechip">Live</span></div>
+        <div class="pills toprow">
+          <span class="pill on">Now</span><span class="pill">Watch</span><span class="pill">Camera</span>
+          <span class="pill">Photos</span><span class="pill">Me</span><span class="pill">More</span>
+        </div>
+        <div class="stage" style="max-width:52em;margin:0 auto;width:100%">
+          <div class="panelcard"><p class="pk">Now</p><p class="pv" style="font-size:1.5em">Dinner is served</p>
+            <p class="ps">Find your table — the programme continues 7:45</p></div>
+          <div class="panelcard"><p class="pk">The wall</p>
+            <div class="walls" style="grid-template-columns:repeat(8,1fr)"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            <p class="ps">214 photos · arriving live</p></div>
+        </div>
+      </div></div>
+      <p class="delta" style="max-width:44rem"><b>The pills move under the header; the stage holds the stage
+      measure.</b> Nothing widens past it — a photo wall smeared across 1440 pixels reads as a screensaver, not a
+      celebration. The relative watching from a laptop gets exactly the phone's panels, larger.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 07 · THE TYPE SCALE ═══════════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">№ 07</span><h2>The masthead does not grow — the room around it does</h2></div>
+  <p class="say">The type scale cannot simply enlarge with the screen: names at a quarter of a 1440 screen stop being
+  elegant and start being a poster. The rule drawn above, stated plainly:</p>
+  <ul class="plain">
+    <li><b>The names step up once</b> — at the small step, exactly as shipped — and then stop. On desktop they are
+    the same size as on a tablet; what grows is the whitespace around them, which is the most legible luxury cue
+    there is.</li>
+    <li><b>The gold date numerals already have a ceiling</b> in the shipped design and keep it at every width.</li>
+    <li><b>The cover plate changes shape once</b> — portrait 4:5 on the phone (a cover), 3:2 from the small step up
+    (a plate) — and on desktop it caps at the plate measure. It is never full-bleed: a photo the width of a 1440
+    screen is a hero banner, which this design deliberately rejected.</li>
+    <li><b>Reading text never exceeds the reading measure</b> at any width — which is the whole tablet fix in one
+    sentence.</li>
+  </ul>
+</section>
+
+<!-- ═══════════════ 08 · THE DELTA, IN PLAIN WORDS ═══════════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">№ 08</span><h2>What changes at each width, and why</h2></div>
+  <ul class="plain">
+    <li><b>Phone (390):</b> nothing. Every phone screen here reproduces what ships. The phone is the design.</li>
+    <li><b>Tablet portrait (834):</b> the column is held to its measure with real margins instead of stretching;
+    the cover goes 3:2; paired plates sit two-up; the contents takes two columns; the bar and every touch behaviour
+    stay. Why: a tablet is the magazine held in two hands, not a small desktop — and this form is achieved with the
+    two breakpoints that already exist. <b>No orphan breakpoint is adopted.</b></li>
+    <li><b>Tablet landscape (~1112):</b> crosses the existing desktop switch and takes the desktop arrangement.
+    Why: at that width the rail earns its keep, and inventing a third arrangement between two working ones would
+    triple the surfaces to maintain.</li>
+    <li><b>Desktop (1440):</b> the five bar slots become the head of a standing rail; the contents page stands
+    beneath them with a place-tracking dot; the page remains one centered column at its measure; the Live hub's
+    pills move under its header. Why: a pinned phone bar across 1440 pixels is the failure this study exists to
+    remove — and a rail preserves all five doors, their order, their colour and their locks while giving the
+    desktop the one thing it lacked: everything reachable without scrolling home.</li>
+  </ul>
+  <p class="note"><b>What never changes:</b> five doors, never six · locked features speak their reason, private
+  content is never drawn greyed · the Hub is a place, not a control panel — the host sees a read-only ribbon and no
+  editing at any width · gold lives on hairlines, icons and heading-scale numerals, never in a sentence, and no
+  tint ever sits under it — hover moves a border or a shadow · both themes carry every surface drawn here.</p>
+</section>
+
+<p class="note" style="border-top:1px solid var(--edge);padding-top:1rem;margin-top:3.5rem">
+Pairs with <b>“Event Hub for Every Event”</b> (the sort, the grid, the word map) and
+<b>EVENT_HUB_UNIVERSAL_DESIGN_2026-08-17.md</b> (the written spec). Counts in № 01 were measured in the shipped
+code on 2026-08-17. Wedding phone screens reproduce the shipped design; any difference from it is a defect in this
+drawing.</p>
+
+</div>

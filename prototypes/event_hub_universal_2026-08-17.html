@@ -1,0 +1,627 @@
+<title>Event Hub for Every Event</title>
+<style>
+  :root{
+    --ground:#FDFBF7; --paper:#FFFFFF; --panel:#F5F0E8; --edge:#E4DBCC;
+    --ink:#2C2A29; --ink-soft:#5C554E; --ink-faint:#8A8078;
+    --action:#C24E25;      /* the CTA terracotta — the ONLY action colour */
+    --gold:#A9834B;        /* hairlines + icons ONLY. Never text. 3.37:1 on cream */
+    --link:#3B4E67;
+    --wed:#7A4A86; --fix:#B4541F; --ok:#3F6152;
+    --wed-bg:#F0E8F3; --fix-bg:#F7E7DC; --ok-bg:#E8EEE9;
+    --mute:#6E6862;
+    --display:"Iowan Old Style",Georgia,"Palatino Linotype",Palatino,serif;
+    --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#1B1917; --paper:#232020; --panel:#26221F; --edge:#3B3630;
+      --ink:#EFE9E0; --ink-soft:#B6ADA2; --ink-faint:#8A8078;
+      --action:#E8794C; --gold:#C9A472; --link:#9DB4D2;
+      --wed:#C9A3D4; --fix:#E8935F; --ok:#93BCA2;
+      --wed-bg:#322638; --fix-bg:#38271D; --ok-bg:#26332B; --mute:#9A928A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#1B1917; --paper:#232020; --panel:#26221F; --edge:#3B3630;
+    --ink:#EFE9E0; --ink-soft:#B6ADA2; --ink-faint:#8A8078;
+    --action:#E8794C; --gold:#C9A472; --link:#9DB4D2;
+    --wed:#C9A3D4; --fix:#E8935F; --ok:#93BCA2;
+    --wed-bg:#322638; --fix-bg:#38271D; --ok-bg:#26332B; --mute:#9A928A;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--body);
+       font-size:16px;line-height:1.6;margin:0;padding:0 1.25rem 6rem;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:78rem;margin:0 auto}
+
+  /* ── masthead ── */
+  .top{border-bottom:2px solid var(--ink);padding:3rem 0 1.2rem;display:flex;
+       flex-wrap:wrap;gap:1.5rem;align-items:flex-end;justify-content:space-between}
+  .top h1{font-family:var(--display);font-size:clamp(2rem,5vw,3rem);font-weight:400;
+          margin:0;line-height:1.05;letter-spacing:-.015em;text-wrap:balance}
+  .kicker{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;
+          color:var(--action);margin:0 0 .55rem}
+  .stampbox{font-family:var(--mono);font-size:.72rem;line-height:1.7;color:var(--ink-faint);text-align:right}
+  .stampbox b{color:var(--ink-soft)}
+  .lede{font-family:var(--display);font-size:1.18rem;line-height:1.55;color:var(--ink-soft);
+        max-width:44rem;margin:1.4rem 0 0;text-wrap:pretty}
+
+  /* ── section chrome ── */
+  section.blk{margin:4rem 0 0}
+  .blk-head{display:flex;align-items:baseline;gap:.9rem;border-bottom:1px solid var(--ink);
+            padding-bottom:.5rem;margin-bottom:1.1rem}
+  .blk-head h2{font-family:var(--display);font-size:clamp(1.35rem,2.7vw,1.8rem);
+               font-weight:400;margin:0;flex:1;line-height:1.2}
+  .num{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;color:var(--gold);
+       border:1px solid var(--edge);padding:.2rem .45rem;border-radius:2px}
+  .blk > .say{font-size:.95rem;color:var(--ink-soft);max-width:47rem;margin:0 0 1.6rem}
+
+  /* ── PHONE FRAMES ── */
+  .fleet{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr))}
+  .unit{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+  .unit > .cap{font-family:var(--mono);font-size:.68rem;letter-spacing:.09em;
+               text-transform:uppercase;color:var(--ink-faint)}
+  .phone{background:var(--paper);border:1px solid var(--edge);border-radius:1.4rem;
+         overflow:hidden;display:flex;flex-direction:column;min-height:34rem;
+         box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05)}
+  .screen{padding:1.5rem 1.25rem 0;flex:1;display:flex;flex-direction:column;gap:0}
+
+  /* the invariant spine, marked */
+  .spine-eyebrow{font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;
+                 text-transform:uppercase;color:var(--action);margin:0 0 1.4rem}
+  .namewell{min-height:8.2rem;display:flex;flex-direction:column;justify-content:center;gap:.1rem}
+  .nm{font-family:var(--display);font-weight:400;line-height:.98;letter-spacing:-.02em;
+      font-size:2.5rem;margin:0;color:var(--ink)}
+  .nm.sm{font-size:1.85rem}
+  .amp{font-family:var(--display);font-style:italic;font-size:1.5rem;color:var(--gold);
+       margin:.1rem 0;line-height:1}
+  .overline{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+            color:var(--ink-faint);margin:0 0 .5rem}
+  .occasion{font-family:var(--display);font-style:italic;font-size:1.15rem;color:var(--ink-soft);
+            margin:.35rem 0 0;line-height:1.25}
+  .rule{height:1px;background:var(--gold);opacity:.5;margin:1.3rem 0 1rem}
+  .dateline{font-family:var(--mono);font-size:.66rem;letter-spacing:.11em;text-transform:uppercase;
+            color:var(--ink-soft);line-height:1.9;margin:0}
+  .plate{margin-top:1.1rem;height:6.2rem;border:1px solid var(--edge);background:var(--panel);
+         display:flex;align-items:center;justify-content:center;
+         font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--ink-faint)}
+
+  /* the contents index — the new part */
+  .contents{margin-top:1.3rem;border-top:1px solid var(--edge);padding-top:.85rem}
+  .contents .ct{font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;
+                text-transform:uppercase;color:var(--ink-faint);margin:0 0 .55rem}
+  .contents ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.34rem}
+  .contents li{display:flex;align-items:baseline;gap:.5rem;font-size:.82rem;color:var(--ink-soft)}
+  .contents li .n{font-family:var(--mono);font-size:.62rem;color:var(--gold);min-width:1.1rem}
+  .contents li .dots{flex:1;border-bottom:1px dotted var(--edge);transform:translateY(-.18rem)}
+  .contents li .st{font-family:var(--mono);font-size:.56rem;letter-spacing:.08em;
+                   text-transform:uppercase;color:var(--ink-faint)}
+  .contents li.off{color:var(--ink-faint)}
+  .contents li.off .n{color:var(--edge)}
+
+  /* the bar */
+  .bar{border-top:1px solid var(--edge);background:var(--panel);display:flex;
+       padding:.5rem .25rem calc(.5rem + 4px);margin-top:1.1rem}
+  .bar div{flex:1;text-align:center;font-size:.56rem;font-family:var(--mono);
+           letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);
+           display:flex;flex-direction:column;align-items:center;gap:.28rem}
+  .bar div.mid{color:var(--action)}
+  .glyph{width:1.05rem;height:1.05rem;border:1.5px solid currentColor;border-radius:3px;opacity:.8}
+  .bar div.mid .glyph{border-radius:50%;border-width:2px}
+
+  /* delta caption under each phone */
+  .delta{font-size:.84rem;color:var(--ink-soft);border-left:2px solid var(--gold);
+         padding-left:.75rem;margin:0}
+  .delta b{color:var(--ink);font-weight:600}
+
+  /* ── before / after nav ── */
+  .compare{display:grid;gap:1.25rem}
+  @media(min-width:52rem){.compare{grid-template-columns:1fr 1fr}}
+  .card{background:var(--panel);border:1px solid var(--edge);padding:1.3rem 1.4rem}
+  .card.bad{border-left:3px solid var(--fix)}
+  .card.good{border-left:3px solid var(--ok)}
+  .card h3{font-family:var(--display);font-size:1.15rem;font-weight:400;margin:0 0 .7rem}
+  .card p{margin:0 0 .7rem;font-size:.92rem;color:var(--ink-soft)}
+  .card p:last-child{margin:0}
+  .map{font-family:var(--mono);font-size:.72rem;line-height:2;color:var(--ink-soft);
+       white-space:pre;overflow-x:auto;display:block;margin:.5rem 0 0}
+
+  /* ── tables ── */
+  .scroll{overflow-x:auto;border:1px solid var(--edge)}
+  table{border-collapse:collapse;width:100%;font-size:.8rem;min-width:44rem}
+  th,td{padding:.5rem .55rem;text-align:left;border-bottom:1px solid var(--edge);vertical-align:top}
+  thead th{background:var(--panel);font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;
+           text-transform:uppercase;color:var(--ink-faint);font-weight:600;
+           position:sticky;top:0;white-space:nowrap}
+  tbody th{font-weight:600;color:var(--ink);white-space:nowrap;font-size:.82rem}
+  td.y{color:var(--ok);font-family:var(--mono);text-align:center;font-weight:700}
+  td.n{color:var(--ink-faint);font-family:var(--mono);text-align:center}
+  td.q{color:var(--action);font-family:var(--mono);text-align:center;font-weight:700}
+  tbody tr:hover{background:var(--panel)}
+
+  .chip{font-family:var(--mono);font-size:.63rem;letter-spacing:.06em;text-transform:uppercase;
+        padding:.16rem .45rem;border-radius:2px;font-weight:600;white-space:nowrap}
+  .chip.wed{color:var(--wed);background:var(--wed-bg)}
+  .chip.fix{color:var(--fix);background:var(--fix-bg)}
+  .chip.ok{color:var(--ok);background:var(--ok-bg)}
+
+  /* ── delta list ── */
+  .items{display:grid;gap:.9rem;counter-reset:d}
+  .item{background:var(--panel);border:1px solid var(--edge);padding:1.05rem 1.2rem;
+        display:grid;gap:.35rem;grid-template-columns:auto 1fr;align-items:start;column-gap:1rem}
+  .item .idx{font-family:var(--mono);font-size:.78rem;color:var(--gold);
+             border:1px solid var(--edge);padding:.15rem .4rem;border-radius:2px}
+  .item h4{font-family:var(--display);font-size:1.1rem;font-weight:400;margin:0;grid-column:2}
+  .item p{margin:0;font-size:.9rem;color:var(--ink-soft);grid-column:2}
+  .item .why{font-size:.84rem;color:var(--ink-faint);grid-column:2;
+             border-top:1px dotted var(--edge);padding-top:.5rem;margin-top:.25rem}
+  .item .why b{color:var(--ink-soft)}
+
+  .flag{background:var(--fix-bg);border-left:3px solid var(--fix);padding:1.1rem 1.3rem;
+        margin:1.4rem 0 0;font-size:.92rem;color:var(--ink-soft)}
+  .flag b{color:var(--ink)}
+
+  .toggle{position:fixed;right:1rem;top:1rem;z-index:9;background:var(--paper);
+          border:1px solid var(--edge);color:var(--ink-soft);font-family:var(--mono);
+          font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+          padding:.45rem .7rem;border-radius:3px;cursor:pointer}
+  .toggle:hover{border-color:var(--gold)}
+  .toggle:focus-visible{outline:2px solid var(--action);outline-offset:2px}
+
+  footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--edge);
+         font-family:var(--mono);font-size:.72rem;color:var(--ink-faint);line-height:1.9}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<button class="toggle" id="tg" type="button">Theme</button>
+
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <p class="kicker">Setnayan · design prototype · 17 August 2026</p>
+    <h1>The Event Hub, for every kind of event</h1>
+  </div>
+  <div class="stampbox">
+    Drawn against shipped code<br>
+    <b>16</b> event types · <b>13</b> rooms<br>
+    <b>68</b> wedding words a guest reads
+  </div>
+</header>
+
+<p class="lede">
+  One design. Four very different events. The structure never moves — the words, the name
+  treatment and the list of rooms change to fit what is actually happening. Below: what is
+  expected, then what has to change to get there.
+</p>
+
+<!-- ════════ 1 · THE FOUR EVENTS ════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">01</span><h2>What is expected — one page, four events</h2></div>
+  <p class="say">
+    Every screen below uses the identical spine: a chapter number, the name block, a hairline,
+    the date line, the cover plate, the contents, the bar. Only the <em>grammar of the name</em>
+    and the <em>words</em> change. If you cover the names, the four are the same product.
+  </p>
+
+  <div class="fleet">
+
+    <!-- WEDDING -->
+    <div class="unit">
+      <p class="cap">A wedding — unchanged, byte for byte</p>
+      <div class="phone"><div class="screen">
+        <p class="spine-eyebrow">01 · You are invited</p>
+        <div class="namewell">
+          <p class="nm">Maria</p>
+          <p class="amp">&amp;</p>
+          <p class="nm">Juan</p>
+        </div>
+        <div class="rule"></div>
+        <p class="dateline">Fourteen February<br>Two Thousand Twenty-Seven<br>Hacienda Isabella, Cavite</p>
+        <div class="plate">cover plate</div>
+        <div class="contents">
+          <p class="ct">In this wedding</p>
+          <ol>
+            <li><span class="n">01</span>Our story<span class="dots"></span><span class="st">read</span></li>
+            <li><span class="n">02</span>Details &amp; dress<span class="dots"></span><span class="st">read</span></li>
+            <li><span class="n">03</span>Your seat<span class="dots"></span><span class="st">table 4</span></li>
+            <li><span class="n">04</span>Walk the room<span class="dots"></span><span class="st">3D</span></li>
+            <li><span class="n">05</span>Send a gift<span class="dots"></span><span class="st">open</span></li>
+            <li class="off"><span class="n">06</span>Photos<span class="dots"></span><span class="st">on the day</span></li>
+          </ol>
+        </div>
+        <div class="bar">
+          <div><span class="glyph"></span>Home</div>
+          <div><span class="glyph"></span>Details</div>
+          <div class="mid"><span class="glyph"></span>Camera</div>
+          <div><span class="glyph"></span>Story</div>
+          <div><span class="glyph"></span>Me</div>
+        </div>
+      </div></div>
+      <p class="delta"><b>Nothing changes here.</b> Two names, the italic ampersand, the gold
+        hairline. This is what already ships and it stays exactly as it is.</p>
+    </div>
+
+    <!-- BIRTHDAY -->
+    <div class="unit">
+      <p class="cap">A child's seventh birthday</p>
+      <div class="phone"><div class="screen">
+        <p class="spine-eyebrow">01 · You're invited</p>
+        <div class="namewell">
+          <p class="nm">Mateo</p>
+          <p class="occasion">turns seven</p>
+        </div>
+        <div class="rule"></div>
+        <p class="dateline">Saturday, 9 March<br>Two Thousand Twenty-Seven<br>Kidzoona, SM North EDSA</p>
+        <div class="plate">cover plate</div>
+        <div class="contents">
+          <p class="ct">In this party</p>
+          <ol>
+            <li><span class="n">01</span>Details &amp; dress<span class="dots"></span><span class="st">read</span></li>
+            <li><span class="n">02</span>Your table<span class="dots"></span><span class="st">table 2</span></li>
+            <li><span class="n">03</span>What to bring<span class="dots"></span><span class="st">read</span></li>
+            <li><span class="n">04</span>Send a gift<span class="dots"></span><span class="st">open</span></li>
+            <li class="off"><span class="n">05</span>Photos<span class="dots"></span><span class="st">on the day</span></li>
+          </ol>
+        </div>
+        <div class="bar">
+          <div><span class="glyph"></span>Home</div>
+          <div><span class="glyph"></span>Details</div>
+          <div class="mid"><span class="glyph"></span>Camera</div>
+          <div><span class="glyph"></span>Photos</div>
+          <div><span class="glyph"></span>Me</div>
+        </div>
+      </div></div>
+      <p class="delta">One honoured name, and an <b>occasion line</b> in italic where the second
+        name would be. No ampersand. No “our story” — a seven-year-old has no love story, and the
+        row simply isn’t there.</p>
+    </div>
+
+    <!-- CORPORATE -->
+    <div class="unit">
+      <p class="cap">A company’s annual day</p>
+      <div class="phone"><div class="screen">
+        <p class="spine-eyebrow">01 · You’re on the list</p>
+        <div class="namewell">
+          <p class="overline">Banawe Group</p>
+          <p class="nm sm">Annual Summit</p>
+          <p class="occasion">Two Thousand Twenty-Seven</p>
+        </div>
+        <div class="rule"></div>
+        <p class="dateline">Thursday, 22 April<br>Doors 8:00 AM<br>Marquis Events Place, BGC</p>
+        <div class="plate">cover plate</div>
+        <div class="contents">
+          <p class="ct">In this event</p>
+          <ol>
+            <li><span class="n">01</span>Programme<span class="dots"></span><span class="st">read</span></li>
+            <li><span class="n">02</span>Your seat<span class="dots"></span><span class="st">row C</span></li>
+            <li><span class="n">03</span>Getting there<span class="dots"></span><span class="st">map</span></li>
+            <li><span class="n">04</span>Watch live<span class="dots"></span><span class="st">on the day</span></li>
+            <li class="off"><span class="n">05</span>Photos<span class="dots"></span><span class="st">on the day</span></li>
+          </ol>
+        </div>
+        <div class="bar">
+          <div><span class="glyph"></span>Home</div>
+          <div><span class="glyph"></span>Programme</div>
+          <div class="mid"><span class="glyph"></span>Camera</div>
+          <div><span class="glyph"></span>Watch</div>
+          <div><span class="glyph"></span>Me</div>
+        </div>
+      </div></div>
+      <p class="delta">The <b>organisation sits above</b> in small caps and the occasion takes the
+        large type. No gift page — a company day doesn’t collect money from guests. “Details”
+        becomes <b>Programme</b>.</p>
+    </div>
+
+    <!-- FUNERAL -->
+    <div class="unit">
+      <p class="cap">A wake — ⚠ not an event type today</p>
+      <div class="phone"><div class="screen">
+        <p class="spine-eyebrow" style="color:var(--mute)">01 · In loving memory</p>
+        <div class="namewell">
+          <p class="nm sm">Rosario</p>
+          <p class="nm sm">Dela Cruz</p>
+          <p class="occasion">1948 — 2026</p>
+        </div>
+        <div class="rule" style="opacity:.3"></div>
+        <p class="dateline">Wake · 18–21 August<br>Interment · Friday, 22 August, 9:00 AM<br>Loyola Memorial, Marikina</p>
+        <div class="plate">cover plate</div>
+        <div class="contents">
+          <p class="ct">In this gathering</p>
+          <ol>
+            <li><span class="n">01</span>Times &amp; place<span class="dots"></span><span class="st">read</span></li>
+            <li><span class="n">02</span>Getting there<span class="dots"></span><span class="st">map</span></li>
+            <li><span class="n">03</span>Leave a message<span class="dots"></span><span class="st">open</span></li>
+            <li><span class="n">04</span>Watch the service<span class="dots"></span><span class="st">Friday</span></li>
+          </ol>
+        </div>
+        <div class="bar">
+          <div><span class="glyph"></span>Home</div>
+          <div><span class="glyph"></span>Times</div>
+          <div><span class="glyph"></span>Watch</div>
+          <div><span class="glyph"></span>Messages</div>
+          <div><span class="glyph"></span>Me</div>
+        </div>
+      </div></div>
+      <p class="delta">No countdown, no RSVP, no gifts, <b>no camera in the middle</b> — the one
+        place the bar’s shape should yield. Two dates instead of one. Gold drops to a whisper.</p>
+    </div>
+
+  </div>
+
+  <div class="flag">
+    <b>You asked for a funeral, so I drew one — but a funeral cannot be created today.</b> The
+    product has sixteen kinds of event and funeral is not one of them; neither is baptism. Three
+    kinds you weren’t told about do exist: a date, a gala night and a hangout. So the funeral
+    above is a proposal, not a repair — and whether to add it is a decision for you, not a
+    drawing. Everything else on this page is real today.
+  </div>
+</section>
+
+<!-- ════════ 2 · BETWEEN THE ROOMS ════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">02</span><h2>Getting from one room to another</h2></div>
+  <p class="say">
+    You said you had not verified this and asked me to drop it if it turned out to be false.
+    <strong>It is true, and worse than you put it.</strong> I read every link out of all thirteen
+    rooms.
+  </p>
+
+  <div class="compare">
+    <div class="card bad">
+      <h3>What happens today</h3>
+      <p>Not one room links to any other room. The bottom bar exists <em>only</em> on the event
+        page — none of the other twelve carry it.</p>
+      <span class="map">seat          → back to the event page, only
+find your seat→ back to the event page, only
+find my table → back to the event page, only
+walk the room → back to the event page, only
+send a gift   → back to the event page, only
+the story     → back to the event page, only
+─────────────────────────────────────────
+welcome       → nothing
+ask to join   → nothing
+photo wall    → nothing
+printable     → nothing</span>
+      <p>A guest standing in the venue looking at their seat has to go back to the event page and
+        find their way again — and four rooms give them no way out at all.</p>
+    </div>
+
+    <div class="card good">
+      <h3>What is expected</h3>
+      <p><b>The contents page, printed under the masthead.</b> Not a hidden sheet behind a button —
+        a magazine tells you what is inside on the way in. It lists only what <em>this</em> event
+        actually has, and says plainly when something isn’t open yet.</p>
+      <p><b>The bar travels.</b> Every room carries the same five buttons, so “back” is never the
+        only way out.</p>
+      <p><b>Each room ends with the contents again</b>, so the guest lands somewhere useful instead
+        of reversing.</p>
+      <p>Nothing here adds a sixth button. The bar stays at five — that decision is right and I
+        am not reopening it.</p>
+    </div>
+  </div>
+
+  <p class="say" style="margin-top:1.4rem">
+    The contents page is drawn into all four phones above. A row that isn’t open yet stays visible
+    and greyed with its reason (“on the day”) — but a row for something the host has kept private
+    is <em>not drawn at all</em>, because a greyed-out one would announce that photos exist and are
+    being held back.
+  </p>
+</section>
+
+<!-- ════════ 3 · THE FOUR STAGES ════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">03</span><h2>One link, four stages</h2></div>
+  <p class="say">
+    The guest keeps the same address from the save-the-date to the album. The page under it changes
+    three times; the link never does. This is why it is one product and not four.
+  </p>
+  <div class="fleet">
+    <div class="unit">
+      <p class="cap">Stage 1 — save the date</p>
+      <div class="phone" style="min-height:20rem"><div class="screen">
+        <p class="spine-eyebrow">Save the date</p>
+        <div class="namewell" style="min-height:5rem"><p class="nm sm">Mateo</p><p class="occasion">turns seven</p></div>
+        <div class="rule"></div>
+        <p class="dateline">9 March 2027</p>
+        <div class="plate">the film plays</div>
+        <div class="contents"><p class="ct">In this party</p>
+          <ol><li class="off"><span class="n">—</span>Invitation to follow<span class="dots"></span><span class="st">soon</span></li></ol>
+        </div>
+      </div></div>
+      <p class="delta">The date and nothing that would spoil the invitation.</p>
+    </div>
+    <div class="unit">
+      <p class="cap">Stage 2 — the invitation</p>
+      <div class="phone" style="min-height:20rem"><div class="screen">
+        <p class="spine-eyebrow">01 · You’re invited</p>
+        <div class="namewell" style="min-height:5rem"><p class="nm sm">Mateo</p><p class="occasion">turns seven</p></div>
+        <div class="rule"></div>
+        <p class="dateline">Saturday, 9 March · Kidzoona</p>
+        <div class="contents"><p class="ct">In this party</p>
+          <ol>
+            <li><span class="n">01</span>Will you come?<span class="dots"></span><span class="st">reply</span></li>
+            <li><span class="n">02</span>Details<span class="dots"></span><span class="st">read</span></li>
+            <li><span class="n">03</span>Your table<span class="dots"></span><span class="st">table 2</span></li>
+          </ol></div>
+      </div></div>
+      <p class="delta">The full page. The reply is the one action in terracotta.</p>
+    </div>
+    <div class="unit">
+      <p class="cap">Stage 3 — the day itself</p>
+      <div class="phone" style="min-height:20rem"><div class="screen">
+        <p class="spine-eyebrow" style="color:var(--action)">Happening now</p>
+        <div class="namewell" style="min-height:5rem"><p class="nm sm">Mateo</p><p class="occasion">turns seven, today</p></div>
+        <div class="rule"></div>
+        <p class="dateline">Cake at 3:00 PM · you are at table 2</p>
+        <div class="contents"><p class="ct">Right now</p>
+          <ol>
+            <li><span class="n">01</span>Take photos<span class="dots"></span><span class="st">open</span></li>
+            <li><span class="n">02</span>The wall<span class="dots"></span><span class="st">live</span></li>
+            <li><span class="n">03</span>Your table<span class="dots"></span><span class="st">table 2</span></li>
+          </ol></div>
+      </div></div>
+      <p class="delta">Home becomes <b>Now</b>. Camera takes the middle.</p>
+    </div>
+    <div class="unit">
+      <p class="cap">Stage 4 — the album</p>
+      <div class="phone" style="min-height:20rem"><div class="screen">
+        <p class="spine-eyebrow">The day, remembered</p>
+        <div class="namewell" style="min-height:5rem"><p class="nm sm">Mateo</p><p class="occasion">turned seven</p></div>
+        <div class="rule"></div>
+        <p class="dateline">9 March 2027 · 214 photos</p>
+        <div class="contents"><p class="ct">In this album</p>
+          <ol>
+            <li><span class="n">01</span>The story<span class="dots"></span><span class="st">read</span></li>
+            <li><span class="n">02</span>Photos of you<span class="dots"></span><span class="st">19</span></li>
+            <li><span class="n">03</span>Everyone’s photos<span class="dots"></span><span class="st">214</span></li>
+          </ol></div>
+      </div></div>
+      <p class="delta">Home becomes <b>Recap</b>. Past tense throughout.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 4 · THE GRID ════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">04</span><h2>Which rooms exist for which event — your decision</h2></div>
+  <p class="say">
+    This is the one call that decides how much of this is even a design problem, and it is yours,
+    not mine. I have filled in a recommendation everywhere so you are correcting a proposal rather
+    than facing a blank grid. <strong>●</strong> yes · <strong>·</strong> no ·
+    <strong style="color:var(--action)">?</strong> genuinely unsure, needs you.
+  </p>
+  <div class="scroll">
+  <table>
+    <thead><tr>
+      <th>Event type</th><th>Page</th><th>RSVP</th><th>Seat</th><th>Find seat</th><th>Table map</th>
+      <th>3D room</th><th>Gifts</th><th>Camera</th><th>Photo wall</th><th>Watch</th><th>Album</th><th>Print</th>
+    </tr></thead>
+    <tbody>
+      <tr><th>Wedding</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td></tr>
+      <tr><th>Debut</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td></tr>
+      <tr><th>Birthday</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td></tr>
+      <tr><th>Christening</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td></tr>
+      <tr><th>Gender reveal</th><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="n">·</td></tr>
+      <tr><th>Anniversary</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td></tr>
+      <tr><th>Graduation</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td></tr>
+      <tr><th>Reunion</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td></tr>
+      <tr><th>Celebration</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td></tr>
+      <tr><th>Gala night</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td></tr>
+      <tr><th>Corporate</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="q">?</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="n">·</td></tr>
+      <tr><th>Tournament</th><td class="y">●</td><td class="y">●</td><td class="q">?</td><td class="q">?</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="n">·</td></tr>
+      <tr><th>Travel</th><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="y">●</td><td class="n">·</td></tr>
+      <tr><th>Date</th><td class="y">●</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">●</td><td class="n">·</td><td class="n">·</td><td class="y">●</td><td class="n">·</td></tr>
+      <tr><th>Hangout</th><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="y">●</td><td class="n">·</td></tr>
+      <tr><th>Simple event</th><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="n">·</td><td class="y">●</td><td class="n">·</td></tr>
+      <tr><th style="color:var(--action)">Funeral (new?)</th><td class="y">●</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="n">·</td><td class="q">?</td><td class="n">·</td><td class="n">·</td><td class="y">●</td><td class="y">●</td><td class="n">·</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="say" style="margin-top:1rem">
+    The four I could not call for you: whether a <b>corporate day</b> wants the 3D room (it may be
+    the best use of it — a conference floor is harder to navigate than a ballroom); whether a
+    <b>tournament</b> seats spectators or only lists fixtures; and whether a <b>funeral</b> should
+    accept money, which is normal at a Filipino wake and might read badly on a screen.
+  </p>
+</section>
+
+<!-- ════════ 5 · THE DELTA ════════ -->
+<section class="blk">
+  <div class="blk-head"><span class="num">05</span><h2>What can be improved — the delta from today</h2></div>
+  <p class="say">Itemised, each with the reason it is on the list. Ordered by what a person would notice first.</p>
+
+  <div class="items">
+
+    <div class="item"><span class="idx">01</span>
+      <h4>The words follow the event <span class="chip fix">the main job</span></h4>
+      <p>A guest at a graduation reads “the couple” sixty-eight times across the Hub — fifty-four
+        of them on the event page alone. Every kind of event already has its own words written down
+        and waiting; the page has simply never asked for them.</p>
+      <p class="why"><b>Why:</b> it is not a taste problem, it is a word count — and eight in ten of
+        those words sit on one page, so most of the value lands in one pass.</p>
+    </div>
+
+    <div class="item"><span class="idx">02</span>
+      <h4>A name treatment for each kind of event <span class="chip fix">design</span></h4>
+      <p>Four grammars, one spine: two names with an ampersand (wedding, unchanged); one honoured
+        name with an occasion line (birthday, debut, graduation); an organisation above a titled
+        occasion (corporate, gala); a name with two dates (a wake).</p>
+      <p class="why"><b>Why:</b> today the opening splits on the word “and”. A gala called
+        <em>“Design &amp; Build Summit”</em> would be stacked across two lines with a wedding’s
+        italic gold ampersand between the halves of its own name.</p>
+    </div>
+
+    <div class="item"><span class="idx">03</span>
+      <h4>The wedding-only parts learn to stay home <span class="chip wed">the biggest build</span></h4>
+      <p>Five things belong to weddings and should keep every wedding word they have: the two-name
+        opening, the love story, the bride’s and groom’s sides, the five cinematic openings, the
+        tea ceremony. They must simply never appear elsewhere.</p>
+      <p class="why"><b>Why:</b> there is no way to do that today. The page asks the event type one
+        question — <em>may this event have a page at all?</em> — and nothing else. So a birthday
+        booked far enough ahead would be handed the wedding save-the-date machinery, and a company
+        summit’s opening would get a lettered wedding monogram. <b>This is the largest piece of
+        work in the plan and nothing else is blocked on it.</b></p>
+    </div>
+
+    <div class="item"><span class="idx">04</span>
+      <h4>A contents page under the masthead <span class="chip fix">navigation</span></h4>
+      <p>One printed list of what is in this event, resolved by the same rules as the bottom bar,
+        showing only what this event actually has.</p>
+      <p class="why"><b>Why:</b> measured — no room links to any other room, the bar exists on only
+        one of the thirteen, and four rooms have no way out at all. A guest at their table cannot
+        reach the directions, the gifts or the album without starting over.</p>
+    </div>
+
+    <div class="item"><span class="idx">05</span>
+      <h4>The bar travels with the guest <span class="chip fix">navigation</span></h4>
+      <p>The same five buttons on every room. Still five — no sixth button, ever.</p>
+      <p class="why"><b>Why:</b> the rooms were each given their own hand-copied top strip. One of
+        them says so in its own notes.</p>
+    </div>
+
+    <div class="item"><span class="idx">06</span>
+      <h4>Look at the redesign that already shipped <span class="chip ok">costs nothing</span></h4>
+      <p>Seven pieces of work in July rebuilt this page’s whole appearance and merged. Its hand-over
+        note asks whoever picks it up to look at it on a phone first. Nobody has.</p>
+      <p class="why"><b>Why:</b> two small wording decisions are still waiting on you, and it is
+        possible some of what looks unfinished is simply unreviewed.</p>
+    </div>
+
+    <div class="item"><span class="idx">07</span>
+      <h4>Decide the grid above <span class="chip wed">yours alone</span></h4>
+      <p>Which rooms exist for which kind of event.</p>
+      <p class="why"><b>Why:</b> it decides how much of the rest is a design problem at all. Four
+        cells I could not call for you.</p>
+    </div>
+
+  </div>
+
+  <div class="flag">
+    <b>Nothing here has been validated against a real customer, and it cannot be.</b> Every event
+    in production today is a wedding — six events, thirty-nine guests, fourteen photos, no orders
+    ever placed. So the four screens above are a claim about the design, not an observation of it
+    working. The wedding column is the only one anyone has ever seen.
+  </div>
+</section>
+
+<footer>
+  Prototype · 17 August 2026 · drawn against shipped code and the live production database.<br>
+  Counts measured, not estimated. Wedding screens reproduce what ships and are not a new design.<br>
+  Action colour #C24E25 · gold #A9834B used on hairlines and icons only, never on text.
+</footer>
+
+</div>
+
+<script>
+  (function(){
+    var b=document.getElementById('tg');
+    b.addEventListener('click',function(){
+      var r=document.documentElement;
+      var cur=r.getAttribute('data-theme');
+      if(!cur){cur=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
+      r.setAttribute('data-theme',cur==='dark'?'light':'dark');
+    });
+  })();
+</script>

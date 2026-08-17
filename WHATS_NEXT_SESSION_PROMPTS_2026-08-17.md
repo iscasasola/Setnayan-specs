@@ -6,6 +6,22 @@
 > **ELEVEN sessions. Run TWO at a time — five waves.** Register:
 > [`WHAT_IS_LEFT_2026-08-17.md`](WHAT_IS_LEFT_2026-08-17.md).
 >
+> ⚠ **SIXTEEN NOW, NOT ELEVEN — the Event Hub was added to this register on 2026-08-17 (evening)
+> and it changes S3's and S11's rows.** ✅ **S12** (Event Hub design) is **DONE**; its builds are
+> **S13 · S14 · S15 · S16**, scoped in
+> [`WHATS_NEXT_EVENT_HUB_BUILDS_2026-08-17.md`](WHATS_NEXT_EVENT_HUB_BUILDS_2026-08-17.md).
+> Two measured corrections you must not miss:
+> - **S3 reaches the Event Hub.** Its own text names *"the invitation page"* — that is the Hub's
+>   main page. S3 is already "run alone"; **this is why**, and it must land AFTER S13 and S14 so
+>   it adopts the states kit on a tree that has stopped moving.
+> - **S11 does NOT share the Hub's body file** (a standing claim elsewhere says it does —
+>   measured, it does not). Its only Hub footprint is the host ribbon's coordinator dead-end, and
+>   it can close that without opening the Hub's body file at all.
+>
+> 🛑 **Only ONE Event Hub session at a time** — S13–S16 all edit the same two large files
+> (1,889 + 980 lines). Any non-Hub session may run beside one of them: S4 · S5 · S6 · S7 · S8 ·
+> S9 · S10 share **zero** files with them.
+>
 > 🛑 **NEVER MORE THAN TWO AT ONCE.** Ten parallel builds once shipped **44 defects** and the
 > shared checkout has been clobbered three times. The waves below are chosen so the two running
 > together **cannot touch the same files.**

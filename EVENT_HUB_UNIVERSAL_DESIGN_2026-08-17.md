@@ -1,249 +1,182 @@
-# The Event Hub, for every kind of event — design plan
+# The Event Hub for every kind of event — the written half
 
-**Date:** 2026-08-17 · **Status:** DESIGN ONLY — nothing here is built; a separate session builds it.
-**Owner's ask, verbatim:** *"The goal of the event hub will be a universal design that can apply to all types of event from wedding to any event. It should be able to easily access all the different parts of the event hub."*
-**Ground rule obeyed throughout:** RULE 0. Every recommendation below is an extension of something that already ships and was read in the shipped code before being proposed. Nothing is redrawn. File-and-line evidence for every claim is in **Appendix A**; the recommendations themselves are written for the owner and name no code.
+**Date:** 2026-08-17 · **Status:** DESIGN DOCUMENT ONLY — the drawings are being produced separately (`prototypes/event_hub_universal_2026-08-17.html`, not by this document's author). No code changes.
+**Owner's ask:** *"a universal design that can apply to all types of event… able to easily access all the different parts of the event hub."*
+**Owner's ruling, applied throughout:** *"there are parts that is dedicated for weddings but there are parts that should also work for non wedding/other events."*
+**Method:** every claim below was verified by opening the shipped file; paths and lines are in Appendix A. Where my measurements disagree with the briefing, I say so — including two places the briefing's numbers are too low.
 
 ---
 
-## 0 · The one idea
+## 1 · The three corrections, checked — and two counter-corrections
 
-The Event Hub already has a design language good enough to be universal — the "Pahina" editorial look: a magazine issue commissioned about *these people*, with a typographic masthead, numbered chapters, a reply card, and the host's own colours. **Nothing about that language is inherently a wedding.** What is wedding-shaped is a thin layer of *words and assumptions* sitting on top of it: the hero assumes two names joined by an ampersand, a chapter is titled "Our love story", a guest is on the "Bride's side", and about seventy small phrases say "wedding" or "couple" to people at a birthday.
+**Correction 1 — the sixteen types: CONFIRMED.** The roster in the code and its seed data is exactly: anniversary · birthday · celebration · christening · corporate · date · debut · gala_night · gender_reveal · graduation · hangout · reunion · simple_event · tournament · travel · wedding. There is **no funeral and no baptism** anywhere in the vocabulary, its migrations, or the app. So no page can today "call a grieving family a couple" — that scenario cannot occur. Worth adding: **christening already covers the baptism occasion in practice** (a family creating a baptism today would pick it); **funeral has no near neighbour at all**. Whether funeral (and a separately-named baptism) become types is an `OWNER_DECISION` — and an add-an-event-type checklist already exists in the project's notes, so the mechanical cost of saying yes is known and small.
 
-The database already knows the right words for all sixteen event types — who the honoree is called, what the occasion is called, whether a seat is a "table" or a "seat" — and the page never asks. So the universal design is not a new design. **It is teaching the page that already exists to ask the questions its own database already answers**, plus one genuinely new piece: a contents page, so a guest can reach every part of the event from one place.
+**Correction 2 — the word count: CONFIRMED IN SHAPE, and the tail is slightly bigger than measured.** I re-enumerated every wedding word a guest can actually read (visible text and screen-reader labels; comments and code excluded). My count is **~79, not 68** — same conclusion, more concentrated evidence: roughly **7 in 10 sit on the event page**, and the whole job is words, not structure. The deltas, with lines in Appendix A, all in the direction of *more* words than the briefing found:
 
-Five work packages fall out of this plan, in order of value:
+- **The Live hub is not 0 — it is 4.** "The couple will assign seats closer to the day" · "straight to the couple" · "The couple hasn't published the program yet" · "lands in the couple's gallery" — all guest-visible on the hub's panels.
+- **Welcome is not 0 — it is 1** ("…in the couple's guest list…" on the +1's name-confirmation screen).
+- Seat reads 3 (not 2), find-seat and find-my-table 2 each (not 1) — the extras are alternate empty-states a guest can reach.
 
-| # | Package | Size |
+None of this weakens the briefing's point; it strengthens it. The full word map is §B.
+
+**Correction 3 — the "shared shell": CONFIRMED VERBATIM.** The layout file wrapping all the rooms is one `<div>` with `display: contents`; its own docblock says *"Purely a CSS-variable scope — zero behavior."* It swaps fonts to the editorial faces and provides no chrome, no navigation, no header. And the hand-copying is real: find-seat's chrome carries the comment *"mirrors find-my-table's"*. The rooms share typography and nothing else. No claim of a shared shell appears anywhere in this document, and no shell rebuild is scoped off it.
+
+**The navigation finding — CONFIRMED, by an independent route.** The bottom bar is imported by exactly one file: the event page's body. None of the eleven sub-rooms mounts it. Every sub-room's outbound links, sampled room by room, either point only back to the event page (seat · find-seat · find-my-table · venue · gifts · recap) or don't exist (welcome · invite · print). It is a hub-and-spoke with no rim: a guest on their seat screen genuinely cannot reach directions or the gifts without going back and starting again. This is context for the drawings; no chrome is designed here.
+
+---
+
+## A · THE GRID — which rooms exist for which kind of event
+
+**`OWNER_DECISION` — this whole table.** It is a filled-in proposal so the owner corrects a recommendation instead of facing a blank. ✓ = the room exists for that type by default (its own honesty gates still apply — a seat room with no published plan still shows its "not posted yet" state). — = the room does not exist for that type: not greyed out, simply absent, exactly as the owner ruled for wedding-dedicated parts.
+
+The 13 rooms: the **event page** · **welcome** (a +1 confirms their name) · **invite** (join this event) · **redeem** (the QR door) · **seat** (your seat pass) · **find-seat** (type your name) · **find-my-table** (the table map) · **3D venue walk** · **gifts** (the digital money dance) · **Live hub** · **live wall feed** · **recap** · **print** (the keepsake sheet).
+
+| | event page | welcome | invite | redeem | seat | find-seat | find-my-table | 3D venue | gifts | Live hub | live wall | recap | print |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **wedding** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **anniversary** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **birthday** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **debut** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **christening** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **gender_reveal** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **graduation** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **celebration** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **reunion** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **corporate** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ |
+| **gala_night** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓* | ✓ | ✓ | ✓ | ✓ |
+| **tournament** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ |
+| **travel** | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | — | ✓ | ✓ |
+| **date** | ✓ | — | ✓ | ✓ | — | — | — | — | — | — | — | ✓ | ✓ |
+| **hangout** | ✓ | — | ✓ | ✓ | — | — | — | — | — | — | — | ✓ | ✓ |
+| **simple_event** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | — | — |
+
+**Justifications, only where the row is not obvious:**
+
+- **travel** — the four seat rooms and the 3D walk model a *banquet floor*; a trip's "seats" are on transport and its venues change daily, so those rooms would always show their apology state. The Live hub's clock is built around one venue day; a five-day roaming trip fits it badly. But the **recap and print keepsake are the trip's best rooms** — a trip is the type where "the photos are the product" is most true. (The type's own profile already says roaming + multi-day; this row follows it.)
+- **date · hangout** — deliberately the lightest rows. These are small, casual kinds; a seat map, money dance or live command hub would be machinery around a dinner. The invite link and QR door stay (that *is* how the other person or the barkada joins); welcome (+1 confirmation) is off because there is no formal guest list to confirm into. Recap and print stay — a printed keepsake of a first date is exactly the kind of object this product is loved for.
+- **tournament** — seating ✓ (awards dinners and spectator tables are real), gifts — (nobody pins cash on a bracket). The programme on its event page is the fixture list; no new feature needed.
+- **corporate** — gifts off: a cash-gift room on a company event reads as a compliance problem, not a delight.
+- **gala_night** — gifts **✓\*** with re-worded copy: a gala's money moment is donation-shaped ("support the cause"), not "pin your cash on the couple". Same room, different words — bucket 2 exactly.
+- **simple_event** — its recorded purpose is a vendor-free container for the in-app services, and its profile already enables seating, day-of and gallery. Recap/print off keeps it the utility type it was designed to be.
+- **redeem ✓ everywhere** — it is a door, not a room; wherever any invitation QR can exist, the door must answer.
+
+---
+
+## B · THE WORD MAP — every wedding word a guest reads, bucketed
+
+Buckets, per the owner's ruling: **(1) wedding by nature** — keep the words exactly, hide the part for other types · **(2) universal job wearing wedding clothes** — the part stays everywhere, the words take the event type's own vocabulary · **(3) sample/demo content** — not real copy.
+
+**Finding on bucket 3 first, said plainly: among the words a guest actually READS, bucket 3 is empty.** The sample-wedding material that inflates the raw source counts lives in database rows and comments, not in rendered strings. Every guest-read wedding word is a 1 or a 2. The distribution of my ~79: **10 are bucket 1 · 69 are bucket 2.** So the visible job is overwhelmingly a wording job — and the ten bucket-1 words are the ones that must NOT be re-worded, only correctly hidden elsewhere (today, several would leak onto non-wedding pages; see §C).
+
+### Bucket 1 — wedding by nature (10 reads; keep verbatim; absent for other types)
+
+| Where a guest meets it | The words | Note |
 |---|---|---|
-| 1 | The masthead learns the three identity grammars (§A) | small |
-| 2 | The vocabulary sweep — chapter titles + guest copy follow the event type (§B) | medium, mechanical |
-| 3 | "In this celebration" — the contents page (§C) | medium, the one new object |
-| 4 | Per-type defaults for art direction — settings only, no new skins (§D) | tiny |
-| 5 | Guardrails — the shipped decisions that must survive (§E) | zero build, pure discipline |
+| The greeting's side line (event page) | "Bride's side" / "Groom's side" | 2 reads. Prints today for ANY type whose guest has a side value — needs the §C gate, not a rewrite. |
+| The tea-ceremony card (event page) | "The couple kneels… the groom's side first, then the bride's…" | 3 reads. Already correctly gated to Chinese weddings — the model bucket-1 part. |
+| The Save-the-Date film (event page, far out) | "are getting married" | 1 read. The film itself is wedding-dedicated and currently calendar-driven for every type — the §C leak. |
+| The calendar entry the Save-the-Date mints | the event lands in the guest's phone calendar as a wedding | 1 read. Travels with the film. |
+| The recap's song credit + the print sheet's | "· their wedding song" (text + its spoken label, and once on print) | 3 reads. The owner has already named the song credit wedding-dedicated. |
 
----
+### Bucket 2 — universal jobs wearing wedding clothes (69 reads; the words take the type's own vocabulary)
 
-## A · The universal masthead
+Grouped by room. "couple" → the type's organizer noun (celebrant's family · graduate · organizers — already in the database for all 16); "wedding" → the type's event word (birthday · graduation · trip — likewise).
 
-### What ships today (verified)
+**The event page (~54 reads — the concentration is real):**
 
-One masthead component serves all four hero situations (stranger with a photo, stranger without, invited guest with a photo, without). It renders: an eyebrow line ("№ 01 · You are invited"), an optional monogram, **stacked names with an italic gold joiner**, a hairline rule, the date in large gold numerals, the venue line, and the photo demoted below the type as a framed "cover plate" with a caption. When the event's name has no "&" or "and" in it, the names collapse to a single line — that fallback exists and works.
-
-### The defect that blocks universality (found while verifying, not in the brief)
-
-The split into two stacked lines is triggered by **sniffing the name for the characters "&" or "and"** — not by asking whether this kind of event has two principals. So a corporate night called "Design & Build Summit" or a reunion called "Mila and Friends" would be torn into two stacked lines with a wedding's italic gold ampersand between them. A title is not two people. The trigger has to move from the spelling of the name to the *kind* of event.
-
-### The design: one block, three identity grammars
-
-The masthead stays **one component with six invariants** and exactly **one variable**: how the name block is set. The variable is decided by the event type's profile (which already records whether the type has two principals), never by the text of the name.
-
-**Invariant for every event type** — this is what makes it one product:
-
-1. The eyebrow line: chapter № + a short phrase.
-2. The name block is the largest type on the page, in the display face, light weight.
-3. The hairline rule under the name.
-4. The date in oversized gold numerals. (For a multi-day trip, the range: "March 12 – 19, 2027". The database already knows an end date.)
-5. The venue line in quiet ink.
-6. The cover plate below the type — the photo never fights the name.
-7. The mark slot: filled for weddings (monogram), simply absent for types that have no mark. The masthead already tolerates an empty mark slot; nothing collapses.
-
-**The one variable — the name-block grammar:**
-
-| Grammar | Event types | How the name is set |
-|---|---|---|
-| **Two names joined** | wedding · anniversary | Stacked lines, small italic gold joiner between — exactly today's treatment. Allowed **only** because the type declares two principals; then the "&"/"and" split applies. |
-| **One person honored** | birthday · debut · graduation · christening · gender reveal | One name line, set exactly as the host typed it ("Remedios 'Lola Remy' Cruz at 80"). No joiner, no second line. This is the shipped single-line fallback, now *chosen by the type* instead of stumbled into by the absence of an ampersand. |
-| **A titled occasion** | corporate · tournament · reunion · travel · celebration · the rest | The title set as typed, wrapping naturally by width — **never** split on "&"/"and", never given the italic joiner. |
-
-**The eyebrow follows the *moment*, and borrows one word from the *type*.** The per-phase eyebrows already designed for weddings generalize cleanly — before: "You are invited" (universal, honest for every type, already the shipped default); on the day: "Happening today"; after: the record line, which today would read "Married · Jan 12" and becomes "*{the type's own word}* · Jan 12" — "Graduation · Jun 4", "The trip · Mar 12–19". One template, one word swapped, and the word already sits in the database for all sixteen types.
-
-**What does NOT vary:** the typefaces, the scale, the gold, the rule, the cover-plate framing, the Candlelight/Daylight behaviour, the palette pipeline. A graduation masthead and a wedding masthead should be recognisably the same magazine — different issue, same publisher. That is the whole point: the design does not "look like a wedding template with words swapped" precisely because the *structure* never pretended to be about weddings; only the split-and-joiner did, and that is now earned by the type instead of assumed.
-
-### Sketches (words only — the builder ports, does not redraw)
-
-```
-WEDDING                      60TH BIRTHDAY                CORPORATE GALA
-№ 01 · YOU ARE INVITED       № 01 · YOU ARE INVITED       № 01 · YOU ARE INVITED
-       [monogram]
-       Maria                 Remedios "Lola Remy"         The Hilaria Group
-        &                    Cruz at 80                   Founders' Gala 2027
-       Jose
-   ──────────                ──────────                   ──────────
- JANUARY 12, 2027            MARCH 3, 2027                NOVEMBER 8, 2027
- Santuario de San Antonio    Casa Milagros, Tagaytay      Shangri-La The Fort
- [cover plate + caption]     [cover plate + caption]      [cover plate + caption]
-```
-
----
-
-## B · The chapter grammar for a non-wedding
-
-### What the page is made of (verified counts — a small correction to the brief)
-
-The brief said "16 host-toggled blocks." Measured: there are **16 block types** in the registry, of which **4 are always-on** (hero, greeting, QR card, RSVP) and **12 are host-toggled**. Around them sit roughly two dozen **automatic blocks** the page adds itself when facts warrant (the seat block, the live wall, the photos-of-you strip, the face-enrol ask, the camera, the video-greeting recorder, the vendor credits, the keepsake ticket, and so on). Nothing new is invented below — every "replacement" is an existing block wearing the right words.
-
-### The chapter verdict, type by type
-
-**Universal — these chapters work for all sixteen types today, needing only wording:**
-
-| Chapter | Verdict |
+| Cluster | The phrases (reads) |
 |---|---|
-| **№ 01 The masthead** | Universal (§A). |
-| **№ 03 Details / the venues** | Universal. Plates saying where and when are the same job everywhere. |
-| **№ 04 The programme** | Universal — a run-of-show is a run-of-show. For a **trip** this chapter *is* the itinerary (the travel schedule machinery already exists and is day-aware); the rail simply gains day headings for multi-day types. Retitle per type: "Programme" → "Itinerary" (travel) → "Match schedule" (tournament). |
-| **№ 06 The gallery** | Universal. Photos of a christening are as precious as of a wedding. All gallery privacy rules carry over unchanged. |
-| **№ 07 The reply card** | Universal. RSVP is enabled for every type; the reply-card treatment (deckled stock, letterpress, the keepsake ticket after answering) is an occasion-neutral delight. The word "RSVP" itself is universal in PH usage. The keepsake's stamp wording is caught by the two *already-pending* owner decisions on RSVP wording — fold this in there, don't decide twice. |
-| Countdown · venue map · dress code · what to bring · special message · our photos | Universal as-is. Dress code earns its keep at galas and debuts; "What to bring" is the pack list of a trip — same block, host already writes the content. |
+| Stranger & lock copy | "…open the link **the couple** sent you" · "This **wedding's** page is private" · "Only **the couple's** guests…" · "…the personal link **the couple** sent you" (4) |
+| The QR card | "**Wedding-day** photographers will scan it…" (1) |
+| Photos, faces, consent | "The **couple's** photos will appear here" · "face recognition at this **wedding**" · "**couple's** photographers can find your candid shots" · "So the **couple** recognizes you…" · "…after the **wedding**" · "so the **couple** and their team can recognise me" · "…so the **couple** and their…" (selfie ask) · "the **couple** is tagged for you automatically" · "photo guidance closer to the **wedding**" · "The **couple** has kept it off phones" (10) |
+| The photo grace window | "These close about a day after the **wedding**" · "The guest view winds down about a day after the **wedding**" (2) |
+| Day-of chrome | "The **wedding** is happening…" · "The **wedding** wrapped up… as the **couple**…" (2 words) · "these times are the **couple's** plan" · "The **couple** will assign seats closer to the date" (5) |
+| Reply, notes, columns | "A note to the **couple**" · "for the **couple's** paper" ·  "the **couple** reads and approves every column" · "Your column is with the **couple** for review" · "The **couple** returned your column" · "Your words for the **couple's** paper…" · "…until the **couple** approves them" · "approved by the **couple**" (8) |
+| Greetings & gifts doors | "Leave the **couple** a video greeting" · "The **couple** will…" · "on its way to the **couple**" · "straight to the **couple**" (4) |
+| +1 & account | "…which the **couple** hasn't enabled for +1s on this **wedding**" (2 words) · "for this **wedding**, you're invited as their +1" · "shoot candids for the **couple**" (4) |
+| Dress code | "…the **wedding**." (1) |
+| The recap takeover (renders on this page after the day) | headline formula "…**Are Married**" · "From the **Couple**" · "This **wedding's** story isn't available yet" · "The **Wedding** Day (Live)" (×2) · picture labels "from the **wedding**" (×2) · "Captured by the **couple's** vendors" · "columns from the guests, approved by the **couple**" · sign-off "your **wedding**, handled" (10) |
 
-**Wedding-only, and what stands in their place — never a new feature:**
+Note on "…Are Married": the *formula* is bucket 2 (a graduation's headline is "…Graduates"), but the wedding's own instance keeps its exact words — re-wording it FOR WEDDINGS would violate the owner's ruling from the other side.
 
-| Wedding piece | For other types |
+**The sub-rooms (~15 reads):**
+
+| Room | The phrases (reads) |
 |---|---|
-| **№ 02 "Our love story"** | The chapter survives — it is host-written prose with a drop cap and a pull quote, which is universal. Only its **title** is wedding-branded. Per-type titles: "The story so far" (birthday/anniversary) · "The road to this day" (graduation) · "Welcome, little one" (christening) · "Why this trip" (travel) · corporate/tournament default the chapter to hidden (hosts can already hide any block). The prose the host writes needs no migration — the label is the whole delta. |
-| **The Save-the-Date film + cinematic reveal** | Stay wedding-only, **on purpose** — this is an existing deliberate lock, recorded in the profile spine: the reveal is a wedding-signature product and the monogram is couple-initials-shaped. A non-wedding's earliest phase simply falls straight to the invitation phase. **Do not unlock these as part of the universal pass.** |
-| **The monogram** | Same deliberate lock. The masthead's mark slot stays empty (§A invariant 7). |
-| **"Bride's side / Groom's side"** | The greeting prints a side for every guest. When the type has no two principals, the side line must simply not print — the role line ("You're joining us as Ninang") stands alone. This is a degrade, not a new feature. |
-| **The Tsinoy tea-ceremony card** | Already conditional on the ceremony — correctly gated today, nothing to do. |
-| **~70 stray phrases** ("the couple sent you", "Wedding-day photographers will scan it", "a day after the wedding", "this wedding") | The mechanical sweep: each phrase takes the type's own words — organizer noun ("the couple" → "the celebrant's family" / "the organizers") and event word ("the wedding" → "the graduation" / "the trip"). Both words already exist in the database for all sixteen types; the guest page just never asks. This is the largest-surface, lowest-risk package in the plan. |
+| Live hub (4) | "The **couple** will assign seats closer to the day" · "straight to the **couple**" · "The **couple** hasn't published the program yet" · "lands in the **couple's** gallery" |
+| Seat (3) | "Once the **couple** posts the seating…" · "The **couple** is still arranging the venue layout" · "Once the **couple** seats…" |
+| Gifts (2–3) | "Pin your cash on the **couple**" · the fallback name "the **couple**" (used twice when the event has no display name) |
+| Find-my-table (2) | "The **couple** is still arranging the venue layout" · "Once the **couple** seats…" |
+| Find-seat (2) | "The **couple** hasn't published the seating plan" · "as the **couple** would have listed it" |
+| Print (3 of its 4) | headline "…**Are Married**" · picture label "from the **wedding**" · "From the **Couple**" (the 4th is the bucket-1 song credit) |
+| Recap page shell (1–2) | "hasn't published their **wedding** recap" (+ the page's browser-tab description) |
+| Welcome (1) | "…on your invitation, in the **couple's** guest list…" |
+| Venue 3D · invite | 0 — clean. |
 
-**What a graduation gets, end to end:** masthead with the graduate's name · details plates · "The road to this day" · programme rail · dress code if the host wants it · reply card → keepsake ticket ("Nº 042 · one seat, reserved") · on the day: camera, live wall, photos-of-you · after: the recap and "You were there". Every one of those is shipped today; it just says "wedding" in eleven places while doing it.
-
-**What a trip gets:** masthead with the title grammar and a date *range* · the itinerary as the programme chapter with day headings · "What to bring" as the pack list · seats are called "seats" (the word is already in the type's profile) · the reply card is the "I'm coming" confirmation. The 3D venue room and money-gift door won't apply and — because every door is already gated on what its destination would actually show — they simply never draw. No work needed to hide them; the honesty rules do it.
-
----
-
-## C · "Everything in this event" — the contents page
-
-### The problem, sized honestly
-
-Under one event live **fifteen distinct addresses** (counted in Appendix A: the page itself, the Live hub, the 3D room, the money gift, find-your-seat, find-my-table, the seat pass, the recap, the printable, the join page, the welcome page, plus the camera surfaces and three action doors). The bottom bar holds **at most five** of seven possible slots, and the five-slot cap is owner-locked with recorded reasoning. Two doors are cards at the page's foot. The rest are reachable only from context-specific moments or not at all from this page.
-
-### The proposal on the table: a sheet behind the last slot — argued, then amended
-
-**For a sheet:** it is the right *container*. It adds no sixth tab (the locked shape survives), it scales to fifteen entries where a bar never can, it is one tap, and the product already owns the precedent — the Live hub's own bottom menu shows five pills and folds the rest behind a "More" sheet. A guest who has seen the Live hub has already learned this gesture.
-
-**Against hanging it behind the *last slot*:** the last slot is **Me** — the guest's own name, QR, seat and RSVP. That is the single highest-frequency personal object on the day (photographers scan it; the door staff read it) and the one personalization no competitor has. Burying a directory under it, or replacing it, demotes identity to make room for a menu. Worse: the last slot already changes meaning by who is holding the phone (Me / Manage / Join / a supplier's kit) — overloading it means the directory lives somewhere different for every viewer, which teaches people the bar is unreliable, the exact failure the navigation rules exist to prevent.
-
-### The recommendation: the magazine already has the answer — a contents page
-
-The Event Hub is styled as a commissioned magazine issue. **A magazine has a table of contents, and it sits right after the cover.** So:
-
-**"In this celebration" — a quiet typographic index, mounted directly below the masthead's cover plate**, inside chapter № 01 (chapter numbers do not shift). Not a stack of cards — a *printed contents page* in the existing editorial grammar: a two-column list of short entries, mono labels, gold leaders, hairline rules. Visually it costs almost nothing; functionally it is the one place every part of the event can be reached. Tapping "Home" on the bar from anywhere returns to the top, where the contents is — so the whole event is always two taps away without touching the bar's shape.
-
-It is mounted **once, above the identity fork** (like the existing doorway strip), so the invited cousin and the cookie-less relative abroad read the same index, differing only in personalization.
-
-**It absorbs the existing foot-of-page doorway strip.** That strip (3D room · money gift · streaming notice) is already a proto-directory; keeping both means two lists that will drift. The streaming notice keeps its special no-link treatment inside the contents (see below). *Marked `OWNER_DECISION` (small): retire the foot strip into the contents page — recommended yes, one directory only.*
-
-### What it lists, in what order
-
-The entries are grouped by what a guest is *doing*, and the groups re-order by the event's moment — the same three moments the bar already knows:
-
-**Before the day** —
-1. *The invitation*: Details · The story · Reply (or "Your reply — sent ✓") · Dress code · What to bring
-2. *Getting there*: Venue & map · Walk the room in 3D · Find your seat
-3. *Yours*: My QR · My seat pass · Keep this on your phone
-4. *Coming up*: Camera (listed locked: "opens on the day") · "This celebration will be streamed live — the player appears on this page" (a sentence, never a link)
-
-**On the day** — *Happening now* leads: Live hub · Watch · Camera · Live wall · My table — then *Gifts & greetings* (Send a blessing · Leave a 5-second greeting), then the rest.
-
-**After** — *The day, kept* leads: The recap · Gallery · Photos of you · Keep them forever — then thanks.
-
-### The rules every row obeys (all existing rules, applied one layer out)
-
-1. **A row is drawn only if the page behind it would let *this viewer* in.** The two shipped doorway cards already obey this ("a door must never be drawn by a rule laxer than the one at the other end of it"); the contents inherits it row by row.
-2. **Features may be listed locked, with a spoken reason. Content is never listed when withheld.** The camera appears padlocked with "The host has not opened the camera" — because a camera is a promise of the invitation. A gallery with nothing public, an unset money-gift page, a fenced broadcast **do not appear at all** — a greyed row would announce that photographs exist and are being withheld, the exact disclosure the owner's rule forbids. The asymmetry is the shipped one: *announce features, hide content.*
-3. **A closed-but-announced row says when it opens, in words** ("opens on the day" · "photos arrive here during the celebration") — the same reasons the bar's padlocks already speak aloud when tapped.
-4. **One brain, two mouths.** The contents must be resolved by the *same* rules engine that resolves the bottom bar — the bar shows the five most important doors for this viewer at this moment; the contents page is the whole index from the same resolution. Built that way, the two can never disagree; built as a second list, they will.
+**One encouraging discovery inside the recap:** it already contains a tiny hand-made version of this fix — one line that says *"if this event is not a wedding, say 'event' instead of 'wedding'"*. It proves the need was real enough that someone patched it locally — and it is a third, hand-typed vocabulary that §C's mechanism must absorb, because hand-typed word lists drifting from the managed one is a disease this project has already named.
 
 ---
 
-## D · Per-type art direction
+## C · WHAT THE VOCABULARY MECHANISM CAN AND CANNOT DO
 
-### What ships
+Both mechanisms named in the retask exist and are populated for all sixteen types. They are different organs, and neither can do the one thing this plan most needs.
 
-Two art directions exist: **Daylight** (the default — every event today) and **Candlelight** (a warm-dark direction the host opts into; it is one switch that re-derives every colour through the same pipeline, and it sits on the Pro side of the flourish map). The host's mood-board palette already makes every site chromatically unique, wedding or not.
+**1 · The roster (`event_type_vocab`) — "which kinds of event exist."** Admin-managed, grows with zero deploys (16 kinds today, 9 before mid-June). Carries each kind's key, label, emoji, ordering and enabled flags. **This is the one the marketplace reads**: the browse page's kind-of-event filter validates against this live table and applies it to supplier profiles, and the search module's own docblock warns that any hardcoded second list would drift from it. It knows nothing about wording inside an event and nothing about blocks.
 
-### The question: does a birthday or a corporate gala get its own direction?
+**2 · The wording spine (`event_type_profiles.terminology`) — "what this kind calls things."** Organizer noun, the two principals (or none), seat word, event word, VIP-tier label — populated for all sixteen. Its readers today are the dashboard and onboarding side: the create flow, Setnayan AI, Pakanta, the Papic studio, the admin profile editor. **Zero readers anywhere in the guest tree.** Every bucket-2 word in §B should come from here; the plumbing that loads the profile already reaches the guest page (it is consulted for two other questions), so threading the words is genuinely small.
 
-**Recommendation: NO new art directions. The event type sets *defaults*; the host's mood board sets the *look*.** — marked `OWNER_DECISION`, with this recommendation:
+**3 · What NEITHER can do — and it must be named: per-block gating does not exist.** Measured three ways:
 
-1. **The product's pitch is "commissioned, not themed."** A per-type skin *is* a theme — sixteen of them would rebuild exactly the template feel the editorial design was created to kill. The right variation axes already exist and are per-*host*: their palette, their photos, their words, and one deliberate mood switch.
-2. **Every direction is a bill.** Candlelight needed its own careful pass to keep text readable in the dark (and this project has learned repeatedly that a tinted surface must be measured in both directions). Sixteen type-skins means sixteen of those bills, forever.
-3. **What the type may rightly do is suggest.** In the site editor, an evening-shaped type (gala · debut · anniversary dinner) pre-suggests Candlelight with one line of copy ("Evening event? Candlelight suits it"); the default remains Daylight for every type, and the choice remains the host's. Driven by the event type *only as a suggestion*, by the mood board for everything real.
-4. **If a third direction is ever wanted** (say, a brighter festival direction for children's parties), add it as a *host choice available to all types*, keeping the set bounded (three at most) — never as a type-locked skin.
+- The profile can switch off nine **whole surfaces** (website, save-the-date, RSVP, seating, budget, schedule, monogram, day-of, gallery). The guest page consults exactly **two** of them: "may this event have a page at all" and "does this kind seat people". The other seven answers are recorded and never read.
+- Every event of every type is seeded with **all 16 content blocks**, type-blind, and the resolver that decides what renders never reads the event type at all.
+- The only per-block, per-kind gates in the entire guest tree are **hand-written specials**: the tea-ceremony card's Chinese-wedding check, and the recap's one-line wedding/event word patch.
 
----
+**Two live consequences, one of them the plan's sharpest finding:** the profile deliberately locks the Save-the-Date and monogram surfaces OFF for non-weddings — and because the guest page never asks, **a non-wedding created more than ~3 months out would render the wedding Save-the-Date machinery anyway** (it is driven purely by the calendar), and a type with no monogram gets a wedding-style lettered medallion as the hero mark (the fallback derives initials from the event's name).
 
-## E · What must NOT change — the shipped decisions this work lives inside
-
-Each of these was found in the code or the design record with its reason attached. The build session must treat every one as a wall.
-
-1. **The five-slot bottom bar, and its resolver.** Owner-locked shape; all slot rules live in one tested rules engine, and the recorded reasoning says a sixth tab "is not a small addition — it is a redesign of an owner-locked shape." The contents page (§C) exists precisely so this never has to move.
-2. **Announce features, hide content.** A locked camera is drawn with its reason; a gallery with nothing public is *not drawn*, because a greyed one would reveal withheld photographs. This asymmetry is the subtlest owner ruling in the tree and §C deliberately extends it rather than touching it.
-3. **The couple's camera is unconditional; everyone else's is the host's switch** — and when closed it locks visibly, never vanishes.
-4. **Watch never displaces the Gallery** — on the day a guest needs both; the broadcast earns its own slot.
-5. **The doorway cards never draw locked**, and every door is gated on what the destination itself demands — an invisible page is better than a visible dead end.
-6. **The streaming notice carries no link** before the day — a saved URL cannot be known to be open, so the only promise made is about the page the reader already has.
-7. **The Pahina reskin decisions**: the typographic masthead with the photo demoted to a cover plate; motion that fails *visible* (a broken script leaves a fully readable page); the functional-colour exile (no app-green/warn-yellow on an event page — verified still clean); numbered chapters for the magazine, starred plates for the guest's personal layer.
-8. **The guest tree is owner-excluded from the app-wide Atelier reskin** and keeps its own editorial faces. Corollary: the five owner-approved archetype prototypes of 2026-08-01 are binding for the *app's* surfaces — porting them into the Event Hub would violate this exclusion. The Event Hub's binding design is the Pahina spec plus the owner's own 5-Tab prototype.
-9. **Chrome is a clone.** The bottom bars are reskinned by palette-token substitution only — no invented camera notch, no geometry changes. (The shipped bar is icon-above-label by a *later* owner design round that superseded the text-only spec; do not regress it either way.)
-10. **Reskin, never drop.** The full element inventory is the acceptance checklist; a port that loses a control is a defect. The RSVPed keepsake keeps its quiet "Need to change your reply?" disclosure until the owner rules otherwise.
-11. **The two pending RSVP owner decisions stay pending** (the option wording; whether the ask disappears entirely after replying). §B folds the keepsake-stamp wording into them; nothing here pre-empts them.
-12. **The Save-the-Date film, cinematic reveal and monogram stay wedding-only** — a recorded deliberate lock, not an oversight for this pass to "fix".
-13. **The Event Hub vocabulary is owner-locked** (Event Hub = the one lifelong address · Live hub = the fullscreen page inside it, chip visible only while live/post · Event Hub Pro = the paid upgrade). This document uses those words and reopens nothing.
-14. **The palette is locked** (cream `#FDFBF7` · ink `#2C2A29` · action terracotta `#C24E25` · link `#3B4E67`), **gold `#A9834B` is decorative only — never body copy or a text link** (3.37:1 on cream), and the gold/terracotta name-swap trap in the code is real: the builder must check any tinted block in both light and Candlelight.
-15. **The sample event keeps the menu always-on; real events keep byte-stable pages under the off flags.** Any new mount (the contents page) must respect the same gating discipline so flag-off DOM stays untouched.
+**So the largest single piece of engineering in this plan is the per-block gate**, and the owner should hear it named: one table — each block, and which facts about the event's kind it requires (has two principals · is a wedding · has the ceremony · seats people) — consulted at the one point both the stranger's and the guest's page already share. The repo already contains this exact table shape twice (the block-by-lifecycle-phase matrix and the block-spotlight matrix, both built so that forgetting an entry is a build error rather than a silent leak), so it is a known pattern, not an invention. Registering the Save-the-Date film, the monogram fallback, the side labels, the love story and the song credit in it closes today's leaks — and makes the *next* wedding-dedicated feature a one-row addition instead of a scattered conditional. The grid in §A is, mechanically, this table plus the room list.
 
 ---
 
-## F · Corrections to the brief (I verified rather than agreed)
+## D · WHAT NOT TO CHANGE — with the reason each decision exists
 
-1. **"16 host-toggled blocks"** → measured: 16 block *types*, of which 4 are always-on and **12 are host-toggled**. The "24 automatic blocks" figure is the right order of magnitude (I count ~24–28 depending on what counts as a block).
-2. **"The guest page reads NONE of the vocabulary; it asks only 'may this event have a page at all?'"** → almost right, refined: terminology is indeed never read anywhere in the guest tree, but the page asks the type profile **two** questions, not one — the website question *and* the seating question (which gates the 3D-room door), and the website answer also switches the lifecycle-phase engine on. The design above relies on this: the plumbing to the profile already reaches the page; only the words don't.
-3. **The single-line name fallback (brief claim 5) is true but fragile** — the two-line split is triggered by the characters "&"/"and" in the name, so a *titled* event containing them would be wrongly stacked with a wedding joiner. §A moves the trigger to the type. This is the one place the brief under-stated the work.
-4. **"15 addresses"** → confirmed at 15 by my count (11 guest-reachable pages + 3 action doors + the seat-claim step); the exact roster is in Appendix A.
-5. **"christening → 'godparents'"** → in the seeded vocabulary, "Godparents" is the *VIP-tier label* for christenings; the organizer noun is "host". Minor, but the builder should not look for a "godparents" organizer noun.
-6. **The 16-type vocabulary "in the production database"** → verified in the seed migrations in the repo (all sixteen types carry full terminology). I did not query prod directly this session; migrations auto-apply on this project, but the builder should confirm by the object per house rule.
-7. The block registry's own docblock still says "12 canonical widget types" above a 16-entry list — a stale comment worth one line in the build PR, not a design matter.
+0. **The wedding is never flattened.** Bucket-1 parts keep their wedding words and forms untouched; the sort hides them elsewhere, it never rewrites them. (Owner, 2026-08-17.)
+1. **The five-slot bottom bar and its rules engine.** Owner-locked shape; the recorded reasoning calls a sixth tab "a redesign of an owner-locked shape," and every slot rule lives in one tested place so the next person changes a decision, not a layout.
+2. **Announce features, hide content.** A locked camera is drawn with its reason (a camera is a promise of the invitation); a gallery with nothing public is not drawn at all (a greyed one would reveal that photos exist and are being withheld). The grid's "—" cells follow the same logic: absent, never greyed.
+3. **The couple's camera is unconditional; everyone else's is the host's switch** — closed means visibly locked with a spoken reason, never missing.
+4. **Watch never displaces the Gallery** — on the day a guest needs both.
+5. **Doors are gated on what the destination itself demands** — the recorded rule that an invisible page beats a visible dead end; every grid ✓ still sits behind it.
+6. **The streaming notice carries no link before the day** — a link saved weeks ahead cannot be known to be open; the only safe promise is about the page the reader already has.
+7. **The Pahina editorial decisions** — the typographic masthead with the photo demoted to a cover plate; motion that fails visible; the functional-colour exile (re-verified clean this session); numbered chapters for the magazine, starred plates for the guest's personal layer.
+8. **The guest tree stays excluded from the app-wide Atelier reskin** (owner exclusion, 2026-07-12) — and the type-scope wrapper that implements it is *all* the rooms share, so it must survive untouched.
+9. **Chrome is a clone** — the bars reskin by palette-token substitution only; the icon-above-label bar is a later owner ruling than the older text-tab spec, so neither direction may be "corrected".
+10. **Reskin, never drop** — the full element inventory is the acceptance checklist; the RSVPed keepsake keeps its "Need to change your reply?" disclosure until the owner rules.
+11. **The two pending RSVP owner decisions stay pending** (option wording; whether the ask disappears after replying). The keepsake and "Are Married"-formula wording of §B fold into them — decide once.
+12. **The Save-the-Date film, reveal and monogram stay wedding-dedicated** — the recorded deliberate lock. §C *enforces* it (closing the leak); nothing here reopens it.
+13. **The Event Hub vocabulary lock** (Event Hub · Live hub · Event Hub Pro) — used, never reopened.
+14. **The palette lock** — cream `#FDFBF7` · ink `#2C2A29` · action terracotta `#C24E25` · link `#3B4E67`; **gold `#A9834B` decorative only, never body copy or a link** (3.37:1 on cream); the repo's gold/terracotta slot-name swap is real, and any new tinted element is measured in both the light and Candlelight faces.
+15. **One vocabulary, never three.** The admin-managed roster is the only list of kinds; the profile's terminology is the only source of words. The recap's hand-typed patch (§B) gets absorbed, and no new hand-typed word list may be born — a second vocabulary drifting from the managed one is a disease this project has already paid for.
 
 ---
 
-## Appendix A — evidence: files, lines, and the verified claims
+## Appendix A — evidence (paths in the read-only worktree `/tmp/wt-hub/apps/web/`)
 
-*(Code paths are in the read-only worktree `/tmp/wt-hub/apps/web/`; corpus paths under `~/Documents/Claude/Projects/Setnayan/`.)*
+**§1 corrections:**
+- 16 types, no funeral/baptism: `lib/papic-event-access.ts:36` ("All 16 rows of `public.event_type_vocab` are status='active'"); seeds `supabase/migrations/20261205000000_event_type_vocab_dynamic.sql` + `20261229000000_event_type_vocab_add_gala_night.sql` + `20270731100000_seed_remaining_event_type_profiles.sql`; grep for `funeral|baptism` across `lib/`, `app/`, and all vocab migrations: zero hits. gala_night/date/hangout existence: `lib/event-type-coverage.test.ts:10-14`, `lib/event-type-search.test.ts:43`.
+- Layout not a shell: `app/[slug]/layout.tsx` (entire file — `display: contents`, docblock "Purely a CSS-variable scope — zero behavior"). Hand-copied chrome: `app/[slug]/find-seat/page.tsx:119` ("mirrors find-my-table's").
+- Navigation: `SiteMenuBar` imported only by `app/[slug]/_components/site-body.tsx` (repo-wide grep, 2 hits incl. its own file). Sub-room links: `recap/page.tsx:124`, `venue/page.tsx:186,202,215`, `pabuya/page.tsx:107`, `find-seat/page.tsx:107,136`, `find-my-table/page.tsx:174,224` — all `/${slug}` only; `welcome/`, `invite/`, `print/page.tsx` — no outbound `href` hits.
 
-**The masthead (§A):**
-- `app/[slug]/_components/pahina-masthead.tsx:21-38` — `splitCoupleNames` splits on `&` / `and` regexes; single-line fallback at line 37. The sniffing defect.
-- Same file, lines 79-99 — stacked names, italic gild joiner (0.42em), rule, gild date `formatEventDate`; lines 103-142 — the cover plate with the load-bearing aspect-ratio note. Lines 44, 54-56 — `eyebrow` defaults to "You are invited"; **none of the four call sites passes it** (`site-body.tsx:758, 781, 1167, 1184` — the brief's "four hero call-sites" claim verified at those lines).
-- `lib/event-type-profile.ts:36-43` — `ProfileTerminology` (organizerNoun · personA/B · seatWord · eventWord · vipTierLabel); `WEDDING_PROFILE` 94-117; `GENERIC_PROFILE` 130-161 with the deliberate STD/monogram lock explained at 119-129; `TRAVEL_PROFILE` 219-233 (`seatWord:'seat'`, `eventWord:'trip'`, `multiDay:true`). `multiDay`/`event_end_date` note at 67-70.
-- Seeded vocabulary: `supabase/migrations/20270221005058_seed_nonwedding_event_type_profiles.sql` + `20270731100000_seed_remaining_event_type_profiles.sql` (celebrant/graduate/organizer rows; christening `vip_tier_label:"Godparents"`).
+**§B word map (guest-visible lines; the counter-corrected rooms first):**
+- Live hub = 4: `app/[slug]/hub/page.tsx:602, 663, 691, 739`. Welcome = 1: `welcome/page.tsx:121`. Seat = 3: `seat/page.tsx:309, 346, 403`. Find-seat = 2: `find-seat/page.tsx:101` + `find-seat/_components/name-search.tsx:112`. Find-my-table = 2: `find-my-table/page.tsx:120, 167`. Gifts: `pabuya/page.tsx:101, 125, 134`. Print: `print/page.tsx:132`, `print/print-sheet.tsx:191, 357, 371`. Recap shell: `recap/page.tsx:120` (+ the `recapNoun` hand patch at `recap/page.tsx:65`).
+- Event page, bucket 1: sides `site-body.tsx:1019-1020`; tea card `tea-ceremony-card.tsx:26` (gate `site-body.tsx:1261`); STD film `save-the-date-film.tsx:506`; calendar `save-the-date.tsx:123-127` (`buildWeddingIcs`, uid `wedding-…`); song credit `editorial/editorial-content.tsx:1064, 1074` + `print/print-sheet.tsx:371`.
+- Event page, bucket 2 (sample of the 54): `site-body.tsx:819, 1367, 1447, 1548, 1699-1700`; `rsvp-widget.tsx:151`; `guest-column-card.tsx:134-135`; `guest-column-form.tsx:123, 159, 203, 217, 275`; `pabati-prompt.tsx:252, 294, 334`; `guest-doorway-strip.tsx:81`; `empty-states.tsx:25`; `face-data-notice.tsx:20-21`; `selfie-capture.tsx:412-413, 481`; `day-of-face-enroll.tsx:100`; `your-photos-widget.tsx:41`; `photo-moments-widget.tsx:59`; `live-wall-block.tsx:168`; `day-of-banner.tsx:20, 38`; `schedule-widget.tsx:193`; `guest-hub-card.tsx:331`; `dress-code-widget.tsx:124`; `tier-comparison-widget.tsx:17, 84`; `private-landing.tsx:76, 79, 85`; recap takeover `editorial/editorial-content.tsx:93, 402, 482, 516, 570, 635, 644, 909, 1125, 1490`.
+- Methodology: grep of `wedding|couple|bride|groom|newlywed|married` (case-insensitive) across `app/[slug]/**/*.tsx`, comment lines excluded, then hand-filtered to rendered strings and aria/alt labels. Raw candidate lines 149; guest-read ~79. Bucket 3 empty among read words — the sample/demo material is DB rows and comments, not rendered strings.
 
-**Profile reads by the guest tree (§F.2):** `app/[slug]/page.tsx:139, 248-249` (website surface → else vendor page), `page.tsx:552` (`phasesEnabled = isWebsitePhasesEnabled() || surfaceEnabled(profile,'website')`), `app/[slug]/_lib/loaders.ts:946-948` (seating surface → `public_venue_scene` doorway fact). `grep` of the tree finds no read of `profile.terminology` anywhere under `app/[slug]/`.
+**§C mechanism:**
+- Roster: table + reader `lib/event-types-db.ts:5, 67-71` (`getEventTypeVocab`, public read / admin write); the marketplace consumes it — `lib/event-type-search.ts:1-50` docblock (filter `?event_type=` validated against live vocab, applied `event_types @> [key]` on vendor_profiles; "a hardcoded list here would be a SECOND vocabulary"). Admin writes `lib/event-types-mutations.ts`.
+- Wording spine: `lib/event-type-profile.ts:36-43` (shape), seeds `supabase/migrations/20270221005058` + `20270731100000`. Readers (all dashboard/onboarding side): `app/onboarding/[type]/page.tsx:107-122`, `app/dashboard/[eventId]/studio/setnayan-ai/page.tsx:93-97`, `studio/pakanta/page.tsx:122`, `studio/papic/page.tsx:317`, `lib/setnayan-ai-notify.ts:165-166`, `lib/onboarding/services-step-server.ts:93`, `app/admin/event-types/[eventType]/profile/page.tsx:90`. Guest-tree readers of `.terminology`: none (repo grep).
+- Surface gating consulted by the guest tree: `app/[slug]/page.tsx:139, 248-249` (`'website'`), `app/[slug]/_lib/loaders.ts:946-948` (`'seating'`); the nine-surface list `lib/event-type-profile.ts:25-34, 81-91`.
+- Per-block gating absent: type-blind 16-block seed `supabase/migrations/20260607030000_invitation_widgets.sql:227-287` + `20270919679722`; `lib/site-body-plan.ts` — zero profile/event_type reads (grep count 0). Hand-written specials: `site-body.tsx:1261` (tea), `recap/page.tsx:65` (recapNoun ternary).
+- The leak: `page.tsx:635` (`stdFilm = search.film !== '0'` — no type gate); STD body branch selected by the date-driven lifecycle (`lib/invitation-widgets.ts:428-454`) inside the type-blind plan; profile's OFF answers (`event-type-profile.ts:119-129`) read nowhere in the tree. Monogram fallback: `resolveMonogram` from event columns (`site-body.tsx:216-224`) mounted in every hero.
+- The precedent table shape: `lib/invitation-widgets.ts:364-381` (`WIDGET_PHASES`) and `487-506` (`WIDGET_SPOTLIGHT`) — compile-time-exhaustive `Record<WidgetType, …>`.
 
-**The chapter grammar (§B):**
-- `lib/invitation-widgets.ts:34-51` — the 16 `WIDGET_TYPES` (docblock at 26-33 stale, says 12); always-on = hero/greeting/qr_card/rsvp (catalog `is_always_on`, lines 84-197). Phase matrix `WIDGET_PHASES` 364-381; open-browse engine 456-660.
-- Chapter numbering + ✦-vs-№ rule: `Design_Premium_Guest_Site_2026-07-25/BUILD_RESUME_2026-07-26.md:80-81`; spec §7 map in `Premium_Guest_Site_Design_Spec_2026-07-25.md:87-102`; the five-timeline matrix §11/§11a (the reskin-never-drop inventory, lines 163-201).
-- Wedding copy printed to guests, sample: `site-body.tsx:818-820` ("the couple sent you"), `1015-1020` (Bride's/Groom's side — unconditional), `1548-1551` ("Wedding-day photographers"), `1367-1368` & `1447-1449` ("a day after the wedding"), `1699-1700` ("this wedding"). ~70-phrase figure from the brief; I verified the pattern, not the exact count.
-- STD/monogram wedding-only lock: `lib/event-type-profile.ts:119-129`. Tea ceremony gate: `site-body.tsx:1261` (`isChineseWedding`).
-- Travel itinerary machinery exists: `lib/event-type-profile.ts:211-218` (references `lib/schedule-travel.ts`).
-
-**Navigation + the contents page (§C):**
-- `app/[slug]/_lib/site-nav.ts:1-52` — the five-slot rulings (owner 2026-08-03), naming lock; `110` — the 7 `NavSlotKey`s; `169-172` — "at most five"; `31-35` — announce-features-hide-content; `295-341` — why the 3D room + money gift are cards, never tabs, and never locked; `438-524` — the no-link broadcast notice; `329-335` — the door-gated-on-destination rule.
-- `app/[slug]/_components/site-menu-bar.tsx:63-117` — locked slots spoken aloud on tap; owner icon+label ruling in the docblock (10-35).
-- `app/[slug]/_components/guest-doorway-strip.tsx` — the proto-directory this plan absorbs; mount + foot-of-page reasoning `site-body.tsx:1848-1881`.
-- More-sheet precedent: `app/[slug]/_components/hub/hub-shell.tsx:82-92, 133-135` (`MAX_PRIMARY = 5` + overflow sheet).
-- The 15 addresses: pages `app/[slug]/{,find-my-table,find-seat,hub,invite,pabuya,print,recap,seat,venue,welcome}/page.tsx` (11) + route handlers `live-wall/route.ts`, `redeem/route.ts`, `sign-out/route.ts` (3) + `seat/claim/` (1). Camera surfaces live outside the tree (`/papic/guest`, `/papic/me/[token]`) and are reached via resolver destinations (`site-body.tsx:982-986, 1772-1780`).
-- One-brain-two-mouths precedent: both trees already call `resolveSiteNav` (`site-body.tsx:974, 1762`) — the contents page should be a second consumer of the same resolution.
-
-**Art direction (§D):** `app/globals.css:2746-2778` — Candlelight is a var-block override through the one palette pipe, opt-in via `data-art`; `app/[slug]/_components/invitation-shell.tsx:34, 74, 84` — the `'daylight' | 'candlelight'` switch; host-facing control at `app/dashboard/[eventId]/website/colors/actions.ts:76-86` (Pro side per spec §8, `Premium_Guest_Site_Design_Spec_2026-07-25.md:104-118`).
-
-**Guardrails (§E):** owner exclusion of the guest tree — `app/globals.css:2595-2599`; fail-visible motion — `globals.css:2779-2809` + `BUILD_RESUME:24-31`; functional-colour exile complete — `BUILD_RESUME:66-73` (re-ran the grep this session: still clean, one comment line); chrome-is-a-clone + reskin-never-drop — `BUILD_RESUME:106-107`, spec §11b-addendum; two pending RSVP decisions — `BUILD_RESUME:40-48`; gild-never-body-copy — `BUILD_RESUME:69-73` + the palette lock memory; keepsake fork keeps the disclosure — `site-body.tsx:1590-1660`; Live-hub chip live/post only — `site-body.tsx:838-844`.
-
-## Appendix B — the build deltas, keyed to existing extension points
-
-1. **Masthead grammar** — thread the resolved profile (already loaded by the page) into the masthead; split only when `personA`/`personB` exist; per-phase eyebrow template with `eventWord`; date range when `multiDay` + `event_end_date`. No schema change.
-2. **Vocabulary sweep** — replace hard-coded "wedding/couple/bride/groom" strings in the guest tree with `terminology` reads; gate the side label on `personA != null`; per-type chapter-title map (the `templatePackKey` slot in the profile spine is the designed home for it — currently null for non-wedding). No schema change if titles ship as a code map keyed by `templatePackKey`/event type.
-3. **Contents page** — new component in chapter № 01's tail, mounted beside the doorway strip's current mount (above the identity fork); rows resolved by extending the site-nav rules module (a `resolveEventContents()` beside `resolveSiteNav`, consuming the same inputs + `DoorwayFacts`); retire `GuestDoorwayStrip` into it (OWNER_DECISION); the broadcast sentence keeps `showBroadcastNotice` semantics.
-4. **Art-direction suggestion** — one line of copy in the website colors editor for evening-shaped types. No new CSS.
-5. **Tests** — the resolver extension lands under the existing site-nav test; flag-off byte-stability goldens must stay green; contrast checks in both Daylight and Candlelight for any new tinted row (mutation-check guard counts per house rules).
+**§D guardrails:** five-slot rulings `app/[slug]/_lib/site-nav.ts:1-52, 169-172`; announce/hide `site-nav.ts:31-35, 337-340`; camera rules `site-nav.ts:14-24, 211-239`; Watch slot `site-nav.ts:37-39, 189-196`; destination-gated doors `site-nav.ts:329-335`; no-link broadcast `site-nav.ts:438-524`; Pahina decisions `Design_Premium_Guest_Site_2026-07-25/BUILD_RESUME_2026-07-26.md:24-31, 66-73, 106-107` + `app/globals.css:2779-2809`; owner exclusion `app/globals.css:2595-2599` + `app/[slug]/layout.tsx`; pending RSVP decisions `BUILD_RESUME:40-48`; keepsake disclosure `site-body.tsx:1590-1660`; STD/monogram lock `lib/event-type-profile.ts:119-129`; palette + two-golds locks per the project's design memory (`project_setnayan_palette_lock_terracotta`, `project_setnayan_two_golds_two_rules`); Live-hub chip live/post only `site-body.tsx:838-844`.

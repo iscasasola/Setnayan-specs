@@ -7,7 +7,18 @@
 >
 > 🛑 **It may run alongside S4 · S8 · S10** — they touch the supplier's day-of screens, the admin
 > console and documents. None of them touches the Event Hub.
-> ⛔ **It must NEVER run beside S11** ("who is in this event") — they share the Hub's body file.
+> ⚠ **CORRECTED 2026-08-17 (evening) — this line said "It must NEVER run beside S11 — they share
+> the Hub's body file." MEASURED: THEY DO NOT.** S11 lives in `app/dashboard/[eventId]/**`; its
+> ONLY Event Hub footprint is the host ribbon's coordinator dead-end (*"Edit this site"*,
+> `app/[slug]/_components/owner-ribbon.tsx:53`), whose model is built in `lib/owner-ribbon.ts` —
+> so S11 can close it **without opening `site-body.tsx` at all**. Downgraded from *never* to
+> *coordinate on one file*. 🔑 **Measure a collision before escalating it.**
+>
+> ✅ **S12 IS DONE.** Its outputs: [`prototypes/event_hub_universal_2026-08-17.html`](prototypes/event_hub_universal_2026-08-17.html)
+> (four events at one design) · [`prototypes/event_hub_three_widths_2026-08-17.html`](prototypes/event_hub_three_widths_2026-08-17.html)
+> (phone · tablet · desktop) · [`EVENT_HUB_UNIVERSAL_DESIGN_2026-08-17.md`](EVENT_HUB_UNIVERSAL_DESIGN_2026-08-17.md).
+> **The builds that follow it are S13–S16** — see
+> [`WHATS_NEXT_EVENT_HUB_BUILDS_2026-08-17.md`](WHATS_NEXT_EVENT_HUB_BUILDS_2026-08-17.md).
 >
 > Companion listing (hand this over too):
 > [`EVENT_HUB_COMPLETE_LISTING_2026-08-17.md`](EVENT_HUB_COMPLETE_LISTING_2026-08-17.md).
