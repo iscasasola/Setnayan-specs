@@ -139,3 +139,43 @@ correct, narrow fix landing on one room of a house nobody has looked at end to e
 → the day → the story afterwards. **A funeral has no RSVP and no gift page; a corporate event has
 no seat plan.** Which rooms simply do not exist for which event types is a product ruling, not an
 engineering one.
+
+
+---
+
+## 8 · TALK FIRST. Nothing is blocking that conversation.
+
+**Owner, 2026-08-17:** *"so we must complete this first? or we can talk about what the event hub
+looks like? i have a session that talks about this"*
+
+**Talk first.** Two measured reasons, not a preference:
+
+1. **The three sessions now running (S4 · S8 · S10) do not touch the Event Hub at all.** S4 is the
+   supplier's day-of screens and the couple's camera crew, S8 is admin, S10 is documents. **The
+   design conversation can happen this minute without waiting for any of them.**
+2. **The one thing that must be settled is a ruling only the owner can give**, and building before
+   it is the expensive order: **a funeral has no RSVP and no gift page; a corporate event has no
+   seat plan.** Which of the 13 rooms exist for which of the 15 event types decides how much of
+   this is even a design problem.
+
+### 📋 HAND THE DESIGN SESSION THESE FIVE THINGS — it will otherwise redraw what ships
+
+1. **This listing.** 13 rooms, 103 wedding-specific words, and the fact that a shared shell
+   ALREADY EXISTS.
+2. ⛔ **The door register is already decided and BINDING** — paper card, terracotta top edge, one
+   terracotta action, the wordmark as the way out. 22 screens wear it as of today. **The Hub
+   inherits it. It does not get a second look.**
+3. ⛔ **The 19 approved archetypes** in `prototypes/archetype_*_2026-08-01.html` are BINDING (owner
+   approved 2026-08-04, no changes requested). **Port, never redraw.** A difference between a
+   drawn screen and its archetype is a defect in the drawing.
+4. ⚠ **`Role_Scoped_Day_Of_DESIGN_2026-08-01.md` — PHASES 1 AND 2 ARE ALREADY BUILT AND MERGED.**
+   The day-of is scoped by ROLE, not by company: one supplier can be stylist *and* emcee at one
+   event and each role has its own run of day. **The Live hub sits inside that decision.** Do not
+   design a day-of view that contradicts it.
+5. ⛔ **The Hub is a PLACE, NOT A CONTROL PANEL** (owner-locked). The host's ribbon on it is
+   read-only; every real control lives in the organiser's dashboard. A design that adds editing to
+   the Hub reverses an owner ruling.
+
+🔑 **AND THE ONE THING THE DESIGN SESSION SHOULD MEASURE BEFORE DRAWING ANYTHING:** how a guest
+currently gets from one of the 13 rooms to another. **I have not measured it.** It is the actual
+gap, and it must not be inferred from this document.
