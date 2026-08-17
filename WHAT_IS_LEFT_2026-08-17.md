@@ -311,8 +311,33 @@ who consents, how long we keep something, what we charge — **the published sit
 truth we keep forgetting to read.** It is the top of our own source-of-truth order and it answered
 this in less time than the investigation that raised it.
 
-⏭ S9's other two stand and are untouched by this: the two settings that claim to be admin-controlled
-and cannot be changed, and the two tables nothing in the plans creates.
+⏭ ~~S9's other two stand.~~ 🛑 **CHECKED AGAIN ON THE OWNER'S INSTRUCTION — ALL THREE DISSOLVE.
+NONE OF THEM IS AN OWNER DECISION.**
+
+**2 · The two "stuck" settings — the site already says what they should be, and one is backwards.**
+- **The supplier radar is NOT "off and stuck off". It is ON in production** (`radar_enabled = true`,
+  and the reader defaults to on when unset). And we **SELL it**: `/vendors` advertises
+  *"Shortlist radar — see how many couples saved you; get a rival-in-your-area demand feed"* and,
+  on Pro, *"Demand Radar — see where demand is building in your market."* So the paid feature works.
+  What is missing is only an **off** switch, which nobody needs today. **Severity was inverted.**
+- **The homepage spotlight strip is off, and off is CORRECT.** `/vendors` lists it as
+  *"Reply-time stats & Spotlight awards **soon** — top performers earn a Spotlight badge plus a
+  homepage feature."* **Our own marketing says it is not live yet.** Being off matches what we
+  publish; switching it on would contradict the page.
+⇒ Neither is a decision. One is a mislabelled severity, one is a feature correctly not launched.
+
+**3 · The two tables nothing creates — OUR OWN MIGRATION NAMES THEM AND SAYS WHY.**
+Computed rather than guessed: exactly **two** of the 384 live tables have no `CREATE TABLE` in any
+of the 1,135 migrations — `event_service_deliveries` and `pioneer_incentive_logs`.
+`20271011873973_reconcile_declared_schema_to_production.sql` calls them, verbatim, *"the two
+prod-only TABLES"* and records that they were **deliberately not back-filled** because declaring
+them "also widens the exposure surface, which would fail the freeze."
+⇒ **Not a mystery and not unexplained — a known, dated, deliberately-deferred item with its reason
+written down.** S9's *"nobody knows what made them"* is the only wrong part.
+
+🔑 **THREE FOR THREE, ALL ANSWERED BY RECORDS WE ALREADY HAD** — twice by the live website, once by
+our own migration. **"Check whether we already answered it" is cheaper than every investigation
+that raised these**, and it is now the first step, not the last.
 
 ---
 

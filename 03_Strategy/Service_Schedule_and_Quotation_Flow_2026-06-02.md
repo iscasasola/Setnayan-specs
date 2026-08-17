@@ -13,7 +13,8 @@ A service appears to a customer **only if it shares a usable date** with them. T
 ## Plain-English glossary
 
 - **Booking request (inquiry)** — the customer shortlists/inquires a service. The vendor gets **Accept / Decline**.
-- **Token** — the vendor **pays a token to Accept** a booking request. Paying the token opens the chat **and reveals both names** (refines the hybrid-anonymity trigger — reveal moves from "first chat reply" → "token paid").
+- ~~**Token** — the vendor **pays a token to Accept** a booking request. Paying the token opens the chat **and reveals both names**.~~
+  🛑 **RETIRED — THE TOKEN CURRENCY NO LONGER EXISTS** (owner 2026-07-21, completed 2026-08-07: *"tokens are already retired"*). Nothing is paid to Accept; **answering is FREE on every tier**, and prod never saw a token bought or spent. ⚠ **This removes the REVEAL TRIGGER this document depends on** — decision 6 below names token-payment as the moment both names appear. That trigger has no replacement written down here. Flagged 2026-08-17; whatever reveals names today is the code, not this file.
 - **Whitelist** — the vendor's list of **accepted-but-not-yet-locked** customers for a date. Pending demand. **Informational — it does NOT block the date.**
 - **Lock request** — the customer commits the deal. The vendor **approves** it (after declining competitors, §T1.4). Approval = the booking is **confirmed** and a slot is **consumed**.
 - **Quotation** — the vendor-issued, versioned, customer-approved pricing instrument for that specific request (§T2).
@@ -29,7 +30,7 @@ A service appears to a customer **only if it shares a usable date** with them. T
 | 3 | **Whoever the vendor approves wins — but the vendor cannot lock anyone while other requests are pending. They must explicitly decline the others first.** | A customer never loses silently. The decline is a deliberate, acknowledged "no," not a passive slot-fill side-effect. Multi-slot vendor: decline everyone beyond who they're taking, then approve. |
 | 4 | **Schedule is the hard gate — a service won't show unless a date is mutual.** | Hide a vendor only when **confirmed-busy on ALL the customer's candidate dates**. An **unfilled calendar = "possibly mutual" → still shows** ("availability to confirm"). The DATE filter is a true hide (not "Expand search"); the *other* hard filters (area · pax · faith · certs) still route to Expand per Vendor_Match §7. |
 | 5 | **Customer requests, vendor approves; they chat first, then the vendor issues a quotation tailored to the specific request.** | Confirms the structured vendor-issued quotation as a V1.x build (owner-approved feature expansion). |
-| 6 | **Reveal happens right after the vendor pays the booking-request token.** | Token payment is the reveal trigger (before any message). Refines hybrid-anonymity ("first chat reply" → "token paid"). |
+| 6 | 🛑 ~~**Reveal happens right after the vendor pays the booking-request token.**~~ **DEAD AS WRITTEN — the token currency was retired (owner 2026-07-21 · completed 2026-08-07).** The trigger this decision names cannot fire, because nothing is paid to Accept any more. The DECISION (reveal at accept, before any message) may still be the intent, but the MECHANISM named here is gone and no replacement is recorded in this file. Flagged 2026-08-17 — read the code for what reveals names today. | Was: token payment as the reveal trigger, refining hybrid-anonymity ("first chat reply" → "token paid"). |
 | 7 | **Setnayan only provides tools to navigate together — it has no means to check payment.** | Vendor↔customer money is **off-platform + untracked-as-truth**. The "payment status" on a service page is what *they* record/observe, not a Setnayan-verified state. Scheduling commitment and payment are **decoupled** (see §3). |
 
 ---
@@ -52,8 +53,27 @@ Multiple customers can be whitelisted for the same date. The whitelist is the ve
 ### T1.2 · Capacity
 `vendor_profiles.daily_booking_capacity` (default 1) = how many weddings the vendor can serve that date. A **Confirmed** booking consumes one slot. Date flips to **Busy** when confirmed bookings reach the limit (surface "1 slot left" while one remains). Slot consumed at vendor-approved-lock — **not** at any payment.
 
-### T1.3 · The 48h pending-lock window (decision 2)
-Customer locks → request is **pending**, vendor is **nudged**, ceiling **48h**. No auto-approve. At 48h unactioned → **auto-expire** (releases back to whitelist; the customer is freed to lock another vendor — never stranded waiting). While pending, the customer's other candidate dates are **not** released.
+### T1.3 · The pending-lock window (decision 2)
+
+> 🛑 **THIS SECTION CONTRADICTED DECISION 2 FOR OVER TWO MONTHS, AND THE BUILD
+> AGREES WITH NEITHER. Flagged 2026-08-17 — NOT resolved here; it is an
+> OWNER_DECISION.** Three different answers exist to one question:
+>
+> | source | the rule |
+> |---|---|
+> | **Decision 2 (owner-locked 2026-06-02)** — the row in the table above | **NO forced expiry.** No auto-approve, no auto-expire; the customer stays a live candidate and may **withdraw anytime**. It is explicitly a *revision away from* the 48h reading. |
+> | **This section, as originally written** | 48h ceiling → **auto-expire**. |
+> | **What actually SHIPPED (PR-H, verified in code 2026-08-17)** | **7 days**, with a nudge to the supplier on **day 5**, then the request closes itself. |
+>
+> 🔑 **The locked decision is the one that outranks this section** — a dated
+> owner lock beats prose further down the same file. The 48h text below is kept
+> only so the drift is visible; **do not implement it.** The live behaviour is
+> the 7-day fuse. Whether that fuse should exist at all is the open question:
+> it overrides an owner lock that said there should be none.
+> ⚠ **Do not "tidy" this by picking one.** The next session to read only the
+> middle of this file is exactly how the 48h number survived this long.
+
+~~Customer locks → request is **pending**, vendor is **nudged**, ceiling **48h**. No auto-approve. At 48h unactioned → **auto-expire** (releases back to whitelist; the customer is freed to lock another vendor — never stranded waiting).~~ While pending, the customer's other candidate dates are **not** released.
 
 ### T1.4 · The decline-the-others-first rule (decision 3 — the strongest new rule)
 **A vendor cannot approve a lock while competing lock-requests are still pending for that slot. They must explicitly decline the non-chosen requests first, then approve the winner.**
