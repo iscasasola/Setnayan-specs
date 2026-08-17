@@ -4,6 +4,24 @@
 **Owns / touches:** cross-cutting — 0006 (vendors), 0019 (chat/inquiry), 0021 (couple dashboard), 0022 (vendor dashboard), 0034 (orders/token), 0028 (email), 0007 (budget tracking).
 **Parent designs:** [Schedule_Matrix_and_Date_Finder_2026-06-02.md](Schedule_Matrix_and_Date_Finder_2026-06-02.md) (availability convergence + capacity + eyeing) · [Vendor_Match_Personalization_2026-06-01.md](Vendor_Match_Personalization_2026-06-01.md) (inquiry → token → reveal · §5b certs · §7b fan-out). This doc makes the **end-to-end engagement lifecycle** concrete and locks the **scheduling-commit** + the **vendor-issued quotation**.
 
+> ### ⚠ READ BEFORE BUILDING FROM THIS FILE — drift audit 2026-08-17
+> The **two-step funnel is intact and correct**: a couple **inquires** (supplier
+> Accepts/Declines), and later **locks** (supplier **approves** → booking
+> confirmed, slot consumed). Both words are real, at different stages, and the
+> live public site uses them consistently. **Do not collapse them into one.**
+> The decline-the-others-first rule (decision 3) is BUILT and live in the
+> database.
+>
+> Three claims in this file are **no longer true of the product**, corrected in
+> place below rather than deleted, so the drift stays visible:
+> 1. **§T1.3's 48h window** — contradicts **decision 2** in this same file (which
+>    says *no forced expiry*) and the build shipped **7 days**. Three answers,
+>    one question. **OWNER_DECISION, open.**
+> 2. **The token** (glossary + decision 6) — the currency was **retired**;
+>    nothing is paid to Accept, so the reveal trigger this file names cannot fire.
+> 3. The lock funnel now ships behind a switch (PR-H). **Flag-off behaviour is
+>    the pre-existing instant booking**, not what this file describes.
+
 ---
 
 ## The one-line idea
