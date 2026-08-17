@@ -54,7 +54,7 @@ To **auto-tag guests in a specific event's photo gallery** (the Papic candid-cap
    - **0.65–0.85** → surface a **suggested tag** for human confirmation,
    - **< 0.65** → the photo **uploads untagged** (still delivered — see § 5).
 4. **Tag → gallery** — the resulting tag routes the photo into the matched guest's tagged-photos view; untagged photos still land in the couple's gallery (untagged-still-delivered guarantee).
-5. **Revocation / expiry** — a guest "Delete my face data" link revokes enrolment within the **next 5-minute refresh cycle**; turning the **Photo Consent** toggle OFF revokes live enrolment and clears any selfie display photo; vectors are otherwise **deleted 3 MONTHS AFTER THE EVENT ENDS** (owner ruling 2026-08-17; same clock as the full-resolution photo floor). ⚠ **CORRECTED 2026-08-17** — this read "deleted at the 5-year retention boundary with the event data", a rule nothing implemented; and once media moved to indefinite retention on 2026-08-02, "with the event data" silently meant NEVER. **Enforcement is not yet built** (production has zero scheduled jobs): today only the revoke link and Photo Consent OFF delete a vector.
+5. **Revocation / expiry** — a guest "Delete my face data" link revokes enrolment within the **next 5-minute refresh cycle**; turning the **Photo Consent** toggle OFF revokes live enrolment and clears any selfie display photo; vectors are otherwise **deleted 3 MONTHS AFTER THE EVENT ENDS** (owner ruling 2026-08-17; same clock as the full-resolution photo floor). ⚠ **CORRECTED 2026-08-17** — this read "deleted at the 5-year retention boundary with the event data", a rule nothing implemented; and once media moved to indefinite retention on 2026-08-02, "with the event data" silently meant NEVER. **Enforcement is not yet built** — no sweep covers face vectors yet. ⚠ Corrected same-day: the platform DOES run ~16 cron-free periodic jobs (several delete automatically); none covers this class: today only the revoke link and Photo Consent OFF delete a vector.
 
 ### 1.4 Data subjects
 
@@ -65,7 +65,7 @@ To **auto-tag guests in a specific event's photo gallery** (the Papic candid-cap
 - **Vector store:** per-event, **encrypted at rest** (policy § 1.4, § 3.2, § 7.1 AES-256). Never reused across events/weddings.
 - **Enrolment / gallery media:** Cloudflare **R2 (Asia-Pacific, APAC)**, signed-URL access only (policy § 3.2).
 - **Matching engine host / location:** `[TO CONFIRM]` — the compute location and any sub-processor for the face-embedding/matching step is not recorded in the policy and must be confirmed (implicates § 10 cross-border analysis if it runs outside SG/PH).
-- **Retention:** face vectors are deleted **3 months after the event ENDS** (owner ruling 2026-08-17). Earlier deletion via the guest "Delete my face data" link or Photo Consent OFF, both of which work today. ⚠ **Enforcement of the 3-month rule is NOT yet built** — no scheduled deletion of any kind runs in production. 🔒 Deleting a vector does **not** remove photo tags (verified in the live schema — no cascade), so guests keep every photo already delivered.
+- **Retention:** face vectors are deleted **3 months after the event ENDS** (owner ruling 2026-08-17). Earlier deletion via the guest "Delete my face data" link or Photo Consent OFF, both of which work today. ⚠ **Enforcement of the 3-month rule is NOT yet built** — no sweep covers face vectors yet. (Corrected same-day: the platform DOES run ~16 cron-free periodic jobs, several of which delete automatically; none covers this class.) 🔒 Deleting a vector does **not** remove photo tags (verified in the live schema — no cascade), so guests keep every photo already delivered.
 - **Database of record for tags/linkage:** Supabase Postgres (Singapore), RLS-gated (policy § 3.1).
 
 ---
@@ -131,7 +131,7 @@ The following controls exist in the shipped design and are load-bearing for the 
 - **Per-event scoping — vectors NEVER reused across events (policy § 1.4)** — the single most important control against function creep and cross-event identification.
 - **Confidence thresholds** — ≥ 0.85 auto-tag · 0.65–0.85 human-confirmed suggestion · < 0.65 untagged.
 - **"Delete my face data" link + ≤ 5-minute revocation cycle**, and Photo Consent OFF revokes live enrolment + clears any selfie display photo.
-- **Deletion 3 months after the event ends** (owner ruling 2026-08-17) — ⚠ **ADOPTED, NOT YET AUTOMATED**: no scheduled deletion runs in production today, so this is a commitment, not a description of current behaviour. Account deletion does cascade to face vectors today (§ 4), and the revoke link works.
+- **Deletion 3 months after the event ends** (owner ruling 2026-08-17) — ⚠ **ADOPTED, NOT YET AUTOMATED**: no sweep covers face vectors yet, so this is a commitment, not a description of current behaviour. (The platform does run ~16 cron-free periodic jobs; none covers this class.) Account deletion does cascade to face vectors today (§ 4), and the revoke link works.
 - **Face-blur for paparazzi opt-outs** — opted-out guests are face-blurred in captures (policy § 6.1).
 - **Encryption at rest** — per-event vector store encrypted (AES-256), signed-URL-only media, RLS-gated linkage tables (policy § 1.4/§ 3.1/§ 3.2/§ 7.1).
 - **NSFW filter always-on** and **couple review window** before public unlock (per Papic constraints).
