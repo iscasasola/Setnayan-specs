@@ -275,6 +275,47 @@ either pull request could have shown it; only reading the live database did.
 
 ---
 
+## 6e · 🛑 "THE WEBSITE ALREADY ANSWERS IT" — and it did. S9's first owner question is VOID.
+
+**Owner, one line:** *"check our website if that has an answer already."* **It does, in full, and
+the code implements it.**
+
+S9 raised as an owner decision: *"Guests' permission for public photos is never recorded anywhere.
+So photos can never reach the public showcase — the feature cannot work as built. Fixing it means
+ruling on whose permission counts: the person in the photo, or the person who took it."*
+
+**Fetched from the LIVE privacy page today, verbatim:**
+
+> *"Guest capture is consent-gated. If you take photos as a guest, a photo only becomes eligible
+> for the couple's public showcase when **two gates** are met: **you opt in at capture time** (off
+> by default, never pre-checked) **and the couple approves it.** You can leave the opt-in off and
+> still have your photos delivered privately to the couple."*
+
+**So the ruling was made and published. It is BOTH, in order: the person who took it, then the
+host.** And every link of that chain exists in shipped code — traced end to end, not inferred:
+
+| the promise | what ships |
+|---|---|
+| off by default, never pre-checked | the capture screen's toggle starts **off** |
+| the guest opts in at capture time | a real checkbox — *"Let the host feature my clips on their event page"* |
+| …which is recorded | posted to the capture route, which writes the guest's consent column |
+| the couple approves it | the couple's approve action writes the second column |
+| only then is it eligible | the public reader filters on that second column |
+
+🔑 **BOTH GATES HAVE WRITERS AND A CONTROL. Nothing here is an owner decision and nothing is
+missing.** The claim was the sixth *gate-with-no-handle* in reverse: **a working mechanism
+reported as absent.**
+
+⚠ **AND THE OWNER FOUND IT WITH ONE SENTENCE, NOT A GREP.** When a question is about a PROMISE —
+who consents, how long we keep something, what we charge — **the published site is a source of
+truth we keep forgetting to read.** It is the top of our own source-of-truth order and it answered
+this in less time than the investigation that raised it.
+
+⏭ S9's other two stand and are untouched by this: the two settings that claim to be admin-controlled
+and cannot be changed, and the two tables nothing in the plans creates.
+
+---
+
 ## 7 · 🆕 FOUND TODAY
 
 🚨 **Your homepage still promises "forever" — in the browser tab, the Google result, and every
