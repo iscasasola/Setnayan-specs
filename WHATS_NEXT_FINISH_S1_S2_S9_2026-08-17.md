@@ -7,6 +7,22 @@
 > read from `origin/main` and the live production database **today** — after their merges — so a
 > fresh session does not re-derive it and does not rebuild it.
 >
+> 🚨 **SPLIT S2-FINISH BEFORE STARTING ANYTHING ELSE — MEASURED 2026-08-17.**
+> Its two halves have wildly different footprints, and the small one is not the blocker:
+>
+> | half | files in scope |
+> |---|---|
+> | sign-up | **3** |
+> | the doubled tab title | **402** — every page file in the app |
+>
+> **The tab-title half is app-wide, exactly like S3, and it is what blocks every other session.**
+> With it in scope, S4 · S5 · S6 · S7 · S8 · S11 ALL collide with S2-FINISH. **Defer it and
+> S3 · S4 · S5 · S6 · S8 · S10 are all free to start immediately.**
+> ⏭ It is the natural thing to defer anyway: **it is already waiting on the owner's wording** for
+> the "keep it forever" line, and those are the same files.
+> 🔑 **A SESSION'S BLAST RADIUS IS NOT ITS IMPORTANCE.** A one-line mechanical change across 402
+> files blocks more work than a careful 860-line rewrite of one.
+>
 > 🛑 **These three touch different trees and may run TWO at a time.** Measured: S1 is the event
 > page, S2 is the account screens, S9 is migrations + the photo tables. **Zero shared files.**
 > The safe pairs are **S1+S2**, **S1+S9**, **S2+S9** — any two, not all three.
