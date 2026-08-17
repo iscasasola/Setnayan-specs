@@ -145,8 +145,14 @@ merely not open yet stays visible with its reason.
 
 # S15 · The wedding-only parts stay home
 
-🔴 **BLOCKED on the owner's grid** — §4 of `event_hub_universal_2026-08-17.html`, 16 types × the
-rooms, recommendation pre-filled, four cells he must call. **Do not guess it.**
+✅ **UNBLOCKED 2026-08-17 — THE GRID IS CLOSED.** Owner: *"yes to all four."* All 16 rows of §4
+in `event_hub_universal_2026-08-17.html` are now decided; zero cells left open. The four he
+called: a **corporate day GETS the 3D room** · a **tournament lists fixtures and does NOT seat
+spectators** · a **wake MAY accept money, with gentler wording** · **funeral and baptism are
+approved as new event types**. Full row in `DECISION_LOG.md` 2026-08-17.
+⚠ **They were answered as a block, not individually — if one reads wrong, it is one word to
+correct. Do not treat any single cell as separately confirmed.**
+🔴 **THE FUNERAL TYPE IS NOT PART OF S15 AND MUST NOT RIDE ALONG — see S17 below.**
 
 **WHAT A PERSON GETS:** a birthday stops being handed a wedding.
 
@@ -193,6 +199,33 @@ Backwards, so `text-terracotta` LOOKS safe and is the unsafe one at **3.37:1 on 
 the 4.5:1 floor. Use `text-mulberry` (4.61) or `text-link` (8.22). Gold on an ICON is fine, never
 on text; it has ~0.29 headroom on cream so ANY tint under it fails — **hover moves the border or
 the shadow, never adds a fill.** Check BOTH themes on every tinted block.
+
+---
+
+---
+
+# S17 · A wake is not a celebration
+
+✅ **Approved 2026-08-17** (owner: *"yes to all four"*). 🛑 **Its own session. Do NOT fold it into
+S15 — it is not a row in a table.**
+
+**WHY IT IS BIGGER THAN IT LOOKS, and this was flagged the hour it was approved:** the other 15
+types are all celebrations and share one voice. The Event Hub says *celebration · party · guests ·
+countdown · photo wall · the digital money dance* throughout. **A countdown to a funeral** is the
+clearest example of a shipped mechanism that is not merely mis-worded but actively wrong. Adding a
+wake is a **tone build across the whole guest tree**, and it lands on a family on the worst week
+of their life — the one audience where getting the voice wrong is unforgivable.
+
+**Scope it as: which parts a wake gets** (grid row already decided: the page · getting there ·
+messages · watch the service · the album · money, gently — **no RSVP, no seating, no camera in the
+middle of the bar, no countdown**) · **then its voice.** The drawn wake in §1 of
+`event_hub_universal_2026-08-17.html` is the reference.
+
+⚖ **BAPTISM IS THE OPPOSITE — cheap, and possibly nothing.** `christening` already covers the
+occasion in practice and already carries the right vocabulary (its VIP tier reads *"Godparents"*).
+So baptism is a **naming and discoverability** question — does a family searching "baptism" find
+"christening"? — not a new voice. **Measure that before building anything.** An add-an-event-type
+checklist already exists in the project notes; the mechanical cost is known and small.
 
 ---
 
