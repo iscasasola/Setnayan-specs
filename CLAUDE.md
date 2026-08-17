@@ -587,6 +587,64 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > a decision down. ⚠ Still unresolved from 2026-08-11: `Pricing.md` says HIDE
 > Live Photo Wall while the SKU is active and publicly listed.
 
+> ### ✅ DONE 2026-08-17: THE DOORS ARE DESIGNED — do NOT rebuild any of it
+> **PR [#4484](https://github.com/iscasasola/setnayan-platform/pull/4484).** Every way *into*
+> Setnayan — the Alaga claim · the supplier claim + its finalize step · the four `/join` steps ·
+> both Papic doors · the Samahan invite — rendered through **SIX different hand-rolled wrappers**,
+> plus a local `Shell()` re-declared independently in **four** files. All ten now render through
+> one `<DoorShell>`.
+>
+> 🔑 **IT IS NOT A NEW DESIGN.** It reproduces the register the app already locked for the one
+> door that WAS designed — the sign-in card (`.sn-signin-terra`, owner 2026-07-18 *"we only want
+> 1 login"*): paper card · 3px terracotta top edge · terracotta eyebrow · ONE terracotta action ·
+> the wordmark as the way out. `JoinShell` had the right idea first and never left `/join` —
+> **three of its own siblings hand-copied its wrapper instead of importing it.**
+>
+> 🎨 **THE REAL DEFECT WAS COLOUR, AND IT IS THE SLOT NAMES — this will bite again.** In this repo
+> the Tailwind slot named **`terracotta` is the atelier GOLD `#A9834B`**; the CTA terracotta
+> `#C24E25` lives in the slot named **`mulberry`**. Inherited, and **backwards**, so
+> `text-terracotta` *looks* like the safe brand colour and is the unsafe one. **Measured 3.37:1 on
+> cream — below the 4.5:1 AA floor — on 10 eyebrows and inline links across the doors.** Now
+> **0**. Gold on an ICON is kept (3.37 clears the 3:1 non-text bar). Same family as design#6's
+> `#9A8F86`. **Reach for `text-mulberry` (4.61:1) or `text-link` (8.22:1); never the gold slot.**
+>
+> ⚖ **THRESHOLD vs DEAD END.** An expired or revoked link does NOT wear the action colour —
+> painting *"act on me"* on a screen with nothing to act on is a lie told to somebody who has just
+> been refused.
+>
+> 🛑 **TWO CLAIMS IN THE BRIEF DID NOT SURVIVE RULE 0 — do not act on them again.** `/login` is
+> **NOT** undesigned (it already renders the owner-locked shared card) and **`/signup` is not
+> either** (a full two-column marketing-register page, 860 lines). Both untouched. And the brief's
+> 12-file scope **omitted `/forgot-password` + `/reset-password`** while promising *"resetting a
+> password"* — both exist and are left in the marketing register. ⏭ **OWNER_DECISION, small:**
+> whether the account funnel (`/signup` · the two password pages) moves to the door register or
+> stays marketing. It is coherent either way today.
+>
+> 🪤 **I SHIPPED A CONTRAST BUG INTO MY OWN COMPONENT AND CAUGHT IT BY MEASURING.** The notice
+> first used `text-mulberry-700` — 5.86:1 light and **3.05:1 DARK**, because that slot flips to the
+> LIGHT theme's `#C24E25` on a dark panel. `mulberry-600` measures 4.92 / 5.78. **A light-only
+> contrast check waves this through.** Check both themes on any tinted block.
+>
+> 🛡 `doors-are-designed.test.ts` — 7 assertions, **every one mutation-checked by occurrence count**
+> (gold-as-text 0→2 · rogue `<main>` 0→1 · shell colour 4→2 · dead-end edge 1→0 · way out 1→0 ·
+> threshold edge 1→0), all six RED. It **strips comments before matching**: every ported door
+> carries a note naming the string it removed, so a raw-source guard reports the defect it just
+> fixed (raw 6, stripped 0, and **0 is the true number**).
+>
+> ⚠ **`lint-port-no-lost-controls` SKIPS A BASELINE ROUTE WHOSE KEY NO LONGER EXISTS.** Its
+> baseline sat at `484ec515b`, from before ~20 public pages (`/pricing` `/privacy` `/terms`
+> `/help` `/explore` + the six product doorways) moved into the **`(shell)` route group** — so
+> those 20 had been **silently unguarded since that move**. Regenerating re-keys and restores them.
+> Verified the regeneration absorbs **no real removal**: across the 381 routes present in both
+> baselines, **zero** destinations and **zero** actions were lost.
+>
+> 🪤 **AND I DESTROYED MY OWN WORK MID-SESSION.** A mutation run ended with `git checkout --` to
+> undo a sabotage; the ports were **not committed**, so `checkout` restored them from the index and
+> **six files silently reverted to `origin/main`** — while the guard still passed, because the
+> guard and the reverted files agreed. **Commit before you mutate, and restore from an explicit
+> backup, never from the index.** The first sabotage in that same run also **did not land**
+> (count 0→0) and its green result meant nothing — which is why the counts are printed.
+
 > ### 📋 WHAT IS LEFT — re-verified 2026-08-17, READ THIS BEFORE THE REGISTER
 > **[`WHAT_IS_LEFT_2026-08-17.md`](WHAT_IS_LEFT_2026-08-17.md) is the CURRENT one.**
 > It supersedes `WHAT_IS_ACTUALLY_LEFT_2026-08-12.md`, which in turn superseded the
