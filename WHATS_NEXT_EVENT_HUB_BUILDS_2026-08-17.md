@@ -99,9 +99,25 @@ forms plus the event word, degrades to "the host", React-cached). All 16 event t
 carry full wording **in production**. You are WIRING, not authoring. `resolveProfile` is already
 called on the page for its surface gate — reuse that profile rather than resolving twice.
 
-**SCOPE:** `page.tsx`, `_components/site-body.tsx`, and about ten widget components. **Re-count
-first** — S12-B0 found two sentences no earlier count had caught, including *"Pin your cash on
-the couple"*.
+**SCOPE — MEASURED 2026-08-17 (evening), after S12-B0 merged. 53 strings across 23 files.**
+This number is derived, not estimated: JSX comments stripped, then imports · type unions · CSS
+class names · DB literals · `resolveProfile` fallbacks excluded, then split three ways.
+
+| | count | |
+|---|---|---|
+| **Bucket 2 — the job** | **53** | universal parts wearing wedding words |
+| Bucket 1 — leave alone | 4 | the bride's/groom's sides, the tea ceremony, the film |
+| Sample/demo editorial | 17 | the five sample weddings' content, not real copy |
+
+Top files: `editorial/editorial-content.tsx` 11 · `site-body.tsx` 6 · `guest-column-form.tsx` 5 ·
+`print/print-sheet.tsx` 4 · `private-landing.tsx` 3 · `selfie-capture.tsx` 3 · then 17 files with
+1–2 each, including **`seat/page.tsx` and `find-my-table/page.tsx`, which S12-B0 MISSED** (a
+second code path in each — *"Once the couple seats…"*).
+
+🛑 **MY COUNT FOR THIS WAS WRONG THREE TIMES BEFORE IT WAS RIGHT — 68, then ~79, then a crude
+pass that said 7. Every error came from a scanner that could not see multi-line JSX text or
+could not tell a comment from a sentence. RE-DERIVE IT YOURSELF before trusting the 53, and
+strip JSX comments (`{/* … */}`) as well as ordinary ones.**
 
 🛑 **THREE COMPONENTS ARE BUCKET 1 AND MUST NOT BE TOUCHED:** `our-love-story-widget.tsx` ·
 `tea-ceremony-card.tsx` · `save-the-date-film.tsx`. Rewording them is the defect, not the fix.
