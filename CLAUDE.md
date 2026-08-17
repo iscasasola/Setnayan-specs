@@ -722,9 +722,28 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > A couple pressing **Lock** now ASKS the supplier, and the supplier's yes is what
 > makes the booking. Full row: `DECISION_LOG.md` 2026-08-16.
 >
-> 🔴 **CORRECTION 2026-08-17 — THE FLIP IS NOT THE ONLY THING LEFT. FIX THIS
-> FIRST.** Read out of production **by the object** (`pg_get_functiondef`, not a
-> migration, not a comment): `vendor_agree_to_lock`'s single agree UPDATE sets
+> ✅ **RESOLVED SAME DAY — 2026-08-17. The flag flip IS now the only thing left.**
+> PR [#4488](https://github.com/iscasasola/setnayan-platform/pull/4488) (migration
+> `20271144481150_agree_stamps_the_link.sql`) fixed it, **verified applied in prod
+> BY THE OBJECT**: the live `vendor_agree_to_lock` body now carries
+> `selection_match_rank = 1, linked_vendor_profile_id =
+> COALESCE(marketplace_vendor_id, linked_vendor_profile_id)`. Its db test asserts
+> before AND after, that an *unanswered* ask stamps nothing, and pins the
+> `event_vendors_lock_request_marketplace_chk` constraint. **Do NOT rebuild it.**
+> ⚠ **Two process lessons from the same hour, both worth more than the fix:**
+> (1) **ANOTHER SESSION WORKS THIS REPO CONCURRENTLY** — a session branched to fix
+> this and found `origin/main`'s tip was already the fix, under a nearly identical
+> branch name. **`git fetch` and read the new tip before building.**
+> (2) A verification query reported `is_monotone = false` because it searched for
+> `COALESCE(linked_vendor_profile_id` while the real argument order is
+> `COALESCE(marketplace_vendor_id, …)`. **A SEARCH THAT CANNOT MATCH IS NOT A
+> NEGATIVE RESULT** — read the clause, never substring-test it.
+>
+> **The diagnosis is kept below, as history, because the LESSON generalises.**
+>
+> 🔴 **WHAT IT WAS (2026-08-17, now fixed).** Read out of production **by the
+> object** (`pg_get_functiondef`, not a
+> migration, not a comment): `vendor_agree_to_lock`'s single agree UPDATE set
 > `lock_request_state='agreed'` · `lock_agreed_at` · `lock_answered_by_user_id` ·
 > `lock_declined_at=NULL` · `lock_decline_reason=NULL` · `status → 'contracted'`
 > (monotone) · `updated_at` — and **NEITHER `linked_vendor_profile_id` NOR
@@ -732,10 +751,11 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > `app/dashboard/[eventId]/vendors/actions.ts` (~1503) states the opposite:
 > *"The agree RPC stamps both alongside 'contracted', exactly as
 > `acquire_service_time_slot` already does."* Half true — `acquire_service_time_slot`
-> **does** stamp both (verified); the agree RPC does not.
-> ⇒ **The moment the flag goes on, the handshake becomes the main booking path and
-> every booking it makes is a `contracted` row with a NULL link**, so everything
-> keyed on that column silently loses handshake bookings: the supplier doorway on
+> **did** stamp both (verified); the agree RPC **did not**, until #4488.
+> ⇒ **Had the flag gone on first**, the handshake would have become the main booking
+> path and every booking it made would have been a `contracted` row with a NULL
+> link, so everything keyed on that column would silently have lost handshake
+> bookings: the supplier doorway on
 > `/{slug}` · editorial first-pick credit · Real Stories vendor credit · Papic
 > vendor attribution · stage-note recipients · showcase credits · the verified
 > median · fraud detection · the plausibility scanner · venue-room-size.

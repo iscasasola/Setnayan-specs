@@ -84,14 +84,17 @@ the first time a real couple locks a real marketplace supplier.**
 ⚠ **My step 1 — "a booked supplier becomes a real account" — was a proposal to build something
 that already exists.** That is the paid-twice mistake, in the register whose job is to prevent it.
 
-### What is genuinely left — one defect and one gap, not six steps
+### What is genuinely left — CLOSED 2026-08-17
 
-- 🚨 **On a private event the page refuses a booked supplier before it ever asks whether they are
-  booked.** The lock screen admits four kinds of person — a guest with a redeemed invitation, a
-  host, someone bound to a seat, and an invited account — and a supplier is none of them. The
-  supplier check runs 200-odd lines later and never gets reached. **4 of your 6 events are
-  private**, so even after a real booking the strip would appear on 2 of 6. **This is an ordering
-  fix, not a build.**
+- ✅ ~~On a private event the page refuses a booked supplier before it ever asks whether they are
+  booked.~~ **FIXED AND LIVE — PR #4483.** Proved on the live site in the risky direction (private
+  weddings still turn strangers away); the supplier getting IN is test-proved only, because prod
+  has no booked marketplace supplier to look at. **Do not upgrade that to "seen working".**
+- ✅ ~~The agree step books a supplier without recording which business they are.~~ **FIXED AND
+  VERIFIED IN PROD BY THE OBJECT — PR #4488.** Without it, the moment the ask-and-agree switch
+  went on, every booking it made would have been a supplier who is booked and invisible: no
+  doorway, no photo credit, no run-of-show notes. Done while it was inert, which was the whole
+  point. **The switch itself is still yours and nothing is on until you flip it.**
 - **There is no way to invite an off-platform supplier onto Setnayan** — which is how 44 of the 45
   would ever become accounts. That is **your call (§6), not an engineering task.**
 

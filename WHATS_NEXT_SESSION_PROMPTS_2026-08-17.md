@@ -23,7 +23,7 @@ overlap count, not from which sessions *sounded* unrelated.
 
 | Wave | Together | Shared files |
 |---|---|---|
-| **1** | **S1** supplier gets through the door · **S2** the first screens anyone sees | 0 |
+| ~~**1**~~ | ✅ **S1 DONE** (PR #4483, live) · **S2 REWRITTEN — now two pages behind an owner ruling** | 0 |
 | **2** | **S4** eight small things · **S9** under the floor | 0 |
 | **3** | **S5** the couple's four screens · **S7** the five undrawn surfaces | 0 |
 | **4** | **S6** the supplier's screens · **S10** the compliance pack | 0 (S10 opens no PR) |
@@ -35,7 +35,7 @@ two-at-a-time cap came from a review-capacity failure, not a file collision.
 
 | Wave | Together | |
 |---|---|---|
-| **1** | **S1** · **S2** · **S9** | all pairs 0 |
+| ~~**1**~~ | ✅ S1 done · S2 rewritten · **S9** remains | all pairs 0 |
 | **2** | **S4** · **S7** · **S8** | all pairs 0 |
 | **3** | **S5** · **S6** · **S10** | all pairs 0 |
 | **4** | **S11** | needs S1 merged |
@@ -129,8 +129,16 @@ Nothing has met a real customer. Every behavioural claim is a claim about code.
 
 ---
 
-# SESSION 1 · The supplier finally gets through the door
-**Wave 1 · pairs with S2 · small · no owner ruling needed**
+# SESSION 1 · The supplier finally gets through the door — ✅ DONE, DO NOT RE-RUN
+**Merged 2026-08-17 · PR #4483 · LIVE**
+
+✅ **VERIFIED, not reported:** merge `52dd5c92a` is on `origin/main` and production self-reports
+`"version":"52dd5c9"` — so the running build IS this change, not merely a merge that happened.
+⚠ **Test-proved, not observed, and the session said so itself:** prod still has no linked
+supplier, so "a booked supplier gets in" cannot be shown live. What WAS proved live is the risky
+direction — private weddings still turn strangers away. **Do not upgrade that to "seen working".**
+
+```
 
 ```
 WHAT A PERSON GETS: a supplier who has been booked for a wedding opens that wedding's web
@@ -189,40 +197,69 @@ as fully public across 31 callers. Add your branch; do not restructure theirs.
 
 ---
 
-# SESSION 2 · The first screens anyone ever sees
-**Wave 1 · pairs with S1 · medium · design port**
+# SESSION 2 · The last two doors — 🛑 REWRITTEN 2026-08-17, THE ORIGINAL WOULD HAVE REBUILT SHIPPED WORK
+**Wave 1 · pairs with S1 · SMALL — this is now a fraction of what it was**
+
+🛑 **READ THIS BEFORE THE BLOCK.** My first version of S2 said twelve sign-in screens were
+undesigned and told a session to port all of them. **THIRTEEN doors were designed and merged the
+same day** across PRs [#4484](https://github.com/iscasasola/setnayan-platform/pull/4484),
+[#4486](https://github.com/iscasasola/setnayan-platform/pull/4486) and a third
+(`feat(doors): one designed door for every way into Setnayan`) — verified by reading the commit's
+own file list — and the other two, `/login` and `/signup`, were checked in that PR and found to be
+**already designed**, so it deliberately left them alone.
+
+🔑 **I WROTE THE PROMPT FROM A FIVE-DAY-OLD REGISTER LINE INSTEAD OF FROM THE CODE — the exact
+failure this whole document warns about, in the document itself.** A session pasting the original
+would have redrawn ten doors and been paid for it.
 
 ```
-WHAT A PERSON GETS: signing in, signing up, resetting a password, claiming an invitation or
-joining an event all look like the same considered product as the rest of Setnayan. Today
-every couple, supplier and guest passes through undesigned screens BEFORE they see anything
-good.
+WHAT A PERSON GETS: the two screens for a forgotten password look like the rest of the way in.
 
-WHY THIS IS FIRST AMONG THE DESIGN WORK: it is the highest-traffic, lowest-complexity gap on
-the list, and it is the only one every single user meets.
+ALREADY SHIPS — DO NOT REBUILD, DO NOT REDRAW, VERIFIED ON origin/main 2026-08-17:
+- app/_components/door/door-shell.tsx — ONE shared door, 266 lines, with its own guard
+  (doors-are-designed.test.ts, 7 assertions, every one mutation-checked). It reproduces the
+  register the sign-in card already locked: paper card, terracotta top edge, terracotta
+  eyebrow, ONE terracotta action, the wordmark as the way out.
+- THIRTEEN doors already render through it: the Alaga claim · the supplier claim and its
+  finalize step · all four /join steps · both Papic doors · the Samahan invite · the co-host
+  planning invite · the plus-one name confirmation · the Live Studio camera sign-in.
+  ⚠ The last three were MISSED by the first pass and found only because the owner pushed back.
+  The camera one is the cautionary tale: its own comment says it is a direct copy of a page that
+  had just been fixed, AND it still carried the "one of the couple" wording corrected weeks ago
+  for 15 of our 16 event types. A COPY QUIETLY KEEPS THE MISTAKE ITS TWIN ALREADY HAD FIXED.
+- NINE more pages carry the same card — mostly camera screens where it appears only as an error
+  message. DELIBERATELY LEFT: making those look like doorways would change screens whose real job
+  is something else. They are a visible, shrinking list in the guard, and a TENTH page copying
+  that card now fails the build.
+- /login already renders the owner-locked shared sign-in card (owner 2026-07-18, "we only
+  want 1 login"). DO NOT TOUCH IT.
+- /signup is a full two-column marketing-register page, 860 lines. DO NOT TOUCH IT.
 
-SCOPE — 12 page files, verified present on origin/main 2026-08-17:
-/login · /signup · /claim/[token] · /vendor/claim/[token] (+finalize) ·
-/join/[eventId] (+check-email, set-password, success) · /papic/join · /papic/claim ·
-/samahan/join
+THE ACTUAL WORK — TWO PAGES:
+app/forgot-password/ and app/reset-password/ both exist (page + actions) and are still in the
+marketing register. #4484's scope promised "resetting a password" and then omitted them.
 
-ALREADY SHIPS — DO NOT REBUILD:
-- The shared top bar and app shell are mounted app-wide (PR #4438). SidebarShell was RETIRED
-  on 2026-08-15 (PR #4451) — do not reintroduce it.
-- The terracotta palette is locked and enforced by a derived-contrast guard.
-- The 19 approved archetypes and overlays in prototypes/archetype_*.html are BINDING.
-  PORT them. A difference between your screen and its archetype is a defect in YOUR PORT,
-  not a fresh design decision.
-- Recent commits on these routes are auth lockout + captcha FIXES, not design. Do not undo
-  them.
+⚖ BUT DO NOT START UNTIL THE OWNER RULES — this is the open OWNER_DECISION from #4484:
+does the ACCOUNT FUNNEL (/signup and the two password pages) move to the door register, or
+stay in the marketing register? It is coherent either way today, which is exactly why nobody
+should decide it by porting.
+IF HE SAYS DOORS: port the two password pages through DoorShell. Nothing else.
+IF HE SAYS MARKETING: close this session, change nothing, and say so.
 
-🎨 TWO GOLDS, TWO RULES — this has bitten twice:
-The TEXT gold is #8A6B39. The decorative gold #A9834B is 3.37:1 and must NEVER carry body
-copy. Gold has ~0.29 of contrast headroom on cream, so ANY tint under it fails — hover must
-move the border or the shadow, never add a fill. A hover tint shipped at 4.42:1 on a live
-public page for exactly this reason.
+🎨 THE COLOUR TRAP THAT #4484 MEASURED — this WILL bite you:
+In this repo the Tailwind slot named `terracotta` is the atelier GOLD #A9834B, and the CTA
+terracotta #C24E25 lives in the slot named `mulberry`. Inherited, and BACKWARDS — so
+`text-terracotta` LOOKS like the safe brand colour and is the unsafe one, measuring 3.37:1 on
+cream, below the 4.5:1 floor. Reach for `text-mulberry` (4.61:1) or `text-link` (8.22:1).
+Gold on an ICON is fine (3:1 bar). NEVER on text.
+⚠ And check BOTH themes: #4484 shipped `text-mulberry-700` into its own component at 5.86:1
+light and 3.05:1 DARK, because that slot flips to the light theme's value on a dark panel. A
+light-only contrast check waves it straight through.
 
-GATE: none. Ship it.
+⚖ ONE MORE THING #4484 LEFT BEHIND, worth folding in if the owner says DOORS:
+An expired or revoked link must NOT wear the action colour. Painting "act on me" on a screen
+with nothing to act on is a lie told to somebody who has just been refused. The rule is in
+the guard already — keep it.
 ```
 
 ---
@@ -659,9 +696,10 @@ booked but never promoted send announcements to guests? Build around it either w
 
 | Open item | Session |
 |---|---|
-| Supplier refused by a private event | **S1** |
-| Host sees the stranger's version of their own page | **S1** |
-| Sign-in / sign-up / reset / claim / join undesigned | **S2** |
+| ~~Supplier refused by a private event~~ | ✅ **S1 DONE** |
+| ~~Host sees the stranger's version of their own page~~ | ✅ **S1 DONE** |
+| ~~Sign-in / sign-up / claim / join undesigned~~ | ✅ **DONE** — PR #4484 + already-designed |
+| The two forgotten-password pages | **S2** (owner ruling first) |
 | "Nothing here" when a read actually failed | **S3** |
 | Host cannot see who holds which camera | **S4** |
 | Supplier limited to six canned messages | **S4** |
