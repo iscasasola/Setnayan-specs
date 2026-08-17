@@ -205,17 +205,24 @@ the suspended Google account is still sitting there.
 **TEN sessions, run TWO at a time — five waves.** Ready-to-paste prompts, one per session, each
 self-contained: [`WHATS_NEXT_SESSION_PROMPTS_2026-08-17.md`](WHATS_NEXT_SESSION_PROMPTS_2026-08-17.md).
 
-| Wave | Together | |
+| Wave | Together | Shared files |
 |---|---|---|
-| 1 | **S1** the supplier gets through the door · **S2** the first screens anyone sees | the two highest-value |
-| 2 | **S4** six small things · **S9** under the floor | |
-| 3 | **S3** "we couldn't load it" | 🛑 **alone** — touches screens app-wide |
-| 4 | **S5** the couple's four screens · **S7** the five undrawn surfaces | |
-| 5 | **S6** the supplier's screens · **S10** the compliance pack | S10 opens no PR |
-| last | **S8** your own admin screens | internal-only, ships last |
+| 1 | **S1** the supplier gets through the door · **S2** the first screens anyone sees | 0 |
+| 2 | **S4** eight small things · **S9** under the floor | 0 |
+| 3 | **S5** the couple's four screens · **S7** the five undrawn surfaces | 0 |
+| 4 | **S6** the supplier's screens · **S10** the compliance pack | 0 |
+| 5 | **S11** who is in this event · **S8** your own admin screens | 0 · S11 needs S1 merged |
+| 6 | **S3** "we couldn't load it" | 🛑 **alone** |
 
-⚠ **S6 must never run beside S4** — both touch the supplier's screens. The one pairing that looks
-safe and is not.
+🛑 **ONLY TWO PAIRS CAN NEVER SHARE A WAVE, AND BOTH WERE MEASURED, NOT GUESSED:**
+**S5 + S11 share 118 files** and **S4 + S6 share 55.** Everything else has ZERO overlap.
+⚠ **My first cut of this table paired S5 with S11** — I had chosen the pairings by which sessions
+sounded unrelated instead of counting. **Deciding a collision by theme is how you get a
+118-file collision.**
+
+🔑 **THE TWO-AT-A-TIME CAP IS ABOUT REVIEW, NOT FILES.** The 44-defect incident was ten diffs
+nobody could read, not ten diffs that touched each other. **Three at a time is safe on the code**
+(S1·S2·S9 → S4·S7·S8 → S5·S6·S10 → S11 → S3) if three changes can actually be reviewed.
 
 ## How to use this
 

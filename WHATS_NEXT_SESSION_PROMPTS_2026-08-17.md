@@ -13,19 +13,57 @@
 > 🛑 **NEVER AUTO-MERGE A FAN-OUT.** Auto-merge is the standing default for a single PR. It is
 > **not** the default when two sessions are in flight — read both diffs first.
 
-## The waves
+## The waves — CORRECTED 2026-08-17 after measuring the file overlaps
 
-| Wave | Run together | Why they are safe together |
+🛑 **THE FIRST CUT OF THIS TABLE PAIRED S5 WITH S11. THEY SHARE 118 FILES.** I had asserted the
+pairings were safe instead of computing them. Every pair below is now derived from an actual
+overlap count, not from which sessions *sounded* unrelated.
+
+**At two at a time — six waves:**
+
+| Wave | Together | Shared files |
 |---|---|---|
-| **1** | **S1** supplier gets through the door · **S2** the first screens anyone sees | the event website vs the sign-in screens — no shared file |
-| **2** | **S4** eight small things · **S9** under the floor | product screens vs database grants and headers |
-| **3** | **S3** "we couldn't load it" — **RUN THIS ONE ALONE** | it touches screens app-wide and will collide with anything |
-| **4** | **S5** the couple's four screens · **S7** the five undrawn surfaces · then **S11** who is in this event | different trees · S11 needs S1 merged |
-| **5** | **S6** the supplier's screens · **S10** the compliance pack | code vs documents — S10 opens no PR |
-| **last** | **S8** your own admin screens | internal-only, so it ships last on purpose |
+| **1** | **S1** supplier gets through the door · **S2** the first screens anyone sees | 0 |
+| **2** | **S4** eight small things · **S9** under the floor | 0 |
+| **3** | **S5** the couple's four screens · **S7** the five undrawn surfaces | 0 |
+| **4** | **S6** the supplier's screens · **S10** the compliance pack | 0 (S10 opens no PR) |
+| **5** | **S11** who is in this event · **S8** your own admin screens | 0 · S11 needs S1 merged |
+| **6** | **S3** "we couldn't load it" | 🛑 **ALONE** |
 
-⚠ **S6 must not run beside S4** — both touch the supplier's screens. That is the one pairing that
-looks fine and is not.
+**At three at a time — five waves.** Only if somebody can genuinely review three diffs; the
+two-at-a-time cap came from a review-capacity failure, not a file collision.
+
+| Wave | Together | |
+|---|---|---|
+| **1** | **S1** · **S2** · **S9** | all pairs 0 |
+| **2** | **S4** · **S7** · **S8** | all pairs 0 |
+| **3** | **S5** · **S6** · **S10** | all pairs 0 |
+| **4** | **S11** | needs S1 merged |
+| **5** | **S3** | 🛑 **ALONE** |
+
+## The conflict matrix — measured, not assumed
+
+Shared file counts across the 11 scopes at `origin/main`, 2026-08-17. **Six pairs collide.**
+
+| Pair | Shared | Verdict |
+|---|---|---|
+| **S5 + S11** | **118** | 🛑 **NEVER TOGETHER.** Same tree — the couple's guest/vendor screens are most of both. Not separable. |
+| **S4 + S6** | **55** | 🛑 **NEVER TOGETHER.** Both live in the supplier's dashboard. Not separable. |
+| S2 + S7 | 5 | ✅ **Separable by scope.** The five are the Papic join and claim screens. **They belong to S2** — S7 must not touch `app/papic/join` or `app/papic/claim`. |
+| S4 + S5 | 1 | ✅ **Separable by rule.** One file: the couple's vendor actions. **S4 owns it** (the date-hold limit); S5 is a design port and must not touch it. |
+| S4 + S11 | 1 | ✅ Same file, same rule — S4 owns it. |
+| S1 + S11 | 1 | ✅ **Separable by order.** One file, the event page body. S11 needs S1 merged first anyway. |
+
+**Everything not listed above has ZERO shared files** and is safe to run in parallel as far as the
+code is concerned.
+
+🔑 **THE CAP IS ABOUT REVIEW, NOT FILES.** The 44-defect incident was ten diffs nobody could read,
+not ten diffs that touched each other. So the matrix tells you what is *possible*; how many
+changes can actually be read before they merge is what should decide.
+
+⚠ **S3 stays alone regardless of the matrix.** Its own scope is seven files, but its whole job is
+to ADOPT them across screens app-wide — its real footprint is unbounded and cannot be predicted
+from a file list.
 
 ---
 
@@ -190,7 +228,7 @@ GATE: none. Ship it.
 ---
 
 # SESSION 3 · The screens that say "nothing here" when they mean "we could not load it"
-**Wave 3 · 🛑 RUN THIS ONE ALONE — it touches screens app-wide**
+**Wave 6 · 🛑 RUN THIS ONE ALONE — its footprint is app-wide and cannot be predicted from a file list**
 
 ```
 WHAT A PERSON GETS: when something fails to load, the screen says so. Today a guest opening
@@ -233,7 +271,7 @@ thing — anchor on the call site.
 ---
 
 # SESSION 4 · Eight small things a person would notice
-**Wave 2 · pairs with S9 · ⚠ must NOT run beside S6**
+**Wave 2 · pairs with S9 · 🛑 NEVER beside S6 (55 shared files) · owns the couple's vendor actions file, S5 must not touch it**
 
 ```
 Eight small fixes, all verified against origin/main and the live database on 2026-08-17. Do them in one PR or eight — your call — but verify each one before you touch it.
@@ -327,12 +365,15 @@ Eight small fixes, all verified against origin/main and the live database on 202
 ---
 
 # SESSION 5 · The couple's four daily screens
-**Wave 4 · pairs with S7 · design port**
+**Wave 3 · pairs with S7 · 🛑 NEVER beside S11 (118 shared files) · design port**
 
 ```
 WHAT A PERSON GETS: the four screens a couple actually opens every day look designed.
 
 SCOPE: app/dashboard/[eventId]/ — guests · vendors · budget · alaala (gallery).
+🛑 DO NOT TOUCH app/dashboard/[eventId]/vendors/actions.ts — S4 owns it this cycle (the
+   date-hold limit). It is the one file you and S4 share. You are a design port; stay in the
+   screens and components.
 
 ALREADY DONE — DO NOT REDO: the couple's Overview WAS redesigned (8 commits, 2026-08-08):
 frosted panels became flat cream cards, the headline card is solid ink, the digest gained
@@ -362,7 +403,7 @@ supplier payment was silently thrown away). Do not regress it while restyling.
 ---
 
 # SESSION 6 · The supplier's screens
-**Wave 5 · pairs with S10 · ⚠ must NOT run beside S4 · design port**
+**Wave 4 · pairs with S10 · 🛑 NEVER beside S4 (55 shared files) · design port**
 
 ```
 WHAT A PERSON GETS: the sixty-odd screens a supplier works in look designed.
@@ -389,7 +430,7 @@ GATE: none.
 ---
 
 # SESSION 7 · The five undrawn surfaces
-**Wave 4 · pairs with S5 · design**
+**Wave 3 · pairs with S5 · ⚠ the Papic join and claim screens belong to S2 — do not touch them · design**
 
 ```
 Four places are built but were never drawn, and one of them is where people SHOP.
@@ -399,6 +440,8 @@ SCOPE, route counts verified at origin/main:
 - /tour — the product walkthrough (5 page files). Its ONLY commit since 2026-08-07 is an
   accessibility contrast fix — no design work has ever touched it.
 - /papic — the deeper photo-service pages (10 page files).
+  🛑 EXCLUDING /papic/join and /papic/claim — those are SIGN-IN screens and belong to S2.
+  They are the only 5 files these two sessions share; leave them alone and the overlap is zero.
 - /onboarding — the persona quiz questions, their order and the reveal.
 
 ALREADY DONE ON /explore — DO NOT REDO: one design unit landed 2026-08-13, "sorting you can
@@ -420,7 +463,7 @@ plan says what it adds. He asked for a matrix on 2026-07-04. Build around it and
 ---
 
 # SESSION 8 · Your own admin screens
-**Runs LAST, alone · design**
+**Wave 5 · pairs with S11 · zero overlap with anything · design**
 
 ```
 WHAT A PERSON GETS: the Setnayan team stops working in ninety-odd hand-built tables.
@@ -519,7 +562,7 @@ Nothing a person sees. Two things that make one future mistake a near-miss inste
 ---
 
 # SESSION 10 · The compliance pack
-**Wave 5 · pairs with S6 · DOCUMENTS ONLY — opens no PR against the app**
+**Wave 4 · pairs with S6 · DOCUMENTS ONLY — opens no PR against the app**
 
 ```
 WHAT THIS PREVENTS: handing a lawyer or the National Privacy Commission a pack that describes
@@ -569,7 +612,7 @@ session and not a chore.
 ---
 
 # SESSION 11 · One place that says who is in this event
-**Wave 4 · pairs with S5 or S7 · medium · needs S1 merged first**
+**Wave 5 · pairs with S8 · 🛑 NEVER beside S5 (118 shared files) · needs S1 merged first**
 
 ```
 WHAT A PERSON GETS: a couple opens one screen and sees everybody involved in their event —
