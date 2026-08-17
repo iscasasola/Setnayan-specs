@@ -109,7 +109,7 @@ Setnayan reduces breach likelihood and impact through the organizational, physic
 | **Strong authentication** | bcrypt-hashed passwords; OTP/SSO options; **TOTP 2FA mandatory for all admin roles** (§ 5.1). |
 | **Append-only audit log** | Every admin action logged with timestamp, actor, action, target, before/after state, rationale; **no UPDATE permission**; export restricted (§ 5.4). |
 | **Application hardening** | Input validation (zod), parameterized queries, React escaping + CSP, CSRF tokens, rate limiting on auth endpoints (§ 7.3). |
-| **Encrypted backups** | Daily encrypted Postgres backups retained 30 days (§ 7.1) — supports recovery from availability/integrity breaches. |
+| **Encrypted backups** | **NONE — no automated database backups exist.** ⚠ CORRECTED 2026-08-17: this row declared "Daily encrypted Postgres backups retained 30 days (§ 7.1)" and the recovery step below relied on it. The database is on the FREE plan (no scheduled snapshots) and there is no backup job of our own. Owner ruling 2026-08-10 accepts this knowingly, to revisit before launch. **A recovery plan that points at backups we do not hold is worse than no plan** — see the corrected recovery step.|
 
 ### 3.2 Monitoring & observability (in place)
 
@@ -221,7 +221,7 @@ A **preliminary** notification may be filed within 72 hours with available facts
 
 ### 7.3 Recovery
 
-- Restore data/service from encrypted daily backups where availability/integrity is affected; validate integrity against the audit log before returning to production.
+- ⚠ **THERE ARE NO BACKUPS TO RESTORE FROM (corrected 2026-08-17).** Recovery from a data-loss event is therefore limited to: the couple's own Google Drive copies of their originals (the only customer-held copy), media objects still present in object storage (a separate system, unaffected by a database loss), and manual reconstruction from application logs. **Restoring the database is NOT currently possible.** Re-establishing a backup capability is an owner decision recorded 2026-08-10 and deferred; until it lands, treat database loss as unrecoverable and prioritise prevention. Validate integrity against the audit log before returning to production.
 - Monitor closely post-recovery (heightened Sentry/Better Stack watch) for recurrence.
 
 ### 7.4 Evidence preservation
@@ -297,7 +297,7 @@ After every notifiable breach (and periodically for aggregated non-notifiable in
 │     • (as appropriate) public notice at setnayan.com/security              │
 │         ▼                                                                   │
 │  5. REMEDIATE                                                              │
-│     Eradicate root cause · recover from encrypted backups · verify         │
+│     Eradicate root cause · recover (NO DB BACKUPS — see § 7.1) · verify            │
 │     integrity vs audit log · heightened monitoring                         │
 │         ▼                                                                   │
 │  6. REVIEW                                                                 │

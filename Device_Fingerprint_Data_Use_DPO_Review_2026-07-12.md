@@ -39,7 +39,9 @@ Nothing here is shared with any third party, used for advertising, or used to pr
 
 ## Engineering state (so the DPO knows the stakes)
 
-**Built but switched OFF** behind a flag (`NEXT_PUBLIC_DEVICE_FINGERPRINT_ENABLED`, default OFF) — it **cannot collect anything** until the flag is flipped, which we will not do until this sign-off. Fully reversible (flag off → capture stops; existing `user_devices` rows are purgeable). The capture only writes `user_devices`; the fraud-cluster detection it feeds runs in **shadow mode** (admin review only, never auto-action).
+**LIVE — collecting in production since 2026-07-12.** ⚠ CORRECTED 2026-08-17: this was described as built-but-switched-off. Measured in production on 2026-08-17: 9 device rows across 4 accounts, first written 2026-07-12, most recent the same day as this correction. The 2026-07-23 instruction to hold it off was SUPERSEDED on 2026-07-24 by the owner-locked Interim Payments & Privacy Deferral Policy, which deliberately activated it; the live public /privacy notice discloses device-fingerprint processing accordingly. Basis relied on: RA 10173 §12(f) legitimate interest (fraud prevention). ⏭ STILL OWED: the documented legitimate-interest assessment (NPC task t2-10). Collection is coarse and first-party — a random id in localStorage, hashed server-side, raw never stored; no canvas/behavioural fingerprint and no external SDK; secured accounts only.
+
+_(The original text read: "Built but switched OFF behind a flag (`NEXT_PUBLIC_DEVICE_FINGERPRINT_ENABLED`, default OFF) — it cannot collect anything" until the flag is flipped, which we will not do until this sign-off. Fully reversible (flag off → capture stops; existing `user_devices` rows are purgeable). The capture only writes `user_devices`; the fraud-cluster detection it feeds runs in **shadow mode** (admin review only, never auto-action).
 
 ---
 

@@ -54,7 +54,7 @@ To **auto-tag guests in a specific event's photo gallery** (the Papic candid-cap
    - **0.65–0.85** → surface a **suggested tag** for human confirmation,
    - **< 0.65** → the photo **uploads untagged** (still delivered — see § 5).
 4. **Tag → gallery** — the resulting tag routes the photo into the matched guest's tagged-photos view; untagged photos still land in the couple's gallery (untagged-still-delivered guarantee).
-5. **Revocation / expiry** — a guest "Delete my face data" link revokes enrolment within the **next 5-minute refresh cycle**; turning the **Photo Consent** toggle OFF revokes live enrolment and clears any selfie display photo; vectors are otherwise **deleted at the 5-year retention boundary** with the event data (policy § 4).
+5. **Revocation / expiry** — a guest "Delete my face data" link revokes enrolment within the **next 5-minute refresh cycle**; turning the **Photo Consent** toggle OFF revokes live enrolment and clears any selfie display photo; vectors are otherwise **deleted 3 MONTHS AFTER THE EVENT ENDS** (owner ruling 2026-08-17; same clock as the full-resolution photo floor). ⚠ **CORRECTED 2026-08-17** — this read "deleted at the 5-year retention boundary with the event data", a rule nothing implemented; and once media moved to indefinite retention on 2026-08-02, "with the event data" silently meant NEVER. **Enforcement is not yet built** (production has zero scheduled jobs): today only the revoke link and Photo Consent OFF delete a vector.
 
 ### 1.4 Data subjects
 
@@ -65,7 +65,7 @@ To **auto-tag guests in a specific event's photo gallery** (the Papic candid-cap
 - **Vector store:** per-event, **encrypted at rest** (policy § 1.4, § 3.2, § 7.1 AES-256). Never reused across events/weddings.
 - **Enrolment / gallery media:** Cloudflare **R2 (Asia-Pacific, APAC)**, signed-URL access only (policy § 3.2).
 - **Matching engine host / location:** `[TO CONFIRM]` — the compute location and any sub-processor for the face-embedding/matching step is not recorded in the policy and must be confirmed (implicates § 10 cross-border analysis if it runs outside SG/PH).
-- **Retention:** face vectors kept for the **per-event lifetime + 5 years**, then **auto-purged with the event data** (policy § 4). Earlier deletion via the guest "Delete my face data" link or Photo Consent OFF.
+- **Retention:** face vectors are deleted **3 months after the event ENDS** (owner ruling 2026-08-17). Earlier deletion via the guest "Delete my face data" link or Photo Consent OFF, both of which work today. ⚠ **Enforcement of the 3-month rule is NOT yet built** — no scheduled deletion of any kind runs in production. 🔒 Deleting a vector does **not** remove photo tags (verified in the live schema — no cascade), so guests keep every photo already delivered.
 - **Database of record for tags/linkage:** Supabase Postgres (Singapore), RLS-gated (policy § 3.1).
 
 ---
@@ -91,7 +91,7 @@ On balance the biometric layer can be **proportionate**, *conditional on the con
 - **Thresholds tuned to reduce harm** — ≥ 0.85 to auto-tag, a human-in-the-loop **suggested-tag** band (0.65–0.85), and **< 0.65 uploads untagged** rather than guessing.
 - **Untagged-still-delivered** — the feature is not load-bearing for photo delivery; a face that never matches still reaches the couple's gallery, so declining biometrics costs the guest nothing structural.
 - **Purpose-limited** — vectors are used **only** to tag within the one event; policy § 2.3 forbids sale, cross-vendor sharing, and out-of-platform advertising.
-- **Revocable + time-boxed** — "Delete my face data" (≤ 5-min revocation), Photo Consent OFF, and the 5-year hard deletion.
+- **Revocable + time-boxed** — "Delete my face data" (≤ 5-min revocation) and Photo Consent OFF both work today; the time-box is deletion 3 months after the event ends (adopted 2026-08-17, **not yet automated**).
 
 **Conclusion.** The processing can be proportionate **only if** (a) the feature stays a genuine opt-in overlay on non-biometric tagging (which it is), and (b) the **consent standard is upgraded to explicit, separate, evidenced opt-in for face recognition** (§ 6). Absent (b), the sensitive-data processing is **not adequately justified** against the available less-intrusive alternatives.
 
@@ -119,7 +119,7 @@ Inherent risk = likelihood × impact **before** controls. Residual risk = risk r
 | BV-6 | **Covert or non-consensual capture (paparazzi)** — a guest photographed/enrolled without a real choice | Med | High | **Med–High** | Paparazzi opt-out with **face-blur** for opted-out guests (policy § 6.1); NSFW filter always-on | **Low–Med** — depends on the § 6 consent fix and on opt-out being surfaced *before* capture, not only after `[TO CONFIRM]` |
 | BV-7 | **Re-identification from vectors** — a stored 128-dim template reverse-engineered or matched against an external face database | Low | High | **Med** | Per-event silo (no cross-event corpus to link against); encryption at rest; no sale/sharing (§ 2.3); no external face DB used | **Low** |
 | BV-8 | **Child / minor faces enrolled** — a minor guest's biometric processed without lawful guardian consent | `[TO CONFIRM]` | High | **High** | Minors excluded from person-graph; **whether the auto-tag enrolment path itself blocks minors is `[TO CONFIRM]`** | **`[TO CONFIRM]` — cannot be rated Low until minor-enrolment behavior is confirmed and, if enrolment is possible, blocked or guardian-consent-gated** |
-| BV-9 | **Retention beyond necessity** — vectors kept longer than needed for tagging | Low | Med | **Med** | 5-year hard deletion with event data; earlier deletion via link/toggle; auto-purge (policy § 4) | **Low** |
+| BV-9 | **Retention beyond necessity** — vectors kept longer than needed for tagging | Low | Med | **Med** | Deletion 3 months after the event ends (adopted 2026-08-17, **enforcement not yet built**); earlier deletion via link/toggle, which does work today | **Low** |
 
 ---
 
@@ -131,7 +131,7 @@ The following controls exist in the shipped design and are load-bearing for the 
 - **Per-event scoping — vectors NEVER reused across events (policy § 1.4)** — the single most important control against function creep and cross-event identification.
 - **Confidence thresholds** — ≥ 0.85 auto-tag · 0.65–0.85 human-confirmed suggestion · < 0.65 untagged.
 - **"Delete my face data" link + ≤ 5-minute revocation cycle**, and Photo Consent OFF revokes live enrolment + clears any selfie display photo.
-- **5-year deletion** — vectors auto-purge with event data at the retention boundary (policy § 4); account-deletion cascades to face vectors (§ 4).
+- **Deletion 3 months after the event ends** (owner ruling 2026-08-17) — ⚠ **ADOPTED, NOT YET AUTOMATED**: no scheduled deletion runs in production today, so this is a commitment, not a description of current behaviour. Account deletion does cascade to face vectors today (§ 4), and the revoke link works.
 - **Face-blur for paparazzi opt-outs** — opted-out guests are face-blurred in captures (policy § 6.1).
 - **Encryption at rest** — per-event vector store encrypted (AES-256), signed-URL-only media, RLS-gated linkage tables (policy § 1.4/§ 3.1/§ 3.2/§ 7.1).
 - **NSFW filter always-on** and **couple review window** before public unlock (per Papic constraints).
@@ -162,7 +162,7 @@ Adopt this **unless PH counsel advises** that a narrower approach satisfies § 1
 
 ## 7. Residual-risk conclusion
 
-With the controls in § 5 — above all **per-event scoping**, the **threshold ladder**, **≤ 5-min revocation**, **5-year deletion**, **face-blur opt-out**, and **encryption at rest** — most biometric risks reduce to **Low** (BV-2, BV-4, BV-5, BV-7, BV-9) or **Low–Med** (BV-3, BV-6).
+With the controls in § 5 — above all **per-event scoping**, the **threshold ladder**, **≤ 5-min revocation**, **deletion 3 months after the event ends (adopted 2026-08-17, not yet automated)**, **face-blur opt-out**, and **encryption at rest** — most biometric risks reduce to **Low** (BV-2, BV-4, BV-5, BV-7, BV-9) or **Low–Med** (BV-3, BV-6).
 
 **However, overall residual risk is CONDITIONAL and cannot be declared Low–Medium until the consent-standard fix lands.** Specifically, before or at wider rollout / scale:
 
