@@ -588,6 +588,34 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > Live Photo Wall while the SKU is active and publicly listed.
 
 > ### ✅ DONE 2026-08-17: THE DOORS ARE DESIGNED — do NOT rebuild any of it
+> **PRs [#4484](https://github.com/iscasasola/setnayan-platform/pull/4484) (merged) +
+> [#4486](https://github.com/iscasasola/setnayan-platform/pull/4486) (merged) +
+> [#4491](https://github.com/iscasasola/setnayan-platform/pull/4491).**
+>
+> 🛑 **READ THIS BEFORE THE REST OF THE BLOCK — IT WAS WRITTEN AFTER #4484 AND WAS WRONG
+> BY THREE DOORS.** The count below says "ten". It is **thirteen**, and the three extras
+> were found only because the owner asked *"did we accomplish the goal here?"* and an
+> adversarial audit then beat my own guard:
+> **`/host/accept/[token]`** (co-host invite — wrapper BYTE-IDENTICAL to the Samahan one
+> deleted three files away, and the Samahan file's own comment says it *"mirrors"* it) ·
+> **`/[slug]/welcome`** (the +1 confirming their name — wrapper one word off `JoinShell`'s)
+> · **`/panood/cam/[token]`** (Live Studio camera seat, whose own header calls it *"A
+> DIRECT clone of the Papic seat-claim page"* that #4484 had just ported).
+> 🔑 **A HAND-ENUMERATED GUARD LIST IS A LIST OF THE DOORS YOU THOUGHT OF**, and
+> **A CLONE INHERITS THE BUG ITS TWIN ALREADY FIXED** — `/panood/cam` still carried the
+> *"one of the couple"* copy its twin had had corrected, surviving in the SIGNED-OUT arm
+> because every review pass was made signed in.
+> ⏭ **AND NINE MORE PAGES CARRY THE IDENTICAL DOOR CARD** (Papic `me`/`seat`/`pool`/
+> `guest`/`decorate`, the Live Studio·3D·Papic demos, Pabati). **Deliberately NOT ported** —
+> several use the card only for a gate/error state on a camera screen, so changing them is
+> a design call. They are **pinned as an exact-match bill** in the guard: a tenth page
+> adopting the shape fails, and porting one of the nine fails until its line is deleted.
+> ⚖ **THE BRIEF'S LITERAL GOAL IS STILL NOT MET AND THAT IS AN OWNER CALL.** It asked that
+> *"signing in, signing up, resetting a password, claiming an invitation or joining an
+> event all look like the same considered product."* Measured: **three** registers remain —
+> sign-in wears its own owner-locked card, sign-up + both password pages wear the marketing
+> register, and the thirteen doors wear the new one.
+>
 > **PR [#4484](https://github.com/iscasasola/setnayan-platform/pull/4484).** Every way *into*
 > Setnayan — the Alaga claim · the supplier claim + its finalize step · the four `/join` steps ·
 > both Papic doors · the Samahan invite — rendered through **SIX different hand-rolled wrappers**,
