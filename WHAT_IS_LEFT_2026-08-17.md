@@ -19,7 +19,7 @@ did not measure something directly, this file says so.
 
 | | |
 |---|---|
-| ~~The big unbuilt thing~~ | 🛑 **RETRACTED 2026-08-17 — the Event Hub IS BUILT.** See §4. What is left there is **one ordering fix**, not six steps. |
+| ~~The big unbuilt thing~~ | 🛑 **RETRACTED — the Event Hub IS BUILT.** See §4. The one ordering fix it needed is now **DONE AND LIVE** (#4483), as is the booking-attribution gap (#4488). |
 | **The finishing work** | ~40 items from the last register, almost all still open. Mostly small. |
 | **Waiting on you** | 15 things no engineer can close — a signature, a price, a ruling, a switch. |
 
@@ -108,9 +108,9 @@ that already exists.** That is the paid-twice mistake, in the register whose job
 - **A supplier-shaped view of the event** — still needs your ruling first (§6). This is the only
   genuinely large one, and it is the *last* thing, not the first.
 
-**Wrong today regardless — unchanged, and these are the real day-of risks:**
-- On the day, every supplier sees a "start the next item" button. Only a coordinator is allowed to press it, **and the refusal is silent.** Embarrassing at a live wedding.
-- The shot list says it syncs to the couple. **It never leaves the phone it was typed on** — and neither does the coordinator's issues log.
+**Wrong today regardless — and two of these three did NOT survive checking, so read carefully:**
+- ⚠ **UNVERIFIED:** "every supplier sees a *start the next item* button only a coordinator may press, and the refusal is silent." The control's own note says **the booked supplier IS allowed**. Measure it before building anything.
+- ⚠ **CORRECTED:** the shot list does **not** claim to sync. Keeping it on the phone is a deliberate choice for venues with bad signal, and the synced version is already named as a follow-up. **A feature request, not a broken promise.** Same for the coordinator's issues log.
 - The day-of console opens only on the exact booked date. No rehearsal, no morning-after.
 
 ⚠ **The scope document
@@ -126,7 +126,10 @@ carries the six-slice framing and its slices 1 and 2 are the wrong shape.** Corr
 - The couple's four daily screens (guest list, supplier comparison, budget, gallery) — still only recoloured.
 - The supplier's sixty-odd screens — same.
 - Your own admin screens — still 33 files of hand-built tables. This ships last on purpose.
-- Sign-in, sign-up, password reset, invite and join — **the first screens anyone ever sees, still undesigned.**
+- ✅ ~~Sign-in, sign-up, password reset, invite and join — the first screens anyone ever sees.~~
+  **THIRTEEN DOORS ARE DONE AND LIVE** (PRs #4484 · #4486 · +1). ⏭ What is left is **your call**,
+  not a build: sign-up and the two password pages still wear the website's look rather than the
+  door look, so five journeys carry three looks. Unifying them is taste, not a defect.
 - Still undrawn: the supplier marketplace, the product tour, the deeper photo-service pages, the onboarding quiz.
 
 **Things that are built but nobody can reach**
