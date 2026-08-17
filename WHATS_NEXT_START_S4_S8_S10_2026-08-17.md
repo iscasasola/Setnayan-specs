@@ -1,4 +1,12 @@
-# Start S4 · S8 · S10 — ready to paste, 17 August 2026 (evening)
+# Start S4 · S8 · S10 — ⚠ SUPERSEDED IN PART, 17 August 2026 (evening)
+
+> 🛑 **S4 IS DONE — ALL EIGHT — DO NOT PASTE ITS BLOCK AGAIN.** PR #4505 merged and every item was
+> verified in the code, not from its changelog. Its block below is kept only as the record of what
+> was asked for.
+> 🔄 **S8 and S10 both STARTED and both have real work left** — see the re-measured register in
+> [`WHATS_NEXT_SESSION_PROMPTS_2026-08-17.md`](WHATS_NEXT_SESSION_PROMPTS_2026-08-17.md).
+> **S8's shared table archetype now EXISTS; 33 files remain to be converted into it — do not
+> rebuild the archetype.**
 
 > 📄 **COPY-PASTE PAGE (one button per prompt):**
 > <https://claude.ai/code/artifact/32b8e301-6d2c-433d-976f-b3490d694d67>

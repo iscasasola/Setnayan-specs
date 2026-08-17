@@ -29,33 +29,40 @@
 > 🛑 **NEVER AUTO-MERGE A FAN-OUT.** Auto-merge is the standing default for a single PR. It is
 > **not** the default when two sessions are in flight — read both diffs first.
 
-## The waves — CORRECTED 2026-08-17 after measuring the file overlaps
+## 📋 THE REGISTER, RE-MEASURED 2026-08-17 (evening) — verified in code and prod, not from docs
 
-🛑 **THE FIRST CUT OF THIS TABLE PAIRED S5 WITH S11. THEY SHARE 118 FILES.** I had asserted the
-pairings were safe instead of computing them. Every pair below is now derived from an actual
-overlap count, not from which sessions *sounded* unrelated.
+**Four done · five part-done · seven not started.** Every line below was measured this evening.
 
-**At two at a time — six waves:**
-
-| Wave | Together | Shared files |
+| | session | state |
 |---|---|---|
-| ~~**1**~~ | ✅ **S1 DONE** (PR #4483, live) · **S2 REWRITTEN — now two pages behind an owner ruling** | 0 |
-| **2** | **S4** eight small things · **S9** under the floor | 0 |
-| **3** | **S5** the couple's four screens · **S7** the five undrawn surfaces | 0 |
-| **4** | **S6** the supplier's screens · **S10** the compliance pack | 0 (S10 opens no PR) |
-| **5** | **S11** who is in this event · **S8** your own admin screens | 0 · S11 needs S1 merged |
-| **6** | **S3** "we couldn't load it" | 🛑 **ALONE** |
+| **S1** | Supplier through the door | ✅ **DONE** — access fix, booking attribution, host page proven already correct |
+| **S2** | The doors | ✅ **DONE** — 22 entry screens, sign-up, password recovery, tab titles |
+| **S4** | Eight small things | ✅ **DONE — all eight, verified in the code** |
+| **S12** | Event Hub design | ✅ **DONE** — prototypes drawn; produced S13–S16 |
+| **S8** | Your admin screens | 🔄 archetype built · **33 files left to convert** |
+| **S9** | Under the floor | 🔄 batches 1–2 · **273 of 384 tables still open — ~177 to go** |
+| **S10** | Compliance pack | 🔄 rebuilt today · one change still open |
+| **S13** | The Hub's words | 🔄 **103 → 93 wedding words left**; four screens done, the main page untouched |
+| **S16** | One measure, three widths | ✅ landed |
+| **S3** | "We couldn't load it" | ⬜ **not started** — the kit has 2 consumers, both from the admin work; **no guest screen uses it** |
+| **S5** | The couple's four daily screens | ⬜ not started |
+| **S6** | The supplier's 63 screens | ⬜ not started |
+| **S7** | The five undrawn surfaces | ⬜ not started |
+| **S11** | Who is in this event | ⬜ **not started — verified.** The `/people` page that exists is ACCOUNT-level, not per-event |
+| **S14** | The way between the rooms | ⬜ not started |
+| **S15** | Wedding-only parts stay home | ⬜ not started |
 
-**At three at a time — five waves.** Only if somebody can genuinely review three diffs; the
-two-at-a-time cap came from a review-capacity failure, not a file collision.
+🔴 **NOT A SESSION, AND STILL OPEN:** three changes from 2026-08-15 remain broken —
+[#4472](https://github.com/iscasasola/setnayan-platform/pull/4472) ·
+[#4473](https://github.com/iscasasola/setnayan-platform/pull/4473) (conflicting, untested) ·
+[#4478](https://github.com/iscasasola/setnayan-platform/pull/4478). The fourth was fixed and
+superseded today — **it was hiding a real disclosure**, which is why these need reading, not
+re-arming.
 
-| Wave | Together | |
-|---|---|---|
-| ~~**1**~~ | ✅ S1 done · S2 rewritten · **S9** remains | all pairs 0 |
-| **2** | **S4** · **S7** · **S8** | all pairs 0 |
-| **3** | **S5** · **S6** · **S10** | all pairs 0 |
-| **4** | **S11** | needs S1 merged |
-| **5** | **S3** | 🛑 **ALONE** |
+🪤 **HOW THIS TABLE WAS CHECKED, because the method matters more than the table.** Counting strings
+said three of S4's items were still open. Reading them showed all three were fixed and the
+survivors were **comments describing the old behaviour**. **A changelog is not evidence and neither
+is a grep count — read the line.**
 
 ## The conflict matrix — measured, not assumed
 
@@ -323,7 +330,21 @@ thing — anchor on the call site.
 
 ---
 
-# SESSION 4 · Eight small things a person would notice
+# SESSION 4 · Eight small things — ✅ DONE, ALL EIGHT, DO NOT RE-RUN
+**PR #4505, merged 2026-08-17. VERIFIED IN THE CODE, not from its changelog.**
+
+✅ Camera-seat holders now show a NAME and shots left · a supplier can type a sentence · the emcee
+survives a bundled booking · the date-hold limit's untrue comment is corrected · the photographer's
+view no longer redirects away after midnight · shops no longer start narrowed.
+✅ **The "3 cameras free" line is fixed WELL** — it is now conditional and only states the number
+when the roster agrees with it, so the number-vs-slots contradiction is gone.
+✅ **Item 8 was CONFIRMED, not assumed** — the silent refusal was real. The prompt said measure
+before building and the session did.
+🪤 **A CHANGELOG IS NOT EVIDENCE, AND NEITHER IS A GREP.** Checking this by counting strings said
+three items were still open; reading them showed all three were fixed and the survivors were
+COMMENTS describing the old behaviour. Read the line, never the count.
+
+
 **Wave 2 · pairs with S9 · 🛑 NEVER beside S6 (55 shared files) · owns the couple's vendor actions file, S5 must not touch it**
 
 ```
@@ -515,7 +536,11 @@ plan says what it adds. He asked for a matrix on 2026-07-04. Build around it and
 
 ---
 
-# SESSION 8 · Your own admin screens
+# SESSION 8 · Your own admin screens — 🔄 STARTED, MOST OF IT LEFT
+**PR #4506 merged. The shared archetype EXISTS now — `app/admin/_components/console-table.tsx`.**
+⏭ **33 files still carry a raw table** (was 34). **Do not rebuild the archetype — convert into it.**
+
+
 **Wave 5 · pairs with S11 · zero overlap with anything · design**
 
 ```
@@ -550,7 +575,12 @@ override reason.
 
 ---
 
-# SESSION 9 · Under the floor
+# SESSION 9 · Under the floor — 🔄 BATCHES 1 AND 2 LANDED
+**Measured in production this evening: 273 of 384 tables still readable by a stranger** (was 306).
+⏭ **~177 to go**, in small batches, with the sixth gate. The browser-report table exists and the
+switches alarm enumerates. **The camera-seat consent gate still needs the owner's ruling.**
+
+
 **Wave 2 · pairs with S4 · no visible change · 🛑 the riskiest session here**
 
 ```
@@ -614,7 +644,11 @@ Nothing a person sees. Two things that make one future mistake a near-miss inste
 
 ---
 
-# SESSION 10 · The compliance pack
+# SESSION 10 · The compliance pack — 🔄 REBUILT TODAY (PR #4504), ONE MORE OPEN
+⚠ The shipped pack was last changed **2026-08-17** — it is no longer three weeks stale. Re-measure
+before repeating any claim below; several were closed by that PR.
+
+
 **Wave 4 · pairs with S6 · DOCUMENTS ONLY — opens no PR against the app**
 
 ```
