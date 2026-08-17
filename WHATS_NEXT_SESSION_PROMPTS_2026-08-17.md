@@ -114,6 +114,39 @@ document is not evidence.** Grep for the writer.
 
 ---
 
+## 🔁 THE COORDINATION BLOCK — paste this SECOND, under the shared header, in EVERY session
+
+**New 2026-08-17 (evening). It exists because none of today's four cross-session failures were
+caught by the file-overlap matrix** — two sessions can share zero files and still undo each other.
+Full reasoning: [`HOW_TO_SEND_A_SESSION_2026-08-17.md`](HOW_TO_SEND_A_SESSION_2026-08-17.md).
+
+```
+BEFORE YOU WRITE ANY CODE, RUN THIS AND PASTE THE RESULT INTO YOUR FIRST REPLY:
+
+  git fetch origin --quiet
+  git log origin/main --oneline --since="24 hours ago" | head -30
+  gh pr list --state open --json number,title,headRefName \
+    -q '.[]|"#\(.number) [\(.headRefName)] \(.title)"'
+
+Then answer, in one line each:
+  - Did anything in that list touch what I am about to touch? (name it, or say none)
+  - Is a branch already open for MY job? (if yes, STOP and say so — do not open a second)
+  - Which of my "already ships" lines does that list contradict?
+
+AND BEFORE YOU MERGE, RUN THE SAME TWO COMMANDS AGAIN. On 2026-08-17 a change that was
+correct when it was written would have undone another session's work by the time it
+merged, and nothing in either pull request could have revealed it.
+
+IF YOUR WORK TOUCHES DATABASE PERMISSIONS: re-read the LIVE grants immediately before
+merging. A migration is judged against the state it will LAND in, not the state it was
+written against.
+
+IF YOUR BRANCH IS MORE THAN A DAY OLD: merge origin/main before doing anything else. One
+branch today sat 37 commits behind and was broken three separate times by main moving.
+```
+
+---
+
 ## SHARED HEADER — paste this at the top of EVERY block below
 
 ```
