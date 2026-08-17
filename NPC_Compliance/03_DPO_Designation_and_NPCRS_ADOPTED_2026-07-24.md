@@ -48,7 +48,7 @@
 | **DPO employment basis (employee / contractor / outsourced)** | Internal — the proprietor / PIC also serves as DPO (2-person founding team). See A.3 for the independence rationale. |
 | **DPO other contact (mobile / landline)** | **‹OWNER TO SUPPLY: contact number›** |
 | **Total employees / headcount** | **2** — Indalecio S. Casasola II (proprietor + DPO) · Claire E. Buanhog (VP, co-founder) |
-| **Total number of data subjects** | **~401** as of 2026-07-05 pre-launch snapshot (19 customers + 50 vendors + 332 guests; 61 events; will grow) |
+| **Total number of data subjects** | **48 as measured in production 2026-08-17** (9 accounts + 39 guests; 2 shops; 6 events; 0 active biometric face vectors). ⚠ CORRECTED 2026-08-17 — this field read **~401** from the 2026-07-05 pre-launch snapshot (19 customers + 50 vendors + 332 guests; 61 events). That test data was purged; `07_Compliance_Facts_Register` recorded the ~10× drop on 2026-07-31 and the correction was never propagated to the headline fields. The registration-threshold analysis is UNAFFECTED and strengthened: 48 subjects and 0 biometric vectors sit further below the ≥1,000-SPI trigger than the stale figures did |
 | **Number of data subjects with sensitive personal information** | **0 active biometric face vectors** currently; a subset of the 50 vendors submit government IDs at verification; some guest dietary fields may reveal health/religion. (Not a fixed count — see B.4.) |
 | **Sector / industry** | Information & communications technology — online life-events / weddings platform (marketplace + SaaS) |
 
@@ -180,7 +180,7 @@ NPC mandatory registration of a data processing system is generally triggered wh
 | NPC field | Value |
 |---|---|
 | Total number of employees | **2** (Indalecio S. Casasola II — proprietor + DPO; Claire E. Buanhog — VP, co-founder) |
-| Total number of data subjects | **~401** (2026-07-05 pre-launch snapshot: 19 customers + 50 vendors + 332 guests; 61 events; will grow) |
+| Total number of data subjects | **48 as measured in production 2026-08-17** (9 accounts + 39 guests; 2 shops; 6 events; 0 active biometric face vectors). ⚠ CORRECTED 2026-08-17 — this field read **~401** from the 2026-07-05 pre-launch snapshot (19 customers + 50 vendors + 332 guests; 61 events). That test data was purged; `07_Compliance_Facts_Register` recorded the ~10× drop on 2026-07-31 and the correction was never propagated to the headline fields. The registration-threshold analysis is UNAFFECTED and strengthened: 48 subjects and 0 biometric vectors sit further below the ≥1,000-SPI trigger than the stale figures did |
 | Number of data subjects whose **sensitive personal information** is processed | **No fixed count today — 0 active biometric face vectors**; a subset of the 50 vendors submit government IDs at verification; some guest dietary fields may reveal health/religion (see B.4). |
 | Categories of data subjects | Customers (couples / organizers) · Guests · Vendors (business representatives) · (internal: Setnayan team / admins) |
 

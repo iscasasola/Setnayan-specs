@@ -19,7 +19,7 @@ The original `*_DRAFT_2026-07-05.md` files are **untouched** (kept for lineage).
 
 - PIC: **SETNAYAN SOFTWARE DEVELOPMENT SERVICE** (sole prop of Indalecio S. Casasola II) · DTI **8297508** (25 Jun 2026 – 25 Jun 2031)
 - DPO: **Indalecio S. Casasola II** · iscasasolaii@gmail.com · registered on the NPC DPO system **2026-07-07**
-- Headcount: **2** (owner + Claire E. Buanhog, VP) · data subjects: **~401** (19 customers + 50 vendors + 332 guests; grows) · **0** active biometric
+- Headcount: **2** (owner + Claire E. Buanhog, VP) · data subjects: **48 as measured in production 2026-08-17** (9 accounts + 39 guests; 2 shops; 6 events; 0 active biometric face vectors). ⚠ CORRECTED 2026-08-17 — this field read **~401** from the 2026-07-05 pre-launch snapshot (19 customers + 50 vendors + 332 guests; 61 events). That test data was purged; `07_Compliance_Facts_Register` recorded the ~10× drop on 2026-07-31 and the correction was never propagated to the headline fields. The registration-threshold analysis is UNAFFECTED and strengthened: 48 subjects and 0 biometric vectors sit further below the ≥1,000-SPI trigger than the stale figures did · **0** active biometric
 - DSR response SLA: **15 business days** everywhere · breach notification: **72 hours**
 - Sub-processor jurisdictions filled (Vercel/Resend/Suno = US; Suno holds no personal data) · automated-decision declaration = Anti-Fraud auto-suspend (reversible)
 

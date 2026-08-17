@@ -39,7 +39,7 @@ This Privacy Manual is the flagship governance document of the Personal Informat
 | Nature of business | Philippines-first life-events (weddings-first) planning platform serving three roles — customers (couples/organizers), vendors, and guests |
 | Registered address / principal place of business | 76 Sampaguita Avenue, Quezon City, **‹OWNER TO SUPPLY: barangay + ZIP›** |
 | Number of employees / personnel with access to personal data | **2 of 2** — Indalecio S. Casasola II (proprietor + DPO) and Claire E. Buanhog (VP, co-founder) |
-| Approximate number of data subjects | **~401** as of the 2026-07-05 pre-launch snapshot (19 customers + 50 vendors + 332 guests; will grow) |
+| Approximate number of data subjects | **48 as measured in production 2026-08-17** (9 accounts + 39 guests; 2 shops; 6 events; 0 active biometric face vectors). ⚠ CORRECTED 2026-08-17 — this field read **~401** from the 2026-07-05 pre-launch snapshot (19 customers + 50 vendors + 332 guests; 61 events). That test data was purged; `07_Compliance_Facts_Register` recorded the ~10× drop on 2026-07-31 and the correction was never propagated to the headline fields. The registration-threshold analysis is UNAFFECTED and strengthened: 48 subjects and 0 biometric vectors sit further below the ≥1,000-SPI trigger than the stale figures did |
 | NPC registration number (PIC/DPO registration) | DPO registered on the NPC DPO system **2026-07-07**; DPS registration reference to be captured after NPCRS filing |
 
 ### 1.2 Purpose
