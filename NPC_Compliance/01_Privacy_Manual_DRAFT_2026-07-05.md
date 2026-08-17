@@ -1,5 +1,12 @@
 # Setnayan Privacy Manual
 
+> 🛑 **SUPERSEDED — DO NOT RENDER, DO NOT FILE, DO NOT CITE. Read [`01_Privacy_Manual_ADOPTED_2026-07-24.md`](01_Privacy_Manual_ADOPTED_2026-07-24.md) instead.**
+> Superseded 2026-07-24 by the DPO-adopted version; this banner added 2026-08-17.
+> **Why this matters:** the NPC PDF generator pointed at THIS file until 2026-08-17, so the
+> shipped compliance pack was built from unadopted text and re-published claims the adopted
+> version had already corrected. Anything below may be stale or untrue. If you need to render
+> this document, repoint `NPC_Submission_PDF_2026-07-16/_generate_pdfs.py` at the ADOPTED file.
+
 > **DRAFT — for DPO (Indalecio Sacdalan Casasola II) + PH counsel finalization and NPC filing; not yet adopted.**
 > Date drafted: **2026-07-05**
 > Document ID: `NPC_Compliance/01_Privacy_Manual_DRAFT_2026-07-05.md`

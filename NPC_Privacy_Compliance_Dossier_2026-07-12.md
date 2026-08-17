@@ -144,7 +144,7 @@ Setnayan uses the following subprocessors. Cross-border transfers rely on § 21 
 |---|---|---|---|
 | Supabase | Database + authentication | Singapore | Primary data store; RLS enforced |
 | Vercel | Web application hosting | United States | |
-| Cloudflare | CDN + R2 object storage (media) | APAC / PH-region buckets | |
+| Cloudflare | CDN + R2 object storage (media) | Asia-Pacific (APAC) buckets | |
 | Resend | Transactional email | United States | |
 | Sentry | Server-side error monitoring (stack traces only, no PII) | United States | |
 | PostHog Cloud | Product analytics (cookie-consent opt-in; no personal identifiers) | United States | |
@@ -156,7 +156,7 @@ Setnayan uses the following subprocessors. Cross-border transfers rely on § 21 
 | Backblaze B2 | Cold object storage — Papic compressed-gallery cold tier at scale | United States | **Not yet active** — flag-gated; engaged only once the aggregate cold pile reaches ~tens of TB |
 | CSAM hash-matching provider (e.g. PhotoDNA / NCMEC) | Known-illegal-image hash matching for **any open-crowd capture (corporate / tournament)** — *restated 2026-07-20: the cancelled "Papic Lite" product is no longer the trigger; the duty travels with open-crowd ingest ([`Papic_Compliance_Delta_2026-07-20.md`](Papic_Compliance_Delta_2026-07-20.md) §3.2)* | United States | **Not yet engaged** — and **no open-crowd capture is offered in V1**; mandatory-reporting duty to be reviewed by counsel before any such capture ships |
 
-Cross-border destinations disclosed: Singapore (Supabase), United States (Vercel, Cloudflare account plane, Resend, Sentry, PostHog, Anthropic, Persona, Google, Suno), United States/Singapore (TikTok). Media objects reside in Cloudflare's PH-region R2 buckets.
+Cross-border destinations disclosed: Singapore (Supabase), United States (Vercel, Cloudflare account plane, Resend, Sentry, PostHog, Anthropic, Persona, Google, Suno), United States/Singapore (TikTok). Media objects reside in Cloudflare R2 buckets in the Asia-Pacific (APAC) region (there is no Philippines region in R2).
 
 ---
 

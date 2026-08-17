@@ -13,7 +13,7 @@
 | **Personal Information Controller (PIC)** | SETNAYAN SOFTWARE DEVELOPMENT SERVICE — sole proprietorship of Indalecio Sacdalan Casasola II · DTI Business Name Reg. No. 8297508. Operating brand: Setnayan. |
 | **Data Protection Officer (DPO)** | Indalecio Sacdalan Casasola II · iscasasolaii@gmail.com · registered (or registration in progress `[TO CONFIRM]`) with the NPC |
 | **Register owner** | DPO (Indalecio Sacdalan Casasola II) |
-| **Key infrastructure / processors** | Vercel (hosting) · Supabase (Postgres, Singapore region) · Cloudflare R2 (object storage, APAC/PH region) · Resend (transactional email) · Persona / Veriff / Onfido (vendor ID + liveness) · Anthropic (Claude API) / OpenAI (fallback) · AMLC API / ComplyAdvantage (sanctions screening) · DTI Database (business-registration validation) |
+| **Key infrastructure / processors** | Vercel (hosting) · Supabase (Postgres, Singapore region) · Cloudflare R2 (object storage, Asia-Pacific (APAC)) · Resend (transactional email) · Persona / Veriff / Onfido (vendor ID + liveness) · Anthropic (Claude API) / OpenAI (fallback) · AMLC API / ComplyAdvantage (sanctions screening) · DTI Database (business-registration validation) |
 | **Governing policy** | `01_Contracts/Setnayan_Privacy_and_Security_Policy.md` (v1, locked 2026-05-12; Person-Graph amendment 2026-07-05 in DRAFT) |
 | **Register status** | DRAFT — pending DPO adoption |
 | **Register version / date** | 2026-07-05 |
@@ -74,7 +74,7 @@ Each row is a distinct processing system (or coherent processing activity) asses
 2. Edge becomes real **only on mutual confirmation**; declined edges are suppressed immediately.
 3. Life-story references are assembled from events where photo-sharing consent was given at RSVP; the person can hide any item or opt out of an event's story without touching the host's gallery.
 4. Trusted-circle score is computed at read time from **explicit endorsements/reviews only**, gated by min-N ≥ 5, degree ≤ 2, never from bookings, never purchasable.
-5. Storage: `person_connections` (edges) + `person_story_items` (references) in Supabase Postgres (Singapore); referenced media in Cloudflare R2 (APAC/PH). Deny-by-default RLS; participant-scoped access only.
+5. Storage: `person_connections` (edges) + `person_story_items` (references) in Supabase Postgres (Singapore); referenced media in Cloudflare R2 (Asia-Pacific, APAC). Deny-by-default RLS; participant-scoped access only.
 
 ## 2.2 Necessity & proportionality assessment
 

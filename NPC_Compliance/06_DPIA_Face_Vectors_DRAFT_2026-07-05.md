@@ -63,7 +63,7 @@ To **auto-tag guests in a specific event's photo gallery** (the Papic candid-cap
 ### 1.5 Systems, storage, and retention
 
 - **Vector store:** per-event, **encrypted at rest** (policy § 1.4, § 3.2, § 7.1 AES-256). Never reused across events/weddings.
-- **Enrolment / gallery media:** Cloudflare **R2 (APAC/PH region)**, signed-URL access only (policy § 3.2).
+- **Enrolment / gallery media:** Cloudflare **R2 (Asia-Pacific, APAC)**, signed-URL access only (policy § 3.2).
 - **Matching engine host / location:** `[TO CONFIRM]` — the compute location and any sub-processor for the face-embedding/matching step is not recorded in the policy and must be confirmed (implicates § 10 cross-border analysis if it runs outside SG/PH).
 - **Retention:** face vectors kept for the **per-event lifetime + 5 years**, then **auto-purged with the event data** (policy § 4). Earlier deletion via the guest "Delete my face data" link or Photo Consent OFF.
 - **Database of record for tags/linkage:** Supabase Postgres (Singapore), RLS-gated (policy § 3.1).

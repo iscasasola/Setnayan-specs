@@ -9,14 +9,27 @@ CORPUS = os.path.expanduser("~/Documents/Claude/Projects/Setnayan")
 OUT = os.path.join(CORPUS, "NPC_Submission_PDF_2026-07-16")
 os.makedirs(OUT, exist_ok=True)
 
+# Stamped into every page footer so a reader can tell the pack's currency from the
+# artifact itself, not from a folder name. Bump when you regenerate.
+REGEN_DATE = "2026-08-17"
+MERGED_NAME = f"Setnayan_NPC_Submission_Complete_{REGEN_DATE}.pdf"
+
 # (source markdown path relative to CORPUS, output pdf basename, human title)
 DOCS = [
     ("NPC_Privacy_Compliance_Dossier_2026-07-12.md", "00_Executive_Dossier", "Privacy Compliance Dossier (Executive Submission)"),
     ("NPC_Compliance/00_README_NPC_Compliance_Pack.md", "01_README_Compliance_Pack", "NPC Compliance Pack — README"),
-    ("NPC_Compliance/01_Privacy_Manual_DRAFT_2026-07-05.md", "02_Privacy_Manual", "Privacy Manual"),
+    # ⚠ ADOPTED, NOT DRAFT. Corrected 2026-08-17. These three had an _ADOPTED_
+    # twin from 2026-07-24 carrying every DPO correction, while this list still
+    # named the superseded _DRAFT_ — so the shipped pack was rendered from the
+    # unadopted text and re-shipped its retired claims (notably the Privacy
+    # Manual's "90 days hot → 5 years cold / 5-year hard limit" photo row, which
+    # DPS-05 retired on 2026-08-07 and which contradicts the live /privacy page).
+    # Regenerating alone would NOT have fixed that: the source pointer was the bug.
+    # If a doc gains an _ADOPTED_ twin, repoint it HERE in the same commit.
+    ("NPC_Compliance/01_Privacy_Manual_ADOPTED_2026-07-24.md", "02_Privacy_Manual", "Privacy Manual"),
     ("NPC_Compliance/02_Records_of_Processing_Activities_DRAFT_2026-07-05.md", "03_Records_of_Processing_Activities", "Records of Processing Activities (ROPA)"),
-    ("NPC_Compliance/03_DPO_Designation_and_NPC_Registration_Sheet_DRAFT_2026-07-05.md", "04_DPO_Designation_and_NPC_Registration_Sheet", "DPO Designation & NPC Registration Sheet"),
-    ("NPC_Compliance/04_Data_Breach_Management_Policy_DRAFT_2026-07-05.md", "05_Data_Breach_Management_Policy", "Data Breach Management Policy"),
+    ("NPC_Compliance/03_DPO_Designation_and_NPCRS_ADOPTED_2026-07-24.md", "04_DPO_Designation_and_NPC_Registration_Sheet", "DPO Designation & NPC Registration Sheet"),
+    ("NPC_Compliance/04_Data_Breach_Management_Policy_ADOPTED_2026-07-24.md", "05_Data_Breach_Management_Policy", "Data Breach Management Policy"),
     ("NPC_Compliance/05_DPIA_Register_DRAFT_2026-07-05.md", "06_DPIA_Register", "DPIA Register"),
     ("NPC_Compliance/06_DPIA_Face_Vectors_DRAFT_2026-07-05.md", "07_DPIA_Face_Vectors", "DPIA — Face Vectors"),
     ("NPC_Compliance/07_Compliance_Facts_Register.md", "08_Compliance_Facts_Register", "Compliance Facts Register"),
@@ -54,14 +67,18 @@ td { padding: 3pt 4pt; border: 0.5pt solid #ccc; vertical-align: top; }
 def convert(md_rel, out_base, title):
     src = os.path.join(CORPUS, md_rel)
     if not os.path.exists(src):
-        print(f"  SKIP (missing): {md_rel}"); return None
+        # ⚠ Was `print SKIP; return None` until 2026-08-17 — a renamed or mistyped
+        # source silently dropped a whole document from the merged packet, and the
+        # run still exited 0. A compliance pack quietly missing its ROPA looks
+        # exactly like a successful build. Fail loudly instead.
+        raise SystemExit(f"FATAL: source missing for '{title}': {md_rel}")
     with open(src, encoding="utf-8") as f:
         text = f.read()
     body = markdown.markdown(
         text,
         extensions=["tables", "fenced_code", "sane_lists", "nl2br", "attr_list"],
     )
-    footer = html.escape(f"Setnayan · NPC Submission · {title}")
+    footer = html.escape(f"Setnayan · NPC Submission · {title} · regenerated {REGEN_DATE}")
     doc = f"""<!DOCTYPE html><html><head><meta charset="utf-8"><style>{CSS}</style></head>
 <body>
 <div id="footerContent">{footer} — Page <pdf:pagenumber/> of <pdf:pagecount/></div>
@@ -87,12 +104,16 @@ def main():
         for p in produced:
             for page in PdfReader(p).pages:
                 writer.add_page(page)
-        merged = os.path.join(OUT, "Setnayan_NPC_Submission_Complete_2026-07-16.pdf")
+        merged = os.path.join(OUT, MERGED_NAME)
         with open(merged, "wb") as f:
             writer.write(f)
         total = len(writer.pages)
         print(f"\nMerged packet: {os.path.basename(merged)} ({total} pages, {len(produced)} documents)")
-    print(f"\nDONE — {len(produced)} PDFs in {OUT}")
+    if len(produced) != len(DOCS):
+        raise SystemExit(
+            f"FATAL: produced {len(produced)} of {len(DOCS)} documents — the packet is incomplete."
+        )
+    print(f"\nDONE — {len(produced)}/{len(DOCS)} PDFs in {OUT}")
 
 if __name__ == "__main__":
     main()
