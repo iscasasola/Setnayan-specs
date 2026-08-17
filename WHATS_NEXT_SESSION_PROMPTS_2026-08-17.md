@@ -33,13 +33,19 @@
 
 **Four done · five part-done · seven not started.** Every line below was measured this evening.
 
+> ⚠ **S8's count in the table below said 33 and was wrong — it is 31**, measured on `origin/main`
+> = `f880f375f` with comments stripped and the archetype itself excluded. One of the 31
+> (`ugat-console.tsx`) is deliberately **not owed**, so the real work is **30 files**. Corrected
+> 2026-08-17 evening. 🔑 **A count in a register is a claim; re-measure it before scoping a session
+> around it.**
+
 | | session | state |
 |---|---|---|
 | **S1** | Supplier through the door | ✅ **DONE** — access fix, booking attribution, host page proven already correct |
 | **S2** | The doors | ✅ **DONE** — 22 entry screens, sign-up, password recovery, tab titles |
 | **S4** | Eight small things | ✅ **DONE — all eight, verified in the code** |
 | **S12** | Event Hub design | ✅ **DONE** — prototypes drawn; produced S13–S16 |
-| **S8** | Your admin screens | 🔄 archetype built · **33 files left to convert** |
+| **S8** | Your admin screens | 🔄 archetype built · **31 files left, and one of those is not owed ⇒ 30 real** · split into 4 lanes: [`WHATS_NEXT_S8_LANES_2026-08-17.md`](WHATS_NEXT_S8_LANES_2026-08-17.md) |
 | **S9** | Under the floor | 🔄 batches 1–2 · **273 of 384 tables still open — ~177 to go** |
 | **S10** | Compliance pack | 🔄 rebuilt today · one change still open |
 | **S13** | The Hub's words | 🔄 **103 → 93 wedding words left**; four screens done, the main page untouched |
