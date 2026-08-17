@@ -194,7 +194,7 @@ auto-merge ARMED and a required check FAILING**, so they will never merge and no
 |---|---|---|
 | [#4471](https://github.com/iscasasola/setnayan-platform/pull/4471) | suppliers may write about a day they worked | a new exposed column + a new anon-callable function, neither registered with a written reason |
 | [#4472](https://github.com/iscasasola/setnayan-platform/pull/4472) | opening a shop no longer takes away your events | two access-check tests failing |
-| [#4475](https://github.com/iscasasola/setnayan-platform/pull/4475) | a put-away celebration still counts on the supplier record | the exposure-baseline guard |
+| ~~[#4475](https://github.com/iscasasola/setnayan-platform/pull/4475)~~ | a put-away celebration still counts on the supplier record | ✅ **FIXED — superseded by [#4492](https://github.com/iscasasola/setnayan-platform/pull/4492).** It was NOT staleness: it re-opened a leak. See below. |
 | [#4478](https://github.com/iscasasola/setnayan-platform/pull/4478) | a put-away celebration stops taking new photos | its own fail-closed gate test |
 
 ⚠ A fifth, [#4473](https://github.com/iscasasola/setnayan-platform/pull/4473) (*a celebration can
@@ -204,7 +204,24 @@ tested at all.
 🔑 **"AUTO-MERGE ARMED" IS NOT "WILL MERGE."** Four sessions armed it, reported success and left.
 The failures are all REAL and all DIFFERENT — this is not one shared cause anybody can sweep.
 
-🛑 **I DELIBERATELY DID NOT MAKE THESE GREEN.** #4471 and #4475 fail the guard that asks *"you are
+🚨 **AND THE FIRST ONE I OPENED WAS A REAL LEAK, NOT A STALE BASELINE.** #4475 rebuilds the
+supplier finished-jobs count with DROP + CREATE and re-granted it to **everyone, signed in or
+not** — a grant line copied from the view's FIRST creation rather than its CURRENT state, which
+silently reversed a revoke made on purpose five days earlier. That matview is the deliberately
+UNREDACTED twin of the public one, so a stranger could read both and **subtract to learn how many
+of a supplier's finished jobs we wrote off as fake.** Harmless only because nothing has been
+written off yet.
+🔑 **DROP + CREATE IS NOT AN EDIT, IT IS A RESET** — every grant and every later narrowing of one
+is discarded. Re-read the current permissions before re-granting; never copy the grant line out of
+the original migration.
+🚨 **AND THE OBVIOUS FIX WAS NOT THE FIX.** Narrowing the grant left the leak fully open, because
+this database hands `anon` back **by itself** on any newly created object, before any grant in the
+file runs. **The REVOKE is the load-bearing line** — learned only because the guard refused the
+first answer.
+⏭ **So "we just wait" was the wrong instinct on all four.** These are not queued, they are broken,
+and one of the four was hiding a disclosure. The remaining three still need doing.
+
+🛑 **I DELIBERATELY DID NOT BLANKET-BASELINE THESE.** #4471 and #4475 fail the guard that asks *"you are
 newly exposing this — say why."* Silencing it would be **adding a line to a bill, not making a
 decision**, on somebody else's work whose intent I do not hold. Each needs the session that wrote
 it, or a fresh one told what it was for.
