@@ -136,7 +136,7 @@ carries the six-slice framing and its slices 1 and 2 are the wrong shape.** Corr
 - **The avatar maker does not exist.** Everyone in the 3D room is a randomly-coloured stranger — 0 of 39 guests has a figure.
 - **The photo wall on the couple's own website can never have photos in it** — nothing anywhere picks them. 0 of 6 events.
 - **A supplier still cannot say how many couples may hold the same date.** Permanently stuck at three, no screen.
-- **The "we couldn't load this" screens were built and no page uses them** — 0 consumers. A failed load still reads as "there is nothing here".
+- ~~**The "we couldn't load this" screens were built and no page uses them** — 0 consumers.~~ ✅ **FALSE as of 2026-08-19: `ErrorState` has seven real import sites**, including the shared admin console table that fans out across the console. It was adopted on 2026-08-17 — the same day this register was written, which is why it recorded the pre-adoption state. ⚠ **The underlying DISEASE is still real and is the current stream** — a failed load rendering as "there is nothing here" — but it is a per-surface job, NOT "mount the unused primitives". See [`WHATS_NEXT_Silent_Failures_2026-08-19.md`](WHATS_NEXT_Silent_Failures_2026-08-19.md) §2 for the 10 confirmed instances with file:line.
 
 **Small but visible**
 - **A supplier can still only tap six fixed messages** to the coordinator — never a sentence.
@@ -162,7 +162,7 @@ rows still quote the retired 90-day rule).
 
 **Press-a-switch (2)**
 1. **Turn on the supplier handshake.** The whole thing is built, merged and dark. A couple pressing *Lock* would ask the supplier first, and the supplier's yes makes the booking. **Safe today by arithmetic: there are no asks in flight and no booking to re-open.** Nothing changes until you flip it in the hosting settings.
-2. **Compromised-password checking is still off at sign-up.** Someone can register today with a password already known to be stolen. One switch in the database console.
+2. ~~**Compromised-password checking is still off at sign-up.**~~ ✅ **SHIPPED 2026-08-18 — NOT a console switch. Do not ask the owner.** Commit `b2d09fd5f`, *"feat(auth): refuse a password that is already in a public breach list"* — it is enforced in application code. Verified 2026-08-19. This row sent a session to recommend a console trip that would have found nothing.
 
 **Rulings (6)**
 3. **How much of the couple's private plan may a booked supplier see?** Today: counts only, never guest names. **This blocks the last Event Hub step.**
@@ -360,9 +360,21 @@ that raised these**, and it is now the first step, not the last.
 
 ---
 
-## 6f · 🛑 STOP — MAIN'S CI IS RED. START NOTHING NEW UNTIL IT IS GREEN.
+## 6f · ✅ ~~STOP — MAIN'S CI IS RED~~ — **CLEARED. THE STOP ORDER IS LIFTED (verified 2026-08-19).**
 
-Checked 2026-08-17 after the three finishers landed. **`ci` on `main` is `completed/failure`.**
+🛑 **DO NOT OBEY THE ORDER BELOW.** Measured 2026-08-19: the last three completed `ci` runs on
+`main` are all **success**, and the four PRs this section says are stuck have all resolved —
+three closed, four merged. A cold session reading this heading would have halted, started
+nothing, and gone hunting for a red build that does not exist. Ten PRs merged on 2026-08-19
+through a green pipeline.
+🔑 **A STOP ORDER IS THE MOST EXPENSIVE THING A STALE DOC CAN CONTAIN** — every other rotten line
+costs a wrong action, but this one costs ALL action. If you write one, date it and say how to
+check it: `gh run list --branch main --limit 5`.
+
+_The original text is kept below because the DIAGNOSIS generalises — a red main does strand
+auto-merge PRs, and that is worth recognising if it recurs._
+
+Checked 2026-08-17 after the three finishers landed. **`ci` on `main` was `completed/failure`.**
 Production is fine (`deploy-prod` succeeded and the site serves), but **every new branch starts
 from a red main, inherits the failure, and cannot merge.** That is precisely how four changes from
 2026-08-15 ended up armed for auto-merge and stuck for two days.

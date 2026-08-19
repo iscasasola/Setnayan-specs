@@ -482,7 +482,10 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > blocked iframe · wrong catalog: rejected, not thrown; the only symptom is an
 > absence.** Assume a sixth exists.
 >
-> ⏭ **NAMED, NOT BUILT:** the correction queue still has **no vendor-side
+> ✅ **BUILT 2026-08-12 — commit `742a7519b`, "a vendor can finally ASK us to fix a permanently
+> wrong detail". It is mounted in My Shop. Do NOT rebuild it** (verified 2026-08-19); rebuilding
+> a shipped page is the failure RULE 0 exists to prevent.
+> ⏭ ~~**NAMED, NOT BUILT:** the correction queue still has **no vendor-side
 > intake**. That is a separate build, not an oversight of this one.
 >
 > ### 🔬 THEN AN ADVERSARIAL PASS OVER THAT WORK FOUND 10 MORE — 2 USER-FACING
@@ -1074,7 +1077,10 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > ⚠ `timeout` **does not exist on macOS** — `timeout 900 npx tsx …` printed
 > `exit=0` and ran nothing.
 >
-> ⏭ **PR #4235 is deliberately NOT auto-merging** (label `do-not-auto-merge`): it
+> ✅ **PR #4235 MERGED 2026-08-08 — the owner gate below is CLOSED. Do not ask for it again.**
+> (Verified 2026-08-19 with `gh pr view`. This line said an owner look was still needed for
+> eleven days after it merged, inside a block headed ACTIVE.)
+> ⏭ ~~**PR #4235 is deliberately NOT auto-merging**~~ (label `do-not-auto-merge`): it
 > also corrects the public `/privacy` notice, which now understated retention —
 > RA 10173 binds us to the period we DECLARE. A new guard **derives** the month
 > figure from `FULL_RES_POST_EVENT_GRACE_DAYS`, so copy and code cannot drift.
@@ -1087,7 +1093,11 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > and every trap inlined rather than linked. **This block is a summary of it, not a
 > replacement.**
 >
-> **Verified prod, 2026-08-07:** 5 events · 2 vendors, **both hidden** · **0** photos ·
+> ⚠ **THESE NUMBERS ARE FROM 2026-08-07 AND THREE OF THEM ARE NOW FALSE. Re-measured 2026-08-19:
+> 8 events (not 5) · 14 Papic photos (not 0) · and the `setnaprod` shop is `verified` and no
+> longer hidden.** Still true: 0 orders ever, 0 fee charges. 🔑 **"Nothing is live to a stranger"
+> is the claim that decays first, and it is the one people lean on to call a change risk-free.**
+> ~~**Verified prod, 2026-08-07:** 5 events · 2 vendors, **both hidden** · **0** photos ·
 > **0** fee charges · **0** livestream channels. **Nothing is live to a stranger.**
 >
 > 🔗 **VENDOR BARE-ROOT URLs ARE ALREADY BUILT — DO NOT "MOVE" ANYTHING.**

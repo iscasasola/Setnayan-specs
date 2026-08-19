@@ -98,21 +98,23 @@ The shape now in `apps/web/lib/guests.ts` is the model to copy: `fetchGuestsByEv
 returns `{ rows, measured }`; the ~30 callers that never state an absence keep the array-only
 wrapper, which **delegates** rather than repeating the query, so the two cannot drift.
 
-### The list — 11 confirmed, **2 now fixed**, 9 left (verified 2026-08-19, each survived an adversarial skeptic)
+### The list — 11 confirmed, **1 merged (#4587)**, 10 still live (verified 2026-08-19, each survived an adversarial skeptic)
 
 **Do money first: a wrong number about money is the worst version of this.**
 
-✅ **THE TWO MONEY ONES ARE DONE — 2026-08-19, later the same day. Do NOT rebuild them.**
-PR [#4587](https://github.com/iscasasola/setnayan-platform/pull/4587) (the supplier payments
-figure) and [#4588](https://github.com/iscasasola/setnayan-platform/pull/4588) (the Overview's
-committed total and booked count). **9 remain, none of them money.**
-⚠ This table listed both as open for about an hour after they were fixed — by the author, in the
-document written to stop exactly that. **A register rots from the moment it is written; verify
-before acting on any row below.**
+⚠ **ONE MONEY FIX IS MERGED, THE OTHER IS NOT — CHECK BEFORE YOU TRUST EITHER ROW.**
+**#4587 (the supplier payments figure) IS merged and live.**
+🛑 **#4588 (the Overview's committed total and booked count) WAS STILL OPEN when this was
+written, and this document said "FIXED · do NOT rebuild" anyway.** That is the worst possible
+direction to be wrong in: a reader would have SKIPPED the item this doc's own ranking puts
+FIRST, while a couple is shown **"₱0 committed"** against a real budget. Verify with
+`gh pr view 4588 --json state,mergedAt` before believing either state.
+🔑 **A PR THAT IS ARMED FOR AUTO-MERGE HAS NOT MERGED.** I armed it, wrote it down as done, and
+never re-read the state. **"Merging" is not "merged" — check the object, not your intent.**
 
 | where | who sees it | the false claim |
 |---|---|---|
-| ~~`app/dashboard/[eventId]/_components/event-dashboard.tsx:657`~~ ✅ **FIXED #4588** | couple | Budget tile renders **"₱0 committed"** against their real target, and "Your team — **0 of 21 booked**", and *"No vendors booked yet"* |
+| `app/dashboard/[eventId]/_components/event-dashboard.tsx:657` ⏳ **fix written in #4588, NOT merged as of writing — verify** | couple | Budget tile renders **"₱0 committed"** against their real target, and "Your team — **0 of 21 booked**", and *"No vendors booked yet"* |
 | ~~`app/dashboard/[eventId]/vendors/[vendorId]/workspace/page.tsx:630`~~ ✅ **FIXED #4587** | couple | **"Paid ₱0"**, so *remaining* becomes the **full** itemised total — the couple is shown owing money they already paid |
 | `app/v/[slug]/page.tsx:858` | supplier | the **public shop page hero** renders a degraded booking count as a trust chip |
 | `app/v/[slug]/page.tsx:3822` | couple | package inclusions vanish, so a package reads as offering nothing |
@@ -136,17 +138,24 @@ Written because the owner asked directly on 2026-08-19. Ranked, not a menu.
 ### 1. Use the product yourself. One real event, on a phone, for an hour.
 
 **This is the top recommendation and it is not code.** Every defect found on 2026-08-19 was
-invisible for one reason: **nobody has ever done the thing.** Production holds **6 events, 0
-orders ever, 0 photos**. The upload bug needed a connection to drop at the wrong second; the "C"
+invisible for one reason: **nobody has ever done the thing.** Production holds **8 events, 0
+orders ever, and 14 Papic photos** (this sentence said "6 events, 0 photos" and disagreed with
+this document's OWN measured section in §5 — the exact rot it warns about). The upload bug needed a connection to drop at the wrong second; the "C"
 needed somebody to turn their camera off mid-call. Reading code finds only what someone thought
 to read. An hour of real use will surface more than another day of sweeping — and it is the one
 thing a session **cannot** do, because a session must not sign in as the owner or push his real
 data around.
 
-### 2. Turn on compromised-password checking at sign-up. One switch, real hole.
+### 2. ~~Turn on compromised-password checking at sign-up.~~ ✅ **ALREADY SHIPPED — do not ask the owner for this.**
 
-Somebody can register today with a password already known to be stolen. It is one switch in the
-database console and it is the best ratio of risk-removed to effort on the whole list.
+🛑 **THIS RECOMMENDATION WAS WRONG AND WAS GIVEN TO THE OWNER.** It came from the register's §6
+"press-a-switch" list, which describes it as a console toggle. It is **not** a toggle: it shipped
+**2026-08-18 as application code** — commit `b2d09fd5f`, *"feat(auth): refuse a password that is
+already in a public breach list"*. Sending the owner into the database console would have cost him
+a trip to find a switch that is not the mechanism.
+🔑 **A REGISTER ENTRY IS A CLAIM, NOT EVIDENCE — INCLUDING WHEN IT IS ABOUT SOMETHING SMALL.**
+I verified the register's *scariest* item before repeating it and skipped verifying the *easiest*
+one, because it sounded cheap. Cheap is not the same as true.
 
 The **supplier handshake flag** (`NEXT_PUBLIC_LOCK_HANDSHAKE_ENABLED`) is the other switch, and
 it is safe **by arithmetic, not optimism**: no request is in flight and there is no booking that
@@ -233,7 +242,10 @@ repo's own existing guards, which is the tell that the invocation is wrong, not 
 
 Measured against the live database and the live site, not remembered.
 
-- **8 events** · **39 guests** (largest roster 32) · **2 shops** · **0 orders ever** · 0 photos
+- **8 events** · **39 guests** (largest roster 32) · **2 shops** · **0 orders ever** · **14 Papic photos** (13 stills + 1 clip, all on one event, none hidden)
+  ⚠ This line said **"0 photos"** when written. It was wrong — measured 14. **Do not treat the
+  gallery as empty when reasoning about retention, the compression sweep, face-matching or the
+  photo wall.**
 - `papic_face_mode`: **5 `mode_a` · 3 `mode_b`**
 - The owner's profile photo is set and rendering (top bar **and** home composer)
 - `users` RLS: enabled, policies scoped to `{authenticated}` only — the `anon` SELECT/UPDATE
