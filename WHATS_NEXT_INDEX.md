@@ -1,5 +1,21 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶▶▶ NEWEST — READ THIS FIRST (2026-08-19)
+> **[`WHATS_NEXT_Silent_Failures_2026-08-19.md`](WHATS_NEXT_Silent_Failures_2026-08-19.md)**
+> — written for a **DIFFERENT CLAUDE ACCOUNT** (owner is continuing elsewhere), so it is
+> self-contained: no memory file is assumed and nothing local is relied on.
+> Carries: **7 PRs shipped 2026-08-19** (do NOT rebuild) · the **11 remaining confirmed**
+> "a failed read is rendered as a fact" defects, money first, each with file:line · the
+> owner's **ranked recommendations** · **7 traps** that each cost real time today · verified
+> production state.
+> 🛑 **Its §0 is the one that will cost you a whole session:** `/Users/icecasasola` is a
+> checkout **749 commits behind `origin/main`**. A subagent sweep aimed at it returned a
+> coherent, fully-traced, **completely wrong** finding. Read main from a detached worktree
+> and give subagents THAT path.
+> ⚠ It also **corrects this register's own §6 item 12** (the face-matching privacy alarm):
+> measured on 2026-08-19, prod is **5 `mode_a` · 3 `mode_b`**, not "every event", and the
+> live `/privacy` page is honest and specific. **Do not action that item as written.**
+
 > 📋 **START HERE (2026-08-08): [`BUILDS_REMAINING_VERIFIED_2026-08-08.md`](BUILDS_REMAINING_VERIFIED_2026-08-08.md)**
 > — the owner asked *"what are all the builds to be done? enumerate all"*. Six independent
 > passes harvested every claimed-open item from this register, the handoffs, the decision log,

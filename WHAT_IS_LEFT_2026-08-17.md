@@ -176,7 +176,7 @@ rows still quote the retired 90-day rule).
 9. Guest photo-taking is selling while two privacy sign-offs for it have never been signed.
 10. One of your twenty live privacy capabilities has nobody's name against it — the anti-fraud scoring that can hide a supplier without a person deciding.
 11. The corrected lawyer's brief on keeping a dead relative's memories: **no record it was ever sent.**
-12. The public page selling the photo service still says photos are not matched by face. **Every event is in the mode where they are.**
+12. ~~The public page selling the photo service still says photos are not matched by face. **Every event is in the mode where they are.**~~ ✅ **CORRECTED 2026-08-19 — DO NOT ACTION AS WRITTEN. Both halves were measured and neither holds.** Production is **5 events `mode_a` · 3 events `mode_b`** — five of eight, not "every". And the live `/privacy` page is **honest and specific**: it states that facial-geometry is derived from a selfie you choose to provide, that the feature is optional, and that matching stays scoped to the one event you consented to. `/features` does not mention faces at all and `/papic` makes no such claim. 🔑 A register entry is a claim, not evidence — this one would have sent the owner to rewrite a page that was already correct. See [`WHATS_NEXT_Silent_Failures_2026-08-19.md`](WHATS_NEXT_Silent_Failures_2026-08-19.md) §3.3.
 
 **Money and words (3)**
 13. **The photo service still has no "what this would otherwise cost you" figure.** Only you can give an honest one.
