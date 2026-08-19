@@ -43,8 +43,10 @@ be found locally. Nothing was ever at risk. Verified via `gh pr list --head` 202
 
 ## 1 · WHAT SHIPPED 2026-08-19 — do NOT rebuild any of it
 
-Seven PRs, all merged, all live. Production self-reported the merge commits as it went
-(`/api/health`), so this is measured, not inferred from GitHub.
+**Ten PRs.** Seven merged and live — production self-reported the merge commits as it went
+(`/api/health`), so that is measured, not inferred from GitHub. Three more (#4586 · #4587 ·
+#4588) were opened later the same day and were still in flight when this was written; **verify
+their state with `gh pr view` before assuming either way.**
 
 | PR | what a person gets |
 |---|---|
@@ -55,6 +57,9 @@ Seven PRs, all merged, all live. Production self-reported the merge commits as i
 | [#4583](https://github.com/iscasasola/setnayan-platform/pull/4583) | a refused read no longer tells a couple they have **no guests** |
 | [#4584](https://github.com/iscasasola/setnayan-platform/pull/4584) | the **phone's** guest summary stops inventing zeros |
 | [#4585](https://github.com/iscasasola/setnayan-platform/pull/4585) | three regressions introduced by the six above |
+| [#4586](https://github.com/iscasasola/setnayan-platform/pull/4586) | the code repo's auto-loaded `CLAUDE.md` points cold sessions here, with the traps inlined |
+| [#4587](https://github.com/iscasasola/setnayan-platform/pull/4587) | a refused payments read no longer bills the couple for money they already paid |
+| [#4588](https://github.com/iscasasola/setnayan-platform/pull/4588) | the Overview stops counting reads that never happened (**₱0 committed**, "0 of 21 booked") |
 
 ### The one disease behind all of it
 
@@ -93,14 +98,22 @@ The shape now in `apps/web/lib/guests.ts` is the model to copy: `fetchGuestsByEv
 returns `{ rows, measured }`; the ~30 callers that never state an absence keep the array-only
 wrapper, which **delegates** rather than repeating the query, so the two cannot drift.
 
-### The 11 left — verified 2026-08-19, each survived an adversarial skeptic
+### The list — 11 confirmed, **2 now fixed**, 9 left (verified 2026-08-19, each survived an adversarial skeptic)
 
 **Do money first: a wrong number about money is the worst version of this.**
 
+✅ **THE TWO MONEY ONES ARE DONE — 2026-08-19, later the same day. Do NOT rebuild them.**
+PR [#4587](https://github.com/iscasasola/setnayan-platform/pull/4587) (the supplier payments
+figure) and [#4588](https://github.com/iscasasola/setnayan-platform/pull/4588) (the Overview's
+committed total and booked count). **9 remain, none of them money.**
+⚠ This table listed both as open for about an hour after they were fixed — by the author, in the
+document written to stop exactly that. **A register rots from the moment it is written; verify
+before acting on any row below.**
+
 | where | who sees it | the false claim |
 |---|---|---|
-| `app/dashboard/[eventId]/_components/event-dashboard.tsx:657` | couple | Budget tile renders **"₱0 committed"** against their real target, and "Your team — **0 of 21 booked**", and *"No vendors booked yet"* |
-| `app/dashboard/[eventId]/vendors/[vendorId]/workspace/page.tsx:630` | couple | **"Paid ₱0"**, so *remaining* becomes the **full** itemised total — the couple is shown owing money they already paid |
+| ~~`app/dashboard/[eventId]/_components/event-dashboard.tsx:657`~~ ✅ **FIXED #4588** | couple | Budget tile renders **"₱0 committed"** against their real target, and "Your team — **0 of 21 booked**", and *"No vendors booked yet"* |
+| ~~`app/dashboard/[eventId]/vendors/[vendorId]/workspace/page.tsx:630`~~ ✅ **FIXED #4587** | couple | **"Paid ₱0"**, so *remaining* becomes the **full** itemised total — the couple is shown owing money they already paid |
 | `app/v/[slug]/page.tsx:858` | supplier | the **public shop page hero** renders a degraded booking count as a trust chip |
 | `app/v/[slug]/page.tsx:3822` | couple | package inclusions vanish, so a package reads as offering nothing |
 | `apps/web/lib/roles.ts:142` | supplier | a supplier **who already has a shop** is told to *"Create your shop"* |
