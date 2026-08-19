@@ -352,11 +352,24 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > after your own rebase.** And **verify the push landed** — a `&& echo "pushed"` chain
 > prints success after a failed push.
 >
-> ⚠️ **2 · THE SHARED MAIN CHECKOUT HOLDS 96 UNCOMMITTED FILES** (29 A, 67 M) from that
-> session and is 122+ commits behind, so `git pull` aborts. **Do NOT stash or discard —
-> they are not yours.** Read current main with
-> `git worktree add --detach /tmp/wt-read origin/main`.
-> 🔴 **OWNER DECISION: keep or discard that work.**
+> ✅ **2 · THE 96 UNCOMMITTED FILES ARE SAFE — THAT OWNER DECISION IS CLOSED (2026-08-19).**
+> ~~🔴 OWNER DECISION: keep or discard that work.~~ Nothing was discarded and nothing was
+> stashed: that work was committed to `claude/cold-signin-returns-to-front-door` and merged
+> as PR [#4424](https://github.com/iscasasola/setnayan-platform/pull/4424) on 2026-08-13.
+> The branch was deleted after merge, which is why the checkout now reads clean and why the
+> branch cannot be found locally. **Do not go looking for it and do not re-ask this.**
+>
+> ⚠️ **BUT THE SHARED CHECKOUT AT `~` IS NOW 749 COMMITS BEHIND `origin/main`** (it sits on
+> the #4287 merge, last touched 2026-08-13). It holds **ZERO** commits `origin/main` lacks,
+> so it is a stale MIRROR, not unsaved work — there is nothing in it to rescue.
+> 🔑 **NEVER READ CODE FROM `~`, AND NEVER POINT A SUBAGENT SWEEP AT IT.** On 2026-08-19 a
+> four-angle avatar sweep was aimed at `${REPO}` = `/Users/icecasasola` and returned a
+> confidently-argued finding that a fix was redundant because a resolved value was "already
+> in scope at line 913". On real `origin/main` that code had been **deleted** — the only
+> surviving match is a COMMENT. The finding cited real line numbers from a file 749 commits
+> stale, which is exactly what a correct-looking wrong answer is made of.
+> ✅ Read current main with `git worktree add --detach /tmp/wt-read origin/main`, and give
+> subagents THAT path.
 >
 > ⚠️ **#4004 (CSAM known-hash hook) MERGED** despite `DECISION_LOG.md` 2026-08-04 saying
 > it must not. **Verified INERT** (`CSAM_HASH_MATCH_ENABLED`, default off) — merging
