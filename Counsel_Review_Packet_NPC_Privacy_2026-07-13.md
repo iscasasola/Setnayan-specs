@@ -50,7 +50,16 @@ Setnayan is a Philippines-first event-planning platform operated by **SETNAYAN S
 
 ### Item 3 — Retention periods + one known deletion gap
 
-**Facts.** Retention (schedule B) sets a **5-year** default (event data, chat, media) and a **10-year statutory floor** (payment records / Official Receipts under BIR RR 17-2013; contracts under Civil Code Art. 1144). **Known gap:** an account **hard-delete does not yet purge chat-message PII** (schedule B § 4; dossier § 3 note).
+**Facts.** Retention (schedule B) is **not one period** — it differs by class, and the media rule changed after this packet was first drafted:
+
+- **Media (Papic photos + clips) — NO DELETION AT ANY POINT.** The full-resolution original is held **6 months from the event's first capture**, floored at **3 months after the event ends**, then **replaced by a compressed web copy**; that compressed copy is retained on the couple's gallery **free, for life** (owner ruling 2026-08-18, superseding an earlier five-year window and its never-built paid tier). Only the *resolution* ever changes — no photo is deleted. Dossier (A) § 8 states this; **please read A as authoritative over any earlier five-year wording.**
+- **Event data + in-app chat:** **5 years** from the event date *(counsel)*.
+- **Facial-geometry vectors:** auto-expire per event at ~5 years; the account-level face profile is governed by account deletion, not that clock.
+- **Payment records / Official Receipts:** **10-year statutory floor** (BIR RR 17-2013; contracts under Civil Code Art. 1144).
+
+⚠ **This section was corrected on 2026-08-20.** As originally drafted it told you media carried the same 5-year default as chat, which the product no longer does — please disregard any copy of this packet that says so.
+
+**Known gap:** an account **hard-delete does not yet purge chat-message PII** (schedule B § 4; dossier § 3 note).
 
 **We need you to confirm / advise:** ratify the *(counsel)*-marked periods, and advise whether the **chat-PII-on-deletion gap is a compliance defect that must be remediated before filing** (we can prioritize the fix) or a tracked remediation acceptable to disclose.
 
