@@ -18,7 +18,13 @@
 > Both merged-on-green with auto-merge armed. **§ 1 and § 1b below are DONE — read them for the
 > reasoning, do not rebuild them.**
 >
-> 🔴 **DEFECTS 1 · 2 · 3 · 4 ARE STILL UNBUILT. No branch, no PR.**
+> ✅ **AND DEFECTS 1 · 2 · 3 · 4 ARE BUILT TOO — PR
+> [#4608](https://github.com/iscasasola/setnayan-platform/pull/4608), merge-on-green.**
+> All five are now closed. **Read the sections below for the REASONING and the traps —
+> do not rebuild any of it.** Two of the four needed almost no new code (RULE 0 paid
+> twice: the "When are you celebrating?" title and the question-drop filter both already
+> shipped and were only mis-triggered), and the raw-key defect turned out to be **187
+> option values across every event type**, not the two chips the owner saw.
 > The only code that shipped in the parent session is PR
 > [#4599](https://github.com/iscasasola/setnayan-platform/pull/4599) (Your Year), which is
 > merged and live and is **NOT** part of this work.
