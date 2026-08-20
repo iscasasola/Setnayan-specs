@@ -1,5 +1,19 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶▶▶▶ NEWEST — UNBUILT WORK, RECOVERED FROM A CUT-OFF SESSION (2026-08-20 evening)
+> **[`WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md`](WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md)**
+> — five defects the owner found in ONE walk from *Your Year* → birthday. **NOTHING IS BUILT:
+> no branch, no PR, no worktree.** The session that found them hit its weekly usage limit before
+> it could write them down; this file is the rescue, re-verified against `origin/main`
+> (`f5fd0fcc2`) and the live production database.
+> 🔴 **One of the five is money and its obvious diagnosis is WRONG** — the order was minted and is
+> **unpaid in prod right now** (₱499 Setnayan AI, ref `SNEYGV00WY`); the buyer was redirected to
+> the **photo studio**, shown no amount and no bank details, and told his *cameras* would activate.
+> 🔑 **A code path that CAN fail silently is not proof that it DID.** Query prod before writing a
+> diagnosis from a plausible code path.
+> ⚠ It does NOT supersede the entry below — that one is about shipped work; this one is about work
+> not started.
+
 > ### ▶▶▶ NEWEST — READ THIS FIRST (2026-08-20)
 > **[`WHATS_NEXT_HANDOFF_2026-08-20.md`](WHATS_NEXT_HANDOFF_2026-08-20.md)** — written for a
 > **NEW CLAUDE ACCOUNT**: self-contained, assumes no memory file and nothing local.

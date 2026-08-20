@@ -69,6 +69,47 @@ committed docs on purpose.
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
+> ### 🔴 NEWEST — THE CREATE FLOW ASKS WHAT IT ALREADY KNOWS (2026-08-20 evening, NOTHING BUILT)
+> **Contract: [`WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md`](WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md).**
+> Five defects the owner found in ONE walk from *Your Year* → birthday. **No branch, no PR.**
+> Recovered from a session that hit its weekly usage limit mid-investigation, then re-verified
+> against `origin/main` (`f5fd0fcc2`) and the live production database.
+>
+> 🔴 **THE MONEY ONE FIRST, AND THE OBVIOUS DIAGNOSIS IS WRONG.** Owner: *"i had a price to pay.
+> but i there was no payment. it just created."* The tempting read — the charge was refused, so
+> the flow fell through to the ordinary dashboard — is **FALSE**. Production holds the order:
+> **`S89O-GCR6BDC4Z6` · Setnayan AI ×1 · ₱499 · status `submitted` · ref `SNEYGV00WY`**, minted
+> 0.7s after the event. He WAS redirected — to the **Papic photo studio**, whose banner names
+> **no amount** (`papic_amount` is never set by the onboarding mint), gives **no bank details**,
+> and says *"your **cameras** activate"* to a man who bought the assisted planner. The services
+> step had promised, verbatim, *"We'll show you where to send it right after this."*
+> 🔑 **A CODE PATH THAT CAN FAIL SILENTLY IS NOT PROOF THAT IT DID.** The mint is non-fatal by
+> contract and returns `paymentPath: null` on every failure — a story that fits the symptom
+> perfectly and did not happen. **One query settled it. Query prod before writing a diagnosis
+> from a plausible code path.**
+> ⏭ **A REAL UNPAID ₱499 ORDER IS SITTING IN PROD** (the owner's own test) — decide whether to
+> cancel it before it confuses the admin payment queue.
+>
+> 🔑 **RULE 0 PAID AGAIN ON THE SECOND ONE — THE OWNER'S EXACT SENTENCE IS ALREADY CODED.** The
+> date screen already flips to *"When are you celebrating?"* with three day chips; it is gated on
+> a value only the **anniversary-only** anchor screen ever writes. **Widen the trigger, draw
+> nothing.** 🪤 And do NOT fix it by pouring the carried date into `anchorDate` — `anchorOrigin`
+> defaults to the literal `'wedding'`, so a birthday would render **"Our wedding falls on Wed 16
+> Dec 2026"**, naming a wedding that does not exist.
+>
+> 🔑 **THE OTHER THREE ARE A MISSING HANDOVER, NOT MISSING MACHINERY** — the question-drop filter
+> ships and works, and the answer already exists twice (the Year page computes "turning 40" and
+> throws it away). ⚠ Its seam is **inert by default**, so a fix written behind it ships switched
+> off. ⚠ The raw `1st_birthday` / `adult_regular` chips are **unfixable at the renderer** — the
+> option type has no label slot at all.
+> ⛔ **Do NOT drop a screen at runtime** — out of range is a render-time THROW, removal disarms
+> the "you already have one of these" walk-back for exactly the people it targets, and the file's
+> own comment justifying "nothing is removed" gives a reason that is **not true**.
+>
+> 🔑 **THE WORKFLOWS DIED OF THE USAGE LIMIT, NOT AN ERROR** — two returned `plan: null` and read
+> like empty results while ~80 verified claims sat in their `journal.jsonl` the whole time.
+> **Read the journal before concluding a workflow returned nothing.**
+
 > ### 📖 SETTLED VOCABULARY — "EVENT HUB" (owner-locked 2026-08-16). Do NOT reopen.
 > Three words, three things. They were argued out in full; the reasoning is below so a new
 > session does not re-litigate it.
