@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-motion="on">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7,94 +7,149 @@
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
    SETNAYAN FRONT DOOR — LIVE INTERACTIVE PROTOTYPE · 2026-08-20
-   Design + motion planned in Fable. Coded in Opus.
+   Motion + interaction planned in Fable. Coded in Opus.
 
-   Palette LOCKED. gold #8C6932 is the front-door action colour and IS safe for
-   text (4.86:1 on cream). #A9834B is DECORATIVE ONLY — never body copy.
-   Every text pairing on this page clears 4.5:1.
+   THE MOTION IDEA — everything is SET DOWN, not floated up. Elements arrive
+   from slightly above and settle flat, the way photographs are laid onto an
+   album spread by many hands. "Set na 'yan" — that's all set. Cards carry a
+   ±0.5° tilt that resolves to 0° as they land: many contributors, one album.
 
-   MOTION CONTRACT
-   · Nothing that carries meaning starts invisible. Reveal animations move
-     elements that are ALREADY painted — if script never runs, the page reads.
-   · prefers-reduced-motion:reduce collapses every effect to an instant state
-     change. Nothing becomes unreachable.
+   PALETTE LOCKED. gold #8C6932 is this register's action colour and IS safe
+   for text (5.02:1 on white). #A9834B is DECORATIVE ONLY — never body copy.
+
+   STRUCTURAL RULE (non-negotiable): scroll-in elements are VISIBLE BY DEFAULT.
+   Only `.js-motion .reveal.pre` hides them, and `.js-motion` is added solely
+   when IntersectionObserver exists AND reduced-motion is not requested. If the
+   script never runs, nothing was ever hidden and the page reads in full.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
-  --cream:#FDFBF7; --ink:#2C2A29; --gold:#8C6932; --deco:#A9834B; --link:#3B4E67;
-  --terra:#C24E25;
-  --m1:#69655D; --m2:#726D64; --m3:#767168;
-  --line:#E1DCD1; --wash:#F3ECDF; --warm:#FBF7EF; --hover:#F4EEE3;
+  --paper:#FFFFFF; --ink:#2C2A29; --gold:#8C6932; --deco:#A9834B; --link:#3B4E67;
+  --m1:#65656A; --m2:#6B6B70;
+  --line:#E3E3E5; --wash:#EFEFF1; --panel:#F7F7F8; --hover:#F2F2F3;
   --sys:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 
-  /* motion tokens — filled from the Fable plan */
-  --e-out:cubic-bezier(.16,.84,.44,1);
-  --e-in-out:cubic-bezier(.65,0,.35,1);
-  --e-press:cubic-bezier(.34,1.56,.64,1);
-  --d-fast:180ms; --d-mid:340ms; --d-slow:620ms;
+  /* ── Fable motion tokens — no other easings anywhere ── */
+  --ease-settle:cubic-bezier(.22,.61,.21,1);
+  --ease-hover:cubic-bezier(.33,0,.2,1);
+  --ease-press:cubic-bezier(.4,0,1,1);
+  --ease-move:cubic-bezier(.35,.17,.15,1);
+  --ease-fly:cubic-bezier(.32,.72,0,1);
+
+  /* transform magnitudes — zeroed when motion is off, so every rule below
+     keeps its colour behaviour and loses only its spatial behaviour */
+  --lift-card:-2px; --sc-thumb:1.03; --sc-press:.985; --sc-chip:.97; --sc-play:1.08;
+  --d-color:140ms; --d-hover-in:160ms; --d-hover-out:220ms; --d-bar:180ms;
+  --sh-rest:0 1px 2px rgba(44,42,41,.06);
+  --sh-lift:0 6px 20px rgba(44,42,41,.10);
 }
+@media (prefers-reduced-motion:reduce){
+  :root{--lift-card:0px;--sc-thumb:1;--sc-press:1;--sc-chip:1;--sc-play:1}
+}
+html[data-motion=off]{--lift-card:0px;--sc-thumb:1;--sc-press:1;--sc-chip:1;--sc-play:1}
+
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sys);
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sys);
   font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-align:left}
 input{font:inherit}
-:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+/* focus rings are INSTANT — an animated focus ring punishes keyboard users */
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px;transition:none}
 
-/* ── dev scaffold (not part of the design) ─────────────────────────────── */
-.scaffold{position:fixed;left:0;right:0;top:0;z-index:200;background:#211F1D;color:#EFE9DD;
+/* ── dev scaffold ──────────────────────────────────────────────────────── */
+.scaffold{position:fixed;left:0;right:0;top:0;z-index:220;background:#211F1D;color:#EFE9DD;
   padding:9px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:12px}
-.scaffold b{font-size:12.5px}
 .scaffold .seg{display:flex;border:1px solid #4A443C;border-radius:8px;overflow:hidden}
 .scaffold .seg button{padding:5px 11px;font-size:11.5px;color:#C9C1B5;min-height:30px}
 .scaffold .seg button[aria-pressed=true]{background:var(--deco);color:#221F1B;font-weight:700}
 .scaffold label{display:flex;align-items:center;gap:6px;color:#9A9186;font-size:11px;
   letter-spacing:.09em;text-transform:uppercase}
+.scaffold .rp{border:1px solid #4A443C;border-radius:8px;padding:5px 12px;font-size:11.5px;
+  color:#C9C1B5;min-height:30px}
 .stage{padding-top:46px}
 .stage[data-w=phone] .site{max-width:400px;margin:22px auto;border:1px solid var(--line);
   border-radius:18px;overflow:hidden;box-shadow:0 30px 70px -40px rgba(50,40,25,.55)}
 
-/* ── top bar ───────────────────────────────────────────────────────────── */
+/* ── reveal system ─────────────────────────────────────────────────────── */
+.js-motion .reveal{transition:opacity 340ms var(--ease-settle),transform 340ms var(--ease-settle)}
+.js-motion .reveal.pre{opacity:0;transform:translateY(-8px) scale(1.01)}
+.js-motion .card.reveal.pre{transform:translateY(-8px) scale(1.01) rotate(var(--rot,.5deg))}
+
+/* ── hero load choreography — CSS keyframes only, no script ────────────── */
+@keyframes settle8{from{opacity:0;transform:translateY(-8px) scale(1.01)}to{opacity:1;transform:none}}
+@keyframes settle10{from{opacity:0;transform:translateY(-10px) scale(1.01)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+/* 🔑 THE HERO IS VISIBLE CSS AT REST. It animates ONLY while `.hero-run` sits
+   on the section, and script removes that class at 820ms — after the 770ms
+   choreography — on a TIMER, never on an animation resolving.
+   Why this matters more here than anywhere else: `fill-mode: both` holds the
+   FROM state, so a stalled or throttled animation timeline leaves the brand
+   name and the headline at opacity 0 — the two things an app-verification
+   reviewer must be able to see. Measured stuck-invisible before this change. */
+@media (prefers-reduced-motion:no-preference){
+  html[data-motion=on] .hero-run .op-mark {animation:settle8  360ms var(--ease-settle)   0ms both}
+  html[data-motion=on] .hero-run .h1a     {animation:settle10 420ms var(--ease-settle)  90ms both}
+  html[data-motion=on] .hero-run .h1b     {animation:settle10 420ms var(--ease-settle) 180ms both}
+  html[data-motion=on] .hero-run .op-purpose{animation:settle8 360ms var(--ease-settle) 290ms both}
+  html[data-motion=on] .hero-run .op-b1   {animation:settle8  320ms var(--ease-settle) 380ms both}
+  html[data-motion=on] .hero-run .op-b2   {animation:settle8  320ms var(--ease-settle) 430ms both}
+  html[data-motion=on] .hero-run .op-fine {animation:fadeIn   300ms linear             470ms both}
+}
+
+/* ── top bar — CONSTANT 72px. Colour and border only; it never resizes ─── */
 .topbar{position:sticky;top:46px;z-index:60;display:flex;align-items:center;gap:14px;
-  padding:14px 26px;background:rgba(253,251,247,.86);backdrop-filter:saturate(1.4) blur(12px);
+  height:72px;padding:0 26px;background:rgba(255,255,255,0);
   border-bottom:1px solid transparent;
-  transition:padding var(--d-mid) var(--e-out), border-color var(--d-mid) linear,
-             box-shadow var(--d-mid) linear}
-.topbar[data-stuck=true]{padding:9px 26px;border-bottom-color:var(--line);
-  box-shadow:0 8px 24px -20px rgba(60,45,20,.55)}
-.wordmark{font-size:15px;font-weight:700;letter-spacing:.18em}
-.search{flex:1;max-width:340px;min-height:36px;border:1px solid var(--line);border-radius:999px;
-  background:var(--warm);display:flex;align-items:center;gap:9px;padding:0 14px;
-  transition:border-color var(--d-fast) linear, box-shadow var(--d-fast) linear,
-             max-width var(--d-mid) var(--e-out)}
-.search:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(140,105,50,.13);max-width:420px}
-.search svg{flex:none;opacity:.5}
-.search input{flex:1;border:0;background:none;outline:0;font-size:13.5px;min-height:34px;color:var(--ink)}
-.search input::placeholder{color:var(--m3)}
-.tbr{margin-left:auto;display:flex;align-items:center;gap:14px}
+  transition:background-color var(--d-bar) linear,border-color var(--d-bar) linear,
+             backdrop-filter var(--d-bar) linear}
+.topbar[data-stuck=true]{background:rgba(255,255,255,.92);backdrop-filter:saturate(1.35) blur(8px);
+  border-bottom-color:var(--line)}
+.wordmark{flex:none;font-size:15px;font-weight:700;letter-spacing:.18em}
+.strack{flex:1;display:flex;min-width:0}
+.search{width:220px;max-width:100%;min-height:36px;border:1px solid var(--line);
+  border-radius:999px;background:var(--panel);display:flex;align-items:center;gap:9px;
+  padding:0 14px;transition:width 200ms var(--ease-hover),border-color var(--d-color) linear}
+.search:focus-within{width:300px;border-color:var(--gold)}
+.search svg{flex:none;color:var(--m1)}
+.search input{flex:1;min-width:0;border:0;background:none;outline:0;font-size:13.5px;
+  min-height:34px;color:var(--ink)}
+.search input::placeholder{color:var(--link)}
+.tbr{flex:none;display:flex;align-items:center;gap:14px}
 .tbr .lk{font-size:13.5px;font-weight:650;color:var(--link)}
-.btn{min-height:38px;padding:0 17px;border-radius:999px;font-size:13.5px;font-weight:650;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  transition:transform var(--d-fast) var(--e-press), background-color var(--d-fast) linear,
-             border-color var(--d-fast) linear, box-shadow var(--d-fast) linear}
-.btn-gold{background:var(--gold);color:var(--cream);box-shadow:0 2px 0 rgba(90,66,28,.25)}
-.btn-gold:hover{background:#7B5C2C}
-.btn-gold:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(90,66,28,.3)}
+.tbr .lk:hover{text-decoration:underline}
+
+/* ── buttons ───────────────────────────────────────────────────────────── */
+.btn{position:relative;min-height:38px;padding:0 17px;border-radius:999px;font-size:13.5px;
+  font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  overflow:hidden;
+  transition:transform var(--d-hover-out) var(--ease-settle),
+             background-color var(--d-color) linear,border-color var(--d-color) linear}
+.btn::after{content:"";position:absolute;inset:0;background:rgba(44,42,41,0);
+  transition:background-color var(--d-color) var(--ease-hover);pointer-events:none}
+.btn-gold{background:var(--gold);color:var(--paper)}
+.btn-gold:hover::after{background:rgba(44,42,41,.08)}
+.btn-gold:active::after{background:rgba(44,42,41,.14)}
 .btn-quiet{border:1px solid var(--line);color:var(--ink);background:transparent}
-.btn-quiet:hover{background:var(--hover);border-color:#D3CBB9}
-.btn-quiet:active{transform:translateY(1px)}
+.btn-quiet:hover{background:rgba(140,105,50,.08);border-color:var(--gold)}
+@media (prefers-reduced-motion:no-preference){
+  html[data-motion=on] .btn:hover{transform:translateY(-1px);
+    transition-duration:var(--d-hover-in);transition-timing-function:var(--ease-hover)}
+  html[data-motion=on] .btn:active{transform:scale(var(--sc-press));
+    transition-duration:90ms;transition-timing-function:var(--ease-press)}
+}
 
 /* ── the opening ───────────────────────────────────────────────────────── */
 .opening{position:relative;padding:74px 26px 58px;max-width:1180px;margin:0 auto;overflow:hidden}
 .glow{position:absolute;right:-90px;top:-110px;width:420px;height:420px;border-radius:50%;
-  background:radial-gradient(circle at 38% 38%,rgba(169,131,75,.15),rgba(169,131,75,0) 68%);
+  background:radial-gradient(circle at 38% 38%,rgba(169,131,75,.08),rgba(169,131,75,0) 68%);
   pointer-events:none}
 .op-mark{margin:0 0 18px;font-size:14px;letter-spacing:.36em;font-weight:700;color:var(--gold)}
-.opening h1{margin:0 0 20px;font-size:clamp(34px,5.2vw,56px);line-height:1.06;letter-spacing:-.032em;
-  font-weight:700;max-width:16ch}
-.opening h1 em{font-style:normal;display:block;color:var(--m1)}
-.op-purpose{margin:0 0 16px;font-size:17px;line-height:1.55;max-width:50ch;color:var(--ink)}
+.opening h1{margin:0 0 20px;font-size:clamp(34px,5.2vw,56px);line-height:1.06;
+  letter-spacing:-.032em;font-weight:700;max-width:16ch}
+.opening h1 span{display:block}
+.opening h1 .h1b{color:var(--m1)}
+.op-purpose{margin:0 0 16px;font-size:17px;line-height:1.55;max-width:50ch}
 .op-purpose b{font-weight:700}
 .op-sub{margin:0 0 30px;font-size:16px;line-height:1.55;max-width:46ch;color:var(--m1)}
 .op-acts{display:flex;gap:12px;flex-wrap:wrap;position:relative;z-index:2}
@@ -103,8 +158,8 @@ input{font:inherit}
 .op-fine i{color:var(--gold);font-style:italic;font-weight:650}
 
 /* ── three things ──────────────────────────────────────────────────────── */
-.three{max-width:1180px;margin:0 auto;padding:0 26px 8px;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+.three{max-width:1180px;margin:0 auto;padding:0 26px 8px;display:grid;
+  grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
 .three>div{padding:28px 28px 30px;border-right:1px solid var(--line)}
 .three>div:first-child{padding-left:0}
 .three>div:last-child{border-right:0;padding-right:0}
@@ -114,14 +169,13 @@ input{font:inherit}
   font-size:11px;font-weight:700;font-family:var(--mono);text-decoration:none}
 .three p{margin:0;font-size:14px;color:var(--m1);line-height:1.6}
 
-/* ── manifesto ─────────────────────────────────────────────────────────── */
-.manifesto{background:var(--warm);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-  padding:64px 26px;margin-top:24px}
+/* ── manifesto — settles as ONE block, never per word ──────────────────── */
+.manifesto{background:var(--panel);border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);padding:64px 26px;margin-top:24px}
 .mf-in{max-width:64ch;margin:0 auto;text-align:center}
 .mf-kick{margin:0 0 22px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
   font-weight:700;color:var(--gold)}
 .manifesto p.body{margin:0;font-size:clamp(18px,2.1vw,21px);line-height:1.62;letter-spacing:-.006em}
-.manifesto p.body b{font-weight:700}
 .mf-fin{display:block;margin-top:20px;font-size:16px;color:var(--m1)}
 .mf-fin i{color:var(--gold);font-weight:650;font-style:italic}
 
@@ -130,51 +184,65 @@ input{font:inherit}
 .fhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:18px}
 .fhead h2{margin:0;font-size:22px;letter-spacing:-.018em}
 .fhead span{font-size:13.5px;color:var(--m2)}
-.chips{display:flex;gap:9px;overflow-x:auto;padding-bottom:14px;margin-bottom:6px;
-  scrollbar-width:none}
+.chips{display:flex;gap:9px;overflow-x:auto;padding-bottom:14px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;min-height:34px;padding:0 15px;border-radius:999px;border:1px solid var(--line);
-  background:var(--warm);font-size:13.5px;font-weight:600;color:var(--m1);
+  background:var(--paper);font-size:13.5px;font-weight:600;color:var(--ink);
   display:inline-flex;align-items:center;gap:7px;
-  transition:background-color var(--d-fast) linear,color var(--d-fast) linear,
-             border-color var(--d-fast) linear,transform var(--d-fast) var(--e-press)}
-.chip:hover{background:var(--hover);color:var(--ink)}
-.chip:active{transform:scale(.96)}
-.chip[aria-pressed=true]{background:var(--ink);color:var(--cream);border-color:var(--ink)}
-.chip u{text-decoration:none;font-family:var(--mono);font-size:11px;opacity:.7}
+  transition:background-color 160ms var(--ease-hover),color 160ms var(--ease-hover),
+             border-color 120ms var(--ease-hover),transform 90ms var(--ease-press)}
+.chip:hover{border-color:rgba(140,105,50,.45)}
+.chip[aria-pressed=true]{background:var(--gold);color:var(--paper);border-color:var(--gold)}
+.chip u{text-decoration:none;font-family:var(--mono);font-size:11px;opacity:.75}
+@media (prefers-reduced-motion:no-preference){
+  html[data-motion=on] .chip:active{transform:scale(var(--sc-chip))}
+}
 
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px 20px;padding:8px 0 4px}
-.card{display:block;width:100%;text-align:left;border-radius:12px;
-  transition:transform var(--d-mid) var(--e-out)}
+.grid{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:24px 20px;
+  padding:8px 0 4px}
+.card{display:block;width:100%;text-align:left;border-radius:12px}
+.card[hidden]{display:none}
 .card .thumb{position:relative;aspect-ratio:16/10;border-radius:11px;overflow:hidden;
-  margin-bottom:11px;border:1px solid var(--line);
-  transition:box-shadow var(--d-mid) var(--e-out),transform var(--d-mid) var(--e-out)}
-.card:hover .thumb{box-shadow:0 18px 34px -22px rgba(70,52,22,.55)}
-.card .thumb i{position:absolute;inset:0;display:block}
+  margin-bottom:11px;border:1px solid var(--line);box-shadow:var(--sh-rest);
+  transition:box-shadow var(--d-hover-out) var(--ease-hover)}
+.card .thumb i{position:absolute;inset:0;display:block;
+  transition:transform 260ms var(--ease-hover)}
+.card:hover .thumb{box-shadow:var(--sh-lift)}
+.card:hover .thumb i{transform:scale(var(--sc-thumb))}
+.card:hover h3{text-decoration:underline;text-decoration-color:var(--gold);
+  text-underline-offset:2px}
 .card .kind{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;letter-spacing:.11em;
   text-transform:uppercase;font-weight:700;color:var(--gold);background:#FBF5E9;
   border:1px solid #E6DAC2;border-radius:4px;padding:2px 7px;margin-bottom:8px}
 .card h3{margin:0 0 6px;font-size:14.5px;line-height:1.36;font-weight:650;letter-spacing:-.006em}
 .card .meta{font-size:12.5px;color:var(--m2)}
 .card .meta b{font-weight:650;color:var(--m1)}
+@media (prefers-reduced-motion:no-preference){
+  html[data-motion=on] .card{transition:transform var(--d-hover-out) var(--ease-hover)}
+  html[data-motion=on] .card:hover{transform:translateY(var(--lift-card));
+    transition-duration:var(--d-hover-in)}
+}
+/* play mark — cream disc, ink glyph. NO idle pulse, ever. */
 .play{position:absolute;left:9px;bottom:9px;width:28px;height:28px;border-radius:50%;
-  background:rgba(24,21,18,.82);color:#fff;display:grid;place-items:center;font-size:10px;
-  transition:transform var(--d-fast) var(--e-press),background-color var(--d-fast) linear}
-.card:hover .play{transform:scale(1.09);background:rgba(24,21,18,.94)}
+  background:rgba(255,255,255,.9);color:var(--ink);display:grid;place-items:center;
+  font-size:9px;box-shadow:0 1px 4px rgba(44,42,41,.25);
+  transition:transform var(--d-hover-in) var(--ease-hover),
+             background-color var(--d-hover-in) linear}
+.card:hover .play{transform:scale(var(--sc-play));background:rgba(255,255,255,1)}
 .empty{grid-column:1/-1;padding:44px 20px;text-align:center;color:var(--m1);font-size:14.5px;
-  border:1px dashed var(--line);border-radius:12px;background:var(--warm)}
+  border:1px dashed var(--line);border-radius:12px;background:var(--panel)}
 .empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:6px;font-weight:700}
+.empty[hidden]{display:none}
 
-/* ── shops ─────────────────────────────────────────────────────────────── */
+/* ── shops — no hover lift, by design ──────────────────────────────────── */
 .shops{max-width:1180px;margin:0 auto;padding:14px 26px 54px}
 .shops .lead{font-size:13.5px;color:var(--m2);margin:0 0 14px;border-top:1px solid var(--line);
   padding-top:22px}
 .shops .lead b{color:var(--ink);font-weight:700;font-size:15px;display:block;margin-bottom:3px}
 .shoprow{display:flex;align-items:center;gap:15px;padding:15px;border:1px solid var(--line);
-  border-radius:12px;background:var(--warm);
-  transition:border-color var(--d-fast) linear,box-shadow var(--d-mid) var(--e-out)}
-.shoprow:hover{border-color:#D3CBB9;box-shadow:0 14px 30px -24px rgba(70,52,22,.5)}
-.shopava{flex:none;width:52px;height:52px;border-radius:14px;background:#EFE5D2;
+  border-radius:12px;background:var(--panel)}
+.shoprow h4 a:hover{text-decoration:underline;text-decoration-color:var(--gold)}
+.shopava{flex:none;width:52px;height:52px;border-radius:14px;background:#FBF5E9;
   display:grid;place-items:center;font-size:19px;font-weight:700;color:var(--gold);
   font-family:var(--mono);border:1px solid #E6DAC2}
 .shoprow h4{margin:0 0 3px;font-size:15px;font-weight:700}
@@ -182,38 +250,192 @@ input{font:inherit}
 .vtick{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;
   color:var(--gold);margin-left:8px}
 
-/* ── reader overlay ────────────────────────────────────────────────────── */
-.scrim{position:fixed;inset:0;z-index:150;background:rgba(38,32,24,.42);
-  backdrop-filter:blur(3px);opacity:0;pointer-events:none;
-  transition:opacity var(--d-mid) linear}
+/* ── reader ────────────────────────────────────────────────────────────── */
+.scrim{position:fixed;inset:0;z-index:150;background:rgba(255,255,255,.86);
+  backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 200ms linear}
 .scrim[data-open=true]{opacity:1;pointer-events:auto}
-.reader{position:fixed;z-index:151;left:50%;top:50%;width:min(680px,92vw);max-height:84vh;
-  transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;
-  background:var(--cream);border:1px solid var(--line);border-radius:16px;overflow:auto;
-  box-shadow:0 40px 90px -40px rgba(40,30,12,.6);
-  transition:transform var(--d-mid) var(--e-out),opacity var(--d-mid) linear}
-.reader[data-open=true]{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
-.reader .rhead{position:relative;aspect-ratio:21/9;border-bottom:1px solid var(--line)}
-.reader .rbody{padding:26px 30px 32px}
-.reader .kind{margin-bottom:10px}
-.reader h2{margin:0 0 10px;font-size:24px;line-height:1.22;letter-spacing:-.022em}
-.reader .meta{font-size:13px;color:var(--m2);margin-bottom:18px}
-.reader p{margin:0 0 14px;font-size:15.5px;line-height:1.68;color:#3A3733}
+.reader{position:fixed;z-index:151;left:50%;top:8vh;width:min(680px,92vw);max-height:84vh;
+  transform:translateX(-50%);opacity:0;pointer-events:none;background:var(--paper);
+  border:1px solid var(--line);border-radius:16px;overflow:auto;
+  box-shadow:0 40px 90px -40px rgba(40,30,12,.55);transition:opacity 200ms linear}
+.reader[data-open=true]{opacity:1;pointer-events:auto}
+.rhead{position:relative;aspect-ratio:21/9;border-bottom:1px solid var(--line)}
+.rbody{padding:26px 30px 32px}
+.rbody h2{margin:0 0 10px;font-size:24px;line-height:1.22;letter-spacing:-.022em}
+.rbody .meta{font-size:13px;color:var(--m2);margin-bottom:18px}
+.rbody p{margin:0 0 14px;font-size:15.5px;line-height:1.68;color:#3A3733}
+.js-motion .rbody{transition:opacity 160ms linear,transform 160ms var(--ease-settle)}
+.js-motion .rbody.pre{opacity:0;transform:translateY(4px)}
 .rclose{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;
-  background:rgba(24,21,18,.72);color:#fff;display:grid;place-items:center;font-size:15px;
-  transition:background-color var(--d-fast) linear,transform var(--d-fast) var(--e-press)}
-.rclose:hover{background:rgba(24,21,18,.9);transform:scale(1.06)}
+  background:rgba(255,255,255,.92);color:var(--ink);display:grid;place-items:center;
+  font-size:14px;box-shadow:0 1px 5px rgba(44,42,41,.3);
+  transition:background-color var(--d-color) linear}
+.rclose:hover{background:#fff}
+.flyer{position:fixed;z-index:160;border-radius:11px;overflow:hidden;pointer-events:none;
+  border:1px solid var(--line)}
 
-/* ── footer ────────────────────────────────────────────────────────────── */
-.foot{border-top:1px solid var(--line);background:var(--warm);padding:36px 26px 44px}
+/* ── the Today / New pill — bottom right, as designed ──────────────────── */
+.vpill{position:fixed;right:20px;bottom:20px;z-index:170;display:flex;align-items:center;
+  gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:999px;
+  padding:8px 14px;box-shadow:0 10px 30px -18px rgba(44,42,41,.5);font-size:12.5px;
+  font-weight:650}
+.vpill .track{position:relative;width:40px;height:22px;border-radius:999px;
+  background:var(--wash);border:1px solid var(--line)}
+.vpill .thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;
+  background:var(--gold);transition:transform 180ms var(--ease-hover)}
+.vpill[aria-pressed=true] .thumb{transform:translateX(20px)}
+.vpill span{color:var(--m1)}
+.vpill[aria-pressed=true] span.nw{color:var(--ink)}
+.vpill[aria-pressed=false] span.td{color:var(--ink)}
+.blink{position:fixed;inset:0;z-index:210;background:var(--paper);opacity:0;
+  pointer-events:none}
+
+/* ── "today" comparison state ──────────────────────────────────────────── */
+.stage[data-v=today] .opening,.stage[data-v=today] .three,
+.stage[data-v=today] .manifesto{display:none}
+.signstrip{display:none;padding:16px 26px;background:var(--panel);
+  border-bottom:1px solid var(--line);align-items:center;gap:14px;flex-wrap:wrap}
+.stage[data-v=today] .signstrip{display:flex}
+.signstrip span{font-size:14px;color:var(--m1)}
+.stage[data-v=today] .card .kind,.stage[data-v=today] .card>h3,
+.stage[data-v=today] .card>.meta,.stage[data-v=today] .play{display:none}
+.stage[data-v=today] .runpill{display:grid}
+.runpill{display:none;position:absolute;right:8px;bottom:8px;background:rgba(20,18,16,.85);
+  color:#fff;font-size:11px;font-weight:650;padding:2px 7px;border-radius:4px;
+  font-family:var(--mono);place-items:center}
+.chanrow{display:none;gap:10px;align-items:flex-start}
+.stage[data-v=today] .chanrow{display:flex}
+.chanrow .ct{display:block;margin-bottom:4px;font-size:14.5px;line-height:1.36;
+  font-weight:650;letter-spacing:-.006em}
+.chanava{flex:none;width:30px;height:30px;border-radius:50%;background:var(--wash);
+  display:grid;place-items:center;font-size:10.5px;font-weight:700;color:var(--gold);
+  font-family:var(--mono)}
+
+
+/* ── THE SHELL — reproduced from what ships, not redrawn ───────────────────
+   The live front door renders <nav class="fd-rail"> beside the content, and it
+   carries FAR more than links: the sign-in prompt, the Studio group with a line
+   of copy per product, and all the small print. My first draft dropped it and
+   invented a footer instead — that is the exact RULE 0 defect. Restored here.
+   ─────────────────────────────────────────────────────────────────────────── */
+.fd-body{display:flex;align-items:flex-start}
+.rail{flex:none;width:92px;position:sticky;top:118px;align-self:flex-start;
+  max-height:calc(100vh - 130px);overflow-y:auto;overflow-x:hidden;
+  padding:14px 10px 30px;border-right:1px solid var(--line);
+  scrollbar-width:thin;
+  transition:width 220ms var(--ease-hover)}
+.rail[data-open=true]{width:268px;padding:14px 14px 30px}
+.rail::-webkit-scrollbar{width:6px}
+.rail::-webkit-scrollbar-thumb{background:#E3E3E5;border-radius:3px}
+.rrow{display:flex;align-items:center;gap:14px;border-radius:10px;padding:9px 10px;
+  color:var(--ink);transition:background-color var(--d-color) linear}
+.rrow:hover{background:var(--hover)}
+.rrow[aria-current=page]{background:var(--wash);font-weight:650}
+.rail[data-open=false] .rrow{flex-direction:column;gap:5px;padding:11px 4px;text-align:center}
+.ri{flex:none;width:22px;height:22px;display:grid;place-items:center;color:var(--ink)}
+.rlab{font-size:14px;line-height:1.3}
+.rail[data-open=false] .rlab{font-size:10px;letter-spacing:.01em;color:var(--m1);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.rdesc{display:none;font-size:12px;color:var(--m1);line-height:1.45;margin-top:2px}
+.rail[data-open=true] .rdesc{display:block}
+.rail[data-open=true] .rrow.two{align-items:flex-start}
+.rail[data-open=true] .rrow.two .ri{margin-top:1px}
+.rdiv{height:1px;background:var(--line);margin:12px 4px}
+.rgroup{display:none;padding:4px 10px 8px}
+.rail[data-open=true] .rgroup{display:block}
+.rgroup b{display:block;font-size:12.5px;font-weight:700}
+.rgroup span{font-size:11.5px;color:var(--m1)}
+.rprompt{display:none;padding:12px;border:1px solid var(--line);border-radius:12px;
+  background:var(--panel);margin:6px 4px 4px}
+.rail[data-open=true] .rprompt{display:block}
+.rprompt p{margin:0 0 10px;font-size:12.5px;color:var(--m1);line-height:1.45}
+.rtry{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+  color:var(--gold);border:1px solid #E6DAC2;background:#FBF5E9;border-radius:4px;
+  padding:1px 5px;margin-left:7px;vertical-align:1px}
+.rail[data-open=false] .rtry{display:none}
+.rsmall{display:none;padding:10px 10px 0;font-size:12px;line-height:2}
+.rail[data-open=true] .rsmall{display:block}
+.rsmall a{color:var(--m1);margin-right:12px;white-space:nowrap}
+.rsmall a:hover{color:var(--ink);text-decoration:underline}
+.rsmall .cr{display:block;margin-top:12px;color:var(--m2);font-size:11.5px;line-height:1.6}
+.fd-main{flex:1;min-width:0}
+.burger{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  transition:background-color var(--d-color) linear}
+.burger:hover{background:var(--hover)}
+
+/* phone: the rail stands down and the bottom nav takes over — as it ships */
+.bnav{display:none;position:sticky;bottom:0;z-index:50;background:var(--paper);
+  border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.bnav ul{margin:0;padding:0;list-style:none;display:flex}
+.bnav li{flex:1}
+.bnav a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;
+  font-size:10px;color:var(--m1)}
+.bnav a[aria-current=page]{color:var(--ink);font-weight:650}
+@media(max-width:900px){
+  .rail{display:none}
+  .bnav{display:block}
+}
+.stage[data-w=phone] .rail{display:none}
+.stage[data-w=phone] .bnav{display:block}
+.stage[data-w=phone] .burger{display:none}
+
+
+/* ── a second view inside the same shell — proves the furniture never moves */
+.svc{max-width:1180px;margin:0 auto;padding:40px 26px 70px}
+.svcback{font-size:13.5px;font-weight:650;color:var(--link);padding:8px 0;margin-bottom:22px}
+.svcback:hover{text-decoration:underline}
+.svckick{margin:0 0 14px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  font-weight:700;color:var(--gold)}
+.svc h1{margin:0 0 16px;font-size:clamp(30px,4.4vw,46px);line-height:1.08;
+  letter-spacing:-.03em;font-weight:700}
+.svcline{margin:0 0 14px;font-size:17px;line-height:1.55;max-width:52ch;color:var(--ink)}
+.svcprice{margin:0 0 28px;font-size:14.5px;color:var(--m1)}
+.svcprice b{color:var(--ink);font-weight:700}
+
+/* ── the rail as a phone drawer — on a phone the hamburger must still work */
+.railscrim{position:fixed;inset:0;z-index:99;background:rgba(44,42,41,.34);opacity:0;
+  pointer-events:none;transition:opacity 200ms linear}
+.railscrim[data-open=true]{opacity:1;pointer-events:auto}
+@media(max-width:900px){
+  .rail{display:block;position:fixed;left:0;top:0;bottom:0;z-index:100;width:284px;
+    max-height:none;background:var(--paper);border-right:1px solid var(--line);
+    padding:18px 14px 30px;transform:translateX(-100%);
+    transition:transform 240ms var(--ease-hover)}
+  .rail[data-drawer=true]{transform:none;box-shadow:0 0 60px rgba(44,42,41,.22)}
+  .rail .rdesc{display:block}
+  .rail .rgroup,.rail .rprompt,.rail .rsmall{display:block}
+  .rail .rrow{flex-direction:row;gap:14px;padding:9px 10px;text-align:left}
+  .rail .rlab{font-size:14px;color:var(--ink)}
+}
+.stage[data-w=phone] .rail{display:block;position:absolute;left:0;top:0;bottom:0;z-index:100;
+  width:284px;max-height:none;transform:translateX(-100%);background:var(--paper);
+  transition:transform 240ms var(--ease-hover)}
+.stage[data-w=phone] .rail[data-drawer=true]{transform:none;box-shadow:0 0 60px rgba(44,42,41,.22)}
+.stage[data-w=phone] .rail .rdesc,.stage[data-w=phone] .rail .rgroup,
+.stage[data-w=phone] .rail .rprompt,.stage[data-w=phone] .rail .rsmall{display:block}
+.stage[data-w=phone] .rail .rrow{flex-direction:row;gap:14px;padding:9px 10px;text-align:left}
+.stage[data-w=phone] .rail .rlab{font-size:14px;color:var(--ink)}
+.stage[data-w=phone] .burger{display:grid}
+.stage[data-w=phone] .site{position:relative;overflow:hidden}
+
+/* ── sign-in panel — a dead-end button is not a working shell ───────────── */
+.sheet{position:fixed;z-index:151;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(380px,92vw);background:var(--paper);border:1px solid var(--line);
+  border-radius:16px;padding:26px;box-shadow:0 40px 90px -40px rgba(40,30,12,.5);
+  opacity:0;pointer-events:none;transition:opacity 180ms linear}
+.sheet[data-open=true]{opacity:1;pointer-events:auto}
+.sheet h3{margin:0 0 8px;font-size:19px;letter-spacing:-.02em}
+.sheet p{margin:0 0 18px;font-size:14px;color:var(--m1);line-height:1.55}
+.sheet .btn{width:100%;min-height:46px;margin-bottom:9px}
+
+/* ── footer — deliberately motionless ──────────────────────────────────── */
+.foot{border-top:1px solid var(--line);background:var(--panel);padding:36px 26px 44px}
 .foot-in{max-width:1180px;margin:0 auto;display:flex;gap:26px;flex-wrap:wrap;
   align-items:baseline;font-size:13px;color:var(--m1)}
 .foot-in .fm{font-weight:700;letter-spacing:.18em;color:var(--ink);font-size:13px}
-.foot-in a{color:var(--m1)}
-.foot-in a:hover{color:var(--ink)}
+.foot-in a:hover{color:var(--ink);text-decoration:underline}
 .foot-in .tail{margin-left:auto;color:var(--m2)}
 
-/* ── responsive ────────────────────────────────────────────────────────── */
 @media(max-width:900px){
   .three{grid-template-columns:1fr}
   .three>div{border-right:0;border-bottom:1px solid var(--line);padding:22px 0}
@@ -223,8 +445,7 @@ input{font:inherit}
 @media(max-width:620px){
   .opening{padding:46px 20px 40px}
   .feed,.shops{padding-left:20px;padding-right:20px}
-  .topbar{padding:11px 18px;gap:10px}
-  .search{max-width:none}
+  .topbar{padding:0 18px;gap:10px}
   .tbr .lk{display:none}
   .grid{grid-template-columns:1fr}
   .manifesto{padding:46px 20px}
@@ -234,81 +455,48 @@ input{font:inherit}
 .stage[data-w=phone] .grid{grid-template-columns:1fr}
 .stage[data-w=phone] .tbr .lk{display:none}
 .stage[data-w=phone] .topbar{position:static}
-
-/* ── "today" comparison mode ───────────────────────────────────────────── */
-.stage[data-v=today] .opening,
-.stage[data-v=today] .three,
-.stage[data-v=today] .manifesto{display:none}
-.signstrip{display:none;padding:16px 26px;background:var(--warm);
-  border-bottom:1px solid var(--line);align-items:center;gap:14px;flex-wrap:wrap}
-.stage[data-v=today] .signstrip{display:flex}
-.signstrip span{font-size:14px;color:var(--m1)}
-.stage[data-v=today] .card .kind{display:none}
-.stage[data-v=today] .runpill{display:grid}
-.runpill{display:none;position:absolute;right:8px;bottom:8px;background:rgba(20,18,16,.85);
-  color:#fff;font-size:11px;font-weight:650;padding:2px 7px;border-radius:4px;
-  font-family:var(--mono);place-items:center}
-.stage[data-v=today] .play{display:none}
-.chanrow{display:none;gap:10px;align-items:flex-start}
-.stage[data-v=today] .chanrow{display:flex}
-.stage[data-v=today] .card>.kind,.stage[data-v=today] .card>h3,
-.stage[data-v=today] .card>.meta{display:none}
-.chanava{flex:none;width:30px;height:30px;border-radius:50%;background:var(--wash);
-  display:grid;place-items:center;font-size:10.5px;font-weight:700;color:var(--gold);
-  font-family:var(--mono)}
-
-/* ── reduced motion — collapse everything ──────────────────────────────── */
-@media(prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;
-    transition-duration:1ms!important;scroll-behavior:auto!important}
-}
 </style>
 </head>
 <body>
 
 <div class="scaffold">
   <b>Setnayan front door</b>
-  <span style="color:#9A9186">live prototype · 2026-08-20</span>
-  <label>View
-    <span class="seg" id="segV">
-      <button data-v="today" aria-pressed="false">Today</button>
-      <button data-v="new" aria-pressed="true">New</button>
-    </span>
-  </label>
-  <label>Width
-    <span class="seg" id="segW">
-      <button data-w="desktop" aria-pressed="true">Desktop</button>
-      <button data-w="phone" aria-pressed="false">Phone</button>
-    </span>
-  </label>
-  <label>Motion
-    <span class="seg" id="segM">
-      <button data-m="on" aria-pressed="true">On</button>
-      <button data-m="off" aria-pressed="false">Off</button>
-    </span>
-  </label>
-  <button id="replay" class="btn btn-quiet" style="min-height:30px;padding:0 13px;font-size:11.5px;
-    border-color:#4A443C;color:#C9C1B5">Replay opening</button>
+  <label>Width <span class="seg" id="segW">
+    <button data-w="desktop" aria-pressed="true">Desktop</button>
+    <button data-w="phone" aria-pressed="false">Phone</button></span></label>
+  <label>Motion <span class="seg" id="segM">
+    <button data-m="on" aria-pressed="true">On</button>
+    <button data-m="off" aria-pressed="false">Off</button></span></label>
+  <button class="rp" id="replay">Replay opening</button>
+  <span style="color:#9A9186;font-size:11px">Today / New switch is bottom-right ↘</span>
 </div>
 
-<div class="stage" id="stage" data-v="new" data-w="desktop" data-m="on">
+<div class="stage" id="stage" data-v="new" data-w="desktop">
 <div class="site">
 
   <header class="topbar" id="topbar">
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"
+      aria-controls="rail"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <div class="wordmark">SETNAYAN</div>
-    <div class="search">
+    <div class="strack"><div class="search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/>
+        <path d="M20 20l-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="Search weddings, suppliers, people"
         aria-label="Search Setnayan">
-    </div>
+    </div></div>
     <div class="tbr">
       <a class="lk" href="#shops">Open your shop</a>
       <button class="btn btn-gold">Sign in</button>
     </div>
   </header>
 
+  <div class="fd-body">
+<nav class="rail" id="rail" data-open="false" aria-label="Sections"><a class="rrow" href="#" aria-current="page"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8H9v8"/><path d="M3 10a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span><span class="rlab">Home</span></span></a><div class="rprompt"><p>Sign in to save suppliers, plan your event, and keep your photos.</p><button class="btn btn-gold" style="width:100%">Sign in</button></div><div class="rdiv"></div><a class="rrow two" href="#" data-svc="alaala"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.6 6.4L20 11l-6.4 1.6L12 19l-1.6-6.4L4 11l6.4-1.6z"/></svg></span><span><span class="rlab">Alaala</span><span class="rdesc">What is Alaala?</span></span></a><div class="rdiv"></div><div class="rgroup"><b>Studio</b><span>the things you make</span></div><a class="rrow two" href="#" data-svc="setnayan-ai"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8 19 13M17.8 6.2 19 5M3 21l9-9M12.2 6.2 11 5"/></svg></span><span><span class="rlab">Setnayan AI</span><span class="rdesc">Watches your vendors and flags a deposit, a price change or a clash before it costs you.</span></span></a><a class="rrow two" href="#" data-svc="event-hub"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"/></svg></span><span><span class="rlab">Event Hub</span><span class="rdesc">One link for your save-the-date, RSVP, details and love story.</span></span></a><a class="rrow two" href="#" data-svc="papic"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L8 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span><span class="rlab">Papic<span class="rtry">try it</span></span><span class="rdesc">Turns your guests into your photo crew.</span></span></a><a class="rrow two" href="#" data-svc="live-studio"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 8-6 4 6 4z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg></span><span><span class="rlab">Live Studio<span class="rtry">try it</span></span><span class="rdesc">Brings the people who can’t be in the room into your day — live.</span></span></a><a class="rrow two" href="#" data-svc="patiktok"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 12h18M3 7.5h4M3 16.5h4M17 7.5h4M17 16.5h4"/></svg></span><span><span class="rlab">Patiktok</span><span class="rdesc">Turns your moments into short, vertical highlight reels.</span></span></a><a class="rrow two" href="#" data-svc="3d-plan"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg></span><span><span class="rlab">3D Plan<span class="rtry">try it</span></span><span class="rdesc">Stand in your reception before it’s built.</span></span></a><a class="rrow two" href="#" data-svc="logo-maker"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8.5 12h7"/></svg></span><span><span class="rlab">Logo Maker</span><span class="rdesc">One monogram of your own, carried across your whole day.</span></span></a><div class="rdiv"></div><div class="rsmall"><a href="#">About</a><a href="#">Pricing</a><a href="#">Help</a><a href="#">Open your shop</a><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Acceptable use</a><a href="#">Cookies</a><a href="#">Refunds</a><a href="#">Download</a><a href="#">Articles</a><a href="#">For storytellers</a><a href="#">For suppliers</a><span class="cr">© 2026 Setnayan<br>Set na ’yan — that’s all set.</span></div></nav>
+  <div class="fd-main">
+  <div id="viewHome">
   <div class="signstrip">
     <span>Sign in to save suppliers, plan your event, and keep your photos.</span>
     <button class="btn btn-quiet">Sign in</button>
@@ -317,31 +505,29 @@ input{font:inherit}
   <section class="opening" id="opening">
     <div class="glow" aria-hidden="true"></div>
     <p class="op-mark">SETNAYAN</p>
-    <h1>Keep your memories.<em>Plan your moments.</em></h1>
+    <h1><span class="h1a">Keep your memories.</span><span class="h1b">Plan your moments.</span></h1>
     <p class="op-purpose"><b>Setnayan</b> is the Filipino app for planning any celebration —
       and keeping every photo from it, for life.</p>
-    <p class="op-sub">Remembered by everyone who came, not just the couple.
-      Plan any event, free.</p>
     <div class="op-acts">
-      <button class="btn btn-gold">Start your event — free</button>
-      <button class="btn btn-quiet" data-jump="feed">See a real day</button>
+      <button class="btn btn-gold op-b1">Start your event — free</button>
+      <button class="btn btn-quiet op-b2" data-jump="feed">See a real day</button>
     </div>
     <p class="op-fine"><i>Set na ’yan</i> — that’s all set. No card.
       No commission on your suppliers, ever.</p>
   </section>
 
   <section class="three" id="three">
-    <div><h3><u>01</u> Plan it</h3>
+    <div class="reveal" data-rv="0"><h3><u>01</u> Plan it</h3>
       <p>Your suppliers, budget, guest list and seating in one place — free, for any
          kind of celebration.</p></div>
-    <div><h3><u>02</u> Run it</h3>
+    <div class="reveal" data-rv="90"><h3><u>02</u> Run it</h3>
       <p>One link your guests open — for the save-the-date, the RSVP, the details,
          and the day itself.</p></div>
-    <div><h3><u>03</u> Remember it</h3>
+    <div class="reveal" data-rv="180"><h3><u>03</u> Remember it</h3>
       <p>Every photo, from everyone who came, gathered into one album. Yours for life.</p></div>
   </section>
 
-  <section class="manifesto" id="manifesto">
+  <section class="manifesto reveal" id="manifesto" data-rv="0">
     <div class="mf-in">
       <p class="mf-kick">Ala ala · why we exist</p>
       <p class="body">A Filipino celebration was never one family’s. It belongs to the whole
@@ -354,43 +540,70 @@ input{font:inherit}
   </section>
 
   <section class="feed" id="feed">
-    <div class="fhead">
+    <div class="fhead reveal" data-rv="0">
       <h2 id="fh">Read while you plan</h2>
       <span id="fcount"></span>
     </div>
-    <div class="chips" id="chips" role="group" aria-label="Filter"></div>
+    <div class="chips reveal" id="chips" data-rv="60" role="group" aria-label="Filter"></div>
     <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" hidden>
+      <b>Nothing here yet</b>Try another filter — or clear the search.</div>
   </section>
 
-  <section class="shops" id="shops">
+  <section class="shops reveal" id="shops" data-rv="0">
     <p class="lead"><b>The first shops</b>not “trending” — one shop cannot trend.</p>
     <div class="shoprow">
       <div class="shopava">S</div>
       <div>
-        <h4>SetnaProd<span class="vtick">✓ verified</span></h4>
+        <h4><a href="#">SetnaProd</a><span class="vtick">✓ verified</span></h4>
         <p>Booths, carts &amp; bars · Metro Manila</p>
       </div>
       <button class="btn btn-quiet" style="margin-left:auto">View shop</button>
     </div>
   </section>
 
-  <footer class="foot">
-    <div class="foot-in">
-      <span class="fm">SETNAYAN</span>
-      <a href="#">About</a><a href="#">Pricing</a><a href="#">Help</a>
-      <a href="#">Open your shop</a><a href="#">Privacy</a>
-      <span class="tail">Set na ’yan — that’s all set.</span>
+  </div>
+
+  <div id="viewSvc" hidden>
+    <div class="svc">
+      <button class="svcback" id="svcback">← Back to home</button>
+      <p class="svckick" id="svcKick"></p>
+      <h1 id="svcName"></h1>
+      <p class="svcline" id="svcLine"></p>
+      <p class="svcprice" id="svcPrice"></p>
+      <div class="op-acts">
+        <button class="btn btn-gold" id="svcCta">Start your event — free</button>
+      </div>
     </div>
-  </footer>
+  </div>
+
+  </div>
+  </div>
+<nav class="bnav" aria-label="Primary"><ul><li><a href="#" data-nav="home" aria-current="page"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8H9v8"/><path d="M3 10a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>Home</a></li><li><a href="#" data-nav="alaala"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.6 6.4L20 11l-6.4 1.6L12 19l-1.6-6.4L4 11l6.4-1.6z"/></svg></span>Alaala</a></li><li><a href="#" data-nav="menu"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L8 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>Studio</a></li><li><a href="#" data-nav="signin"><span class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8.5 12h7"/></svg></span>Sign in</a></li></ul></nav>
 
 </div>
 </div>
 
+<button class="vpill" id="vpill" aria-pressed="true">
+  <span class="td">Today</span>
+  <span class="track"><span class="thumb"></span></span>
+  <span class="nw">New</span>
+</button>
+<div class="blink" id="blink" aria-hidden="true"></div>
+
+<div class="railscrim" id="railscrim" data-open="false"></div>
+<div class="sheet" id="sheet" data-open="false" role="dialog" aria-modal="true"
+  aria-labelledby="sheetTitle">
+  <h3 id="sheetTitle">Sign in to Setnayan</h3>
+  <p>Save suppliers, plan your event, and keep every photo from it — free.</p>
+  <button class="btn btn-gold">Continue with email</button>
+  <button class="btn btn-quiet" id="sheetClose">Not now</button>
+</div>
 <div class="scrim" id="scrim" data-open="false"></div>
 <article class="reader" id="reader" data-open="false" role="dialog" aria-modal="true"
   aria-labelledby="rtitle" tabindex="-1">
   <div class="rhead" id="rhead"><button class="rclose" id="rclose" aria-label="Close">✕</button></div>
-  <div class="rbody">
+  <div class="rbody" id="rbody">
     <span class="kind" id="rkind"></span>
     <h2 id="rtitle"></h2>
     <div class="meta" id="rmeta"></div>
@@ -399,168 +612,539 @@ input{font:inherit}
 </article>
 
 <script>
-/* ═══ content ═════════════════════════════════════════════════════════════
-   Articles are the real titles published on setnayan.com today.
-   The two "Wedding" rows are clearly-labelled SAMPLES — prod has no
-   published real story yet, and inventing one would be a lie on a page
-   whose whole argument is honesty.
-   ═══════════════════════════════════════════════════════════════════════ */
+/* ═══ content ══════════════════════════════════════════════════════════════
+   Articles are real titles published on setnayan.com today. The two "Wedding"
+   rows are clearly-labelled SAMPLES — prod has no published real story, and
+   inventing one would be a lie on a page whose argument is honesty.
+   ════════════════════════════════════════════════════════════════════════ */
 var ITEMS=[
  {k:'Article',c:'Suppliers',t:'15 questions to ask your wedding photographer before booking',r:3,g:[36,52]},
  {k:'Article',c:'Suppliers',t:'The mobile bar guide: drinks for your Filipino wedding',r:3,g:[18,44]},
  {k:'Article',c:'Culture',t:'The Muslim (Moro) wedding in the Philippines',r:3,g:[8,38]},
- {k:'Wedding',c:'Sample',t:'Ana & Marco — Tagaytay, December',r:0,g:[26,46],v:true,
-  s:'214 photos from 31 guests'},
+ {k:'Wedding',c:'Sample',t:'Ana & Marco — Tagaytay, December',r:0,g:[26,46],v:1,s:'214 photos from 31 guests'},
  {k:'Article',c:'Planning',t:'Brownout-proofing your wedding day',r:3,g:[44,30]},
  {k:'Article',c:'Suppliers',t:'The prenup (engagement) shoot, explained for Filipino couples',r:3,g:[30,58]},
  {k:'Article',c:'Culture',t:'The release of doves: a Filipino wedding tradition',r:3,g:[14,50]},
- {k:'Wedding',c:'Sample',t:'Bea & Jomar — Iloilo, a Sunday binyag',r:0,g:[40,36],v:true,
-  s:'96 photos from 12 guests'},
+ {k:'Wedding',c:'Sample',t:'Bea & Jomar — Iloilo, a Sunday binyag',r:0,g:[40,36],v:1,s:'96 photos from 12 guests'},
  {k:'Article',c:'Planning',t:'30 honest ways to save money on a Filipino wedding',r:3,g:[22,34]},
  {k:'Article',c:'Suppliers',t:'Your wedding food tasting: what to taste and what to ask',r:3,g:[34,42]},
  {k:'Article',c:'Planning',t:'Save-the-dates: when to send them and what to include',r:3,g:[12,56]},
  {k:'Article',c:'Culture',t:'Christmas-themed wedding ideas for Filipino couples',r:3,g:[6,40]}
 ];
 var CHIPS=['All','Stories','Articles','Suppliers','Planning','Culture'];
-var BODY='Every supplier will tell you they are booked that weekend. Some of them mean it. '+
- 'The rest are waiting to see whether you are serious — and the way you ask is what decides it. '+
- 'Here is what to bring to the first conversation, in the order it actually comes up.';
-
+var el=function(i){return document.getElementById(i)};
+var root=document.documentElement;
 var state={chip:'All',q:''};
 
+function reduced(){return window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches}
+function moving(){return root.dataset.motion==='on'&&!reduced()}
 function thumbCss(g){
-  return 'background:linear-gradient(140deg,hsl('+(28+g[0]%18)+' 34% '+(84-g[0]%9)+'%),'+
-         'hsl('+(20+g[1]%22)+' 28% '+(72-g[1]%11)+'%));';
+  var h1=(g[0]*29)%360, h2=(h1+18+(g[1]%26))%360;
+  return 'background:linear-gradient(140deg,hsl('+h1+' 32% 72%),hsl('+h2+' 38% 56%));';
 }
 function matches(it){
-  var c=state.chip, ok;
-  if(c==='All') ok=true;
-  else if(c==='Stories') ok=(it.k==='Wedding');
-  else if(c==='Articles') ok=(it.k==='Article');
+  var c=state.chip,ok;
+  if(c==='All')ok=true;
+  else if(c==='Stories')ok=(it.k==='Wedding');
+  else if(c==='Articles')ok=(it.k==='Article');
   else ok=(it.c===c);
-  if(!ok) return false;
-  if(!state.q) return true;
-  var h=(it.t+' '+it.c+' '+it.k).toLowerCase();
-  return h.indexOf(state.q.toLowerCase())>-1;
+  if(!ok)return false;
+  if(!state.q)return true;
+  return (it.t+' '+it.c+' '+it.k).toLowerCase().indexOf(state.q.toLowerCase())>-1;
 }
 function metaLine(it){
-  return it.k==='Wedding'
-    ? '<b>With video</b> · '+it.s
-    : '<b>'+it.c+'</b> · '+it.r+' min read';
+  return it.k==='Wedding'?'<b>With video</b> · '+it.s:'<b>'+it.c+'</b> · '+it.r+' min read';
 }
-function cardHtml(it,i){
-  return '<button class="card" data-i="'+i+'" data-anim="card">'
-   +'<div class="thumb"><i style="'+thumbCss(it.g)+'"></i>'
-   +(it.v?'<span class="play">▶</span>':'')
-   +'<span class="runpill">'+(it.r||3)+':00</span></div>'
-   +'<span class="kind">'+it.k+'</span>'
-   +'<h3>'+it.t+'</h3>'
-   +'<div class="meta">'+metaLine(it)+'</div>'
-   +'<div class="chanrow"><span class="chanava">SN</span><div>'
-   +'<h3 style="margin-bottom:4px">'+it.t+'</h3>'
-   +'<div class="meta">Setnayan · '+it.c+'</div></div></div>'
-   +'</button>';
+
+/* ── cards are rendered ONCE and never re-created; filtering only toggles
+      [hidden], which is what makes the FLIP run possible at all ─────────── */
+function buildGrid(){
+  el('grid').innerHTML=ITEMS.map(function(it,i){
+    return '<button class="card" data-i="'+i+'" style="--rot:'+(i%2?'-':'')+'.5deg">'
+     +'<div class="thumb"><i style="'+thumbCss(it.g)+'"></i>'
+     +(it.v?'<span class="play">▶</span>':'')
+     +'<span class="runpill">'+(it.r||3)+':00</span></div>'
+     +'<span class="kind">'+it.k+'</span><h3>'+it.t+'</h3>'
+     +'<div class="meta">'+metaLine(it)+'</div>'
+     +'<div class="chanrow"><span class="chanava">SN</span><div>'
+     +'<span class="ct">'+it.t+'</span>'
+     +'<div class="meta">Setnayan · '+it.c+'</div></div></div></button>';
+  }).join('');
 }
-function draw(){
-  var list=ITEMS.map(function(it,i){return {it:it,i:i};}).filter(function(o){return matches(o.it);});
-  var g=document.getElementById('grid');
-  g.innerHTML = list.length
-    ? list.map(function(o){return cardHtml(o.it,o.i);}).join('')
-    : '<div class="empty"><b>Nothing here yet</b>Try another filter — or clear the search.</div>';
-  document.getElementById('fcount').textContent =
-    list.length+(list.length===1?' piece':' pieces')+
-    (state.chip==='All'&&!state.q?' — real days from couples will land here beside the reading.':'');
-  if(window.__revealCards) window.__revealCards(g);
-}
-function drawChips(){
-  document.getElementById('chips').innerHTML = CHIPS.map(function(c){
-    var n = c==='All' ? ITEMS.length
-      : c==='Stories' ? ITEMS.filter(function(x){return x.k==='Wedding';}).length
-      : c==='Articles'? ITEMS.filter(function(x){return x.k==='Article';}).length
-      : ITEMS.filter(function(x){return x.c===c;}).length;
+function buildChips(){
+  el('chips').innerHTML=CHIPS.map(function(c){
+    var n=c==='All'?ITEMS.length
+      :c==='Stories'?ITEMS.filter(function(x){return x.k==='Wedding'}).length
+      :c==='Articles'?ITEMS.filter(function(x){return x.k==='Article'}).length
+      :ITEMS.filter(function(x){return x.c===c}).length;
     return '<button class="chip" data-c="'+c+'" aria-pressed="'+(state.chip===c)+'">'
       +c+' <u>'+n+'</u></button>';
   }).join('');
 }
+function countLine(n){
+  el('fcount').textContent=n+(n===1?' piece':' pieces')+
+    (state.chip==='All'&&!state.q?' — real days from couples will land here beside the reading.':'');
+}
 
-/* ── reader ─────────────────────────────────────────────────────────────── */
-var lastFocus=null;
-function openReader(i){
-  var it=ITEMS[i];
-  lastFocus=document.activeElement;
-  document.getElementById('rhead').style.cssText=thumbCss(it.g);
-  document.getElementById('rkind').textContent=it.k;
-  document.getElementById('rtitle').textContent=it.t;
-  document.getElementById('rmeta').innerHTML=metaLine(it);
-  document.getElementById('rtext').innerHTML = it.k==='Wedding'
-    ? '<p>This is a sample card. Setnayan has no published real story yet — when a couple '+
-      'shares their day, it opens right here, beside the reading.</p>'
-    : '<p>'+BODY+'</p><p>Ask for the full package in writing, ask who actually shoots on the '+
-      'day, and ask what happens if it rains. The answers you get in five minutes will tell '+
-      'you more than any portfolio.</p>';
-  document.getElementById('scrim').dataset.open='true';
-  var r=document.getElementById('reader'); r.dataset.open='true'; r.scrollTop=0; r.focus();
+/* ═══ the FLIP filter run ═════════════════════════════════════════════════
+   Leavers are picked back up off the table; stayers slide to their new place
+   with NO stagger (a reshuffle, not a dance); arrivers settle in last.
+   ═══════════════════════════════════════════════════════════════════════ */
+var running=[];
+function cancelRun(){running.forEach(function(a){try{a.finish()}catch(e){}});running=[]}
+
+function applyFilter(){
+  var grid=el('grid'),cards=[].slice.call(grid.querySelectorAll('.card'));
+  var want=cards.map(function(c){return matches(ITEMS[+c.dataset.i])});
+  var n=want.filter(Boolean).length;
+
+  if(!moving()){
+    cards.forEach(function(c,i){c.hidden=!want[i];c.style.transform='';c.style.opacity=''});
+    el('empty').hidden=n>0;grid.style.height='';countLine(n);return;
+  }
+  cancelRun();
+
+  /* 1 · FIRST */
+  var first={},firstH=grid.getBoundingClientRect().height;
+  cards.forEach(function(c){if(!c.hidden)first[c.dataset.i]=c.getBoundingClientRect()});
+
+  /* 3 · leavers pinned at their First rect, then lifted away */
+  var gridRect=grid.getBoundingClientRect(),leavers=[];
+  cards.forEach(function(c,i){
+    if(!c.hidden&&!want[i]){
+      var r=first[c.dataset.i];
+      c.style.position='absolute';c.style.margin='0';
+      c.style.left=(r.left-gridRect.left)+'px';c.style.top=(r.top-gridRect.top)+'px';
+      c.style.width=r.width+'px';c.style.zIndex='1';
+      leavers.push(c);
+    }
+  });
+  cards.forEach(function(c,i){if(want[i])c.hidden=false});
+  el('empty').hidden=n>0;
+
+  /* 2 · LAST */
+  var last={};
+  cards.forEach(function(c,i){if(want[i])last[c.dataset.i]=c.getBoundingClientRect()});
+  var lastH=grid.getBoundingClientRect().height;
+
+  /* grid height First → Last, then released */
+  grid.style.height=firstH+'px';
+  running.push(grid.animate([{height:firstH+'px'},{height:lastH+'px'}],
+    {duration:260,easing:'cubic-bezier(.35,.17,.15,1)',fill:'forwards'}));
+  setTimeout(function(){grid.style.height=''},280);
+
+  leavers.forEach(function(c){
+    running.push(c.animate([{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(.96)'}],
+      {duration:160,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'}));
+    /* 🔑 the STATE change is on a timer, never on the animation resolving.
+       A throttled background tab freezes the document timeline, `finished`
+       never settles, and a card filtered OUT would stay on screen for good. */
+    setTimeout(function(){
+      c.hidden=true;c.style.cssText='--rot:'+(+c.dataset.i%2?'-':'')+'.5deg';
+    },170);
+  });
+
+  /* 4 · stayers invert → identity, no stagger */
+  var arriveIdx=0;
+  cards.forEach(function(c,i){
+    if(!want[i])return;
+    var L=last[c.dataset.i],F=first[c.dataset.i];
+    if(F){
+      var dx=F.left-L.left,dy=F.top-L.top;
+      if(dx||dy) running.push(c.animate(
+        [{transform:'translate('+dx+'px,'+dy+'px)'},{transform:'none'}],
+        {duration:260,easing:'cubic-bezier(.35,.17,.15,1)'}));
+    }else{
+      /* 5 · arrivers settle, 30ms apart, starting at 120ms */
+      var rot=(+c.dataset.i%2?'-':'')+'.5deg';
+      running.push(c.animate(
+        [{opacity:0,transform:'translateY(-8px) scale(1.01) rotate('+rot+')'},
+         {opacity:1,transform:'none'}],
+        {duration:240,delay:120+(arriveIdx++)*30,
+         easing:'cubic-bezier(.22,.61,.21,1)',fill:'backwards'}));
+    }
+  });
+  countLine(n);
+}
+
+/* ═══ reader — the card flies into the header ═════════════════════════════ */
+var lastFocus=null,openCard=null;
+function scrollbarW(){return window.innerWidth-document.documentElement.clientWidth}
+function openReader(card){
+  var i=+card.dataset.i,it=ITEMS[i];
+  lastFocus=document.activeElement;openCard=card;
+  el('rhead').style.cssText=thumbCss(it.g);
+  el('rkind').textContent=it.k;el('rtitle').textContent=it.t;
+  el('rmeta').innerHTML=metaLine(it);
+  el('rtext').innerHTML=it.k==='Wedding'
+    ?'<p>This is a sample card. Setnayan has no published real story yet — when a couple '+
+     'shares their day, it opens right here, beside the reading.</p>'
+    :'<p>Every supplier will tell you they are booked that weekend. Some of them mean it. '+
+     'The rest are waiting to see whether you are serious — and the way you ask is what '+
+     'decides it.</p><p>Ask for the package in writing, ask who actually shoots on the day, '+
+     'and ask what happens if it rains. The answers you get in five minutes will tell you '+
+     'more than any portfolio.</p>';
+
+  var sw=scrollbarW();
   document.body.style.overflow='hidden';
+  if(sw)document.body.style.paddingRight=sw+'px';
+  el('scrim').dataset.open='true';el('reader').dataset.open='true';
+  el('reader').scrollTop=0;
+
+  if(moving()){
+    var from=card.querySelector('.thumb').getBoundingClientRect();
+    var to=el('rhead').getBoundingClientRect();
+    var fly=document.createElement('div');
+    fly.className='flyer';
+    fly.style.cssText+=thumbCss(it.g);
+    fly.style.left=from.left+'px';fly.style.top=from.top+'px';
+    fly.style.width=from.width+'px';fly.style.height=from.height+'px';
+    document.body.appendChild(fly);
+    card.style.opacity='0';
+    var body=el('rbody');body.classList.add('pre');
+    fly.animate([{transform:'none',width:from.width+'px',height:from.height+'px'},
+      {transform:'translate('+(to.left-from.left)+'px,'+(to.top-from.top)+'px)',
+       width:to.width+'px',height:to.height+'px'}],
+      {duration:320,easing:'cubic-bezier(.32,.72,0,1)',fill:'forwards'});
+    /* same rule — the clone is cleaned up on a timer, so a frozen timeline
+       can never strand it over the page */
+    setTimeout(function(){if(fly.parentNode)fly.remove()},340);
+    setTimeout(function(){body.classList.remove('pre')},180);
+  }
+  el('reader').focus();
 }
 function closeReader(){
-  document.getElementById('scrim').dataset.open='false';
-  document.getElementById('reader').dataset.open='false';
-  document.body.style.overflow='';
-  if(lastFocus) lastFocus.focus();
+  var card=openCard;
+  el('scrim').dataset.open='false';el('reader').dataset.open='false';
+  document.body.style.overflow='';document.body.style.paddingRight='';
+  if(card)setTimeout(function(){card.style.opacity=''},moving()?200:0);
+  el('rbody').classList.remove('pre');
+  if(lastFocus)lastFocus.focus();
+  openCard=null;
 }
 
-/* ── wiring ─────────────────────────────────────────────────────────────── */
-document.getElementById('chips').addEventListener('click',function(e){
-  var b=e.target.closest('.chip'); if(!b) return;
-  state.chip=b.dataset.c; drawChips(); draw();
+/* ═══ reveals — armed synchronously so nothing flashes ════════════════════ */
+function armReveals(){
+  if(!('IntersectionObserver' in window)||reduced())return;
+  root.classList.add('js-motion');
+  var vh=window.innerHeight||document.documentElement.clientHeight;
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting)return;
+      var t=e.target;
+      t.style.transitionDelay=(t.dataset.rv||0)+'ms';
+      t.classList.remove('pre');
+      io.unobserve(t);
+      setTimeout(function(){
+        t.classList.remove('reveal');t.style.transitionDelay='';t.style.transform='';
+      },360+(+t.dataset.rv||0));
+    });
+  },{threshold:.2,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(t){
+    var r=t.getBoundingClientRect();
+    var shown=Math.min(r.bottom,vh)-Math.max(r.top,0);
+    /* already ≥40% on screen at arm time → never hidden */
+    if(r.height&&shown/r.height>=.4){t.classList.remove('reveal');return}
+    t.classList.add('pre');io.observe(t);
+  });
+}
+function armCards(){
+  if(!root.classList.contains('js-motion'))return;
+  var vh=window.innerHeight,io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting)return;
+      var c=e.target,row=[].indexOf.call(c.parentNode.children,c)%3;
+      c.style.transitionDelay=(row*70)+'ms';
+      c.classList.remove('pre');io.unobserve(c);
+      setTimeout(function(){
+        c.classList.remove('reveal');c.style.transitionDelay='';c.style.transform='';
+      },340+row*70);
+    });
+  },{threshold:.2,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('#grid .card').forEach(function(c){
+    var r=c.getBoundingClientRect(),shown=Math.min(r.bottom,vh)-Math.max(r.top,0);
+    if(r.height&&shown/r.height>=.4)return;
+    c.classList.add('reveal','pre');io.observe(c);
+  });
+}
+
+/* 🔑 SAFETY NET — the third instance of one rule: CONTENT MUST NOT DEPEND ON
+   A CALLBACK IT CANNOT GUARANTEE. `.reveal.pre` is opacity 0, so an
+   IntersectionObserver that exists but never fires (zero-size or non-painting
+   embedding, some background/hidden contexts) leaves the whole reading feed
+   permanently blank. Anything on screen — or everything, if the document has
+   no measurable viewport at all — is revealed unconditionally. */
+function reveal(t){
+  t.classList.remove('pre');t.classList.remove('reveal');
+  t.style.transitionDelay='';t.style.transform='';
+}
+function safetyNet(){
+  var vh=window.innerHeight||0,vw=window.innerWidth||0;
+  var dead=!vh||!vw;
+  document.querySelectorAll('.pre').forEach(function(t){
+    var r=t.getBoundingClientRect();
+    if(dead||(r.bottom>0&&r.top<vh&&r.right>0&&r.left<vw)) reveal(t);
+  });
+}
+setTimeout(safetyNet,2000);
+var netTick=false;
+window.addEventListener('scroll',function(){
+  if(netTick)return;netTick=true;
+  setTimeout(function(){netTick=false;safetyNet()},400);
+},{passive:true});
+
+/* ═══ wiring ══════════════════════════════════════════════════════════════ */
+el('chips').addEventListener('click',function(e){
+  var b=e.target.closest('.chip');if(!b||b.dataset.c===state.chip)return;
+  state.chip=b.dataset.c;
+  [].forEach.call(this.querySelectorAll('.chip'),function(c){
+    c.setAttribute('aria-pressed',String(c.dataset.c===state.chip))});
+  applyFilter();
 });
-document.getElementById('grid').addEventListener('click',function(e){
-  var b=e.target.closest('.card'); if(b) openReader(+b.dataset.i);
+el('grid').addEventListener('click',function(e){
+  var b=e.target.closest('.card');if(b&&!b.hidden)openReader(b);
 });
-document.getElementById('q').addEventListener('input',function(e){
-  state.q=e.target.value.trim(); draw();
+el('q').addEventListener('input',function(e){state.q=e.target.value.trim();applyFilter()});
+el('rclose').addEventListener('click',closeReader);
+el('scrim').addEventListener('click',function(){
+  if(el('sheet').dataset.open==='true'){closeSheet();return}
+  closeReader();
 });
-document.getElementById('rclose').addEventListener('click',closeReader);
-document.getElementById('scrim').addEventListener('click',closeReader);
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'&&document.getElementById('reader').dataset.open==='true') closeReader();
+  if(e.key!=='Escape')return;
+  if(el('sheet').dataset.open==='true'){closeSheet();return}
+  if(el('reader').dataset.open==='true'){closeReader();return}
+  if(rail.dataset.drawer==='true'){setDrawer(false)}
 });
 document.querySelectorAll('[data-jump]').forEach(function(b){
   b.addEventListener('click',function(){
-    document.getElementById(b.dataset.jump).scrollIntoView({block:'start'});
+    el(b.dataset.jump).scrollIntoView({behavior:moving()?'smooth':'auto',block:'start'});
   });
 });
 
-/* sticky top bar */
-var tb=document.getElementById('topbar');
-new IntersectionObserver(function(es){
-  tb.dataset.stuck = String(!es[0].isIntersecting);
-},{rootMargin:'-1px 0px 0px 0px',threshold:1}).observe(
-  (function(){var s=document.createElement('div');s.style.cssText='height:1px';
-   tb.parentNode.insertBefore(s,tb);return s;})());
+/* ═══ THE SHELL ═══════════════════════════════════════════════════════════
+   One rail, one top bar, two views. The furniture must never move when the
+   content changes — that is the whole point of a shell.
+   ═══════════════════════════════════════════════════════════════════════ */
+var SERVICES={
+ 'alaala':{n:'Alaala',k:'What Setnayan is for',
+   l:'Not one family’s album. The whole samahan’s — every photo, every clip, every story of your day, gathered from everyone who was there.',
+   p:'<b>Yours for life.</b>'},
+ 'event-hub':{n:'Event Hub',k:'Free · Pro upgrade',
+   l:'One link your guests open — the save-the-date, the RSVP, the details, the day itself, and the album afterwards.',
+   p:'<b>Free.</b> Event Hub Pro is ₱3,500 if you want the premium touches.'},
+ 'papic':{n:'Papic',k:'Free · top up when you need more',
+   l:'Your guests become the photo crew. Everyone shoots, everyone goes home with their own pictures, and every shot lands in one album.',
+   p:'<b>Free to start</b> — 50 shots, unlimited cameras. Top-ups: ₱50 / 100 shots · ₱1,000 / 3,000 · ₱3,000 / 10,000 · ₱5,000 / 20,000.'},
+ 'setnayan-ai':{n:'Setnayan AI',k:'Paid',
+   l:'It does not chat. It watches your plan and flags a deposit, a price change or a clash before it costs you money.',
+   p:'<b>₱1,499</b> when you sign up · ₱2,499 after.'},
+ 'live-studio':{n:'Live Studio',k:'Paid',
+   l:'Brings the people who could not be in the room into your day — live. The tita in Dubai, the kuya in Riyadh, the lola who cannot travel.',
+   p:'<b>₱2,999.</b>'},
+ 'patiktok':{n:'Patiktok',k:'Paid',
+   l:'Turns the moments from your day into short, vertical highlight reels, ready the same night.',
+   p:'<b>₱1,500</b> per day.'},
+ '3d-plan':{n:'3D Plan',k:'Paid',
+   l:'Stand in your reception before it is built. Move the tables, seat the family, see it at eye level.',
+   p:'<b>₱1,500.</b>'},
+ 'logo-maker':{n:'Logo Maker',k:'Free to make · ₱1,000 to animate',
+   l:'One mark of your own, from your initials, carried across your whole day — the invitation, the website, the screens.',
+   p:'<b>Free</b> to make and preview, no sign-up. <b>₱1,000</b> to bring it to life as an animation.'}
+};
 
-/* scaffold */
-var stage=document.getElementById('stage');
-function seg(id,attr,fn){
-  document.getElementById(id).addEventListener('click',function(e){
-    var b=e.target.closest('button'); if(!b) return;
-    this.querySelectorAll('button').forEach(function(x){
-      x.setAttribute('aria-pressed',String(x===b)); });
-    stage.dataset[attr]=b.dataset[attr]; if(fn) fn(b.dataset[attr]);
+var rail=el('rail'),burger=el('burger'),railscrim=el('railscrim'),sheet=el('sheet');
+
+/* one focus trap, shared by every overlay — an overlay you can tab out of
+   behind is not really an overlay */
+function trap(box){
+  function onKey(e){
+    if(e.key!=='Tab')return;
+    var f=box.querySelectorAll('a[href],button:not([disabled]),input,[tabindex]:not([tabindex="-1"])');
+    if(!f.length)return;
+    var first=f[0],last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+  }
+  box.addEventListener('keydown',onKey);
+  return function(){box.removeEventListener('keydown',onKey)};
+}
+
+/* the rail is a DRAWER on a phone and a COLLAPSING RAIL on a laptop —
+   the same button, two correct behaviours */
+function drawerMode(){
+  return (window.matchMedia&&matchMedia('(max-width:900px)').matches)||
+         el('stage').dataset.w==='phone';
+}
+var untrapRail=null,railOpener=null;
+function setDrawer(open){
+  if((rail.dataset.drawer==='true')===open)return;   /* same guard, same reason */
+  rail.dataset.drawer=String(open);
+  railscrim.dataset.open=String(open);
+  burger.setAttribute('aria-expanded',String(open));
+  if(open){railOpener=document.activeElement;untrapRail=trap(rail);
+    var f=rail.querySelector('a,button');if(f)f.focus()}
+  else{if(untrapRail){untrapRail();untrapRail=null}
+    if(railOpener&&railOpener.focus)railOpener.focus()}
+}
+function setRailOpen(open){
+  rail.dataset.open=String(open);
+  burger.setAttribute('aria-expanded',String(open));
+  try{localStorage.setItem('sn.rail',open?'1':'0')}catch(e){}
+}
+burger.addEventListener('click',function(){
+  if(drawerMode()) setDrawer(rail.dataset.drawer!=='true');
+  else setRailOpen(rail.dataset.open!=='true');
+});
+railscrim.addEventListener('click',function(){setDrawer(false)});
+
+/* 🔑 CROSSING THE BREAKPOINT MUST CLEAN UP AFTER THE OTHER MODE.
+   Leaving the phone drawer open and widening to a laptop left the dark
+   overlay sitting over the page, swallowing every click — the drawer is
+   hidden by the laptop stylesheet but its scrim is not. Measured, not
+   theorised. Runs on a real resize and on the prototype's width switch. */
+function syncShellMode(){
+  if(!drawerMode()&&rail.dataset.drawer==='true') setDrawer(false);
+}
+window.addEventListener('resize',syncShellMode,{passive:true});
+try{if(localStorage.getItem('sn.rail')==='1')setRailOpen(true)}catch(e){}
+
+/* the views — the rail rows actually go somewhere */
+function showHome(){
+  el('viewHome').hidden=false;el('viewSvc').hidden=true;
+  markRail(null);window.scrollTo(0,0);
+}
+function showService(key){
+  var d=SERVICES[key];if(!d)return;
+  el('svcKick').textContent=d.k;el('svcName').textContent=d.n;
+  el('svcLine').textContent=d.l;el('svcPrice').innerHTML=d.p;
+  el('viewHome').hidden=true;el('viewSvc').hidden=false;
+  markRail(key);window.scrollTo(0,0);
+  el('svcName').setAttribute('tabindex','-1');el('svcName').focus();
+}
+function markRail(key){
+  document.querySelectorAll('#rail .rrow').forEach(function(r){
+    if(key&&r.dataset.svc===key)r.setAttribute('aria-current','page');
+    else if(!key&&r.dataset.svc===undefined)r.setAttribute('aria-current','page');
+    else r.removeAttribute('aria-current');
+  });
+  document.querySelectorAll('.bnav a').forEach(function(a){
+    if(!key&&a.dataset.nav==='home')a.setAttribute('aria-current','page');
+    else a.removeAttribute('aria-current');
   });
 }
-seg('segV','v',function(v){
-  document.getElementById('fh').textContent =
-    v==='today' ? 'Setnayan — plan your event, keep it together' : 'Read while you plan';
+rail.addEventListener('click',function(e){
+  var row=e.target.closest('.rrow');if(!row)return;
+  e.preventDefault();
+  if(drawerMode())setDrawer(false);
+  if(row.dataset.svc)showService(row.dataset.svc);else showHome();
 });
-seg('segW','w');
-seg('segM','m',function(m){
-  document.documentElement.style.setProperty('--d-fast', m==='off'?'1ms':'180ms');
-  document.documentElement.style.setProperty('--d-mid',  m==='off'?'1ms':'340ms');
-  document.documentElement.style.setProperty('--d-slow', m==='off'?'1ms':'620ms');
+el('svcback').addEventListener('click',showHome);
+el('svcCta').addEventListener('click',function(){openSheet()});
+document.querySelector('.bnav').addEventListener('click',function(e){
+  var a=e.target.closest('a');if(!a)return;e.preventDefault();
+  if(a.dataset.nav==='home')showHome();
+  else if(a.dataset.nav==='signin')openSheet();
+  else if(a.dataset.nav==='menu')setDrawer(true);
+  else if(a.dataset.nav)showService(a.dataset.nav);
 });
 
-drawChips(); draw();
+/* sign in — a button that does nothing is a dead end, not a shell */
+var untrapSheet=null,sheetOpener=null;
+function openSheet(){
+  /* the rail's Sign in matches two selectors below, so without this guard one
+     press traps focus twice and only one trap is ever released */
+  if(sheet.dataset.open==='true')return;
+  sheetOpener=document.activeElement;
+  sheet.dataset.open='true';el('scrim').dataset.open='true';
+  untrapSheet=trap(sheet);sheet.querySelector('button').focus();
+}
+function closeSheet(){
+  sheet.dataset.open='false';
+  if(el('reader').dataset.open!=='true')el('scrim').dataset.open='false';
+  if(untrapSheet){untrapSheet();untrapSheet=null}
+  if(sheetOpener&&sheetOpener.focus)sheetOpener.focus();
+}
+el('sheetClose').addEventListener('click',closeSheet);
+document.querySelectorAll('.btn-gold').forEach(function(b){
+  if(/^Sign in$/.test(b.textContent.trim()))b.addEventListener('click',openSheet);
+});
+document.querySelectorAll('.signstrip .btn, #rail .rprompt .btn').forEach(function(b){
+  b.addEventListener('click',openSheet);
+});
+
+/* top bar — hysteresis so it cannot flicker on the threshold */
+var tb=el('topbar'),stuck=false,ticking=false;
+function checkBar(){
+  var y=window.scrollY||document.documentElement.scrollTop;
+  if(!stuck&&y>24){stuck=true;tb.dataset.stuck='true'}
+  else if(stuck&&y<8){stuck=false;tb.dataset.stuck='false'}
+  ticking=false;
+}
+window.addEventListener('scroll',function(){
+  if(!ticking){ticking=true;requestAnimationFrame(checkBar)}
+},{passive:true});
+
+/* the Today / New pill — a 340ms cream blink, like turning an album page */
+var stage=el('stage'),vpill=el('vpill');
+vpill.addEventListener('click',function(){
+  var toNew=stage.dataset.v==='today';
+  vpill.setAttribute('aria-pressed',String(toNew));
+  var swap=function(){
+    stage.dataset.v=toNew?'new':'today';
+    el('fh').textContent=toNew?'Read while you plan':'Setnayan — plan your event, keep it together';
+  };
+  if(!moving()){swap();return}
+  var b=el('blink'),done=false;
+  b.animate([{opacity:0},{opacity:1}],{duration:140,easing:'ease-in',fill:'forwards'});
+  setTimeout(function(){
+    if(done)return;done=true;
+    swap();
+    b.animate([{opacity:1},{opacity:0}],{duration:200,easing:'ease-out',fill:'forwards'});
+    setTimeout(function(){b.style.opacity=''},210);
+  },145);
+});
+
+function seg(id,attr,fn){
+  el(id).addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    [].forEach.call(this.querySelectorAll('button'),function(x){
+      x.setAttribute('aria-pressed',String(x===b))});
+    if(fn)fn(b.dataset[attr]);else stage.dataset[attr]=b.dataset[attr];
+  });
+}
+seg('segW','w',function(w){
+  el('stage').dataset.w=w;
+  syncShellMode();
+});
+seg('segM','m',function(m){
+  root.dataset.motion=m;
+  if(m==='off'){
+    el('opening').classList.remove('hero-run');
+    document.querySelectorAll('.pre').forEach(function(t){t.classList.remove('pre')});
+    document.querySelectorAll('.reveal').forEach(function(t){
+      t.classList.remove('reveal');t.style.transform='';t.style.transitionDelay=''});
+  }
+});
+el('replay').addEventListener('click',function(){
+  var o=el('opening');
+  o.classList.remove('hero-run');
+  void document.body.offsetWidth;   /* force a reflow so the class re-applies */
+  runHero();
+  o.scrollIntoView({block:'start'});
+});
+
+/* the hero choreography — armed only when motion is genuinely allowed, and
+   ALWAYS disarmed 820ms later so the rest state cannot be missed */
+function runHero(){
+  var o=el('opening');
+  if(!moving()){o.classList.remove('hero-run');return}
+  o.classList.add('hero-run');
+  setTimeout(function(){o.classList.remove('hero-run')},820);
+}
+
+buildChips();buildGrid();countLine(ITEMS.length);
+armReveals();armCards();runHero();
 </script>
 </body>
 </html>

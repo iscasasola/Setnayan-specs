@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setnayan — open a service, add it to an event · 2026-08-21</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   OPEN A SERVICE → "ADD TO AN EVENT" · 2026-08-21
+
+   Owner correction: *"each service when opened will have a button to add to
+   event."* The button lives on the SERVICE, not in the sidebar. An earlier cut
+   of this file put it in the rail; that was wrong and is gone.
+
+   Owner's model, whole:
+     • signed out                → the service page as it is today
+     • signed in, not in an event → THE SAME PAGE, plus one button
+     • inside an event            → a control centre (not drawn here)
+
+   The picker's filtering is NOT faked. Same three gates as the shipped
+   lib/events-for-studio-app.ts: yours to organise · not finished · compatible.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --paper:#FFFFFF; --ink:#2C2A29; --gold:#8C6932; --link:#3B4E67;
+  --m1:#65656A; --m2:#6B6B70;
+  --line:#E3E3E5; --panel:#F7F7F8; --hover:#F2F2F3; --tag:#FBF5E9; --tagline:#E6DAC2;
+  --sys:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --ease:cubic-bezier(.22,.61,.21,1);
+}
+*{box-sizing:border-box}
+body{margin:0;background:#EDEDEF;color:var(--ink);font-family:var(--sys);font-size:15px;
+  line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-align:left}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+
+.bar{position:sticky;top:0;z-index:60;background:#211F1D;color:#EFE9DD;padding:10px 16px;
+  display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:12px}
+.bar label{display:flex;align-items:center;gap:7px;color:#9A9186;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase}
+.bar select{background:#2E2B28;color:#EFE9DD;border:1px solid #4A443C;border-radius:7px;
+  padding:5px 9px;font-size:12px}
+.seg{display:flex;border:1px solid #4A443C;border-radius:8px;overflow:hidden}
+.seg button{padding:5px 11px;font-size:11.5px;color:#C9C1B5;min-height:30px}
+.seg button[aria-pressed=true]{background:#A9834B;color:#221F1B;font-weight:700}
+
+.wrap{max-width:1120px;margin:0 auto;padding:24px 20px 90px}
+.note{border-left:3px solid var(--line);background:var(--panel);padding:11px 14px;
+  border-radius:0 8px 8px 0;font-size:13.5px;color:var(--m1);margin:16px 0;max-width:82ch}
+.note b{color:var(--ink)}
+.note.good{border-left-color:#5E7A52;background:#F3F7F0}
+
+/* the shell: rail + the opened service */
+.shell{display:grid;grid-template-columns:250px 1fr;background:var(--paper);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative;min-height:520px}
+@media(max-width:800px){.shell{grid-template-columns:1fr}.rail{display:none}}
+.rail{border-right:1px solid var(--line);padding:14px 10px}
+.rgroup{padding:2px 10px 10px}
+.rgroup b{font-size:12.5px}
+.rgroup span{font-size:11.5px;color:var(--m1);margin-left:7px}
+.rrow{display:flex;gap:12px;align-items:flex-start;padding:9px 10px;border-radius:10px;width:100%}
+.rrow:hover{background:var(--hover)}
+.rrow[aria-current=page]{background:var(--panel)}
+.dot{flex:none;width:6px;height:6px;border-radius:50%;background:#A9834B;margin:7px 0 0}
+.rlab{font-size:14px;font-weight:600;display:block}
+.rdesc{font-size:12px;color:var(--m1);line-height:1.45;display:block;margin-top:2px}
+
+/* ── the opened service — this is where the button lives ───────────────── */
+.svc{padding:34px 32px 40px;position:relative}
+@media(max-width:620px){.svc{padding:24px 20px 34px}}
+.kick{margin:0 0 12px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  font-weight:700;color:var(--gold)}
+.svc h1{margin:0 0 14px;font-size:clamp(28px,4vw,40px);line-height:1.1;letter-spacing:-.028em}
+.lede{margin:0 0 16px;font-size:16.5px;line-height:1.55;max-width:52ch}
+.price{margin:0 0 26px;font-size:14px;color:var(--m1)}
+.price b{color:var(--ink);font-weight:700}
+.acts{display:flex;gap:11px;flex-wrap:wrap;align-items:center}
+.btn{min-height:46px;padding:0 22px;border-radius:999px;font-size:15px;font-weight:650;
+  display:inline-flex;align-items:center;gap:9px;justify-content:center;
+  transition:background-color 140ms var(--ease),transform 90ms var(--ease),border-color 140ms var(--ease)}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-gold:hover{background:#7B5C2C}
+.btn-gold:active{transform:scale(.985)}
+.btn-quiet{border:1px solid var(--line);color:var(--ink)}
+.btn-quiet:hover{background:var(--hover);border-color:#D3CBB9}
+.hint{margin:14px 0 0;font-size:12.5px;color:var(--m2)}
+
+/* ── the picker, in three shapes ───────────────────────────────────────── */
+.evrow{display:flex;align-items:center;gap:13px;width:100%;padding:12px;border-radius:11px;
+  border:1px solid transparent;transition:background-color 140ms var(--ease),border-color 140ms var(--ease)}
+.evrow:hover{background:var(--hover);border-color:var(--line)}
+.evrow .ic{flex:none;width:38px;height:38px;border-radius:11px;background:var(--tag);
+  border:1px solid var(--tagline);display:grid;place-items:center;font-size:16px}
+.evrow .nm{font-size:14.5px;font-weight:650;display:block}
+.evrow .dt{font-size:12.5px;color:var(--m1);display:block;margin-top:1px}
+.evrow .go{margin-left:auto;font-size:12.5px;color:var(--link);font-weight:650;white-space:nowrap}
+.undated{font-style:italic}
+.empty{padding:24px 16px;text-align:center;color:var(--m1);font-size:14px;
+  border:1px dashed var(--line);border-radius:12px;background:var(--panel)}
+.empty b{display:block;color:var(--ink);font-size:15.5px;margin-bottom:6px;font-weight:700}
+.empty .act{margin-top:14px;display:inline-flex;min-height:38px;padding:0 16px;align-items:center;
+  border-radius:999px;background:var(--gold);color:#fff;font-size:13px;font-weight:650}
+.ptitle{font-size:17px;font-weight:700;margin:0 0 3px;letter-spacing:-.012em}
+.psub{font-size:13px;color:var(--m1);margin:0 0 14px}
+.scrim{position:absolute;inset:0;background:rgba(44,42,41,.32);opacity:0;pointer-events:none;
+  transition:opacity 180ms linear;z-index:8}
+.scrim[data-on=true]{opacity:1;pointer-events:auto}
+
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:9;background:var(--paper);
+  border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding:16px 18px 20px;
+  transform:translateY(102%);transition:transform 260ms var(--ease);
+  box-shadow:0 -18px 40px -30px rgba(44,42,41,.5)}
+.sheet[data-on=true]{transform:none}
+.grab{width:36px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+
+.dlg{position:absolute;left:50%;top:50%;z-index:9;width:min(400px,90%);
+  transform:translate(-50%,-46%) scale(.98);background:var(--paper);border:1px solid var(--line);
+  border-radius:16px;padding:20px 18px;opacity:0;pointer-events:none;
+  transition:opacity 180ms linear,transform 220ms var(--ease);
+  box-shadow:0 30px 70px -34px rgba(44,42,41,.55)}
+.dlg[data-on=true]{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+
+.inline{max-height:0;overflow:hidden;transition:max-height 280ms var(--ease)}
+.inline[data-on=true]{max-height:560px}
+.inline .box{border:1px solid var(--line);border-radius:14px;padding:16px 14px;margin-top:20px;
+  background:var(--panel);max-width:520px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <b>Open a service → add it to an event</b>
+  <label>Signed
+    <span class="seg" id="auth">
+      <button data-a="out" aria-pressed="false">out</button>
+      <button data-a="in" aria-pressed="true">in</button>
+    </span>
+  </label>
+  <label>Picker
+    <span class="seg" id="shape">
+      <button data-s="c" aria-pressed="true">C · Inline</button>
+      <button data-s="a" aria-pressed="false">A · Sheet</button>
+      <button data-s="b" aria-pressed="false">B · Dialog</button>
+    </span>
+  </label>
+  <label>Your events
+    <select id="world">
+      <option value="normal">the usual mix</option>
+      <option value="none">you have none yet</option>
+      <option value="past">all already happened</option>
+      <option value="incompatible">none can use this</option>
+      <option value="unreadable">couldn’t be checked</option>
+    </select>
+  </label>
+</div>
+
+<div class="wrap">
+
+  <div class="note good">
+    <b>The only difference between signed out and signed in is one button.</b>
+    Flip <b>Signed out / in</b> above — the page does not change shape, gain a
+    section, or lose one. Signed out it says <i>Start your event — free</i>;
+    signed in it also says <i>Add to an event</i>. Nothing else moves.
+  </div>
+
+  <div class="shell">
+    <div class="rail">
+      <div class="rgroup"><b>Studio</b><span>the things you make</span></div>
+      <div id="rows"></div>
+    </div>
+
+    <div class="svc">
+      <p class="kick" id="kick"></p>
+      <h1 id="name"></h1>
+      <p class="lede" id="lede"></p>
+      <p class="price" id="price"></p>
+      <div class="acts">
+        <button class="btn btn-gold" id="add">＋ Add to an event</button>
+        <button class="btn btn-quiet" id="start">Start your event — free</button>
+        <button class="btn btn-quiet" id="learn">See how it works</button>
+      </div>
+      <p class="hint" id="hint"></p>
+
+      <div class="inline" id="inlineBox" data-on="false">
+        <div class="box">
+          <p class="ptitle" id="cTitle"></p>
+          <p class="psub" id="cSub"></p>
+          <div id="cList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scrim" id="scrim" data-on="false"></div>
+    <div class="sheet" id="sheet" data-on="false">
+      <div class="grab"></div>
+      <p class="ptitle" id="aTitle"></p>
+      <p class="psub" id="aSub"></p>
+      <div id="aList"></div>
+    </div>
+    <div class="dlg" id="dlg" data-on="false">
+      <p class="ptitle" id="bTitle"></p>
+      <p class="psub" id="bSub"></p>
+      <div id="bList"></div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Open Logo Maker, then open Papic.</b> Papic offers all three of your
+    celebrations. Logo Maker offers only the wedding — a monogram is a wedding
+    thing. <b>Mama’s 70th</b> never appears anywhere: it already happened.
+    <b>Lola’s despedida</b> never appears either — you’re a guest at that one.
+    And <b>Baby Elias’s binyag</b> does appear despite having no date yet.
+  </div>
+  <div class="note">
+    <b>Try the last dropdown.</b> Four awkward situations, four different
+    sentences. “You don’t have a celebration yet” and “we couldn’t check” must
+    never look the same, or a loading failure gets reported to somebody as an
+    empty life.
+  </div>
+</div>
+
+<script>
+var SERVICES=[
+ {key:'setnayan-ai',name:'Setnayan AI',kick:'Paid',surface:null,
+  lede:'It doesn’t chat. It watches your plan and flags a deposit, a price change or a clash before it costs you money.',
+  price:'<b>₱1,499</b> when you sign up · ₱2,499 after.',
+  line:'Watches your plan and flags a deposit, a price change or a clash.'},
+ {key:'event-hub',name:'Event Hub',kick:'Free · Pro upgrade',surface:'website',
+  lede:'One link your guests open — the save-the-date, the RSVP, the details, the day itself, and the album afterwards.',
+  price:'<b>Free.</b> Event Hub Pro is ₱3,500 for the premium touches.',
+  line:'One link for your save-the-date, RSVP, details and the day itself.'},
+ {key:'papic',name:'Papic',kick:'Free · top up when you need more',surface:'gallery',
+  lede:'Your guests become the photo crew. Everyone shoots, everyone goes home with their own pictures, and every shot lands in one album.',
+  price:'<b>Free to start</b> — 50 shots, unlimited cameras. Top-ups from ₱50.',
+  line:'Turns your guests into your photo crew.'},
+ {key:'live-studio',name:'Live Studio',kick:'Paid',surface:'day_of',
+  lede:'Brings the people who couldn’t be in the room into your day — live. The tita in Dubai, the kuya in Riyadh, the lola who can’t travel.',
+  price:'<b>₱2,999.</b>',
+  line:'Brings the people who can’t be in the room into your day — live.'},
+ {key:'3d-plan',name:'3D Plan',kick:'Paid',surface:'seating',
+  lede:'Stand in your reception before it’s built. Move the tables, seat the family, see it at eye level.',
+  price:'<b>₱1,500.</b>',
+  line:'Stand in your reception before it’s built.'},
+ {key:'logo-maker',name:'Logo Maker',kick:'Free to make · ₱1,000 to animate',surface:'monogram',
+  lede:'One mark of your own, from your initials, carried across your whole day — the invitation, the website, the screens.',
+  price:'<b>Free</b> to make and preview, no sign-up. <b>₱1,000</b> to bring it to life.',
+  line:'One monogram of your own, carried across your whole day.'}
+];
+
+var WORLDS={
+ normal:[
+  {id:'w1',name:'Ana & Marco',kind:'Wedding',icon:'💍',date:'2026-12-12',mine:true,
+   surfaces:['website','gallery','day_of','seating','monogram']},
+  {id:'w2',name:'Ice turns 40',kind:'Birthday',icon:'🎂',date:'2026-12-16',mine:true,
+   surfaces:['website','gallery','day_of','seating']},
+  {id:'w3',name:'Baby Elias — binyag',kind:'Christening',icon:'🕊',date:null,mine:true,
+   surfaces:['website','gallery','day_of']},
+  {id:'w4',name:'Mama’s 70th',kind:'Birthday',icon:'🎉',date:'2026-08-02',mine:true,
+   surfaces:['website','gallery','day_of','seating']},
+  {id:'w5',name:'Lola’s despedida',kind:'Send-off',icon:'✈️',date:'2026-11-04',mine:false,
+   surfaces:['website','gallery']}
+ ],
+ none:[],
+ past:[{id:'p1',name:'Ana & Marco',kind:'Wedding',icon:'💍',date:'2026-05-02',mine:true,
+        surfaces:['website','gallery','day_of','seating','monogram']},
+       {id:'p2',name:'Mama’s 70th',kind:'Birthday',icon:'🎉',date:'2026-08-02',mine:true,
+        surfaces:['website','gallery']}],
+ incompatible:[{id:'i1',name:'Ice turns 40',kind:'Birthday',icon:'🎂',date:'2026-12-16',mine:true,surfaces:['website']},
+               {id:'i2',name:'Baby Elias — binyag',kind:'Christening',icon:'🕊',date:null,mine:true,surfaces:['website']}],
+ unreadable:[{id:'u1',name:'Ana & Marco',kind:'Wedding',icon:'💍',date:'2026-12-12',mine:true,surfaces:null},
+             {id:'u2',name:'Ice turns 40',kind:'Birthday',icon:'🎂',date:'2026-12-16',mine:true,surfaces:null}]
+};
+
+var TODAY='2026-08-21';
+var state={svc:'logo-maker',shape:'c',world:'normal',auth:'in',open:false};
+var el=function(i){return document.getElementById(i)};
+var svcOf=function(k){return SERVICES.filter(function(s){return s.key===k})[0]};
+
+/* the three gates — same order, same outcomes as the shipped module */
+function pick(service,events){
+  var out=[],rejected=[],unchecked=0;
+  events.forEach(function(e){
+    if(!e.mine){rejected.push('not-organiser');return}
+    if(e.date && e.date < TODAY){rejected.push('finished');return}  // undated => never finished
+    if(service.surface){
+      if(e.surfaces===null){unchecked++;rejected.push('unknown-type');return}
+      if(e.surfaces.indexOf(service.surface)<0){rejected.push('incompatible');return}
+    }
+    out.push(e);
+  });
+  return {pickable:out,rejected:rejected,unchecked:unchecked};
+}
+function emptyReason(r){
+  if(r.pickable.length) return null;
+  if(r.unchecked>0) return {b:'We couldn’t check your celebrations',p:'Something went wrong on our side, not yours. Try again in a moment.',cta:'Try again'};
+  if(!r.rejected.length) return {b:'You don’t have a celebration yet',p:'Start one and this can go straight into it.',cta:'Start a celebration'};
+  if(r.rejected.every(function(x){return x==='finished'})) return {b:'They’ve all already happened',p:'This can only be added to a celebration that’s still coming up.',cta:'Start a celebration'};
+  if(r.rejected.indexOf('incompatible')>=0) return {b:'None of yours can use this one',p:'It only works with certain kinds of celebration.',cta:'See what it needs'};
+  return {b:'Nothing to add this to',p:'You organise no celebration this can be added to.',cta:'Start a celebration'};
+}
+function prettyDate(d){
+  if(!d) return '<span class="undated">No date yet</span>';
+  var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],p=d.split('-');
+  return p[2].replace(/^0/,'')+' '+m[+p[1]-1]+' '+p[0];
+}
+function listHtml(r){
+  var er=emptyReason(r);
+  if(er) return '<div class="empty"><b>'+er.b+'</b>'+er.p+'<br><span class="act">'+er.cta+'</span></div>';
+  return r.pickable.map(function(e){
+    return '<button class="evrow" data-ev="'+e.id+'"><span class="ic">'+e.icon+'</span>'
+      +'<span><span class="nm">'+e.name+'</span>'
+      +'<span class="dt">'+e.kind+' · '+prettyDate(e.date)+'</span></span>'
+      +'<span class="go">Add →</span></button>';
+  }).join('');
+}
+function draw(){
+  var s=svcOf(state.svc), signedIn=state.auth==='in';
+  el('rows').innerHTML=SERVICES.map(function(x){
+    return '<button class="rrow" data-svc="'+x.key+'"'+(x.key===state.svc?' aria-current="page"':'')+'>'
+     +'<span class="dot"></span><span><span class="rlab">'+x.name+'</span>'
+     +'<span class="rdesc">'+x.line+'</span></span></button>';
+  }).join('');
+  el('kick').textContent=s.kick; el('name').textContent=s.name;
+  el('lede').textContent=s.lede; el('price').innerHTML=s.price;
+
+  /* THE ONLY DIFFERENCE — one button appears. Nothing else changes. */
+  el('add').classList.toggle('hide',!signedIn);
+  el('start').classList.toggle('hide',signedIn);
+
+  var r=pick(s,WORLDS[state.world]);
+  ['a','b','c'].forEach(function(k){
+    el(k+'Title').textContent='Add '+s.name+' to…';
+    var sub=r.pickable.length?'Only celebrations you organise that haven’t happened yet.':'';
+    el(k+'Sub').textContent=sub; el(k+'Sub').classList.toggle('hide',!sub);
+    el(({a:'aList',b:'bList',c:'cList'})[k]).innerHTML=listHtml(r);
+  });
+  el('hint').textContent = signedIn
+    ? (r.pickable.length
+        ? r.pickable.length+(r.pickable.length===1?' celebration':' celebrations')+' can take '+s.name+'.'
+        : 'Nothing of yours can take '+s.name+' right now.')
+    : '';
+}
+function setOpen(on){
+  state.open=on;
+  el('scrim').dataset.on=String(on && state.shape!=='c');
+  el('sheet').dataset.on=String(on && state.shape==='a');
+  el('dlg').dataset.on=String(on && state.shape==='b');
+  el('inlineBox').dataset.on=String(on && state.shape==='c');
+}
+el('rows').addEventListener('click',function(e){
+  var b=e.target.closest('[data-svc]'); if(!b) return;
+  state.svc=b.dataset.svc; setOpen(false); draw();
+});
+el('add').addEventListener('click',function(){setOpen(!state.open)});
+el('scrim').addEventListener('click',function(){setOpen(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false)});
+document.addEventListener('click',function(e){
+  var row=e.target.closest('[data-ev]'); if(!row) return;
+  row.querySelector('.go').textContent='Added ✓';
+  row.querySelector('.go').style.color='#3F5837';
+  setTimeout(function(){setOpen(false);draw()},700);
+});
+function seg(id,key,after){
+  el(id).addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.querySelectorAll('button'),function(x){
+      x.setAttribute('aria-pressed',String(x===b))});
+    state[key]=b.dataset[key==='shape'?'s':'a']; setOpen(false); if(after)after(); draw();
+  });
+}
+seg('shape','shape'); seg('auth','auth');
+el('world').addEventListener('change',function(e){state.world=e.target.value;setOpen(false);draw()});
+draw();
+</script>
+</body>
+</html>

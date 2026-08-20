@@ -45,8 +45,24 @@ couple deletes one celebration.
 
 **14 tables are SHARED** — both parties have a real claim (signed contracts, records
 of the couple paying the supplier). *"Only data from the user gets lost"* and
-*"vendor data stays"* both reach for these. **This needs an owner ruling, not an
-engineering decision.**
+*"vendor data stays"* both reach for these.
+
+## ✅ OWNER RULING, 2026-08-21: **"vendors get to keep it."**
+
+**Every SHARED row resolves to the VENDOR.** A signed contract, a record of a
+deposit the couple paid, a completed booking — the supplier keeps their copy when a
+couple deletes the celebration. Do not re-ask this.
+
+⚠ **What that does NOT license.** The ruling settles rows where the supplier has a
+genuine claim — a deal you both made. It does **not** convert the couple's private
+planning into vendor data. The 15 COUPLE rows below still go: their budget, their
+shortlist, who they considered and rejected, their private notes. Preserving those
+would hand a supplier the couple's planning, which is a different harm and not what
+the owner ruled on.
+
+🔑 **The practical test:** did the supplier take part in it? A contract they signed,
+a payment they received, a job they completed — theirs, kept. A note the couple
+wrote *about* them, a shortlist they never knew they were on — the couple's, gone.
 
 ---
 
