@@ -112,6 +112,60 @@ admin payment queue.
 
 ---
 
+## 1b · THE OWNER'S TWO FOLLOW-UP OBSERVATIONS — BOTH CONFIRMED (2026-08-20, later)
+
+> *"there was no paywall on the onboarding. and no way to add shots for papic"*
+
+### (a) "No paywall on the onboarding" — CORRECT, and it is the whole of § 1
+
+**There is no payment step in the create flow, by design.** The flow ends, the event is created,
+and the only thing that ever mentions money is a banner on a page you are redirected to
+afterwards — the Papic studio — which for an AI-only buyer names no amount and no bank details.
+So the owner walked a flow that took a ₱499 decision and never once showed him a price to pay
+against a place to pay it. **His sentence and § 1 are the same defect seen from the two ends.**
+
+### (b) "No way to add shots for Papic" — the control EXISTS, and every word around it says free
+
+**Measured on the exact build production is serving** (`/api/health` → `f5fd0fc`, = `origin/main`
+`f5fd0fcc2`), and against the live catalog. The data is healthy: **four shot bundles are active
+and priced** — ₱50/100 · ₱1,000/3,000 · ₱3,000/10,000 · ₱5,000/20,000 — so the ladder is not
+empty and the stepper CAN increment. **The bug is not a dead control.**
+
+Here is the entire Papic card in its default state, in order, as a person meets it:
+
+| what is on screen | what it says |
+|---|---|
+| green banner | *"**Papic is live on this birthday.** Your free shots and guest QR are ready."* |
+| heading | *"How many shots do you want for this birthday?"* |
+| the control | **`−`  50 shots / "Yours already"  `+`** — bare glyphs, no words; `−` is disabled at 30% opacity |
+| under it | *"Included — **Free**"* |
+| card subtotal | *"Papic — **Free**"* |
+| closing line | *"**Top up any time from your Papic studio.**"* |
+
+🔑 **EVERY VISIBLE WORD SAYS THE THING IS ALREADY YOURS AND FREE, AND THE ONLY WAY TO BUY IS AN
+UNLABELLED `+`.** No price appears until you press it. Nothing on the card uses the words *add*,
+*buy*, *more* or a peso figure in its resting state — the plus button's only "add shots" wording
+is its `aria-label`, which a sighted person never sees.
+
+🔑 **AND THE CARD'S OWN LAST LINE SENDS YOU AWAY FROM ITS OWN CONTROL** — *"top up any time from
+your Papic studio"* tells the reader the place to add shots is a different page. A person who
+reads the card top to bottom is told: it's live, it's free, it's included, and buying happens
+elsewhere. **Reading that as "there is no way to add shots here" is the correct reading of the
+copy.** The control is not hidden — it is *contradicted*.
+
+⚠ **HONEST LIMIT: I could not see his screen.** The stepper is proven present in the shipped code
+and the ladder is proven non-empty in prod; I did NOT observe the rendered page (it is behind a
+login and I do not sign in to accounts). So the finding above is *"the copy defeats the control"*,
+which is provable from source. **A rendering failure that hid Card 1 entirely is not ruled out**
+and would look identical from the owner's chair. **First act on the copy; if he still reports it
+missing after that, the next step is to observe the page signed in as him, not to re-read code.**
+
+⏭ **THE FIX IS COPY AND AFFORDANCE, NOT MACHINERY** — do not rebuild the picker. Name the action
+on the control, show what the next press costs before it is pressed, and stop the closing line
+pointing at another page while a live control sits above it.
+
+---
+
 ## 2 · DEFECT 1 — "This one's yours" with an empty box under it
 
 **The half-fix already shipped and the owner is right that it still asks.** The screen re-titles
