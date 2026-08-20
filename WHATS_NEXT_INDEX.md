@@ -1,6 +1,19 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
-> ### ▶▶▶ NEWEST — READ THIS FIRST (2026-08-19)
+> ### ▶▶▶ NEWEST — READ THIS FIRST (2026-08-20)
+> **[`WHATS_NEXT_HANDOFF_2026-08-20.md`](WHATS_NEXT_HANDOFF_2026-08-20.md)** — written for a
+> **NEW CLAUDE ACCOUNT**: self-contained, assumes no memory file and nothing local.
+> Carries **17 PRs shipped** (do NOT rebuild) · the **completed** 11-item build list · a measured
+> **user/vendor readiness verdict** · what the owner has already DONE vs what is still his ·
+> 4 small builds left · and the corrections made to this register and to the code repo's docs.
+> 🛑 Its §0 carries the four traps that each cost a session, including: **a flag's default in code
+> is not its value in production** (a feature was reported to the owner as switched off while it
+> was live — he caught it, not me), and **"green" is not one verdict** (3 of 5 mutations passed for
+> 3 different reasons).
+> ⏭ The 2026-08-19 entry below is **SUPERSEDED** — its build list is done and one of its owner
+> recommendations was false.
+>
+> ### ▶▶ SUPERSEDED — 2026-08-19
 > **[`WHATS_NEXT_Silent_Failures_2026-08-19.md`](WHATS_NEXT_Silent_Failures_2026-08-19.md)**
 > — written for a **DIFFERENT CLAUDE ACCOUNT** (owner is continuing elsewhere), so it is
 > self-contained: no memory file is assumed and nothing local is relied on.

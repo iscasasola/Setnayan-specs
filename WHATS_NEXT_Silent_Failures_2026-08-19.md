@@ -1,5 +1,14 @@
 # WHAT'S NEXT — SILENT FAILURES, and what the owner should do (2026-08-19)
 
+> 🛑 **SUPERSEDED 2026-08-20 by [`WHATS_NEXT_HANDOFF_2026-08-20.md`](WHATS_NEXT_HANDOFF_2026-08-20.md). READ THAT ONE.**
+> Kept for its traps and its account of the disease, which still generalise. Two things here are
+> now WRONG and would waste your time:
+> - **§2's build list is COMPLETE.** All 11 confirmed instances are fixed and merged (#4583 →
+>   #4594). Nothing on it is open.
+> - **§3 recommendation #2 (compromised-password checking) was FALSE** — it is not a console
+>   switch awaiting a flip; it shipped 2026-08-18 in application code. It was recommended to the
+>   owner before being verified.
+
 > **Written to be read by a DIFFERENT CLAUDE ACCOUNT on a possibly different machine.**
 > Assume you have **no memory files** (`~/.claude/.../memory/` does not travel), no session
 > history, and nothing local that is not committed. Everything needed is in this file.
