@@ -9,7 +9,16 @@
 > ⚠ **A HANDOFF IS NOT EVIDENCE — including this one.** Each claim says how it was measured.
 > Re-verify before acting.
 >
-> 🔴 **NOTHING HAS BEEN BUILT FOR ANY OF THE FIVE. No branch, no PR, no worktree.**
+> ✅ **UPDATED THE SAME DAY — DEFECT 5 (THE MONEY) IS BUILT.** PRs
+> [#4604](https://github.com/iscasasola/setnayan-platform/pull/4604) (the onboarding bill goes
+> to the page that can take the money · the bill stays visible afterwards · the shots card names
+> a price before the press) and
+> [#4606](https://github.com/iscasasola/setnayan-platform/pull/4606) (the studio buy banner stops
+> promising an email that does not exist, and the guard that should have caught it is repaired).
+> Both merged-on-green with auto-merge armed. **§ 1 and § 1b below are DONE — read them for the
+> reasoning, do not rebuild them.**
+>
+> 🔴 **DEFECTS 1 · 2 · 3 · 4 ARE STILL UNBUILT. No branch, no PR.**
 > The only code that shipped in the parent session is PR
 > [#4599](https://github.com/iscasasola/setnayan-platform/pull/4599) (Your Year), which is
 > merged and live and is **NOT** part of this work.
