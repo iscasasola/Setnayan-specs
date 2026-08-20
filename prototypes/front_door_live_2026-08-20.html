@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setnayan — the front door, live prototype · 2026-08-20</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   SETNAYAN FRONT DOOR — LIVE INTERACTIVE PROTOTYPE · 2026-08-20
+   Design + motion planned in Fable. Coded in Opus.
+
+   Palette LOCKED. gold #8C6932 is the front-door action colour and IS safe for
+   text (4.86:1 on cream). #A9834B is DECORATIVE ONLY — never body copy.
+   Every text pairing on this page clears 4.5:1.
+
+   MOTION CONTRACT
+   · Nothing that carries meaning starts invisible. Reveal animations move
+     elements that are ALREADY painted — if script never runs, the page reads.
+   · prefers-reduced-motion:reduce collapses every effect to an instant state
+     change. Nothing becomes unreachable.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --cream:#FDFBF7; --ink:#2C2A29; --gold:#8C6932; --deco:#A9834B; --link:#3B4E67;
+  --terra:#C24E25;
+  --m1:#69655D; --m2:#726D64; --m3:#767168;
+  --line:#E1DCD1; --wash:#F3ECDF; --warm:#FBF7EF; --hover:#F4EEE3;
+  --sys:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  /* motion tokens — filled from the Fable plan */
+  --e-out:cubic-bezier(.16,.84,.44,1);
+  --e-in-out:cubic-bezier(.65,0,.35,1);
+  --e-press:cubic-bezier(.34,1.56,.64,1);
+  --d-fast:180ms; --d-mid:340ms; --d-slow:620ms;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sys);
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-align:left}
+input{font:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+
+/* ── dev scaffold (not part of the design) ─────────────────────────────── */
+.scaffold{position:fixed;left:0;right:0;top:0;z-index:200;background:#211F1D;color:#EFE9DD;
+  padding:9px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:12px}
+.scaffold b{font-size:12.5px}
+.scaffold .seg{display:flex;border:1px solid #4A443C;border-radius:8px;overflow:hidden}
+.scaffold .seg button{padding:5px 11px;font-size:11.5px;color:#C9C1B5;min-height:30px}
+.scaffold .seg button[aria-pressed=true]{background:var(--deco);color:#221F1B;font-weight:700}
+.scaffold label{display:flex;align-items:center;gap:6px;color:#9A9186;font-size:11px;
+  letter-spacing:.09em;text-transform:uppercase}
+.stage{padding-top:46px}
+.stage[data-w=phone] .site{max-width:400px;margin:22px auto;border:1px solid var(--line);
+  border-radius:18px;overflow:hidden;box-shadow:0 30px 70px -40px rgba(50,40,25,.55)}
+
+/* ── top bar ───────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:46px;z-index:60;display:flex;align-items:center;gap:14px;
+  padding:14px 26px;background:rgba(253,251,247,.86);backdrop-filter:saturate(1.4) blur(12px);
+  border-bottom:1px solid transparent;
+  transition:padding var(--d-mid) var(--e-out), border-color var(--d-mid) linear,
+             box-shadow var(--d-mid) linear}
+.topbar[data-stuck=true]{padding:9px 26px;border-bottom-color:var(--line);
+  box-shadow:0 8px 24px -20px rgba(60,45,20,.55)}
+.wordmark{font-size:15px;font-weight:700;letter-spacing:.18em}
+.search{flex:1;max-width:340px;min-height:36px;border:1px solid var(--line);border-radius:999px;
+  background:var(--warm);display:flex;align-items:center;gap:9px;padding:0 14px;
+  transition:border-color var(--d-fast) linear, box-shadow var(--d-fast) linear,
+             max-width var(--d-mid) var(--e-out)}
+.search:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(140,105,50,.13);max-width:420px}
+.search svg{flex:none;opacity:.5}
+.search input{flex:1;border:0;background:none;outline:0;font-size:13.5px;min-height:34px;color:var(--ink)}
+.search input::placeholder{color:var(--m3)}
+.tbr{margin-left:auto;display:flex;align-items:center;gap:14px}
+.tbr .lk{font-size:13.5px;font-weight:650;color:var(--link)}
+.btn{min-height:38px;padding:0 17px;border-radius:999px;font-size:13.5px;font-weight:650;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform var(--d-fast) var(--e-press), background-color var(--d-fast) linear,
+             border-color var(--d-fast) linear, box-shadow var(--d-fast) linear}
+.btn-gold{background:var(--gold);color:var(--cream);box-shadow:0 2px 0 rgba(90,66,28,.25)}
+.btn-gold:hover{background:#7B5C2C}
+.btn-gold:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(90,66,28,.3)}
+.btn-quiet{border:1px solid var(--line);color:var(--ink);background:transparent}
+.btn-quiet:hover{background:var(--hover);border-color:#D3CBB9}
+.btn-quiet:active{transform:translateY(1px)}
+
+/* ── the opening ───────────────────────────────────────────────────────── */
+.opening{position:relative;padding:74px 26px 58px;max-width:1180px;margin:0 auto;overflow:hidden}
+.glow{position:absolute;right:-90px;top:-110px;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle at 38% 38%,rgba(169,131,75,.15),rgba(169,131,75,0) 68%);
+  pointer-events:none}
+.op-mark{margin:0 0 18px;font-size:14px;letter-spacing:.36em;font-weight:700;color:var(--gold)}
+.opening h1{margin:0 0 20px;font-size:clamp(34px,5.2vw,56px);line-height:1.06;letter-spacing:-.032em;
+  font-weight:700;max-width:16ch}
+.opening h1 em{font-style:normal;display:block;color:var(--m1)}
+.op-purpose{margin:0 0 16px;font-size:17px;line-height:1.55;max-width:50ch;color:var(--ink)}
+.op-purpose b{font-weight:700}
+.op-sub{margin:0 0 30px;font-size:16px;line-height:1.55;max-width:46ch;color:var(--m1)}
+.op-acts{display:flex;gap:12px;flex-wrap:wrap;position:relative;z-index:2}
+.op-acts .btn{min-height:50px;padding:0 26px;font-size:15.5px}
+.op-fine{margin:20px 0 0;font-size:12.5px;color:var(--m2)}
+.op-fine i{color:var(--gold);font-style:italic;font-weight:650}
+
+/* ── three things ──────────────────────────────────────────────────────── */
+.three{max-width:1180px;margin:0 auto;padding:0 26px 8px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+.three>div{padding:28px 28px 30px;border-right:1px solid var(--line)}
+.three>div:first-child{padding-left:0}
+.three>div:last-child{border-right:0;padding-right:0}
+.three h3{margin:0 0 9px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px}
+.three h3 u{flex:none;width:24px;height:24px;border-radius:7px;background:#FBF5E9;
+  border:1px solid #E6DAC2;color:var(--gold);display:grid;place-items:center;
+  font-size:11px;font-weight:700;font-family:var(--mono);text-decoration:none}
+.three p{margin:0;font-size:14px;color:var(--m1);line-height:1.6}
+
+/* ── manifesto ─────────────────────────────────────────────────────────── */
+.manifesto{background:var(--warm);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:64px 26px;margin-top:24px}
+.mf-in{max-width:64ch;margin:0 auto;text-align:center}
+.mf-kick{margin:0 0 22px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  font-weight:700;color:var(--gold)}
+.manifesto p.body{margin:0;font-size:clamp(18px,2.1vw,21px);line-height:1.62;letter-spacing:-.006em}
+.manifesto p.body b{font-weight:700}
+.mf-fin{display:block;margin-top:20px;font-size:16px;color:var(--m1)}
+.mf-fin i{color:var(--gold);font-weight:650;font-style:italic}
+
+/* ── feed ──────────────────────────────────────────────────────────────── */
+.feed{max-width:1180px;margin:0 auto;padding:46px 26px 20px}
+.fhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.fhead h2{margin:0;font-size:22px;letter-spacing:-.018em}
+.fhead span{font-size:13.5px;color:var(--m2)}
+.chips{display:flex;gap:9px;overflow-x:auto;padding-bottom:14px;margin-bottom:6px;
+  scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:34px;padding:0 15px;border-radius:999px;border:1px solid var(--line);
+  background:var(--warm);font-size:13.5px;font-weight:600;color:var(--m1);
+  display:inline-flex;align-items:center;gap:7px;
+  transition:background-color var(--d-fast) linear,color var(--d-fast) linear,
+             border-color var(--d-fast) linear,transform var(--d-fast) var(--e-press)}
+.chip:hover{background:var(--hover);color:var(--ink)}
+.chip:active{transform:scale(.96)}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.chip u{text-decoration:none;font-family:var(--mono);font-size:11px;opacity:.7}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px 20px;padding:8px 0 4px}
+.card{display:block;width:100%;text-align:left;border-radius:12px;
+  transition:transform var(--d-mid) var(--e-out)}
+.card .thumb{position:relative;aspect-ratio:16/10;border-radius:11px;overflow:hidden;
+  margin-bottom:11px;border:1px solid var(--line);
+  transition:box-shadow var(--d-mid) var(--e-out),transform var(--d-mid) var(--e-out)}
+.card:hover .thumb{box-shadow:0 18px 34px -22px rgba(70,52,22,.55)}
+.card .thumb i{position:absolute;inset:0;display:block}
+.card .kind{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;font-weight:700;color:var(--gold);background:#FBF5E9;
+  border:1px solid #E6DAC2;border-radius:4px;padding:2px 7px;margin-bottom:8px}
+.card h3{margin:0 0 6px;font-size:14.5px;line-height:1.36;font-weight:650;letter-spacing:-.006em}
+.card .meta{font-size:12.5px;color:var(--m2)}
+.card .meta b{font-weight:650;color:var(--m1)}
+.play{position:absolute;left:9px;bottom:9px;width:28px;height:28px;border-radius:50%;
+  background:rgba(24,21,18,.82);color:#fff;display:grid;place-items:center;font-size:10px;
+  transition:transform var(--d-fast) var(--e-press),background-color var(--d-fast) linear}
+.card:hover .play{transform:scale(1.09);background:rgba(24,21,18,.94)}
+.empty{grid-column:1/-1;padding:44px 20px;text-align:center;color:var(--m1);font-size:14.5px;
+  border:1px dashed var(--line);border-radius:12px;background:var(--warm)}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:6px;font-weight:700}
+
+/* ── shops ─────────────────────────────────────────────────────────────── */
+.shops{max-width:1180px;margin:0 auto;padding:14px 26px 54px}
+.shops .lead{font-size:13.5px;color:var(--m2);margin:0 0 14px;border-top:1px solid var(--line);
+  padding-top:22px}
+.shops .lead b{color:var(--ink);font-weight:700;font-size:15px;display:block;margin-bottom:3px}
+.shoprow{display:flex;align-items:center;gap:15px;padding:15px;border:1px solid var(--line);
+  border-radius:12px;background:var(--warm);
+  transition:border-color var(--d-fast) linear,box-shadow var(--d-mid) var(--e-out)}
+.shoprow:hover{border-color:#D3CBB9;box-shadow:0 14px 30px -24px rgba(70,52,22,.5)}
+.shopava{flex:none;width:52px;height:52px;border-radius:14px;background:#EFE5D2;
+  display:grid;place-items:center;font-size:19px;font-weight:700;color:var(--gold);
+  font-family:var(--mono);border:1px solid #E6DAC2}
+.shoprow h4{margin:0 0 3px;font-size:15px;font-weight:700}
+.shoprow p{margin:0;font-size:13px;color:var(--m2)}
+.vtick{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;
+  color:var(--gold);margin-left:8px}
+
+/* ── reader overlay ────────────────────────────────────────────────────── */
+.scrim{position:fixed;inset:0;z-index:150;background:rgba(38,32,24,.42);
+  backdrop-filter:blur(3px);opacity:0;pointer-events:none;
+  transition:opacity var(--d-mid) linear}
+.scrim[data-open=true]{opacity:1;pointer-events:auto}
+.reader{position:fixed;z-index:151;left:50%;top:50%;width:min(680px,92vw);max-height:84vh;
+  transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;
+  background:var(--cream);border:1px solid var(--line);border-radius:16px;overflow:auto;
+  box-shadow:0 40px 90px -40px rgba(40,30,12,.6);
+  transition:transform var(--d-mid) var(--e-out),opacity var(--d-mid) linear}
+.reader[data-open=true]{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+.reader .rhead{position:relative;aspect-ratio:21/9;border-bottom:1px solid var(--line)}
+.reader .rbody{padding:26px 30px 32px}
+.reader .kind{margin-bottom:10px}
+.reader h2{margin:0 0 10px;font-size:24px;line-height:1.22;letter-spacing:-.022em}
+.reader .meta{font-size:13px;color:var(--m2);margin-bottom:18px}
+.reader p{margin:0 0 14px;font-size:15.5px;line-height:1.68;color:#3A3733}
+.rclose{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;
+  background:rgba(24,21,18,.72);color:#fff;display:grid;place-items:center;font-size:15px;
+  transition:background-color var(--d-fast) linear,transform var(--d-fast) var(--e-press)}
+.rclose:hover{background:rgba(24,21,18,.9);transform:scale(1.06)}
+
+/* ── footer ────────────────────────────────────────────────────────────── */
+.foot{border-top:1px solid var(--line);background:var(--warm);padding:36px 26px 44px}
+.foot-in{max-width:1180px;margin:0 auto;display:flex;gap:26px;flex-wrap:wrap;
+  align-items:baseline;font-size:13px;color:var(--m1)}
+.foot-in .fm{font-weight:700;letter-spacing:.18em;color:var(--ink);font-size:13px}
+.foot-in a{color:var(--m1)}
+.foot-in a:hover{color:var(--ink)}
+.foot-in .tail{margin-left:auto;color:var(--m2)}
+
+/* ── responsive ────────────────────────────────────────────────────────── */
+@media(max-width:900px){
+  .three{grid-template-columns:1fr}
+  .three>div{border-right:0;border-bottom:1px solid var(--line);padding:22px 0}
+  .three>div:last-child{border-bottom:0}
+  .grid{grid-template-columns:1fr 1fr;gap:20px 14px}
+}
+@media(max-width:620px){
+  .opening{padding:46px 20px 40px}
+  .feed,.shops{padding-left:20px;padding-right:20px}
+  .topbar{padding:11px 18px;gap:10px}
+  .search{max-width:none}
+  .tbr .lk{display:none}
+  .grid{grid-template-columns:1fr}
+  .manifesto{padding:46px 20px}
+}
+.stage[data-w=phone] .three{grid-template-columns:1fr}
+.stage[data-w=phone] .three>div{border-right:0;border-bottom:1px solid var(--line);padding:20px 0}
+.stage[data-w=phone] .grid{grid-template-columns:1fr}
+.stage[data-w=phone] .tbr .lk{display:none}
+.stage[data-w=phone] .topbar{position:static}
+
+/* ── "today" comparison mode ───────────────────────────────────────────── */
+.stage[data-v=today] .opening,
+.stage[data-v=today] .three,
+.stage[data-v=today] .manifesto{display:none}
+.signstrip{display:none;padding:16px 26px;background:var(--warm);
+  border-bottom:1px solid var(--line);align-items:center;gap:14px;flex-wrap:wrap}
+.stage[data-v=today] .signstrip{display:flex}
+.signstrip span{font-size:14px;color:var(--m1)}
+.stage[data-v=today] .card .kind{display:none}
+.stage[data-v=today] .runpill{display:grid}
+.runpill{display:none;position:absolute;right:8px;bottom:8px;background:rgba(20,18,16,.85);
+  color:#fff;font-size:11px;font-weight:650;padding:2px 7px;border-radius:4px;
+  font-family:var(--mono);place-items:center}
+.stage[data-v=today] .play{display:none}
+.chanrow{display:none;gap:10px;align-items:flex-start}
+.stage[data-v=today] .chanrow{display:flex}
+.stage[data-v=today] .card>.kind,.stage[data-v=today] .card>h3,
+.stage[data-v=today] .card>.meta{display:none}
+.chanava{flex:none;width:30px;height:30px;border-radius:50%;background:var(--wash);
+  display:grid;place-items:center;font-size:10.5px;font-weight:700;color:var(--gold);
+  font-family:var(--mono)}
+
+/* ── reduced motion — collapse everything ──────────────────────────────── */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;
+    transition-duration:1ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div class="scaffold">
+  <b>Setnayan front door</b>
+  <span style="color:#9A9186">live prototype · 2026-08-20</span>
+  <label>View
+    <span class="seg" id="segV">
+      <button data-v="today" aria-pressed="false">Today</button>
+      <button data-v="new" aria-pressed="true">New</button>
+    </span>
+  </label>
+  <label>Width
+    <span class="seg" id="segW">
+      <button data-w="desktop" aria-pressed="true">Desktop</button>
+      <button data-w="phone" aria-pressed="false">Phone</button>
+    </span>
+  </label>
+  <label>Motion
+    <span class="seg" id="segM">
+      <button data-m="on" aria-pressed="true">On</button>
+      <button data-m="off" aria-pressed="false">Off</button>
+    </span>
+  </label>
+  <button id="replay" class="btn btn-quiet" style="min-height:30px;padding:0 13px;font-size:11.5px;
+    border-color:#4A443C;color:#C9C1B5">Replay opening</button>
+</div>
+
+<div class="stage" id="stage" data-v="new" data-w="desktop" data-m="on">
+<div class="site">
+
+  <header class="topbar" id="topbar">
+    <div class="wordmark">SETNAYAN</div>
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search weddings, suppliers, people"
+        aria-label="Search Setnayan">
+    </div>
+    <div class="tbr">
+      <a class="lk" href="#shops">Open your shop</a>
+      <button class="btn btn-gold">Sign in</button>
+    </div>
+  </header>
+
+  <div class="signstrip">
+    <span>Sign in to save suppliers, plan your event, and keep your photos.</span>
+    <button class="btn btn-quiet">Sign in</button>
+  </div>
+
+  <section class="opening" id="opening">
+    <div class="glow" aria-hidden="true"></div>
+    <p class="op-mark">SETNAYAN</p>
+    <h1>Keep your memories.<em>Plan your moments.</em></h1>
+    <p class="op-purpose"><b>Setnayan</b> is the Filipino app for planning any celebration —
+      and keeping every photo from it, for life.</p>
+    <p class="op-sub">Remembered by everyone who came, not just the couple.
+      Plan any event, free.</p>
+    <div class="op-acts">
+      <button class="btn btn-gold">Start your event — free</button>
+      <button class="btn btn-quiet" data-jump="feed">See a real day</button>
+    </div>
+    <p class="op-fine"><i>Set na ’yan</i> — that’s all set. No card.
+      No commission on your suppliers, ever.</p>
+  </section>
+
+  <section class="three" id="three">
+    <div><h3><u>01</u> Plan it</h3>
+      <p>Your suppliers, budget, guest list and seating in one place — free, for any
+         kind of celebration.</p></div>
+    <div><h3><u>02</u> Run it</h3>
+      <p>One link your guests open — for the save-the-date, the RSVP, the details,
+         and the day itself.</p></div>
+    <div><h3><u>03</u> Remember it</h3>
+      <p>Every photo, from everyone who came, gathered into one album. Yours for life.</p></div>
+  </section>
+
+  <section class="manifesto" id="manifesto">
+    <div class="mf-in">
+      <p class="mf-kick">Ala ala · why we exist</p>
+      <p class="body">A Filipino celebration was never one family’s. It belongs to the whole
+        <b>samahan</b> — the ninong and ninang, the titos and titas, the barkada, everyone who
+        showed up. So the memory shouldn’t belong to one camera either. Every one of them is
+        holding a piece of your day. Setnayan is where those pieces come together, and everyone
+        goes home with their own.
+        <span class="mf-fin">Plan it, run it, remember it — and <i>keep it, for life.</i></span></p>
+    </div>
+  </section>
+
+  <section class="feed" id="feed">
+    <div class="fhead">
+      <h2 id="fh">Read while you plan</h2>
+      <span id="fcount"></span>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Filter"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="shops" id="shops">
+    <p class="lead"><b>The first shops</b>not “trending” — one shop cannot trend.</p>
+    <div class="shoprow">
+      <div class="shopava">S</div>
+      <div>
+        <h4>SetnaProd<span class="vtick">✓ verified</span></h4>
+        <p>Booths, carts &amp; bars · Metro Manila</p>
+      </div>
+      <button class="btn btn-quiet" style="margin-left:auto">View shop</button>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-in">
+      <span class="fm">SETNAYAN</span>
+      <a href="#">About</a><a href="#">Pricing</a><a href="#">Help</a>
+      <a href="#">Open your shop</a><a href="#">Privacy</a>
+      <span class="tail">Set na ’yan — that’s all set.</span>
+    </div>
+  </footer>
+
+</div>
+</div>
+
+<div class="scrim" id="scrim" data-open="false"></div>
+<article class="reader" id="reader" data-open="false" role="dialog" aria-modal="true"
+  aria-labelledby="rtitle" tabindex="-1">
+  <div class="rhead" id="rhead"><button class="rclose" id="rclose" aria-label="Close">✕</button></div>
+  <div class="rbody">
+    <span class="kind" id="rkind"></span>
+    <h2 id="rtitle"></h2>
+    <div class="meta" id="rmeta"></div>
+    <div id="rtext"></div>
+  </div>
+</article>
+
+<script>
+/* ═══ content ═════════════════════════════════════════════════════════════
+   Articles are the real titles published on setnayan.com today.
+   The two "Wedding" rows are clearly-labelled SAMPLES — prod has no
+   published real story yet, and inventing one would be a lie on a page
+   whose whole argument is honesty.
+   ═══════════════════════════════════════════════════════════════════════ */
+var ITEMS=[
+ {k:'Article',c:'Suppliers',t:'15 questions to ask your wedding photographer before booking',r:3,g:[36,52]},
+ {k:'Article',c:'Suppliers',t:'The mobile bar guide: drinks for your Filipino wedding',r:3,g:[18,44]},
+ {k:'Article',c:'Culture',t:'The Muslim (Moro) wedding in the Philippines',r:3,g:[8,38]},
+ {k:'Wedding',c:'Sample',t:'Ana & Marco — Tagaytay, December',r:0,g:[26,46],v:true,
+  s:'214 photos from 31 guests'},
+ {k:'Article',c:'Planning',t:'Brownout-proofing your wedding day',r:3,g:[44,30]},
+ {k:'Article',c:'Suppliers',t:'The prenup (engagement) shoot, explained for Filipino couples',r:3,g:[30,58]},
+ {k:'Article',c:'Culture',t:'The release of doves: a Filipino wedding tradition',r:3,g:[14,50]},
+ {k:'Wedding',c:'Sample',t:'Bea & Jomar — Iloilo, a Sunday binyag',r:0,g:[40,36],v:true,
+  s:'96 photos from 12 guests'},
+ {k:'Article',c:'Planning',t:'30 honest ways to save money on a Filipino wedding',r:3,g:[22,34]},
+ {k:'Article',c:'Suppliers',t:'Your wedding food tasting: what to taste and what to ask',r:3,g:[34,42]},
+ {k:'Article',c:'Planning',t:'Save-the-dates: when to send them and what to include',r:3,g:[12,56]},
+ {k:'Article',c:'Culture',t:'Christmas-themed wedding ideas for Filipino couples',r:3,g:[6,40]}
+];
+var CHIPS=['All','Stories','Articles','Suppliers','Planning','Culture'];
+var BODY='Every supplier will tell you they are booked that weekend. Some of them mean it. '+
+ 'The rest are waiting to see whether you are serious — and the way you ask is what decides it. '+
+ 'Here is what to bring to the first conversation, in the order it actually comes up.';
+
+var state={chip:'All',q:''};
+
+function thumbCss(g){
+  return 'background:linear-gradient(140deg,hsl('+(28+g[0]%18)+' 34% '+(84-g[0]%9)+'%),'+
+         'hsl('+(20+g[1]%22)+' 28% '+(72-g[1]%11)+'%));';
+}
+function matches(it){
+  var c=state.chip, ok;
+  if(c==='All') ok=true;
+  else if(c==='Stories') ok=(it.k==='Wedding');
+  else if(c==='Articles') ok=(it.k==='Article');
+  else ok=(it.c===c);
+  if(!ok) return false;
+  if(!state.q) return true;
+  var h=(it.t+' '+it.c+' '+it.k).toLowerCase();
+  return h.indexOf(state.q.toLowerCase())>-1;
+}
+function metaLine(it){
+  return it.k==='Wedding'
+    ? '<b>With video</b> · '+it.s
+    : '<b>'+it.c+'</b> · '+it.r+' min read';
+}
+function cardHtml(it,i){
+  return '<button class="card" data-i="'+i+'" data-anim="card">'
+   +'<div class="thumb"><i style="'+thumbCss(it.g)+'"></i>'
+   +(it.v?'<span class="play">▶</span>':'')
+   +'<span class="runpill">'+(it.r||3)+':00</span></div>'
+   +'<span class="kind">'+it.k+'</span>'
+   +'<h3>'+it.t+'</h3>'
+   +'<div class="meta">'+metaLine(it)+'</div>'
+   +'<div class="chanrow"><span class="chanava">SN</span><div>'
+   +'<h3 style="margin-bottom:4px">'+it.t+'</h3>'
+   +'<div class="meta">Setnayan · '+it.c+'</div></div></div>'
+   +'</button>';
+}
+function draw(){
+  var list=ITEMS.map(function(it,i){return {it:it,i:i};}).filter(function(o){return matches(o.it);});
+  var g=document.getElementById('grid');
+  g.innerHTML = list.length
+    ? list.map(function(o){return cardHtml(o.it,o.i);}).join('')
+    : '<div class="empty"><b>Nothing here yet</b>Try another filter — or clear the search.</div>';
+  document.getElementById('fcount').textContent =
+    list.length+(list.length===1?' piece':' pieces')+
+    (state.chip==='All'&&!state.q?' — real days from couples will land here beside the reading.':'');
+  if(window.__revealCards) window.__revealCards(g);
+}
+function drawChips(){
+  document.getElementById('chips').innerHTML = CHIPS.map(function(c){
+    var n = c==='All' ? ITEMS.length
+      : c==='Stories' ? ITEMS.filter(function(x){return x.k==='Wedding';}).length
+      : c==='Articles'? ITEMS.filter(function(x){return x.k==='Article';}).length
+      : ITEMS.filter(function(x){return x.c===c;}).length;
+    return '<button class="chip" data-c="'+c+'" aria-pressed="'+(state.chip===c)+'">'
+      +c+' <u>'+n+'</u></button>';
+  }).join('');
+}
+
+/* ── reader ─────────────────────────────────────────────────────────────── */
+var lastFocus=null;
+function openReader(i){
+  var it=ITEMS[i];
+  lastFocus=document.activeElement;
+  document.getElementById('rhead').style.cssText=thumbCss(it.g);
+  document.getElementById('rkind').textContent=it.k;
+  document.getElementById('rtitle').textContent=it.t;
+  document.getElementById('rmeta').innerHTML=metaLine(it);
+  document.getElementById('rtext').innerHTML = it.k==='Wedding'
+    ? '<p>This is a sample card. Setnayan has no published real story yet — when a couple '+
+      'shares their day, it opens right here, beside the reading.</p>'
+    : '<p>'+BODY+'</p><p>Ask for the full package in writing, ask who actually shoots on the '+
+      'day, and ask what happens if it rains. The answers you get in five minutes will tell '+
+      'you more than any portfolio.</p>';
+  document.getElementById('scrim').dataset.open='true';
+  var r=document.getElementById('reader'); r.dataset.open='true'; r.scrollTop=0; r.focus();
+  document.body.style.overflow='hidden';
+}
+function closeReader(){
+  document.getElementById('scrim').dataset.open='false';
+  document.getElementById('reader').dataset.open='false';
+  document.body.style.overflow='';
+  if(lastFocus) lastFocus.focus();
+}
+
+/* ── wiring ─────────────────────────────────────────────────────────────── */
+document.getElementById('chips').addEventListener('click',function(e){
+  var b=e.target.closest('.chip'); if(!b) return;
+  state.chip=b.dataset.c; drawChips(); draw();
+});
+document.getElementById('grid').addEventListener('click',function(e){
+  var b=e.target.closest('.card'); if(b) openReader(+b.dataset.i);
+});
+document.getElementById('q').addEventListener('input',function(e){
+  state.q=e.target.value.trim(); draw();
+});
+document.getElementById('rclose').addEventListener('click',closeReader);
+document.getElementById('scrim').addEventListener('click',closeReader);
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&document.getElementById('reader').dataset.open==='true') closeReader();
+});
+document.querySelectorAll('[data-jump]').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.getElementById(b.dataset.jump).scrollIntoView({block:'start'});
+  });
+});
+
+/* sticky top bar */
+var tb=document.getElementById('topbar');
+new IntersectionObserver(function(es){
+  tb.dataset.stuck = String(!es[0].isIntersecting);
+},{rootMargin:'-1px 0px 0px 0px',threshold:1}).observe(
+  (function(){var s=document.createElement('div');s.style.cssText='height:1px';
+   tb.parentNode.insertBefore(s,tb);return s;})());
+
+/* scaffold */
+var stage=document.getElementById('stage');
+function seg(id,attr,fn){
+  document.getElementById(id).addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    this.querySelectorAll('button').forEach(function(x){
+      x.setAttribute('aria-pressed',String(x===b)); });
+    stage.dataset[attr]=b.dataset[attr]; if(fn) fn(b.dataset[attr]);
+  });
+}
+seg('segV','v',function(v){
+  document.getElementById('fh').textContent =
+    v==='today' ? 'Setnayan — plan your event, keep it together' : 'Read while you plan';
+});
+seg('segW','w');
+seg('segM','m',function(m){
+  document.documentElement.style.setProperty('--d-fast', m==='off'?'1ms':'180ms');
+  document.documentElement.style.setProperty('--d-mid',  m==='off'?'1ms':'340ms');
+  document.documentElement.style.setProperty('--d-slow', m==='off'?'1ms':'620ms');
+});
+
+drawChips(); draw();
+</script>
+</body>
+</html>
