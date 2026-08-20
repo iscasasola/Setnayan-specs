@@ -19,7 +19,14 @@
 > **NEW CLAUDE ACCOUNT**: self-contained, assumes no memory file and nothing local.
 > Carries **17 PRs shipped** (do NOT rebuild) · the **completed** 11-item build list · a measured
 > **user/vendor readiness verdict** · what the owner has already DONE vs what is still his ·
-> 4 small builds left · and the corrections made to this register and to the code repo's docs.
+> ~~4 small builds left~~ **ITS § 5 IS NOW CLOSED (2026-08-20): 3 shipped — PRs #4600 (merged) ·
+> #4601 · #4602 — and the 4th was never a build.** Do not start them again; read its § 5 for the
+> reasons, they are worth more than the fixes. · and the corrections made to this register and to
+> the code repo's docs.
+> 🛑 **Its § 5 item 4 was WRONG and the correction generalises: `is_published` is NOT what makes a
+> shop reachable — `public_visibility` is.** It named the shop that 404s (which has 2 services) and
+> missed the one a stranger can actually open (which has 0). **A boolean whose name sounds like the
+> answer is not the answer — fetch the page.**
 > 🛑 Its §0 carries the four traps that each cost a session, including: **a flag's default in code
 > is not its value in production** (a feature was reported to the owner as switched off while it
 > was live — he caught it, not me), and **"green" is not one verdict** (3 of 5 mutations passed for

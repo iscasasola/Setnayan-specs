@@ -176,26 +176,47 @@ for weeks (the upload stall since 5 July, the call-room initials since 11 July).
 
 ---
 
-## 5 · ⏭ WHAT IS LEFT TO BUILD — small, verified 2026-08-20
+## 5 · ✅ THOSE FOUR ARE CLOSED — 3 SHIPPED 2026-08-20, 1 WAS NEVER A BUILD
 
-Found by walking both journeys; each was attacked by a second agent trying to refute it.
+**Do NOT start any of them again.** Each was re-verified against `origin/main` and the live
+production database *before* acting — not against this section, which was wrong about item 4.
+PRs [#4600](https://github.com/iscasasola/setnayan-platform/pull/4600) (merged) ·
+[#4601](https://github.com/iscasasola/setnayan-platform/pull/4601) ·
+[#4602](https://github.com/iscasasola/setnayan-platform/pull/4602). Full row: `DECISION_LOG.md`
+2026-08-20. ⚠ Verify PR state with `gh pr view <#> --json state,mergedAt` before trusting this
+line — this corpus has been wrong about a PR's state three separate times.
 
-1. **The wedding-onboarding account gate silently opts a couple into public publication.** It
-   posts `public_summary_consent=yes` as a **hidden field** with no checkbox and no mention. The
-   `/signup` door has the same field as an **unticked checkbox** beside explanatory copy — because
-   the owner already ruled (commit `7f933ece1`, 2026-07-12) that it "starts UNTICKED (affirmative
-   consent, not pre-selected)". **One door missed an existing ruling. One line.** This is CODE,
-   not an owner question — do not ask him. `apps/web/app/onboarding/wedding/_components/onboarding-shell.tsx` ~4311.
-2. **The guest "Invite — N to send" counter can never go down.** `guests.invitation_sent_at` has
-   **zero writers** anywhere (verified by repo grep, migration grep, and a `pg_get_functiondef`
-   scan of every function in the prod schema; 0 of 39 guests stamped). It will read "32 to send"
-   forever. Either write the column or re-point the pill.
-3. **The shared invitation link prints a raw machine date** — a guest sees `2026-12-18` instead of
-   *18 December 2026*, on the first screen they ever see.
-4. **The one published shop has no published service cards**, so Inquire is a dead end. Likely
-   CONTENT, but confirm the publish path works before assuming.
-
----
+1. ✅ **The hidden consent field is deleted.** It posted `public_summary_consent="yes"` with no
+   checkbox and no sentence, opting the couple into publication on `/realstories`. Measured
+   first: **9 users, 0 consented** — the door was open, not walked through. Deleted rather than
+   re-drawn, because the Google button on the same screen posts no consent either and two
+   shipped surfaces (Website → Privacy / Editorial) take it deliberately and reversibly. The
+   guard sweeps **every** `.tsx` under `app/`, not the one file — the rule was already written
+   down and already obeyed in one place; what was missing was anything watching the second.
+2. ✅ **The "N to send" pill is re-pointed.** `guests.invitation_sent_at` confirmed to have zero
+   writers (repo · migrations · every function in the prod schema; 0 of 35 guests stamped).
+   🔑 **It was not a missing write — the feature does not exist.** There is no per-guest send;
+   the stage hands out ONE link, and that column's own migration reserves it for a formal RSVP
+   invitation never built, so **stamping it would have been a lie in the other direction.** The
+   step now reports the one true state that stage has — whether the shared link can be opened —
+   which `fetchJoinUrl`/`sharedJoinLinkState` already computes, so it costs no read. The dead
+   query is deleted.
+3. ✅ **The invitation door says the date in words.** 🔑 **And the obvious fix would have been
+   worse than the bug:** `event_date` is a decided day only when `event_date_precision` says so,
+   and **4 of 9 production events are `'year'` precision while holding a real-looking date**
+   (one reads `2027-03-09`). Pretty-formatting that announces a day nobody picked, which a
+   relative could book a flight on. One helper, precision **required not optional** so
+   forgetting it cannot compile. The branded `/{slug}/invite` behind printed QR posters is
+   covered too — it was a third door this section did not mention.
+4. 🛑 **NOT A BUILD, AND THIS SECTION NAMED THE WRONG SHOP.** It said *"the one published shop
+   has no published service cards"*. Measured live: **`is_published` is not what makes a shop
+   reachable — `public_visibility` is.** The `is_published=true` shop (Saysay, and it has **2
+   active services**) is `hidden` and **404s**; the shop a stranger can actually open is
+   **`setnaprod` (HTTP 200), which has 0 services**. So the conclusion was right about the live
+   shop *by accident, through a wrong premise*. Its "Services offered" row renders taxonomy
+   chips, not sellable cards. **This is content on the owner's own test shop, not code.**
+   🔑 **Reading a boolean whose name sounds like the answer is how this went wrong** — the
+   column called `is_published` does not decide whether the page is published.
 
 ## 6 · 📌 CORRECTIONS MADE TO OTHER DOCS — do not re-introduce
 
