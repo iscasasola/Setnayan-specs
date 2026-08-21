@@ -1,5 +1,27 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶▶▶▶▶ NEWEST — THE ONE PAYMENT PAGE, AND A MERGED PR THAT WAS REVERTED (2026-08-22)
+> **[`WHATS_NEXT_One_Payment_Page_2026-08-22.md`](WHATS_NEXT_One_Payment_Page_2026-08-22.md)**
+> — owner: *"we are running in circles"*, so it is written to be the LAST word on this stream.
+> Every purchase now lands on **ONE payment page** with the amount already inside the QR, the
+> screenshot kept on screen, and the last 6 digits of the bank reference. **4 PRs merged, 1 open.**
+>
+> 🚨 **READ ITS §3 EVEN IF YOU NEVER TOUCH PAYMENTS.** A merged, live PR was **reverted wholesale
+> on `main` by another session's stale tree** and nobody noticed for a day — while this register
+> and `DECISION_LOG.md` both said it was live. 🪤 **And merging main back in nearly repeated it:
+> only FOUR files conflicted; every other reverted file merged CLEANLY BY KEEPING THE DELETION.**
+> **The conflicts git reports are not the dangerous part.** §3 carries the exact per-file
+> verification procedure.
+>
+> 🔬 **Its §4 lists TEN defects found by attacking our own already-passing work** — including an
+> admin-gated RPC called on the service-role client (the shop paid, was thanked, and the plan never
+> switched on), a page that thanked almost every buyer for money they had not sent, payments that
+> notified nobody, and a QR asking ₱1,500 against ₱2,000 owed. **Every one shipped green.**
+>
+> ⏭ **What is left:** land PR #4699 (blocked on baseline CONFLICTS, not on a failing check — check
+> `mergeStateStatus`), verify the six shop redirects are back **by reading the deployed build**,
+> and finish the review that lost 17 of 57 agents to a usage limit. One small OWNER DECISION in §2.
+
 > ### ▶▶▶▶ NEWEST — UNBUILT WORK, RECOVERED FROM A CUT-OFF SESSION (2026-08-20 evening)
 > **[`WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md`](WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md)**
 > — five defects the owner found in ONE walk from *Your Year* → birthday. **NOTHING IS BUILT:
