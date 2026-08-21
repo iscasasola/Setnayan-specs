@@ -458,3 +458,24 @@ Ground truth: `/tmp/wt-plan` @ `23d5955cd`. Everything below marked â was r
   "totalTokens": 993903,
   "totalToolCalls": 243
 }
+
+---
+
+# ✅ OWNER RULINGS — 2026-08-21. Do NOT re-ask.
+
+Four of Part D's ten were put to the owner; these are his answers.
+
+| # | Question | Ruling |
+|---|---|---|
+| D1 | Does the supplier see the amount paid? | **No amount.** The card says *"their records show a payment to you"* with no figure. It is the COUPLE'S ledger entry and may not match what the supplier banked; a wrong number invites a dispute. |
+| D3 | What if the supplier never answers? | **It stays open forever, with ONE reminder.** The couple can message them or contact Setnayan. ⚠ **No auto-release after N days** — that would manufacture a consent the supplier never gave, which is the exact thing the handshake exists to prevent. Accepted cost: a couple can be stuck by an inactive supplier. |
+| D5 | Does a review the COUPLE retracts stay with the shop? | **Retraction stays theirs — the review goes.** Deleting a review is a SEPARATE act from deleting an event. A person may withdraw what they said about a business. ⚠ This bounds "vendors get to keep it": the ruling covers rows the supplier TOOK PART in, not a public judgement its author has withdrawn. |
+| D8 | Do chat threads survive? | **Yes — the supplier keeps the conversation.** By the owner's own test the supplier took part in every message. It also protects their response-rate statistics, which otherwise shrink silently. ⚠ **Consequence to build carefully: the couple's messages now outlive their event.** `chat_threads` CASCADEs today, so this is a real change, not a no-op. |
+
+## ⏭ Still unanswered (D2 · D4 · D6 · D7 · D9 · D10)
+Not blocking the build. Defaults in force until ruled:
+- **D2** a supplier not on Setnayan can be asked and can never answer → route the couple to the existing invite link.
+- **D4** declining needs no reason (the shipped RPC accepts a reasonless decline).
+- **D6/D7** the review keeps the couple's public label; the booking record keeps no identity and keeps the money figure that makes the "typical price" card honest.
+- **D9** "the supplier took part" starts at **`contracted`** — the platform's canonical booking gate.
+- **D10** a supplier's agreement is **not** reversible.
