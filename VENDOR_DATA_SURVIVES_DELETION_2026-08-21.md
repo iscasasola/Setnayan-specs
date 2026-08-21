@@ -118,7 +118,32 @@
 > (`source='send'`) still dies with `vendor_proposals` — **that is the next
 > slice.**
 
-**Status: SLICES 1–4 BUILT (reviews · the completed-booking root · contracts · the money) · THE REST MAPPED, NOT BUILT.**
+> ## ✅ SLICE 5 IS BUILT — `vendor_proposals` (PR #4677, 2026-08-21)
+>
+> **Do NOT rebuild it.** A quote the supplier wrote survives, with **no status
+> test** (same reasoning as contracts: they authored it, drafts included).
+>
+> ✅ **AND IT CLOSES THE QUOTE-STAGE FEE GAP SLICE 4 NAMED.** `proposal_id` was
+> the other anchor of `booking_fee_charges_anchor_ck`; with it surviving, a fee
+> raised at `source='send'` no longer disappears. A test asserts the surviving
+> charge still satisfies its CHECK **and can still be marked paid** — a charge
+> nothing can update is a tombstone, not a preserved debt.
+>
+> ✅ **THE SLICE-4 TRAP WAS CHECKED FIRST HERE, AND WAS ABSENT** — every child FK
+> pointing at `vendor_proposals` is single-column. **That check is now the first
+> step of every remaining slice.**
+>
+> 🔑 **THE "WHAT ELSE READS THE EVENT?" TRAP HAS NOW WORN THREE COSTUMES.**
+> Slice 2: the row **VANISHES** (view inner-joined the event). Slice 3: it
+> **GOES ANONYMOUS** (list fell back to "Unknown event"). Slice 5: it **BUILDS A
+> BROKEN URL** (`/dashboard/null/vendors`). **Assume a fourth. One question finds
+> them all — and it is a question about the SURFACE, not the table.**
+>
+> ⚠ And the anonymity trap genuinely did NOT apply here (the proposal carries its
+> own rendered snapshot), so **no snapshot column was added out of symmetry with
+> slice 3.** Measure before copying the previous slice's shape.
+
+**Status: SLICES 1–5 BUILT (reviews · the completed-booking root · contracts · the money · quotes) · THE REST MAPPED, NOT BUILT.**
 
 ⏭ **RE-MEASURED 2026-08-21 against prod, not read off this doc.** Of the vendor-
 side tables, **five already survived before any of this work** —
