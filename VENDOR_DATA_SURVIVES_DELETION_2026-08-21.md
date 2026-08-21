@@ -165,6 +165,19 @@
 > which means SENT, so there is no draft the supplier never saw and a DECLINED
 > request survives as part of a negotiation both sides were in.
 
+> ## ✅✅ ALL SIX SLICES ARE **LIVE IN PRODUCTION** — verified 2026-08-21 BY THE OBJECT
+>
+> Not by `schema_migrations`, not by the merge, not by the deployed commit —
+> by querying `pg_constraint` / `pg_attribute` in the live database. **Ten checks,
+> all true:** reviews · completed jobs · signed contracts (+ the client-name
+> stamp) · payments (and the delete no longer blocked) · fees owed to Setnayan ·
+> quotes · agreed changes · **the agreed amounts** · change orders.
+>
+> 🔑 **A DEPLOYED COMMIT IS NOT AN APPLIED MIGRATION.** Prod served a build
+> containing both final merges for several minutes before this check was run;
+> the check is what makes it a fact. This repo has been bitten by deploys that
+> silently stopped migrating — always re-read the object.
+
 **Status: SLICES 1–6 BUILT (reviews · the completed-booking root · contracts · the money · quotes · amendments) · THE REST MAPPED, NOT BUILT.**
 
 ⏭ **RE-MEASURED 2026-08-21 after slice 5.** 38 tables still cascade from `events`

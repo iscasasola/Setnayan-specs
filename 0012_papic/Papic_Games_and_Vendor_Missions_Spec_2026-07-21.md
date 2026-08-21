@@ -593,3 +593,112 @@ Booth-mission machinery built (phases 1→5, see `project_setnayan_papic_games_b
 challenge-completion reward (client-side reel) and the § 9 library/curation flow are NEW design
 decisions, not yet built. `event_vendors` verified present; the `Photo Challenges` fake door was
 verified live at two guest-facing surfaces and has since been gated behind the flag.*
+
+---
+
+## § 10 — 631 CHALLENGES, AND EVENT-TYPE SCOPE (owner-decided 2026-08-21)
+
+> **This section supersedes every count in § 9.** The library was 40, then 44, then 60. It is
+> **631**. Where § 9 says "the 40-challenge library", read this.
+
+### 10.1 What the owner asked for
+
+Verbatim, in one sitting:
+
+> *"we want to create a 500 papic challenges. activities that they can talk make people do during
+> the event. or something they can share to the host. like a greeting, a story. try to search the
+> internet of similar challenges and compile our challenge pool. so we want to have over 500
+> challenges photos or videos combined."*
+>
+> *"here they can filter it so they can pick which challenge they like. also search. but we will
+> show the top 20 most picked challenges."*
+>
+> *"we can have the idea of a confession box where we want them to share their stories. or like a
+> on the spot anywhere challenge. or a challenge that includes the host. or a challenge that
+> includes other people. a selfie. a flex of what they wore. or brought. a special message for the
+> couple."*
+
+### 10.2 🔑 FIVE OF THE SEVEN SHAPES ALREADY HAD A HOME
+
+Read this before designing anything here. The seven shapes the owner named map onto the shipped
+taxonomy almost exactly — **only three categories are new**, and the rest were GROWN:
+
+| The owner's words | Where it lives | New? |
+|---|---|---|
+| a confession box … share their stories | `stories` · `stories_couple` | no — shipped 2026-08-10 |
+| a special message for the couple | `greeting` (was `couple_family`'s video greeting) | **new category** |
+| an on the spot anywhere challenge | `anywhere` | **new category** |
+| a selfie | `selfie` | **new category** |
+| a challenge that includes the host | `couple_family` | no |
+| a challenge that includes other people | `meet_room` | no |
+| a flex of what they wore. or brought | `fashion_candids` | no |
+
+### 10.3 The pool — 631 rows, 12 categories
+
+**346 photo · 285 video** (284 `clip` + 1 `pabati`). Id blocks, so appending to a block never
+renumbers another: shipped 1–60 · selfie 100 · anywhere 200 · greeting 300 · stories 400 (side)
+and 450 (any event) · stories_couple 500 · couple_family 600 · meet_room 700 · fashion_candids 800
+· food_drinks 900 · decor_booth 1000 · band_dance 1100 · big_moments 1200.
+
+🔒 **The canonical list is `apps/web/lib/papic-challenge-pool.ts` in the code repo, and the
+migration is GENERATED from it.** Do not hand-write challenge rows into a migration again — six
+hundred rows cannot be kept in step with a hand-typed seed, and a CI guard now re-generates and
+compares.
+
+### 10.4 🚨 EVENT-TYPE SCOPE — a live defect, not a precaution
+
+Every one of the 60 shipped challenges was written for a **wedding**, and the library had no column
+that could say so. Measured in production on 2026-08-21: the event `movie-night`, of type `date`,
+was carrying a full 20-slot board asking two people to *"dance with the bride or groom"*, to
+*"catch the newlyweds mid-kiss"*, and to get *"a photo with one of the couple's parents."*
+
+`papic_challenge_library.event_types text[]` — **NULL = fits any celebration**, a list = only those
+types. **Both lanes** of `ensure_papic_board` filter on it: the INSERT that materializes rows AND
+the CTE that assigns slots. Scoping only the INSERT leaves an already-broken board exactly as it is.
+
+**475 of the 631 fit any event**, so no board goes short.
+
+### 10.5 The tokens — four now, resolved at READ time
+
+| token | becomes | scope |
+|---|---|---|
+| `{who}` | the bride / the groom / the couple, **per guest** from `guests.side` | **wedding only** |
+| `{host}` | the couple / the celebrant / the graduate / the host | any |
+| `{hosts}` | the same, possessive | any |
+| `{event}` | wedding / birthday / graduation / event | any |
+
+`{host}` · `{hosts}` · `{event}` come from `event_type_profiles.terminology` — the same block the
+guest tree's own vocabulary reads, so a birthday's Papic board and a birthday's seating page use
+the same word for the same person.
+
+🔑 **`{host}` IS ONLY EVER AN OBJECT.** *"The couple"* takes a plural verb and *"the celebrant"* a
+singular one, so *"{host} is dancing"* is wrong for half the event types no matter how it is
+written. *"A photo with {host}"* is right for all of them.
+
+🔑 **`{hosts}` IS REPLACED BEFORE `{host}`,** in SQL and in TypeScript. The other order turns
+`{hosts}` into `the couple}s` — invisible in review, obvious to a guest.
+
+### 10.6 The picker — filter, search, top 20
+
+Runs as a **URL query**: the chips are links, the search box is a GET form. No client bundle, and
+it works with JavaScript off. Default view is the owner's **top 20 most picked**, from
+`papic_challenge_pick_counts()` — an aggregate-only RPC (a count per library row; no event, guest
+or vendor identity crosses it), because a couple can only read their OWN event's missions.
+
+⚠ **With zero picks the shelf SAYS SO** and shows recommendations under a different heading.
+Presenting our own list as *"what other couples chose"* is a claim about other people that is not
+true, and it is the launch-day empty rail wearing a compliment.
+
+### 10.7 🔒 What must not change
+
+- **A wedding's board does not move.** All 571 new rows are unranked and numbered above
+  `library_id` 99, and the Setnayan lane backfills `ORDER BY priority_rank NULLS LAST, library_id`
+  — so the shipped sixty still win every slot they won before. **Ranking a new row silently gives
+  every couple already planning a different board.**
+- **Exactly six stories hold a guaranteed slot.** Ranking more leaves a 20-slot board with zero
+  errands, and § 9 is explicit that the errands are what walk a guest to the paid line items.
+- **The wording lock of 2026-08-10 binds every one of the 631.** Point at something GOOD; never
+  wildest / most embarrassing / secret / never-told; carry the steer IN the prompt; never ask a
+  guest to rank anyone, compare the two of them, or speak about an ex, money or family friction.
+- **Every clip that asks a guest to SPEAK names the ten seconds.** A clip is cut at 10 000 ms and
+  the guest is told they succeeded.
