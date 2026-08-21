@@ -69,6 +69,59 @@ committed docs on purpose.
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
+> ### 🔴 NEWEST — A COUPLE CAN DELETE THEIR OWN EVENT (2026-08-20/21 · 9 PRs, ALL MERGED AND LIVE)
+> **Do NOT rebuild any of this.** Full row: `DECISION_LOG.md` 2026-08-20 and 2026-08-21.
+> PRs #4603 · #4609 · #4623 · #4626 · #4627 · #4632 · #4638 · #4641 · #4646.
+>
+> **WHAT SHIPS:** a `⋯` menu on every My Events card the person ORGANISES — **Put this away**
+> (reversible, pre-existing) and **Remove for good**. Deleting cancels unpaid bills, cancels
+> waitlist entries, releases our Live Studio channel, clears stranded supplier notifications and
+> chapter gallery pointers, **and deletes the photo files in R2**. The confirmation says so:
+> *"Your photos and everything about this celebration are deleted for good."*
+>
+> 🔑 **THE GATE IS IN THE DATABASE, NOT THE ACTION.** `sever_event_connections()` is a BEFORE
+> DELETE trigger because there were SIX app delete paths and a seventh with none — and
+> **`DELETE` on `events` is now REVOKED from `authenticated`/`anon`** (2026-08-21), because that
+> lane skipped the R2 sweep and the supplier gate. Every real path uses `service_role`.
+>
+> ⚖ **OWNER RULES, 2026-08-21 — do not re-ask:**
+> · A supplier the couple has **PAID** holds the delete until they **agree** — unless the event
+>   has passed AND the job is **confirmed** (`vendor_marked` is a claim, not a release; a
+>   `disputed` completion never releases).
+> · **Photos ARE deleted** when the couple deletes their own event. ⚠ **This EXTENDS the photo
+>   lock, it does not reverse it** — *"not delete, just compress"* / *"we keep it for life"*
+>   govern RETENTION and are untouched.
+> · **Chat attachments are KEPT.** · An **unconfirmed payment screenshot BLOCKS** the delete.
+> · **On a SHARED record, the vendor keeps it** — contracts, payments, completed bookings.
+>   ⚠ Scoped: it does NOT convert the couple's private planning (budget, shortlist, who they
+>   rejected) into vendor data. **The test is whether the supplier took part in it.**
+>
+> ⏭ **TWO THINGS ARE GENUINELY UNBUILT — start here, and do not mistake them for done:**
+> 1. 🔴 **THE VENDOR CANNOT ANSWER.** The handshake machinery is LIVE (`delete_request_state` +
+>    `request_event_deletion` · `vendor_answer_event_deletion` · `cancel_event_deletion_request`,
+>    all applied in prod) and the couple can ask and withdraw — but **no screen shows a supplier
+>    the question.** A supplier can be asked and cannot reply. **A granted RPC nothing calls is a
+>    gate with no handle**; this one has a couple-side caller only.
+> 2. 🔴 **VENDOR DATA DOES NOT SURVIVE A DELETE — the product does the OPPOSITE of the owner's
+>    rule today.** `vendor_reviews.event_id` is **NOT NULL and CASCADEs**, so a review cannot
+>    outlive its event; **152 FKs to events cascade, only 10 survive.** The 65-table
+>    classification is written up in
+>    [`VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md`](VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md)
+>    — ⚠ **its adversarial check is INCOMPLETE** (31 of 71 agents cut off by an account session
+>    limit; the synthesis never ran), so treat every row as **mapped-but-unverified**.
+>    🚨 **And "stored" does not mean "survives"**: `vendor_activity_stats` is recomputed by
+>    unrelated events, so a saved snapshot silently drops to the smaller number.
+>
+> 🪤 **THE TRAP THIS WORK KEPT PRODUCING — assume a sixth.** Five separate guards passed while
+> protecting nothing: a `REVOKE UPDATE (cols)` that is **inert against a table-level grant**; a
+> forgery test that ran with **no `auth.uid()`**, so RLS refused an anonymous caller and it went
+> green for the wrong reason; a test whose **forgery attempt had been deleted by an edit**, so it
+> asserted an outcome nobody had tried to change; `assert.rejects` where **RLS returns zero rows
+> instead of throwing**; and an ordering check that is **untestable in an empty replay**. None
+> were caught by tests passing — only by breaking the guarded thing and measuring whether
+> anything complained. **Print the occurrence count before → after, and when a well-formed
+> sabotage reports GREEN, suspect the sabotage before the guard.**
+
 > ### 🔴 NEWEST — THE CREATE FLOW ASKS WHAT IT ALREADY KNOWS (2026-08-20 evening, NOTHING BUILT)
 > **Contract: [`WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md`](WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md).**
 > Five defects the owner found in ONE walk from *Your Year* → birthday. **No branch, no PR.**
