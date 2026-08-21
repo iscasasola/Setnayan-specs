@@ -89,7 +89,36 @@
 > literal `'Unknown event'`). **One question finds both: WHAT ELSE READS THE
 > EVENT? Read the surface, not just the table.**
 
-**Status: SLICES 1–3 BUILT (reviews · the completed-booking root · contracts) · THE REST MAPPED, NOT BUILT.**
+> ## ✅ SLICE 4 IS BUILT — the money (PR #4672, 2026-08-21)
+>
+> **Do NOT rebuild it.** Supplier receipts, and the fees a supplier owes
+> Setnayan, now outlive the celebration. The receipt keeps `amount_php`,
+> `paid_at`, `schedule_instance_seq`, `vendor_confirmed_at`; `method`,
+> `reference`, `notes` and `proof_r2_key` are **scrubbed** — the couple's rail,
+> reference, private note and a photograph of their bank screen. An
+> **unconfirmed** payment leaves: it is the couple's claim to have paid, not the
+> supplier's record of being paid.
+>
+> 🚨 **IT ALSO FIXES A DEFECT SLICE 2 SHIPPED, AND THE LESSON GENERALISES TO
+> EVERY REMAINING SLICE.** `event_vendor_payments` has a **COMPOSITE** FK
+> `(event_id, vendor_id) → event_vendors(event_id, vendor_id)` with **no
+> `ON UPDATE` clause**. Slice 2's preserve is an **UPDATE of a referenced
+> column**, so it was REFUSED — and inside a `BEFORE DELETE` trigger that took
+> the entire deletion with it: **the couple could never delete their celebration
+> again.** Not a silent wrong answer, a hard failure.
+>
+> 🔑 **AN FK'S `ON DELETE` RULE SAYS NOTHING ABOUT UPDATES. Before nulling any
+> referenced column in a later slice, list the children whose FK SPANS it** —
+> `pg_constraint` with more than one column in `conkey`. Reproduce in the replay
+> first; this one was.
+>
+> ⚠ **HALF A WIN, NAMED:** `booking_fee_charges_anchor_ck` requires
+> `proposal_id` OR `event_vendor_id` and both still cascade. A charge anchored on
+> `event_vendor_id` survives (slice 2); one anchored on `proposal_id`
+> (`source='send'`) still dies with `vendor_proposals` — **that is the next
+> slice.**
+
+**Status: SLICES 1–4 BUILT (reviews · the completed-booking root · contracts · the money) · THE REST MAPPED, NOT BUILT.**
 
 ⏭ **RE-MEASURED 2026-08-21 against prod, not read off this doc.** Of the vendor-
 side tables, **five already survived before any of this work** —
