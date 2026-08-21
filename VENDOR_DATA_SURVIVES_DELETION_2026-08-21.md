@@ -36,7 +36,55 @@
 > already fell back to "Verified couple". Expect the same for other rows — check
 > before scoping.
 
-**Status: SLICE 1 BUILT (reviews) · THE REST MAPPED, NOT BUILT.** This is the classification behind build #1. It was
+> ## ✅ SLICE 2 IS BUILT — the completed-booking root (PR #4667, 2026-08-21)
+>
+> **Do NOT rebuild it.** `event_vendors.event_id` is nullable, and a BEFORE
+> DELETE trigger detaches the bookings a supplier genuinely took part in.
+>
+> ⚖ **THIS SLICE IS WHERE "PRESERVING TOO MUCH" BECOMES THE REAL RISK** — the
+> same table holds the couple's private shortlist. Preservation requires THREE
+> conditions, each separately tested: a really-booked status
+> (`BOOKED_VENDOR_STATUSES`, already exported by `lib/event-deletion-gate.ts`);
+> **`marketplace_vendor_id`, NOT `linked_vendor_profile_id`** (the couple's own
+> action can stamp the latter, so keying on it lets a couple plant a permanent
+> "booking" on any supplier); and **not self-dealt**.
+>
+> 🚨 **"STORED DOES NOT MEAN SURVIVES" BIT AGAIN, IN A NEW COSTUME — AND IT WILL
+> BIT EVERY REMAINING SLICE.** Preserving the row was NOT enough:
+> `vendor_completed_events` reads `event_type`/`event_date` **from the event**
+> and INNER JOINs it, so an orphaned booking dropped out of the view and the
+> count still fell to zero. **Before building any row below, read the VIEW that
+> publishes it — if it joins `events`, preserving the row is theatre.** The row
+> now carries its own snapshot and the view LEFT JOINs.
+>
+> 🚨 **AND THE NAIVE FIX CREATES A FRAUD VECTOR.** The view's self-dealing
+> exclusions read `event_members`, which **CASCADES** — once the event is gone
+> they cannot run and pass permissively, so deleting the event would LAUNDER a
+> vendor's own self-booked job into the public count forever. **Any guard that
+> reads a cascading table must be evaluated AT DELETION TIME.** Assume other
+> rows below have the same shape.
+>
+> 🔑 **A SECURITY DEFINER FUNCTION IS EXECUTABLE BY PUBLIC BY DEFAULT** —
+> `anon-rpc-surface.db.test.ts` flagged the new trigger function for existing.
+> A trigger function needs no EXECUTE grant. **Write the REVOKE in the same
+> migration for every remaining slice.**
+>
+> ⚠ **A COLUMN-LEVEL REVOKE IS INERT HERE** — `authenticated` holds table-level
+> UPDATE on `event_vendors`. The new snapshot columns are writable; the controls
+> are that the trigger OVERWRITES anything pre-written (asserted by test) and
+> that an orphaned row is unreachable through all four RLS policies, which key
+> on `event_id`.
+
+**Status: SLICES 1–2 BUILT (reviews · the completed-booking root) · THE REST MAPPED, NOT BUILT.**
+
+⏭ **Slice 2 changes what is left.** `vendor_activity_stats`,
+`vendor_completed_events`, `vendor_public_completed_events_stats` and
+`vendor_track_record_by_event_type` are **all derived from `event_vendors`** —
+the doc's own note says *"there is no independent record of a completed booking
+anywhere in the schema"*. With the root preserved, **re-measure each of those
+before scoping it**; several may now be satisfied, and the remaining question for
+each is whether its VIEW joins `events` (see the trap above), not whether it
+stores anything. This is the classification behind build #1. It was
 produced by a 71-agent pass over the schema and the reading code; **40 agents
 finished and 31 were cut off by an account session limit**, so the per-item
 adversarial check is INCOMPLETE and the final synthesis never ran. What is below is
