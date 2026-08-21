@@ -4,7 +4,39 @@
 > for the vendor stays, including the reviews, statistics, etc that the vendor needs
 > for their website."*
 
-**Status: MAPPED, NOT BUILT.** This is the classification behind build #1. It was
+> ## ✅ SLICE 1 IS BUILT — `vendor_reviews` (PR #4665, 2026-08-21)
+>
+> **Do NOT rebuild it.** A review now survives its event: `event_id` is nullable
+> + `ON DELETE SET NULL`, and once orphaned the review **freezes** so a couple
+> cannot delete the celebration and then rewrite the supplier's record.
+>
+> 🔑 **IT WAS NOT NEW MACHINERY, AND THAT IS THE PATTERN FOR EVERY REMAINING
+> ROW.** `couple_user_id` was ALREADY nullable + SET NULL, so a review already
+> outlived the PERSON who wrote it — only the EVENT took it down. And
+> `lib/erasure/coverage.ts` already stated the owner's rule almost word for word,
+> months earlier: *"deleting it would silently move a vendor's public star
+> rating, which is a third party's commercial record erasure does not reach."*
+> **Before building any row below, check whether the user-erasure path already
+> solved it — the answer for reviews was yes.**
+>
+> 🔑 **FOUR OF FIVE RLS POLICIES WERE ALREADY CORRECT FOR ORPHANS, FREE.** Public
+> read stays `true`; couple-delete keys on `event_id` and `NULL IN (…)` is NULL
+> so the couple cannot delete an orphan; couple-insert keys on `event_id` so an
+> orphan cannot be FORGED; vendor-reply keys on the vendor. **Read the policies
+> before assuming a row needs new ones.**
+>
+> 🚨 **AND ONE TRAP THAT WILL RECUR ON EVERY REMAINING ROW: RECREATING A POLICY
+> SILENTLY DISCARDS ITS ROLE RESTRICTION.** A `CREATE POLICY` with no `TO` clause
+> defaults to **PUBLIC**, including `anon`. `exposure-freeze.db.test.ts` caught
+> it. Every `DROP POLICY … CREATE POLICY` in the slices below must restate
+> `TO authenticated` explicitly.
+>
+> ⏭ **The application side needed ONE line.** Widening the type produced a single
+> compiler error repo-wide; the couple-name lookup already filtered nulls and
+> already fell back to "Verified couple". Expect the same for other rows — check
+> before scoping.
+
+**Status: SLICE 1 BUILT (reviews) · THE REST MAPPED, NOT BUILT.** This is the classification behind build #1. It was
 produced by a 71-agent pass over the schema and the reading code; **40 agents
 finished and 31 were cut off by an account session limit**, so the per-item
 adversarial check is INCOMPLETE and the final synthesis never ran. What is below is
@@ -14,8 +46,9 @@ mapped-but-unverified and re-check before acting on it.**
 ## The problem, measured in production 2026-08-21
 
 - **152 foreign keys to `events` CASCADE.** Only **10** are `SET NULL` and survive.
-- **`vendor_reviews.event_id` is `NOT NULL` and CASCADEs** — a review cannot outlive
-  its event. That is the headline break, and the owner named reviews first.
+- ~~**`vendor_reviews.event_id` is `NOT NULL` and CASCADEs**~~ — ✅ **FIXED, PR #4665.**
+  Re-measured 2026-08-21: 153 cascade / 11 survive (the doc's 152/10 was one
+  migration stale before this one landed).
 - Prod: 0 reviews · 13 booked `event_vendors` · 3 `event_vendor_payments` ·
   0 contracts · 0 booking-fee charges · 7 events. **The harm is latent, not live** —
   which makes now the cheap moment to fix it.
