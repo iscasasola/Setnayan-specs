@@ -17,13 +17,41 @@
 > 🚨 **CI CANNOT SEE THIS.** Every check passed on that PR: a repo missing a whole
 > feature is internally consistent, because the calling code went too.
 >
-> ⏭ PR #4706 restores the three migrations + the guard that belongs to them.
+> ✅ **PR #4706 IS MERGED** (verified with `gh pr view 4706 --json state,mergedAt`, not read
+> from this file) — it restored the three migrations + the guard that belongs to them.
+> ⚠ **Prod was STILL serving `daf6de9` minutes after that merge**, so do not read the merge
+> as the recovery: `curl -s https://www.setnayan.com/api/health` and check the version.
 > **The remaining 21 deleted + 42 reverted files are the next job** — and must not
 > undo #4700's genuine guest-details work, nor anything merged after it.
 >
 > 🔒 **After any merge somebody expects to SEE:** `curl -s
 > https://www.setnayan.com/api/health` and check the version is your merge or
 > later. **The merge is not the ship.**
+
+> ### ▶▶▶▶▶▶ NEWEST — STUDIO IS ONE CONCEPT, AND THE BUY PAGES HAVE NO HEADLINE (2026-08-22)
+> **[`WHATS_NEXT_Studio_Is_One_Concept_2026-08-22.md`](WHATS_NEXT_Studio_Is_One_Concept_2026-08-22.md)**
+> — written because the owner said *"save the issue on what's next? we are running in circles."*
+>
+> ✅ **SHIPPED, do not rebuild:** the **Studio** group no longer vanishes when you open a wedding
+> (PR #4709, merged) — its rows now open THAT event's tools, it ends in one *All services* row,
+> and *Suite* is gone from the sidebar. **Pakanta is the eighth Studio product** with a real
+> public page at `/pakanta` (PR #4711) — it had been SOLD SINCE MAY with no public page at all.
+>
+> ⏭ **DECIDED, SCOPED, NOT BUILT — RETIRE PABATI.** Owner: *"we do not need pabati. retire it
+> because it is part of papic."* ⚠ **This SUPERSEDES PR #4704 (merged), which made it FREE hours
+> earlier on the owner's earlier instruction in another session.** Safe by measurement: **0
+> greetings ever recorded · 0 sales ever · 1 challenge row of 631**, against **284 clip challenges
+> that already do the job**. The one row converts to `capture_kind='clip'`, so a guest can still
+> leave a greeting. ⏸ Held only because #4708/#4710 were open on the same files — start when they
+> merge. Full ~50-file scope in its §2.
+>
+> 🔴 **STILL OPEN — AND IT IS THE COMPLAINT THAT STARTED THE STREAM.** *"i tried unlocking
+> setnayan AI … it does not look appealing."* Measured: **NINE in-app pages that take money open
+> with no visible headline at all** — the 2026-08-21 masthead retirement is right for a page you
+> live in and is the opposite of right for a page that has to sell. The sell lines are still
+> authored and invisible (*"Stop guessing who to hire"*). ⚖ **The fix is NOT putting the page
+> header back** — it is giving those nine a hero of their own, and the public doorway kit already
+> solves exactly that. **RULE 0: port it, do not draw a new one.**
 
 > ### ▶▶▶▶▶ GUEST ACTIVATION — MAPPED TWICE, NOW WRITTEN DOWN (2026-08-22)
 > **[`WHATS_NEXT_Guest_Activation_2026-08-22.md`](WHATS_NEXT_Guest_Activation_2026-08-22.md)**
