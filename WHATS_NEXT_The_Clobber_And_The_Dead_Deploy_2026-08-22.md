@@ -215,3 +215,42 @@ shipped**, whatever GitHub says.
 
 ⚠ And this is the SECOND time prod has silently stopped applying migrations —
 see `[[project_setnayan_deploy_silently_stopped_migrating]]`. **Assume a third.**
+
+---
+
+## 7 · ⏭ WHAT IS ACTUALLY LEFT FROM THIS SESSION
+
+Small, and none of it blocks anything. **Three need the owner, two are
+engineering.**
+
+### Owner decisions
+
+1. 💰 **A REAL UNPAID ₱499 ORDER IS SITTING IN PRODUCTION** — `S89O-GCR6BDC4Z6`,
+   Setnayan AI ×1, status `submitted`, ref `SNEYGV00WY`. It is the owner's own
+   test walk from 2026-08-20. Decide whether to cancel it **before it confuses
+   the admin payment queue**, which is the one place a real order and a test
+   order look identical.
+2. 🏷 **THE PUBLIC `/alaala` PAGE STILL SAYS "ALAALA"** while the app rail now
+   says **Memories** (owner 2026-08-21, reversing the 2026-07-31 rename). The
+   app-side surfaces were renamed; the **public marketing page and its route
+   were deliberately NOT** — `/alaala` is a sitemapped public address, so
+   renaming it is an SEO/brand call, not a menu call. Coherent as-is; only the
+   owner can say whether it follows.
+3. ⏱ **THE RUN-OF-SHOW IS NOT IN THE CALENDAR FEED**, deliberately. Whether it
+   should be is a product call; if yes, it is a real slice — see below.
+
+### Engineering, unblocked, not started
+
+4. 📅 **RUN-OF-SHOW TIMES IN THE SUBSCRIPTION FEED.**
+   ⚠ `event_schedule_blocks.start_at` stores the **VENUE'S WALL CLOCK in a UTC
+   column** (prod: `Ceremony 14:00+00` for a 2 PM Manila ceremony). Emitting it
+   as an instant puts every ceremony **eight hours out** — the defect that
+   shipped to nine surfaces on 2026-08-04. Doing it properly means `TZID`
+   local times off the venue timezone, with its own tests. **Not a line to bolt
+   on.**
+5. 🔁 **PR [#4535](https://github.com/iscasasola/setnayan-platform/pull/4535) IS
+   STILL OPEN AND CONFLICTING** (since 2026-08-18). It carries genuinely
+   unmerged work — **repeating events at a cadence other than yearly**; today a
+   monthly or quarterly one can only ever say *"Every year"*. It was
+   deliberately left alone so the five-shelves work would not overlap it.
+   ⚠ **A conflicting PR runs NO CI at all** — it is not failing, it is untested.
