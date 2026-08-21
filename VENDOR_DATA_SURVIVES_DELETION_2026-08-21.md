@@ -143,7 +143,44 @@
 > own rendered snapshot), so **no snapshot column was added out of symmetry with
 > slice 3.** Measure before copying the previous slice's shape.
 
-**Status: SLICES 1–5 BUILT (reviews · the completed-booking root · contracts · the money · quotes) · THE REST MAPPED, NOT BUILT.**
+> ## ✅ SLICE 6 IS BUILT — amendments & change orders (PR #4682, 2026-08-21)
+>
+> **Do NOT rebuild it.** `proposal_amendments`, `proposal_amendment_items` and
+> `vendor_change_orders` now survive.
+>
+> 🚨 **A NEW FAILURE SHAPE, AND IT IS THE WORST ONE YET: NOT A MISSING RECORD, A
+> MISLEADING ONE.** Slices 3 and 5 made the contract and the quote survive — but
+> the things that CHANGE those terms still cascaded, so a supplier kept a quote
+> stating the ORIGINAL price with no record of the agreed discount, **and reads
+> it as fact.** When you preserve a record, ask what AMENDS it.
+>
+> ⚠ **AND THE PARENT ALONE WAS NOT ENOUGH.** `proposal_amendments` holds the note
+> and status; **every amount lives one table down** in
+> `proposal_amendment_items.amount_php`. Preserving only the parent leaves an
+> amendment that says "accepted" and cannot say WHAT — the same misleading-record
+> failure reproduced inside the fix. **Check whether the money is in a child
+> table before calling a preserve done.**
+>
+> ⚖ **No status test** — the amendment state machine starts at `'proposed'`,
+> which means SENT, so there is no draft the supplier never saw and a DECLINED
+> request survives as part of a negotiation both sides were in.
+
+**Status: SLICES 1–6 BUILT (reviews · the completed-booking root · contracts · the money · quotes · amendments) · THE REST MAPPED, NOT BUILT.**
+
+⏭ **RE-MEASURED 2026-08-21 after slice 5.** 38 tables still cascade from `events`
+AND carry a vendor id — but **most are working state for a LIVE event**, not
+records a supplier keeps: access grants, day-of reservations, crew devices,
+scheduling suggestions, preparation items. **Do not sweep them in bulk; apply the
+owner's test row by row.** The genuinely open candidates:
+`vendor_client_notes` (the supplier's own CRM notes — ⚠ raises a question the
+earlier slices did not: a supplier retaining private notes ABOUT a person who
+deleted their event; decide it deliberately rather than by symmetry) ·
+`booking_handovers` (the photographer's gallery link) · `vendor_guest_deliveries`
+· `vendor_spotlight_awards` · `vendor_review_flags`.
+⚠ **`chat_threads` carries `agreed_price_centavos`, the frozen final total, and
+still cascades** — the amendment ITEMS now survive so the figure is derivable,
+but the frozen number itself does not. Whether the conversation survives is a
+product call, not an engineering one.
 
 ⏭ **RE-MEASURED 2026-08-21 against prod, not read off this doc.** Of the vendor-
 side tables, **five already survived before any of this work** —
