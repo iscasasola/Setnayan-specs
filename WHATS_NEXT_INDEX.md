@@ -31,6 +31,45 @@
 > https://www.setnayan.com/api/health` and check the version is your merge or
 > later. **The merge is not the ship.**
 
+> ### ▶▶▶▶▶▶ A FINISHED EVENT READS AS FINISHED (2026-08-21 → 22)
+> **[`WHATS_NEXT_A_Finished_Event_2026-08-22.md`](WHATS_NEXT_A_Finished_Event_2026-08-22.md)**
+> — owner, the morning after his Movie Night: *"why can i still plan and build and create guest
+> list as if it hasn't ended."* Then, after a first fix shipped: **"nothing changed."** He was right.
+>
+> ✅ **NINE PRs SHIPPED, DO NOT REBUILD** (#4651 · #4661 · #4668 · #4673 · #4674 · #4680 · #4689 ·
+> #4693 · #4698), several verified **on the owner's own signed-in dashboard**, not only by tests.
+> The headline: **an event is over at 06:00 in the venue's clock on the day after its LAST day** —
+> the product had TWO answers to that, and the My Events board already said "Celebrated" while the
+> dashboard it opens said **"EVENT DAY SOON."** The Overview now leads with *That's a wrap* and six
+> summary cards, and the **editorial maker finally has a door** (it had none in any desktop menu).
+>
+> 🚨 **AND ONE THAT WAS NOT ABOUT THIS AT ALL — #4680.** Three queries were being **refused by the
+> database on every single load** (`event_vendors` reaches `events` one direct way and **19**
+> indirect ways, so a bare `events!inner` is PGRST201 and `?? []` renders an empty page). One of
+> them is the review trigger: **no supplier has ever been flipped to `delivered` after an event, so
+> not one review request has ever been sent — ~72 days.** 🔑 **The cure was already written in this
+> repo**, with a comment saying that query had been silently killed TWICE. It never propagated to
+> its three siblings. **Not a bug nobody understood — a fix nobody copied.**
+>
+> ⚖ **TWO OWNER RULINGS, BUILT:** the services that ARE the day **stop being sold** once it is over
+> (#4689) · **a guest cannot buy Papic shots into a finished celebration** — *"no. it needs to be in
+> a new event"* (#4693). And **"kwento is free"** (#4698).
+> ⚠ **#4704 (Pabati free) is SUPERSEDED by the Pabati RETIREMENT** in the Studio stream below —
+> do not defend it, do not re-ask it.
+>
+> ⏭ **4 ITEMS OPEN**, each measured against `origin/main` @ `931a44f66` rather than remembered:
+> the Schedule double read (first open shows 0 blocks) · the checklist still saying *"This week"*
+> over dates that have passed · **"Review" having no destination** · and the After progress stage
+> stub — **which is the least worth doing and the file says so**, because on the events where it is
+> current the rail sits inside a collapsed disclosure.
+>
+> 🪤 **ITS TRAP LIST IS THE VALUABLE PART**, especially: **making a SKU free takes TWO halves or you
+> do the opposite** (free and retired are identical in the catalog and opposite in the product) ·
+> **the obvious gate is the harm** (the natural place to stop selling also feeds the couple's OWNED
+> list) · **close where a POST lands, not where a button is** · the **port-baseline conflict
+> treadmill** and that a **force-push disarms auto-merge** · and a `git rebase --onto <base> <its
+> own tip>` that **silently dropped a commit**.
+
 > ### ▶▶▶▶▶▶ NEWEST — STUDIO IS ONE CONCEPT, AND THE BUY PAGES HAVE NO HEADLINE (2026-08-22)
 > **[`WHATS_NEXT_Studio_Is_One_Concept_2026-08-22.md`](WHATS_NEXT_Studio_Is_One_Concept_2026-08-22.md)**
 > — written because the owner said *"save the issue on what's next? we are running in circles."*
