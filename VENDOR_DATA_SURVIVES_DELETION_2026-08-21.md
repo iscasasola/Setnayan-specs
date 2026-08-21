@@ -75,7 +75,35 @@
 > that an orphaned row is unreachable through all four RLS policies, which key
 > on `event_id`.
 
-**Status: SLICES 1–2 BUILT (reviews · the completed-booking root) · THE REST MAPPED, NOT BUILT.**
+> ## ✅ SLICE 3 IS BUILT — `vendor_contracts` (PR #4670, 2026-08-21)
+>
+> **Do NOT rebuild it.** `event_id` nullable + SET NULL, and the client's name is
+> stamped at deletion so the supplier's paperwork still names who they signed
+> with. **No status test** — unlike `event_vendors`, the supplier authored every
+> row (drafts included), so all of them survive. **Do not copy slice 2's three
+> conditions onto a table that holds no couple planning; that is cargo.**
+>
+> 🚨 **THE SAME TRAP, IN ITS OTHER COSTUME — EXPECT BOTH SHAPES ON EVERY ROW
+> BELOW.** In slice 2 the preserved row **VANISHED** (the view INNER JOINed the
+> event). Here it survives and goes **ANONYMOUS** (the list falls back to the
+> literal `'Unknown event'`). **One question finds both: WHAT ELSE READS THE
+> EVENT? Read the surface, not just the table.**
+
+**Status: SLICES 1–3 BUILT (reviews · the completed-booking root · contracts) · THE REST MAPPED, NOT BUILT.**
+
+⏭ **RE-MEASURED 2026-08-21 against prod, not read off this doc.** Of the vendor-
+side tables, **five already survived before any of this work** —
+`guest_saved_vendors.source_event_id`, `vendor_profile_views`,
+`vendor_date_waitlist`, `vendor_reuse_requests.source_event_id` — so **check the
+FK before scoping any row here; several entries below may already be closed.**
+⏭ **The clear next targets, both named by the owner and both unblocked by slice
+2:** `event_vendor_payments` (its blocker was *"no `vendor_profile_id` column —
+attribution runs through `event_vendors`"*, which now survives) and
+`booking_fee_charges` + `booking_fee_ledger` — **money Setnayan is owed**, which
+today disappears when a couple deletes their event. ⚠ `booking_fee_charges` has
+a CHECK requiring `event_vendor_id` or `proposal_id` to be non-null and both
+cascade; slice 2 makes the first survive for booked rows, so **re-test that
+constraint rather than assuming it still blocks.**
 
 ⏭ **Slice 2 changes what is left.** `vendor_activity_stats`,
 `vendor_completed_events`, `vendor_public_completed_events_stats` and
