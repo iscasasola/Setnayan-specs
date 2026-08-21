@@ -1,5 +1,30 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ## 🔴🔴 2026-08-22 — READ FIRST, BEFORE ANY STREAM BELOW
+> **[`WHATS_NEXT_The_Clobber_And_The_Dead_Deploy_2026-08-22.md`](WHATS_NEXT_The_Clobber_And_The_Dead_Deploy_2026-08-22.md)**
+>
+> **PRODUCTION STOPPED DEPLOYING 2026-08-21 14:19Z.** Nine merges built green and
+> never reached the site; the owner reported it as *"i do not see it"*.
+> `deploy-prod.yml` applies migrations and only THEN fires the Vercel hook, so a
+> migration failure means nothing publishes — **and the symptom is four features
+> away from the cause.**
+>
+> **THE CAUSE:** commit `aa39dc5a5` (PR #4700) deleted **24 files** and reverted
+> **42**, wiping most of four already-merged PRs (#4686 · #4695 · #4696 · #4699)
+> — including three migrations that are APPLIED IN PROD, which is what fails the
+> push.
+>
+> 🚨 **CI CANNOT SEE THIS.** Every check passed on that PR: a repo missing a whole
+> feature is internally consistent, because the calling code went too.
+>
+> ⏭ PR #4706 restores the three migrations + the guard that belongs to them.
+> **The remaining 21 deleted + 42 reverted files are the next job** — and must not
+> undo #4700's genuine guest-details work, nor anything merged after it.
+>
+> 🔒 **After any merge somebody expects to SEE:** `curl -s
+> https://www.setnayan.com/api/health` and check the version is your merge or
+> later. **The merge is not the ship.**
+
 > ### ▶▶▶▶▶ NEWEST — THE ONE PAYMENT PAGE, AND A MERGED PR THAT WAS REVERTED (2026-08-22)
 > **[`WHATS_NEXT_One_Payment_Page_2026-08-22.md`](WHATS_NEXT_One_Payment_Page_2026-08-22.md)**
 > — owner: *"we are running in circles"*, so it is written to be the LAST word on this stream.
