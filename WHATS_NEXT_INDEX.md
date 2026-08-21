@@ -25,6 +25,32 @@
 > https://www.setnayan.com/api/health` and check the version is your merge or
 > later. **The merge is not the ship.**
 
+> ### ▶▶▶▶▶ GUEST ACTIVATION — MAPPED TWICE, NOW WRITTEN DOWN (2026-08-22)
+> **[`WHATS_NEXT_Guest_Activation_2026-08-22.md`](WHATS_NEXT_Guest_Activation_2026-08-22.md)**
+> — the shared "Invite guests" QR → their details → their personal QR → Papic.
+> Owner: *"we are running in circles."* **He is right: this chain was mapped TWICE in
+> one session (74 agents, ~11M tokens) and the answer barely moved. READ THAT FILE.
+> DO NOT RE-RUN THE MAP.**
+>
+> 🟢 **13 links of the chain ALREADY SHIP** — the personal QR exists the instant the
+> row is written, the shared door works, Papic is free-and-on for every event, the
+> day-only rule is enforced at the upload, and the "confirm who you are, then you're
+> in" screen the owner is describing **already exists, fully written** (fenced to
+> plus-ones today). **Rebuilding any of it is the paid-twice mistake.**
+> 🔴 **9 real gaps remain**, smallest first, each naming the existing thing to extend.
+> The sharpest: **a guest cannot KEEP their QR** — no save, download, print or copy —
+> while one of the three surfaces showing it says *"Save this to your phone."*
+> ⚖ **4 owner decisions**, incl. whether the guest camera goes free like the rest of
+> Papic (that one decision closes two gaps outright).
+> ✅ Fixed on the way: a guest signing in on a **new phone** was never attached to the
+> event — `joined_via: 'email_link'` is not one of the six legal labels, so Postgres
+> refused the row every time and they landed on an empty home page. PR
+> [#4714](https://github.com/iscasasola/setnayan-platform/pull/4714), with a guard
+> that checks every enum literal the app writes against the real schema.
+> 🪤 **Its § 4 is the most valuable part** — six ways this session's own maps were
+> wrong, including the `git reset --soft origin/main` clobber that took production's
+> deploys down, nearly repeated an hour later.
+
 > ### ▶▶▶▶▶ NEWEST — THE ONE PAYMENT PAGE, AND A MERGED PR THAT WAS REVERTED (2026-08-22)
 > **[`WHATS_NEXT_One_Payment_Page_2026-08-22.md`](WHATS_NEXT_One_Payment_Page_2026-08-22.md)**
 > — owner: *"we are running in circles"*, so it is written to be the LAST word on this stream.
