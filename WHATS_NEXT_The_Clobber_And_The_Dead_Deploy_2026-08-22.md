@@ -1,8 +1,24 @@
 # 🔴 THE DEAD DEPLOY AND THE CLOBBER — 2026-08-22
 
-> **Read this before any other stream.** Production stopped shipping on
-> 2026-08-21 and four already-merged features are missing from the repo. Every
-> other handoff in this corpus assumes a repo that deploys; this one does not.
+> # ✅ RESOLVED 2026-08-22 — READ THIS BANNER BEFORE THE BODY
+>
+> **The deploy is unblocked and production is shipping again.** Verified by the
+> live site, not by a merge: `/api/health` reports **`a4e5ec1`** (PR #4706), and
+> both board changes are confirmed ancestors of it — **#4678 LIVE · #4697 LIVE**.
+> The nine-merge backlog went out with it.
+>
+> **The four clobbered features are back too**, restored by another session in
+> **PR #4710** — measured, not assumed: all 7 spot-checked files exist on `main`
+> AND their callers came back with them (`pay-path` 7 consumers ·
+> `connection-request-expiry` 4 · `papic-challenge-pool` 3 · `custom-columns` 3).
+> **Zero consumers was the tell that the first restore attempt would be
+> incomplete; a non-zero count is what makes this one credible.**
+>
+> ⚠ **THE BODY BELOW IS KEPT AS THE POST-MORTEM, NOT AS A LIVE TASK LIST.** § 5
+> ("what is left") is **DONE** — do not start it. Everything else is why it
+> happened and how to catch it next time. **This file was edited the same hour
+> the gate closed**, because a doc that records a fix at the top and a crisis in
+> the middle gets read from the middle.
 
 ---
 
@@ -12,10 +28,10 @@
 
 He is right, and it is **not his browser and not the change he is looking for**.
 
-**PRODUCTION HAS NOT DEPLOYED SINCE 2026-08-21 14:19Z.** Everything merged after
-that built green, tested green, and never reached the site. At the time of
-writing that is **nine merges**, including both My Events board changes
-(#4678, #4697).
+**PRODUCTION DID NOT DEPLOY BETWEEN 2026-08-21 14:19Z AND 2026-08-22 17:00Z.**
+(Past tense — fixed; see the banner.) Everything merged in that window built
+green, tested green, and never reached the site: **nine merges**, including both
+My Events board changes (#4678, #4697).
 
 🔑 **THE SYMPTOM IS FOUR FEATURES AWAY FROM THE CAUSE.** Nothing fails near the
 change that looks stuck. The site simply stops updating.
@@ -47,7 +63,8 @@ record.**
 
 ### The drift that fails the push
 
-Three migrations are **applied in production and absent from the repo**:
+Three migrations WERE **applied in production and absent from the repo**
+(restored by #4706):
 
 | version | name |
 |---|---|
@@ -86,10 +103,12 @@ must look at the commit, not the merge.
 | [#4696](https://github.com/iscasasola/setnayan-platform/pull/4696) | **the couple's own custom editorial column** |
 | [#4699](https://github.com/iscasasola/setnayan-platform/pull/4699) | **`pay-path`** — every buy button landing on the payment page |
 
-🚨 **CI CANNOT SEE THIS, AND THAT IS THE WHOLE LESSON.** Every check passed on
+🚨 **CI COULD NOT SEE THIS, AND THAT IS THE WHOLE LESSON.** Every check passed on
 that PR. **A repo missing an entire feature is internally consistent** — no
 dangling import, no type error, no failing test, because the calling code was
-removed too. Measured: the restored modules have **zero consumers** on `main`.
+removed too. Measured at the time: the restored modules had **zero consumers** on `main`.
+✅ **After #4710 they have 3–7 each** — which is how you tell a real restore from
+a file-shaped one.
 
 🔑 **THE ONLY SYMPTOM WAS A DEPLOY THAT STOPPED.**
 
@@ -126,7 +145,12 @@ and `papic_challenge_pick_counts()`. **A correction, not a widening.**
 
 ---
 
-## 5 · ⏭ WHAT IS LEFT — the actual next job
+## 5 · ✅ DONE — the recovery (kept for its method, NOT as a task)
+
+> **This section is complete. PR #4710 restored all of it on 2026-08-22.** It is
+> left here because the METHOD and the three traps are what the next clobber
+> will need, and because the "zero consumers" check below is the cheapest way to
+> tell a real restore from a file-shaped one.
 
 **Restore the remaining 21 deleted files and the 42 reverted ones**, WITHOUT
 undoing PR #4700's genuine work (guest details) or anything merged after it

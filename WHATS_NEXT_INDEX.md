@@ -1,7 +1,10 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
-> ## 🔴🔴 2026-08-22 — READ FIRST, BEFORE ANY STREAM BELOW
+> ## ✅ 2026-08-22 — RESOLVED THE SAME DAY (kept as the post-mortem)
 > **[`WHATS_NEXT_The_Clobber_And_The_Dead_Deploy_2026-08-22.md`](WHATS_NEXT_The_Clobber_And_The_Dead_Deploy_2026-08-22.md)**
+>
+> ✅ **FIXED — prod serves `a4e5ec1`; #4678 and #4697 both verified LIVE, and
+> #4710 restored the four features WITH their callers. Nothing here is a task.**
 >
 > **PRODUCTION STOPPED DEPLOYING 2026-08-21 14:19Z.** Nine merges built green and
 > never reached the site; the owner reported it as *"i do not see it"*.
