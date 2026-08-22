@@ -51,6 +51,14 @@ Four of them are a missing HANDOVER between two screens that each work correctly
 
 ## 1 · 🔴 DEFECT 5 FIRST — THE MONEY. This is the serious one.
 
+> ✅ **CLOSED 2026-08-23 — THE ORDER IS ALREADY CANCELLED. DO NOT RE-ASK IT.** Read live from
+> production: `S89O-GCR6BDC4Z6` is `status='cancelled'`, cancelled 2026-08-20 at the owner's
+> instruction, carrying an admin note explaining that the celebration it was bought for was
+> removed by its organiser, that it was never paid (0 payment rows, 0 receipts), and that it
+> predates the sever-connections trigger which cancels such bills automatically from now on.
+> **Prod holds exactly one order, ever, and it is this one.** Every "decide whether to cancel the
+> unpaid ₱499 order" line in this register is stale.
+
 **MEASURED IN PRODUCTION, 2026-08-20. Not inferred from code:**
 
 ```

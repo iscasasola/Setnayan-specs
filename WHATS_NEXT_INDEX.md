@@ -1,5 +1,37 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶▶▶▶▶▶▶ NEWEST — THE EXECUTION PLAN. READ THIS BEFORE PICKING UP ANY STREAM (2026-08-23)
+> **[`WHATS_NEXT_EXECUTION_PLAN_2026-08-23.md`](WHATS_NEXT_EXECUTION_PLAN_2026-08-23.md)** — every
+> open item in this whole register, assessed against `origin/main` @ `c984e0caf` and live
+> production, then partitioned into **waves that cannot collide**: no two sessions running at the
+> same time touch the same file, and each wave carries the intersection check that proves it.
+> It also names the **model and effort** for each session, and the rule behind them — *effort is
+> set by whether a wrong call is invisible or irreversible, not by how many files it touches.*
+>
+> 🔴 **CLOSE PR #4535 BEFORE ANYTHING ELSE.** 507 files carrying **16 migrations that are already
+> applied on `main`** — the identical shape of the merge that deleted 24 files, reverted 42, and
+> stopped production deploying for a day. **Rebasing it re-runs the clobber. Close it.**
+> ✅ Prod is healthy again (`/api/health` = `c984e0c` = the tip of main) and the ₱499 unpaid order
+> is **already cancelled** — do not re-ask that one.
+> 🪤 **The trap the assessment itself paid for:** `git worktree add` on an existing path FAILS, and
+> the next command in the chain happily prints the OLD tree's hash. Three agents read a tree **187
+> commits stale** before it was caught. **Print `git rev-parse HEAD` and compare it to
+> `origin/main` before handing a worktree path to anybody.**
+
+> ### ▶▶▶▶▶ ONE STORY PER DAY — the row this index was missing (2026-08-22)
+> **[`WHATS_NEXT_One_Story_Per_Day_2026-08-22.md`](WHATS_NEXT_One_Story_Per_Day_2026-08-22.md)**
+> — the couple was told, in the same minute, that her story was live and that it was never
+> written. **This row was owed and never landed** (the append was refused by a permissions wall
+> and the failure was read as success), so a session opening this index on the *"what's next"*
+> trigger could not find the stream at all. Added 2026-08-23.
+> ✅ **Two of its four engineering items shipped hours after it was written** — the plain story
+> editor (PR #4720) and the three audiences (PR #4722). **Left: the three dead doorway rows with
+> their two decorative guards, and the gold eyebrows failing AA on the story page.**
+> ⚖ Its **four owner decisions are untouched** — what the dashboard calls a story (it collides six
+> ways), the "Editorial PRO" name, whether the love story yields the word, and **whether the
+> free/paid split is inverted**: the blank page is free while correcting the story we already
+> wrote for her is sold as PRO.
+
 > ### ▶▶▶▶▶▶ NEWEST — ADD TO CALENDAR MOVED ONTO THE CARD; THE MARKETPLACE MOVED INSIDE THE EVENT (2026-08-22)
 > **[`WHATS_NEXT_Calendar_And_Marketplace_Placement_2026-08-22.md`](WHATS_NEXT_Calendar_And_Marketplace_Placement_2026-08-22.md)**
 > — three things the owner selected on his own board, plus a deletion he ordered after seeing the
