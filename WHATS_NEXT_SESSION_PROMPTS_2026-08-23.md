@@ -165,10 +165,14 @@ next. can you do it. and decide". This is a standing instruction and it governs 
 > ⏱ **STATE AT 2026-08-22 19:45Z, measured with `gh` and `curl` — a running session is already on
 > this.** #4535 **CLOSED** · #4699 **MERGED** (19:36Z, main tip `0deceeb95`) · #4708 · #4711 ·
 > #4567 · #4563 all **OPEN and BLOCKED** (they were DIRTY; the rebases landed).
-> 🔴 **Production was still serving `c984e0c` nine minutes after #4699 merged.** The shop-redirect
-> verification CANNOT run until health reports `0deceeb` or later — checking against the older
-> build is a false pass, not a check. If it has not caught up ~15 minutes after a merge, that is
-> the dead-deploy pattern and it outranks every remaining PR.
+> ⏱ **DEPLOY LATENCY IS ~10 MINUTES, AND THAT IS NORMAL — DO NOT CALL IT A DEAD DEPLOY TOO EARLY.**
+> Production served the pre-merge build `c984e0c` for nine minutes after #4699 merged, then caught
+> up to `0deceeb` at 19:46Z (`deploy-prod.yml` run: completed success). ⚠ **I raised it as a
+> possible dead deploy at nine minutes and had to retract it one minute later.** The rule that
+> survives: **a verification run against a build that predates your merge is a FALSE PASS, not a
+> check** — wait for `/api/health` to report your merge or later before verifying anything. Give it
+> ~15 minutes before treating a stall as the dead-deploy pattern, and confirm by reading the
+> workflow run, not by the health endpoint alone.
 > ⚠ **BLOCKED is not DIRTY.** Read why before acting: a required check still running is not a
 > conflict, and re-pushing to "unstick" it wastes a cycle. A force-push disarms auto-merge.
 
