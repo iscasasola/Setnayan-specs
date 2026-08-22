@@ -1,5 +1,56 @@
 # WHATS_NEXT_INDEX — master compilation for the "run all what's-next" session (2026-07-18)
 
+> ### ▶▶▶▶▶▶ NEWEST — ADD TO CALENDAR MOVED ONTO THE CARD; THE MARKETPLACE MOVED INSIDE THE EVENT (2026-08-22)
+> **[`WHATS_NEXT_Calendar_And_Marketplace_Placement_2026-08-22.md`](WHATS_NEXT_Calendar_And_Marketplace_Placement_2026-08-22.md)**
+> — three things the owner selected on his own board, plus a deletion he ordered after seeing the
+> first fix land.
+>
+> ✅ **SHIPPED, DO NOT REBUILD:** per-event **Add to calendar** in every My Events card's `⋯` menu
+> (PR [#4717](https://github.com/iscasasola/setnayan-platform/pull/4717)), then narrowed to **Now
+> happening + Planning only** after the owner asked *"shouldn't now happening and planning be the
+> only ones to have this?"* (PR [#4718](https://github.com/iscasasola/setnayan-platform/pull/4718)).
+> **RULE 0 paid — nothing was drawn**; `buildWeddingIcs` already shipped for Save-the-Date.
+>
+> 🔴 **THE MARKETPLACE RULE IS REVERSED — do not "restore consistency" by undoing it.** It now shows
+> **only inside an event**, never on the front door or the board (owner: *"marketplace is best shown
+> inside an event, not when they just logged in"*). The **2026-08-12 rule was the exact opposite**
+> (front-page furniture that collapsed when a context pushed in). 🔑 The gate is `insideEvent`,
+> **deliberately narrower than `railContext`** — the admin console and vendor dashboard also push a
+> context and must NOT get a couple's supplier marketplace.
+>
+> 🔴 **THE ALL-EVENTS CALENDAR SUBSCRIPTION IS DELETED** (owner: *"block delete."*) — PR
+> [#4721](https://github.com/iscasasola/setnayan-platform/pull/4721) + migration `20271157440480`
+> drop the block, the `webcal:` route and the `calendar_feed_tokens` table.
+> ⚠ **STATE AT WRITING: OPEN, auto-merge armed. `gh pr view 4721` before trusting that.**
+> ⚖ **IT IS A REAL LOSS OF BEHAVIOUR, OFFERED AND ACCEPTED — NOT AN OVERSIGHT.** The feed
+> **auto-updated** (move a date, the phone follows); a per-card `.ics` is a **copy taken once** and
+> goes stale silently. Put to the owner before deleting. **Do not file it as a regression later.**
+> 🔢 Safe by arithmetic, measured first: **one token in prod, `last_read_at` NULL — no calendar had
+> ever fetched it.**
+>
+> 🔑 **THE GENERALISABLE PART — RETIRING A TABLE FORCES THREE DIFFERENT DECISIONS.** The schema
+> parsers union every historical `CREATE TABLE` and **never read `DROP TABLE`**, and the original
+> migration must stay on disk (deleting one makes `db push` refuse and **stops every deploy**). So
+> the table stays visible forever: the **executable** erasure list drops its row (a DELETE against a
+> dropped table is recorded by `purge.ts` as an **audit FAILURE on every erasure request forever**,
+> not thrown), while **both coverage guardrails keep an entry** or their "everything is classified"
+> gates go red — one of them **rewritten**, because its old reason promised a control the product no
+> longer has. **Ask of any compliance list: does anything RUN it?** Both "must stay" claims were
+> **mutation-tested** (T1 and G3 each proved red), not assumed.
+>
+> 🪤 **TRAPS:** my own two PRs collided and the conflict was in a **generated** file — regenerate,
+> never hand-merge · **a clean auto-merge is where a silent revert hides**, so both unflagged files
+> were re-checked by occurrence count · a fresh worktree has **no `node_modules`**, and the failure
+> reads as a broken change · a missing `: null` reported `TS1005` **300 lines away**.
+>
+> ⏭ **ONE ITEM OPEN, AND IT IS BLOCKED ON THE OWNER, NOT ON ENGINEERING:** the **cookie banner**
+> (*"not everytime they log in"*). Measured: the choice is **already stored permanently per
+> browser** and the banner already hides once answered. **The question asked and not yet answered —
+> does it re-ask in the SAME ordinary browser, or across incognito/other devices?** Same browser ⇒ a
+> real bug. Different browser ⇒ working as designed, and "remember it for my account" means moving
+> consent **server-side**, which is RA 10173 proof-of-consent and a **DPO call** (the DPO is the
+> owner). **Do not build before that answer.**
+
 > ## ✅ 2026-08-22 — RESOLVED THE SAME DAY (kept as the post-mortem)
 > **[`WHATS_NEXT_The_Clobber_And_The_Dead_Deploy_2026-08-22.md`](WHATS_NEXT_The_Clobber_And_The_Dead_Deploy_2026-08-22.md)**
 >
