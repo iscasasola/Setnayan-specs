@@ -162,6 +162,16 @@ next. can you do it. and decide". This is a standing instruction and it governs 
 
 ### W0 · PR triage and land · **Opus 5 · high**
 
+> ⏱ **STATE AT 2026-08-22 19:45Z, measured with `gh` and `curl` — a running session is already on
+> this.** #4535 **CLOSED** · #4699 **MERGED** (19:36Z, main tip `0deceeb95`) · #4708 · #4711 ·
+> #4567 · #4563 all **OPEN and BLOCKED** (they were DIRTY; the rebases landed).
+> 🔴 **Production was still serving `c984e0c` nine minutes after #4699 merged.** The shop-redirect
+> verification CANNOT run until health reports `0deceeb` or later — checking against the older
+> build is a false pass, not a check. If it has not caught up ~15 minutes after a merge, that is
+> the dead-deploy pattern and it outranks every remaining PR.
+> ⚠ **BLOCKED is not DIRTY.** Read why before acting: a required check still running is not a
+> conflict, and re-pushing to "unstick" it wastes a cycle. A force-push disarms auto-merge.
+
 ```
 Six pull requests are open on setnayan-platform and none is failing a check — they are all stuck
 on conflicts. Land five and close one. Nothing else runs while you do this; every later session
