@@ -23,7 +23,7 @@ starting its session.
 | `origin/main` tip | `c984e0caf` |
 | production serves | `c984e0c` — **the deploy is healthy; the 2026-08-21 dead-deploy incident is closed** |
 | prod scale | 5 events · 40 guests · 2 shops · 14 Papic photos · **1 order ever, and it is cancelled** |
-| open PRs | 6 — none failing a check; all stuck on conflicts |
+| open PRs | 6 — ⛔ **"none failing a check" was MY CLAIM AND IT WAS WRONG**, see § 1 |
 
 ⚠ **THE ₱499 UNPAID ORDER IS ALREADY CANCELLED.** `WHATS_NEXT_Onboarding_Asks_What_It_Knows_2026-08-20.md`
 says a real unpaid ₱499 order is sitting in prod and asks whether to cancel it. Read live:
@@ -54,6 +54,33 @@ not just create is not the tree you think it is — print `git rev-parse HEAD` a
 **Land them one at a time**, rebasing between each, and after every migration-carrying merge
 verify the object in prod **and** `curl -s https://www.setnayan.com/api/health`. The merge is not
 the ship.
+
+### 🛑 CORRECTION, 2026-08-22 — "NONE IS FAILING A CHECK" WAS WRONG, AND IT MATTERED
+
+I wrote that all six were merely conflicted. **Three were failing, for three different reasons**,
+found by the session actually running W0:
+
+- **#4711 was failing typecheck+lint** on the guard that says no new route word may be left
+  uncovered by the database mint. It ships a public `/pakanta` page and **never reserved the
+  word** — `business_slug_is_reserved('pakanta')` returned NO in production, so **a business named
+  "Pakanta" could have been minted our own product page permanently**, shop addresses being
+  immutable. Fixed with a migration; the guard was mutation-measured 1 → 0 RED and 15/15 restored.
+- **#4563 was failing the exposure freeze**, its surface widened by a new column.
+- **#4567's run was CANCELLED at 15m18s** — not an assertion failure at all.
+
+🔑 **BLOCKED · DIRTY · FAILING · CANCELLED ARE FOUR STATES AND I COLLAPSED THEM INTO ONE.** A
+one-line summary of several PRs' health is cheap to write and expensive to believe. Read each run.
+
+### ✅ AND W0 FOUND TWO LIVE MONEY DEFECTS BY FINISHING THE DEAD AUDIT LENSES — PR #4723
+
+The two lenses that died on a usage limit were worth re-running. A **₱400 supplier purchase never
+reached the payment page** and told the buyer to pay "our BDO or GCash account" while naming
+**neither**; and a guest settling a photo order **notified nobody**. One cause behind both: each
+guard enumerated its subjects **by hand** — one listed 7 buy paths where 9 files call the function.
+Both now derive their list from the code and are floored so an empty sweep cannot pass silently.
+
+⚠ **#4723 IS A THIRD GATE ON W1-B** — it touches the Papic buy action and the supplier-side
+photo-challenge buy path, adjacent to the challenge libraries the Pabati retirement edits.
 
 ---
 

@@ -54,6 +54,20 @@ already ships.
 | W1-C: the compliance pack still claims Philippine hosting and a 90-day retention rule | The **adopted** manual already carries the corrected retention row and no PH-hosting claim was found in it. The remaining "90 days" is about marketing samples — a different, correct rule. |
 | C1: the per-guest QR download "refuses anyone without a full account" | It requires the event to own a **paid ₱1,499 SKU** — it is the BRANDED variant. Opening it to every guest gives away a sold product. |
 
+🛑 **AND ONE OF MY OWN CLAIMS WAS WRONG — CORRECTED BY THE SESSION THAT RAN W0.** I wrote, in the
+plan and in W0's prompt, that the six open PRs were *"none failing a check — all stuck on
+conflicts."* **THREE OF THEM WERE FAILING**, and it changed the work:
+- **#4711 was failing typecheck+lint** on a guard that says no NEW route word may be left uncovered
+  by the database mint. It shipped a public `/pakanta` page and **never reserved the word** —
+  confirmed in prod, `business_slug_is_reserved('pakanta')` returned NO, so a business named
+  "Pakanta" could have been minted our own product page **permanently**, since shop addresses are
+  immutable. Fixed with a migration, mutation-measured 1 → 0 RED, 15/15 restored.
+- **#4563 was failing the exposure freeze** — its surface widened by a new column.
+- **#4567's run was CANCELLED at 15m18s** — not an assertion failure at all, a third distinct cause.
+🔑 **"BLOCKED", "DIRTY", "FAILING" AND "CANCELLED" ARE FOUR DIFFERENT STATES AND I COLLAPSED THEM
+INTO ONE.** Read each PR's actual check run before deciding what kind of work it is. A summary of
+several PRs' health is exactly the kind of claim that is cheap to write and expensive to believe.
+
 🪤 **AND EVERY LINE NUMBER IN THESE PROMPTS HAS ALREADY DRIFTED.** Cited positions were re-checked
 and several point at unrelated code — one brief's "unconditional email write at ~:233 and ~:453"
 lands on neither. **GREP THE STRING. NEVER TRUST THE LINE.** The line numbers are kept only as a
@@ -119,6 +133,15 @@ PROOF RULES — this product's entire defect history is bugs that were green in 
   symptom is an absence. If a screen is empty, suspect refusal before emptiness.
 - Supabase does not throw; it resolves with { error }. A try/catch around a read is decoration.
   An unread count is not zero.
+- A HAND-ENUMERATED GUARD LIST IS A LIST OF THE THINGS YOU THOUGHT OF. Proved again on 2026-08-22:
+  one guard listed 7 buy paths while 9 files called the function it was guarding, and a ₱400
+  purchase reached a page naming NEITHER bank account. DERIVE the subject list from the code, and
+  FLOOR it so an empty sweep cannot pass silently.
+- A GUARD THAT PROTECTS NOTHING IS WORSE THAN NO GUARD, and shipping one is worse than deleting it.
+  Also proved 2026-08-22: a column-level REVOKE applied without error and changed nothing, because
+  a column-level REVOKE CANNOT CARVE A HOLE IN A TABLE-LEVEL GRANT. The measured surface was
+  identical afterwards. The right move was to DELETE the migration and record the finding — not to
+  ship a protection that reads as if it were in place.
 - After any migration merges, verify it applied IN PROD BY THE OBJECT (pg_get_functiondef,
   information_schema) — never by schema_migrations, never by the migration's own comment — and
   run `curl -s https://www.setnayan.com/api/health` to confirm the served version is your merge or
@@ -270,8 +293,10 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ### W1-B · Retire Pabati, and let the buy pages sell · **Opus 5 · xhigh**
 
 ```
-🔒 DO NOT START until #4708 AND #4711 are MERGED — verify with
-`gh pr view <n> --json state,mergedAt`, not by reading a document. Both edit the exact files this
+🔒 DO NOT START until #4708, #4711 **AND #4723** are MERGED — verify with
+`gh pr view <n> --json state,mergedAt`, not by reading a document. (#4723 was opened on 2026-08-22
+by the W0 session and touches app/papic/buy/actions.ts and the vendor-side photo-challenge buy
+path — adjacent to the challenge libraries this retirement edits.) Both edit the exact files this
 work deletes; landing an ~80-file deletion into that window makes a deliberate retirement
 indistinguishable from the accident being repaired.
 
@@ -732,8 +757,13 @@ RULES THAT MAKE THIS SURVIVABLE:
 - READ THE COLUMN DEFAULT BEFORE YOU REVOKE. A revoke on a column whose default is the privileged
   value ships silent universal auto-approval — that exact trap was caught once here, and it would
   have been worse than the bug.
-- A TABLE-LEVEL REVOKE DROPS COLUMN GRANTS. A `REVOKE UPDATE (cols)` is INERT against a table-level
-  grant. Pick the tool by what the LEGITIMATE code must NAME: revoke the column when no client
+- A COLUMN-LEVEL REVOKE CANNOT CARVE A HOLE IN A TABLE-LEVEL GRANT — and it applies WITHOUT ERROR,
+  so the only way to know is to MEASURE THE SURFACE BEFORE AND AFTER. This happened again on
+  2026-08-22: the revoke ran clean and the freeze still reported the same anon privileges. The
+  session DELETED its own migration rather than ship it, and checked at the POLICY instead — the
+  table had no write policy admitting anon at all, so the grants were inert. DO THE SAME: if your
+  revoke does not move the measured number, it is not a fix, and shipping it reads as a protection
+  that is in place. Pick the tool by what the LEGITIMATE code must NAME: revoke the column when no client
   writes it; use a trigger when the value must exist but the browser must not choose it; tighten
   the policy when the caller legitimately names it with some legal values.
 - RLS ENABLED WITH NO POLICY READS EMPTY, SILENTLY — 22 prod tables are already in that state and
