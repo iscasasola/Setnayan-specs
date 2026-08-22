@@ -1,0 +1,806 @@
+# SESSION PROMPTS — 2026-08-23
+
+Ready to paste. One block per session, in wave order, from
+[`WHATS_NEXT_EXECUTION_PLAN_2026-08-23.md`](WHATS_NEXT_EXECUTION_PLAN_2026-08-23.md).
+
+**How to use it:** paste **§ 0 (the shared header) first**, then the session's own prompt under it.
+The header is what stops a session rebuilding shipped work, reading a stale tree, or clobbering
+another session — it is not boilerplate.
+
+🔴 **Never run more than three at once, and only ever sessions from the SAME wave.** The
+no-collision guarantee is per wave; two sessions from different waves may own the same files.
+
+▶ **Every prompt is written to RUN TO THE END.** The header carries a standing continuity clause —
+the session finishes its whole list, decides its own way past blocked checks and conflicts, and
+reports once at the end. It stops only at an item explicitly marked OWNER DECISION. **You should
+not have to answer anything mid-session.**
+
+| session | model | effort | wave |
+|---|---|---|---|
+| W0 · PR triage and land | Opus 5 | high | 0 — alone |
+| W1-A · A finished event tells the truth | Opus 5 | medium | 1 |
+| W1-B · Retire Pabati, let the buy pages sell | Opus 5 | **xhigh** | 1 |
+| W1-C · Make the paperwork true | Sonnet 5 | medium | 1 |
+| W2-A · A guest can keep their code | Opus 5 | high | 2 |
+| W2-B · Delete what we said we would delete | Opus 5 | **xhigh** | 2 |
+| W2-C1 · The gold nobody can read | Sonnet 5 | medium | 2 |
+| W2-C2 · Ninety-five admin routes, one shape | Opus 5 | high | 2 (after C1) |
+| W3-A · "You have none" must mean none | Opus 5 | high | 3 |
+| W3-B · A supplier's card earns its keep | Opus 5 | high | 3 |
+| W3-C · A wake is not a celebration | Opus 5 (+ Fable for the words) | high | 3 |
+| W4-A · The four screens a couple lives in | Opus 5 → Sonnet 5 | medium | 4 |
+| W4-B · Sixty-three supplier screens | Opus 5 → Sonnet 5 | medium | 4 |
+| W4-C · Shut the doors nobody uses | Opus 5 | **xhigh** | 4 |
+| W5-A · A supplier's record survives a delete | Opus 5 | **max** | 5 |
+| W5-B · The surfaces nobody drew | Fable → Opus 5 | medium | 5 |
+| W5-C · Who is in my event? | Opus 5 | medium | 5 |
+| W6 · The grab-bag, verified first | Fable → Sonnet 5 | medium | 6 — alone |
+
+---
+
+## § 0 · THE SHARED HEADER — paste this above every session prompt
+
+```
+You are working on Setnayan, a pre-launch Philippines-first life-events platform.
+Code: github.com/iscasasola/setnayan-platform · Specs corpus: ~/Documents/Claude/Projects/Setnayan
+
+BEFORE ANY CODE — non-negotiable:
+1. RULE 0. Assume what you are asked for ALREADY EXISTS. This product is ~2 years of code and the
+   owner has paid more than once to have a screen rebuilt that already shipped. grep for the
+   feature noun in apps/web BEFORE designing anything, then state in one line each:
+   what exists · what is missing · the delta you will build.
+   If you cannot name the existing component, you have not searched enough. Do not start.
+2. Read a FRESH tree, never the home directory (~ is a checkout ~1100 commits behind and returns
+   confidently wrong answers):
+     git -C ~ fetch origin main
+     git worktree add --detach /private/tmp/wt-read-$$ origin/main
+     git -C /private/tmp/wt-read-$$ rev-parse HEAD    # PRINT IT, compare to origin/main
+   `git worktree add` on an EXISTING path fails while the next command in the chain happily prints
+   the OLD tree's hash. Three agents read a 187-commit-stale tree that way on 2026-08-23.
+3. Read WHATS_NEXT_EXECUTION_PLAN_2026-08-23.md § 2 and find YOUR session's territory.
+   DO NOT EDIT A FILE OUTSIDE IT — another session may be in it right now.
+
+WORKING RULES
+- Branch FIRST, then `git worktree add <path> <branch>`. Never work in ~.
+- NEVER `git reset --soft origin/main`. Rebase. Before every push:
+      git diff --diff-filter=D origin/main..HEAD      # MUST be empty
+  A deletion you did not author means you are about to clobber merged work. CI cannot see this —
+  a repo missing a whole feature is internally consistent. It has already stopped production
+  deploying once.
+- apps/web/scripts/port-control-baseline.json is GENERATED. Regenerate on every rebase, never
+  hand-merge. Diff routes before/after and confirm you removed only what you meant to.
+- Add changelog.d/<branch-slug>.md with a `SPEC IMPACT:` line. Never edit CHANGELOG.md or
+  STATUS.md in a feature PR.
+- `gh pr create` then `gh pr merge <n> --auto --merge`. A force-push DISARMS auto-merge — re-arm
+  after every rebase. Check `mergeStateStatus`, not just that the checks are green.
+- Prune your worktree the moment the PR merges.
+
+PROOF RULES — this product's entire defect history is bugs that were green in CI
+- Every guard you write must be MUTATION-TESTED and the mutation MEASURED: print the occurrence
+  count BEFORE → AFTER. An unmeasured mutation proves nothing in either direction. Assume your
+  guard is decorative until you have broken the guarded thing and watched it go red.
+- A rejected query is NOT a thrown error. A phantom column, a phantom enum value, a phantom RPC
+  argument name, a blocked iframe, an unresolved r2:// reference — all get REFUSED, and the only
+  symptom is an absence. If a screen is empty, suspect refusal before emptiness.
+- Supabase does not throw; it resolves with { error }. A try/catch around a read is decoration.
+  An unread count is not zero.
+- After any migration merges, verify it applied IN PROD BY THE OBJECT (pg_get_functiondef,
+  information_schema) — never by schema_migrations, never by the migration's own comment — and
+  run `curl -s https://www.setnayan.com/api/health` to confirm the served version is your merge or
+  later. THE MERGE IS NOT THE SHIP.
+- Production is pre-launch: 5 events · 40 guests · 2 shops · 1 order, cancelled. ZERO ROWS IS THE
+  PLAN, never a defect to report.
+
+WRITING TO THE OWNER
+Plain English. Say what a PERSON experiences — never file names, function names, table names or
+flag names. Decide and act; escalate only locked prices, scope, risk, or reversing an owner lock.
+
+RUN TO THE END — DO NOT STOP TO ASK WHETHER TO PROCEED
+Owner, 2026-08-04, verbatim: "can you keep going instead of telling me what you recommend doing
+next. can you do it. and decide". This is a standing instruction and it governs this whole session.
+- You have ALREADY been authorised to do everything in your prompt. Do not ask permission to start
+  an item, to open the next PR, to continue after a merge, or to move to the next item on your
+  list. Just do it and say what you did.
+- Finish your ENTIRE list before you report. A session that does item 1 and asks "shall I do item
+  2?" has failed the instruction. Work item by item to the end.
+- WHEN A CHECK FAILS OR A PR IS BLOCKED, that is work, not a stopping point. Investigate, fix,
+  rebase, re-arm auto-merge, and carry on. Only a genuinely failing REQUIRED check that you cannot
+  fix after real investigation is worth raising — and even then, park that item and finish the
+  others first.
+- WHEN ONE ITEM TURNS OUT TO BE BLOCKED OR ALREADY DONE, do not stop the session. Say so in one
+  line, move to the next item, and finish everything that is not blocked. Scaling the work down is
+  the owner's call, not yours.
+- THE ONLY LEGITIMATE STOPS are: (a) an item your prompt explicitly marks as an OWNER DECISION —
+  skip it, do not decide it, do not build it; (b) a locked price, SKU, or scope change; (c) an
+  action that would destroy real customer data you cannot restore. Everything else, decide it
+  yourself, state the assumption you made, and keep moving.
+- Pre-launch means reversible. Production holds 5 events, 40 guests, 2 shops and a single cancelled
+  order. Nothing you are asked to do here can hurt a real customer today, so hesitation costs more
+  than a mistake does.
+- Report ONCE, at the end: what shipped, what you skipped and why, what is waiting on the owner.
+  No mid-session check-ins, no "let me know if you'd like me to continue".
+```
+
+---
+
+## WAVE 0 — runs ALONE
+
+### W0 · PR triage and land · **Opus 5 · high**
+
+```
+Six pull requests are open on setnayan-platform and none is failing a check — they are all stuck
+on conflicts. Land five and close one. Nothing else runs while you do this; every later session
+depends on these merges.
+
+FIRST, AND WITHOUT REBASING IT: close #4535.
+It is 507 files carrying SIXTEEN migrations that are already applied on main. That is the exact
+shape of the merge that deleted 24 files, reverted 42, and stopped production deploying for a day
+on 2026-08-21. Read enough of it to say in one line what it was genuinely carrying that main does
+not have, write that down for a future session, then `gh pr close 4535` with that reason. Do not
+rebase it. Do not cherry-pick from it without checking each file against main first.
+
+THEN LAND, IN THIS ORDER, rebasing and regenerating the port baseline between each:
+1. #4699 (the last three payment doors) — DIRTY on the baseline only.
+   AFTER IT DEPLOYS: verify the six shop redirects are actually back BY READING THE DEPLOYED
+   BUILD, not by trusting the merge. That is exactly how a silent revert was found last week.
+2. #4708 (papic challenges, 3 migrations) — gates the Pabati retirement.
+3. #4711 (Pakanta joins the Studio) — BLOCKED; diagnose WHY before rebasing. Second gate on Pabati.
+4. #4567 (admin work-list counts) — 3 files.
+5. #4563 (a band can show you them playing it, 1 migration).
+
+THEN FINISH THE UNFINISHED AUDIT. The adversarial review of the payment conversion ran on
+2026-08-21 and 17 of its 57 agents died on a usage limit — including the whole completeness pass
+and the verification for two of six lenses: `redirect-mechanics` and `notify-and-admin`. Those
+findings were never confirmed or refuted. A partial pass is not a clean bill of health. Re-run
+those two lenses only, and act on what survives.
+
+Read first: WHATS_NEXT_One_Payment_Page_2026-08-22.md (its §3 carries the per-file verification
+procedure for a suspected revert — the conflicts git reports are NOT the dangerous part; the
+files that merge cleanly by keeping a deletion are).
+
+Done when: #4535 is closed with a written reason, the other five are MERGED, production's health
+endpoint reports a version at or after the last of them, and the six shop redirects are confirmed
+in the deployed build.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+---
+
+## WAVE 1 — three at once
+
+### W1-A · A finished event tells the truth · **Opus 5 · medium**
+
+```
+Four defects on a celebration that has already happened. Read
+WHATS_NEXT_A_Finished_Event_2026-08-22.md first — nine PRs already shipped for this stream, do not
+rebuild any of them. These are the four it left open, re-verified 2026-08-23.
+
+1. THE SCHEDULE SHOWS NOTHING ON THE FIRST OPEN.
+   `fetchScheduleBlocks(supabase, eventId)` is called TWICE in
+   apps/web/app/dashboard/[eventId]/schedule/page.tsx (~:130 and ~:180). The second is the
+   deliberate re-read after the non-wedding seed; the first serves a stale "0 blocks". Deleting the
+   duplicate is right whichever cache is at fault — but RUN THE DISCRIMINATOR before you write a
+   cause into a commit message. Do not assert a caching diagnosis you have not tested.
+2. THE CHECKLIST DOES NOT KNOW THE DAY HAPPENED.
+   apps/web/lib/checklist.ts (week buckets ~:292) + the checklist page read `event_date` only and
+   carry ZERO lifecycle references, so a finished event shows "This week" over dates that have
+   passed, at 0%. The nearby "compressed runway" comment is about an event created CLOSE to its
+   date — NOT a past event. Do not read it as a fix.
+3. "REVIEW" HAS NO DESTINATION.
+   apps/web/lib/customer-menu.ts (~:177) and
+   app/dashboard/[eventId]/_components/after/finished-event-summary.tsx (~:141) both open the plain
+   marketplace. `BUDGET_BUILD_TABS` in lib/budget-build.ts is shortlist·build·budget·compare — there
+   is no team tab to land on. The per-supplier "Leave a review" affordance ALREADY SHIPS inside
+   that page: this is a LANDING change, not a new screen.
+4. THE "AFTER" STAGE IS A STUB — and its promise is fiction.
+   lib/progress-stages.ts has `afterPct = 0` (~:301) and a "7-day review window" sentence (~:298,
+   ~:371) describing a mechanism that EXISTS NOWHERE IN THE PRODUCT. Delete the sentence rather
+   than build to it. This is the least valuable of the four and the stream's own file says so —
+   on the events where that stage is current the rail sits inside a COLLAPSED disclosure, so you
+   cannot demonstrate it by loading the page. Do it last, or say you skipped it.
+
+ALSO IN YOUR TERRITORY — three doorway rows that are defined and rendered nowhere:
+`BecomeStorytellerRow`, `OpenShopRow`, `CreateSamahanRow` in app/dashboard/(launcher)/page.tsx
+(~:2436/:2483/:2517, ZERO call sites app-wide). Two guards — open-shop/has-a-doorway.test.ts and
+lib/the-controls-have-a-home.test.ts — assert the board carries those doors and are satisfied by
+strings inside components nothing mounts. Nobody is stranded (the account menu still carries
+"Your Story"), so the honest fix is either mounting a row or rewriting the assertion to check a
+MOUNTED one. A guard satisfied by dead code is worse than no guard.
+
+TERRITORY (do not edit outside it): dashboard/[eventId]/schedule/page.tsx · lib/checklist.ts +
+checklist page · lib/customer-menu.ts · after/finished-event-summary.tsx ·
+dashboard/[eventId]/vendors/page.tsx · lib/budget-build.ts · lib/progress-stages.ts ·
+dashboard/(launcher)/page.tsx + those two guard tests.
+
+Aim for 2 PRs. No migration.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W1-B · Retire Pabati, and let the buy pages sell · **Opus 5 · xhigh**
+
+```
+🔒 DO NOT START until #4708 AND #4711 are MERGED — verify with
+`gh pr view <n> --json state,mergedAt`, not by reading a document. Both edit the exact files this
+work deletes; landing an ~80-file deletion into that window makes a deliberate retirement
+indistinguishable from the accident being repaired.
+
+Read WHATS_NEXT_Studio_Is_One_Concept_2026-08-22.md in full. It carries the owner's rulings, the
+enumerated scope and the traps. Four pieces, in this order, as separate PRs:
+
+PR1 — RETIRE PABATI. Owner, 2026-08-21: "we do not need pabati. retire it because it is part of
+papic." This SUPERSEDES PR #4704, which made it FREE hours earlier on an earlier instruction.
+Safe by measurement: 0 greetings ever recorded, 0 sales ever, 1 challenge row of 631 — against 284
+clip challenges that already do the job. The scope doc estimates ~50 files; the real count measured
+2026-08-23 is ~80 EDITABLE files (92 matches, minus 8 test files and ~10 APPLIED migrations, which
+are never edited).
+  🔑 THE CAPABILITY DOES NOT DIE WITH THE PRODUCT. Convert the one library row (slug `pabati`,
+     "Leave the newlyweds a video greeting") to capture_kind='clip' so a guest can still leave a
+     greeting — recorded the way they record everything else.
+  🚨 MAKING A SKU DISAPPEAR TAKES TWO HALVES OR YOU DO THE OPPOSITE. Free and retired are the same
+     row in the catalog and opposite in the product. Deactivate the row AND remove it from
+     FREE_FOR_ALL_SKUS in lib/entitlements.ts (and lib/v2/sku-catalog-v2.ts, lib/v2-catalog.ts,
+     (shell)/pricing/page.tsx, onboarding-pricing.ts, persona-packs.ts, experience-personas.ts,
+     api/v1/billing/initialize-maya/route.ts).
+  🚨 lib/llms-txt.ts: drop PABATI from REQUIRED_RETAIL **and** its prose line, and update the
+     hand-written test fixture IN THE SAME PR. Retiring a row that file still advertises THROWS and
+     drops the whole AI/GEO document to its 603-byte stub. That has already happened in production
+     once, with PAPIC_ADDON_STORIES.
+  Also: delete app/pabati/, app/api/pabati/, lib/pabati.ts,
+  lib/offline/service-handlers/pabati-handler.ts (+ its registration in sync-daemon.ts and
+  offline/types.ts), app/[slug]/_components/pabati-prompt.tsx and its mount in site-body.tsx; drop
+  the third member of CaptureKind in lib/papic-missions.ts and the `pabatiActive` threading behind
+  it; drop the empty pabati_clips table (0 rows, follows the LED-backdrop precedent).
+  ⛔ MUST NOT TOUCH: the Papic shot ladder (PAPIC_GUEST_100/PAPIC_GUEST/PAPIC_GUEST_10K/
+     PAPIC_GUEST_20K) — owner-locked, features are free and SHOTS are the product;
+     PAPIC_ADDON_THANK_YOU (₱2,499) stays paid; the `greeting` category and its 47 clip challenges,
+     which are the replacement.
+  ⚠ A CATALOG ROW IN PROD IS NOT WHAT THE MERGED MIGRATION SAYS — query the object; #4704's
+     migration had not applied because nothing was deploying.
+
+PR2 — NINE BUY PAGES HAVE NO HEADLINE. This is the complaint that started the stream: "i tried
+unlocking setnayan AI ... it does not look appealing." Nine in-app pages take money and render no
+visible headline: dashboard/[eventId]/studio/{papic, custom-qr-guest, editorial-pro,
+indoor-blueprint, save-the-date, patiktok, setnayan-ai, website-pro, supplies-marketplace}. The
+sell lines are authored and invisible ("Stop guessing who to hire").
+  ⚖ THE FIX IS NOT PUTTING THE PAGE HEADER BACK. PageMasthead was deliberately reduced on
+    2026-08-21 and is owner-locked and CORRECT for the ~380 pages a person lives in. A buy page is
+    the opposite case — the person has not decided anything yet. Give those nine a hero of their
+    own: product name, one-line promise, price, above the fold.
+  🔑 RULE 0: app/_components/marketing/_doorway.tsx already solves this for the eight public
+    product pages. PORT IT. Do not draw a new one.
+
+PR3 — the Setnayan AI page: eight cards in a 3-column grid leaves an orphan last row and reads as
+unfinished (setnayan-ai/_components/setnayan-ai-value.tsx ~:130); the price sits in a plain
+sentence at the bottom of a tile (~:266). Same file as PR2 touches — do them together if simpler.
+
+PR4 — the Studio rail rows are UNLIT (named debt, not an oversight). Lighting them needs ONE match
+list spanning app/_components/frontdoor/front-door-shell.tsx (~:642 documents the hazard) and
+dashboard/[eventId]/_components/event-rail-context.tsx: run separately, "3D Plan" (/seating/lab)
+and the event menu's "Seat plan" (/seating) BOTH light, and two lit rows read as broken.
+
+ALSO YOURS: the story page's gold eyebrows fail AA. app/[slug]/_components/editorial/
+editorial-content.tsx has 10 `text-terracotta` hits (~7 eyebrow sites) plus 1 in living-moments.tsx.
+In this repo the slot named `terracotta` is the GOLD #A9834B — measured 3.48:1 on the now-white
+ground, below the 4.5:1 floor for 12px text. The component's own docblock names champagne-gold as
+a deliberate editorial accent, so fixing one makes it the odd one out: treat it as a
+whole-component call, not a rider. text-mulberry (4.61:1) or text-link (8.22:1) are the passing
+slots. Check BOTH themes — a light-only contrast check waves through a token that flips on dark.
+
+Migration: YES (deactivate the SKU + drop the empty table). Allocate forward with
+`pnpm migration:new`. Dry-run against prod in a ROLLED-BACK transaction first — the PGlite replay
+runs as superuser and will not catch a permissions problem.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W1-C · Make the paperwork true · **Sonnet 5 · medium**
+
+```
+Documents only. You will not touch app code, and no test can catch a mistake here — read
+carefully.
+
+1. RECONCILE THE ~28 PER-SURFACE PROTOTYPES to the shipped palette and the shipped app shell
+   (corpus prototypes/*.html). RECONCILE, NEVER REDRAW: they are still correct about composition
+   and carry only the old palette. A delta between a ported screen and its archetype is a defect in
+   the PORT, not a fresh design decision.
+   The palette, owner-locked: page ground is WHITE #FFFFFF since 2026-08-20 (the token is still
+   NAMED `cream` — do not "fix" the name) · ink #2C2A29 · action #C24E25 · gold #A9834B is
+   DECORATIVE AND UI-ONLY, never body copy · link #3B4E67. In this repo the Tailwind slot named
+   `terracotta` is the GOLD and the action colour lives in the slot named `mulberry` — inherited,
+   backwards, and the single most common colour mistake made here.
+   ⛔ The 19 approved archetypes/overlays are BINDING (owner approved all 19 on 2026-08-04, no
+   changes). Do not ask for them to be reviewed again.
+2. THE COMPLIANCE PACK STILL MISSTATES TWO THINGS. Four rows say the data is in the Philippines —
+   it is not: the database and the face vectors are in SINGAPORE, media is in APAC object storage,
+   and NOTHING is hosted in the Philippines. Two rows still quote the retired 90-day rule; the
+   ruling is: the full-resolution original is replaced by its compressed copy six months from the
+   event's FIRST capture, never sooner than three months after the event ENDS, and the compressed
+   gallery is kept free FOR LIFE. NO PHOTO IS EVER DELETED — only its resolution changes.
+   ⚠ Wording that a regulator reads is the DPO's call, and the DPO is the owner. Apply the factual
+   corrections; FLAG any sentence where the change is a matter of positioning rather than fact.
+
+Done when: every prototype states the current palette, the pack contains no claim of PH hosting
+and no 90-day retention, and you have listed for the owner exactly which sentences you changed and
+which you flagged instead.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+---
+
+## WAVE 2 — three at once
+
+### W2-A · A guest can keep their code · **Opus 5 · high**
+
+```
+🔒 Needs W1-B merged — you share app/[slug]/_components/site-body.tsx.
+
+Read WHATS_NEXT_Guest_Activation_2026-08-22.md IN FULL FIRST. This chain was mapped TWICE in one
+session (74 agents, ~11M tokens) and the answer barely moved. DO NOT RE-RUN THE MAP. Its Section 1
+lists 13 links that ALREADY SHIP — the personal QR exists the instant the guest's row is written,
+the shared door works, Papic is free and on for every event, the day-only rule is enforced at the
+upload, and the "confirm who you are, then you're in" screen the owner describes ALREADY EXISTS
+fully written at /{slug}/welcome (fenced to plus-ones today). Rebuilding any of it is the
+paid-twice mistake.
+
+BUILD THESE SEVEN. Extend the named thing; never draw a new one.
+1. A GUEST CANNOT KEEP THEIR QR. No save, download, print or copy — it is inline SVG, so a
+   long-press offers nothing and a screenshot is the only way. And one of the three surfaces
+   literally says "Save this to your phone" — a promise the page gives them no way to keep.
+   EXTEND: app/api/website/qr/guest/[guestId]/route.ts, the per-guest PNG that already exists on
+   the host side and today refuses anyone without a full account (gate at ~:23).
+   ⚠ A dead "Download PNG" label already ships into every page's HTML from a menu registry,
+   pointing at a route that does not exist and rendered by nothing. A grep of the live site will
+   "find" a guest QR download that has never existed. Do not take it as evidence.
+2. The web address under the QR is dead text — not copyable, not sendable (same QR block in
+   app/[slug]/_components/site-body.tsx).
+3. The "check your email" screen (app/join/[eventId]/check-email/page.tsx) offers no way into the
+   celebration they just joined — its only button leaves for the marketing site. EXTEND the "Open
+   your invitation" button its sibling app/join/[eventId]/success/page.tsx already has.
+4. Nobody who joins is told they are ON THE LIST. The one visible status word is "pending", which
+   reads as NOT FINISHED (rsvp-widget.tsx ~:375-382).
+5. Nothing points a guest at the reply card, so the mobile / email / preferred-name boxes sit on a
+   screen they never find. EXTEND the quick-link chips already on their summary card
+   (guest-hub-bar.tsx).
+6. 🔴 A GUEST CAN OVERWRITE — OR BY SAVING BLANK, ERASE — CONTACT DETAILS THE COUPLE TYPED.
+   The front door refuses this (`.is('email', null)`, fill-a-blank); one screen later the
+   protection is gone (app/[slug]/actions.ts ~:233 and ~:453 write unconditionally). That address
+   is a SIGN-IN KEY, not a note. This is the one with real consequences — do it first.
+9. A guest cannot say who they are bringing, though the couple is promised in writing that the
+   name will arrive. No name ⇒ no row ⇒ no QR ⇒ no camera for that person.
+
+⛔ DO NOT BUILD 7 AND 8 — they ride an OWNER DECISION (should the guest camera be free like the
+rest of Papic?). One answer deletes both: the false "the host hasn't turned on Papic" message
+(untrue on all five prod events) and the camera that shows a live viewfinder and only refuses
+AFTER the shutter. Leave them; say in your summary that one owner answer closes both.
+
+ALSO YOURS — three files in the same guest tree where a refused read renders as blank:
+app/[slug]/seat/page.tsx (7 unbound reads, 0 error bindings), find-my-table/, and the unreachable
+`photos` plate in _components/empty-states.tsx. Extend the existing _lib/silent-absence.test.ts.
+
+🪤 TWO SURFACES FOR ONE THING, TWICE in this stream already — the seat-finder vs the join door, and
+the big QR CARD (phase-gated) vs the My QR BUTTON (not gated at all). ENUMERATE EVERY SURFACE
+before reporting an affordance absent.
+
+2–3 PRs. No migration.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W2-B · Delete what we said we would delete · **Opus 5 · xhigh**
+
+```
+Two retention promises are written, signed off by the owner as DPO, and NOTHING RUNS THEM. Read
+WHATS_NEXT_NPC_Pack_Findings_2026-08-17.md first.
+
+1. FACE DATA IS NOT ACTUALLY DELETED. The privacy pack says face data is deleted three months
+   after the event ends; the pack's own text admits "ENFORCEMENT NOT YET BUILT" and there is no
+   job in the lib/ job registry that does it. Copy the shape of the existing
+   lib/vendor-dossier-retention.ts job.
+2. A SUPPLIER'S ID IMAGE AND LIVENESS VIDEO ARE NOT DELETED 90 days after their decision. No job
+   exists — the dossier-retention job covers Deep Search data, not identity files. These live in
+   the vendor-verification object-storage bucket, which is separate from the media bucket and is
+   NOT covered by the admin media screen.
+
+THIS IS THE ONE PLACE IN THE PLAN WHERE OVER-DELETING IS WORSE THAN THE GAP. Both are irreversible
+and both are legally load-bearing under RA 10173. Requirements:
+- Compute "the event ended" from the ONE resolver the product already has — an event is over at
+  06:00 in the venue's clock on the day AFTER its LAST day (event_end_date where a celebration
+  spans days, else event_date). Do not invent a second definition; the product having two answers
+  to that question is a defect this codebase has already paid for.
+- The sweep must be idempotent, must log what it deleted, and must be provable on a seeded fixture
+  BEFORE it can touch anything real.
+- Ask "what un-does this?" at write time. A forward primitive with no inverse has bitten this repo
+  before. There is no inverse here — which is exactly why the dry-run and the fixture matter.
+- Prod holds 14 Papic photos and 2 shops. Test the boundary, not the volume: an event that ended
+  yesterday, one that ended 89 days ago, one that ended 91 days ago.
+
+⛔ NOT IN SCOPE: the compressed gallery, which is kept FOR LIFE, and the full-resolution
+compression sweep, which already ships and is default-on. NO PHOTO IS EVER DELETED — only its
+resolution changes. Face VECTORS are a different thing from photos; do not conflate them.
+
+ALSO YOURS, READ-ONLY THIS WAVE: 15 privacy-pack findings were never verified because the
+verification fan-out died on a usage limit. Verify them, write down what survives, and QUEUE any
+fix that falls outside your territory rather than applying it.
+
+2 PRs. No migration.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W2-C1 · The gold nobody can read · **Sonnet 5 · medium**
+
+```
+Mechanical sweep, one colour, admin only.
+
+app/admin/** uses the gold #A9834B as TEXT in 106 places across 51 files (measured 2026-08-23 with
+the existing guard's own node regex). On this product's white ground that measures 3.37:1, below
+the 4.5:1 floor. In this repo the Tailwind slot NAMED `terracotta` IS that gold, and the real
+action colour lives in the slot named `mulberry` — inherited and backwards, which is why this
+mistake keeps being made. Reach for `text-mulberry` (4.61:1) or `text-link` (8.22:1).
+
+RULES:
+- Gold on an ICON stays — 3.37:1 clears the 3:1 non-text bar. Only TEXT moves.
+- Check BOTH themes on any tinted block. `mulberry-700` measures 5.86:1 light and 3.05:1 DARK,
+  because that slot flips on a dark panel; `mulberry-600` measures 4.92 / 5.78. A light-only check
+  waves the dark failure straight through.
+- BEFORE you sweep, an Opus session or your own first PR must land the guard, and the guard must
+  be MUTATION-TESTED BY OCCURRENCE COUNT (print before → after). Two contrast guards have already
+  missed a real AA failure in this repo — one checks token DEFINITIONS, the other only judges
+  pairings where both sides are opaque, and the failure lived in the seam between them.
+- Territory is app/admin/** and nothing else.
+
+One PR. Report the occurrence count before and after; "106 → 0" is the deliverable.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W2-C2 · Ninety-five admin routes, one shape · **Opus 5 · high**
+
+```
+🔒 Start after W2-C1's sweep merges. Same territory: app/admin/** exclusively.
+
+The admin console is ~95 routes and 33 raw tables, each screen effectively its own invention.
+Converge them on ONE archetype. The 19 archetypes were approved by the owner on 2026-08-04 and are
+BINDING — port them, never redraw. A delta between a ported screen and its archetype is a defect in
+the port, not a fresh design decision.
+
+RULE 0 APPLIES HARDEST HERE — the persistent app shell ALREADY SHIPS AND IS MOUNTED, and a session
+was once told the opposite for six days. Before drawing anything, name the shell component, the
+mounted navs, and the primitives that already exist. Rebuilding them is described in this project's
+own docs as "the paid-twice mistake at its largest scale."
+
+Also true and easy to miss: /admin/work is ALREADY the ranked work list and /admin/more is ALREADY
+the all-surfaces map. Extend them.
+
+3–5 PRs, one coherent group of routes each. No migration. Internal-only, so it ships last in its
+wave and nothing customer-facing depends on it.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+---
+
+## WAVE 3 — three at once
+
+### W3-A · "You have none" must mean none · **Opus 5 · high**
+
+```
+🔒 Needs W1-A merged — you share dashboard/[eventId]/vendors/page.tsx.
+
+About 30 screens in the couple's dashboard render a REFUSED read as an EMPTY FACT. The worst is
+app/dashboard/[eventId]/vendors/page.tsx: 45 reads, none binding `error`. A couple reads "you have
+no suppliers" and it is not true. The same class was already closed in two other trees — copy
+those, do not invent a third pattern:
+  apps/web/app/vendor-dashboard/reads-are-honest.test.ts (lane B, 31 reads / 16 files)
+  and the explore/tour/papic/panood sweep (lane C, 20 reads) which shipped WITHOUT a per-tree
+  guard — that omission is why this lane must ship one.
+
+REQUIREMENTS
+- Supabase DOES NOT THROW. It resolves with { error }. A try/catch around a read is decoration,
+  and `?? []` turns a refusal into "nothing here".
+- Distinguish the three states honestly: empty · could not be read · refused by permission. A
+  failed count returns 0, and 0 looks exactly like "you have none".
+- SHIP THE PER-TREE GUARD (app/dashboard/reads-are-honest.test.ts) and MUTATION-TEST IT BY
+  OCCURRENCE COUNT. This repo has shipped at least six guards that passed while the thing they
+  guarded was gone: one proved a card was imported not MOUNTED, one matched a file-level substring
+  so a comment exempted the file, one could not fail at all. Assume yours is decorative until you
+  have watched it go red.
+- Fail toward the caveat. A partially-refused list must say so rather than present itself as
+  complete — a coordinator once read only the vendor documentation shots under a card headed
+  "Your gallery".
+
+TERRITORY: apps/web/app/dashboard/[eventId]/** plus the new guard. 2–3 PRs. No migration.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W3-B · A supplier's card earns its keep · **Opus 5 · high**
+
+```
+🔒 Needs #4563 and #4699 merged (wave 0) — they hold vendor-dashboard files.
+Read WHATS_NEXT_Card_Family_Handoff_2026-07-29.md first: 11 PRs already shipped in this stream and
+its locked principles govern. Do not rebuild the maker, the card or the details sheet.
+
+FOUR THINGS, smallest first:
+1. MID-EDIT SAVE NAVIGATES AWAY and the clip pill shows a placeholder instead of the real duration
+   (coverage-actions.ts, ShowcaseMediaFields). Small, no schema, do it first.
+2. START FROM ONE OF YOUR CARDS. A vendor creating a new listing cannot copy an existing one —
+   services/new/[category]/page.tsx takes only { claim? }. Owner asked for this on 2026-07-28.
+3. "WHAT COUPLES ACTUALLY PICKED" on the Card Record. Verified absent: zero references to
+   event_vendor_item_options anywhere. Needs a new table plus a write at lock time.
+   🔒 THIS PUBLISHES AN AGGREGATE ABOUT OTHER PEOPLE'S MONEY. Apply the K-floor from the stream's
+   own doc: below the floor, show NOTHING — not a rounded number, not "fewer than K". And the
+   floor must be enforced in the QUERY, not in the component; a component-level floor ships the
+   raw number to the browser.
+4. REPLY-TIME BADGE + the count of celebrations this supplier documented. Same rule: a minimum-N
+   floor, enforced server-side. A supplier with two replies must not get a badge implying a record.
+
+⚠ PRICING AND CLAIMS ABOUT SOMEBODY ELSE: moving a partnership INTO a pricing claim re-asks the
+partner and drops their acceptance — the same principle applies to anything you publish on a
+supplier's behalf. If a number could be read as a claim the supplier did not make, do not publish
+it.
+
+Migration: YES (one new table). Allocate forward with `pnpm migration:new`. RLS at CREATE TABLE
+time, using one of the 8 canonical patterns — no invented patterns. Another session is writing a
+migration this wave; yours must touch only your new table and read chat_threads. Do not touch
+event-type tables.
+
+3 PRs.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W3-C · A wake is not a celebration · **Opus 5 · high · words drafted by Fable**
+
+```
+The owner already said yes to this (2026-08-17, "yes to all four"). Verified absent 2026-08-23: no
+`funeral` anywhere in lib/event-type-profile.ts, lib/event-words.ts, or any migration.
+
+A family arranging a wake or a funeral gets an event that never says "celebrate", never says
+"party", never counts down to a happy day, and never offers a save-the-date.
+
+THE WORDS ARE THE PRODUCT HERE. Draft every user-visible string with Fable before wiring anything —
+a wake screen reading "Let's get this celebration started!" is not a copy bug, it is the entire
+defect. Then wire them with Opus.
+
+WHERE IT LANDS: lib/event-type-profile.ts · lib/event-words.ts · lib/checklist-event-type-defs.ts ·
+a migration for the event type · and the guest-facing tone strings under app/[slug]/**.
+🔒 You share app/[slug]/** with wave 2 — do not start until W2-A has merged.
+
+THINGS THIS PRODUCT HAS ALREADY LEARNED, which apply directly:
+- The onboarding flow ASKS WHAT IT ALREADY KNOWS. Do not add a screen that re-asks something the
+  previous screen carried.
+- Raw option keys have leaked to customers before (`1st_birthday`, `adult_regular` on screen).
+  Every option needs a label, and the option type may not have a label slot — check before
+  assuming the renderer can fix it.
+- Removing a screen at runtime is NOT the way to drop a question: out of range is a render-time
+  THROW, and removal disarms the "you already have one of these" walk-back.
+- There is a settled checklist for adding an event type in the corpus. Follow it; do not derive
+  a new one.
+
+Migration: YES (event-type tables only — another session is writing a migration this wave against
+a different table set). 2 PRs: schema first, then tone.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+---
+
+## WAVE 4 — three at once
+
+### W4-A · The four screens a couple lives in · **Opus 5 (first screen) → Sonnet 5 (the rest) · medium**
+
+```
+🔒 Needs W3-A merged — same tree.
+MEASURE FIRST, DO NOT BUILD FIRST. This brief is partly eroded: the guests screen was reworked on
+2026-08-22 and the app-wide header retirement touched all four. Re-diff each screen against its
+approved archetype and report the REAL delta before writing code. If a screen already matches, say
+so and skip it — that is a result, not a failure.
+
+Guests · suppliers · budget · photos (app/dashboard/[eventId]/{guests,vendors,budget,alaala}/**).
+The 19 archetypes are BINDING (owner approved 2026-08-04, no changes requested). RECONCILE, NEVER
+REDRAW — a delta between a ported screen and its archetype is a defect in the PORT, not a fresh
+design decision. Do not ask the owner to review them again.
+
+Opus does the FIRST screen and establishes the pattern plus the guard. Sonnet repeats it for the
+other three. If a screen needs a judgement call the pattern does not answer, it goes back to Opus —
+it is not a repeat.
+
+Palette, owner-locked: ground WHITE #FFFFFF (token still NAMED `cream`) · ink #2C2A29 · action
+#C24E25 · gold #A9834B decorative only, never body copy · link #3B4E67. The slot named `terracotta`
+is the GOLD; the action colour lives in the slot named `mulberry`. Check contrast in BOTH themes.
+
+2–4 PRs after the re-measure. No migration. Do not edit vendors/actions.ts.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W4-B · Sixty-three supplier screens · **Opus 5 (the kit) → Sonnet 5 (the sweep) · medium**
+
+```
+🔒 Needs W3-B merged — same tree.
+
+app/vendor-dashboard/** is ~63 screens built from 23 one-off components. Converge them on the
+shared kit and the approved archetypes. Opus builds the kit and the first two screens; Sonnet
+sweeps the rest behind a guard that has been mutation-tested by occurrence count.
+
+RULE 0: the shell, the rails and the primitives ALREADY SHIP AND ARE MOUNTED. Name them before you
+draw. Rebuilding a mounted shell is the largest-scale version of the paid-twice mistake in this
+project's history.
+
+Same palette rules as W4-A, both themes. The supplier is the person we are asking to trust us with
+their business — treat the port as a trust surface, not a repaint.
+
+4–6 PRs. No migration.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W4-C · Shut the doors nobody uses · **Opus 5 · xhigh**
+
+```
+You are the ONLY migration writer in this wave.
+
+~290 anonymous read grants exist that nothing needs, plus two views flagged as carrying elevated
+rights (events_host, vendor_completed_events) that have never been checked. Continue the existing
+batch pattern: apps/web/tests/db/anon-table-grants-closed.db.test.ts records which batches have
+landed, and its own note says the EASY category is now EMPTY. What remains is delicate — tables
+whose policies merely exclude anon, several reached by the service role, where the damage is felt
+only at runtime.
+
+RULES THAT MAKE THIS SURVIVABLE:
+- Small batches, one PR each, each proved before the next.
+- READ THE COLUMN DEFAULT BEFORE YOU REVOKE. A revoke on a column whose default is the privileged
+  value ships silent universal auto-approval — that exact trap was caught once here, and it would
+  have been worse than the bug.
+- A TABLE-LEVEL REVOKE DROPS COLUMN GRANTS. A `REVOKE UPDATE (cols)` is INERT against a table-level
+  grant. Pick the tool by what the LEGITIMATE code must NAME: revoke the column when no client
+  writes it; use a trigger when the value must exist but the browser must not choose it; tighten
+  the policy when the caller legitimately names it with some legal values.
+- RLS ENABLED WITH NO POLICY READS EMPTY, SILENTLY — 22 prod tables are already in that state and
+  one product warning is dead because of it. Closing a door must not close a working feature.
+- `auth.role()` CAN NEVER BE NULL IN THE PGLITE REPLAY (the shim returns 'anon' where prod returns
+  NULL), so every `auth.role() IS NULL` privileged branch is dead code in every db test here.
+  Derive from `current_user NOT IN ('authenticated','anon')` instead.
+- Prove each revoke by BREAKING it: an insert or select that should now fail, that did pass before.
+  Print the before → after.
+
+3–5 small PRs. Verify each applied IN PROD BY THE OBJECT after merge.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+---
+
+## WAVE 5 — two to three at once
+
+### W5-A · A supplier's record survives a delete · **Opus 5 · max**
+
+```
+You are the ONLY migration writer in this wave. This is the most careful piece of work in the plan.
+
+Read VENDOR_DATA_SURVIVES_DELETION_2026-08-21.md and the owner's rules in the project CLAUDE.md
+(2026-08-21) before anything else.
+
+WHAT ALREADY SHIPPED — do not rebuild: the sever-connections trigger, and the migrations that make
+a review, the money and a quote outlive the event. A supplier can now answer a deletion request
+(PR #4646, merged).
+
+WHAT IS LEFT, AND WHY IT NEEDS MAX CARE:
+- 152 of ~162 foreign keys to events CASCADE; only 10 survive. The 65-table classification is
+  written up — and ITS ADVERSARIAL CHECK IS INCOMPLETE: 31 of 71 agents were cut off by a usage
+  limit and the synthesis never ran. TREAT EVERY ROW AS MAPPED-BUT-UNVERIFIED. Verify before you
+  migrate; that verification IS the first half of this session.
+- "STORED" DOES NOT MEAN "SURVIVES". vendor_activity_stats is RECOMPUTED by unrelated events, so a
+  saved snapshot silently drops to the smaller number. Pin it or the guarantee is cosmetic.
+- `ON DELETE` SAYS NOTHING ABOUT `ON UPDATE`, and preserving a parent is an UPDATE.
+
+THE OWNER'S RULE, VERBATIM IN EFFECT: on a SHARED record the vendor keeps it — contracts, payments,
+completed bookings. Scoped: it does NOT convert the couple's private planning (budget, shortlist,
+who they rejected) into vendor data. THE TEST IS WHETHER THE SUPPLIER TOOK PART IN IT. When a row
+is ambiguous, do not decide — list it for the owner.
+
+THE GATE IS IN THE DATABASE, NOT THE ACTION. DELETE on events is REVOKED from authenticated/anon
+because there were six app delete paths and a seventh with none. Keep it that way; do not add an
+app-layer guarantee the database does not keep.
+
+Getting this wrong destroys a business's history permanently and there is no inverse. Every
+migration dry-run against prod in a ROLLED-BACK transaction first — the PGlite replay runs as
+superuser and will not catch a permissions failure.
+
+2–3 PRs. Verify each applied IN PROD BY THE OBJECT.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W5-B · The surfaces nobody drew · **Fable (re-scope) → Opus 5 (build) · medium**
+
+```
+MEASURE FIRST. Part of this brief is now WRONG: the marketplace moved INSIDE the event on
+2026-08-22 (owner: "marketplace is best shown inside an event, not when they just logged in"),
+which reverses the 2026-08-12 rule this brief was written under. Re-scope with Fable before drawing
+anything, and say plainly which parts of the old brief you are discarding.
+
+ALSO ALREADY DONE, do not redraw: the sign-in and joining doors were ported to one shared shell
+(13 of them). The auth half of this brief is finished.
+
+WHAT IS GENUINELY UNDRAWN: the browsing surface, the guided tour, the deeper Papic pages (~11
+public routes), and the onboarding questions' content. The 19 archetypes are BINDING — port, never
+redraw.
+
+⛔ THE TIER MATRIX IS NOT YOURS. Whether the ~450-cell supplier tier grid stays or goes is an owner
+decision. Leave it exactly as it is and flag it.
+
+🪤 A brief that says it was measured was wrong FOUR times in this stream's history — it drew six
+public doorways where there are eight, missed that a sold product had no public page at all, and
+got the folder count wrong. Re-measure every count you are about to design around.
+
+2–3 PRs. No migration.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W5-C · Who is in my event? · **Opus 5 · medium**
+
+```
+🔒 Needs W4-A merged — same tree.
+Three small things, all verified still true on 2026-08-23.
+
+1. ONE SCREEN THAT ANSWERS "WHO IS IN MY EVENT". Today the answer is spread across five separate
+   routes, all still separate. Build one screen above them; do not replace them.
+   ⛔ THE BROADCAST HALF IS NOT YOURS — whether a coordinator nobody promoted may message all the
+   guests is an owner decision. Roster only.
+2. THE COORDINATOR'S "EDIT THIS SITE" IS A DEAD END. lib/owner-ribbon.ts (~:118) links
+   unconditionally to an editor that gates on member_type='couple' (website/editor/page.tsx
+   ~:118). They press it and are refused. Either don't show it or make it work — a control that
+   refuses the person it is shown to reads as a broken product.
+3. DURING A BROADCAST THE HOST CANNOT SEE WHO HOLDS EACH CAMERA — the control page says "Phone
+   joined" with no name (panood/control/[eventId]/page.tsx ~:2276). The camera claim knows who
+   claimed it.
+
+🔑 A GRANTED CAPABILITY NOTHING CALLS IS A GATE WITH NO HANDLE — this repo has found five. Before
+building any of the three, grep for a WRITER, not just a column or a function: the mechanism may
+already exist with nothing calling it, in which case your job is the handle, not the gate.
+
+2 PRs. A migration only if the camera claim genuinely lacks the name — check first.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+---
+
+## WAVE 6 — runs ALONE
+
+### W6 · The grab-bag, verified first · **Fable (verify) → Sonnet 5 (fix) · medium**
+
+```
+NOTHING IN THIS LIST HAS BEEN RE-VERIFIED SINCE 2026-08-06. Expect several to be fixed already —
+in a comparable pass, 17 of 58 register items turned out to be done. VERIFY EACH ONE BEFORE
+TOUCHING IT, and report the closures as results.
+
+1. SHIPPED FEATURES WITH NO DOORWAY. The peer-comparison numbers page (no mount of
+   funnel-benchmark.ts was found), the lucky-date card, the supplier's day-preload button. For
+   each: does a person have any way to reach it? If not, add the doorway — do not rebuild the
+   feature.
+2. The remaining cleanliness items 4–14 from WHATS_NEXT_Cleanliness_Findings_2026-08-06.md —
+   saving an event type disabling the website, two queues ordered opposite ways, a dead marketplace
+   switch, duplicate converters and readers.
+3. Three on-the-day gaps: a supplier can only send the coordinator one of six fixed messages; a
+   photographer cannot see their own shots after the day; the band-as-emcee package does not reach
+   the coordinator's message box.
+4. Anything queued for you by W2-B's privacy verification.
+
+⛔ THE "NOT-WORK" LIST IN THAT FILE IS LOAD-BEARING. 18 files are parked ON PURPOSE, 3 are reached
+by CI rather than by imports, and a 4,100-line "dead" wizard is LIVE — an audit once recommended
+deleting it, which would have broken a working screen for couples. Do not tidy anything that list
+names.
+
+Fable verifies; Sonnet fixes what survives; anything touching a migration, a permission, a deletion
+or money goes to Opus instead. 3–6 tiny PRs. Nothing else runs while you do this, so you may claim
+any file — one at a time.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```

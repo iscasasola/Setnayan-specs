@@ -129,6 +129,26 @@ before touching it.
 
 ---
 
+## § 2b · EVERY SESSION RUNS TO THE END
+
+**Ready-to-paste prompts: [`WHATS_NEXT_SESSION_PROMPTS_2026-08-23.md`](WHATS_NEXT_SESSION_PROMPTS_2026-08-23.md)**
+— one per session, each under a shared header that carries the continuity clause.
+
+Owner, 2026-08-04: *"can you keep going instead of telling me what you recommend doing next. can
+you do it. and decide"*. Every prompt is written so the session **finishes its whole list without
+asking anything.** A blocked check, a conflict, a disarmed auto-merge, an item that turns out to be
+already done — all of those are work, not stopping points. The session says so in one line and
+carries on.
+
+**The only legitimate stops:** an item the prompt explicitly marks OWNER DECISION · a locked price,
+SKU or scope change · an action that would destroy customer data that cannot be restored. Nothing
+else. Pre-launch means reversible — production holds 5 events, 40 guests, 2 shops and one cancelled
+order, so hesitation costs more than a mistake.
+
+**One report, at the end:** what shipped · what was skipped and why · what is waiting on the owner.
+
+---
+
 ## § 3 · MODEL AND EFFORT PER SESSION
 
 The rule, in one line: **effort is set by whether a wrong call is invisible or irreversible, not
