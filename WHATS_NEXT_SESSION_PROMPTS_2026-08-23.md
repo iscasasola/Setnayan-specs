@@ -185,6 +185,35 @@ next. can you do it. and decide". This is a standing instruction and it governs 
 
 ### W0 · PR triage and land · **Opus 5 · high**
 
+> ## ✅ W0 IS COMPLETE — 2026-08-22 21:57Z. DO NOT RUN IT AGAIN.
+> **Independently verified, not taken on the session's word:** `gh pr list --state open` returns
+> **ZERO open PRs** · #4535 CLOSED with a written reason · #4699 · #4708 · #4711 · #4567 · #4563 ·
+> #4723 all MERGED · main tip `09697145d` · **production serving `0969714`, which IS that tip.**
+> Migrations verified in prod **by the object** (my own query, not schema_migrations):
+> `business_slug_is_reserved('pakanta')` = **true**, with `pay` and `creators` still reserved and an
+> ordinary shop name still free — so the CREATE OR REPLACE neither reverted nor over-reserved; and
+> `ensure_papic_board` now carries `10 - v_vendor_used` with the old `20 - v_vendor_used` **gone**.
+> 🔓 **ALL THREE PABATI GATES ARE IN. WAVE 1 IS UNBLOCKED.**
+>
+> 🪤 **TWO THINGS THAT SESSION PAID FOR — carry them:**
+> 1. **`$T:apps/...` in zsh triggers the `:a` history modifier and SILENTLY MANGLES THE PATH**, so
+>    `git show` errors and the grep count comes back 0. **A verification that cannot match reads
+>    exactly like a clean result.** Use `${T}:path`. Same family as every other "search that could
+>    not match is not a negative result" in this repo.
+> 2. **THE ANTI-REVERT RE-READ IS NOT OPTIONAL WHEN MERGES LAND AFTER YOURS.** Five merges landed
+>    after #4699, so the final tip was re-read for every piece of the session's own work before
+>    calling it done. Nothing had been reverted — but that is a measurement, not an assumption.
+>
+> ⏭ **NAMED, NOT FIXED — deliberately, and correctly:** `vendor-dashboard/subscription/actions.ts`
+> hand-builds a payment path instead of calling the shared helper, so it lacks the helper's
+> `.trim()`. Measured INERT (the reference is a database-generated Crockford code that cannot carry
+> whitespace) and the guard documents the exception. **Do not "fix" it in a later session without
+> re-measuring — it is a recorded decision, not an oversight.**
+>
+> ---
+>
+> <details><summary>Its mid-run state, kept for the reasoning</summary>
+>
 > ⏱ **STATE AT 2026-08-22 19:45Z, measured with `gh` and `curl` — a running session is already on
 > this.** #4535 **CLOSED** · #4699 **MERGED** (19:36Z, main tip `0deceeb95`) · #4708 · #4711 ·
 > #4567 · #4563 all **OPEN and BLOCKED** (they were DIRTY; the rebases landed).
@@ -198,6 +227,8 @@ next. can you do it. and decide". This is a standing instruction and it governs 
 > workflow run, not by the health endpoint alone.
 > ⚠ **BLOCKED is not DIRTY.** Read why before acting: a required check still running is not a
 > conflict, and re-pushing to "unstick" it wastes a cycle. A force-push disarms auto-merge.
+>
+> </details>
 
 ```
 Six pull requests are open on setnayan-platform and none is failing a check — they are all stuck
@@ -293,8 +324,9 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ### W1-B · Retire Pabati, and let the buy pages sell · **Opus 5 · xhigh**
 
 ```
-🔒 DO NOT START until #4708, #4711 **AND #4723** are MERGED — verify with
-`gh pr view <n> --json state,mergedAt`, not by reading a document. (#4723 was opened on 2026-08-22
+🔓 **GATE SATISFIED 2026-08-22 21:57Z — #4708, #4711 AND #4723 ARE ALL MERGED, and production is
+serving the last of them. YOU MAY START.** (Re-confirm with `gh pr view <n> --json state,mergedAt`
+anyway — that costs seconds and this file rots.) (#4723 was opened on 2026-08-22
 by the W0 session and touches app/papic/buy/actions.ts and the vendor-side photo-challenge buy
 path — adjacent to the challenge libraries this retirement edits.) Both edit the exact files this
 work deletes; landing an ~80-file deletion into that window makes a deliberate retirement

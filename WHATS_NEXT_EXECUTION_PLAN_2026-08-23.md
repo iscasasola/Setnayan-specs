@@ -40,7 +40,34 @@ not just create is not the tree you think it is — print `git rev-parse HEAD` a
 
 ---
 
-## § 1 · THE SIX OPEN PRs — land five, close one
+## § 1 · ✅ WAVE 0 IS DONE — 2026-08-22 21:57Z. WAVE 1 IS UNBLOCKED.
+
+**Verified independently of the session that did it:** `gh pr list --state open` returns **ZERO
+open PRs**. #4535 CLOSED with a written reason; #4699 · #4708 · #4711 · #4567 · #4563 · #4723 all
+MERGED; main tip `09697145d`; **production serving `0969714` — that same tip.** Two migrations
+verified in prod **by the object**, my own query: the Pakanta word is now reserved (with `pay` and
+`creators` still reserved and an ordinary shop name still free, so nothing was reverted or
+over-reserved), and the photo board carries ten where it used to carry twenty.
+
+⏭ **The three gates on the Pabati retirement are all in. Wave 1 may start — all three sessions.**
+
+🪤 **Two traps that session paid for, worth more than the merges:**
+1. **`$T:apps/...` in zsh triggers the `:a` history modifier and silently mangles the path** — the
+   command errors and the grep count returns 0. **A verification that cannot match reads exactly
+   like a clean result.** Use `${T}:path`.
+2. **When merges land after yours, re-read the FINAL TIP for every piece of your own work before
+   calling it done.** Five merges landed after the first one here; nothing had been reverted, but
+   that is a measurement, not an assumption — and a silent revert is exactly what cost a day last
+   week.
+
+⏭ **Named, not fixed, deliberately:** one supplier-side payment link is hand-built instead of
+calling the shared helper, so it misses the helper's trim. Measured inert — the reference is a
+database-generated code that cannot carry whitespace — and the guard documents the exception. **A
+recorded decision, not an oversight; do not "fix" it later without re-measuring.**
+
+---
+
+## § 1b · WHAT WAVE 0 FOUND (kept for the reasoning) — the six PRs
 
 | PR | state | verdict |
 |---|---|---|
