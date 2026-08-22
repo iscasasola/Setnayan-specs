@@ -38,6 +38,35 @@ not have to answer anything mid-session.**
 
 ---
 
+## § 0a · WHAT A SECOND VERIFICATION PASS FOUND — read this before any session
+
+Every prompt below was re-checked against `origin/main` @ `c984e0caf` and the live production
+database on **2026-08-23, after the prompts were first written**. Six briefs were wrong, and each
+one would have produced exactly the loop this project keeps paying for: rebuilding something that
+already ships.
+
+| brief said | actually true on main today |
+|---|---|
+| W3-A: ~30 files, and the couple's supplier page has **45** unbound reads | **19** unbound reads across **14** files; that page has **3**, and **12** already bind their error. Most of it was fixed already. |
+| W5-A: **152** foreign keys cascade, **10** survive | **145** cascade, **19** survive. Nine more already survive than the brief claims. |
+| W4-C: **~290** anonymous read grants | **235**, across 384 public tables. Batches have landed. |
+| W2-C1: **106** gold-as-text occurrences | 106 by the guard's regex, **207** by a plain grep. Both real, different methods — say which you used. |
+| W1-C: the compliance pack still claims Philippine hosting and a 90-day retention rule | The **adopted** manual already carries the corrected retention row and no PH-hosting claim was found in it. The remaining "90 days" is about marketing samples — a different, correct rule. |
+| C1: the per-guest QR download "refuses anyone without a full account" | It requires the event to own a **paid ₱1,499 SKU** — it is the BRANDED variant. Opening it to every guest gives away a sold product. |
+
+🪤 **AND EVERY LINE NUMBER IN THESE PROMPTS HAS ALREADY DRIFTED.** Cited positions were re-checked
+and several point at unrelated code — one brief's "unconditional email write at ~:233 and ~:453"
+lands on neither. **GREP THE STRING. NEVER TRUST THE LINE.** The line numbers are kept only as a
+hint about which region of the file to search.
+
+🔑 **THE RULE THIS PASS PROVES.** Six of about twenty briefs were stale within hours of being
+written by people looking at the same tree. So: **the first thing every session does is re-measure
+its own premise and print the number.** If the number has moved, ship the smaller fix and say so —
+that is a result, not a failure. If the premise is gone entirely, close the item and move to the
+next one. Do not build to a brief. Build to a measurement.
+
+---
+
 ## § 0 · THE SHARED HEADER — paste this above every session prompt
 
 ```
@@ -45,6 +74,12 @@ You are working on Setnayan, a pre-launch Philippines-first life-events platform
 Code: github.com/iscasasola/setnayan-platform · Specs corpus: ~/Documents/Claude/Projects/Setnayan
 
 BEFORE ANY CODE — non-negotiable:
+0. MEASURE YOUR OWN PREMISE FIRST AND PRINT THE NUMBER. Every count, file path and line number in
+   your prompt was true when written and several have already been proved stale — six of about
+   twenty briefs were wrong within hours. Re-run the grep or the query your prompt is built on
+   BEFORE you scope anything. If the number moved, ship the smaller fix and say so. If the premise
+   is gone, close the item in one line and go to the next. Build to a measurement, never a brief.
+   GREP THE STRING, NEVER TRUST THE LINE — cited line numbers have already drifted.
 1. RULE 0. Assume what you are asked for ALREADY EXISTS. This product is ~2 years of code and the
    owner has paid more than once to have a screen rebuilt that already shipped. grep for the
    feature noun in apps/web BEFORE designing anything, then state in one line each:
@@ -312,7 +347,15 @@ carefully.
    backwards, and the single most common colour mistake made here.
    ⛔ The 19 approved archetypes/overlays are BINDING (owner approved all 19 on 2026-08-04, no
    changes). Do not ask for them to be reviewed again.
-2. THE COMPLIANCE PACK STILL MISSTATES TWO THINGS. Four rows say the data is in the Philippines —
+2. ⚠ MEASURE BEFORE YOU EDIT — MOST OF THIS IS ALREADY DONE. Checked 2026-08-23: the ADOPTED
+   privacy manual already carries the corrected retention row ("for life", no scheduled deletion,
+   nothing ever deleted) and no claim of Philippine hosting was found in it. The one remaining
+   "90 days" in that file is about MARKETING SAMPLES being removed within 90 days of revocation —
+   a different, correct rule. DO NOT "fix" it. DO NOT edit the superseded DRAFT files; a DRAFT
+   corrected to match today's ruling is worse than one that reads as history.
+   Grep the whole pack yourself, list what genuinely still misstates something, and if the answer
+   is "nothing", SAY SO AND STOP THAT ITEM — that is a result. The claim you may have inherited is:
+   four rows say the data is in the Philippines —
    it is not: the database and the face vectors are in SINGAPORE, media is in APAC object storage,
    and NOTHING is hosted in the Philippines. Two rows still quote the retired 90-day rule; the
    ruling is: the full-resolution original is replaced by its compressed copy six months from the
@@ -349,16 +392,28 @@ BUILD THESE SEVEN. Extend the named thing; never draw a new one.
 1. A GUEST CANNOT KEEP THEIR QR. No save, download, print or copy — it is inline SVG, so a
    long-press offers nothing and a screenshot is the only way. And one of the three surfaces
    literally says "Save this to your phone" — a promise the page gives them no way to keep.
-   EXTEND: app/api/website/qr/guest/[guestId]/route.ts, the per-guest PNG that already exists on
-   the host side and today refuses anyone without a full account (gate at ~:23).
+   🔴 RE-READ 2026-08-23 — THE OBVIOUS EXTENSION WOULD GIVE AWAY A PAID PRODUCT. The per-guest PNG
+   at app/api/website/qr/guest/[guestId]/route.ts is NOT merely "account-gated": its own docblock
+   says it requires the event to OWN a paid CUSTOM_QR_GUEST order (₱1,499), because that PNG is the
+   BRANDED variant carrying the couple's Mood Board palette. Opening it to every guest hands out a
+   sold SKU for free, which is a pricing decision and NOT yours.
+   BUILD THE PLAIN ONE INSTEAD: an unbranded PNG of the guest's own QR, which is the thing the copy
+   promises. Keep the branded, paid route exactly as it is. If you cannot separate them cleanly,
+   STOP THAT ITEM, do the other six, and say the branded/plain split needs an owner ruling.
    ⚠ A dead "Download PNG" label already ships into every page's HTML from a menu registry,
    pointing at a route that does not exist and rendered by nothing. A grep of the live site will
    "find" a guest QR download that has never existed. Do not take it as evidence.
 2. The web address under the QR is dead text — not copyable, not sendable (same QR block in
    app/[slug]/_components/site-body.tsx).
-3. The "check your email" screen (app/join/[eventId]/check-email/page.tsx) offers no way into the
-   celebration they just joined — its only button leaves for the marketing site. EXTEND the "Open
-   your invitation" button its sibling app/join/[eventId]/success/page.tsx already has.
+3. ⚠ RE-READ 2026-08-23 — THE PREMISE IS RIGHT AND THE DESCRIPTION IS WRONG. The screen
+   (app/join/[eventId]/check-email/page.tsx, 47 lines) has NO button and NO link at all; the only
+   way out is the shared wordmark in the door shell, which goes to the marketing site. It ALSO
+   already says "You're already on the guest list — the link just lets you sign in later. You can
+   close this tab."
+   So: add a way INTO the celebration without contradicting that copy — it must not imply they must
+   act. And check what they actually hold at that moment: they have no account yet, so confirm a
+   guest session exists before offering a door that will refuse them. EXTEND the "Open your
+   invitation" affordance its sibling app/join/[eventId]/success/page.tsx already has.
 4. Nobody who joins is told they are ON THE LIST. The one visible status word is "pending", which
    reads as NOT FINISHED (rsvp-widget.tsx ~:375-382).
 5. Nothing points a guest at the reply card, so the mobile / email / preferred-name boxes sit on a
@@ -397,8 +452,10 @@ WHATS_NEXT_NPC_Pack_Findings_2026-08-17.md first.
 
 1. FACE DATA IS NOT ACTUALLY DELETED. The privacy pack says face data is deleted three months
    after the event ends; the pack's own text admits "ENFORCEMENT NOT YET BUILT" and there is no
-   job in the lib/ job registry that does it. Copy the shape of the existing
-   lib/vendor-dossier-retention.ts job.
+   job in the lib/ job registry that does it. ⚠ CHECKED 2026-08-23: lib/retention-sweep.ts EXISTS
+   but purges CHAT ONLY (5-year default, via purge_expired_chat) — it is not this. Copy ITS SHAPE:
+   `claimPeriodicJob(<name>, WEEKLY_GAP_MS)` from lib/periodic-jobs, driven cron-free from request
+   traffic, best-effort, never throws. lib/vendor-dossier-retention.ts is the other precedent.
 2. A SUPPLIER'S ID IMAGE AND LIVENESS VIDEO ARE NOT DELETED 90 days after their decision. No job
    exists — the dossier-retention job covers Deep Search data, not identity files. These live in
    the vendor-verification object-storage bucket, which is separate from the media bucket and is
@@ -435,8 +492,11 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ```
 Mechanical sweep, one colour, admin only.
 
-app/admin/** uses the gold #A9834B as TEXT in 106 places across 51 files (measured 2026-08-23 with
-the existing guard's own node regex). On this product's white ground that measures 3.37:1, below
+app/admin/** uses the gold as TEXT in **106 places across 51 files by the existing guard's own node
+regex**, and **207 across 82 files by a plain `grep -rho "text-terracotta" app/admin`**.
+⚠ BOTH NUMBERS ARE REAL AND MEASURE DIFFERENT THINGS. Say which method you used, and move THE
+GUARD'S number to zero — the guard is what fails CI; the raw grep also counts icon uses and
+comments, which are legitimately allowed to stay. On this product's white ground that measures 3.37:1, below
 the 4.5:1 floor. In this repo the Tailwind slot NAMED `terracotta` IS that gold, and the real
 action colour lives in the slot named `mulberry` — inherited and backwards, which is why this
 mistake keeps being made. Reach for `text-mulberry` (4.61:1) or `text-link` (8.22:1).
@@ -644,7 +704,9 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ```
 You are the ONLY migration writer in this wave.
 
-~290 anonymous read grants exist that nothing needs, plus two views flagged as carrying elevated
+⚠ RE-MEASURED IN PRODUCTION 2026-08-23: **235** anon SELECT grants across 384 public tables — not
+the ~290 the older brief says; batches have landed since. Re-run the count before scoping.
+Anonymous read grants exist that nothing needs, plus two views flagged as carrying elevated
 rights (events_host, vendor_completed_events) that have never been checked. Continue the existing
 batch pattern: apps/web/tests/db/anon-table-grants-closed.db.test.ts records which batches have
 landed, and its own note says the EASY category is now EMPTY. What remains is delicate — tables
