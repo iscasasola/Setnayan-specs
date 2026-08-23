@@ -38,6 +38,78 @@ not have to answer anything mid-session.**
 
 ---
 
+## § 0b · THE APPLE-INVITES ITEMS — twelve, and where each one landed
+
+**Where they came from.** The owner said **Apple Invites** looks similar to Setnayan. A session
+compared the two products, then measured our **live signed-in UI** at phone and laptop widths
+against `origin/main` @ `09697145d` — the same tip wave 0 finished on. Its deliverable was an
+artifact, not code; nothing was committed. **It is not "Apple Live"** — that phrase was never used
+in it.
+
+⛔ **THREE THINGS IT FIRST REPORTED AND THEN DISPROVED ITSELF. DO NOT BUILD ANY OF THEM.**
+- **The photo event card with fallbacks ALREADY SHIPS** — `(launcher)/_components/event-scene.tsx`,
+  precedence: the couple's own hero → a per-type stock photo → a deterministic branded gradient.
+  ✅ **I re-checked: the file is there and `grep -c "sm:\|md:\|lg:"` returns 0**, so it does not
+  branch on viewport. The first-pass finding "mobile has no photo card, build one" is FALSE.
+- **The phone/laptop split is DELIBERATE and comes from an approved prototype** — `MobileEventHero`
+  + `MobileEventChip` under `sm:hidden`, the desktop grid under `hidden sm:grid`, with the
+  prototype's own class names cited in the comment. **Changing it is a design reversal, not a fix.**
+- **`#8C6932` is NOT off-palette.** ✅ Re-checked: `app/globals.css:154` defines it as
+  `--color-terracotta-700`, documented at 5.02:1 AA. The "front door breaks the colour lock"
+  finding is FALSE.
+- Co-hosting ships (`app/host/accept` exists); Apple only added theirs in June 2026.
+
+🛑 **AND ONE MORE PREMISE DID NOT SURVIVE MY OWN CHECK — AP-2.** It is filed as *"the app is set in
+the phone's default typeface"*. **Measured on main and on the live site: the app sets its own
+typeface and it loads.** `globals.css:30` defines `--font-app: var(--font-hanken)`; `.app-surface`
+maps `--font-sans` / `--font-display` to it and sets `font-family` directly; `layout.tsx` loads
+Hanken and Space Mono via `next/font/local`; and the woff2 files fetch **200** from
+www.setnayan.com. So the build is NOT "choose and apply a typeface".
+🔑 **The likely real defect is narrower: a surface where `--font-hanken` is not in scope** — a route
+whose layout does not carry the font-variable class, or an element outside `.app-surface` — at
+which point `font-family: var(--font-app), system-ui` silently falls back to **the phone's default**,
+which is exactly what was observed. **FIND THE SURFACE THAT LOSES THE VARIABLE. Do not add a
+typeface the app already has.**
+
+### Where the twelve landed
+
+| id | what a person gets | goes to | why there |
+|---|---|---|---|
+| AP-1 | the bottom bar stops vanishing when you tap People or Spaces | **W1-A** | `HomePillNav` is rendered in exactly ONE place — `(launcher)/page.tsx:1455` — which is W1-A's file. The fix lifts it to a layout. |
+| AP-6 | no name is cut to "Y…" on a phone | **W1-A** | same file |
+| AP-7 | Home and the event page report the same "planned" figure | **W1-A** | `(launcher)/page.tsx` + `lib/progress-stages.ts`, both already W1-A's — and W1-A is already inside `progress-stages.ts` for the After stub |
+| AP-8 | section names that don't need a help button | **W1-A** | same file, copy only |
+| AP-4 | the couple's photo appears on the card shared in Messenger | **W1-A** | `app/api/og/realstory-slug/[slug]/` — owned by nobody; small, and W1-A is the light session |
+| AP-2 | the app stops falling back to the phone's default typeface | **W1-C** | globals/front-door/home-reskin CSS — **and see the correction above: MEASURE FIRST** |
+| AP-5 | one strength of the action colour everywhere | **W1-C** | `globals.css` + `front-door-opening.tsx`, same territory as AP-2 |
+| AP-3 | the invitation reads like an invitation, not a receipt | **W2-A** | `app/[slug]/**` is W2-A's territory |
+| AP-9 | guests see the weather for the day | **W2-A** | same territory ⚠ needs a forecast provider chosen — that is a cost/dependency call, flag it |
+| AP-10 | guests get a map instead of a line of text | **W2-A** | same territory ⚠ **the CSP change in `next.config.ts` MUST be in the same PR** — our own CSP has already blocked our own map once, and the only symptom was an empty grey panel |
+| AP-11 | the couple gets a first draft of their invitation words | **W5-C** | touches `dashboard/[eventId]/website/**` and the AI surface — both collide with wave 1 and wave 3 territory, so it waits |
+| AP-12 | empty screens look deliberate, not unfinished | **W6** | deliberately broad; W6 runs ALONE and may claim any file. Pattern source: `(account)/samahan`, which that session called the best-designed screen it saw |
+
+⚠ **AP-1 MUST BE VERIFIED BY SCREENSHOT, NOT BY QUERYING THE PAGE.** That session nearly filed a
+false "empty nav bar" finding off a DOM probe whose selector matched the wrong element and returned
+**the same result on a page where the bar is plainly visible**. Only the control test caught it.
+
+### 🔴 THREE NEW OWNER DECISIONS — do not schedule, do not decide
+
+1. **Collapse the phone's dark hero + chip into one photo card shared with desktop.** It would
+   reverse an approved prototype.
+2. **May guests see the full guest list?** Apple shipped it in June 2026. Touches our RA 10173
+   posture and the standing lock that *surfaces show presence, the graph never talks*.
+3. **Should the invitation carry an always-visible facts bar over the veil film?** It softens a
+   locked cinematic opening.
+
+### ❓ What that session could not check, and neither can the next one
+
+Anything on a real device, on cellular, or on Android — every reading was a desktop browser at a
+phone frame. **And it was signed in as the OWNER throughout, so the GUEST view was never seen** —
+which is the view that decides AP-3, AP-9 and AP-10. Whether the two "planned" figures are one bug
+or two different measures was observed but never traced. **AP-7 starts by tracing it.**
+
+---
+
 ## § 0a · WHAT A SECOND VERIFICATION PASS FOUND — read this before any session
 
 Every prompt below was re-checked against `origin/main` @ `c984e0caf` and the live production
@@ -311,12 +383,30 @@ strings inside components nothing mounts. Nobody is stranded (the account menu s
 "Your Story"), so the honest fix is either mounting a row or rewriting the assertion to check a
 MOUNTED one. A guard satisfied by dead code is worse than no guard.
 
+ALSO YOURS — FIVE ITEMS FROM THE APPLE-INVITES COMPARISON (see § 0b). They land here because they
+are in files you already own, so they cost you almost nothing and would cost anyone else a
+collision:
+ AP-1 THE BOTTOM BAR VANISHES when you tap People or Spaces. `HomePillNav` is rendered in exactly
+   ONE place — (launcher)/page.tsx:1455 — so every sibling route loses it. Lift it to the layout
+   that covers those routes.
+   ⚠ VERIFY BY SCREENSHOT, NOT BY QUERYING THE PAGE. The session that found this nearly filed a
+   false "empty nav bar" off a DOM probe whose selector matched the wrong element and returned the
+   SAME answer on a page where the bar is plainly visible. Only its control test caught it.
+ AP-6 NAMES ARE CUT TO "Y…" ON A PHONE — several blocks in that same file.
+ AP-7 HOME AND THE EVENT PAGE REPORT DIFFERENT "PLANNED" FIGURES (7% vs 0% was observed live).
+   ⚠ NOBODY HAS TRACED WHETHER THAT IS ONE BUG OR TWO DIFFERENT MEASURES. Trace it first; you are
+   already inside lib/progress-stages.ts for the After stub, so do them in one pass.
+ AP-8 SECTION NAMES THAT NEED A HELP BUTTON TO BE UNDERSTOOD — copy only, SectionLabel.
+ AP-4 THE COUPLE'S OWN PHOTO IS MISSING from the card people see when a story is shared
+   (app/api/og/realstory-slug/[slug]/). Small, and nobody else owns that directory.
+
 TERRITORY (do not edit outside it): dashboard/[eventId]/schedule/page.tsx · lib/checklist.ts +
 checklist page · lib/customer-menu.ts · after/finished-event-summary.tsx ·
-dashboard/[eventId]/vendors/page.tsx · lib/budget-build.ts · lib/progress-stages.ts ·
-dashboard/(launcher)/page.tsx + those two guard tests.
+dashboard/[eventId]/vendors/page.tsx · dashboard/[eventId]/page.tsx · lib/budget-build.ts ·
+lib/progress-stages.ts · dashboard/(launcher)/page.tsx + its _components/home-pill-nav.tsx ·
+the dashboard layout that must host the pill · app/api/og/realstory-slug/** · those two guard tests.
 
-Aim for 2 PRs. No migration.
+Aim for 3 PRs now (the four original items · the Apple items · the OG card). No migration.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
@@ -401,13 +491,34 @@ runs as superuser and will not catch a permissions problem.
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### W1-C · Make the paperwork true · **Sonnet 5 · medium**
+### W1-C · The house style — paperwork, typeface, one action colour · **Opus 5 · medium**
+*(was Sonnet 5 / documents only — it gained two app-wide CSS items from the Apple-Invites
+comparison, and an app-wide typeface change is not a Sonnet job.)*
 
 ```
-Documents only. You will not touch app code, and no test can catch a mistake here — read
-carefully.
+Three things that all answer one question: does the product say the same thing about itself
+everywhere? Two of them touch app-wide CSS; the third is documents, where no test can catch a
+mistake — read carefully.
 
-1. RECONCILE THE ~28 PER-SURFACE PROTOTYPES to the shipped palette and the shipped app shell
+0. 🛑 AP-2 — "THE APP IS SET IN THE PHONE'S DEFAULT TYPEFACE" IS NOT TRUE AS WRITTEN, AND I CHECKED.
+   globals.css:30 defines --font-app: var(--font-hanken); `.app-surface` maps --font-sans and
+   --font-display to it AND sets font-family directly; layout.tsx loads Hanken Grotesk and Space
+   Mono through next/font/local; and the woff2 files fetch 200 from www.setnayan.com right now.
+   THE APP HAS A TYPEFACE AND IT LOADS. Do not add one.
+   🔑 WHAT WAS ACTUALLY OBSERVED IS REAL, AND THE DIAGNOSIS IS NARROWER: somewhere the variable is
+   not in scope — a route whose layout does not carry the font-variable class, or an element
+   outside `.app-surface` — and `font-family: var(--font-app), system-ui` then falls back silently
+   to the phone's default. FIND THE SURFACE THAT LOSES THE VARIABLE, name it, and fix that.
+   If after measuring you find every surface carries it, SAY SO AND CLOSE THE ITEM — that is a
+   result. Check a signed-in dashboard route, a public marketing route and a guest /{slug} route,
+   because they are three different font scopes by design.
+1. AP-5 — ONE STRENGTH OF THE ACTION COLOUR EVERYWHERE (globals.css + front-door-opening.tsx).
+   ⚠ In this repo the Tailwind slot NAMED `terracotta` is the GOLD #A9834B and the action colour
+   lives in the slot named `mulberry` — inherited and backwards. And #8C6932 is NOT off-palette: it
+   is --color-terracotta-700 at a documented 5.02:1. Do not "fix" it.
+   Check contrast in BOTH themes; a token can pass light and fail dark.
+
+2. RECONCILE THE ~28 PER-SURFACE PROTOTYPES to the shipped palette and the shipped app shell
    (corpus prototypes/*.html). RECONCILE, NEVER REDRAW: they are still correct about composition
    and carry only the old palette. A delta between a ported screen and its archetype is a defect in
    the PORT, not a fresh design decision.
@@ -418,7 +529,7 @@ carefully.
    backwards, and the single most common colour mistake made here.
    ⛔ The 19 approved archetypes/overlays are BINDING (owner approved all 19 on 2026-08-04, no
    changes). Do not ask for them to be reviewed again.
-2. ⚠ MEASURE BEFORE YOU EDIT — MOST OF THIS IS ALREADY DONE. Checked 2026-08-23: the ADOPTED
+3. ⚠ MEASURE BEFORE YOU EDIT — MOST OF THIS IS ALREADY DONE. Checked 2026-08-23: the ADOPTED
    privacy manual already carries the corrected retention row ("for life", no scheduled deletion,
    nothing ever deleted) and no claim of Philippine hosting was found in it. The one remaining
    "90 days" in that file is about MARKETING SAMPLES being removed within 90 days of revocation —
@@ -505,6 +616,24 @@ AFTER the shutter. Leave them; say in your summary that one owner answer closes 
 ALSO YOURS — three files in the same guest tree where a refused read renders as blank:
 app/[slug]/seat/page.tsx (7 unbound reads, 0 error bindings), find-my-table/, and the unreachable
 `photos` plate in _components/empty-states.tsx. Extend the existing _lib/silent-absence.test.ts.
+
+ALSO YOURS — THREE ITEMS FROM THE APPLE-INVITES COMPARISON (see § 0b), all inside app/[slug]/**,
+which is your territory and nobody else's this wave:
+ AP-3 THE INVITATION READS LIKE A RECEIPT, NOT AN INVITATION — a monospaced data face where the
+   editorial serif belongs. The guest-facing editorial stack (Cormorant/Manrope) deliberately lives
+   outside the dashboard font scope; use it rather than inventing a third register.
+ AP-9 GUESTS CANNOT SEE THE WEATHER for the day. ⚠ This needs a forecast provider chosen — an
+   outside dependency and a small recurring cost. SCOPE IT, NAME THE PROVIDER AND THE COST, AND
+   FLAG IT rather than signing us up to something.
+ AP-10 GUESTS GET A LINE OF TEXT WHERE A MAP BELONGS.
+   🚨 THE CSP CHANGE IN next.config.ts MUST BE IN THE SAME PR AS THE MAP. Our own CSP has already
+   blocked our own map once: the vendor location map embedded OpenStreetMap, `frame-src` listed
+   YouTube/Vimeo/Instagram/TikTok and not OSM, and the map was an empty grey panel on every shop
+   page with coordinates from the day it shipped. OSM answered 200 — the browser refused the frame.
+   A blocked iframe is the same family as every other refusal in this repo: the only symptom is an
+   absence. There is a test that fails when an iframe host is missing; keep it fed.
+ ⚠ ALL THREE WERE JUDGED WHILE SIGNED IN AS THE OWNER. THE GUEST VIEW WAS NEVER SEEN, and it is
+   the view that decides all three. Look at the guest rendering first.
 
 🪤 TWO SURFACES FOR ONE THING, TWICE in this stream already — the seat-finder vs the join door, and
 the big QR CARD (phase-gated) vs the My QR BUTTON (not gated at all). ENUMERATE EVERY SURFACE
@@ -899,6 +1028,15 @@ Three small things, all verified still true on 2026-08-23.
    joined" with no name (panood/control/[eventId]/page.tsx ~:2276). The camera claim knows who
    claimed it.
 
+ALSO YOURS — AP-11 FROM THE APPLE-INVITES COMPARISON (see § 0b): THE COUPLE FACES A BLANK BOX
+WHERE THEIR INVITATION WORDS GO. Apple drafts them; we ask the couple to write from nothing. It
+lands in this session because it touches dashboard/[eventId]/website/** and the Setnayan AI
+surface, both of which collide with wave 1 and wave 3 territory — by now they are clear.
+🔑 RULE 0 HARD ON THIS ONE. Setnayan AI is DETERMINISTIC, not a language model — check what it
+already generates before assuming anything must be built, and check whether the story page's
+auto-draft (which already writes a whole day up from the schedule and the photos) is the mechanism
+to extend rather than a second one to invent.
+
 🔑 A GRANTED CAPABILITY NOTHING CALLS IS A GATE WITH NO HANDLE — this repo has found five. Before
 building any of the three, grep for a WRITER, not just a column or a function: the mechanism may
 already exist with nothing calling it, in which case your job is the handle, not the gate.
@@ -930,6 +1068,12 @@ TOUCHING IT, and report the closures as results.
    photographer cannot see their own shots after the day; the band-as-emcee package does not reach
    the coordinator's message box.
 4. Anything queued for you by W2-B's privacy verification.
+5. AP-12 FROM THE APPLE-INVITES COMPARISON (see § 0b): EMPTY SCREENS READ AS UNFINISHED RATHER THAN
+   DELIBERATE. This is deliberately broad, which is why it is here — you run ALONE and may claim
+   any file. 🔑 DO NOT DESIGN A NEW EMPTY STATE: the pattern already exists and that session called
+   it the best-designed screen it saw — app/dashboard/(account)/samahan. PORT IT.
+   ⚠ Prod is pre-launch, so MOST OF THESE SCREENS ARE EMPTY BECAUSE THAT IS THE PLAN. You are
+   improving how emptiness READS, never removing it, and never reporting it as a defect.
 
 ⛔ THE "NOT-WORK" LIST IN THAT FILE IS LOAD-BEARING. 18 files are parked ON PURPOSE, 3 are reached
 by CI rather than by imports, and a 4,100-line "dead" wizard is LIVE — an audit once recommended
