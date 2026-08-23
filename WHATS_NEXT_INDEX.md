@@ -195,9 +195,12 @@
 > KEEP their QR~~: **"Save the code" + "Copy link"** now ship on all three surfaces,
 > backed by `GET /api/guest/qr`, so the card's *"Save this to your phone"* is finally
 > true. 🔑 **The route takes NO parameters — that is the security property**: it is
-> authenticated by the guest-session cookie alone, with a possession check, so a
-> **rotated** code cannot fetch its replacement and there is no id for anyone to try
-> other values of. 🔒 **The paid `CUSTOM_QR_GUEST` branded PNG is a different route
+> authenticated by the guest-session cookie alone, and there is no id for anyone to
+> try other values of. ⚠ **A token comparison WAS shipped here and REMOVED the same
+> day (PR #4740) — it refused the honest guest whose host had just re-issued their
+> code, while the page beside it displayed that code, and protected nothing.
+> Revocation belongs to `readGuestSession()` behind `GUEST_SESSION_TOKEN_CHECK`.
+> DO NOT RESTORE IT.** 🔒 **The paid `CUSTOM_QR_GUEST` branded PNG is a different route
 > and is UNTOUCHED** — do not collapse the two.
 > 🪤 **Its coverage guard was DECORATION on the first run** — it matched the bare
 > identifier, which the surviving `import` satisfies, so deleting the JSX from all
