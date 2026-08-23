@@ -422,6 +422,15 @@ strings inside components nothing mounts. Nobody is stranded (the account menu s
 "Your Story"), so the honest fix is either mounting a row or rewriting the assertion to check a
 MOUNTED one. A guard satisfied by dead code is worse than no guard.
 
+⚠ A DESIGN DELTA FOR YOUR FILES IS BEING DRAWN RIGHT NOW — KEEP YOUR DIFFS SURGICAL.
+A study is in flight proposing Apple-Invites-informed improvements to this same dashboard, under
+the owner's explicit constraint "do not create a design on top but only use the existing shell's
+design and improve it". It is READ-ONLY — no branches, no PRs — and the owner has not ruled on it.
+YOU ARE NOT BLOCKED BY IT: your items are defects, not design, and blocking a defect on an unruled
+proposal is how work stalls here. But change the smallest thing that fixes each one, do not
+restructure or re-lay-out anything you are not fixing, and do not "tidy" adjacent markup — a later
+design port has to apply cleanly on top of you.
+
 ALSO YOURS — FIVE ITEMS FROM THE APPLE-INVITES COMPARISON (see § 0b). They land here because they
 are in files you already own, so they cost you almost nothing and would cost anyone else a
 collision:
@@ -660,8 +669,11 @@ which is your territory and nobody else's this wave:
    page with coordinates from the day it shipped. OSM answered 200 — the browser refused the frame.
    A blocked iframe is the same family as every other refusal in this repo: the only symptom is an
    absence. There is a test that fails when an iframe host is missing; keep it fed.
- ⚠ ALL THREE WERE JUDGED WHILE SIGNED IN AS THE OWNER. THE GUEST VIEW WAS NEVER SEEN, and it is
-   the view that decides all three. Look at the guest rendering first.
+ 🛑 ALL THREE WERE JUDGED WHILE SIGNED IN AS THE OWNER, AND THAT INVALIDATES A REAL FRACTION OF
+   WHAT WAS REPORTED — the session that raised them says so itself. THE OWNER'S VIEW CARRIES A
+   PREVIEW CHROME BAR A GUEST NEVER SEES, so the page it describes is not the page a guest gets.
+   LOOK AT THE GUEST RENDERING BEFORE YOU BELIEVE ANY OF THE THREE. If an item's premise does not
+   survive the guest view, close it and say so — that is a result.
 
 🪤 TWO SURFACES FOR ONE THING, TWICE in this stream already — the seat-finder vs the join door, and
 the big QR CARD (phase-gated) vs the My QR BUTTON (not gated at all). ENUMERATE EVERY SURFACE
