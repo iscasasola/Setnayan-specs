@@ -221,6 +221,7 @@ event-words provider).
 | **5** | **W4-A** the couple's four daily screens · **W5-C** who is in my event + drafted invitation words · **W4-C** grant hardening | W4-C |
 | **6** | **W5-A** a supplier's record survives a delete · **W5-B** the undrawn surfaces | W5-A |
 | **7** | **W6** the grab-bag, ALONE | per finding |
+| **8** | ⭑**W8** guests can see who else is coming, ALONE — owner-ruled 2026-08-23 | W8 |
 
 ### The two structural changes, and why
 
@@ -369,31 +370,80 @@ TWO THAT CHANGED OUTCOMES:**
 | 6 | **H-6 weather — yes, scoped:** inside ~10 days only · coordinates required · **silent on any failure, no placeholder and no apology** · server-side | **W3-D** ⛔ **with a STOP CONDITION, see below** |
 | 7 | **Our wordmark on a shared card → ONCE** (three today) | 🟢 **DISSOLVES INTO H-3** — same file, no new slice |
 | 8 | **One event card on phone and laptop — yes, but SEQUENCED LAST**, after the small dashboard items land | **W1-A**, final PR, on its own |
-| 9 | **Guests can see the guest list** — default off, host chooses per event, accepted-only | 🔴 **HELD — NOT SCHEDULED. See below.** |
+| 9 | **Guests can see the guest list** — default off, host chooses per event, accepted-only | ✅ **OWNER RULED IT HIMSELF, 2026-08-23 — "Yes, as scoped". NOW W8, its own wave.** |
 
 ⛔ **#6 CARRIES A HARD STOP, NOT A PREFERENCE. FREE-TIER SOURCE ONLY.** If the only workable
 forecast provider charges anything, **that session STOPS and asks.** The deciding session has not
 committed spend and cannot. Do not sign us up to a paid tier, a trial that converts, or a
 "free for now" plan.
 
-### 🔴 #9 IS HELD, AND HELD DELIBERATELY
+### ✅ #9 WAS HELD, PUT TO THE OWNER, AND HE RULED IT HIMSELF — 2026-08-23
 
-**Guests seeing the guest list is NOT scheduled.** The deciding session's own words: it is *"the one
+**It was deliberately NOT scheduled on the delegation.** The deciding session's own words: *"the one
 of the nine most worth overruling"* and *"the only one touching RA 10173 posture"*. It is also the
-only one of the nine that is **genuinely new scope** rather than a call about something already
-being built.
+only one of the nine that is genuinely NEW SCOPE rather than a call about something already being
+built. **A general "do as you recommend" is not consent to a new guest-visible disclosure under a
+privacy law where the owner is the registered data officer**, so it was put to him directly.
 
-Its reasoning is sound and is recorded so nobody re-derives it: the locked position says *"surfaces
-show presence… only the graph shows relationships, and the graph never talks"*, and that lock
-**names an event guest list as container membership — the explicitly permitted case**, not graph
-traversal. The shape proposed is careful: **default off · the host chooses per event · only people
-who have ACCEPTED** — never invited-but-unanswered, because being invited is the host's choice about
-you while accepting is your own, and publishing non-responses imposes a social cost on guests rather
-than on the host.
+🔒 **HIS ANSWER, IN HIS OWN WORDS: "Yes — as scoped."** So unlike the other eight, **this one IS an
+owner ruling** and carries the weight of one. The shape he approved:
+- **OFF by default.**
+- **The host chooses, per event** — not a global setting.
+- **ONLY people who have ACCEPTED.** ⛔ **NEVER invited-but-unanswered.** The reasoning is the part
+  to protect: **being invited is the host's choice about you; accepting is your own.** Publishing
+  non-responses imposes a social cost on GUESTS, not on the host. That distinction is the ruling.
 
-⚖ **BUT A GENERAL "do as you recommend" IS NOT CONSENT TO A NEW GUEST-VISIBLE DISCLOSURE UNDER A
-PRIVACY LAW WHERE THE OWNER IS THE REGISTERED DATA OFFICER.** It has been put to him directly. **Do
-not build it until he answers in his own words.**
+📋 **The grounds, recorded so nobody re-derives them:** the locked position says *"surfaces show
+presence… only the graph shows relationships, and the graph never talks"* — and that lock **names an
+event guest list as container membership, the explicitly permitted case**, not graph traversal.
+
+### ⭑ W8 · Guests can see who else is coming · **Opus 5 · high** — its own wave, ALONE
+
+**Why its own wave rather than folded into a session:** it needs the guest tree (`app/[slug]/**`),
+the host's guest screen, **and a migration touching `events` and the RLS on `guests`**. Every wave
+that has the guest tree free has a migration writer whose tables could overlap, and every wave with
+a free migration slot has the guest tree taken. **Jamming it in would break the one rule the plan
+rests on.** It is new scope that arrived after the plan was balanced; a wave of its own is the
+honest answer.
+⏭ **It may swap with W6 (the grab-bag) if the owner wants it sooner — both run alone.**
+
+```
+Guests can see who else is coming. The owner ruled this himself on 2026-08-23: "Yes, as scoped."
+
+THE SHAPE HE APPROVED, and none of it is yours to adjust:
+- OFF by default.
+- The HOST chooses, PER EVENT. Not global, not ours.
+- ONLY people who have ACCEPTED. NEVER invited-but-unanswered.
+  🔒 THE REASONING IS THE RULING, so protect it in code and in copy: being invited is the HOST's
+  choice about you; accepting is YOUR OWN. Publishing non-responses imposes a social cost on
+  GUESTS rather than on the host. If your implementation makes a non-response inferable — a count
+  that differs from the list, a gap in numbering, a "12 invited" anywhere near "8 coming" — YOU
+  HAVE BROKEN THE RULING even though the list itself is correct.
+
+THE GROUNDS, so you do not re-derive them: the locked position is "surfaces show presence… only the
+graph shows relationships, and the graph never talks", and that lock NAMES an event guest list as
+container membership — the explicitly permitted case, not graph traversal. You are inside the lock,
+not bending it.
+
+BEFORE YOU BUILD — RULE 0, and this product has burned a session on exactly this shape before:
+grep for who already reads the guest list on a guest surface. A seat-finder, a table view, a
+check-in screen or the "find my table" page may already show guest names to guests in some phase,
+in which case your job is a CONTROL over something that exists, not a new disclosure. Report what
+you find before writing a migration.
+
+THE DATABASE IS THE CONTROL, NEVER THE COMPONENT. Hiding the list in the UI while the rows remain
+readable is not a privacy feature — the anon key is public by construction and every public table
+is served over the REST API. The RLS policy is what decides this. Assert the refusal from an
+anonymous client, not from the screen.
+⚠ AND RLS ENABLED WITH NO POLICY READS EMPTY, SILENTLY — 22 prod tables are already in that state.
+A guest list that renders blank because you closed it too far looks identical to one that is
+switched off. Distinguish them.
+
+MIGRATION: yes — a per-event setting plus the read policy. You are the only session running.
+2 PRs: the setting and the policy, then the guest-facing surface.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
 
 ---
 
