@@ -26,7 +26,7 @@ not have to answer anything mid-session.**
 | W2-C1 · The gold nobody can read | Sonnet 5 | medium | 2 |
 | W2-C2 · Ninety-five admin routes, one shape | Opus 5 | high | 2 (after C1) |
 | W3-A · "You have none" must mean none | Opus 5 | high | 3 |
-| W3-B · A supplier's card earns its keep | Opus 5 | high | 3 |
+| ✅ W3-B · A supplier's card earns its keep — **DONE 2026-08-24, 4 PRs** | Opus 5 | high | 4 |
 | W3-C · A wake is not a celebration | Opus 5 (+ Fable for the words) | high | 3 |
 | W4-A · The four screens a couple lives in | Opus 5 → Sonnet 5 | medium | 4 |
 | W4-B · Sixty-three supplier screens | Opus 5 → Sonnet 5 | medium | 4 |
@@ -216,7 +216,7 @@ event-words provider).
 | ~~0~~ | ~~PR triage~~ ✅ **DONE 2026-08-22** | — |
 | **1** | **W1-A** finished event + launcher + dashboard polish · **W1-B** Pabati + buy pages + story-editing goes free · **W1-C** paperwork | W1-B |
 | **2** | **W2-A** guest activation + the cookie banner + honest reads in the hub · **W2-B** the two deletion jobs · **W2-C1** the admin gold | — |
-| **3** | **W3-A** honest reads in the couple tree · **W3-B** supplier cards · **W3-D** ⭑NEW the guest page's design set | W3-B |
+| **3** | **W3-A** honest reads in the couple tree · ~~**W3-B** supplier cards~~ **✅ DONE 2026-08-24** · **W3-D** ⭑NEW the guest page's design set | W3-A |
 | **4** | **W4-WORDS** ⭑NEW the words follow the occasion · **W4-B** supplier screens · **W2-C2** admin archetype | W4-WORDS |
 | **5** | **W4-A** the couple's four daily screens · **W5-C** who is in my event + drafted invitation words · **W4-C** grant hardening | W4-C |
 | **6** | **W5-A** a supplier's record survives a delete · **W5-B** the undrawn surfaces | W5-A |
@@ -1312,7 +1312,33 @@ TERRITORY: apps/web/app/dashboard/[eventId]/** plus the new guard. 2–3 PRs. No
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### W3-B · A supplier's card earns its keep · **Opus 5 · high**
+### ✅ W3-B · A supplier's card earns its keep — **DONE 2026-08-24. DO NOT RUN THIS SECTION.**
+
+**4 PRs: [#4741](https://github.com/iscasasola/setnayan-platform/pull/4741) ·
+[#4742](https://github.com/iscasasola/setnayan-platform/pull/4742) ·
+[#4744](https://github.com/iscasasola/setnayan-platform/pull/4744) ·
+[#4745](https://github.com/iscasasola/setnayan-platform/pull/4745).**
+Full row: `DECISION_LOG.md` 2026-08-24; summary in `CLAUDE.md`'s ACTIVE block.
+
+🔑 **TWO OF THIS PROMPT'S OWN PREMISES DID NOT SURVIVE MEASUREMENT — read these before reusing
+any of its wording elsewhere:**
+
+1. **Item 3's "needs a new table plus a write at lock time" was stale by ONE DAY.** The pricing
+   freeze (#3862, merged 2026-07-28 — the day before the handoff that says picks are "NOT
+   queryable") already persists every charged option into
+   `event_vendor_packages.customizations_json → pricing_snapshot → options`. **No table was
+   added.** What was missing was the card↔package LINK the code had already named twice:
+   `vendor_packages.vendor_service_id`.
+2. **Item 4's reply-time badge ALREADY SHIPPED and was wrong in two ways** — no sample floor at
+   all (one reply earned the word *usually*) and it read the no-data sentinel `0` as "instant",
+   advertising a shop that had never answered anybody as *"Usually responds in 0m"*.
+
+⏭ **ONE THING IS DELIBERATELY NOT BUILT and it is an OWNER/DPO call, not engineering:** the
+"celebrations this supplier documented" count. Its only honest source is counsel-gated
+(`vendor_papic_captures` — a supplier collecting guest photos becomes a third-party controller
+of guest PI, widening a live NPC filing); the easy substitute counts photos **guests** took.
+
+<details><summary>The completed prompt, kept so a reader pointed here finds the outcome</summary>
 
 ```
 🔓 GATE SATISFIED — #4563 and #4699 both merged in wave 0 on 2026-08-22; the vendor-dashboard files
@@ -1349,6 +1375,8 @@ migration's blast radius to what you can prove.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
+
+</details>
 
 ### 🛑 W3-C · A wake is not a celebration — **SUPERSEDED 2026-08-23. DO NOT RUN THIS SECTION.**
 
@@ -1443,7 +1471,11 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ### W4-B · Sixty-three supplier screens · **Opus 5 (the kit) → Sonnet 5 (the sweep) · medium**
 
 ```
-🔒 Needs W3-B merged — same tree.
+🔓 W3-B is DONE (2026-08-24). Its four PRs are #4741 · #4742 · #4744 · #4745 — confirm they are
+MERGED before starting, in one command, because this file rots:
+`gh pr view 4741 4742 4744 4745 --json number,state,mergedAt` (one at a time if that form is
+rejected). They touch `services/_components/*`, `services/new/[category]/page.tsx`,
+`services/coverage-actions.ts`, `packages/actions.ts` and `app/_components/card-record-section.tsx`.
 
 app/vendor-dashboard/** is ~63 screens built from 23 one-off components. Converge them on the
 shared kit and the approved archetypes. Opus builds the kit and the first two screens; Sonnet

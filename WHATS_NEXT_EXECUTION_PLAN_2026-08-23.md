@@ -152,7 +152,7 @@ intersection check that proves it.
 | session | carries | what a person gets | migration |
 |---|---|---|---|
 | **W3-A · Honest reads, couple tree** | S3-A | ~30 couple screens stop saying "you have none" when the read was refused — worst is the vendors page with 45 unbound reads — plus a per-tree guard so the class stays closed | no |
-| **W3-B · Vendor card features** | CF-3a 3b 3c 3f | a vendor starts a new card from an existing one · the Card Record shows what couples actually picked (K-floored) and a reply-time badge (min-N) · mid-edit saves stop navigating away | **YES** (new table) |
+| ✅ **W3-B · Vendor card features — DONE 2026-08-24** | CF-3a 3b 3c 3f | shipped in 4 PRs (#4741 · #4742 · #4744 · #4745). ⚠ **NOT a new table** — the picks were already frozen in the lock snapshot by #3862; what was missing was the card↔package LINK. CF-3c's Papic half is an OWNER/DPO gate, not built. | **YES** — two columns + a reader, no new table |
 | **W3-C · A wake is not a celebration** | S17 | a family planning a wake gets an event that does not say "celebrate" anywhere | **YES** (event-type) |
 
 **Intersection check:** couple dashboard · vendor dashboard · 3 lib files + guest strings. **Empty.**
@@ -219,7 +219,7 @@ by how many files it touches.**
 | W2-C · admin gold sweep | **Sonnet 5** | medium | 106 mechanical occurrences behind a guard — **but Opus writes the guard, and the mutation is measured by occurrence count, before Sonnet sweeps.** |
 | W2-C · admin archetype port | **Opus 5** | high | ~95 routes onto one archetype is a design-judgement port, not a sweep. |
 | W3-A · Honest reads | **Opus 5** | high | The per-tree guard is the deliverable; this repo has shipped six decorative guards. |
-| W3-B · Vendor card features | **Opus 5** | high | A new table plus an aggregate published to strangers — K-floor and min-N are disclosure rules, not niceties. |
+| ✅ W3-B · Vendor card features — DONE | **Opus 5** | high | Two aggregates published to strangers; both floors enforced in SQL, twice each. The "new table" the brief called for was not needed. |
 | W3-C · A wake | **Opus 5** high for the schema and wiring · **Fable** for the words | high | The tone is the product here. A wake reading "celebrate" is the whole defect. |
 | W4-A / W4-B · design ports | **Opus 5 medium** for the first screen (it sets the pattern) · **Sonnet 5 medium** for the repeats | medium | The archetypes are binding; a delta is a defect in the port, not a design decision. |
 | W4-C · Grant hardening | **Opus 5** | **xhigh** | Grants and RLS fail silently at runtime and are green in every test. |

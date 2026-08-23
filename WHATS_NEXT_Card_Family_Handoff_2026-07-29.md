@@ -76,7 +76,11 @@ belong to the old account):** [`Design_Card_Family_2026-07/service-card-maker-pr
 Gate classes per `WHATS_NEXT_INDEX.md §1`: AUTO-OK = build flag-dark now; OWNER_DECISION /
 FLAG_FLIP_PROD = stop at the gate and surface it.
 
-### 3a · Card-duplicate — "copy a card into the maker" (OWNER ASKED · AUTO-OK flag-dark)
+### ✅ 3a · Card-duplicate — DONE 2026-08-24, PR [#4742](https://github.com/iscasasola/setnayan-platform/pull/4742). DO NOT REBUILD.
+⚠ One thing the design below did NOT anticipate: the ★ Customization options **cannot** be copied, because the package holding them has no link back to the card. The maker says so on screen rather than dropping them silently. (PR #4744 adds that link — carrying the options across is now possible and is a separate, unbuilt change.)
+
+<details><summary>the original item</summary>
+
 Owner (2026-07-28): *"can they copy what they created and place it to the wizard to recreate
 it?"* + the rule **"events created for that card stay on that card."** Design settled: a
 "Start from one of your cards" entry opens the maker PRE-FILLED from an existing
@@ -90,7 +94,13 @@ reference the same R2 keys; never move/delete objects on copy. Files:
 `canvas-maker.tsx` (initial state), the shipped services-manager card menu (the doorway —
 wayfinding rule: no orphaned pages).
 
-### 3b · Most-picked options compilation (needs schema · AUTO-OK for the migration+write, display flag-dark)
+</details>
+
+### ✅ 3b · Most-picked options — DONE 2026-08-24, PR [#4744](https://github.com/iscasasola/setnayan-platform/pull/4744). DO NOT REBUILD.
+🔑 **The premise below is STALE BY ONE DAY and no table was added.** The pricing freeze (#3862, merged 2026-07-28) already persists every charged option into the lock snapshot, so the picks were queryable all along. What was missing was the card↔package LINK — `vendor_packages.vendor_service_id`, the column §3f names below. The floor is applied TWICE in SQL: 3+ arm's-length locked bookings AND 3+ couples per line.
+
+<details><summary>the original item</summary>
+
 The veteran-card "What 50 couples picked" panel. Blocked: per-option picks are NOT queryable —
 `event_vendors.package_item_id` is a single id; picks live in per-booking
 `customizations_json`. **Smallest enabling schema (already designed):** table
@@ -99,11 +109,20 @@ alongside the snapshot. Then aggregate per service/package (arms-length filter �
 `vendor_booking_is_arms_length()`), render on the Card Record with a min-N floor like K=3.
 ⚠ Migration rules in §5 apply (REVOKE ACL, allocator, verify-object).
 
-### 3c · Reply-time badge + Papic-documented count (feasible, separate PRs · AUTO-OK flag-dark)
+</details>
+
+### ⚖ 3c · Reply-time badge DONE 2026-08-24, PR [#4745](https://github.com/iscasasola/setnayan-platform/pull/4745) · Papic count is an OWNER/DPO GATE, not built.
+🔑 **The badge already shipped on `/explore` and was wrong twice**: no sample floor at all, and it read the no-data sentinel `0` as "instant", advertising a shop that had never replied as *"Usually responds in 0m"*. Floor = 3 replies, and the count now travels beside the median.
+🔴 **The Papic count is NOT an engineering task.** Its only honest source, `vendor_papic_captures`, is counsel-gated — a supplier collecting guest photos becomes a third-party controller of guest PI the guest never consented to, widening a LIVE NPC filing. The substitute (photos at events the supplier was booked for) counts photos **guests** took.
+
+<details><summary>the original item</summary>
+
 Reply-time: `chat_threads` + message timestamps → median first-response; needs a min-N floor so
 thin samples don't mislead (the Card Record review's small-N lesson). Papic count: photos→event→
 booking cross-lane join — feasible but not trivial; both render on the card's award shelf
 (design: veteran-card artifact).
+
+</details>
 
 ### 3d · Guest-flywheel stat (BLOCKED — no data)
 "9 of 50 couples first met this card as guests." Needs guest→couple attribution that does not
@@ -116,7 +135,10 @@ Hand them `card-record-section.tsx` + the batched `fetchServiceCardRecords` — 
 details screen data problem they were blocked on is SOLVED by `service_card_records`. Do not
 touch their tree from a card-family session.
 
-### 3f · Smaller epilogue items (AUTO-OK)
+### ✅ 3f · Smaller epilogue items — the first two DONE 2026-08-24, PR [#4741](https://github.com/iscasasola/setnayan-platform/pull/4741). DO NOT REBUILD.
+⚠ The **audience-save redirect** and the **clip pill duration** are shipped. The clip duration is **deliberately NOT persisted** — the only pill in the product is on the screen holding the file, and a column with no reader is this repo's most-repeated defect shape; "expose + persist" below assumed an edit surface that does not exist.
+⚠ The **wizard-created package linkage** now HAS its column (`vendor_packages.vendor_service_id`, PR #4744) — but the OWNER_DECISION half is untouched: whether that package should publish with the service instead of landing `is_active:false`.
+
 - **Audience-save redirect:** `updateCoverageServes` ends in `redirect(servicesReturnBase())` —
   mid-edit in the canvas the vendor is navigated away (the sheet warns today). Build a
   non-redirecting variant for the canvas call site; keep the shipped panel's behavior.

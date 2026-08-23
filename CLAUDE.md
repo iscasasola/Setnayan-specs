@@ -69,6 +69,74 @@ committed docs on purpose.
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
+> ### ✅ DONE 2026-08-24 — W3-B: A SUPPLIER'S CARD EARNS ITS KEEP
+> **4 PRs. Do NOT rebuild any of it.** Row: `DECISION_LOG.md` 2026-08-24.
+> PRs [#4741](https://github.com/iscasasola/setnayan-platform/pull/4741) ·
+> [#4742](https://github.com/iscasasola/setnayan-platform/pull/4742) ·
+> [#4744](https://github.com/iscasasola/setnayan-platform/pull/4744) ·
+> [#4745](https://github.com/iscasasola/setnayan-platform/pull/4745).
+> ⚠ Verify each with `gh pr view <#> --json state,mergedAt` before trusting this line — this file
+> has been wrong about a PR's state three separate times.
+>
+> 🧾 **THE MAKER STOPPED TRADING YOUR CARD FOR A COVERAGE SAVE.** Pressing *Save who it's for*
+> mid-build navigated to Services and took every unposted field with it — title, price,
+> inclusions, the customization draft, the photos already uploaded. The sheet WARNED about it in
+> prose. 🔑 **A WARNING THAT PRECEDES LOSING SOMEBODY'S WORK IS NOT A FIX.** One write body, two
+> doors now; the Services page's own panel still uses the redirecting one because it is already
+> on the page it lands on. The clip pill says **0:24** instead of the word *clip* — the picker had
+> been measuring the file to enforce the 30-second cap and throwing the number away. **Floored,
+> never rounded** (the picker tolerates cap + 0.9s, so rounding prints 0:31 on a card that says
+> 30) and **never persisted** — the only pill in the product is on the screen holding the file,
+> and a stored value with no reader is the shape this repo keeps paying for.
+>
+> 📋 **A SUPPLIER CAN START A NEW CARD FROM ONE THEY ALREADY MADE** (owner asked 2026-07-28).
+> Copies what was AUTHORED; the original keeps everything it EARNED — **by construction, because
+> the maker posts no id and can only insert**. Media is REFERENCED, never duplicated ⇒ two cards
+> name one object now, so a future delete must look for other referents first.
+> ⛔ **The ★ Customization options cannot come across, and the maker SAYS SO on screen.** They sit
+> in a package with no link back to the card, and guessing by category would attach a DIFFERENT
+> card's options to this one. A copy that quietly loses a card's choices is a card published
+> missing what it sells.
+>
+> 🔢 **THE CARD COMPILES WHICH OF ITS OWN OPTIONS COUPLES CHOSE** — *"Album · 4 of the last 6"*.
+> 🔑 **THE BRIEF'S PREMISE WAS STALE BY ONE DAY.** It said picks are "NOT queryable" and
+> prescribed a new table written by `lockPackage`; the pricing freeze (#3862, merged the day
+> BEFORE that note) already persists every charged option into the lock snapshot. **So no new
+> table** — one would have needed a second writer in another session's tree and been a second copy
+> of a fact that already exists. What was missing was the LINK the code had already named twice:
+> `vendor_packages.vendor_service_id`. 🔒 **A NULLABLE FK IS NOT A PERMISSION** — a trigger refuses
+> another vendor's card, on INSERT **and** UPDATE of either column.
+> ⚖ **The floor applies TWICE, both times in SQL:** 3+ arm's-length locked bookings AND 3+ couples
+> per line. Below either, the line is ABSENT — not rounded, not "fewer than 3".
+> 🪤 **AND IT FOUND A GATE WITH NO HANDLE BEFORE SHIPPING ONE.** `booked_count` reads
+> `event_vendors.service_id`, and **a package lock cascades rows carrying none** — so FOUR places
+> each asking `bookedCount > 0` would have hidden exactly the cards this feature is for. One shared
+> predicate now. **That undercount is NAMED, NOT FIXED:** widening it moves a public trust number.
+>
+> ⏱ **"USUALLY RESPONDS IN Xm" NEEDED MORE THAN ONE REPLY.** Two live defects on the public
+> marketplace card, both from a median stored without its sample size: one reply earned the word
+> *usually*, and a shop that had **never answered anybody** was advertised as **"responds in 0m"**
+> — because 0 is the no-data sentinel, honoured by `isFirstLookEligible` and not by the card.
+> 🔑 **A SENTINEL HELD IN ONE CONSUMER'S HEAD IS NOT A RULE.** Floor = 3 replies, decided once,
+> the count now stored beside the median. **Fail closed** (DEFAULT 0, no backfill — re-deriving
+> "replied" in SQL would be the second definition the column exists to prevent).
+>
+> 🔴 **OWNER/DPO, NOT ENGINEERING — the one thing skipped:** the *"celebrations this supplier
+> documented"* count. Its only honest source, `vendor_papic_captures`, is **counsel-gated** because
+> a supplier collecting guest photos makes them a **third-party controller of guest PI the guest
+> never consented to**, widening a LIVE NPC filing. The easy substitute counts photos **GUESTS**
+> took — a number that reads as a claim the supplier never made. Prod holds 0 of them.
+>
+> ⛔ **Also deliberately untouched:** whether a minted package should publish with its service
+> instead of landing `is_active:false` (the OWNER_DECISION half of the same handoff note), and
+> `isFirstLookEligible`, which feeds RANKING rather than a claim.
+>
+> 🪤 **TWO OF MY OWN GUARDS WERE DECORATION, BOTH CAUGHT ONLY BY COUNTING.** One matched
+> `displayUrlForStoredAsset` anywhere in the file, so gutting the resolution left the IMPORT behind
+> and it stayed GREEN at 2 → 1. And I ran `tsc`, THEN added a test file, and never ran it again —
+> CI caught what that ordering hid. **38 mutations across the four PRs, every one printed
+> before → after, every one red.**
+
 > ### ✅ DONE 2026-08-23 — W1-B: PABATI RETIRED · THE BUY PAGES SELL · THE RAIL LIGHTS UP
 > **4 PRs. Do NOT rebuild any of it.** Rows: `DECISION_LOG.md` 2026-08-23.
 >
