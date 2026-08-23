@@ -387,12 +387,22 @@ rebuild any of them. These are the four it left open, re-verified 2026-08-23.
    carry ZERO lifecycle references, so a finished event shows "This week" over dates that have
    passed, at 0%. The nearby "compressed runway" comment is about an event created CLOSE to its
    date — NOT a past event. Do not read it as a fix.
-3. "REVIEW" HAS NO DESTINATION.
+3. "REVIEW" HAS NO DESTINATION — AND THE MACHINERY TO GIVE IT ONE ALREADY SHIPS.
    apps/web/lib/customer-menu.ts (~:177) and
    app/dashboard/[eventId]/_components/after/finished-event-summary.tsx (~:141) both open the plain
-   marketplace. `BUDGET_BUILD_TABS` in lib/budget-build.ts is shortlist·build·budget·compare — there
-   is no team tab to land on. The per-supplier "Leave a review" affordance ALREADY SHIPS inside
-   that page: this is a LANDING change, not a new screen.
+   marketplace.
+   ⚠ RE-CHECKED AT TIP 09697145d — RULE 0 PAYS HERE, DO NOT BUILD A SCREEN:
+     · The vendors page ALREADY ACCEPTS A DEEP LINK: `searchParams` takes `{ status, tab, open,
+       inspect }` and its own comment documents the shipped pattern `?tab=shortlist&open=catering`
+       ("jumps right to that category", 2026-06-12).
+     · The per-supplier "Leave a review" affordance ALREADY SHIPS inside that page.
+     · "Your team" ALREADY EXISTS as a merged section — team-controls.tsx, team-summary-chip.tsx,
+       and build-compare.tsx's comments record capabilities MOVING into it.
+     · What is genuinely missing is only a VALUE to aim at: `BUDGET_BUILD_TABS` is
+       shortlist·build·budget·compare, with no team member.
+   So the whole job is: give the existing deep link something that lands on the team — a tab value
+   or an anchor — and point the two Review links at it. A NEW SCREEN IS THE WRONG ANSWER and a new
+   tab may be too; check whether an anchor on the merged section is enough first.
 4. THE "AFTER" STAGE IS A STUB — and its promise is fiction.
    lib/progress-stages.ts has `afterPct = 0` (~:301) and a "7-day review window" sentence (~:298,
    ~:371) describing a mechanism that EXISTS NOWHERE IN THE PRODUCT. Delete the sentence rather
@@ -400,7 +410,11 @@ rebuild any of them. These are the four it left open, re-verified 2026-08-23.
    on the events where that stage is current the rail sits inside a COLLAPSED disclosure, so you
    cannot demonstrate it by loading the page. Do it last, or say you skipped it.
 
-ALSO IN YOUR TERRITORY — three doorway rows that are defined and rendered nowhere:
+ALSO IN YOUR TERRITORY — three doorway rows that are defined and rendered nowhere.
+🪤 MEASURE THIS ONE CAREFULLY: a naive `grep -rn '<OpenShopRow' app` returns ONE hit, and it is
+inside open-shop/has-a-doorway.test.ts's own REGEX — the guard's assertion contains the component
+name it is looking for. That is the guard proving the point about itself. Exclude the test files
+before you count, or you will read "it is rendered once" off the guard that says it is not:
 `BecomeStorytellerRow`, `OpenShopRow`, `CreateSamahanRow` in app/dashboard/(launcher)/page.tsx
 (~:2436/:2483/:2517, ZERO call sites app-wide). Two guards — open-shop/has-a-doorway.test.ts and
 lib/the-controls-have-a-home.test.ts — assert the board carries those doors and are satisfied by
