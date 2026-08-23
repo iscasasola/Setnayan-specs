@@ -1227,7 +1227,13 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ### W2-C2 · Ninety-five admin routes, one shape · **Opus 5 · high**
 
 ```
-🔒 Start after W2-C1's sweep merges. Same territory: app/admin/** exclusively.
+✅ W2-C1's SWEEP HAS MERGED (PR #4738, 2026-08-23) — you are clear. Same territory:
+app/admin/** exclusively.
+📏 RE-MEASURED 2026-08-24: gold-as-text in `app/admin` is now **150 occurrences across 67 files by
+raw grep**, down from 207 across 82. The remainder is the legitimate kind — icons and comments,
+which the guard's own regex excludes. ⛔ DO NOT "FINISH" THE SWEEP by driving the raw number to
+zero: you would be recolouring icons that pass contrast at the 3:1 non-text bar. The guard is the
+authority on what still counts.
 
 The admin console is ~95 routes and 33 raw tables, each screen effectively its own invention.
 Converge them on ONE archetype. The 19 archetypes were approved by the owner on 2026-08-04 and are
@@ -1626,14 +1632,26 @@ You own app/[slug]/** this wave. W2-A owned it the wave before and its defects h
 redo them, and do not touch app/[slug]/actions.ts, the RSVP widget or the join screens — those were
 its territory and its work is done.
 
+⚠ W2-A WENT WIDER THAN ITS BRIEF AND YOU WILL MEET ITS DIFFS. It swept HTML entities that were
+leaking into visible words (a couple was being shown `Jehovah&apos;s Witnesses` as a ceremony
+option), and it worked in `date-selection` and `account-switcher` as well as the guest tree. READ
+ITS REPORT BEFORE YOU START. Two consequences for you:
+  · Strings you were briefed on may already read differently — re-measure before you "fix" one.
+  · An entity in JSX children or a JSX attribute is CORRECT and renders fine; an entity in a plain
+    JS string used as data is the bug. And ~10 `.ts` files build or ESCAPE html on purpose — the
+    seating print routes, the email template, the monogram markup. Those entities are XSS
+    protection. DO NOT TOUCH THEM.
+
 Five items, all measured on a real anonymous guest render (see below).
 
  AP-3 THE INVITATION READS LIKE A RECEIPT, NOT AN INVITATION — a monospaced data face where the
    editorial serif belongs. The guest-facing editorial stack (Cormorant/Manrope) deliberately lives
    outside the dashboard font scope; use it rather than inventing a third register.
- AP-9 GUESTS CANNOT SEE THE WEATHER for the day. ⚠ This needs a forecast provider chosen — an
-   outside dependency and a small recurring cost. SCOPE IT, NAME THE PROVIDER AND THE COST, AND
-   FLAG IT rather than signing us up to something.
+ 🛑 AP-9 / H-6 — WEATHER IS DEFERRED BY THE OWNER, 2026-08-24: "okay we defer the weather."
+   DO NOT BUILD IT AND DO NOT SCOPE IT. It is the only item in the plan that would add a permanent
+   outside dependency — a supplier, a recurring cost, a licence, and a third party's name printed
+   on a guest's page — for one line of text. The scoping survives in § 0d for whenever a real
+   couple asks. This session has FOUR items, not five.
  AP-10 / H-4 — GUESTS GET A LINE OF TEXT WHERE A MAP BELONGS. (Same item; H-4 is its measured form.)
    🛑 I TOLD YOU THE CSP MUST CHANGE IN THIS PR. THAT WAS WRONG AND I CHECKED IT MYSELF —
    `https://www.openstreetmap.org` IS ALREADY IN the enforced frame-src (next.config.ts ~:203), and
@@ -1658,8 +1676,12 @@ Five items, all measured on a real anonymous guest render (see below).
    exactly that on prerendered blog pages.
    ⚠ ITS WHOLE BENEFIT IS CONDITIONAL on the event actually having a hero photo — unverified.
    Check before you promise it.
- H-5 "ADD TO CALENDAR" MOVES AROUND — it should sit in the same place at every stage, not appear
-   only after the film (app/[slug]/_components/empty-states.tsx ~:131–166).
+ H-5 "ADD TO CALENDAR" APPEARS ONLY AT THE END OF THE FILM — it should sit in the same place at
+   every stage. ⚠ RE-MEASURED 2026-08-24, AND THE FILE IN THE ORIGINAL BRIEF IS WRONG: it is NOT in
+   `empty-states.tsx` (zero occurrences there now). It lives at
+   `app/[slug]/_components/save-the-date-film.tsx:726`, inside the film component itself — which is
+   exactly WHY a guest who leaves early never sees it. The premise holds; the address changed.
+   🔑 GREP THE STRING, NEVER THE LINE, AND NEVER THE FILE A BRIEF NAMES.
  H-7 A BIRTHDAY PAGE CALLS THE FAMILY "THE COUPLE" — 69 guest-read instances across 16 event types.
    THE LARGEST ITEM HERE AND THE ONE WITH THE MOST GUEST-VISIBLE PAYOFF.
    🔑 IT IS THREADING, NOT BUILDING: the words provider is ALREADY MOUNTED in the guest tree
