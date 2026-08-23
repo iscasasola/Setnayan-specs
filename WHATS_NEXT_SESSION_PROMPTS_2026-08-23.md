@@ -869,7 +869,19 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 
 ```
 🔒 Needs W3-A merged — same tree.
-MEASURE FIRST, DO NOT BUILD FIRST. This brief is partly eroded: the guests screen was reworked on
+MEASURE FIRST, DO NOT BUILD FIRST — AND YOU CARRY ONE MEASUREMENT THAT IS NOT YOURS TO BUILD FROM.
+
+📏 THE FONT TALLY (inherited from the withdrawn AP-2, see § 0b). NOBODY HAS EVER MEASURED THE
+COMPUTED TYPEFACE ON AN APP SURFACE. A session tallied it on the FRONT DOOR — the one page in this
+product with its own owner-locked visual identity, which authors a system stack ON PURPOSE — and
+reported the result as "the app". While you have these four screens open at 375pt, tally the
+computed font-family across /dashboard and /dashboard/[eventId] and REPORT THE NUMBER.
+⛔ DO NOT OPEN A BUILD FROM IT UNLESS THE APP ITSELF IS FALLING BACK, and if it is, say so and STOP
+— "which typeface does shared chrome wear" is an OPEN OWNER DECISION (ONE_SHELL_PLAN_2026-08-13.md
+§5.3), and this project has twice ended up with a lock nobody remembers agreeing to by answering a
+question like that silently.
+
+This brief is partly eroded: the guests screen was reworked on
 2026-08-22 and the app-wide header retirement touched all four. Re-diff each screen against its
 approved archetype and report the REAL delta before writing code. If a screen already matches, say
 so and skip it — that is a result, not a failure.
