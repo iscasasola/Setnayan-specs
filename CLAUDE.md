@@ -70,7 +70,8 @@ already ship, and produce errors.** The fix is this block. Keep it CURRENT — o
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
 > ### ✅ DONE 2026-08-24 — W3-B: A SUPPLIER'S CARD EARNS ITS KEEP
-> **4 PRs. Do NOT rebuild any of it.** Row: `DECISION_LOG.md` 2026-08-24.
+> **5 PRs — the fifth is an owner ruling he made mid-session, closing the item the other four left open.**
+> ** Do NOT rebuild any of it.** Row: `DECISION_LOG.md` 2026-08-24.
 > **MERGED at the time of writing:** [#4741](https://github.com/iscasasola/setnayan-platform/pull/4741)
 > (the maker) · [#4744](https://github.com/iscasasola/setnayan-platform/pull/4744) (the picks —
 > and its migration is **verified applied in prod BY THE OBJECT**: the column, the trigger body,
@@ -127,11 +128,28 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > the count now stored beside the median. **Fail closed** (DEFAULT 0, no backfill — re-deriving
 > "replied" in SQL would be the second definition the column exists to prevent).
 >
-> 🔴 **OWNER/DPO, NOT ENGINEERING — the one thing skipped:** the *"celebrations this supplier
-> documented"* count. Its only honest source, `vendor_papic_captures`, is **counsel-gated** because
-> a supplier collecting guest photos makes them a **third-party controller of guest PI the guest
-> never consented to**, widening a LIVE NPC filing. The easy substitute counts photos **GUESTS**
-> took — a number that reads as a claim the supplier never made. Prod holds 0 of them.
+> 📸 **THE OWNER RULED ON THE SKIPPED ITEM THE SAME DAY, AND IT IS BUILT** — PR
+> [#4748](https://github.com/iscasasola/setnayan-platform/pull/4748), 5th of the wave. *"we only
+> count events that they had photos with … no photo, no proof the event took place."*
+> **The unit is the CELEBRATION, never the photo**, and the photograph is the EVIDENCE — which
+> makes the count its own anti-padding rule. **UNFLOORED on purpose** (it counts the shop's OWN
+> work, like `booked_count`, and a floor would kill the nudge for exactly the first two
+> celebrations it exists to encourage), labelled **"· this shop"** because captures are keyed on
+> the profile, and it opens the record on the shop's own view but only rides along on a couple's.
+> 🚨 **A CHECK CONSTRAINT REJECTING A TEST FIXTURE TAUGHT ME A RULE READING HAD NOT:** the capture
+> table's own comment says **`nsfw_checked` must be TRUE to surface**, the route writes FALSE and
+> flips it after the screen, and **a posterless clip stays unscreened forever**. A naive count
+> pads a public number with media nothing has looked at.
+> 🛑 **AND ONE READING WAS REFUSED, DELIBERATELY.** *"Registered as a completed event"* could also
+> mean a photo marks the BOOKING complete. It does not: `completion_status` carries the owner's
+> OWN 2026-08-21 rule that **a supplier's claim is not a release**, and a capture is the
+> supplier's own act — so a photo certifying a finished job would move the booking fee, the review
+> window and the delete handshake with it. **A count, not a state**, pinned by a test.
+> 🔑 *An answer that fits the question you asked is not proof it was about the thing you asked.*
+> **If he meant that too, it is a separate change and needs saying out loud.**
+> ⏭ **STILL HIS, AND STILL OPEN:** the capture lane is flag-dark behind the unresolved DPO
+> question about a supplier collecting guest photos. **This ships the counting rule, not the
+> lane** — prod holds 0 captures, so every card reports 0.
 >
 > ⛔ **Also deliberately untouched:** whether a minted package should publish with its service
 > instead of landing `is_active:false` (the OWNER_DECISION half of the same handoff note), and
@@ -1655,7 +1673,7 @@ never drop.
 
 ### Hard product constraints
 
-- **10-second hard cap on video clips.** Capped client-side. UI must enforce. ⚠ **CLIP CURRENCY IS NO LONGER FLAT — CORRECTED 2026-08-11.** This line said "10s = 7 points" and was wrong twice over: the flat weight had been **8** since 2026-07-29, and a clip is now priced **BY LENGTH** (owner): **1–2s = 2 · 3s = 3 · 4–6s = 5 · 7–10s = 8**; a photo stays 1. Ten seconds still costs 8, so nothing got more expensive — only short clips got cheaper. Derive from `PAPIC_CLIP_COST_BANDS` / `papicClipCost` in `apps/web/lib/papic-cameras.ts`, **never re-type a number**. 🔑 **AN UNMEASURED CLIP COSTS THE MOST**: the duration is stamped by the BROWSER, so an absent or nonsense length bills the top band — the only direction a tampered client cannot profit from. 🔒 **Storage is billed FLAT** (`PAPIC_PRESERVATION_UNITS_PER_CLIP`) because a stored row carries `is_clip` and no duration. ⚠ 10s clips are ~2× the bytes and clips don't compress yet → coupled to the clip-web-copy storage PR.
+- **10-second hard cap on video clips.** Capped client-side. UI must enforce. ⚠ **CLIP CURRENCY IS NO LONGER FLAT — CORRECTED 2026-08-11.** This line said "10s = 7 points" and was wrong twice over: the flat weight had been **8** since 2026-07-29, and a clip is now priced **BY LENGTH** (owner): **1–2s = 2 · 3s = 3 · 4–6s = 5 · 7–10s = 8**; a photo stays 1. Ten seconds still costs 8, so nothing got more expensive — only short clips got cheaper. Derive from `PAPIC_CLIP_COST_BANDS` / `papicClipCost` in `apps/web/lib/papic-cameras.ts`, **never re-type a number**. 🔑 **AN UNMEASURED CLIP COSTS THE MOST**: the duration is stamped by the BROWSER, so an absent or nonsense length bills the top band — the only direction a tampered client cannot profit from. 🔒 **Storage is billed FLAT** (`PAPIC_PRESERVATION_UNITS_PER_CLIP`) because a stored row carries `is_clip` and no duration. ✅ **CORRECTED 2026-08-24 — "clips don't compress yet" is FALSE and was stale by ~3 weeks.** Verified on `origin/main` by the WRITER, not by a note: both capture paths (`app/api/papic/guest-capture/route.ts` and `app/papic/actions.ts`) `.update({ clip_web_r2_key, clip_web_bytes })`, and `clipEligibleForDrop` REFUSES to drop a full-res clip that has no web copy. 🔑 **The transcode runs in the GUEST'S BROWSER and is uploaded as a finished file — we pay ₱0 of compute for it.** The kept copy is **720p** (`web720`), owner-locked 2026-08-07 after a 1080p raise was declined. 📏 **MEASURED, not estimated** (DECISION_LOG 2026-08-07): a 10s clip is **0.25 → 0.47 MB** real footage, **0.70 → 1.48 MB** worst case ⇒ **a 10s kept clip is SMALLER THAN ONE PHONE PHOTO (3–5 MB)**, and a 150-clip event costs **+₱0.37/yr** realistic. Storage was never the argument against long clips — resolution was. ⚠ `BUILDS_REMAINING_VERIFIED_2026-08-08.md` item #36 carries the same dead claim; corrected there too.
 - **NO per-photo tag limit (owner 2026-08-06: "no tag limit. we can tag as many").** Supersedes the 20-tag lock of 2026-07-23, which superseded a 10-tag lock of 2026-06-17. Combined individual + table + face + self-link — none of it is counted against a ceiling any more. Migration `20271117449785`. ⚠ **The 20-cap was never the real bug:** the two capture screens hardcoded **10** while the DB had allowed 20 since 2026-07-23, so a paparazzo was cut off at half the real limit and told "that's the max" — the owner's decision reached the database and never reached the screen. 🔑 A 100,000 ceiling remains in `enforce_photo_tag_cap()` purely as a runaway-write backstop (retry storm / loop bug), **not** a product rule; no real photo approaches it.
 - **Untagged-still-delivered guarantee.** Every uploaded photo lands in the couple's gallery regardless of tagging status.
 - **Personal Reels:** vertical 9:16 only (1080×1920), 1–30 seconds duration, max 5 guest picks + max 5 couple memorable clips, template-driven render (no per-render AI).
