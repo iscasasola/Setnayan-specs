@@ -335,6 +335,68 @@ imaginary is that the two hits resolve through different variables.
 
 ---
 
+## § 0e · 🟠 NINE DESIGN CALLS MADE UNDER DELEGATION — read the provenance BEFORE you treat any of them as settled
+
+🛑 **THE OWNER SAID "do as you recommend". HE DID NOT RULE ON THESE INDIVIDUALLY.** He was not shown
+them one by one and gave no reasoning of his own. The delegation is genuine and the calls stand —
+**but they are REVERSIBLE calls made by a session under a general instruction, and they must never
+be written into a brief as owner rulings.**
+
+🔑 **WHY THIS MATTERS MORE THAN IT SOUNDS.** A future session reading a flat *"decided: yes"* will
+treat these exactly as it treats the 11 August front-door lock — as immovable, and as something to
+protect other work from. That is how this project acquires "a lock nobody remembers agreeing to",
+which its own code comments name as a recurring failure. **If one of these looks wrong to you
+later, it is fair game to reopen. The front-door lock is not.**
+
+✅ **THE DECIDING SESSION RAN THE § 0b DECISION-LOG CHECK ON ALL NINE FIRST, AND I RE-VERIFIED THE
+TWO THAT CHANGED OUTCOMES:**
+- **"Gold as the premium signature" IS NOT A THING.** The only "premium signature" in the log is the
+  **six monogram effects** (2026-07-17) — Drawn, Foil and the rest. **Nothing about buttons
+  anywhere.** ⇒ D-4 was gated on a rule that does not exist, and is UNBLOCKED with no conflict.
+- **Nothing in the log protects the photoless focal card.** The 15 July prototype simply draws it
+  that way, with no recorded reason — and *"one obsidian per view"* is NOT violated, because the
+  photo band sits INSIDE the existing dark card rather than adding a second dark surface.
+
+### What each one does to the plan
+
+| # | call | effect |
+|---|---|---|
+| 1 | **Photograph on the event focal card — yes.** Reuse `event-scene.tsx`, this page only, `.sn-tile-dark` untouched | **W1-A**, as its LAST PR — see #8 |
+| 2 | **D-4 one terracotta action per screen — proceeds**, no gate | **W1-A**, ungated |
+| 3 | **"% planned" — DO NOT UNIFY.** The checklist keeps "% planned"; the focal adopts the already-shipping **"% locked in"** | 🟢 **DISSOLVES WORK** — closes owner decision 0. Nothing to compute once, nothing to migrate. It is the rename already scheduled, and no more |
+| 4 | **The button stays "Add guest"** — drop the PROVISIONAL comment in `customer-nav-fab.tsx` | trivial, fold into any **W1-A** PR |
+| 5 | **H-2, the film's label face — yes.** Only the face; watermark and gild eyebrows protected | **W3-D**, ungated |
+| 6 | **H-6 weather — yes, scoped:** inside ~10 days only · coordinates required · **silent on any failure, no placeholder and no apology** · server-side | **W3-D** ⛔ **with a STOP CONDITION, see below** |
+| 7 | **Our wordmark on a shared card → ONCE** (three today) | 🟢 **DISSOLVES INTO H-3** — same file, no new slice |
+| 8 | **One event card on phone and laptop — yes, but SEQUENCED LAST**, after the small dashboard items land | **W1-A**, final PR, on its own |
+| 9 | **Guests can see the guest list** — default off, host chooses per event, accepted-only | 🔴 **HELD — NOT SCHEDULED. See below.** |
+
+⛔ **#6 CARRIES A HARD STOP, NOT A PREFERENCE. FREE-TIER SOURCE ONLY.** If the only workable
+forecast provider charges anything, **that session STOPS and asks.** The deciding session has not
+committed spend and cannot. Do not sign us up to a paid tier, a trial that converts, or a
+"free for now" plan.
+
+### 🔴 #9 IS HELD, AND HELD DELIBERATELY
+
+**Guests seeing the guest list is NOT scheduled.** The deciding session's own words: it is *"the one
+of the nine most worth overruling"* and *"the only one touching RA 10173 posture"*. It is also the
+only one of the nine that is **genuinely new scope** rather than a call about something already
+being built.
+
+Its reasoning is sound and is recorded so nobody re-derives it: the locked position says *"surfaces
+show presence… only the graph shows relationships, and the graph never talks"*, and that lock
+**names an event guest list as container membership — the explicitly permitted case**, not graph
+traversal. The shape proposed is careful: **default off · the host chooses per event · only people
+who have ACCEPTED** — never invited-but-unanswered, because being invited is the host's choice about
+you while accepting is your own, and publishing non-responses imposes a social cost on guests rather
+than on the host.
+
+⚖ **BUT A GENERAL "do as you recommend" IS NOT CONSENT TO A NEW GUEST-VISIBLE DISCLOSURE UNDER A
+PRIVACY LAW WHERE THE OWNER IS THE REGISTERED DATA OFFICER.** It has been put to him directly. **Do
+not build it until he answers in his own words.**
+
+---
+
 ## § 0a · WHAT A SECOND VERIFICATION PASS FOUND — read this before any session
 
 Every prompt below was re-checked against `origin/main` @ `c984e0caf` and the live production
