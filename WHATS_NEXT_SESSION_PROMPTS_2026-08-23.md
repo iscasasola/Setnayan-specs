@@ -1273,7 +1273,9 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ### W3-A · "You have none" must mean none · **Opus 5 · high**
 
 ```
-🔒 Needs W1-A merged — you share dashboard/[eventId]/vendors/page.tsx.
+🔓 GATE SATISFIED — W1-A merged all seven of its PRs on 2026-08-23 and production is serving them.
+You share dashboard/[eventId]/vendors/page.tsx with it, so that file is now yours. (Re-confirm with
+`gh pr list --state open` — this file rots.)
 
 ⚠ THE ORIGINAL BRIEF SAID "~30 files, and the vendors page has 45 unbound reads". THAT IS WRONG.
 MEASURED ON MAIN 2026-08-23 AND RE-MEASURED 2026-08-24 AFTER WAVES 1 AND 2 LANDED — unchanged both
@@ -1313,7 +1315,8 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ### W3-B · A supplier's card earns its keep · **Opus 5 · high**
 
 ```
-🔒 Needs #4563 and #4699 merged (wave 0) — they hold vendor-dashboard files.
+🔓 GATE SATISFIED — #4563 and #4699 both merged in wave 0 on 2026-08-22; the vendor-dashboard files
+they held are free. (Re-confirm with `gh pr view`; this file rots.)
 Read WHATS_NEXT_Card_Family_Handoff_2026-07-29.md first: 11 PRs already shipped in this stream and
 its locked principles govern. Do not rebuild the maker, the card or the details sheet.
 
