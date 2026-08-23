@@ -191,7 +191,7 @@
 > in" screen the owner is describing **already exists, fully written** (fenced to
 > plus-ones today). **Rebuilding any of it is the paid-twice mistake.**
 > 🔴 **7 real gaps remain**, smallest first, each naming the existing thing to extend.
-> ✅ **GAPS 1 AND 2 ARE CLOSED — 2026-08-24. Do NOT rebuild them.** ~~A guest cannot
+> ✅ **GAPS 1 AND 2 ARE CLOSED AND VERIFIED ON THE LIVE SITE — 2026-08-23. Do NOT rebuild them.** ~~A guest cannot
 > KEEP their QR~~: **"Save the code" + "Copy link"** now ship on all three surfaces,
 > backed by `GET /api/guest/qr`, so the card's *"Save this to your phone"* is finally
 > true. 🔑 **The route takes NO parameters — that is the security property**: it is
