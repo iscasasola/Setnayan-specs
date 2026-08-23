@@ -111,7 +111,10 @@ alongside the snapshot. Then aggregate per service/package (arms-length filter �
 
 </details>
 
-### ⚖ 3c · Reply-time badge DONE 2026-08-24, PR [#4745](https://github.com/iscasasola/setnayan-platform/pull/4745) · Papic count is an OWNER/DPO GATE, not built.
+### ✅ 3c · BOTH HALVES DONE 2026-08-24 — reply-time badge PR [#4745](https://github.com/iscasasola/setnayan-platform/pull/4745) · documented-celebrations count PR [#4748](https://github.com/iscasasola/setnayan-platform/pull/4748). DO NOT REBUILD.
+📸 **The owner ruled on the count the same day:** *"we only count events that they had photos with … no photo, no proof the event took place."* The unit is the CELEBRATION, never the photo; **unfloored** (it counts the shop's own work, and a floor kills the nudge for the first two); labelled **"· this shop"**; requires `hidden_at IS NULL` **and `nsfw_checked = TRUE`** (the capture table's own surfacing rule — a posterless clip stays unscreened forever).
+🛑 **It is a COUNT, NOT A STATE** — it does not touch `completion_status`, whose 2026-08-21 rule is that a supplier's claim is not a release. If *"registered as a completed event"* was also meant to change who decides a job is done, that is a separate change with money attached.
+⏭ **Still the owner's:** the capture lane itself is flag-dark behind the unresolved DPO question.
 🔑 **The badge already shipped on `/explore` and was wrong twice**: no sample floor at all, and it read the no-data sentinel `0` as "instant", advertising a shop that had never replied as *"Usually responds in 0m"*. Floor = 3 replies, and the count now travels beside the median.
 🔴 **The Papic count is NOT an engineering task.** Its only honest source, `vendor_papic_captures`, is counsel-gated — a supplier collecting guest photos becomes a third-party controller of guest PI the guest never consented to, widening a LIVE NPC filing. The substitute (photos at events the supplier was booked for) counts photos **guests** took.
 
