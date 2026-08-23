@@ -153,6 +153,22 @@ anything you saw on a screen. It is cheaper than every other verification in thi
 catches the one class no amount of code-reading will: *the thing that looks like a defect and is a
 decision.*
 
+### 🔴 FIVE MORE FROM THE DASHBOARD + HUB STUDIES (2026-08-23) — do not schedule, do not decide
+
+⚠ **THE OWNER SAID "look good" TO THOSE STUDIES. THAT IS APPROVAL OF THE WORK, NOT A RULING ON
+THESE.** He was asked nothing and decided nothing. Do not read it as a yes to any row below.
+
+5. **A photograph on the event focal card.** It would reuse the shipped `event-scene.tsx`, but the
+   approved 15 July prototype draws that card with NO photo — so it deviates from an approved
+   composition.
+6. **Were the solid gold buttons a deliberate premium signature?** If yes, D-4 (one button per
+   screen that means "do this now") needs his nod. The written palette lock supports D-4 as drawn.
+7. **The film's label typeface** (`lib/std-themes.ts:64`) — one word in one class string, but the
+   cinematic look is paid and owner-approved.
+8. **Weather at all, and from which source** (this is AP-9's gate — an outside dependency and a
+   recurring cost).
+9. **How many times our own wordmark appears on a shared card** — three today, one proposed.
+
 ### 🔴 FOUR NEW OWNER DECISIONS — do not schedule, do not decide
 
 0. **Which "% planned" is THE number — checklist progress, or vendor teams locked?** Today they are
@@ -514,19 +530,37 @@ collision:
    and do not re-derive it. Both halves reverse the owner's own decisions of 2026-08-21: he NAMED
    "Untold/Told" in session over the obvious alternative and the row says do NOT re-open, and the
    circled (i) buttons were removed once and restored the next day AT HIS REQUEST. See § 0b.
- AP-4 THE COUPLE'S OWN PHOTO IS MISSING from the card people see when a story is shared
-   (app/api/og/realstory-slug/[slug]/). Small, and nobody else owns that directory.
-   ⚠ LOOK ONCE MORE BEFORE BUILDING IT. It is the only item in this group that is a DESIGN change
-   rather than a defect, and the session that raised it got six design claims wrong in a row, every
-   one by proposing to undo a deliberate choice. Run the standing check in § 0b first.
+ 🔀 AP-4 HAS MOVED TO W2-A AND IS NOT YOURS. It is the same work as H-3 — both touch
+   app/api/og/realstory-slug/[slug]/route.ts, so leaving it here would have put two sessions in one
+   file. Do not touch that route.
+
+ALSO YOURS — SEVEN MEASURED ITEMS FROM THE EVENT-DASHBOARD STUDY. The owner has SEEN the
+before/after and said "look good". ⚠ READ THAT PRECISELY: it approves the WORK, not the owner-gated
+items below it. Nothing here needs a ruling except D-4.
+ D-1 = AP-7, already described above — the caption. Same file as the rest of these.
+ D-3 APPOINTMENT NAMES ARE CUT to "Hair & mak…" (event-dashboard.tsx ~:2103, the minis grid).
+ D-5 A CHIP SAYS "PICK ONE" THREE TIMES when options are already saved (~:941, byKind()).
+ D-6 THE CARD PRINTS THE SAME NUMBER TWICE (~:1750, the chip row).
+ D-2 THE GREETING STRANDS "today." ON ITS OWN LINE (globals.css `.sn-h1` / `.sn-h1-tail` ~:3285).
+ D-8 MONO SHOULD KEEP DIGITS AND LOSE WORDS (globals.css + those call sites).
+ ⛔ D-4 (one button per screen that means "do this now") IS NOT YOURS YET — it depends on whether
+   solid gold buttons were the deliberate premium signature, which is an OWNER DECISION. Leave it.
+ ⚠ ONE UNSETTLED OBSERVATION ON D-2: the live tail colour was seen as terracotta while the source
+   says ink-400 #8A857B. Either the deploy differs or it was misread. D-2 holds either way — but
+   settle it and say which, rather than inheriting the ambiguity.
 
 TERRITORY (do not edit outside it): dashboard/[eventId]/schedule/page.tsx · lib/checklist.ts +
 checklist page · lib/customer-menu.ts · after/finished-event-summary.tsx ·
 dashboard/[eventId]/vendors/page.tsx · dashboard/[eventId]/page.tsx · lib/budget-build.ts ·
 lib/progress-stages.ts · dashboard/(launcher)/page.tsx + its _components/home-pill-nav.tsx ·
-the dashboard layout that must host the pill · app/api/og/realstory-slug/** · those two guard tests.
+the dashboard layout that must host the pill · dashboard/[eventId]/_components/event-dashboard.tsx ·
+app/globals.css (ONLY the `.sn-h1` / mono rules named in D-2 and D-8 — the palette and typeface
+tokens in that file are owner-locked and are NOT yours) · those two guard tests.
+⛔ NOT yours: app/api/og/realstory-slug/** (moved to W2-A).
 
-Aim for 3 PRs now (the four original items · the Apple items · the OG card). No migration.
+Aim for 4 PRs, defects first: (1) the four finished-event items · (2) the launcher items AP-1 + AP-6
++ D3's dead rows · (3) the caption D-1/AP-7 · (4) the event-dashboard polish D-3/D-5/D-6 + the two
+CSS items. No migration.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
@@ -780,14 +814,39 @@ which is your territory and nobody else's this wave:
  AP-9 GUESTS CANNOT SEE THE WEATHER for the day. ⚠ This needs a forecast provider chosen — an
    outside dependency and a small recurring cost. SCOPE IT, NAME THE PROVIDER AND THE COST, AND
    FLAG IT rather than signing us up to something.
- AP-10 GUESTS GET A LINE OF TEXT WHERE A MAP BELONGS.
-   🚨 THE CSP CHANGE IN next.config.ts MUST BE IN THE SAME PR AS THE MAP. Our own CSP has already
-   blocked our own map once: the vendor location map embedded OpenStreetMap, `frame-src` listed
-   YouTube/Vimeo/Instagram/TikTok and not OSM, and the map was an empty grey panel on every shop
-   page with coordinates from the day it shipped. OSM answered 200 — the browser refused the frame.
-   A blocked iframe is the same family as every other refusal in this repo: the only symptom is an
-   absence. There is a test that fails when an iframe host is missing; keep it fed.
- 🛑 ALL THREE WERE JUDGED WHILE SIGNED IN AS THE OWNER, AND THAT INVALIDATES A REAL FRACTION OF
+ AP-10 / H-4 — GUESTS GET A LINE OF TEXT WHERE A MAP BELONGS. (Same item; H-4 is its measured form.)
+   🛑 I TOLD YOU THE CSP MUST CHANGE IN THIS PR. THAT WAS WRONG AND I CHECKED IT MYSELF —
+   `https://www.openstreetmap.org` IS ALREADY IN the enforced frame-src (next.config.ts ~:203), and
+   a guard (`csp-embeds-are-allowed.test.ts`) already anchors the draft list to the enforced one.
+   THE HISTORY IS REAL AND THE FIX ALREADY LANDED: the vendor map was an empty grey panel on every
+   shop page with coordinates because OSM was missing from that list. It is not missing now.
+   ⇒ DO NOT EDIT THE CSP. Your only obligation is to ASSERT the host with the existing iframe-host
+   test so it cannot silently regress.
+   🔑 RULE 0 — THE MAP COMPONENT ALSO ALREADY SHIPS: `app/_components/vendor-location-map.tsx`.
+   REUSE IT in `app/[slug]/_components/venue-widget.tsx`. Do not draw a second map.
+ H-1 THE VEIL INSTRUCTION READS LIKE A SYSTEM MESSAGE, and "YOU" is stranded on its own line
+   (app/[slug]/_components/reveal/reveal-overlay.tsx ~:253–265).
+ H-3 (= the former AP-4, MOVED HERE so two sessions are not in one file) A SHARED LINK SHOWS OUR
+   BRAND WHERE THE COUPLE'S PHOTO SHOULD BE — three places.
+   🔑 RULE 0, CHECKED MYSELF: THE PHOTO RENDERER ALREADY SHIPS. lib/social/realstory-card.tsx has
+   `photoOverlayTree`, used when a published editorial carries a hero photo; the branded photoless
+   `cardTree` is the FALLBACK. So the job is REACHING the shipped renderer, not building one — and
+   note its own line "Reserved for the real-editorial photo-background variant. Null today", which
+   is the thing to trace.
+   🚨 USE THE STABLE URL, NEVER A PRESIGNED ONE. A presigned URL baked into a crawler's cache
+   EXPIRES and the card silently breaks later with nothing to blame. This repo has already paid for
+   exactly that on prerendered blog pages.
+   ⚠ ITS WHOLE BENEFIT IS CONDITIONAL on the event actually having a hero photo — unverified.
+   Check before you promise it.
+ H-5 "ADD TO CALENDAR" MOVES AROUND — it should sit in the same place at every stage, not appear
+   only after the film (app/[slug]/_components/empty-states.tsx ~:131–166).
+ H-7 A BIRTHDAY PAGE CALLS THE FAMILY "THE COUPLE" — 69 guest-read instances across 16 event types.
+   THE LARGEST ITEM HERE AND THE ONE WITH THE MOST GUEST-VISIBLE PAYOFF.
+   🔑 IT IS THREADING, NOT BUILDING: the words provider is ALREADY MOUNTED in the guest tree
+   (event-words-provider.tsx, proven by countdown.tsx consuming it) and the per-type terminology is
+   already seeded. 🔒 WEDDINGS MUST READ BYTE-IDENTICALLY AFTERWARDS — assert it, do not assume it.
+
+ 🛑 ALL FOUR OF THE ABOVE PLUS AP-3/9/10 WERE JUDGED WHILE SIGNED IN AS THE OWNER, AND THAT INVALIDATES A REAL FRACTION OF
    WHAT WAS REPORTED — the session that raised them says so itself. THE OWNER'S VIEW CARRIES A
    PREVIEW CHROME BAR A GUEST NEVER SEES, so the page it describes is not the page a guest gets.
    LOOK AT THE GUEST RENDERING BEFORE YOU BELIEVE ANY OF THE THREE. If an item's premise does not
