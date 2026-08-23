@@ -12,7 +12,8 @@ the regenerated pack PDFs in `apps/web/assets/npc-docs/` — never against anoth
 
 | verdict | count | findings |
 |---|---|---|
-| 🔴 **CONFIRMED** | **9** | 6 · 8 · 9 · 10 · 11 · 12 · 13 · **14 (already known)** · 16 |
+| 🔴 **CONFIRMED** | **8** | 6 · 8 · 9 · 10 · 11 · 12 · 13 · 16 |
+| 🛑 **RETRACTED IN PART** | 1 | **14** — withdrawal DOES blur; the real gap is that it does not blur photos taken BEFORE the withdrawal, while the couple's equivalent toggle does |
 | ✅ **REFUTED** | 2 | 19 · 20 |
 | ⚖ **RECLASSIFIED — owner decision, not a defect** | 1 | 17 |
 | ⏭ **UNRESOLVED** | 1 | 15 |
@@ -133,13 +134,37 @@ Measured: every form control on the profile page is `display_name` · `phone` ·
 
 **This is a right we advertise on a live public page and do not provide.**
 
-### #14 · Withdrawing consent blurs nothing
-**Evidence.** Privacy Manual §7: *"…can withdraw at any time via a 'Photo Consent' toggle;
-**withdrawal triggers face-blur in captures** and revocation of face data."*
+### #14 · 🛑 RETRACTED IN PART — withdrawal DOES blur. The gap is retroactivity.
+**Originally written as: "withdrawing consent blurs nothing." That is WRONG and is corrected here
+on 2026-08-24, the same day, before anyone acted on it.**
 
-Measured: `withdrawFaceConsent` in `app/[slug]/actions.ts` nulls `face_vector` and `vector_model`,
-stamps `revoked_at`, and deletes the R2 selfie. It contains **no reference to `faceblock_enabled`
-and no call to any blur path.** The revocation half is true; the blur half does not happen.
+**What I did:** read `withdrawFaceConsent` in `app/[slug]/actions.ts`, found it nulls `face_vector`
+and `vector_model`, stamps `revoked_at`, deletes the R2 selfie — and contains **no reference to
+`faceblock_enabled` and no call to any blur path** — and concluded the blur does not happen.
+
+**What is actually true:** `bakeFaceBlurForCapture` (`lib/face-blur.ts` ~394) counts
+`photo_consent = false` guests as a bake trigger **in its own right**, separately from
+`faceblock_enabled`, and deliberately **NOT** gated on owning the wall SKU — its own comment says
+gating it would mean *"a withdrawn guest's photos stay HIDDEN forever on every event that did not
+buy a wall, i.e. the ruling would silently not apply to most events."* **Ruling 2 was built.** A
+photo captured after a withdrawal is blurred.
+
+🔑 **THE MIRROR OF A RULE I QUOTED IN THIS SAME DOCUMENT.** "An empty column is not a missing
+mechanism — grep for the WRITER" has an inverse I walked straight into: **a function that does not
+CALL a thing is not proof the thing does not happen — grep for the READER.** The withdrawal action
+does not invoke the blur; the baker reads the withdrawal *state*. I traced one end and declared the
+other absent.
+
+**THE REAL GAP, measured, and it is narrower and sharper:**
+
+| door | new photos | photos already taken |
+|---|---|---|
+| the COUPLE ticks FaceBlock on a guest | blurred | **re-baked** — `rebakeWallForEvent` runs |
+| the GUEST withdraws their own consent | blurred | **NOT re-baked — nothing calls it** |
+
+So the guest's own door is the weaker one: they are protected going forward and not backward,
+while somebody else acting on their behalf gets both. **And the re-bake that does exist is capped
+at `limit = 25`** — the newest 25 wall tiles. At a real reception that is a fraction of the night.
 
 🔑 **FaceBlock itself IS built** — `lib/face-blur.ts` (sharp, Gaussian, baked server-side by
 `bakeFaceBlurForCapture`). It is simply a **different control**, driven by `guests.faceblock_enabled`.
