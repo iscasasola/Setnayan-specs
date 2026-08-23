@@ -153,8 +153,16 @@ anything you saw on a screen. It is cheaper than every other verification in thi
 catches the one class no amount of code-reading will: *the thing that looks like a defect and is a
 decision.*
 
-### 🔴 THREE NEW OWNER DECISIONS — do not schedule, do not decide
+### 🔴 FOUR NEW OWNER DECISIONS — do not schedule, do not decide
 
+0. **Which "% planned" is THE number — checklist progress, or vendor teams locked?** Today they are
+   two measures sharing one word, and both are correct for what they count (see AP-7). The rename
+   makes them stop contradicting each other WITHOUT answering this. Answering it is what would let
+   one number be computed once and shown everywhere — and that is a product ruling about what
+   "planned" means on your own dashboard, not an engineering choice.
+   🔑 This one is a different species from the three below: **not a decision recorded in the log,
+   but a decision NOBODY HAS EVER MADE, hiding inside something that looked like an inconsistency.**
+   The screen was not lying — two screens were answering different questions.
 1. **Collapse the phone's dark hero + chip into one photo card shared with desktop.** It would
    reverse an approved prototype.
 2. **May guests see the full guest list?** Apple shipped it in June 2026. Touches our RA 10173
@@ -484,9 +492,24 @@ collision:
    false "empty nav bar" off a DOM probe whose selector matched the wrong element and returned the
    SAME answer on a page where the bar is plainly visible. Only its control test caught it.
  AP-6 NAMES ARE CUT TO "Y…" ON A PHONE — several blocks in that same file.
- AP-7 HOME AND THE EVENT PAGE REPORT DIFFERENT "PLANNED" FIGURES (7% vs 0% was observed live).
-   ⚠ NOBODY HAS TRACED WHETHER THAT IS ONE BUG OR TWO DIFFERENT MEASURES. Trace it first; you are
-   already inside lib/progress-stages.ts for the After stub, so do them in one pass.
+ AP-7 RE-SCOPED 2026-08-23 — IT IS A RENAME, NOT A UNIFICATION, AND I TRACED IT MYSELF.
+   Home and the event page show different "% planned" figures. NEITHER IS BROKEN: they are two
+   different measures wearing one word.
+     · Home  — `(launcher)/page.tsx:1977` renders `${pct}% planned`, and pct is the event
+       CHECKLIST's real done/total (the comment at :372 says so).
+     · Focal — `[eventId]/_components/event-dashboard.tsx:1224` assigns
+       `const plannedPct = cockpitModel.briefing.lockedPct`, i.e. VENDOR CATEGORIES LOCKED
+       (`lib/setnayan-ai-cockpit.ts` ~:281). The line above it already admits this in writing:
+       "The focal's '% planned' gold bar = vendor-categories-locked share".
+   ⇒ THE WHOLE FIX IS THE FOCAL'S CAPTION. Home is untouched. Once the two stop sharing a word they
+   cannot contradict. Size S, presentation only.
+   🔑 RULE 0 — THE HONEST CAPTION ALREADY SHIPS TWICE. The SAME value is captioned "% locked in" in
+   `setnayan-ai-value.tsx:114` and `lib/setnayan-ai-activity.ts:226`. USE THAT WORDING. Do not
+   invent a third phrase for a number the product already knows how to name.
+   ⛔ DO NOT "COMPUTE IT ONCE AND SHOW IT EVERYWHERE". That requires deciding WHICH measure is the
+   real answer to "how planned is this wedding" — a product ruling, now on the owner list below.
+   Making it inside a defect fix is exactly how this project acquires a lock nobody remembers
+   agreeing to.
  🛑 AP-8 WAS HERE AND IS WITHDRAWN WHOLE — do not build it, do not build a smaller version of it,
    and do not re-derive it. Both halves reverse the owner's own decisions of 2026-08-21: he NAMED
    "Untold/Told" in session over the obvious alternative and the row says do NOT re-open, and the
