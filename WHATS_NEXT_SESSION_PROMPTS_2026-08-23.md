@@ -574,6 +574,18 @@ PROOF RULES — this product's entire defect history is bugs that were green in 
   symptom is an absence. If a screen is empty, suspect refusal before emptiness.
 - Supabase does not throw; it resolves with { error }. A try/catch around a read is decoration.
   An unread count is not zero.
+- A GUARD THAT EXEMPTS BY *FILE* EXEMPTS THE CODE IT POLICES. Proved 2026-08-24: a guard against
+  markup leaking into visible words exempted any file containing `dangerouslySetInnerHTML`
+  anywhere — and BOTH files carrying real defects contained one, so it exempted exactly what it
+  existed to catch. Reintroducing the defect left it GREEN. The fix was to exempt by SHAPE, per
+  PROPERTY: which names does this file feed to `__html`? There it was `hint`, never `label`, and
+  the defect lived in `label`. **Ask what is exempt, not which file is exempt** — and check the
+  false-positive direction too, that legitimate uses still pass.
+- A WORKAROUND AT THE RENDER SITE IS EVIDENCE OF A DEFECT IN THE DATA. Same stream: one screen
+  carried `.replace(/&apos;/g, "'")` AND a `dangerouslySetInnerHTML` added *so an apostrophe would
+  display* — **a permanent injection surface bought for a punctuation mark.** Fixing the data
+  DELETED a `dangerouslySetInnerHTML` rather than adding one. When you find a render-site patch,
+  look upstream before you copy it.
 - A HAND-ENUMERATED GUARD LIST IS A LIST OF THE THINGS YOU THOUGHT OF. Proved again on 2026-08-22:
   one guard listed 7 buy paths while 9 files called the function it was guarding, and a ₱400
   purchase reached a page naming NEITHER bank account. DERIVE the subject list from the code, and
