@@ -292,6 +292,11 @@ PROOF RULES — this product's entire defect history is bugs that were green in 
 - Every guard you write must be MUTATION-TESTED and the mutation MEASURED: print the occurrence
   count BEFORE → AFTER. An unmeasured mutation proves nothing in either direction. Assume your
   guard is decorative until you have broken the guarded thing and watched it go red.
+- A SEARCH FOR THE RENDERED FORM OF CSS-TRANSFORMED TEXT CAN NEVER MATCH THE SOURCE. Proved again
+  2026-08-23: a guest-page sweep grepped for "TOGETHER WITH THEIR FAMILIES" and "LIFT THE VEIL",
+  got 0/0, and nearly reported that the film does not render for guests at all. The capitals come
+  from CSS `text-transform`; the markup carries sentence case. Third instance of one rule this
+  week — A SEARCH THAT CANNOT MATCH IS NOT A NEGATIVE RESULT.
 - A rejected query is NOT a thrown error. A phantom column, a phantom enum value, a phantom RPC
   argument name, a blocked iframe, an unresolved r2:// reference — all get REFUSED, and the only
   symptom is an absence. If a screen is empty, suspect refusal before emptiness.
@@ -846,11 +851,29 @@ which is your territory and nobody else's this wave:
    (event-words-provider.tsx, proven by countdown.tsx consuming it) and the per-type terminology is
    already seeded. 🔒 WEDDINGS MUST READ BYTE-IDENTICALLY AFTERWARDS — assert it, do not assume it.
 
- 🛑 ALL FOUR OF THE ABOVE PLUS AP-3/9/10 WERE JUDGED WHILE SIGNED IN AS THE OWNER, AND THAT INVALIDATES A REAL FRACTION OF
-   WHAT WAS REPORTED — the session that raised them says so itself. THE OWNER'S VIEW CARRIES A
-   PREVIEW CHROME BAR A GUEST NEVER SEES, so the page it describes is not the page a guest gets.
-   LOOK AT THE GUEST RENDERING BEFORE YOU BELIEVE ANY OF THE THREE. If an item's premise does not
-   survive the guest view, close it and say so — that is a result.
+ ✅ THE GUEST VIEW IS NOW PARTLY MEASURED — 2026-08-23, and I REPRODUCED IT INDEPENDENTLY. An
+   anonymous GET of https://www.setnayan.com/cale-ice with no cookies and an iPhone user agent
+   returns 200 and 271,675 bytes — a stranger gets the real page, not a lock screen. Both runs
+   agreed exactly:
+     · "AS A GUEST SEES IT" 0 · "Edit this site" 0  ⇒ NO OWNER CHROME LEAKS. The earlier worry that
+       the preview bar distorted those readings is ANSWERED: it is simply not there for a guest.
+     · The whole 7-beat film IS server-rendered for a stranger ⇒ H-4 targets a surface guests reach.
+     · "Add to calendar" appears EXACTLY ONCE, at the film's closing beat ⇒ H-5's premise is now a
+       MEASURED FACT, not an inference: a guest who leaves the film early never gets it.
+     · font-mono appears 12 times ⇒ the mono chrome really is guest-facing.
+   ⚠ THIS COVERS THE SERVER RENDER ONLY. A fetch is not a browser; anything client-rendered is
+   still unmeasured.
+ 🛑 SO H-1 IS THE ONE ITEM STILL UNCONFIRMED, AND IT IS SUBTLE. "lift the veil" and "double-tap"
+   are ZERO occurrences in the anonymous HTML — DO NOT READ THAT AS "guests never see the veil".
+   The overlay is CLIENT-rendered, so a fetch cannot see it. The honest state is UNMEASURED, not
+   absent. OPEN H-1 BY LOADING THE PAGE IN A SIGNED-OUT BROWSER AND LOOKING, before you change
+   that pill.
+ 📊 AND H-3's DEPENDENCY IS NOW SETTLED — I QUERIED PRODUCTION. `event_editorial` holds 5 rows:
+   ZERO published, ZERO with a hero photo. So the photo card cannot render for anybody today, and
+   shipping H-3 changes nothing visible on the live site.
+   ⇒ BUILD IT AGAINST A FIXTURE AND ASSERT IT THERE. Do NOT expect to see it live, do NOT go
+   looking for the missing photos, and DO NOT report the emptiness as a defect — prod is
+   pre-launch and zero rows is the plan.
 
 🪤 TWO SURFACES FOR ONE THING, TWICE in this stream already — the seat-finder vs the join door, and
 the big QR CARD (phase-gated) vs the My QR BUTTON (not gated at all). ENUMERATE EVERY SURFACE
