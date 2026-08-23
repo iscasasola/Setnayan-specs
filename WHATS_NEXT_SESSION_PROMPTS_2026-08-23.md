@@ -800,11 +800,28 @@ items below it. Nothing here needs a ruling except D-4.
  D-6 THE CARD PRINTS THE SAME NUMBER TWICE (~:1750, the chip row).
  D-2 THE GREETING STRANDS "today." ON ITS OWN LINE (globals.css `.sn-h1` / `.sn-h1-tail` ~:3285).
  D-8 MONO SHOULD KEEP DIGITS AND LOSE WORDS (globals.css + those call sites).
- ⛔ D-4 (one button per screen that means "do this now") IS NOT YOURS YET — it depends on whether
-   solid gold buttons were the deliberate premium signature, which is an OWNER DECISION. Leave it.
+ ✅ D-4 (one terracotta action per screen that means "do this now") IS NOW UNBLOCKED — BUILD IT.
+   It was gated on whether solid gold buttons were a deliberate premium signature. MEASURED IN THE
+   DECISION LOG, and re-verified by me: THERE IS NO SUCH RULE. The only "premium signature" on
+   record is the six monogram effects (2026-07-17) — nothing about buttons anywhere. It was gated
+   on a rule that does not exist.
  ⚠ ONE UNSETTLED OBSERVATION ON D-2: the live tail colour was seen as terracotta while the source
    says ink-400 #8A857B. Either the deploy differs or it was misread. D-2 holds either way — but
    settle it and say which, rather than inheriting the ambiguity.
+
+ALSO YOURS — THREE MORE FROM THE NINE DELEGATED DESIGN CALLS (§ 0e).
+🟠 READ THE PROVENANCE FIRST: the owner said "do as you recommend" and a session made these. He did
+NOT rule on them individually. They stand and you should build them — but they are REVERSIBLE calls,
+not owner locks, so if one looks wrong when you open the file, SAY SO rather than protecting it.
+ · THE BUTTON STAYS "Add guest" — just drop the PROVISIONAL comment in `customer-nav-fab.tsx`.
+   Trivial; fold it into any PR.
+ · A PHOTOGRAPH ON THE EVENT FOCAL CARD — yes. Reuse `event-scene.tsx` (it already ships, with the
+   couple's own hero → a per-type stock photo → a branded gradient). THIS PAGE ONLY, and
+   `.sn-tile-dark` is untouched: the photo band sits INSIDE the existing dark card, so "one obsidian
+   per view" still holds.
+ · ONE EVENT CARD ON PHONE AND LAPTOP — yes, and ⚠ SEQUENCE IT LAST, AS ITS OWN FINAL PR. It is the
+   most visible change to an approved composition and must be judged on its own rather than buried
+   in a pile of other diffs. ⛔ Do not fold it into the polish PR.
 
 TERRITORY (do not edit outside it): dashboard/[eventId]/schedule/page.tsx · lib/checklist.ts +
 checklist page · lib/customer-menu.ts · after/finished-event-summary.tsx ·
@@ -815,9 +832,15 @@ app/globals.css (ONLY the `.sn-h1` / mono rules named in D-2 and D-8 — the pal
 tokens in that file are owner-locked and are NOT yours) · those two guard tests.
 ⛔ NOT yours: app/api/og/realstory-slug/** (moved to W2-A).
 
-Aim for 4 PRs, defects first: (1) the four finished-event items · (2) the launcher items AP-1 + AP-6
-+ D3's dead rows · (3) the caption D-1/AP-7 · (4) the event-dashboard polish D-3/D-5/D-6 + the two
-CSS items. No migration.
+ALSO YOURS: `app/dashboard/[eventId]/_components/customer-nav-fab.tsx` (the one-line comment above).
+
+Aim for 5 PRs, defects first and the most visible change LAST:
+ (1) the four finished-event items
+ (2) the launcher items AP-1 + AP-6 + D3's dead rows + the FAB comment
+ (3) the caption D-1/AP-7
+ (4) the event-dashboard polish D-3 · D-5 · D-6 · D-4 + the two CSS items D-2 · D-8
+ (5) ON ITS OWN: the photograph on the focal card + one event card on phone and laptop.
+No migration.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
