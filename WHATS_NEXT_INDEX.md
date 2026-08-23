@@ -190,9 +190,19 @@
 > day-only rule is enforced at the upload, and the "confirm who you are, then you're
 > in" screen the owner is describing **already exists, fully written** (fenced to
 > plus-ones today). **Rebuilding any of it is the paid-twice mistake.**
-> 🔴 **9 real gaps remain**, smallest first, each naming the existing thing to extend.
-> The sharpest: **a guest cannot KEEP their QR** — no save, download, print or copy —
-> while one of the three surfaces showing it says *"Save this to your phone."*
+> 🔴 **7 real gaps remain**, smallest first, each naming the existing thing to extend.
+> ✅ **GAPS 1 AND 2 ARE CLOSED — 2026-08-24. Do NOT rebuild them.** ~~A guest cannot
+> KEEP their QR~~: **"Save the code" + "Copy link"** now ship on all three surfaces,
+> backed by `GET /api/guest/qr`, so the card's *"Save this to your phone"* is finally
+> true. 🔑 **The route takes NO parameters — that is the security property**: it is
+> authenticated by the guest-session cookie alone, with a possession check, so a
+> **rotated** code cannot fetch its replacement and there is no id for anyone to try
+> other values of. 🔒 **The paid `CUSTOM_QR_GUEST` branded PNG is a different route
+> and is UNTOUCHED** — do not collapse the two.
+> 🪤 **Its coverage guard was DECORATION on the first run** — it matched the bare
+> identifier, which the surviving `import` satisfies, so deleting the JSX from all
+> three surfaces stayed **green three times**. Anchored to the JSX element; 13
+> mutations, all measured, all red. **Assume a sixth.**
 > ⚖ **4 owner decisions**, incl. whether the guest camera goes free like the rest of
 > Papic (that one decision closes two gaps outright).
 > ✅ Fixed on the way: a guest signing in on a **new phone** was never attached to the
