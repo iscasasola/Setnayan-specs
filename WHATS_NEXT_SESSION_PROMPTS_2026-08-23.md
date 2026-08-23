@@ -960,7 +960,7 @@ that stack authored explicitly as --fd-sys. See § 0b.
 ⛔ DO NOT REINSTATE THEM. Do not touch globals.css, front-door.css, home-reskin.css or
 front-door-opening.tsx in this session. This session is DOCUMENTS ONLY.
 
-2. RECONCILE THE ~28 PER-SURFACE PROTOTYPES to the shipped palette and the shipped app shell
+1. RECONCILE THE ~28 PER-SURFACE PROTOTYPES to the shipped palette and the shipped app shell
    (corpus prototypes/*.html). RECONCILE, NEVER REDRAW: they are still correct about composition
    and carry only the old palette. A delta between a ported screen and its archetype is a defect in
    the PORT, not a fresh design decision.
@@ -971,7 +971,7 @@ front-door-opening.tsx in this session. This session is DOCUMENTS ONLY.
    backwards, and the single most common colour mistake made here.
    ⛔ The 19 approved archetypes/overlays are BINDING (owner approved all 19 on 2026-08-04, no
    changes). Do not ask for them to be reviewed again.
-3. ⚠ MEASURE BEFORE YOU EDIT — MOST OF THIS IS ALREADY DONE. Checked 2026-08-23: the ADOPTED
+2. ⚠ MEASURE BEFORE YOU EDIT — MOST OF THIS IS ALREADY DONE. Checked 2026-08-23: the ADOPTED
    privacy manual already carries the corrected retention row ("for life", no scheduled deletion,
    nothing ever deleted) and no claim of Philippine hosting was found in it. The one remaining
    "90 days" in that file is about MARKETING SAMPLES being removed within 90 days of revocation —
@@ -988,9 +988,13 @@ front-door-opening.tsx in this session. This session is DOCUMENTS ONLY.
    ⚠ Wording that a regulator reads is the DPO's call, and the DPO is the owner. Apply the factual
    corrections; FLAG any sentence where the change is a matter of positioning rather than fact.
 
-Done when: every prototype states the current palette, the pack contains no claim of PH hosting
-and no 90-day retention, and you have listed for the owner exactly which sentences you changed and
-which you flagged instead.
+DONE WHEN: every prototype states the current palette · the pack makes no claim of Philippine
+hosting · every retention sentence matches the current ruling · and you have listed for the owner
+exactly which sentences you changed and which you flagged instead.
+⚠ NOTE THE CARE IN THAT SECOND-TO-LAST CLAUSE. It is NOT "no 90 days appears anywhere" — the
+marketing-samples rule legitimately says 90 days and must survive. A blanket sweep for the number
+would delete a correct rule. Match the MEANING, never the digits.
+✅ AND "NOTHING NEEDED CHANGING" IS A VALID ENDING. If the pack is already true, say so and stop.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
