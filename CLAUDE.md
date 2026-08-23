@@ -72,15 +72,19 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 > ### ✅ DONE 2026-08-24 — W3-B: A SUPPLIER'S CARD EARNS ITS KEEP
 > **5 PRs — the fifth is an owner ruling he made mid-session, closing the item the other four left open.**
 > ** Do NOT rebuild any of it.** Row: `DECISION_LOG.md` 2026-08-24.
-> **MERGED at the time of writing:** [#4741](https://github.com/iscasasola/setnayan-platform/pull/4741)
-> (the maker) · [#4744](https://github.com/iscasasola/setnayan-platform/pull/4744) (the picks —
-> and its migration is **verified applied in prod BY THE OBJECT**: the column, the trigger body,
-> and `option_mix` inside the live `service_card_records`).
-> **Pushed, green, auto-merge armed, NOT yet merged when this was written:**
-> [#4742](https://github.com/iscasasola/setnayan-platform/pull/4742) (start-from-a-card) ·
-> [#4745](https://github.com/iscasasola/setnayan-platform/pull/4745) (the reply-time floor).
-> ⚠ **Confirm all four before trusting this line** — this file has been wrong about a PR's state
-> three separate times: `gh pr view 4741 4742 4744 4745 -R iscasasola/setnayan-platform --json number,state,mergedAt`.
+> **ALL FIVE MERGED** — [#4741](https://github.com/iscasasola/setnayan-platform/pull/4741) (the
+> maker) · [#4742](https://github.com/iscasasola/setnayan-platform/pull/4742) (start-from-a-card) ·
+> [#4744](https://github.com/iscasasola/setnayan-platform/pull/4744) (the picks) ·
+> [#4745](https://github.com/iscasasola/setnayan-platform/pull/4745) (the reply-time floor) ·
+> [#4748](https://github.com/iscasasola/setnayan-platform/pull/4748) (the documented count).
+> ✅ **All three schema changes are VERIFIED APPLIED IN PROD BY THE OBJECT** — not by
+> `schema_migrations`, not by a migration comment: `vendor_packages.vendor_service_id` +
+> its ownership trigger body · `vendor_activity_stats.replied_thread_count` (default 0) · and the
+> live `service_card_records` carrying `option_mix`, `documented_events` AND
+> `vpc.nsfw_checked = TRUE` together — **that last check matters, because this function was
+> REPLACED TWICE in one day and the second replacement had to keep the first one's work.**
+> ⚠ **Confirm before trusting this line** — this file has been wrong about a PR's state three
+> separate times: `gh pr view 4741 4742 4744 4745 4748 -R iscasasola/setnayan-platform --json number,state,mergedAt`.
 > 🪤 And when you write that check, **derive the answer from a positive count, never from an empty
 > read** — a poll of these very PRs reported "ALL THREE MERGED" on its first tick because `gh`
 > failed silently (no repo in scope) and an empty result counted as zero-still-open.
