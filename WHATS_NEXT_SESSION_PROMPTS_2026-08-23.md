@@ -1340,9 +1340,10 @@ supplier's behalf. If a number could be read as a claim the supplier did not mak
 it.
 
 Migration: YES (one new table). Allocate forward with `pnpm migration:new`. RLS at CREATE TABLE
-time, using one of the 8 canonical patterns — no invented patterns. Another session is writing a
-migration this wave; yours must touch only your new table and read chat_threads. Do not touch
-event-type tables.
+time, using one of the 8 canonical patterns — no invented patterns. ⚠ CORRECTED 2026-08-24: the event-type migration MOVED to wave 4 (W4-WORDS), so
+**you are the ONLY migration writer in your wave.** Still touch only your new table and read
+chat_threads — the constraint was never really about the other session, it is about keeping a
+migration's blast radius to what you can prove.
 
 3 PRs.
 
