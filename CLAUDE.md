@@ -71,12 +71,18 @@ stream, deleted or replaced when it finishes. If you finish a stream, update thi
 
 > ### ✅ DONE 2026-08-24 — W3-B: A SUPPLIER'S CARD EARNS ITS KEEP
 > **4 PRs. Do NOT rebuild any of it.** Row: `DECISION_LOG.md` 2026-08-24.
-> PRs [#4741](https://github.com/iscasasola/setnayan-platform/pull/4741) ·
-> [#4742](https://github.com/iscasasola/setnayan-platform/pull/4742) ·
-> [#4744](https://github.com/iscasasola/setnayan-platform/pull/4744) ·
-> [#4745](https://github.com/iscasasola/setnayan-platform/pull/4745).
-> ⚠ Verify each with `gh pr view <#> --json state,mergedAt` before trusting this line — this file
-> has been wrong about a PR's state three separate times.
+> **MERGED at the time of writing:** [#4741](https://github.com/iscasasola/setnayan-platform/pull/4741)
+> (the maker) · [#4744](https://github.com/iscasasola/setnayan-platform/pull/4744) (the picks —
+> and its migration is **verified applied in prod BY THE OBJECT**: the column, the trigger body,
+> and `option_mix` inside the live `service_card_records`).
+> **Pushed, green, auto-merge armed, NOT yet merged when this was written:**
+> [#4742](https://github.com/iscasasola/setnayan-platform/pull/4742) (start-from-a-card) ·
+> [#4745](https://github.com/iscasasola/setnayan-platform/pull/4745) (the reply-time floor).
+> ⚠ **Confirm all four before trusting this line** — this file has been wrong about a PR's state
+> three separate times: `gh pr view 4741 4742 4744 4745 -R iscasasola/setnayan-platform --json number,state,mergedAt`.
+> 🪤 And when you write that check, **derive the answer from a positive count, never from an empty
+> read** — a poll of these very PRs reported "ALL THREE MERGED" on its first tick because `gh`
+> failed silently (no repo in scope) and an empty result counted as zero-still-open.
 >
 > 🧾 **THE MAKER STOPPED TRADING YOUR CARD FOR A COVERAGE SAVE.** Pressing *Save who it's for*
 > mid-build navigated to Services and took every unposted field with it — title, price,
