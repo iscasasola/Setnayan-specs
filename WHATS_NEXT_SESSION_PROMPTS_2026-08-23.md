@@ -195,6 +195,111 @@ or two different measures was observed but never traced. **AP-7 starts by tracin
 
 ---
 
+## § 0c · 🔴 THE CURRENT SEQUENCE — THIS SUPERSEDES THE WAVE NUMBER IN EVERY SESSION HEADING
+
+**Re-balanced 2026-08-23, after wave 0 finished and 23 new items arrived.** The headings below still
+say "wave 1", "wave 3" and so on because renaming eighteen of them invites a transcription error.
+**THIS TABLE IS THE ORDER. The headings are names, not positions.**
+
+**Why it needed redoing:** new items were placed by TERRITORY, which kept collisions out but let
+load pile up unevenly. Measured before rewriting: **W2-A had grown to 14 items and 12KB** — three
+bodies of work wearing one name — and **two separate sessions were building the same machinery**
+(the wake's per-type wording, and the birthday page calling the family "the couple"; both are the
+event-words provider).
+
+| wave | sessions running together | migration writer |
+|---|---|---|
+| ~~0~~ | ~~PR triage~~ ✅ **DONE 2026-08-22** | — |
+| **1** | **W1-A** finished event + launcher + dashboard polish · **W1-B** Pabati + buy pages + story-editing goes free · **W1-C** paperwork | W1-B |
+| **2** | **W2-A** guest activation + the cookie banner + honest reads in the hub · **W2-B** the two deletion jobs · **W2-C1** the admin gold | — |
+| **3** | **W3-A** honest reads in the couple tree · **W3-B** supplier cards · **W3-D** ⭑NEW the guest page's design set | W3-B |
+| **4** | **W4-WORDS** ⭑NEW the words follow the occasion · **W4-B** supplier screens · **W2-C2** admin archetype | W4-WORDS |
+| **5** | **W4-A** the couple's four daily screens · **W5-C** who is in my event + drafted invitation words · **W4-C** grant hardening | W4-C |
+| **6** | **W5-A** a supplier's record survives a delete · **W5-B** the undrawn surfaces | W5-A |
+| **7** | **W6** the grab-bag, ALONE | per finding |
+
+### The two structural changes, and why
+
+**⭑ W2-A IS SPLIT IN TWO, SEQUENTIALLY — both own `app/[slug]/**`, so they can never run together.**
+- **W2-A keeps BEHAVIOUR** (wave 2): the seven guest-activation gaps · the cookie banner · the three
+  hub files where a refused read renders as blank. These are defects. Ship them first.
+- **W3-D ⭑NEW takes the guest page's DESIGN SET** (wave 3): **AP-3** the invitation reading like a
+  receipt · **H-1** the veil instruction (⚠ open it in a signed-out browser first — its evidence is
+  client-rendered and a fetch cannot see it) · **H-3** the photo on a shared link (⚠ build to a
+  fixture: prod has 5 story pages, 0 published, 0 with a photo) · **H-4/AP-10** the venue map (⚠ do
+  NOT edit the CSP, it already allows the map, and the map component already ships — reuse it) ·
+  **H-5** "Add to calendar" in the same place at every stage (⚠ measured: it appears exactly ONCE,
+  at the film's closing beat).
+  ⛔ **AP-9 (weather) is NOT in it** — it needs a provider chosen, which is an owner decision.
+
+**⭑ W4-WORDS ⭑NEW MERGES TWO SESSIONS THAT WERE BUILDING ONE MECHANISM.** The old W3-C ("a wake is
+not a celebration") and **H-7** ("a birthday page stops calling the family the couple", 69
+guest-read instances across 16 event types) are the SAME machinery — the per-event-type vocabulary.
+Run separately, the second would have rebuilt what the first threaded.
+🔑 **AND IT IS THREADING, NOT BUILDING:** the words provider is ALREADY MOUNTED in the guest tree
+(`event-words-provider.tsx`, proven by `countdown.tsx` consuming it) and the per-type terminology is
+already seeded. 🔒 **Weddings must read byte-identically afterwards — ASSERT it, never assume it.**
+Order inside the session: thread H-7 first (it proves the seam on 16 existing types), then add the
+wake as a new type on the seam H-7 just proved.
+
+### What did NOT change, and why that matters
+**W1-A stays as one session at 13 items** — every one of them lives in the couple's dashboard tree,
+so splitting it would put two sessions in one file, which is the failure this plan exists to
+prevent. It runs **four PRs, defects first, polish last**; if it needs to go faster, a second
+session can take the polish PRs **after** its first PR lands and the file is free — never before.
+
+---
+
+## § 0d · EVERY ITEM FROM THE APPLE-INVITES STREAM, AND WHERE IT WENT
+
+**Three deliveries from that session: the twelve AP items (product comparison), the D items (event
+dashboard study) and the H items (event hub study).** This is the complete ledger. If an id is not
+in this table, it does not exist in the plan — say so rather than inventing a home for it.
+
+| id | what a person gets | home | state |
+|---|---|---|---|
+| AP-1 | the bottom bar stops vanishing on People / Spaces | **W1-A** | scheduled |
+| AP-2 | ~~the app's own typeface~~ | — | 🛑 withdrawn — reverses the front-door lock |
+| AP-3 | the invitation reads like an invitation, not a receipt | **W3-D** | scheduled |
+| AP-4 | the couple's photo on a shared card | **W3-D** (merged into H-3) | scheduled |
+| AP-5 | ~~one strength of the action colour~~ | — | 🛑 withdrawn — the gold buttons ARE the lock |
+| AP-6 | no name cut to "Y…" on a phone | **W1-A** | scheduled |
+| AP-7 | Home and the event page stop disagreeing | **W1-A** (= D-1) | scheduled, re-scoped to a rename |
+| AP-8 | ~~rename Untold/Told, drop the (i) buttons~~ | — | 🛑 withdrawn whole — both halves reverse owner decisions |
+| AP-9 | guests see the weather | — | 🔴 owner: whether at all, and from which source |
+| AP-10 | guests get a map | **W3-D** (= H-4) | scheduled |
+| AP-11 | a first draft of the invitation words | **W5-C** | scheduled |
+| AP-12 | empty screens look deliberate | **W6** | scheduled |
+| D-1 | the caption stops saying "planned" for two different things | **W1-A** | scheduled (= AP-7) |
+| D-2 | the greeting stops stranding "today." | **W1-A** | scheduled |
+| D-3 | appointment names stop being cut | **W1-A** | scheduled |
+| D-4 | one button per screen means "do this now" | — | 🔴 owner: were the gold buttons a deliberate signature? |
+| D-5 | the chip stops saying "pick one" when it is picked | **W1-A** | scheduled |
+| D-6 | the card stops printing 117 twice | **W1-A** | scheduled |
+| D-7 | the words-provider seam | **W4-WORDS** | already mounted — threading, not building |
+| D-8 | mono keeps digits, loses words | **W1-A** | scheduled |
+| H-1 | the veil instruction reads like an invitation | **W3-D** | scheduled ⚠ open it in a browser first |
+| H-2 | the mono chrome on the guest page | ❓ **NOT TABLED BY THE STUDY** | see below |
+| H-3 | a shared link shows the couple's photo | **W3-D** | scheduled ⚠ build to a fixture |
+| H-4 | the venue shows real streets | **W3-D** | scheduled ⚠ do NOT touch the CSP |
+| H-5 | "Add to calendar" in the same place at every stage | **W3-D** | scheduled — measured |
+| H-6 | — | ❓ **NEVER DELIVERED** | see below |
+| H-7 | a birthday page stops calling the family "the couple" | **W4-WORDS** | scheduled — the largest, most visible one |
+
+### ❓ TWO GAPS IN THE LEDGER — named, not guessed
+
+**H-2 and H-6 have no rows.** H-2 was referenced in passing — the study noted `font-mono` appears
+12 times in the anonymous guest render and said *"H-2's target is real for guests"* — but it was
+never given a table row, a file or a size. **H-6 was never mentioned at all.** The numbering
+implies both exist.
+
+⛔ **DO NOT INVENT THEM.** H-2 is probably the guest-side twin of **D-8** (mono keeps digits, loses
+words) — probably is not a scope. Ask the study for both rows before scheduling either, and if H-6
+turns out never to have existed, delete it from this table rather than leaving a hole that reads as
+lost work. **A gap you can name is cheap; a gap you paper over becomes a rebuild.**
+
+---
+
 ## § 0a · WHAT A SECOND VERIFICATION PASS FOUND — read this before any session
 
 Every prompt below was re-checked against `origin/main` @ `c984e0caf` and the live production
@@ -811,46 +916,14 @@ already answered.
    RA 10173 proof-of-consent record and is a DPO decision the owner has NOT made. Do not cross that
    line while fixing a bug.
 
-ALSO YOURS — THREE ITEMS FROM THE APPLE-INVITES COMPARISON (see § 0b), all inside app/[slug]/**,
-which is your territory and nobody else's this wave:
- AP-3 THE INVITATION READS LIKE A RECEIPT, NOT AN INVITATION — a monospaced data face where the
-   editorial serif belongs. The guest-facing editorial stack (Cormorant/Manrope) deliberately lives
-   outside the dashboard font scope; use it rather than inventing a third register.
- AP-9 GUESTS CANNOT SEE THE WEATHER for the day. ⚠ This needs a forecast provider chosen — an
-   outside dependency and a small recurring cost. SCOPE IT, NAME THE PROVIDER AND THE COST, AND
-   FLAG IT rather than signing us up to something.
- AP-10 / H-4 — GUESTS GET A LINE OF TEXT WHERE A MAP BELONGS. (Same item; H-4 is its measured form.)
-   🛑 I TOLD YOU THE CSP MUST CHANGE IN THIS PR. THAT WAS WRONG AND I CHECKED IT MYSELF —
-   `https://www.openstreetmap.org` IS ALREADY IN the enforced frame-src (next.config.ts ~:203), and
-   a guard (`csp-embeds-are-allowed.test.ts`) already anchors the draft list to the enforced one.
-   THE HISTORY IS REAL AND THE FIX ALREADY LANDED: the vendor map was an empty grey panel on every
-   shop page with coordinates because OSM was missing from that list. It is not missing now.
-   ⇒ DO NOT EDIT THE CSP. Your only obligation is to ASSERT the host with the existing iframe-host
-   test so it cannot silently regress.
-   🔑 RULE 0 — THE MAP COMPONENT ALSO ALREADY SHIPS: `app/_components/vendor-location-map.tsx`.
-   REUSE IT in `app/[slug]/_components/venue-widget.tsx`. Do not draw a second map.
- H-1 THE VEIL INSTRUCTION READS LIKE A SYSTEM MESSAGE, and "YOU" is stranded on its own line
-   (app/[slug]/_components/reveal/reveal-overlay.tsx ~:253–265).
- H-3 (= the former AP-4, MOVED HERE so two sessions are not in one file) A SHARED LINK SHOWS OUR
-   BRAND WHERE THE COUPLE'S PHOTO SHOULD BE — three places.
-   🔑 RULE 0, CHECKED MYSELF: THE PHOTO RENDERER ALREADY SHIPS. lib/social/realstory-card.tsx has
-   `photoOverlayTree`, used when a published editorial carries a hero photo; the branded photoless
-   `cardTree` is the FALLBACK. So the job is REACHING the shipped renderer, not building one — and
-   note its own line "Reserved for the real-editorial photo-background variant. Null today", which
-   is the thing to trace.
-   🚨 USE THE STABLE URL, NEVER A PRESIGNED ONE. A presigned URL baked into a crawler's cache
-   EXPIRES and the card silently breaks later with nothing to blame. This repo has already paid for
-   exactly that on prerendered blog pages.
-   ⚠ ITS WHOLE BENEFIT IS CONDITIONAL on the event actually having a hero photo — unverified.
-   Check before you promise it.
- H-5 "ADD TO CALENDAR" MOVES AROUND — it should sit in the same place at every stage, not appear
-   only after the film (app/[slug]/_components/empty-states.tsx ~:131–166).
- H-7 A BIRTHDAY PAGE CALLS THE FAMILY "THE COUPLE" — 69 guest-read instances across 16 event types.
-   THE LARGEST ITEM HERE AND THE ONE WITH THE MOST GUEST-VISIBLE PAYOFF.
-   🔑 IT IS THREADING, NOT BUILDING: the words provider is ALREADY MOUNTED in the guest tree
-   (event-words-provider.tsx, proven by countdown.tsx consuming it) and the per-type terminology is
-   already seeded. 🔒 WEDDINGS MUST READ BYTE-IDENTICALLY AFTERWARDS — assert it, do not assume it.
+🔀 THE GUEST PAGE'S DESIGN SET HAS MOVED OUT OF THIS SESSION — see § 0c. AP-3, H-1, H-3, H-4/AP-10
+and H-5 now belong to **W3-D**, one wave later, because this session had grown to 14 items and three
+different bodies of work under one name. YOU OWN app/[slug]/** THIS WAVE AND W3-D OWNS IT THE NEXT;
+the two can never run at the same time. Do the DEFECTS. Leave the design set alone — including the
+map and the share card.
+⛔ AP-9 (weather) is nobody's yet: it needs a provider chosen, which is an owner decision.
 
+The one design-adjacent thing that IS yours, because it is a lie rather than a look:
  ✅ THE GUEST VIEW IS NOW PARTLY MEASURED — 2026-08-23, and I REPRODUCED IT INDEPENDENTLY. An
    anonymous GET of https://www.setnayan.com/cale-ice with no cookies and an iPhone user agent
    returns 200 and 271,675 bytes — a stranger gets the real page, not a lock screen. Both runs
@@ -1335,6 +1408,124 @@ names.
 Fable verifies; Sonnet fixes what survives; anything touching a migration, a permission, a deletion
 or money goes to Opus instead. 3–6 tiny PRs. Nothing else runs while you do this, so you may claim
 any file — one at a time.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+---
+
+## ⭑ NEW SESSIONS FROM THE 2026-08-23 RE-BALANCE (see § 0c)
+
+### W3-D · The guest page's design set · **Opus 5 · medium** — wave 3
+
+```
+You own app/[slug]/** this wave. W2-A owned it the wave before and its defects have landed; do not
+redo them, and do not touch app/[slug]/actions.ts, the RSVP widget or the join screens — those were
+its territory and its work is done.
+
+Five items, all measured on a real anonymous guest render (see below).
+
+ AP-3 THE INVITATION READS LIKE A RECEIPT, NOT AN INVITATION — a monospaced data face where the
+   editorial serif belongs. The guest-facing editorial stack (Cormorant/Manrope) deliberately lives
+   outside the dashboard font scope; use it rather than inventing a third register.
+ AP-9 GUESTS CANNOT SEE THE WEATHER for the day. ⚠ This needs a forecast provider chosen — an
+   outside dependency and a small recurring cost. SCOPE IT, NAME THE PROVIDER AND THE COST, AND
+   FLAG IT rather than signing us up to something.
+ AP-10 / H-4 — GUESTS GET A LINE OF TEXT WHERE A MAP BELONGS. (Same item; H-4 is its measured form.)
+   🛑 I TOLD YOU THE CSP MUST CHANGE IN THIS PR. THAT WAS WRONG AND I CHECKED IT MYSELF —
+   `https://www.openstreetmap.org` IS ALREADY IN the enforced frame-src (next.config.ts ~:203), and
+   a guard (`csp-embeds-are-allowed.test.ts`) already anchors the draft list to the enforced one.
+   THE HISTORY IS REAL AND THE FIX ALREADY LANDED: the vendor map was an empty grey panel on every
+   shop page with coordinates because OSM was missing from that list. It is not missing now.
+   ⇒ DO NOT EDIT THE CSP. Your only obligation is to ASSERT the host with the existing iframe-host
+   test so it cannot silently regress.
+   🔑 RULE 0 — THE MAP COMPONENT ALSO ALREADY SHIPS: `app/_components/vendor-location-map.tsx`.
+   REUSE IT in `app/[slug]/_components/venue-widget.tsx`. Do not draw a second map.
+ H-1 THE VEIL INSTRUCTION READS LIKE A SYSTEM MESSAGE, and "YOU" is stranded on its own line
+   (app/[slug]/_components/reveal/reveal-overlay.tsx ~:253–265).
+ H-3 (= the former AP-4, MOVED HERE so two sessions are not in one file) A SHARED LINK SHOWS OUR
+   BRAND WHERE THE COUPLE'S PHOTO SHOULD BE — three places.
+   🔑 RULE 0, CHECKED MYSELF: THE PHOTO RENDERER ALREADY SHIPS. lib/social/realstory-card.tsx has
+   `photoOverlayTree`, used when a published editorial carries a hero photo; the branded photoless
+   `cardTree` is the FALLBACK. So the job is REACHING the shipped renderer, not building one — and
+   note its own line "Reserved for the real-editorial photo-background variant. Null today", which
+   is the thing to trace.
+   🚨 USE THE STABLE URL, NEVER A PRESIGNED ONE. A presigned URL baked into a crawler's cache
+   EXPIRES and the card silently breaks later with nothing to blame. This repo has already paid for
+   exactly that on prerendered blog pages.
+   ⚠ ITS WHOLE BENEFIT IS CONDITIONAL on the event actually having a hero photo — unverified.
+   Check before you promise it.
+ H-5 "ADD TO CALENDAR" MOVES AROUND — it should sit in the same place at every stage, not appear
+   only after the film (app/[slug]/_components/empty-states.tsx ~:131–166).
+ H-7 A BIRTHDAY PAGE CALLS THE FAMILY "THE COUPLE" — 69 guest-read instances across 16 event types.
+   THE LARGEST ITEM HERE AND THE ONE WITH THE MOST GUEST-VISIBLE PAYOFF.
+   🔑 IT IS THREADING, NOT BUILDING: the words provider is ALREADY MOUNTED in the guest tree
+   (event-words-provider.tsx, proven by countdown.tsx consuming it) and the per-type terminology is
+   already seeded. 🔒 WEDDINGS MUST READ BYTE-IDENTICALLY AFTERWARDS — assert it, do not assume it.
+
+
+📏 WHAT IS ALREADY MEASURED FOR YOU — an anonymous GET of a real invitation page (no cookies,
+iPhone UA) returned 200 and 271,675 bytes, reproduced twice:
+  · NO owner chrome leaks to a guest — the preview bar and the edit link are 0 occurrences.
+  · The whole 7-beat film IS server-rendered for a stranger, so H-4's surface is genuinely reached.
+  · "Add to calendar" appears EXACTLY ONCE, at the film's closing beat — H-5's justification is a
+    measured fact, not an inference.
+  · font-mono appears 12 times, so the mono chrome is genuinely guest-facing.
+  ⚠ THIS IS THE SERVER RENDER ONLY. A fetch is not a browser.
+
+🛑 OPEN H-1 IN A SIGNED-OUT BROWSER BEFORE YOU CHANGE ITS WORDING. Its strings are ZERO occurrences
+in that HTML — and that is NOT evidence they are absent. The overlay is CLIENT-rendered, so a fetch
+cannot see it. Unmeasured, not missing.
+
+🪤 AND WHEN YOU GREP THAT PAGE: a search for the RENDERED form of CSS-transformed text can never
+match the source. A sweep looking for "TOGETHER WITH THEIR FAMILIES" got 0 and nearly reported that
+the film does not render for guests at all — the capitals come from `text-transform` and the markup
+carries sentence case. BEFORE TRUSTING A ZERO, PROVE THE SEARCH CAN FIND A KNOWN POSITIVE.
+
+⛔ NOT YOURS: AP-9 (weather) needs a provider chosen — an owner decision, with a recurring cost.
+And the wording per event type is W4-WORDS, one wave later. Do not start it here.
+
+RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
+```
+
+### W4-WORDS · The words follow the occasion · **Opus 5 · high · the wording drafted by Fable** — wave 4
+
+```
+This session MERGES two that were building one mechanism: "a birthday page stops calling the family
+the couple" (69 guest-read instances across 16 event types) and "a wake is not a celebration" (a new
+event type with its own voice). Both are the per-event-type vocabulary. Run apart, the second would
+have rebuilt what the first threaded.
+
+DO THEM IN THIS ORDER — it is the whole reason they are one session:
+1. THREAD THE EXISTING TYPES FIRST. 🔑 IT IS THREADING, NOT BUILDING: the words provider is ALREADY
+   MOUNTED in the guest tree (`app/[slug]/_components/event-words-provider.tsx`, proven by
+   countdown.tsx consuming it) and the per-type terminology is already seeded. 69 guest-read
+   instances still say "the couple" at people whose event has no couple in it.
+   🔒 WEDDINGS MUST READ BYTE-IDENTICALLY AFTERWARDS. Assert it — do not assume it. That assertion
+   is the deliverable that makes step 2 safe.
+2. THEN ADD THE WAKE, on the seam step 1 just proved. A family arranging a funeral gets an event
+   that never says "celebrate", never says "party", never counts down to a happy day, and never
+   offers a save-the-date. The owner already said yes to this (2026-08-17, "yes to all four").
+   THE WORDS ARE THE PRODUCT HERE — draft every user-visible string with Fable before wiring
+   anything. A wake screen reading "Let's get this celebration started!" is not a copy bug, it is
+   the entire defect.
+
+WHERE IT LANDS: lib/event-type-profile.ts · lib/event-words.ts · lib/checklist-event-type-defs.ts ·
+app/[slug]/_components/event-words-provider.tsx and the guest-tree strings that still hardcode
+couple wording · a migration for the new type.
+
+THINGS THIS PRODUCT HAS ALREADY LEARNED, and they apply directly:
+- The onboarding flow ASKS WHAT IT ALREADY KNOWS. Do not add a screen that re-asks something the
+  previous screen carried.
+- Raw option keys have leaked to customers before (`1st_birthday`, `adult_regular` on screen). Every
+  option needs a label, and the option type may have no label slot — check before assuming the
+  renderer can fix it.
+- Removing a screen at runtime is NOT how to drop a question: out of range is a render-time THROW,
+  and removal disarms the "you already have one of these" walk-back.
+- There is a settled checklist for adding an event type in the corpus. Follow it; do not derive one.
+
+MIGRATION: yes, event-type tables only. You are the ONLY migration writer in your wave.
+2 PRs: the threading, then the wake.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
