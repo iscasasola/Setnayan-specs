@@ -850,11 +850,11 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ```
 🔓 **GATE SATISFIED 2026-08-22 21:57Z — #4708, #4711 AND #4723 ARE ALL MERGED, and production is
 serving the last of them. YOU MAY START.** (Re-confirm with `gh pr view <n> --json state,mergedAt`
-anyway — that costs seconds and this file rots.) (#4723 was opened on 2026-08-22
-by the W0 session and touches app/papic/buy/actions.ts and the vendor-side photo-challenge buy
-path — adjacent to the challenge libraries this retirement edits.) Both edit the exact files this
-work deletes; landing an ~80-file deletion into that window makes a deliberate retirement
-indistinguishable from the accident being repaired.
+anyway — that costs seconds and this file rots.)
+📋 WHY THOSE THREE WERE THE GATE, since you no longer have to wait on them: all three edited the
+exact files this retirement deletes — the papic buy action, the vendor-side photo-challenge path
+and the challenge libraries. Landing an ~80-file DELETION into that window would have made a
+deliberate retirement indistinguishable from the accident that was being repaired at the time.
 
 Read WHATS_NEXT_Studio_Is_One_Concept_2026-08-22.md in full. It carries the owner's rulings, the
 enumerated scope and the traps. Four pieces, in this order, as separate PRs:
