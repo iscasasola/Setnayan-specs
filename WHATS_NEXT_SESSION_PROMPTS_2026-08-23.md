@@ -1279,7 +1279,7 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 
 ### 🛑 W3-A · "You have none" must mean none — **DONE 2026-08-24. DO NOT RUN THIS SECTION.**
 
-> ✅ **3 PRs: [#4746](https://github.com/iscasasola/setnayan-platform/pull/4746) (merged) ·
+> ✅ **3 PRs, ALL MERGED: [#4746](https://github.com/iscasasola/setnayan-platform/pull/4746) ·
 > [#4751](https://github.com/iscasasola/setnayan-platform/pull/4751) ·
 > [#4752](https://github.com/iscasasola/setnayan-platform/pull/4752). Full row:
 > `DECISION_LOG.md` 2026-08-24.** The guard shipped at
