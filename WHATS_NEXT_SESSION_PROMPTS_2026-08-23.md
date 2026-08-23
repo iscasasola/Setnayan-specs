@@ -524,23 +524,13 @@ documents only again, and Sonnet again.)*
 ```
 Documents only. You will not touch app code, and no test can catch a mistake here — read carefully.
 
-0. 🛑 AP-2 — "THE APP IS SET IN THE PHONE'S DEFAULT TYPEFACE" IS NOT TRUE AS WRITTEN, AND I CHECKED.
-   globals.css:30 defines --font-app: var(--font-hanken); `.app-surface` maps --font-sans and
-   --font-display to it AND sets font-family directly; layout.tsx loads Hanken Grotesk and Space
-   Mono through next/font/local; and the woff2 files fetch 200 from www.setnayan.com right now.
-   THE APP HAS A TYPEFACE AND IT LOADS. Do not add one.
-   🔑 WHAT WAS ACTUALLY OBSERVED IS REAL, AND THE DIAGNOSIS IS NARROWER: somewhere the variable is
-   not in scope — a route whose layout does not carry the font-variable class, or an element
-   outside `.app-surface` — and `font-family: var(--font-app), system-ui` then falls back silently
-   to the phone's default. FIND THE SURFACE THAT LOSES THE VARIABLE, name it, and fix that.
-   If after measuring you find every surface carries it, SAY SO AND CLOSE THE ITEM — that is a
-   result. Check a signed-in dashboard route, a public marketing route and a guest /{slug} route,
-   because they are three different font scopes by design.
-1. AP-5 — ONE STRENGTH OF THE ACTION COLOUR EVERYWHERE (globals.css + front-door-opening.tsx).
-   ⚠ In this repo the Tailwind slot NAMED `terracotta` is the GOLD #A9834B and the action colour
-   lives in the slot named `mulberry` — inherited and backwards. And #8C6932 is NOT off-palette: it
-   is --color-terracotta-700 at a documented 5.02:1. Do not "fix" it.
-   Check contrast in BOTH themes; a token can pass light and fail dark.
+🛑 TWO APP-WIDE CSS ITEMS WERE BRIEFLY ADDED HERE AND ARE NOW WITHDRAWN — an app-wide typeface
+change and a single strength of the action colour. BOTH WOULD HAVE REVERSED AN OWNER LOCK. The
+front door's own stylesheet is headed "WHAT IS LOCKED HERE (owner 2026-08-11, this page only)" and
+lists gold #8C6932 action buttons at 4.86:1 and "the SYSTEM typeface, not the app's serif", with
+that stack authored explicitly as --fd-sys. See § 0b.
+⛔ DO NOT REINSTATE THEM. Do not touch globals.css, front-door.css, home-reskin.css or
+front-door-opening.tsx in this session. This session is DOCUMENTS ONLY.
 
 2. RECONCILE THE ~28 PER-SURFACE PROTOTYPES to the shipped palette and the shipped app shell
    (corpus prototypes/*.html). RECONCILE, NEVER REDRAW: they are still correct about composition
