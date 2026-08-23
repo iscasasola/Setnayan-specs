@@ -1273,7 +1273,14 @@ event-type tables.
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### W3-C · A wake is not a celebration · **Opus 5 · high · words drafted by Fable**
+### 🛑 W3-C · A wake is not a celebration — **SUPERSEDED 2026-08-23. DO NOT RUN THIS SECTION.**
+
+**It merged into W4-WORDS** (see § 0c), because the wake's per-type wording and H-7 ("a birthday
+page stops calling the family the couple") are the SAME mechanism — the per-event-type vocabulary.
+Run apart, the second rebuilds what the first threaded. **Use W4-WORDS. The block below is kept only
+so a reader who was pointed here finds the redirection instead of a missing section.**
+
+<details><summary>The superseded block</summary>
 
 ```
 The owner already said yes to this (2026-08-17, "yes to all four"). Verified absent 2026-08-23: no
@@ -1306,6 +1313,8 @@ a different table set). 2 PRs: schema first, then tone.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
+
+</details>
 
 ---
 
