@@ -59,17 +59,42 @@ in it.
   finding is FALSE.
 - Co-hosting ships (`app/host/accept` exists); Apple only added theirs in June 2026.
 
-🛑 **AND ONE MORE PREMISE DID NOT SURVIVE MY OWN CHECK — AP-2.** It is filed as *"the app is set in
-the phone's default typeface"*. **Measured on main and on the live site: the app sets its own
-typeface and it loads.** `globals.css:30` defines `--font-app: var(--font-hanken)`; `.app-surface`
-maps `--font-sans` / `--font-display` to it and sets `font-family` directly; `layout.tsx` loads
-Hanken and Space Mono via `next/font/local`; and the woff2 files fetch **200** from
-www.setnayan.com. So the build is NOT "choose and apply a typeface".
-🔑 **The likely real defect is narrower: a surface where `--font-hanken` is not in scope** — a route
-whose layout does not carry the font-variable class, or an element outside `.app-surface` — at
-which point `font-family: var(--font-app), system-ui` silently falls back to **the phone's default**,
-which is exactly what was observed. **FIND THE SURFACE THAT LOSES THE VARIABLE. Do not add a
-typeface the app already has.**
+🛑 **AP-2 AND AP-5 ARE WITHDRAWN. BOTH WOULD HAVE REVERSED AN OWNER LOCK — AND MY OWN FIRST
+CORRECTION OF AP-2 WAS ALSO WRONG.**
+
+I first wrote that the app *does* set a typeface and that some surface must be losing the variable.
+Closer, still not the cause. **Read it yourself:**
+```bash
+git show origin/main:apps/web/app/_components/frontdoor/front-door.css | sed -n '18,36p'
+```
+That docblock is headed **"WHAT IS LOCKED HERE (owner 2026-08-11, this page only)"** and lists,
+verbatim: **gold `#8C6932` action buttons with cream labels — measured 4.86:1** · **the SYSTEM
+typeface, not the app's serif** · cream `#FDFBF7` page, ink `#2C2A29`. Line ~73 authors it
+explicitly: `--fd-sys: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, …`.
+
+So the front door is **not** losing a variable and is **not** missing a typeface. It wears a
+deliberately authored system stack **because the owner chose it**, and its gold buttons are the
+locked treatment. *"Settle on one strength of the action colour, front door included"* is a
+reversal of an owner decision wearing the clothes of a consistency fix.
+
+🔑 **THE LESSON IS WORTH MORE THAN BOTH ITEMS: THAT SESSION MEASURED THE FRONT DOOR AND SAID "THE
+APP".** The front door is **the single page in this product with its own owner-locked visual
+identity** — the worst possible sample to generalise from. Its "5 on-brand vs 133 fallback" tally
+was the lock working correctly, read as a defect. **Anything sourced from a front-door reading must
+be re-scoped to say "front door", or re-measured on a real app surface.**
+
+🔒 **AND CARRY THIS, FROM THE SAME DOCBLOCK:** under `[data-chrome='app']` the front door's
+page-level declarations — background, colour, typeface — are **UNSET on purpose**, so it lends
+CHROME and never page styling. **"Which typeface does shared chrome wear" is an OPEN OWNER
+DECISION** (`ONE_SHELL_PLAN_2026-08-13.md` §5.3). The file says letting an inherited `font-family`
+leak onto ~15 pages *"would have decided it silently, which is how this project has twice ended up
+with a lock nobody remembers agreeing to."* **Do not decide it by accident.**
+
+⏭ **WHAT SURVIVES IS A MEASUREMENT, NOT A BUILD.** Nobody has ever tallied the computed
+`font-family` on an **app** surface. That measurement now opens W4-A (see its prompt); a build is
+opened only if the app itself is falling back. AP-5 leaves nothing behind on the front door; whether
+the app's own primary buttons are internally inconsistent is a **separate, unmeasured** claim — two
+were observed and both were terracotta.
 
 ### Where the twelve landed
 
@@ -80,8 +105,8 @@ typeface the app already has.**
 | AP-7 | Home and the event page report the same "planned" figure | **W1-A** | `(launcher)/page.tsx` + `lib/progress-stages.ts`, both already W1-A's — and W1-A is already inside `progress-stages.ts` for the After stub |
 | AP-8 | section names that don't need a help button | **W1-A** | same file, copy only |
 | AP-4 | the couple's photo appears on the card shared in Messenger | **W1-A** | `app/api/og/realstory-slug/[slug]/` — owned by nobody; small, and W1-A is the light session |
-| AP-2 | the app stops falling back to the phone's default typeface | **W1-C** | globals/front-door/home-reskin CSS — **and see the correction above: MEASURE FIRST** |
-| AP-5 | one strength of the action colour everywhere | **W1-C** | `globals.css` + `front-door-opening.tsx`, same territory as AP-2 |
+| ~~AP-2~~ | ~~the app stops falling back to the phone's default typeface~~ | 🛑 **WITHDRAWN** | reverses the owner's 2026-08-11 front-door lock. What survives is a measurement, opening **W4-A**. |
+| ~~AP-5~~ | ~~one strength of the action colour everywhere~~ | 🛑 **WITHDRAWN** | the gold front-door buttons ARE the locked treatment. Nothing left on the front door. |
 | AP-3 | the invitation reads like an invitation, not a receipt | **W2-A** | `app/[slug]/**` is W2-A's territory |
 | AP-9 | guests see the weather for the day | **W2-A** | same territory ⚠ needs a forecast provider chosen — that is a cost/dependency call, flag it |
 | AP-10 | guests get a map instead of a line of text | **W2-A** | same territory ⚠ **the CSP change in `next.config.ts` MUST be in the same PR** — our own CSP has already blocked our own map once, and the only symptom was an empty grey panel |
@@ -491,14 +516,13 @@ runs as superuser and will not catch a permissions problem.
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
 ```
 
-### W1-C · The house style — paperwork, typeface, one action colour · **Opus 5 · medium**
-*(was Sonnet 5 / documents only — it gained two app-wide CSS items from the Apple-Invites
-comparison, and an app-wide typeface change is not a Sonnet job.)*
+### W1-C · Make the paperwork true · **Sonnet 5 · medium**
+*(It briefly gained two app-wide CSS items from the Apple-Invites comparison and was raised to
+Opus. **Both were withdrawn on 2026-08-23 — they would have reversed an owner lock (§ 0b).** It is
+documents only again, and Sonnet again.)*
 
 ```
-Three things that all answer one question: does the product say the same thing about itself
-everywhere? Two of them touch app-wide CSS; the third is documents, where no test can catch a
-mistake — read carefully.
+Documents only. You will not touch app code, and no test can catch a mistake here — read carefully.
 
 0. 🛑 AP-2 — "THE APP IS SET IN THE PHONE'S DEFAULT TYPEFACE" IS NOT TRUE AS WRITTEN, AND I CHECKED.
    globals.css:30 defines --font-app: var(--font-hanken); `.app-surface` maps --font-sans and
