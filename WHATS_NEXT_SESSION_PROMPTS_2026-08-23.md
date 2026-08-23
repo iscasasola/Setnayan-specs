@@ -25,7 +25,7 @@ not have to answer anything mid-session.**
 | W2-B · Delete what we said we would delete | Opus 5 | **xhigh** | 2 |
 | W2-C1 · The gold nobody can read | Sonnet 5 | medium | 2 |
 | W2-C2 · Ninety-five admin routes, one shape | Opus 5 | high | 2 (after C1) |
-| W3-A · "You have none" must mean none | Opus 5 | high | 3 |
+| ~~W3-A · "You have none" must mean none~~ ✅ **DONE 2026-08-24** | Opus 5 | high | 3 |
 | ✅ W3-B · A supplier's card earns its keep — **DONE 2026-08-24, 4 PRs** | Opus 5 | high | 4 |
 | W3-C · A wake is not a celebration | Opus 5 (+ Fable for the words) | high | 3 |
 | W4-A · The four screens a couple lives in | Opus 5 → Sonnet 5 | medium | 4 |
@@ -223,7 +223,7 @@ event-words provider).
 | ~~0~~ | ~~PR triage~~ ✅ **DONE 2026-08-22** | — |
 | **1** | **W1-A** finished event + launcher + dashboard polish · **W1-B** Pabati + buy pages + story-editing goes free · **W1-C** paperwork | W1-B |
 | **2** | **W2-A** guest activation + the cookie banner + honest reads in the hub · **W2-B** the two deletion jobs · **W2-C1** the admin gold | — |
-| **3** | **W3-A** honest reads in the couple tree · ~~**W3-B** supplier cards~~ **✅ DONE 2026-08-24** · **W3-D** ⭑NEW the guest page's design set | W3-A |
+| **3** | ~~**W3-A** honest reads in the couple tree~~ **✅ DONE 2026-08-24** · ~~**W3-B** supplier cards~~ **✅ DONE 2026-08-24** · **W3-D** ⭑NEW the guest page's design set | — (both gates closed; **W3-D is the only one left in this wave**) |
 | **4** | **W4-WORDS** ⭑NEW the words follow the occasion · **W4-B** supplier screens · **W2-C2** admin archetype | W4-WORDS |
 | **5** | **W4-A** the couple's four daily screens · **W5-C** who is in my event + drafted invitation words · **W4-C** grant hardening | W4-C |
 | **6** | **W5-A** a supplier's record survives a delete · **W5-B** the undrawn surfaces | W5-A |
@@ -1277,7 +1277,24 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 
 ## WAVE 3 — three at once
 
-### W3-A · "You have none" must mean none · **Opus 5 · high**
+### 🛑 W3-A · "You have none" must mean none — **DONE 2026-08-24. DO NOT RUN THIS SECTION.**
+
+> ✅ **3 PRs: [#4746](https://github.com/iscasasola/setnayan-platform/pull/4746) (merged) ·
+> [#4751](https://github.com/iscasasola/setnayan-platform/pull/4751) ·
+> [#4752](https://github.com/iscasasola/setnayan-platform/pull/4752). Full row:
+> `DECISION_LOG.md` 2026-08-24.** The guard shipped at
+> `apps/web/app/dashboard/reads-are-honest.test.ts`; its bill is **16 sites, none of them in
+> `app/dashboard/[eventId]`** — the sixteen sit in `(account)`/`(launcher)` and are named debt
+> for whoever owns those trees, NOT unfinished W3-A work.
+> 🔑 **The measured premise, for anyone re-reading the brief below:** 19 unbound by its own
+> grep · 105 by the guard's wider regex · **42 of those fail closed** and are correctly left
+> alone. The supplier page's three reads are a **documented fail-open decision**, logged and
+> not rewritten. ⚠ **A count is a different destructure and was invisible to the first two
+> passes** — `{ count } … ?? 0` produced "0 cameras ready" and a render cap that could never
+> fire. Both fixed; the guard now covers that shape with its own floor.
+>
+> **The original prompt is kept below as history. Do not execute it.**
+
 
 ```
 🔓 GATE SATISFIED — W1-A merged all seven of its PRs on 2026-08-23 and production is serving them.
@@ -1435,7 +1452,10 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ### W4-A · The four screens a couple lives in · **Opus 5 (first screen) → Sonnet 5 (the rest) · medium**
 
 ```
-🔒 Needs W3-A merged — same tree.
+🔓 GATE SATISFIED — W3-A merged 2026-08-24 (PRs #4746 · #4751 · #4752); the couple tree is free.
+⚠ It left a guard in that tree: `app/dashboard/reads-are-honest.test.ts`. If you add a read to a
+screen you are re-skinning, BIND ITS ERROR — the guard fails on a new unbound one, and its bill is
+checked in both directions.
 MEASURE FIRST, DO NOT BUILD FIRST — AND YOU CARRY ONE MEASUREMENT THAT IS NOT YOURS TO BUILD FROM.
 
 📏 THE FONT TALLY (inherited from the withdrawn AP-2, see § 0b). NOBODY HAS EVER MEASURED THE

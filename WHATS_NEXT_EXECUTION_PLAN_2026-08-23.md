@@ -151,7 +151,7 @@ intersection check that proves it.
 
 | session | carries | what a person gets | migration |
 |---|---|---|---|
-| **W3-A · Honest reads, couple tree** | S3-A | ~30 couple screens stop saying "you have none" when the read was refused — worst is the vendors page with 45 unbound reads — plus a per-tree guard so the class stays closed | no |
+| ✅ **W3-A · Honest reads, couple tree — DONE 2026-08-24** | S3-A | ~58 reads across the couple tree stop rendering a refusal as "you have none" — ⚠ **the "45 unbound reads on the vendors page" in this row was FALSE: measured 3, with 12 already bound, and all three are a documented fail-open decision** — plus the per-tree guard, whose bill is now 16 sites, none in `[eventId]` | no |
 | ✅ **W3-B · Vendor card features — DONE 2026-08-24** | CF-3a 3b 3c 3f | shipped in 4 PRs (#4741 · #4742 · #4744 · #4745). ⚠ **NOT a new table** — the picks were already frozen in the lock snapshot by #3862; what was missing was the card↔package LINK. CF-3c's Papic half is an OWNER/DPO gate, not built. | **YES** — two columns + a reader, no new table |
 | **W3-C · A wake is not a celebration** | S17 | a family planning a wake gets an event that does not say "celebrate" anywhere | **YES** (event-type) |
 
@@ -218,7 +218,7 @@ by how many files it touches.**
 | W2-B · Privacy deletion jobs | **Opus 5** | **xhigh** | Irreversible deletion of biometric data and government IDs, under RA 10173. Over-deleting is worse than the gap. |
 | W2-C · admin gold sweep | **Sonnet 5** | medium | 106 mechanical occurrences behind a guard — **but Opus writes the guard, and the mutation is measured by occurrence count, before Sonnet sweeps.** |
 | W2-C · admin archetype port | **Opus 5** | high | ~95 routes onto one archetype is a design-judgement port, not a sweep. |
-| W3-A · Honest reads | **Opus 5** | high | The per-tree guard is the deliverable; this repo has shipped six decorative guards. |
+| ~~W3-A · Honest reads~~ ✅ DONE 2026-08-24 | **Opus 5** | high | The per-tree guard was the deliverable and it shipped — and three of its own rules were decoration until the mutation run caught them. Seventh, eighth and ninth. |
 | ✅ W3-B · Vendor card features — DONE | **Opus 5** | high | Two aggregates published to strangers; both floors enforced in SQL, twice each. The "new table" the brief called for was not needed. |
 | W3-C · A wake | **Opus 5** high for the schema and wiring · **Fable** for the words | high | The tone is the product here. A wake reading "celebrate" is the whole defect. |
 | W4-A / W4-B · design ports | **Opus 5 medium** for the first screen (it sets the pattern) · **Sonnet 5 medium** for the repeats | medium | The archetypes are binding; a delta is a defect in the port, not a design decision. |
