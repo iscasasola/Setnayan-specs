@@ -12,8 +12,12 @@ the regenerated pack PDFs in `apps/web/assets/npc-docs/` — never against anoth
 
 | verdict | count | findings |
 |---|---|---|
-| 🔴 **CONFIRMED** | **8** | 6 · 8 · 9 · 10 · 11 · 12 · 13 · 16 |
-| 🛑 **RETRACTED IN PART** | 1 | **14** — withdrawal DOES blur; the real gap is that it does not blur photos taken BEFORE the withdrawal, while the couple's equivalent toggle does |
+| 🔴 **CONFIRMED** | **9** | 6 · 8 · 9 · 10 · 11 · 12 · 13 · **14** · 16 |
+
+⚠ **#14 was retracted and then RE-CONFIRMED on 2026-08-24.** The retraction was my error, caught the
+same hour by reading the live read path instead of the writer. It is confirmed: withdrawal **hides**
+the photo rather than blurring it, which is the behaviour owner ruling 2 explicitly ruled against.
+The flip-flop is written up under #14 because the method that settled it generalises.
 | ✅ **REFUTED** | 2 | 19 · 20 |
 | ⚖ **RECLASSIFIED — owner decision, not a defect** | 1 | 17 |
 | ⏭ **UNRESOLVED** | 1 | 15 |
@@ -134,37 +138,52 @@ Measured: every form control on the profile page is `display_name` · `phone` ·
 
 **This is a right we advertise on a live public page and do not provide.**
 
-### #14 · 🛑 RETRACTED IN PART — withdrawal DOES blur. The gap is retroactivity.
-**Originally written as: "withdrawing consent blurs nothing." That is WRONG and is corrected here
-on 2026-08-24, the same day, before anyone acted on it.**
+### #14 · Withdrawing consent HIDES the photo. It does not blur it. — CONFIRMED
+**Evidence.** Privacy Manual §7: *"…can withdraw at any time via a 'Photo Consent' toggle;
+**withdrawal triggers face-blur in captures** and revocation of face data."*
 
-**What I did:** read `withdrawFaceConsent` in `app/[slug]/actions.ts`, found it nulls `face_vector`
-and `vector_model`, stamps `revoked_at`, deletes the R2 selfie — and contains **no reference to
-`faceblock_enabled` and no call to any blur path** — and concluded the blur does not happen.
+Read out of the **live production functions**, not from a migration file. The wall applies **two
+different rules**, and only one of them is a blur:
 
-**What is actually true:** `bakeFaceBlurForCapture` (`lib/face-blur.ts` ~394) counts
-`photo_consent = false` guests as a bake trigger **in its own right**, separately from
-`faceblock_enabled`, and deliberately **NOT** gated on owning the wall SKU — its own comment says
-gating it would mean *"a withdrawn guest's photos stay HIDDEN forever on every event that did not
-buy a wall, i.e. the ruling would silently not apply to most events."* **Ruling 2 was built.** A
-photo captured after a withdrawal is blurred.
+```
+-- FaceBlock:  blur-and-KEEP. The photo projects once a baked derivative exists.
+AND ( NOT EXISTS (any faceblock_enabled guest on the event)
+      OR <this row has faceblock_baked_at IS NOT NULL> )
 
-🔑 **THE MIRROR OF A RULE I QUOTED IN THIS SAME DOCUMENT.** "An empty column is not a missing
-mechanism — grep for the WRITER" has an inverse I walked straight into: **a function that does not
-CALL a thing is not proof the thing does not happen — grep for the READER.** The withdrawal action
-does not invoke the blur; the baker reads the withdrawal *state*. I traced one end and declared the
-other absent.
+-- Withdrawn consent:  VETO. The photo never projects, baked or not.
+AND NOT EXISTS ( SELECT 1 FROM photo_tags pt JOIN guests g2 USING (guest_id)
+                  WHERE pt.source_id = wf.source_id AND g2.photo_consent = FALSE )
+```
 
-**THE REAL GAP, measured, and it is narrower and sharper:**
+`wall_ingest` carries the same pair and **names it in its own comment: "G2 — photo-consent VETO via
+tagged guests."** So a withdrawn guest is REMOVED from the wall, not blurred on it.
 
-| door | new photos | photos already taken |
-|---|---|---|
-| the COUPLE ticks FaceBlock on a guest | blurred | **re-baked** — `rebakeWallForEvent` runs |
-| the GUEST withdraws their own consent | blurred | **NOT re-baked — nothing calls it** |
+⚖ **Owner ruling 2 of 2026-08-17 says the opposite and is therefore NOT built:** *"Withdrawal BLURS
+and KEEPS the photo, not hides it — deliberately SOFTER than today, so one guest opting out cannot
+delete a table of ten people's group shot."* The veto is exactly the behaviour he ruled against.
 
-So the guest's own door is the weaker one: they are protected going forward and not backward,
-while somebody else acting on their behalf gets both. **And the re-bake that does exist is capped
-at `limit = 25`** — the newest 25 wall tiles. At a real reception that is a fraction of the night.
+🪤 **A blurred copy IS baked for withdrawn guests — and then thrown away.**
+`bakeFaceBlurForCapture` counts `photo_consent = false` as a bake trigger in its own right,
+deliberately not gated on owning the wall. That work is wasted today, because the read path vetoes
+the photo regardless of whether the safe copy exists. **The producer already does the right thing;
+only the consumer still vetoes** — which makes the fix small and localised.
+
+⚠ **And the veto only fires where the guest is TAGGED.** An untagged photo of the same person is
+untouched by it, so the current protection is both harsher than the ruling *and* narrower than it
+sounds.
+
+### 🛑 I GOT THIS WRONG TWICE, IN OPPOSITE DIRECTIONS. The method is the lesson.
+1. First I read the withdrawal action, saw it never calls any blur, and said **"withdrawal blurs
+   nothing."** Right conclusion, wrong reasoning — I had only looked at one end.
+2. Then I found the baker counting withdrawn guests and **retracted**, saying the blur was built.
+   Wrong: the baker is the PRODUCER. I had still not read the thing that decides what a person sees.
+3. Only reading the **read path out of production** settled it. The bake happens; the veto discards
+   it; the guest is hidden.
+
+🔑 **VERIFY THE CONSUMER, NOT THE PRODUCER.** "An empty column is not a missing mechanism — grep the
+WRITER" finds features that exist. This is its opposite number: **a writer that runs proves nothing
+about what anybody sees — grep the READER.** Both of my wrong answers came from stopping at
+whichever end I happened to open first.
 
 🔑 **FaceBlock itself IS built** — `lib/face-blur.ts` (sharp, Gaussian, baked server-side by
 `bakeFaceBlurForCapture`). It is simply a **different control**, driven by `guests.faceblock_enabled`.
