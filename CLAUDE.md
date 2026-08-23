@@ -69,6 +69,50 @@ committed docs on purpose.
 already ship, and produce errors.** The fix is this block. Keep it CURRENT — one active work
 stream, deleted or replaced when it finishes. If you finish a stream, update this block.
 
+> ### ✅ DONE 2026-08-23 — W1-B: PABATI RETIRED · THE BUY PAGES SELL · THE RAIL LIGHTS UP
+> **4 PRs. Do NOT rebuild any of it.** Rows: `DECISION_LOG.md` 2026-08-23.
+>
+> 🗑 **PABATI IS GONE FROM THE PRODUCT** — PR [#4724](https://github.com/iscasasola/setnayan-platform/pull/4724), merged, and its
+> migration `20271159146115` is **verified applied in prod BY THE OBJECT** (`pabati_clips` null · 0 pabati functions ·
+> `ensure_papic_board(p_event_id uuid)` · the greeting row reads `clip` · the CHECK no longer admits the kind · 0 bundle rows).
+> Owner 2026-08-21: *"we do not need pabati. retire it because it is part of papic."* ⚠ **It SUPERSEDES the free-ing made hours
+> earlier the same day.** 🔑 **The capability survives the product** — a guest is still asked for a video greeting; it is an
+> ordinary Papic clip challenge now. Safe by arithmetic: 0 greetings ever, 0 orders ever.
+> 🚨 **FREE AND RETIRED ARE THE SAME CATALOG ROW AND OPPOSITE PRODUCTS**, so a retirement takes BOTH halves too, in the mirror
+> direction: the row stays deactivated AND the `FREE_FOR_ALL_SKUS` entry comes out. ⛔ **The shot ladder, the Thank-You film and
+> the 50 clip greetings are untouched.** 🔒 The word `pabati` stays RESERVED — shop addresses are immutable and it is still a
+> taxonomy leaf `SetnaProd` advertises.
+>
+> 💰 **NINE BUY PAGES OPENED WITH NOTHING; SEVEN ACTUALLY SELL** — PR
+> [#4726](https://github.com/iscasasola/setnayan-platform/pull/4726). The owner's complaint (*"i tried unlocking setnayan AI …
+> it does not look appealing"*) was that a page taking ₱2,499 showed no name, no promise and no price.
+> 🔑 **THE WORDS WERE ALREADY WRITTEN AND WERE INVISIBLE** — passed to `PageMasthead`, which renders its title `sr-only`.
+> ⚖ **THE MASTHEAD IS NOT THE BUG and is untouched** — it is owner-locked and correct for the ~380 pages a person lives in.
+> 🪤 **The brief said nine; measured, SEVEN render a checkout.** `indoor-blueprint` is a RETIRED SKU whose orders are
+> hard-rejected and `supplies-marketplace` cannot take an order at all — a priced hero on either is a **fake door**.
+>
+> 💡 **THE STUDIO RAIL ROWS LIGHT UP** — PR [#4725](https://github.com/iscasasola/setnayan-platform/pull/4725), merged. That was
+> named debt since 2026-08-21: the rail resolved "which row is lit" TWICE, in two components that could not see each other, so
+> lighting the Studio rows double-lit. 🔑 **A winner resolved per COMPONENT is not a winner** — the same mistake as a boolean per
+> row, one level up. One list, one resolver, the answer published down. Measured overlap: exactly **three** URLs.
+>
+> 📰 **ARRANGING YOUR OWN STORY IS FREE** — PR [#4727](https://github.com/iscasasola/setnayan-platform/pull/4727). Owner:
+> *"keep it free if this costs us nothing."* ⚠ **The trap was already half-sprung** — the row was off sale with zero orders and
+> nothing had switched the feature on, so the perks were DARK for anyone without the ₱3,500 umbrella.
+> 🔒 **The umbrella is UNTOUCHED at ₱3,500** — the no-watermark gates on a DIFFERENT helper reading `COUPLE_WEBSITE_PRO`.
+> ⛔ **Do not collapse the two helpers**; that hands the watermark away with nothing thrown.
+> 🔴 **OPEN OWNER DECISION: what Event Hub PRO should now say it buys.** The SKU is not retired and no price is moved.
+>
+> 🎨 Same PR: the story page's gold eyebrows measured **3.48:1** and are deepened to the same gold one step down — **5.02:1**
+> light, **5.17:1** dark. ⚠ In this repo the slot named `terracotta` is the GOLD and the action colour lives in `mulberry`.
+>
+> 🪤 **FIVE GUARDS WERE DECORATION OR CRIED WOLF IN THIS ONE STREAM, AND EVERY ONE WAS CAUGHT BY MEASURING, NOT BY REVIEW:**
+> two mutations landed and stayed GREEN (a behaviour test that composed the rail itself could not see the shell stop composing
+> it); one sabotage **did not apply at all** and reported a pass; a two-h1 check asked only for a `?` between two elements and a
+> `{true ? (` walked through it; a contrast guard went red on **the comment explaining the fix**; and `lint-page-masthead` fired
+> on a comment that merely NAMED its two tokens in one paragraph. **Print the occurrence count before → after, strip comments
+> before matching, and assume the sixth.**
+
 > ### 🔴 NEWEST — A COUPLE CAN DELETE THEIR OWN EVENT (2026-08-20/21 · 9 PRs, ALL MERGED AND LIVE)
 > **Do NOT rebuild any of this.** Full row: `DECISION_LOG.md` 2026-08-20 and 2026-08-21.
 > PRs #4603 · #4609 · #4623 · #4626 · #4627 · #4632 · #4638 · #4641 · #4646.
