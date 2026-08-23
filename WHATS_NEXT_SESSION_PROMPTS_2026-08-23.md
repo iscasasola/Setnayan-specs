@@ -103,7 +103,7 @@ were observed and both were terracotta.
 | AP-1 | the bottom bar stops vanishing when you tap People or Spaces | **W1-A** | `HomePillNav` is rendered in exactly ONE place — `(launcher)/page.tsx:1455` — which is W1-A's file. The fix lifts it to a layout. |
 | AP-6 | no name is cut to "Y…" on a phone | **W1-A** | same file |
 | AP-7 | Home and the event page report the same "planned" figure | **W1-A** | `(launcher)/page.tsx` + `lib/progress-stages.ts`, both already W1-A's — and W1-A is already inside `progress-stages.ts` for the After stub |
-| AP-8 | section names that don't need a help button | **W1-A** | same file, copy only |
+| ~~AP-8~~ | ~~section names that don't need a help button~~ | 🛑 **WITHDRAWN WHOLE** | both halves reverse the owner's own 2026-08-21 decisions; one re-does something he reverted the next day. |
 | AP-4 | the couple's photo appears on the card shared in Messenger | **W1-A** | `app/api/og/realstory-slug/[slug]/` — owned by nobody; small, and W1-A is the light session |
 | ~~AP-2~~ | ~~the app stops falling back to the phone's default typeface~~ | 🛑 **WITHDRAWN** | reverses the owner's 2026-08-11 front-door lock. What survives is a measurement, opening **W4-A**. |
 | ~~AP-5~~ | ~~one strength of the action colour everywhere~~ | 🛑 **WITHDRAWN** | the gold front-door buttons ARE the locked treatment. Nothing left on the front door. |
@@ -116,6 +116,42 @@ were observed and both were terracotta.
 ⚠ **AP-1 MUST BE VERIFIED BY SCREENSHOT, NOT BY QUERYING THE PAGE.** That session nearly filed a
 false "empty nav bar" finding off a DOM probe whose selector matched the wrong element and returned
 **the same result on a page where the bar is plainly visible**. Only the control test caught it.
+
+### 🛑 AP-8 IS WITHDRAWN WHOLE — nothing survives it, not even a measurement
+
+**Verified in `DECISION_LOG.md`, row 2026-08-21 (PR #4678), by reading it — both halves reverse a
+decision the owner made himself.**
+
+- **"Rename Untold and Told."** That row is headed **"Two naming calls he made in session, do NOT
+  re-open"** and records, verbatim, that *Finished/Completed* → **Untold/Told** *"because those two
+  are near-synonyms sitting side by side and neither should ever describe the CELEBRATION"*, with
+  the key line: **the two words are about the STORY, not the day.** The complaint was that they
+  need explaining. **That is the point of them**, and he chose them over the obvious alternative
+  deliberately.
+- **"Delete the five circled (i) buttons."** Same row, verbatim: **"⚠ THE (i) IS BACK ONE DAY AFTER
+  IT WAS RETIRED, per shelf, at the owner's request."** They were removed once; he asked for them
+  back the next day. **This item proposes removing them again.** The objection raised against them
+  is also already answered by construction — the label renders a circle only where a sentence was
+  passed, so the empty-circle case that killed the previous attempt cannot occur.
+
+⛔ **DO NOT REINSTATE THIS ITEM.** If it looks like a fresh idea to you, it is because it looked
+like one to the last two people as well. The row is `DECISION_LOG.md` 2026-08-21.
+
+### 🔑 THE STANDING CHECK THIS STREAM EARNED — run it before scheduling ANY item from a UI observation
+
+**Six findings from that comparison were wrong, and all six failed in the same direction: proposing
+to undo something somebody had already chosen.** The mobile photo card · the palette "break" · the
+front-door typeface · the front-door colour · and both halves of AP-8. **The tell never varied — it
+found something that looked obviously wrong and did not ask whether it had been decided.**
+
+```bash
+grep -n "<the noun on the screen>" ~/Documents/Claude/Projects/Setnayan/DECISION_LOG.md
+```
+
+**Five of the six would have died at that grep, in seconds.** Run it before you write a brief from
+anything you saw on a screen. It is cheaper than every other verification in this file, and it
+catches the one class no amount of code-reading will: *the thing that looks like a defect and is a
+decision.*
 
 ### 🔴 THREE NEW OWNER DECISIONS — do not schedule, do not decide
 
@@ -191,6 +227,13 @@ BEFORE ANY CODE — non-negotiable:
    BEFORE you scope anything. If the number moved, ship the smaller fix and say so. If the premise
    is gone, close the item in one line and go to the next. Build to a measurement, never a brief.
    GREP THE STRING, NEVER TRUST THE LINE — cited line numbers have already drifted.
+0b. AND IF YOUR ITEM CAME FROM LOOKING AT A SCREEN, GREP THE DECISION LOG FIRST:
+       grep -n "<the noun on the screen>" ~/Documents/Claude/Projects/Setnayan/DECISION_LOG.md
+   In one comparison stream, SIX findings were wrong and ALL SIX were proposals to undo something
+   the owner had already chosen — including two that re-did a change he had personally reverted the
+   day after it shipped. Five of the six would have died at that grep in seconds. It is the
+   cheapest check in this file and it catches the one class code-reading never will: THE THING THAT
+   LOOKS LIKE A DEFECT AND IS A DECISION. If the log names it, STOP — it is not yours to change.
 1. RULE 0. Assume what you are asked for ALREADY EXISTS. This product is ~2 years of code and the
    owner has paid more than once to have a screen rebuilt that already shipped. grep for the
    feature noun in apps/web BEFORE designing anything, then state in one line each:
@@ -444,9 +487,15 @@ collision:
  AP-7 HOME AND THE EVENT PAGE REPORT DIFFERENT "PLANNED" FIGURES (7% vs 0% was observed live).
    ⚠ NOBODY HAS TRACED WHETHER THAT IS ONE BUG OR TWO DIFFERENT MEASURES. Trace it first; you are
    already inside lib/progress-stages.ts for the After stub, so do them in one pass.
- AP-8 SECTION NAMES THAT NEED A HELP BUTTON TO BE UNDERSTOOD — copy only, SectionLabel.
+ 🛑 AP-8 WAS HERE AND IS WITHDRAWN WHOLE — do not build it, do not build a smaller version of it,
+   and do not re-derive it. Both halves reverse the owner's own decisions of 2026-08-21: he NAMED
+   "Untold/Told" in session over the obvious alternative and the row says do NOT re-open, and the
+   circled (i) buttons were removed once and restored the next day AT HIS REQUEST. See § 0b.
  AP-4 THE COUPLE'S OWN PHOTO IS MISSING from the card people see when a story is shared
    (app/api/og/realstory-slug/[slug]/). Small, and nobody else owns that directory.
+   ⚠ LOOK ONCE MORE BEFORE BUILDING IT. It is the only item in this group that is a DESIGN change
+   rather than a defect, and the session that raised it got six design claims wrong in a row, every
+   one by proposing to undo a deliberate choice. Run the standing check in § 0b first.
 
 TERRITORY (do not edit outside it): dashboard/[eventId]/schedule/page.tsx · lib/checklist.ts +
 checklist page · lib/customer-menu.ts · after/finished-event-summary.tsx ·
