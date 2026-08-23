@@ -163,10 +163,14 @@ THESE.** He was asked nothing and decided nothing. Do not read it as a yes to an
    composition.
 6. **Were the solid gold buttons a deliberate premium signature?** If yes, D-4 (one button per
    screen that means "do this now") needs his nod. The written palette lock supports D-4 as drawn.
-7. **The film's label typeface** (`lib/std-themes.ts:64`) — one word in one class string, but the
-   cinematic look is paid and owner-approved.
-8. **Weather at all, and from which source** (this is AP-9's gate — an outside dependency and a
-   recurring cost).
+7. **The film's label typeface** — this is **H-2**, now fully scoped (§ 0d). `lib/std-themes.ts:64`,
+   one word in one class string; size, tracking, uppercase and tone all stay and ONLY the face
+   changes; the watermark and the gild eyebrows are explicitly protected. But the cinematic look is
+   paid and owner-approved, so it is his call.
+8. **Weather at all, and from which source** — this is **H-6 = AP-9, ONE item described twice**. An
+   outside dependency, a recurring cost, licensing, and a source we would have to name on a
+   guest-facing page. ✅ Scoped and ready the moment he rules; **no CSP risk**, because the fetch is
+   server-side and so cannot fail into a silent grey panel the way the map did.
 9. **How many times our own wordmark appears on a shared card** — three today, one proposed.
 
 ### 🔴 FOUR NEW OWNER DECISIONS — do not schedule, do not decide
@@ -266,7 +270,7 @@ in this table, it does not exist in the plan — say so rather than inventing a 
 | AP-6 | no name cut to "Y…" on a phone | **W1-A** | scheduled |
 | AP-7 | Home and the event page stop disagreeing | **W1-A** (= D-1) | scheduled, re-scoped to a rename |
 | AP-8 | ~~rename Untold/Told, drop the (i) buttons~~ | — | 🛑 withdrawn whole — both halves reverse owner decisions |
-| AP-9 | guests see the weather | — | 🔴 owner: whether at all, and from which source |
+| AP-9 | guests see the weather | — | 🔴 owner — **AP-9 and H-6 ARE ONE ITEM**, see H-6 |
 | AP-10 | guests get a map | **W3-D** (= H-4) | scheduled |
 | AP-11 | a first draft of the invitation words | **W5-C** | scheduled |
 | AP-12 | empty screens look deliberate | **W6** | scheduled |
@@ -279,24 +283,55 @@ in this table, it does not exist in the plan — say so rather than inventing a 
 | D-7 | the words-provider seam | **W4-WORDS** | already mounted — threading, not building |
 | D-8 | mono keeps digits, loses words | **W1-A** | scheduled |
 | H-1 | the veil instruction reads like an invitation | **W3-D** | scheduled ⚠ open it in a browser first |
-| H-2 | the mono chrome on the guest page | ❓ **NOT TABLED BY THE STUDY** | see below |
+| H-2 | the film's small announcements read as engraved small caps, not terminal type | **W3-D** | 🔴 owner-gated — scoped, do not build until he rules |
 | H-3 | a shared link shows the couple's photo | **W3-D** | scheduled ⚠ build to a fixture |
 | H-4 | the venue shows real streets | **W3-D** | scheduled ⚠ do NOT touch the CSP |
 | H-5 | "Add to calendar" in the same place at every stage | **W3-D** | scheduled — measured |
-| H-6 | — | ❓ **NEVER DELIVERED** | see below |
+| H-6 | one quiet line of weather under the date, and nothing when there is no reliable forecast | **W3-D** | 🔴 owner-gated — **= AP-9**; whether at all, AND which source |
 | H-7 | a birthday page stops calling the family "the couple" | **W4-WORDS** | scheduled — the largest, most visible one |
 
-### ❓ TWO GAPS IN THE LEDGER — named, not guessed
+### ✅ THE TWO GAPS ARE CLOSED — both exist, both are OWNER-GATED, neither is lost work
 
-**H-2 and H-6 have no rows.** H-2 was referenced in passing — the study noted `font-mono` appears
-12 times in the anonymous guest render and said *"H-2's target is real for guests"* — but it was
-never given a table row, a file or a size. **H-6 was never mentioned at all.** The numbering
-implies both exist.
+They had no table row **because they were written as prose in the decisions list while the
+schedulable items got numbers in a table.** 🔑 **A NUMBERING SCHEME WITH HOLES READS AS LOST WORK.**
+The fix for next time is one line: **number every item, then mark the gated ones — never number
+only the ones you can schedule.**
 
-⛔ **DO NOT INVENT THEM.** H-2 is probably the guest-side twin of **D-8** (mono keeps digits, loses
-words) — probably is not a scope. Ask the study for both rows before scheduling either, and if H-6
-turns out never to have existed, delete it from this table rather than leaving a hole that reads as
-lost work. **A gap you can name is cheap; a gap you paper over becomes a rebuild.**
+**H-2 · the film's small announcements.** "Save the Date" · "Together with their families" · "Mark
+your calendars" currently read as terminal type directly above the couple's names; engraved small
+caps is the proposal. `lib/std-themes.ts:64` (`labelCls`) + tone overrides in
+`[slug]/_components/save-the-date-film.tsx` ~:218, ~:227 + the "Press and hold to pause" pill
+(~:1550). **S.** 🔒 **SCOPE, and it is tight: the size, tracking, uppercase and tone all stay —
+ONLY THE FACE CHANGES.** It must NOT touch the 9px "Created at Setnayan" watermark or the 0.66rem
+gild eyebrows; both are protected.
+🔴 **OWNER-GATED** — one word in one class string, but the cinematic look is approved and paid for.
+
+**H-6 · one quiet line of weather** under the date — "Mostly clear, around 27° that evening" — and
+**nothing at all** when no reliable forecast exists. `[slug]/_components/empty-states.tsx`, one more
+row on the details plate. Server-side fetch. **M.**
+✅ **NO CSP IMPACT, and that is load-bearing rather than incidental:** because the fetch is
+server-side, this one CANNOT fail into a silent grey panel the way the map did.
+🔴 **OWNER-GATED TWICE OVER** — whether we show weather at all, and which source (cost, licensing,
+and who we name as the source on a guest-facing page).
+🔀 **AP-9 AND H-6 ARE THE SAME ITEM** described twice. One row, not two.
+
+### 🛑 AND MY INFERENCE ABOUT H-2 WAS WRONG — verified, because acting on it would have merged two unrelated changes
+
+I guessed H-2 was the guest-side twin of D-8 and would therefore collide with it in `globals.css`.
+**It is not, and it does not.** They share the Tailwind utility NAME `font-mono` and nothing else:
+
+| | D-8 | H-2 |
+|---|---|---|
+| file | `app/globals.css` (the `.sn-` grammar) + dashboard call sites | `lib/std-themes.ts:64` + the film |
+| scope | the dashboard | `.sn-editorial`, remapped by `app/[slug]/layout.tsx` |
+| face | **Space Mono** | **DM Mono** |
+
+✅ **I TRACED THE BINDING THE STUDY FLAGGED AS UNVERIFIED**, because if it resolved to Space Mono
+after all, the collision would have been real: `app/layout.tsx:140` declares `--font-editorial-mono`
+on a `localFont` loading `./_fonts/dm-mono/dm-mono-400.woff2`, and `globals.css:2978` remaps
+`--font-mono` to it inside `.sn-editorial`. **It is DM Mono. No collision. H-2 stays in W3-D.**
+🔑 **THE SAME UTILITY NAME IN TWO SCOPES IS NOT THE SAME TYPEFACE** — the tell that a "collision" is
+imaginary is that the two hits resolve through different variables.
 
 ---
 
@@ -1482,7 +1517,13 @@ match the source. A sweep looking for "TOGETHER WITH THEIR FAMILIES" got 0 and n
 the film does not render for guests at all — the capitals come from `text-transform` and the markup
 carries sentence case. BEFORE TRUSTING A ZERO, PROVE THE SEARCH CAN FIND A KNOWN POSITIVE.
 
-⛔ NOT YOURS: AP-9 (weather) needs a provider chosen — an owner decision, with a recurring cost.
+⛔ TWO MORE ITEMS LIVE IN YOUR TERRITORY AND ARE **OWNER-GATED** — H-2 and H-6 (= AP-9). Both are
+fully scoped in § 0d. DO NOT BUILD EITHER, and do not treat them as yours to start if he rules
+while you are running — a ruling reopens them as their own slice, on files you will have left.
+ · H-2 · the film's small announcements as engraved small caps. ONE WORD IN ONE CLASS STRING —
+   `lib/std-themes.ts:64` — but the cinematic look is approved and paid for.
+ · H-6 · one quiet line of weather (= AP-9). Needs a source chosen: cost, licensing, and who we
+   name on a guest-facing page.
 And the wording per event type is W4-WORDS, one wave later. Do not start it here.
 
 RUN TO THE END. Everything above is one session's work. Do not stop between items, do not ask whether to proceed, and do not report until the last one is done or explicitly skipped.
