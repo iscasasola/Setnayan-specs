@@ -40,6 +40,13 @@ not have to answer anything mid-session.**
 
 ## § 0b · THE APPLE-INVITES ITEMS — twelve, and where each one landed
 
+> 🛑 **THIS TABLE WAS WRITTEN BEFORE THE 2026-08-24 RE-BALANCE AND WAS WRONG ABOUT THREE ROWS UNTIL
+> IT WAS CORRECTED. § 0c AND § 0d GOVERN — if any row here ever disagrees with them, THEY WIN.**
+> A session reading this section had a message half-written "correcting" the planner on AP-3 before
+> it reached § 0c and found the reassignment. **Two tables in one file that disagree is the
+> read-from-the-middle failure this corpus documents — and I shipped it in the file whose whole job
+> is preventing it.**
+
 **Where they came from.** The owner said **Apple Invites** looks similar to Setnayan. A session
 compared the two products, then measured our **live signed-in UI** at phone and laptop widths
 against `origin/main` @ `09697145d` — the same tip wave 0 finished on. Its deliverable was an
@@ -107,9 +114,9 @@ were observed and both were terracotta.
 | AP-4 | the couple's photo appears on the card shared in Messenger | **W1-A** | `app/api/og/realstory-slug/[slug]/` — owned by nobody; small, and W1-A is the light session |
 | ~~AP-2~~ | ~~the app stops falling back to the phone's default typeface~~ | 🛑 **WITHDRAWN** | reverses the owner's 2026-08-11 front-door lock. What survives is a measurement, opening **W4-A**. |
 | ~~AP-5~~ | ~~one strength of the action colour everywhere~~ | 🛑 **WITHDRAWN** | the gold front-door buttons ARE the locked treatment. Nothing left on the front door. |
-| AP-3 | the invitation reads like an invitation, not a receipt | **W2-A** | `app/[slug]/**` is W2-A's territory |
-| AP-9 | guests see the weather for the day | **W2-A** | same territory ⚠ needs a forecast provider chosen — that is a cost/dependency call, flag it |
-| AP-10 | guests get a map instead of a line of text | **W2-A** | same territory ⚠ **the CSP change in `next.config.ts` MUST be in the same PR** — our own CSP has already blocked our own map once, and the only symptom was an empty grey panel |
+| AP-3 | the invitation reads like an invitation, not a receipt | **W3-D** | ⚠ **REASSIGNED — this row said W2-A until 2026-08-24.** § 0c split that session and the whole design set moved to W3-D. |
+| AP-9 | guests see the weather for the day | 🛑 **DEFERRED BY THE OWNER** | 2026-08-24: *"okay we defer the weather"*. **= H-6, one item described twice.** Not scheduled anywhere. |
+| AP-10 | guests get a map instead of a line of text | **W3-D** (= H-4) | ⚠ **REASSIGNED, same as AP-3.** And ⛔ **DO NOT EDIT THE CSP** — OpenStreetMap is already in the enforced frame-src; only assert it. The map component already ships too. |
 | AP-11 | the couple gets a first draft of their invitation words | **W5-C** | touches `dashboard/[eventId]/website/**` and the AI surface — both collide with wave 1 and wave 3 territory, so it waits |
 | AP-12 | empty screens look deliberate, not unfinished | **W6** | deliberately broad; W6 runs ALONE and may claim any file. Pattern source: `(account)/samahan`, which that session called the best-designed screen it saw |
 
