@@ -561,6 +561,14 @@ PROOF RULES — this product's entire defect history is bugs that were green in 
   got 0/0, and nearly reported that the film does not render for guests at all. The capitals come
   from CSS `text-transform`; the markup carries sentence case. Third instance of one rule this
   week — A SEARCH THAT CANNOT MATCH IS NOT A NEGATIVE RESULT.
+- A STATUS LINE THAT IS PRINTED RATHER THAN DERIVED IS NOT A STATUS LINE. Never write
+  `cmd; echo "clean"` or `cmd && echo "pushed"` — the label asserts a conclusion it never
+  evaluated, and it lands directly under output that contradicts it. Proved three times in this
+  project: `&& echo "pushed"` after a FAILED push; a deletion check that printed
+  "(empty above = nothing deleted)" underneath two real filenames — MINE, on 2026-08-24, in the
+  same hour I was auditing somebody else's check; and a session that nearly shipped the same
+  pattern and caught it only because the paths looked unfamiliar. DERIVE the label from the result
+  (`test -z "$out" && echo clean || echo "DELETIONS: $out"`), or print the raw output and read it.
 - A rejected query is NOT a thrown error. A phantom column, a phantom enum value, a phantom RPC
   argument name, a blocked iframe, an unresolved r2:// reference — all get REFUSED, and the only
   symptom is an absence. If a screen is empty, suspect refusal before emptiness.
