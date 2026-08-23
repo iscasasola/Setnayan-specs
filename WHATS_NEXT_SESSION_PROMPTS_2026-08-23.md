@@ -596,6 +596,25 @@ list spanning app/_components/frontdoor/front-door-shell.tsx (~:642 documents th
 dashboard/[eventId]/_components/event-rail-context.tsx: run separately, "3D Plan" (/seating/lab)
 and the event menu's "Seat plan" (/seating) BOTH light, and two lit rows read as broken.
 
+ALSO YOURS — OWNER RULED 2026-08-23 THAT CORRECTING THE STORY WE WROTE FOR HER IS FREE.
+Owner, verbatim: "keep it free if this costs us nothing." MEASURED: it costs nothing. Every perk
+behind the PRO chip in website/editorial/_components/editorial-editor.tsx is a PRESENTATION CONTROL
+over data the couple already owns — reordering rows and sections, naming moments, choosing featured
+wishes. They are `disabled` attributes on buttons: no render, no storage, no external call, zero
+marginal cost. By his own rule they go free.
+🚨 BUT MAKING A SKU FREE TAKES TWO HALVES OR YOU DO THE OPPOSITE — you already know this from the
+Pabati work in this same session. Off sale ALONE means nobody owns it and the feature goes DARK for
+everyone. Free means: the controls ungate AND the SKU joins FREE_FOR_ALL_SKUS in lib/entitlements.ts
+AND lib/llms-txt.ts is updated in REQUIRED_RETAIL and its prose line and its hand-typed fixture, or
+the whole AI/GEO document drops to its 603-byte stub — which has already happened in production once.
+🛑 AND STOP BEFORE YOU RETIRE ANYTHING. If every perk on this editor goes free, DOES EDITORIAL PRO
+STILL MEAN ANYTHING? A sold SKU with nothing behind it is the worst of both states. That question
+has NOT been put to the owner. Ungate the controls, ship that, and SURFACE THE SKU QUESTION IN YOUR
+REPORT. Do not answer it, and do not retire the SKU on your own.
+⚠ And name the cost honestly when you report: he meant RUNNING cost. Forgoing a sold upgrade is a
+revenue decision — his to make, effectively made, but say it plainly rather than letting it read as
+a no-op.
+
 ALSO YOURS: the story page's gold eyebrows fail AA. app/[slug]/_components/editorial/
 editorial-content.tsx has 10 `text-terracotta` hits (~7 eyebrow sites) plus 1 in living-moments.tsx.
 In this repo the slot named `terracotta` is the GOLD #A9834B — measured 3.48:1 on the now-white
@@ -717,14 +736,41 @@ BUILD THESE SEVEN. Extend the named thing; never draw a new one.
 9. A guest cannot say who they are bringing, though the couple is promised in writing that the
    name will arrive. No name ⇒ no row ⇒ no QR ⇒ no camera for that person.
 
-⛔ DO NOT BUILD 7 AND 8 — they ride an OWNER DECISION (should the guest camera be free like the
-rest of Papic?). One answer deletes both: the false "the host hasn't turned on Papic" message
-(untrue on all five prod events) and the camera that shows a live viewfinder and only refuses
-AFTER the shutter. Leave them; say in your summary that one owner answer closes both.
+🛑 7 AND 8 — THE OWNER RULED ON 2026-08-23 AND THE ANSWER IS NOT THE ONE THE BRIEF EXPECTED.
+Owner, verbatim: "camera is free the pool shots is the one limited." ✅ THAT IS ALREADY THE SHIPPED
+BEHAVIOUR AND HAS BEEN SINCE 2026-08-02 — `eventPapicGuestActive` (lib/papic-guest.ts) opens the
+camera on a live pool PAID OR FREE, testing `applies` and deliberately NOT `remaining > 0`, and its
+own comment carries his earlier words: "free guests can shoot. Paying buys MORE SHOTS, not more
+PEOPLE." Verified in prod the same day: the pool applies on ALL FIVE events.
+⇒ SO THE BRIEF'S DIAGNOSIS IS FALSE. It says these two are "kept alive purely by the guest-camera
+pack still being paid". That pack was freed THREE WEEKS EARLIER. Do not build against that story.
+⏭ THEY ARE RE-OPENED FOR DIAGNOSIS, and the two surfaces fail for DIFFERENT reasons:
+  · /papic/decorate reads `eventPapicGuestActive` — TRUE on every prod event, so its "the host
+    hasn't turned on guest cameras" message should never render. If it does, the gate is not the
+    one the page appears to read. REPRODUCE IT BEFORE YOU FIX IT.
+  · /papic/me/[token] blames the host for `resolveGuestCamera(...).status === 'none'` — a PER-GUEST
+    camera that failed to materialise. That is not the host's doing and not a SKU. The copy is a
+    lie about the host either way, and the copy is the cheap half of the fix.
+🔑 START BY REPRODUCING EACH MESSAGE AGAINST A PROD EVENT WHOSE POOL APPLIES. A refusal you cannot
+reproduce is a refusal you cannot fix.
 
 ALSO YOURS — three files in the same guest tree where a refused read renders as blank:
 app/[slug]/seat/page.tsx (7 unbound reads, 0 error bindings), find-my-table/, and the unreachable
 `photos` plate in _components/empty-states.tsx. Extend the existing _lib/silent-absence.test.ts.
+
+ALSO YOURS — THE COOKIE BANNER. OWNER RULED 2026-08-23: "fix the bug." It re-asks people who have
+already answered.
+ · The choice lives in localStorage under `setnayan-cookie-consent-v1` (lib/cookie-consent.ts) —
+   per-browser, per-ORIGIN, and the banner already hides once `hasDecidedConsent()` is true.
+ · ✅ ONE THEORY IS ALREADY ELIMINATED — an origin split is NOT the cause: setnayan.com 307s to
+   www.setnayan.com and setnayan.ph does not resolve. Do not spend time there.
+ · 🔑 THE LIVE CANDIDATE IS SAFARI'S SEVEN-DAY CAP ON SCRIPT-WRITTEN localStorage, which re-asks a
+   returning visitor on the owner's own devices while every automated check passes. Confirm before
+   fixing — and if it is something else, say what.
+ ⚖ THE FIX MUST STAY PER-DEVICE. A long-lived first-party cookie is still anonymous and is
+   engineering. MOVING CONSENT SERVER-SIDE, KEYED TO AN ACCOUNT, IS NOT YOURS — that creates an
+   RA 10173 proof-of-consent record and is a DPO decision the owner has NOT made. Do not cross that
+   line while fixing a bug.
 
 ALSO YOURS — THREE ITEMS FROM THE APPLE-INVITES COMPARISON (see § 0b), all inside app/[slug]/**,
 which is your territory and nobody else's this wave:
