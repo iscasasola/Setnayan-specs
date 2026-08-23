@@ -1263,9 +1263,17 @@ RUN TO THE END. Everything above is one session's work. Do not stop between item
 ```
 🔒 Needs W1-A merged — you share dashboard/[eventId]/vendors/page.tsx.
 
-About 30 screens in the couple's dashboard render a REFUSED read as an EMPTY FACT. The worst is
-app/dashboard/[eventId]/vendors/page.tsx: 45 reads, none binding `error`. A couple reads "you have
-no suppliers" and it is not true. The same class was already closed in two other trees — copy
+⚠ THE ORIGINAL BRIEF SAID "~30 files, and the vendors page has 45 unbound reads". THAT IS WRONG.
+MEASURED ON MAIN 2026-08-23 AND RE-MEASURED 2026-08-24 AFTER WAVES 1 AND 2 LANDED — unchanged both
+times:
+    grep -rn "const { data } = await" "app/dashboard/[eventId]"   →  19 hits across 14 files
+    app/dashboard/[eventId]/vendors/page.tsx                      →  3 unbound, 12 already binding
+Most of that page was fixed long ago. RE-RUN THE COUNT YOURSELF before scoping; if it shrank again,
+ship the smaller fix and say so. ⛔ DO NOT rewrite reads that already bind their error — that is the
+rebuild this project keeps paying for.
+
+The remaining unbound reads render a REFUSED read as an EMPTY FACT: a couple reads "you have no
+suppliers" and it is not true. The same class was already closed in two other trees — copy
 those, do not invent a third pattern:
   apps/web/app/vendor-dashboard/reads-are-honest.test.ts (lane B, 31 reads / 16 files)
   and the explore/tour/papic/panood sweep (lane C, 20 reads) which shipped WITHOUT a per-tree
@@ -1389,8 +1397,12 @@ computed font-family across /dashboard and /dashboard/[eventId] and REPORT THE N
 §5.3), and this project has twice ended up with a lock nobody remembers agreeing to by answering a
 question like that silently.
 
-This brief is partly eroded: the guests screen was reworked on
-2026-08-22 and the app-wide header retirement touched all four. Re-diff each screen against its
+This brief is ERODED TWICE OVER NOW: the guests screen was reworked on 2026-08-22, the app-wide
+header retirement touched all four, AND ⚠ **W1-A shipped SEVEN PRs into this tree on 2026-08-23** —
+the event card gained a photograph, phone and laptop now show one card, the progress caption was
+renamed, and several small defects were fixed. **Part of what this brief calls "undesigned" may now
+be designed.** Re-diff each of the four against its archetype and report the REAL delta before
+writing code. If a screen already matches, say so and skip it — that is a result. Re-diff each screen against its
 approved archetype and report the REAL delta before writing code. If a screen already matches, say
 so and skip it — that is a result, not a failure.
 
@@ -1491,8 +1503,11 @@ a review, the money and a quote outlive the event. A supplier can now answer a d
 (PR #4646, merged).
 
 WHAT IS LEFT, AND WHY IT NEEDS MAX CARE:
-- 152 of ~162 foreign keys to events CASCADE; only 10 survive. The 65-table classification is
-  written up — and ITS ADVERSARIAL CHECK IS INCOMPLETE: 31 of 71 agents were cut off by a usage
+- ⚠ RE-MEASURED IN PRODUCTION: **145 foreign keys to `events` CASCADE and 19 SURVIVE.** The older
+  brief says 152 / 10 — NINE MORE ALREADY SURVIVE than it claims, because work landed after it was
+  written. RUN THE COUNT YOURSELF FIRST (`pg_constraint`, `confdeltype`) and scope against the real
+  number. Do not re-do a key that already survives.
+- The 65-table classification is written up — and ITS ADVERSARIAL CHECK IS INCOMPLETE: 31 of 71 agents were cut off by a usage
   limit and the synthesis never ran. TREAT EVERY ROW AS MAPPED-BUT-UNVERIFIED. Verify before you
   migrate; that verification IS the first half of this session.
 - "STORED" DOES NOT MEAN "SURVIVES". vendor_activity_stats is RECOMPUTED by unrelated events, so a
@@ -1602,6 +1617,16 @@ TOUCHING IT, and report the closures as results.
    photographer cannot see their own shots after the day; the band-as-emcee package does not reach
    the coordinator's message box.
 4. Anything queued for you by W2-B's privacy verification.
+4b. 🔴 BUILD THE ANALYTICS OPT-OUT WE ADVERTISE. The live `/privacy` page tells people analytics
+   tracking has an "opt-out available in your profile" — and there is NO such control: no setting,
+   no column storing the choice, nothing that could read one. Owner ruled 2026-08-24: the sentence
+   comes off the page now (done ahead of you) and the real control is built HERE.
+   ⚠ IT NEEDS THREE PARTS OR IT IS THEATRE: a control a person can find · somewhere durable to store
+   the answer · and analytics that actually HONOUR it. A control storing a preference nothing reads
+   is this project's "gate with no handle", of which five have been found.
+   ⚖ KEEP IT PER-DEVICE unless the owner says otherwise. A browser-level choice is anonymous and is
+   engineering; moving consent server-side keyed to an ACCOUNT creates an RA 10173 proof-of-consent
+   record, which is a DPO decision he has not made.
 5. AP-12 FROM THE APPLE-INVITES COMPARISON (see § 0b): EMPTY SCREENS READ AS UNFINISHED RATHER THAN
    DELIBERATE. This is deliberately broad, which is why it is here — you run ALONE and may claim
    any file. 🔑 DO NOT DESIGN A NEW EMPTY STATE: the pattern already exists and that session called
