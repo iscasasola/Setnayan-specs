@@ -527,11 +527,23 @@ BEFORE ANY CODE — non-negotiable:
 
 WORKING RULES
 - Branch FIRST, then `git worktree add <path> <branch>`. Never work in ~.
-- NEVER `git reset --soft origin/main`. Rebase. Before every push:
-      git diff --diff-filter=D origin/main..HEAD      # MUST be empty
-  A deletion you did not author means you are about to clobber merged work. CI cannot see this —
-  a repo missing a whole feature is internally consistent. It has already stopped production
-  deploying once.
+- NEVER `git reset --soft origin/main`. Rebase. Before every push, check what YOUR BRANCH deleted:
+      git diff --diff-filter=D --name-only origin/main...HEAD    # THREE DOTS. MUST be empty.
+  🛑 THREE DOTS, NOT TWO — AND THIS FILE HAD IT WRONG UNTIL 2026-08-24, WHICH COST A SESSION A
+  POINTLESS REBASE. `origin/main..HEAD` (two dots) compares the two TIPS, so every file main GAINED
+  after you branched reads as a file YOU DELETED. In a repo where sibling sessions merge while you
+  work, that fires on EVERY branch. Measured: one branch reported FOUR deletions two-dot and ZERO
+  three-dot, and the four were files two other sessions had added after it branched.
+  `origin/main...HEAD` (three dots) diffs from the MERGE BASE, which is the actual question:
+  what did my branch remove?
+  If you want it decisive rather than merely correct, ask the merge itself:
+      git merge-tree --write-tree origin/main HEAD          # then, for a file you care about:
+      git cat-file -e "<tree>:<path>" && echo survives
+  🔑 A GUARD THAT CRIES WOLF TEACHES YOU TO SKIM PAST THE ONE TIME IT IS RIGHT — and this one would
+  have fired on every branch in a busy repo, which is exactly when a real clobber is easiest to
+  wave through. A deletion you did not author still means you are about to clobber merged work, and
+  CI still cannot see it: a repo missing a whole feature is internally consistent. It has already
+  stopped production deploying once. The rule is right; the command was wrong.
 - apps/web/scripts/port-control-baseline.json is GENERATED. Regenerate on every rebase, never
   hand-merge. Diff routes before/after and confirm you removed only what you meant to.
 - Add changelog.d/<branch-slug>.md with a `SPEC IMPACT:` line. Never edit CHANGELOG.md or
